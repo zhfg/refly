@@ -6,3 +6,7 @@ class VisitLink(BaseModel):
     title: str
     url: str
     visit_count: int
+
+
+class QueryResponse(BaseModel):
+    result: str

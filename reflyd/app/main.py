@@ -8,11 +8,10 @@ from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.extractors import TitleExtractor
 from llama_index.core.ingestion import IngestionPipeline, IngestionCache
 from llama_index.core import VectorStoreIndex
-from llama_index.core.readers.base import BaseReader
 from llama_index.core.ingestion.cache import SimpleCache
-from llama_index.readers.web.async_web.base import AsyncWebPageReader  # type:ignore
+from llama_index.readers.web.simple_web.base import SimpleWebPageReader  # type:ignore
 
-from app.models.dto import VisitLink
+from app.models.dto import VisitLink, QueryResponse
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +35,7 @@ def get_application() -> FastAPI:
 
 app = get_application()
 
-index = VectorStoreIndex([])
+index = VectorStoreIndex(nodes=[])
 pipeline = IngestionPipeline(
     transformations=[
         SentenceSplitter(chunk_size=25, chunk_overlap=0),
@@ -47,25 +46,33 @@ pipeline = IngestionPipeline(
 )
 
 
-@app.post("/store-links")
-def report_links(links: list[VisitLink]):
-    loader = BaseReader()
-
-    documents = loader.load_data()
+@app.post("/sync-links")
+def sync_links(links: list[VisitLink]):
+    """Sync browser links."""
+    loader = SimpleWebPageReader()
+    documents = loader.load_data(urls=[l.url for l in links])
     nodes = pipeline.run(documents=documents)
+    logger.info(f"nodes created: {nodes}")
     index.insert_nodes(nodes)
+
+    # TODO: persist index
+
+    return {}
 
 
 @app.get("/query")
-def query():
-    engine = index.as_query_engine()
-    engine.query()
+def query(q: str):
+    engine = index.as_query_engine(response_mode="tree_summarize", similarity_top_k=5)
+    resp = engine.query(q)
+    return QueryResponse(result=str(resp))
 
 
 @app.get("/chat")
 def chat():
+    # TODO: finish this
     engine = index.as_chat_engine()
     engine.chat()
+    return {}
 
 
 if __name__ == "__main__":
