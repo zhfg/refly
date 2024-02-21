@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "ReflyAI Browser Extension",
+  "version": "1.0",
+  "description": "Turn your cyber footprints into personalized knowledge base, with the power of LLM. Never miss anything valuable and insightful.",
+  "permissions": ["storage", "activeTab", "history"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+}
