@@ -4,17 +4,37 @@ import "cheerio";
 import { CheerioWebBaseLoader } from "langchain/document_loaders/web/cheerio";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
-import { OpenAIEmbeddings, ChatOpenAI } from "@langchain/openai";
+import {
+  OpenAIEmbeddings,
+  ChatOpenAI,
+  formatToOpenAITool,
+} from "@langchain/openai";
 import { pull } from "langchain/hub";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
+import {
+  ChatPromptTemplate,
+  MessagesPlaceholder,
+} from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
 import { BasePromptTemplate } from "langchain/prompts";
 import { BaseOutputParser } from "langchain/schema/output_parser";
+import { RunnablePassthrough, RunnableSequence } from "langchain/runnables";
+import { formatDocumentsAsString } from "langchain/util/document";
+import { Runnable } from "langchain/runnables";
+import {
+  AIMessage,
+  BaseMessage,
+  HumanMessage,
+  SystemMessage,
+} from "langchain/schema";
+
+import { CitedAnswer } from "./tools/cite-documents";
 
 const app = express();
 const PORT = 3000;
+
 let vectorStore: MemoryVectorStore;
+let chatHistory: (AIMessage | HumanMessage | SystemMessage)[] = [];
 
 app.use(express.json());
 
@@ -24,6 +44,8 @@ app.get("/", (req, res) => {
 
 app.post("/indexing", async (req, res) => {
   const { url } = req.body;
+  console.log("indexing with url", url);
+
   try {
     const loader = new CheerioWebBaseLoader(url);
 
@@ -54,30 +76,160 @@ app.post("/indexing", async (req, res) => {
 app.get("/query", async (req, res) => {
   const { q } = req.query;
   const query = q as string;
+  console.log("activated with query", query);
+
+  const qaSystemPrompt = `You are an assistant for question-answering tasks.
+  Use the following pieces of retrieved context to answer the question.
+  If you don't know the answer, just say that you don't know.
+  Use three sentences maximum and keep the answer concise.
+  
+  {context}`;
+  const contextualizeQSystemPrompt = `Given a chat history and the latest user question
+which might reference context in the chat history, formulate a standalone question
+which can be understood without the chat history. Do NOT answer the question,
+just reformulate it if needed and otherwise return it as is.`;
 
   // Retrieve and generate using the relevant snippets of the blog.
   const retriever = vectorStore.asRetriever();
-  const prompt = await pull<BasePromptTemplate>("rlm/rag-prompt");
+  // const prompt = await pull<ChatPromptTemplate>("rlm/rag-prompt");
   const llm = new ChatOpenAI({ modelName: "gpt-3.5-turbo", temperature: 0 });
 
-  const ragChain = await createStuffDocumentsChain({
-    llm,
-    prompt,
-    outputParser: new StringOutputParser() as any as BaseOutputParser,
+  const citedAnswerTool = formatToOpenAITool(new CitedAnswer());
+  const llmWithTool = llm.bind({
+    tools: [citedAnswerTool],
+    tool_choice: citedAnswerTool,
   });
 
-  const retrievedDocs = await retriever.getRelevantDocuments(query);
+  // 构建总结的 Prompt，将 question + chatHistory 总结成
+  const contextualizeQPrompt = ChatPromptTemplate.fromMessages([
+    ["system", contextualizeQSystemPrompt],
+    new MessagesPlaceholder("chatHistory"),
+    ["human", "{question}"],
+  ]);
+  const contextualizeQChain = contextualizeQPrompt
+    .pipe(llm as any)
+    .pipe(new StringOutputParser());
+  const questionWithContext =
+    chatHistory.length === 0
+      ? query
+      : await contextualizeQChain.invoke({
+          question: query,
+          chatHistory,
+        });
+
+  // 添加 Human Message
+  chatHistory = chatHistory.concat(new HumanMessage({ content: query }));
+
+  const qaPrompt = ChatPromptTemplate.fromMessages([
+    ["system", qaSystemPrompt],
+    new MessagesPlaceholder("chatHistory"),
+    ["human", "{question}"],
+  ]);
+
+  // 基于上下文进行问答
+  const ragChain = await createStuffDocumentsChain({
+    llm,
+    prompt: qaPrompt,
+    outputParser: new StringOutputParser(),
+  });
+  const retrievedDocs = await retriever.getRelevantDocuments(
+    questionWithContext
+  );
   const answer = await ragChain.invoke({
     question: query,
     context: retrievedDocs,
+    chatHistory,
   });
+
+  chatHistory = chatHistory.concat(new AIMessage({ content: answer }));
 
   res.send({
     answer,
-    ragPrompt: prompt,
     retrievedDocs,
+    ragPrompt: qaPrompt,
+    chatHistory,
   });
 });
+
+// app.get("/query", async (req, res) => {
+//   const { q } = req.query;
+//   const query = q as string;
+
+//   const contextualizeQSystemPrompt = `Given a chat history and the latest user question
+// which might reference context in the chat history, formulate a standalone question
+// which can be understood without the chat history. Do NOT answer the question,
+// just reformulate it if needed and otherwise return it as is.`;
+
+//   const qaSystemPrompt = `You are an assistant for question-answering tasks.
+// Use the following pieces of retrieved context to answer the question.
+// If you don't know the answer, just say that you don't know.
+// Use three sentences maximum and keep the answer concise.
+
+// {context}`;
+
+//   const contextualizeQPrompt = ChatPromptTemplate.fromMessages([
+//     ["system", contextualizeQSystemPrompt],
+//     new MessagesPlaceholder("chat_history"),
+//     ["human", "{question}"],
+//   ]);
+//   const qaPrompt = ChatPromptTemplate.fromMessages([
+//     ["system", qaSystemPrompt],
+//     new MessagesPlaceholder("chat_history"),
+//     ["human", "{question}"],
+//   ]);
+
+//   // p
+
+//   // Retrieve and generate using the relevant snippets of the blog.
+//   const retriever = vectorStore.asRetriever();
+//   const prompt = await pull<BasePromptTemplate>("rlm/rag-prompt");
+//   const llm = new ChatOpenAI({ modelName: "gpt-3.5-turbo", temperature: 0 });
+
+//   const citedAnswerTool = formatToOpenAITool(new CitedAnswer());
+//   const llmWithTool = llm.bind({
+//     tools: [citedAnswerTool],
+//     tool_choice: citedAnswerTool,
+//   });
+
+//   const contextualizeQChain = contextualizeQPrompt
+//     .pipe(llm as any)
+//     .pipe(new StringOutputParser());
+
+//   const contextualizedQuestion = (input: Record<string, unknown>) => {
+//     if ("chat_history" in input) {
+//       return contextualizeQChain;
+//     }
+//     return input.question;
+//   };
+
+//   const ragChain = RunnableSequence.from([
+//     RunnablePassthrough.assign({
+//       context: (input: Record<string, unknown>) => {
+//         if ("chat_history" in input) {
+//           const chain = contextualizedQuestion(input) as Runnable;
+//           return chain.pipe(retriever).pipe(formatDocumentsAsString);
+//         }
+
+//         return "";
+//       },
+//     }),
+//     qaPrompt,
+//     llmWithTool,
+//   ]);
+
+//   const answer = await ragChain.invoke({
+//     question: query,
+//     chat_history: chatHistory,
+//   });
+
+//   chatHistory = chatHistory.concat(answer);
+
+//   res.send({
+//     answer,
+//     ragPrompt: prompt,
+//     chatHistory,
+//   });
+// });
 
 app.listen(PORT, () => {
   console.log(`app is listening at http://localhost:${PORT}`);
