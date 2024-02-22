@@ -9,6 +9,8 @@ import { pull } from "langchain/hub";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
+import { BasePromptTemplate } from "langchain/prompts";
+import { BaseOutputParser } from "langchain/schema/output_parser";
 
 const app = express();
 const PORT = 3000;
@@ -55,13 +57,13 @@ app.get("/query", async (req, res) => {
 
   // Retrieve and generate using the relevant snippets of the blog.
   const retriever = vectorStore.asRetriever();
-  const prompt = await pull<ChatPromptTemplate>("rlm/rag-prompt");
+  const prompt = await pull<BasePromptTemplate>("rlm/rag-prompt");
   const llm = new ChatOpenAI({ modelName: "gpt-3.5-turbo", temperature: 0 });
 
   const ragChain = await createStuffDocumentsChain({
     llm,
     prompt,
-    outputParser: new StringOutputParser(),
+    outputParser: new StringOutputParser() as any as BaseOutputParser,
   });
 
   const retrievedDocs = await retriever.getRelevantDocuments(query);

@@ -14,11 +14,11 @@ export LANGCHAIN_API_KEY=$YOUR_LANGSMITH_KEY
 安装依赖：
 
 ```sh
-yarn
+pnpm install
 ```
 
 启动项目：
 
 ```sh
-yarn dev
+pnpm dev
 ```
