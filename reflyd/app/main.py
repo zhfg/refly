@@ -62,7 +62,7 @@ def sync_links(links: list[VisitLink]):
 
 @app.get("/query")
 def query(q: str):
-    engine = index.as_query_engine(response_mode="tree_summarize", similarity_top_k=5)
+    engine = index.as_query_engine(response_mode="refine", similarity_top_k=5)
     resp = engine.query(q)
     return QueryResponse(result=str(resp))
 
