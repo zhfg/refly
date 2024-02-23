@@ -43,7 +43,7 @@ app.get("/", (req, res) => {
   res.send("Hello World for ReflyAI");
 });
 
-app.post("/indexing", async (req, res) => {
+app.post("/api/indexing-website", async (req, res) => {
   const { url } = req.body;
   console.log("indexing with url", url);
 

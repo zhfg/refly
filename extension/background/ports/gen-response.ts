@@ -29,6 +29,8 @@ const handler: PlasmoMessaging.PortHandler = async (req, res) => {
 
       evtSource.onerror = (error) => {
         console.log("EventSource failed:", error)
+
+        // 这里是因为 evtSource 之后会进行重试
         res.send({ message: "Meet Error" })
         res.send({ message: "[DONE]" })
         evtSource.close()

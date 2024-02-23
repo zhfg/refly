@@ -7,7 +7,7 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
   console.log(req.body)
 
   try {
-    const [err, conversationRes] = await request(
+    const [err, indexingRes] = await request(
       appConfig.url.indexingWebsite,
       {
         method: "POST",
@@ -22,7 +22,7 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
     } else {
       res.send({
         success: true,
-        data: conversationRes
+        data: indexingRes
       })
     }
   } catch (err) {
