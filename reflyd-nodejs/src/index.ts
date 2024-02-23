@@ -21,6 +21,7 @@ import { BaseOutputParser } from "langchain/schema/output_parser";
 import { RunnablePassthrough, RunnableSequence } from "langchain/runnables";
 import { formatDocumentsAsString } from "langchain/util/document";
 import { Runnable } from "langchain/runnables";
+import { Document } from "langchain/document";
 import {
   AIMessage,
   BaseMessage,
@@ -31,7 +32,7 @@ import {
 import { CitedAnswer } from "./tools/cite-documents";
 
 const app = express();
-const PORT = 3000;
+const PORT = 3001;
 
 let vectorStore: MemoryVectorStore;
 let chatHistory: (AIMessage | HumanMessage | SystemMessage)[] = [];
@@ -73,7 +74,12 @@ app.post("/indexing", async (req, res) => {
   }
 });
 
-app.get("/query", async (req, res) => {
+app.get("/api/generate/gen", async (req, res) => {
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.status(200);
+
   const { q } = req.query;
   const query = q as string;
   console.log("activated with query", query);
@@ -126,6 +132,20 @@ just reformulate it if needed and otherwise return it as is.`;
     ["human", "{question}"],
   ]);
 
+  // 提供 Citations
+  // Citations 低优
+  // const formatDocsWithId = (docs: Array<Document>): string => {
+  //   return (
+  //     "\n\n" +
+  //     docs
+  //       .map(
+  //         (doc: Document, idx: number) =>
+  //           `Source ID: ${idx}\nArticle Snippet: ${doc.pageContent}`
+  //       )
+  //       .join("\n\n")
+  //   );
+  // };
+
   // 基于上下文进行问答
   const ragChain = await createStuffDocumentsChain({
     llm,
@@ -135,20 +155,21 @@ just reformulate it if needed and otherwise return it as is.`;
   const retrievedDocs = await retriever.getRelevantDocuments(
     questionWithContext
   );
-  const answer = await ragChain.invoke({
+  const answerStream = await ragChain.stream({
     question: query,
     context: retrievedDocs,
     chatHistory,
   });
 
-  chatHistory = chatHistory.concat(new AIMessage({ content: answer }));
+  // 进行流式问答
+  let answerStr = "";
+  for await (const chunk of answerStream) {
+    answerStr += chunk;
+    res.write(`data: ${chunk}\n\n`);
+  }
+  chatHistory = chatHistory.concat(new AIMessage({ content: answerStr }));
 
-  res.send({
-    answer,
-    retrievedDocs,
-    ragPrompt: qaPrompt,
-    chatHistory,
-  });
+  res.end(`data: [DONE]\n\n`);
 });
 
 app.listen(PORT, () => {
