@@ -45,8 +45,7 @@ import {
   buildIntentMessageList,
   buildQuestionMessage,
   buildQuestionMessageList,
-  buildReplyMessage,
-  buildWelcomeMessage
+  buildReplyMessage
 } from "~utils/message"
 import { buildTask } from "~utils/task"
 import { calcPopupPosition, scrollToBottom } from "~utils/ui"
@@ -162,9 +161,7 @@ export const Content = () => {
     useState<Conversation>(buildConversation())
 
   // 初始化 Welcome message
-  const [messages, setMessages] = useState<Message[]>([
-    buildWelcomeMessage({ conversationId: nowConversation.conversationId })
-  ])
+  const [messages, setMessages] = useState<Message[]>([])
   const [messageState, setMessageState] =
     useState<MessageState>(defaultMessageState)
 
@@ -790,9 +787,7 @@ export const Content = () => {
    * - currentMode
    */
   useEffect(() => {
-    setMessages([
-      buildWelcomeMessage({ conversationId: nowConversation?.conversationId })
-    ])
+    setMessages([])
     setMessageState(defaultMessageState)
     setSelectedText("")
     setQuickActionToolbarVisible(false)

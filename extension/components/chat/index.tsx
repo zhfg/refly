@@ -18,7 +18,7 @@ import {
   IconPlus,
   IconUpload
 } from "@arco-design/web-react/icon"
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useRef, useState } from "react"
 
 import { sendToBackground } from "@plasmohq/messaging"
 
@@ -43,7 +43,9 @@ import { getPopupContainer, scrollToBottom } from "~utils/ui"
 
 // 自定义组件
 import ConversationList from "../conversation-list"
+import PreviousWebsiteList from "../previous-website-list/"
 import { modeList } from "../quick-action"
+import { IconTip } from "./icon-tip"
 import {
   ErrorMessage,
   ExampleQuestionItem,
@@ -52,40 +54,9 @@ import {
   QuestionMessage,
   ReplyMessage
 } from "./message-list"
+import { getLoadingStatusText } from "./utils"
 
 const TextArea = Input.TextArea
-
-type IconTipPosition =
-  | "top"
-  | "br"
-  | "rt"
-  | "tr"
-  | "tl"
-  | "bottom"
-  | "bl"
-  | "left"
-  | "lt"
-  | "lb"
-  | "right"
-  | "rb"
-
-const IconTip = ({
-  text,
-  children,
-  position = "top"
-}: {
-  text: string
-  children: any
-  position?: IconTipPosition
-}) => (
-  <Tooltip
-    mini
-    position={position}
-    content={text}
-    getPopupContainer={getPopupContainer}>
-    {children}
-  </Tooltip>
-)
 
 type ChatProps = {
   newQAText: string
@@ -103,64 +74,13 @@ type ChatProps = {
   handleShutdownGenReponseTask: () => void
 }
 
-const RecommendQuestions = (props: {
-  handleSideSendMessage: (question?: string) => void
-}) => {
-  return (
-    <div className="chat-recommend">
-      <div className="recommend">
-        {systemExampleQuestions.map((msg) => {
-          return (
-            <div className="recommend-item" key={msg.question}>
-              <p className="title">{msg.title}</p>
-              <Button
-                shape="round"
-                onClick={() => props.handleSideSendMessage(msg.question)}>
-                {msg.question}
-              </Button>
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
-const DynamicIntentMsgList = (props: {
-  intentText: string
-  setSelectedText: (val: string) => void
-}) => {
-  return (
-    <div className="chat-intent">
-      <div className="intent">
-        <Badge
-          count={
-            <IconCloseCircle
-              onClick={() => props.setSelectedText("")}
-              className="close"
-              style={{
-                verticalAlign: "middle",
-                color: "#b7babf",
-                fontSize: 19
-              }}
-            />
-          }>
-          <div className="intent-item">
-            <div className="intent-title">
-              <IconBulb style={{ fontSize: 14, color: "#8b949d" }} />
-              <span className="text">您选择的文本</span>
-            </div>
-            <div>{props.intentText}</div>
-          </div>
-        </Badge>
-        <div className="intent-item">您希望对文本进行什么操作？</div>
-      </div>
-    </div>
-  )
-}
-
 const Chat = (props: ChatProps) => {
   const inputRef = useRef<RefTextAreaType>()
+  const previousWebsiteListRef = useRef(null)
+  const [isUploadingWebsite, setIsUpdatingWebiste] = useState<boolean>(false)
+  const [uploadingStatus, setUploadingStatus] = useState<
+    "normal" | "loading" | "failed" | "success"
+  >("normal")
 
   const {
     newQAText,
@@ -203,10 +123,8 @@ const Chat = (props: ChatProps) => {
   }
 
   const handleUploadWebsite = async (url: string) => {
-    message.loading({
-      id: "website_indexing",
-      content: "网站索引中..."
-    })
+    setIsUpdatingWebiste(true)
+    setUploadingStatus("loading")
 
     const res = await sendToBackground({
       name: "indexingWebsite",
@@ -216,16 +134,14 @@ const Chat = (props: ChatProps) => {
     })
 
     if (res.success) {
-      message.success({
-        id: "website_indexing",
-        content: "网站索引成功，可以基于此网站进行追问"
-      })
+      setUploadingStatus("success")
     } else {
-      message.error({
-        id: "website_indexing",
-        content: "网站索引失败，请尝试重试"
-      })
+      setUploadingStatus("failed")
     }
+
+    setTimeout(() => {
+      setUploadingStatus("normal")
+    }, 3000)
   }
 
   // 自动聚焦输入框
@@ -277,18 +193,13 @@ const Chat = (props: ChatProps) => {
         </div>
       </header>
 
-      <div
+      {/* <div
         className="chat-wrapper"
         style={{ paddingBottom: isIntentActive ? 72 : 52 }}>
         <div className="chat chat-light">
           <div className="chat-box">
             <div className="wrapper">
               <div className="chat-container">
-                {messages.length < 2 && (
-                  <RecommendQuestions
-                    handleSideSendMessage={handleSideSendMessage}
-                  />
-                )}
                 {messages.map((msg, idx) => (
                   <div className={msg?.itemType + "-message"} key={idx}>
                     {renderMessage(msg?.itemType, msg)}
@@ -308,9 +219,10 @@ const Chat = (props: ChatProps) => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <div className="footer input-panel">
+        <div className="refly-slogan">The answer engine for your work</div>
         <div className="actions">
           {isIntentActive && (
             <div className="intent">
@@ -348,31 +260,58 @@ const Chat = (props: ChatProps) => {
               </div>
             )}
         </div>
-        <div className="toolbar">
-          <Space>
-            <Button
-              onClick={() => {
-                handleCreateNewConversation()
-              }}
-              size="mini"
-              icon={<IconPlus />}
-              status="success"
-              type="primary"
-              shape="round">
-              新会话
-            </Button>
-            <Button
-              onClick={() => {
-                handleUploadWebsite(window.location.href)
-              }}
-              size="mini"
-              icon={<IconUpload />}
-              status="success"
-              type="secondary"
-              shape="round">
-              阅读
-            </Button>
-            {/* <Button
+
+        <div className="input-box">
+          <TextArea
+            ref={inputRef}
+            className="message-input"
+            autoFocus
+            value={newQAText}
+            onChange={handleSideInputChange}
+            placeholder="基于网页进行提问任何内容..."
+            onKeyDownCapture={(e) => handleKeyDown(e)}
+            autoSize={{ minRows: 4, maxRows: 4 }}
+            style={{ borderRadius: 8, resize: "none" }}></TextArea>
+          <div>
+            <div className="toolbar">
+              <Space>
+                {/* <Button
+                  onClick={() => {
+                    handleCreateNewConversation()
+                  }}
+                  icon={<IconPlus />}
+                  type="text"
+                  shape="round">
+                  新会话
+                </Button> */}
+                <Tooltip
+                  mini
+                  position={"top"}
+                  content={getLoadingStatusText(uploadingStatus)}
+                  popupVisible={uploadingStatus !== "normal"}
+                  getPopupContainer={getPopupContainer}>
+                  <Button
+                    onClick={() => {
+                      handleUploadWebsite(window.location.href)
+                    }}
+                    icon={<IconUpload />}
+                    type="text"
+                    style={{ marginRight: 0 }}
+                    shape="round">
+                    阅读
+                  </Button>
+                </Tooltip>
+
+                <Button
+                  onClick={() => {
+                    previousWebsiteListRef.current?.setVisible(true)
+                  }}
+                  icon={<IconUpload />}
+                  type="text"
+                  shape="round">
+                  选择
+                </Button>
+                {/* <Button
               onClick={() => {
                 conversationListInstanceRef?.current?.setVisible(true)
               }}
@@ -382,37 +321,22 @@ const Chat = (props: ChatProps) => {
               shape="round">
               历史记录
             </Button> */}
-          </Space>
-        </div>
-
-        <div className="input-box">
-          <TextArea
-            ref={inputRef}
-            className="message-input"
-            autoFocus
-            value={newQAText}
-            onChange={handleSideInputChange}
-            placeholder="问我任何问题"
-            onKeyDownCapture={(e) => handleKeyDown(e)}
-            autoSize={{ minRows: 4, maxRows: 4 }}
-            style={{ borderRadius: 8, resize: "none" }}></TextArea>
-        </div>
-
-        <div className="bar">
-          {/* <img src={HelpSVG} alt="帮助" /> */}
-          <div>
-            <span>按 Ctrl/Command + Enter 或点击 👉 发送消息</span>
-            <img
-              src={SendSVG}
-              alt="发送"
-              onClick={() => handleSideSendMessage()}
-            />
+              </Space>
+            </div>
           </div>
         </div>
       </div>
 
       <ConversationList
         ref={conversationListInstanceRef}
+        getPopupContainer={() =>
+          document
+            .querySelector("plasmo-csui")
+            ?.shadowRoot?.querySelector(".main")
+        }
+      />
+      <PreviousWebsiteList
+        ref={previousWebsiteListRef}
         getPopupContainer={() =>
           document
             .querySelector("plasmo-csui")
