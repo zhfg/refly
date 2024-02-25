@@ -47,6 +47,9 @@
     "typescript": "5.0.3"
   },
   "manifest": {
+    "permissions": [
+      "history"
+    ],
     "host_permissions": [
       "https://*/*"
     ],

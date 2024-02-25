@@ -127,7 +127,7 @@ const Chat = (props: ChatProps) => {
     setUploadingStatus("loading")
 
     const res = await sendToBackground({
-      name: "indexingWebsite",
+      name: "storeWeblink",
       body: {
         url
       }

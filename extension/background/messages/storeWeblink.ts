@@ -7,11 +7,14 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
   console.log(req.body)
 
   try {
-    const [err, indexingRes] = await request(
-      appConfig.url.indexingWebsite,
+    const historyItem = await chrome.history.search({ text: req.body?.url });
+    const [err, storeRes] = await request(
+      appConfig.url.storeWeblink,
       {
         method: "POST",
-        body: req.body
+        body: {
+          data: historyItem
+        }
       }
     )
     if (err) {
@@ -22,7 +25,7 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
     } else {
       res.send({
         success: true,
-        data: indexingRes
+        data: storeRes
       })
     }
   } catch (err) {

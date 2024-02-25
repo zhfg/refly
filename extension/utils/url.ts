@@ -8,14 +8,14 @@ export let DEV_DOMAIN = "https://production-test.refly.ai"
 export const getServerOrigin = () => {
   // return PROD_DOMAIN
   if (overrideLocalDev) {
-    return "http://localhost:3001"
+    return "http://localhost:3000"
   }
   return getEnv() === IENV.DEVELOPMENT ? DEV_DOMAIN : PROD_DOMAIN
 }
 
 export const getClientOrigin = () => {
   if (overrideLocalDev) {
-    return "http://localhost:3001"
+    return "http://localhost:3000"
   }
   return getEnv() === IENV.DEVELOPMENT ? DEV_DOMAIN : PROD_DOMAIN
 }
