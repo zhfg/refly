@@ -1,6 +1,6 @@
 import { Divider, Drawer, Input, Modal, Tooltip } from "@arco-design/web-react"
 import { IconDelete, IconEdit } from "@arco-design/web-react/icon"
-import styleText from "data-text:./conversation-list.scss"
+import styleText from "data-text:./index.scss"
 import dayjs from "dayjs"
 import type { PlasmoGetStyle } from "plasmo"
 import React, { forwardRef, useImperativeHandle, useRef, useState } from "react"

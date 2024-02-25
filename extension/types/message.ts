@@ -17,8 +17,8 @@ export type MessageState = {
   pendingFirstToken?: boolean; // 是否正在准备生成，如果收到第一个字符，即代表已经开始生生成
   pending?: boolean;
   error?: boolean; // 此次信息是否出错，比如还没开始生成就 abort，显示错误信息
-  pendingReplyMsg: Message; // 即将生成的 replyMsg 对象
-  history: [string, string][];
+  pendingReplyMsg?: Message; // 即将生成的 replyMsg 对象
+  history?: [string, string][];
   pendingSourceDocs?: Document[];
 };
 

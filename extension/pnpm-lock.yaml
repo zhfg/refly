@@ -14,6 +14,9 @@ dependencies:
   '@plasmohq/storage':
     specifier: ^1.9.3
     version: 1.9.3(react@18.2.0)
+  '@redux-devtools/extension':
+    specifier: ^3.3.0
+    version: 3.3.0(redux@5.0.1)
   '@types/is-hotkey':
     specifier: ~0.1.7
     version: 0.1.10
@@ -62,6 +65,9 @@ dependencies:
   react-markdown:
     specifier: ^8.0.7
     version: 8.0.7(@types/react@18.0.32)(react@18.2.0)
+  react-router-dom:
+    specifier: ^6.22.1
+    version: 6.22.1(react-dom@18.2.0)(react@18.2.0)
   react-syntax-highlighter:
     specifier: ^15.5.0
     version: 15.5.0(react@18.2.0)
@@ -83,11 +89,14 @@ dependencies:
   uuid:
     specifier: ^9.0.0
     version: 9.0.1
+  zustand:
+    specifier: ^4.5.1
+    version: 4.5.1(@types/react@18.0.32)(react@18.2.0)
 
 devDependencies:
   '@plasmohq/prettier-plugin-sort-imports':
     specifier: 4.0.1
-    version: 4.0.1(prettier@2.8.7)
+    version: 4.0.1(prettier@3.2.4)
   '@types/chrome':
     specifier: 0.0.227
     version: 0.0.227
@@ -101,8 +110,8 @@ devDependencies:
     specifier: 18.0.11
     version: 18.0.11
   prettier:
-    specifier: 2.8.7
-    version: 2.8.7
+    specifier: 3.2.4
+    version: 3.2.4
   typescript:
     specifier: 5.0.3
     version: 5.0.3
@@ -2378,7 +2387,7 @@ packages:
       - whiskers
     dev: false
 
-  /@plasmohq/prettier-plugin-sort-imports@4.0.1(prettier@2.8.7):
+  /@plasmohq/prettier-plugin-sort-imports@4.0.1(prettier@3.2.4):
     resolution: {integrity: sha512-pEIkcMZVqqqnFWoe3xiVGpXCq8rf+6EVGGSJqUMvD3zMAzHNu0pR1hdKjlhdwPYEzi3naResRJzfwmRU8hRzkA==}
     peerDependencies:
       prettier: 3.x
@@ -2391,7 +2400,7 @@ packages:
       javascript-natural-sort: 0.7.1
       lodash.clone: 4.5.0
       lodash.isequal: 4.5.0
-      prettier: 2.8.7
+      prettier: 3.2.4
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -2427,6 +2436,21 @@ packages:
       '@pnpm/config.env-replace': 1.1.0
       '@pnpm/network.ca-file': 1.0.2
       config-chain: 1.1.13
+    dev: false
+
+  /@redux-devtools/extension@3.3.0(redux@5.0.1):
+    resolution: {integrity: sha512-X34S/rC8S/M1BIrkYD1mJ5f8vlH0BDqxXrs96cvxSBo4FhMdbhU+GUGsmNYov1xjSyLMHgo8NYrUG8bNX7525g==}
+    peerDependencies:
+      redux: ^3.1.0 || ^4.0.0 || ^5.0.0
+    dependencies:
+      '@babel/runtime': 7.23.9
+      immutable: 4.3.5
+      redux: 5.0.1
+    dev: false
+
+  /@remix-run/router@1.15.1:
+    resolution: {integrity: sha512-zcU0gM3z+3iqj8UX45AmWY810l3oUmXM7uH4dt5xtzvMhRtYVhKGOmgOd1877dOPPepfCjUv57w+syamWIYe7w==}
+    engines: {node: '>=14.0.0'}
     dev: false
 
   /@sindresorhus/is@5.6.0:
@@ -5937,9 +5961,9 @@ packages:
       tunnel-agent: 0.6.0
     dev: false
 
-  /prettier@2.8.7:
-    resolution: {integrity: sha512-yPngTo3aXUUmyuTjeTUT75txrf+aMh9FiD7q9ZE/i6r0bPb22g4FsE6Y338PQX1bmfy08i9QQCB7/rcUAVntfw==}
-    engines: {node: '>=10.13.0'}
+  /prettier@3.2.4:
+    resolution: {integrity: sha512-FWu1oLHKCrtpO1ypU6J0SbK2d9Ckwysq6bHj/uaCP26DxrPpppCLQRGVuqAxSTvhF00AcvDRyYrLNW7ocBhFFQ==}
+    engines: {node: '>=14'}
     hasBin: true
     dev: true
 
@@ -6130,6 +6154,29 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: false
 
+  /react-router-dom@6.22.1(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-iwMyyyrbL7zkKY7MRjOVRy+TMnS/OPusaFVxM2P11x9dzSzGmLsebkCvYirGq0DWB9K9hOspHYYtDz33gE5Duw==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      react: '>=16.8'
+      react-dom: '>=16.8'
+    dependencies:
+      '@remix-run/router': 1.15.1
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      react-router: 6.22.1(react@18.2.0)
+    dev: false
+
+  /react-router@6.22.1(react@18.2.0):
+    resolution: {integrity: sha512-0pdoRGwLtemnJqn1K0XHUbnKiX0S4X8CgvVVmHGOWmofESj31msHo/1YiqcJWK7Wxfq2a4uvvtS01KAQyWK/CQ==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      react: '>=16.8'
+    dependencies:
+      '@remix-run/router': 1.15.1
+      react: 18.2.0
+    dev: false
+
   /react-syntax-highlighter@15.5.0(react@18.2.0):
     resolution: {integrity: sha512-+zq2myprEnQmH5yw6Gqc8lD55QHnpKaU8TOcFeC/Lg/MQSs8UknEA0JC4nTZGFAXC2J2Hyj/ijJ7NlabyPi2gg==}
     peerDependencies:
@@ -6178,6 +6225,10 @@ packages:
     engines: {node: '>=8.10.0'}
     dependencies:
       picomatch: 2.3.1
+    dev: false
+
+  /redux@5.0.1:
+    resolution: {integrity: sha512-M9/ELqF6fy8FwmkpnF0S3YKOqMyoWJ4+CS5Efg2ct3oY9daQvd/Pc71FpGZsVsbl3Cpb+IIcjBDUnnyBdQbq4w==}
     dev: false
 
   /refractor@3.6.0:
@@ -6975,6 +7026,14 @@ packages:
       tslib: 2.6.2
     dev: false
 
+  /use-sync-external-store@1.2.0(react@18.2.0):
+    resolution: {integrity: sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      react: 18.2.0
+    dev: false
+
   /util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
     dev: false
@@ -7122,6 +7181,26 @@ packages:
   /yaml@2.3.4:
     resolution: {integrity: sha512-8aAvwVUSHpfEqTQ4w/KMlf3HcRdt50E5ODIQJBw1fQ5RL34xabzxtUlzTXVqc4rkZsPbvrXKWnABCD7kWSmocA==}
     engines: {node: '>= 14'}
+    dev: false
+
+  /zustand@4.5.1(@types/react@18.0.32)(react@18.2.0):
+    resolution: {integrity: sha512-XlauQmH64xXSC1qGYNv00ODaQ3B+tNPoy22jv2diYiP4eoDKr9LA+Bh5Bc3gplTrFdb6JVI+N4kc1DZ/tbtfPg==}
+    engines: {node: '>=12.7.0'}
+    peerDependencies:
+      '@types/react': '>=16.8'
+      immer: '>=9.0.6'
+      react: '>=16.8'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      immer:
+        optional: true
+      react:
+        optional: true
+    dependencies:
+      '@types/react': 18.0.32
+      react: 18.2.0
+      use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
 
   /zwitch@2.0.4:

@@ -1,6 +1,4 @@
 import {
-  Avatar,
-  Badge,
   Button,
   Input,
   Message as message,
@@ -9,97 +7,75 @@ import {
 } from "@arco-design/web-react"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input/textarea"
 import {
-  IconBulb,
-  IconClockCircle,
-  IconClose,
-  IconCloseCircle,
-  IconMessage,
   IconMinusCircle,
-  IconPlus,
-  IconUpload
+  IconUpload,
+  IconSend
 } from "@arco-design/web-react/icon"
 import React, { useEffect, useRef, useState } from "react"
-
 import { sendToBackground } from "@plasmohq/messaging"
+import { useNavigate } from 'react-router-dom';
 
 import {
   MessageItemType,
   TASK_TYPE,
-  type Conversation,
   type Message,
-  type MessageState
 } from "~/types"
 // 静态资源
 import Logo from "~assets/logo.svg"
 import CloseGraySVG from "~assets/side/close.svg"
-import FullScreenSVG from "~assets/side/full-screen.svg"
-import HelpSVG from "~assets/side/help.svg"
-import NotificationSVG from "~assets/side/notification.svg"
 import SendSVG from "~assets/side/send.svg"
-import SettingGraySVG from "~assets/side/setting.svg"
-import { systemExampleQuestions } from "~utils/message"
 // 自定义方法
 import { getPopupContainer, scrollToBottom } from "~utils/ui"
 
 // 自定义组件
 import ConversationList from "../conversation-list"
-import { modeList } from "../quick-action"
+import { modeList } from "../quick-action/utils"
 import WeblinkList from "../weblink-list"
 import { IconTip } from "./icon-tip"
 import {
   ErrorMessage,
-  ExampleQuestionItem,
   IntentMessage,
-  LoadingMessage,
   QuestionMessage,
   ReplyMessage
 } from "./message-list"
 import { getLoadingStatusText } from "./utils"
+import { useQuickActionStore } from '../../stores/quick-action'
+import { useChatStore } from '../../stores/chat'
+import { useBuildTask } from "~hooks/use-build-task"
+import { useConversationStore } from "~stores/conversation"
+import { buildConversation } from "~utils/conversation"
+import { useSiderSendMessage } from '~hooks/use-sider-send-message'
+import { useMessageStateStore } from "~stores/message-state"
+import { usePopupStore } from "~stores/popup"
+import { useSiderStore } from "~stores/sider"
 
 const TextArea = Input.TextArea
 
 type ChatProps = {
-  newQAText: string
-  isShowSider: boolean
-  setIsShowSide: (isShowSide: boolean) => void
-  handleCreateNewConversation: () => void
-  handleSideInputChange: (value: string) => void
-  messages: Message[]
-  messageState: MessageState
-  conversationListInstanceRef: any
-  selectedText: string
-  setSelectedText: (val: string) => void
-  buildIntentQuickActionTaskAndGenReponse: (questionContent: string) => void
-  handleSideSendMessage: (question?: string) => void
-  handleShutdownGenReponseTask: () => void
 }
 
 const Chat = (props: ChatProps) => {
   const inputRef = useRef<RefTextAreaType>()
   const weblinkListRef = useRef(null)
+  const conversationListInstanceRef = useRef(null);
   const [isUploadingWebsite, setIsUpdatingWebiste] = useState<boolean>(false)
   const [uploadingStatus, setUploadingStatus] = useState<
     "normal" | "loading" | "failed" | "success"
   >("normal")
+  const navigate = useNavigate();
 
-  const {
-    newQAText,
-    isShowSider,
-    setIsShowSide,
-    handleCreateNewConversation,
-    handleSideInputChange,
-    messages = [],
-    conversationListInstanceRef,
-    selectedText,
-    setSelectedText,
-    buildIntentQuickActionTaskAndGenReponse,
-    handleSideSendMessage,
-    messageState,
-    handleShutdownGenReponseTask
-  } = props
+  const quickActionStore = useQuickActionStore();
+  const chatStore  = useChatStore();
+  const conversationStore = useConversationStore();
+  const messageStateStore = useMessageStateStore();
+  const popupStore = usePopupStore();
+  const siderStore = useSiderStore();
+  const { handleSideSendMessage } = useSiderSendMessage();
 
-  const isIntentActive = !!selectedText
-  console.log("selectedText", selectedText)
+  
+  const { buildIntentQuickActionTaskAndGenReponse, buildShutdownTaskAndGenResponse } = useBuildTask()
+  const isIntentActive = !!quickActionStore.selectedText
+  console.log("selectedText", quickActionStore.selectedText)
 
   const renderMessage = (type: MessageItemType, message: Message) => {
     switch (type) {
@@ -114,6 +90,42 @@ const Chat = (props: ChatProps) => {
       case MessageItemType.ERROR:
         return ErrorMessage(message)
     }
+  }
+
+  /**
+   * 1. 以下几种情况会新建会话 Id：
+   *      1. 打开一个新的 quickAction
+   *      2. 开启聊天窗口（侧边栏、浮框、或者 Options 页）
+   * 2. 直到第一次调用 /generate/gen 接口生成响应的时候，才将会话 id 传给服务端保存一个会话
+   */
+  // 页面状态和 conversationId 是同步的
+  /**
+   * 以下几种情况会新建会话 Id：
+   * 1. 打开一个新的 quickAction
+   * 2. 开启聊天窗口（侧边栏、浮框、或者 Options 页）
+   *
+   * 页面状态和会话 Id 是绑定的：
+   * - messages
+   * - messageState
+   * - selectedText
+   * - popupVisible
+   * - newQAText
+   * - currentMode
+   */
+  const handleCreateNewConversation = () => {
+    /**
+     * 1. 创建新 thread，设置状态
+     * 2. 跳转到 thread 界面，进行第一个回复，展示 问题、sources、答案
+     */
+    const newConversation = buildConversation()
+    conversationStore.setCurrentConversation(newConversation)
+
+    chatStore.resetState();  // 新会话默认是没有创建 title 的状态
+    messageStateStore.resetState();
+    quickActionStore.resetState();
+    popupStore.resetState();
+
+    navigate('/thread/123')
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -146,8 +158,8 @@ const Chat = (props: ChatProps) => {
 
   // 自动聚焦输入框
   useEffect(() => {
-    if (inputRef.current && isShowSider) inputRef?.current?.focus?.()
-  }, [isShowSider])
+    if (inputRef.current && siderStore.showSider) inputRef?.current?.focus?.()
+  }, [siderStore.showSider])
   // 如果有展示意图，那么也需要滚动到底部
   useEffect(() => {
     scrollToBottom()
@@ -187,7 +199,7 @@ const Chat = (props: ChatProps) => {
             <img
               src={CloseGraySVG}
               alt="关闭"
-              onClick={(_) => setIsShowSide(false)}
+              onClick={(_) => siderStore.setShowSider(false)}
             />
           </IconTip>
         </div>
@@ -224,7 +236,7 @@ const Chat = (props: ChatProps) => {
       <div className="footer input-panel">
         <div className="refly-slogan">The answer engine for your work</div>
         <div className="actions">
-          {isIntentActive && (
+          {/* {isIntentActive && (
             <div className="intent">
               <div className="action-bar">
                 <div className="action-box">
@@ -246,15 +258,15 @@ const Chat = (props: ChatProps) => {
                 <div className="action-popover"></div>
               </div>
             </div>
-          )}
-          {messageState.taskType === TASK_TYPE.CHAT &&
-            messageState?.pending && (
+          )} */}
+          {messageStateStore.taskType === TASK_TYPE.CHAT &&
+            messageStateStore?.pending && (
               <div className="stop-reponse">
                 <Button
                   type="outline"
                   className="btn"
                   icon={<IconMinusCircle />}
-                  onClick={handleShutdownGenReponseTask}>
+                  onClick={buildShutdownTaskAndGenResponse}>
                   停止响应
                 </Button>
               </div>
@@ -266,14 +278,16 @@ const Chat = (props: ChatProps) => {
             ref={inputRef}
             className="message-input"
             autoFocus
-            value={newQAText}
-            onChange={handleSideInputChange}
+            value={chatStore?.newQAText}
+            onChange={(value) => {
+              chatStore.setNewQAText(value);
+            }}
             placeholder="基于网页进行提问任何内容..."
             onKeyDownCapture={(e) => handleKeyDown(e)}
             autoSize={{ minRows: 4, maxRows: 4 }}
             style={{ borderRadius: 8, resize: "none" }}></TextArea>
           <div>
-            <div className="toolbar">
+            <div className="toolbar"> 
               <Space>
                 {/* <Button
                   onClick={() => {
@@ -322,7 +336,10 @@ const Chat = (props: ChatProps) => {
               历史记录
             </Button> */}
               </Space>
+              <Button shape="circle"  icon={<IconSend color="white"/>} onClick={handleCreateNewConversation}></Button>
+                
             </div>
+
           </div>
         </div>
       </div>
