@@ -14,7 +14,8 @@ export const appConfig = {
     generateAnswer: "/api/generate/gen",
     generateTitle: "/api/generate/gen-title",
     syncChatItems: "/api/task/syncChatItems",
-    storeWeblink: '/v1/weblink/store'
+    storeWeblink: '/v1/weblink/store',
+    getWeblinkList: '/v1/weblink/list'
   },
   domId: {},
   appInfo: {

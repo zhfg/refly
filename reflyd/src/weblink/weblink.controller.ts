@@ -46,11 +46,15 @@ export class WeblinkController {
     const skip = (page - 1) * pageSize;
     const take = pageSize;
 
-    return this.weblinkService.findMany({
+    const weblinkList = await this.weblinkService.findMany({
       skip,
       take,
       where: { linkId, url },
       orderBy: { updatedAt: 'desc' },
     });
+
+    return {
+      data: weblinkList,
+    };
   }
 }

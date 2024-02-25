@@ -43,8 +43,8 @@ import { getPopupContainer, scrollToBottom } from "~utils/ui"
 
 // 自定义组件
 import ConversationList from "../conversation-list"
-import PreviousWebsiteList from "../previous-website-list/"
 import { modeList } from "../quick-action"
+import WeblinkList from "../weblink-list"
 import { IconTip } from "./icon-tip"
 import {
   ErrorMessage,
@@ -76,7 +76,7 @@ type ChatProps = {
 
 const Chat = (props: ChatProps) => {
   const inputRef = useRef<RefTextAreaType>()
-  const previousWebsiteListRef = useRef(null)
+  const weblinkListRef = useRef(null)
   const [isUploadingWebsite, setIsUpdatingWebiste] = useState<boolean>(false)
   const [uploadingStatus, setUploadingStatus] = useState<
     "normal" | "loading" | "failed" | "success"
@@ -304,7 +304,7 @@ const Chat = (props: ChatProps) => {
 
                 <Button
                   onClick={() => {
-                    previousWebsiteListRef.current?.setVisible(true)
+                    weblinkListRef.current?.setVisible(true)
                   }}
                   icon={<IconUpload />}
                   type="text"
@@ -335,8 +335,8 @@ const Chat = (props: ChatProps) => {
             ?.shadowRoot?.querySelector(".main")
         }
       />
-      <PreviousWebsiteList
-        ref={previousWebsiteListRef}
+      <WeblinkList
+        ref={weblinkListRef}
         getPopupContainer={() =>
           document
             .querySelector("plasmo-csui")

@@ -3,8 +3,10 @@ import { IconDelete, IconEdit } from "@arco-design/web-react/icon"
 import styleText from "data-text:./index.scss"
 import dayjs from "dayjs"
 import type { PlasmoGetStyle } from "plasmo"
-import React, { forwardRef, useImperativeHandle, useRef, useState } from "react"
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
 import InfiniteScroll from "react-infinite-scroll-component"
+import type { QueryPayload, WebLinkItem } from './types'
+import { defaultQueryPayload } from './utils';
 
 import { sendToBackground } from "@plasmohq/messaging"
 import { useMessage } from "@plasmohq/messaging/hook"
@@ -23,24 +25,24 @@ type Props = {
 }
 
 const PreviosWebsiteList = forwardRef((props: Props, ref) => {
-  const [visible, setVisible] = useState<boolean>()
-  const [conversationList, setConversationList] = useState<Conversation[]>([])
+  const [visible, setVisible] = useState<boolean>(false)
+  const [weblinkList, setWeblinkList] = useState<WebLinkItem[]>([])
   const [keyword, setKeyword] = useState("")
-  const currentPage = useRef(1)
+  const queryPayloadRef = useRef(defaultQueryPayload)
   const [hasMore, setHasMore] = useState(true)
   const [loading, setLoading] = useState(false)
 
-  const handleGetConversationList = async () => {
+  const getWebLinkList = async (queryPayload: QueryPayload) => {
+    console.log('queryPayload', queryPayload)
     const res = await sendToBackground({
-      name: "getConversationList",
-      body: {
-        page: currentPage.current
-      }
+      name: 'getWeblinkList',
+      body: queryPayload,
     })
 
-    setConversationList(res.data.data)
+    console.log('res', res)
+    setWeblinkList(res.data || []);
   }
-
+ 
   //编辑
   const handleEdit = async (params: { id: string; title: string }) => {
     const res = await sendToBackground({
@@ -77,34 +79,37 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
       return {
         setVisible(incomingVisible: boolean) {
           setVisible(incomingVisible)
+
           if (incomingVisible) {
-            // handleGetConversationList()
+            // 获取 link 列表
+            getWebLinkList(queryPayloadRef.current);
           }
         },
 
-        setConversationList(conversationList) {
-          setConversationList(conversationList)
+        setWeblinkList(weblinkList) {
+          setWeblinkList(weblinkList)
         },
 
-        getConversationList() {
-          return conversationList
+        getWeblinkList() {
+          return weblinkList
         },
 
-        hasConversation(conversationId: string) {
+        hasWeblink(urlOrLinkId: string) {
           return (
-            conversationList.filter(
-              (item) => item.conversationId === conversationId
+            weblinkList.filter(
+              (item) => item.url === urlOrLinkId || item.linkId === urlOrLinkId
             )?.length > 0
           )
         }
       }
     },
-    [conversationList, visible]
+    [weblinkList, visible]
   )
 
-  const ConversationItem = (props: { conversation: Conversation }) => {
-    const { id, title, updatedAt, origin, originPageTitle, lastMessage } =
-      props?.conversation
+  const WebLinkItem = (props: { weblink: WebLinkItem }) => {
+    const { id, title, updatedAt, description, url = ''  } =
+      props?.weblink
+    const urlItem = new URL(url);
 
     return (
       <div className="conv-item-wrapper">
@@ -119,7 +124,7 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
             <span className="date">{time(updatedAt).utc().fromNow()}</span>
           </div>
           <div className="conv-item-content">
-            <span className="conv-item-content-text">{lastMessage}</span>
+            <span className="conv-item-content-text">{description}</span>
           </div>
           <div className="conv-item-footer">
             <div className="page-link">
@@ -132,13 +137,14 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
                 }}>
                 <img
                   className="icon"
-                  src={`https://s2.googleusercontent.com/s2/favicons?domain=${origin}`}
+                  src={`https://s2.googleusercontent.com/s2/favicons?domain=${urlItem.origin}`}
                   alt=""
                 />
-                <span className="text">{originPageTitle}</span>
+                <span className="text">{title}</span>
               </a>
             </div>
-            <Tooltip className="delete" content="删除会话">
+            {/** 第一版本不允许删除 */}
+            {/* <Tooltip className="delete" content="删除网页">
               <IconDelete
                 onClick={() => {
                   console.log("handleDelete", handleDelete)
@@ -147,7 +153,7 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
                   })
                 }}
               />
-            </Tooltip>
+            </Tooltip> */}
           </div>
         </div>
       </div>
@@ -167,7 +173,7 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
         headerStyle={{ justifyContent: "center" }}
         title={
           <div style={{ display: "flex", justifyContent: "center" }}>
-            <span style={{ fontWeight: "bold" }}>会话历史记录</span>
+            <span style={{ fontWeight: "bold" }}>网页历史</span>
           </div>
         }
         visible={visible}
@@ -181,8 +187,8 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
         }}>
         <Input placeholder="搜索" />
         <div className="conv-list">
-          {conversationList.map((conv, index) => (
-            <ConversationItem conversation={conv} key={index} />
+          {weblinkList.map((weblink, index) => (
+            <WebLinkItem weblink={weblink} key={index} />
           ))}
         </div>
       </Drawer>
