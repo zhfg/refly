@@ -117,6 +117,8 @@ const Chat = (props: ChatProps) => {
      * 1. 创建新 thread，设置状态
      * 2. 跳转到 thread 界面，进行第一个回复，展示 问题、sources、答案
      */
+    const question = chatStore.newQAText;
+    console.log('question', question);
     const newConversation = buildConversation()
     conversationStore.setCurrentConversation(newConversation)
 
@@ -125,7 +127,7 @@ const Chat = (props: ChatProps) => {
     quickActionStore.resetState();
     popupStore.resetState();
 
-    navigate('/thread/123')
+    // navigate('/thread/123')
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -285,7 +287,7 @@ const Chat = (props: ChatProps) => {
             placeholder="基于网页进行提问任何内容..."
             onKeyDownCapture={(e) => handleKeyDown(e)}
             autoSize={{ minRows: 4, maxRows: 4 }}
-            style={{ borderRadius: 8, resize: "none" }}></TextArea>
+            style={{ borderRadius: 8, resize: "none", minHeight: 98, height: 98 }}></TextArea>
           <div>
             <div className="toolbar"> 
               <Space>

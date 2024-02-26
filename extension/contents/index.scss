@@ -472,6 +472,7 @@ img {
     color: rgba(0,0,0,0.80);
     margin-top: 80px;
     margin-bottom: 40px;
+    line-height: 46px;
   }
 }
 
@@ -502,6 +503,7 @@ img {
 
 .main .footer .input-box textarea {
   background-color: transparent; 
+  min-height: 98px;
 }
 
 .main .footer .input-box {
