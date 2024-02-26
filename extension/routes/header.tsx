@@ -7,14 +7,18 @@ import FullScreenSVG from "~assets/side/full-screen.svg"
 import { IconTip } from "~components/chat/icon-tip"
 import { Avatar } from "@arco-design/web-react"
 import { useSiderStore } from "~stores/sider"
+import { useNavigate } from "react-router-dom"
 
 
 export const Header = () => {
     const siderStore = useSiderStore();
+    const navigate = useNavigate();
 
     return (
         <header>
-            <div className="brand">
+            <div className="brand" onClick={() => {
+                navigate('/')
+            }}>
                 <img src={Logo} alt="Refly" />
                 <span>Refly</span>
             </div>
