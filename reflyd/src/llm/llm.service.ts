@@ -97,10 +97,13 @@ export class LlmService implements OnModuleInit {
       questionWithContext,
     );
 
-    return ragChain.stream({
-      question: query,
-      context: retrievedDocs,
-      chatHistory,
-    });
+    return {
+      sources: retrievedDocs,
+      stream: ragChain.stream({
+        question: query,
+        context: retrievedDocs,
+        chatHistory,
+      }),
+    };
   }
 }

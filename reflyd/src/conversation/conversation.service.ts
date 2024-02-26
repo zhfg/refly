@@ -21,6 +21,7 @@ export class ConversationService {
 
   async addChatMessage(msg: {
     source: MessageSource;
+    sources: string;
     content: string;
     userId: string;
     conversationId: string;

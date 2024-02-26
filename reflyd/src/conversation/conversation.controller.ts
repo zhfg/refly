@@ -62,6 +62,7 @@ export class ConversationController {
       userId,
       conversationId: body.conversationId,
       content: body.query,
+      sources: '',
     });
 
     res.setHeader('Content-Type', 'text/event-stream');
@@ -69,7 +70,7 @@ export class ConversationController {
     res.setHeader('Connection', 'keep-alive');
     res.status(200);
 
-    const stream = await this.llmService.chat(
+    const { stream, sources } = await this.llmService.chat(
       body.query,
       body.chatHistory
         ? body.chatHistory.map((msg) =>
@@ -78,9 +79,12 @@ export class ConversationController {
         : [],
     );
 
+    // first return sources，use unique tag for parse data
+    res.write(`data: [REFLY_SOURCES]${JSON.stringify(sources)}\n\n`);
+
     // write answer in a stream style
     let answerStr = '';
-    for await (const chunk of stream) {
+    for await (const chunk of await stream) {
       answerStr += chunk;
       res.write(`data: ${chunk}\n\n`);
     }
@@ -92,6 +96,7 @@ export class ConversationController {
       userId,
       conversationId: body.conversationId,
       content: answerStr,
+      sources: JSON.stringify(sources),
     });
   }
 

@@ -166,6 +166,8 @@ model ChatMessage {
   userId         String        @db.ObjectId
   //内容
   content        String
+  // 引用文档来源，以 JSON 方式存储
+  sources        String?       @default("")
   ///创建时间
   createdAt      DateTime      @default(now())
   ///更新时间

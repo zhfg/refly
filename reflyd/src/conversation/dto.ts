@@ -4,6 +4,9 @@ import { MessageSource } from '@prisma/client';
 export class CreateConversationParam {
   @ApiPropertyOptional()
   title?: string;
+  origin?: string; // 创建会话的 origin
+  url?: string; // 创建会话的 url
+  originPageTitle?: string; // 所在 url 的 page title
 }
 
 export class CreateConversationResponse extends CreateConversationParam {
