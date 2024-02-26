@@ -40,7 +40,14 @@ export class ConversationController {
     @Body() body: CreateConversationParam,
   ) {
     // TODO: replace this with actual user
-    return this.conversationService.create(body, '5c0a7922c9d89830f4911426');
+    const res = await this.conversationService.create(
+      body,
+      '5c0a7922c9d89830f4911426',
+    );
+
+    return {
+      data: res,
+    };
   }
 
   @Post('retrieve')
@@ -48,20 +55,28 @@ export class ConversationController {
     return this.llmService.retrieveRelevantDocs(body.input.query);
   }
 
-  @Post('chat')
-  async chat(@Body() body: ChatParam, @Res() res: Response) {
-    if (!body.conversationId) {
+  @Get(':conversationId/chat')
+  async chat(
+    @Query('query') query = '',
+    @Param('conversationId') conversationId = '',
+    @Res() res: Response,
+  ) {
+    if (!conversationId) {
       throw new BadRequestException('conversation id cannot be empty');
+    }
+
+    if (!query) {
+      throw new BadRequestException('query cannot be empty');
     }
 
     // TODO: replace this with actual user
     const userId = '5c0a7922c9d89830f4911426';
 
     await this.conversationService.addChatMessage({
-      source: 'human',
+      type: 'human',
       userId,
-      conversationId: body.conversationId,
-      content: body.query,
+      conversationId: conversationId,
+      content: query,
       sources: '',
     });
 
@@ -70,17 +85,20 @@ export class ConversationController {
     res.setHeader('Connection', 'keep-alive');
     res.status(200);
 
+    // 获取聊天历史
+    const chatHistory = await this.conversationService.getMessages(
+      conversationId,
+    );
+
     const { stream, sources } = await this.llmService.chat(
-      body.query,
-      body.chatHistory
-        ? body.chatHistory.map((msg) =>
-            createLCChatMessage(msg.content, msg.type),
-          )
+      query,
+      chatHistory
+        ? chatHistory.map((msg) => createLCChatMessage(msg.content, msg.type))
         : [],
     );
 
     // first return sources，use unique tag for parse data
-    res.write(`data: [REFLY_SOURCES]${JSON.stringify(sources)}\n\n`);
+    // res.write(`data: [REFLY_SOURCES]${JSON.stringify(sources)}\n\n`);
 
     // write answer in a stream style
     let answerStr = '';
@@ -92,9 +110,9 @@ export class ConversationController {
     res.end(`data: [DONE]\n\n`);
 
     await this.conversationService.addChatMessage({
-      source: 'ai',
+      type: 'ai',
       userId,
-      conversationId: body.conversationId,
+      conversationId,
       content: answerStr,
       sources: JSON.stringify(sources),
     });

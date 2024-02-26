@@ -142,8 +142,10 @@ model Conversation {
   title           String
   /// 最后一条聊天记录
   lastMessage     String   @default("")
-  /// 会话来源
+  /// 会话来源 origin
   origin          String   @default("")
+  // 会话来源的 url
+  originPageUrl   String   @default("")
   /// 会话来源页面标题
   originPageTitle String   @default("")
   ///创建时间
@@ -155,23 +157,23 @@ model Conversation {
 ///对话消息
 model ChatMessage {
   ///id为主键，自动生成，映射到数据库中的_id字段，类型为ObjectId
-  id             String        @id @default(auto()) @map("_id") @db.ObjectId
+  id             String      @id @default(auto()) @map("_id") @db.ObjectId
   ///聊天记录 ID
-  messageId      String        @unique
+  messageId      String      @unique
   ///会话id
   conversationId String
   ///消息来源
-  source         MessageSource
+  type           MessageType
   ///用户id
-  userId         String        @db.ObjectId
+  userId         String      @db.ObjectId
   //内容
   content        String
   // 引用文档来源，以 JSON 方式存储
-  sources        String?       @default("")
+  sources        String?     @default("")
   ///创建时间
-  createdAt      DateTime      @default(now())
+  createdAt      DateTime    @default(now())
   ///更新时间
-  updatedAt      DateTime      @updatedAt
+  updatedAt      DateTime    @updatedAt
 }
 
 ///web link
@@ -248,7 +250,7 @@ enum IndexStatus {
   finish
 }
 
-enum MessageSource {
+enum MessageType {
   ai
   human
   system

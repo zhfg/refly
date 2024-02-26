@@ -1,13 +1,13 @@
-import { MessageSource } from '@prisma/client';
+import { MessageType } from '@prisma/client';
 import { AIMessage, HumanMessage, SystemMessage } from 'langchain/schema';
 
 export type LCChatMessage = AIMessage | HumanMessage | SystemMessage;
 
 export function createLCChatMessage(
   content: string,
-  source: MessageSource,
+  type: MessageType,
 ): LCChatMessage {
-  switch (source) {
+  switch (type) {
     case 'ai':
       return new AIMessage({ content });
     case 'human':
@@ -15,6 +15,6 @@ export function createLCChatMessage(
     case 'system':
       return new SystemMessage({ content });
     default:
-      throw new Error(`invalid message source: ${source}`);
+      throw new Error(`invalid message source: ${type}`);
   }
 }
