@@ -1,3 +1,4 @@
+import type { Source } from "./session";
 import { TASK_TYPE } from "./task";
 
 export const enum MessageType {
@@ -83,6 +84,8 @@ export type Message = {
     type: MessageDataType;
     content: string;
     suggestions?: { text: string }[]; // 对话开始提示的 3 个问题
+    relatedQuestions?: string[]; // 对话回答完之后，生成的相关问题推荐
+    sources?: Source[];
     questionId?: string; // 对问题进行的回答，都会有 questionId，如果不是基于某个问题的回答，如自动生成的，则为 null
     replies?: Message[]; // 基于 selection，自动生成一个的 system 回答，eg：您希望对文本进行什么操作？
     intentId?: string; // 基于某个意图进行提问回答，有三个。选中的内容、系统推荐提问、用户进行回答

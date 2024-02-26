@@ -12,12 +12,17 @@ const handler: PlasmoMessaging.PortHandler = async (req, res) => {
   try {
     if (type === TASK_STATUS.START) {
       abortController = new AbortController()
+ 
+      // TODO: 这里未来要优化
+      const messageItems = req.body?.payload?.data?.items || [];
+      const question = messageItems?.[messageItems.length - 1]?.data?.content
+      const conversationId = messageItems?.[messageItems.length - 1]?.conversationId
 
-      const question = req.body?.payload?.data?.items?.[1]?.data?.content
       const evtSource = new EventSource(
-        `${getServerOrigin()}/api/generate/gen?q=${question}`
+        `${getServerOrigin()}/v1/conversation/${conversationId}/chat?query=${question}`
       )
       evtSource.onmessage = (ev: MessageEvent<any>) => {
+        console.log('onmessage', ev.data);
         if (ev?.data === "[DONE]") {
           console.log("EventSource done")
           res.send({ message: "[DONE]" })

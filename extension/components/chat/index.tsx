@@ -3,7 +3,8 @@ import {
   Input,
   Message as message,
   Space,
-  Tooltip
+  Tooltip,
+  Avatar,
 } from "@arco-design/web-react"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input/textarea"
 import {
@@ -24,6 +25,9 @@ import {
 import Logo from "~assets/logo.svg"
 import CloseGraySVG from "~assets/side/close.svg"
 import SendSVG from "~assets/side/send.svg"
+import NotificationSVG from "~assets/side/notification.svg"
+import SettingGraySVG from "~assets/side/setting.svg"
+import FullScreenSVG from "~assets/side/full-screen.svg"
 // 自定义方法
 import { getPopupContainer, scrollToBottom } from "~utils/ui"
 
@@ -48,6 +52,8 @@ import { useSiderSendMessage } from '~hooks/use-sider-send-message'
 import { useMessageStateStore } from "~stores/message-state"
 import { usePopupStore } from "~stores/popup"
 import { useSiderStore } from "~stores/sider"
+// hooks
+import { useResetState } from '~hooks/use-reset-state'
 
 const TextArea = Input.TextArea
 
@@ -65,14 +71,16 @@ const Chat = (props: ChatProps) => {
   const navigate = useNavigate();
 
   const quickActionStore = useQuickActionStore();
-  const chatStore  = useChatStore();
+  const chatStore = useChatStore();
   const conversationStore = useConversationStore();
   const messageStateStore = useMessageStateStore();
   const popupStore = usePopupStore();
   const siderStore = useSiderStore();
+  // hooks
+  const { resetState } = useResetState()
   const { handleSideSendMessage } = useSiderSendMessage();
 
-  
+
   const { buildIntentQuickActionTaskAndGenReponse, buildShutdownTaskAndGenResponse } = useBuildTask()
   const isIntentActive = !!quickActionStore.selectedText
   console.log("selectedText", quickActionStore.selectedText)
@@ -112,22 +120,38 @@ const Chat = (props: ChatProps) => {
    * - newQAText
    * - currentMode
    */
-  const handleCreateNewConversation = () => {
+  const handleCreateNewConversation = async () => {
     /**
      * 1. 创建新 thread，设置状态
      * 2. 跳转到 thread 界面，进行第一个回复，展示 问题、sources、答案
      */
     const question = chatStore.newQAText;
-    console.log('question', question);
-    const newConversation = buildConversation()
-    conversationStore.setCurrentConversation(newConversation)
+    const newConversationPayload = buildConversation()
 
-    chatStore.resetState();  // 新会话默认是没有创建 title 的状态
-    messageStateStore.resetState();
-    quickActionStore.resetState();
-    popupStore.resetState();
+    // 创建新会话
+    const res = await sendToBackground({
+      name: "createNewConversation",
+      body: newConversationPayload
+    })
 
-    // navigate('/thread/123')
+    if (!res?.success) {
+      message.error({
+        content: '创建新会话失败！',
+      })
+      return;
+    }
+
+    console.log('createNewConversation', res)
+    conversationStore.setCurrentConversation(res?.data);
+
+    // 清空之前的状态
+    resetState();
+
+
+    // 更新新的 newQAText，for 新会话跳转使用
+    chatStore.setNewQAText(question);
+    chatStore.setIsNewConversation(true);
+    navigate(`/thread/${newConversationPayload?.conversationId}`)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -180,7 +204,7 @@ const Chat = (props: ChatProps) => {
           <span>Refly</span>
         </div>
         <div className="funcs">
-          {/* <IconTip text="全屏">
+          <IconTip text="全屏">
             <img src={FullScreenSVG} alt="全屏" />
           </IconTip>
           <IconTip text="通知">
@@ -196,7 +220,7 @@ const Chat = (props: ChatProps) => {
                 src="//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/3ee5f13fb09879ecb5185e440cef6eb9.png~tplv-uwbnlip3yd-webp.webp"
               />
             </Avatar>
-          </IconTip> */}
+          </IconTip>
           <IconTip text="关闭">
             <img
               src={CloseGraySVG}
@@ -289,7 +313,7 @@ const Chat = (props: ChatProps) => {
             autoSize={{ minRows: 4, maxRows: 4 }}
             style={{ borderRadius: 8, resize: "none", minHeight: 98, height: 98 }}></TextArea>
           <div>
-            <div className="toolbar"> 
+            <div className="toolbar">
               <Space>
                 {/* <Button
                   onClick={() => {
@@ -338,8 +362,8 @@ const Chat = (props: ChatProps) => {
               历史记录
             </Button> */}
               </Space>
-              <Button shape="circle"  icon={<IconSend color="white"/>} onClick={handleCreateNewConversation}></Button>
-                
+              <Button shape="circle" icon={<IconSend color="white" />} onClick={handleCreateNewConversation}></Button>
+
             </div>
 
           </div>

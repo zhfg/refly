@@ -6,14 +6,15 @@ export type BuildConversation = {
   selectionContent: string
 }
 
-export const buildConversation = (msgList?: Message[]): Conversation => {
+export const buildConversation = (msgList?: Message[]): Partial<Conversation> => {
   const conversationId = `conv:${genUniqueId()}`
 
   const conversation = {
     conversationId,
-    items: msgList || [],
-    origin: location?.href || "",
-    originPageTitle: document?.title || ""
+    origin: location?.origin || "", // 冗余存储策略，for 后续能够基于 origin 进行归类归档
+    originPageTitle: document?.title || "",
+    title: document?.title || "",
+    originPageUrl: location.href
   }
 
   return conversation

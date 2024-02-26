@@ -7,7 +7,7 @@ import CSSText from "data-text:~/contents/index.scss"
 import HighlightCSSText from "data-text:~/contents/styles/highlight.scss"
 import MarkdownCSSText from "data-text:~/contents/styles/markdown.scss"
 import type { PlasmoGetInlineAnchor } from "plasmo"
-import React from "react"
+import React, { useEffect } from "react"
 import { MemoryRouter } from 'react-router-dom'
 
 // import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
@@ -29,6 +29,8 @@ import { useQuickActionStore } from '~stores/quick-action'
 
 // 组件
 import { Routing } from '~routes/index';
+import { Message } from "@arco-design/web-react"
+import { getPopupContainer } from "~utils/ui"
 
 // export const config: PlasmoCSConfig = {
 //   run_at: "document_end"
@@ -65,6 +67,15 @@ export const Content = () => {
   useSwitchTheme()
   // 在激活侧边栏时，设置可操作的空间 Dimension，可以使得组件库效果展示好
   useSetContainerDimension()
+
+  // 设置 Message 通知的 container
+  useEffect(() => {
+    Message.config({
+      getContainer: () => document
+        .querySelector("plasmo-csui")
+        ?.shadowRoot?.querySelector(".main")
+    })
+  }, [])
 
   return (
     <div className="light">

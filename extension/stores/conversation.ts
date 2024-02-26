@@ -6,7 +6,6 @@ import { ConversationOperation } from "~/types"
 
 interface ConversationState {
     // state
-    currentConversationId: string;
     currentConversation: Conversation;
     conversationList: Conversation[];
 
@@ -18,7 +17,6 @@ interface ConversationState {
 }
 
 export const useConversationStore = create<ConversationState>()(devtools((set) => ({
-    currentConversationId: '',
     currentConversation: null,
     conversationList: [],
 
