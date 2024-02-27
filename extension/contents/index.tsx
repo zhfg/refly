@@ -7,8 +7,9 @@ import CSSText from "data-text:~/contents/index.scss"
 import HighlightCSSText from "data-text:~/contents/styles/highlight.scss"
 import MarkdownCSSText from "data-text:~/contents/styles/markdown.scss"
 import type { PlasmoGetInlineAnchor } from "plasmo"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { MemoryRouter } from 'react-router-dom'
+import classNames from 'classnames';
 
 // import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 // import { dark } from "react-syntax-highlighter/dist/esm/styles/prism"
@@ -29,8 +30,9 @@ import { useQuickActionStore } from '~stores/quick-action'
 
 // 组件
 import { Routing } from '~routes/index';
-import { Message } from "@arco-design/web-react"
+import { Affix, Button, Message } from "@arco-design/web-react"
 import { getPopupContainer } from "~utils/ui"
+import { IconSearch, IconStorage } from "@arco-design/web-react/icon"
 
 // export const config: PlasmoCSConfig = {
 //   run_at: "document_end"
@@ -57,6 +59,9 @@ export const Content = () => {
   const siderStore = useSiderStore();
   const quickActionStore = useQuickActionStore();
 
+  // 处理状态
+  const [activeTab, setActiveTab] = useState<'home' | 'session-library'>('home')
+
   // 注册 mouse event
   useRegisterMouseEvent()
   // 监听打开与关闭侧边栏消息
@@ -77,8 +82,9 @@ export const Content = () => {
     })
   }, [])
 
+
   return (
-    <div className="light">
+    <div className="light app-container">
       {quickActionStore.toolbarVisible && (
         <QuickAction
         />
@@ -91,7 +97,25 @@ export const Content = () => {
         <span>⌘B</span>
       </div>
 
-      <div className={siderStore.showSider ? "main active" : "main"}><MemoryRouter><Routing /></MemoryRouter></div>
+      <div className={siderStore.showSider ? "main active" : "main"}>
+        <MemoryRouter><Routing /></MemoryRouter>
+        <div className="footer-nav-container">
+          <div className="footer-nav">
+            <div className={classNames('nav-item', activeTab === 'home' && 'nav-item-active')} onClick={() => setActiveTab('home')}>
+              <div className="nav-item-inner">
+                <IconSearch style={{ fontSize: 22 }} />
+                <p className="nav-item-title">主页</p>
+              </div>
+            </div>
+            <div className={classNames('nav-item', activeTab === 'session-library' && 'nav-item-active')} onClick={() => setActiveTab('session-library')}>
+              <div className="nav-item-inner">
+                <IconStorage style={{ fontSize: 22 }} />
+                <p className="nav-item-title">会话库</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
