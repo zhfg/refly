@@ -8,7 +8,7 @@ import HighlightCSSText from "data-text:~/contents/styles/highlight.scss"
 import MarkdownCSSText from "data-text:~/contents/styles/markdown.scss"
 import type { PlasmoGetInlineAnchor } from "plasmo"
 import React, { useEffect, useState } from "react"
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, useNavigate } from 'react-router-dom'
 import classNames from 'classnames';
 
 // import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
@@ -54,13 +54,46 @@ export const getStyle = () => {
   return style
 }
 
+const ContentWithRouter = () => {
+  // 导航相关
+  const navigate = useNavigate();
+
+  // 处理状态
+  const [activeTab, setActiveTab] = useState<'home' | 'session-library'>('home')
+
+  return (
+    <div>
+      <Routing />
+      <div className="footer-nav-container">
+        <div className="footer-nav">
+          <div className={classNames('nav-item', activeTab === 'home' && 'nav-item-active')} onClick={() => {
+            navigate('/')
+            setActiveTab('home')
+          }}>
+            <div className="nav-item-inner">
+              <IconSearch style={{ fontSize: 22 }} />
+              <p className="nav-item-title">主页</p>
+            </div>
+          </div>
+          <div className={classNames('nav-item', activeTab === 'session-library' && 'nav-item-active')} onClick={() => {
+            navigate('/thread')
+            setActiveTab('session-library')
+          }}>
+            <div className="nav-item-inner">
+              <IconStorage style={{ fontSize: 22 }} />
+              <p className="nav-item-title">会话库</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export const Content = () => {
   // 打开聊天窗口的方式
   const siderStore = useSiderStore();
   const quickActionStore = useQuickActionStore();
-
-  // 处理状态
-  const [activeTab, setActiveTab] = useState<'home' | 'session-library'>('home')
 
   // 注册 mouse event
   useRegisterMouseEvent()
@@ -98,23 +131,9 @@ export const Content = () => {
       </div>
 
       <div className={siderStore.showSider ? "main active" : "main"}>
-        <MemoryRouter><Routing /></MemoryRouter>
-        <div className="footer-nav-container">
-          <div className="footer-nav">
-            <div className={classNames('nav-item', activeTab === 'home' && 'nav-item-active')} onClick={() => setActiveTab('home')}>
-              <div className="nav-item-inner">
-                <IconSearch style={{ fontSize: 22 }} />
-                <p className="nav-item-title">主页</p>
-              </div>
-            </div>
-            <div className={classNames('nav-item', activeTab === 'session-library' && 'nav-item-active')} onClick={() => setActiveTab('session-library')}>
-              <div className="nav-item-inner">
-                <IconStorage style={{ fontSize: 22 }} />
-                <p className="nav-item-title">会话库</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <MemoryRouter>
+          <ContentWithRouter />
+        </MemoryRouter>
       </div>
     </div>
   )

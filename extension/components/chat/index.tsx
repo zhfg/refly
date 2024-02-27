@@ -362,7 +362,7 @@ const Chat = (props: ChatProps) => {
               历史记录
             </Button> */}
               </Space>
-              <Button shape="circle" icon={<IconSend color="white" />} onClick={handleCreateNewConversation}></Button>
+              <Button shape="circle" icon={<IconSend />} style={{ color: '#FFF', background: '#00968F' }} onClick={handleCreateNewConversation}></Button>
 
             </div>
 
