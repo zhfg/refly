@@ -5,8 +5,6 @@ import {
     IconSend
 } from "@arco-design/web-react/icon"
 
-import styleText from "data-text:./index.scss"
-
 // stores
 import { useChatStore } from '~stores/chat'
 import { useMessageStateStore } from '~stores/message-state'
@@ -20,12 +18,6 @@ import { useSiderSendMessage } from '~hooks/use-sider-send-message'
 
 interface ThreadItemProps {
     sessions: SessionItem[];
-}
-
-export const getStyle: PlasmoGetStyle = () => {
-    const style = document.createElement("style")
-    style.textContent = styleText
-    return style
 }
 
 const TextArea = Input.TextArea

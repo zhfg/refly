@@ -1,29 +1,29 @@
 import React from 'react';
 import {
-    Button,
-    Divider,
-    Input,
-    Spin,
-    Typography
-  } from "@arco-design/web-react"
-  import {
-    IconCheck,
-    IconCopy,
-    IconMessage,
-    IconMinusCircle,
-    IconRefresh,
-  } from "@arco-design/web-react/icon"
-  import Logo from "~assets/logo.svg"
-  import CloseSVG from "~assets/menu-icons/close.svg"
+  Button,
+  Divider,
+  Input,
+  Spin,
+  Typography
+} from "@arco-design/web-react"
+import {
+  IconCheck,
+  IconCopy,
+  IconMessage,
+  IconMinusCircle,
+  IconRefresh,
+} from "@arco-design/web-react/icon"
+import Logo from "~assets/logo.svg"
+import CloseSVG from "~assets/menu-icons/close.svg"
 
 import { useCountDown } from "~hooks/use-count-down"
 import {
-    ACTION_TYPE,
-    TASK_TYPE,
-    type Mode,
-    type QUICK_ACTION,
-  } from "~/types"
-  // stores
+  ACTION_TYPE,
+  TASK_TYPE,
+  type Mode,
+  type QUICK_ACTION,
+} from "~/types"
+// stores
 import { usePopupStore } from '../../stores/popup'
 import { useChatStore } from '../../stores/chat'
 import { useSiderStore } from '../../stores/sider'
@@ -32,7 +32,7 @@ import { useQuickActionStore } from '../../stores/quick-action'
 import { useConversationStore } from '../../stores/conversation'
 import { modeList } from './utils';
 import { Markdown } from "../markdown"
-import { IconTip } from '../chat/icon-tip';
+import { IconTip } from '../home/icon-tip';
 import copyToClipboard from "copy-to-clipboard"
 import { sendToBackground } from '@plasmohq/messaging';
 import { useBuildTask } from '~hooks/use-build-task';
@@ -41,13 +41,13 @@ import { buildIntentMessageList, errorMessage } from '~utils/message';
 const TextArea = Input.TextArea
 
 interface PopupContentProps {
-    handleQuickActionGenResponse: (taskType: TASK_TYPE,
-        data: QUICK_ACTION) => void
+  handleQuickActionGenResponse: (taskType: TASK_TYPE,
+    data: QUICK_ACTION) => void
 }
 
 export const PopupContent = (props: PopupContentProps) => {
-    const [isAnswerCopyCountdown, setIsAnswerCopyCountdown] = useCountDown(3)
-    const quickActionStore = useQuickActionStore();
+  const [isAnswerCopyCountdown, setIsAnswerCopyCountdown] = useCountDown(3)
+  const quickActionStore = useQuickActionStore();
   const popupStore = usePopupStore();
   const messageStateStore = useMessageStateStore();
   const chatStore = useChatStore();
@@ -99,28 +99,28 @@ export const PopupContent = (props: PopupContentProps) => {
   }
 
 
-    const ModeTagItem = (mode: Mode) => (
-        <div
-          className={
-            mode?.text === quickActionStore.currentMode?.text
-              ? "menu-tag-item active"
-              : "menu-tag-item"
-          }
-          key={mode?.text}
-          onClick={(_) => {
-            props.handleQuickActionGenResponse(TASK_TYPE.QUICK_ACTION, {
-              actionType: ACTION_TYPE.SELECTION,
-              actionPrompt: mode.prompt,
-              reference: quickActionStore.selectedText
-            })
-            quickActionStore.setCurrentMode(mode);
-          }}>
-          <span>{mode?.text}</span>
-        </div>
-      )
-      const ModeTagItems = modeList.map((e) => ModeTagItem(e))
+  const ModeTagItem = (mode: Mode) => (
+    <div
+      className={
+        mode?.text === quickActionStore.currentMode?.text
+          ? "menu-tag-item active"
+          : "menu-tag-item"
+      }
+      key={mode?.text}
+      onClick={(_) => {
+        props.handleQuickActionGenResponse(TASK_TYPE.QUICK_ACTION, {
+          actionType: ACTION_TYPE.SELECTION,
+          actionPrompt: mode.prompt,
+          reference: quickActionStore.selectedText
+        })
+        quickActionStore.setCurrentMode(mode);
+      }}>
+      <span>{mode?.text}</span>
+    </div>
+  )
+  const ModeTagItems = modeList.map((e) => ModeTagItem(e))
 
-    return <div className="popup-content">
+  return <div className="popup-content">
     <header>
       <div className="header-left">
         <img src={Logo} alt="Refly" style={{ width: 24, height: 24 }} />

@@ -11,7 +11,7 @@ import { useConversationStore } from '~stores/conversation';
 // utils
 import { buildSessions } from '~utils/session';
 // 组件
-import { ThreadItem } from '~components/thread/index';
+import { ThreadItem } from '~components/thread-item/thread-item';
 import { sendToBackground } from '@plasmohq/messaging';
 import { Header } from './header';
 

@@ -21,39 +21,34 @@ import {
   TASK_TYPE,
   type Message,
 } from "~/types"
-// 静态资源
-import Logo from "~assets/logo.svg"
-import CloseGraySVG from "~assets/side/close.svg"
-import SendSVG from "~assets/side/send.svg"
-import NotificationSVG from "~assets/side/notification.svg"
-import SettingGraySVG from "~assets/side/setting.svg"
-import FullScreenSVG from "~assets/side/full-screen.svg"
+
 // 自定义方法
 import { getPopupContainer, scrollToBottom } from "~utils/ui"
 
 // 自定义组件
 import ConversationList from "../conversation-list"
-import { modeList } from "../quick-action/utils"
 import WeblinkList from "../weblink-list"
-import { IconTip } from "./icon-tip"
 import {
   ErrorMessage,
   IntentMessage,
   QuestionMessage,
   ReplyMessage
 } from "./message-list"
+import { ChatHeader } from './header'
+// utils
 import { getLoadingStatusText } from "./utils"
+import { buildConversation } from "~utils/conversation"
+// stores
 import { useQuickActionStore } from '../../stores/quick-action'
 import { useChatStore } from '../../stores/chat'
-import { useBuildTask } from "~hooks/use-build-task"
 import { useConversationStore } from "~stores/conversation"
-import { buildConversation } from "~utils/conversation"
 import { useSiderSendMessage } from '~hooks/use-sider-send-message'
 import { useMessageStateStore } from "~stores/message-state"
-import { usePopupStore } from "~stores/popup"
 import { useSiderStore } from "~stores/sider"
 // hooks
+import { useBuildTask } from "~hooks/use-build-task"
 import { useResetState } from '~hooks/use-reset-state'
+import type { PlasmoGetStyle } from "plasmo"
 
 const TextArea = Input.TextArea
 
@@ -64,7 +59,6 @@ const Chat = (props: ChatProps) => {
   const inputRef = useRef<RefTextAreaType>()
   const weblinkListRef = useRef(null)
   const conversationListInstanceRef = useRef(null);
-  const [isUploadingWebsite, setIsUpdatingWebiste] = useState<boolean>(false)
   const [uploadingStatus, setUploadingStatus] = useState<
     "normal" | "loading" | "failed" | "success"
   >("normal")
@@ -74,7 +68,6 @@ const Chat = (props: ChatProps) => {
   const chatStore = useChatStore();
   const conversationStore = useConversationStore();
   const messageStateStore = useMessageStateStore();
-  const popupStore = usePopupStore();
   const siderStore = useSiderStore();
   // hooks
   const { resetState } = useResetState()
@@ -161,7 +154,7 @@ const Chat = (props: ChatProps) => {
   }
 
   const handleUploadWebsite = async (url: string) => {
-    setIsUpdatingWebiste(true)
+    // setIsUpdatingWebiste(true)
     setUploadingStatus("loading")
 
     const res = await sendToBackground({
@@ -198,39 +191,7 @@ const Chat = (props: ChatProps) => {
         display: "flex",
         flexDirection: "column"
       }}>
-      <header>
-        <div className="brand">
-          <img src={Logo} alt="Refly" />
-          <span>Refly</span>
-        </div>
-        <div className="funcs">
-          <IconTip text="全屏">
-            <img src={FullScreenSVG} alt="全屏" />
-          </IconTip>
-          <IconTip text="通知">
-            <img src={NotificationSVG} alt="通知" />
-          </IconTip>
-          <IconTip text="设置">
-            <img src={SettingGraySVG} alt="设置" />
-          </IconTip>
-          <IconTip text="账户">
-            <Avatar size={16}>
-              <img
-                alt="avatar"
-                src="//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/3ee5f13fb09879ecb5185e440cef6eb9.png~tplv-uwbnlip3yd-webp.webp"
-              />
-            </Avatar>
-          </IconTip>
-          <IconTip text="关闭">
-            <img
-              src={CloseGraySVG}
-              alt="关闭"
-              onClick={(_) => siderStore.setShowSider(false)}
-            />
-          </IconTip>
-        </div>
-      </header>
-
+      <ChatHeader />
       {/* <div
         className="chat-wrapper"
         style={{ paddingBottom: isIntentActive ? 72 : 52 }}>

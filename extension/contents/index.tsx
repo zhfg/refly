@@ -1,15 +1,17 @@
 import ArcoCSS from "data-text:@arco-design/web-react/dist/css/arco.css"
-import ChatCSSText from "data-text:~/components/chat/index.scss"
 import ConversationListCSS from "data-text:~/components/conversation-list/index.scss"
 import QuickActionCSS from "data-text:~/components/quick-action/index.scss"
 import LocalArcoCSS from "data-text:~/contents/arco.css"
 import CSSText from "data-text:~/contents/index.scss"
 import HighlightCSSText from "data-text:~/contents/styles/highlight.scss"
 import MarkdownCSSText from "data-text:~/contents/styles/markdown.scss"
+import ThreadLibraryCSSText from "data-text:~/components/thread-library/index.scss"
+import ThreadItemCSSText from "data-text:~/components/thread-item/thread-item.scss"
+import HomeCSSText from "data-text:~/components/home/index.scss"
+import WeblinkCSSText from "data-text:~/components/weblink-list/index.scss"
 import type { PlasmoGetInlineAnchor } from "plasmo"
-import React, { useEffect, useState } from "react"
-import { MemoryRouter, useNavigate } from 'react-router-dom'
-import classNames from 'classnames';
+import React, { useEffect } from "react"
+import { MemoryRouter } from 'react-router-dom'
 
 // import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 // import { dark } from "react-syntax-highlighter/dist/esm/styles/prism"
@@ -29,10 +31,8 @@ import { useSiderStore } from '~stores/sider'
 import { useQuickActionStore } from '~stores/quick-action'
 
 // 组件
-import { Routing } from '~routes/index';
-import { Affix, Button, Message } from "@arco-design/web-react"
-import { getPopupContainer } from "~utils/ui"
-import { IconSearch, IconStorage } from "@arco-design/web-react/icon"
+import { Message } from "@arco-design/web-react"
+import { ContentRouter } from './router'
 
 // export const config: PlasmoCSConfig = {
 //   run_at: "document_end"
@@ -46,49 +46,17 @@ export const getStyle = () => {
     LocalArcoCSS +
     ArcoCSS +
     CSSText +
+    HomeCSSText +
+    ThreadLibraryCSSText +
+    ThreadItemCSSText +
+    WeblinkCSSText +
     ConversationListCSS +
-    ChatCSSText +
     QuickActionCSS +
     MarkdownCSSText +
     HighlightCSSText
   return style
 }
 
-const ContentWithRouter = () => {
-  // 导航相关
-  const navigate = useNavigate();
-
-  // 处理状态
-  const [activeTab, setActiveTab] = useState<'home' | 'session-library'>('home')
-
-  return (
-    <div>
-      <Routing />
-      <div className="footer-nav-container">
-        <div className="footer-nav">
-          <div className={classNames('nav-item', activeTab === 'home' && 'nav-item-active')} onClick={() => {
-            navigate('/')
-            setActiveTab('home')
-          }}>
-            <div className="nav-item-inner">
-              <IconSearch style={{ fontSize: 22 }} />
-              <p className="nav-item-title">主页</p>
-            </div>
-          </div>
-          <div className={classNames('nav-item', activeTab === 'session-library' && 'nav-item-active')} onClick={() => {
-            navigate('/thread')
-            setActiveTab('session-library')
-          }}>
-            <div className="nav-item-inner">
-              <IconStorage style={{ fontSize: 22 }} />
-              <p className="nav-item-title">会话库</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 export const Content = () => {
   // 打开聊天窗口的方式
@@ -132,7 +100,7 @@ export const Content = () => {
 
       <div className={siderStore.showSider ? "main active" : "main"}>
         <MemoryRouter>
-          <ContentWithRouter />
+          <ContentRouter />
         </MemoryRouter>
       </div>
     </div>

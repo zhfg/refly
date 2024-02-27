@@ -1,8 +1,8 @@
 import { Route, Routes } from 'react-router-dom'
 
 import { Home } from './home';
-import { Thread } from './thread'
-import { ThreadLibrary } from './thread-library'
+import { Thread } from '../components/thread-item/thread'
+import { ThreadLibrary } from '../components/thread-library'
 
 export const Routing = () => (
     <Routes>
