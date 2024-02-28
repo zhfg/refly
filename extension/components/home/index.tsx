@@ -49,13 +49,14 @@ import { useSiderStore } from "~stores/sider"
 import { useBuildTask } from "~hooks/use-build-task"
 import { useResetState } from '~hooks/use-reset-state'
 import type { PlasmoGetStyle } from "plasmo"
+import { IconTip } from "./icon-tip"
 
 const TextArea = Input.TextArea
 
 type ChatProps = {
 }
 
-const Chat = (props: ChatProps) => {
+const Home = (props: ChatProps) => {
   const inputRef = useRef<RefTextAreaType>()
   const weblinkListRef = useRef(null)
   const conversationListInstanceRef = useRef(null);
@@ -285,12 +286,8 @@ const Chat = (props: ChatProps) => {
                   shape="round">
                   新会话
                 </Button> */}
-                <Tooltip
-                  mini
-                  position={"top"}
-                  content={getLoadingStatusText(uploadingStatus)}
-                  popupVisible={uploadingStatus !== "normal"}
-                  getPopupContainer={getPopupContainer}>
+
+                <IconTip text="处理当前网页用于问答">
                   <Button
                     onClick={() => {
                       handleUploadWebsite(window.location.href)
@@ -301,9 +298,10 @@ const Chat = (props: ChatProps) => {
                     shape="round">
                     阅读
                   </Button>
-                </Tooltip>
+                </IconTip>
 
-                <Button
+                {/** 第一版本不支持选择指定网页进行问答 */}
+                {/* <Button
                   onClick={() => {
                     weblinkListRef.current?.setVisible(true)
                   }}
@@ -311,7 +309,7 @@ const Chat = (props: ChatProps) => {
                   type="text"
                   shape="round">
                   选择
-                </Button>
+                </Button> */}
                 {/* <Button
               onClick={() => {
                 conversationListInstanceRef?.current?.setVisible(true)
@@ -351,4 +349,4 @@ const Chat = (props: ChatProps) => {
   )
 }
 
-export default Chat
+export default Home;

@@ -53,7 +53,7 @@ export const Thread = () => {
             handleSideSendMessage(question);
             chatStore.setIsNewConversation(false);
         } else {
-            handleGetThreadMessages(threadId);
+            // handleGetThreadMessages(threadId);
         }
     }
 

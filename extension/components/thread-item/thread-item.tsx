@@ -46,7 +46,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
     return (
         <div className='session-container'>
             <div className='session-inner-container'>
-                {sessions?.map((item, index) => <Session key={index} session={item} />)}
+                {sessions?.map((item, index) => <Session key={index} session={item} isLastSession={index === sessions.length - 1} />)}
             </div>
             {!messageStateStore?.pending &&
                 <div className="footer input-panel">
@@ -65,27 +65,29 @@ export const ThreadItem = (props: ThreadItemProps) => {
                             )}
                     </div>
 
-                    <div className="input-box">
-                        <TextArea
-                            ref={inputRef}
-                            className="message-input"
-                            autoFocus
-                            value={chatStore?.newQAText}
-                            onChange={(value) => {
-                                chatStore.setNewQAText(value);
-                            }}
-                            placeholder="基于网页进行提问任何内容..."
-                            onKeyDownCapture={(e) => handleKeyDown(e)}
-                            autoSize={{ minRows: 4, maxRows: 4 }}
-                            style={{ borderRadius: 8, resize: "none", minHeight: 98, height: 98 }}></TextArea>
-                        <div>
-                            <div className="toolbar">
-                                <Space>
-                                </Space>
-                                <Button shape="circle" icon={<IconSend color="white" />} onClick={handleAskFollowing}></Button>
+                    <div className="session-input-box">
+                        <div className='session-inner-input-box'>
+                            <TextArea
+                                ref={inputRef}
+                                className="message-input"
+                                autoFocus
+                                value={chatStore?.newQAText}
+                                onChange={(value) => {
+                                    chatStore.setNewQAText(value);
+                                }}
+                                placeholder="继续提问..."
+                                onKeyDownCapture={(e) => handleKeyDown(e)}
+                                autoSize={{ minRows: 1, maxRows: 4 }}
+                                style={{ borderRadius: 8, resize: "none", backgroundColor: 'transparent' }}></TextArea>
+                            <div>
+                                <div className="toolbar">
+                                    <Space>
+                                    </Space>
+                                    <Button shape="circle" icon={<IconSend />} style={{ color: '#FFF', background: '#00968F' }} onClick={handleAskFollowing}></Button>
+
+                                </div>
 
                             </div>
-
                         </div>
                     </div>
                 </div>

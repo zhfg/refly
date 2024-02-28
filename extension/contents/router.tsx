@@ -9,9 +9,20 @@ export const ContentRouter = () => {
     // 导航相关
     const navigate = useNavigate();
     const isThreadItem = useMatch('/thread/:threadId');
+    const isHomePage = useMatch('/');
 
     // 处理状态
     const [activeTab, setActiveTab] = useState<'home' | 'session-library'>('home')
+
+    useEffect(() => {
+        if (!isThreadItem) {
+            if (isHomePage) {
+                setActiveTab('home')
+            } else {
+                setActiveTab('session-library')
+            }
+        }
+    }, [isHomePage])
 
     return (
         <div>

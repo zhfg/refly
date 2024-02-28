@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 
-import { Home } from './home';
+// 自定义组件
+import Home from "../components/home"
 import { Thread } from '../components/thread-item/thread'
 import { ThreadLibrary } from '../components/thread-library'
 

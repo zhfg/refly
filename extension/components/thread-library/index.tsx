@@ -14,6 +14,7 @@ import { useSiderStore } from "~stores/sider"
 import { IconTip } from '~components/home/icon-tip';
 import { IconClockCircle, IconRightCircle } from '@arco-design/web-react/icon';
 import type { PlasmoGetStyle } from 'plasmo';
+import { useNavigate } from 'react-router-dom';
 
 const names = ['Socrates', 'Balzac', 'Plato'];
 const avatarSrc = [
@@ -28,6 +29,7 @@ const imageSrc = [
 ];
 const dataSource = new Array(15).fill(null).map((_, index) => {
     return {
+        id: index,
         index: index,
         avatar: avatarSrc[index % avatarSrc.length],
         title: names[index % names.length],
@@ -78,6 +80,7 @@ const Header = () => {
 
 export const ThreadLibrary = () => {
     const [scrollLoading, setScrollLoading] = useState(<Skeleton />);
+    const navigate = useNavigate();
 
     const fetchData = (currentPage) => {
 
@@ -108,7 +111,9 @@ export const ThreadLibrary = () => {
                             style={{ padding: '20px 0', borderBottom: '1px solid var(--color-fill-3)' }}
                             actionLayout='vertical'
                             actions={[
-                                <span key={1} className='thread-library-list-item-continue-ask with-border with-hover'>
+                                <span key={1} className='thread-library-list-item-continue-ask with-border with-hover' onClick={() => {
+                                    navigate(`/thread/${item?.id}`)
+                                }}>
                                     <IconRightCircle style={{ fontSize: 14, color: '#64645F' }} />
                                     <span className='thread-library-list-item-text'>继续提问</span>
                                 </span>,
