@@ -285,16 +285,44 @@ export const useBuildTask = () => {
     // 只有在聊天场景下，才需要更新最后一条消息
     if (currentMessageState.taskType === TASK_TYPE.CHAT) {
       if (currentMessageState.pendingFirstToken) {
-        const lastReplyMessage = currentMessageState.pendingReplyMsg
+        const lastMessage = currentMessageState.pendingReplyMsg
 
-        lastReplyMessage.data.content =
-          lastReplyMessage?.data?.content + msg?.message?.includes("[SOURCE]")
+        lastMessage.data.content =
+          lastMessage?.data?.content + msg?.message?.includes("[SOURCE]")
             ? ""
             : msg?.message
 
+        if (msg?.message?.includes("[SOURCE]")) {
+          const sourceWeblinkPayload = safeParseJSON(
+            msg?.message?.split("[SOURCE] ")?.[1]?.trim(),
+          )
+          console.log("sourceWeblinkPayload", sourceWeblinkPayload)
+          messageStateStore.setMessageState({
+            ...currentMessageState,
+            pendingSourceDocs: (
+              currentMessageState.pendingSourceDocs || []
+            ).concat(sourceWeblinkPayload),
+          })
+
+          console.log("sourceWeblinkPayload", lastMessage.data.sources)
+
+          if (Array.isArray(lastMessage?.data?.sources)) {
+            lastMessage.data.sources = lastMessage?.data?.sources?.concat(
+              sourceWeblinkPayload || [],
+            )
+          } else {
+            lastMessage.data.sources = [sourceWeblinkPayload]
+          }
+
+          // 更新消息之后滚动到底部
+          setTimeout(() => {
+            scrollToBottom()
+          }, 1000)
+        }
+
         chatStore.setMessages([
           ...currentChatState.messages,
-          { ...lastReplyMessage },
+          { ...lastMessage },
         ])
 
         // 更新消息之后滚动到底部
@@ -328,11 +356,6 @@ export const useBuildTask = () => {
             lastMessage.data.sources = [sourceWeblinkPayload]
           }
           chatStore.setMessages([...savedMessage, { ...lastMessage }])
-
-          // 更新消息之后滚动到底部
-          setTimeout(() => {
-            scrollToBottom()
-          }, 1000)
         } else {
           const lastMessage = currentChatState.messages.at(-1)
           const savedMessage = currentChatState.messages.slice(0, -1)
