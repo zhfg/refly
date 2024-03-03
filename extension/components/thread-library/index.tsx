@@ -8,12 +8,12 @@ import SettingGraySVG from "~assets/side/setting.svg"
 import FullScreenSVG from "~assets/side/full-screen.svg"
 
 // 组件
-import { Avatar, List, Button, Skeleton, Message as message } from "@arco-design/web-react"
+import { Avatar, List, Button, Skeleton, Message as message, Typography } from "@arco-design/web-react"
 // stores
 import { useSiderStore } from "~stores/sider"
 import { useThreadStore, type Thread } from "~stores/thread"
 import { IconTip } from '~components/home/icon-tip';
-import { IconClockCircle, IconRightCircle } from '@arco-design/web-react/icon';
+import { IconClockCircle, IconMessage, IconRightCircle } from '@arco-design/web-react/icon';
 import type { PlasmoGetStyle } from 'plasmo';
 import { useNavigate, useMatch } from 'react-router-dom';
 import { sendToBackground } from '@plasmohq/messaging';
@@ -153,12 +153,18 @@ export const ThreadLibrary = () => {
                         <span key={2}>
                             <IconClockCircle style={{ fontSize: 14, color: '#64645F' }} />
                             <span className='thread-library-list-item-text'>{time(item.updatedAt).utc().fromNow()}</span>
+                        </span>,
+                        <span key={3}>
+                            <IconMessage style={{ fontSize: 14, color: '#64645F' }} />
+                            <span className='thread-library-list-item-text'>{item?.messageCount} 条消息</span>
                         </span>
                     ]}
                 >
                     <List.Item.Meta
                         title={item.title}
-                        description={item.lastMessage}
+                        description={<Typography.Paragraph ellipsis={{ rows: 2, wrapper: 'span' }} style={{ color: 'rgba(0, 0, 0, .4) !important' }}>
+                            {item.lastMessage}
+                        </Typography.Paragraph>}
                     />
                 </List.Item>
             )}

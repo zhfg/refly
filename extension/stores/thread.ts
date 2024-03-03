@@ -8,6 +8,7 @@ export interface Thread {
   userId: string
   title: string
   lastMessage: string
+  messageCount: number
   origin: string
   originPageUrl: string
   originPageTitle: string

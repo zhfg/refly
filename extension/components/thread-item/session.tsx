@@ -61,11 +61,13 @@ export const Session = (props: SessionProps) => {
                                                 }}>
                                                     <img src={`https://www.google.com/s2/favicons?domain=${item?.metadata?.source}&sz=${16}`} alt={item?.metadata?.source} />
                                                 </span>,
-                                                <span key={2} className='session-source-list-item-action'>
-                                                    <Typography.Paragraph ellipsis={{ rows: 1, wrapper: 'span', }} style={{ fontSize: 10, color: 'rgba(0, 0, 0, .4)' }}>
-                                                        · {new URL(item.metadata?.source as "")?.origin} ·
-                                                    </Typography.Paragraph>
-                                                </span>,
+                                                <a target='_blank' href={item.metadata?.source}>
+                                                    <span key={2} className='session-source-list-item-action'>
+                                                        <Typography.Paragraph ellipsis={{ rows: 1, wrapper: 'span', }} style={{ fontSize: 10, color: 'rgba(0, 0, 0, .4)' }}>
+                                                            · {new URL(item.metadata?.source as "")?.origin} ·
+                                                        </Typography.Paragraph>
+                                                    </span>
+                                                </a>,
                                                 <span key={2} className='session-source-list-item-action' style={{ fontSize: 10, color: 'rgba(0, 0, 0, .4)' }}>
                                                     #{index + 1}
                                                 </span>
