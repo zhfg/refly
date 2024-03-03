@@ -41,7 +41,7 @@ export const Session = (props: SessionProps) => {
                                     bordered={false}
                                     pagination={{}}
                                     dataSource={session?.sources}
-                                    scrollLoading={scrollLoading}
+                                    scrollLoading={session?.sources?.length > 0 ? null : scrollLoading}
                                     onReachBottom={(currentPage) => fetchData(currentPage)}
                                     noDataElement={<div>暂无数据</div>}
                                     render={(item, index) => (
@@ -101,7 +101,7 @@ export const Session = (props: SessionProps) => {
                     ) : <Skeleton></Skeleton>
                 }
             </div>
-            {session?.relatedQuestions && isLastSession && (
+            {session?.relatedQuestions?.length > 0 && isLastSession && (
                 <div className='session-related-question'>
                     <div className='session-title-icon'>
                         <IconReply style={{ fontSize: 18 }} />

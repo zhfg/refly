@@ -8,6 +8,7 @@ import { useResetState } from '~hooks/use-reset-state'
 // stores
 import { useChatStore } from '~stores/chat';
 import { useConversationStore } from '~stores/conversation';
+import { useThreadStore } from '~stores/thread';
 // utils
 import { buildSessions } from '~utils/session';
 // 组件
@@ -23,14 +24,16 @@ export const Thread = () => {
 
     const chatStore = useChatStore();
     const conversationStore = useConversationStore();
+    const threadStore = useThreadStore();
     const { resetState } = useResetState();
 
     const handleGetThreadMessages = async (threadId: string) => {
+        const threadIdMap = threadStore?.threads?.find(item => item?.id === threadId);
         // 异步操作
         const res = await sendToBackground({
             name: 'getThreadMessages',
             body: {
-                threadId,
+                threadId: threadIdMap?.conversationId,
             }
         });
 
@@ -40,8 +43,8 @@ export const Thread = () => {
         resetState();
 
         // 设置会话和消息
-        conversationStore.setCurrentConversation(res);
-        chatStore.setMessages(res?.messages || []);
+        conversationStore.setCurrentConversation(res?.data);
+        chatStore.setMessages(res?.data?.messages || []);
     }
 
     const handleThread = async (threadId: string) => {

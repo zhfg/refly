@@ -1,27 +1,27 @@
-import type { Source } from "./session";
-import { TASK_TYPE } from "./task";
+import type { Source } from "./session"
+import { TASK_TYPE } from "./task"
 
-export const enum MessageType {
-  "Example" = "Example",
-  "System" = "System",
-  "User" = "User",
-  "UnSupported" = "UnSupported",
-}
+// export const enum MessageType {
+//   "Example" = "Example",
+//   "System" = "System",
+//   "User" = "User",
+//   "UnSupported" = "UnSupported",
+// }
 // export const enum QuestionType {
 //   "QuickAction" = "QuickAction",
 //   "NormalQuestion" = "NormalQuestion"
 // }
 
 export type MessageState = {
-  taskType?: TASK_TYPE;
-  pendingMsg?: string;
-  pendingFirstToken?: boolean; // 是否正在准备生成，如果收到第一个字符，即代表已经开始生生成
-  pending?: boolean;
-  error?: boolean; // 此次信息是否出错，比如还没开始生成就 abort，显示错误信息
-  pendingReplyMsg?: Message; // 即将生成的 replyMsg 对象
-  history?: [string, string][];
-  pendingSourceDocs?: Document[];
-};
+  taskType?: TASK_TYPE
+  pendingMsg?: string
+  pendingFirstToken?: boolean // 是否正在准备生成，如果收到第一个字符，即代表已经开始生生成
+  pending?: boolean
+  error?: boolean // 此次信息是否出错，比如还没开始生成就 abort，显示错误信息
+  pendingReplyMsg?: Message // 即将生成的 replyMsg 对象
+  history?: [string, string][]
+  pendingSourceDocs?: Document[]
+}
 
 /**
  * 前端系统配置，可能是获取的在线配置
@@ -72,22 +72,21 @@ export const enum QuestionType {
 //   title?: string
 //   question?: string
 // }
+
+export const enum MessageType {
+  Human = "human",
+  Assistant = "ai",
+  System = "system",
+}
+
 export type Message = {
-  id?: string; // 服务端存消息
-  itemType: MessageItemType;
-  itemId: string; // 针对 question 和 reply 为 msg:xxxx-xxxx-xxxx-xxxx，针对 intent 为 intent:xxxx-xxxx-xxxx-xxxx
-  userId?: string;
-  conversationId: string;
-  summary?: string;
-  seq?: number;
-  data: {
-    type: MessageDataType;
-    content: string;
-    suggestions?: { text: string }[]; // 对话开始提示的 3 个问题
-    relatedQuestions?: string[]; // 对话回答完之后，生成的相关问题推荐
-    sources?: Source[];
-    questionId?: string; // 对问题进行的回答，都会有 questionId，如果不是基于某个问题的回答，如自动生成的，则为 null
-    replies?: Message[]; // 基于 selection，自动生成一个的 system 回答，eg：您希望对文本进行什么操作？
-    intentId?: string; // 基于某个意图进行提问回答，有三个。选中的内容、系统推荐提问、用户进行回答
-  };
-};
+  id?: string // 服务端存消息
+  type: MessageType
+  userId?: string
+  conversationId: string
+  summary?: string
+  seq?: number
+  content: string
+  relatedQuestions?: string[] // 对话回答完之后，生成的相关问题推荐
+  sources?: Source[]
+}

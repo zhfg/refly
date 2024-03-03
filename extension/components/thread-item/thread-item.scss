@@ -97,6 +97,11 @@
         padding: 2px 0 !important;
     }
 
+    .arco-pagination-item-active {
+        background-color: rgb(var(--primary-6));
+        color: white
+    }
+
     .session-source-list-item-action {
         display: flex;
         justify-content: center;
