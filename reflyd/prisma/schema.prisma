@@ -142,6 +142,8 @@ model Conversation {
   title           String
   /// 最后一条聊天记录
   lastMessage     String   @default("")
+  /// 消息数量
+  messageCount    Int      @default(0)
   /// 会话来源 origin
   origin          String   @default("")
   // 会话来源的 url

@@ -22,6 +22,16 @@ export class ConversationService {
     });
   }
 
+  async updateConversation(
+    conversationId: string,
+    data: Prisma.ConversationUpdateInput,
+  ) {
+    return this.prisma.conversation.update({
+      where: { conversationId },
+      data,
+    });
+  }
+
   async addChatMessage(msg: {
     type: MessageType;
     sources: string;

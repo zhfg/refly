@@ -98,7 +98,9 @@ export class ConversationController {
     );
 
     // first return sources，use unique tag for parse data
-    // res.write(`data: [REFLY_SOURCES]${JSON.stringify(sources)}\n\n`);
+    sources.forEach((source) =>
+      res.write(`data: [SOURCE] ${JSON.stringify(source)}\n\n`),
+    );
 
     // write answer in a stream style
     let answerStr = '';
@@ -116,6 +118,20 @@ export class ConversationController {
       content: answerStr,
       sources: JSON.stringify(sources),
     });
+
+    // update conversation last answer and message count
+    const updated = await this.conversationService.updateConversation(
+      conversationId,
+      {
+        lastMessage: answerStr,
+        messageCount: chatHistory.length + 1,
+      },
+    );
+    this.logger.log(
+      `update conversation ${conversationId}, after updated: ${JSON.stringify(
+        updated,
+      )}`,
+    );
   }
 
   @Get('list')
