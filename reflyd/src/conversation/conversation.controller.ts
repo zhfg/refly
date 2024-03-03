@@ -149,6 +149,11 @@ export class ConversationController {
     });
     const messages = await this.conversationService.getMessages(conversationId);
 
-    return { ...conversation, messages: messages };
+    return {
+      data: {
+        ...conversation,
+        messages: messages,
+      },
+    };
   }
 }

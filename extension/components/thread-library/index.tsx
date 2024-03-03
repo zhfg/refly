@@ -15,7 +15,7 @@ import { useThreadStore, type Thread } from "~stores/thread"
 import { IconTip } from '~components/home/icon-tip';
 import { IconClockCircle, IconRightCircle } from '@arco-design/web-react/icon';
 import type { PlasmoGetStyle } from 'plasmo';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useMatch } from 'react-router-dom';
 import { sendToBackground } from '@plasmohq/messaging';
 // utils
 import { time } from "~utils/time"
@@ -86,11 +86,12 @@ export const ThreadLibrary = () => {
     const [scrollLoading, setScrollLoading] = useState(<Skeleton></Skeleton>);
     const threadStore = useThreadStore();
     const navigate = useNavigate();
+    const isThreadLibrary = useMatch('/thread')
 
     const fetchData = async (currentPage = 1) => {
         try {
             console.log('currentPage', currentPage)
-            if (!threadStore?.hasMore) {
+            if (!threadStore?.hasMore && currentPage !== 1) {
                 setScrollLoading(<span>已经到底啦~</span>);
                 return;
             }
@@ -117,7 +118,7 @@ export const ThreadLibrary = () => {
 
     useEffect(() => {
         fetchData();
-    }, [])
+    }, [isThreadLibrary])
 
     return <div
         style={{

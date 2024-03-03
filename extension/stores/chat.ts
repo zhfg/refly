@@ -23,7 +23,8 @@ export interface ChatState {
 }
 
 export const defaultState = {
-  messages: fakeMessages as any,
+  // messages: fakeMessages as any,
+  messages: [],
   sessions: [],
   newQAText: "",
   isGenTitle: false,

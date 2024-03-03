@@ -15,7 +15,7 @@ interface SessionProps {
 export const Session = (props: SessionProps) => {
     const { session, isLastSession = false } = props;
     const messageStateStore = useMessageStateStore();
-    const [scrollLoading, setScrollLoading] = useState(<Skeleton />);
+    const [scrollLoading, setScrollLoading] = useState(<Skeleton></Skeleton>);
 
     const fetchData = (currentPage) => {
 
@@ -41,6 +41,7 @@ export const Session = (props: SessionProps) => {
                                     bordered={false}
                                     pagination={{}}
                                     dataSource={session?.sources}
+                                    scrollLoading={scrollLoading}
                                     onReachBottom={(currentPage) => fetchData(currentPage)}
                                     noDataElement={<div>暂无数据</div>}
                                     render={(item, index) => (

@@ -41,7 +41,7 @@ export const Thread = () => {
 
         // 设置会话和消息
         conversationStore.setCurrentConversation(res);
-        chatStore.setMessages(res?.messages);
+        chatStore.setMessages(res?.messages || []);
     }
 
     const handleThread = async (threadId: string) => {
@@ -53,7 +53,7 @@ export const Thread = () => {
             handleSideSendMessage(question);
             chatStore.setIsNewConversation(false);
         } else {
-            // handleGetThreadMessages(threadId);
+            handleGetThreadMessages(threadId);
         }
     }
 
