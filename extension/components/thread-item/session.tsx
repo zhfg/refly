@@ -6,6 +6,9 @@ import type { Message, SessionItem, Source } from '~types';
 // stores
 import { useMessageStateStore } from '~stores/message-state'
 import { IconTip } from '~components/home/icon-tip';
+import { Markdown } from '~components/markdown';
+
+import copyToClipboard from "copy-to-clipboard"
 
 interface SessionProps {
     session: SessionItem;
@@ -26,7 +29,11 @@ export const Session = (props: SessionProps) => {
     return (
         <div className='session-item-container'>
             <div className='session-item'>
-                <div><p className='session-question'>{session.question}</p></div>
+                <div>
+                    <p className='session-question'>
+                        {session?.question}
+                    </p>
+                </div>
                 {session?.sources?.length > 0 && (
                     <div className='session-source'>
                         <div className='session-title-icon'>
@@ -86,15 +93,17 @@ export const Session = (props: SessionProps) => {
                                     答案
                                 </p>
                             </div>
-                            <p className='session-answer'>{session.answer}</p>
+                            <p className='session-answer'>
+                                {session?.answer}
+                            </p>
                             <div className='session-answer-actionbar'>
                                 <div className='session-answer-actionbar-left'>
-                                    <IconTip text='复制链接'><Button type='text' icon={<IconShareInternal style={{ fontSize: 14 }} />} style={{ color: '#64645F' }}>分享</Button></IconTip>
-                                    <IconTip text="重新生成答案"><Button type='text' icon={<IconPalette style={{ fontSize: 14 }} />} style={{ color: '#64645F' }}>重写</Button></IconTip>
+                                    {/* <IconTip text='复制链接'><Button type='text' icon={<IconShareInternal style={{ fontSize: 14 }} />} style={{ color: '#64645F' }}>分享</Button></IconTip> */}
+                                    {/* <IconTip text="重新生成答案"><Button type='text' icon={<IconPalette style={{ fontSize: 14 }} />} style={{ color: '#64645F' }}>重写</Button></IconTip> */}
                                 </div>
                                 <div className='session-answer-actionbar-right'>
-                                    <IconTip text='复制此答案'><Button type='text' shape='circle' icon={<IconCopy style={{ fontSize: 14 }} />} style={{ color: '#64645F' }}></Button></IconTip>
-                                    <IconTip text='点踩'><Button type='text' shape='circle' icon={<IconNotificationClose style={{ fontSize: 14 }} />} style={{ color: '#64645F' }}></Button></IconTip>
+                                    <IconTip text='复制此答案'><Button type='text' shape='circle' icon={<IconCopy style={{ fontSize: 14 }} />} style={{ color: '#64645F' }} onClick={() => copyToClipboard(session?.answer)}></Button></IconTip>
+                                    {/* <IconTip text='点踩'><Button type='text' shape='circle' icon={<IconNotificationClose style={{ fontSize: 14 }} />} style={{ color: '#64645F' }}></Button></IconTip> */}
                                 </div>
                             </div>
                         </div>

@@ -3,7 +3,7 @@ export const getPopupContainer = (e: HTMLElement): Element =>
 
 export const calcPopupPosition = (
   rect: DOMRect,
-  barDimesion: { barWidth: number; barHeight: number }
+  barDimesion: { barWidth: number; barHeight: number },
 ) => {
   const { barHeight, barWidth } = barDimesion
   let top = 0
@@ -33,8 +33,9 @@ export const calcPopupPosition = (
 export const scrollToBottom = () => {
   setTimeout(() => {
     const chatWrapperElem = document
-      .querySelector("plasmo-csui")
-      ?.shadowRoot?.querySelector(".chat-wrapper")
+      ?.querySelector("html > plasmo-csui:nth-child(4)")
+      ?.shadowRoot?.querySelector("#plasmo-inline")
+      ?.querySelector("div.session-inner-container")
 
     if (chatWrapperElem) {
       const { scrollHeight, clientHeight } = chatWrapperElem

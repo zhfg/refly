@@ -7,10 +7,10 @@ export const buildSessionItem = (
 ) => {
   // 有可能 answer message 还未构建，所以要考虑兜底情况
   const session: SessionItem = {
-    question: questionMsg?.content || "",
-    answer: answerMessage?.content || "",
-    sources: safeParseJSON(answerMessage?.sources) || [],
-    relatedQuestions: answerMessage?.relatedQuestions || [],
+    question: questionMsg?.data.content || "",
+    answer: answerMessage?.data.content || "",
+    sources: safeParseJSON(answerMessage?.data.sources) || [],
+    relatedQuestions: answerMessage?.data.relatedQuestions || [],
   }
 
   return session

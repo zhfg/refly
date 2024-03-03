@@ -33,6 +33,7 @@ import { useQuickActionStore } from '~stores/quick-action'
 // 组件
 import { Message } from "@arco-design/web-react"
 import { ContentRouter } from './router'
+import { Markdown } from "~components/markdown"
 
 // export const config: PlasmoCSConfig = {
 //   run_at: "document_end"

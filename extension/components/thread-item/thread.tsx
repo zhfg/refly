@@ -44,7 +44,21 @@ export const Thread = () => {
 
         // 设置会话和消息
         conversationStore.setCurrentConversation(res?.data);
-        chatStore.setMessages(res?.data?.messages || []);
+
+        // 
+        const messages = (res?.data?.messages || [])?.map(item => {
+            const { content = '', relatedQuestions = [], sources, ...extraInfo } = item || {}
+
+            return {
+                ...extraInfo,
+                data: {
+                    content,
+                    relatedQuestions,
+                    sources
+                }
+            }
+        })
+        chatStore.setMessages(messages);
     }
 
     const handleThread = async (threadId: string) => {
