@@ -9,7 +9,10 @@ export const buildSessionItem = (
   const session: SessionItem = {
     question: questionMsg?.data.content || "",
     answer: answerMessage?.data.content || "",
-    sources: safeParseJSON(answerMessage?.data.sources) || [],
+    sources:
+      safeParseJSON(answerMessage?.data.sources) ||
+      answerMessage?.data.sources ||
+      [],
     relatedQuestions: answerMessage?.data.relatedQuestions || [],
   }
 

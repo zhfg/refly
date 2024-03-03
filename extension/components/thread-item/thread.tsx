@@ -81,7 +81,6 @@ export const Thread = () => {
 
     console.log('thread message', chatStore.messages);
     const sessions = buildSessions(chatStore.messages);
-    console.log('sessions', sessions)
 
     return <div style={{
         height: "100%",

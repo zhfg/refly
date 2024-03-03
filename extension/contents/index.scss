@@ -464,7 +464,8 @@ img {
 }
 
 .main .footer {
-  height: 144px;
+  height: calc(100vh - 130px);
+  overflow-y: scroll;
   background-color: #FCFCF9;
   padding: 0.5em 1em;
 
