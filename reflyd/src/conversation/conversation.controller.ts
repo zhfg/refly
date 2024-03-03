@@ -121,13 +121,21 @@ export class ConversationController {
   @Get('list')
   @ApiResponse({ type: ListConversationResponse })
   async listConversation(
-    @Query('page') page = 1,
-    @Query('pageSize') pageSize = 10,
+    @Query('page') page = '1',
+    @Query('pageSize') pageSize = '10',
   ) {
-    return this.conversationService.getConversations({
-      skip: (page - 1) * pageSize,
-      take: pageSize,
+    const parsedPage = parseInt(page);
+    const parsedPageSize = parseInt(pageSize);
+
+    const conversationList = await this.conversationService.getConversations({
+      skip: (parsedPage - 1) * parsedPageSize,
+      take: parsedPageSize,
+      orderBy: { createdAt: 'desc' },
     });
+
+    return {
+      data: conversationList,
+    };
   }
 
   @Get(':conversationId')

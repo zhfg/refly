@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 // 静态资源
 import Logo from "~assets/logo.svg"
@@ -8,13 +8,17 @@ import SettingGraySVG from "~assets/side/setting.svg"
 import FullScreenSVG from "~assets/side/full-screen.svg"
 
 // 组件
-import { Avatar, List, Button, Skeleton } from "@arco-design/web-react"
+import { Avatar, List, Button, Skeleton, Message as message } from "@arco-design/web-react"
 // stores
 import { useSiderStore } from "~stores/sider"
+import { useThreadStore, type Thread } from "~stores/thread"
 import { IconTip } from '~components/home/icon-tip';
 import { IconClockCircle, IconRightCircle } from '@arco-design/web-react/icon';
 import type { PlasmoGetStyle } from 'plasmo';
 import { useNavigate } from 'react-router-dom';
+import { sendToBackground } from '@plasmohq/messaging';
+// utils
+import { time } from "~utils/time"
 
 const names = ['Socrates', 'Balzac', 'Plato'];
 const avatarSrc = [
@@ -79,12 +83,41 @@ const Header = () => {
 }
 
 export const ThreadLibrary = () => {
-    const [scrollLoading, setScrollLoading] = useState(<Skeleton />);
+    const [scrollLoading, setScrollLoading] = useState(<Skeleton></Skeleton>);
+    const threadStore = useThreadStore();
     const navigate = useNavigate();
 
-    const fetchData = (currentPage) => {
+    const fetchData = async (currentPage = 1) => {
+        try {
+            console.log('currentPage', currentPage)
+            if (!threadStore?.hasMore) {
+                setScrollLoading(<span>已经到底啦~</span>);
+                return;
+            }
 
+            const newRes = await sendToBackground({
+                name: 'getConversationList',
+                body: {
+                    page: currentPage,
+                    pageSize: 10,
+                }
+            })
+
+            threadStore.updateCurrentPage(currentPage);
+            if (newRes?.data?.length < threadStore?.pageSize) {
+                threadStore.updateHasMore(false);
+            }
+
+            console.log('newRes', newRes)
+            threadStore.updateThreadList(newRes?.data || []);
+        } catch (err) {
+            message.error('获取会话列表失败，请重新刷新试试');
+        }
     }
+
+    useEffect(() => {
+        fetchData();
+    }, [])
 
     return <div
         style={{
@@ -93,44 +126,41 @@ export const ThreadLibrary = () => {
             flexDirection: "column"
         }}>
         <Header />
-        <div className="thread-library-container">
-            <p className='thread-library-title'>会话库</p>
-            <div className="thread-library-list">
-                <List
-                    className='thread-library-list-item'
-                    wrapperStyle={{ width: '100%' }}
-                    bordered={false}
-                    pagination={false}
-                    dataSource={dataSource}
-                    scrollLoading={scrollLoading}
-                    onReachBottom={(currentPage) => fetchData(currentPage)}
-                    noDataElement={<div>暂无数据</div>}
-                    render={(item, index) => (
-                        <List.Item
-                            key={index}
-                            style={{ padding: '20px 0', borderBottom: '1px solid var(--color-fill-3)' }}
-                            actionLayout='vertical'
-                            actions={[
-                                <span key={1} className='thread-library-list-item-continue-ask with-border with-hover' onClick={() => {
-                                    navigate(`/thread/${item?.id}`)
-                                }}>
-                                    <IconRightCircle style={{ fontSize: 14, color: '#64645F' }} />
-                                    <span className='thread-library-list-item-text'>继续提问</span>
-                                </span>,
-                                <span key={2}>
-                                    <IconClockCircle style={{ fontSize: 14, color: '#64645F' }} />
-                                    <span className='thread-library-list-item-text'>13h</span>
-                                </span>
-                            ]}
-                        >
-                            <List.Item.Meta
-                                title={item.title}
-                                description={item.description}
-                            />
-                        </List.Item>
-                    )}
-                />
-            </div>
-        </div>
+        <List
+            className='thread-library-list'
+            wrapperStyle={{ width: '100%' }}
+            bordered={false}
+            header={<p className='thread-library-title'>会话库</p>}
+            pagination={false}
+            offsetBottom={50}
+            dataSource={threadStore?.threads}
+            scrollLoading={scrollLoading}
+            onReachBottom={(currentPage) => fetchData(currentPage)}
+            noDataElement={<div>暂无数据</div>}
+            render={(item: Thread, index) => (
+                <List.Item
+                    key={index}
+                    style={{ padding: '20px 0', borderBottom: '1px solid var(--color-fill-3)' }}
+                    actionLayout='vertical'
+                    actions={[
+                        <span key={1} className='thread-library-list-item-continue-ask with-border with-hover' onClick={() => {
+                            navigate(`/thread/${item?.id}`)
+                        }}>
+                            <IconRightCircle style={{ fontSize: 14, color: '#64645F' }} />
+                            <span className='thread-library-list-item-text'>继续提问</span>
+                        </span>,
+                        <span key={2}>
+                            <IconClockCircle style={{ fontSize: 14, color: '#64645F' }} />
+                            <span className='thread-library-list-item-text'>{time(item.updatedAt).utc().fromNow()}</span>
+                        </span>
+                    ]}
+                >
+                    <List.Item.Meta
+                        title={item.title}
+                        description={item.lastMessage}
+                    />
+                </List.Item>
+            )}
+        />
     </div>
 }

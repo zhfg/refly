@@ -3,11 +3,10 @@ export const appConfig = {
   operation: {},
   side: {
     Right: "right",
-    Left: "left"
+    Left: "left",
   },
   url: {
     // 先临时写在这里，后续会替换
-    getConversationList: "/api/conversation/getConversationList",
     deleteConversation: "/api/conversation/deleteConversation",
     updateConversation: "/api/conversation/updateConversation",
     getChatItemList: "/api/chat/getChatItemList",
@@ -16,8 +15,9 @@ export const appConfig = {
     syncChatItems: "/api/task/syncChatItems",
     createNewConversation: "/v1/conversation/new",
     getThreadMessages: (threadId: string) => `/v1/conversation/${threadId}`,
-    storeWeblink: '/v1/weblink/store',
-    getWeblinkList: '/v1/weblink/list'
+    storeWeblink: "/v1/weblink/store",
+    getWeblinkList: "/v1/weblink/list",
+    getConversationList: "/v1/conversation/list",
   },
   domId: {},
   appInfo: {
@@ -25,7 +25,7 @@ export const appConfig = {
     ShowedPauseTip: "showedPauseTip",
     HighlighterColor: "highlighterColor",
     LastViewedAnnouncement: "lastViewedAnnouncement",
-    IsDeveloper: "isDeveloper"
+    IsDeveloper: "isDeveloper",
   },
   uiInfo: {},
   errInfo: [
@@ -36,8 +36,8 @@ export const appConfig = {
     "The browser is shutting down.",
     "ResizeObserver loop limit exceeded",
     "Cannot access contents of the page.",
-    "No tab with id:"
-  ]
+    "No tab with id:",
+  ],
 }
 
 export type REQUEST_URL_TYPE = keyof typeof appConfig.url

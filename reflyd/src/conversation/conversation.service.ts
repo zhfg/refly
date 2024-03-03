@@ -47,7 +47,9 @@ export class ConversationService {
     where?: Prisma.ConversationWhereInput;
     orderBy?: Prisma.ConversationOrderByWithRelationInput;
   }) {
-    return this.prisma.conversation.findMany(params);
+    return this.prisma.conversation.findMany({
+      ...params,
+    });
   }
 
   async getMessages(conversationId: string) {

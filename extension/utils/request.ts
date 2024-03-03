@@ -2,7 +2,7 @@ import { getServerOrigin } from "./url"
 
 const TIMEOUT = 40000
 const DEFAULT_HEADER = {
-  "Content-Type": "application/json"
+  "Content-Type": "application/json",
 }
 
 export class ApiErr {
@@ -52,7 +52,7 @@ export const abortablePromise = (target: Promise<any>, timeout: number) => {
 export async function request<T>(
   url: string,
   opt: any,
-  timeout: number = TIMEOUT
+  timeout: number = TIMEOUT,
 ): Promise<[ApiErr | null, T | null, any?]> {
   let handledUrl = url
   opt.method = (opt.method || "GET").toUpperCase()
@@ -63,7 +63,7 @@ export async function request<T>(
   // 获取 header
   opt.headers = {
     ...DEFAULT_HEADER,
-    ...opt.headers
+    ...opt.headers,
   }
 
   if (opt.method === "GET") {
@@ -79,10 +79,11 @@ export async function request<T>(
   try {
     const BASEURL = getServerOrigin()
     const res = await fetch(`${BASEURL}${handledUrl}`, {
-      ...opt
+      ...opt,
     })
 
     const jsonRes = await res.json()
+    console.log("request res", jsonRes)
     if (res?.status >= 200 && res?.status < 300) {
       const body = jsonRes.data
       // const err = getDataErr(body);
@@ -108,7 +109,7 @@ export const queryJoin = (url = "", query: QUERY | string) => {
 
 export const queryStringify = (
   query: QUERY,
-  doNotUseEmpty = true // 是否拼接空对象
+  doNotUseEmpty = true, // 是否拼接空对象
 ) => {
   let str = ""
   Object.keys(query).forEach((key) => {
