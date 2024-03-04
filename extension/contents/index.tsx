@@ -32,7 +32,7 @@ import { useQuickActionStore } from '~stores/quick-action'
 
 // 组件
 import { Message } from "@arco-design/web-react"
-import { ContentRouter } from './router'
+import { ContentRouter } from '../components/router'
 import { Markdown } from "~components/markdown"
 
 // export const config: PlasmoCSConfig = {
@@ -99,7 +99,7 @@ export const Content = () => {
         <span>⌘B</span>
       </div>
 
-      <div className={siderStore.showSider ? "main active" : "main"}>
+      <div id="refly-app-main" className={siderStore.showSider ? "main active" : "main"}>
         <MemoryRouter>
           <ContentRouter />
         </MemoryRouter>

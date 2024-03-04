@@ -35,5 +35,6 @@ export function useWebLinkIndexed() {
 
   return {
     isWebLinkIndexed,
+    setIsWebLinkIndexed,
   }
 }

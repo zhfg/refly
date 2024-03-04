@@ -68,7 +68,7 @@ const Home = (props: ChatProps) => {
   const navigate = useNavigate();
 
   // 网页索引状态
-  const { isWebLinkIndexed } = useWebLinkIndexed();
+  const { isWebLinkIndexed, setIsWebLinkIndexed } = useWebLinkIndexed();
 
   const quickActionStore = useQuickActionStore();
   const chatStore = useChatStore();
@@ -171,9 +171,10 @@ const Home = (props: ChatProps) => {
     })
 
     if (res.success) {
-      setUploadingStatus("success")
+      message.success('阅读成功！');
+      setIsWebLinkIndexed(false);
     } else {
-      setUploadingStatus("failed")
+      message.error('阅读失败！');
     }
 
     setTimeout(() => {
@@ -294,16 +295,17 @@ const Home = (props: ChatProps) => {
                   新会话
                 </Button> */}
 
-                <IconTip text="处理当前网页用于问答">
+                <IconTip text='处理当前网页用于问答' >
                   <Button
                     onClick={() => {
                       handleUploadWebsite(window.location.href)
                     }}
                     icon={<IconUpload />}
+                    loading={uploadingStatus === 'loading' ? true : false}
                     type="text"
                     style={{ marginRight: 0 }}
                     shape="round">
-                    阅读
+                    {uploadingStatus === 'loading' ? '阅读中' : '阅读'}
                   </Button>
                 </IconTip>
 

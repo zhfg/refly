@@ -1,7 +1,7 @@
 import { getPopupContainer, scrollToBottom } from "~utils/ui"
 import {
-    Tooltip
-  } from "@arco-design/web-react"
+  Tooltip
+} from "@arco-design/web-react"
 
 type IconTipPosition =
   | "top"
