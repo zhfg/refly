@@ -5,6 +5,7 @@ import {
   Space,
   Tooltip,
   Avatar,
+  Alert
 } from "@arco-design/web-react"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input/textarea"
 import {
@@ -48,6 +49,7 @@ import { useSiderStore } from "~stores/sider"
 // hooks
 import { useBuildTask } from "~hooks/use-build-task"
 import { useResetState } from '~hooks/use-reset-state'
+import { useWebLinkIndexed } from '~hooks/use-weblink-indexed'
 import type { PlasmoGetStyle } from "plasmo"
 import { IconTip } from "./icon-tip"
 
@@ -64,6 +66,9 @@ const Home = (props: ChatProps) => {
     "normal" | "loading" | "failed" | "success"
   >("normal")
   const navigate = useNavigate();
+
+  // 网页索引状态
+  const { isWebLinkIndexed } = useWebLinkIndexed();
 
   const quickActionStore = useQuickActionStore();
   const chatStore = useChatStore();
@@ -185,6 +190,7 @@ const Home = (props: ChatProps) => {
     scrollToBottom()
   }, [isIntentActive])
 
+
   return (
     <div
       style={{
@@ -222,6 +228,7 @@ const Home = (props: ChatProps) => {
       </div> */}
 
       <div className="footer input-panel">
+        {isWebLinkIndexed ? <Alert type="success" content="此网页已经被索引，可以直接提问！" closable /> : <Alert type="warning" content="此网页未索引，点击下方「阅读」可索引！" closable />}
         <div className="refly-slogan">The answer engine for your work</div>
         <div className="actions">
           {/* {isIntentActive && (

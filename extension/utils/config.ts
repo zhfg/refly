@@ -17,6 +17,7 @@ export const appConfig = {
     getThreadMessages: (threadId: string) => `/v1/conversation/${threadId}`,
     storeWeblink: "/v1/weblink/store",
     getWeblinkList: "/v1/weblink/list",
+    getWeblinkIndexStatus: "/v1/weblink/list", // 与 weblink 共享
     getConversationList: "/v1/conversation/list",
   },
   domId: {},
