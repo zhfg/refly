@@ -42,6 +42,11 @@
     flex-direction: column;
     gap: 8px;
 
+    div.arco-typography,
+    p.arco-typography {
+      margin-bottom: 0;
+    }
+
     .conv-item-header {
       display: flex;
       align-items: center;
@@ -86,11 +91,6 @@
       justify-content: space-between;
       gap: 8px;
       color: #595959;
-
-      div.arco-typography,
-      p.arco-typography {
-        margin-bottom: 0;
-      }
 
       .conv-item-content-text {
         font-weight: 500;
