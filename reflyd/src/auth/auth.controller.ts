@@ -59,7 +59,7 @@ export class AuthController {
         secure: false,
         sameSite: 'lax',
       })
-      .redirect('/dashboard');
+      .redirect(this.configService.get('auth.redirectUrl'));
   }
 
   @UseGuards(GoogleOauthGuard)
@@ -73,12 +73,8 @@ export class AuthController {
 
     const { accessToken } = await this.authService.login(user);
     res
-      .cookie(this.configService.get('auth.cookieTokenField'), accessToken, {
-        httpOnly: true,
-        secure: false,
-        sameSite: 'lax',
-      })
-      .redirect('/dashboard');
+      .cookie(this.configService.get('auth.cookieTokenField'), accessToken)
+      .redirect(this.configService.get('auth.redirectUrl'));
   }
 
   @UseGuards(JwtAuthGuard)
