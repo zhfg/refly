@@ -28,7 +28,6 @@ import {
 import { getPopupContainer, scrollToBottom } from "~utils/ui"
 
 // 自定义组件
-import ConversationList from "../conversation-list"
 import WeblinkList from "../weblink-list"
 import {
   ErrorMessage,
@@ -47,6 +46,7 @@ import { useConversationStore } from "~stores/conversation"
 import { useSiderSendMessage } from '~hooks/use-sider-send-message'
 import { useMessageStateStore } from "~stores/message-state"
 import { useSiderStore } from "~stores/sider"
+import { useWeblinkStore } from "~stores/weblink"
 // hooks
 import { useBuildTask } from "~hooks/use-build-task"
 import { useResetState } from '~hooks/use-reset-state'
@@ -62,7 +62,6 @@ type ChatProps = {
 const Home = (props: ChatProps) => {
   const inputRef = useRef<RefTextAreaType>()
   const weblinkListRef = useRef(null)
-  const conversationListInstanceRef = useRef(null);
   const [uploadingStatus, setUploadingStatus] = useState<
     "normal" | "loading" | "failed" | "success"
   >("normal")
@@ -76,6 +75,7 @@ const Home = (props: ChatProps) => {
   const conversationStore = useConversationStore();
   const messageStateStore = useMessageStateStore();
   const siderStore = useSiderStore();
+  const webLinkStore = useWeblinkStore()
   // hooks
   const { resetState } = useResetState()
   const { handleSideSendMessage } = useSiderSendMessage();
@@ -320,7 +320,7 @@ const Home = (props: ChatProps) => {
                 <IconTip text='选择历史浏览网页问答' >
                   <Button
                     onClick={() => {
-                      weblinkListRef.current?.setVisible(true)
+                      webLinkStore.updateIsWebLinkListVisible(true)
                     }}
                     icon={<IconSelectAll />}
                     type="text"
@@ -347,14 +347,6 @@ const Home = (props: ChatProps) => {
         </div>
       </div>
 
-      <ConversationList
-        ref={conversationListInstanceRef}
-        getPopupContainer={() =>
-          document
-            .querySelector("plasmo-csui")
-            ?.shadowRoot?.querySelector(".main")
-        }
-      />
       <WeblinkList
         ref={weblinkListRef}
         getPopupContainer={() =>

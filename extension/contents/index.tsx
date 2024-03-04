@@ -1,5 +1,4 @@
 import ArcoCSS from "data-text:@arco-design/web-react/dist/css/arco.css"
-import ConversationListCSS from "data-text:~/components/conversation-list/index.scss"
 import QuickActionCSS from "data-text:~/components/quick-action/index.scss"
 import LocalArcoCSS from "data-text:~/contents/arco.css"
 import CSSText from "data-text:~/contents/index.scss"
@@ -51,7 +50,6 @@ export const getStyle = () => {
     ThreadLibraryCSSText +
     ThreadItemCSSText +
     WeblinkCSSText +
-    ConversationListCSS +
     QuickActionCSS +
     MarkdownCSSText +
     HighlightCSSText
