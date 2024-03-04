@@ -42,7 +42,7 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
     console.log('res', res)
     setWeblinkList(res.data || []);
   }
- 
+
   //编辑
   const handleEdit = async (params: { id: string; title: string }) => {
     const res = await sendToBackground({
@@ -107,7 +107,7 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
   )
 
   const WebLinkItem = (props: { weblink: WebLinkItem }) => {
-    const { id, title, updatedAt, description, url = ''  } =
+    const { id, title, updatedAt, originPageDescription, url = '', originPageTitle, originPageUrl } =
       props?.weblink
     const urlItem = new URL(url);
 
@@ -116,31 +116,28 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
         <div className="conv-item">
           <div className="conv-item-header">
             <span className="title">
-              <div className="title-text">{title}</div>
+              <div className="title-text">{originPageTitle}</div>
             </span>
-            <Tooltip className="edit" content="编辑">
+            {/* <Tooltip className="edit" content="编辑">
               <IconEdit />
-            </Tooltip>
+            </Tooltip> */}
             <span className="date">{time(updatedAt).utc().fromNow()}</span>
           </div>
           <div className="conv-item-content">
-            <span className="conv-item-content-text">{description}</span>
+            <span className="conv-item-content-text">{originPageDescription}</span>
           </div>
           <div className="conv-item-footer">
             <div className="page-link">
               <a
                 rel="noreferrer"
-                onClick={() => {
-                  chrome.tabs.create({
-                    url: origin
-                  })
-                }}>
+                href={originPageUrl}
+                target="_blank">
                 <img
                   className="icon"
-                  src={`https://s2.googleusercontent.com/s2/favicons?domain=${urlItem.origin}`}
+                  src={`https://www.google.com/s2/favicons?domain=${urlItem.origin}&sz=${16}`}
                   alt=""
                 />
-                <span className="text">{title}</span>
+                <span className="text">{originPageTitle}</span>
               </a>
             </div>
             {/** 第一版本不允许删除 */}
@@ -173,7 +170,7 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
         headerStyle={{ justifyContent: "center" }}
         title={
           <div style={{ display: "flex", justifyContent: "center" }}>
-            <span style={{ fontWeight: "bold" }}>网页历史</span>
+            <span style={{ fontWeight: "bold" }}>网页浏览历史</span>
           </div>
         }
         visible={visible}
@@ -185,7 +182,7 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
         onCancel={() => {
           setVisible(false)
         }}>
-        <Input placeholder="搜索" />
+        {/* <Input placeholder="搜索" /> */}
         <div className="conv-list">
           {weblinkList.map((weblink, index) => (
             <WebLinkItem weblink={weblink} key={index} />

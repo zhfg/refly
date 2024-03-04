@@ -18,6 +18,10 @@ export class WeblinkService {
 
   async storeLinks(links: WebLink[]) {
     const docs = links.map((link) => ({
+      origin: link.origin,
+      originPageTitle: link.originPageTitle,
+      originPageUrl: link.originPageUrl,
+      originPageDescription: link.originPageDescription,
       url: link.url,
       linkId: randomUUID(),
       userId: '5c0a7922c9d89830f4911426',

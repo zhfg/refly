@@ -1,5 +1,6 @@
 .arco-drawer-content {
     overscroll-behavior-y: contain;
+    padding: 0;
   }
   
   .conv-list {
@@ -10,13 +11,17 @@
     overflow-y: overlay !important;
   
     .conv-item-wrapper {
-      // padding: 0 16px;
+      padding: 0 16px;
       cursor: pointer;
       user-select: none;
       -webkit-user-drag: none;
   
       &:hover {
         background: rgba(56, 114, 224, 0.08);
+      }
+
+      a {
+        text-decoration: none;
       }
     }
   

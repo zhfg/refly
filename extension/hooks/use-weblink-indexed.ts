@@ -31,7 +31,7 @@ export function useWebLinkIndexed() {
   // 获取当前打开网页的索引状态
   useEffect(() => {
     getWebsiteIndexStatus()
-  }, [isHomePage])
+  }, [isHomePage, location.href])
 
   return {
     isWebLinkIndexed,

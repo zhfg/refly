@@ -11,7 +11,8 @@ import type { RefTextAreaType } from "@arco-design/web-react/es/Input/textarea"
 import {
   IconMinusCircle,
   IconUpload,
-  IconSend
+  IconSend,
+  IconSelectAll
 } from "@arco-design/web-react/icon"
 import React, { useEffect, useRef, useState } from "react"
 import { sendToBackground } from "@plasmohq/messaging"
@@ -163,16 +164,22 @@ const Home = (props: ChatProps) => {
     // setIsUpdatingWebiste(true)
     setUploadingStatus("loading")
 
+    const description = document.head.querySelector('meta[name="description"]');
+
     const res = await sendToBackground({
       name: "storeWeblink",
       body: {
-        url
+        url,
+        origin: location?.origin || "", // 冗余存储策略，for 后续能够基于 origin 进行归类归档
+        originPageTitle: document?.title || "",
+        originPageUrl: location.href,
+        originPageDescription: (description as any)?.content || ''
       }
     })
 
     if (res.success) {
       message.success('阅读成功！');
-      setIsWebLinkIndexed(false);
+      setIsWebLinkIndexed(true);
     } else {
       message.error('阅读失败！');
     }
@@ -310,15 +317,17 @@ const Home = (props: ChatProps) => {
                 </IconTip>
 
                 {/** 第一版本不支持选择指定网页进行问答 */}
-                {/* <Button
-                  onClick={() => {
-                    weblinkListRef.current?.setVisible(true)
-                  }}
-                  icon={<IconUpload />}
-                  type="text"
-                  shape="round">
-                  选择
-                </Button> */}
+                <IconTip text='选择历史浏览网页问答' >
+                  <Button
+                    onClick={() => {
+                      weblinkListRef.current?.setVisible(true)
+                    }}
+                    icon={<IconSelectAll />}
+                    type="text"
+                    shape="round">
+                    选择
+                  </Button>
+                </IconTip>
                 {/* <Button
               onClick={() => {
                 conversationListInstanceRef?.current?.setVisible(true)
