@@ -6,7 +6,9 @@ import {
   Tooltip,
   Avatar,
   Alert,
-  Tag
+  Tag,
+  Dropdown,
+  Menu
 } from "@arco-design/web-react"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input/textarea"
 import {
@@ -15,7 +17,11 @@ import {
   IconSend,
   IconSelectAll,
   IconRightCircle,
-  IconLink
+  IconLink,
+  IconDown,
+  IconOriginalSize,
+  IconArchive,
+  IconCommon
 } from "@arco-design/web-react/icon"
 import React, { useEffect, useRef, useState } from "react"
 import { sendToBackground } from "@plasmohq/messaging"
@@ -50,12 +56,15 @@ import { useSiderSendMessage } from '~hooks/use-sider-send-message'
 import { useMessageStateStore } from "~stores/message-state"
 import { useSiderStore } from "~stores/sider"
 import { useWeblinkStore } from "~stores/weblink"
+import { useSearchStateStore } from "~stores/search-state"
 // hooks
 import { useBuildTask } from "~hooks/use-build-task"
 import { useResetState } from '~hooks/use-reset-state'
 import { useWebLinkIndexed } from '~hooks/use-weblink-indexed'
 import type { PlasmoGetStyle } from "plasmo"
 import { IconTip } from "./icon-tip"
+// 组件
+import { SearchTargetSelector } from './search-target-selector';
 
 const TextArea = Input.TextArea
 
@@ -79,6 +88,7 @@ const Home = (props: ChatProps) => {
   const messageStateStore = useMessageStateStore();
   const siderStore = useSiderStore();
   const webLinkStore = useWeblinkStore()
+  const searchStateStore = useSearchStateStore();
   // hooks
   const { resetState } = useResetState()
   const { handleSideSendMessage } = useSiderSendMessage();
@@ -87,6 +97,8 @@ const Home = (props: ChatProps) => {
   const { buildIntentQuickActionTaskAndGenReponse, buildShutdownTaskAndGenResponse } = useBuildTask()
   const isIntentActive = !!quickActionStore.selectedText
   console.log("selectedText", quickActionStore.selectedText)
+
+
 
   const renderMessage = (type: MessageItemType, message: Message) => {
     switch (type) {
@@ -320,17 +332,7 @@ const Home = (props: ChatProps) => {
                 </IconTip>
 
                 {/** 第一版本不支持选择指定网页进行问答 */}
-                <IconTip text='选择历史浏览网页问答' >
-                  <Button
-                    onClick={() => {
-                      webLinkStore.updateIsWebLinkListVisible(true)
-                    }}
-                    icon={<IconSelectAll />}
-                    type="text"
-                    shape="round">
-                    选择
-                  </Button>
-                </IconTip>
+                <SearchTargetSelector />
                 {/* <Button
               onClick={() => {
                 conversationListInstanceRef?.current?.setVisible(true)
