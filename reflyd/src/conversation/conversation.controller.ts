@@ -55,12 +55,14 @@ export class ConversationController {
     return this.llmService.retrieveRelevantDocs(body.input.query);
   }
 
-  @Get(':conversationId/chat')
+  @Post(':conversationId/chat')
   async chat(
     @Query('query') query = '',
     @Param('conversationId') conversationId = '',
+    @Body() body: { weblinkList: string[] },
     @Res() res: Response,
   ) {
+    console.log('query', query, conversationId, body);
     if (!conversationId) {
       throw new BadRequestException('conversation id cannot be empty');
     }
@@ -103,7 +105,7 @@ export class ConversationController {
         type: 'source',
         body: source,
       };
-      res.write(`refly-sse-data: ${JSON.stringify(payload)}`);
+      res.write(`refly-sse-source: ${JSON.stringify(payload)}`);
     });
 
     // write answer in a stream style
