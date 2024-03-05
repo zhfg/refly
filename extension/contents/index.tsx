@@ -21,7 +21,7 @@ import { useSwitchTheme } from "~hooks/use-switch-theme"
 
 import QuickAction from "../components/quick-action"
 // hooks
-import { useRegisterMouseEvent } from "../hooks/use-register-mouse-event"
+// import { useRegisterMouseEvent } from "../hooks/use-register-mouse-event"
 import { useExtensionMessage } from '../hooks/use-extension-message';
 import { useBindCommands } from '../hooks/use-bind-commands';
 import { useSetContainerDimension } from '../hooks/use-set-container-dimension';
@@ -63,7 +63,7 @@ export const Content = () => {
   const quickActionStore = useQuickActionStore();
 
   // 注册 mouse event
-  useRegisterMouseEvent()
+  // useRegisterMouseEvent()
   // 监听打开与关闭侧边栏消息
   useExtensionMessage();
   // 绑定快捷键，后续允许用户自定义快捷键

@@ -204,3 +204,43 @@
 
 .chat-error {
 }
+
+.selected-weblinks-container {
+  margin-top: 24px;
+
+  .selected-weblinks-inner-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 4px;
+    gap: 4px;
+  }
+
+  .selected-weblink-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    text-decoration: none;
+    font-size: 10px;
+    color: rgba(0, 0, 0, 0.8);
+  }
+
+  .hint-item {
+    font-size: 16px;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 12px;
+
+    span {
+      display: inline-block;
+      margin-left: 4px;
+    }
+  }
+
+  .arco-tag {
+    border-radius: 12px;
+    background-color: transparent !important;
+    border: 1px solid #0000001a !important;
+  }
+}

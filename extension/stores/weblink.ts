@@ -21,6 +21,7 @@ interface WeblinkState {
   isWebLinkListVisible: boolean
   webLinkList: WebLinkItem[]
   pageSize: number
+  selectedRow: { key: number | string; content: WebLinkItem }[]
   currentPage: number
   hasMore: boolean
   isRequest: boolean
@@ -30,12 +31,16 @@ interface WeblinkState {
   updateHasMore: (hasMore: boolean) => void
   updateIsRequest: (isRequest: boolean) => void
   updateIsWebLinkListVisible: (isWebLinkListVisible: boolean) => void
+  updateSelectedRow: (
+    selectedRow: { key: number | string; content: WebLinkItem }[],
+  ) => void
   resetState: () => void
 }
 
 export const defaultState = {
   isWebLinkListVisible: false,
   webLinkList: [] as WebLinkItem[],
+  selectedRow: [],
   pageSize: 10,
   currentPage: 1,
   hasMore: true,
@@ -59,6 +64,9 @@ export const useWeblinkStore = create<WeblinkState>()(
       set((state) => ({ ...state, isRequest })),
     updateIsWebLinkListVisible: (isWebLinkListVisible: boolean) =>
       set((state) => ({ ...state, isWebLinkListVisible })),
+    updateSelectedRow: (
+      selectedRow: { key: number | string; content: WebLinkItem }[],
+    ) => set((state) => ({ ...state, selectedRow })),
     resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),
 )

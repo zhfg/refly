@@ -5,14 +5,17 @@ import {
   Space,
   Tooltip,
   Avatar,
-  Alert
+  Alert,
+  Tag
 } from "@arco-design/web-react"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input/textarea"
 import {
   IconMinusCircle,
   IconUpload,
   IconSend,
-  IconSelectAll
+  IconSelectAll,
+  IconRightCircle,
+  IconLink
 } from "@arco-design/web-react/icon"
 import React, { useEffect, useRef, useState } from "react"
 import { sendToBackground } from "@plasmohq/messaging"
@@ -345,6 +348,36 @@ const Home = (props: ChatProps) => {
 
           </div>
         </div>
+        {
+          webLinkStore?.selectedRow?.length > 0 && (
+            <div className="selected-weblinks-container">
+              <div className="selected-weblinks-inner-container">
+                <div className="hint-item">
+                  <IconRightCircle style={{ color: 'rgba(0, 0, 0, .6)' }} />
+                  <span>基于选中网页提问：</span>
+                </div>
+                {
+                  webLinkStore?.selectedRow.map((item, index) => (
+                    <Tag key={index} closable onClose={() => {
+
+                    }} icon={<IconLink />}
+                      bordered
+                      color="gray"
+                    ><a rel="noreferrer" href={item?.content?.originPageUrl} target="_blank" className="selected-weblink-item">
+                        <img
+                          className="icon"
+                          src={`https://www.google.com/s2/favicons?domain=${item?.content.origin}&sz=${16}`}
+                          alt=""
+                        />
+                        <span className="text">{item?.content?.originPageTitle}</span>
+                      </a></Tag>
+
+                  ))
+                }
+              </div>
+            </div>
+          )
+        }
       </div>
 
       <WeblinkList
