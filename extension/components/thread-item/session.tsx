@@ -24,7 +24,7 @@ export const Session = (props: SessionProps) => {
 
     }
 
-    console.log('session', isLastSession, session)
+    // console.log('session', isLastSession, session)
 
     return (
         <div className='session-item-container'>

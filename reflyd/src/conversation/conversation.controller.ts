@@ -98,18 +98,27 @@ export class ConversationController {
     );
 
     // first return sources，use unique tag for parse data
-    sources.forEach((source) =>
-      res.write(`data: [SOURCE] ${JSON.stringify(source)}\n\n`),
-    );
+    sources.forEach((source) => {
+      const payload = {
+        type: 'source',
+        body: source,
+      };
+      res.write(`refly-sse-data: ${JSON.stringify(payload)}`);
+    });
 
     // write answer in a stream style
     let answerStr = '';
     for await (const chunk of await stream) {
       answerStr += chunk;
-      res.write(`data: ${chunk}\n\n`);
+
+      const payload = {
+        type: 'chunk',
+        body: chunk,
+      };
+      res.write(`refly-sse-data: ${JSON.stringify(payload)}`);
     }
 
-    res.end(`data: [DONE]\n\n`);
+    res.end(`[DONE]`);
 
     await this.conversationService.addChatMessage({
       type: 'ai',

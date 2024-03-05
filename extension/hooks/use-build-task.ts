@@ -206,9 +206,10 @@ export const useBuildTask = () => {
     //         )
     // }
 
-    console.log("setMessageState", msg?.message)
+    const comingMsgPayload = safeParseJSON(msg?.message)
+    console.log("setMessageState", comingMsgPayload)
 
-    if (msg?.message === "[DONE]") {
+    if (msg?.message === `[DONE]`) {
       const newMessageState: Partial<MessageState> = {
         pending: false,
         error: false,
@@ -276,9 +277,10 @@ export const useBuildTask = () => {
     }
 
     // 流式更新消息
-    if (!msg?.message?.includes("[SOURCE]")) {
+    if (comingMsgPayload?.type !== "source") {
       messageStateStore.setMessageState({
-        pendingMsg: (currentMessageState?.pendingMsg || "") + msg?.message,
+        pendingMsg:
+          (currentMessageState?.pendingMsg || "") + comingMsgPayload?.body,
       })
     }
 
@@ -288,14 +290,12 @@ export const useBuildTask = () => {
         const lastMessage = currentMessageState.pendingReplyMsg
 
         lastMessage.data.content =
-          lastMessage?.data?.content + msg?.message?.includes("[SOURCE]")
+          lastMessage?.data?.content + comingMsgPayload?.type === "source"
             ? ""
-            : msg?.message
+            : comingMsgPayload?.body
 
-        if (msg?.message?.includes("[SOURCE]")) {
-          const sourceWeblinkPayload = safeParseJSON(
-            msg?.message?.split("[SOURCE] ")?.[1]?.trim(),
-          )
+        if (comingMsgPayload?.type === "source") {
+          const sourceWeblinkPayload = comingMsgPayload?.body
           console.log("sourceWeblinkPayload", sourceWeblinkPayload)
           messageStateStore.setMessageState({
             ...currentMessageState,
@@ -331,10 +331,8 @@ export const useBuildTask = () => {
         }, 1000)
       } else {
         // 代表是 source docs，就更新 source docs 信息
-        if (msg?.message?.includes("[SOURCE]")) {
-          const sourceWeblinkPayload = safeParseJSON(
-            msg?.message?.split("[SOURCE] ")?.[1]?.trim(),
-          )
+        if (comingMsgPayload?.type === "source") {
+          const sourceWeblinkPayload = comingMsgPayload?.body
           console.log("sourceWeblinkPayload", sourceWeblinkPayload)
           messageStateStore.setMessageState({
             ...currentMessageState,
@@ -360,7 +358,8 @@ export const useBuildTask = () => {
           const lastMessage = currentChatState.messages.at(-1)
           const savedMessage = currentChatState.messages.slice(0, -1)
 
-          lastMessage.data.content = lastMessage?.data?.content + msg?.message
+          lastMessage.data.content =
+            lastMessage?.data?.content + comingMsgPayload?.body
           chatStore.setMessages([...savedMessage, { ...lastMessage }])
         }
       }
