@@ -85,11 +85,11 @@ export async function request<T>(
     const jsonRes = await res.json()
     console.log("request res", jsonRes)
     if (res?.status >= 200 && res?.status < 300) {
-      const body = jsonRes.data
+      const body = jsonRes.data || jsonRes
       // const err = getDataErr(body);
       return [null, body]
     } else {
-      return [new ApiErr(jsonRes.data), null]
+      return [new ApiErr(jsonRes.data || jsonRes), null]
     }
   } catch (err: any) {
     return [new ApiErr(err.message), null]

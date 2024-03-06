@@ -15,7 +15,7 @@ export const getServerOrigin = () => {
 
 export const getClientOrigin = () => {
   if (overrideLocalDev) {
-    return "http://localhost:3000"
+    return "http://localhost:5173/"
   }
   return getEnv() === IENV.DEVELOPMENT ? DEV_DOMAIN : PROD_DOMAIN
 }
