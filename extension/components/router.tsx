@@ -7,6 +7,8 @@ import { IconSearch, IconStorage } from "@arco-design/web-react/icon"
 import { useUserStore } from '~stores/user';
 import { useSiderStore } from '~stores/sider';
 import { sendToBackground } from "@plasmohq/messaging";
+import { useStorage } from "@plasmohq/storage/hook";
+import { bgStorage } from "~storage";
 
 
 export const ContentRouter = () => {
@@ -16,6 +18,10 @@ export const ContentRouter = () => {
     const isHomePage = useMatch('/');
     const userStore = useUserStore();
     const siderStore = useSiderStore();
+    const [loginNotification, setLoginNotification] = useStorage({
+        key: 'login-notification',
+        instance: bgStorage
+    })
 
     // 处理状态
     const [activeTab, setActiveTab] = useState<'home' | 'session-library'>('home')
@@ -32,6 +38,7 @@ export const ContentRouter = () => {
             if (!res?.success) {
                 userStore.setUserProfile(null);
                 userStore.setToken('');
+                setLoginNotification('');
                 navigate('/login')
             } else {
                 userStore.setUserProfile(res?.data);
@@ -40,6 +47,7 @@ export const ContentRouter = () => {
             console.log('getLoginStatus err', err);
             userStore.setUserProfile(null);
             userStore.setToken('');
+            setLoginNotification('');
             navigate('/login')
         }
     }
@@ -49,6 +57,7 @@ export const ContentRouter = () => {
     }, [siderStore?.showSider])
 
     useEffect(() => {
+        console.log('userStore.userProfile', userStore.userProfile)
         if (!userStore.userProfile) {
             return;
         }
@@ -60,7 +69,7 @@ export const ContentRouter = () => {
                 setActiveTab('session-library')
             }
         }
-    }, [isHomePage, userStore.userProfile])
+    }, [isHomePage, userStore.userProfile, siderStore.showSider])
 
     return (
         <div>

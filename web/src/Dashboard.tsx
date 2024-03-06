@@ -13,17 +13,23 @@ function Dashboard() {
     const [data, setData] = useState({});
     const [token, updateCookie, deleteCookie] = useCookie("_refly_ai_sid");
 
-    const handleSendMsgToExtension = (status: 'success' | 'failed', token?: string, user?: User) => {
-        chrome.runtime.sendMessage(extensionId, {
-            message: {
+    const handleSendMsgToExtension = async (status: 'success' | 'failed', token?: string, user?: User) => {
+        try {
+            await chrome.runtime.sendMessage(extensionId, {
                 name: 'login-notification',
                 body: {
                     status,
                     token,
                     user
                 }
-            }
-        })
+            })
+        } catch (err) {
+            console.log('handleSendMsgToExtension err', err)
+        }
+
+        setTimeout(() => {
+            window.close();
+        }, 2000)
     }
 
     useEffect(() => {

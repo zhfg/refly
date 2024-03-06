@@ -1,15 +1,18 @@
 import { Button, Message as message } from "@arco-design/web-react"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { useStorage } from '@plasmohq/storage/hook'
 
 // stores
 import { useUserStore } from "~stores/user"
+// storage
+import { bgStorage } from '~storage/index'
 
 // 静态资源
 import Logo from "~assets/logo.svg"
 import { useMessage } from "@plasmohq/messaging/hook"
 import type { User } from "~types"
 import { useNavigate } from "react-router-dom"
+import { safeParseJSON } from "~utils/parse"
 
 interface ExternalLoginPayload {
     name: string;
@@ -26,10 +29,15 @@ export const Login = () => {
         res.send('recevied msg');
     });
     const navigate = useNavigate();
+    const loginWindowRef = useRef<Window>();
 
     // 鉴权相关内容
     const [token, setToken] = useStorage('token');
     const [userProfile, setUserProfile] = useStorage('userProfile');
+    const [loginNotification] = useStorage({
+        key: 'login-notification',
+        instance: bgStorage
+    })
 
 
     /**
@@ -41,7 +49,7 @@ export const Login = () => {
     const handleLogin = () => {
         const left = (screen.width - 800) / 2
         const top = (screen.height - 730) / 2
-        window.open(
+        loginWindowRef.current = window.open(
             "http://localhost:5173/login",
             "_blank",
             `location=no,toolbar=no,menubar=no,width=800,height=730,left=${left} / 2,top=${top} / 2`,
@@ -61,19 +69,32 @@ export const Login = () => {
             setToken(data?.token);
             setUserProfile(data?.user);
 
+            loginWindowRef.current?.close();
+
             navigate('/');
         } else {
             message.error('登录失败!')
+
+            loginWindowRef.current?.close();
         }
 
         userStore.setIsCheckingLoginStatus(false);
     }
 
     useEffect(() => {
+        console.log('bgMessage.data', bgMessage.data)
         if (bgMessage?.data?.name === 'login-notification') {
             handleLoginStatus(bgMessage?.data);
         }
     }, [bgMessage.data])
+    // sync storage
+    useEffect(() => {
+        console.log('loginNotification', loginNotification)
+        if (loginNotification) {
+            const data = safeParseJSON(loginNotification)
+            handleLoginStatus(data);
+        }
+    }, [loginNotification])
 
     return (
         <div className="login-container">
