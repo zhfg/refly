@@ -15,6 +15,8 @@ import { ThreadItem } from "@/components/thread-item/thread-item"
 import { Header } from "./header"
 // request
 import getThreadMessages from "@/requests/getThreadMessages"
+// styles
+import "./thread-item.scss"
 
 export const Thread = () => {
   const { handleSideSendMessage } = useSiderSendMessage()

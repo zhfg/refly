@@ -30,9 +30,9 @@ export const SearchTargetSelector = () => {
           webLinkStore.updateSelectedRow([])
         }
       }}>
-      <Menu.Item key={SearchTarget.CurrentPage}>
-        <IconOriginalSize style={iconStyle} />
-        当前网页
+      <Menu.Item key={SearchTarget.All}>
+        <IconCommon style={iconStyle} />
+        所有网页
       </Menu.Item>
       <Menu.Item
         key={SearchTarget.SelectedPages}
@@ -41,10 +41,6 @@ export const SearchTargetSelector = () => {
         }}>
         <IconArchive style={iconStyle} />
         历史已阅读
-      </Menu.Item>
-      <Menu.Item key={SearchTarget.All}>
-        <IconCommon style={iconStyle} />
-        所有网页
       </Menu.Item>
     </Menu>
   )

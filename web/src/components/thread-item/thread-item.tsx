@@ -54,7 +54,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
         ))}
       </div>
 
-      <div className="footer input-panel">
+      <div className="">
         {messageStateStore?.pending && (
           <div className="actions">
             {messageStateStore.taskType === TASK_TYPE.CHAT &&
@@ -73,34 +73,37 @@ export const ThreadItem = (props: ThreadItemProps) => {
         )}
 
         <div className="session-input-box">
-          <div className="session-inner-input-box">
-            <TextArea
-              ref={inputRef}
-              className="message-input"
-              autoFocus
-              disabled={messageStateStore?.pending}
-              value={chatStore?.newQAText}
-              onChange={value => {
-                chatStore.setNewQAText(value)
-              }}
-              placeholder="继续提问..."
-              onKeyDownCapture={e => handleKeyDown(e)}
-              autoSize={{ minRows: 1, maxRows: 4 }}
-              style={{
-                borderRadius: 8,
-                resize: "none",
-                backgroundColor: "transparent",
-              }}></TextArea>
-            <div>
-              <div className="toolbar">
-                <Space></Space>
-                <Button
-                  shape="circle"
-                  icon={<IconSend />}
-                  style={{ color: "#FFF", background: "#00968F" }}
-                  onClick={handleAskFollowing}></Button>
+          <div className="session-input-inner">
+            <div className="session-inner-input-box">
+              <TextArea
+                ref={inputRef}
+                className="message-input"
+                autoFocus
+                disabled={messageStateStore?.pending}
+                value={chatStore?.newQAText}
+                onChange={value => {
+                  chatStore.setNewQAText(value)
+                }}
+                placeholder="继续提问..."
+                onKeyDownCapture={e => handleKeyDown(e)}
+                autoSize={{ minRows: 1, maxRows: 4 }}
+                style={{
+                  borderRadius: 8,
+                  resize: "none",
+                  backgroundColor: "transparent",
+                }}></TextArea>
+              <div>
+                <div className="toolbar">
+                  <Space></Space>
+                  <Button
+                    shape="circle"
+                    icon={<IconSend />}
+                    style={{ color: "#FFF", background: "#00968F" }}
+                    onClick={handleAskFollowing}></Button>
+                </div>
               </div>
             </div>
+            <div className="session-inner-input-placeholder"></div>
           </div>
         </div>
       </div>

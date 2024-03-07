@@ -30,6 +30,7 @@ import { time } from "@/utils/time"
 import getConversationList from "@/requests/getConversationList"
 // types
 import { Thread } from "@/types"
+import "./index.scss"
 
 const Header = () => {
   const siderStore = useSiderStore()
@@ -118,7 +119,7 @@ export const ThreadLibrary = () => {
         display: "flex",
         flexDirection: "column",
       }}>
-      <Header />
+      {/* <Header /> */}
       <List
         className="thread-library-list"
         wrapperStyle={{ width: "100%" }}

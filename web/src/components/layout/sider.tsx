@@ -46,8 +46,8 @@ export const SiderLayout = () => {
         break
       }
 
-      case "MyGuide": {
-        navigate(`/guidera/guides`)
+      case "ThreadLibrary": {
+        navigate(`/thread`)
         break
       }
 
@@ -109,44 +109,38 @@ export const SiderLayout = () => {
         </div>
         <Menu
           style={{
-            width: "100%",
+            width: 200,
             backgroundColor: "transparent",
             borderRight: "none",
           }}
+          className="sider-menu-nav"
           onClickMenuItem={handleNavClick}
           defaultSelectedKeys={[selectedKey]}>
-          <MenuItem key="Home">
-            <IconHome style={{ fontSize: 20 }} />
-            <span className="sider-menu-title">主页</span>
-          </MenuItem>
-          {/* <MenuItem key='Explore' ><IconHome style={{ fontSize: 20 }} />主页</MenuItem> */}
-          <MenuItem key="ThreadLibrary">
-            <IconBook style={{ fontSize: 20 }} />
-            <span className="sider-menu-title">会话库</span>
-          </MenuItem>
-        </Menu>
-      </div>
-      <div className="sider-footer">
-        {/* <div className="invite-member">邀请新成员</div> */}
-        <Menu
-          onClickMenuItem={handleNavClick}
-          style={{
-            width: "100%",
-            backgroundColor: "transparent",
-            borderRight: "none",
-          }}>
-          <MenuItem key="Docs">
-            <IconCustomerService style={{ fontSize: 20 }} />
-            <span className="sider-menu-title">查看文档</span>
-          </MenuItem>
-          <MenuItem key="Settings">
-            <IconSettings style={{ fontSize: 20 }} />
-            <span className="sider-menu-title">设置</span>
-          </MenuItem>
-          <MenuItem key="Download">
-            <IconDownload style={{ fontSize: 20 }} />
-            <span className="sider-menu-title">下载插件</span>
-          </MenuItem>
+          <div className="sider-header">
+            <MenuItem key="Home">
+              <IconHome style={{ fontSize: 20 }} />
+              <span className="sider-menu-title">主页</span>
+            </MenuItem>
+            {/* <MenuItem key='Explore' ><IconHome style={{ fontSize: 20 }} />主页</MenuItem> */}
+            <MenuItem key="ThreadLibrary">
+              <IconBook style={{ fontSize: 20 }} />
+              <span className="sider-menu-title">会话库</span>
+            </MenuItem>
+          </div>
+          <div className="sider-footer">
+            <MenuItem key="Docs">
+              <IconCustomerService style={{ fontSize: 20 }} />
+              <span className="sider-menu-title">查看文档</span>
+            </MenuItem>
+            <MenuItem key="Settings">
+              <IconSettings style={{ fontSize: 20 }} />
+              <span className="sider-menu-title">设置</span>
+            </MenuItem>
+            <MenuItem key="Download">
+              <IconDownload style={{ fontSize: 20 }} />
+              <span className="sider-menu-title">下载插件</span>
+            </MenuItem>
+          </div>
         </Menu>
       </div>
     </Sider>

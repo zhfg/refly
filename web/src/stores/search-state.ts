@@ -18,14 +18,14 @@ export interface SearchState {
 }
 
 export const defaultState = {
-  searchTarget: "currentPage" as SearchTarget,
+  searchTarget: SearchTarget.All as SearchTarget,
 }
 
 export const useSearchStateStore = create<SearchState>()(
-  devtools((set) => ({
+  devtools(set => ({
     ...defaultState,
 
     setSearchTarget: (searchTarget: SearchTarget) =>
-      set((state) => ({ ...state, searchTarget })),
+      set(state => ({ ...state, searchTarget })),
   })),
 )

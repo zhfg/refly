@@ -4,6 +4,20 @@
     height: 100vh;
     box-sizing: border-box;
 
+    .sider-header {
+        height: 100%;
+    }
+
+    .sider-menu-nav {
+        height: calc(100% - 74px);
+
+        .arco-menu-inner {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+    }
+
     .arco-layout-sider-children {
         display: flex;
         flex-direction: column;

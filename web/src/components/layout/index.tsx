@@ -10,11 +10,11 @@ interface AppLayoutProps {
 
 export const AppLayout = (props: AppLayoutProps) => {
   return (
-    <Layout className="app-layout">
+    <Layout className="app-layout main">
       <SiderLayout />
       <Layout
         className="content-layout"
-        style={{ height: "calc(100vh - 16px)", minWidth: 1256 }}>
+        style={{ height: "calc(100vh - 16px)", flexGrow: 1 }}>
         <Content>{props.children}</Content>
       </Layout>
     </Layout>

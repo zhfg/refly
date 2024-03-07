@@ -15,6 +15,8 @@ import { time } from "@/utils/time"
 import { useWeblinkStore } from "@/stores/weblink"
 // requests
 import getWeblinkList from "@/requests/getWeblinkList"
+// styles
+import "./index.scss"
 
 const WebLinkItem = (props: { weblink: WebLinkItem }) => {
   const {
@@ -184,8 +186,7 @@ const PreviosWebsiteList = forwardRef(() => {
 
     // 获取列表的滚动高度，以及现在的列表数量，当还存在 2 个时触发滚动
     const scrollTopElem = document
-      .querySelector("plasmo-csui")
-      ?.shadowRoot?.querySelector(".conv-list")
+      .querySelector(".conv-list")
       ?.querySelector(".arco-table-body")
 
     if (!scrollTopElem || webLinkList?.length < 10) return
@@ -208,10 +209,8 @@ const PreviosWebsiteList = forwardRef(() => {
   return (
     <div style={{ width: "100%" }}>
       <Drawer
-        width="100%"
+        width="392px"
         style={{
-          maxHeight: 680,
-          height: "80%",
           zIndex: 66,
         }}
         headerStyle={{ justifyContent: "center" }}
@@ -221,7 +220,7 @@ const PreviosWebsiteList = forwardRef(() => {
           </div>
         }
         visible={webLinkStore.isWebLinkListVisible}
-        placement="bottom"
+        placement="right"
         footer={
           <div className="weblink-footer-container">
             <p className="weblink-footer-selected">
@@ -275,7 +274,7 @@ const PreviosWebsiteList = forwardRef(() => {
             },
           }}
           scroll={{
-            y: 600,
+            y: `calc(100vh - 112px)`,
           }}
           virtualized={true}
           pagination={false}

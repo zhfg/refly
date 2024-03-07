@@ -21,7 +21,6 @@ import { Conversation, TASK_TYPE } from "@/types"
 
 // 自定义组件
 import WeblinkList from "../weblink-list"
-import { ChatHeader } from "./header"
 // utils
 import { buildConversation } from "@/utils/conversation"
 // stores
@@ -40,11 +39,15 @@ import { SearchTargetSelector } from "./search-target-selector"
 // request
 import createNewConversation from "@/requests/createNewConversation"
 import storeWeblink from "@/requests/storeWeblink"
+// scss
+import "./index.scss"
+import classNames from "classnames"
 
 const TextArea = Input.TextArea
 
 const Home = () => {
   const inputRef = useRef<RefTextAreaType>(null)
+  const [isFocused, setIsFocused] = useState(false)
   const weblinkListRef = useRef(null)
   const [uploadingStatus, setUploadingStatus] = useState<
     "normal" | "loading" | "failed" | "success"
@@ -156,12 +159,7 @@ const Home = () => {
   }, [siderStore.showSider])
 
   return (
-    <div
-      style={{
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-      }}>
+    <div className="home-container" style={{}}>
       {/* <div
         className="chat-wrapper"
         style={{ paddingBottom: isIntentActive ? 72 : 52 }}>
@@ -177,7 +175,7 @@ const Home = () => {
                 {messageState.taskType === TASK_TYPE.CHAT &&
                   messageState?.pendingFirstToken && (
                     <div className={"loading-message"}>{LoadingMessage()}</div>
-                  )}
+                  )} 
                 {isIntentActive && (
                   <DynamicIntentMsgList
                     intentText={selectedText}
@@ -230,28 +228,35 @@ const Home = () => {
             )}
         </div>
 
-        <div className="input-box">
-          <TextArea
-            ref={inputRef}
-            className="message-input"
-            autoFocus
-            value={chatStore?.newQAText}
-            onChange={value => {
-              chatStore.setNewQAText(value)
-            }}
-            placeholder="基于网页进行提问任何内容..."
-            onKeyDownCapture={e => handleKeyDown(e)}
-            autoSize={{ minRows: 4, maxRows: 4 }}
-            style={{
-              borderRadius: 8,
-              resize: "none",
-              minHeight: 98,
-              height: 98,
-            }}></TextArea>
-          <div>
-            <div className="toolbar">
-              <Space>
-                {/* <Button
+        <div
+          className={classNames("input-box-container", {
+            "is-focused": isFocused,
+          })}>
+          <div
+            className={classNames("input-box", {
+              "is-focused": isFocused,
+            })}>
+            <TextArea
+              ref={inputRef}
+              className="message-input"
+              autoFocus
+              value={chatStore?.newQAText}
+              onChange={value => {
+                chatStore.setNewQAText(value)
+              }}
+              placeholder="基于网页进行提问任何内容..."
+              onKeyDownCapture={e => handleKeyDown(e)}
+              autoSize={{ minRows: 2, maxRows: 4 }}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              style={{
+                borderRadius: 8,
+                resize: "none",
+              }}></TextArea>
+            <div>
+              <div className="toolbar">
+                <Space>
+                  {/* <Button
                   onClick={() => {
                     handleCreateNewConversation()
                   }}
@@ -261,23 +266,9 @@ const Home = () => {
                   新会话
                 </Button> */}
 
-                <IconTip text="处理当前网页用于问答">
-                  <Button
-                    onClick={() => {
-                      handleUploadWebsite(window.location.href)
-                    }}
-                    icon={<IconUpload />}
-                    loading={uploadingStatus === "loading" ? true : false}
-                    type="text"
-                    style={{ marginRight: 0 }}
-                    shape="round">
-                    {uploadingStatus === "loading" ? "阅读中" : "阅读"}
-                  </Button>
-                </IconTip>
-
-                {/** 第一版本不支持选择指定网页进行问答 */}
-                <SearchTargetSelector />
-                {/* <Button
+                  {/** 第一版本不支持选择指定网页进行问答 */}
+                  <SearchTargetSelector />
+                  {/* <Button
               onClick={() => {
                 conversationListInstanceRef?.current?.setVisible(true)
               }}
@@ -287,12 +278,13 @@ const Home = () => {
               shape="round">
               历史记录
             </Button> */}
-              </Space>
-              <Button
-                shape="circle"
-                icon={<IconSend />}
-                style={{ color: "#FFF", background: "#00968F" }}
-                onClick={handleCreateNewConversation}></Button>
+                </Space>
+                <Button
+                  shape="circle"
+                  icon={<IconSend />}
+                  style={{ color: "#FFF", background: "#00968F" }}
+                  onClick={handleCreateNewConversation}></Button>
+              </div>
             </div>
           </div>
         </div>
