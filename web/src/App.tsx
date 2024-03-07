@@ -1,17 +1,8 @@
-import { useState } from "react";
-import "./App.css";
-import { useNavigate } from "react-router-dom";
+import "./App.css"
 
-function App() {
-  const navigate = useNavigate();
+import { Router } from "./router/index"
+import { AppLayout } from "@/components/layout/index"
 
-  return (
-    <>
-      <h1>Welcome to Refly AI</h1>
-      <button onClick={() => navigate("/login")}>登录</button>
-      <button onClick={() => navigate("/dashboard")}>去 Dashboard</button>
-    </>
-  );
-}
+const App = () => <Router layout={AppLayout} />
 
-export default App;
+export default App

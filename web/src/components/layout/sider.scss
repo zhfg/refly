@@ -1,0 +1,46 @@
+.app-sider {
+    padding: 24px;
+    background-color: #f7f8fa;
+    height: 100vh;
+
+    &.fixed {
+        position: fixed !important;
+        z-index: 100000;
+    }
+
+    .logo {
+        &:hover {
+            cursor: pointer;
+        }
+    }
+
+    .semi-layout-sider-children {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .menu-item {
+        background-color: transparent;
+    }
+
+    .sider-footer {
+        .invite-member {
+            margin-bottom: 36px;
+            padding: 4px 0;
+            text-align: center;
+            border-radius: 8px;
+            color: var(--semi-color-text-0);
+            border: 2px solid var(--semi-color-text-1);
+            font-size: 14px;
+            cursor: pointer;
+
+            &:hover {
+                background-color: var(--semi-color-text-0);
+                color: #fff;
+                transition: background-color 0.5s;
+                // transition: color 0.5s;
+            }
+        }
+    }
+}
