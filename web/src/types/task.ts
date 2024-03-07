@@ -1,10 +1,10 @@
-import { type Conversation } from "./conversation";
+import { type Conversation } from "./conversation"
 
 export interface Mode {
-  id: string;
-  icon: any;
-  text: string;
-  prompt: string;
+  id: string
+  icon: any
+  text: string
+  prompt: string
 }
 
 export const enum TASK_STATUS {
@@ -36,33 +36,35 @@ export const enum ACTION_TYPE {
 }
 
 export type GEN_TITLE = {
-  conversationId: string;
-};
+  conversationId: string
+  items?: any[]
+}
 
 export type QUICK_ACTION = {
-  actionType?: ACTION_TYPE;
-  actionPrompt?: string;
-  reference?: string;
-};
+  actionType?: ACTION_TYPE
+  actionPrompt?: string
+  reference?: string
+  items?: any[]
+}
 
 export type SEARCH_RESULT_ITEM = {
-  title: string;
-  url: string;
-  desc: string;
-};
+  title: string
+  url: string
+  desc: string
+}
 
 export type SEARCH_ENHANCE = {
-  keyword: string;
-  items: SEARCH_RESULT_ITEM[];
-  isManual: boolean;
-};
+  keyword: string
+  items: SEARCH_RESULT_ITEM[]
+  isManual: boolean
+}
 
 export type Task = {
-  taskType: TASK_TYPE;
-  taskId: string; // task:xxxx-xxxx-xxxx-xxxx
-  language: LANGUAGE;
-  locale: LOCALE;
-  data: Partial<Conversation> | GEN_TITLE | QUICK_ACTION | SEARCH_ENHANCE;
-};
+  taskType: TASK_TYPE
+  taskId: string // task:xxxx-xxxx-xxxx-xxxx
+  language: LANGUAGE
+  locale: LOCALE
+  data: Partial<Conversation> | GEN_TITLE | QUICK_ACTION | SEARCH_ENHANCE
+}
 
 //如何把TASK_TYPE和data关联起来

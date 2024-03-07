@@ -1,14 +1,19 @@
-import { type PlasmoMessaging } from "@plasmohq/messaging"
+import { TASK_STATUS, Task } from "@/types"
+import { getServerOrigin } from "@/utils/url"
+import { fetchEventSource } from "@/utils/fetch-event-source"
 
-import { TASK_STATUS, TASK_TYPE } from "~/types"
-import { safeParseJSON } from "~utils/parse"
-import { getServerOrigin } from "~utils/url"
-import { fetchEventSource } from "~utils/fetch-event-source"
+import type { HandlerRequest } from "@/types/request"
 
 let abortController: AbortController
 
-const handler: PlasmoMessaging.PortHandler = async (req, res) => {
-  const { type, payload } = req?.body || {}
+const handler = async (
+  req: HandlerRequest<{
+    type: TASK_STATUS
+    payload?: Task
+  }>,
+  options: { onMessage: (msg: { message: string }) => void },
+) => {
+  const { type } = req?.body || {}
   console.log("receive request", req.body)
 
   try {
@@ -31,24 +36,24 @@ const handler: PlasmoMessaging.PortHandler = async (req, res) => {
           onmessage(data) {
             if (data === "[DONE]") {
               console.log("EventSource done")
-              res.send({ message: "[DONE]" })
+              options.onMessage({ message: "[DONE]" })
             } else {
-              res.send({ message: data })
+              options.onMessage({ message: data })
             }
           },
           onerror(error) {
             console.log("EventSource failed:", error)
 
             // 这里是因为 evtSource 之后会进行重试
-            // res.send({ message: "Meet Error" })
-            res.send({ message: "[DONE]" })
+            // options.onMessage({ message: "Meet Error" })
+            options.onMessage({ message: "[DONE]" })
           },
           signal: abortController.signal,
         },
       )
     } else if (type === TASK_STATUS.SHUTDOWN) {
       abortController.abort()
-      res.send({ message: "[DONE]" })
+      options.onMessage({ message: "[DONE]" })
     }
   } catch (err) {
     console.log("err", err)

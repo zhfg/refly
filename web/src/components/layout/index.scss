@@ -1,0 +1,21 @@
+.app-layout {
+    background-color: #f3f3ee;
+    display: flex;
+    flex-direction: row;
+
+    .arco-layout-sider-light {
+        box-shadow: none;
+    }
+}
+
+.content-layout {
+    box-sizing: border-box;
+
+    margin-top: 8px;
+    margin-bottom: 8px;
+    margin-right: 8px;
+    background-color: #fcfcf9;
+    border-radius: 20px;
+    border-color: hsla(60, 11%, 83%, 0.5);
+    box-shadow: 0 1px 1px 0 hsla(60, 11%, 83%, 0.3);
+}

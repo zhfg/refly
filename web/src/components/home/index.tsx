@@ -162,7 +162,6 @@ const Home = () => {
         display: "flex",
         flexDirection: "column",
       }}>
-      <ChatHeader />
       {/* <div
         className="chat-wrapper"
         style={{ paddingBottom: isIntentActive ? 72 : 52 }}>
@@ -192,19 +191,6 @@ const Home = () => {
       </div> */}
 
       <div className="footer input-panel">
-        {isWebLinkIndexed ? (
-          <Alert
-            type="success"
-            content="此网页已经被索引，可以直接提问！"
-            closable
-          />
-        ) : (
-          <Alert
-            type="warning"
-            content="此网页未索引，点击下方「阅读」可索引！"
-            closable
-          />
-        )}
         <div className="refly-slogan">The answer engine for your work</div>
         <div className="actions">
           {/* {isIntentActive && (

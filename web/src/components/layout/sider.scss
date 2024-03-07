@@ -1,7 +1,18 @@
 .app-sider {
-    padding: 24px;
-    background-color: #f7f8fa;
+    padding: 4px;
+    background-color: #f3f3ee;
     height: 100vh;
+    box-sizing: border-box;
+
+    .arco-layout-sider-children {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .sider-menu-title {
+        font-size: 16px;
+    }
 
     &.fixed {
         position: fixed !important;
@@ -12,6 +23,28 @@
         &:hover {
             cursor: pointer;
         }
+
+        margin-left: 16px;
+        margin-top: 16px;
+        margin-bottom: 24px;
+
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        img {
+            width: 34px;
+            height: 34px;
+        }
+
+        span {
+            font-size: 20px;
+            color: #000000;
+            font-weight: bolder;
+            text-align: left;
+            display: inline-block;
+            margin-left: 4px;
+        }
     }
 
     .semi-layout-sider-children {
@@ -21,6 +54,32 @@
     }
 
     .menu-item {
+        background-color: transparent;
+    }
+
+    .arco-menu-item {
+        display: flex;
+        align-items: center;
+    }
+
+    .arco-menu-light .arco-menu-item.arco-menu-selected,
+    .arco-menu-light .arco-menu-group-title.arco-menu-selected,
+    .arco-menu-light .arco-menu-pop-header.arco-menu-selected,
+    .arco-menu-light .arco-menu-inline-header.arco-menu-selected {
+        color: rgba(0, 0, 0, 0.9) !important;
+    }
+
+    .arco-menu-light .arco-menu-item.arco-menu-selected .arco-icon,
+    .arco-menu-light .arco-menu-group-title.arco-menu-selected .arco-icon,
+    .arco-menu-light .arco-menu-pop-header.arco-menu-selected .arco-icon,
+    .arco-menu-light .arco-menu-inline-header.arco-menu-selected .arco-icon {
+        color: rgba(0, 0, 0, 0.9) !important;
+    }
+
+    .arco-menu-light .arco-menu-item,
+    .arco-menu-light .arco-menu-group-title,
+    .arco-menu-light .arco-menu-pop-header,
+    .arco-menu-light .arco-menu-inline-header {
         background-color: transparent;
     }
 

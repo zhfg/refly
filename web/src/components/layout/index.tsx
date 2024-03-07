@@ -1,5 +1,6 @@
 import { Layout } from "@arco-design/web-react"
 import { SiderLayout } from "./sider"
+import "./index.scss"
 
 const Content = Layout.Content
 
@@ -12,8 +13,8 @@ export const AppLayout = (props: AppLayoutProps) => {
     <Layout className="app-layout">
       <SiderLayout />
       <Layout
-        className="app-layout"
-        style={{ height: "100vh", minWidth: 1256 }}>
+        className="content-layout"
+        style={{ height: "calc(100vh - 16px)", minWidth: 1256 }}>
         <Content>{props.children}</Content>
       </Layout>
     </Layout>

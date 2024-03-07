@@ -1,5 +1,5 @@
 import React, { useEffect } from "react"
-import { useNavigate, BrowserRouter, Route, Routes } from "react-router-dom"
+import { useNavigate, Route, Routes } from "react-router-dom"
 // stores
 import { useUserStore } from "@/stores/user"
 
@@ -12,10 +12,9 @@ import { Login } from "@/components/login"
 // request
 import getUserInfo from "@/requests/getUserInfo"
 
-export const Router = (props: { layout?: any }) => {
+export const AppRouter = (props: { layout?: any }) => {
   const { layout: Layout } = props
   // 导航相关
-  const navigate = useNavigate()
   const userStore = useUserStore()
 
   const getLoginStatus = async () => {
@@ -27,7 +26,6 @@ export const Router = (props: { layout?: any }) => {
       if (!res?.success) {
         userStore.setUserProfile(undefined)
         userStore.setToken("")
-        navigate("/login")
       } else {
         userStore.setUserProfile(res?.data)
       }
@@ -35,7 +33,6 @@ export const Router = (props: { layout?: any }) => {
       console.log("getLoginStatus err", err)
       userStore.setUserProfile(undefined)
       userStore.setToken("")
-      navigate("/login")
     }
   }
 
@@ -44,16 +41,12 @@ export const Router = (props: { layout?: any }) => {
   }, [])
 
   return (
-    <BrowserRouter>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          {/* <Route path="/explore" element={<Explore />} /> */}
-          <Route path="/thread/:threadId" element={<Thread />} />
-          <Route path="/thread" element={<ThreadLibrary />} />
-        </Routes>
-      </Layout>
-    </BrowserRouter>
+    <Layout>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/thread/:threadId" element={<Thread />} />
+        <Route path="/thread" element={<ThreadLibrary />} />
+      </Routes>
+    </Layout>
   )
 }

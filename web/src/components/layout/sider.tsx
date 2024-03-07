@@ -1,4 +1,4 @@
-import { Layout, Menu } from "@arco-design/web-react"
+import { Button, Layout, Menu } from "@arco-design/web-react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { ReactText } from "react"
 import {
@@ -116,13 +116,13 @@ export const SiderLayout = () => {
           onClickMenuItem={handleNavClick}
           defaultSelectedKeys={[selectedKey]}>
           <MenuItem key="Home">
-            <IconHome style={{ fontSize: 16 }} />
-            主页
+            <IconHome style={{ fontSize: 20 }} />
+            <span className="sider-menu-title">主页</span>
           </MenuItem>
-          {/* <MenuItem key='Explore' ><IconHome style={{ fontSize: 16 }} />主页</MenuItem> */}
+          {/* <MenuItem key='Explore' ><IconHome style={{ fontSize: 20 }} />主页</MenuItem> */}
           <MenuItem key="ThreadLibrary">
-            <IconBook style={{ fontSize: 16 }} />
-            会话库
+            <IconBook style={{ fontSize: 20 }} />
+            <span className="sider-menu-title">会话库</span>
           </MenuItem>
         </Menu>
       </div>
@@ -136,16 +136,16 @@ export const SiderLayout = () => {
             borderRight: "none",
           }}>
           <MenuItem key="Docs">
-            <IconCustomerService style={{ fontSize: 16 }} />
-            查看文档
+            <IconCustomerService style={{ fontSize: 20 }} />
+            <span className="sider-menu-title">查看文档</span>
+          </MenuItem>
+          <MenuItem key="Settings">
+            <IconSettings style={{ fontSize: 20 }} />
+            <span className="sider-menu-title">设置</span>
           </MenuItem>
           <MenuItem key="Download">
-            <IconSettings style={{ fontSize: 16 }} />
-            设置
-          </MenuItem>
-          <MenuItem key="Download">
-            <IconDownload style={{ fontSize: 16 }} />
-            下载插件
+            <IconDownload style={{ fontSize: 20 }} />
+            <span className="sider-menu-title">下载插件</span>
           </MenuItem>
         </Menu>
       </div>

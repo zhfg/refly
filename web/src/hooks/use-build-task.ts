@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from "react"
+import React, { useCallback } from "react"
 import { useChatStore } from "../stores/chat"
 import { useMessageStateStore } from "../stores/message-state"
 import { useConversationStore } from "../stores/conversation"
@@ -8,40 +8,32 @@ import type { QUICK_ACTION, Task } from "@/types"
 import { buildTask } from "@/utils/task"
 import { buildQuestionMessage, buildReplyMessage } from "@/utils/message"
 
-import { getPort, removePort } from "@plasmohq/messaging/port"
 import { buildErrorMessage } from "@/utils/message"
 import { scrollToBottom } from "@/utils/ui"
 import { safeParseJSON } from "@/utils/parse"
 
-export const useBuildTask = () => {
-  const genResponsePortRef = useRef<chrome.runtime.Port>()
+// requests
+import streamingGenMessage from "@/requests/streamingGenMessage"
 
+export const useBuildTask = () => {
   const chatStore = useChatStore()
   const messageStateStore = useMessageStateStore()
   const conversationStore = useConversationStore()
 
-  const hasConversation = (id: string) => {
-    return (
-      conversationStore.conversationList.filter(
-        item => item.conversationId === id,
-      )?.length > 0
-    )
-  }
+  // const buildGenTitleTaskAndGenResponse = () => {
+  //   // 每次生成会话 title 时，需要重置此字段
+  //   chatStore.setIsGenTitle(false)
 
-  const buildGenTitleTaskAndGenResponse = () => {
-    // 每次生成会话 title 时，需要重置此字段
-    chatStore.setIsGenTitle(false)
-
-    // 生成 chat task
-    const taskPayload = {
-      taskType: TASK_TYPE.GEN_TITLE,
-      data: {
-        conversationId: conversationStore.currentConversation?.conversationId,
-      },
-    }
-    const task = buildTask(taskPayload)
-    // handleGenResponse(task)
-  }
+  //   // 生成 chat task
+  //   const taskPayload = {
+  //     taskType: TASK_TYPE.GEN_TITLE,
+  //     data: {
+  //       conversationId: conversationStore.currentConversation?.conversationId,
+  //     },
+  //   }
+  //   const task = buildTask(taskPayload)
+  //   // handleGenResponse(task)
+  // }
 
   const buildQuickActionTaskAndGenReponse = (
     taskType: TASK_TYPE,
@@ -93,7 +85,7 @@ export const useBuildTask = () => {
   }
 
   const buildShutdownTaskAndGenResponse = () => {
-    handleSendMessageWithPorts({
+    handleSendMessage({
       body: {
         type: TASK_STATUS.SHUTDOWN,
       },
@@ -112,7 +104,7 @@ export const useBuildTask = () => {
       })
 
       // 直接发送 task
-      handleSendMessageWithPorts({
+      handleSendMessage({
         body: {
           type: TASK_STATUS.START,
           payload: task,
@@ -184,24 +176,24 @@ export const useBuildTask = () => {
       messageStateStore.setMessageState(newMessageState)
 
       // 如果出错，就不会进行 gen-title 的操作
-      if (
-        currentMessageState.taskType === TASK_TYPE.CHAT &&
-        !chatStore.isGenTitle
-      ) {
-        // 会话第一次发消息，会再额外多发一个消息用于生产会话 title
-        buildGenTitleTaskAndGenResponse()
-        chatStore.setIsGenTitle(true)
-      }
+      // if (
+      //   currentMessageState.taskType === TASK_TYPE.CHAT &&
+      //   !chatStore.isGenTitle
+      // ) {
+      //   // 会话第一次发消息，会再额外多发一个消息用于生产会话 title
+      //   buildGenTitleTaskAndGenResponse()
+      //   chatStore.setIsGenTitle(true)
+      // }
 
       // 如果此次任务是 gen_title 的任务，那么就去更新对应的会话列表里面的会话 title，默认为 New Conversation/新会话
       // TODO: 可以改成流式，到时候看实际反馈
-      if (currentMessageState.taskType === TASK_TYPE.GEN_TITLE) {
-        // TODO: 先不处理更新 title 等边缘的操作
-        // handleConversationOperation(ConversationOperation.UPDATE, {
-        //   conversationId: nowConversationRef.current?.conversationId,
-        //   title: messageStateRef?.current?.pendingMsg
-        // })
-      }
+      // if (currentMessageState.taskType === TASK_TYPE.GEN_TITLE) {
+      // TODO: 先不处理更新 title 等边缘的操作
+      // handleConversationOperation(ConversationOperation.UPDATE, {
+      //   conversationId: nowConversationRef.current?.conversationId,
+      //   title: messageStateRef?.current?.pendingMsg
+      // })
+      // }
 
       return
     }
@@ -307,38 +299,20 @@ export const useBuildTask = () => {
     }
   }
 
-  const bindExtensionPorts = () => {
-    console.log("bindExtensionPorts")
-    if (genResponsePortRef.current) return
-    console.log("alreadybindExtensionPorts")
-
-    genResponsePortRef.current = getPort("gen-response" as never)
-    genResponsePortRef.current.onMessage.addListener(handleStreamingMessage)
-  }
-
-  const unbindExtensionPorts = () => {
-    console.log("unbindExtensionPorts")
-    if (genResponsePortRef?.current) return
-
-    genResponsePortRef.current?.onMessage?.removeListener?.(
-      handleStreamingMessage,
-    )
-    removePort?.("gen-response" as never)
-  }
-
-  const handleSendMessageWithPorts = payload => {
-    // 先 unbind
-    unbindExtensionPorts()
-    // 再 bind
-    bindExtensionPorts()
-
+  const handleSendMessage = (payload: {
+    body: {
+      type: TASK_STATUS
+      payload?: Task
+    }
+  }) => {
     // 生成任务
-    genResponsePortRef.current.postMessage(payload)
+    streamingGenMessage(payload, {
+      onMessage: handleStreamingMessage,
+    })
   }
 
   return {
     buildQuickActionTaskAndGenReponse,
-    buildGenTitleTaskAndGenResponse,
     buildChatTaskAndGenReponse,
     buildShutdownTaskAndGenResponse,
   }
