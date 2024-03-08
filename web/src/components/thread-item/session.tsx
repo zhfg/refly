@@ -1,9 +1,16 @@
-import { Button, List, Skeleton, Typography } from "@arco-design/web-react"
+import {
+  Button,
+  List,
+  Skeleton,
+  Typography,
+  Message as message,
+} from "@arco-design/web-react"
 import {
   IconCopy,
   IconPlus,
   IconQuote,
   IconReply,
+  IconShareInternal,
   IconTranslate,
 } from "@arco-design/web-react/icon"
 import React, { useState } from "react"
@@ -50,7 +57,18 @@ export const Session = (props: SessionProps) => {
                 {!messageStateStore?.pending && (
                   <div className="session-answer-actionbar">
                     <div className="session-answer-actionbar-left">
-                      {/* <IconTip text='复制链接'><Button type='text' icon={<IconShareInternal style={{ fontSize: 14 }} />} style={{ color: '#64645F' }}>分享</Button></IconTip> */}
+                      {/* <IconTip text="复制链接">
+                        <Button
+                          type="text"
+                          icon={<IconShareInternal style={{ fontSize: 14 }} />}
+                          onClick={() => {
+                            copyToClipboard(location.href)
+                            message.success("复制成功")
+                          }}
+                          style={{ color: "#64645F" }}>
+                          分享
+                        </Button>
+                      </IconTip> */}
                       {/* <IconTip text="重新生成答案"><Button type='text' icon={<IconPalette style={{ fontSize: 14 }} />} style={{ color: '#64645F' }}>重写</Button></IconTip> */}
                     </div>
                     <div className="session-answer-actionbar-right">
@@ -60,10 +78,21 @@ export const Session = (props: SessionProps) => {
                           shape="circle"
                           icon={<IconCopy style={{ fontSize: 14 }} />}
                           style={{ color: "#64645F" }}
+                          onClick={() => {
+                            copyToClipboard(session?.answer)
+                            message.success("复制成功")
+                          }}></Button>
+                      </IconTip>
+                      {/* <IconTip text="复制此答案">
+                        <Button
+                          type="text"
+                          shape="circle"
+                          icon={<IconCopy style={{ fontSize: 14 }} />}
+                          style={{ color: "#64645F" }}
                           onClick={() =>
                             copyToClipboard(session?.answer)
                           }></Button>
-                      </IconTip>
+                      </IconTip> */}
                       {/* <IconTip text='点踩'><Button type='text' shape='circle' icon={<IconNotificationClose style={{ fontSize: 14 }} />} style={{ color: '#64645F' }}></Button></IconTip> */}
                     </div>
                   </div>

@@ -52,7 +52,7 @@ export const LoginModal = () => {
       `location=no,toolbar=no,menubar=no,width=800,height=730,left=${left} / 2,top=${top} / 2`,
     )
 
-    userStore.setLoginModalVisible(false)
+    // userStore.setLoginModalVisible(false)
   }
 
   const handleLoginStatus = ({ body: data }: ExternalLoginPayload) => {

@@ -97,7 +97,7 @@ export const Thread = () => {
         display: "flex",
         flexDirection: "column",
       }}>
-      <Header />
+      {/* <Header /> */}
       <ThreadItem sessions={sessions} />
     </div>
   )
