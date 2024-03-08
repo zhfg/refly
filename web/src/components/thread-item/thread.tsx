@@ -28,13 +28,10 @@ export const Thread = () => {
   const { resetState } = useResetState()
 
   const handleGetThreadMessages = async (threadId: string) => {
-    const threadIdMap = threadStore?.threads?.find(
-      item => item?.id === threadId,
-    )
     // 异步操作
     const res = await getThreadMessages({
       body: {
-        threadId: threadIdMap?.conversationId as string,
+        threadId,
       },
     })
 
@@ -84,7 +81,10 @@ export const Thread = () => {
   }
 
   useEffect(() => {
-    handleThread(params?.threadId as string)
+    if (params?.threadId) {
+      console.log("params", params)
+      handleThread(params?.threadId as string)
+    }
   }, [params?.threadId])
 
   console.log("thread message", chatStore.messages)

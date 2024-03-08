@@ -172,9 +172,11 @@ export class ConversationController {
     @Param('conversationId') conversationId: string,
   ) {
     const conversation = await this.conversationService.findFirstConversation({
-      where: { conversationId },
+      where: { id: conversationId },
     });
-    const messages = await this.conversationService.getMessages(conversationId);
+    const messages = await this.conversationService.getMessages(
+      conversation?.conversationId as string,
+    );
 
     return {
       data: {

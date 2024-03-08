@@ -19,17 +19,13 @@ export const Header = () => {
 
   return (
     <header>
-      <IconTip text="账户">
-        <Avatar size={20}>
-          <img
-            alt="avatar"
-            src="//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/3ee5f13fb09879ecb5185e440cef6eb9.png~tplv-uwbnlip3yd-webp.webp"
-          />
-        </Avatar>
-      </IconTip>
+      <div></div>
       <div className="funcs">
         <Button type="text" icon={<IconMore />}></Button>
-        <Button type="primary" icon={<IconShareExternal />}>
+        <Button
+          type="primary"
+          icon={<IconShareExternal />}
+          style={{ borderRadius: 4 }}>
           分享
         </Button>
       </div>
