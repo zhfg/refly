@@ -9,10 +9,14 @@ export interface UserState {
   userProfile?: User
   token?: string
 
+  // login modal
+  loginModalVisible?: boolean
+
   // method
   setIsCheckingLoginStatus: (val: boolean) => void
   setUserProfile: (val?: User) => void
   setToken: (val?: string) => void
+  setLoginModalVisible: (val: boolean) => void
 }
 
 export const defaultState = {
@@ -20,6 +24,7 @@ export const defaultState = {
   isCheckingLoginStatus: false,
   userProfile: undefined,
   token: "",
+  loginModalVisible: false,
 }
 
 export const useUserStore = create<UserState>()(
@@ -31,5 +36,7 @@ export const useUserStore = create<UserState>()(
     setUserProfile: (val?: User) =>
       set(state => ({ ...state, userProfile: val })),
     setToken: (val?: string) => set(state => ({ ...state, token: val })),
+    setLoginModalVisible: (val: boolean) =>
+      set(state => ({ ...state, loginModalVisible: val })),
   })),
 )

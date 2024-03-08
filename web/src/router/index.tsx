@@ -1,44 +1,16 @@
-import React, { useEffect } from "react"
-import { useNavigate, Route, Routes } from "react-router-dom"
-// stores
-import { useUserStore } from "@/stores/user"
+import React from "react"
+import { Route, Routes } from "react-router-dom"
 
 // 自定义组件
 import Home from "@/components/home"
 import { Thread } from "@/components/thread-item/thread"
 import { ThreadLibrary } from "@/components/thread-library"
-import { Login } from "@/components/login"
-
-// request
-import getUserInfo from "@/requests/getUserInfo"
+import { Settings } from "@/components/settings/index"
+import Dashboard from "../Dashboard"
 
 export const AppRouter = (props: { layout?: any }) => {
   const { layout: Layout } = props
   // 导航相关
-  const userStore = useUserStore()
-
-  const getLoginStatus = async () => {
-    try {
-      const res = await getUserInfo()
-
-      console.log("loginStatus", res)
-
-      if (!res?.success) {
-        userStore.setUserProfile(undefined)
-        userStore.setToken("")
-      } else {
-        userStore.setUserProfile(res?.data)
-      }
-    } catch (err) {
-      console.log("getLoginStatus err", err)
-      userStore.setUserProfile(undefined)
-      userStore.setToken("")
-    }
-  }
-
-  useEffect(() => {
-    getLoginStatus()
-  }, [])
 
   return (
     <Layout>
@@ -46,6 +18,8 @@ export const AppRouter = (props: { layout?: any }) => {
         <Route path="/" element={<Home />} />
         <Route path="/thread/:threadId" element={<Thread />} />
         <Route path="/thread" element={<ThreadLibrary />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </Layout>
   )

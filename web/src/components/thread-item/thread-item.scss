@@ -110,6 +110,10 @@
     textarea:focus {
         border-color: transparent;
     }
+
+    &:hover {
+        cursor: pointer;
+    }
 }
 
 .session-source {

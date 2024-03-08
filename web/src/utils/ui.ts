@@ -29,9 +29,7 @@ export const calcPopupPosition = (
 
 export const scrollToBottom = () => {
   setTimeout(() => {
-    const chatWrapperElem = document
-      .querySelector("plasmo-csui")
-      ?.shadowRoot?.querySelector(".session-inner-container")
+    const chatWrapperElem = document?.querySelector(".session-inner-container")
 
     if (chatWrapperElem) {
       const { scrollHeight, clientHeight } = chatWrapperElem

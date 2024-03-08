@@ -12,6 +12,7 @@ import { downloadPlugin, openGetStartDocument } from "../../utils"
 // 静态资源
 import Logo from "@/assets/logo.svg"
 import "./sider.scss"
+import { useUserStore } from "@/stores/user"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -35,6 +36,7 @@ type NavData = {
 export const SiderLayout = () => {
   const navigate = useNavigate()
   const location = useLocation()
+  const userStore = useUserStore()
 
   const isGuideDetail = location.pathname.includes("guide/")
 
@@ -52,7 +54,7 @@ export const SiderLayout = () => {
       }
 
       case "Settings": {
-        navigate(`/settings/profile`)
+        navigate(`/settings`)
         break
       }
 
@@ -126,16 +128,32 @@ export const SiderLayout = () => {
               <IconBook style={{ fontSize: 20 }} />
               <span className="sider-menu-title">会话库</span>
             </MenuItem>
+
+            {!userStore.userProfile?.id && (
+              <Button
+                type="primary"
+                onClick={() => userStore.setLoginModalVisible(true)}
+                style={{
+                  marginTop: 16,
+                  width: "calc(100% - 8px)",
+                  height: 38,
+                  borderRadius: 4,
+                }}>
+                登录
+              </Button>
+            )}
           </div>
           <div className="sider-footer">
             <MenuItem key="Docs">
               <IconCustomerService style={{ fontSize: 20 }} />
               <span className="sider-menu-title">查看文档</span>
             </MenuItem>
-            <MenuItem key="Settings">
-              <IconSettings style={{ fontSize: 20 }} />
-              <span className="sider-menu-title">设置</span>
-            </MenuItem>
+            {!!userStore.userProfile?.id && (
+              <MenuItem key="Settings">
+                <IconSettings style={{ fontSize: 20 }} />
+                <span className="sider-menu-title">设置</span>
+              </MenuItem>
+            )}
             <MenuItem key="Download">
               <IconDownload style={{ fontSize: 20 }} />
               <span className="sider-menu-title">下载插件</span>
