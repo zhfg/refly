@@ -1,10 +1,12 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { createClient } from 'redis';
+import { ConfigService } from '@nestjs/config';
+import { v4 as uuid } from 'uuid';
+import omit from 'lodash.omit';
 
+import { QdrantClient } from '@qdrant/js-client-rest';
 import { Document } from '@langchain/core/documents';
 import { CheerioWebBaseLoader } from 'langchain/document_loaders/web/cheerio';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
-import { RedisVectorStore } from '@langchain/redis';
 import { OpenAIEmbeddings, ChatOpenAI } from '@langchain/openai';
 import {
   ChatPromptTemplate,
@@ -19,19 +21,44 @@ import { LCChatMessage } from './schema';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
-  private vectorStore: RedisVectorStore;
+  private vectorStore: QdrantClient;
+  private embedding: OpenAIEmbeddings;
+  private collectionName: string;
+
   private readonly logger = new Logger(LlmService.name);
 
-  async onModuleInit() {
-    const client = createClient({
-      url: process.env.REDIS_URL ?? 'redis://localhost:6379',
-    });
-    await client.connect();
+  constructor(private configService: ConfigService) {}
 
-    this.vectorStore = new RedisVectorStore(new OpenAIEmbeddings(), {
-      redisClient: client,
-      indexName: 'refly_index',
+  async onModuleInit() {
+    this.vectorStore = new QdrantClient({
+      url: this.configService.get('qdrant.url'),
     });
+    this.collectionName = this.configService.get('qdrant.collectionName');
+    await this.ensureCollection();
+
+    this.embedding = new OpenAIEmbeddings();
+  }
+
+  /**
+   * Method to ensure the existence of a collection in the Qdrant database.
+   * If the collection does not exist, it is created.
+   * @returns Promise that resolves when the existence of the collection has been ensured.
+   */
+  async ensureCollection() {
+    const response = await this.vectorStore.getCollections();
+
+    const collectionNames = response.collections.map(
+      (collection) => collection.name,
+    );
+
+    if (!collectionNames.includes(this.collectionName)) {
+      await this.vectorStore.createCollection(this.collectionName, {
+        vectors: {
+          size: (await this.embedding.embedQuery('test')).length,
+          distance: 'Cosine',
+        },
+      });
+    }
   }
 
   async parseAndStoreLink(link: Weblink) {
@@ -41,33 +68,46 @@ export class LlmService implements OnModuleInit {
     const $ = await loader.scrape();
     const text = $(loader.selector).text();
     const title = $('title').text();
-    const metadata = { source: loader.webPath, title };
+    const metadata = { source: loader.webPath, userId: link.userId, title };
     const doc = new Document({ pageContent: text, metadata });
 
     this.logger.log(`link loaded from ${link.url}`);
 
+    // splitting / chunking
     const textSplitter = new RecursiveCharacterTextSplitter({
       chunkSize: 1000,
       chunkOverlap: 200,
     });
-    const splits = await textSplitter.splitDocuments([doc]);
+    const documents = await textSplitter.splitDocuments([doc]);
     this.logger.log(`text splitting complete for ${link.url}`);
 
-    await this.vectorStore.addDocuments(splits);
+    // embedding
+    const texts = documents.map(({ pageContent }) => pageContent);
+    const vectors = await this.embedding.embedDocuments(texts);
+
+    // load into vector store
+    if (vectors.length === 0) {
+      return;
+    }
+
+    const points = vectors.map((embedding, idx) => ({
+      id: uuid(),
+      vector: embedding,
+      payload: {
+        content: documents[idx].pageContent,
+        ...documents[idx].metadata,
+      },
+    }));
+
+    await this.vectorStore.upsert(this.collectionName, {
+      wait: true,
+      points,
+    });
     this.logger.log(`vector stored for ${link.url}`);
   }
 
-  async retrieveRelevantDocs(query: string) {
-    // Retrieve and generate using the relevant snippets of the blog.
-    const retriever = this.vectorStore.asRetriever();
-    return retriever.getRelevantDocuments(query);
-  }
-
-  async chat(query: string, chatHistory: LCChatMessage[]) {
+  async chat(query: string, chatHistory: LCChatMessage[], filter?: any) {
     this.logger.log(`activated with query: ${query}, history: ${chatHistory}`);
-
-    // Retrieve and generate using the relevant snippets of the blog.
-    const retriever = this.vectorStore.asRetriever();
 
     const llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
 
@@ -100,9 +140,21 @@ export class LlmService implements OnModuleInit {
       prompt: qaPrompt,
       outputParser: new StringOutputParser(),
     });
-    const retrievedDocs = await retriever.getRelevantDocuments(
-      questionWithContext,
-    );
+
+    const queryEmbedding = await this.embedding.embedQuery(questionWithContext);
+    const results = await this.vectorStore.search(this.collectionName, {
+      vector: queryEmbedding,
+      limit: 5,
+      filter,
+    });
+
+    const retrievedDocs: [Document, number][] = results.map((res) => [
+      new Document({
+        metadata: omit(res.payload, 'content'),
+        pageContent: res.payload.content as string,
+      }),
+      res.score,
+    ]);
 
     return {
       sources: retrievedDocs,

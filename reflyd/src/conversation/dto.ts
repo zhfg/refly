@@ -43,8 +43,3 @@ export class ChatParam {
   @ApiPropertyOptional()
   conversationId: string;
 }
-
-export class RetrieveParam {
-  @ApiProperty({ type: ChatParam })
-  input: ChatParam;
-}

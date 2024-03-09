@@ -13,11 +13,9 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import {
-  ChatParam,
   CreateConversationParam,
   CreateConversationResponse,
   ListConversationResponse,
-  RetrieveParam,
 } from './dto';
 import { ApiParam, ApiResponse } from '@nestjs/swagger';
 import { ConversationService } from './conversation.service';
@@ -48,11 +46,6 @@ export class ConversationController {
     return {
       data: res,
     };
-  }
-
-  @Post('retrieve')
-  async retrieveDocs(@Body() body: RetrieveParam) {
-    return this.llmService.retrieveRelevantDocs(body.input.query);
   }
 
   @Post(':conversationId/chat')
@@ -92,11 +85,27 @@ export class ConversationController {
       conversationId,
     );
 
+    const filter: any = {
+      must: [
+        {
+          key: 'userId',
+          match: { value: userId },
+        },
+      ],
+    };
+    if (body.weblinkList.length > 0) {
+      filter.must.push({
+        key: 'source',
+        match: { any: body.weblinkList },
+      });
+    }
+
     const { stream, sources } = await this.llmService.chat(
       query,
       chatHistory
         ? chatHistory.map((msg) => createLCChatMessage(msg.content, msg.type))
         : [],
+      filter,
     );
 
     // first return sources，use unique tag for parse data
