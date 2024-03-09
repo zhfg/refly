@@ -5,7 +5,7 @@ export default () => ({
     port: parseInt(process.env.REDIS_PORT, 10) || 6379,
   },
   qdrant: {
-    url: process.env.QDRANT_URL || 'http://localhost:6789',
+    url: process.env.QDRANT_URL || 'http://localhost:6333',
     collectionName: process.env.QDRANT_COLLECTION_NAME || 'refly',
   },
   auth: {

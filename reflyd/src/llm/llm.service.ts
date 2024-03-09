@@ -22,7 +22,7 @@ import { LCChatMessage } from './schema';
 @Injectable()
 export class LlmService implements OnModuleInit {
   private vectorStore: QdrantClient;
-  private embedding: OpenAIEmbeddings;
+  private embeddings: OpenAIEmbeddings;
   private collectionName: string;
 
   private readonly logger = new Logger(LlmService.name);
@@ -34,9 +34,9 @@ export class LlmService implements OnModuleInit {
       url: this.configService.get('qdrant.url'),
     });
     this.collectionName = this.configService.get('qdrant.collectionName');
-    await this.ensureCollection();
+    this.embeddings = new OpenAIEmbeddings();
 
-    this.embedding = new OpenAIEmbeddings();
+    await this.ensureCollection();
   }
 
   /**
@@ -54,11 +54,13 @@ export class LlmService implements OnModuleInit {
     if (!collectionNames.includes(this.collectionName)) {
       await this.vectorStore.createCollection(this.collectionName, {
         vectors: {
-          size: (await this.embedding.embedQuery('test')).length,
+          size: (await this.embeddings.embedQuery('test')).length,
           distance: 'Cosine',
         },
       });
     }
+
+    this.logger.log(`qdrant collection initialized: ${this.collectionName}`);
   }
 
   async parseAndStoreLink(link: Weblink) {
@@ -83,7 +85,7 @@ export class LlmService implements OnModuleInit {
 
     // embedding
     const texts = documents.map(({ pageContent }) => pageContent);
-    const vectors = await this.embedding.embedDocuments(texts);
+    const vectors = await this.embeddings.embedDocuments(texts);
 
     // load into vector store
     if (vectors.length === 0) {
@@ -107,7 +109,9 @@ export class LlmService implements OnModuleInit {
   }
 
   async chat(query: string, chatHistory: LCChatMessage[], filter?: any) {
-    this.logger.log(`activated with query: ${query}, history: ${chatHistory}`);
+    this.logger.log(
+      `activated with query: ${query}, filter: ${JSON.stringify(filter)}`,
+    );
 
     const llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
 
@@ -141,7 +145,9 @@ export class LlmService implements OnModuleInit {
       outputParser: new StringOutputParser(),
     });
 
-    const queryEmbedding = await this.embedding.embedQuery(questionWithContext);
+    const queryEmbedding = await this.embeddings.embedQuery(
+      questionWithContext,
+    );
     const results = await this.vectorStore.search(this.collectionName, {
       vector: queryEmbedding,
       limit: 5,

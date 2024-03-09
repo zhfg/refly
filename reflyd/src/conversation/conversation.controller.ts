@@ -55,7 +55,6 @@ export class ConversationController {
     @Body() body: { weblinkList: string[] },
     @Res() res: Response,
   ) {
-    console.log('query', query, conversationId, body);
     if (!conversationId) {
       throw new BadRequestException('conversation id cannot be empty');
     }
