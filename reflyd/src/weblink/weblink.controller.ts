@@ -19,15 +19,15 @@ export class WeblinkController {
 
   constructor(private weblinkService: WeblinkService) {}
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Post('store')
-  async store(@Body() body: StoreWebLinkParam) {
-    this.logger.log('link:', body);
-    await this.weblinkService.storeLinks(body.data);
+  async store(@Request() req, @Body() body: StoreWebLinkParam) {
+    this.logger.log(`user: ${req.user.id}, store link: ${body}`);
+    await this.weblinkService.storeLinks(req.user.id, body.data);
     return {};
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('list')
   @ApiQuery({ name: 'linkId', type: String, required: false })
   @ApiQuery({ name: 'url', type: String, required: false })
@@ -46,10 +46,17 @@ export class WeblinkController {
     const skip = (page - 1) * pageSize;
     const take = pageSize;
 
+    this.logger.log(
+      `weblink list where: ${JSON.stringify({
+        linkId,
+        url,
+        userId: req.user.id,
+      })}`,
+    );
     const weblinkList = await this.weblinkService.findMany({
       skip,
       take,
-      where: { linkId, url },
+      where: { linkId, url, userId: req.user.id },
       orderBy: { updatedAt: 'desc' },
     });
 

@@ -16,7 +16,7 @@ export class WeblinkService {
     @InjectQueue('index') private indexQueue: Queue,
   ) {}
 
-  async storeLinks(links: WebLink[]) {
+  async storeLinks(userId: string, links: WebLink[]) {
     const docs = links.map((link) => ({
       origin: link.origin,
       originPageTitle: link.originPageTitle,
@@ -24,7 +24,7 @@ export class WeblinkService {
       originPageDescription: link.originPageDescription,
       url: link.url,
       linkId: randomUUID(),
-      userId: '5c0a7922c9d89830f4911426',
+      userId,
       indexStatus: 'init' as IndexStatus,
     }));
     const batch = await this.prisma.weblink.createMany({

@@ -4,6 +4,7 @@ const TIMEOUT = 40000
 const DEFAULT_HEADER = {
   "Content-Type": "application/json",
 }
+const COOKIE_TOKEN_FIELD = "_refly_ai_sid"
 
 export class ApiErr {
   err_no: number
@@ -49,6 +50,12 @@ export const abortablePromise = (target: Promise<any>, timeout: number) => {
   return Promise.race([target, racePromise])
 }
 
+export function getAuthTokenFromCookie() {
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${COOKIE_TOKEN_FIELD}=`) || []
+  return parts.length === 2 ? parts.pop()!.split(";").shift() : ""
+}
+
 export async function request<T>(
   url: string,
   opt: any,
@@ -64,6 +71,11 @@ export async function request<T>(
   opt.headers = {
     ...DEFAULT_HEADER,
     ...opt.headers,
+  }
+
+  const token = getAuthTokenFromCookie()
+  if (token) {
+    opt.headers.Authorization = `Bearer ${token}`
   }
 
   if (opt.method === "GET") {

@@ -1,6 +1,7 @@
 import { TASK_STATUS, Task } from "@/types"
 import { getServerOrigin } from "@/utils/url"
 import { fetchEventSource } from "@/utils/fetch-event-source"
+import { getAuthTokenFromCookie } from "@/utils/request"
 
 import type { HandlerRequest } from "@/types/request"
 
@@ -33,6 +34,10 @@ const handler = async (
           body: JSON.stringify({
             weblinkList: [],
           }),
+          headers: {
+            // TODO: check auth token before making a request, and if it not exists, redirect to login
+            Authorization: `Bearer ${getAuthTokenFromCookie()}`,
+          },
           onmessage(data) {
             if (data === "[DONE]") {
               console.log("EventSource done")

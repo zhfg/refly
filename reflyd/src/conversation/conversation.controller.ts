@@ -18,6 +18,7 @@ import {
   ListConversationResponse,
 } from './dto';
 import { ApiParam, ApiResponse } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
 import { LlmService } from '../llm/llm.service';
 import { createLCChatMessage } from '../llm/schema';
@@ -31,25 +32,25 @@ export class ConversationController {
     private llmService: LlmService,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post('new')
   @ApiResponse({ type: CreateConversationResponse })
   async createConversation(
     @Request() req,
     @Body() body: CreateConversationParam,
   ) {
-    // TODO: replace this with actual user
-    const res = await this.conversationService.create(
-      body,
-      '5c0a7922c9d89830f4911426',
-    );
+    const userId: string = req.user.id;
+    const res = await this.conversationService.create(body, userId);
 
     return {
       data: res,
     };
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post(':conversationId/chat')
   async chat(
+    @Request() req,
     @Query('query') query = '',
     @Param('conversationId') conversationId = '',
     @Body() body: { weblinkList: string[] },
@@ -63,8 +64,7 @@ export class ConversationController {
       throw new BadRequestException('query cannot be empty');
     }
 
-    // TODO: replace this with actual user
-    const userId = '5c0a7922c9d89830f4911426';
+    const userId: string = req.user.id;
 
     await this.conversationService.addChatMessage({
       type: 'human',
@@ -92,7 +92,7 @@ export class ConversationController {
         },
       ],
     };
-    if (body.weblinkList.length > 0) {
+    if (body.weblinkList?.length > 0) {
       filter.must.push({
         key: 'source',
         match: { any: body.weblinkList },
@@ -153,9 +153,11 @@ export class ConversationController {
     );
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('list')
   @ApiResponse({ type: ListConversationResponse })
   async listConversation(
+    @Request() req,
     @Query('page') page = '1',
     @Query('pageSize') pageSize = '10',
   ) {
@@ -165,6 +167,7 @@ export class ConversationController {
     const conversationList = await this.conversationService.getConversations({
       skip: (parsedPage - 1) * parsedPageSize,
       take: parsedPageSize,
+      where: { userId: req.user.id },
       orderBy: { createdAt: 'desc' },
     });
 
