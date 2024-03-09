@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateConversationParam } from './dto';
 import { randomUUID } from 'crypto';
-import { MessageSource, Prisma } from '@prisma/client';
+import { MessageType, Prisma } from '@prisma/client';
 
 @Injectable()
 export class ConversationService {
@@ -13,14 +13,28 @@ export class ConversationService {
     return this.prisma.conversation.create({
       data: {
         title: param.title,
-        conversationId: randomUUID(),
+        origin: param.origin,
+        originPageUrl: param.originPageUrl,
+        originPageTitle: param.originPageTitle,
+        conversationId: param?.conversationId || randomUUID(),
         userId,
       },
     });
   }
 
+  async updateConversation(
+    conversationId: string,
+    data: Prisma.ConversationUpdateInput,
+  ) {
+    return this.prisma.conversation.update({
+      where: { conversationId },
+      data,
+    });
+  }
+
   async addChatMessage(msg: {
-    source: MessageSource;
+    type: MessageType;
+    sources: string;
     content: string;
     userId: string;
     conversationId: string;
@@ -43,7 +57,9 @@ export class ConversationService {
     where?: Prisma.ConversationWhereInput;
     orderBy?: Prisma.ConversationOrderByWithRelationInput;
   }) {
-    return this.prisma.conversation.findMany(params);
+    return this.prisma.conversation.findMany({
+      ...params,
+    });
   }
 
   async getMessages(conversationId: string) {

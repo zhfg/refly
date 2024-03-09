@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { createClient } from 'redis';
 
+import { Document } from '@langchain/core/documents';
 import { CheerioWebBaseLoader } from 'langchain/document_loaders/web/cheerio';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { RedisVectorStore } from '@langchain/redis';
@@ -36,14 +37,20 @@ export class LlmService implements OnModuleInit {
   async parseAndStoreLink(link: Weblink) {
     const loader = new CheerioWebBaseLoader(link.url);
 
-    const docs = await loader.load();
+    // customized webpage loading
+    const $ = await loader.scrape();
+    const text = $(loader.selector).text();
+    const title = $('title').text();
+    const metadata = { source: loader.webPath, title };
+    const doc = new Document({ pageContent: text, metadata });
+
     this.logger.log(`link loaded from ${link.url}`);
 
     const textSplitter = new RecursiveCharacterTextSplitter({
       chunkSize: 1000,
       chunkOverlap: 200,
     });
-    const splits = await textSplitter.splitDocuments(docs);
+    const splits = await textSplitter.splitDocuments([doc]);
     this.logger.log(`text splitting complete for ${link.url}`);
 
     await this.vectorStore.addDocuments(splits);
@@ -97,10 +104,13 @@ export class LlmService implements OnModuleInit {
       questionWithContext,
     );
 
-    return ragChain.stream({
-      question: query,
-      context: retrievedDocs,
-      chatHistory,
-    });
+    return {
+      sources: retrievedDocs,
+      stream: ragChain.stream({
+        question: query,
+        context: retrievedDocs,
+        chatHistory,
+      }),
+    };
   }
 }

@@ -40,7 +40,14 @@ export class ConversationController {
     @Body() body: CreateConversationParam,
   ) {
     // TODO: replace this with actual user
-    return this.conversationService.create(body, '5c0a7922c9d89830f4911426');
+    const res = await this.conversationService.create(
+      body,
+      '5c0a7922c9d89830f4911426',
+    );
+
+    return {
+      data: res,
+    };
   }
 
   @Post('retrieve')
@@ -48,20 +55,31 @@ export class ConversationController {
     return this.llmService.retrieveRelevantDocs(body.input.query);
   }
 
-  @Post('chat')
-  async chat(@Body() body: ChatParam, @Res() res: Response) {
-    if (!body.conversationId) {
+  @Post(':conversationId/chat')
+  async chat(
+    @Query('query') query = '',
+    @Param('conversationId') conversationId = '',
+    @Body() body: { weblinkList: string[] },
+    @Res() res: Response,
+  ) {
+    console.log('query', query, conversationId, body);
+    if (!conversationId) {
       throw new BadRequestException('conversation id cannot be empty');
+    }
+
+    if (!query) {
+      throw new BadRequestException('query cannot be empty');
     }
 
     // TODO: replace this with actual user
     const userId = '5c0a7922c9d89830f4911426';
 
     await this.conversationService.addChatMessage({
-      source: 'human',
+      type: 'human',
       userId,
-      conversationId: body.conversationId,
-      content: body.query,
+      conversationId: conversationId,
+      content: query,
+      sources: '',
     });
 
     res.setHeader('Content-Type', 'text/event-stream');
@@ -69,42 +87,82 @@ export class ConversationController {
     res.setHeader('Connection', 'keep-alive');
     res.status(200);
 
-    const stream = await this.llmService.chat(
-      body.query,
-      body.chatHistory
-        ? body.chatHistory.map((msg) =>
-            createLCChatMessage(msg.content, msg.type),
-          )
+    // 获取聊天历史
+    const chatHistory = await this.conversationService.getMessages(
+      conversationId,
+    );
+
+    const { stream, sources } = await this.llmService.chat(
+      query,
+      chatHistory
+        ? chatHistory.map((msg) => createLCChatMessage(msg.content, msg.type))
         : [],
     );
 
+    // first return sources，use unique tag for parse data
+    sources.forEach((source) => {
+      const payload = {
+        type: 'source',
+        body: source,
+      };
+      res.write(`refly-sse-source: ${JSON.stringify(payload)}`);
+    });
+
     // write answer in a stream style
     let answerStr = '';
-    for await (const chunk of stream) {
+    for await (const chunk of await stream) {
       answerStr += chunk;
-      res.write(`data: ${chunk}\n\n`);
+
+      const payload = {
+        type: 'chunk',
+        body: chunk,
+      };
+      res.write(`refly-sse-data: ${JSON.stringify(payload)}`);
     }
 
-    res.end(`data: [DONE]\n\n`);
+    res.end(`[DONE]`);
 
     await this.conversationService.addChatMessage({
-      source: 'ai',
+      type: 'ai',
       userId,
-      conversationId: body.conversationId,
+      conversationId,
       content: answerStr,
+      sources: JSON.stringify(sources),
     });
+
+    // update conversation last answer and message count
+    const updated = await this.conversationService.updateConversation(
+      conversationId,
+      {
+        lastMessage: answerStr,
+        messageCount: chatHistory.length + 1,
+      },
+    );
+    this.logger.log(
+      `update conversation ${conversationId}, after updated: ${JSON.stringify(
+        updated,
+      )}`,
+    );
   }
 
   @Get('list')
   @ApiResponse({ type: ListConversationResponse })
   async listConversation(
-    @Query('page') page = 1,
-    @Query('pageSize') pageSize = 10,
+    @Query('page') page = '1',
+    @Query('pageSize') pageSize = '10',
   ) {
-    return this.conversationService.getConversations({
-      skip: (page - 1) * pageSize,
-      take: pageSize,
+    const parsedPage = parseInt(page);
+    const parsedPageSize = parseInt(pageSize);
+
+    const conversationList = await this.conversationService.getConversations({
+      skip: (parsedPage - 1) * parsedPageSize,
+      take: parsedPageSize,
+      orderBy: { createdAt: 'desc' },
     });
+
+    return {
+      data: conversationList,
+    };
   }
 
   @Get(':conversationId')
@@ -114,10 +172,17 @@ export class ConversationController {
     @Param('conversationId') conversationId: string,
   ) {
     const conversation = await this.conversationService.findFirstConversation({
-      where: { conversationId },
+      where: { id: conversationId },
     });
-    const messages = await this.conversationService.getMessages(conversationId);
+    const messages = await this.conversationService.getMessages(
+      conversation?.conversationId as string,
+    );
 
-    return { ...conversation, messages: messages };
+    return {
+      data: {
+        ...conversation,
+        messages: messages,
+      },
+    };
   }
 }

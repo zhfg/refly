@@ -9,6 +9,18 @@ export class WebLink {
   title: string;
 
   @ApiProperty()
+  origin: string;
+
+  @ApiProperty()
+  originPageTitle: string;
+
+  @ApiProperty()
+  originPageUrl: string;
+
+  @ApiProperty()
+  originPageDescription: string;
+
+  @ApiProperty()
   url: string;
 
   @ApiProperty()

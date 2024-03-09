@@ -1,9 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { MessageSource } from '@prisma/client';
+import { MessageType } from '@prisma/client';
 
 export class CreateConversationParam {
   @ApiPropertyOptional()
+  conversationId?: string;
   title?: string;
+  origin?: string; // 创建会话的 origin
+  originPageUrl?: string; // 创建会话的 url
+  originPageTitle?: string; // 所在 url 的 page title
 }
 
 export class CreateConversationResponse extends CreateConversationParam {
@@ -19,8 +23,8 @@ export class ListConversationResponse {
 }
 
 export class ChatMessage {
-  @ApiProperty({ enum: MessageSource })
-  type: MessageSource;
+  @ApiProperty({ enum: MessageType })
+  type: MessageType;
 
   @ApiProperty()
   content: string;

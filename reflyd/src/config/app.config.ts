@@ -6,6 +6,7 @@ export default () => ({
   },
   auth: {
     cookieTokenField: '_refly_ai_sid',
+    redirectUrl: process.env.LOGIN_REDIRECT_URL,
     jwt: {
       secret: process.env.JWT_SECRET || 'test',
       expiresIn: parseInt(process.env.JWT_EXPIRATION_TIME) || '12h',
