@@ -38,6 +38,7 @@
     "bull": "^4.12.2",
     "cheerio": "^1.0.0-rc.12",
     "cookie-parser": "~1.4.6",
+    "helmet": "^7.1.0",
     "langchain": "^0.1.21",
     "lodash.omit": "^4.5.0",
     "passport": "~0.6.0",
