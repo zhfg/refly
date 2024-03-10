@@ -4,6 +4,7 @@ import { TASK_STATUS, TASK_TYPE } from "~/types"
 import { safeParseJSON } from "~utils/parse"
 import { getServerOrigin } from "~utils/url"
 import { fetchEventSource } from "~utils/fetch-event-source"
+import { getCookie } from "~utils/cookie"
 
 let abortController: AbortController
 
@@ -21,6 +22,8 @@ const handler: PlasmoMessaging.PortHandler = async (req, res) => {
       const conversationId =
         messageItems?.[messageItems.length - 1]?.conversationId
 
+      const cookie = await getCookie()
+
       await fetchEventSource(
         `${getServerOrigin()}/v1/conversation/${conversationId}/chat?query=${question}`,
         {
@@ -28,6 +31,9 @@ const handler: PlasmoMessaging.PortHandler = async (req, res) => {
           body: JSON.stringify({
             weblinkList: [],
           }),
+          headers: {
+            Authorization: `Bearer ${cookie}`, // Include the JWT token in the Authorization header
+          },
           onmessage(data) {
             if (data === "[DONE]") {
               console.log("EventSource done")

@@ -3,9 +3,6 @@ import { MessageType } from '@prisma/client';
 
 export class CreateConversationParam {
   @ApiPropertyOptional()
-  conversationId?: string;
-
-  @ApiPropertyOptional()
   title?: string;
 
   @ApiPropertyOptional()
@@ -19,7 +16,6 @@ export class CreateConversationParam {
 }
 
 export class CreateConversationResponse extends CreateConversationParam {
-  conversationId: string;
   createdAt: number;
 }
 

@@ -186,7 +186,7 @@ export class ConversationController {
       where: { id: conversationId },
     });
     const messages = await this.conversationService.getMessages(
-      conversation?.conversationId as string,
+      conversation?.id as string,
     );
 
     return {

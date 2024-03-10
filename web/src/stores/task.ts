@@ -32,15 +32,9 @@ export const useTaskStore = create<TaskState>()(
 
         switch (operationType) {
           case ConversationOperation.CREATE: {
-            const {
-              title = "新会话",
-              conversationId,
-              origin,
-              originPageTitle,
-            } = payload
+            const { title = "新会话", origin, originPageTitle } = payload
             const newConversation = {
               title: title ?? "新会话",
-              conversationId,
               origin,
               originPageTitle,
               createdAt: new Date().getTime() as number,
@@ -57,7 +51,7 @@ export const useTaskStore = create<TaskState>()(
           case ConversationOperation.DELETE: {
             const { conversationId } = payload
             const newConversationList = conversationList.filter(
-              item => item.conversationId !== conversationId,
+              item => item.id !== conversationId,
             )
 
             break
@@ -66,7 +60,7 @@ export const useTaskStore = create<TaskState>()(
           case ConversationOperation.UPDATE: {
             const { conversationId } = payload
             const newConversationList = conversationList.map(item => {
-              if (item.conversationId === conversationId) {
+              if (item.id === conversationId) {
                 return { ...item, ...payload }
               }
 

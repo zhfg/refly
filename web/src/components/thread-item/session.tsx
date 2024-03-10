@@ -123,10 +123,12 @@ export const Session = (props: SessionProps) => {
         )}
       </div>
       <div className="session-source">
-        <div className="session-title-icon">
-          <IconQuote style={{ fontSize: 18 }} />
-          <p>来源</p>
-        </div>
+        {messageStateStore.pending || session?.sources?.length > 0 ? (
+          <div className="session-title-icon">
+            <IconQuote style={{ fontSize: 18 }} />
+            <p>来源</p>
+          </div>
+        ) : null}
         {session?.sources?.length > 0 ? (
           <div className="session-source-content">
             <div className="session-source-list">
@@ -207,9 +209,9 @@ export const Session = (props: SessionProps) => {
               />
             </div>
           </div>
-        ) : (
+        ) : messageStateStore?.pending && isLastSession ? (
           <Skeleton></Skeleton>
-        )}
+        ) : null}
       </div>
     </div>
   )

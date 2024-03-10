@@ -43,14 +43,6 @@ export const useBuildTask = () => {
   const messageStateStore = useMessageStateStore()
   const conversationStore = useConversationStore()
 
-  const hasConversation = (id: string) => {
-    return (
-      conversationStore.conversationList.filter(
-        (item) => item.conversationId === id,
-      )?.length > 0
-    )
-  }
-
   const buildGenTitleTaskAndGenResponse = () => {
     // 每次生成会话 title 时，需要重置此字段
     chatStore.setIsGenTitle(false)
@@ -59,7 +51,7 @@ export const useBuildTask = () => {
     const taskPayload = {
       taskType: TASK_TYPE.GEN_TITLE,
       data: {
-        conversationId: conversationStore.currentConversation?.conversationId,
+        conversationId: conversationStore.currentConversation?.id,
       },
     }
     const task = buildTask(taskPayload)
@@ -77,12 +69,12 @@ export const useBuildTask = () => {
 
   const buildChatTaskAndGenReponse = (question: string) => {
     const questionMsg = buildQuestionMessage({
-      conversationId: conversationStore.currentConversation?.conversationId,
+      conversationId: conversationStore.currentConversation?.id,
       content: question,
     })
 
     const replyMsg = buildReplyMessage({
-      conversationId: conversationStore.currentConversation?.conversationId,
+      conversationId: conversationStore.currentConversation?.id,
       content: "",
       questionId: questionMsg?.itemId,
     })
@@ -117,7 +109,7 @@ export const useBuildTask = () => {
 
   const buildIntentTaskAndGenReponse = (questionContent: string) => {
     const oldMessages = chatStore.messages
-    const conversationId = conversationStore.currentConversation?.conversationId
+    const conversationId = conversationStore.currentConversation?.id
     const selectionContent = quickActionStore.selectedText
     const replyContent = ""
 
@@ -189,7 +181,7 @@ export const useBuildTask = () => {
         },
       })
     },
-    [conversationStore.currentConversation?.conversationId],
+    [conversationStore.currentConversation?.id],
   )
 
   const handleStreamingMessage = (msg) => {
@@ -225,8 +217,7 @@ export const useBuildTask = () => {
         if (currentMessageState.taskType === TASK_TYPE.CHAT) {
           // 构建一条错误消息放在末尾，而不是类似 loading 直接展示，因为要 error 停留在聊天列表里
           const errMsg = buildErrorMessage({
-            conversationId:
-              conversationStore.currentConversation?.conversationId,
+            conversationId: conversationStore.currentConversation?.id,
           })
 
           chatStore.setMessages([...currentChatState.messages, { ...errMsg }])

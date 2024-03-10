@@ -16,7 +16,6 @@ export class ConversationService {
         origin: param.origin,
         originPageUrl: param.originPageUrl,
         originPageTitle: param.originPageTitle,
-        conversationId: param?.conversationId || randomUUID(),
         userId,
       },
     });
@@ -27,7 +26,7 @@ export class ConversationService {
     data: Prisma.ConversationUpdateInput,
   ) {
     return this.prisma.conversation.update({
-      where: { conversationId },
+      where: { id: conversationId },
       data,
     });
   }
