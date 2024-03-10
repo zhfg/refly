@@ -15,7 +15,6 @@ function Dashboard() {
   const handleSendMsgToExtension = async (
     status: "success" | "failed",
     token?: string,
-    user?: User,
   ) => {
     try {
       await chrome.runtime.sendMessage(extensionId, {
@@ -23,7 +22,6 @@ function Dashboard() {
         body: {
           status,
           token,
-          user,
         },
       })
     } catch (err) {
@@ -38,14 +36,17 @@ function Dashboard() {
   useEffect(() => {
     if (!token) return
     if (token) {
-      console.log("parent", window.parent)
-      window.opener?.postMessage({
-        type: "refly-login-status",
-        status: "success",
-        payload: token,
-      })
+      // 从插件打开弹窗，给插件发消息
+      handleSendMsgToExtension("success", token)
 
-      window.close()
+      // 从 Web 打开弹窗，给 opener 发消息
+      // window?.opener?.postMessage({
+      //   type: "refly-login-status",
+      //   status: "success",
+      //   payload: token,
+      // })
+
+      // window.close()
     }
   }, [token])
 

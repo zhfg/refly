@@ -6,6 +6,7 @@ import Home from "@/components/home"
 import { Thread } from "@/components/thread-item/thread"
 import { ThreadLibrary } from "@/components/thread-library"
 import { Settings } from "@/components/settings/index"
+import { Login } from "@/components/login/index"
 import Dashboard from "../Dashboard"
 
 export const AppRouter = (props: { layout?: any }) => {
@@ -16,6 +17,7 @@ export const AppRouter = (props: { layout?: any }) => {
     <Layout>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/thread/:threadId" element={<Thread />} />
         <Route path="/thread" element={<ThreadLibrary />} />
         <Route path="/settings" element={<Settings />} />

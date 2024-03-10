@@ -1,0 +1,118 @@
+Arguments: 
+  /Users/bytedance/.nvm/versions/node/v18.17.0/bin/node /Users/bytedance/.nvm/versions/node/v17.9.1/bin/yarn
+
+PATH: 
+  /Users/bytedance/.nvm/versions/node/v18.17.0/bin:/opt/homebrew/opt/mongodb-community@4.4/bin:/Users/bytedance/.nvm/versions/node/v17.9.1/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/bytedance/.oh-my-zsh/custom/plugins/git-open:/Library/Frameworks/Python.framework/Versions/3.11/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/puppetlabs/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/opt/mongodb-community@4.4/bin:/Users/bytedance/.nvm/versions/node/v17.9.1/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/bytedance/.oh-my-zsh/custom/plugins/git-open:/Library/Frameworks/Python.framework/Versions/3.11/bin:/Users/bytedance/.local/bin:/Users/bytedance/.local/bin:/Users/bytedance/.local/bin
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  18.17.0
+
+Platform: 
+  darwin arm64
+
+Trace: 
+  Error: EACCES: permission denied, unlink '/Users/bytedance/Projects/Refly2.0/refly/extension/node_modules/@microsoft/fetch-event-source'
+
+npm manifest: 
+  {
+    "name": "extension",
+    "displayName": "Refly - 您的 ChatGPT 工作助理，适用于任何网站",
+    "version": "0.0.1",
+    "description": "只需单击 Cmd+B，即可在任何网站上获得 ChatGPT 响应。适用于 Google、Gmail 和超过 1000 万个网站",
+    "author": "pftom",
+    "scripts": {
+      "dev": "plasmo dev",
+      "build": "plasmo build",
+      "package": "plasmo package"
+    },
+    "dependencies": {
+      "@arco-design/web-react": "^2.47.1",
+      "@microsoft/fetch-event-source": "^2.0.1",
+      "@plasmohq/messaging": "^0.6.2",
+      "@plasmohq/storage": "^1.9.3",
+      "@redux-devtools/extension": "^3.3.0",
+      "@types/is-hotkey": "~0.1.7",
+      "@types/lodash.throttle": "^4.1.9",
+      "@types/md5": "^2.3.2",
+      "@types/react-syntax-highlighter": "^15.5.6",
+      "@types/uuid": "^9.0.1",
+      "classnames": "^2.5.1",
+      "copy-to-clipboard": "~3.3.3",
+      "dayjs": "~1.11.7",
+      "hotkeys-js": "~3.10.2",
+      "is-hotkey": "~0.2.0",
+      "katex": "0.15.6",
+      "lodash.throttle": "^4.1.1",
+      "md5": "^2.3.0",
+      "plasmo": "0.84.2",
+      "react": "^18.2.0",
+      "react-dom": "^18.2.0",
+      "react-draggable": "~4.4.5",
+      "react-infinite-scroll-component": "~6.1.0",
+      "react-markdown": "^8.0.7",
+      "react-router-dom": "^6.22.1",
+      "react-syntax-highlighter": "^15.5.0",
+      "react-use": "^17.5.0",
+      "rehype-highlight": "^6.0.0",
+      "rehype-katex": "^6.0.2",
+      "remark-breaks": "^3.0.2",
+      "remark-gfm": "^3.0.1",
+      "remark-math": "^5.1.1",
+      "uuid": "^9.0.0",
+      "zustand": "^4.5.1"
+    },
+    "devDependencies": {
+      "@plasmohq/prettier-plugin-sort-imports": "4.0.1",
+      "@types/chrome": "0.0.227",
+      "@types/node": "18.15.11",
+      "@types/react": "18.0.32",
+      "@types/react-dom": "18.0.11",
+      "prettier": "3.2.4",
+      "typescript": "5.0.3"
+    },
+    "manifest": {
+      "permissions": [
+        "history",
+        "storage",
+        "activeTab",
+        "tabs",
+        "scripting",
+        "unlimitedStorage",
+        "cookies",
+        "notifications",
+        "cookies"
+      ],
+      "host_permissions": [
+        "https://*/*",
+        "http://*/*",
+        "<all_urls>"
+      ],
+      "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'"
+      },
+      "externally_connectable": {
+        "matches": [
+          "https://refly.ai/*",
+          "http://localhost:5173/*"
+        ]
+      },
+      "update_url": "https://clients2.google.com/service/update2/crx",
+      "commands": {
+        "_execute_action": {
+          "suggested_key": {
+            "default": "Ctrl+B",
+            "mac": "Command+B"
+          }
+        }
+      }
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

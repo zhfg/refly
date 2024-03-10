@@ -9,7 +9,7 @@ import getUserInfo from "@/requests/getUserInfo"
 import { useLocation } from "react-router-dom"
 
 // 组件
-import { LoginModal } from "@/components/login/index"
+import { LoginModal } from "@/components/login-modal/index"
 import { useCookie } from "react-use"
 
 const Content = Layout.Content
