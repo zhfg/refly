@@ -154,13 +154,11 @@ export class LlmService implements OnModuleInit {
       filter,
     });
 
-    const retrievedDocs: [Document, number][] = results.map((res) => [
-      new Document({
-        metadata: omit(res.payload, 'content'),
-        pageContent: res.payload.content as string,
-      }),
-      res.score,
-    ]);
+    const retrievedDocs = results.map((res) => ({
+      metadata: omit(res.payload, 'content'),
+      pageContent: res.payload.content as string,
+      score: res.score, // similarity score
+    }));
 
     return {
       sources: retrievedDocs,
