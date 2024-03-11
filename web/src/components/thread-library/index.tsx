@@ -18,7 +18,7 @@ import {
 // stores
 import { useSiderStore } from "@/stores/sider"
 import { useThreadStore } from "@/stores/thread"
-import { IconTip } from "@/components/home/icon-tip"
+import { IconTip } from "@/components/dashboard/icon-tip"
 import {
   IconClockCircle,
   IconMessage,

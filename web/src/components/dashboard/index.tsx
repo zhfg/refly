@@ -3,13 +3,11 @@ import {
   Input,
   Message as message,
   Space,
-  Alert,
   Tag,
 } from "@arco-design/web-react"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input/textarea"
 import {
   IconMinusCircle,
-  IconUpload,
   IconSend,
   IconRightCircle,
   IconLink,
@@ -32,30 +30,25 @@ import { useWeblinkStore } from "@/stores/weblink"
 // hooks
 import { useBuildTask } from "@/hooks/use-build-task"
 import { useResetState } from "@/hooks/use-reset-state"
-import { useWebLinkIndexed } from "@/hooks/use-weblink-indexed"
-import { IconTip } from "./icon-tip"
 // 组件
 import { SearchTargetSelector } from "./search-target-selector"
 // request
 import createNewConversation from "@/requests/createNewConversation"
-import storeWeblink from "@/requests/storeWeblink"
 // scss
 import "./index.scss"
 import classNames from "classnames"
+import { useCookie } from "react-use"
 
 const TextArea = Input.TextArea
+
+export const extensionId = "fcncfleeddfdpbigljgiejfdkmpkldpe"
 
 const Home = () => {
   const inputRef = useRef<RefTextAreaType>(null)
   const [isFocused, setIsFocused] = useState(false)
   const weblinkListRef = useRef(null)
-  const [uploadingStatus, setUploadingStatus] = useState<
-    "normal" | "loading" | "failed" | "success"
-  >("normal")
   const navigate = useNavigate()
-
-  // 网页索引状态
-  const { isWebLinkIndexed, setIsWebLinkIndexed } = useWebLinkIndexed()
+  const [token] = useCookie("_refly_ai_sid")
 
   const chatStore = useChatStore()
   const conversationStore = useConversationStore()
@@ -125,33 +118,43 @@ const Home = () => {
     inputRef.current?.dom?.onkeydown?.(e as any as KeyboardEvent)
   }
 
-  const handleUploadWebsite = async (url: string) => {
-    // setIsUpdatingWebiste(true)
-    setUploadingStatus("loading")
-
-    const description = document.head.querySelector('meta[name="description"]')
-
-    const res = await storeWeblink({
-      body: {
-        url,
-        origin: location?.origin || "", // 冗余存储策略，for 后续能够基于 origin 进行归类归档
-        originPageTitle: document?.title || "",
-        originPageUrl: location.href,
-        originPageDescription: (description as any)?.content || "",
-      },
-    })
-
-    if (res.success) {
-      message.success("阅读成功！")
-      setIsWebLinkIndexed(true)
-    } else {
-      message.error("阅读失败！")
+  const handleSendMsgToExtension = async (
+    status: "success" | "failed",
+    token?: string,
+  ) => {
+    try {
+      await chrome.runtime.sendMessage(extensionId, {
+        name: "login-notification",
+        body: {
+          status,
+          token,
+        },
+      })
+    } catch (err) {
+      console.log("handleSendMsgToExtension err", err)
     }
 
     setTimeout(() => {
-      setUploadingStatus("normal")
-    }, 3000)
+      window.close()
+    }, 2000)
   }
+
+  useEffect(() => {
+    if (!token) return
+    if (token) {
+      // 从插件打开弹窗，给插件发消息
+      handleSendMsgToExtension("success", token)
+
+      // 从 Web 打开弹窗，给 opener 发消息
+      // window?.opener?.postMessage({
+      //   type: "refly-login-status",
+      //   status: "success",
+      //   payload: token,
+      // })
+
+      // window.close()
+    }
+  }, [token])
 
   // 自动聚焦输入框
   useEffect(() => {

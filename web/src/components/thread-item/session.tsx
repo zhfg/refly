@@ -18,7 +18,7 @@ import type { SessionItem } from "@/types"
 
 // stores
 import { useMessageStateStore } from "@/stores/message-state"
-import { IconTip } from "@/components/home/icon-tip"
+import { IconTip } from "@/components/dashboard/icon-tip"
 import { Markdown } from "@/components/markdown"
 
 import copyToClipboard from "copy-to-clipboard"

@@ -1,22 +1,31 @@
 import React from "react"
-import { Route, Routes } from "react-router-dom"
+import { Route, Routes, useMatch } from "react-router-dom"
 
 // 自定义组件
-import Home from "@/components/home"
+import Dashboard from "@/components/dashboard"
 import { Thread } from "@/components/thread-item/thread"
 import { ThreadLibrary } from "@/components/thread-library"
 import { Settings } from "@/components/settings/index"
 import { Login } from "@/components/login/index"
-import Dashboard from "../Dashboard"
+import LandingPage from "@/pages/landing-page"
 
 export const AppRouter = (props: { layout?: any }) => {
   const { layout: Layout } = props
+  const routeMatch = useMatch("/")
   // 导航相关
+
+  if (routeMatch) {
+    return (
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+      </Routes>
+    )
+  }
 
   return (
     <Layout>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/thread/:threadId" element={<Thread />} />
         <Route path="/thread" element={<ThreadLibrary />} />
