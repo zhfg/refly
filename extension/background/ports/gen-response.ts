@@ -23,16 +23,18 @@ const handler: PlasmoMessaging.PortHandler = async (req, res) => {
         messageItems?.[messageItems.length - 1]?.conversationId
 
       const cookie = await getCookie()
+      const weblinkList = req.body?.weblinkList || []
 
       await fetchEventSource(
         `${getServerOrigin()}/v1/conversation/${conversationId}/chat?query=${question}`,
         {
           method: "POST",
           body: JSON.stringify({
-            weblinkList: [],
+            weblinkList, // 支持对指定的 weblink list 进行搜索问答
           }),
           headers: {
             Authorization: `Bearer ${cookie}`, // Include the JWT token in the Authorization header
+            "Content-Type": "application/json",
           },
           onmessage(data) {
             if (data === "[DONE]") {

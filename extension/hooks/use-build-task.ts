@@ -14,7 +14,7 @@ import {
   useMessageStateStore,
 } from "../stores/message-state"
 import { useConversationStore } from "../stores/conversation"
-import type { MessageState } from "~types"
+import type { Message, MessageState } from "~types"
 import {
   MessageItemType,
   TASK_STATUS,
@@ -33,6 +33,8 @@ import { getPort, removePort } from "@plasmohq/messaging/port"
 import { buildErrorMessage } from "~utils/message"
 import { scrollToBottom } from "~utils/ui"
 import { safeParseJSON } from "~utils/parse"
+import { SearchTarget, useSearchStateStore } from "~stores/search-state"
+import { useWeblinkStore } from "~stores/weblink"
 
 export const useBuildTask = () => {
   const genResponsePortRef = useRef<chrome.runtime.Port>()
@@ -201,7 +203,18 @@ export const useBuildTask = () => {
     const comingMsgPayload = safeParseJSON(msg?.message)
     console.log("setMessageState", comingMsgPayload)
 
-    if (msg?.message === `[DONE]`) {
+    if (msg?.message?.includes(`[DONE]`)) {
+      // 是否有额外的 message，那么也需要拼接上
+      const extraMessage = msg?.message?.split("[DONE]")?.[0]?.trim()
+      if (extraMessage?.length > 0) {
+        const lastMessage = currentChatState.messages.at(-1) as Message
+        const savedMessage = currentChatState.messages.slice(0, -1) as Message[]
+
+        lastMessage.data.content =
+          lastMessage?.data?.content + (extraMessage || "")
+        chatStore.setMessages([...savedMessage, { ...lastMessage }])
+      }
+
       const newMessageState: Partial<MessageState> = {
         pending: false,
         error: false,
@@ -362,6 +375,26 @@ export const useBuildTask = () => {
     }
   }
 
+  // 在搜索问答时需要传入对应的 weblink
+  const getSelectedWeblinkList = () => {
+    let weblinkList: string[] = []
+    const { searchTarget } = useSearchStateStore.getState()
+    const { selectedRow = [] } = useWeblinkStore.getState()
+
+    if (searchTarget === SearchTarget.All) {
+      weblinkList = []
+    } else if (searchTarget === SearchTarget.CurrentPage) {
+      // TODO：后端需要优先加入队列进行处理
+      weblinkList = [location.href]
+    } else if (searchTarget === SearchTarget.SelectedPages) {
+      weblinkList = selectedRow.map(
+        (item) => item?.content?.originPageUrl || "",
+      )
+    }
+
+    return weblinkList
+  }
+
   const bindExtensionPorts = () => {
     console.log("bindExtensionPorts")
     if (genResponsePortRef.current) return
@@ -387,8 +420,16 @@ export const useBuildTask = () => {
     // 再 bind
     bindExtensionPorts()
 
+    // 获取当前的状态
+    const weblinkList = getSelectedWeblinkList()
+
     // 生成任务
-    genResponsePortRef.current.postMessage(payload)
+    genResponsePortRef.current.postMessage({
+      body: {
+        ...payload.body,
+        weblinkList,
+      },
+    })
   }
 
   return {

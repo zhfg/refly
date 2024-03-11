@@ -68,8 +68,11 @@ export const Thread = () => {
   }
 
   const handleThread = async (threadId: string) => {
+    const { currentConversation } = useConversationStore.getState()
+    const { messages = [] } = useChatStore.getState()
+
     // 新会话，需要手动构建第一条消息
-    if (chatStore.isNewConversation) {
+    if (chatStore.isNewConversation && currentConversation?.id) {
       const question = chatStore.newQAText
       console.log(
         "handleThread",
@@ -78,14 +81,14 @@ export const Thread = () => {
       )
       handleSideSendMessage(question)
       chatStore.setIsNewConversation(false)
-    } else {
+    } else if (params?.threadId && messages?.length === 0) {
       handleGetThreadMessages(threadId)
     }
   }
 
   useEffect(() => {
     handleThread(params.threadId)
-  }, [params.threadId])
+  }, [])
 
   console.log("thread message", chatStore.messages)
   const sessions = buildSessions(chatStore.messages)
