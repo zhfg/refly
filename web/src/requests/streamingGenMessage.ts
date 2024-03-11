@@ -11,6 +11,7 @@ const handler = async (
   req: HandlerRequest<{
     type: TASK_STATUS
     payload?: Task
+    weblinkList?: string[]
   }>,
   options: { onMessage: (msg: { message: string }) => void },
 ) => {
@@ -26,13 +27,14 @@ const handler = async (
       const question = messageItems?.[messageItems.length - 1]?.data?.content
       const conversationId =
         messageItems?.[messageItems.length - 1]?.conversationId
+      const weblinkList = req.body?.weblinkList || []
 
       await fetchEventSource(
         `${getServerOrigin()}/v1/conversation/${conversationId}/chat?query=${question}`,
         {
           method: "POST",
           body: JSON.stringify({
-            weblinkList: [],
+            weblinkList, // 支持对指定的 weblink list 进行搜索问答
           }),
           headers: {
             // TODO: check auth token before making a request, and if it not exists, redirect to login

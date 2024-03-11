@@ -14,6 +14,9 @@ import { safeParseJSON } from "@/utils/parse"
 
 // requests
 import streamingGenMessage from "@/requests/streamingGenMessage"
+// stores
+import { SearchTarget, useSearchStateStore } from "@/stores/search-state"
+import { useWeblinkStore } from "@/stores/weblink"
 
 export const useBuildTask = () => {
   const chatStore = useChatStore()
@@ -298,16 +301,46 @@ export const useBuildTask = () => {
     }
   }
 
+  // 在搜索问答时需要传入对应的 weblink
+  const getSelectedWeblinkList = () => {
+    let weblinkList: string[] = []
+    const { searchTarget } = useSearchStateStore.getState()
+    const { selectedRow = [] } = useWeblinkStore.getState()
+
+    if (searchTarget === SearchTarget.All) {
+      weblinkList = []
+    } else if (searchTarget === SearchTarget.CurrentPage) {
+      // TODO：后端需要优先加入队列进行处理
+      weblinkList = [location.href]
+    } else if (searchTarget === SearchTarget.SelectedPages) {
+      weblinkList = selectedRow.map(item => item?.content?.originPageUrl || "")
+    }
+
+    return weblinkList
+  }
+
   const handleSendMessage = (payload: {
     body: {
       type: TASK_STATUS
       payload?: Task
     }
   }) => {
+    // 获取当前的状态
+    const weblinkList = getSelectedWeblinkList()
+    console.log("weblinkList", weblinkList)
+
     // 生成任务
-    streamingGenMessage(payload, {
-      onMessage: handleStreamingMessage,
-    })
+    streamingGenMessage(
+      {
+        body: {
+          ...payload.body,
+          weblinkList,
+        },
+      },
+      {
+        onMessage: handleStreamingMessage,
+      },
+    )
   }
 
   return {

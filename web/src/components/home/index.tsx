@@ -116,7 +116,7 @@ const Home = () => {
     // 更新新的 newQAText，for 新会话跳转使用
     chatStore.setNewQAText(question)
     chatStore.setIsNewConversation(true)
-    navigate(`/thread/${newConversationPayload?.id}`)
+    navigate(`/thread/${res?.data?.id}`)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
