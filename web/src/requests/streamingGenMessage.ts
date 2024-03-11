@@ -39,6 +39,7 @@ const handler = async (
           headers: {
             // TODO: check auth token before making a request, and if it not exists, redirect to login
             Authorization: `Bearer ${getAuthTokenFromCookie()}`,
+            "Content-Type": "application/json",
           },
           onmessage(data) {
             if (data === "[DONE]") {

@@ -134,7 +134,18 @@ export const useBuildTask = () => {
     const comingMsgPayload = safeParseJSON(msg?.message)
     console.log("setMessageState", comingMsgPayload)
 
-    if (msg?.message === `[DONE]`) {
+    if (msg?.message?.includes(`[DONE]`)) {
+      // 是否有额外的 message，那么也需要拼接上
+      const extraMessage = msg?.message?.split("[DONE]")?.[0]?.trim()
+      if (extraMessage?.length > 0) {
+        const lastMessage = currentChatState.messages.at(-1) as Message
+        const savedMessage = currentChatState.messages.slice(0, -1) as Message[]
+
+        lastMessage.data.content =
+          lastMessage?.data?.content + (extraMessage || "")
+        chatStore.setMessages([...savedMessage, { ...lastMessage }])
+      }
+
       const newMessageState: Partial<MessageState> = {
         pending: false,
         error: false,
