@@ -43,7 +43,7 @@ export const Session = (props: SessionProps) => {
         <div className="session-source">
           {messageStateStore.pending || session?.sources?.length > 0 ? (
             <div className="session-title-icon">
-              <IconQuote style={{ fontSize: 18 }} />
+              <IconQuote style={{ fontSize: 18, color: "rgba(0, 0, 0, .8)" }} />
               <p>来源</p>
             </div>
           ) : null}
