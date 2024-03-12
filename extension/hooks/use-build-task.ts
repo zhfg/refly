@@ -21,8 +21,7 @@ import {
   TASK_TYPE,
   ConversationOperation,
 } from "~types"
-import type { QUICK_ACTION, Task } from "~types"
-import { buildTask } from "~utils/task"
+import type { Task } from "~types"
 import {
   buildIntentMessageList,
   buildQuestionMessage,
@@ -45,31 +44,18 @@ export const useBuildTask = () => {
   const messageStateStore = useMessageStateStore()
   const conversationStore = useConversationStore()
 
-  const buildGenTitleTaskAndGenResponse = () => {
-    // 每次生成会话 title 时，需要重置此字段
-    chatStore.setIsGenTitle(false)
-
-    // 生成 chat task
-    const taskPayload = {
-      taskType: TASK_TYPE.GEN_TITLE,
-      data: {
-        conversationId: conversationStore.currentConversation?.id,
+  const buildShutdownTaskAndGenResponse = () => {
+    handleSendMessageWithPorts({
+      body: {
+        type: TASK_STATUS.SHUTDOWN,
       },
-    }
-    const task = buildTask(taskPayload)
-    // handleGenResponse(task)
+    })
   }
 
-  const buildQuickActionTaskAndGenReponse = (
-    taskType: TASK_TYPE,
-    data: QUICK_ACTION,
-  ) => {
-    const task = buildTask({ taskType, data })
+  const buildTaskAndGenReponse = (task: Task) => {
+    console.log("buildTaskAndGenReponse", task)
+    const question = task.data?.question
 
-    handleGenResponse(task)
-  }
-
-  const buildChatTaskAndGenReponse = (question: string) => {
     const questionMsg = buildQuestionMessage({
       conversationId: conversationStore.currentConversation?.id,
       content: question,
@@ -84,84 +70,12 @@ export const useBuildTask = () => {
     // 将 reply 加到 message-state
     messageStateStore.setMessageState({
       pendingReplyMsg: replyMsg,
+      taskType: task?.taskType,
     })
 
     chatStore.setMessages(chatStore.messages.concat(questionMsg))
 
-    // 将最后一条回答拼到上下文中
-    const lastReplyMsg = chatStore.messages
-      .filter((message) => message?.itemType === MessageItemType?.REPLY)
-      ?.at(-1)
-    const taskMsgList = lastReplyMsg
-      ? [lastReplyMsg, questionMsg]
-      : [questionMsg]
-
-    // 生成 chat task
-    const taskPayload = {
-      taskType: TASK_TYPE.CHAT,
-      data: {
-        ...conversationStore.currentConversation,
-        items: taskMsgList,
-        preGeneratedReplyId: replyMsg?.itemId, // 预先生成的回复，用于快速问答 message
-      },
-    }
-    const task = buildTask(taskPayload)
     handleGenResponse(task)
-  }
-
-  const buildIntentTaskAndGenReponse = (questionContent: string) => {
-    const oldMessages = chatStore.messages
-    const conversationId = conversationStore.currentConversation?.id
-    const selectionContent = quickActionStore.selectedText
-    const replyContent = ""
-
-    const lastOldReplyMsg = oldMessages
-      .filter((item) => item.itemType === MessageItemType.REPLY)
-      ?.at(-1)
-    const intentMsgList = buildIntentMessageList({
-      conversationId,
-      selectionContent,
-      questionContent,
-      replyContent,
-    })
-
-    const replyMsg = intentMsgList.at(-1)
-    // 将 reply 加到 message-state
-    messageStateStore.setMessageState({
-      pendingReplyMsg: replyMsg,
-    })
-
-    const newMsgList = oldMessages.concat(intentMsgList.slice(0, -1))
-    chatStore.setMessages(newMsgList)
-    quickActionStore.setSelectedText("")
-
-    const lastReplyMsgItemId = intentMsgList.at(-1)?.itemId
-
-    // 生成 chat task
-    const taskPayload = {
-      taskType: TASK_TYPE.CHAT,
-      data: {
-        ...conversationStore.currentConversation,
-        items: [lastOldReplyMsg, ...intentMsgList.slice(0, -1)], // 最后一条回复，加上生成的三条，不算新生成的回复
-        preGeneratedReplyId: lastReplyMsgItemId, // 预先生成的回复，用于快速问 答 message
-      },
-    }
-    const task = buildTask(taskPayload)
-    handleGenResponse(task)
-  }
-  const buildIntentChatTaskAndGenReponse = () => {
-    buildIntentTaskAndGenReponse(chatStore.newQAText)
-  }
-  const buildIntentQuickActionTaskAndGenReponse = (questionContent: string) => {
-    buildIntentTaskAndGenReponse(questionContent)
-  }
-
-  const buildShutdownTaskAndGenResponse = () => {
-    handleSendMessageWithPorts({
-      body: {
-        type: TASK_STATUS.SHUTDOWN,
-      },
-    })
   }
 
   const handleGenResponse = useCallback(
@@ -227,7 +141,11 @@ export const useBuildTask = () => {
         ) &&
         currentMessageState.pendingMsg?.length === 0
       ) {
-        if (currentMessageState.taskType === TASK_TYPE.CHAT) {
+        if (
+          [TASK_TYPE.CHAT, TASK_TYPE.QUICK_ACTION].includes(
+            currentMessageState.taskType,
+          )
+        ) {
           // 构建一条错误消息放在末尾，而不是类似 loading 直接展示，因为要 error 停留在聊天列表里
           const errMsg = buildErrorMessage({
             conversationId: conversationStore.currentConversation?.id,
@@ -242,10 +160,6 @@ export const useBuildTask = () => {
 
           newMessageState.error = true
           newMessageState.pendingFirstToken = false
-        } else if (currentMessageState.taskType === TASK_TYPE.QUICK_ACTION) {
-          // 针对 quickAction 这类一次性的，就是直接展示错误信息
-          newMessageState.error = true
-          newMessageState.pendingFirstToken = false
         }
 
         // 更新 messageState 的状态，然后直接结束，不走后面的流程
@@ -258,14 +172,14 @@ export const useBuildTask = () => {
       messageStateStore.setMessageState(newMessageState)
 
       // 如果出错，就不会进行 gen-title 的操作
-      if (
-        currentMessageState.taskType === TASK_TYPE.CHAT &&
-        !chatStore.isGenTitle
-      ) {
-        // 会话第一次发消息，会再额外多发一个消息用于生产会话 title
-        buildGenTitleTaskAndGenResponse()
-        chatStore.setIsGenTitle(true)
-      }
+      // if (
+      //   currentMessageState.taskType === TASK_TYPE.CHAT &&
+      //   !chatStore.isGenTitle
+      // ) {
+      //   // 会话第一次发消息，会再额外多发一个消息用于生产会话 title
+      //   buildGenTitleTaskAndGenResponse()
+      //   chatStore.setIsGenTitle(true)
+      // }
 
       // 如果此次任务是 gen_title 的任务，那么就去更新对应的会话列表里面的会话 title，默认为 New Conversation/新会话
       // TODO: 可以改成流式，到时候看实际反馈
@@ -289,7 +203,11 @@ export const useBuildTask = () => {
     }
 
     // 只有在聊天场景下，才需要更新最后一条消息
-    if (currentMessageState.taskType === TASK_TYPE.CHAT) {
+    if (
+      [TASK_TYPE.CHAT, TASK_TYPE.QUICK_ACTION].includes(
+        currentMessageState.taskType,
+      )
+    ) {
       if (currentMessageState.pendingFirstToken) {
         const lastMessage = currentMessageState.pendingReplyMsg
 
@@ -303,17 +221,17 @@ export const useBuildTask = () => {
           console.log("sourceWeblinkPayload", sourceWeblinkPayload)
           messageStateStore.setMessageState({
             ...currentMessageState,
-            pendingSourceDocs: (
-              currentMessageState.pendingSourceDocs || []
-            ).concat(sourceWeblinkPayload),
+            pendingSourceDocs: (currentMessageState.pendingSourceDocs || [])
+              .concat(sourceWeblinkPayload)
+              ?.filter((item) => item),
           })
 
           console.log("sourceWeblinkPayload", lastMessage.data.sources)
 
           if (Array.isArray(lastMessage?.data?.sources)) {
-            lastMessage.data.sources = lastMessage?.data?.sources?.concat(
-              sourceWeblinkPayload || [],
-            )
+            lastMessage.data.sources = lastMessage?.data?.sources
+              ?.concat(sourceWeblinkPayload || [])
+              ?.filter((item) => item)
           } else {
             lastMessage.data.sources = [sourceWeblinkPayload]
           }
@@ -340,9 +258,9 @@ export const useBuildTask = () => {
           console.log("sourceWeblinkPayload", sourceWeblinkPayload)
           messageStateStore.setMessageState({
             ...currentMessageState,
-            pendingSourceDocs: (
-              currentMessageState.pendingSourceDocs || []
-            ).concat(sourceWeblinkPayload),
+            pendingSourceDocs: (currentMessageState.pendingSourceDocs || [])
+              .concat(sourceWeblinkPayload)
+              ?.filter((item) => item),
           })
 
           const lastMessage = currentChatState.messages.at(-1)
@@ -351,11 +269,13 @@ export const useBuildTask = () => {
           console.log("sourceWeblinkPayload", lastMessage.data.sources)
 
           if (Array.isArray(lastMessage?.data?.sources)) {
-            lastMessage.data.sources = lastMessage?.data?.sources?.concat(
-              sourceWeblinkPayload || [],
-            )
+            lastMessage.data.sources = lastMessage?.data?.sources
+              ?.concat(sourceWeblinkPayload || [])
+              ?.filter((item) => item)
           } else {
-            lastMessage.data.sources = [sourceWeblinkPayload]
+            lastMessage.data.sources = [sourceWeblinkPayload]?.filter(
+              (item) => item,
+            )
           }
           chatStore.setMessages([...savedMessage, { ...lastMessage }])
         } else {
@@ -420,25 +340,12 @@ export const useBuildTask = () => {
     // 再 bind
     bindExtensionPorts()
 
-    // 获取当前的状态
-    const weblinkList = getSelectedWeblinkList()
-
     // 生成任务
-    genResponsePortRef.current.postMessage({
-      body: {
-        ...payload.body,
-        weblinkList,
-      },
-    })
+    genResponsePortRef.current.postMessage(payload)
   }
 
   return {
-    buildQuickActionTaskAndGenReponse,
-    buildGenTitleTaskAndGenResponse,
-    buildChatTaskAndGenReponse,
-    buildIntentChatTaskAndGenReponse,
-    buildIntentQuickActionTaskAndGenReponse,
-    buildIntentTaskAndGenReponse,
+    buildTaskAndGenReponse,
     buildShutdownTaskAndGenResponse,
   }
 }

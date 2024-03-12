@@ -6,7 +6,6 @@ import omit from 'lodash.omit';
 import { QdrantClient } from '@qdrant/js-client-rest';
 import { Document } from '@langchain/core/documents';
 import { CheerioWebBaseLoader } from 'langchain/document_loaders/web/cheerio';
-import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { OpenAIEmbeddings, ChatOpenAI } from '@langchain/openai';
 import {
   ChatPromptTemplate,
@@ -14,10 +13,18 @@ import {
 } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { createStuffDocumentsChain } from 'langchain/chains/combine_documents';
+import { loadSummarizationChain } from 'langchain/chains';
+import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
+import { PromptTemplate } from '@langchain/core/prompts';
 
-import { Weblink } from '@prisma/client';
-import { qaSystemPrompt, contextualizeQSystemPrompt } from './prompts';
-import { LCChatMessage } from './schema';
+import { ChatMessage, Weblink } from '@prisma/client';
+import {
+  qaSystemPrompt,
+  contextualizeQSystemPrompt,
+  summarizeSystemPrompt,
+} from './prompts';
+import { LLMChatMessage } from './schema';
+import { Source } from 'src/types/weblink';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
@@ -63,15 +70,24 @@ export class LlmService implements OnModuleInit {
     this.logger.log(`qdrant collection initialized: ${this.collectionName}`);
   }
 
-  async parseAndStoreLink(link: Weblink) {
-    const loader = new CheerioWebBaseLoader(link.url);
+  async parseWebLinkContent(url: string) {
+    const loader = new CheerioWebBaseLoader(url);
 
     // customized webpage loading
     const $ = await loader.scrape();
-    const text = $(loader.selector).text();
+    const pageContent = $(loader.selector).text();
     const title = $('title').text();
-    const metadata = { source: loader.webPath, userId: link.userId, title };
-    const doc = new Document({ pageContent: text, metadata });
+    const source = loader.webPath;
+
+    return { pageContent, title, source };
+  }
+
+  async parseAndStoreLink(link: Weblink) {
+    const { pageContent, title, source } = await this.parseWebLinkContent(
+      link.url,
+    );
+    const metadata = { source, userId: link.userId, title };
+    const doc = new Document({ pageContent, metadata });
 
     this.logger.log(`link loaded from ${link.url}`);
 
@@ -108,7 +124,66 @@ export class LlmService implements OnModuleInit {
     this.logger.log(`vector stored for ${link.url}`);
   }
 
-  async chat(query: string, chatHistory: LCChatMessage[], filter?: any) {
+  async summary(
+    prompt: string,
+    weblinkList: Source[],
+    chatHistory: ChatMessage[],
+    onMessage: (chunk: string) => void,
+  ) {
+    // 基于一组网页做总结，先获取网页内容
+    const textForSplitter = await Promise.all(
+      weblinkList.map(async (item) => {
+        const { pageContent, title, source } = await this.parseWebLinkContent(
+          item?.metadata?.source,
+        );
+
+        return { metadata: { source, title }, text: pageContent };
+      }),
+    );
+
+    const textSplitter = new RecursiveCharacterTextSplitter({
+      chunkSize: 1000,
+    });
+
+    // 带元数据去拼 docs
+    let weblinkDocs = [];
+    await Promise.all(
+      textForSplitter.map(async (item) => {
+        const { metadata, text } = item;
+        const docs = await textSplitter.createDocuments([text], [metadata]);
+        weblinkDocs = weblinkDocs.concat(docs);
+      }),
+    );
+
+    const llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
+    const combineLLM = new ChatOpenAI({
+      modelName: 'gpt-3.5-turbo',
+      temperature: 0,
+      streaming: true,
+      callbacks: [
+        {
+          handleLLMNewToken(token: string): Promise<void> | void {
+            onMessage(token);
+          },
+        },
+      ],
+    });
+
+    const customPrompt = new PromptTemplate({
+      template: summarizeSystemPrompt,
+      inputVariables: ['text'],
+    });
+    const summarizeChain = loadSummarizationChain(llm, {
+      type: 'map_reduce',
+      combineLLM,
+      combinePrompt: customPrompt,
+    });
+    await summarizeChain.invoke({
+      input_documents: weblinkDocs,
+    });
+  }
+
+  async chat(query: string, chatHistory: LLMChatMessage[], filter?: any) {
     this.logger.log(
       `activated with query: ${query}, filter: ${JSON.stringify(filter)}`,
     );

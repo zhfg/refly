@@ -21,7 +21,7 @@ import { ApiParam, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
 import { LlmService } from '../llm/llm.service';
-import { createLCChatMessage } from '../llm/schema';
+import { TASK_TYPE, type Task } from '../types/task';
 
 @Controller('conversation')
 export class ConversationController {
@@ -51,20 +51,21 @@ export class ConversationController {
   @Post(':conversationId/chat')
   async chat(
     @Request() req,
-    @Query('query') query = '',
     @Param('conversationId') conversationId = '',
-    @Body() body: { weblinkList: string[] },
+    @Body() body: { task: Task },
     @Res() res: Response,
   ) {
     if (!conversationId) {
       throw new BadRequestException('conversation id cannot be empty');
     }
 
-    if (!query) {
+    const { taskType, data = {} } = body?.task;
+    if (taskType === TASK_TYPE.CHAT && !data?.question) {
       throw new BadRequestException('query cannot be empty');
     }
 
     const userId: string = req.user.id;
+    const query = data?.question || '';
 
     await this.conversationService.addChatMessage({
       type: 'human',
@@ -84,57 +85,36 @@ export class ConversationController {
       conversationId,
     );
 
-    const filter: any = {
-      must: [
-        {
-          key: 'userId',
-          match: { value: userId },
-        },
-      ],
-    };
-    if (body.weblinkList?.length > 0) {
-      filter.must.push({
-        key: 'source',
-        match: { any: body.weblinkList },
-      });
+    let sources, answer;
+    if (taskType === TASK_TYPE.CHAT) {
+      const taskRes = await this.conversationService.handleChatTask(
+        req,
+        res,
+        body?.task,
+        chatHistory,
+      );
+
+      sources = taskRes?.sources;
+      answer = taskRes?.answer;
+    } else if (taskType === TASK_TYPE.QUICK_ACTION) {
+      const taskRes = await this.conversationService.handleQuickActionTask(
+        req,
+        res,
+        body?.task,
+        chatHistory,
+      );
+      sources = taskRes?.sources;
+      answer = taskRes?.answer;
     }
 
-    const { stream, sources } = await this.llmService.chat(
-      query,
-      chatHistory
-        ? chatHistory.map((msg) => createLCChatMessage(msg.content, msg.type))
-        : [],
-      filter,
-    );
-
-    // first return sources，use unique tag for parse data
-    sources.forEach((source) => {
-      const payload = {
-        type: 'source',
-        body: source,
-      };
-      res.write(`refly-sse-source: ${JSON.stringify(payload)}`);
-    });
-
-    // write answer in a stream style
-    let answerStr = '';
-    for await (const chunk of await stream) {
-      answerStr += chunk;
-
-      const payload = {
-        type: 'chunk',
-        body: chunk,
-      };
-      res.write(`refly-sse-data: ${JSON.stringify(payload)}`);
-    }
-
+    // 结束流式输出
     res.end(`[DONE]`);
 
     await this.conversationService.addChatMessage({
       type: 'ai',
       userId,
       conversationId,
-      content: answerStr,
+      content: answer,
       sources: JSON.stringify(sources),
     });
 
@@ -142,7 +122,7 @@ export class ConversationController {
     const updated = await this.conversationService.updateConversation(
       conversationId,
       {
-        lastMessage: answerStr,
+        lastMessage: answer,
         messageCount: chatHistory.length + 1,
       },
     );

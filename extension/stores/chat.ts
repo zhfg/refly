@@ -1,10 +1,7 @@
 import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import type {} from "@redux-devtools/extension"
-import type { Message, SessionItem } from "~types"
-
-// fake data for debug
-import { fakeMessages } from "~data/message"
+import { type Message, type SessionItem } from "~types"
 
 export interface ChatState {
   // state

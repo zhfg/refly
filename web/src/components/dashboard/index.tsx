@@ -138,17 +138,17 @@ const Home = () => {
     window.close()
   }
 
-  useEffect(() => {
-    if (!token) return
-    if (token) {
-      // 从插件打开弹窗，给插件发消息
-      handleSendMsgToExtension("success", token)
+  // TODO: 临时关闭，用于开发调试
+  // useEffect(() => {
+  //   if (!token) return
+  //   if (token) {
+  //     // 从插件打开弹窗，给插件发消息
+  //     handleSendMsgToExtension("success", token)
 
-      // 从 Web 打开弹窗，给 opener 发消息
-      console.log("window.opener", window)
-      window.close()
-    }
-  }, [token])
+  //     // 从 Web 打开弹窗，给 opener 发消息
+  //     window.close()
+  //   }
+  // }, [token])
 
   // 自动聚焦输入框
   useEffect(() => {
@@ -211,18 +211,20 @@ const Home = () => {
               </div>
             </div>
           )} */}
-          {messageStateStore.taskType === TASK_TYPE.CHAT &&
+          {/* 暂时不支持中断 */}
+          {/* {messageStateStore.taskType === TASK_TYPE.CHAT &&
             messageStateStore?.pending && (
               <div className="stop-reponse">
                 <Button
                   type="outline"
                   className="btn"
-                  icon={<IconMinusCircle />}
+                  style={{ background: "#64645F" }}
+                  icon={<IconMinusCircle style={{ color: "#64645F" }} />}
                   onClick={buildShutdownTaskAndGenResponse}>
                   停止响应
                 </Button>
               </div>
-            )}
+            )} */}
         </div>
 
         <div

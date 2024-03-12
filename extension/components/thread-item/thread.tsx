@@ -3,7 +3,6 @@ import React, { useEffect, useRef } from "react"
 import { useNavigate, useLocation, useParams } from "react-router-dom"
 
 // hooks
-import { useSiderSendMessage } from "~hooks/use-sider-send-message"
 import { useResetState } from "~hooks/use-reset-state"
 // stores
 import { useChatStore } from "~stores/chat"
@@ -15,10 +14,11 @@ import { buildSessions } from "~utils/session"
 import { ThreadItem } from "~components/thread-item/thread-item"
 import { sendToBackground } from "@plasmohq/messaging"
 import { Header } from "./header"
+import { useBuildTask } from "~hooks/use-build-task"
+import { useTaskStore } from "~stores/task"
 
 export const Thread = () => {
-  const navigate = useNavigate()
-  const { handleSideSendMessage } = useSiderSendMessage()
+  const { buildTaskAndGenReponse } = useBuildTask()
   const params = useParams<{ threadId: string }>()
 
   const chatStore = useChatStore()
@@ -70,16 +70,12 @@ export const Thread = () => {
   const handleThread = async (threadId: string) => {
     const { currentConversation } = useConversationStore.getState()
     const { messages = [] } = useChatStore.getState()
+    const { task } = useTaskStore.getState()
 
     // 新会话，需要手动构建第一条消息
     if (chatStore.isNewConversation && currentConversation?.id) {
-      const question = chatStore.newQAText
-      console.log(
-        "handleThread",
-        chatStore.isNewConversation,
-        chatStore.newQAText,
-      )
-      handleSideSendMessage(question)
+      // 更换成基于 task 的消息模式，核心是基于 task 来处理
+      buildTaskAndGenReponse(task)
       chatStore.setIsNewConversation(false)
     } else if (params?.threadId && messages?.length === 0) {
       handleGetThreadMessages(threadId)

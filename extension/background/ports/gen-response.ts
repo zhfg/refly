@@ -1,6 +1,6 @@
 import { type PlasmoMessaging } from "@plasmohq/messaging"
 
-import { TASK_STATUS, TASK_TYPE } from "~/types"
+import { TASK_STATUS, TASK_TYPE, type Task } from "~/types"
 import { safeParseJSON } from "~utils/parse"
 import { getServerOrigin } from "~utils/url"
 import { fetchEventSource } from "~utils/fetch-event-source"
@@ -8,7 +8,10 @@ import { getCookie } from "~utils/cookie"
 
 let abortController: AbortController
 
-const handler: PlasmoMessaging.PortHandler = async (req, res) => {
+const handler: PlasmoMessaging.PortHandler<{
+  type: TASK_STATUS
+  payload: Task
+}> = async (req, res) => {
   const { type, payload } = req?.body || {}
   console.log("receive request", req.body)
 
@@ -17,20 +20,16 @@ const handler: PlasmoMessaging.PortHandler = async (req, res) => {
       abortController = new AbortController()
 
       // TODO: 这里未来要优化
-      const messageItems = req.body?.payload?.data?.items || []
-      const question = messageItems?.[messageItems.length - 1]?.data?.content
-      const conversationId =
-        messageItems?.[messageItems.length - 1]?.conversationId
+      const conversationId = payload?.data?.conversationId
 
       const cookie = await getCookie()
-      const weblinkList = req.body?.weblinkList || []
 
       await fetchEventSource(
-        `${getServerOrigin()}/v1/conversation/${conversationId}/chat?query=${question}`,
+        `${getServerOrigin()}/v1/conversation/${conversationId}/chat`,
         {
           method: "POST",
           body: JSON.stringify({
-            weblinkList, // 支持对指定的 weblink list 进行搜索问答
+            task: payload,
           }),
           headers: {
             Authorization: `Bearer ${cookie}`, // Include the JWT token in the Authorization header

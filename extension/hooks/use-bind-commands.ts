@@ -2,73 +2,93 @@ import { sendToBackground } from "@plasmohq/messaging"
 import React, { type Dispatch, useEffect, useRef, useState } from "react"
 import { reflyEnv } from "~utils/env"
 import hotKeys from "hotkeys-js"
-import { useSiderSendMessage } from '~hooks/use-sider-send-message'
+import { useBuildTask } from "./use-build-task"
+import { useChatStore } from "~stores/chat"
+import { LANGUAGE, LOCALE, TASK_TYPE, type Source, type Task } from "~types"
+import { buildChatTask } from "~utils/task"
+import { useWeblinkStore } from "~stores/weblink"
 
 export const useBindCommands = () => {
-    // 快捷键相关
+  // 快捷键相关
   const softKeyboardShortcutsEnabledRef = useRef(true)
   const keyboardShortcutRef = useRef("")
   const keyboardSendShortcutRef = useRef("")
-  const { handleSideSendMessage } = useSiderSendMessage();
+  const { buildTaskAndGenReponse } = useBuildTask()
 
-    const loadCommands = async () => {
-
-        const commands = await sendToBackground({
-          name: "getAllCommands"
-        })
-        commands.forEach((command) => {
-          if (command.name === "_execute_action" && command.shortcut) {
-            keyboardShortcutRef.current = command.shortcut
-          }
-        })
-    
-        const osType = reflyEnv.getOsType()
-        if (
-          !keyboardShortcutRef.current &&
-          softKeyboardShortcutsEnabledRef.current
-        ) {
-          const defaultShortcutKey = reflyEnv.getDefaultShortcutKey()
-          keyboardShortcutRef.current =
-            osType === "OSX"
-              ? `Command+${defaultShortcutKey}`
-              : `Ctrl+${defaultShortcutKey}`
-        }
-    
-        if (!keyboardSendShortcutRef.current) {
-          const defaultSendShortcutKey = reflyEnv.getDefaultSendShortcutKey()
-          keyboardSendShortcutRef.current =
-            osType === "OSX"
-              ? `Command+${defaultSendShortcutKey}`
-              : `Ctrl+${defaultSendShortcutKey}`
-        }
-    
-        handleBindHotkey()
+  const loadCommands = async () => {
+    const commands = await sendToBackground({
+      name: "getAllCommands",
+    })
+    commands.forEach((command) => {
+      if (command.name === "_execute_action" && command.shortcut) {
+        keyboardShortcutRef.current = command.shortcut
       }
-      const handleBindHotkey = () => {
-        hotKeys(keyboardShortcutRef.current, { capture: true }, (e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          // setIsShowSide((prevState) => !prevState)
-        })
-    
-        hotKeys(
-          keyboardSendShortcutRef.current,
-          {
-            capture: true,
-            element: document.querySelector(".message-input") as HTMLElement
+    })
+
+    const osType = reflyEnv.getOsType()
+    if (
+      !keyboardShortcutRef.current &&
+      softKeyboardShortcutsEnabledRef.current
+    ) {
+      const defaultShortcutKey = reflyEnv.getDefaultShortcutKey()
+      keyboardShortcutRef.current =
+        osType === "OSX"
+          ? `Command+${defaultShortcutKey}`
+          : `Ctrl+${defaultShortcutKey}`
+    }
+
+    if (!keyboardSendShortcutRef.current) {
+      const defaultSendShortcutKey = reflyEnv.getDefaultSendShortcutKey()
+      keyboardSendShortcutRef.current =
+        osType === "OSX"
+          ? `Command+${defaultSendShortcutKey}`
+          : `Ctrl+${defaultSendShortcutKey}`
+    }
+
+    handleBindHotkey()
+  }
+  const handleBindHotkey = () => {
+    hotKeys(keyboardShortcutRef.current, { capture: true }, (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      // setIsShowSide((prevState) => !prevState)
+    })
+
+    hotKeys(
+      keyboardSendShortcutRef.current,
+      {
+        capture: true,
+        element: document.querySelector(".message-input") as HTMLElement,
+      },
+      (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+
+        const { newQAText } = useChatStore.getState()
+        const { selectedRow } = useWeblinkStore.getState()
+
+        const selectedWebLink: Source[] = selectedRow?.map((item) => ({
+          pageContent: "",
+          metadata: {
+            title: item?.content?.originPageTitle,
+            source: item?.content?.originPageUrl,
           },
-          (e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            handleSideSendMessage()
-          }
-        )
-      }
+          score: -1, // 手工构造
+        }))
 
+        const task = buildChatTask({
+          question: newQAText,
+          filter: { weblinkList: selectedWebLink },
+        })
 
-      useEffect(() => {
-        loadCommands()
-    
-        return () => {}
-      }, [])
+        buildTaskAndGenReponse(task)
+      },
+    )
+  }
+
+  useEffect(() => {
+    loadCommands()
+
+    return () => {}
+  }, [])
 }
