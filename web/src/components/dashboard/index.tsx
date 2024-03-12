@@ -134,9 +134,8 @@ const Home = () => {
       console.log("handleSendMsgToExtension err", err)
     }
 
-    setTimeout(() => {
-      window.close()
-    }, 2000)
+    console.log("dashboard close")
+    window.close()
   }
 
   useEffect(() => {
@@ -146,13 +145,8 @@ const Home = () => {
       handleSendMsgToExtension("success", token)
 
       // 从 Web 打开弹窗，给 opener 发消息
-      // window?.opener?.postMessage({
-      //   type: "refly-login-status",
-      //   status: "success",
-      //   payload: token,
-      // })
-
-      // window.close()
+      console.log("window.opener", window)
+      window.close()
     }
   }, [token])
 
