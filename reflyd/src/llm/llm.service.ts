@@ -27,6 +27,7 @@ import {
 import { LLMChatMessage } from './schema';
 import { Source } from 'src/types/weblink';
 import { HumanMessage } from 'langchain/schema';
+import { maxWebsiteTokenSize, truncateToken } from 'src/utils/token';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
@@ -84,12 +85,31 @@ export class LlmService implements OnModuleInit {
     return { pageContent, title, source };
   }
 
+  // TODO： 目前比较粗暴，直接截断，理论上后续总结场景需要关注所有的 header 以及首段的总结，这样能够得到更加全面的总结
+  getExpectedTokenLenContent(texts: string[] | string = [], tokenLimit = 0) {
+    let newTexts;
+
+    if (Array.isArray(texts)) {
+      newTexts = texts.map((text) => truncateToken(text, tokenLimit));
+    } else {
+      newTexts = truncateToken(texts, tokenLimit);
+    }
+
+    return newTexts;
+  }
+
   async parseAndStoreLink(link: Weblink) {
     const { pageContent, title, source } = await this.parseWebLinkContent(
       link.url,
     );
     const metadata = { source, userId: link.userId, title };
-    const doc = new Document({ pageContent, metadata });
+    const doc = new Document({
+      pageContent: this.getExpectedTokenLenContent(
+        pageContent,
+        maxWebsiteTokenSize,
+      ),
+      metadata,
+    });
 
     this.logger.log(`link loaded from ${link.url}`);
 
@@ -200,6 +220,10 @@ export class LlmService implements OnModuleInit {
     chatHistory: ChatMessage[],
     onMessage: (chunk: string) => void,
   ) {
+    if (weblinkList?.length <= 0) return;
+    // 处理 token 窗口，一共给 6K 窗口用于问答，平均分到每个网页，保障可用性
+    const avgTokenLen = 6000 / weblinkList?.length;
+
     // 基于一组网页做总结，先获取网页内容
     const textForSplitter = await Promise.all(
       weblinkList.map(async (item) => {
@@ -207,7 +231,10 @@ export class LlmService implements OnModuleInit {
           item?.metadata?.source,
         );
 
-        return { metadata: { source, title }, text: pageContent };
+        return {
+          metadata: { source, title },
+          text: this.getExpectedTokenLenContent(pageContent, avgTokenLen),
+        };
       }),
     );
 
