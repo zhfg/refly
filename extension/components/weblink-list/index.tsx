@@ -9,7 +9,7 @@ import {
   Button,
   Message as message,
   Typography,
-  Tag
+  Tag,
 } from "@arco-design/web-react"
 import { IconDelete, IconEdit } from "@arco-design/web-react/icon"
 import styleText from "data-text:./index.scss"
@@ -25,7 +25,7 @@ import React, {
   useMemo,
 } from "react"
 import InfiniteScroll from "react-infinite-scroll-component"
-import throttle from 'lodash.throttle'
+import throttle from "lodash.throttle"
 import type { QueryPayload, WebLinkItem } from "./types"
 import { defaultQueryPayload } from "./utils"
 
@@ -35,7 +35,7 @@ import { useMessage } from "@plasmohq/messaging/hook"
 import { type Conversation } from "~/types"
 import { time } from "~utils/time"
 // stores
-import { useWeblinkStore } from '~stores/weblink'
+import { useWeblinkStore } from "~stores/weblink"
 
 export const getStyle: PlasmoGetStyle = () => {
   const style = document.createElement("style")
@@ -56,19 +56,17 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
     url = "",
     originPageTitle,
     originPageUrl,
-    indexStatus
+    indexStatus,
   } = props?.weblink
   const urlItem = new URL(url || "")
-  console.log('weblink rerender');
+  console.log("weblink rerender")
 
   return (
     <div className="conv-item-wrapper">
       <div className="conv-item">
         <div className="conv-item-header">
           <span className="title">
-            <div className="title-text css-ellipsis">
-              {originPageTitle}
-            </div>
+            <div className="title-text css-ellipsis">{originPageTitle}</div>
           </span>
           {/* <Tooltip className="edit" content="编辑">
             <IconEdit />
@@ -76,7 +74,9 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
           <span className="date">{time(updatedAt).utc().fromNow()}</span>
         </div>
         <div className="conv-item-content">
-          <span className="conv-item-content-text css-ellipsis" style={{ width: 250 }}>
+          <span
+            className="conv-item-content-text css-ellipsis"
+            style={{ width: 250 }}>
             {originPageDescription}
           </span>
         </div>
@@ -89,7 +89,11 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
                 alt=""
               />
               <span className="text">{originPageTitle}</span>
-              {indexStatus === 'finish' ? <Tag color="green">已阅读</Tag> : <Tag color="orange">未阅读</Tag>}
+              {indexStatus === "finish" ? (
+                <Tag color="green">已阅读</Tag>
+              ) : (
+                <Tag color="orange">未阅读</Tag>
+              )}
             </a>
           </div>
           {/** 第一版本不允许删除 */}
@@ -112,23 +116,28 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
 const PreviosWebsiteList = forwardRef((props: Props, ref) => {
   const [keyword, setKeyword] = useState("")
   const [loading, setLoading] = useState(false)
-  const webLinkStore = useWeblinkStore();
+  const webLinkStore = useWeblinkStore()
 
   const loadMore = async (currentPage?: number) => {
-    const { isRequest, hasMore, pageSize, ...extraState } = useWeblinkStore.getState();
-    console.log('loadMore', isRequest, hasMore, pageSize, extraState)
-    if (isRequest || !hasMore) return;
-    if (currentPage < extraState?.currentPage) return;
+    const { isRequest, hasMore, pageSize, ...extraState } =
+      useWeblinkStore.getState()
+    console.log("loadMore", isRequest, hasMore, pageSize, extraState)
+    if (isRequest || !hasMore) return
+    if (currentPage < extraState?.currentPage) return
 
     // 获取数据
     const queryPayload = {
       pageSize,
-      page: (typeof currentPage === 'number' ? currentPage : extraState.currentPage)
+      page:
+        typeof currentPage === "number" ? currentPage : extraState.currentPage,
     }
 
     // 更新页码
-    webLinkStore.updateCurrentPage((typeof currentPage === 'number' ? currentPage : extraState.currentPage) + 1)
-    webLinkStore.updateIsRequest(true);
+    webLinkStore.updateCurrentPage(
+      (typeof currentPage === "number" ? currentPage : extraState.currentPage) +
+        1,
+    )
+    webLinkStore.updateIsRequest(true)
 
     const res = await sendToBackground({
       name: "getWeblinkList",
@@ -136,20 +145,20 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
     })
 
     if (!res?.success) {
-      message.error('获取往期浏览内容识别！');
-      webLinkStore.updateIsRequest(false);
+      message.error("获取往期浏览内容识别！")
+      webLinkStore.updateIsRequest(false)
 
-      return;
+      return
     }
 
     // 处理分页
     if (res?.data?.length < pageSize) {
-      webLinkStore.updateHasMore(false);
+      webLinkStore.updateHasMore(false)
     }
 
     console.log("res", res)
     webLinkStore.updateWebLinkList(res?.data || [])
-    webLinkStore.updateIsRequest(false);
+    webLinkStore.updateIsRequest(false)
   }
 
   //编辑
@@ -182,11 +191,10 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
     })
   }
 
-
   const MemoWebLinkItem = memo(WebLinkItem, (prev, next) => {
-    if (prev?.weblink?.title !== next?.weblink?.title) return true;
-    return false;
-  });
+    if (prev?.weblink?.title !== next?.weblink?.title) return true
+    return false
+  })
 
   const memoData = useMemo(() => {
     return (webLinkStore?.webLinkList || []).map((item, key) => ({
@@ -207,24 +215,28 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
   ]
 
   // 节流的处理
-  const handleScroll = throttle((event: React.UIEvent<HTMLElement, UIEvent>) => {
-    const { webLinkList, } = useWeblinkStore.getState();
+  const handleScroll = throttle(
+    (event: React.UIEvent<HTMLElement, UIEvent>) => {
+      const { webLinkList } = useWeblinkStore.getState()
 
-    // 获取列表的滚动高度，以及现在的列表数量，当还存在 2 个时触发滚动
-    const scrollTopElem = document
-      .querySelector("plasmo-csui")
-      ?.shadowRoot?.querySelector(".conv-list")?.querySelector('.arco-table-body');
+      // 获取列表的滚动高度，以及现在的列表数量，当还存在 2 个时触发滚动
+      const scrollTopElem = document
+        .querySelector("plasmo-csui")
+        ?.shadowRoot?.querySelector(".conv-list")
+        ?.querySelector(".arco-table-body")
 
-    if (!scrollTopElem || webLinkList?.length < 10) return;
-    const scrollTop = scrollTopElem?.scrollTop || 0;
-    const scrollHeight = scrollTopElem?.scrollHeight || 0;
-    const clientHeight = scrollTopElem?.clientHeight;
+      if (!scrollTopElem || webLinkList?.length < 10) return
+      const scrollTop = scrollTopElem?.scrollTop || 0
+      const scrollHeight = scrollTopElem?.scrollHeight || 0
+      const clientHeight = scrollTopElem?.clientHeight
 
-    console.log('clientHeight', scrollTop, clientHeight, scrollHeight)
-    if (scrollTop + clientHeight >= scrollHeight - 100) {
-      loadMore();
-    }
-  }, 500)
+      console.log("clientHeight", scrollTop, clientHeight, scrollHeight)
+      if (scrollTop + clientHeight >= scrollHeight - 100) {
+        loadMore()
+      }
+    },
+    500,
+  )
 
   useEffect(() => {
     if (webLinkStore?.isWebLinkListVisible) {
@@ -250,17 +262,29 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
         }
         visible={webLinkStore.isWebLinkListVisible}
         placement="bottom"
-        footer={<div className="weblink-footer-container">
-          <p className="weblink-footer-selected">已选择 <span>{webLinkStore.selectedRow?.length}</span> 项</p>
-          <div>
-            <Button onClick={() => {
-              webLinkStore.updateIsWebLinkListVisible(false);
-            }} style={{ marginRight: 8 }}>取消</Button>
-            <Button type="primary" onClick={() => {
-              webLinkStore.updateIsWebLinkListVisible(false);
-            }}>确认</Button>
+        footer={
+          <div className="weblink-footer-container">
+            <p className="weblink-footer-selected">
+              已选择 <span>{webLinkStore.selectedRow?.length}</span> 项
+            </p>
+            <div>
+              <Button
+                onClick={() => {
+                  webLinkStore.updateIsWebLinkListVisible(false)
+                }}
+                style={{ marginRight: 8 }}>
+                取消
+              </Button>
+              <Button
+                type="primary"
+                onClick={() => {
+                  webLinkStore.updateIsWebLinkListVisible(false)
+                }}>
+                确认
+              </Button>
+            </div>
           </div>
-        </div>}
+        }
         onOk={() => {
           webLinkStore.updateIsWebLinkListVisible(false)
         }}
@@ -277,21 +301,21 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
         <Table
           className="conv-list"
           rowSelection={{
-            selectedRowKeys: webLinkStore.selectedRow?.map(item => item.key),
+            selectedRowKeys: webLinkStore.selectedRow?.map((item) => item.key),
             onChange: (selectedRowKeys, selectedRows) => {
-              console.log('selectedRowKeys', selectedRowKeys);
-              console.log('selectedRows', selectedRows);
-              webLinkStore.updateSelectedRow(selectedRows);
+              console.log("selectedRowKeys", selectedRowKeys)
+              console.log("selectedRows", selectedRows)
+              webLinkStore.updateSelectedRow(selectedRows)
             },
           }}
           virtualListProps={{
             itemHeight: 100,
             onScroll(event) {
-              handleScroll(event);
-            }
+              handleScroll(event)
+            },
           }}
           scroll={{
-            y: 600
+            y: 600,
           }}
           virtualized={true}
           pagination={false}

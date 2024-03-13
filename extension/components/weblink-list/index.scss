@@ -25,6 +25,11 @@
   text-overflow: ellipsis; /* 显示省略号 */
 }
 
+.arco-table-virtualized div.arco-table-body div.arco-table-tr {
+  width: 100% !important;
+  overflow: hidden !important;
+}
+
 .conv-list {
   display: flex;
   flex-direction: column;
@@ -40,6 +45,11 @@
 
   a {
     text-decoration: none;
+  }
+
+  .arco-table-th.arco-table-operation .arco-table-th-item,
+  .arco-table-td.arco-table-operation {
+    padding: 15px !important;
   }
 
   .conv-item {
@@ -65,7 +75,6 @@
         color: #0d1117;
         font-size: 14px;
         font-weight: 600;
-        flex: 1;
         min-width: 0px;
         display: flex;
         flex-direction: row;
@@ -80,6 +89,7 @@
           word-wrap: break-word;
           -webkit-line-clamp: 1;
           -webkit-box-orient: vertical;
+          width: 240px;
         }
       }
 
@@ -87,6 +97,7 @@
         font-weight: 400;
         font-size: 13px;
         color: #00000040;
+        flex: 1;
       }
     }
 
@@ -128,7 +139,7 @@
         font-size: 13px;
         gap: 5px;
         flex: 1;
-        max-width: 85%;
+        max-width: 65%;
         position: relative;
         overflow: hidden;
         a {

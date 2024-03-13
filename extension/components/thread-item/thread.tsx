@@ -80,6 +80,8 @@ export const Thread = () => {
     } else if (params?.threadId && messages?.length === 0) {
       handleGetThreadMessages(threadId)
     }
+
+    chatStore.setNewQAText("")
   }
 
   useEffect(() => {

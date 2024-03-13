@@ -47,6 +47,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
     })
 
     buildTaskAndGenReponse(task)
+    chatStore.setNewQAText("")
   }
 
   return (
