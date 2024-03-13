@@ -16,6 +16,7 @@ import { createStuffDocumentsChain } from 'langchain/chains/combine_documents';
 import { loadSummarizationChain } from 'langchain/chains';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { PromptTemplate } from '@langchain/core/prompts';
+import { JsonOutputFunctionsParser } from 'langchain/output_parsers';
 
 import { ChatMessage, Weblink } from '@prisma/client';
 import {
@@ -25,6 +26,7 @@ import {
 } from './prompts';
 import { LLMChatMessage } from './schema';
 import { Source } from 'src/types/weblink';
+import { HumanMessage } from 'langchain/schema';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
@@ -93,8 +95,10 @@ export class LlmService implements OnModuleInit {
 
     // splitting / chunking
     const textSplitter = new RecursiveCharacterTextSplitter({
+      separators: ['\n\n', '\n', ' ', ''],
       chunkSize: 1000,
       chunkOverlap: 200,
+      lengthFunction: (str = '') => str.length || 0,
     });
     const documents = await textSplitter.splitDocuments([doc]);
     this.logger.log(`text splitting complete for ${link.url}`);
@@ -122,6 +126,72 @@ export class LlmService implements OnModuleInit {
       points,
     });
     this.logger.log(`vector stored for ${link.url}`);
+  }
+
+  async retrieval(query: string, filter) {
+    /**
+     * 1. 抽取关键字 or 实体
+     * 2. 基于关键字多路召回
+     * 3. rerank scores
+     * 4. 取前
+     */
+
+    // 抽取关键字 or 实体
+    const llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
+    const parser = new JsonOutputFunctionsParser();
+    const runnable = await llm
+      .bind({
+        functions: [
+          {
+            name: 'keyword_for_search_engine',
+            description: `You are an expert search engine keywords extraction algorithm.
+            Only extract keyword from the user query for search engine. If cannot extract keywords, the results should be empty array`,
+            parameters: {
+              type: 'object',
+              properties: {
+                keyword_list: {
+                  type: 'array',
+                  items: { type: 'string' },
+                },
+              },
+              required: ['keyword_list'],
+            },
+          },
+        ],
+        function_call: { name: 'keyword_for_search_engine' },
+      })
+      .pipe(parser);
+    const res = (await runnable.invoke([new HumanMessage(query)])) as {
+      keyword_list: string[];
+    };
+
+    // 基于关键字多路召回
+    let results = [];
+    await Promise.all(
+      // 这里除了关键词，需要把 query 也带上
+      [...(res?.keyword_list || []), query].map(async (keyword) => {
+        const queryEmbedding = await this.embeddings.embedQuery(keyword);
+        const keywordRetrievalResults = await this.vectorStore.search(
+          this.collectionName,
+          {
+            vector: queryEmbedding,
+            limit: 5,
+            filter,
+          },
+        );
+
+        results = results.concat(keywordRetrievalResults);
+      }),
+    );
+
+    // rerank scores
+    // TODO: 这里只考虑了召回阈值和数量，默认取五个，但是没有考虑 token 窗口，未来需要优化
+    results = results
+      .sort((a, b) => (b?.score || 0) - (a?.score || 0))
+      ?.filter((item) => item?.score < 0.8)
+      ?.slice(0, 6);
+
+    return results;
   }
 
   async summary(
@@ -220,16 +290,9 @@ export class LlmService implements OnModuleInit {
       outputParser: new StringOutputParser(),
     });
 
-    const queryEmbedding = await this.embeddings.embedQuery(
-      questionWithContext,
-    );
-    const results = await this.vectorStore.search(this.collectionName, {
-      vector: queryEmbedding,
-      limit: 5,
-      filter,
-    });
+    const retrievalResults = await this.retrieval(questionWithContext, filter);
 
-    const retrievedDocs = results.map((res) => ({
+    const retrievedDocs = retrievalResults.map((res) => ({
       metadata: omit(res.payload, 'content'),
       pageContent: res.payload.content as string,
       score: res.score, // similarity score

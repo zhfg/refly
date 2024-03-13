@@ -211,14 +211,31 @@ const Home = (props: ChatProps) => {
   const runChatTask = () => {
     const question = chatStore.newQAText
     const { selectedRow } = useWeblinkStore.getState()
-    const selectedWebLink: Source[] = selectedRow?.map((item) => ({
-      pageContent: "",
-      metadata: {
-        title: item?.content?.originPageTitle,
-        source: item?.content?.originPageUrl,
-      },
-      score: -1, // 手工构造
-    }))
+    const { searchTarget } = useSearchStateStore.getState()
+
+    let selectedWebLink: Source[] = []
+
+    if (searchTarget === SearchTarget.CurrentPage) {
+      selectedWebLink = [
+        {
+          pageContent: "",
+          metadata: {
+            title: document?.title || "",
+            source: location.href,
+          },
+          score: -1, // 手工构造
+        },
+      ]
+    } else if (searchTarget === SearchTarget.SelectedPages) {
+      selectedWebLink = selectedRow?.map((item) => ({
+        pageContent: "",
+        metadata: {
+          title: item?.content?.originPageTitle,
+          source: item?.content?.originPageUrl,
+        },
+        score: -1, // 手工构造
+      }))
+    }
 
     const task = buildChatTask({
       question,

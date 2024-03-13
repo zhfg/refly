@@ -95,7 +95,11 @@ export class ConversationService {
     if (task?.data?.filter?.weblinkList?.length > 0) {
       filter.must.push({
         key: 'source',
-        match: { any: task?.data?.filter.weblinkList },
+        match: {
+          any: task?.data?.filter?.weblinkList?.map(
+            (item) => item?.metadata?.source,
+          ),
+        },
       });
     }
 
