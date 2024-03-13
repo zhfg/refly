@@ -139,7 +139,9 @@ export const Session = (props: SessionProps) => {
           </div>
           {session?.answer ? (
             <>
-              <p className="session-answer">{session?.answer}</p>
+              <p className="session-answer">
+                <Markdown content={session?.answer} />
+              </p>
               {!messageStateStore?.pending && (
                 <div className="session-answer-actionbar">
                   <div className="session-answer-actionbar-left">

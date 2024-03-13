@@ -92,7 +92,7 @@ export class ConversationService {
         },
       ],
     };
-    if (task?.data?.filter.weblinkList?.length > 0) {
+    if (task?.data?.filter?.weblinkList?.length > 0) {
       filter.must.push({
         key: 'source',
         match: { any: task?.data?.filter.weblinkList },
@@ -116,6 +116,9 @@ export class ConversationService {
       };
       res.write(`refly-sse-source: ${JSON.stringify(payload)}`);
     });
+
+    // 先发一个空块，提前展示 sources
+    res.write(`refly-sse-source: [REFLY-SOURCE-END]`);
 
     // write answer in a stream style
     let answerStr = '';
@@ -161,6 +164,9 @@ export class ConversationService {
       };
       res.write(`refly-sse-source: ${JSON.stringify(payload)}`);
     });
+
+    // 先发一个空块，提前展示 sources
+    res.write(`refly-sse-source: [REFLY-SOURCE-END]`);
 
     // write answer in a stream style
     let answerStr = '';

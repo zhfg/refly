@@ -11,7 +11,8 @@ import { TASK_TYPE, type SessionItem, type Task } from "~types"
 import type { PlasmoGetStyle } from "plasmo"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input"
 import { useBuildTask } from "~hooks/use-build-task"
-import { buildQuickActionTask } from "~utils/task"
+import { buildChatTask, buildQuickActionTask } from "~utils/task"
+import { useConversationStore } from "~stores/conversation"
 
 interface ThreadItemProps {
   sessions: SessionItem[]
@@ -35,8 +36,15 @@ export const ThreadItem = (props: ThreadItemProps) => {
 
   const handleAskFollowing = () => {
     // TODO: 这里需要 follow 之前的 filter 进行提问
-    const question = chatStore.newQAText
-    const task = buildQuickActionTask({ question })
+    const { newQAText } = useChatStore.getState()
+    const { currentConversation } = useConversationStore.getState()
+    const task = buildChatTask({
+      question: newQAText,
+      conversationId: currentConversation?.id || "",
+      filter: {
+        weblinkList: [],
+      },
+    })
 
     buildTaskAndGenReponse(task)
   }
