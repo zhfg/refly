@@ -27,7 +27,11 @@ import {
 import { LLMChatMessage } from './schema';
 import { Source } from 'src/types/weblink';
 import { HumanMessage } from 'langchain/schema';
-import { maxWebsiteTokenSize, truncateToken } from 'src/utils/token';
+import {
+  countToken,
+  maxWebsiteTokenSize,
+  truncateToken,
+} from 'src/utils/token';
 import { uniqueFunc } from 'src/utils/unique';
 
 @Injectable()
@@ -88,15 +92,24 @@ export class LlmService implements OnModuleInit {
 
   // TODO： 目前比较粗暴，直接截断，理论上后续总结场景需要关注所有的 header 以及首段的总结，这样能够得到更加全面的总结
   getExpectedTokenLenContent(texts: string[] | string = [], tokenLimit = 0) {
-    let newTexts;
+    try {
+      let newTexts;
 
-    if (Array.isArray(texts)) {
-      newTexts = texts.map((text) => truncateToken(text, tokenLimit));
-    } else {
-      newTexts = truncateToken(texts, tokenLimit);
+      if (Array.isArray(texts)) {
+        const totalText = texts?.reduce((total, curr) => total + curr, '');
+        if (totalText.length < tokenLimit) return texts;
+
+        newTexts = texts.map((text) => text.slice(0, tokenLimit));
+      } else {
+        if (texts.length < tokenLimit) return texts;
+
+        newTexts = texts.slice(0, tokenLimit);
+      }
+
+      return newTexts;
+    } catch (err) {
+      return texts;
     }
-
-    return newTexts;
   }
 
   async parseAndStoreLink(link: Weblink) {
@@ -231,10 +244,12 @@ export class LlmService implements OnModuleInit {
         const { pageContent, title, source } = await this.parseWebLinkContent(
           item?.metadata?.source,
         );
+        const truncateStr =
+          this.getExpectedTokenLenContent(pageContent, avgTokenLen) || '';
 
         return {
           metadata: { source, title },
-          text: this.getExpectedTokenLenContent(pageContent, avgTokenLen),
+          text: truncateStr,
         };
       }),
     );
@@ -248,8 +263,12 @@ export class LlmService implements OnModuleInit {
     await Promise.all(
       textForSplitter.map(async (item) => {
         const { metadata, text } = item;
+        // 手动区分网页分割
+        const dividerDocs = await textSplitter.createDocuments([
+          `\n\n下面是网页 [${metadata?.title}](${metadata.source}) 的内容\n\n`,
+        ]);
         const docs = await textSplitter.createDocuments([text], [metadata]);
-        weblinkDocs = weblinkDocs.concat(docs);
+        weblinkDocs = weblinkDocs.concat(dividerDocs, docs);
       }),
     );
 

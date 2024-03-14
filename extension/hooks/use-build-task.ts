@@ -81,6 +81,7 @@ export const useBuildTask = () => {
     })
 
     chatStore.setMessages(chatStore.messages.concat(questionMsg))
+    scrollToBottom()
 
     handleGenResponse(task)
   }
@@ -159,11 +160,6 @@ export const useBuildTask = () => {
           })
 
           chatStore.setMessages([...currentChatState.messages, { ...errMsg }])
-
-          // 更新消息之后滚动到底部
-          setTimeout(() => {
-            scrollToBottom()
-          }, 1000)
 
           newMessageState.error = true
           newMessageState.pendingFirstToken = false

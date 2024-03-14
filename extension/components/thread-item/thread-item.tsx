@@ -30,6 +30,7 @@ const TextArea = Input.TextArea
 export const ThreadItem = (props: ThreadItemProps) => {
   const { sessions, selectedWeblinkConfig } = props
   const inputRef = useRef<RefTextAreaType>()
+  const selectedWeblinkListRef = useRef<HTMLDivElement>(null)
   const chatStore = useChatStore()
 
   const [threadSearchTarget, setThreadSearchTarget] = useState(
@@ -99,7 +100,11 @@ export const ThreadItem = (props: ThreadItemProps) => {
       <div
         className="session-inner-container"
         style={
-          showSelectedWeblinkList ? { height: `calc(100vh - 280px)` } : {}
+          showSelectedWeblinkList
+            ? {
+                height: `calc(100vh - 180px - ${selectedWeblinkListRef.current?.clientHeight || 0}px)`,
+              }
+            : {}
         }>
         {sessions?.map((item, index) => (
           <Session
@@ -113,7 +118,11 @@ export const ThreadItem = (props: ThreadItemProps) => {
       <div
         className="footer input-panel"
         style={
-          showSelectedWeblinkList ? { height: `calc(100vh - 260px)` } : {}
+          showSelectedWeblinkList
+            ? {
+                height: `calc(100vh - 130px - ${selectedWeblinkListRef.current?.clientHeight || 0}px)`,
+              }
+            : {}
         }>
         {messageStateStore?.pending && (
           <div className="actions">
@@ -171,6 +180,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
           </div>
           {showSelectedWeblinkList ? (
             <SelectedWeblink
+              ref={selectedWeblinkListRef}
               closable={false}
               selectedWeblinkList={threadWeblinkListFilter}
             />

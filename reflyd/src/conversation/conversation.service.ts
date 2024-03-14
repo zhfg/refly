@@ -156,6 +156,11 @@ export class ConversationService {
     const sources = data?.filter?.weblinkList || [];
     // TODO: 这里后续要处理边界情况，比如没有链接时应该报错
     if (sources?.length <= 0) {
+      res.write(`refly-sse-source: ${JSON.stringify({})}`);
+
+      // 先发一个空块，提前展示 sources
+      res.write(`refly-sse-source: [REFLY-SOURCE-END]`);
+
       return {
         sources: [],
         answer: '',
@@ -186,18 +191,13 @@ export class ConversationService {
       res.write(`refly-sse-data: ${JSON.stringify(payload)}`);
     };
 
-    switch (data?.actionType) {
-      case QUICK_ACTION_TYPE.SUMMARY:
-        await this.llmService.summary(
-          data?.actionPrompt,
-          data?.filter?.weblinkList,
-          chatHistory,
-          onMessage,
-        );
-        break;
-
-      default:
-        break;
+    if (data?.actionType === QUICK_ACTION_TYPE.SUMMARY) {
+      await this.llmService.summary(
+        data?.actionPrompt,
+        data?.filter?.weblinkList,
+        chatHistory,
+        onMessage,
+      );
     }
 
     return {
