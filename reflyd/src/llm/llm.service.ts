@@ -79,15 +79,19 @@ export class LlmService implements OnModuleInit {
   }
 
   async parseWebLinkContent(url: string) {
-    const loader = new CheerioWebBaseLoader(url);
+    try {
+      const loader = new CheerioWebBaseLoader(url);
 
-    // customized webpage loading
-    const $ = await loader.scrape();
-    const pageContent = $(loader.selector).text();
-    const title = $('title').text();
-    const source = loader.webPath;
+      // customized webpage loading
+      const $ = await loader.scrape();
+      const pageContent = $(loader.selector).text();
+      const title = $('title').text();
+      const source = loader.webPath;
 
-    return { pageContent, title, source };
+      return { pageContent, title, source };
+    } catch (err) {
+      return null;
+    }
   }
 
   // TODO： 目前比较粗暴，直接截断，理论上后续总结场景需要关注所有的 header 以及首段的总结，这样能够得到更加全面的总结
@@ -113,9 +117,11 @@ export class LlmService implements OnModuleInit {
   }
 
   async parseAndStoreLink(link: Weblink) {
-    const { pageContent, title, source } = await this.parseWebLinkContent(
-      link.url,
-    );
+    const parseContent = await this.parseWebLinkContent(link.url); // 处理错误边界
+    if (!parseContent) return;
+
+    const { pageContent, title, source } = parseContent;
+
     const metadata = { source, userId: link.userId, title };
     const doc = new Document({
       pageContent: this.getExpectedTokenLenContent(

@@ -17,6 +17,9 @@ const handler: PlasmoMessaging.PortHandler<{
 
   try {
     if (type === TASK_STATUS.START) {
+      // 确保上一次是 aborted 了
+      abortController?.abort?.()
+
       abortController = new AbortController()
 
       // TODO: 这里未来要优化
@@ -59,7 +62,6 @@ const handler: PlasmoMessaging.PortHandler<{
     }
   } catch (err) {
     console.log("err", err)
-  } finally {
     // 最终也需要 abort 确保关闭
     abortController?.abort?.()
   }
