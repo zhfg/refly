@@ -99,7 +99,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
       <div
         className="session-inner-container"
         style={
-          showSelectedWeblinkList ? { height: `calc(100vh - 270px)` } : {}
+          showSelectedWeblinkList ? { height: `calc(100vh - 280px)` } : {}
         }>
         {sessions?.map((item, index) => (
           <Session
