@@ -1,6 +1,7 @@
 import { IconLoading } from "@arco-design/web-react/icon"
 import { useEffect, useRef, useState } from "react"
 import ReactMarkdown from "react-markdown"
+import { Message as message } from "@arco-design/web-react"
 
 import "katex/dist/katex.min.css"
 
@@ -22,6 +23,7 @@ export function PreCode(props: { children: any }) {
           if (ref.current) {
             const code = ref.current.innerText
             copyToClipboard(code)
+            message.success("复制成功")
           }
         }}></span>
       {props.children}
@@ -34,7 +36,7 @@ export function Markdown(
     content: string
     loading?: boolean
     fontSize?: number
-  } & React.DOMAttributes<HTMLDivElement>
+  } & React.DOMAttributes<HTMLDivElement>,
 ) {
   const mdRef = useRef<HTMLDivElement>(null)
 
@@ -66,12 +68,12 @@ export function Markdown(
               RehypeHighlight,
               {
                 detect: false,
-                ignoreMissing: true
-              }
-            ]
+                ignoreMissing: true,
+              },
+            ],
           ]}
           components={{
-            pre: PreCode
+            pre: PreCode,
           }}
           linkTarget={"_blank"}>
           {props.content}

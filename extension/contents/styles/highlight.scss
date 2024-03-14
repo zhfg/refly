@@ -1,6 +1,38 @@
 .markdown-body {
   pre {
     padding: 0;
+    position: relative;
+
+    &:hover .copy-code-button {
+      pointer-events: all;
+      transform: translateX(0px);
+      opacity: 0.5;
+      cursor: pointer;
+    }
+
+    .copy-code-button {
+      position: absolute;
+      right: 10px;
+      top: 1em;
+      cursor: pointer;
+      padding: 0px 5px;
+      background-color: var(--black);
+      color: var(--white);
+      border: var(--border-in-light);
+      border-radius: 10px;
+      transform: translateX(10px);
+      pointer-events: none;
+      opacity: 0;
+      transition: all ease 0.3s;
+
+      &:after {
+        content: "复制";
+      }
+
+      &:hover {
+        opacity: 1;
+      }
+    }
   }
 
   pre,
