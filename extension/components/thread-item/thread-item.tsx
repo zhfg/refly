@@ -39,6 +39,10 @@ export const ThreadItem = (props: ThreadItemProps) => {
     selectedWeblinkConfig?.filter || [],
   )
 
+  const showSelectedWeblinkList =
+    threadSearchTarget === SearchTarget.SelectedPages &&
+    threadWeblinkListFilter?.length > 0
+
   const messageStateStore = useMessageStateStore()
   const { buildShutdownTaskAndGenResponse, buildTaskAndGenReponse } =
     useBuildTask()
@@ -92,7 +96,11 @@ export const ThreadItem = (props: ThreadItemProps) => {
 
   return (
     <div className="session-container">
-      <div className="session-inner-container">
+      <div
+        className="session-inner-container"
+        style={
+          showSelectedWeblinkList ? { height: `calc(100vh - 270px)` } : {}
+        }>
         {sessions?.map((item, index) => (
           <Session
             key={index}
@@ -102,7 +110,11 @@ export const ThreadItem = (props: ThreadItemProps) => {
         ))}
       </div>
 
-      <div className="footer input-panel">
+      <div
+        className="footer input-panel"
+        style={
+          showSelectedWeblinkList ? { height: `calc(100vh - 260px)` } : {}
+        }>
         {messageStateStore?.pending && (
           <div className="actions">
             {messageStateStore.taskType === TASK_TYPE.CHAT &&
@@ -157,8 +169,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
               </div>
             </div>
           </div>
-          {threadSearchTarget === SearchTarget.SelectedPages &&
-          threadWeblinkListFilter?.length > 0 ? (
+          {showSelectedWeblinkList ? (
             <SelectedWeblink
               closable={false}
               selectedWeblinkList={threadWeblinkListFilter}
