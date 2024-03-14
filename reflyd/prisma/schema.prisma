@@ -157,23 +157,25 @@ model Conversation {
 ///对话消息
 model ChatMessage {
   ///id为主键，自动生成，映射到数据库中的_id字段，类型为ObjectId
-  id             String      @id @default(auto()) @map("_id") @db.ObjectId
+  id                    String      @id @default(auto()) @map("_id") @db.ObjectId
   ///聊天记录 ID
-  messageId      String      @unique
+  messageId             String      @unique
   ///会话id
-  conversationId String
+  conversationId        String
   ///消息来源
-  type           MessageType
+  type                  MessageType
   ///用户id
-  userId         String      @db.ObjectId
+  userId                String      @db.ObjectId
   //内容
-  content        String
+  content               String
   // 引用文档来源，以 JSON 方式存储
-  sources        String?     @default("")
+  sources               String?     @default("")
   ///创建时间
-  createdAt      DateTime    @default(now())
+  createdAt             DateTime    @default(now())
   ///更新时间
-  updatedAt      DateTime    @updatedAt
+  updatedAt             DateTime    @updatedAt
+  /// 会话选中 Weblink 配置，未来可能会变，先使用 string 保存
+  selectedWeblinkConfig String?
 }
 
 ///web link

@@ -94,6 +94,9 @@ export type BuildMessageData = {
   replyType?: ReplyType
   intentId?: string
   questionId?: string
+  // 每次提问完在 human message 上加一个提问的 filter，这样之后追问时可以 follow 这个 filter 规则
+  // 这里是前端同步的状态，后续获取新的消息之后，取存储的 last human message 的配置
+  selectedWeblinkConfig?: string
 }
 
 export const buildWelcomeMessage = (data: BuildMessageData) => {
@@ -134,6 +137,7 @@ export const buildQuestionMessage = (data: BuildMessageData) => {
     conversationId = "",
     content = "",
     questionType = QuestionType.NORMAL,
+    selectedWeblinkConfig = "",
   } = data
 
   let dataExtra = {}
@@ -149,8 +153,9 @@ export const buildQuestionMessage = (data: BuildMessageData) => {
     conversationId,
     summary: content,
     data: {
-      type: MessageDataType.TEXT,
+      type: MessageType.Human,
       content,
+      selectedWeblinkConfig,
       ...dataExtra,
     },
   }
@@ -182,7 +187,7 @@ export const buildReplyMessage = (data: BuildMessageData) => {
     itemType: MessageItemType.REPLY,
     summary: content,
     data: {
-      type: MessageDataType.TEXT,
+      type: MessageType.Assistant,
       content,
       ...dataExtra,
     },

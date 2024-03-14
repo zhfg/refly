@@ -45,6 +45,7 @@ export class ConversationService {
     content: string;
     userId: string;
     conversationId: string;
+    selectedWeblinkConfig?: string;
   }) {
     return this.prisma.chatMessage.create({
       data: { ...msg, messageId: randomUUID() },

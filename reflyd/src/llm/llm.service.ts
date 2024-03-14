@@ -28,6 +28,7 @@ import { LLMChatMessage } from './schema';
 import { Source } from 'src/types/weblink';
 import { HumanMessage } from 'langchain/schema';
 import { maxWebsiteTokenSize, truncateToken } from 'src/utils/token';
+import { uniqueFunc } from 'src/utils/unique';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
@@ -206,9 +207,9 @@ export class LlmService implements OnModuleInit {
 
     // rerank scores
     // TODO: 这里只考虑了召回阈值和数量，默认取五个，但是没有考虑 token 窗口，未来需要优化
-    results = results
+    results = uniqueFunc(results, 'content')
       .sort((a, b) => (b?.score || 0) - (a?.score || 0))
-      ?.filter((item) => item?.score < 0.8)
+      ?.filter((item) => item?.score >= 0.8)
       ?.slice(0, 6);
 
     return results;

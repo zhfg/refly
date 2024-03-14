@@ -42,6 +42,7 @@ import {
   ReplyMessage,
 } from "./message-list"
 import { ChatHeader } from "./header"
+import { SelectedWeblink } from "../selected-weblink/index"
 // utils
 import { getLoadingStatusText } from "./utils"
 import { buildConversation } from "~utils/conversation"
@@ -60,9 +61,10 @@ import { useWebLinkIndexed } from "~hooks/use-weblink-indexed"
 import type { PlasmoGetStyle } from "plasmo"
 import { IconTip } from "./icon-tip"
 // 组件
-import { SearchTargetSelector } from "./search-target-selector"
+import { SearchTargetSelector } from "./home-search-target-selector"
 import { useTaskStore } from "~stores/task"
 import { buildChatTask, buildQuickActionTask } from "~utils/task"
+import type { WebLinkItem } from "~components/weblink-list/types"
 
 const TextArea = Input.TextArea
 
@@ -267,6 +269,19 @@ const Home = (props: ChatProps) => {
     handleCreateNewConversation(task)
   }
 
+  const mapSourceFromSelectedRow = (
+    selectedRow: { content: WebLinkItem; key: string | number }[],
+  ) => {
+    return selectedRow?.map((item) => ({
+      pageContent: item?.content?.originPageDescription,
+      metadata: {
+        source: item?.content?.originPageUrl,
+        title: item?.content?.originPageTitle,
+      },
+      score: -1,
+    }))
+  }
+
   // 自动聚焦输入框
   useEffect(() => {
     if (inputRef.current && siderStore.showSider) inputRef?.current?.focus?.()
@@ -428,7 +443,7 @@ const Home = (props: ChatProps) => {
                 </IconTip>
 
                 {/** 第一版本不支持选择指定网页进行问答 */}
-                <SearchTargetSelector />
+                <SearchTargetSelector showText />
                 {/* <Button
               onClick={() => {
                 conversationListInstanceRef?.current?.setVisible(true)
@@ -448,40 +463,14 @@ const Home = (props: ChatProps) => {
             </div>
           </div>
         </div>
-        {webLinkStore?.selectedRow?.length > 0 && (
-          <div className="selected-weblinks-container">
-            <div className="selected-weblinks-inner-container">
-              <div className="hint-item">
-                <IconRightCircle style={{ color: "rgba(0, 0, 0, .6)" }} />
-                <span>基于选中网页提问：</span>
-              </div>
-              {webLinkStore?.selectedRow.map((item, index) => (
-                <Tag
-                  key={index}
-                  closable
-                  onClose={() => {}}
-                  icon={<IconLink />}
-                  bordered
-                  color="gray">
-                  <a
-                    rel="noreferrer"
-                    href={item?.content?.originPageUrl}
-                    target="_blank"
-                    className="selected-weblink-item">
-                    <img
-                      className="icon"
-                      src={`https://www.google.com/s2/favicons?domain=${item?.content.origin}&sz=${16}`}
-                      alt=""
-                    />
-                    <span className="text">
-                      {item?.content?.originPageTitle}
-                    </span>
-                  </a>
-                </Tag>
-              ))}
-            </div>
-          </div>
-        )}
+        {webLinkStore?.selectedRow?.length > 0 ? (
+          <SelectedWeblink
+            closable={true}
+            selectedWeblinkList={mapSourceFromSelectedRow(
+              webLinkStore.selectedRow || [],
+            )}
+          />
+        ) : null}
       </div>
 
       <WeblinkList

@@ -66,6 +66,7 @@ export class ConversationController {
 
     const userId: string = req.user.id;
     const query = data?.question || '';
+    const weblinkList = body?.task?.data?.filter?.weblinkList || [];
 
     await this.conversationService.addChatMessage({
       type: 'human',
@@ -73,6 +74,11 @@ export class ConversationController {
       conversationId: conversationId,
       content: query,
       sources: '',
+      // 每次提问完在 human message 上加一个提问的 filter，这样之后追问时可以 follow 这个 filter 规则
+      selectedWeblinkConfig: JSON.stringify({
+        searchTarget: weblinkList?.length > 0 ? 'selectedPages' : 'all',
+        filter: weblinkList,
+      }),
     });
 
     res.setHeader('Content-Type', 'text/event-stream');

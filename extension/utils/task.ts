@@ -3,7 +3,7 @@ import {
   LOCALE,
   TASK_TYPE,
   type Conversation,
-  type QUICK_ACTION,
+  type QUICK_ACTION_TASK_PAYLOAD,
   type SEARCH_ENHANCE,
   type Task,
   type GEN_TITLE,
@@ -16,7 +16,7 @@ export type BuildTask = {
   taskType: TASK_TYPE
   language?: LANGUAGE
   locale?: LOCALE
-  data: CHAT | GEN_TITLE | QUICK_ACTION | SEARCH_ENHANCE
+  data: CHAT | QUICK_ACTION_TASK_PAYLOAD
 }
 
 export const buildTask = (payload: BuildTask): Task => {

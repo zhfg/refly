@@ -56,9 +56,16 @@ export const useBuildTask = () => {
     console.log("buildTaskAndGenReponse", task)
     const question = task.data?.question
 
+    // 构建 filter, for follow ask question config
+    const weblinkList = task?.data?.filter?.weblinkList || []
+    const selectedWeblinkConfig = {
+      searchTarget: weblinkList?.length > 0 ? "selectedPages" : "all",
+      filter: weblinkList,
+    }
     const questionMsg = buildQuestionMessage({
       conversationId: conversationStore.currentConversation?.id,
       content: question,
+      selectedWeblinkConfig: JSON.stringify(selectedWeblinkConfig),
     })
 
     const replyMsg = buildReplyMessage({

@@ -16,6 +16,10 @@ import { sendToBackground } from "@plasmohq/messaging"
 import { Header } from "./header"
 import { useBuildTask } from "~hooks/use-build-task"
 import { useTaskStore } from "~stores/task"
+import { MessageType, type Message } from "~types"
+import { safeParseJSON } from "~utils/parse"
+import { useWeblinkStore } from "~stores/weblink"
+import { SearchTarget, useSearchStateStore } from "~stores/search-state"
 
 export const Thread = () => {
   const { buildTaskAndGenReponse } = useBuildTask()
@@ -24,6 +28,8 @@ export const Thread = () => {
   const chatStore = useChatStore()
   const conversationStore = useConversationStore()
   const threadStore = useThreadStore()
+  const weblinkStore = useWeblinkStore()
+  const searchStateStore = useSearchStateStore()
   const { resetState } = useResetState()
 
   const handleGetThreadMessages = async (threadId: string) => {
@@ -52,6 +58,8 @@ export const Thread = () => {
         content = "",
         relatedQuestions = [],
         sources,
+        type,
+        selectedWeblinkConfig = "", // 这里需要构建进来
         ...extraInfo
       } = item || {}
 
@@ -61,10 +69,21 @@ export const Thread = () => {
           content,
           relatedQuestions,
           sources,
+          type,
+          selectedWeblinkConfig,
         },
       }
     })
     chatStore.setMessages(messages)
+  }
+
+  const getSelectedWeblinkConfig = (messages: Message[] = []) => {
+    // 这里是获取第一个，早期简化策略，因为一开始设置之后，后续设置就保留
+    const lastHumanMessage = messages?.find(
+      (item) => item?.data?.type === MessageType?.Human,
+    )
+
+    return safeParseJSON(lastHumanMessage?.data?.selectedWeblinkConfig)
   }
 
   const handleThread = async (threadId: string) => {
@@ -77,11 +96,14 @@ export const Thread = () => {
       // 更换成基于 task 的消息模式，核心是基于 task 来处理
       buildTaskAndGenReponse(task)
       chatStore.setIsNewConversation(false)
-    } else if (params?.threadId && messages?.length === 0) {
+    } else if (params?.threadId) {
       handleGetThreadMessages(threadId)
     }
 
+    // 重置状态
     chatStore.setNewQAText("")
+    weblinkStore.updateSelectedRow([])
+    searchStateStore.setSearchTarget(SearchTarget.CurrentPage)
   }
 
   useEffect(() => {
@@ -90,6 +112,7 @@ export const Thread = () => {
 
   console.log("thread message", chatStore.messages)
   const sessions = buildSessions(chatStore.messages)
+  const selectedWeblinkConfig = getSelectedWeblinkConfig(chatStore.messages)
 
   return (
     <div
@@ -99,7 +122,10 @@ export const Thread = () => {
         flexDirection: "column",
       }}>
       <Header />
-      <ThreadItem sessions={sessions} />
+      <ThreadItem
+        sessions={sessions}
+        selectedWeblinkConfig={selectedWeblinkConfig}
+      />
     </div>
   )
 }
