@@ -1,4 +1,4 @@
-import React, { useRef } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Button, Space, Input } from "@arco-design/web-react"
 import { IconMinusCircle, IconSend } from "@arco-design/web-react/icon"
 
@@ -7,24 +7,46 @@ import { useChatStore } from "@/stores/chat"
 import { useMessageStateStore } from "@/stores/message-state"
 // 组件
 import { Session } from "./session"
-import { TASK_TYPE, type SessionItem } from "@/types"
+import { TASK_TYPE, type SessionItem, type Task, type Source } from "@/types"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input"
 import { useBuildTask } from "@/hooks/use-build-task"
-import { useSiderSendMessage } from "@/hooks/use-sider-send-message"
+import { buildChatTask, buildQuickActionTask } from "@/utils/task"
+import { useConversationStore } from "@/stores/conversation"
+
+import { ThreadSearchTargetSelector } from "@/components/thread-item/thread-search-target-selector"
+import { SearchTarget } from "@/stores/search-state"
+// 自定义组件
+import { SelectedWeblink } from "../selected-weblink/index"
 
 interface ThreadItemProps {
   sessions: SessionItem[]
+  selectedWeblinkConfig: {
+    searchTarget: SearchTarget
+    filter: Source[]
+  }
 }
 
 const TextArea = Input.TextArea
 
 export const ThreadItem = (props: ThreadItemProps) => {
-  const { sessions } = props
+  const { sessions, selectedWeblinkConfig } = props
   const inputRef = useRef<RefTextAreaType>(null)
-  const { handleSideSendMessage } = useSiderSendMessage()
   const chatStore = useChatStore()
+
+  const [threadSearchTarget, setThreadSearchTarget] = useState(
+    selectedWeblinkConfig?.searchTarget,
+  )
+  const [threadWeblinkListFilter, setThreadWeblinkListFilter] = useState(
+    selectedWeblinkConfig?.filter || [],
+  )
+
+  const showSelectedWeblinkList =
+    threadSearchTarget === SearchTarget.SelectedPages &&
+    threadWeblinkListFilter?.length > 0
+
   const messageStateStore = useMessageStateStore()
-  const { buildShutdownTaskAndGenResponse } = useBuildTask()
+  const { buildShutdownTaskAndGenResponse, buildTaskAndGenReponse } =
+    useBuildTask()
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     e.stopPropagation()
@@ -33,14 +55,44 @@ export const ThreadItem = (props: ThreadItemProps) => {
   }
 
   const handleAskFollowing = () => {
-    const question = chatStore.newQAText
-    console.log(
-      "handleThread",
-      chatStore.isNewConversation,
-      chatStore.newQAText,
-    )
-    handleSideSendMessage(question)
+    const { newQAText } = useChatStore.getState()
+    const { currentConversation } = useConversationStore.getState()
+    const useWeblinkList =
+      threadSearchTarget === SearchTarget.SelectedPages &&
+      threadWeblinkListFilter?.length > 0
+
+    const task = buildChatTask({
+      question: newQAText,
+      conversationId: currentConversation?.id || "",
+      filter: {
+        weblinkList: useWeblinkList ? threadWeblinkListFilter : [],
+      },
+    })
+
+    buildTaskAndGenReponse(task)
+    chatStore.setNewQAText("")
   }
+
+  // 这里保存为组件状态是只对当前组件生效，而且理论上设置之后就应该在此 thread 一直生效，不应该清空
+  useEffect(() => {
+    if (!threadSearchTarget && selectedWeblinkConfig?.searchTarget) {
+      setThreadSearchTarget(props.selectedWeblinkConfig?.searchTarget)
+    }
+
+    if (
+      (!threadWeblinkListFilter || threadWeblinkListFilter?.length <= 0) &&
+      selectedWeblinkConfig?.filter?.length > 0
+    ) {
+      setThreadWeblinkListFilter(selectedWeblinkConfig.filter)
+    }
+  }, [selectedWeblinkConfig?.searchTarget, selectedWeblinkConfig?.filter])
+
+  console.log(
+    "selectedWeblinkConfig",
+    selectedWeblinkConfig,
+    threadSearchTarget,
+    threadWeblinkListFilter,
+  )
 
   return (
     <div className="session-container">
@@ -75,6 +127,13 @@ export const ThreadItem = (props: ThreadItemProps) => {
         <div className="session-input-box">
           <div className="session-input-inner">
             <div className="session-inner-input-box">
+              <ThreadSearchTargetSelector
+                showText={false}
+                searchTarget={threadSearchTarget}
+                handleChangeSelector={searchTarget =>
+                  setThreadSearchTarget(searchTarget)
+                }
+              />
               <TextArea
                 ref={inputRef}
                 className="message-input"
@@ -103,6 +162,12 @@ export const ThreadItem = (props: ThreadItemProps) => {
                 </div>
               </div>
             </div>
+            {showSelectedWeblinkList ? (
+              <SelectedWeblink
+                closable={false}
+                selectedWeblinkList={threadWeblinkListFilter}
+              />
+            ) : null}
             <div className="session-inner-input-placeholder"></div>
           </div>
         </div>

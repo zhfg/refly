@@ -3,9 +3,6 @@ import { devtools } from "zustand/middleware"
 import type {} from "@redux-devtools/extension"
 import type { Message, SessionItem } from "@/types"
 
-// fake data for debug
-import { fakeMessages } from "@/data/message"
-
 export interface ChatState {
   // state
   messages: Message[]

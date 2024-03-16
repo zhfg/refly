@@ -1,11 +1,10 @@
-import React, { useCallback } from "react"
+import { useCallback } from "react"
 import { useChatStore } from "../stores/chat"
 import { useMessageStateStore } from "../stores/message-state"
 import { useConversationStore } from "../stores/conversation"
 import type { Message, MessageState } from "@/types"
-import { MessageItemType, TASK_STATUS, TASK_TYPE } from "@/types"
-import type { QUICK_ACTION, Task } from "@/types"
-import { buildTask } from "@/utils/task"
+import { TASK_STATUS, TASK_TYPE } from "@/types"
+import type { Task } from "@/types"
 import { buildQuestionMessage, buildReplyMessage } from "@/utils/message"
 
 import { buildErrorMessage } from "@/utils/message"
@@ -15,75 +14,41 @@ import { safeParseJSON } from "@/utils/parse"
 // requests
 import streamingGenMessage from "@/requests/streamingGenMessage"
 // stores
-import { SearchTarget, useSearchStateStore } from "@/stores/search-state"
-import { useWeblinkStore } from "@/stores/weblink"
 
 export const useBuildTask = () => {
   const chatStore = useChatStore()
   const messageStateStore = useMessageStateStore()
   const conversationStore = useConversationStore()
 
-  // const buildGenTitleTaskAndGenResponse = () => {
-  //   // 每次生成会话 title 时，需要重置此字段
-  //   chatStore.setIsGenTitle(false)
+  const buildTaskAndGenReponse = (task: Task) => {
+    console.log("buildTaskAndGenReponse", task)
+    const question = task.data?.question
 
-  //   // 生成 chat task
-  //   const taskPayload = {
-  //     taskType: TASK_TYPE.GEN_TITLE,
-  //     data: {
-  //       conversationId: conversationStore.currentConversation?.conversationId,
-  //     },
-  //   }
-  //   const task = buildTask(taskPayload)
-  //   // handleGenResponse(task)
-  // }
+    // 构建 filter, for follow ask question config
+    const weblinkList = task?.data?.filter?.weblinkList || []
+    const selectedWeblinkConfig = {
+      searchTarget: weblinkList?.length > 0 ? "selectedPages" : "all",
+      filter: weblinkList,
+    }
 
-  const buildQuickActionTaskAndGenReponse = (
-    taskType: TASK_TYPE,
-    data: QUICK_ACTION,
-  ) => {
-    const task = buildTask({ taskType, data })
-
-    handleGenResponse(task)
-  }
-
-  const buildChatTaskAndGenReponse = (question: string) => {
     const questionMsg = buildQuestionMessage({
       conversationId: conversationStore.currentConversation?.id,
       content: question,
+      selectedWeblinkConfig: JSON.stringify(selectedWeblinkConfig),
     })
-
     const replyMsg = buildReplyMessage({
       conversationId: conversationStore.currentConversation?.id,
       content: "",
       questionId: questionMsg?.itemId,
     })
-
     // 将 reply 加到 message-state
     messageStateStore.setMessageState({
       pendingReplyMsg: replyMsg,
+      taskType: task?.taskType,
     })
 
     chatStore.setMessages(chatStore.messages.concat(questionMsg))
 
-    // 将最后一条回答拼到上下文中
-    const lastReplyMsg = chatStore.messages
-      .filter(message => message?.itemType === MessageItemType?.REPLY)
-      ?.at(-1)
-    const taskMsgList = lastReplyMsg
-      ? [lastReplyMsg, questionMsg]
-      : [questionMsg]
-
-    // 生成 chat task
-    const taskPayload = {
-      taskType: TASK_TYPE.CHAT,
-      data: {
-        ...conversationStore.currentConversation,
-        items: taskMsgList,
-        preGeneratedReplyId: replyMsg?.itemId, // 预先生成的回复，用于快速问答 message
-      },
-    }
-    const task = buildTask(taskPayload)
     handleGenResponse(task)
   }
 
@@ -173,7 +138,11 @@ export const useBuildTask = () => {
 
           newMessageState.error = true
           newMessageState.pendingFirstToken = false
-        } else if (currentMessageState.taskType === TASK_TYPE.QUICK_ACTION) {
+        } else if (
+          [TASK_TYPE.CHAT, TASK_TYPE.QUICK_ACTION].includes(
+            currentMessageState?.taskType as TASK_TYPE,
+          )
+        ) {
           // 针对 quickAction 这类一次性的，就是直接展示错误信息
           newMessageState.error = true
           newMessageState.pendingFirstToken = false
@@ -220,7 +189,11 @@ export const useBuildTask = () => {
     }
 
     // 只有在聊天场景下，才需要更新最后一条消息
-    if (currentMessageState.taskType === TASK_TYPE.CHAT) {
+    if (
+      [TASK_TYPE.CHAT, TASK_TYPE.QUICK_ACTION].includes(
+        currentMessageState?.taskType as TASK_TYPE,
+      )
+    ) {
       if (currentMessageState.pendingFirstToken) {
         const lastMessage = currentMessageState.pendingReplyMsg as Message
 
@@ -234,17 +207,17 @@ export const useBuildTask = () => {
           console.log("sourceWeblinkPayload", sourceWeblinkPayload)
           messageStateStore.setMessageState({
             ...currentMessageState,
-            pendingSourceDocs: (
-              currentMessageState.pendingSourceDocs || []
-            ).concat(sourceWeblinkPayload),
+            pendingSourceDocs: (currentMessageState.pendingSourceDocs || [])
+              .concat(sourceWeblinkPayload)
+              ?.filter(item => item),
           })
 
           console.log("sourceWeblinkPayload", lastMessage.data.sources)
 
           if (Array.isArray(lastMessage?.data?.sources)) {
-            lastMessage.data.sources = lastMessage?.data?.sources?.concat(
-              sourceWeblinkPayload || [],
-            )
+            lastMessage.data.sources = lastMessage?.data?.sources
+              ?.concat(sourceWeblinkPayload || [])
+              ?.filter(item => item)
           } else {
             lastMessage.data.sources = [sourceWeblinkPayload]
           }
@@ -271,9 +244,9 @@ export const useBuildTask = () => {
           console.log("sourceWeblinkPayload", sourceWeblinkPayload)
           messageStateStore.setMessageState({
             ...currentMessageState,
-            pendingSourceDocs: (
-              currentMessageState.pendingSourceDocs || []
-            ).concat(sourceWeblinkPayload),
+            pendingSourceDocs: (currentMessageState.pendingSourceDocs || [])
+              ?.concat(sourceWeblinkPayload)
+              ?.filter(item => item),
           })
 
           const lastMessage = currentChatState.messages.at(-1) as Message
@@ -285,11 +258,13 @@ export const useBuildTask = () => {
           console.log("sourceWeblinkPayload", lastMessage?.data.sources)
 
           if (Array.isArray(lastMessage?.data?.sources)) {
-            lastMessage.data.sources = lastMessage?.data?.sources?.concat(
-              sourceWeblinkPayload || [],
-            )
+            lastMessage.data.sources = lastMessage?.data?.sources
+              ?.concat(sourceWeblinkPayload || [])
+              ?.filter(item => item)
           } else {
-            lastMessage.data.sources = [sourceWeblinkPayload]
+            lastMessage.data.sources = [sourceWeblinkPayload]?.filter(
+              item => item,
+            )
           }
           chatStore.setMessages([...savedMessage, { ...lastMessage }])
         } else {
@@ -312,51 +287,20 @@ export const useBuildTask = () => {
     }
   }
 
-  // 在搜索问答时需要传入对应的 weblink
-  const getSelectedWeblinkList = () => {
-    let weblinkList: string[] = []
-    const { searchTarget } = useSearchStateStore.getState()
-    const { selectedRow = [] } = useWeblinkStore.getState()
-
-    if (searchTarget === SearchTarget.All) {
-      weblinkList = []
-    } else if (searchTarget === SearchTarget.CurrentPage) {
-      // TODO：后端需要优先加入队列进行处理
-      weblinkList = [location.href]
-    } else if (searchTarget === SearchTarget.SelectedPages) {
-      weblinkList = selectedRow.map(item => item?.content?.originPageUrl || "")
-    }
-
-    return weblinkList
-  }
-
   const handleSendMessage = (payload: {
     body: {
       type: TASK_STATUS
       payload?: Task
     }
   }) => {
-    // 获取当前的状态
-    const weblinkList = getSelectedWeblinkList()
-    console.log("weblinkList", weblinkList)
-
     // 生成任务
-    streamingGenMessage(
-      {
-        body: {
-          ...payload.body,
-          weblinkList,
-        },
-      },
-      {
-        onMessage: handleStreamingMessage,
-      },
-    )
+    streamingGenMessage(payload, {
+      onMessage: handleStreamingMessage,
+    })
   }
 
   return {
-    buildQuickActionTaskAndGenReponse,
-    buildChatTaskAndGenReponse,
+    buildTaskAndGenReponse,
     buildShutdownTaskAndGenResponse,
   }
 }

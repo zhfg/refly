@@ -1,8 +1,11 @@
-import React, { useEffect, useRef } from "react"
+import { useEffect, useRef } from "react"
 import { reflyEnv } from "@/utils/env"
 import hotKeys from "hotkeys-js"
-import { useSiderSendMessage } from "@/hooks/use-sider-send-message"
-
+import { useBuildTask } from "./use-build-task"
+import { useChatStore } from "@/stores/chat"
+import { type Source } from "@/types"
+import { buildChatTask } from "@/utils/task"
+import { useWeblinkStore } from "@/stores/weblink"
 import getAllCommands from "@/requests/getAllCommands"
 
 export const useBindCommands = () => {
@@ -10,7 +13,7 @@ export const useBindCommands = () => {
   const softKeyboardShortcutsEnabledRef = useRef(true)
   const keyboardShortcutRef = useRef("")
   const keyboardSendShortcutRef = useRef("")
-  const { handleSideSendMessage } = useSiderSendMessage()
+  const { buildTaskAndGenReponse } = useBuildTask()
 
   const loadCommands = async () => {
     const commands = await getAllCommands({
@@ -60,7 +63,25 @@ export const useBindCommands = () => {
       e => {
         e.preventDefault()
         e.stopPropagation()
-        handleSideSendMessage()
+
+        const { newQAText } = useChatStore.getState()
+        const { selectedRow } = useWeblinkStore.getState()
+
+        const selectedWebLink: Source[] = selectedRow?.map(item => ({
+          pageContent: "",
+          metadata: {
+            title: item?.content?.originPageTitle || "",
+            source: item?.content?.originPageUrl || "",
+          },
+          score: -1, // 手工构造
+        }))
+
+        const task = buildChatTask({
+          question: newQAText,
+          filter: { weblinkList: selectedWebLink },
+        })
+
+        buildTaskAndGenReponse(task)
       },
     )
   }

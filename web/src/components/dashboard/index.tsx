@@ -15,33 +15,55 @@ import {
 import React, { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
-import { Conversation, TASK_TYPE } from "@/types"
+import {
+  MessageItemType,
+  TASK_TYPE,
+  type Message,
+  type Task,
+  QUICK_ACTION_TYPE,
+  type QUICK_ACTION_TASK_PAYLOAD,
+  LANGUAGE,
+  LOCALE,
+  type Source,
+  Thread,
+} from "@/types"
 
 // 自定义组件
 import WeblinkList from "../weblink-list"
+import { SelectedWeblink } from "../selected-weblink/index"
 // utils
 import { buildConversation } from "@/utils/conversation"
+import { buildChatTask, buildQuickActionTask } from "@/utils/task"
+// 自定义方法
+import { scrollToBottom } from "@/utils/ui"
 // stores
 import { useChatStore } from "../../stores/chat"
 import { useConversationStore } from "@/stores/conversation"
 import { useMessageStateStore } from "@/stores/message-state"
 import { useSiderStore } from "@/stores/sider"
 import { useWeblinkStore } from "@/stores/weblink"
+import { SearchTarget, useSearchStateStore } from "@/stores/search-state"
+import { useTaskStore } from "@/stores/task"
 // hooks
 import { useBuildTask } from "@/hooks/use-build-task"
 import { useResetState } from "@/hooks/use-reset-state"
 // 组件
-import { SearchTargetSelector } from "./search-target-selector"
+import { SearchTargetSelector } from "./home-search-target-selector"
 // request
 import createNewConversation from "@/requests/createNewConversation"
 // scss
 import "./index.scss"
 import classNames from "classnames"
 import { useCookie } from "react-use"
+// types
+import type { WebLinkItem } from "@/types/weblink"
 
 const TextArea = Input.TextArea
 
 export const extensionId = "fcncfleeddfdpbigljgiejfdkmpkldpe"
+
+// 用于快速选择
+export const quickActionList = ["summary"]
 
 const Home = () => {
   const inputRef = useRef<RefTextAreaType>(null)
@@ -55,6 +77,7 @@ const Home = () => {
   const messageStateStore = useMessageStateStore()
   const siderStore = useSiderStore()
   const webLinkStore = useWeblinkStore()
+  const taskStore = useTaskStore()
   // hooks
   const { resetState } = useResetState()
 
@@ -80,7 +103,7 @@ const Home = () => {
    * - newQAText
    * - currentMode
    */
-  const handleCreateNewConversation = async () => {
+  const handleCreateNewConversation = async (task: Task) => {
     /**
      * 1. 创建新 thread，设置状态
      * 2. 跳转到 thread 界面，进行第一个回复，展示 问题、sources、答案
@@ -101,10 +124,17 @@ const Home = () => {
     }
 
     console.log("createNewConversation", res)
-    conversationStore.setCurrentConversation(res?.data as Conversation)
+    conversationStore.setCurrentConversation(res?.data as Thread)
 
     // 清空之前的状态
     resetState()
+
+    // 设置当前的任务类型及会话 id
+    task.data = {
+      ...(task?.data || {}),
+      conversationId: res?.data?.id,
+    }
+    taskStore.setTask(task)
 
     // 更新新的 newQAText，for 新会话跳转使用
     chatStore.setNewQAText(question)
@@ -136,6 +166,58 @@ const Home = () => {
 
     console.log("dashboard close")
     window.close()
+  }
+
+  const runChatTask = () => {
+    const question = chatStore.newQAText
+    const { selectedRow } = useWeblinkStore.getState()
+    const { searchTarget } = useSearchStateStore.getState()
+
+    let selectedWebLink: Source[] = []
+
+    if (searchTarget === SearchTarget.SelectedPages) {
+      selectedWebLink = selectedRow?.map(item => ({
+        pageContent: "",
+        metadata: {
+          title: item?.content?.originPageTitle || "",
+          source: item?.content?.originPageUrl || "",
+        },
+        score: -1, // 手工构造
+      }))
+    }
+
+    const task = buildChatTask({
+      question,
+      filter: { weblinkList: selectedWebLink },
+    })
+
+    // 创建新会话并跳转
+    handleCreateNewConversation(task)
+  }
+
+  const runQuickActionTask = async (payload: QUICK_ACTION_TASK_PAYLOAD) => {
+    const task = buildQuickActionTask({
+      question: `总结网页`,
+      actionType: QUICK_ACTION_TYPE.SUMMARY,
+      filter: payload?.filter,
+      actionPrompt: "总结网页内容并提炼要点",
+    })
+
+    // 创建新会话并跳转
+    handleCreateNewConversation(task)
+  }
+
+  const mapSourceFromSelectedRow = (
+    selectedRow: { content: WebLinkItem; key: string | number }[],
+  ) => {
+    return selectedRow?.map(item => ({
+      pageContent: item?.content?.originPageDescription,
+      metadata: {
+        source: item?.content?.originPageUrl,
+        title: item?.content?.originPageTitle,
+      },
+      score: -1,
+    }))
   }
 
   // TODO: 临时关闭，用于开发调试
@@ -282,45 +364,19 @@ const Home = () => {
                   shape="circle"
                   icon={<IconSend />}
                   style={{ color: "#FFF", background: "#00968F" }}
-                  onClick={handleCreateNewConversation}></Button>
+                  onClick={runChatTask}></Button>
               </div>
             </div>
           </div>
         </div>
-        {webLinkStore?.selectedRow?.length > 0 && (
-          <div className="selected-weblinks-container">
-            <div className="selected-weblinks-inner-container">
-              <div className="hint-item">
-                <IconRightCircle style={{ color: "rgba(0, 0, 0, .6)" }} />
-                <span>基于选中网页提问：</span>
-              </div>
-              {webLinkStore?.selectedRow.map((item, index) => (
-                <Tag
-                  key={index}
-                  closable
-                  onClose={() => {}}
-                  icon={<IconLink />}
-                  bordered
-                  color="gray">
-                  <a
-                    rel="noreferrer"
-                    href={item?.content?.originPageUrl}
-                    target="_blank"
-                    className="selected-weblink-item">
-                    <img
-                      className="icon"
-                      src={`https://www.google.com/s2/favicons?domain=${item?.content.origin}&sz=${16}`}
-                      alt=""
-                    />
-                    <span className="text">
-                      {item?.content?.originPageTitle}
-                    </span>
-                  </a>
-                </Tag>
-              ))}
-            </div>
-          </div>
-        )}
+        {webLinkStore?.selectedRow?.length > 0 ? (
+          <SelectedWeblink
+            closable={true}
+            selectedWeblinkList={mapSourceFromSelectedRow(
+              webLinkStore.selectedRow || [],
+            )}
+          />
+        ) : null}
       </div>
 
       <WeblinkList ref={weblinkListRef} />
