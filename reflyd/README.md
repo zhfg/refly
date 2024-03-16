@@ -26,7 +26,7 @@ Visit [RedisInsight](http://localhost:8001/redis-stack/browser) for stored data 
 Prepare Qdrant vector store:
 
 ```bash
-docker run -d --name qdrant -p 6333:6333 -p 6334:6334 qdrant/qdrant
+docker run -d -v $(pwd)/qdrant_storage:/qdrant/storage --name qdrant -p 6333:6333 -p 6334:6334 qdrant/qdrant
 ```
 
 Visit [Qdrant Web UI](http://localhost:6333/dashboard) for management.
