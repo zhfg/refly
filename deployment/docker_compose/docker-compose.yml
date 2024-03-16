@@ -5,6 +5,8 @@ services:
     build:
       context: ../../reflyd
       dockerfile: Dockerfile
+    ports:
+      - 3000:3000
     command: >
       node dist/main.js
     depends_on:
@@ -16,7 +18,7 @@ services:
       - .env
     environment:
       - DATABASE_URL=mongodb://db:27017/refly
-      - QDRANT_URL=qdrant:6333
+      - QDRANT_URL=http://qdrant:6333
   db:
     image: mongo:latest
     ports:
