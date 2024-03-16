@@ -146,7 +146,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
             <ThreadSearchTargetSelector
               showText={false}
               searchTarget={threadSearchTarget}
-              handleChangeSelector={(searchTarget) =>
+              handleChangeSelector={searchTarget =>
                 setThreadSearchTarget(searchTarget)
               }
             />
@@ -156,11 +156,11 @@ export const ThreadItem = (props: ThreadItemProps) => {
               autoFocus
               disabled={messageStateStore?.pending}
               value={chatStore?.newQAText}
-              onChange={(value) => {
+              onChange={value => {
                 chatStore.setNewQAText(value)
               }}
               placeholder="继续提问..."
-              onKeyDownCapture={(e) => handleKeyDown(e)}
+              onKeyDownCapture={e => handleKeyDown(e)}
               autoSize={{ minRows: 1, maxRows: 4 }}
               style={{
                 borderRadius: 8,

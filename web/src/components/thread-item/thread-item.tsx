@@ -31,7 +31,9 @@ const TextArea = Input.TextArea
 export const ThreadItem = (props: ThreadItemProps) => {
   const { sessions, selectedWeblinkConfig } = props
   const inputRef = useRef<RefTextAreaType>(null)
+  const selectedWeblinkListRef = useRef<HTMLDivElement>(null)
   const chatStore = useChatStore()
+  const [addedStyle, setAddedStyle] = useState({})
 
   const [threadSearchTarget, setThreadSearchTarget] = useState(
     selectedWeblinkConfig?.searchTarget,
@@ -94,9 +96,21 @@ export const ThreadItem = (props: ThreadItemProps) => {
     threadWeblinkListFilter,
   )
 
+  console.log("addedStyle", addedStyle, showSelectedWeblinkList)
+
+  useEffect(() => {
+    setAddedStyle(
+      showSelectedWeblinkList
+        ? {
+            height: `calc(100vh - 90px - ${selectedWeblinkListRef?.current?.clientHeight || 0}px)`,
+          }
+        : {},
+    )
+  }, [showSelectedWeblinkList])
+
   return (
     <div className="session-container">
-      <div className="session-inner-container">
+      <div className="session-inner-container" style={addedStyle}>
         {sessions?.map((item, index) => (
           <Session
             key={index}
@@ -126,48 +140,51 @@ export const ThreadItem = (props: ThreadItemProps) => {
 
         <div className="session-input-box">
           <div className="session-input-inner">
-            <div className="session-inner-input-box">
-              <ThreadSearchTargetSelector
-                showText={false}
-                searchTarget={threadSearchTarget}
-                handleChangeSelector={searchTarget =>
-                  setThreadSearchTarget(searchTarget)
-                }
-              />
-              <TextArea
-                ref={inputRef}
-                className="message-input"
-                autoFocus
-                disabled={messageStateStore?.pending}
-                value={chatStore?.newQAText}
-                onChange={value => {
-                  chatStore.setNewQAText(value)
-                }}
-                placeholder="继续提问..."
-                onKeyDownCapture={e => handleKeyDown(e)}
-                autoSize={{ minRows: 1, maxRows: 4 }}
-                style={{
-                  borderRadius: 8,
-                  resize: "none",
-                  backgroundColor: "transparent",
-                }}></TextArea>
-              <div>
-                <div className="toolbar">
-                  <Space></Space>
-                  <Button
-                    shape="circle"
-                    icon={<IconSend />}
-                    style={{ color: "#FFF", background: "#00968F" }}
-                    onClick={handleAskFollowing}></Button>
+            <div className="session-input-content">
+              <div className="session-inner-input-box">
+                <ThreadSearchTargetSelector
+                  showText={false}
+                  searchTarget={threadSearchTarget}
+                  handleChangeSelector={searchTarget =>
+                    setThreadSearchTarget(searchTarget)
+                  }
+                />
+                <TextArea
+                  ref={inputRef}
+                  className="message-input"
+                  autoFocus
+                  disabled={messageStateStore?.pending}
+                  value={chatStore?.newQAText}
+                  onChange={value => {
+                    chatStore.setNewQAText(value)
+                  }}
+                  placeholder="继续提问..."
+                  onKeyDownCapture={e => handleKeyDown(e)}
+                  autoSize={{ minRows: 1, maxRows: 4 }}
+                  style={{
+                    borderRadius: 8,
+                    resize: "none",
+                    backgroundColor: "transparent",
+                  }}></TextArea>
+                <div>
+                  <div className="toolbar">
+                    <Space></Space>
+                    <Button
+                      shape="circle"
+                      icon={<IconSend />}
+                      style={{ color: "#FFF", background: "#00968F" }}
+                      onClick={handleAskFollowing}></Button>
+                  </div>
                 </div>
               </div>
+              {showSelectedWeblinkList ? (
+                <SelectedWeblink
+                  ref={selectedWeblinkListRef}
+                  closable={false}
+                  selectedWeblinkList={threadWeblinkListFilter}
+                />
+              ) : null}
             </div>
-            {showSelectedWeblinkList ? (
-              <SelectedWeblink
-                closable={false}
-                selectedWeblinkList={threadWeblinkListFilter}
-              />
-            ) : null}
             <div className="session-inner-input-placeholder"></div>
           </div>
         </div>

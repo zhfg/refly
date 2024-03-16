@@ -46,20 +46,6 @@ export const fetchEventSource = async (
       if (decodedValue) {
         // 普通数据
         if (decodedValue?.includes("refly-sse-data")) {
-          if (sourcesStr && !isHandledSource) {
-            // 遇到普通数据之后，先发 sources
-            const sourceMessages = sourcesStr
-              ?.split("refly-sse-source: ")
-              .filter(val => val)
-            sourceMessages.forEach(
-              message => options?.onmessage && options.onmessage(message),
-            )
-
-            // reset source 相关内容，一次请求只处理一次
-            isHandledSource = true
-            sourcesStr = ""
-          }
-
           const messages = decodedValue
             ?.split("refly-sse-data: ")
             .filter(val => val)

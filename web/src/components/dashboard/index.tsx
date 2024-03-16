@@ -6,24 +6,14 @@ import {
   Tag,
 } from "@arco-design/web-react"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input/textarea"
-import {
-  IconMinusCircle,
-  IconSend,
-  IconRightCircle,
-  IconLink,
-} from "@arco-design/web-react/icon"
+import { IconSend } from "@arco-design/web-react/icon"
 import React, { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 import {
-  MessageItemType,
-  TASK_TYPE,
-  type Message,
   type Task,
   QUICK_ACTION_TYPE,
   type QUICK_ACTION_TASK_PAYLOAD,
-  LANGUAGE,
-  LOCALE,
   type Source,
   Thread,
 } from "@/types"
@@ -49,6 +39,7 @@ import { useBuildTask } from "@/hooks/use-build-task"
 import { useResetState } from "@/hooks/use-reset-state"
 // 组件
 import { SearchTargetSelector } from "./home-search-target-selector"
+import { QuickAction } from "./quick-action"
 // request
 import createNewConversation from "@/requests/createNewConversation"
 // scss
@@ -211,10 +202,10 @@ const Home = () => {
     selectedRow: { content: WebLinkItem; key: string | number }[],
   ) => {
     return selectedRow?.map(item => ({
-      pageContent: item?.content?.originPageDescription,
+      pageContent: item?.content?.originPageDescription || "",
       metadata: {
-        source: item?.content?.originPageUrl,
-        title: item?.content?.originPageTitle,
+        source: item?.content?.originPageUrl || "",
+        title: item?.content?.originPageTitle || "",
       },
       score: -1,
     }))
@@ -377,6 +368,7 @@ const Home = () => {
             )}
           />
         ) : null}
+        {webLinkStore?.selectedRow?.length > 0 ? <QuickAction /> : null}
       </div>
 
       <WeblinkList ref={weblinkListRef} />

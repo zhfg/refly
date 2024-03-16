@@ -48,6 +48,7 @@ export const useBuildTask = () => {
     })
 
     chatStore.setMessages(chatStore.messages.concat(questionMsg))
+    scrollToBottom()
 
     handleGenResponse(task)
   }

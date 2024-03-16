@@ -20,6 +20,8 @@ const handler = async (
 
   try {
     if (type === TASK_STATUS.START) {
+      // 最终也需要 abort 确保关闭
+      abortController?.abort?.()
       abortController = new AbortController()
 
       const conversationId = payload?.data?.conversationId
@@ -60,9 +62,6 @@ const handler = async (
     }
   } catch (err) {
     console.log("err", err)
-  } finally {
-    // 最终也需要 abort 确保关闭
-    abortController?.abort?.()
   }
 }
 
