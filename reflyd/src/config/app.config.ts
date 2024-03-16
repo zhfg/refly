@@ -13,7 +13,7 @@ export default () => ({
     redirectUrl: process.env.LOGIN_REDIRECT_URL,
     jwt: {
       secret: process.env.JWT_SECRET || 'test',
-      expiresIn: parseInt(process.env.JWT_EXPIRATION_TIME) || '12h',
+      expiresIn: parseInt(process.env.JWT_EXPIRATION_TIME) || '14d',
     },
     github: {
       clientId: process.env.GITHUB_CLIENT_ID || 'test',
