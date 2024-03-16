@@ -1,0 +1,52 @@
+version: "3"
+services:
+  reflyd:
+    image: reflyd:latest
+    build:
+      context: ../../reflyd
+      dockerfile: Dockerfile
+    command: >
+      node dist/main.js
+    depends_on:
+      - db
+      - redis
+      - qdrant
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=mongodb://db:27017/refly
+      - QDRANT_URL=qdrant:6333
+  db:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    volumes:
+      - db_volume:/var/lib/postgresql/data
+    restart: always
+  redis:
+    image: redis/redis-stack:latest
+    restart: always
+    volumes:
+      - kv_volume:/var/lib/postgresql/data
+  qdrant:
+    image: qdrant/qdrant:latest
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - vector_volume:/var/lib/postgresql/data
+  # This container name cannot have an underscore in it due to Vespa expectations of the URL
+  nginx:
+    image: nginx:1.23.4-alpine
+    restart: always
+    depends_on:
+      - reflyd
+    ports:
+      - "80:80"
+    volumes:
+      - ../config:/etc/nginx/conf.d
+
+volumes:
+  kv_volume:
+  db_volume:
