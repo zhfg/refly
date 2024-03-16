@@ -22,20 +22,18 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - db_volume:/var/lib/postgresql/data
+      - db_volume:/data/db
     restart: always
   redis:
     image: redis/redis-stack:latest
     restart: always
-    volumes:
-      - kv_volume:/var/lib/postgresql/data
   qdrant:
     image: qdrant/qdrant:latest
     restart: always
     env_file:
       - .env
     volumes:
-      - vector_volume:/var/lib/postgresql/data
+      - vector_volume:/qdrant/storage
   # This container name cannot have an underscore in it due to Vespa expectations of the URL
   nginx:
     image: nginx:1.23.4-alpine
@@ -48,5 +46,5 @@ services:
       - ../config:/etc/nginx/conf.d
 
 volumes:
-  kv_volume:
+  vector_volume:
   db_volume:
