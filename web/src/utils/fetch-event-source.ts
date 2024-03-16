@@ -19,6 +19,7 @@ export const fetchEventSource = async (
 
     let sourcesStr = ""
     let isHandledSource = false
+    let sourceMessages: string[] = []
 
     while (true) {
       // @ts-ignore
@@ -45,11 +46,31 @@ export const fetchEventSource = async (
       if (decodedValue) {
         // 普通数据
         if (decodedValue?.includes("refly-sse-data")) {
+          const messages = decodedValue
+            ?.split("refly-sse-data: ")
+            .filter(val => val)
+          messages.forEach(
+            message => options?.onmessage && options.onmessage(message),
+          )
+        } else if (!isHandledSource) {
+          // 搜索 sources
+          sourcesStr += decodedValue
+
           if (sourcesStr && !isHandledSource) {
             // 遇到普通数据之后，先发 sources
-            const sourceMessages = sourcesStr
+            sourceMessages = sourcesStr
               ?.split("refly-sse-source: ")
               .filter(val => val)
+              .filter(val => {
+                if (val?.includes(`[REFLY-SOURCE-END]`)) {
+                  isHandledSource = true
+                  return false
+                }
+                return true
+              })
+          }
+
+          if (isHandledSource) {
             sourceMessages.forEach(
               message => options?.onmessage && options.onmessage(message),
             )
@@ -58,16 +79,6 @@ export const fetchEventSource = async (
             isHandledSource = true
             sourcesStr = ""
           }
-
-          const messages = decodedValue
-            ?.split("refly-sse-data: ")
-            .filter(val => val)
-          messages.forEach(
-            message => options?.onmessage && options.onmessage(message),
-          )
-        } else {
-          // 搜索 sources
-          sourcesStr += decodedValue
         }
       }
     }

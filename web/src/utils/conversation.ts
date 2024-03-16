@@ -1,16 +1,11 @@
-import { type Conversation } from "@/types"
-
-import { genUniqueId } from "./index"
+import { Thread } from "@/types"
 
 export type BuildConversation = {
   selectionContent: string
 }
 
-export const buildConversation = (): Partial<Conversation> => {
-  const conversationId = `conv:${genUniqueId()}`
-
+export const buildConversation = (): Partial<Thread> => {
   const conversation = {
-    conversationId,
     origin: location?.origin || "", // 冗余存储策略，for 后续能够基于 origin 进行归类归档
     originPageTitle: document?.title || "",
     title: document?.title || "",

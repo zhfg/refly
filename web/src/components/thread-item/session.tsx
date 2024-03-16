@@ -18,7 +18,7 @@ import type { SessionItem } from "@/types"
 
 // stores
 import { useMessageStateStore } from "@/stores/message-state"
-import { IconTip } from "@/components/home/icon-tip"
+import { IconTip } from "@/components/dashboard/icon-tip"
 import { Markdown } from "@/components/markdown"
 
 import copyToClipboard from "copy-to-clipboard"
@@ -35,7 +35,7 @@ export const Session = (props: SessionProps) => {
 
   //   const fetchData = currentPage => {}
 
-  // console.log('session', isLastSession, session)
+  console.log("session", isLastSession, session)
 
   return (
     <div className="session-item-container">
@@ -51,9 +51,9 @@ export const Session = (props: SessionProps) => {
             </div>
             {session?.answer ? (
               <>
-                <p className="session-answer">
+                <div className="session-answer">
                   <Markdown content={session?.answer} />
-                </p>
+                </div>
                 {!messageStateStore?.pending && (
                   <div className="session-answer-actionbar">
                     <div className="session-answer-actionbar-left">
@@ -123,10 +123,12 @@ export const Session = (props: SessionProps) => {
         )}
       </div>
       <div className="session-source">
-        <div className="session-title-icon">
-          <IconQuote style={{ fontSize: 18 }} />
-          <p>来源</p>
-        </div>
+        {messageStateStore.pending || session?.sources?.length > 0 ? (
+          <div className="session-title-icon">
+            <IconQuote style={{ fontSize: 18, color: "rgba(0, 0, 0, .8)" }} />
+            <p>来源</p>
+          </div>
+        ) : null}
         {session?.sources?.length > 0 ? (
           <div className="session-source-content">
             <div className="session-source-list">
@@ -207,9 +209,9 @@ export const Session = (props: SessionProps) => {
               />
             </div>
           </div>
-        ) : (
+        ) : messageStateStore?.pending && isLastSession ? (
           <Skeleton></Skeleton>
-        )}
+        ) : null}
       </div>
     </div>
   )

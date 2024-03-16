@@ -225,6 +225,11 @@
     text-decoration: none;
     font-size: 10px;
     color: rgba(0, 0, 0, 0.8);
+
+    span {
+      display: inline-block;
+      margin-left: 2px;
+    }
   }
 
   .hint-item {

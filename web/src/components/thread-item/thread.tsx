@@ -1,30 +1,34 @@
-import React, { useEffect } from "react"
+import { useEffect } from "react"
 import { useParams } from "react-router-dom"
 
 // hooks
-import { useSiderSendMessage } from "@/hooks/use-sider-send-message"
 import { useResetState } from "@/hooks/use-reset-state"
+import { useBuildTask } from "@/hooks/use-build-task"
 // stores
 import { useChatStore } from "@/stores/chat"
 import { useConversationStore } from "@/stores/conversation"
-import { useThreadStore } from "@/stores/thread"
+import { useTaskStore } from "@/stores/task"
 // utils
 import { buildSessions } from "@/utils/session"
 // 组件
 import { ThreadItem } from "@/components/thread-item/thread-item"
-import { Header } from "./header"
 // request
 import getThreadMessages from "@/requests/getThreadMessages"
 // styles
 import "./thread-item.scss"
+import { Task, Thread as ThreadTypes, type Message, MessageType } from "@/types"
+import { useWeblinkStore } from "@/stores/weblink"
+import { useSearchStateStore, SearchTarget } from "@/stores/search-state"
+import { safeParseJSON } from "@/utils/parse"
 
 export const Thread = () => {
-  const { handleSideSendMessage } = useSiderSendMessage()
+  const { buildTaskAndGenReponse } = useBuildTask()
   const params = useParams<{ threadId: string }>()
 
   const chatStore = useChatStore()
   const conversationStore = useConversationStore()
-  const threadStore = useThreadStore()
+  const weblinkStore = useWeblinkStore()
+  const searchStateStore = useSearchStateStore()
   const { resetState } = useResetState()
 
   const handleGetThreadMessages = async (threadId: string) => {
@@ -41,7 +45,7 @@ export const Thread = () => {
     resetState()
 
     // 设置会话和消息
-    conversationStore.setCurrentConversation(res?.data)
+    conversationStore.setCurrentConversation(res?.data as ThreadTypes)
 
     //
     const messages = (res?.data?.messages || [])?.map(item => {
@@ -49,6 +53,8 @@ export const Thread = () => {
         content = "",
         relatedQuestions = [],
         sources,
+        type,
+        selectedWeblinkConfig = "", // 这里需要构建进来
         ...extraInfo
       } = item || {}
 
@@ -58,26 +64,39 @@ export const Thread = () => {
           content,
           relatedQuestions,
           sources,
+          type,
+          selectedWeblinkConfig,
         },
       }
     })
     chatStore.setMessages(messages)
   }
 
+  const getSelectedWeblinkConfig = (messages: Message[] = []) => {
+    // 这里是获取第一个，早期简化策略，因为一开始设置之后，后续设置就保留
+    const lastHumanMessage = messages?.find(
+      item => item?.data?.type === MessageType.Human,
+    )
+
+    return safeParseJSON(lastHumanMessage?.data?.selectedWeblinkConfig)
+  }
+
   const handleThread = async (threadId: string) => {
+    const { currentConversation } = useConversationStore.getState()
+    const { task } = useTaskStore.getState()
+
     // 新会话，需要手动构建第一条消息
-    if (chatStore.isNewConversation) {
-      const question = chatStore.newQAText
-      console.log(
-        "handleThread",
-        chatStore.isNewConversation,
-        chatStore.newQAText,
-      )
-      handleSideSendMessage(question)
-      chatStore.setIsNewConversation(false)
-    } else {
+    if (chatStore.isNewConversation && currentConversation?.id) {
+      // 更换成基于 task 的消息模式，核心是基于 task 来处理
+      buildTaskAndGenReponse(task as Task)
+    } else if (params?.threadId) {
       handleGetThreadMessages(threadId)
     }
+
+    // 重置状态
+    chatStore.setNewQAText("")
+    weblinkStore.updateSelectedRow([])
+    searchStateStore.setSearchTarget(SearchTarget.CurrentPage)
   }
 
   useEffect(() => {
@@ -85,10 +104,11 @@ export const Thread = () => {
       console.log("params", params)
       handleThread(params?.threadId as string)
     }
-  }, [params?.threadId])
+  }, [])
 
   console.log("thread message", chatStore.messages)
   const sessions = buildSessions(chatStore.messages)
+  const selectedWeblinkConfig = getSelectedWeblinkConfig(chatStore.messages)
 
   return (
     <div
@@ -98,7 +118,10 @@ export const Thread = () => {
         flexDirection: "column",
       }}>
       {/* <Header /> */}
-      <ThreadItem sessions={sessions} />
+      <ThreadItem
+        sessions={sessions}
+        selectedWeblinkConfig={selectedWeblinkConfig}
+      />
     </div>
   )
 }

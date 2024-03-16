@@ -1,3 +1,4 @@
+import { getCookie } from "./cookie"
 import { getServerOrigin } from "./url"
 
 const TIMEOUT = 40000
@@ -64,6 +65,15 @@ export async function request<T>(
   opt.headers = {
     ...DEFAULT_HEADER,
     ...opt.headers,
+  }
+
+  // 添加鉴权相关的信息
+  const cookie = await getCookie()
+  if (cookie) {
+    opt.headers = {
+      ...opt.headers,
+      Authorization: `Bearer ${cookie}`, // Include the JWT token in the Authorization header
+    }
   }
 
   if (opt.method === "GET") {

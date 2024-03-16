@@ -1,6 +1,7 @@
 import { TASK_STATUS, Task } from "@/types"
 import { getServerOrigin } from "@/utils/url"
 import { fetchEventSource } from "@/utils/fetch-event-source"
+import { getAuthTokenFromCookie } from "@/utils/request"
 
 import type { HandlerRequest } from "@/types/request"
 
@@ -10,29 +11,33 @@ const handler = async (
   req: HandlerRequest<{
     type: TASK_STATUS
     payload?: Task
+    weblinkList?: string[]
   }>,
   options: { onMessage: (msg: { message: string }) => void },
 ) => {
-  const { type } = req?.body || {}
+  const { type, payload } = req?.body || {}
   console.log("receive request", req.body)
 
   try {
     if (type === TASK_STATUS.START) {
+      // 最终也需要 abort 确保关闭
+      abortController?.abort?.()
       abortController = new AbortController()
 
-      // TODO: 这里未来要优化
-      const messageItems = req.body?.payload?.data?.items || []
-      const question = messageItems?.[messageItems.length - 1]?.data?.content
-      const conversationId =
-        messageItems?.[messageItems.length - 1]?.conversationId
+      const conversationId = payload?.data?.conversationId
 
       await fetchEventSource(
-        `${getServerOrigin()}/v1/conversation/${conversationId}/chat?query=${question}`,
+        `${getServerOrigin()}/v1/conversation/${conversationId}/chat`,
         {
           method: "POST",
           body: JSON.stringify({
-            weblinkList: [],
+            task: payload,
           }),
+          headers: {
+            // TODO: check auth token before making a request, and if it not exists, redirect to login
+            Authorization: `Bearer ${getAuthTokenFromCookie()}`,
+            "Content-Type": "application/json",
+          },
           onmessage(data) {
             if (data === "[DONE]") {
               console.log("EventSource done")
@@ -57,9 +62,6 @@ const handler = async (
     }
   } catch (err) {
     console.log("err", err)
-  } finally {
-    // 最终也需要 abort 确保关闭
-    abortController?.abort?.()
   }
 }
 

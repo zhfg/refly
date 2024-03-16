@@ -5,7 +5,7 @@ import type { HandlerRequest, HandlerResponse } from "@/types/request"
 import { Thread } from "@/types"
 
 const handler = async (
-  req: HandlerRequest<Thread>,
+  req: HandlerRequest<Partial<Thread>>,
 ): Promise<HandlerResponse<Thread>> => {
   console.log(req.body)
 

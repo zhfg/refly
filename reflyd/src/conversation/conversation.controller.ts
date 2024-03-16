@@ -13,16 +13,15 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import {
-  ChatParam,
   CreateConversationParam,
   CreateConversationResponse,
   ListConversationResponse,
-  RetrieveParam,
 } from './dto';
 import { ApiParam, ApiResponse } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
 import { LlmService } from '../llm/llm.service';
-import { createLCChatMessage } from '../llm/schema';
+import { TASK_TYPE, type Task } from '../types/task';
 
 @Controller('conversation')
 export class ConversationController {
@@ -33,121 +32,125 @@ export class ConversationController {
     private llmService: LlmService,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post('new')
   @ApiResponse({ type: CreateConversationResponse })
   async createConversation(
     @Request() req,
     @Body() body: CreateConversationParam,
   ) {
-    // TODO: replace this with actual user
-    const res = await this.conversationService.create(
-      body,
-      '5c0a7922c9d89830f4911426',
-    );
+    const userId: string = req.user.id;
+    const res = await this.conversationService.create(body, userId);
 
     return {
       data: res,
     };
   }
 
-  @Post('retrieve')
-  async retrieveDocs(@Body() body: RetrieveParam) {
-    return this.llmService.retrieveRelevantDocs(body.input.query);
-  }
-
+  @UseGuards(JwtAuthGuard)
   @Post(':conversationId/chat')
   async chat(
-    @Query('query') query = '',
+    @Request() req,
     @Param('conversationId') conversationId = '',
-    @Body() body: { weblinkList: string[] },
+    @Body() body: { task: Task },
     @Res() res: Response,
   ) {
-    console.log('query', query, conversationId, body);
-    if (!conversationId) {
-      throw new BadRequestException('conversation id cannot be empty');
+    try {
+      if (!conversationId) {
+        throw new BadRequestException('conversation id cannot be empty');
+      }
+
+      const { taskType, data = {} } = body?.task;
+      if (taskType === TASK_TYPE.CHAT && !data?.question) {
+        throw new BadRequestException('query cannot be empty');
+      }
+
+      const userId: string = req.user.id;
+      const query = data?.question || '';
+      const weblinkList = body?.task?.data?.filter?.weblinkList || [];
+
+      await this.conversationService.addChatMessage({
+        type: 'human',
+        userId,
+        conversationId: conversationId,
+        content: query,
+        sources: '',
+        // 每次提问完在 human message 上加一个提问的 filter，这样之后追问时可以 follow 这个 filter 规则
+        selectedWeblinkConfig: JSON.stringify({
+          searchTarget: weblinkList?.length > 0 ? 'selectedPages' : 'all',
+          filter: weblinkList,
+        }),
+      });
+
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      res.status(200);
+
+      // 获取聊天历史
+      const chatHistory = await this.conversationService.getMessages(
+        conversationId,
+      );
+
+      let sources, answer;
+      if (taskType === TASK_TYPE.CHAT) {
+        const taskRes = await this.conversationService.handleChatTask(
+          req,
+          res,
+          body?.task,
+          chatHistory,
+        );
+
+        sources = taskRes?.sources;
+        answer = taskRes?.answer;
+      } else if (taskType === TASK_TYPE.QUICK_ACTION) {
+        const taskRes = await this.conversationService.handleQuickActionTask(
+          req,
+          res,
+          body?.task,
+          chatHistory,
+        );
+        sources = taskRes?.sources;
+        answer = taskRes?.answer;
+      }
+
+      // 结束流式输出
+      res.end(`[DONE]`);
+
+      await this.conversationService.addChatMessage({
+        type: 'ai',
+        userId,
+        conversationId,
+        content: answer,
+        sources: JSON.stringify(sources),
+      });
+
+      // update conversation last answer and message count
+      const updated = await this.conversationService.updateConversation(
+        conversationId,
+        {
+          lastMessage: answer,
+          messageCount: chatHistory.length + 1,
+        },
+      );
+      this.logger.log(
+        `update conversation ${conversationId}, after updated: ${JSON.stringify(
+          updated,
+        )}`,
+      );
+    } catch (err) {
+      console.log('chat error', err);
+
+      // 结束流式输出
+      res.end(`[DONE]`);
     }
-
-    if (!query) {
-      throw new BadRequestException('query cannot be empty');
-    }
-
-    // TODO: replace this with actual user
-    const userId = '5c0a7922c9d89830f4911426';
-
-    await this.conversationService.addChatMessage({
-      type: 'human',
-      userId,
-      conversationId: conversationId,
-      content: query,
-      sources: '',
-    });
-
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.status(200);
-
-    // 获取聊天历史
-    const chatHistory = await this.conversationService.getMessages(
-      conversationId,
-    );
-
-    const { stream, sources } = await this.llmService.chat(
-      query,
-      chatHistory
-        ? chatHistory.map((msg) => createLCChatMessage(msg.content, msg.type))
-        : [],
-    );
-
-    // first return sources，use unique tag for parse data
-    sources.forEach((source) => {
-      const payload = {
-        type: 'source',
-        body: source,
-      };
-      res.write(`refly-sse-source: ${JSON.stringify(payload)}`);
-    });
-
-    // write answer in a stream style
-    let answerStr = '';
-    for await (const chunk of await stream) {
-      answerStr += chunk;
-
-      const payload = {
-        type: 'chunk',
-        body: chunk,
-      };
-      res.write(`refly-sse-data: ${JSON.stringify(payload)}`);
-    }
-
-    res.end(`[DONE]`);
-
-    await this.conversationService.addChatMessage({
-      type: 'ai',
-      userId,
-      conversationId,
-      content: answerStr,
-      sources: JSON.stringify(sources),
-    });
-
-    // update conversation last answer and message count
-    const updated = await this.conversationService.updateConversation(
-      conversationId,
-      {
-        lastMessage: answerStr,
-        messageCount: chatHistory.length + 1,
-      },
-    );
-    this.logger.log(
-      `update conversation ${conversationId}, after updated: ${JSON.stringify(
-        updated,
-      )}`,
-    );
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('list')
   @ApiResponse({ type: ListConversationResponse })
   async listConversation(
+    @Request() req,
     @Query('page') page = '1',
     @Query('pageSize') pageSize = '10',
   ) {
@@ -157,6 +160,7 @@ export class ConversationController {
     const conversationList = await this.conversationService.getConversations({
       skip: (parsedPage - 1) * parsedPageSize,
       take: parsedPageSize,
+      where: { userId: req.user.id },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -175,7 +179,7 @@ export class ConversationController {
       where: { id: conversationId },
     });
     const messages = await this.conversationService.getMessages(
-      conversation?.conversationId as string,
+      conversation?.id as string,
     );
 
     return {

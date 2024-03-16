@@ -10,8 +10,15 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial,
-    sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    Segoe UI,
+    Helvetica,
+    Arial,
+    sans-serif,
+    "Apple Color Emoji",
+    "Segoe UI Emoji";
 }
 
 * + * {
@@ -363,7 +370,7 @@ img {
   bottom: 0;
   right: 0;
   width: 389px;
-  background-color: #FCFCF9;
+  background-color: #fcfcf9;
   box-shadow: -1px 0 1px #919eab3d;
   height: 100%;
   transition: transform 200ms linear;
@@ -380,7 +387,7 @@ img {
   align-items: center;
   padding: 0.5em 0em;
   margin: 0 1em;
-  border-bottom: 0.5px solid rgba(0, 0, 0, .16);
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.16);
   height: 66px;
 }
 
@@ -466,13 +473,13 @@ img {
 .main .footer {
   height: calc(100vh - 130px);
   overflow-y: scroll;
-  background-color: #FCFCF9;
+  background-color: #fcfcf9;
   padding: 0.5em 1em;
 
   .refly-slogan {
     font-family: PingFangSC-Medium;
     font-size: 36px;
-    color: rgba(0,0,0,0.80);
+    color: rgba(0, 0, 0, 0.8);
     margin-top: 80px;
     margin-bottom: 40px;
     line-height: 46px;
@@ -486,12 +493,12 @@ img {
   justify-content: space-between;
 
   button {
-    color: rgba(0, 0, 0, .5)
+    color: rgba(0, 0, 0, 0.5);
   }
 
   button:hover {
-    color: rgba(0, 0, 0, .8);
-    background: #E8E8E2;
+    color: rgba(0, 0, 0, 0.8);
+    background: #e8e8e2;
   }
 }
 
@@ -500,12 +507,12 @@ img {
   padding: 8px;
   border-radius: 8px;
   box-sizing: border-box;
-  background: #FCFCF9;
-  border: 1px solid rgba(0,0,0,0.10);
+  background: #fcfcf9;
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .main .footer .input-box textarea {
-  background-color: transparent; 
+  background-color: transparent;
   min-height: 98px;
 }
 
@@ -550,7 +557,7 @@ img {
   width: 100%;
   position: fixed;
   bottom: 0;
-  border-top: 0.5px solid rgba(0, 0, 0, .16);
+  border-top: 0.5px solid rgba(0, 0, 0, 0.16);
   background-color: rgb(243, 243, 238);
 
   .footer-nav {

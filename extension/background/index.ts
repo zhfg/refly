@@ -15,10 +15,10 @@ chrome.runtime.onMessageExternal.addListener(
         await chrome.tabs.update(parseInt(lastTabId || ""), { active: true })
       }
 
-      await chrome.tabs.sendMessage(parseInt(lastTabId), {
-        name: "login-notification",
-        body: msg,
-      })
+      // await chrome.tabs.sendMessage(parseInt(lastTabId), {
+      //   name: "login-notification",
+      //   body: msg,
+      // })
 
       await bgStorage.set("login-notification", JSON.stringify(msg))
       // sendToContentScript({

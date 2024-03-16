@@ -1,4 +1,4 @@
-import { type Conversation } from "./conversation"
+import type { Source } from "./session"
 
 export interface Mode {
   id: string
@@ -31,20 +31,26 @@ export const enum LOCALE {
   ZH_CN = "zh_CN",
 }
 
-export const enum ACTION_TYPE {
+export const enum QUICK_ACTION_TYPE {
   SELECTION = "selection",
+  SUMMARY = "summary", // 用作总结内容
 }
 
 export type GEN_TITLE = {
   conversationId: string
-  items?: any[]
 }
 
-export type QUICK_ACTION = {
-  actionType?: ACTION_TYPE
+export type QUICK_ACTION_TASK_PAYLOAD = {
+  question?: string // 用户问题
+
+  actionType?: QUICK_ACTION_TYPE
   actionPrompt?: string
   reference?: string
-  items?: any[]
+  conversationId?: string
+  filter?: {
+    // 限制用于 quick-action 的网页列表
+    weblinkList?: Source[]
+  }
 }
 
 export type SEARCH_RESULT_ITEM = {
@@ -59,12 +65,21 @@ export type SEARCH_ENHANCE = {
   isManual: boolean
 }
 
+export type CHAT = {
+  question: string
+  conversationId?: string
+  filter?: {
+    // 限制召回网页的 filter
+    weblinkList?: Source[]
+  }
+}
+
 export type Task = {
   taskType: TASK_TYPE
-  taskId: string // task:xxxx-xxxx-xxxx-xxxx
-  language: LANGUAGE
-  locale: LOCALE
-  data: Partial<Conversation> | GEN_TITLE | QUICK_ACTION | SEARCH_ENHANCE
+  taskId?: string // task:xxxx-xxxx-xxxx-xxxx
+  language?: LANGUAGE
+  locale?: LOCALE
+  data?: CHAT | QUICK_ACTION_TASK_PAYLOAD
 }
 
 //如何把TASK_TYPE和data关联起来

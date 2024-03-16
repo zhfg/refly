@@ -2,7 +2,6 @@ import type { ServerMessage } from "@/types"
 
 export interface Thread {
   id: string
-  conversationId: string
   userId: string
   title: string
   lastMessage: string

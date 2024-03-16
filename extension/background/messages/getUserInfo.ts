@@ -10,7 +10,6 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
   console.log(req.body)
 
   try {
-    const cookie = await getCookie()
     await bgStorage.set("lastTabId", req.sender?.tab?.id)
     await bgStorage.set("lastWindowId", req.sender?.tab?.windowId)
     console.log("lastTabId", req.sender?.tab?.id, req.sender?.tab?.windowId)
@@ -18,7 +17,6 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${cookie}`, // Include the JWT token in the Authorization header
       },
     })
 

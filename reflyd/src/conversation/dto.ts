@@ -3,15 +3,19 @@ import { MessageType } from '@prisma/client';
 
 export class CreateConversationParam {
   @ApiPropertyOptional()
-  conversationId?: string;
   title?: string;
+
+  @ApiPropertyOptional()
   origin?: string; // 创建会话的 origin
+
+  @ApiPropertyOptional()
   originPageUrl?: string; // 创建会话的 url
+
+  @ApiPropertyOptional()
   originPageTitle?: string; // 所在 url 的 page title
 }
 
 export class CreateConversationResponse extends CreateConversationParam {
-  conversationId: string;
   createdAt: number;
 }
 
@@ -42,9 +46,4 @@ export class ChatParam {
 
   @ApiPropertyOptional()
   conversationId: string;
-}
-
-export class RetrieveParam {
-  @ApiProperty({ type: ChatParam })
-  input: ChatParam;
 }

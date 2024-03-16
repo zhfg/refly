@@ -1,11 +1,10 @@
-import React, { useCallback } from "react"
+import { useCallback } from "react"
 import { useChatStore } from "../stores/chat"
 import { useMessageStateStore } from "../stores/message-state"
 import { useConversationStore } from "../stores/conversation"
 import type { Message, MessageState } from "@/types"
-import { MessageItemType, TASK_STATUS, TASK_TYPE } from "@/types"
-import type { QUICK_ACTION, Task } from "@/types"
-import { buildTask } from "@/utils/task"
+import { TASK_STATUS, TASK_TYPE } from "@/types"
+import type { Task } from "@/types"
 import { buildQuestionMessage, buildReplyMessage } from "@/utils/message"
 
 import { buildErrorMessage } from "@/utils/message"
@@ -14,73 +13,43 @@ import { safeParseJSON } from "@/utils/parse"
 
 // requests
 import streamingGenMessage from "@/requests/streamingGenMessage"
+// stores
 
 export const useBuildTask = () => {
   const chatStore = useChatStore()
   const messageStateStore = useMessageStateStore()
   const conversationStore = useConversationStore()
 
-  // const buildGenTitleTaskAndGenResponse = () => {
-  //   // 每次生成会话 title 时，需要重置此字段
-  //   chatStore.setIsGenTitle(false)
+  const buildTaskAndGenReponse = (task: Task) => {
+    console.log("buildTaskAndGenReponse", task)
+    const question = task.data?.question
 
-  //   // 生成 chat task
-  //   const taskPayload = {
-  //     taskType: TASK_TYPE.GEN_TITLE,
-  //     data: {
-  //       conversationId: conversationStore.currentConversation?.conversationId,
-  //     },
-  //   }
-  //   const task = buildTask(taskPayload)
-  //   // handleGenResponse(task)
-  // }
+    // 构建 filter, for follow ask question config
+    const weblinkList = task?.data?.filter?.weblinkList || []
+    const selectedWeblinkConfig = {
+      searchTarget: weblinkList?.length > 0 ? "selectedPages" : "all",
+      filter: weblinkList,
+    }
 
-  const buildQuickActionTaskAndGenReponse = (
-    taskType: TASK_TYPE,
-    data: QUICK_ACTION,
-  ) => {
-    const task = buildTask({ taskType, data })
-
-    handleGenResponse(task)
-  }
-
-  const buildChatTaskAndGenReponse = (question: string) => {
     const questionMsg = buildQuestionMessage({
-      conversationId: conversationStore.currentConversation?.conversationId,
+      conversationId: conversationStore.currentConversation?.id,
       content: question,
+      selectedWeblinkConfig: JSON.stringify(selectedWeblinkConfig),
     })
-
     const replyMsg = buildReplyMessage({
-      conversationId: conversationStore.currentConversation?.conversationId,
+      conversationId: conversationStore.currentConversation?.id,
       content: "",
       questionId: questionMsg?.itemId,
     })
-
     // 将 reply 加到 message-state
     messageStateStore.setMessageState({
       pendingReplyMsg: replyMsg,
+      taskType: task?.taskType,
     })
 
     chatStore.setMessages(chatStore.messages.concat(questionMsg))
+    scrollToBottom()
 
-    // 将最后一条回答拼到上下文中
-    const lastReplyMsg = chatStore.messages
-      .filter(message => message?.itemType === MessageItemType?.REPLY)
-      ?.at(-1)
-    const taskMsgList = lastReplyMsg
-      ? [lastReplyMsg, questionMsg]
-      : [questionMsg]
-
-    // 生成 chat task
-    const taskPayload = {
-      taskType: TASK_TYPE.CHAT,
-      data: {
-        ...conversationStore.currentConversation,
-        items: taskMsgList,
-        preGeneratedReplyId: replyMsg?.itemId, // 预先生成的回复，用于快速问答 message
-      },
-    }
-    const task = buildTask(taskPayload)
     handleGenResponse(task)
   }
 
@@ -111,7 +80,7 @@ export const useBuildTask = () => {
         },
       })
     },
-    [conversationStore.currentConversation?.conversationId],
+    [conversationStore.currentConversation?.id],
   )
 
   const handleStreamingMessage = (msg: { message: string }) => {
@@ -131,7 +100,18 @@ export const useBuildTask = () => {
     const comingMsgPayload = safeParseJSON(msg?.message)
     console.log("setMessageState", comingMsgPayload)
 
-    if (msg?.message === `[DONE]`) {
+    if (msg?.message?.includes(`[DONE]`)) {
+      // 是否有额外的 message，那么也需要拼接上
+      const extraMessage = msg?.message?.split("[DONE]")?.[0]?.trim()
+      if (extraMessage?.length > 0) {
+        const lastMessage = currentChatState.messages.at(-1) as Message
+        const savedMessage = currentChatState.messages.slice(0, -1) as Message[]
+
+        lastMessage.data.content =
+          lastMessage?.data?.content + (extraMessage || "")
+        chatStore.setMessages([...savedMessage, { ...lastMessage }])
+      }
+
       const newMessageState: Partial<MessageState> = {
         pending: false,
         error: false,
@@ -147,8 +127,7 @@ export const useBuildTask = () => {
         if (currentMessageState.taskType === TASK_TYPE.CHAT) {
           // 构建一条错误消息放在末尾，而不是类似 loading 直接展示，因为要 error 停留在聊天列表里
           const errMsg = buildErrorMessage({
-            conversationId:
-              conversationStore.currentConversation?.conversationId,
+            conversationId: conversationStore.currentConversation?.id,
           })
 
           chatStore.setMessages([...currentChatState.messages, { ...errMsg }])
@@ -160,7 +139,11 @@ export const useBuildTask = () => {
 
           newMessageState.error = true
           newMessageState.pendingFirstToken = false
-        } else if (currentMessageState.taskType === TASK_TYPE.QUICK_ACTION) {
+        } else if (
+          [TASK_TYPE.CHAT, TASK_TYPE.QUICK_ACTION].includes(
+            currentMessageState?.taskType as TASK_TYPE,
+          )
+        ) {
           // 针对 quickAction 这类一次性的，就是直接展示错误信息
           newMessageState.error = true
           newMessageState.pendingFirstToken = false
@@ -207,7 +190,11 @@ export const useBuildTask = () => {
     }
 
     // 只有在聊天场景下，才需要更新最后一条消息
-    if (currentMessageState.taskType === TASK_TYPE.CHAT) {
+    if (
+      [TASK_TYPE.CHAT, TASK_TYPE.QUICK_ACTION].includes(
+        currentMessageState?.taskType as TASK_TYPE,
+      )
+    ) {
       if (currentMessageState.pendingFirstToken) {
         const lastMessage = currentMessageState.pendingReplyMsg as Message
 
@@ -221,17 +208,17 @@ export const useBuildTask = () => {
           console.log("sourceWeblinkPayload", sourceWeblinkPayload)
           messageStateStore.setMessageState({
             ...currentMessageState,
-            pendingSourceDocs: (
-              currentMessageState.pendingSourceDocs || []
-            ).concat(sourceWeblinkPayload),
+            pendingSourceDocs: (currentMessageState.pendingSourceDocs || [])
+              .concat(sourceWeblinkPayload)
+              ?.filter(item => item),
           })
 
           console.log("sourceWeblinkPayload", lastMessage.data.sources)
 
           if (Array.isArray(lastMessage?.data?.sources)) {
-            lastMessage.data.sources = lastMessage?.data?.sources?.concat(
-              sourceWeblinkPayload || [],
-            )
+            lastMessage.data.sources = lastMessage?.data?.sources
+              ?.concat(sourceWeblinkPayload || [])
+              ?.filter(item => item)
           } else {
             lastMessage.data.sources = [sourceWeblinkPayload]
           }
@@ -258,9 +245,9 @@ export const useBuildTask = () => {
           console.log("sourceWeblinkPayload", sourceWeblinkPayload)
           messageStateStore.setMessageState({
             ...currentMessageState,
-            pendingSourceDocs: (
-              currentMessageState.pendingSourceDocs || []
-            ).concat(sourceWeblinkPayload),
+            pendingSourceDocs: (currentMessageState.pendingSourceDocs || [])
+              ?.concat(sourceWeblinkPayload)
+              ?.filter(item => item),
           })
 
           const lastMessage = currentChatState.messages.at(-1) as Message
@@ -272,11 +259,13 @@ export const useBuildTask = () => {
           console.log("sourceWeblinkPayload", lastMessage?.data.sources)
 
           if (Array.isArray(lastMessage?.data?.sources)) {
-            lastMessage.data.sources = lastMessage?.data?.sources?.concat(
-              sourceWeblinkPayload || [],
-            )
+            lastMessage.data.sources = lastMessage?.data?.sources
+              ?.concat(sourceWeblinkPayload || [])
+              ?.filter(item => item)
           } else {
-            lastMessage.data.sources = [sourceWeblinkPayload]
+            lastMessage.data.sources = [sourceWeblinkPayload]?.filter(
+              item => item,
+            )
           }
           chatStore.setMessages([...savedMessage, { ...lastMessage }])
         } else {
@@ -312,8 +301,7 @@ export const useBuildTask = () => {
   }
 
   return {
-    buildQuickActionTaskAndGenReponse,
-    buildChatTaskAndGenReponse,
+    buildTaskAndGenReponse,
     buildShutdownTaskAndGenResponse,
   }
 }

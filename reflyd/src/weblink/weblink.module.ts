@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { BullModule } from '@nestjs/bull';
 
 import { WeblinkController } from './weblink.controller';
@@ -9,7 +10,7 @@ import { WeblinkProcessor } from './weblink.processor';
 import { LlmService } from '../llm/llm.service';
 
 @Module({
-  imports: [BullModule.registerQueue({ name: 'index' })],
+  imports: [ConfigModule, BullModule.registerQueue({ name: 'index' })],
   controllers: [WeblinkController],
   providers: [WeblinkService, WeblinkProcessor, PrismaService, LlmService],
 })

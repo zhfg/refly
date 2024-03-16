@@ -5,9 +5,7 @@ import { AppRouter } from "./router/index"
 import { AppLayout } from "@/components/layout/index"
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <AppRouter layout={AppLayout} />
-    </BrowserRouter>
-  </React.StrictMode>,
+  <BrowserRouter>
+    <AppRouter layout={AppLayout} />
+  </BrowserRouter>,
 )

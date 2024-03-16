@@ -1,10 +1,11 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { createClient } from 'redis';
+import { ConfigService } from '@nestjs/config';
+import { v4 as uuid } from 'uuid';
+import omit from 'lodash.omit';
 
+import { QdrantClient } from '@qdrant/js-client-rest';
 import { Document } from '@langchain/core/documents';
 import { CheerioWebBaseLoader } from 'langchain/document_loaders/web/cheerio';
-import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
-import { RedisVectorStore } from '@langchain/redis';
 import { OpenAIEmbeddings, ChatOpenAI } from '@langchain/openai';
 import {
   ChatPromptTemplate,
@@ -12,62 +13,303 @@ import {
 } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { createStuffDocumentsChain } from 'langchain/chains/combine_documents';
+import { loadSummarizationChain } from 'langchain/chains';
+import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
+import { PromptTemplate } from '@langchain/core/prompts';
+import { JsonOutputFunctionsParser } from 'langchain/output_parsers';
 
-import { Weblink } from '@prisma/client';
-import { qaSystemPrompt, contextualizeQSystemPrompt } from './prompts';
-import { LCChatMessage } from './schema';
+import { ChatMessage, Weblink } from '@prisma/client';
+import {
+  qaSystemPrompt,
+  contextualizeQSystemPrompt,
+  summarizeSystemPrompt,
+} from './prompts';
+import { LLMChatMessage } from './schema';
+import { Source } from 'src/types/weblink';
+import { HumanMessage } from 'langchain/schema';
+import {
+  countToken,
+  maxWebsiteTokenSize,
+  truncateToken,
+} from 'src/utils/token';
+import { uniqueFunc } from 'src/utils/unique';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
-  private vectorStore: RedisVectorStore;
+  private vectorStore: QdrantClient;
+  private embeddings: OpenAIEmbeddings;
+  private collectionName: string;
+
   private readonly logger = new Logger(LlmService.name);
 
-  async onModuleInit() {
-    const client = createClient({
-      url: process.env.REDIS_URL ?? 'redis://localhost:6379',
-    });
-    await client.connect();
+  constructor(private configService: ConfigService) {}
 
-    this.vectorStore = new RedisVectorStore(new OpenAIEmbeddings(), {
-      redisClient: client,
-      indexName: 'refly_index',
+  async onModuleInit() {
+    this.vectorStore = new QdrantClient({
+      url: this.configService.get('qdrant.url'),
     });
+    this.collectionName = this.configService.get('qdrant.collectionName');
+    this.embeddings = new OpenAIEmbeddings();
+
+    await this.ensureCollection();
+  }
+
+  /**
+   * Method to ensure the existence of a collection in the Qdrant database.
+   * If the collection does not exist, it is created.
+   * @returns Promise that resolves when the existence of the collection has been ensured.
+   */
+  async ensureCollection() {
+    const response = await this.vectorStore.getCollections();
+
+    const collectionNames = response.collections.map(
+      (collection) => collection.name,
+    );
+
+    if (!collectionNames.includes(this.collectionName)) {
+      await this.vectorStore.createCollection(this.collectionName, {
+        vectors: {
+          size: (await this.embeddings.embedQuery('test')).length,
+          distance: 'Cosine',
+        },
+      });
+    }
+
+    this.logger.log(`qdrant collection initialized: ${this.collectionName}`);
+  }
+
+  async parseWebLinkContent(url: string) {
+    try {
+      const loader = new CheerioWebBaseLoader(url);
+
+      // customized webpage loading
+      const $ = await loader.scrape();
+      const pageContent = $(loader.selector).text();
+      const title = $('title').text();
+      const source = loader.webPath;
+
+      return { pageContent, title, source };
+    } catch (err) {
+      return null;
+    }
+  }
+
+  // TODO： 目前比较粗暴，直接截断，理论上后续总结场景需要关注所有的 header 以及首段的总结，这样能够得到更加全面的总结
+  getExpectedTokenLenContent(texts: string[] | string = [], tokenLimit = 0) {
+    try {
+      let newTexts;
+
+      if (Array.isArray(texts)) {
+        const totalText = texts?.reduce((total, curr) => total + curr, '');
+        if (totalText.length < tokenLimit) return texts;
+
+        newTexts = texts.map((text) => text.slice(0, tokenLimit));
+      } else {
+        if (texts.length < tokenLimit) return texts;
+
+        newTexts = texts.slice(0, tokenLimit);
+      }
+
+      return newTexts;
+    } catch (err) {
+      return texts;
+    }
   }
 
   async parseAndStoreLink(link: Weblink) {
-    const loader = new CheerioWebBaseLoader(link.url);
+    const parseContent = await this.parseWebLinkContent(link.url); // 处理错误边界
+    if (!parseContent) return;
 
-    // customized webpage loading
-    const $ = await loader.scrape();
-    const text = $(loader.selector).text();
-    const title = $('title').text();
-    const metadata = { source: loader.webPath, title };
-    const doc = new Document({ pageContent: text, metadata });
+    const { pageContent, title, source } = parseContent;
+
+    const metadata = { source, userId: link.userId, title };
+    const doc = new Document({
+      pageContent: this.getExpectedTokenLenContent(
+        pageContent,
+        maxWebsiteTokenSize,
+      ),
+      metadata,
+    });
 
     this.logger.log(`link loaded from ${link.url}`);
 
+    // splitting / chunking
     const textSplitter = new RecursiveCharacterTextSplitter({
+      separators: ['\n\n', '\n', ' ', ''],
       chunkSize: 1000,
       chunkOverlap: 200,
+      lengthFunction: (str = '') => str.length || 0,
     });
-    const splits = await textSplitter.splitDocuments([doc]);
+    const documents = await textSplitter.splitDocuments([doc]);
     this.logger.log(`text splitting complete for ${link.url}`);
 
-    await this.vectorStore.addDocuments(splits);
+    // embedding
+    const texts = documents.map(({ pageContent }) => pageContent);
+    const vectors = await this.embeddings.embedDocuments(texts);
+
+    // load into vector store
+    if (vectors.length === 0) {
+      return;
+    }
+
+    const points = vectors.map((embedding, idx) => ({
+      id: uuid(),
+      vector: embedding,
+      payload: {
+        content: documents[idx].pageContent,
+        ...documents[idx].metadata,
+      },
+    }));
+
+    await this.vectorStore.upsert(this.collectionName, {
+      wait: true,
+      points,
+    });
     this.logger.log(`vector stored for ${link.url}`);
   }
 
-  async retrieveRelevantDocs(query: string) {
-    // Retrieve and generate using the relevant snippets of the blog.
-    const retriever = this.vectorStore.asRetriever();
-    return retriever.getRelevantDocuments(query);
+  async retrieval(query: string, filter) {
+    /**
+     * 1. 抽取关键字 or 实体
+     * 2. 基于关键字多路召回
+     * 3. rerank scores
+     * 4. 取前
+     */
+
+    // 抽取关键字 or 实体
+    const llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
+    const parser = new JsonOutputFunctionsParser();
+    const runnable = await llm
+      .bind({
+        functions: [
+          {
+            name: 'keyword_for_search_engine',
+            description: `You are an expert search engine keywords extraction algorithm.
+            Only extract keyword from the user query for search engine. If cannot extract keywords, the results should be empty array`,
+            parameters: {
+              type: 'object',
+              properties: {
+                keyword_list: {
+                  type: 'array',
+                  items: { type: 'string' },
+                },
+              },
+              required: ['keyword_list'],
+            },
+          },
+        ],
+        function_call: { name: 'keyword_for_search_engine' },
+      })
+      .pipe(parser);
+    const res = (await runnable.invoke([new HumanMessage(query)])) as {
+      keyword_list: string[];
+    };
+
+    // 基于关键字多路召回
+    let results = [];
+    await Promise.all(
+      // 这里除了关键词，需要把 query 也带上
+      [...(res?.keyword_list || []), query].map(async (keyword) => {
+        const queryEmbedding = await this.embeddings.embedQuery(keyword);
+        const keywordRetrievalResults = await this.vectorStore.search(
+          this.collectionName,
+          {
+            vector: queryEmbedding,
+            limit: 5,
+            filter,
+          },
+        );
+
+        results = results.concat(keywordRetrievalResults);
+      }),
+    );
+
+    // rerank scores
+    // TODO: 这里只考虑了召回阈值和数量，默认取五个，但是没有考虑 token 窗口，未来需要优化
+    results = uniqueFunc(results, 'content')
+      .sort((a, b) => (b?.score || 0) - (a?.score || 0))
+      ?.filter((item) => item?.score >= 0.8)
+      ?.slice(0, 6);
+
+    return results;
   }
 
-  async chat(query: string, chatHistory: LCChatMessage[]) {
-    this.logger.log(`activated with query: ${query}, history: ${chatHistory}`);
+  async summary(
+    prompt: string,
+    weblinkList: Source[],
+    chatHistory: ChatMessage[],
+    onMessage: (chunk: string) => void,
+  ) {
+    if (weblinkList?.length <= 0) return;
+    // 处理 token 窗口，一共给 6K 窗口用于问答，平均分到每个网页，保障可用性
+    const avgTokenLen = 6000 / weblinkList?.length;
 
-    // Retrieve and generate using the relevant snippets of the blog.
-    const retriever = this.vectorStore.asRetriever();
+    // 基于一组网页做总结，先获取网页内容
+    const textForSplitter = await Promise.all(
+      weblinkList.map(async (item) => {
+        const { pageContent, title, source } = await this.parseWebLinkContent(
+          item?.metadata?.source,
+        );
+        const truncateStr =
+          this.getExpectedTokenLenContent(pageContent, avgTokenLen) || '';
+
+        return {
+          metadata: { source, title },
+          text: truncateStr,
+        };
+      }),
+    );
+
+    const textSplitter = new RecursiveCharacterTextSplitter({
+      chunkSize: 1000,
+    });
+
+    // 带元数据去拼 docs
+    let weblinkDocs = [];
+    await Promise.all(
+      textForSplitter.map(async (item) => {
+        const { metadata, text } = item;
+        // 手动区分网页分割
+        const dividerDocs = await textSplitter.createDocuments([
+          `\n\n下面是网页 [${metadata?.title}](${metadata.source}) 的内容\n\n`,
+        ]);
+        const docs = await textSplitter.createDocuments([text], [metadata]);
+        weblinkDocs = weblinkDocs.concat(dividerDocs, docs);
+      }),
+    );
+
+    const llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
+    const combineLLM = new ChatOpenAI({
+      modelName: 'gpt-3.5-turbo',
+      temperature: 0,
+      streaming: true,
+      callbacks: [
+        {
+          handleLLMNewToken(token: string): Promise<void> | void {
+            onMessage(token);
+          },
+        },
+      ],
+    });
+
+    const customPrompt = new PromptTemplate({
+      template: summarizeSystemPrompt,
+      inputVariables: ['text'],
+    });
+    const summarizeChain = loadSummarizationChain(llm, {
+      type: 'map_reduce',
+      combineLLM,
+      combinePrompt: customPrompt,
+    });
+    await summarizeChain.invoke({
+      input_documents: weblinkDocs,
+    });
+  }
+
+  async chat(query: string, chatHistory: LLMChatMessage[], filter?: any) {
+    this.logger.log(
+      `activated with query: ${query}, filter: ${JSON.stringify(filter)}`,
+    );
 
     const llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
 
@@ -100,9 +342,14 @@ export class LlmService implements OnModuleInit {
       prompt: qaPrompt,
       outputParser: new StringOutputParser(),
     });
-    const retrievedDocs = await retriever.getRelevantDocuments(
-      questionWithContext,
-    );
+
+    const retrievalResults = await this.retrieval(questionWithContext, filter);
+
+    const retrievedDocs = retrievalResults.map((res) => ({
+      metadata: omit(res.payload, 'content'),
+      pageContent: res.payload.content as string,
+      score: res.score, // similarity score
+    }));
 
     return {
       sources: retrievedDocs,

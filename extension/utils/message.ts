@@ -5,13 +5,13 @@ import {
   QuestionType,
   ReplyType,
   SystemAction,
-  type Message
+  type Message,
 } from "~/types"
 
 import { genUniqueId } from "./index"
 
 export const unsupportedMessage = "暂不支持的消息类型，请更新版本之后重试"
-export const errorMessage = "AbortError: The user aborted a request."
+export const errorMessage = "响应出错，请尝试重试！"
 
 /**
  * 1. 这个不是消息的一部分，是可动态配置的，独特展示的
@@ -20,23 +20,23 @@ export const systemExampleQuestions = [
   {
     type: SystemAction.RecommendQuestion,
     title: "🤔 提出复杂问题",
-    question: "如何在 JavaScript 中建立 WebSocket 连接？"
+    question: "如何在 JavaScript 中建立 WebSocket 连接？",
   },
   {
     type: SystemAction.RecommendQuestion,
     title: "👍 获取更多灵感",
-    question: "为一家做 PaaS 的科技公司起一个名字。"
-  }
+    question: "为一家做 PaaS 的科技公司起一个名字。",
+  },
 ]
 
 // 系统希望用户进行的推荐
 export const systemRecommendOperation = [
   {
-    title: "🎁 推荐好友赚奖励"
+    title: "🎁 推荐好友赚奖励",
   },
   {
-    title: "❤️ 支持我们"
-  }
+    title: "❤️ 支持我们",
+  },
 ]
 
 /**
@@ -47,23 +47,23 @@ export const systemRecommendOperation = [
  */
 export const defaultReplyContent = {
   Welcome: "你好啊，欢迎回来！",
-  Intent: "您希望对文本进行什么操作？"
+  Intent: "您希望对文本进行什么操作？",
 }
 
 // 每次随机选三个
 export const suggestionsQuestions = [
   {
-    text: "如何在 JavaScript 中发出 HTTP 请求？"
+    text: "如何在 JavaScript 中发出 HTTP 请求？",
   },
   {
-    text: "什么是大型语言模型？"
+    text: "什么是大型语言模型？",
   },
   {
-    text: "如何应对难缠的老板？"
+    text: "如何应对难缠的老板？",
   },
   {
-    text: "世界上最高的山峰"
-  }
+    text: "世界上最高的山峰",
+  },
 ]
 
 // 生成随机数的函数
@@ -94,13 +94,16 @@ export type BuildMessageData = {
   replyType?: ReplyType
   intentId?: string
   questionId?: string
+  // 每次提问完在 human message 上加一个提问的 filter，这样之后追问时可以 follow 这个 filter 规则
+  // 这里是前端同步的状态，后续获取新的消息之后，取存储的 last human message 的配置
+  selectedWeblinkConfig?: string
 }
 
 export const buildWelcomeMessage = (data: BuildMessageData) => {
   const message = buildReplyMessage({
     ...data,
     content: defaultReplyContent.Welcome,
-    replyType: ReplyType.WELCOME
+    replyType: ReplyType.WELCOME,
   })
 
   return message
@@ -113,7 +116,7 @@ export const buildIntentMessage = (data: BuildMessageData) => {
     conversationId,
     content: defaultReplyContent.Intent,
     replyType: ReplyType.INTENT,
-    intentId: itemId
+    intentId: itemId,
   })
   const message = {
     itemId,
@@ -123,8 +126,8 @@ export const buildIntentMessage = (data: BuildMessageData) => {
     data: {
       type: MessageDataType.SELECTION,
       content,
-      replies: [replyMsg]
-    }
+      replies: [replyMsg],
+    },
   }
 
   return message
@@ -133,7 +136,8 @@ export const buildQuestionMessage = (data: BuildMessageData) => {
   const {
     conversationId = "",
     content = "",
-    questionType = QuestionType.NORMAL
+    questionType = QuestionType.NORMAL,
+    selectedWeblinkConfig = "",
   } = data
 
   let dataExtra = {}
@@ -149,10 +153,11 @@ export const buildQuestionMessage = (data: BuildMessageData) => {
     conversationId,
     summary: content,
     data: {
-      type: MessageDataType.TEXT,
+      type: MessageType.Human,
       content,
-      ...dataExtra
-    }
+      selectedWeblinkConfig,
+      ...dataExtra,
+    },
   }
 
   return message
@@ -161,7 +166,7 @@ export const buildReplyMessage = (data: BuildMessageData) => {
   const {
     conversationId = "",
     content = "",
-    replyType = ReplyType.QUESTION
+    replyType = ReplyType.QUESTION,
   } = data
   const itemId = `msg:${genUniqueId()}`
 
@@ -182,10 +187,10 @@ export const buildReplyMessage = (data: BuildMessageData) => {
     itemType: MessageItemType.REPLY,
     summary: content,
     data: {
-      type: MessageDataType.TEXT,
+      type: MessageType.Assistant,
       content,
-      ...dataExtra
-    }
+      ...dataExtra,
+    },
   }
 
   return message
@@ -208,8 +213,8 @@ export const buildErrorMessage = (data: BuildMessageData) => {
     summary: content,
     data: {
       type: MessageDataType.TEXT,
-      content
-    }
+      content,
+    },
   }
 
   return message
@@ -217,7 +222,7 @@ export const buildErrorMessage = (data: BuildMessageData) => {
 
 export const buildMessage = (
   msgType: MessageItemType,
-  data: BuildMessageData
+  data: BuildMessageData,
 ) => {
   switch (msgType) {
     case MessageItemType.INTENT:
@@ -241,18 +246,18 @@ export const buildIntentMessageList = (data: BuildMessageListData) => {
     data
   const intentMsg = buildIntentMessage({
     conversationId,
-    content: selectionContent
+    content: selectionContent,
   })
   const intentReplyMsg = intentMsg?.data?.replies?.[0]
   const questionMsg = buildQuestionMessage({
     conversationId,
-    content: questionContent
+    content: questionContent,
   })
   const questionReplyMsg = buildReplyMessage({
     conversationId,
     replyType: ReplyType.QUESTION,
     questionId: questionMsg.itemId,
-    content: replyContent
+    content: replyContent,
   })
 
   return [intentMsg, intentReplyMsg, questionMsg, questionReplyMsg]
@@ -263,12 +268,12 @@ export const buildQuestionMessageList = (data: BuildMessageListData) => {
 
   const questionMsg = buildQuestionMessage({
     conversationId,
-    content: questionContent
+    content: questionContent,
   })
   const replyMsg = buildReplyMessage({
     conversationId,
     content: "",
-    questionId: questionMsg?.itemId
+    questionId: questionMsg?.itemId,
   })
 
   return [questionMsg, replyMsg]

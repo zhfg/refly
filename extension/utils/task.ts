@@ -3,9 +3,11 @@ import {
   LOCALE,
   TASK_TYPE,
   type Conversation,
-  type QUICK_ACTION,
+  type QUICK_ACTION_TASK_PAYLOAD,
   type SEARCH_ENHANCE,
-  type Task
+  type Task,
+  type GEN_TITLE,
+  type CHAT,
 } from "~/types"
 
 import { genUniqueId } from "./index"
@@ -14,7 +16,7 @@ export type BuildTask = {
   taskType: TASK_TYPE
   language?: LANGUAGE
   locale?: LOCALE
-  data: Partial<Conversation> | QUICK_ACTION | SEARCH_ENHANCE
+  data: CHAT | QUICK_ACTION_TASK_PAYLOAD
 }
 
 export const buildTask = (payload: BuildTask): Task => {
@@ -22,7 +24,7 @@ export const buildTask = (payload: BuildTask): Task => {
     taskType,
     language = LANGUAGE.AUTO,
     locale = LOCALE.ZH_CN,
-    data = {}
+    data = {},
   } = payload
   const taskId = `task:${genUniqueId()}`
 
@@ -31,7 +33,29 @@ export const buildTask = (payload: BuildTask): Task => {
     taskId,
     language,
     locale,
-    data: data
+    data: data,
+  }
+
+  return task
+}
+
+export const buildChatTask = (data): Task => {
+  const task: Task = {
+    taskType: TASK_TYPE.CHAT,
+    language: LANGUAGE.AUTO,
+    locale: LOCALE.ZH_CN,
+    data,
+  }
+
+  return task
+}
+
+export const buildQuickActionTask = (data): Task => {
+  const task: Task = {
+    taskType: TASK_TYPE.QUICK_ACTION,
+    language: LANGUAGE.AUTO,
+    locale: LOCALE.ZH_CN,
+    data,
   }
 
   return task

@@ -5,7 +5,7 @@
 }
 
 .session-item {
-    border-bottom: 1px solid rgba(0, 0, 0, .05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     padding-bottom: 24px;
 }
 
@@ -24,6 +24,8 @@
     margin-bottom: 24px;
     font-size: 30px;
     line-height: 30px;
+    color: rgba(0, 0, 0, 0.8);
+    font-weight: bold;
 }
 
 .session-title-icon {
@@ -31,20 +33,20 @@
     flex-direction: row;
     align-items: center;
     margin-bottom: 16px;
-    margin-top: 24px;;
-    
+    margin-top: 24px;
+
     p {
         font-size: 18px;
-        color: rgba(0,0,0,0.80);
+        color: rgba(0, 0, 0, 0.8);
         margin-left: 8px;
         font-weight: bolder;
     }
 }
 
 .session-answer {
-    font-size: 16px;   
+    font-size: 16px;
     line-height: 24px;
-    color: rgba(0,0,0,0.80);
+    color: rgba(0, 0, 0, 0.8);
 }
 
 .session-answer-actionbar {
@@ -75,21 +77,21 @@
     padding: 8px;
     border-radius: 8px;
     box-sizing: border-box;
-    background: #FCFCF9;
-    border: 1px solid rgba(0,0,0,0.10);
-    box-shadow: 0 2px 6px 0 rgba(0,0,0,0.10);
-    
+    background: #fcfcf9;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.1);
+
     display: flex;
     align-items: center;
 
     textarea {
-        background-color: #FCFCF9; 
-        background: #FCFCF9;
+        background-color: #fcfcf9;
+        background: #fcfcf9;
     }
 
     textarea:focus {
         border-color: transparent;
-      }
+    }
 }
 
 .session-source-list {
@@ -103,7 +105,7 @@
 
     .arco-pagination-item-active {
         background-color: rgb(var(--primary-6));
-        color: white
+        color: white;
     }
 
     .session-source-list-item-action {
@@ -116,7 +118,8 @@
         margin-top: 8px !important;
     }
 
-    div.arco-typography, p.arco-typography {
+    div.arco-typography,
+    p.arco-typography {
         margin-bottom: 0 !important;
     }
 
@@ -133,11 +136,11 @@
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
-        border-bottom: 0.5px solid rgba(0, 0, 0, .15);
+        border-bottom: 0.5px solid rgba(0, 0, 0, 0.15);
 
         &:hover {
             p {
-                color: #00968F;
+                color: #00968f;
             }
             cursor: pointer;
         }
@@ -145,7 +148,7 @@
         p {
             line-height: 12px;
             font-size: 12px;
-            color: rgba(0,0,0,0.60);
+            color: rgba(0, 0, 0, 0.6);
         }
     }
 }

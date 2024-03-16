@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build",
+    "build": "prisma generate && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "format:schema": "prisma format",
     "start": "nest start",
@@ -34,10 +34,13 @@
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/swagger": "^7.3.0",
     "@prisma/client": "~4.14.1",
+    "@qdrant/js-client-rest": "^1.8.0",
     "bull": "^4.12.2",
     "cheerio": "^1.0.0-rc.12",
     "cookie-parser": "~1.4.6",
+    "helmet": "^7.1.0",
     "langchain": "^0.1.21",
+    "lodash.omit": "^4.5.0",
     "passport": "~0.6.0",
     "passport-github2": "~0.1.12",
     "passport-google-oauth20": "~2.0.0",
@@ -45,7 +48,8 @@
     "passport-local": "~1.0.0",
     "redis": "^4.6.13",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.2.0"
+    "rxjs": "^7.2.0",
+    "@dqbd/tiktoken": "1.0.7"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",
@@ -54,6 +58,7 @@
     "@types/cookie-parser": "~1.4.3",
     "@types/express": "^4.17.13",
     "@types/jest": "29.5.1",
+    "@types/lodash.omit": "^4.5.9",
     "@types/node": "18.16.12",
     "@types/passport": "~1.0.12",
     "@types/passport-github2": "~1.2.5",
