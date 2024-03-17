@@ -21,6 +21,7 @@ services:
       - QDRANT_URL=http://qdrant:6333
   db:
     image: mongo:latest
+    command: --replSet rs0
     ports:
       - 27017:27017
     volumes:
