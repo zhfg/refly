@@ -32,6 +32,7 @@ export const AppLayout = (props: AppLayoutProps) => {
       if (!res?.success) {
         userStore.setUserProfile(undefined)
         userStore.setToken("")
+        localStorage.removeItem("refly-user-profile")
       } else {
         userStore.setUserProfile(res?.data)
         localStorage.setItem("refly-user-profile", safeStringifyJSON(res?.data))
@@ -55,7 +56,7 @@ export const AppLayout = (props: AppLayoutProps) => {
         style={{ height: "calc(100vh - 16px)", flexGrow: 1 }}>
         <Content>{props.children}</Content>
       </Layout>
-      <LoginModal />
+      {userStore.loginModalVisible ? <LoginModal /> : null}
     </Layout>
   )
 }

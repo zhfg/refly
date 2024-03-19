@@ -46,6 +46,7 @@ export const SiderLayout = () => {
     localStorage.getItem("refly-user-profile"),
   )
   const notShowLoginBtn = storageUserProfile?.id || userStore?.userProfile?.id
+  console.log("storageUserProfile", storageUserProfile, userStore?.userProfile)
 
   const selectedKey = getNavSelectedKeys(location.pathname)
   const handleNavClick = (itemKey: string, event, keyPath: string[]) => {

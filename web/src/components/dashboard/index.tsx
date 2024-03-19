@@ -48,6 +48,8 @@ import classNames from "classnames"
 import { useCookie } from "react-use"
 // types
 import type { WebLinkItem } from "@/types/weblink"
+import { useUserStore } from "@/stores/user"
+import { safeStringifyJSON } from "@/utils/parse"
 
 const TextArea = Input.TextArea
 
@@ -69,6 +71,7 @@ const Home = () => {
   const siderStore = useSiderStore()
   const webLinkStore = useWeblinkStore()
   const taskStore = useTaskStore()
+  const userStore = useUserStore()
   // hooks
   const { resetState } = useResetState()
 
@@ -156,7 +159,6 @@ const Home = () => {
     }
 
     console.log("dashboard close")
-    window.close()
   }
 
   const runChatTask = () => {
@@ -212,14 +214,25 @@ const Home = () => {
   }
 
   // TODO: 临时关闭，用于开发调试
+  console.log("token", token)
   useEffect(() => {
-    if (!token) return
+    if (!(token || userStore?.userProfile?.id)) return
 
-    if (token) {
+    const reflyLoginStatus = localStorage.getItem("refly-login-status")
+    console.log("reflyLoginStatus", reflyLoginStatus, token)
+    if ((token || userStore?.userProfile?.id) && reflyLoginStatus) {
       // 从插件打开弹窗，给插件发消息
-      handleSendMsgToExtension("success", token)
+      handleSendMsgToExtension("success", token as string)
+      localStorage.removeItem("refly-login-status")
+      // localStorage.setItem(
+      //   "refly-user-profile",
+      //   safeStringifyJSON(userStore?.userProfile),
+      // )
+      setTimeout(() => {
+        window.close()
+      }, 500)
     }
-  }, [token])
+  }, [token, userStore?.userProfile?.id])
 
   // 自动聚焦输入框
   useEffect(() => {

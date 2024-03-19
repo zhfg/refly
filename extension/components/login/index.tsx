@@ -50,7 +50,7 @@ export const Login = () => {
     const left = (screen.width - 1200) / 2
     const top = (screen.height - 730) / 2
     loginWindowRef.current = window.open(
-      "http://localhost:5173/login",
+      "http://localhost:5173/login?from=refly-extension-login",
       "_blank",
       `location=no,toolbar=no,menubar=no,width=800,height=730,left=${left} / 2,top=${top} / 2`,
     )

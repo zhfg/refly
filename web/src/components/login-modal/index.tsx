@@ -91,7 +91,8 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
     if (props?.from !== "extension-login") {
       localStorage.removeItem("refly-login-status")
     }
-  }, [props.from])
+    console.log("props", props)
+  }, [])
 
   // props
   let modalProps: any = {}
