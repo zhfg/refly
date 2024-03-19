@@ -11,6 +11,7 @@ import { useLocation } from "react-router-dom"
 // 组件
 import { LoginModal } from "@/components/login-modal/index"
 import { useCookie } from "react-use"
+import { safeStringifyJSON } from "@/utils/parse"
 
 const Content = Layout.Content
 
@@ -33,6 +34,7 @@ export const AppLayout = (props: AppLayoutProps) => {
         userStore.setToken("")
       } else {
         userStore.setUserProfile(res?.data)
+        localStorage.setItem("refly-user-profile", safeStringifyJSON(res?.data))
       }
     } catch (err) {
       console.log("getLoginStatus err", err)

@@ -5,6 +5,7 @@ import { useCookie } from "react-use"
 import "./index.scss"
 import { useUserStore } from "@/stores/user"
 import { useNavigate } from "react-router-dom"
+import { extensionId } from "../dashboard"
 
 export const Settings = () => {
   const [token, updateCookie, deleteCookie] = useCookie("_refly_ai_sid")
@@ -20,6 +21,13 @@ export const Settings = () => {
         console.log("delete cookie")
         userStore.setUserProfile(null)
         userStore.setToken("")
+        localStorage.removeItem("refly-user-profile")
+
+        // 给插件发消息
+        chrome.runtime?.sendMessage(extensionId, {
+          name: "logout-notification",
+        })
+
         deleteCookie()
         navigate("/")
       },

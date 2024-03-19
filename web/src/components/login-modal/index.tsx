@@ -33,7 +33,7 @@ interface ExternalLoginPayload {
   }
 }
 
-export const LoginModal = (props: { visible?: boolean }) => {
+export const LoginModal = (props: { visible?: boolean; from?: string }) => {
   const userStore = useUserStore()
   const navigate = useNavigate()
   const loginWindowRef = useRef<Window | null>()
@@ -86,6 +86,12 @@ export const LoginModal = (props: { visible?: boolean }) => {
   //   console.log("refly-login-status")
   //   window.addEventListener("message", handleListenChildPage, false)
   // }, [])
+  useEffect(() => {
+    // 不是插件打开的页面，就直接清除状态，区分插件和普通页面打开
+    if (props?.from !== "extension-login") {
+      localStorage.removeItem("refly-login-status")
+    }
+  }, [props.from])
 
   // props
   let modalProps: any = {}

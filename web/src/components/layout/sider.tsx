@@ -13,6 +13,7 @@ import { downloadPlugin, openGetStartDocument } from "../../utils"
 import Logo from "@/assets/logo.svg"
 import "./sider.scss"
 import { useUserStore } from "@/stores/user"
+import { safeParseJSON } from "@/utils/parse"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -40,11 +41,17 @@ export const SiderLayout = () => {
 
   const isGuideDetail = location.pathname.includes("guide/")
 
+  // 获取 storage user profile
+  const storageUserProfile = safeParseJSON(
+    localStorage.getItem("refly-user-profile"),
+  )
+  const notShowLoginBtn = storageUserProfile?.id || userStore?.userProfile?.id
+
   const selectedKey = getNavSelectedKeys(location.pathname)
   const handleNavClick = (itemKey: string, event, keyPath: string[]) => {
     switch (itemKey) {
       case "Home": {
-        navigate(`/`)
+        navigate(`/dashboard`)
         break
       }
 
@@ -129,7 +136,7 @@ export const SiderLayout = () => {
               <span className="sider-menu-title">会话库</span>
             </MenuItem>
 
-            {!userStore.userProfile?.id && (
+            {!notShowLoginBtn && (
               <Button
                 type="primary"
                 onClick={() => userStore.setLoginModalVisible(true)}

@@ -212,16 +212,14 @@ const Home = () => {
   }
 
   // TODO: 临时关闭，用于开发调试
-  // useEffect(() => {
-  //   if (!token) return
-  //   if (token) {
-  //     // 从插件打开弹窗，给插件发消息
-  //     handleSendMsgToExtension("success", token)
+  useEffect(() => {
+    if (!token) return
 
-  //     // 从 Web 打开弹窗，给 opener 发消息
-  //     window.close()
-  //   }
-  // }, [token])
+    if (token) {
+      // 从插件打开弹窗，给插件发消息
+      handleSendMsgToExtension("success", token)
+    }
+  }, [token])
 
   // 自动聚焦输入框
   useEffect(() => {
