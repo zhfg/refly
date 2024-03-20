@@ -14,6 +14,7 @@ import type { User } from "~types"
 import { useNavigate } from "react-router-dom"
 import { safeParseJSON } from "~utils/parse"
 import { sendToBackground } from "@plasmohq/messaging"
+import { getClientOrigin } from "~utils/url"
 
 interface ExternalLoginPayload {
   name: string
@@ -50,7 +51,7 @@ export const Login = () => {
     const left = (screen.width - 1200) / 2
     const top = (screen.height - 730) / 2
     loginWindowRef.current = window.open(
-      "http://localhost:5173/login?from=refly-extension-login",
+      `${getClientOrigin()}/login?from=refly-extension-login`,
       "_blank",
       `location=no,toolbar=no,menubar=no,width=800,height=730,left=${left} / 2,top=${top} / 2`,
     )

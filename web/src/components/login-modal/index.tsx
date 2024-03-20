@@ -23,6 +23,7 @@ import { safeParseJSON } from "@/utils/parse"
 // styles
 import "./index.scss"
 import { useCookie } from "react-use"
+import { getServerOrigin } from "@/utils/url"
 
 interface ExternalLoginPayload {
   name: string
@@ -46,7 +47,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
    * 3. 之后带着 cookie or 登录状态去获取请求
    */
   const handleLogin = () => {
-    location.href = "http://localhost:3000/v1/auth/google"
+    location.href = `${getServerOrigin()}/v1/auth/google`
 
     // userStore.setLoginModalVisible(false)
   }
