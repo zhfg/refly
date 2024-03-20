@@ -47,9 +47,12 @@ export class LlmService implements OnModuleInit {
   async onModuleInit() {
     this.vectorStore = new QdrantClient({
       url: this.configService.get('qdrant.url'),
+      timeout: 5000,
     });
     this.collectionName = this.configService.get('qdrant.collectionName');
-    this.embeddings = new OpenAIEmbeddings();
+    this.embeddings = new OpenAIEmbeddings({
+      timeout: 5000,
+    });
 
     await this.ensureCollection();
   }
