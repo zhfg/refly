@@ -11,6 +11,7 @@ import { useLocation } from "react-router-dom"
 // 组件
 import { LoginModal } from "@/components/login-modal/index"
 import { useCookie } from "react-use"
+import { safeStringifyJSON } from "@/utils/parse"
 
 const Content = Layout.Content
 
@@ -31,8 +32,10 @@ export const AppLayout = (props: AppLayoutProps) => {
       if (!res?.success) {
         userStore.setUserProfile(undefined)
         userStore.setToken("")
+        localStorage.removeItem("refly-user-profile")
       } else {
         userStore.setUserProfile(res?.data)
+        localStorage.setItem("refly-user-profile", safeStringifyJSON(res?.data))
       }
     } catch (err) {
       console.log("getLoginStatus err", err)
@@ -53,7 +56,7 @@ export const AppLayout = (props: AppLayoutProps) => {
         style={{ height: "calc(100vh - 16px)", flexGrow: 1 }}>
         <Content>{props.children}</Content>
       </Layout>
-      <LoginModal />
+      {userStore.loginModalVisible ? <LoginModal /> : null}
     </Layout>
   )
 }

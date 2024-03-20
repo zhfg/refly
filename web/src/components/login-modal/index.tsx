@@ -23,6 +23,7 @@ import { safeParseJSON } from "@/utils/parse"
 // styles
 import "./index.scss"
 import { useCookie } from "react-use"
+import { getServerOrigin } from "@/utils/url"
 
 interface ExternalLoginPayload {
   name: string
@@ -33,7 +34,7 @@ interface ExternalLoginPayload {
   }
 }
 
-export const LoginModal = (props: { visible?: boolean }) => {
+export const LoginModal = (props: { visible?: boolean; from?: string }) => {
   const userStore = useUserStore()
   const navigate = useNavigate()
   const loginWindowRef = useRef<Window | null>()
@@ -46,7 +47,7 @@ export const LoginModal = (props: { visible?: boolean }) => {
    * 3. 之后带着 cookie or 登录状态去获取请求
    */
   const handleLogin = () => {
-    location.href = "http://localhost:3000/v1/auth/google"
+    location.href = `${getServerOrigin()}/v1/auth/google`
 
     // userStore.setLoginModalVisible(false)
   }
@@ -86,6 +87,13 @@ export const LoginModal = (props: { visible?: boolean }) => {
   //   console.log("refly-login-status")
   //   window.addEventListener("message", handleListenChildPage, false)
   // }, [])
+  useEffect(() => {
+    // 不是插件打开的页面，就直接清除状态，区分插件和普通页面打开
+    if (props?.from !== "extension-login") {
+      localStorage.removeItem("refly-login-status")
+    }
+    console.log("props", props)
+  }, [])
 
   // props
   let modalProps: any = {}
