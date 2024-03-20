@@ -1,6 +1,6 @@
 import { IENV, getEnv } from "./env"
 
-const overrideLocalDev = false
+const overrideLocalDev = true
 
 export let PROD_DOMAIN = "https://www.refly.ai"
 export let DEV_DOMAIN = "https://production-test.refly.ai"
@@ -21,7 +21,7 @@ export const getServerOrigin = () => {
 
 export const getClientOrigin = () => {
   if (overrideLocalDev) {
-    return "http://localhost:5173/"
+    return "http://localhost:5173"
   }
   return getEnv() === IENV.DEVELOPMENT ? CLIENT_DEV_DOMAIN : CLIENT_PROD_DOMAIN
 }

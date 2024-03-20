@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom"
 import { safeParseJSON } from "~utils/parse"
 import { sendToBackground } from "@plasmohq/messaging"
 import { getClientOrigin } from "~utils/url"
+import { ChatHeader } from "~components/home/header"
 
 interface ExternalLoginPayload {
   name: string
@@ -108,25 +109,30 @@ export const Login = () => {
 
   return (
     <div className="login-container">
+      <ChatHeader onlyShowClose />
       <div className="login-brand">
-        <img src={Logo} alt="Refly" style={{ width: 38, height: 38 }} />
-        <span
-          style={{
-            fontSize: 20,
-            fontWeight: "bold",
-            display: "inline-block",
-            marginLeft: 8,
-          }}>
-          Refly
-        </span>
+        <div
+          className="login-branch-content"
+          onClick={() => window.open(getClientOrigin(), "_blank")}>
+          <img src={Logo} alt="Refly" style={{ width: 38, height: 38 }} />
+          <span
+            style={{
+              fontSize: 20,
+              fontWeight: "bold",
+              display: "inline-block",
+              marginLeft: 8,
+            }}>
+            Refly
+          </span>
+        </div>
+        <Button
+          type="primary"
+          onClick={() => handleLogin()}
+          style={{ width: 260, height: 44, marginTop: 32 }}
+          loading={userStore.isCheckingLoginStatus}>
+          {userStore.isCheckingLoginStatus ? "登录中" : "立即登录"}
+        </Button>
       </div>
-      <Button
-        type="primary"
-        onClick={() => handleLogin()}
-        style={{ width: 260, height: 44, marginTop: 32 }}
-        loading={userStore.isCheckingLoginStatus}>
-        {userStore.isCheckingLoginStatus ? "登录中" : "立即登录"}
-      </Button>
     </div>
   )
 }

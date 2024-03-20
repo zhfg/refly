@@ -8,46 +8,69 @@ import { IconTip } from "~components/home/icon-tip"
 import { Avatar } from "@arco-design/web-react"
 import { useSiderStore } from "~stores/sider"
 import { useNavigate } from "react-router-dom"
-
+import { useUserStore } from "~stores/user"
+import { getClientOrigin } from "~utils/url"
 
 export const Header = () => {
-    const siderStore = useSiderStore();
-    const navigate = useNavigate();
+  const siderStore = useSiderStore()
+  const navigate = useNavigate()
+  const { userProfile } = useUserStore()
 
-    return (
-        <header>
-            <div className="brand" onClick={() => {
-                navigate('/')
-            }}>
-                <img src={Logo} alt="Refly" />
-                <span>Refly</span>
-            </div>
-            <div className="funcs">
-                <IconTip text="全屏">
-                    <img src={FullScreenSVG} alt="全屏" />
-                </IconTip>
-                <IconTip text="通知">
+  const showBtn = !!userProfile?.id
+
+  return (
+    <header>
+      <div
+        className="brand"
+        onClick={() => {
+          navigate("/")
+        }}>
+        <img src={Logo} alt="Refly" />
+        <span>Refly</span>
+      </div>
+      <div className="funcs">
+        <IconTip text="全屏">
+          <img
+            src={FullScreenSVG}
+            alt="全屏"
+            onClick={() => window.open(getClientOrigin(), "_blank")}
+          />
+        </IconTip>
+        {/* <IconTip text="通知">
                     <img src={NotificationSVG} alt="通知" />
-                </IconTip>
-                <IconTip text="设置">
-                    <img src={SettingGraySVG} alt="设置" />
-                </IconTip>
-                <IconTip text="账户">
-                    <Avatar size={16}>
-                        <img
-                            alt="avatar"
-                            src="//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/3ee5f13fb09879ecb5185e440cef6eb9.png~tplv-uwbnlip3yd-webp.webp"
-                        />
-                    </Avatar>
-                </IconTip>
-                <IconTip text="关闭">
-                    <img
-                        src={CloseGraySVG}
-                        alt="关闭"
-                        onClick={(_) => siderStore.setShowSider(false)}
-                    />
-                </IconTip>
-            </div>
-        </header>
-    )
+                </IconTip> */}
+        {showBtn && (
+          <IconTip text="设置">
+            <img
+              src={SettingGraySVG}
+              alt="设置"
+              onClick={() =>
+                window.open(`${getClientOrigin()}/settings`, "_blank")
+              }
+            />
+          </IconTip>
+        )}
+        {showBtn && (
+          <IconTip text="账户">
+            <Avatar size={16}>
+              <img
+                alt="avatar"
+                src={userProfile?.avatar}
+                onClick={() =>
+                  window.open(`${getClientOrigin()}/settings`, "_blank")
+                }
+              />
+            </Avatar>
+          </IconTip>
+        )}
+        <IconTip text="关闭">
+          <img
+            src={CloseGraySVG}
+            alt="关闭"
+            onClick={(_) => siderStore.setShowSider(false)}
+          />
+        </IconTip>
+      </div>
+    </header>
+  )
 }
