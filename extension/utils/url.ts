@@ -1,6 +1,6 @@
 import { IENV, getEnv } from "./env"
 
-const overrideLocalDev = true
+const overrideLocalDev = false
 
 export let PROD_DOMAIN = "https://www.refly.ai"
 export let DEV_DOMAIN = "https://production-test.refly.ai"
