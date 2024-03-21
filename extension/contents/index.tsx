@@ -1,5 +1,4 @@
 import ArcoCSS from "data-text:@arco-design/web-react/dist/css/arco.css"
-import QuickActionCSS from "data-text:~/components/quick-action/index.scss"
 import LocalArcoCSS from "data-text:~/contents/arco.css"
 import CSSText from "data-text:~/contents/index.scss"
 import HighlightCSSText from "data-text:~/contents/styles/highlight.scss"
@@ -20,7 +19,6 @@ import Logo from "~assets/logo.svg"
 // 使用方法
 import { useSwitchTheme } from "~hooks/use-switch-theme"
 
-import QuickAction from "../components/quick-action"
 // hooks
 import { useProcessLoginNotify } from "~hooks/use-process-login-notify"
 // import { useRegisterMouseEvent } from "../hooks/use-register-mouse-event"
@@ -52,7 +50,6 @@ export const getStyle = () => {
     ThreadLibraryCSSText +
     ThreadItemCSSText +
     WeblinkCSSText +
-    QuickActionCSS +
     MarkdownCSSText +
     HighlightCSSText +
     LoginCSSText
@@ -89,8 +86,6 @@ export const Content = () => {
 
   return (
     <div className="light app-container">
-      {quickActionStore.toolbarVisible && <QuickAction />}
-
       <div
         className={quickActionStore.selectedText ? "entry active" : "entry"}
         onClick={(_) => siderStore.setShowSider(!siderStore.showSider)}>

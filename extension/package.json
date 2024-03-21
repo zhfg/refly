@@ -1,8 +1,8 @@
 {
   "name": "extension",
-  "displayName": "Refly - 您的 ChatGPT 工作助理，适用于任何网站",
-  "version": "0.0.1",
-  "description": "只需单击 Cmd+B，即可在任何网站上获得 ChatGPT 响应。适用于 Google、Gmail 和超过 1000 万个网站",
+  "displayName": "Refly - 打造世界最大的个性化知识之书",
+  "version": "0.0.5",
+  "description": "Turn your cyber footprints into personalized knowledge base, with the power of LLM. Never miss anything valuable and insightful.",
   "author": "pftom",
   "scripts": {
     "dev": "plasmo dev",

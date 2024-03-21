@@ -14,7 +14,7 @@ import {
   type Task,
   type Source,
   Thread,
-} from "@//types"
+} from "@/types"
 import { SearchTarget, useSearchStateStore } from "@/stores/search-state"
 import { buildChatTask, buildQuickActionTask } from "@/utils/task"
 import { useWeblinkStore } from "@/stores/weblink"
