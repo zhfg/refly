@@ -73,7 +73,9 @@ export class AuthController {
 
     const { accessToken } = await this.authService.login(user);
     res
-      .cookie(this.configService.get('auth.cookieTokenField'), accessToken)
+      .cookie(this.configService.get('auth.cookieTokenField'), accessToken, {
+        domain: this.configService.get('auth.cookieDomain'),
+      })
       .redirect(this.configService.get('auth.redirectUrl'));
   }
 

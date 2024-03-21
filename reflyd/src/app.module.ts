@@ -10,6 +10,7 @@ import { WeblinkModule } from './weblink/weblink.module';
 import { ConversationModule } from './conversation/conversation.module';
 
 import configuration from './config/app.config';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -35,5 +36,6 @@ import configuration from './config/app.config';
     WeblinkModule,
     LlmModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule {}

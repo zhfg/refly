@@ -10,6 +10,7 @@ export default () => ({
   },
   auth: {
     cookieTokenField: '_refly_ai_sid',
+    cookieDomain: process.env.REFLY_COOKIE_DOMAIN || '.refly.ai',
     redirectUrl: process.env.LOGIN_REDIRECT_URL,
     jwt: {
       secret: process.env.JWT_SECRET || 'test',
