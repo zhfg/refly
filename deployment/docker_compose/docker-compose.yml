@@ -2,6 +2,7 @@ version: "3"
 services:
   reflyd:
     image: reflyd:latest
+    container_name: reflyd
     build:
       context: ../../reflyd
       dockerfile: Dockerfile
@@ -10,36 +11,44 @@ services:
     command: >
       node dist/main.js
     depends_on:
-      - db
+      - mongo
       - redis
       - qdrant
     restart: always
     env_file:
       - .env
     environment:
-      - DATABASE_URL=mongodb://db:27017/refly
+      - DATABASE_URL=mongodb://mongo:27017/refly
       - QDRANT_URL=http://qdrant:6333
-  db:
-    image: mongo:latest
-    command: --replSet rs0
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
     ports:
       - 27017:27017
     volumes:
-      - db_volume:/data/db
+      - mongo_volume:/data/db
     restart: always
+    healthcheck:
+      test: test $$(echo "rs.initiate({_id:'rs0',members:[{_id:0,host:\"mongo:27017\"}]}).ok || rs.status().ok" | mongo --port 27017 --quiet) -eq 1
+      interval: 10s
+      start_period: 30s
   redis:
     image: redis/redis-stack:latest
+    container_name: redis
     restart: always
   qdrant:
     image: qdrant/qdrant:latest
+    container_name: qdrant
     restart: always
     env_file:
       - .env
     volumes:
-      - vector_volume:/qdrant/storage
+      - qdrant_volume:/qdrant/storage
   # This container name cannot have an underscore in it due to Vespa expectations of the URL
   nginx:
     image: nginx:1.23.4-alpine
+    container_name: nginx
     restart: always
     depends_on:
       - reflyd
@@ -49,5 +58,5 @@ services:
       - ../config:/etc/nginx/conf.d
 
 volumes:
-  vector_volume:
-  db_volume:
+  qdrant_volume:
+  mongo_volume:
