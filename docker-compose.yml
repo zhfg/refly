@@ -4,7 +4,7 @@ services:
     image: reflyd:latest
     container_name: reflyd
     build:
-      context: ../../reflyd
+      context: ./reflyd
       dockerfile: Dockerfile
     ports:
       - 3000:3000
@@ -20,6 +20,7 @@ services:
     environment:
       - DATABASE_URL=mongodb://mongo:27017/refly
       - QDRANT_URL=http://qdrant:6333
+      - REDIS_HOST=redis
   mongo:
     image: mongo:5
     container_name: mongo
@@ -36,16 +37,19 @@ services:
   redis:
     image: redis/redis-stack:latest
     container_name: redis
+    ports:
+      - 6379:6379
     restart: always
   qdrant:
     image: qdrant/qdrant:latest
     container_name: qdrant
+    ports:
+      - 6333:6333
     restart: always
     env_file:
       - .env
     volumes:
       - ./data/qdrant:/qdrant/storage
-  # This container name cannot have an underscore in it due to Vespa expectations of the URL
   nginx:
     image: nginx:1.23.4-alpine
     container_name: nginx
@@ -55,8 +59,4 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ../config:/etc/nginx/conf.d
-
-volumes:
-  qdrant_volume:
-  mongo_volume:
+      - ./config:/etc/nginx/conf.d
