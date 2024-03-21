@@ -4,3 +4,5 @@ __pycache__
 .yarn
 .env
 **/node_modules/**
+qdrant_storage
+deployment
