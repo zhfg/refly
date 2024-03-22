@@ -53,10 +53,10 @@ export class WeblinkController {
         userId: req.user.id,
       })}`,
     );
-    const weblinkList = await this.weblinkService.findMany({
+    const weblinkList = await this.weblinkService.getUserHistory({
       skip,
       take,
-      where: { linkId, url, userId: req.user.id },
+      where: { id: linkId, url, userId: req.user.id },
       orderBy: { updatedAt: 'desc' },
     });
 

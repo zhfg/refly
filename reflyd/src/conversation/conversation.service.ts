@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
-import { PrismaService } from '../prisma.service';
+import { PrismaService } from '../common/prisma.service';
 import { CreateConversationParam } from './dto';
-import { randomUUID } from 'crypto';
 import { MessageType, Prisma, ChatMessage } from '@prisma/client';
 import {
   QUICK_ACTION_TASK_PAYLOAD,
@@ -12,10 +11,15 @@ import {
 import { createLLMChatMessage } from 'src/llm/schema';
 import { LlmService } from '../llm/llm.service';
 import { Response } from 'express';
+import { WeblinkService } from 'src/weblink/weblink.service';
 
 @Injectable()
 export class ConversationService {
-  constructor(private prisma: PrismaService, private llmService: LlmService) {}
+  constructor(
+    private prisma: PrismaService,
+    private weblinkService: WeblinkService,
+    private llmService: LlmService,
+  ) {}
 
   async create(param: CreateConversationParam, userId: string) {
     return this.prisma.conversation.create({
@@ -48,7 +52,7 @@ export class ConversationService {
     selectedWeblinkConfig?: string;
   }) {
     return this.prisma.chatMessage.create({
-      data: { ...msg, messageId: randomUUID() },
+      data: { ...msg },
     });
   }
 
@@ -192,9 +196,15 @@ export class ConversationService {
     };
 
     if (data?.actionType === QUICK_ACTION_TYPE.SUMMARY) {
+      const weblinkList = data?.filter?.weblinkList;
+      if (weblinkList?.length <= 0) return;
+
+      // 基于一组网页做总结，先获取网页内容
+      const docs = await this.weblinkService.parseMultiWeblinks(weblinkList);
+
       await this.llmService.summary(
         data?.actionPrompt,
-        data?.filter?.weblinkList,
+        docs,
         chatHistory,
         onMessage,
       );

@@ -11,6 +11,8 @@ import { ConversationModule } from './conversation/conversation.module';
 
 import configuration from './config/app.config';
 import { AppController } from './app.controller';
+import { FeedModule } from './feed/feed.module';
+import { DigestModule } from './digest/digest.module';
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { AppController } from './app.controller';
     AccountModule,
     WeblinkModule,
     LlmModule,
+    FeedModule,
+    DigestModule,
   ],
   controllers: [AppController],
 })

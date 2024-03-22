@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IndexStatus } from '@prisma/client';
 
-export class WebLink {
+export class WebLinkDTO {
   @ApiProperty()
   lastVisitTime: number;
 
@@ -25,16 +25,24 @@ export class WebLink {
 
   @ApiProperty()
   visitCount: number;
+
+  @ApiProperty()
+  readTime: number;
+
+  @ApiProperty()
+  pageContent?: string; // 反爬网站前端传入
+
+  userId?: string;
 }
 
-export class StoredWebLink extends WebLink {
+export class StoredWebLink extends WebLinkDTO {
   @ApiProperty()
   indexStatus: IndexStatus;
 }
 
 export class StoreWebLinkParam {
-  @ApiProperty({ type: [WebLink] })
-  data: WebLink[];
+  @ApiProperty({ type: [WebLinkDTO] })
+  data: WebLinkDTO[];
 }
 
 export class GetWebLinkListResponse {

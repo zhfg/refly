@@ -4,14 +4,20 @@ import { BullModule } from '@nestjs/bull';
 
 import { WeblinkController } from './weblink.controller';
 import { WeblinkService } from './weblink.service';
-import { PrismaService } from '../prisma.service';
 
 import { WeblinkProcessor } from './weblink.processor';
-import { LlmService } from '../llm/llm.service';
+import { LlmModule } from '../llm/llm.module';
+import { CommonModule } from 'src/common/common.module';
 
 @Module({
-  imports: [ConfigModule, BullModule.registerQueue({ name: 'index' })],
+  imports: [
+    ConfigModule,
+    CommonModule,
+    LlmModule,
+    BullModule.registerQueue({ name: 'index' }),
+  ],
   controllers: [WeblinkController],
-  providers: [WeblinkService, WeblinkProcessor, PrismaService, LlmService],
+  providers: [WeblinkService, WeblinkProcessor],
+  exports: [WeblinkService],
 })
 export class WeblinkModule {}

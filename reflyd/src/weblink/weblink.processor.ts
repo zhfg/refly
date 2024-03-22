@@ -2,33 +2,21 @@ import { Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
 
-import { Weblink } from '@prisma/client';
-import { LlmService } from '../llm/llm.service';
-import { PrismaService } from '../prisma.service';
+import { WebLinkDTO } from './dto';
+import { WeblinkService } from './weblink.service';
 
 @Processor('index')
 export class WeblinkProcessor {
   private readonly logger = new Logger(WeblinkProcessor.name);
 
-  constructor(private prisma: PrismaService, private llmService: LlmService) {}
+  constructor(private weblinkService: WeblinkService) {}
 
   @Process('indexWebLink')
-  async handleWebLink(job: Job<Weblink>) {
-    this.logger.log(`handle web link, job: ${job}`);
+  async handleWebLink(job: Job<WebLinkDTO>) {
+    this.logger.log(`handle web link, job: ${JSON.stringify(job)}`);
 
     const link = job.data;
-    await this.prisma.weblink.update({
-      where: { linkId: link.linkId },
-      data: { indexStatus: 'processing' },
-    });
-    this.logger.log(`start to process link: ${link.url}`);
-
-    await this.llmService.parseAndStoreLink(link);
-    this.logger.log(`finish process link: ${link.url}`);
-
-    await this.prisma.weblink.update({
-      where: { linkId: link.linkId },
-      data: { indexStatus: 'finish' },
-    });
+    await this.weblinkService.processLinkForUser(link);
+    await this.weblinkService.processLinkForGlobal(link);
   }
 }
