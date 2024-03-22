@@ -50,10 +50,10 @@ import { useCookie } from "react-use"
 import type { WebLinkItem } from "@/types/weblink"
 import { useUserStore } from "@/stores/user"
 import { safeStringifyJSON } from "@/utils/parse"
+import { getExtensionId } from "@/utils/url"
 
 const TextArea = Input.TextArea
 
-export const extensionId = "fcncfleeddfdpbigljgiejfdkmpkldpe"
 
 // 用于快速选择
 export const quickActionList = ["summary"]
@@ -147,7 +147,7 @@ const Home = () => {
     token?: string,
   ) => {
     try {
-      await chrome.runtime.sendMessage(extensionId, {
+      await chrome.runtime.sendMessage(getExtensionId(), {
         name: "login-notification",
         body: {
           status,
