@@ -49,46 +49,49 @@ model VerificationToken {
 }
 
 model User {
+  /// 主键
   id                  String    @id @default(auto()) @map("_id") @db.ObjectId
-  ///头像
+  /// 头像
   avatar              String?
-  ///是否安装了扩展
+  /// 是否安装了扩展
   extensionInstalled  Boolean   @default(false)
-  ///邀请码
+  /// 邀请码
   inviteCode          String?   @default(uuid())
-  ///邀请人数
+  /// 邀请人数
   inviteCount         Int       @default(0)
-  ///用户名
+  /// 用户名
   name                String?
-  ///邮箱
+  /// 邮箱
   email               String?   @unique
-  ///邮箱是否已验证
+  /// 邮箱是否已验证
   emailVerified       DateTime?
-  ///密码
+  /// 密码
   password            String?
-  ///头像
+  /// 头像
   image               String?
-  ///语言偏好列表
+  /// 语言偏好列表
   languagePreferences String[]  @default(["English", "Simplified Chinese"])
-  ///当前语言环境
+  /// 当前语言环境
   locale              String    @default("en")
-  ///禁用的功能列表
+  /// 禁用的功能列表
   disabledCeatures    String[]
-  ///创建时间
+  /// 创建时间
   createdAt           DateTime  @default(now())
-  ///更新时间
+  /// 更新时间
   updatedAt           DateTime  @updatedAt
 
   @@map("user")
 }
 
-//会话模型
+// 会话模型
 model Conversation {
-  ///id为主键，自动生成，映射到数据库中的_id字段，类型为ObjectId
+  /// id为主键
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  ///用户id
+  /// 用户id
   userId          String   @map("user_id") @db.ObjectId
-  ///会话标题
+  /// 内容 id，指向 aigc_content 中的内容
+  contentId       String?  @map("content_id") @db.ObjectId
+  /// 会话标题
   title           String   @map("title")
   /// 最后一条聊天记录
   lastMessage     String   @default("") @map("last_message")
@@ -100,9 +103,9 @@ model Conversation {
   originPageUrl   String   @default("") @map("origin_page_url")
   /// 会话来源页面标题
   originPageTitle String   @default("") @map("origin_page_title")
-  ///创建时间
+  /// 创建时间
   createdAt       DateTime @default(now()) @map("created_at")
-  ///更新时间
+  /// 更新时间
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   @@index([userId, updatedAt])
@@ -111,21 +114,21 @@ model Conversation {
 
 /// 对话消息
 model ChatMessage {
-  /// id为主键，自动生成，映射到数据库中的_id字段，类型为ObjectId
+  /// id为主键
   id                    String      @id @default(auto()) @map("_id") @db.ObjectId
   /// 会话id
-  conversationId        String      @map("conversation_id")
-  ///消息来源
+  conversationId        String      @map("conversation_id") @db.ObjectId
+  /// 消息来源
   type                  MessageType @map("type")
-  ///用户id
+  /// 用户id
   userId                String      @map("user_id") @db.ObjectId
-  //内容
+  // 内容
   content               String      @map("content")
   // 引用文档来源，以 JSON 方式存储
   sources               String?     @default("") @map("sources")
-  ///创建时间
+  /// 创建时间
   createdAt             DateTime    @default(now())
-  ///更新时间
+  /// 更新时间
   updatedAt             DateTime    @updatedAt
   /// 会话选中 Weblink 配置，未来可能会变，先使用 string 保存
   selectedWeblinkConfig String?
@@ -136,7 +139,7 @@ model ChatMessage {
 
 /// 用户访问网页记录
 model UserWeblink {
-  /// id为主键，自动生成，映射到数据库中的_id字段，类型为ObjectId
+  /// id为主键
   id                    String   @id @default(auto()) @map("_id") @db.ObjectId
   /// 网页链接
   url                   String   @map("url")
@@ -166,12 +169,14 @@ model UserWeblink {
 }
 
 model Weblink {
-  /// id为主键，自动生成，映射到数据库中的_id字段，类型为ObjectId
+  /// id为主键
   id          String      @id @default(auto()) @map("_id") @db.ObjectId
   /// 网页链接
   url         String      @unique @map("url")
   /// 索引状态
   indexStatus IndexStatus @default(init) @map("index_status")
+  /// 元数据, JSON 存储
+  meta        String      @map("meta")
   /// 创建时间
   createdAt   DateTime    @default(now()) @map("created_at")
   /// 更新时间
@@ -180,9 +185,9 @@ model Weblink {
   @@map("weblink")
 }
 
-/// 网页元数据
+/// 网页元数据 (待确定)
 model WeblinkMeta {
-  /// id为主键，自动生成，映射到数据库中的_id字段，类型为ObjectId
+  /// 主键
   id        String          @id @default(auto()) @map("_id") @db.ObjectId
   /// 链接 id
   linkId    String          @map("link_id") @db.ObjectId
@@ -201,13 +206,18 @@ model WeblinkMeta {
   @@map("weblink_meta")
 }
 
+/// 生成内容
 model AIGCContent {
-  ///id为主键，自动生成，映射到数据库中的_id字段，类型为ObjectId
+  /// 主键
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  /// 标题
+  title     String   @map("title")
   /// 内容
   content   String   @map("content")
-  /// 引用文档来源，linkId 数组
-  sources   String?  @default("[]") @map("sources")
+  /// 元数据, JSON 存储
+  meta      String   @map("meta")
+  /// 引用文档来源，JSON 字符串
+  sources   String?  @default("") @map("sources")
   /// 创建时间
   createdAt DateTime @default(now()) @map("created_at")
   /// 更新时间
@@ -216,8 +226,9 @@ model AIGCContent {
   @@map("aigc_content")
 }
 
+/// 用户推荐内容
 model UserFeed {
-  ///id为主键，自动生成，映射到数据库中的_id字段，类型为ObjectId
+  /// 主键
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   /// 用户 id
   userId    String   @map("user_id") @db.ObjectId
@@ -228,7 +239,35 @@ model UserFeed {
   /// 更新时间
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@index([userId, updatedAt])
   @@map("user_feed")
+}
+
+/// 用户回顾
+model UserDigest {
+  /// 主键
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  /// 摘要类型
+  type      DigestType @map("digest_type")
+  /// 年份
+  year Int   @default(0)  @map("year")
+  /// 月份
+  month Int @default(0) @map("month")
+  /// week of year
+  week Int @default(0) @map("week")
+  /// 天
+  day Int @default(0) @map("day")
+  /// 用户 id
+  userId    String     @map("user_id") @db.ObjectId
+  /// 内容 id 数组 (JSON)
+  contents String     @map("contents")
+  /// 创建时间
+  createdAt DateTime   @default(now()) @map("created_at")
+  /// 更新时间
+  updatedAt DateTime   @updatedAt @map("updated_at")
+
+  @@index([userId, type])
+  @@map("user_digest")
 }
 
 enum ContentMetaType {
@@ -247,4 +286,11 @@ enum MessageType {
   ai
   human
   system
+}
+
+enum DigestType {
+  Daily
+  Weekly
+  Monthly
+  Annually
 }

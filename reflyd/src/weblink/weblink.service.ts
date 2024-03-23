@@ -152,16 +152,24 @@ export class WeblinkService {
 
     // 提取元数据
     const contentMeta = await this.llmService.extractContentMeta(doc);
-    this.prisma.weblinkMeta.createMany();
+    await this.prisma.weblink.create({
+      data: {
+        url: link.url,
+        meta: JSON.stringify(contentMeta),
+        indexStatus: 'processing',
+      },
+    });
 
     // TODO: 策略选择与匹配，暂时用固定的策略
 
-    // 内容增量生成与更新
+    // Apply strategy and save aigc content
     const content = await this.llmService.applyStrategy(doc);
     await this.prisma.aIGCContent.create({
       data: {
+        title: content.title,
         content: content.content,
         sources: content.sources,
+        meta: content.meta,
       },
     });
 

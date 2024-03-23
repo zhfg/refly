@@ -20,17 +20,13 @@ import {
 import { ApiParam, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
-import { LlmService } from '../llm/llm.service';
 import { TASK_TYPE, type Task } from '../types/task';
 
 @Controller('conversation')
 export class ConversationController {
   private readonly logger = new Logger(ConversationController.name);
 
-  constructor(
-    private conversationService: ConversationService,
-    private llmService: LlmService,
-  ) {}
+  constructor(private conversationService: ConversationService) {}
 
   @UseGuards(JwtAuthGuard)
   @Post('new')

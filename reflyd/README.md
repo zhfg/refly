@@ -5,7 +5,7 @@
 Prepare MongoDB:
 
 ```bash
-docker run --name mongodb -d -p 27017:27017 mongo mongod --replSet rs0
+docker run --name mongodb -d -p 27017:27017 mongo:5 mongod --replSet rs0
 docker exec mongodb mongosh --eval "rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'localhost:27017'}]})"
 ```
 

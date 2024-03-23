@@ -92,6 +92,7 @@ export class LlmService implements OnModuleInit {
    */
   async applyStrategy(doc: Document): Promise<Partial<AIGCContent>> {
     return {
+      title: '',
       content: '',
       sources: '',
     };

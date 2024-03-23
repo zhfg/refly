@@ -7,12 +7,11 @@ import { UserModule } from './user/user.module';
 import { LlmModule } from './llm/llm.module';
 import { AccountModule } from './account/account.module';
 import { WeblinkModule } from './weblink/weblink.module';
+import { AigcModule } from './aigc/aigc.module';
 import { ConversationModule } from './conversation/conversation.module';
 
 import configuration from './config/app.config';
 import { AppController } from './app.controller';
-import { FeedModule } from './feed/feed.module';
-import { DigestModule } from './digest/digest.module';
 
 @Module({
   imports: [
@@ -37,8 +36,7 @@ import { DigestModule } from './digest/digest.module';
     AccountModule,
     WeblinkModule,
     LlmModule,
-    FeedModule,
-    DigestModule,
+    AigcModule,
   ],
   controllers: [AppController],
 })
