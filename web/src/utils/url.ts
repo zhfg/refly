@@ -11,6 +11,16 @@ export const SERVER_DEV_DOMAIN = "http://localhost:3000"
 export const CLIENT_PROD_DOMAIN = "https://www.refly.ai"
 export const CLIENT_DEV_DOMAIN = "http://localhost:3000"
 
+export const getExtensionId = () => {
+  if (overrideLocalDev) {
+    return "fcncfleeddfdpbigljgiejfdkmpkldpe"
+  }
+
+  return getEnv() === IENV.DEVELOPMENT
+    ? "fcncfleeddfdpbigljgiejfdkmpkldpe"
+    : "lecbjbapfkinmikhadakbclblnemmjpd"
+}
+
 export const getServerOrigin = () => {
   // return PROD_DOMAIN
   if (overrideLocalDev) {

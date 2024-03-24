@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { WeblinkService } from './weblink.service';
+import { LlmService } from '../llm/llm.service';
 import { GetWebLinkListResponse, StoreWebLinkParam } from './dto';
 import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 
@@ -17,7 +18,10 @@ import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 export class WeblinkController {
   private readonly logger = new Logger(WeblinkController.name);
 
-  constructor(private weblinkService: WeblinkService) {}
+  constructor(
+    private weblinkService: WeblinkService,
+    private llmService: LlmService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Post('store')
@@ -25,6 +29,15 @@ export class WeblinkController {
     this.logger.log(`user: ${req.user.id}, store link: ${body}`);
     await this.weblinkService.storeLinks(req.user.id, body.data);
     return {};
+  }
+
+  @Get('getWebContent')
+  @ApiQuery({ name: 'url', type: String, required: false })
+  async getWebContent(@Query('url') url) {
+    this.logger.log(`getWebContent, ${url}`);
+
+    const parseContent = await this.llmService.parseWebLinkContent(url); // 处理错误边界
+    return parseContent;
   }
 
   @UseGuards(JwtAuthGuard)
