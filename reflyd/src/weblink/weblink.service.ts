@@ -6,10 +6,11 @@ import { Document } from '@langchain/core/documents';
 import { CheerioWebBaseLoader } from 'langchain/document_loaders/web/cheerio';
 
 import { PrismaService } from '../common/prisma.service';
+import { AigcService } from '../aigc/aigc.service';
 import { WebLinkDTO } from './dto';
 import { getExpectedTokenLenContent } from '../utils/token';
-import { LlmService } from '../llm/llm.service';
 import { Source } from '../types/weblink';
+import { QUEUE_STORE_LINK } from '../utils/const';
 
 @Injectable()
 export class WeblinkService {
@@ -17,10 +18,15 @@ export class WeblinkService {
 
   constructor(
     private prisma: PrismaService,
-    private llmService: LlmService,
-    @InjectQueue('index') private indexQueue: Queue<WebLinkDTO>,
+    private aigcService: AigcService,
+    @InjectQueue(QUEUE_STORE_LINK) private indexQueue: Queue<WebLinkDTO>,
   ) {}
 
+  /**
+   * Preprocess and filter links, then send to processing queue
+   * @param userId user id
+   * @param links link history data
+   */
   async storeLinks(userId: string, links: WebLinkDTO[]) {
     // Aggregate links (pick the last visit one)
     const linkMap = new Map<string, WebLinkDTO>();
@@ -100,10 +106,11 @@ export class WeblinkService {
    */
   async processLinkForUser(link: WebLinkDTO) {
     if (!link.userId) {
-      this.logger.warn(`drop job due to missing user id: ${link}`);
+      this.logger.log(`drop job due to missing user id: ${link}`);
       return;
     }
 
+    // 更新访问记录
     const uwb = await this.prisma.userWeblink.upsert({
       where: {
         userId_url: {
@@ -125,64 +132,37 @@ export class WeblinkService {
         updatedAt: new Date(),
       },
     });
-
     this.logger.log(`user weblink upserted: ${JSON.stringify(uwb)}`);
+
+    return uwb;
   }
 
-  /**
-   * Process weblink globally, including metadata extraction, indexing pipeline, etc.
-   * @param link link data
-   * @returns
-   */
-  async processLinkForGlobal(link: WebLinkDTO) {
-    // TODO: Check global redis lock
+  async processLinkFromStoreQueue(link: WebLinkDTO) {
+    // TODO: 并发控制，妥善处理多个并发请求处理同一个 url 的情况
 
-    // Check if this link is already processed
-    // TODO: handle stale weblink processed too long ago
-    const wl = await this.prisma.weblink.findUnique({
+    // 处理单个用户的访问记录
+    const uwb = await this.processLinkForUser(link);
+
+    // TODO: 处理 link 内容过时
+    let weblink = await this.prisma.weblink.findUnique({
       where: { url: link.url },
     });
-    if (wl) {
-      this.logger.log(`weblink already processed: ${link.url}`);
-      return;
+
+    // 未处理过此链接
+    if (!weblink) {
+      const doc = await this.parseWebLinkContent(link.url);
+      weblink = await this.prisma.weblink.create({
+        data: {
+          url: link.url,
+          indexStatus: 'processing',
+          pageContent: doc.pageContent,
+          pageMeta: JSON.stringify(doc.metadata),
+          contentMeta: '',
+        },
+      });
     }
 
-    // Do real processing
-    const doc = await this.parseWebLinkContent(link.url); // 处理错误边界
-
-    // 提取元数据
-    const contentMeta = await this.llmService.extractContentMeta(doc);
-    await this.prisma.weblink.create({
-      data: {
-        url: link.url,
-        meta: JSON.stringify(contentMeta),
-        indexStatus: 'processing',
-      },
-    });
-
-    // TODO: 策略选择与匹配，暂时用固定的策略
-
-    // Apply strategy and save aigc content
-    const content = await this.llmService.applyStrategy(doc);
-    await this.prisma.aIGCContent.create({
-      data: {
-        title: content.title,
-        content: content.content,
-        sources: content.sources,
-        meta: content.meta,
-      },
-    });
-
-    if (contentMeta.needIndex()) {
-      await this.llmService.indexPipelineFromLink(doc);
-    }
-
-    this.logger.log(`finish process link: ${link.url}`);
-
-    await this.prisma.weblink.update({
-      where: { url: link.url },
-      data: { indexStatus: 'finish' },
-    });
+    await this.aigcService.runContentFlow({ link, uwb, weblink });
   }
 }
 

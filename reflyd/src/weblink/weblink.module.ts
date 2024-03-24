@@ -6,15 +6,16 @@ import { WeblinkController } from './weblink.controller';
 import { WeblinkService } from './weblink.service';
 
 import { WeblinkProcessor } from './weblink.processor';
-import { LlmModule } from '../llm/llm.module';
-import { CommonModule } from 'src/common/common.module';
+import { CommonModule } from '../common/common.module';
+import { AigcModule } from '../aigc/aigc.module';
+import { QUEUE_STORE_LINK } from '../utils/const';
 
 @Module({
   imports: [
     ConfigModule,
     CommonModule,
-    LlmModule,
-    BullModule.registerQueue({ name: 'index' }),
+    AigcModule,
+    BullModule.registerQueue({ name: QUEUE_STORE_LINK }),
   ],
   controllers: [WeblinkController],
   providers: [WeblinkService, WeblinkProcessor],

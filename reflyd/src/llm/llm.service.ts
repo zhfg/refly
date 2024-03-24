@@ -98,6 +98,19 @@ export class LlmService implements OnModuleInit {
     };
   }
 
+  /**
+   * 增量总结
+   * @param oldDoc 现有总结文本
+   * @param newDoc 新的总结文本
+   * @returns
+   */
+  async incrementalSummary(
+    oldDoc: Document,
+    newDoc: Document,
+  ): Promise<string> {
+    return '';
+  }
+
   async indexPipelineFromLink(doc: Document) {
     // splitting / chunking
     const textSplitter = new RecursiveCharacterTextSplitter({
