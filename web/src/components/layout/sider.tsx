@@ -7,6 +7,8 @@ import {
   IconDownload,
   IconBook,
   IconCustomerService,
+  IconHistory,
+  IconBulb,
 } from "@arco-design/web-react/icon"
 import { downloadPlugin, openGetStartDocument } from "../../utils"
 // 静态资源
@@ -66,8 +68,13 @@ export const SiderLayout = () => {
         break
       }
 
-      case "Explore": {
-        navigate(`/explore`)
+      case "Feed": {
+        navigate(`/feed`)
+        break
+      }
+
+      case "Digest": {
+        navigate(`/digest`)
         break
       }
 
@@ -132,6 +139,14 @@ export const SiderLayout = () => {
               <span className="sider-menu-title">主页</span>
             </MenuItem>
             {/* <MenuItem key='Explore' ><IconHome style={{ fontSize: 20 }} />主页</MenuItem> */}
+            <MenuItem key="Feed">
+              <IconBulb style={{ fontSize: 20 }} />
+              <span className="sider-menu-title">探索</span>
+            </MenuItem>
+            <MenuItem key="Digest">
+              <IconHistory style={{ fontSize: 20 }} />
+              <span className="sider-menu-title">回忆</span>
+            </MenuItem>
             <MenuItem key="ThreadLibrary">
               <IconBook style={{ fontSize: 20 }} />
               <span className="sider-menu-title">会话库</span>
