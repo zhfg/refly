@@ -1,8 +1,8 @@
 // 信息抽取使用 function call 技术
 
 import { AIMessage, HumanMessage } from 'langchain/schema';
-import { categoryList } from 'src/llm/category';
-import { makeChatFewshotExamples } from './common';
+import { categoryList } from 'src/prompts/utils/category';
+import { makeChatFewshotExamples } from './utils/common';
 
 // Add more example for performance optimization
 // TODO: compatible with function call message sequence: human/function/ai msg
