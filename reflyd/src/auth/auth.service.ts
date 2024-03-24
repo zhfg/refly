@@ -103,8 +103,8 @@ export class AuthService {
       userId: newUser.id,
       provider,
       providerAccountId: id,
-      access_token: accessToken,
-      refresh_token: refreshToken,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
     });
     this.logger.log(`new account created: ${newAccount.id}`);
 

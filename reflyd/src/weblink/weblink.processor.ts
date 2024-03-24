@@ -4,8 +4,9 @@ import { Job } from 'bull';
 
 import { WebLinkDTO } from './dto';
 import { WeblinkService } from './weblink.service';
+import { QUEUE_STORE_LINK } from '../utils/const';
 
-@Processor('index')
+@Processor(QUEUE_STORE_LINK)
 export class WeblinkProcessor {
   private readonly logger = new Logger(WeblinkProcessor.name);
 
@@ -15,8 +16,6 @@ export class WeblinkProcessor {
   async handleWebLink(job: Job<WebLinkDTO>) {
     this.logger.log(`handle web link, job: ${JSON.stringify(job)}`);
 
-    const link = job.data;
-    await this.weblinkService.processLinkForUser(link);
-    await this.weblinkService.processLinkForGlobal(link);
+    await this.weblinkService.processLinkFromStoreQueue(job.data);
   }
 }

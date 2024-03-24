@@ -1,7 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Source } from '../types/weblink';
-import { DigestType } from '@prisma/client';
-import { ContentMeta } from 'src/llm/dto';
+import { ContentMeta } from '../llm/dto';
 
 export class Content {
   @ApiProperty()
@@ -37,9 +36,6 @@ export class FeedResponse {
 export class DigestListResponse {}
 
 export class DigestDetailResponse {
-  @ApiProperty({ enum: ['daily'] })
-  type: DigestType;
-
   @ApiProperty()
   year: number;
 
