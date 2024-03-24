@@ -5,5 +5,6 @@ import { ConfigModule } from '@nestjs/config';
 @Module({
   imports: [ConfigModule],
   providers: [LlmService],
+  exports: [LlmService],
 })
 export class LlmModule {}

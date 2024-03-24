@@ -5,7 +5,6 @@ import omit from 'lodash.omit';
 
 import { QdrantClient } from '@qdrant/js-client-rest';
 import { Document } from '@langchain/core/documents';
-import { CheerioWebBaseLoader } from 'langchain/document_loaders/web/cheerio';
 import { OpenAIEmbeddings, ChatOpenAI } from '@langchain/openai';
 import {
   ChatPromptTemplate,
@@ -18,21 +17,17 @@ import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { PromptTemplate } from '@langchain/core/prompts';
 import { JsonOutputFunctionsParser } from 'langchain/output_parsers';
 
-import { ChatMessage, Weblink } from '@prisma/client';
+import { AIGCContent, ChatMessage } from '@prisma/client';
 import {
   qaSystemPrompt,
   contextualizeQSystemPrompt,
   summarizeSystemPrompt,
 } from './prompts';
 import { LLMChatMessage } from './schema';
-import { Source } from 'src/types/weblink';
 import { HumanMessage } from 'langchain/schema';
-import {
-  countToken,
-  maxWebsiteTokenSize,
-  truncateToken,
-} from 'src/utils/token';
+
 import { uniqueFunc } from 'src/utils/unique';
+import { ContentMeta } from './dto';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
@@ -47,11 +42,15 @@ export class LlmService implements OnModuleInit {
   async onModuleInit() {
     this.vectorStore = new QdrantClient({
       url: this.configService.get('qdrant.url'),
+      timeout: 5000,
     });
     this.collectionName = this.configService.get('qdrant.collectionName');
-    this.embeddings = new OpenAIEmbeddings();
+    this.embeddings = new OpenAIEmbeddings({
+      timeout: 5000,
+    });
 
     await this.ensureCollection();
+    this.logger.log('LLM Service ready');
   }
 
   /**
@@ -78,61 +77,28 @@ export class LlmService implements OnModuleInit {
     this.logger.log(`qdrant collection initialized: ${this.collectionName}`);
   }
 
-  async parseWebLinkContent(url: string) {
-    try {
-      const loader = new CheerioWebBaseLoader(url);
-
-      // customized webpage loading
-      const $ = await loader.scrape();
-      const pageContent = $(loader.selector).text();
-      const title = $('title').text();
-      const source = loader.webPath;
-
-      return { pageContent, title, source };
-    } catch (err) {
-      return null;
-    }
+  /**
+   * Extract metadata from weblinks.
+   * @param doc valid langchain doc representing website content
+   */
+  async extractContentMeta(doc: Document): Promise<ContentMeta> {
+    return;
   }
 
-  // TODO： 目前比较粗暴，直接截断，理论上后续总结场景需要关注所有的 header 以及首段的总结，这样能够得到更加全面的总结
-  getExpectedTokenLenContent(texts: string[] | string = [], tokenLimit = 0) {
-    try {
-      let newTexts;
-
-      if (Array.isArray(texts)) {
-        const totalText = texts?.reduce((total, curr) => total + curr, '');
-        if (totalText.length < tokenLimit) return texts;
-
-        newTexts = texts.map((text) => text.slice(0, tokenLimit));
-      } else {
-        if (texts.length < tokenLimit) return texts;
-
-        newTexts = texts.slice(0, tokenLimit);
-      }
-
-      return newTexts;
-    } catch (err) {
-      return texts;
-    }
+  /**
+   * Apply content strategy.
+   * @param doc
+   * @returns
+   */
+  async applyStrategy(doc: Document): Promise<Partial<AIGCContent>> {
+    return {
+      title: '',
+      content: '',
+      sources: '',
+    };
   }
 
-  async parseAndStoreLink(link: Weblink) {
-    const parseContent = await this.parseWebLinkContent(link.url); // 处理错误边界
-    if (!parseContent) return;
-
-    const { pageContent, title, source } = parseContent;
-
-    const metadata = { source, userId: link.userId, title };
-    const doc = new Document({
-      pageContent: this.getExpectedTokenLenContent(
-        pageContent,
-        maxWebsiteTokenSize,
-      ),
-      metadata,
-    });
-
-    this.logger.log(`link loaded from ${link.url}`);
-
+  async indexPipelineFromLink(doc: Document) {
     // splitting / chunking
     const textSplitter = new RecursiveCharacterTextSplitter({
       separators: ['\n\n', '\n', ' ', ''],
@@ -141,7 +107,6 @@ export class LlmService implements OnModuleInit {
       lengthFunction: (str = '') => str.length || 0,
     });
     const documents = await textSplitter.splitDocuments([doc]);
-    this.logger.log(`text splitting complete for ${link.url}`);
 
     // embedding
     const texts = documents.map(({ pageContent }) => pageContent);
@@ -165,7 +130,6 @@ export class LlmService implements OnModuleInit {
       wait: true,
       points,
     });
-    this.logger.log(`vector stored for ${link.url}`);
   }
 
   async retrieval(query: string, filter) {
@@ -236,47 +200,29 @@ export class LlmService implements OnModuleInit {
 
   async summary(
     prompt: string,
-    weblinkList: Source[],
+    docs: Document[],
     chatHistory: ChatMessage[],
     onMessage: (chunk: string) => void,
   ) {
-    if (weblinkList?.length <= 0) return;
-    // 处理 token 窗口，一共给 6K 窗口用于问答，平均分到每个网页，保障可用性
-    const avgTokenLen = 6000 / weblinkList?.length;
-
-    // 基于一组网页做总结，先获取网页内容
-    const textForSplitter = await Promise.all(
-      weblinkList.map(async (item) => {
-        const { pageContent, title, source } = await this.parseWebLinkContent(
-          item?.metadata?.source,
-        );
-        const truncateStr =
-          this.getExpectedTokenLenContent(pageContent, avgTokenLen) || '';
-
-        return {
-          metadata: { source, title },
-          text: truncateStr,
-        };
-      }),
-    );
+    if (docs.length <= 0) return;
 
     const textSplitter = new RecursiveCharacterTextSplitter({
       chunkSize: 1000,
     });
 
     // 带元数据去拼 docs
-    let weblinkDocs = [];
-    await Promise.all(
-      textForSplitter.map(async (item) => {
-        const { metadata, text } = item;
-        // 手动区分网页分割
-        const dividerDocs = await textSplitter.createDocuments([
-          `\n\n下面是网页 [${metadata?.title}](${metadata.source}) 的内容\n\n`,
-        ]);
-        const docs = await textSplitter.createDocuments([text], [metadata]);
-        weblinkDocs = weblinkDocs.concat(dividerDocs, docs);
-      }),
-    );
+    const weblinkDocs: Document[] = (
+      await Promise.all(
+        docs.map(async (doc) => {
+          const { metadata } = doc;
+          // 手动区分网页分割
+          const dividerDocs = await textSplitter.createDocuments([
+            `\n\n下面是网页 [${metadata?.title}](${metadata.source}) 的内容\n\n`,
+          ]);
+          return [...dividerDocs, doc];
+        }),
+      )
+    ).flat();
 
     const llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
     const combineLLM = new ChatOpenAI({

@@ -11,7 +11,7 @@ async function bootstrap() {
   app.enableCors();
   app.use(cookieParser());
 
-  app.setGlobalPrefix('/v1');
+  app.setGlobalPrefix('/v1', { exclude: ['/'] });
 
   const config = new DocumentBuilder()
     .setTitle('Refly Backend API')

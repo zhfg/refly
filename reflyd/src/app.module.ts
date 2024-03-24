@@ -7,9 +7,11 @@ import { UserModule } from './user/user.module';
 import { LlmModule } from './llm/llm.module';
 import { AccountModule } from './account/account.module';
 import { WeblinkModule } from './weblink/weblink.module';
+import { AigcModule } from './aigc/aigc.module';
 import { ConversationModule } from './conversation/conversation.module';
 
 import configuration from './config/app.config';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import configuration from './config/app.config';
     AccountModule,
     WeblinkModule,
     LlmModule,
+    AigcModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule {}
