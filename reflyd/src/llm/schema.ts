@@ -1,5 +1,7 @@
 import { MessageType } from '@prisma/client';
 import { AIMessage, HumanMessage, SystemMessage } from 'langchain/schema';
+import { z } from 'zod';
+import { categoryList } from './category';
 
 export type LLMChatMessage = AIMessage | HumanMessage | SystemMessage;
 

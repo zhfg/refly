@@ -22,6 +22,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@dqbd/tiktoken": "1.0.7",
     "@langchain/community": "^0.0.32",
     "@langchain/openai": "^0.0.14",
     "@langchain/redis": "^0.0.1",
@@ -49,7 +50,7 @@
     "redis": "^4.6.13",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
-    "@dqbd/tiktoken": "1.0.7"
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",

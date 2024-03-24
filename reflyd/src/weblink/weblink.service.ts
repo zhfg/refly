@@ -150,16 +150,6 @@ export class WeblinkService {
     // Do real processing
     const doc = await this.parseWebLinkContent(link.url); // 处理错误边界
 
-    // 提取元数据
-    const contentMeta = await this.llmService.extractContentMeta(doc);
-    await this.prisma.weblink.create({
-      data: {
-        url: link.url,
-        meta: JSON.stringify(contentMeta),
-        indexStatus: 'processing',
-      },
-    });
-
     // TODO: 策略选择与匹配，暂时用固定的策略
 
     // Apply strategy and save aigc content
@@ -170,6 +160,16 @@ export class WeblinkService {
         content: content.content,
         sources: content.sources,
         meta: content.meta,
+      },
+    });
+
+    // 提取元数据
+    const contentMeta = await this.llmService.extractContentMeta(doc);
+    await this.prisma.weblink.create({
+      data: {
+        url: link.url,
+        meta: JSON.stringify(contentMeta),
+        indexStatus: 'processing',
       },
     });
 

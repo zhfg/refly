@@ -19,12 +19,15 @@ import { JsonOutputFunctionsParser } from 'langchain/output_parsers';
 
 import { AIGCContent, ChatMessage } from '@prisma/client';
 import {
-  qaSystemPrompt,
-  contextualizeQSystemPrompt,
-  summarizeSystemPrompt,
-} from './prompts';
+  qa,
+  contextualizeQA,
+  extractContentMeta,
+  summarize,
+  summarizeMultipleSource,
+  extractSummarizeMeta,
+} from '../prompts/index';
 import { LLMChatMessage } from './schema';
-import { HumanMessage } from 'langchain/schema';
+import { HumanMessage, SystemMessage } from 'langchain/schema';
 
 import { uniqueFunc } from 'src/utils/unique';
 import { ContentMeta } from './dto';
@@ -82,7 +85,34 @@ export class LlmService implements OnModuleInit {
    * @param doc valid langchain doc representing website content
    */
   async extractContentMeta(doc: Document): Promise<ContentMeta> {
-    return;
+    const { pageContent } = doc;
+
+    const llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
+    const parser = new JsonOutputFunctionsParser();
+    const runnable = await llm
+      .bind({
+        functions: [extractContentMeta.extractContentMetaSchema],
+        function_call: { name: 'content_category' },
+      })
+      .pipe(parser);
+    const res = (await runnable.invoke([
+      new SystemMessage(extractContentMeta.systemPrompt),
+      new HumanMessage(pageContent),
+    ])) as {
+      category: string;
+      reason: string;
+      score: number;
+      format: string;
+    };
+
+    const contentMeta = {
+      topics: [{ key: res?.category, score: String(res?.score) }],
+      contentType: null,
+      formats: [{ key: res?.format, score: '' }],
+      needIndex: () => true,
+    };
+
+    return contentMeta;
   }
 
   /**
@@ -91,10 +121,80 @@ export class LlmService implements OnModuleInit {
    * @returns
    */
   async applyStrategy(doc: Document): Promise<Partial<AIGCContent>> {
+    // direct apply summary and return with structed json format
+    const llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
+
+    const parser = new JsonOutputFunctionsParser();
+    const runnable = await llm
+      .bind({
+        functions: [extractSummarizeMeta.extractSummarizeMetaSchema],
+        function_call: { name: 'content_meta_extractor' },
+      })
+      .pipe(parser);
+    const contentMeta = (await runnable.invoke([
+      new SystemMessage(extractSummarizeMeta.extractSummarizeSystemPrompt),
+      new HumanMessage(doc.pageContent),
+    ])) as {
+      title: string;
+      content: string;
+      keywords: string;
+    };
+
     return {
-      title: '',
-      content: '',
-      sources: '',
+      title: contentMeta?.title || '',
+      content: contentMeta?.content || '',
+      meta: JSON.stringify({
+        keywords: contentMeta?.keywords || '',
+      }),
+      sources: JSON.stringify([doc?.metadata?.source || '']),
+    };
+  }
+
+  /**
+   * summarize multiple weblink
+   * @param doc
+   * @returns
+   */
+  async summarizeMultipleWeblink(
+    docs: AIGCContent[],
+  ): Promise<Partial<AIGCContent>> {
+    // direct apply summary and return with structed json format
+    const llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
+
+    const multipleSourceInputContent = docs.reduce((total, cur) => {
+      total += `网页：${cur?.title}
+      ===
+      网页标题：${cur?.title}
+      网页摘要：${cur?.content}
+      关键词：${cur?.meta}
+      网页链接：${cur?.sources}
+      ===
+      `;
+
+      return total;
+    }, '');
+
+    const parser = new JsonOutputFunctionsParser();
+    const runnable = await llm
+      .bind({
+        functions: [
+          summarizeMultipleSource.extractSummarizeMultipleSourceMetaSchema,
+        ],
+        function_call: { name: 'content_meta_extractor' },
+      })
+      .pipe(parser);
+    const contentMeta = (await runnable.invoke([
+      new SystemMessage(summarizeMultipleSource.systemPrompt),
+      new HumanMessage(multipleSourceInputContent),
+    ])) as {
+      title: string;
+      content: string;
+    };
+
+    // TODO: need return topics、all weblinks
+    return {
+      title: contentMeta?.title || '',
+      content: contentMeta?.content || '',
     };
   }
 
@@ -145,23 +245,7 @@ export class LlmService implements OnModuleInit {
     const parser = new JsonOutputFunctionsParser();
     const runnable = await llm
       .bind({
-        functions: [
-          {
-            name: 'keyword_for_search_engine',
-            description: `You are an expert search engine keywords extraction algorithm.
-            Only extract keyword from the user query for search engine. If cannot extract keywords, the results should be empty array`,
-            parameters: {
-              type: 'object',
-              properties: {
-                keyword_list: {
-                  type: 'array',
-                  items: { type: 'string' },
-                },
-              },
-              required: ['keyword_list'],
-            },
-          },
-        ],
+        functions: [extractContentMeta.extractSearchKeyword],
         function_call: { name: 'keyword_for_search_engine' },
       })
       .pipe(parser);
@@ -239,7 +323,7 @@ export class LlmService implements OnModuleInit {
     });
 
     const customPrompt = new PromptTemplate({
-      template: summarizeSystemPrompt,
+      template: summarize.systemPrompt,
       inputVariables: ['text'],
     });
     const summarizeChain = loadSummarizationChain(llm, {
@@ -261,7 +345,7 @@ export class LlmService implements OnModuleInit {
 
     // 构建总结的 Prompt，将 question + chatHistory 总结成
     const contextualizeQPrompt = ChatPromptTemplate.fromMessages([
-      ['system', contextualizeQSystemPrompt],
+      ['system', contextualizeQA.systemPrompt],
       new MessagesPlaceholder('chatHistory'),
       ['human', '{question}'],
     ]);
@@ -277,7 +361,7 @@ export class LlmService implements OnModuleInit {
           });
 
     const qaPrompt = ChatPromptTemplate.fromMessages([
-      ['system', qaSystemPrompt],
+      ['system', qa.systemPrompt],
       new MessagesPlaceholder('chatHistory'),
       ['human', '{question}'],
     ]);
