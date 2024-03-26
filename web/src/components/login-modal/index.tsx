@@ -147,11 +147,19 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
         <Divider></Divider>
         <Typography.Paragraph className="term-text">
           注册同意即表明您同意
-          <Link to="/terms">
+          <Link
+            to="/terms"
+            onClick={() => {
+              userStore.setLoginModalVisible(false)
+            }}>
             <Typography.Text underline>条款和条件</Typography.Text>
           </Link>
           及
-          <Link to="/privacy">
+          <Link
+            to="/privacy"
+            onClick={() => {
+              userStore.setLoginModalVisible(false)
+            }}>
             <Typography.Text underline>隐私政策</Typography.Text>
           </Link>
         </Typography.Paragraph>
