@@ -8,16 +8,22 @@ import { ThreadLibrary } from "@/components/thread-library"
 import { Settings } from "@/components/settings/index"
 import { Login } from "@/components/login/index"
 import LandingPage from "@/pages/landing-page"
+import Privacy from "@/pages/pravicy"
+import Terms from "@/pages/terms"
 
 export const AppRouter = (props: { layout?: any }) => {
   const { layout: Layout } = props
-  const routeMatch = useMatch("/")
+  const routeLandingPageMatch = useMatch("/")
+  const routePrivacyPageMatch = useMatch("/privacy")
+  const routeTermsPageMatch = useMatch("/terms")
   // 导航相关
 
-  if (routeMatch) {
+  if (routeLandingPageMatch || routePrivacyPageMatch || routeTermsPageMatch) {
     return (
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
       </Routes>
     )
   }

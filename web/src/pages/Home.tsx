@@ -9,8 +9,12 @@ import Testimonials from "@/components/landing-page-partials/Testimonials"
 import Newsletter from "@/components/landing-page-partials/Newsletter"
 import Banner from "@/components/landing-page-partials/Banner"
 import Footer from "@/components/landing-page-partials/Footer"
+import { useUserStore } from "@/stores/user"
+import { LoginModal } from "@/components/login-modal"
 
 function Home() {
+  const userStore = useUserStore()
+
   return (
     <div className="flex flex-col min-h-screen overflow-hidden">
       {/*  Site header */}
@@ -28,13 +32,14 @@ function Home() {
         {/*  Page sections */}
         <HeroHome />
         <FeaturesBlocks />
-        <FeaturesZigZag />
-        <Testimonials />
-        <Newsletter />
+        {/* <FeaturesZigZag /> */}
+        {/* <Testimonials /> */}
+        {/* <Newsletter /> */}
       </main>
 
       {/*  Site footer */}
       <Footer />
+      {userStore.loginModalVisible ? <LoginModal /> : null}
     </div>
   )
 }

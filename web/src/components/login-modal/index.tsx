@@ -17,7 +17,7 @@ import { useUserStore } from "@/stores/user"
 // 静态资源
 import Logo from "@/assets/logo.svg"
 import type { User } from "@/types"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { safeParseJSON } from "@/utils/parse"
 
 // styles
@@ -147,8 +147,13 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
         <Divider></Divider>
         <Typography.Paragraph className="term-text">
           注册同意即表明您同意
-          <Typography.Text underline>条款和条件</Typography.Text>及
-          <Typography.Text underline>隐私政策</Typography.Text>
+          <Link to="/terms">
+            <Typography.Text underline>条款和条件</Typography.Text>
+          </Link>
+          及
+          <Link to="/privacy">
+            <Typography.Text underline>隐私政策</Typography.Text>
+          </Link>
         </Typography.Paragraph>
       </div>
     </Modal>

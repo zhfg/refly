@@ -136,20 +136,6 @@ export const SiderLayout = () => {
               <IconBook style={{ fontSize: 20 }} />
               <span className="sider-menu-title">会话库</span>
             </MenuItem>
-
-            {!notShowLoginBtn && (
-              <Button
-                type="primary"
-                onClick={() => userStore.setLoginModalVisible(true)}
-                style={{
-                  marginTop: 16,
-                  width: "calc(100% - 8px)",
-                  height: 38,
-                  borderRadius: 4,
-                }}>
-                登录
-              </Button>
-            )}
           </div>
           <div className="sider-footer">
             <MenuItem key="Docs">

@@ -2,14 +2,16 @@ import React, { useState, useRef, useEffect } from "react"
 import Modal from "../modal"
 
 import HeroImage from "@/assets/landing-page-images/hero-image-01.jpg"
+import { useUserStore } from "@/stores/user"
 
 function HeroHome() {
-  const [videoModalOpen, setVideoModalOpen] = useState(false)
-  const video = useRef(null)
+  const userStore = useUserStore()
+  // const [videoModalOpen, setVideoModalOpen] = useState(false)
+  // const video = useRef(null)
 
-  useEffect(() => {
-    videoModalOpen ? video.current.play() : video.current.pause()
-  }, [videoModalOpen])
+  // useEffect(() => {
+  //   videoModalOpen ? video.current.play() : video.current.pause()
+  // }, [videoModalOpen])
 
   return (
     <section>
@@ -35,8 +37,8 @@ function HeroHome() {
                 x2="284.352"
                 y2="577.921"
                 gradientUnits="userSpaceOnUse">
-                <stop stopColor="#5D5DFF" stopOpacity=".01" />
-                <stop offset="1" stopColor="#5D5DFF" stopOpacity=".32" />
+                <stop stopColor="#00968F" stopOpacity=".01" />
+                <stop offset="1" stopColor="#00968F" stopOpacity=".32" />
               </linearGradient>
             </defs>
             <path
@@ -53,7 +55,7 @@ function HeroHome() {
           {/* Section header */}
           <div className="max-w-3xl mx-auto text-center pb-12 md:pb-16">
             <h1 className="h1 mb-4" data-aos="fade-up">
-              FLY with smart REtrospection.
+              Refly AI
             </h1>
             <p
               className="text-xl text-gray-400 mb-8"
@@ -65,7 +67,10 @@ function HeroHome() {
             <div className="max-w-xs mx-auto sm:max-w-none sm:flex sm:justify-center">
               <div data-aos="fade-up" data-aos-delay="400">
                 <a
-                  className="btn text-white bg-purple-600 hover:bg-purple-700 w-full mb-4 sm:w-auto sm:mb-0"
+                  onClick={() => {
+                    userStore.setLoginModalVisible(true)
+                  }}
+                  className="btn text-white bg-green-600 hover:bg-green-700 w-full mb-4 sm:w-auto sm:mb-0"
                   href="#0">
                   免费使用
                 </a>
@@ -74,15 +79,15 @@ function HeroHome() {
                 <a
                   className="btn text-white bg-gray-700 hover:bg-gray-800 w-full sm:w-auto sm:ml-4"
                   href="#0">
-                  查看文档
+                  下载插件
                 </a>
               </div>
             </div>
           </div>
 
           {/* Hero image */}
-          <div>
-            <div
+          {/* <div> */}
+          {/* <div
               className="relative flex justify-center items-center"
               data-aos="fade-up"
               data-aos-delay="200">
@@ -119,15 +124,15 @@ function HeroHome() {
                   </defs>
                   <circle fill="url(#a)" cx="44" cy="44" r="44" />
                   <path
-                    className="fill-current text-purple-600"
+                    className="fill-current text-green-600"
                     d="M52 44a.999.999 0 00-.427-.82l-10-7A1 1 0 0040 37V51a.999.999 0 001.573.82l10-7A.995.995 0 0052 44V44c0 .001 0 .001 0 0z"
                   />
                 </svg>
               </a>
-            </div>
+            </div> */}
 
-            {/* Modal */}
-            <Modal
+          {/* Modal */}
+          {/* <Modal
               id="modal"
               ariaLabel="modal-headline"
               show={videoModalOpen}
@@ -145,8 +150,8 @@ function HeroHome() {
                   Your browser does not support the video tag.
                 </video>
               </div>
-            </Modal>
-          </div>
+            </Modal> */}
+          {/* </div> */}
         </div>
       </div>
     </section>
