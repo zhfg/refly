@@ -38,7 +38,9 @@ export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
             <img
               src={FullScreenSVG}
               alt="全屏"
-              onClick={() => window.open(getClientOrigin(), "_blank")}
+              onClick={() =>
+                window.open(`${getClientOrigin()}/dashboard`, "_blank")
+              }
             />
           </IconTip>
         )}

@@ -1,12 +1,12 @@
 import { Button, Modal } from "@arco-design/web-react"
 import { useCookie } from "react-use"
+import Cookies from "js-cookie"
 
 // styles
 import "./index.scss"
 import { useUserStore } from "@/stores/user"
 import { useNavigate } from "react-router-dom"
-import { getExtensionId } from "@/utils/url"
-
+import { getClientOrigin, getCookieOrigin, getExtensionId } from "@/utils/url"
 
 export const Settings = () => {
   const [token, updateCookie, deleteCookie] = useCookie("_refly_ai_sid")
@@ -30,6 +30,8 @@ export const Settings = () => {
         })
 
         deleteCookie()
+        getClientOrigin
+        Cookies.remove("_refly_ai_sid", { domain: getCookieOrigin() })
         navigate("/")
       },
       onConfirm() {},

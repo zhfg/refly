@@ -1,4 +1,4 @@
-import { Button, Layout, Menu } from "@arco-design/web-react"
+import { Layout, Menu } from "@arco-design/web-react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { ReactText } from "react"
 import {
@@ -6,11 +6,11 @@ import {
   IconSettings,
   IconDownload,
   IconBook,
-  IconCustomerService,
   IconHistory,
   IconBulb,
+  IconTwitter,
 } from "@arco-design/web-react/icon"
-import { downloadPlugin, openGetStartDocument } from "../../utils"
+import { openGetStartDocument } from "../../utils"
 // 静态资源
 import Logo from "@/assets/logo.svg"
 import "./sider.scss"
@@ -78,6 +78,11 @@ export const SiderLayout = () => {
         break
       }
 
+      case "GetHelp": {
+        window.open(`https://twitter.com/tuturetom`, "_blank")
+        break
+      }
+
       case "Collection": {
         navigate(`/collection`)
         break
@@ -100,7 +105,10 @@ export const SiderLayout = () => {
 
       case "DownloadExtension": {
         // 下载浏览器插件
-        downloadPlugin()
+        window.open(
+          `https://chromewebstore.google.com/detail/lecbjbapfkinmikhadakbclblnemmjpd`,
+          "_blank",
+        )
         break
       }
 
@@ -119,7 +127,7 @@ export const SiderLayout = () => {
             flexDirection: "row",
             justifyContent: "space-between",
           }}>
-          <div className="logo" onClick={() => navigate("/")}>
+          <div className="logo" onClick={() => navigate("/dashboard")}>
             <img src={Logo} alt="Refly" />
             <span>Refly</span>
           </div>
@@ -151,25 +159,11 @@ export const SiderLayout = () => {
               <IconBook style={{ fontSize: 20 }} />
               <span className="sider-menu-title">会话库</span>
             </MenuItem>
-
-            {!notShowLoginBtn && (
-              <Button
-                type="primary"
-                onClick={() => userStore.setLoginModalVisible(true)}
-                style={{
-                  marginTop: 16,
-                  width: "calc(100% - 8px)",
-                  height: 38,
-                  borderRadius: 4,
-                }}>
-                登录
-              </Button>
-            )}
           </div>
           <div className="sider-footer">
-            <MenuItem key="Docs">
-              <IconCustomerService style={{ fontSize: 20 }} />
-              <span className="sider-menu-title">查看文档</span>
+            <MenuItem key="GetHelp">
+              <IconTwitter style={{ fontSize: 20 }} />
+              <span className="sider-menu-title">获得帮助</span>
             </MenuItem>
             {!!userStore.userProfile?.id && (
               <MenuItem key="Settings">
@@ -177,7 +171,7 @@ export const SiderLayout = () => {
                 <span className="sider-menu-title">设置</span>
               </MenuItem>
             )}
-            <MenuItem key="Download">
+            <MenuItem key="DownloadExtension">
               <IconDownload style={{ fontSize: 20 }} />
               <span className="sider-menu-title">下载插件</span>
             </MenuItem>

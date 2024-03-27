@@ -6,7 +6,7 @@ import { useUserStore } from "@/stores/user"
 
 // request
 import getUserInfo from "@/requests/getUserInfo"
-import { useLocation } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 
 // 组件
 import { LoginModal } from "@/components/login-modal/index"
@@ -21,6 +21,7 @@ interface AppLayoutProps {
 
 export const AppLayout = (props: AppLayoutProps) => {
   const userStore = useUserStore()
+  const navigate = useNavigate()
   const [token, updateCookie, deleteCookie] = useCookie("_refly_ai_sid")
 
   const getLoginStatus = async () => {
@@ -33,6 +34,7 @@ export const AppLayout = (props: AppLayoutProps) => {
         userStore.setUserProfile(undefined)
         userStore.setToken("")
         localStorage.removeItem("refly-user-profile")
+        navigate("/")
       } else {
         userStore.setUserProfile(res?.data)
         localStorage.setItem("refly-user-profile", safeStringifyJSON(res?.data))
