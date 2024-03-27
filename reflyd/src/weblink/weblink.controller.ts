@@ -36,7 +36,7 @@ export class WeblinkController {
   async getWebContent(@Query('url') url) {
     this.logger.log(`getWebContent, ${url}`);
 
-    const parseContent = await this.llmService.parseWebLinkContent(url); // 处理错误边界
+    const parseContent = await this.weblinkService.parseWebLinkContent(url); // 处理错误边界
     return parseContent;
   }
 

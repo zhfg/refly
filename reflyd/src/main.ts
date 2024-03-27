@@ -4,6 +4,8 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import fetch from 'node-fetch';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,6 +22,20 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
+
+  const proxyUrl = 'http://127.0.0.1:17890';
+  const agent = new HttpsProxyAgent(proxyUrl);
+  // @ts-ignore
+  global.fetch = new Proxy(fetch, {
+    apply: function (target, thisArg, args) {
+      const result = target.apply(thisArg, {
+        ...args,
+        agent: agent,
+      });
+
+      return result;
+    },
+  });
 
   const configService = app.get(ConfigService);
   await app.listen(configService.get('port'));

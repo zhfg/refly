@@ -106,10 +106,11 @@ export class LlmService implements OnModuleInit {
     };
 
     const contentMeta = {
-      topics: [{ key: res?.category, score: String(res?.score) }],
+      topics: [{ key: res?.category, score: res?.score, name: '', reason: '' }],
       contentType: null,
-      formats: [{ key: res?.format, score: '' }],
+      formats: [{ key: res?.format, score: 0, name: '', reason: '' }],
       needIndex: () => true,
+      topicKeys: () => [res?.category],
     };
 
     return contentMeta;
