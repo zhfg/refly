@@ -1,9 +1,13 @@
 import { useUserStore } from "@/stores/user"
 import React, { useState, useRef, useEffect } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import Logo from "@/assets/logo.svg"
 
 import "./header.scss"
+import { useCookie } from "react-use"
+// request
+import getUserInfo from "@/requests/getUserInfo"
+import { safeParseJSON, safeStringifyJSON } from "@/utils/parse"
 
 function Header(props: { showLogin?: boolean }) {
   const { showLogin = true } = props
@@ -12,6 +16,41 @@ function Header(props: { showLogin?: boolean }) {
 
   const trigger = useRef(null)
   const mobileNav = useRef(null)
+  const navigate = useNavigate()
+  const [token, updateCookie, deleteCookie] = useCookie("_refly_ai_sid")
+
+  // 获取 storage user profile
+  const storageUserProfile = safeParseJSON(
+    localStorage.getItem("refly-user-profile"),
+  )
+  const showDashboardBtn = storageUserProfile?.id || userStore?.userProfile?.id
+  console.log("storageUserProfile", storageUserProfile, userStore?.userProfile)
+
+  const getLoginStatus = async () => {
+    try {
+      const res = await getUserInfo()
+
+      console.log("loginStatus", res)
+
+      if (!res?.success) {
+        userStore.setUserProfile(undefined)
+        userStore.setToken("")
+        localStorage.removeItem("refly-user-profile")
+        navigate("/")
+      } else {
+        userStore.setUserProfile(res?.data)
+        localStorage.setItem("refly-user-profile", safeStringifyJSON(res?.data))
+      }
+    } catch (err) {
+      console.log("getLoginStatus err", err)
+      userStore.setUserProfile(undefined)
+      userStore.setToken("")
+    }
+  }
+
+  useEffect(() => {
+    getLoginStatus()
+  }, [token, userStore.loginModalVisible])
 
   // close the mobile menu on click outside
   useEffect(() => {
@@ -63,7 +102,7 @@ function Header(props: { showLogin?: boolean }) {
           <nav className="hidden md:flex md:grow">
             {/* Desktop sign in links */}
             <ul className="flex grow justify-end flex-wrap items-center">
-              {showLogin && (
+              {showLogin && !showDashboardBtn && (
                 <li>
                   <Link
                     onClick={() => {
@@ -75,13 +114,15 @@ function Header(props: { showLogin?: boolean }) {
                   </Link>
                 </li>
               )}
-              {/* <li>
-                <Link
-                  to="/signup"
-                  className="btn-sm text-white bg-green-600 hover:bg-green-700 ml-3">
-                  Sign up
-                </Link>
-              </li> */}
+              {showDashboardBtn && (
+                <li>
+                  <Link
+                    to="/dashboard"
+                    className="btn-sm text-white bg-green-600 hover:bg-green-700 ml-3">
+                    Dashboard
+                  </Link>
+                </li>
+              )}
             </ul>
           </nav>
 

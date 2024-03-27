@@ -40,7 +40,8 @@ function Footer() {
                 <ul>
                   <li className="mb-1">
                     <Link
-                      to="#"
+                      target="_blank"
+                      to="https://chromewebstore.google.com/detail/lecbjbapfkinmikhadakbclblnemmjpd"
                       className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">
                       ReflyAI Chrome Extension
                     </Link>
@@ -69,6 +70,7 @@ function Footer() {
                   <li className="mb-1">
                     <Link
                       to="https://twitter.com/tuturetom"
+                      target="_blank"
                       className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">
                       Twitter
                     </Link>
@@ -155,6 +157,7 @@ function Footer() {
             <ul className="flex mb-4 md:order-1 md:ml-4 md:mb-0">
               <li>
                 <Link
+                  target="_blank"
                   to="https://twitter.com/tuturetom"
                   className="flex justify-center items-center text-green-600 bg-gray-800 hover:text-gray-100 hover:bg-green-600 rounded-full transition duration-150 ease-in-out"
                   aria-label="Twitter">

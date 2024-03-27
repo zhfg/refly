@@ -16,14 +16,21 @@ export const AppRouter = (props: { layout?: any }) => {
   const routeLandingPageMatch = useMatch("/")
   const routePrivacyPageMatch = useMatch("/privacy")
   const routeTermsPageMatch = useMatch("/terms")
+  const routeLoginPageMatch = useMatch("/login")
   // 导航相关
 
-  if (routeLandingPageMatch || routePrivacyPageMatch || routeTermsPageMatch) {
+  if (
+    routeLandingPageMatch ||
+    routePrivacyPageMatch ||
+    routeTermsPageMatch ||
+    routeLoginPageMatch
+  ) {
     return (
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/login" element={<Login />} />
       </Routes>
     )
   }
@@ -32,7 +39,6 @@ export const AppRouter = (props: { layout?: any }) => {
     <Layout>
       <Routes>
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/login" element={<Login />} />
         <Route path="/thread/:threadId" element={<Thread />} />
         <Route path="/thread" element={<ThreadLibrary />} />
         <Route path="/settings" element={<Settings />} />

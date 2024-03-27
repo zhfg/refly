@@ -7,6 +7,7 @@ import {
   IconDownload,
   IconBook,
   IconCustomerService,
+  IconTwitter,
 } from "@arco-design/web-react/icon"
 import { downloadPlugin, openGetStartDocument } from "../../utils"
 // 静态资源
@@ -71,6 +72,11 @@ export const SiderLayout = () => {
         break
       }
 
+      case "GetHelp": {
+        window.open(`https://twitter.com/tuturetom`, "_blank")
+        break
+      }
+
       case "Collection": {
         navigate(`/collection`)
         break
@@ -93,7 +99,10 @@ export const SiderLayout = () => {
 
       case "DownloadExtension": {
         // 下载浏览器插件
-        downloadPlugin()
+        window.open(
+          `https://chromewebstore.google.com/detail/lecbjbapfkinmikhadakbclblnemmjpd`,
+          "_blank",
+        )
         break
       }
 
@@ -112,7 +121,7 @@ export const SiderLayout = () => {
             flexDirection: "row",
             justifyContent: "space-between",
           }}>
-          <div className="logo" onClick={() => navigate("/")}>
+          <div className="logo" onClick={() => navigate("/dashboard")}>
             <img src={Logo} alt="Refly" />
             <span>Refly</span>
           </div>
@@ -138,9 +147,9 @@ export const SiderLayout = () => {
             </MenuItem>
           </div>
           <div className="sider-footer">
-            <MenuItem key="Docs">
-              <IconCustomerService style={{ fontSize: 20 }} />
-              <span className="sider-menu-title">查看文档</span>
+            <MenuItem key="GetHelp">
+              <IconTwitter style={{ fontSize: 20 }} />
+              <span className="sider-menu-title">获得帮助</span>
             </MenuItem>
             {!!userStore.userProfile?.id && (
               <MenuItem key="Settings">
@@ -148,7 +157,7 @@ export const SiderLayout = () => {
                 <span className="sider-menu-title">设置</span>
               </MenuItem>
             )}
-            <MenuItem key="Download">
+            <MenuItem key="DownloadExtension">
               <IconDownload style={{ fontSize: 20 }} />
               <span className="sider-menu-title">下载插件</span>
             </MenuItem>
