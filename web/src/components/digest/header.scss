@@ -1,0 +1,63 @@
+.today-header-container {
+  max-width: 1200px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 0 auto;
+  padding: 20px 0;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.16);
+}
+
+.today-menu {
+  display: flex;
+  flex-direction: row;
+
+  .arco-radio {
+    margin-right: 7px;
+  }
+
+  button {
+    width: 77px;
+    height: 30px;
+    border-radius: 15px;
+  }
+
+  .today-menu-item {
+    border-color: #4b587c;
+    color: #4b587c;
+
+    &:hover {
+      background-color: #000000 !important;
+      border-color: #000000 !important;
+      color: #fff !important;
+    }
+  }
+
+  .today-menu-item-checked {
+    background-color: #000000;
+    color: #fff;
+  }
+}
+
+.trending-topic-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  .trending-topics {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .trending-topic-item {
+    margin-right: 8px;
+    button {
+      width: auto;
+      padding: 0 12px;
+      height: 30px;
+      border-radius: 15px;
+      background: #eef2ff;
+      color: #4b587c;
+    }
+  }
+}

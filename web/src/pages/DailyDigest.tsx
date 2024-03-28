@@ -1,3 +1,9 @@
+import { DigestToday } from "@/components/digest/today"
+
 export const Digest = () => {
-  return <div>digest</div>
+  return (
+    <div>
+      <DigestToday />
+    </div>
+  )
 }

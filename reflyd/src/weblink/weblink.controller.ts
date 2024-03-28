@@ -18,10 +18,7 @@ import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 export class WeblinkController {
   private readonly logger = new Logger(WeblinkController.name);
 
-  constructor(
-    private weblinkService: WeblinkService,
-    private llmService: LlmService,
-  ) {}
+  constructor(private weblinkService: WeblinkService) {}
 
   @UseGuards(JwtAuthGuard)
   @Post('store')
