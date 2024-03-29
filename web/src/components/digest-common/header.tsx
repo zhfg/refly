@@ -4,6 +4,7 @@ import { IconArchive, IconBulb } from "@arco-design/web-react/icon"
 
 import "./header.scss"
 import { useNavigate } from "react-router-dom"
+import { getCurrentDateInfo } from "@/utils/time"
 
 interface DigestHeaderProps {
   tab: "today" | "archive"
@@ -15,10 +16,19 @@ export const DigestHeader = (props: DigestHeaderProps) => {
 
   console.log("now tab", props.tab)
 
+  const handleNavigateArchive = (item: "今天" | "归档") => {
+    if (item === "今天") {
+      navigate("/digest")
+    } else if (item === "归档") {
+      const { year, month, day } = getCurrentDateInfo()
+      navigate(`/digest/daily/${year}/${month}/${day}`)
+    }
+  }
+
   return (
     <div className="today-header-container">
       <div className="today-menu">
-        <Radio.Group defaultValue={"今天"}>
+        <Radio.Group defaultValue={props.tab === "today" ? "今天" : "归档"}>
           {["今天", "归档"].map(item => {
             return (
               <Radio key={item} value={item}>
@@ -26,6 +36,9 @@ export const DigestHeader = (props: DigestHeaderProps) => {
                   return (
                     <Button
                       type="outline"
+                      onClick={() =>
+                        handleNavigateArchive(item as "今天" | "归档")
+                      }
                       icon={item === "今天" ? <IconBulb /> : <IconArchive />}
                       className={`today-menu-item ${checked ? "today-menu-item-checked" : ""}`}>
                       {item}

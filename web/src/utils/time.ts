@@ -62,3 +62,14 @@ export function timestampFormat(timestamp: number = new Date().getTime()) {
 export const time = (date?: string | number | Date | dayjsConfig.Dayjs) => {
   return dayjsConfig(date)
 }
+
+export const getCurrentDateInfo = () => {
+  const currentDate = new Date()
+  const year = currentDate.getFullYear()
+  const month = currentDate.getMonth() + 1 // Months are zero-indexed, so we add 1
+  const day = currentDate.getDate()
+
+  console.log(`Today is ${year}-${month}-${day}`) // Output: Today is 2024-3-29
+
+  return { year, month, day }
+}

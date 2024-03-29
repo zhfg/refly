@@ -19,18 +19,18 @@ import {
 import { useNavigate } from "react-router-dom"
 // types
 import type { Digest } from "@/types/digest"
-import { IconTip } from "../dashboard/icon-tip"
+import { IconTip } from "@/components/dashboard/icon-tip"
 import { copyToClipboard } from "@/utils"
 import { getClientOrigin } from "@/utils/url"
 // stores
 import { DigestType, useDigestStore } from "@/stores/digest"
 // components
-import { DigestHeader } from "./header"
+import { DigestHeader } from "@/components/digest-common/header"
 import { useEffect, useState } from "react"
 // utils
 import getDigestList from "@/requests/getDigestList"
 // styles
-import "./today.scss"
+import "./index.scss"
 
 export const DigestToday = () => {
   const navigate = useNavigate()

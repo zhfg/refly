@@ -9,11 +9,12 @@ import { Settings } from "@/components/settings/index"
 import { Login } from "@/components/login/index"
 import LandingPage from "@/pages/landing-page"
 import { Feed } from "@/pages/feed"
-import { Digest } from "@/pages/DailyDigest"
+import { DigestToday } from "@/pages/digest-today/index"
 import { DigestTopics } from "@/pages/digest-topics/index"
 import { DigestTopicDetail } from "@/pages/digest-topic-detail/index"
 import Privacy from "@/pages/pravicy"
 import Terms from "@/pages/terms"
+import { DigestArchive } from "@/pages/digest-archive"
 
 export const AppRouter = (props: { layout?: any }) => {
   const { layout: Layout } = props
@@ -45,7 +46,7 @@ export const AppRouter = (props: { layout?: any }) => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/feed" element={<Feed />} />
-        <Route path="/digest" element={<Digest />} />
+        <Route path="/digest" element={<DigestToday />} />
         <Route path="/digest/topics" element={<DigestTopics />} />
         <Route
           path="/digest/topic/:digestTopicId"
@@ -55,6 +56,11 @@ export const AppRouter = (props: { layout?: any }) => {
         <Route path="/thread" element={<ThreadLibrary />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        {/** dateType: daily/weekly/monthly/yearly */}
+        <Route
+          path="/digest/:dateType/:year/:month/:day"
+          element={<DigestArchive />}
+        />
       </Routes>
     </Layout>
   )
