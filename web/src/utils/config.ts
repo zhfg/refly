@@ -21,6 +21,7 @@ export const appConfig = {
     getConversationList: "/v1/conversation/list",
     getTopicList: "/v1/topic/list",
     getUserInfo: "/v1/auth/getUserInfo",
+    getTopicDetail: (topicId: string) => `/v1/topic/${topicId}`,
   },
   domId: {},
   appInfo: {

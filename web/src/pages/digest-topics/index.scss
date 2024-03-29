@@ -9,30 +9,30 @@
     overflow-y: scroll;
     padding: 0 74px;
   }
-}
 
-.topics-header-container {
-  .topics-header-desc {
-    font-size: 14px;
+  .topics-header-container {
+    .topics-header-desc {
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 17px;
+      letter-spacing: 0px;
+
+      color: #64645f;
+      margin-top: 24px;
+      margin-bottom: 12px;
+    }
+  }
+
+  .topics-header-title {
+    font-size: 32px;
     font-weight: 500;
-    line-height: 17px;
+    line-height: 38px;
     letter-spacing: 0px;
 
-    color: #64645f;
-    margin-top: 24px;
-    margin-bottom: 12px;
+    color: rgba(0, 0, 0, 0.8);
+
+    margin: 24px 0 12px 0;
   }
-}
-
-.topics-header-title {
-  font-size: 32px;
-  font-weight: 500;
-  line-height: 38px;
-  letter-spacing: 0px;
-
-  color: rgba(0, 0, 0, 0.8);
-
-  margin: 24px 0 12px 0;
 }
 
 .topic-item {

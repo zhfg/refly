@@ -11,6 +11,7 @@ import LandingPage from "@/pages/landing-page"
 import { Feed } from "@/pages/feed"
 import { Digest } from "@/pages/DailyDigest"
 import { DigestTopics } from "@/pages/digest-topics/index"
+import { DigestTopicDetail } from "@/pages/digest-topic-detail/index"
 import Privacy from "@/pages/pravicy"
 import Terms from "@/pages/terms"
 
@@ -46,6 +47,10 @@ export const AppRouter = (props: { layout?: any }) => {
         <Route path="/feed" element={<Feed />} />
         <Route path="/digest" element={<Digest />} />
         <Route path="/digest/topics" element={<DigestTopics />} />
+        <Route
+          path="/digest/topic/:digestTopicId"
+          element={<DigestTopicDetail />}
+        />
         <Route path="/thread/:threadId" element={<Thread />} />
         <Route path="/thread" element={<ThreadLibrary />} />
         <Route path="/settings" element={<Settings />} />

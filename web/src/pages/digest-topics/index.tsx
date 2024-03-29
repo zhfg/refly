@@ -109,7 +109,7 @@ export const DigestTopics = () => {
           <List.Item
             key={index}
             className="topic-item-container"
-            onClick={() => navigate(`/digest/topics/${item?.id}`)}>
+            onClick={() => navigate(`/digest/topic/${item?.id}`)}>
             <div className="topic-item">
               <div className="topic-item-left">
                 <Avatar size={60} shape="square">

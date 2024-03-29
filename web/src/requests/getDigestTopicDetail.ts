@@ -2,19 +2,19 @@ import { appConfig } from "@/utils/config"
 import { request } from "@/utils/request"
 
 import type { HandlerRequest, HandlerResponse } from "@/types/request"
-import type { Digest } from "@/types"
+import { MetaRecord as Topic } from "@/types"
 
 const handler = async (
-  req: HandlerRequest<{ pageSize: number; page: number; filter?: any }>,
-): Promise<HandlerResponse<Digest[]>> => {
+  req: HandlerRequest<{ digestTopicId: string }>,
+): Promise<HandlerResponse<Topic>> => {
   console.log(req.body)
 
   try {
-    const [err, fakeDigestListRes] = await request<Digest[]>(
-      appConfig.url.getConversationList,
+    const { digestTopicId } = req.body
+    const [err, threadRes] = await request<Topic>(
+      appConfig.url.getTopicDetail(digestTopicId),
       {
         method: "GET",
-        body: req.body,
       },
     )
     if (err) {
@@ -25,7 +25,7 @@ const handler = async (
     } else {
       return {
         success: true,
-        data: fakeDigestListRes,
+        data: threadRes,
       }
     }
   } catch (err) {
