@@ -93,7 +93,7 @@ export const DigestArchive = () => {
             <div className="digest-archive-header">
               <div className="digest-archive-title">
                 <p>
-                  {year} 年 {month} 月 {day} 日
+                  {year} 年 {month} 月 {day} 日内容精选
                 </p>
               </div>
               <div className="digest-archive-time-picker">
