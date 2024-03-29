@@ -19,6 +19,7 @@ export const appConfig = {
     getWeblinkList: "/v1/weblink/list",
     getWeblinkIndexStatus: "/v1/weblink/list", // 与 weblink 共享
     getConversationList: "/v1/conversation/list",
+    getTopicList: "/v1/topic/list",
     getUserInfo: "/v1/auth/getUserInfo",
   },
   domId: {},

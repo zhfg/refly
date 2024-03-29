@@ -3,6 +3,7 @@ import { Button, Divider, Radio } from "@arco-design/web-react"
 import { IconArchive, IconBulb } from "@arco-design/web-react/icon"
 
 import "./header.scss"
+import { useNavigate } from "react-router-dom"
 
 interface DigestHeaderProps {
   tab: "today" | "archive"
@@ -10,6 +11,8 @@ interface DigestHeaderProps {
 
 export const DigestHeader = (props: DigestHeaderProps) => {
   const digestStore = useDigestStore()
+  const navigate = useNavigate()
+
   console.log("now tab", props.tab)
 
   return (
@@ -44,7 +47,9 @@ export const DigestHeader = (props: DigestHeaderProps) => {
             </div>
           ))}
           <div className="trending-topic-item">
-            <Button>查看全部+{32}</Button>
+            <Button onClick={() => navigate("/digest/topics")}>
+              查看全部+{32}
+            </Button>
           </div>
         </div>
       </div>
