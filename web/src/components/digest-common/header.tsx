@@ -59,7 +59,7 @@ export const DigestHeader = (props: DigestHeaderProps) => {
               <Button>{item?.name}</Button>
             </div>
           ))}
-          <div className="trending-topic-item">
+          <div className="trending-topic-item see-all">
             <Button onClick={() => navigate("/digest/topics")}>
               查看全部+{32}
             </Button>

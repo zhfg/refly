@@ -55,7 +55,11 @@ export const AppLayout = (props: AppLayoutProps) => {
       <SiderLayout />
       <Layout
         className="content-layout"
-        style={{ height: "calc(100vh - 16px)", flexGrow: 1 }}>
+        style={{
+          height: "calc(100vh - 16px)",
+          flexGrow: 1,
+          width: `calc(100% - 200px - 16px)`,
+        }}>
         <Content>{props.children}</Content>
       </Layout>
       {userStore.loginModalVisible ? <LoginModal /> : null}

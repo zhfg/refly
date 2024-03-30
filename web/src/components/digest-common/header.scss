@@ -1,16 +1,18 @@
 .today-header-container {
-  max-width: 1200px;
   display: flex;
   flex-direction: row;
   align-items: center;
   margin: 0 auto;
-  padding: 20px 0px;
+  padding: 20px 60px;
   border-bottom: 0.5px solid rgba(0, 0, 0, 0.16);
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .today-menu {
   display: flex;
   flex-direction: row;
+  min-width: 180px;
 
   .arco-radio {
     margin-right: 7px;
@@ -43,10 +45,17 @@
   display: flex;
   flex-direction: row;
   align-items: center;
+  width: calc(100% - 204px);
+
+  .trending-topic-title {
+    min-width: 70px;
+  }
 
   .trending-topics {
     display: flex;
     flex-direction: row;
+    width: calc(100% - 70px);
+    overflow-x: scroll;
   }
 
   .trending-topic-item {
