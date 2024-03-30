@@ -32,7 +32,9 @@ import { copyToClipboard } from "@/utils"
 import { getClientOrigin } from "@/utils/url"
 
 export const Feed = () => {
-  const [scrollLoading, setScrollLoading] = useState(<Skeleton></Skeleton>)
+  const [scrollLoading, setScrollLoading] = useState(
+    <Skeleton animation></Skeleton>,
+  )
   const feedStore = useFeedStore()
   const navigate = useNavigate()
   const isThreadLibrary = useMatch("/feed")

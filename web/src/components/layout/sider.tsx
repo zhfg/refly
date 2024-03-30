@@ -1,4 +1,4 @@
-import { Layout, Menu } from "@arco-design/web-react"
+import { Avatar, Divider, Layout, Menu } from "@arco-design/web-react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { ReactText } from "react"
 import {
@@ -40,7 +40,6 @@ export const SiderLayout = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const userStore = useUserStore()
-
   const isGuideDetail = location.pathname.includes("guide/")
 
   // 获取 storage user profile
@@ -142,36 +141,50 @@ export const SiderLayout = () => {
           onClickMenuItem={handleNavClick}
           defaultSelectedKeys={[selectedKey]}>
           <div className="sider-header">
-            <MenuItem key="Home">
+            <MenuItem key="Home" className="custom-menu-item">
               <IconHome style={{ fontSize: 20 }} />
               <span className="sider-menu-title">主页</span>
             </MenuItem>
             {/* <MenuItem key='Explore' ><IconHome style={{ fontSize: 20 }} />主页</MenuItem> */}
-            <MenuItem key="Digest">
+            <MenuItem key="Digest" className="custom-menu-item">
               <IconHistory style={{ fontSize: 20 }} />
               <span className="sider-menu-title">回忆</span>
             </MenuItem>
-            <MenuItem key="Feed">
+            <MenuItem key="Feed" className="custom-menu-item">
               <IconBulb style={{ fontSize: 20 }} />
               <span className="sider-menu-title">探索</span>
             </MenuItem>
-            <MenuItem key="ThreadLibrary">
+            <MenuItem key="ThreadLibrary" className="custom-menu-item">
               <IconBook style={{ fontSize: 20 }} />
               <span className="sider-menu-title">会话库</span>
             </MenuItem>
           </div>
           <div className="sider-footer">
-            <MenuItem key="GetHelp">
+            <MenuItem key="GetHelp" className="custom-menu-item">
               <IconTwitter style={{ fontSize: 20 }} />
               <span className="sider-menu-title">获得帮助</span>
             </MenuItem>
+            <Divider style={{ margin: "8px 0" }} />
             {!!userStore.userProfile?.id && (
-              <MenuItem key="Settings">
+              <MenuItem
+                key="Settings"
+                className="menu-setting-container custom-menu-item">
+                <div className="menu-settings">
+                  <Avatar size={32}>
+                    <img
+                      src={userStore?.userProfile?.avatar || ""}
+                      alt="user-avatar"
+                    />
+                  </Avatar>
+                  <span className="username">
+                    {userStore?.userProfile?.name}
+                  </span>
+                </div>
                 <IconSettings style={{ fontSize: 20 }} />
-                <span className="sider-menu-title">设置</span>
               </MenuItem>
             )}
-            <MenuItem key="DownloadExtension">
+            <Divider style={{ margin: "8px 0" }} />
+            <MenuItem key="DownloadExtension" className="custom-menu-item">
               <IconDownload style={{ fontSize: 20 }} />
               <span className="sider-menu-title">下载插件</span>
             </MenuItem>

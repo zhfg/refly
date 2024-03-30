@@ -35,7 +35,9 @@ import { fakeTopics } from "@/fake-data/digest"
 const BreadcrumbItem = Breadcrumb.Item
 
 export const DigestTopicDetail = () => {
-  const [scrollLoading, setScrollLoading] = useState(<Skeleton></Skeleton>)
+  const [scrollLoading, setScrollLoading] = useState(
+    <Skeleton animation></Skeleton>,
+  )
   const digestTopicDetailStore = useDigestTopicDetailStore()
   const digestTopicStore = useDigestTopicStore()
   const navigate = useNavigate()

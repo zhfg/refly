@@ -6,14 +6,17 @@ import { MetaRecord as Topic, ListPageProps } from "@/types"
 
 const handler = async (
   req: HandlerRequest<ListPageProps>,
-): Promise<HandlerResponse<Topic[]>> => {
+): Promise<HandlerResponse<{ list: Topic[]; total: number }>> => {
   console.log(req.body)
 
   try {
-    const [err, topicRes] = await request<Topic[]>(appConfig.url.getTopicList, {
-      method: "GET",
-      body: req.body,
-    })
+    const [err, topicRes] = await request<{ list: Topic[]; total: number }>(
+      appConfig.url.getTopicList,
+      {
+        method: "GET",
+        body: req.body,
+      },
+    )
     if (err) {
       return {
         success: false,

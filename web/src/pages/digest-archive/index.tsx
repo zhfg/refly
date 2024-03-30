@@ -37,7 +37,9 @@ import "./index.scss"
 
 export const DigestArchive = () => {
   const { dateType, year, month, day } = useParams()
-  const [scrollLoading, setScrollLoading] = useState(<Skeleton></Skeleton>)
+  const [scrollLoading, setScrollLoading] = useState(
+    <Skeleton animation></Skeleton>,
+  )
   const digestArchiveStore = useDigestArchiveStore()
   const navigate = useNavigate()
 

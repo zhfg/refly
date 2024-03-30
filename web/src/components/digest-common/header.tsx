@@ -1,18 +1,37 @@
 import { useDigestStore } from "@/stores/digest"
-import { Button, Divider, Radio } from "@arco-design/web-react"
+import {
+  Button,
+  Divider,
+  Radio,
+  Skeleton,
+  Message as message,
+} from "@arco-design/web-react"
 import { IconArchive, IconBulb } from "@arco-design/web-react/icon"
 
 import "./header.scss"
 import { useNavigate } from "react-router-dom"
 import { getCurrentDateInfo } from "@/utils/time"
+import { useDigestTopicStore } from "@/stores/digest-topics"
+import { useEffect, useState } from "react"
+// request
+import getTopicList from "@/requests/getTopicList"
+// types
+import { MetaRecord as Topic } from "@/types/"
+// utils
+import { delay } from "@/utils/delay"
 
 interface DigestHeaderProps {
   tab: "today" | "archive"
 }
 
 export const DigestHeader = (props: DigestHeaderProps) => {
-  const digestStore = useDigestStore()
+  const digestTopicStore = useDigestTopicStore()
   const navigate = useNavigate()
+  const [scrollLoading, setScrollLoading] = useState(
+    <Skeleton animation></Skeleton>,
+  )
+  // 获取内容中
+  const [isFetching, setIsFetching] = useState(false)
 
   console.log("now tab", props.tab)
 
@@ -24,6 +43,51 @@ export const DigestHeader = (props: DigestHeaderProps) => {
       navigate(`/digest/daily/${year}/${month}/${day}`)
     }
   }
+
+  // 只需要获取一页 topics 即可
+  const fetchData = async (currentPage = 1) => {
+    try {
+      setIsFetching(true)
+      await delay(3000)
+      if (!digestTopicStore.hasMore && currentPage !== 1) {
+        setScrollLoading(<span>已经到底啦</span>)
+
+        return
+      }
+
+      const newRes = await getTopicList({
+        body: {
+          // TODO: confirm time filter
+          page: currentPage,
+          pageSize: digestTopicStore.pageSize,
+        },
+      })
+
+      digestTopicStore.updateCurrentPage(currentPage)
+
+      if (!newRes?.success) {
+        throw new Error(newRes?.errMsg)
+      }
+      if (
+        newRes?.data &&
+        newRes?.data?.list?.length < digestTopicStore.pageSize
+      ) {
+        digestTopicStore.updateHasMore(false)
+      }
+
+      console.log("newRes", newRes)
+      digestTopicStore.updateTopicList(newRes?.data?.list as Topic[])
+      digestTopicStore.updateTopicTotalCnt(newRes?.data?.total as number)
+    } catch (err) {
+      message.error("获取今日总结列表失败，请重新刷新试试")
+    } finally {
+      setIsFetching(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
 
   return (
     <div className="today-header-container">
@@ -53,18 +117,31 @@ export const DigestHeader = (props: DigestHeaderProps) => {
       <Divider type="vertical" />
       <div className="trending-topic-container">
         <div className="trending-topic-title">趋势主题：</div>
-        <div className="trending-topics">
-          {digestStore?.topic?.data?.map(item => (
-            <div className="trending-topic-item">
-              <Button>{item?.name}</Button>
+        {isFetching ? (
+          <Skeleton
+            animation
+            text={{
+              rows: 2,
+              width: ["100%", 600],
+            }}></Skeleton>
+        ) : (
+          <div className="trending-topics">
+            {digestTopicStore.topicList?.map(item => (
+              <div
+                className="trending-topic-item"
+                onClick={() => {
+                  navigate(`/digest/topic/${item?.key}`)
+                }}>
+                <Button>{item?.name}</Button>
+              </div>
+            ))}
+            <div className="trending-topic-item see-all">
+              <Button onClick={() => navigate("/digest/topics")}>
+                查看全部+{32}
+              </Button>
             </div>
-          ))}
-          <div className="trending-topic-item see-all">
-            <Button onClick={() => navigate("/digest/topics")}>
-              查看全部+{32}
-            </Button>
           </div>
-        </div>
+        )}
       </div>
     </div>
   )

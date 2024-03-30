@@ -40,7 +40,9 @@ const dataSource = new Array(60).fill(null).map((_, index) => {
 
 export const DigestTopics = () => {
   const digestTopicStore = useDigestTopicStore()
-  const [scrollLoading, setScrollLoading] = useState(<Skeleton></Skeleton>)
+  const [scrollLoading, setScrollLoading] = useState(
+    <Skeleton animation></Skeleton>,
+  )
   const navigate = useNavigate()
   const isDigestTopics = useMatch("/digest/topics")
 

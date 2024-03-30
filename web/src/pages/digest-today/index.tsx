@@ -35,7 +35,9 @@ import "./index.scss"
 export const DigestToday = () => {
   const navigate = useNavigate()
   const digestStore = useDigestStore()
-  const [scrollLoading, setScrollLoading] = useState(<Skeleton></Skeleton>)
+  const [scrollLoading, setScrollLoading] = useState(
+    <Skeleton animation></Skeleton>,
+  )
 
   const fetchData = async (currentPage = 1) => {
     try {
