@@ -29,7 +29,7 @@ import {
 import { LLMChatMessage } from './schema';
 import { HumanMessage, SystemMessage } from 'langchain/schema';
 
-import { uniqueFunc } from 'src/utils/unique';
+import { uniqueFunc } from '../utils/unique';
 import { ContentMeta } from './dto';
 
 @Injectable()

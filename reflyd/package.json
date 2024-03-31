@@ -86,12 +86,12 @@
     "typescript": "^5.0.0"
   },
   "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
     "rootDir": "src",
+    "moduleDirectories": [
+      "node_modules",
+      "src"
+    ],
+    "testTimeout": 15000,
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"

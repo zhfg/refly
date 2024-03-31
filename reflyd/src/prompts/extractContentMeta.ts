@@ -1,7 +1,7 @@
 // 信息抽取使用 function call 技术
 
 import { AIMessage, HumanMessage } from 'langchain/schema';
-import { categoryList } from 'src/prompts/utils/category';
+import { categoryList } from './utils/category';
 import { makeChatFewshotExamples } from './utils/common';
 
 // Add more example for performance optimization

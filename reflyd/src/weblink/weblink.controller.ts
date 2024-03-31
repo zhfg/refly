@@ -8,9 +8,8 @@ import {
   UseGuards,
   Body,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { WeblinkService } from './weblink.service';
-import { LlmService } from '../llm/llm.service';
 import { GetWebLinkListResponse, StoreWebLinkParam } from './dto';
 import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 
