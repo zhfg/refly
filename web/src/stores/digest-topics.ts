@@ -3,6 +3,7 @@ import { devtools } from "zustand/middleware"
 import type {} from "@redux-devtools/extension"
 
 import type { MetaRecord as Topic } from "@/types"
+import { fakeTopics } from "@/fake-data/digest"
 
 interface TopicState {
   topicList: Topic[]
@@ -19,7 +20,7 @@ interface TopicState {
 }
 
 export const defaultState = {
-  topicList: [] as Topic[],
+  topicList: fakeTopics as Topic[],
   total: 0,
   pageSize: 10,
   currentPage: 1,

@@ -47,6 +47,15 @@
   align-items: center;
   width: calc(100% - 204px);
 
+  .custom-skeleton-node {
+    .arco-skeleton-text-row {
+      width: 130px;
+      height: 30px;
+      border-radius: 15px;
+      margin-right: 8px;
+    }
+  }
+
   .trending-topic-title {
     min-width: 70px;
   }

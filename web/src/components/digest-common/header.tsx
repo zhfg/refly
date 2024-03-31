@@ -118,12 +118,20 @@ export const DigestHeader = (props: DigestHeaderProps) => {
       <div className="trending-topic-container">
         <div className="trending-topic-title">趋势主题：</div>
         {isFetching ? (
-          <Skeleton
-            animation
-            text={{
-              rows: 2,
-              width: ["100%", 600],
-            }}></Skeleton>
+          <>
+            {Array(5)
+              .fill(null)
+              .map(item => (
+                <Skeleton
+                  key={item}
+                  animation
+                  text={{
+                    rows: 1,
+                    width: [100],
+                    className: "custom-skeleton-node",
+                  }}></Skeleton>
+              ))}
+          </>
         ) : (
           <div className="trending-topics">
             {digestTopicStore.topicList?.map(item => (
@@ -135,11 +143,13 @@ export const DigestHeader = (props: DigestHeaderProps) => {
                 <Button>{item?.name}</Button>
               </div>
             ))}
-            <div className="trending-topic-item see-all">
-              <Button onClick={() => navigate("/digest/topics")}>
-                查看全部+{32}
-              </Button>
-            </div>
+            {digestTopicStore?.topicList?.length > 0 && (
+              <div className="trending-topic-item see-all">
+                <Button onClick={() => navigate("/digest/topics")}>
+                  查看全部+{32}
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>
