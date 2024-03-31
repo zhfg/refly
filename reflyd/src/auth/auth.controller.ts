@@ -82,7 +82,6 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('getUserInfo')
   getUserInfo(@Request() req) {
-    throw new Error('test');
     return req.user;
   }
 }
