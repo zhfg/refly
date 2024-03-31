@@ -91,7 +91,7 @@
       "node_modules",
       "src"
     ],
-    "testTimeout": 15000,
+    "testTimeout": 40000,
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"

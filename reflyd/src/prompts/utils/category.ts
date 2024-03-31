@@ -65,4 +65,9 @@ export const categoryList = [
     description:
       '良好的财务管理对于创业公司至关重要，包括预算编制、现金流管理、财务报告和分析等，这些都是确保公司财务健康的关键。',
   },
+  {
+    id: 'others',
+    name: '其他分类',
+    description: '不属于上面的任一分类，则归类到这个分类',
+  },
 ];

@@ -31,6 +31,7 @@ import { HumanMessage, SystemMessage } from 'langchain/schema';
 
 import { uniqueFunc } from '../utils/unique';
 import { ContentMeta } from './dto';
+import { categoryList } from '../prompts/utils/category';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
@@ -84,9 +85,11 @@ export class LlmService implements OnModuleInit {
    */
   async extractContentMeta(doc: Document): Promise<ContentMeta> {
     const { pageContent } = doc;
+    this.logger.log('content need to be extract: %s', pageContent);
 
     const llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
     const parser = new JsonOutputFunctionsParser();
+
     const runnable = await llm
       .bind({
         functions: [extractContentMeta.extractContentMetaSchema],
@@ -97,15 +100,23 @@ export class LlmService implements OnModuleInit {
       new SystemMessage(extractContentMeta.systemPrompt),
       new HumanMessage(pageContent),
     ])) as {
-      category: string;
+      categoryId: string;
       reason: string;
       score: number;
       format: string;
     };
     this.logger.log('extract content meta: %j', res);
 
+    const topic = categoryList?.find((item) => item?.id === res?.categoryId);
     const contentMeta = {
-      topics: [{ key: res?.category, score: res?.score, name: '', reason: '' }],
+      topics: [
+        {
+          key: res?.categoryId,
+          score: res?.score,
+          name: topic?.name,
+          reason: res?.reason,
+        },
+      ],
       contentType: null,
       formats: [{ key: res?.format, score: 0, name: '', reason: '' }],
     };

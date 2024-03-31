@@ -11,8 +11,8 @@ datasource db {
 }
 
 model Account {
-  id                String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId            String   @db.ObjectId
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String    @db.ObjectId
   type              String
   provider          String
   providerAccountId String
@@ -21,9 +21,9 @@ model Account {
   expiresAt         Int?
   scope             String?
   /// 创建时间
-  createdAt         DateTime @default(now())
+  createdAt         DateTime? @default(now())
   /// 更新时间
-  updatedAt         DateTime @updatedAt
+  updatedAt         DateTime? @updatedAt
 
   @@unique([provider, providerAccountId])
 }

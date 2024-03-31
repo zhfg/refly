@@ -70,6 +70,9 @@ export class WeblinkService {
 
       // customized webpage loading
       const $ = await loader.scrape();
+      // remove all styles and scripts tag
+      $('script, style').remove();
+      // only get meaning content
       const pageContent = $(loader.selector).text();
       const title = $('title').text();
       const source = loader.webPath;

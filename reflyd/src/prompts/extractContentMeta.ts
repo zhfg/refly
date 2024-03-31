@@ -14,8 +14,10 @@ export const fewshotExamples = [
   new AIMessage({
     content: `\`\`\`ts
   {
-    category: "generative_ai_research"; 
-    reason: "此文本主要关乎生成式AI的研究，特别是在图像生成方面的探讨。关键词包括'GAN'、'图像生成'和'人工智能'，都是生成式AI研究领域的专属语言。因此，根据这些信息，此文本最适合归为'生成式AI研究'类别。"; 
+    categoryId: "generative_ai_research",
+    reason: "此文本主要关乎生成式AI的研究，特别是在图像生成方面的探讨。关键词包括'GAN'、'图像生成'和'人工智能'，都是生成式AI研究领域的专属语言。因此，根据这些信息，此文本最适合归为'生成式AI研究'类别。",
+    score: 0.9,
+    format: "text",
   }
   \`\`\``,
   }),
@@ -64,8 +66,10 @@ ${JSON.stringify(categoryList)}
 
 \`\`\`ts
 interface OutputFormat {
-  category: string; // category id
+  categoryId: string; // category id
   reason: string; // judge this category reason
+  score: number; // Determine the percentage assigned to this category. The value range is 0-1, such as 0.8, which means it belongs to this category to a large extent.
+  format: string; // Website content type, eg. Youtube is a video content type website; Medium is a text content type website
 }
 \`\`\`
 
@@ -77,11 +81,11 @@ ${makeChatFewshotExamples(fewshotExamples)}
 // The category extractor schema
 export const extractContentMetaSchema = {
   name: 'content_category_extractor',
-  description: `The category for the input text content`,
+  description: `extract category`,
   parameters: {
     type: 'object',
     properties: {
-      category: {
+      categoryId: {
         type: 'string',
         enum: categoryList.map((item) => item.id),
         description: `category id`,
@@ -102,7 +106,7 @@ export const extractContentMetaSchema = {
           'Website content type, eg. Youtube is a video content type website; Medium is a text content type website',
       },
     },
-    required: ['catgory', 'reason', 'score', 'format'],
+    required: ['categoryId', 'reason', 'score', 'format'],
   },
 };
 
