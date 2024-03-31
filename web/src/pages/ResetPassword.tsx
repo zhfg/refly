@@ -52,7 +52,7 @@ function ResetPassword() {
                   </div>
                   <div className="flex flex-wrap -mx-3 mt-6">
                     <div className="w-full px-3">
-                      <button className="btn text-white bg-purple-600 hover:bg-purple-700 w-full">
+                      <button className="btn text-white bg-green-600 hover:bg-green-700 w-full">
                         Reset Password
                       </button>
                     </div>
@@ -61,7 +61,7 @@ function ResetPassword() {
                 <div className="text-gray-400 text-center mt-6">
                   <Link
                     to="/signin"
-                    className="text-purple-600 hover:text-gray-200 transition duration-150 ease-in-out">
+                    className="text-green-600 hover:text-gray-200 transition duration-150 ease-in-out">
                     Cancel
                   </Link>
                 </div>

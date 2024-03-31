@@ -72,7 +72,9 @@ const Header = () => {
 }
 
 export const ThreadLibrary = () => {
-  const [scrollLoading, setScrollLoading] = useState(<Skeleton></Skeleton>)
+  const [scrollLoading, setScrollLoading] = useState(
+    <Skeleton animation></Skeleton>,
+  )
   const threadStore = useThreadStore()
   const navigate = useNavigate()
   const isThreadLibrary = useMatch("/thread")

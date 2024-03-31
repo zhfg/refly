@@ -42,7 +42,7 @@ function FeaturesZigzag() {
                 className="max-w-xl md:max-w-none md:w-full mx-auto md:col-span-7 lg:col-span-6"
                 data-aos="fade-right">
                 <div className="md:pr-4 lg:pr-12 xl:pr-16">
-                  <div className="font-architects-daughter text-xl text-purple-600 mb-2">
+                  <div className="font-architects-daughter text-xl text-green-600 mb-2">
                     More speed. Less spend
                   </div>
                   <h3 className="h3 mb-3">Keep projects on schedule</h3>
@@ -103,7 +103,7 @@ function FeaturesZigzag() {
                 className="max-w-xl md:max-w-none md:w-full mx-auto md:col-span-7 lg:col-span-6"
                 data-aos="fade-left">
                 <div className="md:pl-4 lg:pl-12 xl:pl-16">
-                  <div className="font-architects-daughter text-xl text-purple-600 mb-2">
+                  <div className="font-architects-daughter text-xl text-green-600 mb-2">
                     More speed. Less spend
                   </div>
                   <h3 className="h3 mb-3">Keep projects on schedule</h3>
@@ -164,7 +164,7 @@ function FeaturesZigzag() {
                 className="max-w-xl md:max-w-none md:w-full mx-auto md:col-span-7 lg:col-span-6"
                 data-aos="fade-right">
                 <div className="md:pr-4 lg:pr-12 xl:pr-16">
-                  <div className="font-architects-daughter text-xl text-purple-600 mb-2">
+                  <div className="font-architects-daughter text-xl text-green-600 mb-2">
                     More speed. Less spend
                   </div>
                   <h3 className="h3 mb-3">Keep projects on schedule</h3>

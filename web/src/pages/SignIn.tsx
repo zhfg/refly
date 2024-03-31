@@ -52,7 +52,7 @@ function SignIn() {
                     </div>
                   </div>
                 </form>
-                <div className="flex items-center my-6">
+                {/* <div className="flex items-center my-6">
                   <div
                     className="border-t border-gray-700 border-dotted grow mr-3"
                     aria-hidden="true"></div>
@@ -128,7 +128,7 @@ function SignIn() {
                     className="text-purple-600 hover:text-gray-200 transition duration-150 ease-in-out">
                     Sign up
                   </Link>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

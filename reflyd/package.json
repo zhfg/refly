@@ -22,6 +22,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@dqbd/tiktoken": "1.0.7",
     "@langchain/community": "^0.0.32",
     "@langchain/openai": "^0.0.14",
     "@langchain/redis": "^0.0.1",
@@ -39,8 +40,10 @@
     "cheerio": "^1.0.0-rc.12",
     "cookie-parser": "~1.4.6",
     "helmet": "^7.1.0",
+    "https-proxy-agent": "^7.0.4",
     "langchain": "^0.1.21",
     "lodash.omit": "^4.5.0",
+    "node-fetch": "^2.0.0",
     "passport": "~0.6.0",
     "passport-github2": "~0.1.12",
     "passport-google-oauth20": "~2.0.0",
@@ -49,7 +52,7 @@
     "redis": "^4.6.13",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
-    "@dqbd/tiktoken": "1.0.7"
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",
