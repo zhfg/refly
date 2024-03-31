@@ -45,12 +45,10 @@ export class LlmService implements OnModuleInit {
   async onModuleInit() {
     this.vectorStore = new QdrantClient({
       url: this.configService.get('qdrant.url'),
-      timeout: 5000,
+      timeout: 3000,
     });
     this.collectionName = this.configService.get('qdrant.collectionName');
-    this.embeddings = new OpenAIEmbeddings({
-      timeout: 5000,
-    });
+    this.embeddings = new OpenAIEmbeddings({ timeout: 10000, maxRetries: 3 });
 
     await this.ensureCollection();
     this.logger.log('LLM Service ready');
@@ -71,7 +69,7 @@ export class LlmService implements OnModuleInit {
     if (!collectionNames.includes(this.collectionName)) {
       await this.vectorStore.createCollection(this.collectionName, {
         vectors: {
-          size: (await this.embeddings.embedQuery('test')).length,
+          size: 1024,
           distance: 'Cosine',
         },
       });
@@ -208,8 +206,21 @@ export class LlmService implements OnModuleInit {
   async incrementalSummary(
     oldDoc: Document,
     newDoc: Document,
-  ): Promise<string> {
-    return '';
+  ): Promise<Partial<AIGCContent>> {
+    if (!oldDoc) {
+      return {
+        title: `New Digest ${new Date()}`,
+        content: `${newDoc.pageContent}`,
+        sources: JSON.stringify({}),
+        meta: JSON.stringify({}),
+      };
+    }
+    return {
+      title: `Combined Digest ${new Date()}`,
+      content: `Combine("${oldDoc.pageContent}", "${newDoc.pageContent}")`,
+      sources: JSON.stringify({}),
+      meta: JSON.stringify({}),
+    };
   }
 
   async indexPipelineFromLink(doc: Document) {

@@ -28,15 +28,4 @@ export class ContentMeta {
   @ApiPropertyOptional({ type: [MetaRecord] })
   // 内容载体（文字、图片、视频等等）
   formats?: MetaRecord[];
-
-  /**
-   * 是否需要构建 RAG 索引
-   */
-  needIndex(): boolean {
-    return true;
-  }
-
-  topicKeys(): string[] {
-    return this.topics.map((t) => t.key);
-  }
 }

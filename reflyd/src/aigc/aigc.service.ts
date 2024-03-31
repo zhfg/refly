@@ -34,7 +34,7 @@ export class AigcService {
             topicKey: topic.key,
           },
           update: {
-            score: { increment: uwb.visitTimes }, // TODO: 迭代兴趣分数策略,例如权重、衰减等
+            score: { increment: topic.score }, // TODO: 迭代兴趣分数策略,例如权重、衰减等
           },
         });
       }),
@@ -43,53 +43,76 @@ export class AigcService {
 
   /**
    * 更新用户 digest
+   * TODO: 目前认为一个 link 只包含一个 topic，所以直接取第一个 digest
    * @param param
    * @returns
    */
   private async upsertUserDigest(param: {
     uwb: UserWeblink;
-    meta: ContentMeta;
     content: AIGCContent;
-  }) {
-    const { uwb, meta, content } = param;
+    meta: ContentMeta;
+  }): Promise<void> {
+    const { uwb, content, meta } = param;
     const { userId } = uwb;
 
     const today = new Date().toISOString().split('T')[0];
-    const digests = await this.prisma.userDigest.findMany({
+    const digest = await this.prisma.userDigest.findUnique({
       where: {
-        userId,
-        date: today,
-        topicKey: { in: meta.topicKeys() },
+        userId_date_topicKey: {
+          userId,
+          date: today,
+          topicKey: meta.topics[0].key,
+        },
       },
       include: { content: true },
     });
 
-    // 对于该 topic 下的已有内容，进行增量总结
-    // TODO: 目前认为一个 link 只包含一个 topic，所以直接取第一个 digest
-    if (digests.length > 0) {
+    const newDoc = new Document({
+      pageContent: content.content,
+    });
+
+    // 如果该 topic 下已有内容，进行增量总结
+    if (digest) {
+      // 如果该 digest 已包含指定 weblink，则不做任何增量总结
+      if (digest.weblinkIds.includes(uwb.weblinkId)) {
+        this.logger.log(
+          `digest ${digest.id} already contains weblink ${uwb.weblinkId}`,
+        );
+        return;
+      }
+
       const oldDoc = new Document({
-        pageContent: digests[0].content.content,
+        pageContent: digest.content.content,
       });
-      const newDoc = new Document({
-        pageContent: content.content,
-      });
-      const combinedSummary = await this.llmService.incrementalSummary(
+
+      const combinedDigest = await this.llmService.incrementalSummary(
         oldDoc,
         newDoc,
       );
-      return await this.prisma.aIGCContent.update({
-        where: { id: digests[0].content.id },
-        data: { content: combinedSummary },
+      await this.prisma.aIGCContent.update({
+        where: { id: digest.content.id },
+        data: { ...combinedDigest },
       });
+      await this.prisma.userDigest.update({
+        where: { id: digest.id },
+        data: { weblinkIds: { push: uwb.weblinkId } },
+      });
+      return;
     }
 
-    // 创建新的 digest
-    return await this.prisma.userDigest.create({
+    // 创建新的 digest 内容及其对应的记录
+    await this.prisma.userDigest.create({
       data: {
         userId,
         date: today,
-        topicKey: meta.topicKeys()[0],
-        contentId: content.id,
+        topicKey: meta.topics[0].key,
+        weblinkIds: [uwb.weblinkId],
+        content: {
+          create: {
+            ...(await this.llmService.incrementalSummary(null, newDoc)),
+            sourceType: 'digest',
+          } as AIGCContent,
+        },
       },
     });
   }
@@ -119,10 +142,22 @@ export class AigcService {
   }
 
   private async applyContentStrategy(param: {
+    weblink: Weblink;
     doc: Document;
     meta: ContentMeta;
   }) {
-    const { doc, meta } = param;
+    const { weblink, doc, meta } = param;
+
+    // 查找该 weblink 是否已生成内容，如有则直接返回
+    const content = await this.prisma.aIGCContent.findFirst({
+      where: { weblinkId: weblink.id },
+    });
+    if (content) {
+      this.logger.log(
+        `found existing content for source type weblink: ${weblink.id}`,
+      );
+      return content;
+    }
 
     // TODO: 策略选择与匹配，暂时用固定的策略
     this.logger.log(
@@ -130,64 +165,63 @@ export class AigcService {
     );
 
     // Apply strategy and save aigc content
-    const content = await this.llmService.applyStrategy(doc);
+    const newContent = await this.llmService.applyStrategy(doc);
     return await this.prisma.aIGCContent.create({
       data: {
-        title: content.title,
-        content: content.content,
-        sources: content.sources,
-        meta: content.meta,
-      },
+        ...newContent,
+        sourceType: 'weblink',
+        weblinkId: weblink.id,
+      } as AIGCContent,
     });
   }
 
-  /**
-   * Dispatch feed to target users.
-   * @param content aigc content
-   * @returns
-   */
-  private async dispatchFeed(param: {
-    weblink: Weblink;
-    meta: ContentMeta;
-    content: AIGCContent;
-  }) {
-    const { weblink, meta, content } = param;
+  // /**
+  //  * Dispatch feed to target users.
+  //  * @param content aigc content
+  //  * @returns
+  //  */
+  // private async dispatchFeed(param: {
+  //   weblink: Weblink;
+  //   meta: ContentMeta;
+  //   content: AIGCContent;
+  // }) {
+  //   const { weblink, meta, content } = param;
 
-    // topic 管理先简单点，就用 key 去匹配
-    // 介绍文案先前端写死
-    // await this.ensureTopics(meta);
+  //   // topic 管理先简单点，就用 key 去匹配
+  //   // 介绍文案先前端写死
+  //   // await this.ensureTopics(meta);
 
-    // Find users related to this content
-    const userIds = await this.prisma.userPreference.findMany({
-      select: { userId: true },
-      where: {
-        topicKey: { in: meta.topicKeys() },
-        score: { gte: 0 }, // TODO: 设计更合适的推荐门槛
-      },
-    });
+  //   // Find users related to this content
+  //   const userIds = await this.prisma.userPreference.findMany({
+  //     select: { userId: true },
+  //     where: {
+  //       topicKey: { in: meta.topics.map((t) => t.key) },
+  //       score: { gte: 0 }, // TODO: 设计更合适的推荐门槛
+  //     },
+  //   });
 
-    // Check if these users have read this source
-    const readLinkUsers = await this.prisma.userWeblink.findMany({
-      select: { userId: true },
-      where: {
-        url: weblink.url,
-        userId: { in: userIds.map((u) => u.userId) },
-      },
-    });
-    const readUserSet = new Set(readLinkUsers.map((elem) => elem.userId));
-    const unreadUsers = userIds.filter((u) => !readUserSet.has(u.userId));
+  //   // Check if these users have read this source
+  //   const readLinkUsers = await this.prisma.userWeblink.findMany({
+  //     select: { userId: true },
+  //     where: {
+  //       url: weblink.url,
+  //       userId: { in: userIds.map((u) => u.userId) },
+  //     },
+  //   });
+  //   const readUserSet = new Set(readLinkUsers.map((elem) => elem.userId));
+  //   const unreadUsers = userIds.filter((u) => !readUserSet.has(u.userId));
 
-    // Add feed records for unread users
-    if (unreadUsers.length > 0) {
-      this.logger.log(`add feed ${content.id} to users: ${unreadUsers}`);
-      await this.prisma.userFeed.createMany({
-        data: unreadUsers.map((u) => ({
-          userId: u.userId,
-          contentId: content.id,
-        })),
-      });
-    }
-  }
+  //   // Add feed records for unread users
+  //   if (unreadUsers.length > 0) {
+  //     this.logger.log(`add feed ${content.id} to users: ${unreadUsers}`);
+  //     await this.prisma.userFeed.createMany({
+  //       data: unreadUsers.map((u) => ({
+  //         userId: u.userId,
+  //         contentId: content.id,
+  //       })),
+  //     });
+  //   }
+  // }
 
   /**
    * 处理全局内容流程: 应用内容策略，分发 feed
@@ -209,7 +243,7 @@ export class AigcService {
     if (!weblink.contentMeta) {
       // 提取网页分类打标数据 with LLM
       meta = await this.llmService.extractContentMeta(doc);
-      if (meta.needIndex()) {
+      if (shouldRunIndexPipeline(meta)) {
         await this.llmService.indexPipelineFromLink(doc);
       }
       await this.prisma.weblink.update({
@@ -220,8 +254,15 @@ export class AigcService {
       meta = JSON.parse(weblink.contentMeta);
     }
 
+    if (!meta.topics) {
+      this.logger.log(`weblink ${weblink.url} has no topic, skip content flow`);
+      return;
+    }
+
+    // 新的 weblink，运行内容策略和 feed 分发
     const content = await this.applyContentStrategy({ ...param, doc, meta });
-    await this.dispatchFeed({ ...param, meta, content });
+    // await this.dispatchFeed({ ...param, meta, content });
+
     await this.runUserContentFlow({ ...param, meta, content });
   }
 
@@ -245,4 +286,8 @@ export class AigcService {
   //       });
   //     }
   //   }
+}
+
+function shouldRunIndexPipeline(meta: ContentMeta): boolean {
+  return false;
 }

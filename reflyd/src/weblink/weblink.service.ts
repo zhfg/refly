@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, Weblink } from '@prisma/client';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { Document } from '@langchain/core/documents';
@@ -28,6 +28,8 @@ export class WeblinkService {
    * @param links link history data
    */
   async storeLinks(userId: string, links: WebLinkDTO[]) {
+    if (!links) return;
+
     // Aggregate links (pick the last visit one)
     const linkMap = new Map<string, WebLinkDTO>();
     links.forEach((link) => {
@@ -45,7 +47,8 @@ export class WeblinkService {
     });
 
     // Send to queue in a non-block style
-    linkMap.forEach((link) => this.indexQueue.add('indexWebLink', link));
+    // linkMap.forEach((link) => this.indexQueue.add('indexWebLink', link));
+    linkMap.forEach((link) => this.processLinkFromStoreQueue(link));
   }
 
   async getUserHistory(params: {
@@ -60,7 +63,10 @@ export class WeblinkService {
 
   async parseWebLinkContent(url: string): Promise<Document> {
     try {
-      const loader = new CheerioWebBaseLoader(url);
+      const loader = new CheerioWebBaseLoader(url, {
+        maxRetries: 3,
+        timeout: 5000,
+      });
 
       // customized webpage loading
       const $ = await loader.scrape();
@@ -70,6 +76,7 @@ export class WeblinkService {
 
       return { pageContent, metadata: { title, source } };
     } catch (err) {
+      this.logger.error(`process url ${url} failed: ${err}`);
       return null;
     }
   }
@@ -104,7 +111,7 @@ export class WeblinkService {
    * @param link link data
    * @returns
    */
-  async processLinkForUser(link: WebLinkDTO) {
+  async processLinkForUser(link: WebLinkDTO, weblink: Weblink) {
     if (!link.userId) {
       this.logger.log(`drop job due to missing user id: ${link}`);
       return;
@@ -119,8 +126,13 @@ export class WeblinkService {
         },
       },
       create: {
-        ...link,
+        url: link.url,
+        weblinkId: weblink.id,
+        origin: link.origin,
         userId: link.userId,
+        originPageUrl: link.originPageUrl,
+        originPageTitle: link.originPageTitle,
+        originPageDescription: link.originPageDescription,
         lastVisitTime: new Date(link.lastVisitTime),
         visitTimes: link.visitCount,
         totalReadTime: link.readTime,
@@ -132,16 +144,14 @@ export class WeblinkService {
         updatedAt: new Date(),
       },
     });
-    this.logger.log(`user weblink upserted: ${JSON.stringify(uwb)}`);
 
     return uwb;
   }
 
   async processLinkFromStoreQueue(link: WebLinkDTO) {
-    // TODO: 并发控制，妥善处理多个并发请求处理同一个 url 的情况
+    this.logger.log(`process link from queue: ${JSON.stringify(link)}`);
 
-    // 处理单个用户的访问记录
-    const uwb = await this.processLinkForUser(link);
+    // TODO: 并发控制，妥善处理多个并发请求处理同一个 url 的情况
 
     // TODO: 处理 link 内容过时
     let weblink = await this.prisma.weblink.findUnique({
@@ -151,16 +161,21 @@ export class WeblinkService {
     // 未处理过此链接
     if (!weblink) {
       const doc = await this.parseWebLinkContent(link.url);
-      weblink = await this.prisma.weblink.create({
-        data: {
-          url: link.url,
-          indexStatus: 'processing',
-          pageContent: doc.pageContent,
-          pageMeta: JSON.stringify(doc.metadata),
-          contentMeta: '',
-        },
-      });
+      if (doc) {
+        weblink = await this.prisma.weblink.create({
+          data: {
+            url: link.url,
+            indexStatus: 'processing',
+            pageContent: doc.pageContent,
+            pageMeta: JSON.stringify(doc.metadata),
+            contentMeta: '',
+          },
+        });
+      }
     }
+
+    // 处理单个用户的访问记录
+    const uwb = await this.processLinkForUser(link, weblink);
 
     await this.aigcService.runContentFlow({ link, uwb, weblink });
   }

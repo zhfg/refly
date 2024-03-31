@@ -4,14 +4,14 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import fetch from 'node-fetch';
-import { HttpsProxyAgent } from 'https-proxy-agent';
+import { AllExceptionsFilter } from './utils/exception';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(helmet());
   app.enableCors();
   app.use(cookieParser());
+  // app.useGlobalFilters(new AllExceptionsFilter());
 
   app.setGlobalPrefix('/v1', { exclude: ['/'] });
 
