@@ -1,7 +1,7 @@
 import { makeTextFewshotExample } from './utils/common';
 
 const fewshotExamples =
-  '{"title":"Anthony Fu 分享了他在开源项目中的经历和挑战，以及如何平衡心理健康和工作，同时表达了对支持者的感激之情","content":"- Anthony Fu 在开源工作的四年中遇到了超出自己承载能力范围的工作量。\\n- 他谈到了有关未准备好面对突然而来的责任感和其他方面工作的想法。\\n- Fu 提到人类适应和期望会导致满足感变得困难。\\n- 对自我期望太高可能会带来压力和压迫感，这是他面临的挑战之一。\\n- 他提到当梦想变成工作时会遇到的义务和责任。\\n- 文章探讨了在保持开源项目质量、速度和范围三者之间平衡的困难。\\n- Anthony 认为放慢节奏、学会降低期望并欣赏现在的成就是处理挫败感和压力的关键。\\n- 他呼吁维持心理健康是每位开源项目维护者持续发展的重要任务，并邀请读者分享他们的想法。","keywords":"开源项目, 心理健康, 自我期望, 责任, 挑战, 平衡, Anthony Fu, 支持, 社区, 速度, 范围, 质量, 持续学习"}';
+  '{"title":"Anthony Fu 分享了他在开源项目中的经历和挑战，以及如何平衡心理健康和工作，同时表达了对支持者的感激之情","abstract":"- Anthony Fu 在开源工作的四年中遇到了超出自己承载能力范围的工作量。\\n- 他谈到了有关未准备好面对突然而来的责任感和其他方面工作的想法。\\n- Fu 提到人类适应和期望会导致满足感变得困难。\\n- 对自我期望太高可能会带来压力和压迫感，这是他面临的挑战之一。\\n- 他提到当梦想变成工作时会遇到的义务和责任。\\n- 文章探讨了在保持开源项目质量、速度和范围三者之间平衡的困难。\\n- Anthony 认为放慢节奏、学会降低期望并欣赏现在的成就是处理挫败感和压力的关键。\\n- 他呼吁维持心理健康是每位开源项目维护者持续发展的重要任务，并邀请读者分享他们的想法。","keywords":"开源项目, 心理健康, 自我期望, 责任, 挑战, 平衡, Anthony Fu, 支持, 社区, 速度, 范围, 质量, 持续学习"}';
 
 // 总结，并以结构化数据输出
 export const extractSummarizeSystemPrompt = `
@@ -35,7 +35,7 @@ You are an advanced complex article analyst, skilled in providing summarized art
 - Ensuring that one-sentence summaries are as concise and clear as possible.
 - Ensuring that article abstracts and outlines are as detailed and accurate as possible.
 - Maintaining a fair and objective attitude regardless of the content of the article.
-- Using Markdown format for returns
+- Using JSON format for returns
 
 ## Example of output:
 

@@ -90,7 +90,7 @@ export class LlmService implements OnModuleInit {
     const runnable = await llm
       .bind({
         functions: [extractContentMeta.extractContentMetaSchema],
-        function_call: { name: 'content_category' },
+        function_call: { name: 'content_category_extractor' },
       })
       .pipe(parser);
     const res = (await runnable.invoke([
@@ -102,14 +102,15 @@ export class LlmService implements OnModuleInit {
       score: number;
       format: string;
     };
+    this.logger.log('extract content meta: %j', res);
 
     const contentMeta = {
       topics: [{ key: res?.category, score: res?.score, name: '', reason: '' }],
       contentType: null,
       formats: [{ key: res?.format, score: 0, name: '', reason: '' }],
-      needIndex: () => true,
-      topicKeys: () => [res?.category],
     };
+
+    this.logger.log('final content meta: %j', contentMeta);
 
     return contentMeta;
   }
@@ -130,20 +131,21 @@ export class LlmService implements OnModuleInit {
         function_call: { name: 'content_meta_extractor' },
       })
       .pipe(parser);
-    const contentMeta = (await runnable.invoke([
+    const summary = (await runnable.invoke([
       new SystemMessage(extractSummarizeMeta.extractSummarizeSystemPrompt),
       new HumanMessage(doc.pageContent),
     ])) as {
       title: string;
-      content: string;
+      abstract: string;
       keywords: string;
     };
+    this.logger.log('summarized content: %j', summary);
 
     return {
-      title: contentMeta?.title || '',
-      content: contentMeta?.content || '',
+      title: summary?.title || '',
+      content: summary?.abstract || '',
       meta: JSON.stringify({
-        keywords: contentMeta?.keywords || '',
+        keywords: summary?.keywords || '',
       }),
       sources: JSON.stringify([doc?.metadata?.source || '']),
     };

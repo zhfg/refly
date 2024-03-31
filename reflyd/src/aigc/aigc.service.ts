@@ -32,6 +32,7 @@ export class AigcService {
           create: {
             userId: uwb.userId,
             topicKey: topic.key,
+            score: topic.score,
           },
           update: {
             score: { increment: topic.score }, // TODO: 迭代兴趣分数策略,例如权重、衰减等
@@ -243,6 +244,12 @@ export class AigcService {
     if (!weblink.contentMeta) {
       // 提取网页分类打标数据 with LLM
       meta = await this.llmService.extractContentMeta(doc);
+      if (!meta?.topics || !meta?.topics[0].key) {
+        this.logger.log(
+          `invalid meta for ${weblink.url}: ${JSON.stringify(meta)}`,
+        );
+        return;
+      }
       if (shouldRunIndexPipeline(meta)) {
         await this.llmService.indexPipelineFromLink(doc);
       }
