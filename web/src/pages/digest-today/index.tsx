@@ -2,7 +2,7 @@
  * 只聚焦昨天、今天、这周、这个月最核心的内容，剩下的让用户去归档里面查看，能够对自己的工作有一个明确的感知
  */
 
-import { time } from "@/utils/time"
+import { getCurrentDateInfo, time } from "@/utils/time"
 import {
   List,
   Skeleton,
@@ -47,11 +47,20 @@ export const DigestToday = () => {
         return
       }
 
+      const { day, year, month } = getCurrentDateInfo()
       const newRes = await getDigestList({
         body: {
           // TODO: confirm time filter
           page: currentPage,
           pageSize: digestStore.today.pageSize,
+          filter: {
+            date: {
+              dateType: "daily",
+              year: String(year),
+              month: String(month),
+              day: String(day),
+            },
+          }, // 基于今天这个 filter 进行持续分页
         },
       })
 
@@ -160,7 +169,7 @@ export const DigestToday = () => {
                       }}>
                       <IconTag style={{ fontSize: 14, color: "#64645F" }} />
                       <span className="feed-list-item-text">
-                        Developer Tools · Data Science
+                        {item?.meta?.topics?.map(item => item.name).join(" · ")}
                       </span>
                     </span>
                     <span key={3}>

@@ -1,16 +1,8 @@
-import type { ServerMessage } from "@/types"
+import type { Digest } from "@/types"
 
-export interface Feed {
-  id: string
-  userId: string
-  title: string
-  lastMessage: string
-  messageCount: number
-  origin: string
-  originPageUrl: string
-  originPageTitle: string
-  createdAt: string
-  updatedAt: string
-
-  messages?: ServerMessage[]
+export interface Feed extends Digest {
+  // 增加一些指标
+  readCount: number // 阅读次数
+  askFollow: number // 追问次数
+  userId?: string
 }

@@ -23,6 +23,7 @@ export const appConfig = {
     getUserInfo: "/v1/auth/getUserInfo",
     getTopicDetail: (topicId: string) => `/v1/topic/${topicId}`,
     getDigestList: `/v1/digest/list`,
+    getFeedList: `/v1/feed/list`,
   },
   domId: {},
   appInfo: {

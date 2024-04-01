@@ -21,7 +21,7 @@ import {
 } from "@arco-design/web-react/icon"
 import { useNavigate } from "react-router-dom"
 // types
-import type { Digest } from "@/types/digest"
+import type { Digest, DateType } from "@/types/digest"
 import { IconTip } from "@/components/dashboard/icon-tip"
 import { copyToClipboard } from "@/utils"
 import { getClientOrigin } from "@/utils/url"
@@ -56,7 +56,9 @@ export const DigestArchive = () => {
         body: {
           page: currentPage,
           pageSize: 10,
-          filter: { dateType, year, month, day },
+          filter: {
+            date: { dateType: dateType as DateType, year, month, day },
+          },
         },
       })
 
@@ -170,7 +172,7 @@ export const DigestArchive = () => {
                       }}>
                       <IconTag style={{ fontSize: 14, color: "#64645F" }} />
                       <span className="feed-list-item-text">
-                        Developer Tools · Data Science
+                        {item?.meta?.topics?.map(item => item.name).join(" · ")}
                       </span>
                     </span>
                     <span key={3}>

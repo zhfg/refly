@@ -47,6 +47,10 @@ export const DigestHeader = (props: DigestHeaderProps) => {
   // 只需要获取一页 topics 即可
   const fetchData = async (currentPage = 1) => {
     try {
+      // 如果已经有 topics 了，就不再次获取
+      const { topicList } = useDigestTopicStore.getState()
+      if (topicList?.length > 0) return
+
       setIsFetching(true)
       await delay(3000)
       if (!digestTopicStore.hasMore && currentPage !== 1) {
@@ -118,7 +122,7 @@ export const DigestHeader = (props: DigestHeaderProps) => {
       <div className="trending-topic-container">
         <div className="trending-topic-title">趋势主题：</div>
         {isFetching ? (
-          <>
+          <div className="trending-topics">
             {Array(5)
               .fill(null)
               .map(item => (
@@ -131,7 +135,7 @@ export const DigestHeader = (props: DigestHeaderProps) => {
                     className: "custom-skeleton-node",
                   }}></Skeleton>
               ))}
-          </>
+          </div>
         ) : (
           <div className="trending-topics">
             {digestTopicStore.topicList?.map(item => (

@@ -2,19 +2,18 @@ import { appConfig } from "@/utils/config"
 import { request } from "@/utils/request"
 
 import type { HandlerRequest, HandlerResponse } from "@/types/request"
-import type { Digest, DigestFilter } from "@/types"
+import type { Feed } from "@/types"
 
 const handler = async (
   req: HandlerRequest<{
     pageSize: number
     page: number
-    filter?: DigestFilter
   }>,
-): Promise<HandlerResponse<Digest[]>> => {
+): Promise<HandlerResponse<Feed[]>> => {
   console.log(req.body)
 
   try {
-    const [err, fakeDigestListRes] = await request<Digest[]>(
+    const [err, feedListRes] = await request<Feed[]>(
       appConfig.url.getDigestList,
       {
         method: "GET",
@@ -29,7 +28,7 @@ const handler = async (
     } else {
       return {
         success: true,
-        data: fakeDigestListRes,
+        data: feedListRes,
       }
     }
   } catch (err) {

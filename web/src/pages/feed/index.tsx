@@ -8,7 +8,6 @@ import {
   Typography,
 } from "@arco-design/web-react"
 // stores
-import { useSiderStore } from "@/stores/sider"
 import { useFeedStore } from "@/stores/feed"
 import { IconTip } from "@/components/dashboard/icon-tip"
 import {
@@ -22,12 +21,11 @@ import {
 import { useNavigate, useMatch } from "react-router-dom"
 // utils
 import { time } from "@/utils/time"
-import getConversationList from "@/requests/getConversationList"
+import getFeedList from "@/requests/getFeedList"
 // types
 import { Feed as IFeed } from "@/types"
 import "./index.scss"
 // fake data
-import { fakeFeedList } from "@/fake-data/feed"
 import { copyToClipboard } from "@/utils"
 import { getClientOrigin } from "@/utils/url"
 
@@ -37,7 +35,7 @@ export const Feed = () => {
   )
   const feedStore = useFeedStore()
   const navigate = useNavigate()
-  const isThreadLibrary = useMatch("/feed")
+  const isFeed = useMatch("/feed")
 
   const fetchData = async (currentPage = 1) => {
     try {
@@ -47,7 +45,7 @@ export const Feed = () => {
         return
       }
 
-      const newRes = await getConversationList({
+      const newRes = await getFeedList({
         body: {
           page: currentPage,
           pageSize: 10,
@@ -64,7 +62,7 @@ export const Feed = () => {
       }
 
       console.log("newRes", newRes)
-      feedStore.updateFeedList(newRes?.data)
+      feedStore.updateFeedList(newRes?.data as IFeed[])
     } catch (err) {
       message.error("获取推荐内容失败，请重新刷新试试")
     }
@@ -72,7 +70,7 @@ export const Feed = () => {
 
   useEffect(() => {
     fetchData()
-  }, [isThreadLibrary])
+  }, [isFeed])
 
   return (
     <div className="feed-container">
@@ -141,19 +139,19 @@ export const Feed = () => {
                     }}>
                     <IconTag style={{ fontSize: 14, color: "#64645F" }} />
                     <span className="feed-list-item-text">
-                      Developer Tools · Data Science
+                      {item?.meta?.topics?.map(item => item?.name).join(",")}
                     </span>
                   </span>
                   <span key={3}>
                     <IconBook style={{ fontSize: 14, color: "#64645F" }} />
                     <span className="feed-list-item-text">
-                      {item?.messageCount} 阅读
+                      {item?.readCount} 阅读
                     </span>
                   </span>
                   <span key={3}>
                     <IconMessage style={{ fontSize: 14, color: "#64645F" }} />
                     <span className="feed-list-item-text">
-                      {item?.messageCount} 追问
+                      {item?.askFollow} 追问
                     </span>
                   </span>
                   <span key={2}>
@@ -176,7 +174,7 @@ export const Feed = () => {
                     wrapper: "span",
                   }}
                   style={{ color: "rgba(0, 0, 0, .4) !important" }}>
-                  {item.lastMessage}
+                  {item.abstract}
                 </Typography.Paragraph>
               }
             />

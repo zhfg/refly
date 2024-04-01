@@ -28,3 +28,16 @@ export interface Digest {
   createdAt: string
   updatedAt: string
 }
+
+export type DateType = "daily" | "weekly" | "month" | "yearly"
+
+export interface DigestFilter {
+  date?: {
+    year?: string
+    month?: string
+    day?: string
+    dateType: DateType
+  }
+
+  topic?: string
+}

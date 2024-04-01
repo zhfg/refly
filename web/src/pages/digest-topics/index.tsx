@@ -66,12 +66,15 @@ export const DigestTopics = () => {
       if (!newRes?.success) {
         throw new Error(newRes?.errMsg)
       }
-      if (newRes?.data && newRes?.data?.length < digestTopicStore?.pageSize) {
+      if (
+        newRes?.data &&
+        newRes?.data?.list?.length < digestTopicStore?.pageSize
+      ) {
         digestTopicStore.updateHasMore(false)
       }
 
       console.log("newRes", newRes)
-      digestTopicStore.updateTopicList(newRes?.data || [])
+      digestTopicStore.updateTopicList(newRes?.data?.list || [])
     } catch (err) {
       message.error("获取主题列表失败，请重新刷新试试")
     }
