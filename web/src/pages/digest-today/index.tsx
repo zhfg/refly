@@ -133,7 +133,7 @@ export const DigestToday = () => {
                       key={1}
                       className="feed-list-item-continue-ask with-border with-hover"
                       onClick={() => {
-                        navigate(`/feed/${item?.id}`)
+                        navigate(`/digest/${item?.id}`)
                       }}>
                       <IconRightCircle
                         style={{ fontSize: 14, color: "#64645F" }}

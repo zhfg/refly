@@ -1,4 +1,4 @@
-import type { Message, SessionItem } from "@/types"
+import type { Digest, Feed, Message, SessionItem } from "@/types"
 import { safeParseJSON } from "./parse"
 
 export const buildSessionItem = (
@@ -32,4 +32,17 @@ export const buildSessions = (messages: Message[]) => {
 
   const sessions = items.map(item => buildSessionItem(item?.[0], item?.[1]))
   return sessions
+}
+
+// 从 digest 和 feed 等 ready only aigc content 的内容构建 session
+export const buildSessionsFromAIGCContent = (aigcContent: Digest | Feed) => {
+  if (!(aigcContent?.title && aigcContent?.abstract)) return []
+
+  const session: SessionItem = {
+    question: aigcContent?.title,
+    answer: aigcContent?.abstract,
+    sources: aigcContent?.source,
+    relatedQuestions: [],
+  }
+  return [session]
 }
