@@ -1,5 +1,11 @@
-import React, { useRef } from "react"
-import { Button, Space, Input, Breadcrumb } from "@arco-design/web-react"
+import React, { useRef, useState } from "react"
+import {
+  Button,
+  Space,
+  Input,
+  Breadcrumb,
+  Message as message,
+} from "@arco-design/web-react"
 import { IconSend } from "@arco-design/web-react/icon"
 
 // stores
@@ -13,6 +19,7 @@ import { IconTip } from "../dashboard/icon-tip"
 
 interface ThreadItemProps {
   sessions: SessionItem[]
+  handleAskFollowUp: () => void
 }
 
 const TextArea = Input.TextArea
@@ -31,7 +38,18 @@ export const DigestDetailContent = (props: ThreadItemProps) => {
   }
 
   // 这里就不是直接构建聊天，而是弹框让用户确认，然后走进度条的形式进行加载，搞个全局进度条
-  const handleAskFollowing = () => {}
+  const handleAskFollowUp = () => {
+    /**
+     * 1. 【Optional - 后续可能去掉】弹框让用户确认，是否需要创建会话并跳转
+     * 2. 跳转之前需要发起请求创建新会话，并显示 loading
+     * 3. 带着问题跳转过去
+     */
+    if (!chatStore?.newQAText) {
+      message.warning(`追问内容不能为空！`)
+    } else {
+      props.handleAskFollowUp()
+    }
+  }
 
   return (
     <div className="session-container">
@@ -74,7 +92,7 @@ export const DigestDetailContent = (props: ThreadItemProps) => {
                       shape="circle"
                       icon={<IconSend />}
                       style={{ color: "#FFF", background: "#00968F" }}
-                      onClick={handleAskFollowing}></Button>
+                      onClick={handleAskFollowUp}></Button>
                   </IconTip>
                 </div>
               </div>

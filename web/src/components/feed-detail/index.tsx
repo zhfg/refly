@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { Message as message } from "@arco-design/web-react"
 
@@ -8,6 +8,7 @@ import { buildSessionsFromAIGCContent } from "@/utils/session"
 // 组件
 import { DigestDetailContent } from "./digest-detail-content"
 import { Header } from "./header"
+import { AskFollowUpModal } from "@/components/ask-follow-up-modal/index"
 // request
 import getDigestDetail from "@/requests/getDigestDetail"
 // styles
@@ -21,6 +22,7 @@ import { Digest } from "@/types"
  */
 export const FeedDetail = () => {
   const params = useParams<{ digestId: string }>()
+  const [askFollowUpVisible, setAskFollowUpVisible] = useState(false)
 
   const digestDetailStore = useDigestDetailStore()
 
@@ -43,6 +45,10 @@ export const FeedDetail = () => {
     }
   }
 
+  const handleAskFollowUp = () => {
+    setAskFollowUpVisible(true)
+  }
+
   useEffect(() => {
     if (params?.digestId) {
       console.log("params", params)
@@ -63,7 +69,18 @@ export const FeedDetail = () => {
         flexDirection: "column",
       }}>
       <Header digest={digestDetailStore?.digest as Digest} />
-      <DigestDetailContent sessions={sessions} />
+      <DigestDetailContent
+        sessions={sessions}
+        handleAskFollowUp={handleAskFollowUp}
+      />
+
+      {askFollowUpVisible ? (
+        <AskFollowUpModal
+          visible={askFollowUpVisible}
+          setVisible={visible => setAskFollowUpVisible(visible)}
+          aigcContent={digestDetailStore?.digest as Digest}
+        />
+      ) : null}
     </div>
   )
 }

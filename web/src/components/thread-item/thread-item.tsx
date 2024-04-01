@@ -24,6 +24,7 @@ interface ThreadItemProps {
     searchTarget: SearchTarget
     filter: Source[]
   }
+  handleAskFollowing: () => void
 }
 
 const TextArea = Input.TextArea
@@ -54,25 +55,6 @@ export const ThreadItem = (props: ThreadItemProps) => {
     e.stopPropagation()
 
     inputRef.current?.dom?.onkeydown?.(e as any as KeyboardEvent)
-  }
-
-  const handleAskFollowing = () => {
-    const { newQAText } = useChatStore.getState()
-    const { currentConversation } = useConversationStore.getState()
-    const useWeblinkList =
-      threadSearchTarget === SearchTarget.SelectedPages &&
-      threadWeblinkListFilter?.length > 0
-
-    const task = buildChatTask({
-      question: newQAText,
-      conversationId: currentConversation?.id || "",
-      filter: {
-        weblinkList: useWeblinkList ? threadWeblinkListFilter : [],
-      },
-    })
-
-    buildTaskAndGenReponse(task)
-    chatStore.setNewQAText("")
   }
 
   // 这里保存为组件状态是只对当前组件生效，而且理论上设置之后就应该在此 thread 一直生效，不应该清空
@@ -173,7 +155,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
                       shape="circle"
                       icon={<IconSend />}
                       style={{ color: "#FFF", background: "#00968F" }}
-                      onClick={handleAskFollowing}></Button>
+                      onClick={props.handleAskFollowing}></Button>
                   </div>
                 </div>
               </div>

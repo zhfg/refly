@@ -54,7 +54,6 @@ import { getExtensionId } from "@/utils/url"
 
 const TextArea = Input.TextArea
 
-
 // 用于快速选择
 export const quickActionList = ["summary"]
 

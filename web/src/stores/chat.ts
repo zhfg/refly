@@ -10,6 +10,7 @@ export interface ChatState {
   newQAText: string
   isGenTitle: boolean
   isNewConversation: boolean
+  isAskFollowUpNewConversation: boolean
 
   // method
   setMessages: (val: Message[]) => void
@@ -17,6 +18,7 @@ export interface ChatState {
   setNewQAText: (val: string) => void
   resetState: () => void
   setIsNewConversation: (val: boolean) => void
+  setIsAskFollowUpNewConversation: (val: boolean) => void
 }
 
 export const defaultState = {
@@ -26,6 +28,7 @@ export const defaultState = {
   newQAText: "",
   isGenTitle: false,
   isNewConversation: false, // 标识是否是新创建的会话，还是老会话
+  isAskFollowUpNewConversation: false, // 标识是基于 AIGCContent 创建的新会话
 }
 
 export const useChatStore = create<ChatState>()(
@@ -39,5 +42,7 @@ export const useChatStore = create<ChatState>()(
     setNewQAText: (val: string) => set({ newQAText: val }),
     resetState: () => set(state => ({ ...state, ...defaultState })),
     setIsNewConversation: (val: boolean) => set({ isNewConversation: val }),
+    setIsAskFollowUpNewConversation: (val: boolean) =>
+      set({ isAskFollowUpNewConversation: val }),
   })),
 )

@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 
 // hooks
@@ -16,10 +16,18 @@ import { ThreadItem } from "@/components/thread-item/thread-item"
 import getThreadMessages from "@/requests/getThreadMessages"
 // styles
 import "./thread-item.scss"
-import { Task, Thread as ThreadTypes, type Message, MessageType } from "@/types"
+import {
+  Task,
+  Thread as ThreadTypes,
+  type Message,
+  MessageType,
+  Source,
+} from "@/types"
 import { useWeblinkStore } from "@/stores/weblink"
 import { useSearchStateStore, SearchTarget } from "@/stores/search-state"
 import { safeParseJSON } from "@/utils/parse"
+import { buildChatTask } from "@/utils/task"
+import { Skeleton } from "@arco-design/web-react"
 
 export const Thread = () => {
   const { buildTaskAndGenReponse } = useBuildTask()
@@ -30,6 +38,7 @@ export const Thread = () => {
   const weblinkStore = useWeblinkStore()
   const searchStateStore = useSearchStateStore()
   const { resetState } = useResetState()
+  const [isFetching, setIsFetching] = useState(false)
 
   const handleGetThreadMessages = async (threadId: string) => {
     // 异步操作
@@ -72,7 +81,34 @@ export const Thread = () => {
     chatStore.setMessages(messages)
   }
 
-  const getSelectedWeblinkConfig = (messages: Message[] = []) => {
+  const handleAskFollowing = () => {
+    const { newQAText } = useChatStore.getState()
+    const { currentConversation } = useConversationStore.getState()
+    const { messages } = useChatStore.getState()
+    const selectedWeblinkConfig = getSelectedWeblinkConfig(messages)
+
+    const useWeblinkList =
+      selectedWeblinkConfig?.searchTarget === SearchTarget.SelectedPages &&
+      selectedWeblinkConfig?.filter?.length > 0
+
+    const task = buildChatTask({
+      question: newQAText,
+      conversationId: currentConversation?.id || "",
+      filter: {
+        weblinkList: useWeblinkList ? selectedWeblinkConfig?.filter : [],
+      },
+    })
+
+    buildTaskAndGenReponse(task)
+    chatStore.setNewQAText("")
+  }
+
+  const getSelectedWeblinkConfig = (
+    messages: Message[] = [],
+  ): {
+    searchTarget: SearchTarget
+    filter: Source[]
+  } => {
     // 这里是获取第一个，早期简化策略，因为一开始设置之后，后续设置就保留
     const lastHumanMessage = messages?.find(
       item => item?.data?.type === MessageType.Human,
@@ -82,21 +118,36 @@ export const Thread = () => {
   }
 
   const handleThread = async (threadId: string) => {
-    const { currentConversation } = useConversationStore.getState()
-    const { task } = useTaskStore.getState()
+    try {
+      setIsFetching(true)
+      const { currentConversation } = useConversationStore.getState()
+      const { task } = useTaskStore.getState()
 
-    // 新会话，需要手动构建第一条消息
-    if (chatStore.isNewConversation && currentConversation?.id) {
-      // 更换成基于 task 的消息模式，核心是基于 task 来处理
-      buildTaskAndGenReponse(task as Task)
-    } else if (params?.threadId) {
-      handleGetThreadMessages(threadId)
+      // 新会话，需要手动构建第一条消息
+      if (chatStore.isNewConversation && currentConversation?.id) {
+        // 更换成基于 task 的消息模式，核心是基于 task 来处理
+        buildTaskAndGenReponse(task as Task)
+      } else if (
+        chatStore.isAskFollowUpNewConversation &&
+        currentConversation?.id
+      ) {
+        // 先获取会话
+        await handleGetThreadMessages(threadId)
+        // 然后构建 followup question
+        await handleAskFollowing()
+      } else if (params?.threadId) {
+        handleGetThreadMessages(threadId)
+      }
+
+      // 重置状态
+      chatStore.setNewQAText("")
+      weblinkStore.updateSelectedRow([])
+      searchStateStore.setSearchTarget(SearchTarget.CurrentPage)
+    } catch (err) {
+      console.log("thread error")
+    } finally {
+      setIsFetching(false)
     }
-
-    // 重置状态
-    chatStore.setNewQAText("")
-    weblinkStore.updateSelectedRow([])
-    searchStateStore.setSearchTarget(SearchTarget.CurrentPage)
   }
 
   useEffect(() => {
@@ -118,10 +169,15 @@ export const Thread = () => {
         flexDirection: "column",
       }}>
       {/* <Header /> */}
-      <ThreadItem
-        sessions={sessions}
-        selectedWeblinkConfig={selectedWeblinkConfig}
-      />
+      {isFetching ? (
+        <Skeleton animation></Skeleton>
+      ) : (
+        <ThreadItem
+          sessions={sessions}
+          selectedWeblinkConfig={selectedWeblinkConfig}
+          handleAskFollowing={handleAskFollowing}
+        />
+      )}
     </div>
   )
 }
