@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { MessageType } from '@prisma/client';
-import { Content } from 'src/aigc/dto';
+import { Content } from 'src/aigc/aigc.dto';
 
 export class ChatMessage {
   @ApiProperty({ enum: MessageType })

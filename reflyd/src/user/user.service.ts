@@ -23,4 +23,17 @@ export class UserService {
   }) {
     return this.prisma.user.upsert(args);
   }
+
+  async getUserPreferences(params: { userId: string }) {
+    return this.prisma.userPreference.findMany({
+      where: { ...params },
+      orderBy: { score: 'desc' },
+    });
+  }
+
+  async countUserPreferences(params: { userId: string }) {
+    return this.prisma.userPreference.count({
+      where: { ...params },
+    });
+  }
 }

@@ -223,6 +223,8 @@ model AIGCContent {
   id          String            @id @default(auto()) @map("_id") @db.ObjectId
   /// 标题
   title       String
+  /// 摘要
+  abstract    String            @default("")
   /// 内容
   content     String
   /// 元数据, JSON 存储

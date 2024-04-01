@@ -154,6 +154,7 @@ export class LlmService implements OnModuleInit {
 
     return {
       title: summary?.title || '',
+      abstract: summary?.abstract.slice(0, 200) || '', // TODO: 概要暂定取前 200 个字符
       content: summary?.abstract || '',
       meta: JSON.stringify({
         keywords: summary?.keywords || '',
@@ -220,18 +221,20 @@ export class LlmService implements OnModuleInit {
     oldDoc: Document,
     newDoc: Document,
   ): Promise<Partial<AIGCContent>> {
+    // TODO: 实现具体策略
     if (!oldDoc) {
       return {
         title: `New Digest ${new Date()}`,
         content: `${newDoc.pageContent}`,
-        sources: JSON.stringify({}),
+        sources: JSON.stringify([]),
         meta: JSON.stringify({}),
       };
     }
     return {
       title: `Combined Digest ${new Date()}`,
+      abstract: `Abstract of Combined Digest`,
       content: `Combine("${oldDoc.pageContent}", "${newDoc.pageContent}")`,
-      sources: JSON.stringify({}),
+      sources: JSON.stringify([]),
       meta: JSON.stringify({}),
     };
   }

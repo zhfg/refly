@@ -6,12 +6,56 @@ import { PrismaService } from '../common/prisma.service';
 import { AIGCContent, UserWeblink, Weblink } from '@prisma/client';
 import { ContentMeta } from 'src/llm/dto';
 import { WebLinkDTO } from 'src/weblink/dto';
+import { DigestFilter } from './aigc.dto';
 
 @Injectable()
 export class AigcService {
   private readonly logger = new Logger(AigcService.name);
 
   constructor(private prisma: PrismaService, private llmService: LlmService) {}
+
+  async getDigestList(params: {
+    userId: string;
+    page?: number;
+    pageSize?: number;
+    filter: DigestFilter;
+  }) {
+    const { userId, page = 1, pageSize = 10, filter } = params;
+    const cond: any = { userId };
+    if (filter?.date) {
+      const { year, month, day } = filter.date;
+      cond.date = `${year}-${String(month).padStart(2, '0')}-${day}`;
+    }
+    if (filter?.topic) {
+      cond.topicKey = filter.topic;
+    }
+    return this.prisma.userDigest.findMany({
+      where: cond,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      include: { content: true },
+    });
+  }
+
+  async getFeedList(params: {
+    userId: string;
+    page?: number;
+    pageSize?: number;
+  }) {
+    const { page = 1, pageSize = 10 } = params;
+    return this.prisma.aIGCContent.findMany({
+      where: { sourceType: 'weblink' },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    });
+  }
+
+  async getContent(params: { contentId: string }) {
+    const { contentId } = params;
+    return this.prisma.aIGCContent.findUnique({
+      where: { id: contentId },
+    });
+  }
 
   private async updateUserPreferences(param: {
     uwb: UserWeblink;

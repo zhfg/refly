@@ -21,12 +21,16 @@ import { ApiParam, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
 import { TASK_TYPE, type Task } from '../types/task';
+import { AigcService } from 'src/aigc/aigc.service';
 
 @Controller('conversation')
 export class ConversationController {
   private readonly logger = new Logger(ConversationController.name);
 
-  constructor(private conversationService: ConversationService) {}
+  constructor(
+    private conversationService: ConversationService,
+    private aigcService: AigcService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Post('new')
@@ -37,6 +41,32 @@ export class ConversationController {
   ) {
     const userId: string = req.user.id;
     const res = await this.conversationService.create(body, userId);
+
+    if (body.contentId) {
+      const content = await this.aigcService.getContent({
+        contentId: body.contentId,
+      });
+      await this.conversationService.addChatMessages([
+        {
+          type: 'human',
+          content: content.title,
+          sources: '[]',
+          userId,
+          conversationId: res.id,
+        },
+        {
+          type: 'ai',
+          content: content.content,
+          sources: content.sources,
+          userId,
+          conversationId: res.id,
+        },
+      ]);
+      await this.conversationService.updateConversation(res.id, {
+        messageCount: { increment: 2 },
+        lastMessage: content.content,
+      });
+    }
 
     return {
       data: res,

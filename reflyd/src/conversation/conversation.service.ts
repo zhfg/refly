@@ -56,6 +56,21 @@ export class ConversationService {
     });
   }
 
+  async addChatMessages(
+    msgList: {
+      type: MessageType;
+      sources: string;
+      content: string;
+      userId: string;
+      conversationId: string;
+      selectedWeblinkConfig?: string;
+    }[],
+  ) {
+    return this.prisma.chatMessage.createMany({
+      data: msgList,
+    });
+  }
+
   async findFirstConversation(params: {
     where: Prisma.ConversationWhereInput;
   }) {
