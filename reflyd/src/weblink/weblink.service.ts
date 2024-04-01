@@ -177,6 +177,11 @@ export class WeblinkService {
       }
     }
 
+    if (!weblink) {
+      this.logger.log(`weblink is still empty, skip`);
+      return;
+    }
+
     // 处理单个用户的访问记录
     const uwb = await this.processLinkForUser(link, weblink);
 

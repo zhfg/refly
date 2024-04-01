@@ -82,7 +82,7 @@ model UserPreference {
   /// 主题key
   topicKey  String
   /// 兴趣值
-  score     Int      @default(0)
+  score     Float    @default(0)
   /// 创建时间
   createdAt DateTime @default(now())
   /// 更新时间
@@ -197,26 +197,6 @@ model Weblink {
   contents AIGCContent[]
 }
 
-/// 网页元数据 (待确定)
-model WeblinkMeta {
-  /// 主键
-  id        String          @id @default(auto()) @map("_id") @db.ObjectId
-  /// 链接 id
-  linkId    String          @db.ObjectId
-  /// 元数据类型
-  metaType  ContentMetaType
-  /// 元数据值
-  metaVal   String
-  /// 打标分数 (0-100)
-  score     Int
-  /// 创建时间
-  createdAt DateTime        @default(now())
-  /// 更新时间
-  updatedAt DateTime        @updatedAt
-
-  @@unique([linkId, metaType, metaVal])
-}
-
 /// 生成内容
 model AIGCContent {
   /// 主键
@@ -244,6 +224,15 @@ model AIGCContent {
   /// 关联的摘要
   userDigests UserDigest[]
 
+  /// 输入内容 id
+  inputIds  String[]      @db.ObjectId
+  /// 输入内容
+  inputs    AIGCContent[] @relation("ContentGraph", fields: [inputIds], references: [id])
+  /// 输出内容 id
+  outputIds String[]      @db.ObjectId
+  /// 输出内容
+  outputs   AIGCContent[] @relation("ContentGraph", fields: [outputIds], references: [id])
+
   @@index([weblinkId])
 }
 
@@ -266,23 +255,21 @@ model UserFeed {
 /// 用户回顾
 model UserDigest {
   /// 主键
-  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
   /// 用户 id
-  userId     String      @db.ObjectId
+  userId    String      @db.ObjectId
   /// 日期 (YYYY-MM-DD)
-  date       String
+  date      String
   /// 主题
-  topicKey   String
+  topicKey  String
   /// 回顾内容 id
-  contentId  String      @unique @db.ObjectId
+  contentId String      @unique @db.ObjectId
   /// 创建时间
-  createdAt  DateTime    @default(now())
+  createdAt DateTime    @default(now())
   /// 更新时间
-  updatedAt  DateTime    @updatedAt
-  /// 关联的链接 id
-  weblinkIds String[]    @db.ObjectId
+  updatedAt DateTime    @updatedAt
   /// 关联的回顾内容
-  content    AIGCContent @relation(fields: [contentId], references: [id])
+  content   AIGCContent @relation(fields: [contentId], references: [id])
 
   @@unique([userId, date, topicKey])
 }

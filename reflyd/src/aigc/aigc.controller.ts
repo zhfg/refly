@@ -41,6 +41,8 @@ export class AigcController {
         contentId: feed.id,
         meta: JSON.parse(feed.meta),
         source: JSON.parse(feed.sources),
+        readCount: 0,
+        askFollow: 0,
       })),
     };
   }
@@ -59,12 +61,13 @@ export class AigcController {
       data: digestList.map((digest) => ({
         id: digest.id,
         userId: digest.userId,
+        topicKey: digest.topicKey,
         date: digest.date,
         title: digest.content?.title,
         abstract: digest.content?.abstract,
         contentId: digest.contentId,
         meta: JSON.parse(digest.content.meta),
-        source: JSON.parse(digest.content.sources),
+        source: JSON.parse(digest.content.sources || '{}'),
         createdAt: digest.createdAt,
         updatedAt: digest.updatedAt,
       })),

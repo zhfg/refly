@@ -159,7 +159,7 @@ export class LlmService implements OnModuleInit {
       meta: JSON.stringify({
         keywords: summary?.keywords || '',
       }),
-      sources: JSON.stringify([doc?.metadata?.source || '']),
+      sources: JSON.stringify([{ medadata: doc?.metadata }]),
     };
   }
 
@@ -208,34 +208,6 @@ export class LlmService implements OnModuleInit {
     return {
       title: contentMeta?.title || '',
       content: contentMeta?.content || '',
-    };
-  }
-
-  /**
-   * 增量总结
-   * @param oldDoc 现有总结文本
-   * @param newDoc 新的总结文本
-   * @returns
-   */
-  async incrementalSummary(
-    oldDoc: Document,
-    newDoc: Document,
-  ): Promise<Partial<AIGCContent>> {
-    // TODO: 实现具体策略
-    if (!oldDoc) {
-      return {
-        title: `New Digest ${new Date()}`,
-        content: `${newDoc.pageContent}`,
-        sources: JSON.stringify([]),
-        meta: JSON.stringify({}),
-      };
-    }
-    return {
-      title: `Combined Digest ${new Date()}`,
-      abstract: `Abstract of Combined Digest`,
-      content: `Combine("${oldDoc.pageContent}", "${newDoc.pageContent}")`,
-      sources: JSON.stringify([]),
-      meta: JSON.stringify({}),
     };
   }
 

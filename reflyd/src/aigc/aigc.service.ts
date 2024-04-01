@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Document } from '@langchain/core/documents';
+import omit from 'lodash.omit';
 
 import { LlmService } from '../llm/llm.service';
 import { PrismaService } from '../common/prisma.service';
@@ -24,7 +25,9 @@ export class AigcService {
     const cond: any = { userId };
     if (filter?.date) {
       const { year, month, day } = filter.date;
-      cond.date = `${year}-${String(month).padStart(2, '0')}-${day}`;
+      cond.date = `${year}-${String(month).padStart(2, '0')}-${String(
+        day,
+      ).padStart(2, '0')}`;
     }
     if (filter?.topic) {
       cond.topicKey = filter.topic;
@@ -54,6 +57,7 @@ export class AigcService {
     const { contentId } = params;
     return this.prisma.aIGCContent.findUnique({
       where: { id: contentId },
+      include: { inputs: true },
     });
   }
 
@@ -109,56 +113,63 @@ export class AigcService {
           topicKey: meta.topics[0].key,
         },
       },
-      include: { content: true },
     });
 
-    const newDoc = new Document({
-      pageContent: content.content,
-    });
-
-    // 如果该 topic 下已有内容，进行增量总结
+    // 如果该 topic 下已有摘要，进行增量总结
     if (digest) {
-      // 如果该 digest 已包含指定 weblink，则不做任何增量总结
-      if (digest.weblinkIds.includes(uwb.weblinkId)) {
+      const dContent = await this.prisma.aIGCContent.findUnique({
+        where: { id: digest.contentId },
+        include: { inputs: true },
+      });
+
+      // 如果该 digest 输入的 content 已包含新的 content，则不做任何增量总结
+      if (dContent.inputIds.includes(content.id)) {
         this.logger.log(
-          `digest ${digest.id} already contains weblink ${uwb.weblinkId}`,
+          `digest ${digest.id} already contains content ${content.id}`,
         );
         return;
       }
 
-      const oldDoc = new Document({
-        pageContent: digest.content.content,
+      const combinedContent = await this.llmService.summarizeMultipleWeblink([
+        ...dContent.inputs,
+        content,
+      ]);
+
+      // 更新 aigc 依赖关系
+      this.prisma.$transaction(async (tx) => {
+        await tx.aIGCContent.update({
+          where: { id: dContent.id },
+          data: { ...combinedContent, inputIds: { push: content.id } },
+        });
+        await tx.aIGCContent.update({
+          where: { id: content.id },
+          data: { outputIds: { push: dContent.id } },
+        });
       });
 
-      const combinedDigest = await this.llmService.incrementalSummary(
-        oldDoc,
-        newDoc,
-      );
-      await this.prisma.aIGCContent.update({
-        where: { id: digest.content.id },
-        data: { ...combinedDigest },
-      });
-      await this.prisma.userDigest.update({
-        where: { id: digest.id },
-        data: { weblinkIds: { push: uwb.weblinkId } },
-      });
       return;
     }
 
     // 创建新的 digest 内容及其对应的记录
-    await this.prisma.userDigest.create({
-      data: {
-        userId,
-        date: today,
-        topicKey: meta.topics[0].key,
-        weblinkIds: [uwb.weblinkId],
-        content: {
-          create: {
-            ...(await this.llmService.incrementalSummary(null, newDoc)),
-            sourceType: 'digest',
-          } as AIGCContent,
+    this.prisma.$transaction(async (tx) => {
+      const newDigest = await tx.userDigest.create({
+        data: {
+          userId,
+          date: today,
+          topicKey: meta.topics[0].key,
+          content: {
+            create: {
+              ...omit(content, 'id', 'sources'),
+              sourceType: 'digest',
+              inputIds: [content.id],
+            } as AIGCContent,
+          },
         },
-      },
+      });
+      await tx.aIGCContent.update({
+        where: { id: content.id },
+        data: { outputIds: { push: newDigest.contentId } },
+      });
     });
   }
 

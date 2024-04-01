@@ -57,6 +57,7 @@ export class ContentDTO {
 }
 
 export class Digest extends ContentDTO {
+  topicKey: string;
   userId: string;
   date: string;
 }
@@ -65,7 +66,6 @@ export class Feed extends ContentDTO {
   // 增加一些指标
   readCount?: number; // 阅读次数
   askFollow?: number; // 追问次数
-  userId?: string;
 }
 
 export class FeedResponse {
