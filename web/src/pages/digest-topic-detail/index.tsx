@@ -20,7 +20,7 @@ import { useMatch, useNavigate, useParams } from "react-router-dom"
 // stores
 import { useDigestTopicDetailStore } from "@/stores/digest-topic-detail"
 // types
-import { MetaRecord as Topic, Digest } from "@/types"
+import { Digest } from "@/types"
 // request
 import getTopicDigestList from "@/requests/getDigestList"
 import { IconTip } from "@/components/dashboard/icon-tip"
@@ -41,7 +41,7 @@ export const DigestTopicDetail = () => {
   const digestTopicDetailStore = useDigestTopicDetailStore()
   const digestTopicStore = useDigestTopicStore()
   const navigate = useNavigate()
-  const isThreadLibrary = useMatch("/thread")
+  const isTopicDetail = useMatch("/digest/topic/:digestTopicId")
   const { digestTopicId } = useParams()
 
   // TODO: 替换成真正的 topic detail，目前还是 fake
@@ -62,7 +62,7 @@ export const DigestTopicDetail = () => {
         body: {
           page: currentPage,
           pageSize: 10,
-          filter: { topicId: digestTopicId },
+          filter: { topic: digestTopicId }, // 带着 topic 的 filter
         },
       })
 
@@ -87,7 +87,7 @@ export const DigestTopicDetail = () => {
 
   useEffect(() => {
     fetchData()
-  }, [isThreadLibrary])
+  }, [isTopicDetail])
 
   return (
     <div className="digest-topic-detail-container">
