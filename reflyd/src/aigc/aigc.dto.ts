@@ -50,8 +50,8 @@ export class ContentDTO {
   title: string;
   abstract: string;
   contentId: string;
-  meta: ContentMeta;
-  source: Source[];
+  meta: string;
+  source: string;
   createdAt: Date;
   updatedAt: Date;
 }
