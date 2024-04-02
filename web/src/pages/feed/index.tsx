@@ -75,17 +75,19 @@ export const Feed = () => {
   return (
     <div className="feed-container">
       {/* <Header /> */}
-      <div className="feed-title-container">
-        <p className="feed-title">
-          <span>为你推荐</span>
-        </p>
-      </div>
       <List
         className="feed-list"
         wrapperStyle={{ width: "100%" }}
         bordered={false}
         pagination={false}
         offsetBottom={50}
+        header={
+          <div className="feed-title-container">
+            <p className="feed-title">
+              <span>为你推荐</span>
+            </p>
+          </div>
+        }
         dataSource={feedStore?.feeds}
         scrollLoading={scrollLoading}
         onReachBottom={currentPage => fetchData(currentPage)}

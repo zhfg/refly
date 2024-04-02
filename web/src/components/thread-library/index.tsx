@@ -126,7 +126,13 @@ export const ThreadLibrary = () => {
         className="thread-library-list"
         wrapperStyle={{ width: "100%" }}
         bordered={false}
-        header={<p className="thread-library-title">会话库</p>}
+        header={
+          <div className="feed-title-container">
+            <p className="feed-title">
+              <span>会话库</span>
+            </p>
+          </div>
+        }
         pagination={false}
         offsetBottom={50}
         dataSource={threadStore?.threads}

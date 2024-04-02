@@ -20,11 +20,13 @@
 }
 
 .feed-list {
-  padding: 0 16px;
   width: 100%;
-  height: calc(100vh - 28px - 100px);
-  padding: 0 60px;
+  height: calc(100vh - 28px);
   overflow-y: scroll;
+
+  .arco-list-content {
+    padding: 0 60px;
+  }
 
   .feed-item-topic {
     &:hover {
@@ -59,10 +61,6 @@
   .arco-list-header {
     border-bottom: 1px solid transparent;
     padding: 0;
-
-    .feed-title {
-      margin-left: -20px;
-    }
   }
 }
 
