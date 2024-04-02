@@ -22,7 +22,7 @@ import { useDigestTopicDetailStore } from "@/stores/digest-topic-detail"
 // types
 import { Digest } from "@/types"
 // request
-import getTopicDigestList from "@/requests/getDigestList"
+import getDigestList from "@/requests/getDigestList"
 import { IconTip } from "@/components/dashboard/icon-tip"
 import { copyToClipboard } from "@/utils"
 import { getClientOrigin } from "@/utils/url"
@@ -58,7 +58,7 @@ export const DigestTopicDetail = () => {
       }
 
       // TODO: digest 联调，currentTopicDetail?.key
-      const newRes = await getTopicDigestList({
+      const newRes = await getDigestList({
         body: {
           page: currentPage,
           pageSize: 10,
@@ -132,7 +132,7 @@ export const DigestTopicDetail = () => {
                     key={1}
                     className="feed-list-item-continue-ask with-border with-hover"
                     onClick={() => {
-                      navigate(`/feed/${item?.id}`)
+                      navigate(`/feed/${item?.contentId}`)
                     }}>
                     <IconRightCircle
                       style={{ fontSize: 14, color: "#64645F" }}
@@ -145,7 +145,7 @@ export const DigestTopicDetail = () => {
                       className="feed-list-item-continue-ask"
                       onClick={() => {
                         copyToClipboard(
-                          `${getClientOrigin()}/digest/${item?.id}`,
+                          `${getClientOrigin()}/content/${item?.id}`,
                         )
                         message.success("链接已复制到剪切板")
                       }}>

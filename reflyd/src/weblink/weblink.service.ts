@@ -143,7 +143,7 @@ export class WeblinkService {
       update: {
         lastVisitTime: new Date(link.lastVisitTime),
         visitTimes: { increment: link.visitCount },
-        totalReadTime: { increment: link.readTime },
+        totalReadTime: { increment: link.readTime || 0 },
         updatedAt: new Date(),
       },
     });

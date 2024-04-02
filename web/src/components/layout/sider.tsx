@@ -138,8 +138,7 @@ export const SiderLayout = () => {
             borderRight: "none",
           }}
           className="sider-menu-nav"
-          onClickMenuItem={handleNavClick}
-          defaultSelectedKeys={[selectedKey]}>
+          onClickMenuItem={handleNavClick}>
           <div className="sider-header">
             <MenuItem key="Home" className="custom-menu-item">
               <IconHome style={{ fontSize: 20 }} />

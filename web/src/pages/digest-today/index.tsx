@@ -56,9 +56,9 @@ export const DigestToday = () => {
           filter: {
             date: {
               dateType: "daily",
-              year: String(year),
-              month: String(month),
-              day: String(day),
+              year: year,
+              month: month,
+              day: day,
             },
           }, // 基于今天这个 filter 进行持续分页
         },
@@ -133,7 +133,7 @@ export const DigestToday = () => {
                       key={1}
                       className="feed-list-item-continue-ask with-border with-hover"
                       onClick={() => {
-                        navigate(`/digest/${item?.id}`)
+                        navigate(`/digest/${item?.contentId}`)
                       }}>
                       <IconRightCircle
                         style={{ fontSize: 14, color: "#64645F" }}
@@ -146,7 +146,7 @@ export const DigestToday = () => {
                         className="feed-list-item-continue-ask"
                         onClick={() => {
                           copyToClipboard(
-                            `${getClientOrigin()}/feed/${item?.id}`,
+                            `${getClientOrigin()}/content/${item?.contentId}`,
                           )
                           message.success("链接已复制到剪切板")
                         }}>
@@ -239,7 +239,7 @@ export const DigestToday = () => {
                         key={1}
                         className="feed-list-item-continue-ask with-border with-hover"
                         onClick={() => {
-                          navigate(`/feed/${item?.id}`)
+                          navigate(`/feed/${item?.contentId}`)
                         }}>
                         <IconRightCircle
                           style={{ fontSize: 14, color: "#64645F" }}
@@ -252,7 +252,7 @@ export const DigestToday = () => {
                           className="feed-list-item-continue-ask"
                           onClick={() => {
                             copyToClipboard(
-                              `${getClientOrigin()}/feed/${item?.id}`,
+                              `${getClientOrigin()}/content/${item?.contentId}`,
                             )
                             message.success("链接已复制到剪切板")
                           }}>
@@ -346,7 +346,7 @@ export const DigestToday = () => {
                         key={1}
                         className="feed-list-item-continue-ask with-border with-hover"
                         onClick={() => {
-                          navigate(`/feed/${item?.id}`)
+                          navigate(`/feed/${item?.contentId}`)
                         }}>
                         <IconRightCircle
                           style={{ fontSize: 14, color: "#64645F" }}
@@ -359,7 +359,7 @@ export const DigestToday = () => {
                           className="feed-list-item-continue-ask"
                           onClick={() => {
                             copyToClipboard(
-                              `${getClientOrigin()}/feed/${item?.id}`,
+                              `${getClientOrigin()}/content/${item?.contentId}`,
                             )
                             message.success("链接已复制到剪切板")
                           }}>
@@ -453,7 +453,7 @@ export const DigestToday = () => {
                         key={1}
                         className="feed-list-item-continue-ask with-border with-hover"
                         onClick={() => {
-                          navigate(`/feed/${item?.id}`)
+                          navigate(`/feed/${item?.contentId}`)
                         }}>
                         <IconRightCircle
                           style={{ fontSize: 14, color: "#64645F" }}
@@ -466,7 +466,7 @@ export const DigestToday = () => {
                           className="feed-list-item-continue-ask"
                           onClick={() => {
                             copyToClipboard(
-                              `${getClientOrigin()}/feed/${item?.id}`,
+                              `${getClientOrigin()}/content/${item?.contentId}`,
                             )
                             message.success("链接已复制到剪切板")
                           }}>
@@ -560,7 +560,7 @@ export const DigestToday = () => {
                         key={1}
                         className="feed-list-item-continue-ask with-border with-hover"
                         onClick={() => {
-                          navigate(`/feed/${item?.id}`)
+                          navigate(`/feed/${item?.contentId}`)
                         }}>
                         <IconRightCircle
                           style={{ fontSize: 14, color: "#64645F" }}
@@ -573,7 +573,7 @@ export const DigestToday = () => {
                           className="feed-list-item-continue-ask"
                           onClick={() => {
                             copyToClipboard(
-                              `${getClientOrigin()}/feed/${item?.id}`,
+                              `${getClientOrigin()}/content/${item?.contentId}`,
                             )
                             message.success("链接已复制到剪切板")
                           }}>

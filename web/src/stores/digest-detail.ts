@@ -2,8 +2,6 @@ import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import type {} from "@redux-devtools/extension"
 import { Digest } from "@/types"
-// fake-data
-import { fakeDigestDetail } from "@/fake-data/digest"
 
 interface DigestDetailState {
   digest: Digest | null
@@ -13,7 +11,7 @@ interface DigestDetailState {
 }
 
 export const defaultState = {
-  digest: fakeDigestDetail || null,
+  digest: null,
 }
 
 export const useDigestDetailStore = create<DigestDetailState>()(

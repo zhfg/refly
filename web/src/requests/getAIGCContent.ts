@@ -5,14 +5,14 @@ import type { HandlerRequest, HandlerResponse } from "@/types/request"
 import { Digest } from "@/types"
 
 const handler = async (
-  req: HandlerRequest<{ digestId: string }>,
+  req: HandlerRequest<{ contentId: string }>,
 ): Promise<HandlerResponse<Digest>> => {
   console.log(req.body)
 
   try {
-    const { digestId } = req.body
+    const { contentId } = req.body
     const [err, digestRes] = await request<Digest>(
-      appConfig.url.getDigestDetail(digestId),
+      appConfig.url.getAIGCContent(contentId),
       {
         method: "GET",
       },

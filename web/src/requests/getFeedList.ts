@@ -14,7 +14,7 @@ const handler = async (
 
   try {
     const [err, feedListRes] = await request<Feed[]>(
-      appConfig.url.getDigestList,
+      appConfig.url.getFeedList,
       {
         method: "GET",
         body: req.body,

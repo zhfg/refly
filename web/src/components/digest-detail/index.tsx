@@ -10,7 +10,7 @@ import { DigestDetailContent } from "./digest-detail-content"
 import { Header } from "./header"
 import { AskFollowUpModal } from "@/components/ask-follow-up-modal/index"
 // request
-import getDigestDetail from "@/requests/getDigestDetail"
+import getAIGCContent from "@/requests/getAIGCContent"
 // styles
 import "./digest-detail.scss"
 import { Digest } from "@/types"
@@ -28,9 +28,9 @@ export const DigestTail = () => {
 
   const handleGetDetail = async (digestId: string) => {
     try {
-      const newRes = await getDigestDetail({
+      const newRes = await getAIGCContent({
         body: {
-          digestId,
+          contentId: digestId,
         },
       })
 

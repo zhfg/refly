@@ -17,7 +17,7 @@ const handler = async (
     const [err, fakeDigestListRes] = await request<Digest[]>(
       appConfig.url.getDigestList,
       {
-        method: "GET",
+        method: "POST",
         body: req.body,
       },
     )

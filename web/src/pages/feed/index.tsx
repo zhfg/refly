@@ -105,7 +105,7 @@ export const Feed = () => {
                     key={1}
                     className="feed-list-item-continue-ask with-border with-hover"
                     onClick={() => {
-                      navigate(`/feed/${item?.id}`)
+                      navigate(`/feed/${item?.contentId}`)
                     }}>
                     <IconRightCircle
                       style={{ fontSize: 14, color: "#64645F" }}
@@ -117,7 +117,9 @@ export const Feed = () => {
                       key={1}
                       className="feed-list-item-continue-ask"
                       onClick={() => {
-                        copyToClipboard(`${getClientOrigin()}/feed/${item?.id}`)
+                        copyToClipboard(
+                          `${getClientOrigin()}/content/${item?.contentId}`,
+                        )
                         message.success("链接已复制到剪切板")
                       }}>
                       <IconShareExternal

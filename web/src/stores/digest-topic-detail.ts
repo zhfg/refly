@@ -3,8 +3,6 @@ import { devtools } from "zustand/middleware"
 import type {} from "@redux-devtools/extension"
 
 import type { Digest, MetaRecord as Topic } from "@/types"
-// fake-data
-import { fakeDigestList } from "@/fake-data/digest"
 
 /**
  * 承载着 topic detail 以及此 topic 下所有的 digest list
@@ -24,7 +22,7 @@ interface DigestTopicDetailState {
 }
 
 export const defaultState = {
-  digestList: fakeDigestList || ([] as Digest[]),
+  digestList: [] as Digest[],
   digestTopicDetail: null,
   pageSize: 10,
   currentPage: 1,

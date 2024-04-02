@@ -3,7 +3,6 @@ import { devtools } from "zustand/middleware"
 import type {} from "@redux-devtools/extension"
 
 import type { Feed } from "@/types"
-import { fakeFeedList } from "@/fake-data/feed"
 
 interface FeedState {
   feeds: Feed[]
@@ -18,7 +17,7 @@ interface FeedState {
 }
 
 export const defaultState = {
-  feeds: fakeFeedList as Feed[],
+  feeds: [] as Feed[],
   pageSize: 10,
   currentPage: 1,
   hasMore: true,

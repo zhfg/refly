@@ -25,6 +25,7 @@ export const AppLayout = (props: AppLayoutProps) => {
   const [token, updateCookie, deleteCookie] = useCookie("_refly_ai_sid")
   const routeDigestDetailPageMatch = useMatch("/digest/:digestId")
   const routeFeedDetailPageMatch = useMatch("/feed/:feedId")
+  const routeAIGCContentDetailPageMatch = useMatch("/content/:digestId")
 
   const getLoginStatus = async () => {
     try {
@@ -37,7 +38,13 @@ export const AppLayout = (props: AppLayoutProps) => {
         userStore.setToken("")
         localStorage.removeItem("refly-user-profile")
 
-        if (!(routeDigestDetailPageMatch || routeFeedDetailPageMatch)) {
+        if (
+          !(
+            routeDigestDetailPageMatch ||
+            routeFeedDetailPageMatch ||
+            routeAIGCContentDetailPageMatch
+          )
+        ) {
           navigate("/")
         }
       } else {

@@ -21,6 +21,7 @@ export interface ContentMeta {
 
 export interface Digest {
   id: string
+  contentId: string // 代表此 digest 或 feed 所属于的 AIGCContent
   title: string
   abstract: string
   meta: ContentMeta
@@ -33,9 +34,9 @@ export type DateType = "daily" | "weekly" | "month" | "yearly"
 
 export interface DigestFilter {
   date?: {
-    year?: string
-    month?: string
-    day?: string
+    year?: number
+    month?: number
+    day?: number
     dateType: DateType
   }
 

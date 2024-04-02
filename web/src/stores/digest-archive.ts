@@ -2,9 +2,7 @@ import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import type {} from "@redux-devtools/extension"
 
-import type { Digest, MetaRecord as Topic } from "@/types"
-// fake-data
-import { fakeDigestList } from "@/fake-data/digest"
+import type { Digest } from "@/types"
 
 // digest archive 和其他 digest 类似在早期
 interface DigestArchiveState {
@@ -20,7 +18,7 @@ interface DigestArchiveState {
 }
 
 export const defaultState = {
-  digestList: fakeDigestList || ([] as Digest[]),
+  digestList: [] as Digest[],
   pageSize: 10,
   currentPage: 1,
   hasMore: true,

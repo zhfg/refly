@@ -19,6 +19,8 @@ import { DigestArchive } from "@/pages/digest-archive"
 // digest 详情
 import { DigestDetailPage } from "@/pages/digest-detail"
 import { FeedDetailPage } from "@/pages/feed-detail"
+// 这里用于分享之后的不需要鉴权的查看
+import { AIGCContentDetailPage } from "@/pages/aigc-content-detail"
 
 export const AppRouter = (props: { layout?: any }) => {
   const { layout: Layout } = props
@@ -54,6 +56,7 @@ export const AppRouter = (props: { layout?: any }) => {
         <Route path="/feed" element={<Feed />} />
         <Route path="/digest" element={<DigestToday />} />
         <Route path="/digest/topics" element={<DigestTopics />} />
+        <Route path="/content/:digestId" element={<AIGCContentDetailPage />} />
         <Route path="/digest/:digestId" element={<DigestDetailPage />} />
         <Route path="/feed/:feedId" element={<FeedDetailPage />} />
         <Route

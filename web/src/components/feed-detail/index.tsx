@@ -10,7 +10,7 @@ import { DigestDetailContent } from "./digest-detail-content"
 import { Header } from "./header"
 import { AskFollowUpModal } from "@/components/ask-follow-up-modal/index"
 // request
-import getDigestDetail from "@/requests/getDigestDetail"
+import getDigestDetail from "@/requests/getAIGCContent"
 // styles
 import "./digest-detail.scss"
 import { Digest } from "@/types"

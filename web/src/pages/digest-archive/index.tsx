@@ -57,7 +57,12 @@ export const DigestArchive = () => {
           page: currentPage,
           pageSize: 10,
           filter: {
-            date: { dateType: dateType as DateType, year, month, day },
+            date: {
+              dateType: dateType as DateType,
+              year: Number(year),
+              month: Number(month),
+              day: Number(day),
+            },
           },
         },
       })
@@ -136,7 +141,7 @@ export const DigestArchive = () => {
                       key={1}
                       className="feed-list-item-continue-ask with-border with-hover"
                       onClick={() => {
-                        navigate(`/feed/${item?.id}`)
+                        navigate(`/feed/${item?.contentId}`)
                       }}>
                       <IconRightCircle
                         style={{ fontSize: 14, color: "#64645F" }}
@@ -149,7 +154,7 @@ export const DigestArchive = () => {
                         className="feed-list-item-continue-ask"
                         onClick={() => {
                           copyToClipboard(
-                            `${getClientOrigin()}/feed/${item?.id}`,
+                            `${getClientOrigin()}/content/${item?.contentId}`,
                           )
                           message.success("链接已复制到剪切板")
                         }}>

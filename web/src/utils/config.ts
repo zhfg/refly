@@ -22,10 +22,10 @@ export const appConfig = {
     getTopicList: "/v1/topic/list",
     getUserInfo: "/v1/auth/getUserInfo",
     getTopicDetail: (topicId: string) => `/v1/topic/${topicId}`,
-    getDigestList: `/v1/digest/list`,
-    getDigestDetail: (digestId: string) => `/v1/digest/${digestId}`,
+    getDigestList: `/v1/aigc/digest`,
+    getAIGCContent: (contentId: string) => `/v1/aigc/content/${contentId}`,
     getSourceSummary: (sourceId: string) => `/v1/weblink/${sourceId}/summary`,
-    getFeedList: `/v1/feed/list`,
+    getFeedList: `/v1/aigc/feed`,
   },
   domId: {},
   appInfo: {

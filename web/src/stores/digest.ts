@@ -2,8 +2,6 @@ import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import type {} from "@redux-devtools/extension"
 import type { Digest, MetaRecord } from "@/types"
-// fake data
-import { fakeTopics, fakeDigestList } from "@/fake-data/digest"
 
 interface DigestPayload {
   featureList: Digest[]
@@ -26,10 +24,6 @@ interface DigestState {
   lastWeek: DigestPayload // 只获取一页
   lastMonth: DigestPayload // 只获取一页
   lastYear: DigestPayload // 只获取一页
-  topic: {
-    data: MetaRecord[]
-    count: number // 需要做响应式的处理
-  } // 所有的主题
 
   updatePayload: (newPayload: DigestPayload, type: DigestType) => void
   updateTopics: (newTopics: MetaRecord[]) => void
@@ -46,16 +40,11 @@ const defaultDigestPayload = {
 export const defaultState = {
   today: {
     ...defaultDigestPayload,
-    featureList: fakeDigestList || [],
   },
   yesterday: defaultDigestPayload,
   lastWeek: defaultDigestPayload,
   lastMonth: defaultDigestPayload,
   lastYear: defaultDigestPayload,
-  topic: {
-    data: fakeTopics || [],
-    count: 0,
-  },
 }
 
 export const useDigestStore = create<DigestState>()(
