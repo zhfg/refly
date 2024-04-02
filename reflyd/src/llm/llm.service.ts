@@ -98,7 +98,7 @@ export class LlmService implements OnModuleInit {
       .pipe(parser);
     const res = (await runnable.invoke([
       new SystemMessage(extractContentMeta.systemPrompt),
-      new HumanMessage(pageContent),
+      new HumanMessage(pageContent.slice(0, 12000)),
     ])) as {
       categoryId: string;
       reason: string;
@@ -144,7 +144,7 @@ export class LlmService implements OnModuleInit {
       .pipe(parser);
     const summary = (await runnable.invoke([
       new SystemMessage(extractSummarizeMeta.extractSummarizeSystemPrompt),
-      new HumanMessage(doc.pageContent),
+      new HumanMessage(doc.pageContent?.slice(0, 12000)),
     ])) as {
       title: string;
       abstract: string;
@@ -305,6 +305,7 @@ export class LlmService implements OnModuleInit {
 
     const textSplitter = new RecursiveCharacterTextSplitter({
       chunkSize: 1000,
+      chunkOverlap: 200,
     });
 
     // 带元数据去拼 docs
@@ -316,7 +317,10 @@ export class LlmService implements OnModuleInit {
           const dividerDocs = await textSplitter.createDocuments([
             `\n\n下面是网页 [${metadata?.title}](${metadata.source}) 的内容\n\n`,
           ]);
-          return [...dividerDocs, doc];
+          const splittedChunks = await textSplitter.createDocuments([
+            doc.pageContent,
+          ]);
+          return [...dividerDocs, ...splittedChunks];
         }),
       )
     ).flat();

@@ -183,8 +183,8 @@ export const DigestArchive = () => {
                     <span key={3}>
                       <IconLink style={{ fontSize: 14, color: "#64645F" }} />
                       <span className="feed-list-item-text">
-                        {item?.source?.[0]?.metadata?.source} &{" "}
-                        {item?.source?.length} 条更多
+                        {item?.weblinks?.[0]?.url} & {item?.weblinks?.length}{" "}
+                        条更多
                       </span>
                     </span>
                     <span key={2}>

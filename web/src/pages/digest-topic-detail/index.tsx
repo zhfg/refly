@@ -31,6 +31,7 @@ import { useDigestTopicStore } from "@/stores/digest-topics"
 import "./index.scss"
 // fake data
 import { fakeTopics } from "@/fake-data/digest"
+import { safeParseJSON } from "@/utils/parse"
 
 const BreadcrumbItem = Breadcrumb.Item
 
@@ -174,8 +175,8 @@ export const DigestTopicDetail = () => {
                   <span key={3}>
                     <IconLink style={{ fontSize: 14, color: "#64645F" }} />
                     <span className="feed-list-item-text">
-                      {item?.source?.[0]?.metadata?.source} &{" "}
-                      {item?.source?.length} 条更多
+                      {item?.weblinks?.[0]?.url} & {item?.weblinks?.length}{" "}
+                      条更多
                     </span>
                   </span>
                   <span key={2}>

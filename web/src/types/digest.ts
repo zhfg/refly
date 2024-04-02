@@ -25,7 +25,8 @@ export interface Digest {
   title: string
   abstract: string
   meta: ContentMeta
-  source: Source[]
+  sources: string // JSON string 的形式，Source[]
+  weblinks: { url: string; pageMeta: string }[]
   createdAt: string
   updatedAt: string
 }

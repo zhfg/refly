@@ -41,7 +41,14 @@ export const buildSessionsFromAIGCContent = (aigcContent: Digest | Feed) => {
   const session: SessionItem = {
     question: aigcContent?.title,
     answer: aigcContent?.abstract,
-    sources: aigcContent?.source,
+    sources: aigcContent?.weblinks?.map(item => ({
+      score: 0,
+      metadata: {
+        source: item?.url,
+        title: safeParseJSON(item)?.title || "",
+      },
+      pageContent: "",
+    })),
     relatedQuestions: [],
   }
   return [session]
