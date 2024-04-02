@@ -4,10 +4,11 @@ import omit from 'lodash.omit';
 
 import { LlmService } from '../llm/llm.service';
 import { PrismaService } from '../common/prisma.service';
-import { AIGCContent, UserWeblink, Weblink } from '@prisma/client';
+import { AIGCContent, UserDigest, UserWeblink, Weblink } from '@prisma/client';
 import { ContentMeta } from 'src/llm/dto';
 import { WebLinkDTO } from 'src/weblink/dto';
 import { DigestFilter } from './aigc.dto';
+import { categoryList } from '../prompts/utils/category';
 
 @Injectable()
 export class AigcService {
@@ -40,6 +41,18 @@ export class AigcService {
     });
   }
 
+  async fetchDigestWeblinks(content: AIGCContent) {
+    const results = await this.prisma.aIGCContent.findMany({
+      select: {
+        weblink: {
+          select: { url: true, pageMeta: true },
+        },
+      },
+      where: { id: { in: content.inputIds } },
+    });
+    return results.map((res) => res.weblink);
+  }
+
   async getFeedList(params: {
     userId: string;
     page?: number;
@@ -50,6 +63,8 @@ export class AigcService {
       where: { sourceType: 'weblink' },
       skip: (page - 1) * pageSize,
       take: pageSize,
+      orderBy: { createdAt: 'desc' },
+      include: { weblink: { select: { url: true, pageMeta: true } } },
     });
   }
 
@@ -312,6 +327,7 @@ export class AigcService {
         where: { id: weblink.id },
         data: { contentMeta: JSON.stringify(meta), indexStatus: 'finish' },
       });
+      await this.ensureTopics(meta);
     } else {
       meta = JSON.parse(weblink.contentMeta);
     }
@@ -328,26 +344,33 @@ export class AigcService {
     await this.runUserContentFlow({ ...param, meta, content });
   }
 
-  //   async ensureTopics(meta: ContentMeta) {
-  //     const topicKeys = meta.topics.map((topic) => topic.key);
-  //     const existingTopics = await this.prisma.topic.findMany({
-  //       where: { key: { in: topicKeys } },
-  //     });
-  //     const existingTopicKeys = existingTopics.map((topic) => topic.key);
-  //     const newTopicKeys = topicKeys.filter(
-  //       (element) => !existingTopicKeys.includes(element),
-  //     );
+  async findTopicByKey(key: string) {
+    return this.prisma.topic.findUnique({
+      where: { key },
+    });
+  }
 
-  //     if (newTopicKeys.length > 0) {
-  //       await this.prisma.topic.createMany({
-  //         data: newTopicKeys.map((topic) => ({
-  //           key: topic,
-  //           localeName: `关于${topic}的名称`,
-  //           localeDescription: `关于${topic}的描述`,
-  //         })),
-  //       });
-  //     }
-  //   }
+  async ensureTopics(meta: ContentMeta) {
+    const topicKeys = meta.topics.map((topic) => topic.key);
+    const existingTopics = await this.prisma.topic.findMany({
+      where: { key: { in: topicKeys } },
+    });
+    const existingTopicKeys = existingTopics.map((topic) => topic.key);
+    const newTopicKeys = topicKeys.filter(
+      (element) => !existingTopicKeys.includes(element),
+    );
+
+    if (newTopicKeys.length > 0) {
+      const categoryMap = new Map(categoryList.map((c) => [c.id, c]));
+      await this.prisma.topic.createMany({
+        data: newTopicKeys.map((topic) => ({
+          key: topic,
+          name: categoryMap.get(topic).name,
+          description: categoryMap.get(topic).description,
+        })),
+      });
+    }
+  }
 }
 
 function shouldRunIndexPipeline(meta: ContentMeta): boolean {

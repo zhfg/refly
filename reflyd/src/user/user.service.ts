@@ -28,6 +28,7 @@ export class UserService {
     return this.prisma.userPreference.findMany({
       where: { ...params },
       orderBy: { score: 'desc' },
+      include: { topic: true },
     });
   }
 
