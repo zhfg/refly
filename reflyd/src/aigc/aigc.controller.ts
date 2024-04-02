@@ -7,6 +7,7 @@ import {
   Query,
   Param,
 } from '@nestjs/common';
+import omit from 'lodash.omit';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
@@ -37,12 +38,11 @@ export class AigcController {
     });
     return {
       data: feedList.map((feed) => ({
-        ...feed,
+        ...omit(feed, 'weblink', 'inputIds', 'outputIds'),
         contentId: feed.id,
-        meta: feed.meta,
-        source: feed.sources,
         readCount: 0,
         askFollow: 0,
+        weblinks: [feed.weblink],
       })),
     };
   }
@@ -57,20 +57,28 @@ export class AigcController {
       ...req.body,
     });
 
+    const finalList = await Promise.all(
+      digestList.map(async (digest) => {
+        return {
+          id: digest.id,
+          userId: digest.userId,
+          topicKey: digest.topicKey,
+          date: digest.date,
+          title: digest.content?.title,
+          abstract: digest.content?.abstract,
+          contentId: digest.contentId,
+          meta: digest.content.meta,
+          source: digest.content.sources,
+          createdAt: digest.createdAt,
+          updatedAt: digest.updatedAt,
+          weblinks: await this.aigcService.fetchDigestWeblinks(digest.content),
+          topic: await this.aigcService.findTopicByKey(digest.topicKey),
+        };
+      }),
+    );
+
     return {
-      data: digestList.map((digest) => ({
-        id: digest.id,
-        userId: digest.userId,
-        topicKey: digest.topicKey,
-        date: digest.date,
-        title: digest.content?.title,
-        abstract: digest.content?.abstract,
-        contentId: digest.contentId,
-        meta: digest.content.meta,
-        source: digest.content.sources,
-        createdAt: digest.createdAt,
-        updatedAt: digest.updatedAt,
-      })),
+      data: finalList,
     };
   }
 

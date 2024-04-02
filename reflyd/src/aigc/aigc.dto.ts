@@ -51,7 +51,7 @@ export class ContentDTO {
   abstract: string;
   contentId: string;
   meta: string;
-  source: string;
+  weblinks: any[];
   createdAt: Date;
   updatedAt: Date;
 }

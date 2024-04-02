@@ -57,20 +57,23 @@ model User {
   updatedAt     DateTime  @updatedAt
 }
 
-/// (暂不需要) 内容主题
+/// 内容主题
 model Topic {
   /// 主键
-  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   /// 主题 key
-  key               String
+  key         String   @unique
   /// 多语言名称 JSON 字符串 (key: 语言, val: 名称)
-  localeName        String
+  name        String
   /// 多语言描述 JSON 字符串 (key: 语言, val: 名称)
-  localeDescription String
+  description String
   /// 创建时间
-  createdAt         DateTime @default(now())
+  createdAt   DateTime @default(now())
   /// 更新时间
-  updatedAt         DateTime @updatedAt
+  updatedAt   DateTime @updatedAt
+
+  userPreferences UserPreference[]
+  // userDigests     UserDigest[]
 }
 
 /// 用户喜好
@@ -87,6 +90,8 @@ model UserPreference {
   createdAt DateTime @default(now())
   /// 更新时间
   updatedAt DateTime @updatedAt
+  /// 关联的 topic
+  topic     Topic?   @relation(fields: [topicKey], references: [key])
 
   @@unique([userId, topicKey])
   @@index([topicKey])
@@ -270,6 +275,8 @@ model UserDigest {
   updatedAt DateTime    @updatedAt
   /// 关联的回顾内容
   content   AIGCContent @relation(fields: [contentId], references: [id])
+  // /// 关联的主题
+  // topic     Topic       @relation(fields: [topicKey], references: [key])
 
   @@unique([userId, date, topicKey])
 }
