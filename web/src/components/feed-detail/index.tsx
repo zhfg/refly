@@ -21,16 +21,16 @@ import { Digest } from "@/types"
  *
  */
 export const FeedDetail = () => {
-  const params = useParams<{ digestId: string }>()
+  const params = useParams<{ feedId: string }>()
   const [askFollowUpVisible, setAskFollowUpVisible] = useState(false)
 
   const digestDetailStore = useDigestDetailStore()
 
-  const handleGetDetail = async (digestId: string) => {
+  const handleGetDetail = async (feedId: string) => {
     try {
       const newRes = await getDigestDetail({
         body: {
-          digestId,
+          contentId: feedId,
         },
       })
 
@@ -50,9 +50,9 @@ export const FeedDetail = () => {
   }
 
   useEffect(() => {
-    if (params?.digestId) {
+    if (params?.feedId) {
       console.log("params", params)
-      handleGetDetail(params?.digestId as string)
+      handleGetDetail(params?.feedId as string)
     }
   }, [])
 
