@@ -227,8 +227,12 @@
     color: rgba(0, 0, 0, 0.8);
 
     span {
-      display: inline-block;
       margin-left: 2px;
+      display: inline-block;
+      max-width: 120px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 

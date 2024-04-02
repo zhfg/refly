@@ -241,6 +241,10 @@
 
     .text {
       margin-left: 4px;
+      max-width: 120px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 
@@ -248,10 +252,15 @@
     font-size: 16px;
     color: rgba(0, 0, 0, 0.6);
     font-size: 12px;
+    display: flex;
 
     span {
-      display: inline-block;
       margin-left: 4px;
+      display: inline-block;
+      max-width: 120px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 
