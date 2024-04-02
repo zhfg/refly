@@ -66,12 +66,12 @@ export const extractSummarizeMultipleSourceMetaSchema = {
         type: 'string',
         description: 'summarized title for multiple weblink content',
       },
-      abstract: {
+      content: {
         type: 'string',
         description:
           'abstract content from summarized multiple weblink content with referenced link source',
       },
     },
-    required: ['title', 'abstract'],
+    required: ['title', 'content'],
   },
 };
