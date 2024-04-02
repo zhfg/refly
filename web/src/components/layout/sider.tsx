@@ -21,10 +21,14 @@ const Sider = Layout.Sider
 const MenuItem = Menu.Item
 
 const getNavSelectedKeys = (pathname = "") => {
-  if (pathname.includes("guidera/guides")) {
-    return "MyGuide"
-  } else if (pathname.includes("settings/profile")) {
+  if (pathname.includes("digest")) {
+    return "Digest"
+  } else if (pathname.includes("settings")) {
     return "Settings"
+  } else if (pathname.includes("feed")) {
+    return "Feed"
+  } else if (pathname.includes("thread")) {
+    return "ThreadLibrary"
   }
 
   return "Home"
@@ -138,6 +142,7 @@ export const SiderLayout = () => {
             borderRight: "none",
           }}
           className="sider-menu-nav"
+          selectedKeys={[selectedKey]}
           onClickMenuItem={handleNavClick}>
           <div className="sider-header">
             <MenuItem key="Home" className="custom-menu-item">
