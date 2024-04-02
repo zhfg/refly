@@ -1,34 +1,36 @@
-import { Button, Message as message } from "@arco-design/web-react"
-import { useSiderStore } from "@/stores/sider"
-import { useNavigate } from "react-router-dom"
-import {
-  IconClockCircle,
-  IconMenu,
-  IconMessage,
-  IconMore,
-  IconShareExternal,
-} from "@arco-design/web-react/icon"
+import { Button, Message as message, Breadcrumb } from "@arco-design/web-react"
+import { IconClockCircle, IconShareExternal } from "@arco-design/web-react/icon"
 import { copyToClipboard } from "@/utils"
 import { time } from "@/utils/time"
-import { useConversationStore } from "@/stores/conversation"
+import { Thread } from "@/types"
 
-export const Header = () => {
-  const conversationStore = useConversationStore()
+interface HeaderProps {
+  thread: Thread
+}
+
+const BreadcrumbItem = Breadcrumb.Item
+
+export const Header = (props: HeaderProps) => {
+  const { thread } = props
 
   return (
     <header>
       <div>
-        <span key={2}>
-          <IconClockCircle style={{ fontSize: 14, color: "#64645F" }} />
-          <span className="thread-library-list-item-text">
-            {time(conversationStore?.currentConversation?.updatedAt)
-              .utc()
-              .fromNow()}
-          </span>
-        </span>
+        <Breadcrumb>
+          <BreadcrumbItem href="/feed">会话库</BreadcrumbItem>
+          <BreadcrumbItem href={`/thread/${thread?.id}`}>
+            {thread?.title}
+          </BreadcrumbItem>
+        </Breadcrumb>
       </div>
       <div className="funcs">
         {/* <Button type="text" icon={<IconMore />}></Button> */}
+        <span key={2} style={{ display: "inline-block", marginRight: 12 }}>
+          <IconClockCircle style={{ fontSize: 14, color: "#64645F" }} />
+          <span className="thread-library-list-item-text">
+            {time(thread?.updatedAt).utc().fromNow()}
+          </span>
+        </span>
         <Button
           type="primary"
           icon={<IconShareExternal />}

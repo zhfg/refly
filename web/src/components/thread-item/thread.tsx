@@ -12,6 +12,7 @@ import { useTaskStore } from "@/stores/task"
 import { buildSessions } from "@/utils/session"
 // 组件
 import { ThreadItem } from "@/components/thread-item/thread-item"
+import { Header } from "./header"
 // request
 import getThreadMessages from "@/requests/getThreadMessages"
 // styles
@@ -22,6 +23,7 @@ import {
   type Message,
   MessageType,
   Source,
+  Thread as IThread,
 } from "@/types"
 import { useWeblinkStore } from "@/stores/weblink"
 import { useSearchStateStore, SearchTarget } from "@/stores/search-state"
@@ -168,7 +170,7 @@ export const Thread = () => {
         display: "flex",
         flexDirection: "column",
       }}>
-      {/* <Header /> */}
+      <Header thread={conversationStore?.currentConversation as IThread} />
       {isFetching ? (
         <Skeleton animation></Skeleton>
       ) : (
