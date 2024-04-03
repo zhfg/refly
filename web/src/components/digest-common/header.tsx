@@ -52,7 +52,6 @@ export const DigestHeader = (props: DigestHeaderProps) => {
       if (topicList?.length > 0) return
 
       setIsFetching(true)
-      await delay(3000)
       if (!digestTopicStore.hasMore && currentPage !== 1) {
         setScrollLoading(<span>已经到底啦</span>)
 

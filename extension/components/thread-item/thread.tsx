@@ -121,7 +121,7 @@ export const Thread = () => {
         display: "flex",
         flexDirection: "column",
       }}>
-      <Header />
+      <Header thread={conversationStore.currentConversation} />
       <ThreadItem
         sessions={sessions}
         selectedWeblinkConfig={selectedWeblinkConfig}

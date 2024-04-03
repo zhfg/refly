@@ -5,13 +5,23 @@ import NotificationSVG from "~assets/side/notification.svg"
 import SettingGraySVG from "~assets/side/setting.svg"
 import FullScreenSVG from "~assets/side/full-screen.svg"
 import { IconTip } from "~components/home/icon-tip"
-import { Avatar } from "@arco-design/web-react"
+import { Avatar, Button, Message as message } from "@arco-design/web-react"
 import { useSiderStore } from "~stores/sider"
 import { useNavigate } from "react-router-dom"
 import { useUserStore } from "~stores/user"
 import { getClientOrigin } from "~utils/url"
+import { IconClockCircle, IconShareExternal } from "@arco-design/web-react/icon"
+import { time } from "~utils/time"
+// types
+import type { Conversation } from "~types/conversation"
+// 第三方库
+import copyToClipboard from "copy-to-clipboard"
 
-export const Header = () => {
+interface ThreadHeaderProps {
+  thread: Conversation
+}
+
+export const Header = (props: ThreadHeaderProps) => {
   const siderStore = useSiderStore()
   const navigate = useNavigate()
   const { userProfile } = useUserStore()
@@ -29,42 +39,22 @@ export const Header = () => {
         <span>Refly</span>
       </div>
       <div className="funcs">
-        <IconTip text="全屏">
-          <img
-            src={FullScreenSVG}
-            alt="全屏"
-            onClick={() =>
-              window.open(`${getClientOrigin()}/dashboard`, "_blank")
-            }
-          />
-        </IconTip>
-        {/* <IconTip text="通知">
-                    <img src={NotificationSVG} alt="通知" />
-                </IconTip> */}
-        {showBtn && (
-          <IconTip text="设置">
-            <img
-              src={SettingGraySVG}
-              alt="设置"
-              onClick={() =>
-                window.open(`${getClientOrigin()}/settings`, "_blank")
-              }
-            />
-          </IconTip>
-        )}
-        {showBtn && (
-          <IconTip text="账户">
-            <Avatar size={16}>
-              <img
-                alt="avatar"
-                src={userProfile?.avatar}
-                onClick={() =>
-                  window.open(`${getClientOrigin()}/settings`, "_blank")
-                }
-              />
-            </Avatar>
-          </IconTip>
-        )}
+        <span key={2} style={{ display: "inline-block", marginRight: 12 }}>
+          <IconClockCircle style={{ fontSize: 14, color: "#64645F" }} />
+          <span className="thread-library-list-item-text">
+            {time(props.thread?.updatedAt).utc().fromNow()}
+          </span>
+        </span>
+        <Button
+          type="primary"
+          icon={<IconShareExternal />}
+          onClick={() => {
+            copyToClipboard(`${getClientOrigin()}/thread/${props.thread?.id}`)
+            message.success("分享链接已复制到剪切板")
+          }}
+          style={{ borderRadius: 4, marginRight: 12 }}>
+          分享
+        </Button>
         <IconTip text="关闭">
           <img
             src={CloseGraySVG}

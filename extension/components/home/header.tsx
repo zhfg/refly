@@ -38,6 +38,7 @@ export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
             <img
               src={FullScreenSVG}
               alt="全屏"
+              style={{ marginRight: 12 }}
               onClick={() =>
                 window.open(`${getClientOrigin()}/dashboard`, "_blank")
               }
@@ -52,6 +53,7 @@ export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
             <img
               src={SettingGraySVG}
               alt="设置"
+              style={{ marginRight: 12 }}
               onClick={() =>
                 window.open(`${getClientOrigin()}/settings`, "_blank")
               }
@@ -60,7 +62,7 @@ export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
         )}
         {showBtn && !onlyShowClose && (
           <IconTip text="账户">
-            <Avatar size={16}>
+            <Avatar size={16} style={{ marginRight: 12 }}>
               <img
                 alt="avatar"
                 src={userProfile?.avatar}
