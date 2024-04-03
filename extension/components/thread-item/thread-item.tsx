@@ -51,7 +51,10 @@ export const ThreadItem = (props: ThreadItemProps) => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     e.stopPropagation()
 
-    inputRef.current?.dom?.onkeydown?.(e as any as KeyboardEvent)
+    // inputRef.current?.dom?.onkeydown?.(e as any as KeyboardEvent)
+    if (e.keyCode === 13) {
+      handleAskFollowing()
+    }
   }
 
   const handleAskFollowing = () => {
@@ -146,7 +149,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
             <ThreadSearchTargetSelector
               showText={false}
               searchTarget={threadSearchTarget}
-              handleChangeSelector={searchTarget =>
+              handleChangeSelector={(searchTarget) =>
                 setThreadSearchTarget(searchTarget)
               }
             />
@@ -156,11 +159,14 @@ export const ThreadItem = (props: ThreadItemProps) => {
               autoFocus
               disabled={messageStateStore?.pending}
               value={chatStore?.newQAText}
-              onChange={value => {
+              onChange={(value) => {
                 chatStore.setNewQAText(value)
               }}
+              onCompositionStart={(e) => console.log("composition start")}
+              onCompositionUpdate={(e) => console.log("composition update")}
+              onCompositionEnd={(e) => console.log("composition end")}
               placeholder="继续提问..."
-              onKeyDownCapture={e => handleKeyDown(e)}
+              onKeyDownCapture={(e) => handleKeyDown(e)}
               autoSize={{ minRows: 1, maxRows: 4 }}
               style={{
                 borderRadius: 8,

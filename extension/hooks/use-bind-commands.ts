@@ -54,13 +54,18 @@ export const useBindCommands = () => {
       // setIsShowSide((prevState) => !prevState)
     })
 
+    const elem = document
+      .querySelector("plasmo-csui")
+      ?.shadowRoot?.querySelector(".message-input")
+    console.log("bind elem", elem, keyboardSendShortcutRef.current)
     hotKeys(
       keyboardSendShortcutRef.current,
       {
         capture: true,
-        element: document.querySelector(".message-input") as HTMLElement,
+        element: elem as HTMLElement,
       },
       (e) => {
+        console.log("command")
         e.preventDefault()
         e.stopPropagation()
 
