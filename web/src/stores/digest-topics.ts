@@ -2,7 +2,7 @@ import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import type {} from "@redux-devtools/extension"
 
-import type { MetaRecord as Topic } from "@/types"
+import type { Topic } from "@/types"
 
 interface TopicState {
   topicList: Topic[]
@@ -33,7 +33,7 @@ export const useDigestTopicStore = create<TopicState>()(
     updateTopicList: (newTopicList: Topic[]) =>
       set(state => ({
         ...state,
-        topics: state.topicList.concat(newTopicList),
+        topicList: state.topicList.concat(newTopicList),
       })),
     updateTopicTotalCnt: (total: number) =>
       set(state => ({

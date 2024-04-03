@@ -2,7 +2,7 @@ import { appConfig } from "@/utils/config"
 import { request } from "@/utils/request"
 
 import type { HandlerRequest, HandlerResponse } from "@/types/request"
-import { MetaRecord as Topic, ListPageProps } from "@/types"
+import { Topic, ListPageProps } from "@/types"
 
 const handler = async (
   req: HandlerRequest<ListPageProps>,

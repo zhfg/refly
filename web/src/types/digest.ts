@@ -11,6 +11,23 @@ export interface MetaRecord {
   reason: string
 }
 
+export interface Topic {
+  id: string
+  score: number
+  createdAt: string
+  updatedAt: string
+  userId: string
+  topicKey: string
+  topic: {
+    id: string
+    key: string
+    name: string
+    description: string
+    createdAt: string
+    updatedAt: string
+  }
+}
+
 export interface ContentMeta {
   topics: MetaRecord[]
   contentType?: MetaRecord[]

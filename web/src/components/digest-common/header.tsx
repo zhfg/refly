@@ -16,7 +16,7 @@ import { useEffect, useState } from "react"
 // request
 import getTopicList from "@/requests/getTopicList"
 // types
-import { MetaRecord as Topic } from "@/types/"
+import { Topic } from "@/types/"
 // utils
 import { delay } from "@/utils/delay"
 
@@ -51,7 +51,7 @@ export const DigestHeader = (props: DigestHeaderProps) => {
       const { topicList } = useDigestTopicStore.getState()
       if (topicList?.length > 0) return
 
-      setIsFetching(true)
+      // setIsFetching(true)
       if (!digestTopicStore.hasMore && currentPage !== 1) {
         setScrollLoading(<span>已经到底啦</span>)
 
@@ -66,6 +66,7 @@ export const DigestHeader = (props: DigestHeaderProps) => {
         },
       })
 
+      console.log("topicsList", newRes)
       digestTopicStore.updateCurrentPage(currentPage)
 
       if (!newRes?.success) {
@@ -82,7 +83,7 @@ export const DigestHeader = (props: DigestHeaderProps) => {
       digestTopicStore.updateTopicList(newRes?.data?.list as Topic[])
       digestTopicStore.updateTopicTotalCnt(newRes?.data?.total as number)
     } catch (err) {
-      message.error("获取今日总结列表失败，请重新刷新试试")
+      message.error("获取主题列表失败，请重新刷新试试")
     } finally {
       setIsFetching(false)
     }
@@ -90,7 +91,13 @@ export const DigestHeader = (props: DigestHeaderProps) => {
 
   useEffect(() => {
     fetchData()
+
+    return () => {
+      digestTopicStore.resetState()
+    }
   }, [])
+
+  console.log("digest topics", digestTopicStore?.topicList)
 
   return (
     <div className="today-header-container">
@@ -141,15 +148,15 @@ export const DigestHeader = (props: DigestHeaderProps) => {
               <div
                 className="trending-topic-item"
                 onClick={() => {
-                  navigate(`/digest/topic/${item?.key}`)
+                  navigate(`/digest/topic/${item?.id}`)
                 }}>
-                <Button>{item?.name}</Button>
+                <Button>{item?.topic?.name}</Button>
               </div>
             ))}
             {digestTopicStore?.topicList?.length > 0 && (
               <div className="trending-topic-item see-all">
                 <Button onClick={() => navigate("/digest/topics")}>
-                  查看全部+{32}
+                  查看全部+{digestTopicStore?.total || 0}
                 </Button>
               </div>
             )}
