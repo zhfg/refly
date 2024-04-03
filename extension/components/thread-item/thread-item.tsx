@@ -1,5 +1,11 @@
 import React, { useEffect, useRef, useState } from "react"
-import { Button, Skeleton, Space, Input } from "@arco-design/web-react"
+import {
+  Button,
+  Skeleton,
+  Space,
+  Input,
+  Breadcrumb,
+} from "@arco-design/web-react"
 import { IconMinusCircle, IconSend } from "@arco-design/web-react/icon"
 
 // stores
@@ -16,6 +22,7 @@ import { ThreadSearchTargetSelector } from "~components/thread-item/thread-searc
 import { SearchTarget } from "~stores/search-state"
 // 自定义组件
 import { SelectedWeblink } from "../selected-weblink/index"
+import { useNavigate } from "react-router-dom"
 
 interface ThreadItemProps {
   sessions: SessionItem[]
@@ -26,12 +33,14 @@ interface ThreadItemProps {
 }
 
 const TextArea = Input.TextArea
+const BreadcrumbItem = Breadcrumb.Item
 
 export const ThreadItem = (props: ThreadItemProps) => {
   const { sessions, selectedWeblinkConfig } = props
   const inputRef = useRef<RefTextAreaType>()
   const selectedWeblinkListRef = useRef<HTMLDivElement>(null)
   const chatStore = useChatStore()
+  const navigate = useNavigate()
 
   const [threadSearchTarget, setThreadSearchTarget] = useState(
     selectedWeblinkConfig?.searchTarget,
@@ -39,6 +48,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
   const [threadWeblinkListFilter, setThreadWeblinkListFilter] = useState(
     selectedWeblinkConfig?.filter || [],
   )
+  const conversationStore = useConversationStore()
 
   const showSelectedWeblinkList =
     threadSearchTarget === SearchTarget.SelectedPages &&
@@ -100,6 +110,22 @@ export const ThreadItem = (props: ThreadItemProps) => {
 
   return (
     <div className="session-container">
+      <div>
+        <Breadcrumb style={{ padding: `8px 16px` }}>
+          <BreadcrumbItem
+            onClick={() => navigate("/thread")}
+            className="breadcrum-item">
+            会话库
+          </BreadcrumbItem>
+          <BreadcrumbItem
+            className="breadcrum-item breadcrum-description"
+            onClick={() =>
+              navigate(`/thread/${conversationStore?.currentConversation?.id}`)
+            }>
+            <span>{conversationStore?.currentConversation?.title}</span>
+          </BreadcrumbItem>
+        </Breadcrumb>
+      </div>
       <div
         className="session-inner-container"
         style={
