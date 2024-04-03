@@ -40,7 +40,7 @@ export const SummaryModal = (props: SummaryModalProps) => {
 
   return (
     <Modal
-      style={{ height: 600, width: 800, paddingTop: 24 }}
+      style={{ width: 800, paddingTop: 24 }}
       visible={props.visible}
       onCancel={() => props.setVisible(false)}
       footer={null}>

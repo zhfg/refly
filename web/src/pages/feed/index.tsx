@@ -28,6 +28,7 @@ import "./index.scss"
 // fake data
 import { copyToClipboard } from "@/utils"
 import { getClientOrigin } from "@/utils/url"
+import { safeParseJSON } from "@/utils/parse"
 
 export const Feed = () => {
   const [scrollLoading, setScrollLoading] = useState(
@@ -143,7 +144,10 @@ export const Feed = () => {
                     }}>
                     <IconTag style={{ fontSize: 14, color: "#64645F" }} />
                     <span className="feed-list-item-text">
-                      {item?.topic?.name}
+                      {
+                        safeParseJSON(item?.weblinks?.[0]?.contentMeta)
+                          ?.topics?.[0]?.name
+                      }
                     </span>
                   </span>
                   <span key={3}>

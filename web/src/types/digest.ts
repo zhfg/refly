@@ -46,7 +46,21 @@ export interface Digest {
   abstract: string
   meta: ContentMeta
   sources: string // JSON string 的形式，Source[]
-  weblinks: { url: string; pageMeta: string }[]
+  weblinks: { url: string; pageMeta: string; contentMeta: string }[]
+  inputs: {
+    id: string
+    title: string
+    abstract: string
+    content: string
+    meta: string
+    sourceType: string
+    sources: string // Source[] JSON string 标识
+    createdAt: string
+    updatedAt: string
+    weblinkId: string
+    inputIds: string[]
+    outputIds: string[]
+  }[]
   createdAt: string
   updatedAt: string
 

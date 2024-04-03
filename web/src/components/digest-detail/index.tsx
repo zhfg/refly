@@ -4,7 +4,7 @@ import { Message as message } from "@arco-design/web-react"
 
 import { useDigestDetailStore } from "@/stores/digest-detail"
 // utils
-import { buildSessionsFromAIGCContent } from "@/utils/session"
+import { buildSessionsFromDigest } from "@/utils/session"
 // 组件
 import { DigestDetailContent } from "./digest-detail-content"
 import { Header } from "./header"
@@ -56,9 +56,7 @@ export const DigestTail = () => {
     }
   }, [])
 
-  const sessions = buildSessionsFromAIGCContent(
-    digestDetailStore?.digest as Digest,
-  )
+  const sessions = buildSessionsFromDigest(digestDetailStore?.digest as Digest)
 
   return (
     <div

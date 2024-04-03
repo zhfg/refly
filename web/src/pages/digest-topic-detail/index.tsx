@@ -88,7 +88,11 @@ export const DigestTopicDetail = () => {
 
   useEffect(() => {
     fetchData()
-  }, [isTopicDetail])
+
+    return () => {
+      digestTopicDetailStore.resetState()
+    }
+  }, [])
 
   return (
     <div className="digest-topic-detail-container">
@@ -135,7 +139,7 @@ export const DigestTopicDetail = () => {
                     key={1}
                     className="feed-list-item-continue-ask with-border with-hover"
                     onClick={() => {
-                      navigate(`/feed/${item?.contentId}`)
+                      navigate(`/digest/${item?.contentId}`)
                     }}>
                     <IconRightCircle
                       style={{ fontSize: 14, color: "#64645F" }}

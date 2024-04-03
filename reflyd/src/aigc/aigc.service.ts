@@ -45,7 +45,7 @@ export class AigcService {
     const results = await this.prisma.aIGCContent.findMany({
       select: {
         weblink: {
-          select: { url: true, pageMeta: true },
+          select: { url: true, pageMeta: true, contentMeta: true },
         },
       },
       where: { id: { in: content.inputIds } },

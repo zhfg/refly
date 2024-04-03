@@ -85,7 +85,11 @@ export const DigestArchive = () => {
 
   useEffect(() => {
     fetchData()
-  }, [])
+
+    return () => {
+      digestArchiveStore.resetState()
+    }
+  }, [dateType, day, year, month])
 
   return (
     <div className="digest-archive-container">

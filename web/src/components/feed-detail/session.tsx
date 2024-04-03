@@ -49,7 +49,7 @@ export const Session = (props: SessionProps) => {
     await delay(3000)
 
     // 目前先暂时显示 fake 数据
-    return fakeSourceSummary
+    return selectedSummarySource?.pageContent
     const res = await getSourceSummary({
       body: {
         sourceId: id,
@@ -216,7 +216,7 @@ export const Session = (props: SessionProps) => {
                               fontSize: 10,
                               color: "rgba(0, 0, 0, .4)",
                             }}>
-                            · {new URL(item.metadata?.source as "")?.origin} ·
+                            · {new URL(item.metadata?.source || "")?.origin} ·
                           </Typography.Paragraph>
                         </span>
                       </a>,
