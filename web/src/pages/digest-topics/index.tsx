@@ -14,6 +14,7 @@ import { useDigestTopicStore } from "@/stores/digest-topics"
 import { useMatch, useNavigate } from "react-router-dom"
 // utils
 import getDigestTopicList from "@/requests/getTopicList"
+import { getRandomColor } from "@/utils/color"
 
 const names = ["Socrates", "Balzac", "Plato"]
 const avatarSrc = [
@@ -44,13 +45,17 @@ export const DigestTopics = () => {
     <Skeleton animation></Skeleton>,
   )
   const navigate = useNavigate()
-  const isDigestTopics = useMatch("/digest/topics")
 
   const fetchData = async (currentPage = 1) => {
     try {
       console.log("currentPage", currentPage)
       if (!digestTopicStore?.hasMore && currentPage !== 1) {
         setScrollLoading(<span>已经到底啦~</span>)
+        return
+      }
+
+      const { topicList = [], pageSize } = useDigestTopicStore.getState()
+      if (topicList.length > 0 && topicList?.length < pageSize) {
         return
       }
 
@@ -82,7 +87,17 @@ export const DigestTopics = () => {
 
   useEffect(() => {
     fetchData()
-  }, [isDigestTopics])
+  }, [])
+
+  const dataSource = digestTopicStore?.topicList?.map(topic => ({
+    id: topic?.id,
+    index: topic?.id,
+    avatar: topic?.topic?.name,
+    title: topic?.topic?.name,
+    description: topic?.topic?.description,
+    imageSrc: topic?.topic?.name,
+    sourceCount: topic?.topic?.count || 0,
+  }))
 
   return (
     <div className="topics-container">
@@ -117,8 +132,10 @@ export const DigestTopics = () => {
             onClick={() => navigate(`/digest/topic/${item?.id}`)}>
             <div className="topic-item">
               <div className="topic-item-left">
-                <Avatar size={60} shape="square">
-                  <img src={item.imageSrc} alt="topic-cover" />
+                <Avatar size={60} shape="square" style={{ color: "#000" }}>
+                  {/* <img src={item.imageSrc} alt="topic-cover" />
+                   */}
+                  {item?.title?.[0]}
                 </Avatar>
               </div>
               <div className="topic-item-right">

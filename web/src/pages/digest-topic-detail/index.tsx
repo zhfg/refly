@@ -46,9 +46,9 @@ export const DigestTopicDetail = () => {
   const { digestTopicId } = useParams()
 
   // TODO: 替换成真正的 topic detail，目前还是 fake
-  const currentTopicDetail =
-    digestTopicStore.topicList?.find(item => item?.key === digestTopicId) ||
-    fakeTopics?.[0]
+  const currentTopicDetail = digestTopicStore.topicList?.find(
+    item => item?.id === digestTopicId,
+  )
 
   const fetchData = async (currentPage = 1) => {
     try {
@@ -63,7 +63,7 @@ export const DigestTopicDetail = () => {
         body: {
           page: currentPage,
           pageSize: 10,
-          filter: { topic: digestTopicId }, // 带着 topic 的 filter
+          filter: { topic: currentTopicDetail?.topicKey }, // 带着 topic 的 filter
         },
       })
 
@@ -95,8 +95,8 @@ export const DigestTopicDetail = () => {
       <div className="digest-topic-nav">
         <Breadcrumb>
           <BreadcrumbItem href="/digest/topics">所有主题</BreadcrumbItem>
-          <BreadcrumbItem href={`/digest/topic/${currentTopicDetail?.key}`}>
-            {currentTopicDetail?.name}
+          <BreadcrumbItem href={`/digest/topic/${currentTopicDetail?.id}`}>
+            {currentTopicDetail?.topic?.name}
           </BreadcrumbItem>
         </Breadcrumb>
       </div>
@@ -109,9 +109,11 @@ export const DigestTopicDetail = () => {
         header={
           <div className="topics-header-container">
             <div className="topics-header-title">
-              {currentTopicDetail?.name}
+              {currentTopicDetail?.topic?.name}
             </div>
-            <p className="topics-header-desc"></p>
+            <p className="topics-header-desc">
+              {currentTopicDetail?.topic?.description}
+            </p>
           </div>
         }
         dataSource={digestTopicDetailStore.digestList}
@@ -169,14 +171,16 @@ export const DigestTopicDetail = () => {
                     }}>
                     <IconTag style={{ fontSize: 14, color: "#64645F" }} />
                     <span className="feed-list-item-text">
-                      Developer Tools · Data Science
+                      {item?.topic?.name}
                     </span>
                   </span>
                   <span key={3}>
                     <IconLink style={{ fontSize: 14, color: "#64645F" }} />
                     <span className="feed-list-item-text">
-                      {item?.weblinks?.[0]?.url} & {item?.weblinks?.length}{" "}
-                      条更多
+                      {item?.weblinks?.[0]?.url} &{" "}
+                      {item?.weblinks?.length - 1 > 0
+                        ? `${item?.weblinks?.length - 1} 条更多`
+                        : ""}
                     </span>
                   </span>
                   <span key={2}>

@@ -64,7 +64,9 @@ export class AigcService {
       skip: (page - 1) * pageSize,
       take: pageSize,
       orderBy: { createdAt: 'desc' },
-      include: { weblink: { select: { url: true, pageMeta: true } } },
+      include: {
+        weblink: { select: { url: true, pageMeta: true, contentMeta: true } },
+      },
     });
   }
 

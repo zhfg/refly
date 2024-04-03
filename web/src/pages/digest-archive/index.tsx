@@ -177,14 +177,16 @@ export const DigestArchive = () => {
                       }}>
                       <IconTag style={{ fontSize: 14, color: "#64645F" }} />
                       <span className="feed-list-item-text">
-                        {item?.meta?.topics?.map(item => item.name).join(" · ")}
+                        {item?.topic?.name}
                       </span>
                     </span>
                     <span key={3}>
                       <IconLink style={{ fontSize: 14, color: "#64645F" }} />
                       <span className="feed-list-item-text">
-                        {item?.weblinks?.[0]?.url} & {item?.weblinks?.length}{" "}
-                        条更多
+                        {item?.weblinks?.[0]?.url} &{" "}
+                        {item?.weblinks?.length - 1 > 0
+                          ? `${item?.weblinks?.length - 1} 条更多`
+                          : ""}
                       </span>
                     </span>
                     <span key={2}>

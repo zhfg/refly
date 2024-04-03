@@ -11,6 +11,16 @@ export interface MetaRecord {
   reason: string
 }
 
+interface TopicMeta {
+  id: string
+  key: string
+  name: string
+  description: string
+  createdAt: string
+  updatedAt: string
+  count: number // 属于此类 topic 的 digest 数量
+}
+
 export interface Topic {
   id: string
   score: number
@@ -18,14 +28,7 @@ export interface Topic {
   updatedAt: string
   userId: string
   topicKey: string
-  topic: {
-    id: string
-    key: string
-    name: string
-    description: string
-    createdAt: string
-    updatedAt: string
-  }
+  topic: TopicMeta
 }
 
 export interface ContentMeta {
@@ -46,6 +49,8 @@ export interface Digest {
   weblinks: { url: string; pageMeta: string }[]
   createdAt: string
   updatedAt: string
+
+  topic: TopicMeta
 }
 
 export type DateType = "daily" | "weekly" | "month" | "yearly"

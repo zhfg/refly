@@ -91,10 +91,6 @@ export const DigestHeader = (props: DigestHeaderProps) => {
 
   useEffect(() => {
     fetchData()
-
-    return () => {
-      digestTopicStore.resetState()
-    }
   }, [])
 
   console.log("digest topics", digestTopicStore?.topicList)

@@ -143,7 +143,7 @@ export const Feed = () => {
                     }}>
                     <IconTag style={{ fontSize: 14, color: "#64645F" }} />
                     <span className="feed-list-item-text">
-                      {item?.meta?.topics?.map(item => item?.name).join(",")}
+                      {item?.topic?.name}
                     </span>
                   </span>
                   <span key={3}>
