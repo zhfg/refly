@@ -7,6 +7,7 @@ export default () => ({
   qdrant: {
     url: process.env.QDRANT_URL || 'http://localhost:6333',
     collectionName: process.env.QDRANT_COLLECTION_NAME || 'refly',
+    vectorDim: parseInt(process.env.QDRANT_VEC_DIM, 10) || 1024,
   },
   auth: {
     cookieTokenField: '_refly_ai_sid',

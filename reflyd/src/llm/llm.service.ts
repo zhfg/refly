@@ -37,6 +37,7 @@ import { categoryList } from '../prompts/utils/category';
 export class LlmService implements OnModuleInit {
   private vectorStore: QdrantClient;
   private embeddings: OpenAIEmbeddings;
+  private llm: ChatOpenAI;
   private collectionName: string;
 
   private readonly logger = new Logger(LlmService.name);
@@ -49,7 +50,14 @@ export class LlmService implements OnModuleInit {
       timeout: 3000,
     });
     this.collectionName = this.configService.get('qdrant.collectionName');
-    this.embeddings = new OpenAIEmbeddings({ timeout: 10000, maxRetries: 3 });
+    this.embeddings = new OpenAIEmbeddings({
+      modelName: 'text-embedding-3-large',
+      batchSize: 512,
+      dimensions: this.configService.get('qdrant.vectorDim'),
+      timeout: 5000,
+      maxRetries: 3,
+    });
+    this.llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
 
     await this.ensureCollection();
     this.logger.log('LLM Service ready');
@@ -70,7 +78,7 @@ export class LlmService implements OnModuleInit {
     if (!collectionNames.includes(this.collectionName)) {
       await this.vectorStore.createCollection(this.collectionName, {
         vectors: {
-          size: 1024,
+          size: this.configService.get('qdrant.vectorDim') as number,
           distance: 'Cosine',
         },
       });
@@ -87,10 +95,9 @@ export class LlmService implements OnModuleInit {
     const { pageContent } = doc;
     this.logger.log('content need to be extract: %s', pageContent);
 
-    const llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
     const parser = new JsonOutputFunctionsParser();
 
-    const runnable = await llm
+    const runnable = await this.llm
       .bind({
         functions: [extractContentMeta.extractContentMetaSchema],
         function_call: { name: 'content_category_extractor' },
@@ -133,10 +140,8 @@ export class LlmService implements OnModuleInit {
    */
   async applyStrategy(doc: Document): Promise<Partial<AIGCContent>> {
     // direct apply summary and return with structed json format
-    const llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
-
     const parser = new JsonOutputFunctionsParser();
-    const runnable = await llm
+    const runnable = await this.llm
       .bind({
         functions: [extractSummarizeMeta.extractSummarizeMetaSchema],
         function_call: { name: 'content_meta_extractor' },
@@ -172,8 +177,6 @@ export class LlmService implements OnModuleInit {
     docs: AIGCContent[],
   ): Promise<Partial<AIGCContent>> {
     // direct apply summary and return with structed json format
-    const llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
-
     const multipleSourceInputContent = docs.reduce((total, cur) => {
       total += `网页：${cur?.title}
       ===
@@ -188,7 +191,7 @@ export class LlmService implements OnModuleInit {
     }, '');
 
     const parser = new JsonOutputFunctionsParser();
-    const runnable = await llm
+    const runnable = await this.llm
       .bind({
         functions: [
           summarizeMultipleSource.extractSummarizeMultipleSourceMetaSchema,
@@ -254,9 +257,8 @@ export class LlmService implements OnModuleInit {
      */
 
     // 抽取关键字 or 实体
-    const llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
     const parser = new JsonOutputFunctionsParser();
-    const runnable = await llm
+    const runnable = await this.llm
       .bind({
         functions: [extractContentMeta.extractSearchKeyword],
         function_call: { name: 'keyword_for_search_engine' },
@@ -325,7 +327,6 @@ export class LlmService implements OnModuleInit {
       )
     ).flat();
 
-    const llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
     const combineLLM = new ChatOpenAI({
       modelName: 'gpt-3.5-turbo',
       temperature: 0,
@@ -343,7 +344,7 @@ export class LlmService implements OnModuleInit {
       template: summarize.systemPrompt,
       inputVariables: ['text'],
     });
-    const summarizeChain = loadSummarizationChain(llm, {
+    const summarizeChain = loadSummarizationChain(this.llm, {
       type: 'map_reduce',
       combineLLM,
       combinePrompt: customPrompt,
@@ -358,8 +359,6 @@ export class LlmService implements OnModuleInit {
       `activated with query: ${query}, filter: ${JSON.stringify(filter)}`,
     );
 
-    const llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
-
     // 构建总结的 Prompt，将 question + chatHistory 总结成
     const contextualizeQPrompt = ChatPromptTemplate.fromMessages([
       ['system', contextualizeQA.systemPrompt],
@@ -367,7 +366,7 @@ export class LlmService implements OnModuleInit {
       ['human', '{question}'],
     ]);
     const contextualizeQChain = contextualizeQPrompt
-      .pipe(llm as any)
+      .pipe(this.llm as any)
       .pipe(new StringOutputParser());
     const questionWithContext =
       chatHistory.length === 0
@@ -385,7 +384,7 @@ export class LlmService implements OnModuleInit {
 
     // 基于上下文进行问答
     const ragChain = await createStuffDocumentsChain({
-      llm,
+      llm: this.llm,
       prompt: qaPrompt,
       outputParser: new StringOutputParser(),
     });
