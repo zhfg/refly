@@ -23,6 +23,7 @@ export const useBuildTask = () => {
   const buildTaskAndGenReponse = (task: Task) => {
     console.log("buildTaskAndGenReponse", task)
     const question = task.data?.question
+    const { messages = [] } = useChatStore.getState()
 
     // 构建 filter, for follow ask question config
     const weblinkList = task?.data?.filter?.weblinkList || []
@@ -47,7 +48,7 @@ export const useBuildTask = () => {
       taskType: task?.taskType,
     })
 
-    chatStore.setMessages(chatStore.messages.concat(questionMsg))
+    chatStore.setMessages(messages.concat(questionMsg))
     scrollToBottom()
 
     handleGenResponse(task)

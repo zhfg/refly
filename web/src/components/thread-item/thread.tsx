@@ -50,6 +50,7 @@ export const Thread = () => {
       },
     })
 
+    const { newQAText } = useChatStore.getState()
     console.log("getThreadMessages", res)
 
     // 清空之前的状态
@@ -81,6 +82,7 @@ export const Thread = () => {
       }
     })
     chatStore.setMessages(messages)
+    chatStore.setNewQAText(newQAText)
   }
 
   const handleAskFollowing = () => {
@@ -88,6 +90,8 @@ export const Thread = () => {
     const { currentConversation } = useConversationStore.getState()
     const { messages } = useChatStore.getState()
     const selectedWeblinkConfig = getSelectedWeblinkConfig(messages)
+
+    console.log("handleAskFollowing", newQAText)
 
     const useWeblinkList =
       selectedWeblinkConfig?.searchTarget === SearchTarget.SelectedPages &&

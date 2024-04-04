@@ -33,7 +33,9 @@ export const AskFollowUpModal = (props: SummaryModalProps) => {
 
   const handleDigestAskFollow = async () => {
     try {
-      const question = chatStore.newQAText
+      const { newQAText } = useChatStore.getState()
+      console.log("newQAText", newQAText)
+      const question = newQAText
 
       // TODO: origin/originPageUrl 需要确定
       const newConversationPayload = {

@@ -39,8 +39,14 @@ export const useChatStore = create<ChatState>()(
       set(state => ({ ...state, messages: val })),
     setSessions: (val: SessionItem[]) => set({ sessions: val }),
     setIsGenTitle: (val: boolean) => set({ isGenTitle: val }),
-    setNewQAText: (val: string) => set({ newQAText: val }),
-    resetState: () => set(state => ({ ...state, ...defaultState })),
+    setNewQAText: (val: string) => {
+      console.log("trigger setNewQAText", val)
+      return set({ newQAText: val })
+    },
+    resetState: () => {
+      console.log("trigger resetState")
+      return set(state => ({ ...state, ...defaultState }))
+    },
     setIsNewConversation: (val: boolean) => set({ isNewConversation: val }),
     setIsAskFollowUpNewConversation: (val: boolean) =>
       set({ isAskFollowUpNewConversation: val }),
