@@ -49,7 +49,6 @@ export const DigestHeader = (props: DigestHeaderProps) => {
       const { topicList } = useDigestTopicStore.getState()
       if (topicList?.length > 0) return
 
-      await delay(3000)
       const newRes = await getTopicList({
         body: {
           // TODO: confirm time filter
