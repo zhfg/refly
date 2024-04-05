@@ -215,12 +215,17 @@ export const DigestTopicDetail = () => {
                       {item?.topic?.name}
                     </span>
                   </span>
-                  <span key={3}>
+                  <span
+                    key={3}
+                    className="feed-item-link"
+                    onClick={() => {
+                      window.open(item?.weblinks?.[0]?.url, "_blank")
+                    }}>
                     <IconLink style={{ fontSize: 14, color: "#64645F" }} />
                     <span className="feed-list-item-text">
-                      {item?.weblinks?.[0]?.url} &{" "}
+                      {item?.weblinks?.[0]?.url}{" "}
                       {item?.weblinks?.length - 1 > 0
-                        ? `${item?.weblinks?.length - 1} 条更多`
+                        ? `& ${item?.weblinks?.length - 1} 条更多`
                         : ""}
                     </span>
                   </span>

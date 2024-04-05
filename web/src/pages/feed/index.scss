@@ -28,14 +28,6 @@
     padding: 0 60px;
   }
 
-  .feed-item-topic {
-    &:hover {
-      cursor: pointer;
-      text-decoration: underline;
-      text-decoration-color: #64645f;
-    }
-  }
-
   .feed-item-action {
     display: flex;
     flex-direction: row;
@@ -102,4 +94,5 @@
   color: #64645f;
   font-size: 14px;
   margin-left: 4px;
+  line-height: 1.5;
 }

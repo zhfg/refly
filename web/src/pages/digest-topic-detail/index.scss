@@ -71,7 +71,7 @@
   height: calc(100vh - 28px);
   overflow-y: scroll;
 
-  .feed-item-topic {
+  .feed-item-link {
     &:hover {
       cursor: pointer;
       text-decoration: underline;
@@ -144,4 +144,5 @@
   color: #64645f;
   font-size: 14px;
   margin-left: 4px;
+  line-height: 1.5;
 }
