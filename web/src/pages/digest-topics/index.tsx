@@ -13,8 +13,12 @@ import { useEffect, useState } from "react"
 import { useDigestTopicStore } from "@/stores/digest-topics"
 import { useMatch, useNavigate } from "react-router-dom"
 // utils
-import getDigestTopicList from "@/requests/getTopicList"
 import { getRandomColor } from "@/utils/color"
+// hooks
+import { useGetDigestTopics } from "@/hooks/use-get-digest-topics"
+// components
+import { EmptyDigestTopicDetailStatus } from "@/components/empty-digest-topic-detail-status"
+import { delay } from "@/utils/delay"
 
 const names = ["Socrates", "Balzac", "Plato"]
 const avatarSrc = [
@@ -45,43 +49,42 @@ export const DigestTopics = () => {
     <Skeleton animation></Skeleton>,
   )
   const navigate = useNavigate()
+  const { fetchDigestTopicData } = useGetDigestTopics()
 
   const fetchData = async (currentPage = 1) => {
     try {
       console.log("currentPage", currentPage)
+      setScrollLoading(
+        <div
+          style={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "row",
+            gap: 40,
+          }}>
+          <Skeleton animation image style={{ width: 300 }}></Skeleton>
+          <Skeleton animation image style={{ width: 300 }}></Skeleton>
+          <Skeleton animation image style={{ width: 300 }}></Skeleton>
+        </div>,
+      )
       if (!digestTopicStore?.hasMore && currentPage !== 1) {
         setScrollLoading(<span>已经到底啦~</span>)
         return
       }
 
-      const { topicList = [], pageSize } = useDigestTopicStore.getState()
-      if (topicList.length > 0 && topicList?.length < pageSize) {
-        return
-      }
-
-      const newRes = await getDigestTopicList({
-        body: {
-          page: currentPage,
-          pageSize: 10,
-        },
-      })
-
-      digestTopicStore.updateCurrentPage(currentPage)
-
-      if (!newRes?.success) {
-        throw new Error(newRes?.errMsg)
-      }
-      if (
-        newRes?.data &&
-        newRes?.data?.list?.length < digestTopicStore?.pageSize
-      ) {
-        digestTopicStore.updateHasMore(false)
-      }
-
-      console.log("newRes", newRes)
-      digestTopicStore.updateTopicList(newRes?.data?.list || [])
+      await fetchDigestTopicData(currentPage)
     } catch (err) {
       message.error("获取主题列表失败，请重新刷新试试")
+    } finally {
+      const { topicList, pageSize } = useDigestTopicStore.getState()
+
+      if (topicList?.length === 0) {
+        setScrollLoading(
+          <EmptyDigestTopicDetailStatus text="暂无分类，赶快下载插件去阅读新内容吧~" />,
+        )
+      } else if (topicList?.length > 0 && topicList?.length < pageSize) {
+        setScrollLoading(<span>已经到底啦~</span>)
+      }
     }
   }
 

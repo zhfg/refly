@@ -31,6 +31,9 @@ import getConversationList from "@/requests/getConversationList"
 // types
 import { Thread } from "@/types"
 import "./index.scss"
+import { delay } from "@/utils/delay"
+// components
+import { EmptyThreadLibraryStatus } from "@/components/empty-thread-library-status"
 
 const Header = () => {
   const siderStore = useSiderStore()
@@ -82,6 +85,21 @@ export const ThreadLibrary = () => {
   const fetchData = async (currentPage = 1) => {
     try {
       console.log("currentPage", currentPage)
+      setScrollLoading(
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            marginTop: 64,
+          }}>
+          <Skeleton animation style={{ width: "100%" }}></Skeleton>
+          <Skeleton
+            animation
+            style={{ width: "100%", marginTop: 24 }}></Skeleton>
+        </div>,
+      )
+
       if (!threadStore?.hasMore && currentPage !== 1) {
         setScrollLoading(<span>已经到底啦~</span>)
         return
@@ -107,6 +125,14 @@ export const ThreadLibrary = () => {
       threadStore.updateThreadList(newRes?.data || [])
     } catch (err) {
       message.error("获取会话列表失败，请重新刷新试试")
+    } finally {
+      const { threads, pageSize } = useThreadStore.getState()
+
+      if (threads?.length === 0) {
+        setScrollLoading(<EmptyThreadLibraryStatus />)
+      } else if (threads?.length > 0 && threads?.length < pageSize) {
+        setScrollLoading(<span>已经到底啦~</span>)
+      }
     }
   }
 

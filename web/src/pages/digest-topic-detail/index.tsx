@@ -29,9 +29,11 @@ import { getClientOrigin } from "@/utils/url"
 import { useDigestTopicStore } from "@/stores/digest-topics"
 // styles
 import "./index.scss"
-// fake data
-import { fakeTopics } from "@/fake-data/digest"
-import { safeParseJSON } from "@/utils/parse"
+// components
+import { EmptyDigestTopicDetailStatus } from "@/components/empty-digest-topic-detail-status"
+import { delay } from "@/utils/delay"
+// hooks
+import { useGetDigestTopics } from "@/hooks/use-get-digest-topics"
 
 const BreadcrumbItem = Breadcrumb.Item
 
@@ -44,6 +46,7 @@ export const DigestTopicDetail = () => {
   const navigate = useNavigate()
   const isTopicDetail = useMatch("/digest/topic/:digestTopicId")
   const { digestTopicId } = useParams()
+  const { fetchDigestTopicData, isFetching } = useGetDigestTopics()
 
   // TODO: 替换成真正的 topic detail，目前还是 fake
   const currentTopicDetail = digestTopicStore.topicList?.find(
@@ -52,6 +55,21 @@ export const DigestTopicDetail = () => {
 
   const fetchData = async (currentPage = 1) => {
     try {
+      setScrollLoading(
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            marginTop: 64,
+          }}>
+          <Skeleton animation style={{ width: "100%" }}></Skeleton>
+          <Skeleton
+            animation
+            style={{ width: "100%", marginTop: 24 }}></Skeleton>
+        </div>,
+      )
+
       console.log("currentPage", currentPage)
       if (!digestTopicDetailStore?.hasMore && currentPage !== 1) {
         setScrollLoading(<span>已经到底啦~</span>)
@@ -83,16 +101,31 @@ export const DigestTopicDetail = () => {
       digestTopicDetailStore.updateTopicDigestList(newRes?.data || [])
     } catch (err) {
       message.error("获取会话列表失败，请重新刷新试试")
+    } finally {
+      const { digestList, pageSize } = useDigestTopicDetailStore.getState()
+
+      if (digestList?.length === 0) {
+        setScrollLoading(
+          <EmptyDigestTopicDetailStatus text="暂无此分类下的内容，赶快下载插件去阅读新内容吧~" />,
+        )
+      } else if (digestList?.length > 0 && digestList?.length < pageSize) {
+        setScrollLoading(<span>已经到底啦~</span>)
+      }
     }
   }
 
   useEffect(() => {
-    fetchData()
+    const len = digestTopicStore?.topicList?.length
+    if (len === 0) {
+      fetchDigestTopicData()
+    } else if (len > 0) {
+      fetchData()
+    }
 
     return () => {
       digestTopicDetailStore.resetState()
     }
-  }, [])
+  }, [digestTopicStore?.topicList?.length])
 
   return (
     <div className="digest-topic-detail-container">
@@ -111,14 +144,18 @@ export const DigestTopicDetail = () => {
         pagination={false}
         offsetBottom={50}
         header={
-          <div className="topics-header-container">
-            <div className="topics-header-title">
-              {currentTopicDetail?.topic?.name}
+          isFetching ? (
+            <Skeleton animation></Skeleton>
+          ) : (
+            <div className="topics-header-container">
+              <div className="topics-header-title">
+                {currentTopicDetail?.topic?.name}
+              </div>
+              <p className="topics-header-desc">
+                {currentTopicDetail?.topic?.description}
+              </p>
             </div>
-            <p className="topics-header-desc">
-              {currentTopicDetail?.topic?.description}
-            </p>
-          </div>
+          )
         }
         dataSource={digestTopicDetailStore.digestList}
         scrollLoading={scrollLoading}

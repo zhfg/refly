@@ -17,7 +17,7 @@ export const Header = (props: HeaderProps) => {
     <header>
       <div>
         <Breadcrumb>
-          <BreadcrumbItem href="/feed">会话库</BreadcrumbItem>
+          <BreadcrumbItem href="/thread">会话库</BreadcrumbItem>
           <BreadcrumbItem href={`/thread/${thread?.id}`}>
             {thread?.title}
           </BreadcrumbItem>
