@@ -1,6 +1,6 @@
 import { useUserStore } from "@/stores/user"
 import React, { useState, useRef, useEffect } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useMatch, useNavigate } from "react-router-dom"
 import Logo from "@/assets/logo.svg"
 
 import "./header.scss"
@@ -19,6 +19,11 @@ function Header(props: { showLogin?: boolean }) {
   const navigate = useNavigate()
   const [token, updateCookie, deleteCookie] = useCookie("_refly_ai_sid")
 
+  const routeLandingPageMatch = useMatch("/")
+  const routePrivacyPageMatch = useMatch("/privacy")
+  const routeTermsPageMatch = useMatch("/terms")
+  const routeLoginPageMatch = useMatch("/login")
+
   // 获取 storage user profile
   const storageUserProfile = safeParseJSON(
     localStorage.getItem("refly-user-profile"),
@@ -36,7 +41,17 @@ function Header(props: { showLogin?: boolean }) {
         userStore.setUserProfile(undefined)
         userStore.setToken("")
         localStorage.removeItem("refly-user-profile")
-        navigate("/")
+
+        if (
+          routeLandingPageMatch ||
+          routePrivacyPageMatch ||
+          routeTermsPageMatch ||
+          routeLoginPageMatch
+        ) {
+          console.log("命中不需要鉴权页面，直接展示")
+        } else {
+          navigate("/")
+        }
       } else {
         userStore.setUserProfile(res?.data)
         localStorage.setItem("refly-user-profile", safeStringifyJSON(res?.data))
