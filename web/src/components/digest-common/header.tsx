@@ -27,9 +27,6 @@ interface DigestHeaderProps {
 export const DigestHeader = (props: DigestHeaderProps) => {
   const digestTopicStore = useDigestTopicStore()
   const navigate = useNavigate()
-  const [scrollLoading, setScrollLoading] = useState(
-    <Skeleton animation></Skeleton>,
-  )
   // 获取内容中
   const [isFetching, setIsFetching] = useState(false)
 
@@ -48,16 +45,11 @@ export const DigestHeader = (props: DigestHeaderProps) => {
   const fetchData = async (currentPage = 1) => {
     try {
       // 如果已经有 topics 了，就不再次获取
+      setIsFetching(true)
       const { topicList } = useDigestTopicStore.getState()
       if (topicList?.length > 0) return
 
-      // setIsFetching(true)
-      if (!digestTopicStore.hasMore && currentPage !== 1) {
-        setScrollLoading(<span>已经到底啦</span>)
-
-        return
-      }
-
+      await delay(3000)
       const newRes = await getTopicList({
         body: {
           // TODO: confirm time filter
@@ -82,6 +74,7 @@ export const DigestHeader = (props: DigestHeaderProps) => {
       console.log("newRes", newRes)
       digestTopicStore.updateTopicList(newRes?.data?.list as Topic[])
       digestTopicStore.updateTopicTotalCnt(newRes?.data?.total as number)
+      setIsFetching(false)
     } catch (err) {
       message.error("获取主题列表失败，请重新刷新试试")
     } finally {
@@ -92,8 +85,6 @@ export const DigestHeader = (props: DigestHeaderProps) => {
   useEffect(() => {
     fetchData()
   }, [])
-
-  console.log("digest topics", digestTopicStore?.topicList)
 
   return (
     <div className="today-header-container">
@@ -127,9 +118,9 @@ export const DigestHeader = (props: DigestHeaderProps) => {
           <div className="trending-topics">
             {Array(5)
               .fill(null)
-              .map(item => (
+              .map((item, index) => (
                 <Skeleton
-                  key={item}
+                  key={index}
                   animation
                   text={{
                     rows: 1,
@@ -138,10 +129,12 @@ export const DigestHeader = (props: DigestHeaderProps) => {
                   }}></Skeleton>
               ))}
           </div>
-        ) : (
+        ) : null}
+        {!isFetching && digestTopicStore?.topicList?.length > 0 ? (
           <div className="trending-topics">
-            {digestTopicStore.topicList?.map(item => (
+            {digestTopicStore.topicList?.map((item, index) => (
               <div
+                key={index}
                 className="trending-topic-item"
                 onClick={() => {
                   navigate(`/digest/topic/${item?.id}`)
@@ -157,7 +150,7 @@ export const DigestHeader = (props: DigestHeaderProps) => {
               </div>
             )}
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   )

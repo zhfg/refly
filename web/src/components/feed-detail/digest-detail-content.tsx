@@ -16,6 +16,8 @@ import { Session } from "./session"
 import { type SessionItem } from "@/types"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input"
 import { IconTip } from "../dashboard/icon-tip"
+import { safeParseJSON } from "@/utils/parse"
+import { useUserStore } from "@/stores/user"
 
 interface ThreadItemProps {
   sessions: SessionItem[]
@@ -28,8 +30,16 @@ export const DigestDetailContent = (props: ThreadItemProps) => {
   const { sessions } = props
   const inputRef = useRef<RefTextAreaType>(null)
   const chatStore = useChatStore()
+  const userStore = useUserStore()
 
   const messageStateStore = useMessageStateStore()
+
+  // 获取 storage user profile
+  const storageUserProfile = safeParseJSON(
+    localStorage.getItem("refly-user-profile"),
+  )
+  const notShowLoginBtn = storageUserProfile?.id || userStore?.userProfile?.id
+  console.log("storageUserProfile", storageUserProfile, userStore?.userProfile)
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     e.stopPropagation()
@@ -47,7 +57,11 @@ export const DigestDetailContent = (props: ThreadItemProps) => {
     if (!chatStore?.newQAText) {
       message.warning(`追问内容不能为空！`)
     } else {
-      props.handleAskFollowUp()
+      if (!notShowLoginBtn) {
+        userStore.setLoginModalVisible(true)
+      } else {
+        props.handleAskFollowUp()
+      }
     }
   }
 

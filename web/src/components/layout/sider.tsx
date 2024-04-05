@@ -57,12 +57,20 @@ export const SiderLayout = () => {
   const handleNavClick = (itemKey: string, event, keyPath: string[]) => {
     switch (itemKey) {
       case "Home": {
-        navigate(`/dashboard`)
+        if (!notShowLoginBtn) {
+          userStore.setLoginModalVisible(true)
+        } else {
+          navigate(`/dashboard`)
+        }
         break
       }
 
       case "ThreadLibrary": {
-        navigate(`/thread`)
+        if (!notShowLoginBtn) {
+          userStore.setLoginModalVisible(true)
+        } else {
+          navigate(`/thread`)
+        }
         break
       }
 
@@ -72,12 +80,20 @@ export const SiderLayout = () => {
       }
 
       case "Feed": {
-        navigate(`/feed`)
+        if (!notShowLoginBtn) {
+          userStore.setLoginModalVisible(true)
+        } else {
+          navigate(`/feed`)
+        }
         break
       }
 
       case "Digest": {
-        navigate(`/digest`)
+        if (!notShowLoginBtn) {
+          userStore.setLoginModalVisible(true)
+        } else {
+          navigate(`/digest`)
+        }
         break
       }
 
@@ -168,24 +184,26 @@ export const SiderLayout = () => {
               <IconTwitter style={{ fontSize: 20 }} />
               <span className="sider-menu-title">获得帮助</span>
             </MenuItem>
-            <Divider style={{ margin: "8px 0" }} />
             {!!userStore.userProfile?.id && (
-              <MenuItem
-                key="Settings"
-                className="menu-setting-container custom-menu-item">
-                <div className="menu-settings">
-                  <Avatar size={32}>
-                    <img
-                      src={userStore?.userProfile?.avatar || ""}
-                      alt="user-avatar"
-                    />
-                  </Avatar>
-                  <span className="username">
-                    {userStore?.userProfile?.name}
-                  </span>
-                </div>
-                <IconSettings style={{ fontSize: 20 }} />
-              </MenuItem>
+              <>
+                <Divider style={{ margin: "8px 0" }} />
+                <MenuItem
+                  key="Settings"
+                  className="menu-setting-container custom-menu-item">
+                  <div className="menu-settings">
+                    <Avatar size={32}>
+                      <img
+                        src={userStore?.userProfile?.avatar || ""}
+                        alt="user-avatar"
+                      />
+                    </Avatar>
+                    <span className="username">
+                      {userStore?.userProfile?.name}
+                    </span>
+                  </div>
+                  <IconSettings style={{ fontSize: 20 }} />
+                </MenuItem>
+              </>
             )}
             <Divider style={{ margin: "8px 0" }} />
             <MenuItem key="DownloadExtension" className="custom-menu-item">

@@ -33,6 +33,7 @@ export const AskFollowUpModal = (props: SummaryModalProps) => {
 
   const handleDigestAskFollow = async () => {
     try {
+      setIsFetching(true)
       const { newQAText } = useChatStore.getState()
       console.log("newQAText", newQAText)
       const question = newQAText
