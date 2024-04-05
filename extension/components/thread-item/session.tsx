@@ -28,7 +28,9 @@ interface SessionProps {
 export const Session = (props: SessionProps) => {
   const { session, isLastSession = false } = props
   const messageStateStore = useMessageStateStore()
-  const [scrollLoading, setScrollLoading] = useState(<Skeleton></Skeleton>)
+  const [scrollLoading, setScrollLoading] = useState(
+    <Skeleton animation></Skeleton>,
+  )
 
   const fetchData = (currentPage) => {}
 
@@ -129,7 +131,7 @@ export const Session = (props: SessionProps) => {
               </div>
             </div>
           ) : messageStateStore.pending && isLastSession ? (
-            <Skeleton></Skeleton>
+            <Skeleton animation></Skeleton>
           ) : null}
         </div>
         <div className="session-answer">
@@ -165,7 +167,7 @@ export const Session = (props: SessionProps) => {
               )}
             </>
           ) : (
-            <Skeleton></Skeleton>
+            <Skeleton animation></Skeleton>
           )}
         </div>
       </div>

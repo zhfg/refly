@@ -54,7 +54,6 @@ export const DigestToday = () => {
             display: "flex",
             flexDirection: "column",
             width: "100%",
-            marginTop: 64,
           }}>
           <Skeleton animation style={{ width: "100%" }}></Skeleton>
           <Skeleton

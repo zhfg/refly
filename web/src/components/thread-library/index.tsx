@@ -35,45 +35,6 @@ import { delay } from "@/utils/delay"
 // components
 import { EmptyThreadLibraryStatus } from "@/components/empty-thread-library-status"
 
-const Header = () => {
-  const siderStore = useSiderStore()
-
-  return (
-    <header>
-      <div className="brand">
-        <img src={Logo} alt="Refly" />
-        <span>Refly</span>
-      </div>
-      <div className="funcs">
-        <IconTip text="全屏">
-          <img src={FullScreenSVG} alt="全屏" />
-        </IconTip>
-        <IconTip text="通知">
-          <img src={NotificationSVG} alt="通知" />
-        </IconTip>
-        <IconTip text="设置">
-          <img src={SettingGraySVG} alt="设置" />
-        </IconTip>
-        <IconTip text="账户">
-          <Avatar size={16}>
-            <img
-              alt="avatar"
-              src="//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/3ee5f13fb09879ecb5185e440cef6eb9.png~tplv-uwbnlip3yd-webp.webp"
-            />
-          </Avatar>
-        </IconTip>
-        <IconTip text="关闭">
-          <img
-            src={CloseGraySVG}
-            alt="关闭"
-            onClick={() => siderStore.setShowSider(false)}
-          />
-        </IconTip>
-      </div>
-    </header>
-  )
-}
-
 export const ThreadLibrary = () => {
   const [scrollLoading, setScrollLoading] = useState(
     <Skeleton animation></Skeleton>,
@@ -91,7 +52,6 @@ export const ThreadLibrary = () => {
             display: "flex",
             flexDirection: "column",
             width: "100%",
-            marginTop: 64,
           }}>
           <Skeleton animation style={{ width: "100%" }}></Skeleton>
           <Skeleton

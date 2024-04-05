@@ -34,6 +34,8 @@ import { useUserStore } from "~stores/user"
 import { getClientOrigin } from "~utils/url"
 // components
 import { ChatHeader } from "~components/home/header"
+import { EmptyThreadLibraryStatus } from "~components/empty-thread-library-status/index"
+import { delay } from "~utils/delay"
 
 const names = ["Socrates", "Balzac", "Plato"]
 const avatarSrc = [
@@ -59,7 +61,9 @@ const dataSource = new Array(15).fill(null).map((_, index) => {
 })
 
 export const ThreadLibrary = () => {
-  const [scrollLoading, setScrollLoading] = useState(<Skeleton></Skeleton>)
+  const [scrollLoading, setScrollLoading] = useState(
+    <Skeleton animation></Skeleton>,
+  )
   const threadStore = useThreadStore()
   const navigate = useNavigate()
   const isThreadLibrary = useMatch("/thread")
@@ -67,11 +71,25 @@ export const ThreadLibrary = () => {
   const fetchData = async (currentPage = 1) => {
     try {
       console.log("currentPage", currentPage)
+      setScrollLoading(
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+          }}>
+          <Skeleton animation style={{ width: "100%" }}></Skeleton>
+          <Skeleton
+            animation
+            style={{ width: "100%", marginTop: 24 }}></Skeleton>
+        </div>,
+      )
       if (!threadStore?.hasMore && currentPage !== 1) {
         setScrollLoading(<span>已经到底啦~</span>)
         return
       }
 
+      // await delay(30000)
       const newRes = await sendToBackground({
         name: "getConversationList",
         body: {
@@ -89,6 +107,14 @@ export const ThreadLibrary = () => {
       threadStore.updateThreadList(newRes?.data || [])
     } catch (err) {
       message.error("获取会话列表失败，请重新刷新试试")
+    } finally {
+      const { threads, pageSize } = useThreadStore.getState()
+
+      if (threads?.length === 0) {
+        setScrollLoading(<EmptyThreadLibraryStatus />)
+      } else if (threads?.length > 0 && threads?.length < pageSize) {
+        setScrollLoading(<span>已经到底啦~</span>)
+      }
     }
   }
 

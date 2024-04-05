@@ -131,7 +131,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
         style={
           showSelectedWeblinkList
             ? {
-                height: `calc(100vh - 180px - ${selectedWeblinkListRef.current?.clientHeight || 0}px)`,
+                height: `calc(100vh - 180px - ${selectedWeblinkListRef.current?.clientHeight || 0}px - 40px)`,
               }
             : {}
         }>
