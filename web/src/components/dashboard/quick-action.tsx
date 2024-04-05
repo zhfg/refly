@@ -4,22 +4,19 @@ import { IconTip } from "./icon-tip"
 import { useWeblinkStore } from "@/stores/weblink"
 import { mapSourceFromWeblinkList } from "@/utils/weblink"
 import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run"
-import { SearchTarget } from "@/stores/search-state"
+import { Source } from "@/types"
 
 export const QuickAction = () => {
-  const { selectedRow } = useWeblinkStore()
   const { runQuickActionTask } = useBuildThreadAndRun()
 
   const handleSummary = () => {
+    const { selectedRow } = useWeblinkStore.getState()
     const weblinkList = mapSourceFromWeblinkList(selectedRow)
-    runQuickActionTask(
-      {
-        filter: {
-          weblinkList,
-        },
+    runQuickActionTask({
+      filter: {
+        weblinkList: weblinkList as Source[],
       },
-      SearchTarget.SelectedPages,
-    )
+    })
   }
 
   return (
@@ -29,7 +26,7 @@ export const QuickAction = () => {
         <div className="selected-weblinks-inner-container">
           <div className="hint-item">
             <IconStar style={{ color: "rgba(0, 0, 0, .6)" }} />
-            <span>推荐操作：</span>
+            <span>推荐快捷操作：</span>
           </div>
           <IconTip text="对选中的网页进行总结">
             <Button

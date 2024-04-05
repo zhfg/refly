@@ -253,6 +253,8 @@
     color: rgba(0, 0, 0, 0.6);
     font-size: 12px;
     display: flex;
+    flex-direction: row;
+    align-items: center;
 
     span {
       margin-left: 4px;
