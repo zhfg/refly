@@ -10,10 +10,12 @@ interface DigestArchiveState {
   pageSize: number
   currentPage: number
   hasMore: boolean
+  datePopupVisible: boolean
 
   updateDigestList: (newDigestList: Digest[]) => void
   updateCurrentPage: (currentPage: number) => void
   updateHasMore: (hasMore: boolean) => void
+  updateDatePopupVisible: (datePopupVisible: boolean) => void
   resetState: () => void
 }
 
@@ -22,6 +24,7 @@ export const defaultState = {
   pageSize: 10,
   currentPage: 1,
   hasMore: true,
+  datePopupVisible: false,
 }
 
 export const useDigestArchiveStore = create<DigestArchiveState>()(
@@ -36,6 +39,8 @@ export const useDigestArchiveStore = create<DigestArchiveState>()(
     updateCurrentPage: (currentPage: number) =>
       set(state => ({ ...state, currentPage })),
     updateHasMore: (hasMore: boolean) => set(state => ({ ...state, hasMore })),
+    updateDatePopupVisible: (datePopupVisible: boolean) =>
+      set(state => ({ ...state, datePopupVisible })),
     resetState: () => set(state => ({ ...state, ...defaultState })),
   })),
 )

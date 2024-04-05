@@ -27,6 +27,7 @@ import { DigestType, useDigestStore } from "@/stores/digest"
 // components
 import { DigestHeader } from "@/components/digest-common/header"
 import { useEffect, useState } from "react"
+import { EmptyDigestStatus } from "@/components/empty-digest-today-status"
 // utils
 import getDigestList from "@/requests/getDigestList"
 // styles
@@ -41,11 +42,27 @@ export const DigestToday = () => {
   const navigate = useNavigate()
   const digestStore = useDigestStore()
   const [scrollLoading, setScrollLoading] = useState(
-    <Skeleton animation></Skeleton>,
+    <Skeleton animation style={{ width: "100%" }}></Skeleton>,
   )
+  const [isFetching, setIsFetching] = useState(false)
 
   const fetchData = async (currentPage = 1) => {
     try {
+      setScrollLoading(
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            marginTop: 64,
+          }}>
+          <Skeleton animation style={{ width: "100%" }}></Skeleton>
+          <Skeleton
+            animation
+            style={{ width: "100%", marginTop: 24 }}></Skeleton>
+        </div>,
+      )
+
       if (!digestStore.today.hasMore && currentPage !== 1) {
         setScrollLoading(<span>已经到底啦</span>)
 
@@ -94,6 +111,17 @@ export const DigestToday = () => {
       )
     } catch (err) {
       message.error("获取今日总结列表失败，请重新刷新试试")
+    } finally {
+      const { today } = useDigestStore.getState()
+
+      if (today?.featureList?.length === 0) {
+        setScrollLoading(<EmptyDigestStatus />)
+      } else if (
+        today?.featureList?.length > 0 &&
+        today?.featureList?.length < today?.pageSize
+      ) {
+        setScrollLoading(<span>已经到底啦~</span>)
+      }
     }
   }
 
@@ -117,12 +145,11 @@ export const DigestToday = () => {
           wrapperStyle={{ width: "100%" }}
           bordered={false}
           pagination={false}
-          offsetBottom={50}
+          offsetBottom={200}
           header={<p className="today-header-title">今天浏览内容总结</p>}
-          dataSource={digestStore.today.featureList}
+          dataSource={digestStore?.today?.featureList || []}
           scrollLoading={scrollLoading}
           onReachBottom={currentPage => fetchData(currentPage)}
-          noDataElement={<div>暂无数据</div>}
           render={(item: Digest, index) => (
             <List.Item
               key={index}
@@ -163,20 +190,22 @@ export const DigestToday = () => {
                     </IconTip>
                   </div>
                   <div className="feed-item-action" style={{ marginTop: 8 }}>
-                    <span
-                      className="feed-item-topic"
-                      key={3}
-                      style={{
-                        display: "inline-block",
-                        borderRight: `1px solid #64645F`,
-                        paddingRight: 12,
-                        lineHeight: "10px",
-                      }}>
-                      <IconTag style={{ fontSize: 14, color: "#64645F" }} />
-                      <span className="feed-list-item-text">
-                        {item?.topic?.name}
+                    <IconTip text="前往此分类">
+                      <span
+                        className="feed-item-topic"
+                        key={3}
+                        style={{
+                          display: "inline-block",
+                          borderRight: `1px solid #64645F`,
+                          paddingRight: 12,
+                          lineHeight: "10px",
+                        }}>
+                        <IconTag style={{ fontSize: 14, color: "#64645F" }} />
+                        <span className="feed-list-item-text">
+                          {item?.topic?.name}
+                        </span>
                       </span>
-                    </span>
+                    </IconTip>
                     <span key={3}>
                       <IconLink style={{ fontSize: 14, color: "#64645F" }} />
                       <span className="feed-list-item-text">

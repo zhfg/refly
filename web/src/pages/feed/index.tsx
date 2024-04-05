@@ -29,6 +29,9 @@ import "./index.scss"
 import { copyToClipboard } from "@/utils"
 import { getClientOrigin } from "@/utils/url"
 import { safeParseJSON } from "@/utils/parse"
+// components
+import { EmptyFeedStatus } from "@/components/empty-feed-status"
+import { delay } from "@/utils/delay"
 
 export const Feed = () => {
   const [scrollLoading, setScrollLoading] = useState(
@@ -41,6 +44,20 @@ export const Feed = () => {
   const fetchData = async (currentPage = 1) => {
     try {
       console.log("currentPage", currentPage)
+      setScrollLoading(
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            marginTop: 64,
+          }}>
+          <Skeleton animation style={{ width: "100%" }}></Skeleton>
+          <Skeleton
+            animation
+            style={{ width: "100%", marginTop: 24 }}></Skeleton>
+        </div>,
+      )
       if (!feedStore?.hasMore && currentPage !== 1) {
         setScrollLoading(<span>已经到底啦~</span>)
         return
@@ -66,6 +83,14 @@ export const Feed = () => {
       feedStore.updateFeedList(newRes?.data as IFeed[])
     } catch (err) {
       message.error("获取推荐内容失败，请重新刷新试试")
+    } finally {
+      const { feedList, pageSize } = useFeedStore.getState()
+
+      if (feedList?.length === 0) {
+        setScrollLoading(<EmptyFeedStatus />)
+      } else if (feedList?.length > 0 && feedList?.length < pageSize) {
+        setScrollLoading(<span>已经到底啦~</span>)
+      }
     }
   }
 
@@ -89,7 +114,7 @@ export const Feed = () => {
             </p>
           </div>
         }
-        dataSource={feedStore?.feeds}
+        dataSource={feedStore?.feedList}
         scrollLoading={scrollLoading}
         onReachBottom={currentPage => fetchData(currentPage)}
         noDataElement={<div>暂无数据</div>}
@@ -133,23 +158,25 @@ export const Feed = () => {
                   </IconTip>
                 </div>
                 <div className="feed-item-action" style={{ marginTop: 8 }}>
-                  <span
-                    className="feed-item-topic"
-                    key={3}
-                    style={{
-                      display: "inline-block",
-                      borderRight: `1px solid #64645F`,
-                      paddingRight: 12,
-                      lineHeight: "10px",
-                    }}>
-                    <IconTag style={{ fontSize: 14, color: "#64645F" }} />
-                    <span className="feed-list-item-text">
-                      {
-                        safeParseJSON(item?.weblinks?.[0]?.contentMeta)
-                          ?.topics?.[0]?.name
-                      }
+                  <IconTip text="前往此分类">
+                    <span
+                      className="feed-item-topic"
+                      key={3}
+                      style={{
+                        display: "inline-block",
+                        borderRight: `1px solid #64645F`,
+                        paddingRight: 12,
+                        lineHeight: "10px",
+                      }}>
+                      <IconTag style={{ fontSize: 14, color: "#64645F" }} />
+                      <span className="feed-list-item-text">
+                        {
+                          safeParseJSON(item?.weblinks?.[0]?.contentMeta)
+                            ?.topics?.[0]?.name
+                        }
+                      </span>
                     </span>
-                  </span>
+                  </IconTip>
                   <span key={3}>
                     <IconBook style={{ fontSize: 14, color: "#64645F" }} />
                     <span className="feed-list-item-text">

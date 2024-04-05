@@ -30,6 +30,7 @@ import { useDigestArchiveStore } from "@/stores/digest-archive"
 // components
 import { DigestHeader } from "@/components/digest-common/header"
 import { useEffect, useState } from "react"
+import { EmptyDigestStatus } from "@/components/empty-digest-archive-status"
 // utils
 import getDigestList from "@/requests/getDigestList"
 // styles
@@ -37,15 +38,26 @@ import "./index.scss"
 
 export const DigestArchive = () => {
   const { dateType, year, month, day } = useParams()
-  const [scrollLoading, setScrollLoading] = useState(
-    <Skeleton animation></Skeleton>,
-  )
+  const [scrollLoading, setScrollLoading] = useState(<div></div>)
   const digestArchiveStore = useDigestArchiveStore()
   const navigate = useNavigate()
 
   const fetchData = async (currentPage = 1) => {
     try {
-      console.log("currentPage", currentPage)
+      setScrollLoading(
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            marginTop: 64,
+          }}>
+          <Skeleton animation style={{ width: "100%" }}></Skeleton>
+          <Skeleton
+            animation
+            style={{ width: "100%", marginTop: 24 }}></Skeleton>
+        </div>,
+      )
       if (!digestArchiveStore?.hasMore && currentPage !== 1) {
         setScrollLoading(<span>已经到底啦~</span>)
         return
@@ -80,6 +92,18 @@ export const DigestArchive = () => {
       digestArchiveStore.updateDigestList(newRes?.data || [])
     } catch (err) {
       message.error("获取归档内容失败，请重新刷新试试")
+    } finally {
+      const { digestList, pageSize } = useDigestArchiveStore.getState()
+
+      if (digestList?.length === 0) {
+        setScrollLoading(
+          <EmptyDigestStatus
+            date={{ year: year || "", month: month || "", day: day || "" }}
+          />,
+        )
+      } else if (digestList?.length > 0 && digestList?.length < pageSize) {
+        setScrollLoading(<span>已经到底啦~</span>)
+      }
     }
   }
 
@@ -111,6 +135,12 @@ export const DigestArchive = () => {
               </div>
               <div className="digest-archive-time-picker">
                 <DatePicker
+                  popupVisible={digestArchiveStore.datePopupVisible}
+                  onVisibleChange={visible =>
+                    digestArchiveStore.updateDatePopupVisible(
+                      visible as boolean,
+                    )
+                  }
                   defaultValue={`${year}-${Number(month) >= 10 ? month : `0${month}`}-${Number(day) >= 10 ? day : `0${day}`}`}
                   style={{ width: 200 }}
                   onChange={(dateStr, date) => {
@@ -145,7 +175,7 @@ export const DigestArchive = () => {
                       key={1}
                       className="feed-list-item-continue-ask with-border with-hover"
                       onClick={() => {
-                        navigate(`/feed/${item?.contentId}`)
+                        navigate(`/digest/${item?.contentId}`)
                       }}>
                       <IconRightCircle
                         style={{ fontSize: 14, color: "#64645F" }}
@@ -170,20 +200,22 @@ export const DigestArchive = () => {
                     </IconTip>
                   </div>
                   <div className="feed-item-action" style={{ marginTop: 8 }}>
-                    <span
-                      className="feed-item-topic"
-                      key={3}
-                      style={{
-                        display: "inline-block",
-                        borderRight: `1px solid #64645F`,
-                        paddingRight: 12,
-                        lineHeight: "10px",
-                      }}>
-                      <IconTag style={{ fontSize: 14, color: "#64645F" }} />
-                      <span className="feed-list-item-text">
-                        {item?.topic?.name}
+                    <IconTip text="前往此分类">
+                      <span
+                        className="feed-item-topic"
+                        key={3}
+                        style={{
+                          display: "inline-block",
+                          borderRight: `1px solid #64645F`,
+                          paddingRight: 12,
+                          lineHeight: "10px",
+                        }}>
+                        <IconTag style={{ fontSize: 14, color: "#64645F" }} />
+                        <span className="feed-list-item-text">
+                          {item?.topic?.name}
+                        </span>
                       </span>
-                    </span>
+                    </IconTip>
                     <span key={3}>
                       <IconLink style={{ fontSize: 14, color: "#64645F" }} />
                       <span className="feed-list-item-text">

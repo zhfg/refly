@@ -5,7 +5,7 @@ import type {} from "@redux-devtools/extension"
 import type { Feed } from "@/types"
 
 interface FeedState {
-  feeds: Feed[]
+  feedList: Feed[]
   pageSize: number
   currentPage: number
   hasMore: boolean
@@ -17,7 +17,7 @@ interface FeedState {
 }
 
 export const defaultState = {
-  feeds: [] as Feed[],
+  feedList: [] as Feed[],
   pageSize: 10,
   currentPage: 1,
   hasMore: true,
@@ -30,7 +30,7 @@ export const useFeedStore = create<FeedState>()(
     updateFeedList: (newFeedList: Feed[]) =>
       set(state => ({
         ...state,
-        feeds: state.feeds.concat(newFeedList),
+        feedList: state.feedList.concat(newFeedList),
       })),
     updateCurrentPage: (currentPage: number) =>
       set(state => ({ ...state, currentPage })),
