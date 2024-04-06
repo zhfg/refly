@@ -1,9 +1,8 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { v4 as uuid } from 'uuid';
 import omit from 'lodash.omit';
 
-import { QdrantClient } from '@qdrant/js-client-rest';
+import { PGVectorStore } from '@langchain/community/vectorstores/pgvector';
 import { Document } from '@langchain/core/documents';
 import { OpenAIEmbeddings, ChatOpenAI } from '@langchain/openai';
 import {
@@ -17,7 +16,7 @@ import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { PromptTemplate } from '@langchain/core/prompts';
 import { JsonOutputFunctionsParser } from 'langchain/output_parsers';
 
-import { AIGCContent, ChatMessage } from '@prisma/client';
+import { AigcContent, ChatMessage } from '@prisma/client';
 import {
   qa,
   contextualizeQA,
@@ -35,56 +34,38 @@ import { categoryList } from '../prompts/utils/category';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
-  private vectorStore: QdrantClient;
   private embeddings: OpenAIEmbeddings;
+  private vectorStore: PGVectorStore;
   private llm: ChatOpenAI;
-  private collectionName: string;
 
   private readonly logger = new Logger(LlmService.name);
 
   constructor(private configService: ConfigService) {}
 
   async onModuleInit() {
-    this.vectorStore = new QdrantClient({
-      url: this.configService.get('qdrant.url'),
-      timeout: 3000,
-    });
-    this.collectionName = this.configService.get('qdrant.collectionName');
     this.embeddings = new OpenAIEmbeddings({
       modelName: 'text-embedding-3-large',
       batchSize: 512,
-      dimensions: this.configService.get('qdrant.vectorDim'),
+      dimensions: this.configService.get('vectorStore.vectorDim'),
       timeout: 5000,
       maxRetries: 3,
     });
+    this.vectorStore = await PGVectorStore.initialize(this.embeddings, {
+      postgresConnectionOptions: {
+        connectionString: process.env.DATABASE_URL,
+      },
+      tableName: 'content_vectors',
+      columns: {
+        idColumnName: 'id',
+        vectorColumnName: 'vector',
+        contentColumnName: 'content',
+        metadataColumnName: 'metadata',
+      },
+    });
+
     this.llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
 
-    await this.ensureCollection();
     this.logger.log('LLM Service ready');
-  }
-
-  /**
-   * Method to ensure the existence of a collection in the Qdrant database.
-   * If the collection does not exist, it is created.
-   * @returns Promise that resolves when the existence of the collection has been ensured.
-   */
-  async ensureCollection() {
-    const response = await this.vectorStore.getCollections();
-
-    const collectionNames = response.collections.map(
-      (collection) => collection.name,
-    );
-
-    if (!collectionNames.includes(this.collectionName)) {
-      await this.vectorStore.createCollection(this.collectionName, {
-        vectors: {
-          size: this.configService.get('qdrant.vectorDim') as number,
-          distance: 'Cosine',
-        },
-      });
-    }
-
-    this.logger.log(`qdrant collection initialized: ${this.collectionName}`);
   }
 
   /**
@@ -138,7 +119,7 @@ export class LlmService implements OnModuleInit {
    * @param doc
    * @returns
    */
-  async applyStrategy(doc: Document): Promise<Partial<AIGCContent>> {
+  async applyStrategy(doc: Document): Promise<Partial<AigcContent>> {
     // direct apply summary and return with structed json format
     const parser = new JsonOutputFunctionsParser();
     const runnable = await this.llm
@@ -174,8 +155,8 @@ export class LlmService implements OnModuleInit {
    * @returns
    */
   async summarizeMultipleWeblink(
-    docs: AIGCContent[],
-  ): Promise<Partial<AIGCContent>> {
+    docs: AigcContent[],
+  ): Promise<Partial<AigcContent>> {
     // direct apply summary and return with structed json format
     const multipleSourceInputContent = docs.reduce((total, cur) => {
       total += `网页：${cur?.title}
@@ -224,28 +205,7 @@ export class LlmService implements OnModuleInit {
     });
     const documents = await textSplitter.splitDocuments([doc]);
 
-    // embedding
-    const texts = documents.map(({ pageContent }) => pageContent);
-    const vectors = await this.embeddings.embedDocuments(texts);
-
-    // load into vector store
-    if (vectors.length === 0) {
-      return;
-    }
-
-    const points = vectors.map((embedding, idx) => ({
-      id: uuid(),
-      vector: embedding,
-      payload: {
-        content: documents[idx].pageContent,
-        ...documents[idx].metadata,
-      },
-    }));
-
-    await this.vectorStore.upsert(this.collectionName, {
-      wait: true,
-      points,
-    });
+    await this.vectorStore.addDocuments(documents);
   }
 
   async retrieval(query: string, filter) {
@@ -273,14 +233,9 @@ export class LlmService implements OnModuleInit {
     await Promise.all(
       // 这里除了关键词，需要把 query 也带上
       [...(res?.keyword_list || []), query].map(async (keyword) => {
-        const queryEmbedding = await this.embeddings.embedQuery(keyword);
-        const keywordRetrievalResults = await this.vectorStore.search(
-          this.collectionName,
-          {
-            vector: queryEmbedding,
-            limit: 5,
-            filter,
-          },
+        const keywordRetrievalResults = await this.vectorStore.similaritySearch(
+          keyword,
+          5,
         );
 
         results = results.concat(keywordRetrievalResults);

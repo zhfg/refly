@@ -15,7 +15,7 @@ export class ChatMessage {
 
 export class CreateConversationParam {
   @ApiPropertyOptional({ description: '针对提问的内容' })
-  contentId?: string;
+  contentId?: number;
 
   @ApiPropertyOptional()
   title?: string;
@@ -36,7 +36,7 @@ export class CreateConversationResponse extends CreateConversationParam {
 
 export class Conversation {
   @ApiProperty()
-  id: string;
+  id: number;
 
   @ApiPropertyOptional()
   content?: Content;
@@ -58,5 +58,5 @@ export class ChatParam {
   chatHistory?: ChatMessage[];
 
   @ApiPropertyOptional()
-  conversationId: string;
+  conversationId: number;
 }

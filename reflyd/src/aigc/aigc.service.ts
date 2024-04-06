@@ -4,7 +4,7 @@ import omit from 'lodash.omit';
 
 import { LlmService } from '../llm/llm.service';
 import { PrismaService } from '../common/prisma.service';
-import { AIGCContent, UserDigest, UserWeblink, Weblink } from '@prisma/client';
+import { AigcContent, UserWeblink, Weblink } from '@prisma/client';
 import { ContentMeta } from 'src/llm/dto';
 import { WebLinkDTO } from 'src/weblink/dto';
 import { DigestFilter } from './aigc.dto';
@@ -41,8 +41,8 @@ export class AigcService {
     });
   }
 
-  async fetchDigestWeblinks(content: AIGCContent) {
-    const results = await this.prisma.aIGCContent.findMany({
+  async fetchDigestWeblinks(content: AigcContent) {
+    const results = await this.prisma.aigcContent.findMany({
       select: {
         weblink: {
           select: { url: true, pageMeta: true, contentMeta: true },
@@ -59,7 +59,7 @@ export class AigcService {
     pageSize?: number;
   }) {
     const { page = 1, pageSize = 10 } = params;
-    return this.prisma.aIGCContent.findMany({
+    return this.prisma.aigcContent.findMany({
       where: { sourceType: 'weblink' },
       skip: (page - 1) * pageSize,
       take: pageSize,
@@ -70,9 +70,9 @@ export class AigcService {
     });
   }
 
-  async getContent(params: { contentId: string }) {
+  async getContent(params: { contentId: number }) {
     const { contentId } = params;
-    return this.prisma.aIGCContent.findUnique({
+    return this.prisma.aigcContent.findUnique({
       where: { id: contentId },
       include: { inputs: true },
     });
@@ -115,7 +115,7 @@ export class AigcService {
    */
   private async upsertUserDigest(param: {
     uwb: UserWeblink;
-    content: AIGCContent;
+    content: AigcContent;
     meta: ContentMeta;
   }): Promise<void> {
     const { uwb, content, meta } = param;
@@ -134,7 +134,7 @@ export class AigcService {
 
     // 如果该 topic 下已有摘要，进行增量总结
     if (digest) {
-      const dContent = await this.prisma.aIGCContent.findUnique({
+      const dContent = await this.prisma.aigcContent.findUnique({
         where: { id: digest.contentId },
         include: { inputs: true },
       });
@@ -154,11 +154,11 @@ export class AigcService {
 
       // 更新 aigc 依赖关系
       this.prisma.$transaction(async (tx) => {
-        await tx.aIGCContent.update({
+        await tx.aigcContent.update({
           where: { id: dContent.id },
           data: { ...combinedContent, inputIds: { push: content.id } },
         });
-        await tx.aIGCContent.update({
+        await tx.aigcContent.update({
           where: { id: content.id },
           data: { outputIds: { push: dContent.id } },
         });
@@ -179,11 +179,11 @@ export class AigcService {
               ...omit(content, 'id', 'sources'),
               sourceType: 'digest',
               inputIds: [content.id],
-            } as AIGCContent,
+            } as AigcContent,
           },
         },
       });
-      await tx.aIGCContent.update({
+      await tx.aigcContent.update({
         where: { id: content.id },
         data: { outputIds: { push: newDigest.contentId } },
       });
@@ -198,7 +198,7 @@ export class AigcService {
   async runUserContentFlow(param: {
     uwb: UserWeblink;
     meta: ContentMeta;
-    content: AIGCContent;
+    content: AigcContent;
   }) {
     const { uwb, meta } = param;
     const user = await this.prisma.user.findUnique({
@@ -222,7 +222,7 @@ export class AigcService {
     const { weblink, doc, meta } = param;
 
     // 查找该 weblink 是否已生成内容，如有则直接返回
-    const content = await this.prisma.aIGCContent.findFirst({
+    const content = await this.prisma.aigcContent.findFirst({
       where: { weblinkId: weblink.id },
     });
     if (content) {
@@ -239,12 +239,12 @@ export class AigcService {
 
     // Apply strategy and save aigc content
     const newContent = await this.llmService.applyStrategy(doc);
-    return await this.prisma.aIGCContent.create({
+    return await this.prisma.aigcContent.create({
       data: {
         ...newContent,
         sourceType: 'weblink',
         weblinkId: weblink.id,
-      } as AIGCContent,
+      } as AigcContent,
     });
   }
 
@@ -376,5 +376,5 @@ export class AigcService {
 }
 
 function shouldRunIndexPipeline(meta: ContentMeta): boolean {
-  return false;
+  return true;
 }

@@ -2,28 +2,17 @@
 
 ## Docker Images
 
-Prepare MongoDB:
+Prepare database:
 
 ```bash
-docker run --name mongodb -d -p 27017:27017 mongo:5 mongod --replSet rs0
-docker exec mongodb mongosh --eval "rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'localhost:27017'}]})"
+docker-compose up -d
 ```
 
-Prepare Redis Stack:
+Run database migrations:
 
 ```bash
-docker run -d --name redis-stack -p 6379:6379 -p 8001:8001 redis/redis-stack:latest
+npx prisma migrate deploy
 ```
-
-> Visit [RedisInsight](http://localhost:8001/redis-stack/browser) for stored data in detail.
-
-Prepare Qdrant vector store:
-
-```bash
-docker run -d --name qdrant -p 6333:6333 -p 6334:6334 qdrant/qdrant
-```
-
-> Visit [Qdrant Web UI](http://localhost:6333/dashboard) for vector management.
 
 ## Installation
 

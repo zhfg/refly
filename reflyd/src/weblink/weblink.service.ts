@@ -27,7 +27,7 @@ export class WeblinkService {
    * @param userId user id
    * @param links link history data
    */
-  async storeLinks(userId: string, links: WebLinkDTO[]) {
+  async storeLinks(userId: number, links: WebLinkDTO[]) {
     if (!links) return;
 
     // Aggregate links (pick the last visit one)

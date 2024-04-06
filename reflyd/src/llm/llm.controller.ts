@@ -8,11 +8,9 @@ import {
   UseGuards,
   Body,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { LlmService } from './llm.service';
-import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { WeblinkService } from '../weblink/weblink.service';
-import { AIGCContent } from '@prisma/client';
+import { AigcContent } from '@prisma/client';
 
 @Controller('llm')
 export class LLMController {
@@ -78,7 +76,7 @@ export class LLMController {
 
     const aigcContentList = contentList.map((item) => item.aigcContent);
     const res = await this.llmService.summarizeMultipleWeblink(
-      aigcContentList as AIGCContent[],
+      aigcContentList as AigcContent[],
     );
 
     return res;

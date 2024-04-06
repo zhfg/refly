@@ -32,7 +32,7 @@ export class WebLinkDTO {
   @ApiProperty()
   pageContent?: string; // 反爬网站前端传入
 
-  userId?: string;
+  userId?: number;
 }
 
 export class StoredWebLink extends WebLinkDTO {

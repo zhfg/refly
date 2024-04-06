@@ -21,7 +21,7 @@ export class ConversationService {
     private llmService: LlmService,
   ) {}
 
-  async create(param: CreateConversationParam, userId: string) {
+  async create(param: CreateConversationParam, userId: number) {
     return this.prisma.conversation.create({
       data: {
         title: param.title,
@@ -34,7 +34,7 @@ export class ConversationService {
   }
 
   async updateConversation(
-    conversationId: string,
+    conversationId: number,
     data: Prisma.ConversationUpdateInput,
   ) {
     return this.prisma.conversation.update({
@@ -47,8 +47,8 @@ export class ConversationService {
     type: MessageType;
     sources: string;
     content: string;
-    userId: string;
-    conversationId: string;
+    userId: number;
+    conversationId: number;
     selectedWeblinkConfig?: string;
   }) {
     return this.prisma.chatMessage.create({
@@ -61,8 +61,8 @@ export class ConversationService {
       type: MessageType;
       sources: string;
       content: string;
-      userId: string;
-      conversationId: string;
+      userId: number;
+      conversationId: number;
       selectedWeblinkConfig?: string;
     }[],
   ) {
@@ -71,10 +71,11 @@ export class ConversationService {
     });
   }
 
-  async findFirstConversation(params: {
-    where: Prisma.ConversationWhereInput;
-  }) {
-    return this.prisma.conversation.findFirst(params);
+  async findConversationAndMessages(conversationId: number) {
+    return this.prisma.conversation.findUnique({
+      where: { id: conversationId },
+      include: { messages: true },
+    });
   }
 
   async getConversations(params: {
@@ -89,7 +90,7 @@ export class ConversationService {
     });
   }
 
-  async getMessages(conversationId: string) {
+  async getMessages(conversationId: number) {
     return this.prisma.chatMessage.findMany({
       where: { conversationId },
       orderBy: { createdAt: 'asc' },
@@ -102,7 +103,7 @@ export class ConversationService {
     task: Task,
     chatHistory: ChatMessage[],
   ) {
-    const userId: string = req.user?.id;
+    const userId: number = req.user?.id;
 
     const filter: any = {
       must: [
