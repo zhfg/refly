@@ -46,10 +46,10 @@ export class DigestListRequest {
 }
 
 export class ContentDTO {
-  id: string;
+  id: number;
   title: string;
   abstract: string;
-  contentId: string;
+  contentId: number;
   meta: string;
   weblinks: any[];
   createdAt: Date;
@@ -58,7 +58,7 @@ export class ContentDTO {
 
 export class Digest extends ContentDTO {
   topicKey: string;
-  userId: string;
+  userId: number;
   date: string;
 }
 

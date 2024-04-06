@@ -85,7 +85,9 @@ export class AigcController {
   @Get('content/:contentId')
   @ApiResponse({ type: Content })
   async getContentDetail(@Param('contentId') contentId: string) {
-    const content = await this.aigcService.getContent({ contentId });
+    const content = await this.aigcService.getContent({
+      contentId: Number(contentId),
+    });
     return { data: content };
   }
 }

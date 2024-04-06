@@ -48,9 +48,7 @@ export class AuthController {
   async githubAuthCallback(@Request() req, @Res() res: Response) {
     const user = req.user as User;
 
-    this.logger.log(
-      `github oauth callback success, req.user = ${JSON.stringify(user)}`,
-    );
+    this.logger.log(`github oauth callback success, req.user = ${user.email}`);
 
     const { accessToken } = await this.authService.login(user);
     res
@@ -67,9 +65,7 @@ export class AuthController {
   async googleAuthCallback(@Request() req, @Res() res: Response) {
     const user = req.user as User;
 
-    this.logger.log(
-      `google oauth callback success, req.user = ${JSON.stringify(user)}`,
-    );
+    this.logger.log(`google oauth callback success, req.user = ${user.email}`);
 
     const { accessToken } = await this.authService.login(user);
     res
