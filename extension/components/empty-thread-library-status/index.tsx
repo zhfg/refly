@@ -10,7 +10,9 @@ export const EmptyThreadLibraryStatus = () => {
 
   return (
     <div className="empty-digest-container">
-      <img src={EmptySVG} className="empty-digest-cover" />
+      <div className="empty-digest-cover-container">
+        <img src={EmptySVG} className="empty-digest-cover" />
+      </div>
       <p className="empty-digest-hint">
         暂无无会话，赶紧下载插件或访问首页提问吧~
       </p>
