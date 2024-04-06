@@ -29,7 +29,6 @@ export const parseStreaming = async (
         Authorization: `Bearer ${getAuthTokenFromCookie()}`,
       },
       signal: controller.signal,
-
       body: JSON.stringify({
         task: payload,
       }),

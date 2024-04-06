@@ -10,10 +10,9 @@ import {
   IconPlus,
   IconQuote,
   IconReply,
-  IconShareInternal,
   IconTranslate,
 } from "@arco-design/web-react/icon"
-import React, { useState } from "react"
+import { useState } from "react"
 import type { SessionItem } from "@/types"
 
 // stores
@@ -42,6 +41,102 @@ export const Session = (props: SessionProps) => {
         <div className="session-item">
           <div>
             <p className="session-question">{session?.question}</p>
+          </div>
+          <div className="session-source">
+            {messageStateStore.pending || session?.sources?.length > 0 ? (
+              <div className="session-title-icon">
+                <IconQuote
+                  style={{ fontSize: 18, color: "rgba(0, 0, 0, .8)" }}
+                />
+                <p>来源</p>
+              </div>
+            ) : null}
+            {session?.sources?.length > 0 ? (
+              <div className="session-source-content">
+                <div className="session-source-list">
+                  <List
+                    className="session-source-list-item"
+                    wrapperStyle={{ width: "100%" }}
+                    bordered={false}
+                    pagination={{}}
+                    dataSource={session?.sources}
+                    scrollLoading={
+                      session?.sources?.length > 0 ? null : scrollLoading
+                    }
+                    noDataElement={<div>暂无数据</div>}
+                    render={(item, index) => (
+                      <List.Item
+                        key={index}
+                        style={{
+                          borderBottom: "0.5px solid var(--color-fill-3)",
+                        }}
+                        actionLayout="vertical"
+                        actions={[
+                          <span
+                            key={1}
+                            className="session-source-list-item-action"
+                            onClick={() => {}}>
+                            <img
+                              src={`https://www.google.com/s2/favicons?domain=${item?.metadata?.source}&sz=${16}`}
+                              alt={item?.metadata?.source}
+                            />
+                          </span>,
+                          <a target="_blank" href={item.metadata?.source}>
+                            <span
+                              key={2}
+                              className="session-source-list-item-action">
+                              <Typography.Paragraph
+                                ellipsis={{ rows: 1, wrapper: "span" }}
+                                style={{
+                                  fontSize: 10,
+                                  color: "rgba(0, 0, 0, .4)",
+                                }}>
+                                · {item.metadata?.source} ·
+                              </Typography.Paragraph>
+                            </span>
+                          </a>,
+                          <span
+                            key={2}
+                            className="session-source-list-item-action"
+                            style={{
+                              fontSize: 10,
+                              color: "rgba(0, 0, 0, .4)",
+                            }}>
+                            #{index + 1}
+                          </span>,
+                        ]}>
+                        <List.Item.Meta
+                          title={
+                            <a href={item.metadata?.source}>
+                              <span
+                                style={{
+                                  fontSize: 12,
+                                  color: "rgba(0, 0, 0, .8)",
+                                  fontWeight: "bold",
+                                }}>
+                                {item.metadata?.title}
+                              </span>
+                            </a>
+                          }
+                          description={
+                            <Typography.Paragraph
+                              ellipsis={{ rows: 1, wrapper: "span" }}
+                              style={{
+                                fontSize: 10,
+                                color: "rgba(0, 0, 0, .8)",
+                              }}>
+                              {item.pageContent}
+                            </Typography.Paragraph>
+                          }
+                        />
+                      </List.Item>
+                    )}
+                  />
+                </div>
+              </div>
+            ) : messageStateStore?.pending && isLastSession ? (
+              <Skeleton animation></Skeleton>
+            ) : null}
           </div>
           <div className="session-answer">
             <div className="session-title-icon">
@@ -102,115 +197,43 @@ export const Session = (props: SessionProps) => {
             )}
           </div>
         </div>
-        {session?.relatedQuestions?.length > 0 && isLastSession && (
-          <div className="session-related-question">
+      </div>
+      <div className="session-related-question">
+        <div className="session-related-question">
+          {messageStateStore.pending ||
+          session?.relatedQuestions?.length > 0 ? (
             <div className="session-title-icon">
               <IconReply style={{ fontSize: 18 }} />
               <p>相关问题</p>
             </div>
+          ) : null}
+          {session?.relatedQuestions?.length > 0 ? (
             <div className="session-related-question-content">
               {session?.relatedQuestions?.map((item, index) => (
-                <div key={index} onClick={() => handleAskFollowing(item)}>
-                  <p>{item}</p>
-                  <IconPlus
-                    style={{ fontSize: 12, color: "rgba(0,0,0,0.60)" }}
-                  />
-                </div>
+                <IconTip text="点击进行追问">
+                  <div key={index} onClick={() => handleAskFollowing(item)}>
+                    <p>{item}</p>
+                    <IconPlus
+                      style={{ fontSize: 12, color: "rgba(0,0,0,0.60)" }}
+                    />
+                  </div>
+                </IconTip>
               ))}
             </div>
-          </div>
-        )}
-      </div>
-      <div className="session-source">
-        {messageStateStore.pending || session?.sources?.length > 0 ? (
-          <div className="session-title-icon">
-            <IconQuote style={{ fontSize: 18, color: "rgba(0, 0, 0, .8)" }} />
-            <p>来源</p>
-          </div>
-        ) : null}
-        {session?.sources?.length > 0 ? (
-          <div className="session-source-content">
-            <div className="session-source-list">
-              <List
-                className="session-source-list-item"
-                wrapperStyle={{ width: "100%" }}
-                bordered={false}
-                pagination={{}}
-                dataSource={session?.sources}
-                scrollLoading={
-                  session?.sources?.length > 0 ? null : scrollLoading
-                }
-                noDataElement={<div>暂无数据</div>}
-                render={(item, index) => (
-                  <List.Item
-                    key={index}
-                    style={{
-                      borderBottom: "0.5px solid var(--color-fill-3)",
-                    }}
-                    actionLayout="vertical"
-                    actions={[
-                      <span
-                        key={1}
-                        className="session-source-list-item-action"
-                        onClick={() => {}}>
-                        <img
-                          src={`https://www.google.com/s2/favicons?domain=${item?.metadata?.source}&sz=${16}`}
-                          alt={item?.metadata?.source}
-                        />
-                      </span>,
-                      <a target="_blank" href={item.metadata?.source}>
-                        <span
-                          key={2}
-                          className="session-source-list-item-action">
-                          <Typography.Paragraph
-                            ellipsis={{ rows: 1, wrapper: "span" }}
-                            style={{
-                              fontSize: 10,
-                              color: "rgba(0, 0, 0, .4)",
-                            }}>
-                            · {item.metadata?.source} ·
-                          </Typography.Paragraph>
-                        </span>
-                      </a>,
-                      <span
-                        key={2}
-                        className="session-source-list-item-action"
-                        style={{ fontSize: 10, color: "rgba(0, 0, 0, .4)" }}>
-                        #{index + 1}
-                      </span>,
-                    ]}>
-                    <List.Item.Meta
-                      title={
-                        <a href={item.metadata?.source}>
-                          <span
-                            style={{
-                              fontSize: 12,
-                              color: "rgba(0, 0, 0, .8)",
-                              fontWeight: "bold",
-                            }}>
-                            {item.metadata?.title}
-                          </span>
-                        </a>
-                      }
-                      description={
-                        <Typography.Paragraph
-                          ellipsis={{ rows: 1, wrapper: "span" }}
-                          style={{
-                            fontSize: 10,
-                            color: "rgba(0, 0, 0, .8)",
-                          }}>
-                          {item.pageContent}
-                        </Typography.Paragraph>
-                      }
-                    />
-                  </List.Item>
-                )}
-              />
-            </div>
-          </div>
-        ) : messageStateStore?.pending && isLastSession ? (
-          <Skeleton animation></Skeleton>
-        ) : null}
+          ) : messageStateStore?.pending && isLastSession ? (
+            <>
+              <Skeleton animation text={{ rows: 1 }}></Skeleton>
+              <Skeleton
+                animation
+                text={{ rows: 1 }}
+                style={{ marginTop: 8 }}></Skeleton>
+              <Skeleton
+                animation
+                text={{ rows: 1 }}
+                style={{ marginTop: 8 }}></Skeleton>
+            </>
+          ) : null}
+        </div>
       </div>
     </div>
   )

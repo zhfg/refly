@@ -8,6 +8,7 @@ import {
 import { useSearchStateStore, SearchTarget } from "@/stores/search-state"
 import { useWeblinkStore } from "@/stores/weblink"
 import { IconTip } from "./icon-tip"
+import { useEffect } from "react"
 
 export const SearchTargetSelector = () => {
   const searchStateStore = useSearchStateStore()
@@ -49,10 +50,12 @@ export const SearchTargetSelector = () => {
     switch (searchTarget) {
       case SearchTarget.SelectedPages:
         return "历史已阅读"
-      case SearchTarget.CurrentPage:
-        return "当前网页"
       case SearchTarget.All:
         return "所有网页"
+
+      default: {
+        return "所有网页"
+      }
     }
   }
 
@@ -66,6 +69,10 @@ export const SearchTargetSelector = () => {
         return <IconCommon />
     }
   }
+
+  useEffect(() => {
+    searchStateStore.setSearchTarget(SearchTarget.All)
+  }, [])
 
   return (
     <IconTip text="选择网页问答">

@@ -17,12 +17,16 @@ export const SelectedWeblink = React.forwardRef(
     const updateSelectedRow = (link: Source) => {
       const { selectedRow } = useWeblinkStore.getState()
 
+      console.log("updateSelectedRow", link, selectedRow)
       // 去掉删除的 row
       const newSelectedRow = selectedRow.filter(
         item => item.content?.originPageUrl !== link?.metadata?.source,
       )
+      console.log("updateSelectedRow 2", newSelectedRow)
       weblinkStore.updateSelectedRow(newSelectedRow)
     }
+
+    console.log("props.selectedWeblinkList?", props.selectedWeblinkList)
 
     return (
       <div className="selected-weblinks-container" ref={ref}>

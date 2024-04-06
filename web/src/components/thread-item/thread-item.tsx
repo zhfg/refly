@@ -147,7 +147,9 @@ export const ThreadItem = (props: ThreadItemProps) => {
                       shape="circle"
                       icon={<IconSend />}
                       style={{ color: "#FFF", background: "#00968F" }}
-                      onClick={props.handleAskFollowing}></Button>
+                      onClick={() => {
+                        props.handleAskFollowing()
+                      }}></Button>
                   </div>
                 </div>
               </div>

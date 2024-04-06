@@ -56,6 +56,7 @@ export const useBuildTask = () => {
   }
 
   const buildShutdownTaskAndGenResponse = () => {
+    controllerRef.current?.abort()
     handleSendMessage({
       body: {
         type: TASK_STATUS.SHUTDOWN,
