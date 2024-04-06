@@ -25,6 +25,7 @@ import {
   summarize,
   summarizeMultipleSource,
   extractSummarizeMeta,
+  generateAskFollowupQuestion,
 } from '../prompts/index';
 import { LLMChatMessage } from './schema';
 import { HumanMessage, SystemMessage } from 'langchain/schema';
@@ -295,6 +296,58 @@ export class LlmService implements OnModuleInit {
       ?.slice(0, 6);
 
     return results;
+  }
+
+  async getRelatedQuestion(docs: Document[], lastQuery: string) {
+    if (docs.length <= 0) return;
+
+    let contextContent = docs.reduce((total, cur) => {
+      total += `内容块:
+      ===
+      网页标题：${cur?.metadata?.title}
+      网页链接：${cur?.metadata?.source}
+      网页内容：${cur.pageContent}
+      ===
+      `;
+
+      return total;
+    }, '');
+
+    contextContent += lastQuery
+      ? `\n用户上次提问：
+    ===
+    ${lastQuery}
+    ===
+    `
+      : '';
+
+    // 拼接提示
+    contextContent = `## Context\n ${contextContent}`;
+
+    const llm = new ChatOpenAI({
+      modelName: 'gpt-3.5-turbo',
+      temperature: 0.1,
+    });
+    this.llm = llm;
+
+    const parser = new JsonOutputFunctionsParser();
+    const runnable = await this.llm
+      .bind({
+        functions: [
+          generateAskFollowupQuestion.generateAskFollowupQuestionSchema,
+        ],
+        function_call: { name: 'get_ask_follow_up_questions' },
+      })
+      .pipe(parser);
+    const askFollowUpQuestion = (await runnable.invoke([
+      new SystemMessage(generateAskFollowupQuestion.systemPrompt),
+      new HumanMessage(contextContent),
+    ])) as {
+      recommend_ask_followup_question: string[];
+    };
+
+    // TODO: need return topics、all weblinks
+    return askFollowUpQuestion?.recommend_ask_followup_question || [];
   }
 
   async summary(

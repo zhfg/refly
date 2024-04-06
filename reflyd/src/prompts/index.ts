@@ -5,6 +5,7 @@ import * as summarize from './summarize';
 import * as summarizeMultipleWeblink from './summarizeMultipleWeblink';
 import * as extractSummarizeMeta from './extractSummarizeMeta';
 import * as summarizeMultipleSource from './summarizeMultipleSource';
+import * as generateAskFollowupQuestion from './generateAskFollowupQuestion';
 
 export {
   contextualizeQA,
@@ -14,4 +15,5 @@ export {
   summarizeMultipleWeblink,
   extractSummarizeMeta,
   summarizeMultipleSource,
+  generateAskFollowupQuestion,
 };

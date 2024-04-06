@@ -62,4 +62,37 @@ describe('LlmService', () => {
       content: '',
     });
   });
+
+  it('generateAskFollowupQuestionSchema', async () => {
+    const docs = [
+      {
+        pageContent: `- Google's Search Generative Experience (SGE) continues to evolve as consumer interest in AI-powered search grows.
+        - The article discusses the increasing demand for generative AI tools and AI-powered search, the impact of Google SGE on search results, and the potential marketing strategies for adapting to generative AI search experiences.
+        - It also covers Google's focus on enhancing search with AI, user trust in AI-powered search results, and the challenges related to copyright concerns and organic search traffic.`,
+        meta: {
+          title:
+            'Google SGE And Generative AI In Search: What To Expect In 2024',
+          source:
+            'https://www.searchenginejournal.com/google-sge-and-generative-ai-in-search-what-to-expect-in-2024/504578/',
+        },
+      },
+      {
+        pageContent: `- LangSmith provides tracing capabilities for monitoring and debugging applications during testing.
+        - It allows quick editing of examples and addition to datasets for evaluation and model fine-tuning.
+        - LangSmith can monitor applications in production, log feedback, and pinpoint underperforming data points.
+        - It simplifies rigorous testing by using existing or handcrafted datasets to evaluate application performance.`,
+        meta: {
+          title: 'Quickstart | 🦜️🔗 Langchain',
+          source:
+            'https://python.langchain.com/docs/modules/agents/quick_start',
+        },
+      },
+    ];
+    const res = await service.getRelatedQuestion(docs as any, '');
+    console.log('getRelatedQuestion', res);
+    expect(res).toEqual({
+      title: '',
+      content: '',
+    });
+  });
 });
