@@ -138,9 +138,7 @@ export class ConversationController {
         sources = taskRes?.sources;
         answer = taskRes?.answer;
       }
-
-      // 结束流式输出
-      res.end(`[DONE]`);
+      res.end(``);
 
       await this.conversationService.addChatMessage({
         type: 'ai',
@@ -167,7 +165,7 @@ export class ConversationController {
       console.log('chat error', err);
 
       // 结束流式输出
-      res.end(`[DONE]`);
+      res.end(``);
     }
   }
 

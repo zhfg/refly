@@ -85,20 +85,27 @@ export const Thread = () => {
     chatStore.setNewQAText(newQAText)
   }
 
-  const handleAskFollowing = () => {
-    const { newQAText } = useChatStore.getState()
+  const handleAskFollowing = (question?: string) => {
+    // support ask follow up question
+    let newQuestion = ""
+    if (typeof question === "string" && question) {
+      newQuestion = question
+    } else {
+      const { newQAText } = useChatStore.getState()
+      newQuestion = newQAText
+    }
     const { currentConversation } = useConversationStore.getState()
     const { messages } = useChatStore.getState()
     const selectedWeblinkConfig = getSelectedWeblinkConfig(messages)
 
-    console.log("handleAskFollowing", newQAText)
+    console.log("handleAskFollowing", newQuestion)
 
     const useWeblinkList =
       selectedWeblinkConfig?.searchTarget === SearchTarget.SelectedPages &&
       selectedWeblinkConfig?.filter?.length > 0
 
     const task = buildChatTask({
-      question: newQAText,
+      question: newQuestion,
       conversationId: currentConversation?.id || "",
       filter: {
         weblinkList: useWeblinkList ? selectedWeblinkConfig?.filter : [],
@@ -163,7 +170,6 @@ export const Thread = () => {
     }
   }, [])
 
-  console.log("thread message", chatStore.messages)
   const sessions = buildSessions(chatStore.messages)
   const selectedWeblinkConfig = getSelectedWeblinkConfig(chatStore.messages)
 

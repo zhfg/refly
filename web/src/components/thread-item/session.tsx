@@ -26,16 +26,15 @@ import copyToClipboard from "copy-to-clipboard"
 interface SessionProps {
   session: SessionItem
   isLastSession: boolean
+  handleAskFollowing: (question?: string) => void
 }
 
 export const Session = (props: SessionProps) => {
-  const { session, isLastSession = false } = props
+  const { session, isLastSession = false, handleAskFollowing } = props
   const messageStateStore = useMessageStateStore()
   const [scrollLoading] = useState(<Skeleton animation></Skeleton>)
 
   //   const fetchData = currentPage => {}
-
-  console.log("session", isLastSession, session)
 
   return (
     <div className="session-item-container">
@@ -111,7 +110,7 @@ export const Session = (props: SessionProps) => {
             </div>
             <div className="session-related-question-content">
               {session?.relatedQuestions?.map((item, index) => (
-                <div key={index}>
+                <div key={index} onClick={() => handleAskFollowing(item)}>
                   <p>{item}</p>
                   <IconPlus
                     style={{ fontSize: 12, color: "rgba(0,0,0,0.60)" }}

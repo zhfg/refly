@@ -24,8 +24,6 @@ export const SelectedWeblink = React.forwardRef(
       weblinkStore.updateSelectedRow(newSelectedRow)
     }
 
-    console.log("weblinkStore", weblinkStore?.selectedRow)
-
     return (
       <div className="selected-weblinks-container" ref={ref}>
         <div className="selected-weblinks-inner-container">

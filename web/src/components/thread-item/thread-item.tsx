@@ -24,7 +24,7 @@ interface ThreadItemProps {
     searchTarget: SearchTarget
     filter: Source[]
   }
-  handleAskFollowing: () => void
+  handleAskFollowing: (question?: string) => void
 }
 
 const TextArea = Input.TextArea
@@ -71,15 +71,6 @@ export const ThreadItem = (props: ThreadItemProps) => {
     }
   }, [selectedWeblinkConfig?.searchTarget, selectedWeblinkConfig?.filter])
 
-  console.log(
-    "selectedWeblinkConfig",
-    selectedWeblinkConfig,
-    threadSearchTarget,
-    threadWeblinkListFilter,
-  )
-
-  console.log("addedStyle", addedStyle, showSelectedWeblinkList)
-
   useEffect(() => {
     setAddedStyle(
       showSelectedWeblinkList
@@ -97,6 +88,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
           <Session
             key={index}
             session={item}
+            handleAskFollowing={props.handleAskFollowing}
             isLastSession={index === sessions.length - 1}
           />
         ))}

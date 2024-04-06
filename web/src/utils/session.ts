@@ -16,6 +16,8 @@ export const buildSessionItem = (
     relatedQuestions: answerMessage?.data.relatedQuestions || [],
   }
 
+  console.log("buildSessionItem", session)
+
   return session
 }
 

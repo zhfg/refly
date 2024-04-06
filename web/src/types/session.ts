@@ -7,9 +7,11 @@ export interface Source {
   score: number
 }
 
+export type RelatedQuestion = string
+
 export interface SessionItem {
   question: string
   sources: Source[]
   answer: string
-  relatedQuestions: string[] // 推荐问题列表
+  relatedQuestions: RelatedQuestion[] // 推荐问题列表
 }

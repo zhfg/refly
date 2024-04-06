@@ -13,6 +13,9 @@ import { createLLMChatMessage } from 'src/llm/schema';
 import { LlmService } from '../llm/llm.service';
 import { WeblinkService } from 'src/weblink/weblink.service';
 
+const LLM_SPLIT = '__LLM_RESPONSE__';
+const RELATED_SPLIT = '__RELATED_QUESTIONS__';
+
 @Injectable()
 export class ConversationService {
   constructor(
@@ -134,32 +137,35 @@ export class ConversationService {
     );
 
     // first return sources，use unique tag for parse data
-    sources.forEach((source) => {
-      const payload = {
-        type: 'source',
-        body: source,
-      };
-      res.write(`refly-sse-source: ${JSON.stringify(payload)}`);
-    });
+    res.write(JSON.stringify(sources));
+    res.write(LLM_SPLIT);
 
-    // 先发一个空块，提前展示 sources
-    res.write(`refly-sse-source: [REFLY-SOURCE-END]`);
+    const getSSEData = async (stream) => {
+      // write answer in a stream style
+      let answerStr = '';
+      for await (const chunk of await stream) {
+        answerStr += chunk;
 
-    // write answer in a stream style
-    let answerStr = '';
-    for await (const chunk of await stream) {
-      answerStr += chunk;
+        res.write(chunk);
+      }
 
-      const payload = {
-        type: 'chunk',
-        body: chunk,
-      };
-      res.write(`refly-sse-data: ${JSON.stringify(payload)}`);
-    }
+      return answerStr;
+    };
+
+    const [answerStr, relatedQuestions] = await Promise.all([
+      getSSEData(stream),
+      this.llmService.getRelatedQuestion(sources, ''),
+    ]);
+
+    console.log('relatedQuestions', relatedQuestions);
+
+    res.write(RELATED_SPLIT);
+    res.write(JSON.stringify(relatedQuestions));
 
     return {
       sources,
       answer: answerStr,
+      relatedQuestions,
     };
   }
 

@@ -35,7 +35,7 @@ export const generateAskFollowupQuestionSchema = {
         items: {
           type: 'string',
         },
-        description: '需要生成的 3 推荐追问问题',
+        description: '需要生成的 3 个推荐追问问题，并始终使用用户使用的语言。',
       },
     },
     required: ['recommend_ask_followup_question'],

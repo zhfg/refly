@@ -247,7 +247,7 @@ export class LlmService implements OnModuleInit {
     // TODO: 这里只考虑了召回阈值和数量，默认取五个，但是没有考虑 token 窗口，未来需要优化
     results = uniqueFunc(results, 'content')
       .sort((a, b) => (b?.score || 0) - (a?.score || 0))
-      ?.filter((item) => item?.score >= 0.8)
+      // ?.filter((item) => item?.score >= 0.8)
       ?.slice(0, 6);
 
     return results;
@@ -259,7 +259,7 @@ export class LlmService implements OnModuleInit {
     let contextContent = docs.reduce((total, cur) => {
       total += `内容块:
       ===
-      网页标题：${cur?.metadata?.title}
+      网页标题：${cur?.metadata?.title} 
       网页链接：${cur?.metadata?.source}
       网页内容：${cur.pageContent}
       ===
@@ -387,6 +387,7 @@ export class LlmService implements OnModuleInit {
     const qaPrompt = ChatPromptTemplate.fromMessages([
       ['system', qa.systemPrompt],
       new MessagesPlaceholder('chatHistory'),
+      ['human', `The context as follow:\n === \n {context} \n === \n`],
       ['human', '{question}'],
     ]);
 
@@ -399,10 +400,12 @@ export class LlmService implements OnModuleInit {
 
     const retrievalResults = await this.retrieval(questionWithContext, filter);
 
+    console.log('retrievalResults', retrievalResults);
+
     const retrievedDocs = retrievalResults.map((res) => ({
-      metadata: omit(res.payload, 'content'),
-      pageContent: res.payload.content as string,
-      score: res.score, // similarity score
+      metadata: res?.metadata,
+      pageContent: res?.pageContent as string,
+      score: res?.score, // similarity score
     }));
 
     return {

@@ -64,8 +64,6 @@ export const Session = (props: SessionProps) => {
   }
   //   const fetchData = currentPage => {}
 
-  console.log("session", isLastSession, session)
-
   return (
     <div className="session-item-container">
       <div className="session-content-body">
