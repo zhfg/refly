@@ -59,10 +59,10 @@
     "@babel/types" "^7.12.12"
     "@types/node" "^16.11.10"
 
-"@arco-themes/react-refly-ai@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.npmmirror.com/@arco-themes/react-refly-ai/-/react-refly-ai-0.0.1.tgz#0fca5457e2ed5d8a44b8ea2e3dae1a6e473835b3"
-  integrity sha512-xEFz0jQOL1K4EwLMARhc3sqdxCMDq5N4spF7ccTpSoMFqr0Rup/czhHofrU7Mf1iXcRLikX0r5HtbjGc1To/LA==
+"@arco-themes/react-refly-ai@0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@arco-themes/react-refly-ai/-/react-refly-ai-0.0.2.tgz#d68da13aa1088c5a805c55eae5fd3136771a4cc8"
+  integrity sha512-zYhABtGsjBB50CMn5CK6VlesWrWRx8A3K0atS+43oucKfvdk4mzm+pGUYuhEfFEmOnw3eJMuwH8XDOvLBzloZQ==
 
 "@babel/code-frame@^7.23.5":
   version "7.23.5"
