@@ -158,7 +158,7 @@ export class ConversationService {
 
     const [answerStr, relatedQuestions] = await Promise.all([
       getSSEData(stream),
-      this.llmService.getRelatedQuestion(sources, ''),
+      this.llmService.getRelatedQuestion(sources, query),
     ]);
 
     console.log('relatedQuestions', relatedQuestions);
@@ -242,9 +242,20 @@ export class ConversationService {
       }
     });
 
+    const getUserQuestion = (actionType: QUICK_ACTION_TYPE) => {
+      switch (actionType) {
+        case QUICK_ACTION_TYPE.SUMMARY: {
+          return '总结网页';
+        }
+      }
+    };
+
     const [_, relatedQuestions] = await Promise.all([
       promise,
-      this.llmService.getRelatedQuestion(docs, ''),
+      this.llmService.getRelatedQuestion(
+        docs,
+        getUserQuestion(data?.actionType),
+      ),
     ]);
 
     console.log('relatedQuestions', relatedQuestions);

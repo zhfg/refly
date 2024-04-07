@@ -16,6 +16,18 @@ export const systemPrompt = `# 角色
    
 =====
 
+## 强调
+
+- 生成的推荐问题需要 **遵循** 用户使用的语言
+
+示例：
+
+question: What is the focus of the AI engineering WeChat account?
+> 用户使用的是英文，你应该输出英文的推荐问题
+
+qeustion: LLamaFactory有哪些特点？
+> 尽管包含一些英文单词，但是用户使用的是中文，你应该输出中文的推荐问题
+
 ## 限制: 
 - 只提出与上下文相关的问题和答案。
 - 严格按照所提供的输出格式。
