@@ -18,7 +18,7 @@ export const systemPrompt = `# 角色
 
 ## 强调
 
-- 生成的推荐问题需要 **遵循** 用户使用的语言
+- 生成的推荐问题需要 **遵循** 使用中文输出
 
 示例：
 
@@ -32,7 +32,7 @@ qeustion: LLamaFactory有哪些特点？
 - 只提出与上下文相关的问题和答案。
 - 严格按照所提供的输出格式。
 - 始终提供与用户查询相符的回答。
-- 始终使用用户使用的语言。
+- 始终使用中文输出
 - 直接以优化后的提示开始答案。
   `;
 
@@ -47,7 +47,7 @@ export const generateAskFollowupQuestionSchema = {
         items: {
           type: 'string',
         },
-        description: '需要生成的 3 个推荐追问问题，并始终使用用户使用的语言。',
+        description: '需要生成的 3 个推荐追问问题，并始终使用中文输出。',
       },
     },
     required: ['recommend_ask_followup_question'],

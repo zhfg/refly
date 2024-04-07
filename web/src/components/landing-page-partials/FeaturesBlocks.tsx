@@ -50,10 +50,10 @@ function FeaturesBlocks() {
                   strokeWidth="2"
                 />
               </svg>
-              <h4 className="h4 mb-2">兴趣在手边</h4>
+              <h4 className="h4 mb-2">Quick Action with Extension</h4>
               <p className="text-lg text-gray-400 text-center">
-                CMD+B
-                快速切出浏览器插件，并对文章或新闻进行快速总结，立马掌握要点
+                Quick summary for any website, continuous questioning, and
+                conduct in-depth research on your favorite content
               </p>
             </div>
 
@@ -137,9 +137,10 @@ function FeaturesBlocks() {
                   />
                 </g>
               </svg>
-              <h4 className="h4 mb-2">回忆在手边</h4>
+              <h4 className="h4 mb-2">All-in-one Search Engine</h4>
               <p className="text-lg text-gray-400 text-center">
-                持续记录浏览历史，自动打标分类并支持快速检索，发现兴趣回顾工作两不漏
+                All in one search engine supports natural language search for
+                all your memories and builds your second brain
               </p>
             </div>
 
@@ -177,10 +178,10 @@ function FeaturesBlocks() {
                   />
                 </g>
               </svg>
-              <h4 className="h4 mb-2">拥有超能力</h4>
+              <h4 className="h4 mb-2">Auto tag and timeline</h4>
               <p className="text-lg text-gray-400 text-center">
-                动动小嘴，Get 一天事项；无论浏览多么多内容，AI
-                都自动帮你整理归档
+                Automatically and tag, search and review at any time. Build a
+                knowledge system through labels & timelines
               </p>
             </div>
 
