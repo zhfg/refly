@@ -30,6 +30,7 @@ interface ThreadItemProps {
     searchTarget: SearchTarget
     filter: Source[]
   }
+  handleAskFollowing: (question?: string) => void
 }
 
 const TextArea = Input.TextArea
@@ -140,6 +141,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
             key={index}
             session={item}
             isLastSession={index === sessions.length - 1}
+            handleAskFollowing={props.handleAskFollowing}
           />
         ))}
       </div>

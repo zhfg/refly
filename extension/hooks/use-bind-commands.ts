@@ -57,7 +57,6 @@ export const useBindCommands = () => {
     const elem = document
       .querySelector("plasmo-csui")
       ?.shadowRoot?.querySelector(".message-input")
-    console.log("bind elem", elem, keyboardSendShortcutRef.current)
     hotKeys(
       keyboardSendShortcutRef.current,
       {

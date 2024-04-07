@@ -10,6 +10,7 @@ import { useConversationStore } from "~stores/conversation"
 import { useThreadStore } from "~stores/thread"
 // utils
 import { buildSessions } from "~utils/session"
+import { buildChatTask } from "~utils/task"
 // 组件
 import { ThreadItem } from "~components/thread-item/thread-item"
 import { sendToBackground } from "@plasmohq/messaging"
@@ -77,6 +78,36 @@ export const Thread = () => {
     chatStore.setMessages(messages)
   }
 
+  const handleAskFollowing = (question?: string) => {
+    // support ask follow up question
+    let newQuestion = ""
+    if (typeof question === "string" && question) {
+      newQuestion = question
+    } else {
+      const { newQAText } = useChatStore.getState()
+      newQuestion = newQAText
+    }
+    const { currentConversation } = useConversationStore.getState()
+    const { messages } = useChatStore.getState()
+    const selectedWeblinkConfig = getSelectedWeblinkConfig(messages)
+
+    console.log("handleAskFollowing", newQuestion)
+
+    const useWeblinkList =
+      selectedWeblinkConfig?.searchTarget === SearchTarget.SelectedPages &&
+      selectedWeblinkConfig?.filter?.length > 0
+
+    const task = buildChatTask({
+      question: newQuestion,
+      conversationId: currentConversation?.id || "",
+      filter: {
+        weblinkList: useWeblinkList ? selectedWeblinkConfig?.filter : [],
+      },
+    })
+    buildTaskAndGenReponse(task)
+    chatStore.setNewQAText("")
+  }
+
   const getSelectedWeblinkConfig = (messages: Message[] = []) => {
     // 这里是获取第一个，早期简化策略，因为一开始设置之后，后续设置就保留
     const lastHumanMessage = messages?.find(
@@ -125,6 +156,7 @@ export const Thread = () => {
       <ThreadItem
         sessions={sessions}
         selectedWeblinkConfig={selectedWeblinkConfig}
+        handleAskFollowing={handleAskFollowing}
       />
     </div>
   )

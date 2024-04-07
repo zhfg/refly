@@ -112,6 +112,10 @@
   }
 }
 
+.session-related-question {
+  width: 100%;
+}
+
 .session-source-list {
   a {
     text-decoration: none;
@@ -147,6 +151,10 @@
 }
 
 .session-related-question-content {
+  &:hover {
+    cursor: pointer;
+  }
+
   div {
     padding: 8px 0px;
     display: flex;
@@ -167,6 +175,8 @@
       line-height: 12px;
       font-size: 12px;
       color: rgba(0, 0, 0, 0.6);
+      width: 320px;
+      line-height: 1.5;
     }
   }
 }

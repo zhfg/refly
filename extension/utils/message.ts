@@ -212,7 +212,7 @@ export const buildErrorMessage = (data: BuildMessageData) => {
     conversationId,
     summary: content,
     data: {
-      type: MessageDataType.TEXT,
+      type: MessageType.Assistant,
       content,
     },
   }
