@@ -12,6 +12,10 @@ import {
 import { createLLMChatMessage } from 'src/llm/schema';
 import { LlmService } from '../llm/llm.service';
 import { WeblinkService } from 'src/weblink/weblink.service';
+import { resolve } from 'path';
+import { rejects } from 'assert';
+import { Source } from 'src/types/weblink';
+import { Document } from '@langchain/core/documents';
 
 const LLM_SPLIT = '__LLM_RESPONSE__';
 const RELATED_SPLIT = '__RELATED_QUESTIONS__';
@@ -182,10 +186,9 @@ export class ConversationService {
     const sources = data?.filter?.weblinkList || [];
     // TODO: 这里后续要处理边界情况，比如没有链接时应该报错
     if (sources?.length <= 0) {
-      res.write(`refly-sse-source: ${JSON.stringify({})}`);
-
+      res.write(JSON.stringify([]));
       // 先发一个空块，提前展示 sources
-      res.write(`refly-sse-source: [REFLY-SOURCE-END]`);
+      res.write(LLM_SPLIT);
 
       return {
         sources: [],
@@ -193,48 +196,66 @@ export class ConversationService {
       };
     }
 
-    sources.forEach((source) => {
-      const payload = {
-        type: 'source',
-        body: source,
-      };
-      res.write(`refly-sse-source: ${JSON.stringify(payload)}`);
-    });
-
-    // 先发一个空块，提前展示 sources
-    res.write(`refly-sse-source: [REFLY-SOURCE-END]`);
+    res.write(JSON.stringify(sources));
+    res.write(LLM_SPLIT);
 
     // write answer in a stream style
     let answerStr = '';
-    // 这里用于回调
-    const onMessage = (chunk: string) => {
-      answerStr += chunk;
 
-      const payload = {
-        type: 'chunk',
-        body: chunk,
+    const weblinkList = data?.filter?.weblinkList;
+    if (weblinkList?.length <= 0) return;
+
+    // 基于一组网页做总结，先获取网页内容
+    const docs = await this.weblinkService.parseMultiWeblinks(weblinkList);
+
+    // 构建一个 promise 用于处理 summary 输出
+    const promise = new Promise(async (resolve, reject) => {
+      // 这里用于回调
+      const onMessage = (chunk: string) => {
+        answerStr += chunk;
+
+        res.write(chunk);
       };
-      res.write(`refly-sse-data: ${JSON.stringify(payload)}`);
-    };
 
-    if (data?.actionType === QUICK_ACTION_TYPE.SUMMARY) {
-      const weblinkList = data?.filter?.weblinkList;
-      if (weblinkList?.length <= 0) return;
+      // summarize 输出结束之后将 related questions 写回
+      const onEnd = (output) => {
+        resolve(output);
+      };
 
-      // 基于一组网页做总结，先获取网页内容
-      const docs = await this.weblinkService.parseMultiWeblinks(weblinkList);
+      const onError = (err) => {
+        console.log('err', err);
+        reject(err);
+      };
 
-      await this.llmService.summary(
-        data?.actionPrompt,
-        docs,
-        chatHistory,
-        onMessage,
-      );
-    }
+      if (data?.actionType === QUICK_ACTION_TYPE.SUMMARY) {
+        const weblinkList = data?.filter?.weblinkList;
+        if (weblinkList?.length <= 0) return;
+
+        await this.llmService.summary(
+          data?.actionPrompt,
+          docs,
+          chatHistory,
+          onMessage,
+          onEnd,
+          onError,
+        );
+      }
+    });
+
+    const [_, relatedQuestions] = await Promise.all([
+      promise,
+      this.llmService.getRelatedQuestion(docs, ''),
+    ]);
+
+    console.log('relatedQuestions', relatedQuestions);
+
+    res.write(RELATED_SPLIT);
+    res.write(JSON.stringify(relatedQuestions));
 
     return {
       sources,
       answer: answerStr,
+      relatedQuestions,
     };
   }
 }

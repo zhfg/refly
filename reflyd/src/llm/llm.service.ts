@@ -310,6 +310,8 @@ export class LlmService implements OnModuleInit {
     docs: Document[],
     chatHistory: ChatMessage[],
     onMessage: (chunk: string) => void,
+    onEnd: (output) => void,
+    onError: (err) => void,
   ) {
     if (docs.length <= 0) return;
 
@@ -343,6 +345,12 @@ export class LlmService implements OnModuleInit {
         {
           handleLLMNewToken(token: string): Promise<void> | void {
             onMessage(token);
+          },
+          handleLLMEnd(output) {
+            onEnd(output);
+          },
+          handleLLMError(err, runId, parentRunId, tags) {
+            onError(err);
           },
         },
       ],
