@@ -3,6 +3,17 @@ provider "aws" {
   shared_credentials_files = ["~/.aws/credentials"]
 }
 
+data "aws_vpc" "default" {
+  default = true
+}
+
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+}
+
 ###########################################################
 # AWS Security
 ###########################################################
@@ -120,7 +131,6 @@ resource "aws_instance" "pigsty-meta" {
 resource "aws_instance" "reflyd" {
   ami                         = "ami-06f8dce63a6b60467"
   instance_type               = var.instance_type
-  associate_public_ip_address = false
   vpc_security_group_ids      = [aws_security_group.reflyd_sg.id]
   count                       = var.instance_count
 
@@ -166,7 +176,7 @@ resource "aws_lb" "reflyd_lb" {
   name               = "${var.app_name}-lb-tf"
   internal           = false
   load_balancer_type = "application"
-  subnets            = [for subnet in aws_subnet.public : subnet.id]
+  subnets            = data.aws_subnets.default.ids
 
   tags = {
     Environment = "production"
@@ -174,9 +184,11 @@ resource "aws_lb" "reflyd_lb" {
 }
 
 resource "aws_lb_target_group" "reflyd_lb" {
-  name     = "${var.app_name}-tg"
-  port     = 3000
-  protocol = "HTTP"
+  name        = "${var.app_name}-tg"
+  port        = 3000
+  protocol    = "HTTP"
+  target_type = "instance"
+  vpc_id      = data.aws_vpc.default.id
 }
 
 resource "aws_lb_target_group_attachment" "reflyd_lb" {
@@ -187,12 +199,12 @@ resource "aws_lb_target_group_attachment" "reflyd_lb" {
 
   target_group_arn = aws_lb_target_group.reflyd_lb.arn
   target_id        = each.value.id
-  port             = 80
+  port             = 3000
 }
 
 resource "aws_lb_listener" "reflyd_lb" {
   load_balancer_arn = aws_lb.reflyd_lb.arn
-  port              = "80"
+  port              = 80
   protocol          = "HTTP"
 
   default_action {
