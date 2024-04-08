@@ -95,4 +95,14 @@ describe('LlmService', () => {
       content: '',
     });
   });
+
+  it('testOnlineSearch', async () => {
+    const question = `Refly 是什么？`;
+    const res = await service.onlineSearch(question);
+    console.log('searchResults', res);
+    expect(res).toEqual({
+      title: '',
+      content: '',
+    });
+  });
 });

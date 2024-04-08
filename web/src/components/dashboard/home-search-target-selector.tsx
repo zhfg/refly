@@ -3,6 +3,7 @@ import {
   IconOriginalSize,
   IconArchive,
   IconCommon,
+  IconCompass,
 } from "@arco-design/web-react/icon"
 
 import { useSearchStateStore, SearchTarget } from "@/stores/search-state"
@@ -43,6 +44,10 @@ export const SearchTargetSelector = () => {
         <IconArchive style={iconStyle} />
         历史已阅读
       </Menu.Item>
+      <Menu.Item key={SearchTarget.SearchEnhance}>
+        <IconCompass style={iconStyle} />
+        联网搜索
+      </Menu.Item>
     </Menu>
   )
 
@@ -52,6 +57,8 @@ export const SearchTargetSelector = () => {
         return "历史已阅读"
       case SearchTarget.All:
         return "所有网页"
+      case SearchTarget.SearchEnhance:
+        return "联网搜索"
 
       default: {
         return "所有网页"
@@ -65,6 +72,8 @@ export const SearchTargetSelector = () => {
         return <IconArchive />
       case SearchTarget.CurrentPage:
         return <IconOriginalSize />
+      case SearchTarget.SearchEnhance:
+        return <IconCompass />
       case SearchTarget.All:
         return <IconCommon />
     }
@@ -75,7 +84,7 @@ export const SearchTargetSelector = () => {
   }, [])
 
   return (
-    <IconTip text="选择网页问答">
+    <IconTip text="选择搜索模式">
       <Dropdown
         droplist={searchTargetDropList}
         trigger="hover"

@@ -25,6 +25,7 @@ import {
   summarizeMultipleSource,
   extractSummarizeMeta,
   generateAskFollowupQuestion,
+  searchEnhance,
 } from '../prompts/index';
 import { LLMChatMessage } from './schema';
 import { HumanMessage, SystemMessage } from 'langchain/schema';
@@ -32,6 +33,8 @@ import { HumanMessage, SystemMessage } from 'langchain/schema';
 import { uniqueFunc } from '../utils/unique';
 import { ContentMeta } from './dto';
 import { categoryList } from '../prompts/utils/category';
+import { Source } from 'src/types/weblink';
+import { SearchResultContext } from 'src/types/search';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
@@ -423,6 +426,135 @@ export class LlmService implements OnModuleInit {
         context: retrievedDocs,
         chatHistory,
       }),
+    };
+  }
+
+  async onlineSearch(query: string): Promise<SearchResultContext[]> {
+    let jsonContent: any = [];
+    try {
+      const REFERENCE_COUNT = 8;
+      const DEFAULT_SEARCH_ENGINE_TIMEOUT = 5;
+      const queryPayload = JSON.stringify({
+        q: query,
+        num: REFERENCE_COUNT,
+      });
+
+      const res = await fetch('https://google.serper.dev/search', {
+        method: 'post',
+        headers: {
+          'X-API-KEY': '79e74a2b07ad3ae23d2af088ac87754950bb86fc',
+          'Content-Type': 'application/json',
+        },
+        body: queryPayload,
+      });
+      jsonContent = await res.json();
+
+      // convert to the same format as bing/google
+      const contexts = [];
+      if (jsonContent.hasOwnProperty('knowledgeGraph')) {
+        const url =
+          jsonContent.knowledgeGraph.descriptionUrl ||
+          jsonContent.knowledgeGraph.website;
+        const snippet = jsonContent.knowledgeGraph.description;
+        if (url && snippet) {
+          contexts.push({
+            name: jsonContent.knowledgeGraph.title || '',
+            url: url,
+            snippet: snippet,
+          });
+        }
+      }
+
+      if (jsonContent.hasOwnProperty('answerBox')) {
+        const url = jsonContent.answerBox.url;
+        const snippet =
+          jsonContent.answerBox.snippet || jsonContent.answerBox.answer;
+        if (url && snippet) {
+          contexts.push({
+            name: jsonContent.answerBox.title || '',
+            url: url,
+            snippet: snippet,
+          });
+        }
+      }
+      if (jsonContent.hasOwnProperty('organic')) {
+        for (const c of jsonContent.organic) {
+          contexts.push({
+            name: c.title,
+            url: c.link,
+            snippet: c.snippet || '',
+          });
+        }
+      }
+      return contexts.slice(0, REFERENCE_COUNT);
+    } catch (e) {
+      console.error(`Error encountered: ${JSON.stringify(jsonContent)}`);
+      return [];
+    }
+  }
+
+  async searchEnhance(query: string, chatHistory: LLMChatMessage[]) {
+    this.logger.log(`activated with query: ${query}`);
+
+    const stopWords = [
+      '<|im_end|>',
+      '[End]',
+      '[end]',
+      '\nReferences:\n',
+      '\nSources:\n',
+      'End.',
+    ];
+
+    // 构建总结的 Prompt，将 question + chatHistory 总结成
+    const contextualizeQPrompt = ChatPromptTemplate.fromMessages([
+      ['system', contextualizeQA.systemPrompt],
+      new MessagesPlaceholder('chatHistory'),
+      ['human', '{question}'],
+    ]);
+    const contextualizeQChain = contextualizeQPrompt
+      .pipe(this.llm as any)
+      .pipe(new StringOutputParser());
+    const questionWithContext =
+      chatHistory.length === 0
+        ? query
+        : await contextualizeQChain.invoke({
+            question: query,
+            chatHistory,
+          });
+
+    const contexts = await this.onlineSearch(questionWithContext);
+    const contextToCitationText = contexts
+      .map((item, index) => `[[citation:${index + 1}]] ${item?.['snippet']}`)
+      .join('\n\n');
+    console.log('search result contexts', contextToCitationText);
+    // 临时先兼容基于文档召回的 sources 格式，快速实现联网搜索和联通前端
+    const sources: Source[] = contexts.map((item) => ({
+      pageContent: item.snippet,
+      score: -1,
+      metadata: {
+        source: item.url,
+        title: item.name,
+      },
+    }));
+
+    const systemPrompt = searchEnhance.systemPrompt.replace(
+      `{context}`,
+      contextToCitationText,
+    );
+
+    const llm = new ChatOpenAI({
+      modelName: 'gpt-3.5-turbo',
+      temperature: 0.9,
+      maxTokens: 1024,
+    });
+    const stream = await llm.stream([
+      new SystemMessage(systemPrompt),
+      new HumanMessage(query),
+    ]);
+
+    return {
+      sources,
+      stream,
     };
   }
 }

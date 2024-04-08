@@ -137,6 +137,16 @@ export class ConversationController {
         );
         sources = taskRes?.sources;
         answer = taskRes?.answer;
+      } else if (taskType === TASK_TYPE.SEARCH_ENHANCE_ASK) {
+        const taskRes = await this.conversationService.handleSearchEnhanceTask(
+          req,
+          res,
+          body?.task,
+          chatHistory,
+        );
+
+        sources = taskRes?.sources;
+        answer = taskRes?.answer;
       }
       res.end(``);
 

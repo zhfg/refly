@@ -24,11 +24,12 @@ import {
   MessageType,
   Source,
   Thread as IThread,
+  TASK_TYPE,
 } from "@/types"
 import { useWeblinkStore } from "@/stores/weblink"
 import { useSearchStateStore, SearchTarget } from "@/stores/search-state"
 import { safeParseJSON } from "@/utils/parse"
-import { buildChatTask } from "@/utils/task"
+import { buildChatTask, buildTask } from "@/utils/task"
 import { Skeleton } from "@arco-design/web-react"
 
 export const Thread = () => {
@@ -85,7 +86,7 @@ export const Thread = () => {
     chatStore.setNewQAText(newQAText)
   }
 
-  const handleAskFollowing = (question?: string) => {
+  const handleAskFollowing = (question?: string, taskType = TASK_TYPE.CHAT) => {
     // support ask follow up question
     let newQuestion = ""
     if (typeof question === "string" && question) {
@@ -104,12 +105,15 @@ export const Thread = () => {
       selectedWeblinkConfig?.searchTarget === SearchTarget.SelectedPages &&
       selectedWeblinkConfig?.filter?.length > 0
 
-    const task = buildChatTask({
-      question: newQuestion,
-      conversationId: currentConversation?.id || "",
-      filter: {
-        weblinkList: useWeblinkList ? selectedWeblinkConfig?.filter : [],
+    const task = buildTask({
+      data: {
+        question: newQuestion,
+        conversationId: currentConversation?.id || "",
+        filter: {
+          weblinkList: useWeblinkList ? selectedWeblinkConfig?.filter : [],
+        },
       },
+      taskType,
     })
 
     buildTaskAndGenReponse(task)

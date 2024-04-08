@@ -16,6 +16,7 @@ import {
   type QUICK_ACTION_TASK_PAYLOAD,
   type Source,
   Thread,
+  TASK_TYPE,
 } from "@/types"
 
 // 自定义组件
@@ -23,7 +24,7 @@ import WeblinkList from "../weblink-list"
 import { SelectedWeblink } from "../selected-weblink/index"
 // utils
 import { buildConversation } from "@/utils/conversation"
-import { buildChatTask, buildQuickActionTask } from "@/utils/task"
+import { buildChatTask, buildQuickActionTask, buildTask } from "@/utils/task"
 // 自定义方法
 import { scrollToBottom } from "@/utils/ui"
 // stores
@@ -160,7 +161,7 @@ const Home = () => {
     console.log("dashboard close")
   }
 
-  const runChatTask = () => {
+  const runTask = () => {
     const question = chatStore.newQAText
     const { selectedRow } = useWeblinkStore.getState()
     const { searchTarget } = useSearchStateStore.getState()
@@ -178,9 +179,15 @@ const Home = () => {
       }))
     }
 
-    const task = buildChatTask({
-      question,
-      filter: { weblinkList: selectedWebLink },
+    const task = buildTask({
+      taskType:
+        searchTarget === SearchTarget.SearchEnhance
+          ? TASK_TYPE.SEARCH_ENHANCE_ASK
+          : TASK_TYPE.CHAT,
+      data: {
+        question,
+        filter: { weblinkList: selectedWebLink },
+      },
     })
 
     // 创建新会话并跳转
@@ -326,7 +333,7 @@ const Home = () => {
               onChange={value => {
                 chatStore.setNewQAText(value)
               }}
-              placeholder="基于网页进行提问任何内容..."
+              placeholder="Search For Refly..."
               onKeyDownCapture={e => handleKeyDown(e)}
               autoSize={{ minRows: 2, maxRows: 4 }}
               onFocus={() => setIsFocused(true)}
@@ -338,34 +345,13 @@ const Home = () => {
             <div>
               <div className="toolbar">
                 <Space>
-                  {/* <Button
-                  onClick={() => {
-                    handleCreateNewConversation()
-                  }}
-                  icon={<IconPlus />}
-                  type="text"
-                  shape="round">
-                  新会话
-                </Button> */}
-
-                  {/** 第一版本不支持选择指定网页进行问答 */}
                   <SearchTargetSelector />
-                  {/* <Button
-              onClick={() => {
-                conversationListInstanceRef?.current?.setVisible(true)
-              }}
-              size="mini"
-              icon={<IconClockCircle />}
-              status="success"
-              shape="round">
-              历史记录
-            </Button> */}
                 </Space>
                 <Button
                   shape="circle"
                   icon={<IconSend />}
                   style={{ color: "#FFF", background: "#00968F" }}
-                  onClick={runChatTask}></Button>
+                  onClick={runTask}></Button>
               </div>
             </div>
           </div>

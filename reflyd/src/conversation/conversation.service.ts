@@ -173,6 +173,56 @@ export class ConversationService {
     };
   }
 
+  async handleSearchEnhanceTask(
+    req: any,
+    res: Response,
+    task: Task,
+    chatHistory: ChatMessage[],
+  ) {
+    const query = task?.data?.question;
+    const { stream, sources } = await this.llmService.searchEnhance(
+      query,
+      chatHistory
+        ? chatHistory.map((msg) => createLLMChatMessage(msg.content, msg.type))
+        : [],
+    );
+
+    // first return sources，use unique tag for parse data
+    res.write(JSON.stringify(sources));
+    res.write(LLM_SPLIT);
+
+    const getSSEData = async (stream) => {
+      // write answer in a stream style
+      let answerStr = '';
+      for await (const chunk of await stream) {
+        console.log('chunk', chunk);
+        const chunkStr =
+          chunk?.content || (typeof chunk === 'string' ? chunk : '');
+        answerStr += chunkStr;
+
+        res.write(chunkStr);
+      }
+
+      return answerStr;
+    };
+
+    const [answerStr, relatedQuestions] = await Promise.all([
+      getSSEData(stream),
+      this.llmService.getRelatedQuestion(sources, query),
+    ]);
+
+    console.log('relatedQuestions', relatedQuestions);
+
+    res.write(RELATED_SPLIT);
+    res.write(JSON.stringify(relatedQuestions));
+
+    return {
+      sources,
+      answer: answerStr,
+      relatedQuestions,
+    };
+  }
+
   async handleQuickActionTask(
     req: any,
     res: Response,
