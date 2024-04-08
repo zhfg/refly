@@ -3,6 +3,7 @@ import {
   IconOriginalSize,
   IconArchive,
   IconCommon,
+  IconCompass,
 } from "@arco-design/web-react/icon"
 import { IconTip } from "~components/home/icon-tip"
 
@@ -52,6 +53,10 @@ export const ThreadSearchTargetSelector = (
         <IconArchive style={iconStyle} />
         选中网页
       </Menu.Item>
+      <Menu.Item key={SearchTarget.SearchEnhance}>
+        <IconCompass style={iconStyle} />
+        联网搜索
+      </Menu.Item>
     </Menu>
   )
 
@@ -61,6 +66,8 @@ export const ThreadSearchTargetSelector = (
         return "选中网页"
       case SearchTarget.All:
         return "所有网页"
+      case SearchTarget.SearchEnhance:
+        return "联网搜索"
     }
   }
 
@@ -70,13 +77,15 @@ export const ThreadSearchTargetSelector = (
         return <IconArchive />
       case SearchTarget.CurrentPage:
         return <IconOriginalSize />
+      case SearchTarget.SearchEnhance:
+        return <IconCompass />
       case SearchTarget.All:
         return <IconCommon />
     }
   }
 
   return (
-    <IconTip text={getDisplayText(props.searchTarget)}>
+    <IconTip text={getDisplayText(props.searchTarget) || "选择搜索模式"}>
       <Dropdown
         droplist={searchTargetDropList}
         trigger="hover"

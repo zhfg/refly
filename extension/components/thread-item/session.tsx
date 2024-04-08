@@ -11,7 +11,7 @@ import {
   IconTranslate,
 } from "@arco-design/web-react/icon"
 import React, { useState } from "react"
-import type { Message, SessionItem, Source } from "~types"
+import type { Message, SessionItem, Source, TASK_TYPE } from "~types"
 
 // stores
 import { useMessageStateStore } from "~stores/message-state"
@@ -57,7 +57,7 @@ export const Session = (props: SessionProps) => {
                   className="session-source-list-item"
                   wrapperStyle={{ width: "100%" }}
                   bordered={false}
-                  pagination={{}}
+                  pagination={{ pageSize: 4 }}
                   dataSource={session?.sources}
                   scrollLoading={
                     session?.sources?.length > 0 ? null : scrollLoading
@@ -104,7 +104,7 @@ export const Session = (props: SessionProps) => {
                       ]}>
                       <List.Item.Meta
                         title={
-                          <a href={item.metadata?.source}>
+                          <a href={item.metadata?.source} target="_blank">
                             <span
                               style={{
                                 fontSize: 12,

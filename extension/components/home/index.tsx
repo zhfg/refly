@@ -53,7 +53,7 @@ const Home = (props: ChatProps) => {
   const { searchTarget } = useSearchStateStore()
 
   // hooks
-  const { runChatTask, runQuickActionTask } = useBuildThreadAndRun()
+  const { runTask, runQuickActionTask } = useBuildThreadAndRun()
   const { isWebLinkIndexed, uploadingStatus, handleUploadWebsite } =
     useStoreWeblink()
 
@@ -149,7 +149,7 @@ const Home = (props: ChatProps) => {
             onChange={(value) => {
               chatStore.setNewQAText(value)
             }}
-            placeholder="基于网页进行提问任何内容..."
+            placeholder="Search For Refly..."
             onKeyDownCapture={(e) => handleKeyDown(e)}
             autoSize={{ minRows: 4, maxRows: 4 }}
             onCompositionStart={(e) => console.log("composition start")}
@@ -194,7 +194,7 @@ const Home = (props: ChatProps) => {
                 shape="circle"
                 icon={<IconSend />}
                 style={{ color: "#FFF", background: "#00968F" }}
-                onClick={runChatTask}></Button>
+                onClick={() => runTask()}></Button>
             </div>
           </div>
         </div>

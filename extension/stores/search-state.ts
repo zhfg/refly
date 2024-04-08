@@ -7,6 +7,7 @@ export enum SearchTarget {
   All = "all",
   CurrentPage = "currentPage",
   SelectedPages = "selectedPages",
+  SearchEnhance = "searchEnhance",
 }
 
 export interface SearchState {
