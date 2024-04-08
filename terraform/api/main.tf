@@ -3,6 +3,10 @@ provider "aws" {
   shared_credentials_files = ["~/.aws/credentials"]
 }
 
+provider "cloudflare" {
+  api_token = var.cloudflare_api_token
+}
+
 data "aws_vpc" "default" {
   default = true
 }
@@ -85,6 +89,31 @@ resource "aws_instance" "reflyd" {
   }
 }
 
+resource "tls_private_key" "refly_pk" {
+  algorithm = "RSA"
+}
+
+resource "tls_cert_request" "refly_cr" {
+  private_key_pem = tls_private_key.refly_pk.private_key_pem
+
+  subject {
+    common_name  = "refly.ai"
+    organization = "Refly AI"
+  }
+}
+
+resource "cloudflare_origin_ca_certificate" "refly_cert" {
+  csr                = tls_cert_request.refly_cr.cert_request_pem
+  hostnames          = ["refly.ai", "*.refly.ai"]
+  request_type       = "origin-rsa"
+  requested_validity = 5475
+}
+
+resource "aws_acm_certificate" "cert" {
+  private_key      = tls_private_key.refly_pk.private_key_pem
+  certificate_body = cloudflare_origin_ca_certificate.refly_cert.certificate
+}
+
 resource "aws_lb" "reflyd_lb" {
   name               = "reflyd-lb-${var.app_env}"
   internal           = false
@@ -117,8 +146,9 @@ resource "aws_lb_target_group_attachment" "reflyd_lb" {
 
 resource "aws_lb_listener" "reflyd_lb" {
   load_balancer_arn = aws_lb.reflyd_lb.arn
-  port              = 80
-  protocol          = "HTTP"
+  port              = 443
+  protocol          = "HTTPS"
+  certificate_arn   = aws_acm_certificate.cert.arn
 
   default_action {
     type             = "forward"
@@ -126,6 +156,19 @@ resource "aws_lb_listener" "reflyd_lb" {
   }
 }
 
+resource "cloudflare_record" "refly_dns" {
+  zone_id = var.cloudflare_zone_id
+  name    = var.site_name
+  proxied = true
+  type    = "CNAME"
+  value   = aws_lb.reflyd_lb.dns_name
+  ttl     = 1
+}
+
 output "reflyd_lb_dns_name" {
   value = aws_lb.reflyd_lb.dns_name
+}
+
+output "reflyd_host_name" {
+  value = cloudflare_record.refly_dns.hostname
 }

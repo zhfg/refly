@@ -35,6 +35,21 @@ variable "image_version" {
   default     = "latest"
 }
 
+variable "site_name" {
+  description = "Site DNS name, e.g. <site_name>.refly.ai"
+  default     = "api"
+}
+
+variable "cloudflare_api_token" {
+  description = "API Token for Cloudflare"
+  sensitive   = true
+}
+
+variable "cloudflare_zone_id" {
+  description = "Cloudflare zone id"
+  sensitive   = true
+}
+
 /// Application variables.
 
 variable "app_env" {
