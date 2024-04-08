@@ -196,15 +196,18 @@ export const Session = (props: SessionProps) => {
             </div>
           ) : messageStateStore?.pending && isLastSession ? (
             <div style={{ width: "100%" }}>
-              <Skeleton animation text={{ rows: 1 }}></Skeleton>
               <Skeleton
                 animation
                 text={{ rows: 1 }}
-                style={{ marginTop: 8 }}></Skeleton>
+                className="related-question-skeleton-item"></Skeleton>
               <Skeleton
                 animation
                 text={{ rows: 1 }}
-                style={{ marginTop: 8 }}></Skeleton>
+                className="related-question-skeleton-item"></Skeleton>
+              <Skeleton
+                animation
+                text={{ rows: 1 }}
+                className="related-question-skeleton-item"></Skeleton>
             </div>
           ) : null}
         </div>
