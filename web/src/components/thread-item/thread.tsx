@@ -86,7 +86,7 @@ export const Thread = () => {
     chatStore.setNewQAText(newQAText)
   }
 
-  const handleAskFollowing = (question?: string, taskType = TASK_TYPE.CHAT) => {
+  const handleAskFollowing = (question?: string, taskType?: TASK_TYPE) => {
     // support ask follow up question
     let newQuestion = ""
     if (typeof question === "string" && question) {
@@ -113,7 +113,7 @@ export const Thread = () => {
           weblinkList: useWeblinkList ? selectedWeblinkConfig?.filter : [],
         },
       },
-      taskType,
+      taskType: taskType as TASK_TYPE,
     })
 
     buildTaskAndGenReponse(task)

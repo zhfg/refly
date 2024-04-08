@@ -24,7 +24,7 @@ interface ThreadItemProps {
     searchTarget: SearchTarget
     filter: Source[]
   }
-  handleAskFollowing: (question?: string) => void
+  handleAskFollowing: (question?: string, taskType?: TASK_TYPE) => void
 }
 
 const TextArea = Input.TextArea
@@ -88,7 +88,14 @@ export const ThreadItem = (props: ThreadItemProps) => {
           <Session
             key={index}
             session={item}
-            handleAskFollowing={props.handleAskFollowing}
+            handleAskFollowing={question =>
+              props.handleAskFollowing(
+                question,
+                threadSearchTarget === SearchTarget?.SearchEnhance
+                  ? TASK_TYPE.SEARCH_ENHANCE_ASK
+                  : TASK_TYPE.CHAT,
+              )
+            }
             isLastSession={index === sessions.length - 1}
           />
         ))}
@@ -148,7 +155,12 @@ export const ThreadItem = (props: ThreadItemProps) => {
                       icon={<IconSend />}
                       style={{ color: "#FFF", background: "#00968F" }}
                       onClick={() => {
-                        props.handleAskFollowing()
+                        props.handleAskFollowing(
+                          "",
+                          threadSearchTarget === SearchTarget?.SearchEnhance
+                            ? TASK_TYPE.SEARCH_ENHANCE_ASK
+                            : TASK_TYPE.CHAT,
+                        )
                       }}></Button>
                   </div>
                 </div>
