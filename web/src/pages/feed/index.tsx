@@ -39,7 +39,6 @@ export const Feed = () => {
   )
   const feedStore = useFeedStore()
   const navigate = useNavigate()
-  const isFeed = useMatch("/feed")
 
   const fetchData = async (currentPage = 1) => {
     try {
@@ -95,7 +94,11 @@ export const Feed = () => {
 
   useEffect(() => {
     fetchData()
-  }, [isFeed])
+
+    return () => {
+      feedStore.resetState()
+    }
+  }, [])
 
   return (
     <div className="feed-container">

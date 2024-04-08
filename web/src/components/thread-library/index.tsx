@@ -98,7 +98,11 @@ export const ThreadLibrary = () => {
 
   useEffect(() => {
     fetchData()
-  }, [isThreadLibrary])
+
+    return () => {
+      threadStore.resetState()
+    }
+  }, [])
 
   return (
     <div

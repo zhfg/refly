@@ -126,6 +126,10 @@ export const DigestToday = () => {
 
   useEffect(() => {
     fetchData()
+
+    return () => {
+      digestStore.resetState()
+    }
   }, [])
 
   return (
