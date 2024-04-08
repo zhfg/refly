@@ -24,7 +24,7 @@ import { useNavigate } from "react-router-dom"
 import type { Digest, DateType } from "@/types/digest"
 import { IconTip } from "@/components/dashboard/icon-tip"
 import { copyToClipboard } from "@/utils"
-import { getClientOrigin } from "@/utils/url"
+import { getClientOrigin, safeParseURL } from "@/utils/url"
 // stores
 import { useDigestArchiveStore } from "@/stores/digest-archive"
 // components
@@ -223,7 +223,7 @@ export const DigestArchive = () => {
                       }}>
                       <IconLink style={{ fontSize: 14, color: "#64645F" }} />
                       <span className="feed-list-item-text">
-                        {item?.weblinks?.[0]?.url}{" "}
+                        {safeParseURL(item?.weblinks?.[0]?.url)}{" "}
                         {item?.weblinks?.length - 1 > 0
                           ? `& ${item?.weblinks?.length - 1} 条更多`
                           : ""}

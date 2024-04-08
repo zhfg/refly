@@ -25,7 +25,7 @@ import { Digest } from "@/types"
 import getDigestList from "@/requests/getDigestList"
 import { IconTip } from "@/components/dashboard/icon-tip"
 import { copyToClipboard } from "@/utils"
-import { getClientOrigin } from "@/utils/url"
+import { getClientOrigin, safeParseURL } from "@/utils/url"
 import { useDigestTopicStore } from "@/stores/digest-topics"
 // styles
 import "./index.scss"
@@ -221,7 +221,7 @@ export const DigestTopicDetail = () => {
                     }}>
                     <IconLink style={{ fontSize: 14, color: "#64645F" }} />
                     <span className="feed-list-item-text">
-                      {item?.weblinks?.[0]?.url}{" "}
+                      {safeParseURL(item?.weblinks?.[0]?.url)}{" "}
                       {item?.weblinks?.length - 1 > 0
                         ? `& ${item?.weblinks?.length - 1} 条更多`
                         : ""}

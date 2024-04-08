@@ -51,3 +51,13 @@ export const getClientOrigin = () => {
 export function getExtensionUrl(url: any) {
   return chrome.runtime.getURL(url)
 }
+
+export function safeParseURL(url: string) {
+  try {
+    const urlObj = new URL(url)
+
+    return urlObj?.origin
+  } catch (err) {
+    return url || ""
+  }
+}
