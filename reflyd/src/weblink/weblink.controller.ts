@@ -8,9 +8,8 @@ import {
   UseGuards,
   Body,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { WeblinkService } from './weblink.service';
-import { LlmService } from '../llm/llm.service';
 import { GetWebLinkListResponse, StoreWebLinkParam } from './dto';
 import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 
@@ -18,10 +17,7 @@ import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 export class WeblinkController {
   private readonly logger = new Logger(WeblinkController.name);
 
-  constructor(
-    private weblinkService: WeblinkService,
-    private llmService: LlmService,
-  ) {}
+  constructor(private weblinkService: WeblinkService) {}
 
   @UseGuards(JwtAuthGuard)
   @Post('store')
@@ -36,7 +32,7 @@ export class WeblinkController {
   async getWebContent(@Query('url') url) {
     this.logger.log(`getWebContent, ${url}`);
 
-    const parseContent = await this.llmService.parseWebLinkContent(url); // 处理错误边界
+    const parseContent = await this.weblinkService.parseWebLinkContent(url); // 处理错误边界
     return parseContent;
   }
 
@@ -66,10 +62,10 @@ export class WeblinkController {
         userId: req.user.id,
       })}`,
     );
-    const weblinkList = await this.weblinkService.findMany({
+    const weblinkList = await this.weblinkService.getUserHistory({
       skip,
       take,
-      where: { linkId, url, userId: req.user.id },
+      where: { id: linkId, url, userId: req.user.id },
       orderBy: { updatedAt: 'desc' },
     });
 

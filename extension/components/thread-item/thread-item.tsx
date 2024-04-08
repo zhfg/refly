@@ -1,5 +1,11 @@
 import React, { useEffect, useRef, useState } from "react"
-import { Button, Skeleton, Space, Input } from "@arco-design/web-react"
+import {
+  Button,
+  Skeleton,
+  Space,
+  Input,
+  Breadcrumb,
+} from "@arco-design/web-react"
 import { IconMinusCircle, IconSend } from "@arco-design/web-react/icon"
 
 // stores
@@ -16,6 +22,7 @@ import { ThreadSearchTargetSelector } from "~components/thread-item/thread-searc
 import { SearchTarget } from "~stores/search-state"
 // 自定义组件
 import { SelectedWeblink } from "../selected-weblink/index"
+import { useNavigate } from "react-router-dom"
 
 interface ThreadItemProps {
   sessions: SessionItem[]
@@ -23,15 +30,18 @@ interface ThreadItemProps {
     searchTarget: SearchTarget
     filter: Source[]
   }
+  handleAskFollowing: (question?: string) => void
 }
 
 const TextArea = Input.TextArea
+const BreadcrumbItem = Breadcrumb.Item
 
 export const ThreadItem = (props: ThreadItemProps) => {
   const { sessions, selectedWeblinkConfig } = props
   const inputRef = useRef<RefTextAreaType>()
   const selectedWeblinkListRef = useRef<HTMLDivElement>(null)
   const chatStore = useChatStore()
+  const navigate = useNavigate()
 
   const [threadSearchTarget, setThreadSearchTarget] = useState(
     selectedWeblinkConfig?.searchTarget,
@@ -39,6 +49,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
   const [threadWeblinkListFilter, setThreadWeblinkListFilter] = useState(
     selectedWeblinkConfig?.filter || [],
   )
+  const conversationStore = useConversationStore()
 
   const showSelectedWeblinkList =
     threadSearchTarget === SearchTarget.SelectedPages &&
@@ -51,7 +62,10 @@ export const ThreadItem = (props: ThreadItemProps) => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     e.stopPropagation()
 
-    inputRef.current?.dom?.onkeydown?.(e as any as KeyboardEvent)
+    // inputRef.current?.dom?.onkeydown?.(e as any as KeyboardEvent)
+    if (e.keyCode === 13) {
+      handleAskFollowing()
+    }
   }
 
   const handleAskFollowing = () => {
@@ -97,12 +111,28 @@ export const ThreadItem = (props: ThreadItemProps) => {
 
   return (
     <div className="session-container">
+      <div>
+        <Breadcrumb style={{ padding: `8px 16px` }}>
+          <BreadcrumbItem
+            onClick={() => navigate("/thread")}
+            className="breadcrum-item">
+            会话库
+          </BreadcrumbItem>
+          <BreadcrumbItem
+            className="breadcrum-item breadcrum-description"
+            onClick={() =>
+              navigate(`/thread/${conversationStore?.currentConversation?.id}`)
+            }>
+            <span>{conversationStore?.currentConversation?.title}</span>
+          </BreadcrumbItem>
+        </Breadcrumb>
+      </div>
       <div
         className="session-inner-container"
         style={
           showSelectedWeblinkList
             ? {
-                height: `calc(100vh - 180px - ${selectedWeblinkListRef.current?.clientHeight || 0}px)`,
+                height: `calc(100vh - 180px - ${selectedWeblinkListRef.current?.clientHeight || 0}px - 40px)`,
               }
             : {}
         }>
@@ -111,6 +141,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
             key={index}
             session={item}
             isLastSession={index === sessions.length - 1}
+            handleAskFollowing={props.handleAskFollowing}
           />
         ))}
       </div>
@@ -146,7 +177,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
             <ThreadSearchTargetSelector
               showText={false}
               searchTarget={threadSearchTarget}
-              handleChangeSelector={searchTarget =>
+              handleChangeSelector={(searchTarget) =>
                 setThreadSearchTarget(searchTarget)
               }
             />
@@ -156,11 +187,14 @@ export const ThreadItem = (props: ThreadItemProps) => {
               autoFocus
               disabled={messageStateStore?.pending}
               value={chatStore?.newQAText}
-              onChange={value => {
+              onChange={(value) => {
                 chatStore.setNewQAText(value)
               }}
+              onCompositionStart={(e) => console.log("composition start")}
+              onCompositionUpdate={(e) => console.log("composition update")}
+              onCompositionEnd={(e) => console.log("composition end")}
               placeholder="继续提问..."
-              onKeyDownCapture={e => handleKeyDown(e)}
+              onKeyDownCapture={(e) => handleKeyDown(e)}
               autoSize={{ minRows: 1, maxRows: 4 }}
               style={{
                 borderRadius: 8,

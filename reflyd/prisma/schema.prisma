@@ -6,252 +6,291 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model Account {
-  id                String  @id @default(auto()) @map("_id") @db.ObjectId
-  userId            String  @db.ObjectId
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
+  id                Int      @id @default(autoincrement())
+  userId            Int      @map("user_id")
+  type              String   @map("type")
+  provider          String   @map("provider")
+  providerAccountId String   @map("provider_account_id")
+  refreshToken      String?  @map("refresh_token")
+  accessToken       String?  @map("access_token")
+  expiresAt         Int?     @map("expires_at")
+  scope             String?  @map("scope")
+  /// 创建时间
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  /// 更新时间
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz()
 
   @@unique([provider, providerAccountId])
-}
-
-model Session {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  sessionToken String   @unique
-  userId       String   @db.ObjectId
-  expires      DateTime
+  @@map("accounts")
 }
 
 //邮箱
 model VerificationToken {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  identifier String
-  token      String   @unique
-  expires    DateTime
+  id         Int      @id @default(autoincrement())
+  identifier String   @map("identifier")
+  token      String   @unique @map("token")
+  expires    DateTime @map("expires") @db.Timestamptz()
 
   @@unique([identifier, token])
+  @@map("verification_token")
 }
 
 model User {
-  id                  String    @id @default(auto()) @map("_id") @db.ObjectId
-  ///头像
-  avatar              String?
-  ///是否安装了扩展
-  extensionInstalled  Boolean   @default(false)
-  ///邀请码
-  inviteCode          String?   @default(uuid())
-  ///邀请人数
-  inviteCount         Int       @default(0)
-  ///用户名
-  name                String?
-  ///邮箱
-  email               String?   @unique
-  ///邮箱是否已验证
-  emailVerified       DateTime?
-  ///密码
-  password            String?
-  ///头像
-  image               String?
-  ///语言偏好列表
-  languagePreferences String[]  @default(["English", "Simplified Chinese"])
-  ///当前语言环境
-  locale              String    @default("en")
-  ///禁用的功能列表
-  disabledCeatures    String[]
-  ///创建时间
-  createdAt           DateTime  @default(now())
-  ///更新时间
-  updatedAt           DateTime  @updatedAt
+  /// 主键
+  id            Int       @id @default(autoincrement())
+  /// 头像
+  avatar        String?   @map("avatar")
+  /// 用户名
+  name          String?   @map("name")
+  /// 邮箱
+  email         String?   @unique @map("email")
+  /// 邮箱是否已验证
+  emailVerified DateTime? @map("email_verified") @db.Timestamptz()
+  /// 密码
+  password      String?   @map("password")
+  /// 创建时间
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  /// 更新时间
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@map("users")
 }
 
-///自定义prompt模型
-model CustomPrompt {
-  ///id为主键，自动生成，映射到数据库中的_id字段
-  id             String           @id @default(auto()) @map("_id") @db.ObjectId
-  /// 类型
-  type           PromptActionType @default(selectionAction)
-  ///提示名称
-  title          String
-  ///提示内容
-  content        String
-  ///作者id
-  authorId       String           @db.ObjectId
-  ///是否置顶
-  pinned         Boolean          @default(false)
-  ///是否直接发送给用户
-  directSend     Boolean          @default(false)
-  ///图标名称
-  iconName       String           @default("iconfont icon-emoji")
-  /// 排序位置
-  position       Int              @default(0)
-  /// 基于系统prompt创建的自定义prompt
-  systemPromptId String?          @db.ObjectId
-  /// 系统关键字
-  systemKey      String?          @unique
-  ///创建时间
-  createdAt      DateTime         @default(now())
-  ///更新时间
-  updatedAt      DateTime         @updatedAt
+/// 内容主题
+model Topic {
+  /// 主键
+  id          Int      @id @default(autoincrement())
+  /// 主题 key
+  key         String   @unique @map("key")
+  /// 多语言名称 JSON 字符串 (key: 语言, val: 名称)
+  name        String   @map("name")
+  /// 多语言描述 JSON 字符串 (key: 语言, val: 名称)
+  description String   @map("description")
+  /// 创建时间
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  /// 更新时间
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  userPreferences UserPreference[]
+
+  @@map("topics")
 }
 
-///系统提示模型
-model SystemPrompt {
-  ///id为主键，自动生成，映射到数据库中的_id字段，类型为ObjectId
-  id         String           @id @default(auto()) @map("_id") @db.ObjectId
-  /// 类型
-  type       PromptActionType @default(selectionAction)
-  //prompt唯一标识
-  promptKey  String
-  ///提示名称
-  title      String
-  //分类
-  category   String
-  ///提示内容
-  content    String
-  ///是否直接发送给用户
-  directSend Boolean
-  ///图标名称
-  iconName   String
-  ///创建时间
-  createdAt  DateTime         @default(now())
-  ///更新时间
-  updatedAt  DateTime         @updatedAt
+/// 用户喜好
+model UserPreference {
+  /// 主键
+  id        Int      @id @default(autoincrement())
+  /// 用户id
+  userId    Int      @map("user_id")
+  /// 主题key
+  topicKey  String   @map("topic_key")
+  /// 兴趣值
+  score     Float    @default(0) @map("score")
+  /// 创建时间
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  /// 更新时间
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+  /// 关联的 topic
+  topic     Topic?   @relation(fields: [topicKey], references: [key])
+
+  @@unique([userId, topicKey])
+  @@index([topicKey])
+  @@map("user_preferences")
 }
 
-//会话模型
+// 会话模型
 model Conversation {
-  ///id为主键，自动生成，映射到数据库中的_id字段，类型为ObjectId
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  ///用户id
-  userId          String   @db.ObjectId
-  ///会话标题
-  title           String
+  /// id为主键
+  id              Int      @id @default(autoincrement())
+  /// 用户id
+  userId          Int      @map("user_id")
+  /// 内容 id，指向 aigc_content 中的内容
+  contentId       Int?     @map("content_id")
+  /// 会话标题
+  title           String   @map("title")
   /// 最后一条聊天记录
-  lastMessage     String   @default("")
+  lastMessage     String   @default("") @map("last_message")
   /// 消息数量
-  messageCount    Int      @default(0)
+  messageCount    Int      @default(0) @map("message_count")
   /// 会话来源 origin
-  origin          String   @default("")
+  origin          String   @default("") @map("origin")
   // 会话来源的 url
-  originPageUrl   String   @default("")
+  originPageUrl   String   @default("") @map("origin_page_url")
   /// 会话来源页面标题
-  originPageTitle String   @default("")
-  ///创建时间
-  createdAt       DateTime @default(now())
-  ///更新时间
-  updatedAt       DateTime @updatedAt
+  originPageTitle String   @default("") @map("origin_page_title")
+  /// 创建时间
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  /// 更新时间
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  messages ChatMessage[]
+
+  @@index([userId, updatedAt])
+  @@map("conversations")
 }
 
-///对话消息
+/// 对话消息
 model ChatMessage {
-  ///id为主键，自动生成，映射到数据库中的_id字段，类型为ObjectId
-  id                    String      @id @default(auto()) @map("_id") @db.ObjectId
-  ///聊天记录 ID
-  messageId             String      @unique
-  ///会话id
-  conversationId        String
-  ///消息来源
-  type                  MessageType
-  ///用户id
-  userId                String      @db.ObjectId
-  //内容
-  content               String
+  /// id为主键
+  id                    Int         @id @default(autoincrement())
+  /// 会话id
+  conversationId        Int         @map("conversation_id")
+  /// 消息来源
+  type                  MessageType @map("type")
+  /// 用户id
+  userId                Int         @map("user_id")
+  // 内容
+  content               String      @map("content")
   // 引用文档来源，以 JSON 方式存储
-  sources               String?     @default("")
-  ///创建时间
-  createdAt             DateTime    @default(now())
-  ///更新时间
-  updatedAt             DateTime    @updatedAt
+  sources               String?     @default("") @map("sources")
+  /// 创建时间
+  createdAt             DateTime    @default(now()) @map("created_at") @db.Timestamptz()
+  /// 更新时间
+  updatedAt             DateTime    @updatedAt @map("updated_at") @db.Timestamptz()
   /// 会话选中 Weblink 配置，未来可能会变，先使用 string 保存
-  selectedWeblinkConfig String?
+  selectedWeblinkConfig String?     @map("selected_weblink_config")
+
+  /// 关联的对话
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+
+  @@index([conversationId])
+  @@map("chat_messages")
 }
 
-///web link
-model Weblink {
-  ///id为主键，自动生成，映射到数据库中的_id字段，类型为ObjectId
-  id                    String      @id @default(auto()) @map("_id") @db.ObjectId
-  ///the link id
-  linkId                String      @unique
-  ///the actual url
-  url                   String
+/// 用户访问网页记录
+model UserWeblink {
+  /// id为主键
+  id                    Int      @id @default(autoincrement())
+  /// 关联的链接 id
+  weblinkId             Int      @map("weblink_id")
+  /// 网页链接
+  url                   String   @map("url")
   /// 会话来源 origin
-  origin                String      @default("")
+  origin                String   @default("") @map("origin")
+  /// 用户id
+  userId                Int      @map("user_id")
   // 会话来源的 url
-  originPageUrl         String      @default("")
+  originPageUrl         String   @default("") @map("origin_page_url")
   /// 会话来源页面标题
-  originPageTitle       String      @default("")
-  // 会话来源页面的描述
-  originPageDescription String      @default("")
-  ///user id the link belongs to
-  userId                String      @db.ObjectId
-  //status of indexing
-  indexStatus           IndexStatus @default(init)
-  ///创建时间
-  createdAt             DateTime    @default(now())
-  ///更新时间
-  updatedAt             DateTime    @updatedAt
+  originPageTitle       String   @default("") @map("origin_page_title")
+  /// 会话来源页面的描述
+  originPageDescription String   @default("") @map("origin_page_description")
+  /// 最近访问时间
+  lastVisitTime         DateTime @default(now()) @map("last_visit_time") @db.Timestamptz()
+  /// 访问次数
+  visitTimes            Int      @default(0) @map("visit_times")
+  /// 总阅读时长（单位秒）
+  totalReadTime         Int      @default(0) @map("total_read_time")
+  /// 创建时间
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  /// 更新时间
+  updatedAt             DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@unique([userId, url])
+  @@map("user_weblinks")
 }
 
-/// 会员信息模型
-model VipUser {
-  ///id为主键，自动生成，映射到数据库中的_id字段，类型为ObjectId
-  id        String      @id @default(auto()) @map("_id") @db.ObjectId
-  ///用户id
-  userId    String      @db.ObjectId
-  ///会员类型
-  type      VipUserType @default(free)
-  ///会员开始时间
-  startTime DateTime
-  ///会员结束时间
-  endTime   DateTime
-  ///创建时间
-  createdAt DateTime    @default(now())
-  ///更新时间
-  updatedAt DateTime    @updatedAt
+model Weblink {
+  /// id为主键
+  id          Int         @id @default(autoincrement())
+  /// 网页链接
+  url         String      @unique @map("url")
+  /// 页面内容
+  pageContent String      @map("page_content")
+  /// 页面元数据, JSON 存储
+  pageMeta    String      @map("page_meta")
+  /// 内容元数据, JSON 存储
+  contentMeta String      @map("content_meta")
+  /// 索引状态
+  indexStatus IndexStatus @default(init) @map("index_status")
+  /// 创建时间
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz()
+  /// 更新时间
+  updatedAt   DateTime    @updatedAt @map("updated_at") @db.Timestamptz()
+
+  contents AigcContent[]
+
+  @@map("weblinks")
 }
 
-//feedback
-model ChatFeedback {
-  ///id为主键，自动生成，映射到数据库中的_id字段，类型为ObjectId
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  ///用户id
-  userId         String   @db.ObjectId
-  //会话id
-  conversationId String
-  ///聊天记录id
-  chatItemId     String   @unique
-  ///like
-  like           Boolean
-  ///创建时间
-  createdAt      DateTime @default(now())
-  ///更新时间
-  updatedAt      DateTime @updatedAt
+/// 生成内容
+model AigcContent {
+  /// 主键
+  id         Int               @id @default(autoincrement())
+  /// 标题
+  title      String            @map("title")
+  /// 摘要
+  abstract   String            @default("") @map("abstract")
+  /// 内容
+  content    String            @map("content")
+  /// 元数据, JSON 存储
+  meta       String            @map("meta")
+  /// 来源类型
+  sourceType ContentSourceType @map("source_type")
+  /// 引用文档来源，JSON 字符串
+  sources    String?           @default("") @map("sources")
+  /// 创建时间
+  createdAt  DateTime          @default(now()) @map("created_at") @db.Timestamptz()
+  /// 更新时间
+  updatedAt  DateTime          @updatedAt @map("updated_at") @db.Timestamptz()
+  /// 关联的链接 id
+  weblinkId  Int?              @map("weblink_id")
+  /// 输入内容 id
+  inputIds   Int[]             @map("input_ids")
+  /// 输出内容 id
+  outputIds  Int[]             @map("output_ids")
+
+  /// 关联的链接
+  weblink     Weblink?      @relation(fields: [weblinkId], references: [id])
+  /// 关联的摘要
+  userDigests UserDigest[]
+  /// 输入内容
+  inputs      AigcContent[] @relation("content_graph")
+  /// 输出内容
+  outputs     AigcContent[] @relation("content_graph")
+
+  @@index([weblinkId])
+  @@map("aigc_contents")
 }
 
-enum PromptActionType {
-  ///快捷指令
-  selectionAction
-  ///提示词
-  myPrompt
+/// 用户回顾
+model UserDigest {
+  /// 主键
+  id        Int         @id @default(autoincrement())
+  /// 用户 id
+  userId    Int         @map("user_id")
+  /// 日期 (YYYY-MM-DD)
+  date      String      @map("date")
+  /// 主题
+  topicKey  String      @map("topic_key")
+  /// 回顾内容 id
+  contentId Int         @unique @map("content_id")
+  /// 创建时间
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz()
+  /// 更新时间
+  updatedAt DateTime    @updatedAt @map("updated_at") @db.Timestamptz()
+  /// 关联的回顾内容
+  content   AigcContent @relation(fields: [contentId], references: [id])
+
+  @@unique([userId, date, topicKey])
+  @@map("user_digests")
 }
 
-enum VipUserType {
-  ///免费会员
-  free
-  ///付费会员
-  paid
+enum ContentSourceType {
+  weblink
+  digest
+  aigc
+}
+
+enum ContentMetaType {
+  topic
+  entity
+  form
 }
 
 enum IndexStatus {

@@ -32,6 +32,10 @@ import { sendToBackground } from "@plasmohq/messaging"
 import { time } from "~utils/time"
 import { useUserStore } from "~stores/user"
 import { getClientOrigin } from "~utils/url"
+// components
+import { ChatHeader } from "~components/home/header"
+import { EmptyThreadLibraryStatus } from "~components/empty-thread-library-status/index"
+import { delay } from "~utils/delay"
 
 const names = ["Socrates", "Balzac", "Plato"]
 const avatarSrc = [
@@ -56,67 +60,10 @@ const dataSource = new Array(15).fill(null).map((_, index) => {
   }
 })
 
-const Header = () => {
-  const siderStore = useSiderStore()
-  const { userProfile } = useUserStore()
-
-  const showBtn = !!userProfile?.id
-
-  return (
-    <header>
-      <div className="brand">
-        <img src={Logo} alt="Refly" />
-        <span>Refly</span>
-      </div>
-      <div className="funcs">
-        <IconTip text="全屏">
-          <img
-            src={FullScreenSVG}
-            alt="全屏"
-            onClick={() => window.open(getClientOrigin(), "_blank")}
-          />
-        </IconTip>
-        {/* <IconTip text="通知">
-                    <img src={NotificationSVG} alt="通知" />
-                </IconTip> */}
-        {showBtn && (
-          <IconTip text="设置">
-            <img
-              src={SettingGraySVG}
-              alt="设置"
-              onClick={() =>
-                window.open(`${getClientOrigin()}/settings`, "_blank")
-              }
-            />
-          </IconTip>
-        )}
-        {showBtn && (
-          <IconTip text="账户">
-            <Avatar size={16}>
-              <img
-                alt="avatar"
-                src={userProfile?.avatar}
-                onClick={() =>
-                  window.open(`${getClientOrigin()}/settings`, "_blank")
-                }
-              />
-            </Avatar>
-          </IconTip>
-        )}
-        <IconTip text="关闭">
-          <img
-            src={CloseGraySVG}
-            alt="关闭"
-            onClick={(_) => siderStore.setShowSider(false)}
-          />
-        </IconTip>
-      </div>
-    </header>
-  )
-}
-
 export const ThreadLibrary = () => {
-  const [scrollLoading, setScrollLoading] = useState(<Skeleton></Skeleton>)
+  const [scrollLoading, setScrollLoading] = useState(
+    <Skeleton animation></Skeleton>,
+  )
   const threadStore = useThreadStore()
   const navigate = useNavigate()
   const isThreadLibrary = useMatch("/thread")
@@ -124,11 +71,25 @@ export const ThreadLibrary = () => {
   const fetchData = async (currentPage = 1) => {
     try {
       console.log("currentPage", currentPage)
+      setScrollLoading(
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+          }}>
+          <Skeleton animation style={{ width: "100%" }}></Skeleton>
+          <Skeleton
+            animation
+            style={{ width: "100%", marginTop: 24 }}></Skeleton>
+        </div>,
+      )
       if (!threadStore?.hasMore && currentPage !== 1) {
         setScrollLoading(<span>已经到底啦~</span>)
         return
       }
 
+      // await delay(30000)
       const newRes = await sendToBackground({
         name: "getConversationList",
         body: {
@@ -146,6 +107,14 @@ export const ThreadLibrary = () => {
       threadStore.updateThreadList(newRes?.data || [])
     } catch (err) {
       message.error("获取会话列表失败，请重新刷新试试")
+    } finally {
+      const { threads, pageSize } = useThreadStore.getState()
+
+      if (threads?.length === 0) {
+        setScrollLoading(<EmptyThreadLibraryStatus />)
+      } else if (threads?.length > 0 && threads?.length < pageSize) {
+        setScrollLoading(<span>已经到底啦~</span>)
+      }
     }
   }
 
@@ -160,7 +129,7 @@ export const ThreadLibrary = () => {
         display: "flex",
         flexDirection: "column",
       }}>
-      <Header />
+      <ChatHeader />
       <List
         className="thread-library-list"
         wrapperStyle={{ width: "100%" }}

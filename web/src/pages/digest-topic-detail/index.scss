@@ -1,0 +1,148 @@
+.digest-topic-detail-container {
+  .arco-list-header,
+  .arco-list-item:not(:last-child) {
+    border-bottom: none;
+  }
+
+  .topics-list {
+    height: calc(100vh - 28px);
+    overflow-y: scroll;
+    padding: 0 74px;
+  }
+
+  .topics-header-container {
+    .topics-header-desc {
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 17px;
+      letter-spacing: 0px;
+
+      color: #64645f;
+      margin-top: 24px;
+      margin-bottom: 12px;
+    }
+  }
+
+  .topics-header-title {
+    font-size: 32px;
+    font-weight: 500;
+    line-height: 38px;
+    letter-spacing: 0px;
+
+    color: rgba(0, 0, 0, 0.8);
+
+    margin: 0px 0 12px 0;
+  }
+
+  .digest-topic-nav {
+    margin: 0 auto;
+    padding: 24px 60px;
+  }
+
+  .arco-list-item {
+    padding: 13px 0px !important;
+  }
+}
+
+.feed-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.feed-title-container {
+  width: 100%;
+  border-bottom: 1px solid #d8d8d8;
+  padding: 0 60px;
+}
+.feed-title {
+  padding: 24px 0;
+  margin: 0 auto;
+
+  span {
+    font-size: 24px;
+    color: rgba(0, 0, 0, 0.8);
+    font-weight: bold;
+  }
+}
+
+.feed-list {
+  width: 100%;
+  height: calc(100vh - 28px);
+  overflow-y: scroll;
+
+  .feed-item-link {
+    &:hover {
+      cursor: pointer;
+      text-decoration: underline;
+      text-decoration-color: #64645f;
+    }
+  }
+
+  .feed-item-action {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .arco-list-item-meta-title {
+    font-size: 18px;
+  }
+
+  .arco-list-item-meta-description {
+    .arco-typography {
+      color: rgba(0, 0, 0, 0.6) !important;
+    }
+  }
+
+  .arco-list-content {
+    margin: 0 auto;
+  }
+
+  .arco-list-header {
+    border-bottom: 1px solid transparent;
+    padding: 0;
+  }
+}
+
+.arco-list-item-action {
+  align-items: center;
+}
+
+.feed-list-item-continue-ask {
+  display: inline-block;
+  padding: 4px 8px;
+  height: 25px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.with-border {
+  border: 1px solid #64645f;
+}
+
+.with-hover {
+  &:hover {
+    cursor: pointer;
+    background-color: #64645f;
+
+    .feed-list-item-text {
+      color: white;
+    }
+
+    svg {
+      color: white !important;
+    }
+  }
+}
+
+.feed-list-item-text {
+  color: #64645f;
+  font-size: 14px;
+  margin-left: 4px;
+  line-height: 1.5;
+}

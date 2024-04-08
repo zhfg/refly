@@ -23,12 +23,15 @@ import copyToClipboard from "copy-to-clipboard"
 interface SessionProps {
   session: SessionItem
   isLastSession: boolean
+  handleAskFollowing: (question?: string) => void
 }
 
 export const Session = (props: SessionProps) => {
-  const { session, isLastSession = false } = props
+  const { session, isLastSession = false, handleAskFollowing } = props
   const messageStateStore = useMessageStateStore()
-  const [scrollLoading, setScrollLoading] = useState(<Skeleton></Skeleton>)
+  const [scrollLoading, setScrollLoading] = useState(
+    <Skeleton animation></Skeleton>,
+  )
 
   const fetchData = (currentPage) => {}
 
@@ -129,7 +132,7 @@ export const Session = (props: SessionProps) => {
               </div>
             </div>
           ) : messageStateStore.pending && isLastSession ? (
-            <Skeleton></Skeleton>
+            <Skeleton animation></Skeleton>
           ) : null}
         </div>
         <div className="session-answer">
@@ -165,26 +168,50 @@ export const Session = (props: SessionProps) => {
               )}
             </>
           ) : (
-            <Skeleton></Skeleton>
+            <Skeleton animation></Skeleton>
           )}
         </div>
       </div>
-      {session?.relatedQuestions?.length > 0 && isLastSession && (
+      <div className="session-related-question">
         <div className="session-related-question">
-          <div className="session-title-icon">
-            <IconReply style={{ fontSize: 18 }} />
-            <p>相关问题</p>
-          </div>
-          <div className="session-related-question-content">
-            {session?.relatedQuestions?.map((item, index) => (
-              <div key={index}>
-                <p>{item}</p>
-                <IconPlus style={{ fontSize: 12, color: "rgba(0,0,0,0.60)" }} />
-              </div>
-            ))}
-          </div>
+          {messageStateStore.pending ||
+          session?.relatedQuestions?.length > 0 ? (
+            <div className="session-title-icon">
+              <IconReply style={{ fontSize: 18 }} />
+              <p>相关问题</p>
+            </div>
+          ) : null}
+          {session?.relatedQuestions?.length > 0 ? (
+            <div className="session-related-question-content">
+              {session?.relatedQuestions?.map((item, index) => (
+                <IconTip text="点击进行追问">
+                  <div key={index} onClick={() => handleAskFollowing(item)}>
+                    <p>{item}</p>
+                    <IconPlus
+                      style={{ fontSize: 12, color: "rgba(0,0,0,0.60)" }}
+                    />
+                  </div>
+                </IconTip>
+              ))}
+            </div>
+          ) : messageStateStore?.pending && isLastSession ? (
+            <div style={{ width: "100%" }}>
+              <Skeleton
+                animation
+                text={{ rows: 1 }}
+                className="related-question-skeleton-item"></Skeleton>
+              <Skeleton
+                animation
+                text={{ rows: 1 }}
+                className="related-question-skeleton-item"></Skeleton>
+              <Skeleton
+                animation
+                text={{ rows: 1 }}
+                className="related-question-skeleton-item"></Skeleton>
+            </div>
+          ) : null}
         </div>
-      )}
+      </div>
     </div>
   )
 }

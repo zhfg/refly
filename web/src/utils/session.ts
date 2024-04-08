@@ -1,4 +1,4 @@
-import type { Message, SessionItem } from "@/types"
+import type { Digest, Feed, Message, SessionItem, Source } from "@/types"
 import { safeParseJSON } from "./parse"
 
 export const buildSessionItem = (
@@ -16,6 +16,8 @@ export const buildSessionItem = (
     relatedQuestions: answerMessage?.data.relatedQuestions || [],
   }
 
+  console.log("buildSessionItem", session)
+
   return session
 }
 
@@ -32,4 +34,44 @@ export const buildSessions = (messages: Message[]) => {
 
   const sessions = items.map(item => buildSessionItem(item?.[0], item?.[1]))
   return sessions
+}
+
+// 从 digest 和 feed 等 ready only aigc content 的内容构建 session
+export const buildSessionsFromDigest = (aigcContent: Digest | Feed) => {
+  if (!(aigcContent?.title && aigcContent?.abstract)) return []
+
+  const session: SessionItem = {
+    question: aigcContent?.title,
+    answer: aigcContent?.abstract,
+    sources: aigcContent?.inputs?.map(item => ({
+      score: 0,
+      metadata: {
+        ...(safeParseJSON(item?.sources)?.[0]?.medadata || {}),
+        title: item?.title,
+      },
+      pageContent: item?.content || "", // 这里记录单个内容的总结
+    })),
+    relatedQuestions: [],
+  }
+
+  console.log("buildSessionsFromAIGCContent", session)
+  return [session]
+}
+
+export const buildSessionsFromFeed = (aigcContent: Digest | Feed) => {
+  if (!(aigcContent?.title && aigcContent?.abstract)) return []
+
+  const session: SessionItem = {
+    question: aigcContent?.title,
+    answer: aigcContent?.abstract,
+    sources: safeParseJSON(aigcContent?.sources)?.map((item: any) => ({
+      score: 0,
+      pageContent: aigcContent?.abstract,
+      metadata: item?.medadata,
+    })),
+    relatedQuestions: [],
+  }
+
+  console.log("buildSessionsFromAIGCContent", session)
+  return [session]
 }

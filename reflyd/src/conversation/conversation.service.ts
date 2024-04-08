@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { Response } from 'express';
 
-import { PrismaService } from '../prisma.service';
+import { PrismaService } from '../common/prisma.service';
 import { CreateConversationParam } from './dto';
-import { randomUUID } from 'crypto';
 import { MessageType, Prisma, ChatMessage } from '@prisma/client';
 import {
   QUICK_ACTION_TASK_PAYLOAD,
@@ -11,13 +11,24 @@ import {
 } from 'src/types/task';
 import { createLLMChatMessage } from 'src/llm/schema';
 import { LlmService } from '../llm/llm.service';
-import { Response } from 'express';
+import { WeblinkService } from 'src/weblink/weblink.service';
+import { resolve } from 'path';
+import { rejects } from 'assert';
+import { Source } from 'src/types/weblink';
+import { Document } from '@langchain/core/documents';
+
+const LLM_SPLIT = '__LLM_RESPONSE__';
+const RELATED_SPLIT = '__RELATED_QUESTIONS__';
 
 @Injectable()
 export class ConversationService {
-  constructor(private prisma: PrismaService, private llmService: LlmService) {}
+  constructor(
+    private prisma: PrismaService,
+    private weblinkService: WeblinkService,
+    private llmService: LlmService,
+  ) {}
 
-  async create(param: CreateConversationParam, userId: string) {
+  async create(param: CreateConversationParam, userId: number) {
     return this.prisma.conversation.create({
       data: {
         title: param.title,
@@ -30,7 +41,7 @@ export class ConversationService {
   }
 
   async updateConversation(
-    conversationId: string,
+    conversationId: number,
     data: Prisma.ConversationUpdateInput,
   ) {
     return this.prisma.conversation.update({
@@ -43,19 +54,35 @@ export class ConversationService {
     type: MessageType;
     sources: string;
     content: string;
-    userId: string;
-    conversationId: string;
+    userId: number;
+    conversationId: number;
     selectedWeblinkConfig?: string;
   }) {
     return this.prisma.chatMessage.create({
-      data: { ...msg, messageId: randomUUID() },
+      data: { ...msg },
     });
   }
 
-  async findFirstConversation(params: {
-    where: Prisma.ConversationWhereInput;
-  }) {
-    return this.prisma.conversation.findFirst(params);
+  async addChatMessages(
+    msgList: {
+      type: MessageType;
+      sources: string;
+      content: string;
+      userId: number;
+      conversationId: number;
+      selectedWeblinkConfig?: string;
+    }[],
+  ) {
+    return this.prisma.chatMessage.createMany({
+      data: msgList,
+    });
+  }
+
+  async findConversationAndMessages(conversationId: number) {
+    return this.prisma.conversation.findUnique({
+      where: { id: conversationId },
+      include: { messages: true },
+    });
   }
 
   async getConversations(params: {
@@ -70,7 +97,7 @@ export class ConversationService {
     });
   }
 
-  async getMessages(conversationId: string) {
+  async getMessages(conversationId: number) {
     return this.prisma.chatMessage.findMany({
       where: { conversationId },
       orderBy: { createdAt: 'asc' },
@@ -83,7 +110,7 @@ export class ConversationService {
     task: Task,
     chatHistory: ChatMessage[],
   ) {
-    const userId: string = req.user?.id;
+    const userId: number = req.user?.id;
 
     const filter: any = {
       must: [
@@ -114,32 +141,85 @@ export class ConversationService {
     );
 
     // first return sources，use unique tag for parse data
-    sources.forEach((source) => {
-      const payload = {
-        type: 'source',
-        body: source,
-      };
-      res.write(`refly-sse-source: ${JSON.stringify(payload)}`);
-    });
+    res.write(JSON.stringify(sources));
+    res.write(LLM_SPLIT);
 
-    // 先发一个空块，提前展示 sources
-    res.write(`refly-sse-source: [REFLY-SOURCE-END]`);
+    const getSSEData = async (stream) => {
+      // write answer in a stream style
+      let answerStr = '';
+      for await (const chunk of await stream) {
+        answerStr += chunk;
 
-    // write answer in a stream style
-    let answerStr = '';
-    for await (const chunk of await stream) {
-      answerStr += chunk;
+        res.write(chunk);
+      }
 
-      const payload = {
-        type: 'chunk',
-        body: chunk,
-      };
-      res.write(`refly-sse-data: ${JSON.stringify(payload)}`);
-    }
+      return answerStr;
+    };
+
+    const [answerStr, relatedQuestions] = await Promise.all([
+      getSSEData(stream),
+      this.llmService.getRelatedQuestion(sources, query),
+    ]);
+
+    console.log('relatedQuestions', relatedQuestions);
+
+    res.write(RELATED_SPLIT);
+    res.write(JSON.stringify(relatedQuestions));
 
     return {
       sources,
       answer: answerStr,
+      relatedQuestions,
+    };
+  }
+
+  async handleSearchEnhanceTask(
+    req: any,
+    res: Response,
+    task: Task,
+    chatHistory: ChatMessage[],
+  ) {
+    const query = task?.data?.question;
+    const { stream, sources } = await this.llmService.searchEnhance(
+      query,
+      chatHistory
+        ? chatHistory.map((msg) => createLLMChatMessage(msg.content, msg.type))
+        : [],
+    );
+
+    // first return sources，use unique tag for parse data
+    res.write(JSON.stringify(sources));
+    res.write(LLM_SPLIT);
+
+    const getSSEData = async (stream) => {
+      // write answer in a stream style
+      let answerStr = '';
+      for await (const chunk of await stream) {
+        console.log('chunk', chunk);
+        const chunkStr =
+          chunk?.content || (typeof chunk === 'string' ? chunk : '');
+        answerStr += chunkStr;
+
+        res.write(chunkStr);
+      }
+
+      return answerStr;
+    };
+
+    const [answerStr, relatedQuestions] = await Promise.all([
+      getSSEData(stream),
+      this.llmService.getRelatedQuestion(sources, query),
+    ]);
+
+    console.log('relatedQuestions', relatedQuestions);
+
+    res.write(RELATED_SPLIT);
+    res.write(JSON.stringify(relatedQuestions));
+
+    return {
+      sources,
+      answer: answerStr,
+      relatedQuestions,
     };
   }
 
@@ -156,10 +236,9 @@ export class ConversationService {
     const sources = data?.filter?.weblinkList || [];
     // TODO: 这里后续要处理边界情况，比如没有链接时应该报错
     if (sources?.length <= 0) {
-      res.write(`refly-sse-source: ${JSON.stringify({})}`);
-
+      res.write(JSON.stringify([]));
       // 先发一个空块，提前展示 sources
-      res.write(`refly-sse-source: [REFLY-SOURCE-END]`);
+      res.write(LLM_SPLIT);
 
       return {
         sources: [],
@@ -167,42 +246,77 @@ export class ConversationService {
       };
     }
 
-    sources.forEach((source) => {
-      const payload = {
-        type: 'source',
-        body: source,
-      };
-      res.write(`refly-sse-source: ${JSON.stringify(payload)}`);
-    });
-
-    // 先发一个空块，提前展示 sources
-    res.write(`refly-sse-source: [REFLY-SOURCE-END]`);
+    res.write(JSON.stringify(sources));
+    res.write(LLM_SPLIT);
 
     // write answer in a stream style
     let answerStr = '';
-    // 这里用于回调
-    const onMessage = (chunk: string) => {
-      answerStr += chunk;
 
-      const payload = {
-        type: 'chunk',
-        body: chunk,
+    const weblinkList = data?.filter?.weblinkList;
+    if (weblinkList?.length <= 0) return;
+
+    // 基于一组网页做总结，先获取网页内容
+    const docs = await this.weblinkService.parseMultiWeblinks(weblinkList);
+
+    // 构建一个 promise 用于处理 summary 输出
+    const promise = new Promise(async (resolve, reject) => {
+      // 这里用于回调
+      const onMessage = (chunk: string) => {
+        answerStr += chunk;
+
+        res.write(chunk);
       };
-      res.write(`refly-sse-data: ${JSON.stringify(payload)}`);
+
+      // summarize 输出结束之后将 related questions 写回
+      const onEnd = (output) => {
+        resolve(output);
+      };
+
+      const onError = (err) => {
+        console.log('err', err);
+        reject(err);
+      };
+
+      if (data?.actionType === QUICK_ACTION_TYPE.SUMMARY) {
+        const weblinkList = data?.filter?.weblinkList;
+        if (weblinkList?.length <= 0) return;
+
+        await this.llmService.summary(
+          data?.actionPrompt,
+          docs,
+          chatHistory,
+          onMessage,
+          onEnd,
+          onError,
+        );
+      }
+    });
+
+    const getUserQuestion = (actionType: QUICK_ACTION_TYPE) => {
+      switch (actionType) {
+        case QUICK_ACTION_TYPE.SUMMARY: {
+          return '总结网页';
+        }
+      }
     };
 
-    if (data?.actionType === QUICK_ACTION_TYPE.SUMMARY) {
-      await this.llmService.summary(
-        data?.actionPrompt,
-        data?.filter?.weblinkList,
-        chatHistory,
-        onMessage,
-      );
-    }
+    const [_, relatedQuestions] = await Promise.all([
+      promise,
+      this.llmService.getRelatedQuestion(
+        docs,
+        getUserQuestion(data?.actionType),
+      ),
+    ]);
+
+    console.log('relatedQuestions', relatedQuestions);
+
+    res.write(RELATED_SPLIT);
+    res.write(JSON.stringify(relatedQuestions));
 
     return {
       sources,
       answer: answerStr,
+      relatedQuestions,
     };
   }
 }

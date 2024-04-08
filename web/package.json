@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "@arco-design/web-react": "^2.47.1",
-    "@arco-themes/react-refly-ai": "^0.0.1",
+    "@arco-themes/react-refly-ai": "0.0.2",
+    "@radix-ui/react-popover": "^1.0.7",
     "@redux-devtools/extension": "^3.3.0",
     "@tailwindcss/forms": "^0.5.3",
     "@types/is-hotkey": "~0.1.7",
@@ -44,6 +45,7 @@
     "remark-breaks": "^3.0.2",
     "remark-gfm": "^3.0.1",
     "remark-math": "^5.1.1",
+    "tailwind-merge": "^2.2.2",
     "uuid": "^9.0.0",
     "zustand": "^4.5.1"
   },

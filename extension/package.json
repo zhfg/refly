@@ -1,8 +1,8 @@
 {
   "name": "extension",
-  "displayName": "Refly - 打造世界最大的个性化知识之书",
-  "version": "0.0.5",
-  "description": "Turn your cyber footprints into personalized knowledge base, with the power of LLM. Never miss anything valuable and insightful.",
+  "displayName": "Refly - AI Work Assistant & Personal Knowledge Search Engine",
+  "version": "0.0.6",
+  "description": "Quick summaries, Insights, Auto tag and AI Search. Refly can build your second brain, extend knowledge and give you superpower",
   "author": "pftom",
   "scripts": {
     "dev": "plasmo dev",
@@ -66,6 +66,7 @@
       "notifications",
       "cookies"
     ],
+    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlkdw0WXN0WT9YYu1nsWezZzSmWrGpny4gK0UhiL7nbz2NQkqq32KsW51Ag3wdvD/ccyS5VUUEnnlAwxmk0CfnO+TNEFM5lCtF+1/2j5HpmlqZMUlu3tUx+SiY3mF6R9cpbfts3IjWomuRVMfHXmWEu3Gctv4T5hSTNKd44Z3SOPj5KeUxYryJmL/y8LR6lj9F/a5Gfblf5t214GKeFXjewgQOmAGT+v5NurIu3xuwPkYqmkrNcRrQHqkdREH4AFp4TjlNpx5W+AR6Qh9FRkGjXTlcVMQ62KqPlIV29Y/VTO/4oUVhPMhVxXH91ojoA7Vzgr76OtnjaysNZbBapxgFQIDAQAB",
     "host_permissions": [
       "https://*/*",
       "http://*/*",

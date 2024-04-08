@@ -99,3 +99,28 @@ export function truncateToken(
 
   return resultStr;
 }
+
+// TODO： 目前比较粗暴，直接截断，理论上后续总结场景需要关注所有的 header 以及首段的总结，这样能够得到更加全面的总结
+export function getExpectedTokenLenContent(
+  texts: string[] | string = [],
+  tokenLimit = 0,
+) {
+  try {
+    let newTexts;
+
+    if (Array.isArray(texts)) {
+      const totalText = texts?.reduce((total, curr) => total + curr, '');
+      if (totalText.length < tokenLimit) return texts;
+
+      newTexts = texts.map((text) => text.slice(0, tokenLimit));
+    } else {
+      if (texts.length < tokenLimit) return texts;
+
+      newTexts = texts.slice(0, tokenLimit);
+    }
+
+    return newTexts;
+  } catch (err) {
+    return texts;
+  }
+}

@@ -25,11 +25,9 @@ export const buildTask = (payload: BuildTask): Task => {
     locale = LOCALE.ZH_CN,
     data = {},
   } = payload
-  const taskId = `task:${genUniqueId()}`
 
   const task: Task = {
     taskType,
-    taskId,
     language,
     locale,
     data: data,

@@ -28,7 +28,7 @@ export class AuthService {
   }
 
   async login(user: User) {
-    const payload: JwtPayload = { id: user.id, email: user.email };
+    const payload: JwtPayload = { id: String(user.id), email: user.email };
     return {
       accessToken: this.jwtService.sign(payload, {
         secret: this.configService.get('auth.jwt.secret'),
@@ -103,8 +103,8 @@ export class AuthService {
       userId: newUser.id,
       provider,
       providerAccountId: id,
-      access_token: accessToken,
-      refresh_token: refreshToken,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
     });
     this.logger.log(`new account created: ${newAccount.id}`);
 

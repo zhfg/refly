@@ -6,7 +6,7 @@ import { useUserStore } from "@/stores/user"
 
 // request
 import getUserInfo from "@/requests/getUserInfo"
-import { useLocation } from "react-router-dom"
+import { useLocation, useMatch, useNavigate } from "react-router-dom"
 
 // 组件
 import { LoginModal } from "@/components/login-modal/index"
@@ -21,7 +21,11 @@ interface AppLayoutProps {
 
 export const AppLayout = (props: AppLayoutProps) => {
   const userStore = useUserStore()
+  const navigate = useNavigate()
   const [token, updateCookie, deleteCookie] = useCookie("_refly_ai_sid")
+  const routeDigestDetailPageMatch = useMatch("/digest/:digestId")
+  const routeFeedDetailPageMatch = useMatch("/feed/:feedId")
+  const routeAIGCContentDetailPageMatch = useMatch("/content/:digestId")
 
   const getLoginStatus = async () => {
     try {
@@ -33,6 +37,16 @@ export const AppLayout = (props: AppLayoutProps) => {
         userStore.setUserProfile(undefined)
         userStore.setToken("")
         localStorage.removeItem("refly-user-profile")
+
+        if (
+          !(
+            routeDigestDetailPageMatch ||
+            routeFeedDetailPageMatch ||
+            routeAIGCContentDetailPageMatch
+          )
+        ) {
+          navigate("/")
+        }
       } else {
         userStore.setUserProfile(res?.data)
         localStorage.setItem("refly-user-profile", safeStringifyJSON(res?.data))
@@ -53,7 +67,11 @@ export const AppLayout = (props: AppLayoutProps) => {
       <SiderLayout />
       <Layout
         className="content-layout"
-        style={{ height: "calc(100vh - 16px)", flexGrow: 1 }}>
+        style={{
+          height: "calc(100vh - 16px)",
+          flexGrow: 1,
+          width: `calc(100% - 200px - 16px)`,
+        }}>
         <Content>{props.children}</Content>
       </Layout>
       {userStore.loginModalVisible ? <LoginModal /> : null}

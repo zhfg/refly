@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { User, Prisma } from '@prisma/client';
-import { PrismaService } from '../prisma.service';
+import { PrismaService } from '../common/prisma.service';
 
 @Injectable()
 export class UserService {
@@ -22,5 +22,19 @@ export class UserService {
     update: Prisma.UserUpdateInput;
   }) {
     return this.prisma.user.upsert(args);
+  }
+
+  async getUserPreferences(params: { userId: number }) {
+    return this.prisma.userPreference.findMany({
+      where: { ...params },
+      orderBy: { score: 'desc' },
+      include: { topic: true },
+    });
+  }
+
+  async countUserPreferences(params: { userId: number }) {
+    return this.prisma.userPreference.count({
+      where: { ...params },
+    });
   }
 }

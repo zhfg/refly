@@ -24,6 +24,7 @@ interface ThreadItemProps {
     searchTarget: SearchTarget
     filter: Source[]
   }
+  handleAskFollowing: (question?: string) => void
 }
 
 const TextArea = Input.TextArea
@@ -56,25 +57,6 @@ export const ThreadItem = (props: ThreadItemProps) => {
     inputRef.current?.dom?.onkeydown?.(e as any as KeyboardEvent)
   }
 
-  const handleAskFollowing = () => {
-    const { newQAText } = useChatStore.getState()
-    const { currentConversation } = useConversationStore.getState()
-    const useWeblinkList =
-      threadSearchTarget === SearchTarget.SelectedPages &&
-      threadWeblinkListFilter?.length > 0
-
-    const task = buildChatTask({
-      question: newQAText,
-      conversationId: currentConversation?.id || "",
-      filter: {
-        weblinkList: useWeblinkList ? threadWeblinkListFilter : [],
-      },
-    })
-
-    buildTaskAndGenReponse(task)
-    chatStore.setNewQAText("")
-  }
-
   // 这里保存为组件状态是只对当前组件生效，而且理论上设置之后就应该在此 thread 一直生效，不应该清空
   useEffect(() => {
     if (!threadSearchTarget && selectedWeblinkConfig?.searchTarget) {
@@ -89,20 +71,11 @@ export const ThreadItem = (props: ThreadItemProps) => {
     }
   }, [selectedWeblinkConfig?.searchTarget, selectedWeblinkConfig?.filter])
 
-  console.log(
-    "selectedWeblinkConfig",
-    selectedWeblinkConfig,
-    threadSearchTarget,
-    threadWeblinkListFilter,
-  )
-
-  console.log("addedStyle", addedStyle, showSelectedWeblinkList)
-
   useEffect(() => {
     setAddedStyle(
       showSelectedWeblinkList
         ? {
-            height: `calc(100vh - 90px - ${selectedWeblinkListRef?.current?.clientHeight || 0}px)`,
+            height: `calc(100vh - 90px - ${selectedWeblinkListRef?.current?.clientHeight || 0}px - 60px)`,
           }
         : {},
     )
@@ -115,6 +88,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
           <Session
             key={index}
             session={item}
+            handleAskFollowing={props.handleAskFollowing}
             isLastSession={index === sessions.length - 1}
           />
         ))}
@@ -173,7 +147,9 @@ export const ThreadItem = (props: ThreadItemProps) => {
                       shape="circle"
                       icon={<IconSend />}
                       style={{ color: "#FFF", background: "#00968F" }}
-                      onClick={handleAskFollowing}></Button>
+                      onClick={() => {
+                        props.handleAskFollowing()
+                      }}></Button>
                   </div>
                 </div>
               </div>

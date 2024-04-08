@@ -11,6 +11,8 @@ export interface Thread {
   originPageTitle: string
   createdAt: string
   updatedAt: string
-
   messages: ServerMessage[]
+
+  // 基于 feed 或 digest 创建的表示
+  contentId?: string
 }

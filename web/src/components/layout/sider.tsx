@@ -1,4 +1,4 @@
-import { Button, Layout, Menu } from "@arco-design/web-react"
+import { Avatar, Divider, Layout, Menu } from "@arco-design/web-react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { ReactText } from "react"
 import {
@@ -6,9 +6,11 @@ import {
   IconSettings,
   IconDownload,
   IconBook,
-  IconCustomerService,
+  IconHistory,
+  IconBulb,
+  IconTwitter,
 } from "@arco-design/web-react/icon"
-import { downloadPlugin, openGetStartDocument } from "../../utils"
+import { openGetStartDocument } from "../../utils"
 // 静态资源
 import Logo from "@/assets/logo.svg"
 import "./sider.scss"
@@ -19,10 +21,14 @@ const Sider = Layout.Sider
 const MenuItem = Menu.Item
 
 const getNavSelectedKeys = (pathname = "") => {
-  if (pathname.includes("guidera/guides")) {
-    return "MyGuide"
-  } else if (pathname.includes("settings/profile")) {
+  if (pathname.includes("digest")) {
+    return "Digest"
+  } else if (pathname.includes("settings")) {
     return "Settings"
+  } else if (pathname.includes("feed")) {
+    return "Feed"
+  } else if (pathname.includes("thread")) {
+    return "ThreadLibrary"
   }
 
   return "Home"
@@ -38,7 +44,6 @@ export const SiderLayout = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const userStore = useUserStore()
-
   const isGuideDetail = location.pathname.includes("guide/")
 
   // 获取 storage user profile
@@ -52,12 +57,20 @@ export const SiderLayout = () => {
   const handleNavClick = (itemKey: string, event, keyPath: string[]) => {
     switch (itemKey) {
       case "Home": {
-        navigate(`/dashboard`)
+        if (!notShowLoginBtn) {
+          userStore.setLoginModalVisible(true)
+        } else {
+          navigate(`/dashboard`)
+        }
         break
       }
 
       case "ThreadLibrary": {
-        navigate(`/thread`)
+        if (!notShowLoginBtn) {
+          userStore.setLoginModalVisible(true)
+        } else {
+          navigate(`/thread`)
+        }
         break
       }
 
@@ -66,8 +79,26 @@ export const SiderLayout = () => {
         break
       }
 
-      case "Explore": {
-        navigate(`/explore`)
+      case "Feed": {
+        if (!notShowLoginBtn) {
+          userStore.setLoginModalVisible(true)
+        } else {
+          navigate(`/feed`)
+        }
+        break
+      }
+
+      case "Digest": {
+        if (!notShowLoginBtn) {
+          userStore.setLoginModalVisible(true)
+        } else {
+          navigate(`/digest`)
+        }
+        break
+      }
+
+      case "GetHelp": {
+        window.open(`https://twitter.com/tuturetom`, "_blank")
         break
       }
 
@@ -93,7 +124,10 @@ export const SiderLayout = () => {
 
       case "DownloadExtension": {
         // 下载浏览器插件
-        downloadPlugin()
+        window.open(
+          `https://chromewebstore.google.com/detail/lecbjbapfkinmikhadakbclblnemmjpd`,
+          "_blank",
+        )
         break
       }
 
@@ -112,7 +146,7 @@ export const SiderLayout = () => {
             flexDirection: "row",
             justifyContent: "space-between",
           }}>
-          <div className="logo" onClick={() => navigate("/")}>
+          <div className="logo" onClick={() => navigate("/dashboard")}>
             <img src={Logo} alt="Refly" />
             <span>Refly</span>
           </div>
@@ -124,45 +158,55 @@ export const SiderLayout = () => {
             borderRight: "none",
           }}
           className="sider-menu-nav"
-          onClickMenuItem={handleNavClick}
-          defaultSelectedKeys={[selectedKey]}>
+          selectedKeys={[selectedKey]}
+          onClickMenuItem={handleNavClick}>
           <div className="sider-header">
-            <MenuItem key="Home">
+            <MenuItem key="Home" className="custom-menu-item">
               <IconHome style={{ fontSize: 20 }} />
               <span className="sider-menu-title">主页</span>
             </MenuItem>
             {/* <MenuItem key='Explore' ><IconHome style={{ fontSize: 20 }} />主页</MenuItem> */}
-            <MenuItem key="ThreadLibrary">
+            <MenuItem key="Digest" className="custom-menu-item">
+              <IconHistory style={{ fontSize: 20 }} />
+              <span className="sider-menu-title">回忆</span>
+            </MenuItem>
+            <MenuItem key="Feed" className="custom-menu-item">
+              <IconBulb style={{ fontSize: 20 }} />
+              <span className="sider-menu-title">探索</span>
+            </MenuItem>
+            <MenuItem key="ThreadLibrary" className="custom-menu-item">
               <IconBook style={{ fontSize: 20 }} />
               <span className="sider-menu-title">会话库</span>
             </MenuItem>
-
-            {!notShowLoginBtn && (
-              <Button
-                type="primary"
-                onClick={() => userStore.setLoginModalVisible(true)}
-                style={{
-                  marginTop: 16,
-                  width: "calc(100% - 8px)",
-                  height: 38,
-                  borderRadius: 4,
-                }}>
-                登录
-              </Button>
-            )}
           </div>
           <div className="sider-footer">
-            <MenuItem key="Docs">
-              <IconCustomerService style={{ fontSize: 20 }} />
-              <span className="sider-menu-title">查看文档</span>
+            <MenuItem key="GetHelp" className="custom-menu-item">
+              <IconTwitter style={{ fontSize: 20 }} />
+              <span className="sider-menu-title">获得帮助</span>
             </MenuItem>
             {!!userStore.userProfile?.id && (
-              <MenuItem key="Settings">
-                <IconSettings style={{ fontSize: 20 }} />
-                <span className="sider-menu-title">设置</span>
-              </MenuItem>
+              <>
+                <Divider style={{ margin: "8px 0" }} />
+                <MenuItem
+                  key="Settings"
+                  className="menu-setting-container custom-menu-item">
+                  <div className="menu-settings">
+                    <Avatar size={32}>
+                      <img
+                        src={userStore?.userProfile?.avatar || ""}
+                        alt="user-avatar"
+                      />
+                    </Avatar>
+                    <span className="username">
+                      {userStore?.userProfile?.name}
+                    </span>
+                  </div>
+                  <IconSettings style={{ fontSize: 20 }} />
+                </MenuItem>
+              </>
             )}
-            <MenuItem key="Download">
+            <Divider style={{ margin: "8px 0" }} />
+            <MenuItem key="DownloadExtension" className="custom-menu-item">
               <IconDownload style={{ fontSize: 20 }} />
               <span className="sider-menu-title">下载插件</span>
             </MenuItem>

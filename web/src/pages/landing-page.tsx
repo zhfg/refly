@@ -10,6 +10,8 @@ import Home from "./Home"
 import SignIn from "./SignIn"
 import SignUp from "./SignUp"
 import ResetPassword from "./ResetPassword"
+import Privacy from "./pravicy"
+import Terms from "./terms"
 
 function LandingPage() {
   const location = useLocation()
@@ -33,9 +35,8 @@ function LandingPage() {
     <>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
       </Routes>
     </>
   )

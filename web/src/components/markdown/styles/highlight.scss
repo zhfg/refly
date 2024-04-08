@@ -1,4 +1,10 @@
 .markdown-body {
+  ol,
+  ul,
+  menu {
+    list-style: inherit;
+  }
+
   pre {
     padding: 0;
 

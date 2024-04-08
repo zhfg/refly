@@ -31,48 +31,14 @@ import getConversationList from "@/requests/getConversationList"
 // types
 import { Thread } from "@/types"
 import "./index.scss"
-
-const Header = () => {
-  const siderStore = useSiderStore()
-
-  return (
-    <header>
-      <div className="brand">
-        <img src={Logo} alt="Refly" />
-        <span>Refly</span>
-      </div>
-      <div className="funcs">
-        <IconTip text="全屏">
-          <img src={FullScreenSVG} alt="全屏" />
-        </IconTip>
-        <IconTip text="通知">
-          <img src={NotificationSVG} alt="通知" />
-        </IconTip>
-        <IconTip text="设置">
-          <img src={SettingGraySVG} alt="设置" />
-        </IconTip>
-        <IconTip text="账户">
-          <Avatar size={16}>
-            <img
-              alt="avatar"
-              src="//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/3ee5f13fb09879ecb5185e440cef6eb9.png~tplv-uwbnlip3yd-webp.webp"
-            />
-          </Avatar>
-        </IconTip>
-        <IconTip text="关闭">
-          <img
-            src={CloseGraySVG}
-            alt="关闭"
-            onClick={() => siderStore.setShowSider(false)}
-          />
-        </IconTip>
-      </div>
-    </header>
-  )
-}
+import { delay } from "@/utils/delay"
+// components
+import { EmptyThreadLibraryStatus } from "@/components/empty-thread-library-status"
 
 export const ThreadLibrary = () => {
-  const [scrollLoading, setScrollLoading] = useState(<Skeleton></Skeleton>)
+  const [scrollLoading, setScrollLoading] = useState(
+    <Skeleton animation></Skeleton>,
+  )
   const threadStore = useThreadStore()
   const navigate = useNavigate()
   const isThreadLibrary = useMatch("/thread")
@@ -80,6 +46,20 @@ export const ThreadLibrary = () => {
   const fetchData = async (currentPage = 1) => {
     try {
       console.log("currentPage", currentPage)
+      setScrollLoading(
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+          }}>
+          <Skeleton animation style={{ width: "100%" }}></Skeleton>
+          <Skeleton
+            animation
+            style={{ width: "100%", marginTop: 24 }}></Skeleton>
+        </div>,
+      )
+
       if (!threadStore?.hasMore && currentPage !== 1) {
         setScrollLoading(<span>已经到底啦~</span>)
         return
@@ -105,12 +85,24 @@ export const ThreadLibrary = () => {
       threadStore.updateThreadList(newRes?.data || [])
     } catch (err) {
       message.error("获取会话列表失败，请重新刷新试试")
+    } finally {
+      const { threads, pageSize } = useThreadStore.getState()
+
+      if (threads?.length === 0) {
+        setScrollLoading(<EmptyThreadLibraryStatus />)
+      } else if (threads?.length > 0 && threads?.length < pageSize) {
+        setScrollLoading(<span>已经到底啦~</span>)
+      }
     }
   }
 
   useEffect(() => {
     fetchData()
-  }, [isThreadLibrary])
+
+    return () => {
+      threadStore.resetState()
+    }
+  }, [])
 
   return (
     <div
@@ -124,7 +116,13 @@ export const ThreadLibrary = () => {
         className="thread-library-list"
         wrapperStyle={{ width: "100%" }}
         bordered={false}
-        header={<p className="thread-library-title">会话库</p>}
+        header={
+          <div className="feed-title-container">
+            <p className="feed-title">
+              <span>会话库</span>
+            </p>
+          </div>
+        }
         pagination={false}
         offsetBottom={50}
         dataSource={threadStore?.threads}

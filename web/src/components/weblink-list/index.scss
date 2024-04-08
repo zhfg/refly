@@ -159,6 +159,8 @@
         }
 
         .text {
+          display: inline-block;
+          width: 400px;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;

@@ -1,4 +1,4 @@
-import type { Source } from "./session"
+import type { Source, RelatedQuestion } from "./session"
 import { TASK_TYPE } from "./task"
 
 // export const enum MessageType {
@@ -18,9 +18,10 @@ export type MessageState = {
   pendingFirstToken?: boolean // 是否正在准备生成，如果收到第一个字符，即代表已经开始生生成
   pending?: boolean
   error?: boolean // 此次信息是否出错，比如还没开始生成就 abort，显示错误信息
-  pendingReplyMsg?: Message // 即将生成的 replyMsg 对象
+  pendingReplyMsg?: Message | null // 即将生成的 replyMsg 对象
   history?: [string, string][]
-  pendingSourceDocs?: Document[]
+  pendingSourceDocs?: Source[]
+  pendingRelatedQuestions?: RelatedQuestion[]
 }
 
 /**
@@ -92,7 +93,7 @@ export type Message = {
     type: MessageType
     content: string
     suggestions?: { text: string }[] // 对话开始提示的 3 个问题
-    relatedQuestions?: string[] // 对话回答完之后，生成的相关问题推荐
+    relatedQuestions?: RelatedQuestion[] // 对话回答完之后，生成的相关问题推荐
     sources?: Source[]
     questionId?: string // 对问题进行的回答，都会有 questionId，如果不是基于某个问题的回答，如自动生成的，则为 null
     replies?: Message[] // 基于 selection，自动生成一个的 system 回答，eg：您希望对文本进行什么操作？

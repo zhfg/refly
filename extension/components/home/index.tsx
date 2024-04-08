@@ -61,10 +61,36 @@ const Home = (props: ChatProps) => {
   const isIntentActive = !!quickActionStore.selectedText
   console.log("selectedText", quickActionStore.selectedText)
 
+  const handleSendMessage = async () => {
+    // 如果是当前网页的快捷操作，那么先上传 Website
+    // TODO: 这里后续需要处理去重
+    if (searchTarget === SearchTarget.CurrentPage) {
+      await handleUploadWebsite(window.location.href)
+    }
+
+    // 对当前网页进行快速操作
+    runQuickActionTask({
+      filter: {
+        weblinkList: [
+          {
+            pageContent: "",
+            metadata: {
+              title: document?.title || "",
+              source: location.href,
+            },
+            score: -1,
+          } as Source,
+        ],
+      },
+    })
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     e.stopPropagation()
 
-    inputRef.current?.dom?.onkeydown?.(e as any as KeyboardEvent)
+    if (e.keyCode === 13) {
+      handleSendMessage()
+    }
   }
 
   // 自动聚焦输入框
@@ -126,6 +152,9 @@ const Home = (props: ChatProps) => {
             placeholder="基于网页进行提问任何内容..."
             onKeyDownCapture={(e) => handleKeyDown(e)}
             autoSize={{ minRows: 4, maxRows: 4 }}
+            onCompositionStart={(e) => console.log("composition start")}
+            onCompositionUpdate={(e) => console.log("composition update")}
+            onCompositionEnd={(e) => console.log("composition end")}
             style={{
               borderRadius: 8,
               resize: "none",
@@ -148,27 +177,7 @@ const Home = (props: ChatProps) => {
                 <IconTip text="处理当前网页用于问答">
                   <Button
                     onClick={async () => {
-                      // 如果是当前网页的快捷操作，那么先上传 Website
-                      // TODO: 这里后续需要处理去重
-                      if (searchTarget === SearchTarget.CurrentPage) {
-                        await handleUploadWebsite(window.location.href)
-                      }
-
-                      // 对当前网页进行快速操作
-                      runQuickActionTask({
-                        filter: {
-                          weblinkList: [
-                            {
-                              pageContent: "",
-                              metadata: {
-                                title: document?.title || "",
-                                source: location.href,
-                              },
-                              score: -1,
-                            } as Source,
-                          ],
-                        },
-                      })
+                      handleSendMessage()
                     }}
                     icon={<IconUpload />}
                     loading={uploadingStatus === "loading" ? true : false}

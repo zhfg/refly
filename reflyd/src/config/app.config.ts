@@ -4,9 +4,8 @@ export default () => ({
     host: process.env.REDIS_HOST || 'localhost',
     port: parseInt(process.env.REDIS_PORT, 10) || 6379,
   },
-  qdrant: {
-    url: process.env.QDRANT_URL || 'http://localhost:6333',
-    collectionName: process.env.QDRANT_COLLECTION_NAME || 'refly',
+  vectorStore: {
+    vectorDim: parseInt(process.env.REFLY_VEC_DIM, 10) || 1024,
   },
   auth: {
     cookieTokenField: '_refly_ai_sid',
