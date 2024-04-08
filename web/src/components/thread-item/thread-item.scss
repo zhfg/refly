@@ -132,6 +132,15 @@
 .session-related-question {
   max-width: 746px;
   width: 746px;
+
+  .related-question-skeleton-item {
+    .arco-skeleton-text-row {
+      margin-top: 8px;
+      width: 100% !important;
+      height: 30px;
+      border-radius: 4px;
+    }
+  }
 }
 
 .session-source-list {
