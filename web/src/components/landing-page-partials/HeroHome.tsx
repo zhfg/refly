@@ -61,8 +61,8 @@ function HeroHome() {
               className="text-xl text-gray-400 mb-8"
               data-aos="fade-up"
               data-aos-delay="200">
-              Turn your cyber footprints into personalized knowledge base, with
-              the power of LLM. Never miss anything valuable and insightful.
+              Quick summaries, Insights, Auto tag and AI Search. Refly can build
+              your second brain, extend knowledge and give you superpower
             </p>
             <div className="max-w-xs mx-auto sm:max-w-none sm:flex sm:justify-center">
               <div data-aos="fade-up" data-aos-delay="400">

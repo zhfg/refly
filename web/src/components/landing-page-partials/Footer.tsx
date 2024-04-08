@@ -26,9 +26,9 @@ function Footer() {
                 </Link>
               </div>
               <div className="text-gray-400">
-                Turn your cyber footprints into personalized knowledge base,
-                with the power of LLM. Never miss anything valuable and
-                insightful.
+                Quick summaries, Insights, Auto tag and AI Search. Refly can
+                build your second brain, extend knowledge and give you
+                superpower
               </div>
             </div>
 

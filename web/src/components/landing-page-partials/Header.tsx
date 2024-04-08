@@ -125,7 +125,7 @@ function Header(props: { showLogin?: boolean }) {
                     }}
                     to=""
                     className="font-medium text-green-600 hover:text-gray-200 px-4 py-3 flex items-center transition duration-150 ease-in-out">
-                    去登录
+                    Login
                   </Link>
                 </li>
               )}
@@ -179,7 +179,7 @@ function Header(props: { showLogin?: boolean }) {
                     }}
                     to=""
                     className="flex font-medium w-full text-green-600 hover:text-gray-200 py-2 justify-center">
-                    去登录
+                    Login
                   </Link>
                 </li>
                 {/* <li>

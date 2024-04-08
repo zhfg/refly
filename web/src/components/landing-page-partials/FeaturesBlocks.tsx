@@ -178,7 +178,7 @@ function FeaturesBlocks() {
                   />
                 </g>
               </svg>
-              <h4 className="h4 mb-2">Auto tag and timeline</h4>
+              <h4 className="h4 mb-2">Auto tag and Timeline</h4>
               <p className="text-lg text-gray-400 text-center">
                 Automatically and tag, search and review at any time. Build a
                 knowledge system through labels & timelines
