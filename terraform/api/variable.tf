@@ -20,11 +20,6 @@ variable "instance_type" {
   default     = "t2.micro"
 }
 
-variable "db_instance_type" {
-  description = "Type of EC2 instance to provision for DB"
-  default     = "t2.micro"
-}
-
 variable "instance_count" {
   description = "Application instance count"
   default     = 1
@@ -41,6 +36,11 @@ variable "image_version" {
 }
 
 /// Application variables.
+
+variable "app_env" {
+  description = "App env"
+  default     = "dev"
+}
 
 variable "database_url" {
   description = "Database URL"
