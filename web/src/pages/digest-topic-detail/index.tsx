@@ -44,13 +44,12 @@ export const DigestTopicDetail = () => {
   const digestTopicDetailStore = useDigestTopicDetailStore()
   const digestTopicStore = useDigestTopicStore()
   const navigate = useNavigate()
-  const isTopicDetail = useMatch("/digest/topic/:digestTopicId")
   const { digestTopicId } = useParams()
   const { fetchDigestTopicData, isFetching } = useGetDigestTopics()
 
   // TODO: 替换成真正的 topic detail，目前还是 fake
   const currentTopicDetail = digestTopicStore.topicList?.find(
-    item => item?.id === digestTopicId,
+    item => String(item?.id) === String(digestTopicId),
   )
 
   const fetchData = async (currentPage = 1) => {
