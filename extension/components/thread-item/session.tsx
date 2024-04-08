@@ -143,7 +143,10 @@ export const Session = (props: SessionProps) => {
           {session?.answer ? (
             <>
               <div className="session-answer">
-                <Markdown content={session?.answer} />
+                <Markdown
+                  content={session?.answer}
+                  sources={session?.sources}
+                />
               </div>
               {!messageStateStore?.pending && (
                 <div className="session-answer-actionbar">

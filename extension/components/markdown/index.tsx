@@ -2,7 +2,6 @@ import { IconLoading } from "@arco-design/web-react/icon"
 import { useEffect, useRef, useState } from "react"
 import ReactMarkdown from "react-markdown"
 import { Message as message } from "@arco-design/web-react"
-import { Popover, PopoverContent, PopoverTrigger } from "./popover"
 
 import "katex/dist/katex.min.css"
 
@@ -12,11 +11,8 @@ import RehypeKatex from "rehype-katex"
 import RemarkBreaks from "remark-breaks"
 import RemarkGfm from "remark-gfm"
 import RemarkMath from "remark-math"
-
-// styles
-import "./styles/markdown.scss"
-import "./styles/highlight.scss"
-import { Source } from "@/types"
+import { Popover, PopoverContent, PopoverTrigger } from "./popover"
+import type { Source } from "~types"
 
 export function PreCode(props: { children: any }) {
   const ref = useRef<HTMLPreElement>(null)
@@ -38,10 +34,8 @@ export function PreCode(props: { children: any }) {
 }
 
 export function ATag({ ...props }, sources: Source[]) {
-  console.log("ATag before", props, sources)
   if (!props.href) return <></>
   const source = sources[+props.href - 1]
-  console.log("ATag after", props, sources)
   if (!source) return <></>
   return (
     <span className="inline-block w-4">
@@ -102,6 +96,8 @@ export function Markdown(
 ) {
   const mdRef = useRef<HTMLDivElement>(null)
 
+  console.log("Markdown", props.content)
+
   const md = mdRef.current
   const rendered = useRef(true) // disable lazy loading for bad ux
   const [counter, setCounter] = useState(0)
@@ -136,7 +132,7 @@ export function Markdown(
           ]}
           components={{
             pre: PreCode,
-            a: args => ATag(args, props?.sources || []),
+            a: (args) => ATag(args, props?.sources || []),
           }}
           linkTarget={"_blank"}>
           {props.content}

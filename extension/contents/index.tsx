@@ -1,4 +1,5 @@
 import ArcoCSS from "data-text:@arco-design/web-react/dist/css/arco.css"
+import TailwindCSS from "data-text:~/contents/tailwind.css"
 import LocalArcoCSS from "data-text:~/contents/arco.css"
 import CSSText from "data-text:~/contents/index.scss"
 import HighlightCSSText from "data-text:~/contents/styles/highlight.scss"
@@ -44,6 +45,7 @@ export const getInlineAnchor: PlasmoGetInlineAnchor = async () => document.body
 export const getStyle = () => {
   const style = document.createElement("style")
   style.textContent =
+    TailwindCSS +
     LocalArcoCSS +
     ArcoCSS +
     CSSText +
