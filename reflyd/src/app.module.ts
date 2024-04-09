@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { LoggerModule } from 'nestjs-pino';
+import { Request } from 'express';
 
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
@@ -19,6 +21,19 @@ import { AppController } from './app.controller';
       load: [configuration],
       cache: true,
       expandVariables: true,
+    }),
+    LoggerModule.forRootAsync({
+      useFactory: async () => {
+        return {
+          pinoHttp: {
+            autoLogging: false,
+            base: null,
+            quietReqLogger: true,
+            genReqId: (request: Request) => request.header('X-Ray-ID'),
+            level: 'debug',
+          },
+        };
+      },
     }),
     BullModule.forRootAsync({
       imports: [ConfigModule],
