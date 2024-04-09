@@ -44,6 +44,7 @@ export interface Digest {
   contentId: string // 代表此 digest 或 feed 所属于的 AIGCContent
   title: string
   abstract: string
+  content: string
   meta: ContentMeta
   sources: string // JSON string 的形式，Source[]
   weblinks: { url: string; pageMeta: string; contentMeta: string }[]
