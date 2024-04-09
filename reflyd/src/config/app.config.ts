@@ -7,6 +7,9 @@ export default () => ({
   vectorStore: {
     vectorDim: parseInt(process.env.REFLY_VEC_DIM, 10) || 1024,
   },
+  serper: {
+    apiKey: process.env.SERPER_API_KEY,
+  },
   auth: {
     cookieTokenField: '_refly_ai_sid',
     cookieDomain: process.env.REFLY_COOKIE_DOMAIN || '.refly.ai',

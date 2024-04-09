@@ -441,7 +441,7 @@ export class LlmService implements OnModuleInit {
       const res = await fetch('https://google.serper.dev/search', {
         method: 'post',
         headers: {
-          'X-API-KEY': '79e74a2b07ad3ae23d2af088ac87754950bb86fc',
+          'X-API-KEY': this.configService.get('serper.apiKey'),
           'Content-Type': 'application/json',
         },
         body: queryPayload,

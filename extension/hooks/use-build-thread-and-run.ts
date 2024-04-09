@@ -14,9 +14,10 @@ import {
   type QUICK_ACTION_TASK_PAYLOAD,
   type Task,
   type Source,
+  TASK_TYPE,
 } from "~/types"
 import { SearchTarget, useSearchStateStore } from "~stores/search-state"
-import { buildChatTask, buildQuickActionTask } from "~utils/task"
+import { buildChatTask, buildQuickActionTask, buildTask } from "~utils/task"
 import { useWeblinkStore } from "~stores/weblink"
 
 export const useBuildThreadAndRun = () => {
@@ -66,7 +67,7 @@ export const useBuildThreadAndRun = () => {
     navigate(`/thread/${res?.data?.id}`)
   }
 
-  const runChatTask = () => {
+  const runTask = () => {
     const question = chatStore.newQAText
     const { selectedRow } = useWeblinkStore.getState()
     const { searchTarget } = useSearchStateStore.getState()
@@ -95,9 +96,15 @@ export const useBuildThreadAndRun = () => {
       }))
     }
 
-    const task = buildChatTask({
-      question,
-      filter: { weblinkList: selectedWebLink },
+    const task = buildTask({
+      taskType:
+        searchTarget === SearchTarget.SearchEnhance
+          ? TASK_TYPE.SEARCH_ENHANCE_ASK
+          : TASK_TYPE.CHAT,
+      data: {
+        question,
+        filter: { weblinkList: selectedWebLink },
+      },
     })
 
     // 创建新会话并跳转
@@ -116,5 +123,5 @@ export const useBuildThreadAndRun = () => {
     handleCreateNewConversation(task)
   }
 
-  return { handleCreateNewConversation, runQuickActionTask, runChatTask }
+  return { handleCreateNewConversation, runQuickActionTask, runTask }
 }

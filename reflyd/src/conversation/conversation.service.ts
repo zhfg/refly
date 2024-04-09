@@ -211,14 +211,20 @@ export class ConversationService {
       this.llmService.getRelatedQuestion(sources, query),
     ]);
 
-    console.log('relatedQuestions', relatedQuestions);
-
     res.write(RELATED_SPLIT);
     res.write(JSON.stringify(relatedQuestions));
 
+    const handledAnswer = answerStr
+      .replace(/\[\[([cC])itation/g, '[citation')
+      .replace(/[cC]itation:(\d+)]]/g, 'citation:$1]')
+      .replace(/\[\[([cC]itation:\d+)]](?!])/g, `[$1]`)
+      .replace(/\[[cC]itation:(\d+)]/g, '[citation]($1)');
+    console.log('handledAnswer', handledAnswer);
+
     return {
       sources,
-      answer: answerStr,
+      // 支持做 citation 的处理
+      answer: handledAnswer,
       relatedQuestions,
     };
   }

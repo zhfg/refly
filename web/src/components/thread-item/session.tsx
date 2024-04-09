@@ -58,7 +58,7 @@ export const Session = (props: SessionProps) => {
                     className="session-source-list-item"
                     wrapperStyle={{ width: "100%" }}
                     bordered={false}
-                    pagination={{}}
+                    pagination={{ pageSize: 4 }}
                     dataSource={session?.sources}
                     scrollLoading={
                       session?.sources?.length > 0 ? null : scrollLoading
@@ -146,7 +146,10 @@ export const Session = (props: SessionProps) => {
             {session?.answer ? (
               <>
                 <div className="session-answer">
-                  <Markdown content={session?.answer} />
+                  <Markdown
+                    content={session?.answer}
+                    sources={session?.sources || []}
+                  />
                 </div>
                 {!messageStateStore?.pending && (
                   <div className="session-answer-actionbar">

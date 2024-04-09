@@ -10,14 +10,14 @@ import { useConversationStore } from "~stores/conversation"
 import { useThreadStore } from "~stores/thread"
 // utils
 import { buildSessions } from "~utils/session"
-import { buildChatTask } from "~utils/task"
+import { buildChatTask, buildTask } from "~utils/task"
 // 组件
 import { ThreadItem } from "~components/thread-item/thread-item"
 import { sendToBackground } from "@plasmohq/messaging"
 import { Header } from "./header"
 import { useBuildTask } from "~hooks/use-build-task"
 import { useTaskStore } from "~stores/task"
-import { MessageType, type Message } from "~types"
+import { MessageType, type Message, TASK_TYPE } from "~types"
 import { safeParseJSON } from "~utils/parse"
 import { useWeblinkStore } from "~stores/weblink"
 import { SearchTarget, useSearchStateStore } from "~stores/search-state"
@@ -78,7 +78,7 @@ export const Thread = () => {
     chatStore.setMessages(messages)
   }
 
-  const handleAskFollowing = (question?: string) => {
+  const handleAskFollowing = (question?: string, taskType?: TASK_TYPE) => {
     // support ask follow up question
     let newQuestion = ""
     if (typeof question === "string" && question) {
@@ -97,12 +97,15 @@ export const Thread = () => {
       selectedWeblinkConfig?.searchTarget === SearchTarget.SelectedPages &&
       selectedWeblinkConfig?.filter?.length > 0
 
-    const task = buildChatTask({
-      question: newQuestion,
-      conversationId: currentConversation?.id || "",
-      filter: {
-        weblinkList: useWeblinkList ? selectedWeblinkConfig?.filter : [],
+    const task = buildTask({
+      data: {
+        question: newQuestion,
+        conversationId: currentConversation?.id || "",
+        filter: {
+          weblinkList: useWeblinkList ? selectedWeblinkConfig?.filter : [],
+        },
       },
+      taskType,
     })
     buildTaskAndGenReponse(task)
     chatStore.setNewQAText("")
