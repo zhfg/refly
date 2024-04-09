@@ -10,6 +10,7 @@ import HomeCSSText from "data-text:~/components/home/index.scss"
 import WeblinkCSSText from "data-text:~/components/weblink-list/index.scss"
 import LoginCSSText from "data-text:~/components/login/index.scss"
 import EmptyThreadLibraryCSSText from "data-text:~/components/empty-thread-library-status/index.scss"
+import ContentSelectorCSS from "data-text:~/contents/styles/contentSelector.scss"
 import type { PlasmoGetInlineAnchor } from "plasmo"
 import React, { useEffect } from "react"
 import { MemoryRouter } from "react-router-dom"
@@ -56,7 +57,8 @@ export const getStyle = () => {
     MarkdownCSSText +
     HighlightCSSText +
     LoginCSSText +
-    EmptyThreadLibraryCSSText
+    EmptyThreadLibraryCSSText +
+    ContentSelectorCSS
   return style
 }
 
@@ -90,12 +92,12 @@ export const Content = () => {
 
   return (
     <div className="light app-container">
-      <div
+      {/* <div
         className={quickActionStore.selectedText ? "entry active" : "entry"}
         onClick={(_) => siderStore.setShowSider(!siderStore.showSider)}>
         <img src={Logo} alt="唤起 Refly" style={{ width: 25, height: 25 }} />
         <span>⌘B</span>
-      </div>
+      </div> */}
 
       <div
         id="refly-app-main"

@@ -33,6 +33,8 @@ import { IconTip } from "./icon-tip"
 import { SearchTargetSelector } from "./home-search-target-selector"
 import type { WebLinkItem } from "~components/weblink-list/types"
 import { mapSourceFromWeblinkList } from "~utils/weblink"
+import { sendToBackground } from "@plasmohq/messaging"
+import { useContentSelectorStore } from "~stores/content-selector"
 
 const TextArea = Input.TextArea
 
@@ -45,12 +47,14 @@ const Home = (props: ChatProps) => {
   const inputRef = useRef<RefTextAreaType>()
   const weblinkListRef = useRef(null)
 
+  // stores
   const quickActionStore = useQuickActionStore()
   const chatStore = useChatStore()
   const messageStateStore = useMessageStateStore()
   const siderStore = useSiderStore()
   const webLinkStore = useWeblinkStore()
   const { searchTarget } = useSearchStateStore()
+  const contentSelectorStore = useContentSelectorStore()
 
   // hooks
   const { runTask, runQuickActionTask } = useBuildThreadAndRun()
@@ -207,6 +211,30 @@ const Home = (props: ChatProps) => {
           />
         ) : null}
         {webLinkStore?.selectedRow?.length > 0 ? <QuickAction /> : null}
+        <Button
+          style={{ color: "#FFF", background: "#00968F" }}
+          onClick={() => {
+            if (!contentSelectorStore?.isInjectStyles) {
+              sendToBackground({
+                name: "injectContentSelectorCSS",
+              })
+
+              contentSelectorStore?.setIsInjectStyles(true)
+            }
+
+            contentSelectorStore.setShowContentSelector(
+              !contentSelectorStore.showContentSelector,
+            )
+
+            window.postMessage({
+              name: "setShowContentSelector",
+              payload: {
+                showContentSelector: !contentSelectorStore.showContentSelector,
+              },
+            })
+          }}>
+          {contentSelectorStore?.showContentSelector ? "取消选择" : "选择元素"}
+        </Button>
       </div>
 
       <WeblinkList
