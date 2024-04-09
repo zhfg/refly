@@ -96,6 +96,17 @@ export const useContentSelector = () => {
       showContentSelectorRef.current =
         data?.payload?.showContentSelector || false
 
+      if (data?.payload?.showContentSelector) {
+        document.body.addEventListener("mousemove", contentActionHandler)
+        document.body.addEventListener("click", contentSelectorClickHandler)
+      } else {
+        document.body.removeEventListener(
+          "message",
+          contentSelectorClickHandler,
+        )
+        document.body.removeEventListener("click", contentSelectorClickHandler)
+      }
+
       // 取消的话直接取消 classList
       if (!data?.payload?.showContentSelector) {
         resetStyle()
@@ -104,9 +115,6 @@ export const useContentSelector = () => {
   }
 
   useEffect(() => {
-    document.body.addEventListener("mousemove", contentActionHandler)
-    document.body.addEventListener("click", contentSelectorClickHandler)
-
     window.addEventListener("message", contentSelectorStatusHandler)
 
     return () => {
@@ -114,7 +122,8 @@ export const useContentSelector = () => {
         "mousemove",
         contentSelectorStatusHandler,
       )
-      window.removeEventListener("message", contentSelectorClickHandler)
+      document.body.removeEventListener("message", contentSelectorClickHandler)
+      document.body.removeEventListener("click", contentSelectorClickHandler)
     }
   }, [])
 
