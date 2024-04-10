@@ -55,7 +55,7 @@ export const useBindCommands = () => {
     })
 
     const elem = document
-      .querySelector("plasmo-csui")
+      .querySelector("#refly-main-app")
       ?.shadowRoot?.querySelector(".message-input")
     hotKeys(
       keyboardSendShortcutRef.current,

@@ -221,7 +221,7 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
 
       // 获取列表的滚动高度，以及现在的列表数量，当还存在 2 个时触发滚动
       const scrollTopElem = document
-        .querySelector("plasmo-csui")
+        .querySelector("#refly-main-app")
         ?.shadowRoot?.querySelector(".conv-list")
         ?.querySelector(".arco-table-body")
 
@@ -243,6 +243,8 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
       loadMore(1)
     }
   }, [webLinkStore?.isWebLinkListVisible])
+
+  console.log("visible", webLinkStore.isWebLinkListVisible)
 
   return (
     <div style={{ width: "100%" }}>

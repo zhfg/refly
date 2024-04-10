@@ -239,11 +239,13 @@ const Home = (props: ChatProps) => {
 
       <WeblinkList
         ref={weblinkListRef}
-        getPopupContainer={() =>
-          document
-            .querySelector("plasmo-csui")
+        getPopupContainer={() => {
+          const elem = document
+            .querySelector("#refly-main-app")
             ?.shadowRoot?.querySelector(".main")
-        }
+
+          return elem as HTMLElement
+        }}
       />
     </div>
   )

@@ -11,7 +11,7 @@ import WeblinkCSSText from "data-text:~/components/weblink-list/index.scss"
 import LoginCSSText from "data-text:~/components/login/index.scss"
 import EmptyThreadLibraryCSSText from "data-text:~/components/empty-thread-library-status/index.scss"
 import ContentSelectorCSS from "data-text:~/contents/styles/contentSelector.scss"
-import type { PlasmoGetInlineAnchor } from "plasmo"
+import type { PlasmoGetInlineAnchor, PlasmoGetShadowHostId } from "plasmo"
 import React, { useEffect } from "react"
 import { MemoryRouter } from "react-router-dom"
 
@@ -42,6 +42,7 @@ import { Markdown } from "~components/markdown"
 // }
 
 export const getInlineAnchor: PlasmoGetInlineAnchor = async () => document.body
+export const getShadowHostId: PlasmoGetShadowHostId = () => `refly-main-app`
 
 export const getStyle = () => {
   const style = document.createElement("style")
@@ -85,7 +86,7 @@ export const Content = () => {
     Message.config({
       getContainer: () =>
         document
-          .querySelector("plasmo-csui")
+          .querySelector("#refly-main-app")
           ?.shadowRoot?.querySelector(".main"),
     })
   }, [])
