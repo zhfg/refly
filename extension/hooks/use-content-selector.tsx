@@ -2,12 +2,69 @@ import { sendToBackground } from "@plasmohq/messaging"
 import classNames from "classnames"
 import { useEffect, useRef } from "react"
 import getXPath from "get-xpath"
+import type { Mark } from "~types"
+import { safeStringifyJSON } from "~utils/parse"
+
+function getElementType(element) {
+  // 检查元素是否为 table 元素
+  if (element.tagName.toLowerCase() === "table") {
+    return "table"
+  }
+  // 检查元素是否为 a 标签(链接)
+  else if (element.tagName.toLowerCase() === "a") {
+    return "link"
+  }
+  // 检查元素是否为 img 标签(图像)
+  else if (element.tagName.toLowerCase() === "img") {
+    return "image"
+  }
+  // 检查元素是否为 video 标签
+  else if (element.tagName.toLowerCase() === "video") {
+    return "video"
+  }
+  // 检查元素是否为 audio 标签
+  else if (element.tagName.toLowerCase() === "audio") {
+    return "audio"
+  }
+  // 如果以上都不是,则认为是文本元素
+  else {
+    return "text"
+  }
+}
 
 export const useContentSelector = () => {
   const statusRef = useRef(true)
   const markRef = useRef<HTMLDivElement>()
   const targetList = useRef<Element[]>([])
+  const markListRef = useRef<Mark[]>([])
   const showContentSelectorRef = useRef<boolean>(false)
+
+  const buildMark = (target: HTMLElement) => {
+    const content = target.innerText
+
+    const mark: Mark = {
+      type: getElementType(target),
+      data: [content],
+      target,
+      xPath: getXPath(target),
+    }
+
+    return mark
+  }
+
+  const addMark = (target: HTMLElement) => {
+    const mark = buildMark(target)
+
+    markListRef.current = markListRef.current.concat(mark)
+  }
+
+  const removeMark = (target: HTMLElement) => {
+    const xPath = getXPath(target)
+
+    markListRef.current = markListRef.current.filter(
+      (item) => item.xPath !== xPath,
+    )
+  }
 
   const contentSelectorElem = (
     <div className="refly-content-selector-container">
@@ -42,6 +99,17 @@ export const useContentSelector = () => {
     targetList.current.forEach((item) =>
       item?.classList?.remove("refly-content-selected-target"),
     )
+    markListRef.current = []
+
+    // 发送给 refly-main-app
+    const msg = {
+      name: "syncSelectedMark",
+      payload: {
+        marks: safeStringifyJSON(markListRef.current),
+      },
+    }
+    console.log("contentSelectorClickHandler", safeStringifyJSON(msg))
+    window.postMessage(msg)
   }
 
   const contentActionHandler = (ev: MouseEvent) => {
@@ -55,8 +123,6 @@ export const useContentSelector = () => {
       const { target } = ev
       const rect = (target as Element)?.getBoundingClientRect()
       const mark = markRef.current
-
-      console.log("target xPath", getXPath(target))
 
       mark.style.top = window.scrollY + rect.top + "px"
       mark.style.left = window.scrollX + rect.left + "px"
@@ -82,11 +148,24 @@ export const useContentSelector = () => {
         ;(target as Element)?.classList.remove("refly-content-selected-target")
 
         targetList.current = targetList.current.filter((item) => item != target)
+        removeMark(target as HTMLElement)
       } else {
         ;(target as Element)?.classList.add("refly-content-selected-target")
         // 添加到 list 方便后续统一的处理
         targetList.current = targetList.current.concat(target as Element)
+        addMark(target as HTMLElement)
       }
+
+      console.log("markListRef.current", markListRef.current)
+      // 发送给 refly-main-app
+      const msg = {
+        name: "syncSelectedMark",
+        payload: {
+          marks: safeStringifyJSON(markListRef.current),
+        },
+      }
+      console.log("contentSelectorClickHandler", safeStringifyJSON(msg))
+      window.postMessage(msg)
     }
   }
 

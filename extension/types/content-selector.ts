@@ -1,9 +1,8 @@
 export interface Mark {
-  id: string // 随机字符串
   type: "text" | "table" | "link" | "image" | "video" | "audio" // 内容类型
   data: string[]
   target: HTMLElement
-  xPath: string // 该元素对应的 DOM Xpath 路径
+  xPath: string // 该元素对应的 DOM Xpath 路径，这个可以当做唯一 id
 }
 
 export interface Source {

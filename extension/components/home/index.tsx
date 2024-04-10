@@ -24,17 +24,19 @@ import { useMessageStateStore } from "~stores/message-state"
 import { useSiderStore } from "~stores/sider"
 import { useWeblinkStore } from "~stores/weblink"
 import { SearchTarget, useSearchStateStore } from "~stores/search-state"
+import { useContentSelectorStore } from "~stores/content-selector"
 // hooks
 import { useBuildTask } from "~hooks/use-build-task"
 import { useBuildThreadAndRun } from "~hooks/use-build-thread-and-run"
 import { useStoreWeblink } from "~hooks/use-store-weblink"
+import { useSelectedMark } from "~hooks/use-selected-mark"
 // 组件
 import { IconTip } from "./icon-tip"
 import { SearchTargetSelector } from "./home-search-target-selector"
 import type { WebLinkItem } from "~components/weblink-list/types"
 import { mapSourceFromWeblinkList } from "~utils/weblink"
 import { sendToBackground } from "@plasmohq/messaging"
-import { useContentSelectorStore } from "~stores/content-selector"
+import { SelectedContentList } from "~components/selected-content-list"
 
 const TextArea = Input.TextArea
 
@@ -60,6 +62,9 @@ const Home = (props: ChatProps) => {
   const { runTask, runQuickActionTask } = useBuildThreadAndRun()
   const { isWebLinkIndexed, uploadingStatus, handleUploadWebsite } =
     useStoreWeblink()
+
+  // 设置 selected-mark 的监听器
+  useSelectedMark()
 
   const { buildShutdownTaskAndGenResponse } = useBuildTask()
   const isIntentActive = !!quickActionStore.selectedText
@@ -235,6 +240,9 @@ const Home = (props: ChatProps) => {
           }}>
           {contentSelectorStore?.showContentSelector ? "取消选择" : "选择元素"}
         </Button>
+        {contentSelectorStore?.showContentSelector ? (
+          <SelectedContentList marks={contentSelectorStore.marks} />
+        ) : null}
       </div>
 
       <WeblinkList

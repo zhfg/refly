@@ -1,10 +1,12 @@
-import type { PlasmoCSConfig } from "plasmo"
+import type { PlasmoCSConfig, PlasmoGetShadowHostId } from "plasmo"
 import { useContentSelector } from "~hooks/use-content-selector"
 
 export const config: PlasmoCSConfig = {
   matches: ["<all_urls>"],
   world: "MAIN",
 }
+
+export const getShadowHostId: PlasmoGetShadowHostId = () => `content-selector`
 
 export const getStyle = () => {
   const style = document.createElement("style")

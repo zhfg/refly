@@ -10,7 +10,7 @@ import HomeCSSText from "data-text:~/components/home/index.scss"
 import WeblinkCSSText from "data-text:~/components/weblink-list/index.scss"
 import LoginCSSText from "data-text:~/components/login/index.scss"
 import EmptyThreadLibraryCSSText from "data-text:~/components/empty-thread-library-status/index.scss"
-import ContentSelectorCSS from "data-text:~/contents/styles/contentSelector.scss"
+import SelectedContentListCSS from "data-text:~/components/selected-content-list/index.scss"
 import type { PlasmoGetInlineAnchor, PlasmoGetShadowHostId } from "plasmo"
 import React, { useEffect } from "react"
 import { MemoryRouter } from "react-router-dom"
@@ -59,7 +59,7 @@ export const getStyle = () => {
     HighlightCSSText +
     LoginCSSText +
     EmptyThreadLibraryCSSText +
-    ContentSelectorCSS
+    SelectedContentListCSS
   return style
 }
 
