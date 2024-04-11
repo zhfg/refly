@@ -4,6 +4,8 @@ export class Source {
   @ApiProperty()
   pageContent: string;
 
+  xPath?: string[];
+
   metadata: {
     source: string;
     title: string;
