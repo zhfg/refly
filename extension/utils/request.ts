@@ -1,5 +1,6 @@
 import { getCookie } from "./cookie"
 import { getServerOrigin } from "./url"
+import { getExtensionVersion } from "./version"
 
 const TIMEOUT = 40000
 const DEFAULT_HEADER = {
@@ -65,6 +66,7 @@ export async function request<T>(
   opt.headers = {
     ...DEFAULT_HEADER,
     ...opt.headers,
+    "x-refly-ext-version": getExtensionVersion(),
   }
 
   // 添加鉴权相关的信息
