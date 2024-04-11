@@ -96,8 +96,6 @@ export function Markdown(
 ) {
   const mdRef = useRef<HTMLDivElement>(null)
 
-  console.log("Markdown", props.content)
-
   const md = mdRef.current
   const rendered = useRef(true) // disable lazy loading for bad ux
   const [counter, setCounter] = useState(0)

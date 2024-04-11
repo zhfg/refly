@@ -10,7 +10,6 @@ export const useSelectedMark = () => {
   // 从 content-selector-app 获取信息，以此和 main-app 解耦合
   const contentSelectedHandler = (event: MessageEvent<any>) => {
     const data = event?.data || {}
-    console.log("contentSelectedHandler", event)
     if (data?.name === "syncSelectedMark") {
       const marks = safeParseJSON(data?.payload?.marks)
 

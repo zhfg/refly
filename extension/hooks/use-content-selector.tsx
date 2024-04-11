@@ -140,6 +140,8 @@ export const useContentSelector = () => {
 
   const contentSelectorClickHandler = (ev: MouseEvent) => {
     ev.stopImmediatePropagation()
+    ev.preventDefault()
+    ev.stopPropagation()
 
     if (
       statusRef.current &&
@@ -151,6 +153,8 @@ export const useContentSelector = () => {
       if (
         (target as Element)?.classList.contains("refly-content-selected-target")
       ) {
+        console.log("xPath", getXPath(target))
+        console.log("xPath2Selector", xPath2Selector(getXPath(target)))
         removeMark(target as HTMLElement, xPath2Selector(getXPath(target)))
       } else {
         addMark(target as HTMLElement)
@@ -161,7 +165,9 @@ export const useContentSelector = () => {
       const msg = {
         name: "syncSelectedMark",
         payload: {
-          marks: safeStringifyJSON(markListRef.current),
+          marks: safeStringifyJSON(
+            markListRef.current?.map(({ target, ...extra }) => ({ ...extra })), // 去掉 target，因为会产生循环引用
+          ),
         },
       }
       console.log("contentSelectorClickHandler", safeStringifyJSON(msg))
@@ -177,13 +183,19 @@ export const useContentSelector = () => {
 
       if (data?.payload?.showContentSelector) {
         document.body.addEventListener("mousemove", contentActionHandler)
-        document.body.addEventListener("click", contentSelectorClickHandler)
+        document.body.addEventListener("click", contentSelectorClickHandler, {
+          capture: true,
+        })
       } else {
         document.body.removeEventListener(
           "message",
           contentSelectorClickHandler,
         )
-        document.body.removeEventListener("click", contentSelectorClickHandler)
+        document.body.removeEventListener(
+          "click",
+          contentSelectorClickHandler,
+          { capture: true },
+        )
       }
 
       // 取消的话直接取消 classList
@@ -192,7 +204,6 @@ export const useContentSelector = () => {
       }
     }
 
-    console.log("contentSelectorStatusHandler", data)
     if (data?.name === "removeSelectedMark") {
       const cssSelector = data?.payload?.cssSelector || ""
       const target = markListRef.current.find(
