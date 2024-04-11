@@ -48,7 +48,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
   const chatStore = useChatStore()
   const navigate = useNavigate()
 
-  const [threadSearchTarget, setThreadSearchTarget] = useState(
+  const [threadSearchTarget, setThreadSearchTarget] = useState<SearchTarget>(
     selectedWeblinkConfig?.searchTarget,
   )
   const [threadWeblinkListFilter, setThreadWeblinkListFilter] = useState(
@@ -75,6 +75,20 @@ export const ThreadItem = (props: ThreadItemProps) => {
     if (e.keyCode === 13) {
       handleAskFollowing()
     }
+  }
+
+  const getInputText = () => {
+    const { showSelectedMarks } = useContentSelectorStore.getState()
+    const searchTarget = threadSearchTarget
+
+    if (showSelectedMarks) return "基于实时选择内容追问..."
+    if (searchTarget === SearchTarget.SelectedPages)
+      return "对选中的网页进行追问..."
+    if (searchTarget === SearchTarget.CurrentPage)
+      return "对当前网页进行追问..."
+    if (searchTarget === SearchTarget.SearchEnhance)
+      return "输入关键词进行网络搜索追问..."
+    if (searchTarget === SearchTarget.All) return "对历史所有网页进行追问..."
   }
 
   const handleAskFollowing = () => {
@@ -110,13 +124,6 @@ export const ThreadItem = (props: ThreadItemProps) => {
       setThreadWeblinkListFilter(selectedWeblinkConfig.filter)
     }
   }, [selectedWeblinkConfig?.searchTarget, selectedWeblinkConfig?.filter])
-
-  console.log(
-    "selectedWeblinkConfig",
-    selectedWeblinkConfig,
-    threadSearchTarget,
-    threadWeblinkListFilter,
-  )
 
   return (
     <div className="session-container">
@@ -199,9 +206,14 @@ export const ThreadItem = (props: ThreadItemProps) => {
             <ThreadSearchTargetSelector
               showText={false}
               searchTarget={threadSearchTarget}
-              handleChangeSelector={(searchTarget) =>
+              handleChangeSelector={(searchTarget) => {
                 setThreadSearchTarget(searchTarget)
-              }
+
+                // 非当前网页时，则清空内容
+                if (searchTarget !== SearchTarget.CurrentPage) {
+                  contentSelectorStore.resetState()
+                }
+              }}
             />
             <TextArea
               ref={inputRef}
@@ -215,7 +227,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
               onCompositionStart={(e) => console.log("composition start")}
               onCompositionUpdate={(e) => console.log("composition update")}
               onCompositionEnd={(e) => console.log("composition end")}
-              placeholder="继续提问..."
+              placeholder={getInputText()}
               onKeyDownCapture={(e) => handleKeyDown(e)}
               autoSize={{ minRows: 1, maxRows: 4 }}
               style={{

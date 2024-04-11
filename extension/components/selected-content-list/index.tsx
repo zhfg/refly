@@ -7,6 +7,7 @@ import type { Mark } from "~types/content-selector"
 // assets
 import EmptySVG from "~assets/selected-content/empty.svg"
 import classNames from "classnames"
+import { useEffect } from "react"
 
 interface SelectedContentListProps {
   marks: Mark[]
@@ -19,6 +20,7 @@ export const SelectedContentList = (props: SelectedContentListProps) => {
     marks = [],
     setMarks,
     setShowSelectedMarks,
+    resetState,
   } = useContentSelectorStore()
 
   const handleRemoveMark = (cssSelector: string) => {
@@ -45,6 +47,18 @@ export const SelectedContentList = (props: SelectedContentListProps) => {
 
     setShowSelectedMarks(false)
   }
+
+  const handleResetState = () => {
+    resetState()
+    handleExit()
+  }
+
+  // 退出时，清理对应的状态
+  useEffect(() => {
+    return () => {
+      handleResetState()
+    }
+  }, [])
 
   return (
     <div
@@ -81,7 +95,11 @@ export const SelectedContentList = (props: SelectedContentListProps) => {
         ))}
         {marks.length === 0 ? (
           <div className="empty-cover-container">
-            <img src={EmptySVG} className="empty-cover" />
+            <img
+              src={EmptySVG}
+              className="empty-cover"
+              style={limitContainer ? { width: 60 } : { width: 100 }}
+            />
             <div>暂无选中内容...</div>
           </div>
         ) : null}

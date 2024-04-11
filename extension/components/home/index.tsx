@@ -69,6 +69,7 @@ const Home = (props: ChatProps) => {
   const { searchTarget } = useSearchStateStore()
   const contentSelectorStore = useContentSelectorStore()
   const searchQuickActionStore = useSearchQuickActionStore()
+  const searchStateStore = useSearchStateStore()
 
   // hooks
   const { runTask } = useBuildThreadAndRun()
@@ -97,12 +98,17 @@ const Home = (props: ChatProps) => {
   }
 
   const getInputText = () => {
-    const { selectedRow } = useWeblinkStore.getState()
     const { showSelectedMarks } = useContentSelectorStore.getState()
+    const { searchTarget } = useSearchStateStore.getState()
 
     if (showSelectedMarks) return "基于实时选择内容提问..."
-    if (selectedRow?.length > 0) return "对选中的网页进行提问"
-    if (selectedRow?.length === 0) return "对当前网页进行提问"
+    if (searchTarget === SearchTarget.SelectedPages)
+      return "对选中的网页进行提问..."
+    if (searchTarget === SearchTarget.CurrentPage)
+      return "对当前网页进行提问..."
+    if (searchTarget === SearchTarget.SearchEnhance)
+      return "输入关键词进行网络搜索..."
+    if (searchTarget === SearchTarget.All) return "对历史所有网页进行提问..."
   }
 
   // 自动聚焦输入框
@@ -176,8 +182,29 @@ const Home = (props: ChatProps) => {
           <div>
             <div className="toolbar">
               <Space>
-                <ContentSelectorBtn />
-                <SearchTargetSelector showText />
+                <ContentSelectorBtn
+                  handleChangeSelector={() => {
+                    // 如果进行选中之后，则切换成选择当前网页，属于一种快捷方式
+                    searchStateStore.setSearchTarget(SearchTarget.CurrentPage)
+                  }}
+                />
+                <SearchTargetSelector
+                  showText
+                  handleChangeSelector={(searchTarget) => {
+                    // 非当前网页时，则清空内容
+                    if (searchTarget !== SearchTarget.CurrentPage) {
+                      contentSelectorStore.resetState()
+                    }
+
+                    if (
+                      [SearchTarget.All, SearchTarget.SearchEnhance].includes(
+                        searchTarget,
+                      )
+                    ) {
+                      searchQuickActionStore.setShowQuickAction(false)
+                    }
+                  }}
+                />
               </Space>
               <Button
                 shape="circle"

@@ -98,6 +98,7 @@ export const ThreadSearchTargetSelector = (
         position="bottom"
         getPopupContainer={getPopupContainer}>
         <Button
+          className={"thread-search-target-selector"}
           icon={getDisplayIcon(props.searchTarget)}
           type="text"
           style={

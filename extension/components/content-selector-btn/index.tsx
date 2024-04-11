@@ -1,5 +1,6 @@
 import { Button } from "@arco-design/web-react"
 import { IconHighlight } from "@arco-design/web-react/icon"
+import classNames from "classnames"
 import { IconTip } from "~components/home/icon-tip"
 import { useSelectedMark } from "~hooks/use-selected-mark"
 import { useContentSelectorStore } from "~stores/content-selector"
@@ -7,7 +8,7 @@ import { SearchTarget } from "~stores/search-state"
 
 interface ContentSelectorBtnProps {
   btnType?: "default" | "text"
-  handleChangeSelector: (selector: SearchTarget) => void
+  handleChangeSelector?: (selector: SearchTarget) => void
 }
 
 export const ContentSelectorBtn = (props: ContentSelectorBtnProps) => {
@@ -22,7 +23,7 @@ export const ContentSelectorBtn = (props: ContentSelectorBtnProps) => {
 
     // 还未选中，马上选中时，将 target 切为 CurrentPage
     if (!showContentSelector) {
-      props.handleChangeSelector(SearchTarget.CurrentPage)
+      props?.handleChangeSelector?.(SearchTarget.CurrentPage)
     }
 
     handleToggleContentSelector()
@@ -57,7 +58,10 @@ export const ContentSelectorBtn = (props: ContentSelectorBtnProps) => {
         contentSelectorStore?.showContentSelector ? "取消选择" : "选择网页内容"
       }>
       <Button
-        className="content-selector-btn"
+        className={classNames("content-selector-btn", {
+          "content-selector-btn-selected":
+            contentSelectorStore?.showContentSelector,
+        })}
         onClick={() => {
           handleClick()
         }}

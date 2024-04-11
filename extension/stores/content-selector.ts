@@ -14,6 +14,7 @@ interface ContentSelectorState {
   setShowSelectedMarks: (val: boolean) => void
   setIsInjectStyles: (val: boolean) => void
   setMarks: (marks: Mark[]) => void
+  resetState: () => void
 }
 
 export const defaultState = {
@@ -31,5 +32,6 @@ export const useContentSelectorStore = create<ContentSelectorState>()(
     setShowSelectedMarks: (val: boolean) => set({ showSelectedMarks: val }),
     setIsInjectStyles: (val: boolean) => set({ isInjectStyles: val }),
     setMarks: (marks: Mark[]) => set({ marks }),
+    resetState: () => set((state) => ({ ...state, ...defaultState })),
   }),
 )
