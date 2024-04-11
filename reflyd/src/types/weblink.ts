@@ -1,10 +1,16 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+export class Mark {
+  selector: string;
+  type: 'text' | 'table' | 'link' | 'image' | 'video' | 'audio';
+}
 
 export class Source {
   @ApiProperty()
   pageContent: string;
 
-  xPath?: string[];
+  @ApiPropertyOptional({ type: [Mark] })
+  marks?: Mark[];
 
   metadata: {
     source: string;

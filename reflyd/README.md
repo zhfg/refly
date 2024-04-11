@@ -14,6 +14,8 @@ Run database migrations:
 npx prisma migrate deploy
 ```
 
+> Visit minio console on http://localhost:9001, with username and password specified in docker-compose.yml.
+
 ## Installation
 
 ```bash
