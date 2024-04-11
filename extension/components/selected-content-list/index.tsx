@@ -1,5 +1,5 @@
 import { Card } from "@arco-design/web-react"
-import { IconRightCircle } from "@arco-design/web-react/icon"
+import { IconClose, IconRightCircle } from "@arco-design/web-react/icon"
 import { useContentSelector } from "~hooks/use-content-selector"
 import { useContentSelectorStore } from "~stores/content-selector"
 import type { Mark } from "~types/content-selector"
@@ -64,9 +64,10 @@ export const SelectedContentList = (props: SelectedContentListProps) => {
           <Card
             style={{ width: "100%" }}
             extra={
-              <span onClick={() => handleRemoveMark(item?.xPath)}>
-                取消选中
-              </span>
+              <IconClose
+                className="selected-content-item-action"
+                onClick={() => handleRemoveMark(item?.xPath)}
+              />
             }>
             <span className="selected-content-item">{item?.data?.[0]}</span>
           </Card>
