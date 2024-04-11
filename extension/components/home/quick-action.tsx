@@ -24,9 +24,9 @@ export const QuickAction = () => {
 
   const getSummaryText = () => {
     const { selectedRow } = useWeblinkStore.getState()
-    const { showContentSelector } = useContentSelectorStore.getState()
+    const { showSelectedMarks } = useContentSelectorStore.getState()
 
-    if (showContentSelector) return "基于实时选择内容总结"
+    if (showSelectedMarks) return "基于实时选择内容总结"
     if (selectedRow?.length > 0) return "对选中的网页进行总结"
     if (selectedRow?.length === 0) return "对当前网页进行快速总结"
   }
@@ -36,9 +36,11 @@ export const QuickAction = () => {
    * 2. 也只有这两种情况下需要
    */
   const handleSummary = async () => {
-    if (uploadingStatus) return
+    console.log("handleSummary")
+    if (uploadingStatus === "loading") return
 
     const { searchTarget } = useSearchStateStore.getState()
+    const { marks } = useContentSelectorStore.getState()
 
     let filter = {}
 
@@ -56,6 +58,7 @@ export const QuickAction = () => {
               source: location.href,
             },
             score: -1,
+            xPath: marks?.map((item) => item?.xPath),
           } as Source,
         ],
       }
@@ -83,7 +86,6 @@ export const QuickAction = () => {
 
   return (
     <>
-      <Divider />
       <div className="selected-weblinks-container">
         <div className="selected-weblinks-inner-container">
           <div className="hint-item">
@@ -94,7 +96,7 @@ export const QuickAction = () => {
           {showSummary ? (
             <IconTip text={getSummaryText()}>
               <Button
-                onClick={handleSummary}
+                onClick={() => handleSummary()}
                 style={{ fontSize: 12 }}
                 shape="round"
                 size="small">

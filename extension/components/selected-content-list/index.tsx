@@ -60,8 +60,9 @@ export const SelectedContentList = (props: SelectedContentListProps) => {
         </div>
       </div>
       <div className="selected-content-list-container">
-        {marks.map((item) => (
+        {marks.map((item, index) => (
           <Card
+            key={index}
             style={{ width: "100%" }}
             extra={
               <IconClose

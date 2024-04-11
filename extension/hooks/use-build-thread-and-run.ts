@@ -19,6 +19,8 @@ import {
 import { SearchTarget, useSearchStateStore } from "~stores/search-state"
 import { buildChatTask, buildQuickActionTask, buildTask } from "~utils/task"
 import { useWeblinkStore } from "~stores/weblink"
+import { useSelectedMark } from "./use-selected-mark"
+import { useContentSelectorStore } from "~stores/content-selector"
 
 export const useBuildThreadAndRun = () => {
   const chatStore = useChatStore()
@@ -71,6 +73,7 @@ export const useBuildThreadAndRun = () => {
     const question = chatStore.newQAText
     const { selectedRow } = useWeblinkStore.getState()
     const { searchTarget } = useSearchStateStore.getState()
+    const { marks } = useContentSelectorStore.getState()
 
     let selectedWebLink: Source[] = []
 
@@ -83,6 +86,7 @@ export const useBuildThreadAndRun = () => {
             source: location.href,
           },
           score: -1, // 手工构造
+          xPath: marks?.map((item) => item?.xPath),
         },
       ]
     } else if (searchTarget === SearchTarget.SelectedPages) {

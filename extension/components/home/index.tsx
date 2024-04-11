@@ -4,6 +4,7 @@ import {
   Space,
   Alert,
   Message as message,
+  Divider,
 } from "@arco-design/web-react"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input/textarea"
 import {
@@ -80,19 +81,6 @@ const Home = (props: ChatProps) => {
   const isIntentActive = !!quickActionStore.selectedText
   console.log("selectedText", quickActionStore.selectedText)
 
-  const handleQuickAction = async () => {
-    // 如果是当前网页的快捷操作，那么先上传 Website
-    // TODO: 这里后续需要处理去重
-    if (searchTarget === SearchTarget.CurrentPage) {
-      await handleUploadWebsite(window.location.href)
-    }
-
-    // 对当前网页进行快速操作
-    runQuickActionTask({
-      filter: {},
-    })
-  }
-
   const handleSendMessage = () => {
     const { newQAText } = useChatStore.getState()
 
@@ -110,6 +98,15 @@ const Home = (props: ChatProps) => {
     if (e.keyCode === 13) {
       handleSendMessage()
     }
+  }
+
+  const getInputText = () => {
+    const { selectedRow } = useWeblinkStore.getState()
+    const { showSelectedMarks } = useContentSelectorStore.getState()
+
+    if (showSelectedMarks) return "基于实时选择内容提问..."
+    if (selectedRow?.length > 0) return "对选中的网页进行提问"
+    if (selectedRow?.length === 0) return "对当前网页进行提问"
   }
 
   // 自动聚焦输入框
@@ -168,7 +165,7 @@ const Home = (props: ChatProps) => {
             onChange={(value) => {
               chatStore.setNewQAText(value)
             }}
-            placeholder="Search For Refly..."
+            placeholder={getInputText()}
             onKeyDownCapture={(e) => handleKeyDown(e)}
             autoSize={{ minRows: 4, maxRows: 4 }}
             onCompositionStart={(e) => console.log("composition start")}
@@ -197,7 +194,7 @@ const Home = (props: ChatProps) => {
                   text={
                     contentSelectorStore?.showContentSelector
                       ? "取消选择并清空内容"
-                      : "选择内容"
+                      : "选择网页内容"
                   }>
                   <Button
                     className="content-selector-btn"
@@ -229,14 +226,17 @@ const Home = (props: ChatProps) => {
             </div>
           </div>
         </div>
-        {webLinkStore?.selectedRow?.length > 0 ? (
-          <SelectedWeblink
-            closable={true}
-            selectedWeblinkList={mapSourceFromWeblinkList(
-              webLinkStore.selectedRow || [],
-            )}
-          />
-        ) : null}
+        {webLinkStore?.selectedRow?.length > 0
+          ? [
+              <SelectedWeblink
+                closable={true}
+                selectedWeblinkList={mapSourceFromWeblinkList(
+                  webLinkStore.selectedRow || [],
+                )}
+              />,
+              <Divider />,
+            ]
+          : null}
         {searchQuickActionStore.showQuickAction ? <QuickAction /> : null}
         {contentSelectorStore?.showSelectedMarks ? (
           <SelectedContentList marks={contentSelectorStore.marks} />
