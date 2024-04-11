@@ -58,7 +58,7 @@ export const QuickAction = () => {
               source: location.href,
             },
             score: -1,
-            xPath: marks?.map((item) => item?.xPath),
+            cssSelector: marks?.map((item) => item?.cssSelector),
           } as Source,
         ],
       }

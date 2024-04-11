@@ -2,6 +2,7 @@ import { sendToBackground } from "@plasmohq/messaging"
 import classNames from "classnames"
 import { useEffect, useRef } from "react"
 import getXPath from "get-xpath"
+import xPath2Selector from "xpath-to-selector"
 import type { Mark } from "~types"
 import { safeStringifyJSON } from "~utils/parse"
 
@@ -46,7 +47,7 @@ export const useContentSelector = () => {
       type: getElementType(target),
       data: [content],
       target,
-      xPath: getXPath(target),
+      cssSelector: xPath2Selector(getXPath(target)),
     }
 
     return mark
@@ -61,9 +62,9 @@ export const useContentSelector = () => {
     targetList.current = targetList.current.concat(target as Element)
   }
 
-  const removeMark = (target: HTMLElement, xPath: string) => {
+  const removeMark = (target: HTMLElement, cssSelector: string) => {
     markListRef.current = markListRef.current.filter(
-      (item) => item.xPath !== xPath,
+      (item) => item.cssSelector !== cssSelector,
     )
     ;(target as Element)?.classList.remove("refly-content-selected-target")
     targetList.current = targetList.current.filter((item) => item != target)
@@ -150,7 +151,7 @@ export const useContentSelector = () => {
       if (
         (target as Element)?.classList.contains("refly-content-selected-target")
       ) {
-        removeMark(target as HTMLElement, getXPath(target))
+        removeMark(target as HTMLElement, xPath2Selector(getXPath(target)))
       } else {
         addMark(target as HTMLElement)
       }
@@ -193,11 +194,11 @@ export const useContentSelector = () => {
 
     console.log("contentSelectorStatusHandler", data)
     if (data?.name === "removeSelectedMark") {
-      const xPath = data?.payload?.xPath || ""
+      const cssSelector = data?.payload?.cssSelector || ""
       const target = markListRef.current.find(
-        (item) => item.xPath === xPath,
+        (item) => item.cssSelector === cssSelector,
       )?.target
-      removeMark(target as HTMLElement, xPath)
+      removeMark(target as HTMLElement, cssSelector)
     }
 
     if (data?.name === "removeAllSelectedMark") {

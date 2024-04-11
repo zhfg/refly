@@ -86,11 +86,12 @@
 .session-input-box {
   position: fixed;
   bottom: 16px;
-  width: 100%;
+  width: calc(100% - 32px);
+  background-color: rgb(252, 252, 249);
 }
 
 .session-inner-input-box {
-  width: calc(100% - 32px);
+  width: calc(100%);
   margin-bottom: 0.5em;
   padding: 8px;
   border-radius: 8px;

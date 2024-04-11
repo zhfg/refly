@@ -6,28 +6,31 @@ import type { Mark } from "~types/content-selector"
 
 // assets
 import EmptySVG from "~assets/selected-content/empty.svg"
+import classNames from "classnames"
 
 interface SelectedContentListProps {
   marks: Mark[]
+  limitContainer?: boolean // 是否限制高度滚动，用于在会话详情页
 }
 
 export const SelectedContentList = (props: SelectedContentListProps) => {
+  const { limitContainer = false } = props
   const {
     marks = [],
     setMarks,
     setShowSelectedMarks,
   } = useContentSelectorStore()
 
-  const handleRemoveMark = (xPath: string) => {
+  const handleRemoveMark = (cssSelector: string) => {
     window.postMessage({
       name: "removeSelectedMark",
       payload: {
-        xPath,
+        cssSelector,
       },
     })
 
     const { marks } = useContentSelectorStore.getState()
-    const newMarks = marks.filter((item) => item?.xPath !== xPath)
+    const newMarks = marks.filter((item) => item?.cssSelector !== cssSelector)
     setMarks(newMarks)
   }
 
@@ -44,7 +47,10 @@ export const SelectedContentList = (props: SelectedContentListProps) => {
   }
 
   return (
-    <div className="selected-content-container">
+    <div
+      className={classNames("selected-content-container", {
+        "selected-container-limit-container": limitContainer,
+      })}>
       <div className="selected-content-hint-item">
         <div className="selected-content-left-hint">
           <IconRightCircle style={{ color: "rgba(0, 0, 0, .6)" }} />
@@ -67,7 +73,7 @@ export const SelectedContentList = (props: SelectedContentListProps) => {
             extra={
               <IconClose
                 className="selected-content-item-action"
-                onClick={() => handleRemoveMark(item?.xPath)}
+                onClick={() => handleRemoveMark(item?.cssSelector)}
               />
             }>
             <span className="selected-content-item">{item?.data?.[0]}</span>

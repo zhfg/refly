@@ -26,6 +26,7 @@ export const useStoreWeblink = () => {
         originPageTitle: document?.title || "",
         originPageUrl: location.href,
         originPageDescription: (description as any)?.content || "",
+        pageContent: document?.documentElement?.innerHTML || "", // 上传 HTML String 用于后续的操作
       },
     })
 

@@ -26,6 +26,7 @@ import WeblinkList from "../weblink-list"
 import { ChatHeader } from "./header"
 import { SelectedWeblink } from "../selected-weblink/index"
 import { QuickAction } from "./quick-action"
+import { ContentSelectorBtn } from "~components/content-selector-btn/index"
 // stores
 import { useQuickActionStore } from "../../stores/quick-action"
 import { useChatStore } from "../../stores/chat"
@@ -70,16 +71,11 @@ const Home = (props: ChatProps) => {
   const searchQuickActionStore = useSearchQuickActionStore()
 
   // hooks
-  const { runTask, runQuickActionTask } = useBuildThreadAndRun()
-  const { isWebLinkIndexed, uploadingStatus, handleUploadWebsite } =
-    useStoreWeblink()
-
-  // 设置 selected-mark 的监听器
-  const { handleToggleContentSelector } = useSelectedMark()
+  const { runTask } = useBuildThreadAndRun()
+  const { isWebLinkIndexed } = useStoreWeblink()
 
   const { buildShutdownTaskAndGenResponse } = useBuildTask()
   const isIntentActive = !!quickActionStore.selectedText
-  console.log("selectedText", quickActionStore.selectedText)
 
   const handleSendMessage = () => {
     const { newQAText } = useChatStore.getState()
@@ -180,42 +176,7 @@ const Home = (props: ChatProps) => {
           <div>
             <div className="toolbar">
               <Space>
-                {/* <Button
-                  onClick={() => {
-                    handleCreateNewConversation()
-                  }}
-                  icon={<IconPlus />}
-                  type="text"
-                  shape="round">
-                  新会话
-                </Button> */}
-
-                <IconTip
-                  text={
-                    contentSelectorStore?.showContentSelector
-                      ? "取消选择并清空内容"
-                      : "选择网页内容"
-                  }>
-                  <Button
-                    className="content-selector-btn"
-                    onClick={async () => {
-                      handleToggleContentSelector()
-                    }}
-                    type={
-                      contentSelectorStore?.showContentSelector
-                        ? "primary"
-                        : "default"
-                    }
-                    icon={<IconHighlight />}
-                    style={{
-                      marginRight: 0,
-                      color: contentSelectorStore?.showContentSelector
-                        ? "#fff"
-                        : "#00000080",
-                    }}
-                    shape="round"></Button>
-                </IconTip>
-
+                <ContentSelectorBtn />
                 <SearchTargetSelector showText />
               </Space>
               <Button

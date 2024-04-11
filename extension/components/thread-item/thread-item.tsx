@@ -23,6 +23,11 @@ import { SearchTarget } from "~stores/search-state"
 // 自定义组件
 import { SelectedWeblink } from "../selected-weblink/index"
 import { useNavigate } from "react-router-dom"
+import { ContentSelectorBtn } from "~components/content-selector-btn"
+import { useSearchQuickActionStore } from "~stores/search-quick-action"
+import { QuickAction } from "~components/home/quick-action"
+import { useContentSelectorStore } from "~stores/content-selector"
+import { SelectedContentList } from "~components/selected-content-list"
 
 interface ThreadItemProps {
   sessions: SessionItem[]
@@ -49,7 +54,11 @@ export const ThreadItem = (props: ThreadItemProps) => {
   const [threadWeblinkListFilter, setThreadWeblinkListFilter] = useState(
     selectedWeblinkConfig?.filter || [],
   )
+
+  // stores
   const conversationStore = useConversationStore()
+  const searchQuickActionStore = useSearchQuickActionStore()
+  const contentSelectorStore = useContentSelectorStore()
 
   const showSelectedWeblinkList =
     threadSearchTarget === SearchTarget.SelectedPages &&
@@ -132,7 +141,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
         style={
           showSelectedWeblinkList
             ? {
-                height: `calc(100vh - 180px - ${selectedWeblinkListRef.current?.clientHeight || 0}px - 40px)`,
+                height: `calc(100vh - 180px - ${selectedWeblinkListRef.current?.clientHeight || 0}px - 40px - ${contentSelectorStore?.showSelectedMarks ? 150 : 0}px - 52px)`,
               }
             : {}
         }>
@@ -158,7 +167,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
         style={
           showSelectedWeblinkList
             ? {
-                height: `calc(100vh - 130px - ${selectedWeblinkListRef.current?.clientHeight || 0}px)`,
+                height: `calc(100vh - 130px - ${selectedWeblinkListRef.current?.clientHeight || 0}px - ${contentSelectorStore?.showSelectedMarks ? 150 : 0}px - 52px)`,
               }
             : {}
         }>
@@ -181,6 +190,12 @@ export const ThreadItem = (props: ThreadItemProps) => {
 
         <div className="session-input-box">
           <div className="session-inner-input-box">
+            <ContentSelectorBtn
+              btnType="text"
+              handleChangeSelector={(searchTarget) =>
+                setThreadSearchTarget(searchTarget)
+              }
+            />
             <ThreadSearchTargetSelector
               showText={false}
               searchTarget={threadSearchTarget}
@@ -231,6 +246,16 @@ export const ThreadItem = (props: ThreadItemProps) => {
               ref={selectedWeblinkListRef}
               closable={false}
               selectedWeblinkList={threadWeblinkListFilter}
+            />
+          ) : null}
+          {searchQuickActionStore.showQuickAction &&
+          contentSelectorStore?.showSelectedMarks ? (
+            <QuickAction />
+          ) : null}
+          {contentSelectorStore?.showSelectedMarks ? (
+            <SelectedContentList
+              marks={contentSelectorStore.marks}
+              limitContainer
             />
           ) : null}
         </div>

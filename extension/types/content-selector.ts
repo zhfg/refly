@@ -2,7 +2,7 @@ export interface Mark {
   type: "text" | "table" | "link" | "image" | "video" | "audio" // 内容类型
   data: string[]
   target: HTMLElement
-  xPath: string // 该元素对应的 DOM Xpath 路径，这个可以当做唯一 id
+  cssSelector: string // 该元素对应的 DOM CSS Selector 路径，这个可以当做唯一 id
 }
 
 export interface Source {

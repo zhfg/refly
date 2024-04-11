@@ -45,6 +45,10 @@ export const ThreadSearchTargetSelector = (
          */
         props.handleChangeSelector(key as SearchTarget)
       }}>
+      <Menu.Item key={SearchTarget.CurrentPage}>
+        <IconOriginalSize style={iconStyle} />
+        当前网页
+      </Menu.Item>
       <Menu.Item key={SearchTarget.All}>
         <IconCommon style={iconStyle} />
         所有网页
@@ -66,6 +70,8 @@ export const ThreadSearchTargetSelector = (
         return "选中网页"
       case SearchTarget.All:
         return "所有网页"
+      case SearchTarget.CurrentPage:
+        return "当前网页"
       case SearchTarget.SearchEnhance:
         return "联网搜索"
     }
@@ -95,7 +101,7 @@ export const ThreadSearchTargetSelector = (
           icon={getDisplayIcon(props.searchTarget)}
           type="text"
           style={
-            props.showText ? {} : { width: 42, height: 32, borderRadius: 16 }
+            props.showText ? {} : { width: 45, height: 32, borderRadius: 16 }
           }
           shape={props.showText ? "round" : "circle"}>
           {props.showText ? getDisplayText(props.searchTarget) : null}
