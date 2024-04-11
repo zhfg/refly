@@ -56,14 +56,17 @@ export const useContentSelector = () => {
     const mark = buildMark(target)
 
     markListRef.current = markListRef.current.concat(mark)
+    ;(target as Element)?.classList.add("refly-content-selected-target")
+    // 添加到 list 方便后续统一的处理
+    targetList.current = targetList.current.concat(target as Element)
   }
 
-  const removeMark = (target: HTMLElement) => {
-    const xPath = getXPath(target)
-
+  const removeMark = (target: HTMLElement, xPath: string) => {
     markListRef.current = markListRef.current.filter(
       (item) => item.xPath !== xPath,
     )
+    ;(target as Element)?.classList.remove("refly-content-selected-target")
+    targetList.current = targetList.current.filter((item) => item != target)
   }
 
   const contentSelectorElem = (
@@ -86,6 +89,18 @@ export const useContentSelector = () => {
     </div>
   )
 
+  const syncMessageResetMarks = () => {
+    // 发送给 refly-main-app
+    const msg = {
+      name: "syncSelectedMark",
+      payload: {
+        marks: safeStringifyJSON(markListRef.current),
+      },
+    }
+    console.log("contentSelectorClickHandler", safeStringifyJSON(msg))
+    window.postMessage(msg)
+  }
+
   const resetStyle = () => {
     // mark style
     const mark = markRef.current
@@ -100,16 +115,6 @@ export const useContentSelector = () => {
       item?.classList?.remove("refly-content-selected-target"),
     )
     markListRef.current = []
-
-    // 发送给 refly-main-app
-    const msg = {
-      name: "syncSelectedMark",
-      payload: {
-        marks: safeStringifyJSON(markListRef.current),
-      },
-    }
-    console.log("contentSelectorClickHandler", safeStringifyJSON(msg))
-    window.postMessage(msg)
   }
 
   const contentActionHandler = (ev: MouseEvent) => {
@@ -145,14 +150,8 @@ export const useContentSelector = () => {
       if (
         (target as Element)?.classList.contains("refly-content-selected-target")
       ) {
-        ;(target as Element)?.classList.remove("refly-content-selected-target")
-
-        targetList.current = targetList.current.filter((item) => item != target)
-        removeMark(target as HTMLElement)
+        removeMark(target as HTMLElement, getXPath(target))
       } else {
-        ;(target as Element)?.classList.add("refly-content-selected-target")
-        // 添加到 list 方便后续统一的处理
-        targetList.current = targetList.current.concat(target as Element)
         addMark(target as HTMLElement)
       }
 
@@ -190,6 +189,20 @@ export const useContentSelector = () => {
       if (!data?.payload?.showContentSelector) {
         resetStyle()
       }
+    }
+
+    console.log("contentSelectorStatusHandler", data)
+    if (data?.name === "removeSelectedMark") {
+      const xPath = data?.payload?.xPath || ""
+      const target = markListRef.current.find(
+        (item) => item.xPath === xPath,
+      )?.target
+      removeMark(target as HTMLElement, xPath)
+    }
+
+    if (data?.name === "removeAllSelectedMark") {
+      resetStyle()
+      syncMessageResetMarks()
     }
   }
 

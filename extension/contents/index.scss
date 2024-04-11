@@ -496,6 +496,15 @@ img {
     color: rgba(0, 0, 0, 0.8);
     background: #e8e8e2;
   }
+
+  .content-selector-btn:hover {
+    background: var(--brand-color);
+    color: #fff !important;
+
+    span {
+      color: #fff !important;
+    }
+  }
 }
 
 .main .footer .input-box {

@@ -1,3 +1,4 @@
+import { sendToBackground } from "@plasmohq/messaging"
 import { useEffect, useRef } from "react"
 import { useContentSelectorStore } from "~stores/content-selector"
 import { safeParseJSON } from "~utils/parse"
@@ -17,6 +18,32 @@ export const useSelectedMark = () => {
     }
   }
 
+  const handleToggleContentSelector = () => {
+    contentSelectorStore.setShowContentSelector(
+      !contentSelectorStore.showContentSelector,
+    )
+
+    // 这里打开
+    if (!contentSelectorStore.showContentSelector) {
+      contentSelectorStore.setShowSelectedMarks(true)
+    }
+
+    if (!contentSelectorStore?.isInjectStyles) {
+      sendToBackground({
+        name: "injectContentSelectorCSS",
+      })
+
+      contentSelectorStore?.setIsInjectStyles(true)
+    }
+
+    window.postMessage({
+      name: "setShowContentSelector",
+      payload: {
+        showContentSelector: !contentSelectorStore.showContentSelector,
+      },
+    })
+  }
+
   useEffect(() => {
     window.addEventListener("message", contentSelectedHandler)
 
@@ -24,4 +51,8 @@ export const useSelectedMark = () => {
       document.body.removeEventListener("message", contentSelectedHandler)
     }
   }, [])
+
+  return {
+    handleToggleContentSelector,
+  }
 }

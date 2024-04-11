@@ -1,9 +1,17 @@
-import { Button, Input, Space, Alert } from "@arco-design/web-react"
+import {
+  Button,
+  Input,
+  Space,
+  Alert,
+  Message as message,
+} from "@arco-design/web-react"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input/textarea"
 import {
   IconMinusCircle,
   IconUpload,
   IconSend,
+  IconScissor,
+  IconHighlight,
 } from "@arco-design/web-react/icon"
 import React, { useEffect, useRef } from "react"
 
@@ -37,6 +45,7 @@ import type { WebLinkItem } from "~components/weblink-list/types"
 import { mapSourceFromWeblinkList } from "~utils/weblink"
 import { sendToBackground } from "@plasmohq/messaging"
 import { SelectedContentList } from "~components/selected-content-list"
+import { useSearchQuickActionStore } from "~stores/search-quick-action"
 
 const TextArea = Input.TextArea
 
@@ -57,6 +66,7 @@ const Home = (props: ChatProps) => {
   const webLinkStore = useWeblinkStore()
   const { searchTarget } = useSearchStateStore()
   const contentSelectorStore = useContentSelectorStore()
+  const searchQuickActionStore = useSearchQuickActionStore()
 
   // hooks
   const { runTask, runQuickActionTask } = useBuildThreadAndRun()
@@ -64,13 +74,13 @@ const Home = (props: ChatProps) => {
     useStoreWeblink()
 
   // 设置 selected-mark 的监听器
-  useSelectedMark()
+  const { handleToggleContentSelector } = useSelectedMark()
 
   const { buildShutdownTaskAndGenResponse } = useBuildTask()
   const isIntentActive = !!quickActionStore.selectedText
   console.log("selectedText", quickActionStore.selectedText)
 
-  const handleSendMessage = async () => {
+  const handleQuickAction = async () => {
     // 如果是当前网页的快捷操作，那么先上传 Website
     // TODO: 这里后续需要处理去重
     if (searchTarget === SearchTarget.CurrentPage) {
@@ -79,19 +89,19 @@ const Home = (props: ChatProps) => {
 
     // 对当前网页进行快速操作
     runQuickActionTask({
-      filter: {
-        weblinkList: [
-          {
-            pageContent: "",
-            metadata: {
-              title: document?.title || "",
-              source: location.href,
-            },
-            score: -1,
-          } as Source,
-        ],
-      },
+      filter: {},
     })
+  }
+
+  const handleSendMessage = () => {
+    const { newQAText } = useChatStore.getState()
+
+    if (!newQAText) {
+      message.info("提问内容不能为空")
+      return
+    }
+
+    runTask()
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -183,18 +193,30 @@ const Home = (props: ChatProps) => {
                   新会话
                 </Button> */}
 
-                <IconTip text="处理当前网页用于问答">
+                <IconTip
+                  text={
+                    contentSelectorStore?.showContentSelector
+                      ? "取消选择并清空内容"
+                      : "选择内容"
+                  }>
                   <Button
+                    className="content-selector-btn"
                     onClick={async () => {
-                      handleSendMessage()
+                      handleToggleContentSelector()
                     }}
-                    icon={<IconUpload />}
-                    loading={uploadingStatus === "loading" ? true : false}
-                    type="text"
-                    style={{ marginRight: 0 }}
-                    shape="round">
-                    {uploadingStatus === "loading" ? "阅读中" : "阅读"}
-                  </Button>
+                    type={
+                      contentSelectorStore?.showContentSelector
+                        ? "primary"
+                        : "default"
+                    }
+                    icon={<IconHighlight />}
+                    style={{
+                      marginRight: 0,
+                      color: contentSelectorStore?.showContentSelector
+                        ? "#fff"
+                        : "#00000080",
+                    }}
+                    shape="round"></Button>
                 </IconTip>
 
                 <SearchTargetSelector showText />
@@ -203,7 +225,7 @@ const Home = (props: ChatProps) => {
                 shape="circle"
                 icon={<IconSend />}
                 style={{ color: "#FFF", background: "#00968F" }}
-                onClick={() => runTask()}></Button>
+                onClick={() => handleSendMessage()}></Button>
             </div>
           </div>
         </div>
@@ -215,32 +237,8 @@ const Home = (props: ChatProps) => {
             )}
           />
         ) : null}
-        {webLinkStore?.selectedRow?.length > 0 ? <QuickAction /> : null}
-        <Button
-          style={{ color: "#FFF", background: "#00968F" }}
-          onClick={() => {
-            if (!contentSelectorStore?.isInjectStyles) {
-              sendToBackground({
-                name: "injectContentSelectorCSS",
-              })
-
-              contentSelectorStore?.setIsInjectStyles(true)
-            }
-
-            contentSelectorStore.setShowContentSelector(
-              !contentSelectorStore.showContentSelector,
-            )
-
-            window.postMessage({
-              name: "setShowContentSelector",
-              payload: {
-                showContentSelector: !contentSelectorStore.showContentSelector,
-              },
-            })
-          }}>
-          {contentSelectorStore?.showContentSelector ? "取消选择" : "选择元素"}
-        </Button>
-        {contentSelectorStore?.showContentSelector ? (
+        {searchQuickActionStore.showQuickAction ? <QuickAction /> : null}
+        {contentSelectorStore?.showSelectedMarks ? (
           <SelectedContentList marks={contentSelectorStore.marks} />
         ) : null}
       </div>

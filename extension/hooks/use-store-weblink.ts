@@ -14,6 +14,7 @@ export const useStoreWeblink = () => {
   const handleUploadWebsite = async (url: string) => {
     // setIsUpdatingWebiste(true)
     setUploadingStatus("loading")
+    message.loading("阅读中...")
 
     const description = document.head.querySelector('meta[name="description"]')
 
