@@ -121,6 +121,7 @@ export class WeblinkService {
   async parseWebLinkContent(url: string): Promise<Document> {
     // Check if the document is in the cache
     if (this.cache.has(url)) {
+      this.logger.log(`in-mem cache hit: ${url}`);
       return this.cache.get(url);
     }
 
@@ -130,6 +131,7 @@ export class WeblinkService {
       where: { url },
     });
     if (weblink) {
+      this.logger.log(`found weblink in db: ${url}`);
       const content = await this.minio.getObject(
         this.bucketName,
         weblink.storageKey,
@@ -157,8 +159,9 @@ export class WeblinkService {
       const pageContent = $.html();
       const title = $('title').text();
       const source = loader.webPath;
-
-      return { pageContent, metadata: { title, source } };
+      const doc = { pageContent, metadata: { title, source } };
+      this.cache.set(url, doc);
+      return doc;
     } catch (err) {
       this.logger.error(`process url ${url} failed: ${err}`);
       return null;
