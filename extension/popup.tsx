@@ -153,7 +153,7 @@ const Popup = () => {
         <p className="shortcut-hint">
           提示：按下
           <span className="key">
-            {osType === "OSX" ? "Command+B" : "Ctrl+B"}
+            {osType === "OSX" ? "Command+J" : "Ctrl+J"}
           </span>
           以更快地激活 Refly。键盘快捷键可以在
           <a
