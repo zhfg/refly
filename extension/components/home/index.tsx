@@ -73,17 +73,23 @@ const Home = (props: ChatProps) => {
 
   // hooks
   const { runTask } = useBuildThreadAndRun()
-  const { isWebLinkIndexed } = useStoreWeblink()
+  const { isWebLinkIndexed, handleUploadWebsite } = useStoreWeblink()
 
   const { buildShutdownTaskAndGenResponse } = useBuildTask()
   const isIntentActive = !!quickActionStore.selectedText
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     const { newQAText } = useChatStore.getState()
+    const { searchTarget } = useSearchStateStore.getState()
 
     if (!newQAText) {
       message.info("提问内容不能为空")
       return
+    }
+
+    // 先存储 link， 在进行提问操作，这里理论上是需要有个 negotiate 的过程
+    if (searchTarget === SearchTarget.CurrentPage) {
+      await handleUploadWebsite(window.location.href)
     }
 
     runTask()
