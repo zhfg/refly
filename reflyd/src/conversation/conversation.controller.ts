@@ -172,7 +172,7 @@ export class ConversationController {
         )}`,
       );
     } catch (err) {
-      console.log('chat error', err);
+      this.logger.error('chat error', err);
 
       // 结束流式输出
       res.end(``);

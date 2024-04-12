@@ -526,7 +526,7 @@ export class LlmService implements OnModuleInit {
     const contextToCitationText = contexts
       .map((item, index) => `[[citation:${index + 1}]] ${item?.['snippet']}`)
       .join('\n\n');
-    console.log('search result contexts', contextToCitationText);
+    this.logger.log('search result contexts', contextToCitationText);
     // 临时先兼容基于文档召回的 sources 格式，快速实现联网搜索和联通前端
     const sources: Source[] = contexts.map((item) => ({
       pageContent: item.snippet,

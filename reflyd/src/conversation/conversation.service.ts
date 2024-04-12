@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Response } from 'express';
 
 import { PrismaService } from '../common/prisma.service';
@@ -12,16 +12,14 @@ import {
 import { createLLMChatMessage } from 'src/llm/schema';
 import { LlmService } from '../llm/llm.service';
 import { WeblinkService } from 'src/weblink/weblink.service';
-import { resolve } from 'path';
-import { rejects } from 'assert';
-import { Source } from 'src/types/weblink';
-import { Document } from '@langchain/core/documents';
 
 const LLM_SPLIT = '__LLM_RESPONSE__';
 const RELATED_SPLIT = '__RELATED_QUESTIONS__';
 
 @Injectable()
 export class ConversationService {
+  private logger = new Logger(ConversationService.name);
+
   constructor(
     private prisma: PrismaService,
     private weblinkService: WeblinkService,
@@ -161,7 +159,7 @@ export class ConversationService {
       this.llmService.getRelatedQuestion(sources, query),
     ]);
 
-    console.log('relatedQuestions', relatedQuestions);
+    this.logger.log('relatedQuestions', relatedQuestions);
 
     res.write(RELATED_SPLIT);
     res.write(JSON.stringify(relatedQuestions));
@@ -219,7 +217,7 @@ export class ConversationService {
       .replace(/[cC]itation:(\d+)]]/g, 'citation:$1]')
       .replace(/\[\[([cC]itation:\d+)]](?!])/g, `[$1]`)
       .replace(/\[[cC]itation:(\d+)]/g, '[citation]($1)');
-    console.log('handledAnswer', handledAnswer);
+    this.logger.log('handledAnswer', handledAnswer);
 
     return {
       sources,
@@ -261,6 +259,13 @@ export class ConversationService {
     const weblinkList = data?.filter?.weblinkList;
     if (weblinkList?.length <= 0) return;
 
+    // save user mark for each weblink in a non-blocking style
+    this.weblinkService.saveWeblinkUserMarks({
+      userId: req.user.id,
+      weblinkList,
+      extensionVersion: req.header('x-refly-ext-version'),
+    });
+
     // 基于一组网页做总结，先获取网页内容
     const docs = await this.weblinkService.parseMultiWeblinks(weblinkList);
 
@@ -279,7 +284,7 @@ export class ConversationService {
       };
 
       const onError = (err) => {
-        console.log('err', err);
+        this.logger.error(`output summary error: ${err}`);
         reject(err);
       };
 
