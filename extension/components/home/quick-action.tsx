@@ -75,6 +75,10 @@ export const QuickAction = () => {
     })
   }
 
+  const handleQuickActionTranslate = () => {}
+
+  const handleQuickActionExplain = () => {}
+
   const handleActiveContentSelector = () => {
     contentSelectorStore.setShowContentSelector(true)
   }
@@ -104,6 +108,24 @@ export const QuickAction = () => {
               </Button>
             </IconTip>
           ) : null}
+          <IconTip text={getSummaryText()}>
+            <Button
+              onClick={() => handleQuickActionTranslate()}
+              style={{ fontSize: 12 }}
+              shape="round"
+              size="small">
+              翻译
+            </Button>
+          </IconTip>
+          <IconTip text={getSummaryText()}>
+            <Button
+              onClick={() => handleQuickActionExplain()}
+              style={{ fontSize: 12 }}
+              shape="round"
+              size="small">
+              解释
+            </Button>
+          </IconTip>
         </div>
       </div>
     </>

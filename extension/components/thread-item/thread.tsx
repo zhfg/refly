@@ -21,6 +21,7 @@ import { MessageType, type Message, TASK_TYPE } from "~types"
 import { safeParseJSON } from "~utils/parse"
 import { useWeblinkStore } from "~stores/weblink"
 import { SearchTarget, useSearchStateStore } from "~stores/search-state"
+import { useContentSelectorStore } from "~stores/content-selector"
 
 export const Thread = () => {
   const { buildTaskAndGenReponse } = useBuildTask()
@@ -90,19 +91,41 @@ export const Thread = () => {
     const { currentConversation } = useConversationStore.getState()
     const { messages } = useChatStore.getState()
     const selectedWeblinkConfig = getSelectedWeblinkConfig(messages)
+    const { marks } = useContentSelectorStore.getState()
 
     console.log("handleAskFollowing", newQuestion)
 
-    const useWeblinkList =
-      selectedWeblinkConfig?.searchTarget === SearchTarget.SelectedPages &&
-      selectedWeblinkConfig?.filter?.length > 0
+    const getWebLinkList = () => {
+      let selectedWebLink = []
+      if (selectedWeblinkConfig?.searchTarget === SearchTarget.CurrentPage) {
+        selectedWebLink = [
+          {
+            pageContent: "",
+            metadata: {
+              title: document?.title || "",
+              source: location.href,
+            },
+            score: -1, // 手工构造
+            cssSelector: marks?.map((item) => item?.cssSelector),
+          },
+        ]
+      } else {
+        const useWeblinkList =
+          selectedWeblinkConfig?.searchTarget === SearchTarget.SelectedPages &&
+          selectedWeblinkConfig?.filter?.length > 0
+
+        selectedWebLink = useWeblinkList ? selectedWeblinkConfig?.filter : []
+      }
+
+      return selectedWebLink
+    }
 
     const task = buildTask({
       data: {
         question: newQuestion,
         conversationId: currentConversation?.id || "",
         filter: {
-          weblinkList: useWeblinkList ? selectedWeblinkConfig?.filter : [],
+          weblinkList: getWebLinkList(),
         },
       },
       taskType,
