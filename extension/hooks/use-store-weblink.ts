@@ -3,6 +3,9 @@ import { Message as message } from "@arco-design/web-react"
 import { sendToBackground } from "@plasmohq/messaging"
 import { useState } from "react"
 import { useWebLinkIndexed } from "~hooks/use-weblink-indexed"
+import { delay } from "~utils/delay"
+// utils
+import * as cheerio from "cheerio"
 
 export const useStoreWeblink = () => {
   // 网页索引状态
@@ -14,9 +17,22 @@ export const useStoreWeblink = () => {
   const handleUploadWebsite = async (url: string) => {
     // setIsUpdatingWebiste(true)
     setUploadingStatus("loading")
-    message.loading("阅读中...")
 
     const description = document.head.querySelector('meta[name="description"]')
+
+    const $ = cheerio.load(document?.documentElement?.innerHTML)
+
+    // remove all styles and scripts tag
+    $("script, style, plasmo-csui, img, svg, meta, link").remove()
+    // remove comments blocks
+    $("body")
+      .contents()
+      .each((i, node) => {
+        if (node.type === "comment") {
+          $(node).remove()
+        }
+      })
+    const pageContent = $.html()
 
     const res = await sendToBackground({
       name: "storeWeblink",
@@ -26,20 +42,18 @@ export const useStoreWeblink = () => {
         originPageTitle: document?.title || "",
         originPageUrl: location.href,
         originPageDescription: (description as any)?.content || "",
-        pageContent: document?.documentElement?.innerHTML || "", // 上传 HTML String 用于后续的操作
+        pageContent: pageContent || "", // 上传 HTML String 用于后续的操作
       },
     })
 
-    if (res.success) {
-      message.success("阅读成功！")
-      setIsWebLinkIndexed(true)
-    } else {
-      message.error("阅读失败！")
-    }
+    console.log("storeWeblink", res)
+    await delay(2000)
 
     setTimeout(() => {
       setUploadingStatus("normal")
     }, 3000)
+
+    return res
   }
 
   return {

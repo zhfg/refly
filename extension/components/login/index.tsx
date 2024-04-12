@@ -88,12 +88,6 @@ export const Login = () => {
   }
 
   useEffect(() => {
-    window.addEventListener("message", (evt) => {
-      console.log("evt", evt)
-    })
-  }, [])
-  useEffect(() => {
-    console.log("bgMessage.data", bgMessage.data)
     if (bgMessage?.data?.name === "login-notification") {
       handleLoginStatus(bgMessage?.data)
     }
