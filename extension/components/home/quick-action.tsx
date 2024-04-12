@@ -1,4 +1,4 @@
-import { Button, Divider } from "@arco-design/web-react"
+import { Button, Message as message } from "@arco-design/web-react"
 import { IconScissor, IconStar } from "@arco-design/web-react/icon"
 import { IconTip } from "./icon-tip"
 import { useWeblinkStore } from "~stores/weblink"
@@ -15,20 +15,20 @@ export const QuickAction = () => {
   const webLinkStore = useWeblinkStore()
   const contentSelectorStore = useContentSelectorStore()
   const searchQuickActionStore = useSearchQuickActionStore()
-  const { isWebLinkIndexed, uploadingStatus, handleUploadWebsite } =
-    useStoreWeblink()
+  const { uploadingStatus, handleUploadWebsite } = useStoreWeblink()
   const { searchTarget } = useSearchStateStore()
+  const { showSelectedMarks, marks = [] } = useContentSelectorStore()
 
   // hooks
   const { runQuickActionTask } = useBuildThreadAndRun()
 
-  const getSummaryText = () => {
+  const getText = (slot: string) => {
     const { selectedRow } = useWeblinkStore.getState()
     const { showSelectedMarks } = useContentSelectorStore.getState()
 
-    if (showSelectedMarks) return "基于实时选择内容总结"
-    if (selectedRow?.length > 0) return "对选中的网页进行总结"
-    if (selectedRow?.length === 0) return "对当前网页进行快速总结"
+    if (showSelectedMarks) return `基于实时选择内容${slot}`
+    if (selectedRow?.length > 0) return `对选中的网页进行${slot}`
+    if (selectedRow?.length === 0) return `对当前网页进行快速${slot}`
   }
 
   /**
@@ -48,7 +48,15 @@ export const QuickAction = () => {
     if (searchTarget === SearchTarget.CurrentPage) {
       // 1）单个网页的时候 2）单个网页中部分内容，都需要先上传
       // 然后服务端只取 html + xpath 做处理，以及下次重新访问会话时展示 filter 也是用 html + xpath 获取内容展示
-      await handleUploadWebsite(window.location.href)
+      message.loading("处理内容中...")
+      const res = await handleUploadWebsite(window.location.href)
+
+      if (res.success) {
+        message.success("处理成功，正在跳转到会话页面...")
+      } else {
+        message.error("处理失败！")
+      }
+
       filter = {
         weblinkList: [
           {
@@ -79,6 +87,17 @@ export const QuickAction = () => {
 
   const handleQuickActionExplain = () => {}
 
+  const handleStoreForLater = async () => {
+    message.loading("内容保存中...")
+    const res = await handleUploadWebsite(window.location.href)
+
+    if (res.success) {
+      message.success("保存成功！")
+    } else {
+      message.error("处理失败！")
+    }
+  }
+
   const handleActiveContentSelector = () => {
     contentSelectorStore.setShowContentSelector(true)
   }
@@ -87,6 +106,11 @@ export const QuickAction = () => {
     SearchTarget.CurrentPage,
     SearchTarget.SelectedPages,
   ].includes(searchTarget)
+
+  const showTranslateOrExplain =
+    searchTarget === SearchTarget.CurrentPage &&
+    showSelectedMarks &&
+    marks.length > 0
 
   return (
     <>
@@ -98,7 +122,7 @@ export const QuickAction = () => {
           </div>
           {/* 理论上针对单个网页、多个网页都可以进行总结 */}
           {showSummary ? (
-            <IconTip text={getSummaryText()}>
+            <IconTip text={getText("总结")}>
               <Button
                 onClick={() => handleSummary()}
                 style={{ fontSize: 12 }}
@@ -108,22 +132,35 @@ export const QuickAction = () => {
               </Button>
             </IconTip>
           ) : null}
-          <IconTip text={getSummaryText()}>
+          {showTranslateOrExplain
+            ? [
+                <IconTip text={getText("翻译")}>
+                  <Button
+                    onClick={() => handleQuickActionTranslate()}
+                    style={{ fontSize: 12 }}
+                    shape="round"
+                    size="small">
+                    翻译
+                  </Button>
+                </IconTip>,
+                <IconTip text={getText("解释")}>
+                  <Button
+                    onClick={() => handleQuickActionExplain()}
+                    style={{ fontSize: 12 }}
+                    shape="round"
+                    size="small">
+                    解释
+                  </Button>
+                </IconTip>,
+              ]
+            : null}
+          <IconTip text={"保存此网页以供后续阅读"}>
             <Button
-              onClick={() => handleQuickActionTranslate()}
+              onClick={() => handleStoreForLater()}
               style={{ fontSize: 12 }}
               shape="round"
               size="small">
-              翻译
-            </Button>
-          </IconTip>
-          <IconTip text={getSummaryText()}>
-            <Button
-              onClick={() => handleQuickActionExplain()}
-              style={{ fontSize: 12 }}
-              shape="round"
-              size="small">
-              解释
+              保存
             </Button>
           </IconTip>
         </div>

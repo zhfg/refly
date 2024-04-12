@@ -73,7 +73,7 @@ const Home = (props: ChatProps) => {
 
   // hooks
   const { runTask } = useBuildThreadAndRun()
-  const { isWebLinkIndexed, handleUploadWebsite } = useStoreWeblink()
+  const { handleUploadWebsite } = useStoreWeblink()
 
   const { buildShutdownTaskAndGenResponse } = useBuildTask()
   const isIntentActive = !!quickActionStore.selectedText
@@ -89,7 +89,14 @@ const Home = (props: ChatProps) => {
 
     // 先存储 link， 在进行提问操作，这里理论上是需要有个 negotiate 的过程
     if (searchTarget === SearchTarget.CurrentPage) {
-      await handleUploadWebsite(window.location.href)
+      message.loading("处理内容中...")
+      const res = await handleUploadWebsite(window.location.href)
+
+      if (res.success) {
+        message.success("处理成功，正在跳转到会话页面...")
+      } else {
+        message.error("处理失败！")
+      }
     }
 
     runTask()
@@ -155,19 +162,6 @@ const Home = (props: ChatProps) => {
       }}>
       <ChatHeader />
       <div className="footer input-panel">
-        {isWebLinkIndexed ? (
-          <Alert
-            type="success"
-            content="此网页已经被索引，可以直接提问！"
-            closable
-          />
-        ) : (
-          <Alert
-            type="warning"
-            content="此网页未索引，点击下方「阅读」可索引！"
-            closable
-          />
-        )}
         <div className="refly-slogan">The answer engine for your work</div>
         <div className="actions">
           {messageStateStore.taskType === TASK_TYPE.CHAT &&
