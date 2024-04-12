@@ -1,8 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import omit from 'lodash.omit';
 
-import { PGVectorStore } from '@langchain/community/vectorstores/pgvector';
+import { PrismaVectorStore } from '@langchain/community/vectorstores/prisma';
 import { Document } from '@langchain/core/documents';
 import { OpenAIEmbeddings, ChatOpenAI } from '@langchain/openai';
 import {
@@ -16,7 +15,12 @@ import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { PromptTemplate } from '@langchain/core/prompts';
 import { JsonOutputFunctionsParser } from 'langchain/output_parsers';
 
-import { AigcContent, ChatMessage } from '@prisma/client';
+import {
+  AigcContent,
+  ChatMessage,
+  ContentVector,
+  Prisma,
+} from '@prisma/client';
 import {
   qa,
   contextualizeQA,
@@ -35,35 +39,43 @@ import { ContentMeta } from './dto';
 import { categoryList } from '../prompts/utils/category';
 import { Source } from 'src/types/weblink';
 import { SearchResultContext } from 'src/types/search';
+import { PrismaService } from 'src/common/prisma.service';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
   private embeddings: OpenAIEmbeddings;
-  private vectorStore: PGVectorStore;
+  private vectorStore: PrismaVectorStore<
+    ContentVector,
+    'content_vectors',
+    any,
+    any
+  >;
   private llm: ChatOpenAI;
 
   private readonly logger = new Logger(LlmService.name);
 
-  constructor(private configService: ConfigService) {}
+  constructor(
+    private prisma: PrismaService,
+    private configService: ConfigService,
+  ) {}
 
   async onModuleInit() {
     this.embeddings = new OpenAIEmbeddings({
       modelName: 'text-embedding-3-large',
       batchSize: 512,
-      dimensions: this.configService.get('vectorStore.vectorDim'),
+      dimensions: this.configService.getOrThrow('vectorStore.vectorDim'),
       timeout: 5000,
       maxRetries: 3,
     });
-    this.vectorStore = await PGVectorStore.initialize(this.embeddings, {
-      postgresConnectionOptions: {
-        connectionString: process.env.DATABASE_URL,
-      },
-      tableName: 'content_vectors',
+    this.vectorStore = PrismaVectorStore.withModel<ContentVector>(
+      this.prisma,
+    ).create(this.embeddings, {
+      prisma: Prisma,
+      tableName: 'content_vectors' as any,
+      vectorColumnName: 'vector',
       columns: {
-        idColumnName: 'id',
-        vectorColumnName: 'vector',
-        contentColumnName: 'content',
-        metadataColumnName: 'metadata',
+        id: PrismaVectorStore.IdColumn,
+        content: PrismaVectorStore.ContentColumn,
       },
     });
 
@@ -78,7 +90,6 @@ export class LlmService implements OnModuleInit {
    */
   async extractContentMeta(doc: Document): Promise<ContentMeta> {
     const { pageContent } = doc;
-    this.logger.log('content need to be extract: %s', pageContent);
 
     const parser = new JsonOutputFunctionsParser();
 
@@ -113,7 +124,7 @@ export class LlmService implements OnModuleInit {
       formats: [{ key: res?.format, score: 0, name: '', reason: '' }],
     };
 
-    this.logger.log('final content meta: %j', contentMeta);
+    this.logger.log(`final content meta: ${contentMeta}`);
 
     return contentMeta;
   }
@@ -199,7 +210,7 @@ export class LlmService implements OnModuleInit {
     };
   }
 
-  async indexPipelineFromLink(doc: Document) {
+  async indexPipelineFromLink(weblinkId: number, doc: Document) {
     // splitting / chunking
     const textSplitter = new RecursiveCharacterTextSplitter({
       separators: ['\n\n', '\n', ' ', ''],
@@ -209,7 +220,15 @@ export class LlmService implements OnModuleInit {
     });
     const documents = await textSplitter.splitDocuments([doc]);
 
-    await this.vectorStore.addDocuments(documents);
+    await this.vectorStore.addModels(
+      await this.prisma.$transaction(
+        documents.map(({ pageContent }) =>
+          this.prisma.contentVector.create({
+            data: { weblinkId, content: pageContent },
+          }),
+        ),
+      ),
+    );
   }
 
   async retrieval(query: string, filter) {

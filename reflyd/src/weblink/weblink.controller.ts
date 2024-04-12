@@ -10,11 +10,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { WeblinkService } from './weblink.service';
-import {
-  GetWebLinkListResponse,
-  PingWeblinkParam,
-  StoreWebLinkParam,
-} from './dto';
+import { GetWebLinkListResponse, StoreWebLinkParam } from './dto';
 import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 
 @Controller('weblink')
@@ -25,9 +21,13 @@ export class WeblinkController {
 
   @UseGuards(JwtAuthGuard)
   @Get('ping')
-  async ping(@Body() body: PingWeblinkParam) {
-    const weblink = await this.weblinkService.checkWeblinkExists(body.url);
-    return { status: weblink ? 'ok' : 'unavailable' };
+  async ping(@Query('url') url: string) {
+    if (!url) return { status: 'unavailable' };
+    return {
+      status: (await this.weblinkService.checkWeblinkExists(url))
+        ? 'ok'
+        : 'unavailable',
+    };
   }
 
   @UseGuards(JwtAuthGuard)

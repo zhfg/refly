@@ -9,13 +9,13 @@ export class Source {
   @ApiProperty()
   pageContent: string;
 
-  @ApiPropertyOptional({ type: [Mark] })
-  marks?: Mark[];
-
   metadata: {
     source: string;
     title: string;
   };
 
   score: number;
+
+  @ApiPropertyOptional()
+  cssSelector?: string[];
 }
