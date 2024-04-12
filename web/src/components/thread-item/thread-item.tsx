@@ -7,11 +7,9 @@ import { useChatStore } from "@/stores/chat"
 import { useMessageStateStore } from "@/stores/message-state"
 // 组件
 import { Session } from "./session"
-import { TASK_TYPE, type SessionItem, type Task, type Source } from "@/types"
+import { TASK_TYPE, type SessionItem, type Source } from "@/types"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input"
 import { useBuildTask } from "@/hooks/use-build-task"
-import { buildChatTask, buildQuickActionTask } from "@/utils/task"
-import { useConversationStore } from "@/stores/conversation"
 
 import { ThreadSearchTargetSelector } from "@/components/thread-item/thread-search-target-selector"
 import { SearchTarget } from "@/stores/search-state"
@@ -48,13 +46,44 @@ export const ThreadItem = (props: ThreadItemProps) => {
     threadWeblinkListFilter?.length > 0
 
   const messageStateStore = useMessageStateStore()
-  const { buildShutdownTaskAndGenResponse, buildTaskAndGenReponse } =
-    useBuildTask()
+  const { buildShutdownTaskAndGenResponse } = useBuildTask()
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    e.stopPropagation()
+    if (e.keyCode === 13 && (e.ctrlKey || e.shiftKey || e.metaKey)) {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        // 阻止默认行为,即不触发 enter 键的默认事件
+        e.preventDefault()
+        // 在输入框中插入换行符
 
-    inputRef.current?.dom?.onkeydown?.(e as any as KeyboardEvent)
+        // 获取光标位置
+        const cursorPos = e.target.selectionStart
+        // 在光标位置插入换行符
+        e.target.value =
+          e.target.value.slice(0, cursorPos as number) +
+          "\n" +
+          e.target.value.slice(cursorPos as number)
+        // 将光标移动到换行符后面
+        e.target.selectionStart = e.target.selectionEnd =
+          (cursorPos as number) + 1
+      }
+    }
+
+    if (e.keyCode === 13 && !e.ctrlKey && !e.shiftKey && !e.metaKey) {
+      e.preventDefault()
+      handleAskFollowing()
+    }
+  }
+
+  const handleAskFollowing = () => {
+    props.handleAskFollowing(
+      "",
+      threadSearchTarget === SearchTarget?.SearchEnhance
+        ? TASK_TYPE.SEARCH_ENHANCE_ASK
+        : TASK_TYPE.CHAT,
+    )
   }
 
   // 这里保存为组件状态是只对当前组件生效，而且理论上设置之后就应该在此 thread 一直生效，不应该清空
@@ -155,12 +184,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
                       icon={<IconSend />}
                       style={{ color: "#FFF", background: "#00968F" }}
                       onClick={() => {
-                        props.handleAskFollowing(
-                          "",
-                          threadSearchTarget === SearchTarget?.SearchEnhance
-                            ? TASK_TYPE.SEARCH_ENHANCE_ASK
-                            : TASK_TYPE.CHAT,
-                        )
+                        handleAskFollowing()
                       }}></Button>
                   </div>
                 </div>

@@ -137,9 +137,32 @@ const Home = () => {
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    e.stopPropagation()
+    if (e.keyCode === 13 && (e.ctrlKey || e.shiftKey || e.metaKey)) {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        // 阻止默认行为,即不触发 enter 键的默认事件
+        e.preventDefault()
+        // 在输入框中插入换行符
 
-    inputRef.current?.dom?.onkeydown?.(e as any as KeyboardEvent)
+        // 获取光标位置
+        const cursorPos = e.target.selectionStart
+        // 在光标位置插入换行符
+        e.target.value =
+          e.target.value.slice(0, cursorPos as number) +
+          "\n" +
+          e.target.value.slice(cursorPos as number)
+        // 将光标移动到换行符后面
+        e.target.selectionStart = e.target.selectionEnd =
+          (cursorPos as number) + 1
+      }
+    }
+
+    if (e.keyCode === 13 && !e.ctrlKey && !e.shiftKey && !e.metaKey) {
+      e.preventDefault()
+      runTask()
+    }
   }
 
   const handleSendMsgToExtension = async (
@@ -351,7 +374,7 @@ const Home = () => {
                   shape="circle"
                   icon={<IconSend />}
                   style={{ color: "#FFF", background: "#00968F" }}
-                  onClick={runTask}></Button>
+                  onClick={() => runTask()}></Button>
               </div>
             </div>
           </div>
