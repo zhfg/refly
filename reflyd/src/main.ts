@@ -9,7 +9,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 import tracer from './tracer';
 import { GlobalExceptionFilter } from './filters/global-exception.filter';
-import { setTraceID } from './middleware/gen-request-id';
+import { setTraceID } from './middleware/set-trace-id';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

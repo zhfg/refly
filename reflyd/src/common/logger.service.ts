@@ -13,8 +13,8 @@ export class LoggerService extends PinoLogger {
     if (activeSpan) {
       activeSpan.addEvent(message);
       this.assign({
-        trace_id: activeSpan.spanContext().traceId,
-        span_id: activeSpan.spanContext().spanId,
+        traceId: activeSpan.spanContext().traceId,
+        spanId: activeSpan.spanContext().spanId,
       });
     }
 
@@ -26,7 +26,8 @@ export class LoggerService extends PinoLogger {
     if (activeSpan) {
       activeSpan.addEvent(message);
       this.assign({
-        trace_id: activeSpan.spanContext().traceId,
+        traceId: activeSpan.spanContext().traceId,
+        spanId: activeSpan.spanContext().spanId,
       });
     }
 
