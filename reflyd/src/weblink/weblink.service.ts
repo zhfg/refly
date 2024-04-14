@@ -154,7 +154,16 @@ export class WeblinkService {
       // customized webpage loading
       const $ = await loader.scrape();
       // remove all styles and scripts tag
-      $('script, style').remove();
+      $('script, style, plasmo-csui, img, svg, meta, link').remove();
+      // remove comments blocks
+      $('body')
+        .contents()
+        .each((i, node) => {
+          if (node.type === 'comment') {
+            $(node).remove();
+          }
+        });
+
       // only get meaning content
       const pageContent = $.html();
       const title = $('title').text();
@@ -178,7 +187,15 @@ export class WeblinkService {
       const $ = cheerio.load(pageContent);
 
       // remove all styles and scripts tag
-      $('script, style').remove();
+      $('script, style, plasmo-csui, img, svg, meta, link').remove();
+      // remove comments blocks
+      $('body')
+        .contents()
+        .each((i, node) => {
+          if (node.type === 'comment') {
+            $(node).remove();
+          }
+        });
 
       // only get meaning content
       const title = $('title').text();
