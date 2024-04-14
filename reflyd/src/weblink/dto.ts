@@ -35,11 +35,6 @@ export class WebLinkDTO {
   userId?: number;
 }
 
-export class PingWeblinkParam {
-  @ApiProperty()
-  url: string;
-}
-
 export class StoredWebLink extends WebLinkDTO {
   @ApiProperty()
   indexStatus: IndexStatus;

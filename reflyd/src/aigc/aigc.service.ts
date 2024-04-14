@@ -302,16 +302,13 @@ export class AigcService {
    * @returns
    */
   async runContentFlow(param: {
+    doc: Document;
     link: WebLinkDTO;
     uwb: UserWeblink;
     weblink: Weblink;
   }) {
-    const { weblink } = param;
+    const { doc, weblink } = param;
     let meta: ContentMeta;
-    const doc = new Document({
-      pageContent: weblink.pageContent,
-      metadata: JSON.parse(weblink.pageMeta),
-    });
 
     if (!weblink.contentMeta) {
       // 提取网页分类打标数据 with LLM
@@ -323,7 +320,7 @@ export class AigcService {
         return;
       }
       if (shouldRunIndexPipeline(meta)) {
-        await this.llmService.indexPipelineFromLink(doc);
+        await this.llmService.indexPipelineFromLink(weblink.id, doc);
       }
       await this.prisma.weblink.update({
         where: { id: weblink.id },
