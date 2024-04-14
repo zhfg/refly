@@ -1701,14 +1701,6 @@
   dependencies:
     "@opentelemetry/core" "^1.1.0"
 
-"@prisma/adapter-pg@^5.12.1":
-  version "5.12.1"
-  resolved "https://registry.yarnpkg.com/@prisma/adapter-pg/-/adapter-pg-5.12.1.tgz#a3bab739647109186fb8c4a4adc61a11875f14fb"
-  integrity sha512-WDBl3IJL0YyLCwXZPOpRnWqr/xS9RWFeBbSeo+z959DgbX6jrIYFdglvfFgAN0V9EWZGrt0as+t2aEROgrl+OA==
-  dependencies:
-    "@prisma/driver-adapter-utils" "5.12.1"
-    postgres-array "3.0.2"
-
 "@prisma/client@5":
   version "5.12.1"
   resolved "https://registry.yarnpkg.com/@prisma/client/-/client-5.12.1.tgz#c26a674fea76754b3a9e8b90a11e617f90212f76"
@@ -1718,13 +1710,6 @@
   version "5.12.1"
   resolved "https://registry.yarnpkg.com/@prisma/debug/-/debug-5.12.1.tgz#007c8ad2e466d565bcd0671b8846c27f8700c722"
   integrity sha512-kd/wNsR0klrv79o1ITsbWxYyh4QWuBidvxsXSParPsYSu0ircUmNk3q4ojsgNc3/81b0ozg76iastOG43tbf8A==
-
-"@prisma/driver-adapter-utils@5.12.1":
-  version "5.12.1"
-  resolved "https://registry.yarnpkg.com/@prisma/driver-adapter-utils/-/driver-adapter-utils-5.12.1.tgz#2d6b26883d95feec3b7e5b7695bdbcc6a96041bd"
-  integrity sha512-s5EHANHIyWID/3WLNYn3wy1SUGC2OFH2thYriq+sKo4GZxEduX9oraOVlPruZZBt/roN9ojZcph4R2oecWzfXg==
-  dependencies:
-    "@prisma/debug" "5.12.1"
 
 "@prisma/engines-version@5.12.0-21.473ed3124229e22d881cb7addf559799debae1ab":
   version "5.12.0-21.473ed3124229e22d881cb7addf559799debae1ab"
@@ -6196,15 +6181,15 @@ pluralize@8.0.0:
   resolved "https://registry.yarnpkg.com/pluralize/-/pluralize-8.0.0.tgz#1a6fa16a38d12a1901e0320fa017051c539ce3b1"
   integrity sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==
 
-postgres-array@3.0.2, postgres-array@~3.0.1:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/postgres-array/-/postgres-array-3.0.2.tgz#68d6182cb0f7f152a7e60dc6a6889ed74b0a5f98"
-  integrity sha512-6faShkdFugNQCLwucjPcY5ARoW1SlbnrZjmGl0IrrqewpvxvhSLHimCVzqeuULCbG0fQv7Dtk1yDbG3xv7Veog==
-
 postgres-array@~2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/postgres-array/-/postgres-array-2.0.0.tgz#48f8fce054fbc69671999329b8834b772652d82e"
   integrity sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA==
+
+postgres-array@~3.0.1:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/postgres-array/-/postgres-array-3.0.2.tgz#68d6182cb0f7f152a7e60dc6a6889ed74b0a5f98"
+  integrity sha512-6faShkdFugNQCLwucjPcY5ARoW1SlbnrZjmGl0IrrqewpvxvhSLHimCVzqeuULCbG0fQv7Dtk1yDbG3xv7Veog==
 
 postgres-bytea@~1.0.0:
   version "1.0.0"
