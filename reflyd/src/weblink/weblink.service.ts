@@ -136,6 +136,7 @@ export class WeblinkService {
         this.bucketName,
         weblink.storageKey,
       );
+
       const doc = new Document({
         pageContent: content.toString(),
         metadata: JSON.parse(weblink.pageMeta),

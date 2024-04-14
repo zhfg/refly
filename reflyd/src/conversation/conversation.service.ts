@@ -129,13 +129,30 @@ export class ConversationService {
       });
     }
 
+    // 前置的数据处理
     const query = task?.data?.question;
-    const { stream, sources } = await this.llmService.chat(
-      query,
-      chatHistory
-        ? chatHistory.map((msg) => createLLMChatMessage(msg.content, msg.type))
-        : [],
-      filter,
+    const llmChatMessages = chatHistory
+      ? chatHistory.map((msg) => createLLMChatMessage(msg.content, msg.type))
+      : [];
+    const questionWithContext =
+      chatHistory.length === 0
+        ? query
+        : await this.llmService.getContextualQuestion(query, llmChatMessages);
+
+    // 如果有 cssSelector，则代表从基于选中的内容进行提问，否则根据上下文进行相似度匹配召回
+    const chatFromClientSelector = task?.data?.filter?.weblinkList?.find(
+      (item) => item?.cssSelector?.length > 0,
+    );
+    const sources = chatFromClientSelector
+      ? await this.weblinkService.parseMultiWeblinks(
+          task?.data?.filter?.weblinkList,
+        )
+      : await this.llmService.getRetrievalDocs(questionWithContext, filter);
+
+    const { stream } = await this.llmService.chat(
+      questionWithContext,
+      llmChatMessages,
+      sources,
     );
 
     // first return sources，use unique tag for parse data
@@ -156,7 +173,7 @@ export class ConversationService {
 
     const [answerStr, relatedQuestions] = await Promise.all([
       getSSEData(stream),
-      this.llmService.getRelatedQuestion(sources, query),
+      this.llmService.getRelatedQuestion(sources, questionWithContext),
     ]);
 
     this.logger.log('relatedQuestions', relatedQuestions);

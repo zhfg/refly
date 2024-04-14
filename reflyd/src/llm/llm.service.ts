@@ -392,9 +392,9 @@ export class LlmService implements OnModuleInit {
     });
   }
 
-  async chat(query: string, chatHistory: LLMChatMessage[], filter?: any) {
+  async getContextualQuestion(query: string, chatHistory: LLMChatMessage[]) {
     this.logger.log(
-      `activated with query: ${query}, filter: ${JSON.stringify(filter)}`,
+      `activated with query: ${query}, chat history: ${chatHistory}`,
     );
 
     // 构建总结的 Prompt，将 question + chatHistory 总结成
@@ -406,13 +406,37 @@ export class LlmService implements OnModuleInit {
     const contextualizeQChain = contextualizeQPrompt
       .pipe(this.llm as any)
       .pipe(new StringOutputParser());
-    const questionWithContext =
-      chatHistory.length === 0
-        ? query
-        : await contextualizeQChain.invoke({
-            question: query,
-            chatHistory,
-          });
+
+    return await contextualizeQChain.invoke({
+      question: query,
+      chatHistory,
+    });
+  }
+
+  async getRetrievalDocs(query: string, filter?: any) {
+    this.logger.log(
+      `activated with query: ${query}, filter: ${JSON.stringify(filter)}`,
+    );
+
+    const retrievalResults = await this.retrieval(query, filter);
+
+    console.log('retrievalResults', retrievalResults);
+
+    const retrievedDocs = retrievalResults.map((res) => ({
+      metadata: res?.metadata,
+      pageContent: res?.pageContent as string,
+      score: res?.score, // similarity score
+    }));
+
+    return retrievedDocs;
+  }
+
+  async chat(
+    query: string,
+    chatHistory: LLMChatMessage[],
+    context: Document[],
+  ) {
+    this.logger.log(`activated with query: ${query}}`);
 
     const qaPrompt = ChatPromptTemplate.fromMessages([
       ['system', qa.systemPrompt],
@@ -428,21 +452,10 @@ export class LlmService implements OnModuleInit {
       outputParser: new StringOutputParser(),
     });
 
-    const retrievalResults = await this.retrieval(questionWithContext, filter);
-
-    console.log('retrievalResults', retrievalResults);
-
-    const retrievedDocs = retrievalResults.map((res) => ({
-      metadata: res?.metadata,
-      pageContent: res?.pageContent as string,
-      score: res?.score, // similarity score
-    }));
-
     return {
-      sources: retrievedDocs,
       stream: ragChain.stream({
         question: query,
-        context: retrievedDocs,
+        context,
         chatHistory,
       }),
     };
