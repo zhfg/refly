@@ -1,9 +1,24 @@
+.arco-layout-content {
+  height: 100% !important;
+}
+
 .home-container {
   height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+
+  .home-search-container {
+    flex: 0 0 100%;
+
+    .home-search-inner-container {
+      margin: 0 auto;
+      margin-top: 200px;
+    }
+  }
+
+  .digest-archive-container {
+    flex: 0 0 100%;
+  }
 }
 
 .footer {

@@ -51,14 +51,14 @@ export const AppRouter = (props: { layout?: any }) => {
   return (
     <Layout>
       <Routes>
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/feed" element={<Feed />} />
+        {/* <Route path="/feed" element={<Feed />} /> */}
         <Route path="/digest" element={<DigestToday />} />
         <Route path="/digest/topics" element={<DigestTopics />} />
         <Route path="/content/:digestId" element={<AIGCContentDetailPage />} />
         <Route path="/digest/:digestId" element={<DigestDetailPage />} />
-        <Route path="/feed/:feedId" element={<FeedDetailPage />} />
+        {/* <Route path="/feed/:feedId" element={<FeedDetailPage />} /> */}
         <Route
           path="/digest/topic/:digestTopicId"
           element={<DigestTopicDetail />}

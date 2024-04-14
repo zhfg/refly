@@ -70,6 +70,7 @@ export const AppLayout = (props: AppLayoutProps) => {
         style={{
           height: "calc(100vh - 16px)",
           flexGrow: 1,
+          overflowY: "scroll",
           width: `calc(100% - 200px - 16px)`,
         }}>
         <Content>{props.children}</Content>

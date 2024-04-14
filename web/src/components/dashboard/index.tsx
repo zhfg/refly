@@ -3,7 +3,6 @@ import {
   Input,
   Message as message,
   Space,
-  Tag,
 } from "@arco-design/web-react"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input/textarea"
 import { IconSend } from "@arco-design/web-react/icon"
@@ -22,21 +21,19 @@ import {
 // 自定义组件
 import WeblinkList from "../weblink-list"
 import { SelectedWeblink } from "../selected-weblink/index"
+import { DigestArchive } from "@/pages/digest-archive"
 // utils
 import { buildConversation } from "@/utils/conversation"
-import { buildChatTask, buildQuickActionTask, buildTask } from "@/utils/task"
+import { buildQuickActionTask, buildTask } from "@/utils/task"
 // 自定义方法
-import { scrollToBottom } from "@/utils/ui"
 // stores
 import { useChatStore } from "../../stores/chat"
 import { useConversationStore } from "@/stores/conversation"
-import { useMessageStateStore } from "@/stores/message-state"
 import { useSiderStore } from "@/stores/sider"
 import { useWeblinkStore } from "@/stores/weblink"
 import { SearchTarget, useSearchStateStore } from "@/stores/search-state"
 import { useTaskStore } from "@/stores/task"
 // hooks
-import { useBuildTask } from "@/hooks/use-build-task"
 import { useResetState } from "@/hooks/use-reset-state"
 // 组件
 import { SearchTargetSelector } from "./home-search-target-selector"
@@ -50,7 +47,6 @@ import { useCookie } from "react-use"
 // types
 import type { WebLinkItem } from "@/types/weblink"
 import { useUserStore } from "@/stores/user"
-import { safeStringifyJSON } from "@/utils/parse"
 import { getExtensionId } from "@/utils/url"
 
 const TextArea = Input.TextArea
@@ -67,15 +63,12 @@ const Home = () => {
 
   const chatStore = useChatStore()
   const conversationStore = useConversationStore()
-  const messageStateStore = useMessageStateStore()
   const siderStore = useSiderStore()
   const webLinkStore = useWeblinkStore()
   const taskStore = useTaskStore()
   const userStore = useUserStore()
   // hooks
   const { resetState } = useResetState()
-
-  const { buildShutdownTaskAndGenResponse } = useBuildTask()
 
   /**
    * 1. 以下几种情况会新建会话 Id：
@@ -270,127 +263,63 @@ const Home = () => {
 
   return (
     <div className="home-container" style={{}}>
-      {/* <div
-        className="chat-wrapper"
-        style={{ paddingBottom: isIntentActive ? 72 : 52 }}>
-        <div className="chat chat-light">
-          <div className="chat-box">
-            <div className="wrapper">
-              <div className="chat-container">
-                {messages.map((msg, idx) => (
-                  <div className={msg?.itemType + "-message"} key={idx}>
-                    {renderMessage(msg?.itemType, msg)}
-                  </div>
-                ))}
-                {messageState.taskType === TASK_TYPE.CHAT &&
-                  messageState?.pendingFirstToken && (
-                    <div className={"loading-message"}>{LoadingMessage()}</div>
-                  )} 
-                {isIntentActive && (
-                  <DynamicIntentMsgList
-                    intentText={selectedText}
-                    setSelectedText={setSelectedText}
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div> */}
+      <div className="home-search-container">
+        <div className="footer input-panel home-search-inner-container">
+          <div className="refly-slogan">The answer engine for your work</div>
+          <div className="actions"></div>
 
-      <div className="footer input-panel">
-        <div className="refly-slogan">The answer engine for your work</div>
-        <div className="actions">
-          {/* {isIntentActive && (
-            <div className="intent">
-              <div className="action-bar">
-                <div className="action-box">
-                  {modeList.map((modeItem, index) => (
-                    <Button
-                      key={index}
-                      size="mini"
-                      type="outline"
-                      className="action-btn"
-                      onClick={() =>
-                        buildIntentQuickActionTaskAndGenReponse(
-                          modeItem?.prompt
-                        )
-                      }>
-                      {modeItem.text}
-                    </Button>
-                  ))}
-                </div>
-                <div className="action-popover"></div>
-              </div>
-            </div>
-          )} */}
-          {/* 暂时不支持中断 */}
-          {/* {messageStateStore.taskType === TASK_TYPE.CHAT &&
-            messageStateStore?.pending && (
-              <div className="stop-reponse">
-                <Button
-                  type="outline"
-                  className="btn"
-                  style={{ background: "#64645F" }}
-                  icon={<IconMinusCircle style={{ color: "#64645F" }} />}
-                  onClick={buildShutdownTaskAndGenResponse}>
-                  停止响应
-                </Button>
-              </div>
-            )} */}
-        </div>
-
-        <div
-          className={classNames("input-box-container", {
-            "is-focused": isFocused,
-          })}>
           <div
-            className={classNames("input-box", {
+            className={classNames("input-box-container", {
               "is-focused": isFocused,
             })}>
-            <TextArea
-              ref={inputRef}
-              className="message-input"
-              autoFocus
-              value={chatStore?.newQAText}
-              onChange={value => {
-                chatStore.setNewQAText(value)
-              }}
-              placeholder="Search For Refly..."
-              onKeyDownCapture={e => handleKeyDown(e)}
-              autoSize={{ minRows: 2, maxRows: 4 }}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              style={{
-                borderRadius: 8,
-                resize: "none",
-              }}></TextArea>
-            <div>
-              <div className="toolbar">
-                <Space>
-                  <SearchTargetSelector />
-                </Space>
-                <Button
-                  shape="circle"
-                  icon={<IconSend />}
-                  style={{ color: "#FFF", background: "#00968F" }}
-                  onClick={() => runTask()}></Button>
+            <div
+              className={classNames("input-box", {
+                "is-focused": isFocused,
+              })}>
+              <TextArea
+                ref={inputRef}
+                className="message-input"
+                autoFocus
+                value={chatStore?.newQAText}
+                onChange={value => {
+                  chatStore.setNewQAText(value)
+                }}
+                placeholder="Search For Refly..."
+                onKeyDownCapture={e => handleKeyDown(e)}
+                autoSize={{ minRows: 2, maxRows: 4 }}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                style={{
+                  borderRadius: 8,
+                  resize: "none",
+                }}></TextArea>
+              <div>
+                <div className="toolbar">
+                  <Space>
+                    <SearchTargetSelector />
+                  </Space>
+                  <Button
+                    shape="circle"
+                    icon={<IconSend />}
+                    style={{ color: "#FFF", background: "#00968F" }}
+                    onClick={() => runTask()}></Button>
+                </div>
               </div>
             </div>
           </div>
+          {webLinkStore?.selectedRow?.length > 0 ? (
+            <SelectedWeblink
+              closable={true}
+              selectedWeblinkList={mapSourceFromSelectedRow(
+                webLinkStore.selectedRow || [],
+              )}
+            />
+          ) : null}
+          {webLinkStore?.selectedRow?.length > 0 ? <QuickAction /> : null}
         </div>
-        {webLinkStore?.selectedRow?.length > 0 ? (
-          <SelectedWeblink
-            closable={true}
-            selectedWeblinkList={mapSourceFromSelectedRow(
-              webLinkStore.selectedRow || [],
-            )}
-          />
-        ) : null}
-        {webLinkStore?.selectedRow?.length > 0 ? <QuickAction /> : null}
+        <WeblinkList ref={weblinkListRef} />
       </div>
-
-      <WeblinkList ref={weblinkListRef} />
+      <DigestArchive />
     </div>
   )
 }

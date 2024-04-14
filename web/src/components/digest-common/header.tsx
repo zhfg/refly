@@ -89,7 +89,7 @@ export const DigestHeader = (props: DigestHeaderProps) => {
     <div className="today-header-container">
       <div className="today-menu">
         <Radio.Group defaultValue={props.tab === "today" ? "今天" : "归档"}>
-          {["今天", "归档"].map(item => {
+          {["回忆", "今天"].map(item => {
             return (
               <Radio key={item} value={item}>
                 {({ checked }) => {

@@ -166,14 +166,10 @@ export const SiderLayout = () => {
               <span className="sider-menu-title">主页</span>
             </MenuItem>
             {/* <MenuItem key='Explore' ><IconHome style={{ fontSize: 20 }} />主页</MenuItem> */}
-            <MenuItem key="Digest" className="custom-menu-item">
+            {/* <MenuItem key="Digest" className="custom-menu-item">
               <IconHistory style={{ fontSize: 20 }} />
               <span className="sider-menu-title">回忆</span>
-            </MenuItem>
-            <MenuItem key="Feed" className="custom-menu-item">
-              <IconBulb style={{ fontSize: 20 }} />
-              <span className="sider-menu-title">探索</span>
-            </MenuItem>
+            </MenuItem> */}
             <MenuItem key="ThreadLibrary" className="custom-menu-item">
               <IconBook style={{ fontSize: 20 }} />
               <span className="sider-menu-title">会话库</span>
