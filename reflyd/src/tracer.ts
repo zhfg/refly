@@ -8,7 +8,7 @@ import { PrismaInstrumentation } from '@prisma/instrumentation';
 // Configure the SDK to export telemetry data to the console
 // Enable all auto-instrumentations from the meta package
 const exporterOptions = {
-  url: `http://172.20.0.6:4318/v1/traces`,
+  url: `${process.env.OTLP_TRACES_ENDPOINT}/v1/traces`,
 };
 
 const traceExporter = new OTLPTraceExporter(exporterOptions);
@@ -16,9 +16,6 @@ const sdk = new opentelemetry.NodeSDK({
   traceExporter,
   instrumentations: [
     getNodeAutoInstrumentations(),
-    // new NestInstrumentation(),
-    // new HttpInstrumentation(),
-    // new ExpressInstrumentation(),
     new PrismaInstrumentation(),
   ],
   resource: new Resource({
