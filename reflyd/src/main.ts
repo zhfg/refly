@@ -9,12 +9,12 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 import tracer from './tracer';
 import { GlobalExceptionFilter } from './filters/global-exception.filter';
-import { setRayID } from './middleware/gen-request-id';
+import { setTraceID } from './middleware/gen-request-id';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useLogger(app.get(Logger));
-  app.use(setRayID);
+  app.use(setTraceID);
   app.use(helmet());
   app.enableCors();
   app.use(cookieParser());

@@ -11,11 +11,8 @@ import {
 } from 'src/types/task';
 import { createLLMChatMessage } from 'src/llm/schema';
 import { LlmService } from '../llm/llm.service';
-import { WeblinkService } from 'src/weblink/weblink.service';
-import { resolve } from 'path';
-import { rejects } from 'assert';
-import { Source } from 'src/types/weblink';
-import { Document } from '@langchain/core/documents';
+import { WeblinkService } from '../weblink/weblink.service';
+import { LoggerService } from '../common/logger.service';
 
 const LLM_SPLIT = '__LLM_RESPONSE__';
 const RELATED_SPLIT = '__RELATED_QUESTIONS__';
@@ -23,10 +20,13 @@ const RELATED_SPLIT = '__RELATED_QUESTIONS__';
 @Injectable()
 export class ConversationService {
   constructor(
+    private logger: LoggerService,
     private prisma: PrismaService,
     private weblinkService: WeblinkService,
     private llmService: LlmService,
-  ) {}
+  ) {
+    this.logger.setContext(ConversationService.name);
+  }
 
   async create(param: CreateConversationParam, userId: number) {
     return this.prisma.conversation.create({
@@ -161,7 +161,7 @@ export class ConversationService {
       this.llmService.getRelatedQuestion(sources, query),
     ]);
 
-    console.log('relatedQuestions', relatedQuestions);
+    this.logger.log('relatedQuestions', relatedQuestions);
 
     res.write(RELATED_SPLIT);
     res.write(JSON.stringify(relatedQuestions));
@@ -195,7 +195,7 @@ export class ConversationService {
       // write answer in a stream style
       let answerStr = '';
       for await (const chunk of await stream) {
-        console.log('chunk', chunk);
+        this.logger.log('chunk', chunk);
         const chunkStr =
           chunk?.content || (typeof chunk === 'string' ? chunk : '');
         answerStr += chunkStr;
@@ -210,6 +210,8 @@ export class ConversationService {
       getSSEData(stream),
       this.llmService.getRelatedQuestion(sources, query),
     ]);
+
+    this.logger.log('relatedQuestions', relatedQuestions);
 
     res.write(RELATED_SPLIT);
     res.write(JSON.stringify(relatedQuestions));
@@ -279,7 +281,7 @@ export class ConversationService {
       };
 
       const onError = (err) => {
-        console.log('err', err);
+        this.logger.log('err', err);
         reject(err);
       };
 
@@ -314,7 +316,7 @@ export class ConversationService {
       ),
     ]);
 
-    console.log('relatedQuestions', relatedQuestions);
+    this.logger.log('relatedQuestions', relatedQuestions);
 
     res.write(RELATED_SPLIT);
     res.write(JSON.stringify(relatedQuestions));

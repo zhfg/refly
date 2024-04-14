@@ -34,6 +34,7 @@ import { ContentMeta } from './dto';
 import { categoryList } from '../prompts/utils/category';
 import { Source } from '../types/weblink';
 import { SearchResultContext } from '../types/search';
+import { LoggerService } from '../common/logger.service';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
@@ -41,9 +42,12 @@ export class LlmService implements OnModuleInit {
   private vectorStore: PGVectorStore;
   private llm: ChatOpenAI;
 
-  private readonly logger = new Logger(LlmService.name);
-
-  constructor(private configService: ConfigService) {}
+  constructor(
+    private configService: ConfigService,
+    private logger: LoggerService,
+  ) {
+    this.logger.setContext(LlmService.name);
+  }
 
   async onModuleInit() {
     this.embeddings = new OpenAIEmbeddings({
@@ -410,7 +414,7 @@ export class LlmService implements OnModuleInit {
 
     const retrievalResults = await this.retrieval(questionWithContext, filter);
 
-    console.log('retrievalResults', retrievalResults);
+    this.logger.log('retrievalResults', retrievalResults);
 
     const retrievedDocs = retrievalResults.map((res) => ({
       metadata: res?.metadata,
@@ -487,7 +491,7 @@ export class LlmService implements OnModuleInit {
       }
       return contexts.slice(0, REFERENCE_COUNT);
     } catch (e) {
-      console.error(`Error encountered: ${JSON.stringify(jsonContent)}`);
+      this.logger.error(`Error encountered: ${JSON.stringify(jsonContent)}`);
       return [];
     }
   }
@@ -525,7 +529,7 @@ export class LlmService implements OnModuleInit {
     const contextToCitationText = contexts
       .map((item, index) => `[[citation:${index + 1}]] ${item?.['snippet']}`)
       .join('\n\n');
-    console.log('search result contexts', contextToCitationText);
+    this.logger.log('search result contexts', contextToCitationText);
     // 临时先兼容基于文档召回的 sources 格式，快速实现联网搜索和联通前端
     const sources: Source[] = contexts.map((item) => ({
       pageContent: item.snippet,

@@ -1,8 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
+import api from '@opentelemetry/api';
 
-export function setRayID(req: Request, res: Response, next: NextFunction) {
+export function setTraceID(req: Request, res: Response, next: NextFunction) {
   next();
-  if (req.header('X-Ray-ID')) {
-    res.setHeader('X-Ray-ID', req.header('X-Ray-ID'));
+
+  const activeSpan = api.trace.getSpan(api.context.active());
+  if (activeSpan) {
+    res.setHeader('x-trace-id', activeSpan.spanContext().traceId);
   }
 }

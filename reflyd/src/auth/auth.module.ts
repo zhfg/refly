@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { CommonModule } from '../common/common.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { UserModule } from '../user/user.module';
@@ -17,6 +18,7 @@ import { GoogleOauthStrategy } from './strategy/google-oauth.strategy';
   imports: [
     ConfigModule,
     AccountModule,
+    CommonModule,
     UserModule,
     PassportModule.register({
       session: true, // TODO: 确认这个配置是否合理

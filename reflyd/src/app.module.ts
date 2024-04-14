@@ -26,7 +26,7 @@ import { AppController } from './app.controller';
       useFactory: async () => {
         return {
           pinoHttp: {
-            autoLogging: false,
+            autoLogging: true,
             base: null,
             quietReqLogger: true,
             genReqId: (request: Request) => request.header('X-Ray-ID'),

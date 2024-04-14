@@ -5,6 +5,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Document } from '@langchain/core/documents';
 import { CheerioWebBaseLoader } from 'langchain/document_loaders/web/cheerio';
 
+import { LoggerService } from '../common/logger.service';
 import { PrismaService } from '../common/prisma.service';
 import { AigcService } from '../aigc/aigc.service';
 import { WebLinkDTO } from './dto';
@@ -14,13 +15,14 @@ import { QUEUE_STORE_LINK } from '../utils/const';
 
 @Injectable()
 export class WeblinkService {
-  private readonly logger = new Logger(WeblinkService.name);
-
   constructor(
+    private logger: LoggerService,
     private prisma: PrismaService,
     private aigcService: AigcService,
     @InjectQueue(QUEUE_STORE_LINK) private indexQueue: Queue<WebLinkDTO>,
-  ) {}
+  ) {
+    this.logger.setContext(WeblinkService.name);
+  }
 
   /**
    * Preprocess and filter links, then send to processing queue

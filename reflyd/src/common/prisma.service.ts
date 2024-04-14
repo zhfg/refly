@@ -2,14 +2,13 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
+import { LoggerService } from './logger.service';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
-  private readonly logger = new Logger(PrismaService.name);
-
-  constructor() {
+  constructor(private logger: LoggerService) {
     const pool = new Pool({
-      connectionString: `postgresql://refly:test@localhost:5432/refly?schema=refly`,
+      connectionString: process.env.DATABASE_URL,
     });
     const adapter = new PrismaPg(pool, { schema: 'refly' });
 

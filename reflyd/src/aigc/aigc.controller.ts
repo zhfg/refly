@@ -18,10 +18,13 @@ import {
   FeedResponse,
 } from './aigc.dto';
 import { AigcService } from './aigc.service';
+import { LoggerService } from '../common/logger.service';
 
 @Controller('aigc')
 export class AigcController {
-  constructor(private aigcService: AigcService) {}
+  constructor(private logger: LoggerService, private aigcService: AigcService) {
+    this.logger.setContext(AigcController.name);
+  }
 
   @UseGuards(JwtAuthGuard)
   @Get('feed')

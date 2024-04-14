@@ -21,16 +21,18 @@ import { ApiParam, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
 import { TASK_TYPE, type Task } from '../types/task';
-import { AigcService } from 'src/aigc/aigc.service';
+import { AigcService } from '../aigc/aigc.service';
+import { LoggerService } from '../common/logger.service';
 
 @Controller('conversation')
 export class ConversationController {
-  private readonly logger = new Logger(ConversationController.name);
-
   constructor(
+    private logger: LoggerService,
     private conversationService: ConversationService,
     private aigcService: AigcService,
-  ) {}
+  ) {
+    this.logger.setContext(ConversationController.name);
+  }
 
   @UseGuards(JwtAuthGuard)
   @Post('new')

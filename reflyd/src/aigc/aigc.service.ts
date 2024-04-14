@@ -9,12 +9,17 @@ import { ContentMeta } from 'src/llm/dto';
 import { WebLinkDTO } from 'src/weblink/dto';
 import { DigestFilter } from './aigc.dto';
 import { categoryList } from '../prompts/utils/category';
+import { LoggerService } from 'src/common/logger.service';
 
 @Injectable()
 export class AigcService {
-  private readonly logger = new Logger(AigcService.name);
-
-  constructor(private prisma: PrismaService, private llmService: LlmService) {}
+  constructor(
+    private logger: LoggerService,
+    private prisma: PrismaService,
+    private llmService: LlmService,
+  ) {
+    this.logger.setContext(AigcService.name);
+  }
 
   async getDigestList(params: {
     userId: string;
