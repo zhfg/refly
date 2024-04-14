@@ -20,7 +20,7 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class WeblinkService {
   private readonly logger = new Logger(WeblinkService.name);
-  private cache: LRUCache<string, Document>; // url -> document
+  private cache: LRUCache<string, string>; // url -> document
   private bucketName: string;
 
   constructor(
@@ -122,7 +122,7 @@ export class WeblinkService {
     // Check if the document is in the cache
     if (this.cache.has(url)) {
       this.logger.log(`in-mem cache hit: ${url}`);
-      return this.cache.get(url);
+      return JSON.parse(this.cache.get(url));
     }
 
     // Check if the document is in the database
@@ -140,7 +140,7 @@ export class WeblinkService {
         pageContent: content.toString(),
         metadata: JSON.parse(weblink.pageMeta),
       });
-      this.cache.set(url, doc);
+      this.cache.set(url, JSON.stringify(doc));
       return doc;
     }
 
@@ -169,7 +169,7 @@ export class WeblinkService {
       const title = $('title').text();
       const source = loader.webPath;
       const doc = { pageContent, metadata: { title, source } };
-      this.cache.set(url, doc);
+      this.cache.set(url, JSON.stringify(doc));
       return doc;
     } catch (err) {
       this.logger.error(`process url ${url} failed: ${err}`);
@@ -352,7 +352,7 @@ export class WeblinkService {
       }
 
       // Store doc cache for later use
-      this.cache.set(link.url, doc);
+      this.cache.set(link.url, JSON.stringify(doc));
       weblink = await this.createNewLink(link, doc);
     }
 
