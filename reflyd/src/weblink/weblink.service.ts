@@ -16,6 +16,7 @@ import { getExpectedTokenLenContent } from '../utils/token';
 import { Source } from '../types/weblink';
 import { QUEUE_STORE_LINK } from '../utils/const';
 import { ConfigService } from '@nestjs/config';
+import { streamToString } from '../utils/stream';
 
 @Injectable()
 export class WeblinkService {
@@ -138,7 +139,7 @@ export class WeblinkService {
       );
 
       const doc = new Document({
-        pageContent: content.toString(),
+        pageContent: await streamToString(content),
         metadata: JSON.parse(weblink.pageMeta),
       });
       this.cache.set(url, JSON.stringify(doc));
