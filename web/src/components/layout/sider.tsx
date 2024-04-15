@@ -60,7 +60,7 @@ export const SiderLayout = () => {
         if (!notShowLoginBtn) {
           userStore.setLoginModalVisible(true)
         } else {
-          navigate(`/dashboard`)
+          navigate(`/`)
         }
         break
       }
@@ -146,7 +146,7 @@ export const SiderLayout = () => {
             flexDirection: "row",
             justifyContent: "space-between",
           }}>
-          <div className="logo" onClick={() => navigate("/dashboard")}>
+          <div className="logo" onClick={() => navigate("/")}>
             <img src={Logo} alt="Refly" />
             <span>Refly</span>
           </div>
