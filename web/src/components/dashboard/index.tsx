@@ -5,9 +5,14 @@ import {
   Space,
 } from "@arco-design/web-react"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input/textarea"
-import { IconSend } from "@arco-design/web-react/icon"
+import {
+  IconBulb,
+  IconDown,
+  IconHistory,
+  IconSend,
+} from "@arco-design/web-react/icon"
 import React, { useEffect, useRef, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 
 import {
   type Task,
@@ -21,7 +26,8 @@ import {
 // 自定义组件
 import WeblinkList from "../weblink-list"
 import { SelectedWeblink } from "../selected-weblink/index"
-import { DigestArchive } from "@/pages/digest-archive"
+import { DigestArchive } from "@/pages/digest-timeline"
+import { DigestToday } from "@/pages/digest-today"
 // utils
 import { buildConversation } from "@/utils/conversation"
 import { buildQuickActionTask, buildTask } from "@/utils/task"
@@ -69,6 +75,10 @@ const Home = () => {
   const userStore = useUserStore()
   // hooks
   const { resetState } = useResetState()
+
+  // 基于 query 参数判断是 digest 还是归档，默认是归档
+  const [searchParams] = useSearchParams()
+  const isTimeline = searchParams.get("type")
 
   /**
    * 1. 以下几种情况会新建会话 Id：
@@ -235,6 +245,14 @@ const Home = () => {
     }))
   }
 
+  const handleScrollToMemory = () => {
+    const elem = document.querySelector(".content-layout")
+    elem?.scroll({
+      behavior: "smooth",
+      top: elem?.scrollHeight,
+    })
+  }
+
   // TODO: 临时关闭，用于开发调试
   console.log("token", token)
   useEffect(() => {
@@ -273,38 +291,54 @@ const Home = () => {
               "is-focused": isFocused,
             })}>
             <div
-              className={classNames("input-box", {
-                "is-focused": isFocused,
+              className={classNames("search-box-container", {
+                "search-box-container-active": isFocused,
               })}>
-              <TextArea
-                ref={inputRef}
-                className="message-input"
-                autoFocus
-                value={chatStore?.newQAText}
-                onChange={value => {
-                  chatStore.setNewQAText(value)
-                }}
-                placeholder="Search For Refly..."
-                onKeyDownCapture={e => handleKeyDown(e)}
-                autoSize={{ minRows: 2, maxRows: 4 }}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
-                style={{
-                  borderRadius: 8,
-                  resize: "none",
-                }}></TextArea>
-              <div>
-                <div className="toolbar">
-                  <Space>
-                    <SearchTargetSelector />
-                  </Space>
-                  <Button
-                    shape="circle"
-                    icon={<IconSend />}
-                    style={{ color: "#FFF", background: "#00968F" }}
-                    onClick={() => runTask()}></Button>
+              <div
+                className={classNames("input-box", {
+                  "is-focused": isFocused,
+                })}>
+                <TextArea
+                  ref={inputRef}
+                  className="message-input"
+                  autoFocus
+                  value={chatStore?.newQAText}
+                  onChange={value => {
+                    chatStore.setNewQAText(value)
+                  }}
+                  placeholder="Search For Refly..."
+                  onKeyDownCapture={e => handleKeyDown(e)}
+                  autoSize={{ minRows: 2, maxRows: 4 }}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => setIsFocused(false)}
+                  style={{
+                    borderRadius: 8,
+                    resize: "none",
+                  }}></TextArea>
+                <div>
+                  <div className="toolbar">
+                    <Space>
+                      <SearchTargetSelector />
+                    </Space>
+                    <Button
+                      shape="circle"
+                      icon={<IconSend />}
+                      style={{ color: "#FFF", background: "#00968F" }}
+                      onClick={() => runTask()}></Button>
+                  </div>
                 </div>
               </div>
+            </div>
+            <div className="search-assist-container">
+              <Button icon={<IconBulb />} className="search-assist-btn">
+                换一批推荐
+              </Button>
+              <Button
+                icon={<IconHistory />}
+                className="search-assist-btn"
+                onClick={handleScrollToMemory}>
+                查看回忆
+              </Button>
             </div>
           </div>
           {webLinkStore?.selectedRow?.length > 0 ? (
@@ -319,7 +353,7 @@ const Home = () => {
         </div>
         <WeblinkList ref={weblinkListRef} />
       </div>
-      <DigestArchive />
+      {isTimeline ? <DigestArchive /> : <DigestToday />}
     </div>
   )
 }

@@ -32,12 +32,13 @@ export const DigestHeader = (props: DigestHeaderProps) => {
 
   console.log("now tab", props.tab)
 
-  const handleNavigateArchive = (item: "今天" | "归档") => {
-    if (item === "今天") {
-      navigate("/digest")
-    } else if (item === "归档") {
-      const { year, month, day } = getCurrentDateInfo()
-      navigate(`/digest/daily/${year}/${month}/${day}`)
+  const handleNavigateArchive = (item: "归档" | "时间线") => {
+    const { year, month, day } = getCurrentDateInfo()
+
+    if (item === "归档") {
+      navigate(`/`)
+    } else if (item === "时间线") {
+      navigate(`/?type=timeline&dateType=daily&y=${year}&m=${month}&d=${day}`)
     }
   }
 
@@ -88,8 +89,8 @@ export const DigestHeader = (props: DigestHeaderProps) => {
   return (
     <div className="today-header-container">
       <div className="today-menu">
-        <Radio.Group defaultValue={props.tab === "today" ? "今天" : "归档"}>
-          {["回忆", "今天"].map(item => {
+        <Radio.Group defaultValue={props.tab === "today" ? "归档" : "时间线"}>
+          {["归档", "时间线"].map(item => {
             return (
               <Radio key={item} value={item}>
                 {({ checked }) => {
@@ -97,9 +98,9 @@ export const DigestHeader = (props: DigestHeaderProps) => {
                     <Button
                       type="outline"
                       onClick={() =>
-                        handleNavigateArchive(item as "今天" | "归档")
+                        handleNavigateArchive(item as "归档" | "时间线")
                       }
-                      icon={item === "今天" ? <IconBulb /> : <IconArchive />}
+                      icon={item === "归档" ? <IconBulb /> : <IconArchive />}
                       className={`today-menu-item ${checked ? "today-menu-item-checked" : ""}`}>
                       {item}
                     </Button>

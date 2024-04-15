@@ -4,6 +4,10 @@
     border-bottom: none;
   }
 
+  .arco-list-header {
+    padding: 12px 0;
+  }
+
   .arco-list-content {
     width: 100%;
   }
@@ -11,7 +15,12 @@
   .topics-list {
     height: calc(100vh - 28px);
     overflow-y: scroll;
-    padding: 0 74px;
+    padding: 0 60px;
+  }
+
+  .digest-topic-nav {
+    margin: 0 auto;
+    padding: 24px 60px;
   }
 
   .topics-header-container {

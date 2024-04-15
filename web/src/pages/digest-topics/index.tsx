@@ -3,6 +3,7 @@ import {
   Avatar,
   Skeleton,
   Message as message,
+  Breadcrumb,
 } from "@arco-design/web-react"
 
 // styles
@@ -42,6 +43,8 @@ const dataSource = new Array(60).fill(null).map((_, index) => {
     sourceCount: 100,
   }
 })
+
+const BreadcrumbItem = Breadcrumb.Item
 
 export const DigestTopics = () => {
   const digestTopicStore = useDigestTopicStore()
@@ -104,6 +107,12 @@ export const DigestTopics = () => {
 
   return (
     <div className="topics-container">
+      <div className="digest-topic-nav">
+        <Breadcrumb>
+          <BreadcrumbItem href="/">主页</BreadcrumbItem>
+          <BreadcrumbItem href="/digest/topics">所有主题</BreadcrumbItem>
+        </Breadcrumb>
+      </div>
       <List
         className="topics-list"
         grid={{

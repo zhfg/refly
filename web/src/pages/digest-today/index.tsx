@@ -68,20 +68,11 @@ export const DigestToday = () => {
         return
       }
 
-      const { day, year, month } = getCurrentDateInfo()
       const newRes = await getDigestList({
         body: {
           // TODO: confirm time filter
           page: currentPage,
           pageSize: digestStore.today.pageSize,
-          filter: {
-            date: {
-              dateType: "daily",
-              year: year,
-              month: month,
-              day: day,
-            },
-          }, // 基于今天这个 filter 进行持续分页
         },
       })
 
@@ -149,7 +140,7 @@ export const DigestToday = () => {
           bordered={false}
           pagination={false}
           offsetBottom={200}
-          header={<p className="today-header-title">今天浏览内容总结</p>}
+          header={<p className="today-header-title">浏览内容归档</p>}
           dataSource={digestStore?.today?.featureList || []}
           scrollLoading={scrollLoading}
           onReachBottom={currentPage => fetchData(currentPage)}

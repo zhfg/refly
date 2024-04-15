@@ -13,7 +13,7 @@ export const EmptyDigestStatus = () => {
     <div className="empty-digest-container">
       <img src={EmptySVG} className="empty-digest-cover" />
       <p className="empty-digest-hint">
-        今日还未阅读新内容，赶快下载插件去阅读新内容吧~
+        还未阅读任何内容，赶快下载插件去阅读新内容吧~
       </p>
       <div className="empty-digest-action-container">
         <Button
@@ -25,14 +25,14 @@ export const EmptyDigestStatus = () => {
           }}>
           下载插件
         </Button>
-        <Button
+        {/* <Button
           style={{ marginLeft: 24 }}
           onClick={() => {
             const { year, day, month } = getCurrentDateInfo()
             navigate(`/digest/daily/${year}/${month}/${day}`)
           }}>
           查看归档
-        </Button>
+        </Button> */}
       </div>
     </div>
   )

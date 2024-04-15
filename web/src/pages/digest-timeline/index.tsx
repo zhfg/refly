@@ -1,13 +1,16 @@
+import { useSearchParams } from "react-router-dom"
+// components
 /**
  * 只聚焦昨天、今天、这周、这个月最核心的内容，剩下的让用户去归档里面查看，能够对自己的工作有一个明确的感知
  */
 
-import { getCurrentDateInfo, time } from "@/utils/time"
+import { time } from "@/utils/time"
 import {
   List,
   Skeleton,
   Typography,
   Message as message,
+  DatePicker,
 } from "@arco-design/web-react"
 import {
   IconClockCircle,
@@ -18,33 +21,31 @@ import {
 } from "@arco-design/web-react/icon"
 import { useNavigate } from "react-router-dom"
 // types
-import type { Digest } from "@/types/digest"
+import type { Digest, DateType } from "@/types/digest"
 import { IconTip } from "@/components/dashboard/icon-tip"
 import { copyToClipboard } from "@/utils"
 import { getClientOrigin, safeParseURL } from "@/utils/url"
 // stores
-import { DigestType, useDigestStore } from "@/stores/digest"
+import { useDigestArchiveStore } from "@/stores/digest-archive"
 // components
 import { DigestHeader } from "@/components/digest-common/header"
 import { useEffect, useState } from "react"
-import { EmptyDigestStatus } from "@/components/empty-digest-today-status"
+import { EmptyDigestStatus } from "@/components/empty-digest-archive-status"
 // utils
 import getDigestList from "@/requests/getDigestList"
 // styles
 import "./index.scss"
-import { Source } from "@/types"
 
-export const getFirstSourceLink = (sources: Source[]) => {
-  return sources?.[0]?.metadata?.source
-}
-
-export const DigestToday = () => {
+export const DigestArchive = () => {
+  const [searchParams] = useSearchParams()
+  const [scrollLoading, setScrollLoading] = useState(<div></div>)
+  const digestArchiveStore = useDigestArchiveStore()
   const navigate = useNavigate()
-  const digestStore = useDigestStore()
-  const [scrollLoading, setScrollLoading] = useState(
-    <Skeleton animation style={{ width: "100%" }}></Skeleton>,
-  )
-  const [isFetching, setIsFetching] = useState(false)
+
+  const dateType = searchParams.get("dateType")
+  const year = searchParams.get("y")
+  const month = searchParams.get("m")
+  const day = searchParams.get("d")
 
   const fetchData = async (currentPage = 1) => {
     try {
@@ -61,55 +62,50 @@ export const DigestToday = () => {
             style={{ width: "100%", marginTop: 24 }}></Skeleton>
         </div>,
       )
-
-      if (!digestStore.today.hasMore && currentPage !== 1) {
-        setScrollLoading(<span>已经到底啦</span>)
-
+      if (!digestArchiveStore?.hasMore && currentPage !== 1) {
+        setScrollLoading(<span>已经到底啦~</span>)
         return
       }
 
+      // TODO: digest 联调，currentTopicDetail?.key
       const newRes = await getDigestList({
         body: {
-          // TODO: confirm time filter
           page: currentPage,
-          pageSize: digestStore.today.pageSize,
+          pageSize: 10,
+          filter: {
+            date: {
+              dateType: dateType as DateType,
+              year: Number(year),
+              month: Number(month),
+              day: Number(day),
+            },
+          },
         },
       })
 
-      digestStore.updatePayload(
-        { ...digestStore.today, currentPage },
-        DigestType.TODAY,
-      )
+      digestArchiveStore.updateCurrentPage(currentPage)
 
       if (!newRes?.success) {
         throw new Error(newRes?.errMsg)
       }
-      if (newRes?.data && newRes?.data?.length < digestStore.today?.pageSize) {
-        digestStore.updatePayload(
-          { ...digestStore.today, hasMore: false },
-          DigestType.TODAY,
-        )
+      if (newRes?.data && newRes?.data?.length < digestArchiveStore?.pageSize) {
+        digestArchiveStore.updateHasMore(false)
       }
 
       console.log("newRes", newRes)
-      const newFeatureList = digestStore.today.featureList.concat(
-        newRes?.data || [],
-      )
-      digestStore.updatePayload(
-        { ...digestStore.today, featureList: newFeatureList },
-        DigestType.TODAY,
-      )
+      digestArchiveStore.updateDigestList(newRes?.data || [])
     } catch (err) {
-      message.error("获取归档列表失败，请重新刷新试试")
+      message.error("获取归档内容失败，请重新刷新试试")
     } finally {
-      const { today } = useDigestStore.getState()
+      const { digestList, pageSize } = useDigestArchiveStore.getState()
 
-      if (today?.featureList?.length === 0) {
-        setScrollLoading(<EmptyDigestStatus />)
-      } else if (
-        today?.featureList?.length > 0 &&
-        today?.featureList?.length < today?.pageSize
-      ) {
+      if (digestList?.length === 0) {
+        setScrollLoading(
+          <EmptyDigestStatus
+            date={{ year: year || "", month: month || "", day: day || "" }}
+          />,
+        )
+      } else if (digestList?.length > 0 && digestList?.length < pageSize) {
         setScrollLoading(<span>已经到底啦~</span>)
       }
     }
@@ -119,31 +115,57 @@ export const DigestToday = () => {
     fetchData()
 
     return () => {
-      digestStore.resetState()
+      digestArchiveStore.resetState()
     }
-  }, [])
+  }, [dateType, day, year, month])
 
   return (
-    <div className="today-container">
-      <DigestHeader tab="today" />
-      <div className="today-feature-container">
-        {/* <div className="today-block-header"> */}
-        {/* <div className="header-title">今天浏览内容总结</div> */}
-        {/* <div className="header-switch">
-            <span className="header-featured">精选</span>
-            <span className="header-all">全部</span>
-          </div> */}
-        {/* </div> */}
+    <div className="digest-archive-container">
+      <DigestHeader tab="archive" />
+      {/* 现在选中的 archive 是：{dateType}/{year}/{month}/{day} */}
+      <div className="archive-content-container">
         <List
           className="digest-list"
           wrapperStyle={{ width: "100%" }}
           bordered={false}
           pagination={false}
-          offsetBottom={200}
-          header={<p className="today-header-title">浏览内容归档</p>}
-          dataSource={digestStore?.today?.featureList || []}
+          offsetBottom={50}
+          header={
+            <div className="digest-archive-header">
+              <div className="digest-archive-title">
+                <p>
+                  {year} 年 {month} 月 {day} 日内容精选
+                </p>
+              </div>
+              <div className="digest-archive-time-picker">
+                <DatePicker
+                  popupVisible={digestArchiveStore.datePopupVisible}
+                  onVisibleChange={visible =>
+                    digestArchiveStore.updateDatePopupVisible(
+                      visible as boolean,
+                    )
+                  }
+                  defaultValue={`${year}-${Number(month) >= 10 ? month : `0${month}`}-${Number(day) >= 10 ? day : `0${day}`}`}
+                  style={{ width: 200 }}
+                  onChange={(dateStr, date) => {
+                    const year = date.get("year")
+                    const month = date.get("month")
+                    const day = date.get("D")
+
+                    console.log("day", day)
+
+                    navigate(
+                      `/?type=timeline&dateType=daily&y=${year}&m=${month + 1}&d=${day}`,
+                    )
+                  }}
+                />
+              </div>
+            </div>
+          }
+          dataSource={digestArchiveStore.digestList}
           scrollLoading={scrollLoading}
           onReachBottom={currentPage => fetchData(currentPage)}
+          noDataElement={<div>暂无数据</div>}
           render={(item: Digest, index) => (
             <List.Item
               key={index}

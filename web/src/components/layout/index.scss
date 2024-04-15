@@ -474,7 +474,7 @@
   background-color: #fcfcf9;
   padding: 0.5em 1em;
 
-  width: 600px;
+  width: 800px;
 
   .refly-slogan {
     font-family: PingFangSC-Medium;
@@ -482,6 +482,7 @@
     color: rgba(0, 0, 0, 0.8);
     margin-bottom: 40px;
     line-height: 46px;
+    text-align: center;
   }
 }
 
@@ -498,27 +499,6 @@
   button:hover {
     color: rgba(0, 0, 0, 0.8);
     background: #e8e8e2;
-  }
-}
-
-.main .footer .input-box {
-  margin-bottom: 0.5em;
-  padding: 8px;
-  border-radius: 8px;
-  box-sizing: border-box;
-  background: #fcfcf9;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.1);
-}
-
-.main .footer .input-box textarea {
-  background-color: transparent;
-  min-height: 98px;
-}
-
-.main .footer .input-box {
-  textarea:focus {
-    border-color: transparent;
   }
 }
 

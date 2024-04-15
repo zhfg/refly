@@ -1,33 +1,61 @@
-.archive-content-container {
-  .digest-list {
-    padding: 0 16px;
-    width: 100%;
-    height: calc(100vh - 28px - 65px);
-    padding: 0 60px;
-    overflow-y: scroll;
-    box-sizing: border-box;
+.today-container {
+  .arco-list-header {
   }
+
+  .today-header-title {
+    font-size: 24px;
+    color: rgba(0, 0, 0, 0.8);
+    margin-top: 24px;
+    font-weight: bold;
+  }
+}
+
+.digest-list {
+  padding: 0 16px;
+  width: 100%;
+  height: calc(100vh - 28px - 100px);
+  padding: 0 60px;
+  overflow-y: scroll;
 
   .arco-list-content {
     width: 100%;
   }
-}
 
-.digest-archive-header {
-  border-bottom: 0.5px solid rgba(0, 0, 0, 0.16);
-  padding: 12px 0;
-  margin-top: 45px;
+  .feed-item-link {
+    &:hover {
+      cursor: pointer;
+      text-decoration: underline;
+      text-decoration-color: #64645f;
+    }
+  }
 
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
+  .feed-item-action {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
 
-.digest-archive-title {
-  font-size: 24px;
-  font-weight: 500;
-  line-height: 29px;
-  letter-spacing: 0px;
+  .arco-list-item-meta-title {
+    font-size: 18px;
+  }
 
-  color: rgba(0, 0, 0, 0.8);
+  .arco-list-item-meta-description {
+    .arco-typography {
+      color: rgba(0, 0, 0, 0.6) !important;
+    }
+  }
+
+  .arco-list-content {
+    margin: 0 auto;
+  }
+
+  .arco-list-header {
+    border-bottom: 1px solid transparent;
+    padding: 0;
+
+    .feed-title {
+      margin-left: -20px;
+    }
+  }
 }

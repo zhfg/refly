@@ -13,7 +13,7 @@ import { DigestTopics } from "@/pages/digest-topics/index"
 import { DigestTopicDetail } from "@/pages/digest-topic-detail/index"
 import Privacy from "@/pages/pravicy"
 import Terms from "@/pages/terms"
-import { DigestArchive } from "@/pages/digest-archive"
+import { DigestArchive } from "@/pages/digest-timeline"
 
 // digest 详情
 import { DigestDetailPage } from "@/pages/digest-detail"
