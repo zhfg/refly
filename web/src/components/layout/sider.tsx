@@ -1,4 +1,4 @@
-import { Avatar, Divider, Layout, Menu } from "@arco-design/web-react"
+import { Avatar, Button, Divider, Layout, Menu } from "@arco-design/web-react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { ReactText } from "react"
 import {
@@ -6,8 +6,6 @@ import {
   IconSettings,
   IconDownload,
   IconBook,
-  IconHistory,
-  IconBulb,
   IconTwitter,
 } from "@arco-design/web-react/icon"
 import { openGetStartDocument } from "../../utils"
@@ -16,6 +14,8 @@ import Logo from "@/assets/logo.svg"
 import "./sider.scss"
 import { useUserStore } from "@/stores/user"
 import { safeParseJSON } from "@/utils/parse"
+// components
+import { SearchQuickOpenBtn } from "@/components/search-quick-open-btn"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -138,7 +138,7 @@ export const SiderLayout = () => {
   }
 
   return (
-    <Sider className={`app-sider ${isGuideDetail ? "fixed" : ""}`}>
+    <Sider className={`app-sider ${isGuideDetail ? "fixed" : ""}`} width={220}>
       <div className="sider-header">
         <div
           style={{
@@ -151,9 +151,10 @@ export const SiderLayout = () => {
             <span>Refly</span>
           </div>
         </div>
+        <SearchQuickOpenBtn />
         <Menu
           style={{
-            width: 200,
+            width: 220,
             backgroundColor: "transparent",
             borderRight: "none",
           }}

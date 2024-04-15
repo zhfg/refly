@@ -12,6 +12,11 @@ import { useLocation, useMatch, useNavigate } from "react-router-dom"
 import { LoginModal } from "@/components/login-modal/index"
 import { useCookie } from "react-use"
 import { safeStringifyJSON } from "@/utils/parse"
+import { QuickSearchModal } from "@/components/quick-search-modal"
+
+// stores
+import { useQuickSearchStateStore } from "@/stores/quick-search-state"
+import { useBindCommands } from "@/hooks/use-bind-commands"
 
 const Content = Layout.Content
 
@@ -20,12 +25,19 @@ interface AppLayoutProps {
 }
 
 export const AppLayout = (props: AppLayoutProps) => {
+  // stores
   const userStore = useUserStore()
+  const quickSearchStateStore = useQuickSearchStateStore()
+
+  // state hooks
   const navigate = useNavigate()
   const [token, updateCookie, deleteCookie] = useCookie("_refly_ai_sid")
   const routeDigestDetailPageMatch = useMatch("/digest/:digestId")
   const routeFeedDetailPageMatch = useMatch("/feed/:feedId")
   const routeAIGCContentDetailPageMatch = useMatch("/content/:digestId")
+
+  // 绑定快捷键
+  useBindCommands()
 
   const getLoginStatus = async () => {
     try {
@@ -76,6 +88,7 @@ export const AppLayout = (props: AppLayoutProps) => {
         <Content>{props.children}</Content>
       </Layout>
       {userStore.loginModalVisible ? <LoginModal /> : null}
+      {quickSearchStateStore.visible ? <QuickSearchModal /> : null}
     </Layout>
   )
 }

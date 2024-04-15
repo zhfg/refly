@@ -15,6 +15,7 @@ import { ThreadSearchTargetSelector } from "@/components/thread-item/thread-sear
 import { SearchTarget } from "@/stores/search-state"
 // 自定义组件
 import { SelectedWeblink } from "../selected-weblink/index"
+import { useQuickSearchStateStore } from "@/stores/quick-search-state"
 
 interface ThreadItemProps {
   sessions: SessionItem[]
@@ -47,6 +48,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
 
   const messageStateStore = useMessageStateStore()
   const { buildShutdownTaskAndGenResponse } = useBuildTask()
+  const quickSearchStateStore = useQuickSearchStateStore()
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.keyCode === 13 && (e.ctrlKey || e.shiftKey || e.metaKey)) {
@@ -74,6 +76,11 @@ export const ThreadItem = (props: ThreadItemProps) => {
     if (e.keyCode === 13 && !e.ctrlKey && !e.shiftKey && !e.metaKey) {
       e.preventDefault()
       handleAskFollowing()
+    }
+
+    if (e.keyCode === 75 && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault()
+      quickSearchStateStore.setVisible(true)
     }
   }
 

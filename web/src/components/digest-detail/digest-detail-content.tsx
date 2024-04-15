@@ -17,6 +17,7 @@ import type { RefTextAreaType } from "@arco-design/web-react/es/Input"
 import { IconTip } from "../dashboard/icon-tip"
 import { safeParseJSON } from "@/utils/parse"
 import { useUserStore } from "@/stores/user"
+import { useQuickSearchStateStore } from "@/stores/quick-search-state"
 
 interface ThreadItemProps {
   sessions: SessionItem[]
@@ -32,6 +33,7 @@ export const DigestDetailContent = (props: ThreadItemProps) => {
   const userStore = useUserStore()
 
   const messageStateStore = useMessageStateStore()
+  const quickSearchStateStore = useQuickSearchStateStore()
 
   // 获取 storage user profile
   const storageUserProfile = safeParseJSON(
@@ -66,6 +68,11 @@ export const DigestDetailContent = (props: ThreadItemProps) => {
     if (e.keyCode === 13 && !e.ctrlKey && !e.shiftKey && !e.metaKey) {
       e.preventDefault()
       handleAskFollowUp()
+    }
+
+    if (e.keyCode === 75 && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault()
+      quickSearchStateStore.setVisible(true)
     }
   }
 
