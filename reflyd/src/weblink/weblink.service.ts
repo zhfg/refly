@@ -7,6 +7,7 @@ import { InjectQueue } from '@nestjs/bull';
 import * as cheerio from 'cheerio';
 import { Document } from '@langchain/core/documents';
 import { CheerioWebBaseLoader } from 'langchain/document_loaders/web/cheerio';
+import { parse } from 'node-html-parser';
 
 import { PrismaService } from '../common/prisma.service';
 import { MinioService } from '../common/minio.service';
@@ -224,13 +225,16 @@ export class WeblinkService {
         const { pageContent, metadata } = await this.parseWebLinkContent(
           item?.metadata?.source,
         );
-        const $ = cheerio.load(pageContent);
+        const $ = parse(pageContent);
 
         if (item.cssSelector?.length > 0) {
-          return item.cssSelector.map((selector) => ({
-            pageContent: $(selector).text(),
-            metadata,
-          }));
+          return item.cssSelector.map((selector) => {
+            const parsedContentSelector = $.querySelector(selector);
+            return {
+              pageContent: parsedContentSelector?.text || '',
+              metadata,
+            };
+          });
         }
 
         return [

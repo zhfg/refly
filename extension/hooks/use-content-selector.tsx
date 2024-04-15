@@ -1,9 +1,8 @@
 import { sendToBackground } from "@plasmohq/messaging"
 import classNames from "classnames"
 import { useEffect, useRef } from "react"
-import getXPath from "get-xpath"
-import xPath2Selector from "xpath-to-selector"
 import type { Mark } from "~types"
+import { getCSSPath } from "~utils/cssSelector"
 import { safeStringifyJSON } from "~utils/parse"
 
 function getElementType(element) {
@@ -47,8 +46,13 @@ export const useContentSelector = () => {
       type: getElementType(target),
       data: [content],
       target,
-      cssSelector: xPath2Selector(getXPath(target)),
+      cssSelector: getCSSPath(target),
     }
+
+    // console.log(
+    //   "getContentFromHtmlSelector",
+    //   getContentFromHtmlSelector(getCSSPath(target)),
+    // )
 
     return mark
   }
@@ -153,9 +157,7 @@ export const useContentSelector = () => {
       if (
         (target as Element)?.classList.contains("refly-content-selected-target")
       ) {
-        console.log("xPath", getXPath(target))
-        console.log("xPath2Selector", xPath2Selector(getXPath(target)))
-        removeMark(target as HTMLElement, xPath2Selector(getXPath(target)))
+        removeMark(target as HTMLElement, getCSSPath(target))
       } else {
         addMark(target as HTMLElement)
       }
