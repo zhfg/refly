@@ -37,9 +37,9 @@ import { HumanMessage, SystemMessage } from 'langchain/schema';
 import { uniqueFunc } from '../utils/unique';
 import { ContentMeta } from './dto';
 import { categoryList } from '../prompts/utils/category';
-import { Source } from 'src/types/weblink';
-import { SearchResultContext } from 'src/types/search';
-import { PrismaService } from 'src/common/prisma.service';
+import { Source } from '../types/weblink';
+import { SearchResultContext } from '../types/search';
+import { PrismaService } from '../common/prisma.service';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
@@ -155,7 +155,7 @@ export class LlmService implements OnModuleInit {
 
     return {
       title: summary?.title || '',
-      abstract: summary?.abstract.slice(0, 200) || '', // TODO: 概要暂定取前 200 个字符
+      abstract: summary?.abstract || '', // TODO: 概要暂时与正文相同
       content: summary?.abstract || '',
       meta: JSON.stringify({
         keywords: summary?.keywords || '',
