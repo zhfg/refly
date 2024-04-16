@@ -38,6 +38,7 @@ export class AigcService {
       skip: (page - 1) * pageSize,
       take: pageSize,
       include: { content: true },
+      orderBy: { createdAt: 'desc' },
     });
   }
 

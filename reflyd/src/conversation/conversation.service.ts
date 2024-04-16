@@ -212,7 +212,6 @@ export class ConversationService {
       // write answer in a stream style
       let answerStr = '';
       for await (const chunk of await stream) {
-        console.log('chunk', chunk);
         const chunkStr =
           chunk?.content || (typeof chunk === 'string' ? chunk : '');
         answerStr += chunkStr;
