@@ -8,10 +8,11 @@ import {
   QUICK_ACTION_TASK_PAYLOAD,
   QUICK_ACTION_TYPE,
   Task,
-} from 'src/types/task';
-import { createLLMChatMessage } from 'src/llm/schema';
+  TaskResponse,
+} from '../types/task';
+import { createLLMChatMessage } from '../llm/schema';
 import { LlmService } from '../llm/llm.service';
-import { WeblinkService } from 'src/weblink/weblink.service';
+import { WeblinkService } from '../weblink/weblink.service';
 
 const LLM_SPLIT = '__LLM_RESPONSE__';
 const RELATED_SPLIT = '__RELATED_QUESTIONS__';
@@ -54,6 +55,7 @@ export class ConversationService {
     content: string;
     userId: number;
     conversationId: number;
+    relatedQuestions?: string;
     selectedWeblinkConfig?: string;
   }) {
     return this.prisma.chatMessage.create({
@@ -107,7 +109,7 @@ export class ConversationService {
     res: Response,
     task: Task,
     chatHistory: ChatMessage[],
-  ) {
+  ): Promise<TaskResponse> {
     const userId: number = req.user?.id;
 
     const filter: any = {
@@ -193,7 +195,7 @@ export class ConversationService {
     res: Response,
     task: Task,
     chatHistory: ChatMessage[],
-  ) {
+  ): Promise<TaskResponse> {
     const query = task?.data?.question;
     const { stream, sources } = await this.llmService.searchEnhance(
       query,
@@ -249,7 +251,7 @@ export class ConversationService {
     res: Response,
     task: Task,
     chatHistory: ChatMessage[],
-  ) {
+  ): Promise<TaskResponse> {
     const data = task?.data as QUICK_ACTION_TASK_PAYLOAD;
 
     // first return sources，use unique tag for parse data

@@ -42,7 +42,7 @@ export const buildSessionsFromDigest = (aigcContent: Digest | Feed) => {
 
   const session: SessionItem = {
     question: aigcContent?.title,
-    answer: aigcContent?.abstract,
+    answer: aigcContent?.content,
     sources: aigcContent?.inputs?.map(item => ({
       score: 0,
       metadata: {
@@ -63,7 +63,7 @@ export const buildSessionsFromFeed = (aigcContent: Digest | Feed) => {
 
   const session: SessionItem = {
     question: aigcContent?.title,
-    answer: aigcContent?.abstract,
+    answer: aigcContent?.content,
     sources: safeParseJSON(aigcContent?.sources)?.map((item: any) => ({
       score: 0,
       pageContent: aigcContent?.abstract,

@@ -16,7 +16,7 @@ export class Source {
   pageContent: string;
 
   @ApiProperty()
-  metadata: PageMeta;
+  metadata: Record<string, any>;
 
   @ApiPropertyOptional()
   score?: number;
