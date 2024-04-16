@@ -241,7 +241,7 @@ export class LlmService implements OnModuleInit {
 
     // 抽取关键字 or 实体
     const parser = new JsonOutputFunctionsParser();
-    const runnable = await this.llm
+    const runnable = this.llm
       .bind({
         functions: [extractContentMeta.extractSearchKeyword],
         function_call: { name: 'keyword_for_search_engine' },
