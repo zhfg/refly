@@ -1,21 +1,26 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export class Mark {
-  selector: string;
+export class Selection {
+  xPath: string;
+  content: string;
   type: 'text' | 'table' | 'link' | 'image' | 'video' | 'audio';
+}
+
+export class PageMeta {
+  source: string;
+  title: string;
 }
 
 export class Source {
   @ApiProperty()
   pageContent: string;
 
-  metadata: {
-    source: string;
-    title: string;
-  };
-
-  score: number;
+  @ApiProperty()
+  metadata: PageMeta;
 
   @ApiPropertyOptional()
-  cssSelector?: string[];
+  score?: number;
+
+  @ApiPropertyOptional()
+  selections?: Selection[];
 }

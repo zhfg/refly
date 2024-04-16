@@ -14,7 +14,7 @@ import { MinioService } from '../common/minio.service';
 import { AigcService } from '../aigc/aigc.service';
 import { WebLinkDTO } from './dto';
 import { getExpectedTokenLenContent } from '../utils/token';
-import { Source } from '../types/weblink';
+import { PageMeta, Source } from '../types/weblink';
 import { QUEUE_STORE_LINK } from '../utils/const';
 import { ConfigService } from '@nestjs/config';
 import { streamToString } from '../utils/stream';
@@ -78,27 +78,14 @@ export class WeblinkService {
     }
   }
 
-  async createNewLink(link: WebLinkDTO, doc: Document) {
-    // Generate hash for link url as storage key
-    const objectName = createHash('sha256').update(link.url).digest('hex');
-    const result = await this.minio.putObject(
-      this.configService.get('minio.weblinkBucket'),
-      objectName,
-      Buffer.from(doc.pageContent),
-    );
-    this.logger.log(
-      `upload to minio success, object name: ${objectName}, result: ${JSON.stringify(
-        result,
-      )}`,
-    );
-
+  async createNewLink(link: WebLinkDTO, pageMeta: PageMeta) {
     return this.prisma.weblink.create({
       data: {
         url: link.url,
         indexStatus: 'processing',
         pageContent: '', // deprecated, always empty
-        storageKey: objectName,
-        pageMeta: JSON.stringify(doc.metadata),
+        storageKey: link.storageKey,
+        pageMeta: JSON.stringify(pageMeta),
         contentMeta: '',
       },
     });
@@ -185,9 +172,14 @@ export class WeblinkService {
    * @param pageContent raw html page content
    * @returns nothing
    */
-  directParseWebLinkContent(url: string, pageContent: string): Document {
+  async downloadWebLinkContent(
+    url: string,
+    storageKey: string,
+  ): Promise<Document> {
     try {
-      const $ = cheerio.load(pageContent);
+      const stream = await this.minio.getObject(this.bucketName, storageKey);
+      const content = await streamToString(stream);
+      const $ = cheerio.load(content);
 
       // remove all styles and scripts tag
       $('script, style, plasmo-csui, img, svg, meta, link').remove();
@@ -204,7 +196,7 @@ export class WeblinkService {
       const title = $('title').text();
       const source = url;
 
-      return { pageContent, metadata: { title, source } };
+      return { pageContent: $.html(), metadata: { title, source } };
     } catch (err) {
       this.logger.error(`process url ${url} failed: ${err}`);
       return null;
@@ -222,21 +214,17 @@ export class WeblinkService {
 
     const results = await Promise.all<Document[]>(
       weblinkList.map(async (item) => {
-        const { pageContent, metadata } = await this.parseWebLinkContent(
-          item?.metadata?.source,
-        );
-        const $ = parse(pageContent);
-
-        if (item.cssSelector?.length > 0) {
-          return item.cssSelector.map((selector) => {
-            const parsedContentSelector = $.querySelector(selector);
-            return {
-              pageContent: parsedContentSelector?.text || '',
-              metadata,
-            };
-          });
+        // If selections are provided, use the selected content
+        if (item.selections?.length > 0) {
+          return item.selections.map(({ content }) => ({
+            pageContent: content,
+            metadata: item.metadata,
+          }));
         }
 
+        const { pageContent, metadata } = await this.parseWebLinkContent(
+          item.metadata?.source,
+        );
         return [
           {
             pageContent:
@@ -270,16 +258,16 @@ export class WeblinkService {
 
     return Promise.all(
       weblinkList.map(async (item) => {
-        if (item.cssSelector?.length > 0) {
+        if (item.selections?.length > 0) {
           const url = item.metadata.source;
           if (!weblinkIdMap.has(url)) return;
 
           return this.prisma.weblinkUserMark.createMany({
-            data: item.cssSelector.map((selector) => ({
+            data: item.selections.map((selector) => ({
               userId,
               weblinkId: weblinkIdMap.get(url),
               linkHost: new URL(url).hostname,
-              selector: selector,
+              selector: selector.xPath,
               markType: '',
               extensionVersion,
             })),
@@ -347,34 +335,31 @@ export class WeblinkService {
 
     // Link not found
     if (!weblink) {
-      // First tries to read page content from req body.
-      // If not exists, then try to scrape it from source url.
-      const doc = link.pageContent
-        ? this.directParseWebLinkContent(link.url, link.pageContent)
-        : await this.parseWebLinkContent(link.url);
-
-      if (!doc) {
-        return this.logger.log(`weblink cannot be parsed, skip`);
+      if (!link.storageKey) {
+        return this.logger.warn(
+          `storageKey not provided for ${link.url}, skip`,
+        );
       }
 
-      // Store doc cache for later use
-      this.cache.set(link.url, JSON.stringify(doc));
-      weblink = await this.createNewLink(link, doc);
+      weblink = await this.createNewLink(link, {
+        title: link.title,
+        source: link.url,
+      });
     }
 
-    if (!weblink) {
-      this.logger.log(`weblink is still empty, skip`);
-      return;
-    }
+    // Fetch doc and store in cache for later use
+    const doc = link.storageKey
+      ? await this.downloadWebLinkContent(link.url, link.storageKey)
+      : await this.parseWebLinkContent(link.url);
 
-    // 处理单个用户的访问记录
-    const uwb = await this.processLinkForUser(link, weblink);
-
-    const doc = await this.parseWebLinkContent(link.url);
+    this.cache.set(link.url, JSON.stringify(doc));
 
     // TODO: 优化 page content 的清洗逻辑
     const $ = cheerio.load(doc.pageContent);
     doc.pageContent = $.text();
+
+    // 处理单个用户的访问记录
+    const uwb = await this.processLinkForUser(link, weblink);
 
     await this.aigcService.runContentFlow({ doc, link, uwb, weblink });
   }
