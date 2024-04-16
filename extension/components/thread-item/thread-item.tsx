@@ -212,13 +212,9 @@ export const ThreadItem = (props: ThreadItemProps) => {
       </div>
       <div
         className="session-inner-container"
-        style={
-          showSelectedWeblinkList
-            ? {
-                height: `calc(100vh - 180px - ${selectedWeblinkListRef.current?.clientHeight || 0}px - 40px - ${contentSelectorStore?.showSelectedMarks ? 150 : 0}px - 52px)`,
-              }
-            : {}
-        }>
+        style={{
+          height: `calc(100vh - 130px - 90px - ${showSelectedWeblinkList ? selectedWeblinkListRef.current?.clientHeight || 0 : 0}px - ${contentSelectorStore?.showSelectedMarks || contentSelectorStore?.showContentSelector ? 150 + 28 : 0}px)`,
+        }}>
         {sessions?.map((item, index) => (
           <Session
             key={index}
@@ -241,7 +237,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
         style={
           showSelectedWeblinkList
             ? {
-                height: `calc(100vh - 130px - ${selectedWeblinkListRef.current?.clientHeight || 0}px - ${contentSelectorStore?.showSelectedMarks ? 150 : 0}px - 52px)`,
+                height: `calc(100vh - 130px - ${selectedWeblinkListRef.current?.clientHeight || 0}px - ${contentSelectorStore?.showSelectedMarks ? 150 + 52 : 0}px - 52px)`,
               }
             : {}
         }>
