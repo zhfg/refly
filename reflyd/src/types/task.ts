@@ -81,3 +81,9 @@ export type Task = {
   locale?: LOCALE;
   data?: CHAT | QUICK_ACTION_TASK_PAYLOAD;
 };
+
+export type TaskResponse = {
+  sources: Source[];
+  answer: string;
+  relatedQuestions?: string[];
+};
