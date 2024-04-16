@@ -32,6 +32,9 @@ export class WebLinkDTO {
   @ApiPropertyOptional()
   pageContent?: string; // 反爬网站前端传入
 
+  @ApiPropertyOptional()
+  storageKey?: string; // 前端上传 html 拿到的 key
+
   userId?: number;
 }
 

@@ -141,7 +141,7 @@ export class ConversationService {
 
     // 如果有 cssSelector，则代表从基于选中的内容进行提问，否则根据上下文进行相似度匹配召回
     const chatFromClientSelector = task?.data?.filter?.weblinkList?.find(
-      (item) => item?.cssSelector?.length > 0,
+      (item) => item?.selections?.length > 0,
     );
     const sources = chatFromClientSelector
       ? await this.weblinkService.parseMultiWeblinks(
