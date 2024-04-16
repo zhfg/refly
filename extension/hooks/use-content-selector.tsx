@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react"
 import type { Mark } from "~types"
 import { getCSSPath } from "~utils/cssSelector"
 import { safeStringifyJSON } from "~utils/parse"
+// import { getContentFromHtmlSelector } from "~utils/weblink"
 
 function getElementType(element) {
   // 检查元素是否为 table 元素

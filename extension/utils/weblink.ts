@@ -1,7 +1,8 @@
 import type { WebLinkItem } from "~components/weblink-list/types"
 import type { Source } from "~types"
 import * as cheerio from "cheerio"
-import { parse } from "node-html-parser"
+import { removeUnusedHtmlNode } from "./removeUnusedHtmlNode"
+import parse from "node-html-parser"
 
 export const buildSource = (): Source => {
   return {
@@ -29,23 +30,12 @@ export const mapSourceFromWeblinkList = (
 }
 
 export const getContentFromHtmlSelector = (selector: string) => {
-  const $ = parse(document?.documentElement?.innerHTML)
-
-  // $("script, style, plasmo-csui, meta, link").remove()
-  // // remove comments blocks
-  // $("body")
-  //   .contents()
-  //   .each((i, node) => {
-  //     if (node.type === "comment") {
-  //       $(node).remove()
-  //     }
-  // //   })
-  $.querySelectorAll("style").map((item) => item?.remove?.())
-  $.querySelectorAll("script").map((item) => item?.remove?.())
+  const html = removeUnusedHtmlNode()
+  const $ = parse(html)
 
   console.log(
     "getContentFromHtmlSelector",
-    $.querySelector(selector),
+    $.querySelector(selector).text,
     `target`,
     document.querySelector(selector),
   )

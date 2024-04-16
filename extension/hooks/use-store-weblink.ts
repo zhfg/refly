@@ -6,6 +6,8 @@ import { useWebLinkIndexed } from "~hooks/use-weblink-indexed"
 import { delay } from "~utils/delay"
 // utils
 import * as cheerio from "cheerio"
+import { removeUnusedHtmlNode } from "~utils/removeUnusedHtmlNode"
+import { v4 as uuidV4 } from "uuid"
 
 export const useStoreWeblink = () => {
   // 网页索引状态
@@ -19,20 +21,16 @@ export const useStoreWeblink = () => {
     setUploadingStatus("loading")
 
     const description = document.head.querySelector('meta[name="description"]')
+    const pageContent = removeUnusedHtmlNode()
 
-    const $ = cheerio.load(document?.documentElement?.innerHTML)
+    // 先上传到 worker 获取 storageKey
+    const uniqueId = uuidV4()
+    const uploadRes = await sendToBackground({
+      name: "uploadHtml",
+      body: { url, pageContent, fileName: `${uniqueId}.html` },
+    })
 
-    // remove all styles and scripts tag
-    $("script, style, plasmo-csui, img, svg, meta, link").remove()
-    // remove comments blocks
-    $("body")
-      .contents()
-      .each((i, node) => {
-        if (node.type === "comment") {
-          $(node).remove()
-        }
-      })
-    const pageContent = $.html()
+    console.log("uploadRes", uploadRes)
 
     const res = await sendToBackground({
       name: "storeWeblink",
@@ -42,7 +40,7 @@ export const useStoreWeblink = () => {
         originPageTitle: document?.title || "",
         originPageUrl: location.href,
         originPageDescription: (description as any)?.content || "",
-        pageContent: pageContent || "", // 上传 HTML String 用于后续的操作
+        pageContent: uploadRes?.data?.storageKey || "", // 上传 HTML String 用于后续的操作
       },
     })
 
