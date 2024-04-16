@@ -160,6 +160,7 @@ export const Thread = () => {
       // 重置状态
       chatStore.setNewQAText("")
       weblinkStore.updateSelectedRow([])
+      conversationStore.resetState()
       searchStateStore.setSearchTarget(SearchTarget.CurrentPage)
     } catch (err) {
       console.log("thread error")
