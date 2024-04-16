@@ -36,6 +36,7 @@ import { type Conversation } from "~/types"
 import { time } from "~utils/time"
 // stores
 import { useWeblinkStore } from "~stores/weblink"
+import { safeParseUrl } from "~utils/parse"
 
 export const getStyle: PlasmoGetStyle = () => {
   const style = document.createElement("style")
@@ -58,7 +59,7 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
     originPageUrl,
     indexStatus,
   } = props?.weblink
-  const urlItem = new URL(url || "")
+  const urlItem = safeParseUrl(url)
   console.log("weblink rerender")
 
   return (

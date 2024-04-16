@@ -142,6 +142,7 @@ export class WeblinkService {
       });
 
       // customized webpage loading
+      // TODO: remove this in the future
       const $ = await loader.scrape();
       // remove all styles and scripts tag
       $('script, style, plasmo-csui, img, svg, meta, link').remove();

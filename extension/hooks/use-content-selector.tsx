@@ -2,7 +2,7 @@ import { sendToBackground } from "@plasmohq/messaging"
 import classNames from "classnames"
 import { useEffect, useRef } from "react"
 import type { Mark } from "~types"
-import { getCSSPath } from "~utils/cssSelector"
+import getXPath from "get-xpath"
 import { safeStringifyJSON } from "~utils/parse"
 // import { getContentFromHtmlSelector } from "~utils/weblink"
 
@@ -45,9 +45,9 @@ export const useContentSelector = () => {
 
     const mark: Mark = {
       type: getElementType(target),
-      data: [content],
+      data: content,
       target,
-      cssSelector: getCSSPath(target),
+      xPath: getXPath(target),
     }
 
     // console.log(
@@ -67,9 +67,9 @@ export const useContentSelector = () => {
     targetList.current = targetList.current.concat(target as Element)
   }
 
-  const removeMark = (target: HTMLElement, cssSelector: string) => {
+  const removeMark = (target: HTMLElement, xPath: string) => {
     markListRef.current = markListRef.current.filter(
-      (item) => item.cssSelector !== cssSelector,
+      (item) => item.xPath !== xPath,
     )
     ;(target as Element)?.classList.remove("refly-content-selected-target")
     targetList.current = targetList.current.filter((item) => item != target)
@@ -158,7 +158,7 @@ export const useContentSelector = () => {
       if (
         (target as Element)?.classList.contains("refly-content-selected-target")
       ) {
-        removeMark(target as HTMLElement, getCSSPath(target))
+        removeMark(target as HTMLElement, getXPath(target))
       } else {
         addMark(target as HTMLElement)
       }
@@ -208,11 +208,11 @@ export const useContentSelector = () => {
     }
 
     if (data?.name === "removeSelectedMark") {
-      const cssSelector = data?.payload?.cssSelector || ""
+      const xPath = data?.payload?.xPath || ""
       const target = markListRef.current.find(
-        (item) => item.cssSelector === cssSelector,
+        (item) => item.xPath === xPath,
       )?.target
-      removeMark(target as HTMLElement, cssSelector)
+      removeMark(target as HTMLElement, xPath)
     }
 
     if (data?.name === "removeAllSelectedMark") {

@@ -23,16 +23,16 @@ export const SelectedContentList = (props: SelectedContentListProps) => {
     resetState,
   } = useContentSelectorStore()
 
-  const handleRemoveMark = (cssSelector: string) => {
+  const handleRemoveMark = (xPath: string) => {
     window.postMessage({
       name: "removeSelectedMark",
       payload: {
-        cssSelector,
+        xPath,
       },
     })
 
     const { marks } = useContentSelectorStore.getState()
-    const newMarks = marks.filter((item) => item?.cssSelector !== cssSelector)
+    const newMarks = marks.filter((item) => item?.xPath !== xPath)
     setMarks(newMarks)
   }
 
@@ -87,10 +87,10 @@ export const SelectedContentList = (props: SelectedContentListProps) => {
             extra={
               <IconClose
                 className="selected-content-item-action"
-                onClick={() => handleRemoveMark(item?.cssSelector)}
+                onClick={() => handleRemoveMark(item?.xPath)}
               />
             }>
-            <span className="selected-content-item">{item?.data?.[0]}</span>
+            <span className="selected-content-item">{item?.data}</span>
           </Card>
         ))}
         {marks.length === 0 ? (

@@ -1,8 +1,14 @@
 export interface Mark {
   type: "text" | "table" | "link" | "image" | "video" | "audio" // 内容类型
-  data: string[]
+  data: string
   target: HTMLElement
-  cssSelector: string // 该元素对应的 DOM CSS Selector 路径，这个可以当做唯一 id
+  xPath: string // 该元素对应的 xPath 路径，这个可以当做唯一 id
+}
+
+export interface Selection {
+  xPath: string
+  content: string
+  type: "text" | "table" | "link" | "image" | "video" | "audio"
 }
 
 export interface Source {
@@ -12,6 +18,7 @@ export interface Source {
     title: string
   }
   score: number
+  selections?: Selection[]
 }
 
 export interface Data {

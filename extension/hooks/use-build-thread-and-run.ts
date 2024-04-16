@@ -86,7 +86,11 @@ export const useBuildThreadAndRun = () => {
             source: location.href,
           },
           score: -1, // 手工构造
-          cssSelector: marks?.map((item) => item?.cssSelector),
+          selections: marks?.map((item) => ({
+            type: "text",
+            xPath: item?.xPath,
+            content: item?.data,
+          })),
         },
       ]
     } else if (searchTarget === SearchTarget.SelectedPages) {
