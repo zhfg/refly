@@ -40,7 +40,7 @@ export const useStoreWeblink = () => {
         originPageTitle: document?.title || "",
         originPageUrl: location.href,
         originPageDescription: (description as any)?.content || "",
-        pageContent: uploadRes?.data?.storageKey || "", // 上传 HTML String 用于后续的操作
+        storageKey: uploadRes?.data?.storageKey || "", // 上传 HTML String 用于后续的操作
       },
     })
 

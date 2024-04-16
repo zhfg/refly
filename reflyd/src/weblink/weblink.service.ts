@@ -181,22 +181,11 @@ export class WeblinkService {
       const content = await streamToString(stream);
       const $ = cheerio.load(content);
 
-      // remove all styles and scripts tag
-      $('script, style, plasmo-csui, img, svg, meta, link').remove();
-      // remove comments blocks
-      $('body')
-        .contents()
-        .each((i, node) => {
-          if (node.type === 'comment') {
-            $(node).remove();
-          }
-        });
-
       // only get meaning content
       const title = $('title').text();
       const source = url;
 
-      return { pageContent: $.html(), metadata: { title, source } };
+      return { pageContent: content, metadata: { title, source } };
     } catch (err) {
       this.logger.error(`process url ${url} failed: ${err}`);
       return null;
