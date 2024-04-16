@@ -27,7 +27,7 @@ export const EmptyThreadLibraryStatus = () => {
         <Button
           style={{ marginLeft: 24 }}
           onClick={() => {
-            navigate(`/dashboard`)
+            navigate(`/`)
           }}>
           去首页搜索或提问
         </Button>

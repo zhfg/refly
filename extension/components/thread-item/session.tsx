@@ -19,6 +19,7 @@ import { IconTip } from "~components/home/icon-tip"
 import { Markdown } from "~components/markdown"
 
 import copyToClipboard from "copy-to-clipboard"
+import { safeParseUrl } from "~utils/parse"
 
 interface SessionProps {
   session: SessionItem
@@ -91,7 +92,7 @@ export const Session = (props: SessionProps) => {
                                 fontSize: 10,
                                 color: "rgba(0, 0, 0, .4)",
                               }}>
-                              · {new URL(item.metadata?.source as "")?.origin} ·
+                              · {safeParseUrl(item?.metadata?.source)} ·
                             </Typography.Paragraph>
                           </span>
                         </a>,
@@ -187,7 +188,7 @@ export const Session = (props: SessionProps) => {
           {session?.relatedQuestions?.length > 0 ? (
             <div className="session-related-question-content">
               {session?.relatedQuestions?.map((item, index) => (
-                <IconTip text="点击进行追问">
+                <IconTip text="点击进行追问" key={index}>
                   <div key={index} onClick={() => handleAskFollowing(item)}>
                     <p>{item}</p>
                     <IconPlus

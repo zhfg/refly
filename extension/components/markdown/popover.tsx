@@ -15,7 +15,7 @@ const PopoverContent = React.forwardRef<
 >(({ className, align = "center", sideOffset = 4, ...props }, ref) => (
   <PopoverPrimitive.Portal
     container={document
-      .querySelector("plasmo-csui")
+      .querySelector("#refly-main-app")
       ?.shadowRoot?.querySelector(".main")}>
     <PopoverPrimitive.Content
       ref={ref}

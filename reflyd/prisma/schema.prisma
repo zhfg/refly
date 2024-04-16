@@ -1,6 +1,3 @@
-/// This is your Prisma schema file,
-/// learn more about it in the docs: https:///pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -144,10 +141,12 @@ model ChatMessage {
   type                  MessageType @map("type")
   /// 用户id
   userId                Int         @map("user_id")
-  // 内容
+  /// 内容
   content               String      @map("content")
-  // 引用文档来源，以 JSON 方式存储
+  /// 引用文档来源，以 JSON 方式存储
   sources               String?     @default("") @map("sources")
+  /// 相关问题
+  relatedQuestions      String?     @map("related_questions")
   /// 创建时间
   createdAt             DateTime    @default(now()) @map("created_at") @db.Timestamptz()
   /// 更新时间
@@ -200,8 +199,10 @@ model Weblink {
   id          Int         @id @default(autoincrement())
   /// 网页链接
   url         String      @unique @map("url")
-  /// 页面内容
+  /// 页面内容 (deprecated)
   pageContent String      @map("page_content")
+  /// 对象存储 key
+  storageKey  String      @map("storage_key")
   /// 页面元数据, JSON 存储
   pageMeta    String      @map("page_meta")
   /// 内容元数据, JSON 存储
@@ -216,6 +217,31 @@ model Weblink {
   contents AigcContent[]
 
   @@map("weblinks")
+}
+
+model WeblinkUserMark {
+  /// id为主键
+  id               Int      @id @default(autoincrement())
+  /// 网页 id
+  weblinkId        Int      @map("weblink_id")
+  /// 用户 id
+  userId           Int      @map("user_id")
+  /// 网页 host
+  linkHost         String   @map("link_host")
+  /// 选中元素
+  selector         String   @map("selector")
+  /// 插件版本
+  extensionVersion String   @map("extension_version")
+  /// 标记类型
+  markType         String   @map("mark_type")
+  /// 创建时间
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  /// 更新时间
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([weblinkId, userId])
+  @@index([weblinkId, selector])
+  @@map("weblink_user_marks")
 }
 
 /// 生成内容
@@ -279,6 +305,21 @@ model UserDigest {
 
   @@unique([userId, date, topicKey])
   @@map("user_digests")
+}
+
+/// 内容向量
+model ContentVector {
+  /// 主键
+  id        String                 @id @default(cuid())
+  /// 网页 id
+  weblinkId Int                    @map("weblink_id")
+  /// 内容
+  content   String                 @map("content")
+  /// 向量
+  vector    Unsupported("vector")? @map("vector")
+
+  @@index([weblinkId])
+  @@map("content_vectors")
 }
 
 enum ContentSourceType {

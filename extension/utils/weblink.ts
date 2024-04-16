@@ -1,5 +1,8 @@
 import type { WebLinkItem } from "~components/weblink-list/types"
 import type { Source } from "~types"
+import * as cheerio from "cheerio"
+import { removeUnusedHtmlNode } from "./removeUnusedHtmlNode"
+import parse from "node-html-parser"
 
 export const buildSource = (): Source => {
   return {
@@ -24,4 +27,20 @@ export const mapSourceFromWeblinkList = (
     },
     score: -1,
   }))
+}
+
+export const getContentFromHtmlSelector = (selector: string) => {
+  const html = removeUnusedHtmlNode()
+  const $ = parse(html)
+
+  console.log(
+    "getContentFromHtmlSelector",
+    $.querySelector(selector).text,
+    `target`,
+    document.querySelector(selector),
+  )
+
+  return {
+    target: document.querySelector(selector),
+  }
 }

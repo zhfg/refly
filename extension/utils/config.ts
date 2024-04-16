@@ -20,6 +20,9 @@ export const appConfig = {
     getWeblinkIndexStatus: "/v1/weblink/list", // 与 weblink 共享
     getConversationList: "/v1/conversation/list",
     getUserInfo: "/v1/auth/getUserInfo",
+    pingWebLinkStatus: "/v1/weblink/ping",
+    // 基于 serverless worker 进行文件上传处理
+    uploadHtml: "/htmlUpload",
   },
   domId: {},
   appInfo: {

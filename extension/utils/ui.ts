@@ -33,7 +33,7 @@ export const calcPopupPosition = (
 export const scrollToBottom = () => {
   setTimeout(() => {
     const chatWrapperElem = document
-      .querySelector("plasmo-csui")
+      .querySelector("#refly-main-app")
       ?.shadowRoot?.querySelector(".session-inner-container")
 
     if (chatWrapperElem) {

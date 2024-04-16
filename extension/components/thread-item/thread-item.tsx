@@ -5,6 +5,7 @@ import {
   Space,
   Input,
   Breadcrumb,
+  Message as message,
 } from "@arco-design/web-react"
 import { IconMinusCircle, IconSend } from "@arco-design/web-react/icon"
 
@@ -23,6 +24,12 @@ import { SearchTarget } from "~stores/search-state"
 // 自定义组件
 import { SelectedWeblink } from "../selected-weblink/index"
 import { useNavigate } from "react-router-dom"
+import { ContentSelectorBtn } from "~components/content-selector-btn"
+import { useSearchQuickActionStore } from "~stores/search-quick-action"
+import { QuickAction } from "~components/home/quick-action"
+import { useContentSelectorStore } from "~stores/content-selector"
+import { SelectedContentList } from "~components/selected-content-list"
+import { useStoreWeblink } from "~hooks/use-store-weblink"
 
 interface ThreadItemProps {
   sessions: SessionItem[]
@@ -43,13 +50,17 @@ export const ThreadItem = (props: ThreadItemProps) => {
   const chatStore = useChatStore()
   const navigate = useNavigate()
 
-  const [threadSearchTarget, setThreadSearchTarget] = useState(
+  const [threadSearchTarget, setThreadSearchTarget] = useState<SearchTarget>(
     selectedWeblinkConfig?.searchTarget,
   )
   const [threadWeblinkListFilter, setThreadWeblinkListFilter] = useState(
     selectedWeblinkConfig?.filter || [],
   )
+
+  // stores
   const conversationStore = useConversationStore()
+  const searchQuickActionStore = useSearchQuickActionStore()
+  const contentSelectorStore = useContentSelectorStore()
 
   const showSelectedWeblinkList =
     threadSearchTarget === SearchTarget.SelectedPages &&
@@ -59,28 +70,107 @@ export const ThreadItem = (props: ThreadItemProps) => {
   const { buildShutdownTaskAndGenResponse, buildTaskAndGenReponse } =
     useBuildTask()
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    e.stopPropagation()
+  const { handleUploadWebsite } = useStoreWeblink()
 
-    // inputRef.current?.dom?.onkeydown?.(e as any as KeyboardEvent)
-    if (e.keyCode === 13) {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.keyCode === 13 && (e.ctrlKey || e.shiftKey || e.metaKey)) {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        // 阻止默认行为,即不触发 enter 键的默认事件
+        e.preventDefault()
+        // 在输入框中插入换行符
+
+        // 获取光标位置
+        const cursorPos = e.target.selectionStart
+        // 在光标位置插入换行符
+        e.target.value =
+          e.target.value.slice(0, cursorPos) +
+          "\n" +
+          e.target.value.slice(cursorPos)
+        // 将光标移动到换行符后面
+        e.target.selectionStart = e.target.selectionEnd = cursorPos + 1
+      }
+    }
+
+    if (e.keyCode === 13 && !e.ctrlKey && !e.shiftKey && !e.metaKey) {
+      e.preventDefault()
       handleAskFollowing()
     }
   }
 
-  const handleAskFollowing = () => {
+  const getInputText = () => {
+    const { showSelectedMarks } = useContentSelectorStore.getState()
+    const searchTarget = threadSearchTarget
+
+    if (showSelectedMarks) return "基于实时选择内容追问..."
+    if (searchTarget === SearchTarget.SelectedPages)
+      return "对选中的网页进行追问..."
+    if (searchTarget === SearchTarget.CurrentPage)
+      return "对当前网页进行追问..."
+    if (searchTarget === SearchTarget.SearchEnhance)
+      return "输入关键词进行网络搜索追问..."
+    if (searchTarget === SearchTarget.All) return "对历史所有网页进行追问..."
+  }
+
+  const handleAskFollowing = async () => {
     // TODO: 这里需要 follow 之前的 filter 进行提问
     const { newQAText } = useChatStore.getState()
+    const { marks } = useContentSelectorStore.getState()
+
+    if (!newQAText) {
+      message.info("提问内容不能为空")
+      return
+    }
+
+    const searchTarget = threadSearchTarget
+
+    // 先存储 link， 在进行提问操作，这里理论上是需要有个 negotiate 的过程
+    if (searchTarget === SearchTarget.CurrentPage) {
+      message.loading("处理内容中...")
+      const res = await handleUploadWebsite(window.location.href)
+
+      if (res.success) {
+        message.success("处理成功，生成回答中...")
+      } else {
+        message.error("处理失败！")
+      }
+    }
+
+    let selectedWebLink = []
+
+    if (threadSearchTarget === SearchTarget.CurrentPage) {
+      selectedWebLink = [
+        {
+          pageContent: "",
+          metadata: {
+            title: document?.title || "",
+            source: location.href,
+          },
+          score: -1, // 手工构造
+          selections: marks?.map((item) => ({
+            type: "text",
+            xPath: item?.xPath,
+            content: item?.data,
+          })),
+        },
+      ]
+    } else {
+      const useWeblinkList =
+        threadSearchTarget === SearchTarget.SelectedPages &&
+        threadWeblinkListFilter?.length > 0
+
+      selectedWebLink = useWeblinkList ? threadWeblinkListFilter : []
+    }
+
     const { currentConversation } = useConversationStore.getState()
-    const useWeblinkList =
-      threadSearchTarget === SearchTarget.SelectedPages &&
-      threadWeblinkListFilter?.length > 0
 
     const task = buildChatTask({
       question: newQAText,
       conversationId: currentConversation?.id || "",
       filter: {
-        weblinkList: useWeblinkList ? threadWeblinkListFilter : [],
+        weblinkList: selectedWebLink,
       },
     })
 
@@ -102,13 +192,6 @@ export const ThreadItem = (props: ThreadItemProps) => {
     }
   }, [selectedWeblinkConfig?.searchTarget, selectedWeblinkConfig?.filter])
 
-  console.log(
-    "selectedWeblinkConfig",
-    selectedWeblinkConfig,
-    threadSearchTarget,
-    threadWeblinkListFilter,
-  )
-
   return (
     <div className="session-container">
       <div>
@@ -129,13 +212,9 @@ export const ThreadItem = (props: ThreadItemProps) => {
       </div>
       <div
         className="session-inner-container"
-        style={
-          showSelectedWeblinkList
-            ? {
-                height: `calc(100vh - 180px - ${selectedWeblinkListRef.current?.clientHeight || 0}px - 40px)`,
-              }
-            : {}
-        }>
+        style={{
+          height: `calc(100vh - 130px - 90px - ${showSelectedWeblinkList ? selectedWeblinkListRef.current?.clientHeight || 0 : 0}px - ${contentSelectorStore?.showSelectedMarks || contentSelectorStore?.showContentSelector ? 150 + 28 : 0}px)`,
+        }}>
         {sessions?.map((item, index) => (
           <Session
             key={index}
@@ -158,7 +237,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
         style={
           showSelectedWeblinkList
             ? {
-                height: `calc(100vh - 130px - ${selectedWeblinkListRef.current?.clientHeight || 0}px)`,
+                height: `calc(100vh - 130px - ${selectedWeblinkListRef.current?.clientHeight || 0}px - ${contentSelectorStore?.showSelectedMarks ? 150 + 52 : 0}px - 52px)`,
               }
             : {}
         }>
@@ -181,12 +260,23 @@ export const ThreadItem = (props: ThreadItemProps) => {
 
         <div className="session-input-box">
           <div className="session-inner-input-box">
-            <ThreadSearchTargetSelector
-              showText={false}
-              searchTarget={threadSearchTarget}
+            <ContentSelectorBtn
+              btnType="text"
               handleChangeSelector={(searchTarget) =>
                 setThreadSearchTarget(searchTarget)
               }
+            />
+            <ThreadSearchTargetSelector
+              showText={false}
+              searchTarget={threadSearchTarget}
+              handleChangeSelector={(searchTarget) => {
+                setThreadSearchTarget(searchTarget)
+
+                // 非当前网页时，则清空内容
+                if (searchTarget !== SearchTarget.CurrentPage) {
+                  contentSelectorStore.resetState()
+                }
+              }}
             />
             <TextArea
               ref={inputRef}
@@ -200,7 +290,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
               onCompositionStart={(e) => console.log("composition start")}
               onCompositionUpdate={(e) => console.log("composition update")}
               onCompositionEnd={(e) => console.log("composition end")}
-              placeholder="继续提问..."
+              placeholder={getInputText()}
               onKeyDownCapture={(e) => handleKeyDown(e)}
               autoSize={{ minRows: 1, maxRows: 4 }}
               style={{
@@ -231,6 +321,16 @@ export const ThreadItem = (props: ThreadItemProps) => {
               ref={selectedWeblinkListRef}
               closable={false}
               selectedWeblinkList={threadWeblinkListFilter}
+            />
+          ) : null}
+          {searchQuickActionStore.showQuickAction &&
+          contentSelectorStore?.showSelectedMarks ? (
+            <QuickAction />
+          ) : null}
+          {contentSelectorStore?.showSelectedMarks ? (
+            <SelectedContentList
+              marks={contentSelectorStore.marks}
+              limitContainer
             />
           ) : null}
         </div>

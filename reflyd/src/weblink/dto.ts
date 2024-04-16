@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IndexStatus } from '@prisma/client';
 
 export class WebLinkDTO {
@@ -23,14 +23,17 @@ export class WebLinkDTO {
   @ApiProperty()
   url: string;
 
-  @ApiProperty()
-  visitCount: number;
+  @ApiPropertyOptional()
+  visitCount?: number;
 
-  @ApiProperty()
-  readTime: number;
+  @ApiPropertyOptional()
+  readTime?: number;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   pageContent?: string; // 反爬网站前端传入
+
+  @ApiPropertyOptional()
+  storageKey?: string; // 前端上传 html 拿到的 key
 
   userId?: number;
 }

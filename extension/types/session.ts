@@ -1,3 +1,5 @@
+import type { Selection } from "./content-selector"
+
 export interface Source {
   pageContent: string
   metadata: {
@@ -5,6 +7,7 @@ export interface Source {
     title: string
   }
   score: number
+  selections?: Selection[] // 基于此 link 进行部分内容操作
 }
 
 export type RelatedQuestion = string

@@ -13,7 +13,10 @@ export const buildSessionItem = (
       safeParseJSON(answerMessage?.data.sources) ||
       answerMessage?.data.sources ||
       [],
-    relatedQuestions: answerMessage?.data.relatedQuestions || [],
+    relatedQuestions:
+      safeParseJSON(answerMessage?.data.relatedQuestions) ||
+      answerMessage?.data.relatedQuestions ||
+      [],
   }
 
   console.log("buildSessionItem", session)

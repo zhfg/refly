@@ -136,7 +136,11 @@ export const ThreadLibrary = () => {
               padding: "20px 0",
               borderBottom: "1px solid var(--color-fill-3)",
             }}
+            className="thread-library-list-item"
             actionLayout="vertical"
+            onClick={() => {
+              navigate(`/thread/${item?.id}`)
+            }}
             actions={[
               <span
                 key={1}

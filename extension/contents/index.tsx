@@ -10,7 +10,8 @@ import HomeCSSText from "data-text:~/components/home/index.scss"
 import WeblinkCSSText from "data-text:~/components/weblink-list/index.scss"
 import LoginCSSText from "data-text:~/components/login/index.scss"
 import EmptyThreadLibraryCSSText from "data-text:~/components/empty-thread-library-status/index.scss"
-import type { PlasmoGetInlineAnchor } from "plasmo"
+import SelectedContentListCSS from "data-text:~/components/selected-content-list/index.scss"
+import type { PlasmoGetInlineAnchor, PlasmoGetShadowHostId } from "plasmo"
 import React, { useEffect } from "react"
 import { MemoryRouter } from "react-router-dom"
 
@@ -41,6 +42,7 @@ import { Markdown } from "~components/markdown"
 // }
 
 export const getInlineAnchor: PlasmoGetInlineAnchor = async () => document.body
+export const getShadowHostId: PlasmoGetShadowHostId = () => `refly-main-app`
 
 export const getStyle = () => {
   const style = document.createElement("style")
@@ -56,7 +58,8 @@ export const getStyle = () => {
     MarkdownCSSText +
     HighlightCSSText +
     LoginCSSText +
-    EmptyThreadLibraryCSSText
+    EmptyThreadLibraryCSSText +
+    SelectedContentListCSS
   return style
 }
 
@@ -83,19 +86,19 @@ export const Content = () => {
     Message.config({
       getContainer: () =>
         document
-          .querySelector("plasmo-csui")
+          .querySelector("#refly-main-app")
           ?.shadowRoot?.querySelector(".main"),
     })
   }, [])
 
   return (
     <div className="light app-container">
-      <div
+      {/* <div
         className={quickActionStore.selectedText ? "entry active" : "entry"}
         onClick={(_) => siderStore.setShowSider(!siderStore.showSider)}>
         <img src={Logo} alt="唤起 Refly" style={{ width: 25, height: 25 }} />
         <span>⌘B</span>
-      </div>
+      </div> */}
 
       <div
         id="refly-app-main"

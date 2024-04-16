@@ -20,7 +20,7 @@ import {
 import { ApiParam, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
-import { TASK_TYPE, type Task } from '../types/task';
+import { TASK_TYPE, TaskResponse, type Task } from '../types/task';
 import { AigcService } from 'src/aigc/aigc.service';
 
 @Controller('conversation')
@@ -117,36 +117,28 @@ export class ConversationController {
       // 获取聊天历史
       const chatHistory = await this.conversationService.getMessages(convId);
 
-      let sources, answer;
+      let taskRes: TaskResponse;
       if (taskType === TASK_TYPE.CHAT) {
-        const taskRes = await this.conversationService.handleChatTask(
+        taskRes = await this.conversationService.handleChatTask(
           req,
           res,
           body?.task,
           chatHistory,
         );
-
-        sources = taskRes?.sources;
-        answer = taskRes?.answer;
       } else if (taskType === TASK_TYPE.QUICK_ACTION) {
-        const taskRes = await this.conversationService.handleQuickActionTask(
+        taskRes = await this.conversationService.handleQuickActionTask(
           req,
           res,
           body?.task,
           chatHistory,
         );
-        sources = taskRes?.sources;
-        answer = taskRes?.answer;
       } else if (taskType === TASK_TYPE.SEARCH_ENHANCE_ASK) {
-        const taskRes = await this.conversationService.handleSearchEnhanceTask(
+        taskRes = await this.conversationService.handleSearchEnhanceTask(
           req,
           res,
           body?.task,
           chatHistory,
         );
-
-        sources = taskRes?.sources;
-        answer = taskRes?.answer;
       }
       res.end(``);
 
@@ -154,15 +146,16 @@ export class ConversationController {
         type: 'ai',
         userId,
         conversationId: convId,
-        content: answer,
-        sources: JSON.stringify(sources),
+        content: taskRes.answer,
+        sources: JSON.stringify(taskRes.sources),
+        relatedQuestions: JSON.stringify(taskRes.relatedQuestions),
       });
 
       // update conversation last answer and message count
       const updated = await this.conversationService.updateConversation(
         convId,
         {
-          lastMessage: answer,
+          lastMessage: taskRes.answer,
           messageCount: chatHistory.length + 1,
         },
       );
@@ -172,7 +165,7 @@ export class ConversationController {
         )}`,
       );
     } catch (err) {
-      console.log('chat error', err);
+      this.logger.error(`chat error: ${err}`);
 
       // 结束流式输出
       res.end(``);

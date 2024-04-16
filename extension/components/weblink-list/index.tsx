@@ -36,6 +36,7 @@ import { type Conversation } from "~/types"
 import { time } from "~utils/time"
 // stores
 import { useWeblinkStore } from "~stores/weblink"
+import { safeParseUrl } from "~utils/parse"
 
 export const getStyle: PlasmoGetStyle = () => {
   const style = document.createElement("style")
@@ -58,7 +59,7 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
     originPageUrl,
     indexStatus,
   } = props?.weblink
-  const urlItem = new URL(url || "")
+  const urlItem = safeParseUrl(url)
   console.log("weblink rerender")
 
   return (
@@ -221,7 +222,7 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
 
       // 获取列表的滚动高度，以及现在的列表数量，当还存在 2 个时触发滚动
       const scrollTopElem = document
-        .querySelector("plasmo-csui")
+        .querySelector("#refly-main-app")
         ?.shadowRoot?.querySelector(".conv-list")
         ?.querySelector(".arco-table-body")
 
@@ -243,6 +244,8 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
       loadMore(1)
     }
   }, [webLinkStore?.isWebLinkListVisible])
+
+  console.log("visible", webLinkStore.isWebLinkListVisible)
 
   return (
     <div style={{ width: "100%" }}>

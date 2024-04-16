@@ -7,6 +7,7 @@ import { fetchEventSource } from "~utils/fetch-event-source"
 import { getCookie } from "~utils/cookie"
 // utils
 import { fetchStream } from "~utils/fetch-stream"
+import { getExtensionVersion } from "~utils/version"
 
 let abortController: AbortController
 
@@ -44,6 +45,7 @@ const handler: PlasmoMessaging.PortHandler<{
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${cookie}`,
+            "x-refly-ext-version": getExtensionVersion(),
           },
           signal: abortController.signal,
           body: JSON.stringify({

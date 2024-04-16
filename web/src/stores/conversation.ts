@@ -6,7 +6,7 @@ import { ConversationOperation } from "@/types"
 
 interface ConversationState {
   // state
-  currentConversation: Conversation
+  currentConversation: Conversation | null
   conversationList: Conversation[]
 
   // method
@@ -16,12 +16,17 @@ interface ConversationState {
     operationType: ConversationOperation,
     payload: Partial<Conversation>,
   ) => void
+  resetState: () => void
+}
+
+const defaultState = {
+  currentConversation: null,
+  conversationList: [],
 }
 
 export const useConversationStore = create<ConversationState>()(
   devtools(set => ({
-    currentConversation: null,
-    conversationList: [],
+    ...defaultState,
 
     setConversationList: (val: Conversation[]) =>
       set({ conversationList: val }),
@@ -81,5 +86,6 @@ export const useConversationStore = create<ConversationState>()(
           conversationList: newConversationList,
         }
       }),
+    resetState: () => set(state => ({ ...state, ...defaultState })),
   })),
 )

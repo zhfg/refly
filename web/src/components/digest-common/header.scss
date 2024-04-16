@@ -12,14 +12,13 @@
 .today-menu {
   display: flex;
   flex-direction: row;
-  min-width: 180px;
+  min-width: 210px;
 
   .arco-radio {
     margin-right: 7px;
   }
 
   button {
-    width: 77px;
     height: 30px;
     border-radius: 15px;
   }

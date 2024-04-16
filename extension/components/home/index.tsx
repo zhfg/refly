@@ -1,9 +1,18 @@
-import { Button, Input, Space, Alert } from "@arco-design/web-react"
+import {
+  Button,
+  Input,
+  Space,
+  Alert,
+  Message as message,
+  Divider,
+} from "@arco-design/web-react"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input/textarea"
 import {
   IconMinusCircle,
   IconUpload,
   IconSend,
+  IconScissor,
+  IconHighlight,
 } from "@arco-design/web-react/icon"
 import React, { useEffect, useRef } from "react"
 
@@ -17,6 +26,7 @@ import WeblinkList from "../weblink-list"
 import { ChatHeader } from "./header"
 import { SelectedWeblink } from "../selected-weblink/index"
 import { QuickAction } from "./quick-action"
+import { ContentSelectorBtn } from "~components/content-selector-btn/index"
 // stores
 import { useQuickActionStore } from "../../stores/quick-action"
 import { useChatStore } from "../../stores/chat"
@@ -24,15 +34,20 @@ import { useMessageStateStore } from "~stores/message-state"
 import { useSiderStore } from "~stores/sider"
 import { useWeblinkStore } from "~stores/weblink"
 import { SearchTarget, useSearchStateStore } from "~stores/search-state"
+import { useContentSelectorStore } from "~stores/content-selector"
 // hooks
 import { useBuildTask } from "~hooks/use-build-task"
 import { useBuildThreadAndRun } from "~hooks/use-build-thread-and-run"
 import { useStoreWeblink } from "~hooks/use-store-weblink"
+import { useSelectedMark } from "~hooks/use-selected-mark"
 // 组件
 import { IconTip } from "./icon-tip"
 import { SearchTargetSelector } from "./home-search-target-selector"
 import type { WebLinkItem } from "~components/weblink-list/types"
 import { mapSourceFromWeblinkList } from "~utils/weblink"
+import { sendToBackground } from "@plasmohq/messaging"
+import { SelectedContentList } from "~components/selected-content-list"
+import { useSearchQuickActionStore } from "~stores/search-quick-action"
 
 const TextArea = Input.TextArea
 
@@ -45,52 +60,88 @@ const Home = (props: ChatProps) => {
   const inputRef = useRef<RefTextAreaType>()
   const weblinkListRef = useRef(null)
 
+  // stores
   const quickActionStore = useQuickActionStore()
   const chatStore = useChatStore()
   const messageStateStore = useMessageStateStore()
   const siderStore = useSiderStore()
   const webLinkStore = useWeblinkStore()
   const { searchTarget } = useSearchStateStore()
+  const contentSelectorStore = useContentSelectorStore()
+  const searchQuickActionStore = useSearchQuickActionStore()
+  const searchStateStore = useSearchStateStore()
 
   // hooks
-  const { runTask, runQuickActionTask } = useBuildThreadAndRun()
-  const { isWebLinkIndexed, uploadingStatus, handleUploadWebsite } =
-    useStoreWeblink()
+  const { runTask } = useBuildThreadAndRun()
+  const { handleUploadWebsite } = useStoreWeblink()
 
   const { buildShutdownTaskAndGenResponse } = useBuildTask()
   const isIntentActive = !!quickActionStore.selectedText
-  console.log("selectedText", quickActionStore.selectedText)
 
   const handleSendMessage = async () => {
-    // 如果是当前网页的快捷操作，那么先上传 Website
-    // TODO: 这里后续需要处理去重
-    if (searchTarget === SearchTarget.CurrentPage) {
-      await handleUploadWebsite(window.location.href)
+    const { newQAText } = useChatStore.getState()
+    const { searchTarget } = useSearchStateStore.getState()
+
+    if (!newQAText) {
+      message.info("提问内容不能为空")
+      return
     }
 
-    // 对当前网页进行快速操作
-    runQuickActionTask({
-      filter: {
-        weblinkList: [
-          {
-            pageContent: "",
-            metadata: {
-              title: document?.title || "",
-              source: location.href,
-            },
-            score: -1,
-          } as Source,
-        ],
-      },
-    })
+    // 先存储 link， 在进行提问操作，这里理论上是需要有个 negotiate 的过程
+    if (searchTarget === SearchTarget.CurrentPage) {
+      message.loading("处理内容中...")
+      const res = await handleUploadWebsite(window.location.href)
+
+      if (res.success) {
+        message.success("处理成功，正在跳转到会话页面...")
+      } else {
+        message.error("处理失败！")
+      }
+    }
+
+    runTask()
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    e.stopPropagation()
+    if (e.keyCode === 13 && (e.ctrlKey || e.shiftKey || e.metaKey)) {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        // 阻止默认行为,即不触发 enter 键的默认事件
+        e.preventDefault()
+        // 在输入框中插入换行符
 
-    if (e.keyCode === 13) {
+        // 获取光标位置
+        const cursorPos = e.target.selectionStart
+        // 在光标位置插入换行符
+        e.target.value =
+          e.target.value.slice(0, cursorPos) +
+          "\n" +
+          e.target.value.slice(cursorPos)
+        // 将光标移动到换行符后面
+        e.target.selectionStart = e.target.selectionEnd = cursorPos + 1
+      }
+    }
+
+    if (e.keyCode === 13 && !e.ctrlKey && !e.shiftKey && !e.metaKey) {
+      e.preventDefault()
       handleSendMessage()
     }
+  }
+
+  const getInputText = () => {
+    const { showSelectedMarks } = useContentSelectorStore.getState()
+    const { searchTarget } = useSearchStateStore.getState()
+
+    if (showSelectedMarks) return "基于实时选择内容提问..."
+    if (searchTarget === SearchTarget.SelectedPages)
+      return "对选中的网页进行提问..."
+    if (searchTarget === SearchTarget.CurrentPage)
+      return "对当前网页进行提问..."
+    if (searchTarget === SearchTarget.SearchEnhance)
+      return "输入关键词进行网络搜索..."
+    if (searchTarget === SearchTarget.All) return "对历史所有网页进行提问..."
   }
 
   // 自动聚焦输入框
@@ -111,19 +162,6 @@ const Home = (props: ChatProps) => {
       }}>
       <ChatHeader />
       <div className="footer input-panel">
-        {isWebLinkIndexed ? (
-          <Alert
-            type="success"
-            content="此网页已经被索引，可以直接提问！"
-            closable
-          />
-        ) : (
-          <Alert
-            type="warning"
-            content="此网页未索引，点击下方「阅读」可索引！"
-            closable
-          />
-        )}
         <div className="refly-slogan">The answer engine for your work</div>
         <div className="actions">
           {messageStateStore.taskType === TASK_TYPE.CHAT &&
@@ -149,7 +187,7 @@ const Home = (props: ChatProps) => {
             onChange={(value) => {
               chatStore.setNewQAText(value)
             }}
-            placeholder="Search For Refly..."
+            placeholder={getInputText()}
             onKeyDownCapture={(e) => handleKeyDown(e)}
             autoSize={{ minRows: 4, maxRows: 4 }}
             onCompositionStart={(e) => console.log("composition start")}
@@ -164,58 +202,64 @@ const Home = (props: ChatProps) => {
           <div>
             <div className="toolbar">
               <Space>
-                {/* <Button
-                  onClick={() => {
-                    handleCreateNewConversation()
+                <ContentSelectorBtn
+                  handleChangeSelector={() => {
+                    // 如果进行选中之后，则切换成选择当前网页，属于一种快捷方式
+                    searchStateStore.setSearchTarget(SearchTarget.CurrentPage)
                   }}
-                  icon={<IconPlus />}
-                  type="text"
-                  shape="round">
-                  新会话
-                </Button> */}
+                />
+                <SearchTargetSelector
+                  showText
+                  handleChangeSelector={(searchTarget) => {
+                    // 非当前网页时，则清空内容
+                    if (searchTarget !== SearchTarget.CurrentPage) {
+                      contentSelectorStore.resetState()
+                    }
 
-                <IconTip text="处理当前网页用于问答">
-                  <Button
-                    onClick={async () => {
-                      handleSendMessage()
-                    }}
-                    icon={<IconUpload />}
-                    loading={uploadingStatus === "loading" ? true : false}
-                    type="text"
-                    style={{ marginRight: 0 }}
-                    shape="round">
-                    {uploadingStatus === "loading" ? "阅读中" : "阅读"}
-                  </Button>
-                </IconTip>
-
-                <SearchTargetSelector showText />
+                    if (
+                      [SearchTarget.All, SearchTarget.SearchEnhance].includes(
+                        searchTarget,
+                      )
+                    ) {
+                      searchQuickActionStore.setShowQuickAction(false)
+                    }
+                  }}
+                />
               </Space>
               <Button
                 shape="circle"
                 icon={<IconSend />}
                 style={{ color: "#FFF", background: "#00968F" }}
-                onClick={() => runTask()}></Button>
+                onClick={() => handleSendMessage()}></Button>
             </div>
           </div>
         </div>
-        {webLinkStore?.selectedRow?.length > 0 ? (
-          <SelectedWeblink
-            closable={true}
-            selectedWeblinkList={mapSourceFromWeblinkList(
-              webLinkStore.selectedRow || [],
-            )}
-          />
+        {webLinkStore?.selectedRow?.length > 0
+          ? [
+              <SelectedWeblink
+                closable={true}
+                selectedWeblinkList={mapSourceFromWeblinkList(
+                  webLinkStore.selectedRow || [],
+                )}
+              />,
+              <Divider />,
+            ]
+          : null}
+        {searchQuickActionStore.showQuickAction ? <QuickAction /> : null}
+        {contentSelectorStore?.showSelectedMarks ? (
+          <SelectedContentList marks={contentSelectorStore.marks} />
         ) : null}
-        {webLinkStore?.selectedRow?.length > 0 ? <QuickAction /> : null}
       </div>
 
       <WeblinkList
         ref={weblinkListRef}
-        getPopupContainer={() =>
-          document
-            .querySelector("plasmo-csui")
+        getPopupContainer={() => {
+          const elem = document
+            .querySelector("#refly-main-app")
             ?.shadowRoot?.querySelector(".main")
-        }
+
+          return elem as HTMLElement
+        }}
       />
     </div>
   )
