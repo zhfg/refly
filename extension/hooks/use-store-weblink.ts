@@ -20,6 +20,19 @@ export const useStoreWeblink = () => {
     // setIsUpdatingWebiste(true)
     setUploadingStatus("loading")
 
+    // 先 ping 一下，如果已经上传就不传了
+    const pingRes = await sendToBackground({
+      name: "pingWebLinkStatus",
+      body: {
+        url,
+      },
+    })
+
+    // 如果处理成功，就直接返回
+    if (pingRes?.data?.status === "ok") {
+      return pingRes
+    }
+
     const description = document.head.querySelector('meta[name="description"]')
     const pageContent = removeUnusedHtmlNode()
 
@@ -44,7 +57,6 @@ export const useStoreWeblink = () => {
       },
     })
 
-    console.log("storeWeblink", res)
     await delay(2000)
 
     setTimeout(() => {

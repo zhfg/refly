@@ -5,6 +5,7 @@ import {
   Space,
   Input,
   Breadcrumb,
+  Message as message,
 } from "@arco-design/web-react"
 import { IconMinusCircle, IconSend } from "@arco-design/web-react/icon"
 
@@ -28,6 +29,7 @@ import { useSearchQuickActionStore } from "~stores/search-quick-action"
 import { QuickAction } from "~components/home/quick-action"
 import { useContentSelectorStore } from "~stores/content-selector"
 import { SelectedContentList } from "~components/selected-content-list"
+import { useStoreWeblink } from "~hooks/use-store-weblink"
 
 interface ThreadItemProps {
   sessions: SessionItem[]
@@ -67,6 +69,8 @@ export const ThreadItem = (props: ThreadItemProps) => {
   const messageStateStore = useMessageStateStore()
   const { buildShutdownTaskAndGenResponse, buildTaskAndGenReponse } =
     useBuildTask()
+
+  const { handleUploadWebsite } = useStoreWeblink()
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.keyCode === 13 && (e.ctrlKey || e.shiftKey || e.metaKey)) {
@@ -110,19 +114,63 @@ export const ThreadItem = (props: ThreadItemProps) => {
     if (searchTarget === SearchTarget.All) return "对历史所有网页进行追问..."
   }
 
-  const handleAskFollowing = () => {
+  const handleAskFollowing = async () => {
     // TODO: 这里需要 follow 之前的 filter 进行提问
     const { newQAText } = useChatStore.getState()
+    const { marks } = useContentSelectorStore.getState()
+
+    if (!newQAText) {
+      message.info("提问内容不能为空")
+      return
+    }
+
+    const searchTarget = threadSearchTarget
+
+    // 先存储 link， 在进行提问操作，这里理论上是需要有个 negotiate 的过程
+    if (searchTarget === SearchTarget.CurrentPage) {
+      message.loading("处理内容中...")
+      const res = await handleUploadWebsite(window.location.href)
+
+      if (res.success) {
+        message.success("处理成功，生成回答中...")
+      } else {
+        message.error("处理失败！")
+      }
+    }
+
+    let selectedWebLink = []
+
+    if (threadSearchTarget === SearchTarget.CurrentPage) {
+      selectedWebLink = [
+        {
+          pageContent: "",
+          metadata: {
+            title: document?.title || "",
+            source: location.href,
+          },
+          score: -1, // 手工构造
+          selections: marks?.map((item) => ({
+            type: "text",
+            xPath: item?.xPath,
+            content: item?.data,
+          })),
+        },
+      ]
+    } else {
+      const useWeblinkList =
+        threadSearchTarget === SearchTarget.SelectedPages &&
+        threadWeblinkListFilter?.length > 0
+
+      selectedWebLink = useWeblinkList ? threadWeblinkListFilter : []
+    }
+
     const { currentConversation } = useConversationStore.getState()
-    const useWeblinkList =
-      threadSearchTarget === SearchTarget.SelectedPages &&
-      threadWeblinkListFilter?.length > 0
 
     const task = buildChatTask({
       question: newQAText,
       conversationId: currentConversation?.id || "",
       filter: {
-        weblinkList: useWeblinkList ? threadWeblinkListFilter : [],
+        weblinkList: selectedWebLink,
       },
     })
 
