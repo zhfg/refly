@@ -91,7 +91,7 @@ export const ThreadSearchTargetSelector = (
   }
 
   return (
-    <IconTip text={getDisplayText(props.searchTarget) || "选择搜索模式"}>
+    <IconTip text={getDisplayText(props.searchTarget) || "选择提问范围"}>
       <Dropdown
         droplist={searchTargetDropList}
         trigger="hover"

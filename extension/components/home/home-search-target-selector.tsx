@@ -102,7 +102,7 @@ export const SearchTargetSelector = (props: SearchTargetSelectorProps) => {
   }
 
   return (
-    <IconTip text="选择搜索模式">
+    <IconTip text="选择提问范围">
       <Dropdown
         droplist={searchTargetDropList}
         trigger="hover"
