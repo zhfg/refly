@@ -119,9 +119,9 @@ const Home = () => {
           <div>
             <SearchBox />
             <div className="search-assist-container">
-              <Button icon={<IconBulb />} className="search-assist-btn">
+              {/* <Button icon={<IconBulb />} className="search-assist-btn">
                 换一批推荐
-              </Button>
+              </Button> */}
               <Button
                 icon={<IconHistory />}
                 className="search-assist-btn"

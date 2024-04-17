@@ -69,9 +69,10 @@ export const useSelectedMark = () => {
   }
 
   const handleResetState = () => {
+    handleToggleContentSelector(false)
+
     resetState()
     handleExit()
-    handleToggleContentSelector(false)
   }
 
   useEffect(() => {
