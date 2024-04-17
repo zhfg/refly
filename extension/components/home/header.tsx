@@ -13,18 +13,27 @@ import { useSiderStore } from "~stores/sider"
 import { useNavigate } from "react-router-dom"
 import { getClientOrigin } from "~utils/url"
 import { useUserStore } from "~stores/user"
+import { useHomeStateStore } from "~stores/home-state"
+import { useSelectedMark } from "~hooks/use-selected-mark"
 
 export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
   const { onlyShowClose = false } = props
   const siderStore = useSiderStore()
   const navigate = useNavigate()
   const { userProfile } = useUserStore()
+  const homeStateStore = useHomeStateStore()
+  const { handleResetState } = useSelectedMark()
 
   const showBtn = !!userProfile?.id
 
   return (
     <header>
-      <div className="brand" onClick={() => navigate("/")}>
+      <div
+        className="brand"
+        onClick={() => {
+          window.open(`${getClientOrigin()}/`, "_blank")
+          homeStateStore.setActiveTab("home")
+        }}>
         {onlyShowClose ? null : (
           <>
             <img src={Logo} alt="Refly" />
@@ -39,9 +48,7 @@ export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
               src={FullScreenSVG}
               alt="全屏"
               style={{ marginRight: 12 }}
-              onClick={() =>
-                window.open(`${getClientOrigin()}/dashboard`, "_blank")
-              }
+              onClick={() => window.open(`${getClientOrigin()}/`, "_blank")}
             />
           </IconTip>
         )}
@@ -77,7 +84,10 @@ export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
           <img
             src={CloseGraySVG}
             alt="关闭"
-            onClick={(_) => siderStore.setShowSider(false)}
+            onClick={(_) => {
+              siderStore.setShowSider(false)
+              handleResetState()
+            }}
           />
         </IconTip>
       </div>

@@ -131,7 +131,9 @@ export const DigestTopicDetail = () => {
         <Breadcrumb>
           <BreadcrumbItem href="/">主页</BreadcrumbItem>
           <BreadcrumbItem href="/digest/topics">所有主题</BreadcrumbItem>
-          <BreadcrumbItem href={`/digest/topic/${currentTopicDetail?.id}`}>
+          <BreadcrumbItem
+            className="breadcrum-description"
+            href={`/digest/topic/${currentTopicDetail?.id}`}>
             {currentTopicDetail?.topic?.name}
           </BreadcrumbItem>
         </Breadcrumb>

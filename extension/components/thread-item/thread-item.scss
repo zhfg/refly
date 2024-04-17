@@ -198,3 +198,9 @@
     color: rgba(0, 0, 0, 0.8) !important;
   }
 }
+
+.thread-library-list-item-icon {
+  &:hover {
+    cursor: pointer;
+  }
+}

@@ -136,7 +136,8 @@ export const QuickAction = () => {
               </Button>
             </IconTip>
           ) : null}
-          {showTranslateOrExplain
+          {/* 后续快捷操作拓展之后实现 */}
+          {/* {showTranslateOrExplain
             ? [
                 <IconTip text={getText("翻译")}>
                   <Button
@@ -157,7 +158,7 @@ export const QuickAction = () => {
                   </Button>
                 </IconTip>,
               ]
-            : null}
+            : null} */}
           <IconTip text={"保存此网页以供后续阅读"}>
             <Button
               onClick={() => handleStoreForLater()}

@@ -89,7 +89,7 @@ export const ThreadSearchTargetSelector = (
         trigger="hover"
         position="bottom">
         <Button
-          icon={getDisplayIcon(props.searchTarget)}
+          icon={getDisplayIcon(props.searchTarget || SearchTarget.All)}
           type="text"
           style={
             props.showText ? {} : { width: 42, height: 32, borderRadius: 16 }

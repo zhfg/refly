@@ -133,20 +133,22 @@ export class ConversationService {
       });
     }
 
+    // 如果有 cssSelector，则代表从基于选中的内容进行提问，否则根据上下文进行相似度匹配召回
+    const chatFromClientSelector = task?.data?.filter?.weblinkList?.find(
+      (item) => item?.selections?.length > 0,
+    );
+
     // 前置的数据处理
     const query = task?.data?.question;
     const llmChatMessages = chatHistory
       ? chatHistory.map((msg) => createLLMChatMessage(msg.content, msg.type))
       : [];
+    // 如果是基于选中内容提问的话，则不需要考虑上下文
     const questionWithContext =
-      chatHistory.length === 0
+      chatHistory.length === 0 || chatFromClientSelector
         ? query
         : await this.llmService.getContextualQuestion(query, llmChatMessages);
 
-    // 如果有 cssSelector，则代表从基于选中的内容进行提问，否则根据上下文进行相似度匹配召回
-    const chatFromClientSelector = task?.data?.filter?.weblinkList?.find(
-      (item) => item?.selections?.length > 0,
-    );
     const sources = chatFromClientSelector
       ? await this.weblinkService.parseMultiWeblinks(
           task?.data?.filter?.weblinkList,

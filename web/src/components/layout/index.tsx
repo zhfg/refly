@@ -35,6 +35,7 @@ export const AppLayout = (props: AppLayoutProps) => {
   const routeDigestDetailPageMatch = useMatch("/digest/:digestId")
   const routeFeedDetailPageMatch = useMatch("/feed/:feedId")
   const routeAIGCContentDetailPageMatch = useMatch("/content/:digestId")
+  const routeThreadDetailPageMatch = useMatch("/thread/:threadId")
 
   // 绑定快捷键
   useBindCommands()
@@ -54,7 +55,8 @@ export const AppLayout = (props: AppLayoutProps) => {
           !(
             routeDigestDetailPageMatch ||
             routeFeedDetailPageMatch ||
-            routeAIGCContentDetailPageMatch
+            routeAIGCContentDetailPageMatch ||
+            routeThreadDetailPageMatch
           )
         ) {
           navigate("/")

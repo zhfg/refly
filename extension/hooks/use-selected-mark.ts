@@ -6,6 +6,8 @@ import { safeParseJSON } from "~utils/parse"
 
 export const useSelectedMark = () => {
   const contentSelectorStore = useContentSelectorStore()
+  const { setMarks, setShowSelectedMarks, resetState } =
+    useContentSelectorStore()
 
   // 从 content-selector-app 获取信息，以此和 main-app 解耦合
   const contentSelectedHandler = (event: MessageEvent<any>) => {
@@ -17,10 +19,8 @@ export const useSelectedMark = () => {
     }
   }
 
-  const handleToggleContentSelector = () => {
-    contentSelectorStore.setShowContentSelector(
-      !contentSelectorStore.showContentSelector,
-    )
+  const handleToggleContentSelector = (showContentSelector: boolean) => {
+    contentSelectorStore.setShowContentSelector(showContentSelector)
 
     // 这里打开
     if (!contentSelectorStore.showContentSelector) {
@@ -38,9 +38,41 @@ export const useSelectedMark = () => {
     window.postMessage({
       name: "setShowContentSelector",
       payload: {
-        showContentSelector: !contentSelectorStore.showContentSelector,
+        showContentSelector,
       },
     })
+  }
+
+  const handleRemoveMark = (xPath: string) => {
+    window.postMessage({
+      name: "removeSelectedMark",
+      payload: {
+        xPath,
+      },
+    })
+
+    const { marks } = useContentSelectorStore.getState()
+    const newMarks = marks.filter((item) => item?.xPath !== xPath)
+    setMarks(newMarks)
+  }
+
+  const handleRemoveAll = () => {
+    window.postMessage({
+      name: "removeAllSelectedMark",
+    })
+  }
+
+  const handleExit = () => {
+    handleRemoveAll()
+
+    setShowSelectedMarks(false)
+  }
+
+  const handleResetState = () => {
+    handleToggleContentSelector(false)
+
+    resetState()
+    handleExit()
   }
 
   useEffect(() => {
@@ -53,5 +85,9 @@ export const useSelectedMark = () => {
 
   return {
     handleToggleContentSelector,
+    handleExit,
+    handleRemoveAll,
+    handleResetState,
+    handleRemoveMark,
   }
 }

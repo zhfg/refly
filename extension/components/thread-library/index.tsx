@@ -120,6 +120,10 @@ export const ThreadLibrary = () => {
 
   useEffect(() => {
     fetchData()
+
+    return () => {
+      threadStore.resetState()
+    }
   }, [isThreadLibrary])
 
   return (

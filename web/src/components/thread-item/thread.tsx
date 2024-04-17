@@ -86,7 +86,10 @@ export const Thread = () => {
     chatStore.setNewQAText(newQAText)
   }
 
-  const handleAskFollowing = (question?: string, taskType?: TASK_TYPE) => {
+  const handleAskFollowing = (
+    question?: string,
+    taskType: TASK_TYPE = TASK_TYPE.CHAT,
+  ) => {
     // support ask follow up question
     let newQuestion = ""
     if (typeof question === "string" && question) {
@@ -98,8 +101,6 @@ export const Thread = () => {
     const { currentConversation } = useConversationStore.getState()
     const { messages } = useChatStore.getState()
     const selectedWeblinkConfig = getSelectedWeblinkConfig(messages)
-
-    console.log("handleAskFollowing", newQuestion)
 
     const useWeblinkList =
       selectedWeblinkConfig?.searchTarget === SearchTarget.SelectedPages &&
@@ -160,7 +161,6 @@ export const Thread = () => {
       // 重置状态
       chatStore.setNewQAText("")
       weblinkStore.updateSelectedRow([])
-      conversationStore.resetState()
       searchStateStore.setSearchTarget(SearchTarget.CurrentPage)
     } catch (err) {
       console.log("thread error")
@@ -173,6 +173,10 @@ export const Thread = () => {
     if (params?.threadId) {
       console.log("params", params)
       handleThread(params?.threadId as string)
+    }
+
+    return () => {
+      conversationStore.resetState()
     }
   }, [params?.threadId])
 

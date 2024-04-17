@@ -26,7 +26,7 @@ export const ContentSelectorBtn = (props: ContentSelectorBtnProps) => {
       props?.handleChangeSelector?.(SearchTarget.CurrentPage)
     }
 
-    handleToggleContentSelector()
+    handleToggleContentSelector(!showContentSelector)
   }
 
   const getBtnType = () => {

@@ -25,6 +25,7 @@ import { useContentSelectorStore } from "~stores/content-selector"
 export const useBuildThreadAndRun = () => {
   const chatStore = useChatStore()
   const conversationStore = useConversationStore()
+  const { handleResetState } = useSelectedMark()
   const { resetState } = useResetState()
   const taskStore = useTaskStore()
   const navigate = useNavigate()
@@ -115,6 +116,8 @@ export const useBuildThreadAndRun = () => {
       },
     })
 
+    // 退出 content selector
+    handleResetState()
     // 创建新会话并跳转
     handleCreateNewConversation(task)
   }

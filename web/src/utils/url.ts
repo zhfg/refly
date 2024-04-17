@@ -25,11 +25,11 @@ export const getCookieOrigin = () => {
 
 export const getExtensionId = () => {
   if (overrideLocalDev) {
-    return "fcncfleeddfdpbigljgiejfdkmpkldpe"
+    return "lecbjbapfkinmikhadakbclblnemmjpd"
   }
 
   return getEnv() === IENV.DEVELOPMENT
-    ? "fcncfleeddfdpbigljgiejfdkmpkldpe"
+    ? "lecbjbapfkinmikhadakbclblnemmjpd"
     : "lecbjbapfkinmikhadakbclblnemmjpd"
 }
 
