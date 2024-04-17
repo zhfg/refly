@@ -29,6 +29,7 @@ import copyToClipboard from "copy-to-clipboard"
 import { delay } from "@/utils/delay"
 // fake data
 import { fakeSourceSummary } from "@/fake-data/source"
+import { safeParseURL } from "@/utils/url"
 
 interface SessionProps {
   session: SessionItem
@@ -214,7 +215,7 @@ export const Session = (props: SessionProps) => {
                               fontSize: 10,
                               color: "rgba(0, 0, 0, .4)",
                             }}>
-                            · {new URL(item.metadata?.source || "")?.origin} ·
+                            · {safeParseURL(item.metadata?.source || "")} ·
                           </Typography.Paragraph>
                         </span>
                       </a>,

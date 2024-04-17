@@ -17,6 +17,7 @@ import { useWeblinkStore } from "@/stores/weblink"
 import getWeblinkList from "@/requests/getWeblinkList"
 // styles
 import "./index.scss"
+import { safeParseURL } from "@/utils/url"
 
 const WebLinkItem = (props: { weblink: WebLinkItem }) => {
   const {
@@ -27,7 +28,7 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
     originPageUrl,
     indexStatus,
   } = props?.weblink || {}
-  const urlItem = new URL(url || "")
+  const urlItem = safeParseURL(url || "")
   console.log("weblink rerender")
 
   return (
