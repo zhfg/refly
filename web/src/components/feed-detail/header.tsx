@@ -18,7 +18,9 @@ export const Header = (props: HeaderProps) => {
       <div>
         <Breadcrumb>
           <BreadcrumbItem href="/feed">探索</BreadcrumbItem>
-          <BreadcrumbItem href={`/feed/${digest?.id}`}>
+          <BreadcrumbItem
+            href={`/feed/${digest?.id}`}
+            className="breadcrum-description">
             {digest?.title}
           </BreadcrumbItem>
         </Breadcrumb>

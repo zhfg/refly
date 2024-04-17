@@ -86,7 +86,10 @@ export const Thread = () => {
     chatStore.setNewQAText(newQAText)
   }
 
-  const handleAskFollowing = (question?: string, taskType?: TASK_TYPE) => {
+  const handleAskFollowing = (
+    question?: string,
+    taskType: TASK_TYPE = TASK_TYPE.CHAT,
+  ) => {
     // support ask follow up question
     let newQuestion = ""
     if (typeof question === "string" && question) {
