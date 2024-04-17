@@ -12,7 +12,7 @@ export let CLIENT_PROD_DOMAIN = "https://www.refly.ai"
 export let CLIENT_DEV_DOMAIN = "http://localhost:5173"
 
 export let SERVERLESS_WORKER_DEV_DOMAIN = "http://localhost:8787"
-export let SERVERLESS_WORKER_PROD_DOMAIN = "https://api.refly.ai" // TODO：这里需要更换成实际的 worker 地址
+export let SERVERLESS_WORKER_PROD_DOMAIN = "https://worker.refly.ai" // TODO：这里需要更换成实际的 worker 地址
 
 export const getServerOrigin = () => {
   // return PROD_DOMAIN
