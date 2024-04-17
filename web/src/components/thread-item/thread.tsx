@@ -141,7 +141,6 @@ export const Thread = () => {
       const { currentConversation } = useConversationStore.getState()
       const { task } = useTaskStore.getState()
 
-      console.log("currentConversation", chatStore)
       // 新会话，需要手动构建第一条消息
       if (chatStore.isNewConversation && currentConversation?.id) {
         // 更换成基于 task 的消息模式，核心是基于 task 来处理
@@ -176,7 +175,7 @@ export const Thread = () => {
     }
 
     return () => {
-      conversationStore.resetState()
+      chatStore.resetState()
     }
   }, [params?.threadId])
 

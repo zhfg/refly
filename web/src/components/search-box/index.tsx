@@ -65,11 +65,11 @@ export const SearchBox = () => {
       return
     }
 
-    console.log("createNewConversation", res)
-    conversationStore.setCurrentConversation(res?.data as Thread)
-
     // 清空之前的状态
     resetState()
+
+    console.log("createNewConversation", res)
+    conversationStore.setCurrentConversation(res?.data as Thread)
 
     // 设置当前的任务类型及会话 id
     task.data = {
