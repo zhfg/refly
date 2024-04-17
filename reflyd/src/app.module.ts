@@ -31,6 +31,10 @@ import { AppController } from './app.controller';
             quietReqLogger: true,
             genReqId: (request: Request) => request.header('X-Ray-ID'),
             level: 'debug',
+            transport:
+              process.env.NODE_ENV !== 'production'
+                ? { target: 'pino-pretty' }
+                : undefined,
           },
         };
       },
