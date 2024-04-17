@@ -17,7 +17,7 @@ import { Session } from "./session"
 import { TASK_TYPE, type SessionItem, type Task, type Source } from "~types"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input"
 import { useBuildTask } from "~hooks/use-build-task"
-import { buildChatTask, buildQuickActionTask } from "~utils/task"
+import { buildChatTask, buildQuickActionTask, buildTask } from "~utils/task"
 import { useConversationStore } from "~stores/conversation"
 import { ThreadSearchTargetSelector } from "~components/thread-item/thread-search-target-selector"
 import { SearchTarget } from "~stores/search-state"
@@ -31,6 +31,7 @@ import { useContentSelectorStore } from "~stores/content-selector"
 import { SelectedContentList } from "~components/selected-content-list"
 import { useStoreWeblink } from "~hooks/use-store-weblink"
 import { useHomeStateStore } from "~stores/home-state"
+import { useSelectedMark } from "~hooks/use-selected-mark"
 
 interface ThreadItemProps {
   sessions: SessionItem[]
@@ -63,6 +64,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
   const conversationStore = useConversationStore()
   const searchQuickActionStore = useSearchQuickActionStore()
   const contentSelectorStore = useContentSelectorStore()
+  const { handleResetState } = useSelectedMark()
 
   const showSelectedWeblinkList =
     threadSearchTarget === SearchTarget.SelectedPages &&
@@ -168,14 +170,22 @@ export const ThreadItem = (props: ThreadItemProps) => {
 
     const { currentConversation } = useConversationStore.getState()
 
-    const task = buildChatTask({
-      question: newQAText,
-      conversationId: currentConversation?.id || "",
-      filter: {
-        weblinkList: selectedWebLink,
+    const task = buildTask({
+      taskType:
+        threadSearchTarget === SearchTarget.SearchEnhance
+          ? TASK_TYPE.SEARCH_ENHANCE_ASK
+          : TASK_TYPE.CHAT,
+      data: {
+        question: newQAText,
+        conversationId: currentConversation?.id || "",
+        filter: {
+          weblinkList: selectedWebLink,
+        },
       },
     })
 
+    // 清空选中状态
+    handleResetState()
     buildTaskAndGenReponse(task)
     chatStore.setNewQAText("")
   }
@@ -225,14 +235,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
             key={index}
             session={item}
             isLastSession={index === sessions.length - 1}
-            handleAskFollowing={(question) =>
-              props.handleAskFollowing(
-                question,
-                threadSearchTarget === SearchTarget?.SearchEnhance
-                  ? TASK_TYPE.SEARCH_ENHANCE_ASK
-                  : TASK_TYPE.CHAT,
-              )
-            }
+            handleAskFollowing={() => handleAskFollowing()}
           />
         ))}
       </div>
@@ -311,12 +314,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
                   icon={<IconSend />}
                   style={{ color: "#FFF", background: "#00968F" }}
                   onClick={() => {
-                    props.handleAskFollowing(
-                      "",
-                      threadSearchTarget === SearchTarget?.SearchEnhance
-                        ? TASK_TYPE.SEARCH_ENHANCE_ASK
-                        : TASK_TYPE.CHAT,
-                    )
+                    handleAskFollowing()
                   }}></Button>
               </div>
             </div>
