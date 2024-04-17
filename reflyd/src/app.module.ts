@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
-import { Request } from 'express';
+import api from '@opentelemetry/api';
 
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
@@ -29,7 +29,8 @@ import { AppController } from './app.controller';
             autoLogging: true,
             base: null,
             quietReqLogger: true,
-            genReqId: (request: Request) => request.header('X-Ray-ID'),
+            genReqId: () =>
+              api.trace.getSpan(api.context.active())?.spanContext()?.traceId,
             level: 'debug',
             transport:
               process.env.NODE_ENV !== 'production'
