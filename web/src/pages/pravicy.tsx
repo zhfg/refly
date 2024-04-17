@@ -63,7 +63,7 @@ We may update our Privacy Policy from time to time. We will notify you of any ch
 
 ## Contact Information
 
-To ask questions or comment about this Privacy Policy and our privacy practices, contact us at: pftom@qq.com.`
+To ask questions or comment about this Privacy Policy and our privacy practices, contact us at: [pftom@qq.com](mailto:pftom@qq.com).`
 
 const Privacy = () => {
   return (

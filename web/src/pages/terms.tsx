@@ -61,7 +61,7 @@ These Terms are governed by the laws of the jurisdiction in which ReflyAI is loc
 
 ## Contact Us
 
-If you have any questions about these Terms, please contact us at <pftom@qq.com>.`
+If you have any questions about these Terms, please contact us at [pftom@qq.com](mailto:pftom@qq.com).`
 
 const Terms = () => {
   return (
