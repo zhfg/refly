@@ -249,7 +249,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
               }
             : {}
         }>
-        {messageStateStore?.pending && (
+        {/* {messageStateStore?.pending && (
           <div className="actions">
             {messageStateStore.taskType === TASK_TYPE.CHAT &&
               messageStateStore?.pending && (
@@ -264,7 +264,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
                 </div>
               )}
           </div>
-        )}
+        )} */}
 
         <div className="session-input-box">
           <div className="session-inner-input-box">

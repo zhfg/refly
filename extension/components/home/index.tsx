@@ -164,7 +164,7 @@ const Home = (props: ChatProps) => {
       <div className="footer input-panel">
         <div className="refly-slogan">The answer engine for your work</div>
         <div className="actions">
-          {messageStateStore.taskType === TASK_TYPE.CHAT &&
+          {/* {messageStateStore.taskType === TASK_TYPE.CHAT &&
             messageStateStore?.pending && (
               <div className="stop-reponse">
                 <Button
@@ -175,7 +175,7 @@ const Home = (props: ChatProps) => {
                   停止响应
                 </Button>
               </div>
-            )}
+            )} */}
         </div>
 
         <div className="input-box">
