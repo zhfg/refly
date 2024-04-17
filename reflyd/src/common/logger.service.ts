@@ -1,6 +1,5 @@
 import { Inject, Injectable, Scope } from '@nestjs/common';
 import { PinoLogger, Params, PARAMS_PROVIDER_TOKEN } from 'nestjs-pino';
-import api from '@opentelemetry/api';
 
 @Injectable({ scope: Scope.TRANSIENT })
 export class LoggerService extends PinoLogger {
@@ -9,28 +8,10 @@ export class LoggerService extends PinoLogger {
   }
 
   log(message: any, ...optionalParams: any[]): void {
-    const activeSpan = api.trace.getSpan(api.context.active());
-    if (activeSpan) {
-      activeSpan.addEvent(message);
-      this.assign({
-        traceId: activeSpan.spanContext().traceId,
-        spanId: activeSpan.spanContext().spanId,
-      });
-    }
-
-    this.info(message, ...optionalParams);
+    this.logger.info(message, ...optionalParams);
   }
 
   error(message: any, ...optionalParams: any[]): void {
-    const activeSpan = api.trace.getSpan(api.context.active());
-    if (activeSpan) {
-      activeSpan.addEvent(message);
-      this.assign({
-        traceId: activeSpan.spanContext().traceId,
-        spanId: activeSpan.spanContext().spanId,
-      });
-    }
-
-    this.error(message, ...optionalParams);
+    this.logger.error(message, ...optionalParams);
   }
 }
