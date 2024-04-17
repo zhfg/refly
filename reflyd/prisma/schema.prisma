@@ -1,6 +1,6 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters", "tracing"]
+  previewFeatures = ["tracing"]
 }
 
 datasource db {
@@ -203,7 +203,7 @@ model Weblink {
   /// 页面内容 (deprecated)
   pageContent String      @map("page_content")
   /// 对象存储 key
-  storageKey  String      @map("storage_key")
+  storageKey  String      @default("") @map("storage_key")
   /// 页面元数据, JSON 存储
   pageMeta    String      @map("page_meta")
   /// 内容元数据, JSON 存储

@@ -119,14 +119,7 @@ export class ConversationController {
       const chatHistory = await this.conversationService.getMessages(convId);
 
       let taskRes: TaskResponse;
-      if (taskType === TASK_TYPE.CHAT) {
-        taskRes = await this.conversationService.handleChatTask(
-          req,
-          res,
-          body?.task,
-          chatHistory,
-        );
-      } else if (taskType === TASK_TYPE.QUICK_ACTION) {
+      if (taskType === TASK_TYPE.QUICK_ACTION) {
         taskRes = await this.conversationService.handleQuickActionTask(
           req,
           res,
@@ -135,6 +128,13 @@ export class ConversationController {
         );
       } else if (taskType === TASK_TYPE.SEARCH_ENHANCE_ASK) {
         taskRes = await this.conversationService.handleSearchEnhanceTask(
+          req,
+          res,
+          body?.task,
+          chatHistory,
+        );
+      } else {
+        taskRes = await this.conversationService.handleChatTask(
           req,
           res,
           body?.task,
