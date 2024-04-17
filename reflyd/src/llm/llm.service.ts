@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { PrismaVectorStore } from '@langchain/community/vectorstores/prisma';
@@ -39,6 +39,7 @@ import { ContentMeta } from './dto';
 import { categoryList } from '../prompts/utils/category';
 import { Source } from '../types/weblink';
 import { SearchResultContext } from '../types/search';
+import { LoggerService } from '../common/logger.service';
 import { PrismaService } from '../common/prisma.service';
 
 @Injectable()
@@ -52,12 +53,13 @@ export class LlmService implements OnModuleInit {
   >;
   private llm: ChatOpenAI;
 
-  private readonly logger = new Logger(LlmService.name);
-
   constructor(
+    private logger: LoggerService,
     private prisma: PrismaService,
     private configService: ConfigService,
-  ) {}
+  ) {
+    this.logger.setContext(LlmService.name);
+  }
 
   async onModuleInit() {
     this.embeddings = new OpenAIEmbeddings({
@@ -420,7 +422,7 @@ export class LlmService implements OnModuleInit {
 
     const retrievalResults = await this.retrieval(query, filter);
 
-    console.log('retrievalResults', retrievalResults);
+    this.logger.log('retrievalResults', retrievalResults);
 
     const retrievedDocs = retrievalResults.map((res) => ({
       metadata: res?.metadata,
@@ -520,7 +522,7 @@ export class LlmService implements OnModuleInit {
       }
       return contexts.slice(0, REFERENCE_COUNT);
     } catch (e) {
-      console.error(`Error encountered: ${JSON.stringify(jsonContent)}`);
+      this.logger.error(`Error encountered: ${JSON.stringify(jsonContent)}`);
       return [];
     }
   }

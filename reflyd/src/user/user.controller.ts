@@ -2,10 +2,13 @@ import { Controller, Get, Request, UseGuards } from '@nestjs/common';
 
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { UserService } from './user.service';
+import { LoggerService } from '../common/logger.service';
 
 @Controller('user')
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(private logger: LoggerService, private userService: UserService) {
+    this.logger.setContext(UserController.name);
+  }
 
   @UseGuards(JwtAuthGuard)
   @Get('topics')

@@ -6,17 +6,19 @@ import { User } from '@prisma/client';
 import { AccountService } from '../account/account.service';
 import { UserService } from '../user/user.service';
 import { JwtPayload } from './dto';
+import { LoggerService } from '../common/logger.service';
 
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(AuthService.name);
-
   constructor(
+    private logger: LoggerService,
     private configService: ConfigService,
     private accountService: AccountService,
     private userService: UserService,
     private jwtService: JwtService,
-  ) {}
+  ) {
+    this.logger.setContext(AuthService.name);
+  }
 
   async validateEmailPass(email: string, pass: string) {
     const user = await this.userService.findUnique({ email });
