@@ -47,3 +47,11 @@ export function isJSON(variable: any): boolean {
     return false
   }
 }
+
+export const safeParseUrl = (url: string) => {
+  try {
+    return new URL(url)?.origin
+  } catch (error) {
+    return url
+  }
+}

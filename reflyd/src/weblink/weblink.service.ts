@@ -1,27 +1,48 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Prisma, Weblink } from '@prisma/client';
 import { Queue } from 'bull';
+import { LRUCache } from 'lru-cache';
 import { InjectQueue } from '@nestjs/bull';
+import * as cheerio from 'cheerio';
 import { Document } from '@langchain/core/documents';
 import { CheerioWebBaseLoader } from 'langchain/document_loaders/web/cheerio';
 
 import { LoggerService } from '../common/logger.service';
 import { PrismaService } from '../common/prisma.service';
+import { MinioService } from '../common/minio.service';
 import { AigcService } from '../aigc/aigc.service';
 import { WebLinkDTO } from './dto';
 import { getExpectedTokenLenContent } from '../utils/token';
-import { Source } from '../types/weblink';
+import { PageMeta, Source } from '../types/weblink';
 import { QUEUE_STORE_LINK } from '../utils/const';
+import { ConfigService } from '@nestjs/config';
+import { streamToString } from '../utils/stream';
 
 @Injectable()
 export class WeblinkService {
+  private cache: LRUCache<string, string>; // url -> document
+  private bucketName: string;
+
   constructor(
     private logger: LoggerService,
     private prisma: PrismaService,
+    private minio: MinioService,
+    private configService: ConfigService,
     private aigcService: AigcService,
     @InjectQueue(QUEUE_STORE_LINK) private indexQueue: Queue<WebLinkDTO>,
   ) {
     this.logger.setContext(WeblinkService.name);
+    this.cache = new LRUCache({
+      max: 1000,
+    });
+    this.bucketName = this.configService.getOrThrow('minio.weblinkBucket');
+  }
+
+  async checkWeblinkExists(url: string) {
+    return this.prisma.weblink.findUnique({
+      select: { id: true },
+      where: { url },
+    });
   }
 
   /**
@@ -50,7 +71,24 @@ export class WeblinkService {
 
     // Send to queue in a non-block style
     // linkMap.forEach((link) => this.indexQueue.add('indexWebLink', link));
-    linkMap.forEach((link) => this.processLinkFromStoreQueue(link));
+    try {
+      linkMap.forEach((link) => this.processLinkFromStoreQueue(link));
+    } catch (err) {
+      this.logger.error(`process weblink err: ${err}`);
+    }
+  }
+
+  async createNewLink(link: WebLinkDTO, pageMeta: PageMeta) {
+    return this.prisma.weblink.create({
+      data: {
+        url: link.url,
+        indexStatus: 'processing',
+        pageContent: '', // deprecated, always empty
+        storageKey: link.storageKey,
+        pageMeta: JSON.stringify(pageMeta),
+        contentMeta: '',
+      },
+    });
   }
 
   async getUserHistory(params: {
@@ -63,7 +101,40 @@ export class WeblinkService {
     return this.prisma.userWeblink.findMany(params);
   }
 
+  /**
+   * Parse the content of a webpage link using cheerio.
+   *
+   * @param {string} url - The URL of the webpage to parse
+   * @return {Promise<Document>} A Promise that resolves to the parsed document
+   */
   async parseWebLinkContent(url: string): Promise<Document> {
+    // Check if the document is in the cache
+    if (this.cache.has(url)) {
+      this.logger.log(`in-mem cache hit: ${url}`);
+      return JSON.parse(this.cache.get(url));
+    }
+
+    // Check if the document is in the database
+    const weblink = await this.prisma.weblink.findUnique({
+      select: { storageKey: true, pageMeta: true },
+      where: { url },
+    });
+    if (weblink) {
+      this.logger.log(`found weblink in db: ${url}`);
+      const content = await this.minio.getObject(
+        this.bucketName,
+        weblink.storageKey,
+      );
+
+      const doc = new Document({
+        pageContent: await streamToString(content),
+        metadata: JSON.parse(weblink.pageMeta),
+      });
+      this.cache.set(url, JSON.stringify(doc));
+      return doc;
+    }
+
+    // Finally tries to fetch the content from the web
     try {
       const loader = new CheerioWebBaseLoader(url, {
         maxRetries: 3,
@@ -71,15 +142,51 @@ export class WeblinkService {
       });
 
       // customized webpage loading
+      // TODO: remove this in the future
       const $ = await loader.scrape();
       // remove all styles and scripts tag
-      $('script, style').remove();
+      $('script, style, plasmo-csui, img, svg, meta, link').remove();
+      // remove comments blocks
+      $('body')
+        .contents()
+        .each((i, node) => {
+          if (node.type === 'comment') {
+            $(node).remove();
+          }
+        });
+
       // only get meaning content
-      const pageContent = $(loader.selector).text();
+      const pageContent = $.html();
       const title = $('title').text();
       const source = loader.webPath;
+      const doc = { pageContent, metadata: { title, source } };
+      this.cache.set(url, JSON.stringify(doc));
+      return doc;
+    } catch (err) {
+      this.logger.error(`process url ${url} failed: ${err}`);
+      return null;
+    }
+  }
 
-      return { pageContent, metadata: { title, source } };
+  /**
+   * Directly parse html content.
+   * @param pageContent raw html page content
+   * @returns nothing
+   */
+  async downloadWebLinkContent(
+    url: string,
+    storageKey: string,
+  ): Promise<Document> {
+    try {
+      const stream = await this.minio.getObject(this.bucketName, storageKey);
+      const content = await streamToString(stream);
+      const $ = cheerio.load(content);
+
+      // only get meaning content
+      const title = $('title').text();
+      const source = url;
+
+      return { pageContent: content, metadata: { title, source } };
     } catch (err) {
       this.logger.error(`process url ${url} failed: ${err}`);
       return null;
@@ -95,18 +202,67 @@ export class WeblinkService {
     // 处理 token 窗口，一共给 6K 窗口用于问答，平均分到每个网页，保障可用性
     const avgTokenLen = 6000 / weblinkList?.length;
 
+    const results = await Promise.all<Document[]>(
+      weblinkList.map(async (item) => {
+        // If selections are provided, use the selected content
+        if (item.selections?.length > 0) {
+          return item.selections.map(({ content }) => ({
+            pageContent: content,
+            metadata: item.metadata,
+          }));
+        }
+
+        const { pageContent, metadata } = await this.parseWebLinkContent(
+          item.metadata?.source,
+        );
+        return [
+          {
+            pageContent:
+              getExpectedTokenLenContent(pageContent, avgTokenLen) || '',
+            metadata,
+          },
+        ];
+      }),
+    );
+
+    return results.flat();
+  }
+
+  async saveWeblinkUserMarks(param: {
+    userId: number;
+    weblinkList: Source[];
+    extensionVersion?: string;
+  }) {
+    const { userId, weblinkList, extensionVersion = '' } = param;
+    const weblinks = await this.prisma.weblink.findMany({
+      select: { id: true, url: true },
+      where: {
+        url: { in: weblinkList.map((item) => item.metadata.source) },
+      },
+    });
+    const weblinkIdMap = weblinks.reduce((map, item) => {
+      map.set(item.url, item.id);
+      return map;
+    }, new Map<string, number>());
+    this.logger.log(`weblinkIdMap: ${JSON.stringify(weblinkIdMap)}`);
+
     return Promise.all(
       weblinkList.map(async (item) => {
-        const { pageContent, metadata } = await this.parseWebLinkContent(
-          item?.metadata?.source,
-        );
-        const truncateStr =
-          getExpectedTokenLenContent(pageContent, avgTokenLen) || '';
+        if (item.selections?.length > 0) {
+          const url = item.metadata.source;
+          if (!weblinkIdMap.has(url)) return;
 
-        return {
-          pageContent: truncateStr,
-          metadata,
-        };
+          return this.prisma.weblinkUserMark.createMany({
+            data: item.selections.map((selector) => ({
+              userId,
+              weblinkId: weblinkIdMap.get(url),
+              linkHost: new URL(url).hostname,
+              selector: selector.xPath,
+              markType: '',
+              extensionVersion,
+            })),
+          });
+        }
       }),
     );
   }
@@ -138,17 +294,21 @@ export class WeblinkService {
         originPageUrl: link.originPageUrl,
         originPageTitle: link.originPageTitle,
         originPageDescription: link.originPageDescription,
-        lastVisitTime: new Date(link.lastVisitTime),
-        visitTimes: link.visitCount,
-        totalReadTime: link.readTime,
+        lastVisitTime: !!link.lastVisitTime
+          ? new Date(link.lastVisitTime)
+          : new Date(),
+        visitTimes: link.visitCount || 1,
+        totalReadTime: link.readTime || 0,
       },
       update: {
-        lastVisitTime: new Date(link.lastVisitTime),
-        visitTimes: { increment: link.visitCount },
+        lastVisitTime: !!link.lastVisitTime
+          ? new Date(link.lastVisitTime)
+          : new Date(),
+        visitTimes: { increment: link.visitCount || 1 },
         totalReadTime: { increment: link.readTime || 0 },
-        updatedAt: new Date(),
       },
     });
+    this.logger.log(`process link for user finish`);
 
     return uwb;
   }
@@ -163,31 +323,35 @@ export class WeblinkService {
       where: { url: link.url },
     });
 
-    // 未处理过此链接
+    // Link not found
     if (!weblink) {
-      const doc = await this.parseWebLinkContent(link.url);
-      if (doc) {
-        weblink = await this.prisma.weblink.create({
-          data: {
-            url: link.url,
-            indexStatus: 'processing',
-            pageContent: doc.pageContent,
-            pageMeta: JSON.stringify(doc.metadata),
-            contentMeta: '',
-          },
-        });
+      if (!link.storageKey) {
+        return this.logger.warn(
+          `storageKey not provided for ${link.url}, skip`,
+        );
       }
+
+      weblink = await this.createNewLink(link, {
+        title: link.title,
+        source: link.url,
+      });
     }
 
-    if (!weblink) {
-      this.logger.log(`weblink is still empty, skip`);
-      return;
-    }
+    // Fetch doc and store in cache for later use
+    const doc = link.storageKey
+      ? await this.downloadWebLinkContent(link.url, link.storageKey)
+      : await this.parseWebLinkContent(link.url);
+
+    this.cache.set(link.url, JSON.stringify(doc));
+
+    // TODO: 优化 page content 的清洗逻辑
+    const $ = cheerio.load(doc.pageContent);
+    doc.pageContent = $.text();
 
     // 处理单个用户的访问记录
     const uwb = await this.processLinkForUser(link, weblink);
 
-    await this.aigcService.runContentFlow({ link, uwb, weblink });
+    await this.aigcService.runContentFlow({ doc, link, uwb, weblink });
   }
 }
 

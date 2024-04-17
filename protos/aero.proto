@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package aero;
+
+// The aero service definition.
+service Aero {
+  // Parse HTML
+  rpc ParseHTML (ParseHTMLRequest) returns (ParseHTMLResult) {}
+}
+
+enum SelectorType {
+  XPath = 0;
+}
+
+message ParseHTMLRequest {
+  // Raw html file
+  string html = 1;
+  // Content selector type
+  SelectorType selector_type = 2;
+  // Content selectors
+  repeated string selectors = 3;
+}
+
+message HTMLFragment {
+  SelectorType selector_type = 1;
+  string selector = 2;
+  string content = 3;
+}
+
+message ParseHTMLResult {
+  repeated HTMLFragment fragments = 1;
+}

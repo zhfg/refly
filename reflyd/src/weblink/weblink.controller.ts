@@ -24,6 +24,17 @@ export class WeblinkController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('ping')
+  async ping(@Query('url') url: string) {
+    if (!url) return { status: 'unavailable' };
+    return {
+      status: (await this.weblinkService.checkWeblinkExists(url))
+        ? 'ok'
+        : 'unavailable',
+    };
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('store')
   async store(@Request() req, @Body() body: StoreWebLinkParam) {
     this.logger.log(`user: ${req.user.id}, store link: ${body}`);

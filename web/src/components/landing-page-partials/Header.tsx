@@ -132,7 +132,7 @@ function Header(props: { showLogin?: boolean }) {
               {showDashboardBtn && (
                 <li>
                   <Link
-                    to="/dashboard"
+                    to="/"
                     className="btn-sm text-white bg-green-600 hover:bg-green-700 ml-3">
                     Dashboard
                   </Link>

@@ -31,6 +31,12 @@
   .arco-list-content {
     padding: 0 60px;
   }
+
+  .thread-library-list-item {
+    &:hover {
+      cursor: pointer;
+    }
+  }
 }
 
 .arco-list-item-action {

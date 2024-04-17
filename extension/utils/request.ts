@@ -1,5 +1,6 @@
 import { getCookie } from "./cookie"
 import { getServerOrigin } from "./url"
+import { getExtensionVersion } from "./version"
 
 const TIMEOUT = 40000
 const DEFAULT_HEADER = {
@@ -63,8 +64,8 @@ export async function request<T>(
   console.log("url is ", handledUrl)
   // 获取 header
   opt.headers = {
-    ...DEFAULT_HEADER,
     ...opt.headers,
+    "x-refly-ext-version": getExtensionVersion(),
   }
 
   // 添加鉴权相关的信息
@@ -81,13 +82,22 @@ export async function request<T>(
     delete opt.body
   }
 
-  if (opt.method === "POST" && typeof opt.body === "object") {
+  // 如果 data 不为 formData 时，才做 JSON stringify
+  if (
+    opt.method === "POST" &&
+    typeof opt.body === "object" &&
+    !(opt.body instanceof FormData)
+  ) {
+    opt.headers = {
+      ...DEFAULT_HEADER,
+      ...(opt.headers || {}),
+    }
     opt.body = JSON.stringify(opt.body)
   }
   console.log("request opt", opt)
 
   try {
-    const BASEURL = getServerOrigin()
+    const BASEURL = handledUrl.startsWith("http") ? "" : getServerOrigin()
     const res = await fetch(`${BASEURL}${handledUrl}`, {
       ...opt,
     })

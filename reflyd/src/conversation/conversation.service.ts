@@ -8,8 +8,9 @@ import {
   QUICK_ACTION_TASK_PAYLOAD,
   QUICK_ACTION_TYPE,
   Task,
-} from 'src/types/task';
-import { createLLMChatMessage } from 'src/llm/schema';
+  TaskResponse,
+} from '../types/task';
+import { createLLMChatMessage } from '../llm/schema';
 import { LlmService } from '../llm/llm.service';
 import { WeblinkService } from '../weblink/weblink.service';
 import { LoggerService } from '../common/logger.service';
@@ -56,6 +57,7 @@ export class ConversationService {
     content: string;
     userId: number;
     conversationId: number;
+    relatedQuestions?: string;
     selectedWeblinkConfig?: string;
   }) {
     return this.prisma.chatMessage.create({
@@ -109,7 +111,7 @@ export class ConversationService {
     res: Response,
     task: Task,
     chatHistory: ChatMessage[],
-  ) {
+  ): Promise<TaskResponse> {
     const userId: number = req.user?.id;
 
     const filter: any = {
@@ -131,13 +133,30 @@ export class ConversationService {
       });
     }
 
+    // 前置的数据处理
     const query = task?.data?.question;
-    const { stream, sources } = await this.llmService.chat(
-      query,
-      chatHistory
-        ? chatHistory.map((msg) => createLLMChatMessage(msg.content, msg.type))
-        : [],
-      filter,
+    const llmChatMessages = chatHistory
+      ? chatHistory.map((msg) => createLLMChatMessage(msg.content, msg.type))
+      : [];
+    const questionWithContext =
+      chatHistory.length === 0
+        ? query
+        : await this.llmService.getContextualQuestion(query, llmChatMessages);
+
+    // 如果有 cssSelector，则代表从基于选中的内容进行提问，否则根据上下文进行相似度匹配召回
+    const chatFromClientSelector = task?.data?.filter?.weblinkList?.find(
+      (item) => item?.selections?.length > 0,
+    );
+    const sources = chatFromClientSelector
+      ? await this.weblinkService.parseMultiWeblinks(
+          task?.data?.filter?.weblinkList,
+        )
+      : await this.llmService.getRetrievalDocs(questionWithContext, filter);
+
+    const { stream } = await this.llmService.chat(
+      questionWithContext,
+      llmChatMessages,
+      sources,
     );
 
     // first return sources，use unique tag for parse data
@@ -158,7 +177,7 @@ export class ConversationService {
 
     const [answerStr, relatedQuestions] = await Promise.all([
       getSSEData(stream),
-      this.llmService.getRelatedQuestion(sources, query),
+      this.llmService.getRelatedQuestion(sources, questionWithContext),
     ]);
 
     this.logger.log('relatedQuestions', relatedQuestions);
@@ -178,7 +197,7 @@ export class ConversationService {
     res: Response,
     task: Task,
     chatHistory: ChatMessage[],
-  ) {
+  ): Promise<TaskResponse> {
     const query = task?.data?.question;
     const { stream, sources } = await this.llmService.searchEnhance(
       query,
@@ -195,7 +214,6 @@ export class ConversationService {
       // write answer in a stream style
       let answerStr = '';
       for await (const chunk of await stream) {
-        this.logger.log('chunk', chunk);
         const chunkStr =
           chunk?.content || (typeof chunk === 'string' ? chunk : '');
         answerStr += chunkStr;
@@ -221,7 +239,7 @@ export class ConversationService {
       .replace(/[cC]itation:(\d+)]]/g, 'citation:$1]')
       .replace(/\[\[([cC]itation:\d+)]](?!])/g, `[$1]`)
       .replace(/\[[cC]itation:(\d+)]/g, '[citation]($1)');
-    console.log('handledAnswer', handledAnswer);
+    this.logger.log('handledAnswer', handledAnswer);
 
     return {
       sources,
@@ -236,7 +254,7 @@ export class ConversationService {
     res: Response,
     task: Task,
     chatHistory: ChatMessage[],
-  ) {
+  ): Promise<TaskResponse> {
     const data = task?.data as QUICK_ACTION_TASK_PAYLOAD;
 
     // first return sources，use unique tag for parse data
@@ -263,6 +281,13 @@ export class ConversationService {
     const weblinkList = data?.filter?.weblinkList;
     if (weblinkList?.length <= 0) return;
 
+    // save user mark for each weblink in a non-blocking style
+    this.weblinkService.saveWeblinkUserMarks({
+      userId: req.user.id,
+      weblinkList,
+      extensionVersion: req.header('x-refly-ext-version'),
+    });
+
     // 基于一组网页做总结，先获取网页内容
     const docs = await this.weblinkService.parseMultiWeblinks(weblinkList);
 
@@ -281,7 +306,7 @@ export class ConversationService {
       };
 
       const onError = (err) => {
-        this.logger.log('err', err);
+        this.logger.error(`output summary error: ${err}`);
         reject(err);
       };
 

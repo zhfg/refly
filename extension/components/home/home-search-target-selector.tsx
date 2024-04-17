@@ -11,6 +11,11 @@ import { useWeblinkStore } from "~stores/weblink"
 import { IconTip } from "./icon-tip"
 import { getPopupContainer } from "~utils/ui"
 
+interface SearchTargetSelectorProps {
+  showText: boolean
+  handleChangeSelector: (selector: SearchTarget) => void
+}
+
 /**
  * 这里的产品思考：
  * 1. 产品逻辑要打平，不要太复杂
@@ -21,7 +26,7 @@ import { getPopupContainer } from "~utils/ui"
  *  2.4 推迟实现，先简单点 follow 规则和所有网页：用户可以选择基于已有选择、选中新的一组或选择所有内容，这样的好处就是能够倒逼优化多轮效果，做出竞争力，允许用户将多个
  *
  */
-export const SearchTargetSelector = (props: { showText: boolean }) => {
+export const SearchTargetSelector = (props: SearchTargetSelectorProps) => {
   const searchStateStore = useSearchStateStore()
   const webLinkStore = useWeblinkStore()
 
@@ -41,6 +46,11 @@ export const SearchTargetSelector = (props: { showText: boolean }) => {
         if (key !== SearchTarget.SelectedPages) {
           webLinkStore.updateSelectedRow([])
         }
+
+        /**
+         * 这里是 thread selector，只要求更换 selector，不要求清空 selectedRow
+         */
+        props.handleChangeSelector(key as SearchTarget)
       }}>
       <Menu.Item key={SearchTarget.CurrentPage}>
         <IconOriginalSize style={iconStyle} />
@@ -92,7 +102,7 @@ export const SearchTargetSelector = (props: { showText: boolean }) => {
   }
 
   return (
-    <IconTip text="选择搜索模式">
+    <IconTip text="选择提问范围">
       <Dropdown
         droplist={searchTargetDropList}
         trigger="hover"

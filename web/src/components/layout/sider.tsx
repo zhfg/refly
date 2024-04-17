@@ -1,4 +1,4 @@
-import { Avatar, Divider, Layout, Menu } from "@arco-design/web-react"
+import { Avatar, Button, Divider, Layout, Menu } from "@arco-design/web-react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { ReactText } from "react"
 import {
@@ -6,8 +6,6 @@ import {
   IconSettings,
   IconDownload,
   IconBook,
-  IconHistory,
-  IconBulb,
   IconTwitter,
 } from "@arco-design/web-react/icon"
 import { openGetStartDocument } from "../../utils"
@@ -16,6 +14,8 @@ import Logo from "@/assets/logo.svg"
 import "./sider.scss"
 import { useUserStore } from "@/stores/user"
 import { safeParseJSON } from "@/utils/parse"
+// components
+import { SearchQuickOpenBtn } from "@/components/search-quick-open-btn"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -60,7 +60,7 @@ export const SiderLayout = () => {
         if (!notShowLoginBtn) {
           userStore.setLoginModalVisible(true)
         } else {
-          navigate(`/dashboard`)
+          navigate(`/`)
         }
         break
       }
@@ -138,7 +138,7 @@ export const SiderLayout = () => {
   }
 
   return (
-    <Sider className={`app-sider ${isGuideDetail ? "fixed" : ""}`}>
+    <Sider className={`app-sider ${isGuideDetail ? "fixed" : ""}`} width={220}>
       <div className="sider-header">
         <div
           style={{
@@ -146,14 +146,15 @@ export const SiderLayout = () => {
             flexDirection: "row",
             justifyContent: "space-between",
           }}>
-          <div className="logo" onClick={() => navigate("/dashboard")}>
+          <div className="logo" onClick={() => navigate("/")}>
             <img src={Logo} alt="Refly" />
             <span>Refly</span>
           </div>
         </div>
+        <SearchQuickOpenBtn />
         <Menu
           style={{
-            width: 200,
+            width: 220,
             backgroundColor: "transparent",
             borderRight: "none",
           }}
@@ -166,14 +167,10 @@ export const SiderLayout = () => {
               <span className="sider-menu-title">主页</span>
             </MenuItem>
             {/* <MenuItem key='Explore' ><IconHome style={{ fontSize: 20 }} />主页</MenuItem> */}
-            <MenuItem key="Digest" className="custom-menu-item">
+            {/* <MenuItem key="Digest" className="custom-menu-item">
               <IconHistory style={{ fontSize: 20 }} />
               <span className="sider-menu-title">回忆</span>
-            </MenuItem>
-            <MenuItem key="Feed" className="custom-menu-item">
-              <IconBulb style={{ fontSize: 20 }} />
-              <span className="sider-menu-title">探索</span>
-            </MenuItem>
+            </MenuItem> */}
             <MenuItem key="ThreadLibrary" className="custom-menu-item">
               <IconBook style={{ fontSize: 20 }} />
               <span className="sider-menu-title">会话库</span>

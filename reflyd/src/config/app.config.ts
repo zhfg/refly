@@ -4,6 +4,14 @@ export default () => ({
     host: process.env.REDIS_HOST || 'localhost',
     port: parseInt(process.env.REDIS_PORT, 10) || 6379,
   },
+  minio: {
+    endpoint: process.env.MINIO_ENDPOINT || 'localhost',
+    port: process.env.MINIO_PORT || 9000,
+    useSSL: process.env.MINIO_USE_SSL || 'false',
+    accessKey: process.env.MINIO_ACCESS_KEY || 'minioadmin',
+    secretKey: process.env.MINIO_SECRET_KEY || 'minioadmin',
+    weblinkBucket: process.env.MINIO_WEBLINK_BUCKET || 'refly-weblink',
+  },
   vectorStore: {
     vectorDim: parseInt(process.env.REFLY_VEC_DIM, 10) || 1024,
   },

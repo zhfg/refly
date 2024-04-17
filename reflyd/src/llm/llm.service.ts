@@ -1,7 +1,7 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { PGVectorStore } from '@langchain/community/vectorstores/pgvector';
+import { PrismaVectorStore } from '@langchain/community/vectorstores/prisma';
 import { Document } from '@langchain/core/documents';
 import { OpenAIEmbeddings, ChatOpenAI } from '@langchain/openai';
 import {
@@ -15,7 +15,12 @@ import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { PromptTemplate } from '@langchain/core/prompts';
 import { JsonOutputFunctionsParser } from 'langchain/output_parsers';
 
-import { AigcContent, ChatMessage } from '@prisma/client';
+import {
+  AigcContent,
+  ChatMessage,
+  ContentVector,
+  Prisma,
+} from '@prisma/client';
 import {
   qa,
   contextualizeQA,
@@ -35,16 +40,23 @@ import { categoryList } from '../prompts/utils/category';
 import { Source } from '../types/weblink';
 import { SearchResultContext } from '../types/search';
 import { LoggerService } from '../common/logger.service';
+import { PrismaService } from '../common/prisma.service';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
   private embeddings: OpenAIEmbeddings;
-  private vectorStore: PGVectorStore;
+  private vectorStore: PrismaVectorStore<
+    ContentVector,
+    'content_vectors',
+    any,
+    any
+  >;
   private llm: ChatOpenAI;
 
   constructor(
-    private configService: ConfigService,
     private logger: LoggerService,
+    private prisma: PrismaService,
+    private configService: ConfigService,
   ) {
     this.logger.setContext(LlmService.name);
   }
@@ -53,20 +65,19 @@ export class LlmService implements OnModuleInit {
     this.embeddings = new OpenAIEmbeddings({
       modelName: 'text-embedding-3-large',
       batchSize: 512,
-      dimensions: this.configService.get('vectorStore.vectorDim'),
+      dimensions: this.configService.getOrThrow('vectorStore.vectorDim'),
       timeout: 5000,
       maxRetries: 3,
     });
-    this.vectorStore = await PGVectorStore.initialize(this.embeddings, {
-      postgresConnectionOptions: {
-        connectionString: process.env.DATABASE_URL,
-      },
-      tableName: 'content_vectors',
+    this.vectorStore = PrismaVectorStore.withModel<ContentVector>(
+      this.prisma,
+    ).create(this.embeddings, {
+      prisma: Prisma,
+      tableName: 'content_vectors' as any,
+      vectorColumnName: 'vector',
       columns: {
-        idColumnName: 'id',
-        vectorColumnName: 'vector',
-        contentColumnName: 'content',
-        metadataColumnName: 'metadata',
+        id: PrismaVectorStore.IdColumn,
+        content: PrismaVectorStore.ContentColumn,
       },
     });
 
@@ -81,7 +92,6 @@ export class LlmService implements OnModuleInit {
    */
   async extractContentMeta(doc: Document): Promise<ContentMeta> {
     const { pageContent } = doc;
-    this.logger.log('content need to be extract: %s', pageContent);
 
     const parser = new JsonOutputFunctionsParser();
 
@@ -116,7 +126,7 @@ export class LlmService implements OnModuleInit {
       formats: [{ key: res?.format, score: 0, name: '', reason: '' }],
     };
 
-    this.logger.log('final content meta: %j', contentMeta);
+    this.logger.log(`final content meta: ${contentMeta}`);
 
     return contentMeta;
   }
@@ -202,7 +212,7 @@ export class LlmService implements OnModuleInit {
     };
   }
 
-  async indexPipelineFromLink(doc: Document) {
+  async indexPipelineFromLink(weblinkId: number, doc: Document) {
     // splitting / chunking
     const textSplitter = new RecursiveCharacterTextSplitter({
       separators: ['\n\n', '\n', ' ', ''],
@@ -212,7 +222,15 @@ export class LlmService implements OnModuleInit {
     });
     const documents = await textSplitter.splitDocuments([doc]);
 
-    await this.vectorStore.addDocuments(documents);
+    await this.vectorStore.addModels(
+      await this.prisma.$transaction(
+        documents.map(({ pageContent }) =>
+          this.prisma.contentVector.create({
+            data: { weblinkId, content: pageContent },
+          }),
+        ),
+      ),
+    );
   }
 
   async retrieval(query: string, filter) {
@@ -225,7 +243,7 @@ export class LlmService implements OnModuleInit {
 
     // 抽取关键字 or 实体
     const parser = new JsonOutputFunctionsParser();
-    const runnable = await this.llm
+    const runnable = this.llm
       .bind({
         functions: [extractContentMeta.extractSearchKeyword],
         function_call: { name: 'keyword_for_search_engine' },
@@ -376,9 +394,9 @@ export class LlmService implements OnModuleInit {
     });
   }
 
-  async chat(query: string, chatHistory: LLMChatMessage[], filter?: any) {
+  async getContextualQuestion(query: string, chatHistory: LLMChatMessage[]) {
     this.logger.log(
-      `activated with query: ${query}, filter: ${JSON.stringify(filter)}`,
+      `activated with query: ${query}, chat history: ${chatHistory}`,
     );
 
     // 构建总结的 Prompt，将 question + chatHistory 总结成
@@ -390,13 +408,37 @@ export class LlmService implements OnModuleInit {
     const contextualizeQChain = contextualizeQPrompt
       .pipe(this.llm as any)
       .pipe(new StringOutputParser());
-    const questionWithContext =
-      chatHistory.length === 0
-        ? query
-        : await contextualizeQChain.invoke({
-            question: query,
-            chatHistory,
-          });
+
+    return await contextualizeQChain.invoke({
+      question: query,
+      chatHistory,
+    });
+  }
+
+  async getRetrievalDocs(query: string, filter?: any) {
+    this.logger.log(
+      `activated with query: ${query}, filter: ${JSON.stringify(filter)}`,
+    );
+
+    const retrievalResults = await this.retrieval(query, filter);
+
+    this.logger.log('retrievalResults', retrievalResults);
+
+    const retrievedDocs = retrievalResults.map((res) => ({
+      metadata: res?.metadata,
+      pageContent: res?.pageContent as string,
+      score: res?.score, // similarity score
+    }));
+
+    return retrievedDocs;
+  }
+
+  async chat(
+    query: string,
+    chatHistory: LLMChatMessage[],
+    context: Document[],
+  ) {
+    this.logger.log(`activated with query: ${query}}`);
 
     const qaPrompt = ChatPromptTemplate.fromMessages([
       ['system', qa.systemPrompt],
@@ -412,21 +454,10 @@ export class LlmService implements OnModuleInit {
       outputParser: new StringOutputParser(),
     });
 
-    const retrievalResults = await this.retrieval(questionWithContext, filter);
-
-    this.logger.log('retrievalResults', retrievalResults);
-
-    const retrievedDocs = retrievalResults.map((res) => ({
-      metadata: res?.metadata,
-      pageContent: res?.pageContent as string,
-      score: res?.score, // similarity score
-    }));
-
     return {
-      sources: retrievedDocs,
       stream: ragChain.stream({
         question: query,
-        context: retrievedDocs,
+        context,
         chatHistory,
       }),
     };
