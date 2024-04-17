@@ -10,6 +10,7 @@ import { sendToBackground } from "@plasmohq/messaging"
 import { useStorage } from "@plasmohq/storage/hook"
 import { bgStorage } from "~storage"
 import { useHomeStateStore } from "~stores/home-state"
+import { useSelectedMark } from "~hooks/use-selected-mark"
 
 export const ContentRouter = () => {
   // 导航相关
@@ -23,6 +24,7 @@ export const ContentRouter = () => {
     instance: bgStorage,
   })
   const homeStateStore = useHomeStateStore()
+  const { handleResetState } = useSelectedMark()
 
   const getLoginStatus = async () => {
     try {
@@ -82,6 +84,7 @@ export const ContentRouter = () => {
               onClick={() => {
                 navigate("/thread")
                 homeStateStore.setActiveTab("session-library")
+                handleResetState()
               }}>
               <div className="nav-item-inner">
                 <IconStorage style={{ fontSize: 22 }} />

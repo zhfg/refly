@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom"
 import { getClientOrigin } from "~utils/url"
 import { useUserStore } from "~stores/user"
 import { useHomeStateStore } from "~stores/home-state"
+import { useSelectedMark } from "~hooks/use-selected-mark"
 
 export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
   const { onlyShowClose = false } = props
@@ -21,6 +22,7 @@ export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
   const navigate = useNavigate()
   const { userProfile } = useUserStore()
   const homeStateStore = useHomeStateStore()
+  const { handleResetState } = useSelectedMark()
 
   const showBtn = !!userProfile?.id
 
@@ -84,7 +86,10 @@ export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
           <img
             src={CloseGraySVG}
             alt="关闭"
-            onClick={(_) => siderStore.setShowSider(false)}
+            onClick={(_) => {
+              siderStore.setShowSider(false)
+              handleResetState()
+            }}
           />
         </IconTip>
       </div>

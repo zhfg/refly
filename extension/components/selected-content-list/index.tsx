@@ -8,6 +8,7 @@ import type { Mark } from "~types/content-selector"
 import EmptySVG from "~assets/selected-content/empty.svg"
 import classNames from "classnames"
 import { useEffect } from "react"
+import { useSelectedMark } from "~hooks/use-selected-mark"
 
 interface SelectedContentListProps {
   marks: Mark[]
@@ -16,42 +17,9 @@ interface SelectedContentListProps {
 
 export const SelectedContentList = (props: SelectedContentListProps) => {
   const { limitContainer = false } = props
-  const {
-    marks = [],
-    setMarks,
-    setShowSelectedMarks,
-    resetState,
-  } = useContentSelectorStore()
-
-  const handleRemoveMark = (xPath: string) => {
-    window.postMessage({
-      name: "removeSelectedMark",
-      payload: {
-        xPath,
-      },
-    })
-
-    const { marks } = useContentSelectorStore.getState()
-    const newMarks = marks.filter((item) => item?.xPath !== xPath)
-    setMarks(newMarks)
-  }
-
-  const handleRemoveAll = () => {
-    window.postMessage({
-      name: "removeAllSelectedMark",
-    })
-  }
-
-  const handleExit = () => {
-    handleRemoveAll()
-
-    setShowSelectedMarks(false)
-  }
-
-  const handleResetState = () => {
-    resetState()
-    handleExit()
-  }
+  const { marks = [] } = useContentSelectorStore()
+  const { handleExit, handleRemoveAll, handleResetState, handleRemoveMark } =
+    useSelectedMark()
 
   // 退出时，清理对应的状态
   useEffect(() => {
