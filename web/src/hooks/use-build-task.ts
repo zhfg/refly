@@ -25,6 +25,7 @@ export const useBuildTask = () => {
     console.log("buildTaskAndGenReponse", task)
     const question = task.data?.question
     const { messages = [] } = useChatStore.getState()
+    const { currentConversation } = useConversationStore.getState()
 
     // 构建 filter, for follow ask question config
     const weblinkList = task?.data?.filter?.weblinkList || []
@@ -34,12 +35,12 @@ export const useBuildTask = () => {
     }
 
     const questionMsg = buildQuestionMessage({
-      conversationId: conversationStore.currentConversation?.id,
+      conversationId: currentConversation?.id || "",
       content: question,
       selectedWeblinkConfig: JSON.stringify(selectedWeblinkConfig),
     })
     const replyMsg = buildReplyMessage({
-      conversationId: conversationStore.currentConversation?.id,
+      conversationId: currentConversation?.id || "",
       content: "",
       questionId: questionMsg?.itemId,
     })

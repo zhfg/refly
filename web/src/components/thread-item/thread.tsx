@@ -99,8 +99,6 @@ export const Thread = () => {
     const { messages } = useChatStore.getState()
     const selectedWeblinkConfig = getSelectedWeblinkConfig(messages)
 
-    console.log("handleAskFollowing", newQuestion)
-
     const useWeblinkList =
       selectedWeblinkConfig?.searchTarget === SearchTarget.SelectedPages &&
       selectedWeblinkConfig?.filter?.length > 0
@@ -160,7 +158,6 @@ export const Thread = () => {
       // 重置状态
       chatStore.setNewQAText("")
       weblinkStore.updateSelectedRow([])
-      conversationStore.resetState()
       searchStateStore.setSearchTarget(SearchTarget.CurrentPage)
     } catch (err) {
       console.log("thread error")
@@ -173,6 +170,10 @@ export const Thread = () => {
     if (params?.threadId) {
       console.log("params", params)
       handleThread(params?.threadId as string)
+    }
+
+    return () => {
+      conversationStore.resetState()
     }
   }, [params?.threadId])
 
