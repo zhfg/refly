@@ -10,7 +10,11 @@ import { useSiderStore } from "~stores/sider"
 import { useNavigate } from "react-router-dom"
 import { useUserStore } from "~stores/user"
 import { getClientOrigin } from "~utils/url"
-import { IconClockCircle, IconShareExternal } from "@arco-design/web-react/icon"
+import {
+  IconClockCircle,
+  IconHome,
+  IconShareExternal,
+} from "@arco-design/web-react/icon"
 import { time } from "~utils/time"
 // types
 import type { Conversation } from "~types/conversation"
@@ -35,8 +39,7 @@ export const Header = (props: ThreadHeaderProps) => {
       <div
         className="brand"
         onClick={() => {
-          navigate("/")
-          homeStateStore.setActiveTab("home")
+          window.open(`${getClientOrigin()}/`, "_blank")
         }}>
         <img src={Logo} alt="Refly" />
         <span>Refly</span>
@@ -58,6 +61,16 @@ export const Header = (props: ThreadHeaderProps) => {
           style={{ borderRadius: 4, marginRight: 12 }}>
           分享
         </Button>
+        <IconTip text="主页">
+          <IconHome
+            className="thread-library-list-item-icon"
+            style={{ marginRight: 12, color: "#ccc" }}
+            onClick={() => {
+              navigate("/")
+              homeStateStore.setActiveTab("home")
+            }}
+          />
+        </IconTip>
         <IconTip text="关闭">
           <img
             src={CloseGraySVG}

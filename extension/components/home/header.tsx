@@ -31,7 +31,7 @@ export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
       <div
         className="brand"
         onClick={() => {
-          navigate("/")
+          window.open(`${getClientOrigin()}/`, "_blank")
           homeStateStore.setActiveTab("home")
         }}>
         {onlyShowClose ? null : (
