@@ -16,6 +16,7 @@ import { time } from "~utils/time"
 import type { Conversation } from "~types/conversation"
 // 第三方库
 import copyToClipboard from "copy-to-clipboard"
+import { useHomeStateStore } from "~stores/home-state"
 
 interface ThreadHeaderProps {
   thread: Conversation
@@ -25,6 +26,7 @@ export const Header = (props: ThreadHeaderProps) => {
   const siderStore = useSiderStore()
   const navigate = useNavigate()
   const { userProfile } = useUserStore()
+  const homeStateStore = useHomeStateStore()
 
   const showBtn = !!userProfile?.id
 
@@ -34,6 +36,7 @@ export const Header = (props: ThreadHeaderProps) => {
         className="brand"
         onClick={() => {
           navigate("/")
+          homeStateStore.setActiveTab("home")
         }}>
         <img src={Logo} alt="Refly" />
         <span>Refly</span>

@@ -13,18 +13,25 @@ import { useSiderStore } from "~stores/sider"
 import { useNavigate } from "react-router-dom"
 import { getClientOrigin } from "~utils/url"
 import { useUserStore } from "~stores/user"
+import { useHomeStateStore } from "~stores/home-state"
 
 export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
   const { onlyShowClose = false } = props
   const siderStore = useSiderStore()
   const navigate = useNavigate()
   const { userProfile } = useUserStore()
+  const homeStateStore = useHomeStateStore()
 
   const showBtn = !!userProfile?.id
 
   return (
     <header>
-      <div className="brand" onClick={() => navigate("/")}>
+      <div
+        className="brand"
+        onClick={() => {
+          navigate("/")
+          homeStateStore.setActiveTab("home")
+        }}>
         {onlyShowClose ? null : (
           <>
             <img src={Logo} alt="Refly" />

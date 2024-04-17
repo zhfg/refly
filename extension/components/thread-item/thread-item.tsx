@@ -30,6 +30,7 @@ import { QuickAction } from "~components/home/quick-action"
 import { useContentSelectorStore } from "~stores/content-selector"
 import { SelectedContentList } from "~components/selected-content-list"
 import { useStoreWeblink } from "~hooks/use-store-weblink"
+import { useHomeStateStore } from "~stores/home-state"
 
 interface ThreadItemProps {
   sessions: SessionItem[]
@@ -56,6 +57,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
   const [threadWeblinkListFilter, setThreadWeblinkListFilter] = useState(
     selectedWeblinkConfig?.filter || [],
   )
+  const homeStateStore = useHomeStateStore()
 
   // stores
   const conversationStore = useConversationStore()
@@ -197,7 +199,10 @@ export const ThreadItem = (props: ThreadItemProps) => {
       <div>
         <Breadcrumb style={{ padding: `8px 16px` }}>
           <BreadcrumbItem
-            onClick={() => navigate("/thread")}
+            onClick={() => {
+              navigate("/thread")
+              homeStateStore.setActiveTab("session-library")
+            }}
             className="breadcrum-item">
             会话库
           </BreadcrumbItem>
