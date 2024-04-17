@@ -78,10 +78,17 @@ export class AigcService {
 
   async getContent(params: { contentId: number }) {
     const { contentId } = params;
-    return this.prisma.aigcContent.findUnique({
+    const content = await this.prisma.aigcContent.findUnique({
       where: { id: contentId },
-      include: { inputs: true },
     });
+
+    let inputs: AigcContent[];
+    if (content.inputIds.length > 0) {
+      inputs = await this.prisma.aigcContent.findMany({
+        where: { id: { in: content.inputIds } },
+      });
+    }
+    return { ...content, inputs };
   }
 
   private async updateUserPreferences(param: {
