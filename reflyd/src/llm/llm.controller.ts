@@ -11,15 +11,17 @@ import {
 import { LlmService } from './llm.service';
 import { WeblinkService } from '../weblink/weblink.service';
 import { AigcContent } from '@prisma/client';
+import { LoggerService } from '../common/logger.service';
 
 @Controller('llm')
 export class LLMController {
-  private readonly logger = new Logger(LLMController.name);
-
   constructor(
+    private logger: LoggerService,
     private llmService: LlmService,
     private weblinkService: WeblinkService,
-  ) {}
+  ) {
+    this.logger.setContext(LLMController.name);
+  }
 
   @Post('applyStrategy')
   async store(@Request() req, @Body() body: { url: string }) {

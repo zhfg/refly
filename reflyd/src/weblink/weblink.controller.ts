@@ -12,12 +12,16 @@ import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { WeblinkService } from './weblink.service';
 import { GetWebLinkListResponse, StoreWebLinkParam } from './dto';
 import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
+import { LoggerService } from 'src/common/logger.service';
 
 @Controller('weblink')
 export class WeblinkController {
-  private readonly logger = new Logger(WeblinkController.name);
-
-  constructor(private weblinkService: WeblinkService) {}
+  constructor(
+    private logger: LoggerService,
+    private weblinkService: WeblinkService,
+  ) {
+    this.logger.setContext(WeblinkController.name);
+  }
 
   @UseGuards(JwtAuthGuard)
   @Get('ping')

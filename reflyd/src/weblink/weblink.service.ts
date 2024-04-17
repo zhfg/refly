@@ -1,14 +1,13 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Prisma, Weblink } from '@prisma/client';
 import { Queue } from 'bull';
-import { createHash } from 'crypto';
 import { LRUCache } from 'lru-cache';
 import { InjectQueue } from '@nestjs/bull';
 import * as cheerio from 'cheerio';
 import { Document } from '@langchain/core/documents';
 import { CheerioWebBaseLoader } from 'langchain/document_loaders/web/cheerio';
-import { parse } from 'node-html-parser';
 
+import { LoggerService } from '../common/logger.service';
 import { PrismaService } from '../common/prisma.service';
 import { MinioService } from '../common/minio.service';
 import { AigcService } from '../aigc/aigc.service';
@@ -21,17 +20,18 @@ import { streamToString } from '../utils/stream';
 
 @Injectable()
 export class WeblinkService {
-  private readonly logger = new Logger(WeblinkService.name);
   private cache: LRUCache<string, string>; // url -> document
   private bucketName: string;
 
   constructor(
+    private logger: LoggerService,
     private prisma: PrismaService,
     private minio: MinioService,
     private configService: ConfigService,
     private aigcService: AigcService,
     @InjectQueue(QUEUE_STORE_LINK) private indexQueue: Queue<WebLinkDTO>,
   ) {
+    this.logger.setContext(WeblinkService.name);
     this.cache = new LRUCache({
       max: 1000,
     });

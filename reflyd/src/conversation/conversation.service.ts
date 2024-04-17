@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Response } from 'express';
 
 import { PrismaService } from '../common/prisma.service';
@@ -13,19 +13,21 @@ import {
 import { createLLMChatMessage } from '../llm/schema';
 import { LlmService } from '../llm/llm.service';
 import { WeblinkService } from '../weblink/weblink.service';
+import { LoggerService } from '../common/logger.service';
 
 const LLM_SPLIT = '__LLM_RESPONSE__';
 const RELATED_SPLIT = '__RELATED_QUESTIONS__';
 
 @Injectable()
 export class ConversationService {
-  private logger = new Logger(ConversationService.name);
-
   constructor(
+    private logger: LoggerService,
     private prisma: PrismaService,
     private weblinkService: WeblinkService,
     private llmService: LlmService,
-  ) {}
+  ) {
+    this.logger.setContext(ConversationService.name);
+  }
 
   async create(param: CreateConversationParam, userId: number) {
     return this.prisma.conversation.create({
@@ -229,6 +231,8 @@ export class ConversationService {
       this.llmService.getRelatedQuestion(sources, query),
     ]);
 
+    this.logger.log('relatedQuestions', relatedQuestions);
+
     res.write(RELATED_SPLIT);
     res.write(JSON.stringify(relatedQuestions));
 
@@ -339,7 +343,7 @@ export class ConversationService {
       ),
     ]);
 
-    console.log('relatedQuestions', relatedQuestions);
+    this.logger.log('relatedQuestions', relatedQuestions);
 
     res.write(RELATED_SPLIT);
     res.write(JSON.stringify(relatedQuestions));

@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { Account, Prisma } from '@prisma/client';
 import { PrismaService } from '../common/prisma.service';
+import { LoggerService } from '../common/logger.service';
 
 @Injectable()
 export class AccountService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private logger: LoggerService, private prisma: PrismaService) {
+    this.logger.setContext(AccountService.name);
+  }
 
   async findUnique(
     where: Prisma.AccountWhereUniqueInput,
