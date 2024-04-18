@@ -6,8 +6,9 @@ compatibility_date = "2024-04-05"
 # Variable bindings. These are arbitrary, plaintext strings (similar to environment variables)
 # Note: Use secrets to store sensitive data.
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
-# [vars]
-# MY_VARIABLE = "production_value"
+[vars]
+S3_ENDPOINT = "https://s3.us-east-1.amazonaws.com"
+S3_BUCKET = "refly-weblink-prod"
 
 # Bind the Workers AI model catalog. Run machine learning models, powered by serverless GPUs, on Cloudflare’s global network
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#workers-ai
