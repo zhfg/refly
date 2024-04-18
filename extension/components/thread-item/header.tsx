@@ -13,6 +13,7 @@ import { getClientOrigin } from "~utils/url"
 import {
   IconClockCircle,
   IconHome,
+  IconPlus,
   IconShareExternal,
 } from "@arco-design/web-react/icon"
 import { time } from "~utils/time"
@@ -37,12 +38,28 @@ export const Header = (props: ThreadHeaderProps) => {
   return (
     <header>
       <div
-        className="brand"
-        onClick={() => {
-          window.open(`${getClientOrigin()}/`, "_blank")
-        }}>
-        <img src={Logo} alt="Refly" />
-        <span>Refly</span>
+        className="refly-brand-container"
+        style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+        <div
+          className="brand"
+          onClick={() => {
+            window.open(`${getClientOrigin()}/`, "_blank")
+          }}>
+          <img src={Logo} alt="Refly" />
+          <span>Refly</span>
+        </div>
+        <Button
+          type="primary"
+          icon={<IconPlus />}
+          onClick={() => {
+            navigate("/")
+            homeStateStore.setActiveTab("home")
+          }}
+          style={{ borderRadius: 4, marginLeft: 12 }}>
+          <span style={{ fontSize: 14, fontWeight: "normal", color: "#fff" }}>
+            新会话
+          </span>
+        </Button>
       </div>
       <div className="funcs">
         <span key={2} style={{ display: "inline-block", marginRight: 12 }}>
@@ -51,26 +68,6 @@ export const Header = (props: ThreadHeaderProps) => {
             {time(props.thread?.updatedAt).utc().fromNow()}
           </span>
         </span>
-        <Button
-          type="primary"
-          icon={<IconShareExternal />}
-          onClick={() => {
-            copyToClipboard(`${getClientOrigin()}/thread/${props.thread?.id}`)
-            message.success("分享链接已复制到剪切板")
-          }}
-          style={{ borderRadius: 4, marginRight: 12 }}>
-          分享
-        </Button>
-        <IconTip text="主页">
-          <IconHome
-            className="thread-library-list-item-icon"
-            style={{ marginRight: 12, color: "#ccc" }}
-            onClick={() => {
-              navigate("/")
-              homeStateStore.setActiveTab("home")
-            }}
-          />
-        </IconTip>
         <IconTip text="关闭">
           <img
             src={CloseGraySVG}
