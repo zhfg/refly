@@ -135,50 +135,50 @@ export class AigcService {
     const { userId } = uwb;
 
     const today = new Date().toISOString().split('T')[0];
-    const digest = await this.prisma.userDigest.findUnique({
-      where: {
-        userId_date_topicKey: {
-          userId,
-          date: today,
-          topicKey: meta.topics[0].key,
-        },
-      },
-    });
+    // const digest = await this.prisma.userDigest.findUnique({
+    //   where: {
+    //     userId_date_topicKey: {
+    //       userId,
+    //       date: today,
+    //       topicKey: meta.topics[0].key,
+    //     },
+    //   },
+    // });
 
     // 如果该 topic 下已有摘要，进行增量总结
-    if (digest) {
-      const dContent = await this.prisma.aigcContent.findUnique({
-        where: { id: digest.contentId },
-        include: { inputs: true },
-      });
+    // if (digest) {
+    //   const dContent = await this.prisma.aigcContent.findUnique({
+    //     where: { id: digest.contentId },
+    //     include: { inputs: true },
+    //   });
 
-      // 如果该 digest 输入的 content 已包含新的 content，则不做任何增量总结
-      if (dContent.inputIds.includes(content.id)) {
-        this.logger.log(
-          `digest ${digest.id} already contains content ${content.id}`,
-        );
-        return;
-      }
+    //   // 如果该 digest 输入的 content 已包含新的 content，则不做任何增量总结
+    //   if (dContent.inputIds.includes(content.id)) {
+    //     this.logger.log(
+    //       `digest ${digest.id} already contains content ${content.id}`,
+    //     );
+    //     return;
+    //   }
 
-      const combinedContent = await this.llmService.summarizeMultipleWeblink([
-        ...dContent.inputs,
-        content,
-      ]);
+    //   const combinedContent = await this.llmService.summarizeMultipleWeblink([
+    //     ...dContent.inputs,
+    //     content,
+    //   ]);
 
-      // 更新 aigc 依赖关系
-      this.prisma.$transaction(async (tx) => {
-        await tx.aigcContent.update({
-          where: { id: dContent.id },
-          data: { ...combinedContent, inputIds: { push: content.id } },
-        });
-        await tx.aigcContent.update({
-          where: { id: content.id },
-          data: { outputIds: { push: dContent.id } },
-        });
-      });
+    //   // 更新 aigc 依赖关系
+    //   this.prisma.$transaction(async (tx) => {
+    //     await tx.aigcContent.update({
+    //       where: { id: dContent.id },
+    //       data: { ...combinedContent, inputIds: { push: content.id } },
+    //     });
+    //     await tx.aigcContent.update({
+    //       where: { id: content.id },
+    //       data: { outputIds: { push: dContent.id } },
+    //     });
+    //   });
 
-      return;
-    }
+    //   return;
+    // }
 
     // 创建新的 digest 内容及其对应的记录
     this.prisma.$transaction(async (tx) => {
