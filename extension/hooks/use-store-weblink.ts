@@ -57,6 +57,7 @@ export const useStoreWeblink = () => {
       },
     })
 
+    console.log("storeWeblink", res)
     await delay(2000)
 
     setTimeout(() => {

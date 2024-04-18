@@ -4,9 +4,8 @@ import { appConfig } from "~utils/config"
 import { request } from "~utils/request"
 
 const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
-  console.log(req.body)
-
   try {
+    console.log("storeWeblink", req.body)
     const historyItem = await chrome.history.search({ text: req.body?.url })
     const weblink = { ...(historyItem?.[0] || {}), ...req.body }
     const [err, storeRes] = await request(appConfig.url.storeWeblink, {

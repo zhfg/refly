@@ -9,9 +9,7 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
   try {
     const [err, storeRes] = await request(appConfig.url.pingWebLinkStatus, {
       method: "GET",
-      body: {
-        data: req.body,
-      },
+      body: req.body,
     })
     if (err) {
       res.send({

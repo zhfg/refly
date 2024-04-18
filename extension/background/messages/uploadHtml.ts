@@ -8,7 +8,7 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
   console.log(req.body)
 
   try {
-    const BASEURL = `http://localhost:8787`
+    const BASEURL = getServerlessWorkOrigin()
 
     const { pageContent = "", url = "", fileName = "" } = req.body
 
