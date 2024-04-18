@@ -28,7 +28,7 @@ router.post('/htmlUpload', async (request, env) => {
 	const formData = await request.formData();
 	const file = formData.get('file');
 	const data = await file.arrayBuffer();
-	const hash = await sha256(new TextEncoder().encode(formData.get('file')));
+	const hash = await sha256(new TextEncoder().encode(formData.get('url')));
 
 	// Upload HTML file
 	const aws = new AwsClient({ service: 's3', accessKeyId: env.AWS_ACCESS_KEY, secretAccessKey: env.AWS_SECRET_KEY });
