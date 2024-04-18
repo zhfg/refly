@@ -379,7 +379,7 @@ export class LlmService implements OnModuleInit {
 
     const systemPrompt = summarize.systemPrompt.replace(
       `{text}`,
-      contextToCitationText,
+      contextToCitationText?.slice(0, 12000),
     );
     const stream = await llm.stream([
       new SystemMessage(systemPrompt),
