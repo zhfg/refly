@@ -361,69 +361,32 @@ export class LlmService implements OnModuleInit {
     return askFollowUpQuestion?.recommend_ask_followup_question || [];
   }
 
-  async summary(
-    prompt: string,
-    docs: Document[],
-    chatHistory: ChatMessage[],
-    onMessage: (chunk: string) => void,
-    onEnd: (output) => void,
-    onError: (err) => void,
-  ) {
+  async summary(prompt: string, docs: Document[]) {
     if (docs.length <= 0) return;
 
-    const textSplitter = new RecursiveCharacterTextSplitter({
-      chunkSize: 1000,
-      chunkOverlap: 200,
-    });
+    const contextToCitationText = docs.reduce((total, cur) => {
+      (total += `\n\n下面是网页 [${cur?.metadata?.title}](${cur?.metadata?.source}) 的内容\n\n`),
+        (total += `\n===\n${cur?.pageContent}\n===\n\n`);
 
-    // 带元数据去拼 docs
-    const weblinkDocs: Document[] = (
-      await Promise.all(
-        docs.map(async (doc) => {
-          const { metadata } = doc;
-          // 手动区分网页分割
-          const dividerDocs = await textSplitter.createDocuments([
-            `\n\n下面是网页 [${metadata?.title}](${metadata.source}) 的内容\n\n`,
-          ]);
-          const splittedChunks = await textSplitter.createDocuments([
-            doc.pageContent,
-          ]);
-          return [...dividerDocs, ...splittedChunks];
-        }),
-      )
-    ).flat();
+      return total;
+    }, '');
 
-    const combineLLM = new ChatOpenAI({
+    const llm = new ChatOpenAI({
       modelName: 'gpt-3.5-turbo',
-      temperature: 0,
-      streaming: true,
-      callbacks: [
-        {
-          handleLLMNewToken(token: string): Promise<void> | void {
-            onMessage(token);
-          },
-          handleLLMEnd(output) {
-            onEnd(output);
-          },
-          handleLLMError(err, runId, parentRunId, tags) {
-            onError(err);
-          },
-        },
-      ],
+      temperature: 0.9,
+      maxTokens: 1024,
     });
 
-    const customPrompt = new PromptTemplate({
-      template: summarize.systemPrompt,
-      inputVariables: ['text'],
-    });
-    const summarizeChain = loadSummarizationChain(this.llm, {
-      type: 'map_reduce',
-      combineLLM,
-      combinePrompt: customPrompt,
-    });
-    await summarizeChain.invoke({
-      input_documents: weblinkDocs,
-    });
+    const systemPrompt = summarize.systemPrompt.replace(
+      `{text}`,
+      contextToCitationText,
+    );
+    const stream = await llm.stream([
+      new SystemMessage(systemPrompt),
+      new HumanMessage(contextToCitationText),
+    ]);
+
+    return stream;
   }
 
   async getContextualQuestion(query: string, chatHistory: LLMChatMessage[]) {
