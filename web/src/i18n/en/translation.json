@@ -1,0 +1,30 @@
+{
+  "language": "English",
+  "landingPage": {
+    "slogan": "AI-Powered Supermemory For Everyone",
+    "description": "Quick summaries, Insights, Auto tag and AI Search. Refly can build your second brain, extend knowledge and give you superpower",
+    "joinBtn": "Join for free",
+    "downloadBtn": "Download Extension",
+    "loginBtn": "Login",
+    "dashboard": "Dashboard",
+    "featureOne": {
+      "title": "Quick Action with Extension",
+      "description": "Quick summary for any website, continuous questioning, and conduct in-depth research on your favorite content"
+    },
+    "featureTwo": {
+      "title": "All-in-one Search Engine",
+      "description": " All in one search engine supports natural language search for all your memories and builds your second brain"
+    },
+    "featureThree": {
+      "title": "Auto tag and Timeline",
+      "description": " Automatically and tag, search and review at any time. Build a knowledge system through labels & timelines"
+    }
+  },
+  "title": "Welcome {{name}}, to react using react-i18next fully type-safe",
+  "description": {
+    "part1": "This is a simple example.",
+    "part2": "😉"
+  },
+  "userMessagesUnread_one": "You have {{count}} unread message.",
+  "userMessagesUnread_other": "You have {{count}} unread messages."
+}

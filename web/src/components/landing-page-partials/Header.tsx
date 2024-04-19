@@ -8,6 +8,9 @@ import { useCookie } from "react-use"
 // request
 import getUserInfo from "@/requests/getUserInfo"
 import { safeParseJSON, safeStringifyJSON } from "@/utils/parse"
+import { useTranslation } from "react-i18next"
+import { Button, Dropdown, Menu } from "@arco-design/web-react"
+import { IconDown } from "@arco-design/web-react/icon"
 
 function Header(props: { showLogin?: boolean }) {
   const { showLogin = true } = props
@@ -18,6 +21,9 @@ function Header(props: { showLogin?: boolean }) {
   const mobileNav = useRef(null)
   const navigate = useNavigate()
   const [token, updateCookie, deleteCookie] = useCookie("_refly_ai_sid")
+
+  // i18n
+  const { t, i18n } = useTranslation()
 
   const routeLandingPageMatch = useMatch("/")
   const routePrivacyPageMatch = useMatch("/privacy")
@@ -30,6 +36,20 @@ function Header(props: { showLogin?: boolean }) {
   )
   const showDashboardBtn = storageUserProfile?.id || userStore?.userProfile?.id
   console.log("storageUserProfile", storageUserProfile, userStore?.userProfile)
+
+  console.log("用户当前的语言", i18n.languages?.[0])
+  const dropList = (
+    <Menu
+      onClickMenuItem={key => changeLang(key as "en" | "cn")}
+      style={{ width: 120 }}>
+      <Menu.Item key="cn">简体中文</Menu.Item>
+      <Menu.Item key="en">English</Menu.Item>
+    </Menu>
+  )
+
+  const changeLang = (lng: "en" | "cn") => {
+    i18n.changeLanguage(lng)
+  }
 
   const getLoginStatus = async () => {
     try {
@@ -117,6 +137,12 @@ function Header(props: { showLogin?: boolean }) {
           <nav className="hidden md:flex md:grow">
             {/* Desktop sign in links */}
             <ul className="flex grow justify-end flex-wrap items-center">
+              <Dropdown droplist={dropList} position="bl">
+                <Button type="text" className="landing-page-language-btn">
+                  {t("language")} <IconDown />
+                </Button>
+              </Dropdown>
+
               {showLogin && !showDashboardBtn && (
                 <li>
                   <Link
@@ -125,7 +151,7 @@ function Header(props: { showLogin?: boolean }) {
                     }}
                     to=""
                     className="font-medium text-green-600 hover:text-gray-200 px-4 py-3 flex items-center transition duration-150 ease-in-out">
-                    Login
+                    {t("landingPage.loginBtn")}
                   </Link>
                 </li>
               )}
@@ -134,7 +160,7 @@ function Header(props: { showLogin?: boolean }) {
                   <Link
                     to="/"
                     className="btn-sm text-white bg-green-600 hover:bg-green-700 ml-3">
-                    Dashboard
+                    {t("landingPage.dashboard")}
                   </Link>
                 </li>
               )}
@@ -179,7 +205,7 @@ function Header(props: { showLogin?: boolean }) {
                     }}
                     to=""
                     className="flex font-medium w-full text-green-600 hover:text-gray-200 py-2 justify-center">
-                    Login
+                    {t("landingPage.loginBtn")}
                   </Link>
                 </li>
                 {/* <li>
