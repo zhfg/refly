@@ -107,7 +107,7 @@ function Footer() {
                 </ul>
               </div>
 
-              {/* 4th block */}
+              {/* 5th block */}
               <div className="text-sm">
                 <h6 className="font-medium mb-1">About</h6>
                 <ul>
@@ -123,6 +123,40 @@ function Footer() {
                       to="/terms"
                       className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">
                       Terms of Service
+                    </Link>
+                  </li>
+                  {/* <li className="mb-1">
+                    <Link
+                      to="#"
+                      className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">
+                      Consectetur adipiscing
+                    </Link>
+                  </li>
+                  <li className="mb-1">
+                    <Link
+                      to="#"
+                      className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">
+                      Labore et dolore
+                    </Link>
+                  </li>
+                  <li className="mb-1">
+                    <Link
+                      to="#"
+                      className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">
+                      Consectetur adipiscing
+                    </Link>
+                  </li> */}
+                </ul>
+              </div>
+
+              <div className="text-sm">
+                <h6 className="font-medium mb-1">Contact us</h6>
+                <ul>
+                  <li className="mb-1">
+                    <Link
+                      to="mailto:pftom@qq.com"
+                      className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">
+                      pftom@qq.com
                     </Link>
                   </li>
                   {/* <li className="mb-1">
