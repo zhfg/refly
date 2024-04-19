@@ -14,6 +14,8 @@ import { createLLMChatMessage } from '../llm/schema';
 import { LlmService } from '../llm/llm.service';
 import { WeblinkService } from '../weblink/weblink.service';
 import { LoggerService } from '../common/logger.service';
+import { IterableReadableStream } from '@langchain/core/dist/utils/stream';
+import { BaseMessageChunk } from 'langchain/schema';
 
 const LLM_SPLIT = '__LLM_RESPONSE__';
 const RELATED_SPLIT = '__RELATED_QUESTIONS__';
@@ -277,9 +279,6 @@ export class ConversationService {
     res.write(JSON.stringify(sources));
     res.write(LLM_SPLIT);
 
-    // write answer in a stream style
-    let answerStr = '';
-
     const weblinkList = data?.filter?.weblinkList;
     if (weblinkList?.length <= 0) return;
 
@@ -293,39 +292,27 @@ export class ConversationService {
     // 基于一组网页做总结，先获取网页内容
     const docs = await this.weblinkService.parseMultiWeblinks(weblinkList);
 
-    // 构建一个 promise 用于处理 summary 输出
-    const promise = new Promise(async (resolve, reject) => {
-      // 这里用于回调
-      const onMessage = (chunk: string) => {
-        answerStr += chunk;
+    let stream: IterableReadableStream<BaseMessageChunk>;
+    if (data?.actionType === QUICK_ACTION_TYPE.SUMMARY) {
+      const weblinkList = data?.filter?.weblinkList;
+      if (weblinkList?.length <= 0) return;
 
-        res.write(chunk);
-      };
+      stream = await this.llmService.summary(data?.actionPrompt, docs);
+    }
 
-      // summarize 输出结束之后将 related questions 写回
-      const onEnd = (output) => {
-        resolve(output);
-      };
+    const getSSEData = async (stream) => {
+      // write answer in a stream style
+      let answerStr = '';
+      for await (const chunk of await stream) {
+        const chunkStr =
+          chunk?.content || (typeof chunk === 'string' ? chunk : '');
+        answerStr += chunkStr;
 
-      const onError = (err) => {
-        this.logger.error(`output summary error: ${err}`);
-        reject(err);
-      };
-
-      if (data?.actionType === QUICK_ACTION_TYPE.SUMMARY) {
-        const weblinkList = data?.filter?.weblinkList;
-        if (weblinkList?.length <= 0) return;
-
-        await this.llmService.summary(
-          data?.actionPrompt,
-          docs,
-          chatHistory,
-          onMessage,
-          onEnd,
-          onError,
-        );
+        res.write(chunkStr);
       }
-    });
+
+      return answerStr;
+    };
 
     const getUserQuestion = (actionType: QUICK_ACTION_TYPE) => {
       switch (actionType) {
@@ -335,8 +322,8 @@ export class ConversationService {
       }
     };
 
-    const [_, relatedQuestions] = await Promise.all([
-      promise,
+    const [answerStr, relatedQuestions] = await Promise.all([
+      getSSEData(stream),
       this.llmService.getRelatedQuestion(
         docs,
         getUserQuestion(data?.actionType),

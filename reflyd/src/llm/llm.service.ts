@@ -131,6 +131,49 @@ export class LlmService implements OnModuleInit {
     return contentMeta;
   }
 
+  async getWebsiteMeta(doc: Document): Promise<Partial<AigcContent>> {
+    const parser = new JsonOutputFunctionsParser();
+    const runnable = await this.llm
+      .bind({
+        functions: [extractSummarizeMeta.extractWebsiteMetaSchema],
+        function_call: {
+          name: 'getWebsiteMeta',
+        },
+      })
+      .pipe(parser);
+    const summary = (await runnable.invoke([
+      new SystemMessage(extractSummarizeMeta.extractMetaSystemPrompt),
+      new HumanMessage(doc.pageContent?.slice(0, 12000)),
+    ])) as {
+      title: string;
+      keywords: string;
+    };
+    this.logger.log('extract meta: %j', summary);
+
+    return {
+      title: summary?.title || '',
+      meta: JSON.stringify({
+        keywords: summary?.keywords || '',
+      }),
+    };
+  }
+
+  async summarizeContent(doc: Document): Promise<Partial<AigcContent>> {
+    const summary = await this.llm.invoke([
+      new SystemMessage(extractSummarizeMeta.summarizeSystemPrompt),
+      new HumanMessage(
+        `The content to be summarized is as follows:\n` +
+          `===\n ${doc.pageContent?.slice(0, 12000)} \n===\n` +
+          `SUMMARY with **Chinese**:`,
+      ),
+    ]);
+    this.logger.log('summarized content: %j', summary);
+
+    return {
+      content: summary?.text || '',
+    };
+  }
+
   /**
    * Apply content strategy.
    * @param doc
@@ -138,30 +181,19 @@ export class LlmService implements OnModuleInit {
    */
   async applyStrategy(doc: Document): Promise<Partial<AigcContent>> {
     // direct apply summary and return with structed json format
-    const parser = new JsonOutputFunctionsParser();
-    const runnable = await this.llm
-      .bind({
-        functions: [extractSummarizeMeta.extractSummarizeMetaSchema],
-        function_call: { name: 'content_meta_extractor' },
-      })
-      .pipe(parser);
-    const summary = (await runnable.invoke([
-      new SystemMessage(extractSummarizeMeta.extractSummarizeSystemPrompt),
-      new HumanMessage(doc.pageContent?.slice(0, 12000)),
-    ])) as {
-      title: string;
-      abstract: string;
-      keywords: string;
-    };
-    this.logger.log('summarized content: %j', summary);
+    /**
+     * 经过反复实验，gpt-3.5-turbo 的能力比较差，因此将这个任务拆成两个：1）meta 抽取（function call) 2）summary 生成（直接使用 GPT 输出）
+     */
+    const [meta, summary] = await Promise.all([
+      this.getWebsiteMeta(doc),
+      this.summarizeContent(doc),
+    ]);
 
     return {
-      title: summary?.title || '',
-      abstract: summary?.abstract || '', // TODO: 概要暂时与正文相同
-      content: summary?.abstract || '',
-      meta: JSON.stringify({
-        keywords: summary?.keywords || '',
-      }),
+      title: meta?.title || '',
+      abstract: summary?.content || '', // TODO: 概要暂时与正文相同
+      content: summary?.content || '',
+      meta: meta?.meta,
       sources: JSON.stringify([{ medadata: doc?.metadata }]),
     };
   }
@@ -329,69 +361,32 @@ export class LlmService implements OnModuleInit {
     return askFollowUpQuestion?.recommend_ask_followup_question || [];
   }
 
-  async summary(
-    prompt: string,
-    docs: Document[],
-    chatHistory: ChatMessage[],
-    onMessage: (chunk: string) => void,
-    onEnd: (output) => void,
-    onError: (err) => void,
-  ) {
+  async summary(prompt: string, docs: Document[]) {
     if (docs.length <= 0) return;
 
-    const textSplitter = new RecursiveCharacterTextSplitter({
-      chunkSize: 1000,
-      chunkOverlap: 200,
-    });
+    const contextToCitationText = docs.reduce((total, cur) => {
+      (total += `\n\n下面是网页 [${cur?.metadata?.title}](${cur?.metadata?.source}) 的内容\n\n`),
+        (total += `\n===\n${cur?.pageContent}\n===\n\n`);
 
-    // 带元数据去拼 docs
-    const weblinkDocs: Document[] = (
-      await Promise.all(
-        docs.map(async (doc) => {
-          const { metadata } = doc;
-          // 手动区分网页分割
-          const dividerDocs = await textSplitter.createDocuments([
-            `\n\n下面是网页 [${metadata?.title}](${metadata.source}) 的内容\n\n`,
-          ]);
-          const splittedChunks = await textSplitter.createDocuments([
-            doc.pageContent,
-          ]);
-          return [...dividerDocs, ...splittedChunks];
-        }),
-      )
-    ).flat();
+      return total;
+    }, '');
 
-    const combineLLM = new ChatOpenAI({
+    const llm = new ChatOpenAI({
       modelName: 'gpt-3.5-turbo',
-      temperature: 0,
-      streaming: true,
-      callbacks: [
-        {
-          handleLLMNewToken(token: string): Promise<void> | void {
-            onMessage(token);
-          },
-          handleLLMEnd(output) {
-            onEnd(output);
-          },
-          handleLLMError(err, runId, parentRunId, tags) {
-            onError(err);
-          },
-        },
-      ],
+      temperature: 0.9,
+      maxTokens: 1024,
     });
 
-    const customPrompt = new PromptTemplate({
-      template: summarize.systemPrompt,
-      inputVariables: ['text'],
-    });
-    const summarizeChain = loadSummarizationChain(this.llm, {
-      type: 'map_reduce',
-      combineLLM,
-      combinePrompt: customPrompt,
-    });
-    await summarizeChain.invoke({
-      input_documents: weblinkDocs,
-    });
+    const systemPrompt = summarize.systemPrompt.replace(
+      `{text}`,
+      contextToCitationText?.slice(0, 12000),
+    );
+    const stream = await llm.stream([
+      new SystemMessage(systemPrompt),
+      new HumanMessage(contextToCitationText),
+    ]);
+
+    return stream;
   }
 
   async getContextualQuestion(query: string, chatHistory: LLMChatMessage[]) {

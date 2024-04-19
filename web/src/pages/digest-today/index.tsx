@@ -47,6 +47,8 @@ export const DigestToday = () => {
   const [isFetching, setIsFetching] = useState(false)
 
   const fetchData = async (currentPage = 1) => {
+    let newData: Digest[] = []
+
     try {
       setScrollLoading(
         <div
@@ -95,6 +97,7 @@ export const DigestToday = () => {
       const newFeatureList = digestStore.today.featureList.concat(
         newRes?.data || [],
       )
+      newData = newRes?.data as Digest[]
       digestStore.updatePayload(
         { ...digestStore.today, featureList: newFeatureList },
         DigestType.TODAY,
@@ -106,10 +109,7 @@ export const DigestToday = () => {
 
       if (today?.featureList?.length === 0) {
         setScrollLoading(<EmptyDigestStatus />)
-      } else if (
-        today?.featureList?.length > 0 &&
-        today?.featureList?.length < today?.pageSize
-      ) {
+      } else if (newData?.length >= 0 && newData?.length < today?.pageSize) {
         setScrollLoading(<span>已经到底啦~</span>)
       }
     }

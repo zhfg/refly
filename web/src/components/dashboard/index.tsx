@@ -126,7 +126,7 @@ const Home = () => {
                 icon={<IconHistory />}
                 className="search-assist-btn"
                 onClick={handleScrollToMemory}>
-                查看回忆
+                查看知识库
               </Button>
             </div>
           </div>

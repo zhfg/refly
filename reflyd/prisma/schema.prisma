@@ -304,7 +304,7 @@ model UserDigest {
   /// 关联的回顾内容
   content   AigcContent @relation(fields: [contentId], references: [id])
 
-  @@unique([userId, date, topicKey])
+  // @@unique([userId, date, topicKey])
   @@map("user_digests")
 }
 
