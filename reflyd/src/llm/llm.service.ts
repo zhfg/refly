@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { PrismaVectorStore } from '@langchain/community/vectorstores/prisma';
@@ -10,23 +10,17 @@ import {
 } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { createStuffDocumentsChain } from 'langchain/chains/combine_documents';
-import { loadSummarizationChain } from 'langchain/chains';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
-import { PromptTemplate } from '@langchain/core/prompts';
 import { JsonOutputFunctionsParser } from 'langchain/output_parsers';
 
-import {
-  AigcContent,
-  ChatMessage,
-  ContentVector,
-  Prisma,
-} from '@prisma/client';
+import { AigcContent, ContentVector, Prisma } from '@prisma/client';
 import {
   qa,
   contextualizeQA,
   extractContentMeta,
   summarize,
   summarizeMultipleSource,
+  summarizeConversation,
   extractSummarizeMeta,
   generateAskFollowupQuestion,
   searchEnhance,
@@ -39,7 +33,6 @@ import { ContentMeta } from './dto';
 import { categoryList } from '../prompts/utils/category';
 import { Source } from '../types/weblink';
 import { SearchResultContext } from '../types/search';
-import { LoggerService } from '../common/logger.service';
 import { PrismaService } from '../common/prisma.service';
 
 @Injectable()
@@ -52,14 +45,12 @@ export class LlmService implements OnModuleInit {
     any
   >;
   private llm: ChatOpenAI;
+  private logger = new Logger(LlmService.name);
 
   constructor(
-    private logger: LoggerService,
     private prisma: PrismaService,
     private configService: ConfigService,
-  ) {
-    this.logger.setContext(LlmService.name);
-  }
+  ) {}
 
   async onModuleInit() {
     this.embeddings = new OpenAIEmbeddings({
@@ -242,6 +233,28 @@ export class LlmService implements OnModuleInit {
       title: contentMeta?.title || '',
       content: contentMeta?.content || '',
     };
+  }
+
+  async summarizeConversation(
+    messages: {
+      type: string;
+      content: string;
+    }[],
+  ): Promise<string> {
+    const doc = new Document({
+      pageContent: messages.map((m) => `${m.type}: ${m.content}`).join('\n'),
+    });
+    const summary = await this.llm.invoke([
+      new SystemMessage(summarizeConversation.systemPrompt),
+      new HumanMessage(
+        `The conversation to be summarized is as follows:\n` +
+          `===\n ${doc.pageContent?.slice(0, 12000)} \n===\n` +
+          `SUMMARY with language used in the conversation:`,
+      ),
+    ]);
+    this.logger.log(`summarized text: ${summary.text}`);
+
+    return summary.text || '';
   }
 
   async indexPipelineFromLink(weblinkId: number, doc: Document) {
