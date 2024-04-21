@@ -18,6 +18,36 @@
     "featureThree": {
       "title": "自动标签与时间线",
       "description": "自动标记、随时搜索和回顾。通过标签和时间线构建知识体系"
+    },
+    "footer": {
+      "description": "快速总结与形成洞察、自动化归档以及智能语义搜索——Refly 能够为你打造第二大脑，拓展你的知识视野，并赋予你超乎寻常的能力。",
+      "right": "Refly.ai 版权所有。",
+      "product": {
+        "title": "产品",
+        "one": "Refly AI 浏览器插件"
+      },
+      "resource": {
+        "title": "资源",
+        "one": "推特"
+      },
+      "about": {
+        "title": "关于",
+        "one": "隐私政策",
+        "two": "服务条款"
+      },
+      "contactUs": {
+        "title": "联系我们",
+        "one": "pftom@qq.com"
+      }
+    },
+    "loginModal": {
+      "title": "登录或注册以继续使用 Refly",
+      "loginBtn": "立即登录",
+      "loggingStatus": "登录中...",
+      "and": "及",
+      "utilText": "注册同意即表明您同意 ",
+      "privacyPolicy": "隐私政策",
+      "terms": "条款和条件"
     }
   },
   "title": "欢迎 {{name}}，使用 react-i18next 完全类型安全的 React",

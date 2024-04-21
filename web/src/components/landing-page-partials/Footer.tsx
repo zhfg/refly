@@ -1,8 +1,11 @@
 import React from "react"
 import { Link } from "react-router-dom"
 import Logo from "@/assets/logo.svg"
+import { useTranslation } from "react-i18next"
 
 function Footer() {
+  const { t } = useTranslation()
+
   return (
     <footer>
       <div className="py-12 md:py-16">
@@ -26,9 +29,7 @@ function Footer() {
                 </Link>
               </div>
               <div className="text-gray-400">
-                Quick summaries, Insights, Auto tag and AI Search. Refly can
-                build your second brain, extend knowledge and give you
-                superpower
+                {t("landingPage.footer.description")}
               </div>
             </div>
 
@@ -36,14 +37,16 @@ function Footer() {
             <div className="md:col-span-8 lg:col-span-7 grid sm:grid-cols-3 gap-8">
               {/* 2nd block */}
               <div className="text-sm">
-                <h6 className="font-medium mb-1">Products</h6>
+                <h6 className="font-medium mb-1">
+                  {t("landingPage.footer.product.title")}
+                </h6>
                 <ul>
                   <li className="mb-1">
                     <Link
                       target="_blank"
                       to="https://chromewebstore.google.com/detail/lecbjbapfkinmikhadakbclblnemmjpd"
                       className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">
-                      ReflyAI Chrome Extension
+                      {t("landingPage.footer.product.one")}
                     </Link>
                   </li>
                   {/* <li className="mb-1">
@@ -65,14 +68,16 @@ function Footer() {
 
               {/* 3rd block */}
               <div className="text-sm">
-                <h6 className="font-medium mb-1">Resources</h6>
+                <h6 className="font-medium mb-1">
+                  {t("landingPage.footer.resource.title")}
+                </h6>
                 <ul>
                   <li className="mb-1">
                     <Link
                       to="https://twitter.com/tuturetom"
                       target="_blank"
                       className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">
-                      Twitter
+                      {t("landingPage.footer.resource.one")}
                     </Link>
                   </li>
                   {/* <li className="mb-1">
@@ -109,20 +114,22 @@ function Footer() {
 
               {/* 5th block */}
               <div className="text-sm">
-                <h6 className="font-medium mb-1">About</h6>
+                <h6 className="font-medium mb-1">
+                  {t("landingPage.footer.about.title")}
+                </h6>
                 <ul>
                   <li className="mb-1">
                     <Link
                       to="/privacy"
                       className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">
-                      Privacy Policy
+                      {t("landingPage.footer.about.one")}
                     </Link>
                   </li>
                   <li className="mb-1">
                     <Link
                       to="/terms"
                       className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">
-                      Terms of Service
+                      {t("landingPage.footer.about.two")}
                     </Link>
                   </li>
                   {/* <li className="mb-1">
@@ -150,13 +157,15 @@ function Footer() {
               </div>
 
               <div className="text-sm">
-                <h6 className="font-medium mb-1">Contact us</h6>
+                <h6 className="font-medium mb-1">
+                  {t("landingPage.footer.contactUs.title")}
+                </h6>
                 <ul>
                   <li className="mb-1">
                     <Link
                       to="mailto:pftom@qq.com"
                       className="text-gray-400 hover:text-gray-100 transition duration-150 ease-in-out">
-                      pftom@qq.com
+                      {t("landingPage.footer.contactUs.one")}
                     </Link>
                   </li>
                   {/* <li className="mb-1">
@@ -261,7 +270,7 @@ function Footer() {
 
             {/* Copyrights note */}
             <div className="text-gray-400 text-sm mr-4">
-              &copy; Refly.ai. All rights reserved.
+              &copy; {t("landingPage.footer.right")}
             </div>
           </div>
         </div>

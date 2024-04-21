@@ -18,6 +18,36 @@
     "featureThree": {
       "title": "Auto tag and Timeline",
       "description": " Automatically and tag, search and review at any time. Build a knowledge system through labels & timelines"
+    },
+    "footer": {
+      "description": "Quick summaries, Insights, Auto tag and AI Search. Refly can build your second brain, extend knowledge and give you superpower",
+      "right": "Refly.ai. All rights reserved.",
+      "product": {
+        "title": "Products",
+        "one": "Refly AI Chrome Extension"
+      },
+      "resource": {
+        "title": "Resources",
+        "one": "Twitter"
+      },
+      "about": {
+        "title": "About",
+        "one": "Privacy Policy",
+        "two": "Terms of Service"
+      },
+      "contactUs": {
+        "title": "Contact us",
+        "one": "pftom@qq.com"
+      }
+    },
+    "loginModal": {
+      "title": "Sign In or Register to acess with Refly",
+      "loginBtn": "Sign In",
+      "loggingStatus": "Signing in...",
+      "and": "and",
+      "utilText": "By registering, you agree to our",
+      "privacyPolicy": "Privacy Policy",
+      "terms": "Terms of Service"
     }
   },
   "title": "Welcome {{name}}, to react using react-i18next fully type-safe",
