@@ -50,6 +50,60 @@
       "terms": "Terms of Service"
     }
   },
+  "loggedHomePage": {
+    "newThreadText": "New Thread",
+    "homePage": {
+      "title": "AI Powered Supermemory",
+      "searchPlaceholder": "Search for Refly",
+      "searchScope": {
+        "title": "Select Search Scope",
+        "all": "All Web Pages",
+        "history": "History Read",
+        "internet": "Internet Search"
+      },
+      "seeKnowledgeLibrary": "View Knowledge Library"
+    },
+    "siderMenu": {
+      "homePage": "Home",
+      "threadLibrary": "Thread Library",
+      "getHelp": "Get Help",
+      "download": "Download Extension"
+    }
+  },
+  "knowledgeLibrary": {
+    "header": {
+      "archive": "Archive",
+      "timeline": "Timeline",
+      "seeAll": "See All",
+      "trendingTopic": "Trending Topic: "
+    },
+    "archive": {
+      "title": "Explore the Content Archive",
+      "list": {
+        "fetchErr": "Failed to retrieve the archive content. Please try refreshing the page."
+      },
+      "item": {
+        "askFollow": "Ask Follow-Up",
+        "share": "Share",
+        "copy": "Copy Link",
+        "copyNotify": "Link Copied to Clipboard",
+        "noMoreText": "That's the end of the list!",
+        "linkMore": "{{count}} more"
+      }
+    },
+    "timeline": {
+      "title": "Knowledge from {{year}}/{{month}}/{{day}}",
+      "list": {
+        "fetchErr": "Failed to retrieve the archive content. Please try refreshing the page."
+      }
+    },
+    "empty": {
+      "timelineTitle": "No new content read on {{year}}/{{month}}/{{day}}. Download the plugin to start exploring new content.",
+      "archiveTitle": "You haven't read any content yet. Download the plugin to start exploring new material!",
+      "download": "Download Plugin",
+      "seeOther": "View Knowledge from Other Dates"
+    }
+  },
   "title": "Welcome {{name}}, to react using react-i18next fully type-safe",
   "description": {
     "part1": "This is a simple example.",

@@ -35,6 +35,7 @@ import { EmptyDigestStatus } from "@/components/empty-digest-archive-status"
 import getDigestList from "@/requests/getDigestList"
 // styles
 import "./index.scss"
+import { useTranslation } from "react-i18next"
 
 export const DigestArchive = () => {
   const [searchParams] = useSearchParams()
@@ -46,6 +47,9 @@ export const DigestArchive = () => {
   const year = searchParams.get("y")
   const month = searchParams.get("m")
   const day = searchParams.get("d")
+
+  const { t, i18n } = useTranslation()
+  const language = i18n.languages?.[0]
 
   const fetchData = async (currentPage = 1) => {
     try {
@@ -63,7 +67,9 @@ export const DigestArchive = () => {
         </div>,
       )
       if (!digestArchiveStore?.hasMore && currentPage !== 1) {
-        setScrollLoading(<span>已经到底啦~</span>)
+        setScrollLoading(
+          <span>{t("knowledgeLibrary.archive.item.noMoreText")}</span>,
+        )
         return
       }
 
@@ -95,7 +101,7 @@ export const DigestArchive = () => {
       console.log("newRes", newRes)
       digestArchiveStore.updateDigestList(newRes?.data || [])
     } catch (err) {
-      message.error("获取归档内容失败，请重新刷新试试")
+      message.error(t("knowledgeLibrary.timeline.list.fetchErr"))
     } finally {
       const { digestList, pageSize } = useDigestArchiveStore.getState()
 
@@ -106,7 +112,9 @@ export const DigestArchive = () => {
           />,
         )
       } else if (digestList?.length > 0 && digestList?.length < pageSize) {
-        setScrollLoading(<span>已经到底啦~</span>)
+        setScrollLoading(
+          <span>{t("knowledgeLibrary.archive.item.noMoreText")}</span>,
+        )
       }
     }
   }
@@ -134,7 +142,7 @@ export const DigestArchive = () => {
             <div className="digest-archive-header">
               <div className="digest-archive-title">
                 <p>
-                  {year} 年 {month} 月 {day} 日浏览内容
+                  {t("knowledgeLibrary.timeline.title", { year, month, day })}
                 </p>
               </div>
               <div className="digest-archive-time-picker">
@@ -165,7 +173,9 @@ export const DigestArchive = () => {
           dataSource={digestArchiveStore.digestList}
           scrollLoading={scrollLoading}
           onReachBottom={currentPage => fetchData(currentPage)}
-          noDataElement={<div>暂无数据</div>}
+          noDataElement={
+            <div>{t("knowledgeLibrary.archive.item.noMoreText")}</div>
+          }
           render={(item: Digest, index) => (
             <List.Item
               key={index}
@@ -186,9 +196,11 @@ export const DigestArchive = () => {
                       <IconRightCircle
                         style={{ fontSize: 14, color: "#64645F" }}
                       />
-                      <span className="feed-list-item-text">追问阅读</span>
+                      <span className="feed-list-item-text">
+                        {t("knowledgeLibrary.archive.item.askFollow")}
+                      </span>
                     </span>
-                    <IconTip text="复制链接">
+                    <IconTip text={t("knowledgeLibrary.archive.item.copy")}>
                       <span
                         key={1}
                         className="feed-list-item-continue-ask"
@@ -196,32 +208,34 @@ export const DigestArchive = () => {
                           copyToClipboard(
                             `${getClientOrigin()}/content/${item?.contentId}`,
                           )
-                          message.success("链接已复制到剪切板")
+                          message.success(
+                            t("knowledgeLibrary.archive.item.copyNotify"),
+                          )
                         }}>
                         <IconShareExternal
                           style={{ fontSize: 14, color: "#64645F" }}
                         />
-                        <span className="feed-list-item-text">分享</span>
+                        <span className="feed-list-item-text">
+                          {t("knowledgeLibrary.archive.item.share")}
+                        </span>
                       </span>
                     </IconTip>
                   </div>
                   <div className="feed-item-action" style={{ marginTop: 8 }}>
-                    <IconTip text="前往此分类">
-                      <span
-                        className="feed-item-topic"
-                        key={3}
-                        style={{
-                          display: "inline-block",
-                          borderRight: `1px solid #64645F`,
-                          paddingRight: 12,
-                          lineHeight: "10px",
-                        }}>
-                        <IconTag style={{ fontSize: 14, color: "#64645F" }} />
-                        <span className="feed-list-item-text">
-                          {item?.topic?.name}
-                        </span>
+                    <span
+                      className="feed-item-topic"
+                      key={3}
+                      style={{
+                        display: "inline-block",
+                        borderRight: `1px solid #64645F`,
+                        paddingRight: 12,
+                        lineHeight: "10px",
+                      }}>
+                      <IconTag style={{ fontSize: 14, color: "#64645F" }} />
+                      <span className="feed-list-item-text">
+                        {item?.topic?.name}
                       </span>
-                    </IconTip>
+                    </span>
                     <span
                       key={3}
                       className="feed-item-link"
@@ -232,7 +246,7 @@ export const DigestArchive = () => {
                       <span className="feed-list-item-text">
                         {safeParseURL(item?.weblinks?.[0]?.url)}{" "}
                         {item?.weblinks?.length - 1 > 0
-                          ? `& ${item?.weblinks?.length - 1} 条更多`
+                          ? `& ${t("knowledgeLibrary.archive.item.linkMore", { count: item?.weblinks?.length - 1 })}`
                           : ""}
                       </span>
                     </span>
@@ -241,7 +255,9 @@ export const DigestArchive = () => {
                         style={{ fontSize: 14, color: "#64645F" }}
                       />
                       <span className="feed-list-item-text">
-                        {time(item.updatedAt).utc().fromNow()}
+                        {time(item.updatedAt, language as "en" | "cn")
+                          .utc()
+                          .fromNow()}
                       </span>
                     </span>
                   </div>

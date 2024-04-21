@@ -1,4 +1,4 @@
-import { Button, Modal } from "@arco-design/web-react"
+import { Button, Dropdown, Modal, Typography } from "@arco-design/web-react"
 import { useCookie } from "react-use"
 import Cookies from "js-cookie"
 
@@ -7,12 +7,18 @@ import "./index.scss"
 import { useUserStore } from "@/stores/user"
 import { useNavigate } from "react-router-dom"
 import { getClientOrigin, getCookieOrigin, getExtensionId } from "@/utils/url"
+// components
+import { LanguageList } from "@/components/language-list"
+import { IconDown } from "@arco-design/web-react/icon"
+import { useTranslation } from "react-i18next"
 
 export const Settings = () => {
   const [token, updateCookie, deleteCookie] = useCookie("_refly_ai_sid")
   const userStore = useUserStore()
   const navigate = useNavigate()
   const [modal, contextHolder] = Modal.useModal()
+
+  const { t } = useTranslation()
 
   const handleLogout = () => {
     modal.confirm?.({
@@ -43,9 +49,16 @@ export const Settings = () => {
       <div className="settings-inner-container">
         <div className="settings-title">设置</div>
         <div>
-          <Button onClick={() => handleLogout()} style={{ marginTop: 24 }}>
-            退出登录
-          </Button>
+          <Typography.Title heading={4}>语言</Typography.Title>
+          <LanguageList>
+            <Button className="setting-page-language-btn">
+              {t("language")} <IconDown />
+            </Button>
+          </LanguageList>
+        </div>
+        <div>
+          <Typography.Title heading={4}>账户</Typography.Title>
+          <Button onClick={() => handleLogout()}>退出登录</Button>
         </div>
       </div>
       {contextHolder}

@@ -9,8 +9,10 @@ import { useCookie } from "react-use"
 import getUserInfo from "@/requests/getUserInfo"
 import { safeParseJSON, safeStringifyJSON } from "@/utils/parse"
 import { useTranslation } from "react-i18next"
-import { Button, Dropdown, Menu } from "@arco-design/web-react"
+import { Button, Dropdown } from "@arco-design/web-react"
 import { IconDown } from "@arco-design/web-react/icon"
+// components
+import { LanguageList } from "@/components/language-list"
 
 function Header(props: { showLogin?: boolean }) {
   const { showLogin = true } = props
@@ -23,7 +25,7 @@ function Header(props: { showLogin?: boolean }) {
   const [token, updateCookie, deleteCookie] = useCookie("_refly_ai_sid")
 
   // i18n
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
 
   const routeLandingPageMatch = useMatch("/")
   const routePrivacyPageMatch = useMatch("/privacy")
@@ -36,20 +38,6 @@ function Header(props: { showLogin?: boolean }) {
   )
   const showDashboardBtn = storageUserProfile?.id || userStore?.userProfile?.id
   console.log("storageUserProfile", storageUserProfile, userStore?.userProfile)
-
-  console.log("用户当前的语言", i18n.languages?.[0])
-  const dropList = (
-    <Menu
-      onClickMenuItem={key => changeLang(key as "en" | "cn")}
-      style={{ width: 120 }}>
-      <Menu.Item key="cn">简体中文</Menu.Item>
-      <Menu.Item key="en">English</Menu.Item>
-    </Menu>
-  )
-
-  const changeLang = (lng: "en" | "cn") => {
-    i18n.changeLanguage(lng)
-  }
 
   const getLoginStatus = async () => {
     try {
@@ -137,11 +125,11 @@ function Header(props: { showLogin?: boolean }) {
           <nav className="hidden md:flex md:grow">
             {/* Desktop sign in links */}
             <ul className="flex grow justify-end flex-wrap items-center">
-              <Dropdown droplist={dropList} position="bl">
+              <LanguageList>
                 <Button type="text" className="landing-page-language-btn">
                   {t("language")} <IconDown />
                 </Button>
-              </Dropdown>
+              </LanguageList>
 
               {showLogin && !showDashboardBtn && (
                 <li>

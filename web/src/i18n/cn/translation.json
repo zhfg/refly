@@ -1,7 +1,7 @@
 {
   "language": "简体中文",
   "landingPage": {
-    "slogan": "专属于你！人工智能驱动的超级记忆",
+    "slogan": "人工智能驱动的超级记忆",
     "description": "快速总结与形成洞察、自动化归档以及智能语义搜索——Refly 能够为你打造第二大脑，拓展你的知识视野，并赋予你超乎寻常的能力。",
     "joinBtn": "免费使用",
     "downloadBtn": "下载插件",
@@ -49,6 +49,63 @@
       "privacyPolicy": "隐私政策",
       "terms": "条款和条件"
     }
+  },
+  "loggedHomePage": {
+    "newThreadText": "新会话",
+    "homePage": {
+      "title": "人工智能驱动的超级记忆",
+      "searchPlaceholder": "输入搜索内容...",
+      "searchScope": {
+        "title": "选择搜索范围",
+        "all": "所有网页",
+        "history": "历史已阅读",
+        "internet": "联网搜索"
+      },
+      "seeKnowledgeLibrary": "查看知识库"
+    },  
+    "siderMenu": {
+      "homePage": "主页",
+      "threadLibrary": "会话库",
+      "getHelp": "获得帮助",
+      "download": "下载插件"
+    }
+  },
+  "knowledgeLibrary": {
+    "header": {
+      "archive": "归档",
+      "timeline": "时间线",
+      "seeAll": "查看全部",
+      "trendingTopic": "趋势主题："
+    },
+    "archive": {
+      "title": "浏览内容归档",
+      "list": {
+        "fetchErr": "获取归档内容失败，请重新刷新试试"
+      },
+      "item": {
+        "askFollow": "追问阅读",
+        "share": "分享",
+        "copy": "复制链接",
+        "copyNotify": "链接已复制到剪切板",
+        "noMoreText": "已经到底啦~",
+        "linkMore": "{{count}} 条更多"
+      }
+    },
+    "timeline": {
+      "title": "{{year}} 年 {{month}} 月 {{day}} 日浏览内容",
+      "list": {
+        "fetchErr": "获取归档内容失败，请重新刷新试试"
+      }
+    },
+    "empty": {
+      "timelineTitle": "{{year}} 年 {{month}} 月 {{day}} 日还未阅读新内容，赶快下载插件去阅读新内容吧",
+      "archiveTitle": "还未阅读任何内容，赶快下载插件去阅读新内容吧~",
+      "download": "下载插件",
+      "seeOther": "查看其他日期内容"
+    }
+  },
+  "unloginHomePage": {
+
   },
   "title": "欢迎 {{name}}，使用 react-i18next 完全类型安全的 React",
   "description": {

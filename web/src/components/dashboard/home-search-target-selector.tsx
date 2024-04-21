@@ -10,10 +10,13 @@ import { useSearchStateStore, SearchTarget } from "@/stores/search-state"
 import { useWeblinkStore } from "@/stores/weblink"
 import { IconTip } from "./icon-tip"
 import { useEffect } from "react"
+import { useTranslation } from "react-i18next"
 
 export const SearchTargetSelector = () => {
   const searchStateStore = useSearchStateStore()
   const webLinkStore = useWeblinkStore()
+
+  const { t } = useTranslation()
 
   const iconStyle = {
     marginRight: 8,
@@ -34,7 +37,7 @@ export const SearchTargetSelector = () => {
       }}>
       <Menu.Item key={SearchTarget.All}>
         <IconCommon style={iconStyle} />
-        所有网页
+        {t("loggedHomePage.homePage.searchScope.all")}
       </Menu.Item>
       <Menu.Item
         key={SearchTarget.SelectedPages}
@@ -42,11 +45,11 @@ export const SearchTargetSelector = () => {
           webLinkStore.updateIsWebLinkListVisible(true)
         }}>
         <IconArchive style={iconStyle} />
-        历史已阅读
+        {t("loggedHomePage.homePage.searchScope.history")}
       </Menu.Item>
       <Menu.Item key={SearchTarget.SearchEnhance}>
         <IconCompass style={iconStyle} />
-        联网搜索
+        {t("loggedHomePage.homePage.searchScope.internet")}
       </Menu.Item>
     </Menu>
   )
@@ -54,14 +57,14 @@ export const SearchTargetSelector = () => {
   const getDisplayText = (searchTarget: SearchTarget) => {
     switch (searchTarget) {
       case SearchTarget.SelectedPages:
-        return "历史已阅读"
+        return t("loggedHomePage.homePage.searchScope.history")
       case SearchTarget.All:
-        return "所有网页"
+        return t("loggedHomePage.homePage.searchScope.all")
       case SearchTarget.SearchEnhance:
-        return "联网搜索"
+        return t("loggedHomePage.homePage.searchScope.internet")
 
       default: {
-        return "所有网页"
+        return t("loggedHomePage.homePage.searchScope.all")
       }
     }
   }
@@ -84,7 +87,7 @@ export const SearchTargetSelector = () => {
   }, [])
 
   return (
-    <IconTip text="选择搜索模式">
+    <IconTip text={t("loggedHomePage.homePage.searchScope.title")}>
       <Dropdown
         droplist={searchTargetDropList}
         trigger="hover"

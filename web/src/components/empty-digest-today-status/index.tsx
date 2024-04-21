@@ -5,15 +5,17 @@ import EmptySVG from "@/assets/digest/empty.svg"
 import "./index.scss"
 import { useNavigate } from "react-router-dom"
 import { getCurrentDateInfo } from "@/utils/time"
+import { useTranslation } from "react-i18next"
 
 export const EmptyDigestStatus = () => {
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   return (
     <div className="empty-digest-container">
       <img src={EmptySVG} className="empty-digest-cover" />
       <p className="empty-digest-hint">
-        还未阅读任何内容，赶快下载插件去阅读新内容吧~
+        {t("knowledgeLibrary.empty.archiveTitle")}
       </p>
       <div className="empty-digest-action-container">
         <Button
@@ -23,7 +25,7 @@ export const EmptyDigestStatus = () => {
               "_blank",
             )
           }}>
-          下载插件
+          {t("knowledgeLibrary.empty.download")}
         </Button>
         {/* <Button
           style={{ marginLeft: 24 }}

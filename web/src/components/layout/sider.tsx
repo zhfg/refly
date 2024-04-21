@@ -7,6 +7,7 @@ import {
   IconDownload,
   IconBook,
   IconTwitter,
+  IconLanguage,
 } from "@arco-design/web-react/icon"
 import { openGetStartDocument } from "../../utils"
 // 静态资源
@@ -16,6 +17,8 @@ import { useUserStore } from "@/stores/user"
 import { safeParseJSON } from "@/utils/parse"
 // components
 import { SearchQuickOpenBtn } from "@/components/search-quick-open-btn"
+import { LanguageList } from "../language-list"
+import { useTranslation } from "react-i18next"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -45,6 +48,8 @@ export const SiderLayout = () => {
   const location = useLocation()
   const userStore = useUserStore()
   const isGuideDetail = location.pathname.includes("guide/")
+
+  const { t } = useTranslation()
 
   // 获取 storage user profile
   const storageUserProfile = safeParseJSON(
@@ -164,7 +169,9 @@ export const SiderLayout = () => {
           <div className="sider-header">
             <MenuItem key="Home" className="custom-menu-item">
               <IconHome style={{ fontSize: 20 }} />
-              <span className="sider-menu-title">主页</span>
+              <span className="sider-menu-title">
+                {t("loggedHomePage.siderMenu.homePage")}
+              </span>
             </MenuItem>
             {/* <MenuItem key='Explore' ><IconHome style={{ fontSize: 20 }} />主页</MenuItem> */}
             {/* <MenuItem key="Digest" className="custom-menu-item">
@@ -173,13 +180,17 @@ export const SiderLayout = () => {
             </MenuItem> */}
             <MenuItem key="ThreadLibrary" className="custom-menu-item">
               <IconBook style={{ fontSize: 20 }} />
-              <span className="sider-menu-title">会话库</span>
+              <span className="sider-menu-title">
+                {t("loggedHomePage.siderMenu.threadLibrary")}
+              </span>
             </MenuItem>
           </div>
           <div className="sider-footer">
             <MenuItem key="GetHelp" className="custom-menu-item">
               <IconTwitter style={{ fontSize: 20 }} />
-              <span className="sider-menu-title">获得帮助</span>
+              <span className="sider-menu-title">
+                {t("loggedHomePage.siderMenu.getHelp")}
+              </span>
             </MenuItem>
             {!!userStore.userProfile?.id && (
               <>
@@ -198,14 +209,28 @@ export const SiderLayout = () => {
                       {userStore?.userProfile?.name}
                     </span>
                   </div>
-                  <IconSettings style={{ fontSize: 20 }} />
+                  <div>
+                    <span
+                      style={{ display: "inline-block", marginRight: "8px" }}>
+                      <LanguageList>
+                        <IconLanguage
+                          style={{
+                            fontSize: 20,
+                          }}
+                        />
+                      </LanguageList>
+                    </span>
+                    <IconSettings style={{ fontSize: 20 }} />
+                  </div>
                 </MenuItem>
               </>
             )}
             <Divider style={{ margin: "8px 0" }} />
             <MenuItem key="DownloadExtension" className="custom-menu-item">
               <IconDownload style={{ fontSize: 20 }} />
-              <span className="sider-menu-title">下载插件</span>
+              <span className="sider-menu-title">
+                {t("loggedHomePage.siderMenu.download")}
+              </span>
             </MenuItem>
           </div>
         </Menu>
