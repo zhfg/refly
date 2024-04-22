@@ -4,7 +4,7 @@ import omit from 'lodash.omit';
 
 import { LlmService } from '../llm/llm.service';
 import { PrismaService } from '../common/prisma.service';
-import { AigcContent, UserWeblink, Weblink } from '@prisma/client';
+import { AigcContent, User, UserWeblink, Weblink } from '@prisma/client';
 import { ContentMeta } from 'src/llm/dto';
 import { WebLinkDTO } from 'src/weblink/dto';
 import { DigestFilter } from './aigc.dto';
@@ -228,6 +228,7 @@ export class AigcService {
   }
 
   private async applyContentStrategy(param: {
+    user: User;
     weblink: Weblink;
     doc: Document;
     meta: ContentMeta;
@@ -320,7 +321,7 @@ export class AigcService {
     uwb: UserWeblink;
     weblink: Weblink;
   }) {
-    const { doc, weblink } = param;
+    const { doc, weblink, uwb } = param;
     let meta: ContentMeta;
 
     if (!weblink.contentMeta) {
@@ -349,8 +350,21 @@ export class AigcService {
       return;
     }
 
+    const user = await this.prisma.user.findUnique({
+      where: { id: uwb.userId },
+    });
+    if (!user) {
+      this.logger.log(`weblink ${weblink.url} has no user, skip content flow`);
+      return;
+    }
+
     // 新的 weblink，运行内容策略和 feed 分发
-    const content = await this.applyContentStrategy({ ...param, doc, meta });
+    const content = await this.applyContentStrategy({
+      ...param,
+      doc,
+      meta,
+      user,
+    });
     // await this.dispatchFeed({ ...param, meta, content });
 
     await this.runUserContentFlow({ ...param, meta, content });

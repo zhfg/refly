@@ -54,6 +54,7 @@ export class ConversationController {
           sources: '[]',
           userId,
           conversationId: res.id,
+          locale: body.locale,
         },
         {
           type: 'ai',
@@ -61,6 +62,7 @@ export class ConversationController {
           sources: content.sources,
           userId,
           conversationId: res.id,
+          locale: body.locale,
         },
       ]);
       await this.conversationService.updateConversation(res.id, {
@@ -103,6 +105,7 @@ export class ConversationController {
         conversationId: convId,
         content: query,
         sources: '',
+        locale: body.task.locale,
         // 每次提问完在 human message 上加一个提问的 filter，这样之后追问时可以 follow 这个 filter 规则
         selectedWeblinkConfig: JSON.stringify({
           searchTarget: weblinkList?.length > 0 ? 'selectedPages' : 'all',
@@ -148,6 +151,7 @@ export class ConversationController {
         userId,
         conversationId: convId,
         content: taskRes.answer,
+        locale: body.task.locale,
         sources: JSON.stringify(taskRes.sources),
         relatedQuestions: JSON.stringify(taskRes.relatedQuestions),
       });

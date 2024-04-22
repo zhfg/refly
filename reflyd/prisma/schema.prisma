@@ -51,6 +51,8 @@ model User {
   emailVerified DateTime? @map("email_verified") @db.Timestamptz()
   /// 密码
   password      String?   @map("password")
+  /// 语言设置
+  locale        String?   @default("en") @map("locale")
   /// 创建时间
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// 更新时间
@@ -146,6 +148,8 @@ model ChatMessage {
   content               String      @map("content")
   /// 引用文档来源，以 JSON 方式存储
   sources               String?     @default("") @map("sources")
+  /// 语言设置
+  locale                String?     @default("") @map("locale")
   /// 相关问题
   relatedQuestions      String?     @map("related_questions")
   /// 创建时间
