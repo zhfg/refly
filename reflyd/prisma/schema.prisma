@@ -41,6 +41,8 @@ model VerificationToken {
 model User {
   /// 主键
   id            Int       @id @default(autoincrement())
+  /// UID
+  uid           String?   @default("") @map("uid")
   /// 头像
   avatar        String?   @map("avatar")
   /// 用户名
@@ -67,6 +69,8 @@ model User {
 model Topic {
   /// 主键
   id          Int      @id @default(autoincrement())
+  /// 主题 id
+  topicId     String?  @default("") @map("topic_id")
   /// 主题 key
   key         String   @unique @map("key")
   /// 多语言名称 JSON 字符串 (key: 语言, val: 名称)
@@ -107,8 +111,10 @@ model UserPreference {
 
 // 会话模型
 model Conversation {
-  /// id为主键
+  /// 主键
   id              Int      @id @default(autoincrement())
+  /// 对话id
+  convId          String?  @default("") @map("conv_id")
   /// 用户id
   userId          Int      @map("user_id")
   /// 内容 id，指向 aigc_content 中的内容
@@ -140,6 +146,8 @@ model Conversation {
 model ChatMessage {
   /// id为主键
   id                    Int         @id @default(autoincrement())
+  /// 消息id
+  msgId                 String?     @default("") @map("msg_id")
   /// 会话id
   conversationId        Int         @map("conversation_id")
   /// 消息来源
@@ -203,27 +211,57 @@ model UserWeblink {
 
 model Weblink {
   /// id为主键
-  id          Int         @id @default(autoincrement())
+  id                  Int         @id @default(autoincrement())
+  /// 网页id
+  linkId              String?     @default("") @map("link_id")
   /// 网页链接
-  url         String      @unique @map("url")
+  url                 String      @unique @map("url")
   /// 页面内容 (deprecated)
-  pageContent String      @map("page_content")
+  pageContent         String      @map("page_content")
   /// 对象存储 key
-  storageKey  String      @default("") @map("storage_key")
+  storageKey          String      @default("") @map("storage_key")
   /// 页面元数据, JSON 存储
-  pageMeta    String      @map("page_meta")
+  pageMeta            String      @map("page_meta")
   /// 内容元数据, JSON 存储
-  contentMeta String      @map("content_meta")
+  contentMeta         String      @map("content_meta")
   /// 索引状态
-  indexStatus IndexStatus @default(init) @map("index_status")
+  indexStatus         IndexStatus @default(init) @map("index_status")
+  /// 解析策略版本，格式统一为 YYYYMMDD
+  parserVersion       String?     @default("00000000") @map("parser_version")
+  /// 解析后内容存储 key
+  parsedDocStorageKey String?     @default("") @map("parsed_doc_storage_key")
+  /// 切块后数据存储 key
+  chunkStorageKey     String?     @default("") @map("chunk_storage_key")
+  /// 上次解析时间
+  lastParseTime       DateTime?   @default(now()) @map("last_parse_time") @db.Timestamptz()
   /// 创建时间
-  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt           DateTime    @default(now()) @map("created_at") @db.Timestamptz()
   /// 更新时间
-  updatedAt   DateTime    @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt           DateTime    @updatedAt @map("updated_at") @db.Timestamptz()
 
   contents AigcContent[]
 
   @@map("weblinks")
+}
+
+model WeblinkLog {
+  /// id为主键
+  id            Int      @id @default(autoincrement())
+  /// 关联的链接 id
+  weblinkId     Int      @map("weblink_id")
+  /// 用户id
+  userId        Int      @map("user_id")
+  /// 解析策略版本
+  parserVersion String   @default("00000000") @map("parser_version")
+  /// 访问时间
+  visitTime     DateTime @default(now()) @map("visit_time") @db.Timestamptz()
+  /// 创建时间
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  /// 更新时间
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([weblinkId, visitTime])
+  @@map("weblink_log")
 }
 
 model WeblinkUserMark {
@@ -255,6 +293,8 @@ model WeblinkUserMark {
 model AigcContent {
   /// 主键
   id         Int               @id @default(autoincrement())
+  /// 内容id
+  cid        String?           @default("") @map("cid")
   /// 标题
   title      String            @map("title")
   /// 摘要
@@ -295,6 +335,8 @@ model AigcContent {
 model UserDigest {
   /// 主键
   id        Int         @id @default(autoincrement())
+  /// 摘要 id
+  digestId  String?     @default("") @map("digest_id")
   /// 用户 id
   userId    Int         @map("user_id")
   /// 日期 (YYYY-MM-DD)

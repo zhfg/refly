@@ -1,26 +1,31 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Prisma, Weblink } from '@prisma/client';
 import { Queue } from 'bull';
 import { LRUCache } from 'lru-cache';
 import { InjectQueue } from '@nestjs/bull';
 import * as cheerio from 'cheerio';
 import { Document } from '@langchain/core/documents';
-import { CheerioWebBaseLoader } from 'langchain/document_loaders/web/cheerio';
 
 import { LoggerService } from '../common/logger.service';
 import { PrismaService } from '../common/prisma.service';
 import { MinioService } from '../common/minio.service';
+import {
+  RAGService,
+  ContentAvroType,
+  PARSER_VERSION,
+} from '../rag/rag.service';
 import { AigcService } from '../aigc/aigc.service';
 import { WebLinkDTO } from './dto';
 import { getExpectedTokenLenContent } from '../utils/token';
-import { PageMeta, Source } from '../types/weblink';
+import { Source } from '../types/weblink';
 import { QUEUE_STORE_LINK } from '../utils/const';
-import { ConfigService } from '@nestjs/config';
 import { streamToString } from '../utils/stream';
+import { genLinkID } from '../utils/id';
 
 @Injectable()
 export class WeblinkService {
-  private cache: LRUCache<string, string>; // url -> document
+  private cache: LRUCache<string, Document>; // url -> parsed document (in markdown)
   private bucketName: string;
 
   constructor(
@@ -28,6 +33,7 @@ export class WeblinkService {
     private prisma: PrismaService,
     private minio: MinioService,
     private configService: ConfigService,
+    private ragService: RAGService,
     private aigcService: AigcService,
     @InjectQueue(QUEUE_STORE_LINK) private indexQueue: Queue<WebLinkDTO>,
   ) {
@@ -78,19 +84,6 @@ export class WeblinkService {
     }
   }
 
-  async createNewLink(link: WebLinkDTO, pageMeta: PageMeta) {
-    return this.prisma.weblink.create({
-      data: {
-        url: link.url,
-        indexStatus: 'processing',
-        pageContent: '', // deprecated, always empty
-        storageKey: link.storageKey,
-        pageMeta: JSON.stringify(pageMeta),
-        contentMeta: '',
-      },
-    });
-  }
-
   async getUserHistory(params: {
     skip?: number;
     take?: number;
@@ -107,65 +100,39 @@ export class WeblinkService {
    * @param {string} url - The URL of the webpage to parse
    * @return {Promise<Document>} A Promise that resolves to the parsed document
    */
-  async parseWebLinkContent(url: string): Promise<Document> {
+  async readWebLinkContent(url: string): Promise<Document> {
     // Check if the document is in the cache
     if (this.cache.has(url)) {
       this.logger.log(`in-mem cache hit: ${url}`);
-      return JSON.parse(this.cache.get(url));
+      return this.cache.get(url);
     }
 
     // Check if the document is in the database
     const weblink = await this.prisma.weblink.findUnique({
-      select: { storageKey: true, pageMeta: true },
+      select: { parsedDocStorageKey: true, pageMeta: true },
       where: { url },
     });
     if (weblink) {
       this.logger.log(`found weblink in db: ${url}`);
       const content = await this.minio.getObject(
         this.bucketName,
-        weblink.storageKey,
+        weblink.parsedDocStorageKey,
       );
 
       const doc = new Document({
         pageContent: await streamToString(content),
         metadata: JSON.parse(weblink.pageMeta),
       });
-      this.cache.set(url, JSON.stringify(doc));
+      this.cache.set(url, doc);
       return doc;
     }
 
     // Finally tries to fetch the content from the web
-    try {
-      const loader = new CheerioWebBaseLoader(url, {
-        maxRetries: 3,
-        timeout: 5000,
-      });
+    const doc = await this.ragService.parseWebpage(url);
 
-      // customized webpage loading
-      // TODO: remove this in the future
-      const $ = await loader.scrape();
-      // remove all styles and scripts tag
-      $('script, style, plasmo-csui, img, svg, meta, link').remove();
-      // remove comments blocks
-      $('body')
-        .contents()
-        .each((i, node) => {
-          if (node.type === 'comment') {
-            $(node).remove();
-          }
-        });
+    this.cache.set(url, doc);
 
-      // only get meaning content
-      const pageContent = $.html();
-      const title = $('title').text();
-      const source = loader.webPath;
-      const doc = { pageContent, metadata: { title, source } };
-      this.cache.set(url, JSON.stringify(doc));
-      return doc;
-    } catch (err) {
-      this.logger.error(`process url ${url} failed: ${err}`);
-      return null;
-    }
+    return doc;
   }
 
   /**
@@ -173,7 +140,7 @@ export class WeblinkService {
    * @param pageContent raw html page content
    * @returns nothing
    */
-  async downloadWebLinkContent(
+  async directParseWebLinkContent(
     url: string,
     storageKey: string,
   ): Promise<Document> {
@@ -198,7 +165,7 @@ export class WeblinkService {
    * @param weblinkList input weblinks
    * @returns langchain documents
    */
-  async parseMultiWeblinks(weblinkList: Source[]): Promise<Document[]> {
+  async readMultiWeblinks(weblinkList: Source[]): Promise<Document[]> {
     // 处理 token 窗口，一共给 6K 窗口用于问答，平均分到每个网页，保障可用性
     const avgTokenLen = 6000 / weblinkList?.length;
 
@@ -212,7 +179,7 @@ export class WeblinkService {
           }));
         }
 
-        const { pageContent, metadata } = await this.parseWebLinkContent(
+        const { pageContent, metadata } = await this.readWebLinkContent(
           item.metadata?.source,
         );
         return [
@@ -308,9 +275,62 @@ export class WeblinkService {
         totalReadTime: { increment: link.readTime || 0 },
       },
     });
+
     this.logger.log(`process link for user finish`);
 
     return uwb;
+  }
+
+  async createNewWeblink(link: WebLinkDTO): Promise<Weblink> {
+    // Fetch doc and store in cache for later use
+    const doc = link.storageKey
+      ? await this.directParseWebLinkContent(link.url, link.storageKey)
+      : await this.readWebLinkContent(link.url);
+    this.cache.set(link.url, doc);
+
+    // Upload parsed doc to minio
+    // TODO: sha256 of link url
+    const parsedDocStorageKey = `docs/${link.url}.md`;
+    const res = await this.minio.putObject(
+      this.configService.get('minio.weblinkBucket'),
+      parsedDocStorageKey,
+      doc.pageContent,
+    );
+    this.logger.log('upload parsed doc to minio res: ' + JSON.stringify(res));
+
+    return this.prisma.weblink.create({
+      data: {
+        url: link.url,
+        linkId: genLinkID(),
+        indexStatus: 'processing',
+        pageContent: '', // deprecated, always empty
+        storageKey: link.storageKey,
+        parsedDocStorageKey,
+        pageMeta: JSON.stringify({ title: link.title, source: link.url }),
+        contentMeta: '',
+      },
+    });
+  }
+
+  async indexWeblink(weblink: Weblink, doc: Document) {
+    const dataObjs = await this.ragService.indexContent({
+      url: weblink.url,
+      text: doc.pageContent,
+    });
+
+    const buf = ContentAvroType.toBuffer({ chunks: dataObjs });
+    const chunkStorageKey = `content-${PARSER_VERSION}.avro`;
+    const res = await this.minio.putObject(
+      this.configService.get('minio.weblinkBucket'),
+      chunkStorageKey,
+      buf,
+    );
+    this.logger.log('upload chunks to minio res: ' + JSON.stringify(res));
+
+    return this.prisma.weblink.update({
+      where: { id: weblink.id },
+      data: { chunkStorageKey },
+    });
   }
 
   async processLinkFromStoreQueue(link: WebLinkDTO) {
@@ -325,33 +345,17 @@ export class WeblinkService {
 
     // Link not found
     if (!weblink) {
-      if (!link.storageKey) {
-        return this.logger.warn(
-          `storageKey not provided for ${link.url}, skip`,
-        );
-      }
-
-      weblink = await this.createNewLink(link, {
-        title: link.title,
-        source: link.url,
-      });
+      weblink = await this.createNewWeblink(link);
     }
 
-    // Fetch doc and store in cache for later use
-    const doc = link.storageKey
-      ? await this.downloadWebLinkContent(link.url, link.storageKey)
-      : await this.parseWebLinkContent(link.url);
+    const doc = await this.readWebLinkContent(link.url);
 
-    this.cache.set(link.url, JSON.stringify(doc));
-
-    // TODO: 优化 page content 的清洗逻辑
-    const $ = cheerio.load(doc.pageContent);
-    doc.pageContent = $.text();
+    await this.indexWeblink(weblink, doc);
 
     // 处理单个用户的访问记录
     const uwb = await this.processLinkForUser(link, weblink);
 
-    await this.aigcService.runContentFlow({ doc, link, uwb, weblink });
+    await this.aigcService.runContentFlow({ doc, uwb, weblink });
   }
 }
 

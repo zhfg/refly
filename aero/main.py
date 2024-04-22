@@ -10,7 +10,7 @@ import aero_pb2_grpc
 _cleanup_coroutines = []
 
 
-class Greeter(aero_pb2_grpc.AeroServicer):
+class AeroService(aero_pb2_grpc.AeroServicer):
     async def ParseHTML(
         self,
         request: aero_pb2.ParseHTMLRequest,
@@ -32,7 +32,7 @@ class Greeter(aero_pb2_grpc.AeroServicer):
 
 async def serve() -> None:
     server = grpc.aio.server()
-    aero_pb2_grpc.add_AeroServicer_to_server(Greeter(), server)
+    aero_pb2_grpc.add_AeroServicer_to_server(AeroService(), server)
     listen_addr = "[::]:50051"
     server.add_insecure_port(listen_addr)
     logging.info("Starting server on %s", listen_addr)

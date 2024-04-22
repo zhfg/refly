@@ -29,7 +29,7 @@ export class LLMController {
     this.logger.log(`applyStrategy: ${body}`);
 
     const { url } = body;
-    const doc = await this.weblinkService.parseWebLinkContent(url); // 处理错误边界
+    const doc = await this.weblinkService.readWebLinkContent(url); // 处理错误边界
     const res = await this.llmService.applyStrategy(doc);
 
     return res;
@@ -41,7 +41,7 @@ export class LLMController {
     this.logger.log(`applyStrategy: ${body}`);
 
     const { url } = body;
-    const doc = await this.weblinkService.parseWebLinkContent(url); // 处理错误边界
+    const doc = await this.weblinkService.readWebLinkContent(url); // 处理错误边界
     const res = await this.llmService.applyStrategy(doc);
 
     return res;
@@ -53,7 +53,7 @@ export class LLMController {
     this.logger.log(`extractContentMeta: ${body}`);
 
     const { url } = body;
-    const doc = await this.weblinkService.parseWebLinkContent(url); // 处理错误边界
+    const doc = await this.weblinkService.readWebLinkContent(url); // 处理错误边界
     const res = await this.llmService.extractContentMeta(doc);
 
     return res;
@@ -70,7 +70,7 @@ export class LLMController {
     const { urls } = body;
     const contentList = await Promise.all(
       urls.map(async (item) => {
-        const doc = await this.weblinkService.parseWebLinkContent(item); // 处理错误边界
+        const doc = await this.weblinkService.readWebLinkContent(item); // 处理错误边界
 
         // TODO: 这里需要结合 meta + content 来进行多个网页的总结
         const contentMeta = await this.llmService.extractContentMeta(doc);

@@ -91,10 +91,7 @@ export class AigcService {
     return { ...content, inputs };
   }
 
-  private async updateUserPreferences(param: {
-    uwb: UserWeblink;
-    meta: ContentMeta;
-  }) {
+  async updateUserPreferences(param: { uwb: UserWeblink; meta: ContentMeta }) {
     const { uwb, meta } = param;
 
     // 对于每一个标注的 topic，更新用户喜好
@@ -126,7 +123,7 @@ export class AigcService {
    * @param param
    * @returns
    */
-  private async upsertUserDigest(param: {
+  async upsertUserDigest(param: {
     uwb: UserWeblink;
     content: AigcContent;
     meta: ContentMeta;
@@ -135,50 +132,6 @@ export class AigcService {
     const { userId } = uwb;
 
     const today = new Date().toISOString().split('T')[0];
-    // const digest = await this.prisma.userDigest.findUnique({
-    //   where: {
-    //     userId_date_topicKey: {
-    //       userId,
-    //       date: today,
-    //       topicKey: meta.topics[0].key,
-    //     },
-    //   },
-    // });
-
-    // 如果该 topic 下已有摘要，进行增量总结
-    // if (digest) {
-    //   const dContent = await this.prisma.aigcContent.findUnique({
-    //     where: { id: digest.contentId },
-    //     include: { inputs: true },
-    //   });
-
-    //   // 如果该 digest 输入的 content 已包含新的 content，则不做任何增量总结
-    //   if (dContent.inputIds.includes(content.id)) {
-    //     this.logger.log(
-    //       `digest ${digest.id} already contains content ${content.id}`,
-    //     );
-    //     return;
-    //   }
-
-    //   const combinedContent = await this.llmService.summarizeMultipleWeblink([
-    //     ...dContent.inputs,
-    //     content,
-    //   ]);
-
-    //   // 更新 aigc 依赖关系
-    //   this.prisma.$transaction(async (tx) => {
-    //     await tx.aigcContent.update({
-    //       where: { id: dContent.id },
-    //       data: { ...combinedContent, inputIds: { push: content.id } },
-    //     });
-    //     await tx.aigcContent.update({
-    //       where: { id: content.id },
-    //       data: { outputIds: { push: dContent.id } },
-    //     });
-    //   });
-
-    //   return;
-    // }
 
     // 创建新的 digest 内容及其对应的记录
     this.prisma.$transaction(async (tx) => {
@@ -263,54 +216,6 @@ export class AigcService {
     });
   }
 
-  // /**
-  //  * Dispatch feed to target users.
-  //  * @param content aigc content
-  //  * @returns
-  //  */
-  // private async dispatchFeed(param: {
-  //   weblink: Weblink;
-  //   meta: ContentMeta;
-  //   content: AIGCContent;
-  // }) {
-  //   const { weblink, meta, content } = param;
-
-  //   // topic 管理先简单点，就用 key 去匹配
-  //   // 介绍文案先前端写死
-  //   // await this.ensureTopics(meta);
-
-  //   // Find users related to this content
-  //   const userIds = await this.prisma.userPreference.findMany({
-  //     select: { userId: true },
-  //     where: {
-  //       topicKey: { in: meta.topics.map((t) => t.key) },
-  //       score: { gte: 0 }, // TODO: 设计更合适的推荐门槛
-  //     },
-  //   });
-
-  //   // Check if these users have read this source
-  //   const readLinkUsers = await this.prisma.userWeblink.findMany({
-  //     select: { userId: true },
-  //     where: {
-  //       url: weblink.url,
-  //       userId: { in: userIds.map((u) => u.userId) },
-  //     },
-  //   });
-  //   const readUserSet = new Set(readLinkUsers.map((elem) => elem.userId));
-  //   const unreadUsers = userIds.filter((u) => !readUserSet.has(u.userId));
-
-  //   // Add feed records for unread users
-  //   if (unreadUsers.length > 0) {
-  //     this.logger.log(`add feed ${content.id} to users: ${unreadUsers}`);
-  //     await this.prisma.userFeed.createMany({
-  //       data: unreadUsers.map((u) => ({
-  //         userId: u.userId,
-  //         contentId: content.id,
-  //       })),
-  //     });
-  //   }
-  // }
-
   /**
    * 处理全局内容流程: 应用内容策略，分发 feed
    * @param doc
@@ -318,11 +223,10 @@ export class AigcService {
    */
   async runContentFlow(param: {
     doc: Document;
-    link: WebLinkDTO;
     uwb: UserWeblink;
     weblink: Weblink;
   }) {
-    const { doc, weblink, uwb } = param;
+    const { doc, uwb, weblink } = param;
     let meta: ContentMeta;
 
     if (!weblink.contentMeta) {
@@ -335,14 +239,14 @@ export class AigcService {
         );
         return;
       }
-      if (shouldRunIndexPipeline(meta)) {
-        await this.llmService.indexPipelineFromLink(weblink.id, doc);
-      }
-      await this.prisma.weblink.update({
-        where: { id: weblink.id },
-        data: { contentMeta: JSON.stringify(meta), indexStatus: 'finish' },
-      });
-      await this.ensureTopics(meta);
+
+      await Promise.all([
+        this.prisma.weblink.update({
+          where: { id: weblink.id },
+          data: { contentMeta: JSON.stringify(meta) },
+        }),
+        this.ensureTopics(meta),
+      ]);
     } else {
       meta = JSON.parse(weblink.contentMeta);
     }
@@ -367,7 +271,6 @@ export class AigcService {
       meta,
       user,
     });
-    // await this.dispatchFeed({ ...param, meta, content });
 
     await this.runUserContentFlow({ ...param, meta, content });
   }
@@ -399,8 +302,4 @@ export class AigcService {
       });
     }
   }
-}
-
-function shouldRunIndexPipeline(meta: ContentMeta): boolean {
-  return true;
 }

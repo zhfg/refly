@@ -38,7 +38,7 @@ export class WeblinkController {
   @Post('store')
   async store(@Request() req, @Body() body: StoreWebLinkParam) {
     this.logger.log(`user: ${req.user.id}, store link: ${body}`);
-    await this.weblinkService.storeLinks(req.user.id, body.data);
+    await this.weblinkService.storeLinks(req.user.uid, body.data);
     return { success: true };
   }
 
@@ -47,7 +47,7 @@ export class WeblinkController {
   async getWebContent(@Query('url') url) {
     this.logger.log(`getWebContent, ${url}`);
 
-    const parseContent = await this.weblinkService.parseWebLinkContent(url); // 处理错误边界
+    const parseContent = await this.weblinkService.readWebLinkContent(url); // 处理错误边界
     return parseContent;
   }
 

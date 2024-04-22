@@ -105,7 +105,7 @@ export class ConversationController {
     res.setHeader('Connection', 'keep-alive');
     res.status(200);
 
-    await this.conversationService.chat(res, convId, req.user.id, body.task);
+    await this.conversationService.chat(res, req.user, convId, body.task);
   }
 
   @UseGuards(JwtAuthGuard)

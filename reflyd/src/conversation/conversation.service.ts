@@ -3,7 +3,7 @@ import { Response } from 'express';
 
 import { PrismaService } from '../common/prisma.service';
 import { CreateChatMessageInput, CreateConversationParam } from './dto';
-import { Prisma, ChatMessage } from '@prisma/client';
+import { Prisma, ChatMessage, User } from '@prisma/client';
 import {
   LOCALE,
   QUICK_ACTION_TASK_PAYLOAD,
@@ -93,7 +93,7 @@ export class ConversationService {
     });
   }
 
-  async chat(res: Response, convId: number, userId: number, task: Task) {
+  async chat(res: Response, user: User, convId: number, task: Task) {
     const { taskType, data = {} } = task;
 
     const query = data?.question || '';
@@ -104,18 +104,18 @@ export class ConversationService {
 
     let taskRes: TaskResponse;
     if (taskType === TASK_TYPE.QUICK_ACTION) {
-      taskRes = await this.handleQuickActionTask(res, userId, task);
+      taskRes = await this.handleQuickActionTask(res, user, task);
     } else if (taskType === TASK_TYPE.SEARCH_ENHANCE_ASK) {
       taskRes = await this.handleSearchEnhanceTask(res, task, chatHistory);
     } else {
-      taskRes = await this.handleChatTask(res, userId, task, chatHistory);
+      taskRes = await this.handleChatTask(res, user, task, chatHistory);
     }
     res.end(``);
 
     const newMessages: CreateChatMessageInput[] = [
       {
         type: 'human',
-        userId,
+        userId: user.id,
         conversationId: convId,
         content: query,
         sources: '',
@@ -127,7 +127,7 @@ export class ConversationService {
       },
       {
         type: 'ai',
-        userId,
+        userId: user.id,
         conversationId: convId,
         content: taskRes.answer,
         sources: JSON.stringify(taskRes.sources),
@@ -147,17 +147,17 @@ export class ConversationService {
 
   async handleChatTask(
     res: Response,
-    userId: number,
+    user: User,
     task: Task,
     chatHistory: ChatMessage[],
   ): Promise<TaskResponse> {
-    const locale = task?.locale || LOCALE.EN;
+    const locale = task?.locale || (user.outputLocale as LOCALE) || LOCALE.EN;
 
     const filter: any = {
       must: [
         {
           key: 'userId',
-          match: { value: userId },
+          match: { value: user.uid },
         },
       ],
     };
@@ -193,10 +193,14 @@ export class ConversationService {
           );
 
     const sources = chatFromClientSelector
-      ? await this.weblinkService.parseMultiWeblinks(
+      ? await this.weblinkService.readMultiWeblinks(
           task?.data?.filter?.weblinkList,
         )
-      : await this.llmService.getRetrievalDocs(questionWithContext, filter);
+      : await this.llmService.getRetrievalDocs(
+          user.uid,
+          questionWithContext,
+          filter,
+        );
 
     const { stream } = await this.llmService.chat(
       questionWithContext,
@@ -300,7 +304,7 @@ export class ConversationService {
 
   async handleQuickActionTask(
     res: Response,
-    userId: number,
+    user: User,
     task: Task,
   ): Promise<TaskResponse> {
     const data = task?.data as QUICK_ACTION_TASK_PAYLOAD;
@@ -328,13 +332,10 @@ export class ConversationService {
     if (weblinkList?.length <= 0) return;
 
     // save user mark for each weblink in a non-blocking style
-    this.weblinkService.saveWeblinkUserMarks({
-      userId,
-      weblinkList,
-    });
+    this.weblinkService.saveWeblinkUserMarks({ userId: user.id, weblinkList });
 
     // 基于一组网页做总结，先获取网页内容
-    const docs = await this.weblinkService.parseMultiWeblinks(weblinkList);
+    const docs = await this.weblinkService.readMultiWeblinks(weblinkList);
 
     let stream: IterableReadableStream<BaseMessageChunk>;
     if (data?.actionType === QUICK_ACTION_TYPE.SUMMARY) {
@@ -361,7 +362,7 @@ export class ConversationService {
     const getUserQuestion = (actionType: QUICK_ACTION_TYPE) => {
       switch (actionType) {
         case QUICK_ACTION_TYPE.SUMMARY: {
-          return '总结网页';
+          return '总结网页'; // TODO: 国际化
         }
       }
     };

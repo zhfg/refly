@@ -34,7 +34,9 @@ import { categoryList } from '../prompts/utils/category';
 import { Source } from '../types/weblink';
 import { SearchResultContext } from '../types/search';
 import { PrismaService } from '../common/prisma.service';
-import { LOCALE } from 'src/types/task';
+import { LOCALE } from '../types/task';
+import { RAGService } from '../rag/rag.service';
+import { SearchResult } from '../common/weaviate.dto';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
@@ -51,6 +53,7 @@ export class LlmService implements OnModuleInit {
   constructor(
     private prisma: PrismaService,
     private configService: ConfigService,
+    private ragService: RAGService,
   ) {}
 
   async onModuleInit() {
@@ -462,19 +465,24 @@ export class LlmService implements OnModuleInit {
     });
   }
 
-  async getRetrievalDocs(query: string, filter?: any) {
-    this.logger.log(
-      `activated with query: ${query}, filter: ${JSON.stringify(filter)}`,
-    );
+  async getRetrievalDocs(uid: string, query: string, url?: string) {
+    this.logger.log(`uid: ${uid}, activated with query: ${query}, url: ${url}`);
 
-    const retrievalResults = await this.retrieval(query, filter);
+    const retrievalResults: SearchResult[] = await this.ragService.retrieve({
+      tenantId: uid,
+      query,
+      filter: { url },
+    });
 
-    this.logger.log('retrievalResults', retrievalResults);
+    this.logger.log('retrievalResults: ' + JSON.stringify(retrievalResults));
 
     const retrievedDocs = retrievalResults.map((res) => ({
-      metadata: res?.metadata,
-      pageContent: res?.pageContent as string,
-      score: res?.score, // similarity score
+      metadata: {
+        url: res.url,
+        title: res.title,
+      },
+      pageContent: res.content,
+      score: parseFloat(res._additional.score) || 0,
     }));
 
     return retrievedDocs;

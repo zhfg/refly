@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Document } from '@langchain/core/documents';
 import { IndexStatus } from '@prisma/client';
 
 export class WebLinkDTO {
@@ -33,9 +34,11 @@ export class WebLinkDTO {
   pageContent?: string; // 反爬网站前端传入
 
   @ApiPropertyOptional()
-  storageKey?: string; // 前端上传 html 拿到的 key
+  storageKey?: string; // 前端上传 html 拿到的 object key
 
   userId?: number;
+
+  parsedDoc?: Document; // 服务端解析出的 Document
 }
 
 export class StoredWebLink extends WebLinkDTO {
