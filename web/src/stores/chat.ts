@@ -40,7 +40,6 @@ export const useChatStore = create<ChatState>()(
     setSessions: (val: SessionItem[]) => set({ sessions: val }),
     setIsGenTitle: (val: boolean) => set({ isGenTitle: val }),
     setNewQAText: (val: string) => {
-      console.log("trigger setNewQAText", val)
       return set({ newQAText: val })
     },
     resetState: () => {

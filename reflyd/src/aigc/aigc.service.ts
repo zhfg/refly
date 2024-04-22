@@ -227,6 +227,7 @@ export class AigcService {
     await this.upsertUserDigest({ ...param, meta });
   }
 
+  // TODO: need add locale
   private async applyContentStrategy(param: {
     weblink: Weblink;
     doc: Document;
@@ -325,6 +326,7 @@ export class AigcService {
 
     if (!weblink.contentMeta) {
       // 提取网页分类打标数据 with LLM
+      // TODO: need add locale
       meta = await this.llmService.extractContentMeta(doc);
       if (!meta?.topics || !meta?.topics[0].key) {
         this.logger.log(

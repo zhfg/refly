@@ -2,7 +2,7 @@ import { Button, Message as message, Breadcrumb } from "@arco-design/web-react"
 import { IconClockCircle, IconShareExternal } from "@arco-design/web-react/icon"
 import { copyToClipboard } from "@/utils"
 import { time } from "@/utils/time"
-import { Digest, Feed } from "@/types"
+import { Digest, Feed, LOCALE } from "@/types"
 import { useTranslation } from "react-i18next"
 
 interface HeaderProps {
@@ -36,7 +36,7 @@ export const Header = (props: HeaderProps) => {
         <span key={2} style={{ display: "inline-block", marginRight: 12 }}>
           <IconClockCircle style={{ fontSize: 14, color: "#64645F" }} />
           <span className="thread-library-list-item-text">
-            {time(digest?.updatedAt, language as "en" | "cn")
+            {time(digest?.updatedAt, language as LOCALE)
               .utc()
               .fromNow()}
           </span>

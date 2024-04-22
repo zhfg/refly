@@ -61,7 +61,10 @@
         "history": "历史已阅读",
         "internet": "联网搜索"
       },
-      "seeKnowledgeLibrary": "查看知识库"
+      "seeKnowledgeLibrary": "查看知识库",
+      "status": {
+        "createFailed": "创建新会话失败！"
+      }
     },  
     "siderMenu": {
       "homePage": "主页",

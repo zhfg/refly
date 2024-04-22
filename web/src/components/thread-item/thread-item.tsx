@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react"
 import { Button, Space, Input } from "@arco-design/web-react"
-import { IconMinusCircle, IconSend } from "@arco-design/web-react/icon"
+import { IconSend } from "@arco-design/web-react/icon"
 
 // stores
 import { useChatStore } from "@/stores/chat"
@@ -9,7 +9,6 @@ import { useMessageStateStore } from "@/stores/message-state"
 import { Session } from "./session"
 import { TASK_TYPE, type SessionItem, type Source } from "@/types"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input"
-import { useBuildTask } from "@/hooks/use-build-task"
 
 import { ThreadSearchTargetSelector } from "@/components/thread-item/thread-search-target-selector"
 import { SearchTarget } from "@/stores/search-state"
@@ -50,7 +49,6 @@ export const ThreadItem = (props: ThreadItemProps) => {
     threadWeblinkListFilter?.length > 0
 
   const messageStateStore = useMessageStateStore()
-  const { buildShutdownTaskAndGenResponse } = useBuildTask()
   const quickSearchStateStore = useQuickSearchStateStore()
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

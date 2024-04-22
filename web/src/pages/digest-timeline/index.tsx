@@ -36,6 +36,7 @@ import getDigestList from "@/requests/getDigestList"
 // styles
 import "./index.scss"
 import { useTranslation } from "react-i18next"
+import { LOCALE } from "@/types"
 
 export const DigestArchive = () => {
   const [searchParams] = useSearchParams()
@@ -255,7 +256,7 @@ export const DigestArchive = () => {
                         style={{ fontSize: 14, color: "#64645F" }}
                       />
                       <span className="feed-list-item-text">
-                        {time(item.updatedAt, language as "en" | "cn")
+                        {time(item.updatedAt, language as LOCALE)
                           .utc()
                           .fromNow()}
                       </span>

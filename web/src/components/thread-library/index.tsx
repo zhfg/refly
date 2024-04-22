@@ -19,7 +19,7 @@ import { useNavigate, useMatch } from "react-router-dom"
 import { time } from "@/utils/time"
 import getConversationList from "@/requests/getConversationList"
 // types
-import { Thread } from "@/types"
+import { LOCALE, Thread } from "@/types"
 import "./index.scss"
 // components
 import { EmptyThreadLibraryStatus } from "@/components/empty-thread-library-status"
@@ -149,7 +149,7 @@ export const ThreadLibrary = () => {
               <span key={2}>
                 <IconClockCircle style={{ fontSize: 14, color: "#64645F" }} />
                 <span className="thread-library-list-item-text">
-                  {time(item.updatedAt, language as "en" | "cn")
+                  {time(item.updatedAt, language as LOCALE)
                     .utc()
                     .fromNow()}
                 </span>

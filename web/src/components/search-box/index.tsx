@@ -28,6 +28,8 @@ import { SearchTargetSelector } from "../dashboard/home-search-target-selector"
 import "./index.scss"
 import { useSiderStore } from "@/stores/sider"
 import { useQuickSearchStateStore } from "@/stores/quick-search-state"
+import { useUserStore } from "@/stores/user"
+import { useTranslation } from "react-i18next"
 
 const TextArea = Input.TextArea
 
@@ -45,6 +47,8 @@ export const SearchBox = () => {
   const navigate = useNavigate()
   const [isFocused, setIsFocused] = useState(false)
 
+  const { t } = useTranslation()
+
   const handleCreateNewConversation = async (task: Task) => {
     /**
      * 1. 创建新 thread，设置状态
@@ -60,7 +64,7 @@ export const SearchBox = () => {
 
     if (!res?.success) {
       message.error({
-        content: "创建新会话失败！",
+        content: t("loggedHomePage.homePage.status.createFailed"),
       })
       return
     }
@@ -88,6 +92,7 @@ export const SearchBox = () => {
     const question = chatStore.newQAText
     const { selectedRow } = useWeblinkStore.getState()
     const { searchTarget } = useSearchStateStore.getState()
+    const { localSettings } = useUserStore.getState()
 
     let selectedWebLink: Source[] = []
 
@@ -111,6 +116,7 @@ export const SearchBox = () => {
         question,
         filter: { weblinkList: selectedWebLink },
       },
+      locale: localSettings?.locale,
     })
 
     // 创建新会话并跳转
@@ -182,7 +188,7 @@ export const SearchBox = () => {
             onChange={value => {
               chatStore.setNewQAText(value)
             }}
-            placeholder="Search For Refly..."
+            placeholder={t("loggedHomePage.homePage.searchPlaceholder")}
             onKeyDownCapture={e => handleKeyDown(e)}
             autoSize={{ minRows: 2, maxRows: 4 }}
             onFocus={() => setIsFocused(true)}

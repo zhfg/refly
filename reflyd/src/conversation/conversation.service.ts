@@ -5,6 +5,7 @@ import { PrismaService } from '../common/prisma.service';
 import { CreateConversationParam } from './dto';
 import { MessageType, Prisma, ChatMessage } from '@prisma/client';
 import {
+  LOCALE,
   QUICK_ACTION_TASK_PAYLOAD,
   QUICK_ACTION_TYPE,
   Task,
@@ -115,6 +116,7 @@ export class ConversationService {
     chatHistory: ChatMessage[],
   ): Promise<TaskResponse> {
     const userId: number = req.user?.id;
+    const locale = task?.locale || LOCALE.EN;
 
     const filter: any = {
       must: [
@@ -147,9 +149,13 @@ export class ConversationService {
       : [];
     // 如果是基于选中内容提问的话，则不需要考虑上下文
     const questionWithContext =
-      chatHistory.length === 0 || chatFromClientSelector
+      chatHistory.length === 1 || chatFromClientSelector
         ? query
-        : await this.llmService.getContextualQuestion(query, llmChatMessages);
+        : await this.llmService.getContextualQuestion(
+            query,
+            locale,
+            llmChatMessages,
+          );
 
     const sources = chatFromClientSelector
       ? await this.weblinkService.parseMultiWeblinks(
@@ -159,6 +165,7 @@ export class ConversationService {
 
     const { stream } = await this.llmService.chat(
       questionWithContext,
+      locale,
       llmChatMessages,
       sources,
     );
@@ -181,7 +188,7 @@ export class ConversationService {
 
     const [answerStr, relatedQuestions] = await Promise.all([
       getSSEData(stream),
-      this.llmService.getRelatedQuestion(sources, questionWithContext),
+      this.llmService.getRelatedQuestion(sources, questionWithContext, locale),
     ]);
 
     this.logger.log('relatedQuestions', relatedQuestions);
@@ -203,8 +210,10 @@ export class ConversationService {
     chatHistory: ChatMessage[],
   ): Promise<TaskResponse> {
     const query = task?.data?.question;
+    const locale = task?.locale || LOCALE.EN;
     const { stream, sources } = await this.llmService.searchEnhance(
       query,
+      locale,
       chatHistory
         ? chatHistory.map((msg) => createLLMChatMessage(msg.content, msg.type))
         : [],
@@ -230,7 +239,7 @@ export class ConversationService {
 
     const [answerStr, relatedQuestions] = await Promise.all([
       getSSEData(stream),
-      this.llmService.getRelatedQuestion(sources, query),
+      this.llmService.getRelatedQuestion(sources, query, locale),
     ]);
 
     this.logger.log('relatedQuestions', relatedQuestions);
@@ -260,6 +269,7 @@ export class ConversationService {
     chatHistory: ChatMessage[],
   ): Promise<TaskResponse> {
     const data = task?.data as QUICK_ACTION_TASK_PAYLOAD;
+    const locale = task?.locale || LOCALE.EN;
 
     // first return sources，use unique tag for parse data
     // frontend return origin weblink meta
@@ -297,7 +307,7 @@ export class ConversationService {
       const weblinkList = data?.filter?.weblinkList;
       if (weblinkList?.length <= 0) return;
 
-      stream = await this.llmService.summary(data?.actionPrompt, docs);
+      stream = await this.llmService.summary(data?.actionPrompt, locale, docs);
     }
 
     const getSSEData = async (stream) => {
@@ -327,6 +337,7 @@ export class ConversationService {
       this.llmService.getRelatedQuestion(
         docs,
         getUserQuestion(data?.actionType),
+        locale,
       ),
     ]);
 

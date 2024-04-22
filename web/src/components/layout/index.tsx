@@ -11,12 +11,14 @@ import { useLocation, useMatch, useNavigate } from "react-router-dom"
 // 组件
 import { LoginModal } from "@/components/login-modal/index"
 import { useCookie } from "react-use"
-import { safeStringifyJSON } from "@/utils/parse"
+import { safeParseJSON, safeStringifyJSON } from "@/utils/parse"
 import { QuickSearchModal } from "@/components/quick-search-modal"
 
 // stores
 import { useQuickSearchStateStore } from "@/stores/quick-search-state"
 import { useBindCommands } from "@/hooks/use-bind-commands"
+import { useTranslation } from "react-i18next"
+import { LOCALE } from "@/types"
 
 const Content = Layout.Content
 
@@ -28,6 +30,14 @@ export const AppLayout = (props: AppLayoutProps) => {
   // stores
   const userStore = useUserStore()
   const quickSearchStateStore = useQuickSearchStateStore()
+
+  const { i18n } = useTranslation()
+  // 获取 locale
+  const storageLocalSettings = safeParseJSON(
+    localStorage.getItem("refly-local-settings"),
+  )
+  const initialLocale =
+    storageLocalSettings?.locale || userStore?.localSettings?.locale || "en"
 
   // state hooks
   const navigate = useNavigate()
@@ -43,6 +53,7 @@ export const AppLayout = (props: AppLayoutProps) => {
   const getLoginStatus = async () => {
     try {
       const res = await getUserInfo()
+      let { localSettings = {} } = useUserStore.getState()
 
       console.log("loginStatus", res)
 
@@ -63,7 +74,18 @@ export const AppLayout = (props: AppLayoutProps) => {
         }
       } else {
         userStore.setUserProfile(res?.data)
+        // 增加 localSettings
+        const locale = (res?.data?.locale || initialLocale) as LOCALE
+        // 应用 locale
+        i18n.changeLanguage(locale)
+
+        userStore.setLocalSettings({ locale })
+        localSettings = { ...localSettings, locale }
         localStorage.setItem("refly-user-profile", safeStringifyJSON(res?.data))
+        localStorage.setItem(
+          "refly-local-settings",
+          safeStringifyJSON(localSettings),
+        )
       }
     } catch (err) {
       console.log("getLoginStatus err", err)

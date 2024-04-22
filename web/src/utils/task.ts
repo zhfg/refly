@@ -26,6 +26,8 @@ export const buildTask = (payload: BuildTask): Task => {
     data = {},
   } = payload
 
+  console.log("now task locale", locale)
+
   const task: Task = {
     taskType,
     language,
@@ -36,22 +38,28 @@ export const buildTask = (payload: BuildTask): Task => {
   return task
 }
 
-export const buildChatTask = (data): Task => {
+export const buildChatTask = (data, locale: LOCALE = LOCALE.EN): Task => {
+  console.log("now task locale", locale)
   const task: Task = {
     taskType: TASK_TYPE.CHAT,
     language: LANGUAGE.AUTO,
-    locale: LOCALE.ZH_CN,
+    locale,
     data,
   }
 
   return task
 }
 
-export const buildQuickActionTask = (data): Task => {
+export const buildQuickActionTask = (
+  data,
+  locale: LOCALE = LOCALE.EN,
+): Task => {
+  console.log("now task locale", locale)
+
   const task: Task = {
     taskType: TASK_TYPE.QUICK_ACTION,
     language: LANGUAGE.AUTO,
-    locale: LOCALE.ZH_CN,
+    locale,
     data,
   }
 

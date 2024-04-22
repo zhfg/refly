@@ -1,3 +1,4 @@
+import { LOCALE } from "@/types"
 import dayjsConfig from "./dayjsConfig"
 
 export function timestampFormat(
@@ -69,7 +70,7 @@ export function timestampFormat(
 
 export const time = (
   date: string | number | Date | dayjsConfig.Dayjs,
-  locale: "en" | "cn" = "cn",
+  locale: LOCALE = LOCALE.EN,
 ) => {
   return dayjsConfig(date, { locale })
 }

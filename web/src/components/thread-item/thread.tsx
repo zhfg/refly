@@ -29,8 +29,9 @@ import {
 import { useWeblinkStore } from "@/stores/weblink"
 import { useSearchStateStore, SearchTarget } from "@/stores/search-state"
 import { safeParseJSON } from "@/utils/parse"
-import { buildChatTask, buildTask } from "@/utils/task"
+import { buildTask } from "@/utils/task"
 import { Skeleton } from "@arco-design/web-react"
+import { useUserStore } from "@/stores/user"
 
 export const Thread = () => {
   const { buildTaskAndGenReponse } = useBuildTask()
@@ -101,6 +102,7 @@ export const Thread = () => {
     const { currentConversation } = useConversationStore.getState()
     const { messages } = useChatStore.getState()
     const selectedWeblinkConfig = getSelectedWeblinkConfig(messages)
+    const { localSettings } = useUserStore.getState()
 
     const useWeblinkList =
       selectedWeblinkConfig?.searchTarget === SearchTarget.SelectedPages &&
@@ -115,6 +117,7 @@ export const Thread = () => {
         },
       },
       taskType: taskType as TASK_TYPE,
+      locale: localSettings?.locale,
     })
 
     buildTaskAndGenReponse(task)

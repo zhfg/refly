@@ -32,7 +32,7 @@ import { EmptyDigestStatus } from "@/components/empty-digest-today-status"
 import getDigestList from "@/requests/getDigestList"
 // styles
 import "./index.scss"
-import { Source } from "@/types"
+import { LOCALE, Source } from "@/types"
 import { useTranslation } from "react-i18next"
 
 export const getFirstSourceLink = (sources: Source[]) => {
@@ -155,9 +155,9 @@ export const DigestToday = () => {
           dataSource={digestStore?.today?.featureList || []}
           scrollLoading={scrollLoading}
           onReachBottom={currentPage => fetchData(currentPage)}
-          render={(item: Digest, index) => (
+          render={(item: Digest) => (
             <List.Item
-              key={index}
+              key={item?.id}
               style={{
                 padding: "20px 0",
                 borderBottom: "1px solid var(--color-fill-3)",
@@ -203,7 +203,7 @@ export const DigestToday = () => {
                   <div className="feed-item-action" style={{ marginTop: 8 }}>
                     <span
                       className="feed-item-topic"
-                      key={3}
+                      key={1}
                       style={{
                         display: "inline-block",
                         borderRight: `1px solid #64645F`,
@@ -216,7 +216,7 @@ export const DigestToday = () => {
                       </span>
                     </span>
                     <span
-                      key={3}
+                      key={2}
                       className="feed-item-link"
                       onClick={() => {
                         window.open(item?.weblinks?.[0]?.url, "_blank")
@@ -229,12 +229,12 @@ export const DigestToday = () => {
                           : ""}
                       </span>
                     </span>
-                    <span key={2}>
+                    <span key={3}>
                       <IconClockCircle
                         style={{ fontSize: 14, color: "#64645F" }}
                       />
                       <span className="feed-list-item-text">
-                        {time(item.updatedAt, language as "en" | "cn")
+                        {time(item.updatedAt, language as LOCALE)
                           .utc()
                           .fromNow()}
                       </span>

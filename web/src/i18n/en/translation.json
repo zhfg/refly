@@ -61,7 +61,10 @@
         "history": "History Read",
         "internet": "Internet Search"
       },
-      "seeKnowledgeLibrary": "View Knowledge Library"
+      "seeKnowledgeLibrary": "View Knowledge Library",
+      "status": {
+        "createFailed": "Create New Thread Failed!"
+      }
     },
     "siderMenu": {
       "homePage": "Home",

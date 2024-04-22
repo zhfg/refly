@@ -20,7 +20,7 @@ import { useNavigate, useParams } from "react-router-dom"
 // stores
 import { useDigestTopicDetailStore } from "@/stores/digest-topic-detail"
 // types
-import { Digest } from "@/types"
+import { Digest, LOCALE } from "@/types"
 // request
 import getDigestList from "@/requests/getDigestList"
 import { IconTip } from "@/components/dashboard/icon-tip"
@@ -247,7 +247,7 @@ export const DigestTopicDetail = () => {
                     />
                     <span className="feed-list-item-text">
                       {/* TODO: 国际化增加时需要额外处理 */}
-                      {time(item.updatedAt, language as "en" | "cn")
+                      {time(item.updatedAt, language as LOCALE)
                         .utc()
                         .fromNow()}
                     </span>

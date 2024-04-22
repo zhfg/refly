@@ -28,7 +28,8 @@ export const enum LANGUAGE {
 }
 
 export const enum LOCALE {
-  ZH_CN = "zh_CN",
+  ZH_CN = "zh-CN",
+  EN = "en",
 }
 
 export const enum QUICK_ACTION_TYPE {

@@ -2,7 +2,7 @@ import { Button, Message as message, Breadcrumb } from "@arco-design/web-react"
 import { IconClockCircle, IconShareExternal } from "@arco-design/web-react/icon"
 import { copyToClipboard } from "@/utils"
 import { time } from "@/utils/time"
-import { Thread } from "@/types"
+import { LOCALE, Thread } from "@/types"
 import { useTranslation } from "react-i18next"
 
 interface HeaderProps {
@@ -15,7 +15,7 @@ export const Header = (props: HeaderProps) => {
   const { thread } = props
   const { t, i18n } = useTranslation()
 
-  const language = i18n.languages?.[0] as "en" | "cn"
+  const language = i18n.languages?.[0] as LOCALE
 
   return (
     <header>

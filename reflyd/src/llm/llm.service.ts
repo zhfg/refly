@@ -41,6 +41,7 @@ import { Source } from '../types/weblink';
 import { SearchResultContext } from '../types/search';
 import { LoggerService } from '../common/logger.service';
 import { PrismaService } from '../common/prisma.service';
+import { LOCALE } from 'src/types/task';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
@@ -91,8 +92,6 @@ export class LlmService implements OnModuleInit {
    * @param doc valid langchain doc representing website content
    */
   async extractContentMeta(doc: Document): Promise<ContentMeta> {
-    const { pageContent } = doc;
-
     const parser = new JsonOutputFunctionsParser();
 
     const runnable = await this.llm
@@ -103,7 +102,12 @@ export class LlmService implements OnModuleInit {
       .pipe(parser);
     const res = (await runnable.invoke([
       new SystemMessage(extractContentMeta.systemPrompt),
-      new HumanMessage(pageContent.slice(0, 12000)),
+      new HumanMessage(
+        `The website content context as follow: \n ===\n ${doc.pageContent?.slice(
+          0,
+          12000,
+        )} \n===`,
+      ),
     ])) as {
       categoryId: string;
       reason: string;
@@ -131,11 +135,14 @@ export class LlmService implements OnModuleInit {
     return contentMeta;
   }
 
-  async getWebsiteMeta(doc: Document): Promise<Partial<AigcContent>> {
+  async getWebsiteMeta(
+    doc: Document,
+    locale: LOCALE = LOCALE.EN,
+  ): Promise<Partial<AigcContent>> {
     const parser = new JsonOutputFunctionsParser();
     const runnable = await this.llm
       .bind({
-        functions: [extractSummarizeMeta.extractWebsiteMetaSchema],
+        functions: [extractSummarizeMeta.extractWebsiteMetaSchema(locale)],
         function_call: {
           name: 'getWebsiteMeta',
         },
@@ -143,7 +150,13 @@ export class LlmService implements OnModuleInit {
       .pipe(parser);
     const summary = (await runnable.invoke([
       new SystemMessage(extractSummarizeMeta.extractMetaSystemPrompt),
-      new HumanMessage(doc.pageContent?.slice(0, 12000)),
+      new HumanMessage(
+        `The website content context as follow: \n ===\n ${doc.pageContent?.slice(
+          0,
+          12000,
+        )} \n===`,
+      ),
+      new HumanMessage(`Please output answer in ${locale} language:`),
     ])) as {
       title: string;
       keywords: string;
@@ -158,7 +171,10 @@ export class LlmService implements OnModuleInit {
     };
   }
 
-  async summarizeContent(doc: Document): Promise<Partial<AigcContent>> {
+  async summarizeContent(
+    doc: Document,
+    locale: LOCALE,
+  ): Promise<Partial<AigcContent>> {
     const summary = await this.llm.invoke([
       new SystemMessage(extractSummarizeMeta.summarizeSystemPrompt),
       new HumanMessage(
@@ -166,6 +182,7 @@ export class LlmService implements OnModuleInit {
           `===\n ${doc.pageContent?.slice(0, 12000)} \n===\n` +
           `SUMMARY with **Chinese**:`,
       ),
+      new HumanMessage(`Please output answer in ${locale} language:`),
     ]);
     this.logger.log('summarized content: %j', summary);
 
@@ -179,14 +196,17 @@ export class LlmService implements OnModuleInit {
    * @param doc
    * @returns
    */
-  async applyStrategy(doc: Document): Promise<Partial<AigcContent>> {
+  async applyStrategy(
+    doc: Document,
+    locale: LOCALE = LOCALE.EN,
+  ): Promise<Partial<AigcContent>> {
     // direct apply summary and return with structed json format
     /**
      * 经过反复实验，gpt-3.5-turbo 的能力比较差，因此将这个任务拆成两个：1）meta 抽取（function call) 2）summary 生成（直接使用 GPT 输出）
      */
     const [meta, summary] = await Promise.all([
-      this.getWebsiteMeta(doc),
-      this.summarizeContent(doc),
+      this.getWebsiteMeta(doc, locale),
+      this.summarizeContent(doc, locale),
     ]);
 
     return {
@@ -205,6 +225,7 @@ export class LlmService implements OnModuleInit {
    */
   async summarizeMultipleWeblink(
     docs: AigcContent[],
+    locale: LOCALE = LOCALE.EN,
   ): Promise<Partial<AigcContent>> {
     // direct apply summary and return with structed json format
     const multipleSourceInputContent = docs.reduce((total, cur) => {
@@ -224,7 +245,9 @@ export class LlmService implements OnModuleInit {
     const runnable = await this.llm
       .bind({
         functions: [
-          summarizeMultipleSource.extractSummarizeMultipleSourceMetaSchema,
+          summarizeMultipleSource.extractSummarizeMultipleSourceMetaSchema(
+            locale,
+          ),
         ],
         function_call: { name: 'content_meta_extractor' },
       })
@@ -232,6 +255,7 @@ export class LlmService implements OnModuleInit {
     const contentMeta = (await runnable.invoke([
       new SystemMessage(summarizeMultipleSource.systemPrompt),
       new HumanMessage(multipleSourceInputContent),
+      new HumanMessage(`Please output answer in ${locale} language:`),
     ])) as {
       title: string;
       content: string;
@@ -309,7 +333,11 @@ export class LlmService implements OnModuleInit {
     return results;
   }
 
-  async getRelatedQuestion(docs: Document[], lastQuery: string) {
+  async getRelatedQuestion(
+    docs: Document[],
+    lastQuery: string,
+    locale: LOCALE,
+  ) {
     if (docs.length <= 0) return;
 
     let contextContent = docs.reduce((total, cur) => {
@@ -345,7 +373,7 @@ export class LlmService implements OnModuleInit {
     const runnable = await this.llm
       .bind({
         functions: [
-          generateAskFollowupQuestion.generateAskFollowupQuestionSchema,
+          generateAskFollowupQuestion.generateAskFollowupQuestionSchema(locale),
         ],
         function_call: { name: 'get_ask_follow_up_questions' },
       })
@@ -353,6 +381,7 @@ export class LlmService implements OnModuleInit {
     const askFollowUpQuestion = (await runnable.invoke([
       new SystemMessage(generateAskFollowupQuestion.systemPrompt),
       new HumanMessage(contextContent),
+      new HumanMessage(`Please output answer in ${locale} language:`),
     ])) as {
       recommend_ask_followup_question: string[];
     };
@@ -361,7 +390,7 @@ export class LlmService implements OnModuleInit {
     return askFollowUpQuestion?.recommend_ask_followup_question || [];
   }
 
-  async summary(prompt: string, docs: Document[]) {
+  async summary(prompt: string, locale: LOCALE, docs: Document[]) {
     if (docs.length <= 0) return;
 
     const contextToCitationText = docs.reduce((total, cur) => {
@@ -383,22 +412,32 @@ export class LlmService implements OnModuleInit {
     );
     const stream = await llm.stream([
       new SystemMessage(systemPrompt),
-      new HumanMessage(contextToCitationText),
+      new HumanMessage(
+        `The context to be summarized is as follows: \n ===\n ${contextToCitationText} \n ===`,
+      ),
+      new HumanMessage(`Please output the answer in ${locale} language:`),
     ]);
 
     return stream;
   }
 
-  async getContextualQuestion(query: string, chatHistory: LLMChatMessage[]) {
+  async getContextualQuestion(
+    query: string,
+    locale: LOCALE,
+    chatHistory: LLMChatMessage[],
+  ) {
     this.logger.log(
       `activated with query: ${query}, chat history: ${chatHistory}`,
     );
 
     // 构建总结的 Prompt，将 question + chatHistory 总结成
     const contextualizeQPrompt = ChatPromptTemplate.fromMessages([
-      ['system', contextualizeQA.systemPrompt],
+      ['system', contextualizeQA.systemPrompt(locale)],
       new MessagesPlaceholder('chatHistory'),
-      ['human', '{question}'],
+      [
+        'human',
+        `The user's question is {question}, please output answer in ${locale} language:`,
+      ],
     ]);
     const contextualizeQChain = contextualizeQPrompt
       .pipe(this.llm as any)
@@ -430,6 +469,7 @@ export class LlmService implements OnModuleInit {
 
   async chat(
     query: string,
+    locale: LOCALE,
     chatHistory: LLMChatMessage[],
     context: Document[],
   ) {
@@ -439,7 +479,10 @@ export class LlmService implements OnModuleInit {
       ['system', qa.systemPrompt],
       new MessagesPlaceholder('chatHistory'),
       ['human', `The context as follow:\n === \n {context} \n === \n`],
-      ['human', '{question}'],
+      [
+        'human',
+        `The user's question is {question}, please output answer in ${locale} language:`,
+      ],
     ]);
 
     // 基于上下文进行问答
@@ -458,7 +501,10 @@ export class LlmService implements OnModuleInit {
     };
   }
 
-  async onlineSearch(query: string): Promise<SearchResultContext[]> {
+  async onlineSearch(
+    query: string,
+    locale: LOCALE,
+  ): Promise<SearchResultContext[]> {
     let jsonContent: any = [];
     try {
       const REFERENCE_COUNT = 8;
@@ -466,6 +512,8 @@ export class LlmService implements OnModuleInit {
       const queryPayload = JSON.stringify({
         q: query,
         num: REFERENCE_COUNT,
+        hl: locale?.toLocaleLowerCase(),
+        gl: locale === LOCALE.EN ? 'us' : 'cn',
       });
 
       const res = await fetch('https://google.serper.dev/search', {
@@ -522,8 +570,12 @@ export class LlmService implements OnModuleInit {
     }
   }
 
-  async searchEnhance(query: string, chatHistory: LLMChatMessage[]) {
-    this.logger.log(`activated with query: ${query}`);
+  async searchEnhance(
+    query: string,
+    locale: LOCALE,
+    chatHistory: LLMChatMessage[],
+  ) {
+    this.logger.log(`activated with query: ${query}, locale: ${locale}`);
 
     const stopWords = [
       '<|im_end|>',
@@ -536,22 +588,26 @@ export class LlmService implements OnModuleInit {
 
     // 构建总结的 Prompt，将 question + chatHistory 总结成
     const contextualizeQPrompt = ChatPromptTemplate.fromMessages([
-      ['system', contextualizeQA.systemPrompt],
+      ['system', contextualizeQA.systemPrompt(locale)],
       new MessagesPlaceholder('chatHistory'),
-      ['human', '{question}'],
+      [
+        'human',
+        `The user's question is {question}, please output answer in ${locale} language:`,
+      ],
     ]);
     const contextualizeQChain = contextualizeQPrompt
       .pipe(this.llm as any)
       .pipe(new StringOutputParser());
     const questionWithContext =
-      chatHistory.length === 0
+      chatHistory.length === 1
         ? query
         : await contextualizeQChain.invoke({
             question: query,
+            locale,
             chatHistory,
           });
 
-    const contexts = await this.onlineSearch(questionWithContext);
+    const contexts = await this.onlineSearch(questionWithContext, locale);
     const contextToCitationText = contexts
       .map((item, index) => `[[citation:${index + 1}]] ${item?.['snippet']}`)
       .join('\n\n');
@@ -578,7 +634,9 @@ export class LlmService implements OnModuleInit {
     });
     const stream = await llm.stream([
       new SystemMessage(systemPrompt),
-      new HumanMessage(query),
+      new HumanMessage(
+        `The user's query is ${query}, please output answer in locale's ${locale} language:`,
+      ),
     ]);
 
     return {
