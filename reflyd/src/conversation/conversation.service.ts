@@ -60,6 +60,7 @@ export class ConversationService {
     content: string;
     userId: number;
     conversationId: number;
+    locale?: string;
     relatedQuestions?: string;
     selectedWeblinkConfig?: string;
   }) {
@@ -75,6 +76,7 @@ export class ConversationService {
       content: string;
       userId: number;
       conversationId: number;
+      locale?: string;
       selectedWeblinkConfig?: string;
     }[],
   ) {

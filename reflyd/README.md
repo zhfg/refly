@@ -8,10 +8,10 @@ Prepare database:
 docker-compose up -d
 ```
 
-Run database migrations:
+Sync database schemas:
 
 ```bash
-npx prisma migrate diff --from-url 'postgresql://refly:test@localhost:5432/refly?schema=refly' --to-schema-datamodel prisma/schema.prisma --script | npx prisma db execute --stdin
+yarn sync-db-schema
 ```
 
 > Visit minio console on http://localhost:9001, with username and password specified in docker-compose.yml.

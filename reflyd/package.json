@@ -9,6 +9,7 @@
     "build": "prisma generate && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "format:schema": "prisma format",
+    "sync-db-schema": "node -r ts-node/register --env-file=.env scripts/sync-db-schema.ts",
     "proto:generate": "protoc -I ../protos --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=nestJs=true --ts_proto_out=./src/protos ../protos/aero.proto",
     "migrate:dev": "prisma migrate dev --create-only",
     "migrate:deploy": "prisma migrate deploy",
