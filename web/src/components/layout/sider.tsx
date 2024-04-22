@@ -80,7 +80,6 @@ export const SiderLayout = () => {
       }
 
       case "Settings": {
-        navigate(`/settings`)
         break
       }
 
@@ -197,8 +196,12 @@ export const SiderLayout = () => {
                 <Divider style={{ margin: "8px 0" }} />
                 <MenuItem
                   key="Settings"
-                  className="menu-setting-container custom-menu-item">
-                  <div className="menu-settings">
+                  className="menu-setting-container setting-menu-item">
+                  <div
+                    className="menu-settings"
+                    onClick={() => {
+                      navigate("/settings")
+                    }}>
                     <Avatar size={32}>
                       <img
                         src={userStore?.userProfile?.avatar || ""}
@@ -211,6 +214,7 @@ export const SiderLayout = () => {
                   </div>
                   <div>
                     <span
+                      className="setting-language-icon"
                       style={{ display: "inline-block", marginRight: "8px" }}>
                       <LanguageList>
                         <IconLanguage
@@ -220,7 +224,13 @@ export const SiderLayout = () => {
                         />
                       </LanguageList>
                     </span>
-                    <IconSettings style={{ fontSize: 20 }} />
+                    <span
+                      className="setting-icon"
+                      onClick={() => {
+                        navigate("/settings")
+                      }}>
+                      <IconSettings style={{ fontSize: 20 }} />
+                    </span>
                   </div>
                 </MenuItem>
               </>
