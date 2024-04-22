@@ -107,6 +107,172 @@
   "unloginHomePage": {
 
   },
+  "topics": {
+    "breadcrumb": {
+      "homePage": "主页",
+      "allTopics": "所有主题"
+    },
+    "title": "所有主题",
+    "description": "基于您的浏览历史、会话历史分析提取出来的主题分类，代表您的阅读和学习趋势",
+    "footer": {
+      "noMoreText": "已经到底啦~"
+    },
+    "list": {
+      "fetchErr": "获取主题列表失败，请重新刷新试试"
+    },
+    "empty": {
+      "title": "暂无分类，赶快下载插件去阅读新内容吧~",
+      "download": "下载插件"
+    }
+  },
+  "topicDetail": {
+    "breadcrumb": {
+      "homePage": "主页",
+      "allTopics": "所有主题"
+    },
+    "title": "所有主题",
+    "description": "基于您的浏览历史、会话历史分析提取出来的主题分类，代表您的阅读和学习趋势",
+    "footer": {
+      "noMoreText": "已经到底啦~"
+    },
+    "item": {
+      "askFollow": "追问阅读",
+      "share": "分享",
+      "copy": "复制链接",
+      "copyNotify": "链接已复制到剪切板",
+      "noMoreText": "已经到底啦~",
+      "linkMore": "{{count}} 条更多"
+    },
+    "list": {
+      "fetchErr": "获取会话列表失败，请重新刷新试试"
+    },
+    "empty": {
+      "title": "暂无此分类下的内容，赶快下载插件去阅读新内容吧~",
+      "download": "下载插件"
+    }
+  },
+  "threadLibrary": {
+    "breadcrumb": {
+      "homePage": "主页",
+      "allTopics": "所有主题"
+    },
+    "title": "会话库",
+    "footer": {
+      "noMoreText": "已经到底啦~"
+    },
+    "list": {
+      "fetchErr": "获取会话列表失败，请重新刷新试试"
+    },
+    "item": {
+      "askFollow": "继续提问",
+      "messageCount": "{{count}} 条消息"
+    },
+    "empty": {
+      "title": "暂无无会话，赶紧下载插件或访问首页提问吧~",
+      "download": "下载插件",
+      "goHome": "去首页搜索或提问"
+    }
+  },
+  "settings": {
+    "title": "设置",
+    "language": {
+      "title": "语言"
+    },
+    "account": {
+      "title": "账号",
+      "exitLogin": "退出登录",
+      "exitConfirm": {
+        "title": "退出登录",
+        "content": "确定退出登录吗？"
+      }
+    }
+  },
+  "contentDetail": {
+    "breadcrumb": {
+      "homePage": "Home"
+    },
+    "list": {
+      "fetchErr": "获取内容详情失败，请重新刷新试试"
+    },
+    "item": {
+      "share": "分享",
+      "copy": "复制链接",
+      "copyNotify": "链接已复制到剪切板",
+      "copyContent": "复制内容",
+      "copySuccess": "内容已复制到剪切板！",
+      "noMoreText": "已经到底啦~",
+      "askFollow": {
+        "emptyNotify": "追问内容不能为空！",
+        "successNotify":  "创建会话成功！页面跳转中...",
+        "errorNotify": "创建会话失败！请重试",
+        "modal": {
+          "title": "确认创建会话",
+          "okText": "确认",
+          "cancelText": "取消",
+          "content": "确定之后会基于当前内容创建会话，并基于问题 {{question}} 生成追问"
+        }
+      },
+      "session": {
+        "content": "正文内容",
+        "source": "来源",
+        "relatedQuestions": "相关问题"
+      },
+      "webLink": {
+        "btnTip": "查看此网页的总结",
+        "text": "总结",
+        "summaryModal": {
+          "successNotify": "获取总结详情成功！",
+          "errorNotify": "获取总结详情失败，请重试！"
+        }
+      },
+      "input": {
+        "placeholder": "创建新会话并追问...",
+        "btnTip": "创建新会话并追问"
+      }
+    }
+  },
+  "threadDetail": {
+    "breadcrumb": {
+      "threadLibrary": "会话库"
+    },
+    "item": {
+      "share": "分享",
+      "copy": "复制链接",
+      "copyNotify": "链接已复制到剪切板",
+      "copyAnswer": "复制答案",
+      "copySuccess": "答案已复制到剪切板！",
+      "noMoreText": "已经到底啦~",
+      "askFollow": {
+        "btnText": "点击进行追问",
+        "emptyNotify": "追问内容不能为空！",
+        "successNotify":  "创建会话成功！页面跳转中...",
+        "errorNotify": "创建会话失败！请重试",
+        "modal": {
+          "title": "确认创建会话",
+          "okText": "确认",
+          "cancelText": "取消",
+          "content": "确定之后会基于当前内容创建会话，并基于问题 {{question}} 生成追问"
+        }
+      },
+      "session": {
+        "answer": "答案",
+        "source": "来源",
+        "relatedQuestions": "相关问题"
+      },
+      "input": {
+        "placeholder": "继续提问...",
+        "searchScope": {
+          "title": "选择搜索范围",
+          "all": "所有网页",
+          "selected": "选中网页",
+          "internet": "联网搜索"
+        },
+        "selectedWeblink": {
+          "title": "基于选中网页提问："
+        }
+      }
+    }
+  },
   "title": "欢迎 {{name}}，使用 react-i18next 完全类型安全的 React",
   "description": {
     "part1": "这是一个简单的例子。",

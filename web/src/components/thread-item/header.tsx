@@ -3,6 +3,7 @@ import { IconClockCircle, IconShareExternal } from "@arco-design/web-react/icon"
 import { copyToClipboard } from "@/utils"
 import { time } from "@/utils/time"
 import { Thread } from "@/types"
+import { useTranslation } from "react-i18next"
 
 interface HeaderProps {
   thread: Thread
@@ -12,12 +13,17 @@ const BreadcrumbItem = Breadcrumb.Item
 
 export const Header = (props: HeaderProps) => {
   const { thread } = props
+  const { t, i18n } = useTranslation()
+
+  const language = i18n.languages?.[0] as "en" | "cn"
 
   return (
     <header>
       <div>
         <Breadcrumb>
-          <BreadcrumbItem href="/thread">会话库</BreadcrumbItem>
+          <BreadcrumbItem href="/thread">
+            {t("threadDetail.breadcrumb.threadLibrary")}
+          </BreadcrumbItem>
           <BreadcrumbItem
             href={`/thread/${thread?.id}`}
             className="breadcrum-description">
@@ -30,7 +36,7 @@ export const Header = (props: HeaderProps) => {
         <span key={2} style={{ display: "inline-block", marginRight: 12 }}>
           <IconClockCircle style={{ fontSize: 14, color: "#64645F" }} />
           <span className="thread-library-list-item-text">
-            {time(thread?.updatedAt).utc().fromNow()}
+            {time(thread?.updatedAt, language).utc().fromNow()}
           </span>
         </span>
         <Button
@@ -38,10 +44,10 @@ export const Header = (props: HeaderProps) => {
           icon={<IconShareExternal />}
           onClick={() => {
             copyToClipboard(location.href)
-            message.success("分享链接已复制到剪切板")
+            message.success(t("threadDetail.item.copyNotify"))
           }}
           style={{ borderRadius: 4 }}>
-          分享
+          {t("threadDetail.item.share")}
         </Button>
       </div>
     </header>

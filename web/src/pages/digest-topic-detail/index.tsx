@@ -16,7 +16,7 @@ import {
   IconTag,
 } from "@arco-design/web-react/icon"
 import { time } from "@/utils/time"
-import { useMatch, useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 // stores
 import { useDigestTopicDetailStore } from "@/stores/digest-topic-detail"
 // types
@@ -31,9 +31,9 @@ import { useDigestTopicStore } from "@/stores/digest-topics"
 import "./index.scss"
 // components
 import { EmptyDigestTopicDetailStatus } from "@/components/empty-digest-topic-detail-status"
-import { delay } from "@/utils/delay"
 // hooks
 import { useGetDigestTopics } from "@/hooks/use-get-digest-topics"
+import { useTranslation } from "react-i18next"
 
 const BreadcrumbItem = Breadcrumb.Item
 
@@ -46,6 +46,9 @@ export const DigestTopicDetail = () => {
   const navigate = useNavigate()
   const { digestTopicId } = useParams()
   const { fetchDigestTopicData, isFetching } = useGetDigestTopics()
+
+  const { t, i18n } = useTranslation()
+  const language = i18n.languages?.[0]
 
   // TODO: 替换成真正的 topic detail，目前还是 fake
   const currentTopicDetail = digestTopicStore.topicList?.find(
@@ -70,7 +73,7 @@ export const DigestTopicDetail = () => {
 
       console.log("currentPage", currentPage)
       if (!digestTopicDetailStore?.hasMore && currentPage !== 1) {
-        setScrollLoading(<span>已经到底啦~</span>)
+        setScrollLoading(<span>{t("topicDetail.footer.noMoreText")}</span>)
         return
       }
 
@@ -98,16 +101,16 @@ export const DigestTopicDetail = () => {
       console.log("newRes", newRes)
       digestTopicDetailStore.updateTopicDigestList(newRes?.data || [])
     } catch (err) {
-      message.error("获取会话列表失败，请重新刷新试试")
+      message.error(t("topicDetail.list.fetchErr"))
     } finally {
       const { digestList, pageSize } = useDigestTopicDetailStore.getState()
 
       if (digestList?.length === 0) {
         setScrollLoading(
-          <EmptyDigestTopicDetailStatus text="暂无此分类下的内容，赶快下载插件去阅读新内容吧~" />,
+          <EmptyDigestTopicDetailStatus text={t("topicDetail.empty.title")} />,
         )
       } else if (digestList?.length > 0 && digestList?.length < pageSize) {
-        setScrollLoading(<span>已经到底啦~</span>)
+        setScrollLoading(<span>{t("topicDetail.footer.noMoreText")}</span>)
       }
     }
   }
@@ -129,8 +132,12 @@ export const DigestTopicDetail = () => {
     <div className="digest-topic-detail-container">
       <div className="digest-topic-nav">
         <Breadcrumb>
-          <BreadcrumbItem href="/">主页</BreadcrumbItem>
-          <BreadcrumbItem href="/digest/topics">所有主题</BreadcrumbItem>
+          <BreadcrumbItem href="/">
+            {t("topicDetail.breadcrumb.homePage")}
+          </BreadcrumbItem>
+          <BreadcrumbItem href="/digest/topics">
+            {t("topicDetail.breadcrumb.allTopics")}
+          </BreadcrumbItem>
           <BreadcrumbItem
             className="breadcrum-description"
             href={`/digest/topic/${currentTopicDetail?.id}`}>
@@ -161,7 +168,7 @@ export const DigestTopicDetail = () => {
         dataSource={digestTopicDetailStore.digestList}
         scrollLoading={scrollLoading}
         onReachBottom={currentPage => fetchData(currentPage)}
-        noDataElement={<div>暂无数据</div>}
+        noDataElement={<div>{t("topicDetail.footer.noMoreText")}</div>}
         render={(item: Digest, index) => (
           <List.Item
             key={index}
@@ -182,9 +189,11 @@ export const DigestTopicDetail = () => {
                     <IconRightCircle
                       style={{ fontSize: 14, color: "#64645F" }}
                     />
-                    <span className="feed-list-item-text">追问阅读</span>
+                    <span className="feed-list-item-text">
+                      {t("topicDetail.item.askFollow")}
+                    </span>
                   </span>
-                  <IconTip text="复制链接">
+                  <IconTip text={t("topicDetail.item.copy")}>
                     <span
                       key={1}
                       className="feed-list-item-continue-ask"
@@ -192,12 +201,14 @@ export const DigestTopicDetail = () => {
                         copyToClipboard(
                           `${getClientOrigin()}/content/${item?.id}`,
                         )
-                        message.success("链接已复制到剪切板")
+                        message.success(t("topicDetail.item.copyNotify"))
                       }}>
                       <IconShareExternal
                         style={{ fontSize: 14, color: "#64645F" }}
                       />
-                      <span className="feed-list-item-text">分享</span>
+                      <span className="feed-list-item-text">
+                        {t("topicDetail.item.share")}
+                      </span>
                     </span>
                   </IconTip>
                 </div>
@@ -226,7 +237,7 @@ export const DigestTopicDetail = () => {
                     <span className="feed-list-item-text">
                       {safeParseURL(item?.weblinks?.[0]?.url)}{" "}
                       {item?.weblinks?.length - 1 > 0
-                        ? `& ${item?.weblinks?.length - 1} 条更多`
+                        ? `& ${t("topicDetail.item.linkMore", { count: item?.weblinks?.length - 1 })}`
                         : ""}
                     </span>
                   </span>
@@ -235,7 +246,10 @@ export const DigestTopicDetail = () => {
                       style={{ fontSize: 14, color: "#64645F" }}
                     />
                     <span className="feed-list-item-text">
-                      {time(item.updatedAt).utc().fromNow()}
+                      {/* TODO: 国际化增加时需要额外处理 */}
+                      {time(item.updatedAt, language as "en" | "cn")
+                        .utc()
+                        .fromNow()}
                     </span>
                   </span>
                 </div>

@@ -16,6 +16,7 @@ import { SearchTarget } from "@/stores/search-state"
 // 自定义组件
 import { SelectedWeblink } from "../selected-weblink/index"
 import { useQuickSearchStateStore } from "@/stores/quick-search-state"
+import { useTranslation } from "react-i18next"
 
 interface ThreadItemProps {
   sessions: SessionItem[]
@@ -34,6 +35,8 @@ export const ThreadItem = (props: ThreadItemProps) => {
   const selectedWeblinkListRef = useRef<HTMLDivElement>(null)
   const chatStore = useChatStore()
   const [addedStyle, setAddedStyle] = useState({})
+
+  const { t } = useTranslation()
 
   const [threadSearchTarget, setThreadSearchTarget] = useState(
     selectedWeblinkConfig?.searchTarget,
@@ -175,7 +178,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
                   onChange={value => {
                     chatStore.setNewQAText(value)
                   }}
-                  placeholder="继续提问..."
+                  placeholder={t("threadDetail.item.input.placeholder")}
                   onKeyDownCapture={e => handleKeyDown(e)}
                   autoSize={{ minRows: 1, maxRows: 4 }}
                   style={{

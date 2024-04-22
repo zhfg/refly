@@ -11,6 +11,7 @@ import { useConversationStore } from "@/stores/conversation"
 import { useResetState } from "@/hooks/use-reset-state"
 import { useNavigate } from "react-router-dom"
 import { delay } from "@/utils/delay"
+import { useTranslation } from "react-i18next"
 
 interface SummaryModalProps {
   aigcContent: Digest | Feed
@@ -29,6 +30,7 @@ export const AskFollowUpModal = (props: SummaryModalProps) => {
   const conversationStore = useConversationStore()
   const navigate = useNavigate()
 
+  const { t } = useTranslation()
   const { resetState } = useResetState()
 
   const handleDigestAskFollow = async () => {
@@ -64,13 +66,13 @@ export const AskFollowUpModal = (props: SummaryModalProps) => {
       chatStore.setIsAskFollowUpNewConversation(true)
 
       message.success({
-        content: "创建会话成功！页面跳转中...",
+        content: t("contentDetail.item.askFollow.successNotify"),
         duration: 2000,
       })
       await delay(2000)
       navigate(`/thread/${res?.data?.id}`)
     } catch (err) {
-      message.error("创建会话失败！请重试")
+      message.error(t("contentDetail.item.askFollow.errorNotify"))
     } finally {
       setIsFetching(false)
     }
@@ -79,15 +81,16 @@ export const AskFollowUpModal = (props: SummaryModalProps) => {
   return (
     <Modal
       visible={props.visible}
-      title="确认创建会话"
-      okText="确认"
-      cancelText="取消"
+      title={t("contentDetail.item.askFollow.modal.title")}
+      okText={t("contentDetail.item.askFollow.modal.okText")}
+      cancelText={t("contentDetail.item.askFollow.modal.cancelText")}
       okButtonProps={{ loading: isFetching }}
       onOk={() => handleDigestAskFollow()}
       onCancel={() => props.setVisible(false)}>
       <div className="ask-follow-up-content">
-        确定之后会基于当前内容创建会话，并基于问题 <b>{chatStore.newQAText}</b>{" "}
-        生成追问
+        {t("contentDetail.item.askFollow.modal.content", {
+          question: chatStore.newQAText,
+        })}
       </div>
     </Modal>
   )

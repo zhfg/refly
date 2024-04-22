@@ -18,6 +18,7 @@ import { IconTip } from "../dashboard/icon-tip"
 import { safeParseJSON } from "@/utils/parse"
 import { useUserStore } from "@/stores/user"
 import { useQuickSearchStateStore } from "@/stores/quick-search-state"
+import { useTranslation } from "react-i18next"
 
 interface ThreadItemProps {
   sessions: SessionItem[]
@@ -34,6 +35,8 @@ export const DigestDetailContent = (props: ThreadItemProps) => {
 
   const messageStateStore = useMessageStateStore()
   const quickSearchStateStore = useQuickSearchStateStore()
+
+  const { t } = useTranslation()
 
   // 获取 storage user profile
   const storageUserProfile = safeParseJSON(
@@ -85,7 +88,7 @@ export const DigestDetailContent = (props: ThreadItemProps) => {
      * 3. 带着问题跳转过去
      */
     if (!chatStore?.newQAText) {
-      message.warning(`追问内容不能为空！`)
+      message.warning(t("contentDetail.item.askFollow.emptyNotify"))
     } else {
       if (!notShowLoginBtn) {
         userStore.setLoginModalVisible(true)
@@ -120,7 +123,7 @@ export const DigestDetailContent = (props: ThreadItemProps) => {
                 onChange={value => {
                   chatStore.setNewQAText(value)
                 }}
-                placeholder="创建新会话并追问..."
+                placeholder={t("contentDetail.item.input.placeholder")}
                 onKeyDownCapture={e => handleKeyDown(e)}
                 autoSize={{ minRows: 1, maxRows: 4 }}
                 style={{
@@ -131,7 +134,7 @@ export const DigestDetailContent = (props: ThreadItemProps) => {
               <div>
                 <div className="toolbar">
                   <Space></Space>
-                  <IconTip text="创建新会话并追问">
+                  <IconTip text={t("contentDetail.item.input.btnTip")}>
                     <Button
                       shape="circle"
                       icon={<IconSend />}

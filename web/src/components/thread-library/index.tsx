@@ -1,24 +1,14 @@
 import React, { useEffect, useState } from "react"
 
-// 静态资源
-import Logo from "@/assets/logo.svg"
-import CloseGraySVG from "@/assets/side/close.svg"
-import NotificationSVG from "@/assets/side/notification.svg"
-import SettingGraySVG from "@/assets/side/setting.svg"
-import FullScreenSVG from "@/assets/side/full-screen.svg"
-
 // 组件
 import {
-  Avatar,
   List,
   Skeleton,
   Message as message,
   Typography,
 } from "@arco-design/web-react"
 // stores
-import { useSiderStore } from "@/stores/sider"
 import { useThreadStore } from "@/stores/thread"
-import { IconTip } from "@/components/dashboard/icon-tip"
 import {
   IconClockCircle,
   IconMessage,
@@ -31,9 +21,9 @@ import getConversationList from "@/requests/getConversationList"
 // types
 import { Thread } from "@/types"
 import "./index.scss"
-import { delay } from "@/utils/delay"
 // components
 import { EmptyThreadLibraryStatus } from "@/components/empty-thread-library-status"
+import { useTranslation } from "react-i18next"
 
 export const ThreadLibrary = () => {
   const [scrollLoading, setScrollLoading] = useState(
@@ -42,6 +32,9 @@ export const ThreadLibrary = () => {
   const threadStore = useThreadStore()
   const navigate = useNavigate()
   const isThreadLibrary = useMatch("/thread")
+
+  const { t, i18n } = useTranslation()
+  const language = i18n.languages?.[0]
 
   const fetchData = async (currentPage = 1) => {
     try {
@@ -61,7 +54,7 @@ export const ThreadLibrary = () => {
       )
 
       if (!threadStore?.hasMore && currentPage !== 1) {
-        setScrollLoading(<span>已经到底啦~</span>)
+        setScrollLoading(<span>{t("threadLibrary.footer.noMoreText")}</span>)
         return
       }
 
@@ -84,14 +77,14 @@ export const ThreadLibrary = () => {
       console.log("newRes", newRes)
       threadStore.updateThreadList(newRes?.data || [])
     } catch (err) {
-      message.error("获取会话列表失败，请重新刷新试试")
+      message.error(t("threadLibrary.list.fetchErr"))
     } finally {
       const { threads, pageSize } = useThreadStore.getState()
 
       if (threads?.length === 0) {
         setScrollLoading(<EmptyThreadLibraryStatus />)
       } else if (threads?.length > 0 && threads?.length < pageSize) {
-        setScrollLoading(<span>已经到底啦~</span>)
+        setScrollLoading(<span>{t("threadLibrary.footer.noMoreText")}~</span>)
       }
     }
   }
@@ -119,7 +112,7 @@ export const ThreadLibrary = () => {
         header={
           <div className="feed-title-container">
             <p className="feed-title">
-              <span>会话库</span>
+              <span>{t("threadLibrary.title")}</span>
             </p>
           </div>
         }
@@ -128,7 +121,7 @@ export const ThreadLibrary = () => {
         dataSource={threadStore?.threads}
         scrollLoading={scrollLoading}
         onReachBottom={currentPage => fetchData(currentPage)}
-        noDataElement={<div>暂无数据</div>}
+        noDataElement={<div>{t("threadLibrary.footer.noMoreText")}</div>}
         render={(item: Thread, index) => (
           <List.Item
             key={index}
@@ -149,18 +142,24 @@ export const ThreadLibrary = () => {
                   navigate(`/thread/${item?.id}`)
                 }}>
                 <IconRightCircle style={{ fontSize: 14, color: "#64645F" }} />
-                <span className="thread-library-list-item-text">继续提问</span>
+                <span className="thread-library-list-item-text">
+                  {t("threadLibrary.item.askFollow")}
+                </span>
               </span>,
               <span key={2}>
                 <IconClockCircle style={{ fontSize: 14, color: "#64645F" }} />
                 <span className="thread-library-list-item-text">
-                  {time(item.updatedAt).utc().fromNow()}
+                  {time(item.updatedAt, language as "en" | "cn")
+                    .utc()
+                    .fromNow()}
                 </span>
               </span>,
               <span key={3}>
                 <IconMessage style={{ fontSize: 14, color: "#64645F" }} />
                 <span className="thread-library-list-item-text">
-                  {item?.messageCount} 条消息
+                  {t("threadLibrary.item.messageCount", {
+                    count: item?.messageCount,
+                  })}
                 </span>
               </span>,
             ]}>

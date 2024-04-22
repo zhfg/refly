@@ -8,6 +8,7 @@ import {
 import { IconTip } from "@/components/dashboard/icon-tip"
 
 import { SearchTarget } from "@/stores/search-state"
+import { useTranslation } from "react-i18next"
 
 /**
  * 这里的产品思考：
@@ -28,11 +29,13 @@ interface ThreadSearchTargetSelectorProps {
 export const ThreadSearchTargetSelector = (
   props: ThreadSearchTargetSelectorProps,
 ) => {
+  const { t } = useTranslation()
   const iconStyle = {
     marginRight: 8,
     fontSize: 16,
     transform: "translateY(1px)",
   }
+
   const searchTargetDropList = (
     <Menu
       className="search-target-selector"
@@ -45,15 +48,15 @@ export const ThreadSearchTargetSelector = (
       }}>
       <Menu.Item key={SearchTarget.All}>
         <IconCommon style={iconStyle} />
-        所有网页
+        {t("threadDetail.item.input.searchScope.all")}
       </Menu.Item>
       <Menu.Item key={SearchTarget.SelectedPages}>
         <IconArchive style={iconStyle} />
-        选中网页
+        {t("threadDetail.item.input.searchScope.selected")}
       </Menu.Item>
       <Menu.Item key={SearchTarget.SearchEnhance}>
         <IconCompass style={iconStyle} />
-        联网搜索
+        {t("threadDetail.item.input.searchScope.internet")}
       </Menu.Item>
     </Menu>
   )
@@ -61,11 +64,11 @@ export const ThreadSearchTargetSelector = (
   const getDisplayText = (searchTarget: SearchTarget) => {
     switch (searchTarget) {
       case SearchTarget.SelectedPages:
-        return "选中网页"
+        return t("threadDetail.item.input.searchScope.selected")
       case SearchTarget.All:
-        return "所有网页"
+        return t("threadDetail.item.input.searchScope.all")
       case SearchTarget.SearchEnhance:
-        return "联网搜索"
+        return t("threadDetail.item.input.searchScope.internet")
     }
   }
 
@@ -83,7 +86,11 @@ export const ThreadSearchTargetSelector = (
   }
 
   return (
-    <IconTip text={getDisplayText(props.searchTarget) || "选择搜索模式"}>
+    <IconTip
+      text={
+        getDisplayText(props.searchTarget) ||
+        t("threadDetail.item.input.searchScope.title")
+      }>
       <Dropdown
         droplist={searchTargetDropList}
         trigger="hover"

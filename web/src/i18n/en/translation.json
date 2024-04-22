@@ -87,7 +87,7 @@
         "share": "Share",
         "copy": "Copy Link",
         "copyNotify": "Link Copied to Clipboard",
-        "noMoreText": "That's the end of the list!",
+        "noMoreText": "You've reached the end of the list!",
         "linkMore": "{{count}} more"
       }
     },
@@ -102,6 +102,185 @@
       "archiveTitle": "You haven't read any content yet. Download the plugin to start exploring new material!",
       "download": "Download Plugin",
       "seeOther": "View Knowledge from Other Dates"
+    }
+  },
+  "topics": {
+    "breadcrumb": {
+      "homePage": "Home",
+      "allTopics": "All Topics"
+    },
+    "title": "All Topics",
+    "description": "Topic categories derived from your browsing and session history, representing your reading and learning trends",
+    "footer": {
+      "noMoreText": "You've reached the end of the list!"
+    },
+    "list": {
+      "fetchErr": "Failed to retrieve the topic list. Please try refreshing the page."
+    },
+    "empty": {
+      "title": "No categories available at the moment. Download the plugin to access new content!",
+      "download": "Download Plugin",
+      "seeOther": "Explore Content from Other Dates"
+    }
+  },
+  "topicDetail": {
+    "breadcrumb": {
+      "homePage": "Home",
+      "allTopics": "All Topics"
+    },
+    "footer": {
+      "noMoreText": "You've reached the end of the list!"
+    },
+    "item": {
+      "askFollow": "Ask Follow-Up",
+      "share": "Share",
+      "copy": "Copy Link",
+      "copyNotify": "Link Copied to Clipboard",
+      "noMoreText": "You've reached the end of the list!",
+      "linkMore": "{{count}} more"
+    },
+    "list": {
+      "fetchErr": "Failed to retrieve the session list. Please try refreshing the page."
+    },
+    "empty": {
+      "title": "No content available in this category at the moment. Download the plugin to access new content!",
+      "download": "Download Plugin"
+    }
+  },
+  "threadLibrary": {
+    "title": "Conversation Library",
+    "footer": {
+      "noMoreText": "You've reached the end of the list."
+    },
+    "list": {
+      "fetchErr": "Failed to retrieve the conversation list. Please try refreshing the page."
+    },
+    "item": {
+      "askFollow": "Ask a Follow-Up Question",
+      "messageCount": "{{count}} messages"
+    },
+    "empty": {
+      "title": "No conversations at the moment. Download the plugin or visit the home page to ask a question!",
+      "download": "Download Plugin",
+      "goHome": "Go to Home Page to Search or Ask a Question"
+    }
+  },
+  "threadItem": {
+    "title": "Conversation Library",
+    "footer": {
+      "noMoreText": "You've reached the end of the list."
+    },
+    "list": {
+      "fetchErr": "Failed to retrieve the conversation list. Please try refreshing the page."
+    },
+    "item": {
+      "askFollow": "Ask a Follow-Up Question",
+      "messageCount": "{{count}} messages"
+    },
+    "empty": {
+      "title": "No conversations at the moment. Download the plugin or visit the home page to ask a question!",
+      "download": "Download Plugin",
+      "goHome": "Go to Home Page to Search or Ask a Question"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "language": {
+      "title": "Language"
+    },
+    "account": {
+      "title": "Account",
+      "logout": "Log Out",
+      "logoutConfirmation": {
+        "title": "Log Out Confirmation",
+        "message": "Are you sure you want to log out?"
+      }
+    }
+  },
+  "contentDetail": {
+    "breadcrumb": {
+      "homePage": "Home"
+    },
+    "list": {
+      "fetchErr": "Failed to retrieve content details. Please try refreshing the page."
+    },
+    "item": {
+      "share": "Share",
+      "copy": "Copy Link",
+      "copyNotify": "Link Copied to Clipboard",
+      "copyContent": "Copy Content",
+      "copySuccess": "Content Copied to Clipboard",
+      "noMoreText": "You've reached the end of the list!",
+      "askFollow": {
+        "emptyNotify": "The follow-up content cannot be empty!",
+        "successNotify": "Session created successfully! Redirecting...",
+        "errorNotify": "Failed to create a session! Please try again.",
+        "modal": {
+          "title": "Confirm Session Creation",
+          "okText": "Confirm",
+          "cancelText": "Cancel",
+          "content": "Confirming will create a session based on the current content and generate a follow-up question based on \"{{question}}\"."
+        }
+      },
+      "session": {
+        "content": "Content",
+        "source": "Source",
+        "relatedQuestions": "Related Questions"
+      },
+      "webLink": {
+        "btnTip": "View Summary of This Web Page",
+        "text": "Summary",
+        "summaryModal": {
+          "successNotify": "Successfully retrieved summary details!",
+          "errorNotify": "Failed to retrieve summary details. Please try again!"
+        }
+      },
+      "input": {
+        "placeholder": "Create a new session and follow up...",
+        "btnTip": "Create a New Session and Follow Up"
+      }
+    }
+  },
+  "threadDetail": {
+    "breadcrumb": {
+      "threadLibrary": "Thread Library"
+    },
+    "item": {
+      "share": "Share",
+      "copy": "Copy Link",
+      "copyNotify": "Link Copied to Clipboard",
+      "copyAnswer": "Copy Answer",
+      "copySuccess": "Answer Copied to Clipboard",
+      "noMoreText": "You've reached the end of the list!",
+      "askFollow": {
+        "btnText": "Click to Ask a Follow-Up Question",
+        "emptyNotify": "The follow-up question cannot be empty!",
+        "successNotify": "Session created successfully! Redirecting...",
+        "errorNotify": "Failed to create a session! Please try again.",
+        "modal": {
+          "title": "Confirm Session Creation",
+          "okText": "Confirm",
+          "cancelText": "Cancel",
+          "content": "Confirming will create a session based on the current content and generate a follow-up question based on \"{{question}}\"."
+        }
+      },
+      "session": {
+        "answer": "Answer",
+        "source": "Source",
+        "relatedQuestions": "Related Questions"
+      },
+      "input": {
+        "placeholder": "Ask a follow-up question...",
+        "searchScope": {
+          "title": "Select Search Scope",
+          "all": "All Web Pages",
+          "selected": "Selected Web Page",
+          "internet": "Internet Search"
+        },
+        "selectedWeblink": {
+          "title": "Ask a Question Based on the Selected Web Page:"
+        }
+      }
     }
   },
   "title": "Welcome {{name}}, to react using react-i18next fully type-safe",

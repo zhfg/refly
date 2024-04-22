@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Markdown } from "../markdown"
 // styles
 import "./index.scss"
+import { useTranslation } from "react-i18next"
 
 interface SummaryModalProps {
   id: string
@@ -20,15 +21,19 @@ export const SummaryModal = (props: SummaryModalProps) => {
   const [isFetching, setIsFetching] = useState(false)
   const [summaryContent, setSummaryContent] = useState("")
 
+  const { t } = useTranslation()
+
   const getDetail = async () => {
     try {
       setIsFetching(true)
       const res = await props.getDetail(props.id)
       setSummaryContent(res as string)
 
-      message.success("获取总结详情成功！")
+      message.success(
+        t("contentDetail.item.webLink.summaryModal.successNotify"),
+      )
     } catch (err) {
-      message.error("获取总结详情失败，请重试！")
+      message.error(t("contentDetail.item.webLink.summaryModal.errorNotify"))
     } finally {
       setIsFetching(false)
     }

@@ -1,4 +1,4 @@
-import { Button, Dropdown, Modal, Typography } from "@arco-design/web-react"
+import { Button, Modal, Typography } from "@arco-design/web-react"
 import { useCookie } from "react-use"
 import Cookies from "js-cookie"
 
@@ -22,8 +22,8 @@ export const Settings = () => {
 
   const handleLogout = () => {
     modal.confirm?.({
-      title: "退出登录",
-      content: "确定退出登录吗？",
+      title: t("settings.account.logoutConfirmation.title"),
+      content: t("settings.account.logoutConfirmation.message"),
       onOk() {
         console.log("delete cookie")
         userStore.setUserProfile(null)
@@ -47,9 +47,11 @@ export const Settings = () => {
   return (
     <div className="settings-container">
       <div className="settings-inner-container">
-        <div className="settings-title">设置</div>
+        <div className="settings-title">{t("settings.title")}</div>
         <div>
-          <Typography.Title heading={4}>语言</Typography.Title>
+          <Typography.Title heading={4}>
+            {t("settings.language.title")}
+          </Typography.Title>
           <LanguageList>
             <Button className="setting-page-language-btn">
               {t("language")} <IconDown />
@@ -57,8 +59,12 @@ export const Settings = () => {
           </LanguageList>
         </div>
         <div>
-          <Typography.Title heading={4}>账户</Typography.Title>
-          <Button onClick={() => handleLogout()}>退出登录</Button>
+          <Typography.Title heading={4}>
+            {t("settings.account.title")}
+          </Typography.Title>
+          <Button onClick={() => handleLogout()}>
+            {t("settings.account.logout")}
+          </Button>
         </div>
       </div>
       {contextHolder}
