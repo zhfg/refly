@@ -12,6 +12,7 @@ import { useResetState } from "@/hooks/use-reset-state"
 import { useNavigate } from "react-router-dom"
 import { delay } from "@/utils/delay"
 import { useTranslation } from "react-i18next"
+import { useUserStore } from "@/stores/user"
 
 interface SummaryModalProps {
   aigcContent: Digest | Feed
@@ -37,6 +38,7 @@ export const AskFollowUpModal = (props: SummaryModalProps) => {
     try {
       setIsFetching(true)
       const { newQAText } = useChatStore.getState()
+      const { localSettings } = useUserStore.getState()
       console.log("newQAText", newQAText)
       const question = newQAText
 
@@ -53,6 +55,7 @@ export const AskFollowUpModal = (props: SummaryModalProps) => {
         body: {
           ...newConversationPayload,
           contentId: aigcContent?.id,
+          locale: localSettings?.outputLocale,
         },
       })
 

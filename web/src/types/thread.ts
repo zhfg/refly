@@ -1,4 +1,5 @@
 import type { ServerMessage } from "@/types"
+import { OutputLocale } from "@/utils/i18n"
 
 export interface Thread {
   id: string
@@ -15,4 +16,5 @@ export interface Thread {
 
   // 基于 feed 或 digest 创建的表示
   contentId?: string
+  locale: OutputLocale
 }

@@ -60,12 +60,13 @@ export const SearchBox = () => {
      * 1. 创建新 thread，设置状态
      * 2. 跳转到 thread 界面，进行第一个回复，展示 问题、sources、答案
      */
+    const { localSettings } = useUserStore.getState()
     const question = chatStore.newQAText
     const newConversationPayload = buildConversation()
 
     // 创建新会话
     const res = await createNewConversation({
-      body: newConversationPayload,
+      body: { ...newConversationPayload, locale: localSettings.outputLocale },
     })
 
     if (!res?.success) {
