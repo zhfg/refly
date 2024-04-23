@@ -22,7 +22,8 @@ export class UserController {
       'name',
       'email',
       'emailVerified',
-      'locale',
+      'uiLocale',
+      'outputLocale',
     ]);
   }
 

@@ -51,8 +51,10 @@ model User {
   emailVerified DateTime? @map("email_verified") @db.Timestamptz()
   /// 密码
   password      String?   @map("password")
-  /// 语言设置
-  locale        String?   @default("en") @map("locale")
+  /// 界面语言设置
+  uiLocale      String?   @default("") @map("ui_locale")
+  /// 输出语言设置
+  outputLocale  String?   @default("") @map("output_locale")
   /// 创建时间
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// 更新时间

@@ -1,6 +1,9 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateSettingsDTO {
-  @ApiProperty()
-  locale: string;
+  @ApiPropertyOptional()
+  uiLocale?: string;
+
+  @ApiPropertyOptional()
+  outputLocale?: string;
 }

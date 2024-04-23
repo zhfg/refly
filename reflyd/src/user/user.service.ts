@@ -23,7 +23,7 @@ export class UserService {
   async updateSettings(uid: number, data: UpdateSettingsDTO) {
     return this.prisma.user.update({
       where: { id: uid },
-      data: { locale: data.locale },
+      data: { ...data },
     });
   }
 
