@@ -41,7 +41,7 @@
       }
     },
     "loginModal": {
-      "title": "Sign In or Register to acess with Refly",
+      "title": "Sign In or Register to start using Refly",
       "loginBtn": "Sign In",
       "loggingStatus": "Signing in...",
       "and": "and",
@@ -57,7 +57,7 @@
       "searchPlaceholder": "Search for Refly",
       "searchScope": {
         "title": "Select Search Scope",
-        "all": "All Web Pages",
+        "all": "Whole Library",
         "history": "History Read",
         "internet": "Internet Search"
       },
@@ -68,7 +68,7 @@
     },
     "siderMenu": {
       "homePage": "Home",
-      "threadLibrary": "Thread Library",
+      "threadLibrary": "Threads",
       "getHelp": "Get Help",
       "download": "Download Extension"
     }
@@ -192,8 +192,8 @@
       "title": "Interface Display Language"
     },
     "outputLocale": {
-      "title": "Model Output",
-      "description": "This will be passed to the large language model to generate responses in the language you specify."
+      "title": "Chat Language",
+      "description": "AI will respond to your questions in the language set here. You can override this option by setting the language individually within the conversation."
     },
     "account": {
       "title": "Account",
@@ -253,7 +253,7 @@
   },
   "threadDetail": {
     "breadcrumb": {
-      "threadLibrary": "Thread Library"
+      "threadLibrary": "Threads"
     },
     "item": {
       "share": "Share",
@@ -283,7 +283,7 @@
         "placeholder": "Ask a follow-up question...",
         "searchScope": {
           "title": "Select Search Scope",
-          "all": "All Web Pages",
+          "all": "Whole Library",
           "selected": "Selected Web Page",
           "internet": "Internet Search"
         },

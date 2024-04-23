@@ -57,7 +57,7 @@
       "searchPlaceholder": "输入搜索内容...",
       "searchScope": {
         "title": "选择搜索范围",
-        "all": "所有网页",
+        "all": "全部知识库",
         "history": "历史已阅读",
         "internet": "联网搜索"
       },
@@ -179,11 +179,11 @@
   "settings": {
     "title": "设置",
     "uiLocale": {
-      "title": "界面展示语言"
+      "title": "界面语言"
     },
     "outputLocale": {
-      "title": "模型输出语言",
-      "description": "会传给大语言模型，让大语言模型以你指定的语言进行回答"
+      "title": "对话语言",
+      "description": "AI 将按照此语言设置回答您的问题。您可以在对话中单独设置语言以覆盖此选项。"
     },
     "account": {
       "title": "账号",
@@ -273,7 +273,7 @@
         "placeholder": "继续提问...",
         "searchScope": {
           "title": "选择搜索范围",
-          "all": "所有网页",
+          "all": "全部知识库",
           "selected": "选中网页",
           "internet": "联网搜索"
         },
