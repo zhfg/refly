@@ -192,7 +192,7 @@
       "title": "Interface Display Language"
     },
     "outputLocale": {
-      "title": "Language for Large Language Model Output",
+      "title": "Model Output",
       "description": "This will be passed to the large language model to generate responses in the language you specify."
     },
     "account": {

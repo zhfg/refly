@@ -1,5 +1,10 @@
 import { useTranslation } from "react-i18next"
-import { Dropdown, Menu, Message as message } from "@arco-design/web-react"
+import {
+  Dropdown,
+  Menu,
+  Typography,
+  Message as message,
+} from "@arco-design/web-react"
 import { useUserStore } from "@/stores/user"
 import { safeStringifyJSON } from "@/utils/parse"
 import { LOCALE } from "@/types"
@@ -43,6 +48,9 @@ export const OutputLocaleList = (props: { children: any }) => {
       className={"output-locale-list-menu"}
       onClickMenuItem={key => changeLang(key as OutputLocale)}
       style={{ width: 240 }}>
+      <Typography.Text type="secondary" style={{ marginLeft: 12 }}>
+        {t("settings.outputLocale.title")}
+      </Typography.Text>
       {enLocale.map((item: OutputLocale) => (
         <Menu.Item key={item}>
           {localeToLanguageName?.[uiLocale]?.[item]}

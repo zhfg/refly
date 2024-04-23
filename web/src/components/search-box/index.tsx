@@ -208,15 +208,13 @@ export const SearchBox = () => {
               <Space>
                 <SearchTargetSelector />
                 <OutputLocaleList>
-                  <IconTip text={t("settings.outputLocale.title")}>
-                    <Button
-                      type="text"
-                      shape="round"
-                      icon={<IconLanguage />}
-                      className="setting-page-language-btn">
-                      {localeToLanguageName?.[uiLocale]?.[outputLocale]}{" "}
-                    </Button>
-                  </IconTip>
+                  <Button
+                    type="text"
+                    shape="round"
+                    icon={<IconLanguage />}
+                    className="setting-page-language-btn">
+                    {localeToLanguageName?.[uiLocale]?.[outputLocale]}{" "}
+                  </Button>
                 </OutputLocaleList>
               </Space>
               <Button

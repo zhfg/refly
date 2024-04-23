@@ -1,4 +1,4 @@
-import { Button, Dropdown, Menu } from "@arco-design/web-react"
+import { Button, Dropdown, Menu, Typography } from "@arco-design/web-react"
 import {
   IconOriginalSize,
   IconArchive,
@@ -25,6 +25,7 @@ export const SearchTargetSelector = () => {
   }
   const searchTargetDropList = (
     <Menu
+      style={{ width: 200 }}
       className="search-target-selector"
       onClickMenuItem={key => {
         console.log("trigger menu", key)
@@ -35,6 +36,9 @@ export const SearchTargetSelector = () => {
           webLinkStore.updateSelectedRow([])
         }
       }}>
+      <Typography.Text type="secondary" style={{ marginLeft: 12 }}>
+        {t("loggedHomePage.homePage.searchScope.title")}
+      </Typography.Text>
       <Menu.Item key={SearchTarget.All}>
         <IconCommon style={iconStyle} />
         {t("loggedHomePage.homePage.searchScope.all")}
@@ -87,18 +91,13 @@ export const SearchTargetSelector = () => {
   }, [])
 
   return (
-    <IconTip text={t("loggedHomePage.homePage.searchScope.title")}>
-      <Dropdown
-        droplist={searchTargetDropList}
-        trigger="hover"
-        position="bottom">
-        <Button
-          icon={getDisplayIcon(searchStateStore.searchTarget)}
-          type="text"
-          shape="round">
-          {getDisplayText(searchStateStore.searchTarget)}
-        </Button>
-      </Dropdown>
-    </IconTip>
+    <Dropdown droplist={searchTargetDropList} trigger="hover" position="bottom">
+      <Button
+        icon={getDisplayIcon(searchStateStore.searchTarget)}
+        type="text"
+        shape="round">
+        {getDisplayText(searchStateStore.searchTarget)}
+      </Button>
+    </Dropdown>
   )
 }

@@ -182,7 +182,7 @@
       "title": "界面展示语言"
     },
     "outputLocale": {
-      "title": "大语言模型的输出语言",
+      "title": "模型输出语言",
       "description": "会传给大语言模型，让大语言模型以你指定的语言进行回答"
     },
     "account": {
