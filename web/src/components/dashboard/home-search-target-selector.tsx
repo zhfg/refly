@@ -95,6 +95,7 @@ export const SearchTargetSelector = () => {
       <Button
         icon={getDisplayIcon(searchStateStore.searchTarget)}
         type="text"
+        className="search-assist-btn"
         shape="round">
         {getDisplayText(searchStateStore.searchTarget)}
       </Button>
