@@ -2,10 +2,13 @@ import { useQuickSearchStateStore } from "@/stores/quick-search-state"
 import { reflyEnv } from "@/utils/env"
 
 import "./index.scss"
+import { useTranslation } from "react-i18next"
 
 export const SearchQuickOpenBtn = () => {
   // stores
   const quickSearchStateStore = useQuickSearchStateStore()
+
+  const { t } = useTranslation()
 
   return (
     <div className="search-quick-open-container">
@@ -14,7 +17,9 @@ export const SearchQuickOpenBtn = () => {
         onClick={() => {
           quickSearchStateStore.setVisible(true)
         }}>
-        <div className="search-quick-open-text">新会话</div>
+        <div className="search-quick-open-text">
+          {t("loggedHomePage.newThreadText")}
+        </div>
         <div className="search-quick-open-shortcuts">
           <div className="search-quick-open-shortcut-key">
             {reflyEnv.getOsType() === "OSX" ? "⌘" : "ctrl"}

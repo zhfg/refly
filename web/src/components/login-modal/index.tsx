@@ -24,6 +24,7 @@ import { safeParseJSON } from "@/utils/parse"
 import "./index.scss"
 import { useCookie } from "react-use"
 import { getServerOrigin } from "@/utils/url"
+import { useTranslation } from "react-i18next"
 
 interface ExternalLoginPayload {
   name: string
@@ -40,6 +41,8 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
   const loginWindowRef = useRef<Window | null>()
   const [token, updateCookie, deleteCookie] = useCookie("_refly_ai_sid")
 
+  const { t } = useTranslation()
+
   /**
    * 0. 获取主站的登录态，如果没有登录就访问 Login 页面，已登录之后再展示可操作页面
    * 1. 打开一个弹窗，访问 Refly 主站进行登录
@@ -47,6 +50,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
    * 3. 之后带着 cookie or 登录状态去获取请求
    */
   const handleLogin = () => {
+    userStore.setIsCheckingLoginStatus(true)
     location.href = `${getServerOrigin()}/v1/auth/google`
 
     // userStore.setLoginModalVisible(false)
@@ -136,31 +140,41 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
             Refly
           </span>
         </div>
-        <div className="login-hint-text">登录或注册以继续使用 Refly </div>
+        <div className="login-hint-text">
+          {t("landingPage.loginModal.title")}
+        </div>
         <Button
           type="primary"
           onClick={() => handleLogin()}
           style={{ width: 260, height: 44, marginTop: 32, borderRadius: 4 }}
           loading={userStore.isCheckingLoginStatus}>
-          {userStore.isCheckingLoginStatus ? "登录中" : "立即登录"}
+          {userStore.isCheckingLoginStatus
+            ? t("landingPage.loginModal.loggingStatus")
+            : t("landingPage.loginModal.loginBtn")}
         </Button>
         <Divider></Divider>
         <Typography.Paragraph className="term-text">
-          注册同意即表明您同意
+          {t("landingPage.loginModal.utilText")}
           <Link
             to="/terms"
+            style={{ margin: "0 4px" }}
             onClick={() => {
               userStore.setLoginModalVisible(false)
             }}>
-            <Typography.Text underline>条款和条件</Typography.Text>
+            <Typography.Text underline>
+              {t("landingPage.loginModal.terms")}
+            </Typography.Text>
           </Link>
-          及
+          {t("landingPage.loginModal.and")}
           <Link
             to="/privacy"
+            style={{ margin: "0 4px" }}
             onClick={() => {
               userStore.setLoginModalVisible(false)
             }}>
-            <Typography.Text underline>隐私政策</Typography.Text>
+            <Typography.Text underline>
+              {t("landingPage.loginModal.privacyPolicy")}
+            </Typography.Text>
           </Link>
         </Typography.Paragraph>
       </div>

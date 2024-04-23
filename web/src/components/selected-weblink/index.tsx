@@ -3,6 +3,7 @@ import React, { type MutableRefObject } from "react"
 import { IconRightCircle, IconLink } from "@arco-design/web-react/icon"
 import type { Source } from "@/types"
 import { useWeblinkStore } from "@/stores/weblink"
+import { useTranslation } from "react-i18next"
 
 interface SelectedWeblinkProps {
   ref?: MutableRefObject<SelectedWeblinkProps>
@@ -13,6 +14,8 @@ interface SelectedWeblinkProps {
 export const SelectedWeblink = React.forwardRef(
   (props: SelectedWeblinkProps, ref: any) => {
     const weblinkStore = useWeblinkStore()
+
+    const { t } = useTranslation()
 
     const updateSelectedRow = (link: Source) => {
       const { selectedRow } = useWeblinkStore.getState()
@@ -33,7 +36,7 @@ export const SelectedWeblink = React.forwardRef(
         <div className="selected-weblinks-inner-container">
           <div className="hint-item">
             <IconRightCircle style={{ color: "rgba(0, 0, 0, .6)" }} />
-            <span>基于选中网页提问：</span>
+            <span>{t("threadDetail.item.input.selectedWeblink.title")}</span>
           </div>
           {props.selectedWeblinkList?.map((item, index) => (
             <Tag

@@ -1,3 +1,4 @@
+import { LOCALE } from 'src/types/task';
 import { makeTextFewshotExample } from './utils/common';
 
 const fewshotExamples =
@@ -88,20 +89,22 @@ ${makeTextFewshotExample(fewshotExamples)}
 ===
 `;
 
-export const extractWebsiteMetaSchema = {
-  name: 'getWebsiteMeta',
-  description: `extract title/keywords based on given website content`,
-  parameters: {
-    type: 'object',
-    properties: {
-      title: {
-        type: 'string',
+export const extractWebsiteMetaSchema = (locale: LOCALE) => {
+  return {
+    name: 'getWebsiteMeta',
+    description: `extract title/keywords in ${locale} language, based on given website content`,
+    parameters: {
+      type: 'object',
+      properties: {
+        title: {
+          type: 'string',
+        },
+        keywords: {
+          type: 'string',
+          description: 'return multiple keywords joined with comma in one line',
+        },
       },
-      keywords: {
-        type: 'string',
-        description: 'return multiple keywords joined with comma in one line',
-      },
+      required: ['title', 'keywords'],
     },
-    required: ['title', 'keywords'],
-  },
+  };
 };

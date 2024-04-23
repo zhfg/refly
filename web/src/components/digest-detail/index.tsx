@@ -14,6 +14,7 @@ import getAIGCContent from "@/requests/getAIGCContent"
 // styles
 import "./digest-detail.scss"
 import { Digest } from "@/types"
+import { useTranslation } from "react-i18next"
 
 /**
  * 1. same as thread，but only for read
@@ -25,6 +26,7 @@ export const DigestTail = () => {
   const [askFollowUpVisible, setAskFollowUpVisible] = useState(false)
 
   const digestDetailStore = useDigestDetailStore()
+  const { t } = useTranslation()
 
   const handleGetDetail = async (digestId: string) => {
     try {
@@ -41,7 +43,7 @@ export const DigestTail = () => {
       console.log("newRes", newRes)
       digestDetailStore.updateDigest(newRes?.data as Digest)
     } catch (err) {
-      message.error("获取内容详情失败，请重新刷新试试")
+      message.error(t("contentDetail.list.fetchErr"))
     }
   }
 

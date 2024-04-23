@@ -1,3 +1,5 @@
+import { LOCALE } from 'src/types/task';
+
 export const fewshotExamples = `
 输入：
 
@@ -56,22 +58,24 @@ You are a news content condenser, specializing in filtering out core information
 ${fewshotExamples}
 `;
 
-export const extractSummarizeMultipleSourceMetaSchema = {
-  name: 'content_meta_extractor',
-  description: `extract title、abstract`,
-  parameters: {
-    type: 'object',
-    properties: {
-      title: {
-        type: 'string',
-        description: 'summarized title for multiple weblink content',
+export const extractSummarizeMultipleSourceMetaSchema = (locale: LOCALE) => {
+  return {
+    name: 'content_meta_extractor',
+    description: `extract title、abstract in ${locale} language`,
+    parameters: {
+      type: 'object',
+      properties: {
+        title: {
+          type: 'string',
+          description: 'summarized title for multiple weblink content',
+        },
+        content: {
+          type: 'string',
+          description:
+            'abstract content from summarized multiple weblink content with referenced link source',
+        },
       },
-      content: {
-        type: 'string',
-        description:
-          'abstract content from summarized multiple weblink content with referenced link source',
-      },
+      required: ['title', 'content'],
     },
-    required: ['title', 'content'],
-  },
+  };
 };

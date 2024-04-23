@@ -30,6 +30,7 @@ import { delay } from "@/utils/delay"
 // fake data
 import { fakeSourceSummary } from "@/fake-data/source"
 import { safeParseURL } from "@/utils/url"
+import { useTranslation } from "react-i18next"
 
 interface SessionProps {
   session: SessionItem
@@ -40,6 +41,8 @@ export const Session = (props: SessionProps) => {
   const { session, isLastSession = false } = props
   const messageStateStore = useMessageStateStore()
   const [scrollLoading] = useState(<Skeleton animation></Skeleton>)
+
+  const { t } = useTranslation()
 
   // summary source logic
   const [isSummaryModalVisible, setIsSummaryModalVisible] = useState(false)
@@ -75,7 +78,7 @@ export const Session = (props: SessionProps) => {
           <div className="session-answer">
             <div className="session-title-icon">
               <IconTranslate style={{ fontSize: 18 }} />
-              <p>正文内容</p>
+              <p>{t("contentDetail.item.session.content")}</p>
             </div>
             {session?.answer ? (
               <>
@@ -100,7 +103,7 @@ export const Session = (props: SessionProps) => {
                       {/* <IconTip text="重新生成答案"><Button type='text' icon={<IconPalette style={{ fontSize: 14 }} />} style={{ color: '#64645F' }}>重写</Button></IconTip> */}
                     </div>
                     <div className="session-answer-actionbar-right">
-                      <IconTip text="复制内容">
+                      <IconTip text={t("contentDetail.item.copyContent")}>
                         <Button
                           type="text"
                           shape="circle"
@@ -108,7 +111,7 @@ export const Session = (props: SessionProps) => {
                           style={{ color: "#64645F" }}
                           onClick={() => {
                             copyToClipboard(session?.answer)
-                            message.success("复制成功")
+                            message.success(t("contentDetail.item.copySuccess"))
                           }}></Button>
                       </IconTip>
                       {/* <IconTip text="复制此答案">
@@ -135,7 +138,7 @@ export const Session = (props: SessionProps) => {
           <div className="session-related-question">
             <div className="session-title-icon">
               <IconReply style={{ fontSize: 18 }} />
-              <p>相关问题</p>
+              <p>{t("contentDetail.item.session.relatedQuestions")}</p>
             </div>
             <div className="session-related-question-content">
               {session?.relatedQuestions?.map((item, index) => (
@@ -154,7 +157,7 @@ export const Session = (props: SessionProps) => {
         {messageStateStore.pending || session?.sources?.length > 0 ? (
           <div className="session-title-icon">
             <IconQuote style={{ fontSize: 18, color: "rgba(0, 0, 0, .8)" }} />
-            <p>来源</p>
+            <p>{t("threadDetail.item.session.source")}</p>
           </div>
         ) : null}
         {session?.sources?.length > 0 ? (
@@ -169,7 +172,7 @@ export const Session = (props: SessionProps) => {
                 scrollLoading={
                   session?.sources?.length > 0 ? null : scrollLoading
                 }
-                noDataElement={<div>暂无数据</div>}
+                noDataElement={<div>{t("contentDetail.item.noMoreText")}</div>}
                 render={(item, index) => (
                   <List.Item
                     key={index}
@@ -179,7 +182,7 @@ export const Session = (props: SessionProps) => {
                     actionLayout="vertical"
                     extra={
                       <div className="session-source-extra">
-                        <IconTip text="查看此网页的总结">
+                        <IconTip text={t("contentDetail.item.webLink.btnTip")}>
                           <span
                             key={1}
                             className="feed-list-item-continue-ask with-border with-hover"
@@ -190,7 +193,9 @@ export const Session = (props: SessionProps) => {
                             <IconBulb
                               style={{ fontSize: 14, color: "#64645F" }}
                             />
-                            <span className="feed-list-item-text">总结</span>
+                            <span className="feed-list-item-text">
+                              {t("contentDetail.item.webLink.text")}
+                            </span>
                           </span>
                         </IconTip>
                       </div>

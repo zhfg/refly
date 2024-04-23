@@ -41,9 +41,13 @@ export type User = {
    */
   languagePreferences: string[]
   /**
-   * 当前语言环境
+   * 界面展示语言环境
    */
-  locale: string
+  uiLocale: string
+  /**
+   * 模型输出语言语言环境
+   */
+  outputLocale: string
   /**
    * 禁用的功能列表
    */

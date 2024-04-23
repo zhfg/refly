@@ -39,7 +39,7 @@ export class WeblinkController {
   async store(@Request() req, @Body() body: StoreWebLinkParam) {
     this.logger.log(`user: ${req.user.id}, store link: ${body}`);
     await this.weblinkService.storeLinks(req.user.id, body.data);
-    return {};
+    return { success: true };
   }
 
   @Get('getWebContent')

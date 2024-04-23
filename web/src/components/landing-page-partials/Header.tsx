@@ -1,13 +1,15 @@
 import { useUserStore } from "@/stores/user"
-import React, { useState, useRef, useEffect } from "react"
-import { Link, useMatch, useNavigate } from "react-router-dom"
+import { useState, useRef, useEffect } from "react"
+import { Link } from "react-router-dom"
 import Logo from "@/assets/logo.svg"
 
 import "./header.scss"
-import { useCookie } from "react-use"
-// request
-import getUserInfo from "@/requests/getUserInfo"
-import { safeParseJSON, safeStringifyJSON } from "@/utils/parse"
+import { safeParseJSON } from "@/utils/parse"
+import { useTranslation } from "react-i18next"
+import { Button } from "@arco-design/web-react"
+import { IconDown } from "@arco-design/web-react/icon"
+// components
+import { UILocaleList } from "@/components/ui-locale-list"
 
 function Header(props: { showLogin?: boolean }) {
   const { showLogin = true } = props
@@ -16,13 +18,9 @@ function Header(props: { showLogin?: boolean }) {
 
   const trigger = useRef(null)
   const mobileNav = useRef(null)
-  const navigate = useNavigate()
-  const [token, updateCookie, deleteCookie] = useCookie("_refly_ai_sid")
 
-  const routeLandingPageMatch = useMatch("/")
-  const routePrivacyPageMatch = useMatch("/privacy")
-  const routeTermsPageMatch = useMatch("/terms")
-  const routeLoginPageMatch = useMatch("/login")
+  // i18n
+  const { t } = useTranslation()
 
   // 获取 storage user profile
   const storageUserProfile = safeParseJSON(
@@ -30,42 +28,6 @@ function Header(props: { showLogin?: boolean }) {
   )
   const showDashboardBtn = storageUserProfile?.id || userStore?.userProfile?.id
   console.log("storageUserProfile", storageUserProfile, userStore?.userProfile)
-
-  const getLoginStatus = async () => {
-    try {
-      const res = await getUserInfo()
-
-      console.log("loginStatus", res)
-
-      if (!res?.success) {
-        userStore.setUserProfile(undefined)
-        userStore.setToken("")
-        localStorage.removeItem("refly-user-profile")
-
-        if (
-          routeLandingPageMatch ||
-          routePrivacyPageMatch ||
-          routeTermsPageMatch ||
-          routeLoginPageMatch
-        ) {
-          console.log("命中不需要鉴权页面，直接展示")
-        } else {
-          navigate("/")
-        }
-      } else {
-        userStore.setUserProfile(res?.data)
-        localStorage.setItem("refly-user-profile", safeStringifyJSON(res?.data))
-      }
-    } catch (err) {
-      console.log("getLoginStatus err", err)
-      userStore.setUserProfile(undefined)
-      userStore.setToken("")
-    }
-  }
-
-  useEffect(() => {
-    getLoginStatus()
-  }, [token, userStore.loginModalVisible])
 
   // close the mobile menu on click outside
   useEffect(() => {
@@ -117,6 +79,12 @@ function Header(props: { showLogin?: boolean }) {
           <nav className="hidden md:flex md:grow">
             {/* Desktop sign in links */}
             <ul className="flex grow justify-end flex-wrap items-center">
+              <UILocaleList>
+                <Button type="text" className="landing-page-language-btn">
+                  {t("language")} <IconDown />
+                </Button>
+              </UILocaleList>
+
               {showLogin && !showDashboardBtn && (
                 <li>
                   <Link
@@ -125,7 +93,7 @@ function Header(props: { showLogin?: boolean }) {
                     }}
                     to=""
                     className="font-medium text-green-600 hover:text-gray-200 px-4 py-3 flex items-center transition duration-150 ease-in-out">
-                    Login
+                    {t("landingPage.loginBtn")}
                   </Link>
                 </li>
               )}
@@ -134,7 +102,7 @@ function Header(props: { showLogin?: boolean }) {
                   <Link
                     to="/"
                     className="btn-sm text-white bg-green-600 hover:bg-green-700 ml-3">
-                    Dashboard
+                    {t("landingPage.dashboard")}
                   </Link>
                 </li>
               )}
@@ -179,7 +147,7 @@ function Header(props: { showLogin?: boolean }) {
                     }}
                     to=""
                     className="flex font-medium w-full text-green-600 hover:text-gray-200 py-2 justify-center">
-                    Login
+                    {t("landingPage.loginBtn")}
                   </Link>
                 </li>
                 {/* <li>

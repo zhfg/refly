@@ -1,12 +1,12 @@
-import { Avatar, Button, Divider, Layout, Menu } from "@arco-design/web-react"
+import { Avatar, Divider, Layout, Menu } from "@arco-design/web-react"
 import { useLocation, useNavigate } from "react-router-dom"
-import { ReactText } from "react"
 import {
   IconHome,
   IconSettings,
   IconDownload,
   IconBook,
   IconTwitter,
+  IconLanguage,
 } from "@arco-design/web-react/icon"
 import { openGetStartDocument } from "../../utils"
 // 静态资源
@@ -16,6 +16,8 @@ import { useUserStore } from "@/stores/user"
 import { safeParseJSON } from "@/utils/parse"
 // components
 import { SearchQuickOpenBtn } from "@/components/search-quick-open-btn"
+import { UILocaleList } from "../ui-locale-list"
+import { useTranslation } from "react-i18next"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -34,17 +36,13 @@ const getNavSelectedKeys = (pathname = "") => {
   return "Home"
 }
 
-type NavData = {
-  itemKey: ReactText
-  isOpen: boolean
-  domEvent: MouseEvent
-}
-
 export const SiderLayout = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const userStore = useUserStore()
   const isGuideDetail = location.pathname.includes("guide/")
+
+  const { t } = useTranslation()
 
   // 获取 storage user profile
   const storageUserProfile = safeParseJSON(
@@ -54,7 +52,7 @@ export const SiderLayout = () => {
   console.log("storageUserProfile", storageUserProfile, userStore?.userProfile)
 
   const selectedKey = getNavSelectedKeys(location.pathname)
-  const handleNavClick = (itemKey: string, event, keyPath: string[]) => {
+  const handleNavClick = (itemKey: string) => {
     switch (itemKey) {
       case "Home": {
         if (!notShowLoginBtn) {
@@ -75,7 +73,6 @@ export const SiderLayout = () => {
       }
 
       case "Settings": {
-        navigate(`/settings`)
         break
       }
 
@@ -164,7 +161,9 @@ export const SiderLayout = () => {
           <div className="sider-header">
             <MenuItem key="Home" className="custom-menu-item">
               <IconHome style={{ fontSize: 20 }} />
-              <span className="sider-menu-title">主页</span>
+              <span className="sider-menu-title">
+                {t("loggedHomePage.siderMenu.homePage")}
+              </span>
             </MenuItem>
             {/* <MenuItem key='Explore' ><IconHome style={{ fontSize: 20 }} />主页</MenuItem> */}
             {/* <MenuItem key="Digest" className="custom-menu-item">
@@ -173,21 +172,29 @@ export const SiderLayout = () => {
             </MenuItem> */}
             <MenuItem key="ThreadLibrary" className="custom-menu-item">
               <IconBook style={{ fontSize: 20 }} />
-              <span className="sider-menu-title">会话库</span>
+              <span className="sider-menu-title">
+                {t("loggedHomePage.siderMenu.threadLibrary")}
+              </span>
             </MenuItem>
           </div>
           <div className="sider-footer">
             <MenuItem key="GetHelp" className="custom-menu-item">
               <IconTwitter style={{ fontSize: 20 }} />
-              <span className="sider-menu-title">获得帮助</span>
+              <span className="sider-menu-title">
+                {t("loggedHomePage.siderMenu.getHelp")}
+              </span>
             </MenuItem>
             {!!userStore.userProfile?.id && (
               <>
                 <Divider style={{ margin: "8px 0" }} />
                 <MenuItem
                   key="Settings"
-                  className="menu-setting-container custom-menu-item">
-                  <div className="menu-settings">
+                  className="menu-setting-container setting-menu-item">
+                  <div
+                    className="menu-settings"
+                    onClick={() => {
+                      navigate("/settings")
+                    }}>
                     <Avatar size={32}>
                       <img
                         src={userStore?.userProfile?.avatar || ""}
@@ -198,14 +205,35 @@ export const SiderLayout = () => {
                       {userStore?.userProfile?.name}
                     </span>
                   </div>
-                  <IconSettings style={{ fontSize: 20 }} />
+                  <div>
+                    <span
+                      className="setting-language-icon"
+                      style={{ display: "inline-block", marginRight: "8px" }}>
+                      <UILocaleList>
+                        <IconLanguage
+                          style={{
+                            fontSize: 20,
+                          }}
+                        />
+                      </UILocaleList>
+                    </span>
+                    <span
+                      className="setting-icon"
+                      onClick={() => {
+                        navigate("/settings")
+                      }}>
+                      <IconSettings style={{ fontSize: 20 }} />
+                    </span>
+                  </div>
                 </MenuItem>
               </>
             )}
             <Divider style={{ margin: "8px 0" }} />
             <MenuItem key="DownloadExtension" className="custom-menu-item">
               <IconDownload style={{ fontSize: 20 }} />
-              <span className="sider-menu-title">下载插件</span>
+              <span className="sider-menu-title">
+                {t("loggedHomePage.siderMenu.download")}
+              </span>
             </MenuItem>
           </div>
         </Menu>
