@@ -8,9 +8,12 @@ import { useUserStore } from "@/stores/user"
 import { useNavigate } from "react-router-dom"
 import { getClientOrigin, getCookieOrigin, getExtensionId } from "@/utils/url"
 // components
-import { LanguageList } from "@/components/language-list"
+import { UILocaleList } from "@/components/ui-locale-list"
 import { IconDown } from "@arco-design/web-react/icon"
 import { useTranslation } from "react-i18next"
+import { OutputLocaleList } from "../output-locale-list"
+import { LOCALE } from "@/types"
+import { localeToLanguageName } from "@/utils/i18n"
 
 export const Settings = () => {
   const [token, updateCookie, deleteCookie] = useCookie("_refly_ai_sid")
@@ -18,7 +21,9 @@ export const Settings = () => {
   const navigate = useNavigate()
   const [modal, contextHolder] = Modal.useModal()
 
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const uiLocale = i18n?.languages?.[0] as LOCALE
+  const outputLocale = userStore?.localSettings?.outputLocale
 
   const handleLogout = () => {
     modal.confirm?.({
@@ -50,19 +55,36 @@ export const Settings = () => {
         <div className="settings-title">{t("settings.title")}</div>
         <div>
           <Typography.Title heading={4}>
-            {t("settings.language.title")}
+            {t("settings.uiLocale.title")}
           </Typography.Title>
-          <LanguageList>
-            <Button className="setting-page-language-btn">
+          <UILocaleList>
+            <Button
+              className="setting-page-language-btn"
+              style={{ borderRadius: 16 }}>
               {t("language")} <IconDown />
             </Button>
-          </LanguageList>
+          </UILocaleList>
+        </div>
+        <div>
+          <Typography.Title heading={4}>
+            {t("settings.outputLocale.title")}
+          </Typography.Title>
+          <Typography.Paragraph>
+            {t("settings.outputLocale.description")}
+          </Typography.Paragraph>
+          <OutputLocaleList>
+            <Button
+              className="setting-page-language-btn"
+              style={{ borderRadius: 16 }}>
+              {localeToLanguageName?.[uiLocale]?.[outputLocale]} <IconDown />
+            </Button>
+          </OutputLocaleList>
         </div>
         <div>
           <Typography.Title heading={4}>
             {t("settings.account.title")}
           </Typography.Title>
-          <Button onClick={() => handleLogout()}>
+          <Button onClick={() => handleLogout()} style={{ borderRadius: 16 }}>
             {t("settings.account.logout")}
           </Button>
         </div>

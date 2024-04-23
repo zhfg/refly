@@ -21,6 +21,7 @@ export const appConfig = {
     getConversationList: "/v1/conversation/list",
     getTopicList: "/v1/user/topics",
     getUserInfo: "/v1/auth/getUserInfo",
+    userSettings: "/v1/user/settings", // Support get/put
     getTopicDetail: (topicId: string) => `/v1/topic/${topicId}`,
     getDigestList: `/v1/aigc/digest`,
     getAIGCContent: (contentId: string) => `/v1/aigc/content/${contentId}`,

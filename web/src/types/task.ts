@@ -1,3 +1,4 @@
+import { OutputLocale } from "@/utils/i18n"
 import type { Source } from "./session"
 
 export interface Mode {
@@ -79,7 +80,7 @@ export type Task = {
   taskType: TASK_TYPE
   taskId?: string // task:xxxx-xxxx-xxxx-xxxx
   language?: LANGUAGE
-  locale?: LOCALE
+  locale?: OutputLocale
   data?: CHAT | QUICK_ACTION_TASK_PAYLOAD
 }
 

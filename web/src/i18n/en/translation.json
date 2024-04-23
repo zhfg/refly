@@ -159,7 +159,7 @@
       "fetchErr": "Failed to retrieve the conversation list. Please try refreshing the page."
     },
     "item": {
-      "askFollow": "Ask a Follow-Up Question",
+      "askFollow": "Ask Follow-Up",
       "messageCount": "{{count}} messages"
     },
     "empty": {
@@ -177,7 +177,7 @@
       "fetchErr": "Failed to retrieve the conversation list. Please try refreshing the page."
     },
     "item": {
-      "askFollow": "Ask a Follow-Up Question",
+      "askFollow": "Ask Follow-Up",
       "messageCount": "{{count}} messages"
     },
     "empty": {
@@ -188,8 +188,12 @@
   },
   "settings": {
     "title": "Settings",
-    "language": {
-      "title": "Language"
+    "uiLocale": {
+      "title": "Interface Display Language"
+    },
+    "outputLocale": {
+      "title": "Language for Large Language Model Output",
+      "description": "This will be passed to the large language model to generate responses in the language you specify."
     },
     "account": {
       "title": "Account",
@@ -198,6 +202,9 @@
         "title": "Log Out Confirmation",
         "message": "Are you sure you want to log out?"
       }
+    },
+    "action": {
+      "putErrorNotify": "Failed to update user configuration. Please try again!"
     }
   },
   "contentDetail": {

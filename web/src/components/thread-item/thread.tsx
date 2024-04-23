@@ -117,7 +117,7 @@ export const Thread = () => {
         },
       },
       taskType: taskType as TASK_TYPE,
-      locale: localSettings?.locale,
+      locale: localSettings?.outputLocale,
     })
 
     buildTaskAndGenReponse(task)

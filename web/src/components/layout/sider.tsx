@@ -1,6 +1,5 @@
-import { Avatar, Button, Divider, Layout, Menu } from "@arco-design/web-react"
+import { Avatar, Divider, Layout, Menu } from "@arco-design/web-react"
 import { useLocation, useNavigate } from "react-router-dom"
-import { ReactText } from "react"
 import {
   IconHome,
   IconSettings,
@@ -17,7 +16,7 @@ import { useUserStore } from "@/stores/user"
 import { safeParseJSON } from "@/utils/parse"
 // components
 import { SearchQuickOpenBtn } from "@/components/search-quick-open-btn"
-import { LanguageList } from "../language-list"
+import { UILocaleList } from "../ui-locale-list"
 import { useTranslation } from "react-i18next"
 
 const Sider = Layout.Sider
@@ -37,12 +36,6 @@ const getNavSelectedKeys = (pathname = "") => {
   return "Home"
 }
 
-type NavData = {
-  itemKey: ReactText
-  isOpen: boolean
-  domEvent: MouseEvent
-}
-
 export const SiderLayout = () => {
   const navigate = useNavigate()
   const location = useLocation()
@@ -59,7 +52,7 @@ export const SiderLayout = () => {
   console.log("storageUserProfile", storageUserProfile, userStore?.userProfile)
 
   const selectedKey = getNavSelectedKeys(location.pathname)
-  const handleNavClick = (itemKey: string, event, keyPath: string[]) => {
+  const handleNavClick = (itemKey: string) => {
     switch (itemKey) {
       case "Home": {
         if (!notShowLoginBtn) {
@@ -216,13 +209,13 @@ export const SiderLayout = () => {
                     <span
                       className="setting-language-icon"
                       style={{ display: "inline-block", marginRight: "8px" }}>
-                      <LanguageList>
+                      <UILocaleList>
                         <IconLanguage
                           style={{
                             fontSize: 20,
                           }}
                         />
-                      </LanguageList>
+                      </UILocaleList>
                     </span>
                     <span
                       className="setting-icon"

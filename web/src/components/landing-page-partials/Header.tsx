@@ -1,18 +1,15 @@
 import { useUserStore } from "@/stores/user"
-import React, { useState, useRef, useEffect } from "react"
-import { Link, useMatch, useNavigate } from "react-router-dom"
+import { useState, useRef, useEffect } from "react"
+import { Link } from "react-router-dom"
 import Logo from "@/assets/logo.svg"
 
 import "./header.scss"
-import { useCookie } from "react-use"
-// request
-import getUserInfo from "@/requests/getUserInfo"
-import { safeParseJSON, safeStringifyJSON } from "@/utils/parse"
+import { safeParseJSON } from "@/utils/parse"
 import { useTranslation } from "react-i18next"
-import { Button, Dropdown } from "@arco-design/web-react"
+import { Button } from "@arco-design/web-react"
 import { IconDown } from "@arco-design/web-react/icon"
 // components
-import { LanguageList } from "@/components/language-list"
+import { UILocaleList } from "@/components/ui-locale-list"
 
 function Header(props: { showLogin?: boolean }) {
   const { showLogin = true } = props
@@ -21,16 +18,9 @@ function Header(props: { showLogin?: boolean }) {
 
   const trigger = useRef(null)
   const mobileNav = useRef(null)
-  const navigate = useNavigate()
-  const [token, updateCookie, deleteCookie] = useCookie("_refly_ai_sid")
 
   // i18n
   const { t } = useTranslation()
-
-  const routeLandingPageMatch = useMatch("/")
-  const routePrivacyPageMatch = useMatch("/privacy")
-  const routeTermsPageMatch = useMatch("/terms")
-  const routeLoginPageMatch = useMatch("/login")
 
   // 获取 storage user profile
   const storageUserProfile = safeParseJSON(
@@ -38,42 +28,6 @@ function Header(props: { showLogin?: boolean }) {
   )
   const showDashboardBtn = storageUserProfile?.id || userStore?.userProfile?.id
   console.log("storageUserProfile", storageUserProfile, userStore?.userProfile)
-
-  const getLoginStatus = async () => {
-    try {
-      const res = await getUserInfo()
-
-      console.log("loginStatus", res)
-
-      if (!res?.success) {
-        userStore.setUserProfile(undefined)
-        userStore.setToken("")
-        localStorage.removeItem("refly-user-profile")
-
-        if (
-          routeLandingPageMatch ||
-          routePrivacyPageMatch ||
-          routeTermsPageMatch ||
-          routeLoginPageMatch
-        ) {
-          console.log("命中不需要鉴权页面，直接展示")
-        } else {
-          navigate("/")
-        }
-      } else {
-        userStore.setUserProfile(res?.data)
-        localStorage.setItem("refly-user-profile", safeStringifyJSON(res?.data))
-      }
-    } catch (err) {
-      console.log("getLoginStatus err", err)
-      userStore.setUserProfile(undefined)
-      userStore.setToken("")
-    }
-  }
-
-  useEffect(() => {
-    getLoginStatus()
-  }, [token, userStore.loginModalVisible])
 
   // close the mobile menu on click outside
   useEffect(() => {
@@ -125,11 +79,11 @@ function Header(props: { showLogin?: boolean }) {
           <nav className="hidden md:flex md:grow">
             {/* Desktop sign in links */}
             <ul className="flex grow justify-end flex-wrap items-center">
-              <LanguageList>
+              <UILocaleList>
                 <Button type="text" className="landing-page-language-btn">
                   {t("language")} <IconDown />
                 </Button>
-              </LanguageList>
+              </UILocaleList>
 
               {showLogin && !showDashboardBtn && (
                 <li>

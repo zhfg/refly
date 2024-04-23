@@ -83,7 +83,7 @@ export async function request<T>(
     delete opt.body
   }
 
-  if (opt.method === "POST" && typeof opt.body === "object") {
+  if (["POST", "PUT"].includes(opt.method) && typeof opt.body === "object") {
     opt.body = JSON.stringify(opt.body)
   }
   console.log("request opt", opt)

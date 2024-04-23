@@ -10,21 +10,17 @@ import {
 } from "@/types"
 
 import { genUniqueId } from "./index"
+import { OutputLocale } from "./i18n"
 
 export type BuildTask = {
   taskType: TASK_TYPE
   language?: LANGUAGE
-  locale?: LOCALE
+  locale?: OutputLocale
   data: CHAT | QUICK_ACTION_TASK_PAYLOAD
 }
 
 export const buildTask = (payload: BuildTask): Task => {
-  const {
-    taskType,
-    language = LANGUAGE.AUTO,
-    locale = LOCALE.ZH_CN,
-    data = {},
-  } = payload
+  const { taskType, language = LANGUAGE.AUTO, locale, data = {} } = payload
 
   console.log("now task locale", locale)
 

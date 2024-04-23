@@ -12,7 +12,7 @@ import { useWeblinkStore } from "@/stores/weblink"
 import { SearchTarget, useSearchStateStore } from "@/stores/search-state"
 
 // types
-import { type Task, type Source, Thread, TASK_TYPE } from "@/types"
+import { type Task, type Source, Thread, TASK_TYPE, LOCALE } from "@/types"
 // utils
 import { buildTask } from "@/utils/task"
 import { useResetState } from "@/hooks/use-reset-state"
@@ -22,7 +22,7 @@ import { useTaskStore } from "@/stores/task"
 import { useNavigate } from "react-router-dom"
 // request
 import createNewConversation from "@/requests/createNewConversation"
-import { IconSend } from "@arco-design/web-react/icon"
+import { IconLanguage, IconSend } from "@arco-design/web-react/icon"
 import { SearchTargetSelector } from "../dashboard/home-search-target-selector"
 // styles
 import "./index.scss"
@@ -30,6 +30,9 @@ import { useSiderStore } from "@/stores/sider"
 import { useQuickSearchStateStore } from "@/stores/quick-search-state"
 import { useUserStore } from "@/stores/user"
 import { useTranslation } from "react-i18next"
+import { OutputLocaleList } from "../output-locale-list"
+import { localeToLanguageName } from "@/utils/i18n"
+import { IconTip } from "../dashboard/icon-tip"
 
 const TextArea = Input.TextArea
 
@@ -42,12 +45,15 @@ export const SearchBox = () => {
   const taskStore = useTaskStore()
   const siderStore = useSiderStore()
   const quickSearchStateStore = useQuickSearchStateStore()
+  const userStore = useUserStore()
   // hooks
   const { resetState } = useResetState()
   const navigate = useNavigate()
   const [isFocused, setIsFocused] = useState(false)
 
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const uiLocale = i18n?.languages?.[0] as LOCALE
+  const outputLocale = userStore?.localSettings?.outputLocale
 
   const handleCreateNewConversation = async (task: Task) => {
     /**
@@ -116,7 +122,7 @@ export const SearchBox = () => {
         question,
         filter: { weblinkList: selectedWebLink },
       },
-      locale: localSettings?.locale,
+      locale: localSettings?.outputLocale,
     })
 
     // 创建新会话并跳转
@@ -201,6 +207,17 @@ export const SearchBox = () => {
             <div className="toolbar">
               <Space>
                 <SearchTargetSelector />
+                <OutputLocaleList>
+                  <IconTip text={t("settings.outputLocale.title")}>
+                    <Button
+                      type="text"
+                      shape="round"
+                      icon={<IconLanguage />}
+                      className="setting-page-language-btn">
+                      {localeToLanguageName?.[uiLocale]?.[outputLocale]}{" "}
+                    </Button>
+                  </IconTip>
+                </OutputLocaleList>
               </Space>
               <Button
                 shape="circle"

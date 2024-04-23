@@ -13,11 +13,12 @@ const handler = async (
   try {
     const cookie = await getCookie()
     const [err, userRes] = await request<User>(appConfig.url.userSettings, {
-      method: "GET",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${cookie}`, // Include the JWT token in the Authorization header
       },
+      body: req?.body,
     })
 
     if (err) {

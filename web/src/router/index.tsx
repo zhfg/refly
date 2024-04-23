@@ -23,6 +23,8 @@ import { AIGCContentDetailPage } from "@/pages/aigc-content-detail"
 import { safeParseJSON } from "@/utils/parse"
 import { useUserStore } from "@/stores/user"
 import { useTranslation } from "react-i18next"
+import { useGetUserSettings } from "@/hooks/use-get-user-settings"
+import { LOCALE } from "@/types"
 
 export const AppRouter = (props: { layout?: any }) => {
   const { layout: Layout } = props
@@ -49,7 +51,12 @@ export const AppRouter = (props: { layout?: any }) => {
     localStorage.getItem("refly-local-settings"),
   )
   const locale =
-    storageLocalSettings?.locale || userStore?.localSettings?.locale || "en"
+    storageLocalSettings?.uiLocale ||
+    userStore?.localSettings?.uiLocale ||
+    LOCALE.EN
+
+  // 这里进行用户登录信息检查
+  useGetUserSettings()
 
   // TODO: 国际化相关内容
   useEffect(() => {

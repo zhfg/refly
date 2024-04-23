@@ -178,16 +178,23 @@
   },
   "settings": {
     "title": "设置",
-    "language": {
-      "title": "语言"
+    "uiLocale": {
+      "title": "界面展示语言"
+    },
+    "outputLocale": {
+      "title": "大语言模型的输出语言",
+      "description": "会传给大语言模型，让大语言模型以你指定的语言进行回答"
     },
     "account": {
       "title": "账号",
-      "exitLogin": "退出登录",
-      "exitConfirm": {
+      "logout": "退出登录",
+      "logoutConfirmation": {
         "title": "退出登录",
-        "content": "确定退出登录吗？"
+        "message": "确定退出登录吗？"
       }
+    },
+    "action": {
+      "putErrorNotify": "修改用户配置失败，请尝试重试！"
     }
   },
   "contentDetail": {
