@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { LlmService } from './llm.service';
 import { WeblinkService } from '../weblink/weblink.service';
 import { WeblinkModule } from '../weblink/weblink.module';
+import { CommonModule } from '../common/common.module';
 
 describe('LlmService', () => {
   let module: TestingModule;
@@ -11,7 +12,7 @@ describe('LlmService', () => {
 
   beforeEach(async () => {
     module = await Test.createTestingModule({
-      imports: [ConfigModule, WeblinkModule],
+      imports: [ConfigModule, CommonModule, WeblinkModule],
       providers: [LlmService],
     }).compile();
 
@@ -104,5 +105,24 @@ describe('LlmService', () => {
       title: '',
       content: '',
     });
+  });
+
+  it('summarizeConversation', async () => {
+    const chatMessages = [
+      {
+        type: 'human',
+        content: '什么是 refly',
+      },
+      {
+        type: 'ai',
+        content: `"Refly"是一个动词，意思是再次飞行或重新乘飞机。这个词源于英文中的“re-”表示“再次”，加上“fly”表
+        示“飞行”[citation](1). 在某些语境下，例如在航空领域，refly也可以指再次驾驶飞机[citation](2).此外，Refly也可以是一个公司
+        或服务的名称，比如在航班市场中帮助旅客出售机票的对等市场平台[citation](3)，或者是一个专门帮助旅客获得机票赔偿的可信赖合
+        作伙伴[citation](4)。NASA也曾表示希望在他们计划的太空飞行任务中，再次飞行携带旗帜[citation](5)。Refly还有其他反身动词形
+        式和相关的词汇，但总体含义都与飞行相关[citation](6)。`,
+      },
+    ];
+    const text = await service.summarizeConversation(chatMessages);
+    expect(text).toEqual('');
   });
 });

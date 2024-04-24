@@ -2,12 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { Response } from 'express';
 
 import { PrismaService } from '../common/prisma.service';
-import { CreateConversationParam } from './dto';
-import { MessageType, Prisma, ChatMessage } from '@prisma/client';
+import { CreateChatMessageInput, CreateConversationParam } from './dto';
+import { Prisma, ChatMessage } from '@prisma/client';
 import {
   LOCALE,
   QUICK_ACTION_TASK_PAYLOAD,
   QUICK_ACTION_TYPE,
+  TASK_TYPE,
   Task,
   TaskResponse,
 } from '../types/task';
@@ -46,40 +47,21 @@ export class ConversationService {
 
   async updateConversation(
     conversationId: number,
+    messages: { type: string; content: string }[],
     data: Prisma.ConversationUpdateInput,
   ) {
+    const summarizedTitle = await this.llmService.summarizeConversation(
+      messages,
+    );
+    this.logger.log(`Summarized title: ${summarizedTitle}`);
+
     return this.prisma.conversation.update({
       where: { id: conversationId },
-      data,
+      data: { ...data, title: summarizedTitle },
     });
   }
 
-  async addChatMessage(msg: {
-    type: MessageType;
-    sources: string;
-    content: string;
-    userId: number;
-    conversationId: number;
-    locale?: string;
-    relatedQuestions?: string;
-    selectedWeblinkConfig?: string;
-  }) {
-    return this.prisma.chatMessage.create({
-      data: { ...msg },
-    });
-  }
-
-  async addChatMessages(
-    msgList: {
-      type: MessageType;
-      sources: string;
-      content: string;
-      userId: number;
-      conversationId: number;
-      locale?: string;
-      selectedWeblinkConfig?: string;
-    }[],
-  ) {
+  async addChatMessages(msgList: CreateChatMessageInput[]) {
     return this.prisma.chatMessage.createMany({
       data: msgList,
     });
@@ -111,13 +93,64 @@ export class ConversationService {
     });
   }
 
+  async chat(res: Response, convId: number, userId: number, task: Task) {
+    const { taskType, data = {} } = task;
+
+    const query = data?.question || '';
+    const weblinkList = data?.filter?.weblinkList || [];
+
+    // 获取聊天历史
+    const chatHistory = await this.getMessages(convId);
+
+    let taskRes: TaskResponse;
+    if (taskType === TASK_TYPE.QUICK_ACTION) {
+      taskRes = await this.handleQuickActionTask(res, userId, task);
+    } else if (taskType === TASK_TYPE.SEARCH_ENHANCE_ASK) {
+      taskRes = await this.handleSearchEnhanceTask(res, task, chatHistory);
+    } else {
+      taskRes = await this.handleChatTask(res, userId, task, chatHistory);
+    }
+    res.end(``);
+
+    const newMessages: CreateChatMessageInput[] = [
+      {
+        type: 'human',
+        userId,
+        conversationId: convId,
+        content: query,
+        sources: '',
+        // 每次提问完在 human message 上加一个提问的 filter，这样之后追问时可以 follow 这个 filter 规则
+        selectedWeblinkConfig: JSON.stringify({
+          searchTarget: weblinkList?.length > 0 ? 'selectedPages' : 'all',
+          filter: weblinkList,
+        }),
+      },
+      {
+        type: 'ai',
+        userId,
+        conversationId: convId,
+        content: taskRes.answer,
+        sources: JSON.stringify(taskRes.sources),
+        relatedQuestions: JSON.stringify(taskRes.relatedQuestions),
+      },
+    ];
+
+    // post chat logic
+    await Promise.all([
+      this.addChatMessages(newMessages),
+      this.updateConversation(convId, [...chatHistory, ...newMessages], {
+        lastMessage: taskRes.answer,
+        messageCount: chatHistory.length + 2,
+      }),
+    ]);
+  }
+
   async handleChatTask(
-    req: any,
     res: Response,
+    userId: number,
     task: Task,
     chatHistory: ChatMessage[],
   ): Promise<TaskResponse> {
-    const userId: number = req.user?.id;
     const locale = task?.locale || LOCALE.EN;
 
     const filter: any = {
@@ -196,7 +229,9 @@ export class ConversationService {
     this.logger.log('relatedQuestions', relatedQuestions);
 
     res.write(RELATED_SPLIT);
-    res.write(JSON.stringify(relatedQuestions));
+    if (relatedQuestions) {
+      res.write(JSON.stringify(relatedQuestions));
+    }
 
     return {
       sources,
@@ -206,7 +241,6 @@ export class ConversationService {
   }
 
   async handleSearchEnhanceTask(
-    req: any,
     res: Response,
     task: Task,
     chatHistory: ChatMessage[],
@@ -265,10 +299,9 @@ export class ConversationService {
   }
 
   async handleQuickActionTask(
-    req: any,
     res: Response,
+    userId: number,
     task: Task,
-    chatHistory: ChatMessage[],
   ): Promise<TaskResponse> {
     const data = task?.data as QUICK_ACTION_TASK_PAYLOAD;
     const locale = task?.locale || LOCALE.EN;
@@ -296,9 +329,8 @@ export class ConversationService {
 
     // save user mark for each weblink in a non-blocking style
     this.weblinkService.saveWeblinkUserMarks({
-      userId: req.user.id,
+      userId,
       weblinkList,
-      extensionVersion: req.header('x-refly-ext-version'),
     });
 
     // 基于一组网页做总结，先获取网页内容

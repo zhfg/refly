@@ -109,6 +109,9 @@
       "node_modules",
       "src"
     ],
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/$1"
+    },
     "testTimeout": 40000,
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
