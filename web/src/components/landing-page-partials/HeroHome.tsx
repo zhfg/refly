@@ -3,9 +3,12 @@ import Modal from "../modal"
 
 import HeroImage from "@/assets/landing-page-images/hero-image-01.jpg"
 import { useUserStore } from "@/stores/user"
+import { useTranslation } from "react-i18next"
 
 function HeroHome() {
   const userStore = useUserStore()
+
+  const { t } = useTranslation()
   // const [videoModalOpen, setVideoModalOpen] = useState(false)
   // const video = useRef(null)
 
@@ -53,16 +56,15 @@ function HeroHome() {
         {/* Hero content */}
         <div className="relative pt-32 pb-10 md:pt-40 md:pb-16">
           {/* Section header */}
-          <div className="max-w-3xl mx-auto text-center pb-12 md:pb-16">
+          <div className="max-w-4xl mx-auto text-center pb-12 md:pb-16">
             <h1 className="h1 mb-4" data-aos="fade-up">
-              Your AI Work Assistant & Personal Knowledge Search Engine
+              {t("landingPage.slogan")}
             </h1>
             <p
               className="text-xl text-gray-400 mb-8"
               data-aos="fade-up"
               data-aos-delay="200">
-              Quick summaries, Insights, Auto tag and AI Search. Refly can build
-              your second brain, extend knowledge and give you superpower
+              {t("landingPage.description")}
             </p>
             <div className="max-w-xs mx-auto sm:max-w-none sm:flex sm:justify-center">
               <div data-aos="fade-up" data-aos-delay="400">
@@ -72,7 +74,7 @@ function HeroHome() {
                   }}
                   className="btn text-white bg-green-600 hover:bg-green-700 w-full mb-4 sm:w-auto sm:mb-0"
                   href="#0">
-                  Join for free
+                  {t("landingPage.joinBtn")}
                 </a>
               </div>
               <div data-aos="fade-up" data-aos-delay="600">
@@ -80,7 +82,7 @@ function HeroHome() {
                   className="btn text-white bg-gray-700 hover:bg-gray-800 w-full sm:w-auto sm:ml-4"
                   href="https://chromewebstore.google.com/detail/lecbjbapfkinmikhadakbclblnemmjpd"
                   target="_blank">
-                  Download Extension
+                  {t("landingPage.downloadBtn")}
                 </a>
               </div>
             </div>

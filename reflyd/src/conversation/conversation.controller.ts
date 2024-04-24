@@ -55,6 +55,7 @@ export class ConversationController {
           sources: '[]',
           userId,
           conversationId: res.id,
+          locale: body.locale,
         },
         {
           type: 'ai',
@@ -62,6 +63,7 @@ export class ConversationController {
           sources: content.sources,
           userId,
           conversationId: res.id,
+          locale: body.locale,
         },
       ];
       await Promise.all([

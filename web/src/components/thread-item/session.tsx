@@ -21,6 +21,7 @@ import { IconTip } from "@/components/dashboard/icon-tip"
 import { Markdown } from "@/components/markdown"
 
 import copyToClipboard from "copy-to-clipboard"
+import { useTranslation } from "react-i18next"
 
 interface SessionProps {
   session: SessionItem
@@ -29,6 +30,7 @@ interface SessionProps {
 }
 
 export const Session = (props: SessionProps) => {
+  const { t } = useTranslation()
   const { session, isLastSession = false, handleAskFollowing } = props
   const messageStateStore = useMessageStateStore()
   const [scrollLoading] = useState(<Skeleton animation></Skeleton>)
@@ -48,7 +50,7 @@ export const Session = (props: SessionProps) => {
                 <IconQuote
                   style={{ fontSize: 18, color: "rgba(0, 0, 0, .8)" }}
                 />
-                <p>来源</p>
+                <p>{t("threadDetail.item.session.source")}</p>
               </div>
             ) : null}
             {session?.sources?.length > 0 ? (
@@ -63,7 +65,9 @@ export const Session = (props: SessionProps) => {
                     scrollLoading={
                       session?.sources?.length > 0 ? null : scrollLoading
                     }
-                    noDataElement={<div>暂无数据</div>}
+                    noDataElement={
+                      <div>{t("threadDetail.item.noMoreText")}</div>
+                    }
                     render={(item, index) => (
                       <List.Item
                         key={index}
@@ -141,7 +145,7 @@ export const Session = (props: SessionProps) => {
           <div className="session-answer">
             <div className="session-title-icon">
               <IconTranslate style={{ fontSize: 18 }} />
-              <p>答案</p>
+              <p>{t("threadDetail.item.session.answer")}</p>
             </div>
             {session?.answer ? (
               <>
@@ -169,7 +173,7 @@ export const Session = (props: SessionProps) => {
                       {/* <IconTip text="重新生成答案"><Button type='text' icon={<IconPalette style={{ fontSize: 14 }} />} style={{ color: '#64645F' }}>重写</Button></IconTip> */}
                     </div>
                     <div className="session-answer-actionbar-right">
-                      <IconTip text="复制此答案">
+                      <IconTip text={t("threadDetail.item.copyAnswer")}>
                         <Button
                           type="text"
                           shape="circle"
@@ -177,7 +181,7 @@ export const Session = (props: SessionProps) => {
                           style={{ color: "#64645F" }}
                           onClick={() => {
                             copyToClipboard(session?.answer)
-                            message.success("复制成功")
+                            message.success(t("threadDetail.item.copySuccess"))
                           }}></Button>
                       </IconTip>
                       {/* <IconTip text="复制此答案">
@@ -207,13 +211,13 @@ export const Session = (props: SessionProps) => {
           session?.relatedQuestions?.length > 0 ? (
             <div className="session-title-icon">
               <IconReply style={{ fontSize: 18 }} />
-              <p>相关问题</p>
+              <p>{t("threadDetail.item.session.relatedQuestions")}</p>
             </div>
           ) : null}
           {session?.relatedQuestions?.length > 0 ? (
             <div className="session-related-question-content">
               {session?.relatedQuestions?.map((item, index) => (
-                <IconTip text="点击进行追问">
+                <IconTip text={t("threadDetail.item.askFollow.btnText")}>
                   <div key={index} onClick={() => handleAskFollowing(item)}>
                     <p>{item}</p>
                     <IconPlus

@@ -28,6 +28,9 @@ export class CreateConversationParam {
 
   @ApiPropertyOptional()
   originPageTitle?: string; // 所在 url 的 page title
+
+  @ApiPropertyOptional()
+  locale?: string; // 语言设置
 }
 
 export class CreateConversationResponse extends CreateConversationParam {
@@ -66,6 +69,7 @@ export interface CreateChatMessageInput {
   sources: string;
   content: string;
   userId: number;
+  locale?: string;
   conversationId: number;
   relatedQuestions?: string;
   selectedWeblinkConfig?: string;

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react"
 import { Button, Space, Input } from "@arco-design/web-react"
-import { IconMinusCircle, IconSend } from "@arco-design/web-react/icon"
+import { IconSend } from "@arco-design/web-react/icon"
 
 // stores
 import { useChatStore } from "@/stores/chat"
@@ -9,13 +9,13 @@ import { useMessageStateStore } from "@/stores/message-state"
 import { Session } from "./session"
 import { TASK_TYPE, type SessionItem, type Source } from "@/types"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input"
-import { useBuildTask } from "@/hooks/use-build-task"
 
 import { ThreadSearchTargetSelector } from "@/components/thread-item/thread-search-target-selector"
 import { SearchTarget } from "@/stores/search-state"
 // 自定义组件
 import { SelectedWeblink } from "../selected-weblink/index"
 import { useQuickSearchStateStore } from "@/stores/quick-search-state"
+import { useTranslation } from "react-i18next"
 
 interface ThreadItemProps {
   sessions: SessionItem[]
@@ -35,6 +35,8 @@ export const ThreadItem = (props: ThreadItemProps) => {
   const chatStore = useChatStore()
   const [addedStyle, setAddedStyle] = useState({})
 
+  const { t } = useTranslation()
+
   const [threadSearchTarget, setThreadSearchTarget] = useState(
     selectedWeblinkConfig?.searchTarget,
   )
@@ -47,7 +49,6 @@ export const ThreadItem = (props: ThreadItemProps) => {
     threadWeblinkListFilter?.length > 0
 
   const messageStateStore = useMessageStateStore()
-  const { buildShutdownTaskAndGenResponse } = useBuildTask()
   const quickSearchStateStore = useQuickSearchStateStore()
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -175,7 +176,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
                   onChange={value => {
                     chatStore.setNewQAText(value)
                   }}
-                  placeholder="继续提问..."
+                  placeholder={t("threadDetail.item.input.placeholder")}
                   onKeyDownCapture={e => handleKeyDown(e)}
                   autoSize={{ minRows: 1, maxRows: 4 }}
                   style={{

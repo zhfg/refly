@@ -19,6 +19,8 @@ import getTopicList from "@/requests/getTopicList"
 import { Topic } from "@/types/"
 // utils
 import { delay } from "@/utils/delay"
+import { useTranslation } from "react-i18next"
+import classNames from "classnames"
 
 interface DigestHeaderProps {
   tab: "today" | "archive"
@@ -31,6 +33,8 @@ export const DigestHeader = (props: DigestHeaderProps) => {
   const [isFetching, setIsFetching] = useState(false)
 
   console.log("now tab", props.tab)
+  const { t, i18n } = useTranslation()
+  const language = i18n.languages?.[0]
 
   const handleNavigateArchive = (item: "归档" | "时间线") => {
     const { year, month, day } = getCurrentDateInfo()
@@ -86,9 +90,12 @@ export const DigestHeader = (props: DigestHeaderProps) => {
     fetchData()
   }, [])
 
+  // TODO: 这里后续国际化的时候还需要改进
   return (
     <div className="today-header-container">
-      <div className="today-menu">
+      <div
+        className="today-menu"
+        style={{ minWidth: language === "en" ? "240px" : "210px" }}>
         <Radio.Group defaultValue={props.tab === "today" ? "归档" : "时间线"}>
           {["归档", "时间线"].map(item => {
             return (
@@ -102,7 +109,9 @@ export const DigestHeader = (props: DigestHeaderProps) => {
                       }
                       icon={item === "归档" ? <IconBulb /> : <IconArchive />}
                       className={`today-menu-item ${checked ? "today-menu-item-checked" : ""}`}>
-                      {item}
+                      {item === "归档"
+                        ? t("knowledgeLibrary.header.archive")
+                        : t("knowledgeLibrary.header.timeline")}
                     </Button>
                   )
                 }}
@@ -113,9 +122,13 @@ export const DigestHeader = (props: DigestHeaderProps) => {
       </div>
       <Divider type="vertical" />
       <div className="trending-topic-container">
-        <div className="trending-topic-title">趋势主题：</div>
+        <div
+          className="trending-topic-title"
+          style={{ minWidth: language === "en" ? "110px" : "70px" }}>
+          {t("knowledgeLibrary.header.trendingTopic")}
+        </div>
         {isFetching ? (
-          <div className="trending-topics">
+          <div className={classNames("trending-topics")}>
             {Array(5)
               .fill(null)
               .map((item, index) => (
@@ -131,7 +144,10 @@ export const DigestHeader = (props: DigestHeaderProps) => {
           </div>
         ) : null}
         {!isFetching && digestTopicStore?.topicList?.length > 0 ? (
-          <div className="trending-topics">
+          <div
+            className={classNames("trending-topics", {
+              "trending-topics-language-en": language === "en" ? true : false,
+            })}>
             {digestTopicStore.topicList?.map((item, index) => (
               <div
                 key={index}
@@ -145,7 +161,8 @@ export const DigestHeader = (props: DigestHeaderProps) => {
             {digestTopicStore?.topicList?.length > 0 && (
               <div className="trending-topic-item see-all">
                 <Button onClick={() => navigate("/digest/topics")}>
-                  查看全部+{digestTopicStore?.total || 0}
+                  {t("knowledgeLibrary.header.seeAll")}+
+                  {digestTopicStore?.total || 0}
                 </Button>
               </div>
             )}

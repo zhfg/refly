@@ -23,6 +23,7 @@ export class LLMController {
     this.logger.setContext(LLMController.name);
   }
 
+  // TODO: need add locale
   @Post('applyStrategy')
   async store(@Request() req, @Body() body: { url: string }) {
     this.logger.log(`applyStrategy: ${body}`);
@@ -34,6 +35,7 @@ export class LLMController {
     return res;
   }
 
+  // TODO: need add locale
   @Post('applyStrategy')
   async applyStrategy(@Request() req, @Body() body: { url: string }) {
     this.logger.log(`applyStrategy: ${body}`);
@@ -45,6 +47,7 @@ export class LLMController {
     return res;
   }
 
+  // TODO: need add locale
   @Post('extractContentMeta')
   async extractContentMeta(@Request() req, @Body() body: { url: string }) {
     this.logger.log(`extractContentMeta: ${body}`);
@@ -56,6 +59,7 @@ export class LLMController {
     return res;
   }
 
+  // TODO: need add locale
   @Post('summarizeMultipleWeblink')
   async summarizeMultipleWeblink(
     @Request() req,

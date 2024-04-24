@@ -81,6 +81,39 @@
     border-radius: 4px;
   }
 
+  .setting-menu-item {
+    .menu-settings {
+      padding: 4px 8px;
+      margin-left: -8px;
+
+      &:hover {
+        background-color: rgba(232, 232, 227) !important;
+        border-radius: 4px;
+      }
+    }
+
+    .setting-language-icon {
+      padding: 0px 8px;
+      display: inline-block;
+
+      &:hover {
+        background-color: rgba(232, 232, 227) !important;
+        border-radius: 4px;
+      }
+    }
+
+    .setting-icon {
+      padding: 0px 8px;
+      margin-right: -8px;
+      display: inline-block;
+
+      &:hover {
+        background-color: rgba(232, 232, 227) !important;
+        border-radius: 4px;
+      }
+    }
+  }
+
   .menu-setting-container {
     display: flex;
     flex-direction: row;

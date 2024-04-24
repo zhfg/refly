@@ -1,6 +1,9 @@
 import React from "react"
+import { useTranslation } from "react-i18next"
 
 function FeaturesBlocks() {
+  const { t } = useTranslation()
+
   return (
     <section>
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -50,10 +53,9 @@ function FeaturesBlocks() {
                   strokeWidth="2"
                 />
               </svg>
-              <h4 className="h4 mb-2">Quick Action with Extension</h4>
+              <h4 className="h4 mb-2">{t("landingPage.featureOne.title")}</h4>
               <p className="text-lg text-gray-400 text-center">
-                Quick summary for any website, continuous questioning, and
-                conduct in-depth research on your favorite content
+                {t("landingPage.featureOne.description")}
               </p>
             </div>
 
@@ -137,10 +139,9 @@ function FeaturesBlocks() {
                   />
                 </g>
               </svg>
-              <h4 className="h4 mb-2">All-in-one Search Engine</h4>
+              <h4 className="h4 mb-2"> {t("landingPage.featureTwo.title")}</h4>
               <p className="text-lg text-gray-400 text-center">
-                All in one search engine supports natural language search for
-                all your memories and builds your second brain
+                {t("landingPage.featureTwo.description")}
               </p>
             </div>
 
@@ -178,10 +179,9 @@ function FeaturesBlocks() {
                   />
                 </g>
               </svg>
-              <h4 className="h4 mb-2">Auto tag and Timeline</h4>
+              <h4 className="h4 mb-2">{t("landingPage.featureThree.title")}</h4>
               <p className="text-lg text-gray-400 text-center">
-                Automatically and tag, search and review at any time. Build a
-                knowledge system through labels & timelines
+                {t("landingPage.featureThree.description")}
               </p>
             </div>
 

@@ -12,7 +12,7 @@ const handler = async (
 
   try {
     const cookie = await getCookie()
-    const [err, userRes] = await request<User>(appConfig.url.getUserInfo, {
+    const [err, userRes] = await request<User>(appConfig.url.userSettings, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

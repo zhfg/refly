@@ -24,3 +24,13 @@
     margin-left: 4px;
   }
 }
+
+.landing-page-language-btn {
+  &:hover {
+    background-color: transparent !important;
+
+    .arco-icon-down {
+      transform: rotate(180deg);
+    }
+  }
+}

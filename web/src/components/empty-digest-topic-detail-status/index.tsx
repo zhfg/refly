@@ -3,8 +3,11 @@ import { Button } from "@arco-design/web-react"
 import EmptySVG from "@/assets/digest/empty.svg"
 // styles
 import "./index.scss"
+import { useTranslation } from "react-i18next"
 
 export const EmptyDigestTopicDetailStatus = (props: { text: string }) => {
+  const { t } = useTranslation()
+
   return (
     <div className="empty-digest-container">
       <img src={EmptySVG} className="empty-digest-cover" />
@@ -17,7 +20,7 @@ export const EmptyDigestTopicDetailStatus = (props: { text: string }) => {
               "_blank",
             )
           }}>
-          下载插件
+          {t("topics.empty.download")}
         </Button>
       </div>
     </div>

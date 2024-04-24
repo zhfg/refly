@@ -12,7 +12,7 @@ import { useWeblinkStore } from "@/stores/weblink"
 import { SearchTarget, useSearchStateStore } from "@/stores/search-state"
 
 // types
-import { type Task, type Source, Thread, TASK_TYPE } from "@/types"
+import { type Task, type Source, Thread, TASK_TYPE, LOCALE } from "@/types"
 // utils
 import { buildTask } from "@/utils/task"
 import { useResetState } from "@/hooks/use-reset-state"
@@ -22,12 +22,17 @@ import { useTaskStore } from "@/stores/task"
 import { useNavigate } from "react-router-dom"
 // request
 import createNewConversation from "@/requests/createNewConversation"
-import { IconSend } from "@arco-design/web-react/icon"
+import { IconLanguage, IconSend } from "@arco-design/web-react/icon"
 import { SearchTargetSelector } from "../dashboard/home-search-target-selector"
 // styles
 import "./index.scss"
 import { useSiderStore } from "@/stores/sider"
 import { useQuickSearchStateStore } from "@/stores/quick-search-state"
+import { useUserStore } from "@/stores/user"
+import { useTranslation } from "react-i18next"
+import { OutputLocaleList } from "../output-locale-list"
+import { localeToLanguageName } from "@/utils/i18n"
+import { IconTip } from "../dashboard/icon-tip"
 
 const TextArea = Input.TextArea
 
@@ -40,27 +45,33 @@ export const SearchBox = () => {
   const taskStore = useTaskStore()
   const siderStore = useSiderStore()
   const quickSearchStateStore = useQuickSearchStateStore()
+  const userStore = useUserStore()
   // hooks
   const { resetState } = useResetState()
   const navigate = useNavigate()
   const [isFocused, setIsFocused] = useState(false)
+
+  const { t, i18n } = useTranslation()
+  const uiLocale = i18n?.languages?.[0] as LOCALE
+  const outputLocale = userStore?.localSettings?.outputLocale
 
   const handleCreateNewConversation = async (task: Task) => {
     /**
      * 1. 创建新 thread，设置状态
      * 2. 跳转到 thread 界面，进行第一个回复，展示 问题、sources、答案
      */
+    const { localSettings } = useUserStore.getState()
     const question = chatStore.newQAText
     const newConversationPayload = buildConversation()
 
     // 创建新会话
     const res = await createNewConversation({
-      body: newConversationPayload,
+      body: { ...newConversationPayload, locale: localSettings.outputLocale },
     })
 
     if (!res?.success) {
       message.error({
-        content: "创建新会话失败！",
+        content: t("loggedHomePage.homePage.status.createFailed"),
       })
       return
     }
@@ -88,6 +99,7 @@ export const SearchBox = () => {
     const question = chatStore.newQAText
     const { selectedRow } = useWeblinkStore.getState()
     const { searchTarget } = useSearchStateStore.getState()
+    const { localSettings } = useUserStore.getState()
 
     let selectedWebLink: Source[] = []
 
@@ -111,6 +123,7 @@ export const SearchBox = () => {
         question,
         filter: { weblinkList: selectedWebLink },
       },
+      locale: localSettings?.outputLocale,
     })
 
     // 创建新会话并跳转
@@ -182,7 +195,7 @@ export const SearchBox = () => {
             onChange={value => {
               chatStore.setNewQAText(value)
             }}
-            placeholder="Search For Refly..."
+            placeholder={t("loggedHomePage.homePage.searchPlaceholder")}
             onKeyDownCapture={e => handleKeyDown(e)}
             autoSize={{ minRows: 2, maxRows: 4 }}
             onFocus={() => setIsFocused(true)}
@@ -195,6 +208,15 @@ export const SearchBox = () => {
             <div className="toolbar">
               <Space>
                 <SearchTargetSelector />
+                <OutputLocaleList>
+                  <Button
+                    type="text"
+                    shape="round"
+                    icon={<IconLanguage />}
+                    className="setting-page-language-btn">
+                    {localeToLanguageName?.[uiLocale]?.[outputLocale]}{" "}
+                  </Button>
+                </OutputLocaleList>
               </Space>
               <Button
                 shape="circle"

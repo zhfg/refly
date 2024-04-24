@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { User, Prisma } from '@prisma/client';
 import { PrismaService } from '../common/prisma.service';
 import { LoggerService } from '../common/logger.service';
+import { UpdateSettingsDTO } from './user.dto';
 
 @Injectable()
 export class UserService {
@@ -17,6 +18,13 @@ export class UserService {
 
   async create(data: Prisma.UserCreateInput) {
     return this.prisma.user.create({ data });
+  }
+
+  async updateSettings(uid: number, data: UpdateSettingsDTO) {
+    return this.prisma.user.update({
+      where: { id: uid },
+      data: { ...data },
+    });
   }
 
   async upsert(args: {

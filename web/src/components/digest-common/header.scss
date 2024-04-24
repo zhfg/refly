@@ -12,7 +12,7 @@
 .today-menu {
   display: flex;
   flex-direction: row;
-  min-width: 210px;
+  min-width: 240px;
 
   .arco-radio {
     margin-right: 7px;
@@ -64,6 +64,10 @@
     flex-direction: row;
     width: calc(100% - 70px);
     overflow-x: scroll;
+  }
+
+  .trending-topics-language-en {
+    width: calc(100% - 140px);
   }
 
   .trending-topic-item {

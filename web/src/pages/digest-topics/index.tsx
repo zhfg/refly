@@ -12,37 +12,12 @@ import { IconTag } from "@arco-design/web-react/icon"
 import { useEffect, useState } from "react"
 // stores
 import { useDigestTopicStore } from "@/stores/digest-topics"
-import { useMatch, useNavigate } from "react-router-dom"
-// utils
-import { getRandomColor } from "@/utils/color"
+import { useNavigate } from "react-router-dom"
 // hooks
 import { useGetDigestTopics } from "@/hooks/use-get-digest-topics"
 // components
 import { EmptyDigestTopicDetailStatus } from "@/components/empty-digest-topic-detail-status"
-import { delay } from "@/utils/delay"
-
-const names = ["Socrates", "Balzac", "Plato"]
-const avatarSrc = [
-  "//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/a8c8cdb109cb051163646151a4a5083b.png~tplv-uwbnlip3yd-webp.webp",
-  "//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/e278888093bef8910e829486fb45dd69.png~tplv-uwbnlip3yd-webp.webp",
-  "//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/9eeb1800d9b78349b24682c3518ac4a3.png~tplv-uwbnlip3yd-webp.webp",
-]
-const imageSrc = [
-  "//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/29c1f9d7d17c503c5d7bf4e538cb7c4f.png~tplv-uwbnlip3yd-webp.webp",
-  "//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/04d7bc31dd67dcdf380bc3f6aa07599f.png~tplv-uwbnlip3yd-webp.webp",
-  "//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/1f61854a849a076318ed527c8fca1bbf.png~tplv-uwbnlip3yd-webp.webp",
-]
-const dataSource = new Array(60).fill(null).map((_, index) => {
-  return {
-    id: index,
-    index: index,
-    avatar: avatarSrc[index % avatarSrc.length],
-    title: names[index % names.length],
-    description: "Beijing ByteDance Technology Co.,",
-    imageSrc: imageSrc[index % imageSrc.length],
-    sourceCount: 100,
-  }
-})
+import { useTranslation } from "react-i18next"
 
 const BreadcrumbItem = Breadcrumb.Item
 
@@ -53,6 +28,8 @@ export const DigestTopics = () => {
   )
   const navigate = useNavigate()
   const { fetchDigestTopicData } = useGetDigestTopics()
+
+  const { t } = useTranslation()
 
   const fetchData = async (currentPage = 1) => {
     try {
@@ -71,22 +48,22 @@ export const DigestTopics = () => {
         </div>,
       )
       if (!digestTopicStore?.hasMore && currentPage !== 1) {
-        setScrollLoading(<span>已经到底啦~</span>)
+        setScrollLoading(<span>{t("topics.footer.noMoreText")}</span>)
         return
       }
 
       await fetchDigestTopicData(currentPage)
     } catch (err) {
-      message.error("获取主题列表失败，请重新刷新试试")
+      message.error(t("topics.list.fetchErr"))
     } finally {
       const { topicList, pageSize } = useDigestTopicStore.getState()
 
       if (topicList?.length === 0) {
         setScrollLoading(
-          <EmptyDigestTopicDetailStatus text="暂无分类，赶快下载插件去阅读新内容吧~" />,
+          <EmptyDigestTopicDetailStatus text={t("topics.empty.title")} />,
         )
       } else if (topicList?.length > 0 && topicList?.length < pageSize) {
-        setScrollLoading(<span>已经到底啦~</span>)
+        setScrollLoading(<span>{t("topics.footer.noMoreText")}</span>)
       }
     }
   }
@@ -109,8 +86,12 @@ export const DigestTopics = () => {
     <div className="topics-container">
       <div className="digest-topic-nav">
         <Breadcrumb>
-          <BreadcrumbItem href="/">主页</BreadcrumbItem>
-          <BreadcrumbItem href="/digest/topics">所有主题</BreadcrumbItem>
+          <BreadcrumbItem href="/">
+            {t("topics.breadcrumb.homePage")}
+          </BreadcrumbItem>
+          <BreadcrumbItem href="/digest/topics">
+            {t("topics.breadcrumb.allTopics")}
+          </BreadcrumbItem>
         </Breadcrumb>
       </div>
       <List
@@ -128,15 +109,13 @@ export const DigestTopics = () => {
         offsetBottom={50}
         header={
           <div className="topics-header-container">
-            <div className="topics-header-title">所有主题</div>
-            <p className="topics-header-desc">
-              基于您的浏览历史、会话历史分析提取出来的主题分类，代表您的阅读和学习趋势
-            </p>
+            <div className="topics-header-title">{t("topics.title")}</div>
+            <p className="topics-header-desc">{t("topics.description")}</p>
           </div>
         }
         scrollLoading={scrollLoading}
         onReachBottom={currentPage => fetchData(currentPage)}
-        noDataElement={<div>暂无数据</div>}
+        noDataElement={<div>{t("topics.footer.noMoreText")}</div>}
         render={(item, index) => (
           <List.Item
             key={index}

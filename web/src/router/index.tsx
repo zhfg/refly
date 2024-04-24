@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect } from "react"
 import { Route, Routes, useMatch } from "react-router-dom"
 
 // 自定义组件
@@ -22,10 +22,16 @@ import { DigestDetailPage } from "@/pages/digest-detail"
 import { AIGCContentDetailPage } from "@/pages/aigc-content-detail"
 import { safeParseJSON } from "@/utils/parse"
 import { useUserStore } from "@/stores/user"
+import { useTranslation } from "react-i18next"
+import { useGetUserSettings } from "@/hooks/use-get-user-settings"
+import { LOCALE } from "@/types"
 
 export const AppRouter = (props: { layout?: any }) => {
   const { layout: Layout } = props
   const userStore = useUserStore()
+
+  const { i18n } = useTranslation()
+  const language = i18n.languages?.[0]
 
   // 不需要鉴权即可访问的路由
   const routeLandingPageMatch = useMatch("/")
@@ -39,6 +45,25 @@ export const AppRouter = (props: { layout?: any }) => {
     localStorage.getItem("refly-user-profile"),
   )
   const notShowLoginBtn = storageUserProfile?.id || userStore?.userProfile?.id
+
+  // 获取 locale
+  const storageLocalSettings = safeParseJSON(
+    localStorage.getItem("refly-local-settings"),
+  )
+  const locale =
+    storageLocalSettings?.uiLocale ||
+    userStore?.localSettings?.uiLocale ||
+    LOCALE.EN
+
+  // 这里进行用户登录信息检查
+  useGetUserSettings()
+
+  // TODO: 国际化相关内容
+  useEffect(() => {
+    if (locale && language !== locale) {
+      i18n.changeLanguage(locale)
+    }
+  }, [locale])
 
   if (
     (routeLandingPageMatch && !notShowLoginBtn) ||

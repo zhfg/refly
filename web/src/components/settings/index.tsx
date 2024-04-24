@@ -1,4 +1,4 @@
-import { Button, Modal } from "@arco-design/web-react"
+import { Button, Modal, Typography } from "@arco-design/web-react"
 import { useCookie } from "react-use"
 import Cookies from "js-cookie"
 
@@ -7,6 +7,13 @@ import "./index.scss"
 import { useUserStore } from "@/stores/user"
 import { useNavigate } from "react-router-dom"
 import { getClientOrigin, getCookieOrigin, getExtensionId } from "@/utils/url"
+// components
+import { UILocaleList } from "@/components/ui-locale-list"
+import { IconDown } from "@arco-design/web-react/icon"
+import { useTranslation } from "react-i18next"
+import { OutputLocaleList } from "../output-locale-list"
+import { LOCALE } from "@/types"
+import { localeToLanguageName } from "@/utils/i18n"
 
 export const Settings = () => {
   const [token, updateCookie, deleteCookie] = useCookie("_refly_ai_sid")
@@ -14,10 +21,14 @@ export const Settings = () => {
   const navigate = useNavigate()
   const [modal, contextHolder] = Modal.useModal()
 
+  const { t, i18n } = useTranslation()
+  const uiLocale = i18n?.languages?.[0] as LOCALE
+  const outputLocale = userStore?.localSettings?.outputLocale
+
   const handleLogout = () => {
     modal.confirm?.({
-      title: "退出登录",
-      content: "确定退出登录吗？",
+      title: t("settings.account.logoutConfirmation.title"),
+      content: t("settings.account.logoutConfirmation.message"),
       onOk() {
         console.log("delete cookie")
         userStore.setUserProfile(null)
@@ -41,10 +52,40 @@ export const Settings = () => {
   return (
     <div className="settings-container">
       <div className="settings-inner-container">
-        <div className="settings-title">设置</div>
+        <div className="settings-title">{t("settings.title")}</div>
         <div>
-          <Button onClick={() => handleLogout()} style={{ marginTop: 24 }}>
-            退出登录
+          <Typography.Title heading={4}>
+            {t("settings.uiLocale.title")}
+          </Typography.Title>
+          <UILocaleList>
+            <Button
+              className="setting-page-language-btn"
+              style={{ borderRadius: 16 }}>
+              {t("language")} <IconDown />
+            </Button>
+          </UILocaleList>
+        </div>
+        <div>
+          <Typography.Title heading={4}>
+            {t("settings.outputLocale.title")}
+          </Typography.Title>
+          <Typography.Paragraph>
+            {t("settings.outputLocale.description")}
+          </Typography.Paragraph>
+          <OutputLocaleList>
+            <Button
+              className="setting-page-language-btn"
+              style={{ borderRadius: 16 }}>
+              {localeToLanguageName?.[uiLocale]?.[outputLocale]} <IconDown />
+            </Button>
+          </OutputLocaleList>
+        </div>
+        <div>
+          <Typography.Title heading={4}>
+            {t("settings.account.title")}
+          </Typography.Title>
+          <Button onClick={() => handleLogout()} style={{ borderRadius: 16 }}>
+            {t("settings.account.logout")}
           </Button>
         </div>
       </div>

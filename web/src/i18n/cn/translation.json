@@ -1,0 +1,293 @@
+{
+  "language": "简体中文",
+  "landingPage": {
+    "slogan": "人工智能驱动的超级记忆",
+    "description": "快速总结与形成洞察、自动化归档以及智能语义搜索——Refly 能够为你打造第二大脑，拓展你的知识视野，并赋予你超乎寻常的能力。",
+    "joinBtn": "免费使用",
+    "downloadBtn": "下载插件",
+    "loginBtn": "登录",
+    "dashboard": "主页",
+    "featureOne": {
+      "title": "基于插件快捷操作",
+      "description": "为任何网站提供快速摘要，持续提问，并对你喜爱的内容进行深入研究"
+    },
+    "featureTwo": {
+      "title": "全能搜索引擎",
+      "description": "全能搜索引擎支持自然语言搜索，帮助你检索所有记忆，并构建你的第二大脑"
+    },
+    "featureThree": {
+      "title": "自动标签与时间线",
+      "description": "自动标记、随时搜索和回顾。通过标签和时间线构建知识体系"
+    },
+    "footer": {
+      "description": "快速总结与形成洞察、自动化归档以及智能语义搜索——Refly 能够为你打造第二大脑，拓展你的知识视野，并赋予你超乎寻常的能力。",
+      "right": "Refly.ai 版权所有。",
+      "product": {
+        "title": "产品",
+        "one": "Refly AI 浏览器插件"
+      },
+      "resource": {
+        "title": "资源",
+        "one": "推特"
+      },
+      "about": {
+        "title": "关于",
+        "one": "隐私政策",
+        "two": "服务条款"
+      },
+      "contactUs": {
+        "title": "联系我们",
+        "one": "pftom@qq.com"
+      }
+    },
+    "loginModal": {
+      "title": "登录或注册以继续使用 Refly",
+      "loginBtn": "立即登录",
+      "loggingStatus": "登录中...",
+      "and": "及",
+      "utilText": "注册同意即表明您同意 ",
+      "privacyPolicy": "隐私政策",
+      "terms": "条款和条件"
+    }
+  },
+  "loggedHomePage": {
+    "newThreadText": "新会话",
+    "homePage": {
+      "title": "人工智能驱动的超级记忆",
+      "searchPlaceholder": "输入搜索内容...",
+      "searchScope": {
+        "title": "选择搜索范围",
+        "all": "全部知识库",
+        "history": "历史已阅读",
+        "internet": "联网搜索"
+      },
+      "seeKnowledgeLibrary": "查看知识库",
+      "status": {
+        "createFailed": "创建新会话失败！"
+      }
+    },  
+    "siderMenu": {
+      "homePage": "主页",
+      "threadLibrary": "会话库",
+      "getHelp": "获得帮助",
+      "download": "下载插件"
+    }
+  },
+  "knowledgeLibrary": {
+    "header": {
+      "archive": "归档",
+      "timeline": "时间线",
+      "seeAll": "查看全部",
+      "trendingTopic": "趋势主题："
+    },
+    "archive": {
+      "title": "浏览内容归档",
+      "list": {
+        "fetchErr": "获取归档内容失败，请重新刷新试试"
+      },
+      "item": {
+        "askFollow": "追问阅读",
+        "share": "分享",
+        "copy": "复制链接",
+        "copyNotify": "链接已复制到剪切板",
+        "noMoreText": "已经到底啦~",
+        "linkMore": "{{count}} 条更多"
+      }
+    },
+    "timeline": {
+      "title": "{{year}} 年 {{month}} 月 {{day}} 日浏览内容",
+      "list": {
+        "fetchErr": "获取归档内容失败，请重新刷新试试"
+      }
+    },
+    "empty": {
+      "timelineTitle": "{{year}} 年 {{month}} 月 {{day}} 日还未阅读新内容，赶快下载插件去阅读新内容吧",
+      "archiveTitle": "还未阅读任何内容，赶快下载插件去阅读新内容吧~",
+      "download": "下载插件",
+      "seeOther": "查看其他日期内容"
+    }
+  },
+  "unloginHomePage": {
+
+  },
+  "topics": {
+    "breadcrumb": {
+      "homePage": "主页",
+      "allTopics": "所有主题"
+    },
+    "title": "所有主题",
+    "description": "基于您的浏览历史、会话历史分析提取出来的主题分类，代表您的阅读和学习趋势",
+    "footer": {
+      "noMoreText": "已经到底啦~"
+    },
+    "list": {
+      "fetchErr": "获取主题列表失败，请重新刷新试试"
+    },
+    "empty": {
+      "title": "暂无分类，赶快下载插件去阅读新内容吧~",
+      "download": "下载插件"
+    }
+  },
+  "topicDetail": {
+    "breadcrumb": {
+      "homePage": "主页",
+      "allTopics": "所有主题"
+    },
+    "title": "所有主题",
+    "description": "基于您的浏览历史、会话历史分析提取出来的主题分类，代表您的阅读和学习趋势",
+    "footer": {
+      "noMoreText": "已经到底啦~"
+    },
+    "item": {
+      "askFollow": "追问阅读",
+      "share": "分享",
+      "copy": "复制链接",
+      "copyNotify": "链接已复制到剪切板",
+      "noMoreText": "已经到底啦~",
+      "linkMore": "{{count}} 条更多"
+    },
+    "list": {
+      "fetchErr": "获取会话列表失败，请重新刷新试试"
+    },
+    "empty": {
+      "title": "暂无此分类下的内容，赶快下载插件去阅读新内容吧~",
+      "download": "下载插件"
+    }
+  },
+  "threadLibrary": {
+    "breadcrumb": {
+      "homePage": "主页",
+      "allTopics": "所有主题"
+    },
+    "title": "会话库",
+    "footer": {
+      "noMoreText": "已经到底啦~"
+    },
+    "list": {
+      "fetchErr": "获取会话列表失败，请重新刷新试试"
+    },
+    "item": {
+      "askFollow": "继续提问",
+      "messageCount": "{{count}} 条消息"
+    },
+    "empty": {
+      "title": "暂无无会话，赶紧下载插件或访问首页提问吧~",
+      "download": "下载插件",
+      "goHome": "去首页搜索或提问"
+    }
+  },
+  "settings": {
+    "title": "设置",
+    "uiLocale": {
+      "title": "界面语言"
+    },
+    "outputLocale": {
+      "title": "对话语言",
+      "description": "AI 将按照此语言设置回答您的问题。您可以在对话中单独设置语言以覆盖此选项。"
+    },
+    "account": {
+      "title": "账号",
+      "logout": "退出登录",
+      "logoutConfirmation": {
+        "title": "退出登录",
+        "message": "确定退出登录吗？"
+      }
+    },
+    "action": {
+      "putErrorNotify": "修改用户配置失败，请尝试重试！"
+    }
+  },
+  "contentDetail": {
+    "breadcrumb": {
+      "homePage": "Home"
+    },
+    "list": {
+      "fetchErr": "获取内容详情失败，请重新刷新试试"
+    },
+    "item": {
+      "share": "分享",
+      "copy": "复制链接",
+      "copyNotify": "链接已复制到剪切板",
+      "copyContent": "复制内容",
+      "copySuccess": "内容已复制到剪切板！",
+      "noMoreText": "已经到底啦~",
+      "askFollow": {
+        "emptyNotify": "追问内容不能为空！",
+        "successNotify":  "创建会话成功！页面跳转中...",
+        "errorNotify": "创建会话失败！请重试",
+        "modal": {
+          "title": "确认创建会话",
+          "okText": "确认",
+          "cancelText": "取消",
+          "content": "确定之后会基于当前内容创建会话，并基于问题 {{question}} 生成追问"
+        }
+      },
+      "session": {
+        "content": "正文内容",
+        "source": "来源",
+        "relatedQuestions": "相关问题"
+      },
+      "webLink": {
+        "btnTip": "查看此网页的总结",
+        "text": "总结",
+        "summaryModal": {
+          "successNotify": "获取总结详情成功！",
+          "errorNotify": "获取总结详情失败，请重试！"
+        }
+      },
+      "input": {
+        "placeholder": "创建新会话并追问...",
+        "btnTip": "创建新会话并追问"
+      }
+    }
+  },
+  "threadDetail": {
+    "breadcrumb": {
+      "threadLibrary": "会话库"
+    },
+    "item": {
+      "share": "分享",
+      "copy": "复制链接",
+      "copyNotify": "链接已复制到剪切板",
+      "copyAnswer": "复制答案",
+      "copySuccess": "答案已复制到剪切板！",
+      "noMoreText": "已经到底啦~",
+      "askFollow": {
+        "btnText": "点击进行追问",
+        "emptyNotify": "追问内容不能为空！",
+        "successNotify":  "创建会话成功！页面跳转中...",
+        "errorNotify": "创建会话失败！请重试",
+        "modal": {
+          "title": "确认创建会话",
+          "okText": "确认",
+          "cancelText": "取消",
+          "content": "确定之后会基于当前内容创建会话，并基于问题 {{question}} 生成追问"
+        }
+      },
+      "session": {
+        "answer": "答案",
+        "source": "来源",
+        "relatedQuestions": "相关问题"
+      },
+      "input": {
+        "placeholder": "继续提问...",
+        "searchScope": {
+          "title": "选择搜索范围",
+          "all": "全部知识库",
+          "selected": "选中网页",
+          "internet": "联网搜索"
+        },
+        "selectedWeblink": {
+          "title": "基于选中网页提问："
+        }
+      }
+    }
+  },
+  "title": "欢迎 {{name}}，使用 react-i18next 完全类型安全的 React",
+  "description": {
+    "part1": "这是一个简单的例子。",
+    "part2": "😉"
+  },
+  "userMessagesUnread_one": "您有 {{count}} 条未读消息。",
+  "userMessagesUnread_other": "您有 {{count}} 条未读消息。"
+}

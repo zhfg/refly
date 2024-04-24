@@ -1,4 +1,4 @@
-import { Button, Dropdown, Menu } from "@arco-design/web-react"
+import { Button, Dropdown, Menu, Typography } from "@arco-design/web-react"
 import {
   IconOriginalSize,
   IconArchive,
@@ -10,10 +10,13 @@ import { useSearchStateStore, SearchTarget } from "@/stores/search-state"
 import { useWeblinkStore } from "@/stores/weblink"
 import { IconTip } from "./icon-tip"
 import { useEffect } from "react"
+import { useTranslation } from "react-i18next"
 
 export const SearchTargetSelector = () => {
   const searchStateStore = useSearchStateStore()
   const webLinkStore = useWeblinkStore()
+
+  const { t } = useTranslation()
 
   const iconStyle = {
     marginRight: 8,
@@ -22,6 +25,7 @@ export const SearchTargetSelector = () => {
   }
   const searchTargetDropList = (
     <Menu
+      style={{ width: 200 }}
       className="search-target-selector"
       onClickMenuItem={key => {
         console.log("trigger menu", key)
@@ -32,9 +36,12 @@ export const SearchTargetSelector = () => {
           webLinkStore.updateSelectedRow([])
         }
       }}>
+      <Typography.Text type="secondary" style={{ marginLeft: 12 }}>
+        {t("loggedHomePage.homePage.searchScope.title")}
+      </Typography.Text>
       <Menu.Item key={SearchTarget.All}>
         <IconCommon style={iconStyle} />
-        所有网页
+        {t("loggedHomePage.homePage.searchScope.all")}
       </Menu.Item>
       <Menu.Item
         key={SearchTarget.SelectedPages}
@@ -42,11 +49,11 @@ export const SearchTargetSelector = () => {
           webLinkStore.updateIsWebLinkListVisible(true)
         }}>
         <IconArchive style={iconStyle} />
-        历史已阅读
+        {t("loggedHomePage.homePage.searchScope.history")}
       </Menu.Item>
       <Menu.Item key={SearchTarget.SearchEnhance}>
         <IconCompass style={iconStyle} />
-        联网搜索
+        {t("loggedHomePage.homePage.searchScope.internet")}
       </Menu.Item>
     </Menu>
   )
@@ -54,14 +61,14 @@ export const SearchTargetSelector = () => {
   const getDisplayText = (searchTarget: SearchTarget) => {
     switch (searchTarget) {
       case SearchTarget.SelectedPages:
-        return "历史已阅读"
+        return t("loggedHomePage.homePage.searchScope.history")
       case SearchTarget.All:
-        return "所有网页"
+        return t("loggedHomePage.homePage.searchScope.all")
       case SearchTarget.SearchEnhance:
-        return "联网搜索"
+        return t("loggedHomePage.homePage.searchScope.internet")
 
       default: {
-        return "所有网页"
+        return t("loggedHomePage.homePage.searchScope.all")
       }
     }
   }
@@ -84,18 +91,13 @@ export const SearchTargetSelector = () => {
   }, [])
 
   return (
-    <IconTip text="选择搜索模式">
-      <Dropdown
-        droplist={searchTargetDropList}
-        trigger="hover"
-        position="bottom">
-        <Button
-          icon={getDisplayIcon(searchStateStore.searchTarget)}
-          type="text"
-          shape="round">
-          {getDisplayText(searchStateStore.searchTarget)}
-        </Button>
-      </Dropdown>
-    </IconTip>
+    <Dropdown droplist={searchTargetDropList} trigger="hover" position="bottom">
+      <Button
+        icon={getDisplayIcon(searchStateStore.searchTarget)}
+        type="text"
+        shape="round">
+        {getDisplayText(searchStateStore.searchTarget)}
+      </Button>
+    </Dropdown>
   )
 }

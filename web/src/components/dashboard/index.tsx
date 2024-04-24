@@ -21,6 +21,7 @@ import { useCookie } from "react-use"
 import type { WebLinkItem } from "@/types/weblink"
 import { useUserStore } from "@/stores/user"
 import { getExtensionId } from "@/utils/url"
+import { useTranslation } from "react-i18next"
 
 // 用于快速选择
 export const quickActionList = ["summary"]
@@ -35,6 +36,8 @@ const Home = () => {
   // 基于 query 参数判断是 digest 还是归档，默认是归档
   const [searchParams] = useSearchParams()
   const isTimeline = searchParams.get("type")
+
+  const { t } = useTranslation()
 
   const handleSendMsgToExtension = async (
     status: "success" | "failed",
@@ -113,7 +116,9 @@ const Home = () => {
     <div className="home-container" style={{}}>
       <div className="home-search-container">
         <div className="footer input-panel home-search-inner-container">
-          <div className="refly-slogan">The answer engine for your work</div>
+          <div className="refly-slogan">
+            {t("loggedHomePage.homePage.title")}
+          </div>
           <div className="actions"></div>
 
           <div>
@@ -126,7 +131,7 @@ const Home = () => {
                 icon={<IconHistory />}
                 className="search-assist-btn"
                 onClick={handleScrollToMemory}>
-                查看知识库
+                {t("loggedHomePage.homePage.seeKnowledgeLibrary")}
               </Button>
             </div>
           </div>
