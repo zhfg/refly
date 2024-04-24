@@ -68,10 +68,14 @@ export class ConversationService {
   }
 
   async findConversationAndMessages(conversationId: number) {
-    return this.prisma.conversation.findUnique({
+    const data = await this.prisma.conversation.findUnique({
       where: { id: conversationId },
       include: { messages: true },
     });
+
+    data.messages.sort((a, b) => a.id - b.id);
+
+    return data;
   }
 
   async getConversations(params: {
