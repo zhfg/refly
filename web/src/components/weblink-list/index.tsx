@@ -18,6 +18,8 @@ import getWeblinkList from "@/requests/getWeblinkList"
 // styles
 import "./index.scss"
 import { safeParseURL } from "@/utils/url"
+import { useTranslation } from "react-i18next"
+import { LOCALE } from "@/types"
 
 const WebLinkItem = (props: { weblink: WebLinkItem }) => {
   const {
@@ -31,6 +33,9 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
   const urlItem = safeParseURL(url || "")
   console.log("weblink rerender")
 
+  const { t, i18n } = useTranslation()
+  const uiLocale = i18n?.languages?.[0] as LOCALE
+
   return (
     <div className="conv-item-wrapper">
       <div className="conv-item">
@@ -41,7 +46,9 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
           {/* <Tooltip className="edit" content="编辑">
             <IconEdit />
           </Tooltip> */}
-          <span className="date">{time(updatedAt).utc().fromNow()}</span>
+          <span className="date">
+            {time(updatedAt, uiLocale).utc().fromNow()}
+          </span>
         </div>
         <div className="conv-item-content">
           <span
@@ -60,9 +67,13 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
               />
               <span className="text">{originPageTitle}</span>
               {indexStatus === "finish" ? (
-                <Tag color="green">已阅读</Tag>
+                <Tag color="green">
+                  {t("loggedHomePage.homePage.weblinkList.item.read")}
+                </Tag>
               ) : (
-                <Tag color="orange">未阅读</Tag>
+                <Tag color="orange">
+                  {t("loggedHomePage.homePage.weblinkList.item.unread")}
+                </Tag>
               )}
             </a>
           </div>
@@ -85,6 +96,7 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
 
 const PreviosWebsiteList = forwardRef(() => {
   const webLinkStore = useWeblinkStore()
+  const { t } = useTranslation()
 
   const loadMore = async (currentPage?: number) => {
     const { isRequest, hasMore, pageSize, ...extraState } =
@@ -112,7 +124,7 @@ const PreviosWebsiteList = forwardRef(() => {
     })
 
     if (!res?.success) {
-      message.error("获取往期浏览内容识别！")
+      message.error(t("loggedHomePage.homePage.weblinkList.list.fetchErr"))
       webLinkStore.updateIsRequest(false)
 
       return
@@ -217,7 +229,9 @@ const PreviosWebsiteList = forwardRef(() => {
         headerStyle={{ justifyContent: "center" }}
         title={
           <div style={{ display: "flex", justifyContent: "center" }}>
-            <span style={{ fontWeight: "bold" }}>网页阅读历史</span>
+            <span style={{ fontWeight: "bold" }}>
+              {t("loggedHomePage.homePage.weblinkList.title")}
+            </span>
           </div>
         }
         visible={webLinkStore.isWebLinkListVisible}
@@ -225,7 +239,9 @@ const PreviosWebsiteList = forwardRef(() => {
         footer={
           <div className="weblink-footer-container">
             <p className="weblink-footer-selected">
-              已选择 <span>{webLinkStore.selectedRow?.length}</span> 项
+              {t("loggedHomePage.homePage.weblinkList.selectedCnt", {
+                count: webLinkStore.selectedRow?.length,
+              })}
             </p>
             <div>
               <Button
@@ -233,14 +249,14 @@ const PreviosWebsiteList = forwardRef(() => {
                   webLinkStore.updateIsWebLinkListVisible(false)
                 }}
                 style={{ marginRight: 8 }}>
-                取消
+                {t("loggedHomePage.homePage.weblinkList.drawer.cancel")}
               </Button>
               <Button
                 type="primary"
                 onClick={() => {
                   webLinkStore.updateIsWebLinkListVisible(false)
                 }}>
-                确认
+                {t("loggedHomePage.homePage.weblinkList.drawer.confirm")}
               </Button>
             </div>
           </div>

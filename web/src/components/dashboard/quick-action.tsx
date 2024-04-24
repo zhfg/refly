@@ -5,9 +5,11 @@ import { useWeblinkStore } from "@/stores/weblink"
 import { mapSourceFromWeblinkList } from "@/utils/weblink"
 import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run"
 import { Source } from "@/types"
+import { useTranslation } from "react-i18next"
 
 export const QuickAction = () => {
   const { runQuickActionTask } = useBuildThreadAndRun()
+  const { t } = useTranslation()
 
   const handleSummary = () => {
     const { selectedRow } = useWeblinkStore.getState()
@@ -26,15 +28,20 @@ export const QuickAction = () => {
         <div className="selected-weblinks-inner-container">
           <div className="hint-item">
             <IconStar style={{ color: "rgba(0, 0, 0, .6)" }} />
-            <span>推荐快捷操作：</span>
+            <span>
+              {t("loggedHomePage.homePage.recommendQuickAction.title")}
+            </span>
           </div>
-          <IconTip text="对选中的网页进行总结">
+          <IconTip
+            text={t(
+              "loggedHomePage.homePage.recommendQuickAction.summary.tip.title",
+            )}>
             <Button
               onClick={handleSummary}
               style={{ fontSize: 12 }}
               shape="round"
               size="small">
-              总结
+              {t("loggedHomePage.homePage.recommendQuickAction.summary.title")}
             </Button>
           </IconTip>
         </div>

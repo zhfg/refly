@@ -6,9 +6,10 @@ import { AppLayout } from "@/components/layout/index"
 
 // 导入 i18n
 import "./i18n/config"
+import { Spin } from "@arco-design/web-react"
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <Suspense fallback="loading...">
+  <Suspense fallback={<Spin style={{ margin: "200px auto" }} />}>
     <BrowserRouter>
       <AppRouter layout={AppLayout} />
     </BrowserRouter>
