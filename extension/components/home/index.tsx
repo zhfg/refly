@@ -2,21 +2,12 @@ import {
   Button,
   Input,
   Space,
-  Alert,
   Message as message,
   Divider,
 } from "@arco-design/web-react"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input/textarea"
-import {
-  IconMinusCircle,
-  IconUpload,
-  IconSend,
-  IconScissor,
-  IconHighlight,
-} from "@arco-design/web-react/icon"
+import { IconSend } from "@arco-design/web-react/icon"
 import React, { useEffect, useRef } from "react"
-
-import { TASK_TYPE, type Source } from "~/types"
 
 // 自定义方法
 import { scrollToBottom } from "~utils/ui"
@@ -39,15 +30,12 @@ import { useContentSelectorStore } from "~stores/content-selector"
 import { useBuildTask } from "~hooks/use-build-task"
 import { useBuildThreadAndRun } from "~hooks/use-build-thread-and-run"
 import { useStoreWeblink } from "~hooks/use-store-weblink"
-import { useSelectedMark } from "~hooks/use-selected-mark"
 // 组件
-import { IconTip } from "./icon-tip"
 import { SearchTargetSelector } from "./home-search-target-selector"
-import type { WebLinkItem } from "~components/weblink-list/types"
 import { mapSourceFromWeblinkList } from "~utils/weblink"
-import { sendToBackground } from "@plasmohq/messaging"
 import { SelectedContentList } from "~components/selected-content-list"
 import { useSearchQuickActionStore } from "~stores/search-quick-action"
+import { useTranslation } from "react-i18next"
 
 const TextArea = Input.TextArea
 
@@ -71,6 +59,10 @@ const Home = (props: ChatProps) => {
   const searchQuickActionStore = useSearchQuickActionStore()
   const searchStateStore = useSearchStateStore()
 
+  const { t, i18n } = useTranslation()
+
+  console.log("当前用户的语言", i18n.languages?.[0])
+
   // hooks
   const { runTask } = useBuildThreadAndRun()
   const { handleUploadWebsite } = useStoreWeblink()
@@ -83,19 +75,29 @@ const Home = (props: ChatProps) => {
     const { searchTarget } = useSearchStateStore.getState()
 
     if (!newQAText) {
-      message.info("提问内容不能为空")
+      message.info(t("translation:loggedHomePage.homePage.status.emptyNotify"))
       return
     }
 
     // 先存储 link， 在进行提问操作，这里理论上是需要有个 negotiate 的过程
     if (searchTarget === SearchTarget.CurrentPage) {
-      message.loading("处理内容中...")
+      message.loading(
+        t("translation:loggedHomePage.homePage.status.contentHandling"),
+      )
       const res = await handleUploadWebsite(window.location.href)
 
       if (res.success) {
-        message.success("处理成功，正在跳转到会话页面...")
+        message.success(
+          t(
+            "translation:loggedHomePage.homePage.status.contentHandleSuccessNotify",
+          ),
+        )
       } else {
-        message.error("处理失败！")
+        message.error(
+          t(
+            "translation:loggedHomePage.homePage.status.contentHandleFailedNotify",
+          ),
+        )
       }
     }
 
@@ -134,14 +136,20 @@ const Home = (props: ChatProps) => {
     const { showSelectedMarks } = useContentSelectorStore.getState()
     const { searchTarget } = useSearchStateStore.getState()
 
-    if (showSelectedMarks) return "基于实时选择内容提问..."
+    if (showSelectedMarks)
+      return t(
+        "translation:loggedHomePage.homePage.searchPlaceholder.currentSelectedContent",
+      )
     if (searchTarget === SearchTarget.SelectedPages)
-      return "对选中的网页进行提问..."
+      return t(
+        "translation:loggedHomePage.homePage.searchPlaceholder.selectedWeblink",
+      )
     if (searchTarget === SearchTarget.CurrentPage)
-      return "对当前网页进行提问..."
+      return t("translation:loggedHomePage.homePage.searchPlaceholder.current")
     if (searchTarget === SearchTarget.SearchEnhance)
-      return "输入关键词进行网络搜索..."
-    if (searchTarget === SearchTarget.All) return "对历史所有网页进行提问..."
+      return t("translation:loggedHomePage.homePage.searchPlaceholder.internet")
+    if (searchTarget === SearchTarget.All)
+      return t("translation:loggedHomePage.homePage.searchPlaceholder.all")
   }
 
   // 自动聚焦输入框
@@ -161,8 +169,10 @@ const Home = (props: ChatProps) => {
         flexDirection: "column",
       }}>
       <ChatHeader />
-      <div className="footer input-panel">
-        <div className="refly-slogan">The answer engine for your work</div>
+      <div className="home-content-container input-panel">
+        <div className="refly-slogan">
+          {t("translation:loggedHomePage.homePage.title")}
+        </div>
         <div className="actions">
           {/* {messageStateStore.taskType === TASK_TYPE.CHAT &&
             messageStateStore?.pending && (

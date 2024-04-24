@@ -1,5 +1,10 @@
-export const getPopupContainer = (e: HTMLElement): Element =>
-  e?.parentElement?.parentElement?.parentElement!
+export const getPopupContainer = (e: HTMLElement): Element => {
+  const elem = document
+    .querySelector("#refly-main-app")
+    ?.shadowRoot?.querySelector(".main")
+
+  return elem as HTMLElement
+}
 
 export const calcPopupPosition = (
   rect: DOMRect,

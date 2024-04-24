@@ -9,6 +9,7 @@ import { useSearchQuickActionStore } from "~stores/search-quick-action"
 import { useContentSelectorStore } from "~stores/content-selector"
 import { useStoreWeblink } from "~hooks/use-store-weblink"
 import type { Source } from "~types"
+import { useTranslation } from "react-i18next"
 
 export const QuickAction = () => {
   // stores
@@ -19,6 +20,8 @@ export const QuickAction = () => {
   const { searchTarget } = useSearchStateStore()
   const { showSelectedMarks, marks = [] } = useContentSelectorStore()
 
+  const { t } = useTranslation()
+
   // hooks
   const { runQuickActionTask } = useBuildThreadAndRun()
 
@@ -26,9 +29,24 @@ export const QuickAction = () => {
     const { selectedRow } = useWeblinkStore.getState()
     const { showSelectedMarks } = useContentSelectorStore.getState()
 
-    if (showSelectedMarks) return `基于实时选择内容${slot}`
-    if (selectedRow?.length > 0) return `对选中的网页进行${slot}`
-    if (selectedRow?.length === 0) return `对当前网页进行快速${slot}`
+    if (showSelectedMarks)
+      return t(
+        "translation:loggedHomePage.homePage.recommendQuickAction.summary.tip.currentSelectedContent",
+        "",
+        { action: slot },
+      )
+    if (selectedRow?.length > 0)
+      return t(
+        "translation:loggedHomePage.homePage.recommendQuickAction.summary.tip.selectedWeblink",
+        "",
+        { action: slot },
+      )
+    if (selectedRow?.length === 0)
+      return t(
+        "translation:loggedHomePage.homePage.recommendQuickAction.summary.tip.current",
+        "",
+        { action: slot },
+      )
   }
 
   /**
@@ -48,13 +66,25 @@ export const QuickAction = () => {
     if (searchTarget === SearchTarget.CurrentPage) {
       // 1）单个网页的时候 2）单个网页中部分内容，都需要先上传
       // 然后服务端只取 html + xpath 做处理，以及下次重新访问会话时展示 filter 也是用 html + xpath 获取内容展示
-      message.loading("处理内容中...")
+      message.loading(
+        t(
+          "translation:loggedHomePage.homePage.recommendQuickAction.summary.status.contentHandling",
+        ),
+      )
       const res = await handleUploadWebsite(window.location.href)
 
       if (res.success) {
-        message.success("处理成功，正在跳转到会话页面...")
+        message.success(
+          t(
+            "translation:loggedHomePage.homePage.recommendQuickAction.summary.status.contentHandleSuccessNotify",
+          ),
+        )
       } else {
-        message.error("处理失败！")
+        message.error(
+          t(
+            "translation:loggedHomePage.homePage.recommendQuickAction.summary.status.contentHandleFailedNotify",
+          ),
+        )
       }
 
       filter = {
@@ -92,13 +122,25 @@ export const QuickAction = () => {
   const handleQuickActionExplain = () => {}
 
   const handleStoreForLater = async () => {
-    message.loading("内容保存中...")
+    message.loading(
+      t(
+        "translation:loggedHomePage.homePage.recommendQuickAction.save.status.contentHandling",
+      ),
+    )
     const res = await handleUploadWebsite(window.location.href)
 
     if (res.success) {
-      message.success("保存成功！")
+      message.success(
+        t(
+          "translation:loggedHomePage.homePage.recommendQuickAction.save.status.contentHandleSuccessNotify",
+        ),
+      )
     } else {
-      message.error("处理失败！")
+      message.error(
+        t(
+          "translation:loggedHomePage.homePage.recommendQuickAction.save.status.contentHandleFailedNotify",
+        ),
+      )
     }
   }
 
@@ -122,17 +164,28 @@ export const QuickAction = () => {
         <div className="selected-weblinks-inner-container">
           <div className="hint-item">
             <IconStar style={{ color: "rgba(0, 0, 0, .6)" }} />
-            <span>推荐快捷操作：</span>
+            <span>
+              {t(
+                "translation:loggedHomePage.homePage.recommendQuickAction.title",
+              )}
+            </span>
           </div>
           {/* 理论上针对单个网页、多个网页都可以进行总结 */}
           {showSummary ? (
-            <IconTip text={getText("总结")}>
+            <IconTip
+              text={getText(
+                t(
+                  "translation:loggedHomePage.homePage.recommendQuickAction.summary.tip.title",
+                ),
+              )}>
               <Button
                 onClick={() => handleSummary()}
                 style={{ fontSize: 12 }}
                 shape="round"
                 size="small">
-                总结
+                {t(
+                  "translation:loggedHomePage.homePage.recommendQuickAction.summary.title",
+                )}
               </Button>
             </IconTip>
           ) : null}
@@ -159,13 +212,18 @@ export const QuickAction = () => {
                 </IconTip>,
               ]
             : null} */}
-          <IconTip text={"保存此网页以供后续阅读"}>
+          <IconTip
+            text={t(
+              "translation:loggedHomePage.homePage.recommendQuickAction.save.tip",
+            )}>
             <Button
               onClick={() => handleStoreForLater()}
               style={{ fontSize: 12 }}
               shape="round"
               size="small">
-              保存
+              {t(
+                "translation:loggedHomePage.homePage.recommendQuickAction.save.title",
+              )}
             </Button>
           </IconTip>
         </div>

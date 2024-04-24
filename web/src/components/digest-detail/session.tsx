@@ -27,8 +27,6 @@ import getSourceSummary from "@/requests/getSourceSummary"
 
 import copyToClipboard from "copy-to-clipboard"
 import { delay } from "@/utils/delay"
-// fake data
-import { fakeSourceSummary } from "@/fake-data/source"
 import { safeParseURL } from "@/utils/url"
 import { useTranslation } from "react-i18next"
 

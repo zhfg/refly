@@ -13,9 +13,12 @@ import RemarkGfm from "remark-gfm"
 import RemarkMath from "remark-math"
 import { Popover, PopoverContent, PopoverTrigger } from "./popover"
 import type { Source } from "~types"
+import { useTranslation } from "react-i18next"
 
 export function PreCode(props: { children: any }) {
   const ref = useRef<HTMLPreElement>(null)
+
+  const { t } = useTranslation()
 
   return (
     <pre ref={ref}>
@@ -25,7 +28,7 @@ export function PreCode(props: { children: any }) {
           if (ref.current) {
             const code = ref.current.innerText
             copyToClipboard(code)
-            message.success("复制成功")
+            message.success(t("translation:components.markdown.copySuccess"))
           }
         }}></span>
       {props.children}

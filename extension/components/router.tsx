@@ -1,59 +1,60 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect } from "react"
 import { useNavigate, useMatch } from "react-router-dom"
 import classNames from "classnames"
 import { Routing } from "~routes/index"
 import { IconSearch, IconStorage } from "@arco-design/web-react/icon"
 // stores
 import { useUserStore } from "~stores/user"
-import { useSiderStore } from "~stores/sider"
-import { sendToBackground } from "@plasmohq/messaging"
-import { useStorage } from "@plasmohq/storage/hook"
-import { bgStorage } from "~storage"
 import { useHomeStateStore } from "~stores/home-state"
 import { useSelectedMark } from "~hooks/use-selected-mark"
+import { useTranslation } from "react-i18next"
+import { useGetUserSettings } from "~hooks/use-get-user-settings"
+import { safeParseJSON } from "~utils/parse"
+import { bgStorage } from "~storage"
+import { LOCALE } from "~types"
 
 export const ContentRouter = () => {
   // 导航相关
   const navigate = useNavigate()
   const isThreadItem = useMatch("/thread/:threadId")
-  const isHomePage = useMatch("/")
   const userStore = useUserStore()
-  const siderStore = useSiderStore()
-  const [loginNotification, setLoginNotification] = useStorage({
-    key: "login-notification",
-    instance: bgStorage,
-  })
+
   const homeStateStore = useHomeStateStore()
   const { handleResetState } = useSelectedMark()
 
-  const getLoginStatus = async () => {
-    try {
-      const res = await sendToBackground({
-        name: "getUserInfo",
-      })
+  const { t, i18n } = useTranslation()
+  const language = i18n.languages?.[0]
 
-      console.log("loginStatus", res)
+  // 获取 locale
+  const storageLocalSettings = safeParseJSON(
+    bgStorage.getItem("refly-local-settings"),
+  )
 
-      if (!res?.success) {
-        userStore.setUserProfile(null)
-        userStore.setToken("")
-        setLoginNotification("")
-        navigate("/login")
-      } else {
-        userStore.setUserProfile(res?.data)
-      }
-    } catch (err) {
-      console.log("getLoginStatus err", err)
-      userStore.setUserProfile(null)
-      userStore.setToken("")
-      setLoginNotification("")
-      navigate("/login")
-    }
-  }
+  console.log(
+    "locale",
+    storageLocalSettings,
+    bgStorage.getItem("refly-local-settings"),
+  )
+  const locale =
+    userStore?.localSettings?.uiLocale ||
+    storageLocalSettings?.uiLocale ||
+    LOCALE.EN
+  console.log(
+    "locale",
+    storageLocalSettings?.uiLocale,
+    userStore?.localSettings?.uiLocale,
+    LOCALE.EN,
+  )
 
+  // 这里处理 user 登录和状态管理
+  useGetUserSettings()
+
+  // TODO: 国际化相关内容
   useEffect(() => {
-    getLoginStatus()
-  }, [siderStore?.showSider])
+    if (locale && language !== locale) {
+      i18n.changeLanguage(locale)
+    }
+  }, [locale])
 
   return (
     <div>
@@ -72,7 +73,9 @@ export const ContentRouter = () => {
               }}>
               <div className="nav-item-inner">
                 <IconSearch style={{ fontSize: 22 }} />
-                <p className="nav-item-title">主页</p>
+                <p className="nav-item-title">
+                  {t("translation:bottomNav.home")}
+                </p>
               </div>
             </div>
             <div
@@ -88,7 +91,9 @@ export const ContentRouter = () => {
               }}>
               <div className="nav-item-inner">
                 <IconStorage style={{ fontSize: 22 }} />
-                <p className="nav-item-title">会话库</p>
+                <p className="nav-item-title">
+                  {t("translation:bottomNav.threads")}
+                </p>
               </div>
             </div>
           </div>

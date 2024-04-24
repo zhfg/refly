@@ -21,6 +21,7 @@ import { buildChatTask, buildQuickActionTask, buildTask } from "~utils/task"
 import { useWeblinkStore } from "~stores/weblink"
 import { useSelectedMark } from "./use-selected-mark"
 import { useContentSelectorStore } from "~stores/content-selector"
+import { useTranslation } from "react-i18next"
 
 export const useBuildThreadAndRun = () => {
   const chatStore = useChatStore()
@@ -29,6 +30,8 @@ export const useBuildThreadAndRun = () => {
   const { resetState } = useResetState()
   const taskStore = useTaskStore()
   const navigate = useNavigate()
+
+  const { t } = useTranslation()
 
   const handleCreateNewConversation = async (task: Task) => {
     /**
@@ -46,7 +49,9 @@ export const useBuildThreadAndRun = () => {
 
     if (!res?.success) {
       message.error({
-        content: "创建新会话失败！",
+        content: t(
+          "translation:hooks.useBuildThreadAndRun.status.createFailed",
+        ),
       })
       return
     }
@@ -124,10 +129,14 @@ export const useBuildThreadAndRun = () => {
 
   const runQuickActionTask = async (payload: QUICK_ACTION_TASK_PAYLOAD) => {
     const task = buildQuickActionTask({
-      question: `总结网页`,
+      question: t(
+        "translation:hooks.useBuildThreadAndRun.task.summary.question",
+      ),
       actionType: QUICK_ACTION_TYPE.SUMMARY,
       filter: payload?.filter,
-      actionPrompt: "总结网页内容并提炼要点",
+      actionPrompt: t(
+        "translation:hooks.useBuildThreadAndRun.task.summary.actionPrompt",
+      ),
     })
 
     // 创建新会话并跳转

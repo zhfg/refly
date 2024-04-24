@@ -466,11 +466,116 @@ img {
   }
 }
 
+.main {
+  .home-content-container {
+    overflow-y: scroll;
+    background-color: #fcfcf9;
+    padding: 0.5em 1em;
+    height: calc(100vh - 130px);
+
+    .refly-slogan {
+      font-family: PingFangSC-Medium;
+      font-size: 36px;
+      color: rgba(0, 0, 0, 0.8);
+      margin-top: 80px;
+      margin-bottom: 40px;
+      line-height: 46px;
+    }
+
+    .toolbar {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      button {
+        color: rgba(0, 0, 0, 0.5);
+      }
+
+      button:hover {
+        color: rgba(0, 0, 0, 0.8);
+        background: #e8e8e2;
+      }
+
+      .content-selector-btn {
+        color: rgba(0, 0, 0, 0.5) !important;
+        background: transparent;
+      }
+
+      .content-selector-btn-selected {
+        background: var(--brand-color);
+        color: #fff !important;
+
+        span {
+          color: #fff !important;
+        }
+      }
+
+      .content-selector-btn:hover {
+        background: var(--brand-color);
+        color: #fff !important;
+
+        span {
+          color: #fff !important;
+        }
+      }
+    }
+
+    .input-box {
+      margin-bottom: 0.5em;
+      padding: 8px;
+      border-radius: 8px;
+      box-sizing: border-box;
+      background: #fcfcf9;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .input-box textarea {
+      background-color: transparent;
+      min-height: 98px;
+    }
+
+    .input-box {
+      textarea:focus {
+        border-color: transparent;
+      }
+    }
+
+    .bar {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .bar img {
+      width: 18px;
+      height: 18px;
+      transition: transform 200ms linear;
+    }
+
+    .bar img:hover {
+      transform: translateY(-2px);
+      cursor: pointer;
+    }
+
+    .bar div {
+      display: flex;
+      align-items: center;
+    }
+
+    .bar div span {
+      font-size: 0.75em;
+      color: #3c3c3c;
+      margin-right: 1em;
+    }
+  }
+}
+
 .main .footer {
-  height: calc(100vh - 130px);
   overflow-y: scroll;
   background-color: #fcfcf9;
   padding: 0.5em 1em;
+  position: fixed;
+  bottom: 16px;
 
   .refly-slogan {
     font-family: PingFangSC-Medium;

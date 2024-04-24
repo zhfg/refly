@@ -14,10 +14,11 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
     await bgStorage.set("lastWindowId", req.sender?.tab?.windowId)
     console.log("lastTabId", req.sender?.tab?.id, req.sender?.tab?.windowId)
     const [err, userRes] = await request(appConfig.url.userSettings, {
-      method: "GET",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
+      body: req?.body,
     })
 
     if (err) {

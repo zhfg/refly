@@ -1,4 +1,10 @@
-import { Button, List, Skeleton, Typography } from "@arco-design/web-react"
+import {
+  Button,
+  List,
+  Skeleton,
+  Typography,
+  Message as message,
+} from "@arco-design/web-react"
 import {
   IconCopy,
   IconNotificationClose,
@@ -20,6 +26,7 @@ import { Markdown } from "~components/markdown"
 
 import copyToClipboard from "copy-to-clipboard"
 import { safeParseUrl } from "~utils/parse"
+import { useTranslation } from "react-i18next"
 
 interface SessionProps {
   session: SessionItem
@@ -33,6 +40,8 @@ export const Session = (props: SessionProps) => {
   const [scrollLoading, setScrollLoading] = useState(
     <Skeleton animation></Skeleton>,
   )
+
+  const { t } = useTranslation()
 
   const fetchData = (currentPage) => {}
 
@@ -48,7 +57,7 @@ export const Session = (props: SessionProps) => {
           {messageStateStore.pending || session?.sources?.length > 0 ? (
             <div className="session-title-icon">
               <IconQuote style={{ fontSize: 18, color: "rgba(0, 0, 0, .8)" }} />
-              <p>来源</p>
+              <p>{t("translation:threadDetail.item.session.source")}</p>
             </div>
           ) : null}
           {session?.sources?.length > 0 ? (
@@ -64,7 +73,9 @@ export const Session = (props: SessionProps) => {
                     session?.sources?.length > 0 ? null : scrollLoading
                   }
                   onReachBottom={(currentPage) => fetchData(currentPage)}
-                  noDataElement={<div>暂无数据</div>}
+                  noDataElement={
+                    <div>{t("translation:threadDetail.item.noMoreText")}</div>
+                  }
                   render={(item, index) => (
                     <List.Item
                       key={index}
@@ -139,7 +150,7 @@ export const Session = (props: SessionProps) => {
         <div className="session-answer">
           <div className="session-title-icon">
             <IconTranslate style={{ fontSize: 18 }} />
-            <p>答案</p>
+            <p>{t("translation:threadDetail.item.session.answer")}</p>
           </div>
           {session?.answer ? (
             <>
@@ -156,15 +167,19 @@ export const Session = (props: SessionProps) => {
                     {/* <IconTip text="重新生成答案"><Button type='text' icon={<IconPalette style={{ fontSize: 14 }} />} style={{ color: '#64645F' }}>重写</Button></IconTip> */}
                   </div>
                   <div className="session-answer-actionbar-right">
-                    <IconTip text="复制此答案">
+                    <IconTip
+                      text={t("translation:threadDetail.item.copyAnswer")}>
                       <Button
                         type="text"
                         shape="circle"
                         icon={<IconCopy style={{ fontSize: 14 }} />}
                         style={{ color: "#64645F" }}
-                        onClick={() =>
+                        onClick={() => {
                           copyToClipboard(session?.answer)
-                        }></Button>
+                          message.success(
+                            t("translation:threadDetail.item.copySuccess"),
+                          )
+                        }}></Button>
                     </IconTip>
                     {/* <IconTip text='点踩'><Button type='text' shape='circle' icon={<IconNotificationClose style={{ fontSize: 14 }} />} style={{ color: '#64645F' }}></Button></IconTip> */}
                   </div>
@@ -182,13 +197,17 @@ export const Session = (props: SessionProps) => {
           session?.relatedQuestions?.length > 0 ? (
             <div className="session-title-icon">
               <IconReply style={{ fontSize: 18 }} />
-              <p>相关问题</p>
+              <p>
+                {t("translation:threadDetail.item.session.relatedQuestions")}
+              </p>
             </div>
           ) : null}
           {session?.relatedQuestions?.length > 0 ? (
             <div className="session-related-question-content">
               {session?.relatedQuestions?.map((item, index) => (
-                <IconTip text="点击进行追问" key={index}>
+                <IconTip
+                  text={t("translation:threadDetail.item.askFollow.btnText")}
+                  key={index}>
                   <div key={index} onClick={() => handleAskFollowing(item)}>
                     <p>{item}</p>
                     <IconPlus
