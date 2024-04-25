@@ -161,6 +161,11 @@ const Home = (props: ChatProps) => {
     scrollToBottom()
   }, [isIntentActive])
 
+  const showQuickAction =
+    (searchQuickActionStore.showQuickAction &&
+      webLinkStore?.selectedRow?.length > 0) ||
+    webLinkStore?.selectedRow?.length > 0
+
   return (
     <div
       style={{
@@ -233,6 +238,10 @@ const Home = (props: ChatProps) => {
                     ) {
                       searchQuickActionStore.setShowQuickAction(false)
                     }
+
+                    if ([SearchTarget.CurrentPage].includes(searchTarget)) {
+                      searchQuickActionStore.setShowQuickAction(true)
+                    }
                   }}
                 />
               </Space>
@@ -245,17 +254,9 @@ const Home = (props: ChatProps) => {
           </div>
         </div>
         {webLinkStore?.selectedRow?.length > 0
-          ? [
-              <SelectedWeblink
-                closable={true}
-                selectedWeblinkList={mapSourceFromWeblinkList(
-                  webLinkStore.selectedRow || [],
-                )}
-              />,
-              <Divider />,
-            ]
+          ? [<SelectedWeblink closable={true} />, <Divider />]
           : null}
-        {searchQuickActionStore.showQuickAction ? <QuickAction /> : null}
+        {showQuickAction ? <QuickAction /> : null}
         {contentSelectorStore?.showSelectedMarks ? (
           <SelectedContentList marks={contentSelectorStore.marks} />
         ) : null}

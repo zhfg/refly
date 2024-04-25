@@ -205,16 +205,12 @@ export const Session = (props: SessionProps) => {
           {session?.relatedQuestions?.length > 0 ? (
             <div className="session-related-question-content">
               {session?.relatedQuestions?.map((item, index) => (
-                <IconTip
-                  text={t("translation:threadDetail.item.askFollow.btnText")}
-                  key={index}>
-                  <div key={index} onClick={() => handleAskFollowing(item)}>
-                    <p>{item}</p>
-                    <IconPlus
-                      style={{ fontSize: 12, color: "rgba(0,0,0,0.60)" }}
-                    />
-                  </div>
-                </IconTip>
+                <div key={index} onClick={() => handleAskFollowing(item)}>
+                  <p>{item}</p>
+                  <IconPlus
+                    style={{ fontSize: 12, color: "rgba(0,0,0,0.60)" }}
+                  />
+                </div>
               ))}
             </div>
           ) : messageStateStore?.pending && isLastSession ? (
