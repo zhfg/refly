@@ -214,7 +214,7 @@ export const useGetUserSettings = () => {
         navigate("/login")
       }
     } else {
-      message.error(t("translation:loginPage.status.failed"))
+      // message.error(t("translation:loginPage.status.failed"))
     }
 
     userStore.setIsCheckingLoginStatus(false)

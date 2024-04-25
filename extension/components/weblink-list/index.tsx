@@ -92,7 +92,7 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
             <a rel="noreferrer" href={originPageUrl} target="_blank">
               <img
                 className="icon"
-                src={`https://www.google.com/s2/favicons?domain=${urlItem?.origin || ""}&sz=${16}`}
+                src={`https://www.google.com/s2/favicons?domain=${safeParseUrl(originPageUrl) || ""}&sz=${16}`}
                 alt=""
               />
               <span className="text">{originPageTitle}</span>
@@ -296,6 +296,7 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
             </p>
             <div>
               <Button
+                type="primary"
                 onClick={() => {
                   webLinkStore.updateIsWebLinkListVisible(false)
                 }}
@@ -305,7 +306,6 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
                 )}
               </Button>
               <Button
-                type="primary"
                 onClick={() => {
                   webLinkStore.updateIsWebLinkListVisible(false)
                 }}>
@@ -334,8 +334,6 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
           rowSelection={{
             selectedRowKeys: webLinkStore.selectedRow?.map((item) => item.key),
             onChange: (selectedRowKeys, selectedRows) => {
-              console.log("selectedRowKeys", selectedRowKeys)
-              console.log("selectedRows", selectedRows)
               webLinkStore.updateSelectedRow(selectedRows)
             },
           }}
