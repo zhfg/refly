@@ -1,8 +1,8 @@
 {
   "name": "extension",
-  "displayName": "Refly - AI Work Assistant and Personal Knowledge Search Engine",
+  "displayName": "__MSG_displayName__",
   "version": "0.0.7",
-  "description": "Quick summaries, Insights, Auto tag and AI Search. Refly can build your second brain, extend knowledge and give you superpower",
+  "description": "__MSG_description__",
   "author": "pftom",
   "scripts": {
     "dev": "plasmo dev",
@@ -67,6 +67,7 @@
     "typescript": "5.0.3"
   },
   "manifest": {
+    "default_locale": "en",
     "permissions": [
       "history",
       "storage",

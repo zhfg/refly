@@ -29,9 +29,21 @@ export interface UserState {
   resetState: () => void
 }
 
+const getDefaultLocale = () => {
+  const language = navigator.language
+
+  if (language?.startsWith("en")) {
+    return navigator.language?.split("-")?.[0]
+  }
+
+  if (language?.startsWith("zh")) {
+    return "zh_CN"
+  }
+}
+
 export const defaultLocalSettings = {
-  uiLocale: navigator.language,
-  outputLocale: navigator.language,
+  uiLocale: getDefaultLocale(),
+  outputLocale: getDefaultLocale(),
   isLocaleInitialized: false, // locale 是否是初始化状态，用于展示语言
 } as LocalSettings
 

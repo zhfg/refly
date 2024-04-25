@@ -1,0 +1,14 @@
+{
+  "name": {
+    "message": "Refly - AI Work Assistant and Personal Knowledge Search Engine",
+    "description": "Name of the extension."
+  },
+  "description": {
+    "message": "Quick summaries, Insights, Auto tag and AI Search. Refly can build your second brain, extend knowledge and give you superpower",
+    "description": "Description of the extension."
+  },
+  "displayName": {
+    "message": "Refly - AI Work Assistant and Personal Knowledge Search Engine",
+    "description": "Display name of the extension."
+  }
+}
