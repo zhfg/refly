@@ -36,7 +36,7 @@ export class WebLinkDTO {
   @ApiPropertyOptional()
   storageKey?: string; // 前端上传 html 拿到的 object key
 
-  userId?: number;
+  userId?: number; // 是否绑定 user，如果不绑定就走不去存向量，绑定了就存向量
 
   parsedDoc?: Document; // 服务端解析出的 Document
 }

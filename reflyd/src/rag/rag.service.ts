@@ -6,14 +6,13 @@ import { Document } from '@langchain/core/documents';
 import { TokenTextSplitter } from 'langchain/text_splitter';
 import { generateUuid5 } from 'weaviate-ts-client';
 
-import { MinioService } from '../common/minio.service';
-import { PrismaService } from '../common/prisma.service';
 import { WeaviateService } from '../common/weaviate.service';
 import {
   ContentDataObj,
   ContentType,
   HybridSearchParam,
 } from '../common/weaviate.dto';
+import { User } from '@prisma/client';
 
 const READER_URL = 'https://r.jina.ai/';
 
@@ -50,8 +49,6 @@ export class RAGService {
 
   constructor(
     private config: ConfigService,
-    private minio: MinioService,
-    private prisma: PrismaService,
     private weaviate: WeaviateService,
   ) {
     this.embeddings = new OpenAIEmbeddings({
@@ -99,8 +96,11 @@ export class RAGService {
     return dataObjs;
   }
 
-  async saveDataForUser(uid: string, objList: ContentDataObj[]) {
-    await this.weaviate.batchSaveData(uid, objList);
+  async saveDataForUser(user: User, objList: ContentDataObj[]) {
+    if (!user.vsTenantCreated) {
+      await this.weaviate.createTenant(user.uid);
+    }
+    return this.weaviate.batchSaveData(user.uid, objList);
   }
 
   async retrieve(param: HybridSearchParam) {

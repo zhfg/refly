@@ -4,6 +4,7 @@ import weaviate, {
   WeaviateClient,
   ApiKey,
   FusionType,
+  WeaviateClass,
 } from 'weaviate-ts-client';
 
 import {
@@ -13,7 +14,7 @@ import {
 } from './weaviate.dto';
 
 const reflyContentSchema = {
-  class: 'Content',
+  class: 'ReflyContent',
   properties: [
     {
       name: 'url',
@@ -53,13 +54,17 @@ export class WeaviateService implements OnModuleInit {
   }
 
   async ensureCollectionExists() {
-    let classDefinition = await this.client.schema
-      .classGetter()
-      .withClassName(reflyContentSchema.class)
-      .do();
+    let classDefinition: WeaviateClass;
 
-    if (!classDefinition) {
-      this.logger.log('class definition not found, create new one');
+    try {
+      classDefinition = await this.client.schema
+        .classGetter()
+        .withClassName(reflyContentSchema.class)
+        .do();
+    } catch (err) {
+      this.logger.error(
+        `fetch class definition failed (${err}), create new one`,
+      );
       classDefinition = await this.client.schema
         .classCreator()
         .withClass(reflyContentSchema)
@@ -69,6 +74,13 @@ export class WeaviateService implements OnModuleInit {
     this.logger.log(
       'collection definition: ' + JSON.stringify(classDefinition, null, 2),
     );
+  }
+
+  async createTenant(tenantId: string) {
+    const res = await this.client.schema
+      .tenantsCreator(reflyContentSchema.class, [{ name: tenantId }])
+      .do();
+    this.logger.log('create tenant res: ' + JSON.stringify(res));
   }
 
   async batchSaveData(tenantId: string, data: ContentDataObj[]) {

@@ -352,6 +352,10 @@ export class WeblinkService {
 
     await this.indexWeblink(weblink, doc);
 
+    if (!link.userId) {
+      return;
+    }
+
     // 处理单个用户的访问记录
     const uwb = await this.processLinkForUser(link, weblink);
 
