@@ -13,6 +13,7 @@ import putUserInfo from "@/requests/putUserInfo"
 import { type OutputLocale, enLocale, localeToLanguageName } from "~utils/i18n"
 // styles
 import "./index.scss"
+import { bgStorage } from "~storage"
 
 export const OutputLocaleList = (props: { children: any }) => {
   // i18n
@@ -26,7 +27,7 @@ export const OutputLocaleList = (props: { children: any }) => {
     const { localSettings } = useUserStore.getState()
 
     userStore.setLocalSettings({ ...localSettings, outputLocale: lng })
-    localStorage.setItem(
+    bgStorage.setItem(
       "refly-local-settings",
       safeStringifyJSON({ ...localSettings, outputLocale: lng }),
     )

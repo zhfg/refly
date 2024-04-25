@@ -15,7 +15,7 @@ export interface UserState {
   isCheckingLoginStatus: boolean
   userProfile?: User
   token?: string
-  localSettings: LocalSettings // 在获取 user 信息的时候记录这个 settings，并 host 到 localStorage，每次保存更新，类似 userProfile
+  localSettings: LocalSettings // 在获取 user 信息的时候记录这个 settings，并 host 到 localStorage/bgStorage，每次保存更新，类似 userProfile
 
   // login modal
   loginModalVisible?: boolean

@@ -10,7 +10,7 @@ import { useConversationStore } from "~stores/conversation"
 import { useThreadStore } from "~stores/thread"
 // utils
 import { buildSessions } from "~utils/session"
-import { buildChatTask, buildTask } from "~utils/task"
+import { buildTask } from "~utils/task"
 // 组件
 import { ThreadItem } from "~components/thread-item/thread-item"
 import { sendToBackground } from "@plasmohq/messaging"
@@ -22,6 +22,7 @@ import { safeParseJSON } from "~utils/parse"
 import { useWeblinkStore } from "~stores/weblink"
 import { SearchTarget, useSearchStateStore } from "~stores/search-state"
 import { useContentSelectorStore } from "~stores/content-selector"
+import { useUserStore } from "~stores/user"
 
 export const Thread = () => {
   const { buildTaskAndGenReponse } = useBuildTask()
@@ -92,6 +93,7 @@ export const Thread = () => {
     const { messages } = useChatStore.getState()
     const selectedWeblinkConfig = getSelectedWeblinkConfig(messages)
     const { marks } = useContentSelectorStore.getState()
+    const { localSettings } = useUserStore.getState()
 
     console.log("handleAskFollowing", newQuestion)
 
@@ -133,6 +135,7 @@ export const Thread = () => {
         },
       },
       taskType,
+      locale: localSettings?.outputLocale,
     })
     buildTaskAndGenReponse(task)
     chatStore.setNewQAText("")

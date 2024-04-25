@@ -17,11 +17,12 @@ import {
   TASK_TYPE,
 } from "~/types"
 import { SearchTarget, useSearchStateStore } from "~stores/search-state"
-import { buildChatTask, buildQuickActionTask, buildTask } from "~utils/task"
+import { buildQuickActionTask, buildTask } from "~utils/task"
 import { useWeblinkStore } from "~stores/weblink"
 import { useSelectedMark } from "./use-selected-mark"
 import { useContentSelectorStore } from "~stores/content-selector"
 import { useTranslation } from "react-i18next"
+import { useUserStore } from "~stores/user"
 
 export const useBuildThreadAndRun = () => {
   const chatStore = useChatStore()
@@ -34,6 +35,7 @@ export const useBuildThreadAndRun = () => {
   const { t } = useTranslation()
 
   const handleCreateNewConversation = async (task: Task) => {
+    const { localSettings } = useUserStore.getState()
     /**
      * 1. 创建新 thread，设置状态
      * 2. 跳转到 thread 界面，进行第一个回复，展示 问题、sources、答案
@@ -44,7 +46,7 @@ export const useBuildThreadAndRun = () => {
     // 创建新会话
     const res = await sendToBackground({
       name: "createNewConversation",
-      body: newConversationPayload,
+      body: { ...newConversationPayload, locale: localSettings?.outputLocale },
     })
 
     if (!res?.success) {
@@ -80,6 +82,7 @@ export const useBuildThreadAndRun = () => {
     const { selectedRow } = useWeblinkStore.getState()
     const { searchTarget } = useSearchStateStore.getState()
     const { marks } = useContentSelectorStore.getState()
+    const { localSettings } = useUserStore.getState()
 
     let selectedWebLink: Source[] = []
 
@@ -119,6 +122,7 @@ export const useBuildThreadAndRun = () => {
         question,
         filter: { weblinkList: selectedWebLink },
       },
+      locale: localSettings?.outputLocale,
     })
 
     // 退出 content selector
@@ -128,16 +132,21 @@ export const useBuildThreadAndRun = () => {
   }
 
   const runQuickActionTask = async (payload: QUICK_ACTION_TASK_PAYLOAD) => {
-    const task = buildQuickActionTask({
-      question: t(
-        "translation:hooks.useBuildThreadAndRun.task.summary.question",
-      ),
-      actionType: QUICK_ACTION_TYPE.SUMMARY,
-      filter: payload?.filter,
-      actionPrompt: t(
-        "translation:hooks.useBuildThreadAndRun.task.summary.actionPrompt",
-      ),
-    })
+    const { localSettings } = useUserStore.getState()
+
+    const task = buildQuickActionTask(
+      {
+        question: t(
+          "translation:hooks.useBuildThreadAndRun.task.summary.question",
+        ),
+        actionType: QUICK_ACTION_TYPE.SUMMARY,
+        filter: payload?.filter,
+        actionPrompt: t(
+          "translation:hooks.useBuildThreadAndRun.task.summary.actionPrompt",
+        ),
+      },
+      localSettings.outputLocale,
+    )
 
     // 创建新会话并跳转
     handleCreateNewConversation(task)

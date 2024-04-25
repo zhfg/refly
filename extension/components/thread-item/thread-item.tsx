@@ -17,7 +17,7 @@ import { Session } from "./session"
 import { TASK_TYPE, type SessionItem, type Task, type Source } from "~types"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input"
 import { useBuildTask } from "~hooks/use-build-task"
-import { buildChatTask, buildQuickActionTask, buildTask } from "~utils/task"
+import { buildTask } from "~utils/task"
 import { useConversationStore } from "~stores/conversation"
 import { ThreadSearchTargetSelector } from "~components/thread-item/thread-search-target-selector"
 import { SearchTarget } from "~stores/search-state"
@@ -33,6 +33,7 @@ import { useStoreWeblink } from "~hooks/use-store-weblink"
 import { useHomeStateStore } from "~stores/home-state"
 import { useSelectedMark } from "~hooks/use-selected-mark"
 import { useTranslation } from "react-i18next"
+import { useUserStore } from "~stores/user"
 
 interface ThreadItemProps {
   sessions: SessionItem[]
@@ -133,6 +134,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
     // TODO: 这里需要 follow 之前的 filter 进行提问
     const { newQAText } = useChatStore.getState()
     const { marks } = useContentSelectorStore.getState()
+    const { localSettings } = useUserStore.getState()
 
     if (!newQAText) {
       message.info(t("translation:threadDetail.item.input.status.emptyNotify"))
@@ -203,6 +205,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
           weblinkList: selectedWebLink,
         },
       },
+      locale: localSettings?.outputLocale,
     })
 
     // 清空选中状态
