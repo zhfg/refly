@@ -20,7 +20,7 @@ import {
 import { ApiParam, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
-import { TASK_TYPE, type Task } from '../types/task';
+import { LOCALE, TASK_TYPE, type Task } from '../types/task';
 import { AigcService } from '../aigc/aigc.service';
 import { LoggerService } from '../common/logger.service';
 
@@ -68,10 +68,15 @@ export class ConversationController {
       ];
       await Promise.all([
         this.conversationService.addChatMessages(messages),
-        this.conversationService.updateConversation(res.id, messages, {
-          messageCount: { increment: 2 },
-          lastMessage: content.content,
-        }),
+        this.conversationService.updateConversation(
+          res.id,
+          messages,
+          {
+            messageCount: { increment: 2 },
+            lastMessage: content.content,
+          },
+          body?.locale as LOCALE,
+        ),
       ]);
     }
 

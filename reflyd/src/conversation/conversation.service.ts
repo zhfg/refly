@@ -49,9 +49,11 @@ export class ConversationService {
     conversationId: number,
     messages: { type: string; content: string }[],
     data: Prisma.ConversationUpdateInput,
+    locale: LOCALE,
   ) {
     const summarizedTitle = await this.llmService.summarizeConversation(
       messages,
+      locale,
     );
     this.logger.log(`Summarized title: ${summarizedTitle}`);
 
@@ -142,10 +144,15 @@ export class ConversationService {
     // post chat logic
     await Promise.all([
       this.addChatMessages(newMessages),
-      this.updateConversation(convId, [...chatHistory, ...newMessages], {
-        lastMessage: taskRes.answer,
-        messageCount: chatHistory.length + 2,
-      }),
+      this.updateConversation(
+        convId,
+        [...chatHistory, ...newMessages],
+        {
+          lastMessage: taskRes.answer,
+          messageCount: chatHistory.length + 2,
+        },
+        task?.locale,
+      ),
     ]);
   }
 

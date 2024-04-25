@@ -264,17 +264,18 @@ export class LlmService implements OnModuleInit {
       type: string;
       content: string;
     }[],
+    locale: LOCALE,
   ): Promise<string> {
     const doc = new Document({
       pageContent: messages.map((m) => `${m.type}: ${m.content}`).join('\n'),
     });
     const summary = await this.llm.invoke([
-      new SystemMessage(summarizeConversation.systemPrompt),
+      new SystemMessage(summarizeConversation.systemPrompt(locale)),
       new HumanMessage(
         `The conversation to be summarized is as follows:\n` +
-          `===\n ${doc.pageContent?.slice(0, 12000)} \n===\n` +
-          `SUMMARY with language used in the conversation:`,
+          `===\n ${doc.pageContent?.slice(0, 12000)} \n===\n`,
       ),
+      new HumanMessage(`SUMMARY with locale: ${locale} language:`),
     ]);
     this.logger.log(`summarized text: ${summary.text}`);
 
