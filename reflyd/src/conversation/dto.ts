@@ -63,3 +63,14 @@ export class ChatParam {
   @ApiPropertyOptional()
   conversationId: number;
 }
+
+export interface CreateChatMessageInput {
+  type: MessageType;
+  sources: string;
+  content: string;
+  userId: number;
+  locale?: string;
+  conversationId: number;
+  relatedQuestions?: string;
+  selectedWeblinkConfig?: string;
+}

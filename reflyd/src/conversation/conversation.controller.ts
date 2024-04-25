@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import {
+  CreateChatMessageInput,
   CreateConversationParam,
   CreateConversationResponse,
   ListConversationResponse,
@@ -19,7 +20,7 @@ import {
 import { ApiParam, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
-import { TASK_TYPE, TaskResponse, type Task } from '../types/task';
+import { TASK_TYPE, type Task } from '../types/task';
 import { AigcService } from '../aigc/aigc.service';
 import { LoggerService } from '../common/logger.service';
 
@@ -47,7 +48,7 @@ export class ConversationController {
       const content = await this.aigcService.getContent({
         contentId: body.contentId,
       });
-      await this.conversationService.addChatMessages([
+      const messages: CreateChatMessageInput[] = [
         {
           type: 'human',
           content: content.title,
@@ -64,11 +65,14 @@ export class ConversationController {
           conversationId: res.id,
           locale: body.locale,
         },
+      ];
+      await Promise.all([
+        this.conversationService.addChatMessages(messages),
+        this.conversationService.updateConversation(res.id, messages, {
+          messageCount: { increment: 2 },
+          lastMessage: content.content,
+        }),
       ]);
-      await this.conversationService.updateConversation(res.id, {
-        messageCount: { increment: 2 },
-        lastMessage: content.content,
-      });
     }
 
     return {
@@ -84,97 +88,24 @@ export class ConversationController {
     @Body() body: { task: Task },
     @Res() res: Response,
   ) {
-    try {
-      if (!conversationId || !Number(conversationId)) {
-        throw new BadRequestException('invalid conversation id');
-      }
-      const convId = Number(conversationId);
-
-      const { taskType, data = {} } = body?.task;
-      if (taskType === TASK_TYPE.CHAT && !data?.question) {
-        throw new BadRequestException('query cannot be empty');
-      }
-
-      const userId: number = req.user.id;
-      const query = data?.question || '';
-      const weblinkList = body?.task?.data?.filter?.weblinkList || [];
-
-      await this.conversationService.addChatMessage({
-        type: 'human',
-        userId,
-        conversationId: convId,
-        content: query,
-        sources: '',
-        locale: body.task.locale,
-        // 每次提问完在 human message 上加一个提问的 filter，这样之后追问时可以 follow 这个 filter 规则
-        selectedWeblinkConfig: JSON.stringify({
-          searchTarget: weblinkList?.length > 0 ? 'selectedPages' : 'all',
-          filter: weblinkList,
-        }),
-      });
-
-      res.setHeader('Content-Type', 'text/event-stream');
-      res.setHeader('Cache-Control', 'no-cache');
-      res.setHeader('Connection', 'keep-alive');
-      res.status(200);
-
-      // 获取聊天历史
-      const chatHistory = await this.conversationService.getMessages(convId);
-
-      let taskRes: TaskResponse;
-      if (taskType === TASK_TYPE.QUICK_ACTION) {
-        taskRes = await this.conversationService.handleQuickActionTask(
-          req,
-          res,
-          body?.task,
-          chatHistory,
-        );
-      } else if (taskType === TASK_TYPE.SEARCH_ENHANCE_ASK) {
-        taskRes = await this.conversationService.handleSearchEnhanceTask(
-          req,
-          res,
-          body?.task,
-          chatHistory,
-        );
-      } else {
-        taskRes = await this.conversationService.handleChatTask(
-          req,
-          res,
-          body?.task,
-          chatHistory,
-        );
-      }
-      res.end(``);
-
-      await this.conversationService.addChatMessage({
-        type: 'ai',
-        userId,
-        conversationId: convId,
-        content: taskRes.answer,
-        locale: body.task.locale,
-        sources: JSON.stringify(taskRes.sources),
-        relatedQuestions: JSON.stringify(taskRes.relatedQuestions),
-      });
-
-      // update conversation last answer and message count
-      const updated = await this.conversationService.updateConversation(
-        convId,
-        {
-          lastMessage: taskRes.answer,
-          messageCount: chatHistory.length + 1,
-        },
-      );
-      this.logger.log(
-        `update conversation ${convId}, after updated: ${JSON.stringify(
-          updated,
-        )}`,
-      );
-    } catch (err) {
-      this.logger.error(`chat error: ${err}`);
-
-      // 结束流式输出
-      res.end(``);
+    if (!conversationId || !Number(conversationId)) {
+      throw new BadRequestException('invalid conversation id');
     }
+    const convId = Number(conversationId);
+    const { task } = body;
+    if (!task) {
+      throw new BadRequestException('task cannot be empty');
+    }
+    if (task.taskType === TASK_TYPE.CHAT && !task.data?.question) {
+      throw new BadRequestException('query cannot be empty for chat task');
+    }
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.status(200);
+
+    await this.conversationService.chat(res, convId, req.user.id, body.task);
   }
 
   @UseGuards(JwtAuthGuard)
