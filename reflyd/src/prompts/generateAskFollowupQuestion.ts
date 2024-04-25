@@ -46,7 +46,7 @@ export const generateAskFollowupQuestionSchema = (locale: LOCALE) => {
           items: {
             type: 'string',
           },
-          description: `Generate three recommended follow-up questions in ${locale} language`,
+          description: `Generate three recommended follow-up questions in locale: ${locale} language`,
         },
       },
       required: ['recommend_ask_followup_question'],

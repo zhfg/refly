@@ -381,7 +381,7 @@ export class LlmService implements OnModuleInit {
     const askFollowUpQuestion = (await runnable.invoke([
       new SystemMessage(generateAskFollowupQuestion.systemPrompt),
       new HumanMessage(contextContent),
-      new HumanMessage(`Please output answer in ${locale} language:`),
+      new HumanMessage(`Please output answer in locale: ${locale} language:`),
     ])) as {
       recommend_ask_followup_question: string[];
     };
@@ -513,7 +513,10 @@ export class LlmService implements OnModuleInit {
         q: query,
         num: REFERENCE_COUNT,
         hl: locale?.toLocaleLowerCase(),
-        gl: locale === LOCALE.EN ? 'us' : 'cn',
+        gl:
+          locale?.toLocaleLowerCase() === LOCALE.ZH_CN?.toLocaleLowerCase()
+            ? 'cn'
+            : 'us',
       });
 
       const res = await fetch('https://google.serper.dev/search', {
