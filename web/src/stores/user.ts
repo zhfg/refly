@@ -37,7 +37,7 @@ const getDefaultLocale = () => {
   }
 
   if (language?.startsWith("zh")) {
-    return "zh_CN"
+    return "zh-CN"
   }
 }
 
