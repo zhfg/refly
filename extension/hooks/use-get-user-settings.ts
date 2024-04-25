@@ -196,7 +196,7 @@ export const useGetUserSettings = () => {
             safeStringifyJSON(localSettings),
           )
 
-          message.success(t("translation:loginPage.status.success"))
+          // message.success(t("translation:loginPage.status.success"))
 
           if (!lastStatusIsLogin) {
             navigate("/")
