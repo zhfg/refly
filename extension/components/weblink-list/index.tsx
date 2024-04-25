@@ -23,6 +23,7 @@ import React, {
   useState,
   memo,
   useMemo,
+  useTransition,
 } from "react"
 import InfiniteScroll from "react-infinite-scroll-component"
 import throttle from "lodash.throttle"
@@ -32,11 +33,12 @@ import { defaultQueryPayload } from "./utils"
 import { sendToBackground } from "@plasmohq/messaging"
 import { useMessage } from "@plasmohq/messaging/hook"
 
-import { type Conversation } from "~/types"
+import { LOCALE, type Conversation } from "~/types"
 import { time } from "~utils/time"
 // stores
 import { useWeblinkStore } from "~stores/weblink"
 import { safeParseUrl } from "~utils/parse"
+import { useTranslation } from "react-i18next"
 
 export const getStyle: PlasmoGetStyle = () => {
   const style = document.createElement("style")
@@ -60,7 +62,9 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
     indexStatus,
   } = props?.weblink
   const urlItem = safeParseUrl(url)
-  console.log("weblink rerender")
+
+  const { t, i18n } = useTranslation()
+  const uiLocale = i18n?.languages?.[0] as LOCALE
 
   return (
     <div className="conv-item-wrapper">
@@ -72,7 +76,9 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
           {/* <Tooltip className="edit" content="编辑">
             <IconEdit />
           </Tooltip> */}
-          <span className="date">{time(updatedAt).utc().fromNow()}</span>
+          <span className="date">
+            {time(updatedAt, uiLocale).utc().fromNow()}
+          </span>
         </div>
         <div className="conv-item-content">
           <span
@@ -86,14 +92,22 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
             <a rel="noreferrer" href={originPageUrl} target="_blank">
               <img
                 className="icon"
-                src={`https://www.google.com/s2/favicons?domain=${urlItem.origin}&sz=${16}`}
+                src={`https://www.google.com/s2/favicons?domain=${safeParseUrl(originPageUrl) || ""}&sz=${16}`}
                 alt=""
               />
               <span className="text">{originPageTitle}</span>
               {indexStatus === "finish" ? (
-                <Tag color="green">已阅读</Tag>
+                <Tag color="green">
+                  {t(
+                    "translation:loggedHomePage.homePage.weblinkList.item.read",
+                  )}
+                </Tag>
               ) : (
-                <Tag color="orange">未阅读</Tag>
+                <Tag color="orange">
+                  {t(
+                    "translation:loggedHomePage.homePage.weblinkList.item.unread",
+                  )}
+                </Tag>
               )}
             </a>
           </div>
@@ -118,6 +132,8 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
   const [keyword, setKeyword] = useState("")
   const [loading, setLoading] = useState(false)
   const webLinkStore = useWeblinkStore()
+
+  const { t } = useTranslation()
 
   const loadMore = async (currentPage?: number) => {
     const { isRequest, hasMore, pageSize, ...extraState } =
@@ -146,7 +162,9 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
     })
 
     if (!res?.success) {
-      message.error("获取往期浏览内容识别！")
+      message.error(
+        t("translation:loggedHomePage.homePage.weblinkList.list.fetchErr"),
+      )
       webLinkStore.updateIsRequest(false)
 
       return
@@ -260,7 +278,9 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
         headerStyle={{ justifyContent: "center" }}
         title={
           <div style={{ display: "flex", justifyContent: "center" }}>
-            <span style={{ fontWeight: "bold" }}>网页阅读历史</span>
+            <span style={{ fontWeight: "bold" }}>
+              {t("translation:loggedHomePage.homePage.weblinkList.title")}
+            </span>
           </div>
         }
         visible={webLinkStore.isWebLinkListVisible}
@@ -268,22 +288,30 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
         footer={
           <div className="weblink-footer-container">
             <p className="weblink-footer-selected">
-              已选择 <span>{webLinkStore.selectedRow?.length}</span> 项
+              {t(
+                "translation:loggedHomePage.homePage.weblinkList.selectedCnt",
+                "",
+                { count: webLinkStore.selectedRow?.length },
+              )}
             </p>
             <div>
-              <Button
-                onClick={() => {
-                  webLinkStore.updateIsWebLinkListVisible(false)
-                }}
-                style={{ marginRight: 8 }}>
-                取消
-              </Button>
               <Button
                 type="primary"
                 onClick={() => {
                   webLinkStore.updateIsWebLinkListVisible(false)
+                }}
+                style={{ marginRight: 8 }}>
+                {t(
+                  "translation:loggedHomePage.homePage.weblinkList.drawer.confirm",
+                )}
+              </Button>
+              <Button
+                onClick={() => {
+                  webLinkStore.updateIsWebLinkListVisible(false)
                 }}>
-                确认
+                {t(
+                  "translation:loggedHomePage.homePage.weblinkList.drawer.cancel",
+                )}
               </Button>
             </div>
           </div>
@@ -306,8 +334,6 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
           rowSelection={{
             selectedRowKeys: webLinkStore.selectedRow?.map((item) => item.key),
             onChange: (selectedRowKeys, selectedRows) => {
-              console.log("selectedRowKeys", selectedRowKeys)
-              console.log("selectedRows", selectedRows)
               webLinkStore.updateSelectedRow(selectedRows)
             },
           }}

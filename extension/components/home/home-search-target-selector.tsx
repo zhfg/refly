@@ -10,6 +10,7 @@ import { useSearchStateStore, SearchTarget } from "~stores/search-state"
 import { useWeblinkStore } from "~stores/weblink"
 import { IconTip } from "./icon-tip"
 import { getPopupContainer } from "~utils/ui"
+import { useTranslation } from "react-i18next"
 
 interface SearchTargetSelectorProps {
   showText: boolean
@@ -29,6 +30,8 @@ interface SearchTargetSelectorProps {
 export const SearchTargetSelector = (props: SearchTargetSelectorProps) => {
   const searchStateStore = useSearchStateStore()
   const webLinkStore = useWeblinkStore()
+
+  const { t } = useTranslation()
 
   const iconStyle = {
     marginRight: 8,
@@ -54,7 +57,7 @@ export const SearchTargetSelector = (props: SearchTargetSelectorProps) => {
       }}>
       <Menu.Item key={SearchTarget.CurrentPage}>
         <IconOriginalSize style={iconStyle} />
-        当前网页
+        {t("translation:loggedHomePage.homePage.searchScope.current")}
       </Menu.Item>
       <Menu.Item
         key={SearchTarget.SelectedPages}
@@ -62,15 +65,15 @@ export const SearchTargetSelector = (props: SearchTargetSelectorProps) => {
           webLinkStore.updateIsWebLinkListVisible(true)
         }}>
         <IconArchive style={iconStyle} />
-        历史已阅读
+        {t("translation:loggedHomePage.homePage.searchScope.history")}
       </Menu.Item>
       <Menu.Item key={SearchTarget.All}>
         <IconCommon style={iconStyle} />
-        所有网页
+        {t("translation:loggedHomePage.homePage.searchScope.all")}
       </Menu.Item>
       <Menu.Item key={SearchTarget.SearchEnhance}>
         <IconCompass style={iconStyle} />
-        联网搜索
+        {t("translation:loggedHomePage.homePage.searchScope.internet")}
       </Menu.Item>
     </Menu>
   )
@@ -78,13 +81,13 @@ export const SearchTargetSelector = (props: SearchTargetSelectorProps) => {
   const getDisplayText = (searchTarget: SearchTarget) => {
     switch (searchTarget) {
       case SearchTarget.SelectedPages:
-        return "历史已阅读"
+        return t("translation:loggedHomePage.homePage.searchScope.history")
       case SearchTarget.CurrentPage:
-        return "当前网页"
+        return t("translation:loggedHomePage.homePage.searchScope.current")
       case SearchTarget.SearchEnhance:
-        return "联网搜索"
+        return t("translation:loggedHomePage.homePage.searchScope.internet")
       case SearchTarget.All:
-        return "所有网页"
+        return t("translation:loggedHomePage.homePage.searchScope.all")
     }
   }
 
@@ -102,7 +105,7 @@ export const SearchTargetSelector = (props: SearchTargetSelectorProps) => {
   }
 
   return (
-    <IconTip text="选择提问范围">
+    <IconTip text={t("translation:loggedHomePage.homePage.searchScope.title")}>
       <Dropdown
         droplist={searchTargetDropList}
         trigger="hover"

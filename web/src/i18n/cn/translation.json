@@ -55,6 +55,52 @@
     "homePage": {
       "title": "人工智能驱动的超级记忆",
       "searchPlaceholder": "输入搜索内容...",
+      "selectedWeblink": {
+        "title": "基于选中网页提问："
+      },
+      "recommendQuickAction": {
+        "title": "推荐快捷操作：",
+        "summary": {
+          "title": "总结",
+          "tip": {
+            "title": "总结",
+            "current": "对当前网页进行快速{{action}}",
+            "selectedWeblink": "对选中的网页进行{{action}}",
+            "currentSelectedContent": "基于实时选择内容{{action}}"
+          },
+          "status": {
+            "contentHandling": "处理内容中...",
+            "createFailed": "创建新会话失败！",
+            "contentHandleSuccessNotify": "处理成功，正在跳转到会话页面...",
+            "contentHandleFailedNotify": "处理失败！"
+          }
+        },
+        "save": {
+          "title": "保存",
+          "tip": "保存此网页以供后续阅读",
+          "status": {
+            "contentHandling": "内容保存中...",
+            "createFailed": "创建新会话失败！",
+            "contentHandleSuccessNotify": "保存成功！",
+            "contentHandleFailedNotify": "处理失败！"
+          }
+        }
+      },
+      "weblinkList": {
+        "title": "知识库",
+        "selectedCnt": "已选择 {{count}} 项",
+        "drawer": {
+          "cancel": "取消",
+          "confirm": "确认"
+        },
+        "item": {
+          "read": "已处理",
+          "unread": "未处理"
+        },
+        "list": {
+          "fetchErr": "获取知识库内容失败！"
+        }
+      },
       "searchScope": {
         "title": "选择搜索范围",
         "all": "全部知识库",
@@ -281,6 +327,24 @@
           "title": "基于选中网页提问："
         }
       }
+    }
+  },
+  "hooks": {
+    "useBuildThreadAndRun": {
+      "status": {
+        "createFailed": "创建新会话失败！"
+      },
+      "task": {
+        "summary": {
+          "question": "总结网页",
+          "actionPrompt": "总结网页内容并提炼要点"
+        }
+      }
+    }
+  },
+  "components": {
+    "markdown": {
+      "copySuccess": "内容已复制到剪切板！"
     }
   },
   "title": "欢迎 {{name}}，使用 react-i18next 完全类型安全的 React",

@@ -213,7 +213,7 @@ export const SearchBox = () => {
                     type="text"
                     shape="round"
                     icon={<IconLanguage />}
-                    className="setting-page-language-btn">
+                    className="setting-page-language-btn search-assist-btn">
                     {localeToLanguageName?.[uiLocale]?.[outputLocale]}{" "}
                   </Button>
                 </OutputLocaleList>
@@ -221,6 +221,7 @@ export const SearchBox = () => {
               <Button
                 shape="circle"
                 icon={<IconSend />}
+                className="search-btn"
                 style={{ color: "#FFF", background: "#00968F" }}
                 onClick={() => {
                   handleSendMessage()

@@ -55,6 +55,42 @@
     "homePage": {
       "title": "AI Powered Supermemory",
       "searchPlaceholder": "Search for Refly",
+      "selectedWeblink": {
+        "title": "Ask a Question Based on the Selected Web Page:"
+      },
+      "weblinkList": {
+        "title": "Knowledge Base",
+        "selectedCnt": "Selected {{count}} items",
+        "drawer": {
+          "cancel": "Cancel",
+          "confirm": "Confirm"
+        },
+        "item": {
+          "read": "Read",
+          "unread": "Unread"
+        },
+        "list": {
+          "fetchErr": "Failed to retrieve content from the Knowledge Base!"
+        }
+      },
+      "recommendQuickAction": {
+        "title": "Recommended Quick Actions:",
+        "summary": {
+          "title": "Summary",
+          "tip": {
+            "title": "summary",
+            "current": "Quickly {{action}} the current web page",
+            "selectedWeblink": "Perform {{action}} on the selected web page",
+            "currentSelectedContent": "Perform {{action}} based on the currently selected content"
+          },
+          "status": {
+            "contentHandling": "Processing content...",
+            "createFailed": "Failed to create a new session!",
+            "contentHandleSuccessNotify": "Processing successful, redirecting to the session page...",
+            "contentHandleFailedNotify": "Processing failed!"
+          }
+        }
+      },
       "searchScope": {
         "title": "Select Search Scope",
         "all": "Whole Library",
@@ -289,6 +325,24 @@
         },
         "selectedWeblink": {
           "title": "Ask a Question Based on the Selected Web Page:"
+        }
+      }
+    }
+  },
+  "components": {
+    "markdown": {
+      "copySuccess": "Content Copied to Clipboard"
+    }
+  },
+  "hooks": {
+    "useBuildThreadAndRun": {
+      "status": {
+        "createFailed": "Failed to create a new session!"
+      },
+      "task": {
+        "summary": {
+          "question": "Summarize the Web Page",
+          "actionPrompt": "Summarize the content of the web page and extract key points"
         }
       }
     }

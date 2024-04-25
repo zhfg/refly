@@ -31,17 +31,16 @@ export const Settings = () => {
       content: t("settings.account.logoutConfirmation.message"),
       onOk() {
         console.log("delete cookie")
-        userStore.setUserProfile(null)
-        userStore.setToken("")
         localStorage.removeItem("refly-user-profile")
+        localStorage.removeItem("refly-local-settings")
+        userStore.resetState()
 
         // 给插件发消息
         chrome.runtime?.sendMessage(getExtensionId(), {
-          name: "logout-notification",
+          name: "logout-notify",
         })
 
         deleteCookie()
-        getClientOrigin
         Cookies.remove("_refly_ai_sid", { domain: getCookieOrigin() })
         navigate("/")
       },

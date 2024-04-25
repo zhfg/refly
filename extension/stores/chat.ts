@@ -4,6 +4,7 @@ import type {} from "@redux-devtools/extension"
 import { type Message, type SessionItem } from "~types"
 
 export interface ChatState {
+  loading: boolean
   // state
   messages: Message[]
   sessions: SessionItem[]
@@ -12,6 +13,7 @@ export interface ChatState {
   isNewConversation: boolean
 
   // method
+  setLoading: (val: boolean) => void
   setMessages: (val: Message[]) => void
   setIsGenTitle: (val: boolean) => void
   setNewQAText: (val: string) => void
@@ -20,6 +22,7 @@ export interface ChatState {
 }
 
 export const defaultState = {
+  loading: false,
   // messages: fakeMessages as any,
   messages: [],
   sessions: [],
@@ -32,6 +35,7 @@ export const useChatStore = create<ChatState>()(
   devtools((set) => ({
     ...defaultState,
 
+    setLoading: (val: boolean) => set((state) => ({ ...state, loading: val })),
     setMessages: (val: Message[]) =>
       set((state) => ({ ...state, messages: val })),
     setSessions: (val: SessionItem[]) => set({ sessions: val }),

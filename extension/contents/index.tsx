@@ -12,7 +12,7 @@ import LoginCSSText from "data-text:~/components/login/index.scss"
 import EmptyThreadLibraryCSSText from "data-text:~/components/empty-thread-library-status/index.scss"
 import SelectedContentListCSS from "data-text:~/components/selected-content-list/index.scss"
 import type { PlasmoGetInlineAnchor, PlasmoGetShadowHostId } from "plasmo"
-import React, { useEffect } from "react"
+import React, { useEffect, Suspense } from "react"
 import { MemoryRouter } from "react-router-dom"
 
 // import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
@@ -33,9 +33,12 @@ import { useSiderStore } from "~stores/sider"
 import { useQuickActionStore } from "~stores/quick-action"
 
 // 组件
-import { Message } from "@arco-design/web-react"
+import { Message, Spin } from "@arco-design/web-react"
 import { ContentRouter } from "../components/router"
 import { Markdown } from "~components/markdown"
+
+// 加载国际化
+import "~i18n/config"
 
 // export const config: PlasmoCSConfig = {
 //   run_at: "document_end"
@@ -92,22 +95,24 @@ export const Content = () => {
   }, [])
 
   return (
-    <div className="light app-container">
-      {/* <div
+    <Suspense fallback={<Spin style={{ marginTop: "200px auto" }} />}>
+      <div className="light app-container">
+        {/* <div
         className={quickActionStore.selectedText ? "entry active" : "entry"}
         onClick={(_) => siderStore.setShowSider(!siderStore.showSider)}>
         <img src={Logo} alt="唤起 Refly" style={{ width: 25, height: 25 }} />
         <span>⌘B</span>
       </div> */}
 
-      <div
-        id="refly-app-main"
-        className={siderStore.showSider ? "main active" : "main"}>
-        <MemoryRouter>
-          <ContentRouter />
-        </MemoryRouter>
+        <div
+          id="refly-app-main"
+          className={siderStore.showSider ? "main active" : "main"}>
+          <MemoryRouter>
+            <ContentRouter />
+          </MemoryRouter>
+        </div>
       </div>
-    </div>
+    </Suspense>
   )
 }
 

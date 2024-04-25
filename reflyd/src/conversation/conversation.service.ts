@@ -49,9 +49,11 @@ export class ConversationService {
     conversationId: number,
     messages: { type: string; content: string }[],
     data: Prisma.ConversationUpdateInput,
+    locale: LOCALE,
   ) {
     const summarizedTitle = await this.llmService.summarizeConversation(
       messages,
+      locale,
     );
     this.logger.log(`Summarized title: ${summarizedTitle}`);
 
@@ -142,10 +144,15 @@ export class ConversationService {
     // post chat logic
     await Promise.all([
       this.addChatMessages(newMessages),
-      this.updateConversation(convId, [...chatHistory, ...newMessages], {
-        lastMessage: taskRes.answer,
-        messageCount: chatHistory.length + 2,
-      }),
+      this.updateConversation(
+        convId,
+        [...chatHistory, ...newMessages],
+        {
+          lastMessage: taskRes.answer,
+          messageCount: chatHistory.length + 2,
+        },
+        task?.locale,
+      ),
     ]);
   }
 
@@ -217,9 +224,9 @@ export class ConversationService {
       // write answer in a stream style
       let answerStr = '';
       for await (const chunk of await stream) {
-        answerStr += chunk;
+        answerStr += chunk || '';
 
-        res.write(chunk);
+        res.write(chunk || '');
       }
 
       return answerStr;
@@ -233,8 +240,9 @@ export class ConversationService {
     this.logger.log('relatedQuestions', relatedQuestions);
 
     res.write(RELATED_SPLIT);
+
     if (relatedQuestions) {
-      res.write(JSON.stringify(relatedQuestions));
+      res.write(JSON.stringify(relatedQuestions) || '');
     }
 
     return {
@@ -260,7 +268,7 @@ export class ConversationService {
     );
 
     // first return sources，use unique tag for parse data
-    res.write(JSON.stringify(sources));
+    res.write(JSON.stringify(sources) || '');
     res.write(LLM_SPLIT);
 
     const getSSEData = async (stream) => {
@@ -269,9 +277,9 @@ export class ConversationService {
       for await (const chunk of await stream) {
         const chunkStr =
           chunk?.content || (typeof chunk === 'string' ? chunk : '');
-        answerStr += chunkStr;
+        answerStr += chunkStr || '';
 
-        res.write(chunkStr);
+        res.write(chunkStr || '');
       }
 
       return answerStr;
@@ -285,7 +293,7 @@ export class ConversationService {
     this.logger.log('relatedQuestions', relatedQuestions);
 
     res.write(RELATED_SPLIT);
-    res.write(JSON.stringify(relatedQuestions));
+    res.write(JSON.stringify(relatedQuestions) || '');
 
     const handledAnswer = answerStr
       .replace(/\[\[([cC])itation/g, '[citation')
@@ -325,7 +333,7 @@ export class ConversationService {
       };
     }
 
-    res.write(JSON.stringify(sources));
+    res.write(JSON.stringify(sources) || '');
     res.write(LLM_SPLIT);
 
     const weblinkList = data?.filter?.weblinkList;
@@ -356,7 +364,7 @@ export class ConversationService {
           chunk?.content || (typeof chunk === 'string' ? chunk : '');
         answerStr += chunkStr;
 
-        res.write(chunkStr);
+        res.write(chunkStr || '');
       }
 
       return answerStr;

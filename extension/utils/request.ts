@@ -84,7 +84,7 @@ export async function request<T>(
 
   // 如果 data 不为 formData 时，才做 JSON stringify
   if (
-    opt.method === "POST" &&
+    ["POST", "PUT"].includes(opt.method) &&
     typeof opt.body === "object" &&
     !(opt.body instanceof FormData)
   ) {

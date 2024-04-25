@@ -1,3 +1,4 @@
+import type { OutputLocale } from "~utils/i18n"
 import type { Source } from "./session"
 
 export interface Mode {
@@ -28,7 +29,8 @@ export const enum LANGUAGE {
 }
 
 export const enum LOCALE {
-  ZH_CN = "zh_CN",
+  ZH_CN = "zh-CN",
+  EN = "en",
 }
 
 export const enum QUICK_ACTION_TYPE {
@@ -78,7 +80,7 @@ export type Task = {
   taskType: TASK_TYPE
   taskId?: string // task:xxxx-xxxx-xxxx-xxxx
   language?: LANGUAGE
-  locale?: LOCALE
+  locale?: OutputLocale
   data?: CHAT | QUICK_ACTION_TASK_PAYLOAD
 }
 

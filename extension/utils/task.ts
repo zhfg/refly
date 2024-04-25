@@ -11,21 +11,17 @@ import {
 } from "~/types"
 
 import { genUniqueId } from "./index"
+import type { OutputLocale } from "./i18n"
 
 export type BuildTask = {
   taskType: TASK_TYPE
   language?: LANGUAGE
-  locale?: LOCALE
+  locale?: OutputLocale
   data: CHAT | QUICK_ACTION_TASK_PAYLOAD
 }
 
 export const buildTask = (payload: BuildTask): Task => {
-  const {
-    taskType,
-    language = LANGUAGE.AUTO,
-    locale = LOCALE.ZH_CN,
-    data = {},
-  } = payload
+  const { taskType, language = LANGUAGE.AUTO, locale, data = {} } = payload
   const taskId = `task:${genUniqueId()}`
 
   const task: Task = {
@@ -39,22 +35,25 @@ export const buildTask = (payload: BuildTask): Task => {
   return task
 }
 
-export const buildChatTask = (data): Task => {
+export const buildChatTask = (data, locale: OutputLocale = LOCALE.EN): Task => {
   const task: Task = {
     taskType: TASK_TYPE.CHAT,
     language: LANGUAGE.AUTO,
-    locale: LOCALE.ZH_CN,
+    locale,
     data,
   }
 
   return task
 }
 
-export const buildQuickActionTask = (data): Task => {
+export const buildQuickActionTask = (
+  data,
+  locale: OutputLocale = LOCALE.EN,
+): Task => {
   const task: Task = {
     taskType: TASK_TYPE.QUICK_ACTION,
     language: LANGUAGE.AUTO,
-    locale: LOCALE.ZH_CN,
+    locale,
     data,
   }
 

@@ -1,6 +1,7 @@
 import { Button } from "@arco-design/web-react"
 import { IconHighlight } from "@arco-design/web-react/icon"
 import classNames from "classnames"
+import { useTranslation } from "react-i18next"
 import { IconTip } from "~components/home/icon-tip"
 import { useSelectedMark } from "~hooks/use-selected-mark"
 import { useContentSelectorStore } from "~stores/content-selector"
@@ -16,6 +17,7 @@ export const ContentSelectorBtn = (props: ContentSelectorBtnProps) => {
   const contentSelectorStore = useContentSelectorStore()
   // 设置 selected-mark 的监听器
   const { handleToggleContentSelector } = useSelectedMark()
+  const { t } = useTranslation()
 
   const handleClick = async () => {
     // 这里需要切换一下对应的 searchTarget
@@ -55,7 +57,11 @@ export const ContentSelectorBtn = (props: ContentSelectorBtnProps) => {
   return (
     <IconTip
       text={
-        contentSelectorStore?.showContentSelector ? "取消选择" : "选择网页内容"
+        contentSelectorStore?.showContentSelector
+          ? t(
+              "translation:loggedHomePage.homePage.contentSelector.tip.cancelSelect",
+            )
+          : t("translation:loggedHomePage.homePage.contentSelector.tip.select")
       }>
       <Button
         className={classNames("content-selector-btn", {

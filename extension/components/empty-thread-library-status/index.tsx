@@ -4,9 +4,11 @@ import EmptySVG from "~assets/digest/empty.svg"
 // styles
 import "./index.scss"
 import { useNavigate } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 
 export const EmptyThreadLibraryStatus = () => {
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   return (
     <div className="empty-digest-container">
@@ -14,24 +16,15 @@ export const EmptyThreadLibraryStatus = () => {
         <img src={EmptySVG} className="empty-digest-cover" />
       </div>
       <p className="empty-digest-hint">
-        暂无无会话，赶紧下载插件或访问首页提问吧~
+        {t("translation:threadLibrary.empty.title")}
       </p>
       <div className="empty-digest-action-container">
-        <Button
-          onClick={() => {
-            window.open(
-              `https://chromewebstore.google.com/detail/lecbjbapfkinmikhadakbclblnemmjpd`,
-              "_blank",
-            )
-          }}>
-          下载插件
-        </Button>
         <Button
           style={{ marginLeft: 24 }}
           onClick={() => {
             navigate(`/`)
           }}>
-          去首页搜索或提问
+          {t("translation:threadLibrary.empty.goHome")}
         </Button>
       </div>
     </div>
