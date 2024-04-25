@@ -339,6 +339,7 @@ export class LlmService implements OnModuleInit {
     locale: LOCALE,
   ) {
     if (docs.length <= 0) return;
+    console.log('activate getRelatedQuestion with locale: ', locale);
 
     let contextContent = docs.reduce((total, cur) => {
       total += `内容块:
@@ -379,7 +380,7 @@ export class LlmService implements OnModuleInit {
       })
       .pipe(parser);
     const askFollowUpQuestion = (await runnable.invoke([
-      new SystemMessage(generateAskFollowupQuestion.systemPrompt),
+      new SystemMessage(generateAskFollowupQuestion.systemPrompt(locale)),
       new HumanMessage(contextContent),
       new HumanMessage(`Please output answer in locale: ${locale} language:`),
     ])) as {
