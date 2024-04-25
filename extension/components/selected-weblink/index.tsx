@@ -2,24 +2,26 @@ import { Tag } from "@arco-design/web-react"
 import { IconRightCircle, IconLink } from "@arco-design/web-react/icon"
 import React, { type MutableRefObject } from "react"
 import { useTranslation } from "react-i18next"
-import type { WebLinkItem } from "~components/weblink-list/types"
 import { useSearchQuickActionStore } from "~stores/search-quick-action"
 import { useWeblinkStore } from "~stores/weblink"
 import type { Source } from "~types"
+import { safeParseUrl } from "~utils/parse"
 
 interface SelectedWeblinkProps {
   ref?: MutableRefObject<SelectedWeblinkProps>
   closable: boolean
+  selectedWeblinkList: { key: string | number; content: Source }[]
 }
 
 export const SelectedWeblink = (props: SelectedWeblinkProps) => {
   const weblinkStore = useWeblinkStore()
   const searchQuickActionStore = useSearchQuickActionStore()
   const { t } = useTranslation()
+  const selectedRow = props?.selectedWeblinkList
 
   const updateSelectedRow = (link: {
     key: string | number
-    content: WebLinkItem
+    content: Source
   }) => {
     const { selectedRow } = useWeblinkStore.getState()
 
@@ -46,7 +48,7 @@ export const SelectedWeblink = (props: SelectedWeblinkProps) => {
             {t("translation:loggedHomePage.homePage.selectedWeblink.title")}
           </span>
         </div>
-        {weblinkStore?.selectedRow?.map((item, index) => (
+        {selectedRow?.map((item, index) => (
           <Tag
             key={index}
             closable={props.closable}
@@ -59,15 +61,15 @@ export const SelectedWeblink = (props: SelectedWeblinkProps) => {
             color="gray">
             <a
               rel="noreferrer"
-              href={item?.content?.url}
+              href={item?.content?.metadata?.source}
               target="_blank"
               className="selected-weblink-item">
               <img
                 className="icon"
-                src={`https://www.google.com/s2/favicons?domain=${item?.content?.origin}&sz=${16}`}
+                src={`https://www.google.com/s2/favicons?domain=${safeParseUrl(item?.content?.metadata?.source)}&sz=${16}`}
                 alt=""
               />
-              <span className="text">{item?.content?.originPageTitle}</span>
+              <span className="text">{item?.content?.metadata?.title}</span>
             </a>
           </Tag>
         ))}

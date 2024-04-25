@@ -174,9 +174,10 @@ export const Thread = () => {
     handleThread(params.threadId)
   }, [])
 
-  console.log("thread message", chatStore.messages)
   const sessions = buildSessions(chatStore.messages)
   const selectedWeblinkConfig = getSelectedWeblinkConfig(chatStore.messages)
+
+  console.log("selectedWeblinkConfig", selectedWeblinkConfig)
 
   return (
     <div

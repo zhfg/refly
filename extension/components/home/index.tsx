@@ -71,6 +71,8 @@ const Home = (props: ChatProps) => {
   const isIntentActive = !!quickActionStore.selectedText
 
   const handleSendMessage = async () => {
+    chatStore.setLoading(true)
+
     const { newQAText } = useChatStore.getState()
     const { searchTarget } = useSearchStateStore.getState()
 
@@ -161,10 +163,24 @@ const Home = (props: ChatProps) => {
     scrollToBottom()
   }, [isIntentActive])
 
-  const showQuickAction =
-    (searchQuickActionStore.showQuickAction &&
-      webLinkStore?.selectedRow?.length > 0) ||
-    webLinkStore?.selectedRow?.length > 0
+  const getShowQuickAction = () => {
+    if (
+      searchTarget === SearchTarget.CurrentPage &&
+      searchQuickActionStore.showQuickAction
+    ) {
+      return true
+    }
+
+    if (
+      (searchTarget === SearchTarget.SelectedPages &&
+        webLinkStore?.selectedRow?.length > 0) ||
+      webLinkStore?.selectedRow?.length > 0
+    ) {
+      return true
+    }
+
+    return false
+  }
 
   return (
     <div
@@ -248,15 +264,27 @@ const Home = (props: ChatProps) => {
               <Button
                 shape="circle"
                 icon={<IconSend />}
+                loading={chatStore.loading}
                 style={{ color: "#FFF", background: "#00968F" }}
                 onClick={() => handleSendMessage()}></Button>
             </div>
           </div>
         </div>
         {webLinkStore?.selectedRow?.length > 0
-          ? [<SelectedWeblink closable={true} />, <Divider />]
+          ? [
+              <SelectedWeblink
+                closable={true}
+                selectedWeblinkList={mapSourceFromWeblinkList(
+                  webLinkStore?.selectedRow || [],
+                ).map((item, index) => ({
+                  key: webLinkStore?.selectedRow?.[index]?.key,
+                  content: item,
+                }))}
+              />,
+              <Divider />,
+            ]
           : null}
-        {showQuickAction ? <QuickAction /> : null}
+        {getShowQuickAction() ? <QuickAction /> : null}
         {contentSelectorStore?.showSelectedMarks ? (
           <SelectedContentList marks={contentSelectorStore.marks} />
         ) : null}

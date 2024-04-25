@@ -74,6 +74,7 @@ export const useBuildThreadAndRun = () => {
     // 更新新的 newQAText，for 新会话跳转使用
     chatStore.setNewQAText(question)
     chatStore.setIsNewConversation(true)
+    chatStore.setLoading(false)
     navigate(`/thread/${res?.data?.id}`)
   }
 

@@ -10,12 +10,12 @@ import { useContentSelectorStore } from "~stores/content-selector"
 import { useStoreWeblink } from "~hooks/use-store-weblink"
 import type { Source } from "~types"
 import { useTranslation } from "react-i18next"
+import { useChatStore } from "~stores/chat"
 
 export const QuickAction = () => {
   // stores
-  const webLinkStore = useWeblinkStore()
+  const chatStore = useChatStore()
   const contentSelectorStore = useContentSelectorStore()
-  const searchQuickActionStore = useSearchQuickActionStore()
   const { uploadingStatus, handleUploadWebsite } = useStoreWeblink()
   const { searchTarget } = useSearchStateStore()
   const { showSelectedMarks, marks = [] } = useContentSelectorStore()
@@ -54,6 +54,8 @@ export const QuickAction = () => {
    * 2. 也只有这两种情况下需要
    */
   const handleSummary = async () => {
+    chatStore.setLoading(true)
+
     console.log("handleSummary")
     if (uploadingStatus === "loading") return
 

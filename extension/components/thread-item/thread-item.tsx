@@ -351,9 +351,10 @@ export const ThreadItem = (props: ThreadItemProps) => {
           </div>
           {showSelectedWeblinkList ? (
             <SelectedWeblink
-              ref={selectedWeblinkListRef}
               closable={false}
-              selectedWeblinkList={threadWeblinkListFilter}
+              selectedWeblinkList={threadWeblinkListFilter?.map(
+                (item, index) => ({ key: index, content: item }),
+              )}
             />
           ) : null}
           {searchQuickActionStore.showQuickAction &&
