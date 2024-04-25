@@ -9,9 +9,8 @@ import { useHomeStateStore } from "~stores/home-state"
 import { useSelectedMark } from "~hooks/use-selected-mark"
 import { useTranslation } from "react-i18next"
 import { useGetUserSettings } from "~hooks/use-get-user-settings"
-import { safeParseJSON } from "~utils/parse"
-import { bgStorage } from "~storage"
 import { LOCALE } from "~types"
+import { useProcessStatusCheck } from "~hooks/use-process-status-check"
 
 export const ContentRouter = () => {
   // 导航相关
@@ -26,28 +25,12 @@ export const ContentRouter = () => {
   const language = i18n.languages?.[0]
 
   // 获取 locale
-  const storageLocalSettings = safeParseJSON(
-    bgStorage.getItem("refly-local-settings"),
-  )
-
-  console.log(
-    "locale",
-    storageLocalSettings,
-    bgStorage.getItem("refly-local-settings"),
-  )
-  const locale =
-    userStore?.localSettings?.uiLocale ||
-    storageLocalSettings?.uiLocale ||
-    LOCALE.EN
-  console.log(
-    "locale",
-    storageLocalSettings?.uiLocale,
-    userStore?.localSettings?.uiLocale,
-    LOCALE.EN,
-  )
+  const locale = userStore?.localSettings?.uiLocale || LOCALE.EN
 
   // 这里处理 user 登录和状态管理
   useGetUserSettings()
+  // 进行保活检查
+  useProcessStatusCheck()
 
   // TODO: 国际化相关内容
   useEffect(() => {

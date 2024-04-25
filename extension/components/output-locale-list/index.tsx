@@ -27,7 +27,7 @@ export const OutputLocaleList = (props: { children: any }) => {
     const { localSettings } = useUserStore.getState()
 
     userStore.setLocalSettings({ ...localSettings, outputLocale: lng })
-    bgStorage.setItem(
+    await bgStorage.setItem(
       "refly-local-settings",
       safeStringifyJSON({ ...localSettings, outputLocale: lng }),
     )
