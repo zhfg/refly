@@ -45,7 +45,7 @@ const Home = () => {
   ) => {
     try {
       await chrome.runtime.sendMessage(getExtensionId(), {
-        name: "login-notification",
+        name: "refly-login-notify",
         body: {
           status,
           token,
