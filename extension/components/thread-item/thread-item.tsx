@@ -130,12 +130,13 @@ export const ThreadItem = (props: ThreadItemProps) => {
       return t("translation:threadDetail.item.input.searchPlaceholder.all")
   }
 
-  const handleAskFollowing = async () => {
+  const handleAskFollowing = async (question?: string) => {
     // TODO: 这里需要 follow 之前的 filter 进行提问
-    const { newQAText } = useChatStore.getState()
+    const { newQAText: storeNewQAText } = useChatStore.getState()
     const { marks } = useContentSelectorStore.getState()
     const { localSettings } = useUserStore.getState()
 
+    const newQAText = storeNewQAText || question
     if (!newQAText) {
       message.info(t("translation:threadDetail.item.input.status.emptyNotify"))
       return
@@ -272,7 +273,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
             key={index}
             session={item}
             isLastSession={index === sessions.length - 1}
-            handleAskFollowing={() => handleAskFollowing()}
+            handleAskFollowing={(item) => handleAskFollowing(item)}
           />
         ))}
       </div>
