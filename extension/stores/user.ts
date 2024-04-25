@@ -26,6 +26,7 @@ export interface UserState {
   setToken: (val?: string) => void
   setLoginModalVisible: (val: boolean) => void
   setLocalSettings: (val: LocalSettings) => void
+  resetState: () => void
 }
 
 export const defaultLocalSettings = {
@@ -56,5 +57,6 @@ export const useUserStore = create<UserState>()(
       set((state) => ({ ...state, loginModalVisible: val })),
     setLocalSettings: (val: LocalSettings) =>
       set((state) => ({ ...state, localSettings: val })),
+    resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),
 )

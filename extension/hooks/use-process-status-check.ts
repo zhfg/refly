@@ -1,11 +1,14 @@
 import { useEffect } from "react"
+import { useGetUserSettings } from "./use-get-user-settings"
 
-export const useProcessLoginNotify = () => {
+export const useProcessStatusCheck = () => {
+  const { getLoginStatus } = useGetUserSettings()
+
   // 收到消息之后，关闭窗口
   const handleExtensionMessage = (request: any) => {
-    console.log("activate useProcessLoginNotify", request)
-    if (request?.data?.name === "refly-login-notify") {
-      window.close()
+    console.log("activate useProcessLogoutNotify", request)
+    if (request?.name === "refly-status-check") {
+      getLoginStatus()
     }
   }
 

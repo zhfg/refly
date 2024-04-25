@@ -40,25 +40,26 @@ export const useGetUserSettings = () => {
   const { t } = useTranslation()
 
   const [loginNotification, setLoginNotification] = useStorage({
-    key: "login-notification",
+    key: "refly-login-notify",
     instance: bgStorage,
   })
 
   const getLoginStatus = async () => {
     try {
+      let { localSettings, userProfile } = useUserStore.getState()
+      const lastStatusIsLogin = !!userProfile?.id
+
       const res = await sendToBackground({
         name: "getUserInfo",
       })
 
       console.log("loginStatus", res)
-      let { localSettings } = useUserStore.getState()
 
       if (!res?.success) {
-        userStore.setUserProfile(null)
-        userStore.setToken("")
+        userStore.resetState()
         setLoginNotification("")
-        bgStorage.removeItem("refly-user-profile")
-        bgStorage.removeItem("refly-local-settings")
+        await bgStorage.removeItem("refly-user-profile")
+        await bgStorage.removeItem("refly-local-settings")
         navigate("/login")
       } else {
         userStore.setUserProfile(res?.data)
@@ -98,16 +99,22 @@ export const useGetUserSettings = () => {
         i18n.changeLanguage(uiLocale)
         userStore.setLocalSettings(localSettings)
 
-        bgStorage.setItem("refly-user-profile", safeStringifyJSON(res?.data))
-        bgStorage.setItem(
+        await bgStorage.setItem(
+          "refly-user-profile",
+          safeStringifyJSON(res?.data),
+        )
+        await bgStorage.setItem(
           "refly-local-settings",
           safeStringifyJSON(localSettings),
         )
+
+        if (!lastStatusIsLogin) {
+          navigate("/")
+        }
       }
     } catch (err) {
       console.log("getLoginStatus err", err)
-      userStore.setUserProfile(null)
-      userStore.setToken("")
+      userStore.resetState()
       bgStorage.removeItem("refly-user-profile")
       bgStorage.removeItem("refly-local-settings")
       setLoginNotification("")
@@ -118,10 +125,12 @@ export const useGetUserSettings = () => {
   const handleLoginStatus = async ({ body: data }: ExternalLoginPayload) => {
     if (data?.status === "success") {
       try {
+        let { localSettings, userProfile } = useUserStore.getState()
+        const lastStatusIsLogin = !!userProfile?.id
+
         const res = await sendToBackground({
           name: "getUserInfo",
         })
-        let { localSettings } = useUserStore.getState()
 
         console.log("loginStatus", res)
 
@@ -129,8 +138,8 @@ export const useGetUserSettings = () => {
           userStore.setUserProfile(undefined)
           userStore.setToken("")
           setToken("")
-          bgStorage.removeItem("refly-user-profile")
-          bgStorage.removeItem("refly-local-settings")
+          await bgStorage.removeItem("refly-user-profile")
+          await bgStorage.removeItem("refly-local-settings")
 
           navigate("/login")
           message.error(t("translation:loginPage.status.failed"))
@@ -138,7 +147,10 @@ export const useGetUserSettings = () => {
           userStore.setUserProfile(res?.data)
           userStore.setToken(data?.token)
           setToken(data?.token)
-          bgStorage.setItem("refly-user-profile", safeStringifyJSON(res?.data))
+          await bgStorage.setItem(
+            "refly-user-profile",
+            safeStringifyJSON(res?.data),
+          )
 
           // 增加 localSettings
           let uiLocale = res?.data?.uiLocale as LOCALE
@@ -175,14 +187,20 @@ export const useGetUserSettings = () => {
           i18n.changeLanguage(uiLocale)
 
           userStore.setLocalSettings(localSettings)
-          bgStorage.setItem("refly-user-profile", safeStringifyJSON(res?.data))
-          bgStorage.setItem(
+          await bgStorage.setItem(
+            "refly-user-profile",
+            safeStringifyJSON(res?.data),
+          )
+          await bgStorage.setItem(
             "refly-local-settings",
             safeStringifyJSON(localSettings),
           )
 
           message.success(t("translation:loginPage.status.success"))
-          navigate("/")
+
+          if (!lastStatusIsLogin) {
+            navigate("/")
+          }
         }
       } catch (err) {
         console.log("getLoginStatus err", err)
@@ -190,8 +208,8 @@ export const useGetUserSettings = () => {
         userStore.setLocalSettings(defaultLocalSettings)
         userStore.setToken("")
         setToken("")
-        bgStorage.removeItem("refly-user-profile")
-        bgStorage.removeItem("refly-local-settings")
+        await bgStorage.removeItem("refly-user-profile")
+        await bgStorage.removeItem("refly-local-settings")
 
         navigate("/login")
       }
@@ -203,7 +221,7 @@ export const useGetUserSettings = () => {
   }
 
   useEffect(() => {
-    if (bgMessage?.data?.name === "login-notification") {
+    if (bgMessage?.data?.name === "refly-login-notify") {
       handleLoginStatus(bgMessage?.data)
     }
   }, [bgMessage.data])
@@ -220,4 +238,8 @@ export const useGetUserSettings = () => {
   useEffect(() => {
     getLoginStatus()
   }, [siderStore?.showSider])
+
+  return {
+    getLoginStatus,
+  }
 }
