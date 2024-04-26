@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { Message as message } from "@arco-design/web-react"
+import { Helmet } from "react-helmet"
 
 import { useDigestDetailStore } from "@/stores/digest-detail"
 // utils
@@ -68,6 +69,10 @@ export const DigestTail = () => {
         display: "flex",
         flexDirection: "column",
       }}>
+      <Helmet>
+        <title>{digestDetailStore.digest?.title}</title>
+        <meta name="description" content={digestDetailStore.digest?.abstract} />
+      </Helmet>
       <Header digest={digestDetailStore?.digest as Digest} />
       <DigestDetailContent
         sessions={sessions}

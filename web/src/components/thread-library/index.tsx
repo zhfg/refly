@@ -7,6 +7,7 @@ import {
   Message as message,
   Typography,
 } from "@arco-design/web-react"
+import { Helmet } from "react-helmet"
 // stores
 import { useThreadStore } from "@/stores/thread"
 import {
@@ -105,6 +106,9 @@ export const ThreadLibrary = () => {
         flexDirection: "column",
       }}>
       {/* <Header /> */}
+      <Helmet>
+        <title>{t("tabMeta.threadLibrary.title")}</title>
+      </Helmet>
       <List
         className="thread-library-list"
         wrapperStyle={{ width: "100%" }}

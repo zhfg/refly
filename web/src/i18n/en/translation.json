@@ -1,5 +1,21 @@
 {
   "language": "English",
+  "tabMeta": {
+    "landingPage": {
+      "title": "Where knowledge thrives",
+      "description": "Quick summaries, Insights, Auto tag and AI Search. Refly can build your second brain, extend knowledge and give you superpower"
+    },
+    "digestTopics": {
+      "title": "All Topics",
+      "description": "Topic categories derived from your browsing and session history, representing your reading and learning trends"
+    },
+    "threadLibrary": {
+      "title": "Threads"
+    },
+    "settings": {
+      "title": "Settings"
+    }
+  },
   "landingPage": {
     "slogan": "Where knowledge thrives",
     "description": "Quick summaries, Insights, Auto tag and AI Search. Refly can build your second brain, extend knowledge and give you superpower",
