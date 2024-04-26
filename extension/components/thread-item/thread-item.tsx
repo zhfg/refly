@@ -17,7 +17,7 @@ import { Session } from "./session"
 import { TASK_TYPE, type SessionItem, type Task, type Source } from "~types"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input"
 import { useBuildTask } from "~hooks/use-build-task"
-import { buildChatTask, buildQuickActionTask, buildTask } from "~utils/task"
+import { buildTask } from "~utils/task"
 import { useConversationStore } from "~stores/conversation"
 import { ThreadSearchTargetSelector } from "~components/thread-item/thread-search-target-selector"
 import { SearchTarget } from "~stores/search-state"
@@ -32,6 +32,8 @@ import { SelectedContentList } from "~components/selected-content-list"
 import { useStoreWeblink } from "~hooks/use-store-weblink"
 import { useHomeStateStore } from "~stores/home-state"
 import { useSelectedMark } from "~hooks/use-selected-mark"
+import { useTranslation } from "react-i18next"
+import { useUserStore } from "~stores/user"
 
 interface ThreadItemProps {
   sessions: SessionItem[]
@@ -49,8 +51,12 @@ export const ThreadItem = (props: ThreadItemProps) => {
   const { sessions, selectedWeblinkConfig } = props
   const inputRef = useRef<RefTextAreaType>()
   const selectedWeblinkListRef = useRef<HTMLDivElement>(null)
+  const inputContainerRef = useRef<HTMLDivElement>(null)
+  const [inputContainerHeight, setInputContainerHeight] = useState(0)
   const chatStore = useChatStore()
   const navigate = useNavigate()
+
+  const { t } = useTranslation()
 
   const [threadSearchTarget, setThreadSearchTarget] = useState<SearchTarget>(
     selectedWeblinkConfig?.searchTarget,
@@ -108,23 +114,31 @@ export const ThreadItem = (props: ThreadItemProps) => {
     const { showSelectedMarks } = useContentSelectorStore.getState()
     const searchTarget = threadSearchTarget
 
-    if (showSelectedMarks) return "基于实时选择内容追问..."
+    if (showSelectedMarks)
+      return t(
+        "translation:threadDetail.item.input.searchPlaceholder.currentSelectedContent",
+      )
     if (searchTarget === SearchTarget.SelectedPages)
-      return "对选中的网页进行追问..."
+      return t(
+        "translation:threadDetail.item.input.searchPlaceholder.selectedWeblink",
+      )
     if (searchTarget === SearchTarget.CurrentPage)
-      return "对当前网页进行追问..."
+      return t("translation:threadDetail.item.input.searchPlaceholder.current")
     if (searchTarget === SearchTarget.SearchEnhance)
-      return "输入关键词进行网络搜索追问..."
-    if (searchTarget === SearchTarget.All) return "对历史所有网页进行追问..."
+      return t("translation:threadDetail.item.input.searchPlaceholder.internet")
+    if (searchTarget === SearchTarget.All)
+      return t("translation:threadDetail.item.input.searchPlaceholder.all")
   }
 
-  const handleAskFollowing = async () => {
+  const handleAskFollowing = async (question?: string) => {
     // TODO: 这里需要 follow 之前的 filter 进行提问
-    const { newQAText } = useChatStore.getState()
+    const { newQAText: storeNewQAText } = useChatStore.getState()
     const { marks } = useContentSelectorStore.getState()
+    const { localSettings } = useUserStore.getState()
 
+    const newQAText = storeNewQAText || question
     if (!newQAText) {
-      message.info("提问内容不能为空")
+      message.info(t("translation:threadDetail.item.input.status.emptyNotify"))
       return
     }
 
@@ -132,13 +146,23 @@ export const ThreadItem = (props: ThreadItemProps) => {
 
     // 先存储 link， 在进行提问操作，这里理论上是需要有个 negotiate 的过程
     if (searchTarget === SearchTarget.CurrentPage) {
-      message.loading("处理内容中...")
+      message.loading(
+        t("translation:threadDetail.item.input.status.contentHandling"),
+      )
       const res = await handleUploadWebsite(window.location.href)
 
       if (res.success) {
-        message.success("处理成功，生成回答中...")
+        message.success(
+          t(
+            "translation:threadDetail.item.input.status.contentHandleSuccessNotify",
+          ),
+        )
       } else {
-        message.error("处理失败！")
+        message.error(
+          t(
+            "translation:threadDetail.item.input.status.contentHandleFailedNotify",
+          ),
+        )
       }
     }
 
@@ -182,6 +206,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
           weblinkList: selectedWebLink,
         },
       },
+      locale: localSettings?.outputLocale,
     })
 
     // 清空选中状态
@@ -203,6 +228,19 @@ export const ThreadItem = (props: ThreadItemProps) => {
       setThreadWeblinkListFilter(selectedWeblinkConfig.filter)
     }
   }, [selectedWeblinkConfig?.searchTarget, selectedWeblinkConfig?.filter])
+  // 这里更新状态
+  useEffect(() => {
+    if (inputContainerRef?.current) {
+      setInputContainerHeight(inputContainerRef?.current?.clientHeight || 0)
+    }
+  }, [
+    showSelectedWeblinkList,
+    searchQuickActionStore.showQuickAction,
+    contentSelectorStore?.showSelectedMarks,
+  ])
+
+  // 初始化的时候 inputContainerRef?.current 还未渲染，高度为 0
+  const contentHeight = `calc(100vh - 66px - 40px - ${inputContainerHeight || 0 + 16}px`
 
   return (
     <div className="session-container">
@@ -214,7 +252,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
               homeStateStore.setActiveTab("session-library")
             }}
             className="breadcrum-item">
-            会话库
+            {t("translation:threadDetail.breadcrumb.threadLibrary")}
           </BreadcrumbItem>
           <BreadcrumbItem
             className="breadcrum-item breadcrum-description"
@@ -228,27 +266,19 @@ export const ThreadItem = (props: ThreadItemProps) => {
       <div
         className="session-inner-container"
         style={{
-          height: `calc(100vh - 130px - 90px - ${showSelectedWeblinkList ? selectedWeblinkListRef.current?.clientHeight || 0 : 0}px - ${contentSelectorStore?.showSelectedMarks || contentSelectorStore?.showContentSelector ? 150 + 28 : 0}px)`,
+          height: contentHeight,
         }}>
         {sessions?.map((item, index) => (
           <Session
             key={index}
             session={item}
             isLastSession={index === sessions.length - 1}
-            handleAskFollowing={() => handleAskFollowing()}
+            handleAskFollowing={(item) => handleAskFollowing(item)}
           />
         ))}
       </div>
 
-      <div
-        className="footer input-panel"
-        style={
-          showSelectedWeblinkList
-            ? {
-                height: `calc(100vh - 130px - ${selectedWeblinkListRef.current?.clientHeight || 0}px - ${contentSelectorStore?.showSelectedMarks ? 150 + 52 : 0}px - 52px)`,
-              }
-            : {}
-        }>
+      <div className="footer input-panel">
         {/* {messageStateStore?.pending && (
           <div className="actions">
             {messageStateStore.taskType === TASK_TYPE.CHAT &&
@@ -266,7 +296,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
           </div>
         )} */}
 
-        <div className="session-input-box">
+        <div className="session-input-box" ref={inputContainerRef}>
           <div className="session-inner-input-box">
             <ContentSelectorBtn
               btnType="text"
@@ -321,9 +351,10 @@ export const ThreadItem = (props: ThreadItemProps) => {
           </div>
           {showSelectedWeblinkList ? (
             <SelectedWeblink
-              ref={selectedWeblinkListRef}
               closable={false}
-              selectedWeblinkList={threadWeblinkListFilter}
+              selectedWeblinkList={threadWeblinkListFilter?.map(
+                (item, index) => ({ key: index, content: item }),
+              )}
             />
           ) : null}
           {searchQuickActionStore.showQuickAction &&

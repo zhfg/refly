@@ -17,9 +17,11 @@ import RemarkMath from "remark-math"
 import "./styles/markdown.scss"
 import "./styles/highlight.scss"
 import { Source } from "@/types"
+import { useTranslation } from "react-i18next"
 
 export function PreCode(props: { children: any }) {
   const ref = useRef<HTMLPreElement>(null)
+  const { t } = useTranslation()
 
   return (
     <pre ref={ref}>
@@ -29,7 +31,7 @@ export function PreCode(props: { children: any }) {
           if (ref.current) {
             const code = ref.current.innerText
             copyToClipboard(code)
-            message.success("复制成功")
+            message.success(t("components.markdown.copySuccess"))
           }
         }}></span>
       {props.children}
@@ -53,7 +55,8 @@ export function ATag({ ...props }, sources: Source[]) {
         </PopoverTrigger>
         <PopoverContent
           align={"start"}
-          className="max-w-screen-md flex flex-col gap-2 bg-white shadow-transparent ring-zinc-50 ring-4 text-xs">
+          style={{ backgroundColor: "#fcfcf9" }}
+          className="max-w-screen-md flex flex-col gap-2 shadow-transparent ring-zinc-50 ring-4 text-xs">
           <div className="text-ellipsis overflow-hidden whitespace-nowrap font-medium">
             {source.metadata?.title}
           </div>

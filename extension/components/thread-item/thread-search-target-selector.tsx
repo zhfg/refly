@@ -1,14 +1,13 @@
-import { Button, Dropdown, Menu } from "@arco-design/web-react"
+import { Button, Dropdown, Menu, Typography } from "@arco-design/web-react"
 import {
   IconOriginalSize,
   IconArchive,
   IconCommon,
   IconCompass,
 } from "@arco-design/web-react/icon"
-import { IconTip } from "~components/home/icon-tip"
+import { useTranslation } from "react-i18next"
 
 import { SearchTarget } from "~stores/search-state"
-import { useWeblinkStore } from "~stores/weblink"
 import { getPopupContainer } from "~utils/ui"
 
 /**
@@ -30,6 +29,7 @@ interface ThreadSearchTargetSelectorProps {
 export const ThreadSearchTargetSelector = (
   props: ThreadSearchTargetSelectorProps,
 ) => {
+  const { t } = useTranslation()
   const iconStyle = {
     marginRight: 8,
     fontSize: 16,
@@ -45,21 +45,26 @@ export const ThreadSearchTargetSelector = (
          */
         props.handleChangeSelector(key as SearchTarget)
       }}>
+      <Typography.Text
+        type="secondary"
+        style={{ marginLeft: 12, fontSize: 12, fontWeight: "normal" }}>
+        {t("translation:threadDetail.item.input.searchScope.title")}
+      </Typography.Text>
       <Menu.Item key={SearchTarget.CurrentPage}>
         <IconOriginalSize style={iconStyle} />
-        当前网页
+        {t("translation:threadDetail.item.input.searchScope.current")}
       </Menu.Item>
       <Menu.Item key={SearchTarget.All}>
         <IconCommon style={iconStyle} />
-        所有网页
+        {t("translation:threadDetail.item.input.searchScope.all")}
       </Menu.Item>
       <Menu.Item key={SearchTarget.SelectedPages}>
         <IconArchive style={iconStyle} />
-        选中网页
+        {t("translation:threadDetail.item.input.searchScope.selected")}
       </Menu.Item>
       <Menu.Item key={SearchTarget.SearchEnhance}>
         <IconCompass style={iconStyle} />
-        联网搜索
+        {t("translation:threadDetail.item.input.searchScope.internet")}
       </Menu.Item>
     </Menu>
   )
@@ -67,13 +72,13 @@ export const ThreadSearchTargetSelector = (
   const getDisplayText = (searchTarget: SearchTarget) => {
     switch (searchTarget) {
       case SearchTarget.SelectedPages:
-        return "选中网页"
+        return t("translation:threadDetail.item.input.searchScope.selected")
       case SearchTarget.All:
-        return "所有网页"
+        return t("translation:threadDetail.item.input.searchScope.all")
       case SearchTarget.CurrentPage:
-        return "当前网页"
+        return t("translation:threadDetail.item.input.searchScope.current")
       case SearchTarget.SearchEnhance:
-        return "联网搜索"
+        return t("translation:threadDetail.item.input.searchScope.internet")
     }
   }
 
@@ -91,23 +96,20 @@ export const ThreadSearchTargetSelector = (
   }
 
   return (
-    <IconTip text={getDisplayText(props.searchTarget) || "选择提问范围"}>
-      <Dropdown
-        droplist={searchTargetDropList}
-        trigger="hover"
-        position="bottom"
-        getPopupContainer={getPopupContainer}>
-        <Button
-          className={"thread-search-target-selector"}
-          icon={getDisplayIcon(props.searchTarget)}
-          type="text"
-          style={
-            props.showText ? {} : { width: 45, height: 32, borderRadius: 16 }
-          }
-          shape={props.showText ? "round" : "circle"}>
-          {props.showText ? getDisplayText(props.searchTarget) : null}
-        </Button>
-      </Dropdown>
-    </IconTip>
+    <Dropdown
+      droplist={searchTargetDropList}
+      trigger="hover"
+      getPopupContainer={getPopupContainer}>
+      <Button
+        className={"thread-search-target-selector"}
+        icon={getDisplayIcon(props.searchTarget)}
+        type="text"
+        style={
+          props.showText ? {} : { width: 45, height: 32, borderRadius: 16 }
+        }
+        shape={props.showText ? "round" : "circle"}>
+        {props.showText ? getDisplayText(props.searchTarget) : null}
+      </Button>
+    </Dropdown>
   )
 }

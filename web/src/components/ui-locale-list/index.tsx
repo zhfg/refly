@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next"
 import { Dropdown, Menu, Message as message } from "@arco-design/web-react"
 import { useUserStore } from "@/stores/user"
-import { safeStringifyJSON } from "@/utils/parse"
+import { safeParseJSON, safeStringifyJSON } from "@/utils/parse"
 import { LOCALE } from "@/types"
 // request
 import putUserInfo from "@/requests/putUserInfo"
@@ -12,6 +12,13 @@ export const UILocaleList = (props: { children: any }) => {
   // i18n
   const { t, i18n } = useTranslation()
   const userStore = useUserStore()
+
+  // 获取 storage user profile
+  const storageUserProfile = safeParseJSON(
+    localStorage.getItem("refly-user-profile"),
+  )
+  const notShowLoginBtn = storageUserProfile?.id || userStore?.userProfile?.id
+  console.log("storageUserProfile", storageUserProfile, userStore?.userProfile)
 
   const changeLang = async (lng: LOCALE) => {
     const { localSettings } = useUserStore.getState()
@@ -24,12 +31,14 @@ export const UILocaleList = (props: { children: any }) => {
     )
 
     // 不阻塞写回用户配置
-    const res = await putUserInfo({
-      body: { uiLocale: lng, outputLocale: localSettings.outputLocale },
-    })
+    if (notShowLoginBtn) {
+      const res = await putUserInfo({
+        body: { uiLocale: lng, outputLocale: localSettings.outputLocale },
+      })
 
-    if (!res.success) {
-      message.error(t("settings.action.putErrorNotify"))
+      if (!res.success) {
+        message.error(t("settings.action.putErrorNotify"))
+      }
     }
   }
 

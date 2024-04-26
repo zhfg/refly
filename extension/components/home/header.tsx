@@ -15,6 +15,7 @@ import { getClientOrigin } from "~utils/url"
 import { useUserStore } from "~stores/user"
 import { useHomeStateStore } from "~stores/home-state"
 import { useSelectedMark } from "~hooks/use-selected-mark"
+import { useTranslation } from "react-i18next"
 
 export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
   const { onlyShowClose = false } = props
@@ -23,6 +24,8 @@ export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
   const { userProfile } = useUserStore()
   const homeStateStore = useHomeStateStore()
   const { handleResetState } = useSelectedMark()
+
+  const { t } = useTranslation()
 
   const showBtn = !!userProfile?.id
 
@@ -43,10 +46,11 @@ export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
       </div>
       <div className="funcs">
         {!onlyShowClose && (
-          <IconTip text="全屏">
+          <IconTip
+            text={t("translation:loggedHomePage.homePage.header.fullscreen")}>
             <img
               src={FullScreenSVG}
-              alt="全屏"
+              alt={t("translation:loggedHomePage.homePage.header.fullscreen")}
               style={{ marginRight: 12 }}
               onClick={() => window.open(`${getClientOrigin()}/`, "_blank")}
             />
@@ -56,10 +60,11 @@ export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
                 <img src={NotificationSVG} alt="通知" />
             </IconTip> */}
         {showBtn && !onlyShowClose && (
-          <IconTip text="设置">
+          <IconTip
+            text={t("translation:loggedHomePage.homePage.header.settings")}>
             <img
               src={SettingGraySVG}
-              alt="设置"
+              alt={t("translation:loggedHomePage.homePage.header.settings")}
               style={{ marginRight: 12 }}
               onClick={() =>
                 window.open(`${getClientOrigin()}/settings`, "_blank")
@@ -68,7 +73,8 @@ export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
           </IconTip>
         )}
         {showBtn && !onlyShowClose && (
-          <IconTip text="账户">
+          <IconTip
+            text={t("translation:loggedHomePage.homePage.header.account")}>
             <Avatar size={16} style={{ marginRight: 12 }}>
               <img
                 alt="avatar"
@@ -80,10 +86,10 @@ export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
             </Avatar>
           </IconTip>
         )}
-        <IconTip text="关闭">
+        <IconTip text={t("translation:loggedHomePage.homePage.header.close")}>
           <img
             src={CloseGraySVG}
-            alt="关闭"
+            alt={t("translation:loggedHomePage.homePage.header.close")}
             onClick={(_) => {
               siderStore.setShowSider(false)
               handleResetState()

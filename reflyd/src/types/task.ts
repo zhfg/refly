@@ -28,7 +28,7 @@ export const enum LANGUAGE {
 }
 
 export const enum LOCALE {
-  ZH_CN = 'zh-cn',
+  ZH_CN = 'zh-CN',
   EN = 'en',
 }
 

@@ -267,17 +267,18 @@ export class LlmService implements OnModuleInit {
       type: string;
       content: string;
     }[],
+    locale: LOCALE,
   ): Promise<string> {
     const doc = new Document({
       pageContent: messages.map((m) => `${m.type}: ${m.content}`).join('\n'),
     });
     const summary = await this.llm.invoke([
-      new SystemMessage(summarizeConversation.systemPrompt),
+      new SystemMessage(summarizeConversation.systemPrompt(locale)),
       new HumanMessage(
         `The conversation to be summarized is as follows:\n` +
-          `===\n ${doc.pageContent?.slice(0, 12000)} \n===\n` +
-          `SUMMARY with language used in the conversation:`,
+          `===\n ${doc.pageContent?.slice(0, 12000)} \n===\n`,
       ),
+      new HumanMessage(`SUMMARY with locale: ${locale} language:`),
     ]);
     this.logger.log(`summarized text: ${summary.text}`);
 
@@ -355,6 +356,7 @@ export class LlmService implements OnModuleInit {
     locale: LOCALE,
   ) {
     if (docs.length <= 0) return;
+    console.log('activate getRelatedQuestion with locale: ', locale);
 
     let contextContent = docs.reduce((total, cur) => {
       total += `内容块:
@@ -395,9 +397,9 @@ export class LlmService implements OnModuleInit {
       })
       .pipe(parser);
     const askFollowUpQuestion = (await runnable.invoke([
-      new SystemMessage(generateAskFollowupQuestion.systemPrompt),
+      new SystemMessage(generateAskFollowupQuestion.systemPrompt(locale)),
       new HumanMessage(contextContent),
-      new HumanMessage(`Please output answer in ${locale} language:`),
+      new HumanMessage(`Please output answer in locale: ${locale} language:`),
     ])) as {
       recommend_ask_followup_question: string[];
     };
@@ -534,7 +536,10 @@ export class LlmService implements OnModuleInit {
         q: query,
         num: REFERENCE_COUNT,
         hl: locale?.toLocaleLowerCase(),
-        gl: locale === LOCALE.EN ? 'us' : 'cn',
+        gl:
+          locale?.toLocaleLowerCase() === LOCALE.ZH_CN?.toLocaleLowerCase()
+            ? 'cn'
+            : 'us',
       });
 
       const res = await fetch('https://google.serper.dev/search', {
@@ -620,7 +625,7 @@ export class LlmService implements OnModuleInit {
       .pipe(this.llm as any)
       .pipe(new StringOutputParser());
     const questionWithContext =
-      chatHistory.length === 1
+      chatHistory.length === 1 || chatHistory.length === 0
         ? query
         : await contextualizeQChain.invoke({
             question: query,

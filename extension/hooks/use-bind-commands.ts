@@ -7,6 +7,7 @@ import { useChatStore } from "~stores/chat"
 import { LANGUAGE, LOCALE, TASK_TYPE, type Source, type Task } from "~types"
 import { buildChatTask } from "~utils/task"
 import { useWeblinkStore } from "~stores/weblink"
+import { useUserStore } from "~stores/user"
 
 export const useBindCommands = () => {
   // 快捷键相关
@@ -70,6 +71,7 @@ export const useBindCommands = () => {
 
         const { newQAText } = useChatStore.getState()
         const { selectedRow } = useWeblinkStore.getState()
+        const { localSettings } = useUserStore.getState()
 
         const selectedWebLink: Source[] = selectedRow?.map((item) => ({
           pageContent: "",
@@ -80,10 +82,13 @@ export const useBindCommands = () => {
           score: -1, // 手工构造
         }))
 
-        const task = buildChatTask({
-          question: newQAText,
-          filter: { weblinkList: selectedWebLink },
-        })
+        const task = buildChatTask(
+          {
+            question: newQAText,
+            filter: { weblinkList: selectedWebLink },
+          },
+          localSettings.outputLocale,
+        )
 
         buildTaskAndGenReponse(task)
       },

@@ -49,9 +49,11 @@ export class ConversationService {
     conversationId: number,
     messages: { type: string; content: string }[],
     data: Prisma.ConversationUpdateInput,
+    locale: LOCALE,
   ) {
     const summarizedTitle = await this.llmService.summarizeConversation(
       messages,
+      locale,
     );
     this.logger.log(`Summarized title: ${summarizedTitle}`);
 
@@ -68,10 +70,14 @@ export class ConversationService {
   }
 
   async findConversationAndMessages(conversationId: number) {
-    return this.prisma.conversation.findUnique({
+    const data = await this.prisma.conversation.findUnique({
       where: { id: conversationId },
       include: { messages: true },
     });
+
+    data.messages.sort((a, b) => a.id - b.id);
+
+    return data;
   }
 
   async getConversations(params: {
@@ -138,10 +144,15 @@ export class ConversationService {
     // post chat logic
     await Promise.all([
       this.addChatMessages(newMessages),
-      this.updateConversation(convId, [...chatHistory, ...newMessages], {
-        lastMessage: taskRes.answer,
-        messageCount: chatHistory.length + 2,
-      }),
+      this.updateConversation(
+        convId,
+        [...chatHistory, ...newMessages],
+        {
+          lastMessage: taskRes.answer,
+          messageCount: chatHistory.length + 2,
+        },
+        task?.locale,
+      ),
     ]);
   }
 
@@ -184,7 +195,9 @@ export class ConversationService {
       : [];
     // 如果是基于选中内容提问的话，则不需要考虑上下文
     const questionWithContext =
-      chatHistory.length === 1 || chatFromClientSelector
+      chatHistory.length === 1 ||
+      chatHistory.length === 0 ||
+      chatFromClientSelector
         ? query
         : await this.llmService.getContextualQuestion(
             query,
@@ -217,9 +230,9 @@ export class ConversationService {
       // write answer in a stream style
       let answerStr = '';
       for await (const chunk of await stream) {
-        answerStr += chunk;
+        answerStr += chunk || '';
 
-        res.write(chunk);
+        res.write(chunk || '');
       }
 
       return answerStr;
@@ -233,8 +246,9 @@ export class ConversationService {
     this.logger.log('relatedQuestions', relatedQuestions);
 
     res.write(RELATED_SPLIT);
+
     if (relatedQuestions) {
-      res.write(JSON.stringify(relatedQuestions));
+      res.write(JSON.stringify(relatedQuestions) || '');
     }
 
     return {
@@ -260,7 +274,7 @@ export class ConversationService {
     );
 
     // first return sources，use unique tag for parse data
-    res.write(JSON.stringify(sources));
+    res.write(JSON.stringify(sources) || '');
     res.write(LLM_SPLIT);
 
     const getSSEData = async (stream) => {
@@ -269,9 +283,9 @@ export class ConversationService {
       for await (const chunk of await stream) {
         const chunkStr =
           chunk?.content || (typeof chunk === 'string' ? chunk : '');
-        answerStr += chunkStr;
+        answerStr += chunkStr || '';
 
-        res.write(chunkStr);
+        res.write(chunkStr || '');
       }
 
       return answerStr;
@@ -285,7 +299,7 @@ export class ConversationService {
     this.logger.log('relatedQuestions', relatedQuestions);
 
     res.write(RELATED_SPLIT);
-    res.write(JSON.stringify(relatedQuestions));
+    res.write(JSON.stringify(relatedQuestions) || '');
 
     const handledAnswer = answerStr
       .replace(/\[\[([cC])itation/g, '[citation')
@@ -325,7 +339,7 @@ export class ConversationService {
       };
     }
 
-    res.write(JSON.stringify(sources));
+    res.write(JSON.stringify(sources) || '');
     res.write(LLM_SPLIT);
 
     const weblinkList = data?.filter?.weblinkList;
@@ -353,7 +367,7 @@ export class ConversationService {
           chunk?.content || (typeof chunk === 'string' ? chunk : '');
         answerStr += chunkStr;
 
-        res.write(chunkStr);
+        res.write(chunkStr || '');
       }
 
       return answerStr;

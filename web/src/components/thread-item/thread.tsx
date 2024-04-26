@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
+import { Helmet } from "react-helmet"
 
 // hooks
 import { useResetState } from "@/hooks/use-reset-state"
@@ -192,9 +193,20 @@ export const Thread = () => {
         display: "flex",
         flexDirection: "column",
       }}>
+      <Helmet>
+        <title>{conversationStore?.currentConversation?.title}</title>
+        <meta
+          name="description"
+          content={conversationStore?.currentConversation?.lastMessage}
+        />
+      </Helmet>
       <Header thread={conversationStore?.currentConversation as IThread} />
       {isFetching ? (
-        <Skeleton animation></Skeleton>
+        <>
+          <Skeleton animation></Skeleton>
+          <Skeleton animation></Skeleton>
+          <Skeleton animation></Skeleton>
+        </>
       ) : (
         <ThreadItem
           sessions={sessions}

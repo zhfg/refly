@@ -34,7 +34,10 @@ export const buildTask = (payload: BuildTask): Task => {
   return task
 }
 
-export const buildChatTask = (data, locale: LOCALE = LOCALE.EN): Task => {
+export const buildChatTask = (
+  data: any,
+  locale: OutputLocale = LOCALE.EN,
+): Task => {
   console.log("now task locale", locale)
   const task: Task = {
     taskType: TASK_TYPE.CHAT,
@@ -47,8 +50,8 @@ export const buildChatTask = (data, locale: LOCALE = LOCALE.EN): Task => {
 }
 
 export const buildQuickActionTask = (
-  data,
-  locale: LOCALE = LOCALE.EN,
+  data: any,
+  locale: OutputLocale = LOCALE.EN,
 ): Task => {
   console.log("now task locale", locale)
 

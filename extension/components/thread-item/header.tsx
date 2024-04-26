@@ -22,6 +22,8 @@ import type { Conversation } from "~types/conversation"
 // 第三方库
 import copyToClipboard from "copy-to-clipboard"
 import { useHomeStateStore } from "~stores/home-state"
+import { useTranslation } from "react-i18next"
+import { LOCALE } from "~types"
 
 interface ThreadHeaderProps {
   thread: Conversation
@@ -33,7 +35,9 @@ export const Header = (props: ThreadHeaderProps) => {
   const { userProfile } = useUserStore()
   const homeStateStore = useHomeStateStore()
 
+  const { t, i18n } = useTranslation()
   const showBtn = !!userProfile?.id
+  const uiLocale = i18n?.languages?.[0] as LOCALE
 
   return (
     <header>
@@ -50,28 +54,34 @@ export const Header = (props: ThreadHeaderProps) => {
         </div>
         <Button
           type="primary"
-          icon={<IconPlus />}
           onClick={() => {
             navigate("/")
             homeStateStore.setActiveTab("home")
           }}
           style={{ borderRadius: 4, marginLeft: 12 }}>
-          <span style={{ fontSize: 14, fontWeight: "normal", color: "#fff" }}>
-            新会话
+          <span
+            style={{
+              fontSize: uiLocale === LOCALE.EN ? 12 : 14,
+              fontWeight: "normal",
+              color: "#fff",
+            }}>
+            {t("translation:threadDetail.header.newThread")}
           </span>
         </Button>
       </div>
       <div className="funcs">
         <span key={2} style={{ display: "inline-block", marginRight: 12 }}>
           <IconClockCircle style={{ fontSize: 14, color: "#64645F" }} />
-          <span className="thread-library-list-item-text">
-            {time(props.thread?.updatedAt).utc().fromNow()}
+          <span
+            className="thread-library-list-item-text"
+            style={{ fontSize: uiLocale === LOCALE.EN ? 12 : 14 }}>
+            {time(props.thread?.updatedAt, uiLocale).utc().fromNow()}
           </span>
         </span>
-        <IconTip text="关闭">
+        <IconTip text={t("translation:loggedHomePage.homePage.header.close")}>
           <img
             src={CloseGraySVG}
-            alt="关闭"
+            alt={t("translation:loggedHomePage.homePage.header.close")}
             onClick={(_) => siderStore.setShowSider(false)}
           />
         </IconTip>

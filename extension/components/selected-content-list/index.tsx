@@ -9,6 +9,7 @@ import EmptySVG from "~assets/selected-content/empty.svg"
 import classNames from "classnames"
 import { useEffect } from "react"
 import { useSelectedMark } from "~hooks/use-selected-mark"
+import { useTranslation } from "react-i18next"
 
 interface SelectedContentListProps {
   marks: Mark[]
@@ -20,6 +21,8 @@ export const SelectedContentList = (props: SelectedContentListProps) => {
   const { marks = [] } = useContentSelectorStore()
   const { handleExit, handleRemoveAll, handleResetState, handleRemoveMark } =
     useSelectedMark()
+
+  const { t } = useTranslation()
 
   // 退出时，清理对应的状态
   useEffect(() => {
@@ -36,15 +39,19 @@ export const SelectedContentList = (props: SelectedContentListProps) => {
       <div className="selected-content-hint-item">
         <div className="selected-content-left-hint">
           <IconRightCircle style={{ color: "rgba(0, 0, 0, .6)" }} />
-          <span>选中要操作的内容如下：</span>
+          <span>
+            {t("translation:loggedHomePage.homePage.selectedContent.title")}
+          </span>
         </div>
         <div className="selected-content-right-hint">
           {marks?.length > 0 ? (
             <span onClick={() => handleRemoveAll()} style={{ marginRight: 12 }}>
-              清空所有选中
+              {t("translation:loggedHomePage.homePage.selectedContent.clear")}
             </span>
           ) : null}
-          <span onClick={() => handleExit()}>退出</span>
+          <span onClick={() => handleExit()}>
+            {t("translation:loggedHomePage.homePage.selectedContent.exit")}
+          </span>
         </div>
       </div>
       <div className="selected-content-list-container">
@@ -68,7 +75,9 @@ export const SelectedContentList = (props: SelectedContentListProps) => {
               className="empty-cover"
               style={limitContainer ? { width: 60 } : { width: 100 }}
             />
-            <div>暂无选中内容...</div>
+            <div>
+              {t("translation:loggedHomePage.homePage.selectedContent.empty")}
+            </div>
           </div>
         ) : null}
       </div>

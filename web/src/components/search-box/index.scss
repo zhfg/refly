@@ -40,11 +40,11 @@
     align-items: center;
     justify-content: space-between;
 
-    button {
+    .search-assist-btn {
       color: rgba(0, 0, 0, 0.5) !important;
     }
 
-    button:hover {
+    .search-assist-btn:hover {
       color: rgba(0, 0, 0, 0.8) !important;
       background: #e8e8e2 !important;
     }

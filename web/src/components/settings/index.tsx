@@ -1,6 +1,7 @@
 import { Button, Modal, Typography } from "@arco-design/web-react"
 import { useCookie } from "react-use"
 import Cookies from "js-cookie"
+import { Helmet } from "react-helmet"
 
 // styles
 import "./index.scss"
@@ -31,17 +32,16 @@ export const Settings = () => {
       content: t("settings.account.logoutConfirmation.message"),
       onOk() {
         console.log("delete cookie")
-        userStore.setUserProfile(null)
-        userStore.setToken("")
         localStorage.removeItem("refly-user-profile")
+        localStorage.removeItem("refly-local-settings")
+        userStore.resetState()
 
         // 给插件发消息
         chrome.runtime?.sendMessage(getExtensionId(), {
-          name: "logout-notification",
+          name: "logout-notify",
         })
 
         deleteCookie()
-        getClientOrigin
         Cookies.remove("_refly_ai_sid", { domain: getCookieOrigin() })
         navigate("/")
       },
@@ -51,6 +51,9 @@ export const Settings = () => {
 
   return (
     <div className="settings-container">
+      <Helmet>
+        <title>{t("tabMeta.settings.title")}</title>
+      </Helmet>
       <div className="settings-inner-container">
         <div className="settings-title">{t("settings.title")}</div>
         <div>

@@ -1,6 +1,7 @@
 import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import type {} from "@redux-devtools/extension"
+import type { OutputLocale } from "~utils/i18n"
 
 export interface Thread {
   id: string
@@ -14,6 +15,7 @@ export interface Thread {
   originPageTitle: string
   createdAt: string
   updatedAt: string
+  locale: OutputLocale
 }
 
 interface ThreadState {
