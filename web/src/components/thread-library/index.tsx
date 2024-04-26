@@ -107,7 +107,9 @@ export const ThreadLibrary = () => {
       }}>
       {/* <Header /> */}
       <Helmet>
-        <title>{t("tabMeta.threadLibrary.title")}</title>
+        <title>
+          {t("productName")} | {t("tabMeta.threadLibrary.title")}
+        </title>
       </Helmet>
       <List
         className="thread-library-list"

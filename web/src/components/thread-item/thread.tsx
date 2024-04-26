@@ -205,7 +205,10 @@ export const Thread = () => {
         flexDirection: "column",
       }}>
       <Helmet>
-        <title>{conversationStore?.currentConversation?.title}</title>
+        <title>
+          {t("productName")} |{" "}
+          {conversationStore?.currentConversation?.title || ""}
+        </title>
         <meta
           name="description"
           content={conversationStore?.currentConversation?.lastMessage}

@@ -74,7 +74,9 @@ export const DigestTail = () => {
         flexDirection: "column",
       }}>
       <Helmet>
-        <title>{digestDetailStore.digest?.title}</title>
+        <title>
+          {t("productName")} | {digestDetailStore.digest?.title || ""}
+        </title>
         <meta name="description" content={digestDetailStore.digest?.abstract} />
       </Helmet>
       <Header digest={digestDetailStore?.digest as Digest} />
