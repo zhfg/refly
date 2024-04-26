@@ -1,6 +1,6 @@
 {
     "name": {
-      "message": "Refly - 工作助理和知识问答引擎",
+      "message": "Refly - 知识，在此繁茂",
       "description": "Name of the extension."
     },
     "description": {
@@ -8,7 +8,7 @@
       "description": "Description of the extension."
     },
     "displayName": {
-      "message": "Refly - 工作助理和知识问答引擎",
+      "message": "Refly - 知识，在此繁茂",
       "description": "Display name of the extension."
     }
   }
