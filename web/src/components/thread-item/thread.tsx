@@ -33,6 +33,8 @@ import { safeParseJSON } from "@/utils/parse"
 import { buildTask } from "@/utils/task"
 import { Skeleton } from "@arco-design/web-react"
 import { useUserStore } from "@/stores/user"
+import { EmptyDigestTopicDetailStatus } from "../empty-digest-topic-detail-status"
+import { useTranslation } from "react-i18next"
 
 export const Thread = () => {
   const { buildTaskAndGenReponse } = useBuildTask()
@@ -44,6 +46,7 @@ export const Thread = () => {
   const searchStateStore = useSearchStateStore()
   const { resetState } = useResetState()
   const [isFetching, setIsFetching] = useState(false)
+  const { t } = useTranslation()
 
   const handleGetThreadMessages = async (threadId: string) => {
     // 异步操作
@@ -207,6 +210,8 @@ export const Thread = () => {
           <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
           <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
         </div>
+      ) : !isFetching && (sessions || [])?.length === 0 ? (
+        <EmptyDigestTopicDetailStatus text={t("threadDetail.empty.title")} />
       ) : (
         <ThreadItem
           sessions={sessions}
