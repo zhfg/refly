@@ -117,3 +117,8 @@ export const Content = () => {
 }
 
 export default Content
+
+if (process.env.NODE_ENV === "production") {
+  console.log = () => {} // 覆盖console.log为空函数
+  console.error = () => {} // 覆盖console.error为空函数
+}
