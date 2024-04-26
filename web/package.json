@@ -49,6 +49,7 @@
     "remark-gfm": "^3.0.1",
     "remark-math": "^5.1.1",
     "tailwind-merge": "^2.2.2",
+    "terser": "^5.30.4",
     "uuid": "^9.0.0",
     "zustand": "^4.5.1"
   },
