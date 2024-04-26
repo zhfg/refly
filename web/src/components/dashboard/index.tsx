@@ -1,7 +1,8 @@
 import { Button } from "@arco-design/web-react"
-import { IconBulb, IconHistory } from "@arco-design/web-react/icon"
+import { IconHistory } from "@arco-design/web-react/icon"
 import { useEffect, useRef } from "react"
 import { useSearchParams } from "react-router-dom"
+import { Helmet } from "react-helmet"
 
 // 自定义组件
 import WeblinkList from "../weblink-list"
@@ -114,6 +115,10 @@ const Home = () => {
 
   return (
     <div className="home-container" style={{}}>
+      <Helmet>
+        <title>{t("landingPage.slogan")}</title>
+        <meta name="description" content={t("landingPage.description")} />
+      </Helmet>
       <div className="home-search-container">
         <div className="footer input-panel home-search-inner-container">
           <div className="refly-slogan">

@@ -1,7 +1,23 @@
 {
   "language": "简体中文",
+  "tabMeta": {
+    "landingPage": {
+      "title": "知识，在此繁茂",
+      "description": "快速总结与形成洞察、自动化归档以及智能语义搜索——Refly 能够为你打造第二大脑，拓展你的知识视野，并赋予你超乎寻常的能力。"
+    },
+    "digestTopics": {
+      "title": "所有主题",
+      "description": "基于您的浏览历史、会话历史分析提取出来的主题分类，代表您的阅读和学习趋势"
+    },
+    "threadLibrary": {
+      "title": "会话库"
+    },
+    "settings": {
+      "title": "设置"
+    }
+  },
   "landingPage": {
-    "slogan": "人工智能驱动的超级记忆",
+    "slogan": "知识，在此繁茂",
     "description": "快速总结与形成洞察、自动化归档以及智能语义搜索——Refly 能够为你打造第二大脑，拓展你的知识视野，并赋予你超乎寻常的能力。",
     "joinBtn": "免费使用",
     "downloadBtn": "下载插件",
@@ -53,7 +69,7 @@
   "loggedHomePage": {
     "newThreadText": "新会话",
     "homePage": {
-      "title": "人工智能驱动的超级记忆",
+      "title": "知识，在此繁茂",
       "searchPlaceholder": "输入搜索内容...",
       "selectedWeblink": {
         "title": "基于选中网页提问："

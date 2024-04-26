@@ -5,6 +5,7 @@ import {
   Message as message,
   Breadcrumb,
 } from "@arco-design/web-react"
+import { Helmet } from "react-helmet"
 
 // styles
 import "./index.scss"
@@ -84,6 +85,13 @@ export const DigestTopics = () => {
 
   return (
     <div className="topics-container">
+      <Helmet>
+        <title>{t("tabMeta.digestTopics.title")}</title>
+        <meta
+          name="description"
+          content={t("tabMeta.digestTopics.description")}
+        />
+      </Helmet>
       <div className="digest-topic-nav">
         <Breadcrumb>
           <BreadcrumbItem href="/">

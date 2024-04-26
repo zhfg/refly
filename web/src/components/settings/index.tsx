@@ -1,6 +1,7 @@
 import { Button, Modal, Typography } from "@arco-design/web-react"
 import { useCookie } from "react-use"
 import Cookies from "js-cookie"
+import { Helmet } from "react-helmet"
 
 // styles
 import "./index.scss"
@@ -50,6 +51,9 @@ export const Settings = () => {
 
   return (
     <div className="settings-container">
+      <Helmet>
+        <title>{t("tabMeta.settings.title")}</title>
+      </Helmet>
       <div className="settings-inner-container">
         <div className="settings-title">{t("settings.title")}</div>
         <div>

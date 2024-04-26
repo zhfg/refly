@@ -12,9 +12,12 @@ import SignUp from "./SignUp"
 import ResetPassword from "./ResetPassword"
 import Privacy from "./pravicy"
 import Terms from "./terms"
+import { Helmet } from "react-helmet"
+import { useTranslation } from "react-i18next"
 
 function LandingPage() {
   const location = useLocation()
+  const { t } = useTranslation()
 
   useEffect(() => {
     AOS.init({
@@ -33,6 +36,10 @@ function LandingPage() {
 
   return (
     <>
+      <Helmet>
+        <title>{t("landingPage.slogan")}</title>
+        <meta name="description" content={t("landingPage.description")} />
+      </Helmet>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/privacy" element={<Privacy />} />

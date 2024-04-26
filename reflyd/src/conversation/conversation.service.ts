@@ -195,7 +195,9 @@ export class ConversationService {
       : [];
     // 如果是基于选中内容提问的话，则不需要考虑上下文
     const questionWithContext =
-      chatHistory.length === 1 || chatFromClientSelector
+      chatHistory.length === 1 ||
+      chatHistory.length === 0 ||
+      chatFromClientSelector
         ? query
         : await this.llmService.getContextualQuestion(
             query,

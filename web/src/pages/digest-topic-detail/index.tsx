@@ -15,6 +15,7 @@ import {
   IconShareExternal,
   IconTag,
 } from "@arco-design/web-react/icon"
+import { Helmet } from "react-helmet"
 import { time } from "@/utils/time"
 import { useNavigate, useParams } from "react-router-dom"
 // stores
@@ -130,6 +131,10 @@ export const DigestTopicDetail = () => {
 
   return (
     <div className="digest-topic-detail-container">
+      <Helmet>
+        {/* TODO: 国际化 这里需要根据用户语言返回对应的 i18n 的 topic title */}
+        <title>{currentTopicDetail?.topic?.name}</title>
+      </Helmet>
       <div className="digest-topic-nav">
         <Breadcrumb>
           <BreadcrumbItem href="/">

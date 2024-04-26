@@ -617,7 +617,7 @@ export class LlmService implements OnModuleInit {
       .pipe(this.llm as any)
       .pipe(new StringOutputParser());
     const questionWithContext =
-      chatHistory.length === 1
+      chatHistory.length === 1 || chatHistory.length === 0
         ? query
         : await contextualizeQChain.invoke({
             question: query,
