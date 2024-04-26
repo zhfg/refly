@@ -116,7 +116,7 @@ just reformulate it if needed and otherwise return it as is.`;
     .pipe(llm as any)
     .pipe(new StringOutputParser());
   const questionWithContext =
-    chatHistory.length === 0
+    chatHistory.length === 0 || chatHistory.length === 1
       ? query
       : await contextualizeQChain.invoke({
           question: query,
