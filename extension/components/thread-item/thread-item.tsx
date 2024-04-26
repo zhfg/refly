@@ -357,10 +357,10 @@ export const ThreadItem = (props: ThreadItemProps) => {
               )}
             />
           ) : null}
-          {searchQuickActionStore.showQuickAction &&
+          {/* {searchQuickActionStore.showQuickAction &&
           contentSelectorStore?.showSelectedMarks ? (
             <QuickAction />
-          ) : null}
+          ) : null} */}
           {contentSelectorStore?.showSelectedMarks ? (
             <SelectedContentList
               marks={contentSelectorStore.marks}
