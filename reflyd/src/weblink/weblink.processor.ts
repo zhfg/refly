@@ -2,7 +2,7 @@ import { Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
 
-import { WebLinkDTO } from './dto';
+import { WebLinkDTO } from './weblink.dto';
 import { WeblinkService } from './weblink.service';
 import { QUEUE_STORE_LINK } from '../utils/const';
 

@@ -12,17 +12,17 @@ import { PrismaService } from '../common/prisma.service';
 import { MinioService } from '../common/minio.service';
 import { RAGService, ContentAvroType, PARSER_VERSION } from '../rag/rag.service';
 import { AigcService } from '../aigc/aigc.service';
-import { WebLinkDTO } from './dto';
+import { WebLinkDTO } from './weblink.dto';
 import { getExpectedTokenLenContent } from '../utils/token';
-import { Source } from '../types/weblink';
+import { PageMeta, Source } from '../types/weblink';
 import { QUEUE_STORE_LINK } from '../utils/const';
 import { streamToBuffer, streamToString } from '../utils/stream';
-import { genLinkID } from '../utils/id';
+import { genLinkID, sha256Hash } from '../utils/id';
 import { ContentData } from '../common/weaviate.dto';
 
 @Injectable()
 export class WeblinkService {
-  private cache: LRUCache<string, Document>; // url -> parsed document (in markdown)
+  private cache: LRUCache<string, Document<PageMeta>>; // url -> parsed document (in markdown)
   private bucketName: string;
 
   constructor(
@@ -92,12 +92,12 @@ export class WeblinkService {
   }
 
   /**
-   * Parse the content of a webpage link using cheerio.
+   * Parse the content of a webpage link.
    *
    * @param {string} url - The URL of the webpage to parse
    * @return {Promise<Document>} A Promise that resolves to the parsed document
    */
-  async readWebLinkContent(url: string): Promise<Document> {
+  async readWebLinkContent(url: string): Promise<Document<PageMeta>> {
     // Check if the document is in the cache
     if (this.cache.has(url)) {
       this.logger.log(`in-mem cache hit: ${url}`);
@@ -122,8 +122,7 @@ export class WeblinkService {
     }
 
     // Finally tries to fetch the content from the web
-    const doc = await this.ragService.parseWebpage(url);
-
+    const doc = await this.ragService.crawl(url);
     this.cache.set(url, doc);
 
     return doc;
@@ -132,9 +131,9 @@ export class WeblinkService {
   /**
    * Directly parse html content.
    * @param pageContent raw html page content
-   * @returns nothing
+   * @returns parsed markdown document
    */
-  async directParseWebLinkContent(url: string, storageKey: string): Promise<Document> {
+  async directParseWebLinkContent(url: string, storageKey: string): Promise<Document<PageMeta>> {
     try {
       const stream = await this.minio.getObject(this.bucketName, storageKey);
       const content = await streamToString(stream);
@@ -156,11 +155,11 @@ export class WeblinkService {
    * @param weblinkList input weblinks
    * @returns langchain documents
    */
-  async readMultiWeblinks(weblinkList: Source[]): Promise<Document[]> {
+  async readMultiWeblinks(weblinkList: Source[]): Promise<Document<PageMeta>[]> {
     // 处理 token 窗口，一共给 6K 窗口用于问答，平均分到每个网页，保障可用性
     const avgTokenLen = 6000 / weblinkList?.length;
 
-    const results = await Promise.all<Document[]>(
+    const results = await Promise.all<Document<PageMeta>[]>(
       weblinkList.map(async (item) => {
         // If selections are provided, use the selected content
         if (item.selections?.length > 0) {
@@ -309,8 +308,7 @@ export class WeblinkService {
     this.cache.set(link.url, doc);
 
     // Upload parsed doc to minio
-    // TODO: sha256 of link url
-    const parsedDocStorageKey = `docs/${link.url}.md`;
+    const parsedDocStorageKey = `docs/${sha256Hash(link.url)}.md`;
     const res = await this.minio.putObject(
       this.configService.get('minio.weblinkBucket'),
       parsedDocStorageKey,
@@ -353,7 +351,14 @@ export class WeblinkService {
     });
   }
 
-  async processLinkFromStoreQueue(link: WebLinkDTO) {
+  async processLinkByUser(link: WebLinkDTO, weblink: Weblink, doc: Document) {
+    // 处理单个用户的访问记录
+    const uwb = await this.processLinkForUser(link, weblink);
+
+    await this.aigcService.runContentFlow({ doc, uwb, weblink });
+  }
+
+  async processLinkFromStoreQueue(link: WebLinkDTO): Promise<Weblink> {
     this.logger.log(`process link from queue: ${JSON.stringify(link)}`);
 
     // TODO: 并发控制，妥善处理多个并发请求处理同一个 url 的情况
@@ -370,16 +375,13 @@ export class WeblinkService {
 
     const doc = await this.readWebLinkContent(link.url);
 
-    await this.indexWeblink(weblink, doc);
+    weblink = await this.indexWeblink(weblink, doc);
 
-    if (!link.userId) {
-      return;
+    if (link.userId) {
+      this.processLinkByUser(link, weblink, doc);
     }
 
-    // 处理单个用户的访问记录
-    const uwb = await this.processLinkForUser(link, weblink);
-
-    await this.aigcService.runContentFlow({ doc, uwb, weblink });
+    return weblink;
   }
 }
 

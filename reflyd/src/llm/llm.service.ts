@@ -28,7 +28,7 @@ import { HumanMessage, SystemMessage } from 'langchain/schema';
 import { uniqueFunc } from '../utils/unique';
 import { ContentMeta } from './dto';
 import { categoryList } from '../prompts/utils/category';
-import { Source } from '../types/weblink';
+import { PageMeta, Source } from '../types/weblink';
 import { SearchResultContext } from '../types/search';
 import { PrismaService } from '../common/prisma.service';
 import { LOCALE } from '../types/task';
@@ -430,7 +430,11 @@ export class LlmService implements OnModuleInit {
    * @param url
    * @returns
    */
-  async getRetrievalDocs(user: User, query: string, urls?: string[]) {
+  async getRetrievalDocs(
+    user: User,
+    query: string,
+    urls?: string[],
+  ): Promise<Document<PageMeta>[]> {
     this.logger.log(`uid: ${user.uid}, activated with query: ${query}, urls: ${urls}`);
 
     const retrievalResults: SearchResult[] = await this.ragService.retrieve({
@@ -443,7 +447,7 @@ export class LlmService implements OnModuleInit {
 
     const retrievedDocs = retrievalResults.map((res) => ({
       metadata: {
-        url: res.url,
+        source: res.url,
         title: res.title,
       },
       pageContent: res.content,

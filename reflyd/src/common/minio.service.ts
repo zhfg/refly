@@ -27,8 +27,6 @@ export class MinioService extends Client implements OnModuleInit {
   }
 
   async onModuleInit() {
-    await this.ensureBucketExists(
-      this.configService.getOrThrow('minio.weblinkBucket'),
-    );
+    await this.ensureBucketExists(this.configService.getOrThrow('minio.weblinkBucket'));
   }
 }

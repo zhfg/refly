@@ -9,6 +9,7 @@ export class Selection {
 export class PageMeta {
   source: string;
   title: string;
+  publishedTime?: string;
 }
 
 export class Source {
@@ -16,7 +17,7 @@ export class Source {
   pageContent: string;
 
   @ApiProperty()
-  metadata: Record<string, any>;
+  metadata: PageMeta;
 
   @ApiPropertyOptional()
   score?: number;

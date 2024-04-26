@@ -6,7 +6,7 @@ import { LlmService } from '../llm/llm.service';
 import { PrismaService } from '../common/prisma.service';
 import { AigcContent, User, UserWeblink, Weblink } from '@prisma/client';
 import { ContentMeta } from '../llm/dto';
-import { WebLinkDTO } from '../weblink/dto';
+import { WebLinkDTO } from '../weblink/weblink.dto';
 import { DigestFilter } from './aigc.dto';
 import { categoryList } from '../prompts/utils/category';
 import { LoggerService } from '../common/logger.service';
@@ -31,9 +31,7 @@ export class AigcService {
     const cond: any = { userId };
     if (filter?.date) {
       const { year, month, day } = filter.date;
-      cond.date = `${year}-${String(month).padStart(2, '0')}-${String(
-        day,
-      ).padStart(2, '0')}`;
+      cond.date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     }
     if (filter?.topic) {
       cond.topicKey = filter.topic;
@@ -59,11 +57,7 @@ export class AigcService {
     return results.map((res) => res.weblink);
   }
 
-  async getFeedList(params: {
-    userId: string;
-    page?: number;
-    pageSize?: number;
-  }) {
+  async getFeedList(params: { userId: string; page?: number; pageSize?: number }) {
     const { page = 1, pageSize = 10 } = params;
     return this.prisma.aigcContent.findMany({
       where: { sourceType: 'weblink' },
@@ -161,11 +155,7 @@ export class AigcService {
    * @param uwb 用户访问记录
    * @returns
    */
-  async runUserContentFlow(param: {
-    uwb: UserWeblink;
-    meta: ContentMeta;
-    content: AigcContent;
-  }) {
+  async runUserContentFlow(param: { uwb: UserWeblink; meta: ContentMeta; content: AigcContent }) {
     const { uwb, meta } = param;
     const user = await this.prisma.user.findUnique({
       where: { id: uwb.userId },
@@ -194,16 +184,12 @@ export class AigcService {
       where: { weblinkId: weblink.id },
     });
     if (content) {
-      this.logger.log(
-        `found existing content for source type weblink: ${weblink.id}`,
-      );
+      this.logger.log(`found existing content for source type weblink: ${weblink.id}`);
       return content;
     }
 
     // TODO: 策略选择与匹配，暂时用固定的策略
-    this.logger.log(
-      `picking matched strategy with meta: ${JSON.stringify(meta)}`,
-    );
+    this.logger.log(`picking matched strategy with meta: ${JSON.stringify(meta)}`);
 
     // Apply strategy and save aigc content
     const newContent = await this.llmService.applyStrategy(doc);
@@ -221,11 +207,7 @@ export class AigcService {
    * @param doc
    * @returns
    */
-  async runContentFlow(param: {
-    doc: Document;
-    uwb: UserWeblink;
-    weblink: Weblink;
-  }) {
+  async runContentFlow(param: { doc: Document; uwb: UserWeblink; weblink: Weblink }) {
     const { doc, uwb, weblink } = param;
     let meta: ContentMeta;
 
@@ -234,9 +216,7 @@ export class AigcService {
       // TODO: need add locale
       meta = await this.llmService.extractContentMeta(doc);
       if (!meta?.topics || !meta?.topics[0].key) {
-        this.logger.log(
-          `invalid meta for ${weblink.url}: ${JSON.stringify(meta)}`,
-        );
+        this.logger.log(`invalid meta for ${weblink.url}: ${JSON.stringify(meta)}`);
         return;
       }
 
@@ -287,9 +267,7 @@ export class AigcService {
       where: { key: { in: topicKeys } },
     });
     const existingTopicKeys = existingTopics.map((topic) => topic.key);
-    const newTopicKeys = topicKeys.filter(
-      (element) => !existingTopicKeys.includes(element),
-    );
+    const newTopicKeys = topicKeys.filter((element) => !existingTopicKeys.includes(element));
 
     if (newTopicKeys.length > 0) {
       const categoryMap = new Map(categoryList.map((c) => [c.id, c]));

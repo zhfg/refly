@@ -4,28 +4,28 @@ import { IndexStatus } from '@prisma/client';
 
 export class WebLinkDTO {
   @ApiProperty()
-  lastVisitTime: number;
-
-  @ApiProperty()
-  title: string;
-
-  @ApiProperty()
-  origin: string;
-
-  @ApiProperty()
-  originPageTitle: string;
-
-  @ApiProperty()
-  originPageUrl: string;
-
-  @ApiProperty()
-  originPageDescription: string;
-
-  @ApiProperty()
   url: string;
 
   @ApiPropertyOptional()
+  title?: string;
+
+  @ApiPropertyOptional()
+  origin?: string;
+
+  @ApiPropertyOptional()
+  originPageTitle?: string;
+
+  @ApiPropertyOptional()
+  originPageUrl?: string;
+
+  @ApiPropertyOptional()
+  originPageDescription?: string;
+
+  @ApiPropertyOptional()
   visitCount?: number;
+
+  @ApiPropertyOptional()
+  lastVisitTime?: number;
 
   @ApiPropertyOptional()
   readTime?: number;
@@ -37,8 +37,6 @@ export class WebLinkDTO {
   storageKey?: string; // 前端上传 html 拿到的 object key
 
   userId?: number; // 是否绑定 user，如果不绑定就走不去存向量，绑定了就存向量
-
-  parsedDoc?: Document; // 服务端解析出的 Document
 }
 
 export class StoredWebLink extends WebLinkDTO {
@@ -54,4 +52,9 @@ export class StoreWebLinkParam {
 export class GetWebLinkListResponse {
   @ApiProperty({ type: [StoredWebLink] })
   data: StoredWebLink[];
+}
+
+export class PingWeblinkResponse {
+  @ApiProperty()
+  status: 'ok' | 'unavailable';
 }
