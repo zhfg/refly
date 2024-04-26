@@ -1,17 +1,8 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import weaviate, {
-  WeaviateClient,
-  ApiKey,
-  FusionType,
-  WeaviateClass,
-} from 'weaviate-ts-client';
+import weaviate, { WeaviateClient, ApiKey, FusionType, WeaviateClass } from 'weaviate-ts-client';
 
-import {
-  ContentDataObj,
-  HybridSearchParam,
-  SearchResult,
-} from './weaviate.dto';
+import { ContentDataObj, HybridSearchParam, SearchResult } from './weaviate.dto';
 
 const reflyContentSchema = {
   class: 'ReflyContent',
@@ -62,18 +53,11 @@ export class WeaviateService implements OnModuleInit {
         .withClassName(reflyContentSchema.class)
         .do();
     } catch (err) {
-      this.logger.error(
-        `fetch class definition failed (${err}), create new one`,
-      );
-      classDefinition = await this.client.schema
-        .classCreator()
-        .withClass(reflyContentSchema)
-        .do();
+      this.logger.error(`fetch class definition failed (${err}), create new one`);
+      classDefinition = await this.client.schema.classCreator().withClass(reflyContentSchema).do();
     }
 
-    this.logger.log(
-      'collection definition: ' + JSON.stringify(classDefinition, null, 2),
-    );
+    this.logger.log('collection definition: ' + JSON.stringify(classDefinition, null, 2));
   }
 
   async createTenant(tenantId: string) {
@@ -117,11 +101,11 @@ export class WeaviateService implements OnModuleInit {
       .withLimit(param.limit || 5)
       .withFields('url type title content _additional { score explainScore }');
 
-    if (param.filter?.url) {
+    if (param.filter?.urls?.length > 0) {
       getter = getter.withWhere({
         path: ['url'],
-        operator: 'Equal',
-        valueText: param.filter.url,
+        operator: 'ContainsAny',
+        valueTextArray: param.filter.urls,
       });
     }
 

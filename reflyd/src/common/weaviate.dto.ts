@@ -1,3 +1,5 @@
+// TODO: refactor all these types to rag module
+
 export enum ContentType {
   'weblink',
 }
@@ -11,8 +13,12 @@ export interface ContentDataObj {
   vector: number[];
 }
 
+export interface ContentData {
+  chunks: ContentDataObj[];
+}
+
 export interface MetadataFilter {
-  url?: string;
+  urls?: string[];
 }
 
 export interface HybridSearchParam {

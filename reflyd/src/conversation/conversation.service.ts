@@ -51,10 +51,7 @@ export class ConversationService {
     data: Prisma.ConversationUpdateInput,
     locale: LOCALE,
   ) {
-    const summarizedTitle = await this.llmService.summarizeConversation(
-      messages,
-      locale,
-    );
+    const summarizedTitle = await this.llmService.summarizeConversation(messages, locale);
     this.logger.log(`Summarized title: ${summarizedTitle}`);
 
     return this.prisma.conversation.update({
@@ -162,31 +159,15 @@ export class ConversationService {
     task: Task,
     chatHistory: ChatMessage[],
   ): Promise<TaskResponse> {
-    const locale = task?.locale || (user.outputLocale as LOCALE) || LOCALE.EN;
+    const locale = task.locale || (user.outputLocale as LOCALE) || LOCALE.EN;
 
-    const filter: any = {
-      must: [
-        {
-          key: 'userId',
-          match: { value: user.uid },
-        },
-      ],
-    };
-    if (task?.data?.filter?.weblinkList?.length > 0) {
-      filter.must.push({
-        key: 'source',
-        match: {
-          any: task?.data?.filter?.weblinkList?.map(
-            (item) => item?.metadata?.source,
-          ),
-        },
-      });
-    }
+    const { data = {} } = task;
+    const { filter = {} } = data;
+    const urls = filter.weblinkList?.map((item) => item?.metadata?.source);
 
     // 如果有 cssSelector，则代表从基于选中的内容进行提问，否则根据上下文进行相似度匹配召回
-    const chatFromClientSelector = task?.data?.filter?.weblinkList?.find(
-      (item) => item?.selections?.length > 0,
-    );
+    const chatFromClientSelector = filter.weblinkList?.find((item) => item?.selections?.length > 0);
+    this.logger.log(`chatFromClientSelector: ${chatFromClientSelector}, urls: ${urls}`);
 
     // 前置的数据处理
     const query = task?.data?.question;
@@ -195,35 +176,31 @@ export class ConversationService {
       : [];
     // 如果是基于选中内容提问的话，则不需要考虑上下文
     const questionWithContext =
-      chatHistory.length === 1 ||
-      chatHistory.length === 0 ||
-      chatFromClientSelector
+      chatHistory.length <= 1 || chatFromClientSelector
         ? query
-        : await this.llmService.getContextualQuestion(
-            query,
-            locale,
-            llmChatMessages,
-          );
+        : await this.llmService.getContextualQuestion(query, locale, llmChatMessages);
+    this.logger.log(`questionWithContext: ${questionWithContext}`);
 
-    const sources = chatFromClientSelector
-      ? await this.weblinkService.readMultiWeblinks(
-          task?.data?.filter?.weblinkList,
-        )
-      : await this.llmService.getRetrievalDocs(
-          user.uid,
-          questionWithContext,
-          filter,
-        );
+    // 如果需要实时召回向量，则需要先同步保存向量，否则异步保存
+    if (chatFromClientSelector) {
+      this.weblinkService.saveChunkEmbeddingsForUser(user, urls);
+    } else {
+      await this.weblinkService.saveChunkEmbeddingsForUser(user, urls);
+    }
+
+    const docs = chatFromClientSelector
+      ? await this.weblinkService.readMultiWeblinks(task?.data?.filter?.weblinkList)
+      : await this.llmService.getRetrievalDocs(user, questionWithContext, urls);
 
     const { stream } = await this.llmService.chat(
       questionWithContext,
       locale,
       llmChatMessages,
-      sources,
+      docs,
     );
 
     // first return sources，use unique tag for parse data
-    res.write(JSON.stringify(sources));
+    res.write(JSON.stringify(docs));
     res.write(LLM_SPLIT);
 
     const getSSEData = async (stream) => {
@@ -240,7 +217,7 @@ export class ConversationService {
 
     const [answerStr, relatedQuestions] = await Promise.all([
       getSSEData(stream),
-      this.llmService.getRelatedQuestion(sources, questionWithContext, locale),
+      this.llmService.getRelatedQuestion(docs, questionWithContext, locale),
     ]);
 
     this.logger.log('relatedQuestions', relatedQuestions);
@@ -252,7 +229,7 @@ export class ConversationService {
     }
 
     return {
-      sources,
+      sources: docs,
       answer: answerStr,
       relatedQuestions,
     };
@@ -268,9 +245,7 @@ export class ConversationService {
     const { stream, sources } = await this.llmService.searchEnhance(
       query,
       locale,
-      chatHistory
-        ? chatHistory.map((msg) => createLLMChatMessage(msg.content, msg.type))
-        : [],
+      chatHistory ? chatHistory.map((msg) => createLLMChatMessage(msg.content, msg.type)) : [],
     );
 
     // first return sources，use unique tag for parse data
@@ -281,8 +256,7 @@ export class ConversationService {
       // write answer in a stream style
       let answerStr = '';
       for await (const chunk of await stream) {
-        const chunkStr =
-          chunk?.content || (typeof chunk === 'string' ? chunk : '');
+        const chunkStr = chunk?.content || (typeof chunk === 'string' ? chunk : '');
         answerStr += chunkStr || '';
 
         res.write(chunkStr || '');
@@ -316,11 +290,7 @@ export class ConversationService {
     };
   }
 
-  async handleQuickActionTask(
-    res: Response,
-    user: User,
-    task: Task,
-  ): Promise<TaskResponse> {
+  async handleQuickActionTask(res: Response, user: User, task: Task): Promise<TaskResponse> {
     const data = task?.data as QUICK_ACTION_TASK_PAYLOAD;
     const locale = task?.locale || LOCALE.EN;
 
@@ -363,8 +333,7 @@ export class ConversationService {
       // write answer in a stream style
       let answerStr = '';
       for await (const chunk of await stream) {
-        const chunkStr =
-          chunk?.content || (typeof chunk === 'string' ? chunk : '');
+        const chunkStr = chunk?.content || (typeof chunk === 'string' ? chunk : '');
         answerStr += chunkStr;
 
         res.write(chunkStr || '');
@@ -383,11 +352,7 @@ export class ConversationService {
 
     const [answerStr, relatedQuestions] = await Promise.all([
       getSSEData(stream),
-      this.llmService.getRelatedQuestion(
-        docs,
-        getUserQuestion(data?.actionType),
-        locale,
-      ),
+      this.llmService.getRelatedQuestion(docs, getUserQuestion(data?.actionType), locale),
     ]);
 
     this.logger.log('relatedQuestions', relatedQuestions);

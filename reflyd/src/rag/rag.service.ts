@@ -9,6 +9,7 @@ import { generateUuid5 } from 'weaviate-ts-client';
 import { WeaviateService } from '../common/weaviate.service';
 import {
   ContentDataObj,
+  ContentData,
   ContentType,
   HybridSearchParam,
 } from '../common/weaviate.dto';
@@ -47,10 +48,7 @@ export class RAGService {
   private embeddings: OpenAIEmbeddings;
   private splitter: TokenTextSplitter;
 
-  constructor(
-    private config: ConfigService,
-    private weaviate: WeaviateService,
-  ) {
+  constructor(private config: ConfigService, private weaviate: WeaviateService) {
     this.embeddings = new OpenAIEmbeddings({
       modelName: 'text-embedding-3-large',
       batchSize: 512,
@@ -72,10 +70,7 @@ export class RAGService {
     return { pageContent: text, metadata: {} };
   }
 
-  async indexContent(param: {
-    url: string;
-    text?: string;
-  }): Promise<ContentDataObj[]> {
+  async indexContent(param: { url: string; text?: string }): Promise<ContentDataObj[]> {
     const { url, text } = param;
 
     const chunks = await this.splitter.splitText(text);
@@ -96,11 +91,11 @@ export class RAGService {
     return dataObjs;
   }
 
-  async saveDataForUser(user: User, objList: ContentDataObj[]) {
+  async saveDataForUser(user: User, data: ContentData) {
     if (!user.vsTenantCreated) {
       await this.weaviate.createTenant(user.uid);
     }
-    return this.weaviate.batchSaveData(user.uid, objList);
+    return this.weaviate.batchSaveData(user.uid, data.chunks);
   }
 
   async retrieve(param: HybridSearchParam) {

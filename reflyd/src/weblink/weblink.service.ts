@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Prisma, Weblink } from '@prisma/client';
+import { Prisma, User, Weblink } from '@prisma/client';
 import { Queue } from 'bull';
 import { LRUCache } from 'lru-cache';
 import { InjectQueue } from '@nestjs/bull';
@@ -10,18 +10,15 @@ import { Document } from '@langchain/core/documents';
 import { LoggerService } from '../common/logger.service';
 import { PrismaService } from '../common/prisma.service';
 import { MinioService } from '../common/minio.service';
-import {
-  RAGService,
-  ContentAvroType,
-  PARSER_VERSION,
-} from '../rag/rag.service';
+import { RAGService, ContentAvroType, PARSER_VERSION } from '../rag/rag.service';
 import { AigcService } from '../aigc/aigc.service';
 import { WebLinkDTO } from './dto';
 import { getExpectedTokenLenContent } from '../utils/token';
 import { Source } from '../types/weblink';
 import { QUEUE_STORE_LINK } from '../utils/const';
-import { streamToString } from '../utils/stream';
+import { streamToBuffer, streamToString } from '../utils/stream';
 import { genLinkID } from '../utils/id';
+import { ContentData } from '../common/weaviate.dto';
 
 @Injectable()
 export class WeblinkService {
@@ -114,10 +111,7 @@ export class WeblinkService {
     });
     if (weblink) {
       this.logger.log(`found weblink in db: ${url}`);
-      const content = await this.minio.getObject(
-        this.bucketName,
-        weblink.parsedDocStorageKey,
-      );
+      const content = await this.minio.getObject(this.bucketName, weblink.parsedDocStorageKey);
 
       const doc = new Document({
         pageContent: await streamToString(content),
@@ -140,10 +134,7 @@ export class WeblinkService {
    * @param pageContent raw html page content
    * @returns nothing
    */
-  async directParseWebLinkContent(
-    url: string,
-    storageKey: string,
-  ): Promise<Document> {
+  async directParseWebLinkContent(url: string, storageKey: string): Promise<Document> {
     try {
       const stream = await this.minio.getObject(this.bucketName, storageKey);
       const content = await streamToString(stream);
@@ -179,13 +170,10 @@ export class WeblinkService {
           }));
         }
 
-        const { pageContent, metadata } = await this.readWebLinkContent(
-          item.metadata?.source,
-        );
+        const { pageContent, metadata } = await this.readWebLinkContent(item.metadata?.source);
         return [
           {
-            pageContent:
-              getExpectedTokenLenContent(pageContent, avgTokenLen) || '',
+            pageContent: getExpectedTokenLenContent(pageContent, avgTokenLen) || '',
             metadata,
           },
         ];
@@ -193,6 +181,42 @@ export class WeblinkService {
     );
 
     return results.flat();
+  }
+
+  async saveChunkEmbeddingsForUser(user: User, urls: string[]) {
+    const [uwbs, weblinks] = await Promise.all([
+      this.prisma.userWeblink.findMany({
+        where: { userId: user.id, url: { in: urls } },
+      }),
+      this.prisma.weblink.findMany({
+        select: { url: true, chunkStorageKey: true },
+        where: { url: { in: urls } },
+      }),
+    ]);
+
+    // calculate urls not saved by user
+    const unsavedWeblinks = weblinks.filter(({ url }) => !uwbs.some((uwb) => uwb.url === url));
+
+    await Promise.all(
+      unsavedWeblinks.map(async ({ chunkStorageKey }) => {
+        const stream = await this.minio.getObject(this.bucketName, chunkStorageKey);
+        const content = ContentAvroType.fromBuffer(await streamToBuffer(stream)) as ContentData;
+        return this.ragService.saveDataForUser(user, content);
+      }),
+    );
+
+    // 更新向量库租户创建状态
+    if (!user.vsTenantCreated) {
+      this.prisma.user.update({
+        where: { id: user.id },
+        data: { vsTenantCreated: true },
+      });
+    }
+
+    this.logger.log(
+      `save chunk embeddings for user ${user.uid} success, urls: `,
+      JSON.stringify(unsavedWeblinks),
+    );
   }
 
   async saveWeblinkUserMarks(param: {
@@ -261,16 +285,12 @@ export class WeblinkService {
         originPageUrl: link.originPageUrl,
         originPageTitle: link.originPageTitle,
         originPageDescription: link.originPageDescription,
-        lastVisitTime: !!link.lastVisitTime
-          ? new Date(link.lastVisitTime)
-          : new Date(),
+        lastVisitTime: !!link.lastVisitTime ? new Date(link.lastVisitTime) : new Date(),
         visitTimes: link.visitCount || 1,
         totalReadTime: link.readTime || 0,
       },
       update: {
-        lastVisitTime: !!link.lastVisitTime
-          ? new Date(link.lastVisitTime)
-          : new Date(),
+        lastVisitTime: !!link.lastVisitTime ? new Date(link.lastVisitTime) : new Date(),
         visitTimes: { increment: link.visitCount || 1 },
         totalReadTime: { increment: link.readTime || 0 },
       },

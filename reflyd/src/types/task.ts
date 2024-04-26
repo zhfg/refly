@@ -78,6 +78,7 @@ export type CHAT = {
 export type Task = {
   taskType: TASK_TYPE;
   taskId?: string; // task:xxxx-xxxx-xxxx-xxxx
+  convId?: string; // 对话 id，为空代表创建新对话
   language?: LANGUAGE;
   locale?: LOCALE;
   data?: CHAT | QUICK_ACTION_TASK_PAYLOAD;
