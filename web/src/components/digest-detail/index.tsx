@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
-import { Message as message } from "@arco-design/web-react"
+import { Skeleton, Message as message } from "@arco-design/web-react"
 import { Helmet } from "react-helmet"
 
 import { useDigestDetailStore } from "@/stores/digest-detail"
@@ -25,11 +25,13 @@ import { useTranslation } from "react-i18next"
 export const DigestTail = () => {
   const params = useParams<{ digestId: string }>()
   const [askFollowUpVisible, setAskFollowUpVisible] = useState(false)
+  const [isFetching, setIsFetching] = useState(false)
 
   const digestDetailStore = useDigestDetailStore()
   const { t } = useTranslation()
 
   const handleGetDetail = async (digestId: string) => {
+    setIsFetching(true)
     try {
       const newRes = await getAIGCContent({
         body: {
@@ -46,6 +48,8 @@ export const DigestTail = () => {
     } catch (err) {
       message.error(t("contentDetail.list.fetchErr"))
     }
+
+    setIsFetching(false)
   }
 
   const handleAskFollowUp = () => {
@@ -74,10 +78,18 @@ export const DigestTail = () => {
         <meta name="description" content={digestDetailStore.digest?.abstract} />
       </Helmet>
       <Header digest={digestDetailStore?.digest as Digest} />
-      <DigestDetailContent
-        sessions={sessions}
-        handleAskFollowUp={handleAskFollowUp}
-      />
+      {isFetching ? (
+        <>
+          <Skeleton animation></Skeleton>
+          <Skeleton animation></Skeleton>
+          <Skeleton animation></Skeleton>
+        </>
+      ) : (
+        <DigestDetailContent
+          sessions={sessions}
+          handleAskFollowUp={handleAskFollowUp}
+        />
+      )}
 
       {askFollowUpVisible ? (
         <AskFollowUpModal

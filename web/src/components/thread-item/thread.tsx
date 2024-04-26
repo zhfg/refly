@@ -202,7 +202,11 @@ export const Thread = () => {
       </Helmet>
       <Header thread={conversationStore?.currentConversation as IThread} />
       {isFetching ? (
-        <Skeleton animation></Skeleton>
+        <>
+          <Skeleton animation></Skeleton>
+          <Skeleton animation></Skeleton>
+          <Skeleton animation></Skeleton>
+        </>
       ) : (
         <ThreadItem
           sessions={sessions}
