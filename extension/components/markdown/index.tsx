@@ -52,7 +52,7 @@ export function ATag({ ...props }, sources: Source[]) {
         </PopoverTrigger>
         <PopoverContent
           align={"start"}
-          style={{ backgroundClip: "#fcfcf9" }}
+          style={{ backgroundColor: "#fcfcf9" }}
           className="max-w-screen-md flex flex-col gap-2 shadow-transparent ring-zinc-50 ring-4 text-xs">
           <div className="text-ellipsis overflow-hidden whitespace-nowrap font-medium">
             {source.metadata?.title}
