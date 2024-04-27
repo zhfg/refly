@@ -1,5 +1,6 @@
 import {
   Controller,
+  Logger,
   Get,
   Post,
   Query,
@@ -22,25 +23,17 @@ import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
 import { LOCALE, TASK_TYPE, type Task } from '../types/task';
 import { AigcService } from '../aigc/aigc.service';
-import { LoggerService } from '../common/logger.service';
 
 @Controller('conversation')
 export class ConversationController {
-  constructor(
-    private logger: LoggerService,
-    private conversationService: ConversationService,
-    private aigcService: AigcService,
-  ) {
-    this.logger.setContext(ConversationController.name);
-  }
+  private logger = new Logger(ConversationController.name);
+
+  constructor(private conversationService: ConversationService, private aigcService: AigcService) {}
 
   @UseGuards(JwtAuthGuard)
   @Post('new')
   @ApiResponse({ type: CreateConversationResponse })
-  async createConversation(
-    @Request() req,
-    @Body() body: CreateConversationParam,
-  ) {
+  async createConversation(@Request() req, @Body() body: CreateConversationParam) {
     const userId: number = req.user.id;
     const res = await this.conversationService.create(body, userId);
 
@@ -140,18 +133,13 @@ export class ConversationController {
   @Get(':conversationId')
   @ApiParam({ name: 'conversationId' })
   @ApiResponse({ type: ListConversationResponse })
-  async showConversationDetail(
-    @Request() req,
-    @Param('conversationId') conversationId: string,
-  ) {
+  async showConversationDetail(@Request() req, @Param('conversationId') conversationId: string) {
     const convId = Number(conversationId);
     if (!convId) {
       return { data: {} };
     }
 
-    const data = await this.conversationService.findConversationAndMessages(
-      convId,
-    );
+    const data = await this.conversationService.findConversationAndMessages(convId);
 
     return data.userId === (req.user.id as number) ? { data } : { data: {} };
   }

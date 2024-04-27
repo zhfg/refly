@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Response } from 'express';
 
 import { PrismaService } from '../common/prisma.service';
@@ -15,7 +15,6 @@ import {
 import { createLLMChatMessage } from '../llm/schema';
 import { LlmService } from '../llm/llm.service';
 import { WeblinkService } from '../weblink/weblink.service';
-import { LoggerService } from '../common/logger.service';
 import { IterableReadableStream } from '@langchain/core/dist/utils/stream';
 import { BaseMessageChunk } from 'langchain/schema';
 
@@ -24,14 +23,13 @@ const RELATED_SPLIT = '__RELATED_QUESTIONS__';
 
 @Injectable()
 export class ConversationService {
+  private logger = new Logger(ConversationService.name);
+
   constructor(
-    private logger: LoggerService,
     private prisma: PrismaService,
     private weblinkService: WeblinkService,
     private llmService: LlmService,
-  ) {
-    this.logger.setContext(ConversationService.name);
-  }
+  ) {}
 
   async create(param: CreateConversationParam, userId: number) {
     return this.prisma.conversation.create({

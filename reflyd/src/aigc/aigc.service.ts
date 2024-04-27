@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Logger, Injectable } from '@nestjs/common';
 import { Document } from '@langchain/core/documents';
 import omit from 'lodash.omit';
 
@@ -6,20 +6,14 @@ import { LlmService } from '../llm/llm.service';
 import { PrismaService } from '../common/prisma.service';
 import { AigcContent, User, UserWeblink, Weblink } from '@prisma/client';
 import { ContentMeta } from '../llm/dto';
-import { WebLinkDTO } from '../weblink/weblink.dto';
 import { DigestFilter } from './aigc.dto';
 import { categoryList } from '../prompts/utils/category';
-import { LoggerService } from '../common/logger.service';
 
 @Injectable()
 export class AigcService {
-  constructor(
-    private logger: LoggerService,
-    private prisma: PrismaService,
-    private llmService: LlmService,
-  ) {
-    this.logger.setContext(AigcService.name);
-  }
+  private logger = new Logger(AigcService.name);
+
+  constructor(private prisma: PrismaService, private llmService: LlmService) {}
 
   async getDigestList(params: {
     userId: string;

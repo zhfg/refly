@@ -1,6 +1,6 @@
 import os from 'os';
 import fs from 'fs';
-import { Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import genericPool from 'generic-pool';
 
 import type { Browser, CookieParam, Page } from 'puppeteer';
@@ -56,20 +56,7 @@ export interface ScrappingOptions {
   favorScreenshot?: boolean;
 }
 
-puppeteer.use(puppeteerStealth());
-
-puppeteer.use(
-  puppeteerBlockResources({
-    blockedTypes: new Set(['media']),
-    interceptResolutionPriority: 1,
-  }),
-);
-puppeteer.use(
-  puppeteerPageProxy({
-    interceptResolutionPriority: 1,
-  }),
-);
-
+@Injectable()
 export class PuppeteerService implements OnModuleInit {
   private readonly logger = new Logger(PuppeteerService.name);
 
@@ -99,7 +86,7 @@ export class PuppeteerService implements OnModuleInit {
   );
 
   async onModuleInit() {
-    this.logger.log(`PuppeteerControl initializing with pool size ${this.pagePool.max}`);
+    this.logger.log(`PuppeteerService initializing with pool size ${this.pagePool.max}`);
     this.pagePool.start();
 
     if (this.browser) {
@@ -109,12 +96,27 @@ export class PuppeteerService implements OnModuleInit {
         this.browser.process()?.kill();
       }
     }
+
+    puppeteer.use(puppeteerStealth());
+
+    puppeteer.use(
+      puppeteerBlockResources({
+        blockedTypes: new Set(['media']),
+        interceptResolutionPriority: 1,
+      }),
+    );
+    puppeteer.use(
+      puppeteerPageProxy({
+        interceptResolutionPriority: 1,
+      }),
+    );
+
     this.browser = await puppeteer
       .launch({
         timeout: 10_000,
       })
       .catch((err: any) => {
-        this.logger.error(`Unknown firebase issue, just die fast.`, { err });
+        this.logger.error(`launch browser failed: ${err}, just die fast.`);
         return Promise.reject(err);
       });
     this.browser.once('disconnected', () => {

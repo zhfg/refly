@@ -6,19 +6,17 @@ import { User } from '@prisma/client';
 import { AccountService } from '../account/account.service';
 import { UserService } from '../user/user.service';
 import { JwtPayload } from './dto';
-import { LoggerService } from '../common/logger.service';
 
 @Injectable()
 export class AuthService {
+  private logger = new Logger(AuthService.name);
+
   constructor(
-    private logger: LoggerService,
     private configService: ConfigService,
     private accountService: AccountService,
     private userService: UserService,
     private jwtService: JwtService,
-  ) {
-    this.logger.setContext(AuthService.name);
-  }
+  ) {}
 
   async validateEmailPass(email: string, pass: string) {
     const user = await this.userService.findUnique({ email });
@@ -44,13 +42,9 @@ export class AuthService {
    * @param refreshToken
    * @param profile
    */
-  async oauthValidate(
-    accessToken: string,
-    refreshToken: string,
-    profile: Profile,
-  ) {
+  async oauthValidate(accessToken: string, refreshToken: string, profile: Profile) {
     this.logger.log(
-      `oauth validate, accessToken: ${accessToken}, refreshToken: ${refreshToken}, profile: ${JSON.stringify(
+      `oauth accessToken: ${accessToken}, refreshToken: ${refreshToken}, profile: ${JSON.stringify(
         profile,
       )}`,
     );
@@ -66,9 +60,7 @@ export class AuthService {
 
     // 如果有认证账户，且存在对应的用户，则直接返回
     if (account) {
-      this.logger.log(
-        `account found for provider ${provider}, account id: ${id}`,
-      );
+      this.logger.log(`account found for provider ${provider}, account id: ${id}`);
       const user = await this.userService.findUnique({
         id: account.userId,
       });

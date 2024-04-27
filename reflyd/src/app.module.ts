@@ -30,13 +30,10 @@ import { AppController } from './app.controller';
             autoLogging: true,
             base: null,
             quietReqLogger: true,
-            genReqId: () =>
-              api.trace.getSpan(api.context.active())?.spanContext()?.traceId,
+            genReqId: () => api.trace.getSpan(api.context.active())?.spanContext()?.traceId,
             level: 'debug',
             transport:
-              process.env.NODE_ENV !== 'production'
-                ? { target: 'pino-pretty' }
-                : undefined,
+              process.env.NODE_ENV !== 'production' ? { target: 'pino-pretty' } : undefined,
           },
         };
       },
