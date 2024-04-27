@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import avro from 'avsc';
 import { OpenAIEmbeddings } from '@langchain/openai';
+import { FireworksEmbeddings } from '@langchain/community/embeddings/fireworks';
 import { Document } from '@langchain/core/documents';
 import { TokenTextSplitter } from 'langchain/text_splitter';
 import { generateUuid5 } from 'weaviate-ts-client';
@@ -52,7 +53,7 @@ export const PARSER_VERSION = '20240424';
 
 @Injectable()
 export class RAGService {
-  private embeddings: OpenAIEmbeddings;
+  private embeddings: FireworksEmbeddings;
   private splitter: TokenTextSplitter;
   private logger = new Logger(RAGService.name);
 
@@ -63,11 +64,12 @@ export class RAGService {
     private weaviate: WeaviateService,
     private puppeteer: PuppeteerService,
   ) {
-    this.embeddings = new OpenAIEmbeddings({
-      modelName: 'text-embedding-3-large',
+    this.embeddings = new FireworksEmbeddings({
+      modelName: 'nomic-ai/nomic-embed-text-v1.5',
       batchSize: 512,
-      dimensions: this.config.getOrThrow('vectorStore.vectorDim'),
-      timeout: 5000,
+      // dimensions: this.config.getOrThrow('vectorStore.vectorDim'),
+      // timeout: 5000,
+      apiKey: this.config.getOrThrow('fireworks.apiKey'),
       maxRetries: 3,
     });
     this.splitter = new TokenTextSplitter({
@@ -197,19 +199,19 @@ export class RAGService {
     return { pageContent: text, metadata: { source: url, title: '' } }; // TODO: page title
   }
 
-  async indexContent(param: { url: string; text?: string }): Promise<ContentDataObj[]> {
-    const { url, text } = param;
+  async indexContent(doc: Document<PageMeta>): Promise<ContentDataObj[]> {
+    const { pageContent, metadata } = doc;
 
-    const chunks = await this.splitter.splitText(text);
+    const chunks = await this.splitter.splitText(pageContent);
     const chunkEmbeds = await this.embeddings.embedDocuments(chunks);
 
     const dataObjs: ContentDataObj[] = [];
     for (let i = 0; i < chunks.length; i++) {
       dataObjs.push({
-        id: generateUuid5(`${url}-${i}`),
-        url,
-        type: ContentType.weblink,
-        title: chunks[i],
+        id: generateUuid5(`${metadata.source}-${i}`),
+        url: metadata.source,
+        type: ContentType.WEBLINK,
+        title: metadata.title,
         content: chunks[i],
         vector: chunkEmbeds[i],
       });
@@ -218,7 +220,7 @@ export class RAGService {
     return dataObjs;
   }
 
-  async saveDataForUser(user: User, data: ContentData) {
+  async saveDataForUser(user: Pick<User, 'uid' | 'vsTenantCreated'>, data: ContentData) {
     if (!user.vsTenantCreated) {
       await this.weaviate.createTenant(user.uid);
     }

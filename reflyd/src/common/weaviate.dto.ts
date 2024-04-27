@@ -1,7 +1,7 @@
 // TODO: refactor all these types to rag module
 
 export enum ContentType {
-  'weblink',
+  WEBLINK = 'weblink',
 }
 
 export interface ContentDataObj {

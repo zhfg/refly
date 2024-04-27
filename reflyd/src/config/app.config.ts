@@ -20,6 +20,9 @@ export default () => ({
   serper: {
     apiKey: process.env.SERPER_API_KEY,
   },
+  fireworks: {
+    apiKey: process.env.FIREWORKS_API_KEY,
+  },
   auth: {
     cookieTokenField: '_refly_ai_sid',
     cookieDomain: process.env.REFLY_COOKIE_DOMAIN || '.refly.ai',

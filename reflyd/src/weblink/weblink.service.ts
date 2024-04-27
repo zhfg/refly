@@ -174,7 +174,10 @@ export class WeblinkService {
     return results.flat();
   }
 
-  async saveChunkEmbeddingsForUser(user: User, urls: string[]) {
+  async saveChunkEmbeddingsForUser(
+    user: Pick<User, 'id' | 'uid' | 'vsTenantCreated'>,
+    urls: string[],
+  ) {
     const [uwbs, weblinks] = await Promise.all([
       this.prisma.userWeblink.findMany({
         where: { userId: user.id, url: { in: urls } },
@@ -188,8 +191,17 @@ export class WeblinkService {
     // calculate urls not saved by user
     const unsavedWeblinks = weblinks.filter(({ url }) => !uwbs.some((uwb) => uwb.url === url));
 
+    if (unsavedWeblinks.length === 0) {
+      this.logger.log(`user ${user.uid} has all weblinks saved: ${urls}`);
+      return;
+    }
+
     await Promise.all(
-      unsavedWeblinks.map(async ({ chunkStorageKey }) => {
+      unsavedWeblinks.map(async ({ url, chunkStorageKey }) => {
+        if (!chunkStorageKey) {
+          // TODO: 失败补偿，重新 index
+          // this.indexWeblink();
+        }
         const stream = await this.minio.getObject(this.bucketName, chunkStorageKey);
         const content = ContentAvroType.fromBuffer(await streamToBuffer(stream)) as ContentData;
         return this.ragService.saveDataForUser(user, content);
@@ -322,12 +334,9 @@ export class WeblinkService {
     });
   }
 
-  async indexWeblink(weblink: Weblink, doc: Document) {
+  async indexWeblink(weblink: Weblink, doc: Document<PageMeta>) {
     this.logger.log(`start to index weblink: ${weblink.url}`);
-    const dataObjs = await this.ragService.indexContent({
-      url: weblink.url,
-      text: doc.pageContent,
-    });
+    const dataObjs = await this.ragService.indexContent(doc);
 
     const buf = ContentAvroType.toBuffer({ chunks: dataObjs });
     const chunkStorageKey = `chunks/${sha256Hash(weblink.url)}-${PARSER_VERSION}.avro`;
@@ -352,6 +361,7 @@ export class WeblinkService {
   }
 
   async processLinkFromStoreQueue(link: WebLinkDTO): Promise<Weblink> {
+    // TODO: normalize-url 统一处理
     this.logger.log(`process link from queue: ${JSON.stringify(link)}`);
 
     // TODO: 并发控制，妥善处理多个并发请求处理同一个 url 的情况
