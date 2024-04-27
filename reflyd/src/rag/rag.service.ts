@@ -153,19 +153,13 @@ export class RAGService {
   }
 
   async crawl(url: string, mode = 'markdown') {
-    const noSlashURL = url.slice(1);
-    let urlToCrawl: URL;
-    try {
-      urlToCrawl = new URL(
-        normalizeUrl(noSlashURL.trim(), {
-          stripWWW: false,
-          removeTrailingSlash: false,
-          removeSingleSlash: false,
-        }),
-      );
-    } catch (err) {
-      throw new Error(`Invalid URL: ${noSlashURL}`);
-    }
+    const urlToCrawl = new URL(
+      normalizeUrl(url.trim(), {
+        stripWWW: false,
+        removeTrailingSlash: false,
+        removeSingleSlash: false,
+      }),
+    );
     if (urlToCrawl.protocol !== 'http:' && urlToCrawl.protocol !== 'https:') {
       throw new Error(`Invalid protocol ${urlToCrawl.protocol}`);
     }

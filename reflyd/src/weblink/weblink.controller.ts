@@ -1,23 +1,21 @@
-import { Controller, Get, Post, Query, Request, UseGuards, Body } from '@nestjs/common';
+import { Controller, Logger, Get, Post, Query, Request, UseGuards, Body } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { WeblinkService } from './weblink.service';
 import { GetWebLinkListResponse, PingWeblinkResponse, StoreWebLinkParam } from './weblink.dto';
 import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
-import { LoggerService } from 'src/common/logger.service';
 
 @Controller('weblink')
 export class WeblinkController {
-  constructor(private logger: LoggerService, private weblinkService: WeblinkService) {
-    this.logger.setContext(WeblinkController.name);
-  }
+  private logger = new Logger(WeblinkController.name);
+  constructor(private weblinkService: WeblinkService) {}
 
   @UseGuards(JwtAuthGuard)
   @Get('ping')
   async ping(@Query('url') url: string): Promise<PingWeblinkResponse> {
     if (!url) return { status: 'unavailable' };
-    await this.weblinkService.processLinkFromStoreQueue({ url });
+    const weblink = await this.weblinkService.processLinkFromStoreQueue({ url });
     return {
-      status: (await this.weblinkService.checkWeblinkExists(url)) ? 'ok' : 'unavailable',
+      status: weblink?.parsedDocStorageKey && weblink?.chunkStorageKey ? 'ok' : 'unavailable',
     };
   }
 

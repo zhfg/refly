@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma, User, Weblink } from '@prisma/client';
 import { Queue } from 'bull';
@@ -7,7 +7,6 @@ import { InjectQueue } from '@nestjs/bull';
 import * as cheerio from 'cheerio';
 import { Document } from '@langchain/core/documents';
 
-import { LoggerService } from '../common/logger.service';
 import { PrismaService } from '../common/prisma.service';
 import { MinioService } from '../common/minio.service';
 import { RAGService, ContentAvroType, PARSER_VERSION } from '../rag/rag.service';
@@ -22,11 +21,12 @@ import { ContentData } from '../common/weaviate.dto';
 
 @Injectable()
 export class WeblinkService {
+  private logger = new Logger(WeblinkService.name);
+
   private cache: LRUCache<string, Document<PageMeta>>; // url -> parsed document (in markdown)
   private bucketName: string;
 
   constructor(
-    private logger: LoggerService,
     private prisma: PrismaService,
     private minio: MinioService,
     private configService: ConfigService,
@@ -34,18 +34,10 @@ export class WeblinkService {
     private aigcService: AigcService,
     @InjectQueue(QUEUE_STORE_LINK) private indexQueue: Queue<WebLinkDTO>,
   ) {
-    this.logger.setContext(WeblinkService.name);
     this.cache = new LRUCache({
       max: 1000,
     });
     this.bucketName = this.configService.getOrThrow('minio.weblinkBucket');
-  }
-
-  async checkWeblinkExists(url: string) {
-    return this.prisma.weblink.findUnique({
-      select: { id: true },
-      where: { url },
-    });
   }
 
   /**
@@ -331,23 +323,24 @@ export class WeblinkService {
   }
 
   async indexWeblink(weblink: Weblink, doc: Document) {
+    this.logger.log(`start to index weblink: ${weblink.url}`);
     const dataObjs = await this.ragService.indexContent({
       url: weblink.url,
       text: doc.pageContent,
     });
 
     const buf = ContentAvroType.toBuffer({ chunks: dataObjs });
-    const chunkStorageKey = `content-${PARSER_VERSION}.avro`;
+    const chunkStorageKey = `chunks/${sha256Hash(weblink.url)}-${PARSER_VERSION}.avro`;
     const res = await this.minio.putObject(
       this.configService.get('minio.weblinkBucket'),
       chunkStorageKey,
       buf,
     );
-    this.logger.log('upload chunks to minio res: ' + JSON.stringify(res));
+    this.logger.log(`upload ${dataObjs.length} chunk(s) to minio res: ` + JSON.stringify(res));
 
     return this.prisma.weblink.update({
       where: { id: weblink.id },
-      data: { chunkStorageKey },
+      data: { chunkStorageKey, parserVersion: PARSER_VERSION },
     });
   }
 
@@ -370,12 +363,16 @@ export class WeblinkService {
 
     // Link not found
     if (!weblink) {
+      this.logger.log(`weblink not found for ${link.url}, create new one`);
       weblink = await this.createNewWeblink(link);
     }
 
     const doc = await this.readWebLinkContent(link.url);
 
-    weblink = await this.indexWeblink(weblink, doc);
+    // Retry chunking and embedding with idempotency
+    if (!weblink.chunkStorageKey) {
+      weblink = await this.indexWeblink(weblink, doc);
+    }
 
     if (link.userId) {
       this.processLinkByUser(link, weblink, doc);
