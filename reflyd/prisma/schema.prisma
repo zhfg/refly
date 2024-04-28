@@ -389,6 +389,7 @@ enum IndexStatus {
   init
   processing
   finish
+  failed
 }
 
 enum MessageType {

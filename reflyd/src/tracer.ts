@@ -14,10 +14,7 @@ const exporterOptions = {
 const traceExporter = new OTLPTraceExporter(exporterOptions);
 const sdk = new opentelemetry.NodeSDK({
   traceExporter,
-  instrumentations: [
-    getNodeAutoInstrumentations(),
-    new PrismaInstrumentation(),
-  ],
+  instrumentations: [getNodeAutoInstrumentations(), new PrismaInstrumentation()],
   resource: new Resource({
     [SemanticResourceAttributes.SERVICE_NAME]: 'reflyd',
   }),

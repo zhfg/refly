@@ -56,5 +56,5 @@ export class GetWebLinkListResponse {
 
 export class PingWeblinkResponse {
   @ApiProperty()
-  status: 'ok' | 'unavailable';
+  status: IndexStatus | 'unavailable';
 }

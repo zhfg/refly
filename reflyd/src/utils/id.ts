@@ -9,6 +9,10 @@ export function genLinkID(): string {
   return 'l-' + createId();
 }
 
+export function genConvID(): string {
+  return 'cv-' + createId();
+}
+
 export function sha256Hash(str: string): string {
   const hash = crypto.createHash('sha256');
   hash.update(str);

@@ -31,7 +31,6 @@ import { categoryList } from '../prompts/utils/category';
 import { PageMeta, Source } from '../types/weblink';
 import { SearchResultContext } from '../types/search';
 import { PrismaService } from '../common/prisma.service';
-import { LOCALE } from '../types/task';
 import { RAGService } from '../rag/rag.service';
 import { SearchResult } from '../common/weaviate.dto';
 
@@ -405,7 +404,7 @@ export class LlmService implements OnModuleInit {
   }
 
   async getContextualQuestion(query: string, locale: LOCALE, chatHistory: LLMChatMessage[]) {
-    this.logger.log(`activated with query: ${query}, chat history: ${chatHistory}`);
+    this.logger.log(`[getContextualQuestion] query: ${query}, chat history: ${chatHistory}`);
 
     // 构建总结的 Prompt，将 question + chatHistory 总结成
     const contextualizeQPrompt = ChatPromptTemplate.fromMessages([
@@ -435,7 +434,7 @@ export class LlmService implements OnModuleInit {
     query: string,
     urls?: string[],
   ): Promise<Document<PageMeta>[]> {
-    this.logger.log(`uid: ${user.uid}, activated with query: ${query}, urls: ${urls}`);
+    this.logger.log(`[getRetrievalDocs] uid: ${user.uid}, query: ${query}, urls: ${urls}`);
 
     const retrievalResults: SearchResult[] = await this.ragService.retrieve({
       tenantId: user.uid,
@@ -458,7 +457,7 @@ export class LlmService implements OnModuleInit {
   }
 
   async chat(query: string, locale: LOCALE, chatHistory: LLMChatMessage[], docs: Document[]) {
-    this.logger.log(`activated with query: ${query}}`);
+    this.logger.log(`[chat] activated with query: ${query}}`);
 
     const qaPrompt = ChatPromptTemplate.fromMessages([
       ['system', qa.systemPrompt],
@@ -547,7 +546,7 @@ export class LlmService implements OnModuleInit {
   }
 
   async searchEnhance(query: string, locale: LOCALE, chatHistory: LLMChatMessage[]) {
-    this.logger.log(`activated with query: ${query}, locale: ${locale}`);
+    this.logger.log(`[searchEnhance] activated with query: ${query}, locale: ${locale}`);
 
     const stopWords = ['<|im_end|>', '[End]', '[end]', '\nReferences:\n', '\nSources:\n', 'End.'];
 

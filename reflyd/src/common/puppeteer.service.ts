@@ -56,6 +56,20 @@ export interface ScrappingOptions {
   favorScreenshot?: boolean;
 }
 
+puppeteer.use(puppeteerStealth());
+
+puppeteer.use(
+  puppeteerBlockResources({
+    blockedTypes: new Set(['media']),
+    interceptResolutionPriority: 1,
+  }),
+);
+puppeteer.use(
+  puppeteerPageProxy({
+    interceptResolutionPriority: 1,
+  }),
+);
+
 @Injectable()
 export class PuppeteerService implements OnModuleInit {
   private readonly logger = new Logger(PuppeteerService.name);
@@ -96,20 +110,6 @@ export class PuppeteerService implements OnModuleInit {
         this.browser.process()?.kill();
       }
     }
-
-    puppeteer.use(puppeteerStealth());
-
-    puppeteer.use(
-      puppeteerBlockResources({
-        blockedTypes: new Set(['media']),
-        interceptResolutionPriority: 1,
-      }),
-    );
-    puppeteer.use(
-      puppeteerPageProxy({
-        interceptResolutionPriority: 1,
-      }),
-    );
 
     this.browser = await puppeteer
       .launch({

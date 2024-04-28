@@ -3,6 +3,7 @@ import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { WeblinkService } from './weblink.service';
 import { GetWebLinkListResponse, PingWeblinkResponse, StoreWebLinkParam } from './weblink.dto';
 import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
+import { PARSER_VERSION } from '../rag/rag.service';
 
 @Controller('weblink')
 export class WeblinkController {
@@ -13,10 +14,16 @@ export class WeblinkController {
   @Get('ping')
   async ping(@Query('url') url: string): Promise<PingWeblinkResponse> {
     if (!url) return { status: 'unavailable' };
-    const weblink = await this.weblinkService.processLinkFromStoreQueue({ url });
-    return {
-      status: weblink?.parsedDocStorageKey && weblink?.chunkStorageKey ? 'ok' : 'unavailable',
-    };
+
+    const weblink = await this.weblinkService.findWeblinkByURL(url);
+
+    // If weblink not exists or has outdated parser version then reprocess it asynchronously
+    if (!weblink || (weblink.indexStatus === 'finish' && weblink.parserVersion < PARSER_VERSION)) {
+      this.weblinkService.processLinkFromStoreQueue({ url });
+      return { status: 'processing' };
+    }
+
+    return { status: weblink.indexStatus };
   }
 
   @UseGuards(JwtAuthGuard)

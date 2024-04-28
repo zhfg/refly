@@ -6,6 +6,7 @@ import { User } from '@prisma/client';
 import { AccountService } from '../account/account.service';
 import { UserService } from '../user/user.service';
 import { JwtPayload } from './dto';
+import { genUID } from '../utils/id';
 
 @Injectable()
 export class AuthService {
@@ -85,6 +86,7 @@ export class AuthService {
       where: { email },
       create: {
         name: displayName,
+        uid: genUID(),
         email,
         avatar: photos?.length > 0 ? photos[0].value : undefined,
       },

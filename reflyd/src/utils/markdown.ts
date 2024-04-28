@@ -36,11 +36,11 @@ export function tidyMarkdown(markdown: string): string {
     },
   );
 
-  // Step 3: Replace more than two consecutive empty lines with exactly two empty lines
-  normalizedMarkdown = normalizedMarkdown.replace(/\n{3,}/g, '\n\n');
-
-  // Step 4: Remove leading spaces from each line
+  // Step 3: Remove leading spaces from each line
   normalizedMarkdown = normalizedMarkdown.replace(/^[ \t]+/gm, '');
+
+  // Step 4: Replace more than two consecutive empty lines with exactly two empty lines
+  normalizedMarkdown = normalizedMarkdown.replace(/\n{3,}/g, '\n\n');
 
   return normalizedMarkdown.trim();
 }

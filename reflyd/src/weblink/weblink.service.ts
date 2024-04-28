@@ -40,6 +40,10 @@ export class WeblinkService {
     this.bucketName = this.configService.getOrThrow('minio.weblinkBucket');
   }
 
+  async findWeblinkByURL(url: string) {
+    return this.prisma.weblink.findUnique({ where: { url } });
+  }
+
   /**
    * Preprocess and filter links, then send to processing queue
    * @param userId user id
@@ -328,7 +332,7 @@ export class WeblinkService {
         pageContent: '', // deprecated, always empty
         storageKey: link.storageKey,
         parsedDocStorageKey,
-        pageMeta: JSON.stringify({ title: link.title, source: link.url }),
+        pageMeta: JSON.stringify(doc.metadata),
         contentMeta: '',
       },
     });
@@ -349,7 +353,7 @@ export class WeblinkService {
 
     return this.prisma.weblink.update({
       where: { id: weblink.id },
-      data: { chunkStorageKey, parserVersion: PARSER_VERSION },
+      data: { chunkStorageKey, parserVersion: PARSER_VERSION, indexStatus: 'finish' },
     });
   }
 
@@ -371,6 +375,11 @@ export class WeblinkService {
       where: { url: link.url },
     });
 
+    if (weblink?.indexStatus === 'processing') {
+      this.logger.log(`weblink is processing, skip: ${link.url}`);
+      return weblink;
+    }
+
     // Link not found
     if (!weblink) {
       this.logger.log(`weblink not found for ${link.url}, create new one`);
@@ -380,8 +389,16 @@ export class WeblinkService {
     const doc = await this.readWebLinkContent(link.url);
 
     // Retry chunking and embedding with idempotency
-    if (!weblink.chunkStorageKey) {
-      weblink = await this.indexWeblink(weblink, doc);
+    if (!weblink.chunkStorageKey || weblink.parserVersion < PARSER_VERSION) {
+      try {
+        weblink = await this.indexWeblink(weblink, doc);
+      } catch (err) {
+        this.logger.error(`index weblink failed: ${err}`);
+        weblink = await this.prisma.weblink.update({
+          where: { id: weblink.id },
+          data: { indexStatus: 'failed' },
+        });
+      }
     }
 
     if (link.userId) {

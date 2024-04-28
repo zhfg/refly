@@ -1,22 +1,24 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Response } from 'express';
 
+import { Prisma, ChatMessage, User, Conversation } from '@prisma/client';
 import { PrismaService } from '../common/prisma.service';
-import { CreateChatMessageInput, CreateConversationParam } from './dto';
-import { Prisma, ChatMessage, User } from '@prisma/client';
+import { CreateChatMessageInput, CreateConversationParam } from './conversation.dto';
+
 import {
-  LOCALE,
   QUICK_ACTION_TASK_PAYLOAD,
   QUICK_ACTION_TYPE,
   TASK_TYPE,
   Task,
   TaskResponse,
-} from '../types/task';
+} from './conversation.dto';
 import { createLLMChatMessage } from '../llm/schema';
 import { LlmService } from '../llm/llm.service';
 import { WeblinkService } from '../weblink/weblink.service';
 import { IterableReadableStream } from '@langchain/core/dist/utils/stream';
 import { BaseMessageChunk } from 'langchain/schema';
+import { genConvID } from '../utils/id';
+import { AigcService } from '../aigc/aigc.service';
 
 const LLM_SPLIT = '__LLM_RESPONSE__';
 const RELATED_SPLIT = '__RELATED_QUESTIONS__';
@@ -27,20 +29,62 @@ export class ConversationService {
 
   constructor(
     private prisma: PrismaService,
+    private aigcService: AigcService,
     private weblinkService: WeblinkService,
     private llmService: LlmService,
   ) {}
 
-  async create(param: CreateConversationParam, userId: number) {
-    return this.prisma.conversation.create({
+  async createConversation(param: CreateConversationParam, user: User): Promise<Conversation> {
+    const conversation = await this.prisma.conversation.create({
       data: {
+        convId: genConvID(),
         title: param.title,
         origin: param.origin,
         originPageUrl: param.originPageUrl,
         originPageTitle: param.originPageTitle,
-        userId,
+        userId: user.id,
       },
     });
+
+    // If this conversation is based on generated content
+    // then initialize conversation messages with this content
+    if (param.contentId) {
+      const content = await this.aigcService.getContent({
+        contentId: param.contentId,
+      });
+      const messages: CreateChatMessageInput[] = [
+        {
+          type: 'human',
+          content: content.title,
+          sources: '[]',
+          userId: user.id,
+          conversationId: conversation.id,
+          locale: param.locale,
+        },
+        {
+          type: 'ai',
+          content: content.content,
+          sources: content.sources,
+          userId: user.id,
+          conversationId: conversation.id,
+          locale: param.locale,
+        },
+      ];
+      await Promise.all([
+        this.addChatMessages(messages),
+        this.updateConversation(
+          conversation.id,
+          messages,
+          {
+            messageCount: { increment: 2 },
+            lastMessage: content.content,
+          },
+          param?.locale as LOCALE,
+        ),
+      ]);
+    }
+
+    return conversation;
   }
 
   async updateConversation(
@@ -64,13 +108,19 @@ export class ConversationService {
     });
   }
 
-  async findConversationAndMessages(conversationId: number) {
-    const data = await this.prisma.conversation.findUnique({
-      where: { id: conversationId },
-      include: { messages: true },
+  async findConversationById(id: number) {
+    return this.prisma.conversation.findUnique({ where: { id } });
+  }
+
+  async findConversation(convId: string, withMessages = false) {
+    const data = await this.prisma.conversation.findFirst({
+      where: { convId },
+      include: { messages: withMessages },
     });
 
-    data.messages.sort((a, b) => a.id - b.id);
+    if (data && withMessages) {
+      data.messages?.sort((a, b) => a.id - b.id);
+    }
 
     return data;
   }
@@ -94,14 +144,14 @@ export class ConversationService {
     });
   }
 
-  async chat(res: Response, user: User, convId: number, task: Task) {
-    const { taskType, data = {} } = task;
+  async chat(res: Response, user: User, task: Task) {
+    const { taskType, data = {}, conversation } = task;
 
     const query = data?.question || '';
     const weblinkList = data?.filter?.weblinkList || [];
 
     // 获取聊天历史
-    const chatHistory = await this.getMessages(convId);
+    const chatHistory = await this.getMessages(conversation.id);
 
     let taskRes: TaskResponse;
     if (taskType === TASK_TYPE.QUICK_ACTION) {
@@ -117,7 +167,7 @@ export class ConversationService {
       {
         type: 'human',
         userId: user.id,
-        conversationId: convId,
+        conversationId: conversation.id,
         content: query,
         sources: '',
         // 每次提问完在 human message 上加一个提问的 filter，这样之后追问时可以 follow 这个 filter 规则
@@ -129,7 +179,7 @@ export class ConversationService {
       {
         type: 'ai',
         userId: user.id,
-        conversationId: convId,
+        conversationId: conversation.id,
         content: taskRes.answer,
         sources: JSON.stringify(taskRes.sources),
         relatedQuestions: JSON.stringify(taskRes.relatedQuestions),
@@ -140,7 +190,7 @@ export class ConversationService {
     await Promise.all([
       this.addChatMessages(newMessages),
       this.updateConversation(
-        convId,
+        conversation.id,
         [...chatHistory, ...newMessages],
         {
           lastMessage: taskRes.answer,
@@ -164,7 +214,9 @@ export class ConversationService {
     const urls = filter.weblinkList?.map((item) => item?.metadata?.source);
 
     // 如果有 cssSelector，则代表从基于选中的内容进行提问，否则根据上下文进行相似度匹配召回
-    const chatFromClientSelector = filter.weblinkList?.find((item) => item?.selections?.length > 0);
+    const chatFromClientSelector = !!filter.weblinkList?.find(
+      (item) => item?.selections?.length > 0,
+    );
     this.logger.log(`chatFromClientSelector: ${chatFromClientSelector}, urls: ${urls}`);
 
     // 前置的数据处理
@@ -172,6 +224,7 @@ export class ConversationService {
     const llmChatMessages = chatHistory
       ? chatHistory.map((msg) => createLLMChatMessage(msg.content, msg.type))
       : [];
+
     // 如果是基于选中内容提问的话，则不需要考虑上下文
     const questionWithContext =
       chatHistory.length <= 1 || chatFromClientSelector
@@ -179,11 +232,13 @@ export class ConversationService {
         : await this.llmService.getContextualQuestion(query, locale, llmChatMessages);
     this.logger.log(`questionWithContext: ${questionWithContext}`);
 
-    // 如果需要实时召回向量，则需要先同步保存向量，否则异步保存
-    if (chatFromClientSelector) {
-      this.weblinkService.saveChunkEmbeddingsForUser(user, urls);
-    } else {
-      await this.weblinkService.saveChunkEmbeddingsForUser(user, urls);
+    // 如果需要指定 URL 进行 chat，则需要实时召回向量，先同步保存向量，否则异步保存
+    if (urls?.length > 0) {
+      if (chatFromClientSelector) {
+        this.weblinkService.saveChunkEmbeddingsForUser(user, urls);
+      } else {
+        await this.weblinkService.saveChunkEmbeddingsForUser(user, urls);
+      }
     }
 
     const docs = chatFromClientSelector

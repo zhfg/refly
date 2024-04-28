@@ -22,7 +22,7 @@ describe('RAGService', () => {
   });
 
   it('crawl should work', async () => {
-    const doc = await service.crawl('https://refly.ai');
+    const doc = await service.crawl('https://mp.weixin.qq.com/s/FbHTyHqEBJT-1PhA5x7FRg');
     expect(doc).toEqual({});
   });
 });

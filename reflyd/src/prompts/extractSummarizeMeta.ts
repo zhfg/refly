@@ -1,4 +1,3 @@
-import { LOCALE } from 'src/types/task';
 import { makeTextFewshotExample } from './utils/common';
 
 const fewshotExamples =

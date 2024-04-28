@@ -1,8 +1,6 @@
-import { LOCALE } from 'src/types/task';
-
-export const systemPrompt = (
-  locale: LOCALE,
-) => `You are an expert on summarizing conversation between AI and human, and you will be given a conversation between AI and human.
+export const systemPrompt = (locale: LOCALE) =>
+  `You are an expert on summarizing conversation between AI and human, ` +
+  `and you will be given a conversation between AI and human.
 
 ## Constraints
 

@@ -228,6 +228,7 @@ export class RAGService {
   }
 
   async retrieve(param: HybridSearchParam) {
+    param.vector = await this.embeddings.embedQuery(param.query);
     return this.weaviate.hybridSearch(param);
   }
 }
