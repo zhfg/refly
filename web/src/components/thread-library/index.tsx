@@ -15,7 +15,7 @@ import {
   IconMessage,
   IconRightCircle,
 } from "@arco-design/web-react/icon"
-import { useNavigate, useMatch } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 // utils
 import { time } from "@/utils/time"
 import getConversationList from "@/requests/getConversationList"
@@ -32,7 +32,6 @@ export const ThreadLibrary = () => {
   )
   const threadStore = useThreadStore()
   const navigate = useNavigate()
-  const isThreadLibrary = useMatch("/thread")
 
   const { t, i18n } = useTranslation()
   const language = i18n.languages?.[0]
@@ -136,14 +135,14 @@ export const ThreadLibrary = () => {
             className="thread-library-list-item"
             actionLayout="vertical"
             onClick={() => {
-              navigate(`/thread/${item?.id}`)
+              navigate(`/thread/${item?.convId}`)
             }}
             actions={[
               <span
                 key={1}
                 className="thread-library-list-item-continue-ask with-border with-hover"
                 onClick={() => {
-                  navigate(`/thread/${item?.id}`)
+                  navigate(`/thread/${item?.convId}`)
                 }}>
                 <IconRightCircle style={{ fontSize: 14, color: "#64645F" }} />
                 <span className="thread-library-list-item-text">

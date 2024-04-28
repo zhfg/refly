@@ -136,7 +136,7 @@ export const ThreadLibrary = () => {
                 key={1}
                 className="thread-library-list-item-continue-ask with-border with-hover"
                 onClick={() => {
-                  navigate(`/thread/${item?.id}`)
+                  navigate(`/thread/${item?.convId}`)
                 }}>
                 <IconRightCircle style={{ fontSize: 14, color: "#64645F" }} />
                 <span

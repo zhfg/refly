@@ -75,7 +75,7 @@ export const useBuildThreadAndRun = () => {
     chatStore.setNewQAText(question)
     chatStore.setIsNewConversation(true)
     chatStore.setLoading(false)
-    navigate(`/thread/${res?.data?.id}`)
+    navigate(`/thread/${res?.data?.convId}`)
   }
 
   const runTask = () => {

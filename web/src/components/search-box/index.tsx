@@ -92,7 +92,7 @@ export const SearchBox = () => {
     // 更新新的 newQAText，for 新会话跳转使用
     chatStore.setNewQAText(question)
     chatStore.setIsNewConversation(true)
-    navigate(`/thread/${res?.data?.id}`)
+    navigate(`/thread/${res?.data?.convId}`)
   }
 
   const runTask = () => {

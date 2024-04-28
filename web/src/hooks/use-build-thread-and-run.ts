@@ -41,7 +41,7 @@ export const useBuildThreadAndRun = () => {
     const newConversationPayload = buildConversation()
 
     // 创建新会话
-    const res = await await createNewConversation({
+    const res = await createNewConversation({
       body: { ...newConversationPayload, locale: localSettings.outputLocale },
     })
 
@@ -68,7 +68,7 @@ export const useBuildThreadAndRun = () => {
     // 更新新的 newQAText，for 新会话跳转使用
     chatStore.setNewQAText(question)
     chatStore.setIsNewConversation(true)
-    navigate(`/thread/${res?.data?.id}`)
+    navigate(`/thread/${res?.data?.convId}`)
   }
 
   const runChatTask = () => {

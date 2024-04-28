@@ -73,7 +73,7 @@ export const AskFollowUpModal = (props: SummaryModalProps) => {
         duration: 2000,
       })
       await delay(2000)
-      navigate(`/thread/${res?.data?.id}`)
+      navigate(`/thread/${res?.data?.convId}`)
     } catch (err) {
       message.error(t("contentDetail.item.askFollow.errorNotify"))
     } finally {
