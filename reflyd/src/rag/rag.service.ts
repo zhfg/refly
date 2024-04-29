@@ -7,7 +7,6 @@ import { TokenTextSplitter } from 'langchain/text_splitter';
 import { generateUuid5 } from 'weaviate-ts-client';
 
 import { tables } from 'turndown-plugin-gfm';
-import normalizeUrl from '@esm2cjs/normalize-url';
 import TurndownService from 'turndown';
 import { tidyMarkdown } from '../utils/markdown';
 
@@ -21,6 +20,7 @@ import {
   HybridSearchParam,
 } from '../common/weaviate.dto';
 import { PageMeta } from '../types/weblink';
+import { normalizeURL } from '../utils/url';
 
 const READER_URL = 'https://r.jina.ai/';
 
@@ -151,13 +151,7 @@ export class RAGService {
   }
 
   async crawl(url: string, mode = 'markdown') {
-    const urlToCrawl = new URL(
-      normalizeUrl(url.trim(), {
-        stripWWW: false,
-        removeTrailingSlash: false,
-        removeSingleSlash: false,
-      }),
-    );
+    const urlToCrawl = new URL(normalizeURL(url.trim()));
     if (urlToCrawl.protocol !== 'http:' && urlToCrawl.protocol !== 'https:') {
       throw new Error(`Invalid protocol ${urlToCrawl.protocol}`);
     }

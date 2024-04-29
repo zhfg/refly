@@ -1,9 +1,11 @@
+import _ from 'lodash';
 import { Controller, Logger, Get, Post, Query, Request, UseGuards, Body } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { WeblinkService } from './weblink.service';
 import { GetWebLinkListResponse, PingWeblinkResponse, StoreWebLinkParam } from './weblink.dto';
 import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { PARSER_VERSION } from '../rag/rag.service';
+import { normalizeURL } from '../utils/url';
 
 @Controller('weblink')
 export class WeblinkController {
@@ -13,27 +15,19 @@ export class WeblinkController {
   @UseGuards(JwtAuthGuard)
   @Get('ping')
   async ping(@Query('url') url: string): Promise<PingWeblinkResponse> {
-    if (!url) return { status: 'unavailable' };
-
-    if (await this.weblinkService.getProcessingLink(url)) {
-      return { status: 'processing' };
-    }
+    url = normalizeURL(url);
+    if (!url) return { parseStatus: 'unavailable', chunkStatus: 'unavailable' };
 
     const weblink = await this.weblinkService.findWeblinkByURL(url);
 
     // If weblink not exists, the storage key is not complete
     // or has outdated parser version then reprocess it asynchronously
-    if (
-      !weblink ||
-      !weblink.chunkStorageKey ||
-      !weblink.parsedDocStorageKey ||
-      (weblink.indexStatus === 'finish' && weblink.parserVersion < PARSER_VERSION)
-    ) {
+    if (!weblink || (weblink.indexStatus === 'finish' && weblink.parserVersion < PARSER_VERSION)) {
       this.weblinkService.processLink({ url });
-      return { status: 'processing' };
+      return { parseStatus: 'processing', chunkStatus: 'processing' };
     }
 
-    return { status: weblink.indexStatus };
+    return _.pick(weblink, 'parseStatus', 'chunkStatus', 'summary', 'relatedQuestions');
   }
 
   @UseGuards(JwtAuthGuard)

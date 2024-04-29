@@ -20,6 +20,9 @@ export class CreateConversationParam {
   contentId?: number;
 
   @ApiPropertyOptional()
+  linkId?: string;
+
+  @ApiPropertyOptional()
   title?: string;
 
   @ApiPropertyOptional()

@@ -213,57 +213,49 @@ model UserWeblink {
 
 model Weblink {
   /// id为主键
-  id                  Int         @id @default(autoincrement())
+  id                     Int         @id @default(autoincrement())
   /// 网页id
-  linkId              String?     @default("") @map("link_id")
+  linkId                 String?     @default("") @map("link_id")
   /// 网页链接
-  url                 String      @unique @map("url")
+  url                    String      @unique @map("url")
   /// 页面内容 (deprecated)
-  pageContent         String      @map("page_content")
+  pageContent            String      @map("page_content")
   /// 对象存储 key
-  storageKey          String      @default("") @map("storage_key")
+  storageKey             String      @default("") @map("storage_key")
+  /// 内容解析来源
+  parseSource            ParseSource @default(serverCrawl) @map("parse_source")
   /// 页面元数据, JSON 存储
-  pageMeta            String      @map("page_meta")
+  pageMeta               String      @map("page_meta")
   /// 内容元数据, JSON 存储
-  contentMeta         String      @map("content_meta")
+  contentMeta            String      @map("content_meta")
   /// 索引状态
-  indexStatus         IndexStatus @default(init) @map("index_status")
+  indexStatus            IndexStatus @default(init) @map("index_status")
   /// 解析策略版本，格式统一为 YYYYMMDD
-  parserVersion       String?     @default("00000000") @map("parser_version")
+  parserVersion          String?     @default("00000000") @map("parser_version")
+  /// 解析状态
+  parseStatus            IndexStatus @default(init) @map("parse_status")
   /// 解析后内容存储 key
-  parsedDocStorageKey String?     @default("") @map("parsed_doc_storage_key")
+  parsedDocStorageKey    String?     @default("") @map("parsed_doc_storage_key")
+  /// 切块状态
+  chunkStatus            IndexStatus @default(init) @map("chunk_status")
   /// 切块后数据存储 key
-  chunkStorageKey     String?     @default("") @map("chunk_storage_key")
+  chunkStorageKey        String?     @default("") @map("chunk_storage_key")
+  /// 网页内容总结
+  summary                String?     @default("") @map("summary")
+  /// 相关问题
+  relatedQuestions       String[]    @default([]) @map("related_questions")
+  /// 总结策略版本
+  summaryStrategyVersion String?     @default("00000000") @map("summary_strategy_version")
   /// 上次解析时间
-  lastParseTime       DateTime?   @default(now()) @map("last_parse_time") @db.Timestamptz()
+  lastParseTime          DateTime?   @default(now()) @map("last_parse_time") @db.Timestamptz()
   /// 创建时间
-  createdAt           DateTime    @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt              DateTime    @default(now()) @map("created_at") @db.Timestamptz()
   /// 更新时间
-  updatedAt           DateTime    @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt              DateTime    @updatedAt @map("updated_at") @db.Timestamptz()
 
   contents AigcContent[]
 
   @@map("weblinks")
-}
-
-model WeblinkLog {
-  /// id为主键
-  id            Int      @id @default(autoincrement())
-  /// 关联的链接 id
-  weblinkId     Int      @map("weblink_id")
-  /// 用户id
-  userId        Int      @map("user_id")
-  /// 解析策略版本
-  parserVersion String   @default("00000000") @map("parser_version")
-  /// 访问时间
-  visitTime     DateTime @default(now()) @map("visit_time") @db.Timestamptz()
-  /// 创建时间
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  /// 更新时间
-  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz()
-
-  @@index([weblinkId, visitTime])
-  @@map("weblink_log")
 }
 
 model WeblinkUserMark {
@@ -383,6 +375,11 @@ enum ContentMetaType {
   topic
   entity
   form
+}
+
+enum ParseSource {
+  serverCrawl
+  clientUpload
 }
 
 enum IndexStatus {

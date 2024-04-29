@@ -19,6 +19,7 @@ import { QUEUE_STORE_LINK } from '../utils/const';
 import { streamToBuffer, streamToString } from '../utils/stream';
 import { genLinkID, sha256Hash } from '../utils/id';
 import { ContentData } from '../common/weaviate.dto';
+import { normalizeURL } from '../utils/url';
 
 @Injectable()
 export class WeblinkService {
@@ -59,7 +60,7 @@ export class WeblinkService {
     const linkMap = new Map<string, WebLinkDTO>();
     links.forEach((link) => {
       // TODO: pre filtering (with bloom filter, etc.)
-      const url = stripURL(link.url);
+      const url = normalizeURL(link.url);
       if (!linkMap.has(url)) {
         link.userId = userId;
         return linkMap.set(url, link);
@@ -108,8 +109,8 @@ export class WeblinkService {
       select: { storageKey: true, parsedDocStorageKey: true, pageMeta: true },
       where: { url },
     });
-    if (weblink) {
-      this.logger.log(`found weblink in db: ${url}`);
+    if (weblink?.storageKey && weblink?.parsedDocStorageKey) {
+      this.logger.log(`found valid weblink from db: ${JSON.stringify(weblink)}`);
       const [htmlStream, docStream] = await Promise.all([
         this.minio.getObject(this.bucketName, weblink.storageKey),
         this.minio.getObject(this.bucketName, weblink.parsedDocStorageKey),
@@ -152,8 +153,10 @@ export class WeblinkService {
         { html: content, title: link.title, href: link.origin },
         new URL(link.url),
       );
+      const data = { html: content, doc };
+      this.cache.set(link.url, data);
 
-      return { html: content, doc };
+      return data;
     } catch (err) {
       this.logger.error(`[directParseWebLinkContent] process url ${link.url} failed: ${err.trace}`);
       return null;
@@ -355,53 +358,72 @@ export class WeblinkService {
     return parsedDocStorageKey;
   }
 
-  async createNewWeblink(link: WebLinkDTO): Promise<Weblink> {
-    // Fetch doc and store in cache for later use
-    const { html, doc } = link.storageKey
-      ? await this.directParseWebLinkContent(link)
-      : await this.readWebLinkContent(link.url);
-    this.cache.set(link.url, { html, doc });
+  /**
+   * Chunking and embedding with idempotency when chunking failed or parser version is outdated
+   * @param weblink
+   * @param doc
+   * @returns
+   */
+  async indexWeblink(weblink: Weblink, doc: Document<PageMeta>): Promise<Weblink> {
+    if (weblink.chunkStorageKey && weblink.parserVersion === PARSER_VERSION) {
+      this.logger.log(`weblink already indexed: ${weblink.url}, skip`);
+      return weblink;
+    }
 
-    // Upload parsed doc to minio
-    const [storageKey, parsedDocStorageKey] = await Promise.all([
-      this.uploadHTMLToMinio(link, html),
-      this.uploadParsedDocToMinio(link, doc),
-    ]);
+    // 并发控制，妥善处理多个并发请求处理同一个 url 的情况
+    const releaseLock = await this.redis.acquireLock(`weblink:index:${weblink.url}`);
+    if (!releaseLock) {
+      this.logger.log(`acquire index lock failed for weblink: ${weblink.url}`);
+      return weblink;
+    }
 
-    return this.prisma.weblink.create({
-      data: {
-        url: link.url,
-        linkId: genLinkID(),
-        indexStatus: 'processing',
-        pageContent: '', // deprecated, always empty
-        storageKey,
-        parsedDocStorageKey,
-        pageMeta: JSON.stringify(doc.metadata),
-        contentMeta: '',
-      },
-    });
-  }
-
-  async indexWeblink(weblink: Pick<Weblink, 'id' | 'url'>, doc: Document<PageMeta>) {
     this.logger.log(`start to index weblink: ${weblink.url}`);
-    const dataObjs = await this.ragService.indexContent(doc);
 
-    const buf = ContentAvroType.toBuffer({ chunks: dataObjs });
-    const chunkStorageKey = `chunks/${sha256Hash(weblink.url)}-${PARSER_VERSION}.avro`;
-    const res = await this.minio.putObject(
-      this.configService.get('minio.weblinkBucket'),
-      chunkStorageKey,
-      buf,
-    );
-    this.logger.log(`upload ${dataObjs.length} chunk(s) to minio res: ` + JSON.stringify(res));
+    try {
+      const dataObjs = await this.ragService.indexContent(doc);
 
-    return this.prisma.weblink.update({
-      where: { id: weblink.id },
-      data: { chunkStorageKey, parserVersion: PARSER_VERSION, indexStatus: 'finish' },
-    });
+      const buf = ContentAvroType.toBuffer({ chunks: dataObjs });
+      const chunkStorageKey = `chunks/${sha256Hash(weblink.url)}-${PARSER_VERSION}.avro`;
+      const res = await this.minio.putObject(
+        this.configService.get('minio.weblinkBucket'),
+        chunkStorageKey,
+        buf,
+      );
+      this.logger.log(`upload ${dataObjs.length} chunk(s) to minio res: ` + JSON.stringify(res));
+
+      return this.prisma.weblink.update({
+        where: { id: weblink.id },
+        data: { chunkStorageKey, parserVersion: PARSER_VERSION, indexStatus: 'finish' },
+      });
+    } catch (err) {
+      this.logger.error(`index weblink failed: ${err}`);
+      return this.prisma.weblink.update({
+        where: { id: weblink.id },
+        data: { indexStatus: 'failed' },
+      });
+    } finally {
+      await releaseLock();
+    }
   }
 
+  /**
+   * Extract content metadata for weblink.
+   * @param weblink
+   * @param doc
+   * @returns
+   */
   async extractWeblinkContentMeta(weblink: Weblink, doc: Document<PageMeta>): Promise<Weblink> {
+    if (weblink.contentMeta) {
+      return weblink;
+    }
+
+    // 并发控制，妥善处理多个并发请求处理同一个 url 的情况
+    const releaseLock = await this.redis.acquireLock(`weblink:content_meta:${weblink.url}`);
+    if (!releaseLock) {
+      this.logger.log(`acquire lock failed for weblink: ${weblink.url}`);
+      return weblink;
+    }
+
     // 提取网页分类打标数据 with LLM
     // TODO: need add locale
     const meta = await this.llmService.extractContentMeta(doc);
@@ -416,10 +438,6 @@ export class WeblinkService {
     });
   }
 
-  async getProcessingLink(url: string) {
-    return this.redis.get(`weblink:${url}`);
-  }
-
   async processLinkByUser(link: WebLinkDTO, weblink: Weblink, doc: Document<PageMeta>) {
     // 处理单个用户的访问记录
     const uwb = await this.updateUserWeblink(link, weblink);
@@ -432,79 +450,98 @@ export class WeblinkService {
     ]);
   }
 
+  async updateWeblinkStorageKey(
+    weblink: Weblink,
+    link: WebLinkDTO,
+    data: WeblinkData,
+  ): Promise<Weblink> {
+    if (weblink.storageKey && weblink.parsedDocStorageKey) {
+      return;
+    }
+
+    // 并发控制，妥善处理多个并发请求处理同一个 url 的情况
+    const releaseLock = await this.redis.acquireLock(`weblink:parse:${link.url}`);
+    if (!releaseLock) {
+      this.logger.log(`acquire lock failed for weblink: ${link.url}`);
+      return weblink;
+    }
+
+    const { html, doc } = data;
+
+    // Upload parsed doc to minio
+    try {
+      const [storageKey, parsedDocStorageKey] = await Promise.all([
+        this.uploadHTMLToMinio(link, html),
+        this.uploadParsedDocToMinio(link, doc),
+      ]);
+
+      return this.prisma.weblink.update({
+        where: { id: weblink.id },
+        data: { storageKey, parsedDocStorageKey },
+      });
+    } finally {
+      await releaseLock();
+    }
+  }
+
   /**
    * 解析网页统一入口，保证并发安全，保证幂等性.
    * @param link
    * @returns
    */
   async processLink(link: WebLinkDTO): Promise<Weblink> {
-    // TODO: normalize-url 统一处理
+    link.url = normalizeURL(link.url);
     this.logger.log(`process link from queue: ${JSON.stringify(link)}`);
-
-    // 并发控制，妥善处理多个并发请求处理同一个 url 的情况
-    const releaseLock = await this.redis.acquireLock(`weblink:${link.url}`);
-    if (!releaseLock) {
-      this.logger.log(`acquire lock failed for weblink: ${link.url}`);
-      return null;
-    }
 
     let weblink: Weblink;
     let doc: Document<PageMeta>;
 
     try {
-      // TODO: 处理 link 内容过时
-      weblink = await this.prisma.weblink.findUnique({
+      weblink = await this.prisma.weblink.upsert({
         where: { url: link.url },
+        create: {
+          url: link.url,
+          linkId: genLinkID(),
+          indexStatus: 'init',
+          pageContent: '', // deprecated, always empty
+          pageMeta: '',
+          contentMeta: '',
+        },
+        update: {},
       });
 
-      if (weblink?.indexStatus === 'processing') {
-        this.logger.log(`weblink is processing, skip: ${link.url}`);
-        return weblink;
-      }
+      if (!isWeblinkReady(weblink)) {
+        // Fetch doc and store in cache for later use
+        const data =
+          this.cache.get(link.url) ||
+          (link.storageKey
+            ? await this.directParseWebLinkContent(link)
+            : await this.readWebLinkContent(link.url));
+        doc = data.doc;
 
-      // Link not found, then create new one
-      if (!weblink) {
-        this.logger.log(`weblink not found for ${link.url}, create new one`);
-        weblink = await this.createNewWeblink(link);
-      }
-
-      const data = await this.readWebLinkContent(link.url);
-      doc = data.doc;
-
-      // Retry chunking and embedding with idempotency
-      // when chunking failed or parser version is outdated
-      if (!weblink.chunkStorageKey || weblink.parserVersion < PARSER_VERSION) {
-        try {
-          weblink = await this.indexWeblink(weblink, doc);
-        } catch (err) {
-          this.logger.error(`index weblink failed: ${err}`);
-          weblink = await this.prisma.weblink.update({
-            where: { id: weblink.id },
-            data: { indexStatus: 'failed' },
-          });
-        }
-      }
-
-      // Extract content metadata
-      if (!weblink.contentMeta) {
-        weblink = await this.extractWeblinkContentMeta(weblink, doc);
+        await Promise.all([
+          this.updateWeblinkStorageKey(weblink, link, data),
+          this.indexWeblink(weblink, doc),
+          this.extractWeblinkContentMeta(weblink, doc),
+        ]);
       }
     } catch (err) {
       this.logger.error(`process weblink err: ${err.trace}`);
-    } finally {
-      await releaseLock();
     }
 
     if (weblink && link.userId && doc) {
-      this.processLinkByUser(link, weblink, doc);
+      await this.processLinkByUser(link, weblink, doc);
     }
 
     return weblink;
   }
 }
 
-function stripURL(url: string) {
-  const urlObj = new URL(url);
-  urlObj.hash = '';
-  return urlObj.toString();
+function isWeblinkReady(weblink: Weblink): boolean {
+  return (
+    weblink.storageKey &&
+    weblink.parsedDocStorageKey &&
+    weblink.chunkStorageKey &&
+    weblink.parserVersion === PARSER_VERSION
+  );
 }

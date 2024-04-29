@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Document } from '@langchain/core/documents';
-import { IndexStatus } from '@prisma/client';
+import { IndexStatus, ParseSource } from '@prisma/client';
 import { PageMeta } from '../types/weblink';
 
 export class WebLinkDTO {
@@ -56,8 +56,23 @@ export class GetWebLinkListResponse {
 }
 
 export class PingWeblinkResponse {
+  @ApiPropertyOptional()
+  linkId?: string;
+
+  @ApiPropertyOptional()
+  parseStatus?: IndexStatus | 'unavailable';
+
+  @ApiPropertyOptional()
+  chunkStatus?: IndexStatus | 'unavailable';
+
   @ApiProperty()
-  status: IndexStatus | 'unavailable';
+  summary?: string;
+
+  @ApiPropertyOptional()
+  relatedQuestions?: string[];
+
+  @ApiPropertyOptional()
+  parseSource?: ParseSource;
 }
 
 export interface WeblinkData {
