@@ -4,7 +4,6 @@ import { Prisma, User, Weblink } from '@prisma/client';
 import { Queue } from 'bull';
 import { LRUCache } from 'lru-cache';
 import { InjectQueue } from '@nestjs/bull';
-import * as cheerio from 'cheerio';
 import { Document } from '@langchain/core/documents';
 
 import { PrismaService } from '../common/prisma.service';
@@ -13,7 +12,7 @@ import { RAGService, ContentAvroType, PARSER_VERSION } from '../rag/rag.service'
 import { AigcService } from '../aigc/aigc.service';
 import { RedisService } from '../common/redis.service';
 import { LlmService } from '../llm/llm.service';
-import { WebLinkDTO } from './weblink.dto';
+import { WebLinkDTO, WeblinkData } from './weblink.dto';
 import { getExpectedTokenLenContent } from '../utils/token';
 import { PageMeta, Source } from '../types/weblink';
 import { QUEUE_STORE_LINK } from '../utils/const';
@@ -25,7 +24,7 @@ import { ContentData } from '../common/weaviate.dto';
 export class WeblinkService {
   private logger = new Logger(WeblinkService.name);
 
-  private cache: LRUCache<string, Document<PageMeta>>; // url -> parsed document (in markdown)
+  private cache: LRUCache<string, WeblinkData>; // url -> weblink data
   private bucketName: string;
 
   constructor(
@@ -77,7 +76,7 @@ export class WeblinkService {
     try {
       linkMap.forEach((link) => this.processLink(link));
     } catch (err) {
-      this.logger.error(`process weblink err: ${err}`);
+      this.logger.error(`store weblink err: ${err.trace}`);
     }
   }
 
@@ -97,7 +96,7 @@ export class WeblinkService {
    * @param {string} url - The URL of the webpage to parse
    * @return {Promise<Document>} A Promise that resolves to the parsed document
    */
-  async readWebLinkContent(url: string): Promise<Document<PageMeta>> {
+  async readWebLinkContent(url: string): Promise<WeblinkData> {
     // Check if the document is in the cache
     if (this.cache.has(url)) {
       this.logger.log(`in-mem cache hit: ${url}`);
@@ -106,26 +105,36 @@ export class WeblinkService {
 
     // Check if the document is in the database
     const weblink = await this.prisma.weblink.findUnique({
-      select: { parsedDocStorageKey: true, pageMeta: true },
+      select: { storageKey: true, parsedDocStorageKey: true, pageMeta: true },
       where: { url },
     });
     if (weblink) {
       this.logger.log(`found weblink in db: ${url}`);
-      const content = await this.minio.getObject(this.bucketName, weblink.parsedDocStorageKey);
-
-      const doc = new Document({
-        pageContent: await streamToString(content),
-        metadata: JSON.parse(weblink.pageMeta),
-      });
-      this.cache.set(url, doc);
-      return doc;
+      const [htmlStream, docStream] = await Promise.all([
+        this.minio.getObject(this.bucketName, weblink.storageKey),
+        this.minio.getObject(this.bucketName, weblink.parsedDocStorageKey),
+      ]);
+      const [html, doc] = await Promise.all([
+        streamToString(htmlStream),
+        streamToString(docStream),
+      ]);
+      const data = {
+        html,
+        doc: {
+          pageContent: doc,
+          metadata: JSON.parse(weblink.pageMeta),
+        },
+      };
+      this.cache.set(url, data);
+      return data;
     }
 
     // Finally tries to fetch the content from the web
-    const doc = await this.ragService.crawl(url);
-    this.cache.set(url, doc);
+    const snapshot = await this.ragService.crawl(url);
+    const doc = await this.ragService.formatSnapshot('markdown', snapshot, new URL(url));
+    this.cache.set(url, { html: snapshot.html, doc });
 
-    return doc;
+    return { html: snapshot.html, doc };
   }
 
   /**
@@ -133,19 +142,20 @@ export class WeblinkService {
    * @param pageContent raw html page content
    * @returns parsed markdown document
    */
-  async directParseWebLinkContent(url: string, storageKey: string): Promise<Document<PageMeta>> {
+  async directParseWebLinkContent(link: WebLinkDTO): Promise<WeblinkData> {
     try {
-      const stream = await this.minio.getObject(this.bucketName, storageKey);
+      const stream = await this.minio.getObject(this.bucketName, link.storageKey);
       const content = await streamToString(stream);
-      const $ = cheerio.load(content);
 
-      // only get meaning content
-      const title = $('title').text();
-      const source = url;
+      const doc = await this.ragService.formatSnapshot(
+        'markdown',
+        { html: content, title: link.title, href: link.origin },
+        new URL(link.url),
+      );
 
-      return { pageContent: content, metadata: { title, source } };
+      return { html: content, doc };
     } catch (err) {
-      this.logger.error(`process url ${url} failed: ${err}`);
+      this.logger.error(`[directParseWebLinkContent] process url ${link.url} failed: ${err.trace}`);
       return null;
     }
   }
@@ -169,7 +179,8 @@ export class WeblinkService {
           }));
         }
 
-        const { pageContent, metadata } = await this.readWebLinkContent(item.metadata?.source);
+        const { doc } = await this.readWebLinkContent(item.metadata?.source);
+        const { pageContent, metadata } = doc;
         return [
           {
             pageContent: getExpectedTokenLenContent(pageContent, avgTokenLen) || '',
@@ -315,14 +326,24 @@ export class WeblinkService {
     });
   }
 
-  async createNewWeblink(link: WebLinkDTO): Promise<Weblink> {
-    // Fetch doc and store in cache for later use
-    const doc = link.storageKey
-      ? await this.directParseWebLinkContent(link.url, link.storageKey)
-      : await this.readWebLinkContent(link.url);
-    this.cache.set(link.url, doc);
+  async uploadHTMLToMinio(link: WebLinkDTO, html: string): Promise<string> {
+    if (link.storageKey) {
+      return link.storageKey;
+    }
 
-    // Upload parsed doc to minio
+    const storageKey = `html/${sha256Hash(link.url)}.html`;
+
+    const res = await this.minio.putObject(
+      this.configService.get('minio.weblinkBucket'),
+      link.storageKey,
+      html,
+    );
+    this.logger.log('upload html to minio res: ' + JSON.stringify(res));
+
+    return storageKey;
+  }
+
+  async uploadParsedDocToMinio(link: WebLinkDTO, doc: Document<PageMeta>): Promise<string> {
     const parsedDocStorageKey = `docs/${sha256Hash(link.url)}.md`;
     const res = await this.minio.putObject(
       this.configService.get('minio.weblinkBucket'),
@@ -331,13 +352,29 @@ export class WeblinkService {
     );
     this.logger.log('upload parsed doc to minio res: ' + JSON.stringify(res));
 
+    return parsedDocStorageKey;
+  }
+
+  async createNewWeblink(link: WebLinkDTO): Promise<Weblink> {
+    // Fetch doc and store in cache for later use
+    const { html, doc } = link.storageKey
+      ? await this.directParseWebLinkContent(link)
+      : await this.readWebLinkContent(link.url);
+    this.cache.set(link.url, { html, doc });
+
+    // Upload parsed doc to minio
+    const [storageKey, parsedDocStorageKey] = await Promise.all([
+      this.uploadHTMLToMinio(link, html),
+      this.uploadParsedDocToMinio(link, doc),
+    ]);
+
     return this.prisma.weblink.create({
       data: {
         url: link.url,
         linkId: genLinkID(),
         indexStatus: 'processing',
         pageContent: '', // deprecated, always empty
-        storageKey: link.storageKey,
+        storageKey,
         parsedDocStorageKey,
         pageMeta: JSON.stringify(doc.metadata),
         contentMeta: '',
@@ -431,7 +468,8 @@ export class WeblinkService {
         weblink = await this.createNewWeblink(link);
       }
 
-      doc = await this.readWebLinkContent(link.url);
+      const data = await this.readWebLinkContent(link.url);
+      doc = data.doc;
 
       // Retry chunking and embedding with idempotency
       // when chunking failed or parser version is outdated
@@ -452,7 +490,7 @@ export class WeblinkService {
         weblink = await this.extractWeblinkContentMeta(weblink, doc);
       }
     } catch (err) {
-      this.logger.error(`process weblink err: ${err}`);
+      this.logger.error(`process weblink err: ${err.trace}`);
     } finally {
       await releaseLock();
     }

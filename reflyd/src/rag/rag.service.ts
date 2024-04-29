@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import avro from 'avsc';
-import { OpenAIEmbeddings } from '@langchain/openai';
 import { FireworksEmbeddings } from '@langchain/community/embeddings/fireworks';
 import { Document } from '@langchain/core/documents';
 import { TokenTextSplitter } from 'langchain/text_splitter';
@@ -140,9 +139,6 @@ export class RAGService {
         }
       }
     }
-    if (!contentText || contentText.startsWith('<') || contentText.endsWith('>')) {
-      contentText = snapshot.text;
-    }
 
     return {
       pageContent: tidyMarkdown(contentText || '').trim(),
@@ -180,16 +176,14 @@ export class RAGService {
         continue;
       }
 
-      const formatted = await this.formatSnapshot(customMode, scrapped, urlToCrawl);
-
-      return formatted;
+      return scrapped;
     }
 
     if (!lastScrapped) {
       throw new Error(`No content available for URL ${urlToCrawl}`);
     }
 
-    return await this.formatSnapshot(customMode, lastScrapped, urlToCrawl);
+    return lastScrapped;
   }
 
   async crawlFromRemoteReader(url: string): Promise<Document<PageMeta>> {

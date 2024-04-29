@@ -44,7 +44,6 @@ export interface PageSnapshot {
   title: string;
   href: string;
   html: string;
-  text: string;
   parsed?: Partial<ReadabilityParsed> | null;
   screenshot?: Buffer;
   imgs?: ImgBrief[];
