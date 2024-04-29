@@ -1,6 +1,7 @@
 import { sendToBackground } from "@plasmohq/messaging"
 import { useEffect, useRef } from "react"
 import type { IndexStatus, WebLinkItem } from "~components/weblink-list/types"
+import { useSiderStore } from "~stores/sider"
 import { useUserStore } from "~stores/user"
 import { useWeblinkStore } from "~stores/weblink"
 import { buildCurrentWeblink } from "~utils/weblink"
@@ -9,18 +10,24 @@ export const usePollingPingCurrentWeblink = () => {
   const pingFuncRef = useRef<NodeJS.Timer>()
   const weblinkStore = useWeblinkStore()
   const userStore = useUserStore()
+  const siderStore = useSiderStore()
 
   // 检查是否满足 startPing 的条件
   const checkValidStartPing = () => {
     const { userProfile } = useUserStore.getState()
     const { currentWeblink } = useWeblinkStore.getState()
+    const { showSider } = useSiderStore.getState()
 
     const isLogged = !!userProfile?.id
     const isCurrentWeblinkStatusNotComplete = ["init", "processing"].includes(
       currentWeblink?.indexStatus,
     )
 
-    if (isLogged && (isCurrentWeblinkStatusNotComplete || !currentWeblink)) {
+    if (
+      isLogged &&
+      showSider &&
+      (isCurrentWeblinkStatusNotComplete || !currentWeblink)
+    ) {
       return true
     }
 
@@ -29,6 +36,7 @@ export const usePollingPingCurrentWeblink = () => {
 
   const isLogged = !!userStore?.userProfile?.id
   const isValidStartPing = checkValidStartPing()
+  const showSider = siderStore?.showSider
   console.log("isLogged", isLogged, isValidStartPing)
 
   /**
@@ -109,8 +117,8 @@ export const usePollingPingCurrentWeblink = () => {
 
   // 如果登录状态发生变化，且当前网页状态满足 startPing 的条件，则开始轮训
   useEffect(() => {
-    if (isLogged && isValidStartPing) {
+    if (isLogged && isValidStartPing && showSider) {
       startPollingPing()
     }
-  }, [isLogged, isValidStartPing])
+  }, [isLogged, isValidStartPing, showSider])
 }
