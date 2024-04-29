@@ -11,6 +11,8 @@ import { PrismaService } from '../common/prisma.service';
 import { MinioService } from '../common/minio.service';
 import { RAGService, ContentAvroType, PARSER_VERSION } from '../rag/rag.service';
 import { AigcService } from '../aigc/aigc.service';
+import { RedisService } from '../common/redis.service';
+import { LlmService } from '../llm/llm.service';
 import { WebLinkDTO } from './weblink.dto';
 import { getExpectedTokenLenContent } from '../utils/token';
 import { PageMeta, Source } from '../types/weblink';
@@ -28,8 +30,10 @@ export class WeblinkService {
 
   constructor(
     private prisma: PrismaService,
+    private redis: RedisService,
     private minio: MinioService,
     private configService: ConfigService,
+    private llmService: LlmService,
     private ragService: RAGService,
     private aigcService: AigcService,
     @InjectQueue(QUEUE_STORE_LINK) private indexQueue: Queue<WebLinkDTO>,
@@ -71,7 +75,7 @@ export class WeblinkService {
     // Send to queue in a non-block style
     // linkMap.forEach((link) => this.indexQueue.add('indexWebLink', link));
     try {
-      linkMap.forEach((link) => this.processLinkFromStoreQueue(link));
+      linkMap.forEach((link) => this.processLink(link));
     } catch (err) {
       this.logger.error(`process weblink err: ${err}`);
     }
@@ -192,6 +196,13 @@ export class WeblinkService {
       }),
     ]);
 
+    // 如果有未处理过的 url，则同步等待处理完成
+    const unhandledUrls = urls.filter((url) => !weblinks.some((weblink) => weblink.url === url));
+    if (unhandledUrls.length > 0) {
+      this.logger.log(`process unhandled urls: ${JSON.stringify(unhandledUrls)}`);
+      await Promise.all(unhandledUrls.map((url) => this.processLink({ url })));
+    }
+
     // calculate urls not saved by user
     const unsavedWeblinks = weblinks.filter(({ url }) => !uwbs.some((uwb) => uwb.url === url));
 
@@ -203,8 +214,13 @@ export class WeblinkService {
     await Promise.all(
       unsavedWeblinks.map(async ({ url, chunkStorageKey }) => {
         if (!chunkStorageKey) {
-          // TODO: 失败补偿，重新 index
-          // this.indexWeblink();
+          // 失败补偿，重新 index
+          const weblink = await this.processLink({ url });
+          if (!chunkStorageKey) {
+            this.logger.error(`still fail to retry chunk embedding for url: ${url}`);
+            return;
+          }
+          chunkStorageKey = weblink.chunkStorageKey;
         }
         const stream = await this.minio.getObject(this.bucketName, chunkStorageKey);
         const content = ContentAvroType.fromBuffer(await streamToBuffer(stream)) as ContentData;
@@ -265,19 +281,14 @@ export class WeblinkService {
     );
   }
 
-  /**
-   * Process weblink for a single user.
-   * @param link link data
-   * @returns
-   */
-  async processLinkForUser(link: WebLinkDTO, weblink: Weblink) {
+  async updateUserWeblink(link: WebLinkDTO, weblink: Weblink) {
     if (!link.userId) {
       this.logger.log(`drop job due to missing user id: ${link}`);
       return;
     }
 
     // 更新访问记录
-    const uwb = await this.prisma.userWeblink.upsert({
+    return this.prisma.userWeblink.upsert({
       where: {
         userId_url: {
           userId: link.userId,
@@ -302,10 +313,6 @@ export class WeblinkService {
         totalReadTime: { increment: link.readTime || 0 },
       },
     });
-
-    this.logger.log(`process link for user finish`);
-
-    return uwb;
   }
 
   async createNewWeblink(link: WebLinkDTO): Promise<Weblink> {
@@ -338,7 +345,7 @@ export class WeblinkService {
     });
   }
 
-  async indexWeblink(weblink: Weblink, doc: Document<PageMeta>) {
+  async indexWeblink(weblink: Pick<Weblink, 'id' | 'url'>, doc: Document<PageMeta>) {
     this.logger.log(`start to index weblink: ${weblink.url}`);
     const dataObjs = await this.ragService.indexContent(doc);
 
@@ -357,51 +364,100 @@ export class WeblinkService {
     });
   }
 
-  async processLinkByUser(link: WebLinkDTO, weblink: Weblink, doc: Document) {
-    // 处理单个用户的访问记录
-    const uwb = await this.processLinkForUser(link, weblink);
-
-    await this.aigcService.runContentFlow({ doc, uwb, weblink });
-  }
-
-  async processLinkFromStoreQueue(link: WebLinkDTO): Promise<Weblink> {
-    // TODO: normalize-url 统一处理
-    this.logger.log(`process link from queue: ${JSON.stringify(link)}`);
-
-    // TODO: 并发控制，妥善处理多个并发请求处理同一个 url 的情况
-
-    // TODO: 处理 link 内容过时
-    let weblink = await this.prisma.weblink.findUnique({
-      where: { url: link.url },
-    });
-
-    if (weblink?.indexStatus === 'processing') {
-      this.logger.log(`weblink is processing, skip: ${link.url}`);
+  async extractWeblinkContentMeta(weblink: Weblink, doc: Document<PageMeta>): Promise<Weblink> {
+    // 提取网页分类打标数据 with LLM
+    // TODO: need add locale
+    const meta = await this.llmService.extractContentMeta(doc);
+    if (!meta?.topics || !meta?.topics[0].key) {
+      this.logger.log(`invalid meta for ${weblink.url}: ${JSON.stringify(meta)}`);
       return weblink;
     }
 
-    // Link not found
-    if (!weblink) {
-      this.logger.log(`weblink not found for ${link.url}, create new one`);
-      weblink = await this.createNewWeblink(link);
+    return this.prisma.weblink.update({
+      where: { id: weblink.id },
+      data: { contentMeta: JSON.stringify(meta) },
+    });
+  }
+
+  async getProcessingLink(url: string) {
+    return this.redis.get(`weblink:${url}`);
+  }
+
+  async processLinkByUser(link: WebLinkDTO, weblink: Weblink, doc: Document<PageMeta>) {
+    // 处理单个用户的访问记录
+    const uwb = await this.updateUserWeblink(link, weblink);
+
+    const user = await this.prisma.user.findUnique({ where: { id: link.userId } });
+
+    await Promise.all([
+      this.saveChunkEmbeddingsForUser(user, [link.url]),
+      this.aigcService.runContentFlow({ uwb, weblink, doc }),
+    ]);
+  }
+
+  /**
+   * 解析网页统一入口，保证并发安全，保证幂等性.
+   * @param link
+   * @returns
+   */
+  async processLink(link: WebLinkDTO): Promise<Weblink> {
+    // TODO: normalize-url 统一处理
+    this.logger.log(`process link from queue: ${JSON.stringify(link)}`);
+
+    // 并发控制，妥善处理多个并发请求处理同一个 url 的情况
+    const releaseLock = await this.redis.acquireLock(`weblink:${link.url}`);
+    if (!releaseLock) {
+      this.logger.log(`acquire lock failed for weblink: ${link.url}`);
+      return null;
     }
 
-    const doc = await this.readWebLinkContent(link.url);
+    let weblink: Weblink;
+    let doc: Document<PageMeta>;
 
-    // Retry chunking and embedding with idempotency
-    if (!weblink.chunkStorageKey || weblink.parserVersion < PARSER_VERSION) {
-      try {
-        weblink = await this.indexWeblink(weblink, doc);
-      } catch (err) {
-        this.logger.error(`index weblink failed: ${err}`);
-        weblink = await this.prisma.weblink.update({
-          where: { id: weblink.id },
-          data: { indexStatus: 'failed' },
-        });
+    try {
+      // TODO: 处理 link 内容过时
+      weblink = await this.prisma.weblink.findUnique({
+        where: { url: link.url },
+      });
+
+      if (weblink?.indexStatus === 'processing') {
+        this.logger.log(`weblink is processing, skip: ${link.url}`);
+        return weblink;
       }
+
+      // Link not found, then create new one
+      if (!weblink) {
+        this.logger.log(`weblink not found for ${link.url}, create new one`);
+        weblink = await this.createNewWeblink(link);
+      }
+
+      doc = await this.readWebLinkContent(link.url);
+
+      // Retry chunking and embedding with idempotency
+      // when chunking failed or parser version is outdated
+      if (!weblink.chunkStorageKey || weblink.parserVersion < PARSER_VERSION) {
+        try {
+          weblink = await this.indexWeblink(weblink, doc);
+        } catch (err) {
+          this.logger.error(`index weblink failed: ${err}`);
+          weblink = await this.prisma.weblink.update({
+            where: { id: weblink.id },
+            data: { indexStatus: 'failed' },
+          });
+        }
+      }
+
+      // Extract content metadata
+      if (!weblink.contentMeta) {
+        weblink = await this.extractWeblinkContentMeta(weblink, doc);
+      }
+    } catch (err) {
+      this.logger.error(`process weblink err: ${err}`);
+    } finally {
+      await releaseLock();
     }
 
-    if (link.userId) {
+    if (weblink && link.userId && doc) {
       this.processLinkByUser(link, weblink, doc);
     }
 

@@ -1,5 +1,4 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Document } from '@langchain/core/documents';
 import { IndexStatus } from '@prisma/client';
 
 export class WebLinkDTO {

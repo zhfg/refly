@@ -8,6 +8,7 @@ import { AigcContent, User, UserWeblink, Weblink } from '@prisma/client';
 import { ContentMeta } from '../llm/dto';
 import { DigestFilter } from './aigc.dto';
 import { categoryList } from '../prompts/utils/category';
+import { PageMeta } from '../types/weblink';
 
 @Injectable()
 export class AigcService {
@@ -201,29 +202,9 @@ export class AigcService {
    * @param doc
    * @returns
    */
-  async runContentFlow(param: { doc: Document; uwb: UserWeblink; weblink: Weblink }) {
+  async runContentFlow(param: { doc: Document<PageMeta>; uwb: UserWeblink; weblink: Weblink }) {
     const { doc, uwb, weblink } = param;
-    let meta: ContentMeta;
-
-    if (!weblink.contentMeta) {
-      // 提取网页分类打标数据 with LLM
-      // TODO: need add locale
-      meta = await this.llmService.extractContentMeta(doc);
-      if (!meta?.topics || !meta?.topics[0].key) {
-        this.logger.log(`invalid meta for ${weblink.url}: ${JSON.stringify(meta)}`);
-        return;
-      }
-
-      await Promise.all([
-        this.prisma.weblink.update({
-          where: { id: weblink.id },
-          data: { contentMeta: JSON.stringify(meta) },
-        }),
-        this.ensureTopics(meta),
-      ]);
-    } else {
-      meta = JSON.parse(weblink.contentMeta);
-    }
+    const meta = JSON.parse(weblink.contentMeta || '{}');
 
     if (!meta.topics) {
       this.logger.log(`weblink ${weblink.url} has no topic, skip content flow`);

@@ -16,6 +16,6 @@ export class WeblinkProcessor {
   async handleWebLink(job: Job<WebLinkDTO>) {
     this.logger.log(`handle web link, job: ${JSON.stringify(job)}`);
 
-    await this.weblinkService.processLinkFromStoreQueue(job.data);
+    await this.weblinkService.processLink(job.data);
   }
 }

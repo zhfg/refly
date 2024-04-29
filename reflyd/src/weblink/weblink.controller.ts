@@ -15,11 +15,21 @@ export class WeblinkController {
   async ping(@Query('url') url: string): Promise<PingWeblinkResponse> {
     if (!url) return { status: 'unavailable' };
 
+    if (await this.weblinkService.getProcessingLink(url)) {
+      return { status: 'processing' };
+    }
+
     const weblink = await this.weblinkService.findWeblinkByURL(url);
 
-    // If weblink not exists or has outdated parser version then reprocess it asynchronously
-    if (!weblink || (weblink.indexStatus === 'finish' && weblink.parserVersion < PARSER_VERSION)) {
-      this.weblinkService.processLinkFromStoreQueue({ url });
+    // If weblink not exists, the storage key is not complete
+    // or has outdated parser version then reprocess it asynchronously
+    if (
+      !weblink ||
+      !weblink.chunkStorageKey ||
+      !weblink.parsedDocStorageKey ||
+      (weblink.indexStatus === 'finish' && weblink.parserVersion < PARSER_VERSION)
+    ) {
+      this.weblinkService.processLink({ url });
       return { status: 'processing' };
     }
 
