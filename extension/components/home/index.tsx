@@ -79,24 +79,23 @@ const Home = (props: ChatProps) => {
 
     // 先存储 link， 在进行提问操作，这里理论上是需要有个 negotiate 的过程
     if (searchTarget === SearchTarget.CurrentPage) {
-      message.loading(
-        t("translation:loggedHomePage.homePage.status.contentHandling"),
-      )
-      const res = await handleUploadWebsite(window.location.href)
-
-      if (res.success) {
-        message.success(
-          t(
-            "translation:loggedHomePage.homePage.status.contentHandleSuccessNotify",
-          ),
-        )
-      } else {
-        message.error(
-          t(
-            "translation:loggedHomePage.homePage.status.contentHandleFailedNotify",
-          ),
-        )
-      }
+      // message.loading(
+      //   t("translation:loggedHomePage.homePage.status.contentHandling"),
+      // )
+      // const res = await handleUploadWebsite(window.location.href)
+      // if (res.success) {
+      //   message.success(
+      //     t(
+      //       "translation:loggedHomePage.homePage.status.contentHandleSuccessNotify",
+      //     ),
+      //   )
+      // } else {
+      //   message.error(
+      //     t(
+      //       "translation:loggedHomePage.homePage.status.contentHandleFailedNotify",
+      //     ),
+      //   )
+      // }
     }
 
     runTask()
