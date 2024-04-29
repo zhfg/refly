@@ -2,7 +2,6 @@ import { Message as message } from "@arco-design/web-react"
 
 import { sendToBackground } from "@plasmohq/messaging"
 import { useState } from "react"
-import { useWebLinkIndexed } from "~hooks/use-weblink-indexed"
 import { delay } from "~utils/delay"
 // utils
 import * as cheerio from "cheerio"
@@ -11,7 +10,6 @@ import { v4 as uuidV4 } from "uuid"
 
 export const useStoreWeblink = () => {
   // 网页索引状态
-  const { isWebLinkIndexed, setIsWebLinkIndexed } = useWebLinkIndexed()
   const [uploadingStatus, setUploadingStatus] = useState<
     "normal" | "loading" | "failed" | "success"
   >("normal")
@@ -68,7 +66,6 @@ export const useStoreWeblink = () => {
   }
 
   return {
-    isWebLinkIndexed,
     uploadingStatus,
     handleUploadWebsite,
   }

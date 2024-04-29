@@ -1,0 +1,116 @@
+import { sendToBackground } from "@plasmohq/messaging"
+import { useEffect, useRef } from "react"
+import type { IndexStatus, WebLinkItem } from "~components/weblink-list/types"
+import { useUserStore } from "~stores/user"
+import { useWeblinkStore } from "~stores/weblink"
+import { buildCurrentWeblink } from "~utils/weblink"
+
+export const usePollingPingCurrentWeblink = () => {
+  const pingFuncRef = useRef<NodeJS.Timer>()
+  const weblinkStore = useWeblinkStore()
+  const userStore = useUserStore()
+
+  // 检查是否满足 startPing 的条件
+  const checkValidStartPing = () => {
+    const { userProfile } = useUserStore.getState()
+    const { currentWeblink } = useWeblinkStore.getState()
+
+    const isLogged = !!userProfile?.id
+    const isCurrentWeblinkStatusNotComplete = ["init", "processing"].includes(
+      currentWeblink?.indexStatus,
+    )
+
+    if (isLogged && (isCurrentWeblinkStatusNotComplete || !currentWeblink)) {
+      return true
+    }
+
+    return false
+  }
+
+  const isLogged = !!userStore?.userProfile?.id
+  const isValidStartPing = checkValidStartPing()
+  console.log("isLogged", isLogged, isValidStartPing)
+
+  /**
+   * 用于轮训 Ping 当前打开的网页，登录状态下，2S 轮训一次
+   *
+   * 状态机：1）初始 Init 2）开始轮训并初始化 currentWeblink 3) 轮训 4）直到状态完毕
+   */
+  const pingCurrentWeblink = async () => {
+    if (!checkValidStartPing()) {
+      return
+    }
+
+    // check 初始化状态
+    const currentState = useWeblinkStore.getState()
+    let currentWeblink = currentState?.currentWeblink
+    console.log("currentWeblink", currentWeblink)
+
+    if (!currentWeblink) {
+      currentWeblink = buildCurrentWeblink() as WebLinkItem
+      weblinkStore.setCurrentWeblink(currentWeblink)
+    }
+
+    console.log("currentWeblink", currentWeblink)
+
+    // 开启轮训
+    const pingRes = await sendToBackground({
+      name: "pingWebLinkStatus",
+      body: {
+        url: currentWeblink?.originPageUrl,
+      },
+    })
+
+    // 如果服务调用失败，直接静默失败，且持续轮训
+    if (pingRes?.success) {
+      const status = pingRes?.data?.status as IndexStatus
+
+      const { currentWeblink } = useWeblinkStore.getState()
+      weblinkStore.setCurrentWeblink({ ...currentWeblink, indexStatus: status })
+    }
+  }
+
+  const startPollingPing = () => {
+    clearPollingPing() // 开启新轮训时，先清除上一个轮训
+    pingFuncRef.current = setInterval(pingCurrentWeblink, 2000)
+  }
+  const clearPollingPing = () => {
+    if (pingFuncRef.current) {
+      clearInterval(pingFuncRef.current)
+    }
+  }
+
+  const listenWebpageVisibilityChange = () => {
+    // 如果网页隐藏，清除轮训
+    if (document.hidden) {
+      clearPollingPing()
+    } else {
+      if (checkValidStartPing()) {
+        startPollingPing()
+      }
+    }
+  }
+
+  useEffect(() => {
+    /**
+     * 1. 网页状态：document hide/visible
+     */
+    document.addEventListener("visibilitychange", listenWebpageVisibilityChange)
+
+    return () => {
+      document.removeEventListener(
+        "visibilitychange",
+        listenWebpageVisibilityChange,
+      )
+
+      clearPollingPing()
+    }
+  }, [])
+
+  // 如果登录状态发生变化，且当前网页状态满足 startPing 的条件，则开始轮训
+  useEffect(() => {
+    if (isLogged && isValidStartPing) {
+      startPollingPing()
+    }
+  }, [isLogged, isValidStartPing])
+}

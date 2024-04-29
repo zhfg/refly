@@ -39,6 +39,7 @@ import { Markdown } from "~components/markdown"
 
 // 加载国际化
 import "~i18n/config"
+import { usePollingPingCurrentWeblink } from "~hooks/use-polling-ping-current-weblink"
 
 // export const config: PlasmoCSConfig = {
 //   run_at: "document_end"
@@ -83,6 +84,8 @@ export const Content = () => {
   useSetContainerDimension()
   // 处理登录状态
   useProcessLoginNotify()
+  // 用于登录状态下，Ping 网页前置的处理状态
+  usePollingPingCurrentWeblink()
 
   // 设置 Message 通知的 container
   useEffect(() => {

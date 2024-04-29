@@ -44,3 +44,15 @@ export const getContentFromHtmlSelector = (selector: string) => {
     target: document.querySelector(selector),
   }
 }
+
+export const buildCurrentWeblink = (): Partial<WebLinkItem> => {
+  return {
+    origin: location?.origin || "", // 冗余存储策略，for 后续能够基于 origin 进行归类归档
+    originPageTitle: document?.title || "",
+    title: document?.title || "",
+    originPageUrl: location.href,
+    summary: "",
+    relatedQuestions: [],
+    indexStatus: "init",
+  }
+}

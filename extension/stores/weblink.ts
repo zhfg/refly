@@ -26,6 +26,8 @@ interface WeblinkState {
   hasMore: boolean
   isRequest: boolean
 
+  currentWeblink: WebLinkItem | null // 轮训 Ping 当前打开的网页，处理和获取对应的信息
+
   updateWebLinkList: (newWebLinkList: WebLinkItem[]) => void
   updateCurrentPage: (currentPage: number) => void
   updateHasMore: (hasMore: boolean) => void
@@ -34,6 +36,7 @@ interface WeblinkState {
   updateSelectedRow: (
     selectedRow: { key: number | string; content: WebLinkItem }[],
   ) => void
+  setCurrentWeblink: (newWeblink: WebLinkItem | null) => void
   resetState: () => void
 }
 
@@ -45,6 +48,7 @@ export const defaultState = {
   currentPage: 1,
   hasMore: true,
   isRequest: false,
+  currentWeblink: null,
 }
 
 export const useWeblinkStore = create<WeblinkState>()(
@@ -67,6 +71,8 @@ export const useWeblinkStore = create<WeblinkState>()(
     updateSelectedRow: (
       selectedRow: { key: number | string; content: WebLinkItem }[],
     ) => set((state) => ({ ...state, selectedRow })),
+    setCurrentWeblink: (newWeblink: WebLinkItem | null) =>
+      set((state) => ({ ...state, currentWeblink: newWeblink })),
     resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),
 )

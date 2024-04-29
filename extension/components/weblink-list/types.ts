@@ -5,6 +5,8 @@ export type QueryPayload = {
   linkId?: string
 }
 
+export type IndexStatus = "init" | "processing" | "finish" | "failed"
+
 export type WebLinkItem = {
   id: string
   linkId: string
@@ -17,7 +19,11 @@ export type WebLinkItem = {
   icon: string
   url: string
   userId: string
-  indexStatus: "processing" | "finish"
+  indexStatus: IndexStatus
   createdAt: string
   updatedAt: string
+
+  // 新增属性，用于缩短用户的路径
+  summary?: string
+  relatedQuestions?: string[]
 }

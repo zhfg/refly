@@ -27,7 +27,6 @@ import { useWeblinkStore } from "~stores/weblink"
 import { SearchTarget, useSearchStateStore } from "~stores/search-state"
 import { useContentSelectorStore } from "~stores/content-selector"
 // hooks
-import { useBuildTask } from "~hooks/use-build-task"
 import { useBuildThreadAndRun } from "~hooks/use-build-thread-and-run"
 import { useStoreWeblink } from "~hooks/use-store-weblink"
 // 组件
@@ -51,7 +50,6 @@ const Home = (props: ChatProps) => {
   // stores
   const quickActionStore = useQuickActionStore()
   const chatStore = useChatStore()
-  const messageStateStore = useMessageStateStore()
   const siderStore = useSiderStore()
   const webLinkStore = useWeblinkStore()
   const { searchTarget } = useSearchStateStore()
@@ -66,8 +64,6 @@ const Home = (props: ChatProps) => {
   // hooks
   const { runTask } = useBuildThreadAndRun()
   const { handleUploadWebsite } = useStoreWeblink()
-
-  const { buildShutdownTaskAndGenResponse } = useBuildTask()
   const isIntentActive = !!quickActionStore.selectedText
 
   const handleSendMessage = async () => {
