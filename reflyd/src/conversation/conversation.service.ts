@@ -452,11 +452,18 @@ export class ConversationService {
     res.write(JSON.stringify(relatedQuestions));
     res.end(``);
 
-    return {
+    const taskRes = {
       sources,
       answer: answerStr,
       relatedQuestions,
     };
+
+    // 异步更新 weblink summary
+    if (weblinkList.length === 1 && data?.actionType === QUICK_ACTION_TYPE.SUMMARY) {
+      this.weblinkService.updateWeblinkSummary(weblinkList[0].metadata.source, taskRes);
+    }
+
+    return taskRes;
   }
 }
 
