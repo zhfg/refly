@@ -21,10 +21,13 @@ export const CurrentWeblinkQuickSummary = () => {
   const messageStateStore = useMessageStateStore()
 
   // 是否在处理网页
-  const isProcessingParse = currentWeblink?.parseStatus === "processing"
+  const isProcessingParse =
+    !currentWeblink || currentWeblink?.parseStatus === "processing"
   const isFailedToServerCrawl = currentWeblink?.parseStatus === "failed"
   const isParseSuccessfully = currentWeblink?.parseStatus === "finish"
   const alreadySummarize = !!currentWeblink?.summary
+
+  console.log("isProcessingParse", isProcessingParse, currentWeblink)
 
   // 是否已经 summary 完成，展示 continue
   const showContinueChat =
@@ -109,7 +112,7 @@ export const CurrentWeblinkQuickSummary = () => {
 
   return (
     <div className="current-weblink-quick-summary-container">
-      {isProcessingParse && (
+      {isProcessingParse ? (
         <div className="current-weblink-quick-summary-processing">
           <>
             <Skeleton animation></Skeleton>
@@ -117,7 +120,7 @@ export const CurrentWeblinkQuickSummary = () => {
             <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
           </>
         </div>
-      )}
+      ) : null}
       {isFailedToServerCrawl && (
         <Alert
           type="warning"
