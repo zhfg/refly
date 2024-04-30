@@ -35,6 +35,7 @@ import { mapSourceFromWeblinkList } from "~utils/weblink"
 import { SelectedContentList } from "~components/selected-content-list"
 import { useSearchQuickActionStore } from "~stores/search-quick-action"
 import { useTranslation } from "react-i18next"
+import { CurrentWeblinkQuickSummary } from "~components/current-weblink-quick-summary"
 
 const TextArea = Input.TextArea
 
@@ -63,7 +64,7 @@ const Home = (props: ChatProps) => {
 
   // hooks
   const { runTask } = useBuildThreadAndRun()
-  const { handleUploadWebsite } = useStoreWeblink()
+  const { uploadingStatus, handleUploadWebsite } = useStoreWeblink()
   const isIntentActive = !!quickActionStore.selectedText
 
   const handleSendMessage = async () => {
@@ -71,6 +72,7 @@ const Home = (props: ChatProps) => {
 
     const { newQAText } = useChatStore.getState()
     const { searchTarget } = useSearchStateStore.getState()
+    const { currentWeblink } = useWeblinkStore.getState()
 
     if (!newQAText) {
       message.info(t("translation:loggedHomePage.homePage.status.emptyNotify"))
@@ -79,23 +81,10 @@ const Home = (props: ChatProps) => {
 
     // 先存储 link， 在进行提问操作，这里理论上是需要有个 negotiate 的过程
     if (searchTarget === SearchTarget.CurrentPage) {
-      // message.loading(
-      //   t("translation:loggedHomePage.homePage.status.contentHandling"),
-      // )
-      // const res = await handleUploadWebsite(window.location.href)
-      // if (res.success) {
-      //   message.success(
-      //     t(
-      //       "translation:loggedHomePage.homePage.status.contentHandleSuccessNotify",
-      //     ),
-      //   )
-      // } else {
-      //   message.error(
-      //     t(
-      //       "translation:loggedHomePage.homePage.status.contentHandleFailedNotify",
-      //     ),
-      //   )
-      // }
+      const res = await handleUploadWebsite(window.location.href)
+      if (!res?.success) {
+        return
+      }
     }
 
     runTask()
@@ -259,7 +248,7 @@ const Home = (props: ChatProps) => {
               <Button
                 shape="circle"
                 icon={<IconSend />}
-                loading={chatStore.loading}
+                loading={chatStore.loading || uploadingStatus === "loading"}
                 style={{ color: "#FFF", background: "#00968F" }}
                 onClick={() => handleSendMessage()}></Button>
             </div>
@@ -283,6 +272,7 @@ const Home = (props: ChatProps) => {
         {contentSelectorStore?.showSelectedMarks ? (
           <SelectedContentList marks={contentSelectorStore.marks} />
         ) : null}
+        <CurrentWeblinkQuickSummary />
       </div>
 
       <WeblinkList

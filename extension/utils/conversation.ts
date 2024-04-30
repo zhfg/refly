@@ -1,6 +1,7 @@
 import { type Conversation, type Message } from "~/types"
 
 import { genUniqueId } from "./index"
+import { createId } from "@paralleldrive/cuid2"
 
 export type BuildConversation = {
   selectionContent: string
@@ -14,30 +15,8 @@ export const buildConversation = (
     originPageTitle: document?.title || "",
     title: document?.title || "",
     originPageUrl: location.href,
+    convId: createId(), // 前端生成和带上 convId
   }
 
   return conversation
 }
-
-// // 初始化创建对话，带欢迎
-// export const buildConversationWithWelcome = () => {
-//   const conversationId = `conv:${genUniqueId()}`
-//   const msg = buildWelcomeMessage({ conversationId })
-//   const conversation = buildConversation(conversationId, [msg])
-
-//   return conversation
-// }
-
-// // 基于选中的意图内容直接创建一个会话
-// export const buildConversationWithIntent = (data: BuildConversation) => {
-//   const conversationId = `conv:${genUniqueId()}`
-//   const { selectionContent = "" } = data
-
-//   const msgList = buildIntentMessageList({
-//     conversationId,
-//     selectionContent
-//   })
-//   const conversation = buildConversation(conversationId, [...msgList])
-
-//   return conversation
-// }

@@ -5,7 +5,6 @@ import {
   QuestionType,
   ReplyType,
   SystemAction,
-  type Message,
 } from "@/types"
 
 import { genUniqueId } from "./index"
@@ -88,7 +87,7 @@ export const getRandomSuggestionsQuestion = (k: number) => {
 }
 
 export type BuildMessageData = {
-  conversationId: string
+  convId: string
   content?: string
   questionType?: QuestionType
   replyType?: ReplyType
@@ -109,11 +108,11 @@ export const buildWelcomeMessage = (data: BuildMessageData) => {
   return message
 }
 export const buildIntentMessage = (data: BuildMessageData) => {
-  const { conversationId = "", content = "" } = data
+  const { convId = "", content = "" } = data
 
   const itemId = `intent:${genUniqueId()}`
   const replyMsg = buildReplyMessage({
-    conversationId,
+    convId,
     content: defaultReplyContent.Intent,
     replyType: ReplyType.INTENT,
     intentId: itemId,
@@ -121,7 +120,7 @@ export const buildIntentMessage = (data: BuildMessageData) => {
   const message = {
     itemId,
     itemType: MessageItemType.INTENT,
-    conversationId,
+    convId,
     summary: content,
     data: {
       type: MessageDataType.SELECTION,
@@ -134,7 +133,7 @@ export const buildIntentMessage = (data: BuildMessageData) => {
 }
 export const buildQuestionMessage = (data: BuildMessageData) => {
   const {
-    conversationId = "",
+    convId = "",
     content = "",
     questionType = QuestionType.NORMAL,
     selectedWeblinkConfig = "",
@@ -150,7 +149,7 @@ export const buildQuestionMessage = (data: BuildMessageData) => {
   const message = {
     itemId,
     itemType: MessageItemType.QUESTION,
-    conversationId,
+    convId,
     summary: content,
     data: {
       type: MessageType.Human,
@@ -163,11 +162,7 @@ export const buildQuestionMessage = (data: BuildMessageData) => {
   return message
 }
 export const buildReplyMessage = (data: BuildMessageData) => {
-  const {
-    conversationId = "",
-    content = "",
-    replyType = ReplyType.QUESTION,
-  } = data
+  const { convId = "", content = "", replyType = ReplyType.QUESTION } = data
   const itemId = `msg:${genUniqueId()}`
 
   let dataExtra = {}
@@ -183,7 +178,7 @@ export const buildReplyMessage = (data: BuildMessageData) => {
 
   const message = {
     itemId,
-    conversationId,
+    convId,
     itemType: MessageItemType.REPLY,
     summary: content,
     data: {
@@ -202,14 +197,14 @@ export const buildReplyMessage = (data: BuildMessageData) => {
  *
  */
 export const buildErrorMessage = (data: BuildMessageData) => {
-  const { conversationId = "", content = errorMessage } = data
+  const { convId = "", content = errorMessage } = data
 
   const itemId = `error:${genUniqueId()}`
 
   const message = {
     itemId,
     itemType: MessageItemType.ERROR,
-    conversationId,
+    convId,
     summary: content,
     data: {
       type: MessageType.Assistant,
@@ -238,23 +233,22 @@ export type BuildMessageListData = {
   questionContent?: string
   selectionContent?: string
   replyContent?: string
-  conversationId: string
+  convId: string
 }
 
 export const buildIntentMessageList = (data: BuildMessageListData) => {
-  const { conversationId, selectionContent, questionContent, replyContent } =
-    data
+  const { convId, selectionContent, questionContent, replyContent } = data
   const intentMsg = buildIntentMessage({
-    conversationId,
+    convId,
     content: selectionContent,
   })
   const intentReplyMsg = intentMsg?.data?.replies?.[0]
   const questionMsg = buildQuestionMessage({
-    conversationId,
+    convId,
     content: questionContent,
   })
   const questionReplyMsg = buildReplyMessage({
-    conversationId,
+    convId,
     replyType: ReplyType.QUESTION,
     questionId: questionMsg.itemId,
     content: replyContent,
@@ -264,14 +258,14 @@ export const buildIntentMessageList = (data: BuildMessageListData) => {
 }
 
 export const buildQuestionMessageList = (data: BuildMessageListData) => {
-  const { conversationId, questionContent } = data
+  const { convId, questionContent } = data
 
   const questionMsg = buildQuestionMessage({
-    conversationId,
+    convId,
     content: questionContent,
   })
   const replyMsg = buildReplyMessage({
-    conversationId,
+    convId,
     content: "",
     questionId: questionMsg?.itemId,
   })

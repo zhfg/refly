@@ -67,7 +67,7 @@ export const useBuildThreadAndRun = () => {
     // 设置当前的任务类型及会话 id
     task.data = {
       ...(task?.data || {}),
-      conversationId: res?.data?.id,
+      convId: res?.data?.convId,
     }
     taskStore.setTask(task)
 

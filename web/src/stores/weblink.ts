@@ -5,7 +5,7 @@ import type { WebLinkItem } from "@/types/weblink"
 
 export interface Thread {
   id: string
-  conversationId: string
+  convId: string
   userId: string
   title: string
   lastMessage: string

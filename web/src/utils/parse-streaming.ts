@@ -19,22 +19,17 @@ export const parseStreaming = async (
   let chunks = ""
   let sourcesEmitted = false
 
-  const conversationId = payload?.data?.conversationId
-  const response = await fetch(
-    `${getServerOrigin()}/v1/conversation/${conversationId}/chat`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${getAuthTokenFromCookie()}`,
-      },
-      signal: controller.signal,
-
-      body: JSON.stringify({
-        task: payload,
-      }),
+  const response = await fetch(`${getServerOrigin()}/v1/conversation/chat`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getAuthTokenFromCookie()}`,
     },
-  )
+    signal: controller.signal,
+    body: JSON.stringify({
+      task: payload,
+    }),
+  })
   if (response.status !== 200) {
     onError?.(response.status)
     return

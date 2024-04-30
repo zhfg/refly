@@ -353,6 +353,11 @@
   "components": {
     "markdown": {
       "copySuccess": "Content Copied to Clipboard"
+    },
+    "currentWeblinkQuickSummary": {
+      "message": {
+        "question": "Website Summary"
+      }
     }
   },
   "hooks": {

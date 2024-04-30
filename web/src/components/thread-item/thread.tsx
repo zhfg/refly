@@ -112,7 +112,7 @@ export const Thread = () => {
     const task = buildTask({
       data: {
         question: newQuestion,
-        conversationId: currentConversation?.id || "",
+        convId: currentConversation?.convId || "",
         filter: {
           weblinkList: useWeblinkList ? selectedWeblinkConfig?.filter : [],
         },
@@ -146,12 +146,12 @@ export const Thread = () => {
       const { task } = useTaskStore.getState()
 
       // 新会话，需要手动构建第一条消息
-      if (chatStore.isNewConversation && currentConversation?.id) {
+      if (chatStore.isNewConversation && currentConversation?.convId) {
         // 更换成基于 task 的消息模式，核心是基于 task 来处理
         buildTaskAndGenReponse(task as Task)
       } else if (
         chatStore.isAskFollowUpNewConversation &&
-        currentConversation?.id
+        currentConversation?.convId
       ) {
         // 先获取会话
         await handleGetThreadMessages(threadId)

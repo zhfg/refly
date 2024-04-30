@@ -59,7 +59,7 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
     url = "",
     originPageTitle,
     originPageUrl,
-    indexStatus,
+    chunkStatus,
   } = props?.weblink
   const urlItem = safeParseUrl(url)
 
@@ -96,7 +96,7 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
                 alt=""
               />
               <span className="text">{originPageTitle}</span>
-              {indexStatus === "finish" ? (
+              {chunkStatus === "finish" ? (
                 <Tag color="green">
                   {t(
                     "translation:loggedHomePage.homePage.weblinkList.item.read",

@@ -20,7 +20,7 @@ export const usePollingPingCurrentWeblink = () => {
 
     const isLogged = !!userProfile?.id
     const isCurrentWeblinkStatusNotComplete = ["init", "processing"].includes(
-      currentWeblink?.indexStatus,
+      currentWeblink?.parseStatus,
     )
 
     if (
@@ -52,14 +52,11 @@ export const usePollingPingCurrentWeblink = () => {
     // check 初始化状态
     const currentState = useWeblinkStore.getState()
     let currentWeblink = currentState?.currentWeblink
-    console.log("currentWeblink", currentWeblink)
 
     if (!currentWeblink) {
       currentWeblink = buildCurrentWeblink() as WebLinkItem
       weblinkStore.setCurrentWeblink(currentWeblink)
     }
-
-    console.log("currentWeblink", currentWeblink)
 
     // 开启轮训
     const pingRes = await sendToBackground({
@@ -69,12 +66,15 @@ export const usePollingPingCurrentWeblink = () => {
       },
     })
 
-    // 如果服务调用失败，直接静默失败，且持续轮训
-    if (pingRes?.success) {
-      const status = pingRes?.data?.status as IndexStatus
+    console.log("currentWeblink pingRes", pingRes)
 
+    // 如果服务调用失败，直接静默失败，且持续轮训，这里直接将 ping 结果写回 currentWeblink
+    if (pingRes?.success) {
       const { currentWeblink } = useWeblinkStore.getState()
-      weblinkStore.setCurrentWeblink({ ...currentWeblink, indexStatus: status })
+      weblinkStore.setCurrentWeblink({
+        ...currentWeblink,
+        ...((pingRes?.data as WebLinkItem) || {}),
+      })
     }
   }
 

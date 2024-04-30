@@ -59,23 +59,23 @@ export const useConversationStore = create<ConversationState>()(
           }
 
           case ConversationOperation.DELETE: {
-            const { conversationId } = payload
-            const newConversationList = conversationList.filter(
-              item => item.id !== conversationId,
-            )
+            // const { convId } = payload
+            // const newConversationList = conversationList.filter(
+            //   item => item.convId !== convId,
+            // )
 
             break
           }
 
           case ConversationOperation.UPDATE: {
-            const { conversationId } = payload
-            const newConversationList = conversationList.map(item => {
-              if (item.id === conversationId) {
-                return { ...item, ...payload }
-              }
+            // const { convId } = payload
+            // const newConversationList = conversationList.map(item => {
+            //   if (item.convId === convId) {
+            //     return { ...item, ...payload }
+            //   }
 
-              return item
-            })
+            //   return item
+            // })
 
             break
           }

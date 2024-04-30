@@ -1,3 +1,6 @@
+/**
+ * Deprecated：目前没有使用
+ */
 import { sendToBackground } from "@plasmohq/messaging"
 import { useState, useEffect } from "react"
 import { useMatch } from "react-router-dom"

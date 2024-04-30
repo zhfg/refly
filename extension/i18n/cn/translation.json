@@ -357,6 +357,11 @@
   "components": {
     "markdown": {
       "copySuccess": "内容已复制到剪切板！"
+    },
+    "currentWeblinkQuickSummary": {
+      "message": {
+        "question": "网页总结"
+      }
     }
   },
   "title": "欢迎 {{name}}，使用 react-i18next 完全类型安全的 React",

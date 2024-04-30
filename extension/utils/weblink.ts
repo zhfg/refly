@@ -1,17 +1,23 @@
-import type { WebLinkItem } from "~components/weblink-list/types"
+import { ParseSource, type WebLinkItem } from "~components/weblink-list/types"
 import type { Source } from "~types"
 import * as cheerio from "cheerio"
 import { removeUnusedHtmlNode } from "./removeUnusedHtmlNode"
 import parse from "node-html-parser"
 
-export const buildSource = (): Source => {
+export const buildSource = (weblink?: Source): Source => {
+  const { pageContent = "", metadata = {}, score = -1 } = weblink
+  const { title = "", source = "" } = metadata as {
+    title: string
+    source: string
+  }
+
   return {
-    pageContent: "",
+    pageContent,
     metadata: {
-      title: "",
-      source: "",
+      title,
+      source,
     },
-    score: -1,
+    score,
   }
 }
 
@@ -53,6 +59,8 @@ export const buildCurrentWeblink = (): Partial<WebLinkItem> => {
     originPageUrl: location.href,
     summary: "",
     relatedQuestions: [],
-    indexStatus: "init",
+    parseSource: ParseSource.serverCrawl,
+    parseStatus: "init",
+    chunkStatus: "init",
   }
 }
