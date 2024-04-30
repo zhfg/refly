@@ -214,13 +214,6 @@ export class WeblinkService {
       }),
     ]);
 
-    // 如果有未处理过的 url，则同步等待处理完成
-    const unhandledUrls = urls.filter((url) => !weblinks.some((weblink) => weblink.url === url));
-    if (unhandledUrls.length > 0) {
-      this.logger.log(`process unhandled urls: ${JSON.stringify(unhandledUrls)}`);
-      await Promise.all(unhandledUrls.map((url) => this.processLink({ url })));
-    }
-
     // calculate urls not saved by user
     const unsavedWeblinks = weblinks.filter(({ url }) => !uwbs.some((uwb) => uwb.url === url));
 
@@ -232,13 +225,9 @@ export class WeblinkService {
     await Promise.all(
       unsavedWeblinks.map(async ({ url, chunkStorageKey }) => {
         if (!chunkStorageKey) {
-          // 失败补偿，重新 index
-          const weblink = await this.processLink({ url });
-          if (!chunkStorageKey) {
-            this.logger.error(`still fail to retry chunk embedding for url: ${url}`);
-            return;
-          }
-          chunkStorageKey = weblink.chunkStorageKey;
+          // techically this cannot happen
+          this.logger.error(`chunkStorageKey is empty: ${chunkStorageKey}, url: ${url}`);
+          return;
         }
         const stream = await this.minio.getObject(this.bucketName, chunkStorageKey);
         const content = ContentAvroType.fromBuffer(await streamToBuffer(stream)) as ContentData;
@@ -425,7 +414,7 @@ export class WeblinkService {
    * @returns
    */
   async extractWeblinkContentMeta(weblink: Weblink, doc: Document<PageMeta>): Promise<Weblink> {
-    if (weblink.contentMeta) {
+    if (Object.keys(JSON.parse(weblink.contentMeta || '{}')).length > 0) {
       return weblink;
     }
 
@@ -456,14 +445,18 @@ export class WeblinkService {
    * @param link
    */
   async processLinkByUser(link: WebLinkDTO) {
+    if (link.retryTimes >= 20) {
+      this.logger.error(`processLinkByUser: retry times exceed limit: ${link.url}`);
+      return;
+    }
+
     const weblink = await this.findFirstWeblink({ url: link.url });
 
     // If weblink not ready, then retry processing the link and re-queue this task
-    // TODO: 优化重试逻辑，处理中不应该再重试
-    if (!weblink || isWeblinkReady(weblink)) {
+    if (!weblink || !isWeblinkReady(weblink)) {
       await this.enqueueProcessTask(link);
       await new Promise((r) => setTimeout(r, 2000));
-      await this.enqueueProcessByUserTask(link);
+      await this.enqueueProcessByUserTask({ ...link, retryTimes: link.retryTimes + 1 });
       return;
     }
 
@@ -486,7 +479,7 @@ export class WeblinkService {
     link: WebLinkDTO,
     data: WeblinkData,
   ): Promise<Weblink> {
-    if (weblink.storageKey && weblink.parsedDocStorageKey) {
+    if (weblink.storageKey && weblink.parsedDocStorageKey && weblink.parseStatus === 'finish') {
       return;
     }
 
@@ -590,9 +583,12 @@ export class WeblinkService {
 
 function isWeblinkReady(weblink: Weblink): boolean {
   return (
+    weblink.parseStatus === 'finish' &&
     weblink.storageKey &&
     weblink.parsedDocStorageKey &&
     weblink.chunkStorageKey &&
-    weblink.parserVersion === PARSER_VERSION
+    weblink.chunkStatus === 'finish' &&
+    weblink.parserVersion === PARSER_VERSION &&
+    Object.keys(JSON.parse(weblink.contentMeta || '{}')).length > 0
   );
 }

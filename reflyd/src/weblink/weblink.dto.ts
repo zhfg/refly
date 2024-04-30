@@ -38,6 +38,8 @@ export class WebLinkDTO {
   storageKey?: string; // 前端上传 html 拿到的 object key
 
   userId?: number; // 是否绑定 user
+
+  retryTimes? = 0; // 重试次数
 }
 
 export class StoredWebLink extends WebLinkDTO {
