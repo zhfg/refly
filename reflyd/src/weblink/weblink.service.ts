@@ -127,7 +127,7 @@ export class WeblinkService {
         html,
         doc: {
           pageContent: doc,
-          metadata: JSON.parse(weblink.pageMeta),
+          metadata: JSON.parse(weblink.pageMeta || '{}'),
         },
       };
       this.cache.set(url, data);
@@ -266,7 +266,7 @@ export class WeblinkService {
     extensionVersion?: string;
   }) {
     const { userId, weblinkList, extensionVersion = '' } = param;
-    const weblinkWithSelectors = weblinkList.filter((weblink) => weblink.selections.length > 0);
+    const weblinkWithSelectors = weblinkList.filter((weblink) => weblink.selections?.length > 0);
 
     if (weblinkWithSelectors.length <= 0) return;
 
@@ -552,8 +552,8 @@ export class WeblinkService {
           linkId: genLinkID(),
           indexStatus: 'init',
           pageContent: '', // deprecated, always empty
-          pageMeta: '',
-          contentMeta: '',
+          pageMeta: '{}',
+          contentMeta: '{}',
         },
         update: {},
       });
@@ -568,6 +568,10 @@ export class WeblinkService {
         doc = data.doc;
 
         await Promise.all([
+          this.prisma.weblink.update({
+            where: { id: weblink.id },
+            data: { pageMeta: JSON.stringify(doc.metadata) },
+          }),
           this.updateWeblinkStorageKey(weblink, link, data),
           this.genWeblinkChunkEmbedding(weblink, doc),
           this.extractWeblinkContentMeta(weblink, doc),

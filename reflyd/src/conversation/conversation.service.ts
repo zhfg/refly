@@ -67,7 +67,7 @@ export class ConversationService {
           sources: JSON.stringify([
             {
               pageContent: '',
-              metadata: JSON.parse(weblink.pageMeta),
+              metadata: JSON.parse(weblink.pageMeta || '{}'),
             },
           ]),
           userId: user.id,
@@ -416,6 +416,8 @@ export class ConversationService {
     }
 
     const getSSEData = async (stream) => {
+      if (!stream) return '';
+
       // write answer in a stream style
       let answerStr = '';
       for await (const chunk of await stream) {

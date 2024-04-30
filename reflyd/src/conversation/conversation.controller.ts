@@ -17,6 +17,7 @@ import {
   CreateConversationParam,
   CreateConversationResponse,
   ListConversationResponse,
+  QUICK_ACTION_TYPE,
 } from './conversation.dto';
 import { ApiParam, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
@@ -53,6 +54,7 @@ export class ConversationController {
       taskType: TASK_TYPE.QUICK_ACTION,
       locale: req.user.outputLocale,
       data: {
+        actionType: QUICK_ACTION_TYPE.SUMMARY,
         filter: { weblinkList: [source] },
       },
     });
