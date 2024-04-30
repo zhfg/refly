@@ -156,9 +156,9 @@ export type CHAT = {
 
 export type Task = {
   taskType: TASK_TYPE;
+  dryRun?: boolean; // 不关联任何对话
   taskId?: string; // task:xxxx-xxxx-xxxx-xxxx
   convId?: string; // 对话 id，为空代表创建新对话
-  contentId?: string; // 内容 id
   createConvParam?: CreateConversationParam; // 创建新对话的参数
   language?: LANGUAGE;
   locale?: LOCALE;

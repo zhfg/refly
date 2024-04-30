@@ -34,10 +34,14 @@ export class ConversationService {
     private llmService: LlmService,
   ) {}
 
-  async createConversation(param: CreateConversationParam, user: User): Promise<Conversation> {
+  async createConversation(
+    user: User,
+    param: CreateConversationParam,
+    convId?: string,
+  ): Promise<Conversation> {
     const conversation = await this.prisma.conversation.create({
       data: {
-        convId: genConvID(),
+        convId: convId || genConvID(),
         title: param.title,
         origin: param.origin,
         originPageUrl: param.originPageUrl,
@@ -180,13 +184,13 @@ export class ConversationService {
   }
 
   async chat(res: Response, user: User, task: Task) {
-    const { taskType, data = {}, conversation } = task;
+    const { taskType, data = {}, conversation, dryRun } = task;
 
     const query = data?.question || '';
     const weblinkList = data?.filter?.weblinkList || [];
 
     // 如果指定 URL 进行 chat，则异步进行保存
-    if (weblinkList.length > 0) {
+    if (!dryRun && weblinkList.length > 0) {
       this.weblinkService.storeLinks(
         user.id,
         weblinkList.map((weblink) => ({ url: weblink.metadata.source })),
@@ -194,7 +198,10 @@ export class ConversationService {
     }
 
     // 获取聊天历史
-    const chatHistory = await this.getMessages(conversation.id);
+    let chatHistory: ChatMessage[] = [];
+    if (conversation?.id) {
+      chatHistory = await this.getMessages(conversation?.id);
+    }
 
     let taskRes: TaskResponse;
     if (taskType === TASK_TYPE.QUICK_ACTION) {
@@ -205,42 +212,44 @@ export class ConversationService {
       taskRes = await this.handleChatTask(res, user, task, chatHistory);
     }
 
-    const newMessages: CreateChatMessageInput[] = [
-      {
-        type: 'human',
-        userId: user.id,
-        conversationId: conversation.id,
-        content: query,
-        sources: '',
-        // 每次提问完在 human message 上加一个提问的 filter，这样之后追问时可以 follow 这个 filter 规则
-        selectedWeblinkConfig: JSON.stringify({
-          searchTarget: weblinkList?.length > 0 ? 'selectedPages' : 'all',
-          filter: weblinkList,
-        }),
-      },
-      {
-        type: 'ai',
-        userId: user.id,
-        conversationId: conversation.id,
-        content: taskRes.answer,
-        sources: JSON.stringify(taskRes.sources),
-        relatedQuestions: JSON.stringify(taskRes.relatedQuestions),
-      },
-    ];
-
-    // post chat logic
-    await Promise.all([
-      this.addChatMessages(newMessages),
-      this.updateConversation(
-        conversation.id,
-        [...chatHistory, ...newMessages],
+    if (!dryRun && conversation?.id && taskRes) {
+      const newMessages: CreateChatMessageInput[] = [
         {
-          lastMessage: taskRes.answer,
-          messageCount: chatHistory.length + 2,
+          type: 'human',
+          userId: user.id,
+          conversationId: conversation.id,
+          content: query,
+          sources: '',
+          // 每次提问完在 human message 上加一个提问的 filter，这样之后追问时可以 follow 这个 filter 规则
+          selectedWeblinkConfig: JSON.stringify({
+            searchTarget: weblinkList?.length > 0 ? 'selectedPages' : 'all',
+            filter: weblinkList,
+          }),
         },
-        task?.locale,
-      ),
-    ]);
+        {
+          type: 'ai',
+          userId: user.id,
+          conversationId: conversation.id,
+          content: taskRes.answer,
+          sources: JSON.stringify(taskRes.sources),
+          relatedQuestions: JSON.stringify(taskRes.relatedQuestions),
+        },
+      ];
+
+      // post chat logic
+      await Promise.all([
+        this.addChatMessages(newMessages),
+        this.updateConversation(
+          conversation.id,
+          [...chatHistory, ...newMessages],
+          {
+            lastMessage: taskRes.answer,
+            messageCount: chatHistory.length + 2,
+          },
+          task?.locale,
+        ),
+      ]);
+    }
   }
 
   async handleChatTask(
@@ -405,7 +414,9 @@ export class ConversationService {
     if (weblinkList?.length <= 0) return;
 
     // save user mark for each weblink in a non-blocking style
-    this.weblinkService.saveWeblinkUserMarks({ userId: user.id, weblinkList });
+    if (!task.dryRun) {
+      this.weblinkService.saveWeblinkUserMarks({ userId: user.id, weblinkList });
+    }
 
     // 基于一组网页做总结，先获取网页内容
     const docs = await this.weblinkService.readMultiWeblinks(weblinkList);

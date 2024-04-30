@@ -113,7 +113,7 @@ export class LlmService implements OnModuleInit {
       formats: [{ key: res?.format, score: 0, name: '', reason: '' }],
     };
 
-    this.logger.log(`final content meta: ${contentMeta}`);
+    this.logger.log(`final content meta: ${JSON.stringify(contentMeta)}`);
 
     return contentMeta;
   }

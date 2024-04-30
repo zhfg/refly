@@ -10,6 +10,7 @@ import {
   Res,
   Param,
   BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Response } from 'express';
 import {
@@ -24,6 +25,7 @@ import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
 import { WeblinkService } from '../weblink/weblink.service';
 import { TASK_TYPE, type Task } from './conversation.dto';
+import { Conversation } from '@prisma/client';
 
 @Controller('conversation')
 export class ConversationController {
@@ -38,27 +40,7 @@ export class ConversationController {
   @Post('new')
   @ApiResponse({ type: CreateConversationResponse })
   async createConversation(@Request() req, @Body() body: CreateConversationParam) {
-    return { data: await this.conversationService.createConversation(body, req.user) };
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('summary')
-  async summary(@Request() req, @Body() body: SummaryParam, @Res() res: Response) {
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.status(200);
-
-    const { source } = body;
-    const taskRes = await this.conversationService.handleQuickActionTask(res, req.user, {
-      taskType: TASK_TYPE.QUICK_ACTION,
-      locale: req.user.outputLocale,
-      data: {
-        actionType: QUICK_ACTION_TYPE.SUMMARY,
-        filter: { weblinkList: [source] },
-      },
-    });
-    await this.weblinkService.updateWeblinkSummary(source.metadata.source, taskRes);
+    return { data: await this.conversationService.createConversation(req.user, body) };
   }
 
   @UseGuards(JwtAuthGuard)
@@ -70,19 +52,32 @@ export class ConversationController {
       throw new BadRequestException('query cannot be empty for chat task');
     }
 
-    // create new conversation if convId not exists
     if (!task.convId) {
-      const conversation = await this.conversationService.createConversation(
-        { ...task.createConvParam, title: task.data?.question },
-        req.user,
-      );
-      task.convId = conversation.convId;
-      task.conversation = conversation;
-    } else {
-      task.conversation = await this.conversationService.findConversation(task.convId);
-      if (!task.conversation) {
-        throw new BadRequestException('conversation not found: ' + task.convId);
+      throw new BadRequestException('convId cannot be empty');
+    }
+
+    if (!task.dryRun) {
+      let conversation: Conversation = await this.conversationService.findConversation(task.convId);
+
+      if (conversation) {
+        if (conversation.userId !== req.user.id) {
+          throw new UnauthorizedException('cannot access this conversation');
+        }
+      } else {
+        if (!task.createConvParam) {
+          throw new BadRequestException('createConvParam cannot be empty');
+        }
+        conversation = await this.conversationService.createConversation(
+          req.user,
+          {
+            ...task.createConvParam,
+            title: task.data?.question,
+          },
+          task.convId,
+        );
       }
+
+      task.conversation = conversation;
     }
 
     res.setHeader('Content-Type', 'text/event-stream');
