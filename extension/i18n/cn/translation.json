@@ -361,6 +361,11 @@
     "currentWeblinkQuickSummary": {
       "message": {
         "question": "网页总结"
+      },
+      "action": {
+        "askFollow": {
+          "title": "在会话中继续提问"
+        }
       }
     }
   },

@@ -146,6 +146,9 @@ export const useBuildTask = () => {
 
     lastMessage.data.content = content
     chatStore.setMessages([...savedMessage, { ...lastMessage }])
+    messageStateStore.setMessageState({
+      pendingMsg: content,
+    })
   }
 
   const onSources = (sources: Source[]) => {
@@ -158,7 +161,10 @@ export const useBuildTask = () => {
       savedMessage = currentChatState.messages as Message[]
 
       lastMessage.data.content = ""
-      messageStateStore.setMessageState({ pendingFirstToken: false })
+      messageStateStore.setMessageState({
+        pendingFirstToken: false,
+        pending: true,
+      })
     } else {
       lastMessage = currentChatState.messages.at(-1) as Message
       savedMessage = currentChatState.messages.slice(0, -1) as Message[]

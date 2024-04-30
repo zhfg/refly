@@ -357,7 +357,12 @@
     "currentWeblinkQuickSummary": {
       "message": {
         "question": "Website Summary"
-      }
+      },
+        "action": {
+          "askFollow": {
+            "title": "Continue in the conversation"
+          }
+        }
     }
   },
   "hooks": {

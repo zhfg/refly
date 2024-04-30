@@ -1,4 +1,4 @@
-import { Spin, Alert } from "@arco-design/web-react"
+import { Spin, Alert, Button, Skeleton } from "@arco-design/web-react"
 import { useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import { Session } from "~components/thread-item/session"
@@ -6,6 +6,7 @@ import { ThreadItem } from "~components/thread-item/thread-item"
 import type { WebLinkItem } from "~components/weblink-list/types"
 import { useQuickActionHandler } from "~hooks/use-quick-action-handler"
 import { useChatStore } from "~stores/chat"
+import { useMessageStateStore } from "~stores/message-state"
 import { useWeblinkStore } from "~stores/weblink"
 import type { SessionItem, Source } from "~types"
 import { buildSessions } from "~utils/session"
@@ -17,12 +18,19 @@ export const CurrentWeblinkQuickSummary = () => {
   const handledFlagRef = useRef(false)
   const { t } = useTranslation()
   const chatStore = useChatStore()
+  const messageStateStore = useMessageStateStore()
 
   // 是否在处理网页
   const isProcessingParse = currentWeblink?.parseStatus === "processing"
   const isFailedToServerCrawl = currentWeblink?.parseStatus === "failed"
   const isParseSuccessfully = currentWeblink?.parseStatus === "finish"
   const alreadySummarize = !!currentWeblink?.summary
+
+  // 是否已经 summary 完成，展示 continue
+  const showContinueChat =
+    isParseSuccessfully &&
+    messageStateStore?.pendingMsg?.length > 0 &&
+    !messageStateStore?.pending
 
   const buildSessionsForQuickSummary = (weblinkItem: WebLinkItem) => {
     const { summary, relatedQuestions } = weblinkItem
@@ -49,7 +57,23 @@ export const CurrentWeblinkQuickSummary = () => {
     return [session]
   }
 
-  const handleAskFollowing = (question: string) => {}
+  const scrollToTop = () => {
+    const elem = document
+      .querySelector("#refly-main-app")
+      ?.shadowRoot?.querySelector(".home-content-container")
+
+    if (elem) {
+      elem.scroll({
+        behavior: "smooth",
+        top: 0,
+      })
+    }
+  }
+
+  const handleAskFollowing = (question: string) => {
+    chatStore.setNewQAText(question)
+    scrollToTop()
+  }
 
   // 每次开始一个新网页，则将 flag 标识为未处理
   useEffect(() => {
@@ -87,7 +111,11 @@ export const CurrentWeblinkQuickSummary = () => {
     <div className="current-weblink-quick-summary-container">
       {isProcessingParse && (
         <div className="current-weblink-quick-summary-processing">
-          <Spin tip="正在处理网页..." />
+          <>
+            <Skeleton animation></Skeleton>
+            <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
+            <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
+          </>
         </div>
       )}
       {isFailedToServerCrawl && (
@@ -97,7 +125,7 @@ export const CurrentWeblinkQuickSummary = () => {
           content="网页抓取失败，请手动触发快捷操作或聊天"
         />
       )}
-      {isParseSuccessfully && (
+      {isParseSuccessfully && sessions?.length === 0 && (
         <Alert type="success" closable content="网页已处理，获取总结中..." />
       )}
       {isParseSuccessfully ? (
@@ -106,6 +134,14 @@ export const CurrentWeblinkQuickSummary = () => {
           isLastSession={true}
           handleAskFollowing={(item) => handleAskFollowing(item)}
         />
+      ) : null}
+
+      {showContinueChat || alreadySummarize ? (
+        <Button type="outline" shape="round">
+          {t(
+            "translation:components.currentWeblinkQuickSummary.action.askFollow.title",
+          )}
+        </Button>
       ) : null}
     </div>
   )

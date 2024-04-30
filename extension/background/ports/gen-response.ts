@@ -28,6 +28,9 @@ const handler: PlasmoMessaging.PortHandler<{
 
       abortController = new AbortController()
 
+      // TODO: 这里未来要优化
+      const convId = payload?.data?.convId
+
       const cookie = await getCookie()
 
       const decoder = new TextDecoder()
@@ -46,7 +49,7 @@ const handler: PlasmoMessaging.PortHandler<{
           },
           signal: abortController.signal,
           body: JSON.stringify({
-            task: payload,
+            task: { ...payload, convId },
           }),
         },
       )

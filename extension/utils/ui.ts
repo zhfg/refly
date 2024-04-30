@@ -35,6 +35,21 @@ export const calcPopupPosition = (
   return { top, left }
 }
 
+export const scrollToTop = () => {
+  setTimeout(() => {
+    const chatWrapperElem = document
+      .querySelector("#refly-main-app")
+      ?.shadowRoot?.querySelector(".session-inner-container")
+
+    if (chatWrapperElem) {
+      chatWrapperElem.scroll({
+        behavior: "smooth",
+        top: 0,
+      })
+    }
+  })
+}
+
 export const scrollToBottom = () => {
   setTimeout(() => {
     const chatWrapperElem = document
@@ -43,7 +58,10 @@ export const scrollToBottom = () => {
 
     if (chatWrapperElem) {
       const { scrollHeight, clientHeight } = chatWrapperElem
-      chatWrapperElem.scrollTop = scrollHeight - clientHeight
+      chatWrapperElem.scroll({
+        behavior: "smooth",
+        top: scrollHeight - clientHeight,
+      })
     }
   })
 }

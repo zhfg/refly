@@ -80,6 +80,7 @@ export const usePollingPingCurrentWeblink = () => {
 
   const startPollingPing = () => {
     clearPollingPing() // 开启新轮训时，先清除上一个轮训
+    pingCurrentWeblink() // 立马运行一次，然后开始轮训
     pingFuncRef.current = setInterval(pingCurrentWeblink, 2000)
   }
   const clearPollingPing = () => {
