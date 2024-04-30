@@ -20,7 +20,7 @@ export class CreateConversationParam {
   contentId?: number;
 
   @ApiPropertyOptional()
-  linkId?: string;
+  linkId?: string; // 创建会话基于的 linkId
 
   @ApiPropertyOptional()
   title?: string;

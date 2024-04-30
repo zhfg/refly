@@ -10,7 +10,7 @@ import { CommonModule } from '../common/common.module';
 import { AigcModule } from '../aigc/aigc.module';
 import { LlmModule } from '../llm/llm.module';
 import { RAGModule } from '../rag/rag.module';
-import { QUEUE_STORE_LINK } from '../utils/const';
+import { QUEUE_WEBLINK } from '../utils/const';
 
 @Module({
   imports: [
@@ -19,7 +19,7 @@ import { QUEUE_STORE_LINK } from '../utils/const';
     LlmModule,
     AigcModule,
     RAGModule,
-    BullModule.registerQueue({ name: QUEUE_STORE_LINK }),
+    BullModule.registerQueue({ name: QUEUE_WEBLINK }),
   ],
   controllers: [WeblinkController],
   providers: [WeblinkService, WeblinkProcessor],

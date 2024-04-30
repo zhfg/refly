@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Document } from '@langchain/core/documents';
 import { IndexStatus, ParseSource } from '@prisma/client';
-import { PageMeta } from '../types/weblink';
+import { PageMeta, Source } from '../types/weblink';
 
 export class WebLinkDTO {
   @ApiProperty()
@@ -37,7 +37,7 @@ export class WebLinkDTO {
   @ApiPropertyOptional()
   storageKey?: string; // 前端上传 html 拿到的 object key
 
-  userId?: number; // 是否绑定 user，如果不绑定就走不去存向量，绑定了就存向量
+  userId?: number; // 是否绑定 user
 }
 
 export class StoredWebLink extends WebLinkDTO {
@@ -73,6 +73,11 @@ export class PingWeblinkResponse {
 
   @ApiPropertyOptional()
   parseSource?: ParseSource;
+}
+
+export class SummaryWeblinkParam {
+  @ApiProperty()
+  weblink: Source;
 }
 
 export interface WeblinkData {

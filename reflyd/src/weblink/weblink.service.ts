@@ -15,11 +15,12 @@ import { LlmService } from '../llm/llm.service';
 import { WebLinkDTO, WeblinkData } from './weblink.dto';
 import { getExpectedTokenLenContent } from '../utils/token';
 import { PageMeta, Source } from '../types/weblink';
-import { QUEUE_STORE_LINK } from '../utils/const';
+import { PROCESS_LINK_BY_USER_CHANNEL, PROCESS_LINK_CHANNEL, QUEUE_WEBLINK } from '../utils/const';
 import { streamToBuffer, streamToString } from '../utils/stream';
 import { genLinkID, sha256Hash } from '../utils/id';
 import { ContentData } from '../common/weaviate.dto';
 import { normalizeURL } from '../utils/url';
+import { TaskResponse } from 'src/conversation/conversation.dto';
 
 @Injectable()
 export class WeblinkService {
@@ -36,7 +37,7 @@ export class WeblinkService {
     private llmService: LlmService,
     private ragService: RAGService,
     private aigcService: AigcService,
-    @InjectQueue(QUEUE_STORE_LINK) private indexQueue: Queue<WebLinkDTO>,
+    @InjectQueue(QUEUE_WEBLINK) private indexQueue: Queue<WebLinkDTO>,
   ) {
     this.cache = new LRUCache({
       max: 1000,
@@ -44,8 +45,16 @@ export class WeblinkService {
     this.bucketName = this.configService.getOrThrow('minio.weblinkBucket');
   }
 
-  async findWeblinkByURL(url: string) {
-    return this.prisma.weblink.findUnique({ where: { url } });
+  async enqueueProcessTask(link: WebLinkDTO) {
+    return this.indexQueue.add(PROCESS_LINK_CHANNEL, link);
+  }
+
+  async enqueueProcessByUserTask(link: WebLinkDTO) {
+    return this.indexQueue.add(PROCESS_LINK_BY_USER_CHANNEL, link);
+  }
+
+  async findFirstWeblink(where: { url?: string; linkId?: string }) {
+    return this.prisma.weblink.findFirst({ where });
   }
 
   /**
@@ -73,12 +82,7 @@ export class WeblinkService {
     });
 
     // Send to queue in a non-block style
-    // linkMap.forEach((link) => this.indexQueue.add('indexWebLink', link));
-    try {
-      linkMap.forEach((link) => this.processLink(link));
-    } catch (err) {
-      this.logger.error(`store weblink err: ${err.trace}`);
-    }
+    linkMap.forEach((link) => this.enqueueProcessByUserTask(link));
   }
 
   async getUserHistory(params: {
@@ -262,10 +266,14 @@ export class WeblinkService {
     extensionVersion?: string;
   }) {
     const { userId, weblinkList, extensionVersion = '' } = param;
+    const weblinkWithSelectors = weblinkList.filter((weblink) => weblink.selections.length > 0);
+
+    if (weblinkWithSelectors.length <= 0) return;
+
     const weblinks = await this.prisma.weblink.findMany({
       select: { id: true, url: true },
       where: {
-        url: { in: weblinkList.map((item) => item.metadata.source) },
+        url: { in: weblinkWithSelectors.map((item) => item.metadata.source) },
       },
     });
     const weblinkIdMap = weblinks.reduce((map, item) => {
@@ -438,11 +446,29 @@ export class WeblinkService {
     });
   }
 
-  async processLinkByUser(link: WebLinkDTO, weblink: Weblink, doc: Document<PageMeta>) {
-    // 处理单个用户的访问记录
-    const uwb = await this.updateUserWeblink(link, weblink);
+  /**
+   * Connect weblink with user.
+   * @param link
+   */
+  async processLinkByUser(link: WebLinkDTO) {
+    const weblink = await this.findFirstWeblink({ url: link.url });
 
-    const user = await this.prisma.user.findUnique({ where: { id: link.userId } });
+    // If weblink not ready, then retry processing the link and re-queue this task
+    // TODO: 优化重试逻辑，处理中不应该再重试
+    if (!weblink || isWeblinkReady(weblink)) {
+      await this.enqueueProcessTask(link);
+      await new Promise((r) => setTimeout(r, 2000));
+      await this.enqueueProcessByUserTask(link);
+      return;
+    }
+
+    const { doc } = await this.readWebLinkContent(weblink.url);
+
+    // 处理单个用户的访问记录
+    const [uwb, user] = await Promise.all([
+      this.updateUserWeblink(link, weblink),
+      this.prisma.user.findUnique({ where: { id: link.userId } }),
+    ]);
 
     await Promise.all([
       this.saveChunkEmbeddingsForUser(user, [link.url]),
@@ -468,8 +494,8 @@ export class WeblinkService {
 
     const { html, doc } = data;
 
-    // Upload parsed doc to minio
     try {
+      // Upload parsed doc to minio
       const [storageKey, parsedDocStorageKey] = await Promise.all([
         this.uploadHTMLToMinio(link, html),
         this.uploadParsedDocToMinio(link, doc),
@@ -477,11 +503,23 @@ export class WeblinkService {
 
       return this.prisma.weblink.update({
         where: { id: weblink.id },
-        data: { storageKey, parsedDocStorageKey },
+        data: {
+          storageKey,
+          parsedDocStorageKey,
+          parseSource: link.storageKey ? 'clientUpload' : 'serverCrawl',
+        },
       });
     } finally {
       await releaseLock();
     }
+  }
+
+  async updateWeblinkSummary(url: string, taskRes: TaskResponse) {
+    const { answer, relatedQuestions } = taskRes;
+    return this.prisma.weblink.update({
+      where: { url },
+      data: { summary: answer, relatedQuestions },
+    });
   }
 
   /**
@@ -527,10 +565,6 @@ export class WeblinkService {
       }
     } catch (err) {
       this.logger.error(`process weblink err: ${err.trace}`);
-    }
-
-    if (weblink && link.userId && doc) {
-      await this.processLinkByUser(link, weblink, doc);
     }
 
     return weblink;

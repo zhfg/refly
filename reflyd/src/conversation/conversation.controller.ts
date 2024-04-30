@@ -21,13 +21,12 @@ import { ApiParam, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
 import { TASK_TYPE, type Task } from './conversation.dto';
-import { AigcService } from '../aigc/aigc.service';
 
 @Controller('conversation')
 export class ConversationController {
   private logger = new Logger(ConversationController.name);
 
-  constructor(private conversationService: ConversationService, private aigcService: AigcService) {}
+  constructor(private conversationService: ConversationService) {}
 
   @UseGuards(JwtAuthGuard)
   @Post('new')

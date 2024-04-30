@@ -5,7 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { RAGModule } from '../rag/rag.module';
 import { AigcModule } from '../aigc/aigc.module';
 import { BullModule } from '@nestjs/bull';
-import { QUEUE_STORE_LINK } from '../utils/const';
+import { QUEUE_WEBLINK } from '../utils/const';
 import configuration from '../config/app.config';
 
 describe('WeblinkService', () => {
@@ -18,7 +18,7 @@ describe('WeblinkService', () => {
         CommonModule,
         RAGModule,
         AigcModule,
-        BullModule.registerQueue({ name: QUEUE_STORE_LINK }),
+        BullModule.registerQueue({ name: QUEUE_WEBLINK }),
       ],
       providers: [WeblinkService],
     }).compile();

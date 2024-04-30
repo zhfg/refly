@@ -46,13 +46,45 @@ export class ConversationService {
       },
     });
 
+    // Messages to initialize when creating this conversation
+    const initMessages: CreateChatMessageInput[] = [];
+
+    if (param.linkId) {
+      const weblink = await this.weblinkService.findFirstWeblink({ linkId: param.linkId });
+      const { summary, relatedQuestions } = weblink;
+      initMessages.push(
+        {
+          type: 'human',
+          content: getUserQuestion(QUICK_ACTION_TYPE.SUMMARY),
+          sources: '[]',
+          userId: user.id,
+          conversationId: conversation.id,
+          locale: param.locale,
+        },
+        {
+          type: 'ai',
+          content: summary,
+          sources: JSON.stringify([
+            {
+              pageContent: '',
+              metadata: JSON.parse(weblink.pageMeta),
+            },
+          ]),
+          userId: user.id,
+          conversationId: conversation.id,
+          locale: param.locale,
+          relatedQuestions: JSON.stringify(relatedQuestions),
+        },
+      );
+    }
+
     // If this conversation is based on generated content
     // then initialize conversation messages with this content
     if (param.contentId) {
       const content = await this.aigcService.getContent({
         contentId: param.contentId,
       });
-      const messages: CreateChatMessageInput[] = [
+      initMessages.push(
         {
           type: 'human',
           content: content.title,
@@ -69,15 +101,18 @@ export class ConversationService {
           conversationId: conversation.id,
           locale: param.locale,
         },
-      ];
+      );
+    }
+
+    if (initMessages.length > 0) {
       await Promise.all([
-        this.addChatMessages(messages),
+        this.addChatMessages(initMessages),
         this.updateConversation(
           conversation.id,
-          messages,
+          initMessages,
           {
             messageCount: { increment: 2 },
-            lastMessage: content.content,
+            lastMessage: initMessages[initMessages.length - 1].content,
           },
           param?.locale as LOCALE,
         ),
@@ -150,6 +185,14 @@ export class ConversationService {
     const query = data?.question || '';
     const weblinkList = data?.filter?.weblinkList || [];
 
+    // 如果指定 URL 进行 chat，则异步进行保存
+    if (weblinkList.length > 0) {
+      this.weblinkService.storeLinks(
+        user.id,
+        weblinkList.map((weblink) => ({ url: weblink.metadata.source })),
+      );
+    }
+
     // 获取聊天历史
     const chatHistory = await this.getMessages(conversation.id);
 
@@ -161,7 +204,6 @@ export class ConversationService {
     } else {
       taskRes = await this.handleChatTask(res, user, task, chatHistory);
     }
-    res.end(``);
 
     const newMessages: CreateChatMessageInput[] = [
       {
@@ -232,15 +274,6 @@ export class ConversationService {
         : await this.llmService.getContextualQuestion(query, locale, llmChatMessages);
     this.logger.log(`questionWithContext: ${questionWithContext}`);
 
-    // 如果需要指定 URL 进行 chat，则需要实时召回向量，先同步保存向量，否则异步保存
-    if (urls?.length > 0) {
-      if (chatFromClientSelector) {
-        this.weblinkService.saveChunkEmbeddingsForUser(user, urls);
-      } else {
-        await this.weblinkService.saveChunkEmbeddingsForUser(user, urls);
-      }
-    }
-
     const docs = chatFromClientSelector
       ? await this.weblinkService.readMultiWeblinks(task?.data?.filter?.weblinkList)
       : await this.llmService.getRetrievalDocs(user, questionWithContext, urls);
@@ -280,6 +313,7 @@ export class ConversationService {
     if (relatedQuestions) {
       res.write(JSON.stringify(relatedQuestions) || '');
     }
+    res.end(``);
 
     return {
       sources: docs,
@@ -327,6 +361,7 @@ export class ConversationService {
 
     res.write(RELATED_SPLIT);
     res.write(JSON.stringify(relatedQuestions) || '');
+    res.end(``);
 
     const handledAnswer = answerStr
       .replace(/\[\[([cC])itation/g, '[citation')
@@ -376,9 +411,6 @@ export class ConversationService {
 
     let stream: IterableReadableStream<BaseMessageChunk>;
     if (data?.actionType === QUICK_ACTION_TYPE.SUMMARY) {
-      const weblinkList = data?.filter?.weblinkList;
-      if (weblinkList?.length <= 0) return;
-
       stream = await this.llmService.summary(data?.actionPrompt, locale, docs);
     }
 
@@ -395,14 +427,6 @@ export class ConversationService {
       return answerStr;
     };
 
-    const getUserQuestion = (actionType: QUICK_ACTION_TYPE) => {
-      switch (actionType) {
-        case QUICK_ACTION_TYPE.SUMMARY: {
-          return '总结网页'; // TODO: 国际化
-        }
-      }
-    };
-
     const [answerStr, relatedQuestions] = await Promise.all([
       getSSEData(stream),
       this.llmService.getRelatedQuestion(docs, getUserQuestion(data?.actionType), locale),
@@ -412,6 +436,7 @@ export class ConversationService {
 
     res.write(RELATED_SPLIT);
     res.write(JSON.stringify(relatedQuestions));
+    res.end(``);
 
     return {
       sources,
@@ -420,3 +445,11 @@ export class ConversationService {
     };
   }
 }
+
+const getUserQuestion = (actionType: QUICK_ACTION_TYPE) => {
+  switch (actionType) {
+    case QUICK_ACTION_TYPE.SUMMARY: {
+      return '总结网页'; // TODO: 国际化
+    }
+  }
+};
