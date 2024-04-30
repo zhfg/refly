@@ -438,6 +438,7 @@ export class WeblinkService {
 
     // 提取网页分类打标数据 with LLM
     // TODO: need add locale
+    this.logger.log(`start to extract content meta for weblink: ${weblink.url}`);
     const meta = await this.llmService.extractContentMeta(doc);
     if (!meta?.topics || !meta?.topics[0].key) {
       this.logger.log(`invalid meta for ${weblink.url}: ${JSON.stringify(meta)}`);
@@ -550,10 +551,12 @@ export class WeblinkService {
         create: {
           url: link.url,
           linkId: genLinkID(),
-          indexStatus: 'init',
+          chunkStatus: 'processing',
+          parseStatus: 'processing',
           pageContent: '', // deprecated, always empty
           pageMeta: '{}',
           contentMeta: '{}',
+          lastParseTime: new Date(),
         },
         update: {},
       });

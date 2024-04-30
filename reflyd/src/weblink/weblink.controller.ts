@@ -27,7 +27,7 @@ export class WeblinkController {
 
     // If weblink not exists, the storage key is not complete
     // or has outdated parser version then reprocess it asynchronously
-    if (!weblink || (weblink.indexStatus === 'finish' && weblink.parserVersion < PARSER_VERSION)) {
+    if (!weblink || (weblink.chunkStatus === 'finish' && weblink.parserVersion < PARSER_VERSION)) {
       await this.weblinkService.enqueueProcessTask({ url });
       return { data: { parseStatus: 'processing', chunkStatus: 'processing' } };
     }

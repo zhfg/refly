@@ -228,8 +228,6 @@ model Weblink {
   pageMeta               String      @map("page_meta")
   /// 内容元数据, JSON 存储
   contentMeta            String      @map("content_meta")
-  /// 索引状态
-  indexStatus            IndexStatus @default(init) @map("index_status")
   /// 解析策略版本，格式统一为 YYYYMMDD
   parserVersion          String?     @default("00000000") @map("parser_version")
   /// 解析状态
