@@ -58,6 +58,11 @@ export class ListConversationResponse {
   data: ConversationListItem[];
 }
 
+export class SummaryParam {
+  @ApiProperty()
+  source: Source;
+}
+
 export class ChatParam {
   @ApiProperty()
   query: string;

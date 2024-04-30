@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Document } from '@langchain/core/documents';
 import { IndexStatus, ParseSource } from '@prisma/client';
-import { PageMeta, Source } from '../types/weblink';
+import { PageMeta } from '../types/weblink';
 
 export class WebLinkDTO {
   @ApiProperty()
@@ -55,7 +55,7 @@ export class GetWebLinkListResponse {
   data: StoredWebLink[];
 }
 
-export class PingWeblinkResponse {
+export class PingWeblinkData {
   @ApiPropertyOptional()
   linkId?: string;
 
@@ -75,9 +75,9 @@ export class PingWeblinkResponse {
   parseSource?: ParseSource;
 }
 
-export class SummaryWeblinkParam {
-  @ApiProperty()
-  weblink: Source;
+export class PingWeblinkResponse {
+  @ApiProperty({ type: PingWeblinkData })
+  data: PingWeblinkData;
 }
 
 export interface WeblinkData {

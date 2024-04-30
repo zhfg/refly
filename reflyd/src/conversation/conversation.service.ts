@@ -274,9 +274,10 @@ export class ConversationService {
         : await this.llmService.getContextualQuestion(query, locale, llmChatMessages);
     this.logger.log(`questionWithContext: ${questionWithContext}`);
 
-    const docs = chatFromClientSelector
-      ? await this.weblinkService.readMultiWeblinks(task?.data?.filter?.weblinkList)
-      : await this.llmService.getRetrievalDocs(user, questionWithContext, urls);
+    const docs =
+      urls.length > 1 || chatFromClientSelector
+        ? await this.weblinkService.readMultiWeblinks(filter.weblinkList)
+        : await this.llmService.getRetrievalDocs(user, questionWithContext, urls);
 
     const { stream } = await this.llmService.chat(
       questionWithContext,

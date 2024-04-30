@@ -20,7 +20,7 @@ import { streamToBuffer, streamToString } from '../utils/stream';
 import { genLinkID, sha256Hash } from '../utils/id';
 import { ContentData } from '../common/weaviate.dto';
 import { normalizeURL } from '../utils/url';
-import { TaskResponse } from 'src/conversation/conversation.dto';
+import { TaskResponse } from '../conversation/conversation.dto';
 
 @Injectable()
 export class WeblinkService {
@@ -173,8 +173,8 @@ export class WeblinkService {
    * @returns langchain documents
    */
   async readMultiWeblinks(weblinkList: Source[]): Promise<Document<PageMeta>[]> {
-    // 处理 token 窗口，一共给 6K 窗口用于问答，平均分到每个网页，保障可用性
-    const avgTokenLen = 6000 / weblinkList?.length;
+    // 处理 token 窗口，一共给 12K 窗口用于问答，平均分到每个网页，保障可用性
+    const avgTokenLen = 12000 / weblinkList?.length;
 
     const results = await Promise.all<Document<PageMeta>[]>(
       weblinkList.map(async (item) => {
@@ -346,7 +346,7 @@ export class WeblinkService {
 
     const res = await this.minio.putObject(
       this.configService.get('minio.weblinkBucket'),
-      link.storageKey,
+      storageKey,
       html,
     );
     this.logger.log('upload html to minio res: ' + JSON.stringify(res));
@@ -372,8 +372,12 @@ export class WeblinkService {
    * @param doc
    * @returns
    */
-  async indexWeblink(weblink: Weblink, doc: Document<PageMeta>): Promise<Weblink> {
-    if (weblink.chunkStorageKey && weblink.parserVersion === PARSER_VERSION) {
+  async genWeblinkChunkEmbedding(weblink: Weblink, doc: Document<PageMeta>): Promise<Weblink> {
+    if (
+      weblink.chunkStorageKey &&
+      weblink.chunkStatus === 'finish' &&
+      weblink.parserVersion === PARSER_VERSION
+    ) {
       this.logger.log(`weblink already indexed: ${weblink.url}, skip`);
       return weblink;
     }
@@ -401,13 +405,13 @@ export class WeblinkService {
 
       return this.prisma.weblink.update({
         where: { id: weblink.id },
-        data: { chunkStorageKey, parserVersion: PARSER_VERSION, indexStatus: 'finish' },
+        data: { chunkStorageKey, parserVersion: PARSER_VERSION, chunkStatus: 'finish' },
       });
     } catch (err) {
       this.logger.error(`index weblink failed: ${err}`);
       return this.prisma.weblink.update({
         where: { id: weblink.id },
-        data: { indexStatus: 'failed' },
+        data: { chunkStatus: 'failed' },
       });
     } finally {
       await releaseLock();
@@ -506,8 +510,14 @@ export class WeblinkService {
         data: {
           storageKey,
           parsedDocStorageKey,
+          parseStatus: 'finish',
           parseSource: link.storageKey ? 'clientUpload' : 'serverCrawl',
         },
+      });
+    } catch (err) {
+      await this.prisma.weblink.update({
+        where: { id: weblink.id },
+        data: { parseStatus: 'failed' },
       });
     } finally {
       await releaseLock();
@@ -559,12 +569,12 @@ export class WeblinkService {
 
         await Promise.all([
           this.updateWeblinkStorageKey(weblink, link, data),
-          this.indexWeblink(weblink, doc),
+          this.genWeblinkChunkEmbedding(weblink, doc),
           this.extractWeblinkContentMeta(weblink, doc),
         ]);
       }
     } catch (err) {
-      this.logger.error(`process weblink err: ${err.trace}`);
+      this.logger.error(`process weblink err: ${err}`);
     }
 
     return weblink;

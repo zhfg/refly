@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import {
+  SummaryParam,
   CreateConversationParam,
   CreateConversationResponse,
   ListConversationResponse,
@@ -20,19 +21,42 @@ import {
 import { ApiParam, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
+import { WeblinkService } from '../weblink/weblink.service';
 import { TASK_TYPE, type Task } from './conversation.dto';
 
 @Controller('conversation')
 export class ConversationController {
   private logger = new Logger(ConversationController.name);
 
-  constructor(private conversationService: ConversationService) {}
+  constructor(
+    private conversationService: ConversationService,
+    private weblinkService: WeblinkService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Post('new')
   @ApiResponse({ type: CreateConversationResponse })
   async createConversation(@Request() req, @Body() body: CreateConversationParam) {
     return { data: await this.conversationService.createConversation(body, req.user) };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('summary')
+  async summary(@Request() req, @Body() body: SummaryParam, @Res() res: Response) {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.status(200);
+
+    const { source } = body;
+    const taskRes = await this.conversationService.handleQuickActionTask(res, req.user, {
+      taskType: TASK_TYPE.QUICK_ACTION,
+      locale: req.user.outputLocale,
+      data: {
+        filter: { weblinkList: [source] },
+      },
+    });
+    await this.weblinkService.updateWeblinkSummary(source.metadata.source, taskRes);
   }
 
   @UseGuards(JwtAuthGuard)
