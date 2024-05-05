@@ -4,7 +4,12 @@ import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { WeblinkService } from './weblink.service';
-import { GetWebLinkListResponse, PingWeblinkResponse, StoreWebLinkParam } from './weblink.dto';
+import {
+  GetWebLinkListResponse,
+  PingWeblinkData,
+  PingWeblinkResponse,
+  StoreWebLinkParam,
+} from './weblink.dto';
 import { PARSER_VERSION } from '../rag/rag.service';
 import { normalizeURL } from '../utils/url';
 
@@ -13,7 +18,7 @@ export class WeblinkController {
   private logger = new Logger(WeblinkController.name);
   constructor(private weblinkService: WeblinkService) {}
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get('ping')
   async ping(@Query('url') url: string): Promise<PingWeblinkResponse> {
     url = normalizeURL(url);
@@ -32,17 +37,18 @@ export class WeblinkController {
       return { data: { parseStatus: 'processing', chunkStatus: 'processing' } };
     }
 
-    return {
-      data: _.pick(
-        weblink,
-        'linkId',
-        'parseStatus',
-        'chunkStatus',
-        'summary',
-        'relatedQuestions',
-        'parseSource',
-      ),
-    };
+    const data: Partial<PingWeblinkData> = _.pick(
+      weblink,
+      'linkId',
+      'parseStatus',
+      'chunkStatus',
+      'parseSource',
+    );
+
+    if (weblink.summary) data.summary = weblink.summary;
+    if (weblink.relatedQuestions.length > 0) data.relatedQuestions = weblink.relatedQuestions;
+
+    return { data };
   }
 
   @UseGuards(JwtAuthGuard)

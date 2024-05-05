@@ -10,7 +10,7 @@ import puppeteerBlockResources from 'puppeteer-extra-plugin-block-resources';
 import puppeteerPageProxy from 'puppeteer-extra-plugin-page-proxy';
 import puppeteerStealth from 'puppeteer-extra-plugin-stealth';
 
-import { Defer } from '../utils/defer';
+import { Defer, delay } from '../utils';
 
 const READABILITY_JS = fs.readFileSync(
   require.resolve('@mozilla/readability/Readability.js'),
@@ -82,23 +82,40 @@ export class PuppeteerService implements OnModuleInit {
         return page;
       },
       destroy: async (page) => {
-        await page.browserContext().close();
+        await Promise.race([
+          (async () => {
+            const ctx = page.browserContext();
+            await page.removeExposedFunction('reportSnapshot');
+            await page.close();
+            await ctx.close();
+          })(),
+          delay(5000),
+        ]).catch((err) => {
+          this.logger.error(`Failed to destroy page: ${err}`);
+        });
       },
       validate: async (page) => {
         return page.browser().connected && !page.isClosed();
       },
     },
     {
-      max: Math.max(1 + Math.floor(os.totalmem() / (384 * 1024 * 1024)), 16),
+      max: 16,
       min: 1,
       acquireTimeoutMillis: 60_000,
       testOnBorrow: true,
       testOnReturn: true,
       autostart: false,
+      priorityRange: 3,
     },
   );
 
+  private __healthCheckInterval?: NodeJS.Timeout;
+
   async onModuleInit() {
+    if (this.__healthCheckInterval) {
+      clearInterval(this.__healthCheckInterval);
+      this.__healthCheckInterval = undefined;
+    }
     this.logger.log(`PuppeteerService initializing with pool size ${this.pagePool.max}`);
     this.pagePool.start();
 
@@ -106,7 +123,7 @@ export class PuppeteerService implements OnModuleInit {
       if (this.browser.connected) {
         await this.browser.close();
       } else {
-        this.browser.process()?.kill();
+        this.browser.process()?.kill('SIGKILL');
       }
     }
 
@@ -122,6 +139,28 @@ export class PuppeteerService implements OnModuleInit {
       this.logger.warn(`Browser disconnected`);
     });
     this.logger.log(`Browser launched: ${this.browser.process()?.pid}`);
+
+    this.__healthCheckInterval = setInterval(() => this.healthCheck(), 30_000);
+  }
+
+  async healthCheck() {
+    const healthyPage = await Promise.race([
+      this.pagePool.acquire(3),
+      delay(60_000).then(() => null),
+    ]).catch((err) => {
+      this.logger.error(`Health check failed: ${err}`);
+      return null;
+    });
+
+    if (healthyPage) {
+      this.pagePool.release(healthyPage);
+      return;
+    }
+
+    this.logger.warn(`Health check failed, trying to clean up.`);
+    await this.pagePool.clear();
+    this.browser.process()?.kill('SIGKILL');
+    Reflect.deleteProperty(this, 'browser');
   }
 
   async newPage() {
@@ -254,10 +293,9 @@ document.addEventListener('load', handlePageLoad);
     page.on('snapshot', hdl);
 
     const gotoPromise = page
-      .goto(url, { waitUntil: ['load', 'domcontentloaded', 'networkidle0'], timeout: 30_000 })
+      .goto(url, { waitUntil: ['load', 'domcontentloaded', 'networkidle0'], timeout: 10_000 })
       .catch((err) => {
         this.logger.warn(`Browsing of ${url} did not fully succeed: ${err}`);
-        return Promise.reject(new Error(`Failed to goto ${url}: ${err}`));
       })
       .finally(async () => {
         if (!snapshot?.html) {

@@ -97,6 +97,7 @@ export class WeblinkService {
 
   /**
    * Parse the content of a webpage link.
+   * NOTE: the data could be empty, please check the return value
    *
    * @param {string} url - The URL of the webpage to parse
    * @return {Promise<Document>} A Promise that resolves to the parsed document
@@ -136,8 +137,12 @@ export class WeblinkService {
 
     // Finally tries to fetch the content from the web
     const snapshot = await this.ragService.crawl(url);
-    const doc = await this.ragService.formatSnapshot('markdown', snapshot, new URL(url));
-    this.cache.set(url, { html: snapshot.html, doc });
+
+    let doc: Document<PageMeta>;
+    if (snapshot.html) {
+      doc = await this.ragService.formatSnapshot('markdown', snapshot, new URL(url));
+      this.cache.set(url, { html: snapshot.html, doc });
+    }
 
     return { html: snapshot.html, doc };
   }
@@ -186,7 +191,9 @@ export class WeblinkService {
           }));
         }
 
+        // Else read the whole document
         const { doc } = await this.readWebLinkContent(item.metadata?.source);
+        if (!doc) return [];
         const { pageContent, metadata } = doc;
         return [
           {
@@ -462,6 +469,8 @@ export class WeblinkService {
 
     const { doc } = await this.readWebLinkContent(weblink.url);
 
+    if (!doc) return;
+
     // 处理单个用户的访问记录
     const [uwb, user] = await Promise.all([
       this.updateUserWeblink(link, weblink),
@@ -561,6 +570,14 @@ export class WeblinkService {
           (link.storageKey
             ? await this.directParseWebLinkContent(link)
             : await this.readWebLinkContent(link.url));
+        if (!data?.doc) {
+          this.logger.warn(`cannot parse web link content: ${link.url}, mark as failed`);
+          return this.prisma.weblink.update({
+            where: { id: weblink.id },
+            data: { parseStatus: 'failed', chunkStatus: 'failed' },
+          });
+        }
+
         doc = data.doc;
 
         await Promise.all([
@@ -575,6 +592,10 @@ export class WeblinkService {
       }
     } catch (err) {
       this.logger.error(`process weblink err: ${err}`);
+      await this.prisma.weblink.update({
+        where: { url: link.url },
+        data: { parseStatus: 'failed', chunkStatus: 'failed' },
+      });
     }
 
     return weblink;
@@ -583,10 +604,10 @@ export class WeblinkService {
 
 function isWeblinkReady(weblink: Weblink): boolean {
   return (
-    weblink.parseStatus === 'finish' &&
     weblink.storageKey &&
     weblink.parsedDocStorageKey &&
     weblink.chunkStorageKey &&
+    weblink.parseStatus === 'finish' &&
     weblink.chunkStatus === 'finish' &&
     weblink.parserVersion === PARSER_VERSION &&
     Object.keys(JSON.parse(weblink.contentMeta || '{}')).length > 0

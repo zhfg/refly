@@ -13,7 +13,17 @@ import { setTraceID } from './middleware/set-trace-id';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useLogger(app.get(Logger));
+  const logger = app.get(Logger);
+
+  process.on('uncaughtException', (err) => {
+    logger.error('uncaughtException', err);
+  });
+
+  process.on('unhandledRejection', (err) => {
+    logger.error('unhandledRejection', err);
+  });
+
+  app.useLogger(logger);
   app.use(setTraceID);
   app.use(helmet());
   app.enableCors();
