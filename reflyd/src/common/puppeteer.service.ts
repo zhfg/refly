@@ -10,7 +10,7 @@ import puppeteerBlockResources from 'puppeteer-extra-plugin-block-resources';
 import puppeteerPageProxy from 'puppeteer-extra-plugin-page-proxy';
 import puppeteerStealth from 'puppeteer-extra-plugin-stealth';
 
-import { Defer, delay } from '../utils';
+import { Defer, delay, hasUrlRedirected } from '../utils';
 
 const READABILITY_JS = fs.readFileSync(
   require.resolve('@mozilla/readability/Readability.js'),
@@ -341,6 +341,11 @@ document.addEventListener('load', handlePageLoad);
     } finally {
       gotoPromise.finally(() => {
         page.off('snapshot', hdl);
+
+        if (hasUrlRedirected(url, snapshot?.href)) {
+          this.logger.warn(`URL ${url} redirected to ${snapshot?.href}`);
+        }
+
         this.pagePool.destroy(page).catch((err) => {
           this.logger.warn(`Failed to destroy page: ${err}`);
         });
@@ -366,7 +371,7 @@ document.addEventListener('load', handlePageLoad);
 
     await page
       .goto(googleArchiveUrl, {
-        waitUntil: ['load', 'domcontentloaded', 'networkidle0'],
+        waitUntil: ['load', 'domcontentloaded'],
         timeout: 15_000,
       })
       .catch((err) => {

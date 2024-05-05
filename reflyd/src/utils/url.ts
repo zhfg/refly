@@ -4,8 +4,15 @@ export const normalizeURL = (url: string) => {
   return normalizeUrl(url.trim(), {
     stripWWW: false,
     stripHash: true,
-    removeTrailingSlash: true,
-    removeSingleSlash: true,
     removeQueryParameters: ['ref', /^utm_\w+/i],
   });
+};
+
+export const hasUrlRedirected = (origin: string, current: string) => {
+  const normalize = (url: string) =>
+    normalizeUrl(url.trim(), {
+      stripHash: true,
+      removeQueryParameters: true,
+    });
+  return normalize(origin) !== normalize(current);
 };

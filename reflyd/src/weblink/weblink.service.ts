@@ -19,7 +19,7 @@ import { PROCESS_LINK_BY_USER_CHANNEL, PROCESS_LINK_CHANNEL, QUEUE_WEBLINK } fro
 import { streamToBuffer, streamToString } from '../utils/stream';
 import { genLinkID, sha256Hash } from '../utils/id';
 import { ContentData } from '../common/weaviate.dto';
-import { normalizeURL } from '../utils/url';
+import { hasUrlRedirected, normalizeURL } from '../utils/url';
 import { TaskResponse } from '../conversation/conversation.dto';
 
 @Injectable()
@@ -139,7 +139,7 @@ export class WeblinkService {
     const snapshot = await this.ragService.crawl(url);
 
     let doc: Document<PageMeta>;
-    if (snapshot.html) {
+    if (snapshot.html && !hasUrlRedirected(url, snapshot.href)) {
       doc = await this.ragService.formatSnapshot('markdown', snapshot, new URL(url));
       this.cache.set(url, { html: snapshot.html, doc });
     }
