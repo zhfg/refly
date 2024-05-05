@@ -1,7 +1,8 @@
-import os from 'os';
 import fs from 'fs';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import genericPool from 'generic-pool';
+import * as fastq from 'fastq';
+import type { queueAsPromised } from 'fastq';
 
 import type { Browser, CookieParam, Page } from 'puppeteer';
 import puppeteer from 'puppeteer-extra';
@@ -101,7 +102,7 @@ export class PuppeteerService implements OnModuleInit {
     {
       max: 16,
       min: 1,
-      acquireTimeoutMillis: 60_000,
+      acquireTimeoutMillis: 1000,
       testOnBorrow: true,
       testOnReturn: true,
       autostart: false,
@@ -109,22 +110,11 @@ export class PuppeteerService implements OnModuleInit {
     },
   );
 
-  private __healthCheckInterval?: NodeJS.Timeout;
+  private healthCheckQueue: queueAsPromised;
 
-  async onModuleInit() {
-    if (this.__healthCheckInterval) {
-      clearInterval(this.__healthCheckInterval);
-      this.__healthCheckInterval = undefined;
-    }
-    this.logger.log(`PuppeteerService initializing with pool size ${this.pagePool.max}`);
-    this.pagePool.start();
-
+  async launchBrowser() {
     if (this.browser) {
-      if (this.browser.connected) {
-        await this.browser.close();
-      } else {
-        this.browser.process()?.kill('SIGKILL');
-      }
+      await this.browser.close();
     }
 
     this.browser = await puppeteer
@@ -139,28 +129,36 @@ export class PuppeteerService implements OnModuleInit {
       this.logger.warn(`Browser disconnected`);
     });
     this.logger.log(`Browser launched: ${this.browser.process()?.pid}`);
+  }
 
-    this.__healthCheckInterval = setInterval(() => this.healthCheck(), 30_000);
+  async onModuleInit() {
+    this.logger.log(`PuppeteerService initializing with pool size ${this.pagePool.max}`);
+    this.pagePool.start();
+
+    await this.launchBrowser();
+
+    this.healthCheckQueue = fastq.promise(this, this.healthCheck, 1);
+    this.healthCheckQueue.push({});
   }
 
   async healthCheck() {
-    const healthyPage = await Promise.race([
-      this.pagePool.acquire(3),
-      delay(60_000).then(() => null),
-    ]).catch((err) => {
-      this.logger.error(`Health check failed: ${err}`);
-      return null;
-    });
+    try {
+      const healthyPage = await this.pagePool.acquire(3).catch((err) => {
+        this.logger.error(`Health check failed: ${err}`);
+        return null;
+      });
 
-    if (healthyPage) {
-      this.pagePool.release(healthyPage);
-      return;
+      if (healthyPage) {
+        this.logger.log(`Health check passed for puppeteer pool.`);
+        this.pagePool.release(healthyPage);
+      } else {
+        this.logger.warn(`Health check failed, trying to re-launch browser.`);
+        await this.launchBrowser();
+      }
+    } finally {
+      await delay(30_000);
+      this.healthCheckQueue.push({});
     }
-
-    this.logger.warn(`Health check failed, trying to clean up.`);
-    await this.pagePool.clear();
-    this.browser.process()?.kill('SIGKILL');
-    Reflect.deleteProperty(this, 'browser');
   }
 
   async newPage() {

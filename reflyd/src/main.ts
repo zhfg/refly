@@ -16,11 +16,11 @@ async function bootstrap() {
   const logger = app.get(Logger);
 
   process.on('uncaughtException', (err) => {
-    logger.error('uncaughtException', err);
+    console.error('uncaughtException', err);
   });
 
   process.on('unhandledRejection', (err) => {
-    logger.error('unhandledRejection', err);
+    console.error('unhandledRejection', err);
   });
 
   app.useLogger(logger);
