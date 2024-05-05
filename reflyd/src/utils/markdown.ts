@@ -1,7 +1,7 @@
 export function tidyMarkdown(markdown: string): string {
   // Step 1: Handle complex broken links with text and optional images spread across multiple lines
   let normalizedMarkdown = markdown.replace(
-    /\[\s*([^]+?)\s*\]\s*\(\s*([^)]+)\s*\)/g,
+    /\[\s*([^\]\n]+?)\s*\]\s*\(\s*([^)]+)\s*\)/g,
     (match, text, url) => {
       // Remove internal new lines and excessive spaces within the text
       text = text.replace(/\s+/g, ' ').trim();
@@ -11,7 +11,7 @@ export function tidyMarkdown(markdown: string): string {
   );
 
   normalizedMarkdown = normalizedMarkdown.replace(
-    /\[\s*([^!]*?)\s*\n*(?:!\[([^\]]*)\]\((.*?)\))?\s*\n*\]\s*\(\s*([^)]+)\s*\)/g,
+    /\[\s*([^\]\n!]*?)\s*\n*(?:!\[([^\]]*)\]\((.*?)\))?\s*\n*\]\s*\(\s*([^)]+)\s*\)/g,
     (match, text, alt, imgUrl, linkUrl) => {
       // Normalize by removing excessive spaces and new lines
       text = text.replace(/\s+/g, ' ').trim();
