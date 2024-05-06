@@ -9,6 +9,9 @@ export const normalizeURL = (url: string) => {
 };
 
 export const hasUrlRedirected = (origin: string, current: string) => {
+  if (!origin || !current) {
+    return false;
+  }
   const normalize = (url: string) =>
     normalizeUrl(url.trim(), {
       stripHash: true,
