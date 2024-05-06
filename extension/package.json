@@ -6,8 +6,9 @@
   "author": "pftom",
   "scripts": {
     "dev": "plasmo dev",
-    "build": "plasmo build",
-    "package": "plasmo package"
+    "build": "plasmo build --source-maps && yarn sentry:sourcemaps",
+    "package": "plasmo package",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org refly-ai --project extension ./build && sentry-cli sourcemaps upload --org refly-ai --project extension ./build"
   },
   "dependencies": {
     "@arco-design/web-react": "^2.47.1",
@@ -17,6 +18,8 @@
     "@plasmohq/storage": "^1.9.3",
     "@radix-ui/react-popover": "^1.0.7",
     "@redux-devtools/extension": "^3.3.0",
+    "@sentry/cli": "^2.31.2",
+    "@sentry/react": "^7.113.0",
     "@types/is-hotkey": "~0.1.7",
     "@types/lodash.throttle": "^4.1.9",
     "@types/md5": "^2.3.2",

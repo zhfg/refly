@@ -2,6 +2,9 @@ import { IENV, getEnv } from "./env"
 
 const overrideLocalDev = false
 
+export let SENTRY_DSN =
+  "https://3a105c6104e4c4de3ead00dc11f16623@o4507205453414400.ingest.us.sentry.io/4507209639133184"
+
 export let PROD_DOMAIN = "https://www.refly.ai"
 export let DEV_DOMAIN = "https://production-test.refly.ai"
 

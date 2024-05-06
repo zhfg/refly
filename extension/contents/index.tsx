@@ -13,6 +13,7 @@ import EmptyThreadLibraryCSSText from "data-text:~/components/empty-thread-libra
 import SelectedContentListCSS from "data-text:~/components/selected-content-list/index.scss"
 import CurrentWeblinkQuickSummaryCSS from "data-text:~/components/current-weblink-quick-summary/index.scss"
 import type { PlasmoGetInlineAnchor, PlasmoGetShadowHostId } from "plasmo"
+import * as _Sentry from "@sentry/react"
 import React, { useEffect, Suspense } from "react"
 import { MemoryRouter } from "react-router-dom"
 
@@ -41,10 +42,27 @@ import { Markdown } from "~components/markdown"
 // 加载国际化
 import "~i18n/config"
 import { usePollingPingCurrentWeblink } from "~hooks/use-polling-ping-current-weblink"
+import { getEnv } from "~utils/env"
+import { SENTRY_DSN } from "~utils/url"
 
 // export const config: PlasmoCSConfig = {
 //   run_at: "document_end"
 // }
+
+const Sentry = _Sentry
+
+Sentry.init({
+  dsn: SENTRY_DSN,
+  environment: getEnv(),
+  integrations: [
+    Sentry.browserTracingIntegration(),
+    Sentry.replayIntegration(),
+  ],
+  tracesSampleRate: 1.0, //  Capture 100% of the transactions
+  tracePropagationTargets: ["localhost", "https://refly.ai"],
+  replaysSessionSampleRate: 0.1, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
+  replaysOnErrorSampleRate: 1.0,
+})
 
 export const getInlineAnchor: PlasmoGetInlineAnchor = async () => document.body
 export const getShadowHostId: PlasmoGetShadowHostId = () => `refly-main-app`
@@ -121,4 +139,4 @@ export const Content = () => {
   )
 }
 
-export default Content
+export default Sentry.withProfiler(Content)
