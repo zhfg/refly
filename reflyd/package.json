@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "prisma generate && nest build",
+    "build": "prisma generate && nest build && yarn sentry:sourcemaps && yarn sentry:sourcemaps",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "format:schema": "prisma format",
     "sync-db-schema": "node -r ts-node/register --env-file=.env scripts/sync-db-schema.ts",
@@ -23,7 +23,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org refly-ai --project reflyd ./dist && sentry-cli sourcemaps upload --org refly-ai --project reflyd ./dist"
   },
   "dependencies": {
     "@dqbd/tiktoken": "1.0.7",
@@ -47,6 +48,9 @@
     "@paralleldrive/cuid2": "^2.2.2",
     "@prisma/client": "5",
     "@prisma/instrumentation": "^5.12.1",
+    "@sentry/cli": "^2.31.2",
+    "@sentry/node": "^7.113.0",
+    "@sentry/profiling-node": "^7.113.0",
     "avsc": "^5.7.7",
     "bull": "^4.12.2",
     "cookie-parser": "~1.4.6",

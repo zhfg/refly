@@ -1,26 +1,36 @@
 import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
-import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
+import * as Sentry from '@sentry/node';
+import { nodeProfilingIntegration } from '@sentry/profiling-node';
+import { Logger } from 'nestjs-pino';
 
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 import tracer from './tracer';
-import { GlobalExceptionFilter } from './filters/global-exception.filter';
 import { setTraceID } from './middleware/set-trace-id';
+import { GlobalExceptionFilter } from './filters/global-exception.filter';
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  integrations: [nodeProfilingIntegration()],
+  environment: process.env.NODE_ENV,
+  tracesSampleRate: 1.0, //  Capture 100% of the transactions
+  profilesSampleRate: 1.0,
+});
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const logger = app.get(Logger);
 
   process.on('uncaughtException', (err) => {
-    console.error('uncaughtException', err);
+    Sentry.captureException(err);
   });
 
   process.on('unhandledRejection', (err) => {
-    console.error('unhandledRejection', err);
+    Sentry.captureException(err);
   });
 
   app.useLogger(logger);
@@ -28,8 +38,7 @@ async function bootstrap() {
   app.use(helmet());
   app.enableCors();
   app.use(cookieParser());
-  app.useGlobalInterceptors(new LoggerErrorInterceptor());
-  // app.useGlobalFilters(new GlobalExceptionFilter());
+  app.useGlobalFilters(new GlobalExceptionFilter());
 
   app.setGlobalPrefix('/v1', { exclude: ['/'] });
 

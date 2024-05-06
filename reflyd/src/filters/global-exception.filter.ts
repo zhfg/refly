@@ -1,5 +1,6 @@
 import { ExceptionFilter, Catch, ArgumentsHost, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
+import * as Sentry from '@sentry/node';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -11,7 +12,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
 
     // Log the error
-    this.logger.error(`Unhandled exception: ${error.message}`, error.stack);
+    Sentry.captureException(error);
+    this.logger.error(`Request: ${request.method} ${request.url}`, error);
 
     // You can also customize the response sent back to the client
     response.status(500).json({
