@@ -291,7 +291,7 @@ document.addEventListener('load', handlePageLoad);
     page.on('snapshot', hdl);
 
     const gotoPromise = page
-      .goto(url, { waitUntil: ['load', 'domcontentloaded', 'networkidle0'], timeout: 10_000 })
+      .goto(url, { waitUntil: ['load', 'domcontentloaded', 'networkidle0'], timeout: 30_000 })
       .catch((err) => {
         this.logger.warn(`Browsing of ${url} did not fully succeed: ${err}`);
       })

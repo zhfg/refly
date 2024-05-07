@@ -34,7 +34,6 @@ export class WeaviateService implements OnModuleInit {
 
   constructor(private configService: ConfigService) {
     this.client = weaviate.client({
-      scheme: 'https',
       host: this.configService.getOrThrow('vectorStore.host'),
       apiKey: new ApiKey(this.configService.getOrThrow('vectorStore.apiKey')),
     });
