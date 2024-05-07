@@ -7,10 +7,9 @@ import { OpenAIEmbeddings, ChatOpenAI } from '@langchain/openai';
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { createStuffDocumentsChain } from 'langchain/chains/combine_documents';
-import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { JsonOutputFunctionsParser } from 'langchain/output_parsers';
 
-import { AigcContent, ContentVector, Prisma, User } from '@prisma/client';
+import { AigcContent, Prisma, User } from '@prisma/client';
 import {
   qa,
   contextualizeQA,
@@ -37,7 +36,6 @@ import { SearchResult } from '../common/weaviate.dto';
 @Injectable()
 export class LlmService implements OnModuleInit {
   private embeddings: OpenAIEmbeddings;
-  private vectorStore: PrismaVectorStore<ContentVector, 'content_vectors', any, any>;
   private llm: ChatOpenAI;
   private logger = new Logger(LlmService.name);
 
@@ -55,18 +53,6 @@ export class LlmService implements OnModuleInit {
       timeout: 5000,
       maxRetries: 3,
     });
-    this.vectorStore = PrismaVectorStore.withModel<ContentVector>(this.prisma).create(
-      this.embeddings,
-      {
-        prisma: Prisma,
-        tableName: 'content_vectors' as any,
-        vectorColumnName: 'vector',
-        columns: {
-          id: PrismaVectorStore.IdColumn,
-          content: PrismaVectorStore.ContentColumn,
-        },
-      },
-    );
 
     this.llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
 
@@ -258,67 +244,46 @@ export class LlmService implements OnModuleInit {
     return summary.text || '';
   }
 
-  async indexPipelineFromLink(weblinkId: number, doc: Document) {
-    // splitting / chunking
-    const textSplitter = new RecursiveCharacterTextSplitter({
-      separators: ['\n\n', '\n', ' ', ''],
-      chunkSize: 1000,
-      chunkOverlap: 200,
-      lengthFunction: (str = '') => str.length || 0,
-    });
-    const documents = await textSplitter.splitDocuments([doc]);
+  // async retrieval(query: string, filter) {
+  //   /**
+  //    * 1. 抽取关键字 or 实体
+  //    * 2. 基于关键字多路召回
+  //    * 3. rerank scores
+  //    * 4. 取前
+  //    */
 
-    await this.vectorStore.addModels(
-      await this.prisma.$transaction(
-        documents.map(({ pageContent }) =>
-          this.prisma.contentVector.create({
-            data: { weblinkId, content: pageContent },
-          }),
-        ),
-      ),
-    );
-  }
+  //   // 抽取关键字 or 实体
+  //   const parser = new JsonOutputFunctionsParser();
+  //   const runnable = this.llm
+  //     .bind({
+  //       functions: [extractContentMeta.extractSearchKeyword],
+  //       function_call: { name: 'keyword_for_search_engine' },
+  //     })
+  //     .pipe(parser);
+  //   const res = (await runnable.invoke([new HumanMessage(query)])) as {
+  //     keyword_list: string[];
+  //   };
 
-  async retrieval(query: string, filter) {
-    /**
-     * 1. 抽取关键字 or 实体
-     * 2. 基于关键字多路召回
-     * 3. rerank scores
-     * 4. 取前
-     */
+  //   // 基于关键字多路召回
+  //   let results = [];
+  //   await Promise.all(
+  //     // 这里除了关键词，需要把 query 也带上
+  //     [...(res?.keyword_list || []), query].map(async (keyword) => {
+  //       const keywordRetrievalResults = await this.vectorStore.similaritySearch(keyword, 5);
 
-    // 抽取关键字 or 实体
-    const parser = new JsonOutputFunctionsParser();
-    const runnable = this.llm
-      .bind({
-        functions: [extractContentMeta.extractSearchKeyword],
-        function_call: { name: 'keyword_for_search_engine' },
-      })
-      .pipe(parser);
-    const res = (await runnable.invoke([new HumanMessage(query)])) as {
-      keyword_list: string[];
-    };
+  //       results = results.concat(keywordRetrievalResults);
+  //     }),
+  //   );
 
-    // 基于关键字多路召回
-    let results = [];
-    await Promise.all(
-      // 这里除了关键词，需要把 query 也带上
-      [...(res?.keyword_list || []), query].map(async (keyword) => {
-        const keywordRetrievalResults = await this.vectorStore.similaritySearch(keyword, 5);
+  //   // rerank scores
+  //   // TODO: 这里只考虑了召回阈值和数量，默认取五个，但是没有考虑 token 窗口，未来需要优化
+  //   results = uniqueFunc(results, 'content')
+  //     .sort((a, b) => (b?.score || 0) - (a?.score || 0))
+  //     // ?.filter((item) => item?.score >= 0.8)
+  //     ?.slice(0, 6);
 
-        results = results.concat(keywordRetrievalResults);
-      }),
-    );
-
-    // rerank scores
-    // TODO: 这里只考虑了召回阈值和数量，默认取五个，但是没有考虑 token 窗口，未来需要优化
-    results = uniqueFunc(results, 'content')
-      .sort((a, b) => (b?.score || 0) - (a?.score || 0))
-      // ?.filter((item) => item?.score >= 0.8)
-      ?.slice(0, 6);
-
-    return results;
-  }
+  //   return results;
+  // }
 
   async getRelatedQuestion(docs: Document[], lastQuery: string, locale: LOCALE) {
     if (docs.length <= 0) return;
