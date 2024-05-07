@@ -18,7 +18,7 @@ export class WeblinkController {
   private logger = new Logger(WeblinkController.name);
   constructor(private weblinkService: WeblinkService) {}
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('ping')
   async ping(@Query('url') url: string): Promise<PingWeblinkResponse> {
     url = normalizeURL(url);
@@ -55,7 +55,7 @@ export class WeblinkController {
   @Post('store')
   async store(@Request() req, @Body() body: StoreWebLinkParam) {
     this.logger.log(`user: ${req.user.id}, store link: ${body}`);
-    await this.weblinkService.storeLinks(req.user.uid, body.data);
+    await this.weblinkService.storeLinks(req.user.id, body.data);
     return { success: true };
   }
 

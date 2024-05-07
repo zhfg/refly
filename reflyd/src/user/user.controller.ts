@@ -16,7 +16,7 @@ export class UserController {
   getSettings(@Request() req) {
     this.logger.log(`getSettings success, req.user = ${req.user.email}`);
     return pick(req.user, [
-      'id',
+      'uid',
       'avatar',
       'name',
       'email',

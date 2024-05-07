@@ -59,7 +59,7 @@ export class WeblinkService {
 
   /**
    * Preprocess and filter links, then send to processing queue
-   * @param userId user id
+   * @param uid user id
    * @param links link history data
    */
   async storeLinks(userId: number, links: WebLinkDTO[]) {
@@ -77,8 +77,12 @@ export class WeblinkService {
       if (link.lastVisitTime > linkMap.get(link.url).lastVisitTime) {
         linkMap.get(url).lastVisitTime = link.lastVisitTime;
       }
-      linkMap.get(url).visitCount += link.visitCount;
-      linkMap.get(url).readTime += link.readTime;
+      if (link.visitCount) {
+        linkMap.get(url).visitCount += link.visitCount;
+      }
+      if (link.readTime) {
+        linkMap.get(url).readTime += link.readTime;
+      }
     });
 
     // Send to queue in a non-block style
@@ -211,26 +215,32 @@ export class WeblinkService {
     user: Pick<User, 'id' | 'uid' | 'vsTenantCreated'>,
     urls: string[],
   ) {
-    const [uwbs, weblinks] = await Promise.all([
-      this.prisma.userWeblink.findMany({
-        where: { userId: user.id, url: { in: urls } },
-      }),
-      this.prisma.weblink.findMany({
-        select: { url: true, chunkStorageKey: true },
-        where: { url: { in: urls } },
-      }),
-    ]);
+    // const [uwbs, weblinks] = await Promise.all([
+    //   this.prisma.userWeblink.findMany({
+    //     where: { userId: user.id, url: { in: urls } },
+    //   }),
+    //   this.prisma.weblink.findMany({
+    //     select: { url: true, chunkStorageKey: true },
+    //     where: { url: { in: urls } },
+    //   }),
+    // ]);
 
-    // calculate urls not saved by user
-    const unsavedWeblinks = weblinks.filter(({ url }) => !uwbs.some((uwb) => uwb.url === url));
+    // // calculate urls not saved by user
+    // const unsavedWeblinks = weblinks.filter(({ url }) => !uwbs.some((uwb) => uwb.url === url));
 
-    if (unsavedWeblinks.length === 0) {
-      this.logger.log(`user ${user.uid} has all weblinks saved: ${urls}`);
-      return;
-    }
+    // if (unsavedWeblinks.length === 0) {
+    //   this.logger.log(`user ${user.uid} has all weblinks saved: ${urls}`);
+    //   return;
+    // }
+
+    // TODO: 减少不必要的重复插入
+    const weblinks = await this.prisma.weblink.findMany({
+      select: { url: true, chunkStorageKey: true },
+      where: { url: { in: urls } },
+    });
 
     await Promise.all(
-      unsavedWeblinks.map(async ({ url, chunkStorageKey }) => {
+      weblinks.map(async ({ url, chunkStorageKey }) => {
         if (!chunkStorageKey) {
           // techically this cannot happen
           this.logger.error(`chunkStorageKey is empty: ${chunkStorageKey}, url: ${url}`);
@@ -244,15 +254,15 @@ export class WeblinkService {
 
     // 更新向量库租户创建状态
     if (!user.vsTenantCreated) {
-      this.prisma.user.update({
+      await this.prisma.user.update({
         where: { id: user.id },
         data: { vsTenantCreated: true },
       });
     }
 
     this.logger.log(
-      `save chunk embeddings for user ${user.uid} success, urls: `,
-      JSON.stringify(unsavedWeblinks),
+      `save chunk embeddings for user ${user.uid} success, urls: ` +
+        JSON.stringify(weblinks.map(({ url }) => url)),
     );
   }
 
@@ -469,7 +479,10 @@ export class WeblinkService {
 
     const { doc } = await this.readWebLinkContent(weblink.url);
 
-    if (!doc) return;
+    if (!doc) {
+      this.logger.warn(`[processLinkByUser] doc is empty for ${weblink.url}, skip`);
+      return;
+    }
 
     // 处理单个用户的访问记录
     const [uwb, user] = await Promise.all([
