@@ -86,7 +86,9 @@ export const DigestTopics = () => {
   return (
     <div className="topics-container">
       <Helmet>
-        <title>{t("tabMeta.digestTopics.title")}</title>
+        <title>
+          {t("productName")} | {t("tabMeta.digestTopics.title")}
+        </title>
         <meta
           name="description"
           content={t("tabMeta.digestTopics.description")}

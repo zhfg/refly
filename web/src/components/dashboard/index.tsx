@@ -116,7 +116,9 @@ const Home = () => {
   return (
     <div className="home-container" style={{}}>
       <Helmet>
-        <title>{t("landingPage.slogan")}</title>
+        <title>
+          {t("productName")} | {t("landingPage.slogan")}
+        </title>
         <meta name="description" content={t("landingPage.description")} />
       </Helmet>
       <div className="home-search-container">

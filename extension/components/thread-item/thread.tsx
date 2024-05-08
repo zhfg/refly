@@ -1,5 +1,5 @@
-import { Button } from "@arco-design/web-react"
-import React, { useEffect, useRef } from "react"
+import { Button, Skeleton } from "@arco-design/web-react"
+import React, { useEffect, useRef, useState } from "react"
 import { useNavigate, useLocation, useParams } from "react-router-dom"
 
 // hooks
@@ -23,6 +23,9 @@ import { useWeblinkStore } from "~stores/weblink"
 import { SearchTarget, useSearchStateStore } from "~stores/search-state"
 import { useContentSelectorStore } from "~stores/content-selector"
 import { useUserStore } from "~stores/user"
+import { delay } from "~utils/delay"
+import { useTranslation } from "react-i18next"
+import { EmptyThreadDetailStatus } from "~components/empty-thread-detail-status"
 
 export const Thread = () => {
   const { buildTaskAndGenReponse } = useBuildTask()
@@ -34,6 +37,9 @@ export const Thread = () => {
   const weblinkStore = useWeblinkStore()
   const searchStateStore = useSearchStateStore()
   const { resetState } = useResetState()
+  const [isFetching, setIsFetching] = useState(true)
+
+  const { t } = useTranslation()
 
   const handleGetThreadMessages = async (threadId: string) => {
     const threadIdMap = threadStore?.threads?.find(
@@ -90,6 +96,7 @@ export const Thread = () => {
   }
 
   const handleThread = async (threadId: string) => {
+    setIsFetching(true)
     const { currentConversation } = useConversationStore.getState()
     const { messages = [] } = useChatStore.getState()
     const { task } = useTaskStore.getState()
@@ -107,6 +114,9 @@ export const Thread = () => {
     chatStore.setNewQAText("")
     weblinkStore.updateSelectedRow([])
     searchStateStore.setSearchTarget(SearchTarget.CurrentPage)
+
+    await delay(1500)
+    setIsFetching(false)
   }
 
   useEffect(() => {
@@ -126,10 +136,23 @@ export const Thread = () => {
         flexDirection: "column",
       }}>
       <Header thread={conversationStore.currentConversation} />
-      <ThreadItem
-        sessions={sessions}
-        selectedWeblinkConfig={selectedWeblinkConfig}
-      />
+      {isFetching ? (
+        <div style={{ width: "calc(100% - 32px)", margin: "20px auto" }}>
+          <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
+          <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
+          <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
+        </div>
+      ) : !isFetching && (sessions || [])?.length === 0 ? (
+        <EmptyThreadDetailStatus
+          text={t("translation:threadDetail.empty.title")}
+        />
+      ) : (
+        <ThreadItem
+          sessions={sessions}
+          selectedWeblinkConfig={selectedWeblinkConfig}
+          handleAskFollowing={handleAskFollowing}
+        />
+      )}
     </div>
   )
 }

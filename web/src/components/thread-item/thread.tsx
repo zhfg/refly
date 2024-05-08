@@ -33,17 +33,27 @@ import { safeParseJSON } from "@/utils/parse"
 import { buildTask } from "@/utils/task"
 import { Skeleton } from "@arco-design/web-react"
 import { useUserStore } from "@/stores/user"
+import { EmptyDigestTopicDetailStatus } from "../empty-digest-topic-detail-status"
+import { useTranslation } from "react-i18next"
+import { delay } from "@/utils/delay"
 
 export const Thread = () => {
   const { buildTaskAndGenReponse } = useBuildTask()
   const params = useParams<{ threadId: string }>()
 
+  const userStore = useUserStore()
   const chatStore = useChatStore()
   const conversationStore = useConversationStore()
   const weblinkStore = useWeblinkStore()
   const searchStateStore = useSearchStateStore()
   const { resetState } = useResetState()
-  const [isFetching, setIsFetching] = useState(false)
+  const [isFetching, setIsFetching] = useState(true)
+  const { t } = useTranslation()
+
+  const storageUserProfile = safeParseJSON(
+    localStorage.getItem("refly-user-profile"),
+  )
+  const notShowLoginBtn = storageUserProfile?.id || userStore?.userProfile?.id
 
   const handleGetThreadMessages = async (threadId: string) => {
     // 异步操作
@@ -167,13 +177,14 @@ export const Thread = () => {
       searchStateStore.setSearchTarget(SearchTarget.CurrentPage)
     } catch (err) {
       console.log("thread error")
-    } finally {
-      setIsFetching(false)
     }
+
+    await delay(1500)
+    setIsFetching(false)
   }
 
   useEffect(() => {
-    if (params?.threadId) {
+    if (params?.threadId && notShowLoginBtn) {
       console.log("params", params)
       handleThread(params?.threadId as string)
     }
@@ -181,7 +192,7 @@ export const Thread = () => {
     return () => {
       chatStore.resetState()
     }
-  }, [params?.threadId])
+  }, [params?.threadId, notShowLoginBtn])
 
   const sessions = buildSessions(chatStore.messages)
   const selectedWeblinkConfig = getSelectedWeblinkConfig(chatStore.messages)
@@ -194,7 +205,10 @@ export const Thread = () => {
         flexDirection: "column",
       }}>
       <Helmet>
-        <title>{conversationStore?.currentConversation?.title}</title>
+        <title>
+          {t("productName")} |{" "}
+          {conversationStore?.currentConversation?.title || ""}
+        </title>
         <meta
           name="description"
           content={conversationStore?.currentConversation?.lastMessage}
@@ -202,11 +216,13 @@ export const Thread = () => {
       </Helmet>
       <Header thread={conversationStore?.currentConversation as IThread} />
       {isFetching ? (
-        <>
-          <Skeleton animation></Skeleton>
-          <Skeleton animation></Skeleton>
-          <Skeleton animation></Skeleton>
-        </>
+        <div style={{ maxWidth: "748px", width: "748px", margin: "20px auto" }}>
+          <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
+          <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
+          <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
+        </div>
+      ) : !isFetching && (sessions || [])?.length === 0 ? (
+        <EmptyDigestTopicDetailStatus text={t("threadDetail.empty.title")} />
       ) : (
         <ThreadItem
           sessions={sessions}

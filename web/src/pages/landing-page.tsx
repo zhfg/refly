@@ -37,7 +37,9 @@ function LandingPage() {
   return (
     <>
       <Helmet>
-        <title>{t("landingPage.slogan")}</title>
+        <title>
+          {t("productName")} | {t("landingPage.slogan")}
+        </title>
         <meta name="description" content={t("landingPage.description")} />
       </Helmet>
       <Routes>

@@ -288,6 +288,9 @@
     "breadcrumb": {
       "threadLibrary": "会话库"
     },
+    "empty": {
+      "title": "对话遇到点问题哦~ 暂无内容"
+    },
     "item": {
       "share": "分享",
       "copy": "复制链接",

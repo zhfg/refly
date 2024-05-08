@@ -74,16 +74,18 @@ export const DigestTail = () => {
         flexDirection: "column",
       }}>
       <Helmet>
-        <title>{digestDetailStore.digest?.title}</title>
+        <title>
+          {t("productName")} | {digestDetailStore.digest?.title || ""}
+        </title>
         <meta name="description" content={digestDetailStore.digest?.abstract} />
       </Helmet>
       <Header digest={digestDetailStore?.digest as Digest} />
       {isFetching ? (
-        <>
-          <Skeleton animation></Skeleton>
-          <Skeleton animation></Skeleton>
-          <Skeleton animation></Skeleton>
-        </>
+        <div style={{ maxWidth: "748px", width: "748px", margin: "20px auto" }}>
+          <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
+          <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
+          <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
+        </div>
       ) : (
         <DigestDetailContent
           sessions={sessions}

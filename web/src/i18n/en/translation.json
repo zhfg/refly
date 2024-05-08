@@ -1,5 +1,6 @@
 {
   "language": "English",
+  "productName": "Refly",
   "tabMeta": {
     "landingPage": {
       "title": "Where knowledge thrives",
@@ -306,6 +307,9 @@
   "threadDetail": {
     "breadcrumb": {
       "threadLibrary": "Threads"
+    },
+    "empty": {
+      "title": "There's an issue with the conversation. No content is available at the moment."
     },
     "item": {
       "share": "Share",

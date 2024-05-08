@@ -133,7 +133,9 @@ export const DigestTopicDetail = () => {
     <div className="digest-topic-detail-container">
       <Helmet>
         {/* TODO: 国际化 这里需要根据用户语言返回对应的 i18n 的 topic title */}
-        <title>{currentTopicDetail?.topic?.name}</title>
+        <title>
+          {t("productName")} | {currentTopicDetail?.topic?.name || ""}
+        </title>
       </Helmet>
       <div className="digest-topic-nav">
         <Breadcrumb>
