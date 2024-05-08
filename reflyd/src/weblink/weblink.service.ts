@@ -144,8 +144,8 @@ export class WeblinkService {
 
     let doc: Document<PageMeta>;
     if (snapshot.html && !hasUrlRedirected(url, snapshot.href)) {
-      doc = await this.ragService.formatSnapshot('markdown', snapshot, new URL(url));
-      this.cache.set(url, { html: snapshot.html, doc });
+      doc = await this.ragService.formatSnapshot('ingest', snapshot, new URL(url));
+      this.cache.set(url, { html: snapshot.parsed?.content, doc });
     }
 
     return { html: snapshot.html, doc };
@@ -162,7 +162,7 @@ export class WeblinkService {
       const content = await streamToString(stream);
 
       const doc = await this.ragService.formatSnapshot(
-        'markdown',
+        'ingest',
         { html: content, title: link.title, href: link.origin },
         new URL(link.url),
       );

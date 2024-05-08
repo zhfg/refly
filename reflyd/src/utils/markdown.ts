@@ -44,3 +44,14 @@ export function tidyMarkdown(markdown: string): string {
 
   return normalizedMarkdown.trim();
 }
+
+export function cleanMarkdownForLLM(markdown: string): string {
+  // Regular expression to match Markdown links
+  const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+
+  // Replace each link with the link text
+  // example: "Check out [Google](https://www.google.com)!" => "Check out Google!"
+  return markdown.replace(linkRegex, (match, linkText, linkUrl) => {
+    return linkText;
+  });
+}

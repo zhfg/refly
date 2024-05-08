@@ -1,4 +1,6 @@
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import * as Sentry from '@sentry/node';
@@ -22,7 +24,7 @@ Sentry.init({
 });
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const logger = app.get(Logger);
 
   process.on('uncaughtException', (err) => {
@@ -32,6 +34,10 @@ async function bootstrap() {
   process.on('unhandledRejection', (err) => {
     Sentry.captureException(err);
   });
+
+  app.useStaticAssets(join(__dirname, '..', 'public'));
+  app.setBaseViewsDir(join(__dirname, '..', 'views'));
+  app.setViewEngine('hbs');
 
   app.useLogger(logger);
   app.use(setTraceID);

@@ -8,7 +8,7 @@ import { generateUuid5 } from 'weaviate-ts-client';
 
 import { tables } from 'turndown-plugin-gfm';
 import TurndownService from 'turndown';
-import { tidyMarkdown } from '../utils/markdown';
+import { cleanMarkdownForLLM, tidyMarkdown } from '../utils/markdown';
 
 import { User } from '@prisma/client';
 import { PageSnapshot, PuppeteerService, ScrappingOptions } from '../common/puppeteer.service';
@@ -23,6 +23,11 @@ import { PageMeta } from '../types/weblink';
 import { normalizeURL } from '../utils/url';
 
 const READER_URL = 'https://r.jina.ai/';
+
+export type SnapshotFormatMode =
+  | 'render' // For markdown rendering
+  | 'ingest' // For consumption by LLMs
+  | 'vanilla'; // Without any processing;
 
 export const ChunkAvroType = avro.Type.forSchema({
   type: 'record',
@@ -78,16 +83,25 @@ export class RAGService {
     });
   }
 
-  getTurndown(noRules?: boolean | string) {
-    const turnDownService = new TurndownService();
-    if (!noRules) {
+  getTurndown(mode: SnapshotFormatMode) {
+    const turnDownService = new TurndownService({
+      headingStyle: 'atx',
+      bulletListMarker: '-',
+      codeBlockStyle: 'fenced',
+    });
+    if (mode === 'render') {
       turnDownService.addRule('remove-irrelevant', {
         filter: ['meta', 'style', 'script', 'noscript', 'link', 'textarea'],
         replacement: () => '',
       });
-      turnDownService.addRule('title-as-h1', {
-        filter: ['title'],
-        replacement: (innerText) => `${innerText}\n===============\n`,
+    } else if (mode === 'ingest') {
+      turnDownService.addRule('remove-irrelevant', {
+        filter: ['meta', 'style', 'script', 'noscript', 'link', 'textarea', 'img'],
+        replacement: () => '',
+      });
+      turnDownService.addRule('unlink', {
+        filter: ['a'],
+        replacement: (content, node, options) => node.textContent,
       });
     }
 
@@ -95,15 +109,12 @@ export class RAGService {
   }
 
   async formatSnapshot(
-    mode: string | 'markdown' | 'html' | 'text',
-    snapshot: PageSnapshot & {
-      screenshotUrl?: string;
-    },
+    mode: SnapshotFormatMode,
+    snapshot: PageSnapshot,
     nominalUrl?: URL,
   ): Promise<Document<PageMeta>> {
-    const toBeTurnedToMd = mode === 'markdown' ? snapshot.html : snapshot.parsed?.content;
-    let turnDownService =
-      mode === 'markdown' ? this.getTurndown() : this.getTurndown('without any rule');
+    const toBeTurnedToMd = snapshot.parsed?.content || snapshot.html;
+    let turnDownService = this.getTurndown(mode);
     for (const plugin of this.turnDownPlugins) {
       turnDownService = turnDownService.use(plugin);
     }
@@ -114,7 +125,7 @@ export class RAGService {
         contentText = turnDownService.turndown(toBeTurnedToMd).trim();
       } catch (err) {
         this.logger.error(`Turndown failed to run, retrying without plugins: ${err}`);
-        const vanillaTurnDownService = this.getTurndown();
+        const vanillaTurnDownService = this.getTurndown('vanilla');
         try {
           contentText = vanillaTurnDownService.turndown(toBeTurnedToMd).trim();
         } catch (err2) {
@@ -131,7 +142,7 @@ export class RAGService {
         contentText = turnDownService.turndown(snapshot.html);
       } catch (err) {
         this.logger.warn(`Turndown failed to run, retrying without plugins`, { err });
-        const vanillaTurnDownService = this.getTurndown();
+        const vanillaTurnDownService = this.getTurndown('vanilla');
         try {
           contentText = vanillaTurnDownService.turndown(snapshot.html);
         } catch (err2) {
@@ -187,10 +198,14 @@ export class RAGService {
     return { pageContent: text, metadata: { source: url, title: '' } }; // TODO: page title
   }
 
+  async chunkText(text: string) {
+    return await this.splitter.splitText(cleanMarkdownForLLM(text));
+  }
+
   async indexContent(doc: Document<PageMeta>): Promise<ContentDataObj[]> {
     const { pageContent, metadata } = doc;
 
-    const chunks = await this.splitter.splitText(pageContent);
+    const chunks = await this.chunkText(pageContent);
     const chunkEmbeds = await this.embeddings.embedDocuments(chunks);
 
     const dataObjs: ContentDataObj[] = [];
