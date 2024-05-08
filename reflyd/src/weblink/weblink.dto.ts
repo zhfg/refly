@@ -86,3 +86,9 @@ export interface WeblinkData {
   html: string;
   doc: Document<PageMeta>;
 }
+
+export interface VersionMap {
+  htmlCrawlVersion?: string;
+  mdIngestVersion?: string;
+  mdChunkVersion?: string;
+}

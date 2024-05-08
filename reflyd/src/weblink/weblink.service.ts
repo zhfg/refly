@@ -145,7 +145,7 @@ export class WeblinkService {
     let doc: Document<PageMeta>;
     if (snapshot.html && !hasUrlRedirected(url, snapshot.href)) {
       doc = await this.ragService.formatSnapshot('ingest', snapshot, new URL(url));
-      this.cache.set(url, { html: snapshot.parsed?.content, doc });
+      this.cache.set(url, { html: snapshot.parsed?.content || snapshot.html, doc });
     }
 
     return { html: snapshot.html, doc };
