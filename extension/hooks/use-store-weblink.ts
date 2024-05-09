@@ -4,7 +4,7 @@ import { sendToBackground } from "@plasmohq/messaging"
 import { useState } from "react"
 import { delay } from "~utils/delay"
 // utils
-import { removeUnusedHtmlNode } from "~utils/removeUnusedHtmlNode"
+import { getReadabilityHtml } from "~utils/readability"
 import { v4 as uuidV4 } from "uuid"
 import { useWeblinkStore } from "~stores/weblink"
 import { retryify } from "~utils/retry"
@@ -20,7 +20,7 @@ export const useStoreWeblink = () => {
   const { t } = useTranslation()
 
   const handleClientUploadHtml = async (url: string) => {
-    const pageContent = removeUnusedHtmlNode()
+    const pageContent = getReadabilityHtml()
 
     // 先上传到 worker 获取 storageKey
     const uniqueId = uuidV4()

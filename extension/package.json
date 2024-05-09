@@ -13,6 +13,7 @@
   "dependencies": {
     "@arco-design/web-react": "^2.47.1",
     "@microsoft/fetch-event-source": "^2.0.1",
+    "@mozilla/readability": "^0.5.0",
     "@paralleldrive/cuid2": "^2.2.2",
     "@plasmohq/messaging": "^0.6.2",
     "@plasmohq/storage": "^1.9.3",
