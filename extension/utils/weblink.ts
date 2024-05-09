@@ -1,6 +1,5 @@
 import { ParseSource, type WebLinkItem } from "~components/weblink-list/types"
 import type { Source } from "~types"
-import * as cheerio from "cheerio"
 import { removeUnusedHtmlNode } from "./removeUnusedHtmlNode"
 import parse from "node-html-parser"
 
