@@ -10,6 +10,7 @@ import {
   useUserStore,
 } from "@/stores/user"
 import { safeStringifyJSON } from "@/utils/parse"
+import { mapCNLocale } from "@/utils/locale"
 import { useCookie } from "react-use"
 import { LOCALE } from "@/types"
 import { useTranslation } from "react-i18next"
@@ -63,8 +64,10 @@ export const useGetUserSettings = () => {
         localStorage.setItem("refly-user-profile", safeStringifyJSON(res?.data))
 
         // 增加 localSettings
-        let uiLocale = res?.data?.uiLocale as LOCALE
-        let outputLocale = res?.data?.outputLocale as LOCALE
+        let uiLocale = mapCNLocale(res?.data?.uiLocale as LOCALE) as LOCALE
+        let outputLocale = mapCNLocale(
+          res?.data?.outputLocale as LOCALE,
+        ) as LOCALE
 
         // 先写回
         localSettings = {
@@ -76,8 +79,12 @@ export const useGetUserSettings = () => {
 
         // 说明是第一次注册使用，此时没有 locale，需要写回
         if (!uiLocale && !outputLocale) {
-          uiLocale = (navigator?.language || LOCALE.EN) as LOCALE
-          outputLocale = (navigator?.language || LOCALE.EN) as LOCALE
+          uiLocale = mapCNLocale(
+            (navigator?.language || LOCALE.EN) as LOCALE,
+          ) as LOCALE
+          outputLocale = mapCNLocale(
+            (navigator?.language || LOCALE.EN) as LOCALE,
+          ) as LOCALE
           // 不阻塞写回用户配置
           putUserInfo({
             body: { uiLocale, outputLocale },
