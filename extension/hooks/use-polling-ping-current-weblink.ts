@@ -4,7 +4,6 @@ import type { IndexStatus, WebLinkItem } from "~components/weblink-list/types"
 import { useSiderStore } from "~stores/sider"
 import { useUserStore } from "~stores/user"
 import { useWeblinkStore } from "~stores/weblink"
-import { delay } from "~utils/delay"
 import { buildCurrentWeblink } from "~utils/weblink"
 
 export const usePollingPingCurrentWeblink = () => {
