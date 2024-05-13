@@ -65,7 +65,7 @@ export const fakeMessages = [
   {
     itemId: "msg:4e5fb7a580ad24f8ddf0cfcd8b93cddb",
     itemType: "question",
-    conversationId: "conv:b03cb1669896628aac3ef97d2a5eb1b2",
+    convId: "conv:b03cb1669896628aac3ef97d2a5eb1b2",
     summary: "agent 是什么？",
     data: {
       type: "text",
@@ -74,7 +74,7 @@ export const fakeMessages = [
   },
   {
     itemId: "msg:1702b1adf87e99835da58c6fd7a3ca9d",
-    conversationId: "conv:b03cb1669896628aac3ef97d2a5eb1b2",
+    convId: "conv:b03cb1669896628aac3ef97d2a5eb1b2",
     itemType: "reply",
     summary: "",
     data: {
@@ -93,7 +93,7 @@ export const fakeMessages = [
   {
     itemId: "msg:4e5fb7a580ad24f8ddf0cfcd8b93cddb",
     itemType: "question",
-    conversationId: "conv:b03cb1669896628aac3ef97d2a5eb1b2",
+    convId: "conv:b03cb1669896628aac3ef97d2a5eb1b2",
     summary: "agent 是什么？",
     data: {
       type: "text",
@@ -102,7 +102,7 @@ export const fakeMessages = [
   },
   {
     itemId: "msg:1702b1adf87e99835da58c6fd7a3ca9d",
-    conversationId: "conv:b03cb1669896628aac3ef97d2a5eb1b2",
+    convId: "conv:b03cb1669896628aac3ef97d2a5eb1b2",
     itemType: "reply",
     summary: "",
     data: {

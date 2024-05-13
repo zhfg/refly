@@ -1,18 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { User, Prisma } from '@prisma/client';
 import { PrismaService } from '../common/prisma.service';
-import { LoggerService } from '../common/logger.service';
 import { UpdateSettingsDTO } from './user.dto';
 
 @Injectable()
 export class UserService {
-  constructor(private logger: LoggerService, private prisma: PrismaService) {
-    this.logger.setContext(UserService.name);
-  }
+  private logger = new Logger(UserService.name);
 
-  async findUnique(
-    where: Prisma.UserWhereUniqueInput,
-  ): Promise<User | undefined> {
+  constructor(private prisma: PrismaService) {}
+
+  async findUnique(where: Prisma.UserWhereUniqueInput): Promise<User | undefined> {
     return this.prisma.user.findUnique({ where });
   }
 

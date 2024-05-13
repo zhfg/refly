@@ -31,8 +31,9 @@ router.post('/htmlUpload', async (request, env) => {
 	const hash = await sha256(new TextEncoder().encode(formData.get('url')));
 
 	// Upload HTML file
+	const objectKey = `html-upload/${hash}.html`;
 	const aws = new AwsClient({ service: 's3', accessKeyId: env.AWS_ACCESS_KEY, secretAccessKey: env.AWS_SECRET_KEY });
-	const uploadUrl = `${env.S3_ENDPOINT}/${env.S3_BUCKET}/${hash}`;
+	const uploadUrl = `${env.S3_ENDPOINT}/${env.S3_BUCKET}/${objectKey}`;
 	console.log('uploadUrl:', uploadUrl);
 
 	const res = await aws.fetch(uploadUrl, {
@@ -45,7 +46,7 @@ router.post('/htmlUpload', async (request, env) => {
 	const resText = await res.text();
 	console.log(resText);
 
-	return Response.json({ storageKey: hash }, { status: 200 });
+	return Response.json({ storageKey: objectKey }, { status: 200 });
 });
 
 // 404 for everything else

@@ -1,10 +1,11 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { LoggerService } from './logger.service';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
-  constructor(private logger: LoggerService) {
+  private logger = new Logger(PrismaService.name);
+
+  constructor() {
     super({
       log: [
         {
@@ -13,15 +14,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
         },
       ],
     });
-
-    this.logger.setContext(PrismaService.name);
   }
 
   async onModuleInit() {
     this.$on('query' as never, (e: any) => {
-      this.logger.log(
-        `query: ${e.query}, param: ${e.params}, duration: ${e.duration}ms`,
-      );
+      this.logger.log(`query: ${e.query}, param: ${e.params}, duration: ${e.duration}ms`);
     });
     await this.$connect();
     this.logger.log('Connected to database');

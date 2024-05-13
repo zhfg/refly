@@ -191,18 +191,15 @@ export const Session = (props: SessionProps) => {
           )}
         </div>
       </div>
-      <div className="session-related-question">
+      {session?.relatedQuestions?.length > 0 ? (
         <div className="session-related-question">
-          {messageStateStore.pending ||
-          session?.relatedQuestions?.length > 0 ? (
+          <div className="session-related-question">
             <div className="session-title-icon">
               <IconReply style={{ fontSize: 18 }} />
               <p>
                 {t("translation:threadDetail.item.session.relatedQuestions")}
               </p>
             </div>
-          ) : null}
-          {session?.relatedQuestions?.length > 0 ? (
             <div className="session-related-question-content">
               {session?.relatedQuestions?.map((item, index) => (
                 <div key={index} onClick={() => handleAskFollowing(item)}>
@@ -213,24 +210,9 @@ export const Session = (props: SessionProps) => {
                 </div>
               ))}
             </div>
-          ) : messageStateStore?.pending && isLastSession ? (
-            <div style={{ width: "100%" }}>
-              <Skeleton
-                animation
-                text={{ rows: 1 }}
-                className="related-question-skeleton-item"></Skeleton>
-              <Skeleton
-                animation
-                text={{ rows: 1 }}
-                className="related-question-skeleton-item"></Skeleton>
-              <Skeleton
-                animation
-                text={{ rows: 1 }}
-                className="related-question-skeleton-item"></Skeleton>
-            </div>
-          ) : null}
+          </div>
         </div>
-      </div>
+      ) : null}
     </div>
   )
 }

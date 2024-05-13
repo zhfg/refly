@@ -1,5 +1,3 @@
-import { LOCALE } from 'src/types/task';
-
 export const fewshotExamples = `
 输入：
 

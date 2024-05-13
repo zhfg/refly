@@ -1,8 +1,13 @@
-export function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
-  const chunks = [];
-  return new Promise((resolve, reject) => {
-    stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
-    stream.on('error', (err) => reject(err));
-    stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-  });
+export async function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
+  const buffers = [];
+
+  for await (const data of stream) {
+    buffers.push(data);
+  }
+
+  return Buffer.concat(buffers);
+}
+
+export async function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
+  return (await streamToBuffer(stream)).toString();
 }

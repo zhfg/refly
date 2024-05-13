@@ -5,7 +5,7 @@ import type { OutputLocale } from "~utils/i18n"
 
 export interface Thread {
   id: string
-  conversationId: string
+  convId: string
   userId: string
   title: string
   lastMessage: string

@@ -4,16 +4,12 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaVectorStore } from '@langchain/community/vectorstores/prisma';
 import { Document } from '@langchain/core/documents';
 import { OpenAIEmbeddings, ChatOpenAI } from '@langchain/openai';
-import {
-  ChatPromptTemplate,
-  MessagesPlaceholder,
-} from '@langchain/core/prompts';
+import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { createStuffDocumentsChain } from 'langchain/chains/combine_documents';
-import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { JsonOutputFunctionsParser } from 'langchain/output_parsers';
 
-import { AigcContent, ContentVector, Prisma } from '@prisma/client';
+import { AigcContent, Prisma, User } from '@prisma/client';
 import {
   qa,
   contextualizeQA,
@@ -31,26 +27,22 @@ import { HumanMessage, SystemMessage } from 'langchain/schema';
 import { uniqueFunc } from '../utils/unique';
 import { ContentMeta } from './dto';
 import { categoryList } from '../prompts/utils/category';
-import { Source } from '../types/weblink';
+import { PageMeta, Source } from '../types/weblink';
 import { SearchResultContext } from '../types/search';
 import { PrismaService } from '../common/prisma.service';
-import { LOCALE } from 'src/types/task';
+import { RAGService } from '../rag/rag.service';
+import { SearchResult } from '../common/weaviate.dto';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
   private embeddings: OpenAIEmbeddings;
-  private vectorStore: PrismaVectorStore<
-    ContentVector,
-    'content_vectors',
-    any,
-    any
-  >;
   private llm: ChatOpenAI;
   private logger = new Logger(LlmService.name);
 
   constructor(
     private prisma: PrismaService,
     private configService: ConfigService,
+    private ragService: RAGService,
   ) {}
 
   async onModuleInit() {
@@ -60,17 +52,6 @@ export class LlmService implements OnModuleInit {
       dimensions: this.configService.getOrThrow('vectorStore.vectorDim'),
       timeout: 5000,
       maxRetries: 3,
-    });
-    this.vectorStore = PrismaVectorStore.withModel<ContentVector>(
-      this.prisma,
-    ).create(this.embeddings, {
-      prisma: Prisma,
-      tableName: 'content_vectors' as any,
-      vectorColumnName: 'vector',
-      columns: {
-        id: PrismaVectorStore.IdColumn,
-        content: PrismaVectorStore.ContentColumn,
-      },
     });
 
     this.llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
@@ -94,10 +75,7 @@ export class LlmService implements OnModuleInit {
     const res = (await runnable.invoke([
       new SystemMessage(extractContentMeta.systemPrompt),
       new HumanMessage(
-        `The website content context as follow: \n ===\n ${doc.pageContent?.slice(
-          0,
-          12000,
-        )} \n===`,
+        `The website content context as follow: \n ===\n ${doc.pageContent?.slice(0, 12000)} \n===`,
       ),
     ])) as {
       categoryId: string;
@@ -121,15 +99,12 @@ export class LlmService implements OnModuleInit {
       formats: [{ key: res?.format, score: 0, name: '', reason: '' }],
     };
 
-    this.logger.log(`final content meta: ${contentMeta}`);
+    this.logger.log(`final content meta: ${JSON.stringify(contentMeta)}`);
 
     return contentMeta;
   }
 
-  async getWebsiteMeta(
-    doc: Document,
-    locale: LOCALE = LOCALE.EN,
-  ): Promise<Partial<AigcContent>> {
+  async getWebsiteMeta(doc: Document, locale: LOCALE = LOCALE.EN): Promise<Partial<AigcContent>> {
     const parser = new JsonOutputFunctionsParser();
     const runnable = await this.llm
       .bind({
@@ -142,10 +117,7 @@ export class LlmService implements OnModuleInit {
     const summary = (await runnable.invoke([
       new SystemMessage(extractSummarizeMeta.extractMetaSystemPrompt),
       new HumanMessage(
-        `The website content context as follow: \n ===\n ${doc.pageContent?.slice(
-          0,
-          12000,
-        )} \n===`,
+        `The website content context as follow: \n ===\n ${doc.pageContent?.slice(0, 12000)} \n===`,
       ),
       new HumanMessage(`Please output answer in ${locale} language:`),
     ])) as {
@@ -162,10 +134,7 @@ export class LlmService implements OnModuleInit {
     };
   }
 
-  async summarizeContent(
-    doc: Document,
-    locale: LOCALE,
-  ): Promise<Partial<AigcContent>> {
+  async summarizeContent(doc: Document, locale: LOCALE): Promise<Partial<AigcContent>> {
     const summary = await this.llm.invoke([
       new SystemMessage(extractSummarizeMeta.summarizeSystemPrompt),
       new HumanMessage(
@@ -187,10 +156,7 @@ export class LlmService implements OnModuleInit {
    * @param doc
    * @returns
    */
-  async applyStrategy(
-    doc: Document,
-    locale: LOCALE = LOCALE.EN,
-  ): Promise<Partial<AigcContent>> {
+  async applyStrategy(doc: Document, locale: LOCALE = LOCALE.EN): Promise<Partial<AigcContent>> {
     // direct apply summary and return with structed json format
     /**
      * 经过反复实验，gpt-3.5-turbo 的能力比较差，因此将这个任务拆成两个：1）meta 抽取（function call) 2）summary 生成（直接使用 GPT 输出）
@@ -235,11 +201,7 @@ export class LlmService implements OnModuleInit {
     const parser = new JsonOutputFunctionsParser();
     const runnable = await this.llm
       .bind({
-        functions: [
-          summarizeMultipleSource.extractSummarizeMultipleSourceMetaSchema(
-            locale,
-          ),
-        ],
+        functions: [summarizeMultipleSource.extractSummarizeMultipleSourceMetaSchema(locale)],
         function_call: { name: 'content_meta_extractor' },
       })
       .pipe(parser);
@@ -282,76 +244,48 @@ export class LlmService implements OnModuleInit {
     return summary.text || '';
   }
 
-  async indexPipelineFromLink(weblinkId: number, doc: Document) {
-    // splitting / chunking
-    const textSplitter = new RecursiveCharacterTextSplitter({
-      separators: ['\n\n', '\n', ' ', ''],
-      chunkSize: 1000,
-      chunkOverlap: 200,
-      lengthFunction: (str = '') => str.length || 0,
-    });
-    const documents = await textSplitter.splitDocuments([doc]);
+  // async retrieval(query: string, filter) {
+  //   /**
+  //    * 1. 抽取关键字 or 实体
+  //    * 2. 基于关键字多路召回
+  //    * 3. rerank scores
+  //    * 4. 取前
+  //    */
 
-    await this.vectorStore.addModels(
-      await this.prisma.$transaction(
-        documents.map(({ pageContent }) =>
-          this.prisma.contentVector.create({
-            data: { weblinkId, content: pageContent },
-          }),
-        ),
-      ),
-    );
-  }
+  //   // 抽取关键字 or 实体
+  //   const parser = new JsonOutputFunctionsParser();
+  //   const runnable = this.llm
+  //     .bind({
+  //       functions: [extractContentMeta.extractSearchKeyword],
+  //       function_call: { name: 'keyword_for_search_engine' },
+  //     })
+  //     .pipe(parser);
+  //   const res = (await runnable.invoke([new HumanMessage(query)])) as {
+  //     keyword_list: string[];
+  //   };
 
-  async retrieval(query: string, filter) {
-    /**
-     * 1. 抽取关键字 or 实体
-     * 2. 基于关键字多路召回
-     * 3. rerank scores
-     * 4. 取前
-     */
+  //   // 基于关键字多路召回
+  //   let results = [];
+  //   await Promise.all(
+  //     // 这里除了关键词，需要把 query 也带上
+  //     [...(res?.keyword_list || []), query].map(async (keyword) => {
+  //       const keywordRetrievalResults = await this.vectorStore.similaritySearch(keyword, 5);
 
-    // 抽取关键字 or 实体
-    const parser = new JsonOutputFunctionsParser();
-    const runnable = this.llm
-      .bind({
-        functions: [extractContentMeta.extractSearchKeyword],
-        function_call: { name: 'keyword_for_search_engine' },
-      })
-      .pipe(parser);
-    const res = (await runnable.invoke([new HumanMessage(query)])) as {
-      keyword_list: string[];
-    };
+  //       results = results.concat(keywordRetrievalResults);
+  //     }),
+  //   );
 
-    // 基于关键字多路召回
-    let results = [];
-    await Promise.all(
-      // 这里除了关键词，需要把 query 也带上
-      [...(res?.keyword_list || []), query].map(async (keyword) => {
-        const keywordRetrievalResults = await this.vectorStore.similaritySearch(
-          keyword,
-          5,
-        );
+  //   // rerank scores
+  //   // TODO: 这里只考虑了召回阈值和数量，默认取五个，但是没有考虑 token 窗口，未来需要优化
+  //   results = uniqueFunc(results, 'content')
+  //     .sort((a, b) => (b?.score || 0) - (a?.score || 0))
+  //     // ?.filter((item) => item?.score >= 0.8)
+  //     ?.slice(0, 6);
 
-        results = results.concat(keywordRetrievalResults);
-      }),
-    );
+  //   return results;
+  // }
 
-    // rerank scores
-    // TODO: 这里只考虑了召回阈值和数量，默认取五个，但是没有考虑 token 窗口，未来需要优化
-    results = uniqueFunc(results, 'content')
-      .sort((a, b) => (b?.score || 0) - (a?.score || 0))
-      // ?.filter((item) => item?.score >= 0.8)
-      ?.slice(0, 6);
-
-    return results;
-  }
-
-  async getRelatedQuestion(
-    docs: Document[],
-    lastQuery: string,
-    locale: LOCALE,
-  ) {
+  async getRelatedQuestion(docs: Document[], lastQuery: string, locale: LOCALE) {
     if (docs.length <= 0) return;
     console.log('activate getRelatedQuestion with locale: ', locale);
 
@@ -387,9 +321,7 @@ export class LlmService implements OnModuleInit {
     const parser = new JsonOutputFunctionsParser();
     const runnable = await this.llm
       .bind({
-        functions: [
-          generateAskFollowupQuestion.generateAskFollowupQuestionSchema(locale),
-        ],
+        functions: [generateAskFollowupQuestion.generateAskFollowupQuestionSchema(locale)],
         function_call: { name: 'get_ask_follow_up_questions' },
       })
       .pipe(parser);
@@ -436,23 +368,14 @@ export class LlmService implements OnModuleInit {
     return stream;
   }
 
-  async getContextualQuestion(
-    query: string,
-    locale: LOCALE,
-    chatHistory: LLMChatMessage[],
-  ) {
-    this.logger.log(
-      `activated with query: ${query}, chat history: ${chatHistory}`,
-    );
+  async getContextualQuestion(query: string, locale: LOCALE, chatHistory: LLMChatMessage[]) {
+    this.logger.log(`[getContextualQuestion] query: ${query}, chat history: ${chatHistory}`);
 
     // 构建总结的 Prompt，将 question + chatHistory 总结成
     const contextualizeQPrompt = ChatPromptTemplate.fromMessages([
       ['system', contextualizeQA.systemPrompt(locale)],
       new MessagesPlaceholder('chatHistory'),
-      [
-        'human',
-        `The user's question is {question}, please output answer in ${locale} language:`,
-      ],
+      ['human', `The user's question is {question}, please output answer in ${locale} language:`],
     ]);
     const contextualizeQChain = contextualizeQPrompt
       .pipe(this.llm as any)
@@ -464,40 +387,48 @@ export class LlmService implements OnModuleInit {
     });
   }
 
-  async getRetrievalDocs(query: string, filter?: any) {
-    this.logger.log(
-      `activated with query: ${query}, filter: ${JSON.stringify(filter)}`,
-    );
+  /**
+   * Retrieve relevant docs
+   * @param uid
+   * @param query
+   * @param url
+   * @returns
+   */
+  async getRetrievalDocs(
+    user: User,
+    query: string,
+    urls?: string[],
+  ): Promise<Document<PageMeta>[]> {
+    this.logger.log(`[getRetrievalDocs] uid: ${user.uid}, query: ${query}, urls: ${urls}`);
 
-    const retrievalResults = await this.retrieval(query, filter);
+    const retrievalResults: SearchResult[] = await this.ragService.retrieve({
+      tenantId: user.uid,
+      query,
+      filter: { urls },
+    });
 
-    this.logger.log('retrievalResults', retrievalResults);
+    this.logger.log('retrievalResults: ' + JSON.stringify(retrievalResults));
 
     const retrievedDocs = retrievalResults.map((res) => ({
-      metadata: res?.metadata,
-      pageContent: res?.pageContent as string,
-      score: res?.score, // similarity score
+      metadata: {
+        source: res.url,
+        title: res.title,
+      },
+      pageContent: res.content,
+      score: parseFloat(res._additional.score) || 0,
     }));
 
     return retrievedDocs;
   }
 
-  async chat(
-    query: string,
-    locale: LOCALE,
-    chatHistory: LLMChatMessage[],
-    context: Document[],
-  ) {
-    this.logger.log(`activated with query: ${query}}`);
+  async chat(query: string, locale: LOCALE, chatHistory: LLMChatMessage[], docs: Document[]) {
+    this.logger.log(`[chat] activated with query: ${query}}`);
 
     const qaPrompt = ChatPromptTemplate.fromMessages([
       ['system', qa.systemPrompt],
       new MessagesPlaceholder('chatHistory'),
       ['human', `The context as follow:\n === \n {context} \n === \n`],
-      [
-        'human',
-        `The user's question is {question}, please output answer in ${locale} language:`,
-      ],
+      ['human', `The user's question is {question}, please output answer in ${locale} language:`],
     ]);
 
     // 基于上下文进行问答
@@ -510,16 +441,13 @@ export class LlmService implements OnModuleInit {
     return {
       stream: ragChain.stream({
         question: query,
-        context,
+        context: docs,
         chatHistory,
       }),
     };
   }
 
-  async onlineSearch(
-    query: string,
-    locale: LOCALE,
-  ): Promise<SearchResultContext[]> {
+  async onlineSearch(query: string, locale: LOCALE): Promise<SearchResultContext[]> {
     let jsonContent: any = [];
     try {
       const REFERENCE_COUNT = 8;
@@ -528,10 +456,7 @@ export class LlmService implements OnModuleInit {
         q: query,
         num: REFERENCE_COUNT,
         hl: locale?.toLocaleLowerCase(),
-        gl:
-          locale?.toLocaleLowerCase() === LOCALE.ZH_CN?.toLocaleLowerCase()
-            ? 'cn'
-            : 'us',
+        gl: locale?.toLocaleLowerCase() === LOCALE.ZH_CN?.toLocaleLowerCase() ? 'cn' : 'us',
       });
 
       const res = await fetch('https://google.serper.dev/search', {
@@ -547,9 +472,7 @@ export class LlmService implements OnModuleInit {
       // convert to the same format as bing/google
       const contexts = [];
       if (jsonContent.hasOwnProperty('knowledgeGraph')) {
-        const url =
-          jsonContent.knowledgeGraph.descriptionUrl ||
-          jsonContent.knowledgeGraph.website;
+        const url = jsonContent.knowledgeGraph.descriptionUrl || jsonContent.knowledgeGraph.website;
         const snippet = jsonContent.knowledgeGraph.description;
         if (url && snippet) {
           contexts.push({
@@ -562,8 +485,7 @@ export class LlmService implements OnModuleInit {
 
       if (jsonContent.hasOwnProperty('answerBox')) {
         const url = jsonContent.answerBox.url;
-        const snippet =
-          jsonContent.answerBox.snippet || jsonContent.answerBox.answer;
+        const snippet = jsonContent.answerBox.snippet || jsonContent.answerBox.answer;
         if (url && snippet) {
           contexts.push({
             name: jsonContent.answerBox.title || '',
@@ -588,30 +510,16 @@ export class LlmService implements OnModuleInit {
     }
   }
 
-  async searchEnhance(
-    query: string,
-    locale: LOCALE,
-    chatHistory: LLMChatMessage[],
-  ) {
-    this.logger.log(`activated with query: ${query}, locale: ${locale}`);
+  async searchEnhance(query: string, locale: LOCALE, chatHistory: LLMChatMessage[]) {
+    this.logger.log(`[searchEnhance] activated with query: ${query}, locale: ${locale}`);
 
-    const stopWords = [
-      '<|im_end|>',
-      '[End]',
-      '[end]',
-      '\nReferences:\n',
-      '\nSources:\n',
-      'End.',
-    ];
+    const stopWords = ['<|im_end|>', '[End]', '[end]', '\nReferences:\n', '\nSources:\n', 'End.'];
 
     // 构建总结的 Prompt，将 question + chatHistory 总结成
     const contextualizeQPrompt = ChatPromptTemplate.fromMessages([
       ['system', contextualizeQA.systemPrompt(locale)],
       new MessagesPlaceholder('chatHistory'),
-      [
-        'human',
-        `The user's question is {question}, please output answer in ${locale} language:`,
-      ],
+      ['human', `The user's question is {question}, please output answer in ${locale} language:`],
     ]);
     const contextualizeQChain = contextualizeQPrompt
       .pipe(this.llm as any)
@@ -640,10 +548,7 @@ export class LlmService implements OnModuleInit {
       },
     }));
 
-    const systemPrompt = searchEnhance.systemPrompt.replace(
-      `{context}`,
-      contextToCitationText,
-    );
+    const systemPrompt = searchEnhance.systemPrompt.replace(`{context}`, contextToCitationText);
 
     const llm = new ChatOpenAI({
       modelName: 'gpt-3.5-turbo',

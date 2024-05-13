@@ -1,29 +1,23 @@
 import { Button, Message as message } from "@arco-design/web-react"
-import { IconScissor, IconStar } from "@arco-design/web-react/icon"
+import { IconStar } from "@arco-design/web-react/icon"
 import { IconTip } from "./icon-tip"
 import { useWeblinkStore } from "~stores/weblink"
-import { mapSourceFromWeblinkList } from "~utils/weblink"
 import { useBuildThreadAndRun } from "~hooks/use-build-thread-and-run"
 import { SearchTarget, useSearchStateStore } from "~stores/search-state"
-import { useSearchQuickActionStore } from "~stores/search-quick-action"
 import { useContentSelectorStore } from "~stores/content-selector"
-import { useStoreWeblink } from "~hooks/use-store-weblink"
-import type { Source } from "~types"
 import { useTranslation } from "react-i18next"
 import { useChatStore } from "~stores/chat"
+import { useQuickActionHandler } from "~hooks/use-quick-action-handler"
 
 export const QuickAction = () => {
   // stores
   const chatStore = useChatStore()
   const contentSelectorStore = useContentSelectorStore()
-  const { uploadingStatus, handleUploadWebsite } = useStoreWeblink()
   const { searchTarget } = useSearchStateStore()
   const { showSelectedMarks, marks = [] } = useContentSelectorStore()
 
+  const { summarize, storeForLater } = useQuickActionHandler()
   const { t } = useTranslation()
-
-  // hooks
-  const { runQuickActionTask } = useBuildThreadAndRun()
 
   const getText = (slot: string) => {
     const { selectedRow } = useWeblinkStore.getState()
@@ -47,103 +41,6 @@ export const QuickAction = () => {
         "",
         { action: slot },
       )
-  }
-
-  /**
-   * 1. quickAction 单个网页或多个网页都统一应用规则
-   * 2. 也只有这两种情况下需要
-   */
-  const handleSummary = async () => {
-    chatStore.setLoading(true)
-
-    console.log("handleSummary")
-    if (uploadingStatus === "loading") return
-
-    const { searchTarget } = useSearchStateStore.getState()
-    const { marks } = useContentSelectorStore.getState()
-
-    let filter = {}
-
-    // TODO: 增加 xPath
-    if (searchTarget === SearchTarget.CurrentPage) {
-      // 1）单个网页的时候 2）单个网页中部分内容，都需要先上传
-      // 然后服务端只取 html + xpath 做处理，以及下次重新访问会话时展示 filter 也是用 html + xpath 获取内容展示
-      message.loading(
-        t(
-          "translation:loggedHomePage.homePage.recommendQuickAction.summary.status.contentHandling",
-        ),
-      )
-      const res = await handleUploadWebsite(window.location.href)
-
-      if (res.success) {
-        message.success(
-          t(
-            "translation:loggedHomePage.homePage.recommendQuickAction.summary.status.contentHandleSuccessNotify",
-          ),
-        )
-      } else {
-        message.error(
-          t(
-            "translation:loggedHomePage.homePage.recommendQuickAction.summary.status.contentHandleFailedNotify",
-          ),
-        )
-      }
-
-      filter = {
-        weblinkList: [
-          {
-            pageContent: "",
-            metadata: {
-              title: document?.title || "",
-              source: location.href,
-            },
-            score: -1,
-            selections: marks?.map((item) => ({
-              type: "text",
-              xPath: item?.xPath,
-              content: item?.data,
-            })),
-          } as Source,
-        ],
-      }
-    } else if (searchTarget === SearchTarget.SelectedPages) {
-      const { selectedRow } = useWeblinkStore.getState()
-      const weblinkList = mapSourceFromWeblinkList(selectedRow)
-      filter = {
-        weblinkList,
-      }
-    }
-
-    runQuickActionTask({
-      filter,
-    })
-  }
-
-  const handleQuickActionTranslate = () => {}
-
-  const handleQuickActionExplain = () => {}
-
-  const handleStoreForLater = async () => {
-    message.loading(
-      t(
-        "translation:loggedHomePage.homePage.recommendQuickAction.save.status.contentHandling",
-      ),
-    )
-    const res = await handleUploadWebsite(window.location.href)
-
-    if (res.success) {
-      message.success(
-        t(
-          "translation:loggedHomePage.homePage.recommendQuickAction.save.status.contentHandleSuccessNotify",
-        ),
-      )
-    } else {
-      message.error(
-        t(
-          "translation:loggedHomePage.homePage.recommendQuickAction.save.status.contentHandleFailedNotify",
-        ),
-      )
-    }
   }
 
   const handleActiveContentSelector = () => {
@@ -181,7 +78,7 @@ export const QuickAction = () => {
                 ),
               )}>
               <Button
-                onClick={() => handleSummary()}
+                onClick={() => summarize()}
                 style={{ fontSize: 12 }}
                 shape="round"
                 size="small">
@@ -219,7 +116,7 @@ export const QuickAction = () => {
               "translation:loggedHomePage.homePage.recommendQuickAction.save.tip",
             )}>
             <Button
-              onClick={() => handleStoreForLater()}
+              onClick={() => storeForLater()}
               style={{ fontSize: 12 }}
               shape="round"
               size="small">

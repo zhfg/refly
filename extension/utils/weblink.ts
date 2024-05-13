@@ -1,17 +1,22 @@
-import type { WebLinkItem } from "~components/weblink-list/types"
+import { ParseSource, type WebLinkItem } from "~components/weblink-list/types"
 import type { Source } from "~types"
-import * as cheerio from "cheerio"
 import { removeUnusedHtmlNode } from "./removeUnusedHtmlNode"
 import parse from "node-html-parser"
 
-export const buildSource = (): Source => {
+export const buildSource = (weblink?: Source): Source => {
+  const { pageContent = "", metadata = {}, score = -1 } = weblink
+  const { title = "", source = "" } = metadata as {
+    title: string
+    source: string
+  }
+
   return {
-    pageContent: "",
+    pageContent,
     metadata: {
-      title: "",
-      source: "",
+      title,
+      source,
     },
-    score: -1,
+    score,
   }
 }
 
@@ -42,5 +47,19 @@ export const getContentFromHtmlSelector = (selector: string) => {
 
   return {
     target: document.querySelector(selector),
+  }
+}
+
+export const buildCurrentWeblink = (): Partial<WebLinkItem> => {
+  return {
+    origin: location?.origin || "", // 冗余存储策略，for 后续能够基于 origin 进行归类归档
+    originPageTitle: document?.title || "",
+    title: document?.title || "",
+    originPageUrl: location.href,
+    summary: "",
+    relatedQuestions: [],
+    parseSource: ParseSource.serverCrawl,
+    parseStatus: "init",
+    chunkStatus: "init",
   }
 }

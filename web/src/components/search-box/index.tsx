@@ -85,14 +85,14 @@ export const SearchBox = () => {
     // 设置当前的任务类型及会话 id
     task.data = {
       ...(task?.data || {}),
-      conversationId: res?.data?.id,
+      convId: res?.data?.convId,
     }
     taskStore.setTask(task)
 
     // 更新新的 newQAText，for 新会话跳转使用
     chatStore.setNewQAText(question)
     chatStore.setIsNewConversation(true)
-    navigate(`/thread/${res?.data?.id}`)
+    navigate(`/thread/${res?.data?.convId}`)
   }
 
   const runTask = () => {

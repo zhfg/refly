@@ -20,7 +20,7 @@ export type BuildTask = {
   data: CHAT | QUICK_ACTION_TASK_PAYLOAD
 }
 
-export const buildTask = (payload: BuildTask): Task => {
+export const buildTask = (payload: BuildTask, dryRun = false): Task => {
   const { taskType, language = LANGUAGE.AUTO, locale, data = {} } = payload
   const taskId = `task:${genUniqueId()}`
 
@@ -29,17 +29,23 @@ export const buildTask = (payload: BuildTask): Task => {
     taskId,
     language,
     locale,
+    dryRun,
     data: data,
   }
 
   return task
 }
 
-export const buildChatTask = (data, locale: OutputLocale = LOCALE.EN): Task => {
+export const buildChatTask = (
+  data,
+  locale: OutputLocale = LOCALE.EN,
+  dryRun = false,
+): Task => {
   const task: Task = {
     taskType: TASK_TYPE.CHAT,
     language: LANGUAGE.AUTO,
     locale,
+    dryRun,
     data,
   }
 
@@ -49,11 +55,13 @@ export const buildChatTask = (data, locale: OutputLocale = LOCALE.EN): Task => {
 export const buildQuickActionTask = (
   data,
   locale: OutputLocale = LOCALE.EN,
+  dryRun = false,
 ): Task => {
   const task: Task = {
     taskType: TASK_TYPE.QUICK_ACTION,
     language: LANGUAGE.AUTO,
     locale,
+    dryRun,
     data,
   }
 

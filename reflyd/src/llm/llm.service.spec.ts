@@ -26,7 +26,7 @@ describe('LlmService', () => {
 
   it('extractContentMeta', async () => {
     const url = 'https://paulgraham.com/vcsqueeze.html';
-    const doc = await weblinkService.parseWebLinkContent(url);
+    const doc = await weblinkService.readWebLinkContent(url);
     const res = await service.extractContentMeta(doc);
     expect(res).toEqual({});
   });

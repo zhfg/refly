@@ -40,25 +40,29 @@ model VerificationToken {
 
 model User {
   /// 主键
-  id            Int       @id @default(autoincrement())
+  id              Int       @id @default(autoincrement())
+  /// UID
+  uid             String?   @default("") @map("uid")
   /// 头像
-  avatar        String?   @map("avatar")
+  avatar          String?   @map("avatar")
   /// 用户名
-  name          String?   @map("name")
+  name            String?   @map("name")
   /// 邮箱
-  email         String?   @unique @map("email")
+  email           String?   @unique @map("email")
   /// 邮箱是否已验证
-  emailVerified DateTime? @map("email_verified") @db.Timestamptz()
+  emailVerified   DateTime? @map("email_verified") @db.Timestamptz()
   /// 密码
-  password      String?   @map("password")
+  password        String?   @map("password")
   /// 界面语言设置
-  uiLocale      String?   @default("") @map("ui_locale")
+  uiLocale        String?   @default("") @map("ui_locale")
   /// 输出语言设置
-  outputLocale  String?   @default("") @map("output_locale")
+  outputLocale    String?   @default("") @map("output_locale")
+  /// 向量库是否初始化租户
+  vsTenantCreated Boolean?  @default(false) @map("vs_tenant_created")
   /// 创建时间
-  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// 更新时间
-  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
 
   @@map("users")
 }
@@ -67,6 +71,8 @@ model User {
 model Topic {
   /// 主键
   id          Int      @id @default(autoincrement())
+  /// 主题 id
+  topicId     String?  @default("") @map("topic_id")
   /// 主题 key
   key         String   @unique @map("key")
   /// 多语言名称 JSON 字符串 (key: 语言, val: 名称)
@@ -107,8 +113,10 @@ model UserPreference {
 
 // 会话模型
 model Conversation {
-  /// id为主键
+  /// 主键
   id              Int      @id @default(autoincrement())
+  /// 对话id
+  convId          String?  @default("") @map("conv_id")
   /// 用户id
   userId          Int      @map("user_id")
   /// 内容 id，指向 aigc_content 中的内容
@@ -140,6 +148,8 @@ model Conversation {
 model ChatMessage {
   /// id为主键
   id                    Int         @id @default(autoincrement())
+  /// 消息id
+  msgId                 String?     @default("") @map("msg_id")
   /// 会话id
   conversationId        Int         @map("conversation_id")
   /// 消息来源
@@ -201,25 +211,44 @@ model UserWeblink {
   @@map("user_weblinks")
 }
 
+/// 网页数据
 model Weblink {
   /// id为主键
-  id          Int         @id @default(autoincrement())
+  id                  Int         @id @default(autoincrement())
+  /// 网页id
+  linkId              String?     @default("") @map("link_id")
   /// 网页链接
-  url         String      @unique @map("url")
+  url                 String      @unique @map("url")
   /// 页面内容 (deprecated)
-  pageContent String      @map("page_content")
-  /// 对象存储 key
-  storageKey  String      @default("") @map("storage_key")
+  pageContent         String      @map("page_content")
+  /// 对象存储 key (html)
+  storageKey          String      @default("") @map("storage_key")
+  /// 内容解析来源
+  parseSource         ParseSource @default(serverCrawl) @map("parse_source")
   /// 页面元数据, JSON 存储
-  pageMeta    String      @map("page_meta")
+  pageMeta            String      @map("page_meta")
   /// 内容元数据, JSON 存储
-  contentMeta String      @map("content_meta")
-  /// 索引状态
-  indexStatus IndexStatus @default(init) @map("index_status")
+  contentMeta         String      @map("content_meta")
+  /// 解析策略版本，格式统一为 YYYYMMDD
+  parserVersion       String?     @default("00000000") @map("parser_version")
+  /// 解析状态
+  parseStatus         IndexStatus @default(init) @map("parse_status")
+  /// 解析后文档存储 key (markdown)
+  parsedDocStorageKey String?     @default("") @map("parsed_doc_storage_key")
+  /// 切块状态
+  chunkStatus         IndexStatus @default(init) @map("chunk_status")
+  /// 切块后数据存储 key (avro)
+  chunkStorageKey     String?     @default("") @map("chunk_storage_key")
+  /// 网页内容总结
+  summary             String?     @default("") @map("summary")
+  /// 相关问题
+  relatedQuestions    String[]    @default([]) @map("related_questions")
+  /// 上次解析时间
+  lastParseTime       DateTime?   @default(now()) @map("last_parse_time") @db.Timestamptz()
   /// 创建时间
-  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt           DateTime    @default(now()) @map("created_at") @db.Timestamptz()
   /// 更新时间
-  updatedAt   DateTime    @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt           DateTime    @updatedAt @map("updated_at") @db.Timestamptz()
 
   contents AigcContent[]
 
@@ -255,6 +284,8 @@ model WeblinkUserMark {
 model AigcContent {
   /// 主键
   id         Int               @id @default(autoincrement())
+  /// 内容id
+  cid        String?           @default("") @map("cid")
   /// 标题
   title      String            @map("title")
   /// 摘要
@@ -295,6 +326,8 @@ model AigcContent {
 model UserDigest {
   /// 主键
   id        Int         @id @default(autoincrement())
+  /// 摘要 id
+  digestId  String?     @default("") @map("digest_id")
   /// 用户 id
   userId    Int         @map("user_id")
   /// 日期 (YYYY-MM-DD)
@@ -314,21 +347,6 @@ model UserDigest {
   @@map("user_digests")
 }
 
-/// 内容向量
-model ContentVector {
-  /// 主键
-  id        String                 @id @default(cuid())
-  /// 网页 id
-  weblinkId Int                    @map("weblink_id")
-  /// 内容
-  content   String                 @map("content")
-  /// 向量
-  vector    Unsupported("vector")? @map("vector")
-
-  @@index([weblinkId])
-  @@map("content_vectors")
-}
-
 enum ContentSourceType {
   weblink
   digest
@@ -341,10 +359,16 @@ enum ContentMetaType {
   form
 }
 
+enum ParseSource {
+  serverCrawl
+  clientUpload
+}
+
 enum IndexStatus {
   init
   processing
   finish
+  failed
 }
 
 enum MessageType {

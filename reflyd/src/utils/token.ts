@@ -33,10 +33,7 @@ export const countToken = (text: string) => {
   return enc_cl100k_base.encode(text).length;
 };
 
-export const generalCountToken = (
-  text: string,
-  model: TokenizerType = 'turbo',
-) => {
+export const generalCountToken = (text: string, model: TokenizerType = 'turbo') => {
   if (model === 'turbo') {
     return enc_cl100k_base.encode(text).length;
   }
@@ -51,11 +48,7 @@ export const modelTokenConfig: Record<string, [TokenizerType, number]> = {
   [LLMTypeGPT4Turbo]: ['turbo', 128 * 1024],
 };
 
-export const isTokenOverflow = (
-  content: string | number,
-  model: string,
-  reservation = 1024,
-) => {
+export const isTokenOverflow = (content: string | number, model: string, reservation = 1024) => {
   const limit = modelTokenConfig[model]; // 这里model指 LLMType
   const count = typeof content === 'string' ? countToken(content) : content;
   return count + reservation > limit?.[1] ?? 8 * 1024;
@@ -73,11 +66,7 @@ export const chunkSize = 1000;
 export const maxWebsiteTokenSize = 6000;
 export const chunkOverlap = 200;
 
-export function truncateToken(
-  text: string,
-  maxTokenLimit: number,
-  chunkSize = 1000,
-) {
+export function truncateToken(text: string, maxTokenLimit: number, chunkSize = 1000) {
   let resultStr = '';
 
   if (countToken(text) < maxTokenLimit) return text;
@@ -101,10 +90,7 @@ export function truncateToken(
 }
 
 // TODO： 目前比较粗暴，直接截断，理论上后续总结场景需要关注所有的 header 以及首段的总结，这样能够得到更加全面的总结
-export function getExpectedTokenLenContent(
-  texts: string[] | string = [],
-  tokenLimit = 0,
-) {
+export function getExpectedTokenLenContent(texts: string[] | string = [], tokenLimit = 0) {
   try {
     let newTexts;
 

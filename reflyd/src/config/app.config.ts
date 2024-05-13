@@ -13,10 +13,15 @@ export default () => ({
     weblinkBucket: process.env.MINIO_WEBLINK_BUCKET || 'refly-weblink',
   },
   vectorStore: {
-    vectorDim: parseInt(process.env.REFLY_VEC_DIM) || 1024,
+    host: process.env.WEAVIATE_INSTANCE_URL,
+    apiKey: process.env.WEAVIATE_API_KEY,
+    vectorDim: parseInt(process.env.REFLY_VEC_DIM) || 256,
   },
   serper: {
     apiKey: process.env.SERPER_API_KEY,
+  },
+  fireworks: {
+    apiKey: process.env.FIREWORKS_API_KEY,
   },
   auth: {
     cookieTokenField: '_refly_ai_sid',

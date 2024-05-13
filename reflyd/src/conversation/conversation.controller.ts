@@ -1,5 +1,6 @@
 import {
   Controller,
+  Logger,
   Get,
   Post,
   Query,
@@ -9,80 +10,82 @@ import {
   Res,
   Param,
   BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Response } from 'express';
 import {
-  CreateChatMessageInput,
+  SummaryParam,
   CreateConversationParam,
   CreateConversationResponse,
   ListConversationResponse,
-} from './dto';
+  QUICK_ACTION_TYPE,
+} from './conversation.dto';
 import { ApiParam, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
-import { LOCALE, TASK_TYPE, type Task } from '../types/task';
-import { AigcService } from '../aigc/aigc.service';
-import { LoggerService } from '../common/logger.service';
+import { WeblinkService } from '../weblink/weblink.service';
+import { TASK_TYPE, type Task } from './conversation.dto';
+import { Conversation } from '@prisma/client';
 
 @Controller('conversation')
 export class ConversationController {
+  private logger = new Logger(ConversationController.name);
+
   constructor(
-    private logger: LoggerService,
     private conversationService: ConversationService,
-    private aigcService: AigcService,
-  ) {
-    this.logger.setContext(ConversationController.name);
-  }
+    private weblinkService: WeblinkService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Post('new')
   @ApiResponse({ type: CreateConversationResponse })
-  async createConversation(
-    @Request() req,
-    @Body() body: CreateConversationParam,
-  ) {
-    const userId: number = req.user.id;
-    const res = await this.conversationService.create(body, userId);
+  async createConversation(@Request() req, @Body() body: CreateConversationParam) {
+    return { data: await this.conversationService.createConversation(req.user, body) };
+  }
 
-    if (body.contentId) {
-      const content = await this.aigcService.getContent({
-        contentId: body.contentId,
-      });
-      const messages: CreateChatMessageInput[] = [
-        {
-          type: 'human',
-          content: content.title,
-          sources: '[]',
-          userId,
-          conversationId: res.id,
-          locale: body.locale,
-        },
-        {
-          type: 'ai',
-          content: content.content,
-          sources: content.sources,
-          userId,
-          conversationId: res.id,
-          locale: body.locale,
-        },
-      ];
-      await Promise.all([
-        this.conversationService.addChatMessages(messages),
-        this.conversationService.updateConversation(
-          res.id,
-          messages,
-          {
-            messageCount: { increment: 2 },
-            lastMessage: content.content,
-          },
-          body?.locale as LOCALE,
-        ),
-      ]);
+  @UseGuards(JwtAuthGuard)
+  @Post('chat')
+  async chatV2(@Request() req, @Res() res: Response, @Body() body: { task: Task }) {
+    const { task } = body;
+
+    if (task.taskType === TASK_TYPE.CHAT && !task.data?.question) {
+      throw new BadRequestException('query cannot be empty for chat task');
     }
 
-    return {
-      data: res,
-    };
+    if (!task.convId) {
+      throw new BadRequestException('convId cannot be empty');
+    }
+
+    if (!task.dryRun) {
+      let conversation: Conversation = await this.conversationService.findConversation(task.convId);
+
+      if (conversation) {
+        if (conversation.userId !== req.user.id) {
+          throw new UnauthorizedException('cannot access this conversation');
+        }
+      } else {
+        if (!task.createConvParam) {
+          throw new BadRequestException('createConvParam cannot be empty');
+        }
+        conversation = await this.conversationService.createConversation(
+          req.user,
+          {
+            ...task.createConvParam,
+            title: task.data?.question,
+          },
+          task.convId,
+        );
+      }
+
+      task.conversation = conversation;
+    }
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.status(200);
+
+    await this.conversationService.chat(res, req.user, task);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -96,7 +99,14 @@ export class ConversationController {
     if (!conversationId || !Number(conversationId)) {
       throw new BadRequestException('invalid conversation id');
     }
-    const convId = Number(conversationId);
+
+    const id = Number(conversationId);
+    const conversation = await this.conversationService.findConversationById(id);
+
+    if (!conversation) {
+      throw new BadRequestException('conversation not found: ' + id);
+    }
+
     const { task } = body;
     if (!task) {
       throw new BadRequestException('task cannot be empty');
@@ -104,13 +114,14 @@ export class ConversationController {
     if (task.taskType === TASK_TYPE.CHAT && !task.data?.question) {
       throw new BadRequestException('query cannot be empty for chat task');
     }
+    task.conversation = conversation;
 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.status(200);
 
-    await this.conversationService.chat(res, convId, req.user.id, body.task);
+    await this.conversationService.chat(res, req.user, body.task);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -137,21 +148,11 @@ export class ConversationController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get(':conversationId')
-  @ApiParam({ name: 'conversationId' })
+  @Get(':convId')
+  @ApiParam({ name: 'convId' })
   @ApiResponse({ type: ListConversationResponse })
-  async showConversationDetail(
-    @Request() req,
-    @Param('conversationId') conversationId: string,
-  ) {
-    const convId = Number(conversationId);
-    if (!convId) {
-      return { data: {} };
-    }
-
-    const data = await this.conversationService.findConversationAndMessages(
-      convId,
-    );
+  async showConversationDetail(@Request() req, @Param('convId') convId: string) {
+    const data = await this.conversationService.findConversation(convId, true);
 
     return data.userId === (req.user.id as number) ? { data } : { data: {} };
   }

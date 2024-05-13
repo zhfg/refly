@@ -39,7 +39,7 @@ export const enum QUICK_ACTION_TYPE {
 }
 
 export type GEN_TITLE = {
-  conversationId: string
+  convId: string
 }
 
 export type QUICK_ACTION_TASK_PAYLOAD = {
@@ -48,7 +48,7 @@ export type QUICK_ACTION_TASK_PAYLOAD = {
   actionType?: QUICK_ACTION_TYPE
   actionPrompt?: string
   reference?: string
-  conversationId?: string
+  convId?: string
   filter?: {
     // 限制用于 quick-action 的网页列表
     weblinkList?: Source[]
@@ -69,7 +69,7 @@ export type SEARCH_ENHANCE = {
 
 export type CHAT = {
   question: string
-  conversationId?: string
+  convId?: string
   filter?: {
     // 限制召回网页的 filter
     weblinkList?: Source[]
@@ -79,6 +79,7 @@ export type CHAT = {
 export type Task = {
   taskType: TASK_TYPE
   taskId?: string // task:xxxx-xxxx-xxxx-xxxx
+  dryRun?: boolean
   language?: LANGUAGE
   locale?: OutputLocale
   data?: CHAT | QUICK_ACTION_TASK_PAYLOAD

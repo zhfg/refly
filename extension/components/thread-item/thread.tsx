@@ -86,67 +86,6 @@ export const Thread = () => {
     chatStore.setMessages(messages)
   }
 
-  const handleAskFollowing = (question?: string, taskType?: TASK_TYPE) => {
-    // support ask follow up question
-    let newQuestion = ""
-    if (typeof question === "string" && question) {
-      newQuestion = question
-    } else {
-      const { newQAText } = useChatStore.getState()
-      newQuestion = newQAText
-    }
-    const { currentConversation } = useConversationStore.getState()
-    const { messages } = useChatStore.getState()
-    const selectedWeblinkConfig = getSelectedWeblinkConfig(messages)
-    const { marks } = useContentSelectorStore.getState()
-    const { localSettings } = useUserStore.getState()
-
-    console.log("handleAskFollowing", newQuestion)
-
-    const getWebLinkList = () => {
-      let selectedWebLink = []
-      if (selectedWeblinkConfig?.searchTarget === SearchTarget.CurrentPage) {
-        selectedWebLink = [
-          {
-            pageContent: "",
-            metadata: {
-              title: document?.title || "",
-              source: location.href,
-            },
-            score: -1, // 手工构造
-            selections: marks?.map((item) => ({
-              type: "text",
-              xPath: item?.xPath,
-              content: item?.data,
-            })),
-          },
-        ]
-      } else {
-        const useWeblinkList =
-          selectedWeblinkConfig?.searchTarget === SearchTarget.SelectedPages &&
-          selectedWeblinkConfig?.filter?.length > 0
-
-        selectedWebLink = useWeblinkList ? selectedWeblinkConfig?.filter : []
-      }
-
-      return selectedWebLink
-    }
-
-    const task = buildTask({
-      data: {
-        question: newQuestion,
-        conversationId: currentConversation?.id || "",
-        filter: {
-          weblinkList: getWebLinkList(),
-        },
-      },
-      taskType,
-      locale: localSettings?.outputLocale,
-    })
-    buildTaskAndGenReponse(task)
-    chatStore.setNewQAText("")
-  }
-
   const getSelectedWeblinkConfig = (messages: Message[] = []) => {
     // 这里是获取第一个，早期简化策略，因为一开始设置之后，后续设置就保留
     const lastHumanMessage = messages?.find(
@@ -163,7 +102,7 @@ export const Thread = () => {
     const { task } = useTaskStore.getState()
 
     // 新会话，需要手动构建第一条消息
-    if (chatStore.isNewConversation && currentConversation?.id) {
+    if (chatStore.isNewConversation && currentConversation?.convId) {
       // 更换成基于 task 的消息模式，核心是基于 task 来处理
       buildTaskAndGenReponse(task)
       chatStore.setIsNewConversation(false)

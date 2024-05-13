@@ -29,7 +29,7 @@ const handler: PlasmoMessaging.PortHandler<{
       abortController = new AbortController()
 
       // TODO: 这里未来要优化
-      const conversationId = payload?.data?.conversationId
+      const convId = payload?.data?.convId
 
       const cookie = await getCookie()
 
@@ -39,7 +39,7 @@ const handler: PlasmoMessaging.PortHandler<{
       let sourcesEmitted = false
 
       const response = await fetch(
-        `${getServerOrigin()}/v1/conversation/${conversationId}/chat`,
+        `${getServerOrigin()}/v1/conversation/chat`,
         {
           method: "POST",
           headers: {
@@ -49,7 +49,7 @@ const handler: PlasmoMessaging.PortHandler<{
           },
           signal: abortController.signal,
           body: JSON.stringify({
-            task: payload,
+            task: { ...payload, convId },
           }),
         },
       )

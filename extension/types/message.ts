@@ -86,7 +86,7 @@ export type Message = {
   type?: MessageType
   itemId: string // 针对 question 和 reply 为 msg:xxxx-xxxx-xxxx-xxxx，针对 intent 为 intent:xxxx-xxxx-xxxx-xxxx
   userId?: string
-  conversationId: string
+  convId: string
   summary?: string
   seq?: number
   data: {

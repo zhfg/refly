@@ -63,13 +63,13 @@ export const useBuildTask = () => {
       filter: weblinkList,
     }
     const questionMsg = buildQuestionMessage({
-      conversationId: conversationStore.currentConversation?.id,
+      convId: conversationStore.currentConversation?.convId,
       content: question,
       selectedWeblinkConfig: JSON.stringify(selectedWeblinkConfig),
     })
 
     const replyMsg = buildReplyMessage({
-      conversationId: conversationStore.currentConversation?.id,
+      convId: conversationStore.currentConversation?.convId,
       content: "",
       questionId: questionMsg?.itemId,
     })
@@ -105,7 +105,7 @@ export const useBuildTask = () => {
         },
       })
     },
-    [conversationStore.currentConversation?.id],
+    [conversationStore.currentConversation?.convId],
   )
 
   const onError = (status: number) => {
@@ -119,7 +119,7 @@ export const useBuildTask = () => {
 
     // 构建一条错误消息放在末尾，而不是类似 loading 直接展示，因为要 error 停留在聊天列表里
     const errMsg = buildErrorMessage({
-      conversationId: conversationStore.currentConversation?.id,
+      convId: conversationStore.currentConversation?.convId,
     })
 
     chatStore.setMessages([...currentChatState.messages, { ...errMsg }])
@@ -146,6 +146,9 @@ export const useBuildTask = () => {
 
     lastMessage.data.content = content
     chatStore.setMessages([...savedMessage, { ...lastMessage }])
+    messageStateStore.setMessageState({
+      pendingMsg: content,
+    })
   }
 
   const onSources = (sources: Source[]) => {
@@ -158,7 +161,10 @@ export const useBuildTask = () => {
       savedMessage = currentChatState.messages as Message[]
 
       lastMessage.data.content = ""
-      messageStateStore.setMessageState({ pendingFirstToken: false })
+      messageStateStore.setMessageState({
+        pendingFirstToken: false,
+        pending: true,
+      })
     } else {
       lastMessage = currentChatState.messages.at(-1) as Message
       savedMessage = currentChatState.messages.slice(0, -1) as Message[]

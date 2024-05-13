@@ -1,37 +1,54 @@
-import {
-  Controller,
-  Logger,
-  Get,
-  Post,
-  Query,
-  Request,
-  UseGuards,
-  Body,
-} from '@nestjs/common';
+import _ from 'lodash';
+import { Controller, Logger, Get, Post, Query, Request, UseGuards, Body } from '@nestjs/common';
+import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
+
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { WeblinkService } from './weblink.service';
-import { GetWebLinkListResponse, StoreWebLinkParam } from './dto';
-import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
-import { LoggerService } from 'src/common/logger.service';
+import {
+  GetWebLinkListResponse,
+  PingWeblinkData,
+  PingWeblinkResponse,
+  StoreWebLinkParam,
+} from './weblink.dto';
+import { PARSER_VERSION } from '../rag/rag.service';
+import { normalizeURL } from '../utils/url';
 
 @Controller('weblink')
 export class WeblinkController {
-  constructor(
-    private logger: LoggerService,
-    private weblinkService: WeblinkService,
-  ) {
-    this.logger.setContext(WeblinkController.name);
-  }
+  private logger = new Logger(WeblinkController.name);
+  constructor(private weblinkService: WeblinkService) {}
 
   @UseGuards(JwtAuthGuard)
   @Get('ping')
-  async ping(@Query('url') url: string) {
-    if (!url) return { status: 'unavailable' };
-    return {
-      status: (await this.weblinkService.checkWeblinkExists(url))
-        ? 'ok'
-        : 'unavailable',
-    };
+  async ping(@Query('url') url: string): Promise<PingWeblinkResponse> {
+    url = normalizeURL(url);
+    if (!url) {
+      return {
+        data: { parseStatus: 'unavailable', chunkStatus: 'unavailable' },
+      };
+    }
+
+    const weblink = await this.weblinkService.findFirstWeblink({ url });
+
+    // If weblink not exists, the storage key is not complete
+    // or has outdated parser version then reprocess it asynchronously
+    if (!weblink || (weblink.chunkStatus === 'finish' && weblink.parserVersion < PARSER_VERSION)) {
+      await this.weblinkService.enqueueProcessTask({ url });
+      return { data: { parseStatus: 'processing', chunkStatus: 'processing' } };
+    }
+
+    const data: Partial<PingWeblinkData> = _.pick(
+      weblink,
+      'linkId',
+      'parseStatus',
+      'chunkStatus',
+      'parseSource',
+    );
+
+    if (weblink.summary) data.summary = weblink.summary;
+    if (weblink.relatedQuestions.length > 0) data.relatedQuestions = weblink.relatedQuestions;
+
+    return { data };
   }
 
   @UseGuards(JwtAuthGuard)
@@ -40,15 +57,6 @@ export class WeblinkController {
     this.logger.log(`user: ${req.user.id}, store link: ${body}`);
     await this.weblinkService.storeLinks(req.user.id, body.data);
     return { success: true };
-  }
-
-  @Get('getWebContent')
-  @ApiQuery({ name: 'url', type: String, required: false })
-  async getWebContent(@Query('url') url) {
-    this.logger.log(`getWebContent, ${url}`);
-
-    const parseContent = await this.weblinkService.parseWebLinkContent(url); // 处理错误边界
-    return parseContent;
   }
 
   @UseGuards(JwtAuthGuard)

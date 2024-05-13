@@ -1,0 +1,474 @@
+[
+  {
+    "url": "https://unstructured-io.github.io/unstructured/introduction.html",
+    "title": "Introduction - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/best_practices/table_extraction_pdf.html",
+    "title": "Table Extraction from PDF - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/best_practices/strategies.html",
+    "title": "Strategies - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/best_practices.html",
+    "title": "Best Practices - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/examples/chroma.html",
+    "title": "Data Processing into Vector Database - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/examples/dict_to_elements.html",
+    "title": "Multi-files API Processing - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/examples/databricks.html",
+    "title": "Delta Table Source Connector - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/integrations.html",
+    "title": "Integrations - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/best_practices/models.html",
+    "title": "Models - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/examples.html",
+    "title": "Examples - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/metadata.html",
+    "title": "Metadata - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/configs/fsspec_config.html",
+    "title": "Fsspec Configuration - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/configs/embedding_config.html",
+    "title": "Embedding Configuration - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/configs/chunking_config.html",
+    "title": "Chunking Configuration - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/configs/retry_strategy_config.html",
+    "title": "Retry Strategy Configuration - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/configs/permissions_config.html",
+    "title": "Permissions Configuration - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/configs/processor_config.html",
+    "title": "Processor Configuration - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/configs/partition_config.html",
+    "title": "Partition Configuration - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/configs/read_config.html",
+    "title": "Read Configuration - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/configs.html",
+    "title": "Ingest Configuration - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/destination_connectors/weaviate.html",
+    "title": "Weaviate - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/destination_connectors/vectara.html",
+    "title": "Vectara - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/destination_connectors/s3.html",
+    "title": "S3 - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/destination_connectors/sql.html",
+    "title": "SQL - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/destination_connectors/opensearch.html",
+    "title": "OpenSearch - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/destination_connectors/qdrant.html",
+    "title": "Qdrant - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/destination_connectors/mongodb.html",
+    "title": "MongoDB - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/destination_connectors/gcs.html",
+    "title": "Google Cloud Service - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/destination_connectors/pinecone.html",
+    "title": "Pinecone - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/destination_connectors/elasticsearch.html",
+    "title": "Elasticsearch - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/destination_connectors/dropbox.html",
+    "title": "Dropbox - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/destination_connectors/databricks_volumes.html",
+    "title": "Databricks Volumes - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/destination_connectors/delta_table.html",
+    "title": "Delta Table - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/destination_connectors/clarifai.html",
+    "title": "Clarifai - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/destination_connectors/chroma.html",
+    "title": "Chroma - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/destination_connectors/box.html",
+    "title": "Box - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/destination_connectors/azure_cognitive_search.html",
+    "title": "Azure Cognitive Search - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/destination_connectors/azure.html",
+    "title": "Azure - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/slack.html",
+    "title": "Slack - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/destination_connectors.html",
+    "title": "Destination Connectors - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/wikipedia.html",
+    "title": "Wikipedia - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/sharepoint.html",
+    "title": "Sharepoint - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/destination_connectors/astra.html",
+    "title": "Astra - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/sftp.html",
+    "title": "Sftp - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/salesforce.html",
+    "title": "Salesforce - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/s3.html",
+    "title": "S3 - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/reddit.html",
+    "title": "Reddit - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/outlook.html",
+    "title": "Outlook - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/opensearch.html",
+    "title": "OpenSearch - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/onedrive.html",
+    "title": "One Drive - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/mongodb.html",
+    "title": "MongoDB - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/notion.html",
+    "title": "Notion - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/google_cloud_storage.html",
+    "title": "Google Cloud Storage - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/github.html",
+    "title": "Github - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/local_connector.html",
+    "title": "Local - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/dropbox.html",
+    "title": "Dropbox - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/google_drive.html",
+    "title": "Google Drive - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/jira.html",
+    "title": "Jira - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/elasticsearch.html",
+    "title": "Elasticsearch - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/gitlab.html",
+    "title": "Gitlab - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/discord.html",
+    "title": "Discord - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/delta_table.html",
+    "title": "Delta Table - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/confluence.html",
+    "title": "Confluence - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/biomed.html",
+    "title": "Biomed - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/box.html",
+    "title": "Box - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/azure.html",
+    "title": "Azure - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors/airtable.html",
+    "title": "Airtable - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/source_connectors.html",
+    "title": "Source Connectors - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/core/embedding.html",
+    "title": "Embedding - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/ingest/index.html",
+    "title": "Ingest - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/core/chunking.html",
+    "title": "Chunking - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/core/extracting.html",
+    "title": "Extracting - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/core/staging.html",
+    "title": "Staging - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/core/partition.html",
+    "title": "Partitioning - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/platform_destinations/weaviate.html",
+    "title": "Weaviate - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/core/cleaning.html",
+    "title": "Cleaning - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/core.html",
+    "title": "Core Functionality - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/platform_destinations/postgresql.html",
+    "title": "PostgreSQL - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/platform_destinations/pinecone.html",
+    "title": "Pinecone - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/platform_destinations/opensearch.html",
+    "title": "OpenSearch - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/platform_destinations/mongodb.html",
+    "title": "MongoDB - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/platform_destinations/google_cloud_destination.html",
+    "title": "Google Cloud Storage - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/platform_destinations/elasticsearch_destination.html",
+    "title": "Elasticsearch - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/platform_destinations/databricks.html",
+    "title": "Databricks - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/platform_destinations/azure_cognitive_search.html",
+    "title": "Azure Cognitive Search - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/platform_destinations/chroma.html",
+    "title": "Chroma - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/platform_sources/sftp.html",
+    "title": "SFTP Storage - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/destination_platform.html",
+    "title": "Platform Destination Connectors - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/platform_destinations/amazon_s3_destination.html",
+    "title": "Amazon S3 - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/platform_sources/salesforce.html",
+    "title": "Salesforce - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/platform_sources/sharepoint.html",
+    "title": "Sharepoint - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/platform_sources/opensearch.html",
+    "title": "OpenSearch - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/platform_sources/onedrive.html",
+    "title": "OneDrive Cloud Storage - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/platform_sources/google_cloud_source.html",
+    "title": "Google Cloud Storage - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/platform_sources/google_drive.html",
+    "title": "Google Drive - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/platform_sources/azure_blob.html",
+    "title": "Azure Blob Storage - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/platform_sources/amazon_s3_source.html",
+    "title": "Amazon S3 - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/platform_sources/elasticsearch_source.html",
+    "title": "Elasticsearch - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/source_platform.html",
+    "title": "Platform Source Connectors - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/job.html",
+    "title": "Jobs Scheduling - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platforms/workflow.html",
+    "title": "Workflows Automation - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/platform.html",
+    "title": "Unstructured Platform - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/apis/validation_errors.html",
+    "title": "API Validation Errors - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/apis/api_parameters.html",
+    "title": "API Parameters - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/apis/usage_methods.html",
+    "title": "Accessing Unstructured API - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/apis/api_sdks.html",
+    "title": "Python and JavaScript SDK - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/apis/aws_marketplace.html",
+    "title": "AWS Marketplace Deployment Guide - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/apis/azure_marketplace.html",
+    "title": "Azure Marketplace Deployment Guide - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/api.html",
+    "title": "Unstructured API Services - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/apis/saas_api.html",
+    "title": "SaaS API Deployment Guide - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/introduction.html",
+    "title": "Introduction - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/installing.html",
+    "title": "Installation - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/installation/docker.html",
+    "title": "Docker Installation - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/installation/full_installation.html",
+    "title": "Full Installation - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/introduction/key_concepts.html",
+    "title": "Key Concepts - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/introduction/overview.html",
+    "title": "Document Elements - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/introduction/getting_started.html",
+    "title": "Quick Start - Unstructured 0.13.0 documentation"
+  },
+  {
+    "url": "https://unstructured-io.github.io/unstructured/index.html",
+    "title": "Unstructured 0.13.0 documentation"
+  }
+]

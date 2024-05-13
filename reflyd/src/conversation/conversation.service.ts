@@ -1,48 +1,129 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Response } from 'express';
 
+import { Prisma, ChatMessage, User, Conversation } from '@prisma/client';
 import { PrismaService } from '../common/prisma.service';
-import { CreateChatMessageInput, CreateConversationParam } from './dto';
-import { Prisma, ChatMessage } from '@prisma/client';
+import { CreateChatMessageInput, CreateConversationParam } from './conversation.dto';
+
 import {
-  LOCALE,
   QUICK_ACTION_TASK_PAYLOAD,
   QUICK_ACTION_TYPE,
   TASK_TYPE,
   Task,
   TaskResponse,
-} from '../types/task';
+} from './conversation.dto';
 import { createLLMChatMessage } from '../llm/schema';
 import { LlmService } from '../llm/llm.service';
 import { WeblinkService } from '../weblink/weblink.service';
-import { LoggerService } from '../common/logger.service';
 import { IterableReadableStream } from '@langchain/core/dist/utils/stream';
 import { BaseMessageChunk } from 'langchain/schema';
+import { genConvID } from '../utils/id';
+import { AigcService } from '../aigc/aigc.service';
 
 const LLM_SPLIT = '__LLM_RESPONSE__';
 const RELATED_SPLIT = '__RELATED_QUESTIONS__';
 
 @Injectable()
 export class ConversationService {
+  private logger = new Logger(ConversationService.name);
+
   constructor(
-    private logger: LoggerService,
     private prisma: PrismaService,
+    private aigcService: AigcService,
     private weblinkService: WeblinkService,
     private llmService: LlmService,
-  ) {
-    this.logger.setContext(ConversationService.name);
-  }
+  ) {}
 
-  async create(param: CreateConversationParam, userId: number) {
-    return this.prisma.conversation.create({
+  async createConversation(
+    user: User,
+    param: CreateConversationParam,
+    convId?: string,
+  ): Promise<Conversation> {
+    const conversation = await this.prisma.conversation.create({
       data: {
+        convId: convId || genConvID(),
         title: param.title,
         origin: param.origin,
         originPageUrl: param.originPageUrl,
         originPageTitle: param.originPageTitle,
-        userId,
+        userId: user.id,
       },
     });
+
+    // Messages to initialize when creating this conversation
+    const initMessages: CreateChatMessageInput[] = [];
+
+    if (param.linkId) {
+      const weblink = await this.weblinkService.findFirstWeblink({ linkId: param.linkId });
+      const { summary, relatedQuestions } = weblink;
+      initMessages.push(
+        {
+          type: 'human',
+          content: getUserQuestion(QUICK_ACTION_TYPE.SUMMARY),
+          sources: '[]',
+          userId: user.id,
+          conversationId: conversation.id,
+          locale: param.locale,
+        },
+        {
+          type: 'ai',
+          content: summary,
+          sources: JSON.stringify([
+            {
+              pageContent: '',
+              metadata: JSON.parse(weblink.pageMeta || '{}'),
+            },
+          ]),
+          userId: user.id,
+          conversationId: conversation.id,
+          locale: param.locale,
+          relatedQuestions: JSON.stringify(relatedQuestions),
+        },
+      );
+    }
+
+    // If this conversation is based on generated content
+    // then initialize conversation messages with this content
+    if (param.contentId) {
+      const content = await this.aigcService.getContent({
+        contentId: param.contentId,
+      });
+      initMessages.push(
+        {
+          type: 'human',
+          content: content.title,
+          sources: '[]',
+          userId: user.id,
+          conversationId: conversation.id,
+          locale: param.locale,
+        },
+        {
+          type: 'ai',
+          content: content.content,
+          sources: content.sources,
+          userId: user.id,
+          conversationId: conversation.id,
+          locale: param.locale,
+        },
+      );
+    }
+
+    if (initMessages.length > 0) {
+      await Promise.all([
+        this.addChatMessages(initMessages),
+        this.updateConversation(
+          conversation.id,
+          initMessages,
+          {
+            messageCount: { increment: 2 },
+            lastMessage: initMessages[initMessages.length - 1].content,
+          },
+          param?.locale as LOCALE,
+        ),
+      ]);
+    }
+
+    return conversation;
   }
 
   async updateConversation(
@@ -51,10 +132,7 @@ export class ConversationService {
     data: Prisma.ConversationUpdateInput,
     locale: LOCALE,
   ) {
-    const summarizedTitle = await this.llmService.summarizeConversation(
-      messages,
-      locale,
-    );
+    const summarizedTitle = await this.llmService.summarizeConversation(messages, locale);
     this.logger.log(`Summarized title: ${summarizedTitle}`);
 
     return this.prisma.conversation.update({
@@ -69,13 +147,19 @@ export class ConversationService {
     });
   }
 
-  async findConversationAndMessages(conversationId: number) {
-    const data = await this.prisma.conversation.findUnique({
-      where: { id: conversationId },
-      include: { messages: true },
+  async findConversationById(id: number) {
+    return this.prisma.conversation.findUnique({ where: { id } });
+  }
+
+  async findConversation(convId: string, withMessages = false) {
+    const data = await this.prisma.conversation.findFirst({
+      where: { convId },
+      include: { messages: withMessages },
     });
 
-    data.messages.sort((a, b) => a.id - b.id);
+    if (data && withMessages) {
+      data.messages?.sort((a, b) => a.id - b.id);
+    }
 
     return data;
   }
@@ -99,127 +183,120 @@ export class ConversationService {
     });
   }
 
-  async chat(res: Response, convId: number, userId: number, task: Task) {
-    const { taskType, data = {} } = task;
+  async chat(res: Response, user: User, task: Task) {
+    const { taskType, data = {}, conversation, dryRun } = task;
 
     const query = data?.question || '';
     const weblinkList = data?.filter?.weblinkList || [];
 
+    // 如果指定 URL 进行 chat，则异步进行保存
+    if (!dryRun && weblinkList.length > 0) {
+      this.weblinkService.storeLinks(
+        user.id,
+        weblinkList.map((weblink) => ({ url: weblink.metadata.source })),
+      );
+    }
+
     // 获取聊天历史
-    const chatHistory = await this.getMessages(convId);
+    let chatHistory: ChatMessage[] = [];
+    if (conversation?.id) {
+      chatHistory = await this.getMessages(conversation?.id);
+    }
 
     let taskRes: TaskResponse;
     if (taskType === TASK_TYPE.QUICK_ACTION) {
-      taskRes = await this.handleQuickActionTask(res, userId, task);
+      taskRes = await this.handleQuickActionTask(res, user, task);
     } else if (taskType === TASK_TYPE.SEARCH_ENHANCE_ASK) {
       taskRes = await this.handleSearchEnhanceTask(res, task, chatHistory);
     } else {
-      taskRes = await this.handleChatTask(res, userId, task, chatHistory);
+      taskRes = await this.handleChatTask(res, user, task, chatHistory);
     }
-    res.end(``);
 
-    const newMessages: CreateChatMessageInput[] = [
-      {
-        type: 'human',
-        userId,
-        conversationId: convId,
-        content: query,
-        sources: '',
-        // 每次提问完在 human message 上加一个提问的 filter，这样之后追问时可以 follow 这个 filter 规则
-        selectedWeblinkConfig: JSON.stringify({
-          searchTarget: weblinkList?.length > 0 ? 'selectedPages' : 'all',
-          filter: weblinkList,
-        }),
-      },
-      {
-        type: 'ai',
-        userId,
-        conversationId: convId,
-        content: taskRes.answer,
-        sources: JSON.stringify(taskRes.sources),
-        relatedQuestions: JSON.stringify(taskRes.relatedQuestions),
-      },
-    ];
-
-    // post chat logic
-    await Promise.all([
-      this.addChatMessages(newMessages),
-      this.updateConversation(
-        convId,
-        [...chatHistory, ...newMessages],
+    if (!dryRun && conversation?.id && taskRes) {
+      const newMessages: CreateChatMessageInput[] = [
         {
-          lastMessage: taskRes.answer,
-          messageCount: chatHistory.length + 2,
+          type: 'human',
+          userId: user.id,
+          conversationId: conversation.id,
+          content: query,
+          sources: '',
+          // 每次提问完在 human message 上加一个提问的 filter，这样之后追问时可以 follow 这个 filter 规则
+          selectedWeblinkConfig: JSON.stringify({
+            searchTarget: weblinkList?.length > 0 ? 'selectedPages' : 'all',
+            filter: weblinkList,
+          }),
         },
-        task?.locale,
-      ),
-    ]);
+        {
+          type: 'ai',
+          userId: user.id,
+          conversationId: conversation.id,
+          content: taskRes.answer,
+          sources: JSON.stringify(taskRes.sources),
+          relatedQuestions: JSON.stringify(taskRes.relatedQuestions),
+        },
+      ];
+
+      // post chat logic
+      await Promise.all([
+        this.addChatMessages(newMessages),
+        this.updateConversation(
+          conversation.id,
+          [...chatHistory, ...newMessages],
+          {
+            lastMessage: taskRes.answer,
+            messageCount: chatHistory.length + 2,
+          },
+          task?.locale,
+        ),
+      ]);
+    }
   }
 
   async handleChatTask(
     res: Response,
-    userId: number,
+    user: User,
     task: Task,
     chatHistory: ChatMessage[],
   ): Promise<TaskResponse> {
-    const locale = task?.locale || LOCALE.EN;
+    const locale = task.locale || (user.outputLocale as LOCALE) || LOCALE.EN;
 
-    const filter: any = {
-      must: [
-        {
-          key: 'userId',
-          match: { value: userId },
-        },
-      ],
-    };
-    if (task?.data?.filter?.weblinkList?.length > 0) {
-      filter.must.push({
-        key: 'source',
-        match: {
-          any: task?.data?.filter?.weblinkList?.map(
-            (item) => item?.metadata?.source,
-          ),
-        },
-      });
-    }
+    const { data = {} } = task;
+    const { filter = {} } = data;
+    const urls = filter.weblinkList?.map((item) => item?.metadata?.source);
 
     // 如果有 cssSelector，则代表从基于选中的内容进行提问，否则根据上下文进行相似度匹配召回
-    const chatFromClientSelector = task?.data?.filter?.weblinkList?.find(
+    const chatFromClientSelector = !!filter.weblinkList?.find(
       (item) => item?.selections?.length > 0,
     );
+    this.logger.log(`chatFromClientSelector: ${chatFromClientSelector}, urls: ${urls}`);
 
     // 前置的数据处理
     const query = task?.data?.question;
     const llmChatMessages = chatHistory
       ? chatHistory.map((msg) => createLLMChatMessage(msg.content, msg.type))
       : [];
+
     // 如果是基于选中内容提问的话，则不需要考虑上下文
     const questionWithContext =
-      chatHistory.length === 1 ||
-      chatHistory.length === 0 ||
-      chatFromClientSelector
+      chatHistory.length <= 1 || chatFromClientSelector
         ? query
-        : await this.llmService.getContextualQuestion(
-            query,
-            locale,
-            llmChatMessages,
-          );
+        : await this.llmService.getContextualQuestion(query, locale, llmChatMessages);
+    this.logger.log(`questionWithContext: ${questionWithContext}`);
 
-    const sources = chatFromClientSelector
-      ? await this.weblinkService.parseMultiWeblinks(
-          task?.data?.filter?.weblinkList,
-        )
-      : await this.llmService.getRetrievalDocs(questionWithContext, filter);
+    const docs =
+      urls.length > 1 || chatFromClientSelector
+        ? await this.weblinkService.readMultiWeblinks(filter.weblinkList)
+        : await this.llmService.getRetrievalDocs(user, questionWithContext, urls);
 
     const { stream } = await this.llmService.chat(
       questionWithContext,
       locale,
       llmChatMessages,
-      sources,
+      docs,
     );
 
     // first return sources，use unique tag for parse data
-    res.write(JSON.stringify(sources));
+    res.write(JSON.stringify(docs));
     res.write(LLM_SPLIT);
 
     const getSSEData = async (stream) => {
@@ -236,7 +313,7 @@ export class ConversationService {
 
     const [answerStr, relatedQuestions] = await Promise.all([
       getSSEData(stream),
-      this.llmService.getRelatedQuestion(sources, questionWithContext, locale),
+      this.llmService.getRelatedQuestion(docs, questionWithContext, locale),
     ]);
 
     this.logger.log('relatedQuestions', relatedQuestions);
@@ -246,9 +323,10 @@ export class ConversationService {
     if (relatedQuestions) {
       res.write(JSON.stringify(relatedQuestions) || '');
     }
+    res.end(``);
 
     return {
-      sources,
+      sources: docs,
       answer: answerStr,
       relatedQuestions,
     };
@@ -264,9 +342,7 @@ export class ConversationService {
     const { stream, sources } = await this.llmService.searchEnhance(
       query,
       locale,
-      chatHistory
-        ? chatHistory.map((msg) => createLLMChatMessage(msg.content, msg.type))
-        : [],
+      chatHistory ? chatHistory.map((msg) => createLLMChatMessage(msg.content, msg.type)) : [],
     );
 
     // first return sources，use unique tag for parse data
@@ -277,8 +353,7 @@ export class ConversationService {
       // write answer in a stream style
       let answerStr = '';
       for await (const chunk of await stream) {
-        const chunkStr =
-          chunk?.content || (typeof chunk === 'string' ? chunk : '');
+        const chunkStr = chunk?.content || (typeof chunk === 'string' ? chunk : '');
         answerStr += chunkStr || '';
 
         res.write(chunkStr || '');
@@ -296,6 +371,7 @@ export class ConversationService {
 
     res.write(RELATED_SPLIT);
     res.write(JSON.stringify(relatedQuestions) || '');
+    res.end(``);
 
     const handledAnswer = answerStr
       .replace(/\[\[([cC])itation/g, '[citation')
@@ -312,11 +388,7 @@ export class ConversationService {
     };
   }
 
-  async handleQuickActionTask(
-    res: Response,
-    userId: number,
-    task: Task,
-  ): Promise<TaskResponse> {
+  async handleQuickActionTask(res: Response, user: User, task: Task): Promise<TaskResponse> {
     const data = task?.data as QUICK_ACTION_TASK_PAYLOAD;
     const locale = task?.locale || LOCALE.EN;
 
@@ -342,28 +414,25 @@ export class ConversationService {
     if (weblinkList?.length <= 0) return;
 
     // save user mark for each weblink in a non-blocking style
-    this.weblinkService.saveWeblinkUserMarks({
-      userId,
-      weblinkList,
-    });
+    if (!task.dryRun) {
+      this.weblinkService.saveWeblinkUserMarks({ userId: user.id, weblinkList });
+    }
 
     // 基于一组网页做总结，先获取网页内容
-    const docs = await this.weblinkService.parseMultiWeblinks(weblinkList);
+    const docs = await this.weblinkService.readMultiWeblinks(weblinkList);
 
     let stream: IterableReadableStream<BaseMessageChunk>;
     if (data?.actionType === QUICK_ACTION_TYPE.SUMMARY) {
-      const weblinkList = data?.filter?.weblinkList;
-      if (weblinkList?.length <= 0) return;
-
       stream = await this.llmService.summary(data?.actionPrompt, locale, docs);
     }
 
     const getSSEData = async (stream) => {
+      if (!stream) return '';
+
       // write answer in a stream style
       let answerStr = '';
       for await (const chunk of await stream) {
-        const chunkStr =
-          chunk?.content || (typeof chunk === 'string' ? chunk : '');
+        const chunkStr = chunk?.content || (typeof chunk === 'string' ? chunk : '');
         answerStr += chunkStr;
 
         res.write(chunkStr || '');
@@ -372,32 +441,36 @@ export class ConversationService {
       return answerStr;
     };
 
-    const getUserQuestion = (actionType: QUICK_ACTION_TYPE) => {
-      switch (actionType) {
-        case QUICK_ACTION_TYPE.SUMMARY: {
-          return '总结网页';
-        }
-      }
-    };
-
     const [answerStr, relatedQuestions] = await Promise.all([
       getSSEData(stream),
-      this.llmService.getRelatedQuestion(
-        docs,
-        getUserQuestion(data?.actionType),
-        locale,
-      ),
+      this.llmService.getRelatedQuestion(docs, getUserQuestion(data?.actionType), locale),
     ]);
 
     this.logger.log('relatedQuestions', relatedQuestions);
 
     res.write(RELATED_SPLIT);
     res.write(JSON.stringify(relatedQuestions));
+    res.end(``);
 
-    return {
+    const taskRes = {
       sources,
       answer: answerStr,
       relatedQuestions,
     };
+
+    // 异步更新 weblink summary
+    if (weblinkList.length === 1 && data?.actionType === QUICK_ACTION_TYPE.SUMMARY) {
+      this.weblinkService.updateWeblinkSummary(weblinkList[0].metadata.source, taskRes);
+    }
+
+    return taskRes;
   }
 }
+
+const getUserQuestion = (actionType: QUICK_ACTION_TYPE) => {
+  switch (actionType) {
+    case QUICK_ACTION_TYPE.SUMMARY: {
+      return '总结网页'; // TODO: 国际化
+    }
+  }
+};

@@ -1,1 +1,4 @@
-export const QUEUE_STORE_LINK = 'store_link';
+export const QUEUE_WEBLINK = 'weblink';
+
+export const PROCESS_LINK_CHANNEL = 'processLink';
+export const PROCESS_LINK_BY_USER_CHANNEL = 'processLinkByUser';

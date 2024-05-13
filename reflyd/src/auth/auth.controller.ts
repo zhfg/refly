@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Res, Request, UseGuards } from '@nestjs/common';
+import { Controller, Logger, Get, Post, Res, Request, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { User } from '@prisma/client';
@@ -9,17 +9,11 @@ import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { GithubOauthGuard } from './guard/github-oauth.guard';
 import { GoogleOauthGuard } from './guard/google-oauth.guard';
 
-import { LoggerService } from '../common/logger.service';
-
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private logger: LoggerService,
-    private configService: ConfigService,
-    private authService: AuthService,
-  ) {
-    this.logger.setContext(AuthController.name);
-  }
+  private logger = new Logger(AuthController.name);
+
+  constructor(private configService: ConfigService, private authService: AuthService) {}
 
   @UseGuards(LocalAuthGuard)
   @Post('login')

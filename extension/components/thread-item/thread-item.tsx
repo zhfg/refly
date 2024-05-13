@@ -41,7 +41,6 @@ interface ThreadItemProps {
     searchTarget: SearchTarget
     filter: Source[]
   }
-  handleAskFollowing: (question?: string, taskType?: TASK_TYPE) => void
 }
 
 const TextArea = Input.TextArea
@@ -143,26 +142,14 @@ export const ThreadItem = (props: ThreadItemProps) => {
     }
 
     const searchTarget = threadSearchTarget
+    let needRunTask = true
 
     // 先存储 link， 在进行提问操作，这里理论上是需要有个 negotiate 的过程
-    if (searchTarget === SearchTarget.CurrentPage) {
-      message.loading(
-        t("translation:threadDetail.item.input.status.contentHandling"),
-      )
+    // 选中当前网页，但是没有选择任何内容，都需要做 handleUploadWebsite 的处理
+    if (searchTarget === SearchTarget.CurrentPage && marks?.length === 0) {
       const res = await handleUploadWebsite(window.location.href)
-
-      if (res.success) {
-        message.success(
-          t(
-            "translation:threadDetail.item.input.status.contentHandleSuccessNotify",
-          ),
-        )
-      } else {
-        message.error(
-          t(
-            "translation:threadDetail.item.input.status.contentHandleFailedNotify",
-          ),
-        )
+      if (!res?.success) {
+        return
       }
     }
 
@@ -201,7 +188,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
           : TASK_TYPE.CHAT,
       data: {
         question: newQAText,
-        conversationId: currentConversation?.id || "",
+        convId: currentConversation?.convId || "",
         filter: {
           weblinkList: selectedWebLink,
         },
@@ -257,7 +244,9 @@ export const ThreadItem = (props: ThreadItemProps) => {
           <BreadcrumbItem
             className="breadcrum-item breadcrum-description"
             onClick={() =>
-              navigate(`/thread/${conversationStore?.currentConversation?.id}`)
+              navigate(
+                `/thread/${conversationStore?.currentConversation?.convId}`,
+              )
             }>
             <span>{conversationStore?.currentConversation?.title}</span>
           </BreadcrumbItem>

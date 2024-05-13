@@ -54,18 +54,18 @@ export const useConversationStore = create<ConversationState>()(
           }
 
           case ConversationOperation.DELETE: {
-            const { conversationId } = payload
+            const { convId } = payload
             const newConversationList = conversationList.filter(
-              (item) => item.id !== conversationId,
+              (item) => item.convId !== convId,
             )
 
             break
           }
 
           case ConversationOperation.UPDATE: {
-            const { conversationId } = payload
+            const { convId } = payload
             const newConversationList = conversationList.map((item) => {
-              if (item.id === conversationId) {
+              if (item.convId === convId) {
                 return { ...item, ...payload }
               }
 

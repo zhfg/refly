@@ -11,7 +11,7 @@ import { buildErrorMessage } from "@/utils/message"
 import { scrollToBottom } from "@/utils/ui"
 
 // requests
-import { parseStreaming } from "@/utils/parse-straming"
+import { parseStreaming } from "@/utils/parse-streaming"
 // stores
 
 export const useBuildTask = () => {
@@ -35,12 +35,12 @@ export const useBuildTask = () => {
     }
 
     const questionMsg = buildQuestionMessage({
-      conversationId: currentConversation?.id || "",
+      convId: currentConversation?.convId || "",
       content: question,
       selectedWeblinkConfig: JSON.stringify(selectedWeblinkConfig),
     })
     const replyMsg = buildReplyMessage({
-      conversationId: currentConversation?.id || "",
+      convId: currentConversation?.convId || "",
       content: "",
       questionId: questionMsg?.itemId,
     })
@@ -84,7 +84,7 @@ export const useBuildTask = () => {
         },
       })
     },
-    [conversationStore.currentConversation?.id],
+    [conversationStore.currentConversation?.convId],
   )
 
   const onContent = (content: string) => {
@@ -182,7 +182,7 @@ export const useBuildTask = () => {
 
     // 构建一条错误消息放在末尾，而不是类似 loading 直接展示，因为要 error 停留在聊天列表里
     const errMsg = buildErrorMessage({
-      conversationId: conversationStore.currentConversation?.id,
+      convId: conversationStore.currentConversation?.convId || "",
     })
 
     chatStore.setMessages([...currentChatState.messages, { ...errMsg }])
@@ -206,10 +206,7 @@ export const useBuildTask = () => {
     }
   }) => {
     controllerRef.current = new AbortController()
-    // 生成任务
-    // streamingGenMessage(payload, {
-    //   onMessage: handleStreamingMessage,
-    // })
+
     parseStreaming(
       controllerRef.current,
       payload?.body?.payload as Task,

@@ -2,13 +2,14 @@
 
 ## Docker Images
 
-Prepare database:
+Prepare databases and start dev server:
 
 ```bash
-docker-compose up -d
+docker-compose -f docker-compose.dev.yml up -d
+yarn dev
 ```
 
-Sync database schemas:
+Sync postgres schema:
 
 ```bash
 yarn sync-db-schema

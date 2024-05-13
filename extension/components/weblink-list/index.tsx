@@ -59,7 +59,7 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
     url = "",
     originPageTitle,
     originPageUrl,
-    indexStatus,
+    chunkStatus,
   } = props?.weblink
   const urlItem = safeParseUrl(url)
 
@@ -96,7 +96,7 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
                 alt=""
               />
               <span className="text">{originPageTitle}</span>
-              {indexStatus === "finish" ? (
+              {chunkStatus === "finish" ? (
                 <Tag color="green">
                   {t(
                     "translation:loggedHomePage.homePage.weblinkList.item.read",
@@ -236,7 +236,9 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
   // 节流的处理
   const handleScroll = throttle(
     (event: React.UIEvent<HTMLElement, UIEvent>) => {
-      const { webLinkList } = useWeblinkStore.getState()
+      const { webLinkList, isWebLinkListVisible } = useWeblinkStore.getState()
+
+      if (!isWebLinkListVisible) return
 
       // 获取列表的滚动高度，以及现在的列表数量，当还存在 2 个时触发滚动
       const scrollTopElem = document
@@ -262,8 +264,6 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
       loadMore(1)
     }
   }, [webLinkStore?.isWebLinkListVisible])
-
-  console.log("visible", webLinkStore.isWebLinkListVisible)
 
   return (
     <div style={{ width: "100%" }}>

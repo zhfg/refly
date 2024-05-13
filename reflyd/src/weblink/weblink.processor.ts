@@ -2,20 +2,27 @@ import { Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
 
-import { WebLinkDTO } from './dto';
+import { WebLinkDTO } from './weblink.dto';
 import { WeblinkService } from './weblink.service';
-import { QUEUE_STORE_LINK } from '../utils/const';
+import { PROCESS_LINK_BY_USER_CHANNEL, PROCESS_LINK_CHANNEL, QUEUE_WEBLINK } from '../utils/const';
 
-@Processor(QUEUE_STORE_LINK)
+@Processor(QUEUE_WEBLINK)
 export class WeblinkProcessor {
   private readonly logger = new Logger(WeblinkProcessor.name);
 
   constructor(private weblinkService: WeblinkService) {}
 
-  @Process('indexWebLink')
-  async handleWebLink(job: Job<WebLinkDTO>) {
-    this.logger.log(`handle web link, job: ${JSON.stringify(job)}`);
+  @Process(PROCESS_LINK_BY_USER_CHANNEL)
+  async handleWebLinkForUser(job: Job<WebLinkDTO>) {
+    this.logger.log(`[handleWebLinkForUser] job: ${JSON.stringify(job)}`);
 
-    await this.weblinkService.processLinkFromStoreQueue(job.data);
+    await this.weblinkService.processLinkByUser(job.data);
+  }
+
+  @Process(PROCESS_LINK_CHANNEL)
+  async handleWebLink(job: Job<WebLinkDTO>) {
+    this.logger.log(`[handleWebLink] job: ${JSON.stringify(job)}`);
+
+    await this.weblinkService.processLink(job.data);
   }
 }

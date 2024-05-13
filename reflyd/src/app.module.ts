@@ -9,6 +9,7 @@ import { UserModule } from './user/user.module';
 import { LlmModule } from './llm/llm.module';
 import { AccountModule } from './account/account.module';
 import { WeblinkModule } from './weblink/weblink.module';
+import { RAGModule } from './rag/rag.module';
 import { AigcModule } from './aigc/aigc.module';
 import { ConversationModule } from './conversation/conversation.module';
 
@@ -29,13 +30,10 @@ import { AppController } from './app.controller';
             autoLogging: true,
             base: null,
             quietReqLogger: true,
-            genReqId: () =>
-              api.trace.getSpan(api.context.active())?.spanContext()?.traceId,
+            genReqId: () => api.trace.getSpan(api.context.active())?.spanContext()?.traceId,
             level: 'debug',
             transport:
-              process.env.NODE_ENV !== 'production'
-                ? { target: 'pino-pretty' }
-                : undefined,
+              process.env.NODE_ENV !== 'production' ? { target: 'pino-pretty' } : undefined,
           },
         };
       },
@@ -57,6 +55,7 @@ import { AppController } from './app.controller';
     WeblinkModule,
     LlmModule,
     AigcModule,
+    RAGModule,
   ],
   controllers: [AppController],
 })

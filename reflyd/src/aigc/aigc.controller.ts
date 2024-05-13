@@ -1,30 +1,16 @@
-import {
-  Controller,
-  Get,
-  Post,
-  UseGuards,
-  Request,
-  Query,
-  Param,
-} from '@nestjs/common';
+import { Controller, Logger, Get, Post, UseGuards, Request, Query, Param } from '@nestjs/common';
 import omit from 'lodash.omit';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
-import {
-  Content,
-  DigestListRequest,
-  DigestListResponse,
-  FeedResponse,
-} from './aigc.dto';
+import { Content, DigestListRequest, DigestListResponse, FeedResponse } from './aigc.dto';
 import { AigcService } from './aigc.service';
-import { LoggerService } from '../common/logger.service';
 
 @Controller('aigc')
 export class AigcController {
-  constructor(private logger: LoggerService, private aigcService: AigcService) {
-    this.logger.setContext(AigcController.name);
-  }
+  private logger = new Logger(AigcController.name);
+
+  constructor(private aigcService: AigcService) {}
 
   @UseGuards(JwtAuthGuard)
   @Get('feed')
