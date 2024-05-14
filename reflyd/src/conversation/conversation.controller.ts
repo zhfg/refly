@@ -14,16 +14,13 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import {
-  SummaryParam,
   CreateConversationParam,
   CreateConversationResponse,
   ListConversationResponse,
-  QUICK_ACTION_TYPE,
 } from './conversation.dto';
 import { ApiParam, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
-import { WeblinkService } from '../weblink/weblink.service';
 import { TASK_TYPE, type Task } from './conversation.dto';
 import { Conversation } from '@prisma/client';
 
@@ -31,10 +28,7 @@ import { Conversation } from '@prisma/client';
 export class ConversationController {
   private logger = new Logger(ConversationController.name);
 
-  constructor(
-    private conversationService: ConversationService,
-    private weblinkService: WeblinkService,
-  ) {}
+  constructor(private conversationService: ConversationService) {}
 
   @UseGuards(JwtAuthGuard)
   @Post('new')

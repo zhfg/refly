@@ -13,6 +13,14 @@ export function genConvID(): string {
   return 'cv-' + createId();
 }
 
+export function genResourceID(): string {
+  return 'r-' + createId();
+}
+
+export function genCollectionID(): string {
+  return 'cl-' + createId();
+}
+
 export function sha256Hash(str: string): string {
   const hash = crypto.createHash('sha256');
   hash.update(str);
