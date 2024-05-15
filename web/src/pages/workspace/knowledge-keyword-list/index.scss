@@ -3,7 +3,6 @@
   flex-direction: row;
   align-items: center;
   margin: 0 auto;
-  padding: 20px 60px;
   border-bottom: 0.5px solid rgba(0, 0, 0, 0.16);
   box-sizing: border-box;
   width: 100%;
@@ -73,13 +72,17 @@
 
   .trending-topic-item {
     margin-right: 8px;
+    margin-top: 8px;
+
     button {
       width: auto;
+      font-size: 14px;
       padding: 0 12px;
-      height: 30px;
-      border-radius: 15px;
-      background: #eef2ff;
-      color: #4b587c;
+      height: 36px;
+      border-radius: 8px;
+      background: #fcfcf9;
+      color: rgba(0, 0, 0, 0.8);
+      border: 1px solid rgba(0, 0, 0, 0.1);
     }
   }
 }

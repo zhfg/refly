@@ -74,7 +74,7 @@ export const KnowledgeKeywordList = () => {
 
   // TODO: 这里后续国际化的时候还需要改进
   return (
-    <div className="today-header-container">
+    <div className="knowledge-keyword-list-container">
       <div className="trending-topic-container">
         {isFetching ? (
           <div className={classNames("trending-topics")}>
@@ -104,12 +104,14 @@ export const KnowledgeKeywordList = () => {
                 onClick={() => {
                   navigate(`/digest/topic/${item?.id}`)
                 }}>
-                <Button>{item?.topic?.name}</Button>
+                <Button icon={<IconBulb />}>{item?.topic?.name}</Button>
               </div>
             ))}
             {digestTopicStore?.topicList?.length > 0 && (
               <div className="trending-topic-item see-all">
-                <Button onClick={() => navigate("/digest/topics")}>
+                <Button
+                  onClick={() => navigate("/digest/topics")}
+                  icon={<IconBulb />}>
                   {t("knowledgeLibrary.header.seeAll")}+
                   {digestTopicStore?.total || 0}
                 </Button>
