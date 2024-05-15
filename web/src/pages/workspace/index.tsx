@@ -4,6 +4,7 @@ import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels"
 
 // 自定义组件
 import { LeftAssistPanel } from "./left-assist-panel"
+import { ContentPanel } from "./content-panel"
 // utils
 // 自定义方法
 // stores
@@ -77,11 +78,17 @@ const Workspace = () => {
         <PanelGroup
           direction="horizontal"
           className="workspace-panel-container">
-          <Panel defaultSize={20} minSize={20}>
+          <Panel
+            defaultSize={20}
+            minSize={20}
+            maxSize={50}
+            className="workspace-left-assist-panel">
             <LeftAssistPanel />
           </Panel>
-          <PanelResizeHandle />
-          <Panel minSize={70}>middle</Panel>
+          <PanelResizeHandle className="workspace-panel-resize" />
+          <Panel minSize={50} className="workspace-content-panel">
+            <ContentPanel />
+          </Panel>
         </PanelGroup>
       </div>
     </div>

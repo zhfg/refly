@@ -114,13 +114,13 @@ export const ThreadLibrary = () => {
         className="thread-library-list"
         wrapperStyle={{ width: "100%" }}
         bordered={false}
-        header={
-          <div className="feed-title-container">
-            <p className="feed-title">
-              <span>{t("threadLibrary.title")}</span>
-            </p>
-          </div>
-        }
+        // header={
+        //   <div className="feed-title-container">
+        //     <p className="feed-title">
+        //       <span>{t("threadLibrary.title")}</span>
+        //     </p>
+        //   </div>
+        // }
         pagination={false}
         offsetBottom={50}
         dataSource={threadStore?.threads}
