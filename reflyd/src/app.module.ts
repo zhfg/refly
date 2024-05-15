@@ -28,7 +28,7 @@ import { KnowledgeModule } from './knowledge/knowledge.module';
       useFactory: async () => {
         return {
           pinoHttp: {
-            autoLogging: true,
+            autoLogging: false,
             base: null,
             quietReqLogger: true,
             genReqId: () => api.trace.getSpan(api.context.active())?.spanContext()?.traceId,

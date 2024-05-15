@@ -1,15 +1,22 @@
+import _ from 'lodash';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ResourceType } from '@prisma/client';
+import { Resource, ResourceType } from '@prisma/client';
 
 export class WeblinkMeta {
   @ApiProperty()
   url: string;
 
   @ApiProperty()
-  title: string;
+  linkId?: string;
+
+  @ApiProperty()
+  title?: string;
 
   @ApiPropertyOptional()
   storageKey?: string;
+
+  @ApiPropertyOptional()
+  parsedDocStorageKey?: string;
 }
 
 export class ResourceListItem {
@@ -19,25 +26,52 @@ export class ResourceListItem {
   @ApiProperty({ enum: ResourceType })
   resourceType: ResourceType;
 
-  @ApiProperty({ type: WeblinkMeta })
-  data: WeblinkMeta;
+  @ApiPropertyOptional({ type: WeblinkMeta })
+  data?: WeblinkMeta;
+
+  @ApiProperty()
+  isPublic: boolean;
 
   @ApiProperty()
   createdAt: Date;
 
   @ApiProperty()
   updatedAt: Date;
+
+  userId?: number;
 }
 
-export class CreateResourceParam {
+export class ResourceDetail extends ResourceListItem {
+  @ApiPropertyOptional()
+  doc?: string;
+}
+
+export class GetResourceDetailResponse {
+  @ApiProperty({ type: ResourceDetail })
+  data: ResourceDetail;
+}
+
+export class UpsertResourceRequest {
   @ApiProperty({ enum: ResourceType })
-  type: ResourceType;
+  resourceType: ResourceType;
+
+  @ApiProperty()
+  collectionId: string;
+
+  @ApiProperty()
+  title: string;
 
   @ApiProperty()
   data: WeblinkMeta;
+
+  @ApiPropertyOptional()
+  resourceId?: string; // only used for update
+
+  @ApiPropertyOptional()
+  isPublic?: boolean;
 }
 
-export class CreateResourceResponse {
+export class UpsertResourceResponse {
   @ApiProperty({ type: ResourceListItem })
   data: ResourceListItem;
 }
@@ -52,6 +86,10 @@ export class QueryResourceParam {
   collectionId?: string;
 }
 
+export class DeleteResourceRequest {
+  resourceId: string;
+}
+
 export class CollectionListItem {
   @ApiProperty()
   collectionId: string;
@@ -63,10 +101,15 @@ export class CollectionListItem {
   description?: string;
 
   @ApiProperty()
+  isPublic: boolean;
+
+  @ApiProperty()
   createdAt: Date;
 
   @ApiProperty()
   updatedAt: Date;
+
+  userId?: number; // only used for authorization check
 }
 
 export class CollectionDetail extends CollectionListItem {
@@ -74,15 +117,21 @@ export class CollectionDetail extends CollectionListItem {
   resources: ResourceListItem[];
 }
 
-export class CreateCollectionParam {
+export class UpsertCollectionRequest {
   @ApiProperty()
-  title: string;
+  title?: string;
 
   @ApiPropertyOptional()
   description?: string;
+
+  @ApiPropertyOptional()
+  collectionId?: string; // used for update
+
+  @ApiPropertyOptional()
+  isPublic?: boolean;
 }
 
-export class CreateCollectionResponse {
+export class UpsertCollectionResponse {
   @ApiProperty({ type: CollectionListItem })
   data: CollectionListItem;
 }
@@ -96,3 +145,12 @@ export class GetCollectionDetailResponse {
   @ApiProperty({ type: CollectionDetail })
   data: CollectionDetail;
 }
+
+export class DeleteCollectionRequest {
+  @ApiProperty()
+  collectionId: string;
+}
+
+export const convertResourcePoToListItem = (resource: Resource): ResourceListItem => {
+  return _.omit(resource, ['id', 'userId', 'deletedAt']);
+};

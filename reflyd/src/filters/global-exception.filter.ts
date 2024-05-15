@@ -21,7 +21,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     // Log the error for unknown exception
     if (!(exception instanceof HttpException)) {
       Sentry.captureException(exception);
-      this.logger.error(`Request: ${request.method} ${request.url} err: ` + exception);
+      console.error(exception);
+      this.logger.error(`Request: ${request.method} ${request.url} err: ${exception}`);
     }
 
     const httpStatus =
