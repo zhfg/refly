@@ -7,6 +7,8 @@ import {
   IconBook,
   IconTwitter,
   IconLanguage,
+  IconThunderbolt,
+  IconFire,
 } from "@arco-design/web-react/icon"
 import { openGetStartDocument } from "../../utils"
 // 静态资源
@@ -160,6 +162,13 @@ export const SiderLayout = () => {
           onClickMenuItem={handleNavClick}>
           <div className="sider-header">
             <MenuItem key="Home" className="custom-menu-item">
+              <IconThunderbolt style={{ fontSize: 20 }} />
+              <span className="sider-menu-title">
+                {t("loggedHomePage.siderMenu.news")}
+              </span>
+            </MenuItem>
+            <Divider />
+            <MenuItem key="Home" className="custom-menu-item">
               <IconHome style={{ fontSize: 20 }} />
               <span className="sider-menu-title">
                 {t("loggedHomePage.siderMenu.homePage")}
@@ -171,9 +180,9 @@ export const SiderLayout = () => {
               <span className="sider-menu-title">回忆</span>
             </MenuItem> */}
             <MenuItem key="ThreadLibrary" className="custom-menu-item">
-              <IconBook style={{ fontSize: 20 }} />
+              <IconFire style={{ fontSize: 20 }} />
               <span className="sider-menu-title">
-                {t("loggedHomePage.siderMenu.threadLibrary")}
+                {t("loggedHomePage.siderMenu.explore")}
               </span>
             </MenuItem>
           </div>

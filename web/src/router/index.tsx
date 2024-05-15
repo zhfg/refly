@@ -17,6 +17,8 @@ import { DigestArchive } from "@/pages/digest-timeline"
 
 // digest 详情
 import { DigestDetailPage } from "@/pages/digest-detail"
+// 页面
+import Workspace from "@/pages/workspace"
 
 // 这里用于分享之后的不需要鉴权的查看
 import { AIGCContentDetailPage } from "@/pages/aigc-content-detail"
@@ -84,7 +86,7 @@ export const AppRouter = (props: { layout?: any }) => {
   return (
     <Layout>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<Workspace />} />
         <Route path="/login" element={<Login />} />
         {/* <Route path="/feed" element={<Feed />} /> */}
         <Route path="/digest" element={<DigestToday />} />

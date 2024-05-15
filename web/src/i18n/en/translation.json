@@ -67,6 +67,17 @@
       "terms": "Terms of Service"
     }
   },
+  "workspace": {
+    "leftPanel": {
+      "welcomeTitle": "Hello, ",
+      "welcomeQuestion": "How can I help you today?",
+      "guessTitle": "Recommend Questions",
+      "keyword": {
+        "title": "Knowledge Category",
+        "seeMore": "See more categories"
+      }
+    }
+  },
   "loggedHomePage": {
     "newThreadText": "New Thread",
     "homePage": {
@@ -120,8 +131,10 @@
       }
     },
     "siderMenu": {
-      "homePage": "Home",
+      "homePage": "Workspace",
+      "news": "What's new?",
       "threadLibrary": "Threads",
+      "explore": "Explore",
       "getHelp": "Get Help",
       "download": "Download Extension"
     }

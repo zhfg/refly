@@ -67,6 +67,17 @@
       "terms": "条款和条件"
     }
   },
+  "workspace": {
+    "leftPanel": {
+      "welcomeTitle": "你好， ",
+      "welcomeQuestion": "有什么可以帮助您的吗? ",
+      "guessTitle": "猜你想问",
+      "keyword": {
+        "title": "知识归类",
+        "seeMore": "查看更多分类"
+      }
+    }
+  },
   "loggedHomePage": {
     "newThreadText": "新会话",
     "homePage": {
@@ -130,7 +141,9 @@
       }
     },  
     "siderMenu": {
-      "homePage": "主页",
+      "homePage": "工作台",
+      "news": "新特性",
+      "explore": "探索",
       "threadLibrary": "会话库",
       "getHelp": "获得帮助",
       "download": "下载插件"
