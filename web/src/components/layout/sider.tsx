@@ -48,7 +48,7 @@ export const SiderLayout = () => {
   const storageUserProfile = safeParseJSON(
     localStorage.getItem("refly-user-profile"),
   )
-  const notShowLoginBtn = storageUserProfile?.id || userStore?.userProfile?.id
+  const notShowLoginBtn = storageUserProfile?.uid || userStore?.userProfile?.uid
   console.log("storageUserProfile", storageUserProfile, userStore?.userProfile)
 
   const selectedKey = getNavSelectedKeys(location.pathname)
@@ -184,7 +184,7 @@ export const SiderLayout = () => {
                 {t("loggedHomePage.siderMenu.getHelp")}
               </span>
             </MenuItem>
-            {!!userStore.userProfile?.id && (
+            {!!userStore.userProfile?.uid && (
               <>
                 <Divider style={{ margin: "8px 0" }} />
                 <MenuItem

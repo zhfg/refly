@@ -47,7 +47,7 @@ export const useGetUserSettings = () => {
   const getLoginStatus = async () => {
     try {
       let { localSettings, userProfile } = useUserStore.getState()
-      const lastStatusIsLogin = !!userProfile?.id
+      const lastStatusIsLogin = !!userProfile?.uid
 
       const res = await sendToBackground({
         name: "getUserInfo",
@@ -126,7 +126,7 @@ export const useGetUserSettings = () => {
     if (data?.status === "success") {
       try {
         let { localSettings, userProfile } = useUserStore.getState()
-        const lastStatusIsLogin = !!userProfile?.id
+        const lastStatusIsLogin = !!userProfile?.uid
 
         const res = await sendToBackground({
           name: "getUserInfo",

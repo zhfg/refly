@@ -10,7 +10,7 @@ export const useIsLogin = () => {
   const storageUserProfile = safeParseJSON(
     localStorage.getItem("refly-user-profile"),
   )
-  isLoggedRef.current = storageUserProfile?.id || userStore?.userProfile?.id
+  isLoggedRef.current = storageUserProfile?.uid || userStore?.userProfile?.uid
 
   return {
     isLoggedRef,

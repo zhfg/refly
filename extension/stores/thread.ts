@@ -4,7 +4,6 @@ import type {} from "@redux-devtools/extension"
 import type { OutputLocale } from "~utils/i18n"
 
 export interface Thread {
-  id: string
   convId: string
   userId: string
   title: string

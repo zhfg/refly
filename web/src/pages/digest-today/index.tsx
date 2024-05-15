@@ -157,7 +157,7 @@ export const DigestToday = () => {
           onReachBottom={currentPage => fetchData(currentPage)}
           render={(item: Digest) => (
             <List.Item
-              key={item?.id}
+              key={item?.cid}
               style={{
                 padding: "20px 0",
                 borderBottom: "1px solid var(--color-fill-3)",

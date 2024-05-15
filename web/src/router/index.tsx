@@ -44,7 +44,7 @@ export const AppRouter = (props: { layout?: any }) => {
   const storageUserProfile = safeParseJSON(
     localStorage.getItem("refly-user-profile"),
   )
-  const notShowLoginBtn = storageUserProfile?.id || userStore?.userProfile?.id
+  const notShowLoginBtn = storageUserProfile?.uid || userStore?.userProfile?.uid
 
   // 获取 locale
   const storageLocalSettings = safeParseJSON(

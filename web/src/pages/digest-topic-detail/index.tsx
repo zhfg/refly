@@ -206,7 +206,7 @@ export const DigestTopicDetail = () => {
                       className="feed-list-item-continue-ask"
                       onClick={() => {
                         copyToClipboard(
-                          `${getClientOrigin()}/content/${item?.id}`,
+                          `${getClientOrigin()}/content/${item?.cid}`,
                         )
                         message.success(t("topicDetail.item.copyNotify"))
                       }}>

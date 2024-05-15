@@ -54,7 +54,7 @@ export const AskFollowUpModal = (props: SummaryModalProps) => {
       const res = await createNewConversation({
         body: {
           ...newConversationPayload,
-          contentId: aigcContent?.id,
+          contentId: aigcContent?.cid,
           locale: localSettings?.outputLocale,
         },
       })

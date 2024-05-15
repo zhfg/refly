@@ -18,7 +18,7 @@ export const usePollingPingCurrentWeblink = () => {
     const { currentWeblink } = useWeblinkStore.getState()
     const { showSider } = useSiderStore.getState()
 
-    const isLogged = !!userProfile?.id
+    const isLogged = !!userProfile?.uid
     const isCurrentWeblinkStatusNotComplete = ["init", "processing"].includes(
       currentWeblink?.parseStatus,
     )
@@ -34,7 +34,7 @@ export const usePollingPingCurrentWeblink = () => {
     return false
   }
 
-  const isLogged = !!userStore?.userProfile?.id
+  const isLogged = !!userStore?.userProfile?.uid
   const isValidStartPing = checkValidStartPing()
   const showSider = siderStore?.showSider
   console.log("isLogged", isLogged, isValidStartPing)

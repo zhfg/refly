@@ -1,7 +1,6 @@
 import type { Message } from "./message"
 
 export type Conversation = {
-  id?: string
   convId: string
   items?: Message[]
   origin: string
