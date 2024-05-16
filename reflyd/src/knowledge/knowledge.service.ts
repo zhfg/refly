@@ -143,7 +143,10 @@ export class KnowledgeService {
     const resource = await this.prisma.resource.findFirst({
       where: { resourceId, deletedAt: null },
     });
-    const detail: ResourceDetail = { ...resource, data: JSON.parse(resource.meta) };
+    const detail: ResourceDetail = {
+      ..._.omit(resource, ['id']),
+      data: JSON.parse(resource.meta),
+    };
 
     if (needDoc) {
       const weblinkMeta = JSON.parse(resource.meta) as WeblinkMeta;

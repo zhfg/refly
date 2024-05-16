@@ -23,6 +23,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       Sentry.captureException(exception);
       console.error(exception);
       this.logger.error(`Request: ${request.method} ${request.url} err: ${exception}`);
+    } else {
+      this.logger.warn(`Request: ${request.method} ${request.url} err: ${exception}`);
     }
 
     const httpStatus =
