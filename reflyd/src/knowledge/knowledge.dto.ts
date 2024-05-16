@@ -84,6 +84,8 @@ export class ListResourceResponse {
 export class QueryResourceParam {
   resourceId?: string;
   collectionId?: string;
+  page?: number;
+  pageSize?: number;
 }
 
 export class DeleteResourceRequest {

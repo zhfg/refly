@@ -6,9 +6,11 @@ import {
   Post,
   Query,
   Req,
+  UseGuards,
+  ParseIntPipe,
+  DefaultValuePipe,
   BadRequestException,
   UnauthorizedException,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiResponse } from '@nestjs/swagger';
 import { KnowledgeService } from './knowledge.service';
@@ -21,11 +23,11 @@ import {
   GetCollectionDetailResponse,
   ListCollectionResponse,
   ListResourceResponse,
-  QueryResourceParam,
   GetResourceDetailResponse,
   DeleteCollectionRequest,
   DeleteResourceRequest,
   convertResourcePoToListItem,
+  CollectionListItem,
 } from './knowledge.dto';
 
 @Controller('knowledge')
@@ -35,10 +37,14 @@ export class KnowledgeController {
   @UseGuards(JwtAuthGuard)
   @Get('collection/list')
   @ApiResponse({ type: ListCollectionResponse })
-  async listCollections(@Req() req): Promise<ListCollectionResponse> {
-    const colls = await this.knowledgeService.listCollections(req.user);
+  async listCollections(
+    @Req() req,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
+  ): Promise<ListCollectionResponse> {
+    const colls = await this.knowledgeService.listCollections(req.user, { page, pageSize });
     return {
-      data: colls.map((coll) => _.omit(coll, ['id', 'userId', 'deletedAt'])),
+      data: colls.map((coll) => _.omit(coll, ['id', 'userId', 'deletedAt']) as CollectionListItem),
     };
   }
 
@@ -98,9 +104,13 @@ export class KnowledgeController {
   async listResources(
     @Req() req,
     @Query('collectionId') collectionId: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListResourceResponse> {
-    const param: QueryResourceParam = { collectionId };
-    return { data: await this.knowledgeService.listResources(param) };
+    const resources = await this.knowledgeService.listResources({ collectionId, page, pageSize });
+    return {
+      data: resources.map((r) => convertResourcePoToListItem(r)),
+    };
   }
 
   @UseGuards(JwtAuthGuard)

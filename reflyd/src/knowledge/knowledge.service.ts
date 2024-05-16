@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { Collection, Prisma, User } from '@prisma/client';
+import { Prisma, Resource, User } from '@prisma/client';
 import _ from 'lodash';
 import { PrismaService } from '../common/prisma.service';
 import { MinioService } from '../common/minio.service';
@@ -9,12 +9,11 @@ import {
   UpsertCollectionRequest,
   UpsertResourceRequest,
   QueryResourceParam,
-  ResourceListItem,
   ResourceDetail,
   WeblinkMeta,
   CollectionListItem,
 } from './knowledge.dto';
-import { genCollectionID, genConvID, genResourceID, streamToString } from 'src/utils';
+import { genCollectionID, genResourceID, streamToString } from 'src/utils';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -28,10 +27,16 @@ export class KnowledgeService {
     private weblinkService: WeblinkService,
   ) {}
 
-  async listCollections(user: User) {
+  async listCollections(
+    user: User,
+    params: { page: number; pageSize: number },
+  ): Promise<CollectionListItem[]> {
+    const { page, pageSize } = params;
     return this.prisma.collection.findMany({
       where: { userId: user.id, deletedAt: null },
       orderBy: { updatedAt: 'desc' },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
     });
   }
 
@@ -103,12 +108,31 @@ export class KnowledgeService {
     });
   }
 
-  async listResources(param: QueryResourceParam): Promise<ResourceListItem[]> {
-    // TODO: support collection id query
+  async listResources(param: QueryResourceParam): Promise<Resource[]> {
+    const { collectionId, page = 1, pageSize = 10 } = param;
+
+    // Query resources by collection
+    if (collectionId) {
+      const data = await this.prisma.collection.findMany({
+        where: { collectionId, deletedAt: null },
+        include: {
+          resources: {
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+            orderBy: { updatedAt: 'desc' },
+          },
+        },
+      });
+      return data.length > 0 ? data[0].resources : [];
+    }
+
     const resources = await this.prisma.resource.findMany({
       where: { resourceId: param.resourceId, deletedAt: null },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
       orderBy: { updatedAt: 'desc' },
     });
+
     return resources.map((r) => ({
       ...r,
       data: JSON.parse(r.meta),
