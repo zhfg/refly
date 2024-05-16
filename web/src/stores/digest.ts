@@ -2,6 +2,7 @@ import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import type {} from "@redux-devtools/extension"
 import type { Digest, MetaRecord } from "@/types"
+import { fakeDigestList } from "@/fake-data/digest"
 
 interface DigestPayload {
   featureList: Digest[]
@@ -31,7 +32,7 @@ interface DigestState {
 }
 
 const defaultDigestPayload = {
-  featureList: [] as Digest[],
+  featureList: fakeDigestList as Digest[],
   pageSize: 10,
   currentPage: 1,
   hasMore: true,

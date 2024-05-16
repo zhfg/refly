@@ -56,7 +56,7 @@ export const SiderLayout = () => {
   const selectedKey = getNavSelectedKeys(location.pathname)
   const handleNavClick = (itemKey: string) => {
     switch (itemKey) {
-      case "Home": {
+      case "Workspace": {
         if (!notShowLoginBtn) {
           userStore.setLoginModalVisible(true)
         } else {
@@ -65,11 +65,11 @@ export const SiderLayout = () => {
         break
       }
 
-      case "ThreadLibrary": {
+      case "Explore": {
         if (!notShowLoginBtn) {
           userStore.setLoginModalVisible(true)
         } else {
-          navigate(`/thread`)
+          navigate(`/explore`)
         }
         break
       }
@@ -161,14 +161,14 @@ export const SiderLayout = () => {
           selectedKeys={[selectedKey]}
           onClickMenuItem={handleNavClick}>
           <div className="sider-header">
-            <MenuItem key="Home" className="custom-menu-item">
+            <MenuItem key="News" className="custom-menu-item">
               <IconThunderbolt style={{ fontSize: 20 }} />
               <span className="sider-menu-title">
                 {t("loggedHomePage.siderMenu.news")}
               </span>
             </MenuItem>
             <Divider />
-            <MenuItem key="Home" className="custom-menu-item">
+            <MenuItem key="Workspace" className="custom-menu-item">
               <IconHome style={{ fontSize: 20 }} />
               <span className="sider-menu-title">
                 {t("loggedHomePage.siderMenu.homePage")}
@@ -179,7 +179,7 @@ export const SiderLayout = () => {
               <IconHistory style={{ fontSize: 20 }} />
               <span className="sider-menu-title">回忆</span>
             </MenuItem> */}
-            <MenuItem key="ThreadLibrary" className="custom-menu-item">
+            <MenuItem key="Explore" className="custom-menu-item">
               <IconFire style={{ fontSize: 20 }} />
               <span className="sider-menu-title">
                 {t("loggedHomePage.siderMenu.explore")}

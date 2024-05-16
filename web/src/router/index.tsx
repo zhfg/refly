@@ -2,7 +2,6 @@ import React, { useEffect } from "react"
 import { Route, Routes, useMatch } from "react-router-dom"
 
 // 自定义组件
-import Dashboard from "@/components/dashboard"
 import { Thread } from "@/components/thread-item/thread"
 import { ThreadLibrary } from "@/components/thread-library"
 import { Settings } from "@/components/settings/index"
@@ -19,6 +18,7 @@ import { DigestArchive } from "@/pages/digest-timeline"
 import { DigestDetailPage } from "@/pages/digest-detail"
 // 页面
 import Workspace from "@/pages/workspace"
+import KnowledgeBase from "@/pages/knowledge-base/layout"
 
 // 这里用于分享之后的不需要鉴权的查看
 import { AIGCContentDetailPage } from "@/pages/aigc-content-detail"
@@ -87,6 +87,7 @@ export const AppRouter = (props: { layout?: any }) => {
     <Layout>
       <Routes>
         <Route path="/" element={<Workspace />} />
+        <Route path="/knowledge-base/:kbId" element={<KnowledgeBase />} />
         <Route path="/login" element={<Login />} />
         {/* <Route path="/feed" element={<Feed />} /> */}
         <Route path="/digest" element={<DigestToday />} />

@@ -1,7 +1,7 @@
 import { Tabs } from "@arco-design/web-react"
 
 // 自定义组件
-import { DigestToday } from "@/pages/digest-today"
+import { KnowledgeBaseList } from "@/components/knowledge-base-list"
 import { ThreadLibrary } from "@/components/thread-library"
 
 // 自定义组件
@@ -18,10 +18,10 @@ export const ContentPanel = () => {
           title={
             <span>
               <IconFolder style={{ marginRight: 6 }} />
-              知识集
+              知识库
             </span>
           }>
-          <DigestToday />
+          <KnowledgeBaseList />
         </TabPanel>
         <TabPanel
           key="knowledge-resource"
@@ -31,7 +31,7 @@ export const ContentPanel = () => {
               资源库
             </span>
           }>
-          <DigestToday />
+          <KnowledgeBaseList />
         </TabPanel>
         <TabPanel
           key="thread-library"
