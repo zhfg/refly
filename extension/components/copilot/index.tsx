@@ -2,12 +2,9 @@ import { Tabs, Input } from "@arco-design/web-react"
 import { Breadcrumb, Button } from "@arco-design/web-react"
 
 // 自定义组件
-import { DigestToday } from "@/pages/digest-today"
-import { ThreadLibrary } from "@/components/thread-library"
-
-// 自定义组件
 import {
   IconApps,
+  IconArchive,
   IconBook,
   IconCaretDown,
   IconDown,
@@ -21,32 +18,24 @@ import {
 } from "@arco-design/web-react/icon"
 // 自定义样式
 import "./index.scss"
-import { fakeConversations } from "@/fake-data/conversation"
-import { MessageType } from "@/types"
+import { MessageType } from "~/types"
 import { AssistantMessage, HumanMessage } from "./message"
+import { ChatHeader } from "~components/home/header"
+import { fakeConversations } from "~fake-data/conversation"
+import { ContentSelectorBtn } from "~components/content-selector-btn"
+import { SearchTarget, useSearchStateStore } from "~stores/search-state"
 
 const TextArea = Input.TextArea
 
 export const AICopilot = () => {
-  const conv = fakeConversations?.[0]
+  const messages = fakeConversations?.[0]?.messages
+  const searchStateStore = useSearchStateStore()
 
   return (
     <div className="ai-copilot-container">
-      <div className="knowledge-base-detail-header">
-        <div className="knowledge-base-detail-navigation-bar">
-          <div className="conv-meta">
-            <IconMessage style={{ color: "rgba(0, 0, 0, .6)" }} />
-            <p className="conv-title">elmo chat 和 devv 比较如何？</p>
-          </div>
-        </div>
-        <div className="knowledge-base-detail-menu">
-          <Button
-            type="text"
-            icon={<IconMore style={{ fontSize: 16 }} />}></Button>
-        </div>
-      </div>
+      <ChatHeader />
       <div className="ai-copilot-message-container">
-        {conv?.messages?.map((item, index) =>
+        {messages?.map((item, index) =>
           item.type === MessageType.Human ? (
             <HumanMessage message={item} key={index} />
           ) : (
@@ -80,7 +69,6 @@ export const AICopilot = () => {
               </Button>
             </div>
           </div>
-
           <div className="skill-container">
             {["搜索", "写作", "翻译", "数据分析", "更多技能"].map(
               (item, index) => (

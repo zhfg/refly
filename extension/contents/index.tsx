@@ -12,6 +12,7 @@ import LoginCSSText from "data-text:~/components/login/index.scss"
 import EmptyThreadLibraryCSSText from "data-text:~/components/empty-thread-library-status/index.scss"
 import SelectedContentListCSS from "data-text:~/components/selected-content-list/index.scss"
 import CurrentWeblinkQuickSummaryCSS from "data-text:~/components/current-weblink-quick-summary/index.scss"
+import CopilotCSS from "data-text:~/components/copilot/index.scss"
 import type { PlasmoGetInlineAnchor, PlasmoGetShadowHostId } from "plasmo"
 import * as _Sentry from "@sentry/react"
 import React, { useEffect, Suspense } from "react"
@@ -75,6 +76,7 @@ export const getStyle = () => {
     ArcoCSS +
     CSSText +
     HomeCSSText +
+    CopilotCSS +
     ThreadLibraryCSSText +
     ThreadItemCSSText +
     WeblinkCSSText +
