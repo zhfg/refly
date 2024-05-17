@@ -10,10 +10,18 @@ import { KnowledgeBaseResourceDetail } from "../resource-detail"
 import { IconMore } from "@arco-design/web-react/icon"
 // 样式
 import "./index.scss"
+import { useResizePanel } from "@/hooks/use-resize-panel"
 
 const BreadcrumbItem = Breadcrumb.Item
 
 export const KnowledgeBaseDetail = () => {
+  const [minSize] = useResizePanel({
+    groupSelector: "knowledge-base-detail-panel-container",
+    resizeSelector: "knowledge-base-detail-panel-resize",
+    initialMinSize: 24,
+    initialMinPixelSize: 200,
+  })
+
   return (
     <div className="knowledge-base-detail-container">
       <div className="knowledge-base-detail-header">
@@ -37,8 +45,8 @@ export const KnowledgeBaseDetail = () => {
         direction="horizontal"
         className="knowledge-base-detail-panel-container">
         <Panel
-          defaultSize={24}
-          minSize={24}
+          defaultSize={minSize}
+          minSize={minSize}
           maxSize={50}
           className="knowledge-base-detail-directory-panel">
           <KnowledgeBaseDirectory />

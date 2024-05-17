@@ -20,8 +20,6 @@ import { useSearchableList } from "@/components/use-searchable-list"
 import { useEffect, useState } from "react"
 import type { Resource } from "@/types/knowledge-base"
 
-const InputSearch = Input.Search
-
 export const KnowledgeBaseDirectory = () => {
   const [searchVal, setSearchVal] = useState("")
   const [directoryList, setDirectoryList, filter] = useSearchableList<Resource>(

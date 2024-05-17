@@ -1,4 +1,4 @@
-import { termsMdText } from "./markdown"
+import { fakeTermsMdText } from "./markdown"
 
 export const fakeKnowledgeBaseDetail = {
   name: "Refly 产品设计参考大全",
@@ -16,7 +16,7 @@ export const fakeKnowledgeResourceDetail = {
     keywords: ["Prototyping", "Developer Tools"],
     title: "Langchain Quick Start",
   },
-  content: termsMdText,
+  content: fakeTermsMdText,
 }
 
 export const fakeKnowledgeBaseDirectoryList = [

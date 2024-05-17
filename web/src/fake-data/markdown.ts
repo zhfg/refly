@@ -1,4 +1,6 @@
-export const termsMdText = `# ReflyAI Terms of Service
+export const fakeTermsMdText = `
+
+![](//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/volcengine-solutions-finance.png~tplv-uwbnlip3yd-png.png)
 
 > Effective Date: March 26, 2024
 
