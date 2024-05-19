@@ -36,6 +36,7 @@ import { SelectedContentList } from "~components/selected-content-list"
 import { useSearchQuickActionStore } from "~stores/search-quick-action"
 import { useTranslation } from "react-i18next"
 import { CurrentWeblinkQuickSummary } from "~components/current-weblink-quick-summary"
+import { SaveKnowledgeBaseModal } from "~components/save-knowledge-base-modal"
 
 const TextArea = Input.TextArea
 
@@ -272,7 +273,7 @@ const Home = (props: ChatProps) => {
         {contentSelectorStore?.showSelectedMarks ? (
           <SelectedContentList marks={contentSelectorStore.marks} />
         ) : null}
-        <CurrentWeblinkQuickSummary />
+        {/* <CurrentWeblinkQuickSummary /> */}
       </div>
 
       <WeblinkList
@@ -285,6 +286,7 @@ const Home = (props: ChatProps) => {
           return elem as HTMLElement
         }}
       />
+      <SaveKnowledgeBaseModal />
     </div>
   )
 }
