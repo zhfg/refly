@@ -280,6 +280,68 @@ model WeblinkUserMark {
   @@map("weblink_user_marks")
 }
 
+/// 知识库资源
+model Resource {
+  /// 主键
+  id           BigInt       @id @default(autoincrement())
+  /// 资源项 id
+  resourceId   String       @unique @map("resource_id")
+  /// 资源类型
+  resourceType ResourceType @map("resource_type")
+  /// 用户主键
+  userId       Int          @map("user_id")
+  /// 是否公开
+  isPublic     Boolean      @default(false) @map("is_public")
+  /// 标题
+  title        String       @map("title")
+  /// 资源元数据
+  meta         String       @map("meta")
+  /// 创建时间
+  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz()
+  /// 更新时间
+  updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
+  /// 软删除标记
+  deletedAt    DateTime?    @map("deleted_at") @db.Timestamptz()
+
+  /// 关联的知识集
+  collections Collection[]
+
+  @@index([resourceId])
+  @@index([userId, updatedAt])
+  @@map("resources")
+}
+
+/// 知识集
+model Collection {
+  /// 主键
+  id           BigInt    @id @default(autoincrement())
+  /// 知识集 id
+  collectionId String    @unique @map("collection_id")
+  /// 标题
+  title        String    @map("title")
+  /// 描述
+  description  String?   @default("") @map("description")
+  /// 用户主键
+  userId       Int       @map("user_id")
+  /// 是否为默认集合（资源会默认添加到此集合）
+  isDefault    Boolean   @default(false) @map("is_default")
+  /// 是否公开
+  isPublic     Boolean   @default(false) @map("is_public")
+  /// 创建时间
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  /// 更新时间
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  /// 软删除标记
+  deletedAt    DateTime? @map("deleted_at") @db.Timestamptz()
+
+  /// 包含的资源
+  resources Resource[]
+
+  @@index([collectionId])
+  @@index([userId, updatedAt])
+  @@map("collections")
+}
+
 /// 生成内容
 model AigcContent {
   /// 主键
@@ -345,6 +407,10 @@ model UserDigest {
 
   // @@unique([userId, date, topicKey])
   @@map("user_digests")
+}
+
+enum ResourceType {
+  weblink
 }
 
 enum ContentSourceType {
