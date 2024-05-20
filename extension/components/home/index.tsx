@@ -37,6 +37,7 @@ import { useSearchQuickActionStore } from "~stores/search-quick-action"
 import { useTranslation } from "react-i18next"
 import { CurrentWeblinkQuickSummary } from "~components/current-weblink-quick-summary"
 import { SaveKnowledgeBaseModal } from "~components/save-knowledge-base-modal"
+import { useKnowledgeBaseStore } from "~stores/knowledge-base"
 
 const TextArea = Input.TextArea
 
@@ -58,6 +59,7 @@ const Home = (props: ChatProps) => {
   const contentSelectorStore = useContentSelectorStore()
   const searchQuickActionStore = useSearchQuickActionStore()
   const searchStateStore = useSearchStateStore()
+  const knowledgeBaseStore = useKnowledgeBaseStore()
 
   const { t, i18n } = useTranslation()
 
@@ -286,7 +288,9 @@ const Home = (props: ChatProps) => {
           return elem as HTMLElement
         }}
       />
-      <SaveKnowledgeBaseModal />
+      {knowledgeBaseStore.isSaveKnowledgeBaseModalVisible ? (
+        <SaveKnowledgeBaseModal />
+      ) : null}
     </div>
   )
 }

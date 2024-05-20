@@ -105,7 +105,8 @@ export const SaveKnowledgeBaseModal = () => {
       )
       console.log("knowledgeBaseLocation", knowledgeBaseLocation)
       if (knowledgeBaseLocation === "newlyKnowledgeBase") {
-        body = { ...body, collectionName: document?.title }
+        const collectionName = form.getFieldValue("new-knowledge-base-title")
+        body = { ...body, collectionName }
       }
 
       const resourceRes = await newResource({
@@ -185,11 +186,19 @@ export const SaveKnowledgeBaseModal = () => {
       loadMore(1)
     }
   }, [knowledgeBaseStore?.isSaveKnowledgeBaseModalVisible])
+  useEffect(() => {
+    return () => {
+      console.log("exit exit")
+      knowledgeBaseStore.resetState()
+    }
+  }, [])
 
   return (
     <Modal
       title="保存资源到知识库"
       style={{ width: "80%" }}
+      unmountOnExit={true}
+      escToExit
       getPopupContainer={() =>
         document
           .querySelector("#refly-main-app")
@@ -199,9 +208,10 @@ export const SaveKnowledgeBaseModal = () => {
       onOk={() => onOk()}
       okButtonProps={{ loading: confirmLoading }}
       confirmLoading={confirmLoading}
-      onCancel={() =>
+      onCancel={() => {
+        knowledgeBaseStore.resetState()
         knowledgeBaseStore.updateIsSaveKnowledgeBaseModalVisible(false)
-      }>
+      }}>
       <Form
         layout="vertical"
         {...formItemLayout}

@@ -10,25 +10,19 @@ const handler = async (
   console.log(req.body)
 
   try {
-    const [err, resourceRes] = await extRequest<ResourceListItem>({
+    const [err, resourceRes] = await extRequest<{
+      success: boolean
+      data: ResourceDetail
+    }>({
       name: "newResource",
       body: req.body,
     })
-    if (err) {
-      return {
-        success: false,
-        errMsg: err,
-      }
-    } else {
-      return {
-        success: true,
-        data: resourceRes,
-      }
-    }
+
+    return resourceRes
   } catch (err) {
     return {
       success: false,
-      errMsg: err,
+      errMsg: String(err),
     }
   }
 }

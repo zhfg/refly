@@ -127,7 +127,7 @@ export async function extRequest<T>(
 ): Promise<[ApiErr | null, T | null, any?]> {
   const res = await sendToBackground(payload)
 
-  return res
+  return [null, res]
 }
 
 export const queryJoin = (url = "", query: QUERY | string) => {
