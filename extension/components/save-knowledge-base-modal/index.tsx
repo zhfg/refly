@@ -179,7 +179,7 @@ export const SaveKnowledgeBaseModal = () => {
           ?.shadowRoot?.querySelector(".main")
       }
       visible={knowledgeBaseStore.isSaveKnowledgeBaseModalVisible}
-      onOk={onOk}
+      onOk={() => onOk()}
       okButtonProps={{ loading: confirmLoading }}
       confirmLoading={confirmLoading}
       onCancel={() =>
@@ -218,12 +218,7 @@ export const SaveKnowledgeBaseModal = () => {
               required
               field="select-knowledge-base"
               rules={[{ required: true, message: "知识库是必填项" }]}>
-              <Select
-                allowClear
-                showSearch
-                defaultValue={
-                  knowledgeBaseStore?.knowledgeBaseList?.[0]?.title
-                }>
+              <Select allowClear showSearch>
                 {knowledgeBaseStore?.knowledgeBaseList.map((option) => (
                   <Option
                     key={option?.collectionId}
@@ -255,11 +250,21 @@ export const SaveKnowledgeBaseModal = () => {
             </Select>
           </FormItem>
         ) : null}
-        {(selectedStoreMannagerState as any)?.value === "新建知识库" ? (
-          <Typography.Paragraph blockquote>
-            将会以当前网页内容信息创建新知识库
-          </Typography.Paragraph>
-        ) : null}
+        {(selectedStoreMannagerState as any)?.value === "新建知识库"
+          ? [
+              <FormItem
+                label="知识库名称"
+                required
+                field="new-knowledge-base-title"
+                initialValue={document?.title || ""}
+                rules={[{ required: true }]}>
+                <Input />
+              </FormItem>,
+              <Typography.Paragraph blockquote>
+                将会以当前网页内容信息创建新知识库
+              </Typography.Paragraph>,
+            ]
+          : null}
       </Form>
     </Modal>
   )
