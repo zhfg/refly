@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { Prisma, Resource, User } from '@prisma/client';
+import { Prisma, Resource, User, Weblink } from '@prisma/client';
 import _ from 'lodash';
 import { PrismaService } from '../common/prisma.service';
 import { MinioService } from '../common/minio.service';
@@ -167,18 +167,22 @@ export class KnowledgeService {
       if (!param.data) {
         throw new BadRequestException('data is required');
       }
-      const { url, linkId } = param.data;
+      const { url, linkId, storageKey } = param.data;
       if (!url && !linkId) {
         throw new BadRequestException('url or linkId is required');
       }
+      let weblink: Weblink;
       if (param.data?.linkId) {
-        const weblink = await this.weblinkService.findFirstWeblink({ url, linkId });
+        weblink = await this.weblinkService.findFirstWeblink({ url, linkId });
         if (!weblink) {
           throw new BadRequestException('Weblink not found');
         }
-        param.data.storageKey = weblink.storageKey;
-        param.data.parsedDocStorageKey = weblink.parsedDocStorageKey;
+      } else {
+        weblink = await this.weblinkService.processLink({ url, storageKey });
       }
+      param.data.linkId = weblink.linkId;
+      param.data.storageKey = weblink.storageKey;
+      param.data.parsedDocStorageKey = weblink.parsedDocStorageKey;
     } else {
       throw new BadRequestException('Invalid resource type');
     }
@@ -188,10 +192,18 @@ export class KnowledgeService {
       const defaultColl = await this.prisma.collection.findFirst({
         where: { userId: user.id, isDefault: true },
       });
+      this.logger.log(
+        `no collection specified, use default collection for user: ${defaultColl?.collectionId}`,
+      );
 
       // If default collection not exists, create new one
       if (!defaultColl) {
         param.collectionId = genCollectionID();
+        this.logger.log(
+          `create default collection for user ${user.uid}, collection id: ${param.collectionId}`,
+        );
+      } else {
+        param.collectionId = defaultColl.collectionId;
       }
     }
 
@@ -210,6 +222,7 @@ export class KnowledgeService {
               title: 'Default Collection',
               userId: user.id,
               collectionId: param.collectionId,
+              isDefault: true,
             },
           },
         },
