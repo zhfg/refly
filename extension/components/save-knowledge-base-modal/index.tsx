@@ -18,10 +18,18 @@ import { getPopupContainer } from "~utils/ui"
 
 // requests
 import newResource from "~requests/newResource"
-import { ResourceType } from "~types"
+import { ResourceType, type ResourceListItem } from "~types"
 
 const FormItem = Form.Item
 const Option = Select.Option
+
+export type KnowledgeBaseLocation =
+  | "lastSaved"
+  | "newlyKnowledgeBase"
+  | "selectedKnowledgeBase"
+export interface KnowledgeBaseLocationValue {
+  value: KnowledgeBaseLocation
+}
 
 export const SaveKnowledgeBaseModal = () => {
   // 这里前端持久化上次的保存知识库信息
@@ -63,7 +71,7 @@ export const SaveKnowledgeBaseModal = () => {
   const selectedStoreMannagerState = (Form.useFormState(
     "knowledge-base-location",
     form,
-  ) || { value: selectOptions?.[0]?.value }) as { value: string }
+  ) || { value: selectOptions?.[0]?.label }) as { value: string }
 
   console.log("selectedStoreMannagerState", selectedStoreMannagerState)
 
@@ -88,11 +96,20 @@ export const SaveKnowledgeBaseModal = () => {
         storageKey: weblinkRes?.data?.storageKey || "",
       }
 
+      let body: ResourceListItem = {
+        resourceType: ResourceType.weblink,
+        data: weblinkData,
+      }
+      const knowledgeBaseLocation = form.getFieldValue(
+        "knowledge-base-location",
+      )
+      console.log("knowledgeBaseLocation", knowledgeBaseLocation)
+      if (knowledgeBaseLocation === "newlyKnowledgeBase") {
+        body = { ...body, collectionName: document?.title }
+      }
+
       const resourceRes = await newResource({
-        body: {
-          resourceType: ResourceType.weblink,
-          data: weblinkData,
-        },
+        body,
       })
 
       console.log("resourceRes", resourceRes)
@@ -201,17 +218,18 @@ export const SaveKnowledgeBaseModal = () => {
           required
           field="knowledge-base-location"
           rules={[{ required: true }]}>
-          <Select defaultValue={selectOptions[0]}>
+          <Select>
             {selectOptions.map((item, index) => {
               return (
-                <Option key={item?.label} value={item?.value}>
+                <Option key={item?.label} value={item?.label}>
                   {item?.value}
                 </Option>
               )
             })}
           </Select>
         </FormItem>
-        {(selectedStoreMannagerState as any)?.value === "选择知识库" ? (
+        {(selectedStoreMannagerState as KnowledgeBaseLocationValue)?.value ===
+        "selectedKnowledgeBase" ? (
           knowledgeBaseStore?.knowledgeBaseList?.length > 0 ? (
             <FormItem
               label="选择知识库"
@@ -234,7 +252,8 @@ export const SaveKnowledgeBaseModal = () => {
             </Typography.Paragraph>
           )
         ) : null}
-        {(selectedStoreMannagerState as any)?.value === "上次保存" ? (
+        {(selectedStoreMannagerState as KnowledgeBaseLocationValue)?.value ===
+        "lastSaved" ? (
           <FormItem
             label="保存位置"
             required
@@ -250,7 +269,8 @@ export const SaveKnowledgeBaseModal = () => {
             </Select>
           </FormItem>
         ) : null}
-        {(selectedStoreMannagerState as any)?.value === "新建知识库"
+        {(selectedStoreMannagerState as KnowledgeBaseLocationValue)?.value ===
+        "newlyKnowledgeBase"
           ? [
               <FormItem
                 label="知识库名称"

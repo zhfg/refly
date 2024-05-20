@@ -24,9 +24,10 @@ export interface ResourceListItem {
   resourceId?: string
   resourceType: ResourceType
   data?: WeblinkMeta
+  collectionName?: string
   isPublic?: boolean
-  createdAt: string
-  updatedAt: string
+  createdAt?: string
+  updatedAt?: string
   userId?: number
 }
 
