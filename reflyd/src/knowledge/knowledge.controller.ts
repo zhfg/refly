@@ -120,7 +120,7 @@ export class KnowledgeController {
     @Req() req,
     @Query('resourceId') resourceId: string,
   ): Promise<GetResourceDetailResponse> {
-    const resource = await this.knowledgeService.getResourceDetail(resourceId);
+    const resource = await this.knowledgeService.getResourceDetail(resourceId, true);
     if (resource.isPublic || resource.userId === req.user.id) {
       return { data: _.omit(resource, 'userId') };
     }
