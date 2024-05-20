@@ -90,6 +90,11 @@ export const SaveKnowledgeBaseModal = () => {
       setConfirmLoading(true)
 
       const weblinkRes = await handleClientUploadHtml(location?.href)
+      if (!weblinkRes?.data?.storageKey) {
+        message?.error("保存资源失败，请重试！")
+        return
+      }
+
       const weblinkData = {
         title: document?.title || "",
         url: location.href,
@@ -107,6 +112,9 @@ export const SaveKnowledgeBaseModal = () => {
       if (knowledgeBaseLocation === "newlyKnowledgeBase") {
         const collectionName = form.getFieldValue("new-knowledge-base-title")
         body = { ...body, collectionName }
+      } else if (knowledgeBaseLocation === "selectedKnowledgeBase") {
+        const collectionId = form.getFieldValue("select-knowledge-base")
+        body = { ...body, collectionId }
       }
 
       const resourceRes = await newResource({
@@ -120,6 +128,7 @@ export const SaveKnowledgeBaseModal = () => {
         message.success({
           content: `保存资源成功，可以点击链接访问`,
         })
+        knowledgeBaseStore.updateIsSaveKnowledgeBaseModalVisible(false)
       }
     } catch (err) {}
 

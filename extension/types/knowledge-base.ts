@@ -21,6 +21,7 @@ export interface WeblinkMeta {
 }
 
 export interface ResourceListItem {
+  collectionId?: string
   resourceId?: string
   resourceType: ResourceType
   data?: WeblinkMeta

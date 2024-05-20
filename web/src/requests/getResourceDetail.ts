@@ -14,6 +14,7 @@ const handler = async (
       appConfig.url.getResourceDetail,
       {
         method: "GET",
+        body: req.body,
       },
     )
     if (err) {

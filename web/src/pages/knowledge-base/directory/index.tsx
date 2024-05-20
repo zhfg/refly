@@ -15,7 +15,12 @@ import {
   IconMore,
   IconSearch,
 } from "@arco-design/web-react/icon"
-import { Divider, Input, Message as message } from "@arco-design/web-react"
+import {
+  Divider,
+  Input,
+  Skeleton,
+  Message as message,
+} from "@arco-design/web-react"
 import { useSearchableList } from "@/components/use-searchable-list"
 import { useEffect, useState } from "react"
 import type { ResourceDetail } from "@/types/knowledge-base"
@@ -34,11 +39,13 @@ export const KnowledgeBaseDirectory = () => {
       debounce: true,
       delay: 300,
     })
+  const [isFetching, setIsFetching] = useState(false)
   const params = useParams<{ kbId: string; resourceId: string }>()
   const knowledgeBaseStore = useKnowledgeBaseStore()
   const navigate = useNavigate()
 
   const handleGetDetail = async (collectionId: string) => {
+    setIsFetching(true)
     try {
       const newRes = await getKnowledgeBaseDetail({
         body: {
@@ -65,6 +72,7 @@ export const KnowledgeBaseDirectory = () => {
     } catch (err) {
       message.error("获取内容详情失败，请重新刷新试试")
     }
+    setIsFetching(false)
   }
 
   useEffect(() => {
@@ -132,51 +140,64 @@ export const KnowledgeBaseDirectory = () => {
         <Divider />
       </div>
       <div className="knowledge-base-directory-list">
-        {(directoryList || []).map((item, index) => (
-          <div className="knowledge-base-directory-item" key={index}>
-            <div className="knowledge-base-directory-site-intro">
-              <div className="site-intro-icon">
-                <img
-                  src={`https://www.google.com/s2/favicons?domain=${safeParseURL(item?.data?.url as string)}&sz=${32}`}
-                  alt={item?.data?.url}
-                />
-              </div>
-              <div className="site-intro-content">
-                <p className="site-intro-site-name">{item.data?.title}</p>
-                <a
-                  className="site-intro-site-url"
-                  href={item.data?.url}
-                  target="_blank">
-                  {item.data?.url}
-                </a>
-              </div>
-            </div>
-            <div className="knowledge-base-directory-title">
-              {item.data?.title}
-            </div>
-            <div className="knowledge-base-directory-action">
-              <div className="action-summary">
-                <IconBulb />
-                <span>AI Summary</span>
-              </div>
-              <div className="action-markdown-content active">
-                <IconBook />
-              </div>
-              <div className="action-external-origin-website">
-                <IconCompass />
-              </div>
-            </div>
-            <div className="knowledge-base-directory-keyword-list">
-              {(item?.data?.keywords || [])?.map((keyword, index) => (
-                <div
-                  className="knowledge-base-directory-keyword-item"
-                  key={index}>
-                  <span>{keyword}</span>
-                </div>
-              ))}
-            </div>
+        {isFetching ? (
+          <div style={{ margin: "20px auto" }}>
+            <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
+            <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
+            <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
           </div>
-        ))}
+        ) : (
+          (directoryList || []).map((item, index) => (
+            <div
+              className="knowledge-base-directory-item"
+              key={index}
+              onClick={() => {
+                navigate(`/knowledge-base/${params?.kbId}/${item?.resourceId}`)
+              }}>
+              <div className="knowledge-base-directory-site-intro">
+                <div className="site-intro-icon">
+                  <img
+                    src={`https://www.google.com/s2/favicons?domain=${safeParseURL(item?.data?.url as string)}&sz=${32}`}
+                    alt={item?.data?.url}
+                  />
+                </div>
+                <div className="site-intro-content">
+                  <p className="site-intro-site-name">{item.data?.title}</p>
+                  <a
+                    className="site-intro-site-url"
+                    href={item.data?.url}
+                    target="_blank">
+                    {item.data?.url}
+                  </a>
+                </div>
+              </div>
+              <div className="knowledge-base-directory-title">
+                {item.data?.title}
+              </div>
+              <div className="knowledge-base-directory-action">
+                <div className="action-summary">
+                  <IconBulb />
+                  <span>AI Summary</span>
+                </div>
+                <div className="action-markdown-content active">
+                  <IconBook />
+                </div>
+                <div className="action-external-origin-website">
+                  <IconCompass />
+                </div>
+              </div>
+              <div className="knowledge-base-directory-keyword-list">
+                {(item?.data?.keywords || [])?.map((keyword, index) => (
+                  <div
+                    className="knowledge-base-directory-keyword-item"
+                    key={index}>
+                    <span>{keyword}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   )
