@@ -23,3 +23,5 @@ export const enum ConversationOperation {
   UPDATE = "update",
   DELETE = "delete",
 }
+
+export interface Thread extends Conversation {}

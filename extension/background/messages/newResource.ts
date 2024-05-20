@@ -7,13 +7,10 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
   console.log(req.body)
 
   try {
-    const [err, knowledgeBaseListRes] = await request(
-      appConfig.url.getKnowledgeBaseList,
-      {
-        method: "GET",
-        body: req.body,
-      },
-    )
+    const [err, resourceRes] = await request(appConfig.url.newResource, {
+      method: "POST",
+      body: req.body,
+    })
     if (err) {
       res.send({
         success: false,
@@ -22,7 +19,7 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
     } else {
       res.send({
         success: true,
-        data: knowledgeBaseListRes,
+        data: resourceRes,
       })
     }
   } catch (err) {
