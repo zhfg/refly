@@ -291,7 +291,7 @@ document.addEventListener('load', handlePageLoad);
     page.on('snapshot', hdl);
 
     const gotoPromise = page
-      .goto(url, { waitUntil: ['load', 'domcontentloaded', 'networkidle0'], timeout: 30_000 })
+      .goto(url, { waitUntil: ['load', 'domcontentloaded'], timeout: 30_000 })
       .catch((err) => {
         this.logger.warn(`Browsing of ${url} did not fully succeed: ${err}`);
       })
@@ -370,7 +370,7 @@ document.addEventListener('load', handlePageLoad);
     await page
       .goto(googleArchiveUrl, {
         waitUntil: ['load', 'domcontentloaded'],
-        timeout: 15_000,
+        timeout: 30_000,
       })
       .catch((err) => {
         this.logger.error(`Page salvation did not fully succeed: ` + err);
