@@ -167,7 +167,7 @@ export class KnowledgeService {
       if (!param.data) {
         throw new BadRequestException('data is required');
       }
-      const { url, linkId, storageKey } = param.data;
+      const { url, linkId, storageKey, title } = param.data;
       if (!url && !linkId) {
         throw new BadRequestException('url or linkId is required');
       }
@@ -180,6 +180,8 @@ export class KnowledgeService {
       } else {
         weblink = await this.weblinkService.processLink({ url, storageKey });
       }
+
+      param.title ||= title;
       param.data.linkId = weblink.linkId;
       param.data.storageKey = weblink.storageKey;
       param.data.parsedDocStorageKey = weblink.parsedDocStorageKey;
