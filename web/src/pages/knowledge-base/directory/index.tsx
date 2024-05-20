@@ -15,20 +15,64 @@ import {
   IconMore,
   IconSearch,
 } from "@arco-design/web-react/icon"
-import { Divider, Input } from "@arco-design/web-react"
+import { Divider, Input, Message as message } from "@arco-design/web-react"
 import { useSearchableList } from "@/components/use-searchable-list"
 import { useEffect, useState } from "react"
-import type { Resource } from "@/types/knowledge-base"
+import type { ResourceDetail } from "@/types/knowledge-base"
+import { useNavigate, useParams } from "react-router-dom"
+import { useKnowledgeBaseStore } from "@/stores/knowledge-base"
+// 类型
+import { CollectionDetail } from "@/types/knowledge-base"
+// 请求
+import getKnowledgeBaseDetail from "@/requests/getKnowledgeBaseDetail"
+import { safeParseURL } from "@/utils/url"
 
 export const KnowledgeBaseDirectory = () => {
   const [searchVal, setSearchVal] = useState("")
-  const [directoryList, setDirectoryList, filter] = useSearchableList<Resource>(
-    "title",
-    {
+  const [directoryList, setDirectoryList, filter] =
+    useSearchableList<ResourceDetail>("title", {
       debounce: true,
       delay: 300,
-    },
-  )
+    })
+  const params = useParams<{ kbId: string; resourceId: string }>()
+  const knowledgeBaseStore = useKnowledgeBaseStore()
+  const navigate = useNavigate()
+
+  const handleGetDetail = async (collectionId: string) => {
+    try {
+      const newRes = await getKnowledgeBaseDetail({
+        body: {
+          collectionId,
+        },
+      })
+
+      if (!newRes?.success) {
+        throw new Error(newRes?.errMsg)
+      }
+
+      console.log("newRes", newRes)
+      knowledgeBaseStore.updateCurrentKnowledgeBase(
+        newRes?.data as CollectionDetail,
+      )
+
+      // 如果没有资源，则跳转到第一个资源
+      if (!params?.resourceId) {
+        const firstResourceId = newRes?.data?.resources?.[0]?.resourceId
+        if (firstResourceId) {
+          navigate(`/knowledge-base/${collectionId}/${firstResourceId}`)
+        }
+      }
+    } catch (err) {
+      message.error("获取内容详情失败，请重新刷新试试")
+    }
+  }
+
+  useEffect(() => {
+    if (params?.kbId) {
+      console.log("params", params)
+      handleGetDetail(params?.kbId as string)
+    }
+  }, [])
 
   const handleChange = (val: string) => {
     filter(val)
@@ -36,8 +80,11 @@ export const KnowledgeBaseDirectory = () => {
   }
 
   useEffect(() => {
-    setDirectoryList(fakeKnowledgeBaseDirectoryList)
-  }, [])
+    const mappedDirectoryList = (
+      knowledgeBaseStore?.currentKnowledgeBase?.resources || []
+    ).map(item => ({ ...item, title: item?.data?.title || "" }))
+    setDirectoryList(mappedDirectoryList)
+  }, [knowledgeBaseStore?.currentKnowledgeBase?.resources])
 
   return (
     <div className="knowledge-base-directory-container">
@@ -47,15 +94,24 @@ export const KnowledgeBaseDirectory = () => {
             <IconFile style={{ fontSize: 28, color: "rgba(0, 0, 0, .5)" }} />
           </div>
           <div className="intro-content">
-            <div className="intro-title">{fakeKnowledgeBaseDetail?.name}</div>
+            <div className="intro-title">
+              {knowledgeBaseStore?.currentKnowledgeBase?.title}
+            </div>
             <div className="intro-meta">
               <span>
-                {time(fakeKnowledgeBaseDetail?.updatedAt, LOCALE.EN)
+                {time(
+                  knowledgeBaseStore?.currentKnowledgeBase?.updatedAt as string,
+                  LOCALE.EN,
+                )
                   .utc()
                   .fromNow()}
               </span>
               {" · "}
-              <span>{fakeKnowledgeBaseDetail?.count} 个内容</span>
+              <span>
+                {knowledgeBaseStore?.currentKnowledgeBase?.resources?.length ||
+                  0}{" "}
+                个内容
+              </span>
             </div>
           </div>
         </div>
@@ -76,26 +132,28 @@ export const KnowledgeBaseDirectory = () => {
         <Divider />
       </div>
       <div className="knowledge-base-directory-list">
-        {directoryList.map((item, index) => (
+        {(directoryList || []).map((item, index) => (
           <div className="knowledge-base-directory-item" key={index}>
             <div className="knowledge-base-directory-site-intro">
               <div className="site-intro-icon">
                 <img
-                  src={`https://www.google.com/s2/favicons?domain=${item?.origin}&sz=${32}`}
-                  alt={item?.origin}
+                  src={`https://www.google.com/s2/favicons?domain=${safeParseURL(item?.data?.url as string)}&sz=${32}`}
+                  alt={item?.data?.url}
                 />
               </div>
               <div className="site-intro-content">
-                <p className="site-intro-site-name">{item.siteName}</p>
+                <p className="site-intro-site-name">{item.data?.title}</p>
                 <a
                   className="site-intro-site-url"
-                  href={item.url}
+                  href={item.data?.url}
                   target="_blank">
-                  {item.url}
+                  {item.data?.url}
                 </a>
               </div>
             </div>
-            <div className="knowledge-base-directory-title">{item.title}</div>
+            <div className="knowledge-base-directory-title">
+              {item.data?.title}
+            </div>
             <div className="knowledge-base-directory-action">
               <div className="action-summary">
                 <IconBulb />
@@ -109,7 +167,7 @@ export const KnowledgeBaseDirectory = () => {
               </div>
             </div>
             <div className="knowledge-base-directory-keyword-list">
-              {item.keywords.map((keyword, index) => (
+              {(item?.data?.keywords || [])?.map((keyword, index) => (
                 <div
                   className="knowledge-base-directory-keyword-item"
                   key={index}>

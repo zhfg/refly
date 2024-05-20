@@ -1,7 +1,11 @@
 import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import type {} from "@redux-devtools/extension"
-import type { CollectionListItem } from "@/types/knowledge-base"
+import type {
+  CollectionListItem,
+  CollectionDetail,
+  ResourceDetail,
+} from "@/types/knowledge-base"
 
 interface KnowledgeBaseState {
   isSaveKnowledgeBaseModalVisible: boolean
@@ -11,11 +15,17 @@ interface KnowledgeBaseState {
   hasMore: boolean
   isRequesting: boolean
 
+  // 详情
+  currentKnowledgeBase: null | CollectionDetail
+  currentResource: null | ResourceDetail
+
   updateIsSaveKnowledgeBaseModalVisible: (
     isSaveKnowledgeBaseModalVisible: boolean,
   ) => void
   updateIsRequesting: (isRequesting: boolean) => void
   updateKnowledgeBaseList: (knowledgeBaseList: CollectionListItem[]) => void
+  updateCurrentKnowledgeBase: (knowledgeBase: CollectionDetail) => void
+  updateResource: (resource: ResourceDetail) => void
   updateCurrentPage: (currentPage: number) => void
   updateHasMore: (hasMore: boolean) => void
   resetState: () => void
@@ -23,6 +33,8 @@ interface KnowledgeBaseState {
 
 export const defaultState = {
   isSaveKnowledgeBaseModalVisible: false,
+  currentKnowledgeBase: null,
+  currentResource: null,
   knowledgeBaseList: [],
   pageSize: 10,
   currentPage: 1,
@@ -41,6 +53,16 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
       set(state => ({
         ...state,
         knowledgeBaseList,
+      })),
+    updateCurrentKnowledgeBase: (knowledgeBase: CollectionDetail) =>
+      set(state => ({
+        ...state,
+        currentKnowledgeBase: knowledgeBase,
+      })),
+    updateResource: (resource: ResourceDetail) =>
+      set(state => ({
+        ...state,
+        currentResource: resource,
       })),
     updateCurrentPage: (currentPage: number) =>
       set(state => ({ ...state, currentPage })),

@@ -4,9 +4,47 @@ import { IconBulb, IconCodepen } from "@arco-design/web-react/icon"
 
 // 自定义样式
 import "./index.scss"
+import { useParams } from "react-router-dom"
+import { Message as message } from "@arco-design/web-react"
+import { useKnowledgeBaseStore } from "@/stores/knowledge-base"
+// 请求
+import getResourceDetail from "@/requests/getResourceDetail"
+// 类型
+import { ResourceDetail } from "@/types"
+import { useEffect } from "react"
+import { safeParseURL } from "@/utils/url"
 
 export const KnowledgeBaseResourceDetail = () => {
-  const resourceDetail = fakeKnowledgeResourceDetail
+  const params = useParams<{ resourceId: string }>()
+  const knowledgeBaseStore = useKnowledgeBaseStore()
+
+  const resourceDetail = knowledgeBaseStore?.currentResource as ResourceDetail
+
+  const handleGetDetail = async (resourceId: string) => {
+    try {
+      const newRes = await getResourceDetail({
+        body: {
+          resourceId,
+        },
+      })
+
+      if (!newRes?.success) {
+        throw new Error(newRes?.errMsg)
+      }
+
+      console.log("newRes", newRes)
+      knowledgeBaseStore.updateResource(newRes?.data as ResourceDetail)
+    } catch (err) {
+      message.error("获取内容详情失败，请重新刷新试试")
+    }
+  }
+
+  useEffect(() => {
+    if (params?.resourceId) {
+      console.log("params", params)
+      handleGetDetail(params?.resourceId as string)
+    }
+  }, [])
 
   return (
     <div className="knowledge-base-resource-detail-container">
@@ -15,19 +53,19 @@ export const KnowledgeBaseResourceDetail = () => {
           <div className="knowledge-base-directory-site-intro">
             <div className="site-intro-icon">
               <img
-                src={`https://www.google.com/s2/favicons?domain=${resourceDetail?.meta?.origin}&sz=${32}`}
-                alt={resourceDetail?.meta?.origin}
+                src={`https://www.google.com/s2/favicons?domain=${safeParseURL(resourceDetail?.data?.url as string)}&sz=${32}`}
+                alt={resourceDetail?.data?.url}
               />
             </div>
             <div className="site-intro-content">
               <p className="site-intro-site-name">
-                {resourceDetail?.meta.siteName}
+                {resourceDetail.data?.title}
               </p>
               <a
                 className="site-intro-site-url"
-                href={resourceDetail?.meta.url}
+                href={resourceDetail.data?.url}
                 target="_blank">
-                {resourceDetail?.meta.url}
+                {resourceDetail.data?.url}
               </a>
             </div>
           </div>
@@ -43,7 +81,7 @@ export const KnowledgeBaseResourceDetail = () => {
             </div>
           </div>
           <div className="knowledge-base-directory-keyword-list">
-            {resourceDetail?.meta.keywords.map((keyword, index) => (
+            {(resourceDetail?.data?.keywords || []).map((keyword, index) => (
               <div
                 className="knowledge-base-directory-keyword-item"
                 key={index}>
@@ -54,9 +92,9 @@ export const KnowledgeBaseResourceDetail = () => {
         </div>
         <div className="knowledge-base-resource-content">
           <div className="knowledge-base-resource-content-title">
-            {resourceDetail?.meta.title}
+            {resourceDetail?.title}
           </div>
-          <Markdown content={resourceDetail?.content}></Markdown>
+          <Markdown content={resourceDetail?.doc || ""}></Markdown>
         </div>
       </div>
     </div>

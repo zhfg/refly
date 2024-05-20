@@ -1,6 +1,11 @@
 import { useUserStore } from "@/stores/user"
 import { cnGuessQuestions, enGuessQuestions } from "@/utils/guess-question"
-import { Avatar, Breadcrumb, Button } from "@arco-design/web-react"
+import {
+  Avatar,
+  Breadcrumb,
+  Button,
+  Message as message,
+} from "@arco-design/web-react"
 import { useTranslation } from "react-i18next"
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels"
 

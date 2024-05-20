@@ -18,6 +18,7 @@ export interface WeblinkMeta {
   title?: string
   storageKey?: string
   parsedDocStorageKey?: string
+  keywords?: string[]
 }
 
 export interface ResourceListItem {
@@ -29,6 +30,8 @@ export interface ResourceListItem {
   createdAt?: string
   updatedAt?: string
   userId?: number
+  title?: string
+  description?: string
 }
 
 export interface ResourceDetail extends ResourceListItem {
