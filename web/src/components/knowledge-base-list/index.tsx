@@ -22,17 +22,16 @@ import type { Digest } from "@/types/digest"
 import { IconTip } from "@/components/dashboard/icon-tip"
 import { copyToClipboard } from "@/utils"
 import { getClientOrigin, safeParseURL } from "@/utils/url"
-// stores
-import { DigestType, useDigestStore } from "@/stores/digest"
 // components
 import { useEffect, useState } from "react"
 import { EmptyDigestStatus } from "@/components/empty-digest-today-status"
 // utils
-import getDigestList from "@/requests/getDigestList"
+import getKnowledgeBaseList from "@/requests/getKnowledgeBaseList"
 // styles
 import "./index.scss"
-import { LOCALE, Source } from "@/types"
+import { CollectionListItem, LOCALE, Source } from "@/types"
 import { useTranslation } from "react-i18next"
+import { useKnowledgeBaseStore } from "@/stores/knowledge-base"
 
 export const getFirstSourceLink = (sources: Source[]) => {
   return sources?.[0]?.metadata?.source
@@ -40,7 +39,7 @@ export const getFirstSourceLink = (sources: Source[]) => {
 
 export const KnowledgeBaseList = () => {
   const navigate = useNavigate()
-  const digestStore = useDigestStore()
+  const knowledgeBaseStore = useKnowledgeBaseStore()
   const [scrollLoading, setScrollLoading] = useState(
     <Skeleton animation style={{ width: "100%" }}></Skeleton>,
   )
@@ -49,7 +48,7 @@ export const KnowledgeBaseList = () => {
   const language = i18n.languages?.[0]
 
   const fetchData = async (currentPage = 1) => {
-    let newData: Digest[] = []
+    let newData: CollectionListItem[] = []
 
     try {
       setScrollLoading(
@@ -66,7 +65,7 @@ export const KnowledgeBaseList = () => {
         </div>,
       )
 
-      if (!digestStore.today.hasMore && currentPage !== 1) {
+      if (!knowledgeBaseStore.hasMore && currentPage !== 1) {
         setScrollLoading(
           <span>{t("knowledgeLibrary.archive.item.noMoreText")}</span>,
         )
@@ -74,46 +73,29 @@ export const KnowledgeBaseList = () => {
         return
       }
 
-      const newRes = await getDigestList({
+      const newRes = await getKnowledgeBaseList({
         body: {
           // TODO: confirm time filter
           page: currentPage,
-          pageSize: digestStore.today.pageSize,
+          pageSize: knowledgeBaseStore.pageSize,
         },
       })
-
-      digestStore.updatePayload(
-        { ...digestStore.today, currentPage },
-        DigestType.TODAY,
-      )
 
       if (!newRes?.success) {
         throw new Error(newRes?.errMsg)
       }
-      if (newRes?.data && newRes?.data?.length < digestStore.today?.pageSize) {
-        digestStore.updatePayload(
-          { ...digestStore.today, hasMore: false },
-          DigestType.TODAY,
-        )
-      }
 
       console.log("newRes", newRes)
-      const newFeatureList = digestStore.today.featureList.concat(
-        newRes?.data || [],
-      )
-      newData = newRes?.data as Digest[]
-      digestStore.updatePayload(
-        { ...digestStore.today, featureList: newFeatureList },
-        DigestType.TODAY,
-      )
+      newData = knowledgeBaseStore.knowledgeBaseList.concat(newRes?.data || [])
+      knowledgeBaseStore.updateKnowledgeBaseList(newData)
     } catch (err) {
       message.error(t("knowledgeLibrary.archive.list.fetchErr"))
     } finally {
-      const { today } = useDigestStore.getState()
+      const { knowledgeBaseList, pageSize } = useKnowledgeBaseStore.getState()
 
-      if (today?.featureList?.length === 0) {
+      if (knowledgeBaseList?.length === 0) {
         setScrollLoading(<EmptyDigestStatus />)
-      } else if (newData?.length >= 0 && newData?.length < today?.pageSize) {
+      } else if (newData?.length >= 0 && newData?.length < pageSize) {
         setScrollLoading(
           <span>{t("knowledgeLibrary.archive.item.noMoreText")}</span>,
         )
@@ -125,12 +107,12 @@ export const KnowledgeBaseList = () => {
     fetchData()
 
     return () => {
-      digestStore.resetState()
+      knowledgeBaseStore.resetState()
     }
   }, [])
 
   return (
-    <div className="today-container">
+    <div className="today-container knowledge-base-list-container">
       <div className="today-feature-container">
         {/* <div className="today-block-header"> */}
         {/* <div className="header-title">今天浏览内容总结</div> */}
@@ -140,7 +122,7 @@ export const KnowledgeBaseList = () => {
           </div> */}
         {/* </div> */}
         <List
-          className="digest-list"
+          className="digest-list knowledge-base-list"
           wrapperStyle={{ width: "100%" }}
           bordered={false}
           pagination={false}
@@ -150,31 +132,35 @@ export const KnowledgeBaseList = () => {
           //     {t("knowledgeLibrary.archive.title")}
           //   </p>
           // }
-          dataSource={digestStore?.today?.featureList || []}
+          dataSource={knowledgeBaseStore.knowledgeBaseList || []}
           scrollLoading={scrollLoading}
           onReachBottom={currentPage => fetchData(currentPage)}
-          render={(item: Digest) => (
+          render={(item: CollectionListItem) => (
             <List.Item
-              key={item?.cid}
+              key={item?.collectionId}
               style={{
                 padding: "20px 0",
                 borderBottom: "1px solid var(--color-fill-3)",
               }}
+              className="knowledge-base-list-item-container"
               actionLayout="vertical"
+              onClick={() => {
+                navigate(`/knowledge-base/${item?.collectionId}`)
+              }}
               actions={[
-                <div className="feed-item-action-container">
+                <div className="feed-item-action-container knowledge-base-list-item-action-container">
                   <div className="feed-item-action">
                     <span
                       key={1}
-                      className="feed-list-item-continue-ask with-border with-hover"
+                      className="feed-list-item-continue-ask with-border with-hover knowledge-base-list-see-item"
                       onClick={() => {
-                        navigate(`/knowledge-base/${item?.cid}`)
+                        navigate(`/knowledge-base/${item?.collectionId}`)
                       }}>
                       <IconRightCircle
                         style={{ fontSize: 14, color: "#64645F" }}
                       />
-                      <span className="feed-list-item-text">
-                        {t("knowledgeLibrary.archive.item.askFollow")}
+                      <span className="knowledge-base-list-see-item-text">
+                        查看知识库
                       </span>
                     </span>
                     <IconTip text={t("knowledgeLibrary.archive.item.copy")}>
@@ -183,7 +169,7 @@ export const KnowledgeBaseList = () => {
                         className="feed-list-item-continue-ask"
                         onClick={() => {
                           copyToClipboard(
-                            `${getClientOrigin()}/content/${item?.contentId}`,
+                            `${getClientOrigin()}/knowledge-base/${item?.collectionId}`,
                           )
                           message.success(
                             t("knowledgeLibrary.archive.item.copyNotify"),
@@ -199,34 +185,6 @@ export const KnowledgeBaseList = () => {
                     </IconTip>
                   </div>
                   <div className="feed-item-action" style={{ marginTop: 8 }}>
-                    <span
-                      className="feed-item-topic"
-                      key={1}
-                      style={{
-                        display: "inline-block",
-                        borderRight: `1px solid #64645F`,
-                        paddingRight: 12,
-                        lineHeight: "10px",
-                      }}>
-                      <IconTag style={{ fontSize: 14, color: "#64645F" }} />
-                      <span className="feed-list-item-text">
-                        {item?.topic?.name}
-                      </span>
-                    </span>
-                    <span
-                      key={2}
-                      className="feed-item-link"
-                      onClick={() => {
-                        window.open(item?.weblinks?.[0]?.url, "_blank")
-                      }}>
-                      <IconLink style={{ fontSize: 14, color: "#64645F" }} />
-                      <span className="feed-list-item-text">
-                        {safeParseURL(item?.weblinks?.[0]?.url)}{" "}
-                        {item?.weblinks?.length - 1 > 0
-                          ? `& ${t("knowledgeLibrary.archive.item.linkMore", { count: item?.weblinks?.length - 1 })}`
-                          : ""}
-                      </span>
-                    </span>
                     <span key={3}>
                       <IconClockCircle
                         style={{ fontSize: 14, color: "#64645F" }}
@@ -249,7 +207,7 @@ export const KnowledgeBaseList = () => {
                       wrapper: "span",
                     }}
                     style={{ color: "rgba(0, 0, 0, .4) !important" }}>
-                    {item.abstract}
+                    {item.description}
                   </Typography.Paragraph>
                 }
               />
