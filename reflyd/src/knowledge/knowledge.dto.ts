@@ -55,8 +55,11 @@ export class UpsertResourceRequest {
   @ApiProperty({ enum: ResourceType })
   resourceType: ResourceType;
 
-  @ApiProperty()
-  collectionId: string;
+  @ApiPropertyOptional()
+  collectionId?: string; // if empty, create new collection
+
+  @ApiPropertyOptional()
+  collectionName?: string;
 
   @ApiProperty()
   title: string;

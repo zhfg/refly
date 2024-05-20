@@ -191,22 +191,10 @@ export class KnowledgeService {
 
     // If target collection not specified, try to save to default collection
     if (!param.collectionId) {
-      const defaultColl = await this.prisma.collection.findFirst({
-        where: { userId: user.id, isDefault: true },
-      });
+      param.collectionId = genCollectionID();
       this.logger.log(
-        `no collection specified, use default collection for user: ${defaultColl?.collectionId}`,
+        `create new collection for user ${user.uid}, collection id: ${param.collectionId}`,
       );
-
-      // If default collection not exists, create new one
-      if (!defaultColl) {
-        param.collectionId = genCollectionID();
-        this.logger.log(
-          `create default collection for user ${user.uid}, collection id: ${param.collectionId}`,
-        );
-      } else {
-        param.collectionId = defaultColl.collectionId;
-      }
     }
 
     return this.prisma.resource.create({
@@ -221,10 +209,9 @@ export class KnowledgeService {
           connectOrCreate: {
             where: { collectionId: param.collectionId },
             create: {
-              title: 'Default Collection',
+              title: param.collectionName || 'Default Collection',
               userId: user.id,
               collectionId: param.collectionId,
-              isDefault: true,
             },
           },
         },

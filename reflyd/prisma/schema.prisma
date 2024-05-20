@@ -323,8 +323,6 @@ model Collection {
   description  String?   @default("") @map("description")
   /// 用户主键
   userId       Int       @map("user_id")
-  /// 是否为默认集合（资源会默认添加到此集合）
-  isDefault    Boolean   @default(false) @map("is_default")
   /// 是否公开
   isPublic     Boolean   @default(false) @map("is_public")
   /// 创建时间
