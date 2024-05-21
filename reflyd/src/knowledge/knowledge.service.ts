@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, Logger, UnauthorizedException } from '
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { Prisma, Resource, User, Weblink } from '@prisma/client';
+import { generateUuid5 } from 'weaviate-ts-client';
 import _ from 'lodash';
 import { PrismaService } from '../common/prisma.service';
 import { MinioService } from '../common/minio.service';
@@ -23,6 +24,7 @@ import {
   streamToString,
 } from 'src/utils';
 import { ConfigService } from '@nestjs/config';
+import { RAGService } from 'src/rag/rag.service';
 
 @Injectable()
 export class KnowledgeService {
@@ -32,6 +34,7 @@ export class KnowledgeService {
     private prisma: PrismaService,
     private minio: MinioService,
     private config: ConfigService,
+    private ragService: RAGService,
     private weblinkService: WeblinkService,
     @InjectQueue(QUEUE_RESOURCE) private queue: Queue<UpsertResourceRequest>,
   ) {}
@@ -111,6 +114,9 @@ export class KnowledgeService {
     if (coll.userId !== user.id) {
       throw new UnauthorizedException();
     }
+
+    // TODO: delete resources
+
     return this.prisma.collection.update({
       where: { collectionId, userId: user.id },
       data: { deletedAt: new Date() },
@@ -159,11 +165,8 @@ export class KnowledgeService {
 
     if (needDoc) {
       const weblinkMeta = JSON.parse(resource.meta) as WeblinkMeta;
-      const docStream = await this.minio.getObject(
-        this.config.getOrThrow('minio.weblinkBucket'),
-        weblinkMeta.parsedDocStorageKey,
-      );
-      detail.doc = await streamToString(docStream);
+      const buf = await this.minio.downloadData(weblinkMeta.parsedDocStorageKey);
+      detail.doc = buf.toString();
     }
 
     return detail;
@@ -239,12 +242,31 @@ export class KnowledgeService {
       }
     } else {
       weblink = await this.weblinkService.processLink({ url, storageKey });
-      await this.weblinkService.saveResourceSegmentsForUser(user, {
-        weblink,
-        resourceId: param.resourceId,
-        collectionId: param.collectionId,
-      });
     }
+
+    // TODO: 减少不必要的重复插入
+    const { resourceId, collectionId } = param;
+    const { chunkStorageKey } = weblink;
+
+    if (!chunkStorageKey) {
+      // techically this cannot happen
+      this.logger.error(`chunkStorageKey is empty: ${chunkStorageKey}, url: ${url}`);
+      return;
+    }
+
+    const content = await this.ragService.loadContentChunks(chunkStorageKey);
+
+    content.chunks.forEach((chunk, index) => {
+      chunk.id = generateUuid5(`${resourceId}-${index}`);
+      chunk.resourceId = resourceId;
+      chunk.collectionId = collectionId;
+    });
+
+    await this.ragService.saveDataForUser(user, content);
+
+    this.logger.log(
+      `save resource segments for user ${user.uid} success, resourceId: ${param.resourceId}`,
+    );
 
     await this.prisma.resource.update({
       where: { resourceId: param.resourceId, userId: user.id },
@@ -281,9 +303,13 @@ export class KnowledgeService {
     if (resource.userId !== user.id) {
       throw new UnauthorizedException();
     }
-    return this.prisma.resource.update({
-      where: { resourceId },
-      data: { deletedAt: new Date() },
-    });
+
+    return Promise.all([
+      this.ragService.deleteResourceData(user, resourceId),
+      this.prisma.resource.update({
+        where: { resourceId },
+        data: { deletedAt: new Date() },
+      }),
+    ]);
   }
 }

@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Prisma, User, Weblink } from '@prisma/client';
 import { Queue } from 'bull';
 import { LRUCache } from 'lru-cache';
@@ -8,7 +7,7 @@ import { Document } from '@langchain/core/documents';
 
 import { PrismaService } from '../common/prisma.service';
 import { MinioService } from '../common/minio.service';
-import { RAGService, ContentAvroType, PARSER_VERSION } from '../rag/rag.service';
+import { RAGService, PARSER_VERSION } from '../rag/rag.service';
 import { AigcService } from '../aigc/aigc.service';
 import { RedisService } from '../common/redis.service';
 import { LlmService } from '../llm/llm.service';
@@ -16,25 +15,20 @@ import { WebLinkDTO, WeblinkData } from './weblink.dto';
 import { getExpectedTokenLenContent } from '../utils/token';
 import { PageMeta, Source } from '../types/weblink';
 import { CHANNEL_PROCESS_LINK_BY_USER, CHANNEL_PROCESS_LINK, QUEUE_WEBLINK } from '../utils/const';
-import { streamToBuffer, streamToString } from '../utils/stream';
 import { genLinkID, sha256Hash } from '../utils/id';
-import { ContentData } from '../common/weaviate.dto';
 import { hasUrlRedirected, normalizeURL } from '../utils/url';
 import { TaskResponse } from '../conversation/conversation.dto';
-import { generateUuid5 } from 'weaviate-ts-client';
 
 @Injectable()
 export class WeblinkService {
   private logger = new Logger(WeblinkService.name);
 
   private cache: LRUCache<string, WeblinkData>; // url -> weblink data
-  private bucketName: string;
 
   constructor(
     private prisma: PrismaService,
     private redis: RedisService,
     private minio: MinioService,
-    private configService: ConfigService,
     private llmService: LlmService,
     private ragService: RAGService,
     private aigcService: AigcService,
@@ -43,7 +37,6 @@ export class WeblinkService {
     this.cache = new LRUCache({
       max: 1000,
     });
-    this.bucketName = this.configService.getOrThrow('minio.weblinkBucket');
   }
 
   async enqueueProcessTask(link: WebLinkDTO) {
@@ -121,18 +114,14 @@ export class WeblinkService {
     });
     if (weblink?.storageKey && weblink?.parsedDocStorageKey) {
       this.logger.log(`found valid weblink from db: ${JSON.stringify(weblink)}`);
-      const [htmlStream, docStream] = await Promise.all([
-        this.minio.getObject(this.bucketName, weblink.storageKey),
-        this.minio.getObject(this.bucketName, weblink.parsedDocStorageKey),
-      ]);
-      const [html, doc] = await Promise.all([
-        streamToString(htmlStream),
-        streamToString(docStream),
+      const [htmlBuf, docBuf] = await Promise.all([
+        this.minio.downloadData(weblink.storageKey),
+        this.minio.downloadData(weblink.parsedDocStorageKey),
       ]);
       const data = {
-        html,
+        html: htmlBuf.toString(),
         doc: {
-          pageContent: doc,
+          pageContent: docBuf.toString(),
           metadata: JSON.parse(weblink.pageMeta || '{}'),
         },
       };
@@ -159,8 +148,7 @@ export class WeblinkService {
    */
   async directParseWebLinkContent(link: WebLinkDTO): Promise<WeblinkData> {
     try {
-      const stream = await this.minio.getObject(this.bucketName, link.storageKey);
-      const content = await streamToString(stream);
+      const content = (await this.minio.downloadData(link.storageKey)).toString();
 
       const doc = await this.ragService.formatSnapshot(
         'ingest',
@@ -229,65 +217,14 @@ export class WeblinkService {
           this.logger.error(`chunkStorageKey is empty: ${chunkStorageKey}, url: ${url}`);
           return;
         }
-        const stream = await this.minio.getObject(this.bucketName, chunkStorageKey);
-        const content = ContentAvroType.fromBuffer(await streamToBuffer(stream)) as ContentData;
+        const content = await this.ragService.loadContentChunks(chunkStorageKey);
         return this.ragService.saveDataForUser(user, content);
       }),
     );
 
-    // 更新向量库租户创建状态
-    if (!user.vsTenantCreated) {
-      await this.prisma.user.update({
-        where: { id: user.id, vsTenantCreated: false },
-        data: { vsTenantCreated: true },
-      });
-    }
-
     this.logger.log(
       `save chunk embeddings for user ${user.uid} success, urls: ` +
         JSON.stringify(weblinks.map(({ url }) => url)),
-    );
-  }
-
-  async saveResourceSegmentsForUser(
-    user: Pick<User, 'id' | 'uid' | 'vsTenantCreated'>,
-    param: {
-      weblink: Weblink;
-      resourceId: string;
-      collectionId: string;
-    },
-  ) {
-    // TODO: 减少不必要的重复插入
-    const { weblink, resourceId, collectionId } = param;
-    const { url, chunkStorageKey } = weblink;
-
-    if (!chunkStorageKey) {
-      // techically this cannot happen
-      this.logger.error(`chunkStorageKey is empty: ${chunkStorageKey}, url: ${url}`);
-      return;
-    }
-
-    const stream = await this.minio.getObject(this.bucketName, chunkStorageKey);
-    const content = ContentAvroType.fromBuffer(await streamToBuffer(stream)) as ContentData;
-
-    content.chunks.forEach((chunk, index) => {
-      chunk.id = generateUuid5(`${resourceId}-${index}`);
-      chunk.resourceId = resourceId;
-      chunk.collectionId = collectionId;
-    });
-
-    await this.ragService.saveDataForUser(user, content);
-
-    // 更新向量库租户创建状态
-    if (!user.vsTenantCreated) {
-      await this.prisma.user.update({
-        where: { id: user.id, vsTenantCreated: false },
-        data: { vsTenantCreated: true },
-      });
-    }
-
-    this.logger.log(
-      `save resource segments for user ${user.uid} success, resourceId: ${param.resourceId}`,
     );
   }
 
@@ -375,11 +312,7 @@ export class WeblinkService {
 
     const storageKey = `html/${sha256Hash(link.url)}.html`;
 
-    const res = await this.minio.putObject(
-      this.configService.get('minio.weblinkBucket'),
-      storageKey,
-      html,
-    );
+    const res = await this.minio.uploadData(storageKey, html);
     this.logger.log('upload html to minio res: ' + JSON.stringify(res));
 
     return storageKey;
@@ -387,11 +320,7 @@ export class WeblinkService {
 
   async uploadParsedDocToMinio(link: WebLinkDTO, doc: Document<PageMeta>): Promise<string> {
     const parsedDocStorageKey = `docs/${sha256Hash(link.url)}.md`;
-    const res = await this.minio.putObject(
-      this.configService.get('minio.weblinkBucket'),
-      parsedDocStorageKey,
-      doc.pageContent,
-    );
+    const res = await this.minio.uploadData(parsedDocStorageKey, doc.pageContent);
     this.logger.log('upload parsed doc to minio res: ' + JSON.stringify(res));
 
     return parsedDocStorageKey;
@@ -424,14 +353,8 @@ export class WeblinkService {
 
     try {
       const dataObjs = await this.ragService.indexContent(doc);
-
-      const buf = ContentAvroType.toBuffer({ chunks: dataObjs });
       const chunkStorageKey = `chunks/${sha256Hash(weblink.url)}-${PARSER_VERSION}.avro`;
-      const res = await this.minio.putObject(
-        this.configService.get('minio.weblinkBucket'),
-        chunkStorageKey,
-        buf,
-      );
+      const res = await this.ragService.saveContentChunks(chunkStorageKey, { chunks: dataObjs });
       this.logger.log(`upload ${dataObjs.length} chunk(s) to minio res: ` + JSON.stringify(res));
 
       return this.prisma.weblink.update({

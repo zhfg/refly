@@ -11,14 +11,11 @@ import TurndownService from 'turndown';
 import { cleanMarkdownForLLM, tidyMarkdown } from '../utils/markdown';
 
 import { User } from '@prisma/client';
+import { MinioService } from '../common/minio.service';
+import { PrismaService } from '../common/prisma.service';
 import { PageSnapshot, PuppeteerService, ScrappingOptions } from '../common/puppeteer.service';
-import { WeaviateService } from '../common/weaviate.service';
-import {
-  ContentDataObj,
-  ContentData,
-  ContentType,
-  HybridSearchParam,
-} from '../common/weaviate.dto';
+import { ReflyContentSchema, WeaviateService } from '../common/weaviate.service';
+import { HybridSearchParam, ContentDataObj, ContentData, ContentType } from './rag.dto';
 import { PageMeta } from '../types/weblink';
 import { normalizeURL } from '../utils/url';
 
@@ -65,6 +62,8 @@ export class RAGService {
 
   constructor(
     private config: ConfigService,
+    private minio: MinioService,
+    private prisma: PrismaService,
     private weaviate: WeaviateService,
     private puppeteer: PuppeteerService,
   ) {
@@ -223,15 +222,85 @@ export class RAGService {
     return dataObjs;
   }
 
-  async saveDataForUser(user: Pick<User, 'uid' | 'vsTenantCreated'>, data: ContentData) {
-    if (!user.vsTenantCreated) {
-      await this.weaviate.createTenant(user.uid);
-    }
-    return this.weaviate.batchSaveData(user.uid, data.chunks);
+  /**
+   * Save content chunks to object storage.
+   */
+  async saveContentChunks(storageKey: string, data: ContentData) {
+    const buf = ContentAvroType.toBuffer(data);
+    return this.minio.uploadData(storageKey, buf);
   }
 
-  async retrieve(param: HybridSearchParam) {
+  /**
+   * Load content chunks from object storage.
+   */
+  async loadContentChunks(storageKey: string) {
+    const buf = await this.minio.downloadData(storageKey);
+    return ContentAvroType.fromBuffer(buf) as ContentData;
+  }
+
+  async saveDataForUser(user: Pick<User, 'id' | 'uid' | 'vsTenantCreated'>, data: ContentData) {
+    if (!user.vsTenantCreated) {
+      // 更新向量库租户创建状态
+      await Promise.all([
+        this.weaviate.createTenant(user.uid),
+        this.prisma.user.update({
+          where: { id: user.id, vsTenantCreated: false },
+          data: { vsTenantCreated: true },
+        }),
+      ]);
+    }
+
+    const objects = data.chunks.map((chunk) => ({
+      class: ReflyContentSchema.class,
+      properties: {
+        url: chunk.url,
+        type: chunk.type,
+        title: chunk.title,
+        content: chunk.content,
+      },
+      id: chunk.id,
+      vector: chunk.vector,
+      tenant: user.uid,
+    }));
+
+    return this.weaviate.batchSaveData(objects);
+  }
+
+  async deleteResourceData(user: Pick<User, 'uid'>, resourceId: string) {
+    return this.weaviate.batchDelete(user.uid, {
+      path: ['resourceId'],
+      operator: 'Equal',
+      valueText: resourceId,
+    });
+  }
+
+  async retrieve(user: Pick<User, 'uid'>, param: HybridSearchParam) {
     param.vector = await this.embeddings.embedQuery(param.query);
-    return this.weaviate.hybridSearch(param);
+
+    const filters = [];
+    if (param.filter?.urls?.length > 0) {
+      filters.push({
+        path: ['url'],
+        operator: 'ContainsAny',
+        valueTextArray: param.filter.urls,
+      });
+    }
+
+    if (param.filter?.resourceIds?.length > 0) {
+      filters.push({
+        path: ['resourceId'],
+        operator: 'ContainsAny',
+        valueTextArray: param.filter.resourceIds,
+      });
+    }
+
+    if (param.filter?.collectionIds?.length > 0) {
+      filters.push({
+        path: ['collectionId'],
+        operator: 'ContainsAny',
+        valueTextArray: param.filter.collectionIds,
+      });
+    }
+    return this.weaviate.hybridSearch(user.uid, param, filters);
   }
 }

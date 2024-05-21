@@ -1,27 +1,36 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import weaviate, { WeaviateClient, ApiKey, FusionType, WeaviateClass } from 'weaviate-ts-client';
+import weaviate, {
+  WeaviateClient,
+  ApiKey,
+  FusionType,
+  WeaviateClass,
+  WhereFilter,
+  WeaviateObject,
+} from 'weaviate-ts-client';
 
-import { ContentDataObj, HybridSearchParam, SearchResult } from './weaviate.dto';
-
-const reflyContentSchema = {
+export const ReflyContentSchema = {
   class: 'ReflyContent',
   properties: [
     {
       name: 'url',
       dataType: ['text'],
+      indexSearchable: false,
     },
     {
       name: 'resourceId',
       dataType: ['text'],
+      indexSearchable: false,
     },
     {
       name: 'collectionId',
       dataType: ['text'],
+      indexSearchable: false,
     },
     {
       name: 'type',
       dataType: ['text'],
+      indexSearchable: false,
     },
     {
       name: 'title',
@@ -57,11 +66,11 @@ export class WeaviateService implements OnModuleInit {
     try {
       classDefinition = await this.client.schema
         .classGetter()
-        .withClassName(reflyContentSchema.class)
+        .withClassName(ReflyContentSchema.class)
         .do();
     } catch (err) {
       this.logger.error(`fetch class definition failed (${err}), create new one`);
-      classDefinition = await this.client.schema.classCreator().withClass(reflyContentSchema).do();
+      classDefinition = await this.client.schema.classCreator().withClass(ReflyContentSchema).do();
     }
 
     this.logger.log('collection definition: ' + JSON.stringify(classDefinition, null, 2));
@@ -69,72 +78,57 @@ export class WeaviateService implements OnModuleInit {
 
   async createTenant(tenantId: string) {
     const res = await this.client.schema
-      .tenantsCreator(reflyContentSchema.class, [{ name: tenantId }])
+      .tenantsCreator(ReflyContentSchema.class, [{ name: tenantId }])
       .do();
     this.logger.log('create tenant res: ' + JSON.stringify(res));
   }
 
-  async batchSaveData(tenantId: string, data: ContentDataObj[]) {
+  async batchSaveData(objects: WeaviateObject[]) {
     let batcher = this.client.batch.objectsBatcher();
-    for (const obj of data)
-      batcher = batcher.withObject({
-        class: reflyContentSchema.class,
-        properties: {
-          url: obj.url,
-          type: obj.type,
-          title: obj.title,
-          content: obj.content,
-        },
-        id: obj.id,
-        vector: obj.vector,
-        tenant: tenantId,
-      });
-
-    // Flush
-    await batcher.do();
+    for (const obj of objects) batcher = batcher.withObject(obj);
+    return batcher.do();
   }
 
-  async hybridSearch(param: HybridSearchParam): Promise<SearchResult[]> {
+  async batchDelete(tenantId: string, where: WhereFilter) {
+    return this.client.batch
+      .objectsBatchDeleter()
+      .withTenant(tenantId)
+      .withClassName(ReflyContentSchema.class)
+      .withWhere(where)
+      .do();
+  }
+
+  async hybridSearch(
+    tenantId: string,
+    args: {
+      query: string;
+      vector?: number[];
+      limit?: number;
+    },
+    filters: WhereFilter[],
+  ) {
     let getter = this.client.graphql
       .get()
-      .withTenant(param.tenantId)
-      .withClassName(reflyContentSchema.class)
+      .withTenant(tenantId)
+      .withClassName(ReflyContentSchema.class)
       .withHybrid({
-        query: param.query,
+        query: args.query,
         alpha: 0.5,
-        vector: param.vector,
+        vector: args.vector,
         fusionType: FusionType.rankedFusion,
       })
-      .withLimit(param.limit || 5)
-      .withFields('url type title content _additional { score explainScore }');
+      .withLimit(args.limit || 5)
+      .withFields(
+        'url collectionId resourceId type title content _additional { score explainScore }',
+      );
 
-    if (param.filter?.urls?.length > 0) {
-      getter = getter.withWhere({
-        path: ['url'],
-        operator: 'ContainsAny',
-        valueTextArray: param.filter.urls,
-      });
-    }
-
-    if (param.filter?.resourceIds?.length > 0) {
-      getter = getter.withWhere({
-        path: ['resourceId'],
-        operator: 'ContainsAny',
-        valueTextArray: param.filter.resourceIds,
-      });
-    }
-
-    if (param.filter?.collectionIds?.length > 0) {
-      getter = getter.withWhere({
-        path: ['collectionId'],
-        operator: 'ContainsAny',
-        valueTextArray: param.filter.collectionIds,
-      });
+    for (const filter of filters) {
+      getter = getter.withWhere(filter);
     }
 
     const res = await getter.do();
     this.logger.log('hybrid search result: ' + JSON.stringify(res, null, 2));
 
-    return res.data?.Get?.[reflyContentSchema.class];
+    return res.data?.Get?.[ReflyContentSchema.class];
   }
 }
