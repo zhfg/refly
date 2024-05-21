@@ -2,7 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { Document } from '@langchain/core/documents';
-import { OpenAIEmbeddings, ChatOpenAI } from '@langchain/openai';
+import { ChatOpenAI } from '@langchain/openai';
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { createStuffDocumentsChain } from 'langchain/chains/combine_documents';
@@ -27,32 +27,18 @@ import { ContentMeta } from './dto';
 import { categoryList } from '../prompts/utils/category';
 import { PageMeta, Source } from '../types/weblink';
 import { SearchResultContext } from '../types/search';
-import { PrismaService } from '../common/prisma.service';
 import { RAGService } from '../rag/rag.service';
-import { SearchResult } from '../rag/rag.dto';
+import { ContentPayload } from '../rag/rag.dto';
 import { RetrieveFilter } from 'src/conversation/conversation.dto';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
-  private embeddings: OpenAIEmbeddings;
   private llm: ChatOpenAI;
   private logger = new Logger(LlmService.name);
 
-  constructor(
-    private prisma: PrismaService,
-    private configService: ConfigService,
-    private ragService: RAGService,
-  ) {}
+  constructor(private configService: ConfigService, private ragService: RAGService) {}
 
   async onModuleInit() {
-    this.embeddings = new OpenAIEmbeddings({
-      modelName: 'text-embedding-3-large',
-      batchSize: 512,
-      dimensions: this.configService.getOrThrow('vectorStore.vectorDim'),
-      timeout: 5000,
-      maxRetries: 3,
-    });
-
     this.llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
 
     this.logger.log('LLM Service ready');
@@ -402,7 +388,7 @@ export class LlmService implements OnModuleInit {
       `[getRetrievalDocs] uid: ${user.uid}, query: ${query}, filter: ${JSON.stringify(filter)}`,
     );
 
-    const retrievalResults: SearchResult[] = await this.ragService.retrieve(user, {
+    const retrievalResults: ContentPayload[] = await this.ragService.retrieve(user, {
       query,
       filter,
     });
@@ -415,7 +401,6 @@ export class LlmService implements OnModuleInit {
         title: res.title,
       },
       pageContent: res.content,
-      score: parseFloat(res._additional.score) || 0,
     }));
 
     return retrievedDocs;

@@ -2,7 +2,6 @@ import { BadRequestException, Injectable, Logger, UnauthorizedException } from '
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { Prisma, Resource, User, Weblink } from '@prisma/client';
-import { generateUuid5 } from 'weaviate-ts-client';
 import _ from 'lodash';
 import { PrismaService } from '../common/prisma.service';
 import { MinioService } from '../common/minio.service';
@@ -21,7 +20,7 @@ import {
   QUEUE_RESOURCE,
   genCollectionID,
   genResourceID,
-  streamToString,
+  genResourceUuid,
 } from 'src/utils';
 import { ConfigService } from '@nestjs/config';
 import { RAGService } from 'src/rag/rag.service';
@@ -198,7 +197,7 @@ export class KnowledgeService {
 
     const res = await this.prisma.resource.create({
       data: {
-        resourceId: genResourceID(),
+        resourceId: param.resourceId,
         resourceType: param.resourceType,
         meta: JSON.stringify(param.data),
         userId: user.id,
@@ -218,6 +217,7 @@ export class KnowledgeService {
     });
 
     await this.queue.add(CHANNEL_FINALIZE_RESOURCE, param);
+    // await this.finalizeResource(param);
 
     return res;
   }
@@ -240,6 +240,7 @@ export class KnowledgeService {
       weblink = await this.weblinkService.findFirstWeblink({ url, linkId });
       if (!weblink) {
         this.logger.warn(`Weblink not found, url: ${url}, linkId: ${linkId}`);
+        return;
       }
     } else {
       weblink = await this.weblinkService.processLink({ url, storageKey });
@@ -247,30 +248,24 @@ export class KnowledgeService {
 
     // TODO: 减少不必要的重复插入
     const { resourceId, collectionId } = param;
-    const { chunkStorageKey } = weblink;
 
-    if (!chunkStorageKey) {
-      // techically this cannot happen
-      this.logger.error(`chunkStorageKey is empty: ${chunkStorageKey}, url: ${url}`);
-      return;
-    }
+    const { doc } = await this.weblinkService.readWebLinkContent(url);
+    const chunks = await this.ragService.indexContent(doc);
 
-    const content = await this.ragService.loadContentChunks(chunkStorageKey);
-
-    content.chunks.forEach((chunk, index) => {
-      chunk.id = generateUuid5(`${resourceId}-${index}`);
+    chunks.forEach((chunk, index) => {
+      chunk.id = genResourceUuid(`${resourceId}-${index}`);
       chunk.resourceId = resourceId;
       chunk.collectionId = collectionId;
     });
 
-    await this.ragService.saveDataForUser(user, content);
+    await this.ragService.saveDataForUser(user, { chunks });
 
     this.logger.log(
-      `save resource segments for user ${user.uid} success, resourceId: ${param.resourceId}`,
+      `save resource segments for user ${user.uid} success, resourceId: ${resourceId}`,
     );
 
     await this.prisma.resource.update({
-      where: { resourceId: param.resourceId, userId: user.id },
+      where: { resourceId, userId: user.id },
       data: {
         meta: JSON.stringify({
           url,

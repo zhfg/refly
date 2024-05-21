@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import _ from 'lodash';
 import avro from 'avsc';
-import { FireworksEmbeddings } from '@langchain/community/embeddings/fireworks';
 import { Document } from '@langchain/core/documents';
 import { TokenTextSplitter } from 'langchain/text_splitter';
-import { generateUuid5 } from 'weaviate-ts-client';
+import { OpenAIEmbeddings } from '@langchain/openai';
 
 import { tables } from 'turndown-plugin-gfm';
 import TurndownService from 'turndown';
@@ -12,12 +12,18 @@ import { cleanMarkdownForLLM, tidyMarkdown } from '../utils/markdown';
 
 import { User } from '@prisma/client';
 import { MinioService } from '../common/minio.service';
-import { PrismaService } from '../common/prisma.service';
 import { PageSnapshot, PuppeteerService, ScrappingOptions } from '../common/puppeteer.service';
-import { ReflyContentSchema, WeaviateService } from '../common/weaviate.service';
-import { HybridSearchParam, ContentDataObj, ContentData, ContentType } from './rag.dto';
+import {
+  HybridSearchParam,
+  ContentDataObj,
+  ContentData,
+  ContentType,
+  ContentPayload,
+} from './rag.dto';
 import { PageMeta } from '../types/weblink';
 import { normalizeURL } from '../utils/url';
+import { QdrantService } from 'src/common/qdrant.service';
+import { Condition, PointStruct } from 'src/common/qdrant.dto';
 
 const READER_URL = 'https://r.jina.ai/';
 
@@ -54,7 +60,7 @@ export const PARSER_VERSION = '20240424';
 
 @Injectable()
 export class RAGService {
-  private embeddings: FireworksEmbeddings;
+  private embeddings: OpenAIEmbeddings;
   private splitter: TokenTextSplitter;
   private logger = new Logger(RAGService.name);
 
@@ -63,16 +69,14 @@ export class RAGService {
   constructor(
     private config: ConfigService,
     private minio: MinioService,
-    private prisma: PrismaService,
-    private weaviate: WeaviateService,
+    private qdrant: QdrantService,
     private puppeteer: PuppeteerService,
   ) {
-    this.embeddings = new FireworksEmbeddings({
-      modelName: 'nomic-ai/nomic-embed-text-v1.5',
+    this.embeddings = new OpenAIEmbeddings({
+      modelName: 'text-embedding-3-large',
       batchSize: 512,
-      // dimensions: this.config.getOrThrow('vectorStore.vectorDim'),
-      // timeout: 5000,
-      apiKey: this.config.getOrThrow('fireworks.apiKey'),
+      dimensions: this.config.getOrThrow('vectorStore.vectorDim'),
+      timeout: 5000,
       maxRetries: 3,
     });
     this.splitter = new TokenTextSplitter({
@@ -210,7 +214,7 @@ export class RAGService {
     const dataObjs: ContentDataObj[] = [];
     for (let i = 0; i < chunks.length; i++) {
       dataObjs.push({
-        id: generateUuid5(`${metadata.source}-${i}`),
+        id: '', // leave it empty for future update
         url: metadata.source,
         type: ContentType.WEBLINK,
         title: metadata.title,
@@ -238,71 +242,60 @@ export class RAGService {
     return ContentAvroType.fromBuffer(buf) as ContentData;
   }
 
-  async saveDataForUser(user: Pick<User, 'id' | 'uid' | 'vsTenantCreated'>, data: ContentData) {
-    if (!user.vsTenantCreated) {
-      // 更新向量库租户创建状态
-      await Promise.all([
-        this.weaviate.createTenant(user.uid),
-        this.prisma.user.update({
-          where: { id: user.id, vsTenantCreated: false },
-          data: { vsTenantCreated: true },
-        }),
-      ]);
-    }
-
-    const objects = data.chunks.map((chunk) => ({
-      class: ReflyContentSchema.class,
-      properties: {
-        url: chunk.url,
-        type: chunk.type,
-        title: chunk.title,
-        content: chunk.content,
-      },
+  async saveDataForUser(user: Pick<User, 'id' | 'uid'>, data: ContentData) {
+    const points: PointStruct[] = data.chunks.map((chunk) => ({
       id: chunk.id,
       vector: chunk.vector,
-      tenant: user.uid,
+      payload: {
+        ..._.omit(chunk, ['id', 'vector']),
+        tenantId: user.uid,
+      },
     }));
 
-    return this.weaviate.batchSaveData(objects);
+    return this.qdrant.batchSaveData(points);
   }
 
   async deleteResourceData(user: Pick<User, 'uid'>, resourceId: string) {
-    return this.weaviate.batchDelete(user.uid, {
-      path: ['resourceId'],
-      operator: 'Equal',
-      valueText: resourceId,
+    return this.qdrant.batchDelete({
+      must: [
+        { key: 'tenantId', match: { value: user.uid } },
+        { key: 'resourceId', match: { value: resourceId } },
+      ],
     });
   }
 
-  async retrieve(user: Pick<User, 'uid'>, param: HybridSearchParam) {
+  async retrieve(user: Pick<User, 'uid'>, param: HybridSearchParam): Promise<ContentPayload[]> {
     if (!param.vector) {
       param.vector = await this.embeddings.embedQuery(param.query);
     }
 
-    const filters = [];
+    const conditions: Condition[] = [
+      {
+        key: 'tenantId',
+        match: { value: user.uid },
+      },
+    ];
+
     if (param.filter?.urls?.length > 0) {
-      filters.push({
-        path: ['url'],
-        operator: 'ContainsAny',
-        valueTextArray: param.filter.urls,
+      conditions.push({
+        key: 'url',
+        match: { any: param.filter?.urls },
       });
     }
-
     if (param.filter?.resourceIds?.length > 0) {
-      filters.push({
-        path: ['resourceId'],
-        operator: 'ContainsAny',
-        valueTextArray: param.filter.resourceIds,
+      conditions.push({
+        key: 'url',
+        match: { any: param.filter?.resourceIds },
+      });
+    }
+    if (param.filter?.collectionIds?.length > 0) {
+      conditions.push({
+        key: 'url',
+        match: { any: param.filter?.resourceIds },
       });
     }
 
-    if (param.filter?.collectionIds?.length > 0) {
-      filters.push({
-        path: ['collectionId'],
-        operator: 'ContainsAny',
-        valueTextArray: param.filter.collectionIds,
-      });
-    }
-    return this.weaviate.hybridSearch(user.uid, param, filters);
+    const results = await this.qdrant.search(param, { must: conditions });
+    return results.map((res) => res.payload as any);
   }
 }

@@ -200,10 +200,7 @@ export class WeblinkService {
     return results.flat();
   }
 
-  async saveChunkEmbeddingsForUser(
-    user: Pick<User, 'id' | 'uid' | 'vsTenantCreated'>,
-    urls: string[],
-  ) {
+  async saveChunkEmbeddingsForUser(user: Pick<User, 'id' | 'uid'>, urls: string[]) {
     // TODO: 减少不必要的重复插入
     const weblinks = await this.prisma.weblink.findMany({
       select: { url: true, chunkStorageKey: true },
@@ -547,8 +544,8 @@ export class WeblinkService {
             data: { pageMeta: JSON.stringify(doc.metadata) },
           }),
           this.updateWeblinkStorageKey(weblink, link, data),
-          this.genWeblinkChunkEmbedding(weblink, doc),
-          this.extractWeblinkContentMeta(weblink, doc),
+          // this.genWeblinkChunkEmbedding(weblink, doc),
+          // this.extractWeblinkContentMeta(weblink, doc),
         ]);
       }
     } catch (err) {
@@ -567,9 +564,7 @@ function isWeblinkReady(weblink: Weblink): boolean {
   return (
     weblink.storageKey &&
     weblink.parsedDocStorageKey &&
-    weblink.chunkStorageKey &&
     weblink.parseStatus === 'finish' &&
-    weblink.chunkStatus === 'finish' &&
     weblink.parserVersion === PARSER_VERSION &&
     Object.keys(JSON.parse(weblink.contentMeta || '{}')).length > 0
   );

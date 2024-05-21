@@ -14,7 +14,7 @@ export class ResourceProcessor {
 
   @Process(CHANNEL_FINALIZE_RESOURCE)
   async handleFinalizeResource(job: Job<UpsertResourceRequest>) {
-    this.logger.log(`[handleWebLinkForUser] job: ${JSON.stringify(job)}`);
+    this.logger.log(`[handleFinalizeResource] job: ${JSON.stringify(job)}`);
 
     await this.knowledgeService.finalizeResource(job.data);
   }

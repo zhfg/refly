@@ -4,15 +4,18 @@ export enum ContentType {
   WEBLINK = 'weblink',
 }
 
-export interface ContentDataObj {
-  id: string;
+export interface ContentPayload {
   url: string;
   type: ContentType;
   title: string;
   content: string;
-  vector: number[];
   resourceId?: string;
   collectionId?: string;
+}
+
+export interface ContentDataObj extends ContentPayload {
+  id: string;
+  vector: number[];
 }
 
 export interface ContentData {
@@ -24,17 +27,4 @@ export interface HybridSearchParam {
   vector?: number[];
   filter?: RetrieveFilter;
   limit?: number;
-}
-
-export interface SearchMeta {
-  score: string;
-  explainScore: string;
-}
-
-export interface SearchResult {
-  url: string;
-  type: ContentType;
-  title: string;
-  content: string;
-  _additional: SearchMeta;
 }
