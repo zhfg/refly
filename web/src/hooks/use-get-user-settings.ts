@@ -64,9 +64,7 @@ export const useGetUserSettings = () => {
 
         // 增加 localSettings
         let uiLocale = mapCNLocale(res?.data?.uiLocale as LOCALE) as LOCALE
-        let outputLocale = mapCNLocale(
-          res?.data?.outputLocale as LOCALE,
-        ) as LOCALE
+        let outputLocale = res?.data?.outputLocale as LOCALE
 
         // 先写回
         localSettings = {
@@ -81,9 +79,7 @@ export const useGetUserSettings = () => {
           uiLocale = mapCNLocale(
             (navigator?.language || LOCALE.EN) as LOCALE,
           ) as LOCALE
-          outputLocale = mapCNLocale(
-            (navigator?.language || LOCALE.EN) as LOCALE,
-          ) as LOCALE
+          outputLocale = (navigator?.language || LOCALE.EN) as LOCALE
           // 不阻塞写回用户配置
           putUserInfo({
             body: { uiLocale, outputLocale },

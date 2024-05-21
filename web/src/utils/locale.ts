@@ -3,5 +3,5 @@ export const mapCNLocale = (locale: string) => {
     return "zh-CN"
   }
 
-  return locale
+  return "en"
 }

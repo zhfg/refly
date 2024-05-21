@@ -33,7 +33,7 @@ const getDefaultLocale = () => {
   const language = navigator.language
 
   if (language?.toLocaleLowerCase()?.startsWith("en")) {
-    return navigator.language?.split("-")?.[0]
+    return "en"
   }
 
   if (language?.toLocaleLowerCase()?.startsWith("zh")) {
@@ -43,7 +43,7 @@ const getDefaultLocale = () => {
 
 export const defaultLocalSettings = {
   uiLocale: getDefaultLocale(),
-  outputLocale: getDefaultLocale(),
+  outputLocale: navigator.language,
   isLocaleInitialized: false, // locale 是否是初始化状态，用于展示语言
 } as LocalSettings
 
