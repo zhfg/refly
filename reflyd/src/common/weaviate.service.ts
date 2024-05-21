@@ -12,6 +12,14 @@ const reflyContentSchema = {
       dataType: ['text'],
     },
     {
+      name: 'resourceId',
+      dataType: ['text'],
+    },
+    {
+      name: 'collectionId',
+      dataType: ['text'],
+    },
+    {
       name: 'type',
       dataType: ['text'],
     },
@@ -105,6 +113,22 @@ export class WeaviateService implements OnModuleInit {
         path: ['url'],
         operator: 'ContainsAny',
         valueTextArray: param.filter.urls,
+      });
+    }
+
+    if (param.filter?.resourceIds?.length > 0) {
+      getter = getter.withWhere({
+        path: ['resourceId'],
+        operator: 'ContainsAny',
+        valueTextArray: param.filter.resourceIds,
+      });
+    }
+
+    if (param.filter?.collectionIds?.length > 0) {
+      getter = getter.withWhere({
+        path: ['collectionId'],
+        operator: 'ContainsAny',
+        valueTextArray: param.filter.collectionIds,
       });
     }
 

@@ -121,6 +121,17 @@ export type GEN_TITLE = {
   conversationId: string;
 };
 
+export type RetrieveFilter = {
+  // 限制召回的网页列表
+  weblinkList?: Source[];
+  // 限制召回的 url
+  urls?: string[];
+  // 限制召回的资源 id
+  resourceIds?: string[];
+  // 限制召回的集合 id
+  collectionIds?: string[];
+};
+
 export type QUICK_ACTION_TASK_PAYLOAD = {
   question?: string; // 用户问题
 
@@ -128,10 +139,7 @@ export type QUICK_ACTION_TASK_PAYLOAD = {
   actionPrompt?: string;
   reference?: string;
   conversationId?: string;
-  filter?: {
-    // 限制用于 quick-action 的网页列表
-    weblinkList?: Source[];
-  };
+  filter?: RetrieveFilter;
 };
 
 export type SEARCH_RESULT_ITEM = {
@@ -148,10 +156,7 @@ export type SEARCH_ENHANCE = {
 
 export type CHAT = {
   question: string;
-  filter?: {
-    // 限制召回网页的 filter，都换成这种富内容的形态
-    weblinkList?: Source[];
-  };
+  filter?: RetrieveFilter;
 };
 
 export type Task = {

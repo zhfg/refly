@@ -1,4 +1,6 @@
 export const QUEUE_WEBLINK = 'weblink';
+export const QUEUE_RESOURCE = 'resource';
 
-export const PROCESS_LINK_CHANNEL = 'processLink';
-export const PROCESS_LINK_BY_USER_CHANNEL = 'processLinkByUser';
+export const CHANNEL_PROCESS_LINK = 'processLink';
+export const CHANNEL_PROCESS_LINK_BY_USER = 'processLinkByUser';
+export const CHANNEL_FINALIZE_RESOURCE = 'finalizeResource';

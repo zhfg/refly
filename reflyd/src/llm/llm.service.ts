@@ -32,6 +32,7 @@ import { SearchResultContext } from '../types/search';
 import { PrismaService } from '../common/prisma.service';
 import { RAGService } from '../rag/rag.service';
 import { SearchResult } from '../common/weaviate.dto';
+import { RetrieveFilter } from 'src/conversation/conversation.dto';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
@@ -397,14 +398,16 @@ export class LlmService implements OnModuleInit {
   async getRetrievalDocs(
     user: User,
     query: string,
-    urls?: string[],
+    filter?: RetrieveFilter,
   ): Promise<Document<PageMeta>[]> {
-    this.logger.log(`[getRetrievalDocs] uid: ${user.uid}, query: ${query}, urls: ${urls}`);
+    this.logger.log(
+      `[getRetrievalDocs] uid: ${user.uid}, query: ${query}, filter: ${JSON.stringify(filter)}`,
+    );
 
     const retrievalResults: SearchResult[] = await this.ragService.retrieve({
       tenantId: user.uid,
       query,
-      filter: { urls },
+      filter,
     });
 
     this.logger.log('retrievalResults: ' + JSON.stringify(retrievalResults));

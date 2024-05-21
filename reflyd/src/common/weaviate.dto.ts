@@ -1,5 +1,7 @@
 // TODO: refactor all these types to rag module
 
+import { RetrieveFilter } from '../conversation/conversation.dto';
+
 export enum ContentType {
   WEBLINK = 'weblink',
 }
@@ -11,21 +13,19 @@ export interface ContentDataObj {
   title: string;
   content: string;
   vector: number[];
+  resourceId?: string;
+  collectionId?: string;
 }
 
 export interface ContentData {
   chunks: ContentDataObj[];
 }
 
-export interface MetadataFilter {
-  urls?: string[];
-}
-
 export interface HybridSearchParam {
   tenantId: string;
   query: string;
   vector?: number[];
-  filter?: MetadataFilter;
+  filter?: RetrieveFilter;
   limit?: number;
 }
 

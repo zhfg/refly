@@ -72,6 +72,8 @@ export class UpsertResourceRequest {
 
   @ApiPropertyOptional()
   isPublic?: boolean;
+
+  userId?: number; // internal use only
 }
 
 export class UpsertResourceResponse {

@@ -1,4 +1,6 @@
 import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Queue } from 'bull';
+import { InjectQueue } from '@nestjs/bull';
 import { Prisma, Resource, User, Weblink } from '@prisma/client';
 import _ from 'lodash';
 import { PrismaService } from '../common/prisma.service';
@@ -13,7 +15,13 @@ import {
   WeblinkMeta,
   CollectionListItem,
 } from './knowledge.dto';
-import { genCollectionID, genResourceID, streamToString } from 'src/utils';
+import {
+  CHANNEL_FINALIZE_RESOURCE,
+  QUEUE_RESOURCE,
+  genCollectionID,
+  genResourceID,
+  streamToString,
+} from 'src/utils';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -25,6 +33,7 @@ export class KnowledgeService {
     private minio: MinioService,
     private config: ConfigService,
     private weblinkService: WeblinkService,
+    @InjectQueue(QUEUE_RESOURCE) private queue: Queue<UpsertResourceRequest>,
   ) {}
 
   async listCollections(
@@ -163,33 +172,7 @@ export class KnowledgeService {
   async createResource(user: User, param: UpsertResourceRequest) {
     param.resourceId = genResourceID();
 
-    if (param.resourceType === 'weblink') {
-      if (!param.data) {
-        throw new BadRequestException('data is required');
-      }
-      const { url, linkId, storageKey, title } = param.data;
-      if (!url && !linkId) {
-        throw new BadRequestException('url or linkId is required');
-      }
-      let weblink: Weblink;
-      if (param.data?.linkId) {
-        weblink = await this.weblinkService.findFirstWeblink({ url, linkId });
-        if (!weblink) {
-          throw new BadRequestException('Weblink not found');
-        }
-      } else {
-        weblink = await this.weblinkService.processLink({ url, storageKey });
-      }
-
-      param.title ||= title;
-      param.data.linkId = weblink.linkId;
-      param.data.storageKey = weblink.storageKey;
-      param.data.parsedDocStorageKey = weblink.parsedDocStorageKey;
-    } else {
-      throw new BadRequestException('Invalid resource type');
-    }
-
-    // If target collection not specified, try to save to default collection
+    // If target collection not specified, create new one
     if (!param.collectionId) {
       param.collectionId = genCollectionID();
       this.logger.log(
@@ -197,7 +180,19 @@ export class KnowledgeService {
       );
     }
 
-    return this.prisma.resource.create({
+    if (param.resourceType === 'weblink') {
+      if (!param.data) {
+        throw new BadRequestException('data is required');
+      }
+      const { url, linkId } = param.data;
+      if (!url && !linkId) {
+        throw new BadRequestException('url or linkId is required');
+      }
+    } else {
+      throw new BadRequestException('Invalid resource type');
+    }
+
+    const res = await this.prisma.resource.create({
       data: {
         resourceId: genResourceID(),
         resourceType: param.resourceType,
@@ -215,6 +210,52 @@ export class KnowledgeService {
             },
           },
         },
+      },
+    });
+
+    await this.queue.add(CHANNEL_FINALIZE_RESOURCE, param);
+
+    return res;
+  }
+
+  /**
+   * Process resource after inserted, including connecting with weblink and
+   * save to vector store.
+   */
+  async finalizeResource(param: UpsertResourceRequest) {
+    const user = await this.prisma.user.findFirst({ where: { id: param.userId } });
+    if (!user) {
+      this.logger.warn(`User not found, userId: ${param.userId}`);
+      return;
+    }
+
+    const { url, linkId, storageKey, title } = param.data;
+
+    let weblink: Weblink;
+    if (param.data?.linkId) {
+      weblink = await this.weblinkService.findFirstWeblink({ url, linkId });
+      if (!weblink) {
+        this.logger.warn(`Weblink not found, url: ${url}, linkId: ${linkId}`);
+      }
+    } else {
+      weblink = await this.weblinkService.processLink({ url, storageKey });
+      await this.weblinkService.saveResourceSegmentsForUser(user, {
+        weblink,
+        resourceId: param.resourceId,
+        collectionId: param.collectionId,
+      });
+    }
+
+    await this.prisma.resource.update({
+      where: { resourceId: param.resourceId, userId: user.id },
+      data: {
+        meta: JSON.stringify({
+          url,
+          linkId: weblink.linkId,
+          title,
+          storageKey,
+          parsedDocStorageKey: weblink.parsedDocStorageKey,
+        } as WeblinkMeta),
       },
     });
   }

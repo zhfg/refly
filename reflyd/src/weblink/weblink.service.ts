@@ -15,12 +15,13 @@ import { LlmService } from '../llm/llm.service';
 import { WebLinkDTO, WeblinkData } from './weblink.dto';
 import { getExpectedTokenLenContent } from '../utils/token';
 import { PageMeta, Source } from '../types/weblink';
-import { PROCESS_LINK_BY_USER_CHANNEL, PROCESS_LINK_CHANNEL, QUEUE_WEBLINK } from '../utils/const';
+import { CHANNEL_PROCESS_LINK_BY_USER, CHANNEL_PROCESS_LINK, QUEUE_WEBLINK } from '../utils/const';
 import { streamToBuffer, streamToString } from '../utils/stream';
 import { genLinkID, sha256Hash } from '../utils/id';
 import { ContentData } from '../common/weaviate.dto';
 import { hasUrlRedirected, normalizeURL } from '../utils/url';
 import { TaskResponse } from '../conversation/conversation.dto';
+import { generateUuid5 } from 'weaviate-ts-client';
 
 @Injectable()
 export class WeblinkService {
@@ -46,11 +47,11 @@ export class WeblinkService {
   }
 
   async enqueueProcessTask(link: WebLinkDTO) {
-    return this.indexQueue.add(PROCESS_LINK_CHANNEL, link);
+    return this.indexQueue.add(CHANNEL_PROCESS_LINK, link);
   }
 
   async enqueueProcessByUserTask(link: WebLinkDTO) {
-    return this.indexQueue.add(PROCESS_LINK_BY_USER_CHANNEL, link);
+    return this.indexQueue.add(CHANNEL_PROCESS_LINK_BY_USER, link);
   }
 
   async findFirstWeblink(where: { url?: string; linkId?: string }) {
@@ -215,24 +216,6 @@ export class WeblinkService {
     user: Pick<User, 'id' | 'uid' | 'vsTenantCreated'>,
     urls: string[],
   ) {
-    // const [uwbs, weblinks] = await Promise.all([
-    //   this.prisma.userWeblink.findMany({
-    //     where: { userId: user.id, url: { in: urls } },
-    //   }),
-    //   this.prisma.weblink.findMany({
-    //     select: { url: true, chunkStorageKey: true },
-    //     where: { url: { in: urls } },
-    //   }),
-    // ]);
-
-    // // calculate urls not saved by user
-    // const unsavedWeblinks = weblinks.filter(({ url }) => !uwbs.some((uwb) => uwb.url === url));
-
-    // if (unsavedWeblinks.length === 0) {
-    //   this.logger.log(`user ${user.uid} has all weblinks saved: ${urls}`);
-    //   return;
-    // }
-
     // TODO: 减少不必要的重复插入
     const weblinks = await this.prisma.weblink.findMany({
       select: { url: true, chunkStorageKey: true },
@@ -255,7 +238,7 @@ export class WeblinkService {
     // 更新向量库租户创建状态
     if (!user.vsTenantCreated) {
       await this.prisma.user.update({
-        where: { id: user.id },
+        where: { id: user.id, vsTenantCreated: false },
         data: { vsTenantCreated: true },
       });
     }
@@ -263,6 +246,48 @@ export class WeblinkService {
     this.logger.log(
       `save chunk embeddings for user ${user.uid} success, urls: ` +
         JSON.stringify(weblinks.map(({ url }) => url)),
+    );
+  }
+
+  async saveResourceSegmentsForUser(
+    user: Pick<User, 'id' | 'uid' | 'vsTenantCreated'>,
+    param: {
+      weblink: Weblink;
+      resourceId: string;
+      collectionId: string;
+    },
+  ) {
+    // TODO: 减少不必要的重复插入
+    const { weblink, resourceId, collectionId } = param;
+    const { url, chunkStorageKey } = weblink;
+
+    if (!chunkStorageKey) {
+      // techically this cannot happen
+      this.logger.error(`chunkStorageKey is empty: ${chunkStorageKey}, url: ${url}`);
+      return;
+    }
+
+    const stream = await this.minio.getObject(this.bucketName, chunkStorageKey);
+    const content = ContentAvroType.fromBuffer(await streamToBuffer(stream)) as ContentData;
+
+    content.chunks.forEach((chunk, index) => {
+      chunk.id = generateUuid5(`${resourceId}-${index}`);
+      chunk.resourceId = resourceId;
+      chunk.collectionId = collectionId;
+    });
+
+    await this.ragService.saveDataForUser(user, content);
+
+    // 更新向量库租户创建状态
+    if (!user.vsTenantCreated) {
+      await this.prisma.user.update({
+        where: { id: user.id, vsTenantCreated: false },
+        data: { vsTenantCreated: true },
+      });
+    }
+
+    this.logger.log(
+      `save resource segments for user ${user.uid} success, resourceId: ${param.resourceId}`,
     );
   }
 

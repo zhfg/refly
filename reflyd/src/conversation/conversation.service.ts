@@ -286,7 +286,7 @@ export class ConversationService {
     const docs =
       urls.length > 1 || chatFromClientSelector
         ? await this.weblinkService.readMultiWeblinks(filter.weblinkList)
-        : await this.llmService.getRetrievalDocs(user, questionWithContext, urls);
+        : await this.llmService.getRetrievalDocs(user, questionWithContext, filter);
 
     const { stream } = await this.llmService.chat(
       questionWithContext,
