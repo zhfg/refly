@@ -10,6 +10,8 @@ export class PageMeta {
   source: string;
   title: string;
   publishedTime?: string;
+  resourceId?: string;
+  collectionId?: string;
 }
 
 export class Source {

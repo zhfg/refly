@@ -399,6 +399,8 @@ export class LlmService implements OnModuleInit {
       metadata: {
         source: res.url,
         title: res.title,
+        collectionId: res.collectionId,
+        resourceId: res.resourceId,
       },
       pageContent: res.content,
     }));
