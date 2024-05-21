@@ -1,26 +1,86 @@
+import { useCopilotContextState } from "@/hooks/use-copilot-context-state"
 import { SearchTarget, useSearchStateStore } from "@/stores/search-state"
-import { useSearchParams } from "react-router-dom"
+import { Tag } from "@arco-design/web-react"
+import {
+  IconCloseCircle,
+  IconFile,
+  IconFolder,
+} from "@arco-design/web-react/icon"
 
 export const ContextStateDisplay = () => {
+  const {
+    showKnowledgeBaseContext,
+    showResourceContext,
+    currentKnowledgeBase,
+    currentResource,
+  } = useCopilotContextState()
   const searchStateStore = useSearchStateStore()
 
-  const [queryParams] = useSearchParams()
-  const resId = queryParams.get("resId")
-  const kbId = queryParams.get("kbId")
-
-  const showContextState = !!resId || !!kbId
-  const isCurrentPageSelected =
-    searchStateStore?.searchTarget === SearchTarget.CurrentPage
-  const isCurrentKnowledgeBaseSelected =
-    searchStateStore?.searchTarget === SearchTarget.CurrentKnowledgeBase
+  const clearContextState = () => {
+    searchStateStore.setSearchTarget(SearchTarget.None)
+  }
 
   return (
     <div className="ai-copilot-context-state-display-container">
-      {showContextState && isCurrentPageSelected ? (
-        <div className="context-state-current-page"></div>
+      {showResourceContext ? (
+        <div className="context-state-card context-state-current-page">
+          <div className="context-state-card-header">
+            <div className="context-state-card-header-left">
+              <IconFile />
+              <span className="context-state-card-header-title">
+                选中当前页面问答
+              </span>
+            </div>
+            <div className="context-state-card-header-right">
+              <IconCloseCircle
+                onClick={() => {
+                  clearContextState()
+                }}
+              />
+            </div>
+          </div>
+          <div className="context-state-card-body">
+            <div className="context-state-resource-item">
+              <Tag
+                icon={<IconFile />}
+                bordered
+                className="context-state-resource-item-tag">
+                {currentResource?.title}
+              </Tag>
+            </div>
+          </div>
+          <div className="context-state-card-footer"></div>
+        </div>
       ) : null}
-      {showContextState && isCurrentKnowledgeBaseSelected ? (
-        <div className="context-state-current-knowledge-base"></div>
+      {showKnowledgeBaseContext ? (
+        <div className="context-state-card context-state-current-knowledge-base">
+          <div className="context-state-card-header">
+            <div className="context-state-card-header-left">
+              <IconFolder />
+              <span className="context-state-card-header-title">
+                选中当前知识库问答
+              </span>
+            </div>
+            <div className="context-state-card-header-right">
+              <IconCloseCircle
+                onClick={() => {
+                  clearContextState()
+                }}
+              />
+            </div>
+          </div>
+          <div className="context-state-card-body">
+            <div className="context-state-resource-item">
+              <Tag
+                icon={<IconFile />}
+                bordered
+                className="context-state-resource-item-tag">
+                {currentKnowledgeBase?.title}
+              </Tag>
+            </div>
+          </div>
+          <div className="context-state-card-footer"></div>
+        </div>
       ) : null}
     </div>
   )

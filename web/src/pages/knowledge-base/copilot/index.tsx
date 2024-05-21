@@ -28,11 +28,19 @@ import { AssistantMessage, HumanMessage } from "./message"
 import { SearchTargetSelector } from "@/components/search-target-selector"
 import { useSearchParams } from "react-router-dom"
 import { SearchTarget, useSearchStateStore } from "@/stores/search-state"
+import { ContextStateDisplay } from "./context-state-display"
+import { useCopilotContextState } from "@/hooks/use-copilot-context-state"
+import { useState } from "react"
 
 const TextArea = Input.TextArea
 
 export const AICopilot = () => {
   const conv = fakeConversations?.[0]
+  const [copilotBodyHeight, setCopilotBodyHeight] = useState(215)
+  const { contextCardHeight, showContextCard } = useCopilotContextState()
+
+  const actualCopilotBodyHeight =
+    copilotBodyHeight + (showContextCard ? contextCardHeight : 0)
 
   return (
     <div className="ai-copilot-container">
@@ -49,7 +57,9 @@ export const AICopilot = () => {
             icon={<IconMore style={{ fontSize: 16 }} />}></Button>
         </div>
       </div>
-      <div className="ai-copilot-message-container">
+      <div
+        className="ai-copilot-message-container"
+        style={{ height: `calc(100% - ${actualCopilotBodyHeight}px - 50px)` }}>
         {conv?.messages?.map((item, index) =>
           item.type === MessageType.Human ? (
             <HumanMessage message={item} key={index} />
@@ -58,8 +68,14 @@ export const AICopilot = () => {
           ),
         )}
       </div>
-      <div className="ai-copilot-body">
-        <div className="ai-copilot-context-display"></div>
+      <div
+        className="ai-copilot-body"
+        style={{ height: actualCopilotBodyHeight }}>
+        {showContextCard ? (
+          <div className="ai-copilot-context-display">
+            <ContextStateDisplay />
+          </div>
+        ) : null}
         <div className="ai-copilot-chat-container">
           <div className="chat-setting-container">
             <div className="chat-operation-container">
