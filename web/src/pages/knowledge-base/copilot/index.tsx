@@ -24,6 +24,10 @@ import "./index.scss"
 import { fakeConversations } from "@/fake-data/conversation"
 import { MessageType } from "@/types"
 import { AssistantMessage, HumanMessage } from "./message"
+// 自定义组件
+import { SearchTargetSelector } from "@/components/search-target-selector"
+import { useSearchParams } from "react-router-dom"
+import { SearchTarget, useSearchStateStore } from "@/stores/search-state"
 
 const TextArea = Input.TextArea
 
@@ -55,6 +59,7 @@ export const AICopilot = () => {
         )}
       </div>
       <div className="ai-copilot-body">
+        <div className="ai-copilot-context-display"></div>
         <div className="ai-copilot-chat-container">
           <div className="chat-setting-container">
             <div className="chat-operation-container">
@@ -98,18 +103,12 @@ export const AICopilot = () => {
               />
             </div>
             <div className="chat-input-assist-action">
+              <SearchTargetSelector classNames="chat-input-assist-action-item" />
               <Button
                 icon={<IconTranslate />}
                 type="text"
                 className="chat-input-assist-action-item">
                 <span>简体中文</span>
-                <IconCaretDown />
-              </Button>
-              <Button
-                icon={<IconApps />}
-                type="text"
-                className="chat-input-assist-action-item">
-                <span>总结会话</span>
                 <IconCaretDown />
               </Button>
             </div>

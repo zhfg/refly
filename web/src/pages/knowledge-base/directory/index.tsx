@@ -24,7 +24,7 @@ import {
 import { useSearchableList } from "@/components/use-searchable-list"
 import { useEffect, useState } from "react"
 import type { ResourceDetail } from "@/types/knowledge-base"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { useKnowledgeBaseStore } from "@/stores/knowledge-base"
 // 类型
 import { CollectionDetail } from "@/types/knowledge-base"
@@ -40,11 +40,14 @@ export const KnowledgeBaseDirectory = () => {
       delay: 300,
     })
   const [isFetching, setIsFetching] = useState(false)
-  const params = useParams<{ kbId: string; resourceId: string }>()
   const knowledgeBaseStore = useKnowledgeBaseStore()
   const navigate = useNavigate()
 
-  const handleGetDetail = async (collectionId: string) => {
+  const [queryParams] = useSearchParams()
+  const kbId = queryParams.get("kbId")
+  const resId = queryParams.get("resId")
+
+  const handleGetDetail = async (collectionId: string, resourceId: string) => {
     setIsFetching(true)
     try {
       const newRes = await getKnowledgeBaseDetail({
@@ -63,10 +66,12 @@ export const KnowledgeBaseDirectory = () => {
       )
 
       // 如果没有资源，则跳转到第一个资源
-      if (!params?.resourceId) {
+      if (!resourceId) {
         const firstResourceId = newRes?.data?.resources?.[0]?.resourceId
         if (firstResourceId) {
-          navigate(`/knowledge-base/${collectionId}/${firstResourceId}`)
+          navigate(
+            `/knowledge-base?kbId=${collectionId}&resId=${firstResourceId}`,
+          )
         }
       }
     } catch (err) {
@@ -76,11 +81,11 @@ export const KnowledgeBaseDirectory = () => {
   }
 
   useEffect(() => {
-    if (params?.kbId) {
-      console.log("params", params)
-      handleGetDetail(params?.kbId as string)
+    if (kbId) {
+      console.log("params kbId", kbId)
+      handleGetDetail(kbId as string, resId as string)
     }
-  }, [])
+  }, [kbId, resId])
 
   const handleChange = (val: string) => {
     filter(val)
@@ -152,7 +157,9 @@ export const KnowledgeBaseDirectory = () => {
               className="knowledge-base-directory-item"
               key={index}
               onClick={() => {
-                navigate(`/knowledge-base/${params?.kbId}/${item?.resourceId}`)
+                navigate(
+                  `/knowledge-base?kbId=${kbId}&resId=${item?.resourceId}`,
+                )
               }}>
               <div className="knowledge-base-directory-site-intro">
                 <div className="site-intro-icon">

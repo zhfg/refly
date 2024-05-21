@@ -87,11 +87,7 @@ export const AppRouter = (props: { layout?: any }) => {
     <Layout>
       <Routes>
         <Route path="/" element={<Workspace />} />
-        <Route
-          path="/knowledge-base/:kbId/:resourceId"
-          element={<KnowledgeBase />}
-        />
-        <Route path="/knowledge-base/:kbId" element={<KnowledgeBase />} />
+        <Route path="/knowledge-base" element={<KnowledgeBase />} />
         <Route path="/login" element={<Login />} />
         {/* <Route path="/feed" element={<Feed />} /> */}
         <Route path="/digest" element={<DigestToday />} />

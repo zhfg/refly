@@ -1,18 +1,22 @@
 import { Button, Dropdown, Menu, Typography } from "@arco-design/web-react"
 import {
-  IconOriginalSize,
-  IconArchive,
   IconCommon,
   IconCompass,
+  IconFile,
+  IconDriveFile,
+  IconFolder,
+  IconBook,
+  IconCaretDown,
 } from "@arco-design/web-react/icon"
 
 import { useSearchStateStore, SearchTarget } from "@/stores/search-state"
 import { useWeblinkStore } from "@/stores/weblink"
-import { IconTip } from "./icon-tip"
 import { useEffect } from "react"
 import { useTranslation } from "react-i18next"
+// 自定义样式
+import "./index.scss"
 
-export const SearchTargetSelector = () => {
+export const SearchTargetSelector = (props: { classNames: string }) => {
   const searchStateStore = useSearchStateStore()
   const webLinkStore = useWeblinkStore()
 
@@ -39,6 +43,14 @@ export const SearchTargetSelector = () => {
       <Typography.Text type="secondary" style={{ marginLeft: 12 }}>
         {t("loggedHomePage.homePage.searchScope.title")}
       </Typography.Text>
+      <Menu.Item key={SearchTarget.CurrentPage}>
+        <IconFile style={iconStyle} />
+        {t("loggedHomePage.homePage.searchScope.currentPage")}
+      </Menu.Item>
+      <Menu.Item key={SearchTarget.CurrentKnowledgeBase}>
+        <IconFolder style={iconStyle} />
+        {t("loggedHomePage.homePage.searchScope.currentKnowledgeBase")}
+      </Menu.Item>
       <Menu.Item key={SearchTarget.All}>
         <IconCommon style={iconStyle} />
         {t("loggedHomePage.homePage.searchScope.all")}
@@ -48,24 +60,35 @@ export const SearchTargetSelector = () => {
         onClick={() => {
           webLinkStore.updateIsWebLinkListVisible(true)
         }}>
-        <IconArchive style={iconStyle} />
+        <IconBook style={iconStyle} />
         {t("loggedHomePage.homePage.searchScope.history")}
       </Menu.Item>
       <Menu.Item key={SearchTarget.SearchEnhance}>
         <IconCompass style={iconStyle} />
         {t("loggedHomePage.homePage.searchScope.internet")}
       </Menu.Item>
+      <Menu.Item key={SearchTarget.None}>
+        <IconDriveFile style={iconStyle} />
+        {t("loggedHomePage.homePage.searchScope.none")}
+      </Menu.Item>
     </Menu>
   )
 
   const getDisplayText = (searchTarget: SearchTarget) => {
     switch (searchTarget) {
+      case SearchTarget.CurrentPage:
+        return t("loggedHomePage.homePage.searchScope.currentPage")
+      case SearchTarget.CurrentKnowledgeBase:
+        return t("loggedHomePage.homePage.searchScope.currentKnowledgeBase")
+
       case SearchTarget.SelectedPages:
         return t("loggedHomePage.homePage.searchScope.history")
       case SearchTarget.All:
         return t("loggedHomePage.homePage.searchScope.all")
       case SearchTarget.SearchEnhance:
         return t("loggedHomePage.homePage.searchScope.internet")
+      case SearchTarget.None:
+        return t("loggedHomePage.homePage.searchScope.none")
 
       default: {
         return t("loggedHomePage.homePage.searchScope.all")
@@ -75,12 +98,16 @@ export const SearchTargetSelector = () => {
 
   const getDisplayIcon = (searchTarget: SearchTarget) => {
     switch (searchTarget) {
-      case SearchTarget.SelectedPages:
-        return <IconArchive />
       case SearchTarget.CurrentPage:
-        return <IconOriginalSize />
+        return <IconFile />
+      case SearchTarget.CurrentKnowledgeBase:
+        return <IconFolder />
+      case SearchTarget.SelectedPages:
+        return <IconBook />
       case SearchTarget.SearchEnhance:
         return <IconCompass />
+      case SearchTarget.None:
+        return <IconDriveFile />
       case SearchTarget.All:
         return <IconCommon />
     }
@@ -95,9 +122,10 @@ export const SearchTargetSelector = () => {
       <Button
         icon={getDisplayIcon(searchStateStore.searchTarget)}
         type="text"
-        className="search-assist-btn"
+        className={props.classNames}
         shape="round">
-        {getDisplayText(searchStateStore.searchTarget)}
+        <span>{getDisplayText(searchStateStore.searchTarget)}</span>
+        <IconCaretDown />
       </Button>
     </Dropdown>
   )

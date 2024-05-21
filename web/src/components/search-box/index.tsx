@@ -23,7 +23,7 @@ import { useNavigate } from "react-router-dom"
 // request
 import createNewConversation from "@/requests/createNewConversation"
 import { IconLanguage, IconSend } from "@arco-design/web-react/icon"
-import { SearchTargetSelector } from "../dashboard/home-search-target-selector"
+import { SearchTargetSelector } from "@/components/search-target-selector"
 // styles
 import "./index.scss"
 import { useSiderStore } from "@/stores/sider"
@@ -32,7 +32,6 @@ import { useUserStore } from "@/stores/user"
 import { useTranslation } from "react-i18next"
 import { OutputLocaleList } from "../output-locale-list"
 import { localeToLanguageName } from "@/utils/i18n"
-import { IconTip } from "../dashboard/icon-tip"
 
 const TextArea = Input.TextArea
 
@@ -207,7 +206,7 @@ export const SearchBox = () => {
           <div>
             <div className="toolbar">
               <Space>
-                <SearchTargetSelector />
+                <SearchTargetSelector classNames="search-assist-btn" />
                 <OutputLocaleList>
                   <Button
                     type="text"

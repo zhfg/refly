@@ -121,8 +121,11 @@
       },
       "searchScope": {
         "title": "Select Search Scope",
-        "all": "Whole Library",
-        "history": "History Read",
+        "none": "General Knowledge Q&A",
+        "currentPage": "Current Selected Page",
+        "currentKnowledgeBase": "Current Knowledge Base",
+        "all": "All Knowledge Bases",
+        "history": "History of Read Content",
         "internet": "Internet Search"
       },
       "seeKnowledgeLibrary": "View Knowledge Library",

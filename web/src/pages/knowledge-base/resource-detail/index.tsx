@@ -1,10 +1,9 @@
 import { Markdown } from "@/components/markdown"
-import { fakeKnowledgeResourceDetail } from "@/fake-data/knowledge-base"
 import { IconBulb, IconCodepen } from "@arco-design/web-react/icon"
 
 // 自定义样式
 import "./index.scss"
-import { useParams } from "react-router-dom"
+import { useSearchParams } from "react-router-dom"
 import { Skeleton, Message as message } from "@arco-design/web-react"
 import { useKnowledgeBaseStore } from "@/stores/knowledge-base"
 // 请求
@@ -15,9 +14,11 @@ import { useEffect, useState } from "react"
 import { safeParseURL } from "@/utils/url"
 
 export const KnowledgeBaseResourceDetail = () => {
-  const params = useParams<{ resourceId: string }>()
   const [isFetching, setIsFetching] = useState(false)
   const knowledgeBaseStore = useKnowledgeBaseStore()
+
+  const [queryParams] = useSearchParams()
+  const resId = queryParams.get("resId")
 
   const resourceDetail = knowledgeBaseStore?.currentResource as ResourceDetail
 
@@ -44,11 +45,11 @@ export const KnowledgeBaseResourceDetail = () => {
   }
 
   useEffect(() => {
-    if (params?.resourceId) {
-      console.log("params", params)
-      handleGetDetail(params?.resourceId as string)
+    if (resId) {
+      console.log("params resId", resId)
+      handleGetDetail(resId as string)
     }
-  }, [params?.resourceId])
+  }, [resId])
 
   return (
     <div className="knowledge-base-resource-detail-container">

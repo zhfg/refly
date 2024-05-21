@@ -15,15 +15,21 @@ import { useCookie } from "react-use"
 import { useUserStore } from "@/stores/user"
 import { getExtensionId } from "@/utils/url"
 import { useTranslation } from "react-i18next"
+import { useSearchParams } from "react-router-dom"
 
 // 用于快速选择
 export const quickActionList = ["summary"]
 
+/**
+ *
+ * 分层架构设计：AI Workspace -> AI Knowledge Base (Knowledge Collecton + AI Note + AI Copilot)
+ * /knowledge-base 打开的是一体的，通过 query 参数显示 collection、note 或 copilot，都属于 knowledge base 里面的资源
+ */
 const KnowledgeLibraryLayout = () => {
   const [token] = useCookie("_refly_ai_sid")
-
+  const [searchParams] = useSearchParams()
+  const kbId = searchParams.get("kbId")
   const userStore = useUserStore()
-
   const { t } = useTranslation()
 
   const handleSendMsgToExtension = async (
@@ -66,6 +72,18 @@ const KnowledgeLibraryLayout = () => {
     }
   }, [token, userStore?.userProfile?.uid])
 
+  const copilotStyle = kbId
+    ? {
+        defaultSize: 20,
+        minSize: 20,
+        maxSize: 50,
+      }
+    : {
+        defaultSize: 100,
+        minSize: 100,
+        maxSize: 100,
+      }
+
   return (
     <div className="workspace-container" style={{}}>
       <Helmet>
@@ -78,15 +96,15 @@ const KnowledgeLibraryLayout = () => {
         <PanelGroup
           direction="horizontal"
           className="workspace-panel-container">
-          <Panel minSize={50} className="workspace-left-assist-panel">
-            <KnowledgeBaseDetail />
-          </Panel>
-          <PanelResizeHandle className="workspace-panel-resize" />
-          <Panel
-            className="workspace-content-panel"
-            defaultSize={20}
-            minSize={20}
-            maxSize={50}>
+          {kbId
+            ? [
+                <Panel minSize={50} className="workspace-left-assist-panel">
+                  <KnowledgeBaseDetail />
+                </Panel>,
+                <PanelResizeHandle className="workspace-panel-resize" />,
+              ]
+            : null}
+          <Panel className="workspace-content-panel" {...copilotStyle}>
             <AICopilot />
           </Panel>
         </PanelGroup>

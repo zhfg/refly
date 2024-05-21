@@ -145,7 +145,7 @@ export const KnowledgeBaseList = () => {
               className="knowledge-base-list-item-container"
               actionLayout="vertical"
               onClick={() => {
-                navigate(`/knowledge-base/${item?.collectionId}`)
+                navigate(`/knowledge-base?kbId=${item?.collectionId}`)
               }}
               actions={[
                 <div className="feed-item-action-container knowledge-base-list-item-action-container">
@@ -154,7 +154,7 @@ export const KnowledgeBaseList = () => {
                       key={1}
                       className="feed-list-item-continue-ask with-border with-hover knowledge-base-list-see-item"
                       onClick={() => {
-                        navigate(`/knowledge-base/${item?.collectionId}`)
+                        navigate(`/knowledge-base?kbId=${item?.collectionId}`)
                       }}>
                       <IconRightCircle
                         style={{ fontSize: 14, color: "#64645F" }}
@@ -169,7 +169,7 @@ export const KnowledgeBaseList = () => {
                         className="feed-list-item-continue-ask"
                         onClick={() => {
                           copyToClipboard(
-                            `${getClientOrigin()}/knowledge-base/${item?.collectionId}`,
+                            `${getClientOrigin()}/knowledge-base?kbId=${item?.collectionId}`,
                           )
                           message.success(
                             t("knowledgeLibrary.archive.item.copyNotify"),
