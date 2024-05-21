@@ -187,10 +187,11 @@ export class KnowledgeService {
       if (!param.data) {
         throw new BadRequestException('data is required');
       }
-      const { url, linkId } = param.data;
+      const { url, linkId, title } = param.data;
       if (!url && !linkId) {
         throw new BadRequestException('url or linkId is required');
       }
+      param.title ||= title;
     } else {
       throw new BadRequestException('Invalid resource type');
     }
@@ -202,7 +203,7 @@ export class KnowledgeService {
         meta: JSON.stringify(param.data),
         userId: user.id,
         isPublic: param.isPublic,
-        title: param.title,
+        title: param.title || 'Untitled',
         collections: {
           connectOrCreate: {
             where: { collectionId: param.collectionId },

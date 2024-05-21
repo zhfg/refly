@@ -275,7 +275,9 @@ export class RAGService {
   }
 
   async retrieve(user: Pick<User, 'uid'>, param: HybridSearchParam) {
-    param.vector = await this.embeddings.embedQuery(param.query);
+    if (!param.vector) {
+      param.vector = await this.embeddings.embedQuery(param.query);
+    }
 
     const filters = [];
     if (param.filter?.urls?.length > 0) {

@@ -1,7 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { PrismaVectorStore } from '@langchain/community/vectorstores/prisma';
 import { Document } from '@langchain/core/documents';
 import { OpenAIEmbeddings, ChatOpenAI } from '@langchain/openai';
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
@@ -9,7 +8,7 @@ import { StringOutputParser } from '@langchain/core/output_parsers';
 import { createStuffDocumentsChain } from 'langchain/chains/combine_documents';
 import { JsonOutputFunctionsParser } from 'langchain/output_parsers';
 
-import { AigcContent, Prisma, User } from '@prisma/client';
+import { AigcContent, User } from '@prisma/client';
 import {
   qa,
   contextualizeQA,
@@ -24,14 +23,13 @@ import {
 import { LLMChatMessage } from './schema';
 import { HumanMessage, SystemMessage } from 'langchain/schema';
 
-import { uniqueFunc } from '../utils/unique';
 import { ContentMeta } from './dto';
 import { categoryList } from '../prompts/utils/category';
 import { PageMeta, Source } from '../types/weblink';
 import { SearchResultContext } from '../types/search';
 import { PrismaService } from '../common/prisma.service';
 import { RAGService } from '../rag/rag.service';
-import { SearchResult } from '../common/weaviate.dto';
+import { SearchResult } from '../rag/rag.dto';
 import { RetrieveFilter } from 'src/conversation/conversation.dto';
 
 @Injectable()
@@ -404,8 +402,7 @@ export class LlmService implements OnModuleInit {
       `[getRetrievalDocs] uid: ${user.uid}, query: ${query}, filter: ${JSON.stringify(filter)}`,
     );
 
-    const retrievalResults: SearchResult[] = await this.ragService.retrieve({
-      tenantId: user.uid,
+    const retrievalResults: SearchResult[] = await this.ragService.retrieve(user, {
       query,
       filter,
     });
