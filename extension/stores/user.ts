@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import type {} from "@redux-devtools/extension"
-import type { User, LOCALE } from "~types"
+import { type User, LOCALE } from "~types"
 import { type OutputLocale } from "~utils/i18n"
 
 export interface LocalSettings {
@@ -33,17 +33,19 @@ const getDefaultLocale = () => {
   const language = navigator.language
 
   if (language?.startsWith("en")) {
-    return navigator.language?.split("-")?.[0]
+    return LOCALE.EN
   }
 
   if (language?.startsWith("zh")) {
     return "zh-CN"
   }
+
+  return LOCALE.EN
 }
 
 export const defaultLocalSettings = {
   uiLocale: getDefaultLocale(),
-  outputLocale: getDefaultLocale(),
+  outputLocale: navigator.language,
   isLocaleInitialized: false, // locale 是否是初始化状态，用于展示语言
 } as LocalSettings
 
