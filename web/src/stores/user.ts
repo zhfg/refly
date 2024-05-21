@@ -32,18 +32,20 @@ export interface UserState {
 const getDefaultLocale = () => {
   const language = navigator.language
 
-  if (language?.startsWith("en")) {
-    return navigator.language?.split("-")?.[0]
+  if (language?.toLocaleLowerCase()?.startsWith("en")) {
+    return "en"
   }
 
-  if (language?.startsWith("zh")) {
+  if (language?.toLocaleLowerCase()?.startsWith("zh")) {
     return "zh-CN"
   }
+
+  return "en"
 }
 
 export const defaultLocalSettings = {
   uiLocale: getDefaultLocale(),
-  outputLocale: getDefaultLocale(),
+  outputLocale: navigator.language,
   isLocaleInitialized: false, // locale 是否是初始化状态，用于展示语言
 } as LocalSettings
 

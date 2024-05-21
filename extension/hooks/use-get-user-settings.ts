@@ -16,6 +16,7 @@ import { bgStorage } from "~storage"
 import { Message as message } from "@arco-design/web-react"
 import { useMessage } from "@plasmohq/messaging/hook"
 import { useSiderStore } from "~stores/sider"
+import { mapDefaultLocale } from "~utils/locale"
 
 interface ExternalLoginPayload {
   name: string
@@ -65,7 +66,7 @@ export const useGetUserSettings = () => {
         userStore.setUserProfile(res?.data)
 
         // 增加 localSettings
-        let uiLocale = res?.data?.uiLocale as LOCALE
+        let uiLocale = mapDefaultLocale(res?.data?.uiLocale) as LOCALE
         let outputLocale = res?.data?.outputLocale as LOCALE
 
         // 先写回
@@ -78,7 +79,8 @@ export const useGetUserSettings = () => {
 
         // 说明是第一次注册使用，此时没有 locale，需要写回
         if (!uiLocale && !outputLocale) {
-          uiLocale = (navigator?.language || LOCALE.EN) as LOCALE
+          uiLocale = (mapDefaultLocale(navigator?.language) ||
+            LOCALE.EN) as LOCALE
           outputLocale = (navigator?.language || LOCALE.EN) as LOCALE
           // 不阻塞写回用户配置
           sendToBackground({
