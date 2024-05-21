@@ -40,6 +40,7 @@ export const useGetUserSettings = () => {
       if (!res?.success) {
         userStore.setUserProfile(undefined)
         userStore.setToken("")
+        userStore.resetState()
         localStorage.removeItem("refly-user-profile")
         localStorage.removeItem("refly-local-settings")
 

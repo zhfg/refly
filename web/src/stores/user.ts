@@ -32,11 +32,11 @@ export interface UserState {
 const getDefaultLocale = () => {
   const language = navigator.language
 
-  if (language?.startsWith("en")) {
+  if (language?.toLocaleLowerCase()?.startsWith("en")) {
     return navigator.language?.split("-")?.[0]
   }
 
-  if (language?.startsWith("zh")) {
+  if (language?.toLocaleLowerCase()?.startsWith("zh")) {
     return "zh-CN"
   }
 }
