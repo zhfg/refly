@@ -39,6 +39,8 @@ const getDefaultLocale = () => {
   if (language?.toLocaleLowerCase()?.startsWith("zh")) {
     return "zh-CN"
   }
+
+  return "en"
 }
 
 export const defaultLocalSettings = {
