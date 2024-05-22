@@ -164,8 +164,8 @@ export class KnowledgeService {
 
     if (needDoc) {
       const weblinkMeta = JSON.parse(resource.meta) as WeblinkMeta;
-      const buf = await this.minio.downloadData(weblinkMeta.parsedDocStorageKey);
-      detail.doc = buf.toString();
+      const buf = await this.minio.downloadData(weblinkMeta.storageKey);
+      detail.doc = await this.ragService.convertHTMLToMarkdown('render', buf.toString());
     }
 
     return detail;
@@ -203,6 +203,7 @@ export class KnowledgeService {
         userId: user.id,
         isPublic: param.isPublic,
         title: param.title || 'Untitled',
+        indexStatus: 'processing',
         collections: {
           connectOrCreate: {
             where: { collectionId: param.collectionId },
@@ -222,17 +223,7 @@ export class KnowledgeService {
     return res;
   }
 
-  /**
-   * Process resource after inserted, including connecting with weblink and
-   * save to vector store.
-   */
-  async finalizeResource(param: UpsertResourceRequest) {
-    const user = await this.prisma.user.findFirst({ where: { id: param.userId } });
-    if (!user) {
-      this.logger.warn(`User not found, userId: ${param.userId}`);
-      return;
-    }
-
+  async indexResource(user: User, param: UpsertResourceRequest) {
     const { url, linkId, storageKey, title } = param.data;
 
     let weblink: Weblink;
@@ -261,21 +252,47 @@ export class KnowledgeService {
     await this.ragService.saveDataForUser(user, { chunks });
 
     this.logger.log(
-      `save resource segments for user ${user.uid} success, resourceId: ${resourceId}`,
+      `save resource segments for user ${
+        user.uid
+      } success, resourceId: ${resourceId}, weblink: ${JSON.stringify(weblink)}`,
     );
 
     await this.prisma.resource.update({
       where: { resourceId, userId: user.id },
       data: {
+        indexStatus: 'finish',
         meta: JSON.stringify({
           url,
           linkId: weblink.linkId,
-          title,
-          storageKey,
-          parsedDocStorageKey: weblink.parsedDocStorageKey,
+          title: title,
+          storageKey: storageKey || weblink.storageKey,
         } as WeblinkMeta),
       },
     });
+  }
+
+  /**
+   * Process resource after inserted, including connecting with weblink and
+   * save to vector store.
+   */
+  async finalizeResource(param: UpsertResourceRequest) {
+    const user = await this.prisma.user.findFirst({ where: { id: param.userId } });
+    if (!user) {
+      this.logger.warn(`User not found, userId: ${param.userId}`);
+      return;
+    }
+
+    try {
+      await this.indexResource(user, param);
+    } catch (err) {
+      console.error(err);
+      this.logger.error(`finalize resource error: ${err}`);
+      await this.prisma.resource.update({
+        where: { resourceId: param.resourceId, userId: user.id },
+        data: { indexStatus: 'failed' },
+      });
+      throw err;
+    }
   }
 
   async updateResource(user: User, param: UpsertResourceRequest) {

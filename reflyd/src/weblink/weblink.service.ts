@@ -133,8 +133,16 @@ export class WeblinkService {
     const snapshot = await this.ragService.crawl(url);
 
     let doc: Document<PageMeta>;
-    if (snapshot.html && !hasUrlRedirected(url, snapshot.href)) {
-      doc = await this.ragService.formatSnapshot('ingest', snapshot, new URL(url));
+    const content = snapshot.parsed?.content || snapshot.html;
+    if (content && !hasUrlRedirected(url, snapshot.href)) {
+      doc = {
+        pageContent: await this.ragService.convertHTMLToMarkdown('ingest', content),
+        metadata: {
+          title: (snapshot.parsed?.title || snapshot.title || '').trim(),
+          source: url || snapshot.href?.trim(),
+          publishedTime: snapshot.parsed?.publishedTime || undefined,
+        },
+      };
       this.cache.set(url, { html: snapshot.parsed?.content || snapshot.html, doc });
     }
 
@@ -150,11 +158,13 @@ export class WeblinkService {
     try {
       const content = (await this.minio.downloadData(link.storageKey)).toString();
 
-      const doc = await this.ragService.formatSnapshot(
-        'ingest',
-        { html: content, title: link.title, href: link.origin },
-        new URL(link.url),
-      );
+      const doc = {
+        pageContent: await this.ragService.convertHTMLToMarkdown('ingest', content),
+        metadata: {
+          title: link.title,
+          source: link.url,
+        },
+      };
       const data = { html: content, doc };
       this.cache.set(link.url, data);
 
@@ -565,7 +575,6 @@ function isWeblinkReady(weblink: Weblink): boolean {
     weblink.storageKey &&
     weblink.parsedDocStorageKey &&
     weblink.parseStatus === 'finish' &&
-    weblink.parserVersion === PARSER_VERSION &&
-    Object.keys(JSON.parse(weblink.contentMeta || '{}')).length > 0
+    weblink.parserVersion === PARSER_VERSION
   );
 }

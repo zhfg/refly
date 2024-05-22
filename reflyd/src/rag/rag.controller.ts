@@ -34,10 +34,11 @@ export class RagController {
       this.logger.log('save cache to ' + cacheFile);
     }
 
-    const doc = await this.ragService.formatSnapshot('ingest', snapshot, new URL(url));
-    const chunks = await this.ragService.chunkText(doc.pageContent);
+    const content = snapshot.parsed?.content || snapshot.html;
+    const markdownText = await this.ragService.convertHTMLToMarkdown('ingest', content);
+    const chunks = await this.ragService.chunkText(markdownText);
 
-    return { url, doc: doc.pageContent, chunks: chunks };
+    return { url, doc: markdownText, chunks: chunks };
   }
 
   @Get('parse')

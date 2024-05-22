@@ -27,7 +27,7 @@ import { Condition, PointStruct } from 'src/common/qdrant.dto';
 
 const READER_URL = 'https://r.jina.ai/';
 
-export type SnapshotFormatMode =
+export type FormatMode =
   | 'render' // For markdown rendering
   | 'ingest' // For consumption by LLMs
   | 'vanilla'; // Without any processing;
@@ -86,7 +86,7 @@ export class RAGService {
     });
   }
 
-  getTurndown(mode: SnapshotFormatMode) {
+  getTurndown(mode: FormatMode) {
     const turnDownService = new TurndownService({
       headingStyle: 'atx',
       bulletListMarker: '-',
@@ -111,12 +111,8 @@ export class RAGService {
     return turnDownService;
   }
 
-  async formatSnapshot(
-    mode: SnapshotFormatMode,
-    snapshot: PageSnapshot,
-    nominalUrl?: URL,
-  ): Promise<Document<PageMeta>> {
-    const toBeTurnedToMd = snapshot.parsed?.content || snapshot.html;
+  async convertHTMLToMarkdown(mode: FormatMode, html: string): Promise<string> {
+    const toBeTurnedToMd = html;
     let turnDownService = this.getTurndown(mode);
     for (const plugin of this.turnDownPlugins) {
       turnDownService = turnDownService.use(plugin);
@@ -139,29 +135,22 @@ export class RAGService {
 
     if (
       !contentText ||
-      (contentText.startsWith('<') && contentText.endsWith('>') && toBeTurnedToMd !== snapshot.html)
+      (contentText.startsWith('<') && contentText.endsWith('>') && toBeTurnedToMd !== html)
     ) {
       try {
-        contentText = turnDownService.turndown(snapshot.html);
+        contentText = turnDownService.turndown(html);
       } catch (err) {
         this.logger.warn(`Turndown failed to run, retrying without plugins`, { err });
         const vanillaTurnDownService = this.getTurndown('vanilla');
         try {
-          contentText = vanillaTurnDownService.turndown(snapshot.html);
+          contentText = vanillaTurnDownService.turndown(html);
         } catch (err2) {
           this.logger.warn(`Turndown failed to run, giving up`, { err: err2 });
         }
       }
     }
 
-    return {
-      pageContent: tidyMarkdown(contentText || '').trim(),
-      metadata: {
-        title: (snapshot.parsed?.title || snapshot.title || '').trim(),
-        source: nominalUrl?.toString() || snapshot.href?.trim(),
-        publishedTime: snapshot.parsed?.publishedTime || undefined,
-      },
-    };
+    return tidyMarkdown(contentText || '').trim();
   }
 
   async crawl(url: string, mode = 'markdown') {
