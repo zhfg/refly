@@ -8,12 +8,7 @@ import {
   Spin,
   Typography,
 } from "@arco-design/web-react"
-import {
-  IconCopy,
-  IconQuote,
-  IconReply,
-  IconRight,
-} from "@arco-design/web-react/icon"
+import { IconCopy, IconQuote, IconRight } from "@arco-design/web-react/icon"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -32,8 +27,14 @@ export const AssistantMessage = (props: {
   message: Partial<ServerMessage>
   isPending: boolean
   isLastSession: boolean
+  handleAskFollowing: (question?: string) => void
 }) => {
-  const { message, isPending = false, isLastSession = false } = props
+  const {
+    message,
+    isPending = false,
+    isLastSession = false,
+    handleAskFollowing,
+  } = props
   const [scrollLoading] = useState(<Skeleton animation></Skeleton>)
 
   const { t } = useTranslation()
@@ -159,7 +160,10 @@ export const AssistantMessage = (props: {
         <div className="ai-copilot-related-question-container">
           <div className="ai-copilot-related-question-list">
             {message?.relatedQuestions?.map((item, index) => (
-              <div className="ai-copilot-related-question-item" key={index}>
+              <div
+                className="ai-copilot-related-question-item"
+                key={index}
+                onClick={() => handleAskFollowing(item)}>
                 <p className="ai-copilot-related-question-title">{item}</p>
                 <IconRight style={{ color: "rgba(0, 0, 0, 0.5)" }} />
               </div>

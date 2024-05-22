@@ -15,6 +15,9 @@ import {
   type Source,
   TASK_TYPE,
   Conversation,
+  LOCALE,
+  Message,
+  MessageType,
 } from "@/types"
 import { SearchTarget, useSearchStateStore } from "@/stores/search-state"
 import { buildTask } from "@/utils/task"
@@ -24,6 +27,8 @@ import createNewConversation from "@/requests/createNewConversation"
 import { useUserStore } from "@/stores/user"
 import { useTranslation } from "react-i18next"
 import { OutputLocale } from "@/utils/i18n"
+import { useBuildTask } from "./use-build-task"
+import { safeParseJSON } from "@/utils/parse"
 
 export const useBuildThreadAndRun = () => {
   const chatStore = useChatStore()
@@ -32,6 +37,7 @@ export const useBuildThreadAndRun = () => {
   const taskStore = useTaskStore()
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const { buildTaskAndGenReponse } = useBuildTask()
 
   const handleCreateNewConversation = async (task: Task) => {
     /**
@@ -89,9 +95,17 @@ export const useBuildThreadAndRun = () => {
     return currentConversation
   }
 
-  const runChatTask = () => {
+  const runChatTask = (comingQuestion?: string) => {
+    // support ask follow up question
+    let question = ""
+    if (typeof comingQuestion === "string" && comingQuestion) {
+      question = comingQuestion
+    } else {
+      const { newQAText } = useChatStore.getState()
+      question = newQAText
+    }
+
     const { localSettings } = useUserStore.getState()
-    const question = chatStore.newQAText
     const { selectedRow } = useWeblinkStore.getState()
     const { searchTarget } = useSearchStateStore.getState()
 
@@ -154,5 +168,87 @@ export const useBuildThreadAndRun = () => {
     handleCreateNewConversation(task)
   }
 
-  return { handleCreateNewConversation, runQuickActionTask, runChatTask }
+  const getSelectedWeblinkConfig = (
+    messages: Message[] = [],
+  ): {
+    searchTarget: SearchTarget
+    filter: Source[]
+  } => {
+    // 这里是获取第一个，早期简化策略，因为一开始设置之后，后续设置就保留
+    const lastHumanMessage = messages?.find(
+      item => item?.data?.type === MessageType.Human,
+    )
+
+    return safeParseJSON(lastHumanMessage?.data?.selectedWeblinkConfig)
+  }
+
+  const runTask = (comingQuestion?: string) => {
+    // support ask follow up question
+    let question = ""
+    const isFollowUpAsk = !!comingQuestion
+    if (typeof comingQuestion === "string" && comingQuestion) {
+      question = comingQuestion
+    } else {
+      const { newQAText } = useChatStore.getState()
+      question = newQAText
+    }
+
+    const { searchTarget } = useSearchStateStore.getState()
+    const { localSettings } = useUserStore.getState()
+
+    //
+    const { messages } = useChatStore.getState()
+    const selectedWeblinkConfig = getSelectedWeblinkConfig(messages)
+
+    let selectedWebLink: Source[] = []
+
+    if (isFollowUpAsk) {
+      const useWeblinkList =
+        selectedWeblinkConfig?.searchTarget === SearchTarget.SelectedPages &&
+        selectedWeblinkConfig?.filter?.length > 0
+
+      selectedWebLink = useWeblinkList ? selectedWeblinkConfig?.filter : []
+    } else {
+      const { selectedRow } = useWeblinkStore.getState()
+      if (searchTarget === SearchTarget.SelectedPages) {
+        selectedWebLink = selectedRow?.map(item => ({
+          pageContent: "",
+          metadata: {
+            title: item?.content?.originPageTitle || "",
+            source: item?.content?.originPageUrl || "",
+          },
+          score: -1, // 手工构造
+        }))
+      }
+    }
+
+    // 创建新会话并跳转
+    const conv = ensureConversationExist()
+
+    // 设置当前的任务类型及会话 id
+    const task = buildTask({
+      taskType:
+        searchTarget === SearchTarget.SearchEnhance
+          ? TASK_TYPE.SEARCH_ENHANCE_ASK
+          : TASK_TYPE.CHAT,
+      data: {
+        question,
+        filter: { weblinkList: selectedWebLink },
+      },
+      locale: localSettings?.outputLocale || LOCALE.EN,
+      convId: conv?.convId || "",
+      createConvParam: { ...conv },
+    })
+    taskStore.setTask(task)
+    // 开始提问
+    buildTaskAndGenReponse(task as Task)
+    chatStore.setNewQAText("")
+  }
+
+  return {
+    handleCreateNewConversation,
+    runQuickActionTask,
+    runChatTask,
+    runTask,
+  }
 }

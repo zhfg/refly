@@ -2,37 +2,12 @@ import { Button, Input } from "@arco-design/web-react"
 import { useRef, useState } from "react"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input/textarea"
 import { useChatStore } from "@/stores/chat"
-import { useWeblinkStore } from "@/stores/weblink"
-import { SearchTarget, useSearchStateStore } from "@/stores/search-state"
-
-// types
-import {
-  type Task,
-  type Source,
-  TASK_TYPE,
-  type Message,
-  MessageType,
-  Conversation,
-  LOCALE,
-} from "@/types"
-// utils
-import { buildTask } from "@/utils/task"
-import { useResetState } from "@/hooks/use-reset-state"
-import { useConversationStore } from "@/stores/conversation"
-import { buildConversation } from "@/utils/conversation"
-import { useTaskStore } from "@/stores/task"
-import { useNavigate } from "react-router-dom"
-import { delay } from "@/utils/delay"
-// request
-import getThreadMessages from "@/requests/getThreadMessages"
 // styles
 import "./index.scss"
 import { useQuickSearchStateStore } from "@/stores/quick-search-state"
-import { useUserStore } from "@/stores/user"
 import { IconSend } from "@arco-design/web-react/icon"
-import { safeParseJSON } from "@/utils/parse"
-import { useBuildTask } from "@/hooks/use-build-task"
 import { useMessageStateStore } from "@/stores/message-state"
+import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run"
 
 const TextArea = Input.TextArea
 
@@ -45,192 +20,11 @@ export const ChatInput = (props: ChatInputProps) => {
   const inputRef = useRef<RefTextAreaType>(null)
   // stores
   const chatStore = useChatStore()
-  const conversationStore = useConversationStore()
-  const taskStore = useTaskStore()
   const quickSearchStateStore = useQuickSearchStateStore()
   const messageStateStore = useMessageStateStore()
+  const { runTask } = useBuildThreadAndRun()
   // hooks
-  const { resetState } = useResetState()
-  const navigate = useNavigate()
   const [isFocused, setIsFocused] = useState(false)
-
-  const { buildTaskAndGenReponse } = useBuildTask()
-
-  const weblinkStore = useWeblinkStore()
-  const [isFetching, setIsFetching] = useState(true)
-
-  const handleGetThreadMessages = async (threadId: string) => {
-    // 异步操作
-    const res = await getThreadMessages({
-      body: {
-        threadId,
-      },
-    })
-
-    const { newQAText } = useChatStore.getState()
-    console.log("getThreadMessages", res)
-
-    // 清空之前的状态
-    resetState()
-
-    // 设置会话和消息
-    conversationStore.setCurrentConversation(res?.data as Conversation)
-
-    //
-    const messages = (res?.data?.messages || [])?.map(item => {
-      const {
-        content = "",
-        relatedQuestions = [],
-        sources,
-        type,
-        selectedWeblinkConfig = "", // 这里需要构建进来
-        ...extraInfo
-      } = item || {}
-
-      return {
-        ...extraInfo,
-        data: {
-          content,
-          relatedQuestions,
-          sources,
-          type,
-          selectedWeblinkConfig,
-        },
-      }
-    })
-    chatStore.setMessages(messages)
-    chatStore.setNewQAText(newQAText)
-  }
-
-  const getSelectedWeblinkConfig = (
-    messages: Message[] = [],
-  ): {
-    searchTarget: SearchTarget
-    filter: Source[]
-  } => {
-    // 这里是获取第一个，早期简化策略，因为一开始设置之后，后续设置就保留
-    const lastHumanMessage = messages?.find(
-      item => item?.data?.type === MessageType.Human,
-    )
-
-    return safeParseJSON(lastHumanMessage?.data?.selectedWeblinkConfig)
-  }
-
-  const handleThread = async (threadId: string) => {
-    try {
-      setIsFetching(true)
-      const { currentConversation } = useConversationStore.getState()
-      const { task } = useTaskStore.getState()
-
-      // 新会话，需要手动构建第一条消息
-      if (chatStore.isNewConversation && currentConversation?.convId) {
-        // 更换成基于 task 的消息模式，核心是基于 task 来处理
-        buildTaskAndGenReponse(task as Task)
-      } else if (
-        chatStore.isAskFollowUpNewConversation &&
-        currentConversation?.convId
-      ) {
-        // 先获取会话
-        await handleGetThreadMessages(threadId)
-        // 然后构建 followup question
-        await handleAskFollowing()
-      } else if (threadId) {
-        handleGetThreadMessages(threadId)
-      }
-
-      // 重置状态
-      chatStore.setNewQAText("")
-      weblinkStore.updateSelectedRow([])
-    } catch (err) {
-      console.log("thread error")
-    }
-
-    await delay(1500)
-    setIsFetching(false)
-  }
-
-  const runTask = () => {
-    const question = chatStore.newQAText
-    const { selectedRow } = useWeblinkStore.getState()
-    const { searchTarget } = useSearchStateStore.getState()
-    const { localSettings } = useUserStore.getState()
-
-    let selectedWebLink: Source[] = []
-
-    if (searchTarget === SearchTarget.SelectedPages) {
-      selectedWebLink = selectedRow?.map(item => ({
-        pageContent: "",
-        metadata: {
-          title: item?.content?.originPageTitle || "",
-          source: item?.content?.originPageUrl || "",
-        },
-        score: -1, // 手工构造
-      }))
-    }
-
-    // 创建新会话并跳转
-    const newConversationPayload = buildConversation()
-    conversationStore.setCurrentConversation(
-      newConversationPayload as Conversation,
-    )
-
-    // 设置当前的任务类型及会话 id
-    const task = buildTask({
-      taskType:
-        searchTarget === SearchTarget.SearchEnhance
-          ? TASK_TYPE.SEARCH_ENHANCE_ASK
-          : TASK_TYPE.CHAT,
-      data: {
-        question,
-        filter: { weblinkList: selectedWebLink },
-      },
-      locale: localSettings?.outputLocale || LOCALE.EN,
-      convId: newConversationPayload?.convId || "",
-      createConvParam: { ...newConversationPayload },
-    })
-    taskStore.setTask(task)
-    // 开始提问
-    buildTaskAndGenReponse(task as Task)
-    chatStore.setNewQAText("")
-  }
-
-  const handleAskFollowing = (
-    question?: string,
-    taskType: TASK_TYPE = TASK_TYPE.CHAT,
-  ) => {
-    // support ask follow up question
-    let newQuestion = ""
-    if (typeof question === "string" && question) {
-      newQuestion = question
-    } else {
-      const { newQAText } = useChatStore.getState()
-      newQuestion = newQAText
-    }
-    const { currentConversation } = useConversationStore.getState()
-    const { messages } = useChatStore.getState()
-    const selectedWeblinkConfig = getSelectedWeblinkConfig(messages)
-    const { localSettings } = useUserStore.getState()
-
-    const useWeblinkList =
-      selectedWeblinkConfig?.searchTarget === SearchTarget.SelectedPages &&
-      selectedWeblinkConfig?.filter?.length > 0
-
-    const task = buildTask({
-      data: {
-        question: newQuestion,
-        convId: currentConversation?.convId || "",
-        filter: {
-          weblinkList: useWeblinkList ? selectedWeblinkConfig?.filter : [],
-        },
-      },
-      taskType: taskType as TASK_TYPE,
-      locale: localSettings?.outputLocale || LOCALE.EN,
-      convId: currentConversation?.convId || "",
-    })
-
-    buildTaskAndGenReponse(task)
-    chatStore.setNewQAText("")
-  }
 
   const handleSendMessage = () => {
     quickSearchStateStore.setVisible(false)

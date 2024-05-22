@@ -5,10 +5,12 @@ import { MessageType } from "@/types"
 import { AssistantMessage, HumanMessage, PendingMessage } from "./message"
 import { mapToServerMessage } from "@/utils/message"
 import { useMessageStateStore } from "@/stores/message-state"
+import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run"
 
 export const ChatMessages = () => {
   const chatStore = useChatStore()
   const messageStateStore = useMessageStateStore()
+  const { runTask } = useBuildThreadAndRun()
 
   const mappedServerMessages = mapToServerMessage(chatStore.messages || [])
 
@@ -23,6 +25,7 @@ export const ChatMessages = () => {
             key={index}
             isLastSession={index === mappedServerMessages?.length - 1}
             isPending={messageStateStore?.pending as boolean}
+            handleAskFollowing={(question: string) => runTask(question)}
           />
         ),
       )}
