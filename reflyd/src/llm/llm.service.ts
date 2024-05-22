@@ -393,7 +393,7 @@ export class LlmService implements OnModuleInit {
       filter,
     });
 
-    this.logger.log('retrievalResults: ' + JSON.stringify(retrievalResults));
+    this.logger.log('[getRetrievalDocs] results: ' + JSON.stringify(retrievalResults));
 
     const retrievedDocs = retrievalResults.map((res) => ({
       metadata: {

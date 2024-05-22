@@ -273,14 +273,14 @@ export class RAGService {
     }
     if (param.filter?.resourceIds?.length > 0) {
       conditions.push({
-        key: 'url',
+        key: 'resourceId',
         match: { any: param.filter?.resourceIds },
       });
     }
     if (param.filter?.collectionIds?.length > 0) {
       conditions.push({
-        key: 'url',
-        match: { any: param.filter?.resourceIds },
+        key: 'collectionId',
+        match: { any: param.filter?.collectionIds },
       });
     }
 
