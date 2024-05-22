@@ -212,6 +212,35 @@ export class ConversationService {
       taskRes = await this.handleChatTask(res, user, task, chatHistory);
     }
 
+    // Complete resource and collection info
+    const collectionIds = [
+      ...new Set(taskRes.sources.map((source) => source.metadata.collectionId).filter((id) => id)),
+    ];
+    const resourceIds = [
+      ...new Set(taskRes.sources.map((source) => source.metadata.resourceId).filter((id) => id)),
+    ];
+    const [collections, resources] = await Promise.all([
+      this.prisma.collection.findMany({
+        select: { collectionId: true, title: true },
+        where: { collectionId: { in: collectionIds } },
+      }),
+      this.prisma.resource.findMany({
+        select: { resourceId: true, title: true },
+        where: { resourceId: { in: resourceIds } },
+      }),
+    ]);
+
+    taskRes.sources.forEach((source) => {
+      const { metadata } = source;
+      const { collectionId, resourceId } = metadata;
+      if (collectionId) {
+        metadata.collectionName = collections.find((c) => c.collectionId === collectionId)?.title;
+      }
+      if (metadata.resourceId) {
+        metadata.resourceName = resources.find((r) => r.resourceId === resourceId)?.title;
+      }
+    });
+
     if (!dryRun && conversation?.id && taskRes) {
       const newMessages: CreateChatMessageInput[] = [
         {
@@ -286,7 +315,7 @@ export class ConversationService {
     const docs =
       urls.length > 1 || chatFromClientSelector
         ? await this.weblinkService.readMultiWeblinks(filter.weblinkList)
-        : await this.llmService.getRetrievalDocs(user, questionWithContext, urls);
+        : await this.llmService.getRetrievalDocs(user, questionWithContext, filter);
 
     const { stream } = await this.llmService.chat(
       questionWithContext,

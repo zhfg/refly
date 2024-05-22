@@ -40,29 +40,27 @@ model VerificationToken {
 
 model User {
   /// 主键
-  id              Int       @id @default(autoincrement())
+  id            Int       @id @default(autoincrement())
   /// UID
-  uid             String?   @default("") @map("uid")
+  uid           String?   @default("") @map("uid")
   /// 头像
-  avatar          String?   @map("avatar")
+  avatar        String?   @map("avatar")
   /// 用户名
-  name            String?   @map("name")
+  name          String?   @map("name")
   /// 邮箱
-  email           String?   @unique @map("email")
+  email         String?   @unique @map("email")
   /// 邮箱是否已验证
-  emailVerified   DateTime? @map("email_verified") @db.Timestamptz()
+  emailVerified DateTime? @map("email_verified") @db.Timestamptz()
   /// 密码
-  password        String?   @map("password")
+  password      String?   @map("password")
   /// 界面语言设置
-  uiLocale        String?   @default("") @map("ui_locale")
+  uiLocale      String?   @default("") @map("ui_locale")
   /// 输出语言设置
-  outputLocale    String?   @default("") @map("output_locale")
-  /// 向量库是否初始化租户
-  vsTenantCreated Boolean?  @default(false) @map("vs_tenant_created")
+  outputLocale  String?   @default("") @map("output_locale")
   /// 创建时间
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// 更新时间
-  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
 
   @@map("users")
 }
@@ -292,6 +290,8 @@ model Resource {
   userId       Int          @map("user_id")
   /// 是否公开
   isPublic     Boolean      @default(false) @map("is_public")
+  /// 索引状态
+  indexStatus  IndexStatus  @default(init) @map("index_status")
   /// 标题
   title        String       @map("title")
   /// 资源元数据

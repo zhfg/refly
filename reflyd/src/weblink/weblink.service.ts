@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Prisma, User, Weblink } from '@prisma/client';
 import { Queue } from 'bull';
 import { LRUCache } from 'lru-cache';
@@ -8,17 +7,15 @@ import { Document } from '@langchain/core/documents';
 
 import { PrismaService } from '../common/prisma.service';
 import { MinioService } from '../common/minio.service';
-import { RAGService, ContentAvroType, PARSER_VERSION } from '../rag/rag.service';
+import { RAGService, PARSER_VERSION } from '../rag/rag.service';
 import { AigcService } from '../aigc/aigc.service';
 import { RedisService } from '../common/redis.service';
 import { LlmService } from '../llm/llm.service';
 import { WebLinkDTO, WeblinkData } from './weblink.dto';
 import { getExpectedTokenLenContent } from '../utils/token';
 import { PageMeta, Source } from '../types/weblink';
-import { PROCESS_LINK_BY_USER_CHANNEL, PROCESS_LINK_CHANNEL, QUEUE_WEBLINK } from '../utils/const';
-import { streamToBuffer, streamToString } from '../utils/stream';
+import { CHANNEL_PROCESS_LINK_BY_USER, CHANNEL_PROCESS_LINK, QUEUE_WEBLINK } from '../utils/const';
 import { genLinkID, sha256Hash } from '../utils/id';
-import { ContentData } from '../common/weaviate.dto';
 import { hasUrlRedirected, normalizeURL } from '../utils/url';
 import { TaskResponse } from '../conversation/conversation.dto';
 
@@ -27,13 +24,11 @@ export class WeblinkService {
   private logger = new Logger(WeblinkService.name);
 
   private cache: LRUCache<string, WeblinkData>; // url -> weblink data
-  private bucketName: string;
 
   constructor(
     private prisma: PrismaService,
     private redis: RedisService,
     private minio: MinioService,
-    private configService: ConfigService,
     private llmService: LlmService,
     private ragService: RAGService,
     private aigcService: AigcService,
@@ -42,15 +37,14 @@ export class WeblinkService {
     this.cache = new LRUCache({
       max: 1000,
     });
-    this.bucketName = this.configService.getOrThrow('minio.weblinkBucket');
   }
 
   async enqueueProcessTask(link: WebLinkDTO) {
-    return this.indexQueue.add(PROCESS_LINK_CHANNEL, link);
+    return this.indexQueue.add(CHANNEL_PROCESS_LINK, link);
   }
 
   async enqueueProcessByUserTask(link: WebLinkDTO) {
-    return this.indexQueue.add(PROCESS_LINK_BY_USER_CHANNEL, link);
+    return this.indexQueue.add(CHANNEL_PROCESS_LINK_BY_USER, link);
   }
 
   async findFirstWeblink(where: { url?: string; linkId?: string }) {
@@ -120,18 +114,14 @@ export class WeblinkService {
     });
     if (weblink?.storageKey && weblink?.parsedDocStorageKey) {
       this.logger.log(`found valid weblink from db: ${JSON.stringify(weblink)}`);
-      const [htmlStream, docStream] = await Promise.all([
-        this.minio.getObject(this.bucketName, weblink.storageKey),
-        this.minio.getObject(this.bucketName, weblink.parsedDocStorageKey),
-      ]);
-      const [html, doc] = await Promise.all([
-        streamToString(htmlStream),
-        streamToString(docStream),
+      const [htmlBuf, docBuf] = await Promise.all([
+        this.minio.downloadData(weblink.storageKey),
+        this.minio.downloadData(weblink.parsedDocStorageKey),
       ]);
       const data = {
-        html,
+        html: htmlBuf.toString(),
         doc: {
-          pageContent: doc,
+          pageContent: docBuf.toString(),
           metadata: JSON.parse(weblink.pageMeta || '{}'),
         },
       };
@@ -143,8 +133,16 @@ export class WeblinkService {
     const snapshot = await this.ragService.crawl(url);
 
     let doc: Document<PageMeta>;
-    if (snapshot.html && !hasUrlRedirected(url, snapshot.href)) {
-      doc = await this.ragService.formatSnapshot('ingest', snapshot, new URL(url));
+    const content = snapshot.parsed?.content || snapshot.html;
+    if (content && !hasUrlRedirected(url, snapshot.href)) {
+      doc = {
+        pageContent: this.ragService.convertHTMLToMarkdown('ingest', content),
+        metadata: {
+          title: (snapshot.parsed?.title || snapshot.title || '').trim(),
+          source: url || snapshot.href?.trim(),
+          publishedTime: snapshot.parsed?.publishedTime || undefined,
+        },
+      };
       this.cache.set(url, { html: snapshot.parsed?.content || snapshot.html, doc });
     }
 
@@ -158,14 +156,15 @@ export class WeblinkService {
    */
   async directParseWebLinkContent(link: WebLinkDTO): Promise<WeblinkData> {
     try {
-      const stream = await this.minio.getObject(this.bucketName, link.storageKey);
-      const content = await streamToString(stream);
+      const content = (await this.minio.downloadData(link.storageKey)).toString();
 
-      const doc = await this.ragService.formatSnapshot(
-        'ingest',
-        { html: content, title: link.title, href: link.origin },
-        new URL(link.url),
-      );
+      const doc = {
+        pageContent: this.ragService.convertHTMLToMarkdown('ingest', content),
+        metadata: {
+          title: link.title,
+          source: link.url,
+        },
+      };
       const data = { html: content, doc };
       this.cache.set(link.url, data);
 
@@ -211,28 +210,7 @@ export class WeblinkService {
     return results.flat();
   }
 
-  async saveChunkEmbeddingsForUser(
-    user: Pick<User, 'id' | 'uid' | 'vsTenantCreated'>,
-    urls: string[],
-  ) {
-    // const [uwbs, weblinks] = await Promise.all([
-    //   this.prisma.userWeblink.findMany({
-    //     where: { userId: user.id, url: { in: urls } },
-    //   }),
-    //   this.prisma.weblink.findMany({
-    //     select: { url: true, chunkStorageKey: true },
-    //     where: { url: { in: urls } },
-    //   }),
-    // ]);
-
-    // // calculate urls not saved by user
-    // const unsavedWeblinks = weblinks.filter(({ url }) => !uwbs.some((uwb) => uwb.url === url));
-
-    // if (unsavedWeblinks.length === 0) {
-    //   this.logger.log(`user ${user.uid} has all weblinks saved: ${urls}`);
-    //   return;
-    // }
-
+  async saveChunkEmbeddingsForUser(user: Pick<User, 'id' | 'uid'>, urls: string[]) {
     // TODO: 减少不必要的重复插入
     const weblinks = await this.prisma.weblink.findMany({
       select: { url: true, chunkStorageKey: true },
@@ -246,19 +224,10 @@ export class WeblinkService {
           this.logger.error(`chunkStorageKey is empty: ${chunkStorageKey}, url: ${url}`);
           return;
         }
-        const stream = await this.minio.getObject(this.bucketName, chunkStorageKey);
-        const content = ContentAvroType.fromBuffer(await streamToBuffer(stream)) as ContentData;
+        const content = await this.ragService.loadContentChunks(chunkStorageKey);
         return this.ragService.saveDataForUser(user, content);
       }),
     );
-
-    // 更新向量库租户创建状态
-    if (!user.vsTenantCreated) {
-      await this.prisma.user.update({
-        where: { id: user.id },
-        data: { vsTenantCreated: true },
-      });
-    }
 
     this.logger.log(
       `save chunk embeddings for user ${user.uid} success, urls: ` +
@@ -350,11 +319,7 @@ export class WeblinkService {
 
     const storageKey = `html/${sha256Hash(link.url)}.html`;
 
-    const res = await this.minio.putObject(
-      this.configService.get('minio.weblinkBucket'),
-      storageKey,
-      html,
-    );
+    const res = await this.minio.uploadData(storageKey, html);
     this.logger.log('upload html to minio res: ' + JSON.stringify(res));
 
     return storageKey;
@@ -362,11 +327,7 @@ export class WeblinkService {
 
   async uploadParsedDocToMinio(link: WebLinkDTO, doc: Document<PageMeta>): Promise<string> {
     const parsedDocStorageKey = `docs/${sha256Hash(link.url)}.md`;
-    const res = await this.minio.putObject(
-      this.configService.get('minio.weblinkBucket'),
-      parsedDocStorageKey,
-      doc.pageContent,
-    );
+    const res = await this.minio.uploadData(parsedDocStorageKey, doc.pageContent);
     this.logger.log('upload parsed doc to minio res: ' + JSON.stringify(res));
 
     return parsedDocStorageKey;
@@ -399,14 +360,8 @@ export class WeblinkService {
 
     try {
       const dataObjs = await this.ragService.indexContent(doc);
-
-      const buf = ContentAvroType.toBuffer({ chunks: dataObjs });
       const chunkStorageKey = `chunks/${sha256Hash(weblink.url)}-${PARSER_VERSION}.avro`;
-      const res = await this.minio.putObject(
-        this.configService.get('minio.weblinkBucket'),
-        chunkStorageKey,
-        buf,
-      );
+      const res = await this.ragService.saveContentChunks(chunkStorageKey, { chunks: dataObjs });
       this.logger.log(`upload ${dataObjs.length} chunk(s) to minio res: ` + JSON.stringify(res));
 
       return this.prisma.weblink.update({
@@ -599,8 +554,8 @@ export class WeblinkService {
             data: { pageMeta: JSON.stringify(doc.metadata) },
           }),
           this.updateWeblinkStorageKey(weblink, link, data),
-          this.genWeblinkChunkEmbedding(weblink, doc),
-          this.extractWeblinkContentMeta(weblink, doc),
+          // this.genWeblinkChunkEmbedding(weblink, doc),
+          // this.extractWeblinkContentMeta(weblink, doc),
         ]);
       }
     } catch (err) {
@@ -619,10 +574,7 @@ function isWeblinkReady(weblink: Weblink): boolean {
   return (
     weblink.storageKey &&
     weblink.parsedDocStorageKey &&
-    weblink.chunkStorageKey &&
     weblink.parseStatus === 'finish' &&
-    weblink.chunkStatus === 'finish' &&
-    weblink.parserVersion === PARSER_VERSION &&
-    Object.keys(JSON.parse(weblink.contentMeta || '{}')).length > 0
+    weblink.parserVersion === PARSER_VERSION
   );
 }

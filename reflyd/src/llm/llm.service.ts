@@ -1,15 +1,14 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { PrismaVectorStore } from '@langchain/community/vectorstores/prisma';
 import { Document } from '@langchain/core/documents';
-import { OpenAIEmbeddings, ChatOpenAI } from '@langchain/openai';
+import { ChatOpenAI } from '@langchain/openai';
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { createStuffDocumentsChain } from 'langchain/chains/combine_documents';
 import { JsonOutputFunctionsParser } from 'langchain/output_parsers';
 
-import { AigcContent, Prisma, User } from '@prisma/client';
+import { AigcContent, User } from '@prisma/client';
 import {
   qa,
   contextualizeQA,
@@ -24,37 +23,23 @@ import {
 import { LLMChatMessage } from './schema';
 import { HumanMessage, SystemMessage } from 'langchain/schema';
 
-import { uniqueFunc } from '../utils/unique';
 import { ContentMeta } from './dto';
 import { categoryList } from '../prompts/utils/category';
 import { PageMeta, Source } from '../types/weblink';
 import { SearchResultContext } from '../types/search';
-import { PrismaService } from '../common/prisma.service';
 import { RAGService } from '../rag/rag.service';
-import { SearchResult } from '../common/weaviate.dto';
+import { ContentPayload } from '../rag/rag.dto';
+import { RetrieveFilter } from 'src/conversation/conversation.dto';
 import { LOCALE } from 'src/types/locale';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
-  private embeddings: OpenAIEmbeddings;
   private llm: ChatOpenAI;
   private logger = new Logger(LlmService.name);
 
-  constructor(
-    private prisma: PrismaService,
-    private configService: ConfigService,
-    private ragService: RAGService,
-  ) {}
+  constructor(private configService: ConfigService, private ragService: RAGService) {}
 
   async onModuleInit() {
-    this.embeddings = new OpenAIEmbeddings({
-      modelName: 'text-embedding-3-large',
-      batchSize: 512,
-      dimensions: this.configService.getOrThrow('vectorStore.vectorDim'),
-      timeout: 5000,
-      maxRetries: 3,
-    });
-
     this.llm = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 });
 
     this.logger.log('LLM Service ready');
@@ -398,14 +383,15 @@ export class LlmService implements OnModuleInit {
   async getRetrievalDocs(
     user: User,
     query: string,
-    urls?: string[],
+    filter?: RetrieveFilter,
   ): Promise<Document<PageMeta>[]> {
-    this.logger.log(`[getRetrievalDocs] uid: ${user.uid}, query: ${query}, urls: ${urls}`);
+    this.logger.log(
+      `[getRetrievalDocs] uid: ${user.uid}, query: ${query}, filter: ${JSON.stringify(filter)}`,
+    );
 
-    const retrievalResults: SearchResult[] = await this.ragService.retrieve({
-      tenantId: user.uid,
+    const retrievalResults: ContentPayload[] = await this.ragService.retrieve(user, {
       query,
-      filter: { urls },
+      filter,
     });
 
     this.logger.log('retrievalResults: ' + JSON.stringify(retrievalResults));
@@ -414,9 +400,10 @@ export class LlmService implements OnModuleInit {
       metadata: {
         source: res.url,
         title: res.title,
+        collectionId: res.collectionId,
+        resourceId: res.resourceId,
       },
       pageContent: res.content,
-      score: parseFloat(res._additional.score) || 0,
     }));
 
     return retrievedDocs;

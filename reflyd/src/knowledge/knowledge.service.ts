@@ -1,4 +1,6 @@
 import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Queue } from 'bull';
+import { InjectQueue } from '@nestjs/bull';
 import { Prisma, Resource, User, Weblink } from '@prisma/client';
 import _ from 'lodash';
 import { PrismaService } from '../common/prisma.service';
@@ -13,8 +15,15 @@ import {
   WeblinkMeta,
   CollectionListItem,
 } from './knowledge.dto';
-import { genCollectionID, genResourceID, streamToString } from 'src/utils';
+import {
+  CHANNEL_FINALIZE_RESOURCE,
+  QUEUE_RESOURCE,
+  genCollectionID,
+  genResourceID,
+  genResourceUuid,
+} from 'src/utils';
 import { ConfigService } from '@nestjs/config';
+import { RAGService } from 'src/rag/rag.service';
 
 @Injectable()
 export class KnowledgeService {
@@ -24,7 +33,9 @@ export class KnowledgeService {
     private prisma: PrismaService,
     private minio: MinioService,
     private config: ConfigService,
+    private ragService: RAGService,
     private weblinkService: WeblinkService,
+    @InjectQueue(QUEUE_RESOURCE) private queue: Queue<UpsertResourceRequest>,
   ) {}
 
   async listCollections(
@@ -102,6 +113,9 @@ export class KnowledgeService {
     if (coll.userId !== user.id) {
       throw new UnauthorizedException();
     }
+
+    // TODO: delete resources
+
     return this.prisma.collection.update({
       where: { collectionId, userId: user.id },
       data: { deletedAt: new Date() },
@@ -150,11 +164,8 @@ export class KnowledgeService {
 
     if (needDoc) {
       const weblinkMeta = JSON.parse(resource.meta) as WeblinkMeta;
-      const docStream = await this.minio.getObject(
-        this.config.getOrThrow('minio.weblinkBucket'),
-        weblinkMeta.parsedDocStorageKey,
-      );
-      detail.doc = await streamToString(docStream);
+      const buf = await this.minio.downloadData(weblinkMeta.storageKey);
+      detail.doc = this.ragService.convertHTMLToMarkdown('render', buf.toString());
     }
 
     return detail;
@@ -163,33 +174,7 @@ export class KnowledgeService {
   async createResource(user: User, param: UpsertResourceRequest) {
     param.resourceId = genResourceID();
 
-    if (param.resourceType === 'weblink') {
-      if (!param.data) {
-        throw new BadRequestException('data is required');
-      }
-      const { url, linkId, storageKey, title } = param.data;
-      if (!url && !linkId) {
-        throw new BadRequestException('url or linkId is required');
-      }
-      let weblink: Weblink;
-      if (param.data?.linkId) {
-        weblink = await this.weblinkService.findFirstWeblink({ url, linkId });
-        if (!weblink) {
-          throw new BadRequestException('Weblink not found');
-        }
-      } else {
-        weblink = await this.weblinkService.processLink({ url, storageKey });
-      }
-
-      param.title ||= title;
-      param.data.linkId = weblink.linkId;
-      param.data.storageKey = weblink.storageKey;
-      param.data.parsedDocStorageKey = weblink.parsedDocStorageKey;
-    } else {
-      throw new BadRequestException('Invalid resource type');
-    }
-
-    // If target collection not specified, try to save to default collection
+    // If target collection not specified, create new one
     if (!param.collectionId) {
       param.collectionId = genCollectionID();
       this.logger.log(
@@ -197,14 +182,28 @@ export class KnowledgeService {
       );
     }
 
-    return this.prisma.resource.create({
+    if (param.resourceType === 'weblink') {
+      if (!param.data) {
+        throw new BadRequestException('data is required');
+      }
+      const { url, linkId, title } = param.data;
+      if (!url && !linkId) {
+        throw new BadRequestException('url or linkId is required');
+      }
+      param.title ||= title;
+    } else {
+      throw new BadRequestException('Invalid resource type');
+    }
+
+    const res = await this.prisma.resource.create({
       data: {
-        resourceId: genResourceID(),
+        resourceId: param.resourceId,
         resourceType: param.resourceType,
         meta: JSON.stringify(param.data),
         userId: user.id,
         isPublic: param.isPublic,
-        title: param.title,
+        title: param.title || 'Untitled',
+        indexStatus: 'processing',
         collections: {
           connectOrCreate: {
             where: { collectionId: param.collectionId },
@@ -217,6 +216,86 @@ export class KnowledgeService {
         },
       },
     });
+
+    await this.queue.add(CHANNEL_FINALIZE_RESOURCE, param);
+    // await this.finalizeResource(param);
+
+    return res;
+  }
+
+  async indexResource(user: User, param: UpsertResourceRequest) {
+    const { url, linkId, storageKey, title } = param.data;
+
+    let weblink: Weblink;
+    if (param.data?.linkId) {
+      weblink = await this.weblinkService.findFirstWeblink({ url, linkId });
+      if (!weblink) {
+        this.logger.warn(`Weblink not found, url: ${url}, linkId: ${linkId}`);
+        return;
+      }
+    } else {
+      weblink = await this.weblinkService.processLink({ url, storageKey });
+    }
+
+    // TODO: 减少不必要的重复插入
+    const { resourceId, collectionId } = param;
+    const { doc, html } = await this.weblinkService.readWebLinkContent(url);
+
+    // ensure the document is for ingestion use
+    doc.pageContent = this.ragService.convertHTMLToMarkdown('ingest', html);
+
+    const chunks = await this.ragService.indexContent(doc);
+
+    chunks.forEach((chunk, index) => {
+      chunk.id = genResourceUuid(`${resourceId}-${index}`);
+      chunk.resourceId = resourceId;
+      chunk.collectionId = collectionId;
+    });
+
+    await this.ragService.saveDataForUser(user, { chunks });
+
+    this.logger.log(
+      `save resource segments for user ${
+        user.uid
+      } success, resourceId: ${resourceId}, weblink: ${JSON.stringify(weblink)}`,
+    );
+
+    await this.prisma.resource.update({
+      where: { resourceId, userId: user.id },
+      data: {
+        indexStatus: 'finish',
+        meta: JSON.stringify({
+          url,
+          linkId: weblink.linkId,
+          title: title,
+          storageKey: storageKey || weblink.storageKey,
+        } as WeblinkMeta),
+      },
+    });
+  }
+
+  /**
+   * Process resource after inserted, including connecting with weblink and
+   * save to vector store.
+   */
+  async finalizeResource(param: UpsertResourceRequest) {
+    const user = await this.prisma.user.findFirst({ where: { id: param.userId } });
+    if (!user) {
+      this.logger.warn(`User not found, userId: ${param.userId}`);
+      return;
+    }
+
+    try {
+      await this.indexResource(user, param);
+    } catch (err) {
+      console.error(err);
+      this.logger.error(`finalize resource error: ${err}`);
+      await this.prisma.resource.update({
+        where: { resourceId: param.resourceId, userId: user.id },
+        data: { indexStatus: 'failed' },
+      });
+      throw err;
+    }
   }
 
   async updateResource(user: User, param: UpsertResourceRequest) {
@@ -240,9 +319,13 @@ export class KnowledgeService {
     if (resource.userId !== user.id) {
       throw new UnauthorizedException();
     }
-    return this.prisma.resource.update({
-      where: { resourceId },
-      data: { deletedAt: new Date() },
-    });
+
+    return Promise.all([
+      this.ragService.deleteResourceData(user, resourceId),
+      this.prisma.resource.update({
+        where: { resourceId },
+        data: { deletedAt: new Date() },
+      }),
+    ]);
   }
 }
