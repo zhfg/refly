@@ -136,7 +136,7 @@ export class WeblinkService {
     const content = snapshot.parsed?.content || snapshot.html;
     if (content && !hasUrlRedirected(url, snapshot.href)) {
       doc = {
-        pageContent: await this.ragService.convertHTMLToMarkdown('ingest', content),
+        pageContent: this.ragService.convertHTMLToMarkdown('ingest', content),
         metadata: {
           title: (snapshot.parsed?.title || snapshot.title || '').trim(),
           source: url || snapshot.href?.trim(),
@@ -159,7 +159,7 @@ export class WeblinkService {
       const content = (await this.minio.downloadData(link.storageKey)).toString();
 
       const doc = {
-        pageContent: await this.ragService.convertHTMLToMarkdown('ingest', content),
+        pageContent: this.ragService.convertHTMLToMarkdown('ingest', content),
         metadata: {
           title: link.title,
           source: link.url,

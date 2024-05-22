@@ -35,7 +35,7 @@ export class RagController {
     }
 
     const content = snapshot.parsed?.content || snapshot.html;
-    const markdownText = await this.ragService.convertHTMLToMarkdown('ingest', content);
+    const markdownText = this.ragService.convertHTMLToMarkdown('ingest', content);
     const chunks = await this.ragService.chunkText(markdownText);
 
     return { url, doc: markdownText, chunks: chunks };

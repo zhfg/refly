@@ -111,7 +111,7 @@ export class RAGService {
     return turnDownService;
   }
 
-  async convertHTMLToMarkdown(mode: FormatMode, html: string): Promise<string> {
+  convertHTMLToMarkdown(mode: FormatMode, html: string): string {
     const toBeTurnedToMd = html;
     let turnDownService = this.getTurndown(mode);
     for (const plugin of this.turnDownPlugins) {

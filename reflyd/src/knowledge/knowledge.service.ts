@@ -165,7 +165,7 @@ export class KnowledgeService {
     if (needDoc) {
       const weblinkMeta = JSON.parse(resource.meta) as WeblinkMeta;
       const buf = await this.minio.downloadData(weblinkMeta.storageKey);
-      detail.doc = await this.ragService.convertHTMLToMarkdown('render', buf.toString());
+      detail.doc = this.ragService.convertHTMLToMarkdown('render', buf.toString());
     }
 
     return detail;
@@ -239,8 +239,11 @@ export class KnowledgeService {
 
     // TODO: 减少不必要的重复插入
     const { resourceId, collectionId } = param;
+    const { doc, html } = await this.weblinkService.readWebLinkContent(url);
 
-    const { doc } = await this.weblinkService.readWebLinkContent(url);
+    // ensure the document is for ingestion use
+    doc.pageContent = this.ragService.convertHTMLToMarkdown('ingest', html);
+
     const chunks = await this.ragService.indexContent(doc);
 
     chunks.forEach((chunk, index) => {
