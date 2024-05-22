@@ -17,7 +17,7 @@ export const ChatMessages = () => {
   return (
     <div className="ai-copilot-message-inner-container">
       {mappedServerMessages?.map((item, index) =>
-        item.type === MessageType.Human ? (
+        item?.type === MessageType.Human ? (
           <HumanMessage message={item} key={index} />
         ) : (
           <AssistantMessage
@@ -25,7 +25,9 @@ export const ChatMessages = () => {
             key={index}
             isLastSession={index === mappedServerMessages?.length - 1}
             isPending={messageStateStore?.pending as boolean}
-            handleAskFollowing={(question: string) => runTask(question)}
+            handleAskFollowing={(question?: string) => {
+              runTask(question)
+            }}
           />
         ),
       )}

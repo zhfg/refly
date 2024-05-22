@@ -27,8 +27,15 @@ export const ChatInput = (props: ChatInputProps) => {
   const [isFocused, setIsFocused] = useState(false)
 
   const handleSendMessage = () => {
+    const { messages, newQAText } = useChatStore.getState()
     quickSearchStateStore.setVisible(false)
-    runTask()
+
+    if (messages?.length > 0) {
+      // 追问阅读
+      runTask(newQAText)
+    } else {
+      runTask()
+    }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

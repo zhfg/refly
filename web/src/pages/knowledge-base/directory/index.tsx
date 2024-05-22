@@ -192,6 +192,13 @@ export const KnowledgeBaseDirectory = () => {
                 <div className="action-external-origin-website">
                   <IconCompass />
                 </div>
+                <div className="resource-utility-info">
+                  <span>
+                    {time(item?.updatedAt as string, LOCALE.EN)
+                      .utc()
+                      .fromNow()}
+                  </span>
+                </div>
               </div>
               <div className="knowledge-base-directory-keyword-list">
                 {(item?.data?.keywords || [])?.map((keyword, index) => (
