@@ -82,7 +82,7 @@ export const AICopilot = () => {
             <div className="chat-input-body">
               <TextArea
                 placeholder="提出问题，发现新知"
-                autoSize={{ minRows: 3, maxRows: 4 }}
+                autoSize={{ minRows: 2, maxRows: 2 }}
               />
             </div>
             <div className="chat-input-assist-action">

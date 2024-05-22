@@ -13,15 +13,17 @@ import {
   type QUICK_ACTION_TASK_PAYLOAD,
   type Task,
   type Source,
-  Thread,
+  TASK_TYPE,
+  Conversation,
 } from "@/types"
 import { SearchTarget, useSearchStateStore } from "@/stores/search-state"
-import { buildChatTask, buildQuickActionTask } from "@/utils/task"
+import { buildTask } from "@/utils/task"
 import { useWeblinkStore } from "@/stores/weblink"
 // request
 import createNewConversation from "@/requests/createNewConversation"
 import { useUserStore } from "@/stores/user"
 import { useTranslation } from "react-i18next"
+import { OutputLocale } from "@/utils/i18n"
 
 export const useBuildThreadAndRun = () => {
   const chatStore = useChatStore()
@@ -53,7 +55,7 @@ export const useBuildThreadAndRun = () => {
     }
 
     console.log("createNewConversation", res)
-    conversationStore.setCurrentConversation(res?.data as Thread)
+    conversationStore.setCurrentConversation(res?.data as Conversation)
 
     // 清空之前的状态
     resetState()
@@ -69,6 +71,22 @@ export const useBuildThreadAndRun = () => {
     chatStore.setNewQAText(question)
     chatStore.setIsNewConversation(true)
     navigate(`/thread/${res?.data?.convId}`)
+  }
+
+  const ensureConversationExist = () => {
+    const { currentConversation } = useConversationStore.getState()
+    const { localSettings } = useUserStore.getState()
+
+    if (!currentConversation?.convId) {
+      const newConv = buildConversation({
+        locale: localSettings?.outputLocale as OutputLocale,
+      })
+      conversationStore.setCurrentConversation(newConv)
+
+      return newConv
+    }
+
+    return currentConversation
   }
 
   const runChatTask = () => {
@@ -101,13 +119,16 @@ export const useBuildThreadAndRun = () => {
       }))
     }
 
-    const task = buildChatTask(
-      {
+    const conv = ensureConversationExist()
+    const task = buildTask({
+      taskType: TASK_TYPE.CHAT,
+      convId: conv?.convId || "",
+      data: {
         question,
         filter: { weblinkList: selectedWebLink },
       },
-      localSettings.outputLocale,
-    )
+      locale: localSettings.outputLocale,
+    })
 
     // 创建新会话并跳转
     handleCreateNewConversation(task)
@@ -116,15 +137,18 @@ export const useBuildThreadAndRun = () => {
   const runQuickActionTask = async (payload: QUICK_ACTION_TASK_PAYLOAD) => {
     const { localSettings } = useUserStore.getState()
 
-    const task = buildQuickActionTask(
-      {
+    const conv = ensureConversationExist()
+    const task = buildTask({
+      taskType: TASK_TYPE.QUICK_ACTION,
+      convId: conv?.convId || "",
+      data: {
         question: t("hooks.useBuildThreadAndRun.task.summary.question"),
         actionType: QUICK_ACTION_TYPE.SUMMARY,
         filter: payload?.filter,
         actionPrompt: t("hooks.useBuildThreadAndRun.task.summary.actionPrompt"),
       },
-      localSettings?.outputLocale,
-    )
+      locale: localSettings.outputLocale,
+    })
 
     // 创建新会话并跳转
     handleCreateNewConversation(task)

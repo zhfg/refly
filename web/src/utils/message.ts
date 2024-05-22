@@ -1,13 +1,16 @@
 import {
+  Message,
   MessageDataType,
   MessageItemType,
   MessageType,
   QuestionType,
   ReplyType,
+  ServerMessage,
   SystemAction,
 } from "@/types"
 
 import { genUniqueId } from "./index"
+import { safeParseJSON } from "./parse"
 
 export const unsupportedMessage = "暂不支持的消息类型，请更新版本之后重试"
 export const errorMessage = "AbortError: The user aborted a request."
@@ -271,4 +274,27 @@ export const buildQuestionMessageList = (data: BuildMessageListData) => {
   })
 
   return [questionMsg, replyMsg]
+}
+
+export const mapToServerMessage = (messages: Message[]): ServerMessage[] => {
+  const newMessages = (messages || []).map(item => {
+    if (item?.itemType === MessageItemType.QUESTION) {
+      const { data, ...rest } = item
+      return { ...rest, ...data }
+    }
+
+    if (item?.itemType === MessageItemType.REPLY) {
+      const { data, ...rest } = item
+      const { sources, relatedQuestions, ...dataExtra } = data || {}
+      return {
+        ...rest,
+        ...dataExtra,
+        relatedQuestions:
+          safeParseJSON(relatedQuestions) || relatedQuestions || [],
+        sources: safeParseJSON(sources) || sources || [],
+      }
+    }
+  })
+
+  return newMessages as ServerMessage[]
 }

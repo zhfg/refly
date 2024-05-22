@@ -61,6 +61,7 @@
       justify-content: flex-start;
 
       .assistant-message {
+        width: 100%;
         font-size: 16px;
         color: rgba(0, 0, 0, 0.9);
       }
@@ -220,5 +221,18 @@
         max-width: 200px;
       }
     }
+  }
+}
+
+.ai-copilot-chat-input-container {
+  display: flex;
+  flex-direction: row;
+
+  .ai-copilot-chat-input-action {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    padding-right: 16px;
+    padding-bottom: 16px;
   }
 }

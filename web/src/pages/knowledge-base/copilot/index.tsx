@@ -22,8 +22,6 @@ import {
 // 自定义样式
 import "./index.scss"
 import { fakeConversations } from "@/fake-data/conversation"
-import { MessageType } from "@/types"
-import { AssistantMessage, HumanMessage } from "./message"
 // 自定义组件
 import { SearchTargetSelector } from "@/components/search-target-selector"
 import { useSearchParams } from "react-router-dom"
@@ -31,6 +29,11 @@ import { SearchTarget, useSearchStateStore } from "@/stores/search-state"
 import { ContextStateDisplay } from "./context-state-display"
 import { useCopilotContextState } from "@/hooks/use-copilot-context-state"
 import { useState } from "react"
+import { ChatInput } from "./chat-input"
+import { ChatMessages } from "./chat-messages"
+
+// state
+import { useChatStore } from "@/stores/chat"
 
 const TextArea = Input.TextArea
 
@@ -38,6 +41,7 @@ export const AICopilot = () => {
   const conv = fakeConversations?.[0]
   const [copilotBodyHeight, setCopilotBodyHeight] = useState(215)
   const { contextCardHeight, showContextCard } = useCopilotContextState()
+  const chatStore = useChatStore()
 
   const actualCopilotBodyHeight =
     copilotBodyHeight + (showContextCard ? contextCardHeight : 0)
@@ -60,13 +64,7 @@ export const AICopilot = () => {
       <div
         className="ai-copilot-message-container"
         style={{ height: `calc(100% - ${actualCopilotBodyHeight}px - 50px)` }}>
-        {conv?.messages?.map((item, index) =>
-          item.type === MessageType.Human ? (
-            <HumanMessage message={item} key={index} />
-          ) : (
-            <AssistantMessage message={item} key={index} />
-          ),
-        )}
+        <ChatMessages />
       </div>
       <div
         className="ai-copilot-body"
@@ -113,7 +111,7 @@ export const AICopilot = () => {
           </div>
           <div className="chat-input-container">
             <div className="chat-input-body">
-              <TextArea
+              <ChatInput
                 placeholder="提出问题，发现新知"
                 autoSize={{ minRows: 3, maxRows: 3 }}
               />

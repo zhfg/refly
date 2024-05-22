@@ -76,9 +76,22 @@ export type CHAT = {
   }
 }
 
+export interface CreateConversationParam {
+  contentId?: number
+  linkId?: string // 创建会话基于的 linkId
+  title?: string
+  origin?: string // 创建会话的 origin
+  originPageUrl?: string // 创建会话的 url
+  originPageTitle?: string // 所在 url 的 page title
+  locale?: string // 语言设置
+}
+
 export type Task = {
+  convId: string
+  dryRun?: boolean // 不关联任何对话
   taskType: TASK_TYPE
   taskId?: string // task:xxxx-xxxx-xxxx-xxxx
+  createConvParam?: CreateConversationParam // 创建新对话的参数
   language?: LANGUAGE
   locale?: OutputLocale
   data?: CHAT | QUICK_ACTION_TASK_PAYLOAD
