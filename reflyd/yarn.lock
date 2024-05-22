@@ -7639,6 +7639,11 @@ readdirp@~3.6.0:
   dependencies:
     picomatch "^2.2.1"
 
+reading-time-estimator@^1.11.0:
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/reading-time-estimator/-/reading-time-estimator-1.11.0.tgz#46229a4f534e8168849da1aeb55530dd9f6c26f5"
+  integrity sha512-2813WXSxCPsDvgrYq+cPBI4gGqgmtKlo62rpI0mwnhrMfZJIqbDfOeidr9Y36OruDesQGmYA9DkVRmvsBbv2DA==
+
 real-require@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/real-require/-/real-require-0.2.0.tgz#209632dea1810be2ae063a6ac084fee7e33fba78"
