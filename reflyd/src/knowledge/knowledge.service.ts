@@ -54,7 +54,7 @@ export class KnowledgeService {
   async getCollectionDetail(collectionId: string): Promise<CollectionDetail> {
     const data = await this.prisma.collection.findFirst({
       where: { collectionId, deletedAt: null },
-      include: { resources: true },
+      include: { resources: { orderBy: { updatedAt: 'desc' } } },
     });
     if (!data) {
       return null;
