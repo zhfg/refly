@@ -52,6 +52,9 @@ export type QUICK_ACTION_TASK_PAYLOAD = {
   filter?: {
     // 限制用于 quick-action 的网页列表
     weblinkList?: Source[]
+    urls?: string[]
+    resourceIds?: string[]
+    collectionIds?: string[]
   }
 }
 
@@ -73,6 +76,9 @@ export type CHAT = {
   filter?: {
     // 限制召回网页的 filter
     weblinkList?: Source[]
+    urls?: string[]
+    resourceIds?: string[]
+    collectionIds?: string[]
   }
 }
 

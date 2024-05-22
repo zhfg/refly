@@ -29,6 +29,7 @@ import { useTranslation } from "react-i18next"
 import { OutputLocale } from "@/utils/i18n"
 import { useBuildTask } from "./use-build-task"
 import { safeParseJSON } from "@/utils/parse"
+import { useCopilotContextState } from "./use-copilot-context-state"
 
 export const useBuildThreadAndRun = () => {
   const chatStore = useChatStore()
@@ -38,6 +39,7 @@ export const useBuildThreadAndRun = () => {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { buildTaskAndGenReponse } = useBuildTask()
+  const { currentResource, currentKnowledgeBase } = useCopilotContextState()
 
   const handleCreateNewConversation = async (task: Task) => {
     /**
@@ -198,19 +200,19 @@ export const useBuildThreadAndRun = () => {
 
     //
     const { messages } = useChatStore.getState()
-    const selectedWeblinkConfig = getSelectedWeblinkConfig(messages)
-
     let selectedWebLink: Source[] = []
+    let resourceIds: string[] = []
+    let collectionIds: string[] = []
 
-    if (isFollowUpAsk) {
-      const useWeblinkList =
-        selectedWeblinkConfig?.searchTarget === SearchTarget.SelectedPages &&
-        selectedWeblinkConfig?.filter?.length > 0
-
-      selectedWebLink = useWeblinkList ? selectedWeblinkConfig?.filter : []
-    } else {
-      const { selectedRow } = useWeblinkStore.getState()
-      if (searchTarget === SearchTarget.SelectedPages) {
+    if (searchTarget === SearchTarget.SelectedPages) {
+      if (isFollowUpAsk) {
+        const selectedWeblinkConfig = getSelectedWeblinkConfig(messages)
+        // 选中多个资源
+        if (selectedWeblinkConfig?.filter?.length > 0) {
+          selectedWebLink = selectedWeblinkConfig?.filter || {}
+        }
+      } else {
+        const { selectedRow } = useWeblinkStore.getState()
         selectedWebLink = selectedRow?.map(item => ({
           pageContent: "",
           metadata: {
@@ -220,6 +222,10 @@ export const useBuildThreadAndRun = () => {
           score: -1, // 手工构造
         }))
       }
+    } else if (searchTarget === SearchTarget.CurrentPage) {
+      resourceIds = [currentResource?.resourceId || ""]
+    } else if (searchTarget === SearchTarget.CurrentKnowledgeBase) {
+      collectionIds = [currentKnowledgeBase?.collectionId || ""]
     }
 
     // 创建新会话并跳转
@@ -233,7 +239,7 @@ export const useBuildThreadAndRun = () => {
           : TASK_TYPE.CHAT,
       data: {
         question,
-        filter: { weblinkList: selectedWebLink },
+        filter: { weblinkList: selectedWebLink, resourceIds, collectionIds },
       },
       locale: localSettings?.outputLocale || LOCALE.EN,
       convId: conv?.convId || "",

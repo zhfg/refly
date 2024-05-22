@@ -1,8 +1,10 @@
 export interface Source {
   pageContent: string
   metadata: {
-    source: string
+    source?: string
     title: string
+    resourceId?: string
+    collectionId?: string
   }
   score: number
 }
