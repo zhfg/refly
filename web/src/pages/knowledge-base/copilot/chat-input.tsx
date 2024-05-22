@@ -32,6 +32,7 @@ import { useUserStore } from "@/stores/user"
 import { IconSend } from "@arco-design/web-react/icon"
 import { safeParseJSON } from "@/utils/parse"
 import { useBuildTask } from "@/hooks/use-build-task"
+import { useMessageStateStore } from "@/stores/message-state"
 
 const TextArea = Input.TextArea
 
@@ -47,6 +48,7 @@ export const ChatInput = (props: ChatInputProps) => {
   const conversationStore = useConversationStore()
   const taskStore = useTaskStore()
   const quickSearchStateStore = useQuickSearchStateStore()
+  const messageStateStore = useMessageStateStore()
   // hooks
   const { resetState } = useResetState()
   const navigate = useNavigate()
@@ -269,6 +271,8 @@ export const ChatInput = (props: ChatInputProps) => {
     }
   }
 
+  console.log("messageState", messageStateStore.pendingFirstToken)
+
   return (
     <div className="ai-copilot-chat-input-container">
       <TextArea
@@ -290,7 +294,9 @@ export const ChatInput = (props: ChatInputProps) => {
       <div className="ai-copilot-chat-input-action">
         <Button
           shape="circle"
+          loading={messageStateStore?.pending}
           icon={<IconSend />}
+          disabled={messageStateStore?.pending}
           className="search-btn"
           style={{ color: "#FFF", background: "#00968F" }}
           onClick={() => {

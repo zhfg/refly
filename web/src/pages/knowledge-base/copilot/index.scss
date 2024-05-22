@@ -39,6 +39,8 @@
     .ai-copilot-message {
       width: 100%;
       margin-top: 24px;
+      display: flex;
+      flex-direction: column;
     }
 
     .human-message-container {
@@ -57,13 +59,89 @@
 
     .assistant-message-container {
       display: flex;
-      flex-direction: row;
-      justify-content: flex-start;
+      flex-direction: column;
 
       .assistant-message {
         width: 100%;
         font-size: 16px;
         color: rgba(0, 0, 0, 0.9);
+        margin-top: 32px;
+      }
+
+      .session-related-question {
+        width: 100%;
+      }
+
+      .session-source {
+        width: 100%;
+
+        .session-title-icon p {
+          color: rgba(0, 0, 0, 0.5);
+        }
+      }
+
+      .ai-copilot-related-question-container {
+        margin-top: 16px;
+      }
+
+      .ai-copilot-answer-action-container {
+        .session-answer-actionbar {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 8px;
+          font-size: 14px;
+
+          button {
+            padding: 0 8px;
+            font-size: 12px;
+            background-color: transparent;
+
+            &:hover {
+              color: rgba(0, 0, 0, 1) !important;
+            }
+          }
+
+          .session-answer-actionbar-left {
+            margin-left: -8px;
+            font-size: 14px;
+          }
+        }
+      }
+
+      .ai-copilot-related-question-item {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 12px;
+        max-width: 70%;
+
+        background: #fcfcf9;
+        box-sizing: border-box;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+
+        box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.02);
+        border-radius: 8px;
+
+        &:hover {
+          color: #00968f;
+          cursor: pointer;
+
+          .ai-copilot-related-question-title {
+            color: #00968f;
+          }
+        }
+
+        &:not(:first-child) {
+          margin-top: 8px;
+        }
+
+        .ai-copilot-related-question-title {
+          font-size: 12px;
+          color: rgba(0, 0, 0, 1);
+        }
       }
     }
   }

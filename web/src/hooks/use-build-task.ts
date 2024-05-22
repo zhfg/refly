@@ -118,6 +118,7 @@ export const useBuildTask = () => {
     console.log("sourceWeblinkPayload", sources)
     messageStateStore.setMessageState({
       ...currentMessageState,
+      pendingFirstToken: false,
       pendingSourceDocs: (currentMessageState.pendingSourceDocs || [])
         ?.concat(sources)
         ?.filter(item => item),
@@ -148,6 +149,7 @@ export const useBuildTask = () => {
     messageStateStore.setMessageState({
       ...currentMessageState,
       pending: false,
+      pendingFirstToken: true,
       pendingRelatedQuestions: (
         currentMessageState.pendingRelatedQuestions || []
       )

@@ -7,11 +7,8 @@ import { ThreadLibrary } from "@/components/thread-library"
 
 // 自定义组件
 import {
-  IconApps,
   IconBook,
   IconCaretDown,
-  IconDown,
-  IconFolder,
   IconHistory,
   IconMessage,
   IconMore,
@@ -40,7 +37,8 @@ const TextArea = Input.TextArea
 export const AICopilot = () => {
   const conv = fakeConversations?.[0]
   const [copilotBodyHeight, setCopilotBodyHeight] = useState(215)
-  const { contextCardHeight, showContextCard } = useCopilotContextState()
+  const { contextCardHeight, showContextCard, showRelatedQuestions } =
+    useCopilotContextState()
   const chatStore = useChatStore()
 
   const actualCopilotBodyHeight =
