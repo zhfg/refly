@@ -288,6 +288,8 @@ model Resource {
   resourceType ResourceType @map("resource_type")
   /// 用户主键
   userId       Int          @map("user_id")
+  /// 字数
+  wordCount    Int          @default(0) @map("word_count")
   /// 是否公开
   isPublic     Boolean      @default(false) @map("is_public")
   /// 索引状态

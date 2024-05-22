@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
+import { readingTime } from 'reading-time-estimator';
 import { Prisma, Resource, User, Weblink } from '@prisma/client';
 import _ from 'lodash';
 import { PrismaService } from '../common/prisma.service';
@@ -70,7 +71,7 @@ export class KnowledgeService {
         'updatedAt',
       ]),
       resources: data.resources.map((r) => ({
-        ..._.omit(r, ['id', 'deletedAt']),
+        ..._.omit(r, ['id', 'userId', 'deletedAt']),
         data: JSON.parse(r.meta),
       })),
     };
@@ -263,6 +264,7 @@ export class KnowledgeService {
     await this.prisma.resource.update({
       where: { resourceId, userId: user.id },
       data: {
+        wordCount: readingTime(doc.pageContent).words,
         indexStatus: 'finish',
         meta: JSON.stringify({
           url,
