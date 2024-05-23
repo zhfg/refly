@@ -6,10 +6,13 @@ import { ThreadLibrary } from "@/components/thread-library"
 
 // 自定义组件
 import { IconFolder, IconRobot } from "@arco-design/web-react/icon"
+import { useNavigate } from "react-router-dom"
 
 const TabPanel = Tabs.TabPane
 
 export const ContentPanel = () => {
+  const navigate = useNavigate()
+
   return (
     <div className="content-panel-container">
       <Tabs defaultActiveTab="knowledge-collection">
@@ -21,7 +24,11 @@ export const ContentPanel = () => {
               知识库
             </span>
           }>
-          <KnowledgeBaseList />
+          <KnowledgeBaseList
+            handleItemClick={kbId => {
+              navigate(`/knowledge-base?kbId=${kbId}`)
+            }}
+          />
         </TabPanel>
         <TabPanel
           key="knowledge-resource"
@@ -31,7 +38,11 @@ export const ContentPanel = () => {
               资源库
             </span>
           }>
-          <KnowledgeBaseList />
+          <KnowledgeBaseList
+            handleItemClick={kbId => {
+              navigate(`/knowledge-base?kbId=${kbId}`)
+            }}
+          />
         </TabPanel>
         <TabPanel
           key="thread-library"

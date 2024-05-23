@@ -35,6 +35,12 @@
     padding: 0;
   }
 
+  .kb-list-modal {
+    .knowledge-base-list {
+      padding: 0 16px;
+    }
+  }
+
   .ai-copilot-message-container {
     height: calc(100% - 264px);
     overflow-y: scroll;

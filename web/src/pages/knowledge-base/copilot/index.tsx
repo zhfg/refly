@@ -9,6 +9,7 @@ import { ThreadLibrary } from "@/components/thread-library"
 import {
   IconBook,
   IconCaretDown,
+  IconFolder,
   IconHistory,
   IconMessage,
   IconMore,
@@ -28,6 +29,7 @@ import { useEffect, useState } from "react"
 import { ChatInput } from "./chat-input"
 import { ChatMessages } from "./chat-messages"
 import { ConvListModal } from "./conv-list-modal"
+import { KnowledgeBaseListModal } from "./knowledge-base-list-modal"
 
 // requests
 import getThreadMessages from "@/requests/getThreadMessages"
@@ -69,6 +71,10 @@ export const AICopilot = () => {
   const handleNewTempConv = () => {
     conversationStore.resetState()
     chatStore.resetState()
+  }
+
+  const handleNewTempKb = () => {
+    knowledgeBaseStore.updateKbModalVisible(true)
   }
 
   const handleNewOpenConvList = () => {
@@ -181,10 +187,13 @@ export const AICopilot = () => {
           <div className="chat-setting-container">
             <div className="chat-operation-container">
               <Button
-                icon={<IconBook />}
+                icon={<IconFolder />}
                 type="text"
+                onClick={() => {
+                  handleNewTempKb()
+                }}
                 className="chat-input-assist-action-item">
-                快速总结
+                选择知识库
               </Button>
             </div>
             <div className="conv-operation-container">
@@ -242,6 +251,15 @@ export const AICopilot = () => {
         <ConvListModal
           title="会话库"
           classNames="conv-list-modal"
+          getPopupContainer={() => {
+            return document.querySelector(".ai-copilot-container") as Element
+          }}
+        />
+      ) : null}
+      {knowledgeBaseStore?.kbModalVisible ? (
+        <KnowledgeBaseListModal
+          title="知识库"
+          classNames="kb-list-modal"
           getPopupContainer={() => {
             return document.querySelector(".ai-copilot-container") as Element
           }}

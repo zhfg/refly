@@ -50,6 +50,14 @@ export const useBuildThreadAndRun = () => {
     navigate(`/knowledge-base?${newSearchParams.toString()}`)
   }
 
+  const jumpNewKnowledgeBase = (kbId: string) => {
+    const newSearchParams = new URLSearchParams(searchParams)
+    newSearchParams.set("kbId", kbId)
+    newSearchParams.delete("resId")
+    setSearchParams(newSearchParams)
+    navigate(`/knowledge-base?${newSearchParams.toString()}`)
+  }
+
   const emptyConvRunTask = (question: string) => {
     const newConv = ensureConversationExist()
     conversationStore.setCurrentConversation(newConv)
@@ -276,5 +284,6 @@ export const useBuildThreadAndRun = () => {
     emptyConvRunTask,
     ensureConversationExist,
     jumpNewConvQuery,
+    jumpNewKnowledgeBase,
   }
 }

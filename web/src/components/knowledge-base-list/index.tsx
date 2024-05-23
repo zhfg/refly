@@ -32,12 +32,18 @@ import "./index.scss"
 import { CollectionListItem, LOCALE, Source } from "@/types"
 import { useTranslation } from "react-i18next"
 import { useKnowledgeBaseStore } from "@/stores/knowledge-base"
+import classNames from "classnames"
 
 export const getFirstSourceLink = (sources: Source[]) => {
   return sources?.[0]?.metadata?.source
 }
 
-export const KnowledgeBaseList = () => {
+interface KnowledgeBaseListProps {
+  classNames?: string
+  handleItemClick: (kbId: string) => void
+}
+
+export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
   const navigate = useNavigate()
   const knowledgeBaseStore = useKnowledgeBaseStore()
   const [scrollLoading, setScrollLoading] = useState(
@@ -112,7 +118,12 @@ export const KnowledgeBaseList = () => {
   }, [])
 
   return (
-    <div className="today-container knowledge-base-list-container">
+    <div
+      className={classNames(
+        "today-container",
+        "knowledge-base-list-container",
+        props.classNames,
+      )}>
       <div className="today-feature-container">
         {/* <div className="today-block-header"> */}
         {/* <div className="header-title">今天浏览内容总结</div> */}
@@ -145,7 +156,7 @@ export const KnowledgeBaseList = () => {
               className="knowledge-base-list-item-container"
               actionLayout="vertical"
               onClick={() => {
-                navigate(`/knowledge-base?kbId=${item?.collectionId}`)
+                props.handleItemClick(item?.collectionId)
               }}
               actions={[
                 <div className="feed-item-action-container knowledge-base-list-item-action-container">
@@ -154,7 +165,7 @@ export const KnowledgeBaseList = () => {
                       key={1}
                       className="feed-list-item-continue-ask with-border with-hover knowledge-base-list-see-item"
                       onClick={() => {
-                        navigate(`/knowledge-base?kbId=${item?.collectionId}`)
+                        props.handleItemClick(item?.collectionId)
                       }}>
                       <IconRightCircle
                         style={{ fontSize: 14, color: "#64645F" }}
