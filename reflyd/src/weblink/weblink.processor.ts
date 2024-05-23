@@ -4,7 +4,7 @@ import { Job } from 'bull';
 
 import { WebLinkDTO } from './weblink.dto';
 import { WeblinkService } from './weblink.service';
-import { PROCESS_LINK_BY_USER_CHANNEL, PROCESS_LINK_CHANNEL, QUEUE_WEBLINK } from '../utils/const';
+import { CHANNEL_PROCESS_LINK_BY_USER, CHANNEL_PROCESS_LINK, QUEUE_WEBLINK } from '../utils/const';
 
 @Processor(QUEUE_WEBLINK)
 export class WeblinkProcessor {
@@ -12,14 +12,14 @@ export class WeblinkProcessor {
 
   constructor(private weblinkService: WeblinkService) {}
 
-  @Process(PROCESS_LINK_BY_USER_CHANNEL)
+  @Process(CHANNEL_PROCESS_LINK_BY_USER)
   async handleWebLinkForUser(job: Job<WebLinkDTO>) {
     this.logger.log(`[handleWebLinkForUser] job: ${JSON.stringify(job)}`);
 
     await this.weblinkService.processLinkByUser(job.data);
   }
 
-  @Process(PROCESS_LINK_CHANNEL)
+  @Process(CHANNEL_PROCESS_LINK)
   async handleWebLink(job: Job<WebLinkDTO>) {
     this.logger.log(`[handleWebLink] job: ${JSON.stringify(job)}`);
 

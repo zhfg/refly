@@ -13,8 +13,9 @@ export default () => ({
     weblinkBucket: process.env.MINIO_WEBLINK_BUCKET || 'refly-weblink',
   },
   vectorStore: {
-    host: process.env.WEAVIATE_INSTANCE_URL,
-    apiKey: process.env.WEAVIATE_API_KEY,
+    host: process.env.QDRANT_HOST || 'localhost',
+    port: parseInt(process.env.QDRANT_PORT) || 6333,
+    apiKey: process.env.QDRANT_API_KEY,
     vectorDim: parseInt(process.env.REFLY_VEC_DIM) || 256,
   },
   serper: {

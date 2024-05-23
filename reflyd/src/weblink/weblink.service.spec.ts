@@ -35,7 +35,6 @@ describe('WeblinkService', () => {
       {
         id: 1,
         uid: 'u-s9h25bshm6yx2m5fktbcrcrh',
-        vsTenantCreated: false,
       },
       ['https://mp.weixin.qq.com/s/FbHTyHqEBJT-1PhA5x7FRg'],
     );

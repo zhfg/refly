@@ -40,29 +40,27 @@ model VerificationToken {
 
 model User {
   /// 主键
-  id              Int       @id @default(autoincrement())
+  id            Int       @id @default(autoincrement())
   /// UID
-  uid             String?   @default("") @map("uid")
+  uid           String?   @default("") @map("uid")
   /// 头像
-  avatar          String?   @map("avatar")
+  avatar        String?   @map("avatar")
   /// 用户名
-  name            String?   @map("name")
+  name          String?   @map("name")
   /// 邮箱
-  email           String?   @unique @map("email")
+  email         String?   @unique @map("email")
   /// 邮箱是否已验证
-  emailVerified   DateTime? @map("email_verified") @db.Timestamptz()
+  emailVerified DateTime? @map("email_verified") @db.Timestamptz()
   /// 密码
-  password        String?   @map("password")
+  password      String?   @map("password")
   /// 界面语言设置
-  uiLocale        String?   @default("") @map("ui_locale")
+  uiLocale      String?   @default("") @map("ui_locale")
   /// 输出语言设置
-  outputLocale    String?   @default("") @map("output_locale")
-  /// 向量库是否初始化租户
-  vsTenantCreated Boolean?  @default(false) @map("vs_tenant_created")
+  outputLocale  String?   @default("") @map("output_locale")
   /// 创建时间
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// 更新时间
-  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
 
   @@map("users")
 }
@@ -280,6 +278,70 @@ model WeblinkUserMark {
   @@map("weblink_user_marks")
 }
 
+/// 知识库资源
+model Resource {
+  /// 主键
+  id           BigInt       @id @default(autoincrement())
+  /// 资源项 id
+  resourceId   String       @unique @map("resource_id")
+  /// 资源类型
+  resourceType ResourceType @map("resource_type")
+  /// 用户主键
+  userId       Int          @map("user_id")
+  /// 字数
+  wordCount    Int          @default(0) @map("word_count")
+  /// 是否公开
+  isPublic     Boolean      @default(false) @map("is_public")
+  /// 索引状态
+  indexStatus  IndexStatus  @default(init) @map("index_status")
+  /// 标题
+  title        String       @map("title")
+  /// 资源元数据
+  meta         String       @map("meta")
+  /// 创建时间
+  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz()
+  /// 更新时间
+  updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
+  /// 软删除标记
+  deletedAt    DateTime?    @map("deleted_at") @db.Timestamptz()
+
+  /// 关联的知识集
+  collections Collection[]
+
+  @@index([resourceId])
+  @@index([userId, updatedAt])
+  @@map("resources")
+}
+
+/// 知识集
+model Collection {
+  /// 主键
+  id           BigInt    @id @default(autoincrement())
+  /// 知识集 id
+  collectionId String    @unique @map("collection_id")
+  /// 标题
+  title        String    @map("title")
+  /// 描述
+  description  String?   @default("") @map("description")
+  /// 用户主键
+  userId       Int       @map("user_id")
+  /// 是否公开
+  isPublic     Boolean   @default(false) @map("is_public")
+  /// 创建时间
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  /// 更新时间
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  /// 软删除标记
+  deletedAt    DateTime? @map("deleted_at") @db.Timestamptz()
+
+  /// 包含的资源
+  resources Resource[]
+
+  @@index([collectionId])
+  @@index([userId, updatedAt])
+  @@map("collections")
+}
+
 /// 生成内容
 model AigcContent {
   /// 主键
@@ -345,6 +407,10 @@ model UserDigest {
 
   // @@unique([userId, date, topicKey])
   @@map("user_digests")
+}
+
+enum ResourceType {
+  weblink
 }
 
 enum ContentSourceType {
