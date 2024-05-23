@@ -4,6 +4,7 @@ import {
   Avatar,
   Breadcrumb,
   Button,
+  Typography,
   Message as message,
 } from "@arco-design/web-react"
 import { useTranslation } from "react-i18next"
@@ -12,10 +13,17 @@ import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels"
 // 自定义组件
 import { KnowledgeBaseDirectory } from "../directory"
 import { KnowledgeBaseResourceDetail } from "../resource-detail"
-import { IconMore } from "@arco-design/web-react/icon"
+import {
+  IconCaretDown,
+  IconDown,
+  IconDownCircle,
+  IconFolder,
+} from "@arco-design/web-react/icon"
 // 样式
 import "./index.scss"
 import { useResizePanel } from "@/hooks/use-resize-panel"
+import { ActionSource, useKnowledgeBaseStore } from "@/stores/knowledge-base"
+import { KnowledgeBaseListModal } from "../copilot/knowledge-base-list-modal"
 
 const BreadcrumbItem = Breadcrumb.Item
 
@@ -26,6 +34,9 @@ export const KnowledgeBaseDetail = () => {
     initialMinSize: 24,
     initialMinPixelSize: 200,
   })
+
+  const knowledgeBaseStore = useKnowledgeBaseStore()
+  console.log("knowledgeBaseStore", knowledgeBaseStore.actionSource)
 
   return (
     <div className="knowledge-base-detail-container">
@@ -40,10 +51,25 @@ export const KnowledgeBaseDetail = () => {
             </BreadcrumbItem>
           </Breadcrumb>
         </div>
-        <div className="knowledge-base-detail-menu">
+        <div className="knowledge-base-detail-nav-switcher">
           <Button
+            icon={<IconFolder />}
             type="text"
-            icon={<IconMore style={{ fontSize: 16 }} />}></Button>
+            onClick={() => {
+              knowledgeBaseStore.updateActionSource(ActionSource.KnowledgeBase)
+              knowledgeBaseStore.updateKbModalVisible(true)
+            }}
+            className="chat-input-assist-action-item">
+            <p className="assist-action-title">
+              {knowledgeBaseStore?.currentKnowledgeBase?.title || "选择知识库"}
+            </p>
+            <IconCaretDown />
+          </Button>
+        </div>
+        <div className="knowledge-base-detail-menu">
+          {/* <Button
+            type="text"
+            icon={<IconMore style={{ fontSize: 16 }} />}></Button> */}
         </div>
       </div>
       <PanelGroup
@@ -61,6 +87,25 @@ export const KnowledgeBaseDetail = () => {
           <KnowledgeBaseResourceDetail />
         </Panel>
       </PanelGroup>
+      {knowledgeBaseStore?.kbModalVisible &&
+      knowledgeBaseStore.actionSource === ActionSource.KnowledgeBase ? (
+        <KnowledgeBaseListModal
+          title="知识库"
+          classNames="kb-list-modal"
+          placement="right"
+          width={360}
+          height="100%"
+          getPopupContainer={() => {
+            const elem = document.querySelector(
+              ".knowledge-base-detail-container",
+            ) as Element
+
+            console.log("getPopupContainer knowledge", elem)
+
+            return elem
+          }}
+        />
+      ) : null}
     </div>
   )
 }

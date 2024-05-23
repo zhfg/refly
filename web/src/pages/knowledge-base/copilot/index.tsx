@@ -41,7 +41,7 @@ import { useConversationStore } from "@/stores/conversation"
 import { useResetState } from "@/hooks/use-reset-state"
 import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run"
 import { delay } from "@/utils/delay"
-import { useKnowledgeBaseStore } from "@/stores/knowledge-base"
+import { ActionSource, useKnowledgeBaseStore } from "@/stores/knowledge-base"
 // utils
 import { localeToLanguageName } from "@/utils/i18n"
 import { OutputLocaleList } from "@/components/output-locale-list"
@@ -81,10 +81,6 @@ export const AICopilot = () => {
   const handleNewTempConv = () => {
     conversationStore.resetState()
     chatStore.resetState()
-  }
-
-  const handleNewTempKb = () => {
-    knowledgeBaseStore.updateKbModalVisible(true)
   }
 
   const handleNewOpenConvList = () => {
@@ -165,19 +161,17 @@ export const AICopilot = () => {
     <div className="ai-copilot-container">
       <div className="knowledge-base-detail-header">
         <div className="knowledge-base-detail-navigation-bar">
-          {conversationStore?.currentConversation?.title ? (
-            <div className="conv-meta">
-              <IconMessage style={{ color: "rgba(0, 0, 0, .6)" }} />
-              <p className="conv-title">
-                {conversationStore?.currentConversation?.title}
-              </p>
-            </div>
-          ) : null}
+          <div className="conv-meta">
+            <IconMessage style={{ color: "rgba(0, 0, 0, .6)" }} />
+            <p className="conv-title">
+              {conversationStore?.currentConversation?.title || "新会话"}
+            </p>
+          </div>
         </div>
         <div className="knowledge-base-detail-menu">
-          <Button
+          {/* <Button
             type="text"
-            icon={<IconMore style={{ fontSize: 16 }} />}></Button>
+            icon={<IconMore style={{ fontSize: 16 }} />}></Button> */}
         </div>
       </div>
       <div
@@ -200,10 +194,12 @@ export const AICopilot = () => {
                 icon={<IconFolder />}
                 type="text"
                 onClick={() => {
-                  handleNewTempKb()
+                  knowledgeBaseStore.updateActionSource(ActionSource.Conv)
+                  knowledgeBaseStore.updateKbModalVisible(true)
                 }}
                 className="chat-input-assist-action-item">
                 选择知识库
+                <IconCaretDown />
               </Button>
             </div>
             <div className="conv-operation-container">
@@ -271,7 +267,8 @@ export const AICopilot = () => {
           }}
         />
       ) : null}
-      {knowledgeBaseStore?.kbModalVisible ? (
+      {knowledgeBaseStore?.kbModalVisible &&
+      knowledgeBaseStore.actionSource === ActionSource.Conv ? (
         <KnowledgeBaseListModal
           title="知识库"
           classNames="kb-list-modal"

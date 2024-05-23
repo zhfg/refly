@@ -7,6 +7,12 @@ import type {
   ResourceDetail,
 } from "@/types/knowledge-base"
 
+export enum ActionSource {
+  KnowledgeBase = "knowledge-base",
+  Conv = "conv",
+  Note = "note",
+}
+
 interface KnowledgeBaseState {
   isSaveKnowledgeBaseModalVisible: boolean
   knowledgeBaseList: CollectionListItem[]
@@ -22,6 +28,7 @@ interface KnowledgeBaseState {
   // 会话 modal
   convModalVisible: boolean
   kbModalVisible: boolean
+  actionSource: ActionSource
 
   updateIsSaveKnowledgeBaseModalVisible: (
     isSaveKnowledgeBaseModalVisible: boolean,
@@ -33,6 +40,7 @@ interface KnowledgeBaseState {
   updateCurrentPage: (currentPage: number) => void
   updateHasMore: (hasMore: boolean) => void
   updateConvModalVisible: (convModalVisible: boolean) => void
+  updateActionSource: (actionSource: ActionSource) => void
   updateKbModalVisible: (kbModalVisible: boolean) => void
   resetState: () => void
 }
@@ -41,6 +49,7 @@ export const defaultState = {
   isSaveKnowledgeBaseModalVisible: false,
   convModalVisible: false,
   kbModalVisible: false,
+  actionSource: ActionSource.Conv,
   currentKnowledgeBase: null,
   currentResource: null,
   knowledgeBaseList: [],
@@ -81,6 +90,8 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
       set(state => ({ ...state, kbModalVisible })),
     updateIsRequesting: (isRequesting: boolean) =>
       set(state => ({ ...state, isRequesting })),
+    updateActionSource: (actionSource: ActionSource) =>
+      set(state => ({ ...state, actionSource })),
     resetState: () => set(state => ({ ...state, ...defaultState })),
   })),
 )

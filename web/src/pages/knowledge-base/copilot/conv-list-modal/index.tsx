@@ -13,6 +13,7 @@ interface ConvListModalProps {
   getPopupContainer: () => Element
   title: string
   classNames: string
+  placement?: "bottom" | "left" | "right" | "top"
 }
 
 export const ConvListModal = (props: ConvListModalProps) => {
@@ -45,7 +46,7 @@ export const ConvListModal = (props: ConvListModalProps) => {
           </div>
         }
         visible={knowledgeBaseStore.convModalVisible}
-        placement="bottom"
+        placement={props.placement || "bottom"}
         footer={null}
         onOk={() => {
           knowledgeBaseStore.updateConvModalVisible(false)
