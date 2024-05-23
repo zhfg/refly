@@ -1,7 +1,10 @@
 import { Markdown } from "@/components/markdown"
+import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run"
+import { useUserStore } from "@/stores/user"
 import { ServerMessage } from "@/types"
 import { copyToClipboard } from "@/utils"
 import {
+  Avatar,
   Button,
   List,
   Skeleton,
@@ -180,6 +183,47 @@ export const PendingMessage = () => {
     <div className="ai-copilot-message assistant-message-container">
       <div className="assistant-message">
         <Spin dot size={4} />
+      </div>
+    </div>
+  )
+}
+
+export const WelcomeMessage = () => {
+  const userStore = useUserStore()
+  const { runTask } = useBuildThreadAndRun()
+  const guessQuestions = [
+    "总结选中内容要点",
+    "脑暴写作灵感",
+    "写一篇 Twitter 原创文章",
+  ]
+  return (
+    <div className="ai-copilot-message welcome-message-container">
+      <div className="welcome-message">
+        <div className="welcome-message-user-container">
+          <div className="user-container-avatar">
+            <Avatar>
+              <img src={userStore?.userProfile?.avatar || ""} />
+            </Avatar>
+          </div>
+          <div className="user-container-title">
+            Hello, {userStore?.userProfile?.name}
+          </div>
+        </div>
+        <div className="welcome-message-text">How can I help you today?</div>
+        <div className="welcome-message-guess-you-ask-container ai-copilot-related-question-container">
+          <div className="guess-you-ask-assist"></div>
+          <div className="guess-you-ask ai-copilot-related-question-lis">
+            {guessQuestions?.map((item, index) => (
+              <div
+                className="ai-copilot-related-question-item"
+                key={index}
+                onClick={() => runTask(item)}>
+                <p className="ai-copilot-related-question-title">{item}</p>
+                <IconRight style={{ color: "rgba(0, 0, 0, 0.5)" }} />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )

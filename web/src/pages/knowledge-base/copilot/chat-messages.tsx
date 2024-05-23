@@ -2,7 +2,12 @@
 import { useChatStore } from "@/stores/chat"
 // styles
 import { MessageType } from "@/types"
-import { AssistantMessage, HumanMessage, PendingMessage } from "./message"
+import {
+  AssistantMessage,
+  HumanMessage,
+  PendingMessage,
+  WelcomeMessage,
+} from "./message"
 import { mapToServerMessage } from "@/utils/message"
 import { useMessageStateStore } from "@/stores/message-state"
 import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run"
@@ -32,6 +37,7 @@ export const ChatMessages = () => {
           />
         ),
       )}
+      {chatStore?.messages?.length === 0 ? <WelcomeMessage /> : null}
       {messageStateStore?.pending && messageStateStore?.pendingFirstToken ? (
         <PendingMessage />
       ) : null}

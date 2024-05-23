@@ -45,17 +45,24 @@ const TextArea = Input.TextArea
 export const AICopilot = () => {
   const [searchParams] = useSearchParams()
   const [copilotBodyHeight, setCopilotBodyHeight] = useState(215)
-  const { contextCardHeight, showContextCard, showRelatedQuestions } =
+  const { contextCardHeight, showContextCard, showContextState } =
     useCopilotContextState()
   const chatStore = useChatStore()
   const conversationStore = useConversationStore()
   const [isFetching, setIsFetching] = useState(false)
   const { runTask } = useBuildThreadAndRun()
+  const searchStateStore = useSearchStateStore()
 
   const convId = searchParams.get("convId")
   const { resetState } = useResetState()
   const actualCopilotBodyHeight =
     copilotBodyHeight + (showContextCard ? contextCardHeight : 0)
+
+  const handleSwitchSearchTarget = () => {
+    if (showContextState) {
+      searchStateStore.setSearchTarget(SearchTarget.CurrentPage)
+    }
+  }
 
   const handleGetThreadMessages = async (convId: string) => {
     // 异步操作
@@ -123,15 +130,22 @@ export const AICopilot = () => {
       handleConvTask(convId)
     }
   }, [convId])
+  useEffect(() => {
+    handleSwitchSearchTarget()
+  }, [showContextState])
 
   return (
     <div className="ai-copilot-container">
       <div className="knowledge-base-detail-header">
         <div className="knowledge-base-detail-navigation-bar">
-          <div className="conv-meta">
-            <IconMessage style={{ color: "rgba(0, 0, 0, .6)" }} />
-            <p className="conv-title">elmo chat 和 devv 比较如何？</p>
-          </div>
+          {conversationStore?.currentConversation?.title ? (
+            <div className="conv-meta">
+              <IconMessage style={{ color: "rgba(0, 0, 0, .6)" }} />
+              <p className="conv-title">
+                {conversationStore?.currentConversation?.title}
+              </p>
+            </div>
+          ) : null}
         </div>
         <div className="knowledge-base-detail-menu">
           <Button

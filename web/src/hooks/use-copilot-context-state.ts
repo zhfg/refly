@@ -63,6 +63,7 @@ export const useCopilotContextState = () => {
 
   return {
     showContextCard,
+    showContextState,
     showResourceContext,
     showRelatedQuestions,
     showKnowledgeBaseContext,
