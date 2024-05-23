@@ -6,6 +6,23 @@
 
   .sider-header {
     height: 100%;
+
+    .logo {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .logo-beta {
+      margin-left: 4px;
+      opacity: 0.8;
+    }
+
+    .logo-beta span {
+      color: #fff !important;
+      font-size: 10px;
+      margin-left: 0;
+    }
   }
 
   .sider-menu-nav {

@@ -34,8 +34,17 @@ export interface ResourceListItem {
   description?: string
 }
 
+export enum ResourceIndexStatus {
+  init = "init",
+  processing = "processing",
+  finish = "finish",
+  failed = "failed",
+}
+
 export interface ResourceDetail extends ResourceListItem {
   doc?: string
+  wordCount?: number
+  indexStatus?: ResourceIndexStatus
 }
 
 export interface CollectionDetail extends CollectionListItem {

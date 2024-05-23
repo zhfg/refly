@@ -111,10 +111,6 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
 
   useEffect(() => {
     fetchData()
-
-    return () => {
-      knowledgeBaseStore.resetState()
-    }
   }, [])
 
   return (

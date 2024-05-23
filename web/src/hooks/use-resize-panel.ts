@@ -19,31 +19,14 @@ export const useResizePanel = (props: ResizePanelProps) => {
     const resizeHandles = document.querySelectorAll(
       `.${resizeSelector}`,
     ) as NodeListOf<HTMLElement>
-
-    let width = panelGroup.offsetWidth
-
-    resizeHandles.forEach(resizeHandle => {
-      width -= resizeHandle.offsetWidth
-    })
-
-    console.log("initialMinPixelSize", width)
-
-    setMinSize((initialMinPixelSize / width) * 100)
-  }, [initialMinPixelSize])
-
-  useLayoutEffect(() => {
-    const panelGroup = document.querySelector(
-      `.${groupSelector}`,
-    ) as HTMLElement
-    const resizeHandles = document.querySelectorAll(
-      `.${resizeSelector}`,
-    ) as NodeListOf<HTMLElement>
     const observer = new ResizeObserver(() => {
       let width = panelGroup.offsetWidth
 
       resizeHandles.forEach(resizeHandle => {
         width -= resizeHandle.offsetWidth
       })
+
+      console.log("initialMinPixelSize", width)
 
       setMinSize((initialMinPixelSize / width) * 100)
     })

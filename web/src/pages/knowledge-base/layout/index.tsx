@@ -16,6 +16,7 @@ import { useUserStore } from "@/stores/user"
 import { getExtensionId } from "@/utils/url"
 import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
+import { useResizePanel } from "@/hooks/use-resize-panel"
 
 // 用于快速选择
 export const quickActionList = ["summary"]
@@ -31,6 +32,13 @@ const KnowledgeLibraryLayout = () => {
   const kbId = searchParams.get("kbId")
   const userStore = useUserStore()
   const { t } = useTranslation()
+
+  const [minSize] = useResizePanel({
+    groupSelector: "workspace-panel-container",
+    resizeSelector: "workspace-panel-resize",
+    initialMinSize: 24,
+    initialMinPixelSize: 310,
+  })
 
   const handleSendMsgToExtension = async (
     status: "success" | "failed",
@@ -104,7 +112,10 @@ const KnowledgeLibraryLayout = () => {
                 <PanelResizeHandle className="workspace-panel-resize" />,
               ]
             : null}
-          <Panel className="workspace-content-panel" {...copilotStyle}>
+          <Panel
+            className="workspace-content-panel"
+            {...copilotStyle}
+            minSize={minSize}>
             <AICopilot />
           </Panel>
         </PanelGroup>

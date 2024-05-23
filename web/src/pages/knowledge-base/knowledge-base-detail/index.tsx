@@ -28,11 +28,12 @@ import { KnowledgeBaseListModal } from "../copilot/knowledge-base-list-modal"
 const BreadcrumbItem = Breadcrumb.Item
 
 export const KnowledgeBaseDetail = () => {
+  // directory minSize 270px ~ maxSize 50%
   const [minSize] = useResizePanel({
     groupSelector: "knowledge-base-detail-panel-container",
     resizeSelector: "knowledge-base-detail-panel-resize",
     initialMinSize: 24,
-    initialMinPixelSize: 200,
+    initialMinPixelSize: 270,
   })
 
   const knowledgeBaseStore = useKnowledgeBaseStore()

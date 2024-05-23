@@ -1,4 +1,4 @@
-import { Avatar, Divider, Layout, Menu } from "@arco-design/web-react"
+import { Avatar, Divider, Layout, Menu, Tag } from "@arco-design/web-react"
 import { useLocation, useNavigate } from "react-router-dom"
 import {
   IconHome,
@@ -147,7 +147,10 @@ export const SiderLayout = () => {
           }}>
           <div className="logo" onClick={() => navigate("/")}>
             <img src={Logo} alt="Refly" />
-            <span>Refly</span>
+            <span>Refly </span>
+            <Tag color="#00968F" className="logo-beta" size="small">
+              Beta
+            </Tag>
           </div>
         </div>
         <SearchQuickOpenBtn />

@@ -19,6 +19,8 @@ import {
   Divider,
   Input,
   Skeleton,
+  Tag,
+  Tooltip,
   Message as message,
 } from "@arco-design/web-react"
 import { useSearchableList } from "@/components/use-searchable-list"
@@ -27,7 +29,7 @@ import type { ResourceDetail } from "@/types/knowledge-base"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { useKnowledgeBaseStore } from "@/stores/knowledge-base"
 // 类型
-import { CollectionDetail } from "@/types/knowledge-base"
+import { CollectionDetail, ResourceIndexStatus } from "@/types/knowledge-base"
 // 请求
 import getKnowledgeBaseDetail from "@/requests/getKnowledgeBaseDetail"
 import { safeParseURL } from "@/utils/url"
@@ -92,6 +94,30 @@ export const KnowledgeBaseDirectory = () => {
     setSearchVal(val)
   }
 
+  const getIndexStatusText = (indexStatus?: ResourceIndexStatus) => {
+    switch (indexStatus) {
+      case ResourceIndexStatus.processing:
+        return "索引中"
+      case ResourceIndexStatus.failed:
+        return "索引失败"
+      default: {
+        return ""
+      }
+    }
+  }
+
+  const getIndexStatusColor = (indexStatus?: ResourceIndexStatus) => {
+    switch (indexStatus) {
+      case ResourceIndexStatus.processing:
+        return "orange"
+      case ResourceIndexStatus.failed:
+        return "red"
+      default: {
+        return ""
+      }
+    }
+  }
+
   useEffect(() => {
     const mappedDirectoryList = (
       knowledgeBaseStore?.currentKnowledgeBase?.resources || []
@@ -128,9 +154,7 @@ export const KnowledgeBaseDirectory = () => {
             </div>
           </div>
         </div>
-        <div className="intro-menu">
-          <IconMore />
-        </div>
+        <div className="intro-menu">{/* <IconMore /> */}</div>
       </div>
       <div className="knowledge-base-directory-search-container">
         <Input
@@ -190,15 +214,27 @@ export const KnowledgeBaseDirectory = () => {
                   <IconBook />
                 </div>
                 <div className="action-external-origin-website">
-                  <IconCompass />
+                  <IconCompass
+                    onClick={() => {
+                      window.open(item?.data?.url, "_blank")
+                    }}
+                  />
                 </div>
-                <div className="resource-utility-info">
-                  <span>
-                    {time(item?.updatedAt as string, LOCALE.EN)
-                      .utc()
-                      .fromNow()}
-                  </span>
-                </div>
+              </div>
+              <div className="resource-utility-info">
+                <span>
+                  {time(item?.updatedAt as string, LOCALE.EN)
+                    .utc()
+                    .fromNow()}
+                </span>
+                {getIndexStatusText(item?.indexStatus) ? (
+                  <Tag
+                    color={getIndexStatusColor(item?.indexStatus)}
+                    style={{ marginLeft: 8 }}
+                    size="small">
+                    {getIndexStatusText(item?.indexStatus)}
+                  </Tag>
+                ) : null}
               </div>
               <div className="knowledge-base-directory-keyword-list">
                 {(item?.data?.keywords || [])?.map((keyword, index) => (
