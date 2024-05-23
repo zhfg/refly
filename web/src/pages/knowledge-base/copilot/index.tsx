@@ -13,7 +13,6 @@ import {
   IconMessage,
   IconMore,
   IconPlusCircle,
-  IconRobot,
   IconTranslate,
 } from "@arco-design/web-react/icon"
 // 自定义样式
@@ -28,6 +27,7 @@ import { useCopilotContextState } from "@/hooks/use-copilot-context-state"
 import { useEffect, useState } from "react"
 import { ChatInput } from "./chat-input"
 import { ChatMessages } from "./chat-messages"
+import { ConvListModal } from "./conv-list-modal"
 
 // requests
 import getThreadMessages from "@/requests/getThreadMessages"
@@ -39,12 +39,14 @@ import { useConversationStore } from "@/stores/conversation"
 import { useResetState } from "@/hooks/use-reset-state"
 import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run"
 import { delay } from "@/utils/delay"
+import { useKnowledgeBaseStore } from "@/stores/knowledge-base"
 
 const TextArea = Input.TextArea
 
 export const AICopilot = () => {
   const [searchParams] = useSearchParams()
   const [copilotBodyHeight, setCopilotBodyHeight] = useState(215)
+  const knowledgeBaseStore = useKnowledgeBaseStore()
   const { contextCardHeight, showContextCard, showContextState } =
     useCopilotContextState()
   const chatStore = useChatStore()
@@ -62,6 +64,15 @@ export const AICopilot = () => {
     if (showContextState) {
       searchStateStore.setSearchTarget(SearchTarget.CurrentPage)
     }
+  }
+
+  const handleNewTempConv = () => {
+    conversationStore.resetState()
+    chatStore.resetState()
+  }
+
+  const handleNewOpenConvList = () => {
+    knowledgeBaseStore.updateConvModalVisible(true)
   }
 
   const handleGetThreadMessages = async (convId: string) => {
@@ -180,12 +191,18 @@ export const AICopilot = () => {
               <Button
                 icon={<IconHistory />}
                 type="text"
+                onClick={() => {
+                  handleNewOpenConvList()
+                }}
                 className="chat-input-assist-action-item">
                 会话历史
               </Button>
               <Button
                 icon={<IconPlusCircle />}
                 type="text"
+                onClick={() => {
+                  handleNewTempConv()
+                }}
                 className="chat-input-assist-action-item">
                 新会话
               </Button>
@@ -221,6 +238,15 @@ export const AICopilot = () => {
           </div>
         </div>
       </div>
+      {knowledgeBaseStore?.convModalVisible ? (
+        <ConvListModal
+          title="会话库"
+          classNames="conv-list-modal"
+          getPopupContainer={() => {
+            return document.querySelector(".ai-copilot-container") as Element
+          }}
+        />
+      ) : null}
     </div>
   )
 }

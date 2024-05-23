@@ -19,6 +19,9 @@ interface KnowledgeBaseState {
   currentKnowledgeBase: null | CollectionDetail
   currentResource: null | ResourceDetail
 
+  // 会话 modal
+  convModalVisible: boolean
+
   updateIsSaveKnowledgeBaseModalVisible: (
     isSaveKnowledgeBaseModalVisible: boolean,
   ) => void
@@ -28,11 +31,13 @@ interface KnowledgeBaseState {
   updateResource: (resource: ResourceDetail) => void
   updateCurrentPage: (currentPage: number) => void
   updateHasMore: (hasMore: boolean) => void
+  updateConvModalVisible: (convModalVisible: boolean) => void
   resetState: () => void
 }
 
 export const defaultState = {
   isSaveKnowledgeBaseModalVisible: false,
+  convModalVisible: false,
   currentKnowledgeBase: null,
   currentResource: null,
   knowledgeBaseList: [],
@@ -67,6 +72,8 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
     updateCurrentPage: (currentPage: number) =>
       set(state => ({ ...state, currentPage })),
     updateHasMore: (hasMore: boolean) => set(state => ({ ...state, hasMore })),
+    updateConvModalVisible: (convModalVisible: boolean) =>
+      set(state => ({ ...state, convModalVisible })),
     updateIsRequesting: (isRequesting: boolean) =>
       set(state => ({ ...state, isRequesting })),
     resetState: () => set(state => ({ ...state, ...defaultState })),
