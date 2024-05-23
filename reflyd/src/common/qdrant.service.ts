@@ -14,13 +14,8 @@ export class QdrantService implements OnModuleInit {
     this.client = new QdrantClient({
       host: this.configService.getOrThrow('vectorStore.host'),
       port: this.configService.getOrThrow('vectorStore.port'),
-      // apiKey: this.configService.getOrThrow('vectorStore.apiKey'),
+      apiKey: this.configService.get('vectorStore.apiKey') || undefined,
     });
-    this.logger.log(
-      `qdrant host: ${this.configService.getOrThrow(
-        'vectorStore.host',
-      )}, port: ${this.configService.getOrThrow('vectorStore.port')}`,
-    );
     this.collectionName = 'refly_content';
   }
 
