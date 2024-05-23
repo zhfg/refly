@@ -95,6 +95,8 @@ export const SaveKnowledgeBaseModal = () => {
         return
       }
 
+      console.log("weblinkRes", weblinkRes)
+
       const weblinkData = {
         title: document?.title || "",
         url: location.href,

@@ -2,17 +2,17 @@ import { appConfig } from "@/utils/config"
 import { request } from "@/utils/request"
 
 import type { HandlerRequest, HandlerResponse } from "@/types/request"
-import { Thread } from "@/types"
+import { Conversation } from "@/types"
 
 const handler = async (
-  req: HandlerRequest<{ threadId: string }>,
-): Promise<HandlerResponse<Thread>> => {
+  req: HandlerRequest<{ convId: string }>,
+): Promise<HandlerResponse<Conversation>> => {
   console.log(req.body)
 
   try {
-    const { threadId } = req.body
-    const [err, threadRes] = await request<Thread>(
-      appConfig.url.getThreadMessages(threadId),
+    const { convId } = req.body
+    const [err, threadRes] = await request<Conversation>(
+      appConfig.url.getThreadMessages(convId),
       {
         method: "GET",
       },

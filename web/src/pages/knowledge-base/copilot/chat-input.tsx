@@ -8,6 +8,8 @@ import { useQuickSearchStateStore } from "@/stores/quick-search-state"
 import { IconSend } from "@arco-design/web-react/icon"
 import { useMessageStateStore } from "@/stores/message-state"
 import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run"
+import { buildConversation } from "@/utils/conversation"
+import { useConversationStore } from "@/stores/conversation"
 
 const TextArea = Input.TextArea
 
@@ -21,8 +23,9 @@ export const ChatInput = (props: ChatInputProps) => {
   // stores
   const chatStore = useChatStore()
   const quickSearchStateStore = useQuickSearchStateStore()
+  const conversationStore = useConversationStore()
   const messageStateStore = useMessageStateStore()
-  const { runTask } = useBuildThreadAndRun()
+  const { runTask, emptyConvRunTask } = useBuildThreadAndRun()
   // hooks
   const [isFocused, setIsFocused] = useState(false)
 
@@ -34,7 +37,8 @@ export const ChatInput = (props: ChatInputProps) => {
       // 追问阅读
       runTask(newQAText)
     } else {
-      runTask()
+      // 新会话阅读，先创建会话，然后进行跳转之后发起聊天
+      emptyConvRunTask(newQAText)
     }
   }
 

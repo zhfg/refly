@@ -5,7 +5,7 @@ import { useConversationStore } from "@/stores/conversation"
 import { buildConversation } from "@/utils/conversation"
 import { useResetState } from "./use-reset-state"
 import { useTaskStore } from "@/stores/task"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom"
 
 // 类型
 import {
@@ -36,10 +36,28 @@ export const useBuildThreadAndRun = () => {
   const conversationStore = useConversationStore()
   const { resetState } = useResetState()
   const taskStore = useTaskStore()
+  const location = useLocation()
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { buildTaskAndGenReponse } = useBuildTask()
   const { currentResource, currentKnowledgeBase } = useCopilotContextState()
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const jumpNewConvQuery = (convId: string) => {
+    const newSearchParams = new URLSearchParams(searchParams)
+    newSearchParams.set("convId", convId)
+    setSearchParams(newSearchParams)
+    navigate(`/knowledge-base?${newSearchParams.toString()}`)
+  }
+
+  const emptyConvRunTask = (question: string) => {
+    const newConv = ensureConversationExist()
+    conversationStore.setCurrentConversation(newConv)
+    chatStore.setIsNewConversation(true)
+    chatStore.setNewQAText(question)
+
+    jumpNewConvQuery(newConv?.convId)
+  }
 
   const handleCreateNewConversation = async (task: Task) => {
     /**
@@ -198,8 +216,10 @@ export const useBuildThreadAndRun = () => {
     const { searchTarget } = useSearchStateStore.getState()
     const { localSettings } = useUserStore.getState()
 
-    //
+    // 创建新会话并跳转
+    const conv = ensureConversationExist()
     const { messages } = useChatStore.getState()
+
     let selectedWebLink: Source[] = []
     let resourceIds: string[] = []
     let collectionIds: string[] = []
@@ -228,9 +248,6 @@ export const useBuildThreadAndRun = () => {
       collectionIds = [currentKnowledgeBase?.collectionId || ""]
     }
 
-    // 创建新会话并跳转
-    const conv = ensureConversationExist()
-
     // 设置当前的任务类型及会话 id
     const task = buildTask({
       taskType:
@@ -256,5 +273,8 @@ export const useBuildThreadAndRun = () => {
     runQuickActionTask,
     runChatTask,
     runTask,
+    emptyConvRunTask,
+    ensureConversationExist,
+    jumpNewConvQuery,
   }
 }

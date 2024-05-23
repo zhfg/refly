@@ -1,5 +1,5 @@
 import { OutputLocale } from "@/utils/i18n"
-import type { Message } from "./message"
+import type { Message, ServerMessage } from "./message"
 
 export type Conversation = {
   convId: string
@@ -19,6 +19,8 @@ export type Conversation = {
   // 为阅读文章，阅读增强做的设计，后续添加
   readEnhanceIndexStatus?: any
   readEnhanceArticle?: any
+
+  messages: ServerMessage[]
 }
 
 export const enum ConversationOperation {

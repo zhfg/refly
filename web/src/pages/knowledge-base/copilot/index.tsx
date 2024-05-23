@@ -25,24 +25,104 @@ import { useSearchParams } from "react-router-dom"
 import { SearchTarget, useSearchStateStore } from "@/stores/search-state"
 import { ContextStateDisplay } from "./context-state-display"
 import { useCopilotContextState } from "@/hooks/use-copilot-context-state"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ChatInput } from "./chat-input"
 import { ChatMessages } from "./chat-messages"
 
+// requests
+import getThreadMessages from "@/requests/getThreadMessages"
+
 // state
 import { useChatStore } from "@/stores/chat"
+import { Conversation } from "@/types"
+import { useConversationStore } from "@/stores/conversation"
+import { useResetState } from "@/hooks/use-reset-state"
+import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run"
+import { delay } from "@/utils/delay"
 
 const TextArea = Input.TextArea
 
 export const AICopilot = () => {
-  const conv = fakeConversations?.[0]
+  const [searchParams] = useSearchParams()
   const [copilotBodyHeight, setCopilotBodyHeight] = useState(215)
   const { contextCardHeight, showContextCard, showRelatedQuestions } =
     useCopilotContextState()
   const chatStore = useChatStore()
+  const conversationStore = useConversationStore()
+  const [isFetching, setIsFetching] = useState(false)
+  const { runTask } = useBuildThreadAndRun()
 
+  const convId = searchParams.get("convId")
+  const { resetState } = useResetState()
   const actualCopilotBodyHeight =
     copilotBodyHeight + (showContextCard ? contextCardHeight : 0)
+
+  const handleGetThreadMessages = async (convId: string) => {
+    // 异步操作
+    const res = await getThreadMessages({
+      body: {
+        convId,
+      },
+    })
+
+    console.log("getThreadMessages", res)
+
+    // 清空之前的状态
+    resetState()
+
+    // 设置会话和消息
+    conversationStore.setCurrentConversation(res?.data as Conversation)
+
+    //
+    const messages = (res?.data?.messages || [])?.map(item => {
+      const {
+        content = "",
+        relatedQuestions = [],
+        sources,
+        type,
+        selectedWeblinkConfig = "", // 这里需要构建进来
+        ...extraInfo
+      } = item || {}
+
+      return {
+        ...extraInfo,
+        data: {
+          content,
+          relatedQuestions,
+          sources,
+          type,
+          selectedWeblinkConfig,
+        },
+      }
+    })
+    chatStore.setMessages(messages)
+  }
+
+  const handleConvTask = async (convId: string) => {
+    try {
+      setIsFetching(true)
+      const { isNewConversation } = useChatStore.getState()
+
+      // 新会话，需要手动构建第一条消息
+      if (isNewConversation && convId) {
+        // 更换成基于 task 的消息模式，核心是基于 task 来处理
+        runTask()
+      } else if (convId) {
+        handleGetThreadMessages(convId)
+      }
+    } catch (err) {
+      console.log("thread error")
+    }
+
+    await delay(1500)
+    setIsFetching(false)
+  }
+
+  useEffect(() => {
+    if (convId) {
+      handleConvTask(convId)
+    }
+  }, [convId])
 
   return (
     <div className="ai-copilot-container">

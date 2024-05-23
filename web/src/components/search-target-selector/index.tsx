@@ -55,22 +55,22 @@ export const SearchTargetSelector = (props: { classNames: string }) => {
         <IconCommon style={iconStyle} />
         {t("loggedHomePage.homePage.searchScope.all")}
       </Menu.Item>
-      <Menu.Item
+      {/* <Menu.Item
         key={SearchTarget.SelectedPages}
         onClick={() => {
           webLinkStore.updateIsWebLinkListVisible(true)
         }}>
         <IconBook style={iconStyle} />
         {t("loggedHomePage.homePage.searchScope.history")}
-      </Menu.Item>
+      </Menu.Item> */}
       <Menu.Item key={SearchTarget.SearchEnhance}>
         <IconCompass style={iconStyle} />
         {t("loggedHomePage.homePage.searchScope.internet")}
       </Menu.Item>
-      <Menu.Item key={SearchTarget.None}>
+      {/* <Menu.Item key={SearchTarget.None}>
         <IconDriveFile style={iconStyle} />
         {t("loggedHomePage.homePage.searchScope.none")}
-      </Menu.Item>
+      </Menu.Item> */}
     </Menu>
   )
 

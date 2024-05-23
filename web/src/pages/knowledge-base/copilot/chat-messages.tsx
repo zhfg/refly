@@ -12,6 +12,7 @@ export const ChatMessages = () => {
   const messageStateStore = useMessageStateStore()
   const { runTask } = useBuildThreadAndRun()
 
+  console.log("chatStore.messages", chatStore.messages)
   const mappedServerMessages = mapToServerMessage(chatStore.messages || [])
 
   return (

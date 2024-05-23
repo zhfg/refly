@@ -278,12 +278,12 @@ export const buildQuestionMessageList = (data: BuildMessageListData) => {
 
 export const mapToServerMessage = (messages: Message[]): ServerMessage[] => {
   const newMessages = (messages || []).map(item => {
-    if (item?.itemType === MessageItemType.QUESTION) {
+    if (item?.data?.type === MessageType?.Human) {
       const { data, ...rest } = item
       return { ...rest, ...data }
     }
 
-    if (item?.itemType === MessageItemType.REPLY) {
+    if (item?.data?.type === MessageType.Assistant) {
       const { data, ...rest } = item
       const { sources, relatedQuestions, ...dataExtra } = data || {}
       return {
