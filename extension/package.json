@@ -6,7 +6,7 @@
   "author": "pftom",
   "scripts": {
     "dev": "plasmo dev",
-    "build": "plasmo build --source-maps && yarn sentry:sourcemaps",
+    "build": "plasmo build --source-maps",
     "package": "plasmo package",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org refly-ai --project extension ./build && sentry-cli sourcemaps upload --org refly-ai --project extension ./build"
   },

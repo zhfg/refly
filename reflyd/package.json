@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "prisma generate && nest build && yarn sentry:sourcemaps && yarn sentry:sourcemaps",
+    "build": "prisma generate && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "format:schema": "prisma format",
     "sync-db-schema": "node -r ts-node/register --env-file=.env scripts/sync-db-schema.ts",
