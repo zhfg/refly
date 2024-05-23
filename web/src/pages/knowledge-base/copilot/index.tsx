@@ -36,18 +36,24 @@ import getThreadMessages from "@/requests/getThreadMessages"
 
 // state
 import { useChatStore } from "@/stores/chat"
-import { Conversation } from "@/types"
+import { Conversation, LOCALE } from "@/types"
 import { useConversationStore } from "@/stores/conversation"
 import { useResetState } from "@/hooks/use-reset-state"
 import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run"
 import { delay } from "@/utils/delay"
 import { useKnowledgeBaseStore } from "@/stores/knowledge-base"
+// utils
+import { localeToLanguageName } from "@/utils/i18n"
+import { OutputLocaleList } from "@/components/output-locale-list"
+import { useTranslation } from "react-i18next"
+import { useUserStore } from "@/stores/user"
 
 const TextArea = Input.TextArea
 
 export const AICopilot = () => {
   const [searchParams] = useSearchParams()
-  const [copilotBodyHeight, setCopilotBodyHeight] = useState(215)
+  const [copilotBodyHeight, setCopilotBodyHeight] = useState(215 - 32)
+  const userStore = useUserStore()
   const knowledgeBaseStore = useKnowledgeBaseStore()
   const { contextCardHeight, showContextCard, showContextState } =
     useCopilotContextState()
@@ -61,6 +67,10 @@ export const AICopilot = () => {
   const { resetState } = useResetState()
   const actualCopilotBodyHeight =
     copilotBodyHeight + (showContextCard ? contextCardHeight : 0)
+
+  const { t, i18n } = useTranslation()
+  const uiLocale = i18n?.languages?.[0] as LOCALE
+  const outputLocale = userStore?.localSettings?.outputLocale
 
   const handleSwitchSearchTarget = () => {
     if (showContextState) {
@@ -218,7 +228,7 @@ export const AICopilot = () => {
             </div>
           </div>
 
-          <div className="skill-container">
+          {/* <div className="skill-container">
             {["搜索", "写作", "翻译", "数据分析", "更多技能"].map(
               (item, index) => (
                 <div key={index} className="skill-item">
@@ -226,7 +236,7 @@ export const AICopilot = () => {
                 </div>
               ),
             )}
-          </div>
+          </div> */}
           <div className="chat-input-container">
             <div className="chat-input-body">
               <ChatInput
@@ -236,13 +246,18 @@ export const AICopilot = () => {
             </div>
             <div className="chat-input-assist-action">
               <SearchTargetSelector classNames="chat-input-assist-action-item" />
-              <Button
-                icon={<IconTranslate />}
-                type="text"
-                className="chat-input-assist-action-item">
-                <span>简体中文</span>
-                <IconCaretDown />
-              </Button>
+
+              <OutputLocaleList>
+                <Button
+                  icon={<IconTranslate />}
+                  type="text"
+                  className="chat-input-assist-action-item">
+                  <span>
+                    {localeToLanguageName?.[uiLocale]?.[outputLocale]}{" "}
+                  </span>
+                  <IconCaretDown />
+                </Button>
+              </OutputLocaleList>
             </div>
           </div>
         </div>
