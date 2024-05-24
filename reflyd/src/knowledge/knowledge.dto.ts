@@ -6,7 +6,7 @@ export class WeblinkMeta {
   @ApiProperty()
   url: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   linkId?: string;
 
   @ApiProperty()
@@ -14,9 +14,6 @@ export class WeblinkMeta {
 
   @ApiPropertyOptional()
   storageKey?: string;
-
-  @ApiPropertyOptional()
-  parsedDocStorageKey?: string;
 }
 
 export class ResourceListItem {
@@ -51,6 +48,8 @@ export class GetResourceDetailResponse {
   data: ResourceDetail;
 }
 
+export type ResourceMeta = WeblinkMeta;
+
 export class UpsertResourceRequest {
   @ApiProperty({ enum: ResourceType })
   resourceType: ResourceType;
@@ -64,8 +63,14 @@ export class UpsertResourceRequest {
   @ApiProperty()
   title: string;
 
+  @ApiPropertyOptional()
+  storageKey?: string; // if empty, will perform server crawl
+
   @ApiProperty()
-  data: WeblinkMeta;
+  data: ResourceMeta;
+
+  @ApiPropertyOptional()
+  content?: string; // NOTE: this will be ignored if storageKey is set
 
   @ApiPropertyOptional()
   resourceId?: string; // only used for update

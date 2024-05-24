@@ -44,4 +44,7 @@ export default () => ({
       callbackUrl: process.env.GOOGLE_CALLBACK_URL || 'test',
     },
   },
+  rag: {
+    jinaToken: process.env.JINA_TOKEN,
+  },
 });
