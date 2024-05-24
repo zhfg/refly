@@ -134,7 +134,7 @@ export class WeblinkService {
 
     const content = data.content;
     const doc: Document<PageMeta> = {
-      pageContent: this.ragService.convertHTMLToMarkdown('ingest', content),
+      pageContent: content,
       metadata: {
         title: data.title,
         source: url,
