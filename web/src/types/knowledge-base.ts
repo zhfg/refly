@@ -26,6 +26,7 @@ export interface ResourceListItem {
   resourceType: ResourceType
   data?: WeblinkMeta
   collectionName?: string
+  collectionId?: string
   isPublic?: boolean
   createdAt?: string
   updatedAt?: string

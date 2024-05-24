@@ -47,6 +47,8 @@ import { localeToLanguageName } from "@/utils/i18n"
 import { OutputLocaleList } from "@/components/output-locale-list"
 import { useTranslation } from "react-i18next"
 import { useUserStore } from "@/stores/user"
+import { useResizeCopilot } from "@/hooks/use-resize-copilot"
+import { SourceListModal } from "@/components/source-list/source-list-modal"
 
 const TextArea = Input.TextArea
 
@@ -156,6 +158,7 @@ export const AICopilot = () => {
   useEffect(() => {
     handleSwitchSearchTarget()
   }, [showContextState])
+  useResizeCopilot({ containerSelector: "ai-copilot-container" })
 
   return (
     <div className="ai-copilot-container">
@@ -275,6 +278,16 @@ export const AICopilot = () => {
           getPopupContainer={() => {
             return document.querySelector(".ai-copilot-container") as Element
           }}
+        />
+      ) : null}
+      {knowledgeBaseStore?.sourceListModalVisible ? (
+        <SourceListModal
+          title={`结果来源 (${knowledgeBaseStore?.tempConvResources?.length || 0})`}
+          classNames="source-list-modal"
+          getPopupContainer={() => {
+            return document.querySelector(".ai-copilot-container") as Element
+          }}
+          resources={knowledgeBaseStore?.tempConvResources || []}
         />
       ) : null}
     </div>

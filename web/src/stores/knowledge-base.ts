@@ -30,6 +30,10 @@ interface KnowledgeBaseState {
   kbModalVisible: boolean
   actionSource: ActionSource
 
+  // source-list
+  sourceListModalVisible: boolean
+  tempConvResources: ResourceDetail[]
+
   updateIsSaveKnowledgeBaseModalVisible: (
     isSaveKnowledgeBaseModalVisible: boolean,
   ) => void
@@ -42,6 +46,8 @@ interface KnowledgeBaseState {
   updateConvModalVisible: (convModalVisible: boolean) => void
   updateActionSource: (actionSource: ActionSource) => void
   updateKbModalVisible: (kbModalVisible: boolean) => void
+  updateSourceListModalVisible: (sourceListModalVisible: boolean) => void
+  updateTempConvResources: (tempConvResources: ResourceDetail[]) => void
   resetState: () => void
 }
 
@@ -49,6 +55,8 @@ export const defaultState = {
   isSaveKnowledgeBaseModalVisible: false,
   convModalVisible: false,
   kbModalVisible: false,
+  sourceListModalVisible: false,
+  tempConvResources: [],
   actionSource: ActionSource.Conv,
   currentKnowledgeBase: null,
   currentResource: null,
@@ -88,10 +96,14 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
       set(state => ({ ...state, convModalVisible })),
     updateKbModalVisible: (kbModalVisible: boolean) =>
       set(state => ({ ...state, kbModalVisible })),
+    updateSourceListModalVisible: (sourceListModalVisible: boolean) =>
+      set(state => ({ ...state, sourceListModalVisible })),
     updateIsRequesting: (isRequesting: boolean) =>
       set(state => ({ ...state, isRequesting })),
     updateActionSource: (actionSource: ActionSource) =>
       set(state => ({ ...state, actionSource })),
+    updateTempConvResources: (tempConvResources: ResourceDetail[]) =>
+      set(state => ({ ...state, tempConvResources })),
     resetState: () => set(state => ({ ...state, ...defaultState })),
   })),
 )

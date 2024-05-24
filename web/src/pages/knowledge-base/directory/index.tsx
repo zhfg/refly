@@ -1,46 +1,21 @@
-import {
-  fakeKnowledgeBaseDetail,
-  fakeKnowledgeBaseDirectoryList,
-} from "@/fake-data/knowledge-base"
 import { LOCALE } from "@/types"
 import { time } from "@/utils/time"
 
 // styles
 import "./index.scss"
-import {
-  IconBook,
-  IconBulb,
-  IconCompass,
-  IconFile,
-  IconMore,
-  IconSearch,
-} from "@arco-design/web-react/icon"
-import {
-  Divider,
-  Input,
-  Skeleton,
-  Tag,
-  Tooltip,
-  Message as message,
-} from "@arco-design/web-react"
-import { useSearchableList } from "@/components/use-searchable-list"
+import { IconFile } from "@arco-design/web-react/icon"
+import { Message as message } from "@arco-design/web-react"
 import { useEffect, useState } from "react"
-import type { ResourceDetail } from "@/types/knowledge-base"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { useKnowledgeBaseStore } from "@/stores/knowledge-base"
 // 类型
-import { CollectionDetail, ResourceIndexStatus } from "@/types/knowledge-base"
+import { CollectionDetail, ResourceDetail } from "@/types/knowledge-base"
 // 请求
 import getKnowledgeBaseDetail from "@/requests/getKnowledgeBaseDetail"
-import { safeParseURL } from "@/utils/url"
+// 组件
+import { ResourceList } from "@/components/resource-list"
 
 export const KnowledgeBaseDirectory = () => {
-  const [searchVal, setSearchVal] = useState("")
-  const [directoryList, setDirectoryList, filter] =
-    useSearchableList<ResourceDetail>("title", {
-      debounce: true,
-      delay: 300,
-    })
   const [isFetching, setIsFetching] = useState(false)
   const knowledgeBaseStore = useKnowledgeBaseStore()
   const navigate = useNavigate()
@@ -89,41 +64,13 @@ export const KnowledgeBaseDirectory = () => {
     }
   }, [kbId, resId])
 
-  const handleChange = (val: string) => {
-    filter(val)
-    setSearchVal(val)
-  }
-
-  const getIndexStatusText = (indexStatus?: ResourceIndexStatus) => {
-    switch (indexStatus) {
-      case ResourceIndexStatus.processing:
-        return "索引中"
-      case ResourceIndexStatus.failed:
-        return "索引失败"
-      default: {
-        return ""
-      }
-    }
-  }
-
-  const getIndexStatusColor = (indexStatus?: ResourceIndexStatus) => {
-    switch (indexStatus) {
-      case ResourceIndexStatus.processing:
-        return "orange"
-      case ResourceIndexStatus.failed:
-        return "red"
-      default: {
-        return ""
-      }
-    }
-  }
-
-  useEffect(() => {
-    const mappedDirectoryList = (
-      knowledgeBaseStore?.currentKnowledgeBase?.resources || []
-    ).map(item => ({ ...item, title: item?.data?.title || "" }))
-    setDirectoryList(mappedDirectoryList)
-  }, [knowledgeBaseStore?.currentKnowledgeBase?.resources])
+  // 添加 collectionId
+  const resources = knowledgeBaseStore?.currentKnowledgeBase?.resources?.map(
+    item => ({
+      ...item,
+      collectionId: kbId,
+    }),
+  )
 
   return (
     <div className="knowledge-base-directory-container">
@@ -156,98 +103,17 @@ export const KnowledgeBaseDirectory = () => {
         </div>
         <div className="intro-menu">{/* <IconMore /> */}</div>
       </div>
-      <div className="knowledge-base-directory-search-container">
-        <Input
+      <div className="knowledge-base-directory-list-container">
+        <ResourceList
           placeholder="搜索知识库..."
-          allowClear
-          className="knowledge-base-directory-search"
-          style={{ height: 32, borderRadius: "8px" }}
-          value={searchVal}
-          prefix={<IconSearch />}
-          onChange={handleChange}
+          isFetching={isFetching}
+          resources={resources as ResourceDetail[]}
+          handleItemClick={item => {
+            navigate(
+              `/knowledge-base?kbId=${item?.collectionId}&resId=${item?.resourceId}`,
+            )
+          }}
         />
-        <Divider />
-      </div>
-      <div className="knowledge-base-directory-list">
-        {isFetching ? (
-          <div style={{ margin: "20px auto" }}>
-            <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
-            <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
-            <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
-          </div>
-        ) : (
-          (directoryList || []).map((item, index) => (
-            <div
-              className="knowledge-base-directory-item"
-              key={index}
-              onClick={() => {
-                navigate(
-                  `/knowledge-base?kbId=${kbId}&resId=${item?.resourceId}`,
-                )
-              }}>
-              <div className="knowledge-base-directory-site-intro">
-                <div className="site-intro-icon">
-                  <img
-                    src={`https://www.google.com/s2/favicons?domain=${safeParseURL(item?.data?.url as string)}&sz=${32}`}
-                    alt={item?.data?.url}
-                  />
-                </div>
-                <div className="site-intro-content">
-                  <p className="site-intro-site-name">{item.data?.title}</p>
-                  <a
-                    className="site-intro-site-url"
-                    href={item.data?.url}
-                    target="_blank">
-                    {item.data?.url}
-                  </a>
-                </div>
-              </div>
-              <div className="knowledge-base-directory-title">
-                {item.data?.title}
-              </div>
-              <div className="knowledge-base-directory-action">
-                <div className="action-summary">
-                  <IconBulb />
-                  <span>AI Summary</span>
-                </div>
-                <div className="action-markdown-content active">
-                  <IconBook />
-                </div>
-                <div className="action-external-origin-website">
-                  <IconCompass
-                    onClick={() => {
-                      window.open(item?.data?.url, "_blank")
-                    }}
-                  />
-                </div>
-              </div>
-              <div className="resource-utility-info">
-                <span>
-                  {time(item?.updatedAt as string, LOCALE.EN)
-                    .utc()
-                    .fromNow()}
-                </span>
-                {getIndexStatusText(item?.indexStatus) ? (
-                  <Tag
-                    color={getIndexStatusColor(item?.indexStatus)}
-                    style={{ marginLeft: 8 }}
-                    size="small">
-                    {getIndexStatusText(item?.indexStatus)}
-                  </Tag>
-                ) : null}
-              </div>
-              <div className="knowledge-base-directory-keyword-list">
-                {(item?.data?.keywords || [])?.map((keyword, index) => (
-                  <div
-                    className="knowledge-base-directory-keyword-item"
-                    key={index}>
-                    <span>{keyword}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))
-        )}
       </div>
     </div>
   )
