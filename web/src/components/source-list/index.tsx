@@ -16,9 +16,13 @@ import { useNavigate } from "react-router-dom"
 import { IconBook, IconBulb, IconCompass } from "@arco-design/web-react/icon"
 import { time } from "@/utils/time"
 import { Markdown } from "../markdown"
-import { useKnowledgeBaseStore } from "@/stores/knowledge-base"
+import {
+  KnowledgeBaseTab,
+  useKnowledgeBaseStore,
+} from "@/stores/knowledge-base"
 import { SourceListModal } from "./source-list-modal"
 import { mapSourceToResource } from "@/utils/resource"
+import { useKnowledgeBaseTabs } from "@/hooks/use-knowledge-base-tabs"
 
 interface SourceListProps {
   sources: Source[]
@@ -114,6 +118,7 @@ export const ResourceItem = (props: {
   showDesc?: boolean
 }) => {
   const { item, index, showDesc = false } = props
+  const { handleAddTabWithResource } = useKnowledgeBaseTabs()
   const navigate = useNavigate()
 
   return (

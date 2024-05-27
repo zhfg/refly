@@ -5,7 +5,10 @@ import { IconBulb, IconCodepen } from "@arco-design/web-react/icon"
 import "./index.scss"
 import { useSearchParams } from "react-router-dom"
 import { Skeleton, Message as message } from "@arco-design/web-react"
-import { useKnowledgeBaseStore } from "@/stores/knowledge-base"
+import {
+  type KnowledgeBaseTab,
+  useKnowledgeBaseStore,
+} from "@/stores/knowledge-base"
 // 请求
 import getResourceDetail from "@/requests/getResourceDetail"
 // 类型
@@ -13,13 +16,16 @@ import { ResourceDetail } from "@/types"
 import { useEffect, useState } from "react"
 import { safeParseURL } from "@/utils/url"
 import { useListenToSelection } from "@/hooks/use-listen-to-selection"
+import { useKnowledgeBaseTabs } from "@/hooks/use-knowledge-base-tabs"
 
 export const KnowledgeBaseResourceDetail = () => {
   const [isFetching, setIsFetching] = useState(false)
   const knowledgeBaseStore = useKnowledgeBaseStore()
+  const { handleAddTab } = useKnowledgeBaseTabs()
 
   const [queryParams] = useSearchParams()
   const resId = queryParams.get("resId")
+  const kbId = queryParams.get("kbId")
 
   const resourceDetail = knowledgeBaseStore?.currentResource as ResourceDetail
 
@@ -37,7 +43,20 @@ export const KnowledgeBaseResourceDetail = () => {
       }
 
       console.log("newRes", newRes)
-      knowledgeBaseStore.updateResource(newRes?.data as ResourceDetail)
+      const resource = newRes?.data as ResourceDetail
+      knowledgeBaseStore.updateResource(resource)
+
+      setTimeout(() => {
+        // 添加新 Tab
+        const newTab: KnowledgeBaseTab = {
+          title: resource?.title || "",
+          key: resource?.resourceId || "",
+          content: resource?.description || "",
+          collectionId: kbId || "",
+          resourceId: resource?.resourceId || "",
+        }
+        handleAddTab(newTab)
+      })
     } catch (err) {
       message.error("获取内容详情失败，请重新刷新试试")
     }

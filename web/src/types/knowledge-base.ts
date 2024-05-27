@@ -1,6 +1,7 @@
 export interface CollectionListItem {
   collectionId: string
   title: string
+  name?: string
   description?: string
   isPublic: boolean
   createdAt: string

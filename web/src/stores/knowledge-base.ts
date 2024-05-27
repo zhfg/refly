@@ -13,6 +13,14 @@ export enum ActionSource {
   Note = "note",
 }
 
+export interface KnowledgeBaseTab {
+  title: string
+  key: string
+  content: string
+  collectionId: string
+  resourceId: string
+}
+
 interface KnowledgeBaseState {
   isSaveKnowledgeBaseModalVisible: boolean
   knowledgeBaseList: CollectionListItem[]
@@ -23,6 +31,10 @@ interface KnowledgeBaseState {
 
   // selection
   currentSelectedText: string
+
+  // tabs
+  tabs: KnowledgeBaseTab[]
+  activeTab: string
 
   // 详情
   currentKnowledgeBase: null | CollectionDetail
@@ -52,12 +64,22 @@ interface KnowledgeBaseState {
   updateSourceListModalVisible: (sourceListModalVisible: boolean) => void
   updateTempConvResources: (tempConvResources: ResourceDetail[]) => void
   updateSelectedText: (selectedText: string) => void
+  updateTabs: (tabs: KnowledgeBaseTab[]) => void
+  updateActiveTab: (key: string) => void
   resetState: () => void
 }
 
 export const defaultState = {
   isSaveKnowledgeBaseModalVisible: false,
   currentSelectedText: "",
+  tabs: [
+    {
+      title: "New Tab",
+      key: "key1",
+      content: "Content of Tab Pane 1",
+    },
+  ] as KnowledgeBaseTab[],
+  activeTab: "key1",
   convModalVisible: false,
   kbModalVisible: false,
   sourceListModalVisible: false,
@@ -111,6 +133,10 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
       set(state => ({ ...state, tempConvResources })),
     updateSelectedText: (selectedText: string) =>
       set(state => ({ ...state, currentSelectedText: selectedText })),
+    updateTabs: (tabs: KnowledgeBaseTab[]) =>
+      set(state => ({ ...state, tabs })),
+    updateActiveTab: (key: string) =>
+      set(state => ({ ...state, activeTab: key })),
     resetState: () => set(state => ({ ...state, ...defaultState })),
   })),
 )
