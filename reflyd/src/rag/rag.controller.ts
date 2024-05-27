@@ -3,7 +3,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { Controller, Get, Param, Render, Logger } from '@nestjs/common';
 import { RAGService } from './rag.service';
-import { sha256Hash } from 'src/utils';
+import { cleanMarkdownForIngest, sha256Hash } from 'src/utils';
 
 @Controller('rag')
 export class RagController {
@@ -29,16 +29,16 @@ export class RagController {
       this.logger.log(`found cache for ${url}, reading from ${cacheFile}`);
       snapshot = JSON.parse(await fs.readFile(cacheFile, 'utf8'));
     } else {
-      snapshot = await this.ragService.crawl(url);
+      snapshot = await this.ragService.crawlFromRemoteReader(url);
       await fs.writeFile(cacheFile, JSON.stringify(snapshot));
       this.logger.log('save cache to ' + cacheFile);
     }
 
     const content = snapshot.parsed?.content || snapshot.html;
-    const markdownText = this.ragService.convertHTMLToMarkdown('ingest', content);
-    const chunks = await this.ragService.chunkText(markdownText);
+    const contentForIngest = cleanMarkdownForIngest(content);
+    const chunks = await this.ragService.chunkText(contentForIngest);
 
-    return { url, doc: markdownText, chunks: chunks };
+    return { url, doc: content, chunks: chunks };
   }
 
   @Get('parse')

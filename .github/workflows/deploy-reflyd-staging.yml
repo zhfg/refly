@@ -1,0 +1,17 @@
+name: Deploy Reflyd To Staging
+
+on:
+  push:
+    branches:
+      - "!release**"
+    paths:
+      - "reflyd/src/**"
+  workflow_dispatch:
+
+jobs:
+  deploy-staging:
+    uses: ./.github/workflows/deploy-reflyd-base.yml
+    with:
+      environment: staging
+      ecs-cluster: Prod
+      ecs-service: staging

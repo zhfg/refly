@@ -16,7 +16,7 @@ import { getExpectedTokenLenContent } from '../utils/token';
 import { PageMeta, Source } from '../types/weblink';
 import { CHANNEL_PROCESS_LINK_BY_USER, CHANNEL_PROCESS_LINK, QUEUE_WEBLINK } from '../utils/const';
 import { genLinkID, sha256Hash } from '../utils/id';
-import { hasUrlRedirected, normalizeURL } from '../utils/url';
+import { normalizeURL } from '../utils/url';
 import { TaskResponse } from '../conversation/conversation.dto';
 
 @Injectable()
@@ -130,23 +130,20 @@ export class WeblinkService {
     }
 
     // Finally tries to fetch the content from the web
-    const snapshot = await this.ragService.crawl(url);
+    const { data } = await this.ragService.crawlFromRemoteReader(url);
 
-    let doc: Document<PageMeta>;
-    const content = snapshot.parsed?.content || snapshot.html;
-    if (content && !hasUrlRedirected(url, snapshot.href)) {
-      doc = {
-        pageContent: this.ragService.convertHTMLToMarkdown('ingest', content),
-        metadata: {
-          title: (snapshot.parsed?.title || snapshot.title || '').trim(),
-          source: url || snapshot.href?.trim(),
-          publishedTime: snapshot.parsed?.publishedTime || undefined,
-        },
-      };
-      this.cache.set(url, { html: snapshot.parsed?.content || snapshot.html, doc });
-    }
+    const content = data.content;
+    const doc: Document<PageMeta> = {
+      pageContent: content,
+      metadata: {
+        title: data.title,
+        source: url,
+        publishedTime: data.publishedTime || undefined,
+      },
+    };
+    this.cache.set(url, { html: '', doc });
 
-    return { html: snapshot.html, doc };
+    return { html: '', doc };
   }
 
   /**
@@ -467,19 +464,15 @@ export class WeblinkService {
       return weblink;
     }
 
-    const { html, doc } = data;
+    const { doc } = data;
 
     try {
       // Upload parsed doc to minio
-      const [storageKey, parsedDocStorageKey] = await Promise.all([
-        this.uploadHTMLToMinio(link, html),
-        this.uploadParsedDocToMinio(link, doc),
-      ]);
+      const parsedDocStorageKey = await this.uploadParsedDocToMinio(link, doc);
 
       return this.prisma.weblink.update({
         where: { id: weblink.id },
         data: {
-          storageKey,
           parsedDocStorageKey,
           parseStatus: 'finish',
           parseSource: link.storageKey ? 'clientUpload' : 'serverCrawl',
@@ -572,7 +565,6 @@ export class WeblinkService {
 
 function isWeblinkReady(weblink: Weblink): boolean {
   return (
-    weblink.storageKey &&
     weblink.parsedDocStorageKey &&
     weblink.parseStatus === 'finish' &&
     weblink.parserVersion === PARSER_VERSION

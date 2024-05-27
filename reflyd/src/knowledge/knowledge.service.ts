@@ -2,11 +2,11 @@ import { BadRequestException, Injectable, Logger, UnauthorizedException } from '
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { readingTime } from 'reading-time-estimator';
-import { Prisma, Resource, User, Weblink } from '@prisma/client';
+import { Prisma, Resource, User } from '@prisma/client';
 import _ from 'lodash';
+import { RAGService } from '../rag/rag.service';
 import { PrismaService } from '../common/prisma.service';
 import { MinioService } from '../common/minio.service';
-import { WeblinkService } from '../weblink/weblink.service';
 import {
   CollectionDetail,
   UpsertCollectionRequest,
@@ -19,12 +19,11 @@ import {
 import {
   CHANNEL_FINALIZE_RESOURCE,
   QUEUE_RESOURCE,
+  cleanMarkdownForIngest,
   genCollectionID,
   genResourceID,
   genResourceUuid,
 } from 'src/utils';
-import { ConfigService } from '@nestjs/config';
-import { RAGService } from 'src/rag/rag.service';
 
 @Injectable()
 export class KnowledgeService {
@@ -33,9 +32,7 @@ export class KnowledgeService {
   constructor(
     private prisma: PrismaService,
     private minio: MinioService,
-    private config: ConfigService,
     private ragService: RAGService,
-    private weblinkService: WeblinkService,
     @InjectQueue(QUEUE_RESOURCE) private queue: Queue<UpsertResourceRequest>,
   ) {}
 
@@ -164,9 +161,9 @@ export class KnowledgeService {
     };
 
     if (needDoc) {
-      const weblinkMeta = JSON.parse(resource.meta) as WeblinkMeta;
-      const buf = await this.minio.downloadData(weblinkMeta.storageKey);
-      detail.doc = this.ragService.convertHTMLToMarkdown('render', buf.toString());
+      const metadata = detail.data as WeblinkMeta;
+      const buf = await this.minio.downloadData(resource.storageKey || metadata.storageKey);
+      detail.doc = buf.toString();
     }
 
     return detail;
@@ -201,6 +198,7 @@ export class KnowledgeService {
         resourceId: param.resourceId,
         resourceType: param.resourceType,
         meta: JSON.stringify(param.data),
+        storageKey: param.storageKey,
         userId: user.id,
         isPublic: param.isPublic,
         title: param.title || 'Untitled',
@@ -225,27 +223,42 @@ export class KnowledgeService {
   }
 
   async indexResource(user: User, param: UpsertResourceRequest) {
+    const { resourceId, collectionId } = param;
     const { url, linkId, storageKey, title } = param.data;
+    param.storageKey ||= storageKey;
 
-    let weblink: Weblink;
-    if (param.data?.linkId) {
-      weblink = await this.weblinkService.findFirstWeblink({ url, linkId });
+    if (!param.storageKey && linkId) {
+      const weblink = await this.prisma.weblink.findFirst({
+        where: { linkId },
+      });
       if (!weblink) {
-        this.logger.warn(`Weblink not found, url: ${url}, linkId: ${linkId}`);
-        return;
+        this.logger.warn(`weblink not found for linkId: ${linkId}, fallback to server crawl`);
+      } else {
+        param.storageKey = weblink.parsedDocStorageKey;
       }
+    }
+
+    if (!param.storageKey) {
+      const { data } = await this.ragService.crawlFromRemoteReader(url);
+      param.content = data.content;
+      param.title ||= data.title;
+
+      const resourceKey = `resource/${resourceId}`;
+      const res = await this.minio.uploadData(resourceKey, param.content);
+      param.storageKey = resourceKey;
+
+      this.logger.log(`upload resource ${resourceKey} success, res: ${JSON.stringify(res)}`);
     } else {
-      weblink = await this.weblinkService.processLink({ url, storageKey });
+      param.content = (await this.minio.downloadData(param.storageKey)).toString();
     }
 
     // TODO: 减少不必要的重复插入
-    const { resourceId, collectionId } = param;
-    const { doc, html } = await this.weblinkService.readWebLinkContent(url);
 
     // ensure the document is for ingestion use
-    doc.pageContent = this.ragService.convertHTMLToMarkdown('ingest', html);
-
-    const chunks = await this.ragService.indexContent(doc);
+    const chunks = await this.ragService.indexContent({
+      pageContent: cleanMarkdownForIngest(param.content),
+      metadata: { url, title },
+    });
 
     chunks.forEach((chunk, index) => {
       chunk.id = genResourceUuid(`${resourceId}-${index}`);
@@ -256,21 +269,19 @@ export class KnowledgeService {
     await this.ragService.saveDataForUser(user, { chunks });
 
     this.logger.log(
-      `save resource segments for user ${
-        user.uid
-      } success, resourceId: ${resourceId}, weblink: ${JSON.stringify(weblink)}`,
+      `save resource segments for user ${user.uid} success, resourceId: ${resourceId}`,
     );
 
     await this.prisma.resource.update({
       where: { resourceId, userId: user.id },
       data: {
-        wordCount: readingTime(doc.pageContent).words,
+        storageKey: storageKey,
+        wordCount: readingTime(param.content).words,
         indexStatus: 'finish',
         meta: JSON.stringify({
           url,
-          linkId: weblink.linkId,
-          title: title,
-          storageKey: storageKey || weblink.storageKey,
+          title: param.title,
+          storageKey: param.storageKey,
         } as WeblinkMeta),
       },
     });

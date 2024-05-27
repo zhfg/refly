@@ -1,0 +1,17 @@
+name: Deploy Reflyd To Prod
+
+on:
+  push:
+    branches:
+      - release
+    paths:
+      - "reflyd/src/**"
+  workflow_dispatch:
+
+jobs:
+  deploy-prod:
+    uses: ./.github/workflows/deploy-reflyd-base.yml
+    with:
+      environment: production
+      ecs-cluster: Prod
+      ecs-service: prod

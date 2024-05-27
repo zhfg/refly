@@ -1,14 +1,22 @@
-name: Reflyd Deploy
+name: Deploy Reflyd
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      ecs-cluster:
+        required: true
+        type: string
+      ecs-service:
+        required: true
+        type: string
 
 env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: public.ecr.aws/g1y9i0k2/reflyd
+  CONTAINER_NAME: reflyd
 
 jobs:
   deploy:
@@ -27,7 +35,7 @@ jobs:
           SENTRY_ORG: refly-ai
           SENTRY_PROJECT: reflyd
         with:
-          environment: production
+          environment: ${{ inputs.environment }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -50,3 +58,20 @@ jobs:
           docker build -t $ECR_REPOSITORY:$IMAGE_TAG reflyd
           docker push $ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@e7a3acb4b268f78ddea77b30ba9aa6a76dbae9e2
+        with:
+          task-definition: .aws/ecs-task-definition.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+          env-files: ${{ secrets.AWS_S3_ENV_ARN }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@3ad7feed6186d3b69bb6d87b9729470bf8f0215b
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ inputs.ecs-service }}
+          cluster: ${{ inputs.ecs-cluster }}
+          wait-for-service-stability: true
