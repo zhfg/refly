@@ -14,6 +14,7 @@ import Privacy from "./pravicy"
 import Terms from "./terms"
 import { Helmet } from "react-helmet"
 import { useTranslation } from "react-i18next"
+import { Alert } from "@arco-design/web-react"
 
 function LandingPage() {
   const location = useLocation()
@@ -42,6 +43,14 @@ function LandingPage() {
         </title>
         <meta name="description" content={t("landingPage.description")} />
       </Helmet>
+      <div>
+        <Alert
+          style={{ width: "100%" }}
+          type="warning"
+          title={<div>{t("systemMaintenanceShutdown.title")}</div>}
+          content={<div>{t("systemMaintenanceShutdown.content")}</div>}
+        />
+      </div>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/privacy" element={<Privacy />} />
