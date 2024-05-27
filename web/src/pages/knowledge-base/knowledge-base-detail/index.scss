@@ -12,6 +12,14 @@
     }
   }
 
+  .knowledge-base-detail-tab-container {
+    .arco-tabs-card > .arco-tabs-content,
+    .arco-tabs-card-gutter > .arco-tabs-content {
+      border: none;
+      padding-top: 0;
+    }
+  }
+
   .knowledge-base-detail-header {
     height: 40px;
     width: 100%;
@@ -23,7 +31,9 @@
     position: relative;
 
     .knowledge-base-detail-navigation-bar {
-      position: absolute;
+      // position: absolute;
+      display: flex;
+      flex-direction: row;
     }
 
     .knowledge-base-detail-nav-switcher {
@@ -31,9 +41,8 @@
       width: 100%;
       display: flex;
       flex-direction: row;
-      justify-content: center;
 
-      button.chat-input-assist-action-item {
+      .arco-tabs-header-title button.chat-input-assist-action-item {
         height: 24px;
         padding: 0 8px;
         border-radius: 8px;

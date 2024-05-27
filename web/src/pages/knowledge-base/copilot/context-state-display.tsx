@@ -24,10 +24,6 @@ export const ContextStateDisplay = () => {
   const knowledgeBaseStore = useKnowledgeBaseStore()
   const { runTask } = useBuildThreadAndRun()
 
-  const clearContextState = () => {
-    searchStateStore.setSearchTarget(SearchTarget.None)
-  }
-
   return (
     <div className="ai-copilot-context-state-display-container">
       {showSelectedTextContext ? (
