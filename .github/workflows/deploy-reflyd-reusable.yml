@@ -1,18 +1,22 @@
-name: Reflyd Deploy
+name: Deploy Reflyd
 
 on:
-  push:
-    branches:
-      - main
-      - feat/drop-puppeteer
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      ecs-cluster:
+        required: true
+        type: string
+      ecs-service:
+        required: true
+        type: string
 
 env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: public.ecr.aws/g1y9i0k2/reflyd
   CONTAINER_NAME: reflyd
-  ECS_CLUSTER: Prod
-  ECS_SERVICE: default
 
 jobs:
   deploy:
@@ -31,7 +35,7 @@ jobs:
           SENTRY_ORG: refly-ai
           SENTRY_PROJECT: reflyd
         with:
-          environment: production
+          environment: ${{ inputs.environment }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -68,6 +72,6 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@3ad7feed6186d3b69bb6d87b9729470bf8f0215b
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
+          service: ${{ inputs.ecs-service }}
+          cluster: ${{ inputs.ecs-cluster }}
           wait-for-service-stability: true

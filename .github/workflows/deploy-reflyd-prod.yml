@@ -1,0 +1,21 @@
+name: Deploy Reflyd To Prod
+
+on:
+  push:
+    branches:
+      - release
+    paths:
+      - "reflyd/src/**"
+  workflow_dispatch:
+
+jobs:
+  deploy-staging:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to staging
+        uses: .github/actions/deploy-reflyd-reusable
+        with:
+          environment: staging
+          ecs-cluster: Prod
+          ecs-service: prod
