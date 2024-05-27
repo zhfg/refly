@@ -7,6 +7,13 @@ export interface Source {
     collectionId?: string
   }
   score: number
+  selections?: Selection[] // 基于此 link 进行部分内容操作
+}
+
+export interface Selection {
+  xPath: string
+  content: string
+  type: "text" | "table" | "link" | "image" | "video" | "audio"
 }
 
 export type RelatedQuestion = string

@@ -328,6 +328,18 @@
     .context-state-card-body {
       margin-top: 8px;
 
+      .context-state-action-list {
+        display: flex;
+        flex-direction: row;
+        margin-top: 12px;
+
+        .context-state-action-item {
+          &:not(:first-child) {
+            margin-left: 8px;
+          }
+        }
+      }
+
       .context-state-resource-item-tag {
         border-radius: 8px;
         background-color: transparent;

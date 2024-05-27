@@ -21,6 +21,9 @@ interface KnowledgeBaseState {
   hasMore: boolean
   isRequesting: boolean
 
+  // selection
+  currentSelectedText: string
+
   // 详情
   currentKnowledgeBase: null | CollectionDetail
   currentResource: null | ResourceDetail
@@ -48,15 +51,17 @@ interface KnowledgeBaseState {
   updateKbModalVisible: (kbModalVisible: boolean) => void
   updateSourceListModalVisible: (sourceListModalVisible: boolean) => void
   updateTempConvResources: (tempConvResources: ResourceDetail[]) => void
+  updateSelectedText: (selectedText: string) => void
   resetState: () => void
 }
 
 export const defaultState = {
   isSaveKnowledgeBaseModalVisible: false,
+  currentSelectedText: "",
   convModalVisible: false,
   kbModalVisible: false,
   sourceListModalVisible: false,
-  tempConvResources: [],
+  tempConvResources: [] as ResourceDetail[],
   actionSource: ActionSource.Conv,
   currentKnowledgeBase: null,
   currentResource: null,
@@ -104,6 +109,8 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
       set(state => ({ ...state, actionSource })),
     updateTempConvResources: (tempConvResources: ResourceDetail[]) =>
       set(state => ({ ...state, tempConvResources })),
+    updateSelectedText: (selectedText: string) =>
+      set(state => ({ ...state, currentSelectedText: selectedText })),
     resetState: () => set(state => ({ ...state, ...defaultState })),
   })),
 )

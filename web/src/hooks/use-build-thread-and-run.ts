@@ -30,6 +30,7 @@ import { OutputLocale } from "@/utils/i18n"
 import { useBuildTask } from "./use-build-task"
 import { safeParseJSON } from "@/utils/parse"
 import { useCopilotContextState } from "./use-copilot-context-state"
+import { useKnowledgeBaseStore } from "@/stores/knowledge-base"
 
 export const useBuildThreadAndRun = () => {
   const chatStore = useChatStore()
@@ -42,6 +43,7 @@ export const useBuildThreadAndRun = () => {
   const { buildTaskAndGenReponse } = useBuildTask()
   const { currentResource, currentKnowledgeBase } = useCopilotContextState()
   const [searchParams, setSearchParams] = useSearchParams()
+  const knowledgeBaseStore = useKnowledgeBaseStore()
 
   const jumpNewConvQuery = (convId: string) => {
     const newSearchParams = new URLSearchParams(searchParams)
@@ -222,6 +224,8 @@ export const useBuildThreadAndRun = () => {
     }
 
     const { searchTarget } = useSearchStateStore.getState()
+    const { currentSelectedText, currentResource } =
+      useKnowledgeBaseStore.getState()
     const { localSettings } = useUserStore.getState()
 
     // 创建新会话并跳转
@@ -251,7 +255,29 @@ export const useBuildThreadAndRun = () => {
         }))
       }
     } else if (searchTarget === SearchTarget.CurrentPage) {
-      resourceIds = [currentResource?.resourceId || ""]
+      // 如果有选中内容，直接使用选中的内容
+      if (currentSelectedText) {
+        selectedWebLink = [
+          {
+            pageContent: "",
+            metadata: {
+              title: currentResource?.title as string,
+              source: currentResource?.data?.url as string,
+            },
+            score: -1, // 手工构造
+            selections: [
+              {
+                type: "text",
+                xPath: "",
+                content: currentSelectedText || "",
+              },
+            ],
+          },
+        ]
+      } else {
+        // 否则选中当前资源
+        resourceIds = [currentResource?.resourceId || ""]
+      }
     } else if (searchTarget === SearchTarget.CurrentKnowledgeBase) {
       collectionIds = [currentKnowledgeBase?.collectionId || ""]
     }
@@ -268,12 +294,13 @@ export const useBuildThreadAndRun = () => {
       },
       locale: localSettings?.outputLocale || LOCALE.EN,
       convId: conv?.convId || "",
-      createConvParam: { ...conv },
+      ...(conv?.messages?.length > 0 ? {} : { createConvParam: { ...conv } }),
     })
     taskStore.setTask(task)
     // 开始提问
     buildTaskAndGenReponse(task as Task)
     chatStore.setNewQAText("")
+    knowledgeBaseStore.updateSelectedText("")
   }
 
   return {

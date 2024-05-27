@@ -51,9 +51,13 @@ export const useBuildTask = () => {
     })
 
     chatStore.setMessages(messages.concat(questionMsg))
-    scrollToBottom()
 
     handleGenResponse(task)
+
+    setTimeout(() => {
+      // 滑动到底部
+      scrollToBottom()
+    })
   }
 
   const buildShutdownTaskAndGenResponse = () => {

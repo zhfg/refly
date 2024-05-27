@@ -12,6 +12,7 @@ import getResourceDetail from "@/requests/getResourceDetail"
 import { ResourceDetail } from "@/types"
 import { useEffect, useState } from "react"
 import { safeParseURL } from "@/utils/url"
+import { useListenToSelection } from "@/hooks/use-listen-to-selection"
 
 export const KnowledgeBaseResourceDetail = () => {
   const [isFetching, setIsFetching] = useState(false)
@@ -44,6 +45,7 @@ export const KnowledgeBaseResourceDetail = () => {
     setIsFetching(false)
   }
 
+  useListenToSelection(`knowledge-base-resource-detail-container`)
   useEffect(() => {
     if (resId) {
       console.log("params resId", resId)

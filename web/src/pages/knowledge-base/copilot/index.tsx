@@ -57,8 +57,12 @@ export const AICopilot = () => {
   const [copilotBodyHeight, setCopilotBodyHeight] = useState(215 - 32)
   const userStore = useUserStore()
   const knowledgeBaseStore = useKnowledgeBaseStore()
-  const { contextCardHeight, showContextCard, showContextState } =
-    useCopilotContextState()
+  const {
+    contextCardHeight,
+    showContextCard,
+    showContextState,
+    showSelectedTextContext,
+  } = useCopilotContextState()
   const chatStore = useChatStore()
   const conversationStore = useConversationStore()
   const [isFetching, setIsFetching] = useState(false)
@@ -244,7 +248,9 @@ export const AICopilot = () => {
               />
             </div>
             <div className="chat-input-assist-action">
-              <SearchTargetSelector classNames="chat-input-assist-action-item" />
+              {!showSelectedTextContext ? (
+                <SearchTargetSelector classNames="chat-input-assist-action-item" />
+              ) : null}
 
               <OutputLocaleList>
                 <Button

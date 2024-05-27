@@ -113,9 +113,9 @@ export const SearchTargetSelector = (props: { classNames: string }) => {
     }
   }
 
-  useEffect(() => {
-    searchStateStore.setSearchTarget(SearchTarget.All)
-  }, [])
+  // useEffect(() => {
+  //   searchStateStore.setSearchTarget(SearchTarget.All)
+  // }, [])
 
   return (
     <Dropdown droplist={searchTargetDropList} trigger="hover" position="bottom">
