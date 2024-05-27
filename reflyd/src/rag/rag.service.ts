@@ -2,28 +2,28 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import _ from 'lodash';
 import avro from 'avsc';
+import { LRUCache } from 'lru-cache';
 import { Document } from '@langchain/core/documents';
 import { TokenTextSplitter } from 'langchain/text_splitter';
 import { OpenAIEmbeddings } from '@langchain/openai';
 
 import { tables } from 'turndown-plugin-gfm';
 import TurndownService from 'turndown';
-import { cleanMarkdownForLLM, tidyMarkdown } from '../utils/markdown';
+import { cleanMarkdownForIngest, tidyMarkdown } from '../utils/markdown';
 
 import { User } from '@prisma/client';
 import { MinioService } from '../common/minio.service';
-import { PageSnapshot, PuppeteerService, ScrappingOptions } from '../common/puppeteer.service';
 import {
   HybridSearchParam,
   ContentDataObj,
   ContentData,
   ContentType,
   ContentPayload,
+  ReaderResult,
+  DocMeta,
 } from './rag.dto';
-import { PageMeta } from '../types/weblink';
-import { normalizeURL } from '../utils/url';
-import { QdrantService } from 'src/common/qdrant.service';
-import { Condition, PointStruct } from 'src/common/qdrant.dto';
+import { QdrantService } from '../common/qdrant.service';
+import { Condition, PointStruct } from '../common/qdrant.dto';
 
 const READER_URL = 'https://r.jina.ai/';
 
@@ -62,6 +62,7 @@ export const PARSER_VERSION = '20240424';
 export class RAGService {
   private embeddings: OpenAIEmbeddings;
   private splitter: TokenTextSplitter;
+  private cache: LRUCache<string, ReaderResult>; // url -> reader result
   private logger = new Logger(RAGService.name);
 
   turnDownPlugins = [tables];
@@ -70,7 +71,6 @@ export class RAGService {
     private config: ConfigService,
     private minio: MinioService,
     private qdrant: QdrantService,
-    private puppeteer: PuppeteerService,
   ) {
     this.embeddings = new OpenAIEmbeddings({
       modelName: 'text-embedding-3-large',
@@ -84,6 +84,7 @@ export class RAGService {
       chunkSize: 800,
       chunkOverlap: 400,
     });
+    this.cache = new LRUCache({ max: 1000 });
   }
 
   getTurndown(mode: FormatMode) {
@@ -153,48 +154,50 @@ export class RAGService {
     return tidyMarkdown(contentText || '').trim();
   }
 
-  async crawl(url: string, mode = 'markdown') {
-    const urlToCrawl = new URL(normalizeURL(url.trim()));
-    if (urlToCrawl.protocol !== 'http:' && urlToCrawl.protocol !== 'https:') {
-      throw new Error(`Invalid protocol ${urlToCrawl.protocol}`);
+  async crawlFromRemoteReader(url: string): Promise<ReaderResult> {
+    if (this.cache.get(url)) {
+      this.logger.log(`in-mem crawl cache hit: ${url}`);
+      return this.cache.get(url) as ReaderResult;
     }
 
-    const customMode = mode || 'default';
+    this.logger.log(
+      `Authorization: ${
+        this.config.get('rag.jinaToken') ? `Bearer ${this.config.get('rag.jinaToken')}` : undefined
+      }`,
+    );
 
-    const crawlOpts: ScrappingOptions = {
-      favorScreenshot: customMode === 'screenshot',
-    };
-
-    let lastScrapped: PageSnapshot | undefined;
-
-    for await (const scrapped of this.puppeteer.scrap(urlToCrawl, crawlOpts)) {
-      lastScrapped = scrapped;
-      if (!scrapped?.parsed?.content || !scrapped.title?.trim()) {
-        continue;
-      }
-
-      return scrapped;
-    }
-
-    if (!lastScrapped) {
-      throw new Error(`No content available for URL ${urlToCrawl}`);
-    }
-
-    return lastScrapped;
-  }
-
-  async crawlFromRemoteReader(url: string): Promise<Document<PageMeta>> {
     // TODO: error handling
-    const response = await fetch(READER_URL + url);
-    const text = await response.text();
-    return { pageContent: text, metadata: { source: url, title: '' } }; // TODO: page title
+    const response = await fetch(READER_URL + url, {
+      method: 'GET',
+      headers: {
+        Authorization: this.config.get('rag.jinaToken')
+          ? `Bearer ${this.config.get('rag.jinaToken')}`
+          : undefined,
+        Accept: 'application/json',
+      },
+    });
+    if (response.status !== 200) {
+      throw new Error(
+        `call remote reader failed: ${response.status} ${response.statusText} ${response.text}`,
+      );
+    }
+
+    const data = await response.json();
+    if (!data) {
+      throw new Error(`invalid data from remote reader: ${response.text}`);
+    }
+
+    this.logger.log(`crawl from reader success: ${url}`);
+    this.cache.set(url, data);
+
+    return data;
   }
 
   async chunkText(text: string) {
-    return await this.splitter.splitText(cleanMarkdownForLLM(text));
+    return await this.splitter.splitText(cleanMarkdownForIngest(text));
   }
 
-  async indexContent(doc: Document<PageMeta>): Promise<ContentDataObj[]> {
+  async indexContent(doc: Document<DocMeta>): Promise<ContentDataObj[]> {
     const { pageContent, metadata } = doc;
 
     const chunks = await this.chunkText(pageContent);
@@ -204,7 +207,7 @@ export class RAGService {
     for (let i = 0; i < chunks.length; i++) {
       dataObjs.push({
         id: '', // leave it empty for future update
-        url: metadata.source,
+        url: metadata.url,
         type: ContentType.WEBLINK,
         title: metadata.title,
         content: chunks[i],

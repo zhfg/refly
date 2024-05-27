@@ -290,6 +290,8 @@ model Resource {
   userId       Int          @map("user_id")
   /// 字数
   wordCount    Int          @default(0) @map("word_count")
+  /// 对象存储 key
+  storageKey   String       @default("") @map("storage_key")
   /// 是否公开
   isPublic     Boolean      @default(false) @map("is_public")
   /// 索引状态

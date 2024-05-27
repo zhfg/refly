@@ -45,6 +45,7 @@ import { KnowledgeModule } from './knowledge/knowledge.module';
         redis: {
           host: configService.get('redis.host'),
           port: configService.get('redis.port'),
+          password: configService.get('redis.password') || undefined,
         },
       }),
       inject: [ConfigService],

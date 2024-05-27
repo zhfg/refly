@@ -3,6 +3,7 @@ export default () => ({
   redis: {
     host: process.env.REDIS_HOST || 'localhost',
     port: parseInt(process.env.REDIS_PORT) || 6379,
+    password: process.env.REDIS_PASSWORD || '',
   },
   minio: {
     endpoint: process.env.MINIO_ENDPOINT || 'localhost',
@@ -42,5 +43,8 @@ export default () => ({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'test',
       callbackUrl: process.env.GOOGLE_CALLBACK_URL || 'test',
     },
+  },
+  rag: {
+    jinaToken: process.env.JINA_TOKEN,
   },
 });
