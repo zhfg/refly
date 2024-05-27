@@ -4,10 +4,12 @@ import type {} from "@redux-devtools/extension"
 
 // 搜索的内容来源
 export enum SearchTarget {
-  All = "all",
-  CurrentPage = "currentPage",
-  SelectedPages = "selectedPages",
-  SearchEnhance = "searchEnhance",
+  None = "none", // 无上下文
+  All = "all", // 整个 Workspace
+  CurrentPage = "currentPage", // 当前 resource
+  SelectedPages = "selectedPages", // 选中的多个资源
+  CurrentKnowledgeBase = "currentKnowledgeBase", // 选中知识库 -> 后续应该内聚到知识库中，通过关联、接力等能力，随着时间推移变得更好
+  SearchEnhance = "searchEnhance", // 搜索增强
 }
 
 export interface SearchState {

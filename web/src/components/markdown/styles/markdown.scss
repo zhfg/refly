@@ -1135,3 +1135,15 @@
 .markdown-body ::-webkit-calendar-picker-indicator {
   filter: invert(50%);
 }
+
+.markdown-body span {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  word-break: break-all;
+  width: auto;
+}
+
+.markdown-body .katex span {
+  width: auto !important;
+}

@@ -25,7 +25,7 @@ export const Header = (props: HeaderProps) => {
             {t("contentDetail.breadcrumb.homePage")}
           </BreadcrumbItem>
           <BreadcrumbItem
-            href={`/digest/${digest?.id}`}
+            href={`/digest/${digest?.cid}`}
             className="breadcrum-description">
             {digest?.title}
           </BreadcrumbItem>
@@ -45,7 +45,7 @@ export const Header = (props: HeaderProps) => {
           type="primary"
           icon={<IconShareExternal />}
           onClick={() => {
-            copyToClipboard(`${window.origin}/content/${digest?.id}`)
+            copyToClipboard(`${window.origin}/content/${digest?.cid}`)
             message.success(t("contentDetail.item.copyNotify"))
           }}
           style={{ borderRadius: 4 }}>

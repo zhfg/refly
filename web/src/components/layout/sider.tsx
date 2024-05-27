@@ -1,4 +1,4 @@
-import { Avatar, Divider, Layout, Menu } from "@arco-design/web-react"
+import { Avatar, Divider, Layout, Menu, Tag } from "@arco-design/web-react"
 import { useLocation, useNavigate } from "react-router-dom"
 import {
   IconHome,
@@ -7,6 +7,8 @@ import {
   IconBook,
   IconTwitter,
   IconLanguage,
+  IconThunderbolt,
+  IconFire,
 } from "@arco-design/web-react/icon"
 import { openGetStartDocument } from "../../utils"
 // 静态资源
@@ -33,7 +35,7 @@ const getNavSelectedKeys = (pathname = "") => {
     return "ThreadLibrary"
   }
 
-  return "Home"
+  return "Workspace"
 }
 
 export const SiderLayout = () => {
@@ -48,13 +50,13 @@ export const SiderLayout = () => {
   const storageUserProfile = safeParseJSON(
     localStorage.getItem("refly-user-profile"),
   )
-  const notShowLoginBtn = storageUserProfile?.id || userStore?.userProfile?.id
+  const notShowLoginBtn = storageUserProfile?.uid || userStore?.userProfile?.uid
   console.log("storageUserProfile", storageUserProfile, userStore?.userProfile)
 
   const selectedKey = getNavSelectedKeys(location.pathname)
   const handleNavClick = (itemKey: string) => {
     switch (itemKey) {
-      case "Home": {
+      case "Workspace": {
         if (!notShowLoginBtn) {
           userStore.setLoginModalVisible(true)
         } else {
@@ -63,11 +65,11 @@ export const SiderLayout = () => {
         break
       }
 
-      case "ThreadLibrary": {
+      case "Explore": {
         if (!notShowLoginBtn) {
           userStore.setLoginModalVisible(true)
         } else {
-          navigate(`/thread`)
+          navigate(`/explore`)
         }
         break
       }
@@ -145,7 +147,10 @@ export const SiderLayout = () => {
           }}>
           <div className="logo" onClick={() => navigate("/")}>
             <img src={Logo} alt="Refly" />
-            <span>Refly</span>
+            <span>Refly </span>
+            <Tag color="#00968F" className="logo-beta" size="small">
+              Beta
+            </Tag>
           </div>
         </div>
         <SearchQuickOpenBtn />
@@ -155,11 +160,19 @@ export const SiderLayout = () => {
             backgroundColor: "transparent",
             borderRight: "none",
           }}
+          defaultSelectedKeys={["Workspace"]}
           className="sider-menu-nav"
           selectedKeys={[selectedKey]}
           onClickMenuItem={handleNavClick}>
           <div className="sider-header">
-            <MenuItem key="Home" className="custom-menu-item">
+            {/* <MenuItem key="News" className="custom-menu-item">
+              <IconThunderbolt style={{ fontSize: 20 }} />
+              <span className="sider-menu-title">
+                {t("loggedHomePage.siderMenu.news")}
+              </span>
+            </MenuItem> */}
+            <Divider />
+            <MenuItem key="Workspace" className="custom-menu-item">
               <IconHome style={{ fontSize: 20 }} />
               <span className="sider-menu-title">
                 {t("loggedHomePage.siderMenu.homePage")}
@@ -170,12 +183,12 @@ export const SiderLayout = () => {
               <IconHistory style={{ fontSize: 20 }} />
               <span className="sider-menu-title">回忆</span>
             </MenuItem> */}
-            <MenuItem key="ThreadLibrary" className="custom-menu-item">
-              <IconBook style={{ fontSize: 20 }} />
+            {/* <MenuItem key="Explore" className="custom-menu-item">
+              <IconFire style={{ fontSize: 20 }} />
               <span className="sider-menu-title">
-                {t("loggedHomePage.siderMenu.threadLibrary")}
+                {t("loggedHomePage.siderMenu.explore")}
               </span>
-            </MenuItem>
+            </MenuItem> */}
           </div>
           <div className="sider-footer">
             <MenuItem key="GetHelp" className="custom-menu-item">
@@ -184,7 +197,7 @@ export const SiderLayout = () => {
                 {t("loggedHomePage.siderMenu.getHelp")}
               </span>
             </MenuItem>
-            {!!userStore.userProfile?.id && (
+            {!!userStore.userProfile?.uid && (
               <>
                 <Divider style={{ margin: "8px 0" }} />
                 <MenuItem

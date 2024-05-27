@@ -1,0 +1,88 @@
+.today-header-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 0 auto;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.16);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.today-menu {
+  display: flex;
+  flex-direction: row;
+  min-width: 240px;
+
+  .arco-radio {
+    margin-right: 7px;
+  }
+
+  button {
+    height: 30px;
+    border-radius: 15px;
+  }
+
+  .today-menu-item {
+    border-color: #4b587c;
+    color: #4b587c;
+
+    &:hover {
+      background-color: #000000 !important;
+      border-color: #000000 !important;
+      color: #fff !important;
+    }
+  }
+
+  .today-menu-item-checked {
+    background-color: #000000;
+    color: #fff;
+  }
+}
+
+.trending-topic-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+
+  .custom-skeleton-node {
+    .arco-skeleton-text-row {
+      width: 130px;
+      height: 30px;
+      border-radius: 15px;
+      margin-right: 8px;
+    }
+  }
+
+  .trending-topic-title {
+    min-width: 70px;
+  }
+
+  .trending-topics {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    flex-wrap: wrap;
+    overflow-x: scroll;
+  }
+
+  .trending-topics-language-en {
+    width: calc(100% - 140px);
+  }
+
+  .trending-topic-item {
+    margin-right: 8px;
+    margin-top: 8px;
+
+    button {
+      width: auto;
+      font-size: 14px;
+      padding: 0 12px;
+      height: 36px;
+      border-radius: 8px;
+      background: #fcfcf9;
+      color: rgba(0, 0, 0, 0.8);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+  }
+}

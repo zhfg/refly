@@ -1,0 +1,33 @@
+.knowledge-base-directory-container {
+  .knowledge-base-directory-intro {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 12px 0;
+
+    .intro-body {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .intro-content {
+      margin-left: 8px;
+    }
+
+    .intro-title {
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.8);
+    }
+
+    .intro-meta {
+      font-size: 10px;
+      color: rgba(0, 0, 0, 0.8);
+      margin-top: 4px;
+    }
+  }
+
+  .knowledge-base-directory-list-container {
+    height: calc(100vh - 125px);
+  }
+}

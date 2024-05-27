@@ -1,9 +1,8 @@
 import { Button, Spin } from "@arco-design/web-react"
 import React from "react"
 
-import type { Message, RecommendQuestionItem } from "~/types"
-
-import { Markdown } from "../markdown"
+import type { Message, ServerMessage, RecommendQuestionItem } from "~/types"
+import { Markdown } from "~/components/markdown"
 
 export const ExampleQuestionItem = (msg: RecommendQuestionItem) => (
   <>
@@ -53,8 +52,26 @@ export const UnSupportedMessage = (msg: Message) => (
   </div>
 )
 
-const MessageList = () => {
-  return <div>hello</div>
+export const HumanMessage = (props: { message: Partial<ServerMessage> }) => {
+  const { message } = props
+  return (
+    <div className="ai-copilot-message human-message-container">
+      <div className="human-message">
+        <Markdown content={message?.content as string} />
+      </div>
+    </div>
+  )
 }
 
-export default MessageList
+export const AssistantMessage = (props: {
+  message: Partial<ServerMessage>
+}) => {
+  const { message } = props
+  return (
+    <div className="ai-copilot-message assistant-message-container">
+      <div className="assistant-message">
+        <Markdown content={message?.content as string} />
+      </div>
+    </div>
+  )
+}

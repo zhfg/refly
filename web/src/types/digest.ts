@@ -1,5 +1,3 @@
-import type { Source } from "./"
-
 export interface MetaRecord {
   // 分类key，例如 startup_product_research
   key: string
@@ -40,7 +38,7 @@ export interface ContentMeta {
 }
 
 export interface Digest {
-  id: string
+  cid: string
   contentId: string // 代表此 digest 或 feed 所属于的 AIGCContent
   title: string
   abstract: string
@@ -49,7 +47,7 @@ export interface Digest {
   sources: string // JSON string 的形式，Source[]
   weblinks: { url: string; pageMeta: string; contentMeta: string }[]
   inputs: {
-    id: string
+    cid: string
     title: string
     abstract: string
     content: string

@@ -25,7 +25,7 @@ export const Header = (props: HeaderProps) => {
             {t("threadDetail.breadcrumb.threadLibrary")}
           </BreadcrumbItem>
           <BreadcrumbItem
-            href={`/thread/${thread?.id}`}
+            href={`/thread/${thread?.convId}`}
             className="breadcrum-description">
             {thread?.title}
           </BreadcrumbItem>

@@ -23,7 +23,7 @@ import { useNavigate } from "react-router-dom"
 // request
 import createNewConversation from "@/requests/createNewConversation"
 import { IconLanguage, IconSend } from "@arco-design/web-react/icon"
-import { SearchTargetSelector } from "../dashboard/home-search-target-selector"
+import { SearchTargetSelector } from "@/components/search-target-selector"
 // styles
 import "./index.scss"
 import { useSiderStore } from "@/stores/sider"
@@ -32,7 +32,7 @@ import { useUserStore } from "@/stores/user"
 import { useTranslation } from "react-i18next"
 import { OutputLocaleList } from "../output-locale-list"
 import { localeToLanguageName } from "@/utils/i18n"
-import { IconTip } from "../dashboard/icon-tip"
+import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run"
 
 const TextArea = Input.TextArea
 
@@ -41,98 +41,22 @@ export const SearchBox = () => {
   const inputRef = useRef<RefTextAreaType>(null)
   // stores
   const chatStore = useChatStore()
-  const conversationStore = useConversationStore()
-  const taskStore = useTaskStore()
   const siderStore = useSiderStore()
   const quickSearchStateStore = useQuickSearchStateStore()
+  const searchTargetStore = useSearchStateStore()
   const userStore = useUserStore()
+  const { emptyConvRunTask } = useBuildThreadAndRun()
   // hooks
-  const { resetState } = useResetState()
-  const navigate = useNavigate()
   const [isFocused, setIsFocused] = useState(false)
 
   const { t, i18n } = useTranslation()
   const uiLocale = i18n?.languages?.[0] as LOCALE
   const outputLocale = userStore?.localSettings?.outputLocale
 
-  const handleCreateNewConversation = async (task: Task) => {
-    /**
-     * 1. 创建新 thread，设置状态
-     * 2. 跳转到 thread 界面，进行第一个回复，展示 问题、sources、答案
-     */
-    const { localSettings } = useUserStore.getState()
-    const question = chatStore.newQAText
-    const newConversationPayload = buildConversation()
-
-    // 创建新会话
-    const res = await createNewConversation({
-      body: { ...newConversationPayload, locale: localSettings.outputLocale },
-    })
-
-    if (!res?.success) {
-      message.error({
-        content: t("loggedHomePage.homePage.status.createFailed"),
-      })
-      return
-    }
-
-    // 清空之前的状态
-    resetState()
-
-    console.log("createNewConversation", res)
-    conversationStore.setCurrentConversation(res?.data as Thread)
-
-    // 设置当前的任务类型及会话 id
-    task.data = {
-      ...(task?.data || {}),
-      convId: res?.data?.convId,
-    }
-    taskStore.setTask(task)
-
-    // 更新新的 newQAText，for 新会话跳转使用
-    chatStore.setNewQAText(question)
-    chatStore.setIsNewConversation(true)
-    navigate(`/thread/${res?.data?.convId}`)
-  }
-
-  const runTask = () => {
-    const question = chatStore.newQAText
-    const { selectedRow } = useWeblinkStore.getState()
-    const { searchTarget } = useSearchStateStore.getState()
-    const { localSettings } = useUserStore.getState()
-
-    let selectedWebLink: Source[] = []
-
-    if (searchTarget === SearchTarget.SelectedPages) {
-      selectedWebLink = selectedRow?.map(item => ({
-        pageContent: "",
-        metadata: {
-          title: item?.content?.originPageTitle || "",
-          source: item?.content?.originPageUrl || "",
-        },
-        score: -1, // 手工构造
-      }))
-    }
-
-    const task = buildTask({
-      taskType:
-        searchTarget === SearchTarget.SearchEnhance
-          ? TASK_TYPE.SEARCH_ENHANCE_ASK
-          : TASK_TYPE.CHAT,
-      data: {
-        question,
-        filter: { weblinkList: selectedWebLink },
-      },
-      locale: localSettings?.outputLocale,
-    })
-
-    // 创建新会话并跳转
-    handleCreateNewConversation(task)
-  }
-
   const handleSendMessage = () => {
+    const question = chatStore?.newQAText || ""
     quickSearchStateStore.setVisible(false)
-    runTask()
+    emptyConvRunTask(question, true)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -173,6 +97,9 @@ export const SearchBox = () => {
   useEffect(() => {
     if (inputRef.current && siderStore.showSider) inputRef?.current?.focus?.()
   }, [siderStore.showSider])
+  useEffect(() => {
+    searchTargetStore.setSearchTarget(SearchTarget.All)
+  }, [])
 
   return (
     <div
@@ -207,7 +134,10 @@ export const SearchBox = () => {
           <div>
             <div className="toolbar">
               <Space>
-                <SearchTargetSelector />
+                <SearchTargetSelector
+                  classNames="search-assist-btn"
+                  selectorList={[SearchTarget.All, SearchTarget.SearchEnhance]}
+                />
                 <OutputLocaleList>
                   <Button
                     type="text"

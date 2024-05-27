@@ -19,7 +19,7 @@ export const Header = (props: HeaderProps) => {
         <Breadcrumb>
           <BreadcrumbItem href="/feed">探索</BreadcrumbItem>
           <BreadcrumbItem
-            href={`/feed/${digest?.id}`}
+            href={`/feed/${digest?.cid}`}
             className="breadcrum-description">
             {digest?.title}
           </BreadcrumbItem>
@@ -37,7 +37,7 @@ export const Header = (props: HeaderProps) => {
           type="primary"
           icon={<IconShareExternal />}
           onClick={() => {
-            copyToClipboard(`${window.origin}/content/${digest?.id}`)
+            copyToClipboard(`${window.origin}/content/${digest?.cid}`)
             message.success("分享链接已复制到剪切板")
           }}
           style={{ borderRadius: 4 }}>

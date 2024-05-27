@@ -4,7 +4,6 @@ import type { IndexStatus, WebLinkItem } from "~components/weblink-list/types"
 import { useSiderStore } from "~stores/sider"
 import { useUserStore } from "~stores/user"
 import { useWeblinkStore } from "~stores/weblink"
-import { delay } from "~utils/delay"
 import { buildCurrentWeblink } from "~utils/weblink"
 
 export const usePollingPingCurrentWeblink = () => {
@@ -19,7 +18,7 @@ export const usePollingPingCurrentWeblink = () => {
     const { currentWeblink } = useWeblinkStore.getState()
     const { showSider } = useSiderStore.getState()
 
-    const isLogged = !!userProfile?.id
+    const isLogged = !!userProfile?.uid
     const isCurrentWeblinkStatusNotComplete = ["init", "processing"].includes(
       currentWeblink?.parseStatus,
     )
@@ -35,7 +34,7 @@ export const usePollingPingCurrentWeblink = () => {
     return false
   }
 
-  const isLogged = !!userStore?.userProfile?.id
+  const isLogged = !!userStore?.userProfile?.uid
   const isValidStartPing = checkValidStartPing()
   const showSider = siderStore?.showSider
   console.log("isLogged", isLogged, isValidStartPing)

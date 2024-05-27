@@ -13,11 +13,13 @@ import { useUserStore } from "~stores/user"
 import { buildQuickActionTask } from "~utils/task"
 import { buildConversation } from "~utils/conversation"
 import { useBuildTask } from "./use-build-task"
+import { useKnowledgeBaseStore } from "~stores/knowledge-base"
 
 export const useQuickActionHandler = () => {
   const chatStore = useChatStore()
   const { uploadingStatus, handleUploadWebsite } = useStoreWeblink()
   const { searchTarget } = useSearchStateStore()
+  const knowledgeBaseStore = useKnowledgeBaseStore()
   const { buildTaskAndGenReponse } = useBuildTask()
   const { runQuickActionTask } = useBuildThreadAndRun()
   const { t } = useTranslation()
@@ -114,13 +116,14 @@ export const useQuickActionHandler = () => {
   const explain = async () => {}
 
   const storeForLater = async () => {
-    if (searchTarget === SearchTarget.CurrentPage) {
-      const res = await handleUploadWebsite(window.location.href, true)
+    knowledgeBaseStore.updateIsSaveKnowledgeBaseModalVisible(true)
+    // if (searchTarget === SearchTarget.CurrentPage) {
+    //   const res = await handleUploadWebsite(window.location.href, true)
 
-      if (!res?.success) {
-        return
-      }
-    }
+    //   if (!res?.success) {
+    //     return
+    //   }
+    // }
   }
 
   return {

@@ -12,15 +12,14 @@ import {
 import { genUniqueId } from "./index"
 import { OutputLocale } from "./i18n"
 
-export type BuildTask = {
-  taskType: TASK_TYPE
-  language?: LANGUAGE
-  locale?: OutputLocale
-  data: CHAT | QUICK_ACTION_TASK_PAYLOAD
-}
-
-export const buildTask = (payload: BuildTask): Task => {
-  const { taskType, language = LANGUAGE.AUTO, locale, data = {} } = payload
+export const buildTask = (payload: Task): Task => {
+  const {
+    taskType,
+    language = LANGUAGE.AUTO,
+    locale,
+    data = {},
+    createConvParam = {},
+  } = payload
 
   console.log("now task locale", locale)
 
@@ -29,37 +28,8 @@ export const buildTask = (payload: BuildTask): Task => {
     language,
     locale,
     data: data,
-  }
-
-  return task
-}
-
-export const buildChatTask = (
-  data: any,
-  locale: OutputLocale = LOCALE.EN,
-): Task => {
-  console.log("now task locale", locale)
-  const task: Task = {
-    taskType: TASK_TYPE.CHAT,
-    language: LANGUAGE.AUTO,
-    locale,
-    data,
-  }
-
-  return task
-}
-
-export const buildQuickActionTask = (
-  data: any,
-  locale: OutputLocale = LOCALE.EN,
-): Task => {
-  console.log("now task locale", locale)
-
-  const task: Task = {
-    taskType: TASK_TYPE.QUICK_ACTION,
-    language: LANGUAGE.AUTO,
-    locale,
-    data,
+    convId: payload?.convId,
+    createConvParam,
   }
 
   return task

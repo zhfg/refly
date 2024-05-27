@@ -11,6 +11,7 @@ import { retryify } from "~utils/retry"
 import type { WebLinkItem } from "~components/weblink-list/types"
 import { useTranslation } from "react-i18next"
 import type { ReturnType } from "~types/return-types"
+import type { WeblinkMeta } from "~types"
 
 export const useStoreWeblink = () => {
   // 网页索引状态
@@ -48,7 +49,30 @@ export const useStoreWeblink = () => {
       },
     })
 
-    return res
+    // 将通知逻辑也涵盖了
+    if (!res?.success) {
+      message.error(
+        t(
+          "translation:loggedHomePage.homePage.status.contentHandleFailedNotify",
+        ),
+      )
+    } else {
+      message.success(
+        t(
+          "translation:loggedHomePage.homePage.status.contentHandleSuccessNotify",
+        ),
+      )
+    }
+
+    return {
+      success: res?.success,
+      data: {
+        title: document?.title || "",
+        url: location.href,
+        linkId: res?.linkId || "",
+        storageKey: uploadRes?.data?.storageKey || "",
+      },
+    }
   }
 
   // TODO:
@@ -63,21 +87,7 @@ export const useStoreWeblink = () => {
         status: "warning",
       },
       onOk: async () => {
-        const res = await handleClientStore(url)
-
-        if (!res?.success) {
-          message.error(
-            t(
-              "translation:loggedHomePage.homePage.status.contentHandleFailedNotify",
-            ),
-          )
-        } else {
-          message.success(
-            t(
-              "translation:loggedHomePage.homePage.status.contentHandleSuccessNotify",
-            ),
-          )
-        }
+        await handleClientStore(url)
       },
     })
   }
@@ -254,6 +264,8 @@ export const useStoreWeblink = () => {
   return {
     uploadingStatus,
     handleUploadWebsite,
+    handleClientUploadHtml,
+    handleClientStore,
     retryUploadWebsite,
   }
 }

@@ -2,7 +2,6 @@ import React, { useEffect } from "react"
 import { Route, Routes, useMatch } from "react-router-dom"
 
 // 自定义组件
-import Dashboard from "@/components/dashboard"
 import { Thread } from "@/components/thread-item/thread"
 import { ThreadLibrary } from "@/components/thread-library"
 import { Settings } from "@/components/settings/index"
@@ -17,6 +16,9 @@ import { DigestArchive } from "@/pages/digest-timeline"
 
 // digest 详情
 import { DigestDetailPage } from "@/pages/digest-detail"
+// 页面
+import Workspace from "@/pages/workspace"
+import KnowledgeBase from "@/pages/knowledge-base/layout"
 
 // 这里用于分享之后的不需要鉴权的查看
 import { AIGCContentDetailPage } from "@/pages/aigc-content-detail"
@@ -44,7 +46,7 @@ export const AppRouter = (props: { layout?: any }) => {
   const storageUserProfile = safeParseJSON(
     localStorage.getItem("refly-user-profile"),
   )
-  const notShowLoginBtn = storageUserProfile?.id || userStore?.userProfile?.id
+  const notShowLoginBtn = storageUserProfile?.uid || userStore?.userProfile?.uid
 
   // 获取 locale
   const storageLocalSettings = safeParseJSON(
@@ -84,7 +86,8 @@ export const AppRouter = (props: { layout?: any }) => {
   return (
     <Layout>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<Workspace />} />
+        <Route path="/knowledge-base" element={<KnowledgeBase />} />
         <Route path="/login" element={<Login />} />
         {/* <Route path="/feed" element={<Feed />} /> */}
         <Route path="/digest" element={<DigestToday />} />

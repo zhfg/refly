@@ -5,7 +5,7 @@ import { useConversationStore } from "@/stores/conversation"
 import { buildConversation } from "@/utils/conversation"
 import { useResetState } from "./use-reset-state"
 import { useTaskStore } from "@/stores/task"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom"
 
 // 类型
 import {
@@ -13,23 +13,64 @@ import {
   type QUICK_ACTION_TASK_PAYLOAD,
   type Task,
   type Source,
-  Thread,
+  TASK_TYPE,
+  Conversation,
+  LOCALE,
+  Message,
+  MessageType,
 } from "@/types"
 import { SearchTarget, useSearchStateStore } from "@/stores/search-state"
-import { buildChatTask, buildQuickActionTask } from "@/utils/task"
+import { buildTask } from "@/utils/task"
 import { useWeblinkStore } from "@/stores/weblink"
 // request
 import createNewConversation from "@/requests/createNewConversation"
 import { useUserStore } from "@/stores/user"
 import { useTranslation } from "react-i18next"
+import { OutputLocale } from "@/utils/i18n"
+import { useBuildTask } from "./use-build-task"
+import { safeParseJSON } from "@/utils/parse"
+import { useCopilotContextState } from "./use-copilot-context-state"
+import { useKnowledgeBaseStore } from "@/stores/knowledge-base"
 
 export const useBuildThreadAndRun = () => {
   const chatStore = useChatStore()
   const conversationStore = useConversationStore()
   const { resetState } = useResetState()
   const taskStore = useTaskStore()
+  const location = useLocation()
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const { buildTaskAndGenReponse } = useBuildTask()
+  const { currentResource, currentKnowledgeBase } = useCopilotContextState()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const knowledgeBaseStore = useKnowledgeBaseStore()
+
+  const jumpNewConvQuery = (convId: string) => {
+    const newSearchParams = new URLSearchParams(searchParams)
+    newSearchParams.set("convId", convId)
+    setSearchParams(newSearchParams)
+    navigate(`/knowledge-base?${newSearchParams.toString()}`)
+  }
+
+  const jumpNewKnowledgeBase = (kbId: string) => {
+    const newSearchParams = new URLSearchParams(searchParams)
+    newSearchParams.set("kbId", kbId)
+    newSearchParams.delete("resId")
+    setSearchParams(newSearchParams)
+    navigate(`/knowledge-base?${newSearchParams.toString()}`)
+  }
+
+  const emptyConvRunTask = (question: string, forceNewConv?: boolean) => {
+    // 首先情况所有状态
+    resetState()
+
+    const newConv = ensureConversationExist(forceNewConv)
+    conversationStore.setCurrentConversation(newConv)
+    chatStore.setIsNewConversation(true)
+    chatStore.setNewQAText(question)
+
+    jumpNewConvQuery(newConv?.convId)
+  }
 
   const handleCreateNewConversation = async (task: Task) => {
     /**
@@ -53,7 +94,7 @@ export const useBuildThreadAndRun = () => {
     }
 
     console.log("createNewConversation", res)
-    conversationStore.setCurrentConversation(res?.data as Thread)
+    conversationStore.setCurrentConversation(res?.data as Conversation)
 
     // 清空之前的状态
     resetState()
@@ -71,9 +112,33 @@ export const useBuildThreadAndRun = () => {
     navigate(`/thread/${res?.data?.convId}`)
   }
 
-  const runChatTask = () => {
+  const ensureConversationExist = (forceNewConv = false) => {
+    const { currentConversation } = useConversationStore.getState()
     const { localSettings } = useUserStore.getState()
-    const question = chatStore.newQAText
+
+    if (!currentConversation?.convId || forceNewConv) {
+      const newConv = buildConversation({
+        locale: localSettings?.outputLocale as OutputLocale,
+      })
+      conversationStore.setCurrentConversation(newConv)
+
+      return newConv
+    }
+
+    return currentConversation
+  }
+
+  const runChatTask = (comingQuestion?: string) => {
+    // support ask follow up question
+    let question = ""
+    if (typeof comingQuestion === "string" && comingQuestion) {
+      question = comingQuestion
+    } else {
+      const { newQAText } = useChatStore.getState()
+      question = newQAText
+    }
+
+    const { localSettings } = useUserStore.getState()
     const { selectedRow } = useWeblinkStore.getState()
     const { searchTarget } = useSearchStateStore.getState()
 
@@ -101,13 +166,16 @@ export const useBuildThreadAndRun = () => {
       }))
     }
 
-    const task = buildChatTask(
-      {
+    const conv = ensureConversationExist()
+    const task = buildTask({
+      taskType: TASK_TYPE.CHAT,
+      convId: conv?.convId || "",
+      data: {
         question,
         filter: { weblinkList: selectedWebLink },
       },
-      localSettings.outputLocale,
-    )
+      locale: localSettings.outputLocale,
+    })
 
     // 创建新会话并跳转
     handleCreateNewConversation(task)
@@ -116,19 +184,136 @@ export const useBuildThreadAndRun = () => {
   const runQuickActionTask = async (payload: QUICK_ACTION_TASK_PAYLOAD) => {
     const { localSettings } = useUserStore.getState()
 
-    const task = buildQuickActionTask(
-      {
+    const conv = ensureConversationExist()
+    const task = buildTask({
+      taskType: TASK_TYPE.QUICK_ACTION,
+      convId: conv?.convId || "",
+      data: {
         question: t("hooks.useBuildThreadAndRun.task.summary.question"),
         actionType: QUICK_ACTION_TYPE.SUMMARY,
         filter: payload?.filter,
         actionPrompt: t("hooks.useBuildThreadAndRun.task.summary.actionPrompt"),
       },
-      localSettings?.outputLocale,
-    )
+      locale: localSettings.outputLocale,
+    })
 
     // 创建新会话并跳转
     handleCreateNewConversation(task)
   }
 
-  return { handleCreateNewConversation, runQuickActionTask, runChatTask }
+  const getSelectedWeblinkConfig = (
+    messages: Message[] = [],
+  ): {
+    searchTarget: SearchTarget
+    filter: Source[]
+  } => {
+    // 这里是获取第一个，早期简化策略，因为一开始设置之后，后续设置就保留
+    const lastHumanMessage = messages?.find(
+      item => item?.data?.type === MessageType.Human,
+    )
+
+    return safeParseJSON(lastHumanMessage?.data?.selectedWeblinkConfig)
+  }
+
+  const runTask = (comingQuestion?: string) => {
+    // support ask follow up question
+    let question = ""
+    const isFollowUpAsk = !!comingQuestion
+    if (typeof comingQuestion === "string" && comingQuestion) {
+      question = comingQuestion
+    } else {
+      const { newQAText } = useChatStore.getState()
+      question = newQAText
+    }
+
+    const { searchTarget } = useSearchStateStore.getState()
+    const { currentSelectedText, currentResource } =
+      useKnowledgeBaseStore.getState()
+    const { localSettings } = useUserStore.getState()
+
+    // 创建新会话并跳转
+    const conv = ensureConversationExist()
+    const { messages } = useChatStore.getState()
+
+    let selectedWebLink: Source[] = []
+    let resourceIds: string[] = []
+    let collectionIds: string[] = []
+
+    if (searchTarget === SearchTarget.SelectedPages) {
+      if (isFollowUpAsk) {
+        const selectedWeblinkConfig = getSelectedWeblinkConfig(messages)
+        // 选中多个资源
+        if (selectedWeblinkConfig?.filter?.length > 0) {
+          selectedWebLink = selectedWeblinkConfig?.filter || {}
+        }
+      } else {
+        const { selectedRow } = useWeblinkStore.getState()
+        selectedWebLink = selectedRow?.map(item => ({
+          pageContent: "",
+          metadata: {
+            title: item?.content?.originPageTitle || "",
+            source: item?.content?.originPageUrl || "",
+          },
+          score: -1, // 手工构造
+        }))
+      }
+    } else if (searchTarget === SearchTarget.CurrentPage) {
+      // 如果有选中内容，直接使用选中的内容
+      if (currentSelectedText) {
+        selectedWebLink = [
+          {
+            pageContent: "",
+            metadata: {
+              title: currentResource?.title as string,
+              source: currentResource?.data?.url as string,
+            },
+            score: -1, // 手工构造
+            selections: [
+              {
+                type: "text",
+                xPath: "",
+                content: currentSelectedText || "",
+              },
+            ],
+          },
+        ]
+      } else {
+        // 否则选中当前资源
+        resourceIds = [currentResource?.resourceId || ""]
+      }
+    } else if (searchTarget === SearchTarget.CurrentKnowledgeBase) {
+      collectionIds = [currentKnowledgeBase?.collectionId || ""]
+    }
+
+    // 设置当前的任务类型及会话 id
+    const task = buildTask({
+      taskType:
+        searchTarget === SearchTarget.SearchEnhance
+          ? TASK_TYPE.SEARCH_ENHANCE_ASK
+          : TASK_TYPE.CHAT,
+      data: {
+        question,
+        filter: { weblinkList: selectedWebLink, resourceIds, collectionIds },
+      },
+      locale: localSettings?.outputLocale || LOCALE.EN,
+      convId: conv?.convId || "",
+      ...(conv?.messages?.length > 0 ? {} : { createConvParam: { ...conv } }),
+    })
+    taskStore.setTask(task)
+    // 开始提问
+    buildTaskAndGenReponse(task as Task)
+    chatStore.setNewQAText("")
+    knowledgeBaseStore.updateSelectedText("")
+  }
+
+  return {
+    handleCreateNewConversation,
+    runQuickActionTask,
+    runChatTask,
+    runTask,
+    emptyConvRunTask,
+    ensureConversationExist,
+    jumpNewConvQuery,
+    jumpNewKnowledgeBase,
+  }
 }

@@ -1,6 +1,10 @@
 {
   "language": "简体中文",
   "productName": "Refly",
+  "systemMaintenanceShutdown": {
+    "title": "尊敬的用户，您好！",
+    "content": "为了提供更加稳定和高效的服务，我们计划在北京时间 21:00 至 23:00 期间对系统进行例行维护。在此期间，虽然您仍可以访问我们的产品页面，但服务将暂时无法使用。我们对由此给您带来的任何不便深表歉意，并感谢您的理解和支持。"
+  },
   "tabMeta": {
     "landingPage": {
       "title": "知识，在此繁茂",
@@ -67,6 +71,17 @@
       "terms": "条款和条件"
     }
   },
+  "workspace": {
+    "leftPanel": {
+      "welcomeTitle": "你好， ",
+      "welcomeQuestion": "有什么可以帮助您的吗? ",
+      "guessTitle": "猜你想问",
+      "keyword": {
+        "title": "知识归类",
+        "seeMore": "查看更多分类"
+      }
+    }
+  },
   "loggedHomePage": {
     "newThreadText": "新会话",
     "homePage": {
@@ -119,7 +134,10 @@
         }
       },
       "searchScope": {
-        "title": "选择搜索范围",
+        "title": "选择问答搜索范围",
+        "none": "常识问答",
+        "currentPage": "当前选中页面",
+        "currentKnowledgeBase": "当前知识库",
         "all": "全部知识库",
         "history": "历史已阅读",
         "internet": "联网搜索"
@@ -130,7 +148,9 @@
       }
     },  
     "siderMenu": {
-      "homePage": "主页",
+      "homePage": "工作台",
+      "news": "新特性",
+      "explore": "探索",
       "threadLibrary": "会话库",
       "getHelp": "获得帮助",
       "download": "下载插件"
@@ -338,7 +358,7 @@
       "input": {
         "placeholder": "继续提问...",
         "searchScope": {
-          "title": "选择搜索范围",
+          "title": "选择问答搜索范围",
           "all": "全部知识库",
           "selected": "选中网页",
           "internet": "联网搜索"

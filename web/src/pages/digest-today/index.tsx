@@ -132,7 +132,6 @@ export const DigestToday = () => {
 
   return (
     <div className="today-container">
-      <DigestHeader tab="today" />
       <div className="today-feature-container">
         {/* <div className="today-block-header"> */}
         {/* <div className="header-title">今天浏览内容总结</div> */}
@@ -147,17 +146,17 @@ export const DigestToday = () => {
           bordered={false}
           pagination={false}
           offsetBottom={200}
-          header={
-            <p className="today-header-title">
-              {t("knowledgeLibrary.archive.title")}
-            </p>
-          }
+          // header={
+          //   <p className="today-header-title">
+          //     {t("knowledgeLibrary.archive.title")}
+          //   </p>
+          // }
           dataSource={digestStore?.today?.featureList || []}
           scrollLoading={scrollLoading}
           onReachBottom={currentPage => fetchData(currentPage)}
           render={(item: Digest) => (
             <List.Item
-              key={item?.id}
+              key={item?.cid}
               style={{
                 padding: "20px 0",
                 borderBottom: "1px solid var(--color-fill-3)",

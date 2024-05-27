@@ -30,6 +30,7 @@ import { SearchResultContext } from '../types/search';
 import { RAGService } from '../rag/rag.service';
 import { ContentPayload } from '../rag/rag.dto';
 import { RetrieveFilter } from 'src/conversation/conversation.dto';
+import { LOCALE } from 'src/types/locale';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
@@ -492,7 +493,7 @@ export class LlmService implements OnModuleInit {
       }
       return contexts.slice(0, REFERENCE_COUNT);
     } catch (e) {
-      this.logger.error(`Error encountered: ${JSON.stringify(jsonContent)}`);
+      this.logger.error(`onlineSearch error encountered: ${e}`);
       return [];
     }
   }

@@ -43,7 +43,7 @@ export const Thread = () => {
 
   const handleGetThreadMessages = async (threadId: string) => {
     const threadIdMap = threadStore?.threads?.find(
-      (item) => item?.id === threadId,
+      (item) => item?.convId === threadId,
     )
     // 异步操作
     const res = await sendToBackground({
@@ -150,7 +150,6 @@ export const Thread = () => {
         <ThreadItem
           sessions={sessions}
           selectedWeblinkConfig={selectedWeblinkConfig}
-          handleAskFollowing={handleAskFollowing}
         />
       )}
     </div>

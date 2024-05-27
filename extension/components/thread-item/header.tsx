@@ -36,7 +36,7 @@ export const Header = (props: ThreadHeaderProps) => {
   const homeStateStore = useHomeStateStore()
 
   const { t, i18n } = useTranslation()
-  const showBtn = !!userProfile?.id
+  const showBtn = !!userProfile?.uid
   const uiLocale = i18n?.languages?.[0] as LOCALE
 
   return (

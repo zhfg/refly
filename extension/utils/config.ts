@@ -23,6 +23,17 @@ export const appConfig = {
     pingWebLinkStatus: "/v1/weblink/ping",
     // 基于 serverless worker 进行文件上传处理
     uploadHtml: "/htmlUpload",
+    // knowledge
+    getKnowledgeBaseList: "/v1/knowledge/collection/list",
+    newKnowledgeBase: "/v1/knowledge/collection/new",
+    updateKnowledgeBase: "/v1/knowledge/collection/update",
+    deleteKnowledgeBase: "/v1/knowledge/collection/delete",
+    getKnowledgeBaseDetail: "/v1/knowledge/collection/detail",
+    getKnowledgeBaseResourceList: "/v1/knowledge/resource/list",
+    getResourceDetail: "/v1/knowledge/resource/detail",
+    newResource: "/v1/knowledge/resource/new",
+    deleteResource: "/v1/knowledge/resource/delete",
+    updateResource: "/v1/knowledge/resource/update",
   },
   domId: {},
   appInfo: {

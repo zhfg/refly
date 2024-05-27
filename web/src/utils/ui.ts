@@ -29,11 +29,16 @@ export const calcPopupPosition = (
 
 export const scrollToBottom = () => {
   setTimeout(() => {
-    const chatWrapperElem = document?.querySelector(".session-inner-container")
+    const chatWrapperElem = document.querySelector(
+      ".ai-copilot-message-container",
+    )
 
     if (chatWrapperElem) {
       const { scrollHeight, clientHeight } = chatWrapperElem
-      chatWrapperElem.scrollTop = scrollHeight - clientHeight
+      chatWrapperElem.scroll({
+        behavior: "smooth",
+        top: scrollHeight - clientHeight + 50,
+      })
     }
   })
 }

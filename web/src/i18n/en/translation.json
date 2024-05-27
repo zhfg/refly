@@ -1,6 +1,10 @@
 {
   "language": "English",
   "productName": "Refly",
+  "systemMaintenanceShutdown": {
+    "title": "Dear Valued Users,",
+    "content": "We are dedicated to enhancing the stability and efficiency of our services. To achieve this, we have scheduled a system maintenance that will take place from 21:00 to 23:00 Beijing Time. During this period, our services will be temporarily unavailable. For our users in Seattle, this maintenance corresponds to 05:00 to 07:00 AM local time, taking into account the current daylight saving time adjustments. We apologize for any inconvenience this may cause and appreciate your understanding and support."
+  },
   "tabMeta": {
     "landingPage": {
       "title": "Where knowledge thrives",
@@ -67,6 +71,17 @@
       "terms": "Terms of Service"
     }
   },
+  "workspace": {
+    "leftPanel": {
+      "welcomeTitle": "Hello, ",
+      "welcomeQuestion": "How can I help you today?",
+      "guessTitle": "Recommend Questions",
+      "keyword": {
+        "title": "Knowledge Category",
+        "seeMore": "See more categories"
+      }
+    }
+  },
   "loggedHomePage": {
     "newThreadText": "New Thread",
     "homePage": {
@@ -110,8 +125,11 @@
       },
       "searchScope": {
         "title": "Select Search Scope",
-        "all": "Whole Library",
-        "history": "History Read",
+        "none": "General Knowledge Q&A",
+        "currentPage": "Current Selected Page",
+        "currentKnowledgeBase": "Current Knowledge Base",
+        "all": "All Knowledge Bases",
+        "history": "History of Read Content",
         "internet": "Internet Search"
       },
       "seeKnowledgeLibrary": "View Knowledge Library",
@@ -120,8 +138,10 @@
       }
     },
     "siderMenu": {
-      "homePage": "Home",
+      "homePage": "Workspace",
+      "news": "What's new?",
       "threadLibrary": "Threads",
+      "explore": "Explore",
       "getHelp": "Get Help",
       "download": "Download Extension"
     }

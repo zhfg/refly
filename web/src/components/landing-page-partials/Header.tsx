@@ -26,7 +26,8 @@ function Header(props: { showLogin?: boolean }) {
   const storageUserProfile = safeParseJSON(
     localStorage.getItem("refly-user-profile"),
   )
-  const showDashboardBtn = storageUserProfile?.id || userStore?.userProfile?.id
+  const showDashboardBtn =
+    storageUserProfile?.uid || userStore?.userProfile?.uid
   console.log("storageUserProfile", storageUserProfile, userStore?.userProfile)
 
   // close the mobile menu on click outside

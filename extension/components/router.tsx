@@ -40,7 +40,7 @@ export const ContentRouter = () => {
   }, [locale])
 
   return (
-    <div>
+    <div style={{ height: "100%" }}>
       <Routing />
       {!isThreadItem && userStore.userProfile && (
         <div className="footer-nav-container">

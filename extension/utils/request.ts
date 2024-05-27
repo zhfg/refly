@@ -1,3 +1,8 @@
+import {
+  sendToBackground,
+  type MessagesMetadata,
+  type PlasmoMessaging,
+} from "@plasmohq/messaging"
 import { getCookie } from "./cookie"
 import { getServerOrigin } from "./url"
 import { getExtensionVersion } from "./version"
@@ -114,6 +119,15 @@ export async function request<T>(
   } catch (err: any) {
     return [new ApiErr(err.message), null]
   }
+}
+
+export async function extRequest<T>(
+  payload: PlasmoMessaging.Request<keyof MessagesMetadata, any>,
+  timeout: number = TIMEOUT,
+): Promise<[ApiErr | null, T | null, any?]> {
+  const res = await sendToBackground(payload)
+
+  return [null, res]
 }
 
 export const queryJoin = (url = "", query: QUERY | string) => {

@@ -27,7 +27,7 @@ export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
 
   const { t } = useTranslation()
 
-  const showBtn = !!userProfile?.id
+  const showBtn = !!userProfile?.uid
 
   return (
     <header>

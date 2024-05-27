@@ -2,10 +2,10 @@ import { appConfig } from "@/utils/config"
 import { request } from "@/utils/request"
 
 import type { HandlerRequest, HandlerResponse } from "@/types/request"
-import { Thread } from "@/types"
+import { Conversation, Thread } from "@/types"
 
 const handler = async (
-  req: HandlerRequest<Partial<Thread>>,
+  req: HandlerRequest<Partial<Conversation>>,
 ): Promise<HandlerResponse<Thread>> => {
   console.log(req.body)
 

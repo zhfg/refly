@@ -95,11 +95,11 @@ const Home = () => {
   // TODO: 临时关闭，用于开发调试
   console.log("token", token)
   useEffect(() => {
-    if (!(token || userStore?.userProfile?.id)) return
+    if (!(token || userStore?.userProfile?.uid)) return
 
     const reflyLoginStatus = localStorage.getItem("refly-login-status")
     console.log("reflyLoginStatus", reflyLoginStatus, token)
-    if ((token || userStore?.userProfile?.id) && reflyLoginStatus) {
+    if ((token || userStore?.userProfile?.uid) && reflyLoginStatus) {
       // 从插件打开弹窗，给插件发消息
       handleSendMsgToExtension("success", token as string)
       localStorage.removeItem("refly-login-status")
@@ -111,7 +111,7 @@ const Home = () => {
         window.close()
       }, 500)
     }
-  }, [token, userStore?.userProfile?.id])
+  }, [token, userStore?.userProfile?.uid])
 
   return (
     <div className="home-container" style={{}}>

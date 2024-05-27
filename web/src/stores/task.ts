@@ -55,18 +55,18 @@ export const useTaskStore = create<TaskState>()(
           }
 
           case ConversationOperation.DELETE: {
-            const { id } = payload
+            const { convId } = payload
             newConversationList = conversationList.filter(
-              item => item.id !== id,
+              item => item.convId !== convId,
             )
 
             break
           }
 
           case ConversationOperation.UPDATE: {
-            const { id } = payload
+            const { convId } = payload
             newConversationList = conversationList.map(item => {
-              if (item.id === id) {
+              if (item.convId === convId) {
                 return { ...item, ...payload }
               }
 
