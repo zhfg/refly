@@ -3,7 +3,7 @@ import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run"
 import { useUserStore } from "@/stores/user"
 import { ServerMessage } from "@/types"
 import { copyToClipboard } from "@/utils"
-import { Avatar, Button, Spin } from "@arco-design/web-react"
+import { Avatar, Button, Spin, Message } from "@arco-design/web-react"
 import { IconCopy, IconQuote, IconRight } from "@arco-design/web-react/icon"
 import { useTranslation } from "react-i18next"
 // 自定义组件
@@ -62,6 +62,7 @@ export const AssistantMessage = (props: {
                 style={{ color: "#64645F" }}
                 onClick={() => {
                   copyToClipboard(message?.content || "")
+                  Message.success("复制成功")
                 }}>
                 复制
               </Button>

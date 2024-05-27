@@ -43,14 +43,14 @@ function LandingPage() {
         </title>
         <meta name="description" content={t("landingPage.description")} />
       </Helmet>
-      <div>
+      {/* <div>
         <Alert
           style={{ width: "100%" }}
           type="warning"
           title={<div>{t("systemMaintenanceShutdown.title")}</div>}
           content={<div>{t("systemMaintenanceShutdown.content")}</div>}
         />
-      </div>
+      </div> */}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/privacy" element={<Privacy />} />
