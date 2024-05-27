@@ -1,6 +1,10 @@
 {
   "language": "English",
   "productName": "Refly",
+  "systemMaintenanceShutdown": {
+    "title": "Dear Valued Users,",
+    "content": "We are dedicated to enhancing the stability and efficiency of our services. To achieve this, we have scheduled a system maintenance that will take place from 21:00 to 23:00 Beijing Time. During this period, our services will be temporarily unavailable. For our users in Seattle, this maintenance corresponds to 05:00 to 07:00 AM local time, taking into account the current daylight saving time adjustments. We apologize for any inconvenience this may cause and appreciate your understanding and support."
+  },
   "tabMeta": {
     "landingPage": {
       "title": "Where knowledge thrives",

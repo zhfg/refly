@@ -13,6 +13,9 @@ i18next.use(initReactI18next).init({
     "zh-CN": {
       translation: cnTranslation,
     },
+    "zh-Hant": {
+      translation: cnTranslation,
+    },
     zh: {
       translation: cnTranslation,
     },
