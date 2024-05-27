@@ -1,7 +1,8 @@
 # Base image
 FROM node:20-alpine
 
-ENV NODE_ENV build
+# Add necessary dependencies
+RUN apk --no-cache add curl
 
 # Create app directory
 WORKDIR /usr/src/app
