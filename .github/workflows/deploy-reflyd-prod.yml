@@ -9,13 +9,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy-staging:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to staging
-        uses: .github/actions/deploy-reflyd-reusable
-        with:
-          environment: staging
-          ecs-cluster: Prod
-          ecs-service: prod
+  deploy-prod:
+    uses: ./.github/workflows/deploy-reflyd-base.yml
+    with:
+      environment: production
+      ecs-cluster: Prod
+      ecs-service: prod
