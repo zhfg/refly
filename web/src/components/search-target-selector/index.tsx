@@ -16,7 +16,18 @@ import { useTranslation } from "react-i18next"
 // 自定义样式
 import "./index.scss"
 
-export const SearchTargetSelector = (props: { classNames: string }) => {
+const defaultSelectorList = [
+  SearchTarget.CurrentPage,
+  SearchTarget.All,
+  SearchTarget.SearchEnhance,
+  SearchTarget.CurrentKnowledgeBase,
+]
+
+export const SearchTargetSelector = (props: {
+  classNames: string
+  selectorList?: string[]
+}) => {
+  const { selectorList = defaultSelectorList } = props
   const searchStateStore = useSearchStateStore()
   const webLinkStore = useWeblinkStore()
 
@@ -43,14 +54,18 @@ export const SearchTargetSelector = (props: { classNames: string }) => {
       <Typography.Text type="secondary" style={{ marginLeft: 12 }}>
         {t("loggedHomePage.homePage.searchScope.title")}
       </Typography.Text>
-      <Menu.Item key={SearchTarget.CurrentPage}>
-        <IconFile style={iconStyle} />
-        {t("loggedHomePage.homePage.searchScope.currentPage")}
-      </Menu.Item>
-      <Menu.Item key={SearchTarget.CurrentKnowledgeBase}>
-        <IconFolder style={iconStyle} />
-        {t("loggedHomePage.homePage.searchScope.currentKnowledgeBase")}
-      </Menu.Item>
+      {selectorList?.includes(SearchTarget.CurrentPage) ? (
+        <Menu.Item key={SearchTarget.CurrentPage}>
+          <IconFile style={iconStyle} />
+          {t("loggedHomePage.homePage.searchScope.currentPage")}
+        </Menu.Item>
+      ) : null}
+      {selectorList?.includes(SearchTarget.CurrentKnowledgeBase) ? (
+        <Menu.Item key={SearchTarget.CurrentKnowledgeBase}>
+          <IconFolder style={iconStyle} />
+          {t("loggedHomePage.homePage.searchScope.currentKnowledgeBase")}
+        </Menu.Item>
+      ) : null}
       <Menu.Item key={SearchTarget.All}>
         <IconCommon style={iconStyle} />
         {t("loggedHomePage.homePage.searchScope.all")}

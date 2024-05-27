@@ -60,8 +60,11 @@ export const useBuildThreadAndRun = () => {
     navigate(`/knowledge-base?${newSearchParams.toString()}`)
   }
 
-  const emptyConvRunTask = (question: string) => {
-    const newConv = ensureConversationExist()
+  const emptyConvRunTask = (question: string, forceNewConv?: boolean) => {
+    // 首先情况所有状态
+    resetState()
+
+    const newConv = ensureConversationExist(forceNewConv)
     conversationStore.setCurrentConversation(newConv)
     chatStore.setIsNewConversation(true)
     chatStore.setNewQAText(question)
@@ -109,11 +112,11 @@ export const useBuildThreadAndRun = () => {
     navigate(`/thread/${res?.data?.convId}`)
   }
 
-  const ensureConversationExist = () => {
+  const ensureConversationExist = (forceNewConv = false) => {
     const { currentConversation } = useConversationStore.getState()
     const { localSettings } = useUserStore.getState()
 
-    if (!currentConversation?.convId) {
+    if (!currentConversation?.convId || forceNewConv) {
       const newConv = buildConversation({
         locale: localSettings?.outputLocale as OutputLocale,
       })

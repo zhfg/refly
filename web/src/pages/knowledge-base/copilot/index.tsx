@@ -137,12 +137,12 @@ export const AICopilot = () => {
   const handleConvTask = async (convId: string) => {
     try {
       setIsFetching(true)
-      const { isNewConversation } = useChatStore.getState()
+      const { isNewConversation, newQAText } = useChatStore.getState()
 
       // 新会话，需要手动构建第一条消息
       if (isNewConversation && convId) {
         // 更换成基于 task 的消息模式，核心是基于 task 来处理
-        runTask()
+        runTask(newQAText)
       } else if (convId) {
         handleGetThreadMessages(convId)
       }
@@ -157,6 +157,10 @@ export const AICopilot = () => {
   useEffect(() => {
     if (convId) {
       handleConvTask(convId)
+    }
+
+    return () => {
+      chatStore.setMessages([])
     }
   }, [convId])
   useEffect(() => {
