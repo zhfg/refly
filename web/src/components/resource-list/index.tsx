@@ -75,6 +75,7 @@ export const ResourceList = (props: ResourceListProps) => {
         ) : (
           (resourceList || []).map((item, index) => (
             <ResourceItem
+              key={index}
               index={index}
               item={item}
               btnProps={props.btnProps}

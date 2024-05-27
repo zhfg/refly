@@ -35,7 +35,7 @@ const getNavSelectedKeys = (pathname = "") => {
     return "ThreadLibrary"
   }
 
-  return "Home"
+  return "Workspace"
 }
 
 export const SiderLayout = () => {
@@ -160,16 +160,17 @@ export const SiderLayout = () => {
             backgroundColor: "transparent",
             borderRight: "none",
           }}
+          defaultSelectedKeys={["Workspace"]}
           className="sider-menu-nav"
           selectedKeys={[selectedKey]}
           onClickMenuItem={handleNavClick}>
           <div className="sider-header">
-            <MenuItem key="News" className="custom-menu-item">
+            {/* <MenuItem key="News" className="custom-menu-item">
               <IconThunderbolt style={{ fontSize: 20 }} />
               <span className="sider-menu-title">
                 {t("loggedHomePage.siderMenu.news")}
               </span>
-            </MenuItem>
+            </MenuItem> */}
             <Divider />
             <MenuItem key="Workspace" className="custom-menu-item">
               <IconHome style={{ fontSize: 20 }} />
@@ -182,12 +183,12 @@ export const SiderLayout = () => {
               <IconHistory style={{ fontSize: 20 }} />
               <span className="sider-menu-title">回忆</span>
             </MenuItem> */}
-            <MenuItem key="Explore" className="custom-menu-item">
+            {/* <MenuItem key="Explore" className="custom-menu-item">
               <IconFire style={{ fontSize: 20 }} />
               <span className="sider-menu-title">
                 {t("loggedHomePage.siderMenu.explore")}
               </span>
-            </MenuItem>
+            </MenuItem> */}
           </div>
           <div className="sider-footer">
             <MenuItem key="GetHelp" className="custom-menu-item">

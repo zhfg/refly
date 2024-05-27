@@ -40,8 +40,8 @@ export const useListenToSelection = (selector: string) => {
 
     return () => {
       const divElement = document.querySelector(`.${selector}`) as HTMLElement
-      divElement.removeEventListener("mousedown", handleMouseDown)
-      divElement.addEventListener("mouseup", handleMouseUp)
+      divElement?.removeEventListener("mousedown", handleMouseDown)
+      divElement?.removeEventListener("mouseup", handleMouseUp)
       clearTimeout(mouseDownTimerRef.current)
       clearTimeout(mouseUpTimerRef.current)
     }

@@ -30,7 +30,7 @@ export const ContentPanel = () => {
             }}
           />
         </TabPanel>
-        <TabPanel
+        {/* <TabPanel
           key="knowledge-resource"
           title={
             <span>
@@ -43,7 +43,7 @@ export const ContentPanel = () => {
               navigate(`/knowledge-base?kbId=${kbId}`)
             }}
           />
-        </TabPanel>
+        </TabPanel> */}
         <TabPanel
           key="thread-library"
           title={

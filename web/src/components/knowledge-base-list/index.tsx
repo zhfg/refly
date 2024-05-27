@@ -142,9 +142,9 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
           dataSource={knowledgeBaseStore.knowledgeBaseList || []}
           scrollLoading={scrollLoading}
           onReachBottom={currentPage => fetchData(currentPage)}
-          render={(item: CollectionListItem) => (
+          render={(item: CollectionListItem, key) => (
             <List.Item
-              key={item?.collectionId}
+              key={item?.collectionId + key}
               style={{
                 padding: "20px 0",
                 borderBottom: "1px solid var(--color-fill-3)",

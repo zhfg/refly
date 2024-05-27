@@ -25,7 +25,7 @@ export const ThreadLibrary = () => {
       <ConvList
         classNames=""
         handleConvItemClick={convId => {
-          navigate(`/thread/${convId}`)
+          navigate(`/knowledge-base?convId=${convId}`)
         }}
       />
     </div>

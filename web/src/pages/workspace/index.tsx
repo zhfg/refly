@@ -78,14 +78,14 @@ const Workspace = () => {
         <PanelGroup
           direction="horizontal"
           className="workspace-panel-container">
-          <Panel
+          {/* <Panel
             defaultSize={20}
             minSize={20}
             maxSize={50}
             className="workspace-left-assist-panel">
             <LeftAssistPanel />
           </Panel>
-          <PanelResizeHandle className="workspace-panel-resize" />
+          <PanelResizeHandle className="workspace-panel-resize" /> */}
           <Panel minSize={50} className="workspace-content-panel">
             <ContentPanel />
           </Panel>

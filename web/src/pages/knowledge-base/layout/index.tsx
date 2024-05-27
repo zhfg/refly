@@ -17,6 +17,7 @@ import { getExtensionId } from "@/utils/url"
 import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
 import { useResizePanel } from "@/hooks/use-resize-panel"
+import { ErrorBoundary } from "@sentry/react"
 
 // 用于快速选择
 export const quickActionList = ["summary"]
@@ -93,34 +94,48 @@ const KnowledgeLibraryLayout = () => {
       }
 
   return (
-    <div className="workspace-container" style={{}}>
-      <Helmet>
-        <title>
-          {t("productName")} | {t("landingPage.slogan")}
-        </title>
-        <meta name="description" content={t("landingPage.description")} />
-      </Helmet>
-      <div className="workspace-inner-container">
-        <PanelGroup
-          direction="horizontal"
-          className="workspace-panel-container">
-          {kbId
-            ? [
-                <Panel minSize={50} className="workspace-left-assist-panel">
+    <ErrorBoundary>
+      <div className="workspace-container" style={{}}>
+        <Helmet>
+          <title>
+            {t("productName")} | {t("landingPage.slogan")}
+          </title>
+          <meta name="description" content={t("landingPage.description")} />
+        </Helmet>
+        <div className="workspace-inner-container">
+          <PanelGroup
+            direction="horizontal"
+            className="workspace-panel-container">
+            {kbId ? (
+              <>
+                <Panel
+                  minSize={50}
+                  order={1}
+                  className="workspace-left-assist-panel"
+                  key="workspace-left-assist-panel"
+                  id="workspace-left-assist-panel">
                   <KnowledgeBaseDetail />
-                </Panel>,
-                <PanelResizeHandle className="workspace-panel-resize" />,
-              ]
-            : null}
-          <Panel
-            className="workspace-content-panel"
-            {...copilotStyle}
-            minSize={minSize}>
-            <AICopilot />
-          </Panel>
-        </PanelGroup>
+                </Panel>
+                <PanelResizeHandle
+                  className="workspace-panel-resize"
+                  key="workspace-panel-resize"
+                  id="workspace-panel-resize"
+                />
+              </>
+            ) : null}
+            <Panel
+              order={3}
+              className="workspace-content-panel"
+              {...copilotStyle}
+              minSize={minSize}
+              key="workspace-content-panel"
+              id="workspace-content-panel">
+              <AICopilot />
+            </Panel>
+          </PanelGroup>
+        </div>
       </div>
-    </div>
+    </ErrorBoundary>
   )
 }
 
