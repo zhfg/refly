@@ -1,4 +1,4 @@
-name: Deploy Reflyd
+name: Deploy API
 
 on:
   workflow_call:
@@ -55,7 +55,7 @@ jobs:
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REPOSITORY:$IMAGE_TAG reflyd
+          docker build -t $ECR_REPOSITORY:$IMAGE_TAG apps/api
           docker push $ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 

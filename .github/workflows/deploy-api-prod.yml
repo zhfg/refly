@@ -1,16 +1,16 @@
-name: Deploy Reflyd To Prod
+name: Deploy API To Prod
 
 on:
   push:
     branches:
       - release
     paths:
-      - "reflyd/**"
+      - 'apps/api/**'
   workflow_dispatch:
 
 jobs:
   deploy-prod:
-    uses: ./.github/workflows/deploy-reflyd-base.yml
+    uses: ./.github/workflows/deploy-api-base.yml
     with:
       environment: production
       ecs-cluster: Prod

@@ -1,16 +1,16 @@
-name: Deploy Reflyd To Staging
+name: Deploy API To Staging
 
 on:
   push:
     branches-ignore:
       - release
     paths:
-      - "reflyd/**"
+      - 'apps/api/**'
   workflow_dispatch:
 
 jobs:
   deploy-staging:
-    uses: ./.github/workflows/deploy-reflyd-base.yml
+    uses: ./.github/workflows/deploy-api-base.yml
     with:
       environment: staging
       ecs-cluster: Prod
