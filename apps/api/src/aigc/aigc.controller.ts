@@ -1,5 +1,5 @@
 import { Controller, Logger, Get, Post, UseGuards, Request, Query, Param } from '@nestjs/common';
-import omit from 'lodash.omit';
+import { omit } from 'lodash';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';

@@ -1,5 +1,5 @@
 {
-  "name": "extension",
+  "name": "@refly/extension",
   "displayName": "__MSG_displayName__",
   "version": "0.1.0",
   "description": "__MSG_description__",

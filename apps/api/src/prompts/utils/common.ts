@@ -1,9 +1,7 @@
 import { AIMessage, HumanMessage } from 'langchain/schema';
 
 // ChatCompletion fewshots
-export const makeChatFewshotExamples = (
-  examples: (HumanMessage | AIMessage)[],
-) => {
+export const makeChatFewshotExamples = (examples: (HumanMessage | AIMessage)[]) => {
   return examples.reduce((total, cur) => {
     if (cur?._getType() === 'human') {
       total += `\n- human: ${cur?.content}\n`;

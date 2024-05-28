@@ -1,5 +1,5 @@
 {
-  "name": "web",
+  "name": "@refly/web",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -65,8 +65,6 @@
     "@types/react": "^18.2.56",
     "@types/react-dom": "^18.2.19",
     "@types/react-helmet": "^6.1.11",
-    "@typescript-eslint/eslint-plugin": "^7.0.2",
-    "@typescript-eslint/parser": "^7.0.2",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.13",
     "eslint": "^8.56.0",
@@ -76,7 +74,6 @@
     "postcss": "^8.4.21",
     "sass": "^1.71.1",
     "tailwindcss": "^3.2.6",
-    "typescript": "^5.2.2",
     "vite": "^5.1.4"
   }
 }

@@ -1,6 +1,6 @@
 import { Logger, Injectable } from '@nestjs/common';
 import { Document } from '@langchain/core/documents';
-import omit from 'lodash.omit';
+import { omit } from 'lodash';
 
 import { LlmService } from '../llm/llm.service';
 import { PrismaService } from '../common/prisma.service';
