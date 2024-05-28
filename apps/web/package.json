@@ -25,6 +25,7 @@
     "@types/uuid": "^9.0.1",
     "aos": "^3.0.0-beta.6",
     "classnames": "^2.5.1",
+    "clsx": "^2.1.0",
     "copy-to-clipboard": "~3.3.3",
     "dayjs": "~1.11.7",
     "hotkeys-js": "~3.10.2",
