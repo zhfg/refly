@@ -45,5 +45,6 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: ${{ inputs.project-name }}
+          branch: main # always main, to ensure production deployment
           workingDirectory: web
           directory: dist
