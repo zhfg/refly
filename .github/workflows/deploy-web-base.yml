@@ -15,9 +15,6 @@ jobs:
     name: Publish to Cloudflare Pages
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
-    permissions:
-      contents: read
-      deployments: write
 
     steps:
       - name: Checkout
@@ -46,6 +43,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           projectName: ${{ inputs.project-name }}
           directory: web/dist
           workingDirectory: web
