@@ -34,6 +34,7 @@ jobs:
         with:
           node-version: "20.x"
           cache: "yarn"
+          cache-dependency-path: web/yarn.lock
 
       - name: Build
         run: cd web && yarn --frozen-lockfile && yarn build
@@ -44,5 +45,5 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: ${{ inputs.project-name }}
-          directory: web/dist
           workingDirectory: web
+          directory: dist
