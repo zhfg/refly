@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Client } from 'minio';
-import { streamToBuffer } from 'src/utils';
+import { streamToBuffer } from '../utils';
 
 @Injectable()
 export class MinioService implements OnModuleInit {

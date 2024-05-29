@@ -35,13 +35,7 @@ import { GoogleOauthStrategy } from './strategy/google-oauth.strategy';
       inject: [ConfigService],
     }),
   ],
-  providers: [
-    AuthService,
-    LocalStrategy,
-    JwtStrategy,
-    GithubOauthStrategy,
-    GoogleOauthStrategy,
-  ],
+  providers: [AuthService, LocalStrategy, JwtStrategy, GithubOauthStrategy, GoogleOauthStrategy],
   exports: [AuthService],
   controllers: [AuthController],
 })

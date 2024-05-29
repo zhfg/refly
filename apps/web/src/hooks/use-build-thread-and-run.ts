@@ -15,10 +15,11 @@ import {
   type Source,
   TASK_TYPE,
   Conversation,
-  LOCALE,
+  // LOCALE,
   Message,
   MessageType,
 } from "@/types"
+import { LOCALE } from "@refly/types"
 import { SearchTarget, useSearchStateStore } from "@/stores/search-state"
 import { buildTask } from "@/utils/task"
 import { useWeblinkStore } from "@/stores/weblink"

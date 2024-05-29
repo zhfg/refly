@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush.schema.json",
+  "rushVersion": "5.125.0",
+  "pnpmVersion": "8.15.1",
+  "nodeSupportedVersionRange": ">=20.0.0",
+  "projects": [
+    {
+      "packageName": "@refly/types",
+      "projectFolder": "packages/types",
+      "reviewCategory": "packages"
+    },
+    {
+      "packageName": "@refly/utils",
+      "projectFolder": "packages/utils",
+      "reviewCategory": "packages"
+    },
+    {
+      "packageName": "@refly/api",
+      "projectFolder": "apps/api",
+      "reviewCategory": "apps"
+    },
+    {
+      "packageName": "@refly/extension",
+      "projectFolder": "apps/extension",
+      "reviewCategory": "apps"
+    },
+    {
+      "packageName": "@refly/web",
+      "projectFolder": "apps/web",
+      "reviewCategory": "apps"
+    },
+    {
+      "packageName": "@refly/workers",
+      "projectFolder": "apps/workers",
+      "reviewCategory": "apps"
+    }
+  ]
+}

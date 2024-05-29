@@ -8,6 +8,7 @@ import { StringOutputParser } from '@langchain/core/output_parsers';
 import { createStuffDocumentsChain } from 'langchain/chains/combine_documents';
 import { JsonOutputFunctionsParser } from 'langchain/output_parsers';
 
+import { LOCALE } from '@refly/types';
 import { AigcContent, User } from '@prisma/client';
 import {
   qa,
@@ -21,7 +22,7 @@ import {
   searchEnhance,
 } from '../prompts/index';
 import { LLMChatMessage } from './schema';
-import { HumanMessage, SystemMessage } from 'langchain/schema';
+import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 
 import { ContentMeta } from './dto';
 import { categoryList } from '../prompts/utils/category';
@@ -30,7 +31,6 @@ import { SearchResultContext } from '../types/search';
 import { RAGService } from '../rag/rag.service';
 import { ContentPayload } from '../rag/rag.dto';
 import { RetrieveFilter } from 'src/conversation/conversation.dto';
-import { LOCALE } from 'src/types/locale';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
@@ -439,7 +439,6 @@ export class LlmService implements OnModuleInit {
     let jsonContent: any = [];
     try {
       const REFERENCE_COUNT = 8;
-      const DEFAULT_SEARCH_ENGINE_TIMEOUT = 5;
       const queryPayload = JSON.stringify({
         q: query,
         num: REFERENCE_COUNT,
@@ -500,8 +499,6 @@ export class LlmService implements OnModuleInit {
 
   async searchEnhance(query: string, locale: LOCALE, chatHistory: LLMChatMessage[]) {
     this.logger.log(`[searchEnhance] activated with query: ${query}, locale: ${locale}`);
-
-    const stopWords = ['<|im_end|>', '[End]', '[end]', '\nReferences:\n', '\nSources:\n', 'End.'];
 
     // 构建总结的 Prompt，将 question + chatHistory 总结成
     const contextualizeQPrompt = ChatPromptTemplate.fromMessages([

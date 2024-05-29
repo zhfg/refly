@@ -1,4 +1,4 @@
-import { AIMessage, HumanMessage } from 'langchain/schema';
+import { AIMessage, HumanMessage } from '@langchain/core/messages';
 
 // ChatCompletion fewshots
 export const makeChatFewshotExamples = (examples: (HumanMessage | AIMessage)[]) => {

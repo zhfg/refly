@@ -1,0 +1,24 @@
+{
+  "name": "@refly/types",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/cjs/index.js",
+  "typings": "dist/cjs/index.d.ts",
+  "module": "dist/esm/index.js",
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "pnpm run build:cjs && pnpm run build:esm",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@arco-design/web-react": "~2.62.1"
+  }
+}

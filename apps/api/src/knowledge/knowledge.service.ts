@@ -23,7 +23,7 @@ import {
   genCollectionID,
   genResourceID,
   genResourceUuid,
-} from 'src/utils';
+} from '../utils';
 
 @Injectable()
 export class KnowledgeService {

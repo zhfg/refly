@@ -16,7 +16,7 @@ import { createLLMChatMessage } from '../llm/schema';
 import { LlmService } from '../llm/llm.service';
 import { WeblinkService } from '../weblink/weblink.service';
 import { IterableReadableStream } from '@langchain/core/dist/utils/stream';
-import { BaseMessageChunk } from 'langchain/schema';
+import { BaseMessageChunk } from '@langchain/core/messages';
 import { genConvID } from '../utils/id';
 import { AigcService } from '../aigc/aigc.service';
 
