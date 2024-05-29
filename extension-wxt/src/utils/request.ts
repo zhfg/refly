@@ -52,7 +52,7 @@ export const abortablePromise = (target: Promise<any>, timeout: number) => {
   return Promise.race([target, racePromise]);
 };
 
-export async function request<T>(
+export async function extRequest<T>(
   url: string,
   opt: any,
   timeout: number = TIMEOUT
@@ -117,14 +117,14 @@ export async function request<T>(
   }
 }
 
-export async function extRequest<T>(
-  payload: {
-    name: string;
-    body?: any;
-  },
-  timeout: number = TIMEOUT
+export async function request<T>(
+  url: string,
+  opt: any
 ): Promise<[ApiErr | null, T | null, any?]> {
-  const res = await sendToBackground(payload);
+  const res = await sendToBackground({
+    ...opt,
+    name: url,
+  });
 
   if (res?.success) {
     return [null, res.data, null];

@@ -1,28 +1,37 @@
-import { appConfig } from "@/src/utils/config";
-import { extRequest } from "@/src/utils/request";
+import { appConfig } from "@/utils/config";
+import { request } from "@/utils/request";
 
-import type { HandlerRequest, HandlerResponse } from "@/src/types/request";
-import type { ResourceListItem, ResourceDetail } from "@/src/types";
+import type { HandlerRequest, HandlerResponse } from "@/types/request";
+import type { WebLinkItem, ListPageProps, ResourceDetail } from "@/types";
 
 const handler = async (
-  req: HandlerRequest<Partial<ResourceListItem>>
+  req: HandlerRequest<ListPageProps>
 ): Promise<HandlerResponse<ResourceDetail>> => {
   console.log(req.body);
 
   try {
-    const [err, resourceRes] = await extRequest<{
-      success: boolean;
-      data: ResourceDetail;
-    }>({
-      name: "newResource",
-      body: req.body,
-    });
-
-    return resourceRes;
+    const [err, weblinkListRes] = await request<ResourceDetail>(
+      appConfig.url.newResource,
+      {
+        method: "GET",
+        body: req.body,
+      }
+    );
+    if (err) {
+      return {
+        success: false,
+        errMsg: err,
+      };
+    } else {
+      return {
+        success: true,
+        data: weblinkListRes,
+      };
+    }
   } catch (err) {
     return {
       success: false,
-      errMsg: String(err),
+      errMsg: err,
     };
   }
 };
