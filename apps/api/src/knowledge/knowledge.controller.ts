@@ -13,8 +13,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ApiResponse } from '@nestjs/swagger';
-import { KnowledgeService } from './knowledge.service';
-import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import {
   UpsertCollectionRequest,
   UpsertCollectionResponse,
@@ -26,9 +24,12 @@ import {
   GetResourceDetailResponse,
   DeleteCollectionRequest,
   DeleteResourceRequest,
-  convertResourcePoToListItem,
   CollectionListItem,
-} from './knowledge.dto';
+} from '@refly/schema';
+import { KnowledgeService } from './knowledge.service';
+import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
+
+import { convertResourcePoToListItem } from './knowledge.dto';
 
 @Controller('knowledge')
 export class KnowledgeController {

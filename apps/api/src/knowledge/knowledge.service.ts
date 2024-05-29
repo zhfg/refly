@@ -15,7 +15,7 @@ import {
   ResourceDetail,
   WeblinkMeta,
   CollectionListItem,
-} from './knowledge.dto';
+} from '@refly/schema';
 import {
   CHANNEL_FINALIZE_RESOURCE,
   QUEUE_RESOURCE,

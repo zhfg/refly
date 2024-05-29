@@ -1,6 +1,4 @@
-export enum ResourceType {
-  'weblink',
-}
+export type ResourceType = 'weblink';
 
 export class WeblinkMeta {
   url: string;

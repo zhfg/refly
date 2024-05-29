@@ -15,6 +15,11 @@
       "reviewCategory": "packages"
     },
     {
+      "packageName": "@refly/api-client",
+      "projectFolder": "packages/api-client",
+      "reviewCategory": "packages"
+    },
+    {
       "packageName": "@refly/arco-vite-plugin-react",
       "projectFolder": "packages/plugin-vite-react",
       "reviewCategory": "packages"

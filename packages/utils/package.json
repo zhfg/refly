@@ -11,8 +11,21 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "@paralleldrive/cuid2": "^2.2.2",
+    "@refly/constants": "workspace:*",
+    "@refly/schema": "workspace:*",
+    "clsx": "^2.1.0",
+    "dayjs": "~1.11.7",
+    "js-cookie": "^3.0.5",
+    "md5": "^2.3.0",
+    "tailwind-merge": "^2.2.2",
+    "uuid": "^9.0.0"
+  },
   "devDependencies": {
+    "@types/chrome": "0.0.227",
     "rimraf": "~5.0.7",
-    "typescript": "^5"
+    "typescript": "^5",
+    "@types/node": "~20.12.12"
   }
 }
