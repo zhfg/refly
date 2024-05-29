@@ -45,6 +45,8 @@ export const useGetUserSettings = () => {
     "local"
   );
 
+  const getUserInfo = async () => {};
+
   const getLoginStatus = async () => {
     try {
       let { localSettings, userProfile } = useUserStore.getState();
@@ -84,7 +86,7 @@ export const useGetUserSettings = () => {
           outputLocale = (navigator?.language || LOCALE.EN) as LOCALE;
           // 不阻塞写回用户配置
           sendToBackground({
-            name: "getUserInfo",
+            name: "putUserInfo",
             body: { uiLocale, outputLocale },
           });
 

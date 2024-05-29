@@ -1,7 +1,7 @@
 import { getCookie } from "./cookie";
 import { getServerOrigin } from "./url";
 import { getExtensionVersion } from "./version";
-import { sendToBackground } from "./extension-message";
+import { sendToBackground } from "./extension/messaging";
 
 const TIMEOUT = 40000;
 const DEFAULT_HEADER = {

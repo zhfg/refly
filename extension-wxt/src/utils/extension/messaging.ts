@@ -1,4 +1,5 @@
 import { Runtime } from "wxt/browser";
+import { getCurrentTab } from "./tabs";
 
 // TODO: return types support
 export const sendToBackground = async (message: {
@@ -21,6 +22,16 @@ export const sendToBackground = async (message: {
 
   const res = await waitForResponse;
   return res as Promise<{ success: boolean; data: any; errMsg?: string }>;
+};
+
+export const sendToContentScript = async (message: {
+  name: string;
+  body?: any;
+}) => {
+  const currentTab = await getCurrentTab();
+  if (!currentTab?.id) return;
+
+  await browser.tabs.sendMessage(currentTab?.id as number, message);
 };
 
 let portStore: { [key: string]: Runtime.Port } = {};
