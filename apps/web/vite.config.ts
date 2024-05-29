@@ -3,7 +3,7 @@ import { defineConfig } from "vite"
 import react from "@vitejs/plugin-react"
 import path from "path"
 import postcss from "./postcss.config.js"
-import { vitePluginForArco } from "@arco-plugins/vite-react"
+import { vitePluginForArco } from "@refly/arco-vite-plugin-react"
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -15,6 +15,7 @@ export default defineConfig({
     sentryVitePlugin({
       org: "refly-ai",
       project: "web",
+      errorHandler: err => console.warn(err),
     }),
   ],
   css: {

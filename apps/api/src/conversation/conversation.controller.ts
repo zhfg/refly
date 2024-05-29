@@ -21,7 +21,7 @@ import {
 import { ApiParam, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
-import { TASK_TYPE, type Task } from './conversation.dto';
+import { TASK_TYPE, Task } from './conversation.dto';
 import { Conversation } from '@prisma/client';
 
 @Controller('conversation')

@@ -19,7 +19,8 @@ import {
   Message,
   MessageType,
 } from "@/types"
-import { LOCALE } from "@refly/types"
+import { LOCALE } from "@refly/constants"
+import { ContentMeta } from "@refly/schema"
 import { SearchTarget, useSearchStateStore } from "@/stores/search-state"
 import { buildTask } from "@/utils/task"
 import { useWeblinkStore } from "@/stores/weblink"
@@ -45,6 +46,11 @@ export const useBuildThreadAndRun = () => {
   const { currentResource, currentKnowledgeBase } = useCopilotContextState()
   const [searchParams, setSearchParams] = useSearchParams()
   const knowledgeBaseStore = useKnowledgeBaseStore()
+
+  const cm: ContentMeta = {
+    topics: [],
+  }
+  console.log(cm)
 
   const jumpNewConvQuery = (convId: string) => {
     const newSearchParams = new URLSearchParams(searchParams)

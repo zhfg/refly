@@ -5,8 +5,18 @@
   "nodeSupportedVersionRange": ">=20.0.0",
   "projects": [
     {
-      "packageName": "@refly/types",
-      "projectFolder": "packages/types",
+      "packageName": "@refly/constants",
+      "projectFolder": "packages/constants",
+      "reviewCategory": "packages"
+    },
+    {
+      "packageName": "@refly/schema",
+      "projectFolder": "packages/schema",
+      "reviewCategory": "packages"
+    },
+    {
+      "packageName": "@refly/arco-vite-plugin-react",
+      "projectFolder": "packages/plugin-vite-react",
       "reviewCategory": "packages"
     },
     {

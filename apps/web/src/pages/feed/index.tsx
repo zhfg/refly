@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react"
+import { ContentMeta } from "@refly/schema"
 
 // 组件
 import {
@@ -173,8 +174,11 @@ export const Feed = () => {
                       <IconTag style={{ fontSize: 14, color: "#64645F" }} />
                       <span className="feed-list-item-text">
                         {
-                          safeParseJSON(item?.weblinks?.[0]?.contentMeta)
-                            ?.topics?.[0]?.name
+                          (
+                            safeParseJSON(
+                              item?.weblinks?.[0]?.contentMeta,
+                            ) as ContentMeta
+                          )?.topics?.[0]?.name
                         }
                       </span>
                     </span>

@@ -8,7 +8,7 @@ import { StringOutputParser } from '@langchain/core/output_parsers';
 import { createStuffDocumentsChain } from 'langchain/chains/combine_documents';
 import { JsonOutputFunctionsParser } from 'langchain/output_parsers';
 
-import { LOCALE } from '@refly/types';
+import { LOCALE } from '@refly/constants';
 import { AigcContent, User } from '@prisma/client';
 import {
   qa,
@@ -24,7 +24,8 @@ import {
 import { LLMChatMessage } from './schema';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 
-import { ContentMeta } from './dto';
+import { ContentMeta } from '@refly/schema';
+// import { ContentMeta } from './dto';
 import { categoryList } from '../prompts/utils/category';
 import { PageMeta, Source } from '../types/weblink';
 import { SearchResultContext } from '../types/search';
