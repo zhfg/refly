@@ -5,6 +5,7 @@ import postcssConfig from "./postcss.config";
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
+  srcDir: "src",
   vite: () => ({
     plugins: [
       react(),
