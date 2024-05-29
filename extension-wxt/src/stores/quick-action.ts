@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import type {} from "@redux-devtools/extension";
-import type { Mode } from "@/src/types";
-import { modeList } from "@/src/utils/quick-action";
+import type { Mode } from "@/types";
+import { modeList } from "@/utils/quick-action";
 
 interface BarPosition {
   top?: number;

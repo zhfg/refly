@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import type {} from "@redux-devtools/extension";
-import type { OutputLocale } from "@/src/utils/i18n";
+import type { OutputLocale } from "@/utils/i18n";
 
 export interface Thread {
   convId: string;

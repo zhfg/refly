@@ -1,8 +1,8 @@
 import classNames from "classnames";
 import { useEffect, useRef } from "react";
-import type { Mark } from "@/src/types";
+import type { Mark } from "@/types";
 import getXPath from "get-xpath";
-import { safeStringifyJSON } from "@/src/utils/parse";
+import { safeStringifyJSON } from "@/utils/parse";
 // import { getContentFromHtmlSelector } from "@/utils/weblink"
 
 function getElementType(element) {

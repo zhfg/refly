@@ -1,4 +1,4 @@
-import { LOCALE } from "@/src/types";
+import { LOCALE } from "@/types";
 import dayjsConfig from "./dayjsConfig";
 
 export function timestampFormat(

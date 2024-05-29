@@ -2,29 +2,28 @@ import * as _Sentry from "@sentry/react";
 import { useEffect, Suspense } from "react";
 import { MemoryRouter } from "react-router-dom";
 // 使用方法
-import { useSwitchTheme } from "@/src/hooks/use-switch-theme";
+import { useSwitchTheme } from "@/hooks/use-switch-theme";
 
 // hooks
-import { useProcessLoginNotify } from "@/src/hooks/use-process-login-notify";
+import { useProcessLoginNotify } from "@/hooks/use-process-login-notify";
 // import { useRegisterMouseEvent } from "../hooks/use-register-mouse-event"
-import { useExtensionMessage } from "@/src/hooks/use-extension-message";
-import { useBindCommands } from "@/src/hooks/use-bind-commands";
-import { useSetContainerDimension } from "@/src/hooks/use-set-container-dimension";
+import { useBindCommands } from "@/hooks/use-bind-commands";
+import { useSetContainerDimension } from "@/hooks/use-set-container-dimension";
 // stores
-import { useSiderStore } from "@/src/stores/sider";
-import { useQuickActionStore } from "@/src/stores/quick-action";
+import { useSiderStore } from "@/stores/sider";
+import { useQuickActionStore } from "@/stores/quick-action";
 
 // 组件
 import { Message, Spin } from "@arco-design/web-react";
-import { ContentRouter } from "@/src/components/router";
-import { Markdown } from "@/src/components/markdown";
+import { ContentRouter } from "@/components/router";
+import { Markdown } from "@/components/markdown";
 
 // 加载国际化
-import "@/src/i18n/config";
-import { usePollingPingCurrentWeblink } from "@/src/hooks/use-polling-ping-current-weblink";
-import { getEnv } from "@/src/utils/env";
-import { SENTRY_DSN } from "@/src/utils/url";
-import { useSiderBarOpen } from "@/src/hooks/use-sider-bar-open";
+import "@/i18n/config";
+import { usePollingPingCurrentWeblink } from "@/hooks/use-polling-ping-current-weblink";
+import { getEnv } from "@/utils/env";
+import { SENTRY_DSN } from "@/utils/url";
+import { useSiderBarOpen } from "@/hooks/use-sider-bar-open";
 
 const Sentry = _Sentry;
 

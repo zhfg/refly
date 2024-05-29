@@ -5,6 +5,7 @@ import { getCurrentTab } from "./tabs";
 export const sendToBackground = async (message: {
   name: string;
   body?: any;
+  type?: "request";
 }) => {
   await browser.runtime.sendMessage(message);
 
@@ -24,6 +25,7 @@ export const sendToBackground = async (message: {
   return res as Promise<{ success: boolean; data: any; errMsg?: string }>;
 };
 
+// sendToContentScript 和 useExtensionMessage 配合使用
 export const sendToContentScript = async (message: {
   name: string;
   body?: any;
@@ -34,22 +36,4 @@ export const sendToContentScript = async (message: {
   await browser.tabs.sendMessage(currentTab?.id as number, message);
 };
 
-let portStore: { [key: string]: Runtime.Port } = {};
-export const getPort = (name: string) => {
-  if (portStore?.[name]) return;
-
-  const port = browser.runtime.connect({
-    name,
-  });
-  portStore[name] = port;
-
-  return port;
-};
-
-export const removePort = (name: string) => {
-  const port = portStore?.[name];
-
-  if (port) {
-    port.disconnect();
-  }
-};
+export const onContentScriptMessage = async (message) => {};

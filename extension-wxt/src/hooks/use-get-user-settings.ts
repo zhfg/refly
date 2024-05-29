@@ -6,14 +6,14 @@ import {
   type LocalSettings,
   defaultLocalSettings,
   useUserStore,
-} from "@/src/stores/user";
-import { safeParseJSON, safeStringifyJSON } from "@/src/utils/parse";
-import { LOCALE, type User } from "@/src/types";
+} from "@/stores/user";
+import { safeParseJSON, safeStringifyJSON } from "@/utils/parse";
+import { LOCALE, type User } from "@/types";
 import { useTranslation } from "react-i18next";
 import { Message as message } from "@arco-design/web-react";
-import { useSiderStore } from "@/src/stores/sider";
-import { mapDefaultLocale } from "@/src/utils/locale";
-import { sendToBackground } from "@/src/utils/extension-message";
+import { useSiderStore } from "@/stores/sider";
+import { mapDefaultLocale } from "@/utils/locale";
+import { sendToBackground } from "@/utils/extension/messaging";
 import { storage } from "wxt/storage";
 import { useStorage } from "./use-storage";
 
@@ -31,9 +31,12 @@ export const useGetUserSettings = () => {
   const navigate = useNavigate();
   const siderStore = useSiderStore();
 
-  const [bgMessage] = useExtensionMessage<ExternalLoginPayload>((req, res) => {
-    res.send("recevied msg");
-  });
+  const [messageData] = useExtensionMessage<ExternalLoginPayload>(
+    "refly-login-notify",
+    (req, res) => {
+      res.send("recevied msg");
+    }
+  );
 
   const { i18n } = useTranslation();
   const [token, setToken] = useStorage("token", "", "local");
@@ -225,10 +228,10 @@ export const useGetUserSettings = () => {
   };
 
   useEffect(() => {
-    if (bgMessage?.data?.name === "refly-login-notify") {
-      handleLoginStatus(bgMessage?.data);
+    if (messageData?.name === "refly-login-notify") {
+      handleLoginStatus(messageData);
     }
-  }, [bgMessage?.data]);
+  }, [messageData]);
   // sync storage
   useEffect(() => {
     console.log("loginNotification", loginNotification);

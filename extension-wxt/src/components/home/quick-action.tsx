@@ -1,13 +1,13 @@
 import { Button, Message as message } from "@arco-design/web-react";
 import { IconStar } from "@arco-design/web-react/icon";
 import { IconTip } from "./icon-tip";
-import { useWeblinkStore } from "@/src/stores/weblink";
-import { useBuildThreadAndRun } from "@/src/hooks/use-build-thread-and-run";
-import { SearchTarget, useSearchStateStore } from "@/src/stores/search-state";
-import { useContentSelectorStore } from "@/src/stores/content-selector";
+import { useWeblinkStore } from "@/stores/weblink";
+import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run";
+import { SearchTarget, useSearchStateStore } from "@/stores/search-state";
+import { useContentSelectorStore } from "@/stores/content-selector";
 import { useTranslation } from "react-i18next";
-import { useChatStore } from "@/src/stores/chat";
-import { useQuickActionHandler } from "@/src/hooks/use-quick-action-handler";
+import { useChatStore } from "@/stores/chat";
+import { useQuickActionHandler } from "@/hooks/use-quick-action-handler";
 
 export const QuickAction = () => {
   // stores

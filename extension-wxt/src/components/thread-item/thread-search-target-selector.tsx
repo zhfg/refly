@@ -7,8 +7,8 @@ import {
 } from "@arco-design/web-react/icon";
 import { useTranslation } from "react-i18next";
 
-import { SearchTarget } from "@/src/stores/search-state";
-import { getPopupContainer } from "@/src/utils/ui";
+import { SearchTarget } from "@/stores/search-state";
+import { getPopupContainer } from "@/utils/ui";
 
 /**
  * 这里的产品思考：

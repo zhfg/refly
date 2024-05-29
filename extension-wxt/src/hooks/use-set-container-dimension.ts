@@ -1,6 +1,6 @@
 import React, { type Dispatch, useEffect, useRef, useState } from "react";
 // stores
-import { useSiderStore } from "@/src/stores/sider";
+import { useSiderStore } from "@/stores/sider";
 
 export const useSetContainerDimension = () => {
   const siderStore = useSiderStore();

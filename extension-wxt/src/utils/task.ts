@@ -8,7 +8,7 @@ import {
   type Task,
   type GEN_TITLE,
   type CHAT,
-} from "@/src/types";
+} from "@/types";
 
 import { genUniqueId } from "./index";
 import type { OutputLocale } from "./i18n";

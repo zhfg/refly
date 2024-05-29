@@ -6,7 +6,7 @@ import {
   ReplyType,
   SystemAction,
   type Message,
-} from "@/src/types";
+} from "@/types";
 
 import { genUniqueId } from "./index";
 

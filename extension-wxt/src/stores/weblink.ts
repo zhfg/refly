@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import type {} from "@redux-devtools/extension";
-import type { WebLinkItem } from "@/src/components/weblink-list/types";
-import { type Message, type SessionItem } from "@/src/types";
+import type { WebLinkItem } from "@/components/weblink-list/types";
+import { type Message, type SessionItem } from "@/types";
 
 export interface Thread {
   id: string;

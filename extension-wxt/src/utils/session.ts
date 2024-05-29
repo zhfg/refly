@@ -1,4 +1,4 @@
-import type { Message, SessionItem } from "@/src/types";
+import type { Message, SessionItem } from "@/types";
 import { safeParseJSON } from "./parse";
 
 export const buildSessionItem = (

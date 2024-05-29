@@ -10,35 +10,30 @@ import {
 import { IconMinusCircle, IconSend } from "@arco-design/web-react/icon";
 
 // stores
-import { useChatStore } from "@/src/stores/chat";
-import { useMessageStateStore } from "@/src/stores/message-state";
+import { useChatStore } from "@/stores/chat";
+import { useMessageStateStore } from "@/stores/message-state";
 // 组件
 import { Session } from "./session";
-import {
-  TASK_TYPE,
-  type SessionItem,
-  type Task,
-  type Source,
-} from "@/src/types";
+import { TASK_TYPE, type SessionItem, type Task, type Source } from "@/types";
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input";
-import { useBuildTask } from "@/src/hooks/use-build-task";
-import { buildTask } from "@/src/utils/task";
-import { useConversationStore } from "@/src/stores/conversation";
-import { ThreadSearchTargetSelector } from "@/src/components/thread-item/thread-search-target-selector";
-import { SearchTarget } from "@/src/stores/search-state";
+import { useBuildTask } from "@/hooks/use-build-task";
+import { buildTask } from "@/utils/task";
+import { useConversationStore } from "@/stores/conversation";
+import { ThreadSearchTargetSelector } from "@/components/thread-item/thread-search-target-selector";
+import { SearchTarget } from "@/stores/search-state";
 // 自定义组件
 import { SelectedWeblink } from "../selected-weblink/index";
 import { useNavigate } from "react-router-dom";
-import { ContentSelectorBtn } from "@/src/components/content-selector-btn";
-import { useSearchQuickActionStore } from "@/src/stores/search-quick-action";
-import { QuickAction } from "@/src/components/home/quick-action";
-import { useContentSelectorStore } from "@/src/stores/content-selector";
-import { SelectedContentList } from "@/src/components/selected-content-list";
-import { useStoreWeblink } from "@/src/hooks/use-store-weblink";
-import { useHomeStateStore } from "@/src/stores/home-state";
-import { useSelectedMark } from "@/src/hooks/use-selected-mark";
+import { ContentSelectorBtn } from "@/components/content-selector-btn";
+import { useSearchQuickActionStore } from "@/stores/search-quick-action";
+import { QuickAction } from "@/components/home/quick-action";
+import { useContentSelectorStore } from "@/stores/content-selector";
+import { SelectedContentList } from "@/components/selected-content-list";
+import { useStoreWeblink } from "@/hooks/use-store-weblink";
+import { useHomeStateStore } from "@/stores/home-state";
+import { useSelectedMark } from "@/hooks/use-selected-mark";
 import { useTranslation } from "react-i18next";
-import { useUserStore } from "@/src/stores/user";
+import { useUserStore } from "@/stores/user";
 
 interface ThreadItemProps {
   sessions: SessionItem[];

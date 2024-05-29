@@ -1,4 +1,4 @@
-import type { OutputLocale } from "@/src/utils/i18n";
+import type { OutputLocale } from "@/utils/i18n";
 import type { Message } from "./message";
 
 export type Conversation = {

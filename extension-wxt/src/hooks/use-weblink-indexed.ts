@@ -2,7 +2,7 @@
  * Deprecated：目前没有使用
  */
 
-import { sendToBackground } from "@/src/utils/extension-message";
+import { sendToBackground } from "@/utils/extension-message";
 import { useState, useEffect } from "react";
 import { useMatch } from "react-router-dom";
 

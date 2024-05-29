@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import type {} from "@redux-devtools/extension";
-import { TASK_TYPE, type Conversation, type Task } from "@/src/types";
-import { ConversationOperation } from "@/src/types";
+import { TASK_TYPE, type Conversation, type Task } from "@/types";
+import { ConversationOperation } from "@/types";
 
 interface TaskState {
   // state

@@ -1,4 +1,4 @@
-import { getPopupContainer, scrollToBottom } from "@/src/utils/ui";
+import { getPopupContainer, scrollToBottom } from "@/utils/ui";
 import { Tooltip } from "@arco-design/web-react";
 
 type IconTipPosition =

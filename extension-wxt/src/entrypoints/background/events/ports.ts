@@ -1,42 +1,34 @@
-import { type PlasmoMessaging } from "@plasmohq/messaging"
+import { Runtime } from "wxt/browser";
+import { TASK_STATUS } from "@/types";
 
-import { TASK_STATUS, TASK_TYPE, type Task } from "~/types"
-import { safeParseJSON } from "~utils/parse"
-import { getServerOrigin } from "~utils/url"
-import { fetchEventSource } from "~utils/fetch-event-source"
-import { getCookie } from "~utils/cookie"
-// utils
-import { fetchStream } from "~utils/fetch-stream"
-import { getExtensionVersion } from "~utils/version"
+const LLM_SPLIT = "__LLM_RESPONSE__";
+const RELATED_SPLIT = "__RELATED_QUESTIONS__";
 
-let abortController: AbortController
+let abortController: AbortController;
 
-const LLM_SPLIT = "__LLM_RESPONSE__"
-const RELATED_SPLIT = "__RELATED_QUESTIONS__"
-
-const handler: PlasmoMessaging.PortHandler<{
-  type: TASK_STATUS
-  payload: Task
-}> = async (req, res) => {
-  const { type, payload } = req?.body || {}
-  console.log("receive request", req.body)
+export const handleGenResponse = async (
+  req: { body: any },
+  res: { send: (response?: any) => void }
+) => {
+  const { type, payload } = req?.body || {};
+  console.log("receive request", req.body);
 
   try {
     if (type === TASK_STATUS.START) {
       // 确保上一次是 aborted 了
-      abortController?.abort?.()
+      abortController?.abort?.();
 
-      abortController = new AbortController()
+      abortController = new AbortController();
 
       // TODO: 这里未来要优化
-      const convId = payload?.data?.convId
+      const convId = payload?.data?.convId;
 
-      const cookie = await getCookie()
+      const cookie = await getCookie();
 
-      const decoder = new TextDecoder()
-      let uint8Array = new Uint8Array()
-      let chunks = ""
-      let sourcesEmitted = false
+      const decoder = new TextDecoder();
+      let uint8Array = new Uint8Array();
+      let chunks = "";
+      let sourcesEmitted = false;
 
       const response = await fetch(
         `${getServerOrigin()}/v1/conversation/chat`,
@@ -51,14 +43,14 @@ const handler: PlasmoMessaging.PortHandler<{
           body: JSON.stringify({
             task: { ...payload, convId },
           }),
-        },
-      )
+        }
+      );
       if (response.status !== 200) {
         res.send({
           type: "error",
           message: response.status,
-        })
-        return
+        });
+        return;
       }
       const markdownParse = (text: string) => {
         res.send({
@@ -68,61 +60,71 @@ const handler: PlasmoMessaging.PortHandler<{
             .replace(/[cC]itation:(\d+)]]/g, "citation:$1]")
             .replace(/\[\[([cC]itation:\d+)]](?!])/g, `[$1]`)
             .replace(/\[[cC]itation:(\d+)]/g, "[citation]($1)"),
-        })
-      }
+        });
+      };
       fetchStream(
         response,
         (chunk) => {
-          uint8Array = new Uint8Array([...uint8Array, ...chunk])
-          chunks = decoder.decode(uint8Array, { stream: true })
+          uint8Array = new Uint8Array([...uint8Array, ...chunk]);
+          chunks = decoder.decode(uint8Array, { stream: true });
           if (chunks.includes(LLM_SPLIT)) {
-            const [sources, rest] = chunks.split(LLM_SPLIT)
+            const [sources, rest] = chunks.split(LLM_SPLIT);
             if (!sourcesEmitted) {
               try {
                 res.send({
                   type: "source",
                   message: sources,
-                })
+                });
               } catch (e) {
                 res.send({
                   type: "source",
                   message: JSON.stringify([]),
-                })
+                });
               }
             }
-            sourcesEmitted = true
+            sourcesEmitted = true;
             if (rest.includes(RELATED_SPLIT)) {
-              const [md] = rest.split(RELATED_SPLIT)
-              markdownParse(md)
+              const [md] = rest.split(RELATED_SPLIT);
+              markdownParse(md);
             } else {
-              markdownParse(rest)
+              markdownParse(rest);
             }
           }
         },
         () => {
-          const [_, relates] = chunks.split(RELATED_SPLIT)
+          const [_, relates] = chunks.split(RELATED_SPLIT);
           try {
             res.send({
               type: "relatedQuestions",
               message: relates,
-            })
+            });
           } catch (e) {
             res.send({
               type: "relatedQuestions",
               message: JSON.stringify([]),
-            })
+            });
           }
-        },
-      )
+        }
+      );
     } else if (type === TASK_STATUS.SHUTDOWN) {
-      abortController.abort()
-      res.send({ message: "[DONE]" })
+      abortController.abort();
+      res.send({ message: "[DONE]" });
     }
   } catch (err) {
-    console.log("err", err)
+    console.log("err", err);
     // 最终也需要 abort 确保关闭
-    abortController?.abort?.()
+    abortController?.abort?.();
   }
-}
+};
 
-export default handler
+export const onPort = async (port: Runtime.Port) => {
+  port.onMessage.addListener(async (message: any, comingPort: Runtime.Port) => {
+    if (comingPort.name === "gen-response") {
+      return handleGenResponse(message, {
+        send: (msg: any) => {
+          browser.tabs.sendMessage(comingPort?.sender?.tab?.id as number, msg);
+        },
+      });
+    }
+  });
+};

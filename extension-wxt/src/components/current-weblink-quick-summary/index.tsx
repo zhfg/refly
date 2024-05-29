@@ -1,16 +1,16 @@
 import { Spin, Alert, Button, Skeleton } from "@arco-design/web-react";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { Session } from "@/src/components/thread-item/session";
-import { ThreadItem } from "@/src/components/thread-item/thread-item";
-import type { WebLinkItem } from "@/src/components/weblink-list/types";
-import { useQuickActionHandler } from "@/src/hooks/use-quick-action-handler";
-import { useChatStore } from "@/src/stores/chat";
-import { useMessageStateStore } from "@/src/stores/message-state";
-import { useWeblinkStore } from "@/src/stores/weblink";
-import type { SessionItem, Source } from "@/src/types";
-import { buildSessions } from "@/src/utils/session";
-import { buildSource } from "@/src/utils/weblink";
+import { Session } from "@/components/thread-item/session";
+import { ThreadItem } from "@/components/thread-item/thread-item";
+import type { WebLinkItem } from "@/components/weblink-list/types";
+import { useQuickActionHandler } from "@/hooks/use-quick-action-handler";
+import { useChatStore } from "@/stores/chat";
+import { useMessageStateStore } from "@/stores/message-state";
+import { useWeblinkStore } from "@/stores/weblink";
+import type { SessionItem, Source } from "@/types";
+import { buildSessions } from "@/utils/session";
+import { buildSource } from "@/utils/weblink";
 
 // 样式
 import "./index.scss";

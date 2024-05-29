@@ -11,10 +11,6 @@ const handler = async (
   console.log(req?.body);
 
   try {
-    // 提升到前置去做
-    // await storage.setItem("lastTabId", req?.sender?.tab?.id)
-    // await storage.setItem("lastWindowId", req.sender?.tab?.windowId)
-
     const [err, userRes] = await request<User>(appConfig.url.userSettings, {
       method: "GET",
       headers: {

@@ -3,28 +3,28 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 
 // hooks
-import { useResetState } from "@/src/hooks/use-reset-state";
+import { useResetState } from "@/hooks/use-reset-state";
 // stores
-import { useChatStore } from "@/src/stores/chat";
-import { useConversationStore } from "@/src/stores/conversation";
-import { useThreadStore } from "@/src/stores/thread";
+import { useChatStore } from "@/stores/chat";
+import { useConversationStore } from "@/stores/conversation";
+import { useThreadStore } from "@/stores/thread";
 // utils
-import { buildSessions } from "@/src/utils/session";
-import { sendToBackground } from "@/src/utils/extension-message";
+import { buildSessions } from "@/utils/session";
+import { sendToBackground } from "@/utils/extension-message";
 // 组件
-import { ThreadItem } from "@/src/components/thread-item/thread-item";
+import { ThreadItem } from "@/components/thread-item/thread-item";
 import { Header } from "./header";
-import { useBuildTask } from "@/src/hooks/use-build-task";
-import { useTaskStore } from "@/src/stores/task";
-import { MessageType, type Message, TASK_TYPE } from "@/src/types";
-import { safeParseJSON } from "@/src/utils/parse";
-import { useWeblinkStore } from "@/src/stores/weblink";
-import { SearchTarget, useSearchStateStore } from "@/src/stores/search-state";
-import { useContentSelectorStore } from "@/src/stores/content-selector";
-import { useUserStore } from "@/src/stores/user";
-import { delay } from "@/src/utils/delay";
+import { useBuildTask } from "@/hooks/use-build-task";
+import { useTaskStore } from "@/stores/task";
+import { MessageType, type Message, TASK_TYPE } from "@/types";
+import { safeParseJSON } from "@/utils/parse";
+import { useWeblinkStore } from "@/stores/weblink";
+import { SearchTarget, useSearchStateStore } from "@/stores/search-state";
+import { useContentSelectorStore } from "@/stores/content-selector";
+import { useUserStore } from "@/stores/user";
+import { delay } from "@/utils/delay";
 import { useTranslation } from "react-i18next";
-import { EmptyThreadDetailStatus } from "@/src/components/empty-thread-detail-status";
+import { EmptyThreadDetailStatus } from "@/components/empty-thread-detail-status";
 // styles
 import "./thread-item.scss";
 

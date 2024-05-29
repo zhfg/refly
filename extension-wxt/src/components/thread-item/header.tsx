@@ -4,26 +4,26 @@ import SendSVG from "~assets/side/send.svg";
 import NotificationSVG from "~assets/side/notification.svg";
 import SettingGraySVG from "~assets/side/setting.svg";
 import FullScreenSVG from "~assets/side/full-screen.svg";
-import { IconTip } from "@/src/components/home/icon-tip";
+import { IconTip } from "@/components/home/icon-tip";
 import { Avatar, Button, Message as message } from "@arco-design/web-react";
-import { useSiderStore } from "@/src/stores/sider";
+import { useSiderStore } from "@/stores/sider";
 import { useNavigate } from "react-router-dom";
-import { useUserStore } from "@/src/stores/user";
-import { getClientOrigin } from "@/src/utils/url";
+import { useUserStore } from "@/stores/user";
+import { getClientOrigin } from "@/utils/url";
 import {
   IconClockCircle,
   IconHome,
   IconPlus,
   IconShareExternal,
 } from "@arco-design/web-react/icon";
-import { time } from "@/src/utils/time";
+import { time } from "@/utils/time";
 // types
-import type { Conversation } from "@/src/types/conversation";
+import type { Conversation } from "@/types/conversation";
 // 第三方库
 import copyToClipboard from "copy-to-clipboard";
-import { useHomeStateStore } from "@/src/stores/home-state";
+import { useHomeStateStore } from "@/stores/home-state";
 import { useTranslation } from "react-i18next";
-import { LOCALE } from "@/src/types";
+import { LOCALE } from "@/types";
 
 interface ThreadHeaderProps {
   thread: Conversation;

@@ -4,13 +4,13 @@ import classNames from "classnames";
 import { Routing } from "~routes/index";
 import { IconSearch, IconStorage } from "@arco-design/web-react/icon";
 // stores
-import { useUserStore } from "@/src/stores/user";
-import { useHomeStateStore } from "@/src/stores/home-state";
-import { useSelectedMark } from "@/src/hooks/use-selected-mark";
+import { useUserStore } from "@/stores/user";
+import { useHomeStateStore } from "@/stores/home-state";
+import { useSelectedMark } from "@/hooks/use-selected-mark";
 import { useTranslation } from "react-i18next";
-import { useGetUserSettings } from "@/src/hooks/use-get-user-settings";
-import { LOCALE } from "@/src/types";
-import { useProcessStatusCheck } from "@/src/hooks/use-process-status-check";
+import { useGetUserSettings } from "@/hooks/use-get-user-settings";
+import { LOCALE } from "@/types";
+import { useProcessStatusCheck } from "@/hooks/use-process-status-check";
 
 export const ContentRouter = () => {
   // 导航相关

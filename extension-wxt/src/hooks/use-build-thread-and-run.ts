@@ -1,10 +1,10 @@
 import { Message as message } from "@arco-design/web-react";
 
-import { useChatStore } from "@/src/stores/chat";
-import { useConversationStore } from "@/src/stores/conversation";
-import { buildConversation } from "@/src/utils/conversation";
+import { useChatStore } from "@/stores/chat";
+import { useConversationStore } from "@/stores/conversation";
+import { buildConversation } from "@/utils/conversation";
 import { useResetState } from "./use-reset-state";
-import { useTaskStore } from "@/src/stores/task";
+import { useTaskStore } from "@/stores/task";
 import { useNavigate } from "react-router-dom";
 
 // 类型
@@ -14,15 +14,15 @@ import {
   type Task,
   type Source,
   TASK_TYPE,
-} from "@/src/types";
-import { SearchTarget, useSearchStateStore } from "@/src/stores/search-state";
-import { buildQuickActionTask, buildTask } from "@/src/utils/task";
-import { useWeblinkStore } from "@/src/stores/weblink";
+} from "@/types";
+import { SearchTarget, useSearchStateStore } from "@/stores/search-state";
+import { buildQuickActionTask, buildTask } from "@/utils/task";
+import { useWeblinkStore } from "@/stores/weblink";
 import { useSelectedMark } from "./use-selected-mark";
-import { useContentSelectorStore } from "@/src/stores/content-selector";
+import { useContentSelectorStore } from "@/stores/content-selector";
 import { useTranslation } from "react-i18next";
-import { useUserStore } from "@/src/stores/user";
-import { sendToBackground } from "@/src/utils/extension-message";
+import { useUserStore } from "@/stores/user";
+import { sendToBackground } from "@/utils/extension-message";
 
 export const useBuildThreadAndRun = () => {
   const chatStore = useChatStore();

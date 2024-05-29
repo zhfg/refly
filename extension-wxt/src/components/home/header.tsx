@@ -9,12 +9,12 @@ import FullScreenSVG from "~assets/side/full-screen.svg";
 import { IconTip } from "./icon-tip";
 import { Avatar } from "@arco-design/web-react";
 // stores
-import { useSiderStore } from "@/src/stores/sider";
+import { useSiderStore } from "@/stores/sider";
 import { useNavigate } from "react-router-dom";
-import { getClientOrigin } from "@/src/utils/url";
-import { useUserStore } from "@/src/stores/user";
-import { useHomeStateStore } from "@/src/stores/home-state";
-import { useSelectedMark } from "@/src/hooks/use-selected-mark";
+import { getClientOrigin } from "@/utils/url";
+import { useUserStore } from "@/stores/user";
+import { useHomeStateStore } from "@/stores/home-state";
+import { useSelectedMark } from "@/hooks/use-selected-mark";
 import { useTranslation } from "react-i18next";
 
 export const ChatHeader = (props: { onlyShowClose?: boolean }) => {

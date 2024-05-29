@@ -1,14 +1,14 @@
 import { Button, Spin } from "@arco-design/web-react";
 import { useEffect, useRef, useState } from "react";
 
-import { reflyEnv } from "@/src/utils/env";
+import { reflyEnv } from "@/utils/env";
 
 import "./App.scss";
 
 import { IconRefresh } from "@arco-design/web-react/icon";
 
 import Logo from "~/assets/logo.svg";
-import { useStorage } from "@/src/hooks/use-storage";
+import { useStorage } from "@/hooks/use-storage";
 
 const getActiveTab = async () => {
   const [tab] = await browser.tabs.query({

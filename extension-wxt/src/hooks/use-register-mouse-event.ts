@@ -1,7 +1,7 @@
 import React, { type Dispatch, useEffect, useRef, useState } from "react";
 import { useQuickActionStore } from "../stores/quick-action";
 import { usePopupStore } from "../stores/popup";
-import { calcPopupPosition } from "@/src/utils/ui";
+import { calcPopupPosition } from "@/utils/ui";
 
 export const useRegisterMouseEvent = () => {
   const quickActionStore = useQuickActionStore();

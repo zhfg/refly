@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import type {} from "@redux-devtools/extension";
-import { type User, LOCALE } from "@/src/types";
-import { type OutputLocale } from "@/src/utils/i18n";
+import { type User, LOCALE } from "@/types";
+import { type OutputLocale } from "@/utils/i18n";
 
 export interface LocalSettings {
   uiLocale: LOCALE; // UI 相关的

@@ -14,31 +14,26 @@ import {
   useMessageStateStore,
 } from "../stores/message-state";
 import { useConversationStore } from "../stores/conversation";
-import type {
-  Message,
-  MessageState,
-  RelatedQuestion,
-  Source,
-} from "@/src/types";
+import type { Message, MessageState, RelatedQuestion, Source } from "@/types";
 import {
   MessageItemType,
   TASK_STATUS,
   TASK_TYPE,
   ConversationOperation,
-} from "@/src/types";
-import type { Task } from "@/src/types";
+} from "@/types";
+import type { Task } from "@/types";
 import {
   buildIntentMessageList,
   buildQuestionMessage,
   buildReplyMessage,
-} from "@/src/utils/message";
+} from "@/utils/message";
 
-import { buildErrorMessage } from "@/src/utils/message";
-import { scrollToBottom } from "@/src/utils/ui";
-import { safeParseJSON } from "@/src/utils/parse";
-import { SearchTarget, useSearchStateStore } from "@/src/stores/search-state";
-import { useWeblinkStore } from "@/src/stores/weblink";
-import { getPort, removePort } from "@/src/utils/extension-message";
+import { buildErrorMessage } from "@/utils/message";
+import { scrollToBottom } from "@/utils/ui";
+import { safeParseJSON } from "@/utils/parse";
+import { SearchTarget, useSearchStateStore } from "@/stores/search-state";
+import { useWeblinkStore } from "@/stores/weblink";
+import { getPort, removePort } from "@/utils/extension/ports";
 import { Runtime } from "wxt/browser";
 
 export const useBuildTask = () => {

@@ -122,8 +122,11 @@ export async function request<T>(
   opt: any
 ): Promise<[ApiErr | null, T | null, any?]> {
   const res = await sendToBackground({
-    ...opt,
-    name: url,
+    name: "request", // 代表用于发起请求
+    body: {
+      ...opt,
+      url,
+    },
   });
 
   if (res?.success) {

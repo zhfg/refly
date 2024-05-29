@@ -5,16 +5,16 @@ import {
   Typography,
   Message as message,
 } from "@arco-design/web-react";
-import { useUserStore } from "@/src/stores/user";
-import { safeStringifyJSON } from "@/src/utils/parse";
-import { LOCALE } from "@/src/types";
+import { useUserStore } from "@/stores/user";
+import { safeStringifyJSON } from "@/utils/parse";
+import { LOCALE } from "@/types";
 // request
 import putUserInfo from "@/requests/putUserInfo";
 import {
   type OutputLocale,
   enLocale,
   localeToLanguageName,
-} from "@/src/utils/i18n";
+} from "@/utils/i18n";
 // styles
 import "./index.scss";
 import { storage } from "wxt/storage";

@@ -1,13 +1,10 @@
 import { useEffect, useRef } from "react";
-import type {
-  IndexStatus,
-  WebLinkItem,
-} from "@/src/components/weblink-list/types";
-import { useSiderStore } from "@/src/stores/sider";
-import { useUserStore } from "@/src/stores/user";
-import { useWeblinkStore } from "@/src/stores/weblink";
-import { buildCurrentWeblink } from "@/src/utils/weblink";
-import { sendToBackground } from "@/src/utils/extension-message";
+import type { IndexStatus, WebLinkItem } from "@/components/weblink-list/types";
+import { useSiderStore } from "@/stores/sider";
+import { useUserStore } from "@/stores/user";
+import { useWeblinkStore } from "@/stores/weblink";
+import { buildCurrentWeblink } from "@/utils/weblink";
+import { sendToBackground } from "@/utils/extension-message";
 
 export const usePollingPingCurrentWeblink = () => {
   const pingFuncRef = useRef<NodeJS.Timer>();

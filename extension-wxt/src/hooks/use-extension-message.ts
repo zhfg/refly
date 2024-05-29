@@ -1,23 +1,26 @@
 import { useEffect, useState } from "react";
-import { useSiderStore } from "@/src/stores/sider";
+import { Runtime } from "wxt/browser";
 
 export const useExtensionMessage = <T>(
+  name: string,
   onCallback: (
-    req: chrome.runtime.MessageSender,
+    req: Runtime.MessageSender,
     res: { send: (response?: any) => void }
   ) => void
 ) => {
-  const [extensionData, setExtensionData] = useState<{ data: T }>();
+  const [extensionData, setExtensionData] = useState<T>();
 
   const listenToExtensionMessage = (
     message: any,
-    sender: chrome.runtime.MessageSender,
+    sender: Runtime.MessageSender,
     sendResponse: (response?: any) => void
   ) => {
-    setExtensionData(message);
-    onCallback(sender, {
-      send: sendResponse,
-    });
+    if (message?.data?.name === name) {
+      setExtensionData(message?.data);
+      onCallback(sender, {
+        send: sendResponse,
+      });
+    }
   };
 
   useEffect(() => {

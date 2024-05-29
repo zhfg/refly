@@ -1,4 +1,4 @@
-import { useSiderStore } from "@/src/stores/sider";
+import { useSiderStore } from "@/stores/sider";
 import { useEffect } from "react";
 
 interface SiderBarStatus {
@@ -10,6 +10,7 @@ export const useSiderBarOpen = () => {
   const siderStore = useSiderStore();
 
   const [siderBarStatusData] = useExtensionMessage<SiderBarStatus>(
+    "runRefly",
     (req, res) => {
       const { showSider } = useSiderStore.getState();
       res.send(showSider ? "true" : "false");
@@ -24,6 +25,6 @@ export const useSiderBarOpen = () => {
   };
 
   useEffect(() => {
-    handlerSiderOpen(siderBarStatusData?.data);
-  }, [siderBarStatusData?.data]);
+    handlerSiderOpen(siderBarStatusData);
+  }, [siderBarStatusData]);
 };

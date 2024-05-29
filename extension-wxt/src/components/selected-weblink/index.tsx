@@ -2,10 +2,10 @@ import { Tag } from "@arco-design/web-react";
 import { IconRightCircle, IconLink } from "@arco-design/web-react/icon";
 import React, { type MutableRefObject } from "react";
 import { useTranslation } from "react-i18next";
-import { useSearchQuickActionStore } from "@/src/stores/search-quick-action";
-import { useWeblinkStore } from "@/src/stores/weblink";
-import type { Source } from "@/src/types";
-import { safeParseUrl } from "@/src/utils/parse";
+import { useSearchQuickActionStore } from "@/stores/search-quick-action";
+import { useWeblinkStore } from "@/stores/weblink";
+import type { Source } from "@/types";
+import { safeParseUrl } from "@/utils/parse";
 
 interface SelectedWeblinkProps {
   ref?: MutableRefObject<SelectedWeblinkProps>;

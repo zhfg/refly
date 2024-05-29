@@ -10,34 +10,34 @@ import { IconSend } from "@arco-design/web-react/icon";
 import React, { useEffect, useRef } from "react";
 
 // 自定义方法
-import { scrollToBottom } from "@/src/utils/ui";
+import { scrollToBottom } from "@/utils/ui";
 
 // 自定义组件
 import WeblinkList from "../weblink-list";
 import { ChatHeader } from "./header";
 import { SelectedWeblink } from "../selected-weblink/index";
 import { QuickAction } from "./quick-action";
-import { ContentSelectorBtn } from "@/src/components/content-selector-btn/index";
+import { ContentSelectorBtn } from "@/components/content-selector-btn/index";
 // stores
 import { useQuickActionStore } from "../../stores/quick-action";
 import { useChatStore } from "../../stores/chat";
-import { useMessageStateStore } from "@/src/stores/message-state";
-import { useSiderStore } from "@/src/stores/sider";
-import { useWeblinkStore } from "@/src/stores/weblink";
-import { SearchTarget, useSearchStateStore } from "@/src/stores/search-state";
-import { useContentSelectorStore } from "@/src/stores/content-selector";
+import { useMessageStateStore } from "@/stores/message-state";
+import { useSiderStore } from "@/stores/sider";
+import { useWeblinkStore } from "@/stores/weblink";
+import { SearchTarget, useSearchStateStore } from "@/stores/search-state";
+import { useContentSelectorStore } from "@/stores/content-selector";
 // hooks
-import { useBuildThreadAndRun } from "@/src/hooks/use-build-thread-and-run";
-import { useStoreWeblink } from "@/src/hooks/use-store-weblink";
+import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run";
+import { useStoreWeblink } from "@/hooks/use-store-weblink";
 // 组件
 import { SearchTargetSelector } from "./home-search-target-selector";
-import { mapSourceFromWeblinkList } from "@/src/utils/weblink";
-import { SelectedContentList } from "@/src/components/selected-content-list";
-import { useSearchQuickActionStore } from "@/src/stores/search-quick-action";
+import { mapSourceFromWeblinkList } from "@/utils/weblink";
+import { SelectedContentList } from "@/components/selected-content-list";
+import { useSearchQuickActionStore } from "@/stores/search-quick-action";
 import { useTranslation } from "react-i18next";
-import { CurrentWeblinkQuickSummary } from "@/src/components/current-weblink-quick-summary";
-import { SaveKnowledgeBaseModal } from "@/src/components/save-knowledge-base-modal";
-import { useKnowledgeBaseStore } from "@/src/stores/knowledge-base";
+import { CurrentWeblinkQuickSummary } from "@/components/current-weblink-quick-summary";
+import { SaveKnowledgeBaseModal } from "@/components/save-knowledge-base-modal";
+import { useKnowledgeBaseStore } from "@/stores/knowledge-base";
 // styles
 import "./index.scss";
 

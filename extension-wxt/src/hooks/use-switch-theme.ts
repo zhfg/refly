@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-import { getCSSVar, isMobileScreen } from "@/src/utils/ui";
+import { getCSSVar, isMobileScreen } from "@/utils/ui";
 
 export function useSwitchTheme() {
   const config = { theme: "light" };

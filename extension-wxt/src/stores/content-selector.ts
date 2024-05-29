@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type {} from "@redux-devtools/extension";
-import type { Mark } from "@/src/types";
+import type { Mark } from "@/types";
 
 interface ContentSelectorState {
   // state

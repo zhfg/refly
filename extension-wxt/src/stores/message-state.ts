@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import type {} from "@redux-devtools/extension";
-import { TASK_TYPE } from "@/src/types";
-import type { MessageState } from "@/src/types";
+import { TASK_TYPE } from "@/types";
+import type { MessageState } from "@/types";
 
 interface MessageStoreState extends MessageState {
   // state

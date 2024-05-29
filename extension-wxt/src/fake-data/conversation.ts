@@ -1,4 +1,4 @@
-import { MessageType } from "@/src/types";
+import { MessageType } from "@/types";
 import { fakeTermsMdText } from "./markdown";
 
 export const fakeConversations = [

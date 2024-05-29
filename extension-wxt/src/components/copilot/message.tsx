@@ -1,11 +1,7 @@
 import { Button, Spin } from "@arco-design/web-react";
 import React from "react";
 
-import type {
-  Message,
-  ServerMessage,
-  RecommendQuestionItem,
-} from "@/src/types";
+import type { Message, ServerMessage, RecommendQuestionItem } from "@/types";
 import { Markdown } from "~/components/markdown";
 
 export const ExampleQuestionItem = (msg: RecommendQuestionItem) => (

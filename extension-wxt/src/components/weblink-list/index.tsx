@@ -26,15 +26,15 @@ import throttle from "lodash.throttle";
 import type { QueryPayload, WebLinkItem } from "./types";
 import { defaultQueryPayload } from "./utils";
 
-import { LOCALE, type Conversation } from "@/src/types";
-import { time } from "@/src/utils/time";
+import { LOCALE, type Conversation } from "@/types";
+import { time } from "@/utils/time";
 // stores
-import { useWeblinkStore } from "@/src/stores/weblink";
-import { safeParseUrl } from "@/src/utils/parse";
+import { useWeblinkStore } from "@/stores/weblink";
+import { safeParseUrl } from "@/utils/parse";
 import { useTranslation } from "react-i18next";
 // styles
 import "./index.scss";
-import { sendToBackground } from "@/src/utils/extension-message";
+import { sendToBackground } from "@/utils/extension-message";
 
 type Props = {
   getPopupContainer: () => HTMLElement;

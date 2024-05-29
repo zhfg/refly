@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import type {} from "@redux-devtools/extension";
-import { type Message, type SessionItem } from "@/src/types";
+import { type Message, type SessionItem } from "@/types";
 
 export interface ChatState {
   loading: boolean;

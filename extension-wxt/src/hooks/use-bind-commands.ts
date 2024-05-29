@@ -1,19 +1,13 @@
 import React, { type Dispatch, useEffect, useRef, useState } from "react";
-import { reflyEnv } from "@/src/utils/env";
+import { reflyEnv } from "@/utils/env";
 import hotKeys from "hotkeys-js";
 import { useBuildTask } from "./use-build-task";
-import { useChatStore } from "@/src/stores/chat";
-import {
-  LANGUAGE,
-  LOCALE,
-  TASK_TYPE,
-  type Source,
-  type Task,
-} from "@/src/types";
-import { buildChatTask } from "@/src/utils/task";
-import { useWeblinkStore } from "@/src/stores/weblink";
-import { useUserStore } from "@/src/stores/user";
-import { sendToBackground } from "@/src/utils/extension-message";
+import { useChatStore } from "@/stores/chat";
+import { LANGUAGE, LOCALE, TASK_TYPE, type Source, type Task } from "@/types";
+import { buildChatTask } from "@/utils/task";
+import { useWeblinkStore } from "@/stores/weblink";
+import { useUserStore } from "@/stores/user";
+import { sendToBackground } from "@/utils/extension-message";
 
 export const useBindCommands = () => {
   // 快捷键相关

@@ -1,14 +1,14 @@
 import { Card } from "@arco-design/web-react";
 import { IconClose, IconRightCircle } from "@arco-design/web-react/icon";
-import { useContentSelector } from "@/src/hooks/use-content-selector";
-import { useContentSelectorStore } from "@/src/stores/content-selector";
-import type { Mark } from "@/src/types/content-selector";
+import { useContentSelector } from "@/hooks/use-content-selector";
+import { useContentSelectorStore } from "@/stores/content-selector";
+import type { Mark } from "@/types/content-selector";
 
 // assets
 import EmptySVG from "~assets/selected-content/empty.svg";
 import classNames from "classnames";
 import { useEffect } from "react";
-import { useSelectedMark } from "@/src/hooks/use-selected-mark";
+import { useSelectedMark } from "@/hooks/use-selected-mark";
 import { useTranslation } from "react-i18next";
 // styles
 import "./index.scss";

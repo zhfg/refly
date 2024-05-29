@@ -2,12 +2,12 @@ import { Button } from "@arco-design/web-react";
 import React, { useRef } from "react";
 
 // stores
-import { useUserStore } from "@/src/stores/user";
+import { useUserStore } from "@/stores/user";
 
 // 静态资源
 import Logo from "~assets/logo.svg";
-import { getClientOrigin } from "@/src/utils/url";
-import { ChatHeader } from "@/src/components/home/header";
+import { getClientOrigin } from "@/utils/url";
+import { ChatHeader } from "@/components/home/header";
 import { useTranslation } from "react-i18next";
 // styles
 import "./index.scss";

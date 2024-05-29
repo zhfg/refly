@@ -17,15 +17,15 @@ import {
   IconTranslate,
 } from "@arco-design/web-react/icon";
 import React, { useState } from "react";
-import type { Message, SessionItem, Source, TASK_TYPE } from "@/src/types";
+import type { Message, SessionItem, Source, TASK_TYPE } from "@/types";
 
 // stores
-import { useMessageStateStore } from "@/src/stores/message-state";
-import { IconTip } from "@/src/components/home/icon-tip";
-import { Markdown } from "@/src/components/markdown";
+import { useMessageStateStore } from "@/stores/message-state";
+import { IconTip } from "@/components/home/icon-tip";
+import { Markdown } from "@/components/markdown";
 
 import copyToClipboard from "copy-to-clipboard";
-import { safeParseUrl } from "@/src/utils/parse";
+import { safeParseUrl } from "@/utils/parse";
 import { useTranslation } from "react-i18next";
 
 interface SessionProps {

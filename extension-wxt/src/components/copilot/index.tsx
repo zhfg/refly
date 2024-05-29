@@ -18,12 +18,12 @@ import {
 } from "@arco-design/web-react/icon";
 // 自定义样式
 import "./index.scss";
-import { MessageType } from "@/src/types";
+import { MessageType } from "@/types";
 import { AssistantMessage, HumanMessage } from "./message";
-import { ChatHeader } from "@/src/components/home/header";
-import { fakeConversations } from "@/src/fake-data/conversation";
-import { ContentSelectorBtn } from "@/src/components/content-selector-btn";
-import { SearchTarget, useSearchStateStore } from "@/src/stores/search-state";
+import { ChatHeader } from "@/components/home/header";
+import { fakeConversations } from "@/fake-data/conversation";
+import { ContentSelectorBtn } from "@/components/content-selector-btn";
+import { SearchTarget, useSearchStateStore } from "@/stores/search-state";
 // styles
 import "./index.scss";
 

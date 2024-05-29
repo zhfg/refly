@@ -1,4 +1,4 @@
-import { type Conversation, type Message } from "@/src/types";
+import { type Conversation, type Message } from "@/types";
 
 import { genUniqueId } from "./index";
 import { createId } from "@paralleldrive/cuid2";

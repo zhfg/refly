@@ -1,7 +1,7 @@
-import { useQuickActionStore } from "@/src/stores/quick-action";
-import { useChatStore } from "@/src/stores/chat";
-import { useMessageStateStore } from "@/src/stores/message-state";
-import { usePopupStore } from "@/src/stores/popup";
+import { useQuickActionStore } from "@/stores/quick-action";
+import { useChatStore } from "@/stores/chat";
+import { useMessageStateStore } from "@/stores/message-state";
+import { usePopupStore } from "@/stores/popup";
 
 export const useResetState = () => {
   const quickActionStore = useQuickActionStore();

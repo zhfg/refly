@@ -1,5 +1,5 @@
-import { fetchStream } from "@/src/utils/fetch-stream";
-import type { Source, RelatedQuestion, Task } from "@/src/types";
+import { fetchStream } from "@/utils/fetch-stream";
+import type { Source, RelatedQuestion, Task } from "@/types";
 import { getAuthTokenFromCookie } from "./request";
 import { getServerOrigin } from "./url";
 

@@ -1,8 +1,5 @@
-import {
-  ParseSource,
-  type WebLinkItem,
-} from "@/src/components/weblink-list/types";
-import type { Source } from "@/src/types";
+import { ParseSource, type WebLinkItem } from "@/components/weblink-list/types";
+import type { Source } from "@/types";
 import { removeUnusedHtmlNode } from "./removeUnusedHtmlNode";
 import parse from "node-html-parser";
 

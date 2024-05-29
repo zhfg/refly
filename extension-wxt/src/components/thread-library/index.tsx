@@ -8,21 +8,21 @@ import {
   Typography,
 } from "@arco-design/web-react";
 // stores
-import { useThreadStore, type Thread } from "@/src/stores/thread";
+import { useThreadStore, type Thread } from "@/stores/thread";
 import {
   IconClockCircle,
   IconMessage,
   IconRightCircle,
 } from "@arco-design/web-react/icon";
 import { useNavigate, useMatch } from "react-router-dom";
-import { sendToBackground } from "@/src/utils/extension-message";
+import { sendToBackground } from "@/utils/extension-message";
 // utils
-import { time } from "@/src/utils/time";
+import { time } from "@/utils/time";
 // components
-import { ChatHeader } from "@/src/components/home/header";
-import { EmptyThreadLibraryStatus } from "@/src/components/empty-thread-library-status/index";
+import { ChatHeader } from "@/components/home/header";
+import { EmptyThreadLibraryStatus } from "@/components/empty-thread-library-status/index";
 import { useTranslation } from "react-i18next";
-import type { LOCALE } from "@/src/types";
+import type { LOCALE } from "@/types";
 import classNames from "classnames";
 // styles
 import "./index.scss";

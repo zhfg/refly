@@ -8,18 +8,18 @@ import {
 } from "@arco-design/web-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { fakeKnowledgeBaseList } from "@/src/fake-data/knowledge-base";
-import { useStoreWeblink } from "@/src/hooks/use-store-weblink";
-import { useKnowledgeBaseStore } from "@/src/stores/knowledge-base";
-import { delay } from "@/src/utils/delay";
-import { safeParseJSON } from "@/src/utils/parse";
-import { getPopupContainer } from "@/src/utils/ui";
+import { fakeKnowledgeBaseList } from "@/fake-data/knowledge-base";
+import { useStoreWeblink } from "@/hooks/use-store-weblink";
+import { useKnowledgeBaseStore } from "@/stores/knowledge-base";
+import { delay } from "@/utils/delay";
+import { safeParseJSON } from "@/utils/parse";
+import { getPopupContainer } from "@/utils/ui";
 
 // requests
-import newResource from "@/src/requests/newResource";
-import { ResourceType, type ResourceListItem } from "@/src/types";
+import newResource from "@/requests/newResource";
+import { ResourceType, type ResourceListItem } from "@/types";
 // utils
-import { sendToBackground } from "@/src/utils/extension-message";
+import { sendToBackground } from "@/utils/extension-message";
 
 const FormItem = Form.Item;
 const Option = Select.Option;

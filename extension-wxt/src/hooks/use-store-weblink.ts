@@ -1,17 +1,17 @@
 import { Modal, Message as message } from "@arco-design/web-react";
 
 import { useState } from "react";
-import { delay } from "@/src/utils/delay";
+import { delay } from "@/utils/delay";
 // utils
-import { getReadabilityHtml } from "@/src/utils/readability";
+import { getReadabilityHtml } from "@/utils/readability";
 import { v4 as uuidV4 } from "uuid";
-import { useWeblinkStore } from "@/src/stores/weblink";
-import { retryify } from "@/src/utils/retry";
-import type { WebLinkItem } from "@/src/components/weblink-list/types";
+import { useWeblinkStore } from "@/stores/weblink";
+import { retryify } from "@/utils/retry";
+import type { WebLinkItem } from "@/components/weblink-list/types";
 import { useTranslation } from "react-i18next";
-import type { ReturnType } from "@/src/types/return-types";
-import type { WeblinkMeta } from "@/src/types";
-import { sendToBackground } from "@/src/utils/extension-message";
+import type { ReturnType } from "@/types/return-types";
+import type { WeblinkMeta } from "@/types";
+import { sendToBackground } from "@/utils/extension-message";
 
 export const useStoreWeblink = () => {
   // 网页索引状态

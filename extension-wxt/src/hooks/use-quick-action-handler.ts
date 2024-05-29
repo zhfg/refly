@@ -1,19 +1,19 @@
-import { useWeblinkStore } from "@/src/stores/weblink";
-import { mapSourceFromWeblinkList } from "@/src/utils/weblink";
-import { useBuildThreadAndRun } from "@/src/hooks/use-build-thread-and-run";
-import { SearchTarget, useSearchStateStore } from "@/src/stores/search-state";
-import { useSearchQuickActionStore } from "@/src/stores/search-quick-action";
-import { useContentSelectorStore } from "@/src/stores/content-selector";
-import { useStoreWeblink } from "@/src/hooks/use-store-weblink";
-import type { Source } from "@/src/types";
+import { useWeblinkStore } from "@/stores/weblink";
+import { mapSourceFromWeblinkList } from "@/utils/weblink";
+import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run";
+import { SearchTarget, useSearchStateStore } from "@/stores/search-state";
+import { useSearchQuickActionStore } from "@/stores/search-quick-action";
+import { useContentSelectorStore } from "@/stores/content-selector";
+import { useStoreWeblink } from "@/hooks/use-store-weblink";
+import type { Source } from "@/types";
 import { useTranslation } from "react-i18next";
-import { useChatStore } from "@/src/stores/chat";
-import { QUICK_ACTION_TYPE, type QUICK_ACTION_TASK_PAYLOAD } from "@/src/types";
-import { useUserStore } from "@/src/stores/user";
-import { buildQuickActionTask } from "@/src/utils/task";
-import { buildConversation } from "@/src/utils/conversation";
+import { useChatStore } from "@/stores/chat";
+import { QUICK_ACTION_TYPE, type QUICK_ACTION_TASK_PAYLOAD } from "@/types";
+import { useUserStore } from "@/stores/user";
+import { buildQuickActionTask } from "@/utils/task";
+import { buildConversation } from "@/utils/conversation";
 import { useBuildTask } from "./use-build-task";
-import { useKnowledgeBaseStore } from "@/src/stores/knowledge-base";
+import { useKnowledgeBaseStore } from "@/stores/knowledge-base";
 
 export const useQuickActionHandler = () => {
   const chatStore = useChatStore();

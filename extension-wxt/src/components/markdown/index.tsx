@@ -14,7 +14,7 @@ import RemarkBreaks from "remark-breaks";
 import RemarkGfm from "remark-gfm";
 import RemarkMath from "remark-math";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
-import type { Source } from "@/src/types";
+import type { Source } from "@/types";
 import { useTranslation } from "react-i18next";
 
 export function PreCode(props: { children: any }) {

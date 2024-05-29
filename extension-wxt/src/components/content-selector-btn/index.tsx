@@ -2,10 +2,10 @@ import { Button } from "@arco-design/web-react";
 import { IconHighlight } from "@arco-design/web-react/icon";
 import classNames from "classnames";
 import { useTranslation } from "react-i18next";
-import { IconTip } from "@/src/components/home/icon-tip";
-import { useSelectedMark } from "@/src/hooks/use-selected-mark";
-import { useContentSelectorStore } from "@/src/stores/content-selector";
-import { SearchTarget } from "@/src/stores/search-state";
+import { IconTip } from "@/components/home/icon-tip";
+import { useSelectedMark } from "@/hooks/use-selected-mark";
+import { useContentSelectorStore } from "@/stores/content-selector";
+import { SearchTarget } from "@/stores/search-state";
 
 interface ContentSelectorBtnProps {
   btnType?: "default" | "text";

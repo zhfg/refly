@@ -6,10 +6,10 @@ import {
   IconCompass,
 } from "@arco-design/web-react/icon";
 
-import { useSearchStateStore, SearchTarget } from "@/src/stores/search-state";
-import { useWeblinkStore } from "@/src/stores/weblink";
+import { useSearchStateStore, SearchTarget } from "@/stores/search-state";
+import { useWeblinkStore } from "@/stores/weblink";
 import { IconTip } from "./icon-tip";
-import { getPopupContainer } from "@/src/utils/ui";
+import { getPopupContainer } from "@/utils/ui";
 import { useTranslation } from "react-i18next";
 
 interface SearchTargetSelectorProps {

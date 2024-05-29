@@ -4,7 +4,7 @@ import type {} from "@redux-devtools/extension";
 import type {
   CollectionDetail,
   CollectionListItem,
-} from "@/src/types/knowledge-base";
+} from "@/types/knowledge-base";
 
 interface KnowledgeBaseState {
   isSaveKnowledgeBaseModalVisible: boolean;
