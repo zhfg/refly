@@ -1,0 +1,86 @@
+.selected-content-container {
+  .selected-content-list-container {
+    .arco-card-header {
+      border-bottom: none;
+    }
+
+    .arco-card-size-default .arco-card-header {
+      height: 16px;
+      padding-top: 8px;
+      padding-right: 8px;
+
+      .selected-content-item-action {
+        &:hover {
+          cursor: pointer;
+        }
+      }
+    }
+
+    .arco-card-size-default .arco-card-body {
+      padding-top: 0;
+    }
+  }
+
+  .selected-content-hint-item {
+    font-size: 12px;
+    margin-top: 12px;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    .selected-content-left-hint {
+      color: rgba(0, 0, 0, 0.6);
+
+      span {
+        display: inline-block;
+        margin-left: 4px;
+      }
+
+      &:hover {
+        cursor: pointer;
+      }
+    }
+
+    .selected-content-right-hint {
+      span {
+        color: rgb(var(--primary-6));
+      }
+
+      &:hover {
+        cursor: pointer;
+      }
+    }
+  }
+
+  .arco-card-size-default {
+    border-radius: 8px;
+    background-color: #fcfcf9;
+    margin-top: 12px;
+  }
+
+  .empty-cover-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 48px;
+    margin-bottom: 48px;
+
+    img {
+      width: 230px;
+      height: auto;
+    }
+
+    div {
+      margin-top: 12px;
+      color: #0009;
+      font-size: 12px;
+    }
+  }
+}
+
+.selected-container-limit-container {
+  max-height: 150px;
+  overflow-y: scroll;
+}

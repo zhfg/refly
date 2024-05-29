@@ -1,0 +1,1 @@
+export type UploadingStatus = 'normal' | 'loading' | 'failed' | 'success'

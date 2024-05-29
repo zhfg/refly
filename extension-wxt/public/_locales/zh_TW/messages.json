@@ -1,0 +1,15 @@
+{
+    "name": {
+      "message": "Refly - 知识，在此繁茂",
+      "description": "Name of the extension."
+    },
+    "description": {
+      "message": "快速总结与形成洞察、自动化归档以及智能语义搜索——Refly 能够为你打造第二大脑，拓展你的知识视野，并赋予你超乎寻常的能力。",
+      "description": "Description of the extension."
+    },
+    "displayName": {
+      "message": "Refly - 知识，在此繁茂",
+      "description": "Display name of the extension."
+    }
+  }
+  
