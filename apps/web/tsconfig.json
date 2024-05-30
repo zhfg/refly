@@ -22,7 +22,8 @@
 
     // path
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@refly/ai-workspace-common/*": ["./node_modules/@refly/ai-workspace-common/src/*"]
     }
   },
   "include": ["src"],

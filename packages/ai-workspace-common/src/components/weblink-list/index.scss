@@ -1,0 +1,175 @@
+.arco-drawer-content {
+  overscroll-behavior-y: contain;
+  padding: 0;
+}
+
+.weblink-footer-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+  .weblink-footer-selected {
+    font-size: 16px;
+    color: rgba(0, 0, 0, 0.6);
+
+    span {
+      color: #00968f;
+    }
+  }
+}
+
+.css-ellipsis {
+  white-space: nowrap; /* 不换行 */
+  overflow: hidden; /* 超出部分隐藏 */
+  text-overflow: ellipsis; /* 显示省略号 */
+}
+
+.arco-table-virtualized div.arco-table-body div.arco-table-tr {
+  width: 100% !important;
+  overflow: hidden !important;
+}
+
+.conv-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0px;
+
+  .arco-table-th.arco-table-operation .arco-table-th-item,
+  .arco-table-td.arco-table-operation {
+    padding: 15px !important;
+  }
+
+  .conv-item-wrapper {
+    // padding: 0 16px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  .conv-item {
+    padding: 8px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    div.arco-typography,
+    p.arco-typography {
+      margin-bottom: 0;
+    }
+
+    .conv-item-header {
+      display: flex;
+      align-items: center;
+      height: 18px;
+      min-height: 18px;
+      justify-content: space-between;
+      gap: 8px;
+
+      .title {
+        color: #0d1117;
+        font-size: 14px;
+        font-weight: 600;
+        flex: 1;
+        min-width: 0px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        justify-content: flex-start;
+
+        .title-text {
+          width: 260px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          word-wrap: break-word;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
+          width: 240px;
+        }
+      }
+
+      .date {
+        font-weight: 400;
+        font-size: 13px;
+        color: #00000040;
+        flex: 1;
+      }
+    }
+
+    .conv-item-content {
+      display: flex;
+      align-items: center;
+      line-height: 16px;
+      justify-content: space-between;
+      gap: 8px;
+      color: #595959;
+
+      .conv-item-content-text {
+        font-weight: 500;
+        font-size: 13px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        word-wrap: break-word;
+        font-weight: 400;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+      }
+    }
+
+    .conv-item-footer {
+      display: flex;
+      align-items: center;
+      line-height: 16px;
+      justify-content: space-between;
+      gap: 8px;
+
+      .page-link {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        justify-content: flex-start;
+        font-weight: 400;
+        font-size: 13px;
+        gap: 5px;
+        flex: 1;
+        max-width: 65%;
+        position: relative;
+        overflow: hidden;
+        a {
+          color: #a6a6a6;
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+          align-items: center;
+          gap: 5px;
+          justify-content: flex-start;
+          overflow: hidden;
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+
+        .text {
+          display: inline-block;
+          width: 400px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          word-wrap: break-word;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
+          flex: 1;
+        }
+      }
+    }
+  }
+}

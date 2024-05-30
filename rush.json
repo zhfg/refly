@@ -30,6 +30,11 @@
       "reviewCategory": "packages"
     },
     {
+      "packageName": "@refly/ai-workspace-common",
+      "projectFolder": "packages/ai-workspace-common",
+      "reviewCategory": "packages"
+    },
+    {
       "packageName": "@refly/api",
       "projectFolder": "apps/api",
       "reviewCategory": "apps"

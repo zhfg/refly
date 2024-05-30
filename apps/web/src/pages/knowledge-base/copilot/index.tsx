@@ -20,11 +20,14 @@ import {
 import "./index.scss"
 import { fakeConversations } from "@/fake-data/conversation"
 // 自定义组件
-import { SearchTargetSelector } from "@/components/search-target-selector"
+import { SearchTargetSelector } from "@refly/ai-workspace-common/components/search-target-selector"
 import { useSearchParams } from "react-router-dom"
-import { SearchTarget, useSearchStateStore } from "@/stores/search-state"
+import {
+  SearchTarget,
+  useSearchStateStore,
+} from "@refly/ai-workspace-common/stores/search-state"
 import { ContextStateDisplay } from "./context-state-display"
-import { useCopilotContextState } from "@/hooks/use-copilot-context-state"
+import { useCopilotContextState } from "@refly/ai-workspace-common/hooks/use-copilot-context-state"
 import { useEffect, useState } from "react"
 import { ChatInput } from "./chat-input"
 import { ChatMessages } from "./chat-messages"
@@ -35,20 +38,23 @@ import { KnowledgeBaseListModal } from "./knowledge-base-list-modal"
 import getThreadMessages from "@/requests/getThreadMessages"
 
 // state
-import { useChatStore } from "@/stores/chat"
-import { Conversation, LOCALE } from "@/types"
-import { useConversationStore } from "@/stores/conversation"
-import { useResetState } from "@/hooks/use-reset-state"
-import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run"
-import { delay } from "@/utils/delay"
-import { ActionSource, useKnowledgeBaseStore } from "@/stores/knowledge-base"
+import { useChatStore } from "@refly/ai-workspace-common/stores/chat"
+import { Conversation, LOCALE } from "@refly/ai-workspace-common/types"
+import { useConversationStore } from "@refly/ai-workspace-common/stores/conversation"
+import { useResetState } from "@refly/ai-workspace-common/hooks/use-reset-state"
+import { useBuildThreadAndRun } from "@refly/ai-workspace-common/hooks/use-build-thread-and-run"
+import { delay } from "@refly/ai-workspace-common/utils/delay"
+import {
+  ActionSource,
+  useKnowledgeBaseStore,
+} from "@refly/ai-workspace-common/stores/knowledge-base"
 // utils
-import { localeToLanguageName } from "@/utils/i18n"
-import { OutputLocaleList } from "@/components/output-locale-list"
+import { localeToLanguageName } from "@refly/ai-workspace-common/utils/i18n"
+import { OutputLocaleList } from "@refly/ai-workspace-common/components/output-locale-list"
 import { useTranslation } from "react-i18next"
-import { useUserStore } from "@/stores/user"
-import { useResizeCopilot } from "@/hooks/use-resize-copilot"
-import { SourceListModal } from "@/components/source-list/source-list-modal"
+import { useUserStore } from "@refly/ai-workspace-common/stores/user"
+import { useResizeCopilot } from "@refly/ai-workspace-common/hooks/use-resize-copilot"
+import { SourceListModal } from "@refly/ai-workspace-common/components/source-list/source-list-modal"
 
 const TextArea = Input.TextArea
 

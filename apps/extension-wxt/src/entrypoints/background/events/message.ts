@@ -1,13 +1,13 @@
-import { Runtime, Tabs } from "wxt/browser";
-import { extRequest } from "@/utils/request";
-import { HandlerRequest, HandlerResponse } from "@/types/request";
-import { storage } from "wxt/storage";
-import { getLastActiveTab, saveLastActiveTab } from "@/utils/extension/tabs";
-import { requestFileNames } from "@/types/request-filename";
+import { Runtime, Tabs } from 'wxt/browser';
+import { extRequest } from '@/utils/request';
+import { HandlerRequest, HandlerResponse } from '@/types/request';
+import { storage } from 'wxt/storage';
+import { getLastActiveTab, saveLastActiveTab } from '@/utils/extension/tabs';
+import { requestFileNames } from '@/types/request-filename';
 
 export const handleRequest = async (msg: HandlerRequest<any>) => {
   const lastActiveTab = await getLastActiveTab();
-  const url = appConfig?.url[msg.name as keyof typeof appConfig.url] || "";
+  const url = appConfig?.url[msg.name as keyof typeof appConfig.url] || '';
   const [err, userRes] = await extRequest(url as string, msg?.body);
   let messageRes = {} as HandlerResponse<any>;
 
@@ -29,11 +29,7 @@ export const handleRequest = async (msg: HandlerRequest<any>) => {
   });
 };
 
-export const onMessage = async (
-  msg: any,
-  sender: Runtime.MessageSender,
-  sendResponse: (response?: any) => void
-) => {
+export const onMessage = async (msg: any, sender: Runtime.MessageSender, sendResponse: (response?: any) => void) => {
   // 前置做保存，后续使用
   await saveLastActiveTab(sender?.tab as Tabs.Tab);
 
