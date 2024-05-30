@@ -1,4 +1,4 @@
-import Header from "@/components/landing-page-partials/Header"
+import Header from "@refly/ai-workspace-common/components/landing-page-partials/Header"
 import PageIllustration from "@/components/landing-page-partials/PageIllustration"
 import HeroHome from "@/components/landing-page-partials/HeroHome"
 import FeaturesBlocks from "@/components/landing-page-partials/FeaturesBlocks"
