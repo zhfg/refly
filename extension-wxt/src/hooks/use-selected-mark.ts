@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useContentSelectorStore } from "@/stores/content-selector";
 import { safeParseJSON } from "@/utils/parse";
-import { sendToBackground } from "@/utils/extension-message";
+import { sendToBackground } from "@/utils/extension/messaging";
 // stores
 
 export const useSelectedMark = () => {

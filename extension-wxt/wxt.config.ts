@@ -16,6 +16,12 @@ export default defineConfig({
     css: {
       postcss: postcssConfig,
     },
+    build: {
+      sourcemap: "inline",
+    },
+    server: {
+      port: 4000,
+    },
   }),
   manifest: {
     version: "0.2.0",
@@ -43,5 +49,8 @@ export default defineConfig({
       "cookies",
       "notifications",
     ],
+  },
+  runner: {
+    startUrls: ["https://google.com/"],
   },
 });

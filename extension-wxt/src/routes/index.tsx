@@ -9,9 +9,9 @@ import { Login } from "../components/login";
 
 export const Routing = () => (
   <Routes>
-    <Route path="/" element={<Home />} />
-    <Route path="/login" element={<Login />} />
-    <Route path="/thread/:threadId" element={<Thread />} />
-    <Route path="/thread" element={<ThreadLibrary />} />
+    {/* <Route path="/" element={<Home />} /> */}
+    {/* <Route path="/login" element={<Login />} /> */}
+    {/* <Route path="/thread/:threadId" element={<Thread />} /> */}
+    {/* <Route path="/" element={<ThreadLibrary />} /> */}
   </Routes>
 );

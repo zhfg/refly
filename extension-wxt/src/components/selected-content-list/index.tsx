@@ -5,7 +5,7 @@ import { useContentSelectorStore } from "@/stores/content-selector";
 import type { Mark } from "@/types/content-selector";
 
 // assets
-import EmptySVG from "~assets/selected-content/empty.svg";
+import EmptySVG from "@/assets/selected-content/empty.svg";
 import classNames from "classnames";
 import { useEffect } from "react";
 import { useSelectedMark } from "@/hooks/use-selected-mark";

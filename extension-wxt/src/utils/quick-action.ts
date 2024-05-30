@@ -1,11 +1,11 @@
-import AbstractSVG from "~assets/menu-icons/abstract.svg"
-import CodeSVG from "~assets/menu-icons/code.svg"
-import ExplainSVG from "~assets/menu-icons/explain.svg"
-import ExtensionSVG from "~assets/menu-icons/extension.svg"
-import GrammarySVG from "~assets/menu-icons/grammary.svg"
-import QASVG from "~assets/menu-icons/qa.svg"
-import TranslateSVG from "~assets/menu-icons/translate.svg"
-import WriteSVG from "~assets/menu-icons/write.svg"
+import AbstractSVG from "@/assets/menu-icons/abstract.svg";
+import CodeSVG from "@/assets/menu-icons/code.svg";
+import ExplainSVG from "@/assets/menu-icons/explain.svg";
+import ExtensionSVG from "@/assets/menu-icons/extension.svg";
+import GrammarySVG from "@/assets/menu-icons/grammary.svg";
+import QASVG from "@/assets/menu-icons/qa.svg";
+import TranslateSVG from "@/assets/menu-icons/translate.svg";
+import WriteSVG from "@/assets/menu-icons/write.svg";
 
 export const modeList = [
   {
@@ -60,7 +60,7 @@ export const modeList = [
     text: "扩写",
     prompt: `详细说明这段文字。`,
   },
-]
+];
 
 const markdown = `
     
@@ -78,7 +78,7 @@ const markdown = `
     const foo = 42
     \`\`\`
     
-    `
+    `;
 const getModePrompt = (modeId: string) => {
-  return modeList.filter((item) => (item.id = modeId))?.[0]?.prompt
-}
+  return modeList.filter((item) => (item.id = modeId))?.[0]?.prompt;
+};

@@ -68,20 +68,21 @@ const App = () => {
     const activeTab = await getActiveTab();
     setCurrentTabUrl(activeTab?.url || "");
     currentTabUrlRef.current = activeTab?.url || "";
+    console.log("activeTab", activeTab);
 
     if (activeTab) {
-      browser.tabs.sendMessage(
-        activeTab?.id as number,
-        {
-          body: { name: "runRefly", toggle: !isSideBarOpen },
-        },
-        (response: any) => {
-          if (response) {
-            window.close();
-          }
-        }
-      );
+      console.log("activeTab", browser.tabs.sendMessage);
+      const res = await browser.tabs.sendMessage(activeTab?.id as number, {
+        data: { name: "runRefly", toggle: !isSideBarOpen },
+      });
+
       setIsSideBarOpen(!isSideBarOpen);
+
+      setTimeout(() => {
+        if (res) {
+          window.close();
+        }
+      });
     }
   };
 

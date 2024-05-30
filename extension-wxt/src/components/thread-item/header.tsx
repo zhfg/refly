@@ -1,9 +1,9 @@
-import Logo from "~assets/logo.svg";
-import CloseGraySVG from "~assets/side/close.svg";
-import SendSVG from "~assets/side/send.svg";
-import NotificationSVG from "~assets/side/notification.svg";
-import SettingGraySVG from "~assets/side/setting.svg";
-import FullScreenSVG from "~assets/side/full-screen.svg";
+import Logo from "@/assets/logo.svg";
+import CloseGraySVG from "@/assets/side/close.svg";
+import SendSVG from "@/assets/side/send.svg";
+import NotificationSVG from "@/assets/side/notification.svg";
+import SettingGraySVG from "@/assets/side/setting.svg";
+import FullScreenSVG from "@/assets/side/full-screen.svg";
 import { IconTip } from "@/components/home/icon-tip";
 import { Avatar, Button, Message as message } from "@arco-design/web-react";
 import { useSiderStore } from "@/stores/sider";

@@ -381,6 +381,10 @@ img {
   transform: translateX(0);
 }
 
+#refly-app-main {
+  z-index: 999999;
+}
+
 .main header {
   display: flex;
   justify-content: space-between;

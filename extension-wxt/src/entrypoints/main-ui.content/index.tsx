@@ -7,14 +7,20 @@ export default defineContentScript({
   cssInjectionMode: "ui",
 
   async main(ctx) {
+    console.log("ctx", ctx);
     // 3. Define your UI
     const ui = await createShadowRootUi(ctx, {
       name: "refly-main-app",
       position: "inline",
-      anchor: "body",
-      append: "first",
+      append: "before",
       onMount(container) {
-        const root = ReactDOM.createRoot(container);
+        const elem = document.createElement("div");
+        elem.id = "#refly-main-app";
+        container.appendChild(elem);
+
+        console.log("container", container);
+
+        const root = ReactDOM.createRoot(elem);
         root.render(<App />);
         return root;
       },

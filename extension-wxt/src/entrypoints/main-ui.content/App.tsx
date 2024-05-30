@@ -25,6 +25,9 @@ import { getEnv } from "@/utils/env";
 import { SENTRY_DSN } from "@/utils/url";
 import { useSiderBarOpen } from "@/hooks/use-sider-bar-open";
 
+// 样式
+import "./App.scss";
+
 const Sentry = _Sentry;
 
 Sentry.init({
@@ -79,15 +82,14 @@ const App = () => {
         <img src={Logo} alt="唤起 Refly" style={{ width: 25, height: 25 }} />
         <span>⌘B</span>
       </div> */}
-
         <div
           id="refly-app-main"
           className={siderStore.showSider ? "main active" : "main"}
         >
-          {/* <MemoryRouter>
+          <MemoryRouter>
             <ContentRouter />
-          </MemoryRouter> */}
-          <div>hello world</div>
+          </MemoryRouter>
+          <div>hello refly</div>
         </div>
       </div>
     </Suspense>

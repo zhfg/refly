@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate, useMatch } from "react-router-dom";
 import classNames from "classnames";
-import { Routing } from "~routes/index";
+import { Routing } from "@/routes/index";
 import { IconSearch, IconStorage } from "@arco-design/web-react/icon";
 // stores
 import { useUserStore } from "@/stores/user";
@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import { useGetUserSettings } from "@/hooks/use-get-user-settings";
 import { LOCALE } from "@/types";
 import { useProcessStatusCheck } from "@/hooks/use-process-status-check";
+import Home from "./home";
 
 export const ContentRouter = () => {
   // 导航相关
@@ -28,7 +29,7 @@ export const ContentRouter = () => {
   const locale = userStore?.localSettings?.uiLocale || LOCALE.EN;
 
   // 这里处理 user 登录和状态管理
-  useGetUserSettings();
+  // useGetUserSettings();
   // 进行保活检查
   useProcessStatusCheck();
 
@@ -41,7 +42,7 @@ export const ContentRouter = () => {
 
   return (
     <div style={{ height: "100%" }}>
-      <Routing />
+      <Home />
       {!isThreadItem && userStore.userProfile && (
         <div className="footer-nav-container">
           <div className="footer-nav">

@@ -15,7 +15,7 @@ import {
   IconRightCircle,
 } from "@arco-design/web-react/icon";
 import { useNavigate, useMatch } from "react-router-dom";
-import { sendToBackground } from "@/utils/extension-message";
+import { sendToBackground } from "@/utils/extension/messaging";
 // utils
 import { time } from "@/utils/time";
 // components

@@ -34,7 +34,7 @@ import { safeParseUrl } from "@/utils/parse";
 import { useTranslation } from "react-i18next";
 // styles
 import "./index.scss";
-import { sendToBackground } from "@/utils/extension-message";
+import { sendToBackground } from "@/utils/extension/messaging";
 
 type Props = {
   getPopupContainer: () => HTMLElement;

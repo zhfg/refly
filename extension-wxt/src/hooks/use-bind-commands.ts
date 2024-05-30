@@ -7,7 +7,7 @@ import { LANGUAGE, LOCALE, TASK_TYPE, type Source, type Task } from "@/types";
 import { buildChatTask } from "@/utils/task";
 import { useWeblinkStore } from "@/stores/weblink";
 import { useUserStore } from "@/stores/user";
-import { sendToBackground } from "@/utils/extension-message";
+import { sendToBackground } from "@/utils/extension/messaging";
 
 export const useBindCommands = () => {
   // 快捷键相关

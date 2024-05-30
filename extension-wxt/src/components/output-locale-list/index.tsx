@@ -32,10 +32,10 @@ export const OutputLocaleList = (props: { children: any }) => {
 
     userStore.setLocalSettings({ ...localSettings, outputLocale: lng });
 
-    await storage.setItem(
-      "refly-local-settings",
-      safeStringifyJSON({ ...localSettings, outputLocale: lng })
-    );
+    // await storage.setItem(
+    //   "refly-local-settings",
+    //   safeStringifyJSON({ ...localSettings, outputLocale: lng })
+    // );
 
     // 不阻塞写回用户配置
     const res = await putUserInfo({

@@ -5,7 +5,7 @@ import React, { useRef } from "react";
 import { useUserStore } from "@/stores/user";
 
 // 静态资源
-import Logo from "~assets/logo.svg";
+import Logo from "@/assets/logo.svg";
 import { getClientOrigin } from "@/utils/url";
 import { ChatHeader } from "@/components/home/header";
 import { useTranslation } from "react-i18next";

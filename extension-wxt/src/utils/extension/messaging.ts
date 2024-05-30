@@ -35,5 +35,3 @@ export const sendToContentScript = async (message: {
 
   await browser.tabs.sendMessage(currentTab?.id as number, message);
 };
-
-export const onContentScriptMessage = async (message) => {};

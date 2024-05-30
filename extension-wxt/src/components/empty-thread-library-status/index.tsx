@@ -1,6 +1,6 @@
 import { Button } from "@arco-design/web-react";
 // assets
-import EmptySVG from "~assets/digest/empty.svg";
+import EmptySVG from "@/assets/digest/empty.svg";
 // styles
 import "./index.scss";
 import { useNavigate } from "react-router-dom";

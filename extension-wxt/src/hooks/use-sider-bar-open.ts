@@ -12,6 +12,7 @@ export const useSiderBarOpen = () => {
   const [siderBarStatusData] = useExtensionMessage<SiderBarStatus>(
     "runRefly",
     (req, res) => {
+      console.log("runRefly", req, res);
       const { showSider } = useSiderStore.getState();
       res.send(showSider ? "true" : "false");
     }

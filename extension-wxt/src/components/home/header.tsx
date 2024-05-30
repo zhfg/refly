@@ -1,9 +1,9 @@
 // 静态资源
-import Logo from "~assets/logo.svg";
-import CloseGraySVG from "~assets/side/close.svg";
-import NotificationSVG from "~assets/side/notification.svg";
-import SettingGraySVG from "~assets/side/setting.svg";
-import FullScreenSVG from "~assets/side/full-screen.svg";
+import Logo from "@/assets/logo.svg";
+import CloseGraySVG from "@/assets/side/close.svg";
+import NotificationSVG from "@/assets/side/notification.svg";
+import SettingGraySVG from "@/assets/side/setting.svg";
+import FullScreenSVG from "@/assets/side/full-screen.svg";
 
 // 组件
 import { IconTip } from "./icon-tip";

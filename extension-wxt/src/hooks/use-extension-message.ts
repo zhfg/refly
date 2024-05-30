@@ -15,6 +15,7 @@ export const useExtensionMessage = <T>(
     sender: Runtime.MessageSender,
     sendResponse: (response?: any) => void
   ) => {
+    console.log("listenToExtensionMessage", message);
     if (message?.data?.name === name) {
       setExtensionData(message?.data);
       onCallback(sender, {
@@ -26,9 +27,9 @@ export const useExtensionMessage = <T>(
   useEffect(() => {
     browser.runtime.onMessage.addListener(listenToExtensionMessage as any);
 
-    return () => {
-      browser.runtime.onMessage.removeListener(listenToExtensionMessage as any);
-    };
+    // return () => {
+    //   browser.runtime.onMessage.removeListener(listenToExtensionMessage as any);
+    // };
   }, []);
 
   return [extensionData];

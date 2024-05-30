@@ -19,7 +19,7 @@ import { getPopupContainer } from "@/utils/ui";
 import newResource from "@/requests/newResource";
 import { ResourceType, type ResourceListItem } from "@/types";
 // utils
-import { sendToBackground } from "@/utils/extension-message";
+import { sendToBackground } from "@/utils/extension/messaging";
 
 const FormItem = Form.Item;
 const Option = Select.Option;

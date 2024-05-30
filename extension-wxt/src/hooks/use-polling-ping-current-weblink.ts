@@ -4,7 +4,7 @@ import { useSiderStore } from "@/stores/sider";
 import { useUserStore } from "@/stores/user";
 import { useWeblinkStore } from "@/stores/weblink";
 import { buildCurrentWeblink } from "@/utils/weblink";
-import { sendToBackground } from "@/utils/extension-message";
+import { sendToBackground } from "@/utils/extension/messaging";
 
 export const usePollingPingCurrentWeblink = () => {
   const pingFuncRef = useRef<NodeJS.Timer>();

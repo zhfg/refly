@@ -22,7 +22,7 @@ import { useSelectedMark } from "./use-selected-mark";
 import { useContentSelectorStore } from "@/stores/content-selector";
 import { useTranslation } from "react-i18next";
 import { useUserStore } from "@/stores/user";
-import { sendToBackground } from "@/utils/extension-message";
+import { sendToBackground } from "@/utils/extension/messaging";
 
 export const useBuildThreadAndRun = () => {
   const chatStore = useChatStore();

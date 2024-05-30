@@ -10,7 +10,7 @@ import { useConversationStore } from "@/stores/conversation";
 import { useThreadStore } from "@/stores/thread";
 // utils
 import { buildSessions } from "@/utils/session";
-import { sendToBackground } from "@/utils/extension-message";
+import { sendToBackground } from "@/utils/extension/messaging";
 // 组件
 import { ThreadItem } from "@/components/thread-item/thread-item";
 import { Header } from "./header";

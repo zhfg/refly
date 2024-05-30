@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Storage } from "wxt/browser";
 import { storage } from "wxt/storage";
 
 export const useStorage = <T>(
@@ -8,17 +9,24 @@ export const useStorage = <T>(
 ): [T, (val: T) => void] => {
   const [storageValue, setStorageValue] = useState<T>(defaultVal);
 
-  const storageItem = storage.defineItem<T>(`${location}:${key}`, {
-    defaultValue: defaultVal,
-  });
+  console.log("key", key, location);
+  // const storageItem = storage.defineItem<T>(`local:showChangelogOnUpdate}`, {
+  //   defaultValue: defaultVal,
+  // });
+  // console.log("storage", storageItem);
 
   const syncStorageValue = async (newStorageValue: T) => {
-    await storageItem.setValue(newStorageValue);
+    // await storageItem.setValue(newStorageValue);
     setStorageValue(newStorageValue);
   };
 
   useEffect(() => {
-    storageItem.watch((newValue) => setStorageValue(newValue));
+    browser.storage.sync.onChanged.addListener(
+      (changes: Storage.StorageAreaSyncOnChangedChangesType) => {
+        console.log("changes");
+      }
+    );
+    // storageItem.watch((newValue) => setStorageValue(newValue));
   }, []);
 
   return [storageValue, syncStorageValue];

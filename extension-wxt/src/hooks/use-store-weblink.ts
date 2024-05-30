@@ -11,7 +11,7 @@ import type { WebLinkItem } from "@/components/weblink-list/types";
 import { useTranslation } from "react-i18next";
 import type { ReturnType } from "@/types/return-types";
 import type { WeblinkMeta } from "@/types";
-import { sendToBackground } from "@/utils/extension-message";
+import { sendToBackground } from "@/utils/extension/messaging";
 
 export const useStoreWeblink = () => {
   // 网页索引状态

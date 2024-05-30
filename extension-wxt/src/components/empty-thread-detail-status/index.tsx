@@ -1,14 +1,14 @@
-import { Button } from "@arco-design/web-react"
+import { Button } from "@arco-design/web-react";
 // assets
-import EmptySVG from "~assets/digest/empty.svg"
+import EmptySVG from "@/assets/digest/empty.svg";
 // styles
-import "./index.scss"
-import { useNavigate } from "react-router-dom"
-import { useTranslation } from "react-i18next"
+import "./index.scss";
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export const EmptyThreadDetailStatus = (props: { text: string }) => {
-  const navigate = useNavigate()
-  const { t } = useTranslation()
+  const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className="empty-digest-container">
@@ -18,5 +18,5 @@ export const EmptyThreadDetailStatus = (props: { text: string }) => {
       <p className="empty-digest-hint">{props.text}</p>
       <div className="empty-digest-action-container"></div>
     </div>
-  )
-}
+  );
+};
