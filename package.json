@@ -1,6 +1,0 @@
-{
-	"dependencies": {
-		"@arco-themes/react-refly-ai": "^0.0.1",
-		"@paralleldrive/cuid2": "^2.2.2"
-	}
-}
