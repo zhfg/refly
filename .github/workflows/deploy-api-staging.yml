@@ -1,17 +1,18 @@
-name: Deploy Web To Staging
+name: Deploy API To Staging
 
 on:
   push:
     branches-ignore:
       - release
     paths:
-      - 'apps/web/**'
+      - 'apps/api/**'
   workflow_dispatch:
 
 jobs:
   deploy-staging:
-    uses: ./.github/workflows/deploy-web-base.yml
+    uses: ./.github/workflows/deploy-api-base.yml
     with:
       environment: staging
-      project-name: refly-staging
+      ecs-cluster: Prod
+      ecs-service: staging
     secrets: inherit

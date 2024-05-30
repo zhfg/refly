@@ -5,7 +5,7 @@ on:
     branches:
       - release
     paths:
-      - "web/**"
+      - 'apps/web/**'
   workflow_dispatch:
 
 jobs:
