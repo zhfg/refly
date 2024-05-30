@@ -7,7 +7,7 @@ import { LANGUAGE, LOCALE, TASK_TYPE, type Source, type Task } from "@/types";
 import { buildChatTask } from "@/utils/task";
 import { useWeblinkStore } from "@/stores/weblink";
 import { useUserStore } from "@/stores/user";
-import { sendToBackground } from "@/utils/extension/messaging";
+import { apiRequest } from "@/requests/apiRequest";
 
 export const useBindCommands = () => {
   // 快捷键相关
@@ -17,7 +17,7 @@ export const useBindCommands = () => {
   const { buildTaskAndGenReponse } = useBuildTask();
 
   const loadCommands = async () => {
-    const commands = await sendToBackground({
+    const commands = await apiRequest({
       name: "getAllCommands",
     });
     commands?.data?.forEach((command) => {

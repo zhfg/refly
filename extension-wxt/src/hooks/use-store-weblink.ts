@@ -11,7 +11,7 @@ import type { WebLinkItem } from "@/components/weblink-list/types";
 import { useTranslation } from "react-i18next";
 import type { ReturnType } from "@/types/return-types";
 import type { WeblinkMeta } from "@/types";
-import { sendToBackground } from "@/utils/extension/messaging";
+import { apiRequest } from "@/requests/apiRequest";
 
 export const useStoreWeblink = () => {
   // 网页索引状态
@@ -25,7 +25,7 @@ export const useStoreWeblink = () => {
 
     // 先上传到 worker 获取 storageKey
     const uniqueId = uuidV4();
-    const uploadRes = await sendToBackground({
+    const uploadRes = await apiRequest({
       name: "uploadHtml",
       body: { url, pageContent, fileName: `${uniqueId}.html` },
     });
@@ -37,7 +37,7 @@ export const useStoreWeblink = () => {
     const uploadRes = await handleClientUploadHtml(url);
     const description = document.head.querySelector('meta[name="description"]');
 
-    const res = await sendToBackground({
+    const res = await apiRequest({
       name: "storeWeblink",
       body: {
         url,
@@ -111,7 +111,7 @@ export const useStoreWeblink = () => {
     // 如果还在处理，则获取一下
     if (isProcessingParse) {
       // 先 ping 一下，如果已经上传就不传了
-      const pingRes = await sendToBackground({
+      const pingRes = await apiRequest({
         name: "pingWebLinkStatus",
         body: {
           url,
@@ -148,7 +148,7 @@ export const useStoreWeblink = () => {
 
   const handleUploadWebsite = async (url: string, needSave = false) => {
     let pingRes: ReturnType<WebLinkItem>;
-    let res: ReturnType<any>;
+    let res: ReturnType<any> = null as any;
 
     // setIsUpdatingWebiste(true)
     setUploadingStatus("loading"); // 标识处理过程
@@ -202,7 +202,7 @@ export const useStoreWeblink = () => {
         'meta[name="description"]'
       );
       // 如果能够
-      res = await sendToBackground({
+      res = await apiRequest({
         name: "storeWeblink",
         body: {
           url,

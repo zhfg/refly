@@ -18,8 +18,8 @@ import { getPopupContainer } from "@/utils/ui";
 // requests
 import newResource from "@/requests/newResource";
 import { ResourceType, type ResourceListItem } from "@/types";
+import { apiRequest } from "@/requests/apiRequest";
 // utils
-import { sendToBackground } from "@/utils/extension/messaging";
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -160,7 +160,7 @@ export const SaveKnowledgeBaseModal = () => {
     );
     knowledgeBaseStore.updateIsRequesting(true);
 
-    const res = await sendToBackground({
+    const res = await apiRequest({
       name: "getKnowledgeBaseList",
       body: queryPayload,
     });

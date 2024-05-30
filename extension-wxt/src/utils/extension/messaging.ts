@@ -1,20 +1,17 @@
-import { Runtime } from "wxt/browser";
-import { getCurrentTab } from "./tabs";
+import { getCurrentTab, getLastActiveTab } from "./tabs";
 
-// TODO: return types support
 export const sendToBackground = async (message: {
   name: string;
   body?: any;
-  type?: "request";
 }) => {
   await browser.runtime.sendMessage(message);
 
   const waitForResponse = new Promise((resolve) => {
     const listener = (response: any) => {
-      if (response?.data?.name === message?.name) {
+      if (response?.name === message?.name) {
         browser.runtime.onMessage.removeListener(listener);
 
-        resolve(response);
+        resolve(response?.body);
       }
     };
 
@@ -30,8 +27,13 @@ export const sendToContentScript = async (message: {
   name: string;
   body?: any;
 }) => {
-  const currentTab = await getCurrentTab();
-  if (!currentTab?.id) return;
+  // 先使用 senderTab，然后 backUp 到 currentTab
+  let lastActiveTab = await getLastActiveTab();
+  if (!lastActiveTab?.id) {
+    lastActiveTab = await getCurrentTab();
+  }
 
-  await browser.tabs.sendMessage(currentTab?.id as number, message);
+  if (!lastActiveTab?.id) return;
+
+  await browser.tabs.sendMessage(lastActiveTab?.id as number, message);
 };

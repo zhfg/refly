@@ -1,7 +1,6 @@
 import { getCookie } from "./cookie";
 import { getServerOrigin } from "./url";
 import { getExtensionVersion } from "./version";
-import { sendToBackground } from "./extension/messaging";
 
 const TIMEOUT = 40000;
 const DEFAULT_HEADER = {
@@ -114,32 +113,6 @@ export async function extRequest<T>(
     }
   } catch (err: any) {
     return [new ApiErr(err.message), null];
-  }
-}
-
-export async function request<T>(
-  url: string,
-  opt: any
-): Promise<[ApiErr | null, T | null, any?]> {
-  const res = await sendToBackground({
-    name: "request", // 代表用于发起请求
-    body: {
-      ...opt,
-      url,
-    },
-  });
-
-  if (res?.success) {
-    return [null, res.data, null];
-  } else {
-    return [
-      {
-        err_msg: res?.errMsg as string,
-        err_no: 1,
-        origin: null,
-      },
-      null,
-    ];
   }
 }
 

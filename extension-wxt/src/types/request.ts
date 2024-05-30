@@ -1,5 +1,6 @@
 export interface HandlerRequest<T> {
-  body: T;
+  name: string;
+  body?: T;
 }
 
 export interface HandlerResponse<T> {

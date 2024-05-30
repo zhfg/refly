@@ -4,7 +4,7 @@ import { useSiderStore } from "@/stores/sider";
 import { useUserStore } from "@/stores/user";
 import { useWeblinkStore } from "@/stores/weblink";
 import { buildCurrentWeblink } from "@/utils/weblink";
-import { sendToBackground } from "@/utils/extension/messaging";
+import { apiRequest } from "@/requests/apiRequest";
 
 export const usePollingPingCurrentWeblink = () => {
   const pingFuncRef = useRef<NodeJS.Timer>();
@@ -59,7 +59,7 @@ export const usePollingPingCurrentWeblink = () => {
     }
 
     // 开启轮训
-    const pingRes = await sendToBackground({
+    const pingRes = await apiRequest({
       name: "pingWebLinkStatus",
       body: {
         url: currentWeblink?.originPageUrl,

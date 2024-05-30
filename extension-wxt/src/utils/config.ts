@@ -54,6 +54,8 @@ export const appConfig = {
     "Cannot access contents of the page.",
     "No tab with id:",
   ],
-}
+};
 
-export type REQUEST_URL_TYPE = keyof typeof appConfig.url
+export const requestNames = Object.keys(appConfig?.url);
+
+export type REQUEST_URL_TYPE = keyof typeof appConfig.url;

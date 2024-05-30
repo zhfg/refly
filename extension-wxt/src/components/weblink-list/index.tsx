@@ -34,7 +34,7 @@ import { safeParseUrl } from "@/utils/parse";
 import { useTranslation } from "react-i18next";
 // styles
 import "./index.scss";
-import { sendToBackground } from "@/utils/extension/messaging";
+import { apiRequest } from "@/requests/apiRequest";
 
 type Props = {
   getPopupContainer: () => HTMLElement;
@@ -143,7 +143,7 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
     );
     webLinkStore.updateIsRequest(true);
 
-    const res = await sendToBackground({
+    const res = await apiRequest({
       name: "getWeblinkList",
       body: queryPayload,
     });
@@ -167,7 +167,7 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
 
   //编辑
   const handleEdit = async (params: { id: string; title: string }) => {
-    const res = await sendToBackground({
+    const res = await apiRequest({
       name: "updateConversation",
       body: params,
     });
@@ -187,7 +187,7 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
       },
 
       onOk: () => {
-        return sendToBackground({
+        return apiRequest({
           name: "deleteConversation",
           body: params,
         });

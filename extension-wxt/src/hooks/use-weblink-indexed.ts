@@ -2,7 +2,7 @@
  * Deprecated：目前没有使用
  */
 
-import { sendToBackground } from "@/utils/extension/messaging";
+import { apiRequest } from "@/requests/apiRequest";
 import { useState, useEffect } from "react";
 import { useMatch } from "react-router-dom";
 
@@ -14,7 +14,7 @@ export function useWebLinkIndexed() {
   const getWebsiteIndexStatus = async () => {
     setIsWebLinkIndexed(false);
 
-    const indexRes = await sendToBackground({
+    const indexRes = await apiRequest({
       name: "getWebLinkIndexStatus",
       body: {
         url: location.href,

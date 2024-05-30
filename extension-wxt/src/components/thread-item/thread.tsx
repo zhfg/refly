@@ -10,7 +10,6 @@ import { useConversationStore } from "@/stores/conversation";
 import { useThreadStore } from "@/stores/thread";
 // utils
 import { buildSessions } from "@/utils/session";
-import { sendToBackground } from "@/utils/extension/messaging";
 // 组件
 import { ThreadItem } from "@/components/thread-item/thread-item";
 import { Header } from "./header";
@@ -27,6 +26,7 @@ import { useTranslation } from "react-i18next";
 import { EmptyThreadDetailStatus } from "@/components/empty-thread-detail-status";
 // styles
 import "./thread-item.scss";
+import { apiRequest } from "@/requests/apiRequest";
 
 export const Thread = () => {
   const { buildTaskAndGenReponse } = useBuildTask();
@@ -47,7 +47,7 @@ export const Thread = () => {
       (item) => item?.convId === threadId
     );
     // 异步操作
-    const res = await sendToBackground({
+    const res = await apiRequest({
       name: "getThreadMessages",
       body: {
         threadId,

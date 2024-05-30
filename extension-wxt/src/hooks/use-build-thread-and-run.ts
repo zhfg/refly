@@ -22,7 +22,7 @@ import { useSelectedMark } from "./use-selected-mark";
 import { useContentSelectorStore } from "@/stores/content-selector";
 import { useTranslation } from "react-i18next";
 import { useUserStore } from "@/stores/user";
-import { sendToBackground } from "@/utils/extension/messaging";
+import { apiRequest } from "@/requests/apiRequest";
 
 export const useBuildThreadAndRun = () => {
   const chatStore = useChatStore();
@@ -44,7 +44,7 @@ export const useBuildThreadAndRun = () => {
     const newConversationPayload = buildConversation();
 
     // 创建新会话
-    const res = await sendToBackground({
+    const res = await apiRequest({
       name: "createNewConversation",
       body: { ...newConversationPayload, locale: localSettings?.outputLocale },
     });

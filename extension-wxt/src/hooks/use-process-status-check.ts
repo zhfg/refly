@@ -6,7 +6,6 @@ export const useProcessStatusCheck = () => {
 
   // 收到消息之后，关闭窗口
   const handleExtensionMessage = (request: any) => {
-    console.log("activate useProcessLogoutNotify", request);
     if (request?.name === "refly-status-check") {
       getLoginStatus();
     }

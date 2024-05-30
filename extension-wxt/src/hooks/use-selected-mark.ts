@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useContentSelectorStore } from "@/stores/content-selector";
 import { safeParseJSON } from "@/utils/parse";
-import { sendToBackground } from "@/utils/extension/messaging";
+import { apiRequest } from "@/requests/apiRequest";
 // stores
 
 export const useSelectedMark = () => {
@@ -28,7 +28,7 @@ export const useSelectedMark = () => {
     }
 
     if (!contentSelectorStore?.isInjectStyles) {
-      sendToBackground({
+      apiRequest({
         name: "injectContentSelectorCSS",
       });
 

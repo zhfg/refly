@@ -1,4 +1,5 @@
-export const requestFilesNames = import.meta.glob("../requests/*.ts", {
+export const requestFileNameModuleMap = import.meta.glob("../requests/*.ts", {
   eager: true,
 });
-export type RequestFilename = keyof typeof requestFilesNames;
+export const requestFileNames = Object.keys(requestFileNameModuleMap);
+export type RequestFilename = keyof typeof requestFileNames;

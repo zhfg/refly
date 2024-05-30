@@ -15,7 +15,6 @@ import {
   IconRightCircle,
 } from "@arco-design/web-react/icon";
 import { useNavigate, useMatch } from "react-router-dom";
-import { sendToBackground } from "@/utils/extension/messaging";
 // utils
 import { time } from "@/utils/time";
 // components
@@ -26,6 +25,7 @@ import type { LOCALE } from "@/types";
 import classNames from "classnames";
 // styles
 import "./index.scss";
+import { apiRequest } from "@/requests/apiRequest";
 
 export const ThreadLibrary = () => {
   const [scrollLoading, setScrollLoading] = useState(
@@ -62,7 +62,7 @@ export const ThreadLibrary = () => {
       }
 
       // await delay(30000)
-      const newRes = await sendToBackground({
+      const newRes = await apiRequest({
         name: "getConversationList",
         body: {
           page: currentPage,
