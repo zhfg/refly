@@ -2,20 +2,17 @@ import { getClientOrigin } from "./url";
 
 export async function getCookie() {
   try {
-    const promise = new Promise((resolve, reject) => {
-      browser.cookies?.get(
-        {
-          name: "_refly_ai_sid",
-          url: getClientOrigin(),
-        },
-        (cookie) => {
-          if (cookie?.value) {
-            resolve(cookie?.value);
-          } else {
-            reject("user not auth");
-          }
-        }
-      );
+    const promise = new Promise(async (resolve, reject) => {
+      const res = await browser.cookies?.get({
+        name: "_refly_ai_sid",
+        url: getClientOrigin(),
+      });
+
+      if (res?.value) {
+        resolve(res?.value);
+      } else {
+        reject("user not auth");
+      }
     });
 
     const res = await promise;

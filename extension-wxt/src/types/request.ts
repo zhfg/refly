@@ -3,7 +3,7 @@ export interface HandlerRequest<T> {
 }
 
 export interface HandlerResponse<T> {
-  data?: T | null;
+  data?: T | null | undefined;
   success: boolean;
   errMsg?: any;
 }

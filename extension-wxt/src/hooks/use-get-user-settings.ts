@@ -13,9 +13,11 @@ import { useTranslation } from "react-i18next";
 import { Message as message } from "@arco-design/web-react";
 import { useSiderStore } from "@/stores/sider";
 import { mapDefaultLocale } from "@/utils/locale";
-import { sendToBackground } from "@/utils/extension/messaging";
-// import { storage } from "wxt/storage";
+import { storage } from "wxt/storage";
 import { useStorage } from "./use-storage";
+// request
+import getUserInfo from "@/requests/getUserInfo";
+import putUserInfo from "@/requests/putUserInfo";
 
 interface ExternalLoginPayload {
   name: string;
@@ -48,30 +50,26 @@ export const useGetUserSettings = () => {
     "sync"
   );
 
-  const getUserInfo = async () => {};
-
   const getLoginStatus = async () => {
     try {
       let { localSettings, userProfile } = useUserStore.getState();
       const lastStatusIsLogin = !!userProfile?.uid;
 
-      const res = await sendToBackground({
-        name: "getUserInfo",
-      });
+      const res = await getUserInfo();
 
       console.log("loginStatus", res);
 
       if (!res?.success) {
         userStore.resetState();
         setLoginNotification("");
-        // await storage.removeItem("sync:refly-user-profile");
-        // await storage.removeItem("sync:refly-local-settings");
+        await storage.removeItem("local:refly-user-profile");
+        await storage.removeItem("local:refly-local-settings");
         navigate("/login");
       } else {
-        userStore.setUserProfile(res?.data);
+        userStore.setUserProfile(res?.data!);
 
         // 增加 localSettings
-        let uiLocale = mapDefaultLocale(res?.data?.uiLocale) as LOCALE;
+        let uiLocale = mapDefaultLocale(res?.data?.uiLocale!) as LOCALE;
         let outputLocale = res?.data?.outputLocale as LOCALE;
 
         // 先写回
@@ -88,10 +86,7 @@ export const useGetUserSettings = () => {
             LOCALE.EN) as LOCALE;
           outputLocale = (navigator?.language || LOCALE.EN) as LOCALE;
           // 不阻塞写回用户配置
-          sendToBackground({
-            name: "putUserInfo",
-            body: { uiLocale, outputLocale },
-          });
+          putUserInfo({ body: { uiLocale, outputLocale } });
 
           // 如果是初始化的再替换
           localSettings = {
@@ -106,14 +101,14 @@ export const useGetUserSettings = () => {
         i18n.changeLanguage(uiLocale);
         userStore.setLocalSettings(localSettings);
 
-        // await storage.setItem(
-        //   "sync:refly-user-profile",
-        //   safeStringifyJSON(res?.data)
-        // );
-        // await storage.setItem(
-        //   "sync:refly-local-settings",
-        //   safeStringifyJSON(localSettings)
-        // );
+        await storage.setItem(
+          "sync:refly-user-profile",
+          safeStringifyJSON(res?.data)
+        );
+        await storage.setItem(
+          "sync:refly-local-settings",
+          safeStringifyJSON(localSettings)
+        );
 
         if (!lastStatusIsLogin) {
           navigate("/");
@@ -122,8 +117,8 @@ export const useGetUserSettings = () => {
     } catch (err) {
       console.log("getLoginStatus err", err);
       userStore.resetState();
-      // await storage.removeItem("sync:refly-user-profile");
-      // await storage.removeItem("sync:refly-local-settings");
+      await storage.removeItem("sync:refly-user-profile");
+      await storage.removeItem("sync:refly-local-settings");
       setLoginNotification("");
       navigate("/login");
     }
@@ -135,9 +130,7 @@ export const useGetUserSettings = () => {
         let { localSettings, userProfile } = useUserStore.getState();
         const lastStatusIsLogin = !!userProfile?.uid;
 
-        const res = await sendToBackground({
-          name: "getUserInfo",
-        });
+        const res = await getUserInfo();
 
         console.log("loginStatus", res);
 
@@ -145,19 +138,19 @@ export const useGetUserSettings = () => {
           userStore.setUserProfile(undefined);
           userStore.setToken("");
           setToken("");
-          // await await storage.removeItem("sync:refly-user-profile");
-          // await await storage.removeItem("sync:refly-local-settings");
+          await await storage.removeItem("sync:refly-user-profile");
+          await await storage.removeItem("sync:refly-local-settings");
 
           navigate("/login");
           message.error(t("loginPage.status.failed"));
         } else {
-          userStore.setUserProfile(res?.data);
+          userStore.setUserProfile(res?.data!);
           userStore.setToken(data?.token);
           setToken(data?.token as string);
-          // await storage.setItem(
-          //   "sync:refly-user-profile",
-          //   safeStringifyJSON(res?.data)
-          // );
+          await storage.setItem(
+            "sync:refly-user-profile",
+            safeStringifyJSON(res?.data)
+          );
 
           // 增加 localSettings
           let uiLocale = res?.data?.uiLocale as LOCALE;
@@ -176,8 +169,7 @@ export const useGetUserSettings = () => {
             uiLocale = (navigator?.language || LOCALE.EN) as LOCALE;
             outputLocale = (navigator?.language || LOCALE.EN) as LOCALE;
             // 不阻塞写回用户配置
-            sendToBackground({
-              name: "getUserInfo",
+            putUserInfo({
               body: { uiLocale, outputLocale },
             });
 
@@ -194,14 +186,14 @@ export const useGetUserSettings = () => {
           i18n.changeLanguage(uiLocale);
 
           userStore.setLocalSettings(localSettings);
-          // await storage.setItem(
-          //   "sync:refly-user-profile",
-          //   safeStringifyJSON(res?.data)
-          // );
-          // await storage.setItem(
-          //   "sync:refly-local-settings",
-          //   safeStringifyJSON(localSettings)
-          // );
+          await storage.setItem(
+            "sync:refly-user-profile",
+            safeStringifyJSON(res?.data)
+          );
+          await storage.setItem(
+            "sync:refly-local-settings",
+            safeStringifyJSON(localSettings)
+          );
 
           // message.success(t("loginPage.status.success"))
 
@@ -215,8 +207,8 @@ export const useGetUserSettings = () => {
         userStore.setLocalSettings(defaultLocalSettings);
         userStore.setToken("");
         setToken("");
-        // await await storage.removeItem("sync:refly-user-profile");
-        // await await storage.removeItem("sync:refly-local-settings");
+        await await storage.removeItem("sync:refly-user-profile");
+        await await storage.removeItem("sync:refly-local-settings");
 
         navigate("/login");
       }

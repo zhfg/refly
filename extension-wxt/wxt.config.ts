@@ -20,7 +20,7 @@ export default defineConfig({
       sourcemap: "inline",
     },
     server: {
-      port: 4000,
+      port: 8000,
     },
   }),
   manifest: {

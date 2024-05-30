@@ -14,13 +14,7 @@ export default defineContentScript({
       position: "inline",
       append: "before",
       onMount(container) {
-        const elem = document.createElement("div");
-        elem.id = "#refly-main-app";
-        container.appendChild(elem);
-
-        console.log("container", container);
-
-        const root = ReactDOM.createRoot(elem);
+        const root = ReactDOM.createRoot(container);
         root.render(<App />);
         return root;
       },

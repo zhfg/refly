@@ -68,7 +68,7 @@ const App = () => {
     Message.config({
       getContainer: () =>
         document
-          .querySelector("#refly-main-app")
+          .querySelector("refly-main-app")
           ?.shadowRoot?.querySelector(".main") as HTMLElement,
     });
   }, []);
@@ -89,7 +89,6 @@ const App = () => {
           <MemoryRouter>
             <ContentRouter />
           </MemoryRouter>
-          <div>hello refly</div>
         </div>
       </div>
     </Suspense>

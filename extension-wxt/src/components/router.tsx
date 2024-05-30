@@ -29,7 +29,7 @@ export const ContentRouter = () => {
   const locale = userStore?.localSettings?.uiLocale || LOCALE.EN;
 
   // 这里处理 user 登录和状态管理
-  // useGetUserSettings();
+  useGetUserSettings();
   // 进行保活检查
   useProcessStatusCheck();
 
