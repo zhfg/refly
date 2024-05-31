@@ -8,7 +8,7 @@
     "require": "./dist/cjs/index.js"
   },
   "scripts": {
-    "clean": "rimraf dist && pnpm run generate",
+    "clean": "rimraf dist",
     "generate": "openapi-ts",
     "build": "openapi-ts && pnpm run clean && pnpm run build:cjs && pnpm run build:esm",
     "build:cjs": "tsc -p tsconfig.cjs.json",

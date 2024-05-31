@@ -101,6 +101,158 @@ export type CollectionDetail = CollectionListItem & {
   resources?: Array<ResourceListItem>;
 };
 
+/**
+ * Source metadata
+ */
+export type SourceMeta = {
+  /**
+   * Source URL
+   */
+  source?: string;
+  /**
+   * Source title
+   */
+  title?: number;
+};
+
+/**
+ * Source of the message
+ */
+export type Source = {
+  /**
+   * Source URL
+   */
+  url?: string;
+  /**
+   * Source title
+   */
+  title?: string;
+  /**
+   * Source content
+   */
+  pageContent?: string;
+  /**
+   * Relativity score
+   */
+  score?: number;
+  /**
+   * Source metadata
+   * @deprecated
+   */
+  metadata?: SourceMeta;
+};
+
+/**
+ * Chat message type
+ */
+export type MessageType = 'ai' | 'human' | 'system';
+
+/**
+ * Chat message
+ */
+export type ChatMessage = {
+  /**
+   * Message type
+   */
+  type: MessageType;
+  /**
+   * Message content
+   */
+  content: string;
+  /**
+   * Message creation time
+   */
+  createdAt: string;
+  /**
+   * Message update time
+   */
+  updatedAt?: string;
+};
+
+/**
+ * Conversation list item
+ */
+export type ConversationListItem = {
+  /**
+   * Conversation ID
+   */
+  convId?: string;
+  /**
+   * Conversation title
+   */
+  title?: string;
+  /**
+   * Last message content
+   */
+  lastMessage?: string;
+  /**
+   * Number of chat messages in this conversation
+   */
+  messageCount?: number;
+  /**
+   * Related content ID
+   */
+  contentId?: string;
+  /**
+   * Origin page host
+   */
+  origin?: string;
+  /**
+   * Origin page title
+   */
+  originPageTitle?: string;
+  /**
+   * Origin page url
+   */
+  originPageUrl?: string;
+  /**
+   * Conversation creation time
+   */
+  createdAt?: string;
+  /**
+   * Conversation creation time
+   */
+  updatedAt?: string;
+};
+
+export type ConversationDetail = ConversationListItem & {
+  /**
+   * Conversation messages
+   */
+  messages?: Array<ChatMessage>;
+};
+
+export type UserSettings = {
+  /**
+   * User ID
+   */
+  uid: string;
+  /**
+   * User avatar
+   */
+  avatar: string;
+  /**
+   * User name
+   */
+  name: string;
+  /**
+   * User email
+   */
+  email: string;
+  /**
+   * Whether email is verified
+   */
+  emailVerified?: boolean;
+  /**
+   * User UI locale
+   */
+  uiLocale?: string;
+  /**
+   * User output locale
+   */
+  outputLocale?: string;
+};
+
 export type BaseResponse = {
   /**
    * Whether the operation was successful
@@ -218,6 +370,76 @@ export type GetCollectionDetailResponse = BaseResponse & {
    * Collection data
    */
   data?: CollectionDetail;
+};
+
+export type CreateConversationRequest = {
+  /**
+   * Conversation title
+   */
+  title?: string;
+  /**
+   * Related content ID
+   */
+  contentId?: string;
+  /**
+   * Related link ID
+   */
+  linkId?: string;
+  /**
+   * Conversation locale
+   */
+  locale?: string;
+  /**
+   * Origin page host
+   */
+  origin?: string;
+  /**
+   * Origin page title
+   */
+  originPageTitle?: string;
+  /**
+   * Origin page url
+   */
+  originPageUrl?: string;
+};
+
+export type CreateConversationResponse = BaseResponse & {
+  /**
+   * Created conversation
+   */
+  data?: ConversationListItem;
+};
+
+export type ListConversationResponse = BaseResponse & {
+  /**
+   * Conversation list
+   */
+  data?: ConversationListItem;
+};
+
+export type GetConversationDetailResponse = BaseResponse & {
+  /**
+   * Conversation data
+   */
+  data?: ConversationDetail;
+};
+
+export type UpdateUserSettingsRequest = {
+  /**
+   * UI locale
+   */
+  uiLocale?: string;
+  /**
+   * Output locale
+   */
+  outputLocale?: string;
+};
+
+export type GetUserSettingsResponse = BaseResponse & {
+  /**
+   * User settings data
+   */
+  data?: UserSettings;
 };
 
 export type ListResourcesData = {
@@ -344,6 +566,46 @@ export type DeleteCollectionResponse = BaseResponse;
 
 export type DeleteCollectionError = unknown;
 
+export type ListConversationsResponse = ListConversationResponse;
+
+export type ListConversationsError = unknown;
+
+export type CreateConversationData = {
+  /**
+   * Conversation creation request
+   */
+  body: CreateConversationRequest;
+};
+
+export type CreateConversationResponse2 = CreateConversationResponse;
+
+export type CreateConversationError = unknown;
+
+export type GetConversationData = {
+  path: {
+    /**
+     * Conversation ID
+     */
+    convId: string;
+  };
+};
+
+export type GetConversationResponse = GetConversationDetailResponse;
+
+export type GetConversationError = unknown;
+
+export type GetSettingsResponse = UserSettings;
+
+export type GetSettingsError = unknown;
+
+export type UpdateSettingsData = {
+  body: UpdateUserSettingsRequest;
+};
+
+export type UpdateSettingsResponse = BaseResponse;
+
+export type UpdateSettingsError = unknown;
+
 export type $OpenApiTs = {
   '/knowledge/resource/list': {
     get: {
@@ -450,6 +712,57 @@ export type $OpenApiTs = {
       res: {
         /**
          * Successful operation
+         */
+        '200': BaseResponse;
+      };
+    };
+  };
+  '/conversation/list': {
+    get: {
+      res: {
+        /**
+         * successful operation
+         */
+        '200': ListConversationResponse;
+      };
+    };
+  };
+  '/conversation/new': {
+    post: {
+      req: CreateConversationData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': CreateConversationResponse;
+      };
+    };
+  };
+  '/conversation/{convId}': {
+    get: {
+      req: GetConversationData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': GetConversationDetailResponse;
+      };
+    };
+  };
+  '/user/settings': {
+    get: {
+      res: {
+        /**
+         * successful operation
+         */
+        '200': UserSettings;
+      };
+    };
+    put: {
+      req: UpdateSettingsData;
+      res: {
+        /**
+         * successful operation
          */
         '200': BaseResponse;
       };

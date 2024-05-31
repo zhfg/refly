@@ -32,6 +32,19 @@ import type {
   DeleteCollectionData,
   DeleteCollectionError,
   DeleteCollectionResponse,
+  ListConversationsError,
+  ListConversationsResponse,
+  CreateConversationData,
+  CreateConversationError,
+  CreateConversationResponse2,
+  GetConversationData,
+  GetConversationError,
+  GetConversationResponse,
+  GetSettingsError,
+  GetSettingsResponse,
+  UpdateSettingsData,
+  UpdateSettingsError,
+  UpdateSettingsResponse,
 } from './types.gen';
 
 /**
@@ -141,5 +154,60 @@ export const deleteCollection = (options: Options<DeleteCollectionData>) => {
   return (options?.client ?? client).post<DeleteCollectionResponse, DeleteCollectionError>({
     ...options,
     url: '/knowledge/collection/delete',
+  });
+};
+
+/**
+ * List conversations
+ * List all conversations
+ */
+export const listConversations = (options?: Options) => {
+  return (options?.client ?? client).get<ListConversationsResponse, ListConversationsError>({
+    ...options,
+    url: '/conversation/list',
+  });
+};
+
+/**
+ * Create new conversation
+ * Create a new conversation
+ */
+export const createConversation = (options: Options<CreateConversationData>) => {
+  return (options?.client ?? client).post<CreateConversationResponse2, CreateConversationError>({
+    ...options,
+    url: '/conversation/new',
+  });
+};
+
+/**
+ * Get conversation
+ * Get conversation detail
+ */
+export const getConversation = (options: Options<GetConversationData>) => {
+  return (options?.client ?? client).get<GetConversationResponse, GetConversationError>({
+    ...options,
+    url: '/conversation/{convId}',
+  });
+};
+
+/**
+ * Get user settings
+ * Return settings for current user
+ */
+export const getSettings = (options?: Options) => {
+  return (options?.client ?? client).get<GetSettingsResponse, GetSettingsError>({
+    ...options,
+    url: '/user/settings',
+  });
+};
+
+/**
+ * Update user settings
+ * Update settings for current user
+ */
+export const updateSettings = (options: Options<UpdateSettingsData>) => {
+  return (options?.client ?? client).put<UpdateSettingsResponse, UpdateSettingsError>({
+    ...options,
+    url: '/user/settings',
   });
 };

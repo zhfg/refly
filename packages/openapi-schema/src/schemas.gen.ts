@@ -153,6 +153,203 @@ export const $CollectionDetail = {
   ],
 } as const;
 
+export const $SourceMeta = {
+  type: 'object',
+  description: 'Source metadata',
+  required: ['pageContent', 'score'],
+  properties: {
+    source: {
+      type: 'string',
+      description: 'Source URL',
+    },
+    title: {
+      type: 'number',
+      description: 'Source title',
+    },
+  },
+} as const;
+
+export const $Source = {
+  type: 'object',
+  description: 'Source of the message',
+  properties: {
+    url: {
+      type: 'string',
+      description: 'Source URL',
+    },
+    title: {
+      type: 'string',
+      description: 'Source title',
+    },
+    pageContent: {
+      type: 'string',
+      description: 'Source content',
+    },
+    score: {
+      type: 'number',
+      description: 'Relativity score',
+    },
+    metadata: {
+      type: 'object',
+      description: 'Source metadata',
+      deprecated: true,
+      $ref: '#/components/schemas/SourceMeta',
+    },
+  },
+} as const;
+
+export const $MessageType = {
+  type: 'string',
+  description: 'Chat message type',
+  enum: ['ai', 'human', 'system'],
+} as const;
+
+export const $ChatMessage = {
+  type: 'object',
+  description: 'Chat message',
+  required: ['type', 'content', 'createdAt'],
+  properties: {
+    type: {
+      description: 'Message type',
+      $ref: '#/components/schemas/MessageType',
+    },
+    content: {
+      type: 'string',
+      description: 'Message content',
+      example: 'Hello',
+    },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Message creation time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Message update time',
+    },
+  },
+} as const;
+
+export const $ConversationListItem = {
+  type: 'object',
+  description: 'Conversation list item',
+  properties: {
+    convId: {
+      type: 'string',
+      description: 'Conversation ID',
+      example: 'cv-g30e1b80b5g1itbemc0g5jj3',
+    },
+    title: {
+      type: 'string',
+      description: 'Conversation title',
+      example: 'Default Conversation',
+    },
+    lastMessage: {
+      type: 'string',
+      description: 'Last message content',
+      example: 'Hello',
+    },
+    messageCount: {
+      type: 'number',
+      description: 'Number of chat messages in this conversation',
+      example: 42,
+    },
+    contentId: {
+      type: 'string',
+      description: 'Related content ID',
+      example: 'c-g30e1b80b5g1itbemc0g5jj3',
+    },
+    origin: {
+      type: 'string',
+      description: 'Origin page host',
+      example: 'https://refly.ai',
+    },
+    originPageTitle: {
+      type: 'string',
+      description: 'Origin page title',
+      example: 'Refly | Where knowledge thrives',
+    },
+    originPageUrl: {
+      type: 'string',
+      description: 'Origin page url',
+      example: 'https://refly.ai/knowledge-base',
+    },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Conversation creation time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Conversation creation time',
+    },
+  },
+} as const;
+
+export const $ConversationDetail = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/ConversationListItem',
+    },
+    {
+      type: 'object',
+      properties: {
+        messages: {
+          type: 'array',
+          description: 'Conversation messages',
+          items: {
+            $ref: '#/components/schemas/ChatMessage',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $UserSettings = {
+  type: 'object',
+  required: ['uid', 'avatar', 'name', 'email'],
+  properties: {
+    uid: {
+      type: 'string',
+      description: 'User ID',
+      example: 'u-g30e1b80b5g1itbemc0g5jj3',
+    },
+    avatar: {
+      type: 'string',
+      description: 'User avatar',
+      example: 'https://www.gstatic.com/webp/gallery/1.jpg',
+    },
+    name: {
+      type: 'string',
+      description: 'User name',
+      example: 'John Doe',
+    },
+    email: {
+      type: 'string',
+      description: 'User email',
+      example: '6XJpZ@example.com',
+    },
+    emailVerified: {
+      type: 'boolean',
+      description: 'Whether email is verified',
+      default: false,
+    },
+    uiLocale: {
+      type: 'string',
+      description: 'User UI locale',
+      example: 'en',
+    },
+    outputLocale: {
+      type: 'string',
+      description: 'User output locale',
+      example: 'en',
+    },
+  },
+} as const;
+
 export const $BaseResponse = {
   type: 'object',
   required: ['success'],
@@ -370,6 +567,135 @@ export const $GetCollectionDetailResponse = {
           type: 'object',
           description: 'Collection data',
           $ref: '#/components/schemas/CollectionDetail',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $CreateConversationRequest = {
+  type: 'object',
+  properties: {
+    title: {
+      type: 'string',
+      description: 'Conversation title',
+      example: 'My Conversation',
+    },
+    contentId: {
+      type: 'string',
+      description: 'Related content ID',
+      example: 'c-g30e1b80b5g1itbemc0g5jj3',
+    },
+    linkId: {
+      type: 'string',
+      description: 'Related link ID',
+      example: 'l-g30e1b80b5g1itbemc0g5jj3',
+    },
+    locale: {
+      type: 'string',
+      description: 'Conversation locale',
+      example: 'en',
+    },
+    origin: {
+      type: 'string',
+      description: 'Origin page host',
+      example: 'https://refly.ai',
+    },
+    originPageTitle: {
+      type: 'string',
+      description: 'Origin page title',
+      example: 'Refly | Where knowledge thrives',
+    },
+    originPageUrl: {
+      type: 'string',
+      description: 'Origin page url',
+      example: 'https://refly.ai/knowledge-base',
+    },
+  },
+} as const;
+
+export const $CreateConversationResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Created conversation',
+          $ref: '#/components/schemas/ConversationListItem',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $ListConversationResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Conversation list',
+          $ref: '#/components/schemas/ConversationListItem',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $GetConversationDetailResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Conversation data',
+          $ref: '#/components/schemas/ConversationDetail',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $UpdateUserSettingsRequest = {
+  type: 'object',
+  properties: {
+    uiLocale: {
+      type: 'string',
+      description: 'UI locale',
+      example: 'en',
+    },
+    outputLocale: {
+      type: 'string',
+      description: 'Output locale',
+      example: 'en',
+    },
+  },
+} as const;
+
+export const $GetUserSettingsResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'User settings data',
+          $ref: '#/components/schemas/UserSettings',
         },
       },
     },
