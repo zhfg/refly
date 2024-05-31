@@ -1,8 +1,8 @@
 import { sentryVitePlugin } from "@sentry/vite-plugin"
-import { defineConfig } from "vite"
+import { defineConfig, searchForWorkspaceRoot, UserConfig } from "vite"
 import react from "@vitejs/plugin-react"
 import path from "path"
-import postcss from "./postcss.config.js"
+import postcss from "./postcss.config"
 import { vitePluginForArco } from "@refly/arco-vite-plugin-react"
 import tsconfigPaths from "vite-tsconfig-paths"
 
@@ -54,7 +54,8 @@ export default defineConfig({
   // },
   server: {
     fs: {
-      strict: false,
+      strict: false, // TODO：这里需要添加限制，allow 需要处理，目前先临时解决
+      allow: [searchForWorkspaceRoot(process.cwd())],
     },
   },
-})
+} as UserConfig)
