@@ -5,7 +5,7 @@ import { omit } from 'lodash';
 import { LlmService } from '../llm/llm.service';
 import { PrismaService } from '../common/prisma.service';
 import { AigcContent, User, UserWeblink, Weblink } from '@prisma/client';
-import { ContentMeta } from '../llm/dto';
+import { ContentMeta } from '../llm/llm.dto';
 import { DigestFilter } from './aigc.dto';
 import { categoryList } from '../prompts/utils/category';
 import { PageMeta } from '../types/weblink';

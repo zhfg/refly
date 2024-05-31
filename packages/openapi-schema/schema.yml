@@ -1,0 +1,534 @@
+openapi: 3.0.3
+info:
+  title: Refly AI
+  description: AI-native knowledge management solutions and infra.
+  contact:
+    email: team@refly.ai
+  version: 0.2.0
+externalDocs:
+  description: Where knowledge thrives
+  url: https://refly.ai
+servers:
+  - url: /v1
+tags:
+  - name: knowledge
+    description: Knowledge base management endpoints
+paths:
+  /knowledge/resource/list:
+    get:
+      tags:
+        - knowledge
+      summary: List resources
+      description: List all resources
+      operationId: listResources
+      parameters:
+        - name: collectionId
+          in: query
+          description: Target collection ID
+          schema:
+            type: string
+            example: cl-g30e1b80b5g1itbemc0g5jj3
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: number
+            default: 1
+        - name: pageSize
+          in: query
+          description: Page size
+          schema:
+            type: number
+            default: 10
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListResourceResponse'
+      security:
+        - api_key: []
+  /knowledge/resource/detail:
+    get:
+      tags:
+        - knowledge
+      summary: Get resource detail
+      description: Return resource detail along with its document content
+      operationId: getResourceDetail
+      parameters:
+        - name: resourceId
+          in: query
+          description: Resource ID to retrieve
+          required: true
+          schema:
+            type: string
+            example: r-g30e1b80b5g1itbemc0g5jj3
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetResourceDetailResponse'
+      security:
+        - api_key: []
+  /knowledge/resource/update:
+    post:
+      tags:
+        - knowledge
+      summary: Update resource
+      description: Update an existing resource
+      operationId: updateResource
+      requestBody:
+        description: Resource update request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertResourceRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertResourceResponse'
+      security:
+        - api_key: []
+  /knowledge/resource/new:
+    post:
+      tags:
+        - knowledge
+      summary: Create new resource
+      description: Create a new resource
+      operationId: createResource
+      requestBody:
+        description: Resource creation request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertResourceRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertResourceResponse'
+      security:
+        - api_key: []
+  /knowledge/resource/delete:
+    post:
+      tags:
+        - knowledge
+      summary: Delete resource
+      description: Delete an existing resource
+      operationId: deleteResource
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteResourceRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+      security:
+        - api_key: []
+  /knowledge/collection/list:
+    get:
+      tags:
+        - knowledge
+      summary: List user collections
+      description: List all collections for a user
+      operationId: listCollections
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          required: false
+          schema:
+            type: number
+            default: 1
+        - name: pageSize
+          in: query
+          description: Page size
+          required: false
+          schema:
+            type: number
+            default: 10
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListCollectionResponse'
+      security:
+        - api_key: []
+  /knowledge/collection/detail:
+    get:
+      tags:
+        - knowledge
+      summary: Get collection detail
+      description: Return collection details along with its resources
+      operationId: getCollectionDetail
+      parameters:
+        - name: collectionId
+          in: query
+          description: Collection ID to retrieve
+          required: true
+          schema:
+            type: string
+            example: cl-g30e1b80b5g1itbemc0g5jj3
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetCollectionDetailResponse'
+      security:
+        - api_key: []
+  /knowledge/collection/update:
+    post:
+      tags:
+        - knowledge
+      summary: Update collection
+      description: Update an existing collection
+      operationId: updateCollection
+      requestBody:
+        description: Collection update request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertCollectionRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+      security:
+        - api_key: []
+  /knowledge/collection/new:
+    post:
+      tags:
+        - knowledge
+      summary: Create new collection
+      description: Create a new collection
+      operationId: createCollection
+      requestBody:
+        description: Collection creation request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertCollectionRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+      security:
+        - api_key: []
+  /knowledge/collection/delete:
+    post:
+      tags:
+        - knowledge
+      summary: Delete collection
+      description: Delete an existing collection
+      operationId: deleteCollection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteCollectionRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+      security:
+        - api_key: []
+components:
+  schemas:
+    WeblinkMeta:
+      type: object
+      description: Weblink metadata
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          description: Weblink URL
+          example: https://www.google.com
+        title:
+          type: string
+          description: Weblink title
+          example: Google
+        linkId:
+          type: string
+          description: Weblink ID (if it already exists)
+          example: l-g30e1b80b5g1itbemc0g5jj3
+        storageKey:
+          type: string
+          description: Storage key for the weblink
+          deprecated: true
+    ResourceMeta:
+      description: Resource metadata
+      oneOf:
+        - $ref: '#/components/schemas/WeblinkMeta'
+    ResourceType:
+      type: string
+      description: Resource type
+      enum:
+        - weblink
+    ResourceListItem:
+      type: object
+      required:
+        - resourceId
+        - resourceType
+        - isPublic
+        - createdAt
+        - updatedAt
+      properties:
+        resourceId:
+          type: string
+          description: Resource ID
+          example: r-g30e1b80b5g1itbemc0g5jj3
+        resourceType:
+          description: Resource type
+          $ref: '#/components/schemas/ResourceType'
+        data:
+          type: object
+          description: Resource metadata
+          $ref: '#/components/schemas/ResourceMeta'
+        isPublic:
+          type: boolean
+          description: Whether this resource is public
+          default: false
+        createdAt:
+          type: string
+          format: date-time
+          description: Collection creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Collection creation time
+    CollectionListItem:
+      type: object
+      required:
+        - collectionId
+        - title
+        - createdAt
+        - updatedAt
+      properties:
+        collectionId:
+          type: string
+          description: Collection ID
+          example: cl-g30e1b80b5g1itbemc0g5jj3
+        title:
+          type: string
+          description: Collection title
+          example: Default Collection
+        description:
+          type: string
+          description: Collection description
+          example: Collection description
+        isPublic:
+          type: boolean
+          description: Whether this collection is public
+          default: false
+        createdAt:
+          type: string
+          format: date-time
+          description: Collection creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Collection creation time
+    ResourceDetail:
+      allOf:
+        - $ref: '#/components/schemas/ResourceListItem'
+        - type: object
+          properties:
+            doc:
+              type: string
+              description: Document content for this resource
+    CollectionDetail:
+      allOf:
+        - $ref: '#/components/schemas/CollectionListItem'
+        - type: object
+          properties:
+            resources:
+              type: array
+              description: Collection resources
+              items:
+                $ref: '#/components/schemas/ResourceListItem'
+    BaseResponse:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          description: Whether the operation was successful
+          example: true
+        errMsg:
+          type: string
+          description: Error message
+          example: Operation failed
+    UpsertResourceRequest:
+      type: object
+      required:
+        - resourceType
+        - data
+      properties:
+        resourceType:
+          description: Resource type
+          $ref: '#/components/schemas/ResourceType'
+        title:
+          type: string
+          description: Resource title
+          example: My Resource
+        resourceId:
+          type: string
+          description: Resource ID (only used for update)
+          example: r-g30e1b80b5g1itbemc0g5jj3
+        collectionId:
+          type: string
+          description: Collection ID (will create new collection if empty)
+          example: cl-g30e1b80b5g1itbemc0g5jj3
+        collectionName:
+          type: string
+          description: Collection name
+          example: New Collection
+        data:
+          description: Resource metadata
+          $ref: '#/components/schemas/ResourceMeta'
+        storageKey:
+          type: string
+          description: Storage key for the resource
+        content:
+          type: string
+          description: Resource content (this will be ignored if storageKey was set)
+        isPublic:
+          type: boolean
+          description: Whether this resource is public
+          default: false
+    UpsertResourceResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ResourceListItem'
+    DeleteResourceRequest:
+      type: object
+      required:
+        - resourceId
+      properties:
+        resourceId:
+          type: string
+          description: Resource ID to delete
+          example: r-g30e1b80b5g1itbemc0g5jj3
+    ListResourceResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Resource list
+              items:
+                $ref: '#/components/schemas/ResourceListItem'
+    GetResourceDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              description: Resource data
+              $ref: '#/components/schemas/ResourceDetail'
+    UpsertCollectionRequest:
+      type: object
+      properties:
+        collectionId:
+          type: string
+          description: Collection ID (only used for update)
+          example: cl-g30e1b80b5g1itbemc0g5jj3
+        title:
+          type: string
+          description: Collection title
+          example: My Collection
+        description:
+          type: string
+          description: Collection description
+          example: Collection description
+        isPublic:
+          type: boolean
+          description: Whether this collection is public
+          default: false
+    UpsertCollectionResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/CollectionListItem'
+    DeleteCollectionRequest:
+      type: object
+      required:
+        - collectionId
+      properties:
+        collectionId:
+          type: string
+          description: Collection ID to delete
+          example: cl-g30e1b80b5g1itbemc0g5jj3
+    ListCollectionResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Collection list
+              items:
+                $ref: '#/components/schemas/CollectionListItem'
+    GetCollectionDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              description: Collection data
+              $ref: '#/components/schemas/CollectionDetail'
+  securitySchemes:
+    petstore_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://petstore3.swagger.io/oauth/authorize
+          scopes:
+            write:pets: modify pets in your account
+            read:pets: read your pets
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header

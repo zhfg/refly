@@ -9,6 +9,7 @@ import {
 import { sendToBackground } from "@plasmohq/messaging"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { createResource } from "@refly/openapi-schema"
 import { fakeKnowledgeBaseList } from "~fake-data/knowledge-base"
 import { useStoreWeblink } from "~hooks/use-store-weblink"
 import { useKnowledgeBaseStore } from "~stores/knowledge-base"

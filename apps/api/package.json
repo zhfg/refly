@@ -84,7 +84,7 @@
     "uuid": "^9.0.1",
     "zod": "^3.22.4",
     "@refly/constants": "workspace:*",
-    "@refly/schema": "workspace:*",
+    "@refly/openapi-schema": "workspace:*",
     "@langchain/core": "~0.2.2"
   },
   "devDependencies": {
@@ -118,7 +118,9 @@
     "ts-node": "^10.0.0",
     "ts-proto": "^1.172.0",
     "tsconfig-paths": "4.2.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "@swc/core": "~1.5.24",
+    "@swc/cli": "~0.3.12"
   },
   "jest": {
     "rootDir": "src",

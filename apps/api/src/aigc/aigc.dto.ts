@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Source } from '../types/weblink';
-import { ContentMeta } from '../llm/dto';
+import { ContentMeta } from '../llm/llm.dto';
 
 export class Content {
   @ApiProperty()

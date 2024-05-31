@@ -8,3 +8,11 @@ export interface HandlerResponse<T> {
   success: boolean;
   errMsg?: any;
 }
+
+export interface BackgroundMessage {
+  name: string;
+  type: 'apiRequest' | 'others';
+  target: any;
+  thisArg: any;
+  args: any;
+}

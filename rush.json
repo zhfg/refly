@@ -15,8 +15,8 @@
       "reviewCategory": "packages"
     },
     {
-      "packageName": "@refly/api-client",
-      "projectFolder": "packages/api-client",
+      "packageName": "@refly/openapi-schema",
+      "projectFolder": "packages/openapi-schema",
       "reviewCategory": "packages"
     },
     {

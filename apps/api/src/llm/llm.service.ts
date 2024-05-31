@@ -24,14 +24,13 @@ import {
 import { LLMChatMessage } from './schema';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 
-import { ContentMeta } from '@refly/schema';
-// import { ContentMeta } from './dto';
+import { ContentMeta } from './llm.dto';
 import { categoryList } from '../prompts/utils/category';
 import { PageMeta, Source } from '../types/weblink';
 import { SearchResultContext } from '../types/search';
 import { RAGService } from '../rag/rag.service';
 import { ContentPayload } from '../rag/rag.dto';
-import { RetrieveFilter } from 'src/conversation/conversation.dto';
+import { RetrieveFilter } from '../conversation/conversation.dto';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
