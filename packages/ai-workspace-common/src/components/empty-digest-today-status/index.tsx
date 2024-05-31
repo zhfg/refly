@@ -1,31 +1,27 @@
-import { Button } from "@arco-design/web-react"
+import { Button } from '@arco-design/web-react';
 // assets
-import EmptySVG from "@/assets/digest/empty.svg"
+import EmptySVG from '@/assets/digest/empty.svg';
 // styles
-import "./index.scss"
-import { useNavigate } from "react-router-dom"
-import { getCurrentDateInfo } from "@/utils/time"
-import { useTranslation } from "react-i18next"
+import './index.scss';
+import { useNavigate } from 'react-router-dom';
+import { getCurrentDateInfo } from '@refly-packages/ai-workspace-common/utils/time';
+import { useTranslation } from 'react-i18next';
 
 export const EmptyDigestStatus = () => {
-  const navigate = useNavigate()
-  const { t } = useTranslation()
+  const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className="empty-digest-container">
       <img src={EmptySVG} className="empty-digest-cover" />
-      <p className="empty-digest-hint">
-        {t("knowledgeLibrary.empty.archiveTitle")}
-      </p>
+      <p className="empty-digest-hint">{t('knowledgeLibrary.empty.archiveTitle')}</p>
       <div className="empty-digest-action-container">
         <Button
           onClick={() => {
-            window.open(
-              `https://chromewebstore.google.com/detail/lecbjbapfkinmikhadakbclblnemmjpd`,
-              "_blank",
-            )
-          }}>
-          {t("knowledgeLibrary.empty.download")}
+            window.open(`https://chromewebstore.google.com/detail/lecbjbapfkinmikhadakbclblnemmjpd`, '_blank');
+          }}
+        >
+          {t('knowledgeLibrary.empty.download')}
         </Button>
         {/* <Button
           style={{ marginLeft: 24 }}
@@ -37,5 +33,5 @@ export const EmptyDigestStatus = () => {
         </Button> */}
       </div>
     </div>
-  )
-}
+  );
+};

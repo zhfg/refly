@@ -1,15 +1,15 @@
-import { useUserStore } from '@/stores/user';
+import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Logo from '@/assets/logo.svg';
 
 import './header.scss';
-import { safeParseJSON } from '@/utils/parse';
+import { safeParseJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@arco-design/web-react';
 import { IconDown } from '@arco-design/web-react/icon';
 // components
-import { UILocaleList } from '@/components/ui-locale-list';
+import { UILocaleList } from '@refly-packages/ai-workspace-common/components/ui-locale-list';
 
 function Header(props: { showLogin?: boolean }) {
   const { showLogin = true } = props;

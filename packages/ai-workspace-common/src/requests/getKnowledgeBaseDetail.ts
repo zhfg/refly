@@ -1,39 +1,34 @@
-import { appConfig } from "@/utils/config"
-import { request } from "@/utils/request"
+import { appConfig } from '@refly-packages/ai-workspace-common/utils/config';
+import { request } from '@refly-packages/ai-workspace-common/utils/request';
 
-import type { HandlerRequest, HandlerResponse } from "@/types/request"
-import { CollectionDetail } from "@/types"
+import type { HandlerRequest, HandlerResponse } from '@refly-packages/ai-workspace-common/types/request';
+import { CollectionDetail } from '@refly-packages/ai-workspace-common/types';
 
-const handler = async (
-  req: HandlerRequest<{ collectionId: string }>,
-): Promise<HandlerResponse<CollectionDetail>> => {
-  console.log(req.body)
+const handler = async (req: HandlerRequest<{ collectionId: string }>): Promise<HandlerResponse<CollectionDetail>> => {
+  console.log(req.body);
 
   try {
-    const [err, kbRes] = await request<CollectionDetail>(
-      appConfig.url.getKnowledgeBaseDetail,
-      {
-        method: "GET",
-        body: req.body,
-      },
-    )
+    const [err, kbRes] = await request<CollectionDetail>(appConfig.url.getKnowledgeBaseDetail, {
+      method: 'GET',
+      body: req.body,
+    });
     if (err) {
       return {
         success: false,
         errMsg: err,
-      }
+      };
     } else {
       return {
         success: true,
         data: kbRes,
-      }
+      };
     }
   } catch (err) {
     return {
       success: false,
       errMsg: err,
-    }
+    };
   }
-}
+};
 
-export default handler
+export default handler;

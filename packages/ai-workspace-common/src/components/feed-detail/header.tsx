@@ -1,49 +1,46 @@
-import { Button, Message as message, Breadcrumb } from "@arco-design/web-react"
-import { IconClockCircle, IconShareExternal } from "@arco-design/web-react/icon"
-import { copyToClipboard } from "@/utils"
-import { time } from "@/utils/time"
-import { Digest, Feed } from "@/types"
+import { Button, Message as message, Breadcrumb } from '@arco-design/web-react';
+import { IconClockCircle, IconShareExternal } from '@arco-design/web-react/icon';
+import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
+import { time } from '@refly-packages/ai-workspace-common/utils/time';
+import { Digest, Feed } from '@refly-packages/ai-workspace-common/types';
 
 interface HeaderProps {
-  digest: Digest | Feed
+  digest: Digest | Feed;
 }
 
-const BreadcrumbItem = Breadcrumb.Item
+const BreadcrumbItem = Breadcrumb.Item;
 
 export const Header = (props: HeaderProps) => {
-  const { digest } = props
+  const { digest } = props;
 
   return (
     <header>
       <div>
         <Breadcrumb>
           <BreadcrumbItem href="/feed">探索</BreadcrumbItem>
-          <BreadcrumbItem
-            href={`/feed/${digest?.cid}`}
-            className="breadcrum-description">
+          <BreadcrumbItem href={`/feed/${digest?.cid}`} className="breadcrum-description">
             {digest?.title}
           </BreadcrumbItem>
         </Breadcrumb>
       </div>
       <div className="funcs">
         {/* <Button type="text" icon={<IconMore />}></Button> */}
-        <span key={2} style={{ display: "inline-block", marginRight: 12 }}>
-          <IconClockCircle style={{ fontSize: 14, color: "#64645F" }} />
-          <span className="thread-library-list-item-text">
-            {time(digest?.updatedAt).utc().fromNow()}
-          </span>
+        <span key={2} style={{ display: 'inline-block', marginRight: 12 }}>
+          <IconClockCircle style={{ fontSize: 14, color: '#64645F' }} />
+          <span className="thread-library-list-item-text">{time(digest?.updatedAt).utc().fromNow()}</span>
         </span>
         <Button
           type="primary"
           icon={<IconShareExternal />}
           onClick={() => {
-            copyToClipboard(`${window.origin}/content/${digest?.cid}`)
-            message.success("分享链接已复制到剪切板")
+            copyToClipboard(`${window.origin}/content/${digest?.cid}`);
+            message.success('分享链接已复制到剪切板');
           }}
-          style={{ borderRadius: 4 }}>
+          style={{ borderRadius: 4 }}
+        >
           分享
         </Button>
       </div>
     </header>
-  )
-}
+  );
+};

@@ -37,10 +37,6 @@ export const onMessage = async (msg: any, sender: Runtime.MessageSender, sendRes
   if (requestFileNames?.includes(msg?.name)) {
     return await handleRequest({
       ...msg,
-      currentTab: {
-        tabId: sender?.tab?.id as number,
-        windowId: sender?.tab?.windowId as number,
-      },
     });
   }
 };

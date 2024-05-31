@@ -21,12 +21,12 @@
 
     // path
     "baseUrl": ".",
-    "rootDir": "src",
+    "rootDir": "./src",
     "paths": {
-      "@/*": ["./src/*"]
+      "@refly-packages/ai-workspace-common/*": ["./src/*"]
     },
     "composite": true,
-    "noEmit": true,
+    "noEmit": false,
     "declaration": true,
     "declarationMap": true
   },

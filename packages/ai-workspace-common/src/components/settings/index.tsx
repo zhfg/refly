@@ -1,100 +1,88 @@
-import { Button, Modal, Typography } from "@arco-design/web-react"
-import { useCookie } from "react-use"
-import Cookies from "js-cookie"
-import { Helmet } from "react-helmet"
+import { Button, Modal, Typography } from '@arco-design/web-react';
+import { useCookie } from 'react-use';
+import Cookies from 'js-cookie';
+import { Helmet } from 'react-helmet';
 
 // styles
-import "./index.scss"
-import { useUserStore } from "@/stores/user"
-import { useNavigate } from "react-router-dom"
-import { getClientOrigin, getCookieOrigin, getExtensionId } from "@/utils/url"
+import './index.scss';
+import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import { useNavigate } from 'react-router-dom';
+import { getClientOrigin, getCookieOrigin, getExtensionId } from '@refly-packages/ai-workspace-common/utils/url';
 // components
-import { UILocaleList } from "@/components/ui-locale-list"
-import { IconDown } from "@arco-design/web-react/icon"
-import { useTranslation } from "react-i18next"
-import { OutputLocaleList } from "../output-locale-list"
-import { LOCALE } from "@/types"
-import { localeToLanguageName } from "@/utils/i18n"
+import { UILocaleList } from '@refly-packages/ai-workspace-common/components/ui-locale-list';
+import { IconDown } from '@arco-design/web-react/icon';
+import { useTranslation } from 'react-i18next';
+import { OutputLocaleList } from '../output-locale-list';
+import { LOCALE } from '@refly-packages/ai-workspace-common/types';
+import { localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/i18n';
 
 export const Settings = () => {
-  const [token, updateCookie, deleteCookie] = useCookie("_refly_ai_sid")
-  const userStore = useUserStore()
-  const navigate = useNavigate()
-  const [modal, contextHolder] = Modal.useModal()
+  const [token, updateCookie, deleteCookie] = useCookie('_refly_ai_sid');
+  const userStore = useUserStore();
+  const navigate = useNavigate();
+  const [modal, contextHolder] = Modal.useModal();
 
-  const { t, i18n } = useTranslation()
-  const uiLocale = i18n?.languages?.[0] as LOCALE
-  const outputLocale = userStore?.localSettings?.outputLocale
+  const { t, i18n } = useTranslation();
+  const uiLocale = i18n?.languages?.[0] as LOCALE;
+  const outputLocale = userStore?.localSettings?.outputLocale;
 
   const handleLogout = () => {
     modal.confirm?.({
-      title: t("settings.account.logoutConfirmation.title"),
-      content: t("settings.account.logoutConfirmation.message"),
+      title: t('settings.account.logoutConfirmation.title'),
+      content: t('settings.account.logoutConfirmation.message'),
       onOk() {
-        console.log("delete cookie")
-        localStorage.removeItem("refly-user-profile")
-        localStorage.removeItem("refly-local-settings")
-        userStore.resetState()
+        console.log('delete cookie');
+        localStorage.removeItem('refly-user-profile');
+        localStorage.removeItem('refly-local-settings');
+        userStore.resetState();
 
         // 给插件发消息
         chrome.runtime?.sendMessage(getExtensionId(), {
-          name: "logout-notify",
-        })
+          name: 'logout-notify',
+        });
 
-        deleteCookie()
-        Cookies.remove("_refly_ai_sid", { domain: getCookieOrigin() })
-        navigate("/")
+        deleteCookie();
+        Cookies.remove('_refly_ai_sid', { domain: getCookieOrigin() });
+        navigate('/');
       },
       onConfirm() {},
-    })
-  }
+    });
+  };
 
   return (
     <div className="settings-container">
       <Helmet>
         <title>
-          {t("productName")} | {t("tabMeta.settings.title")}
+          {t('productName')} | {t('tabMeta.settings.title')}
         </title>
       </Helmet>
       <div className="settings-inner-container">
-        <div className="settings-title">{t("settings.title")}</div>
+        <div className="settings-title">{t('settings.title')}</div>
         <div>
-          <Typography.Title heading={4}>
-            {t("settings.uiLocale.title")}
-          </Typography.Title>
+          <Typography.Title heading={4}>{t('settings.uiLocale.title')}</Typography.Title>
           <UILocaleList>
-            <Button
-              className="setting-page-language-btn"
-              style={{ borderRadius: 16 }}>
-              {t("language")} <IconDown />
+            <Button className="setting-page-language-btn" style={{ borderRadius: 16 }}>
+              {t('language')} <IconDown />
             </Button>
           </UILocaleList>
         </div>
         <div>
-          <Typography.Title heading={4}>
-            {t("settings.outputLocale.title")}
-          </Typography.Title>
-          <Typography.Paragraph>
-            {t("settings.outputLocale.description")}
-          </Typography.Paragraph>
+          <Typography.Title heading={4}>{t('settings.outputLocale.title')}</Typography.Title>
+          <Typography.Paragraph>{t('settings.outputLocale.description')}</Typography.Paragraph>
           <OutputLocaleList>
-            <Button
-              className="setting-page-language-btn"
-              style={{ borderRadius: 16 }}>
+            <Button className="setting-page-language-btn" style={{ borderRadius: 16 }}>
               {localeToLanguageName?.[uiLocale]?.[outputLocale]} <IconDown />
             </Button>
           </OutputLocaleList>
         </div>
         <div>
-          <Typography.Title heading={4}>
-            {t("settings.account.title")}
-          </Typography.Title>
+          <Typography.Title heading={4}>{t('settings.account.title')}</Typography.Title>
           <Button onClick={() => handleLogout()} style={{ borderRadius: 16 }}>
-            {t("settings.account.logout")}
+            {t('settings.account.logout')}
           </Button>
         </div>
       </div>
       {contextHolder}
     </div>
-  )
-}
+  );
+};

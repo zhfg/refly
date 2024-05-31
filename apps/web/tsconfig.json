@@ -23,10 +23,11 @@
     // path
     "paths": {
       "@/*": ["./src/*"],
-      "@refly/ai-workspace-common/*": ["./node_modules/@refly/ai-workspace-common/src/*"]
-    }
+      "@refly/ai-workspace-common/*": ["../../packages/ai-workspace-common/src/*"]
+    },
+    "rootDir": "./src"
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"],
-  "references": [{ "path": "./tsconfig.node.json" },  { "path": "./node_modules/@refly/ai-workspace-common"}]
+  "references": [{ "path": "./tsconfig.node.json" },  { "path": "../../packages/ai-workspace-common"}]
 }

@@ -1,39 +1,34 @@
-import { appConfig } from "@/utils/config"
-import { request } from "@/utils/request"
+import { appConfig } from '@refly-packages/ai-workspace-common/utils/config';
+import { request } from '@refly-packages/ai-workspace-common/utils/request';
 
-import type { HandlerRequest, HandlerResponse } from "@/types/request"
-import { ResourceDetail } from "@/types"
+import type { HandlerRequest, HandlerResponse } from '@refly-packages/ai-workspace-common/types/request';
+import { ResourceDetail } from '@refly-packages/ai-workspace-common/types';
 
-const handler = async (
-  req: HandlerRequest<{ resourceId: string }>,
-): Promise<HandlerResponse<ResourceDetail>> => {
-  console.log(req.body)
+const handler = async (req: HandlerRequest<{ resourceId: string }>): Promise<HandlerResponse<ResourceDetail>> => {
+  console.log(req.body);
 
   try {
-    const [err, resourceRes] = await request<ResourceDetail>(
-      appConfig.url.getResourceDetail,
-      {
-        method: "GET",
-        body: req.body,
-      },
-    )
+    const [err, resourceRes] = await request<ResourceDetail>(appConfig.url.getResourceDetail, {
+      method: 'GET',
+      body: req.body,
+    });
     if (err) {
       return {
         success: false,
         errMsg: err,
-      }
+      };
     } else {
       return {
         success: true,
         data: resourceRes,
-      }
+      };
     }
   } catch (err) {
     return {
       success: false,
       errMsg: err,
-    }
+    };
   }
-}
+};
 
-export default handler
+export default handler;

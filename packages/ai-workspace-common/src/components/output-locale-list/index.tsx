@@ -1,67 +1,58 @@
-import { useTranslation } from "react-i18next"
-import {
-  Dropdown,
-  Menu,
-  Typography,
-  Message as message,
-} from "@arco-design/web-react"
-import { useUserStore } from "@/stores/user"
-import { safeStringifyJSON } from "@/utils/parse"
-import { LOCALE } from "@/types"
+import { useTranslation } from 'react-i18next';
+import { Dropdown, Menu, Typography, Message as message } from '@arco-design/web-react';
+import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import { safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/parse';
+import { LOCALE } from '@refly-packages/ai-workspace-common/types';
 // request
-import putUserInfo from "@/requests/putUserInfo"
-import { OutputLocale, enLocale, localeToLanguageName } from "@/utils/i18n"
+import putUserInfo from '@refly-packages/ai-workspace-common/requests/putUserInfo';
+import { OutputLocale, enLocale, localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/i18n';
 // styles
-import "./index.scss"
+import './index.scss';
 
 export const OutputLocaleList = (props: { children: any }) => {
   // i18n
-  const { t, i18n } = useTranslation()
-  const uiLocale = i18n?.languages?.[0] as LOCALE
+  const { t, i18n } = useTranslation();
+  const uiLocale = i18n?.languages?.[0] as LOCALE;
 
-  const userStore = useUserStore()
-  const { outputLocale } = userStore?.localSettings || {}
+  const userStore = useUserStore();
+  const { outputLocale } = userStore?.localSettings || {};
 
   const changeLang = async (lng: OutputLocale) => {
-    const { localSettings } = useUserStore.getState()
+    const { localSettings } = useUserStore.getState();
 
-    userStore.setLocalSettings({ ...localSettings, outputLocale: lng })
-    localStorage.setItem(
-      "refly-local-settings",
-      safeStringifyJSON({ ...localSettings, outputLocale: lng }),
-    )
+    userStore.setLocalSettings({ ...localSettings, outputLocale: lng });
+    localStorage.setItem('refly-local-settings', safeStringifyJSON({ ...localSettings, outputLocale: lng }));
 
     // 不阻塞写回用户配置
     const res = await putUserInfo({
       body: { outputLocale: lng, uiLocale: localSettings.uiLocale },
-    })
+    });
 
     if (!res.success) {
-      message.error(t("settings.action.putErrorNotify"))
+      message.error(t('settings.action.putErrorNotify'));
     }
-  }
+  };
 
-  console.log("用户当前的模型输出语言", outputLocale)
+  console.log('用户当前的模型输出语言', outputLocale);
 
   const dropList = (
     <Menu
-      className={"output-locale-list-menu"}
-      onClickMenuItem={key => changeLang(key as OutputLocale)}
-      style={{ width: 240 }}>
+      className={'output-locale-list-menu'}
+      onClickMenuItem={(key) => changeLang(key as OutputLocale)}
+      style={{ width: 240 }}
+    >
       <Typography.Text type="secondary" style={{ marginLeft: 12 }}>
-        {t("settings.outputLocale.title")}
+        {t('settings.outputLocale.title')}
       </Typography.Text>
       {enLocale.map((item: OutputLocale) => (
-        <Menu.Item key={item}>
-          {localeToLanguageName?.[uiLocale]?.[item]}
-        </Menu.Item>
+        <Menu.Item key={item}>{localeToLanguageName?.[uiLocale]?.[item]}</Menu.Item>
       ))}
     </Menu>
-  )
+  );
 
   return (
     <Dropdown droplist={dropList} position="bl">
       {props.children}
     </Dropdown>
-  )
-}
+  );
+};

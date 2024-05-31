@@ -1,23 +1,23 @@
 // 静态资源
-import Logo from "@/assets/logo.svg"
-import CloseGraySVG from "@/assets/side/close.svg"
-import NotificationSVG from "@/assets/side/notification.svg"
-import SettingGraySVG from "@/assets/side/setting.svg"
-import FullScreenSVG from "@/assets/side/full-screen.svg"
+import Logo from '@/assets/logo.svg';
+import CloseGraySVG from '@/assets/side/close.svg';
+import NotificationSVG from '@/assets/side/notification.svg';
+import SettingGraySVG from '@/assets/side/setting.svg';
+import FullScreenSVG from '@/assets/side/full-screen.svg';
 
 // 组件
-import { IconTip } from "./icon-tip"
-import { Avatar } from "@arco-design/web-react"
+import { IconTip } from './icon-tip';
+import { Avatar } from '@arco-design/web-react';
 // stores
-import { useSiderStore } from "@/stores/sider"
-import { useNavigate } from "react-router-dom"
+import { useSiderStore } from '@refly-packages/ai-workspace-common/stores/sider';
+import { useNavigate } from 'react-router-dom';
 
 export const ChatHeader = () => {
-  const siderStore = useSiderStore()
-  const navigate = useNavigate()
+  const siderStore = useSiderStore();
+  const navigate = useNavigate();
   return (
     <header>
-      <div className="brand" onClick={() => navigate("/")}>
+      <div className="brand" onClick={() => navigate('/')}>
         <img src={Logo} alt="Refly" />
         <span>Refly</span>
       </div>
@@ -40,13 +40,9 @@ export const ChatHeader = () => {
           </Avatar>
         </IconTip>
         <IconTip text="关闭">
-          <img
-            src={CloseGraySVG}
-            alt="关闭"
-            onClick={() => siderStore.setShowSider(false)}
-          />
+          <img src={CloseGraySVG} alt="关闭" onClick={() => siderStore.setShowSider(false)} />
         </IconTip>
       </div>
     </header>
-  )
-}
+  );
+};

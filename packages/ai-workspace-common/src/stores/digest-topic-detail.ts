@@ -1,24 +1,24 @@
-import { create } from "zustand"
-import { devtools } from "zustand/middleware"
-import type {} from "@redux-devtools/extension"
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import type {} from '@redux-devtools/extension';
 
-import type { Digest, MetaRecord as Topic } from "@/types"
+import type { Digest, MetaRecord as Topic } from '@refly-packages/ai-workspace-common/types';
 
 /**
  * 承载着 topic detail 以及此 topic 下所有的 digest list
  */
 interface DigestTopicDetailState {
-  digestList: Digest[]
-  digestTopicDetail: Topic | null
-  pageSize: number
-  currentPage: number
-  hasMore: boolean
+  digestList: Digest[];
+  digestTopicDetail: Topic | null;
+  pageSize: number;
+  currentPage: number;
+  hasMore: boolean;
 
-  updateDigestTopicDetail: (newDigestTopicDetail: Topic) => void
-  updateTopicDigestList: (newTopicDigestList: Digest[]) => void
-  updateCurrentPage: (currentPage: number) => void
-  updateHasMore: (hasMore: boolean) => void
-  resetState: () => void
+  updateDigestTopicDetail: (newDigestTopicDetail: Topic) => void;
+  updateTopicDigestList: (newTopicDigestList: Digest[]) => void;
+  updateCurrentPage: (currentPage: number) => void;
+  updateHasMore: (hasMore: boolean) => void;
+  resetState: () => void;
 }
 
 export const defaultState = {
@@ -27,28 +27,27 @@ export const defaultState = {
   pageSize: 10,
   currentPage: 1,
   hasMore: true,
-}
+};
 
 export const useDigestTopicDetailStore = create<DigestTopicDetailState>()(
-  devtools(set => ({
+  devtools((set) => ({
     ...defaultState,
 
     updateTopicDigestList: (newTopicDigestList: Digest[]) =>
-      set(state => ({
+      set((state) => ({
         ...state,
         digestList: state.digestList.concat(newTopicDigestList),
       })),
     updateDigestTopicDetail: (newDigestTopicDetail: Topic) =>
-      set(state => ({
+      set((state) => ({
         state,
         digestTopicDetail: {
           ...state.digestTopicDetail,
           ...newDigestTopicDetail,
         },
       })),
-    updateCurrentPage: (currentPage: number) =>
-      set(state => ({ ...state, currentPage })),
-    updateHasMore: (hasMore: boolean) => set(state => ({ ...state, hasMore })),
-    resetState: () => set(state => ({ ...state, ...defaultState })),
+    updateCurrentPage: (currentPage: number) => set((state) => ({ ...state, currentPage })),
+    updateHasMore: (hasMore: boolean) => set((state) => ({ ...state, hasMore })),
+    resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),
-)
+);

@@ -1,14 +1,14 @@
-import React, { useState, useRef, useEffect } from "react"
-import Modal from "../modal"
+import React, { useState, useRef, useEffect } from 'react';
+import Modal from '../modal';
 
-import HeroImage from "@/assets/landing-page-images/hero-image-01.jpg"
-import { useUserStore } from "@/stores/user"
-import { useTranslation } from "react-i18next"
+import HeroImage from '@/assets/landing-page-images/hero-image-01.jpg';
+import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import { useTranslation } from 'react-i18next';
 
 function HeroHome() {
-  const userStore = useUserStore()
+  const userStore = useUserStore();
 
-  const { t } = useTranslation()
+  const { t } = useTranslation();
   // const [videoModalOpen, setVideoModalOpen] = useState(false)
   // const video = useRef(null)
 
@@ -24,14 +24,16 @@ function HeroHome() {
           className="absolute left-0 bottom-0 -ml-20 hidden lg:block pointer-events-none"
           aria-hidden="true"
           data-aos="fade-up"
-          data-aos-delay="400">
+          data-aos-delay="400"
+        >
           <svg
             className="max-w-full"
             width="564"
             height="552"
             viewBox="0 0 564 552"
             fill="none"
-            xmlns="http://www.w3.org/2000/svg">
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <defs>
               <linearGradient
                 id="illustration-02"
@@ -39,7 +41,8 @@ function HeroHome() {
                 y1="300.204"
                 x2="284.352"
                 y2="577.921"
-                gradientUnits="userSpaceOnUse">
+                gradientUnits="userSpaceOnUse"
+              >
                 <stop stopColor="#00968F" stopOpacity=".01" />
                 <stop offset="1" stopColor="#00968F" stopOpacity=".32" />
               </linearGradient>
@@ -58,31 +61,30 @@ function HeroHome() {
           {/* Section header */}
           <div className="max-w-4xl mx-auto text-center pb-12 md:pb-16">
             <h1 className="h1 mb-4" data-aos="fade-up">
-              {t("landingPage.slogan")}
+              {t('landingPage.slogan')}
             </h1>
-            <p
-              className="text-xl text-gray-400 mb-8"
-              data-aos="fade-up"
-              data-aos-delay="200">
-              {t("landingPage.description")}
+            <p className="text-xl text-gray-400 mb-8" data-aos="fade-up" data-aos-delay="200">
+              {t('landingPage.description')}
             </p>
             <div className="max-w-xs mx-auto sm:max-w-none sm:flex sm:justify-center">
               <div data-aos="fade-up" data-aos-delay="400">
                 <a
                   onClick={() => {
-                    userStore.setLoginModalVisible(true)
+                    userStore.setLoginModalVisible(true);
                   }}
                   className="btn text-white bg-green-600 hover:bg-green-700 w-full mb-4 sm:w-auto sm:mb-0"
-                  href="#0">
-                  {t("landingPage.joinBtn")}
+                  href="#0"
+                >
+                  {t('landingPage.joinBtn')}
                 </a>
               </div>
               <div data-aos="fade-up" data-aos-delay="600">
                 <a
                   className="btn text-white bg-gray-700 hover:bg-gray-800 w-full sm:w-auto sm:ml-4"
                   href="https://chromewebstore.google.com/detail/lecbjbapfkinmikhadakbclblnemmjpd"
-                  target="_blank">
-                  {t("landingPage.downloadBtn")}
+                  target="_blank"
+                >
+                  {t('landingPage.downloadBtn')}
                 </a>
               </div>
             </div>
@@ -158,7 +160,7 @@ function HeroHome() {
         </div>
       </div>
     </section>
-  )
+  );
 }
 
-export default HeroHome
+export default HeroHome;

@@ -1,43 +1,40 @@
-import { appConfig } from "@/utils/config"
-import { request } from "@/utils/request"
+import { appConfig } from '@refly-packages/ai-workspace-common/utils/config';
+import { request } from '@refly-packages/ai-workspace-common/utils/request';
 
-import type { HandlerRequest, HandlerResponse } from "@/types/request"
-import type { Digest, DigestFilter } from "@/types"
+import type { HandlerRequest, HandlerResponse } from '@refly-packages/ai-workspace-common/types/request';
+import type { Digest, DigestFilter } from '@refly-packages/ai-workspace-common/types';
 
 const handler = async (
   req: HandlerRequest<{
-    pageSize: number
-    page: number
-    filter?: DigestFilter
+    pageSize: number;
+    page: number;
+    filter?: DigestFilter;
   }>,
 ): Promise<HandlerResponse<Digest[]>> => {
-  console.log(req.body)
+  console.log(req.body);
 
   try {
-    const [err, fakeDigestListRes] = await request<Digest[]>(
-      appConfig.url.getDigestList,
-      {
-        method: "POST",
-        body: req.body,
-      },
-    )
+    const [err, fakeDigestListRes] = await request<Digest[]>(appConfig.url.getDigestList, {
+      method: 'POST',
+      body: req.body,
+    });
     if (err) {
       return {
         success: false,
         errMsg: err,
-      }
+      };
     } else {
       return {
         success: true,
         data: fakeDigestListRes,
-      }
+      };
     }
   } catch (err) {
     return {
       success: false,
       errMsg: err,
-    }
+    };
   }
-}
+};
 
-export default handler
+export default handler;

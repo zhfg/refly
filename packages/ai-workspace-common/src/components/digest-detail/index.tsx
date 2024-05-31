@@ -1,21 +1,21 @@
-import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
-import { Skeleton, Message as message } from "@arco-design/web-react"
-import { Helmet } from "react-helmet"
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { Skeleton, Message as message } from '@arco-design/web-react';
+import { Helmet } from 'react-helmet';
 
-import { useDigestDetailStore } from "@/stores/digest-detail"
+import { useDigestDetailStore } from '@refly-packages/ai-workspace-common/stores/digest-detail';
 // utils
-import { buildSessionsFromDigest } from "@/utils/session"
+import { buildSessionsFromDigest } from '@refly-packages/ai-workspace-common/utils/session';
 // 组件
-import { DigestDetailContent } from "./digest-detail-content"
-import { Header } from "./header"
-import { AskFollowUpModal } from "@/components/ask-follow-up-modal/index"
+import { DigestDetailContent } from './digest-detail-content';
+import { Header } from './header';
+import { AskFollowUpModal } from '@refly-packages/ai-workspace-common/components/ask-follow-up-modal/index';
 // request
-import getAIGCContent from "@/requests/getAIGCContent"
+import getAIGCContent from '@refly-packages/ai-workspace-common/requests/getAIGCContent';
 // styles
-import "./digest-detail.scss"
-import { Digest } from "@/types"
-import { useTranslation } from "react-i18next"
+import './digest-detail.scss';
+import { Digest } from '@refly-packages/ai-workspace-common/types';
+import { useTranslation } from 'react-i18next';
 
 /**
  * 1. same as thread，but only for read
@@ -23,83 +23,81 @@ import { useTranslation } from "react-i18next"
  *
  */
 export const DigestTail = () => {
-  const params = useParams<{ digestId: string }>()
-  const [askFollowUpVisible, setAskFollowUpVisible] = useState(false)
-  const [isFetching, setIsFetching] = useState(false)
+  const params = useParams<{ digestId: string }>();
+  const [askFollowUpVisible, setAskFollowUpVisible] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
-  const digestDetailStore = useDigestDetailStore()
-  const { t } = useTranslation()
+  const digestDetailStore = useDigestDetailStore();
+  const { t } = useTranslation();
 
   const handleGetDetail = async (digestId: string) => {
-    setIsFetching(true)
+    setIsFetching(true);
     try {
       const newRes = await getAIGCContent({
         body: {
           contentId: digestId,
         },
-      })
+      });
 
       if (!newRes?.success) {
-        throw new Error(newRes?.errMsg)
+        throw new Error(newRes?.errMsg);
       }
 
-      console.log("newRes", newRes)
-      digestDetailStore.updateDigest(newRes?.data as Digest)
+      console.log('newRes', newRes);
+      digestDetailStore.updateDigest(newRes?.data as Digest);
     } catch (err) {
-      message.error(t("contentDetail.list.fetchErr"))
+      message.error(t('contentDetail.list.fetchErr'));
     }
 
-    setIsFetching(false)
-  }
+    setIsFetching(false);
+  };
 
   const handleAskFollowUp = () => {
-    setAskFollowUpVisible(true)
-  }
+    setAskFollowUpVisible(true);
+  };
 
   useEffect(() => {
     if (params?.digestId) {
-      console.log("params", params)
-      handleGetDetail(params?.digestId as string)
+      console.log('params', params);
+      handleGetDetail(params?.digestId as string);
     }
-  }, [])
+  }, []);
 
-  const sessions = buildSessionsFromDigest(digestDetailStore?.digest as Digest)
+  const sessions = buildSessionsFromDigest(digestDetailStore?.digest as Digest);
 
   return (
     <div
       className="digest-detail-container"
       style={{
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-      }}>
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
       <Helmet>
         <title>
-          {t("productName")} | {digestDetailStore.digest?.title || ""}
+          {t('productName')} | {digestDetailStore.digest?.title || ''}
         </title>
         <meta name="description" content={digestDetailStore.digest?.abstract} />
       </Helmet>
       <Header digest={digestDetailStore?.digest as Digest} />
       {isFetching ? (
-        <div style={{ maxWidth: "748px", width: "748px", margin: "20px auto" }}>
+        <div style={{ maxWidth: '748px', width: '748px', margin: '20px auto' }}>
           <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
           <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
           <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
         </div>
       ) : (
-        <DigestDetailContent
-          sessions={sessions}
-          handleAskFollowUp={handleAskFollowUp}
-        />
+        <DigestDetailContent sessions={sessions} handleAskFollowUp={handleAskFollowUp} />
       )}
 
       {askFollowUpVisible ? (
         <AskFollowUpModal
           visible={askFollowUpVisible}
-          setVisible={visible => setAskFollowUpVisible(visible)}
+          setVisible={(visible) => setAskFollowUpVisible(visible)}
           aigcContent={digestDetailStore?.digest as Digest}
         />
       ) : null}
     </div>
-  )
-}
+  );
+};

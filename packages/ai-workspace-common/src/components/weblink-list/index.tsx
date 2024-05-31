@@ -1,40 +1,33 @@
-import {
-  Drawer,
-  Table,
-  type TableColumnProps,
-  Button,
-  Message as message,
-  Tag,
-} from "@arco-design/web-react"
-import React, { forwardRef, useEffect, memo, useMemo } from "react"
-import throttle from "lodash.throttle"
-import type { WebLinkItem } from "@/types/weblink"
+import { Drawer, Table, type TableColumnProps, Button, Message as message, Tag } from '@arco-design/web-react';
+import React, { forwardRef, useEffect, memo, useMemo } from 'react';
+import throttle from 'lodash.throttle';
+import type { WebLinkItem } from '@refly-packages/ai-workspace-common/types/weblink';
 
-import { time } from "@/utils/time"
+import { time } from '@refly-packages/ai-workspace-common/utils/time';
 // stores
-import { useWeblinkStore } from "@/stores/weblink"
+import { useWeblinkStore } from '@refly-packages/ai-workspace-common/stores/weblink';
 // requests
-import getWeblinkList from "@/requests/getWeblinkList"
+import getWeblinkList from '@refly-packages/ai-workspace-common/requests/getWeblinkList';
 // styles
-import "./index.scss"
-import { safeParseURL } from "@/utils/url"
-import { useTranslation } from "react-i18next"
-import { LOCALE } from "@/types"
+import './index.scss';
+import { safeParseURL } from '@refly-packages/ai-workspace-common/utils/url';
+import { useTranslation } from 'react-i18next';
+import { LOCALE } from '@refly-packages/ai-workspace-common/types';
 
 const WebLinkItem = (props: { weblink: WebLinkItem }) => {
   const {
     updatedAt,
     originPageDescription,
-    url = "",
+    url = '',
     originPageTitle,
     originPageUrl,
     indexStatus,
-  } = props?.weblink || {}
-  const urlItem = safeParseURL(url || "")
-  console.log("weblink rerender")
+  } = props?.weblink || {};
+  const urlItem = safeParseURL(url || '');
+  console.log('weblink rerender');
 
-  const { t, i18n } = useTranslation()
-  const uiLocale = i18n?.languages?.[0] as LOCALE
+  const { t, i18n } = useTranslation();
+  const uiLocale = i18n?.languages?.[0] as LOCALE;
 
   return (
     <div className="conv-item-wrapper">
@@ -46,14 +39,10 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
           {/* <Tooltip className="edit" content="编辑">
             <IconEdit />
           </Tooltip> */}
-          <span className="date">
-            {time(updatedAt, uiLocale).utc().fromNow()}
-          </span>
+          <span className="date">{time(updatedAt, uiLocale).utc().fromNow()}</span>
         </div>
         <div className="conv-item-content">
-          <span
-            className="conv-item-content-text css-ellipsis"
-            style={{ width: 250 }}>
+          <span className="conv-item-content-text css-ellipsis" style={{ width: 250 }}>
             {originPageDescription}
           </span>
         </div>
@@ -66,14 +55,10 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
                 alt=""
               />
               <span className="text">{originPageTitle}</span>
-              {indexStatus === "finish" ? (
-                <Tag color="green">
-                  {t("loggedHomePage.homePage.weblinkList.item.read")}
-                </Tag>
+              {indexStatus === 'finish' ? (
+                <Tag color="green">{t('loggedHomePage.homePage.weblinkList.item.read')}</Tag>
               ) : (
-                <Tag color="orange">
-                  {t("loggedHomePage.homePage.weblinkList.item.unread")}
-                </Tag>
+                <Tag color="orange">{t('loggedHomePage.homePage.weblinkList.item.unread')}</Tag>
               )}
             </a>
           </div>
@@ -91,54 +76,49 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 const PreviosWebsiteList = forwardRef(() => {
-  const webLinkStore = useWeblinkStore()
-  const { t } = useTranslation()
+  const webLinkStore = useWeblinkStore();
+  const { t } = useTranslation();
 
   const loadMore = async (currentPage?: number) => {
-    const { isRequest, hasMore, pageSize, ...extraState } =
-      useWeblinkStore.getState()
-    console.log("loadMore", isRequest, hasMore, pageSize, extraState)
-    if (isRequest || !hasMore) return
-    if (currentPage && currentPage < extraState?.currentPage) return
+    const { isRequest, hasMore, pageSize, ...extraState } = useWeblinkStore.getState();
+    console.log('loadMore', isRequest, hasMore, pageSize, extraState);
+    if (isRequest || !hasMore) return;
+    if (currentPage && currentPage < extraState?.currentPage) return;
 
     // 获取数据
     const queryPayload = {
       pageSize,
-      page:
-        typeof currentPage === "number" ? currentPage : extraState.currentPage,
-    }
+      page: typeof currentPage === 'number' ? currentPage : extraState.currentPage,
+    };
 
     // 更新页码
-    webLinkStore.updateCurrentPage(
-      (typeof currentPage === "number" ? currentPage : extraState.currentPage) +
-        1,
-    )
-    webLinkStore.updateIsRequest(true)
+    webLinkStore.updateCurrentPage((typeof currentPage === 'number' ? currentPage : extraState.currentPage) + 1);
+    webLinkStore.updateIsRequest(true);
 
     const res = await getWeblinkList({
       body: queryPayload,
-    })
+    });
 
     if (!res?.success) {
-      message.error(t("loggedHomePage.homePage.weblinkList.list.fetchErr"))
-      webLinkStore.updateIsRequest(false)
+      message.error(t('loggedHomePage.homePage.weblinkList.list.fetchErr'));
+      webLinkStore.updateIsRequest(false);
 
-      return
+      return;
     }
 
     // 处理分页
     if (res?.data && res?.data?.length < pageSize) {
-      webLinkStore.updateHasMore(false)
+      webLinkStore.updateHasMore(false);
     }
 
-    console.log("res", res)
-    webLinkStore.updateWebLinkList(res?.data || [])
-    webLinkStore.updateIsRequest(false)
-  }
+    console.log('res', res);
+    webLinkStore.updateWebLinkList(res?.data || []);
+    webLinkStore.updateIsRequest(false);
+  };
 
   //编辑
   // const handleEdit = async (params: { id: string; title: string }) => {
@@ -171,67 +151,61 @@ const PreviosWebsiteList = forwardRef(() => {
   // }
 
   const MemoWebLinkItem = memo(WebLinkItem, (prev, next) => {
-    if (prev?.weblink?.title !== next?.weblink?.title) return true
-    return false
-  })
+    if (prev?.weblink?.title !== next?.weblink?.title) return true;
+    return false;
+  });
 
   const memoData = useMemo(() => {
     return (webLinkStore?.webLinkList || []).map((item, key) => ({
       key,
       content: item,
-    }))
-  }, [webLinkStore?.webLinkList?.length])
+    }));
+  }, [webLinkStore?.webLinkList?.length]);
 
   const columns: TableColumnProps[] = [
     {
-      key: "0",
-      dataIndex: "content",
-      title: "content",
-      render: (col, record, index) => (
-        <MemoWebLinkItem weblink={record?.content} key={index} />
-      ),
+      key: '0',
+      dataIndex: 'content',
+      title: 'content',
+      render: (col, record, index) => <MemoWebLinkItem weblink={record?.content} key={index} />,
     },
-  ]
+  ];
 
   // 节流的处理
   const handleScroll = throttle(() => {
-    const { webLinkList } = useWeblinkStore.getState()
+    const { webLinkList } = useWeblinkStore.getState();
 
     // 获取列表的滚动高度，以及现在的列表数量，当还存在 2 个时触发滚动
-    const scrollTopElem = document
-      .querySelector(".conv-list")
-      ?.querySelector(".arco-table-body")
+    const scrollTopElem = document.querySelector('.conv-list')?.querySelector('.arco-table-body');
 
-    if (!scrollTopElem || webLinkList?.length < 10) return
-    const scrollTop = scrollTopElem?.scrollTop || 0
-    const scrollHeight = scrollTopElem?.scrollHeight || 0
-    const clientHeight = scrollTopElem?.clientHeight
+    if (!scrollTopElem || webLinkList?.length < 10) return;
+    const scrollTop = scrollTopElem?.scrollTop || 0;
+    const scrollHeight = scrollTopElem?.scrollHeight || 0;
+    const clientHeight = scrollTopElem?.clientHeight;
 
-    console.log("clientHeight", scrollTop, clientHeight, scrollHeight)
+    console.log('clientHeight', scrollTop, clientHeight, scrollHeight);
     if (scrollTop + clientHeight >= scrollHeight - 100) {
-      loadMore()
+      loadMore();
     }
-  }, 500)
+  }, 500);
 
   useEffect(() => {
     if (webLinkStore?.isWebLinkListVisible) {
-      loadMore(1)
+      loadMore(1);
     }
-  }, [webLinkStore?.isWebLinkListVisible])
+  }, [webLinkStore?.isWebLinkListVisible]);
 
   return (
-    <div style={{ width: "100%" }}>
+    <div style={{ width: '100%' }}>
       <Drawer
         width="392px"
         style={{
           zIndex: 66,
         }}
-        headerStyle={{ justifyContent: "center" }}
+        headerStyle={{ justifyContent: 'center' }}
         title={
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <span style={{ fontWeight: "bold" }}>
-              {t("loggedHomePage.homePage.weblinkList.title")}
-            </span>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <span style={{ fontWeight: 'bold' }}>{t('loggedHomePage.homePage.weblinkList.title')}</span>
           </div>
         }
         visible={webLinkStore.isWebLinkListVisible}
@@ -239,34 +213,37 @@ const PreviosWebsiteList = forwardRef(() => {
         footer={
           <div className="weblink-footer-container">
             <p className="weblink-footer-selected">
-              {t("loggedHomePage.homePage.weblinkList.selectedCnt", {
+              {t('loggedHomePage.homePage.weblinkList.selectedCnt', {
                 count: webLinkStore.selectedRow?.length,
               })}
             </p>
             <div>
               <Button
                 onClick={() => {
-                  webLinkStore.updateIsWebLinkListVisible(false)
+                  webLinkStore.updateIsWebLinkListVisible(false);
                 }}
-                style={{ marginRight: 8 }}>
-                {t("loggedHomePage.homePage.weblinkList.drawer.cancel")}
+                style={{ marginRight: 8 }}
+              >
+                {t('loggedHomePage.homePage.weblinkList.drawer.cancel')}
               </Button>
               <Button
                 type="primary"
                 onClick={() => {
-                  webLinkStore.updateIsWebLinkListVisible(false)
-                }}>
-                {t("loggedHomePage.homePage.weblinkList.drawer.confirm")}
+                  webLinkStore.updateIsWebLinkListVisible(false);
+                }}
+              >
+                {t('loggedHomePage.homePage.weblinkList.drawer.confirm')}
               </Button>
             </div>
           </div>
         }
         onOk={() => {
-          webLinkStore.updateIsWebLinkListVisible(false)
+          webLinkStore.updateIsWebLinkListVisible(false);
         }}
         onCancel={() => {
-          webLinkStore.updateIsWebLinkListVisible(false)
-        }}>
+          webLinkStore.updateIsWebLinkListVisible(false);
+        }}
+      >
         {/* <Input placeholder="搜索" /> */}
         {/* <div className="conv-list"> */}
         {/* {weblinkList.map((weblink, index) => (
@@ -277,17 +254,17 @@ const PreviosWebsiteList = forwardRef(() => {
         <Table
           className="conv-list"
           rowSelection={{
-            selectedRowKeys: webLinkStore.selectedRow?.map(item => item.key),
+            selectedRowKeys: webLinkStore.selectedRow?.map((item) => item.key),
             onChange: (selectedRowKeys, selectedRows) => {
-              console.log("selectedRowKeys", selectedRowKeys)
-              console.log("selectedRows", selectedRows)
-              webLinkStore.updateSelectedRow(selectedRows)
+              console.log('selectedRowKeys', selectedRowKeys);
+              console.log('selectedRows', selectedRows);
+              webLinkStore.updateSelectedRow(selectedRows);
             },
           }}
           virtualListProps={{
             itemHeight: 100,
             onScroll() {
-              handleScroll()
+              handleScroll();
             },
           }}
           scroll={{
@@ -302,7 +279,7 @@ const PreviosWebsiteList = forwardRef(() => {
         />
       </Drawer>
     </div>
-  )
-})
+  );
+});
 
-export default PreviosWebsiteList
+export default PreviosWebsiteList;

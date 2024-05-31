@@ -1,23 +1,23 @@
-import { Message as message, Modal } from "@arco-design/web-react"
-import { useState } from "react"
+import { Message as message, Modal } from '@arco-design/web-react';
+import { useState } from 'react';
 // components
 // styles
-import "./index.scss"
+import './index.scss';
 // request
-import createNewConversation from "@/requests/createNewConversation"
-import { Digest, Feed, Thread } from "@/types"
-import { useChatStore } from "@/stores/chat"
-import { useConversationStore } from "@/stores/conversation"
-import { useResetState } from "@/hooks/use-reset-state"
-import { useNavigate } from "react-router-dom"
-import { delay } from "@/utils/delay"
-import { useTranslation } from "react-i18next"
-import { useUserStore } from "@/stores/user"
+import createNewConversation from '@refly-packages/ai-workspace-common/requests/createNewConversation';
+import { Digest, Feed, Thread } from '@refly-packages/ai-workspace-common/types';
+import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
+import { useResetState } from '@refly-packages/ai-workspace-common/hooks/use-reset-state';
+import { useNavigate } from 'react-router-dom';
+import { delay } from '@refly-packages/ai-workspace-common/utils/delay';
+import { useTranslation } from 'react-i18next';
+import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 
 interface SummaryModalProps {
-  aigcContent: Digest | Feed
-  visible: boolean
-  setVisible: (visible: boolean) => void
+  aigcContent: Digest | Feed;
+  visible: boolean;
+  setVisible: (visible: boolean) => void;
 }
 
 /**
@@ -25,30 +25,30 @@ interface SummaryModalProps {
  * 用于为 Feed & Digest 的 Source 提供弹框总结能力
  */
 export const AskFollowUpModal = (props: SummaryModalProps) => {
-  const { aigcContent } = props
-  const [isFetching, setIsFetching] = useState(false)
-  const chatStore = useChatStore()
-  const conversationStore = useConversationStore()
-  const navigate = useNavigate()
+  const { aigcContent } = props;
+  const [isFetching, setIsFetching] = useState(false);
+  const chatStore = useChatStore();
+  const conversationStore = useConversationStore();
+  const navigate = useNavigate();
 
-  const { t } = useTranslation()
-  const { resetState } = useResetState()
+  const { t } = useTranslation();
+  const { resetState } = useResetState();
 
   const handleDigestAskFollow = async () => {
     try {
-      setIsFetching(true)
-      const { newQAText } = useChatStore.getState()
-      const { localSettings } = useUserStore.getState()
-      console.log("newQAText", newQAText)
-      const question = newQAText
+      setIsFetching(true);
+      const { newQAText } = useChatStore.getState();
+      const { localSettings } = useUserStore.getState();
+      console.log('newQAText', newQAText);
+      const question = newQAText;
 
       // TODO: origin/originPageUrl 需要确定
       const newConversationPayload = {
-        origin: location?.origin || "", // 冗余存储策略，for 后续能够基于 origin 进行归类归档
-        originPageTitle: aigcContent?.title || "",
-        title: aigcContent?.title || "",
+        origin: location?.origin || '', // 冗余存储策略，for 后续能够基于 origin 进行归类归档
+        originPageTitle: aigcContent?.title || '',
+        title: aigcContent?.title || '',
         originPageUrl: location.href,
-      }
+      };
 
       // 创建新会话
       const res = await createNewConversation({
@@ -57,44 +57,45 @@ export const AskFollowUpModal = (props: SummaryModalProps) => {
           contentId: aigcContent?.cid,
           locale: localSettings?.outputLocale,
         },
-      })
+      });
 
-      console.log("createNewConversation", res)
-      conversationStore.setCurrentConversation(res?.data as Thread)
+      console.log('createNewConversation', res);
+      conversationStore.setCurrentConversation(res?.data as Thread);
 
-      resetState()
+      resetState();
 
       // 更新新的 newQAText，for 新会话跳转使用
-      chatStore.setNewQAText(question)
-      chatStore.setIsAskFollowUpNewConversation(true)
+      chatStore.setNewQAText(question);
+      chatStore.setIsAskFollowUpNewConversation(true);
 
       message.success({
-        content: t("contentDetail.item.askFollow.successNotify"),
+        content: t('contentDetail.item.askFollow.successNotify'),
         duration: 2000,
-      })
-      await delay(2000)
-      navigate(`/thread/${res?.data?.convId}`)
+      });
+      await delay(2000);
+      navigate(`/thread/${res?.data?.convId}`);
     } catch (err) {
-      message.error(t("contentDetail.item.askFollow.errorNotify"))
+      message.error(t('contentDetail.item.askFollow.errorNotify'));
     } finally {
-      setIsFetching(false)
+      setIsFetching(false);
     }
-  }
+  };
 
   return (
     <Modal
       visible={props.visible}
-      title={t("contentDetail.item.askFollow.modal.title")}
-      okText={t("contentDetail.item.askFollow.modal.okText")}
-      cancelText={t("contentDetail.item.askFollow.modal.cancelText")}
+      title={t('contentDetail.item.askFollow.modal.title')}
+      okText={t('contentDetail.item.askFollow.modal.okText')}
+      cancelText={t('contentDetail.item.askFollow.modal.cancelText')}
       okButtonProps={{ loading: isFetching }}
       onOk={() => handleDigestAskFollow()}
-      onCancel={() => props.setVisible(false)}>
+      onCancel={() => props.setVisible(false)}
+    >
       <div className="ask-follow-up-content">
-        {t("contentDetail.item.askFollow.modal.content", {
+        {t('contentDetail.item.askFollow.modal.content', {
           question: chatStore.newQAText,
         })}
       </div>
     </Modal>
-  )
-}
+  );
+};

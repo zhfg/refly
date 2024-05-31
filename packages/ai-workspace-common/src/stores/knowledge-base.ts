@@ -1,85 +1,83 @@
-import { create } from "zustand"
-import { devtools } from "zustand/middleware"
-import type {} from "@redux-devtools/extension"
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import type {} from '@redux-devtools/extension';
 import type {
   CollectionListItem,
   CollectionDetail,
   ResourceDetail,
-} from "@/types/knowledge-base"
+} from '@refly-packages/ai-workspace-common/types/knowledge-base';
 
 export enum ActionSource {
-  KnowledgeBase = "knowledge-base",
-  Conv = "conv",
-  Note = "note",
+  KnowledgeBase = 'knowledge-base',
+  Conv = 'conv',
+  Note = 'note',
 }
 
 export interface KnowledgeBaseTab {
-  title: string
-  key: string
-  content: string
-  collectionId: string
-  resourceId: string
+  title: string;
+  key: string;
+  content: string;
+  collectionId: string;
+  resourceId: string;
 }
 
 interface KnowledgeBaseState {
-  isSaveKnowledgeBaseModalVisible: boolean
-  knowledgeBaseList: CollectionListItem[]
-  pageSize: number
-  currentPage: number
-  hasMore: boolean
-  isRequesting: boolean
+  isSaveKnowledgeBaseModalVisible: boolean;
+  knowledgeBaseList: CollectionListItem[];
+  pageSize: number;
+  currentPage: number;
+  hasMore: boolean;
+  isRequesting: boolean;
 
   // selection
-  currentSelectedText: string
+  currentSelectedText: string;
 
   // tabs
-  tabs: KnowledgeBaseTab[]
-  activeTab: string
+  tabs: KnowledgeBaseTab[];
+  activeTab: string;
 
   // 详情
-  currentKnowledgeBase: null | CollectionDetail
-  currentResource: null | ResourceDetail
+  currentKnowledgeBase: null | CollectionDetail;
+  currentResource: null | ResourceDetail;
 
   // 会话 modal
-  convModalVisible: boolean
-  kbModalVisible: boolean
-  actionSource: ActionSource
+  convModalVisible: boolean;
+  kbModalVisible: boolean;
+  actionSource: ActionSource;
 
   // source-list
-  sourceListModalVisible: boolean
-  tempConvResources: ResourceDetail[]
+  sourceListModalVisible: boolean;
+  tempConvResources: ResourceDetail[];
 
-  updateIsSaveKnowledgeBaseModalVisible: (
-    isSaveKnowledgeBaseModalVisible: boolean,
-  ) => void
-  updateIsRequesting: (isRequesting: boolean) => void
-  updateKnowledgeBaseList: (knowledgeBaseList: CollectionListItem[]) => void
-  updateCurrentKnowledgeBase: (knowledgeBase: CollectionDetail) => void
-  updateResource: (resource: ResourceDetail) => void
-  updateCurrentPage: (currentPage: number) => void
-  updateHasMore: (hasMore: boolean) => void
-  updateConvModalVisible: (convModalVisible: boolean) => void
-  updateActionSource: (actionSource: ActionSource) => void
-  updateKbModalVisible: (kbModalVisible: boolean) => void
-  updateSourceListModalVisible: (sourceListModalVisible: boolean) => void
-  updateTempConvResources: (tempConvResources: ResourceDetail[]) => void
-  updateSelectedText: (selectedText: string) => void
-  updateTabs: (tabs: KnowledgeBaseTab[]) => void
-  updateActiveTab: (key: string) => void
-  resetState: () => void
+  updateIsSaveKnowledgeBaseModalVisible: (isSaveKnowledgeBaseModalVisible: boolean) => void;
+  updateIsRequesting: (isRequesting: boolean) => void;
+  updateKnowledgeBaseList: (knowledgeBaseList: CollectionListItem[]) => void;
+  updateCurrentKnowledgeBase: (knowledgeBase: CollectionDetail) => void;
+  updateResource: (resource: ResourceDetail) => void;
+  updateCurrentPage: (currentPage: number) => void;
+  updateHasMore: (hasMore: boolean) => void;
+  updateConvModalVisible: (convModalVisible: boolean) => void;
+  updateActionSource: (actionSource: ActionSource) => void;
+  updateKbModalVisible: (kbModalVisible: boolean) => void;
+  updateSourceListModalVisible: (sourceListModalVisible: boolean) => void;
+  updateTempConvResources: (tempConvResources: ResourceDetail[]) => void;
+  updateSelectedText: (selectedText: string) => void;
+  updateTabs: (tabs: KnowledgeBaseTab[]) => void;
+  updateActiveTab: (key: string) => void;
+  resetState: () => void;
 }
 
 export const defaultState = {
   isSaveKnowledgeBaseModalVisible: false,
-  currentSelectedText: "",
+  currentSelectedText: '',
   tabs: [
     {
-      title: "New Tab",
-      key: "key1",
-      content: "Content of Tab Pane 1",
+      title: 'New Tab',
+      key: 'key1',
+      content: 'Content of Tab Pane 1',
     },
   ] as KnowledgeBaseTab[],
-  activeTab: "key1",
+  activeTab: 'key1',
   convModalVisible: false,
   kbModalVisible: false,
   sourceListModalVisible: false,
@@ -92,51 +90,41 @@ export const defaultState = {
   currentPage: 1,
   hasMore: true,
   isRequesting: false,
-}
+};
 
 export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
-  devtools(set => ({
+  devtools((set) => ({
     ...defaultState,
 
-    updateIsSaveKnowledgeBaseModalVisible: (
-      isSaveKnowledgeBaseModalVisible: boolean,
-    ) => set(state => ({ ...state, isSaveKnowledgeBaseModalVisible })),
+    updateIsSaveKnowledgeBaseModalVisible: (isSaveKnowledgeBaseModalVisible: boolean) =>
+      set((state) => ({ ...state, isSaveKnowledgeBaseModalVisible })),
     updateKnowledgeBaseList: (knowledgeBaseList: CollectionListItem[]) =>
-      set(state => ({
+      set((state) => ({
         ...state,
         knowledgeBaseList,
       })),
     updateCurrentKnowledgeBase: (knowledgeBase: CollectionDetail) =>
-      set(state => ({
+      set((state) => ({
         ...state,
         currentKnowledgeBase: knowledgeBase,
       })),
     updateResource: (resource: ResourceDetail) =>
-      set(state => ({
+      set((state) => ({
         ...state,
         currentResource: resource,
       })),
-    updateCurrentPage: (currentPage: number) =>
-      set(state => ({ ...state, currentPage })),
-    updateHasMore: (hasMore: boolean) => set(state => ({ ...state, hasMore })),
-    updateConvModalVisible: (convModalVisible: boolean) =>
-      set(state => ({ ...state, convModalVisible })),
-    updateKbModalVisible: (kbModalVisible: boolean) =>
-      set(state => ({ ...state, kbModalVisible })),
+    updateCurrentPage: (currentPage: number) => set((state) => ({ ...state, currentPage })),
+    updateHasMore: (hasMore: boolean) => set((state) => ({ ...state, hasMore })),
+    updateConvModalVisible: (convModalVisible: boolean) => set((state) => ({ ...state, convModalVisible })),
+    updateKbModalVisible: (kbModalVisible: boolean) => set((state) => ({ ...state, kbModalVisible })),
     updateSourceListModalVisible: (sourceListModalVisible: boolean) =>
-      set(state => ({ ...state, sourceListModalVisible })),
-    updateIsRequesting: (isRequesting: boolean) =>
-      set(state => ({ ...state, isRequesting })),
-    updateActionSource: (actionSource: ActionSource) =>
-      set(state => ({ ...state, actionSource })),
-    updateTempConvResources: (tempConvResources: ResourceDetail[]) =>
-      set(state => ({ ...state, tempConvResources })),
-    updateSelectedText: (selectedText: string) =>
-      set(state => ({ ...state, currentSelectedText: selectedText })),
-    updateTabs: (tabs: KnowledgeBaseTab[]) =>
-      set(state => ({ ...state, tabs })),
-    updateActiveTab: (key: string) =>
-      set(state => ({ ...state, activeTab: key })),
-    resetState: () => set(state => ({ ...state, ...defaultState })),
+      set((state) => ({ ...state, sourceListModalVisible })),
+    updateIsRequesting: (isRequesting: boolean) => set((state) => ({ ...state, isRequesting })),
+    updateActionSource: (actionSource: ActionSource) => set((state) => ({ ...state, actionSource })),
+    updateTempConvResources: (tempConvResources: ResourceDetail[]) => set((state) => ({ ...state, tempConvResources })),
+    updateSelectedText: (selectedText: string) => set((state) => ({ ...state, currentSelectedText: selectedText })),
+    updateTabs: (tabs: KnowledgeBaseTab[]) => set((state) => ({ ...state, tabs })),
+    updateActiveTab: (key: string) => set((state) => ({ ...state, activeTab: key })),
+    resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),
-)
+);
