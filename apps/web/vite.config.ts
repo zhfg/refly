@@ -52,4 +52,9 @@ export default defineConfig({
   // esbuild: {
   //   drop: ["console", "debugger"],
   // },
+  server: {
+    fs: {
+      strict: false,
+    },
+  },
 })
