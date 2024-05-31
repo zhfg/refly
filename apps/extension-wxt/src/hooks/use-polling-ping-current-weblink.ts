@@ -1,10 +1,10 @@
-import { useEffect, useRef } from "react";
-import type { IndexStatus, WebLinkItem } from "@/components/weblink-list/types";
-import { useSiderStore } from "@/stores/sider";
-import { useUserStore } from "@/stores/user";
-import { useWeblinkStore } from "@/stores/weblink";
-import { buildCurrentWeblink } from "@/utils/weblink";
-import { apiRequest } from "@/requests/apiRequest";
+import { useEffect, useRef } from 'react';
+import type { IndexStatus, WebLinkItem } from '@/components/weblink-list/types';
+import { useSiderStore } from '@/stores/sider';
+import { useUserStore } from '@/stores/user';
+import { useWeblinkStore } from '@/stores/weblink';
+import { buildCurrentWeblink } from '@/utils/weblink';
+import { apiRequest } from '@/requests/apiRequest';
 
 export const usePollingPingCurrentWeblink = () => {
   const pingFuncRef = useRef<NodeJS.Timer>();
@@ -19,15 +19,9 @@ export const usePollingPingCurrentWeblink = () => {
     const { showSider } = useSiderStore.getState();
 
     const isLogged = !!userProfile?.uid;
-    const isCurrentWeblinkStatusNotComplete = ["init", "processing"].includes(
-      currentWeblink?.parseStatus
-    );
+    const isCurrentWeblinkStatusNotComplete = ['init', 'processing'].includes(currentWeblink?.parseStatus);
 
-    if (
-      isLogged &&
-      showSider &&
-      (isCurrentWeblinkStatusNotComplete || !currentWeblink)
-    ) {
+    if (isLogged && showSider && (isCurrentWeblinkStatusNotComplete || !currentWeblink)) {
       return true;
     }
 
@@ -37,7 +31,7 @@ export const usePollingPingCurrentWeblink = () => {
   const isLogged = !!userStore?.userProfile?.uid;
   const isValidStartPing = checkValidStartPing();
   const showSider = siderStore?.showSider;
-  console.log("isLogged", isLogged, isValidStartPing);
+  console.log('isLogged', isLogged, isValidStartPing);
 
   /**
    * 用于轮训 Ping 当前打开的网页，登录状态下，2S 轮训一次
@@ -59,14 +53,16 @@ export const usePollingPingCurrentWeblink = () => {
     }
 
     // 开启轮训
+    // TODO: 不一定是 apiRequest，只是单纯的通信
     const pingRes = await apiRequest({
-      name: "pingWebLinkStatus",
+      name: 'pingWebLinkStatus',
+      method: 'GET',
       body: {
         url: currentWeblink?.originPageUrl,
       },
     });
 
-    console.log("currentWeblink pingRes", pingRes);
+    console.log('currentWeblink pingRes', pingRes);
 
     // 如果服务调用失败，直接静默失败，且持续轮训，这里直接将 ping 结果写回 currentWeblink
     if (pingRes?.success) {
@@ -104,16 +100,10 @@ export const usePollingPingCurrentWeblink = () => {
     /**
      * 1. 网页状态：document hide/visible
      */
-    document.addEventListener(
-      "visibilitychange",
-      listenWebpageVisibilityChange
-    );
+    document.addEventListener('visibilitychange', listenWebpageVisibilityChange);
 
     return () => {
-      document.removeEventListener(
-        "visibilitychange",
-        listenWebpageVisibilityChange
-      );
+      document.removeEventListener('visibilitychange', listenWebpageVisibilityChange);
 
       clearPollingPing();
     };

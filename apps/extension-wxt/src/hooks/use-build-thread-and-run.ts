@@ -1,28 +1,22 @@
-import { Message as message } from "@arco-design/web-react";
+import { Message as message } from '@arco-design/web-react';
 
-import { useChatStore } from "@/stores/chat";
-import { useConversationStore } from "@/stores/conversation";
-import { buildConversation } from "@/utils/conversation";
-import { useResetState } from "./use-reset-state";
-import { useTaskStore } from "@/stores/task";
-import { useNavigate } from "react-router-dom";
+import { useChatStore } from '@/stores/chat';
+import { useConversationStore } from '@/stores/conversation';
+import { buildConversation } from '@/utils/conversation';
+import { useResetState } from './use-reset-state';
+import { useTaskStore } from '@/stores/task';
+import { useNavigate } from 'react-router-dom';
 
 // 类型
-import {
-  QUICK_ACTION_TYPE,
-  type QUICK_ACTION_TASK_PAYLOAD,
-  type Task,
-  type Source,
-  TASK_TYPE,
-} from "@/types";
-import { SearchTarget, useSearchStateStore } from "@/stores/search-state";
-import { buildQuickActionTask, buildTask } from "@/utils/task";
-import { useWeblinkStore } from "@/stores/weblink";
-import { useSelectedMark } from "./use-selected-mark";
-import { useContentSelectorStore } from "@/stores/content-selector";
-import { useTranslation } from "react-i18next";
-import { useUserStore } from "@/stores/user";
-import { apiRequest } from "@/requests/apiRequest";
+import { QUICK_ACTION_TYPE, type QUICK_ACTION_TASK_PAYLOAD, type Task, type Source, TASK_TYPE } from '@/types';
+import { SearchTarget, useSearchStateStore } from '@/stores/search-state';
+import { buildQuickActionTask, buildTask } from '@/utils/task';
+import { useWeblinkStore } from '@/stores/weblink';
+import { useSelectedMark } from './use-selected-mark';
+import { useContentSelectorStore } from '@/stores/content-selector';
+import { useTranslation } from 'react-i18next';
+import { useUserStore } from '@/stores/user';
+import { apiRequest } from '@/requests/apiRequest';
 
 export const useBuildThreadAndRun = () => {
   const chatStore = useChatStore();
@@ -45,18 +39,19 @@ export const useBuildThreadAndRun = () => {
 
     // 创建新会话
     const res = await apiRequest({
-      name: "createNewConversation",
+      name: 'createNewConversation',
+      method: 'POST',
       body: { ...newConversationPayload, locale: localSettings?.outputLocale },
     });
 
     if (!res?.success) {
       message.error({
-        content: t("hooks.useBuildThreadAndRun.status.createFailed"),
+        content: t('hooks.useBuildThreadAndRun.status.createFailed'),
       });
       return;
     }
 
-    console.log("createNewConversation", res);
+    console.log('createNewConversation', res);
     conversationStore.setCurrentConversation(res?.data);
 
     // 清空之前的状态
@@ -88,14 +83,14 @@ export const useBuildThreadAndRun = () => {
     if (searchTarget === SearchTarget.CurrentPage) {
       selectedWebLink = [
         {
-          pageContent: "",
+          pageContent: '',
           metadata: {
-            title: document?.title || "",
+            title: document?.title || '',
             source: location.href,
           },
           score: -1, // 手工构造
           selections: marks?.map((item) => ({
-            type: "text",
+            type: 'text',
             xPath: item?.xPath,
             content: item?.data,
           })),
@@ -103,7 +98,7 @@ export const useBuildThreadAndRun = () => {
       ];
     } else if (searchTarget === SearchTarget.SelectedPages) {
       selectedWebLink = selectedRow?.map((item) => ({
-        pageContent: "",
+        pageContent: '',
         metadata: {
           title: item?.content?.originPageTitle,
           source: item?.content?.originPageUrl,
@@ -113,10 +108,7 @@ export const useBuildThreadAndRun = () => {
     }
 
     const task = buildTask({
-      taskType:
-        searchTarget === SearchTarget.SearchEnhance
-          ? TASK_TYPE.SEARCH_ENHANCE_ASK
-          : TASK_TYPE.CHAT,
+      taskType: searchTarget === SearchTarget.SearchEnhance ? TASK_TYPE.SEARCH_ENHANCE_ASK : TASK_TYPE.CHAT,
       data: {
         question,
         filter: { weblinkList: selectedWebLink },
@@ -135,12 +127,12 @@ export const useBuildThreadAndRun = () => {
 
     const task = buildQuickActionTask(
       {
-        question: t("hooks.useBuildThreadAndRun.task.summary.question"),
+        question: t('hooks.useBuildThreadAndRun.task.summary.question'),
         actionType: QUICK_ACTION_TYPE.SUMMARY,
         filter: payload?.filter,
-        actionPrompt: t("hooks.useBuildThreadAndRun.task.summary.actionPrompt"),
+        actionPrompt: t('hooks.useBuildThreadAndRun.task.summary.actionPrompt'),
       },
-      localSettings.outputLocale
+      localSettings.outputLocale,
     );
 
     // 创建新会话并跳转
