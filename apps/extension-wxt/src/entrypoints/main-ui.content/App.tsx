@@ -1,44 +1,41 @@
-import * as _Sentry from "@sentry/react";
-import { useEffect, Suspense } from "react";
-import { MemoryRouter } from "react-router-dom";
+import * as _Sentry from '@sentry/react';
+import { useEffect, Suspense } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 // 使用方法
-import { useSwitchTheme } from "@/hooks/use-switch-theme";
+import { useSwitchTheme } from '@/hooks/use-switch-theme';
 
 // hooks
-import { useProcessLoginNotify } from "@/hooks/use-process-login-notify";
+import { useProcessLoginNotify } from '@/hooks/use-process-login-notify';
 // import { useRegisterMouseEvent } from "../hooks/use-register-mouse-event"
-import { useBindCommands } from "@/hooks/use-bind-commands";
-import { useSetContainerDimension } from "@/hooks/use-set-container-dimension";
+import { useBindCommands } from '@/hooks/use-bind-commands';
+import { useSetContainerDimension } from '@/hooks/use-set-container-dimension';
 // stores
-import { useSiderStore } from "@/stores/sider";
-import { useQuickActionStore } from "@/stores/quick-action";
+import { useSiderStore } from '@/stores/sider';
+import { useQuickActionStore } from '@/stores/quick-action';
 
 // 组件
-import { Message, Spin } from "@arco-design/web-react";
-import { ContentRouter } from "@/components/router";
-import { Markdown } from "@/components/markdown";
+import { Message, Spin } from '@arco-design/web-react';
+import { ContentRouter } from '@/components/router';
+import { Markdown } from '@/components/markdown';
 
 // 加载国际化
-import "@/i18n/config";
-import { usePollingPingCurrentWeblink } from "@/hooks/use-polling-ping-current-weblink";
-import { getEnv } from "@/utils/env";
-import { SENTRY_DSN } from "@/utils/url";
-import { useSiderBarOpen } from "@/hooks/use-sider-bar-open";
+import '@/i18n/config';
+import { usePollingPingCurrentWeblink } from '@/hooks/use-polling-ping-current-weblink';
+import { getEnv } from '@/utils/env';
+import { SENTRY_DSN } from '@/utils/url';
+import { useSiderBarOpen } from '@/hooks/use-sider-bar-open';
 
 // 样式
-import "./App.scss";
+import './App.scss';
 
 const Sentry = _Sentry;
 
 Sentry.init({
   dsn: SENTRY_DSN,
   environment: getEnv(),
-  integrations: [
-    Sentry.browserTracingIntegration(),
-    Sentry.replayIntegration(),
-  ],
+  integrations: [Sentry.browserTracingIntegration(), Sentry.replayIntegration()],
   tracesSampleRate: 1.0, //  Capture 100% of the transactions
-  tracePropagationTargets: ["localhost", "https://refly.ai"],
+  tracePropagationTargets: ['localhost', 'https://refly.ai'],
   replaysSessionSampleRate: 0.1, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
   replaysOnErrorSampleRate: 1.0,
 });
@@ -66,15 +63,12 @@ const App = () => {
   // 设置 Message 通知的 container
   useEffect(() => {
     Message.config({
-      getContainer: () =>
-        document
-          .querySelector("refly-main-app")
-          ?.shadowRoot?.querySelector(".main") as HTMLElement,
+      getContainer: () => document.querySelector('refly-main-app')?.shadowRoot?.querySelector('.main') as HTMLElement,
     });
   }, []);
 
   return (
-    <Suspense fallback={<Spin style={{ marginTop: "200px auto" }} />}>
+    <Suspense fallback={<Spin style={{ marginTop: '200px auto' }} />}>
       <div className="light app-container">
         {/* <div
         className={quickActionStore.selectedText ? "entry active" : "entry"}
@@ -82,10 +76,7 @@ const App = () => {
         <img src={Logo} alt="唤起 Refly" style={{ width: 25, height: 25 }} />
         <span>⌘B</span>
       </div> */}
-        <div
-          id="refly-app-main"
-          className={siderStore.showSider ? "main active" : "main"}
-        >
+        <div id="refly-app-main" className={siderStore.showSider ? 'main active' : 'main'}>
           <MemoryRouter>
             <ContentRouter />
           </MemoryRouter>

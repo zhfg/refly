@@ -1,12 +1,10 @@
-import { appConfig } from "@/utils/config";
-import { request } from "@/utils/request";
+import { appConfig } from '@/utils/config';
+import { extRequest } from '@/utils/request';
 
-import type { HandlerRequest, HandlerResponse } from "@/types/request";
-import type { WebLinkItem } from "@/types";
+import type { HandlerRequest, HandlerResponse } from '@/types/request';
+import type { WebLinkItem } from '@/types';
 
-const handler = async (
-  req: HandlerRequest<Partial<WebLinkItem>>
-): Promise<HandlerResponse<WebLinkItem>> => {
+const handler = async (req: HandlerRequest<Partial<WebLinkItem>>): Promise<HandlerResponse<WebLinkItem>> => {
   console.log(req.body);
 
   try {
@@ -14,15 +12,12 @@ const handler = async (
       text: req.body?.url as string,
     });
     const weblink = { ...(historyItem?.[0] || {}), ...req.body };
-    const [err, storeRes] = await request<WebLinkItem>(
-      appConfig.url.storeWeblink,
-      {
-        method: "POST",
-        body: {
-          data: [weblink],
-        },
-      }
-    );
+    const [err, storeRes] = await extRequest<WebLinkItem>(appConfig.url.storeWeblink, {
+      method: 'POST',
+      body: {
+        data: [weblink],
+      },
+    });
     if (err) {
       return {
         success: false,

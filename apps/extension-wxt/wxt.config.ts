@@ -1,6 +1,6 @@
 import { defineConfig, WxtViteConfig } from 'wxt';
 import react from '@vitejs/plugin-react';
-import { vitePluginForArco } from '@arco-plugins/vite-react';
+import { vitePluginForArco } from '@refly/arco-vite-plugin-react';
 import postcssConfig from './postcss.config';
 
 // See https://wxt.dev/api/config.html
