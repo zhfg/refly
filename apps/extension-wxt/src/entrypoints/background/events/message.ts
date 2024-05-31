@@ -8,7 +8,7 @@ import { requestFileNames } from '@/types/request-filename';
 export const handleRequest = async (msg: HandlerRequest<any>) => {
   const lastActiveTab = await getLastActiveTab();
   const url = appConfig?.url[msg.name as keyof typeof appConfig.url] || '';
-  const [err, userRes] = await extRequest(url as string, msg?.body);
+  const [err, userRes] = await extRequest(url as string, { ...msg });
   let messageRes = {} as HandlerResponse<any>;
 
   if (err) {
