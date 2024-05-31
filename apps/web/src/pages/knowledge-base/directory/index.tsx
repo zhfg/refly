@@ -1,5 +1,5 @@
-import { LOCALE } from "@/types"
-import { time } from "@/utils/time"
+import { LOCALE } from "@refly/ai-workspace-common/types"
+import { time } from "@refly/ai-workspace-common/utils/time"
 
 // styles
 import "./index.scss"
@@ -7,13 +7,16 @@ import { IconFile } from "@arco-design/web-react/icon"
 import { Message as message } from "@arco-design/web-react"
 import { useEffect, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { useKnowledgeBaseStore } from "@/stores/knowledge-base"
+import { useKnowledgeBaseStore } from "@refly/ai-workspace-common/stores/knowledge-base"
 // 类型
-import { CollectionDetail, ResourceDetail } from "@/types/knowledge-base"
+import {
+  CollectionDetail,
+  ResourceDetail,
+} from "@refly/ai-workspace-common/types/knowledge-base"
 // 请求
 import getKnowledgeBaseDetail from "@/requests/getKnowledgeBaseDetail"
 // 组件
-import { ResourceList } from "@/components/resource-list"
+import { ResourceList } from "@refly/ai-workspace-common/components/resource-list"
 
 export const KnowledgeBaseDirectory = () => {
   const [isFetching, setIsFetching] = useState(false)

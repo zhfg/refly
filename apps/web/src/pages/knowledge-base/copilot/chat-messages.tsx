@@ -1,16 +1,16 @@
 // stores
-import { useChatStore } from "@/stores/chat"
+import { useChatStore } from "@refly/ai-workspace-common/stores/chat"
 // styles
-import { MessageType } from "@/types"
+import { MessageType } from "@refly/ai-workspace-common/types"
 import {
   AssistantMessage,
   HumanMessage,
   PendingMessage,
   WelcomeMessage,
 } from "./message"
-import { mapToServerMessage } from "@/utils/message"
-import { useMessageStateStore } from "@/stores/message-state"
-import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run"
+import { mapToServerMessage } from "@refly/ai-workspace-common/utils/message"
+import { useMessageStateStore } from "@refly/ai-workspace-common/stores/message-state"
+import { useBuildThreadAndRun } from "@refly/ai-workspace-common/hooks/use-build-thread-and-run"
 
 export const ChatMessages = () => {
   const chatStore = useChatStore()

@@ -1,8 +1,11 @@
-import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run"
-import { useCopilotContextState } from "@/hooks/use-copilot-context-state"
-import { useKnowledgeBaseStore } from "@/stores/knowledge-base"
-import { SearchTarget, useSearchStateStore } from "@/stores/search-state"
-import { getQuickActionPrompt } from "@/utils/quickActionPrompt"
+import { useBuildThreadAndRun } from "@refly/ai-workspace-common/hooks/use-build-thread-and-run"
+import { useCopilotContextState } from "@refly/ai-workspace-common/hooks/use-copilot-context-state"
+import { useKnowledgeBaseStore } from "@refly/ai-workspace-common/stores/knowledge-base"
+import {
+  SearchTarget,
+  useSearchStateStore,
+} from "@refly/ai-workspace-common/stores/search-state"
+import { getQuickActionPrompt } from "@refly/ai-workspace-common/utils/quickActionPrompt"
 import { Button, Tag } from "@arco-design/web-react"
 import {
   IconCloseCircle,

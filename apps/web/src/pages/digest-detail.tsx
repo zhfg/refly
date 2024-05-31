@@ -1,3 +1,3 @@
-import { DigestTail } from "@/components/digest-detail"
+import { DigestTail } from "@refly/ai-workspace-common/components/digest-detail"
 
 export const DigestDetailPage = () => <DigestTail></DigestTail>

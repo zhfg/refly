@@ -3,7 +3,7 @@ import { Breadcrumb, Button } from "@arco-design/web-react"
 
 // 自定义组件
 import { DigestToday } from "@/pages/digest-today"
-import { ThreadLibrary } from "@/components/thread-library"
+import { ThreadLibrary } from "@refly/ai-workspace-common/components/thread-library"
 
 // 自定义组件
 import {
@@ -18,7 +18,7 @@ import {
 } from "@arco-design/web-react/icon"
 // 自定义样式
 import "./index.scss"
-import { fakeConversations } from "@/fake-data/conversation"
+import { fakeConversations } from "@refly/ai-workspace-common/fake-data/conversation"
 // 自定义组件
 import { SearchTargetSelector } from "@refly/ai-workspace-common/components/search-target-selector"
 import { useSearchParams } from "react-router-dom"

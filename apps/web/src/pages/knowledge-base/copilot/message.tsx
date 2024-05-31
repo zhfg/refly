@@ -1,13 +1,13 @@
-import { Markdown } from "@/components/markdown"
-import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run"
-import { useUserStore } from "@/stores/user"
-import { ServerMessage } from "@/types"
-import { copyToClipboard } from "@/utils"
+import { Markdown } from "@refly/ai-workspace-common/components/markdown"
+import { useBuildThreadAndRun } from "@refly/ai-workspace-common/hooks/use-build-thread-and-run"
+import { useUserStore } from "@refly/ai-workspace-common/stores/user"
+import { ServerMessage } from "@refly/ai-workspace-common/types"
+import { copyToClipboard } from "@refly/ai-workspace-common/utils"
 import { Avatar, Button, Spin, Message } from "@arco-design/web-react"
 import { IconCopy, IconQuote, IconRight } from "@arco-design/web-react/icon"
 import { useTranslation } from "react-i18next"
 // 自定义组件
-import { SourceList } from "@/components/source-list"
+import { SourceList } from "@refly/ai-workspace-common/components/source-list"
 
 export const HumanMessage = (props: { message: Partial<ServerMessage> }) => {
   const { message } = props

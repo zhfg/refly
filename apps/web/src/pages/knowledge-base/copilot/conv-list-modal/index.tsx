@@ -1,13 +1,13 @@
-import { useKnowledgeBaseStore } from "@/stores/knowledge-base"
+import { useKnowledgeBaseStore } from "@refly/ai-workspace-common/stores/knowledge-base"
 import { Drawer } from "@arco-design/web-react"
 import { useTranslation } from "react-i18next"
 // 样式
 import "./index.scss"
 
 // 自定义组件
-import { ConvList } from "@/components/conv-list"
+import { ConvList } from "@refly/ai-workspace-common/components/conv-list"
 import { useNavigate } from "react-router-dom"
-import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run"
+import { useBuildThreadAndRun } from "@refly/ai-workspace-common/hooks/use-build-thread-and-run"
 
 interface ConvListModalProps {
   getPopupContainer: () => Element

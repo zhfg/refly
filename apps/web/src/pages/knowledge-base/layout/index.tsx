@@ -12,11 +12,11 @@ import { AICopilot } from "../copilot"
 import "./index.scss"
 import { useCookie } from "react-use"
 // types
-import { useUserStore } from "@/stores/user"
-import { getExtensionId } from "@/utils/url"
+import { useUserStore } from "@refly/ai-workspace-common/stores/user"
+import { getExtensionId } from "@refly/ai-workspace-common/utils/url"
 import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
-import { useResizePanel } from "@/hooks/use-resize-panel"
+import { useResizePanel } from "@refly/ai-workspace-common/hooks/use-resize-panel"
 import { ErrorBoundary } from "@sentry/react"
 
 // 用于快速选择

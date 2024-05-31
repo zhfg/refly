@@ -1,8 +1,14 @@
-import { appConfig } from "@/utils/config"
-import { request } from "@/utils/request"
+import { appConfig } from "@refly/ai-workspace-common/utils/config"
+import { request } from "@refly/ai-workspace-common/utils/request"
 
-import type { HandlerRequest, HandlerResponse } from "@/types/request"
-import type { WebLinkItem, ListPageProps } from "@/types"
+import type {
+  HandlerRequest,
+  HandlerResponse,
+} from "@refly/ai-workspace-common/types/request"
+import type {
+  WebLinkItem,
+  ListPageProps,
+} from "@refly/ai-workspace-common/types"
 
 const handler = async (
   req: HandlerRequest<ListPageProps>,

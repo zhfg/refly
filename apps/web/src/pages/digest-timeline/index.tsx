@@ -4,7 +4,7 @@ import { useSearchParams } from "react-router-dom"
  * 只聚焦昨天、今天、这周、这个月最核心的内容，剩下的让用户去归档里面查看，能够对自己的工作有一个明确的感知
  */
 
-import { time } from "@/utils/time"
+import { time } from "@refly/ai-workspace-common/utils/time"
 import {
   List,
   Skeleton,
@@ -21,22 +21,25 @@ import {
 } from "@arco-design/web-react/icon"
 import { useNavigate } from "react-router-dom"
 // types
-import type { Digest, DateType } from "@/types/digest"
-import { IconTip } from "@/components/dashboard/icon-tip"
-import { copyToClipboard } from "@/utils"
-import { getClientOrigin, safeParseURL } from "@/utils/url"
+import type { Digest, DateType } from "@refly/ai-workspace-common/types/digest"
+import { IconTip } from "@refly/ai-workspace-common/components/dashboard/icon-tip"
+import { copyToClipboard } from "@refly/ai-workspace-common/utils"
+import {
+  getClientOrigin,
+  safeParseURL,
+} from "@refly/ai-workspace-common/utils/url"
 // stores
-import { useDigestArchiveStore } from "@/stores/digest-archive"
+import { useDigestArchiveStore } from "@refly/ai-workspace-common/stores/digest-archive"
 // components
-import { DigestHeader } from "@/components/digest-common/header"
+import { DigestHeader } from "@refly/ai-workspace-common/components/digest-common/header"
 import { useEffect, useState } from "react"
-import { EmptyDigestStatus } from "@/components/empty-digest-archive-status"
+import { EmptyDigestStatus } from "@refly/ai-workspace-common/components/empty-digest-archive-status"
 // utils
 import getDigestList from "@/requests/getDigestList"
 // styles
 import "./index.scss"
 import { useTranslation } from "react-i18next"
-import { LOCALE } from "@/types"
+import { LOCALE } from "@refly/ai-workspace-common/types"
 
 export const DigestArchive = () => {
   const [searchParams] = useSearchParams()

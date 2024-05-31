@@ -1,5 +1,8 @@
-import { useUserStore } from "@/stores/user"
-import { cnGuessQuestions, enGuessQuestions } from "@/utils/guess-question"
+import { useUserStore } from "@refly/ai-workspace-common/stores/user"
+import {
+  cnGuessQuestions,
+  enGuessQuestions,
+} from "@refly/ai-workspace-common/utils/guess-question"
 import { Button, Tabs } from "@arco-design/web-react"
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels"
 
@@ -9,10 +12,13 @@ import { KnowledgeBaseResourceDetail } from "../resource-detail"
 import { IconArrowLeft, IconArrowRight } from "@arco-design/web-react/icon"
 // 样式
 import "./index.scss"
-import { useResizePanel } from "@/hooks/use-resize-panel"
-import { ActionSource, useKnowledgeBaseStore } from "@/stores/knowledge-base"
+import { useResizePanel } from "@refly/ai-workspace-common/hooks/use-resize-panel"
+import {
+  ActionSource,
+  useKnowledgeBaseStore,
+} from "@refly/ai-workspace-common/stores/knowledge-base"
 import { KnowledgeBaseListModal } from "../copilot/knowledge-base-list-modal"
-import { useKnowledgeBaseTabs } from "@/hooks/use-knowledge-base-tabs"
+import { useKnowledgeBaseTabs } from "@refly/ai-workspace-common/hooks/use-knowledge-base-tabs"
 
 const TabPane = Tabs.TabPane
 

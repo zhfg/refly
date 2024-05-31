@@ -1,12 +1,12 @@
-import { useKnowledgeBaseStore } from "@/stores/knowledge-base"
+import { useKnowledgeBaseStore } from "@refly/ai-workspace-common/stores/knowledge-base"
 import { Drawer } from "@arco-design/web-react"
 import { useTranslation } from "react-i18next"
 // 样式
 import "./index.scss"
 
 // 自定义组件
-import { KnowledgeBaseList } from "@/components/knowledge-base-list"
-import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run"
+import { KnowledgeBaseList } from "@refly/ai-workspace-common/components/knowledge-base-list"
+import { useBuildThreadAndRun } from "@refly/ai-workspace-common/hooks/use-build-thread-and-run"
 
 interface KnowledgeBaseListModalProps {
   getPopupContainer: () => Element

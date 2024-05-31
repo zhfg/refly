@@ -1,7 +1,10 @@
-import { appConfig } from "@/utils/config"
-import { request } from "@/utils/request"
+import { appConfig } from "@refly/ai-workspace-common/utils/config"
+import { request } from "@refly/ai-workspace-common/utils/request"
 
-import type { HandlerRequest, HandlerResponse } from "@/types/request"
+import type {
+  HandlerRequest,
+  HandlerResponse,
+} from "@refly/ai-workspace-common/types/request"
 
 const handler = async (
   req: HandlerRequest<{ sourceId: string }>,

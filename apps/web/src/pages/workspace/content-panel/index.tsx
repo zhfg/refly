@@ -1,8 +1,8 @@
 import { Tabs } from "@arco-design/web-react"
 
 // 自定义组件
-import { KnowledgeBaseList } from "@/components/knowledge-base-list"
-import { ThreadLibrary } from "@/components/thread-library"
+import { KnowledgeBaseList } from "@refly/ai-workspace-common/components/knowledge-base-list"
+import { ThreadLibrary } from "@refly/ai-workspace-common/components/thread-library"
 
 // 自定义组件
 import { IconFolder, IconRobot } from "@arco-design/web-react/icon"

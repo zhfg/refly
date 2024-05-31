@@ -8,13 +8,13 @@ import {
   matchRoutes,
 } from "react-router-dom"
 import { AppRouter } from "./router/index"
-import { AppLayout } from "@/components/layout/index"
+import { AppLayout } from "@refly/ai-workspace-common/components/layout/index"
 import * as Sentry from "@sentry/react"
 
 // 导入 i18n
-import "./i18n/config"
+import "@refly/ai-workspace-common/i18n/config"
 import { Spin } from "@arco-design/web-react"
-import { getEnv } from "./utils/env"
+import { getEnv } from "@refly/ai-workspace-common/utils/env"
 
 Sentry.init({
   dsn: "https://a687291d5ba3a77b0fa559e6d197eac8@o4507205453414400.ingest.us.sentry.io/4507208398602240",

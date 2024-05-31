@@ -16,24 +16,27 @@ import {
   IconTag,
 } from "@arco-design/web-react/icon"
 import { Helmet } from "react-helmet"
-import { time } from "@/utils/time"
+import { time } from "@refly/ai-workspace-common/utils/time"
 import { useNavigate, useParams } from "react-router-dom"
 // stores
-import { useDigestTopicDetailStore } from "@/stores/digest-topic-detail"
+import { useDigestTopicDetailStore } from "@refly/ai-workspace-common/stores/digest-topic-detail"
 // types
-import { Digest, LOCALE } from "@/types"
+import { Digest, LOCALE } from "@refly/ai-workspace-common/types"
 // request
 import getDigestList from "@/requests/getDigestList"
-import { IconTip } from "@/components/dashboard/icon-tip"
-import { copyToClipboard } from "@/utils"
-import { getClientOrigin, safeParseURL } from "@/utils/url"
-import { useDigestTopicStore } from "@/stores/digest-topics"
+import { IconTip } from "@refly/ai-workspace-common/components/dashboard/icon-tip"
+import { copyToClipboard } from "@refly/ai-workspace-common/utils"
+import {
+  getClientOrigin,
+  safeParseURL,
+} from "@refly/ai-workspace-common/utils/url"
+import { useDigestTopicStore } from "@refly/ai-workspace-common/stores/digest-topics"
 // styles
 import "./index.scss"
 // components
-import { EmptyDigestTopicDetailStatus } from "@/components/empty-digest-topic-detail-status"
+import { EmptyDigestTopicDetailStatus } from "@refly/ai-workspace-common/components/empty-digest-topic-detail-status"
 // hooks
-import { useGetDigestTopics } from "@/hooks/use-get-digest-topics"
+import { useGetDigestTopics } from "@refly/ai-workspace-common/hooks/use-get-digest-topics"
 import { useTranslation } from "react-i18next"
 
 const BreadcrumbItem = Breadcrumb.Item

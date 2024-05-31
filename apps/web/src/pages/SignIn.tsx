@@ -1,9 +1,9 @@
 import React from "react"
 import { Link } from "react-router-dom"
 
-import Header from "@/components/landing-page-partials/Header"
-import PageIllustration from "@/components/landing-page-partials/PageIllustration"
-import Banner from "@/components/landing-page-partials/Banner"
+import Header from "@refly/ai-workspace-common/components/landing-page-partials/Header"
+import PageIllustration from "@refly/ai-workspace-common/components/landing-page-partials/PageIllustration"
+import Banner from "@refly/ai-workspace-common/components/landing-page-partials/Banner"
 
 function SignIn() {
   return (

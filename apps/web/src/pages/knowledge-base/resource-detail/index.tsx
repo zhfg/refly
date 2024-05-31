@@ -1,4 +1,4 @@
-import { Markdown } from "@/components/markdown"
+import { Markdown } from "@refly/ai-workspace-common/components/markdown"
 import { IconBulb, IconCodepen } from "@arco-design/web-react/icon"
 
 // 自定义样式
@@ -8,15 +8,15 @@ import { Skeleton, Message as message } from "@arco-design/web-react"
 import {
   type KnowledgeBaseTab,
   useKnowledgeBaseStore,
-} from "@/stores/knowledge-base"
+} from "@refly/ai-workspace-common/stores/knowledge-base"
 // 请求
 import getResourceDetail from "@/requests/getResourceDetail"
 // 类型
-import { ResourceDetail } from "@/types"
+import { ResourceDetail } from "@refly/ai-workspace-common/types"
 import { useEffect, useState } from "react"
-import { safeParseURL } from "@/utils/url"
-import { useListenToSelection } from "@/hooks/use-listen-to-selection"
-import { useKnowledgeBaseTabs } from "@/hooks/use-knowledge-base-tabs"
+import { safeParseURL } from "@refly/ai-workspace-common/utils/url"
+import { useListenToSelection } from "@refly/ai-workspace-common/hooks/use-listen-to-selection"
+import { useKnowledgeBaseTabs } from "@refly/ai-workspace-common/hooks/use-knowledge-base-tabs"
 
 export const KnowledgeBaseResourceDetail = () => {
   const [isFetching, setIsFetching] = useState(false)

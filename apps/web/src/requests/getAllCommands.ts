@@ -1,4 +1,7 @@
-import type { HandlerRequest, HandlerResponse } from "@/types/request"
+import type {
+  HandlerRequest,
+  HandlerResponse,
+} from "@refly/ai-workspace-common/types/request"
 
 const handler = async (
   req: HandlerRequest<null>,

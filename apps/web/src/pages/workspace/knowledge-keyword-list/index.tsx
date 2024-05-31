@@ -9,12 +9,12 @@ import { IconArchive, IconBulb } from "@arco-design/web-react/icon"
 
 import "./index.scss"
 import { useNavigate } from "react-router-dom"
-import { useDigestTopicStore } from "@/stores/digest-topics"
+import { useDigestTopicStore } from "@refly/ai-workspace-common/stores/digest-topics"
 import { useEffect, useState } from "react"
 // request
 import getTopicList from "@/requests/getTopicList"
 // types
-import { Topic } from "@/types/"
+import { Topic } from "@refly/ai-workspace-common/types/"
 // utils
 import { useTranslation } from "react-i18next"
 import classNames from "classnames"

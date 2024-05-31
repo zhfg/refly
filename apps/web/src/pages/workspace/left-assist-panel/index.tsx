@@ -1,5 +1,8 @@
-import { useUserStore } from "@/stores/user"
-import { cnGuessQuestions, enGuessQuestions } from "@/utils/guess-question"
+import { useUserStore } from "@refly/ai-workspace-common/stores/user"
+import {
+  cnGuessQuestions,
+  enGuessQuestions,
+} from "@refly/ai-workspace-common/utils/guess-question"
 import { Avatar } from "@arco-design/web-react"
 import { useTranslation } from "react-i18next"
 

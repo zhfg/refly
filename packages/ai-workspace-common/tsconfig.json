@@ -20,12 +20,17 @@
     "noFallthroughCasesInSwitch": true,
 
     // path
+    "baseUrl": ".",
+    "rootDir": "src",
     "paths": {
       "@/*": ["./src/*"]
     },
     "composite": true,
     "noEmit": true,
+    "declaration": true,
+    "declarationMap": true
   },
   "include": ["src"],
+  "exclude": ["node_modules", "dist"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

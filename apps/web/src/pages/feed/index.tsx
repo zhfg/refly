@@ -9,8 +9,8 @@ import {
   Typography,
 } from "@arco-design/web-react"
 // stores
-import { useFeedStore } from "@/stores/feed"
-import { IconTip } from "@/components/dashboard/icon-tip"
+import { useFeedStore } from "@refly/ai-workspace-common/stores/feed"
+import { IconTip } from "@refly/ai-workspace-common/components/dashboard/icon-tip"
 import {
   IconBook,
   IconClockCircle,
@@ -21,18 +21,18 @@ import {
 } from "@arco-design/web-react/icon"
 import { useNavigate, useMatch } from "react-router-dom"
 // utils
-import { time } from "@/utils/time"
+import { time } from "@refly/ai-workspace-common/utils/time"
 import getFeedList from "@/requests/getFeedList"
 // types
-import { Feed as IFeed } from "@/types"
+import { Feed as IFeed } from "@refly/ai-workspace-common/types"
 import "./index.scss"
 // fake data
-import { copyToClipboard } from "@/utils"
-import { getClientOrigin } from "@/utils/url"
-import { safeParseJSON } from "@/utils/parse"
+import { copyToClipboard } from "@refly/ai-workspace-common/utils"
+import { getClientOrigin } from "@refly/ai-workspace-common/utils/url"
+import { safeParseJSON } from "@refly/ai-workspace-common/utils/parse"
 // components
-import { EmptyFeedStatus } from "@/components/empty-feed-status"
-import { delay } from "@/utils/delay"
+import { EmptyFeedStatus } from "@refly/ai-workspace-common/components/empty-feed-status"
+import { delay } from "@refly/ai-workspace-common/utils/delay"
 
 export const Feed = () => {
   const [scrollLoading, setScrollLoading] = useState(

@@ -2,10 +2,10 @@ import React, { useEffect } from "react"
 import { Route, Routes, useMatch } from "react-router-dom"
 
 // 自定义组件
-import { Thread } from "@/components/thread-item/thread"
-import { ThreadLibrary } from "@/components/thread-library"
-import { Settings } from "@/components/settings/index"
-import { Login } from "@/components/login/index"
+import { Thread } from "@refly/ai-workspace-common/components/thread-item/thread"
+import { ThreadLibrary } from "@refly/ai-workspace-common/components/thread-library"
+import { Settings } from "@refly/ai-workspace-common/components/settings/index"
+import { Login } from "@refly/ai-workspace-common/components/login/index"
 import LandingPage from "@/pages/landing-page"
 import { DigestToday } from "@/pages/digest-today"
 import { DigestTopics } from "@/pages/digest-topics/index"
@@ -22,11 +22,11 @@ import KnowledgeBase from "@/pages/knowledge-base/layout"
 
 // 这里用于分享之后的不需要鉴权的查看
 import { AIGCContentDetailPage } from "@/pages/aigc-content-detail"
-import { safeParseJSON } from "@/utils/parse"
-import { useUserStore } from "@/stores/user"
+import { safeParseJSON } from "@refly/ai-workspace-common/utils/parse"
+import { useUserStore } from "@refly/ai-workspace-common/stores/user"
 import { useTranslation } from "react-i18next"
-import { useGetUserSettings } from "@/hooks/use-get-user-settings"
-import { LOCALE } from "@/types"
+import { useGetUserSettings } from "@refly/ai-workspace-common/hooks/use-get-user-settings"
+import { LOCALE } from "@refly/ai-workspace-common/types"
 
 export const AppRouter = (props: { layout?: any }) => {
   const { layout: Layout } = props

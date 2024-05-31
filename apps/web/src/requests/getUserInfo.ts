@@ -1,9 +1,12 @@
-import { appConfig } from "@/utils/config"
-import { getCookie } from "@/utils/cookie"
-import { request } from "@/utils/request"
+import { appConfig } from "@refly/ai-workspace-common/utils/config"
+import { getCookie } from "@refly/ai-workspace-common/utils/cookie"
+import { request } from "@refly/ai-workspace-common/utils/request"
 
-import type { HandlerRequest, HandlerResponse } from "@/types/request"
-import { User } from "@/types"
+import type {
+  HandlerRequest,
+  HandlerResponse,
+} from "@refly/ai-workspace-common/types/request"
+import { User } from "@refly/ai-workspace-common/types"
 
 const handler = async (
   req?: HandlerRequest<any>,

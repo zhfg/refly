@@ -1,15 +1,15 @@
 import { Button, Input } from "@arco-design/web-react"
 import { useRef, useState } from "react"
 import type { RefTextAreaType } from "@arco-design/web-react/es/Input/textarea"
-import { useChatStore } from "@/stores/chat"
+import { useChatStore } from "@refly/ai-workspace-common/stores/chat"
 // styles
 import "./index.scss"
-import { useQuickSearchStateStore } from "@/stores/quick-search-state"
+import { useQuickSearchStateStore } from "@refly/ai-workspace-common/stores/quick-search-state"
 import { IconSend } from "@arco-design/web-react/icon"
-import { useMessageStateStore } from "@/stores/message-state"
-import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run"
-import { buildConversation } from "@/utils/conversation"
-import { useConversationStore } from "@/stores/conversation"
+import { useMessageStateStore } from "@refly/ai-workspace-common/stores/message-state"
+import { useBuildThreadAndRun } from "@refly/ai-workspace-common/hooks/use-build-thread-and-run"
+import { buildConversation } from "@refly/ai-workspace-common/utils/conversation"
+import { useConversationStore } from "@refly/ai-workspace-common/stores/conversation"
 
 const TextArea = Input.TextArea
 
