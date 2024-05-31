@@ -1,11 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension';
-import type {
-  CollectionListItem,
-  CollectionDetail,
-  ResourceDetail,
-} from '@refly-packages/ai-workspace-common/types/knowledge-base';
+import type { CollectionListItem, CollectionDetail, ResourceDetail } from '@refly/openapi-schema';
 
 export enum ActionSource {
   KnowledgeBase = 'knowledge-base',

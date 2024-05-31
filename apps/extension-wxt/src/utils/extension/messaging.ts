@@ -28,7 +28,7 @@ export const sendToBackgroundV2 = async (message: BackgroundMessage) => {
       if (response?.name === message?.name) {
         browser.runtime.onMessage.removeListener(listener);
 
-        resolve(response?.body);
+        resolve(response);
       }
     };
 

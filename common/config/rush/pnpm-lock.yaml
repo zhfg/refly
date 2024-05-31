@@ -921,6 +921,9 @@ importers:
       '@refly/constants':
         specifier: workspace:*
         version: link:../constants
+      '@refly/openapi-schema':
+        specifier: workspace:*
+        version: link:../openapi-schema
       '@refly/schema':
         specifier: workspace:*
         version: link:../schema
