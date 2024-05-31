@@ -3,8 +3,8 @@ import { Helmet } from "react-helmet"
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels"
 
 // 自定义组件
-import { LeftAssistPanel } from "./left-assist-panel"
-import { ContentPanel } from "./content-panel"
+import { LeftAssistPanel } from "../../../../../packages/ai-workspace-common/src/components/workspace/left-assist-panel"
+import { ContentPanel } from "../../../../../packages/ai-workspace-common/src/components/workspace/content-panel"
 // utils
 // 自定义方法
 // stores

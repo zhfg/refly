@@ -22,7 +22,7 @@ import {
 import { useNavigate, useMatch } from "react-router-dom"
 // utils
 import { time } from "@refly/ai-workspace-common/utils/time"
-import getFeedList from "@/requests/getFeedList"
+import getFeedList from "@refly/ai-workspace-common/requests/getFeedList"
 // types
 import { Feed as IFeed } from "@refly/ai-workspace-common/types"
 import "./index.scss"
