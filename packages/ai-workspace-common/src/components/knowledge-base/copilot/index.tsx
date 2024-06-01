@@ -148,19 +148,19 @@ export const AICopilot = () => {
     setIsFetching(false);
   };
 
-  useEffect(() => {
-    if (convId) {
-      handleConvTask(convId);
-    }
+  // useEffect(() => {
+  //   if (convId) {
+  //     handleConvTask(convId);
+  //   }
 
-    return () => {
-      chatStore.setMessages([]);
-    };
-  }, [convId]);
-  useEffect(() => {
-    handleSwitchSearchTarget();
-  }, [showContextState]);
-  useResizeCopilot({ containerSelector: 'ai-copilot-container' });
+  //   return () => {
+  //     chatStore.setMessages([]);
+  //   };
+  // }, [convId]);
+  // useEffect(() => {
+  //   handleSwitchSearchTarget();
+  // }, [showContextState]);
+  // useResizeCopilot({ containerSelector: 'ai-copilot-container' });
 
   return (
     <div className="ai-copilot-container">
@@ -177,12 +177,12 @@ export const AICopilot = () => {
             icon={<IconMore style={{ fontSize: 16 }} />}></Button> */}
         </div>
       </div>
-      <div
+      {/* <div
         className="ai-copilot-message-container"
         style={{ height: `calc(100% - ${actualCopilotBodyHeight}px - 50px)` }}
       >
         <ChatMessages />
-      </div>
+      </div> */}
       <div className="ai-copilot-body" style={{ height: actualCopilotBodyHeight }}>
         {showContextCard ? (
           <div className="ai-copilot-context-display">
@@ -273,7 +273,7 @@ export const AICopilot = () => {
           }}
         />
       ) : null}
-      {knowledgeBaseStore?.sourceListModalVisible ? (
+      {/* {knowledgeBaseStore?.sourceListModalVisible ? (
         <SourceListModal
           title={`结果来源 (${knowledgeBaseStore?.tempConvResources?.length || 0})`}
           classNames="source-list-modal"
@@ -282,7 +282,7 @@ export const AICopilot = () => {
           }}
           resources={knowledgeBaseStore?.tempConvResources || []}
         />
-      ) : null}
+      ) : null} */}
     </div>
   );
 };

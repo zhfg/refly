@@ -2,6 +2,8 @@ import { defineConfig, WxtViteConfig } from 'wxt';
 import react from '@vitejs/plugin-react';
 import { vitePluginForArco } from '@refly/arco-vite-plugin-react';
 import postcssConfig from './postcss.config';
+import tsconfigPaths from 'vite-tsconfig-paths';
+import path from 'path';
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
@@ -10,6 +12,7 @@ export default defineConfig({
     ({
       plugins: [
         react(),
+        tsconfigPaths(),
         vitePluginForArco({
           theme: '@arco-themes/react-refly-ai',
         }),
@@ -17,11 +20,24 @@ export default defineConfig({
       css: {
         postcss: postcssConfig,
       },
+      resolve: {
+        alias: {
+          '@': path.resolve(__dirname, './src'),
+          '@refly/ai-workspace-common': path.resolve(__dirname, './node_modules/@refly/ai-workspace-common/src'),
+          '@refly-packages/ai-workspace-common': path.resolve(
+            __dirname,
+            './node_modules/@refly/ai-workspace-common/src',
+          ),
+        },
+      },
       build: {
         sourcemap: 'inline',
       },
       server: {
         port: 8000,
+        fs: {
+          strict: false, // TODO：这里需要添加限制，allow 需要处理，目前先临时解决
+        },
       },
     }) as WxtViteConfig,
   manifest: {

@@ -35,8 +35,10 @@ const KnowledgeLibraryLayout = () => {
   const { t } = useTranslation()
 
   const [minSize] = useResizePanel({
-    groupSelector: "workspace-panel-container",
-    resizeSelector: "workspace-panel-resize",
+    getGroupSelector: () =>
+      document.querySelector(`.workspace-panel-container`) as HTMLElement,
+    getResizeSelector: () =>
+      document.querySelectorAll(`.workspace-panel-resize`),
     initialMinSize: 24,
     initialMinPixelSize: 310,
   })

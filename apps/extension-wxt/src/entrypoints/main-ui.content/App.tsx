@@ -26,6 +26,7 @@ import { SENTRY_DSN } from '@/utils/url';
 import { useSiderBarOpen } from '@/hooks/use-sider-bar-open';
 
 // 样式
+import '@/styles/style.css';
 import './App.scss';
 
 const Sentry = _Sentry;
