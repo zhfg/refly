@@ -112,8 +112,52 @@ export type SourceMeta = {
   /**
    * Source title
    */
-  title?: number;
+  title?: string;
+  /**
+   * Source publish time
+   */
+  publishedTime?: string;
+  /**
+   * Related collection ID
+   */
+  collectionId?: string;
+  /**
+   * Related collection name
+   */
+  collectionName?: string;
+  /**
+   * Related resource ID
+   */
+  resourceId?: string;
+  /**
+   * Related resource name
+   */
+  resourceName?: string;
 };
+
+/**
+ * Source selection
+ */
+export type SourceSelection = {
+  /**
+   * Selected xPath
+   * @deprecated
+   */
+  xPath?: string;
+  /**
+   * Selected content
+   */
+  content: string;
+  /**
+   * Selection type
+   */
+  type: 'text' | 'table' | 'link' | 'image' | 'video' | 'audio';
+};
+
+/**
+ * Selection type
+ */
+export type type = 'text' | 'table' | 'link' | 'image' | 'video' | 'audio';
 
 /**
  * Source of the message
@@ -130,7 +174,7 @@ export type Source = {
   /**
    * Source content
    */
-  pageContent?: string;
+  pageContent: string;
   /**
    * Relativity score
    */
@@ -140,6 +184,10 @@ export type Source = {
    * @deprecated
    */
   metadata?: SourceMeta;
+  /**
+   * Source selections
+   */
+  selections?: Array<SourceSelection>;
 };
 
 /**
@@ -192,7 +240,7 @@ export type ConversationListItem = {
   /**
    * Related content ID
    */
-  contentId?: string;
+  cid?: string;
   /**
    * Origin page host
    */
@@ -318,13 +366,35 @@ export type ChatTask = {
    */
   convId?: string;
   /**
+   * Create conversation parameters
+   */
+  createConvParam?: CreateConversationRequest;
+  /**
    * Chat locale
    */
   locale?: string;
   /**
    * Chat data
    */
-  data?: unknown;
+  data?: ChatPayload | QuickActionTaskPayload;
+};
+
+/**
+ * Chat task response
+ */
+export type ChatTaskResponse = {
+  /**
+   * List of web links
+   */
+  sources: Array<Source>;
+  /**
+   * Chat Answer
+   */
+  answer: string;
+  /**
+   * Related questions
+   */
+  relatedQuestions?: Array<string>;
 };
 
 /**
@@ -357,7 +427,7 @@ export type PingWeblinkData = {
   /**
    * Related questions for this weblink summary
    */
-  relationQuestions?: Array<string>;
+  relatedQuestions?: Array<string>;
   /**
    * Weblink parse source
    */
@@ -378,6 +448,10 @@ export type WeblinkDTO = {
    */
   title?: string;
   /**
+   * Weblink document storage key
+   */
+  storageKey?: string;
+  /**
    * Origin page host
    */
   origin?: string;
@@ -389,6 +463,22 @@ export type WeblinkDTO = {
    * Origin page url
    */
   originPageUrl?: string;
+  /**
+   * Origin page description
+   */
+  originPageDescription?: string;
+  /**
+   * Weblink visit count
+   */
+  visitCount?: number;
+  /**
+   * UNIX timestamp for last visit time
+   */
+  lastVisitTime?: number;
+  /**
+   * Read time in seconds
+   */
+  readTime?: number;
   /**
    * Weblink index status
    */
@@ -407,7 +497,7 @@ export type ContentDTO = {
   /**
    * Content ID
    */
-  contentId: string;
+  cid: string;
   /**
    * Content title
    */
@@ -663,7 +753,7 @@ export type CreateConversationRequest = {
   /**
    * Related content ID
    */
-  contentId?: string;
+  cid?: string;
   /**
    * Related link ID
    */
@@ -1050,7 +1140,7 @@ export type GetContentDetailData = {
     /**
      * Content ID
      */
-    contentId: string;
+    cid: string;
   };
 };
 
@@ -1279,7 +1369,7 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/aigc/content/{contentId}': {
+  '/aigc/content/{cid}': {
     get: {
       req: GetContentDetailData;
       res: {

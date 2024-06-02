@@ -1,3 +1,5 @@
+import { LOCALE } from '@refly/constants';
+
 export const fewshotExamples = `
 输入：
 

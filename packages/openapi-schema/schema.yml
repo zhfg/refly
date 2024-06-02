@@ -490,7 +490,7 @@ paths:
                 $ref: '#/components/schemas/ListDigestResponse'
       security:
         - api_key: []
-  /aigc/content/{contentId}:
+  /aigc/content/{cid}:
     get:
       tags:
         - aigc
@@ -498,7 +498,7 @@ paths:
       description: Get AIGC content detail
       operationId: getContentDetail
       parameters:
-        - name: contentId
+        - name: cid
           in: path
           required: true
           description: Content ID
@@ -675,11 +675,53 @@ components:
           type: string
           description: Source URL
         title:
-          type: number
+          type: string
           description: Source title
+        publishedTime:
+          type: string
+          format: date-time
+          description: Source publish time
+        collectionId:
+          type: string
+          description: Related collection ID
+        collectionName:
+          type: string
+          description: Related collection name
+        resourceId:
+          type: string
+          description: Related resource ID
+        resourceName:
+          type: string
+          description: Related resource name
+    SourceSelection:
+      type: object
+      description: Source selection
+      required:
+        - content
+        - type
+      properties:
+        xPath:
+          type: string
+          description: Selected xPath
+          deprecated: true
+        content:
+          type: string
+          description: Selected content
+        type:
+          type: string
+          description: Selection type
+          enum:
+            - text
+            - table
+            - link
+            - image
+            - video
+            - audio
     Source:
       type: object
       description: Source of the message
+      required:
+        - pageContent
       properties:
         url:
           type: string
@@ -698,6 +740,11 @@ components:
           description: Source metadata
           deprecated: true
           $ref: '#/components/schemas/SourceMeta'
+        selections:
+          type: array
+          description: Source selections
+          items:
+            $ref: '#/components/schemas/SourceSelection'
     MessageType:
       type: string
       description: Chat message type
@@ -748,7 +795,7 @@ components:
           type: number
           description: Number of chat messages in this conversation
           example: 42
-        contentId:
+        cid:
           type: string
           description: Related content ID
           example: c-g30e1b80b5g1itbemc0g5jj3
@@ -875,12 +922,38 @@ components:
           description: Conversation ID, a new conversation will be created if empty or non-existent
           type: string
           example: cv-g30e1b80b5g1itbemc0g5jj3
+        createConvParam:
+          description: Create conversation parameters
+          $ref: '#/components/schemas/CreateConversationRequest'
         locale:
           description: Chat locale
           type: string
           example: en
         data:
           description: Chat data
+          oneOf:
+            - $ref: '#/components/schemas/ChatPayload'
+            - $ref: '#/components/schemas/QuickActionTaskPayload'
+    ChatTaskResponse:
+      type: object
+      description: Chat task response
+      required:
+        - sources
+        - answer
+      properties:
+        sources:
+          type: array
+          description: List of web links
+          items:
+            $ref: '#/components/schemas/Source'
+        answer:
+          type: string
+          description: Chat Answer
+        relatedQuestions:
+          type: array
+          description: Related questions
+          items:
+            type: string
     IndexStatus:
       type: string
       description: Resource index status
@@ -913,7 +986,7 @@ components:
           type: string
           description: Summary of the weblink
           example: The summary of the weblink
-        relationQuestions:
+        relatedQuestions:
           type: array
           description: Related questions for this weblink summary
           items:
@@ -937,6 +1010,9 @@ components:
           type: string
           description: Weblink title
           example: Google
+        storageKey:
+          type: string
+          description: Weblink document storage key
         origin:
           type: string
           description: Origin page host
@@ -949,6 +1025,21 @@ components:
           type: string
           description: Origin page url
           example: https://refly.ai/knowledge-base
+        originPageDescription:
+          type: string
+          description: Origin page description
+          example: The knowledge base for developers
+        visitCount:
+          type: number
+          description: Weblink visit count
+          example: 1
+        lastVisitTime:
+          type: number
+          description: UNIX timestamp for last visit time
+        readTime:
+          type: number
+          description: Read time in seconds
+          example: 60
         indexStatus:
           description: Weblink index status
           $ref: '#/components/schemas/IndexStatus'
@@ -963,12 +1054,12 @@ components:
     ContentDTO:
       type: object
       required:
-        - contentId
+        - cid
         - title
         - createdAt
         - updatedAt
       properties:
-        contentId:
+        cid:
           type: string
           description: Content ID
           example: c-g30e1b80b5g1itbemc0g5jj3
@@ -1259,7 +1350,7 @@ components:
           type: string
           description: Conversation title
           example: My Conversation
-        contentId:
+        cid:
           type: string
           description: Related content ID
           example: c-g30e1b80b5g1itbemc0g5jj3
@@ -1427,14 +1518,6 @@ components:
               description: User settings data
               $ref: '#/components/schemas/UserSettings'
   securitySchemes:
-    petstore_auth:
-      type: oauth2
-      flows:
-        implicit:
-          authorizationUrl: https://petstore3.swagger.io/oauth/authorize
-          scopes:
-            write:pets: modify pets in your account
-            read:pets: read your pets
     api_key:
       type: apiKey
       name: api_key

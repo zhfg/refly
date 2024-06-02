@@ -31,7 +31,7 @@ import { KnowledgeService } from './knowledge.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { buildSuccessResponse } from '../utils/response';
 
-export const convertResourcePoToListItem = (resource: Resource): ResourceListItem => {
+const convertResourcePoToListItem = (resource: Resource): ResourceListItem => {
   return {
     ..._.omit(resource, ['id', 'userId', 'deletedAt']),
     createdAt: resource.createdAt.toJSON(),

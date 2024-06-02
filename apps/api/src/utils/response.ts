@@ -1,4 +1,4 @@
-export const buildSuccessResponse = <T>(data: T) => {
+export const buildSuccessResponse = <T>(data?: T) => {
   return {
     success: true,
     data,

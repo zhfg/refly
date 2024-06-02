@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Conversation, MessageType } from '@prisma/client';
 
+import { LOCALE } from '@refly/constants';
 import { Content } from '../aigc/aigc.dto';
 import { Source } from '../types/weblink';
 

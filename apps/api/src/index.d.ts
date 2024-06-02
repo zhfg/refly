@@ -7,9 +7,4 @@ declare global {
       user?: { id: string; name: string };
     }
   }
-
-  enum LOCALE {
-    ZH_CN = 'zh-CN',
-    EN = 'en',
-  }
 }

@@ -1,3 +1,5 @@
+import { LOCALE } from '@refly/constants';
+
 export const systemPrompt = (locale: LOCALE) =>
   `You are an expert on summarizing conversation between AI and human, ` +
   `and you will be given a conversation between AI and human.

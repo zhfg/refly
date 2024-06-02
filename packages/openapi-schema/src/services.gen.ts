@@ -284,7 +284,7 @@ export const getDigestList = (options: Options<GetDigestListData>) => {
 export const getContentDetail = (options: Options<GetContentDetailData>) => {
   return (options?.client ?? client).get<GetContentDetailResponse2, GetContentDetailError>({
     ...options,
-    url: '/aigc/content/{contentId}',
+    url: '/aigc/content/{cid}',
   });
 };
 

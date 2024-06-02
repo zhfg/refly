@@ -163,8 +163,51 @@ export const $SourceMeta = {
       description: 'Source URL',
     },
     title: {
-      type: 'number',
+      type: 'string',
       description: 'Source title',
+    },
+    publishedTime: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Source publish time',
+    },
+    collectionId: {
+      type: 'string',
+      description: 'Related collection ID',
+    },
+    collectionName: {
+      type: 'string',
+      description: 'Related collection name',
+    },
+    resourceId: {
+      type: 'string',
+      description: 'Related resource ID',
+    },
+    resourceName: {
+      type: 'string',
+      description: 'Related resource name',
+    },
+  },
+} as const;
+
+export const $SourceSelection = {
+  type: 'object',
+  description: 'Source selection',
+  required: ['content', 'type'],
+  properties: {
+    xPath: {
+      type: 'string',
+      description: 'Selected xPath',
+      deprecated: true,
+    },
+    content: {
+      type: 'string',
+      description: 'Selected content',
+    },
+    type: {
+      type: 'string',
+      description: 'Selection type',
+      enum: ['text', 'table', 'link', 'image', 'video', 'audio'],
     },
   },
 } as const;
@@ -172,6 +215,7 @@ export const $SourceMeta = {
 export const $Source = {
   type: 'object',
   description: 'Source of the message',
+  required: ['pageContent'],
   properties: {
     url: {
       type: 'string',
@@ -194,6 +238,13 @@ export const $Source = {
       description: 'Source metadata',
       deprecated: true,
       $ref: '#/components/schemas/SourceMeta',
+    },
+    selections: {
+      type: 'array',
+      description: 'Source selections',
+      items: {
+        $ref: '#/components/schemas/SourceSelection',
+      },
     },
   },
 } as const;
@@ -255,7 +306,7 @@ export const $ConversationListItem = {
       description: 'Number of chat messages in this conversation',
       example: 42,
     },
-    contentId: {
+    cid: {
       type: 'string',
       description: 'Related content ID',
       example: 'c-g30e1b80b5g1itbemc0g5jj3',
@@ -422,6 +473,10 @@ export const $ChatTask = {
       type: 'string',
       example: 'cv-g30e1b80b5g1itbemc0g5jj3',
     },
+    createConvParam: {
+      description: 'Create conversation parameters',
+      $ref: '#/components/schemas/CreateConversationRequest',
+    },
     locale: {
       description: 'Chat locale',
       type: 'string',
@@ -429,6 +484,40 @@ export const $ChatTask = {
     },
     data: {
       description: 'Chat data',
+      oneOf: [
+        {
+          $ref: '#/components/schemas/ChatPayload',
+        },
+        {
+          $ref: '#/components/schemas/QuickActionTaskPayload',
+        },
+      ],
+    },
+  },
+} as const;
+
+export const $ChatTaskResponse = {
+  type: 'object',
+  description: 'Chat task response',
+  required: ['sources', 'answer'],
+  properties: {
+    sources: {
+      type: 'array',
+      description: 'List of web links',
+      items: {
+        $ref: '#/components/schemas/Source',
+      },
+    },
+    answer: {
+      type: 'string',
+      description: 'Chat Answer',
+    },
+    relatedQuestions: {
+      type: 'array',
+      description: 'Related questions',
+      items: {
+        type: 'string',
+      },
     },
   },
 } as const;
@@ -466,7 +555,7 @@ export const $PingWeblinkData = {
       description: 'Summary of the weblink',
       example: 'The summary of the weblink',
     },
-    relationQuestions: {
+    relatedQuestions: {
       type: 'array',
       description: 'Related questions for this weblink summary',
       items: {
@@ -499,6 +588,10 @@ export const $WeblinkDTO = {
       description: 'Weblink title',
       example: 'Google',
     },
+    storageKey: {
+      type: 'string',
+      description: 'Weblink document storage key',
+    },
     origin: {
       type: 'string',
       description: 'Origin page host',
@@ -513,6 +606,25 @@ export const $WeblinkDTO = {
       type: 'string',
       description: 'Origin page url',
       example: 'https://refly.ai/knowledge-base',
+    },
+    originPageDescription: {
+      type: 'string',
+      description: 'Origin page description',
+      example: 'The knowledge base for developers',
+    },
+    visitCount: {
+      type: 'number',
+      description: 'Weblink visit count',
+      example: 1,
+    },
+    lastVisitTime: {
+      type: 'number',
+      description: 'UNIX timestamp for last visit time',
+    },
+    readTime: {
+      type: 'number',
+      description: 'Read time in seconds',
+      example: 60,
     },
     indexStatus: {
       description: 'Weblink index status',
@@ -533,9 +645,9 @@ export const $WeblinkDTO = {
 
 export const $ContentDTO = {
   type: 'object',
-  required: ['contentId', 'title', 'createdAt', 'updatedAt'],
+  required: ['cid', 'title', 'createdAt', 'updatedAt'],
   properties: {
-    contentId: {
+    cid: {
       type: 'string',
       description: 'Content ID',
       example: 'c-g30e1b80b5g1itbemc0g5jj3',
@@ -968,7 +1080,7 @@ export const $CreateConversationRequest = {
       description: 'Conversation title',
       example: 'My Conversation',
     },
-    contentId: {
+    cid: {
       type: 'string',
       description: 'Related content ID',
       example: 'c-g30e1b80b5g1itbemc0g5jj3',
