@@ -34,12 +34,33 @@ import type {
   DeleteCollectionResponse,
   ListConversationsError,
   ListConversationsResponse,
+  ChatData,
+  ChatError,
+  ChatResponse,
   CreateConversationData,
   CreateConversationError,
   CreateConversationResponse2,
-  GetConversationData,
-  GetConversationError,
-  GetConversationResponse,
+  GetConversationDetailData,
+  GetConversationDetailError,
+  GetConversationDetailResponse2,
+  PingWeblinkData2,
+  PingWeblinkError,
+  PingWeblinkResponse2,
+  StoreWeblinkData,
+  StoreWeblinkError,
+  StoreWeblinkResponse,
+  ListWeblinksData,
+  ListWeblinksError,
+  ListWeblinksResponse,
+  GetFeedListData,
+  GetFeedListError,
+  GetFeedListResponse,
+  GetDigestListData,
+  GetDigestListError,
+  GetDigestListResponse,
+  GetContentDetailData,
+  GetContentDetailError,
+  GetContentDetailResponse2,
   GetSettingsError,
   GetSettingsResponse,
   UpdateSettingsData,
@@ -169,6 +190,17 @@ export const listConversations = (options?: Options) => {
 };
 
 /**
+ * Chat in a streaming style
+ * Chat in a streaming style
+ */
+export const chat = (options: Options<ChatData>) => {
+  return (options?.client ?? client).post<ChatResponse, ChatError>({
+    ...options,
+    url: '/conversation/chat',
+  });
+};
+
+/**
  * Create new conversation
  * Create a new conversation
  */
@@ -183,10 +215,76 @@ export const createConversation = (options: Options<CreateConversationData>) => 
  * Get conversation
  * Get conversation detail
  */
-export const getConversation = (options: Options<GetConversationData>) => {
-  return (options?.client ?? client).get<GetConversationResponse, GetConversationError>({
+export const getConversationDetail = (options: Options<GetConversationDetailData>) => {
+  return (options?.client ?? client).get<GetConversationDetailResponse2, GetConversationDetailError>({
     ...options,
     url: '/conversation/{convId}',
+  });
+};
+
+/**
+ * Ping a weblink
+ * Find out the processing status for a given weblink
+ */
+export const pingWeblink = (options: Options<PingWeblinkData2>) => {
+  return (options?.client ?? client).get<PingWeblinkResponse2, PingWeblinkError>({
+    ...options,
+    url: '/weblink/ping',
+  });
+};
+
+/**
+ * Store a weblink
+ * Store a weblink
+ */
+export const storeWeblink = (options: Options<StoreWeblinkData>) => {
+  return (options?.client ?? client).post<StoreWeblinkResponse, StoreWeblinkError>({
+    ...options,
+    url: '/weblink/store',
+  });
+};
+
+/**
+ * List weblinks
+ * List all weblinks
+ */
+export const listWeblinks = (options?: Options<ListWeblinksData>) => {
+  return (options?.client ?? client).get<ListWeblinksResponse, ListWeblinksError>({
+    ...options,
+    url: '/weblink/list',
+  });
+};
+
+/**
+ * Get AIGC feed
+ * Get AIGC feed
+ */
+export const getFeedList = (options?: Options<GetFeedListData>) => {
+  return (options?.client ?? client).get<GetFeedListResponse, GetFeedListError>({
+    ...options,
+    url: '/aigc/feed',
+  });
+};
+
+/**
+ * Get AIGC digest
+ * Get AIGC digest
+ */
+export const getDigestList = (options: Options<GetDigestListData>) => {
+  return (options?.client ?? client).post<GetDigestListResponse, GetDigestListError>({
+    ...options,
+    url: '/aigc/digest',
+  });
+};
+
+/**
+ * Get AIGC content detail
+ * Get AIGC content detail
+ */
+export const getContentDetail = (options: Options<GetContentDetailData>) => {
+  return (options?.client ?? client).get<GetContentDetailResponse2, GetContentDetailError>({
+    ...options,
+    url: '/aigc/content/{contentId}',
   });
 };
 

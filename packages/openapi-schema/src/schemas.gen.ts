@@ -308,6 +308,393 @@ export const $ConversationDetail = {
   ],
 } as const;
 
+export const $ChatTaskType = {
+  type: 'string',
+  description: 'Chat task type',
+  enum: ['chat', 'genTitle', 'quickAction', 'searchEnhanceKeyword', 'searchEnhanceSummarize', 'searchEnhanceAsk'],
+} as const;
+
+export const $RetrieveFilter = {
+  type: 'object',
+  description: 'Content retrieval filter',
+  properties: {
+    weblinkList: {
+      type: 'array',
+      description: 'List of web links',
+      items: {
+        $ref: '#/components/schemas/Source',
+      },
+      deprecated: true,
+    },
+    urls: {
+      type: 'array',
+      description: 'List of URLs to retrieve',
+      items: {
+        type: 'string',
+        example: 'https://refly.ai',
+      },
+    },
+    resourceIds: {
+      type: 'array',
+      description: 'List of resource IDs to retrieve',
+      items: {
+        type: 'string',
+        example: 'r-g30e1b80b5g1itbemc0g5jj3',
+      },
+    },
+    collectionIds: {
+      type: 'array',
+      description: 'List of collection IDs to retrieve',
+      items: {
+        type: 'string',
+        example: 'cl-g30e1b80b5g1itbemc0g5jj3',
+      },
+    },
+  },
+} as const;
+
+export const $ChatPayload = {
+  type: 'object',
+  description: 'Chat payload',
+  required: ['question'],
+  properties: {
+    question: {
+      type: 'string',
+      description: 'Question',
+    },
+    filter: {
+      type: 'object',
+      description: 'Content retrieval filter',
+      $ref: '#/components/schemas/RetrieveFilter',
+    },
+  },
+} as const;
+
+export const $QuickActionType = {
+  type: 'string',
+  description: 'Quick action type',
+  enum: ['selection', 'summary'],
+} as const;
+
+export const $QuickActionTaskPayload = {
+  type: 'object',
+  description: 'Quick action task payload',
+  properties: {
+    question: {
+      type: 'string',
+      description: 'Question',
+    },
+    actionType: {
+      description: 'Quick action type',
+      $ref: '#/components/schemas/QuickActionType',
+    },
+    actionPrompt: {
+      type: 'string',
+      description: 'Prompt for this action',
+    },
+    reference: {
+      type: 'string',
+      description: 'Reference for this action',
+    },
+    filter: {
+      description: 'Content retrieval filter',
+      $ref: '#/components/schemas/RetrieveFilter',
+    },
+  },
+} as const;
+
+export const $ChatTask = {
+  type: 'object',
+  description: 'Chat task',
+  required: ['taskType'],
+  properties: {
+    taskType: {
+      description: 'Task type',
+      $ref: '#/components/schemas/ChatTaskType',
+    },
+    dryRun: {
+      description: 'Whether to dry run the task',
+      type: 'boolean',
+      default: false,
+    },
+    convId: {
+      description: 'Conversation ID, a new conversation will be created if empty or non-existent',
+      type: 'string',
+      example: 'cv-g30e1b80b5g1itbemc0g5jj3',
+    },
+    locale: {
+      description: 'Chat locale',
+      type: 'string',
+      example: 'en',
+    },
+    data: {
+      description: 'Chat data',
+    },
+  },
+} as const;
+
+export const $IndexStatus = {
+  type: 'string',
+  description: 'Resource index status',
+  enum: ['init', 'processing', 'finish', 'failed', 'unavailable'],
+} as const;
+
+export const $ParseSource = {
+  type: 'string',
+  description: 'Weblink parse source',
+  enum: ['serverCrawl', 'clientUpload'],
+} as const;
+
+export const $PingWeblinkData = {
+  type: 'object',
+  properties: {
+    linkId: {
+      type: 'string',
+      description: 'Weblink ID',
+      example: 'l-g30e1b80b5g1itbemc0g5jj3',
+    },
+    parseStatus: {
+      description: 'Weblink parse status',
+      $ref: '#/components/schemas/IndexStatus',
+    },
+    chunkStatus: {
+      description: 'Weblink chunking status',
+      $ref: '#/components/schemas/IndexStatus',
+    },
+    summary: {
+      type: 'string',
+      description: 'Summary of the weblink',
+      example: 'The summary of the weblink',
+    },
+    relationQuestions: {
+      type: 'array',
+      description: 'Related questions for this weblink summary',
+      items: {
+        type: 'string',
+        example: 'What is the summary of the weblink?',
+      },
+    },
+    parseSource: {
+      description: 'Weblink parse source',
+      $ref: '#/components/schemas/ParseSource',
+    },
+  },
+} as const;
+
+export const $WeblinkDTO = {
+  type: 'object',
+  properties: {
+    linkId: {
+      type: 'string',
+      description: 'Weblink ID',
+      example: 'l-g30e1b80b5g1itbemc0g5jj3',
+    },
+    url: {
+      type: 'string',
+      description: 'Weblink URL',
+      example: 'https://www.google.com',
+    },
+    title: {
+      type: 'string',
+      description: 'Weblink title',
+      example: 'Google',
+    },
+    origin: {
+      type: 'string',
+      description: 'Origin page host',
+      example: 'https://refly.ai',
+    },
+    originPageTitle: {
+      type: 'string',
+      description: 'Origin page title',
+      example: 'Refly | Where knowledge thrives',
+    },
+    originPageUrl: {
+      type: 'string',
+      description: 'Origin page url',
+      example: 'https://refly.ai/knowledge-base',
+    },
+    indexStatus: {
+      description: 'Weblink index status',
+      $ref: '#/components/schemas/IndexStatus',
+    },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Weblink creation time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Weblink update time',
+    },
+  },
+} as const;
+
+export const $ContentDTO = {
+  type: 'object',
+  required: ['contentId', 'title', 'createdAt', 'updatedAt'],
+  properties: {
+    contentId: {
+      type: 'string',
+      description: 'Content ID',
+      example: 'c-g30e1b80b5g1itbemc0g5jj3',
+    },
+    title: {
+      type: 'string',
+      description: 'Content title',
+    },
+    abstract: {
+      type: 'string',
+      description: 'Content abstract',
+    },
+    meta: {
+      type: 'string',
+      description: 'Content metadata',
+    },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Content creation time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Content update time',
+    },
+  },
+} as const;
+
+export const $ContentMetaRecord = {
+  type: 'object',
+  required: ['key', 'name', 'score', 'reason'],
+  properties: {
+    key: {
+      type: 'string',
+      description: 'Meta key',
+      example: 'startup_product_research',
+    },
+    name: {
+      type: 'string',
+      description: 'Meta name',
+      example: 'Startup Product Research',
+    },
+    score: {
+      type: 'number',
+      description: 'Meta relativity score',
+      example: 0.9,
+    },
+    reason: {
+      type: 'string',
+      description: 'Reason for classification',
+      example: 'The content is related to startup product research',
+    },
+  },
+} as const;
+
+export const $ContentMeta = {
+  type: 'object',
+  properties: {
+    topics: {
+      type: 'array',
+      description: 'Topic list',
+      items: {
+        $ref: '#/components/schemas/ContentMetaRecord',
+      },
+    },
+    contentType: {
+      type: 'array',
+      description: 'Content type list',
+      items: {
+        $ref: '#/components/schemas/ContentMetaRecord',
+      },
+    },
+    formats: {
+      type: 'array',
+      description: 'Content format list',
+      items: {
+        $ref: '#/components/schemas/ContentMetaRecord',
+      },
+    },
+  },
+} as const;
+
+export const $ContentDetail = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/ContentDTO',
+    },
+    {
+      type: 'object',
+      properties: {
+        content: {
+          type: 'string',
+          description: 'Content',
+          example: 'The actual content',
+        },
+        source: {
+          type: 'array',
+          description: 'Content source list',
+          items: {
+            $ref: '#/components/schemas/Source',
+          },
+        },
+        meta: {
+          description: 'Content metadata',
+          $ref: '#/components/schemas/ContentMeta',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $Digest = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/ContentDTO',
+    },
+    {
+      type: 'object',
+      required: ['topicKey', 'date'],
+      properties: {
+        topicKey: {
+          type: 'string',
+          description: 'Topic key',
+        },
+        uid: {
+          type: 'string',
+          description: 'User ID',
+        },
+        date: {
+          type: 'string',
+          description: 'Digest date',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $Feed = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/ContentDTO',
+    },
+    {
+      type: 'object',
+      properties: {
+        readCount: {
+          type: 'number',
+          description: 'Read count',
+        },
+        askFollow: {
+          type: 'number',
+          description: 'Ask follow count',
+        },
+      },
+    },
+  ],
+} as const;
+
 export const $UserSettings = {
   type: 'object',
   required: ['uid', 'avatar', 'name', 'email'],
@@ -643,11 +1030,23 @@ export const $ListConversationResponse = {
         data: {
           type: 'array',
           description: 'Conversation list',
-          $ref: '#/components/schemas/ConversationListItem',
+          items: {
+            $ref: '#/components/schemas/ConversationListItem',
+          },
         },
       },
     },
   ],
+} as const;
+
+export const $ChatRequest = {
+  type: 'object',
+  properties: {
+    task: {
+      description: 'chat task config',
+      $ref: '#/components/schemas/ChatTask',
+    },
+  },
 } as const;
 
 export const $GetConversationDetailResponse = {
@@ -662,6 +1061,160 @@ export const $GetConversationDetailResponse = {
           type: 'object',
           description: 'Conversation data',
           $ref: '#/components/schemas/ConversationDetail',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $PingWeblinkResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Weblink ping result',
+          $ref: '#/components/schemas/PingWeblinkData',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $StoreWeblinkRequest = {
+  type: 'object',
+  properties: {
+    data: {
+      type: 'array',
+      description: 'Weblink list',
+      items: {
+        $ref: '#/components/schemas/WeblinkDTO',
+      },
+    },
+  },
+} as const;
+
+export const $ListWeblinkResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Weblink list',
+          items: {
+            $ref: '#/components/schemas/WeblinkDTO',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $ListFeedResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Feed list',
+          items: {
+            $ref: '#/components/schemas/Feed',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $ListDigestRequest = {
+  type: 'object',
+  required: ['filter'],
+  properties: {
+    page: {
+      type: 'number',
+      description: 'Page number',
+      default: 1,
+    },
+    pageSize: {
+      type: 'number',
+      description: 'Page size',
+      default: 10,
+    },
+    filter: {
+      type: 'object',
+      description: 'Digest query filter',
+      properties: {
+        date: {
+          type: 'object',
+          description: 'Date filter',
+          properties: {
+            year: {
+              type: 'number',
+              description: 'Year',
+            },
+            month: {
+              type: 'number',
+              description: 'Month',
+            },
+            day: {
+              type: 'number',
+              description: 'Day',
+            },
+          },
+        },
+        topic: {
+          type: 'string',
+          description: 'Topic filter',
+        },
+      },
+    },
+  },
+} as const;
+
+export const $ListDigestResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Digest list',
+          items: {
+            $ref: '#/components/schemas/Digest',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $GetContentDetailResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Content data',
+          $ref: '#/components/schemas/ContentDetail',
         },
       },
     },
