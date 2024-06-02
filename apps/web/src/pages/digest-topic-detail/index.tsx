@@ -23,7 +23,7 @@ import { useDigestTopicDetailStore } from "@refly/ai-workspace-common/stores/dig
 // types
 import { Digest, LOCALE } from "@refly/ai-workspace-common/types"
 // request
-import getDigestList from "@/requests/getDigestList"
+import getDigestList from "@refly/ai-workspace-common/requests/getDigestList"
 import { IconTip } from "@refly/ai-workspace-common/components/dashboard/icon-tip"
 import { copyToClipboard } from "@refly/ai-workspace-common/utils"
 import {

@@ -18,7 +18,7 @@ import { DigestArchive } from "@/pages/digest-timeline"
 import { DigestDetailPage } from "@/pages/digest-detail"
 // 页面
 import Workspace from "@/pages/workspace"
-import KnowledgeBase from "@/pages/knowledge-base/layout"
+import KnowledgeBase from "@/pages/knowledge-base"
 
 // 这里用于分享之后的不需要鉴权的查看
 import { AIGCContentDetailPage } from "@/pages/aigc-content-detail"

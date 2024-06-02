@@ -2,29 +2,30 @@
  * Deprecated：目前没有使用
  */
 
-import { apiRequest } from "@/requests/apiRequest";
-import { useState, useEffect } from "react";
-import { useMatch } from "react-router-dom";
+import { apiRequest } from '@/requests/apiRequest';
+import { useState, useEffect } from 'react';
+import { useMatch } from 'react-router-dom';
 
 export function useWebLinkIndexed() {
   // 标识此网页是否被索引的状态
   const [isWebLinkIndexed, setIsWebLinkIndexed] = useState(false);
-  const isHomePage = useMatch("/");
+  const isHomePage = useMatch('/');
 
   const getWebsiteIndexStatus = async () => {
     setIsWebLinkIndexed(false);
 
     const indexRes = await apiRequest({
-      name: "getWebLinkIndexStatus",
+      name: 'getWebLinkIndexStatus',
+      method: 'GET',
       body: {
         url: location.href,
       },
     });
 
-    console.log("weblink index status", indexRes);
+    console.log('weblink index status', indexRes);
 
     if (indexRes?.data?.length > 0) {
-      const indexStatus = indexRes?.data?.[0]?.indexStatus === "finish";
+      const indexStatus = indexRes?.data?.[0]?.indexStatus === 'finish';
 
       if (indexStatus) {
         setIsWebLinkIndexed(true);

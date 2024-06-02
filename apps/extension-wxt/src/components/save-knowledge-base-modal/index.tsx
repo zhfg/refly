@@ -1,80 +1,66 @@
-import {
-  Form,
-  Modal,
-  Input,
-  Select,
-  Typography,
-  Message as message,
-} from "@arco-design/web-react";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { fakeKnowledgeBaseList } from "@/fake-data/knowledge-base";
-import { useStoreWeblink } from "@/hooks/use-store-weblink";
-import { useKnowledgeBaseStore } from "@/stores/knowledge-base";
-import { delay } from "@/utils/delay";
-import { safeParseJSON } from "@/utils/parse";
-import { getPopupContainer } from "@/utils/ui";
+import { Form, Modal, Input, Select, Typography, Message as message } from '@arco-design/web-react';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { fakeKnowledgeBaseList } from '@/fake-data/knowledge-base';
+import { useStoreWeblink } from '@/hooks/use-store-weblink';
+import { useKnowledgeBaseStore } from '@/stores/knowledge-base';
+import { delay } from '@/utils/delay';
+import { safeParseJSON } from '@/utils/parse';
+import { getPopupContainer } from '@/utils/ui';
 
 // requests
-import newResource from "@/requests/newResource";
-import { ResourceType, type ResourceListItem } from "@/types";
-import { apiRequest } from "@/requests/apiRequest";
+import { ResourceType, type ResourceListItem } from '@/types';
+import { apiRequest } from '@/requests/apiRequest';
 // utils
 
 const FormItem = Form.Item;
 const Option = Select.Option;
 
-export type KnowledgeBaseLocation =
-  | "lastSaved"
-  | "newlyKnowledgeBase"
-  | "selectedKnowledgeBase";
+export type KnowledgeBaseLocation = 'lastSaved' | 'newlyKnowledgeBase' | 'selectedKnowledgeBase';
 export interface KnowledgeBaseLocationValue {
   value: KnowledgeBaseLocation;
 }
 
 export const SaveKnowledgeBaseModal = () => {
   // 这里前端持久化上次的保存知识库信息
-  const lastSavedKnowledgeBaseStr = localStorage.getItem(
-    "lastSavedKnowledgeBase"
-  );
+  const lastSavedKnowledgeBaseStr = localStorage.getItem('lastSavedKnowledgeBase');
   const { t } = useTranslation();
   const lastSavedKnowledgeBase = safeParseJSON(lastSavedKnowledgeBaseStr);
   const { handleClientUploadHtml } = useStoreWeblink();
   const selectOptions = lastSavedKnowledgeBase
     ? [
         {
-          label: "lastSaved",
-          value: "上次保存",
+          label: 'lastSaved',
+          value: '上次保存',
         },
         {
-          label: "newlyKnowledgeBase",
-          value: "新建知识库",
+          label: 'newlyKnowledgeBase',
+          value: '新建知识库',
         },
         {
-          label: "selectedKnowledgeBase",
-          value: "选择知识库",
+          label: 'selectedKnowledgeBase',
+          value: '选择知识库',
         },
       ]
     : [
         {
-          label: "newlyKnowledgeBase",
-          value: "新建知识库",
+          label: 'newlyKnowledgeBase',
+          value: '新建知识库',
         },
         {
-          label: "selectedKnowledgeBase",
-          value: "选择知识库",
+          label: 'selectedKnowledgeBase',
+          value: '选择知识库',
         },
       ];
 
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [form] = Form.useForm();
   const knowledgeBaseStore = useKnowledgeBaseStore();
-  const selectedStoreMannagerState = (Form.useFormState(
-    "knowledge-base-location",
-    form
-  ) || { value: selectOptions?.[0]?.label }) as { value: string };
+  const selectedStoreMannagerState = (Form.useFormState('knowledge-base-location', form) || {
+    value: selectOptions?.[0]?.label,
+  }) as { value: string };
 
-  console.log("selectedStoreMannagerState", selectedStoreMannagerState);
+  console.log('selectedStoreMannagerState', selectedStoreMannagerState);
 
   const formItemLayout = {
     labelCol: {
@@ -92,41 +78,40 @@ export const SaveKnowledgeBaseModal = () => {
 
       const weblinkRes = await handleClientUploadHtml(location?.href);
       if (!weblinkRes?.data?.storageKey) {
-        message?.error("保存资源失败，请重试！");
+        message?.error('保存资源失败，请重试！');
         return;
       }
 
-      console.log("weblinkRes", weblinkRes);
+      console.log('weblinkRes', weblinkRes);
 
       const weblinkData = {
-        title: document?.title || "",
+        title: document?.title || '',
         url: location.href,
-        storageKey: weblinkRes?.data?.storageKey || "",
+        storageKey: weblinkRes?.data?.storageKey || '',
       };
 
       let body: ResourceListItem = {
         resourceType: ResourceType.weblink,
         data: weblinkData,
       };
-      const knowledgeBaseLocation = form.getFieldValue(
-        "knowledge-base-location"
-      );
-      console.log("knowledgeBaseLocation", knowledgeBaseLocation);
-      if (knowledgeBaseLocation === "newlyKnowledgeBase") {
-        const collectionName = form.getFieldValue("new-knowledge-base-title");
+      const knowledgeBaseLocation = form.getFieldValue('knowledge-base-location');
+      console.log('knowledgeBaseLocation', knowledgeBaseLocation);
+      if (knowledgeBaseLocation === 'newlyKnowledgeBase') {
+        const collectionName = form.getFieldValue('new-knowledge-base-title');
         body = { ...body, collectionName };
-      } else if (knowledgeBaseLocation === "selectedKnowledgeBase") {
-        const collectionId = form.getFieldValue("select-knowledge-base");
+      } else if (knowledgeBaseLocation === 'selectedKnowledgeBase') {
+        const collectionId = form.getFieldValue('select-knowledge-base');
         body = { ...body, collectionId };
       }
 
-      const resourceRes = await newResource({
+      const resourceRes = await apiRequest({
+        name: 'GET',
         body,
       });
 
-      console.log("resourceRes", resourceRes);
+      console.log('resourceRes', resourceRes);
       if (!resourceRes?.success) {
-        message?.error("保存资源失败，请重试！");
+        message?.error('保存资源失败，请重试！');
       } else {
         message.success({
           content: `保存资源成功，可以点击链接访问`,
@@ -140,35 +125,31 @@ export const SaveKnowledgeBaseModal = () => {
   };
 
   const loadMore = async (currentPage?: number) => {
-    const { isRequesting, hasMore, pageSize, ...extraState } =
-      useKnowledgeBaseStore.getState();
-    console.log("loadMore", isRequesting, hasMore, pageSize, extraState);
+    const { isRequesting, hasMore, pageSize, ...extraState } = useKnowledgeBaseStore.getState();
+    console.log('loadMore', isRequesting, hasMore, pageSize, extraState);
     if (isRequesting || !hasMore) return;
     if (currentPage < extraState?.currentPage) return;
 
     // 获取数据
     const queryPayload = {
       pageSize,
-      page:
-        typeof currentPage === "number" ? currentPage : extraState.currentPage,
+      page: typeof currentPage === 'number' ? currentPage : extraState.currentPage,
     };
 
     // 更新页码
-    knowledgeBaseStore.updateCurrentPage(
-      (typeof currentPage === "number" ? currentPage : extraState.currentPage) +
-        1
-    );
+    knowledgeBaseStore.updateCurrentPage((typeof currentPage === 'number' ? currentPage : extraState.currentPage) + 1);
     knowledgeBaseStore.updateIsRequesting(true);
 
     const res = await apiRequest({
-      name: "getKnowledgeBaseList",
+      name: 'getKnowledgeBaseList',
+      method: 'GET',
       body: queryPayload,
     });
 
-    console.log("res", res);
+    console.log('res', res);
 
     if (!res?.success) {
-      message.error(t("loggedHomePage.homePage.weblinkList.list.fetchErr"));
+      message.error(t('loggedHomePage.homePage.weblinkList.list.fetchErr'));
       knowledgeBaseStore.updateIsRequesting(false);
 
       return;
@@ -179,16 +160,13 @@ export const SaveKnowledgeBaseModal = () => {
       knowledgeBaseStore.updateHasMore(false);
     }
 
-    console.log("res", res);
+    console.log('res', res);
     knowledgeBaseStore.updateKnowledgeBaseList(res?.data || []);
     knowledgeBaseStore.updateIsRequesting(false);
   };
 
   useEffect(() => {
-    form.setFieldValue(
-      "knowledge-base-location",
-      selectedStoreMannagerState?.value
-    );
+    form.setFieldValue('knowledge-base-location', selectedStoreMannagerState?.value);
   }, []);
 
   useEffect(() => {
@@ -198,7 +176,7 @@ export const SaveKnowledgeBaseModal = () => {
   }, [knowledgeBaseStore?.isSaveKnowledgeBaseModalVisible]);
   useEffect(() => {
     return () => {
-      console.log("exit exit");
+      console.log('exit exit');
       knowledgeBaseStore.resetState();
     };
   }, []);
@@ -206,14 +184,10 @@ export const SaveKnowledgeBaseModal = () => {
   return (
     <Modal
       title="保存资源到知识库"
-      style={{ width: "80%" }}
+      style={{ width: '80%' }}
       unmountOnExit={true}
       escToExit
-      getPopupContainer={() =>
-        document
-          .querySelector("#refly-main-app")
-          ?.shadowRoot?.querySelector(".main")
-      }
+      getPopupContainer={() => document.querySelector('#refly-main-app')?.shadowRoot?.querySelector('.main')}
       visible={knowledgeBaseStore.isSaveKnowledgeBaseModalVisible}
       onOk={() => onOk()}
       okButtonProps={{ loading: confirmLoading }}
@@ -232,15 +206,10 @@ export const SaveKnowledgeBaseModal = () => {
         }}
         onChange={(value) => {}}
         wrapperCol={{
-          style: { flexBasis: "calc(100% - 90px)" },
+          style: { flexBasis: 'calc(100% - 90px)' },
         }}
       >
-        <FormItem
-          label="保存位置"
-          required
-          field="knowledge-base-location"
-          rules={[{ required: true }]}
-        >
+        <FormItem label="保存位置" required field="knowledge-base-location" rules={[{ required: true }]}>
           <Select>
             {selectOptions.map((item, index) => {
               return (
@@ -251,21 +220,17 @@ export const SaveKnowledgeBaseModal = () => {
             })}
           </Select>
         </FormItem>
-        {(selectedStoreMannagerState as KnowledgeBaseLocationValue)?.value ===
-        "selectedKnowledgeBase" ? (
+        {(selectedStoreMannagerState as KnowledgeBaseLocationValue)?.value === 'selectedKnowledgeBase' ? (
           knowledgeBaseStore?.knowledgeBaseList?.length > 0 ? (
             <FormItem
               label="选择知识库"
               required
               field="select-knowledge-base"
-              rules={[{ required: true, message: "知识库是必填项" }]}
+              rules={[{ required: true, message: '知识库是必填项' }]}
             >
               <Select allowClear showSearch>
                 {knowledgeBaseStore?.knowledgeBaseList.map((option) => (
-                  <Option
-                    key={option?.collectionId}
-                    value={option?.collectionId}
-                  >
+                  <Option key={option?.collectionId} value={option?.collectionId}>
                     {option?.title}
                   </Option>
                 ))}
@@ -277,8 +242,7 @@ export const SaveKnowledgeBaseModal = () => {
             </Typography.Paragraph>
           )
         ) : null}
-        {(selectedStoreMannagerState as KnowledgeBaseLocationValue)?.value ===
-        "lastSaved" ? (
+        {(selectedStoreMannagerState as KnowledgeBaseLocationValue)?.value === 'lastSaved' ? (
           <FormItem
             label="保存位置"
             required
@@ -295,21 +259,18 @@ export const SaveKnowledgeBaseModal = () => {
             </Select>
           </FormItem>
         ) : null}
-        {(selectedStoreMannagerState as KnowledgeBaseLocationValue)?.value ===
-        "newlyKnowledgeBase"
+        {(selectedStoreMannagerState as KnowledgeBaseLocationValue)?.value === 'newlyKnowledgeBase'
           ? [
               <FormItem
                 label="知识库名称"
                 required
                 field="new-knowledge-base-title"
-                initialValue={document?.title || ""}
+                initialValue={document?.title || ''}
                 rules={[{ required: true }]}
               >
                 <Input />
               </FormItem>,
-              <Typography.Paragraph blockquote>
-                将会以当前网页内容信息创建新知识库
-              </Typography.Paragraph>,
+              <Typography.Paragraph blockquote>将会以当前网页内容信息创建新知识库</Typography.Paragraph>,
             ]
           : null}
       </Form>

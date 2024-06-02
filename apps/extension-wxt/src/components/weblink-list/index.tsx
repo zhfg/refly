@@ -10,7 +10,7 @@ import {
   Message as message,
   Typography,
   Tag,
-} from "@arco-design/web-react";
+} from '@arco-design/web-react';
 import React, {
   forwardRef,
   useEffect,
@@ -20,21 +20,21 @@ import React, {
   memo,
   useMemo,
   useTransition,
-} from "react";
-import InfiniteScroll from "react-infinite-scroll-component";
-import throttle from "lodash.throttle";
-import type { QueryPayload, WebLinkItem } from "./types";
-import { defaultQueryPayload } from "./utils";
+} from 'react';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import throttle from 'lodash.throttle';
+import type { QueryPayload, WebLinkItem } from './types';
+import { defaultQueryPayload } from './utils';
 
-import { LOCALE, type Conversation } from "@/types";
-import { time } from "@/utils/time";
+import { LOCALE, type Conversation } from '@/types';
+import { time } from '@/utils/time';
 // stores
-import { useWeblinkStore } from "@/stores/weblink";
-import { safeParseUrl } from "@/utils/parse";
-import { useTranslation } from "react-i18next";
+import { useWeblinkStore } from '@/stores/weblink';
+import { safeParseUrl } from '@/utils/parse';
+import { useTranslation } from 'react-i18next';
 // styles
-import "./index.scss";
-import { apiRequest } from "@/requests/apiRequest";
+import './index.scss';
+import { apiRequest } from '@/requests/apiRequest';
 
 type Props = {
   getPopupContainer: () => HTMLElement;
@@ -46,7 +46,7 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
     title,
     updatedAt,
     originPageDescription,
-    url = "",
+    url = '',
     originPageTitle,
     originPageUrl,
     chunkStatus,
@@ -66,15 +66,10 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
           {/* <Tooltip className="edit" content="编辑">
             <IconEdit />
           </Tooltip> */}
-          <span className="date">
-            {time(updatedAt, uiLocale).utc().fromNow()}
-          </span>
+          <span className="date">{time(updatedAt, uiLocale).utc().fromNow()}</span>
         </div>
         <div className="conv-item-content">
-          <span
-            className="conv-item-content-text css-ellipsis"
-            style={{ width: 250 }}
-          >
+          <span className="conv-item-content-text css-ellipsis" style={{ width: 250 }}>
             {originPageDescription}
           </span>
         </div>
@@ -83,18 +78,14 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
             <a rel="noreferrer" href={originPageUrl} target="_blank">
               <img
                 className="icon"
-                src={`https://www.google.com/s2/favicons?domain=${safeParseUrl(originPageUrl) || ""}&sz=${16}`}
+                src={`https://www.google.com/s2/favicons?domain=${safeParseUrl(originPageUrl) || ''}&sz=${16}`}
                 alt=""
               />
               <span className="text">{originPageTitle}</span>
-              {chunkStatus === "finish" ? (
-                <Tag color="green">
-                  {t("loggedHomePage.homePage.weblinkList.item.read")}
-                </Tag>
+              {chunkStatus === 'finish' ? (
+                <Tag color="green">{t('loggedHomePage.homePage.weblinkList.item.read')}</Tag>
               ) : (
-                <Tag color="orange">
-                  {t("loggedHomePage.homePage.weblinkList.item.unread")}
-                </Tag>
+                <Tag color="orange">{t('loggedHomePage.homePage.weblinkList.item.unread')}</Tag>
               )}
             </a>
           </div>
@@ -116,40 +107,36 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
 };
 
 const PreviosWebsiteList = forwardRef((props: Props, ref) => {
-  const [keyword, setKeyword] = useState("");
+  const [keyword, setKeyword] = useState('');
   const [loading, setLoading] = useState(false);
   const webLinkStore = useWeblinkStore();
 
   const { t } = useTranslation();
 
   const loadMore = async (currentPage?: number) => {
-    const { isRequest, hasMore, pageSize, ...extraState } =
-      useWeblinkStore.getState();
-    console.log("loadMore", isRequest, hasMore, pageSize, extraState);
+    const { isRequest, hasMore, pageSize, ...extraState } = useWeblinkStore.getState();
+    console.log('loadMore', isRequest, hasMore, pageSize, extraState);
     if (isRequest || !hasMore) return;
     if (currentPage < extraState?.currentPage) return;
 
     // 获取数据
     const queryPayload = {
       pageSize,
-      page:
-        typeof currentPage === "number" ? currentPage : extraState.currentPage,
+      page: typeof currentPage === 'number' ? currentPage : extraState.currentPage,
     };
 
     // 更新页码
-    webLinkStore.updateCurrentPage(
-      (typeof currentPage === "number" ? currentPage : extraState.currentPage) +
-        1
-    );
+    webLinkStore.updateCurrentPage((typeof currentPage === 'number' ? currentPage : extraState.currentPage) + 1);
     webLinkStore.updateIsRequest(true);
 
     const res = await apiRequest({
-      name: "getWeblinkList",
+      name: 'getWeblinkList',
+      method: 'GET',
       body: queryPayload,
     });
 
     if (!res?.success) {
-      message.error(t("loggedHomePage.homePage.weblinkList.list.fetchErr"));
+      message.error(t('loggedHomePage.homePage.weblinkList.list.fetchErr'));
       webLinkStore.updateIsRequest(false);
 
       return;
@@ -160,7 +147,7 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
       webLinkStore.updateHasMore(false);
     }
 
-    console.log("res", res);
+    console.log('res', res);
     webLinkStore.updateWebLinkList(res?.data || []);
     webLinkStore.updateIsRequest(false);
   };
@@ -168,7 +155,8 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
   //编辑
   const handleEdit = async (params: { id: string; title: string }) => {
     const res = await apiRequest({
-      name: "updateConversation",
+      name: 'updateConversation',
+      method: 'POST',
       body: params,
     });
   };
@@ -176,19 +164,20 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
   //删除
   const handleDelete = async (params: { id: string }) => {
     Modal.confirm({
-      title: "确认删除会话！",
+      title: '确认删除会话！',
       style: {
         width: 340,
         height: 170,
       },
-      content: "您确定要删除此对话吗？",
+      content: '您确定要删除此对话吗？',
       okButtonProps: {
-        status: "danger",
+        status: 'danger',
       },
 
       onOk: () => {
         return apiRequest({
-          name: "deleteConversation",
+          method: 'POST',
+          name: 'deleteConversation',
           body: params,
         });
       },
@@ -209,40 +198,35 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
 
   const columns: TableColumnProps[] = [
     {
-      key: "0",
-      dataIndex: "content",
-      title: "content",
-      render: (col, record, index) => (
-        <MemoWebLinkItem weblink={record?.content} key={index} />
-      ),
+      key: '0',
+      dataIndex: 'content',
+      title: 'content',
+      render: (col, record, index) => <MemoWebLinkItem weblink={record?.content} key={index} />,
     },
   ];
 
   // 节流的处理
-  const handleScroll = throttle(
-    (event: React.UIEvent<HTMLElement, UIEvent>) => {
-      const { webLinkList, isWebLinkListVisible } = useWeblinkStore.getState();
+  const handleScroll = throttle((event: React.UIEvent<HTMLElement, UIEvent>) => {
+    const { webLinkList, isWebLinkListVisible } = useWeblinkStore.getState();
 
-      if (!isWebLinkListVisible) return;
+    if (!isWebLinkListVisible) return;
 
-      // 获取列表的滚动高度，以及现在的列表数量，当还存在 2 个时触发滚动
-      const scrollTopElem = document
-        .querySelector("#refly-main-app")
-        ?.shadowRoot?.querySelector(".conv-list")
-        ?.querySelector(".arco-table-body");
+    // 获取列表的滚动高度，以及现在的列表数量，当还存在 2 个时触发滚动
+    const scrollTopElem = document
+      .querySelector('#refly-main-app')
+      ?.shadowRoot?.querySelector('.conv-list')
+      ?.querySelector('.arco-table-body');
 
-      if (!scrollTopElem || webLinkList?.length < 10) return;
-      const scrollTop = scrollTopElem?.scrollTop || 0;
-      const scrollHeight = scrollTopElem?.scrollHeight || 0;
-      const clientHeight = scrollTopElem?.clientHeight;
+    if (!scrollTopElem || webLinkList?.length < 10) return;
+    const scrollTop = scrollTopElem?.scrollTop || 0;
+    const scrollHeight = scrollTopElem?.scrollHeight || 0;
+    const clientHeight = scrollTopElem?.clientHeight;
 
-      console.log("clientHeight", scrollTop, clientHeight, scrollHeight);
-      if (scrollTop + clientHeight >= scrollHeight - 100) {
-        loadMore();
-      }
-    },
-    500
-  );
+    console.log('clientHeight', scrollTop, clientHeight, scrollHeight);
+    if (scrollTop + clientHeight >= scrollHeight - 100) {
+      loadMore();
+    }
+  }, 500);
 
   useEffect(() => {
     if (webLinkStore?.isWebLinkListVisible) {
@@ -251,21 +235,19 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
   }, [webLinkStore?.isWebLinkListVisible]);
 
   return (
-    <div style={{ width: "100%" }}>
+    <div style={{ width: '100%' }}>
       <Drawer
         getPopupContainer={props.getPopupContainer}
         width="100%"
         style={{
           maxHeight: 680,
-          height: "80%",
+          height: '80%',
           zIndex: 66,
         }}
-        headerStyle={{ justifyContent: "center" }}
+        headerStyle={{ justifyContent: 'center' }}
         title={
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <span style={{ fontWeight: "bold" }}>
-              {t("loggedHomePage.homePage.weblinkList.title")}
-            </span>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <span style={{ fontWeight: 'bold' }}>{t('loggedHomePage.homePage.weblinkList.title')}</span>
           </div>
         }
         visible={webLinkStore.isWebLinkListVisible}
@@ -273,7 +255,7 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
         footer={
           <div className="weblink-footer-container">
             <p className="weblink-footer-selected">
-              {t("loggedHomePage.homePage.weblinkList.selectedCnt", "", {
+              {t('loggedHomePage.homePage.weblinkList.selectedCnt', '', {
                 count: webLinkStore.selectedRow?.length,
               })}
             </p>
@@ -285,14 +267,14 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
                 }}
                 style={{ marginRight: 8 }}
               >
-                {t("loggedHomePage.homePage.weblinkList.drawer.confirm")}
+                {t('loggedHomePage.homePage.weblinkList.drawer.confirm')}
               </Button>
               <Button
                 onClick={() => {
                   webLinkStore.updateIsWebLinkListVisible(false);
                 }}
               >
-                {t("loggedHomePage.homePage.weblinkList.drawer.cancel")}
+                {t('loggedHomePage.homePage.weblinkList.drawer.cancel')}
               </Button>
             </div>
           </div>

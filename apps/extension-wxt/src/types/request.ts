@@ -1,5 +1,6 @@
 export interface HandlerRequest<T> {
   name: string;
+  method?: 'GET' | 'POST' | 'PUT';
   body?: T;
 }
 

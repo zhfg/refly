@@ -1,32 +1,32 @@
-import { Button, Skeleton } from "@arco-design/web-react";
-import React, { useEffect, useRef, useState } from "react";
-import { useNavigate, useLocation, useParams } from "react-router-dom";
+import { Button, Skeleton } from '@arco-design/web-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 
 // hooks
-import { useResetState } from "@/hooks/use-reset-state";
+import { useResetState } from '@/hooks/use-reset-state';
 // stores
-import { useChatStore } from "@/stores/chat";
-import { useConversationStore } from "@/stores/conversation";
-import { useThreadStore } from "@/stores/thread";
+import { useChatStore } from '@/stores/chat';
+import { useConversationStore } from '@/stores/conversation';
+import { useThreadStore } from '@/stores/thread';
 // utils
-import { buildSessions } from "@/utils/session";
+import { buildSessions } from '@/utils/session';
 // 组件
-import { ThreadItem } from "@/components/thread-item/thread-item";
-import { Header } from "./header";
-import { useBuildTask } from "@/hooks/use-build-task";
-import { useTaskStore } from "@/stores/task";
-import { MessageType, type Message, TASK_TYPE } from "@/types";
-import { safeParseJSON } from "@/utils/parse";
-import { useWeblinkStore } from "@/stores/weblink";
-import { SearchTarget, useSearchStateStore } from "@/stores/search-state";
-import { useContentSelectorStore } from "@/stores/content-selector";
-import { useUserStore } from "@/stores/user";
-import { delay } from "@/utils/delay";
-import { useTranslation } from "react-i18next";
-import { EmptyThreadDetailStatus } from "@/components/empty-thread-detail-status";
+import { ThreadItem } from '@/components/thread-item/thread-item';
+import { Header } from './header';
+import { useBuildTask } from '@/hooks/use-build-task';
+import { useTaskStore } from '@/stores/task';
+import { MessageType, type Message, TASK_TYPE } from '@/types';
+import { safeParseJSON } from '@/utils/parse';
+import { useWeblinkStore } from '@/stores/weblink';
+import { SearchTarget, useSearchStateStore } from '@/stores/search-state';
+import { useContentSelectorStore } from '@/stores/content-selector';
+import { useUserStore } from '@/stores/user';
+import { delay } from '@/utils/delay';
+import { useTranslation } from 'react-i18next';
+import { EmptyThreadDetailStatus } from '@/components/empty-thread-detail-status';
 // styles
-import "./thread-item.scss";
-import { apiRequest } from "@/requests/apiRequest";
+import './thread-item.scss';
+import { apiRequest } from '@/requests/apiRequest';
 
 export const Thread = () => {
   const { buildTaskAndGenReponse } = useBuildTask();
@@ -43,18 +43,17 @@ export const Thread = () => {
   const { t } = useTranslation();
 
   const handleGetThreadMessages = async (threadId: string) => {
-    const threadIdMap = threadStore?.threads?.find(
-      (item) => item?.convId === threadId
-    );
+    const threadIdMap = threadStore?.threads?.find((item) => item?.convId === threadId);
     // 异步操作
     const res = await apiRequest({
-      name: "getThreadMessages",
+      name: 'getThreadMessages',
+      method: 'GET',
       body: {
         threadId,
       },
     });
 
-    console.log("getThreadMessages", res);
+    console.log('getThreadMessages', res);
 
     // 清空之前的状态
     resetState();
@@ -65,11 +64,11 @@ export const Thread = () => {
     //
     const messages = (res?.data?.messages || [])?.map((item) => {
       const {
-        content = "",
+        content = '',
         relatedQuestions = [],
         sources,
         type,
-        selectedWeblinkConfig = "", // 这里需要构建进来
+        selectedWeblinkConfig = '', // 这里需要构建进来
         ...extraInfo
       } = item || {};
 
@@ -89,9 +88,7 @@ export const Thread = () => {
 
   const getSelectedWeblinkConfig = (messages: Message[] = []) => {
     // 这里是获取第一个，早期简化策略，因为一开始设置之后，后续设置就保留
-    const lastHumanMessage = messages?.find(
-      (item) => item?.data?.type === MessageType?.Human
-    );
+    const lastHumanMessage = messages?.find((item) => item?.data?.type === MessageType?.Human);
 
     return safeParseJSON(lastHumanMessage?.data?.selectedWeblinkConfig);
   };
@@ -112,7 +109,7 @@ export const Thread = () => {
     }
 
     // 重置状态
-    chatStore.setNewQAText("");
+    chatStore.setNewQAText('');
     weblinkStore.updateSelectedRow([]);
     searchStateStore.setSearchTarget(SearchTarget.CurrentPage);
 
@@ -127,30 +124,27 @@ export const Thread = () => {
   const sessions = buildSessions(chatStore.messages);
   const selectedWeblinkConfig = getSelectedWeblinkConfig(chatStore.messages);
 
-  console.log("selectedWeblinkConfig", selectedWeblinkConfig);
+  console.log('selectedWeblinkConfig', selectedWeblinkConfig);
 
   return (
     <div
       style={{
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
       <Header thread={conversationStore.currentConversation} />
       {isFetching ? (
-        <div style={{ width: "calc(100% - 32px)", margin: "20px auto" }}>
+        <div style={{ width: 'calc(100% - 32px)', margin: '20px auto' }}>
           <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
           <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
           <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
         </div>
       ) : !isFetching && (sessions || [])?.length === 0 ? (
-        <EmptyThreadDetailStatus text={t("threadDetail.empty.title")} />
+        <EmptyThreadDetailStatus text={t('threadDetail.empty.title')} />
       ) : (
-        <ThreadItem
-          sessions={sessions}
-          selectedWeblinkConfig={selectedWeblinkConfig}
-        />
+        <ThreadItem sessions={sessions} selectedWeblinkConfig={selectedWeblinkConfig} />
       )}
     </div>
   );

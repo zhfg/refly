@@ -1,48 +1,46 @@
-import { useLayoutEffect, useState } from "react"
+import { useLayoutEffect, useState } from 'react';
 
 interface ResizePanelProps {
-  groupSelector: string
-  resizeSelector: string
-  initialMinSize: number
-  initialMinPixelSize: number
+  getGroupSelector: () => HTMLElement;
+  getResizeSelector: () => NodeListOf<HTMLElement>;
+  initialMinSize: number;
+  initialMinPixelSize: number;
 }
 
 export const useResizePanel = (props: ResizePanelProps) => {
-  const { groupSelector, resizeSelector, initialMinPixelSize, initialMinSize } =
-    props
-  const [minSize, setMinSize] = useState(initialMinSize)
+  const { getGroupSelector, getResizeSelector, initialMinPixelSize, initialMinSize } = props;
+  const [minSize, setMinSize] = useState(initialMinSize);
 
   useLayoutEffect(() => {
-    const panelGroup = document.querySelector(
-      `.${groupSelector}`,
-    ) as HTMLElement
-    const resizeHandles = document.querySelectorAll(
-      `.${resizeSelector}`,
-    ) as NodeListOf<HTMLElement>
+    const panelGroup = getGroupSelector();
+    const resizeHandles = getResizeSelector();
+    if (!(panelGroup instanceof Element)) return;
+
     const observer = new ResizeObserver(() => {
-      let width = panelGroup.offsetWidth
+      let width = panelGroup.offsetWidth;
 
-      resizeHandles.forEach(resizeHandle => {
-        width -= resizeHandle.offsetWidth
-      })
+      resizeHandles.forEach((resizeHandle) => {
+        width -= resizeHandle.offsetWidth;
+      });
 
-      console.log("initialMinPixelSize", width)
+      console.log('initialMinPixelSize', width);
 
-      setMinSize((initialMinPixelSize / width) * 100)
-    })
-    observer.observe(panelGroup)
-    resizeHandles.forEach(resizeHandle => {
-      observer.observe(resizeHandle)
-    })
+      setMinSize((initialMinPixelSize / width) * 100);
+    });
+    observer.observe(panelGroup);
+    resizeHandles.forEach((resizeHandle) => {
+      if (!(resizeHandle instanceof Element)) return;
+      observer.observe(resizeHandle);
+    });
 
     return () => {
-      observer.unobserve(panelGroup)
-      resizeHandles.forEach(resizeHandle => {
-        observer.unobserve(resizeHandle)
-      })
-      observer.disconnect()
-    }
-  }, [])
+      observer.unobserve(panelGroup);
+      resizeHandles.forEach((resizeHandle) => {
+        observer.unobserve(resizeHandle);
+      });
+      observer.disconnect();
+    };
+  }, []);
 
-  return [minSize]
-}
+  return [minSize];
+};

@@ -35,7 +35,7 @@ import { DigestHeader } from "@refly/ai-workspace-common/components/digest-commo
 import { useEffect, useState } from "react"
 import { EmptyDigestStatus } from "@refly/ai-workspace-common/components/empty-digest-archive-status"
 // utils
-import getDigestList from "@/requests/getDigestList"
+import getDigestList from "@refly/ai-workspace-common/requests/getDigestList"
 // styles
 import "./index.scss"
 import { useTranslation } from "react-i18next"
