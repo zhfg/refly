@@ -1,4 +1,4 @@
-export const getPopupContainer = (e?: HTMLElement): Element => {
+export const getPopupContainer = (e?: HTMLElement): HTMLElement => {
   const elem = document.querySelector('refly-main-app')?.shadowRoot?.querySelector('.main');
 
   return elem as HTMLElement;

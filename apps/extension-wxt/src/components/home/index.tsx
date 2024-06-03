@@ -1,52 +1,46 @@
-import {
-  Button,
-  Input,
-  Space,
-  Message as message,
-  Divider,
-} from "@arco-design/web-react";
-import type { RefTextAreaType } from "@arco-design/web-react/es/Input/textarea";
-import { IconSend } from "@arco-design/web-react/icon";
-import React, { useEffect, useRef } from "react";
+import { Button, Input, Space, Message as message, Divider } from '@arco-design/web-react';
+import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
+import { IconSend } from '@arco-design/web-react/icon';
+import React, { useEffect, useRef } from 'react';
 
 // 自定义方法
-import { scrollToBottom } from "@/utils/ui";
+import { getPopupContainer, scrollToBottom } from '@/utils/ui';
 
 // 自定义组件
-import WeblinkList from "../weblink-list";
-import { ChatHeader } from "./header";
-import { SelectedWeblink } from "../selected-weblink/index";
-import { QuickAction } from "./quick-action";
-import { ContentSelectorBtn } from "@/components/content-selector-btn/index";
+import WeblinkList from '../weblink-list';
+import { ChatHeader } from './header';
+import { SelectedWeblink } from '../selected-weblink/index';
+import { QuickAction } from './quick-action';
+import { ContentSelectorBtn } from '@/components/content-selector-btn/index';
 // stores
-import { useQuickActionStore } from "../../stores/quick-action";
-import { useChatStore } from "../../stores/chat";
-import { useMessageStateStore } from "@/stores/message-state";
-import { useSiderStore } from "@/stores/sider";
-import { useWeblinkStore } from "@/stores/weblink";
-import { SearchTarget, useSearchStateStore } from "@/stores/search-state";
-import { useContentSelectorStore } from "@/stores/content-selector";
+import { useQuickActionStore } from '../../stores/quick-action';
+import { useChatStore } from '../../stores/chat';
+import { useMessageStateStore } from '@/stores/message-state';
+import { useSiderStore } from '@/stores/sider';
+import { useWeblinkStore } from '@/stores/weblink';
+import { SearchTarget, useSearchStateStore } from '@/stores/search-state';
+import { useContentSelectorStore } from '@/stores/content-selector';
 // hooks
-import { useBuildThreadAndRun } from "@/hooks/use-build-thread-and-run";
-import { useStoreWeblink } from "@/hooks/use-store-weblink";
+import { useBuildThreadAndRun } from '@/hooks/use-build-thread-and-run';
+import { useStoreWeblink } from '@/hooks/use-store-weblink';
 // 组件
-import { SearchTargetSelector } from "./home-search-target-selector";
-import { mapSourceFromWeblinkList } from "@/utils/weblink";
-import { SelectedContentList } from "@/components/selected-content-list";
-import { useSearchQuickActionStore } from "@/stores/search-quick-action";
-import { useTranslation } from "react-i18next";
-import { CurrentWeblinkQuickSummary } from "@/components/current-weblink-quick-summary";
-import { SaveKnowledgeBaseModal } from "@/components/save-knowledge-base-modal";
-import { useKnowledgeBaseStore } from "@/stores/knowledge-base";
+import { SearchTargetSelector } from './home-search-target-selector';
+import { mapSourceFromWeblinkList } from '@/utils/weblink';
+import { SelectedContentList } from '@/components/selected-content-list';
+import { useSearchQuickActionStore } from '@/stores/search-quick-action';
+import { useTranslation } from 'react-i18next';
+import { CurrentWeblinkQuickSummary } from '@/components/current-weblink-quick-summary';
+import { SaveKnowledgeBaseModal } from '@/components/save-knowledge-base-modal';
+import { useKnowledgeBaseStore } from '@/stores/knowledge-base';
 // styles
-import "./index.scss";
+import './index.scss';
 
 const TextArea = Input.TextArea;
 
 type ChatProps = {};
 
 // 用于快速选择
-export const quickActionList = ["summary"];
+export const quickActionList = ['summary'];
 
 const Home = (props: ChatProps) => {
   const inputRef = useRef<RefTextAreaType>();
@@ -65,7 +59,7 @@ const Home = (props: ChatProps) => {
 
   const { t, i18n } = useTranslation();
 
-  console.log("当前用户的语言", i18n.languages?.[0]);
+  console.log('当前用户的语言', i18n.languages?.[0]);
 
   // hooks
   const { runTask } = useBuildThreadAndRun();
@@ -80,7 +74,7 @@ const Home = (props: ChatProps) => {
     const { currentWeblink } = useWeblinkStore.getState();
 
     if (!newQAText) {
-      message.info(t("loggedHomePage.homePage.status.emptyNotify"));
+      message.info(t('loggedHomePage.homePage.status.emptyNotify'));
       return;
     }
 
@@ -97,10 +91,7 @@ const Home = (props: ChatProps) => {
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.keyCode === 13 && (e.ctrlKey || e.shiftKey || e.metaKey)) {
-      if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement
-      ) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
         // 阻止默认行为,即不触发 enter 键的默认事件
         e.preventDefault();
         // 在输入框中插入换行符
@@ -108,10 +99,7 @@ const Home = (props: ChatProps) => {
         // 获取光标位置
         const cursorPos = e.target.selectionStart;
         // 在光标位置插入换行符
-        e.target.value =
-          e.target.value.slice(0, cursorPos) +
-          "\n" +
-          e.target.value.slice(cursorPos);
+        e.target.value = e.target.value.slice(0, cursorPos) + '\n' + e.target.value.slice(cursorPos);
         // 将光标移动到换行符后面
         e.target.selectionStart = e.target.selectionEnd = cursorPos + 1;
       }
@@ -127,18 +115,12 @@ const Home = (props: ChatProps) => {
     const { showSelectedMarks } = useContentSelectorStore.getState();
     const { searchTarget } = useSearchStateStore.getState();
 
-    if (showSelectedMarks)
-      return t(
-        "loggedHomePage.homePage.searchPlaceholder.currentSelectedContent"
-      );
+    if (showSelectedMarks) return t('loggedHomePage.homePage.searchPlaceholder.currentSelectedContent');
     if (searchTarget === SearchTarget.SelectedPages)
-      return t("loggedHomePage.homePage.searchPlaceholder.selectedWeblink");
-    if (searchTarget === SearchTarget.CurrentPage)
-      return t("loggedHomePage.homePage.searchPlaceholder.current");
-    if (searchTarget === SearchTarget.SearchEnhance)
-      return t("loggedHomePage.homePage.searchPlaceholder.internet");
-    if (searchTarget === SearchTarget.All)
-      return t("loggedHomePage.homePage.searchPlaceholder.all");
+      return t('loggedHomePage.homePage.searchPlaceholder.selectedWeblink');
+    if (searchTarget === SearchTarget.CurrentPage) return t('loggedHomePage.homePage.searchPlaceholder.current');
+    if (searchTarget === SearchTarget.SearchEnhance) return t('loggedHomePage.homePage.searchPlaceholder.internet');
+    if (searchTarget === SearchTarget.All) return t('loggedHomePage.homePage.searchPlaceholder.all');
   };
 
   // 自动聚焦输入框
@@ -151,16 +133,12 @@ const Home = (props: ChatProps) => {
   }, [isIntentActive]);
 
   const getShowQuickAction = () => {
-    if (
-      searchTarget === SearchTarget.CurrentPage &&
-      searchQuickActionStore.showQuickAction
-    ) {
+    if (searchTarget === SearchTarget.CurrentPage && searchQuickActionStore.showQuickAction) {
       return true;
     }
 
     if (
-      (searchTarget === SearchTarget.SelectedPages &&
-        webLinkStore?.selectedRow?.length > 0) ||
+      (searchTarget === SearchTarget.SelectedPages && webLinkStore?.selectedRow?.length > 0) ||
       webLinkStore?.selectedRow?.length > 0
     ) {
       return true;
@@ -172,14 +150,14 @@ const Home = (props: ChatProps) => {
   return (
     <div
       style={{
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
       <ChatHeader />
       <div className="home-content-container input-panel">
-        <div className="refly-slogan">{t("loggedHomePage.homePage.title")}</div>
+        <div className="refly-slogan">{t('loggedHomePage.homePage.title')}</div>
         <div className="actions">
           {/* {messageStateStore.taskType === TASK_TYPE.CHAT &&
             messageStateStore?.pending && (
@@ -207,12 +185,12 @@ const Home = (props: ChatProps) => {
             placeholder={getInputText()}
             onKeyDownCapture={(e) => handleKeyDown(e)}
             autoSize={{ minRows: 4, maxRows: 4 }}
-            onCompositionStart={(e) => console.log("composition start")}
-            onCompositionUpdate={(e) => console.log("composition update")}
-            onCompositionEnd={(e) => console.log("composition end")}
+            onCompositionStart={(e) => console.log('composition start')}
+            onCompositionUpdate={(e) => console.log('composition update')}
+            onCompositionEnd={(e) => console.log('composition end')}
             style={{
               borderRadius: 8,
-              resize: "none",
+              resize: 'none',
               minHeight: 98,
               height: 98,
             }}
@@ -234,11 +212,7 @@ const Home = (props: ChatProps) => {
                       contentSelectorStore.resetState();
                     }
 
-                    if (
-                      [SearchTarget.All, SearchTarget.SearchEnhance].includes(
-                        searchTarget
-                      )
-                    ) {
+                    if ([SearchTarget.All, SearchTarget.SearchEnhance].includes(searchTarget)) {
                       searchQuickActionStore.setShowQuickAction(false);
                     }
 
@@ -251,8 +225,8 @@ const Home = (props: ChatProps) => {
               <Button
                 shape="circle"
                 icon={<IconSend />}
-                loading={chatStore.loading || uploadingStatus === "loading"}
-                style={{ color: "#FFF", background: "#00968F" }}
+                loading={chatStore.loading || uploadingStatus === 'loading'}
+                style={{ color: '#FFF', background: '#00968F' }}
                 onClick={() => handleSendMessage()}
               ></Button>
             </div>
@@ -262,9 +236,7 @@ const Home = (props: ChatProps) => {
           ? [
               <SelectedWeblink
                 closable={true}
-                selectedWeblinkList={mapSourceFromWeblinkList(
-                  webLinkStore?.selectedRow || []
-                ).map((item, index) => ({
+                selectedWeblinkList={mapSourceFromWeblinkList(webLinkStore?.selectedRow || []).map((item, index) => ({
                   key: webLinkStore?.selectedRow?.[index]?.key,
                   content: item,
                 }))}
@@ -273,25 +245,12 @@ const Home = (props: ChatProps) => {
             ]
           : null}
         {getShowQuickAction() ? <QuickAction /> : null}
-        {contentSelectorStore?.showSelectedMarks ? (
-          <SelectedContentList marks={contentSelectorStore.marks} />
-        ) : null}
+        {contentSelectorStore?.showSelectedMarks ? <SelectedContentList marks={contentSelectorStore.marks} /> : null}
         {/* <CurrentWeblinkQuickSummary /> */}
       </div>
 
-      <WeblinkList
-        ref={weblinkListRef}
-        getPopupContainer={() => {
-          const elem = document
-            .querySelector("#refly-main-app")
-            ?.shadowRoot?.querySelector(".main");
-
-          return elem as HTMLElement;
-        }}
-      />
-      {knowledgeBaseStore.isSaveKnowledgeBaseModalVisible ? (
-        <SaveKnowledgeBaseModal />
-      ) : null}
+      <WeblinkList ref={weblinkListRef} getPopupContainer={() => getPopupContainer() as HTMLElement} />
+      {knowledgeBaseStore.isSaveKnowledgeBaseModalVisible ? <SaveKnowledgeBaseModal /> : null}
     </div>
   );
 };

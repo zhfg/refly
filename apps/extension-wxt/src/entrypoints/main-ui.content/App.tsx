@@ -28,6 +28,7 @@ import { useSiderBarOpen } from '@/hooks/use-sider-bar-open';
 // 样式
 import '@/styles/style.css';
 import './App.scss';
+import { getPopupContainer } from '../../utils/ui';
 
 const Sentry = _Sentry;
 
@@ -64,7 +65,7 @@ const App = () => {
   // 设置 Message 通知的 container
   useEffect(() => {
     Message.config({
-      getContainer: () => document.querySelector('refly-main-app')?.shadowRoot?.querySelector('.main') as HTMLElement,
+      getContainer: () => getPopupContainer() as HTMLElement,
     });
   }, []);
 

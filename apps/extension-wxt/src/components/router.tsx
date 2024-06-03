@@ -79,7 +79,7 @@ export const ContentRouter = () => {
     <div className="workspace-container">
       <div className="workspace-inner-container">
         <ErrorBoundary>
-          <AICopilot />
+          <AICopilot getPopupContainer={() => getPopupContainer() as HTMLElement} />
         </ErrorBoundary>
       </div>
     </div>

@@ -12,14 +12,22 @@ import { useResizePanel } from '@refly-packages/ai-workspace-common/hooks/use-re
 import { ActionSource, useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { KnowledgeBaseListModal } from '../copilot/knowledge-base-list-modal';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
+import { getDefaultPopupContainer } from '../../../utils/ui';
 
 const TabPane = Tabs.TabPane;
 
-export const KnowledgeBaseDetail = () => {
+interface KnowledgeBaseDetailProps {
+  getPopupContainer: () => HTMLElement;
+}
+
+export const KnowledgeBaseDetail = (props: KnowledgeBaseDetailProps) => {
   // directory minSize 270px ~ maxSize 50%
   const [minSize] = useResizePanel({
-    groupSelector: 'knowledge-base-detail-panel-container',
-    resizeSelector: 'knowledge-base-detail-panel-resize',
+    getGroupSelector: () => {
+      return document.querySelector('.knowledge-base-detail-panel-container');
+    },
+    getResizeSelector: () =>
+      document.querySelectorAll('.knowledge-base-detail-panel-resize') as NodeListOf<HTMLElement>,
     initialMinSize: 24,
     initialMinPixelSize: 270,
   });
@@ -114,7 +122,8 @@ export const KnowledgeBaseDetail = () => {
           width={360}
           height="100%"
           getPopupContainer={() => {
-            const elem = document.querySelector('.knowledge-base-detail-container') as Element;
+            const container = props.getPopupContainer() || getDefaultPopupContainer();
+            const elem = container?.querySelector('.knowledge-base-detail-container') as Element;
 
             console.log('getPopupContainer knowledge', elem);
 

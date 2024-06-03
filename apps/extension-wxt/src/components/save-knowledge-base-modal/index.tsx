@@ -187,7 +187,7 @@ export const SaveKnowledgeBaseModal = () => {
       style={{ width: '80%' }}
       unmountOnExit={true}
       escToExit
-      getPopupContainer={() => document.querySelector('#refly-main-app')?.shadowRoot?.querySelector('.main')}
+      getPopupContainer={() => getPopupContainer()}
       visible={knowledgeBaseStore.isSaveKnowledgeBaseModalVisible}
       onOk={() => onOk()}
       okButtonProps={{ loading: confirmLoading }}

@@ -8,8 +8,10 @@ import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest'
 import { OutputLocale, enLocale, localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/i18n';
 // styles
 import './index.scss';
+import { getDefaultPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
-export const OutputLocaleList = (props: { children: any }) => {
+export const OutputLocaleList = (props: { children: any; getPopupContainer: () => HTMLElement }) => {
+  const { getPopupContainer = getDefaultPopupContainer } = props;
   // i18n
   const { t, i18n } = useTranslation();
   const uiLocale = i18n?.languages?.[0] as LOCALE;
@@ -51,7 +53,7 @@ export const OutputLocaleList = (props: { children: any }) => {
   );
 
   return (
-    <Dropdown droplist={dropList} position="bl">
+    <Dropdown droplist={dropList} position="bl" getPopupContainer={getPopupContainer}>
       {props.children}
     </Dropdown>
   );

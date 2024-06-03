@@ -39,8 +39,14 @@ import { localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/
 import { OutputLocaleList } from '@refly-packages/ai-workspace-common/components/output-locale-list';
 import { useTranslation } from 'react-i18next';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import { getDefaultPopupContainer } from '../../../utils/ui';
+import { SourceListModal } from '../../source-list/source-list-modal';
 
-export const AICopilot = () => {
+interface AICopilotProps {
+  getPopupContainer: () => HTMLElement;
+}
+
+export const AICopilot = (props: AICopilotProps) => {
   const [searchParams] = useSearchParams();
   const [copilotBodyHeight, setCopilotBodyHeight] = useState(215 - 32);
   const userStore = useUserStore();
@@ -239,7 +245,7 @@ export const AICopilot = () => {
             <div className="chat-input-assist-action">
               {!showSelectedTextContext ? <SearchTargetSelector classNames="chat-input-assist-action-item" /> : null}
 
-              <OutputLocaleList>
+              <OutputLocaleList getPopupContainer={props.getPopupContainer}>
                 <Button icon={<IconTranslate />} type="text" className="chat-input-assist-action-item">
                   <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span>
                   <IconCaretDown />
@@ -254,7 +260,8 @@ export const AICopilot = () => {
           title="会话库"
           classNames="conv-list-modal"
           getPopupContainer={() => {
-            return document.querySelector('.ai-copilot-container') as Element;
+            const container = props.getPopupContainer() || getDefaultPopupContainer();
+            return container?.querySelector('.ai-copilot-container') as Element;
           }}
         />
       ) : null}
@@ -263,11 +270,12 @@ export const AICopilot = () => {
           title="知识库"
           classNames="kb-list-modal"
           getPopupContainer={() => {
-            return document.querySelector('.ai-copilot-container') as Element;
+            const container = props.getPopupContainer() || getDefaultPopupContainer();
+            return container?.querySelector('.ai-copilot-container') as Element;
           }}
         />
       ) : null}
-      {/* {knowledgeBaseStore?.sourceListModalVisible ? (
+      {knowledgeBaseStore?.sourceListModalVisible ? (
         <SourceListModal
           title={`结果来源 (${knowledgeBaseStore?.tempConvResources?.length || 0})`}
           classNames="source-list-modal"
@@ -276,7 +284,7 @@ export const AICopilot = () => {
           }}
           resources={knowledgeBaseStore?.tempConvResources || []}
         />
-      ) : null} */}
+      ) : null}
     </div>
   );
 };
