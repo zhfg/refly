@@ -650,6 +650,67 @@ export type UserSettings = {
   outputLocale?: string;
 };
 
+export type TopicMeta = {
+  /**
+   * Topic ID
+   */
+  topicId?: string;
+  /**
+   * Topic key
+   */
+  key?: string;
+  /**
+   * Topic name
+   */
+  name?: string;
+  /**
+   * Topic description
+   */
+  description?: string;
+  /**
+   * Topic creation time
+   */
+  createdAt?: string;
+  /**
+   * Topic update time
+   */
+  updatedAt?: string;
+};
+
+export type Topic = {
+  /**
+   * Topic score
+   */
+  score: number;
+  /**
+   * Topic key
+   */
+  topicKey: string;
+  /**
+   * Topic meta
+   */
+  topic: TopicMeta;
+  /**
+   * Topic creation time
+   */
+  createdAt: string;
+  /**
+   * Topic update time
+   */
+  updatedAt: string;
+};
+
+export type UserTopics = {
+  /**
+   * Topic list
+   */
+  list?: Array<Topic>;
+  /**
+   * Total count of topics
+   */
+  total: number;
+};
+
 export type BaseResponse = {
   /**
    * Whether the operation was successful
@@ -925,6 +986,13 @@ export type GetUserSettingsResponse = BaseResponse & {
   data?: UserSettings;
 };
 
+export type GetUserTopicsResponse = BaseResponse & {
+  /**
+   * User topics
+   */
+  data?: UserTopics;
+};
+
 export type ListResourcesData = {
   query?: {
     /**
@@ -1184,6 +1252,10 @@ export type UpdateSettingsResponse = BaseResponse;
 
 export type UpdateSettingsError = unknown;
 
+export type GetUserTopicsResponse2 = GetUserTopicsResponse;
+
+export type GetUserTopicsError = unknown;
+
 export type $OpenApiTs = {
   '/knowledge/resource/list': {
     get: {
@@ -1420,6 +1492,16 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': BaseResponse;
+      };
+    };
+  };
+  '/user/topics': {
+    get: {
+      res: {
+        /**
+         * successful operation
+         */
+        '200': GetUserTopicsResponse;
       };
     };
   };

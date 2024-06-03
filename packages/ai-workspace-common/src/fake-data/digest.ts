@@ -1,17 +1,25 @@
-import { Digest, MetaRecord, Topic } from '@/types/digest';
+import { Digest, Topic } from '@refly/openapi-schema';
 
 // 需要支持响应式，超出一定数目，就自动收缩成菜单
 export const fakeTopics: Partial<Topic>[] = [
   {
-    id: '1',
     score: 0.1,
     topic: {
       key: 'startup_product_research',
       name: '生成式AI研究',
-      id: '1',
       createdAt: '212',
       updatedAt: '1212',
-      count: 10,
+      description:
+        '我会将文章归类到“生成式AI研究”类别是因为它与生成式AI的研究和开发有关。生成式AI是一种人工智能技术，它可以根据输入的信息生成新的内容，比如文本、图片或音频。将这篇文章归类到“生成式AI研究”可以使人们更容易找到相关领域的内容和最新进展。',
+    },
+  },
+  {
+    score: 0.1,
+    topic: {
+      key: 'startup_product_research',
+      name: '生成式AI研究',
+      createdAt: '212',
+      updatedAt: '1212',
       description:
         '我会将文章归类到“生成式AI研究”类别是因为它与生成式AI的研究和开发有关。生成式AI是一种人工智能技术，它可以根据输入的信息生成新的内容，比如文本、图片或音频。将这篇文章归类到“生成式AI研究”可以使人们更容易找到相关领域的内容和最新进展。',
     },
@@ -22,10 +30,8 @@ export const fakeTopics: Partial<Topic>[] = [
     topic: {
       key: 'startup_product_research',
       name: '生成式AI研究',
-      id: '1',
       createdAt: '212',
       updatedAt: '1212',
-      count: 10,
       description:
         '我会将文章归类到“生成式AI研究”类别是因为它与生成式AI的研究和开发有关。生成式AI是一种人工智能技术，它可以根据输入的信息生成新的内容，比如文本、图片或音频。将这篇文章归类到“生成式AI研究”可以使人们更容易找到相关领域的内容和最新进展。',
     },
@@ -36,10 +42,8 @@ export const fakeTopics: Partial<Topic>[] = [
     topic: {
       key: 'startup_product_research',
       name: '生成式AI研究',
-      id: '1',
       createdAt: '212',
       updatedAt: '1212',
-      count: 10,
       description:
         '我会将文章归类到“生成式AI研究”类别是因为它与生成式AI的研究和开发有关。生成式AI是一种人工智能技术，它可以根据输入的信息生成新的内容，比如文本、图片或音频。将这篇文章归类到“生成式AI研究”可以使人们更容易找到相关领域的内容和最新进展。',
     },
@@ -50,10 +54,8 @@ export const fakeTopics: Partial<Topic>[] = [
     topic: {
       key: 'startup_product_research',
       name: '生成式AI研究',
-      id: '1',
       createdAt: '212',
       updatedAt: '1212',
-      count: 10,
       description:
         '我会将文章归类到“生成式AI研究”类别是因为它与生成式AI的研究和开发有关。生成式AI是一种人工智能技术，它可以根据输入的信息生成新的内容，比如文本、图片或音频。将这篇文章归类到“生成式AI研究”可以使人们更容易找到相关领域的内容和最新进展。',
     },
@@ -64,91 +66,61 @@ export const fakeTopics: Partial<Topic>[] = [
     topic: {
       key: 'startup_product_research',
       name: '生成式AI研究',
-      id: '1',
       createdAt: '212',
       updatedAt: '1212',
-      count: 10,
       description:
         '我会将文章归类到“生成式AI研究”类别是因为它与生成式AI的研究和开发有关。生成式AI是一种人工智能技术，它可以根据输入的信息生成新的内容，比如文本、图片或音频。将这篇文章归类到“生成式AI研究”可以使人们更容易找到相关领域的内容和最新进展。',
     },
   },
   {
-    id: '1',
-    score: 0.1,
-    topic: {
-      key: 'startup_product_research',
-      name: '生成式AI研究',
-      id: '1',
-      createdAt: '212',
-      updatedAt: '1212',
-      count: 10,
-      description:
-        '我会将文章归类到“生成式AI研究”类别是因为它与生成式AI的研究和开发有关。生成式AI是一种人工智能技术，它可以根据输入的信息生成新的内容，比如文本、图片或音频。将这篇文章归类到“生成式AI研究”可以使人们更容易找到相关领域的内容和最新进展。',
-    },
-  },
-  {
-    id: '1',
     score: 0.1,
     topic: {
       key: 'startup_product_research',
       name: 'AI研究',
-      id: '1',
       createdAt: '212',
       updatedAt: '1212',
-      count: 10,
       description:
         '我会将文章归类到“生成式AI研究”类别是因为它与生成式AI的研究和开发有关。生成式AI是一种人工智能技术，它可以根据输入的信息生成新的内容，比如文本、图片或音频。将这篇文章归类到“生成式AI研究”可以使人们更容易找到相关领域的内容和最新进展。',
     },
   },
   {
-    id: '1',
     score: 0.1,
     topic: {
       key: 'startup_product_research',
       name: '研究',
-      id: '1',
       createdAt: '212',
       updatedAt: '1212',
-      count: 10,
       description:
         '我会将文章归类到“生成式AI研究”类别是因为它与生成式AI的研究和开发有关。生成式AI是一种人工智能技术，它可以根据输入的信息生成新的内容，比如文本、图片或音频。将这篇文章归类到“生成式AI研究”可以使人们更容易找到相关领域的内容和最新进展。',
     },
   },
   {
-    id: '1',
     score: 0.1,
     topic: {
       key: 'startup_product_research',
       name: '究',
-      id: '1',
       createdAt: '212',
       updatedAt: '1212',
-      count: 10,
       description:
         '我会将文章归类到“生成式AI研究”类别是因为它与生成式AI的研究和开发有关。生成式AI是一种人工智能技术，它可以根据输入的信息生成新的内容，比如文本、图片或音频。将这篇文章归类到“生成式AI研究”可以使人们更容易找到相关领域的内容和最新进展。',
     },
   },
   {
-    id: '1',
     score: 0.1,
     topic: {
       key: 'startup_product_research',
       name: '生成式AI研究',
-      id: '1',
       createdAt: '212',
       updatedAt: '1212',
-      count: 10,
       description:
         '我会将文章归类到“生成式AI研究”类别是因为它与生成式AI的研究和开发有关。生成式AI是一种人工智能技术，它可以根据输入的信息生成新的内容，比如文本、图片或音频。将这篇文章归类到“生成式AI研究”可以使人们更容易找到相关领域的内容和最新进展。',
     },
   },
   {
-    id: '1',
     score: 0.1,
     topic: {
       key: 'startup_product_research',
       name: '生成式AI研究',
-      id: '1',
       createdAt: '212',
       updatedAt: '1212',
       count: 10,

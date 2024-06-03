@@ -8,7 +8,7 @@ import { getCurrentDateInfo } from '@refly-packages/ai-workspace-common/utils/ti
 import { useDigestTopicStore } from '@refly-packages/ai-workspace-common/stores/digest-topics';
 import { useEffect, useState } from 'react';
 // request
-import getTopicList from '@refly-packages/ai-workspace-common/requests/getTopicList';
+import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // types
 import { Topic } from '@refly-packages/ai-workspace-common/types/';
 // utils
@@ -48,13 +48,11 @@ export const DigestHeader = (props: DigestHeaderProps) => {
       const { topicList } = useDigestTopicStore.getState();
       if (topicList?.length > 0) return;
 
-      const newRes = await getTopicList({
-        body: {
-          // TODO: confirm time filter
-          page: currentPage,
-          pageSize: digestTopicStore.pageSize,
-        },
-      });
+      const { data: newRes, error } = await client.getUserTopics();
+
+      if (error) {
+        throw error;
+      }
 
       console.log('topicsList', newRes);
       digestTopicStore.updateCurrentPage(currentPage);

@@ -880,6 +880,87 @@ export const $UserSettings = {
   },
 } as const;
 
+export const $TopicMeta = {
+  type: 'object',
+  properties: {
+    topicId: {
+      type: 'string',
+      description: 'Topic ID',
+      example: 't-g30e1b80b5g1itbemc0g5jj3',
+    },
+    key: {
+      type: 'string',
+      description: 'Topic key',
+      example: 'startup_product_research',
+    },
+    name: {
+      type: 'string',
+      description: 'Topic name',
+    },
+    description: {
+      type: 'string',
+      description: 'Topic description',
+    },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Topic creation time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Topic update time',
+    },
+  },
+} as const;
+
+export const $Topic = {
+  type: 'object',
+  required: ['score', 'topicKey', 'topic', 'createdAt', 'updatedAt'],
+  properties: {
+    score: {
+      type: 'number',
+      description: 'Topic score',
+    },
+    topicKey: {
+      type: 'string',
+      description: 'Topic key',
+    },
+    topic: {
+      description: 'Topic meta',
+      $ref: '#/components/schemas/TopicMeta',
+    },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Topic creation time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Topic update time',
+    },
+  },
+} as const;
+
+export const $UserTopics = {
+  type: 'object',
+  required: ['topics', 'total'],
+  properties: {
+    list: {
+      type: 'array',
+      description: 'Topic list',
+      items: {
+        $ref: '#/components/schemas/Topic',
+      },
+    },
+    total: {
+      type: 'number',
+      description: 'Total count of topics',
+    },
+  },
+} as const;
+
 export const $BaseResponse = {
   type: 'object',
   required: ['success'],
@@ -1392,6 +1473,23 @@ export const $GetUserSettingsResponse = {
           type: 'object',
           description: 'User settings data',
           $ref: '#/components/schemas/UserSettings',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $GetUserTopicsResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          description: 'User topics',
+          $ref: '#/components/schemas/UserTopics',
         },
       },
     },

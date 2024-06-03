@@ -549,6 +549,22 @@ paths:
                 $ref: '#/components/schemas/BaseResponse'
       security:
         - api_key: []
+  /user/topics:
+    get:
+      tags:
+        - user
+      summary: Get user topics
+      description: Return topics for current user
+      operationId: getUserTopics
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserTopicsResponse'
+      security:
+        - api_key: []
 components:
   schemas:
     WeblinkMeta:
@@ -1228,6 +1244,71 @@ components:
           type: string
           description: User output locale
           example: en
+    TopicMeta:
+      type: object
+      properties:
+        topicId:
+          type: string
+          description: Topic ID
+          example: t-g30e1b80b5g1itbemc0g5jj3
+        key:
+          type: string
+          description: Topic key
+          example: startup_product_research
+        name:
+          type: string
+          description: Topic name
+        description:
+          type: string
+          description: Topic description
+        createdAt:
+          type: string
+          format: date-time
+          description: Topic creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Topic update time
+    Topic:
+      type: object
+      required:
+        - score
+        - topicKey
+        - topic
+        - createdAt
+        - updatedAt
+      properties:
+        score:
+          type: number
+          description: Topic score
+        topicKey:
+          type: string
+          description: Topic key
+        topic:
+          description: Topic meta
+          $ref: '#/components/schemas/TopicMeta'
+        createdAt:
+          type: string
+          format: date-time
+          description: Topic creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Topic update time
+    UserTopics:
+      type: object
+      required:
+        - topics
+        - total
+      properties:
+        list:
+          type: array
+          description: Topic list
+          items:
+            $ref: '#/components/schemas/Topic'
+        total:
+          type: number
+          description: Total count of topics
     BaseResponse:
       type: object
       required:
@@ -1542,6 +1623,14 @@ components:
               type: object
               description: User settings data
               $ref: '#/components/schemas/UserSettings'
+    GetUserTopicsResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              description: User topics
+              $ref: '#/components/schemas/UserTopics'
   securitySchemes:
     api_key:
       type: apiKey
