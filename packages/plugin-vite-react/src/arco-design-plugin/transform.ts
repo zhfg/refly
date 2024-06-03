@@ -17,14 +17,7 @@ type TransformedResult = undefined | { code: string; map: any };
 
 type Style = boolean | 'css';
 
-export function transformCssFile({
-  id,
-  theme,
-}: {
-  code: string;
-  id: string;
-  theme: string;
-}): TransformedResult {
+export function transformCssFile({ id, theme }: { code: string; id: string; theme: string }): TransformedResult {
   if (theme) {
     const matches = pathMatch(id, fullCssMatchers);
     if (matches) {
@@ -86,9 +79,7 @@ export function transformJsFiles({
             node.specifiers.forEach((spec) => {
               if (types.isImportSpecifier(spec)) {
                 const importedName = (spec as Specifier).imported.name;
-                const stylePath = `${libraryName}/es/${importedName}/style/${
-                  style === 'css' ? 'css.js' : 'index.js'
-                }`;
+                const stylePath = `${libraryName}/es/${importedName}/style/${style === 'css' ? 'css.js' : 'index.js'}`;
                 if (isModExist(stylePath)) addSideEffect(path, stylePath);
               }
             });

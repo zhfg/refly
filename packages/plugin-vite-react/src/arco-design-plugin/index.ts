@@ -56,10 +56,15 @@ export default function vitePluginArcoImport(options: PluginOption = {}): Plugin
     },
     transform(code, id) {
       let shouldTransform = false;
+
       for (const pattern of options.filePatterns) {
         if (id.match(pattern)) {
           shouldTransform = true;
         }
+      }
+
+      if (id.includes('node_modules/wxt')) {
+        console.log('id', id, shouldTransform, options.filePatterns);
       }
 
       // Do not transform packages in this monorepo!

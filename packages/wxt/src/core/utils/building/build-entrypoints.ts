@@ -19,10 +19,12 @@ export async function buildEntrypoints(
     spinner.text = pc.dim(`[${i + 1}/${groups.length}]`) + ` ${groupNameColored}`;
     try {
       steps.push(await wxt.builder.build(group));
+      console.log('build from refly success: ');
     } catch (err) {
       // spinner.stop().clear();
+      console.log('build from refly err: ');
       console.error(err);
-      // wxt.logger.error(err);
+      // console.error(err);
       throw Error(`Failed to build ${groupNames.join(', ')}`, { cause: err });
     }
   }

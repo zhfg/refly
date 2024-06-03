@@ -68,7 +68,9 @@
     "@refly/ai-workspace-common": "workspace:*",
     "react-resizable-panels": "^2.0.19",
     "vite-tsconfig-paths": "~4.3.2",
-    "react-error-boundary": "~4.0.13"
+    "react-error-boundary": "~4.0.13",
+    "vite-plugin-encoding": "~1.0.0",
+    "@refly/plugin-vite-encoding": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^18.2.46",

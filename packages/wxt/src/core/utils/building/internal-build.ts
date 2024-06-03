@@ -73,7 +73,7 @@ export async function internalBuild(): Promise<BuildOutput> {
   );
 
   for (const warning of warnings) {
-    wxt.logger.warn(...warning);
+    console.warn(...warning);
   }
 
   if (wxt.config.analysis.enabled) {
@@ -119,7 +119,7 @@ function printValidationResults({
   errors,
   warningCount,
 }: ValidationResults) {
-  (errorCount > 0 ? wxt.logger.error : wxt.logger.warn)(
+  (errorCount > 0 ? console.error : console.warn)(
     `Entrypoint validation failed: ${errorCount} error${
       errorCount === 1 ? '' : 's'
     }, ${warningCount} warning${warningCount === 1 ? '' : 's'}`,

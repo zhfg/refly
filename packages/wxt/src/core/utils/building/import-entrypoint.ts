@@ -94,7 +94,7 @@ export async function importEntrypointFile<T>(path: string): Promise<T> {
         { cause: err },
       );
     } else {
-      wxt.logger.error(err);
+      console.error(err);
       throw Error(`Failed to load entrypoint: ${filePath}`, { cause: err });
     }
   }

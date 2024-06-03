@@ -8,7 +8,7 @@ import { wxt } from '../wxt';
 export function createSafariRunner(): ExtensionRunner {
   return {
     async openBrowser() {
-      wxt.logger.warn(
+      console.warn(
         `Cannot Safari using web-ext. Load "${relative(
           process.cwd(),
           wxt.config.outDir,

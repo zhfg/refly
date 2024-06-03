@@ -38,7 +38,8 @@ export async function rebuild(
 
   // Update types directory with new files and types
   await generateTypesDir(allEntrypoints).catch((err) => {
-    wxt.logger.warn('Failed to update .wxt directory:', err);
+    console.error('Failed to update .wxt directory:', err);
+    console.warn('Failed to update .wxt directory:', err);
     // Throw the error if doing a regular build, don't for dev mode.
     if (wxt.config.command === 'build') throw err;
   });

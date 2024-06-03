@@ -26,8 +26,8 @@ export function createWebExtRunner(): ExtensionRunner {
       // Use WXT's logger instead of web-ext's built-in one.
       const webExtLogger = await import('web-ext-run/util/logger');
       webExtLogger.consoleStream.write = ({ level, msg, name }) => {
-        if (level >= ERROR_LOG_LEVEL) wxt.logger.error(name, msg);
-        if (level >= WARN_LOG_LEVEL) wxt.logger.warn(msg);
+        if (level >= ERROR_LOG_LEVEL) console.error(name, msg);
+        if (level >= WARN_LOG_LEVEL) console.warn(msg);
       };
 
       const wxtUserConfig = wxt.config.runnerConfig.config;

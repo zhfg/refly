@@ -20,10 +20,7 @@ import { minimatch } from 'minimatch';
 import { parseHTML } from 'linkedom';
 import JSON5 from 'json5';
 import glob from 'fast-glob';
-import {
-  getEntrypointName,
-  resolvePerBrowserOptions,
-} from '~/core/utils/entrypoints';
+import { getEntrypointName, resolvePerBrowserOptions } from '~/core/utils/entrypoints';
 import { VIRTUAL_NOOP_BACKGROUND_MODULE_ID } from '~/core/utils/constants';
 import { CSS_EXTENSIONS_PATTERN } from '~/core/utils/paths';
 import pc from 'picocolors';
@@ -45,23 +42,17 @@ export async function findEntrypoints(): Promise<Entrypoint[]> {
   relativePaths.sort();
 
   const pathGlobs = Object.keys(PATH_GLOB_TO_TYPE_MAP);
-  const entrypointInfos: EntrypointInfo[] = relativePaths.reduce<
-    EntrypointInfo[]
-  >((results, relativePath) => {
+  const entrypointInfos: EntrypointInfo[] = relativePaths.reduce<EntrypointInfo[]>((results, relativePath) => {
     const inputPath = resolve(wxt.config.entrypointsDir, relativePath);
     const name = getEntrypointName(wxt.config.entrypointsDir, inputPath);
-    const matchingGlob = pathGlobs.find((glob) =>
-      minimatch(relativePath, glob),
-    );
+    const matchingGlob = pathGlobs.find((glob) => minimatch(relativePath, glob));
     if (matchingGlob) {
       const type = PATH_GLOB_TO_TYPE_MAP[matchingGlob];
       results.push({
         name,
         inputPath,
         type,
-        skipped:
-          wxt.config.filterEntrypoints != null &&
-          !wxt.config.filterEntrypoints.has(name),
+        skipped: wxt.config.filterEntrypoints != null && !wxt.config.filterEntrypoints.has(name),
       });
     }
     return results;
@@ -128,11 +119,9 @@ export async function findEntrypoints(): Promise<Entrypoint[]> {
   }
 
   wxt.logger.debug('All entrypoints:', entrypoints);
-  const skippedEntrypointNames = entrypointInfos
-    .filter((item) => item.skipped)
-    .map((item) => item.name);
+  const skippedEntrypointNames = entrypointInfos.filter((item) => item.skipped).map((item) => item.name);
   if (skippedEntrypointNames.length) {
-    wxt.logger.warn(
+    console.warn(
       `Filter excluded the following entrypoints:\n${skippedEntrypointNames
         .map((item) => `${pc.dim('-')} ${pc.cyan(item)}`)
         .join('\n')}`,
@@ -141,7 +130,7 @@ export async function findEntrypoints(): Promise<Entrypoint[]> {
   const targetEntrypoints = entrypoints.filter((entry) => {
     const { include, exclude } = entry.options;
     if (include?.length && exclude?.length) {
-      wxt.logger.warn(
+      console.warn(
         `The ${entry.name} entrypoint lists both include and exclude, but only one can be used per entrypoint. Entrypoint ignored.`,
       );
       return false;
@@ -175,26 +164,20 @@ interface EntrypointInfo {
 }
 
 function preventDuplicateEntrypointNames(files: EntrypointInfo[]) {
-  const namesToPaths = files.reduce<Record<string, string[]>>(
-    (map, { name, inputPath }) => {
-      map[name] ??= [];
-      map[name].push(inputPath);
-      return map;
-    },
-    {},
-  );
-  const errorLines = Object.entries(namesToPaths).reduce<string[]>(
-    (lines, [name, absolutePaths]) => {
-      if (absolutePaths.length > 1) {
-        lines.push(`- ${name}`);
-        absolutePaths.forEach((absolutePath) => {
-          lines.push(`  - ${relative(wxt.config.root, absolutePath)}`);
-        });
-      }
-      return lines;
-    },
-    [],
-  );
+  const namesToPaths = files.reduce<Record<string, string[]>>((map, { name, inputPath }) => {
+    map[name] ??= [];
+    map[name].push(inputPath);
+    return map;
+  }, {});
+  const errorLines = Object.entries(namesToPaths).reduce<string[]>((lines, [name, absolutePaths]) => {
+    if (absolutePaths.length > 1) {
+      lines.push(`- ${name}`);
+      absolutePaths.forEach((absolutePath) => {
+        lines.push(`  - ${relative(wxt.config.root, absolutePath)}`);
+      });
+    }
+    return lines;
+  }, []);
   if (errorLines.length > 0) {
     const errorContent = errorLines.join('\n');
     throw Error(
@@ -209,9 +192,7 @@ function preventNoEntrypoints(files: EntrypointInfo[]) {
   }
 }
 
-async function getPopupEntrypoint(
-  info: EntrypointInfo,
-): Promise<PopupEntrypoint> {
+async function getPopupEntrypoint(info: EntrypointInfo): Promise<PopupEntrypoint> {
   const options = await getHtmlEntrypointOptions<PopupEntrypointOptions>(
     info,
     {
@@ -223,13 +204,11 @@ async function getPopupEntrypoint(
       mv2Key: 'type',
     },
     {
-      defaultTitle: (document) =>
-        document.querySelector('title')?.textContent || undefined,
+      defaultTitle: (document) => document.querySelector('title')?.textContent || undefined,
     },
     {
       defaultTitle: (content) => content,
-      mv2Key: (content) =>
-        content === 'page_action' ? 'page_action' : 'browser_action',
+      mv2Key: (content) => (content === 'page_action' ? 'page_action' : 'browser_action'),
     },
   );
 
@@ -243,19 +222,14 @@ async function getPopupEntrypoint(
   };
 }
 
-async function getOptionsEntrypoint(
-  info: EntrypointInfo,
-): Promise<OptionsEntrypoint> {
-  const options = await getHtmlEntrypointOptions<OptionsEntrypointOptions>(
-    info,
-    {
-      browserStyle: 'browse_style',
-      chromeStyle: 'chrome_style',
-      exclude: 'exclude',
-      include: 'include',
-      openInTab: 'open_in_tab',
-    },
-  );
+async function getOptionsEntrypoint(info: EntrypointInfo): Promise<OptionsEntrypoint> {
+  const options = await getHtmlEntrypointOptions<OptionsEntrypointOptions>(info, {
+    browserStyle: 'browse_style',
+    chromeStyle: 'chrome_style',
+    exclude: 'exclude',
+    include: 'include',
+    openInTab: 'open_in_tab',
+  });
   return {
     type: 'options',
     name: 'options',
@@ -266,9 +240,7 @@ async function getOptionsEntrypoint(
   };
 }
 
-async function getUnlistedPageEntrypoint(
-  info: EntrypointInfo,
-): Promise<GenericEntrypoint> {
+async function getUnlistedPageEntrypoint(info: EntrypointInfo): Promise<GenericEntrypoint> {
   const options = await getHtmlEntrypointOptions<BaseEntrypointOptions>(info, {
     exclude: 'exclude',
     include: 'include',
@@ -284,13 +256,8 @@ async function getUnlistedPageEntrypoint(
   };
 }
 
-async function getUnlistedScriptEntrypoint({
-  inputPath,
-  name,
-  skipped,
-}: EntrypointInfo): Promise<GenericEntrypoint> {
-  const defaultExport =
-    await importEntrypoint<UnlistedScriptDefinition>(inputPath);
+async function getUnlistedScriptEntrypoint({ inputPath, name, skipped }: EntrypointInfo): Promise<GenericEntrypoint> {
+  const defaultExport = await importEntrypoint<UnlistedScriptDefinition>(inputPath);
   if (defaultExport == null) {
     throw Error(
       `${name}: Default export not found, did you forget to call "export default defineUnlistedScript(...)"?`,
@@ -307,19 +274,12 @@ async function getUnlistedScriptEntrypoint({
   };
 }
 
-async function getBackgroundEntrypoint({
-  inputPath,
-  name,
-  skipped,
-}: EntrypointInfo): Promise<BackgroundEntrypoint> {
+async function getBackgroundEntrypoint({ inputPath, name, skipped }: EntrypointInfo): Promise<BackgroundEntrypoint> {
   let options: Omit<BackgroundDefinition, 'main'> = {};
   if (inputPath !== VIRTUAL_NOOP_BACKGROUND_MODULE_ID) {
-    const defaultExport =
-      await importEntrypoint<BackgroundDefinition>(inputPath);
+    const defaultExport = await importEntrypoint<BackgroundDefinition>(inputPath);
     if (defaultExport == null) {
-      throw Error(
-        `${name}: Default export not found, did you forget to call "export default defineBackground(...)"?`,
-      );
+      throw Error(`${name}: Default export not found, did you forget to call "export default defineBackground(...)"?`);
     }
     const { main: _, ...moduleOptions } = defaultExport;
     options = moduleOptions;
@@ -344,12 +304,9 @@ async function getContentScriptEntrypoint({
   name,
   skipped,
 }: EntrypointInfo): Promise<ContentScriptEntrypoint> {
-  const { main: _, ...options } =
-    await importEntrypoint<ContentScriptDefinition>(inputPath);
+  const { main: _, ...options } = await importEntrypoint<ContentScriptDefinition>(inputPath);
   if (options == null) {
-    throw Error(
-      `${name}: Default export not found, did you forget to call "export default defineContentScript(...)"?`,
-    );
+    throw Error(`${name}: Default export not found, did you forget to call "export default defineContentScript(...)"?`);
   }
   return {
     type: 'content-script',
@@ -361,9 +318,7 @@ async function getContentScriptEntrypoint({
   };
 }
 
-async function getSidepanelEntrypoint(
-  info: EntrypointInfo,
-): Promise<SidepanelEntrypoint> {
+async function getSidepanelEntrypoint(info: EntrypointInfo): Promise<SidepanelEntrypoint> {
   const options = await getHtmlEntrypointOptions<SidepanelEntrypointOptions>(
     info,
     {
@@ -375,8 +330,7 @@ async function getSidepanelEntrypoint(
       openAtInstall: 'open_at_install',
     },
     {
-      defaultTitle: (document) =>
-        document.querySelector('title')?.textContent || undefined,
+      defaultTitle: (document) => document.querySelector('title')?.textContent || undefined,
     },
     {
       defaultTitle: (content) => content,
@@ -400,10 +354,7 @@ async function getHtmlEntrypointOptions<T extends BaseEntrypointOptions>(
   info: EntrypointInfo,
   keyMap: Record<keyof T, string>,
   queries?: Partial<{
-    [key in keyof T]: (
-      document: Document,
-      manifestKey: string,
-    ) => string | undefined;
+    [key in keyof T]: (document: Document, manifestKey: string) => string | undefined;
   }>,
   parsers?: Partial<{ [key in keyof T]: (content: string) => T[key] }>,
 ): Promise<T> {
@@ -413,15 +364,11 @@ async function getHtmlEntrypointOptions<T extends BaseEntrypointOptions>(
   const options = {} as T;
 
   const defaultQuery = (manifestKey: string) =>
-    document
-      .querySelector(`meta[name='manifest.${manifestKey}']`)
-      ?.getAttribute('content');
+    document.querySelector(`meta[name='manifest.${manifestKey}']`)?.getAttribute('content');
 
   Object.entries(keyMap).forEach(([_key, manifestKey]) => {
     const key = _key as keyof T;
-    const content = queries?.[key]
-      ? queries[key]!(document, manifestKey)
-      : defaultQuery(manifestKey);
+    const content = queries?.[key] ? queries[key]!(document, manifestKey) : defaultQuery(manifestKey);
     if (content) {
       try {
         options[key] = (parsers?.[key] ?? JSON5.parse)(content);
@@ -490,7 +437,5 @@ const PATH_GLOB_TO_TYPE_MAP: Record<string, Entrypoint['type']> = {
 const CONTENT_SCRIPT_OUT_DIR = 'content-scripts';
 
 function importEntrypoint<T>(path: string) {
-  return wxt.config.experimental.viteRuntime
-    ? wxt.builder.importEntrypoint<T>(path)
-    : importEntrypointFile<T>(path);
+  return wxt.config.experimental.viteRuntime ? wxt.builder.importEntrypoint<T>(path) : importEntrypointFile<T>(path);
 }

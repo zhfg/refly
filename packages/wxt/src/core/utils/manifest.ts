@@ -59,7 +59,7 @@ export async function generateManifest(
     pkg?.version;
   if (versionName == null) {
     versionName = '0.0.0';
-    wxt.logger.warn(
+    console.warn(
       'Extension version not found, defaulting to "0.0.0". Add a version to your `package.json` or `wxt.config.ts` file. For more details, see: https://wxt.dev/guide/manifest.html#version-and-version-name',
     );
   }
@@ -218,7 +218,7 @@ function addEntrypoints(
 
   if (bookmarks) {
     if (wxt.config.browser === 'firefox') {
-      wxt.logger.warn(
+      console.warn(
         'Bookmarks are not supported by Firefox. chrome_url_overrides.bookmarks was not added to the manifest',
       );
     } else {
@@ -234,7 +234,7 @@ function addEntrypoints(
 
   if (history) {
     if (wxt.config.browser === 'firefox') {
-      wxt.logger.warn(
+      console.warn(
         'Bookmarks are not supported by Firefox. chrome_url_overrides.history was not added to the manifest',
       );
     } else {
@@ -312,7 +312,7 @@ function addEntrypoints(
 
   if (sandboxes?.length) {
     if (wxt.config.browser === 'firefox') {
-      wxt.logger.warn(
+      console.warn(
         'Sandboxed pages not supported by Firefox. sandbox.pages was not added to the manifest',
       );
     } else {
@@ -349,7 +349,7 @@ function addEntrypoints(
       };
       addPermission(manifest, 'sidePanel');
     } else {
-      wxt.logger.warn(
+      console.warn(
         'Side panel not supported by Chromium using MV2. side_panel.default_path was not added to the manifest',
       );
     }

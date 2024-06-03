@@ -1,6 +1,7 @@
 import { defineConfig, WxtViteConfig } from 'wxt';
 import react from '@vitejs/plugin-react';
 import { vitePluginForArco } from '@refly/arco-vite-plugin-react';
+import { pluginViteEncoding } from '@refly/plugin-vite-encoding';
 import postcssConfig from './postcss.config';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import path from 'path';
@@ -10,9 +11,11 @@ export default defineConfig({
   srcDir: 'src',
   vite: () =>
     ({
+      logLevel: 'error',
       plugins: [
         react(),
         tsconfigPaths(),
+        pluginViteEncoding(),
         vitePluginForArco({
           theme: '@arco-themes/react-refly-ai',
           filePatterns: ['apps/web/src', 'apps/extension-wxt/src', 'packages/ai-workspace-common/src'],
@@ -32,7 +35,7 @@ export default defineConfig({
         },
       },
       build: {
-        sourcemap: 'inline',
+        sourcemap: false,
       },
       server: {
         port: 8000,

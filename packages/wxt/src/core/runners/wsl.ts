@@ -8,7 +8,7 @@ import { wxt } from '../wxt';
 export function createWslRunner(): ExtensionRunner {
   return {
     async openBrowser() {
-      wxt.logger.warn(
+      console.warn(
         `Cannot open browser when using WSL. Load "${relative(
           process.cwd(),
           wxt.config.outDir,

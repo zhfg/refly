@@ -1,24 +1,7 @@
-import {
-  BuildStepOutput,
-  EntrypointGroup,
-  InlineConfig,
-  ServerInfo,
-  WxtDevServer,
-} from '~/types';
-import {
-  getEntrypointBundlePath,
-  isHtmlEntrypoint,
-} from '~/core/utils/entrypoints';
-import {
-  getContentScriptCssFiles,
-  getContentScriptsCssMap,
-} from '~/core/utils/manifest';
-import {
-  internalBuild,
-  detectDevChanges,
-  rebuild,
-  findEntrypoints,
-} from '~/core/utils/building';
+import { BuildStepOutput, EntrypointGroup, InlineConfig, ServerInfo, WxtDevServer } from '~/types';
+import { getEntrypointBundlePath, isHtmlEntrypoint } from '~/core/utils/entrypoints';
+import { getContentScriptCssFiles, getContentScriptsCssMap } from '~/core/utils/manifest';
+import { internalBuild, detectDevChanges, rebuild, findEntrypoints } from '~/core/utils/building';
 import { createExtensionRunner } from '~/core/runners';
 import { consola } from 'consola';
 import { Mutex } from 'async-mutex';
@@ -26,10 +9,7 @@ import pc from 'picocolors';
 import { relative } from 'node:path';
 import { registerWxt, wxt } from './wxt';
 import { unnormalizePath } from './utils/paths';
-import {
-  getContentScriptJs,
-  mapWxtOptionsToRegisteredContentScript,
-} from './utils/content-scripts';
+import { getContentScriptJs, mapWxtOptionsToRegisteredContentScript } from './utils/content-scripts';
 
 /**
  * Creates a dev server and pre-builds all the files that need to exist before loading the extension.
@@ -40,9 +20,7 @@ import {
  * });
  * await server.start();
  */
-export async function createServer(
-  inlineConfig?: InlineConfig,
-): Promise<WxtDevServer> {
+export async function createServer(inlineConfig?: InlineConfig): Promise<WxtDevServer> {
   await registerWxt('serve', inlineConfig, async (config) => {
     const { port, hostname } = config.dev.server!;
     const serverInfo: ServerInfo = {
@@ -96,10 +74,7 @@ export async function createServer(
   });
 
   const server = wxt.server!;
-  let [runner, builderServer] = await Promise.all([
-    createExtensionRunner(),
-    wxt.builder.createServer(server),
-  ]);
+  let [runner, builderServer] = await Promise.all([createExtensionRunner(), wxt.builder.createServer(server)]);
 
   const buildAndOpenBrowser = async () => {
     // Build after starting the dev server so it can be used to transform HTML files
@@ -158,9 +133,7 @@ function createFileReloader(server: WxtDevServer) {
     await fileChangedMutex.runExclusive(async () => {
       if (server.currentOutput == null) return;
 
-      const fileChanges = changeQueue
-        .splice(0, changeQueue.length)
-        .map(([_, file]) => file);
+      const fileChanges = changeQueue.splice(0, changeQueue.length).map(([_, file]) => file);
       if (fileChanges.length === 0) return;
 
       const changes = detectDevChanges(fileChanges, server.currentOutput);
@@ -203,17 +176,12 @@ function createFileReloader(server: WxtDevServer) {
             consola.success(`Reloaded extension`);
             break;
           case 'html-reload':
-            const { reloadedNames } = reloadHtmlPages(
-              changes.rebuildGroups,
-              server,
-            );
+            const { reloadedNames } = reloadHtmlPages(changes.rebuildGroups, server);
             consola.success(`Reloaded: ${getFilenameList(reloadedNames)}`);
             break;
           case 'content-script-reload':
             reloadContentScripts(changes.changedSteps, server);
-            const rebuiltNames = changes.rebuildGroups
-              .flat()
-              .map((entry) => entry.name);
+            const rebuiltNames = changes.rebuildGroups.flat().map((entry) => entry.name);
             consola.success(`Reloaded: ${getFilenameList(rebuiltNames)}`);
             break;
         }
@@ -241,11 +209,7 @@ function reloadContentScripts(steps: BuildStepOutput[], server: WxtDevServer) {
 
       server.reloadContentScript({
         registration: entry.options.registration,
-        contentScript: mapWxtOptionsToRegisteredContentScript(
-          entry.options,
-          js,
-          css,
-        ),
+        contentScript: mapWxtOptionsToRegisteredContentScript(entry.options, js, css),
       });
     });
   } else {
@@ -253,10 +217,7 @@ function reloadContentScripts(steps: BuildStepOutput[], server: WxtDevServer) {
   }
 }
 
-function reloadHtmlPages(
-  groups: EntrypointGroup[],
-  server: WxtDevServer,
-): { reloadedNames: string[] } {
+function reloadHtmlPages(groups: EntrypointGroup[], server: WxtDevServer): { reloadedNames: string[] } {
   // groups might contain other files like background/content scripts, and we only care about the HTMl pages
   const htmlEntries = groups.flat().filter(isHtmlEntrypoint);
 
@@ -297,9 +258,7 @@ function getExternalOutputDependencies(server: WxtDevServer) {
           return chunk.moduleIds;
         });
       })
-      .filter(
-        (file) => !file.includes('node_modules') && !file.startsWith('\x00'),
-      )
+      .filter((file) => !file.includes('node_modules') && !file.startsWith('\x00'))
       .map(unnormalizePath)
       .filter((file) => !file.startsWith(wxt.config.root)) ?? []
   );

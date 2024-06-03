@@ -25,6 +25,11 @@
       "reviewCategory": "packages"
     },
     {
+      "packageName": "@refly/plugin-vite-encoding",
+      "projectFolder": "packages/plugin-vite-encoding",
+      "reviewCategory": "packages"
+    },
+    {
       "packageName": "@refly/utils",
       "projectFolder": "packages/utils",
       "reviewCategory": "packages"

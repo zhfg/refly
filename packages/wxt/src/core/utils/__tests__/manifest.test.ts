@@ -14,12 +14,7 @@ import {
   setFakeWxt,
 } from '../testing/fake-objects';
 import { Manifest } from 'webextension-polyfill';
-import {
-  BuildOutput,
-  ContentScriptEntrypoint,
-  Entrypoint,
-  OutputAsset,
-} from '~/types';
+import { BuildOutput, ContentScriptEntrypoint, Entrypoint, OutputAsset } from '~/types';
 import { wxt } from '../../wxt';
 
 const outDir = '/output';
@@ -64,10 +59,7 @@ describe('Manifest Utils', () => {
           },
         };
 
-        const { manifest: actual } = await generateManifest(
-          [popup],
-          buildOutput,
-        );
+        const { manifest: actual } = await generateManifest([popup], buildOutput);
 
         expect(actual).toMatchObject(expected);
       });
@@ -79,31 +71,25 @@ describe('Manifest Utils', () => {
         { inputType: undefined, expectedType: 'browser_action' },
         { inputType: 'browser_action', expectedType: 'browser_action' },
         { inputType: 'page_action', expectedType: 'page_action' },
-      ])(
-        'should use the correct action for mv2: %j',
-        async ({ inputType, expectedType }) => {
-          const popup = popupEntrypoint(inputType);
-          const buildOutput = fakeBuildOutput();
-          setFakeWxt({
-            config: {
-              manifestVersion: 2,
-              outDir,
-            },
-          });
-          const expected = {
-            default_icon: popup.options.defaultIcon,
-            default_title: popup.options.defaultTitle,
-            default_popup: 'popup.html',
-          };
+      ])('should use the correct action for mv2: %j', async ({ inputType, expectedType }) => {
+        const popup = popupEntrypoint(inputType);
+        const buildOutput = fakeBuildOutput();
+        setFakeWxt({
+          config: {
+            manifestVersion: 2,
+            outDir,
+          },
+        });
+        const expected = {
+          default_icon: popup.options.defaultIcon,
+          default_title: popup.options.defaultTitle,
+          default_popup: 'popup.html',
+        };
 
-          const { manifest: actual } = await generateManifest(
-            [popup],
-            buildOutput,
-          );
+        const { manifest: actual } = await generateManifest([popup], buildOutput);
 
-          expect(actual[expectedType]).toEqual(expected);
-        },
-      );
+        expect(actual[expectedType]).toEqual(expected);
+      });
     });
 
     describe('action without popup', () => {
@@ -194,9 +180,7 @@ describe('Manifest Utils', () => {
         const { manifest: actual } = await generateManifest([], buildOutput);
 
         expect(actual.action).toBeUndefined();
-        expect(actual.browser_action).toEqual(
-          wxt.config.manifest.browser_action,
-        );
+        expect(actual.browser_action).toEqual(wxt.config.manifest.browser_action);
         expect(actual.page_action).toBeUndefined();
       });
     });
@@ -226,10 +210,7 @@ describe('Manifest Utils', () => {
           page: 'options.html',
         };
 
-        const { manifest: actual } = await generateManifest(
-          [options],
-          buildOutput,
-        );
+        const { manifest: actual } = await generateManifest([options], buildOutput);
 
         expect(actual.options_ui).toEqual(expected);
       });
@@ -249,10 +230,7 @@ describe('Manifest Utils', () => {
           page: 'options.html',
         };
 
-        const { manifest: actual } = await generateManifest(
-          [options],
-          buildOutput,
-        );
+        const { manifest: actual } = await generateManifest([options], buildOutput);
 
         expect(actual.options_ui).toEqual(expected);
       });
@@ -268,30 +246,24 @@ describe('Manifest Utils', () => {
       });
 
       describe('MV3', () => {
-        it.each(['chrome', 'safari'])(
-          'should include a service worker and type for %s',
-          async (browser) => {
-            setFakeWxt({
-              config: {
-                outDir,
-                manifestVersion: 3,
-                browser,
-              },
-            });
-            const buildOutput = fakeBuildOutput();
-            const expected = {
-              type: 'module',
-              service_worker: 'background.js',
-            };
+        it.each(['chrome', 'safari'])('should include a service worker and type for %s', async (browser) => {
+          setFakeWxt({
+            config: {
+              outDir,
+              manifestVersion: 3,
+              browser,
+            },
+          });
+          const buildOutput = fakeBuildOutput();
+          const expected = {
+            type: 'module',
+            service_worker: 'background.js',
+          };
 
-            const { manifest: actual } = await generateManifest(
-              [background],
-              buildOutput,
-            );
+          const { manifest: actual } = await generateManifest([background], buildOutput);
 
-            expect(actual.background).toEqual(expected);
-          },
-        );
+          expect(actual.background).toEqual(expected);
+        });
 
         it('should include a background script and type for firefox', async () => {
           setFakeWxt({
@@ -307,40 +279,31 @@ describe('Manifest Utils', () => {
             scripts: ['background.js'],
           };
 
-          const { manifest: actual } = await generateManifest(
-            [background],
-            buildOutput,
-          );
+          const { manifest: actual } = await generateManifest([background], buildOutput);
 
           expect(actual.background).toEqual(expected);
         });
       });
 
       describe('MV2', () => {
-        it.each(['chrome', 'safari'])(
-          'should include scripts and persistent for %s',
-          async (browser) => {
-            setFakeWxt({
-              config: {
-                outDir,
-                manifestVersion: 2,
-                browser,
-              },
-            });
-            const buildOutput = fakeBuildOutput();
-            const expected = {
-              persistent: true,
-              scripts: ['background.js'],
-            };
+        it.each(['chrome', 'safari'])('should include scripts and persistent for %s', async (browser) => {
+          setFakeWxt({
+            config: {
+              outDir,
+              manifestVersion: 2,
+              browser,
+            },
+          });
+          const buildOutput = fakeBuildOutput();
+          const expected = {
+            persistent: true,
+            scripts: ['background.js'],
+          };
 
-            const { manifest: actual } = await generateManifest(
-              [background],
-              buildOutput,
-            );
+          const { manifest: actual } = await generateManifest([background], buildOutput);
 
-            expect(actual.background).toEqual(expected);
-          },
-        );
+          expect(actual.background).toEqual(expected);
+        });
 
         it('should include a background script and persistent for firefox mv2', async () => {
           setFakeWxt({
@@ -356,10 +319,7 @@ describe('Manifest Utils', () => {
             scripts: ['background.js'],
           };
 
-          const { manifest: actual } = await generateManifest(
-            [background],
-            buildOutput,
-          );
+          const { manifest: actual } = await generateManifest([background], buildOutput);
 
           expect(actual.background).toEqual(expected);
         });
@@ -380,10 +340,7 @@ describe('Manifest Utils', () => {
           ],
         });
 
-        const { manifest: actual } = await generateManifest(
-          entrypoints,
-          buildOutput,
-        );
+        const { manifest: actual } = await generateManifest(entrypoints, buildOutput);
 
         expect(actual.icons).toEqual({
           16: 'icon-16.png',
@@ -404,10 +361,7 @@ describe('Manifest Utils', () => {
           ],
         });
 
-        const { manifest: actual } = await generateManifest(
-          entrypoints,
-          buildOutput,
-        );
+        const { manifest: actual } = await generateManifest(entrypoints, buildOutput);
 
         expect(actual.icons).toBeUndefined();
       });
@@ -436,10 +390,7 @@ describe('Manifest Utils', () => {
           },
         });
 
-        const { manifest: actual } = await generateManifest(
-          entrypoints,
-          buildOutput,
-        );
+        const { manifest: actual } = await generateManifest(entrypoints, buildOutput);
 
         expect(actual.icons).toEqual(expected);
       });
@@ -541,10 +492,7 @@ describe('Manifest Utils', () => {
           ],
         };
 
-        const { manifest: actual } = await generateManifest(
-          entrypoints,
-          buildOutput,
-        );
+        const { manifest: actual } = await generateManifest(entrypoints, buildOutput);
 
         expect(actual.content_scripts).toContainEqual({
           matches: ['*://google.com/*'],
@@ -603,10 +551,7 @@ describe('Manifest Utils', () => {
           },
         });
 
-        const { manifest: actual } = await generateManifest(
-          entrypoints,
-          buildOutput,
-        );
+        const { manifest: actual } = await generateManifest(entrypoints, buildOutput);
 
         expect(actual.content_scripts).toContainEqual(userContentScript);
         expect(actual.content_scripts).toContainEqual(generatedContentScript);
@@ -644,10 +589,7 @@ describe('Manifest Utils', () => {
               },
             });
 
-            const { manifest: actual } = await generateManifest(
-              entrypoints,
-              buildOutput,
-            );
+            const { manifest: actual } = await generateManifest(entrypoints, buildOutput);
 
             expect(actual.content_scripts).toEqual([
               {
@@ -690,10 +632,7 @@ describe('Manifest Utils', () => {
               },
             });
 
-            const { manifest: actual } = await generateManifest(
-              entrypoints,
-              buildOutput,
-            );
+            const { manifest: actual } = await generateManifest(entrypoints, buildOutput);
 
             expect(actual.content_scripts).toEqual([
               {
@@ -734,10 +673,7 @@ describe('Manifest Utils', () => {
             },
           });
 
-          const { manifest: actual } = await generateManifest(
-            entrypoints,
-            buildOutput,
-          );
+          const { manifest: actual } = await generateManifest(entrypoints, buildOutput);
 
           expect(actual.web_accessible_resources).toEqual([
             {
@@ -777,14 +713,9 @@ describe('Manifest Utils', () => {
             },
           });
 
-          const { manifest: actual } = await generateManifest(
-            entrypoints,
-            buildOutput,
-          );
+          const { manifest: actual } = await generateManifest(entrypoints, buildOutput);
 
-          expect(actual.web_accessible_resources).toEqual([
-            'content-scripts/one.css',
-          ]);
+          expect(actual.web_accessible_resources).toEqual(['content-scripts/one.css']);
         });
 
         it('should strip the path off the match pattern so the pattern is valid for `web_accessible_resources`', async () => {
@@ -817,10 +748,7 @@ describe('Manifest Utils', () => {
             },
           });
 
-          const { manifest: actual } = await generateManifest(
-            entrypoints,
-            buildOutput,
-          );
+          const { manifest: actual } = await generateManifest(entrypoints, buildOutput);
 
           expect(actual.web_accessible_resources).toEqual([
             {
@@ -850,9 +778,7 @@ describe('Manifest Utils', () => {
             },
           });
 
-          await expect(
-            generateManifest(entrypoints, buildOutput),
-          ).rejects.toThrowError();
+          await expect(generateManifest(entrypoints, buildOutput)).rejects.toThrowError();
         });
 
         it('should add host_permissions instead of content_scripts when registration=runtime', async () => {
@@ -885,10 +811,7 @@ describe('Manifest Utils', () => {
             },
           });
 
-          const { manifest: actual } = await generateManifest(
-            entrypoints,
-            buildOutput,
-          );
+          const { manifest: actual } = await generateManifest(entrypoints, buildOutput);
 
           expect(actual.content_scripts).toEqual([]);
           expect(actual.host_permissions).toEqual(['*://google.com/*']);
@@ -920,48 +843,39 @@ describe('Manifest Utils', () => {
             permissions: ['sidePanel'],
           };
 
-          const { manifest: actual } = await generateManifest(
-            [sidepanel],
-            buildOutput,
-          );
+          const { manifest: actual } = await generateManifest([sidepanel], buildOutput);
 
           expect(actual).toMatchObject(expected);
         },
       );
 
-      it.each(['firefox'])(
-        'should include a sidebar_action for %s',
-        async (browser) => {
-          const sidepanel = fakeSidepanelEntrypoint({
-            outputDir: outDir,
-          });
-          const buildOutput = fakeBuildOutput();
+      it.each(['firefox'])('should include a sidebar_action for %s', async (browser) => {
+        const sidepanel = fakeSidepanelEntrypoint({
+          outputDir: outDir,
+        });
+        const buildOutput = fakeBuildOutput();
 
-          setFakeWxt({
-            config: {
-              manifestVersion: 3,
-              browser,
-              outDir,
-            },
-          });
-          const expected = {
-            sidebar_action: {
-              default_panel: 'sidepanel.html',
-              open_at_install: sidepanel.options.openAtInstall,
-              default_title: sidepanel.options.defaultTitle,
-              default_icon: sidepanel.options.defaultIcon,
-              browser_style: sidepanel.options.browserStyle,
-            },
-          };
+        setFakeWxt({
+          config: {
+            manifestVersion: 3,
+            browser,
+            outDir,
+          },
+        });
+        const expected = {
+          sidebar_action: {
+            default_panel: 'sidepanel.html',
+            open_at_install: sidepanel.options.openAtInstall,
+            default_title: sidepanel.options.defaultTitle,
+            default_icon: sidepanel.options.defaultIcon,
+            browser_style: sidepanel.options.browserStyle,
+          },
+        };
 
-          const { manifest: actual } = await generateManifest(
-            [sidepanel],
-            buildOutput,
-          );
+        const { manifest: actual } = await generateManifest([sidepanel], buildOutput);
 
-          expect(actual).toMatchObject(expected);
-        },
-      );
+        expect(actual).toMatchObject(expected);
+      });
     });
 
     describe('web_accessible_resources', () => {
@@ -993,17 +907,12 @@ describe('Manifest Utils', () => {
             command: 'build',
             manifestVersion: 3,
             manifest: {
-              web_accessible_resources: [
-                { resources: ['one.png'], matches: ['*://one.com/*'] },
-              ],
+              web_accessible_resources: [{ resources: ['one.png'], matches: ['*://one.com/*'] }],
             },
           },
         });
 
-        const { manifest: actual } = await generateManifest(
-          entrypoints,
-          buildOutput,
-        );
+        const { manifest: actual } = await generateManifest(entrypoints, buildOutput);
 
         expect(actual.web_accessible_resources).toEqual([
           { resources: ['one.png'], matches: ['*://one.com/*'] },
@@ -1047,15 +956,9 @@ describe('Manifest Utils', () => {
           },
         });
 
-        const { manifest: actual } = await generateManifest(
-          entrypoints,
-          buildOutput,
-        );
+        const { manifest: actual } = await generateManifest(entrypoints, buildOutput);
 
-        expect(actual.web_accessible_resources).toEqual([
-          'one.png',
-          'content-scripts/one.css',
-        ]);
+        expect(actual.web_accessible_resources).toEqual(['one.png', 'content-scripts/one.css']);
       });
 
       it('should convert mv3 items to mv2 strings automatically', async () => {
@@ -1078,15 +981,9 @@ describe('Manifest Utils', () => {
           },
         });
 
-        const { manifest: actual } = await generateManifest(
-          [],
-          fakeBuildOutput(),
-        );
+        const { manifest: actual } = await generateManifest([], fakeBuildOutput());
 
-        expect(actual.web_accessible_resources).toEqual([
-          '/icon-128.png',
-          '/icon-32.png',
-        ]);
+        expect(actual.web_accessible_resources).toEqual(['/icon-128.png', '/icon-32.png']);
       });
 
       it('should convert mv2 strings to mv3 items with a warning automatically', async () => {
@@ -1100,9 +997,7 @@ describe('Manifest Utils', () => {
           },
         });
 
-        await expect(() =>
-          generateManifest([], fakeBuildOutput()),
-        ).rejects.toThrow(
+        await expect(() => generateManifest([], fakeBuildOutput())).rejects.toThrow(
           'Non-MV3 web_accessible_resources detected: ["/icon.svg"]. When manually defining web_accessible_resources, define them as MV3 objects ({ matches: [...], resources: [...] }), and WXT will automatically convert them to MV2 when necessary.',
         );
       });
@@ -1124,10 +1019,7 @@ describe('Manifest Utils', () => {
           author: newAuthor,
         };
 
-        const { manifest: actual } = await generateManifest(
-          entrypoints,
-          buildOutput,
-        );
+        const { manifest: actual } = await generateManifest(entrypoints, buildOutput);
 
         expect(actual).toMatchObject(expected);
       });
@@ -1151,10 +1043,7 @@ describe('Manifest Utils', () => {
             },
           });
 
-          const { manifest: actual } = await generateManifest(
-            entrypoints,
-            buildOutput,
-          );
+          const { manifest: actual } = await generateManifest(entrypoints, buildOutput);
 
           expect(actual.version).toBe(version);
           expect(actual.version_name).toBe(versionName);
@@ -1178,10 +1067,7 @@ describe('Manifest Utils', () => {
             },
           });
 
-          const { manifest: actual } = await generateManifest(
-            entrypoints,
-            buildOutput,
-          );
+          const { manifest: actual } = await generateManifest(entrypoints, buildOutput);
 
           expect(actual.version).toBe(version);
           expect(actual.version_name).toBeUndefined();
@@ -1204,10 +1090,7 @@ describe('Manifest Utils', () => {
             },
           });
 
-          const { manifest: actual } = await generateManifest(
-            entrypoints,
-            buildOutput,
-          );
+          const { manifest: actual } = await generateManifest(entrypoints, buildOutput);
 
           expect(actual.version).toBe(version);
           expect(actual.version_name).toBeUndefined();
@@ -1226,17 +1109,12 @@ describe('Manifest Utils', () => {
           },
         });
 
-        const { manifest: actual } = await generateManifest(
-          entrypoints,
-          buildOutput,
-        );
+        const { manifest: actual } = await generateManifest(entrypoints, buildOutput);
 
         expect(actual.version).toBe('0.0.0');
         expect(actual.version_name).toBeUndefined();
-        expect(wxt.logger.warn).toBeCalledTimes(1);
-        expect(wxt.logger.warn).toBeCalledWith(
-          expect.stringContaining('Extension version not found'),
-        );
+        expect(console.warn).toBeCalledTimes(1);
+        expect(console.warn).toBeCalledWith(expect.stringContaining('Extension version not found'));
       });
     });
 
@@ -1256,10 +1134,7 @@ describe('Manifest Utils', () => {
         const output = fakeBuildOutput();
         const entrypoints = fakeArray(fakeEntrypoint);
 
-        const { manifest: actual } = await generateManifest(
-          entrypoints,
-          output,
-        );
+        const { manifest: actual } = await generateManifest(entrypoints, output);
 
         expect(actual.commands).toEqual({
           [reloadCommandName]: reloadCommand,
@@ -1278,10 +1153,7 @@ describe('Manifest Utils', () => {
         const output = fakeBuildOutput();
         const entrypoints = fakeArray(fakeEntrypoint);
 
-        const { manifest: actual } = await generateManifest(
-          entrypoints,
-          output,
-        );
+        const { manifest: actual } = await generateManifest(entrypoints, output);
 
         expect(actual.commands).toEqual({
           [reloadCommandName]: {
@@ -1305,10 +1177,7 @@ describe('Manifest Utils', () => {
         const output = fakeBuildOutput();
         const entrypoints = fakeArray(fakeEntrypoint);
 
-        const { manifest: actual } = await generateManifest(
-          entrypoints,
-          output,
-        );
+        const { manifest: actual } = await generateManifest(entrypoints, output);
 
         expect(actual.commands).toBeUndefined();
       });
@@ -1329,10 +1198,7 @@ describe('Manifest Utils', () => {
         const output = fakeBuildOutput();
         const entrypoints = fakeArray(fakeEntrypoint);
 
-        const { manifest: actual } = await generateManifest(
-          entrypoints,
-          output,
-        );
+        const { manifest: actual } = await generateManifest(entrypoints, output);
 
         expect(actual.commands).toEqual({
           [reloadCommandName]: reloadCommand,
@@ -1356,10 +1222,7 @@ describe('Manifest Utils', () => {
         const output = fakeBuildOutput();
         const entrypoints = fakeArray(fakeEntrypoint);
 
-        const { manifest: actual, warnings } = await generateManifest(
-          entrypoints,
-          output,
-        );
+        const { manifest: actual, warnings } = await generateManifest(entrypoints, output);
 
         expect(actual.commands).toEqual(commands);
         expect(warnings).toHaveLength(1);
@@ -1372,10 +1235,7 @@ describe('Manifest Utils', () => {
         const output = fakeBuildOutput();
         const entrypoints = fakeArray(fakeEntrypoint);
 
-        const { manifest: actual } = await generateManifest(
-          entrypoints,
-          output,
-        );
+        const { manifest: actual } = await generateManifest(entrypoints, output);
 
         expect(actual.commands).toBeUndefined();
       });
@@ -1426,29 +1286,26 @@ describe('Manifest Utils', () => {
         ['chrome', 3, { ...mv3Manifest, ...hostPermissionsManifest }],
         ['safari', 3, { ...mv3Manifest, ...hostPermissionsManifest }],
         ['edge', 3, { ...mv3Manifest, ...hostPermissionsManifest }],
-      ] as const)(
-        "%s MV%s should only include that version's keys",
-        async (browser, manifestVersion, expected) => {
-          setFakeWxt({
-            config: {
-              browser,
-              manifest,
-              manifestVersion,
-              command: 'build',
-            },
-          });
-          const output = fakeBuildOutput();
+      ] as const)("%s MV%s should only include that version's keys", async (browser, manifestVersion, expected) => {
+        setFakeWxt({
+          config: {
+            browser,
+            manifest,
+            manifestVersion,
+            command: 'build',
+          },
+        });
+        const output = fakeBuildOutput();
 
-          const { manifest: actual } = await generateManifest([], output);
+        const { manifest: actual } = await generateManifest([], output);
 
-          expect(actual).toEqual({
-            name: expect.any(String),
-            version: expect.any(String),
-            manifest_version: manifestVersion,
-            ...expected,
-          });
-        },
-      );
+        expect(actual).toEqual({
+          name: expect.any(String),
+          version: expect.any(String),
+          manifest_version: manifestVersion,
+          ...expected,
+        });
+      });
     });
 
     describe('host_permissions', () => {
@@ -1474,11 +1331,7 @@ describe('Manifest Utils', () => {
       });
 
       it('should move host_permissions to permissions for MV2, ignoring duplicates', async () => {
-        const expectedPermissions = [
-          'scripting',
-          '*://*.youtube.com/*',
-          'https://google.com/*',
-        ];
+        const expectedPermissions = ['scripting', '*://*.youtube.com/*', 'https://google.com/*'];
         setFakeWxt({
           config: {
             manifest: {
@@ -1513,10 +1366,7 @@ describe('Manifest Utils', () => {
         const output = fakeBuildOutput();
         const entrypoints: Entrypoint[] = [];
 
-        const { manifest: actual } = await generateManifest(
-          entrypoints,
-          output,
-        );
+        const { manifest: actual } = await generateManifest(entrypoints, output);
 
         expect(actual.permissions).toBeUndefined();
         expect(actual.content_security_policy).toBeUndefined();
@@ -1537,14 +1387,10 @@ describe('Manifest Utils', () => {
         const output = fakeBuildOutput();
         const entrypoints: Entrypoint[] = [];
 
-        const { manifest: actual } = await generateManifest(
-          entrypoints,
-          output,
-        );
+        const { manifest: actual } = await generateManifest(entrypoints, output);
 
         expect(actual).toMatchObject({
-          content_security_policy:
-            "script-src 'self' http://localhost:3000; object-src 'self';",
+          content_security_policy: "script-src 'self' http://localhost:3000; object-src 'self';",
           permissions: ['http://localhost/*', 'tabs'],
         });
       });
@@ -1565,15 +1411,11 @@ describe('Manifest Utils', () => {
         const output = fakeBuildOutput();
         const entrypoints: Entrypoint[] = [];
 
-        const { manifest: actual } = await generateManifest(
-          entrypoints,
-          output,
-        );
+        const { manifest: actual } = await generateManifest(entrypoints, output);
 
         expect(actual).toMatchObject({
           content_security_policy: {
-            extension_pages:
-              "script-src 'self' 'wasm-unsafe-eval' http://localhost:3000; object-src 'self';",
+            extension_pages: "script-src 'self' 'wasm-unsafe-eval' http://localhost:3000; object-src 'self';",
             sandbox:
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:3000; sandbox allow-scripts allow-forms allow-popups allow-modals; child-src 'self';",
           },

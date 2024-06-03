@@ -21,10 +21,7 @@ export function reloadContentScript(payload: ReloadContentScriptPayload) {
   }
 }
 
-export async function reloadContentScriptMv3({
-  registration,
-  contentScript,
-}: ReloadContentScriptPayload) {
+export async function reloadContentScriptMv3({ registration, contentScript }: ReloadContentScriptPayload) {
   if (registration === 'runtime') {
     await reloadRuntimeContentScriptMv3(contentScript);
   } else {
@@ -32,9 +29,7 @@ export async function reloadContentScriptMv3({
   }
 }
 
-export async function reloadManifestContentScriptMv3(
-  contentScript: ContentScript,
-) {
+export async function reloadManifestContentScriptMv3(contentScript: ContentScript) {
   const id = `wxt:${contentScript.js![0]}`;
   logger.log('Reloading content script:', contentScript);
   const registered = await browser.scripting.getRegisteredContentScripts();
@@ -53,9 +48,7 @@ export async function reloadManifestContentScriptMv3(
   await reloadTabsForContentScript(contentScript);
 }
 
-export async function reloadRuntimeContentScriptMv3(
-  contentScript: ContentScript,
-) {
+export async function reloadRuntimeContentScriptMv3(contentScript: ContentScript) {
   logger.log('Reloading content script:', contentScript);
   const registered = await browser.scripting.getRegisteredContentScripts();
   logger.debug('Existing scripts:', registered);
@@ -67,10 +60,7 @@ export async function reloadRuntimeContentScriptMv3(
   });
 
   if (matches.length === 0) {
-    logger.log(
-      'Content script is not registered yet, nothing to reload',
-      contentScript,
-    );
+    logger.log('Content script is not registered yet, nothing to reload', contentScript);
     return;
   }
 
@@ -80,9 +70,7 @@ export async function reloadRuntimeContentScriptMv3(
 
 async function reloadTabsForContentScript(contentScript: ContentScript) {
   const allTabs = await browser.tabs.query({});
-  const matchPatterns = contentScript.matches.map(
-    (match) => new MatchPattern(match),
-  );
+  const matchPatterns = contentScript.matches.map((match) => new MatchPattern(match));
   const matchingTabs = allTabs.filter((tab) => {
     const url = tab.url;
     if (!url) return false;
@@ -91,8 +79,6 @@ async function reloadTabsForContentScript(contentScript: ContentScript) {
   await Promise.all(matchingTabs.map((tab) => browser.tabs.reload(tab.id)));
 }
 
-export async function reloadContentScriptMv2(
-  _payload: ReloadContentScriptPayload,
-) {
+export async function reloadContentScriptMv2(_payload: ReloadContentScriptPayload) {
   throw Error('TODO: reloadContentScriptMv2');
 }
