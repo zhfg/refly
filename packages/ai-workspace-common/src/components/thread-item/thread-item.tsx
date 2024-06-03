@@ -7,7 +7,8 @@ import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
 // 组件
 import { Session } from './session';
-import { TASK_TYPE, type SessionItem, type Source } from '@refly-packages/ai-workspace-common/types';
+import { ChatTaskType, Source } from '@refly/openapi-schema';
+import { type SessionItem } from '@refly-packages/ai-workspace-common/types';
 import type { RefTextAreaType } from '@arco-design/web-react/es/Input';
 
 import { ThreadSearchTargetSelector } from '@refly-packages/ai-workspace-common/components/thread-item/thread-search-target-selector';
@@ -23,7 +24,7 @@ interface ThreadItemProps {
     searchTarget: SearchTarget;
     filter: Source[];
   };
-  handleAskFollowing: (question?: string, taskType?: TASK_TYPE) => void;
+  handleAskFollowing: (question?: string, taskType?: ChatTaskType) => void;
 }
 
 const TextArea = Input.TextArea;
@@ -75,10 +76,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
   };
 
   const handleAskFollowing = () => {
-    props.handleAskFollowing(
-      '',
-      threadSearchTarget === SearchTarget?.SearchEnhance ? TASK_TYPE.SEARCH_ENHANCE_ASK : TASK_TYPE.CHAT,
-    );
+    props.handleAskFollowing('', threadSearchTarget === SearchTarget?.SearchEnhance ? 'searchEnhanceAsk' : 'chat');
   };
 
   // 这里保存为组件状态是只对当前组件生效，而且理论上设置之后就应该在此 thread 一直生效，不应该清空
@@ -115,7 +113,7 @@ export const ThreadItem = (props: ThreadItemProps) => {
             handleAskFollowing={(question) =>
               props.handleAskFollowing(
                 question,
-                threadSearchTarget === SearchTarget?.SearchEnhance ? TASK_TYPE.SEARCH_ENHANCE_ASK : TASK_TYPE.CHAT,
+                threadSearchTarget === SearchTarget?.SearchEnhance ? 'searchEnhanceAsk' : 'chat',
               )
             }
             isLastSession={index === sessions.length - 1}

@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension';
-import type { LOCALE, User } from '@refly-packages/ai-workspace-common/types';
+import { LOCALE } from '@refly/constants';
+import { UserSettings } from '@refly/openapi-schema';
 import { OutputLocale } from '@refly-packages/ai-workspace-common/utils/i18n';
 
 export interface LocalSettings {
@@ -13,7 +14,7 @@ export interface LocalSettings {
 export interface UserState {
   // state
   isCheckingLoginStatus: boolean;
-  userProfile?: User;
+  userProfile?: UserSettings;
   token?: string;
   localSettings: LocalSettings; // 在获取 user 信息的时候记录这个 settings，并 host 到 localStorage，每次保存更新，类似 userProfile
 
@@ -22,7 +23,7 @@ export interface UserState {
 
   // method
   setIsCheckingLoginStatus: (val: boolean) => void;
-  setUserProfile: (val?: User) => void;
+  setUserProfile: (val?: UserSettings) => void;
   setToken: (val?: string) => void;
   setLoginModalVisible: (val: boolean) => void;
   setLocalSettings: (val: LocalSettings) => void;
@@ -63,7 +64,7 @@ export const useUserStore = create<UserState>()(
     ...defaultState,
 
     setIsCheckingLoginStatus: (val: boolean) => set((state) => ({ ...state, isCheckingLoginStatus: val })),
-    setUserProfile: (val?: User) => set((state) => ({ ...state, userProfile: val })),
+    setUserProfile: (val?: UserSettings) => set((state) => ({ ...state, userProfile: val })),
     setToken: (val?: string) => set((state) => ({ ...state, token: val })),
     setLoginModalVisible: (val: boolean) => set((state) => ({ ...state, loginModalVisible: val })),
     setLocalSettings: (val: LocalSettings) => set((state) => ({ ...state, localSettings: val })),

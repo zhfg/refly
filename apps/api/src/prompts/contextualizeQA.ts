@@ -1,3 +1,5 @@
+import { LOCALE } from '@refly/constants';
+
 export const systemPrompt = (locale: LOCALE) => `
 ## Target
 Given a chat history and the latest user question

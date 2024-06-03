@@ -1,4 +1,4 @@
-import { RetrieveFilter } from '../conversation/conversation.dto';
+import { RetrieveFilter } from '@refly/openapi-schema';
 
 export enum ContentType {
   WEBLINK = 'weblink',

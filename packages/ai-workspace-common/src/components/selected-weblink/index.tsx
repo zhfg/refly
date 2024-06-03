@@ -1,7 +1,7 @@
 import { Tag } from '@arco-design/web-react';
 import React, { type MutableRefObject } from 'react';
 import { IconRightCircle, IconLink } from '@arco-design/web-react/icon';
-import type { Source } from '@refly-packages/ai-workspace-common/types';
+import { Source } from '@refly/openapi-schema';
 import { useWeblinkStore } from '@refly-packages/ai-workspace-common/stores/weblink';
 import { useTranslation } from 'react-i18next';
 

@@ -5,7 +5,6 @@ import './index.scss';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 
 // request
-import getUserInfo from '@refly-packages/ai-workspace-common/requests/getUserInfo';
 import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 
 // 组件

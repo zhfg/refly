@@ -7,12 +7,12 @@ import { time } from '@refly-packages/ai-workspace-common/utils/time';
 // stores
 import { useWeblinkStore } from '@refly-packages/ai-workspace-common/stores/weblink';
 // requests
-import getWeblinkList from '@refly-packages/ai-workspace-common/requests/getWeblinkList';
+import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // styles
 import './index.scss';
 import { safeParseURL } from '@refly-packages/ai-workspace-common/utils/url';
 import { useTranslation } from 'react-i18next';
-import { LOCALE } from '@refly-packages/ai-workspace-common/types';
+import { LOCALE } from '@refly/constants';
 
 const WebLinkItem = (props: { weblink: WebLinkItem }) => {
   const {
@@ -23,7 +23,7 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
     originPageUrl,
     indexStatus,
   } = props?.weblink || {};
-  const urlItem = safeParseURL(url || '');
+  const origin = safeParseURL(url || '');
   console.log('weblink rerender');
 
   const { t, i18n } = useTranslation();
@@ -49,11 +49,7 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
         <div className="conv-item-footer">
           <div className="page-link">
             <a rel="noreferrer" href={originPageUrl} target="_blank">
-              <img
-                className="icon"
-                src={`https://www.google.com/s2/favicons?domain=${urlItem.origin}&sz=${16}`}
-                alt=""
-              />
+              <img className="icon" src={`https://www.google.com/s2/favicons?domain=${origin}&sz=${16}`} alt="" />
               <span className="text">{originPageTitle}</span>
               {indexStatus === 'finish' ? (
                 <Tag color="green">{t('loggedHomePage.homePage.weblinkList.item.read')}</Tag>
@@ -99,11 +95,11 @@ const PreviosWebsiteList = forwardRef(() => {
     webLinkStore.updateCurrentPage((typeof currentPage === 'number' ? currentPage : extraState.currentPage) + 1);
     webLinkStore.updateIsRequest(true);
 
-    const res = await getWeblinkList({
+    const { data: res, error } = await client.listWeblinks({
       body: queryPayload,
     });
 
-    if (!res?.success) {
+    if (error || !res?.success) {
       message.error(t('loggedHomePage.homePage.weblinkList.list.fetchErr'));
       webLinkStore.updateIsRequest(false);
 

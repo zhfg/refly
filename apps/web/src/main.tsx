@@ -14,7 +14,7 @@ import * as Sentry from "@sentry/react"
 // 导入 i18n
 import "@refly/ai-workspace-common/i18n/config"
 import { Spin } from "@arco-design/web-react"
-import { getEnv } from "@refly/ai-workspace-common/utils/env"
+import { getEnv, setRuntime } from "@refly/ai-workspace-common/utils/env"
 
 Sentry.init({
   dsn: "https://a687291d5ba3a77b0fa559e6d197eac8@o4507205453414400.ingest.us.sentry.io/4507208398602240",
@@ -38,6 +38,8 @@ Sentry.init({
   replaysSessionSampleRate: 0.1, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
   replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
 })
+
+setRuntime("web")
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <Suspense fallback={<Spin style={{ margin: "200px auto" }} />}>

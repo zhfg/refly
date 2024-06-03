@@ -2,7 +2,7 @@ import { Button, Message as message, Breadcrumb } from '@arco-design/web-react';
 import { IconClockCircle, IconShareExternal } from '@arco-design/web-react/icon';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
-import { Digest, Feed } from '@refly-packages/ai-workspace-common/types';
+import { Digest, Feed } from '@refly/openapi-schema';
 
 interface HeaderProps {
   digest: Digest | Feed;

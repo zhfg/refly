@@ -117,8 +117,10 @@ model Conversation {
   convId          String?  @default("") @map("conv_id")
   /// 用户id
   userId          Int      @map("user_id")
-  /// 内容 id，指向 aigc_content 中的内容
+  /// 内容 id，指向 aigc_content 中的内容（已废弃）
   contentId       Int?     @map("content_id")
+  /// 内容 id
+  cid             String   @default("") @map("cid")
   /// 会话标题
   title           String   @map("title")
   /// 最后一条聊天记录

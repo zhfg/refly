@@ -1,22 +1,14 @@
 import classNames from 'classnames';
-import { Button, Input, Message as message, Space } from '@arco-design/web-react';
+import { Button, Input, Space } from '@arco-design/web-react';
 import { useEffect, useRef, useState } from 'react';
 import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
-import { useWeblinkStore } from '@refly-packages/ai-workspace-common/stores/weblink';
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 
 // types
-import { type Task, type Source, Thread, TASK_TYPE, LOCALE } from '@refly-packages/ai-workspace-common/types';
-// utils
-import { buildTask } from '@refly-packages/ai-workspace-common/utils/task';
-import { useResetState } from '@refly-packages/ai-workspace-common/hooks/use-reset-state';
-import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
-import { buildConversation } from '@refly-packages/ai-workspace-common/utils/conversation';
-import { useTaskStore } from '@refly-packages/ai-workspace-common/stores/task';
-import { useNavigate } from 'react-router-dom';
+import { LOCALE } from '@refly/constants';
+
 // request
-import createNewConversation from '@refly-packages/ai-workspace-common/requests/createNewConversation';
 import { IconLanguage, IconSend } from '@arco-design/web-react/icon';
 import { SearchTargetSelector } from '@refly-packages/ai-workspace-common/components/search-target-selector';
 // styles

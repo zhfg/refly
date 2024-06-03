@@ -2,16 +2,17 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Response } from 'express';
 
 import { Prisma, ChatMessage, User, Conversation } from '@prisma/client';
-import { PrismaService } from '../common/prisma.service';
-import { CreateChatMessageInput, CreateConversationParam } from './conversation.dto';
-
+import { LOCALE } from '@refly/constants';
 import {
-  QUICK_ACTION_TASK_PAYLOAD,
-  QUICK_ACTION_TYPE,
-  TASK_TYPE,
-  Task,
-  TaskResponse,
-} from './conversation.dto';
+  QuickActionTaskPayload,
+  CreateConversationRequest,
+  ChatTask,
+  ChatTaskResponse,
+  QuickActionType,
+} from '@refly/openapi-schema';
+
+import { PrismaService } from '../common/prisma.service';
+import { CreateChatMessageInput } from './conversation.dto';
 import { createLLMChatMessage } from '../llm/schema';
 import { LlmService } from '../llm/llm.service';
 import { WeblinkService } from '../weblink/weblink.service';
@@ -36,7 +37,7 @@ export class ConversationService {
 
   async createConversation(
     user: User,
-    param: CreateConversationParam,
+    param: CreateConversationRequest,
     convId?: string,
   ): Promise<Conversation> {
     const conversation = await this.prisma.conversation.create({
@@ -59,7 +60,7 @@ export class ConversationService {
       initMessages.push(
         {
           type: 'human',
-          content: getUserQuestion(QUICK_ACTION_TYPE.SUMMARY),
+          content: getUserQuestion('summary'),
           sources: '[]',
           userId: user.id,
           conversationId: conversation.id,
@@ -84,9 +85,9 @@ export class ConversationService {
 
     // If this conversation is based on generated content
     // then initialize conversation messages with this content
-    if (param.contentId) {
+    if (param.cid) {
       const content = await this.aigcService.getContent({
-        contentId: param.contentId,
+        cid: param.cid,
       });
       initMessages.push(
         {
@@ -183,8 +184,8 @@ export class ConversationService {
     });
   }
 
-  async chat(res: Response, user: User, task: Task) {
-    const { taskType, data = {}, conversation, dryRun } = task;
+  async chat(res: Response, user: User, conversation: Conversation, task: ChatTask) {
+    const { taskType, data = {}, dryRun } = task;
 
     const query = data?.question || '';
     const weblinkList = data?.filter?.weblinkList || [];
@@ -203,10 +204,10 @@ export class ConversationService {
       chatHistory = await this.getMessages(conversation?.id);
     }
 
-    let taskRes: TaskResponse;
-    if (taskType === TASK_TYPE.QUICK_ACTION) {
+    let taskRes: ChatTaskResponse;
+    if (taskType === 'quickAction') {
       taskRes = await this.handleQuickActionTask(res, user, task);
-    } else if (taskType === TASK_TYPE.SEARCH_ENHANCE_ASK) {
+    } else if (taskType === 'searchEnhanceAsk') {
       taskRes = await this.handleSearchEnhanceTask(res, task, chatHistory);
     } else {
       taskRes = await this.handleChatTask(res, user, task, chatHistory);
@@ -275,7 +276,7 @@ export class ConversationService {
             lastMessage: taskRes.answer,
             messageCount: chatHistory.length + 2,
           },
-          task?.locale,
+          task?.locale as LOCALE,
         ),
       ]);
     }
@@ -284,10 +285,10 @@ export class ConversationService {
   async handleChatTask(
     res: Response,
     user: User,
-    task: Task,
+    task: ChatTask,
     chatHistory: ChatMessage[],
-  ): Promise<TaskResponse> {
-    const locale = task.locale || (user.outputLocale as LOCALE) || LOCALE.EN;
+  ): Promise<ChatTaskResponse> {
+    const locale: LOCALE = (task.locale as LOCALE) || (user.outputLocale as LOCALE) || LOCALE.EN;
 
     const { data = {} } = task;
     const { filter = {} } = data;
@@ -363,11 +364,11 @@ export class ConversationService {
 
   async handleSearchEnhanceTask(
     res: Response,
-    task: Task,
+    task: ChatTask,
     chatHistory: ChatMessage[],
-  ): Promise<TaskResponse> {
+  ): Promise<ChatTaskResponse> {
     const query = task?.data?.question;
-    const locale = task?.locale || LOCALE.EN;
+    const locale = (task?.locale as LOCALE) || LOCALE.EN;
     const { stream, sources } = await this.llmService.searchEnhance(
       query,
       locale,
@@ -417,9 +418,13 @@ export class ConversationService {
     };
   }
 
-  async handleQuickActionTask(res: Response, user: User, task: Task): Promise<TaskResponse> {
-    const data = task?.data as QUICK_ACTION_TASK_PAYLOAD;
-    const locale = task?.locale || LOCALE.EN;
+  async handleQuickActionTask(
+    res: Response,
+    user: User,
+    task: ChatTask,
+  ): Promise<ChatTaskResponse> {
+    const data = task?.data as QuickActionTaskPayload;
+    const locale = (task?.locale as LOCALE) || LOCALE.EN;
 
     // first return sources，use unique tag for parse data
     // frontend return origin weblink meta
@@ -451,7 +456,7 @@ export class ConversationService {
     const docs = await this.weblinkService.readMultiWeblinks(weblinkList);
 
     let stream: IterableReadableStream<BaseMessageChunk>;
-    if (data?.actionType === QUICK_ACTION_TYPE.SUMMARY) {
+    if (data?.actionType === 'summary') {
       stream = await this.llmService.summary(data?.actionPrompt, locale, docs);
     }
 
@@ -488,7 +493,7 @@ export class ConversationService {
     };
 
     // 异步更新 weblink summary
-    if (weblinkList.length === 1 && data?.actionType === QUICK_ACTION_TYPE.SUMMARY) {
+    if (weblinkList.length === 1 && data?.actionType === 'summary') {
       this.weblinkService.updateWeblinkSummary(weblinkList[0].metadata.source, taskRes);
     }
 
@@ -496,9 +501,9 @@ export class ConversationService {
   }
 }
 
-const getUserQuestion = (actionType: QUICK_ACTION_TYPE) => {
+const getUserQuestion = (actionType: QuickActionType) => {
   switch (actionType) {
-    case QUICK_ACTION_TYPE.SUMMARY: {
+    case 'summary': {
       return '总结网页'; // TODO: 国际化
     }
   }

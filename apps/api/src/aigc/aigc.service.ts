@@ -1,14 +1,12 @@
 import { Logger, Injectable } from '@nestjs/common';
 import { Document } from '@langchain/core/documents';
-import { omit } from 'lodash';
+import { ListDigestRequest, ContentMeta, SourceMeta } from '@refly/openapi-schema';
 
 import { LlmService } from '../llm/llm.service';
 import { PrismaService } from '../common/prisma.service';
 import { AigcContent, User, UserWeblink, Weblink } from '@prisma/client';
-import { ContentMeta } from '../llm/dto';
-import { DigestFilter } from './aigc.dto';
 import { categoryList } from '../prompts/utils/category';
-import { PageMeta } from '../types/weblink';
+import { omit } from '../utils';
 
 @Injectable()
 export class AigcService {
@@ -16,13 +14,8 @@ export class AigcService {
 
   constructor(private prisma: PrismaService, private llmService: LlmService) {}
 
-  async getDigestList(params: {
-    userId: string;
-    page?: number;
-    pageSize?: number;
-    filter: DigestFilter;
-  }) {
-    const { userId, page = 1, pageSize = 10, filter } = params;
+  async getDigestList(userId: string, req: ListDigestRequest) {
+    const { page = 1, pageSize = 10, filter } = req;
     const cond: any = { userId };
     if (filter?.date) {
       const { year, month, day } = filter.date;
@@ -65,10 +58,9 @@ export class AigcService {
     });
   }
 
-  async getContent(params: { contentId: number }) {
-    const { contentId } = params;
-    const content = await this.prisma.aigcContent.findUnique({
-      where: { id: contentId },
+  async getContent(params: { cid: string }) {
+    const content = await this.prisma.aigcContent.findFirst({
+      where: params,
     });
 
     let inputs: AigcContent[];
@@ -131,7 +123,7 @@ export class AigcService {
           topicKey: meta.topics[0].key,
           content: {
             create: {
-              ...omit(content, 'id', 'sources'),
+              ...omit(content, ['id', 'sources']),
               sourceType: 'digest',
               inputIds: [content.id],
             } as AigcContent,
@@ -202,7 +194,7 @@ export class AigcService {
    * @param doc
    * @returns
    */
-  async runContentFlow(param: { doc: Document<PageMeta>; uwb: UserWeblink; weblink: Weblink }) {
+  async runContentFlow(param: { doc: Document<SourceMeta>; uwb: UserWeblink; weblink: Weblink }) {
     const { doc, uwb, weblink } = param;
     const meta = JSON.parse(weblink.contentMeta || '{}');
 

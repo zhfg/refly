@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension';
 
-import type { Feed } from '@refly-packages/ai-workspace-common/types';
+import { Feed } from '@refly/openapi-schema';
 
 interface FeedState {
   feedList: Feed[];

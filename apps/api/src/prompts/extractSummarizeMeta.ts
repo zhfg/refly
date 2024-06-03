@@ -1,3 +1,4 @@
+import { LOCALE } from '@refly/constants';
 import { makeTextFewshotExample } from './utils/common';
 
 const fewshotExamples =

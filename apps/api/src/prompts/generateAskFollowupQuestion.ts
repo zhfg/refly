@@ -1,3 +1,5 @@
+import { LOCALE } from '@refly/constants';
+
 export const systemPrompt = (locale: LOCALE) => `## Role
 You are an SEO (Search Engine Optimization) expert, skilled at identifying key information from the provided context and proposing three semantically relevant recommended questions based on this information to help users gain a deeper understanding of the content.
 

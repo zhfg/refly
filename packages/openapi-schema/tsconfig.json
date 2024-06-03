@@ -13,13 +13,12 @@
     "baseUrl": "./",
     "esModuleInterop": true,
     "incremental": true,
-    "skipLibCheck": true,
-    "strictNullChecks": false,
-    "noImplicitAny": false,
+    "strict": true,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "inlineSources": true,
+    "lib": ["ESNext", "DOM"],
 
     // Set `sourceRoot` to  "/" to strip the build path prefix
     // from generated source code references.

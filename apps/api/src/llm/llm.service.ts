@@ -9,6 +9,7 @@ import { createStuffDocumentsChain } from 'langchain/chains/combine_documents';
 import { JsonOutputFunctionsParser } from 'langchain/output_parsers';
 
 import { LOCALE } from '@refly/constants';
+import { RetrieveFilter, SourceMeta } from '@refly/openapi-schema';
 import { AigcContent, User } from '@prisma/client';
 import {
   qa,
@@ -24,14 +25,12 @@ import {
 import { LLMChatMessage } from './schema';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 
-import { ContentMeta } from '@refly/schema';
-// import { ContentMeta } from './dto';
+import { ContentMeta } from './llm.dto';
 import { categoryList } from '../prompts/utils/category';
-import { PageMeta, Source } from '../types/weblink';
+import { Source } from '../types/weblink';
 import { SearchResultContext } from '../types/search';
 import { RAGService } from '../rag/rag.service';
 import { ContentPayload } from '../rag/rag.dto';
-import { RetrieveFilter } from 'src/conversation/conversation.dto';
 
 @Injectable()
 export class LlmService implements OnModuleInit {
@@ -385,7 +384,7 @@ export class LlmService implements OnModuleInit {
     user: User,
     query: string,
     filter?: RetrieveFilter,
-  ): Promise<Document<PageMeta>[]> {
+  ): Promise<Document<SourceMeta>[]> {
     this.logger.log(
       `[getRetrievalDocs] uid: ${user.uid}, query: ${query}, filter: ${JSON.stringify(filter)}`,
     );
@@ -503,7 +502,7 @@ export class LlmService implements OnModuleInit {
 
     // 构建总结的 Prompt，将 question + chatHistory 总结成
     const contextualizeQPrompt = ChatPromptTemplate.fromMessages([
-      ['system', contextualizeQA.systemPrompt(locale)],
+      ['system', contextualizeQA.systemPrompt(locale as LOCALE)],
       new MessagesPlaceholder('chatHistory'),
       ['human', `The user's question is {question}, please output answer in ${locale} language:`],
     ]);

@@ -15,10 +15,12 @@ import { getClientOrigin, safeParseURL } from '@refly-packages/ai-workspace-comm
 import { useEffect, useState } from 'react';
 import { EmptyDigestStatus } from '@refly-packages/ai-workspace-common/components/empty-digest-today-status';
 // utils
-import getKnowledgeBaseList from '@refly-packages/ai-workspace-common/requests/getKnowledgeBaseList';
+import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // styles
 import './index.scss';
-import { CollectionListItem, LOCALE, Source } from '@refly-packages/ai-workspace-common/types';
+import { Source } from '@refly-packages/ai-workspace-common/types';
+import { LOCALE } from '@refly/constants';
+import { CollectionListItem } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import classNames from 'classnames';
@@ -63,20 +65,21 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
         return;
       }
 
-      const newRes = await getKnowledgeBaseList({
-        body: {
+      const newRes = await client.listCollections({
+        query: {
           // TODO: confirm time filter
           page: currentPage,
           pageSize: knowledgeBaseStore.pageSize,
         },
       });
 
-      if (!newRes?.success) {
-        throw new Error(newRes?.errMsg);
+      if (newRes.error || !newRes?.data?.success) {
+        throw new Error(newRes?.data?.errMsg);
       }
 
       console.log('newRes', newRes);
-      newData = knowledgeBaseStore.knowledgeBaseList.concat(newRes?.data || []);
+      const data = newRes.data;
+      newData = knowledgeBaseStore.knowledgeBaseList.concat(data?.data || []);
       knowledgeBaseStore.updateKnowledgeBaseList(newData);
     } catch (err) {
       message.error(t('knowledgeLibrary.archive.list.fetchErr'));

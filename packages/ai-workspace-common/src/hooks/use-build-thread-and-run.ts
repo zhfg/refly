@@ -25,7 +25,7 @@ import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-
 import { buildTask } from '@refly-packages/ai-workspace-common/utils/task';
 import { useWeblinkStore } from '@refly-packages/ai-workspace-common/stores/weblink';
 // request
-import createNewConversation from '@refly-packages/ai-workspace-common/requests/createNewConversation';
+import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useTranslation } from 'react-i18next';
 import { OutputLocale } from '@refly-packages/ai-workspace-common/utils/i18n';
@@ -89,11 +89,11 @@ export const useBuildThreadAndRun = () => {
     const newConversationPayload = buildConversation();
 
     // 创建新会话
-    const res = await createNewConversation({
+    const { data: res, error } = await client.createConversation({
       body: { ...newConversationPayload, locale: localSettings.outputLocale },
     });
 
-    if (!res?.success) {
+    if (error || !res?.success) {
       message.error({
         content: t('hooks.useBuildThreadAndRun.status.createFailed'),
       });

@@ -63,7 +63,9 @@
     "zustand": "^4.5.1",
     "@refly/constants": "workspace:*",
     "@refly/schema": "workspace:*",
-    "vite-tsconfig-paths": "~4.3.2"
+    "@refly/openapi-schema": "workspace:*",
+    "vite-tsconfig-paths": "~4.3.2",
+    "@hey-api/client-fetch": "~0.1.3"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",

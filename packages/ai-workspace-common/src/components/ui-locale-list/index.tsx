@@ -2,9 +2,9 @@ import { useTranslation } from 'react-i18next';
 import { Dropdown, Menu, Message as message } from '@arco-design/web-react';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { safeParseJSON, safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/parse';
-import { LOCALE } from '@refly-packages/ai-workspace-common/types';
+import { LOCALE } from '@refly/constants';
 // request
-import putUserInfo from '@refly-packages/ai-workspace-common/requests/putUserInfo';
+import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // styles
 import './index.scss';
 
@@ -27,11 +27,11 @@ export const UILocaleList = (props: { children: any }) => {
 
     // 不阻塞写回用户配置
     if (notShowLoginBtn) {
-      const res = await putUserInfo({
+      const { data: res, error } = await client.updateSettings({
         body: { uiLocale: lng, outputLocale: localSettings.outputLocale },
       });
 
-      if (!res.success) {
+      if (error || !res.success) {
         message.error(t('settings.action.putErrorNotify'));
       }
     }
