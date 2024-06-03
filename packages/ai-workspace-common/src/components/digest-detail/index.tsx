@@ -68,7 +68,7 @@ export const DigestTail = () => {
     }
   }, []);
 
-  const sessions = buildSessionsFromDigest(digestDetailStore?.digest as Digest);
+  const sessions = buildSessionsFromDigest(digestDetailStore?.digest);
 
   return (
     <div
@@ -85,7 +85,7 @@ export const DigestTail = () => {
         </title>
         <meta name="description" content={digestDetailStore.digest?.abstract} />
       </Helmet>
-      <Header digest={digestDetailStore?.digest as Digest} />
+      <Header digest={digestDetailStore?.digest} />
       {isFetching ? (
         <div style={{ maxWidth: '748px', width: '748px', margin: '20px auto' }}>
           <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
@@ -100,7 +100,7 @@ export const DigestTail = () => {
         <AskFollowUpModal
           visible={askFollowUpVisible}
           setVisible={(visible) => setAskFollowUpVisible(visible)}
-          aigcContent={digestDetailStore?.digest as Digest}
+          aigcContent={digestDetailStore?.digest}
         />
       ) : null}
     </div>

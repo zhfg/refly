@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension';
-import type { Conversation, Task } from '@refly-packages/ai-workspace-common/types';
+import { Conversation, ChatTask as Task } from '@refly/openapi-schema';
 import { ConversationOperation } from '@refly-packages/ai-workspace-common/types';
 
 interface TaskState {
@@ -36,8 +36,8 @@ export const useTaskStore = create<TaskState>()(
               title: title ?? '新会话',
               origin,
               originPageTitle,
-              createdAt: new Date().getTime() as number,
-              updatedAt: new Date().getTime() as number,
+              createdAt: new Date().toJSON(),
+              updatedAt: new Date().toJSON(),
               readEnhanceArticle: null,
               readEnhanceIndexStatus: null,
             } as Conversation;

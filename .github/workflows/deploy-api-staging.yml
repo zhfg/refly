@@ -1,11 +1,11 @@
 name: Deploy API To Staging
 
 on:
-  push:
-    branches-ignore:
-      - release
-    paths:
-      - 'apps/api/**'
+  # push:
+  #   branches-ignore:
+  #     - release
+  #   paths:
+  #     - 'apps/api/**'
   workflow_dispatch:
 
 jobs:

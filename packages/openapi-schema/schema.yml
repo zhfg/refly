@@ -549,6 +549,22 @@ paths:
                 $ref: '#/components/schemas/BaseResponse'
       security:
         - api_key: []
+  /user/topics:
+    get:
+      tags:
+        - user
+      summary: Get user topics
+      description: Return topics for current user
+      operationId: getUserTopics
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserTopicsResponse'
+      security:
+        - api_key: []
 components:
   schemas:
     WeblinkMeta:
@@ -766,7 +782,6 @@ components:
         - msgId
         - type
         - content
-        - createdAt
       properties:
         msgId:
           type: string
@@ -800,7 +815,7 @@ components:
           type: string
           format: date-time
           description: Message update time
-    ConversationListItem:
+    Conversation:
       type: object
       description: Conversation list item
       properties:
@@ -824,6 +839,10 @@ components:
           type: string
           description: Related content ID
           example: c-g30e1b80b5g1itbemc0g5jj3
+        locale:
+          description: Conversation locale
+          type: string
+          example: en
         origin:
           type: string
           description: Origin page host
@@ -844,16 +863,11 @@ components:
           type: string
           format: date-time
           description: Conversation creation time
-    ConversationDetail:
-      allOf:
-        - $ref: '#/components/schemas/ConversationListItem'
-        - type: object
-          properties:
-            messages:
-              type: array
-              description: Conversation messages
-              items:
-                $ref: '#/components/schemas/ChatMessage'
+        messages:
+          type: array
+          description: Conversation messages (only returned for getConversationDetail api)
+          items:
+            $ref: '#/components/schemas/ChatMessage'
     ChatTaskType:
       type: string
       description: Chat task type
@@ -1080,11 +1094,16 @@ components:
       type: object
       required:
         - cid
+        - contentId
         - title
         - createdAt
         - updatedAt
       properties:
         cid:
+          type: string
+          description: Content ID
+          example: c-g30e1b80b5g1itbemc0g5jj3
+        contentId:
           type: string
           description: Content ID
           example: c-g30e1b80b5g1itbemc0g5jj3
@@ -1156,11 +1175,14 @@ components:
               type: string
               description: Content
               example: The actual content
-            source:
+            sources:
+              type: string
+              description: Content source list (JSON)
+            inputs:
               type: array
-              description: Content source list
+              description: Content input list
               items:
-                $ref: '#/components/schemas/Source'
+                $ref: '#/components/schemas/ContentDetail'
             meta:
               description: Content metadata
               $ref: '#/components/schemas/ContentMeta'
@@ -1228,6 +1250,75 @@ components:
           type: string
           description: User output locale
           example: en
+    TopicMeta:
+      type: object
+      properties:
+        topicId:
+          type: string
+          description: Topic ID
+          example: t-g30e1b80b5g1itbemc0g5jj3
+        key:
+          type: string
+          description: Topic key
+          example: startup_product_research
+        name:
+          type: string
+          description: Topic name
+        description:
+          type: string
+          description: Topic description
+        createdAt:
+          type: string
+          format: date-time
+          description: Topic creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Topic update time
+    Topic:
+      type: object
+      required:
+        - score
+        - topicKey
+        - topic
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: number
+          description: Topic ID
+          deprecated: true
+        score:
+          type: number
+          description: Topic score
+        topicKey:
+          type: string
+          description: Topic key
+        topic:
+          description: Topic meta
+          $ref: '#/components/schemas/TopicMeta'
+        createdAt:
+          type: string
+          format: date-time
+          description: Topic creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Topic update time
+    UserTopics:
+      type: object
+      required:
+        - topics
+        - total
+      properties:
+        list:
+          type: array
+          description: Topic list
+          items:
+            $ref: '#/components/schemas/Topic'
+        total:
+          type: number
+          description: Total count of topics
     BaseResponse:
       type: object
       required:
@@ -1407,7 +1498,7 @@ components:
             data:
               type: object
               description: Created conversation
-              $ref: '#/components/schemas/ConversationListItem'
+              $ref: '#/components/schemas/Conversation'
     ListConversationResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -1417,7 +1508,7 @@ components:
               type: array
               description: Conversation list
               items:
-                $ref: '#/components/schemas/ConversationListItem'
+                $ref: '#/components/schemas/Conversation'
     ChatRequest:
       type: object
       properties:
@@ -1432,7 +1523,7 @@ components:
             data:
               type: object
               description: Conversation data
-              $ref: '#/components/schemas/ConversationDetail'
+              $ref: '#/components/schemas/Conversation'
     PingWeblinkResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -1472,8 +1563,6 @@ components:
                 $ref: '#/components/schemas/Feed'
     ListDigestRequest:
       type: object
-      required:
-        - filter
       properties:
         page:
           type: number
@@ -1542,6 +1631,14 @@ components:
               type: object
               description: User settings data
               $ref: '#/components/schemas/UserSettings'
+    GetUserTopicsResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              description: User topics
+              $ref: '#/components/schemas/UserTopics'
   securitySchemes:
     api_key:
       type: apiKey

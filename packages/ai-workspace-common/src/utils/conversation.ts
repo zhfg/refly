@@ -1,4 +1,4 @@
-import { Conversation } from '@refly-packages/ai-workspace-common/types';
+import { Conversation } from '@refly/openapi-schema';
 import { genConvID } from './id';
 
 export type BuildConversation = {

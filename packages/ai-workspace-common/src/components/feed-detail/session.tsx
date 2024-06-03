@@ -38,17 +38,17 @@ export const Session = (props: SessionProps) => {
 
     // 目前先暂时显示 fake 数据
     return selectedSummarySource?.pageContent;
-    const res = await getSourceSummary({
-      body: {
-        sourceId: id,
-      },
-    });
+    // const res = await getSourceSummary({
+    //   body: {
+    //     sourceId: id,
+    //   },
+    // });
 
-    if (!res?.success) {
-      throw new Error('获取总结详情失败');
-    }
+    // if (!res?.success) {
+    //   throw new Error('获取总结详情失败');
+    // }
 
-    return res?.data;
+    // return res?.data;
   };
   //   const fetchData = currentPage => {}
 

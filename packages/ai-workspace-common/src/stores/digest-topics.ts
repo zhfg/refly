@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension';
 
-import type { Topic } from '@refly-packages/ai-workspace-common/types';
+import { Topic } from '@refly/openapi-schema';
 import { fakeTopics } from '@refly-packages/ai-workspace-common/fake-data/digest';
 
 interface TopicState {

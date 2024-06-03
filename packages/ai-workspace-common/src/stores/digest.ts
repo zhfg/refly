@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension';
-import type { Digest, MetaRecord } from '@refly-packages/ai-workspace-common/types';
+import type { Digest, ContentMetaRecord } from '@refly/openapi-schema';
 import { fakeDigestList } from '@refly-packages/ai-workspace-common/fake-data/digest';
 
 interface DigestPayload {
@@ -27,7 +27,7 @@ interface DigestState {
   lastYear: DigestPayload; // 只获取一页
 
   updatePayload: (newPayload: DigestPayload, type: DigestType) => void;
-  updateTopics: (newTopics: MetaRecord[]) => void;
+  updateTopics: (newTopics: ContentMetaRecord[]) => void;
   resetState: () => void;
 }
 
@@ -59,7 +59,7 @@ export const useDigestStore = create<DigestState>()(
           [type]: { ...state?.[type], ...newPayload },
         };
       }),
-    updateTopics: (newTopics: MetaRecord[]) =>
+    updateTopics: (newTopics: ContentMetaRecord[]) =>
       set((state) => {
         return { ...state, topics: newTopics };
       }),

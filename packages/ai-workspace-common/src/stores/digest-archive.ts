@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension';
 
-import type { Digest } from '@refly-packages/ai-workspace-common/types';
+import { Digest } from '@refly/openapi-schema';
 
 // digest archive 和其他 digest 类似在早期
 interface DigestArchiveState {

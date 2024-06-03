@@ -1,6 +1,9 @@
 import { OutputLocale } from '@refly-packages/ai-workspace-common/utils/i18n';
 import type { Message, ServerMessage } from './message';
 
+/**
+ * @deprecated
+ */
 export type Conversation = {
   convId: string;
   items?: Message[];
