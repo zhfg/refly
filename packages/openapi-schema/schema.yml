@@ -782,7 +782,6 @@ components:
         - msgId
         - type
         - content
-        - createdAt
       properties:
         msgId:
           type: string
@@ -816,7 +815,7 @@ components:
           type: string
           format: date-time
           description: Message update time
-    ConversationListItem:
+    Conversation:
       type: object
       description: Conversation list item
       properties:
@@ -840,6 +839,10 @@ components:
           type: string
           description: Related content ID
           example: c-g30e1b80b5g1itbemc0g5jj3
+        locale:
+          description: Conversation locale
+          type: string
+          example: en
         origin:
           type: string
           description: Origin page host
@@ -860,16 +863,11 @@ components:
           type: string
           format: date-time
           description: Conversation creation time
-    ConversationDetail:
-      allOf:
-        - $ref: '#/components/schemas/ConversationListItem'
-        - type: object
-          properties:
-            messages:
-              type: array
-              description: Conversation messages
-              items:
-                $ref: '#/components/schemas/ChatMessage'
+        messages:
+          type: array
+          description: Conversation messages (only returned for getConversationDetail api)
+          items:
+            $ref: '#/components/schemas/ChatMessage'
     ChatTaskType:
       type: string
       description: Chat task type
@@ -1096,11 +1094,16 @@ components:
       type: object
       required:
         - cid
+        - contentId
         - title
         - createdAt
         - updatedAt
       properties:
         cid:
+          type: string
+          description: Content ID
+          example: c-g30e1b80b5g1itbemc0g5jj3
+        contentId:
           type: string
           description: Content ID
           example: c-g30e1b80b5g1itbemc0g5jj3
@@ -1172,11 +1175,14 @@ components:
               type: string
               description: Content
               example: The actual content
-            source:
+            sources:
+              type: string
+              description: Content source list (JSON)
+            inputs:
               type: array
-              description: Content source list
+              description: Content input list
               items:
-                $ref: '#/components/schemas/Source'
+                $ref: '#/components/schemas/ContentDetail'
             meta:
               description: Content metadata
               $ref: '#/components/schemas/ContentMeta'
@@ -1278,6 +1284,10 @@ components:
         - createdAt
         - updatedAt
       properties:
+        id:
+          type: number
+          description: Topic ID
+          deprecated: true
         score:
           type: number
           description: Topic score
@@ -1488,7 +1498,7 @@ components:
             data:
               type: object
               description: Created conversation
-              $ref: '#/components/schemas/ConversationListItem'
+              $ref: '#/components/schemas/Conversation'
     ListConversationResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -1498,7 +1508,7 @@ components:
               type: array
               description: Conversation list
               items:
-                $ref: '#/components/schemas/ConversationListItem'
+                $ref: '#/components/schemas/Conversation'
     ChatRequest:
       type: object
       properties:
@@ -1513,7 +1523,7 @@ components:
             data:
               type: object
               description: Conversation data
-              $ref: '#/components/schemas/ConversationDetail'
+              $ref: '#/components/schemas/Conversation'
     PingWeblinkResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -1553,8 +1563,6 @@ components:
                 $ref: '#/components/schemas/Feed'
     ListDigestRequest:
       type: object
-      required:
-        - filter
       properties:
         page:
           type: number

@@ -1,11 +1,12 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension';
-import type { Message, SessionItem } from '@refly-packages/ai-workspace-common/types';
+import type { SessionItem } from '@refly-packages/ai-workspace-common/types';
+import { ChatMessage } from '@refly/openapi-schema';
 
 export interface ChatState {
   // state
-  messages: Message[];
+  messages: ChatMessage[];
   sessions: SessionItem[];
   newQAText: string;
   isGenTitle: boolean;
@@ -13,7 +14,7 @@ export interface ChatState {
   isAskFollowUpNewConversation: boolean;
 
   // method
-  setMessages: (val: Message[]) => void;
+  setMessages: (val: ChatMessage[]) => void;
   setIsGenTitle: (val: boolean) => void;
   setNewQAText: (val: string) => void;
   resetState: () => void;
@@ -35,7 +36,7 @@ export const useChatStore = create<ChatState>()(
   devtools((set) => ({
     ...defaultState,
 
-    setMessages: (val: Message[]) => set((state) => ({ ...state, messages: val })),
+    setMessages: (val: ChatMessage[]) => set((state) => ({ ...state, messages: val })),
     setSessions: (val: SessionItem[]) => set({ sessions: val }),
     setIsGenTitle: (val: boolean) => set({ isGenTitle: val }),
     setNewQAText: (val: string) => {

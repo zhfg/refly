@@ -2,11 +2,12 @@ import { Button, Message as message, Breadcrumb } from '@arco-design/web-react';
 import { IconClockCircle, IconShareExternal } from '@arco-design/web-react/icon';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
-import { Digest, Feed, LOCALE } from '@refly-packages/ai-workspace-common/types';
+import { LOCALE } from '@refly/constants';
 import { useTranslation } from 'react-i18next';
+import { ContentDetail } from '@refly/openapi-schema';
 
 interface HeaderProps {
-  digest: Digest | Feed;
+  digest: ContentDetail;
 }
 
 const BreadcrumbItem = Breadcrumb.Item;

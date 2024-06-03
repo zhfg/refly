@@ -1,4 +1,4 @@
-import { ResourceDetail, Source } from '@refly-packages/ai-workspace-common/types';
+import { ResourceDetail, Source } from '@refly/openapi-schema';
 
 export const mapSourceToResource = (sources: Source[]): Partial<ResourceDetail>[] => {
   return sources?.map((item) => ({

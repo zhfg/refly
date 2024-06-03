@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension';
 
-import type { Digest, MetaRecord as Topic } from '@refly-packages/ai-workspace-common/types';
+import type { Digest, ContentMetaRecord as Topic } from '@refly/openapi-schema';
 
 /**
  * 承载着 topic detail 以及此 topic 下所有的 digest list

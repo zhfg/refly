@@ -1,7 +1,8 @@
 import { Button, Spin } from '@arco-design/web-react';
 import React from 'react';
 
-import type { Message, RecommendQuestionItem } from '@refly-packages/ai-workspace-common/types';
+import { ChatMessage } from '@refly/openapi-schema';
+import type { RecommendQuestionItem } from '@refly-packages/ai-workspace-common/types';
 
 import { Markdown } from '../markdown';
 
@@ -12,30 +13,30 @@ export const ExampleQuestionItem = (msg: RecommendQuestionItem) => (
   </>
 );
 
-export const ReplyMessage = (msg: Message) => (
+export const ReplyMessage = (msg: ChatMessage) => (
   <div className="message-item">
     <p>
-      <Markdown content={msg?.data?.content} />
+      <Markdown content={msg?.content} />
     </p>
   </div>
 );
 
-export const QuestionMessage = (msg: Message) => (
+export const QuestionMessage = (msg: ChatMessage) => (
   <div className="message-item">
-    <p>{msg?.data?.content}</p>
+    <p>{msg?.content}</p>
   </div>
 );
 
-export const IntentMessage = (msg: Message) => (
+export const IntentMessage = (msg: ChatMessage) => (
   <div className="message-item">
     <p className="chat-intent-title">您选择的文本</p>
-    <p>{msg?.data?.content}</p>
+    <p>{msg?.content}</p>
   </div>
 );
 
-export const ErrorMessage = (msg: Message) => (
+export const ErrorMessage = (msg: ChatMessage) => (
   <div className="message-item">
-    <p>{msg?.data?.content}</p>
+    <p>{msg?.content}</p>
   </div>
 );
 
@@ -47,9 +48,9 @@ export const LoadingMessage = () => (
   </div>
 );
 
-export const UnSupportedMessage = (msg: Message) => (
+export const UnSupportedMessage = (msg: ChatMessage) => (
   <div className="message-item">
-    <p>{msg?.data?.content}</p>
+    <p>{msg?.content}</p>
   </div>
 );
 

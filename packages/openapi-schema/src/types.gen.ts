@@ -234,7 +234,7 @@ export type ChatMessage = {
   /**
    * Message creation time
    */
-  createdAt: string;
+  createdAt?: string;
   /**
    * Message update time
    */
@@ -244,7 +244,7 @@ export type ChatMessage = {
 /**
  * Conversation list item
  */
-export type ConversationListItem = {
+export type Conversation = {
   /**
    * Conversation ID
    */
@@ -266,6 +266,10 @@ export type ConversationListItem = {
    */
   cid?: string;
   /**
+   * Conversation locale
+   */
+  locale?: string;
+  /**
    * Origin page host
    */
   origin?: string;
@@ -285,11 +289,8 @@ export type ConversationListItem = {
    * Conversation creation time
    */
   updatedAt?: string;
-};
-
-export type ConversationDetail = ConversationListItem & {
   /**
-   * Conversation messages
+   * Conversation messages (only returned for getConversationDetail api)
    */
   messages?: Array<ChatMessage>;
 };
@@ -523,6 +524,10 @@ export type Content = {
    */
   cid: string;
   /**
+   * Content ID
+   */
+  contentId: string;
+  /**
    * Content title
    */
   title: string;
@@ -584,9 +589,13 @@ export type ContentDetail = Content & {
    */
   content?: string;
   /**
-   * Content source list
+   * Content source list (JSON)
    */
-  source?: Array<Source>;
+  sources?: string;
+  /**
+   * Content input list
+   */
+  inputs?: Array<ContentDetail>;
   /**
    * Content metadata
    */
@@ -678,6 +687,11 @@ export type TopicMeta = {
 };
 
 export type Topic = {
+  /**
+   * Topic ID
+   * @deprecated
+   */
+  id?: number;
   /**
    * Topic score
    */
@@ -865,14 +879,14 @@ export type CreateConversationResponse = BaseResponse & {
   /**
    * Created conversation
    */
-  data?: ConversationListItem;
+  data?: Conversation;
 };
 
 export type ListConversationResponse = BaseResponse & {
   /**
    * Conversation list
    */
-  data?: Array<ConversationListItem>;
+  data?: Array<Conversation>;
 };
 
 export type ChatRequest = {
@@ -886,7 +900,7 @@ export type GetConversationDetailResponse = BaseResponse & {
   /**
    * Conversation data
    */
-  data?: ConversationDetail;
+  data?: Conversation;
 };
 
 export type PingWeblinkResponse = BaseResponse & {
@@ -929,7 +943,7 @@ export type ListDigestRequest = {
   /**
    * Digest query filter
    */
-  filter: {
+  filter?: {
     /**
      * Date filter
      */

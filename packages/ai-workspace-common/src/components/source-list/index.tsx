@@ -1,4 +1,4 @@
-import { LOCALE, ResourceDetail, ResourceIndexStatus, Source } from '@refly-packages/ai-workspace-common/types';
+import { ResourceDetail, Source } from '@refly/openapi-schema';
 import { safeParseURL } from '@refly-packages/ai-workspace-common/utils/url';
 import { List, Popover, Skeleton, Tag, Typography } from '@arco-design/web-react';
 import { useState } from 'react';
@@ -123,11 +123,11 @@ export const ResourceItem = (props: {
       <div className="knowledge-base-directory-title">{item.data?.title}</div>
       <div className="knowledge-base-directory-action">
         <div className="action-markdown-content knowledge-base-directory-action-item">
-          <IconBook
+          {/* <IconBook
             onClick={() => {
               navigate(`/knowledge-base?kbId=${item?.collectionId}&resId=${item?.resourceId}`);
             }}
-          />
+          /> */}
         </div>
         <div className="action-external-origin-website knowledge-base-directory-action-item">
           <IconCompass
@@ -149,7 +149,7 @@ export const ResourceItem = (props: {
 const SourceDetailContent = (props: { source: Source; index: number }) => {
   const { source, index } = props;
   const item: Partial<ResourceDetail> = {
-    collectionId: source?.metadata?.collectionId,
+    // collectionId: source?.metadata?.collectionId,
     resourceId: source?.metadata?.resourceId,
     data: {
       url: source?.metadata?.source || '',

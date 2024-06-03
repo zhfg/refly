@@ -21,7 +21,7 @@ import {
 } from "@arco-design/web-react/icon"
 import { useNavigate } from "react-router-dom"
 // types
-import type { Digest, DateType } from "@refly/ai-workspace-common/types/digest"
+import type { Digest } from "@refly/ai-workspace-common/types/digest"
 import { IconTip } from "@refly/ai-workspace-common/components/dashboard/icon-tip"
 import { copyToClipboard } from "@refly/ai-workspace-common/utils"
 import {
@@ -35,11 +35,11 @@ import { DigestHeader } from "@refly/ai-workspace-common/components/digest-commo
 import { useEffect, useState } from "react"
 import { EmptyDigestStatus } from "@refly/ai-workspace-common/components/empty-digest-archive-status"
 // utils
-import getDigestList from "@refly/ai-workspace-common/requests/getDigestList"
+import client from "@refly/ai-workspace-common/requests/proxiedRequest"
 // styles
 import "./index.scss"
 import { useTranslation } from "react-i18next"
-import { LOCALE } from "@refly/ai-workspace-common/types"
+import { LOCALE } from "@refly/constants"
 
 export const DigestArchive = () => {
   const [searchParams] = useSearchParams()
@@ -78,13 +78,12 @@ export const DigestArchive = () => {
       }
 
       // TODO: digest 联调，currentTopicDetail?.key
-      const newRes = await getDigestList({
+      const { data: newRes, error } = await client.getDigestList({
         body: {
           page: currentPage,
           pageSize: 10,
           filter: {
             date: {
-              dateType: dateType as DateType,
               year: Number(year),
               month: Number(month),
               day: Number(day),
@@ -92,6 +91,10 @@ export const DigestArchive = () => {
           },
         },
       })
+
+      if (error) {
+        throw error
+      }
 
       digestArchiveStore.updateCurrentPage(currentPage)
 

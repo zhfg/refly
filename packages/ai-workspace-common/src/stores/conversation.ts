@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension';
-import { ConversationListItem as Conversation, CreateConversationRequest } from '@refly/openapi-schema';
+import { Conversation, CreateConversationRequest } from '@refly/openapi-schema';
 import { ConversationOperation } from '@refly-packages/ai-workspace-common/types';
 
 interface ConversationState {

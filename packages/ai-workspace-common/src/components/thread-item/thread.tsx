@@ -18,17 +18,15 @@ import { Header } from './header';
 import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // styles
 import './thread-item.scss';
-import { type Message, Thread as IThread, MessageItemType } from '@refly-packages/ai-workspace-common/types';
 import { useWeblinkStore } from '@refly-packages/ai-workspace-common/stores/weblink';
 import { useSearchStateStore, SearchTarget } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { safeParseJSON } from '@refly-packages/ai-workspace-common/utils/parse';
-import { buildTask } from '@refly-packages/ai-workspace-common/utils/task';
 import { Skeleton } from '@arco-design/web-react';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { EmptyDigestTopicDetailStatus } from '../empty-digest-topic-detail-status';
 import { useTranslation } from 'react-i18next';
 import { delay } from '@refly-packages/ai-workspace-common/utils/delay';
-import { ChatTaskType, Source } from '@refly/openapi-schema';
+import { ChatMessage as Message, ChatTaskType, Source } from '@refly/openapi-schema';
 
 export const Thread = () => {
   const { buildTaskAndGenReponse } = useBuildTask();
@@ -67,33 +65,7 @@ export const Thread = () => {
     // 设置会话和消息
     conversationStore.setCurrentConversation(res?.data);
 
-    // 转换消息格式
-    const messages: Message[] = (res?.data?.messages || [])?.map((item) => {
-      const {
-        content = '',
-        relatedQuestions = [],
-        sources,
-        type,
-        selectedWeblinkConfig = '', // 这里需要构建进来
-        ...extraInfo
-      } = item || {};
-
-      return {
-        ...extraInfo,
-        id: item.msgId,
-        itemId: item.msgId,
-        itemType: MessageItemType.REPLY, // TODO: confirm this
-        convId: res.data.convId,
-        data: {
-          content,
-          relatedQuestions,
-          sources,
-          type,
-          selectedWeblinkConfig,
-        },
-      };
-    });
-    chatStore.setMessages(messages);
+    chatStore.setMessages(res.data.messages);
     chatStore.setNewQAText(newQAText);
   };
 
@@ -136,9 +108,9 @@ export const Thread = () => {
     filter: Source[];
   } => {
     // 这里是获取第一个，早期简化策略，因为一开始设置之后，后续设置就保留
-    const lastHumanMessage = messages?.find((item) => item?.data?.type === 'human');
+    const lastHumanMessage = messages?.find((item) => item?.type === 'human');
 
-    return safeParseJSON(lastHumanMessage?.data?.selectedWeblinkConfig);
+    return safeParseJSON(lastHumanMessage?.selectedWeblinkConfig);
   };
 
   const handleThread = async (threadId: string) => {

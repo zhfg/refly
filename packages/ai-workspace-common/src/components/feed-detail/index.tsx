@@ -60,7 +60,7 @@ export const FeedDetail = () => {
     }
   }, []);
 
-  const sessions = buildSessionsFromFeed(digestDetailStore?.digest as Digest);
+  const sessions = buildSessionsFromFeed(digestDetailStore?.digest);
 
   return (
     <div
@@ -71,14 +71,14 @@ export const FeedDetail = () => {
         flexDirection: 'column',
       }}
     >
-      <Header digest={digestDetailStore?.digest as Digest} />
+      <Header digest={digestDetailStore?.digest} />
       <DigestDetailContent sessions={sessions} handleAskFollowUp={handleAskFollowUp} />
 
       {askFollowUpVisible ? (
         <AskFollowUpModal
           visible={askFollowUpVisible}
           setVisible={(visible) => setAskFollowUpVisible(visible)}
-          aigcContent={digestDetailStore?.digest as Digest}
+          aigcContent={digestDetailStore?.digest}
         />
       ) : null}
     </div>
