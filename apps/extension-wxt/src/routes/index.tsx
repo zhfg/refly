@@ -1,17 +1,15 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes } from 'react-router-dom';
+
+// 页面
+import KnowledgeBase from '@/pages/knowledge-base';
 
 // 自定义组件
-import { AICopilot } from "../components/copilot";
-import Home from "../components/home";
-import { Thread } from "../components/thread-item/thread";
-import { ThreadLibrary } from "../components/thread-library";
-import { Login } from "../components/login";
+import { Login } from '@/pages/login';
 
 export const Routing = () => (
   <Routes>
-    {/* <Route path="/" element={<Home />} /> */}
-    {/* <Route path="/login" element={<Login />} /> */}
-    {/* <Route path="/thread/:threadId" element={<Thread />} /> */}
-    {/* <Route path="/" element={<ThreadLibrary />} /> */}
+    <Route path="/" element={<KnowledgeBase />} />
+    <Route path="/knowledge-base" element={<KnowledgeBase />} />
+    <Route path="/login" element={<Login />} />
   </Routes>
 );

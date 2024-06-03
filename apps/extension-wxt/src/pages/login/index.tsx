@@ -1,20 +1,20 @@
-import { Button } from "@arco-design/web-react";
-import React, { useRef } from "react";
+import { Button } from '@arco-design/web-react';
+import React, { useRef } from 'react';
 
 // stores
-import { useUserStore } from "@/stores/user";
+import { useUserStore } from '@/stores/user';
 
 // 静态资源
-import Logo from "@/assets/logo.svg";
-import { getClientOrigin } from "@/utils/url";
-import { ChatHeader } from "@/components/home/header";
-import { useTranslation } from "react-i18next";
+import Logo from '@/assets/logo.svg';
+import { getClientOrigin } from '@/utils/url';
+import { ChatHeader } from '@/components/home/header';
+import { useTranslation } from 'react-i18next';
 // styles
-import "./index.scss";
+import './index.scss';
 
 export const Login = () => {
   const userStore = useUserStore();
-  const loginWindowRef = useRef<Window>();
+  const loginWindowRef = useRef<Window | null>();
   const { t } = useTranslation();
 
   /**
@@ -31,8 +31,8 @@ export const Login = () => {
     const top = (screen.height - 730) / 2;
     loginWindowRef.current = window.open(
       `${getClientOrigin()}/login?from=refly-extension-login`,
-      "_blank",
-      `location=no,toolbar=no,menubar=no,width=800,height=730,left=${left} / 2,top=${top} / 2`
+      '_blank',
+      `location=no,toolbar=no,menubar=no,width=800,height=730,left=${left} / 2,top=${top} / 2`,
     );
 
     userStore.setIsCheckingLoginStatus(true);
@@ -42,16 +42,13 @@ export const Login = () => {
     <div className="login-container">
       <ChatHeader onlyShowClose />
       <div className="login-brand">
-        <div
-          className="login-branch-content"
-          onClick={() => window.open(getClientOrigin(), "_blank")}
-        >
+        <div className="login-branch-content" onClick={() => window.open(getClientOrigin(), '_blank')}>
           <img src={Logo} alt="Refly" style={{ width: 38, height: 38 }} />
           <span
             style={{
               fontSize: 20,
-              fontWeight: "bold",
-              display: "inline-block",
+              fontWeight: 'bold',
+              display: 'inline-block',
               marginLeft: 8,
             }}
           >
@@ -64,9 +61,7 @@ export const Login = () => {
           style={{ width: 260, height: 44, marginTop: 32 }}
           loading={userStore.isCheckingLoginStatus}
         >
-          {userStore.isCheckingLoginStatus
-            ? t("loginPage.loggingStatus")
-            : t("loginPage.loginBtn")}
+          {userStore.isCheckingLoginStatus ? t('loginPage.loggingStatus') : t('loginPage.loginBtn')}
         </Button>
       </div>
     </div>

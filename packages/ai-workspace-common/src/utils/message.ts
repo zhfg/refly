@@ -2,7 +2,6 @@ import {
   Message,
   MessageDataType,
   MessageItemType,
-  MessageType,
   QuestionType,
   ReplyType,
   ServerMessage,
@@ -11,6 +10,7 @@ import {
 
 import { genUniqueId } from './index';
 import { safeParseJSON } from './parse';
+import { MessageType } from '@refly/schema';
 
 export const unsupportedMessage = '暂不支持的消息类型，请更新版本之后重试';
 export const errorMessage = 'AbortError: The user aborted a request.';
@@ -150,7 +150,7 @@ export const buildQuestionMessage = (data: BuildMessageData) => {
     convId,
     summary: content,
     data: {
-      type: MessageType.Human,
+      type: 'human' as MessageType,
       content,
       selectedWeblinkConfig,
       ...dataExtra,
@@ -180,7 +180,7 @@ export const buildReplyMessage = (data: BuildMessageData) => {
     itemType: MessageItemType.REPLY,
     summary: content,
     data: {
-      type: MessageType.Assistant,
+      type: 'ai' as MessageType,
       content,
       ...dataExtra,
     },
@@ -205,7 +205,7 @@ export const buildErrorMessage = (data: BuildMessageData) => {
     convId,
     summary: content,
     data: {
-      type: MessageType.Assistant,
+      type: 'ai' as MessageType,
       content,
     },
   };
@@ -270,12 +270,12 @@ export const buildQuestionMessageList = (data: BuildMessageListData) => {
 
 export const mapToServerMessage = (messages: Message[]): ServerMessage[] => {
   const newMessages = (messages || []).map((item) => {
-    if (item?.data?.type === MessageType?.Human) {
+    if (item?.data?.type === 'human') {
       const { data, ...rest } = item;
       return { ...rest, ...data };
     }
 
-    if (item?.data?.type === MessageType.Assistant) {
+    if (item?.data?.type === 'ai') {
       const { data, ...rest } = item;
       const { sources, relatedQuestions, ...dataExtra } = data || {};
       return {
