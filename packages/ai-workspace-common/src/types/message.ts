@@ -1,4 +1,4 @@
-import { ChatTaskType, MessageType, Source } from '@refly/openapi-schema';
+import { ChatMessage, ChatTaskType, MessageType, Source } from '@refly/openapi-schema';
 import type { RelatedQuestion } from './session';
 
 export type MessageState = {
@@ -7,7 +7,7 @@ export type MessageState = {
   pendingFirstToken?: boolean; // 是否正在准备生成，如果收到第一个字符，即代表已经开始生生成
   pending?: boolean;
   error?: boolean; // 此次信息是否出错，比如还没开始生成就 abort，显示错误信息
-  pendingReplyMsg?: Message | null; // 即将生成的 replyMsg 对象
+  pendingReplyMsg?: ChatMessage | null; // 即将生成的 replyMsg 对象
   history?: [string, string][];
   pendingSourceDocs?: Source[];
   pendingRelatedQuestions?: RelatedQuestion[];
@@ -63,6 +63,9 @@ export const enum QuestionType {
 //   question?: string
 // }
 
+/**
+ * @deprecated
+ */
 export type Message = {
   id?: string; // 服务端存消息
   itemType: MessageItemType;
@@ -85,6 +88,9 @@ export type Message = {
   }>;
 };
 
+/**
+ * @deprecated
+ */
 export type ServerMessage = {
   id?: string; // 服务端存消息
   itemType: MessageItemType;

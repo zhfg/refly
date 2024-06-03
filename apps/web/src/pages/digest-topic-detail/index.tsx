@@ -21,9 +21,10 @@ import { useNavigate, useParams } from "react-router-dom"
 // stores
 import { useDigestTopicDetailStore } from "@refly/ai-workspace-common/stores/digest-topic-detail"
 // types
-import { Digest, LOCALE } from "@refly/ai-workspace-common/types"
+import { LOCALE } from "@refly/constants"
+import { Digest } from "@refly/openapi-schema"
 // request
-import getDigestList from "@refly/ai-workspace-common/requests/getDigestList"
+import client from "@refly/ai-workspace-common/requests/proxiedRequest"
 import { IconTip } from "@refly/ai-workspace-common/components/dashboard/icon-tip"
 import { copyToClipboard } from "@refly/ai-workspace-common/utils"
 import {
@@ -82,13 +83,17 @@ export const DigestTopicDetail = () => {
       }
 
       // TODO: digest 联调，currentTopicDetail?.key
-      const newRes = await getDigestList({
+      const { data: newRes, error } = await client.getDigestList({
         body: {
           page: currentPage,
           pageSize: 10,
           filter: { topic: currentTopicDetail?.topicKey }, // 带着 topic 的 filter
         },
       })
+
+      if (error) {
+        throw error
+      }
 
       digestTopicDetailStore.updateCurrentPage(currentPage)
 
@@ -222,7 +227,7 @@ export const DigestTopicDetail = () => {
                     </span>
                   </IconTip>
                 </div>
-                <div className="feed-item-action" style={{ marginTop: 8 }}>
+                {/* <div className="feed-item-action" style={{ marginTop: 8 }}>
                   <span
                     className="feed-item-topic"
                     key={3}
@@ -256,13 +261,12 @@ export const DigestTopicDetail = () => {
                       style={{ fontSize: 14, color: "#64645F" }}
                     />
                     <span className="feed-list-item-text">
-                      {/* TODO: 国际化增加时需要额外处理 */}
                       {time(item.updatedAt, language as LOCALE)
                         .utc()
                         .fromNow()}
                     </span>
                   </span>
-                </div>
+                </div> */}
               </div>,
             ]}>
             <List.Item.Meta

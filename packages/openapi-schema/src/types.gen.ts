@@ -234,7 +234,7 @@ export type ChatMessage = {
   /**
    * Message creation time
    */
-  createdAt: string;
+  createdAt?: string;
   /**
    * Message update time
    */
@@ -244,7 +244,7 @@ export type ChatMessage = {
 /**
  * Conversation list item
  */
-export type ConversationListItem = {
+export type Conversation = {
   /**
    * Conversation ID
    */
@@ -266,6 +266,10 @@ export type ConversationListItem = {
    */
   cid?: string;
   /**
+   * Conversation locale
+   */
+  locale?: string;
+  /**
    * Origin page host
    */
   origin?: string;
@@ -285,11 +289,8 @@ export type ConversationListItem = {
    * Conversation creation time
    */
   updatedAt?: string;
-};
-
-export type ConversationDetail = ConversationListItem & {
   /**
-   * Conversation messages
+   * Conversation messages (only returned for getConversationDetail api)
    */
   messages?: Array<ChatMessage>;
 };
@@ -523,6 +524,10 @@ export type Content = {
    */
   cid: string;
   /**
+   * Content ID
+   */
+  contentId: string;
+  /**
    * Content title
    */
   title: string;
@@ -584,9 +589,13 @@ export type ContentDetail = Content & {
    */
   content?: string;
   /**
-   * Content source list
+   * Content source list (JSON)
    */
-  source?: Array<Source>;
+  sources?: string;
+  /**
+   * Content input list
+   */
+  inputs?: Array<ContentDetail>;
   /**
    * Content metadata
    */
@@ -648,6 +657,72 @@ export type UserSettings = {
    * User output locale
    */
   outputLocale?: string;
+};
+
+export type TopicMeta = {
+  /**
+   * Topic ID
+   */
+  topicId?: string;
+  /**
+   * Topic key
+   */
+  key?: string;
+  /**
+   * Topic name
+   */
+  name?: string;
+  /**
+   * Topic description
+   */
+  description?: string;
+  /**
+   * Topic creation time
+   */
+  createdAt?: string;
+  /**
+   * Topic update time
+   */
+  updatedAt?: string;
+};
+
+export type Topic = {
+  /**
+   * Topic ID
+   * @deprecated
+   */
+  id?: number;
+  /**
+   * Topic score
+   */
+  score: number;
+  /**
+   * Topic key
+   */
+  topicKey: string;
+  /**
+   * Topic meta
+   */
+  topic: TopicMeta;
+  /**
+   * Topic creation time
+   */
+  createdAt: string;
+  /**
+   * Topic update time
+   */
+  updatedAt: string;
+};
+
+export type UserTopics = {
+  /**
+   * Topic list
+   */
+  list?: Array<Topic>;
+  /**
+   * Total count of topics
+   */
+  total: number;
 };
 
 export type BaseResponse = {
@@ -804,14 +879,14 @@ export type CreateConversationResponse = BaseResponse & {
   /**
    * Created conversation
    */
-  data?: ConversationListItem;
+  data?: Conversation;
 };
 
 export type ListConversationResponse = BaseResponse & {
   /**
    * Conversation list
    */
-  data?: Array<ConversationListItem>;
+  data?: Array<Conversation>;
 };
 
 export type ChatRequest = {
@@ -825,7 +900,7 @@ export type GetConversationDetailResponse = BaseResponse & {
   /**
    * Conversation data
    */
-  data?: ConversationDetail;
+  data?: Conversation;
 };
 
 export type PingWeblinkResponse = BaseResponse & {
@@ -868,7 +943,7 @@ export type ListDigestRequest = {
   /**
    * Digest query filter
    */
-  filter: {
+  filter?: {
     /**
      * Date filter
      */
@@ -923,6 +998,13 @@ export type GetUserSettingsResponse = BaseResponse & {
    * User settings data
    */
   data?: UserSettings;
+};
+
+export type GetUserTopicsResponse = BaseResponse & {
+  /**
+   * User topics
+   */
+  data?: UserTopics;
 };
 
 export type ListResourcesData = {
@@ -1184,6 +1266,10 @@ export type UpdateSettingsResponse = BaseResponse;
 
 export type UpdateSettingsError = unknown;
 
+export type GetUserTopicsResponse2 = GetUserTopicsResponse;
+
+export type GetUserTopicsError = unknown;
+
 export type $OpenApiTs = {
   '/knowledge/resource/list': {
     get: {
@@ -1420,6 +1506,16 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': BaseResponse;
+      };
+    };
+  };
+  '/user/topics': {
+    get: {
+      res: {
+        /**
+         * successful operation
+         */
+        '200': GetUserTopicsResponse;
       };
     };
   };

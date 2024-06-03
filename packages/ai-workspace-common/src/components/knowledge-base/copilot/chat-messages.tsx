@@ -1,9 +1,7 @@
 // stores
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 // styles
-import { MessageType } from '@refly-packages/ai-workspace-common/types';
 import { AssistantMessage, HumanMessage, PendingMessage, WelcomeMessage } from './message';
-import { mapToServerMessage } from '@refly-packages/ai-workspace-common/utils/message';
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 
@@ -13,18 +11,17 @@ export const ChatMessages = () => {
   const { runTask } = useBuildThreadAndRun();
 
   console.log('chatStore.messages', chatStore.messages);
-  const mappedServerMessages = mapToServerMessage(chatStore.messages || []);
 
   return (
     <div className="ai-copilot-message-inner-container">
-      {mappedServerMessages?.map((item, index) =>
-        item?.type === MessageType.Human ? (
+      {chatStore.messages.map((item, index) =>
+        item?.type === 'human' ? (
           <HumanMessage message={item} key={index} />
         ) : (
           <AssistantMessage
             message={item}
             key={index}
-            isLastSession={index === mappedServerMessages?.length - 1}
+            isLastSession={index === chatStore.messages.length - 1}
             isPending={messageStateStore?.pending as boolean}
             handleAskFollowing={(question?: string) => {
               runTask(question);

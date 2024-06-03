@@ -8,21 +8,16 @@ import { useTaskStore } from '@refly-packages/ai-workspace-common/stores/task';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 // 类型
-import {
-  QUICK_ACTION_TYPE,
-  type QUICK_ACTION_TASK_PAYLOAD,
-  type Task,
-  type Source,
-  TASK_TYPE,
-  Conversation,
-  // LOCALE,
-  Message,
-  MessageType,
-} from '@refly-packages/ai-workspace-common/types';
 import { LOCALE } from '@refly/constants';
-import { ContentMeta } from '@refly/schema';
+import {
+  QuickActionTaskPayload,
+  ChatTask,
+  ContentMeta,
+  Source,
+  Conversation,
+  ChatMessage as Message,
+} from '@refly/openapi-schema';
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
-import { buildTask } from '@refly-packages/ai-workspace-common/utils/task';
 import { useWeblinkStore } from '@refly-packages/ai-workspace-common/stores/weblink';
 // request
 import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
@@ -79,7 +74,7 @@ export const useBuildThreadAndRun = () => {
     jumpNewConvQuery(newConv?.convId);
   };
 
-  const handleCreateNewConversation = async (task: Task) => {
+  const handleCreateNewConversation = async (task: ChatTask) => {
     /**
      * 1. 创建新 thread，设置状态
      * 2. 跳转到 thread 界面，进行第一个回复，展示 问题、sources、答案
@@ -107,10 +102,7 @@ export const useBuildThreadAndRun = () => {
     resetState();
 
     // 设置当前的任务类型及会话 id
-    task.data = {
-      ...(task?.data || {}),
-      convId: res?.data?.convId,
-    };
+    task.convId = res?.data?.convId;
     taskStore.setTask(task);
 
     // 更新新的 newQAText，for 新会话跳转使用
@@ -174,35 +166,35 @@ export const useBuildThreadAndRun = () => {
     }
 
     const conv = ensureConversationExist();
-    const task = buildTask({
-      taskType: TASK_TYPE.CHAT,
+    const task: ChatTask = {
+      taskType: 'chat',
       convId: conv?.convId || '',
       data: {
         question,
         filter: { weblinkList: selectedWebLink },
       },
       locale: localSettings.outputLocale,
-    });
+    };
 
     // 创建新会话并跳转
     handleCreateNewConversation(task);
   };
 
-  const runQuickActionTask = async (payload: QUICK_ACTION_TASK_PAYLOAD) => {
+  const runQuickActionTask = async (payload: QuickActionTaskPayload) => {
     const { localSettings } = useUserStore.getState();
 
     const conv = ensureConversationExist();
-    const task = buildTask({
-      taskType: TASK_TYPE.QUICK_ACTION,
+    const task: ChatTask = {
+      taskType: 'quickAction',
       convId: conv?.convId || '',
       data: {
         question: t('hooks.useBuildThreadAndRun.task.summary.question'),
-        actionType: QUICK_ACTION_TYPE.SUMMARY,
+        actionType: 'summary',
         filter: payload?.filter,
         actionPrompt: t('hooks.useBuildThreadAndRun.task.summary.actionPrompt'),
       },
       locale: localSettings.outputLocale,
-    });
+    };
 
     // 创建新会话并跳转
     handleCreateNewConversation(task);
@@ -215,9 +207,9 @@ export const useBuildThreadAndRun = () => {
     filter: Source[];
   } => {
     // 这里是获取第一个，早期简化策略，因为一开始设置之后，后续设置就保留
-    const lastHumanMessage = messages?.find((item) => item?.data?.type === MessageType.Human);
+    const lastHumanMessage = messages?.find((item) => item.type === 'human');
 
-    return safeParseJSON(lastHumanMessage?.data?.selectedWeblinkConfig);
+    return safeParseJSON(lastHumanMessage?.selectedWeblinkConfig);
   };
 
   const runTask = (comingQuestion?: string) => {
@@ -248,7 +240,7 @@ export const useBuildThreadAndRun = () => {
         const selectedWeblinkConfig = getSelectedWeblinkConfig(messages);
         // 选中多个资源
         if (selectedWeblinkConfig?.filter?.length > 0) {
-          selectedWebLink = selectedWeblinkConfig?.filter || {};
+          selectedWebLink = selectedWeblinkConfig?.filter;
         }
       } else {
         const { selectedRow } = useWeblinkStore.getState();
@@ -290,8 +282,8 @@ export const useBuildThreadAndRun = () => {
     }
 
     // 设置当前的任务类型及会话 id
-    const task = buildTask({
-      taskType: searchTarget === SearchTarget.SearchEnhance ? TASK_TYPE.SEARCH_ENHANCE_ASK : TASK_TYPE.CHAT,
+    const task: ChatTask = {
+      taskType: searchTarget === SearchTarget.SearchEnhance ? 'searchEnhanceAsk' : 'chat',
       data: {
         question,
         filter: { weblinkList: selectedWebLink, resourceIds, collectionIds },
@@ -299,10 +291,10 @@ export const useBuildThreadAndRun = () => {
       locale: localSettings?.outputLocale || LOCALE.EN,
       convId: conv?.convId || '',
       ...(conv?.messages?.length > 0 ? {} : { createConvParam: { ...conv } }),
-    });
+    };
     taskStore.setTask(task);
     // 开始提问
-    buildTaskAndGenReponse(task as Task);
+    buildTaskAndGenReponse(task as ChatTask);
     chatStore.setNewQAText('');
     knowledgeBaseStore.updateSelectedText('');
   };

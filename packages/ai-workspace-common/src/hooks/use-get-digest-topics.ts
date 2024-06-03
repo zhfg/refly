@@ -1,6 +1,6 @@
 import { useDigestTopicStore } from '@refly-packages/ai-workspace-common/stores/digest-topics';
 // requests
-import getDigestTopicList from '@refly-packages/ai-workspace-common/requests/getTopicList';
+import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useState } from 'react';
 
 export const useGetDigestTopics = () => {
@@ -15,12 +15,11 @@ export const useGetDigestTopics = () => {
       return;
     }
 
-    const newRes = await getDigestTopicList({
-      body: {
-        page: currentPage,
-        pageSize: 10,
-      },
-    });
+    const { data: newRes, error } = await client.getUserTopics();
+
+    if (error) {
+      throw error;
+    }
 
     digestTopicStore.updateCurrentPage(currentPage);
 

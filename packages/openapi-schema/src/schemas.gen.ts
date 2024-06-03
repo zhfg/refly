@@ -266,7 +266,7 @@ export const $MessageType = {
 export const $ChatMessage = {
   type: 'object',
   description: 'Chat message',
-  required: ['msgId', 'type', 'content', 'createdAt'],
+  required: ['msgId', 'type', 'content'],
   properties: {
     msgId: {
       type: 'string',
@@ -313,7 +313,7 @@ export const $ChatMessage = {
   },
 } as const;
 
-export const $ConversationListItem = {
+export const $Conversation = {
   type: 'object',
   description: 'Conversation list item',
   properties: {
@@ -342,6 +342,11 @@ export const $ConversationListItem = {
       description: 'Related content ID',
       example: 'c-g30e1b80b5g1itbemc0g5jj3',
     },
+    locale: {
+      description: 'Conversation locale',
+      type: 'string',
+      example: 'en',
+    },
     origin: {
       type: 'string',
       description: 'Origin page host',
@@ -367,27 +372,14 @@ export const $ConversationListItem = {
       format: 'date-time',
       description: 'Conversation creation time',
     },
-  },
-} as const;
-
-export const $ConversationDetail = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/ConversationListItem',
-    },
-    {
-      type: 'object',
-      properties: {
-        messages: {
-          type: 'array',
-          description: 'Conversation messages',
-          items: {
-            $ref: '#/components/schemas/ChatMessage',
-          },
-        },
+    messages: {
+      type: 'array',
+      description: 'Conversation messages (only returned for getConversationDetail api)',
+      items: {
+        $ref: '#/components/schemas/ChatMessage',
       },
     },
-  ],
+  },
 } as const;
 
 export const $ChatTaskType = {
@@ -676,9 +668,14 @@ export const $Weblink = {
 
 export const $Content = {
   type: 'object',
-  required: ['cid', 'title', 'createdAt', 'updatedAt'],
+  required: ['cid', 'contentId', 'title', 'createdAt', 'updatedAt'],
   properties: {
     cid: {
+      type: 'string',
+      description: 'Content ID',
+      example: 'c-g30e1b80b5g1itbemc0g5jj3',
+    },
+    contentId: {
       type: 'string',
       description: 'Content ID',
       example: 'c-g30e1b80b5g1itbemc0g5jj3',
@@ -775,11 +772,15 @@ export const $ContentDetail = {
           description: 'Content',
           example: 'The actual content',
         },
-        source: {
+        sources: {
+          type: 'string',
+          description: 'Content source list (JSON)',
+        },
+        inputs: {
           type: 'array',
-          description: 'Content source list',
+          description: 'Content input list',
           items: {
-            $ref: '#/components/schemas/Source',
+            $ref: '#/components/schemas/ContentDetail',
           },
         },
         meta: {
@@ -876,6 +877,92 @@ export const $UserSettings = {
       type: 'string',
       description: 'User output locale',
       example: 'en',
+    },
+  },
+} as const;
+
+export const $TopicMeta = {
+  type: 'object',
+  properties: {
+    topicId: {
+      type: 'string',
+      description: 'Topic ID',
+      example: 't-g30e1b80b5g1itbemc0g5jj3',
+    },
+    key: {
+      type: 'string',
+      description: 'Topic key',
+      example: 'startup_product_research',
+    },
+    name: {
+      type: 'string',
+      description: 'Topic name',
+    },
+    description: {
+      type: 'string',
+      description: 'Topic description',
+    },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Topic creation time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Topic update time',
+    },
+  },
+} as const;
+
+export const $Topic = {
+  type: 'object',
+  required: ['score', 'topicKey', 'topic', 'createdAt', 'updatedAt'],
+  properties: {
+    id: {
+      type: 'number',
+      description: 'Topic ID',
+      deprecated: true,
+    },
+    score: {
+      type: 'number',
+      description: 'Topic score',
+    },
+    topicKey: {
+      type: 'string',
+      description: 'Topic key',
+    },
+    topic: {
+      description: 'Topic meta',
+      $ref: '#/components/schemas/TopicMeta',
+    },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Topic creation time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Topic update time',
+    },
+  },
+} as const;
+
+export const $UserTopics = {
+  type: 'object',
+  required: ['topics', 'total'],
+  properties: {
+    list: {
+      type: 'array',
+      description: 'Topic list',
+      items: {
+        $ref: '#/components/schemas/Topic',
+      },
+    },
+    total: {
+      type: 'number',
+      description: 'Total count of topics',
     },
   },
 } as const;
@@ -1155,7 +1242,7 @@ export const $CreateConversationResponse = {
         data: {
           type: 'object',
           description: 'Created conversation',
-          $ref: '#/components/schemas/ConversationListItem',
+          $ref: '#/components/schemas/Conversation',
         },
       },
     },
@@ -1174,7 +1261,7 @@ export const $ListConversationResponse = {
           type: 'array',
           description: 'Conversation list',
           items: {
-            $ref: '#/components/schemas/ConversationListItem',
+            $ref: '#/components/schemas/Conversation',
           },
         },
       },
@@ -1203,7 +1290,7 @@ export const $GetConversationDetailResponse = {
         data: {
           type: 'object',
           description: 'Conversation data',
-          $ref: '#/components/schemas/ConversationDetail',
+          $ref: '#/components/schemas/Conversation',
         },
       },
     },
@@ -1283,7 +1370,6 @@ export const $ListFeedResponse = {
 
 export const $ListDigestRequest = {
   type: 'object',
-  required: ['filter'],
   properties: {
     page: {
       type: 'number',
@@ -1392,6 +1478,23 @@ export const $GetUserSettingsResponse = {
           type: 'object',
           description: 'User settings data',
           $ref: '#/components/schemas/UserSettings',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $GetUserTopicsResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          description: 'User topics',
+          $ref: '#/components/schemas/UserTopics',
         },
       },
     },

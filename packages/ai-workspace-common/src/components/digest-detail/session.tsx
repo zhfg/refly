@@ -10,7 +10,6 @@ import { Markdown } from '@refly-packages/ai-workspace-common/components/markdow
 // components
 import { SummaryModal } from '@refly-packages/ai-workspace-common/components/summary-modal';
 // request
-import getSourceSummary from '@refly-packages/ai-workspace-common/requests/getSourceSummary';
 
 import copyToClipboard from 'copy-to-clipboard';
 import { delay } from '@refly-packages/ai-workspace-common/utils/delay';
@@ -39,17 +38,17 @@ export const Session = (props: SessionProps) => {
 
     // 目前先暂时显示 fake 数据
     return selectedSummarySource?.pageContent;
-    const res = await getSourceSummary({
-      body: {
-        sourceId: id,
-      },
-    });
+    // const res = await getSourceSummary({
+    //   body: {
+    //     sourceId: id,
+    //   },
+    // });
 
-    if (!res?.success) {
-      throw new Error('获取总结详情失败');
-    }
+    // if (!res?.success) {
+    //   throw new Error('获取总结详情失败');
+    // }
 
-    return res?.data;
+    // return res?.data;
   };
   //   const fetchData = currentPage => {}
 

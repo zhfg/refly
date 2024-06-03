@@ -1,13 +1,14 @@
-import type { Digest, Feed, Message, SessionItem, Source } from '@refly-packages/ai-workspace-common/types';
+import type { SessionItem } from '@refly-packages/ai-workspace-common/types';
+import { ChatMessage as Message, Source, Digest, Feed, ContentDetail } from '@refly/openapi-schema';
 import { safeParseJSON } from './parse';
 
 export const buildSessionItem = (questionMsg: Message, answerMessage: Message) => {
   // 有可能 answer message 还未构建，所以要考虑兜底情况
   const session: SessionItem = {
-    question: questionMsg?.data.content || '',
-    answer: answerMessage?.data.content || '',
-    sources: safeParseJSON(answerMessage?.data.sources) || answerMessage?.data.sources || [],
-    relatedQuestions: safeParseJSON(answerMessage?.data.relatedQuestions) || answerMessage?.data.relatedQuestions || [],
+    question: questionMsg.content || '',
+    answer: answerMessage.content || '',
+    sources: safeParseJSON(answerMessage.sources) || answerMessage.sources || [],
+    relatedQuestions: safeParseJSON(answerMessage.relatedQuestions) || answerMessage.relatedQuestions || [],
   };
 
   console.log('buildSessionItem', session);
@@ -31,7 +32,7 @@ export const buildSessions = (messages: Message[]) => {
 };
 
 // 从 digest 和 feed 等 ready only aigc content 的内容构建 session
-export const buildSessionsFromDigest = (aigcContent: Digest | Feed) => {
+export const buildSessionsFromDigest = (aigcContent: ContentDetail) => {
   if (!(aigcContent?.title && aigcContent?.abstract)) return [];
 
   const session: SessionItem = {
@@ -52,7 +53,7 @@ export const buildSessionsFromDigest = (aigcContent: Digest | Feed) => {
   return [session];
 };
 
-export const buildSessionsFromFeed = (aigcContent: Digest | Feed) => {
+export const buildSessionsFromFeed = (aigcContent: ContentDetail) => {
   if (!(aigcContent?.title && aigcContent?.abstract)) return [];
 
   const session: SessionItem = {

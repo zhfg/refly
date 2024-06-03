@@ -1,7 +1,7 @@
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
-import { ServerMessage } from '@refly-packages/ai-workspace-common/types';
+import { ChatMessage } from '@refly/openapi-schema';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { Avatar, Button, Spin, Message } from '@arco-design/web-react';
 import { IconCopy, IconQuote, IconRight } from '@arco-design/web-react/icon';
@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 // 自定义组件
 import { SourceList } from '@refly-packages/ai-workspace-common/components/source-list';
 
-export const HumanMessage = (props: { message: Partial<ServerMessage> }) => {
+export const HumanMessage = (props: { message: Partial<ChatMessage> }) => {
   const { message } = props;
   return (
     <div className="ai-copilot-message human-message-container">
@@ -21,7 +21,7 @@ export const HumanMessage = (props: { message: Partial<ServerMessage> }) => {
 };
 
 export const AssistantMessage = (props: {
-  message: Partial<ServerMessage>;
+  message: Partial<ChatMessage>;
   isPending: boolean;
   isLastSession: boolean;
   handleAskFollowing: (question?: string) => void;

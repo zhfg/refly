@@ -3,7 +3,7 @@ import { useChatStore } from '../stores/chat';
 import { useMessageStateStore } from '../stores/message-state';
 import { useConversationStore } from '../stores/conversation';
 import { Source } from '@refly/openapi-schema';
-import type { Message, MessageState, RelatedQuestion } from '@refly-packages/ai-workspace-common/types';
+import type { MessageState, RelatedQuestion } from '@refly-packages/ai-workspace-common/types';
 import { TASK_STATUS } from '@refly-packages/ai-workspace-common/types';
 import type { ChatTask } from '@refly/openapi-schema';
 import { buildQuestionMessage, buildReplyMessage } from '@refly-packages/ai-workspace-common/utils/message';
@@ -43,7 +43,7 @@ export const useBuildTask = () => {
     const replyMsg = buildReplyMessage({
       convId: currentConversation?.convId || '',
       content: '',
-      questionId: questionMsg?.itemId,
+      questionId: questionMsg?.msgId,
     });
     // 将 reply 加到 message-state
     messageStateStore.setMessageState({
@@ -96,10 +96,10 @@ export const useBuildTask = () => {
     const currentChatState = useChatStore.getState();
 
     // 没有消息时，先创建
-    const lastMessage = currentChatState.messages.at(-1) as Message;
-    const savedMessage = currentChatState.messages.slice(0, -1) as Message[];
+    const lastMessage = currentChatState.messages.at(-1);
+    const savedMessage = currentChatState.messages.slice(0, -1);
 
-    lastMessage.data.content = content;
+    lastMessage.content = content;
     chatStore.setMessages([...savedMessage, { ...lastMessage }]);
   };
 
@@ -109,14 +109,14 @@ export const useBuildTask = () => {
 
     let lastMessage, savedMessage;
     if (currentMessageState.pendingFirstToken) {
-      lastMessage = currentMessageState.pendingReplyMsg as Message;
-      savedMessage = currentChatState.messages as Message[];
+      lastMessage = currentMessageState.pendingReplyMsg;
+      savedMessage = currentChatState.messages;
 
       lastMessage.data.content = '';
       messageStateStore.setMessageState({ pendingFirstToken: false });
     } else {
-      lastMessage = currentChatState.messages.at(-1) as Message;
-      savedMessage = currentChatState.messages.slice(0, -1) as Message[];
+      lastMessage = currentChatState.messages.at(-1);
+      savedMessage = currentChatState.messages.slice(0, -1);
     }
 
     console.log('sourceWeblinkPayload', sources);
@@ -155,17 +155,15 @@ export const useBuildTask = () => {
         ?.filter((item) => item),
     });
 
-    const lastMessage = currentChatState.messages.at(-1) as Message;
-    const savedMessage = currentChatState.messages.slice(0, -1) as Message[];
+    const lastMessage = currentChatState.messages.at(-1);
+    const savedMessage = currentChatState.messages.slice(0, -1);
 
-    console.log('latest related question', lastMessage?.data.relatedQuestions);
+    console.log('latest related question', lastMessage?.relatedQuestions);
 
-    if (Array.isArray(lastMessage?.data?.relatedQuestions)) {
-      lastMessage.data.relatedQuestions = lastMessage?.data?.relatedQuestions
-        ?.concat(related || [])
-        ?.filter((item) => item);
+    if (Array.isArray(lastMessage?.relatedQuestions)) {
+      lastMessage.relatedQuestions = lastMessage?.relatedQuestions?.concat(related || [])?.filter((item) => item);
     } else {
-      lastMessage.data.relatedQuestions = [...related]?.filter((item) => item);
+      lastMessage.relatedQuestions = [...related]?.filter((item) => item);
     }
     chatStore.setMessages([...savedMessage, { ...lastMessage }]);
   };
