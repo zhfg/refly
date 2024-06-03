@@ -1,5 +1,7 @@
 import { createClient, client } from '@hey-api/client-fetch';
 import * as requestModule from '@refly/openapi-schema';
+import { browser } from 'wxt/browser';
+
 import { getRuntime } from '../utils/env';
 import { getAuthTokenFromCookie } from '../utils/request';
 import { getServerOrigin } from '../utils/url';

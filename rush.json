@@ -35,6 +35,11 @@
       "reviewCategory": "packages"
     },
     {
+      "packageName": "wxt",
+      "projectFolder": "packages/wxt",
+      "reviewCategory": "packages"
+    },
+    {
       "packageName": "@refly/api",
       "projectFolder": "apps/api",
       "reviewCategory": "apps"
