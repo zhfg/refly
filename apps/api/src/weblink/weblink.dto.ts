@@ -1,5 +1,5 @@
 import { Document } from '@langchain/core/documents';
-import { SourceMeta, WeblinkDTO } from '@refly/openapi-schema';
+import { SourceMeta, Weblink as WeblinkDTO } from '@refly/openapi-schema';
 
 export type WeblinkJobData = WeblinkDTO & {
   userId?: number; // 是否绑定 user

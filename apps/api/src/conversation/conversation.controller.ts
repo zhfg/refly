@@ -17,7 +17,7 @@ import {
   CreateConversationRequest,
   CreateConversationResponse,
   ListConversationResponse,
-  ConversationListItem,
+  Conversation as ConversationListItem,
   ChatRequest,
   GetConversationDetailResponse,
 } from '@refly/openapi-schema';

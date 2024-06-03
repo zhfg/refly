@@ -41,7 +41,7 @@ export class AigcController {
     return buildSuccessResponse(
       feedList.map((feed) => ({
         ...omit(feed, ['weblink', 'inputIds', 'outputIds']),
-        contentId: feed.id,
+        contentId: feed.cid,
         readCount: 0,
         askFollow: 0,
         weblinks: [feed.weblink],
@@ -65,8 +65,8 @@ export class AigcController {
           ...pick(digest, ['userId', 'topicKey', 'date']),
           title: digest.content?.title,
           abstract: digest.content?.abstract,
-          contentId: digest.contentId,
-          cid: '',
+          contentId: digest.content.cid,
+          cid: digest.content.cid,
           meta: digest.content.meta,
           source: digest.content.sources,
           createdAt: digest.createdAt.toString(),
@@ -87,6 +87,7 @@ export class AigcController {
     });
     return buildSuccessResponse({
       ...pick(content, ['cid', 'title', 'abstract', 'meta', 'content']),
+      contentId: content.cid,
       meta: JSON.parse(content.meta),
       source: JSON.parse(content.sources),
       createdAt: content.createdAt.toString(),

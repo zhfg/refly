@@ -582,6 +582,9 @@ importers:
       react-draggable:
         specifier: ~4.4.5
         version: 4.4.5(react-dom@18.2.0)(react@18.2.0)
+      react-error-boundary:
+        specifier: ~4.0.13
+        version: 4.0.13(react@18.2.0)
       react-i18next:
         specifier: ^14.1.0
         version: 14.1.0(i18next@23.11.2)(react-dom@18.2.0)(react@18.2.0)
@@ -19123,6 +19126,15 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
+  /react-error-boundary@4.0.13(react@18.2.0):
+    resolution: {integrity: sha512-b6PwbdSv8XeOSYvjt8LpgpKrZ0yGdtZokYwkwV2wlcZbxgopHX/hgPl5VgpnoVOWd868n1hktM8Qm4b+02MiLQ==}
+    peerDependencies:
+      react: '>=16.13.1'
+    dependencies:
+      '@babel/runtime': 7.24.5
+      react: 18.2.0
+    dev: false
+
   /react-error-overlay@6.0.9:
     resolution: {integrity: sha512-nQTTcUu+ATDbrSD1BZHr5kgSD4oF8OFjxun8uAaL8RwPBacGBNPf/yAuVVdx17N8XNzRDMrZ9XcKZHCjPW+9ew==}
     dev: false
@@ -23124,6 +23136,7 @@ time:
   /publish-browser-extension@2.1.3: '2024-02-23T20:55:02.471Z'
   /react-dom@18.2.0: '2022-06-14T19:46:48.370Z'
   /react-draggable@4.4.5: '2022-04-26T18:04:09.131Z'
+  /react-error-boundary@4.0.13: '2024-03-01T02:06:29.880Z'
   /react-helmet@6.1.0: '2020-06-08T04:59:07.232Z'
   /react-i18next@14.1.0: '2024-03-07T09:10:36.381Z'
   /react-infinite-scroll-component@6.1.0: '2021-04-20T12:12:49.911Z'
