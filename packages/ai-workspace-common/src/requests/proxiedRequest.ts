@@ -1,5 +1,19 @@
+import { createClient, client } from '@hey-api/client-fetch';
 import * as requestModule from '@refly/openapi-schema';
 import { getRuntime } from '../utils/env';
+import { getAuthTokenFromCookie } from '../utils/request';
+import { getServerOrigin } from '../utils/url';
+
+createClient({ baseUrl: getServerOrigin() + '/v1' });
+
+client.interceptors.request.use((request) => {
+  console.log('intercept request:', request);
+  const token = getAuthTokenFromCookie();
+  if (token) {
+    request.headers.set('Authorization', `Bearer ${token}`);
+  }
+  return request;
+});
 
 export interface BackgroundMessage {
   name: string;
@@ -30,6 +44,7 @@ export const sendToBackgroundV2 = async (message: BackgroundMessage) => {
 
 const proxiedRequestModule = new Proxy(requestModule, {
   get(target, propKey, receiver) {
+    // console.log('accessing proxied module', target, propKey, receiver);
     const origMethod = target[propKey as keyof typeof requestModule];
 
     if (getRuntime() === 'extension' && typeof origMethod === 'function') {

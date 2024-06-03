@@ -1,17 +1,17 @@
 import { fetchStream } from '@refly-packages/ai-workspace-common/utils/fetch-stream';
-import type { Source, RelatedQuestion, Task } from '@refly-packages/ai-workspace-common/types/';
 import { getAuthTokenFromCookie } from './request';
 import { getServerOrigin } from './url';
+import { Source, ChatTask } from '@refly/openapi-schema';
 
 const LLM_SPLIT = '__LLM_RESPONSE__';
 const RELATED_SPLIT = '__RELATED_QUESTIONS__';
 
 export const parseStreaming = async (
   controller: AbortController,
-  payload: Task,
+  payload: ChatTask,
   onSources: (value: Source[]) => void,
   onMarkdown: (value: string) => void,
-  onRelates: (value: RelatedQuestion[]) => void,
+  onRelates: (value: string[]) => void,
   onError?: (status: number) => void,
 ) => {
   const decoder = new TextDecoder();
@@ -67,7 +67,7 @@ export const parseStreaming = async (
       }
     },
     () => {
-      const [_, relates] = chunks.split(RELATED_SPLIT);
+      const [, relates] = chunks.split(RELATED_SPLIT);
       try {
         onRelates(JSON.parse(relates));
       } catch (e) {

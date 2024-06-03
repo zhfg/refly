@@ -9,9 +9,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 // 类型
-import { CollectionDetail, ResourceDetail } from '@refly-packages/ai-workspace-common/types/knowledge-base';
+import { ResourceDetail } from '@refly-packages/ai-workspace-common/types/knowledge-base';
 // 请求
-import getKnowledgeBaseDetail from '@refly-packages/ai-workspace-common/requests/getKnowledgeBaseDetail';
+import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // 组件
 import { ResourceList } from '@refly-packages/ai-workspace-common/components/resource-list';
 
@@ -27,18 +27,23 @@ export const KnowledgeBaseDirectory = () => {
   const handleGetDetail = async (collectionId: string, resourceId: string) => {
     setIsFetching(true);
     try {
-      const newRes = await getKnowledgeBaseDetail({
-        body: {
+      const { data: newRes, error } = await client.getCollectionDetail({
+        query: {
           collectionId,
         },
       });
 
+      if (error) {
+        throw error;
+      }
       if (!newRes?.success) {
         throw new Error(newRes?.errMsg);
       }
 
       console.log('newRes', newRes);
-      knowledgeBaseStore.updateCurrentKnowledgeBase(newRes?.data as CollectionDetail);
+      if (newRes.data) {
+        knowledgeBaseStore.updateCurrentKnowledgeBase(newRes?.data);
+      }
 
       // 如果没有资源，则跳转到第一个资源
       if (!resourceId) {

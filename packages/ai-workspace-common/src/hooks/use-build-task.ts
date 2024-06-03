@@ -2,9 +2,10 @@ import { useCallback, useRef } from 'react';
 import { useChatStore } from '../stores/chat';
 import { useMessageStateStore } from '../stores/message-state';
 import { useConversationStore } from '../stores/conversation';
-import type { Message, MessageState, RelatedQuestion, Source } from '@refly-packages/ai-workspace-common/types';
+import { Source } from '@refly/openapi-schema';
+import type { Message, MessageState, RelatedQuestion } from '@refly-packages/ai-workspace-common/types';
 import { TASK_STATUS } from '@refly-packages/ai-workspace-common/types';
-import type { Task } from '@refly-packages/ai-workspace-common/types';
+import type { ChatTask } from '@refly/openapi-schema';
 import { buildQuestionMessage, buildReplyMessage } from '@refly-packages/ai-workspace-common/utils/message';
 
 import { buildErrorMessage } from '@refly-packages/ai-workspace-common/utils/message';
@@ -21,7 +22,7 @@ export const useBuildTask = () => {
   // 中断生成
   const controllerRef = useRef<AbortController>();
 
-  const buildTaskAndGenReponse = (task: Task) => {
+  const buildTaskAndGenReponse = (task: ChatTask) => {
     console.log('buildTaskAndGenReponse', task);
     const question = task.data?.question;
     const { messages = [] } = useChatStore.getState();
@@ -70,7 +71,7 @@ export const useBuildTask = () => {
   };
 
   const handleGenResponse = useCallback(
-    (task: Task) => {
+    (task: ChatTask) => {
       // 发起一个 gen 请求，开始接收
       messageStateStore.setMessageState({
         pending: true,
@@ -92,7 +93,6 @@ export const useBuildTask = () => {
   );
 
   const onContent = (content: string) => {
-    const currentMessageState = useMessageStateStore.getState();
     const currentChatState = useChatStore.getState();
 
     // 没有消息时，先创建
@@ -202,12 +202,12 @@ export const useBuildTask = () => {
   const handleSendMessage = (payload: {
     body: {
       type: TASK_STATUS;
-      payload?: Task;
+      payload?: ChatTask;
     };
   }) => {
     controllerRef.current = new AbortController();
 
-    parseStreaming(controllerRef.current, payload?.body?.payload as Task, onSources, onContent, onRelated, onError);
+    parseStreaming(controllerRef.current, payload?.body?.payload, onSources, onContent, onRelated, onError);
   };
 
   return {

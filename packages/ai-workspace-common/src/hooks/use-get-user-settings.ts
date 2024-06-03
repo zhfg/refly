@@ -2,13 +2,12 @@ import { useEffect } from 'react';
 import { useMatch, useNavigate } from 'react-router-dom';
 
 // request
-import getUserInfo from '@refly-packages/ai-workspace-common/requests/getUserInfo';
-import putUserInfo from '@refly-packages/ai-workspace-common/requests/putUserInfo';
+import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { LocalSettings, defaultLocalSettings, useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 import { mapDefaultLocale } from '@refly-packages/ai-workspace-common/utils/locale';
 import { useCookie } from 'react-use';
-import { LOCALE } from '@refly-packages/ai-workspace-common/types';
+import { LOCALE } from '@refly/constants';
 import { useTranslation } from 'react-i18next';
 
 export const useGetUserSettings = () => {
@@ -29,12 +28,12 @@ export const useGetUserSettings = () => {
 
   const getLoginStatus = async () => {
     try {
-      const res = await getUserInfo();
+      const res = await client.getSettings();
       let { localSettings } = useUserStore.getState();
 
       console.log('loginStatus', res);
 
-      if (!res?.success) {
+      if (res.error || !res.data) {
         userStore.setUserProfile(undefined);
         userStore.setToken('');
         localStorage.removeItem('refly-user-profile');
@@ -75,7 +74,7 @@ export const useGetUserSettings = () => {
           uiLocale = mapDefaultLocale((navigator?.language || LOCALE.EN) as LOCALE) as LOCALE;
           outputLocale = (navigator?.language || LOCALE.EN) as LOCALE;
           // 不阻塞写回用户配置
-          putUserInfo({
+          client.updateSettings({
             body: { uiLocale, outputLocale },
           });
 

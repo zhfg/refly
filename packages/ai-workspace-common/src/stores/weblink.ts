@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension';
-import type { WebLinkItem } from '@refly-packages/ai-workspace-common/types/weblink';
+import { Weblink } from '@refly/openapi-schema';
 
 export interface Thread {
   id: string;
@@ -19,25 +19,25 @@ export interface Thread {
 
 interface WeblinkState {
   isWebLinkListVisible: boolean;
-  webLinkList: WebLinkItem[];
+  webLinkList: Weblink[];
   pageSize: number;
-  selectedRow: { key: number | string; content: WebLinkItem }[];
+  selectedRow: { key: number | string; content: Weblink }[];
   currentPage: number;
   hasMore: boolean;
   isRequest: boolean;
 
-  updateWebLinkList: (newWebLinkList: WebLinkItem[]) => void;
+  updateWebLinkList: (newWebLinkList: Weblink[]) => void;
   updateCurrentPage: (currentPage: number) => void;
   updateHasMore: (hasMore: boolean) => void;
   updateIsRequest: (isRequest: boolean) => void;
   updateIsWebLinkListVisible: (isWebLinkListVisible: boolean) => void;
-  updateSelectedRow: (selectedRow: { key: number | string; content: WebLinkItem }[]) => void;
+  updateSelectedRow: (selectedRow: { key: number | string; content: Weblink }[]) => void;
   resetState: () => void;
 }
 
 export const defaultState = {
   isWebLinkListVisible: false,
-  webLinkList: [] as WebLinkItem[],
+  webLinkList: [] as Weblink[],
   selectedRow: [],
   pageSize: 10,
   currentPage: 1,
@@ -49,7 +49,7 @@ export const useWeblinkStore = create<WeblinkState>()(
   devtools((set) => ({
     ...defaultState,
 
-    updateWebLinkList: (newWebLinkList: WebLinkItem[]) =>
+    updateWebLinkList: (newWebLinkList: Weblink[]) =>
       set((state) => ({
         ...state,
         webLinkList: state.webLinkList.concat(newWebLinkList),
@@ -58,7 +58,7 @@ export const useWeblinkStore = create<WeblinkState>()(
     updateHasMore: (hasMore: boolean) => set((state) => ({ ...state, hasMore })),
     updateIsRequest: (isRequest: boolean) => set((state) => ({ ...state, isRequest })),
     updateIsWebLinkListVisible: (isWebLinkListVisible: boolean) => set((state) => ({ ...state, isWebLinkListVisible })),
-    updateSelectedRow: (selectedRow: { key: number | string; content: WebLinkItem }[]) =>
+    updateSelectedRow: (selectedRow: { key: number | string; content: Weblink }[]) =>
       set((state) => ({ ...state, selectedRow })),
     resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),

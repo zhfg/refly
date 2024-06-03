@@ -587,6 +587,7 @@ components:
       required:
         - resourceId
         - resourceType
+        - title
         - isPublic
         - createdAt
         - updatedAt
@@ -598,6 +599,12 @@ components:
         resourceType:
           description: Resource type
           $ref: '#/components/schemas/ResourceType'
+        title:
+          type: string
+          description: Resource title
+        description:
+          type: string
+          description: Resource description
         data:
           type: object
           description: Resource metadata
@@ -756,10 +763,15 @@ components:
       type: object
       description: Chat message
       required:
+        - msgId
         - type
         - content
         - createdAt
       properties:
+        msgId:
+          type: string
+          description: Message ID
+          example: m-g30e1b80b5g1itbemc0g5jj3
         type:
           description: Message type
           $ref: '#/components/schemas/MessageType'
@@ -767,6 +779,19 @@ components:
           type: string
           description: Message content
           example: Hello
+        relatedQuestions:
+          type: array
+          description: Related questions
+          items:
+            type: string
+        sources:
+          type: array
+          description: Related sources
+          items:
+            $ref: '#/components/schemas/Source'
+        selectedWeblinkConfig:
+          type: string
+          description: Selected weblink config (JSON)
         createdAt:
           type: string
           format: date-time
@@ -995,7 +1020,7 @@ components:
         parseSource:
           description: Weblink parse source
           $ref: '#/components/schemas/ParseSource'
-    WeblinkDTO:
+    Weblink:
       type: object
       properties:
         linkId:
@@ -1051,7 +1076,7 @@ components:
           type: string
           format: date-time
           description: Weblink update time
-    ContentDTO:
+    Content:
       type: object
       required:
         - cid
@@ -1124,7 +1149,7 @@ components:
             $ref: '#/components/schemas/ContentMetaRecord'
     ContentDetail:
       allOf:
-        - $ref: '#/components/schemas/ContentDTO'
+        - $ref: '#/components/schemas/Content'
         - type: object
           properties:
             content:
@@ -1141,7 +1166,7 @@ components:
               $ref: '#/components/schemas/ContentMeta'
     Digest:
       allOf:
-        - $ref: '#/components/schemas/ContentDTO'
+        - $ref: '#/components/schemas/Content'
         - type: object
           required:
             - topicKey
@@ -1158,7 +1183,7 @@ components:
               description: Digest date
     Feed:
       allOf:
-        - $ref: '#/components/schemas/ContentDTO'
+        - $ref: '#/components/schemas/Content'
         - type: object
           properties:
             readCount:
@@ -1424,7 +1449,7 @@ components:
           type: array
           description: Weblink list
           items:
-            $ref: '#/components/schemas/WeblinkDTO'
+            $ref: '#/components/schemas/Weblink'
     ListWeblinkResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -1434,7 +1459,7 @@ components:
               type: array
               description: Weblink list
               items:
-                $ref: '#/components/schemas/WeblinkDTO'
+                $ref: '#/components/schemas/Weblink'
     ListFeedResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

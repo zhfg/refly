@@ -4,8 +4,8 @@ import { useState } from 'react';
 // styles
 import './index.scss';
 // request
-import createNewConversation from '@refly-packages/ai-workspace-common/requests/createNewConversation';
-import { Digest, Feed, Thread } from '@refly-packages/ai-workspace-common/types';
+import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { Digest, Feed, ConversationDetail as Thread } from '@refly/openapi-schema';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
 import { useResetState } from '@refly-packages/ai-workspace-common/hooks/use-reset-state';
@@ -51,13 +51,18 @@ export const AskFollowUpModal = (props: SummaryModalProps) => {
       };
 
       // 创建新会话
-      const res = await createNewConversation({
+      const { data: res, error } = await client.createConversation({
         body: {
           ...newConversationPayload,
-          contentId: aigcContent?.cid,
+          cid: aigcContent?.cid,
           locale: localSettings?.outputLocale,
         },
       });
+
+      if (error || !res?.success) {
+        console.error(error || res);
+        throw new Error(`${error}` || res?.errMsg);
+      }
 
       console.log('createNewConversation', res);
       conversationStore.setCurrentConversation(res?.data as Thread);

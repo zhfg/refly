@@ -8,7 +8,7 @@ import { IconClockCircle, IconMessage, IconRightCircle } from '@arco-design/web-
 import { useNavigate } from 'react-router-dom';
 // utils
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
-import getConversationList from '@refly-packages/ai-workspace-common/requests/getConversationList';
+import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // types
 import { LOCALE, Thread } from '@refly-packages/ai-workspace-common/types';
 import './index.scss';
@@ -51,12 +51,15 @@ export const ConvList = (props: ConvListProps) => {
         return;
       }
 
-      const newRes = await getConversationList({
-        body: {
+      const { error, data: newRes } = await client.listConversations({
+        query: {
           page: currentPage,
           pageSize: 10,
         },
       });
+      if (error) {
+        throw error;
+      }
 
       threadStore.updateCurrentPage(currentPage);
 

@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension';
 
-import type { Thread } from '@refly-packages/ai-workspace-common/types';
+import type { ConversationDetail as Thread } from '@refly/openapi-schema';
 
 interface ThreadState {
   threads: Thread[];

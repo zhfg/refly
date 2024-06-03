@@ -1,24 +1,16 @@
-import { Tabs, Input } from '@arco-design/web-react';
-import { Breadcrumb, Button } from '@arco-design/web-react';
-
-// 自定义组件
-import { DigestToday } from '@/pages/digest-today';
-import { ThreadLibrary } from '@refly-packages/ai-workspace-common/components/thread-library';
+import { Button } from '@arco-design/web-react';
 
 // 自定义组件
 import {
-  IconBook,
   IconCaretDown,
   IconFolder,
   IconHistory,
   IconMessage,
-  IconMore,
   IconPlusCircle,
   IconTranslate,
 } from '@arco-design/web-react/icon';
 // 自定义样式
 import './index.scss';
-import { fakeConversations } from '@refly-packages/ai-workspace-common/fake-data/conversation';
 // 自定义组件
 import { SearchTargetSelector } from '@refly-packages/ai-workspace-common/components/search-target-selector';
 import { useSearchParams } from 'react-router-dom';
@@ -32,25 +24,21 @@ import { ConvListModal } from './conv-list-modal';
 import { KnowledgeBaseListModal } from './knowledge-base-list-modal';
 
 // requests
-import getThreadMessages from '@refly-packages/ai-workspace-common/requests/getThreadMessages';
+import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 // state
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
-import { Conversation, LOCALE } from '@refly-packages/ai-workspace-common/types';
 import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
 import { useResetState } from '@refly-packages/ai-workspace-common/hooks/use-reset-state';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { delay } from '@refly-packages/ai-workspace-common/utils/delay';
 import { ActionSource, useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 // utils
+import { LOCALE } from '@refly/constants';
 import { localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/i18n';
 import { OutputLocaleList } from '@refly-packages/ai-workspace-common/components/output-locale-list';
 import { useTranslation } from 'react-i18next';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
-import { useResizeCopilot } from '@refly-packages/ai-workspace-common/hooks/use-resize-copilot';
-import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
-
-const TextArea = Input.TextArea;
 
 export const AICopilot = () => {
   const [searchParams] = useSearchParams();
@@ -89,11 +77,15 @@ export const AICopilot = () => {
 
   const handleGetThreadMessages = async (convId: string) => {
     // 异步操作
-    const res = await getThreadMessages({
-      body: {
+    const { data: res, error } = await client.getConversationDetail({
+      path: {
         convId,
       },
     });
+
+    if (error) {
+      throw error;
+    }
 
     console.log('getThreadMessages', res);
 
@@ -101,7 +93,9 @@ export const AICopilot = () => {
     resetState();
 
     // 设置会话和消息
-    conversationStore.setCurrentConversation(res?.data as Conversation);
+    if (res?.data) {
+      conversationStore.setCurrentConversation(res?.data);
+    }
 
     //
     const messages = (res?.data?.messages || [])?.map((item) => {

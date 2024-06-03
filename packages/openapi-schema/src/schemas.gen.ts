@@ -45,7 +45,7 @@ export const $ResourceType = {
 
 export const $ResourceListItem = {
   type: 'object',
-  required: ['resourceId', 'resourceType', 'isPublic', 'createdAt', 'updatedAt'],
+  required: ['resourceId', 'resourceType', 'title', 'isPublic', 'createdAt', 'updatedAt'],
   properties: {
     resourceId: {
       type: 'string',
@@ -55,6 +55,14 @@ export const $ResourceListItem = {
     resourceType: {
       description: 'Resource type',
       $ref: '#/components/schemas/ResourceType',
+    },
+    title: {
+      type: 'string',
+      description: 'Resource title',
+    },
+    description: {
+      type: 'string',
+      description: 'Resource description',
     },
     data: {
       type: 'object',
@@ -258,8 +266,13 @@ export const $MessageType = {
 export const $ChatMessage = {
   type: 'object',
   description: 'Chat message',
-  required: ['type', 'content', 'createdAt'],
+  required: ['msgId', 'type', 'content', 'createdAt'],
   properties: {
+    msgId: {
+      type: 'string',
+      description: 'Message ID',
+      example: 'm-g30e1b80b5g1itbemc0g5jj3',
+    },
     type: {
       description: 'Message type',
       $ref: '#/components/schemas/MessageType',
@@ -268,6 +281,24 @@ export const $ChatMessage = {
       type: 'string',
       description: 'Message content',
       example: 'Hello',
+    },
+    relatedQuestions: {
+      type: 'array',
+      description: 'Related questions',
+      items: {
+        type: 'string',
+      },
+    },
+    sources: {
+      type: 'array',
+      description: 'Related sources',
+      items: {
+        $ref: '#/components/schemas/Source',
+      },
+    },
+    selectedWeblinkConfig: {
+      type: 'string',
+      description: 'Selected weblink config (JSON)',
     },
     createdAt: {
       type: 'string',
@@ -570,7 +601,7 @@ export const $PingWeblinkData = {
   },
 } as const;
 
-export const $WeblinkDTO = {
+export const $Weblink = {
   type: 'object',
   properties: {
     linkId: {
@@ -643,7 +674,7 @@ export const $WeblinkDTO = {
   },
 } as const;
 
-export const $ContentDTO = {
+export const $Content = {
   type: 'object',
   required: ['cid', 'title', 'createdAt', 'updatedAt'],
   properties: {
@@ -734,7 +765,7 @@ export const $ContentMeta = {
 export const $ContentDetail = {
   allOf: [
     {
-      $ref: '#/components/schemas/ContentDTO',
+      $ref: '#/components/schemas/Content',
     },
     {
       type: 'object',
@@ -763,7 +794,7 @@ export const $ContentDetail = {
 export const $Digest = {
   allOf: [
     {
-      $ref: '#/components/schemas/ContentDTO',
+      $ref: '#/components/schemas/Content',
     },
     {
       type: 'object',
@@ -789,7 +820,7 @@ export const $Digest = {
 export const $Feed = {
   allOf: [
     {
-      $ref: '#/components/schemas/ContentDTO',
+      $ref: '#/components/schemas/Content',
     },
     {
       type: 'object',
@@ -1204,7 +1235,7 @@ export const $StoreWeblinkRequest = {
       type: 'array',
       description: 'Weblink list',
       items: {
-        $ref: '#/components/schemas/WeblinkDTO',
+        $ref: '#/components/schemas/Weblink',
       },
     },
   },
@@ -1222,7 +1253,7 @@ export const $ListWeblinkResponse = {
           type: 'array',
           description: 'Weblink list',
           items: {
-            $ref: '#/components/schemas/WeblinkDTO',
+            $ref: '#/components/schemas/Weblink',
           },
         },
       },

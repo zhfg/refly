@@ -15,18 +15,10 @@ import { buildSessions } from '@refly-packages/ai-workspace-common/utils/session
 import { ThreadItem } from '@refly-packages/ai-workspace-common/components/thread-item/thread-item';
 import { Header } from './header';
 // request
-import getThreadMessages from '@refly-packages/ai-workspace-common/requests/getThreadMessages';
+import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // styles
 import './thread-item.scss';
-import {
-  Task,
-  Thread as ThreadTypes,
-  type Message,
-  MessageType,
-  Source,
-  Thread as IThread,
-  TASK_TYPE,
-} from '@refly-packages/ai-workspace-common/types';
+import { type Message, Thread as IThread, MessageItemType } from '@refly-packages/ai-workspace-common/types';
 import { useWeblinkStore } from '@refly-packages/ai-workspace-common/stores/weblink';
 import { useSearchStateStore, SearchTarget } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { safeParseJSON } from '@refly-packages/ai-workspace-common/utils/parse';
@@ -36,6 +28,7 @@ import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { EmptyDigestTopicDetailStatus } from '../empty-digest-topic-detail-status';
 import { useTranslation } from 'react-i18next';
 import { delay } from '@refly-packages/ai-workspace-common/utils/delay';
+import { ChatTaskType, Source } from '@refly/openapi-schema';
 
 export const Thread = () => {
   const { buildTaskAndGenReponse } = useBuildTask();
@@ -55,11 +48,15 @@ export const Thread = () => {
 
   const handleGetThreadMessages = async (threadId: string) => {
     // 异步操作
-    const res = await getThreadMessages({
-      body: {
-        threadId,
+    const { data: res, error } = await client.getConversationDetail({
+      path: {
+        convId: threadId,
       },
     });
+
+    if (error) {
+      throw error;
+    }
 
     const { newQAText } = useChatStore.getState();
     console.log('getThreadMessages', res);
@@ -68,10 +65,10 @@ export const Thread = () => {
     resetState();
 
     // 设置会话和消息
-    conversationStore.setCurrentConversation(res?.data as ThreadTypes);
+    conversationStore.setCurrentConversation(res?.data);
 
-    //
-    const messages = (res?.data?.messages || [])?.map((item) => {
+    // 转换消息格式
+    const messages: Message[] = (res?.data?.messages || [])?.map((item) => {
       const {
         content = '',
         relatedQuestions = [],
@@ -83,6 +80,10 @@ export const Thread = () => {
 
       return {
         ...extraInfo,
+        id: item.msgId,
+        itemId: item.msgId,
+        itemType: MessageItemType.REPLY, // TODO: confirm this
+        convId: res.data.convId,
         data: {
           content,
           relatedQuestions,
@@ -96,7 +97,7 @@ export const Thread = () => {
     chatStore.setNewQAText(newQAText);
   };
 
-  const handleAskFollowing = (question?: string, taskType: TASK_TYPE = TASK_TYPE.CHAT) => {
+  const handleAskFollowing = (question?: string, taskType: ChatTaskType = 'chat') => {
     // support ask follow up question
     let newQuestion = '';
     if (typeof question === 'string' && question) {
@@ -113,19 +114,18 @@ export const Thread = () => {
     const useWeblinkList =
       selectedWeblinkConfig?.searchTarget === SearchTarget.SelectedPages && selectedWeblinkConfig?.filter?.length > 0;
 
-    const task = buildTask({
+    buildTaskAndGenReponse({
+      taskType: taskType,
+      convId: currentConversation?.convId || '',
       data: {
         question: newQuestion,
-        convId: currentConversation?.convId || '',
         filter: {
           weblinkList: useWeblinkList ? selectedWeblinkConfig?.filter : [],
         },
       },
-      taskType: taskType as TASK_TYPE,
+
       locale: localSettings?.outputLocale,
     });
-
-    buildTaskAndGenReponse(task);
     chatStore.setNewQAText('');
   };
 
@@ -136,7 +136,7 @@ export const Thread = () => {
     filter: Source[];
   } => {
     // 这里是获取第一个，早期简化策略，因为一开始设置之后，后续设置就保留
-    const lastHumanMessage = messages?.find((item) => item?.data?.type === MessageType.Human);
+    const lastHumanMessage = messages?.find((item) => item?.data?.type === 'human');
 
     return safeParseJSON(lastHumanMessage?.data?.selectedWeblinkConfig);
   };
@@ -150,7 +150,7 @@ export const Thread = () => {
       // 新会话，需要手动构建第一条消息
       if (chatStore.isNewConversation && currentConversation?.convId) {
         // 更换成基于 task 的消息模式，核心是基于 task 来处理
-        buildTaskAndGenReponse(task as Task);
+        buildTaskAndGenReponse(task);
       } else if (chatStore.isAskFollowUpNewConversation && currentConversation?.convId) {
         // 先获取会话
         await handleGetThreadMessages(threadId);
@@ -200,7 +200,7 @@ export const Thread = () => {
         </title>
         <meta name="description" content={conversationStore?.currentConversation?.lastMessage} />
       </Helmet>
-      <Header thread={conversationStore?.currentConversation as IThread} />
+      <Header thread={conversationStore?.currentConversation} />
       {isFetching ? (
         <div style={{ maxWidth: '748px', width: '748px', margin: '20px auto' }}>
           <Skeleton animation style={{ marginTop: 24 }}></Skeleton>

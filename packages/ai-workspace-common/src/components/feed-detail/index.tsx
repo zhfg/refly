@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Message as message } from '@arco-design/web-react';
-
+import { Digest } from '@refly/openapi-schema';
 import { useDigestDetailStore } from '@refly-packages/ai-workspace-common/stores/digest-detail';
 // utils
 import { buildSessionsFromFeed } from '@refly-packages/ai-workspace-common/utils/session';
@@ -10,10 +10,9 @@ import { DigestDetailContent } from './digest-detail-content';
 import { Header } from './header';
 import { AskFollowUpModal } from '@refly-packages/ai-workspace-common/components/ask-follow-up-modal/index';
 // request
-import getDigestDetail from '@refly-packages/ai-workspace-common/requests/getAIGCContent';
+import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // styles
 import './digest-detail.scss';
-import { Digest } from '@refly-packages/ai-workspace-common/types';
 
 /**
  * 1. same as thread，but only for read
@@ -28,18 +27,23 @@ export const FeedDetail = () => {
 
   const handleGetDetail = async (feedId: string) => {
     try {
-      const newRes = await getDigestDetail({
-        body: {
-          contentId: feedId,
+      const { data: newRes, error } = await client.getContentDetail({
+        path: {
+          cid: feedId,
         },
       });
 
+      if (error) {
+        throw error;
+      }
       if (!newRes?.success) {
         throw new Error(newRes?.errMsg);
       }
 
       console.log('newRes', newRes);
-      digestDetailStore.updateDigest(newRes?.data as Digest);
+      if (newRes.data) {
+        digestDetailStore.updateDigest(newRes?.data);
+      }
     } catch (err) {
       message.error('获取内容详情失败，请重新刷新试试');
     }

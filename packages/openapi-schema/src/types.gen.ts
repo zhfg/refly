@@ -43,6 +43,14 @@ export type ResourceListItem = {
    */
   resourceType: ResourceType;
   /**
+   * Resource title
+   */
+  title: string;
+  /**
+   * Resource description
+   */
+  description?: string;
+  /**
    * Resource metadata
    */
   data?: ResourceMeta;
@@ -200,6 +208,10 @@ export type MessageType = 'ai' | 'human' | 'system';
  */
 export type ChatMessage = {
   /**
+   * Message ID
+   */
+  msgId: string;
+  /**
    * Message type
    */
   type: MessageType;
@@ -207,6 +219,18 @@ export type ChatMessage = {
    * Message content
    */
   content: string;
+  /**
+   * Related questions
+   */
+  relatedQuestions?: Array<string>;
+  /**
+   * Related sources
+   */
+  sources?: Array<Source>;
+  /**
+   * Selected weblink config (JSON)
+   */
+  selectedWeblinkConfig?: string;
   /**
    * Message creation time
    */
@@ -434,7 +458,7 @@ export type PingWeblinkData = {
   parseSource?: ParseSource;
 };
 
-export type WeblinkDTO = {
+export type Weblink = {
   /**
    * Weblink ID
    */
@@ -493,7 +517,7 @@ export type WeblinkDTO = {
   updatedAt?: string;
 };
 
-export type ContentDTO = {
+export type Content = {
   /**
    * Content ID
    */
@@ -554,7 +578,7 @@ export type ContentMeta = {
   formats?: Array<ContentMetaRecord>;
 };
 
-export type ContentDetail = ContentDTO & {
+export type ContentDetail = Content & {
   /**
    * Content
    */
@@ -569,7 +593,7 @@ export type ContentDetail = ContentDTO & {
   meta?: ContentMeta;
 };
 
-export type Digest = ContentDTO & {
+export type Digest = Content & {
   /**
    * Topic key
    */
@@ -584,7 +608,7 @@ export type Digest = ContentDTO & {
   date: string;
 };
 
-export type Feed = ContentDTO & {
+export type Feed = Content & {
   /**
    * Read count
    */
@@ -815,14 +839,14 @@ export type StoreWeblinkRequest = {
   /**
    * Weblink list
    */
-  data?: Array<WeblinkDTO>;
+  data?: Array<Weblink>;
 };
 
 export type ListWeblinkResponse = BaseResponse & {
   /**
    * Weblink list
    */
-  data?: Array<WeblinkDTO>;
+  data?: Array<Weblink>;
 };
 
 export type ListFeedResponse = BaseResponse & {

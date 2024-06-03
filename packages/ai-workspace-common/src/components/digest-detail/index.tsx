@@ -11,7 +11,7 @@ import { DigestDetailContent } from './digest-detail-content';
 import { Header } from './header';
 import { AskFollowUpModal } from '@refly-packages/ai-workspace-common/components/ask-follow-up-modal/index';
 // request
-import getAIGCContent from '@refly-packages/ai-workspace-common/requests/getAIGCContent';
+import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // styles
 import './digest-detail.scss';
 import { Digest } from '@refly-packages/ai-workspace-common/types';
@@ -33,18 +33,23 @@ export const DigestTail = () => {
   const handleGetDetail = async (digestId: string) => {
     setIsFetching(true);
     try {
-      const newRes = await getAIGCContent({
-        body: {
-          contentId: digestId,
+      const { data: newRes, error } = await client.getContentDetail({
+        path: {
+          cid: digestId,
         },
       });
 
+      if (error) {
+        throw error;
+      }
       if (!newRes?.success) {
         throw new Error(newRes?.errMsg);
       }
 
       console.log('newRes', newRes);
-      digestDetailStore.updateDigest(newRes?.data as Digest);
+      if (newRes.data) {
+        digestDetailStore.updateDigest(newRes?.data);
+      }
     } catch (err) {
       message.error(t('contentDetail.list.fetchErr'));
     }

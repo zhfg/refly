@@ -13,6 +13,11 @@ export default defineConfig({
     tsconfigPaths(),
     vitePluginForArco({
       theme: "@arco-themes/react-refly-ai",
+      filePatterns: [
+        "apps/web/src",
+        "apps/extension-wxt/src",
+        "packages/ai-workspace-common/src",
+      ],
     }),
     sentryVitePlugin({
       org: "refly-ai",

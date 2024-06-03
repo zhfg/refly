@@ -13,6 +13,7 @@ interface PluginOption {
   iconBox?: string; // Icon library package name
   modifyVars?: Vars; // less modifyVars
   style?: Style; // Style lazy load
+  filePatterns?: (string | RegExp)[]; // File to transform
   varsInjectScope?: (string | RegExp)[]; // Less vars inject
 }
 
@@ -54,8 +55,15 @@ export default function vitePluginArcoImport(options: PluginOption = {}): Plugin
       // console.log('viteConfig', resolvedConfig)
     },
     transform(code, id) {
+      let shouldTransform = false;
+      for (const pattern of options.filePatterns) {
+        if (id.match(pattern)) {
+          shouldTransform = true;
+        }
+      }
+
       // Do not transform packages in this monorepo!
-      if (id.match(/packages\/\w+\/src/)) {
+      if (!shouldTransform) {
         return code;
       }
 

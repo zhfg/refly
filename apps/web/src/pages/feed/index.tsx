@@ -22,7 +22,7 @@ import {
 import { useNavigate, useMatch } from "react-router-dom"
 // utils
 import { time } from "@refly/ai-workspace-common/utils/time"
-import getFeedList from "@refly/ai-workspace-common/requests/getFeedList"
+import client from "@refly/ai-workspace-common/requests/proxiedRequest"
 // types
 import { Feed as IFeed } from "@refly/ai-workspace-common/types"
 import "./index.scss"
@@ -62,7 +62,7 @@ export const Feed = () => {
         return
       }
 
-      const newRes = await getFeedList({
+      const { data: newRes, error } = await client.getFeedList({
         body: {
           page: currentPage,
           pageSize: 10,
@@ -71,6 +71,9 @@ export const Feed = () => {
 
       feedStore.updateCurrentPage(currentPage)
 
+      if (error) {
+        throw error
+      }
       if (!newRes?.success) {
         throw new Error(newRes?.errMsg)
       }
@@ -79,7 +82,9 @@ export const Feed = () => {
       }
 
       console.log("newRes", newRes)
-      feedStore.updateFeedList(newRes?.data as IFeed[])
+      if (newRes.data) {
+        feedStore.updateFeedList(newRes?.data)
+      }
     } catch (err) {
       message.error("获取推荐内容失败，请重新刷新试试")
     } finally {

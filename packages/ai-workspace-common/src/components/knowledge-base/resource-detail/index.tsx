@@ -10,9 +10,9 @@ import {
   useKnowledgeBaseStore,
 } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 // 请求
-import getResourceDetail from '@refly-packages/ai-workspace-common/requests/getResourceDetail';
+import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // 类型
-import { ResourceDetail } from '@refly-packages/ai-workspace-common/types';
+import { ResourceDetail } from '@refly/openapi-schema';
 import { useEffect, useState } from 'react';
 import { safeParseURL } from '@refly-packages/ai-workspace-common/utils/url';
 import { useListenToSelection } from '@refly-packages/ai-workspace-common/hooks/use-listen-to-selection';
@@ -32,12 +32,15 @@ export const KnowledgeBaseResourceDetail = () => {
   const handleGetDetail = async (resourceId: string) => {
     setIsFetching(true);
     try {
-      const newRes = await getResourceDetail({
-        body: {
+      const { data: newRes, error } = await client.getResourceDetail({
+        query: {
           resourceId,
         },
       });
 
+      if (error) {
+        throw error;
+      }
       if (!newRes?.success) {
         throw new Error(newRes?.errMsg);
       }
