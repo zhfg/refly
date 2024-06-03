@@ -9,8 +9,8 @@ export const calcPopupPosition = (rect: DOMRect, barDimesion: { barWidth: number
   let top = 0;
   let left = 0;
 
-  const viewportWidth = window.visualViewport.width;
-  const viewportHeight = window.visualViewport.height;
+  const viewportWidth = window?.visualViewport?.width || 0;
+  const viewportHeight = window?.visualViewport?.height || 0;
 
   if (rect.width <= barWidth) {
     left = rect.left - (barWidth - rect.width) / 2;

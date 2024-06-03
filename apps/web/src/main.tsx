@@ -7,7 +7,7 @@ import {
   createRoutesFromChildren,
   matchRoutes,
 } from "react-router-dom"
-import { AppRouter } from "./router/index"
+import { AppRouter } from "./routes/index"
 import { AppLayout } from "@refly/ai-workspace-common/components/layout/index"
 import * as Sentry from "@sentry/react"
 

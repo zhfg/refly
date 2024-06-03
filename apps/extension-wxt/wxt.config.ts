@@ -66,6 +66,7 @@ export default defineConfig({
       'unlimitedStorage',
       'cookies',
       'notifications',
+      'sidePanel',
     ],
   },
   runner: {
