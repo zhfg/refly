@@ -1,6 +1,5 @@
 import { createClient, client } from '@hey-api/client-fetch';
 import * as requestModule from '@refly/openapi-schema';
-import { browser } from 'wxt/browser';
 
 import { getRuntime } from '../utils/env';
 import { getAuthTokenFromCookie } from '../utils/request';
@@ -26,6 +25,7 @@ export interface BackgroundMessage {
 }
 
 export const sendToBackgroundV2 = async (message: BackgroundMessage) => {
+  const { browser } = await import('wxt/browser');
   await browser.runtime.sendMessage(message);
 
   const waitForResponse = new Promise((resolve) => {
