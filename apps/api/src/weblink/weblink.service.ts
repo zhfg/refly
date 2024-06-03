@@ -5,7 +5,7 @@ import { LRUCache } from 'lru-cache';
 import { InjectQueue } from '@nestjs/bull';
 import { Document } from '@langchain/core/documents';
 
-import { WeblinkDTO, Source, SourceMeta, ChatTaskResponse } from '@refly/openapi-schema';
+import { Weblink as WeblinkDTO, Source, SourceMeta, ChatTaskResponse } from '@refly/openapi-schema';
 import { PrismaService } from '../common/prisma.service';
 import { MinioService } from '../common/minio.service';
 import { RAGService, PARSER_VERSION } from '../rag/rag.service';
