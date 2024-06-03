@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import { ContentMeta } from "@refly/schema"
+import { ContentMeta } from "@refly/openapi-schema"
 
 // 组件
 import {

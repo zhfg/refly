@@ -10,11 +10,6 @@
       "reviewCategory": "packages"
     },
     {
-      "packageName": "@refly/schema",
-      "projectFolder": "packages/schema",
-      "reviewCategory": "packages"
-    },
-    {
       "packageName": "@refly/openapi-schema",
       "projectFolder": "packages/openapi-schema",
       "reviewCategory": "packages"

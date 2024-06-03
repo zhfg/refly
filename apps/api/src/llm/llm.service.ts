@@ -9,7 +9,7 @@ import { createStuffDocumentsChain } from 'langchain/chains/combine_documents';
 import { JsonOutputFunctionsParser } from 'langchain/output_parsers';
 
 import { LOCALE } from '@refly/constants';
-import { RetrieveFilter, SourceMeta } from '@refly/openapi-schema';
+import { RetrieveFilter, Source, SourceMeta, ContentMeta } from '@refly/openapi-schema';
 import { AigcContent, User } from '@prisma/client';
 import {
   qa,
@@ -25,9 +25,7 @@ import {
 import { LLMChatMessage } from './schema';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 
-import { ContentMeta } from './llm.dto';
 import { categoryList } from '../prompts/utils/category';
-import { Source } from '../types/weblink';
 import { SearchResultContext } from '../types/search';
 import { RAGService } from '../rag/rag.service';
 import { ContentPayload } from '../rag/rag.dto';
@@ -271,11 +269,11 @@ export class LlmService implements OnModuleInit {
   //   return results;
   // }
 
-  async getRelatedQuestion(docs: Document[], lastQuery: string, locale: LOCALE) {
-    if (docs.length <= 0) return;
+  async getRelatedQuestion(sources: Source[], lastQuery: string, locale: LOCALE) {
+    if (sources.length <= 0) return;
     console.log('activate getRelatedQuestion with locale: ', locale);
 
-    let contextContent = docs.reduce((total, cur) => {
+    let contextContent = sources.reduce((total, cur) => {
       total += `内容块:
       ===
       网页标题：${cur?.metadata?.title} 

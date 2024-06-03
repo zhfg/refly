@@ -63,10 +63,11 @@ export const useBuildThreadAndRun = () => {
   };
 
   const emptyConvRunTask = (question: string, forceNewConv?: boolean) => {
-    // 首先情况所有状态
+    // 首先清空所有状态
     resetState();
 
     const newConv = ensureConversationExist(forceNewConv);
+    console.log('emptyConvTask', newConv);
     conversationStore.setCurrentConversation(newConv);
     chatStore.setIsNewConversation(true);
     chatStore.setNewQAText(question);

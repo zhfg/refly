@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { User, Prisma } from '@prisma/client';
 import { PrismaService } from '../common/prisma.service';
-import { UpdateSettingsDTO } from './user.dto';
+import { UpdateUserSettingsRequest } from '@refly/openapi-schema';
 
 @Injectable()
 export class UserService {
@@ -17,7 +17,7 @@ export class UserService {
     return this.prisma.user.create({ data });
   }
 
-  async updateSettings(uid: number, data: UpdateSettingsDTO) {
+  async updateSettings(uid: number, data: UpdateUserSettingsRequest) {
     return this.prisma.user.update({
       where: { id: uid },
       data: { ...data },

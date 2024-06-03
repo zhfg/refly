@@ -1,9 +1,14 @@
 import { Controller, Logger, Get, Body, Request, UseGuards, Put } from '@nestjs/common';
-import { pick } from 'lodash';
 
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { UserService } from './user.service';
-import { UpdateSettingsDTO } from './user.dto';
+import {
+  BaseResponse,
+  GetUserTopicsResponse,
+  UpdateUserSettingsRequest,
+  UserSettings,
+} from '@refly/openapi-schema';
+import { buildSuccessResponse, pick } from '../utils';
 
 @Controller('user')
 export class UserController {
@@ -13,7 +18,7 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get('settings')
-  getSettings(@Request() req) {
+  getSettings(@Request() req): UserSettings {
     this.logger.log(`getSettings success, req.user = ${req.user.email}`);
     return pick(req.user, [
       'uid',
@@ -28,14 +33,17 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Put('settings')
-  async updateSettings(@Request() req, @Body() body: UpdateSettingsDTO) {
+  async updateSettings(
+    @Request() req,
+    @Body() body: UpdateUserSettingsRequest,
+  ): Promise<BaseResponse> {
     await this.userService.updateSettings(req.user.id, body);
-    return { success: true };
+    return buildSuccessResponse();
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('topics')
-  async getTopicList(@Request() req) {
+  async getTopicList(@Request() req): Promise<GetUserTopicsResponse> {
     const topics = await this.userService.getUserPreferences({
       userId: req.user.id,
     });
@@ -43,11 +51,18 @@ export class UserController {
       userId: req.user.id,
     });
 
-    return {
-      data: {
-        list: topics,
-        total: topicCnt,
-      },
-    };
+    return buildSuccessResponse({
+      list: topics.map((topic) => ({
+        ...pick(topic, ['score', 'topicKey']),
+        topic: {
+          ...pick(topic.topic, ['topicId', 'key', 'name', 'description']),
+          createdAt: topic.createdAt.toJSON(),
+          updatedAt: topic.updatedAt.toJSON(),
+        },
+        createdAt: topic.createdAt.toJSON(),
+        updatedAt: topic.updatedAt.toJSON(),
+      })),
+      total: topicCnt,
+    });
   }
 }

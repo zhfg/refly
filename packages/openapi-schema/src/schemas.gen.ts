@@ -1466,24 +1466,6 @@ export const $UpdateUserSettingsRequest = {
   },
 } as const;
 
-export const $GetUserSettingsResponse = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/BaseResponse',
-    },
-    {
-      type: 'object',
-      properties: {
-        data: {
-          type: 'object',
-          description: 'User settings data',
-          $ref: '#/components/schemas/UserSettings',
-        },
-      },
-    },
-  ],
-} as const;
-
 export const $GetUserTopicsResponse = {
   allOf: [
     {

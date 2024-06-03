@@ -993,13 +993,6 @@ export type UpdateUserSettingsRequest = {
   outputLocale?: string;
 };
 
-export type GetUserSettingsResponse = BaseResponse & {
-  /**
-   * User settings data
-   */
-  data?: UserSettings;
-};
-
 export type GetUserTopicsResponse = BaseResponse & {
   /**
    * User topics

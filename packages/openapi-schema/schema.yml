@@ -1622,15 +1622,6 @@ components:
           type: string
           description: Output locale
           example: en
-    GetUserSettingsResponse:
-      allOf:
-        - $ref: '#/components/schemas/BaseResponse'
-        - type: object
-          properties:
-            data:
-              type: object
-              description: User settings data
-              $ref: '#/components/schemas/UserSettings'
     GetUserTopicsResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
