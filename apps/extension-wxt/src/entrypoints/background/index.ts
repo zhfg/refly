@@ -3,6 +3,8 @@ import { onActivated } from './events/activated';
 import { onMessage } from './events/message';
 import { onPort } from './events/ports';
 import { setRuntime } from '@refly/ai-workspace-common/utils/env';
+import { browser } from 'wxt/browser';
+import { defineBackground } from 'wxt/sandbox';
 
 export default defineBackground(() => {
   setRuntime('extension');

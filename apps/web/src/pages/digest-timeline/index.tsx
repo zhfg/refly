@@ -21,7 +21,7 @@ import {
 } from "@arco-design/web-react/icon"
 import { useNavigate } from "react-router-dom"
 // types
-import type { Digest } from "@refly/ai-workspace-common/types/digest"
+import type { Digest } from "@refly/openapi-schema"
 import { IconTip } from "@refly/ai-workspace-common/components/dashboard/icon-tip"
 import { copyToClipboard } from "@refly/ai-workspace-common/utils"
 import {

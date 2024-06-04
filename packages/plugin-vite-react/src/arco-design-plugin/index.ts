@@ -15,6 +15,7 @@ interface PluginOption {
   style?: Style; // Style lazy load
   filePatterns?: (string | RegExp)[]; // File to transform
   varsInjectScope?: (string | RegExp)[]; // Less vars inject
+  sourceMaps?: boolean;
 }
 
 export default function vitePluginArcoImport(options: PluginOption = {}): Plugin {
@@ -63,10 +64,6 @@ export default function vitePluginArcoImport(options: PluginOption = {}): Plugin
         }
       }
 
-      if (id.includes('node_modules/wxt')) {
-        console.log('id', id, shouldTransform, options.filePatterns);
-      }
-
       // Do not transform packages in this monorepo!
       if (!shouldTransform) {
         return code;
@@ -89,7 +86,7 @@ export default function vitePluginArcoImport(options: PluginOption = {}): Plugin
         theme,
         style,
         isDevelopment,
-        sourceMaps: isDevelopment || Boolean(resolvedConfig?.build?.sourcemap),
+        sourceMaps: options.sourceMaps || isDevelopment || Boolean(resolvedConfig?.build?.sourcemap),
       });
     },
   };

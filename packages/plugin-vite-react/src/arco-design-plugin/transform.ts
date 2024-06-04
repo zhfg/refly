@@ -93,5 +93,9 @@ export function transformJsFiles({
     },
   });
 
-  return generate(ast, { sourceMaps, sourceFileName: id });
+  const res = generate(ast, { sourceMaps, sourceFileName: id });
+  return {
+    ...res,
+    map: null,
+  };
 }
