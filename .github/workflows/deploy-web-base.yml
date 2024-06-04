@@ -20,23 +20,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Create Sentry release
-        uses: getsentry/action-release@v1
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: refly-ai
-          SENTRY_PROJECT: web
+      - uses: pnpm/action-setup@v2
         with:
-          environment: ${{ inputs.environment }}
+          version: 8
 
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'pnpm'
 
-      - name: Build
-        run: pnpm install && pnpm --filter '@refly/web' build
+      - name: Set cache env
+        uses: gigara/rush-cache@v2
+
+      - name: Rush Install
+        run: node common/scripts/install-run-rush.js install
+
+      - name: Rush Build
+        run: node common/scripts/install-run-rush.js build
 
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
@@ -47,3 +47,12 @@ jobs:
           branch: main # always main, to ensure production deployment
           workingDirectory: apps/web
           directory: dist
+
+      - name: Create Sentry release
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: refly-ai
+          SENTRY_PROJECT: web
+        with:
+          environment: ${{ inputs.environment }}
