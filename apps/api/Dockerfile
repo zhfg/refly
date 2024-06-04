@@ -15,6 +15,7 @@ RUN cd common/deploy/apps/api && rushx build
 # Runner image
 FROM base AS runner
 RUN apk --no-cache add curl
+COPY --from=builder /app/common/deploy/apps/api/node_modules node_modules
 COPY --from=builder /app/common/deploy/apps/api/ .
 EXPOSE 3000
 CMD [ "node", "dist/main.js" ]
