@@ -10,12 +10,13 @@ COPY . .
 RUN rush install --to @refly/api
 RUN rush build --to @refly/api
 RUN rush deploy --overwrite
-RUN cd common/deploy && node create-link.js create
-RUN cd common/deploy/apps/api && rushx build
+RUN node common/deploy/create-links.js create
+RUN cp -r apps/api/node_modules/.bin common/deploy/apps/api/node_modules/
+RUN cd common/deploy/apps/api && npm run build
 
 # Runner image
 FROM base AS runner
 RUN apk --no-cache add curl
-COPY --from=builder /app/common/deploy/ .
+COPY --from=builder /app/common/deploy /app/common/deploy
 EXPOSE 3000
-CMD [ "node", "apps/api/dist/main.js" ]
+CMD [ "node", "common/deploy/apps/api/dist/main.js" ]
