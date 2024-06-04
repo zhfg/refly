@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension';
-import { TASK_TYPE } from '@refly-packages/ai-workspace-common/types';
+import { ChatTaskType } from '@refly/openapi-schema';
 import type { MessageState } from '@refly-packages/ai-workspace-common/types';
 
 interface MessageStoreState extends MessageState {
@@ -18,7 +18,7 @@ export const defaultMessageState = {
   pending: false, // 是否正在生成，表示一次任务生成是否正在进行中
   error: false, // 此次信息是否出错，比如还没开始生成就 abort，显示错误信息
   pendingReplyMsg: null, // 即将生成的 replyMsg 对象
-  taskType: TASK_TYPE.CHAT,
+  taskType: 'chat' as ChatTaskType,
   history: [], // 本次聊天历史
   pendingSourceDocs: [], // 实现搜索知识库时，给出的答案引用来源，也是流式获取
   pendingRelatedQuestions: [], // 实现搜索知识库时，给出的答案引用来源，也是流式获取

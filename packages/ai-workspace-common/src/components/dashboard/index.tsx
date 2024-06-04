@@ -19,7 +19,7 @@ import { QuickAction } from './quick-action';
 import './index.scss';
 import { useCookie } from 'react-use';
 // types
-import type { WebLinkItem } from '@refly-packages/ai-workspace-common/types/weblink';
+import { Weblink } from '@refly/openapi-schema';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { getExtensionId } from '@refly-packages/ai-workspace-common/utils/url';
 import { useTranslation } from 'react-i18next';
@@ -68,7 +68,7 @@ const Home = () => {
   //   handleCreateNewConversation(task)
   // }
 
-  const mapSourceFromSelectedRow = (selectedRow: { content: WebLinkItem; key: string | number }[]) => {
+  const mapSourceFromSelectedRow = (selectedRow: { content: Weblink; key: string | number }[]) => {
     return selectedRow?.map((item) => ({
       pageContent: item?.content?.originPageDescription || '',
       metadata: {

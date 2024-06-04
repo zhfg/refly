@@ -2,7 +2,7 @@
  * 只聚焦昨天、今天、这周、这个月最核心的内容，剩下的让用户去归档里面查看，能够对自己的工作有一个明确的感知
  */
 
-import { getCurrentDateInfo, time } from "@refly/ai-workspace-common/utils/time"
+import { time } from "@refly/ai-workspace-common/utils/time"
 import {
   List,
   Skeleton,
@@ -18,7 +18,6 @@ import {
 } from "@arco-design/web-react/icon"
 import { useNavigate } from "react-router-dom"
 // types
-import type { Digest } from "@refly/ai-workspace-common/types/digest"
 import { IconTip } from "@refly/ai-workspace-common/components/dashboard/icon-tip"
 import { copyToClipboard } from "@refly/ai-workspace-common/utils"
 import {
@@ -35,10 +34,10 @@ import { DigestHeader } from "@refly/ai-workspace-common/components/digest-commo
 import { useEffect, useState } from "react"
 import { EmptyDigestStatus } from "@refly/ai-workspace-common/components/empty-digest-today-status"
 // utils
-import getDigestList from "@refly/ai-workspace-common/requests/getDigestList"
+import client from "@refly/ai-workspace-common/requests/proxiedRequest"
 // styles
 import "./index.scss"
-import { Source } from "@refly/ai-workspace-common/types"
+import { Source, Digest } from "@refly/openapi-schema"
 
 export const getFirstSourceLink = (sources: Source[]) => {
   return sources?.[0]?.metadata?.source
@@ -76,13 +75,17 @@ export const DigestToday = () => {
         return
       }
 
-      const newRes = await getDigestList({
+      const { data: newRes, error } = await client.getDigestList({
         body: {
           // TODO: confirm time filter
           page: currentPage,
           pageSize: digestStore.today.pageSize,
         },
       })
+
+      if (error) {
+        throw error
+      }
 
       digestStore.updatePayload(
         { ...digestStore.today, currentPage },
@@ -203,11 +206,11 @@ export const DigestToday = () => {
                         }}>
                         <IconTag style={{ fontSize: 14, color: "#64645F" }} />
                         <span className="feed-list-item-text">
-                          {item?.topic?.name}
+                          {item?.topicKey}
                         </span>
                       </span>
                     </IconTip>
-                    <span
+                    {/* <span
                       key={3}
                       className="feed-item-link"
                       onClick={() => {
@@ -220,7 +223,7 @@ export const DigestToday = () => {
                           ? `& ${item?.weblinks?.length - 1} 条更多`
                           : ""}
                       </span>
-                    </span>
+                    </span> */}
                     <span key={2}>
                       <IconClockCircle
                         style={{ fontSize: 14, color: "#64645F" }}

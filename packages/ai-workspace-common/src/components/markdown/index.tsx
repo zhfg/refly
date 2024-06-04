@@ -16,7 +16,7 @@ import RemarkMath from 'remark-math';
 // styles
 import './styles/markdown.scss';
 import './styles/highlight.scss';
-import { Source } from '@refly-packages/ai-workspace-common/types';
+import { Source } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 
 export function PreCode(props: { children: any }) {

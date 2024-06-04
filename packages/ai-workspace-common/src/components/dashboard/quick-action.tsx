@@ -4,7 +4,7 @@ import { IconTip } from './icon-tip';
 import { useWeblinkStore } from '@refly-packages/ai-workspace-common/stores/weblink';
 import { mapSourceFromWeblinkList } from '@refly-packages/ai-workspace-common/utils/weblink';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
-import { Source } from '@refly-packages/ai-workspace-common/types';
+import { Source } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 
 export const QuickAction = () => {

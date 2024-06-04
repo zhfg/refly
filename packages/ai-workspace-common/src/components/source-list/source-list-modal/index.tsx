@@ -7,7 +7,7 @@ import './index.scss';
 // 自定义组件
 import { ResourceList } from '@refly-packages/ai-workspace-common/components/resource-list';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
-import { ResourceDetail } from '@refly-packages/ai-workspace-common/types';
+import { ResourceDetail } from '@refly/openapi-schema';
 
 interface SourceListModalProps {
   getPopupContainer: () => Element;

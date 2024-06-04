@@ -10,7 +10,8 @@ import { useNavigate } from 'react-router-dom';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // types
-import { LOCALE, Thread } from '@refly-packages/ai-workspace-common/types';
+import { LOCALE } from '@refly/constants';
+import { Conversation } from '@refly/openapi-schema';
 import './index.scss';
 // components
 import { EmptyThreadLibraryStatus } from '@refly-packages/ai-workspace-common/components/empty-thread-library-status';
@@ -113,7 +114,7 @@ export const ConvList = (props: ConvListProps) => {
       scrollLoading={scrollLoading}
       onReachBottom={(currentPage) => fetchData(currentPage)}
       noDataElement={<div>{t('threadLibrary.footer.noMoreText')}</div>}
-      render={(item: Thread, index) => (
+      render={(item: Conversation, index) => (
         <List.Item
           key={index}
           style={{

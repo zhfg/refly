@@ -5,7 +5,7 @@ import { useState } from 'react';
 import './index.scss';
 // request
 import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { Digest, Feed, ConversationDetail as Thread } from '@refly/openapi-schema';
+import { Digest, Feed, Conversation as Thread } from '@refly/openapi-schema';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
 import { useResetState } from '@refly-packages/ai-workspace-common/hooks/use-reset-state';

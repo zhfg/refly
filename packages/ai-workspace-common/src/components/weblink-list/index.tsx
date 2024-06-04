@@ -1,7 +1,7 @@
 import { Drawer, Table, type TableColumnProps, Button, Message as message, Tag } from '@arco-design/web-react';
 import React, { forwardRef, useEffect, memo, useMemo } from 'react';
 import throttle from 'lodash.throttle';
-import type { WebLinkItem } from '@refly-packages/ai-workspace-common/types/weblink';
+import { Weblink } from '@refly/openapi-schema';
 
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 // stores
@@ -14,7 +14,7 @@ import { safeParseURL } from '@refly-packages/ai-workspace-common/utils/url';
 import { useTranslation } from 'react-i18next';
 import { LOCALE } from '@refly/constants';
 
-const WebLinkItem = (props: { weblink: WebLinkItem }) => {
+const WebLinkItem = (props: { weblink: Weblink }) => {
   const {
     updatedAt,
     originPageDescription,

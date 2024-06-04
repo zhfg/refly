@@ -1,7 +1,8 @@
 import { Button, List, Skeleton, Typography, Message as message } from '@arco-design/web-react';
 import { IconBulb, IconCopy, IconPlus, IconQuote, IconReply, IconTranslate } from '@arco-design/web-react/icon';
 import React, { useState } from 'react';
-import type { SessionItem, Source } from '@refly-packages/ai-workspace-common/types';
+import { Source } from '@refly/openapi-schema';
+import type { SessionItem } from '@refly-packages/ai-workspace-common/types';
 
 // stores
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';

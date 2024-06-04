@@ -109,13 +109,13 @@ export const KnowledgeBaseResourceDetail = () => {
                 <span className="action-summary-text">知识图谱</span>
               </div>
             </div>
-            <div className="knowledge-base-directory-keyword-list">
+            {/* <div className="knowledge-base-directory-keyword-list">
               {(resourceDetail?.data?.keywords || []).map((keyword, index) => (
                 <div className="knowledge-base-directory-keyword-item" key={index}>
                   <span>{keyword}</span>
                 </div>
               ))}
-            </div>
+            </div> */}
           </div>
         )}
         {isFetching ? (

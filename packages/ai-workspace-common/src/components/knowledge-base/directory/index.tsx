@@ -1,4 +1,4 @@
-import { LOCALE } from '@refly-packages/ai-workspace-common/types';
+import { LOCALE } from '@refly/constants';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 
 // styles
@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 // 类型
-import { ResourceDetail } from '@refly-packages/ai-workspace-common/types/knowledge-base';
+import { ResourceDetail } from '@refly/openapi-schema';
 // 请求
 import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // 组件

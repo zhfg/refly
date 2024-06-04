@@ -17,7 +17,7 @@ import { QuickSearchModal } from '@refly-packages/ai-workspace-common/components
 import { useQuickSearchStateStore } from '@refly-packages/ai-workspace-common/stores/quick-search-state';
 import { useBindCommands } from '@refly-packages/ai-workspace-common/hooks/use-bind-commands';
 import { useTranslation } from 'react-i18next';
-import { LOCALE } from '@refly-packages/ai-workspace-common/types';
+import { LOCALE } from '@refly/constants';
 
 const Content = Layout.Content;
 

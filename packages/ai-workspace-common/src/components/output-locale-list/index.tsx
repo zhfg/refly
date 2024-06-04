@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Dropdown, Menu, Typography, Message as message } from '@arco-design/web-react';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/parse';
-import { LOCALE } from '@refly-packages/ai-workspace-common/types';
+import { LOCALE } from '@refly/constants';
 // request
 import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { OutputLocale, enLocale, localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/i18n';
@@ -10,7 +10,7 @@ import { OutputLocale, enLocale, localeToLanguageName } from '@refly-packages/ai
 import './index.scss';
 import { getDefaultPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
-export const OutputLocaleList = (props: { children: any; getPopupContainer: () => HTMLElement }) => {
+export const OutputLocaleList = (props: { children: any; getPopupContainer?: () => HTMLElement }) => {
   const { getPopupContainer = getDefaultPopupContainer } = props;
   // i18n
   const { t, i18n } = useTranslation();

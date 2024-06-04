@@ -13,7 +13,7 @@ import { UILocaleList } from '@refly-packages/ai-workspace-common/components/ui-
 import { IconDown } from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
 import { OutputLocaleList } from '../output-locale-list';
-import { LOCALE } from '@refly-packages/ai-workspace-common/types';
+import { LOCALE } from '@refly/constants';
 import { localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/i18n';
 
 export const Settings = () => {

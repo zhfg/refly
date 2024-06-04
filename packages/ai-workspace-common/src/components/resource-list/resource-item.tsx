@@ -1,4 +1,4 @@
-import { LOCALE } from '@refly-packages/ai-workspace-common/types';
+import { LOCALE } from '@refly/constants';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 
 // styles
@@ -6,9 +6,9 @@ import './index.scss';
 import { IconBook, IconBulb, IconCompass } from '@arco-design/web-react/icon';
 import { Tag, Typography } from '@arco-design/web-react';
 
-import type { ResourceDetail } from '@refly-packages/ai-workspace-common/types/knowledge-base';
+import { ResourceDetail } from '@refly/openapi-schema';
 // 类型
-import { ResourceIndexStatus } from '@refly-packages/ai-workspace-common/types/knowledge-base';
+import { IndexStatus } from '@refly/openapi-schema';
 // 请求
 import { safeParseURL } from '@refly-packages/ai-workspace-common/utils/url';
 import { Markdown } from '../markdown';
@@ -34,11 +34,11 @@ export const ResourceItem = (props: {
   } = props;
   const navigate = useNavigate();
 
-  const getIndexStatusText = (indexStatus?: ResourceIndexStatus) => {
+  const getIndexStatusText = (indexStatus?: IndexStatus) => {
     switch (indexStatus) {
-      case ResourceIndexStatus.processing:
+      case 'processing':
         return '处理中';
-      case ResourceIndexStatus.failed:
+      case 'failed':
         return '处理失败';
       default: {
         return '';
@@ -46,11 +46,11 @@ export const ResourceItem = (props: {
     }
   };
 
-  const getIndexStatusColor = (indexStatus?: ResourceIndexStatus) => {
+  const getIndexStatusColor = (indexStatus?: IndexStatus) => {
     switch (indexStatus) {
-      case ResourceIndexStatus.processing:
+      case 'processing':
         return 'orange';
-      case ResourceIndexStatus.failed:
+      case 'failed':
         return 'red';
       default: {
         return '';
@@ -136,13 +136,13 @@ export const ResourceItem = (props: {
           ) : null}
         </div>
       ) : null}
-      <div className="knowledge-base-directory-keyword-list">
+      {/* <div className="knowledge-base-directory-keyword-list">
         {(item?.data?.keywords || [])?.map((keyword, index) => (
           <div className="knowledge-base-directory-keyword-item" key={index}>
             <span>{keyword}</span>
           </div>
         ))}
-      </div>
+      </div> */}
       {showDesc ? (
         <div style={{ maxHeight: 200, overflowY: 'scroll' }}>
           <Markdown content={item?.description || ''} />

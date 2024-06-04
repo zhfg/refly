@@ -2,7 +2,7 @@ import { Button, Message as message, Breadcrumb } from '@arco-design/web-react';
 import { IconClockCircle, IconShareExternal } from '@arco-design/web-react/icon';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
-import { ConversationListItem as Thread } from '@refly/openapi-schema';
+import { Conversation as Thread } from '@refly/openapi-schema';
 import { LOCALE } from '@refly/constants';
 import { useTranslation } from 'react-i18next';
 

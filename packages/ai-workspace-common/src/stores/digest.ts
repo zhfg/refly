@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension';
 import type { Digest, ContentMetaRecord } from '@refly/openapi-schema';
-import { fakeDigestList } from '@refly-packages/ai-workspace-common/fake-data/digest';
 
 interface DigestPayload {
   featureList: Digest[];
@@ -32,7 +31,7 @@ interface DigestState {
 }
 
 const defaultDigestPayload = {
-  featureList: fakeDigestList as Digest[],
+  featureList: [],
   pageSize: 10,
   currentPage: 1,
   hasMore: true,

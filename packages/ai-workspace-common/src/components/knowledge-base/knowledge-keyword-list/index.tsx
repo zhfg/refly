@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 // request
 import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // types
-import { Topic } from '@refly-packages/ai-workspace-common/types/';
+import { Topic } from '@refly/openapi-schema';
 // utils
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';

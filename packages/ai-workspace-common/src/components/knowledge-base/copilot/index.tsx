@@ -103,29 +103,7 @@ export const AICopilot = (props: AICopilotProps) => {
       conversationStore.setCurrentConversation(res?.data);
     }
 
-    //
-    const messages = (res?.data?.messages || [])?.map((item) => {
-      const {
-        content = '',
-        relatedQuestions = [],
-        sources,
-        type,
-        selectedWeblinkConfig = '', // 这里需要构建进来
-        ...extraInfo
-      } = item || {};
-
-      return {
-        ...extraInfo,
-        data: {
-          content,
-          relatedQuestions,
-          sources,
-          type,
-          selectedWeblinkConfig,
-        },
-      };
-    });
-    chatStore.setMessages(messages);
+    chatStore.setMessages(res.data.messages);
   };
 
   const handleConvTask = async (convId: string) => {

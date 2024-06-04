@@ -45,7 +45,7 @@ export const $ResourceType = {
 
 export const $ResourceListItem = {
   type: 'object',
-  required: ['resourceId', 'resourceType', 'title', 'isPublic', 'createdAt', 'updatedAt'],
+  required: ['resourceId', 'resourceType', 'title', 'isPublic', 'indexStatus', 'createdAt', 'updatedAt'],
   properties: {
     resourceId: {
       type: 'string',
@@ -55,6 +55,11 @@ export const $ResourceListItem = {
     resourceType: {
       description: 'Resource type',
       $ref: '#/components/schemas/ResourceType',
+    },
+    collectionId: {
+      type: 'string',
+      description: 'Collection ID',
+      deprecated: true,
     },
     title: {
       type: 'string',
@@ -68,6 +73,10 @@ export const $ResourceListItem = {
       type: 'object',
       description: 'Resource metadata',
       $ref: '#/components/schemas/ResourceMeta',
+    },
+    indexStatus: {
+      description: 'Resource index status',
+      $ref: '#/components/schemas/IndexStatus',
     },
     isPublic: {
       type: 'boolean',

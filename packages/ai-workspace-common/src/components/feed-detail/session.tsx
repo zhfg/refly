@@ -1,7 +1,8 @@
 import { Button, List, Skeleton, Typography, Message as message } from '@arco-design/web-react';
 import { IconBulb, IconCopy, IconPlus, IconQuote, IconReply, IconTranslate } from '@arco-design/web-react/icon';
 import React, { useState } from 'react';
-import type { SessionItem, Source } from '@refly-packages/ai-workspace-common/types';
+import { Source } from '@refly/openapi-schema';
+import type { SessionItem } from '@refly-packages/ai-workspace-common/types';
 
 // stores
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
@@ -9,13 +10,10 @@ import { IconTip } from '@refly-packages/ai-workspace-common/components/dashboar
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 // components
 import { SummaryModal } from '@refly-packages/ai-workspace-common/components/summary-modal';
-// request
-import getSourceSummary from '@refly-packages/ai-workspace-common/requests/getSourceSummary';
 
 import copyToClipboard from 'copy-to-clipboard';
 import { delay } from '@refly-packages/ai-workspace-common/utils/delay';
 // fake data
-import { fakeSourceSummary } from '@refly-packages/ai-workspace-common/fake-data/source';
 import { safeParseURL } from '@refly-packages/ai-workspace-common/utils/url';
 
 interface SessionProps {

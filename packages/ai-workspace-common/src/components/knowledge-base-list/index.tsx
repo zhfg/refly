@@ -7,7 +7,6 @@ import { List, Skeleton, Typography, Message as message } from '@arco-design/web
 import { IconClockCircle, IconLink, IconRightCircle, IconShareExternal, IconTag } from '@arco-design/web-react/icon';
 import { useNavigate } from 'react-router-dom';
 // types
-import type { Digest } from '@refly-packages/ai-workspace-common/types/digest';
 import { IconTip } from '@refly-packages/ai-workspace-common/components/dashboard/icon-tip';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { getClientOrigin, safeParseURL } from '@refly-packages/ai-workspace-common/utils/url';
@@ -18,9 +17,8 @@ import { EmptyDigestStatus } from '@refly-packages/ai-workspace-common/component
 import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // styles
 import './index.scss';
-import { Source } from '@refly-packages/ai-workspace-common/types';
 import { LOCALE } from '@refly/constants';
-import { CollectionListItem } from '@refly/openapi-schema';
+import { CollectionListItem, Source } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import classNames from 'classnames';

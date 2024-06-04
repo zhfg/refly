@@ -14,7 +14,6 @@ import { AskFollowUpModal } from '@refly-packages/ai-workspace-common/components
 import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // styles
 import './digest-detail.scss';
-import { Digest } from '@refly-packages/ai-workspace-common/types';
 import { useTranslation } from 'react-i18next';
 
 /**

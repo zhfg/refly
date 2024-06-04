@@ -605,6 +605,7 @@ components:
         - resourceType
         - title
         - isPublic
+        - indexStatus
         - createdAt
         - updatedAt
       properties:
@@ -615,6 +616,10 @@ components:
         resourceType:
           description: Resource type
           $ref: '#/components/schemas/ResourceType'
+        collectionId:
+          type: string
+          description: Collection ID
+          deprecated: true
         title:
           type: string
           description: Resource title
@@ -625,6 +630,9 @@ components:
           type: object
           description: Resource metadata
           $ref: '#/components/schemas/ResourceMeta'
+        indexStatus:
+          description: Resource index status
+          $ref: '#/components/schemas/IndexStatus'
         isPublic:
           type: boolean
           description: Whether this resource is public

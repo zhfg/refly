@@ -9,8 +9,6 @@ import { useDigestTopicStore } from '@refly-packages/ai-workspace-common/stores/
 import { useEffect, useState } from 'react';
 // request
 import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-// types
-import { Topic } from '@refly-packages/ai-workspace-common/types/';
 // utils
 import { delay } from '@refly-packages/ai-workspace-common/utils/delay';
 import { useTranslation } from 'react-i18next';
@@ -65,7 +63,7 @@ export const DigestHeader = (props: DigestHeaderProps) => {
       }
 
       console.log('newRes', newRes);
-      digestTopicStore.updateTopicList(newRes?.data?.list as Topic[]);
+      digestTopicStore.updateTopicList(newRes?.data?.list);
       digestTopicStore.updateTopicTotalCnt(newRes?.data?.total as number);
       setIsFetching(false);
     } catch (err) {

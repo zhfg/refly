@@ -4,7 +4,7 @@ import { IconSearch } from '@arco-design/web-react/icon';
 import { Divider, Input, Skeleton } from '@arco-design/web-react';
 import { useSearchableList } from '@refly-packages/ai-workspace-common/components/use-searchable-list';
 import { useEffect, useState } from 'react';
-import type { ResourceDetail } from '@refly-packages/ai-workspace-common/types/knowledge-base';
+import { ResourceDetail } from '@refly/openapi-schema';
 // 组件
 import { ResourceItem } from './resource-item';
 import classNames from 'classnames';

@@ -1,4 +1,4 @@
-import { LOCALE } from '@refly-packages/ai-workspace-common/types';
+import { LOCALE } from '@refly/constants';
 
 export const languageNameToLocale = {
   en: {

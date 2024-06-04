@@ -10,7 +10,6 @@ import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 
 // 静态资源
 import Logo from '@/assets/logo.svg';
-import type { User } from '@refly-packages/ai-workspace-common/types';
 import { Link, useNavigate } from 'react-router-dom';
 import { safeParseJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 
@@ -19,15 +18,6 @@ import './index.scss';
 import { useCookie } from 'react-use';
 import { getServerOrigin } from '@refly-packages/ai-workspace-common/utils/url';
 import { useTranslation } from 'react-i18next';
-
-interface ExternalLoginPayload {
-  name: string;
-  body: {
-    status: 'success' | 'failed';
-    token?: string;
-    user?: User;
-  };
-}
 
 export const LoginModal = (props: { visible?: boolean; from?: string }) => {
   const userStore = useUserStore();

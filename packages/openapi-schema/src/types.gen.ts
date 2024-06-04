@@ -43,6 +43,11 @@ export type ResourceListItem = {
    */
   resourceType: ResourceType;
   /**
+   * Collection ID
+   * @deprecated
+   */
+  collectionId?: string;
+  /**
    * Resource title
    */
   title: string;
@@ -54,6 +59,10 @@ export type ResourceListItem = {
    * Resource metadata
    */
   data?: ResourceMeta;
+  /**
+   * Resource index status
+   */
+  indexStatus: IndexStatus;
   /**
    * Whether this resource is public
    */

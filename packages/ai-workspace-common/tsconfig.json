@@ -8,7 +8,7 @@
 
     /* Bundler mode */
     "moduleResolution": "bundler",
-    // "allowImportingTsExtensions": true,
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
@@ -26,7 +26,7 @@
       "@refly-packages/ai-workspace-common/*": ["./src/*"]
     },
     "composite": true,
-    "noEmit": false,
+    "noEmit": true,
     "declaration": true,
     "declarationMap": true
   },

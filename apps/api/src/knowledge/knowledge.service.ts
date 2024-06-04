@@ -3,7 +3,6 @@ import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { readingTime } from 'reading-time-estimator';
 import { Prisma, Resource, User } from '@prisma/client';
-import _ from 'lodash';
 import { RAGService } from '../rag/rag.service';
 import { PrismaService } from '../common/prisma.service';
 import { MinioService } from '../common/minio.service';
@@ -22,6 +21,7 @@ import {
   genResourceUuid,
 } from '../utils';
 import { FinalizeResourceParam } from './knowledge.dto';
+import { pick, omit } from '../utils';
 
 @Injectable()
 export class KnowledgeService {
@@ -53,7 +53,7 @@ export class KnowledgeService {
       return null;
     }
     return {
-      ..._.pick(data, [
+      ...pick(data, [
         'collectionId',
         'userId',
         'title',
@@ -63,7 +63,7 @@ export class KnowledgeService {
         'updatedAt',
       ]),
       resources: data.resources.map((r) => ({
-        ..._.omit(r, ['id', 'userId', 'deletedAt']),
+        ...omit(r, ['id', 'userId', 'deletedAt']),
         createdAt: r.createdAt.toJSON(),
         updatedAt: r.updatedAt.toJSON(),
         data: JSON.parse(r.meta),
@@ -85,7 +85,7 @@ export class KnowledgeService {
         userId: user.id,
         isPublic: param.isPublic,
       },
-      update: { ..._.omit(param, 'collectionId') },
+      update: { ...omit(param, ['collectionId']) },
     });
   }
 
@@ -152,7 +152,7 @@ export class KnowledgeService {
       where: { resourceId, deletedAt: null },
     });
     const detail: ResourceDetail & { userId: number } = {
-      ..._.omit(resource, ['id']),
+      ...omit(resource, ['id']),
       createdAt: resource.createdAt.toJSON(),
       updatedAt: resource.updatedAt.toJSON(),
       data: JSON.parse(resource.meta),
@@ -310,7 +310,7 @@ export class KnowledgeService {
   }
 
   async updateResource(user: User, param: UpsertResourceRequest) {
-    const updates: Prisma.ResourceUpdateInput = _.pick(param, ['title', 'isPublic']);
+    const updates: Prisma.ResourceUpdateInput = pick(param, ['title', 'isPublic']);
     if (param.data) {
       updates.meta = JSON.stringify(param.data);
     }

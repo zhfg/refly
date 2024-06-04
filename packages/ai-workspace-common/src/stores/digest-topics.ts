@@ -3,7 +3,6 @@ import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension';
 
 import { Topic } from '@refly/openapi-schema';
-import { fakeTopics } from '@refly-packages/ai-workspace-common/fake-data/digest';
 
 interface TopicState {
   topicList: Topic[];
@@ -20,7 +19,7 @@ interface TopicState {
 }
 
 export const defaultState = {
-  topicList: fakeTopics as Topic[],
+  topicList: [],
   total: 0,
   pageSize: 10,
   currentPage: 1,
