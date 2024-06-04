@@ -10,20 +10,32 @@ export function toUtf8(str: string) {
     .join('');
 }
 
-export default function vitePluginArcoImport(): Plugin {
+interface PluginOption {
+  filePatterns?: (string | RegExp)[]; // File to transform
+}
+
+export default function vitePluginEncoding(options: PluginOption): Plugin {
   return {
     name: pkg.name,
 
-    generateBundle(options, bundle) {
-      options;
-      // 遍历所有 chunk
+    generateBundle(_, bundle) {
       for (const file in bundle) {
         const chunk = bundle[file] as OutputAsset | OutputChunk;
-        console.log('file', file, chunk.type, chunk);
+
+        let shouldTransform = false;
+
+        for (const pattern of options.filePatterns) {
+          if (file.match(new RegExp(pattern))) {
+            shouldTransform = true;
+          }
+        }
+
+        if (!shouldTransform) {
+          continue;
+        }
 
         // 如果是 JavaScript 文件
         if (chunk.type === 'chunk' && chunk?.code && /\.js$/.test(file)) {
-          console.log('file', file);
           // 将内容转换为 UTF-8 编码
           const utf8Content = toUtf8(chunk.code as string);
           chunk.code = utf8Content;

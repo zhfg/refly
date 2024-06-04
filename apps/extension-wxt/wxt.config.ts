@@ -1,4 +1,4 @@
-import { defineConfig, WxtViteConfig } from 'wxt';
+import { ConfigEnv, defineConfig, WxtViteConfig } from 'wxt';
 import react from '@vitejs/plugin-react';
 import { vitePluginForArco } from '@refly/arco-vite-plugin-react';
 import { pluginViteEncoding } from '@refly/plugin-vite-encoding';
@@ -9,15 +9,18 @@ import path from 'path';
 // See https://wxt.dev/api/config.html
 export default defineConfig({
   srcDir: 'src',
-  vite: () =>
+  vite: (env: ConfigEnv) =>
     ({
       logLevel: 'error',
       plugins: [
         react(),
         tsconfigPaths(),
-        pluginViteEncoding(),
+        pluginViteEncoding({
+          filePatterns: ['(.*)?-csui.js'], // optimized only for content scripts ui
+        }),
         vitePluginForArco({
           theme: '@arco-themes/react-refly-ai',
+          sourceMaps: true,
           filePatterns: ['apps/web/src', 'apps/extension-wxt/src', 'packages/ai-workspace-common/src'],
         }),
       ],
@@ -35,7 +38,7 @@ export default defineConfig({
         },
       },
       build: {
-        sourcemap: false,
+        sourcemap: true,
       },
       server: {
         port: 8000,
