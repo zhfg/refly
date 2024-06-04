@@ -21,14 +21,12 @@ import Home from './home';
 import { ErrorBoundary } from '@sentry/react';
 // styles
 import './router.scss';
+import { getPopupContainer } from '@refly/ai-workspace-common/utils/ui';
 
-interface ContentRouterProps {
-  getPopupContainer: () => HTMLElement;
-}
+interface ContentRouterProps {}
 
 export const ContentRouter = (props: ContentRouterProps) => {
   // 导航相关
-  const getPopupContainer = props.getPopupContainer;
   const navigate = useNavigate();
   const userStore = useUserStore();
 
@@ -83,7 +81,7 @@ export const ContentRouter = (props: ContentRouterProps) => {
     <div className="workspace-container">
       <div className="workspace-inner-container">
         <ErrorBoundary>
-          <AICopilot getPopupContainer={() => getPopupContainer() as HTMLElement} />
+          <AICopilot />
         </ErrorBoundary>
       </div>
     </div>

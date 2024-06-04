@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { reflyEnv } from '@/utils/env';
 
+import '@/styles/style.css';
 import './App.scss';
 
 import { IconRefresh, IconBulb } from '@arco-design/web-react/icon';

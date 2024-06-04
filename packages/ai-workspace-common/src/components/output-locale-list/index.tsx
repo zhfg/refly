@@ -8,10 +8,9 @@ import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest'
 import { OutputLocale, enLocale, localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/i18n';
 // styles
 import './index.scss';
-import { getDefaultPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
+import { getDefaultPopupContainer, getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
-export const OutputLocaleList = (props: { children: any; getPopupContainer?: () => HTMLElement }) => {
-  const { getPopupContainer = getDefaultPopupContainer } = props;
+export const OutputLocaleList = (props: { children: any }) => {
   // i18n
   const { t, i18n } = useTranslation();
   const uiLocale = i18n?.languages?.[0] as LOCALE;
@@ -53,7 +52,13 @@ export const OutputLocaleList = (props: { children: any; getPopupContainer?: () 
   );
 
   return (
-    <Dropdown droplist={dropList} position="bl" getPopupContainer={getPopupContainer}>
+    <Dropdown
+      droplist={dropList}
+      position="bl"
+      getPopupContainer={() => {
+        return getPopupContainer();
+      }}
+    >
       {props.children}
     </Dropdown>
   );

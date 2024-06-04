@@ -7,9 +7,9 @@ import './index.scss';
 // 自定义组件
 import { KnowledgeBaseList } from '@refly-packages/ai-workspace-common/components/knowledge-base-list';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 interface KnowledgeBaseListModalProps {
-  getPopupContainer: () => Element;
   title: string;
   classNames: string;
   width?: number;
@@ -22,14 +22,6 @@ export const KnowledgeBaseListModal = (props: KnowledgeBaseListModalProps) => {
   const knowledgeBaseStore = useKnowledgeBaseStore();
   const { jumpNewKnowledgeBase } = useBuildThreadAndRun();
 
-  const getPopupContainer = () => {
-    if (props?.getPopupContainer) {
-      return props.getPopupContainer();
-    }
-
-    return document.body;
-  };
-
   return (
     <Drawer
       width={props.width || '100%'}
@@ -38,7 +30,10 @@ export const KnowledgeBaseListModal = (props: KnowledgeBaseListModalProps) => {
         background: '#FCFCF9',
         height: props.height || '66%',
       }}
-      getPopupContainer={getPopupContainer}
+      getPopupContainer={() => {
+        const container = getPopupContainer();
+        return container?.querySelector('.ai-copilot-container') as Element;
+      }}
       headerStyle={{ justifyContent: 'center' }}
       title={
         <div style={{ display: 'flex', justifyContent: 'center' }}>

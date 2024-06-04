@@ -35,10 +35,9 @@ import { useTranslation } from 'react-i18next';
 // styles
 import './index.scss';
 import { apiRequest } from '@/requests/apiRequest';
+import { getPopupContainer } from '@refly/ai-workspace-common/utils/ui';
 
-type Props = {
-  getPopupContainer: () => HTMLElement;
-};
+type Props = {};
 
 const WebLinkItem = (props: { weblink: WebLinkItem }) => {
   const {
@@ -237,7 +236,9 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
   return (
     <div style={{ width: '100%' }}>
       <Drawer
-        getPopupContainer={props.getPopupContainer}
+        getPopupContainer={() => {
+          return getPopupContainer();
+        }}
         width="100%"
         style={{
           maxHeight: 680,

@@ -39,12 +39,9 @@ import { localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/
 import { OutputLocaleList } from '@refly-packages/ai-workspace-common/components/output-locale-list';
 import { useTranslation } from 'react-i18next';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
-import { getDefaultPopupContainer } from '../../../utils/ui';
 import { SourceListModal } from '../../source-list/source-list-modal';
 
-interface AICopilotProps {
-  getPopupContainer: () => HTMLElement;
-}
+interface AICopilotProps {}
 
 export const AICopilot = (props: AICopilotProps) => {
   const [searchParams] = useSearchParams();
@@ -155,12 +152,12 @@ export const AICopilot = (props: AICopilotProps) => {
             icon={<IconMore style={{ fontSize: 16 }} />}></Button> */}
         </div>
       </div>
-      {/* <div
+      <div
         className="ai-copilot-message-container"
-        style={{ height: `calc(100% - ${actualCopilotBodyHeight}px - 50px)` }}
+        style={{ height: `calc(100vh - ${actualCopilotBodyHeight}px - 50px)` }}
       >
         <ChatMessages />
-      </div> */}
+      </div>
       <div className="ai-copilot-body" style={{ height: actualCopilotBodyHeight }}>
         {showContextCard ? (
           <div className="ai-copilot-context-display">
@@ -221,14 +218,9 @@ export const AICopilot = (props: AICopilotProps) => {
               <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
             </div>
             <div className="chat-input-assist-action">
-              {!showSelectedTextContext ? (
-                <SearchTargetSelector
-                  classNames="chat-input-assist-action-item"
-                  getPopupContainer={props.getPopupContainer}
-                />
-              ) : null}
+              {!showSelectedTextContext ? <SearchTargetSelector classNames="chat-input-assist-action-item" /> : null}
 
-              <OutputLocaleList getPopupContainer={props.getPopupContainer}>
+              <OutputLocaleList>
                 <Button icon={<IconTranslate />} type="text" className="chat-input-assist-action-item">
                   <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span>
                   <IconCaretDown />
@@ -238,33 +230,14 @@ export const AICopilot = (props: AICopilotProps) => {
           </div>
         </div>
       </div>
-      {knowledgeBaseStore?.convModalVisible ? (
-        <ConvListModal
-          title="会话库"
-          classNames="conv-list-modal"
-          getPopupContainer={() => {
-            const container = props.getPopupContainer() || getDefaultPopupContainer();
-            return container?.querySelector('.ai-copilot-container') as Element;
-          }}
-        />
-      ) : null}
+      {knowledgeBaseStore?.convModalVisible ? <ConvListModal title="会话库" classNames="conv-list-modal" /> : null}
       {knowledgeBaseStore?.kbModalVisible && knowledgeBaseStore.actionSource === ActionSource.Conv ? (
-        <KnowledgeBaseListModal
-          title="知识库"
-          classNames="kb-list-modal"
-          getPopupContainer={() => {
-            const container = props.getPopupContainer() || getDefaultPopupContainer();
-            return container?.querySelector('.ai-copilot-container') as Element;
-          }}
-        />
+        <KnowledgeBaseListModal title="知识库" classNames="kb-list-modal" />
       ) : null}
       {knowledgeBaseStore?.sourceListModalVisible ? (
         <SourceListModal
           title={`结果来源 (${knowledgeBaseStore?.tempConvResources?.length || 0})`}
           classNames="source-list-modal"
-          getPopupContainer={() => {
-            return document.querySelector('.ai-copilot-container') as Element;
-          }}
           resources={knowledgeBaseStore?.tempConvResources || []}
         />
       ) : null}

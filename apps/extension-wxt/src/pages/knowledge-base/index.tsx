@@ -14,7 +14,6 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { useResizePanel } from '@refly/ai-workspace-common/hooks/use-resize-panel';
 import { ErrorBoundary } from '@sentry/react';
-import { getPopupContainer } from '../../utils/ui';
 
 // 用于快速选择
 export const quickActionList = ['summary'];
@@ -63,7 +62,7 @@ const KnowledgeLibraryLayout = () => {
                   key="workspace-left-assist-panel"
                   id="workspace-left-assist-panel"
                 >
-                  <KnowledgeBaseDetail getPopupContainer={() => getPopupContainer()} />
+                  <KnowledgeBaseDetail />
                 </Panel>
                 <PanelResizeHandle
                   className="workspace-panel-resize"
@@ -80,7 +79,7 @@ const KnowledgeLibraryLayout = () => {
               key="workspace-content-panel"
               id="workspace-content-panel"
             >
-              <AICopilot getPopupContainer={() => getPopupContainer()} />
+              <AICopilot />
             </Panel>
           </PanelGroup>
         </div>

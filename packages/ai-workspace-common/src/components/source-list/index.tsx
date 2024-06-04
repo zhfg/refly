@@ -14,6 +14,7 @@ import { KnowledgeBaseTab, useKnowledgeBaseStore } from '@refly-packages/ai-work
 import { SourceListModal } from './source-list-modal';
 import { mapSourceToResource } from '@refly-packages/ai-workspace-common/utils/resource';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 interface SourceListProps {
   sources: Source[];
@@ -31,6 +32,7 @@ const SourceItem = ({ source, index }: { source: Source; index: number }) => {
       className="source-item-popover-container"
       style={{ background: '#FCFCF9' }}
       position="bottom"
+      getPopupContainer={getPopupContainer}
       content={<SourceDetailContent source={source} index={index} />}
     >
       <div className="source-list-item relative text-xs py-3 px-3 rounded-lg flex flex-col gap-2" key={index}>
@@ -123,11 +125,11 @@ export const ResourceItem = (props: {
       <div className="knowledge-base-directory-title">{item.data?.title}</div>
       <div className="knowledge-base-directory-action">
         <div className="action-markdown-content knowledge-base-directory-action-item">
-          {/* <IconBook
+          <IconBook
             onClick={() => {
               navigate(`/knowledge-base?kbId=${item?.collectionId}&resId=${item?.resourceId}`);
             }}
-          /> */}
+          />
         </div>
         <div className="action-external-origin-website knowledge-base-directory-action-item">
           <IconCompass

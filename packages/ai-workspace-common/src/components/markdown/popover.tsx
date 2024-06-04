@@ -2,16 +2,17 @@ import * as React from 'react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 
 import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 const Popover = PopoverPrimitive.Root;
 
 const PopoverTrigger = PopoverPrimitive.Trigger;
 
-const PopoverContent = React.forwardRef<
+const PopoverContent: any = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
 >(({ className, align = 'center', sideOffset = 4, ...props }, ref) => (
-  <PopoverPrimitive.Portal>
+  <PopoverPrimitive.Portal container={getPopupContainer()}>
     <PopoverPrimitive.Content
       ref={ref}
       align={align}

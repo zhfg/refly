@@ -117,9 +117,7 @@ const KnowledgeLibraryLayout = () => {
                   className="workspace-left-assist-panel"
                   key="workspace-left-assist-panel"
                   id="workspace-left-assist-panel">
-                  <KnowledgeBaseDetail
-                    getPopupContainer={() => getDefaultPopupContainer()}
-                  />
+                  <KnowledgeBaseDetail />
                 </Panel>
                 <PanelResizeHandle
                   className="workspace-panel-resize"
@@ -135,7 +133,7 @@ const KnowledgeLibraryLayout = () => {
               minSize={minSize}
               key="workspace-content-panel"
               id="workspace-content-panel">
-              <AICopilot getPopupContainer={() => getDefaultPopupContainer()} />
+              <AICopilot />
             </Panel>
           </PanelGroup>
         </div>

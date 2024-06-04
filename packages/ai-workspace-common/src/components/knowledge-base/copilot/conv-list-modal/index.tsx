@@ -8,9 +8,9 @@ import './index.scss';
 import { ConvList } from '@refly-packages/ai-workspace-common/components/conv-list';
 import { useNavigate } from 'react-router-dom';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 interface ConvListModalProps {
-  getPopupContainer: () => Element;
   title: string;
   classNames: string;
   placement?: 'bottom' | 'left' | 'right' | 'top';
@@ -21,14 +21,6 @@ export const ConvListModal = (props: ConvListModalProps) => {
   const knowledgeBaseStore = useKnowledgeBaseStore();
   const { jumpNewConvQuery } = useBuildThreadAndRun();
 
-  const getPopupContainer = () => {
-    if (props?.getPopupContainer) {
-      return props.getPopupContainer();
-    }
-
-    return document.body;
-  };
-
   return (
     <div style={{ width: '100%' }} className="conv-list-modal-container">
       <Drawer
@@ -38,7 +30,10 @@ export const ConvListModal = (props: ConvListModalProps) => {
           height: '66%',
           background: '#FCFCF9',
         }}
-        getPopupContainer={getPopupContainer}
+        getPopupContainer={() => {
+          const container = getPopupContainer();
+          return container?.querySelector('.ai-copilot-container') as Element;
+        }}
         headerStyle={{ justifyContent: 'center' }}
         title={
           <div style={{ display: 'flex', justifyContent: 'center' }}>

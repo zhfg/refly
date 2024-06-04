@@ -8,9 +8,9 @@ import './index.scss';
 import { ResourceList } from '@refly-packages/ai-workspace-common/components/resource-list';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { ResourceDetail } from '@refly/openapi-schema';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 interface SourceListModalProps {
-  getPopupContainer: () => Element;
   title: string;
   classNames: string;
   width?: number;
@@ -24,14 +24,6 @@ export const SourceListModal = (props: SourceListModalProps) => {
   const knowledgeBaseStore = useKnowledgeBaseStore();
   const { jumpNewKnowledgeBase } = useBuildThreadAndRun();
 
-  const getPopupContainer = () => {
-    if (props?.getPopupContainer) {
-      return props.getPopupContainer();
-    }
-
-    return document.body;
-  };
-
   return (
     <Drawer
       width={props.width || '100%'}
@@ -40,7 +32,10 @@ export const SourceListModal = (props: SourceListModalProps) => {
         background: '#FCFCF9',
         height: props.height || '66%',
       }}
-      getPopupContainer={getPopupContainer}
+      getPopupContainer={() => {
+        const container = getPopupContainer();
+        return container.querySelector('.ai-copilot-container') as Element;
+      }}
       headerStyle={{ justifyContent: 'center' }}
       title={
         <div style={{ display: 'flex', justifyContent: 'center' }}>

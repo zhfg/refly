@@ -1,3 +1,5 @@
+import { getRuntime } from './env';
+
 export const calcPopupPosition = (rect: DOMRect, barDimesion: { barWidth: number; barHeight: number }) => {
   const { barHeight, barWidth } = barDimesion;
   let top = 0;
@@ -48,4 +50,18 @@ export function isMobileScreen() {
 
 export const getDefaultPopupContainer = () => {
   return document.body;
+};
+
+export const getWebPopupContainer = () => {
+  return document.body;
+};
+
+export const getExtensionPopupContainer = () => {
+  const elem = document.querySelector('refly-main-app')?.shadowRoot?.querySelector('.main');
+
+  return elem as HTMLElement;
+};
+
+export const getPopupContainer = () => {
+  return getRuntime() === 'web' ? getWebPopupContainer() : getExtensionPopupContainer();
 };

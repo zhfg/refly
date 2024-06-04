@@ -5,7 +5,9 @@ import { AssistantMessage, HumanMessage, PendingMessage, WelcomeMessage } from '
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 
-export const ChatMessages = () => {
+interface ChatMessagesProps {}
+
+export const ChatMessages = (props: ChatMessagesProps) => {
   const chatStore = useChatStore();
   const messageStateStore = useMessageStateStore();
   const { runTask } = useBuildThreadAndRun();

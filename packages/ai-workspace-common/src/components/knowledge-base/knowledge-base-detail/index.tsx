@@ -12,13 +12,11 @@ import { useResizePanel } from '@refly-packages/ai-workspace-common/hooks/use-re
 import { ActionSource, useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { KnowledgeBaseListModal } from '../copilot/knowledge-base-list-modal';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
-import { getDefaultPopupContainer } from '../../../utils/ui';
+import { getDefaultPopupContainer, getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 const TabPane = Tabs.TabPane;
 
-interface KnowledgeBaseDetailProps {
-  getPopupContainer: () => HTMLElement;
-}
+interface KnowledgeBaseDetailProps {}
 
 export const KnowledgeBaseDetail = (props: KnowledgeBaseDetailProps) => {
   // directory minSize 270px ~ maxSize 50%
@@ -122,7 +120,7 @@ export const KnowledgeBaseDetail = (props: KnowledgeBaseDetailProps) => {
           width={360}
           height="100%"
           getPopupContainer={() => {
-            const container = props.getPopupContainer() || getDefaultPopupContainer();
+            const container = getPopupContainer();
             const elem = container?.querySelector('.knowledge-base-detail-container') as Element;
 
             console.log('getPopupContainer knowledge', elem);

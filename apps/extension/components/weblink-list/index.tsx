@@ -39,6 +39,7 @@ import { time } from "~utils/time"
 import { useWeblinkStore } from "~stores/weblink"
 import { safeParseUrl } from "~utils/parse"
 import { useTranslation } from "react-i18next"
+import { getPopupContainer } from "../../utils/ui"
 
 export const getStyle: PlasmoGetStyle = () => {
   const style = document.createElement("style")
@@ -268,7 +269,9 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
   return (
     <div style={{ width: "100%" }}>
       <Drawer
-        getPopupContainer={props.getPopupContainer}
+        getPopupContainer={() => {
+          return getPopupContainer()
+        }}
         width="100%"
         style={{
           maxHeight: 680,

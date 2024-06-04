@@ -11,6 +11,7 @@ import {
 
 import { useSearchStateStore, SearchTarget } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { useWeblinkStore } from '@refly-packages/ai-workspace-common/stores/weblink';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 // 自定义样式
@@ -23,11 +24,7 @@ const defaultSelectorList = [
   SearchTarget.CurrentKnowledgeBase,
 ];
 
-export const SearchTargetSelector = (props: {
-  classNames: string;
-  selectorList?: string[];
-  getPopupContainer: () => HTMLElement;
-}) => {
+export const SearchTargetSelector = (props: { classNames: string; selectorList?: string[] }) => {
   const { selectorList = defaultSelectorList } = props;
   const searchStateStore = useSearchStateStore();
   const webLinkStore = useWeblinkStore();
@@ -140,9 +137,7 @@ export const SearchTargetSelector = (props: {
       trigger="hover"
       position="bottom"
       getPopupContainer={() => {
-        const elem = props.getPopupContainer();
-        console.log('elem', elem);
-        return elem;
+        return getPopupContainer();
       }}
     >
       <Button

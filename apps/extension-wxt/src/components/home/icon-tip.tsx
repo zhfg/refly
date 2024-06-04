@@ -1,35 +1,18 @@
-import { getPopupContainer, scrollToBottom } from "@/utils/ui";
-import { Tooltip } from "@arco-design/web-react";
+import { Tooltip } from '@arco-design/web-react';
+import { getPopupContainer } from '@refly/ai-workspace-common/utils/ui';
 
-type IconTipPosition =
-  | "top"
-  | "br"
-  | "rt"
-  | "tr"
-  | "tl"
-  | "bottom"
-  | "bl"
-  | "left"
-  | "lt"
-  | "lb"
-  | "right"
-  | "rb";
+type IconTipPosition = 'top' | 'br' | 'rt' | 'tr' | 'tl' | 'bottom' | 'bl' | 'left' | 'lt' | 'lb' | 'right' | 'rb';
 
 export const IconTip = ({
   text,
   children,
-  position = "top",
+  position = 'top',
 }: {
   text: string;
   children: any;
   position?: IconTipPosition;
 }) => (
-  <Tooltip
-    mini
-    position={position}
-    content={text}
-    getPopupContainer={getPopupContainer}
-  >
+  <Tooltip mini position={position} content={text} getPopupContainer={getPopupContainer}>
     {children}
   </Tooltip>
 );

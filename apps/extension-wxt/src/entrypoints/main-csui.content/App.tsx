@@ -21,15 +21,18 @@ import { Markdown } from '@/components/markdown';
 // 加载国际化
 import '@/i18n/config';
 import { usePollingPingCurrentWeblink } from '@/hooks/use-polling-ping-current-weblink';
-import { getEnv } from '@/utils/env';
 import { SENTRY_DSN } from '@/utils/url';
 import { useSiderBarOpen } from '@/hooks/use-sider-bar-open';
 
 // 样式
 import '@/styles/style.css';
 import './App.scss';
-import { getPopupContainer } from '../../utils/ui';
+import { getPopupContainer } from '@refly/ai-workspace-common/utils/ui';
 import { checkBrowserArc } from '@/utils/browser';
+import { useChatStore } from '@refly/ai-workspace-common/stores/chat';
+import { fakeMessages } from '../../fake-data/message';
+// 设置 runtime 环境
+import { getEnv, setRuntime } from '@refly/ai-workspace-common/utils/env';
 
 const Sentry = _Sentry;
 
@@ -47,6 +50,8 @@ const App = () => {
   // 打开聊天窗口的方式
   const siderStore = useSiderStore();
   const quickActionStore = useQuickActionStore();
+
+  setRuntime('extension');
 
   // 注册 mouse event
   // useRegisterMouseEvent()
@@ -73,6 +78,12 @@ const App = () => {
     checkBrowserArc();
   }, []);
 
+  const chatStore = useChatStore();
+
+  useEffect(() => {
+    chatStore.setMessages(fakeMessages as any);
+  }, []);
+
   return (
     <Suspense fallback={<Spin style={{ marginTop: '200px auto' }} />}>
       <div className="light app-container">
@@ -84,7 +95,7 @@ const App = () => {
       </div> */}
         <div id="refly-app-main" className={siderStore.showSider ? 'main active' : 'main'}>
           <MemoryRouter>
-            <ContentRouter getPopupContainer={() => getPopupContainer()} />
+            <ContentRouter />
           </MemoryRouter>
         </div>
       </div>

@@ -249,7 +249,7 @@ const Home = (props: ChatProps) => {
         {/* <CurrentWeblinkQuickSummary /> */}
       </div>
 
-      <WeblinkList ref={weblinkListRef} getPopupContainer={() => getPopupContainer() as HTMLElement} />
+      <WeblinkList ref={weblinkListRef} />
       {knowledgeBaseStore.isSaveKnowledgeBaseModalVisible ? <SaveKnowledgeBaseModal /> : null}
     </div>
   );

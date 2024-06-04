@@ -3,19 +3,30 @@ import { MemoryRouter } from 'react-router-dom';
 import { useSiderStore } from '@refly/ai-workspace-common/stores/sider';
 import { ContentRouter } from '@/components/router';
 
+import '@/styles/style.css';
 import './App.scss';
-import { Suspense } from 'react';
-import { getDefaultPopupContainer } from '@refly/ai-workspace-common/utils/ui';
+import { Suspense, useEffect } from 'react';
 
 // i18n
 // 加载国际化
 import '@/i18n/config';
+import { useChatStore } from '@refly/ai-workspace-common/stores/chat';
+import { fakeMessages } from '../../fake-data/message';
+// 加载 runtime 设置
+import { getEnv, setRuntime } from '@refly/ai-workspace-common/utils/env';
 /**
  * 打开 popup 页面的规则
  * 1. 如果是
  */
 const App = () => {
   const siderStore = useSiderStore();
+  const chatStore = useChatStore();
+
+  setRuntime('web');
+
+  useEffect(() => {
+    chatStore.setMessages(fakeMessages as any);
+  }, []);
 
   return (
     <Suspense fallback={<Spin style={{ marginTop: '200px auto' }} />}>
@@ -28,13 +39,7 @@ const App = () => {
       </div> */}
         <div id="refly-app-main" className="main active">
           <MemoryRouter>
-            <ContentRouter
-              getPopupContainer={() => {
-                const elem = document.querySelector('#refly-app-main') as HTMLElement;
-
-                return elem;
-              }}
-            />
+            <ContentRouter />
           </MemoryRouter>
         </div>
       </div>
