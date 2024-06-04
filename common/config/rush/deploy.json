@@ -44,7 +44,7 @@
    *   create the links described in the "deploy-metadata.json" output file.
    * - "none": Do nothing; some other tool may create the links later.
    */
-  // "linkCreation": "script",
+  "linkCreation": "script",
 
   /**
    * Customize how Rush projects are processed during deployment.
