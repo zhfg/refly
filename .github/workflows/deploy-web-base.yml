@@ -33,10 +33,10 @@ jobs:
         uses: gigara/rush-cache@v2
 
       - name: Rush Install
-        run: node common/scripts/install-run-rush.js install --to @refly/web
+        run: node common/scripts/install-run-rush.js install
 
       - name: Rush rebuild
-        run: node common/scripts/install-run-rush.js rebuild --to @refly/web --verbose --production
+        run: node common/scripts/install-run-rush.js rebuild
 
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
