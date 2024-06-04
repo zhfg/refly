@@ -33,6 +33,36 @@ export function transformCssFile({ id, theme }: { code: string; id: string; them
   return undefined;
 }
 
+export function emptyTransformJsFiles({
+  id,
+  code,
+  isDevelopment,
+  sourceMaps,
+}: {
+  code: string;
+  id: string;
+  isDevelopment: boolean;
+  sourceMaps: boolean;
+}): TransformedResult {
+  if (!/\.(js|jsx|ts|tsx)$/.test(id)) {
+    return undefined;
+  }
+
+  if (isDevelopment) {
+    return {
+      code,
+      map: null,
+    };
+  }
+
+  const ast = parser.parse(code, {
+    sourceType: 'module',
+    plugins: ['jsx'],
+  }) as any;
+
+  return generate(ast, { sourceMaps, sourceFileName: id });
+}
+
 export function transformJsFiles({
   code,
   id,
@@ -93,9 +123,5 @@ export function transformJsFiles({
     },
   });
 
-  const res = generate(ast, { sourceMaps, sourceFileName: id });
-  return {
-    ...res,
-    map: null,
-  };
+  return generate(ast, { sourceMaps, sourceFileName: id });
 }

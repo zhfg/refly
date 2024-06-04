@@ -1,7 +1,7 @@
 import type { Plugin, ResolvedConfig, UserConfig, ConfigEnv } from 'vite';
 import { modifyCssConfig } from './less';
 import { modifyIconConfig, loadIcon } from './icon';
-import { transformCssFile, transformJsFiles } from './transform';
+import { emptyTransformJsFiles, transformCssFile, transformJsFiles } from './transform';
 
 const pkg = require('../../package.json');
 
@@ -66,7 +66,12 @@ export default function vitePluginArcoImport(options: PluginOption = {}): Plugin
 
       // Do not transform packages in this monorepo!
       if (!shouldTransform) {
-        return code;
+        return emptyTransformJsFiles({
+          id,
+          code,
+          isDevelopment,
+          sourceMaps: options.sourceMaps || isDevelopment || Boolean(resolvedConfig?.build?.sourcemap),
+        });
       }
 
       // transform css files

@@ -26,7 +26,7 @@
       "@refly-packages/ai-workspace-common/*": ["./src/*"]
     },
     "composite": true,
-    "noEmit": true,
+    "noEmit": false,
     "declaration": true,
     "declarationMap": true
   },
