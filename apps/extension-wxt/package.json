@@ -5,12 +5,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "wxt prepare && wxt",
-    "dev:firefox": "wxt -b firefox",
-    "build": "wxt prepare && wxt build",
-    "build:firefox": "wxt build -b firefox",
-    "zip": "wxt prepare && wxt zip",
-    "zip:firefox": "wxt zip -b firefox",
+    "predev": "wxt prepare",
+    "dev": "npx predev && wxt",
+    "dev:firefox": "npx predev wxt -b firefox",
+    "build": "npx predev && wxt build",
+    "build:firefox": "npx predev wxt build -b firefox",
+    "zip": "npx predev && wxt zip",
+    "zip:firefox": "npx predev wxt zip -b firefox",
     "compile": "tsc --noEmit"
   },
   "dependencies": {
