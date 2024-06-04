@@ -23,7 +23,11 @@ const defaultSelectorList = [
   SearchTarget.CurrentKnowledgeBase,
 ];
 
-export const SearchTargetSelector = (props: { classNames: string; selectorList?: string[] }) => {
+export const SearchTargetSelector = (props: {
+  classNames: string;
+  selectorList?: string[];
+  getPopupContainer: () => HTMLElement;
+}) => {
   const { selectorList = defaultSelectorList } = props;
   const searchStateStore = useSearchStateStore();
   const webLinkStore = useWeblinkStore();
@@ -131,7 +135,16 @@ export const SearchTargetSelector = (props: { classNames: string; selectorList?:
   // }, [])
 
   return (
-    <Dropdown droplist={searchTargetDropList} trigger="hover" position="bottom">
+    <Dropdown
+      droplist={searchTargetDropList}
+      trigger="hover"
+      position="bottom"
+      getPopupContainer={() => {
+        const elem = props.getPopupContainer();
+        console.log('elem', elem);
+        return elem;
+      }}
+    >
       <Button
         icon={getDisplayIcon(searchStateStore.searchTarget)}
         type="text"

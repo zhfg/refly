@@ -28,7 +28,13 @@ const App = () => {
       </div> */}
         <div id="refly-app-main" className="main active">
           <MemoryRouter>
-            <ContentRouter getPopupContainer={() => getDefaultPopupContainer()} />
+            <ContentRouter
+              getPopupContainer={() => {
+                const elem = document.querySelector('#refly-app-main') as HTMLElement;
+
+                return elem;
+              }}
+            />
           </MemoryRouter>
         </div>
       </div>
