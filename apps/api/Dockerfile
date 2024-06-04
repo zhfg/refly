@@ -1,24 +1,22 @@
 # Base image
-FROM node:20-alpine
+FROM node:20-alpine AS base
 
-# Add necessary dependencies
-RUN apk --no-cache add curl
+# Builder image
+FROM base AS builder
+WORKDIR /app
 
-# Create app directory
-WORKDIR /usr/src/app
-
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-COPY package.json ./
-COPY yarn.lock ./
-
-# Install app dependencies
-RUN yarn
-
-# Bundle app source
+RUN npm install -g @microsoft/rush@5.125.0
 COPY . .
+RUN rush install --purge
+RUN rush build --to @refly/api
+RUN rush deploy --overwrite
+RUN cd common/deploy/apps/api && rushx build
 
-# Creates a "dist" folder with the production build
-RUN yarn build
+# Runner image
+FROM base AS runner
+WORKDIR /app
 
-# Start the server using the production build
+RUN apk --no-cache add curl
+COPY --from=builder /app/common/deploy/apps/api/ .
+
 CMD [ "node", "dist/main.js" ]
