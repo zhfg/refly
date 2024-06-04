@@ -7,7 +7,7 @@ WORKDIR /app
 
 RUN npm install -g @microsoft/rush@5.125.0
 COPY . .
-RUN rush install --purge
+RUN rush install --to @refly/api
 RUN rush build --to @refly/api
 RUN rush deploy --overwrite
 RUN cd common/deploy/apps/api && rushx build

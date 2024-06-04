@@ -32,10 +32,10 @@ jobs:
           cache-dependency-path: common/config/rush/pnpm-lock.yaml
 
       - name: Rush Install
-        run: node common/scripts/install-run-rush.js install
+        run: node common/scripts/install-run-rush.js install --to @refly/web
 
       - name: Rush rebuild
-        run: node common/scripts/install-run-rush.js rebuild --verbose --production
+        run: node common/scripts/install-run-rush.js rebuild --to @refly/web --verbose --production
 
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
