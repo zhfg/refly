@@ -28,15 +28,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Create Sentry release
-        uses: getsentry/action-release@v1
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: refly-ai
-          SENTRY_PROJECT: reflyd
-        with:
-          environment: ${{ inputs.environment }}
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -55,7 +46,7 @@ jobs:
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REPOSITORY:$IMAGE_TAG apps/api
+          docker build -t $ECR_REPOSITORY:$IMAGE_TAG -f apps/api/Dockerfile .
           docker push $ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
@@ -75,3 +66,12 @@ jobs:
           service: ${{ inputs.ecs-service }}
           cluster: ${{ inputs.ecs-cluster }}
           wait-for-service-stability: true
+
+      - name: Create Sentry release
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: refly-ai
+          SENTRY_PROJECT: reflyd
+        with:
+          environment: ${{ inputs.environment }}
