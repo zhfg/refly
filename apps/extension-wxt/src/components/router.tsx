@@ -17,14 +17,18 @@ import { AICopilot } from '@refly/ai-workspace-common/components/knowledge-base/
 import { EmptyFeedStatus } from '@refly/ai-workspace-common/components/empty-feed-status';
 // utils
 import { useResizePanel } from '@refly/ai-workspace-common/hooks/use-resize-panel';
-import { getPopupContainer } from '../utils/ui';
 import Home from './home';
 import { ErrorBoundary } from '@sentry/react';
 // styles
 import './router.scss';
 
-export const ContentRouter = () => {
+interface ContentRouterProps {
+  getPopupContainer: () => HTMLElement;
+}
+
+export const ContentRouter = (props: ContentRouterProps) => {
   // 导航相关
+  const getPopupContainer = props.getPopupContainer;
   const navigate = useNavigate();
   const userStore = useUserStore();
 

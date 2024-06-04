@@ -12,7 +12,8 @@ export interface HandlerResponse<T> {
 
 export interface BackgroundMessage {
   name: string;
-  type: 'apiRequest' | 'others';
+  type: 'apiRequest' | 'others' | 'registerEvent';
+  body?: any;
   target: any;
   thisArg: any;
   args: any;

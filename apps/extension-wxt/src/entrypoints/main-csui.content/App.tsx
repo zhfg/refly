@@ -29,6 +29,7 @@ import { useSiderBarOpen } from '@/hooks/use-sider-bar-open';
 import '@/styles/style.css';
 import './App.scss';
 import { getPopupContainer } from '../../utils/ui';
+import { checkBrowserArc } from '@/utils/browser';
 
 const Sentry = _Sentry;
 
@@ -68,6 +69,9 @@ const App = () => {
       getContainer: () => getPopupContainer() as HTMLElement,
     });
   }, []);
+  useEffect(() => {
+    checkBrowserArc();
+  }, []);
 
   return (
     <Suspense fallback={<Spin style={{ marginTop: '200px auto' }} />}>
@@ -80,7 +84,7 @@ const App = () => {
       </div> */}
         <div id="refly-app-main" className={siderStore.showSider ? 'main active' : 'main'}>
           <MemoryRouter>
-            <ContentRouter />
+            <ContentRouter getPopupContainer={() => getPopupContainer()} />
           </MemoryRouter>
         </div>
       </div>

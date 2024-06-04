@@ -1,8 +1,8 @@
-import { Runtime, Tabs } from 'wxt/browser';
+import { Runtime, Tabs, browser } from 'wxt/browser';
 import { extRequest } from '@/utils/request';
 import { BackgroundMessage, HandlerRequest, HandlerResponse } from '@/types/request';
 import { storage } from 'wxt/storage';
-import { getLastActiveTab, saveLastActiveTab } from '@/utils/extension/tabs';
+import { getCurrentTab, getLastActiveTab, saveLastActiveTab } from '@/utils/extension/tabs';
 import { requestFileNames } from '@/types/request-filename';
 
 /**
@@ -41,6 +41,31 @@ export const handleRequestReflect = async (msg: BackgroundMessage) => {
   });
 };
 
+export const handleRegisterSidePanel = async (msg: BackgroundMessage) => {
+  if (msg?.body?.isArc) {
+    const path = browser.runtime.getURL('/popup.html');
+    browser.action.onClicked.addListener(async () => {
+      console.log('action click');
+      browser.browserAction.openPopup();
+      browser.action.openPopup();
+    });
+  } else {
+    // @ts-ignore
+    browser?.sidePanel
+      .setPanelBehavior({ openPanelOnActionClick: true })
+      .then(() => {
+        console.log('open sidePanel success');
+      })
+      .catch((error: any) => console.error(`sidePanel open error: `, error));
+  }
+};
+
+export const handleRegisterEvent = async (msg: BackgroundMessage) => {
+  if (msg?.name === 'registerSidePanel') {
+    handleRegisterSidePanel(msg);
+  }
+};
+
 export const onMessage = async (
   msg: BackgroundMessage,
   sender: Runtime.MessageSender,
@@ -54,5 +79,9 @@ export const onMessage = async (
     return await handleRequestReflect({
       ...msg,
     });
+  }
+
+  if (msg.type === 'registerEvent') {
+    return await handleRegisterEvent(msg);
   }
 };

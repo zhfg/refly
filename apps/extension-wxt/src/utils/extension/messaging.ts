@@ -1,7 +1,7 @@
 import { BackgroundMessage } from '@/types/request';
 import { getCurrentTab, getLastActiveTab } from './tabs';
 
-export const sendToBackground = async (message: { name: string; body?: any }) => {
+export const sendToBackground = async (message: { type?: string; name: string; body?: any }) => {
   await browser.runtime.sendMessage(message);
 
   const waitForResponse = new Promise((resolve) => {

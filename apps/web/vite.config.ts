@@ -45,7 +45,6 @@ export default defineConfig({
     commonjsOptions: {
       transformMixedEsModules: true,
     },
-    sourcemap: true,
     minify: "terser",
     terserOptions: {
       compress: {

@@ -2,6 +2,7 @@ import ReactDOM from 'react-dom/client';
 import { setRuntime } from '@refly/ai-workspace-common/utils/env';
 
 import App from './App';
+import { checkBrowserArc } from '@/utils/browser';
 
 export default defineContentScript({
   matches: ['<all_urls>'],

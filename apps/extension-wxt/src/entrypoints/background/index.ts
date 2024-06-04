@@ -5,6 +5,7 @@ import { onPort } from './events/ports';
 import { setRuntime } from '@refly/ai-workspace-common/utils/env';
 import { browser } from 'wxt/browser';
 import { defineBackground } from 'wxt/sandbox';
+import { getCurrentTab } from '@/utils/extension/tabs';
 
 export default defineBackground(() => {
   setRuntime('extension');
@@ -15,4 +16,11 @@ export default defineBackground(() => {
   browser.tabs.onActivated.addListener(onActivated);
   browser.runtime.onMessage.addListener(onMessage);
   browser.runtime.onConnect.addListener(onPort);
+
+  chrome.action.onClicked.addListener((tab) => {
+    chrome.action.setTitle({
+      tabId: tab.id,
+      title: `You are on tab: ${tab.id}`,
+    });
+  });
 });
