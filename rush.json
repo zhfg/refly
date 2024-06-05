@@ -45,11 +45,6 @@
       "reviewCategory": "apps"
     },
     {
-      "packageName": "@refly/extension",
-      "projectFolder": "apps/extension",
-      "reviewCategory": "apps"
-    },
-    {
       "packageName": "@refly/web",
       "projectFolder": "apps/web",
       "reviewCategory": "apps"

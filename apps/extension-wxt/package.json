@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "predev": "wxt prepare",
-    "dev": "wxt prepare && wxt",
+    "dev": "wxt prepare && wxt -p 4000",
     "dev:firefox": "wxt prepare wxt -b firefox",
     "build": "wxt prepare && wxt build",
     "build:firefox": "wxt prepare wxt build -b firefox",
