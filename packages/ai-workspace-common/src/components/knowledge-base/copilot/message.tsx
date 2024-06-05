@@ -8,6 +8,7 @@ import { IconCopy, IconQuote, IconRight } from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
 // 自定义组件
 import { SourceList } from '@refly-packages/ai-workspace-common/components/source-list';
+import { safeParseJSON } from '../../../utils/parse';
 
 export const HumanMessage = (props: { message: Partial<ChatMessage> }) => {
   const { message } = props;
@@ -32,14 +33,14 @@ export const AssistantMessage = (props: {
   return (
     <div className="ai-copilot-message assistant-message-container ">
       <div className="session-source">
-        {isPending || (message?.sources || [])?.length > 0 ? (
+        {isPending || (safeParseJSON(message?.sources) || [])?.length > 0 ? (
           <div className="session-title-icon">
             <IconQuote style={{ fontSize: 18, color: 'rgba(0, 0, 0, .5)' }} />
             <p>{t('threadDetail.item.session.source')}</p>
           </div>
         ) : null}
       </div>
-      <SourceList isPending={isPending} sources={message?.sources || []} isLastSession={isLastSession} />
+      <SourceList isPending={isPending} sources={safeParseJSON(message?.sources) || []} isLastSession={isLastSession} />
       <div className="assistant-message">
         <Markdown content={message?.content as string} />
       </div>
@@ -63,10 +64,10 @@ export const AssistantMessage = (props: {
           </div>
         </div>
       )}
-      {isLastSession && (message?.relatedQuestions || []).length > 0 ? (
+      {isLastSession && (safeParseJSON(message?.relatedQuestions) || []).length > 0 ? (
         <div className="ai-copilot-related-question-container">
           <div className="ai-copilot-related-question-list">
-            {message?.relatedQuestions?.map((item, index) => (
+            {safeParseJSON(message?.relatedQuestions)?.map((item, index) => (
               <div className="ai-copilot-related-question-item" key={index} onClick={() => handleAskFollowing(item)}>
                 <p className="ai-copilot-related-question-title">{item}</p>
                 <IconRight style={{ color: 'rgba(0, 0, 0, 0.5)' }} />

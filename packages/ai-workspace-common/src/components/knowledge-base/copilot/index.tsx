@@ -40,6 +40,7 @@ import { OutputLocaleList } from '@refly-packages/ai-workspace-common/components
 import { useTranslation } from 'react-i18next';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { SourceListModal } from '../../source-list/source-list-modal';
+import { useResizeCopilot } from '../../../hooks/use-resize-copilot';
 
 interface AICopilotProps {}
 
@@ -123,19 +124,19 @@ export const AICopilot = (props: AICopilotProps) => {
     setIsFetching(false);
   };
 
-  // useEffect(() => {
-  //   if (convId) {
-  //     handleConvTask(convId);
-  //   }
+  useEffect(() => {
+    if (convId) {
+      handleConvTask(convId);
+    }
 
-  //   return () => {
-  //     chatStore.setMessages([]);
-  //   };
-  // }, [convId]);
-  // useEffect(() => {
-  //   handleSwitchSearchTarget();
-  // }, [showContextState]);
-  // useResizeCopilot({ containerSelector: 'ai-copilot-container' });
+    return () => {
+      chatStore.setMessages([]);
+    };
+  }, [convId]);
+  useEffect(() => {
+    handleSwitchSearchTarget();
+  }, [showContextState]);
+  useResizeCopilot({ containerSelector: 'ai-copilot-container' });
 
   return (
     <div className="ai-copilot-container">
