@@ -188,7 +188,11 @@ export const SourceList = (props: SourceListProps) => {
               ?.slice(0, 3)
               .map((item, index) => <SourceItem key={index} index={index} source={item}></SourceItem>),
             props?.sources?.length > 3 ? (
-              <ViewMoreItem sources={props?.sources || []} extraCnt={props?.sources?.slice(3)?.length || 0} />
+              <ViewMoreItem
+                key="view-more"
+                sources={props?.sources || []}
+                extraCnt={props?.sources?.slice(3)?.length || 0}
+              />
             ) : null,
           ]
         ) : (

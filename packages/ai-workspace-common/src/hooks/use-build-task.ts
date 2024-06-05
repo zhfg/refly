@@ -112,7 +112,7 @@ export const useBuildTask = () => {
       lastMessage = currentMessageState.pendingReplyMsg;
       savedMessage = currentChatState.messages;
 
-      lastMessage.data.content = '';
+      lastMessage.content = '';
       messageStateStore.setMessageState({ pendingFirstToken: false });
     } else {
       lastMessage = currentChatState.messages.at(-1);
@@ -128,10 +128,10 @@ export const useBuildTask = () => {
 
     console.log('sourceWeblinkPayload', currentChatState.messages);
 
-    if (Array.isArray(lastMessage?.data?.sources)) {
-      lastMessage.data.sources = lastMessage?.data?.sources?.concat(sources || [])?.filter((item) => item);
+    if (Array.isArray(lastMessage?.sources)) {
+      lastMessage.sources = lastMessage?.sources?.concat(sources || [])?.filter((item) => item);
     } else {
-      lastMessage.data.sources = [...sources]?.filter((item) => item);
+      lastMessage.sources = [...sources]?.filter((item) => item);
     }
     chatStore.setMessages([...savedMessage, { ...lastMessage }]);
 

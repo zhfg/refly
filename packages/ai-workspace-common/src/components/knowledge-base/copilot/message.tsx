@@ -29,18 +29,23 @@ export const AssistantMessage = (props: {
 }) => {
   const { message, isPending = false, isLastSession = false, handleAskFollowing } = props;
   const { t } = useTranslation();
+  const sources = typeof message?.sources === 'string' ? safeParseJSON(message?.sources) : message?.sources;
+  const relatedQuestions =
+    typeof message?.relatedQuestions === 'string'
+      ? safeParseJSON(message?.relatedQuestions)
+      : message?.relatedQuestions;
 
   return (
     <div className="ai-copilot-message assistant-message-container ">
       <div className="session-source">
-        {isPending || (safeParseJSON(message?.sources) || [])?.length > 0 ? (
+        {isPending || (sources || [])?.length > 0 ? (
           <div className="session-title-icon">
             <IconQuote style={{ fontSize: 18, color: 'rgba(0, 0, 0, .5)' }} />
             <p>{t('threadDetail.item.session.source')}</p>
           </div>
         ) : null}
       </div>
-      <SourceList isPending={isPending} sources={safeParseJSON(message?.sources) || []} isLastSession={isLastSession} />
+      <SourceList isPending={isPending} sources={sources || []} isLastSession={isLastSession} />
       <div className="assistant-message">
         <Markdown content={message?.content as string} />
       </div>
@@ -64,10 +69,10 @@ export const AssistantMessage = (props: {
           </div>
         </div>
       )}
-      {isLastSession && (safeParseJSON(message?.relatedQuestions) || []).length > 0 ? (
+      {isLastSession && (relatedQuestions || []).length > 0 ? (
         <div className="ai-copilot-related-question-container">
           <div className="ai-copilot-related-question-list">
-            {safeParseJSON(message?.relatedQuestions)?.map((item, index) => (
+            {relatedQuestions?.map((item, index) => (
               <div className="ai-copilot-related-question-item" key={index} onClick={() => handleAskFollowing(item)}>
                 <p className="ai-copilot-related-question-title">{item}</p>
                 <IconRight style={{ color: 'rgba(0, 0, 0, 0.5)' }} />
