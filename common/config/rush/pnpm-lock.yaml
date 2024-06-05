@@ -317,6 +317,9 @@ importers:
       '@refly/arco-vite-plugin-react':
         specifier: workspace:*
         version: link:../../packages/plugin-vite-react
+      '@refly/constants':
+        specifier: workspace:*
+        version: link:../../packages/constants
       '@refly/openapi-schema':
         specifier: workspace:*
         version: link:../../packages/openapi-schema

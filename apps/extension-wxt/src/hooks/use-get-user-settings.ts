@@ -2,9 +2,10 @@ import { useEffect, useTransition } from 'react';
 import { useMatch, useNavigate } from 'react-router-dom';
 
 // request
-import { type LocalSettings, defaultLocalSettings, useUserStore } from '@/stores/user';
+import { LocalSettings, defaultLocalSettings, useUserStore } from '@refly/ai-workspace-common/stores/user';
 import { safeParseJSON, safeStringifyJSON } from '@/utils/parse';
-import { LOCALE, type User } from '@/types';
+import { type User } from '@/types';
+import { LOCALE } from '@refly/constants';
 import { useTranslation } from 'react-i18next';
 import { Message as message } from '@arco-design/web-react';
 import { useSiderStore } from '@/stores/sider';
@@ -12,7 +13,8 @@ import { mapDefaultLocale } from '@/utils/locale';
 import { storage } from 'wxt/storage';
 import { useStorage } from './use-storage';
 // request
-import { apiRequest } from '../requests/apiRequest';
+import client from '@refly/ai-workspace-common/requests/proxiedRequest';
+import { useExtensionMessage } from './use-extension-message';
 
 interface ExternalLoginPayload {
   name: string;
@@ -43,14 +45,11 @@ export const useGetUserSettings = () => {
       let { localSettings, userProfile } = useUserStore.getState();
       const lastStatusIsLogin = !!userProfile?.uid;
 
-      const res = await apiRequest({
-        name: 'getUserInfo',
-        method: 'GET',
-      });
+      const res = await client.getSettings();
 
       console.log('loginStatus', res);
 
-      if (!res?.success) {
+      if (res?.error) {
         userStore.resetState();
         setLoginNotification('');
         await storage.removeItem('local:refly-user-profile');
@@ -69,14 +68,16 @@ export const useGetUserSettings = () => {
           uiLocale,
           outputLocale,
           isLocaleInitialized: true,
-        };
+        } as LocalSettings;
 
         // 说明是第一次注册使用，此时没有 locale，需要写回
         if (!uiLocale && !outputLocale) {
           uiLocale = (mapDefaultLocale(navigator?.language) || LOCALE.EN) as LOCALE;
           outputLocale = (navigator?.language || LOCALE.EN) as LOCALE;
           // 不阻塞写回用户配置
-          apiRequest({ name: 'putUserInfo', method: 'PUT', body: { uiLocale, outputLocale } });
+          client.updateSettings({
+            body: { uiLocale, outputLocale },
+          });
 
           // 如果是初始化的再替换
           localSettings = {
@@ -84,7 +85,7 @@ export const useGetUserSettings = () => {
             uiLocale,
             outputLocale,
             isLocaleInitialized: false,
-          } as LocalSettings;
+          };
         }
 
         // 应用 locale
@@ -114,14 +115,11 @@ export const useGetUserSettings = () => {
         let { localSettings, userProfile } = useUserStore.getState();
         const lastStatusIsLogin = !!userProfile?.uid;
 
-        const res = await apiRequest({
-          name: 'getUserInfo',
-          method: 'GET',
-        });
+        const res = await client.getSettings();
 
         console.log('loginStatus', res);
 
-        if (!res?.success) {
+        if (res?.error) {
           userStore.setUserProfile(undefined);
           userStore.setToken('');
           setToken('');
@@ -153,19 +151,16 @@ export const useGetUserSettings = () => {
             uiLocale = (navigator?.language || LOCALE.EN) as LOCALE;
             outputLocale = (navigator?.language || LOCALE.EN) as LOCALE;
             // 不阻塞写回用户配置
-            apiRequest({
-              name: 'putUserInfo',
+            client.updateSettings({
               body: { uiLocale, outputLocale },
-              method: 'PUT',
             });
-
             // 如果是初始化的再替换
             localSettings = {
               ...localSettings,
               uiLocale,
               outputLocale,
               isLocaleInitialized: false,
-            } as LocalSettings;
+            };
           }
 
           // 应用 locale

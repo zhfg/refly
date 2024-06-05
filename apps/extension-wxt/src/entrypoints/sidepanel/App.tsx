@@ -1,7 +1,6 @@
 import { Button, Spin } from '@arco-design/web-react';
 import { MemoryRouter } from 'react-router-dom';
-import { useSiderStore } from '@refly/ai-workspace-common/stores/sider';
-import { ContentRouter } from '@/components/router';
+import { AppRouter } from '@/routes/index';
 
 import '@/styles/style.css';
 import './App.scss';
@@ -10,8 +9,6 @@ import { Suspense, useEffect } from 'react';
 // i18n
 // 加载国际化
 import '@/i18n/config';
-import { useChatStore } from '@refly/ai-workspace-common/stores/chat';
-import { fakeMessages } from '../../fake-data/message';
 // 加载 runtime 设置
 import { getEnv, setRuntime } from '@refly/ai-workspace-common/utils/env';
 /**
@@ -19,14 +16,7 @@ import { getEnv, setRuntime } from '@refly/ai-workspace-common/utils/env';
  * 1. 如果是
  */
 const App = () => {
-  const siderStore = useSiderStore();
-  const chatStore = useChatStore();
-
   setRuntime('web');
-
-  useEffect(() => {
-    chatStore.setMessages(fakeMessages as any);
-  }, []);
 
   return (
     <Suspense fallback={<Spin style={{ marginTop: '200px auto' }} />}>
@@ -39,7 +29,7 @@ const App = () => {
       </div> */}
         <div id="refly-app-main" className="main active">
           <MemoryRouter>
-            <ContentRouter />
+            <AppRouter />
           </MemoryRouter>
         </div>
       </div>

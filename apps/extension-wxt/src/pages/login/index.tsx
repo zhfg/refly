@@ -61,7 +61,7 @@ export const Login = () => {
           style={{ width: 260, height: 44, marginTop: 32 }}
           loading={userStore.isCheckingLoginStatus}
         >
-          {userStore.isCheckingLoginStatus ? t('loginPage.loggingStatus') : t('loginPage.loginBtn')}
+          {userStore.isCheckingLoginStatus ? t('extension.loginPage.loggingStatus') : t('extension.loginPage.loginBtn')}
         </Button>
       </div>
     </div>

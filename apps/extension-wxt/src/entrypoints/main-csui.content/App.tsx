@@ -33,18 +33,19 @@ import { useChatStore } from '@refly/ai-workspace-common/stores/chat';
 import { fakeMessages } from '../../fake-data/message';
 // 设置 runtime 环境
 import { getEnv, setRuntime } from '@refly/ai-workspace-common/utils/env';
-
 const Sentry = _Sentry;
 
-Sentry.init({
-  dsn: SENTRY_DSN,
-  environment: getEnv(),
-  integrations: [Sentry.browserTracingIntegration(), Sentry.replayIntegration()],
-  tracesSampleRate: 1.0, //  Capture 100% of the transactions
-  tracePropagationTargets: ['localhost', 'https://refly.ai'],
-  replaysSessionSampleRate: 0.1, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
-  replaysOnErrorSampleRate: 1.0,
-});
+if (process.env.NODE_ENV !== 'development') {
+  Sentry.init({
+    dsn: SENTRY_DSN,
+    environment: getEnv(),
+    integrations: [Sentry.browserTracingIntegration(), Sentry.replayIntegration()],
+    tracesSampleRate: 1.0, //  Capture 100% of the transactions
+    tracePropagationTargets: ['localhost', 'https://refly.ai'],
+    replaysSessionSampleRate: 0.1, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
+    replaysOnErrorSampleRate: 1.0,
+  });
+}
 
 const App = () => {
   // 打开聊天窗口的方式
