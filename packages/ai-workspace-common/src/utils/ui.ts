@@ -63,5 +63,5 @@ export const getExtensionPopupContainer = () => {
 };
 
 export const getPopupContainer = () => {
-  return getRuntime() === 'web' ? getWebPopupContainer() : getExtensionPopupContainer();
+  return ['web', 'extension-sidepanel'].includes(getRuntime()) ? getWebPopupContainer() : getExtensionPopupContainer();
 };

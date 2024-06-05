@@ -16,7 +16,7 @@ import { getEnv, setRuntime } from '@refly/ai-workspace-common/utils/env';
  * 1. 如果是
  */
 const App = () => {
-  setRuntime('web');
+  setRuntime('extension-sidepanel');
 
   return (
     <Suspense fallback={<Spin style={{ marginTop: '200px auto' }} />}>

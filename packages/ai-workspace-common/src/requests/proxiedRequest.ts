@@ -49,7 +49,7 @@ const proxiedRequestModule = new Proxy(requestModule, {
     // console.log('accessing proxied module', target, propKey, receiver);
     const origMethod = target[propKey as keyof typeof requestModule];
 
-    if (getRuntime() === 'extension' && typeof origMethod === 'function') {
+    if (getRuntime()?.includes('extension') && typeof origMethod === 'function') {
       // The return function type is unknown because we don't know the exact signature of each function
       return async function (thisArg: unknown, ...args: unknown[]) {
         console.log(`Calling function ${String(propKey)} with arguments: ${args}`);

@@ -127,7 +127,7 @@ export const useGetUserSettings = () => {
           await await storage.removeItem('sync:refly-local-settings');
 
           navigate('/login');
-          message.error(t('loginPage.status.failed'));
+          message.error(t('extension.loginPage.status.failed'));
         } else {
           userStore.setUserProfile(res?.data!);
           userStore.setToken(data?.token);
@@ -170,7 +170,7 @@ export const useGetUserSettings = () => {
           await storage.setItem('sync:refly-user-profile', safeStringifyJSON(res?.data));
           await storage.setItem('sync:refly-local-settings', safeStringifyJSON(localSettings));
 
-          // message.success(t("loginPage.status.success"))
+          message.success(t('extension.loginPage.status.success'));
 
           if (!lastStatusIsLogin) {
             navigate('/');

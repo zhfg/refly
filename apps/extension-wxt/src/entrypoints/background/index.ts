@@ -8,7 +8,7 @@ import { defineBackground } from 'wxt/sandbox';
 import { getCurrentTab } from '@/utils/extension/tabs';
 
 export default defineBackground(() => {
-  setRuntime('extension');
+  setRuntime('extension-background');
 
   console.log('hello background');
   // 接收 refly 官网的消息，了解登录的状态

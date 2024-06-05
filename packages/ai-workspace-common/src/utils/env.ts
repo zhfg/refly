@@ -11,13 +11,15 @@ export const getEnv = () => {
   return env;
 };
 
-let runtime: 'web' | 'extension';
+type IRuntime = 'web' | 'extension-csui' | 'extension-sidepanel' | 'extension-background';
+
+let runtime: IRuntime;
 
 export const getRuntime = () => {
   return runtime;
 };
 
-export const setRuntime = (r: 'web' | 'extension') => {
+export const setRuntime = (r: IRuntime) => {
   runtime = r;
 };
 
