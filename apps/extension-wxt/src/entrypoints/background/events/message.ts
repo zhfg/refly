@@ -4,6 +4,7 @@ import { BackgroundMessage, HandlerRequest, HandlerResponse } from '@/types/requ
 import { storage } from 'wxt/storage';
 import { getCurrentTab, getLastActiveTab, saveLastActiveTab } from '@/utils/extension/tabs';
 import { requestFileNames } from '@/types/request-filename';
+import * as requestModule from '@refly/openapi-schema';
 
 /**
  * @deprecated
@@ -33,7 +34,8 @@ export const handleRequest = async (msg: HandlerRequest<any>) => {
 };
 
 export const handleRequestReflect = async (msg: BackgroundMessage) => {
-  const res = await Reflect.apply(msg.target, msg.thisArg, msg.args);
+  // @ts-ignore
+  const res = await requestModule[msg.name as keyof typeof requestModule]?.call?.(msg?.thisArg, ...msg.args);
   const lastActiveTab = await getLastActiveTab();
   await browser.tabs.sendMessage(lastActiveTab?.id as number, {
     name: msg?.name,
