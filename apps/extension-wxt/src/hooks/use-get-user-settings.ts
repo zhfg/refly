@@ -8,7 +8,7 @@ import { type User } from '@/types';
 import { LOCALE } from '@refly/constants';
 import { useTranslation } from 'react-i18next';
 import { Message as message } from '@arco-design/web-react';
-import { useSiderStore } from '@/stores/sider';
+import { useSiderStore } from '@refly/ai-workspace-common/stores/sider';
 import { mapDefaultLocale } from '@/utils/locale';
 import { storage } from 'wxt/storage';
 import { useStorage } from './use-storage';
@@ -210,8 +210,25 @@ export const useGetUserSettings = () => {
 
   // 监听打开关闭
   useEffect(() => {
-    getLoginStatus();
+    if (siderStore?.showSider) {
+      getLoginStatus();
+    }
   }, [siderStore?.showSider]);
+
+  // 收到消息之后，关闭窗口，保活检查
+  const handleExtensionMessage = (request: any) => {
+    if (request?.name === 'refly-status-check') {
+      getLoginStatus();
+    }
+  };
+
+  useEffect(() => {
+    chrome.runtime.onMessage.addListener(handleExtensionMessage);
+
+    return () => {
+      chrome.runtime.onMessage.removeListener(handleExtensionMessage);
+    };
+  }, []);
 
   return {
     getLoginStatus,

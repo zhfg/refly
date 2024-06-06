@@ -12,12 +12,19 @@ import { Suspense, useEffect } from 'react';
 import '@/i18n/config';
 // 加载 runtime 设置
 import { getEnv, setRuntime } from '@refly/ai-workspace-common/utils/env';
+import { useSiderStore } from '@refly/ai-workspace-common/stores/sider';
 /**
  * 打开 popup 页面的规则
  * 1. 如果是
  */
 const App = () => {
+  const siderStore = useSiderStore();
   setRuntime('extension-sidepanel');
+
+  useEffect(() => {
+    // 针对 sider open 来说，SidePanel 渲染则代表打开 sider，与 Popup/App.tsx 逻辑保持一致
+    siderStore.setShowSider(true);
+  }, []);
 
   return (
     <Suspense fallback={<Spin style={{ marginTop: '200px auto' }} />}>

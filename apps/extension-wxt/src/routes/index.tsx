@@ -26,8 +26,6 @@ export const AppRouter = () => {
 
   // 这里进行用户登录信息检查
   useGetUserSettings();
-  // 进行保活检查
-  useProcessStatusCheck();
 
   // TODO: 国际化相关内容
   useEffect(() => {
