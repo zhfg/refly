@@ -38,9 +38,9 @@ export const handleRequest = async (msg: HandlerRequest<any>) => {
 
 const client = createClient({ baseUrl: getServerOrigin() + '/v1' });
 
-client.interceptors.request.use((request) => {
+client.interceptors.request.use(async (request) => {
   console.log('extension intercept request:', request);
-  const token = getCookie();
+  const token = await getCookie();
   if (token) {
     request.headers.set('Authorization', `Bearer ${token}`);
   }
