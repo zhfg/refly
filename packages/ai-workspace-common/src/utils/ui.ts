@@ -28,7 +28,8 @@ export const calcPopupPosition = (rect: DOMRect, barDimesion: { barWidth: number
 
 export const scrollToBottom = () => {
   setTimeout(() => {
-    const chatWrapperElem = document.querySelector('.ai-copilot-message-container');
+    const container = getPopupContainer();
+    const chatWrapperElem = container?.querySelector('.ai-copilot-message-container');
 
     if (chatWrapperElem) {
       const { scrollHeight, clientHeight } = chatWrapperElem;

@@ -3,7 +3,7 @@ import { Button, Divider, Radio, Skeleton, Message as message } from '@arco-desi
 import { IconArchive, IconBulb } from '@arco-design/web-react/icon';
 
 import './header.scss';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import { getCurrentDateInfo } from '@refly-packages/ai-workspace-common/utils/time';
 import { useDigestTopicStore } from '@refly-packages/ai-workspace-common/stores/digest-topics';
 import { useEffect, useState } from 'react';

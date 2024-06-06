@@ -3,7 +3,7 @@ import { IconBulb, IconCodepen } from '@arco-design/web-react/icon';
 
 // 自定义样式
 import './index.scss';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { Skeleton, Message as message } from '@arco-design/web-react';
 import {
   type KnowledgeBaseTab,

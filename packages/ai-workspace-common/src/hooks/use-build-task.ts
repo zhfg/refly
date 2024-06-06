@@ -1,7 +1,7 @@
 import { useCallback, useRef } from 'react';
-import { useChatStore } from '../stores/chat';
-import { useMessageStateStore } from '../stores/message-state';
-import { useConversationStore } from '../stores/conversation';
+import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
+import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
 import { Source } from '@refly/openapi-schema';
 import type { MessageState, RelatedQuestion } from '@refly-packages/ai-workspace-common/types';
 import { TASK_STATUS } from '@refly-packages/ai-workspace-common/types';
@@ -13,9 +13,15 @@ import { scrollToBottom } from '@refly-packages/ai-workspace-common/utils/ui';
 
 // requests
 import { parseStreaming } from '@refly-packages/ai-workspace-common/utils/parse-streaming';
+import { Runtime } from 'wxt/browser';
+import { getPort, removePort } from '@refly-packages/ai-workspace-common/utils/extension/ports';
+import { safeParseJSON } from '@refly-packages/ai-workspace-common/utils/parse';
+import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 // stores
 
 export const useBuildTask = () => {
+  const streamingChatPortRef = useRef<Runtime.Port>();
   const chatStore = useChatStore();
   const messageStateStore = useMessageStateStore();
   const conversationStore = useConversationStore();
@@ -203,9 +209,74 @@ export const useBuildTask = () => {
       payload?: ChatTask;
     };
   }) => {
+    const { runtime } = useUserStore.getState();
+    console.log('handleSendMessage runtime', runtime);
+    if (runtime?.includes('extension')) {
+      return handleSendMessageFromExtension(payload);
+    } else {
+      return handleSendMessageFromWeb(payload);
+    }
+  };
+
+  const handleSendMessageFromWeb = (payload: {
+    body: {
+      type: TASK_STATUS;
+      payload?: ChatTask;
+    };
+  }) => {
     controllerRef.current = new AbortController();
 
     parseStreaming(controllerRef.current, payload?.body?.payload, onSources, onContent, onRelated, onError);
+  };
+
+  /**
+   * For extension send message
+   * @param msg
+   * @returns
+   */
+  const handleStreamingMessage = (msg: { type: string; message: any }) => {
+    console.log('handleStreamingMessage', msg);
+    switch (msg?.type) {
+      case 'source':
+        return onSources(safeParseJSON(msg?.message));
+      case 'content':
+        return onContent(msg?.message);
+      case 'relatedQuestions':
+        return onRelated(safeParseJSON(msg?.message));
+      case 'error':
+        return onError(msg?.message);
+    }
+  };
+
+  const bindExtensionPorts = () => {
+    console.log('bindExtensionPorts');
+    if (streamingChatPortRef.current) return;
+    console.log('alreadybindExtensionPorts');
+
+    streamingChatPortRef.current = getPort('streaming-chat' as never);
+    streamingChatPortRef.current?.onMessage.addListener(handleStreamingMessage);
+  };
+
+  // for extension
+  const unbindExtensionPorts = () => {
+    console.log('unbindExtensionPorts');
+    if (streamingChatPortRef?.current) return;
+
+    streamingChatPortRef.current?.onMessage?.removeListener?.(handleStreamingMessage);
+    removePort?.('streaming-chat' as never);
+  };
+
+  const handleSendMessageFromExtension = (payload: { body: any }) => {
+    // 先 unbind
+    unbindExtensionPorts();
+    // 再 bind
+    bindExtensionPorts();
+
+    // 生成任务
+    streamingChatPortRef.current?.postMessage({
+      ...payload,
+      source: getRuntime(),
+    });
   };
 
   return {

@@ -2,7 +2,7 @@ import { Message as message } from '@arco-design/web-react';
 
 import { KnowledgeBaseTab, useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { ResourceDetail } from '@refly/openapi-schema';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 
 export const useKnowledgeBaseTabs = () => {
   const knowledgeBaseStore = useKnowledgeBaseStore();

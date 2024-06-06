@@ -23,7 +23,6 @@ export interface BackgroundMessage {
   type: BackgroundMsgType;
   source: IRuntime;
   target: any;
-  thisArg: any;
   args: any;
 }
 
@@ -54,7 +53,7 @@ const proxiedRequestModule = new Proxy(requestModule, {
 
     if (getRuntime()?.includes('extension') && typeof origMethod === 'function') {
       // The return function type is unknown because we don't know the exact signature of each function
-      return async function (thisArg: unknown, ...args: unknown[]) {
+      return async function (...args: unknown[]) {
         console.log(`Calling function ${String(propKey)} with arguments: ${args}`);
 
         try {
@@ -63,7 +62,6 @@ const proxiedRequestModule = new Proxy(requestModule, {
             type: 'apiRequest',
             source: getRuntime(),
             target,
-            thisArg,
             args,
           });
 

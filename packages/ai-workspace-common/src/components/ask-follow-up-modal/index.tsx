@@ -9,7 +9,7 @@ import { Digest, Feed, Conversation as Thread } from '@refly/openapi-schema';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
 import { useResetState } from '@refly-packages/ai-workspace-common/hooks/use-reset-state';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import { delay } from '@refly-packages/ai-workspace-common/utils/delay';
 import { useTranslation } from 'react-i18next';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';

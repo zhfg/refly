@@ -47,9 +47,10 @@ client.interceptors.request.use(async (request) => {
 });
 
 export const handleRequestReflect = async (msg: BackgroundMessage) => {
+  console.log('reflect msg', msg);
   // @ts-ignore
-  const res = await requestModule[msg.name as keyof typeof requestModule]?.call?.(msg?.thisArg, {
-    ...msg.args[0],
+  const res = await requestModule[msg.name as keyof typeof requestModule]?.call?.(null, {
+    ...msg.args?.[0],
     client,
   });
   const lastActiveTab = await getLastActiveTab();

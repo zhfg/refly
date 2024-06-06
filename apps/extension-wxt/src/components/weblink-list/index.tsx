@@ -30,7 +30,7 @@ import { LOCALE, type Conversation } from '@/types';
 import { time } from '@/utils/time';
 // stores
 import { useWeblinkStore } from '@/stores/weblink';
-import { safeParseUrl } from '@/utils/parse';
+import { safeParseUrl } from '@refly/ai-workspace-common/utils/parse';
 import { useTranslation } from 'react-i18next';
 // styles
 import './index.scss';

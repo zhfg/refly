@@ -1,6 +1,6 @@
 import { Button, Skeleton } from '@arco-design/web-react';
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from '@refly/ai-workspace-common/utils/router';
 
 // hooks
 import { useResetState } from '@/hooks/use-reset-state';
@@ -16,7 +16,7 @@ import { Header } from './header';
 import { useBuildTask } from '@/hooks/use-build-task';
 import { useTaskStore } from '@/stores/task';
 import { MessageType, type Message, TASK_TYPE } from '@/types';
-import { safeParseJSON } from '@/utils/parse';
+import { safeParseJSON } from '@refly/ai-workspace-common/utils/parse';
 import { useWeblinkStore } from '@/stores/weblink';
 import { SearchTarget, useSearchStateStore } from '@/stores/search-state';
 import { useContentSelectorStore } from '@/stores/content-selector';

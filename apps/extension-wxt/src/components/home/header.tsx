@@ -10,7 +10,7 @@ import { IconTip } from './icon-tip';
 import { Avatar } from '@arco-design/web-react';
 // stores
 import { useSiderStore } from '@/stores/sider';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@refly/ai-workspace-common/utils/router';
 import { getClientOrigin } from '@/utils/url';
 import { useUserStore } from '@/stores/user';
 import { useHomeStateStore } from '@/stores/home-state';

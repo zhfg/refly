@@ -5,7 +5,7 @@ import { useConversationStore } from '@refly-packages/ai-workspace-common/stores
 import { buildConversation } from '@refly-packages/ai-workspace-common/utils/conversation';
 import { useResetState } from './use-reset-state';
 import { useTaskStore } from '@refly-packages/ai-workspace-common/stores/task';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 // 类型
 import { LOCALE } from '@refly/constants';

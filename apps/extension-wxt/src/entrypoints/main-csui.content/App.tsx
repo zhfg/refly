@@ -1,6 +1,6 @@
 import * as _Sentry from '@sentry/react';
 import { useEffect, Suspense } from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@refly/ai-workspace-common/utils/router';
 // 使用方法
 import { useSwitchTheme } from '@/hooks/use-switch-theme';
 
@@ -12,10 +12,11 @@ import { useSetContainerDimension } from '@/hooks/use-set-container-dimension';
 // stores
 import { useSiderStore } from '@/stores/sider';
 import { useQuickActionStore } from '@/stores/quick-action';
+import { useUserStore } from '@refly/ai-workspace-common/stores/user';
 
 // 组件
 import { Message, Spin } from '@arco-design/web-react';
-import { ContentRouter } from '@/components/router';
+import { AppRouter } from '@/routes/index';
 import { Markdown } from '@/components/markdown';
 
 // 加载国际化
@@ -52,7 +53,7 @@ const App = () => {
   const siderStore = useSiderStore();
   const quickActionStore = useQuickActionStore();
 
-  setRuntime('extension-csui');
+  const userStore = useUserStore();
 
   // 注册 mouse event
   // useRegisterMouseEvent()
@@ -77,6 +78,8 @@ const App = () => {
   }, []);
   useEffect(() => {
     checkBrowserArc();
+    setRuntime('extension-csui');
+    userStore.setRuntime('extension-sidepanel');
   }, []);
 
   const chatStore = useChatStore();
@@ -96,7 +99,7 @@ const App = () => {
       </div> */}
         <div id="refly-app-main" className={siderStore.showSider ? 'main active' : 'main'}>
           <MemoryRouter>
-            <ContentRouter />
+            <AppRouter />
           </MemoryRouter>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { Message as message } from '@arco-design/web-react';
 import { Digest } from '@refly/openapi-schema';
 import { useDigestDetailStore } from '@refly-packages/ai-workspace-common/stores/digest-detail';

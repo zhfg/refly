@@ -1,7 +1,7 @@
 import { Button } from '@arco-design/web-react';
 import { IconHistory } from '@arco-design/web-react/icon';
 import { useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { Helmet } from 'react-helmet';
 
 // 自定义组件

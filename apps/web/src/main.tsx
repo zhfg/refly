@@ -1,4 +1,4 @@
-import React, { Suspense } from "react"
+import React, { Suspense, useEffect } from "react"
 import ReactDOM from "react-dom/client"
 import {
   BrowserRouter,
@@ -14,6 +14,7 @@ import { AppLayout } from "@refly/ai-workspace-common/components/layout/index"
 import "@refly/ai-workspace-common/i18n/config"
 import { Spin } from "@arco-design/web-react"
 import { getEnv, setRuntime } from "@refly/ai-workspace-common/utils/env"
+import { useUserStore } from "../../../packages/ai-workspace-common/src/stores/user"
 
 // dev for disable sentry as it will overload console.log result worse dev experience
 if (process.env.NODE_ENV !== "development") {
@@ -43,12 +44,21 @@ if (process.env.NODE_ENV !== "development") {
   })
 }
 
-setRuntime("web")
+export const App = () => {
+  const userStore = useUserStore()
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <Suspense fallback={<Spin style={{ margin: "200px auto" }} />}>
-    <BrowserRouter>
-      <AppRouter layout={AppLayout} />
-    </BrowserRouter>
-  </Suspense>,
-)
+  useEffect(() => {
+    setRuntime("web")
+    userStore.setRuntime("web")
+  }, [])
+
+  return (
+    <Suspense fallback={<Spin style={{ margin: "200px auto" }} />}>
+      <BrowserRouter>
+        <AppRouter layout={AppLayout} />
+      </BrowserRouter>
+    </Suspense>
+  )
+}
+
+ReactDOM.createRoot(document.getElementById("root")!).render(<App />)

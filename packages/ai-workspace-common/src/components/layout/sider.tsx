@@ -1,5 +1,5 @@
 import { Avatar, Divider, Layout, Menu, Tag } from '@arco-design/web-react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import {
   IconHome,
   IconSettings,

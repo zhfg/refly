@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { Helmet } from 'react-helmet';
 
 // hooks

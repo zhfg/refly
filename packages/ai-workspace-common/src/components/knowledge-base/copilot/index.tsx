@@ -13,7 +13,7 @@ import {
 import './index.scss';
 // 自定义组件
 import { SearchTargetSelector } from '@refly-packages/ai-workspace-common/components/search-target-selector';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { ContextStateDisplay } from './context-state-display';
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
@@ -110,7 +110,7 @@ export const AICopilot = (props: AICopilotProps) => {
       const { isNewConversation, newQAText } = useChatStore.getState();
 
       // 新会话，需要手动构建第一条消息
-      if (isNewConversation && convId) {
+      if (isNewConversation && convId && newQAText) {
         // 更换成基于 task 的消息模式，核心是基于 task 来处理
         runTask(newQAText);
       } else if (convId) {
@@ -122,6 +122,9 @@ export const AICopilot = (props: AICopilotProps) => {
 
     await delay(1500);
     setIsFetching(false);
+
+    // reset state
+    chatStore.setIsNewConversation(false);
   };
 
   useEffect(() => {
@@ -137,6 +140,8 @@ export const AICopilot = (props: AICopilotProps) => {
     handleSwitchSearchTarget();
   }, [showContextState]);
   useResizeCopilot({ containerSelector: 'ai-copilot-container' });
+
+  console.log('ai-copilot convId', convId);
 
   return (
     <div className="ai-copilot-container">

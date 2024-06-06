@@ -1,8 +1,6 @@
 import ReactDOM from 'react-dom/client';
-import { setRuntime } from '@refly/ai-workspace-common/utils/env';
 
 import App from './App';
-import { checkBrowserArc } from '@/utils/browser';
 
 export default defineContentScript({
   matches: ['<all_urls>'],
@@ -10,8 +8,6 @@ export default defineContentScript({
   cssInjectionMode: 'ui',
 
   async main(ctx) {
-    setRuntime('extension-csui');
-
     console.log('ctx', ctx);
     // 3. Define your UI
     const ui = await createShadowRootUi(ctx, {

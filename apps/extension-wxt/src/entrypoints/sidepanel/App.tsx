@@ -1,5 +1,5 @@
 import { Button, Spin } from '@arco-design/web-react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@refly/ai-workspace-common/utils/router';
 import { AppRouter } from '@/routes/index';
 import { createClient, client } from '@hey-api/client-fetch';
 
@@ -11,19 +11,22 @@ import { Suspense, useEffect } from 'react';
 // 加载国际化
 import '@/i18n/config';
 // 加载 runtime 设置
-import { getEnv, setRuntime } from '@refly/ai-workspace-common/utils/env';
+import { getEnv, getRuntime, setRuntime } from '@refly/ai-workspace-common/utils/env';
 import { useSiderStore } from '@refly/ai-workspace-common/stores/sider';
+import { useUserStore } from '@refly/ai-workspace-common/stores/user';
 /**
  * 打开 popup 页面的规则
  * 1. 如果是
  */
 const App = () => {
   const siderStore = useSiderStore();
-  setRuntime('extension-sidepanel');
+  const userStore = useUserStore();
 
   useEffect(() => {
     // 针对 sider open 来说，SidePanel 渲染则代表打开 sider，与 Popup/App.tsx 逻辑保持一致
     siderStore.setShowSider(true);
+    setRuntime('extension-sidepanel');
+    userStore.setRuntime('extension-sidepanel');
   }, []);
 
   return (

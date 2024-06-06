@@ -1,9 +1,9 @@
 import { useEffect, useTransition } from 'react';
-import { useMatch, useNavigate } from 'react-router-dom';
+import { useMatch, useNavigate } from '@refly/ai-workspace-common/utils/router';
 
 // request
 import { LocalSettings, defaultLocalSettings, useUserStore } from '@refly/ai-workspace-common/stores/user';
-import { safeParseJSON, safeStringifyJSON } from '@/utils/parse';
+import { safeParseJSON, safeStringifyJSON } from '@refly/ai-workspace-common/utils/parse';
 import { type User } from '@/types';
 import { LOCALE } from '@refly/constants';
 import { useTranslation } from 'react-i18next';

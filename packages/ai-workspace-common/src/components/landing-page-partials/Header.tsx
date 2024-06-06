@@ -1,6 +1,6 @@
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@refly-packages/ai-workspace-common/utils/router';
 import Logo from '@/assets/logo.svg';
 
 import './header.scss';

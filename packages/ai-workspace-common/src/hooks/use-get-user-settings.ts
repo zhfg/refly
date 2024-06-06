@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useMatch, useNavigate } from 'react-router-dom';
+import { useMatch, useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 
 // request
 import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';

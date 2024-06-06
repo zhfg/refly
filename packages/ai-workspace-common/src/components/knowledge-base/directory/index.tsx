@@ -6,7 +6,7 @@ import './index.scss';
 import { IconFile } from '@arco-design/web-react/icon';
 import { Message as message } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 // 类型
 import { ResourceDetail } from '@refly/openapi-schema';

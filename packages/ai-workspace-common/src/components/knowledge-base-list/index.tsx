@@ -5,7 +5,7 @@
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { List, Skeleton, Typography, Message as message } from '@arco-design/web-react';
 import { IconClockCircle, IconLink, IconRightCircle, IconShareExternal, IconTag } from '@arco-design/web-react/icon';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 // types
 import { IconTip } from '@refly-packages/ai-workspace-common/components/dashboard/icon-tip';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';

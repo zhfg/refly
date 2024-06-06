@@ -10,7 +10,7 @@ import { IconTip } from './icon-tip';
 import { Avatar } from '@arco-design/web-react';
 // stores
 import { useSiderStore } from '@refly-packages/ai-workspace-common/stores/sider';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 
 export const ChatHeader = () => {
   const siderStore = useSiderStore();

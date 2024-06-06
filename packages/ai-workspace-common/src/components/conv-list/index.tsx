@@ -5,7 +5,7 @@ import { List, Skeleton, Message as message, Typography } from '@arco-design/web
 // stores
 import { useThreadStore } from '@refly-packages/ai-workspace-common/stores/thread';
 import { IconClockCircle, IconMessage, IconRightCircle } from '@arco-design/web-react/icon';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 // utils
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';

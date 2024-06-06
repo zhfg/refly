@@ -1,11 +1,11 @@
-import { Tag } from "@arco-design/web-react";
-import { IconRightCircle, IconLink } from "@arco-design/web-react/icon";
-import React, { type MutableRefObject } from "react";
-import { useTranslation } from "react-i18next";
-import { useSearchQuickActionStore } from "@/stores/search-quick-action";
-import { useWeblinkStore } from "@/stores/weblink";
-import type { Source } from "@/types";
-import { safeParseUrl } from "@/utils/parse";
+import { Tag } from '@arco-design/web-react';
+import { IconRightCircle, IconLink } from '@arco-design/web-react/icon';
+import React, { type MutableRefObject } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useSearchQuickActionStore } from '@/stores/search-quick-action';
+import { useWeblinkStore } from '@/stores/weblink';
+import type { Source } from '@/types';
+import { safeParseUrl } from '@refly/ai-workspace-common/utils/parse';
 
 interface SelectedWeblinkProps {
   ref?: MutableRefObject<SelectedWeblinkProps>;
@@ -19,18 +19,13 @@ export const SelectedWeblink = (props: SelectedWeblinkProps) => {
   const { t } = useTranslation();
   const selectedRow = props?.selectedWeblinkList;
 
-  const updateSelectedRow = (link: {
-    key: string | number;
-    content: Source;
-  }) => {
+  const updateSelectedRow = (link: { key: string | number; content: Source }) => {
     const { selectedRow } = useWeblinkStore.getState();
 
     // 去掉删除的 row
-    const newSelectedRow = selectedRow.filter(
-      (item) => String(item?.key) !== String(link?.key)
-    );
+    const newSelectedRow = selectedRow.filter((item) => String(item?.key) !== String(link?.key));
 
-    console.log("link", link, newSelectedRow);
+    console.log('link', link, newSelectedRow);
 
     if (newSelectedRow?.length === 0) {
       searchQuickActionStore.setShowQuickAction(false);
@@ -43,8 +38,8 @@ export const SelectedWeblink = (props: SelectedWeblinkProps) => {
     <div className="selected-weblinks-container">
       <div className="selected-weblinks-inner-container">
         <div className="hint-item">
-          <IconRightCircle style={{ color: "rgba(0, 0, 0, .6)" }} />
-          <span>{t("loggedHomePage.homePage.selectedWeblink.title")}</span>
+          <IconRightCircle style={{ color: 'rgba(0, 0, 0, .6)' }} />
+          <span>{t('loggedHomePage.homePage.selectedWeblink.title')}</span>
         </div>
         {selectedRow?.map((item, index) => (
           <Tag
