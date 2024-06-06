@@ -1,14 +1,17 @@
-import { Button, Spin } from "@arco-design/web-react";
-import { useEffect, useRef, useState } from "react";
+import { Button, Spin } from '@arco-design/web-react';
+import { useEffect, useRef, useState } from 'react';
 
-import { reflyEnv } from "@/utils/env";
+import { reflyEnv } from '@/utils/env';
 
-import "./App.scss";
+import '@/styles/style.css';
+import './App.scss';
 
-import { IconRefresh } from "@arco-design/web-react/icon";
+import { IconRefresh, IconBulb } from '@arco-design/web-react/icon';
 
-import Logo from "~/assets/logo.svg";
-import { useStorage } from "@/hooks/use-storage";
+import Logo from '~/assets/logo.svg';
+import { useStorage } from '@/hooks/use-storage';
+import { browser } from 'wxt/browser';
+import { getCurrentTab } from '@/utils/extension/tabs';
 
 const getActiveTab = async () => {
   const [tab] = await browser.tabs.query({
@@ -19,17 +22,15 @@ const getActiveTab = async () => {
 };
 
 const checkPageUnsupported = (pageUrl: string) => {
-  console.log("checking page url", JSON.stringify(pageUrl));
+  console.log('checking page url', JSON.stringify(pageUrl));
 
   if (pageUrl) {
     const checkBrowserSettingPage =
-      pageUrl.startsWith("chrome://") ||
-      pageUrl.startsWith("edge://") ||
-      pageUrl.startsWith("about:");
+      pageUrl.startsWith('chrome://') || pageUrl.startsWith('edge://') || pageUrl.startsWith('about:');
     const checkBrowserExtensionStorePage = [
-      "https://browser.google.com/webstore",
-      "https://microsoftedge.microsoft.com/addons",
-      "https://addons.mozilla.org/en-US/firefox",
+      'https://browser.google.com/webstore',
+      'https://microsoftedge.microsoft.com/addons',
+      'https://addons.mozilla.org/en-US/firefox',
     ].some((url) => pageUrl.startsWith(url));
 
     return checkBrowserSettingPage || checkBrowserExtensionStorePage;
@@ -44,14 +45,11 @@ const checkPageUnsupported = (pageUrl: string) => {
  */
 const App = () => {
   const osType = reflyEnv.getOsType();
-  const [isSideBarOpen, setIsSideBarOpen] = useStorage<boolean>(
-    "isSideBarOpen",
-    false,
-    "sync"
-  );
+  const openSidePanelBtnRef = useRef<HTMLButtonElement>();
+  const [isSideBarOpen, setIsSideBarOpen] = useStorage<boolean>('isSideBarOpen', false, 'sync');
 
-  const [currentTabUrl, setCurrentTabUrl] = useState("");
-  const currentTabUrlRef = useRef("");
+  const [currentTabUrl, setCurrentTabUrl] = useState('');
+  const currentTabUrlRef = useRef('');
   const [loading, setLoading] = useState(true);
   const [pageUnsupported, setPageUnsupported] = useState(false);
 
@@ -64,16 +62,33 @@ const App = () => {
     }
   };
 
+  const openSidePanel = async () => {
+    console.log('clicked');
+    const currentTab = await getCurrentTab();
+    // @ts-ignore
+    // await browser?.sidePanel?.open({
+    //   windowId: currentTab?.windowId,
+    // });
+    browser.runtime.sendMessage({
+      type: 'registerSidePanel',
+    });
+
+    // setTimeout(() => {
+    //   window.close();
+    // });
+    return;
+  };
+
   const handleRunRefly = async () => {
     const activeTab = await getActiveTab();
-    setCurrentTabUrl(activeTab?.url || "");
-    currentTabUrlRef.current = activeTab?.url || "";
-    console.log("activeTab", activeTab);
+    setCurrentTabUrl(activeTab?.url || '');
+    currentTabUrlRef.current = activeTab?.url || '';
+    console.log('activeTab', activeTab);
 
     if (activeTab) {
-      console.log("activeTab", browser.tabs.sendMessage);
+      console.log('activeTab', browser.tabs.sendMessage);
       const res = await browser.tabs.sendMessage(activeTab?.id as number, {
-        data: { name: "runRefly", toggle: !isSideBarOpen },
+        data: { name: 'runRefly', toggle: !isSideBarOpen },
       });
 
       setIsSideBarOpen(!isSideBarOpen);
@@ -116,7 +131,7 @@ const App = () => {
           <Button
             type="outline"
             onClick={() => {
-              browser.tabs.create({ url: "https://refly.ai" });
+              browser.tabs.create({ url: 'https://refly.ai' });
             }}
           >
             教程
@@ -127,9 +142,7 @@ const App = () => {
         <p className="content-title">感谢使用 Refly！</p>
         {pageUnsupported ? (
           <>
-            <p className="state">
-              😵 由于浏览器安全限制，Refly 无法在以下页面工作：
-            </p>
+            <p className="state">😵 由于浏览器安全限制，Refly 无法在以下页面工作：</p>
             <ul>
               <li>Chrome Web 商店页面</li>
               <li>Chrome 页面</li>
@@ -151,11 +164,19 @@ const App = () => {
             </Button>
           </>
         )}
+        <Button
+          ref={openSidePanelBtnRef}
+          long
+          type="primary"
+          style={{ marginTop: 16 }}
+          icon={<IconBulb />}
+          onClick={() => openSidePanel()}
+        >
+          打开侧边栏提问
+        </Button>
         <p className="shortcut-hint">
           提示：按下
-          <span className="key">
-            {osType === "OSX" ? "Command+J" : "Ctrl+J"}
-          </span>
+          <span className="key">{osType === 'OSX' ? 'Command+J' : 'Ctrl+J'}</span>
           以更快地激活 Refly。键盘快捷键可以在
           <a
             onClick={() => {

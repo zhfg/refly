@@ -1,17 +1,20 @@
-import { Runtime } from "wxt/browser";
-import { TASK_STATUS } from "@/types";
+import { Runtime, browser } from 'wxt/browser';
+import { TASK_STATUS } from '@/types';
+import { getCookie } from '@/utils/cookie';
+import { getServerOrigin } from '@refly/ai-workspace-common/utils/url';
+import { getExtensionVersion } from '@/utils/version';
+import { fetchStream } from '@refly/ai-workspace-common/utils/fetch-stream';
+import { getRuntime } from '@refly/ai-workspace-common/utils/env';
+import { getCurrentTab } from '@refly/ai-workspace-common/utils/extension/tabs';
 
-const LLM_SPLIT = "__LLM_RESPONSE__";
-const RELATED_SPLIT = "__RELATED_QUESTIONS__";
+const LLM_SPLIT = '__LLM_RESPONSE__';
+const RELATED_SPLIT = '__RELATED_QUESTIONS__';
 
 let abortController: AbortController;
 
-export const handleGenResponse = async (
-  req: { body: any },
-  res: { send: (response?: any) => void }
-) => {
+export const handleStreamingChat = async (req: { body: any }, res: { send: (response?: any) => void }) => {
   const { type, payload } = req?.body || {};
-  console.log("receive request", req.body);
+  console.log('receive request', req.body);
 
   try {
     if (type === TASK_STATUS.START) {
@@ -21,45 +24,42 @@ export const handleGenResponse = async (
       abortController = new AbortController();
 
       // TODO: 这里未来要优化
-      const convId = payload?.data?.convId;
+      const convId = payload?.convId;
 
       const cookie = await getCookie();
 
       const decoder = new TextDecoder();
       let uint8Array = new Uint8Array();
-      let chunks = "";
+      let chunks = '';
       let sourcesEmitted = false;
 
-      const response = await fetch(
-        `${getServerOrigin()}/v1/conversation/chat`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${cookie}`,
-            "x-refly-ext-version": getExtensionVersion(),
-          },
-          signal: abortController.signal,
-          body: JSON.stringify({
-            task: { ...payload, convId },
-          }),
-        }
-      );
+      const response = await fetch(`${getServerOrigin()}/v1/conversation/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${cookie}`,
+          'x-refly-ext-version': getExtensionVersion(),
+        },
+        signal: abortController.signal,
+        body: JSON.stringify({
+          task: { ...payload, convId },
+        }),
+      });
       if (response.status !== 200) {
         res.send({
-          type: "error",
+          type: 'error',
           message: response.status,
         });
         return;
       }
       const markdownParse = (text: string) => {
         res.send({
-          type: "content",
+          type: 'content',
           message: text
-            .replace(/\[\[([cC])itation/g, "[citation")
-            .replace(/[cC]itation:(\d+)]]/g, "citation:$1]")
+            .replace(/\[\[([cC])itation/g, '[citation')
+            .replace(/[cC]itation:(\d+)]]/g, 'citation:$1]')
             .replace(/\[\[([cC]itation:\d+)]](?!])/g, `[$1]`)
-            .replace(/\[[cC]itation:(\d+)]/g, "[citation]($1)"),
+            .replace(/\[[cC]itation:(\d+)]/g, '[citation]($1)'),
         });
       };
       fetchStream(
@@ -72,12 +72,12 @@ export const handleGenResponse = async (
             if (!sourcesEmitted) {
               try {
                 res.send({
-                  type: "source",
+                  type: 'source',
                   message: sources,
                 });
               } catch (e) {
                 res.send({
-                  type: "source",
+                  type: 'source',
                   message: JSON.stringify([]),
                 });
               }
@@ -95,23 +95,23 @@ export const handleGenResponse = async (
           const [_, relates] = chunks.split(RELATED_SPLIT);
           try {
             res.send({
-              type: "relatedQuestions",
+              type: 'relatedQuestions',
               message: relates,
             });
           } catch (e) {
             res.send({
-              type: "relatedQuestions",
+              type: 'relatedQuestions',
               message: JSON.stringify([]),
             });
           }
-        }
+        },
       );
     } else if (type === TASK_STATUS.SHUTDOWN) {
       abortController.abort();
-      res.send({ message: "[DONE]" });
+      res.send({ message: '[DONE]' });
     }
   } catch (err) {
-    console.log("err", err);
+    console.log('err', err);
     // 最终也需要 abort 确保关闭
     abortController?.abort?.();
   }
@@ -119,10 +119,17 @@ export const handleGenResponse = async (
 
 export const onPort = async (port: Runtime.Port) => {
   port.onMessage.addListener(async (message: any, comingPort: Runtime.Port) => {
-    if (comingPort.name === "gen-response") {
-      return handleGenResponse(message, {
-        send: (msg: any) => {
-          browser.tabs.sendMessage(comingPort?.sender?.tab?.id as number, msg);
+    if (comingPort.name === 'streaming-chat') {
+      return handleStreamingChat(message, {
+        send: async (msg: any) => {
+          const runtime = message?.source;
+
+          if (runtime === 'extension-csui') {
+            const tab = await getCurrentTab();
+            browser.tabs.sendMessage(tab?.id as number, msg);
+          } else if (runtime === 'extension-sidepanel') {
+            port?.postMessage(msg);
+          }
         },
       });
     }

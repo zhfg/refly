@@ -14,15 +14,34 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import {
-  CreateConversationParam,
+  CreateConversationRequest,
   CreateConversationResponse,
   ListConversationResponse,
-} from './conversation.dto';
-import { ApiParam, ApiResponse } from '@nestjs/swagger';
+  Conversation as ConversationListItem,
+  ChatRequest,
+  GetConversationDetailResponse,
+} from '@refly/openapi-schema';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
-import { TASK_TYPE, Task } from './conversation.dto';
 import { Conversation } from '@prisma/client';
+import { buildSuccessResponse, pick } from '../utils';
+
+const convertConversationToListItem = (conversation: Conversation): ConversationListItem => {
+  return {
+    ...pick(conversation, [
+      'convId',
+      'title',
+      'lastMessage',
+      'messageCount',
+      'cid',
+      'origin',
+      'originPageTitle',
+      'originPageUrl',
+    ]),
+    createdAt: conversation.createdAt.toJSON(),
+    updatedAt: conversation.updatedAt.toJSON(),
+  };
+};
 
 @Controller('conversation')
 export class ConversationController {
@@ -32,17 +51,20 @@ export class ConversationController {
 
   @UseGuards(JwtAuthGuard)
   @Post('new')
-  @ApiResponse({ type: CreateConversationResponse })
-  async createConversation(@Request() req, @Body() body: CreateConversationParam) {
-    return { data: await this.conversationService.createConversation(req.user, body) };
+  async createConversation(
+    @Request() req,
+    @Body() body: CreateConversationRequest,
+  ): Promise<CreateConversationResponse> {
+    const conversation = await this.conversationService.createConversation(req.user, body);
+    return buildSuccessResponse(convertConversationToListItem(conversation));
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('chat')
-  async chatV2(@Request() req, @Res() res: Response, @Body() body: { task: Task }) {
+  async chatV2(@Request() req, @Res() res: Response, @Body() body: ChatRequest) {
     const { task } = body;
 
-    if (task.taskType === TASK_TYPE.CHAT && !task.data?.question) {
+    if (task.taskType === 'chat' && !task.data?.question) {
       throw new BadRequestException('query cannot be empty for chat task');
     }
 
@@ -50,6 +72,7 @@ export class ConversationController {
       throw new BadRequestException('convId cannot be empty');
     }
 
+    let chatConv: Conversation;
     if (!task.dryRun) {
       let conversation: Conversation = await this.conversationService.findConversation(task.convId);
 
@@ -71,7 +94,7 @@ export class ConversationController {
         );
       }
 
-      task.conversation = conversation;
+      chatConv = conversation;
     }
 
     res.setHeader('Content-Type', 'text/event-stream');
@@ -79,7 +102,7 @@ export class ConversationController {
     res.setHeader('Connection', 'keep-alive');
     res.status(200);
 
-    await this.conversationService.chat(res, req.user, task);
+    await this.conversationService.chat(res, req.user, chatConv, task);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -87,7 +110,7 @@ export class ConversationController {
   async chat(
     @Request() req,
     @Param('conversationId') conversationId = '',
-    @Body() body: { task: Task },
+    @Body() body: ChatRequest,
     @Res() res: Response,
   ) {
     if (!conversationId || !Number(conversationId)) {
@@ -105,27 +128,25 @@ export class ConversationController {
     if (!task) {
       throw new BadRequestException('task cannot be empty');
     }
-    if (task.taskType === TASK_TYPE.CHAT && !task.data?.question) {
+    if (task.taskType === 'chat' && !task.data?.question) {
       throw new BadRequestException('query cannot be empty for chat task');
     }
-    task.conversation = conversation;
 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.status(200);
 
-    await this.conversationService.chat(res, req.user, body.task);
+    await this.conversationService.chat(res, req.user, conversation, body.task);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('list')
-  @ApiResponse({ type: ListConversationResponse })
   async listConversation(
     @Request() req,
     @Query('page') page = '1',
     @Query('pageSize') pageSize = '10',
-  ) {
+  ): Promise<ListConversationResponse> {
     const parsedPage = parseInt(page);
     const parsedPageSize = parseInt(pageSize);
 
@@ -136,18 +157,18 @@ export class ConversationController {
       orderBy: { createdAt: 'desc' },
     });
 
-    return {
-      data: conversationList,
-    };
+    return buildSuccessResponse(
+      conversationList.map((conv) => convertConversationToListItem(conv)),
+    );
   }
 
   @UseGuards(JwtAuthGuard)
   @Get(':convId')
-  @ApiParam({ name: 'convId' })
-  @ApiResponse({ type: ListConversationResponse })
-  async showConversationDetail(@Request() req, @Param('convId') convId: string) {
+  async showConversationDetail(
+    @Request() req,
+    @Param('convId') convId: string,
+  ): Promise<GetConversationDetailResponse> {
     const data = await this.conversationService.findConversation(convId, true);
-
-    return data.userId === (req.user.id as number) ? { data } : { data: {} };
+    return buildSuccessResponse(data.userId === (req.user.id as number) ? data : {});
   }
 }

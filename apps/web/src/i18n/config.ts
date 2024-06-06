@@ -1,7 +1,7 @@
 import i18next from "i18next"
 import { initReactI18next } from "react-i18next"
-import enTranslation from "./en/translation.json"
-import cnTranslation from "./cn/translation.json"
+import enTranslation from "@refly/ai-workspace-common/i18n/en/translation.json"
+import cnTranslation from "@refly/ai-workspace-common/i18n/cn/translation.json"
 
 i18next.use(initReactI18next).init({
   lng: "en", // if you're using a language detector, do not define the lng option
@@ -11,12 +11,6 @@ i18next.use(initReactI18next).init({
       translation: enTranslation,
     },
     "zh-CN": {
-      translation: cnTranslation,
-    },
-    "zh-Hant": {
-      translation: cnTranslation,
-    },
-    zh: {
       translation: cnTranslation,
     },
   },

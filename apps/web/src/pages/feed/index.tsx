@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import { ContentMeta } from "@refly/schema"
+import { ContentMeta } from "@refly/openapi-schema"
 
 // 组件
 import {
@@ -9,8 +9,8 @@ import {
   Typography,
 } from "@arco-design/web-react"
 // stores
-import { useFeedStore } from "@/stores/feed"
-import { IconTip } from "@/components/dashboard/icon-tip"
+import { useFeedStore } from "@refly/ai-workspace-common/stores/feed"
+import { IconTip } from "@refly/ai-workspace-common/components/dashboard/icon-tip"
 import {
   IconBook,
   IconClockCircle,
@@ -21,18 +21,18 @@ import {
 } from "@arco-design/web-react/icon"
 import { useNavigate, useMatch } from "react-router-dom"
 // utils
-import { time } from "@/utils/time"
-import getFeedList from "@/requests/getFeedList"
+import { time } from "@refly/ai-workspace-common/utils/time"
+import client from "@refly/ai-workspace-common/requests/proxiedRequest"
 // types
-import { Feed as IFeed } from "@/types"
+import { Feed as IFeed } from "@refly/openapi-schema"
 import "./index.scss"
 // fake data
-import { copyToClipboard } from "@/utils"
-import { getClientOrigin } from "@/utils/url"
-import { safeParseJSON } from "@/utils/parse"
+import { copyToClipboard } from "@refly/ai-workspace-common/utils"
+import { getClientOrigin } from "@refly/ai-workspace-common/utils/url"
+import { safeParseJSON } from "@refly/ai-workspace-common/utils/parse"
 // components
-import { EmptyFeedStatus } from "@/components/empty-feed-status"
-import { delay } from "@/utils/delay"
+import { EmptyFeedStatus } from "@refly/ai-workspace-common/components/empty-feed-status"
+import { delay } from "@refly/ai-workspace-common/utils/delay"
 
 export const Feed = () => {
   const [scrollLoading, setScrollLoading] = useState(
@@ -62,7 +62,7 @@ export const Feed = () => {
         return
       }
 
-      const newRes = await getFeedList({
+      const { data: newRes, error } = await client.getFeedList({
         body: {
           page: currentPage,
           pageSize: 10,
@@ -71,6 +71,9 @@ export const Feed = () => {
 
       feedStore.updateCurrentPage(currentPage)
 
+      if (error) {
+        throw error
+      }
       if (!newRes?.success) {
         throw new Error(newRes?.errMsg)
       }
@@ -79,7 +82,9 @@ export const Feed = () => {
       }
 
       console.log("newRes", newRes)
-      feedStore.updateFeedList(newRes?.data as IFeed[])
+      if (newRes.data) {
+        feedStore.updateFeedList(newRes?.data)
+      }
     } catch (err) {
       message.error("获取推荐内容失败，请重新刷新试试")
     } finally {

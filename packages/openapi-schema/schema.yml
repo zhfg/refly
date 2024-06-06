@@ -1,0 +1,1645 @@
+openapi: 3.0.3
+info:
+  title: Refly AI
+  description: AI-native knowledge management solutions and infra.
+  contact:
+    email: team@refly.ai
+  version: 0.2.0
+externalDocs:
+  description: Where knowledge thrives
+  url: https://refly.ai
+servers:
+  - url: /v1
+tags:
+  - name: knowledge
+    description: Knowledge base management endpoints
+  - name: chat
+    description: Chatbot related endpoints
+  - name: weblink
+    description: Weblink related endpoints
+  - name: aigc
+    description: AIGC relation endpoints
+  - name: user
+    description: User management endpoints
+paths:
+  /knowledge/resource/list:
+    get:
+      tags:
+        - knowledge
+      summary: List resources
+      description: List all resources
+      operationId: listResources
+      parameters:
+        - name: collectionId
+          in: query
+          description: Target collection ID
+          schema:
+            type: string
+            example: cl-g30e1b80b5g1itbemc0g5jj3
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: number
+            default: 1
+        - name: pageSize
+          in: query
+          description: Page size
+          schema:
+            type: number
+            default: 10
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListResourceResponse'
+      security:
+        - api_key: []
+  /knowledge/resource/detail:
+    get:
+      tags:
+        - knowledge
+      summary: Get resource detail
+      description: Return resource detail along with its document content
+      operationId: getResourceDetail
+      parameters:
+        - name: resourceId
+          in: query
+          description: Resource ID to retrieve
+          required: true
+          schema:
+            type: string
+            example: r-g30e1b80b5g1itbemc0g5jj3
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetResourceDetailResponse'
+      security:
+        - api_key: []
+  /knowledge/resource/update:
+    post:
+      tags:
+        - knowledge
+      summary: Update resource
+      description: Update an existing resource
+      operationId: updateResource
+      requestBody:
+        description: Resource update request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertResourceRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertResourceResponse'
+      security:
+        - api_key: []
+  /knowledge/resource/new:
+    post:
+      tags:
+        - knowledge
+      summary: Create new resource
+      description: Create a new resource
+      operationId: createResource
+      requestBody:
+        description: Resource creation request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertResourceRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertResourceResponse'
+      security:
+        - api_key: []
+  /knowledge/resource/delete:
+    post:
+      tags:
+        - knowledge
+      summary: Delete resource
+      description: Delete an existing resource
+      operationId: deleteResource
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteResourceRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+      security:
+        - api_key: []
+  /knowledge/collection/list:
+    get:
+      tags:
+        - knowledge
+      summary: List user collections
+      description: List all collections for a user
+      operationId: listCollections
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          required: false
+          schema:
+            type: number
+            default: 1
+        - name: pageSize
+          in: query
+          description: Page size
+          required: false
+          schema:
+            type: number
+            default: 10
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListCollectionResponse'
+      security:
+        - api_key: []
+  /knowledge/collection/detail:
+    get:
+      tags:
+        - knowledge
+      summary: Get collection detail
+      description: Return collection details along with its resources
+      operationId: getCollectionDetail
+      parameters:
+        - name: collectionId
+          in: query
+          description: Collection ID to retrieve
+          required: true
+          schema:
+            type: string
+            example: cl-g30e1b80b5g1itbemc0g5jj3
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetCollectionDetailResponse'
+      security:
+        - api_key: []
+  /knowledge/collection/update:
+    post:
+      tags:
+        - knowledge
+      summary: Update collection
+      description: Update an existing collection
+      operationId: updateCollection
+      requestBody:
+        description: Collection update request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertCollectionRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+      security:
+        - api_key: []
+  /knowledge/collection/new:
+    post:
+      tags:
+        - knowledge
+      summary: Create new collection
+      description: Create a new collection
+      operationId: createCollection
+      requestBody:
+        description: Collection creation request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertCollectionRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+      security:
+        - api_key: []
+  /knowledge/collection/delete:
+    post:
+      tags:
+        - knowledge
+      summary: Delete collection
+      description: Delete an existing collection
+      operationId: deleteCollection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteCollectionRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+      security:
+        - api_key: []
+  /conversation/list:
+    get:
+      tags:
+        - chat
+      summary: List conversations
+      description: List all conversations
+      operationId: listConversations
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListConversationResponse'
+      security:
+        - api_key: []
+  /conversation/chat:
+    post:
+      tags:
+        - chat
+      summary: Chat in a streaming style
+      description: Chat in a streaming style
+      operationId: chat
+      requestBody:
+        description: Chat request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/event-stream:
+              schema:
+                type: string
+      security:
+        - api_key: []
+  /conversation/new:
+    post:
+      tags:
+        - chat
+      summary: Create new conversation
+      description: Create a new conversation
+      operationId: createConversation
+      requestBody:
+        description: Conversation creation request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateConversationRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateConversationResponse'
+  /conversation/{convId}:
+    get:
+      tags:
+        - chat
+      summary: Get conversation
+      description: Get conversation detail
+      operationId: getConversationDetail
+      parameters:
+        - name: convId
+          in: path
+          description: Conversation ID
+          example: cv-g30e1b80b5g1itbemc0g5jj3
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetConversationDetailResponse'
+  /weblink/ping:
+    get:
+      tags:
+        - weblink
+      summary: Ping a weblink
+      description: Find out the processing status for a given weblink
+      operationId: pingWeblink
+      parameters:
+        - name: url
+          in: query
+          description: Weblink URL
+          required: true
+          example: https://refly.ai
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PingWeblinkResponse'
+      security:
+        - api_key: []
+  /weblink/store:
+    post:
+      tags:
+        - weblink
+      summary: Store a weblink
+      description: Store a weblink
+      operationId: storeWeblink
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreWeblinkRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+      security:
+        - api_key: []
+  /weblink/list:
+    get:
+      tags:
+        - weblink
+      summary: List weblinks
+      description: List all weblinks
+      operationId: listWeblinks
+      parameters:
+        - name: linkId
+          in: query
+          description: Weblink ID
+          schema:
+            type: string
+        - name: url
+          in: query
+          description: Weblink URL
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: number
+            default: 1
+        - name: pageSize
+          in: query
+          description: Page size
+          schema:
+            type: number
+            default: 10
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListWeblinkResponse'
+      security:
+        - api_key: []
+  /aigc/feed:
+    get:
+      tags:
+        - aigc
+      summary: Get AIGC feed
+      description: Get AIGC feed
+      operationId: getFeedList
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: number
+            default: 1
+        - name: pageSize
+          in: query
+          description: Page size
+          schema:
+            type: number
+            default: 10
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListFeedResponse'
+      security:
+        - api_key: []
+  /aigc/digest:
+    post:
+      tags:
+        - aigc
+      summary: Get AIGC digest
+      description: Get AIGC digest
+      operationId: getDigestList
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListDigestRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListDigestResponse'
+      security:
+        - api_key: []
+  /aigc/content/{cid}:
+    get:
+      tags:
+        - aigc
+      summary: Get AIGC content detail
+      description: Get AIGC content detail
+      operationId: getContentDetail
+      parameters:
+        - name: cid
+          in: path
+          required: true
+          description: Content ID
+          schema:
+            type: string
+            example: c-g30e1b80b5g1itbemc0g5jj3
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetContentDetailResponse'
+  /user/settings:
+    get:
+      tags:
+        - user
+      summary: Get user settings
+      description: Return settings for current user
+      operationId: getSettings
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSettings'
+      security:
+        - api_key: []
+    put:
+      tags:
+        - user
+      summary: Update user settings
+      description: Update settings for current user
+      operationId: updateSettings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserSettingsRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+      security:
+        - api_key: []
+  /user/topics:
+    get:
+      tags:
+        - user
+      summary: Get user topics
+      description: Return topics for current user
+      operationId: getUserTopics
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserTopicsResponse'
+      security:
+        - api_key: []
+components:
+  schemas:
+    WeblinkMeta:
+      type: object
+      description: Weblink metadata
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          description: Weblink URL
+          example: https://www.google.com
+        title:
+          type: string
+          description: Weblink title
+          example: Google
+        linkId:
+          type: string
+          description: Weblink ID (if it already exists)
+          example: l-g30e1b80b5g1itbemc0g5jj3
+        storageKey:
+          type: string
+          description: Storage key for the weblink
+          deprecated: true
+    ResourceMeta:
+      description: Resource metadata
+      oneOf:
+        - $ref: '#/components/schemas/WeblinkMeta'
+    ResourceType:
+      type: string
+      description: Resource type
+      enum:
+        - weblink
+    ResourceListItem:
+      type: object
+      required:
+        - resourceId
+        - resourceType
+        - title
+        - isPublic
+        - indexStatus
+        - createdAt
+        - updatedAt
+      properties:
+        resourceId:
+          type: string
+          description: Resource ID
+          example: r-g30e1b80b5g1itbemc0g5jj3
+        resourceType:
+          description: Resource type
+          $ref: '#/components/schemas/ResourceType'
+        collectionId:
+          type: string
+          description: Collection ID
+          deprecated: true
+        title:
+          type: string
+          description: Resource title
+        description:
+          type: string
+          description: Resource description
+        data:
+          type: object
+          description: Resource metadata
+          $ref: '#/components/schemas/ResourceMeta'
+        indexStatus:
+          description: Resource index status
+          $ref: '#/components/schemas/IndexStatus'
+        isPublic:
+          type: boolean
+          description: Whether this resource is public
+          default: false
+        createdAt:
+          type: string
+          format: date-time
+          description: Collection creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Collection creation time
+    CollectionListItem:
+      type: object
+      required:
+        - collectionId
+        - title
+        - createdAt
+        - updatedAt
+      properties:
+        collectionId:
+          type: string
+          description: Collection ID
+          example: cl-g30e1b80b5g1itbemc0g5jj3
+        title:
+          type: string
+          description: Collection title
+          example: Default Collection
+        description:
+          type: string
+          description: Collection description
+          example: Collection description
+        isPublic:
+          type: boolean
+          description: Whether this collection is public
+          default: false
+        createdAt:
+          type: string
+          format: date-time
+          description: Collection creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Collection creation time
+    ResourceDetail:
+      allOf:
+        - $ref: '#/components/schemas/ResourceListItem'
+        - type: object
+          properties:
+            doc:
+              type: string
+              description: Document content for this resource
+    CollectionDetail:
+      allOf:
+        - $ref: '#/components/schemas/CollectionListItem'
+        - type: object
+          properties:
+            resources:
+              type: array
+              description: Collection resources
+              items:
+                $ref: '#/components/schemas/ResourceListItem'
+    SourceMeta:
+      type: object
+      description: Source metadata
+      required:
+        - pageContent
+        - score
+      properties:
+        source:
+          type: string
+          description: Source URL
+        title:
+          type: string
+          description: Source title
+        publishedTime:
+          type: string
+          format: date-time
+          description: Source publish time
+        collectionId:
+          type: string
+          description: Related collection ID
+        collectionName:
+          type: string
+          description: Related collection name
+        resourceId:
+          type: string
+          description: Related resource ID
+        resourceName:
+          type: string
+          description: Related resource name
+    SourceSelection:
+      type: object
+      description: Source selection
+      required:
+        - content
+        - type
+      properties:
+        xPath:
+          type: string
+          description: Selected xPath
+          deprecated: true
+        content:
+          type: string
+          description: Selected content
+        type:
+          type: string
+          description: Selection type
+          enum:
+            - text
+            - table
+            - link
+            - image
+            - video
+            - audio
+    Source:
+      type: object
+      description: Source of the message
+      required:
+        - pageContent
+      properties:
+        url:
+          type: string
+          description: Source URL
+        title:
+          type: string
+          description: Source title
+        pageContent:
+          type: string
+          description: Source content
+        score:
+          type: number
+          description: Relativity score
+        metadata:
+          type: object
+          description: Source metadata
+          deprecated: true
+          $ref: '#/components/schemas/SourceMeta'
+        selections:
+          type: array
+          description: Source selections
+          items:
+            $ref: '#/components/schemas/SourceSelection'
+    MessageType:
+      type: string
+      description: Chat message type
+      enum:
+        - ai
+        - human
+        - system
+    ChatMessage:
+      type: object
+      description: Chat message
+      required:
+        - msgId
+        - type
+        - content
+      properties:
+        msgId:
+          type: string
+          description: Message ID
+          example: m-g30e1b80b5g1itbemc0g5jj3
+        type:
+          description: Message type
+          $ref: '#/components/schemas/MessageType'
+        content:
+          type: string
+          description: Message content
+          example: Hello
+        relatedQuestions:
+          type: array
+          description: Related questions
+          items:
+            type: string
+        sources:
+          type: array
+          description: Related sources
+          items:
+            $ref: '#/components/schemas/Source'
+        selectedWeblinkConfig:
+          type: string
+          description: Selected weblink config (JSON)
+        createdAt:
+          type: string
+          format: date-time
+          description: Message creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Message update time
+    Conversation:
+      type: object
+      description: Conversation list item
+      properties:
+        convId:
+          type: string
+          description: Conversation ID
+          example: cv-g30e1b80b5g1itbemc0g5jj3
+        title:
+          type: string
+          description: Conversation title
+          example: Default Conversation
+        lastMessage:
+          type: string
+          description: Last message content
+          example: Hello
+        messageCount:
+          type: number
+          description: Number of chat messages in this conversation
+          example: 42
+        cid:
+          type: string
+          description: Related content ID
+          example: c-g30e1b80b5g1itbemc0g5jj3
+        locale:
+          description: Conversation locale
+          type: string
+          example: en
+        origin:
+          type: string
+          description: Origin page host
+          example: https://refly.ai
+        originPageTitle:
+          type: string
+          description: Origin page title
+          example: Refly | Where knowledge thrives
+        originPageUrl:
+          type: string
+          description: Origin page url
+          example: https://refly.ai/knowledge-base
+        createdAt:
+          type: string
+          format: date-time
+          description: Conversation creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Conversation creation time
+        messages:
+          type: array
+          description: Conversation messages (only returned for getConversationDetail api)
+          items:
+            $ref: '#/components/schemas/ChatMessage'
+    ChatTaskType:
+      type: string
+      description: Chat task type
+      enum:
+        - chat
+        - genTitle
+        - quickAction
+        - searchEnhanceKeyword
+        - searchEnhanceSummarize
+        - searchEnhanceAsk
+    RetrieveFilter:
+      type: object
+      description: Content retrieval filter
+      properties:
+        weblinkList:
+          type: array
+          description: List of web links
+          items:
+            $ref: '#/components/schemas/Source'
+          deprecated: true
+        urls:
+          type: array
+          description: List of URLs to retrieve
+          items:
+            type: string
+            example: https://refly.ai
+        resourceIds:
+          type: array
+          description: List of resource IDs to retrieve
+          items:
+            type: string
+            example: r-g30e1b80b5g1itbemc0g5jj3
+        collectionIds:
+          type: array
+          description: List of collection IDs to retrieve
+          items:
+            type: string
+            example: cl-g30e1b80b5g1itbemc0g5jj3
+    ChatPayload:
+      type: object
+      description: Chat payload
+      required:
+        - question
+      properties:
+        question:
+          type: string
+          description: Question
+        filter:
+          type: object
+          description: Content retrieval filter
+          $ref: '#/components/schemas/RetrieveFilter'
+    QuickActionType:
+      type: string
+      description: Quick action type
+      enum:
+        - selection
+        - summary
+    QuickActionTaskPayload:
+      type: object
+      description: Quick action task payload
+      properties:
+        question:
+          type: string
+          description: Question
+        actionType:
+          description: Quick action type
+          $ref: '#/components/schemas/QuickActionType'
+        actionPrompt:
+          type: string
+          description: Prompt for this action
+        reference:
+          type: string
+          description: Reference for this action
+        filter:
+          description: Content retrieval filter
+          $ref: '#/components/schemas/RetrieveFilter'
+    ChatTask:
+      type: object
+      description: Chat task
+      required:
+        - taskType
+      properties:
+        taskType:
+          description: Task type
+          $ref: '#/components/schemas/ChatTaskType'
+        dryRun:
+          description: Whether to dry run the task
+          type: boolean
+          default: false
+        convId:
+          description: Conversation ID, a new conversation will be created if empty or non-existent
+          type: string
+          example: cv-g30e1b80b5g1itbemc0g5jj3
+        createConvParam:
+          description: Create conversation parameters
+          $ref: '#/components/schemas/CreateConversationRequest'
+        locale:
+          description: Chat locale
+          type: string
+          example: en
+        data:
+          description: Chat data
+          oneOf:
+            - $ref: '#/components/schemas/ChatPayload'
+            - $ref: '#/components/schemas/QuickActionTaskPayload'
+    ChatTaskResponse:
+      type: object
+      description: Chat task response
+      required:
+        - sources
+        - answer
+      properties:
+        sources:
+          type: array
+          description: List of web links
+          items:
+            $ref: '#/components/schemas/Source'
+        answer:
+          type: string
+          description: Chat Answer
+        relatedQuestions:
+          type: array
+          description: Related questions
+          items:
+            type: string
+    IndexStatus:
+      type: string
+      description: Resource index status
+      enum:
+        - init
+        - processing
+        - finish
+        - failed
+        - unavailable
+    ParseSource:
+      type: string
+      description: Weblink parse source
+      enum:
+        - serverCrawl
+        - clientUpload
+    PingWeblinkData:
+      type: object
+      properties:
+        linkId:
+          type: string
+          description: Weblink ID
+          example: l-g30e1b80b5g1itbemc0g5jj3
+        parseStatus:
+          description: Weblink parse status
+          $ref: '#/components/schemas/IndexStatus'
+        chunkStatus:
+          description: Weblink chunking status
+          $ref: '#/components/schemas/IndexStatus'
+        summary:
+          type: string
+          description: Summary of the weblink
+          example: The summary of the weblink
+        relatedQuestions:
+          type: array
+          description: Related questions for this weblink summary
+          items:
+            type: string
+            example: What is the summary of the weblink?
+        parseSource:
+          description: Weblink parse source
+          $ref: '#/components/schemas/ParseSource'
+    Weblink:
+      type: object
+      properties:
+        linkId:
+          type: string
+          description: Weblink ID
+          example: l-g30e1b80b5g1itbemc0g5jj3
+        url:
+          type: string
+          description: Weblink URL
+          example: https://www.google.com
+        title:
+          type: string
+          description: Weblink title
+          example: Google
+        storageKey:
+          type: string
+          description: Weblink document storage key
+        origin:
+          type: string
+          description: Origin page host
+          example: https://refly.ai
+        originPageTitle:
+          type: string
+          description: Origin page title
+          example: Refly | Where knowledge thrives
+        originPageUrl:
+          type: string
+          description: Origin page url
+          example: https://refly.ai/knowledge-base
+        originPageDescription:
+          type: string
+          description: Origin page description
+          example: The knowledge base for developers
+        visitCount:
+          type: number
+          description: Weblink visit count
+          example: 1
+        lastVisitTime:
+          type: number
+          description: UNIX timestamp for last visit time
+        readTime:
+          type: number
+          description: Read time in seconds
+          example: 60
+        indexStatus:
+          description: Weblink index status
+          $ref: '#/components/schemas/IndexStatus'
+        createdAt:
+          type: string
+          format: date-time
+          description: Weblink creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Weblink update time
+    Content:
+      type: object
+      required:
+        - cid
+        - contentId
+        - title
+        - createdAt
+        - updatedAt
+      properties:
+        cid:
+          type: string
+          description: Content ID
+          example: c-g30e1b80b5g1itbemc0g5jj3
+        contentId:
+          type: string
+          description: Content ID
+          example: c-g30e1b80b5g1itbemc0g5jj3
+        title:
+          type: string
+          description: Content title
+        abstract:
+          type: string
+          description: Content abstract
+        meta:
+          type: string
+          description: Content metadata
+        createdAt:
+          type: string
+          format: date-time
+          description: Content creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Content update time
+    ContentMetaRecord:
+      type: object
+      required:
+        - key
+        - name
+        - score
+        - reason
+      properties:
+        key:
+          type: string
+          description: Meta key
+          example: startup_product_research
+        name:
+          type: string
+          description: Meta name
+          example: Startup Product Research
+        score:
+          type: number
+          description: Meta relativity score
+          example: 0.9
+        reason:
+          type: string
+          description: Reason for classification
+          example: 'The content is related to startup product research'
+    ContentMeta:
+      type: object
+      properties:
+        topics:
+          type: array
+          description: Topic list
+          items:
+            $ref: '#/components/schemas/ContentMetaRecord'
+        contentType:
+          type: array
+          description: Content type list
+          items:
+            $ref: '#/components/schemas/ContentMetaRecord'
+        formats:
+          type: array
+          description: Content format list
+          items:
+            $ref: '#/components/schemas/ContentMetaRecord'
+    ContentDetail:
+      allOf:
+        - $ref: '#/components/schemas/Content'
+        - type: object
+          properties:
+            content:
+              type: string
+              description: Content
+              example: The actual content
+            sources:
+              type: string
+              description: Content source list (JSON)
+            inputs:
+              type: array
+              description: Content input list
+              items:
+                $ref: '#/components/schemas/ContentDetail'
+            meta:
+              description: Content metadata
+              $ref: '#/components/schemas/ContentMeta'
+    Digest:
+      allOf:
+        - $ref: '#/components/schemas/Content'
+        - type: object
+          required:
+            - topicKey
+            - date
+          properties:
+            topicKey:
+              type: string
+              description: Topic key
+            uid:
+              type: string
+              description: User ID
+            date:
+              type: string
+              description: Digest date
+    Feed:
+      allOf:
+        - $ref: '#/components/schemas/Content'
+        - type: object
+          properties:
+            readCount:
+              type: number
+              description: Read count
+            askFollow:
+              type: number
+              description: Ask follow count
+    UserSettings:
+      type: object
+      required:
+        - uid
+        - avatar
+        - name
+        - email
+      properties:
+        uid:
+          type: string
+          description: User ID
+          example: u-g30e1b80b5g1itbemc0g5jj3
+        avatar:
+          type: string
+          description: User avatar
+          example: https://www.gstatic.com/webp/gallery/1.jpg
+        name:
+          type: string
+          description: User name
+          example: John Doe
+        email:
+          type: string
+          description: User email
+          example: 6XJpZ@example.com
+        emailVerified:
+          type: boolean
+          description: Whether email is verified
+          default: false
+        uiLocale:
+          type: string
+          description: User UI locale
+          example: en
+        outputLocale:
+          type: string
+          description: User output locale
+          example: en
+    TopicMeta:
+      type: object
+      properties:
+        topicId:
+          type: string
+          description: Topic ID
+          example: t-g30e1b80b5g1itbemc0g5jj3
+        key:
+          type: string
+          description: Topic key
+          example: startup_product_research
+        name:
+          type: string
+          description: Topic name
+        description:
+          type: string
+          description: Topic description
+        createdAt:
+          type: string
+          format: date-time
+          description: Topic creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Topic update time
+    Topic:
+      type: object
+      required:
+        - score
+        - topicKey
+        - topic
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: number
+          description: Topic ID
+          deprecated: true
+        score:
+          type: number
+          description: Topic score
+        topicKey:
+          type: string
+          description: Topic key
+        topic:
+          description: Topic meta
+          $ref: '#/components/schemas/TopicMeta'
+        createdAt:
+          type: string
+          format: date-time
+          description: Topic creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Topic update time
+    UserTopics:
+      type: object
+      required:
+        - topics
+        - total
+      properties:
+        list:
+          type: array
+          description: Topic list
+          items:
+            $ref: '#/components/schemas/Topic'
+        total:
+          type: number
+          description: Total count of topics
+    BaseResponse:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          description: Whether the operation was successful
+          example: true
+        errMsg:
+          type: string
+          description: Error message
+          example: Operation failed
+    UpsertResourceRequest:
+      type: object
+      required:
+        - resourceType
+        - data
+      properties:
+        resourceType:
+          description: Resource type
+          $ref: '#/components/schemas/ResourceType'
+        title:
+          type: string
+          description: Resource title
+          example: My Resource
+        resourceId:
+          type: string
+          description: Resource ID (only used for update)
+          example: r-g30e1b80b5g1itbemc0g5jj3
+        collectionId:
+          type: string
+          description: Collection ID (will create new collection if empty)
+          example: cl-g30e1b80b5g1itbemc0g5jj3
+        collectionName:
+          type: string
+          description: Collection name
+          example: New Collection
+        data:
+          description: Resource metadata
+          $ref: '#/components/schemas/ResourceMeta'
+        storageKey:
+          type: string
+          description: Storage key for the resource
+        content:
+          type: string
+          description: Resource content (this will be ignored if storageKey was set)
+        isPublic:
+          type: boolean
+          description: Whether this resource is public
+          default: false
+    UpsertResourceResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ResourceListItem'
+    DeleteResourceRequest:
+      type: object
+      required:
+        - resourceId
+      properties:
+        resourceId:
+          type: string
+          description: Resource ID to delete
+          example: r-g30e1b80b5g1itbemc0g5jj3
+    ListResourceResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Resource list
+              items:
+                $ref: '#/components/schemas/ResourceListItem'
+    GetResourceDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              description: Resource data
+              $ref: '#/components/schemas/ResourceDetail'
+    UpsertCollectionRequest:
+      type: object
+      properties:
+        collectionId:
+          type: string
+          description: Collection ID (only used for update)
+          example: cl-g30e1b80b5g1itbemc0g5jj3
+        title:
+          type: string
+          description: Collection title
+          example: My Collection
+        description:
+          type: string
+          description: Collection description
+          example: Collection description
+        isPublic:
+          type: boolean
+          description: Whether this collection is public
+          default: false
+    UpsertCollectionResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/CollectionListItem'
+    DeleteCollectionRequest:
+      type: object
+      required:
+        - collectionId
+      properties:
+        collectionId:
+          type: string
+          description: Collection ID to delete
+          example: cl-g30e1b80b5g1itbemc0g5jj3
+    ListCollectionResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Collection list
+              items:
+                $ref: '#/components/schemas/CollectionListItem'
+    GetCollectionDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              description: Collection data
+              $ref: '#/components/schemas/CollectionDetail'
+    CreateConversationRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Conversation title
+          example: My Conversation
+        cid:
+          type: string
+          description: Related content ID
+          example: c-g30e1b80b5g1itbemc0g5jj3
+        linkId:
+          type: string
+          description: Related link ID
+          example: l-g30e1b80b5g1itbemc0g5jj3
+        locale:
+          type: string
+          description: Conversation locale
+          example: en
+        origin:
+          type: string
+          description: Origin page host
+          example: https://refly.ai
+        originPageTitle:
+          type: string
+          description: Origin page title
+          example: Refly | Where knowledge thrives
+        originPageUrl:
+          type: string
+          description: Origin page url
+          example: https://refly.ai/knowledge-base
+    CreateConversationResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              description: Created conversation
+              $ref: '#/components/schemas/Conversation'
+    ListConversationResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Conversation list
+              items:
+                $ref: '#/components/schemas/Conversation'
+    ChatRequest:
+      type: object
+      properties:
+        task:
+          description: chat task config
+          $ref: '#/components/schemas/ChatTask'
+    GetConversationDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              description: Conversation data
+              $ref: '#/components/schemas/Conversation'
+    PingWeblinkResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              description: Weblink ping result
+              $ref: '#/components/schemas/PingWeblinkData'
+    StoreWeblinkRequest:
+      type: object
+      properties:
+        data:
+          type: array
+          description: Weblink list
+          items:
+            $ref: '#/components/schemas/Weblink'
+    ListWeblinkResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Weblink list
+              items:
+                $ref: '#/components/schemas/Weblink'
+    ListFeedResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Feed list
+              items:
+                $ref: '#/components/schemas/Feed'
+    ListDigestRequest:
+      type: object
+      properties:
+        page:
+          type: number
+          description: Page number
+          default: 1
+        pageSize:
+          type: number
+          description: Page size
+          default: 10
+        filter:
+          type: object
+          description: Digest query filter
+          properties:
+            date:
+              type: object
+              description: Date filter
+              properties:
+                year:
+                  type: number
+                  description: Year
+                month:
+                  type: number
+                  description: Month
+                day:
+                  type: number
+                  description: Day
+            topic:
+              type: string
+              description: Topic filter
+    ListDigestResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Digest list
+              items:
+                $ref: '#/components/schemas/Digest'
+    GetContentDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              description: Content data
+              $ref: '#/components/schemas/ContentDetail'
+    UpdateUserSettingsRequest:
+      type: object
+      properties:
+        uiLocale:
+          type: string
+          description: UI locale
+          example: en
+        outputLocale:
+          type: string
+          description: Output locale
+          example: en
+    GetUserTopicsResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              description: User topics
+              $ref: '#/components/schemas/UserTopics'
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header

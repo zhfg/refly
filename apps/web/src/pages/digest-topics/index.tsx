@@ -12,12 +12,12 @@ import "./index.scss"
 import { IconTag } from "@arco-design/web-react/icon"
 import { useEffect, useState } from "react"
 // stores
-import { useDigestTopicStore } from "@/stores/digest-topics"
+import { useDigestTopicStore } from "@refly/ai-workspace-common/stores/digest-topics"
 import { useNavigate } from "react-router-dom"
 // hooks
-import { useGetDigestTopics } from "@/hooks/use-get-digest-topics"
+import { useGetDigestTopics } from "@refly/ai-workspace-common/hooks/use-get-digest-topics"
 // components
-import { EmptyDigestTopicDetailStatus } from "@/components/empty-digest-topic-detail-status"
+import { EmptyDigestTopicDetailStatus } from "@refly/ai-workspace-common/components/empty-digest-topic-detail-status"
 import { useTranslation } from "react-i18next"
 
 const BreadcrumbItem = Breadcrumb.Item

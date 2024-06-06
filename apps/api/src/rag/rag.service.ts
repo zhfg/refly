@@ -105,7 +105,7 @@ export class RAGService {
       });
       turnDownService.addRule('unlink', {
         filter: ['a'],
-        replacement: (content, node, options) => node.textContent,
+        replacement: (content, node) => node.textContent,
       });
     }
 

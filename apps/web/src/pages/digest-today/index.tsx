@@ -2,7 +2,7 @@
  * 只聚焦昨天、今天、这周、这个月最核心的内容，剩下的让用户去归档里面查看，能够对自己的工作有一个明确的感知
  */
 
-import { getCurrentDateInfo, time } from "@/utils/time"
+import { time } from "@refly/ai-workspace-common/utils/time"
 import {
   List,
   Skeleton,
@@ -18,21 +18,26 @@ import {
 } from "@arco-design/web-react/icon"
 import { useNavigate } from "react-router-dom"
 // types
-import type { Digest } from "@/types/digest"
-import { IconTip } from "@/components/dashboard/icon-tip"
-import { copyToClipboard } from "@/utils"
-import { getClientOrigin, safeParseURL } from "@/utils/url"
+import { Digest, Source } from "@refly/openapi-schema"
+import { IconTip } from "@refly/ai-workspace-common/components/dashboard/icon-tip"
+import { copyToClipboard } from "@refly/ai-workspace-common/utils"
+import {
+  getClientOrigin,
+  safeParseURL,
+} from "@refly/ai-workspace-common/utils/url"
 // stores
-import { DigestType, useDigestStore } from "@/stores/digest"
+import {
+  DigestType,
+  useDigestStore,
+} from "@refly/ai-workspace-common/stores/digest"
 // components
-import { DigestHeader } from "@/components/digest-common/header"
 import { useEffect, useState } from "react"
-import { EmptyDigestStatus } from "@/components/empty-digest-today-status"
+import { EmptyDigestStatus } from "@refly/ai-workspace-common/components/empty-digest-today-status"
 // utils
-import getDigestList from "@/requests/getDigestList"
+import client from "@refly/ai-workspace-common/requests/proxiedRequest"
 // styles
 import "./index.scss"
-import { LOCALE, Source } from "@/types"
+import { LOCALE } from "@refly/constants"
 import { useTranslation } from "react-i18next"
 
 export const getFirstSourceLink = (sources: Source[]) => {
@@ -45,7 +50,6 @@ export const DigestToday = () => {
   const [scrollLoading, setScrollLoading] = useState(
     <Skeleton animation style={{ width: "100%" }}></Skeleton>,
   )
-  const [isFetching, setIsFetching] = useState(false)
   const { t, i18n } = useTranslation()
   const language = i18n.languages?.[0]
 
@@ -75,13 +79,17 @@ export const DigestToday = () => {
         return
       }
 
-      const newRes = await getDigestList({
+      const { data: newRes, error } = await client.getDigestList({
         body: {
           // TODO: confirm time filter
           page: currentPage,
           pageSize: digestStore.today.pageSize,
         },
       })
+
+      if (error) {
+        throw error
+      }
 
       digestStore.updatePayload(
         { ...digestStore.today, currentPage },
@@ -102,7 +110,7 @@ export const DigestToday = () => {
       const newFeatureList = digestStore.today.featureList.concat(
         newRes?.data || [],
       )
-      newData = newRes?.data as Digest[]
+      newData = newRes?.data || []
       digestStore.updatePayload(
         { ...digestStore.today, featureList: newFeatureList },
         DigestType.TODAY,
@@ -169,7 +177,7 @@ export const DigestToday = () => {
                       key={1}
                       className="feed-list-item-continue-ask with-border with-hover"
                       onClick={() => {
-                        navigate(`/digest/${item?.contentId}`)
+                        navigate(`/digest/${item?.cid}`)
                       }}>
                       <IconRightCircle
                         style={{ fontSize: 14, color: "#64645F" }}
@@ -199,7 +207,7 @@ export const DigestToday = () => {
                       </span>
                     </IconTip>
                   </div>
-                  <div className="feed-item-action" style={{ marginTop: 8 }}>
+                  {/* <div className="feed-item-action" style={{ marginTop: 8 }}>
                     <span
                       className="feed-item-topic"
                       key={1}
@@ -238,7 +246,7 @@ export const DigestToday = () => {
                           .fromNow()}
                       </span>
                     </span>
-                  </div>
+                  </div> */}
                 </div>,
               ]}>
               <List.Item.Meta

@@ -5,19 +5,18 @@ import { LRUCache } from 'lru-cache';
 import { InjectQueue } from '@nestjs/bull';
 import { Document } from '@langchain/core/documents';
 
+import { Weblink as WeblinkDTO, Source, SourceMeta, ChatTaskResponse } from '@refly/openapi-schema';
 import { PrismaService } from '../common/prisma.service';
 import { MinioService } from '../common/minio.service';
 import { RAGService, PARSER_VERSION } from '../rag/rag.service';
 import { AigcService } from '../aigc/aigc.service';
 import { RedisService } from '../common/redis.service';
 import { LlmService } from '../llm/llm.service';
-import { WebLinkDTO, WeblinkData } from './weblink.dto';
+import { WeblinkData, WeblinkJobData } from './weblink.dto';
 import { getExpectedTokenLenContent } from '../utils/token';
-import { PageMeta, Source } from '../types/weblink';
 import { CHANNEL_PROCESS_LINK_BY_USER, CHANNEL_PROCESS_LINK, QUEUE_WEBLINK } from '../utils/const';
 import { genLinkID, sha256Hash } from '../utils/id';
 import { normalizeURL } from '../utils/url';
-import { TaskResponse } from '../conversation/conversation.dto';
 
 @Injectable()
 export class WeblinkService {
@@ -32,18 +31,18 @@ export class WeblinkService {
     private llmService: LlmService,
     private ragService: RAGService,
     private aigcService: AigcService,
-    @InjectQueue(QUEUE_WEBLINK) private indexQueue: Queue<WebLinkDTO>,
+    @InjectQueue(QUEUE_WEBLINK) private indexQueue: Queue<WeblinkJobData>,
   ) {
     this.cache = new LRUCache({
       max: 1000,
     });
   }
 
-  async enqueueProcessTask(link: WebLinkDTO) {
+  async enqueueProcessTask(link: WeblinkJobData) {
     return this.indexQueue.add(CHANNEL_PROCESS_LINK, link);
   }
 
-  async enqueueProcessByUserTask(link: WebLinkDTO) {
+  async enqueueProcessByUserTask(link: WeblinkJobData) {
     return this.indexQueue.add(CHANNEL_PROCESS_LINK_BY_USER, link);
   }
 
@@ -56,26 +55,16 @@ export class WeblinkService {
    * @param uid user id
    * @param links link history data
    */
-  async storeLinks(userId: number, links: WebLinkDTO[]) {
+  async storeLinks(userId: number, links: WeblinkDTO[]) {
     if (!links) return;
 
     // Aggregate links (pick the last visit one)
-    const linkMap = new Map<string, WebLinkDTO>();
+    const linkMap = new Map<string, WeblinkJobData>();
     links.forEach((link) => {
       // TODO: pre filtering (with bloom filter, etc.)
       const url = normalizeURL(link.url);
       if (!linkMap.has(url)) {
-        link.userId = userId;
-        return linkMap.set(url, link);
-      }
-      if (link.lastVisitTime > linkMap.get(link.url).lastVisitTime) {
-        linkMap.get(url).lastVisitTime = link.lastVisitTime;
-      }
-      if (link.visitCount) {
-        linkMap.get(url).visitCount += link.visitCount;
-      }
-      if (link.readTime) {
-        linkMap.get(url).readTime += link.readTime;
+        return linkMap.set(url, { ...link, userId, retryTimes: 0 });
       }
     });
 
@@ -133,7 +122,7 @@ export class WeblinkService {
     const { data } = await this.ragService.crawlFromRemoteReader(url);
 
     const content = data.content;
-    const doc: Document<PageMeta> = {
+    const doc: Document<SourceMeta> = {
       pageContent: content,
       metadata: {
         title: data.title,
@@ -151,7 +140,7 @@ export class WeblinkService {
    * @param pageContent raw html page content
    * @returns parsed markdown document
    */
-  async directParseWebLinkContent(link: WebLinkDTO): Promise<WeblinkData> {
+  async directParseWebLinkContent(link: WeblinkDTO): Promise<WeblinkData> {
     try {
       const content = (await this.minio.downloadData(link.storageKey)).toString();
 
@@ -177,11 +166,11 @@ export class WeblinkService {
    * @param weblinkList input weblinks
    * @returns langchain documents
    */
-  async readMultiWeblinks(weblinkList: Source[]): Promise<Document<PageMeta>[]> {
+  async readMultiWeblinks(weblinkList: Source[]): Promise<Document<SourceMeta>[]> {
     // 处理 token 窗口，一共给 12K 窗口用于问答，平均分到每个网页，保障可用性
     const avgTokenLen = 12000 / weblinkList?.length;
 
-    const results = await Promise.all<Document<PageMeta>[]>(
+    const results = await Promise.all(
       weblinkList.map(async (item) => {
         // If selections are provided, use the selected content
         if (item.selections?.length > 0) {
@@ -275,7 +264,7 @@ export class WeblinkService {
     );
   }
 
-  async updateUserWeblink(link: WebLinkDTO, weblink: Weblink) {
+  async updateUserWeblink(link: WeblinkJobData, weblink: Weblink) {
     if (!link.userId) {
       this.logger.log(`drop job due to missing user id: ${link}`);
       return;
@@ -309,7 +298,7 @@ export class WeblinkService {
     });
   }
 
-  async uploadHTMLToMinio(link: WebLinkDTO, html: string): Promise<string> {
+  async uploadHTMLToMinio(link: WeblinkDTO, html: string): Promise<string> {
     if (link.storageKey) {
       return link.storageKey;
     }
@@ -322,7 +311,7 @@ export class WeblinkService {
     return storageKey;
   }
 
-  async uploadParsedDocToMinio(link: WebLinkDTO, doc: Document<PageMeta>): Promise<string> {
+  async uploadParsedDocToMinio(link: WeblinkDTO, doc: Document<SourceMeta>): Promise<string> {
     const parsedDocStorageKey = `docs/${sha256Hash(link.url)}.md`;
     const res = await this.minio.uploadData(parsedDocStorageKey, doc.pageContent);
     this.logger.log('upload parsed doc to minio res: ' + JSON.stringify(res));
@@ -336,7 +325,7 @@ export class WeblinkService {
    * @param doc
    * @returns
    */
-  async genWeblinkChunkEmbedding(weblink: Weblink, doc: Document<PageMeta>): Promise<Weblink> {
+  async genWeblinkChunkEmbedding(weblink: Weblink, doc: Document<SourceMeta>): Promise<Weblink> {
     if (
       weblink.chunkStorageKey &&
       weblink.chunkStatus === 'finish' &&
@@ -382,7 +371,7 @@ export class WeblinkService {
    * @param doc
    * @returns
    */
-  async extractWeblinkContentMeta(weblink: Weblink, doc: Document<PageMeta>): Promise<Weblink> {
+  async extractWeblinkContentMeta(weblink: Weblink, doc: Document<SourceMeta>): Promise<Weblink> {
     if (Object.keys(JSON.parse(weblink.contentMeta || '{}')).length > 0) {
       return weblink;
     }
@@ -413,8 +402,9 @@ export class WeblinkService {
    * Connect weblink with user.
    * @param link
    */
-  async processLinkByUser(link: WebLinkDTO) {
-    if (link.retryTimes >= 20) {
+  async processLinkByUser(link: WeblinkJobData) {
+    const { retryTimes = 0 } = link;
+    if (retryTimes >= 20) {
       this.logger.error(`processLinkByUser: retry times exceed limit: ${link.url}`);
       return;
     }
@@ -425,7 +415,7 @@ export class WeblinkService {
     if (!weblink || !isWeblinkReady(weblink)) {
       await this.enqueueProcessTask(link);
       await new Promise((r) => setTimeout(r, 2000));
-      await this.enqueueProcessByUserTask({ ...link, retryTimes: link.retryTimes + 1 });
+      await this.enqueueProcessByUserTask({ ...link, retryTimes: retryTimes + 1 });
       return;
     }
 
@@ -450,7 +440,7 @@ export class WeblinkService {
 
   async updateWeblinkStorageKey(
     weblink: Weblink,
-    link: WebLinkDTO,
+    link: WeblinkDTO,
     data: WeblinkData,
   ): Promise<Weblink> {
     if (weblink.storageKey && weblink.parsedDocStorageKey && weblink.parseStatus === 'finish') {
@@ -488,7 +478,7 @@ export class WeblinkService {
     }
   }
 
-  async updateWeblinkSummary(url: string, taskRes: TaskResponse) {
+  async updateWeblinkSummary(url: string, taskRes: ChatTaskResponse) {
     const { answer, relatedQuestions } = taskRes;
     return this.prisma.weblink.update({
       where: { url },
@@ -501,12 +491,12 @@ export class WeblinkService {
    * @param link
    * @returns
    */
-  async processLink(link: WebLinkDTO): Promise<Weblink> {
+  async processLink(link: WeblinkJobData): Promise<Weblink> {
     link.url = normalizeURL(link.url);
     this.logger.log(`process link from queue: ${JSON.stringify(link)}`);
 
     let weblink: Weblink;
-    let doc: Document<PageMeta>;
+    let doc: Document<SourceMeta>;
 
     try {
       weblink = await this.prisma.weblink.upsert({

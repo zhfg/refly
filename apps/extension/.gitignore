@@ -1,6 +1,0 @@
-build/**
-node_modules/**
-.plasmo/**
-
-# Sentry Config File
-.sentryclirc

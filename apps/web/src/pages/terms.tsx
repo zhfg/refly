@@ -1,13 +1,13 @@
-import Header from "@/components/landing-page-partials/Header"
-import PageIllustration from "@/components/landing-page-partials/PageIllustration"
-import HeroHome from "@/components/landing-page-partials/HeroHome"
-import FeaturesBlocks from "@/components/landing-page-partials/FeaturesBlocks"
-import FeaturesZigZag from "@/components/landing-page-partials/FeaturesZigzag"
-import Testimonials from "@/components/landing-page-partials/Testimonials"
-import Newsletter from "@/components/landing-page-partials/Newsletter"
-import Banner from "@/components/landing-page-partials/Banner"
-import Footer from "@/components/landing-page-partials/Footer"
-import { Markdown } from "@/components/markdown"
+import Header from "@refly/ai-workspace-common/components/landing-page-partials/Header"
+import PageIllustration from "@refly/ai-workspace-common/components/landing-page-partials/PageIllustration"
+import HeroHome from "@refly/ai-workspace-common/components/landing-page-partials/HeroHome"
+import FeaturesBlocks from "@refly/ai-workspace-common/components/landing-page-partials/FeaturesBlocks"
+import FeaturesZigZag from "@refly/ai-workspace-common/components/landing-page-partials/FeaturesZigzag"
+import Testimonials from "@refly/ai-workspace-common/components/landing-page-partials/Testimonials"
+import Newsletter from "@refly/ai-workspace-common/components/landing-page-partials/Newsletter"
+import Banner from "@refly/ai-workspace-common/components/landing-page-partials/Banner"
+import Footer from "@refly/ai-workspace-common/components/landing-page-partials/Footer"
+import { Markdown } from "@refly/ai-workspace-common/components/markdown"
 
 const termsMdText = `# ReflyAI Terms of Service
 

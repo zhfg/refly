@@ -1,10 +1,10 @@
-import { fetchStream } from "@/utils/fetch-stream";
-import type { Source, RelatedQuestion, Task } from "@/types";
-import { getAuthTokenFromCookie } from "./request";
-import { getServerOrigin } from "./url";
+import { fetchStream } from '@/utils/fetch-stream';
+import type { Source, RelatedQuestion, Task } from '@/types';
+import { getServerOrigin } from './url';
+import { getCookie } from './cookie';
 
-const LLM_SPLIT = "__LLM_RESPONSE__";
-const RELATED_SPLIT = "__RELATED_QUESTIONS__";
+const LLM_SPLIT = '__LLM_RESPONSE__';
+const RELATED_SPLIT = '__RELATED_QUESTIONS__';
 
 export const parseStreaming = async (
   controller: AbortController,
@@ -12,18 +12,18 @@ export const parseStreaming = async (
   onSources: (value: Source[]) => void,
   onMarkdown: (value: string) => void,
   onRelates: (value: RelatedQuestion[]) => void,
-  onError?: (status: number) => void
+  onError?: (status: number) => void,
 ) => {
   const decoder = new TextDecoder();
   let uint8Array = new Uint8Array();
-  let chunks = "";
+  let chunks = '';
   let sourcesEmitted = false;
 
   const response = await fetch(`${getServerOrigin()}/v1/conversation/chat`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getAuthTokenFromCookie()}`,
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getCookie()}`,
     },
     signal: controller.signal,
 
@@ -38,10 +38,10 @@ export const parseStreaming = async (
   const markdownParse = (text: string) => {
     onMarkdown(
       text
-        .replace(/\[\[([cC])itation/g, "[citation")
-        .replace(/[cC]itation:(\d+)]]/g, "citation:$1]")
+        .replace(/\[\[([cC])itation/g, '[citation')
+        .replace(/[cC]itation:(\d+)]]/g, 'citation:$1]')
         .replace(/\[\[([cC]itation:\d+)]](?!])/g, `[$1]`)
-        .replace(/\[[cC]itation:(\d+)]/g, "[citation]($1)")
+        .replace(/\[[cC]itation:(\d+)]/g, '[citation]($1)'),
     );
   };
   fetchStream(
@@ -74,6 +74,6 @@ export const parseStreaming = async (
       } catch (e) {
         onRelates([]);
       }
-    }
+    },
   );
 };

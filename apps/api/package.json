@@ -39,7 +39,6 @@
     "@nestjs/jwt": "~10.0.3",
     "@nestjs/passport": "~9.0.3",
     "@nestjs/platform-express": "^9.0.0",
-    "@nestjs/swagger": "^7.3.0",
     "@opentelemetry/api": "^1.8.0",
     "@opentelemetry/auto-instrumentations-node": "^0.44.0",
     "@opentelemetry/exporter-trace-otlp-http": "^0.50.0",
@@ -84,7 +83,7 @@
     "uuid": "^9.0.1",
     "zod": "^3.22.4",
     "@refly/constants": "workspace:*",
-    "@refly/schema": "workspace:*",
+    "@refly/openapi-schema": "workspace:*",
     "@langchain/core": "~0.2.2"
   },
   "devDependencies": {
@@ -118,7 +117,9 @@
     "ts-node": "^10.0.0",
     "ts-proto": "^1.172.0",
     "tsconfig-paths": "4.2.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "@swc/core": "~1.5.24",
+    "@swc/cli": "~0.3.12"
   },
   "jest": {
     "rootDir": "src",

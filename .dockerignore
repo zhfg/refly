@@ -1,0 +1,30 @@
+# Versioning and metadata
+.git
+.gitignore
+.dockerignore
+.github
+.vscode
+
+# Rush temp files
+common/deploy/
+common/temp/
+common/autoinstallers/*/.npmrc
+**/.rush/temp/
+*.lock
+*.log
+*.chunks.jsonl
+
+# Build dependencies
+dist
+node_modules
+coverage
+
+# Environment (contains sensitive data)
+.env
+
+# Files not required for production
+.editorconfig
+Dockerfile
+README.md
+.eslintrc.js
+nodemon.json

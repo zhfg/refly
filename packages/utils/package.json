@@ -14,7 +14,6 @@
   "dependencies": {
     "@paralleldrive/cuid2": "^2.2.2",
     "@refly/constants": "workspace:*",
-    "@refly/schema": "workspace:*",
     "clsx": "^2.1.0",
     "dayjs": "~1.11.7",
     "js-cookie": "^3.0.5",

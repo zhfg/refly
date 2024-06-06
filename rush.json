@@ -10,13 +10,8 @@
       "reviewCategory": "packages"
     },
     {
-      "packageName": "@refly/schema",
-      "projectFolder": "packages/schema",
-      "reviewCategory": "packages"
-    },
-    {
-      "packageName": "@refly/api-client",
-      "projectFolder": "packages/api-client",
+      "packageName": "@refly/openapi-schema",
+      "projectFolder": "packages/openapi-schema",
       "reviewCategory": "packages"
     },
     {
@@ -25,18 +20,33 @@
       "reviewCategory": "packages"
     },
     {
+      "packageName": "@refly/plugin-vite-encoding",
+      "projectFolder": "packages/plugin-vite-encoding",
+      "reviewCategory": "packages"
+    },
+    {
+      "packageName": "@refly/plugin-vite-watcher",
+      "projectFolder": "packages/plugin-vite-watcher",
+      "reviewCategory": "packages"
+    },
+    {
       "packageName": "@refly/utils",
       "projectFolder": "packages/utils",
       "reviewCategory": "packages"
     },
     {
-      "packageName": "@refly/api",
-      "projectFolder": "apps/api",
-      "reviewCategory": "apps"
+      "packageName": "@refly/ai-workspace-common",
+      "projectFolder": "packages/ai-workspace-common",
+      "reviewCategory": "packages"
     },
     {
-      "packageName": "@refly/extension",
-      "projectFolder": "apps/extension",
+      "packageName": "wxt",
+      "projectFolder": "packages/wxt",
+      "reviewCategory": "packages"
+    },
+    {
+      "packageName": "@refly/api",
+      "projectFolder": "apps/api",
       "reviewCategory": "apps"
     },
     {

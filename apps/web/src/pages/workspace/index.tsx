@@ -3,8 +3,8 @@ import { Helmet } from "react-helmet"
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels"
 
 // 自定义组件
-import { LeftAssistPanel } from "./left-assist-panel"
-import { ContentPanel } from "./content-panel"
+import { LeftAssistPanel } from "../../../../../packages/ai-workspace-common/src/components/workspace/left-assist-panel"
+import { ContentPanel } from "../../../../../packages/ai-workspace-common/src/components/workspace/content-panel"
 // utils
 // 自定义方法
 // stores
@@ -12,8 +12,8 @@ import { ContentPanel } from "./content-panel"
 import "./index.scss"
 import { useCookie } from "react-use"
 // types
-import { useUserStore } from "@/stores/user"
-import { getExtensionId } from "@/utils/url"
+import { useUserStore } from "@refly/ai-workspace-common/stores/user"
+import { getExtensionId } from "@refly/ai-workspace-common/utils/url"
 import { useTranslation } from "react-i18next"
 
 // 用于快速选择

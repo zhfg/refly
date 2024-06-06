@@ -1,10 +1,4 @@
-import {
-  Button,
-  List,
-  Skeleton,
-  Typography,
-  Message as message,
-} from "@arco-design/web-react";
+import { Button, List, Skeleton, Typography, Message as message } from '@arco-design/web-react';
 import {
   IconCopy,
   IconNotificationClose,
@@ -15,18 +9,18 @@ import {
   IconShareExternal,
   IconShareInternal,
   IconTranslate,
-} from "@arco-design/web-react/icon";
-import React, { useState } from "react";
-import type { Message, SessionItem, Source, TASK_TYPE } from "@/types";
+} from '@arco-design/web-react/icon';
+import React, { useState } from 'react';
+import type { Message, SessionItem, Source, TASK_TYPE } from '@/types';
 
 // stores
-import { useMessageStateStore } from "@/stores/message-state";
-import { IconTip } from "@/components/home/icon-tip";
-import { Markdown } from "@/components/markdown";
+import { useMessageStateStore } from '@/stores/message-state';
+import { IconTip } from '@/components/home/icon-tip';
+import { Markdown } from '@/components/markdown';
 
-import copyToClipboard from "copy-to-clipboard";
-import { safeParseUrl } from "@/utils/parse";
-import { useTranslation } from "react-i18next";
+import copyToClipboard from 'copy-to-clipboard';
+import { safeParseUrl } from '@refly/ai-workspace-common/utils/parse';
+import { useTranslation } from 'react-i18next';
 
 interface SessionProps {
   session: SessionItem;
@@ -37,9 +31,7 @@ interface SessionProps {
 export const Session = (props: SessionProps) => {
   const { session, isLastSession = false, handleAskFollowing } = props;
   const messageStateStore = useMessageStateStore();
-  const [scrollLoading, setScrollLoading] = useState(
-    <Skeleton animation></Skeleton>
-  );
+  const [scrollLoading, setScrollLoading] = useState(<Skeleton animation></Skeleton>);
 
   const { t } = useTranslation();
 
@@ -56,8 +48,8 @@ export const Session = (props: SessionProps) => {
         <div className="session-source">
           {messageStateStore.pending || session?.sources?.length > 0 ? (
             <div className="session-title-icon">
-              <IconQuote style={{ fontSize: 18, color: "rgba(0, 0, 0, .8)" }} />
-              <p>{t("threadDetail.item.session.source")}</p>
+              <IconQuote style={{ fontSize: 18, color: 'rgba(0, 0, 0, .8)' }} />
+              <p>{t('threadDetail.item.session.source')}</p>
             </div>
           ) : null}
           {session?.sources?.length > 0 ? (
@@ -65,43 +57,34 @@ export const Session = (props: SessionProps) => {
               <div className="session-source-list">
                 <List
                   className="session-source-list-item"
-                  wrapperStyle={{ width: "100%" }}
+                  wrapperStyle={{ width: '100%' }}
                   bordered={false}
                   pagination={{ pageSize: 4 }}
                   dataSource={session?.sources}
-                  scrollLoading={
-                    session?.sources?.length > 0 ? null : scrollLoading
-                  }
+                  scrollLoading={session?.sources?.length > 0 ? null : scrollLoading}
                   onReachBottom={(currentPage) => fetchData(currentPage)}
-                  noDataElement={<div>{t("threadDetail.item.noMoreText")}</div>}
+                  noDataElement={<div>{t('threadDetail.item.noMoreText')}</div>}
                   render={(item, index) => (
                     <List.Item
                       key={index}
                       style={{
-                        borderBottom: "0.5px solid var(--color-fill-3)",
+                        borderBottom: '0.5px solid var(--color-fill-3)',
                       }}
                       actionLayout="vertical"
                       actions={[
-                        <span
-                          key={1}
-                          className="session-source-list-item-action"
-                          onClick={() => {}}
-                        >
+                        <span key={1} className="session-source-list-item-action" onClick={() => {}}>
                           <img
                             src={`https://www.google.com/s2/favicons?domain=${item?.metadata?.source}&sz=${16}`}
                             alt={item?.metadata?.source}
                           />
                         </span>,
                         <a target="_blank" href={item.metadata?.source}>
-                          <span
-                            key={2}
-                            className="session-source-list-item-action"
-                          >
+                          <span key={2} className="session-source-list-item-action">
                             <Typography.Paragraph
-                              ellipsis={{ rows: 1, wrapper: "span" }}
+                              ellipsis={{ rows: 1, wrapper: 'span' }}
                               style={{
                                 fontSize: 10,
-                                color: "rgba(0, 0, 0, .4)",
+                                color: 'rgba(0, 0, 0, .4)',
                               }}
                             >
                               · {safeParseUrl(item?.metadata?.source)} ·
@@ -111,7 +94,7 @@ export const Session = (props: SessionProps) => {
                         <span
                           key={2}
                           className="session-source-list-item-action"
-                          style={{ fontSize: 10, color: "rgba(0, 0, 0, .4)" }}
+                          style={{ fontSize: 10, color: 'rgba(0, 0, 0, .4)' }}
                         >
                           #{index + 1}
                         </span>,
@@ -123,8 +106,8 @@ export const Session = (props: SessionProps) => {
                             <span
                               style={{
                                 fontSize: 12,
-                                color: "rgba(0, 0, 0, .8)",
-                                fontWeight: "bold",
+                                color: 'rgba(0, 0, 0, .8)',
+                                fontWeight: 'bold',
                               }}
                             >
                               {item.metadata?.title}
@@ -133,10 +116,10 @@ export const Session = (props: SessionProps) => {
                         }
                         description={
                           <Typography.Paragraph
-                            ellipsis={{ rows: 1, wrapper: "span" }}
+                            ellipsis={{ rows: 1, wrapper: 'span' }}
                             style={{
                               fontSize: 10,
-                              color: "rgba(0, 0, 0, .8)",
+                              color: 'rgba(0, 0, 0, .8)',
                             }}
                           >
                             {item.pageContent}
@@ -155,15 +138,12 @@ export const Session = (props: SessionProps) => {
         <div className="session-answer">
           <div className="session-title-icon">
             <IconTranslate style={{ fontSize: 18 }} />
-            <p>{t("threadDetail.item.session.answer")}</p>
+            <p>{t('threadDetail.item.session.answer')}</p>
           </div>
           {session?.answer ? (
             <>
               <div className="session-answer">
-                <Markdown
-                  content={session?.answer}
-                  sources={session?.sources}
-                />
+                <Markdown content={session?.answer} sources={session?.sources} />
               </div>
               {!messageStateStore?.pending && (
                 <div className="session-answer-actionbar">
@@ -172,15 +152,15 @@ export const Session = (props: SessionProps) => {
                     {/* <IconTip text="重新生成答案"><Button type='text' icon={<IconPalette style={{ fontSize: 14 }} />} style={{ color: '#64645F' }}>重写</Button></IconTip> */}
                   </div>
                   <div className="session-answer-actionbar-right">
-                    <IconTip text={t("threadDetail.item.copyAnswer")}>
+                    <IconTip text={t('threadDetail.item.copyAnswer')}>
                       <Button
                         type="text"
                         shape="circle"
                         icon={<IconCopy style={{ fontSize: 14 }} />}
-                        style={{ color: "#64645F" }}
+                        style={{ color: '#64645F' }}
                         onClick={() => {
                           copyToClipboard(session?.answer);
-                          message.success(t("threadDetail.item.copySuccess"));
+                          message.success(t('threadDetail.item.copySuccess'));
                         }}
                       ></Button>
                     </IconTip>
@@ -199,15 +179,13 @@ export const Session = (props: SessionProps) => {
           <div className="session-related-question">
             <div className="session-title-icon">
               <IconReply style={{ fontSize: 18 }} />
-              <p>{t("threadDetail.item.session.relatedQuestions")}</p>
+              <p>{t('threadDetail.item.session.relatedQuestions')}</p>
             </div>
             <div className="session-related-question-content">
               {session?.relatedQuestions?.map((item, index) => (
                 <div key={index} onClick={() => handleAskFollowing(item)}>
                   <p>{item}</p>
-                  <IconPlus
-                    style={{ fontSize: 12, color: "rgba(0,0,0,0.60)" }}
-                  />
+                  <IconPlus style={{ fontSize: 12, color: 'rgba(0,0,0,0.60)' }} />
                 </div>
               ))}
             </div>

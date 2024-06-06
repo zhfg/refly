@@ -1,94 +1,46 @@
 {
   "language": "English",
-  "productName": "Refly",
-  "systemMaintenanceShutdown": {
-    "title": "Dear Valued Users,",
-    "content": "We are dedicated to enhancing the stability and efficiency of our services. To achieve this, we have scheduled a system maintenance that will take place from 21:00 to 23:00 Beijing Time. During this period, our services will be temporarily unavailable. For our users in Seattle, this maintenance corresponds to 05:00 to 07:00 AM local time, taking into account the current daylight saving time adjustments. We apologize for any inconvenience this may cause and appreciate your understanding and support."
+  "bottomNav": {
+    "home": "Home",
+    "threads": "Thread"
   },
-  "tabMeta": {
-    "landingPage": {
-      "title": "Where knowledge thrives",
-      "description": "Quick summaries, Insights, Auto tag and AI Search. Refly can build your second brain, extend knowledge and give you superpower"
-    },
-    "digestTopics": {
-      "title": "All Topics",
-      "description": "Topic categories derived from your browsing and session history, representing your reading and learning trends"
-    },
-    "threadLibrary": {
-      "title": "Threads"
-    },
-    "settings": {
-      "title": "Settings"
-    }
-  },
-  "landingPage": {
-    "slogan": "Where knowledge thrives",
-    "description": "Quick summaries, Insights, Auto tag and AI Search. Refly can build your second brain, extend knowledge and give you superpower",
-    "joinBtn": "Join for free",
-    "downloadBtn": "Download Extension",
-    "loginBtn": "Login",
-    "dashboard": "Dashboard",
-    "featureOne": {
-      "title": "Quick Action with Extension",
-      "description": "Quick summary for any website, continuous questioning, and conduct in-depth research on your favorite content"
-    },
-    "featureTwo": {
-      "title": "All-in-one Search Engine",
-      "description": " All in one search engine supports natural language search for all your memories and builds your second brain"
-    },
-    "featureThree": {
-      "title": "Auto tag and Timeline",
-      "description": " Automatically and tag, search and review at any time. Build a knowledge system through labels & timelines"
-    },
-    "footer": {
-      "description": "Quick summaries, Insights, Auto tag and AI Search. Refly can build your second brain, extend knowledge and give you superpower",
-      "right": "Refly.ai. All rights reserved.",
-      "product": {
-        "title": "Products",
-        "one": "Refly AI Chrome Extension"
-      },
-      "resource": {
-        "title": "Resources",
-        "one": "Twitter"
-      },
-      "about": {
-        "title": "About",
-        "one": "Privacy Policy",
-        "two": "Terms of Service"
-      },
-      "contactUs": {
-        "title": "Contact us",
-        "one": "pftom@qq.com"
-      }
-    },
-    "loginModal": {
-      "title": "Sign In or Register to start using Refly",
-      "loginBtn": "Sign In",
-      "loggingStatus": "Signing in...",
-      "and": "and",
-      "utilText": "By registering, you agree to our",
-      "privacyPolicy": "Privacy Policy",
-      "terms": "Terms of Service"
-    }
-  },
-  "workspace": {
-    "leftPanel": {
-      "welcomeTitle": "Hello, ",
-      "welcomeQuestion": "How can I help you today?",
-      "guessTitle": "Recommend Questions",
-      "keyword": {
-        "title": "Knowledge Category",
-        "seeMore": "See more categories"
-      }
+  "loginPage": {
+    "title": "Sign In or Register to start using Refly",
+    "loginBtn": "Sign In",
+    "loggingStatus": "Signing in...",
+    "and": "and",
+    "utilText": "By registering, you agree to our",
+    "privacyPolicy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "status": {
+      "failed": "Login failed",
+      "success": "Login successful"
     }
   },
   "loggedHomePage": {
     "newThreadText": "New Thread",
     "homePage": {
       "title": "Where knowledge thrives",
-      "searchPlaceholder": "Search for Refly",
+      "header": {
+        "fullscreen": "Fullscreen",
+        "settings": "Settings",
+        "account": "Account",
+        "close": "Close"
+      },
+      "contentSelector": {
+        "tip": {
+          "select": "Select web page content",
+          "cancelSelect": "Cancel selection"
+        }
+      },
       "selectedWeblink": {
         "title": "Ask a Question Based on the Selected Web Page:"
+      },
+      "selectedContent": {
+        "title": "The content you have selected for action is as follows:",
+        "clear": "Clear All Selections",
+        "exit": "Exit",
+        "empty": "No content is currently selected..."
       },
       "weblinkList": {
         "title": "Knowledge Base",
@@ -121,27 +73,43 @@
             "contentHandleSuccessNotify": "Processing successful, redirecting to the session page...",
             "contentHandleFailedNotify": "Processing failed!"
           }
+        },
+        "save": {
+          "title": "Save",
+          "tip": "Save this web page for future reading",
+          "status": {
+            "contentHandling": "Saving content...",
+            "createFailed": "Failed to create a new session!",
+            "contentHandleSuccessNotify": "Content saved successfully!",
+            "contentHandleFailedNotify": "Content processing failed!"
+          }
         }
+      },
+      "searchPlaceholder": {
+        "all": "Ask a question about the entire knowledge base...",
+        "selectedWeblink": "Ask a question about the selected web page...",
+        "current": "Ask a question about the current web page...",
+        "internet": "Enter keywords for an internet search...",
+        "currentSelectedContent": "Ask a question based on the currently selected content..."
       },
       "searchScope": {
         "title": "Select Search Scope",
-        "none": "General Knowledge Q&A",
-        "currentPage": "Current Selected Page",
-        "currentKnowledgeBase": "Current Knowledge Base",
-        "all": "All Knowledge Bases",
+        "current": "Current WebPage",
+        "all": "Entire Knowledge Base",
         "history": "History of Read Content",
         "internet": "Internet Search"
       },
-      "seeKnowledgeLibrary": "View Knowledge Library",
       "status": {
-        "createFailed": "Create New Thread Failed!"
+        "emptyNotify": "The question field cannot be empty.",
+        "contentHandling": "Processing content...",
+        "createFailed": "Failed to create a new session!",
+        "contentHandleSuccessNotify": "Processing successful, redirecting to the session page...",
+        "contentHandleFailedNotify": "Processing failed!"
       }
     },
     "siderMenu": {
-      "homePage": "Workspace",
-      "news": "What's new?",
+      "homePage": "Home",
       "threadLibrary": "Threads",
-      "explore": "Explore",
       "getHelp": "Get Help",
       "download": "Download Extension"
     }
@@ -236,8 +204,7 @@
       "messageCount": "{{count}} messages"
     },
     "empty": {
-      "title": "No conversations at the moment. Download the plugin or visit the home page to ask a question!",
-      "download": "Download Plugin",
+      "title": "No conversations at the moment",
       "goHome": "Go to Home Page to Search or Ask a Question"
     }
   },
@@ -325,6 +292,9 @@
     }
   },
   "threadDetail": {
+    "header": {
+      "newThread": "New Thread"
+    },
     "breadcrumb": {
       "threadLibrary": "Threads"
     },
@@ -356,12 +326,26 @@
         "relatedQuestions": "Related Questions"
       },
       "input": {
-        "placeholder": "Ask a follow-up question...",
+        "searchPlaceholder": {
+          "all": "Ask a question about the entire knowledge base...",
+          "selectedWeblink": "Ask a question about the selected web page...",
+          "current": "Ask a question about the current web page...",
+          "internet": "Enter keywords for an internet search...",
+          "currentSelectedContent": "Ask a question based on the currently selected content..."
+        },
         "searchScope": {
           "title": "Select Search Scope",
-          "all": "Whole Library",
+          "current": "Current WebPage",
+          "all": "Entire Knowledge Base",
           "selected": "Selected Web Page",
           "internet": "Internet Search"
+        },
+        "status": {
+          "emptyNotify": "The question field cannot be empty.",
+          "contentHandling": "Processing content...",
+          "createFailed": "Failed to create a new session!",
+          "contentHandleSuccessNotify": "Processing successful, redirecting to the session page...",
+          "contentHandleFailedNotify": "Processing failed!"
         },
         "selectedWeblink": {
           "title": "Ask a Question Based on the Selected Web Page:"
@@ -372,6 +356,16 @@
   "components": {
     "markdown": {
       "copySuccess": "Content Copied to Clipboard"
+    },
+    "currentWeblinkQuickSummary": {
+      "message": {
+        "question": "Website Summary"
+      },
+        "action": {
+          "askFollow": {
+            "title": "Continue in the conversation"
+          }
+        }
     }
   },
   "hooks": {

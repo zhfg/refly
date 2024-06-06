@@ -1,10 +1,24 @@
-import { Controller, Logger, Get, Post, UseGuards, Request, Query, Param } from '@nestjs/common';
-import { omit } from 'lodash';
-import { ApiBody, ApiResponse } from '@nestjs/swagger';
+import {
+  Controller,
+  Logger,
+  Body,
+  Get,
+  Post,
+  UseGuards,
+  Request,
+  Query,
+  Param,
+} from '@nestjs/common';
+import {
+  GetContentDetailResponse,
+  ListDigestRequest,
+  ListDigestResponse,
+  ListFeedResponse,
+} from '@refly/openapi-schema';
 
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
-import { Content, DigestListRequest, DigestListResponse, FeedResponse } from './aigc.dto';
 import { AigcService } from './aigc.service';
+import { buildSuccessResponse, omit, pick } from '../utils';
 
 @Controller('aigc')
 export class AigcController {
@@ -14,69 +28,70 @@ export class AigcController {
 
   @UseGuards(JwtAuthGuard)
   @Get('feed')
-  @ApiResponse({ type: FeedResponse })
   async listFeed(
     @Request() req,
     @Query('page') page: string,
     @Query('pageSize') pageSize: string,
-  ): Promise<FeedResponse> {
+  ): Promise<ListFeedResponse> {
     const feedList = await this.aigcService.getFeedList({
       userId: req.user.id,
       page: parseInt(page) || 1,
       pageSize: parseInt(pageSize) || 10,
     });
-    return {
-      data: feedList.map((feed) => ({
-        ...omit(feed, 'weblink', 'inputIds', 'outputIds'),
-        contentId: feed.id,
+    return buildSuccessResponse(
+      feedList.map((feed) => ({
+        ...omit(feed, ['weblink', 'inputIds', 'outputIds']),
+        contentId: feed.cid,
         readCount: 0,
         askFollow: 0,
         weblinks: [feed.weblink],
+        createdAt: feed.createdAt.toString(),
+        updatedAt: feed.updatedAt.toString(),
       })),
-    };
+    );
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('digest')
-  @ApiBody({ type: DigestListRequest })
-  @ApiResponse({ type: DigestListResponse })
-  async getDigestList(@Request() req): Promise<DigestListResponse> {
-    const digestList = await this.aigcService.getDigestList({
-      userId: req.user.id,
-      ...req.body,
-    });
+  async getDigestList(
+    @Request() req,
+    @Body() body: ListDigestRequest,
+  ): Promise<ListDigestResponse> {
+    const digestList = await this.aigcService.getDigestList(req.user.id, body);
 
     const finalList = await Promise.all(
       digestList.map(async (digest) => {
         return {
-          id: digest.id,
-          userId: digest.userId,
-          topicKey: digest.topicKey,
-          date: digest.date,
+          ...pick(digest, ['userId', 'topicKey', 'date']),
           title: digest.content?.title,
           abstract: digest.content?.abstract,
-          contentId: digest.contentId,
+          contentId: digest.content.cid,
+          cid: digest.content.cid,
           meta: digest.content.meta,
           source: digest.content.sources,
-          createdAt: digest.createdAt,
-          updatedAt: digest.updatedAt,
+          createdAt: digest.createdAt.toString(),
+          updatedAt: digest.updatedAt.toString(),
           weblinks: await this.aigcService.fetchDigestWeblinks(digest.content),
           topic: await this.aigcService.findTopicByKey(digest.topicKey),
         };
       }),
     );
 
-    return {
-      data: finalList,
-    };
+    return buildSuccessResponse(finalList);
   }
 
   @Get('content/:contentId')
-  @ApiResponse({ type: Content })
-  async getContentDetail(@Param('contentId') contentId: string) {
+  async getContentDetail(@Param('contentId') contentId: string): Promise<GetContentDetailResponse> {
     const content = await this.aigcService.getContent({
-      contentId: Number(contentId),
+      cid: contentId,
     });
-    return { data: content };
+    return buildSuccessResponse({
+      ...pick(content, ['cid', 'title', 'abstract', 'meta', 'content']),
+      contentId: content.cid,
+      meta: JSON.parse(content.meta),
+      source: JSON.parse(content.sources),
+      createdAt: content.createdAt.toString(),
+      updatedAt: content.updatedAt.toString(),
+    });
   }
 }

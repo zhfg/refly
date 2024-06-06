@@ -9,7 +9,6 @@ import { Logger } from 'nestjs-pino';
 
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 import tracer from './tracer';
 import { setTraceID } from './middleware/set-trace-id';
@@ -45,16 +44,7 @@ async function bootstrap() {
   app.enableCors();
   app.use(cookieParser());
   app.useGlobalFilters(new GlobalExceptionFilter());
-
   app.setGlobalPrefix('/v1', { exclude: ['/'] });
-
-  const config = new DocumentBuilder()
-    .setTitle('Refly Backend API')
-    .setDescription('The Refly API description')
-    .setVersion('1.0')
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
 
   tracer.start();
   const configService = app.get(ConfigService);

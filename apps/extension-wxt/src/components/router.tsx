@@ -1,26 +1,50 @@
-import React, { useEffect } from "react";
-import { useNavigate, useMatch } from "react-router-dom";
-import classNames from "classnames";
-import { Routing } from "@/routes/index";
-import { IconSearch, IconStorage } from "@arco-design/web-react/icon";
+import React, { useEffect } from 'react';
+import { useNavigate, useMatch } from '@refly/ai-workspace-common/utils/router';
+import classNames from 'classnames';
+import { Routing } from '@/routes/index';
+import { IconSearch, IconStorage } from '@arco-design/web-react/icon';
 // stores
-import { useUserStore } from "@/stores/user";
-import { useHomeStateStore } from "@/stores/home-state";
-import { useSelectedMark } from "@/hooks/use-selected-mark";
-import { useTranslation } from "react-i18next";
-import { useGetUserSettings } from "@/hooks/use-get-user-settings";
-import { LOCALE } from "@/types";
-import { useProcessStatusCheck } from "@/hooks/use-process-status-check";
-import Home from "./home";
+import { useUserStore } from '@/stores/user';
+import { useHomeStateStore } from '@/stores/home-state';
+import { useSelectedMark } from '@/hooks/use-selected-mark';
+import { useTranslation } from 'react-i18next';
+import { useGetUserSettings } from '@/hooks/use-get-user-settings';
+import { LOCALE } from '@/types';
+import { useProcessStatusCheck } from '@/hooks/use-process-status-check';
+// components
+import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
+import { AICopilot } from '@refly/ai-workspace-common/components/knowledge-base/copilot';
+import { EmptyFeedStatus } from '@refly/ai-workspace-common/components/empty-feed-status';
+// utils
+import { useResizePanel } from '@refly/ai-workspace-common/hooks/use-resize-panel';
+import Home from './home';
+import { ErrorBoundary } from '@sentry/react';
+// styles
+import './router.scss';
+import { getPopupContainer } from '@refly/ai-workspace-common/utils/ui';
 
-export const ContentRouter = () => {
+interface ContentRouterProps {}
+
+export const ContentRouter = (props: ContentRouterProps) => {
   // 导航相关
   const navigate = useNavigate();
-  const isThreadItem = useMatch("/thread/:threadId");
   const userStore = useUserStore();
 
   const homeStateStore = useHomeStateStore();
   const { handleResetState } = useSelectedMark();
+
+  const [minSize] = useResizePanel({
+    getGroupSelector: () => {
+      const rootElem = getPopupContainer();
+      return rootElem.querySelector('.workspace-panel-container') as HTMLElement;
+    },
+    getResizeSelector: () => {
+      const rootElem = getPopupContainer();
+      return rootElem.querySelectorAll('.workspace-panel-resize') as NodeListOf<HTMLElement>;
+    },
+    initialMinSize: 24,
+    initialMinPixelSize: 310,
+  });
 
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
@@ -40,47 +64,26 @@ export const ContentRouter = () => {
     }
   }, [locale]);
 
+  const noteId = '';
+  const copilotStyle = noteId
+    ? {
+        defaultSize: 20,
+        minSize: 20,
+        maxSize: 50,
+      }
+    : {
+        defaultSize: 100,
+        minSize: 100,
+        maxSize: 100,
+      };
+
   return (
-    <div style={{ height: "100%" }}>
-      <Home />
-      {!isThreadItem && userStore.userProfile && (
-        <div className="footer-nav-container">
-          <div className="footer-nav">
-            <div
-              className={classNames(
-                "nav-item",
-                homeStateStore.activeTab === "home" && "nav-item-active"
-              )}
-              onClick={() => {
-                navigate("/");
-                homeStateStore.setActiveTab("home");
-              }}
-            >
-              <div className="nav-item-inner">
-                <IconSearch style={{ fontSize: 22 }} />
-                <p className="nav-item-title">{t("bottomNav.home")}</p>
-              </div>
-            </div>
-            <div
-              className={classNames(
-                "nav-item",
-                homeStateStore.activeTab === "session-library" &&
-                  "nav-item-active"
-              )}
-              onClick={() => {
-                navigate("/thread");
-                homeStateStore.setActiveTab("session-library");
-                handleResetState();
-              }}
-            >
-              <div className="nav-item-inner">
-                <IconStorage style={{ fontSize: 22 }} />
-                <p className="nav-item-title">{t("bottomNav.threads")}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+    <div className="workspace-container">
+      <div className="workspace-inner-container">
+        <ErrorBoundary>
+          <AICopilot />
+        </ErrorBoundary>
+      </div>
     </div>
   );
 };

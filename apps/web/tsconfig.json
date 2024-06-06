@@ -22,9 +22,11 @@
 
     // path
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@refly/ai-workspace-common/*": ["../../packages/ai-workspace-common/src/*"]
     }
   },
-  "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src", "tailwind.config.ts", "../../packages/ai-workspace-common/src/components/workspace/content-panel", "../../packages/ai-workspace-common/src/components/workspace/knowledge-keyword-list", "../../packages/ai-workspace-common/src/components/workspace/left-assist-panel"],
+  "exclude": ["node_modules", "dist"],
+  "references": [{ "path": "./tsconfig.node.json" },  { "path": "../../packages/ai-workspace-common"}]
 }

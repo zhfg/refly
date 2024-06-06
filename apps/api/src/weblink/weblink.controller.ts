@@ -1,17 +1,29 @@
 import _ from 'lodash';
-import { Controller, Logger, Get, Post, Query, Request, UseGuards, Body } from '@nestjs/common';
-import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
+import {
+  Controller,
+  Logger,
+  Get,
+  Post,
+  Query,
+  Request,
+  UseGuards,
+  ParseIntPipe,
+  DefaultValuePipe,
+  Body,
+} from '@nestjs/common';
 
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { WeblinkService } from './weblink.service';
 import {
-  GetWebLinkListResponse,
+  BaseResponse,
+  ListWeblinkResponse,
   PingWeblinkData,
   PingWeblinkResponse,
-  StoreWebLinkParam,
-} from './weblink.dto';
+  StoreWeblinkRequest,
+} from '@refly/openapi-schema';
 import { PARSER_VERSION } from '../rag/rag.service';
 import { normalizeURL } from '../utils/url';
+import { buildSuccessResponse, pick } from '../utils';
 
 @Controller('weblink')
 export class WeblinkController {
@@ -23,9 +35,7 @@ export class WeblinkController {
   async ping(@Query('url') url: string): Promise<PingWeblinkResponse> {
     url = normalizeURL(url);
     if (!url) {
-      return {
-        data: { parseStatus: 'unavailable', chunkStatus: 'unavailable' },
-      };
+      return buildSuccessResponse({ parseStatus: 'unavailable', chunkStatus: 'unavailable' });
     }
 
     const weblink = await this.weblinkService.findFirstWeblink({ url });
@@ -34,7 +44,7 @@ export class WeblinkController {
     // or has outdated parser version then reprocess it asynchronously
     if (!weblink || (weblink.chunkStatus === 'finish' && weblink.parserVersion < PARSER_VERSION)) {
       await this.weblinkService.enqueueProcessTask({ url });
-      return { data: { parseStatus: 'processing', chunkStatus: 'processing' } };
+      return buildSuccessResponse({ parseStatus: 'processing', chunkStatus: 'processing' });
     }
 
     const data: Partial<PingWeblinkData> = _.pick(
@@ -48,33 +58,26 @@ export class WeblinkController {
     if (weblink.summary) data.summary = weblink.summary;
     if (weblink.relatedQuestions.length > 0) data.relatedQuestions = weblink.relatedQuestions;
 
-    return { data };
+    return buildSuccessResponse(data);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('store')
-  async store(@Request() req, @Body() body: StoreWebLinkParam) {
+  async store(@Request() req, @Body() body: StoreWeblinkRequest): Promise<BaseResponse> {
     this.logger.log(`user: ${req.user.id}, store link: ${body}`);
     await this.weblinkService.storeLinks(req.user.id, body.data);
-    return { success: true };
+    return buildSuccessResponse();
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('list')
-  @ApiQuery({ name: 'linkId', type: String, required: false })
-  @ApiQuery({ name: 'url', type: String, required: false })
-  @ApiQuery({ name: 'page', type: Number, required: false })
-  @ApiQuery({ name: 'pageSize', type: Number, required: false })
-  @ApiOkResponse({ type: GetWebLinkListResponse })
   async list(
     @Request() req,
-    @Query('linkId') linkId,
-    @Query('url') url,
-    @Query('page') page = 1,
-    @Query('pageSize') pageSize = 10,
-  ) {
-    page = Number(page);
-    pageSize = Number(pageSize);
+    @Query('linkId') linkId: string,
+    @Query('url') url: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
+  ): Promise<ListWeblinkResponse> {
     const skip = (page - 1) * pageSize;
     const take = pageSize;
 
@@ -85,15 +88,25 @@ export class WeblinkController {
         userId: req.user.id,
       })}`,
     );
+    const weblink = await this.weblinkService.findFirstWeblink({ url, linkId });
+    if (!weblink) {
+      return buildSuccessResponse([]);
+    }
+
     const weblinkList = await this.weblinkService.getUserHistory({
       skip,
       take,
-      where: { id: linkId, url, userId: req.user.id },
+      where: { weblinkId: weblink.id, userId: req.user.id },
       orderBy: { updatedAt: 'desc' },
     });
 
-    return {
-      data: weblinkList,
-    };
+    return buildSuccessResponse(
+      weblinkList.map((w) => ({
+        ...pick(w, ['url', 'origin', 'originPageUrl', 'originPageTitle', 'totalReadTime']),
+        lastVisitTime: Math.floor(w.lastVisitTime.getTime() / 1000),
+        createdAt: w.createdAt.toJSON(),
+        updatedAt: w.updatedAt.toJSON(),
+      })),
+    );
   }
 }
