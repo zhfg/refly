@@ -5,18 +5,14 @@ import { storage } from 'wxt/storage';
 export let localLastActiveTab = {} as Tabs.Tab;
 
 export const getCurrentTab = async () => {
-  const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+  const tabs = await browser.tabs.query({ active: true });
   return tabs[0] as Tabs.Tab;
 };
 
-export const saveLastActiveTab = async (tab: Tabs.Tab) => {
-  localLastActiveTab = {
-    ...localLastActiveTab,
-    id: tab?.id,
-    windowId: tab?.windowId,
-  };
-  await storage.setItem('sync:lastActiveTabId', tab?.id);
-  await storage.setItem('sync:lastActiveWindowId', tab?.windowId);
+export const saveLastActiveTab = async () => {
+  localLastActiveTab = await getCurrentTab();
+  await storage.setItem('sync:lastActiveTabId', localLastActiveTab?.id);
+  await storage.setItem('sync:lastActiveWindowId', localLastActiveTab?.windowId);
 };
 
 export const getLastActiveTab = async (): Promise<Tabs.Tab> => {

@@ -10,7 +10,7 @@ export default defineContentScript({
   cssInjectionMode: 'ui',
 
   async main(ctx) {
-    setRuntime('extension');
+    setRuntime('extension-csui');
 
     console.log('ctx', ctx);
     // 3. Define your UI

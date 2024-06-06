@@ -52,7 +52,7 @@ const App = () => {
   const siderStore = useSiderStore();
   const quickActionStore = useQuickActionStore();
 
-  setRuntime('extension');
+  setRuntime('extension-csui');
 
   // 注册 mouse event
   // useRegisterMouseEvent()

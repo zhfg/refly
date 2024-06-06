@@ -1,4 +1,4 @@
-import { BackgroundMessage } from '@/types/request';
+import { BackgroundMessage } from '@refly/ai-workspace-common/requests/proxiedRequest';
 import { getCurrentTab, getLastActiveTab } from './tabs';
 
 export const sendToBackground = async (message: { type?: string; name: string; body?: any }) => {

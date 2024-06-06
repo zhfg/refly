@@ -11,7 +11,7 @@ export const getEnv = () => {
   return env;
 };
 
-type IRuntime = 'web' | 'extension-csui' | 'extension-sidepanel' | 'extension-background';
+export type IRuntime = 'web' | 'extension-csui' | 'extension-sidepanel' | 'extension-background';
 
 let runtime: IRuntime;
 

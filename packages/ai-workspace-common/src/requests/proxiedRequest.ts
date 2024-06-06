@@ -1,7 +1,7 @@
 import { createClient, client } from '@hey-api/client-fetch';
 import * as requestModule from '@refly/openapi-schema';
 
-import { getRuntime } from '../utils/env';
+import { IRuntime, getRuntime } from '../utils/env';
 import { getAuthTokenFromCookie } from '../utils/request';
 import { getServerOrigin } from '../utils/url';
 
@@ -16,9 +16,12 @@ client.interceptors.request.use((request) => {
   return request;
 });
 
+export type BackgroundMsgType = 'apiRequest' | 'others' | 'registerEvent';
+
 export interface BackgroundMessage {
   name: string;
-  type: 'apiRequest' | 'others';
+  type: BackgroundMsgType;
+  source: IRuntime;
   target: any;
   thisArg: any;
   args: any;
@@ -26,19 +29,19 @@ export interface BackgroundMessage {
 
 export const sendToBackgroundV2 = async (message: BackgroundMessage) => {
   const { browser } = await import('wxt/browser');
-  await browser.runtime.sendMessage(message);
-
   const waitForResponse = new Promise((resolve) => {
     const listener = (response: any) => {
+      console.log('sendToBackgroundV2', response);
       if (response?.name === message?.name) {
         browser.runtime.onMessage.removeListener(listener);
 
-        resolve(response);
+        resolve(response?.body);
       }
     };
 
     browser.runtime.onMessage.addListener(listener);
   });
+  await browser.runtime.sendMessage(message);
 
   const res = await waitForResponse;
   return res;
@@ -58,6 +61,7 @@ const proxiedRequestModule = new Proxy(requestModule, {
           const res = await sendToBackgroundV2({
             name: String(propKey),
             type: 'apiRequest',
+            source: getRuntime(),
             target,
             thisArg,
             args,
