@@ -25,6 +25,11 @@
       "reviewCategory": "packages"
     },
     {
+      "packageName": "@refly/plugin-vite-watcher",
+      "projectFolder": "packages/plugin-vite-watcher",
+      "reviewCategory": "packages"
+    },
+    {
       "packageName": "@refly/utils",
       "projectFolder": "packages/utils",
       "reviewCategory": "packages"

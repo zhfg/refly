@@ -71,6 +71,7 @@
     "react-error-boundary": "~4.0.13",
     "vite-plugin-encoding": "~1.0.0",
     "@refly/plugin-vite-encoding": "workspace:*",
+    "@refly/plugin-vite-watcher": "workspace:*",
     "@refly/constants": "workspace:*"
   },
   "devDependencies": {

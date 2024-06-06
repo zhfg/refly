@@ -2,9 +2,19 @@ import { ConfigEnv, defineConfig, WxtViteConfig } from 'wxt';
 import react from '@vitejs/plugin-react';
 import { vitePluginForArco } from '@refly/arco-vite-plugin-react';
 import { pluginViteEncoding } from '@refly/plugin-vite-encoding';
+import { pluginViteWatcher } from '@refly/plugin-vite-watcher';
 import postcssConfig from './postcss.config';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import path from 'path';
+
+const getFileAbsolutePath = (fileName: string) => {
+  return path.join(__dirname, fileName);
+};
+
+const extraWatchFiles = [
+  getFileAbsolutePath('./node_modules/@refly/ai-workspace-common/src'),
+  getFileAbsolutePath('./src/entrypoints/sidepanel'),
+];
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
@@ -22,6 +32,9 @@ export default defineConfig({
           theme: '@arco-themes/react-refly-ai',
           sourceMaps: true,
           filePatterns: ['apps/web/src', 'apps/extension-wxt/src', 'packages/ai-workspace-common/src'],
+        }),
+        pluginViteWatcher({
+          filesPath: extraWatchFiles,
         }),
       ],
       css: {

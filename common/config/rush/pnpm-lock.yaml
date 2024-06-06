@@ -326,6 +326,9 @@ importers:
       '@refly/plugin-vite-encoding':
         specifier: workspace:*
         version: link:../../packages/plugin-vite-encoding
+      '@refly/plugin-vite-watcher':
+        specifier: workspace:*
+        version: link:../../packages/plugin-vite-watcher
       '@sentry/cli':
         specifier: ^2.31.2
         version: 2.31.2
@@ -1042,6 +1045,40 @@ importers:
       '@types/node':
         specifier: ^16.11.10
         version: 16.18.97
+    devDependencies:
+      esbuild:
+        specifier: ^0.13.2
+        version: 0.13.15
+      typescript:
+        specifier: ^4.5.2
+        version: 4.7.4
+      vite:
+        specifier: ^2.6.14
+        version: 2.6.14
+
+  ../../packages/plugin-vite-watcher:
+    dependencies:
+      '@babel/generator':
+        specifier: ^7.12.11
+        version: 7.22.9
+      '@babel/helper-module-imports':
+        specifier: ^7.12.5
+        version: 7.24.3
+      '@babel/parser':
+        specifier: ^7.12.11
+        version: 7.22.7
+      '@babel/traverse':
+        specifier: ^7.12.12
+        version: 7.22.8
+      '@babel/types':
+        specifier: ^7.12.12
+        version: 7.22.5
+      '@types/node':
+        specifier: ^16.11.10
+        version: 16.18.97
+      rollup:
+        specifier: ~4.18.0
+        version: 4.18.0
     devDependencies:
       esbuild:
         specifier: ^0.13.2
@@ -8021,7 +8058,7 @@ packages:
       '@vue/shared': 3.3.10
       estree-walker: 2.0.2
       magic-string: 0.30.10
-      postcss: 8.4.33
+      postcss: 8.4.38
       source-map-js: 1.2.0
     dev: true
 
@@ -18722,7 +18759,7 @@ packages:
         optional: true
     dependencies:
       esbuild: 0.13.15
-      postcss: 8.4.33
+      postcss: 8.4.38
       resolve: 1.22.8
       rollup: 2.79.1
     optionalDependencies:
