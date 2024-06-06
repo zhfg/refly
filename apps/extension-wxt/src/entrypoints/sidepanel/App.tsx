@@ -1,6 +1,7 @@
 import { Button, Spin } from '@arco-design/web-react';
 import { MemoryRouter } from 'react-router-dom';
 import { AppRouter } from '@/routes/index';
+import { createClient, client } from '@hey-api/client-fetch';
 
 import '@/styles/style.css';
 import './App.scss';

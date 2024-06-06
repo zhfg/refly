@@ -5,6 +5,9 @@ import { storage } from 'wxt/storage';
 import { getCurrentTab, getLastActiveTab, saveLastActiveTab } from '@/utils/extension/tabs';
 import { requestFileNames } from '@/types/request-filename';
 import * as requestModule from '@refly/openapi-schema';
+import { createClient } from '@hey-api/client-fetch';
+import { getServerOrigin } from '@refly/ai-workspace-common/utils/url';
+import { getCookie } from '@/utils/cookie';
 
 /**
  * @deprecated
@@ -33,9 +36,24 @@ export const handleRequest = async (msg: HandlerRequest<any>) => {
   });
 };
 
+const client = createClient({ baseUrl: getServerOrigin() + '/v1' });
+
+client.interceptors.request.use((request) => {
+  console.log('extension intercept request:', request);
+  const token = getCookie();
+  if (token) {
+    request.headers.set('Authorization', `Bearer ${token}`);
+  }
+  return request;
+});
+
 export const handleRequestReflect = async (msg: BackgroundMessage) => {
   // @ts-ignore
-  const res = await requestModule[msg.name as keyof typeof requestModule]?.call?.(msg?.thisArg, ...msg.args);
+  console.log('received background msg:', msg);
+  const res = await requestModule[msg.name as keyof typeof requestModule]?.call?.(msg?.thisArg, {
+    ...msg.args[0],
+    client,
+  });
   const lastActiveTab = await getLastActiveTab();
   await browser.tabs.sendMessage(lastActiveTab?.id as number, {
     name: msg?.name,
