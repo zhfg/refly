@@ -10,7 +10,7 @@ import { DigestDetailContent } from './digest-detail-content';
 import { Header } from './header';
 import { AskFollowUpModal } from '@refly-packages/ai-workspace-common/components/ask-follow-up-modal/index';
 // request
-import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // styles
 import './digest-detail.scss';
 
@@ -27,7 +27,7 @@ export const FeedDetail = () => {
 
   const handleGetDetail = async (feedId: string) => {
     try {
-      const { data: newRes, error } = await client.getContentDetail({
+      const { data: newRes, error } = await getClient().getContentDetail({
         path: {
           cid: feedId,
         },

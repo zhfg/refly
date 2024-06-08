@@ -4,7 +4,7 @@ import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { safeParseJSON, safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 import { LOCALE } from '@refly/constants';
 // request
-import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // styles
 import './index.scss';
 
@@ -27,7 +27,7 @@ export const UILocaleList = (props: { children: any }) => {
 
     // 不阻塞写回用户配置
     if (notShowLoginBtn) {
-      const { data: res, error } = await client.updateSettings({
+      const { data: res, error } = await getClient().updateSettings({
         body: { uiLocale: lng, outputLocale: localSettings.outputLocale },
       });
 

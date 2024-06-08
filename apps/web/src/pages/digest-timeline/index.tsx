@@ -35,7 +35,7 @@ import { DigestHeader } from "@refly/ai-workspace-common/components/digest-commo
 import { useEffect, useState } from "react"
 import { EmptyDigestStatus } from "@refly/ai-workspace-common/components/empty-digest-archive-status"
 // utils
-import client from "@refly/ai-workspace-common/requests/proxiedRequest"
+import getClient from "@refly/ai-workspace-common/requests/proxiedRequest"
 // styles
 import "./index.scss"
 import { useTranslation } from "react-i18next"
@@ -78,7 +78,7 @@ export const DigestArchive = () => {
       }
 
       // TODO: digest 联调，currentTopicDetail?.key
-      const { data: newRes, error } = await client.getDigestList({
+      const { data: newRes, error } = await getClient().getDigestList({
         body: {
           page: currentPage,
           pageSize: 10,

@@ -8,7 +8,7 @@ import { IconClockCircle, IconMessage, IconRightCircle } from '@arco-design/web-
 import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 // utils
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
-import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // types
 import { LOCALE } from '@refly/constants';
 import { Conversation } from '@refly/openapi-schema';
@@ -52,7 +52,7 @@ export const ConvList = (props: ConvListProps) => {
         return;
       }
 
-      const { error, data: newRes } = await client.listConversations({
+      const { error, data: newRes } = await getClient().listConversations({
         query: {
           page: currentPage,
           pageSize: 10,

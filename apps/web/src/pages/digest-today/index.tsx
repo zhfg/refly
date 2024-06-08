@@ -34,7 +34,7 @@ import {
 import { useEffect, useState } from "react"
 import { EmptyDigestStatus } from "@refly/ai-workspace-common/components/empty-digest-today-status"
 // utils
-import client from "@refly/ai-workspace-common/requests/proxiedRequest"
+import getClient from "@refly/ai-workspace-common/requests/proxiedRequest"
 // styles
 import "./index.scss"
 import { LOCALE } from "@refly/constants"
@@ -79,7 +79,7 @@ export const DigestToday = () => {
         return
       }
 
-      const { data: newRes, error } = await client.getDigestList({
+      const { data: newRes, error } = await getClient().getDigestList({
         body: {
           // TODO: confirm time filter
           page: currentPage,

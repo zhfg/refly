@@ -1,6 +1,6 @@
 import { useDigestTopicStore } from '@refly-packages/ai-workspace-common/stores/digest-topics';
 // requests
-import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useState } from 'react';
 
 export const useGetDigestTopics = () => {
@@ -15,7 +15,7 @@ export const useGetDigestTopics = () => {
       return;
     }
 
-    const { data: newRes, error } = await client.getUserTopics();
+    const { data: newRes, error } = await getClient().getUserTopics();
 
     if (error) {
       throw error;

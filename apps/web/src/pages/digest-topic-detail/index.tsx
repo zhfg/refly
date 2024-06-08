@@ -24,7 +24,7 @@ import { useDigestTopicDetailStore } from "@refly/ai-workspace-common/stores/dig
 import { LOCALE } from "@refly/constants"
 import { Digest } from "@refly/openapi-schema"
 // request
-import client from "@refly/ai-workspace-common/requests/proxiedRequest"
+import getClient from "@refly/ai-workspace-common/requests/proxiedRequest"
 import { IconTip } from "@refly/ai-workspace-common/components/dashboard/icon-tip"
 import { copyToClipboard } from "@refly/ai-workspace-common/utils"
 import {
@@ -83,7 +83,7 @@ export const DigestTopicDetail = () => {
       }
 
       // TODO: digest 联调，currentTopicDetail?.key
-      const { data: newRes, error } = await client.getDigestList({
+      const { data: newRes, error } = await getClient().getDigestList({
         body: {
           page: currentPage,
           pageSize: 10,

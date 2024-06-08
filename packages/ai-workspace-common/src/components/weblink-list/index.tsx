@@ -7,7 +7,7 @@ import { time } from '@refly-packages/ai-workspace-common/utils/time';
 // stores
 import { useWeblinkStore } from '@refly-packages/ai-workspace-common/stores/weblink';
 // requests
-import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // styles
 import './index.scss';
 import { safeParseURL } from '@refly-packages/ai-workspace-common/utils/url';
@@ -95,7 +95,7 @@ const PreviosWebsiteList = forwardRef(() => {
     webLinkStore.updateCurrentPage((typeof currentPage === 'number' ? currentPage : extraState.currentPage) + 1);
     webLinkStore.updateIsRequest(true);
 
-    const { data: res, error } = await client.listWeblinks({
+    const { data: res, error } = await getClient().listWeblinks({
       body: queryPayload,
     });
 

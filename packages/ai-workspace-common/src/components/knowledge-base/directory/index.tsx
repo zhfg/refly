@@ -11,7 +11,7 @@ import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/store
 // 类型
 import { ResourceDetail } from '@refly/openapi-schema';
 // 请求
-import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // 组件
 import { ResourceList } from '@refly-packages/ai-workspace-common/components/resource-list';
 
@@ -27,7 +27,7 @@ export const KnowledgeBaseDirectory = () => {
   const handleGetDetail = async (collectionId: string, resourceId: string) => {
     setIsFetching(true);
     try {
-      const { data: newRes, error } = await client.getCollectionDetail({
+      const { data: newRes, error } = await getClient().getCollectionDetail({
         query: {
           collectionId,
         },

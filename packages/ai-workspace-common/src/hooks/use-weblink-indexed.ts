@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useMatch } from '@refly-packages/ai-workspace-common/utils/router';
 
-import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 export function useWebLinkIndexed() {
   // 标识此网页是否被索引的状态
@@ -11,7 +11,7 @@ export function useWebLinkIndexed() {
   const getWebsiteIndexStatus = async () => {
     setIsWebLinkIndexed(false);
 
-    const { data: indexRes, error } = await client.listWeblinks({
+    const { data: indexRes, error } = await getClient().listWeblinks({
       body: {
         url: location.href,
       },
