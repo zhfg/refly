@@ -122,16 +122,7 @@ export const onPort = async (port: Runtime.Port) => {
     if (comingPort.name === 'streaming-chat') {
       return handleStreamingChat(message, {
         send: async (msg: any) => {
-          const runtime = message?.source;
-
-          if (runtime === 'extension-csui') {
-            const tab = await getCurrentTab();
-            browser.tabs.sendMessage(tab?.id as number, msg).catch((err) => {
-              console.log('onPort send message error', err);
-            });
-          } else if (runtime === 'extension-sidepanel') {
-            port?.postMessage(msg);
-          }
+          port?.postMessage(msg);
         },
       });
     }

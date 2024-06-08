@@ -10,14 +10,13 @@ import { useProcessLoginNotify } from '@/hooks/use-process-login-notify';
 import { useBindCommands } from '@/hooks/use-bind-commands';
 import { useSetContainerDimension } from '@/hooks/use-set-container-dimension';
 // stores
-import { useSiderStore } from '@/stores/sider';
+import { useSiderStore } from '@refly/ai-workspace-common/stores/sider';
 import { useQuickActionStore } from '@/stores/quick-action';
 import { useUserStore } from '@refly/ai-workspace-common/stores/user';
 
 // 组件
 import { Message, Spin } from '@arco-design/web-react';
 import { AppRouter } from '@/routes/index';
-import { Markdown } from '@/components/markdown';
 
 // utils
 import { checkPageUnsupported } from '@refly/ai-workspace-common/utils/extension/check';
@@ -33,8 +32,6 @@ import '@/styles/style.css';
 import './App.scss';
 import { getPopupContainer } from '@refly/ai-workspace-common/utils/ui';
 import { checkBrowserArc } from '@/utils/browser';
-import { useChatStore } from '@refly/ai-workspace-common/stores/chat';
-import { fakeMessages } from '../../fake-data/message';
 // 设置 runtime 环境
 import { getEnv, setRuntime } from '@refly/ai-workspace-common/utils/env';
 const Sentry = _Sentry;
@@ -90,13 +87,7 @@ const App = () => {
       checkBrowserArc();
     }
     setRuntime('extension-csui');
-    userStore.setRuntime('extension-sidepanel');
-  }, []);
-
-  const chatStore = useChatStore();
-
-  useEffect(() => {
-    chatStore.setMessages(fakeMessages as any);
+    userStore.setRuntime('extension-csui');
   }, []);
 
   return (

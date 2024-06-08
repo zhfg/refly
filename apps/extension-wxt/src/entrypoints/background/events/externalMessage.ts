@@ -36,6 +36,14 @@ export const onExternalMessage = async (
       }
 
       await storage.setItem('sync:refly-login-notify', JSON.stringify(msg));
+      await browser.tabs
+        .sendMessage(lastActiveTab?.id as number, {
+          name: 'refly-login-notify',
+          data: JSON.stringify(msg),
+        })
+        .catch((err) => {
+          console.log('onExternalMessage refly-login-notify send message error', err);
+        });
     }
   }
 

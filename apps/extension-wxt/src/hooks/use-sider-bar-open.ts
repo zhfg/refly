@@ -1,4 +1,4 @@
-import { useSiderStore } from '@/stores/sider';
+import { useSiderStore } from '@refly/ai-workspace-common/stores/sider';
 import { useEffect } from 'react';
 import { useExtensionMessage } from './use-extension-message';
 
