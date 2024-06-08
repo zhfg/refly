@@ -16,7 +16,7 @@ import { ContentSelectorBtn } from '@/components/content-selector-btn/index';
 import { useQuickActionStore } from '../../stores/quick-action';
 import { useChatStore } from '../../stores/chat';
 import { useMessageStateStore } from '@/stores/message-state';
-import { useSiderStore } from '@/stores/sider';
+import { useSiderStore } from '@refly/ai-workspace-common/stores/sider';
 import { useWeblinkStore } from '@/stores/weblink';
 import { SearchTarget, useSearchStateStore } from '@/stores/search-state';
 import { useContentSelectorStore } from '@/stores/content-selector';

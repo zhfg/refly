@@ -62,9 +62,7 @@ const App = () => {
 
     if (activeTab) {
       console.log('activeTab', browser.tabs.sendMessage);
-      const res = await browser.tabs.sendMessage(activeTab?.id as number, {
-        data: { name: 'runRefly', toggle: !isSideBarOpen },
-      });
+      const res = await browser.tabs.sendMessage(activeTab?.id as number, { name: 'runRefly', toggle: !isSideBarOpen });
 
       setIsSideBarOpen(!isSideBarOpen);
 
