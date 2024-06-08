@@ -1,5 +1,6 @@
-import { useSiderStore } from "@/stores/sider";
-import { useEffect } from "react";
+import { useSiderStore } from '@/stores/sider';
+import { useEffect } from 'react';
+import { useExtensionMessage } from './use-extension-message';
 
 interface SiderBarStatus {
   name: string;
@@ -9,18 +10,15 @@ interface SiderBarStatus {
 export const useSiderBarOpen = () => {
   const siderStore = useSiderStore();
 
-  const [siderBarStatusData] = useExtensionMessage<SiderBarStatus>(
-    "runRefly",
-    (req, res) => {
-      console.log("runRefly", req, res);
-      const { showSider } = useSiderStore.getState();
-      res.send(showSider ? "true" : "false");
-    }
-  );
+  const [siderBarStatusData] = useExtensionMessage<SiderBarStatus>('runRefly', (req, res) => {
+    console.log('runRefly', req, res);
+    const { showSider } = useSiderStore.getState();
+    res.send(showSider ? 'true' : 'false');
+  });
 
   const handlerSiderOpen = (data?: SiderBarStatus) => {
     const { showSider } = useSiderStore.getState();
-    if (data?.name === "runRefly" && data?.toggle) {
+    if (data?.name === 'runRefly' && data?.toggle) {
       siderStore.setShowSider(!showSider);
     }
   };
