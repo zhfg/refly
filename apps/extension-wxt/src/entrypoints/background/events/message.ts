@@ -61,10 +61,14 @@ export const handleRequestReflect = async (msg: BackgroundMessage) => {
       body: res,
     });
   } else if (msg?.source === 'extension-sidepanel') {
-    await browser.runtime.sendMessage({
-      name: msg?.name,
-      body: res,
-    });
+    try {
+      await browser.runtime.sendMessage({
+        name: msg?.name,
+        body: res,
+      });
+    } catch (err) {
+      console.log('handleRequestReflect send message error', err);
+    }
   }
 };
 
@@ -76,12 +80,14 @@ export const handleRegisterSidePanel = async (msg: BackgroundMessage) => {
       browser.browserAction.openPopup();
       browser.action.openPopup();
     });
+    browser.action.setPopup({ popup: path });
+    console.log('register popup success');
   } else {
     // @ts-ignore
     browser?.sidePanel
       .setPanelBehavior({ openPanelOnActionClick: true })
       .then(() => {
-        console.log('open sidePanel success');
+        console.log('register sidePanel success');
       })
       .catch((error: any) => console.error(`sidePanel open error: `, error));
   }

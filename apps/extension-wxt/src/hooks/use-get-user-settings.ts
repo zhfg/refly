@@ -15,6 +15,7 @@ import { useStorage } from './use-storage';
 // request
 import client from '@refly/ai-workspace-common/requests/proxiedRequest';
 import { useExtensionMessage } from './use-extension-message';
+import { checkBrowserArc } from '@/utils/browser';
 
 interface ExternalLoginPayload {
   name: string;
@@ -219,6 +220,7 @@ export const useGetUserSettings = () => {
   const handleExtensionMessage = (request: any) => {
     if (request?.name === 'refly-status-check') {
       getLoginStatus();
+      checkBrowserArc();
     }
   };
 

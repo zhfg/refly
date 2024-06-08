@@ -87,11 +87,11 @@ export const AICopilot = (props: AICopilotProps) => {
       },
     });
 
+    console.log('getThreadMessages', res, error);
+
     if (error) {
       throw error;
     }
-
-    console.log('getThreadMessages', res);
 
     // 清空之前的状态
     resetState();

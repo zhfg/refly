@@ -20,6 +20,7 @@ export type BackgroundMsgType = 'apiRequest' | 'others' | 'registerEvent';
 
 export interface BackgroundMessage {
   name: string;
+  body?: any;
   type: BackgroundMsgType;
   source: IRuntime;
   target: any;
@@ -27,23 +28,27 @@ export interface BackgroundMessage {
 }
 
 export const sendToBackgroundV2 = async (message: BackgroundMessage) => {
-  const { browser } = await import('wxt/browser');
-  const waitForResponse = new Promise((resolve) => {
-    const listener = (response: any) => {
-      console.log('sendToBackgroundV2', response);
-      if (response?.name === message?.name) {
-        browser.runtime.onMessage.removeListener(listener);
+  try {
+    const { browser } = await import('wxt/browser');
+    const waitForResponse = new Promise((resolve) => {
+      const listener = (response: any) => {
+        console.log('sendToBackgroundV2', response);
+        if (response?.name === message?.name) {
+          browser.runtime.onMessage.removeListener(listener);
 
-        resolve(response?.body);
-      }
-    };
+          resolve(response?.body);
+        }
+      };
 
-    browser.runtime.onMessage.addListener(listener);
-  });
-  await browser.runtime.sendMessage(message);
+      browser.runtime.onMessage.addListener(listener);
+    });
+    await browser.runtime.sendMessage(message);
 
-  const res = await waitForResponse;
-  return res;
+    const res = await waitForResponse;
+    return res;
+  } catch (err) {
+    console.log('sendToBackgroundV2 error', err);
+  }
 };
 
 const proxiedRequestModule = new Proxy(requestModule, {

@@ -8,36 +8,11 @@ import './App.scss';
 
 import { IconRefresh, IconBulb } from '@arco-design/web-react/icon';
 
-import Logo from '~/assets/logo.svg';
+import Logo from '@/assets/logo.svg';
 import { useStorage } from '@/hooks/use-storage';
 import { browser } from 'wxt/browser';
-import { getCurrentTab } from '@/utils/extension/tabs';
-
-const getActiveTab = async () => {
-  const [tab] = await browser.tabs.query({
-    active: true,
-    currentWindow: true,
-  });
-  return tab;
-};
-
-const checkPageUnsupported = (pageUrl: string) => {
-  console.log('checking page url', JSON.stringify(pageUrl));
-
-  if (pageUrl) {
-    const checkBrowserSettingPage =
-      pageUrl.startsWith('chrome://') || pageUrl.startsWith('edge://') || pageUrl.startsWith('about:');
-    const checkBrowserExtensionStorePage = [
-      'https://browser.google.com/webstore',
-      'https://microsoftedge.microsoft.com/addons',
-      'https://addons.mozilla.org/en-US/firefox',
-    ].some((url) => pageUrl.startsWith(url));
-
-    return checkBrowserSettingPage || checkBrowserExtensionStorePage;
-  }
-
-  return true;
-};
+import { getCurrentTab } from '@refly/ai-workspace-common/utils/extension/tabs';
+import { checkPageUnsupported } from '@refly/ai-workspace-common/utils/extension/check';
 
 /**
  * 打开 popup 页面的规则
@@ -54,7 +29,7 @@ const App = () => {
   const [pageUnsupported, setPageUnsupported] = useState(false);
 
   const refreshPage = async () => {
-    const activeTab = await getActiveTab();
+    const activeTab = await getCurrentTab();
 
     if (activeTab?.id) {
       await browser.tabs.reload(activeTab?.id);
@@ -80,7 +55,7 @@ const App = () => {
   };
 
   const handleRunRefly = async () => {
-    const activeTab = await getActiveTab();
+    const activeTab = await getCurrentTab();
     setCurrentTabUrl(activeTab?.url || '');
     currentTabUrlRef.current = activeTab?.url || '';
     console.log('activeTab', activeTab);

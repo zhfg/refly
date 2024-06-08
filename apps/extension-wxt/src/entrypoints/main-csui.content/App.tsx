@@ -19,6 +19,9 @@ import { Message, Spin } from '@arco-design/web-react';
 import { AppRouter } from '@/routes/index';
 import { Markdown } from '@/components/markdown';
 
+// utils
+import { checkPageUnsupported } from '@refly/ai-workspace-common/utils/extension/check';
+
 // 加载国际化
 import '@/i18n/config';
 import { usePollingPingCurrentWeblink } from '@/hooks/use-polling-ping-current-weblink';
@@ -77,7 +80,15 @@ const App = () => {
     });
   }, []);
   useEffect(() => {
-    checkBrowserArc();
+    /**
+     * 如果决定是否使用 SidePanel 还是 Content Script UI？
+     *
+     * 1. 如果页面支持 CSUI 注入，判断是否是 Arc，直接处理
+     * 2. 如果不支持 CSUI 注入，比如 extension://url，则打开 Popup 要求跳转到支持页面，然后处理
+     */
+    if (!checkPageUnsupported(location.href)) {
+      checkBrowserArc();
+    }
     setRuntime('extension-csui');
     userStore.setRuntime('extension-sidepanel');
   }, []);
