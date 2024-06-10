@@ -16,6 +16,7 @@ import { Spin } from "@arco-design/web-react"
 import { getEnv, setRuntime } from "@refly/ai-workspace-common/utils/env"
 import { useUserStore } from "../../../packages/ai-workspace-common/src/stores/user"
 
+setRuntime("web")
 // dev for disable sentry as it will overload console.log result worse dev experience
 if (process.env.NODE_ENV !== "development") {
   import("@sentry/react").then(Sentry => {

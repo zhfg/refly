@@ -1,8 +1,8 @@
 import { createClient, client } from '@hey-api/client-fetch';
 import * as requestModule from '@refly/openapi-schema';
 
-import { IRuntime, getRuntime } from '../utils/env';
-import { getAuthTokenFromCookie } from '../utils/request';
+import { IRuntime, getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { getAuthTokenFromCookie } from '@refly-packages/ai-workspace-common/utils/request';
 import { getServerOrigin } from '../utils/url';
 
 createClient({ baseUrl: getServerOrigin() + '/v1' });
@@ -75,7 +75,7 @@ const wrapFunctions = (module: any) => {
   for (const key of Reflect.ownKeys(module)) {
     const origMethod = module[key];
 
-    const runtime = getRuntime();
+    const runtime = getRuntime() || '';
     if (runtime.includes('extension') && typeof origMethod === 'function') {
       wrappedModule[key] = async function (...args: unknown[]) {
         console.log(`Calling function ${String(key)} with arguments: ${args}`);
