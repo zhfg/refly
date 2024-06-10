@@ -15,9 +15,13 @@ export const onExternalMessage = async (
 
     if (!userProfile) {
       // 回复消息，关闭弹窗
-      browser.tabs.sendMessage(sender?.tab?.id!, {
-        name: 'refly-login-notify',
-      });
+      browser.tabs
+        .sendMessage(sender?.tab?.id!, {
+          name: 'refly-login-notify',
+        })
+        .catch((err) => {
+          console.log('onExternalMessage refly-login-notify send message error', err);
+        });
 
       const lastActiveTab = await getLastActiveTab();
 
@@ -32,13 +36,25 @@ export const onExternalMessage = async (
       }
 
       await storage.setItem('sync:refly-login-notify', JSON.stringify(msg));
+      await browser.tabs
+        .sendMessage(lastActiveTab?.id as number, {
+          name: 'refly-login-notify',
+          data: JSON.stringify(msg),
+        })
+        .catch((err) => {
+          console.log('onExternalMessage refly-login-notify send message error', err);
+        });
     }
   }
 
   if (msg?.name === 'logout-notify') {
     await storage.removeItem('sync:refly-login-notify');
-    browser.tabs.sendMessage(sender?.tab?.id!, {
-      name: 'refly-logout-notify',
-    });
+    browser.tabs
+      .sendMessage(sender?.tab?.id!, {
+        name: 'refly-logout-notify',
+      })
+      .catch((err) => {
+        console.log('onExternalMessage logout-notify send message error', err);
+      });
   }
 };

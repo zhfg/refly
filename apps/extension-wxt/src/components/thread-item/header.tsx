@@ -1,29 +1,24 @@
-import Logo from "@/assets/logo.svg";
-import CloseGraySVG from "@/assets/side/close.svg";
-import SendSVG from "@/assets/side/send.svg";
-import NotificationSVG from "@/assets/side/notification.svg";
-import SettingGraySVG from "@/assets/side/setting.svg";
-import FullScreenSVG from "@/assets/side/full-screen.svg";
-import { IconTip } from "@/components/home/icon-tip";
-import { Avatar, Button, Message as message } from "@arco-design/web-react";
-import { useSiderStore } from "@/stores/sider";
-import { useNavigate } from "react-router-dom";
-import { useUserStore } from "@/stores/user";
-import { getClientOrigin } from "@/utils/url";
-import {
-  IconClockCircle,
-  IconHome,
-  IconPlus,
-  IconShareExternal,
-} from "@arco-design/web-react/icon";
-import { time } from "@/utils/time";
+import Logo from '@/assets/logo.svg';
+import CloseGraySVG from '@/assets/side/close.svg';
+import SendSVG from '@/assets/side/send.svg';
+import NotificationSVG from '@/assets/side/notification.svg';
+import SettingGraySVG from '@/assets/side/setting.svg';
+import FullScreenSVG from '@/assets/side/full-screen.svg';
+import { IconTip } from '@/components/home/icon-tip';
+import { Avatar, Button, Message as message } from '@arco-design/web-react';
+import { useSiderStore } from '@refly/ai-workspace-common/stores/sider';
+import { useNavigate } from 'react-router-dom';
+import { useUserStore } from '@/stores/user';
+import { getClientOrigin } from '@/utils/url';
+import { IconClockCircle, IconHome, IconPlus, IconShareExternal } from '@arco-design/web-react/icon';
+import { time } from '@/utils/time';
 // types
-import type { Conversation } from "@/types/conversation";
+import type { Conversation } from '@/types/conversation';
 // 第三方库
-import copyToClipboard from "copy-to-clipboard";
-import { useHomeStateStore } from "@/stores/home-state";
-import { useTranslation } from "react-i18next";
-import { LOCALE } from "@/types";
+import copyToClipboard from 'copy-to-clipboard';
+import { useHomeStateStore } from '@/stores/home-state';
+import { useTranslation } from 'react-i18next';
+import { LOCALE } from '@/types';
 
 interface ThreadHeaderProps {
   thread: Conversation;
@@ -41,14 +36,11 @@ export const Header = (props: ThreadHeaderProps) => {
 
   return (
     <header>
-      <div
-        className="refly-brand-container"
-        style={{ display: "flex", flexDirection: "row", alignItems: "center" }}
-      >
+      <div className="refly-brand-container" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
         <div
           className="brand"
           onClick={() => {
-            window.open(`${getClientOrigin()}/`, "_blank");
+            window.open(`${getClientOrigin()}/`, '_blank');
           }}
         >
           <img src={Logo} alt="Refly" />
@@ -57,36 +49,33 @@ export const Header = (props: ThreadHeaderProps) => {
         <Button
           type="primary"
           onClick={() => {
-            navigate("/");
-            homeStateStore.setActiveTab("home");
+            navigate('/');
+            homeStateStore.setActiveTab('home');
           }}
           style={{ borderRadius: 4, marginLeft: 12 }}
         >
           <span
             style={{
               fontSize: uiLocale === LOCALE.EN ? 12 : 14,
-              fontWeight: "normal",
-              color: "#fff",
+              fontWeight: 'normal',
+              color: '#fff',
             }}
           >
-            {t("threadDetail.header.newThread")}
+            {t('threadDetail.header.newThread')}
           </span>
         </Button>
       </div>
       <div className="funcs">
-        <span key={2} style={{ display: "inline-block", marginRight: 12 }}>
-          <IconClockCircle style={{ fontSize: 14, color: "#64645F" }} />
-          <span
-            className="thread-library-list-item-text"
-            style={{ fontSize: uiLocale === LOCALE.EN ? 12 : 14 }}
-          >
+        <span key={2} style={{ display: 'inline-block', marginRight: 12 }}>
+          <IconClockCircle style={{ fontSize: 14, color: '#64645F' }} />
+          <span className="thread-library-list-item-text" style={{ fontSize: uiLocale === LOCALE.EN ? 12 : 14 }}>
             {time(props.thread?.updatedAt, uiLocale).utc().fromNow()}
           </span>
         </span>
-        <IconTip text={t("loggedHomePage.homePage.header.close")}>
+        <IconTip text={t('loggedHomePage.homePage.header.close')}>
           <img
             src={CloseGraySVG}
-            alt={t("loggedHomePage.homePage.header.close")}
+            alt={t('loggedHomePage.homePage.header.close')}
             onClick={(_) => siderStore.setShowSider(false)}
           />
         </IconTip>

@@ -10,7 +10,7 @@ import {
   useKnowledgeBaseStore,
 } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 // 请求
-import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // 类型
 import { ResourceDetail } from '@refly/openapi-schema';
 import { useEffect, useState } from 'react';
@@ -32,7 +32,7 @@ export const KnowledgeBaseResourceDetail = () => {
   const handleGetDetail = async (resourceId: string) => {
     setIsFetching(true);
     try {
-      const { data: newRes, error } = await client.getResourceDetail({
+      const { data: newRes, error } = await getClient().getResourceDetail({
         query: {
           resourceId,
         },

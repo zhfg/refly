@@ -20,6 +20,7 @@ export type BackgroundMsgType = 'apiRequest' | 'others' | 'registerEvent';
 
 export interface BackgroundMessage {
   name: string;
+  body?: any;
   type: BackgroundMsgType;
   source: IRuntime;
   target: any;
@@ -27,41 +28,64 @@ export interface BackgroundMessage {
 }
 
 export const sendToBackgroundV2 = async (message: BackgroundMessage) => {
-  const { browser } = await import('wxt/browser');
-  const waitForResponse = new Promise((resolve) => {
-    const listener = (response: any) => {
-      console.log('sendToBackgroundV2', response);
-      if (response?.name === message?.name) {
-        browser.runtime.onMessage.removeListener(listener);
+  try {
+    const { browser } = await import('wxt/browser');
+    const waitForResponse = new Promise((resolve) => {
+      const listener = (response: any) => {
+        console.log('sendToBackgroundV2', response);
+        if (response?.name === message?.name) {
+          browser.runtime.onMessage.removeListener(listener);
 
-        resolve(response?.body);
-      }
-    };
+          resolve(response?.body);
+        }
+      };
 
-    browser.runtime.onMessage.addListener(listener);
-  });
-  await browser.runtime.sendMessage(message);
+      browser.runtime.onMessage.addListener(listener);
+    });
+    await browser.runtime.sendMessage(message);
 
-  const res = await waitForResponse;
-  return res;
+    const res = await waitForResponse;
+    return res;
+  } catch (err) {
+    console.log('sendToBackgroundV2 error', err);
+  }
 };
 
-const proxiedRequestModule = new Proxy(requestModule, {
-  get(target, propKey, receiver) {
-    // console.log('accessing proxied module', target, propKey, receiver);
-    const origMethod = target[propKey as keyof typeof requestModule];
+const cloneObject = (obj: any) => {
+  const clone = {};
 
-    if (getRuntime()?.includes('extension') && typeof origMethod === 'function') {
-      // The return function type is unknown because we don't know the exact signature of each function
-      return async function (...args: unknown[]) {
-        console.log(`Calling function ${String(propKey)} with arguments: ${args}`);
+  for (const key of Reflect.ownKeys(obj)) {
+    const descriptor = Object.getOwnPropertyDescriptor(obj, key);
+    if (descriptor) {
+      // Make the property writable and configurable
+      Object.defineProperty(clone, key, {
+        ...descriptor,
+        configurable: true,
+        writable: true,
+      });
+    }
+  }
+
+  return clone;
+};
+
+const wrapFunctions = (module: any) => {
+  const wrappedModule: any = {};
+
+  for (const key of Reflect.ownKeys(module)) {
+    const origMethod = module[key];
+
+    const runtime = getRuntime();
+    if (runtime.includes('extension') && typeof origMethod === 'function') {
+      wrappedModule[key] = async function (...args: unknown[]) {
+        console.log(`Calling function ${String(key)} with arguments: ${args}`);
 
         try {
           const res = await sendToBackgroundV2({
-            name: String(propKey),
+            name: String(key),
             type: 'apiRequest',
             source: getRuntime(),
-            target,
+            target: module,
             args,
           });
 
@@ -73,11 +97,16 @@ const proxiedRequestModule = new Proxy(requestModule, {
           };
         }
       };
+    } else {
+      wrappedModule[key] = origMethod;
     }
+  }
 
-    // If it's not a function, return the property as is
-    return origMethod;
-  },
-});
+  return wrappedModule as typeof requestModule;
+};
 
-export default proxiedRequestModule;
+const wrappedRequestModule = () => {
+  return wrapFunctions(requestModule);
+};
+
+export default wrappedRequestModule;

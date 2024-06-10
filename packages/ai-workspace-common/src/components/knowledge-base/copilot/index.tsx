@@ -24,7 +24,7 @@ import { ConvListModal } from './conv-list-modal';
 import { KnowledgeBaseListModal } from './knowledge-base-list-modal';
 
 // requests
-import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 // state
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
@@ -39,8 +39,9 @@ import { localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/
 import { OutputLocaleList } from '@refly-packages/ai-workspace-common/components/output-locale-list';
 import { useTranslation } from 'react-i18next';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
-import { SourceListModal } from '../../source-list/source-list-modal';
-import { useResizeCopilot } from '../../../hooks/use-resize-copilot';
+import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
+import { useResizeCopilot } from '@refly-packages/ai-workspace-common/hooks/use-resize-copilot';
+import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
 
 interface AICopilotProps {}
 
@@ -55,6 +56,7 @@ export const AICopilot = (props: AICopilotProps) => {
   const [isFetching, setIsFetching] = useState(false);
   const { runTask } = useBuildThreadAndRun();
   const searchStateStore = useSearchStateStore();
+  const messageStateStore = useMessageStateStore();
 
   const convId = searchParams.get('convId');
   const { resetState } = useResetState();
@@ -73,6 +75,7 @@ export const AICopilot = (props: AICopilotProps) => {
   const handleNewTempConv = () => {
     conversationStore.resetState();
     chatStore.resetState();
+    messageStateStore.resetState();
   };
 
   const handleNewOpenConvList = () => {
@@ -81,17 +84,17 @@ export const AICopilot = (props: AICopilotProps) => {
 
   const handleGetThreadMessages = async (convId: string) => {
     // 异步操作
-    const { data: res, error } = await client.getConversationDetail({
+    const { data: res, error } = await getClient().getConversationDetail({
       path: {
         convId,
       },
     });
 
+    console.log('getThreadMessages', res, error);
+
     if (error) {
       throw error;
     }
-
-    console.log('getThreadMessages', res);
 
     // 清空之前的状态
     resetState();

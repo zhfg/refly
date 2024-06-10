@@ -1,6 +1,9 @@
 import ReactDOM from 'react-dom/client';
+import { defineContentScript } from 'wxt/sandbox';
+import { createShadowRootUi } from 'wxt/client';
 
 import App from './App';
+import { setRuntime } from '@refly/ai-workspace-common/utils/env';
 
 export default defineContentScript({
   matches: ['<all_urls>'],
@@ -8,8 +11,10 @@ export default defineContentScript({
   cssInjectionMode: 'ui',
 
   async main(ctx) {
+    setRuntime('extension-csui');
+
     console.log('ctx', ctx);
-    // 3. Define your UI
+    // 3. Define your UI`
     const ui = await createShadowRootUi(ctx, {
       name: 'refly-main-app',
       position: 'inline',

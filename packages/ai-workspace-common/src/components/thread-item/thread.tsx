@@ -15,7 +15,7 @@ import { buildSessions } from '@refly-packages/ai-workspace-common/utils/session
 import { ThreadItem } from '@refly-packages/ai-workspace-common/components/thread-item/thread-item';
 import { Header } from './header';
 // request
-import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // styles
 import './thread-item.scss';
 import { useWeblinkStore } from '@refly-packages/ai-workspace-common/stores/weblink';
@@ -46,7 +46,7 @@ export const Thread = () => {
 
   const handleGetThreadMessages = async (threadId: string) => {
     // 异步操作
-    const { data: res, error } = await client.getConversationDetail({
+    const { data: res, error } = await getClient().getConversationDetail({
       path: {
         convId: threadId,
       },

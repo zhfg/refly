@@ -4,7 +4,7 @@ import { useState } from 'react';
 // styles
 import './index.scss';
 // request
-import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { Digest, Feed, Conversation as Thread } from '@refly/openapi-schema';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
@@ -51,7 +51,7 @@ export const AskFollowUpModal = (props: SummaryModalProps) => {
       };
 
       // 创建新会话
-      const { data: res, error } = await client.createConversation({
+      const { data: res, error } = await getClient().createConversation({
         body: {
           ...newConversationPayload,
           cid: aigcContent?.cid,

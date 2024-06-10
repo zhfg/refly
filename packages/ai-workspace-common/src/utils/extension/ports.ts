@@ -1,7 +1,6 @@
-import { Runtime, browser } from 'wxt/browser';
-
-let portStore: { [key: string]: Runtime.Port } = {};
-export const getPort = (name: string) => {
+let portStore: { [key: string]: any } = {};
+export const getPort = async (name: string) => {
+  const { browser } = await import('wxt/browser');
   if (portStore?.[name]) return;
 
   const port = browser.runtime.connect({
@@ -17,5 +16,6 @@ export const removePort = (name: string) => {
 
   if (port) {
     port.disconnect();
+    delete portStore[name];
   }
 };

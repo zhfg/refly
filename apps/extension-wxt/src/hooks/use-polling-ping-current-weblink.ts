@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { IndexStatus, WebLinkItem } from '@/components/weblink-list/types';
-import { useSiderStore } from '@/stores/sider';
+import { useSiderStore } from '@refly/ai-workspace-common/stores/sider';
 import { useUserStore } from '@/stores/user';
 import { useWeblinkStore } from '@/stores/weblink';
 import { buildCurrentWeblink } from '@/utils/weblink';

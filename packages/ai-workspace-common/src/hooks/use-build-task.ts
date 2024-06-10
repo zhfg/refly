@@ -248,12 +248,12 @@ export const useBuildTask = () => {
     }
   };
 
-  const bindExtensionPorts = () => {
+  const bindExtensionPorts = async () => {
     console.log('bindExtensionPorts');
     if (streamingChatPortRef.current) return;
     console.log('alreadybindExtensionPorts');
 
-    streamingChatPortRef.current = getPort('streaming-chat' as never);
+    streamingChatPortRef.current = await getPort('streaming-chat' as never);
     streamingChatPortRef.current?.onMessage.addListener(handleStreamingMessage);
   };
 
@@ -266,11 +266,11 @@ export const useBuildTask = () => {
     removePort?.('streaming-chat' as never);
   };
 
-  const handleSendMessageFromExtension = (payload: { body: any }) => {
+  const handleSendMessageFromExtension = async (payload: { body: any }) => {
     // 先 unbind
     unbindExtensionPorts();
     // 再 bind
-    bindExtensionPorts();
+    await bindExtensionPorts();
 
     // 生成任务
     streamingChatPortRef.current?.postMessage({
