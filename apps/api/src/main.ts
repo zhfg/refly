@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import * as Sentry from '@sentry/node';
 import { nodeProfilingIntegration } from '@sentry/profiling-node';
 import { Logger } from 'nestjs-pino';
+import { WsAdapter } from '@nestjs/platform-ws';
 
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
@@ -43,6 +44,7 @@ async function bootstrap() {
   app.use(helmet());
   app.enableCors();
   app.use(cookieParser());
+  app.useWebSocketAdapter(new WsAdapter(app));
   app.useGlobalFilters(new GlobalExceptionFilter());
   app.setGlobalPrefix('/v1', { exclude: ['/'] });
 

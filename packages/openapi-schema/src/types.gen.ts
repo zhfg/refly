@@ -31,7 +31,7 @@ export type ResourceMeta = WeblinkMeta;
 /**
  * Resource type
  */
-export type ResourceType = 'weblink';
+export type ResourceType = 'weblink' | 'note';
 
 export type ResourceListItem = {
   /**

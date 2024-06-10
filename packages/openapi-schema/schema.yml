@@ -598,6 +598,7 @@ components:
       description: Resource type
       enum:
         - weblink
+        - note
     ResourceListItem:
       type: object
       required:
