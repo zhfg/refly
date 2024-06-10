@@ -7,6 +7,7 @@ import { KnowledgeService } from './knowledge.service';
 import { CommonModule } from '../common/common.module';
 import { RAGModule } from '../rag/rag.module';
 import { ResourceProcessor } from './knowledge.processor';
+import { NoteWsGateway } from './knowledge.gateway';
 import { QUEUE_RESOURCE } from '../utils';
 
 @Module({
@@ -17,6 +18,6 @@ import { QUEUE_RESOURCE } from '../utils';
     BullModule.registerQueue({ name: QUEUE_RESOURCE }),
   ],
   controllers: [KnowledgeController],
-  providers: [KnowledgeService, ResourceProcessor],
+  providers: [KnowledgeService, ResourceProcessor, NoteWsGateway],
 })
 export class KnowledgeModule {}
