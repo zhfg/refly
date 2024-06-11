@@ -1,9 +1,10 @@
 import { createClient, client } from '@hey-api/client-fetch';
 import * as requestModule from '@refly/openapi-schema';
 
-import { IRuntime, getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { getAuthTokenFromCookie } from '@refly-packages/ai-workspace-common/utils/request';
 import { getServerOrigin } from '../utils/url';
+import { sendToBackground } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 
 createClient({ baseUrl: getServerOrigin() + '/v1' });
 
@@ -15,59 +16,6 @@ client.interceptors.request.use((request) => {
   }
   return request;
 });
-
-export type BackgroundMsgType = 'apiRequest' | 'others' | 'registerEvent';
-
-export interface BackgroundMessage {
-  name: string;
-  body?: any;
-  type: BackgroundMsgType;
-  source: IRuntime;
-  target: any;
-  args: any;
-}
-
-export const sendToBackgroundV2 = async (message: BackgroundMessage) => {
-  try {
-    const { browser } = await import('wxt/browser');
-    const waitForResponse = new Promise((resolve) => {
-      const listener = (response: any) => {
-        console.log('sendToBackgroundV2', response);
-        if (response?.name === message?.name) {
-          browser.runtime.onMessage.removeListener(listener);
-
-          resolve(response?.body);
-        }
-      };
-
-      browser.runtime.onMessage.addListener(listener);
-    });
-    await browser.runtime.sendMessage(message);
-
-    const res = await waitForResponse;
-    return res;
-  } catch (err) {
-    console.log('sendToBackgroundV2 error', err);
-  }
-};
-
-const cloneObject = (obj: any) => {
-  const clone = {};
-
-  for (const key of Reflect.ownKeys(obj)) {
-    const descriptor = Object.getOwnPropertyDescriptor(obj, key);
-    if (descriptor) {
-      // Make the property writable and configurable
-      Object.defineProperty(clone, key, {
-        ...descriptor,
-        configurable: true,
-        writable: true,
-      });
-    }
-  }
-
-  return clone;
-};
 
 const wrapFunctions = (module: any) => {
   const wrappedModule: any = {};
@@ -81,7 +29,7 @@ const wrapFunctions = (module: any) => {
         console.log(`Calling function ${String(key)} with arguments: ${args}`);
 
         try {
-          const res = await sendToBackgroundV2({
+          const res = await sendToBackground({
             name: String(key),
             type: 'apiRequest',
             source: getRuntime(),

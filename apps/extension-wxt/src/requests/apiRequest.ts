@@ -1,5 +1,4 @@
 import type { HandlerRequest, HandlerResponse } from '@/types/request';
-import { sendToBackground } from '@/utils/extension/messaging';
 
 export const apiRequest = async <TRequest = any, TResponse = any>(
   req: HandlerRequest<TRequest>,
@@ -7,11 +6,7 @@ export const apiRequest = async <TRequest = any, TResponse = any>(
   console.log(req.body);
 
   try {
-    const res = await sendToBackground({
-      ...req,
-    });
-
-    return res;
+    return null as any;
   } catch (err) {
     return {
       success: false,
