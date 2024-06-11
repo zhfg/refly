@@ -15,10 +15,8 @@ import {
 import {
   CHANNEL_FINALIZE_RESOURCE,
   QUEUE_RESOURCE,
-  cleanMarkdownForIngest,
   genCollectionID,
   genResourceID,
-  genResourceUuid,
 } from '../utils';
 import { FinalizeResourceParam } from './knowledge.dto';
 import { pick, omit } from '../utils';
@@ -64,6 +62,7 @@ export class KnowledgeService {
       ]),
       resources: data.resources.map((r) => ({
         ...omit(r, ['id', 'userId', 'deletedAt']),
+        collabEnabled: !!r.stateStorageKey,
         createdAt: r.createdAt.toJSON(),
         updatedAt: r.updatedAt.toJSON(),
         data: JSON.parse(r.meta),
@@ -153,6 +152,7 @@ export class KnowledgeService {
     });
     const detail: ResourceDetail & { userId: number } = {
       ...omit(resource, ['id']),
+      collabEnabled: !!resource.stateStorageKey,
       createdAt: resource.createdAt.toJSON(),
       updatedAt: resource.updatedAt.toJSON(),
       data: JSON.parse(resource.meta),
@@ -178,6 +178,11 @@ export class KnowledgeService {
       );
     }
 
+    if (param.readOnly === undefined) {
+      param.readOnly = param.resourceType === 'weblink';
+    }
+
+    let stateStorageKey: string;
     if (param.resourceType === 'weblink') {
       if (!param.data) {
         throw new BadRequestException('data is required');
@@ -187,6 +192,9 @@ export class KnowledgeService {
         throw new BadRequestException('url or linkId is required');
       }
       param.title ||= title;
+    } else if (param.resourceType === 'note') {
+      stateStorageKey = `state/${param.resourceId}`;
+      await this.minio.uploadData(stateStorageKey, Buffer.from([]));
     } else {
       throw new BadRequestException('Invalid resource type');
     }
@@ -197,8 +205,10 @@ export class KnowledgeService {
         resourceType: param.resourceType,
         meta: JSON.stringify(param.data),
         storageKey: param.storageKey,
+        stateStorageKey,
         userId: user.id,
         isPublic: param.isPublic,
+        readOnly: param.readOnly,
         title: param.title || 'Untitled',
         indexStatus: 'processing',
         collections: {
@@ -250,21 +260,25 @@ export class KnowledgeService {
       param.content = (await this.minio.downloadData(param.storageKey)).toString();
     }
 
+    // initialize Yjs doc from resource markdown
+    // const stateStorageKey = `state/${resourceId}`;
+    // await this.minio.uploadData(stateStorageKey, Buffer.from(markdown2StateUpdate(param.content)));
+
     // TODO: 减少不必要的重复插入
 
     // ensure the document is for ingestion use
-    const chunks = await this.ragService.indexContent({
-      pageContent: cleanMarkdownForIngest(param.content),
-      metadata: { url, title },
-    });
+    // const chunks = await this.ragService.indexContent({
+    //   pageContent: cleanMarkdownForIngest(param.content),
+    //   metadata: { url, title },
+    // });
 
-    chunks.forEach((chunk, index) => {
-      chunk.id = genResourceUuid(`${resourceId}-${index}`);
-      chunk.resourceId = resourceId;
-      chunk.collectionId = collectionId;
-    });
+    // chunks.forEach((chunk, index) => {
+    //   chunk.id = genResourceUuid(`${resourceId}-${index}`);
+    //   chunk.resourceId = resourceId;
+    //   chunk.collectionId = collectionId;
+    // });
 
-    await this.ragService.saveDataForUser(user, { chunks });
+    // await this.ragService.saveDataForUser(user, { chunks });
 
     this.logger.log(
       `save resource segments for user ${user.uid} success, resourceId: ${resourceId}`,
@@ -273,7 +287,7 @@ export class KnowledgeService {
     await this.prisma.resource.update({
       where: { resourceId, userId: user.id },
       data: {
-        storageKey: storageKey,
+        storageKey: param.storageKey,
         wordCount: readingTime(param.content).words,
         indexStatus: 'finish',
         meta: JSON.stringify({

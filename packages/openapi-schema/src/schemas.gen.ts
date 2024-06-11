@@ -45,7 +45,17 @@ export const $ResourceType = {
 
 export const $ResourceListItem = {
   type: 'object',
-  required: ['resourceId', 'resourceType', 'title', 'isPublic', 'indexStatus', 'createdAt', 'updatedAt'],
+  required: [
+    'resourceId',
+    'resourceType',
+    'title',
+    'isPublic',
+    'readOnly',
+    'collabEnabled',
+    'indexStatus',
+    'createdAt',
+    'updatedAt',
+  ],
   properties: {
     resourceId: {
       type: 'string',
@@ -81,6 +91,16 @@ export const $ResourceListItem = {
     isPublic: {
       type: 'boolean',
       description: 'Whether this resource is public',
+      default: false,
+    },
+    readOnly: {
+      type: 'boolean',
+      description: 'Whether this resource is read-only',
+      default: false,
+    },
+    collabEnabled: {
+      type: 'boolean',
+      description: 'Whether this resource is collaborative',
       default: false,
     },
     createdAt: {
@@ -1036,6 +1056,16 @@ export const $UpsertResourceRequest = {
     isPublic: {
       type: 'boolean',
       description: 'Whether this resource is public',
+      default: false,
+    },
+    readOnly: {
+      type: 'boolean',
+      description: 'Whether this resource is read-only',
+      default: false,
+    },
+    collabEnabled: {
+      type: 'boolean',
+      description: 'Whether this resource is collaborative',
       default: false,
     },
   },
