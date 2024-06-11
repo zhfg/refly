@@ -1,6 +1,5 @@
 import * as _Sentry from '@sentry/react';
 import { useEffect, Suspense } from 'react';
-import { MemoryRouter } from '@refly/ai-workspace-common/utils/router';
 // 使用方法
 import { useSwitchTheme } from '@/hooks/use-switch-theme';
 
@@ -34,6 +33,8 @@ import { getPopupContainer } from '@refly/ai-workspace-common/utils/ui';
 import { checkBrowserArc } from '@/utils/browser';
 // 设置 runtime 环境
 import { getEnv, setRuntime } from '@refly/ai-workspace-common/utils/env';
+import { useSyncWeblinkResourceMeta } from '@/hooks/content-scripts/use-get-weblink-resource-meta';
+import { useMockInAppResource } from '@/hooks/use-mock-in-app-resource';
 const Sentry = _Sentry;
 
 if (process.env.NODE_ENV !== 'development') {
@@ -69,6 +70,10 @@ const App = () => {
   useProcessLoginNotify();
   // 用于登录状态下，Ping 网页前置的处理状态
   usePollingPingCurrentWeblink();
+  // 在挂载时记录当前资源,Only for Content Script
+  useSyncWeblinkResourceMeta();
+  // 在网页时，模拟在知识库的资源选中状态
+  useMockInAppResource();
 
   // 设置 Message 通知的 container
   useEffect(() => {
@@ -100,9 +105,7 @@ const App = () => {
         <span>⌘B</span>
       </div> */}
         <div id="refly-app-main" className={siderStore.showSider ? 'main active' : 'main'}>
-          <MemoryRouter>
-            <AppRouter />
-          </MemoryRouter>
+          <AppRouter />
         </div>
       </div>
     </Suspense>

@@ -10,12 +10,13 @@ import { useTranslation } from 'react-i18next';
 import { Message as message } from '@arco-design/web-react';
 import { useSiderStore } from '@refly/ai-workspace-common/stores/sider';
 import { mapDefaultLocale } from '@/utils/locale';
-import { storage } from 'wxt/storage';
+import { storage } from '@refly/ai-workspace-common/utils/storage';
 import { useStorage } from './use-storage';
 // request
 import getClient from '@refly/ai-workspace-common/requests/proxiedRequest';
 import { useExtensionMessage } from './use-extension-message';
 import { checkBrowserArc } from '@/utils/browser';
+import { getRuntime } from '@refly/ai-workspace-common/utils/env';
 
 interface ExternalLoginPayload {
   name: string;
@@ -218,7 +219,7 @@ export const useGetUserSettings = () => {
 
   // 收到消息之后，关闭窗口，保活检查
   const handleExtensionMessage = (request: any) => {
-    if (request?.name === 'refly-status-check') {
+    if (request?.name === 'refly-status-check' && getRuntime() === 'extension-csui') {
       getLoginStatus();
       checkBrowserArc();
     }

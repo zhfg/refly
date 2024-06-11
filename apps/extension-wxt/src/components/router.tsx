@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useMatch } from '@refly/ai-workspace-common/utils/router';
 import classNames from 'classnames';
-import { Routing } from '@/routes/index';
 import { IconSearch, IconStorage } from '@arco-design/web-react/icon';
 // stores
 import { useUserStore } from '@/stores/user';
@@ -10,7 +9,6 @@ import { useSelectedMark } from '@/hooks/use-selected-mark';
 import { useTranslation } from 'react-i18next';
 import { useGetUserSettings } from '@/hooks/use-get-user-settings';
 import { LOCALE } from '@/types';
-import { useProcessStatusCheck } from '@/hooks/use-process-status-check';
 // components
 import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 import { AICopilot } from '@refly/ai-workspace-common/components/knowledge-base/copilot';
@@ -55,7 +53,6 @@ export const ContentRouter = (props: ContentRouterProps) => {
   // 这里处理 user 登录和状态管理
   useGetUserSettings();
   // 进行保活检查
-  useProcessStatusCheck();
 
   // TODO: 国际化相关内容
   useEffect(() => {

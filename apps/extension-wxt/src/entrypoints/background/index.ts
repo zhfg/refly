@@ -1,6 +1,6 @@
 import { onExternalMessage } from './events/externalMessage';
 import { onActivated } from './events/activated';
-import { onMessage } from './events/message';
+import { onMessage } from './events/messages/index';
 import { onPort } from './events/ports';
 import { setRuntime } from '@refly/ai-workspace-common/utils/env';
 import { browser } from 'wxt/browser';

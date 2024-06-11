@@ -7,7 +7,6 @@ import { LOCALE } from '@/types';
 import { type OutputLocale, enLocale, localeToLanguageName } from '@/utils/i18n';
 // styles
 import './index.scss';
-import { storage } from 'wxt/storage';
 import { apiRequest } from '../../requests/apiRequest';
 
 export const OutputLocaleList = (props: { children: any }) => {

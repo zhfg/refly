@@ -95,7 +95,14 @@ export const ContextStateDisplay = () => {
               </Tag>
             </div>
           </div>
-          <div className="context-state-card-footer"></div>
+          <div className="context-state-card-footer">
+            <Button type="primary" size="mini">
+              快速总结
+            </Button>
+            <Button type="primary" size="mini" style={{ marginLeft: 12 }}>
+              保存到知识库
+            </Button>
+          </div>
         </div>
       ) : null}
       {showKnowledgeBaseContext ? (

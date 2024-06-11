@@ -5,6 +5,7 @@ import { ChatMessage } from '@refly/openapi-schema';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useListenToSelection } from './use-listen-to-selection';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 const checkShowRelatedQuestion = (messsages: ChatMessage[] = []) => {
   const message = messsages?.[messsages.length - 1];
@@ -48,7 +49,8 @@ export const useCopilotContextState = () => {
   const showRelatedQuestions = checkShowRelatedQuestion(chatStore?.messages);
 
   const calcContextCardHeight = () => {
-    const elem = document.querySelector('.ai-copilot-context-state-display-container');
+    const container = getPopupContainer();
+    const elem = container?.querySelector('.ai-copilot-context-state-display-container');
     const height = elem?.clientHeight || 0;
     setContextCardHeight(height);
   };

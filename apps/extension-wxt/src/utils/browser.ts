@@ -1,5 +1,6 @@
-import { storage } from 'wxt/storage';
-import { sendToBackground } from './extension/messaging';
+import { getRuntime } from '@refly/ai-workspace-common/utils/env';
+import { sendToBackground } from '@refly/ai-workspace-common/utils/extension/messaging';
+import { storage } from '@refly/ai-workspace-common/utils/storage';
 
 export const checkBrowserArc = async () => {
   try {
@@ -21,6 +22,7 @@ export const checkBrowserArc = async () => {
         body: {
           isArc: false,
         },
+        source: getRuntime(),
       });
     }
   } catch (err) {

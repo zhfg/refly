@@ -24,8 +24,9 @@ export const quickActionList = ['summary'];
  * /knowledge-base 打开的是一体的，通过 query 参数显示 collection、note 或 copilot，都属于 knowledge base 里面的资源
  */
 const KnowledgeLibraryLayout = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const kbId = searchParams.get('kbId');
+  const resId = searchParams.get('resId');
   const userStore = useUserStore();
   const { t } = useTranslation();
 
@@ -52,36 +53,11 @@ const KnowledgeLibraryLayout = () => {
     <ErrorBoundary>
       <div className="workspace-container" style={{}}>
         <div className="workspace-inner-container">
-          <PanelGroup direction="horizontal" className="workspace-panel-container">
-            {kbId ? (
-              <>
-                <Panel
-                  minSize={50}
-                  order={1}
-                  className="workspace-left-assist-panel"
-                  key="workspace-left-assist-panel"
-                  id="workspace-left-assist-panel"
-                >
-                  <KnowledgeBaseDetail />
-                </Panel>
-                <PanelResizeHandle
-                  className="workspace-panel-resize"
-                  key="workspace-panel-resize"
-                  id="workspace-panel-resize"
-                />
-              </>
-            ) : null}
-            <Panel
-              order={3}
-              className="workspace-content-panel"
-              {...copilotStyle}
-              minSize={minSize}
-              key="workspace-content-panel"
-              id="workspace-content-panel"
-            >
+          <div className="workspace-panel-container">
+            <div className="workspace-content-panel">
               <AICopilot />
-            </Panel>
-          </PanelGroup>
+            </div>
+          </div>
         </div>
       </div>
     </ErrorBoundary>
