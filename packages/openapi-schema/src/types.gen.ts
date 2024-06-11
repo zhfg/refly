@@ -31,7 +31,7 @@ export type ResourceMeta = WeblinkMeta;
 /**
  * Resource type
  */
-export type ResourceType = 'weblink';
+export type ResourceType = 'weblink' | 'note';
 
 export type ResourceListItem = {
   /**
@@ -67,6 +67,14 @@ export type ResourceListItem = {
    * Whether this resource is public
    */
   isPublic: boolean;
+  /**
+   * Whether this resource is read-only
+   */
+  readOnly: boolean;
+  /**
+   * Whether this resource is collaborative
+   */
+  collabEnabled: boolean;
   /**
    * Collection creation time
    */
@@ -782,6 +790,14 @@ export type UpsertResourceRequest = {
    * Whether this resource is public
    */
   isPublic?: boolean;
+  /**
+   * Whether this resource is read-only
+   */
+  readOnly?: boolean;
+  /**
+   * Whether this resource is collaborative
+   */
+  collabEnabled?: boolean;
 };
 
 export type UpsertResourceResponse = BaseResponse & {

@@ -598,6 +598,7 @@ components:
       description: Resource type
       enum:
         - weblink
+        - note
     ResourceListItem:
       type: object
       required:
@@ -605,6 +606,8 @@ components:
         - resourceType
         - title
         - isPublic
+        - readOnly
+        - collabEnabled
         - indexStatus
         - createdAt
         - updatedAt
@@ -636,6 +639,14 @@ components:
         isPublic:
           type: boolean
           description: Whether this resource is public
+          default: false
+        readOnly:
+          type: boolean
+          description: Whether this resource is read-only
+          default: false
+        collabEnabled:
+          type: boolean
+          description: Whether this resource is collaborative
           default: false
         createdAt:
           type: string
@@ -1377,6 +1388,14 @@ components:
         isPublic:
           type: boolean
           description: Whether this resource is public
+          default: false
+        readOnly:
+          type: boolean
+          description: Whether this resource is read-only
+          default: false
+        collabEnabled:
+          type: boolean
+          description: Whether this resource is collaborative
           default: false
     UpsertResourceResponse:
       allOf:

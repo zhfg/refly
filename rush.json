@@ -35,6 +35,11 @@
       "reviewCategory": "packages"
     },
     {
+      "packageName": "@refly/editor-common",
+      "projectFolder": "packages/editor-common",
+      "reviewCategory": "packages"
+    },
+    {
       "packageName": "@refly/ai-workspace-common",
       "projectFolder": "packages/ai-workspace-common",
       "reviewCategory": "packages"
@@ -57,6 +62,11 @@
     {
       "packageName": "@refly/extension-v2",
       "projectFolder": "apps/extension-wxt",
+      "reviewCategory": "apps"
+    },
+    {
+      "packageName": "@refly/editor-playground",
+      "projectFolder": "apps/editor-playground",
       "reviewCategory": "apps"
     },
     {
