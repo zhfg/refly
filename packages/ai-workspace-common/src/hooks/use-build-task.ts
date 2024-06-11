@@ -249,27 +249,15 @@ export const useBuildTask = () => {
   };
 
   const bindExtensionPorts = async () => {
-    console.log('bindExtensionPorts');
-    if (streamingChatPortRef.current) return;
-    console.log('alreadybindExtensionPorts');
-
-    streamingChatPortRef.current = await getPort('streaming-chat' as never);
-    streamingChatPortRef.current?.onMessage.addListener(handleStreamingMessage);
-  };
-
-  // for extension
-  const unbindExtensionPorts = () => {
-    console.log('unbindExtensionPorts');
-    if (streamingChatPortRef?.current) return;
-
-    streamingChatPortRef.current?.onMessage?.removeListener?.(handleStreamingMessage);
-    removePort?.('streaming-chat' as never);
+    const portRes = await getPort('streaming-chat' as never);
+    if (portRes?.isNew || !streamingChatPortRef.current) {
+      streamingChatPortRef.current = portRes.port;
+      streamingChatPortRef.current?.onMessage?.removeListener?.(handleStreamingMessage);
+      streamingChatPortRef.current?.onMessage.addListener(handleStreamingMessage);
+    }
   };
 
   const handleSendMessageFromExtension = async (payload: { body: any }) => {
-    // 先 unbind
-    unbindExtensionPorts();
-    // 再 bind
     await bindExtensionPorts();
 
     // 生成任务
