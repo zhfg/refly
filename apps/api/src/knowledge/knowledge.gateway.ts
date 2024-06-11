@@ -39,12 +39,11 @@ export class NoteWsGateway implements OnGatewayConnection {
             try {
               return await this.minio.downloadData(context.resource.stateStorageKey);
             } catch (err) {
-              this.logger.log(`fetch state failed for ${context}, err: ${err.stack}`);
+              this.logger.error(`fetch state failed for ${context}, err: ${err.stack}`);
               return null;
             }
           },
           store: async ({ state, context }: { state: Buffer; context: NoteContext }) => {
-            console.log('store context', context);
             await this.minio.uploadData(context.resource.stateStorageKey, state);
           },
         }),
