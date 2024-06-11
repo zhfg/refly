@@ -3,7 +3,7 @@ import { Button } from '@arco-design/web-react';
 import EmptySVG from '@/assets/digest/empty.svg';
 // styles
 import './index.scss';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import { getCurrentDateInfo } from '@refly-packages/ai-workspace-common/utils/time';
 import { useTranslation } from 'react-i18next';
 

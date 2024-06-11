@@ -5,7 +5,7 @@ import { useConversationStore } from '@refly-packages/ai-workspace-common/stores
 import { buildConversation } from '@refly-packages/ai-workspace-common/utils/conversation';
 import { useResetState } from './use-reset-state';
 import { useTaskStore } from '@refly-packages/ai-workspace-common/stores/task';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 // 类型
 import { LOCALE } from '@refly/constants';
@@ -20,7 +20,7 @@ import {
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { useWeblinkStore } from '@refly-packages/ai-workspace-common/stores/weblink';
 // request
-import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useTranslation } from 'react-i18next';
 import { OutputLocale } from '@refly-packages/ai-workspace-common/utils/i18n';
@@ -85,7 +85,7 @@ export const useBuildThreadAndRun = () => {
     const newConversationPayload = buildConversation();
 
     // 创建新会话
-    const { data: res, error } = await client.createConversation({
+    const { data: res, error } = await getClient().createConversation({
       body: { ...newConversationPayload, locale: localSettings.outputLocale },
     });
 

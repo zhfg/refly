@@ -3,12 +3,12 @@ import { Button, Divider, Radio, Skeleton, Message as message } from '@arco-desi
 import { IconArchive, IconBulb } from '@arco-design/web-react/icon';
 
 import './header.scss';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import { getCurrentDateInfo } from '@refly-packages/ai-workspace-common/utils/time';
 import { useDigestTopicStore } from '@refly-packages/ai-workspace-common/stores/digest-topics';
 import { useEffect, useState } from 'react';
 // request
-import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // utils
 import { delay } from '@refly-packages/ai-workspace-common/utils/delay';
 import { useTranslation } from 'react-i18next';
@@ -46,7 +46,7 @@ export const DigestHeader = (props: DigestHeaderProps) => {
       const { topicList } = useDigestTopicStore.getState();
       if (topicList?.length > 0) return;
 
-      const { data: newRes, error } = await client.getUserTopics();
+      const { data: newRes, error } = await getClient().getUserTopics();
 
       if (error) {
         throw error;

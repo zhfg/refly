@@ -5,7 +5,7 @@ import { List, Skeleton, Message as message, Typography } from '@arco-design/web
 // stores
 import { useThreadStore, type Thread } from '@/stores/thread';
 import { IconClockCircle, IconMessage, IconRightCircle } from '@arco-design/web-react/icon';
-import { useNavigate, useMatch } from 'react-router-dom';
+import { useNavigate, useMatch } from '@refly/ai-workspace-common/utils/router';
 // utils
 import { time } from '@/utils/time';
 // components

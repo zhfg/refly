@@ -4,7 +4,7 @@
 
 import { apiRequest } from '@/requests/apiRequest';
 import { useState, useEffect } from 'react';
-import { useMatch } from 'react-router-dom';
+import { useMatch } from '@refly/ai-workspace-common/utils/router';
 
 export function useWebLinkIndexed() {
   // 标识此网页是否被索引的状态

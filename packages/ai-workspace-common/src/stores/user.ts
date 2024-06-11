@@ -4,6 +4,7 @@ import type {} from '@redux-devtools/extension';
 import { LOCALE } from '@refly/constants';
 import { UserSettings } from '@refly/openapi-schema';
 import { OutputLocale } from '@refly-packages/ai-workspace-common/utils/i18n';
+import { IRuntime } from '../utils/env';
 
 export interface LocalSettings {
   uiLocale: LOCALE; // UI 相关的
@@ -18,6 +19,8 @@ export interface UserState {
   token?: string;
   localSettings: LocalSettings; // 在获取 user 信息的时候记录这个 settings，并 host 到 localStorage，每次保存更新，类似 userProfile
 
+  runtime: IRuntime;
+
   // login modal
   loginModalVisible?: boolean;
 
@@ -27,6 +30,7 @@ export interface UserState {
   setToken: (val?: string) => void;
   setLoginModalVisible: (val: boolean) => void;
   setLocalSettings: (val: LocalSettings) => void;
+  setRuntime: (val: IRuntime) => void;
   resetState: () => void;
 }
 
@@ -55,6 +59,7 @@ export const defaultState = {
   isCheckingLoginStatus: false,
   userProfile: undefined,
   token: '',
+  runtime: 'web' as IRuntime,
   loginModalVisible: false,
   localSettings: { ...defaultLocalSettings }, // 默认使用浏览器的 navigator 获取语言，插件里面使用 chrome.i18n.detectLanguage
 };
@@ -68,6 +73,7 @@ export const useUserStore = create<UserState>()(
     setToken: (val?: string) => set((state) => ({ ...state, token: val })),
     setLoginModalVisible: (val: boolean) => set((state) => ({ ...state, loginModalVisible: val })),
     setLocalSettings: (val: LocalSettings) => set((state) => ({ ...state, localSettings: val })),
+    setRuntime: (val: IRuntime) => set((state) => ({ ...state, runtime: val })),
     resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),
 );

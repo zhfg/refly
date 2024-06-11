@@ -11,7 +11,7 @@ import './index.scss';
 // types
 import { useUserStore } from '@refly/ai-workspace-common/stores/user';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from '@refly/ai-workspace-common/utils/router';
 import { useResizePanel } from '@refly/ai-workspace-common/hooks/use-resize-panel';
 import { ErrorBoundary } from '@sentry/react';
 

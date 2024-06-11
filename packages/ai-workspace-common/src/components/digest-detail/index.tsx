@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { Skeleton, Message as message } from '@arco-design/web-react';
 import { Helmet } from 'react-helmet';
 
@@ -11,7 +11,7 @@ import { DigestDetailContent } from './digest-detail-content';
 import { Header } from './header';
 import { AskFollowUpModal } from '@refly-packages/ai-workspace-common/components/ask-follow-up-modal/index';
 // request
-import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // styles
 import './digest-detail.scss';
 import { useTranslation } from 'react-i18next';
@@ -32,7 +32,7 @@ export const DigestTail = () => {
   const handleGetDetail = async (digestId: string) => {
     setIsFetching(true);
     try {
-      const { data: newRes, error } = await client.getContentDetail({
+      const { data: newRes, error } = await getClient().getContentDetail({
         path: {
           cid: digestId,
         },

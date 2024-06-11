@@ -1,7 +1,7 @@
 import React, { type Dispatch, useEffect, useRef, useState } from 'react';
 import { reflyEnv } from '@/utils/env';
 import hotKeys from 'hotkeys-js';
-import { useBuildTask } from './use-build-task';
+import { useBuildTask } from '@refly/ai-workspace-common/hooks/use-build-task';
 import { useChatStore } from '@/stores/chat';
 import { LANGUAGE, LOCALE, TASK_TYPE, type Source, type Task } from '@/types';
 import { buildChatTask } from '@/utils/task';

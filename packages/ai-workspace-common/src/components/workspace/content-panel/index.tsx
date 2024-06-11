@@ -6,7 +6,7 @@ import { ThreadLibrary } from '@refly-packages/ai-workspace-common/components/th
 
 // 自定义组件
 import { IconFolder, IconRobot } from '@arco-design/web-react/icon';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 
 const TabPanel = Tabs.TabPane;
 

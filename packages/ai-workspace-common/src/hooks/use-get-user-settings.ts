@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
-import { useMatch, useNavigate } from 'react-router-dom';
+import { useMatch, useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 
 // request
-import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { LocalSettings, defaultLocalSettings, useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 import { mapDefaultLocale } from '@refly-packages/ai-workspace-common/utils/locale';
@@ -28,7 +28,7 @@ export const useGetUserSettings = () => {
 
   const getLoginStatus = async () => {
     try {
-      const res = await client.getSettings();
+      const res = await getClient().getSettings();
       let { localSettings } = useUserStore.getState();
 
       console.log('loginStatus', res);

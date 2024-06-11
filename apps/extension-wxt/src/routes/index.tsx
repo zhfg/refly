@@ -1,4 +1,4 @@
-import { Route, Routes, useMatch } from 'react-router-dom';
+import { Route, Routes, useMatch } from '@refly/ai-workspace-common/utils/router';
 
 // 页面
 import KnowledgeBase from '@/pages/knowledge-base';
@@ -10,7 +10,6 @@ import { LOCALE } from '@refly/constants';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 // requests
-import { useProcessStatusCheck } from '@/hooks/use-process-status-check';
 import { useGetUserSettings } from '@/hooks/use-get-user-settings';
 
 export const AppRouter = () => {

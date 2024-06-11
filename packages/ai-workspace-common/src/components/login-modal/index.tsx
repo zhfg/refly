@@ -10,7 +10,7 @@ import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 
 // 静态资源
 import Logo from '@/assets/logo.svg';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import { safeParseJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 
 // styles

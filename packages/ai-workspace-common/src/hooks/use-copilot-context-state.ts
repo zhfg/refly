@@ -3,7 +3,7 @@ import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/store
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { ChatMessage } from '@refly/openapi-schema';
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useListenToSelection } from './use-listen-to-selection';
 
 const checkShowRelatedQuestion = (messsages: ChatMessage[] = []) => {

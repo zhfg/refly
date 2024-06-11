@@ -3,7 +3,7 @@ import './index.scss';
 // components
 import { ConvList } from '@refly-packages/ai-workspace-common/components/conv-list';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 
 export const ThreadLibrary = () => {
   const { t } = useTranslation();

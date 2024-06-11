@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
-import { Storage } from "wxt/browser";
-import { storage } from "wxt/storage";
+import { useEffect, useState } from 'react';
+import { Storage } from 'wxt/browser';
+import { storage } from 'wxt/storage';
 
 export const useStorage = <T>(
   key: string,
   defaultVal: T,
-  location: "local" | "sync" | "session" | "managed" = "local"
+  location: 'local' | 'sync' | 'session' | 'managed' = 'local',
 ): [T, (val: T) => void] => {
   const [storageValue, setStorageValue] = useState<T>(defaultVal);
   const storageItem = storage.defineItem<T>(`${location}:${key}`, {
@@ -18,7 +18,10 @@ export const useStorage = <T>(
   };
 
   useEffect(() => {
-    storageItem.watch((newValue) => setStorageValue(newValue));
+    storageItem.watch((newValue) => {
+      console.log('new Syn storage value', newValue);
+      setStorageValue(newValue);
+    });
   }, []);
 
   return [storageValue, syncStorageValue];

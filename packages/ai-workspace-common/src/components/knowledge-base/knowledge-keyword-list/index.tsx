@@ -2,11 +2,11 @@ import { Button, Divider, Radio, Skeleton, Message as message } from '@arco-desi
 import { IconArchive, IconBulb } from '@arco-design/web-react/icon';
 
 import './index.scss';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import { useDigestTopicStore } from '@refly-packages/ai-workspace-common/stores/digest-topics';
 import { useEffect, useState } from 'react';
 // request
-import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // types
 import { Topic } from '@refly/openapi-schema';
 // utils
@@ -30,7 +30,7 @@ export const KnowledgeKeywordList = () => {
       const { topicList } = useDigestTopicStore.getState();
       if (topicList?.length > 0) return;
 
-      const { data: newRes, error } = await client.getUserTopics({});
+      const { data: newRes, error } = await getClient().getUserTopics({});
 
       if (error) {
         throw error;

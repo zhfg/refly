@@ -13,7 +13,7 @@ import { IndexStatus } from '@refly/openapi-schema';
 import { safeParseURL } from '@refly-packages/ai-workspace-common/utils/url';
 import { Markdown } from '../markdown';
 import classNames from 'classnames';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 
 export const ResourceItem = (props: {
   item: Partial<ResourceDetail>;

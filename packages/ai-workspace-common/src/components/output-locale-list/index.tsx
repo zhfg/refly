@@ -4,7 +4,7 @@ import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 import { LOCALE } from '@refly/constants';
 // request
-import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { OutputLocale, enLocale, localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/i18n';
 // styles
 import './index.scss';
@@ -25,7 +25,7 @@ export const OutputLocaleList = (props: { children: any }) => {
     localStorage.setItem('refly-local-settings', safeStringifyJSON({ ...localSettings, outputLocale: lng }));
 
     // 不阻塞写回用户配置
-    const { data: res, error } = await client.updateSettings({
+    const { data: res, error } = await getClient().updateSettings({
       body: { outputLocale: lng, uiLocale: localSettings.uiLocale },
     });
 

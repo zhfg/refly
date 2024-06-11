@@ -6,7 +6,7 @@ import { Helmet } from 'react-helmet';
 // styles
 import './index.scss';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import { getClientOrigin, getCookieOrigin, getExtensionId } from '@refly-packages/ai-workspace-common/utils/url';
 // components
 import { UILocaleList } from '@refly-packages/ai-workspace-common/components/ui-locale-list';

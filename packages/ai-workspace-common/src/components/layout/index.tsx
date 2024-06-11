@@ -5,7 +5,7 @@ import './index.scss';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 
 // request
-import { useLocation, useMatch, useNavigate } from 'react-router-dom';
+import { useLocation, useMatch, useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 
 // 组件
 import { LoginModal } from '@refly-packages/ai-workspace-common/components/login-modal/index';
@@ -18,6 +18,7 @@ import { useQuickSearchStateStore } from '@refly-packages/ai-workspace-common/st
 import { useBindCommands } from '@refly-packages/ai-workspace-common/hooks/use-bind-commands';
 import { useTranslation } from 'react-i18next';
 import { LOCALE } from '@refly/constants';
+import { setRuntime } from '../../utils/env';
 
 const Content = Layout.Content;
 

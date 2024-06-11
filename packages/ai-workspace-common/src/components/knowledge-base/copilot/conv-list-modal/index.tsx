@@ -6,7 +6,7 @@ import './index.scss';
 
 // 自定义组件
 import { ConvList } from '@refly-packages/ai-workspace-common/components/conv-list';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 

@@ -1,9 +1,9 @@
 import { useEffect, useTransition } from 'react';
-import { useMatch, useNavigate } from 'react-router-dom';
+import { useMatch, useNavigate } from '@refly/ai-workspace-common/utils/router';
 
 // request
 import { LocalSettings, defaultLocalSettings, useUserStore } from '@refly/ai-workspace-common/stores/user';
-import { safeParseJSON, safeStringifyJSON } from '@/utils/parse';
+import { safeParseJSON, safeStringifyJSON } from '@refly/ai-workspace-common/utils/parse';
 import { type User } from '@/types';
 import { LOCALE } from '@refly/constants';
 import { useTranslation } from 'react-i18next';
@@ -13,12 +13,13 @@ import { mapDefaultLocale } from '@/utils/locale';
 import { storage } from 'wxt/storage';
 import { useStorage } from './use-storage';
 // request
-import client from '@refly/ai-workspace-common/requests/proxiedRequest';
+import getClient from '@refly/ai-workspace-common/requests/proxiedRequest';
 import { useExtensionMessage } from './use-extension-message';
+import { checkBrowserArc } from '@/utils/browser';
 
 interface ExternalLoginPayload {
   name: string;
-  body: {
+  data: {
     status: 'success' | 'failed';
     token?: string;
     user?: User;
@@ -45,7 +46,7 @@ export const useGetUserSettings = () => {
       let { localSettings, userProfile } = useUserStore.getState();
       const lastStatusIsLogin = !!userProfile?.uid;
 
-      const res = await client.getSettings();
+      const res = await getClient().getSettings();
 
       console.log('loginStatus', res);
 
@@ -109,13 +110,13 @@ export const useGetUserSettings = () => {
     }
   };
 
-  const handleLoginStatus = async ({ body: data }: ExternalLoginPayload) => {
+  const handleLoginStatus = async ({ data }: ExternalLoginPayload) => {
     if (data?.status === 'success') {
       try {
         let { localSettings, userProfile } = useUserStore.getState();
         const lastStatusIsLogin = !!userProfile?.uid;
 
-        const res = await client.getSettings();
+        const res = await getClient().getSettings();
 
         console.log('loginStatus', res);
 
@@ -219,6 +220,7 @@ export const useGetUserSettings = () => {
   const handleExtensionMessage = (request: any) => {
     if (request?.name === 'refly-status-check') {
       getLoginStatus();
+      checkBrowserArc();
     }
   };
 

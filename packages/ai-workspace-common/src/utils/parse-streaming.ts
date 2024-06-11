@@ -2,6 +2,7 @@ import { fetchStream } from '@refly-packages/ai-workspace-common/utils/fetch-str
 import { getAuthTokenFromCookie } from './request';
 import { getServerOrigin } from './url';
 import { Source, ChatTask } from '@refly/openapi-schema';
+import { safeParseJSON } from './parse';
 
 const LLM_SPLIT = '__LLM_RESPONSE__';
 const RELATED_SPLIT = '__RELATED_QUESTIONS__';
@@ -52,7 +53,7 @@ export const parseStreaming = async (
         const [sources, rest] = chunks.split(LLM_SPLIT);
         if (!sourcesEmitted) {
           try {
-            onSources(JSON.parse(sources));
+            onSources(safeParseJSON(sources));
           } catch (e) {
             onSources([]);
           }
@@ -69,7 +70,7 @@ export const parseStreaming = async (
     () => {
       const [, relates] = chunks.split(RELATED_SPLIT);
       try {
-        onRelates(JSON.parse(relates));
+        onRelates(safeParseJSON(relates));
       } catch (e) {
         onRelates([]);
       }

@@ -22,7 +22,7 @@ import {
 import { useNavigate, useMatch } from "react-router-dom"
 // utils
 import { time } from "@refly/ai-workspace-common/utils/time"
-import client from "@refly/ai-workspace-common/requests/proxiedRequest"
+import getClient from "@refly/ai-workspace-common/requests/proxiedRequest"
 // types
 import { Feed as IFeed } from "@refly/openapi-schema"
 import "./index.scss"
@@ -62,7 +62,7 @@ export const Feed = () => {
         return
       }
 
-      const { data: newRes, error } = await client.getFeedList({
+      const { data: newRes, error } = await getClient().getFeedList({
         body: {
           page: currentPage,
           pageSize: 10,

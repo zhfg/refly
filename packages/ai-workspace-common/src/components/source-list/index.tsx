@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 // 样式
 import './index.scss';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import { IconBook, IconBulb, IconCompass } from '@arco-design/web-react/icon';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { Markdown } from '../markdown';

@@ -5,7 +5,7 @@
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { List, Skeleton, Typography, Message as message } from '@arco-design/web-react';
 import { IconClockCircle, IconLink, IconRightCircle, IconShareExternal, IconTag } from '@arco-design/web-react/icon';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 // types
 import { IconTip } from '@refly-packages/ai-workspace-common/components/dashboard/icon-tip';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
@@ -14,7 +14,7 @@ import { getClientOrigin, safeParseURL } from '@refly-packages/ai-workspace-comm
 import { useEffect, useState } from 'react';
 import { EmptyDigestStatus } from '@refly-packages/ai-workspace-common/components/empty-digest-today-status';
 // utils
-import client from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // styles
 import './index.scss';
 import { LOCALE } from '@refly/constants';
@@ -63,7 +63,7 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
         return;
       }
 
-      const newRes = await client.listCollections({
+      const newRes = await getClient().listCollections({
         query: {
           // TODO: confirm time filter
           page: currentPage,

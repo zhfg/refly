@@ -13,8 +13,8 @@ export const useExtensionMessage = <T>(
     sendResponse: (response?: any) => void,
   ) => {
     console.log('listenToExtensionMessage', message);
-    if (message?.data?.name === name) {
-      setExtensionData(message?.data);
+    if (message?.name === name) {
+      setExtensionData(message);
       onCallback(sender, {
         send: sendResponse,
       });

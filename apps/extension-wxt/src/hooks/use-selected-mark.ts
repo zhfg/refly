@@ -1,18 +1,17 @@
-import { useEffect, useRef } from "react";
-import { useContentSelectorStore } from "@/stores/content-selector";
-import { safeParseJSON } from "@/utils/parse";
-import { apiRequest } from "@/requests/apiRequest";
+import { useEffect, useRef } from 'react';
+import { useContentSelectorStore } from '@/stores/content-selector';
+import { safeParseJSON } from '@refly/ai-workspace-common/utils/parse';
+import { apiRequest } from '@/requests/apiRequest';
 // stores
 
 export const useSelectedMark = () => {
   const contentSelectorStore = useContentSelectorStore();
-  const { setMarks, setShowSelectedMarks, resetState } =
-    useContentSelectorStore();
+  const { setMarks, setShowSelectedMarks, resetState } = useContentSelectorStore();
 
   // 从 content-selector-app 获取信息，以此和 main-app 解耦合
   const contentSelectedHandler = (event: MessageEvent<any>) => {
     const data = event?.data || {};
-    if (data?.name === "syncSelectedMark") {
+    if (data?.name === 'syncSelectedMark') {
       const marks = safeParseJSON(data?.payload?.marks);
 
       contentSelectorStore.setMarks(marks);
@@ -29,14 +28,14 @@ export const useSelectedMark = () => {
 
     if (!contentSelectorStore?.isInjectStyles) {
       apiRequest({
-        name: "injectContentSelectorCSS",
+        name: 'injectContentSelectorCSS',
       });
 
       contentSelectorStore?.setIsInjectStyles(true);
     }
 
     window.postMessage({
-      name: "setShowContentSelector",
+      name: 'setShowContentSelector',
       payload: {
         showContentSelector,
       },
@@ -45,7 +44,7 @@ export const useSelectedMark = () => {
 
   const handleRemoveMark = (xPath: string) => {
     window.postMessage({
-      name: "removeSelectedMark",
+      name: 'removeSelectedMark',
       payload: {
         xPath,
       },
@@ -58,7 +57,7 @@ export const useSelectedMark = () => {
 
   const handleRemoveAll = () => {
     window.postMessage({
-      name: "removeAllSelectedMark",
+      name: 'removeAllSelectedMark',
     });
   };
 
@@ -76,10 +75,10 @@ export const useSelectedMark = () => {
   };
 
   useEffect(() => {
-    window.addEventListener("message", contentSelectedHandler);
+    window.addEventListener('message', contentSelectedHandler);
 
     return () => {
-      document.body.removeEventListener("message", contentSelectedHandler);
+      document.body.removeEventListener('message', contentSelectedHandler);
     };
   }, []);
 

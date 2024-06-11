@@ -1,6 +1,6 @@
 import * as _Sentry from '@sentry/react';
 import { useEffect, Suspense } from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@refly/ai-workspace-common/utils/router';
 // 使用方法
 import { useSwitchTheme } from '@/hooks/use-switch-theme';
 
@@ -10,13 +10,16 @@ import { useProcessLoginNotify } from '@/hooks/use-process-login-notify';
 import { useBindCommands } from '@/hooks/use-bind-commands';
 import { useSetContainerDimension } from '@/hooks/use-set-container-dimension';
 // stores
-import { useSiderStore } from '@/stores/sider';
+import { useSiderStore } from '@refly/ai-workspace-common/stores/sider';
 import { useQuickActionStore } from '@/stores/quick-action';
+import { useUserStore } from '@refly/ai-workspace-common/stores/user';
 
 // 组件
 import { Message, Spin } from '@arco-design/web-react';
-import { ContentRouter } from '@/components/router';
-import { Markdown } from '@/components/markdown';
+import { AppRouter } from '@/routes/index';
+
+// utils
+import { checkPageUnsupported } from '@refly/ai-workspace-common/utils/extension/check';
 
 // 加载国际化
 import '@/i18n/config';
@@ -29,8 +32,6 @@ import '@/styles/style.css';
 import './App.scss';
 import { getPopupContainer } from '@refly/ai-workspace-common/utils/ui';
 import { checkBrowserArc } from '@/utils/browser';
-import { useChatStore } from '@refly/ai-workspace-common/stores/chat';
-import { fakeMessages } from '../../fake-data/message';
 // 设置 runtime 环境
 import { getEnv, setRuntime } from '@refly/ai-workspace-common/utils/env';
 const Sentry = _Sentry;
@@ -52,7 +53,7 @@ const App = () => {
   const siderStore = useSiderStore();
   const quickActionStore = useQuickActionStore();
 
-  setRuntime('extension-csui');
+  const userStore = useUserStore();
 
   // 注册 mouse event
   // useRegisterMouseEvent()
@@ -76,13 +77,17 @@ const App = () => {
     });
   }, []);
   useEffect(() => {
-    checkBrowserArc();
-  }, []);
-
-  const chatStore = useChatStore();
-
-  useEffect(() => {
-    chatStore.setMessages(fakeMessages as any);
+    /**
+     * 如果决定是否使用 SidePanel 还是 Content Script UI？
+     *
+     * 1. 如果页面支持 CSUI 注入，判断是否是 Arc，直接处理
+     * 2. 如果不支持 CSUI 注入，比如 extension://url，则打开 Popup 要求跳转到支持页面，然后处理
+     */
+    if (!checkPageUnsupported(location.href)) {
+      checkBrowserArc();
+    }
+    setRuntime('extension-csui');
+    userStore.setRuntime('extension-csui');
   }, []);
 
   return (
@@ -96,7 +101,7 @@ const App = () => {
       </div> */}
         <div id="refly-app-main" className={siderStore.showSider ? 'main active' : 'main'}>
           <MemoryRouter>
-            <ContentRouter />
+            <AppRouter />
           </MemoryRouter>
         </div>
       </div>
