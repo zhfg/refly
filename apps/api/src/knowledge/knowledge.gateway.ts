@@ -1,7 +1,8 @@
 import { Request } from 'express';
+import { Logger } from '@nestjs/common';
 import jwt from 'jsonwebtoken';
 import { Server, Hocuspocus } from '@hocuspocus/server';
-import { Logger } from '@hocuspocus/extension-logger';
+import { Logger as HocuspocusLogger } from '@hocuspocus/extension-logger';
 import { Database } from '@hocuspocus/extension-database';
 import { OnGatewayConnection, WebSocketGateway } from '@nestjs/websockets';
 import { MinioService } from '../common/minio.service';
@@ -22,6 +23,7 @@ interface NoteContext {
 })
 export class NoteWsGateway implements OnGatewayConnection {
   private server: Hocuspocus;
+  private logger = new Logger(NoteWsGateway.name);
 
   constructor(
     private minio: MinioService,
@@ -31,12 +33,18 @@ export class NoteWsGateway implements OnGatewayConnection {
     this.server = Server.configure({
       port: 1234,
       extensions: [
-        new Logger(),
+        new HocuspocusLogger(),
         new Database({
           fetch: async ({ context }: { context: NoteContext }) => {
-            return await this.minio.downloadData(context.resource.stateStorageKey);
+            try {
+              return await this.minio.downloadData(context.resource.stateStorageKey);
+            } catch (err) {
+              this.logger.log(`fetch state failed for ${context}, err: ${err.stack}`);
+              return null;
+            }
           },
           store: async ({ state, context }: { state: Buffer; context: NoteContext }) => {
+            console.log('store context', context);
             await this.minio.uploadData(context.resource.stateStorageKey, state);
           },
         }),
@@ -59,6 +67,9 @@ export class NoteWsGateway implements OnGatewayConnection {
         if (resource.userId !== Number(payload.id)) {
           throw new Error(`user not authorized: ${documentName}`);
         }
+        if (resource.readOnly) {
+          throw new Error(`read-only resource: ${documentName}`);
+        }
         const user = await this.prisma.user.findUnique({
           where: { id: Number(payload.id) },
         });
@@ -76,9 +87,6 @@ export class NoteWsGateway implements OnGatewayConnection {
 
         // Set contextual data to use it in other hooks
         return { user, resource } as NoteContext;
-      },
-      onDisconnect: async (data) => {
-        return null;
       },
     });
   }

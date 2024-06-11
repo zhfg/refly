@@ -298,6 +298,8 @@ model Resource {
   stateStorageKey String       @default("") @map("state_storage_key")
   /// 是否公开
   isPublic        Boolean      @default(false) @map("is_public")
+  /// 是否只读
+  readOnly        Boolean      @default(false) @map("read_only")
   /// 索引状态
   indexStatus     IndexStatus  @default(init) @map("index_status")
   /// 标题

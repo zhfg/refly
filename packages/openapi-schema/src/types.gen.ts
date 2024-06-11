@@ -68,6 +68,14 @@ export type ResourceListItem = {
    */
   isPublic: boolean;
   /**
+   * Whether this resource is read-only
+   */
+  readOnly: boolean;
+  /**
+   * Whether this resource is collaborative
+   */
+  collabEnabled: boolean;
+  /**
    * Collection creation time
    */
   createdAt: string;
@@ -782,6 +790,14 @@ export type UpsertResourceRequest = {
    * Whether this resource is public
    */
   isPublic?: boolean;
+  /**
+   * Whether this resource is read-only
+   */
+  readOnly?: boolean;
+  /**
+   * Whether this resource is collaborative
+   */
+  collabEnabled?: boolean;
 };
 
 export type UpsertResourceResponse = BaseResponse & {

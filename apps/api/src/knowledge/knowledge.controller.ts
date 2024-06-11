@@ -34,6 +34,7 @@ import { buildSuccessResponse } from '../utils/response';
 const convertResourcePoToListItem = (resource: Resource): ResourceListItem => {
   return {
     ..._.omit(resource, ['id', 'userId', 'deletedAt']),
+    collabEnabled: !!resource.stateStorageKey,
     createdAt: resource.createdAt.toJSON(),
     updatedAt: resource.updatedAt.toJSON(),
   };
