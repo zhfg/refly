@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import {
   Body,
   Controller,
@@ -29,11 +28,11 @@ import {
 import { Resource } from '@prisma/client';
 import { KnowledgeService } from './knowledge.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
-import { buildSuccessResponse } from '../utils/response';
+import { buildSuccessResponse, pick, omit } from '../utils';
 
 const convertResourcePoToListItem = (resource: Resource): ResourceListItem => {
   return {
-    ..._.omit(resource, ['id', 'userId', 'deletedAt']),
+    ...omit(resource, ['id', 'userId', 'storageKey', 'stateStorageKey', 'deletedAt']),
     collabEnabled: !!resource.stateStorageKey,
     createdAt: resource.createdAt.toJSON(),
     updatedAt: resource.updatedAt.toJSON(),
@@ -54,7 +53,7 @@ export class KnowledgeController {
     const colls = await this.knowledgeService.listCollections(req.user, { page, pageSize });
     return buildSuccessResponse(
       colls.map((coll) => ({
-        ..._.omit(coll, ['id', 'userId', 'deletedAt']),
+        ...omit(coll, ['id', 'userId', 'deletedAt']),
         createdAt: coll.createdAt.toJSON(),
         updatedAt: coll.updatedAt.toJSON(),
       })),
@@ -70,7 +69,7 @@ export class KnowledgeController {
     const coll = await this.knowledgeService.getCollectionDetail(collectionId);
     if (coll.isPublic || coll.userId === req.user.id) {
       return buildSuccessResponse({
-        ..._.omit(coll, 'userId'),
+        ...omit(coll, ['userId']),
         createdAt: coll.createdAt.toJSON(),
         updatedAt: coll.updatedAt.toJSON(),
       });
@@ -94,7 +93,7 @@ export class KnowledgeController {
 
     const upserted = await this.knowledgeService.upsertCollection(req.user, body);
     return buildSuccessResponse({
-      ..._.omit(upserted, ['id', 'userId', 'deletedAt']),
+      ...omit(upserted, ['id', 'userId', 'deletedAt']),
       createdAt: upserted.createdAt.toJSON(),
       updatedAt: upserted.updatedAt.toJSON(),
     });
@@ -112,7 +111,7 @@ export class KnowledgeController {
 
     const coll = await this.knowledgeService.upsertCollection(req.user, body);
     return buildSuccessResponse({
-      ..._.pick(coll, ['collectionId', 'title', 'description', 'isPublic']),
+      ...pick(coll, ['collectionId', 'title', 'description', 'isPublic']),
       createdAt: coll.createdAt.toJSON(),
       updatedAt: coll.updatedAt.toJSON(),
     });
@@ -148,7 +147,7 @@ export class KnowledgeController {
   ): Promise<GetResourceDetailResponse> {
     const resource = await this.knowledgeService.getResourceDetail(resourceId, true);
     if (resource.isPublic || resource.userId === req.user.id) {
-      return buildSuccessResponse(_.omit(resource, 'userId'));
+      return buildSuccessResponse(omit(resource, ['userId']));
     }
     return buildSuccessResponse(null);
   }

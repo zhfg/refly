@@ -567,11 +567,9 @@ paths:
         - api_key: []
 components:
   schemas:
-    WeblinkMeta:
+    ResourceMeta:
       type: object
-      description: Weblink metadata
-      required:
-        - url
+      description: Resource metadata
       properties:
         url:
           type: string
@@ -589,10 +587,6 @@ components:
           type: string
           description: Storage key for the weblink
           deprecated: true
-    ResourceMeta:
-      description: Resource metadata
-      oneOf:
-        - $ref: '#/components/schemas/WeblinkMeta'
     ResourceType:
       type: string
       description: Resource type
@@ -1392,10 +1386,6 @@ components:
         readOnly:
           type: boolean
           description: Whether this resource is read-only
-          default: false
-        collabEnabled:
-          type: boolean
-          description: Whether this resource is collaborative
           default: false
     UpsertResourceResponse:
       allOf:
