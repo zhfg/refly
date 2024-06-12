@@ -1,6 +1,4 @@
 export const checkPageUnsupported = (pageUrl: string) => {
-  console.log('checking page url', JSON.stringify(pageUrl));
-
   if (pageUrl) {
     const checkBrowserSettingPage =
       pageUrl.startsWith('chrome://') ||

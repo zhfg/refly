@@ -144,8 +144,6 @@ export const AICopilot = (props: AICopilotProps) => {
   }, [showContextState]);
   useResizeCopilot({ containerSelector: 'ai-copilot-container' });
 
-  console.log('ai-copilot convId', convId);
-
   return (
     <div className="ai-copilot-container">
       <div className="knowledge-base-detail-header">

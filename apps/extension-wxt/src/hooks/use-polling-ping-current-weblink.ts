@@ -31,7 +31,6 @@ export const usePollingPingCurrentWeblink = () => {
   const isLogged = !!userStore?.userProfile?.uid;
   const isValidStartPing = checkValidStartPing();
   const showSider = siderStore?.showSider;
-  console.log('isLogged', isLogged, isValidStartPing);
 
   /**
    * 用于轮训 Ping 当前打开的网页，登录状态下，2S 轮训一次

@@ -104,7 +104,7 @@ const App = () => {
         <img src={Logo} alt="唤起 Refly" style={{ width: 25, height: 25 }} />
         <span>⌘B</span>
       </div> */}
-        <div id="refly-app-main" className={siderStore.showSider ? 'main active' : 'main'}>
+        <div id="refly-app-main" className={siderStore.showSider ? 'main active' : 'main active'}>
           <AppRouter />
         </div>
       </div>
