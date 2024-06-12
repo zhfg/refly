@@ -5,6 +5,8 @@ import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-
 import { getQuickActionPrompt } from '@refly-packages/ai-workspace-common/utils/quickActionPrompt';
 import { Button, Tag } from '@arco-design/web-react';
 import { IconCloseCircle, IconFile, IconFolder, IconFontColors } from '@arco-design/web-react/icon';
+import { useGetSkills } from '@refly-packages/ai-workspace-common/skills/main-logic/use-get-skills';
+import { useDispatchAction } from '@refly-packages/ai-workspace-common/skills/main-logic/use-dispatch-action';
 
 export const ContextStateDisplay = () => {
   const {
@@ -18,6 +20,11 @@ export const ContextStateDisplay = () => {
   const searchStateStore = useSearchStateStore();
   const knowledgeBaseStore = useKnowledgeBaseStore();
   const { runTask } = useBuildThreadAndRun();
+
+  // skill
+  const [skills] = useGetSkills();
+  const filterResourceContextSkill = skills?.filter((skill) => skill?.appScope?.includes('resource.context'));
+  const { dispatch } = useDispatchAction();
 
   return (
     <div className="ai-copilot-context-state-display-container">
@@ -99,9 +106,26 @@ export const ContextStateDisplay = () => {
             <Button type="primary" size="mini">
               快速总结
             </Button>
-            <Button type="primary" size="mini" style={{ marginLeft: 12 }}>
-              保存到知识库
-            </Button>
+            {filterResourceContextSkill?.map((skill, index) => {
+              return (
+                <Button
+                  type="primary"
+                  size="mini"
+                  style={{ marginLeft: 12 }}
+                  onClick={() => {
+                    dispatch({
+                      name: skill?.name,
+                      type: 'state',
+                      body: {
+                        modalVisible: true,
+                      },
+                    });
+                  }}
+                >
+                  保存到知识库
+                </Button>
+              );
+            })}
           </div>
         </div>
       ) : null}

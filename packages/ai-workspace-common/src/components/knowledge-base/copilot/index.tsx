@@ -42,6 +42,7 @@ import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
 import { useResizeCopilot } from '@refly-packages/ai-workspace-common/hooks/use-resize-copilot';
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
+import { RegisterSkillComponent } from '@refly-packages/ai-workspace-common/skills/main-logic/register-skill-component';
 
 interface AICopilotProps {}
 
@@ -248,6 +249,9 @@ export const AICopilot = (props: AICopilotProps) => {
           resources={knowledgeBaseStore?.tempConvResources || []}
         />
       ) : null}
+
+      {/** 注册 Skill 相关内容，目前先收敛在 Copilot 内部，后续允许挂在在其他扩展点，比如笔记、reading */}
+      <RegisterSkillComponent />
     </div>
   );
 };
