@@ -7,6 +7,8 @@ import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui'
 import { delay } from '@refly-packages/ai-workspace-common/utils/delay';
 import { ResourceDetail, ResourceType, CreateResourceData, UpsertResourceRequest } from '@refly/openapi-schema';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+// utils
+import { convertHTMLToMarkdown } from '@refly/utils';
 
 // Skills 相关内容
 import { useGetCurrentContext } from '@refly-packages/ai-workspace-common/skills/main-logic/use-get-current-context';
@@ -92,7 +94,7 @@ const SaveKnowledgeBaseModal = () => {
         body: {
           resourceType: 'weblink',
           data: currentResource?.data,
-          content: (currentResource as UpsertResourceRequest)?.content || '',
+          content: convertHTMLToMarkdown('render', (currentResource as UpsertResourceRequest)?.content || ''),
         },
       };
       const knowledgeBaseLocation = form.getFieldValue('knowledge-base-location');

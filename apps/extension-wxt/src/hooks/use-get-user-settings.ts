@@ -77,7 +77,7 @@ export const useGetUserSettings = () => {
           uiLocale = (mapDefaultLocale(navigator?.language) || LOCALE.EN) as LOCALE;
           outputLocale = (navigator?.language || LOCALE.EN) as LOCALE;
           // 不阻塞写回用户配置
-          client.updateSettings({
+          getClient().updateSettings({
             body: { uiLocale, outputLocale },
           });
 

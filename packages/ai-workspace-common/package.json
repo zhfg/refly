@@ -63,6 +63,7 @@
     "zustand": "^4.5.1",
     "@refly/constants": "workspace:*",
     "@refly/openapi-schema": "workspace:*",
+    "@refly/utils": "workspace:*",
     "vite-tsconfig-paths": "~4.3.2",
     "@hey-api/client-fetch": "~0.1.3"
   },
