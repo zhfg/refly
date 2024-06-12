@@ -89,16 +89,7 @@
     "@nestjs/websockets": "~10.3.9",
     "ws": "~8.17.0",
     "@hocuspocus/extension-database": "~2.13.0",
-    "jsonwebtoken": "~9.0.2",
-    "prosemirror-markdown": "~1.13.0",
-    "y-prosemirror": "~1.2.6",
-    "@tiptap/core": "~2.4.0",
-    "@tiptap/starter-kit": "~2.4.0",
-    "prosemirror-view": "~1.33.7",
-    "prosemirror-model": "~1.21.1",
-    "y-protocols": "~1.0.6",
-    "@tiptap/pm": "~2.4.0",
-    "markdown-it": "~14.1.0"
+    "jsonwebtoken": "~9.0.2"
   },
   "devDependencies": {
     "@nestjs/cli": "~10.3.2",
