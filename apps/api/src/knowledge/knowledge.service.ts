@@ -12,6 +12,7 @@ import {
   ResourceDetail,
   ResourceMeta,
 } from '@refly/openapi-schema';
+import { state2Markdown } from '@refly/editor-common';
 import {
   CHANNEL_FINALIZE_RESOURCE,
   QUEUE_RESOURCE,
@@ -160,9 +161,14 @@ export class KnowledgeService {
     };
 
     if (needDoc) {
-      const metadata = detail.data;
-      const buf = await this.minio.downloadData(resource.storageKey || metadata.storageKey);
-      detail.doc = buf.toString();
+      if (resource.readOnly) {
+        const metadata = detail.data;
+        const buf = await this.minio.downloadData(resource.storageKey || metadata.storageKey);
+        detail.doc = buf.toString();
+      } else {
+        const buf = await this.minio.downloadData(resource.stateStorageKey);
+        detail.doc = state2Markdown(buf);
+      }
     }
 
     return detail;

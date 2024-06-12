@@ -35,7 +35,7 @@
     "prosemirror-model": "~1.21.1",
     "@tiptap/extension-image": "~2.4.0",
     "@tiptap/extension-link": "~2.4.0",
-    "tiptap-markdown": "~0.8.10"
+    "y-protocols": "~1.0.6"
   },
   "devDependencies": {
     "typescript": "^5",
