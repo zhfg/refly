@@ -1,6 +1,7 @@
 import { Router } from 'itty-router';
-import { AwsClient } from 'aws4fetch';
-import jwt from '@tsndr/cloudflare-worker-jwt';
+
+import { randomUUID } from 'node:crypto';
+import { validateToken, uploadS3 } from './utils';
 
 // declare let AWS_ACCESS_KEY: string;
 // declare let AWS_SECRET_KEY: string;
@@ -15,13 +16,7 @@ const router = Router();
 // GET collection index
 router.post('/htmlUpload', async (request, env) => {
 	// Check authorization header for jwt token
-	const authorization = request.headers.get('Authorization');
-	if (!authorization || !authorization.toLowerCase().startsWith('bearer ')) {
-		return new Response('Authorization failed', { status: 401 });
-	}
-	const token = authorization.substring(7);
-	const isValid = await jwt.verify(token, env.JWT_SECRET);
-	if (!isValid) {
+	if (!(await validateToken(request, env))) {
 		return new Response('Invalid token', { status: 401 });
 	}
 
@@ -32,19 +27,33 @@ router.post('/htmlUpload', async (request, env) => {
 
 	// Upload HTML file
 	const objectKey = `html-upload/${hash}.html`;
-	const aws = new AwsClient({ service: 's3', accessKeyId: env.AWS_ACCESS_KEY, secretAccessKey: env.AWS_SECRET_KEY });
-	const uploadUrl = `${env.S3_ENDPOINT}/${env.S3_BUCKET}/${objectKey}`;
-	console.log('uploadUrl:', uploadUrl);
+	await uploadS3({ env, objectKey: `${hash}.html`, data });
 
-	const res = await aws.fetch(uploadUrl, {
-		body: data,
-		method: 'PUT',
-		headers: {
-			'Content-Type': 'application/html',
-		},
-	});
-	const resText = await res.text();
-	console.log(resText);
+	return Response.json({ storageKey: objectKey }, { status: 200 });
+});
+
+// GET collection index
+router.post('/resourceUpload', async (request, env) => {
+	// Check authorization header for jwt token
+	if (!(await validateToken(request, env))) {
+		return new Response('Invalid token', { status: 401 });
+	}
+
+	const formData = await request.formData();
+	const file = formData.get('file');
+	const data = await file.arrayBuffer();
+
+	let objectKey: string;
+
+	// NOTE: allowing `storageKey` to be specified can be dangerous, but for now
+	// `storageKey` is only visible to resource owner, so it should be fine
+	if (formData.get('storageKey')) {
+		objectKey = formData.get('storageKey');
+	} else {
+		objectKey = `resource/${randomUUID()}`;
+	}
+
+	await uploadS3({ env, objectKey, data });
 
 	return Response.json({ storageKey: objectKey }, { status: 200 });
 });
