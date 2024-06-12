@@ -1,3 +1,4 @@
+import { tempTabState } from '@/entrypoints/background';
 import { BackgroundMessage } from '@refly/ai-workspace-common/utils/extension/messaging';
 import { getCurrentTab } from '@refly/ai-workspace-common/utils/extension/tabs';
 import { safeStringifyJSON } from '@refly/ai-workspace-common/utils/parse';
@@ -10,14 +11,15 @@ export interface TabStorage {
 }
 
 // 按照 tabId_* 存储和处理
-export const handleUpdateTabStorage = async (msg: BackgroundMessage) => {
+export const handleUpdateTabStorage = async (msg: BackgroundMessage, tabId?: number) => {
   const lastActiveTab = await getCurrentTab();
+  const actualTabId = tabId || lastActiveTab?.id;
 
-  if (lastActiveTab?.id) {
+  if (actualTabId) {
     if (msg?.body) {
-      await storage.setItem(`sync:${lastActiveTab?.id}_${msg?.name}`, safeStringifyJSON(msg?.body));
+      tempTabState[`${actualTabId}_${msg?.name}`] = safeStringifyJSON(msg?.body);
     } else {
-      await storage.removeItem(`sync:${lastActiveTab?.id}_${msg?.name}`);
+      delete tempTabState[`${actualTabId}_${msg?.name}`];
     }
   }
 };

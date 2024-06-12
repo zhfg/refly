@@ -1,3 +1,4 @@
+import { tempTabState } from '@/entrypoints/background/index';
 import { BackgroundMessage } from '@refly/ai-workspace-common/utils/extension/messaging';
 import { getCurrentTab } from '@refly/ai-workspace-common/utils/extension/tabs';
 import { safeParseJSON } from '@refly/ai-workspace-common/utils/parse';
@@ -27,7 +28,7 @@ export const handleOtherMessage = async (msg: BackgroundMessage) => {
     const lastActiveTab = await getCurrentTab();
     if (!lastActiveTab?.id) return;
 
-    const currentMockResource = safeParseJSON(await storage.getItem(`sync:${lastActiveTab?.id}_currentMockResource`));
+    const currentMockResource = safeParseJSON(tempTabState?.[`${lastActiveTab?.id}_currentMockResource`]);
 
     if (msg?.source === 'extension-csui') {
       browser.tabs.sendMessage(lastActiveTab?.id as number, {

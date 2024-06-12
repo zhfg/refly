@@ -17,6 +17,10 @@ export interface KnowledgeBaseTab {
   resourceId: string;
 }
 
+export interface SkillState {
+  [skillName: string]: any;
+}
+
 interface KnowledgeBaseState {
   isSaveKnowledgeBaseModalVisible: boolean;
   knowledgeBaseList: CollectionListItem[];
@@ -44,6 +48,10 @@ interface KnowledgeBaseState {
   // source-list
   sourceListModalVisible: boolean;
   tempConvResources: ResourceDetail[];
+
+  // skills states
+  skillState: SkillState;
+  setSkillState: (newState: SkillState) => void;
 
   updateIsSaveKnowledgeBaseModalVisible: (isSaveKnowledgeBaseModalVisible: boolean) => void;
   updateIsRequesting: (isRequesting: boolean) => void;
@@ -86,6 +94,9 @@ export const defaultState = {
   currentPage: 1,
   hasMore: true,
   isRequesting: false,
+
+  // skills
+  skillState: {},
 };
 
 export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
@@ -122,5 +133,8 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
     updateTabs: (tabs: KnowledgeBaseTab[]) => set((state) => ({ ...state, tabs })),
     updateActiveTab: (key: string) => set((state) => ({ ...state, activeTab: key })),
     resetState: () => set((state) => ({ ...state, ...defaultState })),
+
+    // skill
+    setSkillState: (newState: SkillState) => set((state) => ({ ...state, skillState: newState })),
   })),
 );
