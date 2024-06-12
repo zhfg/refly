@@ -10,11 +10,12 @@ import {
   UpsertCollectionRequest,
   UpsertResourceRequest,
   ResourceDetail,
-  WeblinkMeta,
+  ResourceMeta,
 } from '@refly/openapi-schema';
 import {
   CHANNEL_FINALIZE_RESOURCE,
   QUEUE_RESOURCE,
+  cleanMarkdownForIngest,
   genCollectionID,
   genResourceID,
 } from '../utils';
@@ -151,7 +152,7 @@ export class KnowledgeService {
       where: { resourceId, deletedAt: null },
     });
     const detail: ResourceDetail & { userId: number } = {
-      ...omit(resource, ['id']),
+      ...omit(resource, ['id', 'storageKey', 'stateStorageKey']),
       collabEnabled: !!resource.stateStorageKey,
       createdAt: resource.createdAt.toJSON(),
       updatedAt: resource.updatedAt.toJSON(),
@@ -159,7 +160,7 @@ export class KnowledgeService {
     };
 
     if (needDoc) {
-      const metadata = detail.data as WeblinkMeta;
+      const metadata = detail.data;
       const buf = await this.minio.downloadData(resource.storageKey || metadata.storageKey);
       detail.doc = buf.toString();
     }
@@ -182,7 +183,6 @@ export class KnowledgeService {
       param.readOnly = param.resourceType === 'weblink';
     }
 
-    let stateStorageKey: string;
     if (param.resourceType === 'weblink') {
       if (!param.data) {
         throw new BadRequestException('data is required');
@@ -193,8 +193,7 @@ export class KnowledgeService {
       }
       param.title ||= title;
     } else if (param.resourceType === 'note') {
-      stateStorageKey = `state/${param.resourceId}`;
-      await this.minio.uploadData(stateStorageKey, Buffer.from([]));
+      // do nothing
     } else {
       throw new BadRequestException('Invalid resource type');
     }
@@ -205,7 +204,6 @@ export class KnowledgeService {
         resourceType: param.resourceType,
         meta: JSON.stringify(param.data),
         storageKey: param.storageKey,
-        stateStorageKey,
         userId: user.id,
         isPublic: param.isPublic,
         readOnly: param.readOnly,
@@ -234,8 +232,9 @@ export class KnowledgeService {
     const { resourceId, collectionId } = param;
     const { url, linkId, storageKey, title } = param.data;
     param.storageKey ||= storageKey;
+    param.content ||= '';
 
-    if (!param.storageKey && linkId) {
+    if (linkId) {
       const weblink = await this.prisma.weblink.findFirst({
         where: { linkId },
       });
@@ -246,39 +245,30 @@ export class KnowledgeService {
       }
     }
 
-    if (!param.storageKey) {
-      const { data } = await this.ragService.crawlFromRemoteReader(url);
-      param.content = data.content;
-      param.title ||= data.title;
-
-      const resourceKey = `resource/${resourceId}`;
-      const res = await this.minio.uploadData(resourceKey, param.content);
-      param.storageKey = resourceKey;
-
-      this.logger.log(`upload resource ${resourceKey} success, res: ${JSON.stringify(res)}`);
-    } else {
+    if (param.storageKey) {
       param.content = (await this.minio.downloadData(param.storageKey)).toString();
-    }
+    } else {
+      if (!param.content && url) {
+        const { data } = await this.ragService.crawlFromRemoteReader(url);
+        param.content = data.content;
+        param.title ||= data.title;
+      }
 
-    // initialize Yjs doc from resource markdown
-    // const stateStorageKey = `state/${resourceId}`;
-    // await this.minio.uploadData(stateStorageKey, Buffer.from(markdown2StateUpdate(param.content)));
+      param.storageKey = `resource/${resourceId}`;
+      const res = await this.minio.uploadData(param.storageKey, param.content);
+      this.logger.log(`upload resource ${param.storageKey} success, res: ${JSON.stringify(res)}`);
+    }
 
     // TODO: 减少不必要的重复插入
 
     // ensure the document is for ingestion use
-    // const chunks = await this.ragService.indexContent({
-    //   pageContent: cleanMarkdownForIngest(param.content),
-    //   metadata: { url, title },
-    // });
-
-    // chunks.forEach((chunk, index) => {
-    //   chunk.id = genResourceUuid(`${resourceId}-${index}`);
-    //   chunk.resourceId = resourceId;
-    //   chunk.collectionId = collectionId;
-    // });
-
-    // await this.ragService.saveDataForUser(user, { chunks });
+    if (param.content) {
+      const chunks = await this.ragService.indexContent({
+        pageContent: cleanMarkdownForIngest(param.content),
+        metadata: { url, title, collectionId, resourceId },
+      });
+      await this.ragService.saveDataForUser(user, { chunks });
+    }
 
     this.logger.log(
       `save resource segments for user ${user.uid} success, resourceId: ${resourceId}`,
@@ -294,7 +284,7 @@ export class KnowledgeService {
           url,
           title: param.title,
           storageKey: param.storageKey,
-        } as WeblinkMeta),
+        } as ResourceMeta),
       },
     });
   }
@@ -324,9 +314,12 @@ export class KnowledgeService {
   }
 
   async updateResource(user: User, param: UpsertResourceRequest) {
-    const updates: Prisma.ResourceUpdateInput = pick(param, ['title', 'isPublic']);
+    const updates: Prisma.ResourceUpdateInput = pick(param, ['title', 'isPublic', 'readOnly']);
     if (param.data) {
       updates.meta = JSON.stringify(param.data);
+    }
+    if (param.content) {
+      await this.minio.uploadData(param.storageKey, param.content);
     }
     return this.prisma.resource.update({
       where: { resourceId: param.resourceId, userId: user.id },

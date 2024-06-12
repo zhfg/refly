@@ -43,4 +43,6 @@ export interface ReaderResult {
 export interface DocMeta {
   title?: string;
   url?: string;
+  collectionId?: string;
+  resourceId?: string;
 }

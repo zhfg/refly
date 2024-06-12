@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import _ from 'lodash';
 import avro from 'avsc';
 import { LRUCache } from 'lru-cache';
 import { Document } from '@langchain/core/documents';
@@ -24,6 +23,7 @@ import {
 } from './rag.dto';
 import { QdrantService } from '../common/qdrant.service';
 import { Condition, PointStruct } from '../common/qdrant.dto';
+import { genResourceUuid, omit } from '../utils';
 
 const READER_URL = 'https://r.jina.ai/';
 
@@ -199,6 +199,7 @@ export class RAGService {
 
   async indexContent(doc: Document<DocMeta>): Promise<ContentDataObj[]> {
     const { pageContent, metadata } = doc;
+    const { resourceId, collectionId } = metadata;
 
     const chunks = await this.chunkText(pageContent);
     const chunkEmbeds = await this.embeddings.embedDocuments(chunks);
@@ -206,12 +207,14 @@ export class RAGService {
     const dataObjs: ContentDataObj[] = [];
     for (let i = 0; i < chunks.length; i++) {
       dataObjs.push({
-        id: '', // leave it empty for future update
+        id: genResourceUuid(`${resourceId}-${i}`),
         url: metadata.url,
         type: ContentType.WEBLINK,
         title: metadata.title,
         content: chunks[i],
         vector: chunkEmbeds[i],
+        resourceId,
+        collectionId,
       });
     }
 
@@ -239,7 +242,7 @@ export class RAGService {
       id: chunk.id,
       vector: chunk.vector,
       payload: {
-        ..._.omit(chunk, ['id', 'vector']),
+        ...omit(chunk, ['id', 'vector']),
         tenantId: user.uid,
       },
     }));
