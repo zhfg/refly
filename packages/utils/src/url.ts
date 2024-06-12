@@ -45,7 +45,7 @@ export const getClientOrigin = () => {
 };
 
 export function getExtensionUrl(url: any) {
-  return chrome.runtime.getURL(url);
+  return chrome?.runtime.getURL(url);
 }
 
 export function safeParseURL(url: string) {

@@ -27,3 +27,4 @@ export * from './time';
 export * from './ui';
 export * from './url';
 export * from './weblink';
+export * from './markdown';

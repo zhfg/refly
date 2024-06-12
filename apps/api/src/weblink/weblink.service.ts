@@ -17,6 +17,7 @@ import { getExpectedTokenLenContent } from '../utils/token';
 import { CHANNEL_PROCESS_LINK_BY_USER, CHANNEL_PROCESS_LINK, QUEUE_WEBLINK } from '../utils/const';
 import { genLinkID, sha256Hash } from '../utils/id';
 import { normalizeURL } from '../utils/url';
+import { convertHTMLToMarkdown } from '@refly/utils';
 
 @Injectable()
 export class WeblinkService {
@@ -145,7 +146,7 @@ export class WeblinkService {
       const content = (await this.minio.downloadData(link.storageKey)).toString();
 
       const doc = {
-        pageContent: this.ragService.convertHTMLToMarkdown('ingest', content),
+        pageContent: convertHTMLToMarkdown('ingest', content),
         metadata: {
           title: link.title,
           source: link.url,

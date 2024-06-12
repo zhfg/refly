@@ -81,6 +81,7 @@
     "@refly/constants": "workspace:*",
     "@refly/openapi-schema": "workspace:*",
     "@refly/editor-common": "workspace:*",
+    "@refly/utils": "workspace:*",
     "@langchain/core": "~0.2.2",
     "@hocuspocus/server": "~2.13.0",
     "@hocuspocus/extension-logger": "~2.13.0",
