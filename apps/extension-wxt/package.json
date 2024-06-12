@@ -72,7 +72,8 @@
     "vite-plugin-encoding": "~1.0.0",
     "@refly/plugin-vite-encoding": "workspace:*",
     "@refly/plugin-vite-watcher": "workspace:*",
-    "@refly/constants": "workspace:*"
+    "@refly/constants": "workspace:*",
+    "@refly/utils": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^18.2.46",
