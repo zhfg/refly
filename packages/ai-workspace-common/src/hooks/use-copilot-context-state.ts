@@ -27,8 +27,6 @@ export const useCopilotContextState = () => {
   const kbId = queryParams.get('kbId');
   const currentSelectedText = knowledgeBaseStore?.currentSelectedText;
 
-  console.log('currentSelectedText', currentSelectedText);
-
   // 优先级: text > resource > knowledgeBase > all
   const showContextState = !!resId || !!kbId || !!currentSelectedText;
   const isCurrentSelectedText = !!currentSelectedText;

@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams } from '@refly/ai-workspace-common/utils/router';
 import { useResizePanel } from '@refly/ai-workspace-common/hooks/use-resize-panel';
 import { ErrorBoundary } from '@sentry/react';
+import { useKnowledgeBaseStore } from '@refly/ai-workspace-common/stores/knowledge-base';
 
 // 用于快速选择
 export const quickActionList = ['summary'];
@@ -29,6 +30,7 @@ const KnowledgeLibraryLayout = () => {
   const resId = searchParams.get('resId');
   const userStore = useUserStore();
   const { t } = useTranslation();
+  const knowledgeBaseStore = useKnowledgeBaseStore();
 
   const [minSize] = useResizePanel({
     getGroupSelector: () => document.querySelector(`.workspace-panel-container`) as HTMLElement,
@@ -48,6 +50,8 @@ const KnowledgeLibraryLayout = () => {
         minSize: 100,
         maxSize: 100,
       };
+
+  console.log('current resource', knowledgeBaseStore.currentResource);
 
   return (
     <ErrorBoundary>

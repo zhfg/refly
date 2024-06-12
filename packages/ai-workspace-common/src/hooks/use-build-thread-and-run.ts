@@ -42,11 +42,6 @@ export const useBuildThreadAndRun = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const knowledgeBaseStore = useKnowledgeBaseStore();
 
-  const cm: ContentMeta = {
-    topics: [],
-  };
-  console.log(cm);
-
   const jumpNewConvQuery = (convId: string) => {
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set('convId', convId);

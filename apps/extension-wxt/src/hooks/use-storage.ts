@@ -44,7 +44,7 @@ export const handleGetAndWatchValue = async <T>(
 
   // 否则 watch 更新
   storage.watch(`${location}:${key}`, (newVal: T | null) => {
-    onCallback(newVal as T);
+    onCallback(safeParseJSON(newVal) as T);
   });
 };
 

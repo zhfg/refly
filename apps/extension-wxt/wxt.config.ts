@@ -92,6 +92,7 @@ export default defineConfig({
   },
   runner: {
     startUrls: ['https://google.com/'],
+    disabled: true,
     chromiumArgs: ['--user-data-dir=./chrome-data'],
   },
 });

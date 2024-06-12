@@ -1,5 +1,7 @@
 import { BackgroundMessage } from '@refly/ai-workspace-common/utils/extension/messaging';
 import { getCurrentTab } from '@refly/ai-workspace-common/utils/extension/tabs';
+import { safeParseJSON } from '@refly/ai-workspace-common/utils/parse';
+import { storage } from '@refly/ai-workspace-common/utils/storage';
 import { browser } from 'wxt/browser';
 
 export const handleOtherMessage = async (msg: BackgroundMessage) => {
@@ -17,6 +19,25 @@ export const handleOtherMessage = async (msg: BackgroundMessage) => {
       browser.runtime.sendMessage({
         name: msg?.name,
         body: { tabId: lastActiveTab?.id },
+      });
+    }
+  }
+
+  if (msg?.name === 'getCurrentMockResourceByTabId') {
+    const lastActiveTab = await getCurrentTab();
+    if (!lastActiveTab?.id) return;
+
+    const currentMockResource = safeParseJSON(await storage.getItem(`sync:${lastActiveTab?.id}_currentMockResource`));
+
+    if (msg?.source === 'extension-csui') {
+      browser.tabs.sendMessage(lastActiveTab?.id as number, {
+        name: msg?.name,
+        body: { currentMockResource },
+      });
+    } else if (msg?.source === 'extension-sidepanel') {
+      browser.runtime.sendMessage({
+        name: msg?.name,
+        body: { currentMockResource },
       });
     }
   }
