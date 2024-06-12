@@ -36,15 +36,25 @@ export class NoteWsGateway implements OnGatewayConnection {
         new HocuspocusLogger(),
         new Database({
           fetch: async ({ context }: { context: NoteContext }) => {
+            const { resource } = context;
+            if (!resource.stateStorageKey) return null;
             try {
-              return await this.minio.downloadData(context.resource.stateStorageKey);
+              return await this.minio.downloadData(resource.stateStorageKey);
             } catch (err) {
-              this.logger.error(`fetch state failed for ${context}, err: ${err.stack}`);
+              this.logger.error(`fetch state failed for ${resource}, err: ${err.stack}`);
               return null;
             }
           },
           store: async ({ state, context }: { state: Buffer; context: NoteContext }) => {
-            await this.minio.uploadData(context.resource.stateStorageKey, state);
+            const { resource } = context;
+            if (!resource.stateStorageKey) {
+              resource.stateStorageKey = `state/${resource.resourceId}`;
+              await this.prisma.resource.update({
+                where: { resourceId: resource.resourceId },
+                data: { stateStorageKey: resource.stateStorageKey },
+              });
+            }
+            await this.minio.uploadData(resource.stateStorageKey, state);
           },
         }),
       ],
@@ -74,14 +84,6 @@ export class NoteWsGateway implements OnGatewayConnection {
         });
         if (!user) {
           throw new Error(`user not found`);
-        }
-
-        if (!resource.stateStorageKey) {
-          resource.stateStorageKey = `state/${resource.resourceId}`;
-          await this.prisma.resource.update({
-            where: { resourceId: resource.resourceId },
-            data: { stateStorageKey: resource.stateStorageKey },
-          });
         }
 
         // Set contextual data to use it in other hooks

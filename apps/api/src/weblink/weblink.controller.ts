@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import {
   Controller,
   Logger,
@@ -47,13 +46,12 @@ export class WeblinkController {
       return buildSuccessResponse({ parseStatus: 'processing', chunkStatus: 'processing' });
     }
 
-    const data: Partial<PingWeblinkData> = _.pick(
-      weblink,
+    const data: Partial<PingWeblinkData> = pick(weblink, [
       'linkId',
       'parseStatus',
       'chunkStatus',
       'parseSource',
-    );
+    ]);
 
     if (weblink.summary) data.summary = weblink.summary;
     if (weblink.relatedQuestions.length > 0) data.relatedQuestions = weblink.relatedQuestions;
