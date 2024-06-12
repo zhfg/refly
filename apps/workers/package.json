@@ -6,13 +6,16 @@
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
-		"build": "wrangler build"
+		"build": "wrangler build",
+		"test": "vitest run"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20240405.0",
 		"itty-router": "^3.0.12",
 		"typescript": "^5.0.4",
-		"wrangler": "^3.0.0"
+		"wrangler": "^3.0.0",
+		"@types/node": "~20.14.2",
+		"vitest": "1.5.0"
 	},
 	"dependencies": {
 		"@tsndr/cloudflare-worker-jwt": "^2.5.3",
