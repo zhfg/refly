@@ -15,10 +15,10 @@ import {
 import {
   CHANNEL_FINALIZE_RESOURCE,
   QUEUE_RESOURCE,
-  cleanMarkdownForIngest,
   genCollectionID,
   genResourceID,
 } from '../utils';
+import { cleanMarkdownForIngest } from '@refly/utils';
 import { FinalizeResourceParam } from './knowledge.dto';
 import { pick, omit } from '../utils';
 

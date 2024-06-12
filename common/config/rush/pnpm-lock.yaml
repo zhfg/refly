@@ -103,6 +103,9 @@ importers:
       '@refly/openapi-schema':
         specifier: workspace:*
         version: link:../../packages/openapi-schema
+      '@refly/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       '@sentry/cli':
         specifier: ^2.31.2
         version: 2.31.2
@@ -1337,6 +1340,12 @@ importers:
       tailwind-merge:
         specifier: ^2.2.2
         version: 2.2.2
+      turndown:
+        specifier: ^7.1.3
+        version: 7.1.3
+      turndown-plugin-gfm:
+        specifier: ^1.0.2
+        version: 1.0.2
       uuid:
         specifier: ^9.0.0
         version: 9.0.1
