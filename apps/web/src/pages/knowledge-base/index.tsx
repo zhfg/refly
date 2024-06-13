@@ -5,6 +5,7 @@ import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels"
 // 自定义组件
 import { KnowledgeBaseDetail } from "@refly/ai-workspace-common/components/knowledge-base/knowledge-base-detail"
 import { AICopilot } from "@refly/ai-workspace-common/components/knowledge-base/copilot"
+import { AINote } from "@refly/ai-workspace-common/components/knowledge-base/note"
 // utils
 // 自定义方法
 // stores
@@ -18,7 +19,6 @@ import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
 import { useResizePanel } from "@refly/ai-workspace-common/hooks/use-resize-panel"
 import { ErrorBoundary } from "@sentry/react"
-import { getDefaultPopupContainer } from "@refly/ai-workspace-common/utils/ui"
 
 // 用于快速选择
 export const quickActionList = ["summary"]
@@ -32,6 +32,7 @@ const KnowledgeLibraryLayout = () => {
   const [token] = useCookie("_refly_ai_sid")
   const [searchParams] = useSearchParams()
   const kbId = searchParams.get("kbId")
+  const noteId = searchParams.get("noteId") || "tempNoteId"
   const userStore = useUserStore()
   const { t } = useTranslation()
 
@@ -122,7 +123,24 @@ const KnowledgeLibraryLayout = () => {
                 <PanelResizeHandle
                   className="workspace-panel-resize"
                   key="workspace-panel-resize"
-                  id="workspace-panel-resize"
+                  id={`workspace-panel-resize-${kbId}`}
+                />
+              </>
+            ) : null}
+            {noteId ? (
+              <>
+                <Panel
+                  minSize={minSize}
+                  order={2}
+                  className="workspace-content-panel"
+                  key="workspace-content-panel"
+                  id={`workspace-content-panel-note`}>
+                  <AINote />
+                </Panel>
+                <PanelResizeHandle
+                  className="workspace-panel-resize"
+                  key="workspace-panel-resize"
+                  id={`workspace-panel-resize-${noteId}`}
                 />
               </>
             ) : null}
@@ -132,7 +150,7 @@ const KnowledgeLibraryLayout = () => {
               {...copilotStyle}
               minSize={minSize}
               key="workspace-content-panel"
-              id="workspace-content-panel">
+              id="workspace-content-panel-copilot">
               <AICopilot />
             </Panel>
           </PanelGroup>

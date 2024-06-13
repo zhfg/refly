@@ -313,7 +313,7 @@ importers:
         version: 0.1.3
       '@hocuspocus/provider':
         specifier: ^2.13.0
-        version: 2.13.0
+        version: 2.13.0(y-protocols@1.0.6)(yjs@13.6.16)
       '@refly/openapi-schema':
         specifier: workspace:*
         version: link:../../packages/openapi-schema
@@ -879,6 +879,9 @@ importers:
       '@hey-api/client-fetch':
         specifier: ~0.1.3
         version: 0.1.3
+      '@hocuspocus/provider':
+        specifier: ^2.13.0
+        version: 2.13.0(y-protocols@1.0.6)(yjs@13.6.16)
       '@paralleldrive/cuid2':
         specifier: ^2.2.2
         version: 2.2.2
@@ -891,6 +894,9 @@ importers:
       '@refly/constants':
         specifier: workspace:*
         version: link:../constants
+      '@refly/editor-common':
+        specifier: workspace:*
+        version: link:../editor-common
       '@refly/openapi-schema':
         specifier: workspace:*
         version: link:../openapi-schema
@@ -906,6 +912,48 @@ importers:
       '@tailwindcss/forms':
         specifier: ^0.5.3
         version: 0.5.3(tailwindcss@3.2.6)
+      '@tiptap/extension-character-count':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)
+      '@tiptap/extension-collaboration':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/pm@2.4.0)(y-prosemirror@1.2.6)
+      '@tiptap/extension-collaboration-cursor':
+        specifier: ^2.4.0
+        version: 2.4.0(y-prosemirror@1.2.6)
+      '@tiptap/extension-color':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/extension-text-style@2.4.0)
+      '@tiptap/extension-highlight':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)
+      '@tiptap/extension-image':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)
+      '@tiptap/extension-link':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)
+      '@tiptap/extension-list-item':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)
+      '@tiptap/extension-task-item':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)
+      '@tiptap/extension-task-list':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)
+      '@tiptap/extension-text-style':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)
+      '@tiptap/pm':
+        specifier: ^2.4.0
+        version: 2.4.0
+      '@tiptap/react':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/pm@2.4.0)(react-dom@18.2.0)(react@18.2.0)
+      '@tiptap/starter-kit':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/pm@2.4.0)
       '@types/is-hotkey':
         specifier: ~0.1.7
         version: 0.1.7
@@ -1017,12 +1065,24 @@ importers:
       terser:
         specifier: ^5.30.4
         version: 5.30.4
+      tiptap-markdown:
+        specifier: ^0.8.10
+        version: 0.8.10
       uuid:
         specifier: ^9.0.0
         version: 9.0.1
       vite-tsconfig-paths:
         specifier: ~4.3.2
         version: 4.3.2(typescript@5.3.3)(vite@5.2.12)
+      y-prosemirror:
+        specifier: ^1.2.6
+        version: 1.2.6(prosemirror-model@1.21.1)(y-protocols@1.0.6)(yjs@13.6.16)
+      y-protocols:
+        specifier: ^1.0.6
+        version: 1.0.6(yjs@13.6.16)
+      yjs:
+        specifier: ^13.6.16
+        version: 13.6.16
       zustand:
         specifier: ^4.5.1
         version: 4.5.1(@types/react@18.2.66)(react@18.2.0)
@@ -3468,7 +3528,7 @@ packages:
       - yjs
     dev: false
 
-  /@hocuspocus/provider@2.13.0:
+  /@hocuspocus/provider@2.13.0(y-protocols@1.0.6)(yjs@13.6.16):
     resolution: {integrity: sha512-xWRcyjW3koQajBCTEK3X2PrwaadUpaABsbYGKMWlr6I86pfknLJR8QIjEw1xgump9EbXjwtoXP6V6wuBkN4wkQ==}
     peerDependencies:
       y-protocols: ^1.0.6
@@ -3478,6 +3538,8 @@ packages:
       '@lifeomic/attempt': 3.1.0
       lib0: 0.2.94
       ws: 8.17.0
+      y-protocols: 1.0.6(yjs@13.6.16)
+      yjs: 13.6.16
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -7296,6 +7358,15 @@ packages:
       y-prosemirror: 1.2.6(prosemirror-model@1.21.1)(y-protocols@1.0.6)(yjs@13.6.16)
     dev: false
 
+  /@tiptap/extension-collaboration-cursor@2.4.0(y-prosemirror@1.2.6):
+    resolution: {integrity: sha512-BTVy9FCTGdHxYieJ4lteVLrRY5qAPQyfunhMwakVf1NT3iU9quE6CaeaIwt6wEDJPMPPKzOHg1/ltSz9nIDe4A==}
+    peerDependencies:
+      '@tiptap/core': ^2.0.0
+      y-prosemirror: ^1.2.5
+    dependencies:
+      y-prosemirror: 1.2.6(prosemirror-model@1.21.1)(y-protocols@1.0.6)(yjs@13.6.16)
+    dev: false
+
   /@tiptap/extension-collaboration@2.4.0(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)(y-prosemirror@1.2.6):
     resolution: {integrity: sha512-achU+GU9tqxn3zsU61CbwWrCausf0U23MJIpo8vnywOIx6E955by6okHEHoUazLIGVFXVc5DBzBP7bf+Snzk0Q==}
     peerDependencies:
@@ -7304,6 +7375,17 @@ packages:
       y-prosemirror: ^1.2.5
     dependencies:
       '@tiptap/core': 2.4.0(@tiptap/pm@2.4.0)
+      '@tiptap/pm': 2.4.0
+      y-prosemirror: 1.2.6(prosemirror-model@1.21.1)(y-protocols@1.0.6)(yjs@13.6.16)
+    dev: false
+
+  /@tiptap/extension-collaboration@2.4.0(@tiptap/pm@2.4.0)(y-prosemirror@1.2.6):
+    resolution: {integrity: sha512-achU+GU9tqxn3zsU61CbwWrCausf0U23MJIpo8vnywOIx6E955by6okHEHoUazLIGVFXVc5DBzBP7bf+Snzk0Q==}
+    peerDependencies:
+      '@tiptap/core': ^2.0.0
+      '@tiptap/pm': ^2.0.0
+      y-prosemirror: ^1.2.5
+    dependencies:
       '@tiptap/pm': 2.4.0
       y-prosemirror: 1.2.6(prosemirror-model@1.21.1)(y-protocols@1.0.6)(yjs@13.6.16)
     dev: false

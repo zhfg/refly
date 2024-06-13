@@ -163,11 +163,15 @@ export class KnowledgeService {
     if (needDoc) {
       if (resource.readOnly) {
         const metadata = detail.data;
-        const buf = await this.minio.downloadData(resource.storageKey || metadata.storageKey);
-        detail.doc = buf.toString();
+        if (resource.storageKey || metadata.storageKey) {
+          const buf = await this.minio.downloadData(resource.storageKey || metadata.storageKey);
+          detail.doc = buf.toString();
+        }
       } else {
-        const buf = await this.minio.downloadData(resource.stateStorageKey);
-        detail.doc = state2Markdown(buf);
+        if (resource.stateStorageKey) {
+          const buf = await this.minio.downloadData(resource.stateStorageKey);
+          detail.doc = state2Markdown(buf);
+        }
       }
     }
 

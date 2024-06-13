@@ -113,21 +113,7 @@ export const KnowledgeBaseDetail = (props: KnowledgeBaseDetailProps) => {
         </Panel>
       </PanelGroup>
       {knowledgeBaseStore?.kbModalVisible && knowledgeBaseStore.actionSource === ActionSource.KnowledgeBase ? (
-        <KnowledgeBaseListModal
-          title="知识库"
-          classNames="kb-list-modal"
-          placement="right"
-          width={360}
-          height="100%"
-          getPopupContainer={() => {
-            const container = getPopupContainer();
-            const elem = container?.querySelector('.knowledge-base-detail-container') as Element;
-
-            console.log('getPopupContainer knowledge', elem);
-
-            return elem;
-          }}
-        />
+        <KnowledgeBaseListModal title="知识库" classNames="kb-list-modal" placement="right" width={360} height="100%" />
       ) : null}
     </div>
   );
