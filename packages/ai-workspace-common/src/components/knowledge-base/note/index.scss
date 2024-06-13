@@ -86,12 +86,15 @@
 }
 
 .editor {
-  background-color: #fff;
-  border: 3px solid #0d0d0d;
+  background-color: transparent;
   border-radius: 0.75rem;
   color: #0d0d0d;
   display: flex;
   flex-direction: column;
+
+  .tiptap {
+    padding: 0;
+  }
 
   &__header {
     align-items: center;
@@ -106,19 +109,15 @@
   }
 
   &__content {
-    border: 1px solid gray;
-    margin: 1rem;
     flex: 1 1 auto;
     overflow-x: hidden;
     overflow-y: auto;
-    padding: 1.25rem 1rem;
+    padding: 12px;
     -webkit-overflow-scrolling: touch;
   }
 
   &__footer {
     align-items: center;
-    border-top: 3px solid #0d0d0d;
-    color: #0d0d0d;
     display: flex;
     flex: 0 0 auto;
     font-size: 12px;
