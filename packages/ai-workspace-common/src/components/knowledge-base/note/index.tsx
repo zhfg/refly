@@ -43,7 +43,7 @@ const ReadonlyEditor = ({ resourceDetail }: { resourceDetail: ResourceDetail }) 
   });
 
   return (
-    <div className="editor">
+    <div className="editor ai-note-editor">
       <h1>Readonly Editor</h1>
       <EditorContent style={{ margin: '1rem', border: '1px solid gray' }} className="editor__content" editor={editor} />
       <div className="editor__footer">
@@ -111,8 +111,8 @@ const CollaborativeEditor = ({ resourceDetail }: { resourceDetail: ResourceDetai
   }, [editor, collabEnabled, doc]);
 
   return (
-    <div className="editor">
-      <EditorContent className="editor__content" editor={editor} />
+    <div className="editor ai-note-editor">
+      <EditorContent className="editor__content" editor={editor} placeholder="写点东西..." />
       {/* <div className="editor__footer">
         <div className="editor__name">
           <span>Current document: {resourceId}</span>
@@ -183,7 +183,10 @@ export const AINote = () => {
 
   return (
     <div className="ai-note-container">
-      <Button onClick={() => handleInitEmptyNote()}>添加笔记</Button>
+      <div className="knowledge-base-detail-header">
+        <div className="knowledge-base-detail-navigation-bar"></div>
+      </div>
+      {/* <Button onClick={() => handleInitEmptyNote()}>添加笔记</Button> */}
       {resourceId ? <Resource resourceId={resourceId} /> : null}
     </div>
   );

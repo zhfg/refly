@@ -1,8 +1,10 @@
-import { Button } from '@arco-design/web-react';
+import { Button, Checkbox } from '@arco-design/web-react';
 
 // 自定义组件
 import {
   IconCaretDown,
+  IconEdit,
+  IconFile,
   IconFolder,
   IconHistory,
   IconMessage,
@@ -43,6 +45,8 @@ import { SourceListModal } from '@refly-packages/ai-workspace-common/components/
 import { useResizeCopilot } from '@refly-packages/ai-workspace-common/hooks/use-resize-copilot';
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { RegisterSkillComponent } from '@refly-packages/ai-workspace-common/skills/main-logic/register-skill-component';
+import { KnowledgeBaseNavHeader } from '@refly-packages/ai-workspace-common/components/knowledge-base/nav-header';
+import classNames from 'classnames';
 
 interface AICopilotProps {}
 
@@ -149,10 +153,34 @@ export const AICopilot = (props: AICopilotProps) => {
     <div className="ai-copilot-container">
       <div className="knowledge-base-detail-header">
         <div className="knowledge-base-detail-navigation-bar">
-          <div className="conv-meta">
-            <IconMessage style={{ color: 'rgba(0, 0, 0, .6)' }} />
-            <p className="conv-title">{conversationStore?.currentConversation?.title || '新会话'}</p>
-          </div>
+          <Checkbox key={'knowledge-base-resource-panel'} checked={knowledgeBaseStore.resourcePanelVisible}>
+            {({ checked }) => {
+              return (
+                <Button
+                  icon={<IconFile />}
+                  type="text"
+                  onClick={() => {
+                    knowledgeBaseStore.updateResourcePanelVisible(!knowledgeBaseStore.resourcePanelVisible);
+                  }}
+                  className={classNames('assist-action-item', { active: checked })}
+                ></Button>
+              );
+            }}
+          </Checkbox>
+          <Checkbox key={'knowledge-base-note-panel'} checked={knowledgeBaseStore.notePanelVisible}>
+            {({ checked }) => {
+              return (
+                <Button
+                  icon={<IconEdit />}
+                  type="text"
+                  onClick={() => {
+                    knowledgeBaseStore.updateNotePanelVisible(!knowledgeBaseStore.notePanelVisible);
+                  }}
+                  className={classNames('assist-action-item', { active: checked })}
+                ></Button>
+              );
+            }}
+          </Checkbox>
         </div>
         <div className="knowledge-base-detail-menu">
           {/* <Button

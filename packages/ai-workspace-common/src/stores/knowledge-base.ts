@@ -35,6 +35,8 @@ interface KnowledgeBaseState {
   // tabs
   tabs: KnowledgeBaseTab[];
   activeTab: string;
+  resourcePanelVisible: boolean;
+  notePanelVisible: boolean;
 
   // 详情
   currentKnowledgeBase: null | CollectionDetail;
@@ -68,6 +70,8 @@ interface KnowledgeBaseState {
   updateSelectedText: (selectedText: string) => void;
   updateTabs: (tabs: KnowledgeBaseTab[]) => void;
   updateActiveTab: (key: string) => void;
+  updateResourcePanelVisible: (visible: boolean) => void;
+  updateNotePanelVisible: (visible: boolean) => void;
   resetState: () => void;
 }
 
@@ -82,6 +86,8 @@ export const defaultState = {
     },
   ] as KnowledgeBaseTab[],
   activeTab: 'key1',
+  resourcePanelVisible: true,
+  notePanelVisible: false,
   convModalVisible: false,
   kbModalVisible: false,
   sourceListModalVisible: false,
@@ -136,5 +142,9 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
 
     // skill
     setSkillState: (newState: SkillState) => set((state) => ({ ...state, skillState: newState })),
+
+    // tabs
+    updateResourcePanelVisible: (visible: boolean) => set((state) => ({ ...state, resourcePanelVisible: visible })),
+    updateNotePanelVisible: (visible: boolean) => set((state) => ({ ...state, notePanelVisible: visible })),
   })),
 );
