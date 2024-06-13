@@ -112,16 +112,15 @@ const CollaborativeEditor = ({ resourceDetail }: { resourceDetail: ResourceDetai
 
   return (
     <div className="editor">
-      <h1>Collaborative Editor</h1>
-      <EditorContent style={{ margin: '1rem', border: '1px solid gray' }} className="editor__content" editor={editor} />
-      <div className="editor__footer">
+      <EditorContent className="editor__content" editor={editor} />
+      {/* <div className="editor__footer">
         <div className="editor__name">
           <span>Current document: {resourceId}</span>
         </div>
         <div className="editor__name">
           <span>Connection status: {status}</span>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
