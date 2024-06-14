@@ -4,7 +4,6 @@ import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-
 import { ChatMessage } from '@refly/openapi-schema';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
-import { useListenToSelection } from './use-listen-to-selection';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 const checkShowRelatedQuestion = (messsages: ChatMessage[] = []) => {

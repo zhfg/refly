@@ -17,7 +17,7 @@ import './index.scss';
 import { SearchTargetSelector } from '@refly-packages/ai-workspace-common/components/search-target-selector';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
-import { ContextStateDisplay } from './context-state-display';
+import { ContextStateDisplay } from './context-state-display/index';
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
 import { useEffect, useState } from 'react';
 import { ChatInput } from './chat-input';

@@ -67,7 +67,7 @@ export const KnowledgeBaseResourceDetail = () => {
     setIsFetching(false);
   };
 
-  useListenToSelection(`knowledge-base-resource-detail-container`);
+  useListenToSelection(`knowledge-base-resource-detail-container`, 'resource-detail');
   useEffect(() => {
     if (resId) {
       console.log('params resId', resId);
