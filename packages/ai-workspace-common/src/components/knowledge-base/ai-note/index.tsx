@@ -21,6 +21,7 @@ import { useSearchParams } from 'react-router-dom';
 import { IconClockCircle, IconEdit, IconList, IconMenu, IconMore, IconSearch } from '@arco-design/web-react/icon';
 import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useListenToSelection } from '@refly-packages/ai-workspace-common/hooks/use-listen-to-selection';
 
 const wsUrl = 'ws://localhost:1234';
 
@@ -134,6 +135,7 @@ const CollaborativeEditor = ({ resourceDetail }: { resourceDetail: ResourceDetai
       }
     });
   }, []);
+  useListenToSelection(`ai-note-editor`, 'note');
 
   return (
     <div className="editor ai-note-editor">

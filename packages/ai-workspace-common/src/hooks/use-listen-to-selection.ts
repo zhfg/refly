@@ -1,8 +1,8 @@
-import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { SelectedNamespace, useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { useEffect, useRef } from 'react';
 
-export const useListenToSelection = (selector: string) => {
+export const useListenToSelection = (selector: string, namespace: SelectedNamespace) => {
   const mouseUpTimerRef = useRef<number>();
   const mouseDownTimerRef = useRef<number>();
   const knowledgeBaseStore = useKnowledgeBaseStore();
@@ -14,6 +14,7 @@ export const useListenToSelection = (selector: string) => {
 
     if (text && text?.trim()?.length > 0) {
       knowledgeBaseStore.updateSelectedText(text);
+      knowledgeBaseStore.updateSelectedNamespace(namespace);
       searchStateStore.setSearchTarget(SearchTarget.CurrentPage);
     } else {
       knowledgeBaseStore.updateSelectedText('');

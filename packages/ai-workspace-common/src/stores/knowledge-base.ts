@@ -21,6 +21,8 @@ export interface SkillState {
   [skillName: string]: any;
 }
 
+export type SelectedNamespace = 'resource-detail' | 'note';
+
 interface KnowledgeBaseState {
   isSaveKnowledgeBaseModalVisible: boolean;
   knowledgeBaseList: CollectionListItem[];
@@ -31,6 +33,7 @@ interface KnowledgeBaseState {
 
   // selection
   currentSelectedText: string;
+  selectedNamespace: SelectedNamespace;
 
   // tabs
   tabs: KnowledgeBaseTab[];
@@ -68,6 +71,7 @@ interface KnowledgeBaseState {
   updateSourceListModalVisible: (sourceListModalVisible: boolean) => void;
   updateTempConvResources: (tempConvResources: ResourceDetail[]) => void;
   updateSelectedText: (selectedText: string) => void;
+  updateSelectedNamespace: (selectedNamespace: SelectedNamespace) => void;
   updateTabs: (tabs: KnowledgeBaseTab[]) => void;
   updateActiveTab: (key: string) => void;
   updateResourcePanelVisible: (visible: boolean) => void;
@@ -78,6 +82,7 @@ interface KnowledgeBaseState {
 export const defaultState = {
   isSaveKnowledgeBaseModalVisible: false,
   currentSelectedText: '',
+  selectedNamespace: 'resource-detail' as SelectedNamespace,
   tabs: [
     {
       title: 'New Tab',
@@ -136,6 +141,8 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
     updateActionSource: (actionSource: ActionSource) => set((state) => ({ ...state, actionSource })),
     updateTempConvResources: (tempConvResources: ResourceDetail[]) => set((state) => ({ ...state, tempConvResources })),
     updateSelectedText: (selectedText: string) => set((state) => ({ ...state, currentSelectedText: selectedText })),
+    updateSelectedNamespace: (selectedNamespace: SelectedNamespace) =>
+      set((state) => ({ ...state, selectedNamespace })),
     updateTabs: (tabs: KnowledgeBaseTab[]) => set((state) => ({ ...state, tabs })),
     updateActiveTab: (key: string) => set((state) => ({ ...state, activeTab: key })),
     resetState: () => set((state) => ({ ...state, ...defaultState })),
