@@ -6,9 +6,9 @@ import TaskItem from '@tiptap/extension-task-item';
 import TaskList from '@tiptap/extension-task-list';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
-import { EditorContent, useEditor } from '@tiptap/react';
+import { Editor, EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Markdown } from 'tiptap-markdown';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { ResourceDetail } from '@refly/openapi-schema';
@@ -18,6 +18,9 @@ import './index.scss';
 import { useCookie } from 'react-use';
 import { Button, Message as message } from '@arco-design/web-react';
 import { useSearchParams } from 'react-router-dom';
+import { IconClockCircle, IconEdit, IconList, IconMenu, IconMore, IconSearch } from '@arco-design/web-react/icon';
+import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
+import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 
 const wsUrl = 'ws://localhost:1234';
 
@@ -59,6 +62,8 @@ const CollaborativeEditor = ({ resourceDetail }: { resourceDetail: ResourceDetai
   const { resourceId, doc } = resourceDetail;
   const [collabEnabled, setCollabEnabled] = useState(resourceDetail.collabEnabled);
   const [status, setStatus] = useState('disconnected');
+  const lastCursorPosRef = useRef<number>();
+  const editorRef = useRef<Editor>();
   const [token] = useCookie('_refly_ai_sid');
 
   useEffect(() => {
@@ -77,7 +82,7 @@ const CollaborativeEditor = ({ resourceDetail }: { resourceDetail: ResourceDetai
   }, [resourceId]);
 
   // eslint-disable-next-line
-  const editor = useEditor({
+  editorRef.current = useEditor({
     extensions: [
       StarterKit.configure({
         history: false,
@@ -102,17 +107,37 @@ const CollaborativeEditor = ({ resourceDetail }: { resourceDetail: ResourceDetai
 
   useEffect(() => {
     console.log('trying to set content');
-    console.log('editor', editor);
-    if (editor && !collabEnabled) {
-      editor.commands.setContent(doc || '');
+    console.log('editor', editorRef.current);
+    if (editorRef.current && !collabEnabled) {
+      editorRef.current.commands.setContent(doc || '');
       setCollabEnabled(true);
       console.log('collaboration initialized!');
     }
-  }, [editor, collabEnabled, doc]);
+
+    if (editorRef.current && collabEnabled) {
+      editorRef.current.on('blur', () => {
+        lastCursorPosRef.current = editorRef.current?.view?.state?.selection?.$head?.pos;
+        console.log('cursor position', lastCursorPosRef.current);
+      });
+    }
+  }, [editorRef.current, collabEnabled, doc]);
+  useEffect(() => {
+    editorEmitter.on('insertBlow', (content) => {
+      const isFocused = editorRef.current?.isFocused;
+
+      if (isFocused) {
+        lastCursorPosRef.current = editorRef.current?.view?.state?.selection?.$head?.pos;
+        editorRef.current?.commands?.insertContentAt?.(lastCursorPosRef.current, content);
+      } else if (lastCursorPosRef.current) {
+        editorRef.current?.commands?.focus(lastCursorPosRef.current);
+        editorRef.current?.commands?.insertContentAt?.(lastCursorPosRef.current, content);
+      }
+    });
+  }, []);
 
   return (
     <div className="editor ai-note-editor">
-      <EditorContent className="editor__content" editor={editor} placeholder="写点东西..." />
+      <EditorContent className="editor__content" editor={editorRef.current} placeholder="写点东西..." />
       {/* <div className="editor__footer">
         <div className="editor__name">
           <span>Current document: {resourceId}</span>
@@ -125,7 +150,10 @@ const CollaborativeEditor = ({ resourceDetail }: { resourceDetail: ResourceDetai
   );
 };
 
-const Resource = ({ resourceId }: { resourceId: string }) => {
+export const AINote = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const noteId = searchParams.get('noteId');
+  const resourceId = noteId;
   const [resourceDetail, setResourceDetail] = useState<ResourceDetail | null>(null);
 
   useEffect(() => {
@@ -144,50 +172,56 @@ const Resource = ({ resourceId }: { resourceId: string }) => {
     return <p>Loading...</p>;
   }
 
-  return resourceDetail.readOnly ? (
-    <ReadonlyEditor resourceDetail={resourceDetail} />
-  ) : (
-    <CollaborativeEditor resourceDetail={resourceDetail} />
-  );
-};
-
-export const AINote = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const noteId = searchParams.get('noteId');
-  const resourceId = noteId;
-
-  const jumpNewNote = (noteId: string) => {
-    const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.set('noteId', noteId);
-    setSearchParams(newSearchParams);
-    navigate(`/knowledge-base?${newSearchParams.toString()}`);
-  };
-
-  const handleInitEmptyNote = async () => {
-    const res = await getClient().createResource({
-      body: {
-        resourceType: 'note',
-        title: 'New Article',
-        data: {},
-        content: '',
-      },
-    });
-
-    if (!res?.data?.success) {
-      message.error(`创建笔记失败，请重试！`);
-    }
-    const noteId = res?.data?.data?.resourceId;
-    jumpNewNote(noteId);
-  };
-
   return (
     <div className="ai-note-container">
       <div className="knowledge-base-detail-header">
-        <div className="knowledge-base-detail-navigation-bar"></div>
+        <div className="knowledge-base-detail-navigation-bar">
+          <div className="conv-meta">
+            <IconEdit style={{ color: 'rgba(0, 0, 0, .6)' }} />
+            <p className="conv-title">{resourceDetail?.title || '新笔记'}</p>
+          </div>
+        </div>
+        <div className="knowledge-base-detail-menu">
+          <div className="conv-meta" style={{ marginRight: 8 }}>
+            <IconClockCircle style={{ color: 'rgba(0, 0, 0, .4)' }} />
+            <p className="conv-title" style={{ color: 'rgba(0, 0, 0, .4)' }}>
+              笔记已自动保存
+            </p>
+          </div>
+          <div className="conv-meta">
+            <Button
+              icon={<IconSearch style={{ fontSize: 16 }} />}
+              type="text"
+              onClick={() => {}}
+              className={'assist-action-item'}
+            ></Button>
+          </div>
+          <div className="conv-meta">
+            <Button
+              icon={<IconList style={{ fontSize: 16 }} />}
+              type="text"
+              onClick={() => {}}
+              className={'assist-action-item'}
+            ></Button>
+          </div>
+          <div className="conv-meta">
+            <Button
+              icon={<IconMore style={{ fontSize: 16 }} />}
+              type="text"
+              onClick={() => {}}
+              className={'assist-action-item'}
+            ></Button>
+          </div>
+        </div>
       </div>
       {/* <Button onClick={() => handleInitEmptyNote()}>添加笔记</Button> */}
-      {resourceId ? <Resource resourceId={resourceId} /> : null}
+      {resourceId ? (
+        resourceDetail.readOnly ? (
+          <ReadonlyEditor resourceDetail={resourceDetail} />
+        ) : (
+          <CollaborativeEditor resourceDetail={resourceDetail} />
+        )
+      ) : null}
     </div>
   );
 };

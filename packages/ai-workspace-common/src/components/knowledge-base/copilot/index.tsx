@@ -47,6 +47,7 @@ import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores
 import { RegisterSkillComponent } from '@refly-packages/ai-workspace-common/skills/main-logic/register-skill-component';
 import { KnowledgeBaseNavHeader } from '@refly-packages/ai-workspace-common/components/knowledge-base/nav-header';
 import classNames from 'classnames';
+import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
 
 interface AICopilotProps {}
 
@@ -70,6 +71,9 @@ export const AICopilot = (props: AICopilotProps) => {
   const { t, i18n } = useTranslation();
   const uiLocale = i18n?.languages?.[0] as LOCALE;
   const outputLocale = userStore?.localSettings?.outputLocale;
+
+  // ai-note handler
+  useAINote();
 
   const handleSwitchSearchTarget = () => {
     if (showContextState) {
