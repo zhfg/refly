@@ -3,12 +3,22 @@ import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { ChatMessage } from '@refly/openapi-schema';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
-import { Avatar, Button, Spin, Message } from '@arco-design/web-react';
-import { IconCopy, IconQuote, IconRight } from '@arco-design/web-react/icon';
+import { Avatar, Button, Spin, Message, Dropdown, Menu } from '@arco-design/web-react';
+import {
+  IconBook,
+  IconCaretDown,
+  IconCheckCircle,
+  IconCopy,
+  IconEdit,
+  IconImport,
+  IconQuote,
+  IconRight,
+} from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
 // 自定义组件
 import { SourceList } from '@refly-packages/ai-workspace-common/components/source-list';
 import { safeParseJSON } from '../../../utils/parse';
+import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
 
 export const HumanMessage = (props: { message: Partial<ChatMessage> }) => {
   const { message } = props;
@@ -35,6 +45,32 @@ export const AssistantMessage = (props: {
       ? safeParseJSON(message?.relatedQuestions)
       : message?.relatedQuestions;
 
+  // TODO: 移入新组件
+
+  const dropList = (
+    <Menu
+      className={'output-locale-list-menu'}
+      onClickMenuItem={(key) => {
+        if (key === 'createNewNote') {
+          editorEmitter.emit('createNewNote', message?.content);
+        } else if (key === 'insertNote') {
+          editorEmitter.emit('insertBlow', message?.content);
+        }
+      }}
+      style={{ width: 240 }}
+    >
+      <Menu.Item key="insertNote">
+        <IconImport /> 插入笔记
+      </Menu.Item>
+      <Menu.Item key="insertNote">
+        <IconCheckCircle /> 替换选中
+      </Menu.Item>
+      <Menu.Item key="createNewNote">
+        <IconBook /> 创建新笔记
+      </Menu.Item>
+    </Menu>
+  );
+
   return (
     <div className="ai-copilot-message assistant-message-container ">
       <div className="session-source">
@@ -57,6 +93,7 @@ export const AssistantMessage = (props: {
                 type="text"
                 icon={<IconCopy style={{ fontSize: 14 }} />}
                 style={{ color: '#64645F' }}
+                className={'assist-action-item'}
                 onClick={() => {
                   copyToClipboard(message?.content || '');
                   Message.success('复制成功');
@@ -64,6 +101,20 @@ export const AssistantMessage = (props: {
               >
                 复制
               </Button>
+              <Dropdown droplist={dropList} position="bl">
+                <Button
+                  type="text"
+                  className={'assist-action-item'}
+                  icon={<IconImport style={{ fontSize: 14 }} />}
+                  style={{ color: '#64645F' }}
+                  onClick={() => {
+                    editorEmitter.emit('insertBlow', message?.content || '');
+                  }}
+                >
+                  插入笔记
+                  <IconCaretDown />
+                </Button>
+              </Dropdown>
             </div>
             <div className="session-answer-actionbar-right"></div>
           </div>
