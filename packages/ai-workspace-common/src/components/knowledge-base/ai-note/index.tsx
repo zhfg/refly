@@ -4,6 +4,8 @@ import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import Highlight from '@tiptap/extension-highlight';
 import TaskItem from '@tiptap/extension-task-item';
 import TaskList from '@tiptap/extension-task-list';
+import Placeholder from '@tiptap/extension-placeholder';
+import Document from '@tiptap/extension-document';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import { Editor, EditorContent, useEditor } from '@tiptap/react';
@@ -24,6 +26,10 @@ import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/store
 import { useListenToSelection } from '@refly-packages/ai-workspace-common/hooks/use-listen-to-selection';
 
 const wsUrl = 'ws://localhost:1234';
+
+const CustomDocument = Document.extend({
+  content: 'heading block*',
+});
 
 const ReadonlyEditor = ({ resourceDetail }: { resourceDetail: ResourceDetail }) => {
   const { doc, resourceId } = resourceDetail;
@@ -85,8 +91,19 @@ const CollaborativeEditor = ({ resourceDetail }: { resourceDetail: ResourceDetai
   // eslint-disable-next-line
   editorRef.current = useEditor({
     extensions: [
+      CustomDocument,
       StarterKit.configure({
         history: false,
+        document: false,
+      }),
+      Placeholder.configure({
+        placeholder: ({ node }) => {
+          if (node.type.name === 'heading') {
+            return '新文章';
+          }
+
+          return '添加正文内容...';
+        },
       }),
       Link,
       Image,
@@ -139,7 +156,7 @@ const CollaborativeEditor = ({ resourceDetail }: { resourceDetail: ResourceDetai
 
   return (
     <div className="editor ai-note-editor">
-      <EditorContent className="editor__content" editor={editorRef.current} placeholder="写点东西..." />
+      <EditorContent className="editor__content" editor={editorRef.current} />
       {/* <div className="editor__footer">
         <div className="editor__name">
           <span>Current document: {resourceId}</span>
