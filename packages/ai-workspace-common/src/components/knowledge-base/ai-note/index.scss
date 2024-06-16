@@ -1,5 +1,32 @@
+:root {
+  --editor-white: #fff;
+  --editor-black: #2e2b29;
+  --editor-black-contrast: #110f0e;
+  --editor-gray-1: rgba(61, 37, 20, 0.05);
+  --editor-gray-2: rgba(61, 37, 20, 0.08);
+  --editor-gray-3: rgba(61, 37, 20, 0.12);
+  --editor-gray-4: rgba(53, 38, 28, 0.3);
+  --editor-gray-5: rgba(28, 25, 23, 0.6);
+  --editor-purple: #6a00f5;
+  --editor-purple-contrast: #5800cc;
+  --editor-purple-light: rgba(88, 5, 255, 0.05);
+  --editor-yellow-contrast: #facc15;
+  --editor-yellow: rgba(250, 204, 21, 0.4);
+  --editor-yellow-light: #fffae5;
+  --editor-red: #ff5c33;
+  --editor-red-light: #ffebe5;
+  --editor-shadow: 0px 12px 33px 0px rgba(0, 0, 0, 0.06), 0px 3.618px 9.949px 0px rgba(0, 0, 0, 0.04);
+}
+
 /* Basic editor styles */
 .tiptap {
+  caret-color: var(--purple);
+  margin: 1.5rem;
+
+  &:focus {
+    outline: none;
+  }
+
   > * + * {
     margin-top: 0.75em;
   }
@@ -170,6 +197,14 @@
         color: #fff;
       }
     }
+  }
+
+  .is-empty:before {
+    color: var(--editor-gray-4);
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
   }
 }
 
