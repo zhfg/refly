@@ -89,7 +89,8 @@
     "mitt": "~3.0.1",
     "@tiptap/extension-placeholder": "~2.4.0",
     "@tiptap/extension-document": "~2.4.0",
-    "react-icons": "~5.2.1"
+    "react-icons": "~5.2.1",
+    "use-debounce": "^9.0.3"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",

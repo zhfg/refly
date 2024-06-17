@@ -1,14 +1,3 @@
-import { HocuspocusProvider } from '@hocuspocus/provider';
-import Collaboration from '@tiptap/extension-collaboration';
-import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
-import Highlight from '@tiptap/extension-highlight';
-import TaskItem from '@tiptap/extension-task-item';
-import TaskList from '@tiptap/extension-task-list';
-import Placeholder from '@tiptap/extension-placeholder';
-import Document from '@tiptap/extension-document';
-import Link from '@tiptap/extension-link';
-import Image from '@tiptap/extension-image';
-import { Editor, EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Markdown } from 'tiptap-markdown';
@@ -24,62 +13,37 @@ import { IconClockCircle, IconEdit, IconList, IconMenu, IconMore, IconSearch } f
 import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useListenToSelection } from '@refly-packages/ai-workspace-common/hooks/use-listen-to-selection';
+// 编辑器组件
+import { CollabEditorCommand, CollabGenAIMenuSwitch } from '@refly-packages/editor-component/advanced-editor';
+import { EditorRoot } from '@refly-packages/editor-core/components';
+import { useEditor } from '@refly-packages/editor-core/components';
+import { EditorContent, type JSONContent, EditorInstance } from '@refly-packages/editor-core/components';
+import { ImageResizer, handleCommandNavigation } from '@refly-packages/editor-core/extensions';
+import { defaultExtensions } from '@refly-packages/editor-component/extensions';
+import { defaultEditorContent } from '@refly-packages/editor-component/data/content';
+import { uploadFn } from '@refly-packages/editor-component/image-upload';
+import { slashCommand } from '@refly-packages/editor-component/slash-command';
+import { HocuspocusProvider } from '@hocuspocus/provider';
+import Collaboration from '@tiptap/extension-collaboration';
+import { useDebouncedCallback } from 'use-debounce';
+import { handleImageDrop, handleImagePaste } from '@refly-packages/editor-core/plugins';
+import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
+// 编辑器样式
+// 图标
+import { AiOutlineWarning, AiOutlineFileWord } from 'react-icons/ai';
 
 const wsUrl = 'ws://localhost:1234';
-
-const CustomDocument = Document.extend({
-  content: 'heading block*',
-});
-
-const ReadonlyEditor = ({ resourceDetail }: { resourceDetail: ResourceDetail }) => {
-  const { doc, resourceId } = resourceDetail;
-  const editor = useEditor({
-    content: doc,
-    editable: false,
-    extensions: [
-      StarterKit.configure({
-        history: false,
-      }),
-      Link,
-      Image,
-      Highlight,
-      TaskList,
-      TaskItem,
-      Markdown,
-    ],
-    onUpdate: ({ editor }) => {
-      console.log('update', editor.getHTML());
-    },
-  });
-
-  return (
-    <div className="editor ai-note-editor">
-      <h1>Readonly Editor</h1>
-      <EditorContent style={{ margin: '1rem', border: '1px solid gray' }} className="editor__content" editor={editor} />
-      <div className="editor__footer">
-        <div className="editor__name">
-          <span>Current document: {resourceId}</span>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const CollaborativeEditor = ({ resourceDetail }: { resourceDetail: ResourceDetail }) => {
   const { resourceId, doc } = resourceDetail;
   const [collabEnabled, setCollabEnabled] = useState(resourceDetail.collabEnabled);
-  const [status, setStatus] = useState('disconnected');
   const lastCursorPosRef = useRef<number>();
-  const editorRef = useRef<Editor>();
   const [token] = useCookie('_refly_ai_sid');
+  const knowledgeBaseStore = useKnowledgeBaseStore();
+  const editorRef = useRef<EditorInstance>();
+  const [initialContent, setInitialContent] = useState<null | JSONContent>(null);
 
-  useEffect(() => {
-    // Update status changes
-    websocketProvider.on('status', (event) => {
-      setStatus(event.status);
-    });
-  }, []);
-
+  // 准备 extensions
   const websocketProvider = useMemo(() => {
     return new HocuspocusProvider({
       url: wsUrl,
@@ -87,41 +51,49 @@ const CollaborativeEditor = ({ resourceDetail }: { resourceDetail: ResourceDetai
       token,
     });
   }, [resourceId]);
+  const extensions = [
+    ...defaultExtensions,
+    slashCommand,
+    Collaboration.configure({
+      document: websocketProvider.document,
+    }),
+    CollaborationCursor.configure({
+      provider: websocketProvider,
+    }),
+  ];
 
-  // eslint-disable-next-line
-  editorRef.current = useEditor({
-    extensions: [
-      CustomDocument,
-      StarterKit.configure({
-        history: false,
-        document: false,
-      }),
-      Placeholder.configure({
-        placeholder: ({ node }) => {
-          if (node.type.name === 'heading') {
-            return '新文章';
-          }
+  //Apply Codeblock Highlighting on the HTML from editor.getHTML()
+  const highlightCodeblocks = (content: string) => {
+    const doc = new DOMParser().parseFromString(content, 'text/html');
+    doc.querySelectorAll('pre code').forEach((el) => {
+      // @ts-ignore
+      // https://highlightjs.readthedocs.io/en/latest/api.html?highlight=highlightElement#highlightelement
+      hljs.highlightElement(el);
+    });
+    return new XMLSerializer().serializeToString(doc);
+  };
 
-          return '添加正文内容...';
-        },
-      }),
-      Link,
-      Image,
-      Highlight,
-      TaskList,
-      TaskItem,
-      Markdown,
-      Collaboration.configure({
-        document: websocketProvider.document,
-      }),
-      CollaborationCursor.configure({
-        provider: websocketProvider,
-      }),
-    ],
-    onUpdate: ({ editor }) => {
-      console.log('update', editor.getJSON());
-    },
-  });
+  const debouncedUpdates = useDebouncedCallback(async (editor: EditorInstance) => {
+    const json = editor.getJSON();
+    knowledgeBaseStore.updateNoteCharsCount(editor.storage.characterCount.words());
+    window.localStorage.setItem('html-content', highlightCodeblocks(editor.getHTML()));
+    window.localStorage.setItem('novel-content', JSON.stringify(json));
+    window.localStorage.setItem('markdown', editor.storage.markdown.getMarkdown());
+    knowledgeBaseStore.updateNoteSaveStatus('Saved');
+  }, 500);
+
+  useEffect(() => {
+    const content = window.localStorage.getItem('novel-content');
+    if (content) setInitialContent(JSON.parse(content));
+    else setInitialContent(defaultEditorContent);
+  }, []);
+
+  useEffect(() => {
+    // Update status changes
+    websocketProvider.on('status', (event) => {
+      knowledgeBaseStore.updateNoteServerStatus(event.status);
+    });
+  }, []);
 
   useEffect(() => {
     console.log('trying to set content');
@@ -147,24 +119,58 @@ const CollaborativeEditor = ({ resourceDetail }: { resourceDetail: ResourceDetai
         lastCursorPosRef.current = editorRef.current?.view?.state?.selection?.$head?.pos;
         editorRef.current?.commands?.insertContentAt?.(lastCursorPosRef.current, content);
       } else if (lastCursorPosRef.current) {
-        editorRef.current?.commands?.focus(lastCursorPosRef.current);
-        editorRef.current?.commands?.insertContentAt?.(lastCursorPosRef.current, content);
+        const selection = editorRef.current.view.state.selection;
+
+        editorRef.current
+          .chain()
+          .focus(lastCursorPosRef.current)
+          .insertContentAt(
+            {
+              from: lastCursorPosRef.current,
+              to: lastCursorPosRef.current,
+            },
+            content,
+          )
+          .run();
+        // editorRef.current?.commands?.focus(lastCursorPosRef.current);
+        // editorRef.current?.commands?.insertContentAt?.(lastCursorPosRef.current, content);
       }
     });
   }, []);
+
   useListenToSelection(`ai-note-editor`, 'note');
 
   return (
     <div className="editor ai-note-editor">
-      <EditorContent className="editor__content" editor={editorRef.current} />
-      {/* <div className="editor__footer">
-        <div className="editor__name">
-          <span>Current document: {resourceId}</span>
-        </div>
-        <div className="editor__name">
-          <span>Connection status: {status}</span>
-        </div>
-      </div> */}
+      <div className="relative w-full max-w-screen-lg h-full">
+        <EditorRoot>
+          <EditorContent
+            initialContent={initialContent}
+            extensions={extensions}
+            onCreate={({ editor }) => (editorRef.current = editor)}
+            className="relative h-full w-full max-w-screen-lg border-muted  sm:rounded-lg"
+            editorProps={{
+              handleDOMEvents: {
+                keydown: (_view, event) => handleCommandNavigation(event),
+              },
+              handlePaste: (view, event) => handleImagePaste(view, event, uploadFn),
+              handleDrop: (view, event, _slice, moved) => handleImageDrop(view, event, moved, uploadFn),
+              attributes: {
+                class:
+                  'prose prose-lg dark:prose-invert prose-headings:font-title font-default focus:outline-none max-w-full',
+              },
+            }}
+            onUpdate={({ editor }) => {
+              debouncedUpdates(editor);
+              knowledgeBaseStore.updateNoteSaveStatus('Unsaved');
+            }}
+            slotAfter={<ImageResizer />}
+          >
+            <CollabEditorCommand />
+            <CollabGenAIMenuSwitch />
+          </EditorContent>
+        </EditorRoot>
+      </div>
     </div>
   );
 };
@@ -174,6 +180,7 @@ export const AINote = () => {
   const noteId = searchParams.get('noteId');
   const resourceId = noteId;
   const [resourceDetail, setResourceDetail] = useState<ResourceDetail | null>(null);
+  const knowledgeBaseStore = useKnowledgeBaseStore();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -201,12 +208,30 @@ export const AINote = () => {
           </div>
         </div>
         <div className="knowledge-base-detail-menu">
-          <div className="conv-meta" style={{ marginRight: 8 }}>
-            <IconClockCircle style={{ color: 'rgba(0, 0, 0, .4)' }} />
-            <p className="conv-title" style={{ color: 'rgba(0, 0, 0, .4)' }}>
-              笔记已自动保存
-            </p>
-          </div>
+          {resourceId && knowledgeBaseStore.noteServerStatus === 'connected' ? (
+            <div className="conv-meta" style={{ marginRight: 8 }}>
+              <AiOutlineFileWord style={{ color: 'rgba(0, 0, 0, .4)' }} />
+              <p className="conv-title" style={{ color: 'rgba(0, 0, 0, .4)' }}>
+                共 {knowledgeBaseStore.noteCharsCount} 字
+              </p>
+            </div>
+          ) : null}
+          {resourceId && knowledgeBaseStore.noteServerStatus === 'disconnected' ? (
+            <div className="conv-meta" style={{ marginRight: 8 }}>
+              <AiOutlineWarning style={{ color: 'rgba(0, 0, 0, .4)' }} />
+              <p className="conv-title" style={{ color: 'rgba(0, 0, 0, .4)' }}>
+                服务已断开
+              </p>
+            </div>
+          ) : null}
+          {resourceId && knowledgeBaseStore.noteServerStatus === 'connected' ? (
+            <div className="conv-meta" style={{ marginRight: 8 }}>
+              <IconClockCircle style={{ color: 'rgba(0, 0, 0, .4)' }} />
+              <p className="conv-title" style={{ color: 'rgba(0, 0, 0, .4)' }}>
+                {knowledgeBaseStore.noteSaveStatus === 'Unsaved' ? `笔记已自动保存` : `笔记保存中...`}
+              </p>
+            </div>
+          ) : null}
           <div className="conv-meta">
             <Button
               icon={<IconSearch style={{ fontSize: 16 }} />}

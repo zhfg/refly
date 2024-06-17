@@ -13,6 +13,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@refly-packages/editor-core': path.resolve(__dirname, './src/headless-core'),
+      '@refly-packages/editor-component': path.resolve(__dirname, './src/components'),
     },
   },
 });

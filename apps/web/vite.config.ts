@@ -40,11 +40,19 @@ export default defineConfig(({ mode }) => {
         "@": path.resolve(__dirname, "./src"),
         "@refly/ai-workspace-common": path.resolve(
           __dirname,
-          "./node_modules/@refly/ai-workspace-common/src",
+          "../../packages/ai-workspace-common/src",
         ),
         "@refly-packages/ai-workspace-common": path.resolve(
           __dirname,
-          "./node_modules/@refly/ai-workspace-common/src",
+          "../../packages/ai-workspace-common/src",
+        ),
+        "@refly-packages/editor-component": path.resolve(
+          __dirname,
+          "../../packages/editor-common/src/components",
+        ),
+        "@refly-packages/editor-core": path.resolve(
+          __dirname,
+          "../../packages/editor-common/src/headless-core",
         ),
       },
     },

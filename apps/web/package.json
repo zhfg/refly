@@ -60,7 +60,11 @@
     "@refly/constants": "workspace:*",
     "@refly/openapi-schema": "workspace:*",
     "@refly/ai-workspace-common": "workspace:*",
-    "vite-tsconfig-paths": "~4.3.2"
+    "@refly/editor-common": "workspace:*",
+    "vite-tsconfig-paths": "~4.3.2",
+    "@tailwindcss/typography": "^0.5.10",
+    "tailwindcss-animate": "^1.0.6",
+    "use-debounce": "^9.0.3"
   },
   "devDependencies": {
     "@refly/arco-vite-plugin-react": "workspace:*",

@@ -23,7 +23,9 @@
     "baseUrl": ".",
     "rootDir": "./src",
     "paths": {
-      "@refly-packages/ai-workspace-common/*": ["./src/*"]
+      "@refly-packages/ai-workspace-common/*": ["./src/*"],
+      "@refly-packages/editor-component/*": ["../editor-common/src/components/*"],
+      "@refly-packages/editor-core/*": ["../editor-common/src/headless-core/*"]
     },
     "composite": true,
     "noEmit": false,
@@ -32,5 +34,5 @@
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "references": [{ "path": "./tsconfig.node.json" }, { "path": "../editor-common/tsconfig.json"}]
 }

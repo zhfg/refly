@@ -1,9 +1,11 @@
 import { CommandGroup, CommandItem, CommandSeparator } from '../ui/command';
 import { useEditor } from '@refly-packages/editor-core/components';
 import { Check, TextQuote, TrashIcon } from 'lucide-react';
+import { useEffect } from 'react';
 
 const AICompletionCommands = ({ completion, onDiscard }: { completion: string; onDiscard: () => void }) => {
   const { editor } = useEditor();
+
   return (
     <>
       <CommandGroup>

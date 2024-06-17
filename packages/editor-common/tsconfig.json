@@ -30,7 +30,8 @@
     "rootDir": "./src",
     "sourceRoot": "/",
     "paths": {
-      "@refly-packages/editor-core/*": ["./src/headless-core/*"]
+      "@refly-packages/editor-core/*": ["./src/headless-core/*"],
+      "@refly-packages/editor-component/*": ["./src/components/*"]
     },
     "composite": true,
     "noEmit": false,
