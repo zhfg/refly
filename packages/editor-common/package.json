@@ -85,7 +85,9 @@
     "postcss-nesting": "~12.1.5",
     "postcss-nested": "~6.0.1",
     "@hocuspocus/provider": "^2.13.0",
-    "react-use": "^17.5.0"
+    "react-use": "^17.5.0",
+    "copy-to-clipboard": "~3.3.3",
+    "@arco-design/web-react": "^2.62.1"
   },
   "devDependencies": {
     "typescript": "^5",

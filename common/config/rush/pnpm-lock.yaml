@@ -1189,6 +1189,9 @@ importers:
 
   ../../packages/editor-common:
     dependencies:
+      '@arco-design/web-react':
+        specifier: ^2.62.1
+        version: 2.62.1(@types/react@18.2.66)(react-dom@18.2.0)(react@18.2.0)
       '@hocuspocus/provider':
         specifier: ^2.13.0
         version: 2.13.0(y-protocols@1.0.6)(yjs@13.6.16)
@@ -1306,6 +1309,9 @@ importers:
       cmdk:
         specifier: ^0.2.1
         version: 0.2.1(@types/react@18.2.66)(react-dom@18.2.0)(react@18.2.0)
+      copy-to-clipboard:
+        specifier: ~3.3.3
+        version: 3.3.3
       eventsource-parser:
         specifier: ^0.1.0
         version: 0.1.0
@@ -21459,7 +21465,7 @@ packages:
       debug: 4.3.4
       globrex: 0.1.2
       tsconfck: 3.0.3(typescript@5.3.3)
-      vite: 5.2.12(@types/node@18.15.11)(less@4.2.0)(sass@1.71.1)(terser@5.30.4)
+      vite: 5.2.12(@types/node@18.15.3)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -21563,6 +21569,7 @@ packages:
       terser: 5.30.4
     optionalDependencies:
       fsevents: 2.3.3
+    dev: true
 
   /vite@5.2.12(@types/node@18.15.3):
     resolution: {integrity: sha512-/gC8GxzxMK5ntBwb48pR32GGhENnjtY30G4A0jemunsBkiEZFw60s8InGpN8gkhHEkjnRK1aSAxeQgwvFhUHAA==}
@@ -21598,7 +21605,6 @@ packages:
       rollup: 4.18.0
     optionalDependencies:
       fsevents: 2.3.3
-    dev: true
 
   /vite@5.2.12(@types/node@20.12.12):
     resolution: {integrity: sha512-/gC8GxzxMK5ntBwb48pR32GGhENnjtY30G4A0jemunsBkiEZFw60s8InGpN8gkhHEkjnRK1aSAxeQgwvFhUHAA==}
