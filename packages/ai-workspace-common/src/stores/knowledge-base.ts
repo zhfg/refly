@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension';
 import type { CollectionListItem, CollectionDetail, ResourceDetail } from '@refly/openapi-schema';
+import { EditorInstance } from '@refly-packages/editor-core/components';
 
 export enum ActionSource {
   KnowledgeBase = 'knowledge-base',
@@ -44,6 +45,7 @@ interface KnowledgeBaseState {
   notePanelVisible: boolean;
 
   // 笔记
+  editor: EditorInstance | null;
   noteServerStatus: NoteServerStatus;
   noteCharsCount: number;
   noteSaveStatus: NoteSaveStatus;
@@ -86,6 +88,7 @@ interface KnowledgeBaseState {
   updateNoteServerStatus: (status: NoteServerStatus) => void;
   updateNoteSaveStatus: (status: NoteSaveStatus) => void;
   updateNoteCharsCount: (count: number) => void;
+  updateEditor: (editor: EditorInstance) => void;
   resetState: () => void;
 }
 
@@ -105,6 +108,7 @@ export const defaultState = {
   notePanelVisible: false,
 
   // notes
+  editor: null,
   noteServerStatus: 'disconnected' as NoteServerStatus,
   noteCharsCount: 0,
   noteSaveStatus: 'Unsaved' as NoteSaveStatus,
@@ -171,6 +175,7 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
     updateNotePanelVisible: (visible: boolean) => set((state) => ({ ...state, notePanelVisible: visible })),
 
     // notes
+    updateEditor: (editor: EditorInstance) => set((state) => ({ ...state, editor })),
     updateNoteServerStatus: (status: NoteServerStatus) => set((state) => ({ ...state, noteServerStatus: status })),
     updateNoteSaveStatus: (status: NoteSaveStatus) => set((state) => ({ ...state, noteSaveStatus: status })),
     updateNoteCharsCount: (count: number) => set((state) => ({ ...state, noteCharsCount: count })),

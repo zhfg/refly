@@ -147,7 +147,10 @@ const CollaborativeEditor = ({ resourceDetail }: { resourceDetail: ResourceDetai
           <EditorContent
             initialContent={initialContent}
             extensions={extensions}
-            onCreate={({ editor }) => (editorRef.current = editor)}
+            onCreate={({ editor }) => {
+              editorRef.current = editor;
+              knowledgeBaseStore.updateEditor(editor);
+            }}
             className="relative h-full w-full max-w-screen-lg border-muted  sm:rounded-lg"
             editorProps={{
               handleDOMEvents: {
@@ -228,7 +231,7 @@ export const AINote = () => {
             <div className="conv-meta" style={{ marginRight: 8 }}>
               <IconClockCircle style={{ color: 'rgba(0, 0, 0, .4)' }} />
               <p className="conv-title" style={{ color: 'rgba(0, 0, 0, .4)' }}>
-                {knowledgeBaseStore.noteSaveStatus === 'Unsaved' ? `笔记已自动保存` : `笔记保存中...`}
+                {knowledgeBaseStore.noteSaveStatus === 'Saved' ? `笔记已自动保存` : `笔记保存中...`}
               </p>
             </div>
           ) : null}

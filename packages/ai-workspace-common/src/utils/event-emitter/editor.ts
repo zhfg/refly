@@ -7,4 +7,6 @@ type Events = {
   createNewNote: string;
 };
 
+export type EditorOperation = 'insertBlow' | 'replaceSelection' | 'contineInChat' | 'createNewNote';
+
 export const editorEmitter = mitt<Events>();

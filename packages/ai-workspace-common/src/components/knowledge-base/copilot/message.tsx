@@ -18,7 +18,8 @@ import { useTranslation } from 'react-i18next';
 // 自定义组件
 import { SourceList } from '@refly-packages/ai-workspace-common/components/source-list';
 import { safeParseJSON } from '../../../utils/parse';
-import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
+import { EditorOperation, editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
+import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 
 export const HumanMessage = (props: { message: Partial<ChatMessage> }) => {
   const { message } = props;
@@ -39,6 +40,7 @@ export const AssistantMessage = (props: {
 }) => {
   const { message, isPending = false, isLastSession = false, handleAskFollowing } = props;
   const { t } = useTranslation();
+  const knowledgeBaseStore = useKnowledgeBaseStore();
   const sources = typeof message?.sources === 'string' ? safeParseJSON(message?.sources) : message?.sources;
   const relatedQuestions =
     typeof message?.relatedQuestions === 'string'
@@ -47,15 +49,36 @@ export const AssistantMessage = (props: {
 
   // TODO: 移入新组件
 
+  const handleEditorOperation = (type: EditorOperation, content: string) => {
+    // editorEmitter.emit('insertBlow', message?.content);
+
+    if (type === 'insertBlow' || type === 'replaceSelection') {
+      const editor = knowledgeBaseStore.editor;
+      const selection = editor.view.state.selection;
+
+      if (!editor) return;
+
+      editor
+        ?.chain()
+        .focus()
+        .insertContentAt(
+          {
+            from: selection.from,
+            to: selection.to,
+          },
+          content,
+        )
+        .run();
+    } else if (type === 'createNewNote') {
+      editorEmitter.emit('createNewNote', content);
+    }
+  };
+
   const dropList = (
     <Menu
       className={'output-locale-list-menu'}
       onClickMenuItem={(key) => {
-        if (key === 'createNewNote') {
-          editorEmitter.emit('createNewNote', message?.content);
-        } else if (key === 'insertNote') {
-          editorEmitter.emit('insertBlow', message?.content);
-        }
+        handleEditorOperation(key as EditorOperation, message?.content || '');
       }}
       style={{ width: 240 }}
     >
@@ -108,7 +131,8 @@ export const AssistantMessage = (props: {
                   icon={<IconImport style={{ fontSize: 14 }} />}
                   style={{ color: '#64645F' }}
                   onClick={() => {
-                    editorEmitter.emit('insertBlow', message?.content || '');
+                    // editorEmitter.emit('insertBlow', message?.content || '');
+                    handleEditorOperation('insertBlow', message?.content || '');
                   }}
                 >
                   插入笔记
