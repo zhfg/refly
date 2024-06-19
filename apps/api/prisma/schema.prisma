@@ -350,6 +350,76 @@ model Collection {
   @@map("collections")
 }
 
+/// User-defined skills.
+model Skill {
+  /// primary key
+  pk        BigInt    @id @default(autoincrement())
+  /// skill id
+  skillId   String    @unique @map("skill_id")
+  /// skill template name
+  skillTpl  String    @map("skill_tpl")
+  /// skill name
+  name      String    @map("name")
+  /// uid of skill owner
+  uid       String    @map("uid")
+  /// workflow configuration (JSON)
+  config    String    @map("config")
+  /// create timestamp
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  /// update timestamp
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  /// deletion timestamp
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz()
+
+  @@index([uid, updatedAt])
+  @@map("skills")
+}
+
+model SkillTrigger {
+  /// primary key
+  pk        BigInt            @id @default(autoincrement())
+  /// trigger id
+  triggerId String            @unique @map("trigger_id")
+  /// skill id
+  skillId   String            @map("skill_id")
+  /// trigger event
+  event     SkillTriggerEvent @map("event")
+  /// whether this skill is enabled
+  enabled   Boolean           @map("enabled")
+  /// create timestamp
+  createdAt DateTime          @default(now()) @map("created_at") @db.Timestamptz()
+  /// update timestamp
+  updatedAt DateTime          @updatedAt @map("updated_at") @db.Timestamptz()
+  /// deletion timestamp
+  deletedAt DateTime?         @map("deleted_at") @db.Timestamptz()
+
+  @@index([skillId, deletedAt])
+  @@map("skill_triggers")
+}
+
+/// Running logs of skills.
+model SkillLog {
+  /// primary key
+  pk        BigInt   @id @default(autoincrement())
+  /// skill log id
+  logId     String   @unique @map("log_id")
+  /// skill id
+  skillId   String   @map("skill_id")
+  /// skill name
+  skillName String   @map("skill_name")
+  /// skill trigger id
+  triggerId String   @map("trigger_id")
+  /// uid of skill owner
+  uid       String   @map("uid")
+  /// create timestamp
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  /// update timestamp
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([uid, updatedAt])
+  @@map("skill_log")
+}
+
 /// 生成内容
 model AigcContent {
   /// 主键
@@ -432,6 +502,14 @@ enum ContentMetaType {
   topic
   entity
   form
+}
+
+enum SkillTriggerEvent {
+  resourceAdd
+  resourceUpdate
+  collectionAdd
+  collectionUpdate
+  cron
 }
 
 enum ParseSource {
