@@ -2,7 +2,6 @@
   "name": "@refly/utils",
   "version": "1.0.0",
   "description": "",
-  "types": "dist/index.d.ts",
   "main": "src/index.ts",
   "exports": {
     "import": "./src/index.ts",
