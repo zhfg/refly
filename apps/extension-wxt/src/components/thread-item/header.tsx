@@ -13,12 +13,12 @@ import { getClientOrigin } from '@/utils/url';
 import { IconClockCircle, IconHome, IconPlus, IconShareExternal } from '@arco-design/web-react/icon';
 import { time } from '@/utils/time';
 // types
-import type { Conversation } from '@/types/conversation';
+import type { Conversation } from '@refly/common-types';
 // 第三方库
 import copyToClipboard from 'copy-to-clipboard';
 import { useHomeStateStore } from '@/stores/home-state';
 import { useTranslation } from 'react-i18next';
-import { LOCALE } from '@/types';
+import { LOCALE } from '@refly/common-types';
 
 interface ThreadHeaderProps {
   thread: Conversation;

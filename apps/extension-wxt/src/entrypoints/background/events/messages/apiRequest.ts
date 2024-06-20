@@ -1,6 +1,6 @@
 import { Runtime, Tabs, browser } from 'wxt/browser';
 import { extRequest } from '@/utils/request';
-import { HandlerRequest, HandlerResponse } from '@/types/request';
+import { HandlerRequest, HandlerResponse } from '@refly/common-types';
 import { getCurrentTab, getLastActiveTab, saveLastActiveTab } from '@/utils/extension/tabs';
 import * as requestModule from '@refly/openapi-schema';
 import { BackgroundMessage } from '@refly/ai-workspace-common/utils/extension/messaging';

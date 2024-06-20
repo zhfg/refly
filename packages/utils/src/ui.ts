@@ -1,3 +1,9 @@
+export const getPopupContainer = (e?: HTMLElement): HTMLElement => {
+  const elem = document.querySelector('refly-main-app')?.shadowRoot?.querySelector('.main');
+
+  return elem as HTMLElement;
+};
+
 export const calcPopupPosition = (rect: DOMRect, barDimesion: { barWidth: number; barHeight: number }) => {
   const { barHeight, barWidth } = barDimesion;
   let top = 0;

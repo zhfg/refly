@@ -1,5 +1,5 @@
 {
-  "name": "@refly/utils",
+  "name": "@refly/common-types",
   "version": "1.0.0",
   "description": "",
   "types": "dist/index.d.ts",
@@ -21,6 +21,7 @@
     "@paralleldrive/cuid2": "^2.2.2",
     "@refly/constants": "workspace:*",
     "@refly/openapi-schema": "workspace:*",
+    "@refly/utils": "workspace:*",
     "clsx": "^2.1.0",
     "dayjs": "~1.11.7",
     "js-cookie": "^3.0.5",

@@ -10,6 +10,7 @@ import {
 } from './types';
 
 import { genUniqueId } from './id';
+import { ChatMessage } from '@refly/openapi-schema';
 import { safeParseJSON } from './parse';
 
 export const unsupportedMessage = '暂不支持的消息类型，请更新版本之后重试';
@@ -134,8 +135,8 @@ export const buildIntentMessage = (data: BuildMessageData) => {
 
   return message;
 };
-export const buildQuestionMessage = (data: BuildMessageData) => {
-  const { convId = '', content = '', questionType = QuestionType.NORMAL, selectedWeblinkConfig = '' } = data;
+export const buildQuestionMessage = (data: BuildMessageData): ChatMessage => {
+  const { content = '', questionType = QuestionType.NORMAL, selectedWeblinkConfig = '' } = data;
 
   let dataExtra = {};
   if (questionType === QuestionType.INTENT) {
@@ -144,22 +145,16 @@ export const buildQuestionMessage = (data: BuildMessageData) => {
   }
 
   const itemId = `msg:${genUniqueId()}`;
-  const message = {
-    itemId,
-    itemType: MessageItemType.QUESTION,
-    convId,
-    summary: content,
-    data: {
-      type: MessageType.Human,
-      content,
-      selectedWeblinkConfig,
-      ...dataExtra,
-    },
-  };
 
-  return message;
+  return {
+    msgId: itemId,
+    type: 'human',
+    content,
+    selectedWeblinkConfig,
+  };
 };
-export const buildReplyMessage = (data: BuildMessageData) => {
+
+export const buildReplyMessage = (data: BuildMessageData): ChatMessage => {
   const { convId = '', content = '', replyType = ReplyType.QUESTION } = data;
   const itemId = `msg:${genUniqueId()}`;
 
@@ -174,19 +169,11 @@ export const buildReplyMessage = (data: BuildMessageData) => {
     dataExtra = { suggestions: getRandomSuggestionsQuestion(3) };
   }
 
-  const message = {
-    itemId,
-    convId,
-    itemType: MessageItemType.REPLY,
-    summary: content,
-    data: {
-      type: MessageType.Assistant,
-      content,
-      ...dataExtra,
-    },
+  return {
+    type: 'ai',
+    msgId: itemId,
+    content,
   };
-
-  return message;
 };
 
 /**
@@ -194,98 +181,14 @@ export const buildReplyMessage = (data: BuildMessageData) => {
  *  1. 只用于前端展示，不保存在服务端
  *
  */
-export const buildErrorMessage = (data: BuildMessageData) => {
+export const buildErrorMessage = (data: BuildMessageData): ChatMessage => {
   const { convId = '', content = errorMessage } = data;
 
   const itemId = `error:${genUniqueId()}`;
 
-  const message = {
-    itemId,
-    itemType: MessageItemType.ERROR,
-    convId,
-    summary: content,
-    data: {
-      type: MessageType.Assistant,
-      content,
-    },
+  return {
+    type: 'ai',
+    msgId: itemId,
+    content,
   };
-
-  return message;
-};
-
-export const buildMessage = (msgType: MessageItemType, data: BuildMessageData) => {
-  switch (msgType) {
-    case MessageItemType.INTENT:
-      return buildIntentMessage(data);
-    case MessageItemType.QUESTION:
-      return buildQuestionMessage(data);
-    case MessageItemType.REPLY:
-      return buildReplyMessage(data);
-  }
-};
-
-export type BuildMessageListData = {
-  questionContent?: string;
-  selectionContent?: string;
-  replyContent?: string;
-  convId: string;
-};
-
-export const buildIntentMessageList = (data: BuildMessageListData) => {
-  const { convId, selectionContent, questionContent, replyContent } = data;
-  const intentMsg = buildIntentMessage({
-    convId,
-    content: selectionContent,
-  });
-  const intentReplyMsg = intentMsg?.data?.replies?.[0];
-  const questionMsg = buildQuestionMessage({
-    convId,
-    content: questionContent,
-  });
-  const questionReplyMsg = buildReplyMessage({
-    convId,
-    replyType: ReplyType.QUESTION,
-    questionId: questionMsg.itemId,
-    content: replyContent,
-  });
-
-  return [intentMsg, intentReplyMsg, questionMsg, questionReplyMsg];
-};
-
-export const buildQuestionMessageList = (data: BuildMessageListData) => {
-  const { convId, questionContent } = data;
-
-  const questionMsg = buildQuestionMessage({
-    convId,
-    content: questionContent,
-  });
-  const replyMsg = buildReplyMessage({
-    convId,
-    content: '',
-    questionId: questionMsg?.itemId,
-  });
-
-  return [questionMsg, replyMsg];
-};
-
-export const mapToServerMessage = (messages: Message[]): ServerMessage[] => {
-  const newMessages = (messages || []).map((item) => {
-    if (item?.data?.type === MessageType?.Human) {
-      const { data, ...rest } = item;
-      return { ...rest, ...data };
-    }
-
-    if (item?.data?.type === MessageType.Assistant) {
-      const { data, ...rest } = item;
-      const { sources, relatedQuestions, ...dataExtra } = data || {};
-      return {
-        ...rest,
-        ...dataExtra,
-        relatedQuestions: safeParseJSON(relatedQuestions) || relatedQuestions || [],
-        sources: safeParseJSON(sources) || sources || [],
-      };
-    }
-  });
-
-  return newMessages as ServerMessage[];
 };

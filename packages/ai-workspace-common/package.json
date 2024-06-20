@@ -41,7 +41,6 @@
     "katex": "0.15.6",
     "lodash.throttle": "^4.1.1",
     "md5": "^2.3.0",
-    "prettier": "^3.2.5",
     "react-draggable": "~4.4.5",
     "react-helmet": "^6.1.0",
     "react-i18next": "^14.1.0",
@@ -113,6 +112,8 @@
     "postcss": "^8.4.21",
     "sass": "^1.71.1",
     "tailwindcss": "^3.2.6",
-    "wxt": "workspace:*"
+    "wxt": "workspace:*",
+    "prettier-plugin-tailwindcss": "~0.6.5",
+    "prettier": "~3.3.2"
   }
 }

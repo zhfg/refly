@@ -1,44 +1,57 @@
-import { Button, List, Skeleton, Typography, Message as message } from '@arco-design/web-react';
-import { IconBulb, IconCopy, IconPlus, IconQuote, IconReply, IconTranslate } from '@arco-design/web-react/icon';
-import React, { useState } from 'react';
-import { Source } from '@refly/openapi-schema';
-import type { SessionItem } from '@refly-packages/ai-workspace-common/types';
+import {
+  Button,
+  List,
+  Skeleton,
+  Typography,
+  Message as message,
+} from "@arco-design/web-react"
+import {
+  IconBulb,
+  IconCopy,
+  IconPlus,
+  IconQuote,
+  IconReply,
+  IconTranslate,
+} from "@arco-design/web-react/icon"
+import React, { useState } from "react"
+import { Source } from "@refly/openapi-schema"
+import type { SessionItem } from "@refly/common-types"
 
 // stores
-import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
-import { IconTip } from '@refly-packages/ai-workspace-common/components/dashboard/icon-tip';
-import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
+import { useMessageStateStore } from "@refly-packages/ai-workspace-common/stores/message-state"
+import { IconTip } from "@refly-packages/ai-workspace-common/components/dashboard/icon-tip"
+import { Markdown } from "@refly-packages/ai-workspace-common/components/markdown"
 // components
-import { SummaryModal } from '@refly-packages/ai-workspace-common/components/summary-modal';
+import { SummaryModal } from "@refly-packages/ai-workspace-common/components/summary-modal"
 // request
 
-import copyToClipboard from 'copy-to-clipboard';
-import { delay } from '@refly-packages/ai-workspace-common/utils/delay';
-import { safeParseURL } from '@refly-packages/ai-workspace-common/utils/url';
-import { useTranslation } from 'react-i18next';
+import copyToClipboard from "copy-to-clipboard"
+import { delay } from "@refly-packages/ai-workspace-common/utils/delay"
+import { safeParseURL } from "@refly-packages/ai-workspace-common/utils/url"
+import { useTranslation } from "react-i18next"
 
 interface SessionProps {
-  session: SessionItem;
-  isLastSession: boolean;
+  session: SessionItem
+  isLastSession: boolean
 }
 
 export const Session = (props: SessionProps) => {
-  const { session, isLastSession = false } = props;
-  const messageStateStore = useMessageStateStore();
-  const [scrollLoading] = useState(<Skeleton animation></Skeleton>);
+  const { session, isLastSession = false } = props
+  const messageStateStore = useMessageStateStore()
+  const [scrollLoading] = useState(<Skeleton animation></Skeleton>)
 
-  const { t } = useTranslation();
+  const { t } = useTranslation()
 
   // summary source logic
-  const [isSummaryModalVisible, setIsSummaryModalVisible] = useState(false);
-  const [selectedSummarySource, setSelectedSummarySource] = useState<Source>();
+  const [isSummaryModalVisible, setIsSummaryModalVisible] = useState(false)
+  const [selectedSummarySource, setSelectedSummarySource] = useState<Source>()
 
   // method to get source summary
   const getDetail = async (id: string) => {
-    await delay(3000);
+    await delay(3000)
 
     // 目前先暂时显示 fake 数据
-    return selectedSummarySource?.pageContent;
+    return selectedSummarySource?.pageContent
     // const res = await getSourceSummary({
     //   body: {
     //     sourceId: id,
@@ -50,7 +63,7 @@ export const Session = (props: SessionProps) => {
     // }
 
     // return res?.data;
-  };
+  }
   //   const fetchData = currentPage => {}
 
   return (
@@ -63,7 +76,7 @@ export const Session = (props: SessionProps) => {
           <div className="session-answer">
             <div className="session-title-icon">
               <IconTranslate style={{ fontSize: 18 }} />
-              <p>{t('contentDetail.item.session.content')}</p>
+              <p>{t("contentDetail.item.session.content")}</p>
             </div>
             {session?.answer ? (
               <>
@@ -88,17 +101,16 @@ export const Session = (props: SessionProps) => {
                       {/* <IconTip text="重新生成答案"><Button type='text' icon={<IconPalette style={{ fontSize: 14 }} />} style={{ color: '#64645F' }}>重写</Button></IconTip> */}
                     </div>
                     <div className="session-answer-actionbar-right">
-                      <IconTip text={t('contentDetail.item.copyContent')}>
+                      <IconTip text={t("contentDetail.item.copyContent")}>
                         <Button
                           type="text"
                           shape="circle"
                           icon={<IconCopy style={{ fontSize: 14 }} />}
-                          style={{ color: '#64645F' }}
+                          style={{ color: "#64645F" }}
                           onClick={() => {
-                            copyToClipboard(session?.answer);
-                            message.success(t('contentDetail.item.copySuccess'));
-                          }}
-                        ></Button>
+                            copyToClipboard(session?.answer)
+                            message.success(t("contentDetail.item.copySuccess"))
+                          }}></Button>
                       </IconTip>
                       {/* <IconTip text="复制此答案">
                         <Button
@@ -124,13 +136,15 @@ export const Session = (props: SessionProps) => {
           <div className="session-related-question">
             <div className="session-title-icon">
               <IconReply style={{ fontSize: 18 }} />
-              <p>{t('contentDetail.item.session.relatedQuestions')}</p>
+              <p>{t("contentDetail.item.session.relatedQuestions")}</p>
             </div>
             <div className="session-related-question-content">
               {session?.relatedQuestions?.map((item, index) => (
                 <div key={index}>
                   <p>{item}</p>
-                  <IconPlus style={{ fontSize: 12, color: 'rgba(0,0,0,0.60)' }} />
+                  <IconPlus
+                    style={{ fontSize: 12, color: "rgba(0,0,0,0.60)" }}
+                  />
                 </div>
               ))}
             </div>
@@ -140,8 +154,8 @@ export const Session = (props: SessionProps) => {
       <div className="session-source">
         {messageStateStore.pending || session?.sources?.length > 0 ? (
           <div className="session-title-icon">
-            <IconQuote style={{ fontSize: 18, color: 'rgba(0, 0, 0, .8)' }} />
-            <p>{t('threadDetail.item.session.source')}</p>
+            <IconQuote style={{ fontSize: 18, color: "rgba(0, 0, 0, .8)" }} />
+            <p>{t("threadDetail.item.session.source")}</p>
           </div>
         ) : null}
         {session?.sources?.length > 0 ? (
@@ -149,88 +163,93 @@ export const Session = (props: SessionProps) => {
             <div className="session-source-list">
               <List
                 className="session-source-list-item"
-                wrapperStyle={{ width: '100%' }}
+                wrapperStyle={{ width: "100%" }}
                 bordered={false}
                 pagination={{}}
                 dataSource={session?.sources}
-                scrollLoading={session?.sources?.length > 0 ? null : scrollLoading}
-                noDataElement={<div>{t('contentDetail.item.noMoreText')}</div>}
+                scrollLoading={
+                  session?.sources?.length > 0 ? null : scrollLoading
+                }
+                noDataElement={<div>{t("contentDetail.item.noMoreText")}</div>}
                 render={(item, index) => (
                   <List.Item
                     key={index}
                     style={{
-                      borderBottom: '0.5px solid var(--color-fill-3)',
+                      borderBottom: "0.5px solid var(--color-fill-3)",
                     }}
                     actionLayout="vertical"
                     extra={
                       <div className="session-source-extra">
-                        <IconTip text={t('contentDetail.item.webLink.btnTip')}>
+                        <IconTip text={t("contentDetail.item.webLink.btnTip")}>
                           <span
                             key={1}
                             className="feed-list-item-continue-ask with-border with-hover"
                             onClick={() => {
-                              setSelectedSummarySource(item);
-                              setIsSummaryModalVisible(true);
-                            }}
-                          >
-                            <IconBulb style={{ fontSize: 14, color: '#64645F' }} />
-                            <span className="feed-list-item-text">{t('contentDetail.item.webLink.text')}</span>
+                              setSelectedSummarySource(item)
+                              setIsSummaryModalVisible(true)
+                            }}>
+                            <IconBulb
+                              style={{ fontSize: 14, color: "#64645F" }}
+                            />
+                            <span className="feed-list-item-text">
+                              {t("contentDetail.item.webLink.text")}
+                            </span>
                           </span>
                         </IconTip>
                       </div>
                     }
                     actions={[
-                      <span key={1} className="session-source-list-item-action" onClick={() => {}}>
+                      <span
+                        key={1}
+                        className="session-source-list-item-action"
+                        onClick={() => {}}>
                         <img
                           src={`https://www.google.com/s2/favicons?domain=${item?.metadata?.source}&sz=${16}`}
                           alt={item?.metadata?.source}
                         />
                       </span>,
                       <a target="_blank" href={item.metadata?.source}>
-                        <span key={2} className="session-source-list-item-action">
+                        <span
+                          key={2}
+                          className="session-source-list-item-action">
                           <Typography.Paragraph
-                            ellipsis={{ rows: 1, wrapper: 'span' }}
+                            ellipsis={{ rows: 1, wrapper: "span" }}
                             style={{
                               fontSize: 10,
-                              color: 'rgba(0, 0, 0, .4)',
-                            }}
-                          >
-                            · {safeParseURL(item.metadata?.source || '')} ·
+                              color: "rgba(0, 0, 0, .4)",
+                            }}>
+                            · {safeParseURL(item.metadata?.source || "")} ·
                           </Typography.Paragraph>
                         </span>
                       </a>,
                       <span
                         key={2}
                         className="session-source-list-item-action"
-                        style={{ fontSize: 10, color: 'rgba(0, 0, 0, .4)' }}
-                      >
+                        style={{ fontSize: 10, color: "rgba(0, 0, 0, .4)" }}>
                         #{index + 1}
                       </span>,
-                    ]}
-                  >
+                    ]}>
                     <List.Item.Meta
                       title={
                         <a href={item.metadata?.source}>
                           <span
                             style={{
                               fontSize: 12,
-                              color: 'rgba(0, 0, 0, .8)',
-                              fontWeight: 'bold',
-                            }}
-                          >
+                              color: "rgba(0, 0, 0, .8)",
+                              fontWeight: "bold",
+                            }}>
                             {item.metadata?.title}
                           </span>
                         </a>
                       }
                       description={
                         <Typography.Paragraph
-                          ellipsis={{ rows: 1, wrapper: 'span' }}
+                          ellipsis={{ rows: 1, wrapper: "span" }}
                           style={{
                             fontSize: 10,
-                            color: 'rgba(0, 0, 0, .8)',
+                            color: "rgba(0, 0, 0, .8)",
                             width: 600,
-                          }}
-                        >
+                          }}>
                           {item.pageContent}
                         </Typography.Paragraph>
                       }
@@ -249,9 +268,9 @@ export const Session = (props: SessionProps) => {
           getDetail={getDetail}
           id={selectedSummarySource?.metadata?.source as string}
           visible={isSummaryModalVisible}
-          setVisible={(visible) => setIsSummaryModalVisible(visible)}
+          setVisible={visible => setIsSummaryModalVisible(visible)}
         />
       ) : null}
     </div>
-  );
-};
+  )
+}

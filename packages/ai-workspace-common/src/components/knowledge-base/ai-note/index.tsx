@@ -164,6 +164,7 @@ const CollaborativeEditor = ({ resourceDetail }: { resourceDetail: ResourceDetai
               },
             }}
             onUpdate={({ editor }) => {
+              console.log('edito json', editor.getJSON());
               debouncedUpdates(editor);
               knowledgeBaseStore.updateNoteSaveStatus('Unsaved');
             }}

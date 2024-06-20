@@ -95,6 +95,28 @@
   }
 }
 
+@layer utilities {
+  .important-outline-none {
+    outline: 0 !important;
+  }
+
+  .important-box-shadow-none {
+    box-shadow: none !important;
+  }
+
+  .important-outline-none:hover, .important-outline-none:active, .important-outline-none:focus {
+    outline: 0 !important;
+  }
+
+  .important-box-shadow-none:hover, .important-box-shadow-none:active, .important-box-shadow-none:focus {
+    outline: 0 !important;
+  }
+
+  .calc-width-50px {
+    width: calc(100% - 50px);
+  }
+}
+
 
 pre {
   background: #0d0d0d;

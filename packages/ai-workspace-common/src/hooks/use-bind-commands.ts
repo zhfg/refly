@@ -1,11 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect } from "react"
 // import { reflyEnv } from "@refly-packages/ai-workspace-common/utils/env"
-import hotKeys from 'hotkeys-js';
+import hotKeys from "hotkeys-js"
 // import { useBuildTask } from "./use-build-task"
-import { useQuickSearchStateStore } from '@refly-packages/ai-workspace-common/stores/quick-search-state';
-import { useIsLogin } from './use-is-login';
+import { useQuickSearchStateStore } from "@refly-packages/ai-workspace-common/stores/quick-search-state"
+import { useIsLogin } from "./use-is-login"
 // import { useChatStore } from "@refly-packages/ai-workspace-common/stores/chat"
-// import { type Source } from "@refly-packages/ai-workspace-common/types"
+// import { type Source } from "@refly/common-types"
 // import { buildChatTask } from "@refly-packages/ai-workspace-common/utils/task"
 // import { useWeblinkStore } from "@refly-packages/ai-workspace-common/stores/weblink"
 // import getAllCommands from "@refly-packages/ai-workspace-common/requests/getAllCommands"
@@ -16,8 +16,8 @@ export const useBindCommands = () => {
   // const keyboardShortcutRef = useRef("")
   // const keyboardSendShortcutRef = useRef("")
   // const { buildTaskAndGenReponse } = useBuildTask()
-  const quickSearchStateStore = useQuickSearchStateStore();
-  const { isLoggedRef } = useIsLogin();
+  const quickSearchStateStore = useQuickSearchStateStore()
+  const { isLoggedRef } = useIsLogin()
 
   const loadCommands = async () => {
     // const commands = await getAllCommands({
@@ -46,24 +46,24 @@ export const useBindCommands = () => {
     //       ? `Command+${defaultSendShortcutKey}`
     //       : `Ctrl+${defaultSendShortcutKey}`
     // }
-  };
+  }
   const handleBindHotkey = () => {
-    hotKeys('command+k, ctrl+k', () => {
-      console.log('hit hotkey');
+    hotKeys("command+k, ctrl+k", () => {
+      console.log("hit hotkey")
 
       // 没有登录的时候不处理
       if (!isLoggedRef.current) {
-        return;
+        return
       }
 
-      quickSearchStateStore.setVisible(true);
-    });
-  };
+      quickSearchStateStore.setVisible(true)
+    })
+  }
 
   useEffect(() => {
-    loadCommands();
-    handleBindHotkey();
+    loadCommands()
+    handleBindHotkey()
 
-    return () => {};
-  }, []);
-};
+    return () => {}
+  }, [])
+}

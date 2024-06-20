@@ -9,8 +9,8 @@ import { useWeblinkStore } from '@/stores/weblink';
 import { retryify } from '@/utils/retry';
 import type { WebLinkItem } from '@/components/weblink-list/types';
 import { useTranslation } from 'react-i18next';
-import type { ReturnType } from '@/types/return-types';
-import type { WeblinkMeta } from '@/types';
+import type { ReturnType } from '@refly/common-types';
+import type { WeblinkMeta } from '@refly/common-types';
 import { apiRequest } from '@/requests/apiRequest';
 
 export const useStoreWeblink = () => {
