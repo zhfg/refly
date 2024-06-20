@@ -1120,6 +1120,9 @@ importers:
       '@refly/arco-vite-plugin-react':
         specifier: workspace:*
         version: link:../plugin-vite-react
+      '@refly/common-types':
+        specifier: workspace:*
+        version: link:../common-types
       '@types/aos':
         specifier: ^3.0.7
         version: 3.0.7
@@ -1641,6 +1644,9 @@ importers:
       '@paralleldrive/cuid2':
         specifier: ^2.2.2
         version: 2.2.2
+      '@refly/common-types':
+        specifier: workspace:*
+        version: link:../common-types
       '@refly/constants':
         specifier: workspace:*
         version: link:../constants

@@ -1,4 +1,4 @@
-import { Conversation } from './types';
+import { Conversation } from '@refly/openapi-schema';
 import { genConvID } from './id';
 
 export type BuildConversation = {

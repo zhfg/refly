@@ -2,13 +2,14 @@ import { fetchStream } from './fetch-stream';
 import type { Source, RelatedQuestion, Task } from './types/';
 import { getAuthTokenFromCookie } from './request';
 import { getServerOrigin } from './url';
+import { ChatTask } from '@refly/openapi-schema';
 
 const LLM_SPLIT = '__LLM_RESPONSE__';
 const RELATED_SPLIT = '__RELATED_QUESTIONS__';
 
 export const parseStreaming = async (
   controller: AbortController,
-  payload: Task,
+  payload: ChatTask,
   onSources: (value: Source[]) => void,
   onMarkdown: (value: string) => void,
   onRelates: (value: RelatedQuestion[]) => void,
