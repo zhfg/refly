@@ -6,7 +6,7 @@ import { User } from '@prisma/client';
 import { AccountService } from '../account/account.service';
 import { UserService } from '../user/user.service';
 import { JwtPayload } from './dto';
-import { genUID } from '../utils/id';
+import { genUID } from '@refly/utils';
 
 @Injectable()
 export class AuthService {

@@ -281,6 +281,19 @@ paths:
       summary: List skill templates
       description: List all skill templates
       operationId: listSkillTemplates
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: number
+            default: 1
+        - name: pageSize
+          in: query
+          description: Page size
+          schema:
+            type: number
+            default: 10
       responses:
         '200':
           description: successful operation
@@ -295,6 +308,19 @@ paths:
       summary: List skills
       description: List all skills
       operationId: listSkills
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: number
+            default: 1
+        - name: pageSize
+          in: query
+          description: Page size
+          schema:
+            type: number
+            default: 10
       responses:
         '200':
           description: successful operation
@@ -415,6 +441,25 @@ paths:
       summary: List skill triggers
       description: List all skill triggers
       operationId: listSkillTriggers
+      parameters:
+        - name: skillId
+          in: query
+          description: Skill ID
+          schema:
+            type: string
+            example: sk-g30e1b80b5g1itbemc0g5jj3
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: number
+            default: 1
+        - name: pageSize
+          in: query
+          description: Page size
+          schema:
+            type: number
+            default: 10
       responses:
         '200':
           description: successful operation
@@ -492,14 +537,33 @@ paths:
         - skill
       summary: Get skill logs
       description: Get skill logs
-      operationId: getSkillLogs
+      operationId: listSkillLogs
+      parameters:
+        - name: skillId
+          in: query
+          description: Skill ID
+          schema:
+            type: string
+            example: sk-g30e1b80b5g1itbemc0g5jj3
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: number
+            default: 1
+        - name: pageSize
+          in: query
+          description: Page size
+          schema:
+            type: number
+            default: 10
       responses:
         '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetSkillLogsResponse'
+                $ref: '#/components/schemas/ListSkillLogResponse'
       security:
         - api_key: []
   /conversation/list:
@@ -955,7 +1019,18 @@ components:
     SkillTrigger:
       type: object
       description: Skill triggers
+      required:
+        - skillId
+        - triggerId
+        - event
+        - enabled
+        - createdAt
+        - updatedAt
       properties:
+        skillId:
+          type: string
+          description: Skill ID
+          example: sk-g30e1b80b5g1itbemc0g5jj3
         triggerId:
           type: string
           description: Trigger ID
@@ -1840,6 +1915,10 @@ components:
           type: string
           description: Skill name
           example: Twitter Scraping
+        skillId:
+          type: string
+          description: Skill ID (only used for update)
+          example: s-g30e1b80b5g1itbemc0g5jj3
         skillTpl:
           type: string
           description: Skill template name
@@ -1903,9 +1982,13 @@ components:
     UpsertSkillTriggerRequest:
       type: object
       properties:
-        triggerId:
-          description: Trigger ID (only used for update)
+        skillId:
           type: string
+          description: Skill ID (only used for updating triggers or adding triggers to an existing skill)
+          example: sk-g30e1b80b5g1itbemc0g5jj3
+        triggerId:
+          type: string
+          description: Trigger ID (only used for update)
           example: tr-g30e1b80b5g1itbemc0g5jj3
         event:
           description: Trigger event
@@ -1916,7 +1999,7 @@ components:
           example: 0 0 1 * *
         enabled:
           type: boolean
-          description: Trigger enabled
+          description: Whether this trigger is enabled
     UpsertSkillTriggerResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -1932,7 +2015,7 @@ components:
         triggerId:
           type: string
           description: Trigger ID to delete
-    GetSkillLogsResponse:
+    ListSkillLogResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object

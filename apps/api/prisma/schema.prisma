@@ -382,8 +382,12 @@ model SkillTrigger {
   triggerId String            @unique @map("trigger_id")
   /// skill id
   skillId   String            @map("skill_id")
+  /// owner uid
+  uid       String            @map("uid")
   /// trigger event
   event     SkillTriggerEvent @map("event")
+  /// crontab for cron trigger
+  crontab   String?           @map("crontab")
   /// whether this skill is enabled
   enabled   Boolean           @map("enabled")
   /// create timestamp

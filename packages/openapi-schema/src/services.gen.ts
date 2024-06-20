@@ -32,6 +32,42 @@ import type {
   DeleteCollectionData,
   DeleteCollectionError,
   DeleteCollectionResponse,
+  ListSkillTemplatesData,
+  ListSkillTemplatesError,
+  ListSkillTemplatesResponse,
+  ListSkillsData,
+  ListSkillsError,
+  ListSkillsResponse,
+  CreateSkillData,
+  CreateSkillError,
+  CreateSkillResponse,
+  UpdateSkillData,
+  UpdateSkillError,
+  UpdateSkillResponse,
+  DeleteSkillData,
+  DeleteSkillError,
+  DeleteSkillResponse,
+  InvokeSkillData,
+  InvokeSkillError,
+  InvokeSkillResponse2,
+  StreamInvokeSkillData,
+  StreamInvokeSkillError,
+  StreamInvokeSkillResponse,
+  ListSkillTriggersData,
+  ListSkillTriggersError,
+  ListSkillTriggersResponse,
+  CreateSkillTriggerData,
+  CreateSkillTriggerError,
+  CreateSkillTriggerResponse,
+  UpdateSkillTriggerData,
+  UpdateSkillTriggerError,
+  UpdateSkillTriggerResponse,
+  DeleteSkillTriggerData,
+  DeleteSkillTriggerError,
+  DeleteSkillTriggerResponse,
+  ListSkillLogsData,
+  ListSkillLogsError,
+  ListSkillLogsResponse,
   ListConversationsError,
   ListConversationsResponse,
   ChatData,
@@ -177,6 +213,138 @@ export const deleteCollection = (options: Options<DeleteCollectionData>) => {
   return (options?.client ?? client).post<DeleteCollectionResponse, DeleteCollectionError>({
     ...options,
     url: '/knowledge/collection/delete',
+  });
+};
+
+/**
+ * List skill templates
+ * List all skill templates
+ */
+export const listSkillTemplates = (options?: Options<ListSkillTemplatesData>) => {
+  return (options?.client ?? client).get<ListSkillTemplatesResponse, ListSkillTemplatesError>({
+    ...options,
+    url: '/skill/template/list',
+  });
+};
+
+/**
+ * List skills
+ * List all skills
+ */
+export const listSkills = (options?: Options<ListSkillsData>) => {
+  return (options?.client ?? client).get<ListSkillsResponse, ListSkillsError>({
+    ...options,
+    url: '/skill/instance/list',
+  });
+};
+
+/**
+ * Create new skill
+ * Create a new skill
+ */
+export const createSkill = (options: Options<CreateSkillData>) => {
+  return (options?.client ?? client).post<CreateSkillResponse, CreateSkillError>({
+    ...options,
+    url: '/skill/instance/new',
+  });
+};
+
+/**
+ * Update skill
+ * Update an existing skill
+ */
+export const updateSkill = (options: Options<UpdateSkillData>) => {
+  return (options?.client ?? client).post<UpdateSkillResponse, UpdateSkillError>({
+    ...options,
+    url: '/skill/instance/update',
+  });
+};
+
+/**
+ * Delete skill
+ * Delete an existing skill
+ */
+export const deleteSkill = (options: Options<DeleteSkillData>) => {
+  return (options?.client ?? client).post<DeleteSkillResponse, DeleteSkillError>({
+    ...options,
+    url: '/skill/instance/delete',
+  });
+};
+
+/**
+ * Invoke skill
+ * Invoke a skill
+ */
+export const invokeSkill = (options: Options<InvokeSkillData>) => {
+  return (options?.client ?? client).post<InvokeSkillResponse2, InvokeSkillError>({
+    ...options,
+    url: '/skill/instance/invoke',
+  });
+};
+
+/**
+ * Stream invoke skill
+ * Invoke a skill and return SSE stream
+ */
+export const streamInvokeSkill = (options: Options<StreamInvokeSkillData>) => {
+  return (options?.client ?? client).post<StreamInvokeSkillResponse, StreamInvokeSkillError>({
+    ...options,
+    url: '/skill/instance/streamInvoke',
+  });
+};
+
+/**
+ * List skill triggers
+ * List all skill triggers
+ */
+export const listSkillTriggers = (options?: Options<ListSkillTriggersData>) => {
+  return (options?.client ?? client).get<ListSkillTriggersResponse, ListSkillTriggersError>({
+    ...options,
+    url: '/skill/trigger/list',
+  });
+};
+
+/**
+ * Create new trigger
+ * Create a new trigger
+ */
+export const createSkillTrigger = (options: Options<CreateSkillTriggerData>) => {
+  return (options?.client ?? client).post<CreateSkillTriggerResponse, CreateSkillTriggerError>({
+    ...options,
+    url: '/skill/trigger/new',
+  });
+};
+
+/**
+ * Update trigger
+ * Update an existing trigger
+ */
+export const updateSkillTrigger = (options: Options<UpdateSkillTriggerData>) => {
+  return (options?.client ?? client).post<UpdateSkillTriggerResponse, UpdateSkillTriggerError>({
+    ...options,
+    url: '/skill/trigger/update',
+  });
+};
+
+/**
+ * Delete trigger
+ * Delete an existing trigger
+ */
+export const deleteSkillTrigger = (options: Options<DeleteSkillTriggerData>) => {
+  return (options?.client ?? client).post<DeleteSkillTriggerResponse, DeleteSkillTriggerError>({
+    ...options,
+    url: '/skill/trigger/delete',
+  });
+};
+
+/**
+ * Get skill logs
+ * Get skill logs
+ */
+export const listSkillLogs = (options?: Options<ListSkillLogsData>) => {
+  return (options?.client ?? client).get<ListSkillLogsResponse, ListSkillLogsError>({
+    ...options,
+    url: '/skill/log/list',
   });
 };
 

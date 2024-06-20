@@ -18,7 +18,7 @@ import { LlmService } from '../llm/llm.service';
 import { WeblinkService } from '../weblink/weblink.service';
 import { IterableReadableStream } from '@langchain/core/dist/utils/stream';
 import { BaseMessageChunk } from '@langchain/core/messages';
-import { genConvID } from '../utils/id';
+import { genConvID } from '@refly/utils';
 import { AigcService } from '../aigc/aigc.service';
 
 const LLM_SPLIT = '__LLM_RESPONSE__';

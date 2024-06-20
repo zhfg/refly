@@ -13,13 +13,8 @@ import {
   ResourceMeta,
 } from '@refly/openapi-schema';
 import { state2Markdown } from '@refly/editor-common';
-import {
-  CHANNEL_FINALIZE_RESOURCE,
-  QUEUE_RESOURCE,
-  genCollectionID,
-  genResourceID,
-} from '../utils';
-import { cleanMarkdownForIngest } from '@refly/utils';
+import { CHANNEL_FINALIZE_RESOURCE, QUEUE_RESOURCE } from '../utils';
+import { genCollectionID, genResourceID, cleanMarkdownForIngest } from '@refly/utils';
 import { FinalizeResourceParam } from './knowledge.dto';
 import { pick, omit } from '../utils';
 

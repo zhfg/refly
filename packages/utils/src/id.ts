@@ -22,6 +22,18 @@ export function genCollectionID(): string {
   return 'cl-' + createId();
 }
 
+export function genSkillID(): string {
+  return 'sk-' + createId();
+}
+
+export function genSkillTriggerID(): string {
+  return 'tr-' + createId();
+}
+
+export function genSkillLogID(): string {
+  return 'lg-' + createId();
+}
+
 export const genUniqueId = () => {
   const uuid = UUIDV4();
   const timestamp = new Date().getTime();

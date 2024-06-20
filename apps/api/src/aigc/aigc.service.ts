@@ -115,7 +115,7 @@ export class AigcService {
     const today = new Date().toISOString().split('T')[0];
 
     // 创建新的 digest 内容及其对应的记录
-    this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx) => {
       const newDigest = await tx.userDigest.create({
         data: {
           userId,
