@@ -391,7 +391,7 @@ paths:
     post:
       tags:
         - skill
-      summary: Invoke skill
+      summary: Stream invoke skill
       description: Invoke a skill and return SSE stream
       operationId: streamInvokeSkill
       requestBody:
