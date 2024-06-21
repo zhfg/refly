@@ -1,5 +1,6 @@
 import { CommandGroup, CommandItem, CommandSeparator } from "../ui/command"
 import { useEditor } from "@refly-packages/editor-core/components"
+import { editorEmitter } from "@refly-packages/editor-core/utils/event"
 import { Check, TextQuote, TrashIcon } from "lucide-react"
 import { useEffect } from "react"
 
@@ -35,6 +36,7 @@ const AICompletionCommands = ({
                 completion,
               )
               .run()
+            editorEmitter.emit("activeAskAI", false)
           }}>
           <Check className="h-4 w-4 text-muted-foreground" />
           Replace selection
@@ -51,6 +53,7 @@ const AICompletionCommands = ({
               .insertContentAt(selection.to + 1, completion)
               .run()
 
+            editorEmitter.emit("activeAskAI", false)
             // onOpenChange(false)
           }}>
           <TextQuote className="h-4 w-4 text-muted-foreground" />

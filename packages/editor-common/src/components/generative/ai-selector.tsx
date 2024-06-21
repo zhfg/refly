@@ -16,6 +16,7 @@ import { ScrollArea } from "../ui/scroll-area"
 import AICompletionCommands from "./ai-completion-command"
 import AISelectorCommands from "./ai-selector-commands"
 import { LOCALE } from "@refly/common-types"
+import { editorEmitter } from "@refly-packages/editor-core/utils/event"
 //TODO: I think it makes more sense to create a custom Tiptap extension for this functionality https://tiptap.dev/docs/editor/ai/introduction
 
 interface AISelectorProps {
@@ -76,7 +77,7 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
                   : "Ask AI to edit or generate..."
               }
               onFocus={() => {
-                addAIHighlight(editor)
+                // addAIHighlight(editor)
               }}
             />
             <Button
@@ -107,6 +108,7 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
               onDiscard={() => {
                 editor.chain().unsetHighlight().focus().run()
                 onOpenChange(false)
+                editorEmitter.emit("activeAskAI", false)
               }}
               onOpenChange={onOpenChange}
               completion={completion}

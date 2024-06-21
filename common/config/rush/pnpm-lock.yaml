@@ -1488,6 +1488,9 @@ importers:
       markdown-it:
         specifier: ~14.1.0
         version: 14.1.0
+      mitt:
+        specifier: ~3.0.1
+        version: 3.0.1
       next:
         specifier: 14.1.0
         version: 14.1.0(react-dom@18.2.0)(react@18.2.0)

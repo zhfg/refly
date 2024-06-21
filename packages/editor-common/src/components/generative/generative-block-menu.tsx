@@ -8,20 +8,29 @@ import { AISelector } from "@refly-packages/editor-component/generative/ai-selec
 import { editorEmitter } from "@refly-packages/editor-core/utils/event"
 
 interface GenerativeMenuSwitchProps {
-  children: ReactNode
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 const GenerativeMenuSwitch = ({
-  children,
   open,
   onOpenChange,
 }: GenerativeMenuSwitchProps) => {
   const { editor } = useEditor()
+  const [askAIShow, setAskAIShow] = useState(false)
 
   useEffect(() => {
     if (!open) removeAIHighlight(editor)
   }, [open])
+
+  useEffect(() => {
+    editorEmitter.on("activeAskAI", () => {
+      onOpenChange(true)
+      setAskAIShow(true)
+    })
+    return () => {
+      editorEmitter.off("activeAskAI")
+    }
+  }, [])
 
   return (
     <EditorBubble
@@ -32,20 +41,10 @@ const GenerativeMenuSwitch = ({
           editor.chain().unsetHighlight().run()
         },
       }}
+      askAIShow={askAIShow}
       className="z-50 flex w-fit max-w-[90vw] overflow-hidden rounded-md border border-muted bg-background shadow-xl">
-      {open && <AISelector open={open} onOpenChange={onOpenChange} />}
-      {!open && (
-        <Fragment>
-          <Button
-            className="gap-1 rounded-none text-purple-500"
-            variant="ghost"
-            onClick={() => onOpenChange(true)}
-            size="sm">
-            <Magic className="h-5 w-5" />
-            Ask AI
-          </Button>
-          {children}
-        </Fragment>
+      {open && askAIShow && (
+        <AISelector open={open} onOpenChange={onOpenChange} />
       )}
     </EditorBubble>
   )

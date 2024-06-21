@@ -6,12 +6,14 @@ import type { Instance, Props } from "tippy.js"
 
 export interface EditorBubbleProps extends Omit<BubbleMenuProps, "editor"> {
   readonly children: ReactNode
+  askAIShow?: boolean
 }
 
 export const EditorBubble = forwardRef<HTMLDivElement, EditorBubbleProps>(
   ({ children, tippyOptions, ...rest }, ref) => {
     const { editor: currentEditor } = useCurrentEditor()
     const instanceRef = useRef<Instance<Props> | null>(null)
+    const askAIShowRef = useRef<boolean>(rest?.askAIShow ?? false)
 
     useEffect(() => {
       if (!instanceRef.current || !tippyOptions?.placement) return
@@ -19,6 +21,9 @@ export const EditorBubble = forwardRef<HTMLDivElement, EditorBubbleProps>(
       instanceRef.current.setProps({ placement: tippyOptions.placement })
       instanceRef.current.popperInstance?.update()
     }, [tippyOptions?.placement])
+    useEffect(() => {
+      askAIShowRef.current = rest?.askAIShow ?? false
+    }, [rest?.askAIShow])
 
     const bubbleMenuProps: Omit<BubbleMenuProps, "children"> = useMemo(() => {
       const shouldShow: BubbleMenuProps["shouldShow"] = ({ editor, state }) => {
@@ -31,6 +36,7 @@ export const EditorBubble = forwardRef<HTMLDivElement, EditorBubbleProps>(
           editor.isActive("image"),
           empty,
           isNodeSelection(selection),
+          askAIShowRef.current,
         )
 
         // don't show bubble menu if:
@@ -39,10 +45,11 @@ export const EditorBubble = forwardRef<HTMLDivElement, EditorBubbleProps>(
         // - the selection is empty
         // - the selection is a node selection (for drag handles)
         if (
-          !editor.isEditable ||
-          editor.isActive("image") ||
-          empty ||
-          isNodeSelection(selection)
+          (!editor.isEditable ||
+            editor.isActive("image") ||
+            empty ||
+            isNodeSelection(selection)) &&
+          !askAIShowRef.current
         ) {
           return false
         }
@@ -60,7 +67,7 @@ export const EditorBubble = forwardRef<HTMLDivElement, EditorBubbleProps>(
         },
         ...rest,
       }
-    }, [rest, tippyOptions])
+    }, [rest, rest.askAIShow, tippyOptions])
 
     if (!currentEditor) return null
 

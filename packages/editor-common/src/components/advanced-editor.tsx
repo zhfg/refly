@@ -12,6 +12,7 @@ import { NodeSelector } from "./selectors/node-selector"
 import { Separator } from "./ui/separator"
 
 import GenerativeMenuSwitch from "./generative/generative-menu-switch"
+import GenerativeBlockMenu from "./generative/generative-block-menu"
 import { TextButtons } from "./selectors/text-buttons"
 import { SaveButton } from "./selectors/save-buttons"
 import { AIBtnSelector } from "./selectors/ai-btn-selector"
@@ -69,5 +70,15 @@ export const CollabGenAIMenuSwitch = () => {
       <Separator orientation="vertical" />
       <SaveButton onOpenChange={setOpenAI} />
     </GenerativeMenuSwitch>
+  )
+}
+
+export const CollabGenAIBlockMenu = () => {
+  const [openAI, setOpenAI] = useState(false)
+
+  return (
+    <GenerativeBlockMenu
+      open={openAI}
+      onOpenChange={setOpenAI}></GenerativeBlockMenu>
   )
 }
