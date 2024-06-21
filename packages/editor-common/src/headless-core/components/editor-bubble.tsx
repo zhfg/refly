@@ -29,15 +29,15 @@ export const EditorBubble = forwardRef<HTMLDivElement, EditorBubbleProps>(
       const shouldShow: BubbleMenuProps["shouldShow"] = ({ editor, state }) => {
         const { selection } = state
         const { empty } = selection
+        const selectedNode = selection.$anchor.node()
+        const isEmptyNode = selectedNode?.content?.size === 0
 
-        console.log(
-          "shouldshow",
-          !editor.isEditable,
-          editor.isActive("image"),
-          empty,
-          isNodeSelection(selection),
-          askAIShowRef.current,
-        )
+        // Block AI Editor 的情况
+        if (isEmptyNode && askAIShowRef.current) {
+          return true
+        }
+
+        // 其他情况
 
         // don't show bubble menu if:
         // - the editor is not editable
@@ -45,11 +45,10 @@ export const EditorBubble = forwardRef<HTMLDivElement, EditorBubbleProps>(
         // - the selection is empty
         // - the selection is a node selection (for drag handles)
         if (
-          (!editor.isEditable ||
-            editor.isActive("image") ||
-            empty ||
-            isNodeSelection(selection)) &&
-          !askAIShowRef.current
+          !editor.isEditable ||
+          editor.isActive("image") ||
+          empty ||
+          isNodeSelection(selection)
         ) {
           return false
         }

@@ -219,6 +219,7 @@ const CollaborativeEditor = ({
             slotAfter={<ImageResizer />}>
             <CollabEditorCommand />
             <CollabGenAIMenuSwitch />
+            <CollabGenAIBlockMenu />
           </EditorContent>
         </EditorRoot>
       </div>

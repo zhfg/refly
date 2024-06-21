@@ -27,16 +27,21 @@ export const suggestionItems = createSuggestionItems([
   //     window.open('/feedback', '_blank');
   //   },
   // },
-  // {
-  //   title: "Ask AI",
-  //   description: "Ask AI to generate content.",
-  //   searchTerms: ["ask", "ai", "ask ai"],
-  //   icon: <Text size={18} />,
-  //   command: ({ editor, range }) => {
-  //     editorEmitter.emit("activeAskAI", true)
-  //     editor.chain().focus().deleteRange(range).run()
-  //   },
-  // },
+  {
+    title: "Ask AI",
+    description: "Ask AI to generate content.",
+    searchTerms: ["ask", "ai", "ask ai"],
+    icon: <Text size={18} />,
+    command: ({ editor, range }) => {
+      editorEmitter.emit("activeAskAI", true)
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .updateAttributes("paragraph", { isActiveBlockAIMenu: true })
+        .run()
+    },
+  },
   {
     title: "Text",
     description: "Just start typing with plain text.",

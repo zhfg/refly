@@ -23,9 +23,9 @@ const GenerativeMenuSwitch = ({
   }, [open])
 
   useEffect(() => {
-    editorEmitter.on("activeAskAI", () => {
-      onOpenChange(true)
-      setAskAIShow(true)
+    editorEmitter.on("activeAskAI", (value: boolean) => {
+      onOpenChange(value)
+      setAskAIShow(value)
     })
     return () => {
       editorEmitter.off("activeAskAI")
