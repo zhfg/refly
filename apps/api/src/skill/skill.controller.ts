@@ -7,6 +7,7 @@ import {
   Query,
   DefaultValuePipe,
   ParseIntPipe,
+  Res,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { SkillService } from './skill.service';
@@ -31,11 +32,18 @@ import {
   Skill,
   SkillLog,
   SkillTrigger,
+  SkillTriggerEvent,
   UpsertSkillRequest,
   UpsertSkillResponse,
   UpsertSkillTriggerResponse,
 } from '@refly/openapi-schema';
 import { buildSuccessResponse, omit } from 'src/utils';
+import { Response } from 'express';
+import { AIMessageChunk } from '@langchain/core/messages';
+import { ChatGenerationChunk } from '@langchain/core/outputs';
+
+const LLM_SPLIT = '__LLM_RESPONSE__';
+// const RELATED_SPLIT = '__RELATED_QUESTIONS__';
 
 function convertSkill(skill: SkillModel): Skill {
   return {
@@ -48,6 +56,7 @@ function convertSkill(skill: SkillModel): Skill {
 function convertSkillTrigger(trigger: SkillTriggerModel): SkillTrigger {
   return {
     ...omit(trigger, ['pk', 'deletedAt']),
+    event: trigger.event as SkillTriggerEvent,
     createdAt: trigger.createdAt.toJSON(),
     updatedAt: trigger.updatedAt.toJSON(),
   };
@@ -127,9 +136,27 @@ export class SkillController {
 
   @UseGuards(JwtAuthGuard)
   @Post('/instance/streamInvoke')
-  async streamInvokeSkill(@User() user: UserModel, @Body() body: InvokeSkillRequest) {
-    await this.skillService.invokeSkill(user, body);
-    return buildSuccessResponse();
+  async streamInvokeSkill(
+    @User() user: UserModel,
+    @Body() body: InvokeSkillRequest,
+    @Res() res: Response,
+  ) {
+    const stream = await this.skillService.streamInvokeSkill(user, body);
+
+    res.write(JSON.stringify([]));
+    res.write(LLM_SPLIT);
+
+    for await (const event of stream) {
+      if (event.event === 'on_llm_stream') {
+        const chunk: ChatGenerationChunk = event.data?.chunk;
+        const msg = chunk.message as AIMessageChunk;
+        if (msg.tool_call_chunks && msg.tool_call_chunks.length > 0) {
+          console.log(msg.tool_call_chunks);
+        } else {
+          res.write(msg.content || '');
+        }
+      }
+    }
   }
 
   @UseGuards(JwtAuthGuard)

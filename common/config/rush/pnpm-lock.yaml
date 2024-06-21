@@ -103,6 +103,9 @@ importers:
       '@refly/openapi-schema':
         specifier: workspace:*
         version: link:../../packages/openapi-schema
+      '@refly/skill-template':
+        specifier: workspace:*
+        version: link:../../packages/skill-template
       '@refly/utils':
         specifier: workspace:*
         version: link:../../packages/utils

@@ -144,7 +144,14 @@ export type SkillTemplate = {
 /**
  * Skill trigger event
  */
-export type SkillTriggerEvent = 'resourceAdd' | 'resourceUpdate' | 'collectionAdd' | 'collectionUpdate' | 'cron';
+export type SkillTriggerEvent =
+  | 'copilotRun'
+  | 'noteAsk'
+  | 'resourceAdd'
+  | 'resourceUpdate'
+  | 'collectionAdd'
+  | 'collectionUpdate'
+  | 'cron';
 
 /**
  * Skill triggers
@@ -1033,17 +1040,45 @@ export type DeleteSkillRequest = {
   skillId: string;
 };
 
+/**
+ * Skill invocation context
+ */
+export type SkillContext = {
+  /**
+   * User query
+   */
+  query?: string;
+  /**
+   * Conversation ID (if passed, model output will be automatically appended to this conversation)
+   */
+  convId?: string;
+  /**
+   * List of resource IDs
+   */
+  resourceIds?: Array<string>;
+  /**
+   * List of collection IDs
+   */
+  collectionIds?: Array<string>;
+  /**
+   * List of content
+   */
+  contentList?: Array<string>;
+};
+
 export type InvokeSkillRequest = {
   /**
    * Skill ID to invoke
    */
   skillId: string;
   /**
-   * Skill input
+   * Skill trigger event
    */
-  input: {
-    [key: string]: unknown;
-  };
+  event: SkillTriggerEvent;
+  /**
+   * Skill input context
+   */
+  context: SkillContext;
   /**
    * Skill config (should conform to template config schema)
    */

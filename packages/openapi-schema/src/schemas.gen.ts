@@ -202,7 +202,7 @@ export const $SkillTemplate = {
 export const $SkillTriggerEvent = {
   type: 'string',
   description: 'Skill trigger event',
-  enum: ['resourceAdd', 'resourceUpdate', 'collectionAdd', 'collectionUpdate', 'cron'],
+  enum: ['copilotRun', 'noteAsk', 'resourceAdd', 'resourceUpdate', 'collectionAdd', 'collectionUpdate', 'cron'],
 } as const;
 
 export const $SkillTrigger = {
@@ -1454,17 +1454,57 @@ export const $DeleteSkillRequest = {
   },
 } as const;
 
+export const $SkillContext = {
+  type: 'object',
+  description: 'Skill invocation context',
+  properties: {
+    query: {
+      type: 'string',
+      description: 'User query',
+    },
+    convId: {
+      type: 'string',
+      description: 'Conversation ID (if passed, model output will be automatically appended to this conversation)',
+    },
+    resourceIds: {
+      type: 'array',
+      description: 'List of resource IDs',
+      items: {
+        type: 'string',
+      },
+    },
+    collectionIds: {
+      type: 'array',
+      description: 'List of collection IDs',
+      items: {
+        type: 'string',
+      },
+    },
+    contentList: {
+      type: 'array',
+      description: 'List of content',
+      items: {
+        type: 'string',
+      },
+    },
+  },
+} as const;
+
 export const $InvokeSkillRequest = {
   type: 'object',
-  required: ['skillId', 'input', 'config'],
+  required: ['skillId', 'event', 'context', 'config'],
   properties: {
     skillId: {
       type: 'string',
       description: 'Skill ID to invoke',
     },
-    input: {
-      type: 'object',
-      description: 'Skill input',
+    event: {
+      description: 'Skill trigger event',
+      $ref: '#/components/schemas/SkillTriggerEvent',
+    },
+    context: {
+      description: 'Skill input context',
+      $ref: '#/components/schemas/SkillContext',
     },
     config: {
       type: 'object',
