@@ -1,8 +1,8 @@
 import { fetchStream } from './fetch-stream';
-import type { Source, RelatedQuestion, Task } from './types/';
+import type { RelatedQuestion } from '@refly/common-types';
 import { getAuthTokenFromCookie } from './request';
 import { getServerOrigin } from './url';
-import { ChatTask } from '@refly/openapi-schema';
+import { Source, ChatTask } from '@refly/openapi-schema';
 
 const LLM_SPLIT = '__LLM_RESPONSE__';
 const RELATED_SPLIT = '__RELATED_QUESTIONS__';
@@ -14,6 +14,7 @@ export const parseStreaming = async (
   onMarkdown: (value: string) => void,
   onRelates: (value: RelatedQuestion[]) => void,
   onError?: (status: number) => void,
+  onResponse?: (response: Response) => void,
 ) => {
   const decoder = new TextDecoder();
   let uint8Array = new Uint8Array();
@@ -31,10 +32,14 @@ export const parseStreaming = async (
       task: payload,
     }),
   });
+
   if (response.status !== 200) {
     onError?.(response.status);
     return;
+  } else {
+    onResponse(response);
   }
+
   const markdownParse = (text: string) => {
     onMarkdown(
       text

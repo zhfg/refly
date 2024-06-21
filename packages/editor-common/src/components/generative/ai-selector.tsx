@@ -2,7 +2,7 @@
 
 import { Command, CommandInput } from "../ui/command"
 
-import { useCompletion } from "ai/react"
+import { useChat } from "@refly/ai-sdk"
 import { ArrowUp } from "lucide-react"
 import { useEditor } from "@refly-packages/editor-core/components"
 import { addAIHighlight } from "@refly-packages/editor-core/extensions"
@@ -15,6 +15,7 @@ import Magic from "../ui/icons/magic"
 import { ScrollArea } from "../ui/scroll-area"
 import AICompletionCommands from "./ai-completion-command"
 import AISelectorCommands from "./ai-selector-commands"
+import { LOCALE } from "@refly/common-types"
 //TODO: I think it makes more sense to create a custom Tiptap extension for this functionality https://tiptap.dev/docs/editor/ai/introduction
 
 interface AISelectorProps {
@@ -26,9 +27,8 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
   const { editor } = useEditor()
   const [inputValue, setInputValue] = useState("")
 
-  const { completion, complete, isLoading } = useCompletion({
+  const { completion, completionMsg, chat, isLoading } = useChat({
     // id: @refly-packages/editor-core,
-    api: "/api/generate",
     onResponse: response => {
       if (response.status === 429) {
         toast.error("You have reached your request limit for the day.")
@@ -75,24 +75,28 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
                   ? "Tell AI what to do next"
                   : "Ask AI to edit or generate..."
               }
-              onFocus={() => addAIHighlight(editor)}
+              onFocus={() => {
+                addAIHighlight(editor)
+              }}
             />
             <Button
               size="icon"
               className="absolute right-2 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-purple-500 hover:bg-purple-900"
               onClick={() => {
-                if (completion)
-                  return complete(completion, {
-                    body: { option: "zap", command: inputValue },
-                  }).then(() => setInputValue(""))
-
                 const slice = editor.state.selection.content()
                 const text = editor.storage.markdown.serializer.serialize(
                   slice.content,
                 )
 
-                complete(text, {
-                  body: { option: "zap", command: inputValue },
+                chat({
+                  userPrompt: inputValue,
+                  context: {
+                    type: "text",
+                    content: text,
+                  },
+                  config: {
+                    locale: "en" as LOCALE,
+                  },
                 }).then(() => setInputValue(""))
               }}>
               <ArrowUp className="h-4 w-4" />
@@ -104,12 +108,22 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
                 editor.chain().unsetHighlight().focus().run()
                 onOpenChange(false)
               }}
+              onOpenChange={onOpenChange}
               completion={completion}
             />
           ) : (
             <AISelectorCommands
               onSelect={(value, option) =>
-                complete(value, { body: { option } })
+                chat({
+                  userPrompt: option,
+                  context: {
+                    type: "text",
+                    content: value,
+                  },
+                  config: {
+                    locale: "en" as LOCALE,
+                  },
+                })
               }
             />
           )}

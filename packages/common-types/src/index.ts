@@ -9,5 +9,4 @@ export * from './weblink';
 export * from './page';
 export * from './feed';
 export * from './digest';
-export * from './knowledge-base';
 export * from './content-selector';

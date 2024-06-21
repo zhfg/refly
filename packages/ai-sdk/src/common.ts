@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { LOCALE, MessageState, RelatedQuestion, TASK_STATUS, TASK_TYPE } from '@refly/common-types';
 
 import { buildErrorMessage, buildQuestionMessage, buildReplyMessage } from '@refly/utils/message';
-import { type ChatTask, type Source } from '@refly/openapi-schema';
+import { chat, type ChatTask, type Source } from '@refly/openapi-schema';
 import { parseStreaming } from '@refly/utils/parse-streaming';
-import { useChatTaskStore } from '@refly/utils/hooks/ai-task/state';
+import { useChatTaskStore } from './state';
 import { buildConversation } from '@refly/utils/conversation';
 
 // stores
@@ -15,6 +15,7 @@ import { buildConversation } from '@refly/utils/conversation';
 
 interface ChatProps {
   onError?: (status: number) => void;
+  onResponse?: (response: Response) => void;
 }
 
 export interface TaskContext {
@@ -31,6 +32,8 @@ export const useCommonAITask = (props: ChatProps) => {
   const chatTaskStore = useChatTaskStore();
   // 中断生成
   const controllerRef = useRef<AbortController>();
+  const resolveRef = useRef<(value: any) => void>();
+  const rejectRef = useRef<(err: any) => void>();
 
   const ensureConversationExist = (config: TaskConfig) => {
     const { currentConversation } = useChatTaskStore.getState();
@@ -174,6 +177,7 @@ export const useCommonAITask = (props: ChatProps) => {
     chatTaskStore.setMessageState({
       ...currentChatTaskState,
       pendingFirstToken: false,
+      pending: true,
       pendingSourceDocs: (currentChatTaskState.pendingSourceDocs || [])?.concat(sources)?.filter((item) => item),
     });
 
@@ -216,6 +220,9 @@ export const useCommonAITask = (props: ChatProps) => {
       lastMessage.relatedQuestions = [...related]?.filter((item) => item);
     }
     chatTaskStore.setMessages([...savedMessage, { ...lastMessage }]);
+
+    // 完成流程
+    resolveRef.current?.(lastMessage);
   };
 
   const onError = (status: number) => {
@@ -248,6 +255,11 @@ export const useCommonAITask = (props: ChatProps) => {
     // 更新 messageState 的状态，然后直接结束，不走后面的流程
     chatTaskStore.setMessageState(newMessageState);
     props.onError(status);
+    rejectRef.current?.(errMsg); // 结束流程
+  };
+
+  const onResponse = (response: Response) => {
+    props?.onResponse?.(response);
   };
 
   // Web 和插件分块处理
@@ -259,7 +271,7 @@ export const useCommonAITask = (props: ChatProps) => {
   }) => {
     controllerRef.current = new AbortController();
 
-    parseStreaming(controllerRef.current, payload?.body?.payload, onSources, onContent, onRelated, onError);
+    parseStreaming(controllerRef.current, payload?.body?.payload, onSources, onContent, onRelated, onError, onResponse);
   };
 
   const buildTaskAndGenReponse = ({
@@ -267,11 +279,15 @@ export const useCommonAITask = (props: ChatProps) => {
     context,
     config,
     taskType,
+    resolve,
+    reject,
   }: {
     userPrompt: string;
     context: TaskContext;
     config: TaskConfig;
     taskType: TASK_TYPE;
+    resolve: (value: any) => void;
+    reject: (err: any) => void;
   }) => {
     // 定位为一次性的 task 执行，所以每次执行新任务时，都需要清空之前的状态
     const task = buildTask({
@@ -288,16 +304,25 @@ export const useCommonAITask = (props: ChatProps) => {
         payload: task,
       },
     });
+
+    // 构建处理函数
+    resolveRef.current = resolve;
+    rejectRef.current = reject;
   };
 
   const stop = () => {
     controllerRef.current?.abort();
+    rejectRef.current?.('Process has been interrupted'); // 中断之后，直接 reject
   };
+
+  console.log('chatTaskStore', chatTaskStore.pendingMsg);
+  const lastMessage = chatTaskStore?.messages?.[chatTaskStore.messages?.length - 1];
 
   return {
     buildTaskAndGenReponse,
     stop,
-    content: chatTaskStore.pendingMsg,
+    completion: lastMessage?.content || '',
+    completionMsg: lastMessage || null,
     messages: chatTaskStore.messages,
     sources: chatTaskStore.pendingSourceDocs,
     relatedQuestions: chatTaskStore.pendingRelatedQuestions,

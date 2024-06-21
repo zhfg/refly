@@ -886,6 +886,76 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0
 
+  ../../packages/ai-sdk:
+    dependencies:
+      '@paralleldrive/cuid2':
+        specifier: ^2.2.2
+        version: 2.2.2
+      '@refly/common-types':
+        specifier: workspace:*
+        version: link:../common-types
+      '@refly/constants':
+        specifier: workspace:*
+        version: link:../constants
+      '@refly/openapi-schema':
+        specifier: workspace:*
+        version: link:../openapi-schema
+      '@refly/utils':
+        specifier: workspace:*
+        version: link:../utils
+      clsx:
+        specifier: ^2.1.0
+        version: 2.1.0
+      dayjs:
+        specifier: ~1.11.7
+        version: 1.11.7
+      js-cookie:
+        specifier: ^3.0.5
+        version: 3.0.5
+      md5:
+        specifier: ^2.3.0
+        version: 2.3.0
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
+      tailwind-merge:
+        specifier: ^2.2.2
+        version: 2.2.2
+      turndown:
+        specifier: ^7.1.3
+        version: 7.1.3
+      turndown-plugin-gfm:
+        specifier: ^1.0.2
+        version: 1.0.2
+      uuid:
+        specifier: ^9.0.0
+        version: 9.0.1
+      zustand:
+        specifier: ^4.5.1
+        version: 4.5.1(@types/react@18.2.66)(react@18.2.0)
+    devDependencies:
+      '@types/chrome':
+        specifier: 0.0.227
+        version: 0.0.227
+      '@types/node':
+        specifier: ~20.12.12
+        version: 20.12.12
+      '@types/react':
+        specifier: ^18.2.56
+        version: 18.2.66
+      '@types/react-dom':
+        specifier: ^18.2.19
+        version: 18.2.22
+      rimraf:
+        specifier: ~5.0.7
+        version: 5.0.7
+      typescript:
+        specifier: ^5
+        version: 5.3.3
+
   ../../packages/ai-workspace-common:
     dependencies:
       '@arco-design/web-react':
@@ -1289,6 +1359,15 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.0.2
         version: 1.0.2(@types/react@18.2.66)(react@18.2.0)
+      '@refly/ai-sdk':
+        specifier: workspace:*
+        version: link:../ai-sdk
+      '@refly/common-types':
+        specifier: workspace:*
+        version: link:../common-types
+      '@refly/utils':
+        specifier: workspace:*
+        version: link:../utils
       '@tailwindcss/forms':
         specifier: ^0.5.3
         version: 0.5.3(tailwindcss@3.3.0)
@@ -1683,6 +1762,9 @@ importers:
       uuid:
         specifier: ^9.0.0
         version: 9.0.1
+      zustand:
+        specifier: ^4.5.1
+        version: 4.5.1(@types/react@18.2.66)(react@18.2.0)
     devDependencies:
       '@types/chrome':
         specifier: 0.0.227
@@ -8873,7 +8955,7 @@ packages:
   /@types/jsonwebtoken@9.0.6:
     resolution: {integrity: sha512-/5hndP5dCjloafCXns6SZyESp3Ldq7YjH3zwzwczYnjxIT0Fqzk5ROSYVGfFyczIue7IUEj8hkvLbPoLQ18vQw==}
     dependencies:
-      '@types/node': 20.12.12
+      '@types/node': 20.14.2
     dev: true
 
   /@types/katex@0.11.1:
@@ -9113,7 +9195,7 @@ packages:
   /@types/pg@8.11.4:
     resolution: {integrity: sha512-yw3Bwbda6vO+NvI1Ue/YKOwtl31AYvvd/e73O3V4ZkNzuGpTDndLSyc0dQRB2xrQqDePd20pEGIfqSp/GH3pRw==}
     dependencies:
-      '@types/node': 18.16.12
+      '@types/node': 20.14.2
       pg-protocol: 1.6.1
       pg-types: 4.0.2
 

@@ -1,13 +1,4 @@
-import {
-  Message,
-  MessageDataType,
-  MessageItemType,
-  MessageType,
-  QuestionType,
-  ReplyType,
-  ServerMessage,
-  SystemAction,
-} from './types';
+import { MessageDataType, MessageItemType, QuestionType, ReplyType, SystemAction } from '@refly/common-types';
 
 import { genUniqueId } from './id';
 import { ChatMessage } from '@refly/openapi-schema';

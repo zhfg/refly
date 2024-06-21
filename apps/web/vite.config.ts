@@ -54,6 +54,7 @@ export default defineConfig(({ mode }) => {
           __dirname,
           "../../packages/editor-common/src/headless-core",
         ),
+        "@refly/utils": path.resolve(__dirname, "../../packages/utils/src"),
       },
     },
     build: {
