@@ -4,7 +4,7 @@ import {} from "@refly-packages/editor-core/plugins"
 import { Fragment, type ReactNode, useEffect, useState } from "react"
 import { Button } from "../ui/button"
 import Magic from "../ui/icons/magic"
-import { AISelector } from "@refly-packages/editor-component/generative/ai-selector"
+import { AISelector } from "@refly-packages/editor-component/generative/ai-block-selector"
 import { editorEmitter } from "@refly-packages/editor-core/utils/event"
 
 interface GenerativeMenuSwitchProps {
