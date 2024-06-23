@@ -10,4 +10,4 @@ export * from './locale';
 export * from './parse';
 export * from './resource';
 export * from './time';
-export * from './markdown';
+export * from './editor';

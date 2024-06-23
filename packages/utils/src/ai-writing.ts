@@ -1,3 +1,5 @@
+const localeList = {};
+
 export const writingSkills = [
   // 编辑或 review - editOrReviewSelection
   {

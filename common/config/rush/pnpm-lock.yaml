@@ -1726,6 +1726,9 @@ importers:
       '@paralleldrive/cuid2':
         specifier: ^2.2.2
         version: 2.2.2
+      '@radix-ui/react-slot':
+        specifier: ^1.0.2
+        version: 1.0.2(@types/react@18.2.66)(react@18.2.0)
       '@refly/common-types':
         specifier: workspace:*
         version: link:../common-types
@@ -1735,6 +1738,63 @@ importers:
       '@refly/openapi-schema':
         specifier: workspace:*
         version: link:../openapi-schema
+      '@tiptap/core':
+        specifier: ~2.4.0
+        version: 2.4.0(@tiptap/pm@2.4.0)
+      '@tiptap/extension-code-block-lowlight':
+        specifier: ^2.2.6
+        version: 2.2.6(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)
+      '@tiptap/extension-color':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/extension-text-style@2.4.0)
+      '@tiptap/extension-highlight':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)
+      '@tiptap/extension-horizontal-rule':
+        specifier: ^2.1.7
+        version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)
+      '@tiptap/extension-image':
+        specifier: ~2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)
+      '@tiptap/extension-link':
+        specifier: ~2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)
+      '@tiptap/extension-list-item':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)
+      '@tiptap/extension-placeholder':
+        specifier: 2.0.3
+        version: 2.0.3(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)
+      '@tiptap/extension-task-item':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)
+      '@tiptap/extension-task-list':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)
+      '@tiptap/extension-text-style':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)
+      '@tiptap/extension-underline':
+        specifier: ^2.1.7
+        version: 2.1.7(@tiptap/core@2.4.0)
+      '@tiptap/extension-youtube':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)
+      '@tiptap/pm':
+        specifier: ^2.4.0
+        version: 2.4.0
+      '@tiptap/react':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)(react-dom@18.2.0)(react@18.2.0)
+      '@tiptap/starter-kit':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/pm@2.4.0)
+      '@tiptap/suggestion':
+        specifier: ^2.1.7
+        version: 2.1.7(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)
+      '@types/node':
+        specifier: 18.15.3
+        version: 18.15.3
       clsx:
         specifier: ^2.1.0
         version: 2.1.0
@@ -1744,9 +1804,18 @@ importers:
       js-cookie:
         specifier: ^3.0.5
         version: 3.0.5
+      markdown-it:
+        specifier: ~14.1.0
+        version: 14.1.0
       md5:
         specifier: ^2.3.0
         version: 2.3.0
+      prosemirror-markdown:
+        specifier: ~1.13.0
+        version: 1.13.0
+      prosemirror-model:
+        specifier: ~1.21.1
+        version: 1.21.1
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -1765,6 +1834,15 @@ importers:
       uuid:
         specifier: ^9.0.0
         version: 9.0.1
+      y-prosemirror:
+        specifier: ~1.2.6
+        version: 1.2.6(prosemirror-model@1.21.1)(y-protocols@1.0.6)(yjs@13.6.16)
+      y-protocols:
+        specifier: ~1.0.6
+        version: 1.0.6(yjs@13.6.16)
+      yjs:
+        specifier: 13.6.16
+        version: 13.6.16
       zustand:
         specifier: ^4.5.1
         version: 4.5.1(@types/react@18.2.66)(react@18.2.0)
@@ -1772,9 +1850,6 @@ importers:
       '@types/chrome':
         specifier: 0.0.227
         version: 0.0.227
-      '@types/node':
-        specifier: ~20.12.12
-        version: 20.12.12
       '@types/react':
         specifier: ^18.2.56
         version: 18.2.66
