@@ -55,6 +55,7 @@ import CollaborationCursor from "@tiptap/extension-collaboration-cursor"
 // 编辑器样式
 // 图标
 import { AiOutlineWarning, AiOutlineFileWord } from "react-icons/ai"
+import hljs from "highlight.js"
 
 const wsUrl = "ws://localhost:1234"
 

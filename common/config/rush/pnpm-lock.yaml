@@ -1078,6 +1078,9 @@ importers:
       dayjs:
         specifier: ~1.11.7
         version: 1.11.7
+      highlight.js:
+        specifier: ^11.9.0
+        version: 11.9.0
       hotkeys-js:
         specifier: ~3.10.2
         version: 3.10.2
