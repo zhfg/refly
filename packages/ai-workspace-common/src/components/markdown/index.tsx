@@ -1,27 +1,27 @@
-import { IconLoading } from '@arco-design/web-react/icon';
-import { useEffect, useRef, useState } from 'react';
-import ReactMarkdown from 'react-markdown';
-import { Message as message } from '@arco-design/web-react';
-import { Popover, PopoverContent, PopoverTrigger } from './popover';
+import { IconLoading } from "@arco-design/web-react/icon"
+import { useEffect, useRef, useState } from "react"
+import ReactMarkdown from "react-markdown"
+import { Message as message } from "@arco-design/web-react"
+import { Popover, PopoverContent, PopoverTrigger } from "./popover"
 
-import 'katex/dist/katex.min.css';
+import "katex/dist/katex.min.css"
 
-import copyToClipboard from 'copy-to-clipboard';
-import RehypeHighlight from 'rehype-highlight';
-import RehypeKatex from 'rehype-katex';
-import RemarkBreaks from 'remark-breaks';
-import RemarkGfm from 'remark-gfm';
-import RemarkMath from 'remark-math';
+import copyToClipboard from "copy-to-clipboard"
+import RehypeHighlight from "rehype-highlight"
+import RehypeKatex from "rehype-katex"
+import RemarkBreaks from "remark-breaks"
+import RemarkGfm from "remark-gfm"
+import RemarkMath from "remark-math"
 
 // styles
-import './styles/markdown.scss';
-import './styles/highlight.scss';
-import { Source } from '@refly/openapi-schema';
-import { useTranslation } from 'react-i18next';
+import "./styles/markdown.scss"
+import "./styles/highlight.scss"
+import { Source } from "@refly/openapi-schema"
+import { useTranslation } from "react-i18next"
 
 export function PreCode(props: { children: any }) {
-  const ref = useRef<HTMLPreElement>(null);
-  const { t } = useTranslation();
+  const ref = useRef<HTMLPreElement>(null)
+  const { t } = useTranslation()
 
   return (
     <pre ref={ref}>
@@ -29,53 +29,57 @@ export function PreCode(props: { children: any }) {
         className="copy-code-button"
         onClick={() => {
           if (ref.current) {
-            const code = ref.current.innerText;
-            copyToClipboard(code);
-            message.success(t('components.markdown.copySuccess'));
+            const code = ref.current.innerText
+            copyToClipboard(code)
+            message.success(t("components.markdown.copySuccess"))
           }
-        }}
-      ></span>
+        }}></span>
       {props.children}
     </pre>
-  );
+  )
 }
 
 export function ATag({ ...props }, sources: Source[]) {
-  if (!props.href) return <></>;
-  const source = sources[+props.href - 1];
-  if (!source) return <a href={props.href}>{props.href}</a>;
+  if (!props.href) return <></>
+  const source = sources[+props.href - 1]
+  if (!source) return <a href={props.href}>{props.href}</a>
   return (
     <span className="inline-block w-4">
       <Popover>
         <PopoverTrigger asChild>
           <span
             title={source.metadata?.title}
-            className="inline-block cursor-pointer transform scale-[60%] no-underline font-medium bg-zinc-300 hover:bg-zinc-400 w-6 text-center h-6 rounded-full origin-top-left"
-          >
+            className="inline-block h-6 w-6 origin-top-left scale-[60%] transform cursor-pointer rounded-full bg-zinc-300 text-center font-medium no-underline hover:bg-zinc-400">
             {props.href}
           </span>
         </PopoverTrigger>
         <PopoverContent
-          align={'start'}
-          style={{ backgroundColor: '#fcfcf9' }}
-          className="max-w-screen-md flex flex-col gap-2 shadow-transparent ring-zinc-50 ring-4 text-xs"
-        >
-          <div className="text-ellipsis overflow-hidden whitespace-nowrap font-medium">{source.metadata?.title}</div>
+          align={"start"}
+          style={{ backgroundColor: "#fcfcf9" }}
+          className="flex max-w-screen-md flex-col gap-2 text-xs shadow-transparent ring-4 ring-zinc-50">
+          <div className="overflow-hidden text-ellipsis whitespace-nowrap font-medium">
+            {source.metadata?.title}
+          </div>
           <div className="flex gap-4">
             <div className="flex-1">
-              <div className="line-clamp-4 text-zinc-500 break-words">{source.pageContent}</div>
+              <div className="line-clamp-4 break-words text-zinc-500">
+                {source.pageContent}
+              </div>
             </div>
           </div>
 
-          <div className="flex gap-2 items-center">
+          <div className="flex items-center gap-2">
             <div className="flex-1 overflow-hidden">
-              <div className="text-ellipsis text-blue-500 overflow-hidden whitespace-nowrap">
-                <a title={source.metadata?.title} href={source.metadata?.source} target="_blank">
+              <div className="overflow-hidden text-ellipsis whitespace-nowrap text-blue-500">
+                <a
+                  title={source.metadata?.title}
+                  href={source.metadata?.source}
+                  target="_blank">
                   {source.metadata?.source}
                 </a>
               </div>
             </div>
-            <div className="flex-none flex items-center relative">
+            <div className="relative flex flex-none items-center">
               <img
                 className="h-3 w-3"
                 alt={source.metadata?.source}
@@ -86,33 +90,36 @@ export function ATag({ ...props }, sources: Source[]) {
         </PopoverContent>
       </Popover>
     </span>
-  );
+  )
 }
 
 export function Markdown(
   props: {
-    content: string;
-    loading?: boolean;
-    fontSize?: number;
-    sources?: Source[];
+    content: string
+    loading?: boolean
+    fontSize?: number
+    sources?: Source[]
   } & React.DOMAttributes<HTMLDivElement>,
 ) {
-  const mdRef = useRef<HTMLDivElement>(null);
+  const mdRef = useRef<HTMLDivElement>(null)
 
-  const md = mdRef.current;
-  const rendered = useRef(true); // disable lazy loading for bad ux
-  const [counter, setCounter] = useState(0);
+  const md = mdRef.current
+  const rendered = useRef(true) // disable lazy loading for bad ux
+  const [counter, setCounter] = useState(0)
 
   useEffect(() => {
     // to triggr rerender
-    setCounter(counter + 1);
+    setCounter(counter + 1)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.loading]);
+  }, [props.loading])
 
-  const shouldLoading = props.loading;
+  const shouldLoading = props.loading
 
   return (
-    <div className="markdown-body" style={{ fontSize: `${props.fontSize ?? 14}px` }} ref={mdRef}>
+    <div
+      className="markdown-body"
+      style={{ fontSize: `${props.fontSize ?? 14}px` }}
+      ref={mdRef}>
       {shouldLoading ? (
         <IconLoading />
       ) : (
@@ -130,13 +137,12 @@ export function Markdown(
           ]}
           components={{
             pre: PreCode,
-            a: (args) => ATag(args, props?.sources || []),
+            a: args => ATag(args, props?.sources || []),
           }}
-          linkTarget={'_blank'}
-        >
+          linkTarget={"_blank"}>
           {props.content}
         </ReactMarkdown>
       )}
     </div>
-  );
+  )
 }

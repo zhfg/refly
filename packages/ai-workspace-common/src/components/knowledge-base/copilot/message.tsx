@@ -96,7 +96,8 @@ export const AssistantMessage = (props: {
     <Menu
       className={"output-locale-list-menu"}
       onClickMenuItem={key => {
-        handleEditorOperation(key as EditorOperation, message?.content || "")
+        const parsedText = message?.content?.replace(/\[citation]\(\d+\)/g, "")
+        handleEditorOperation(key as EditorOperation, parsedText || "")
       }}
       style={{ width: 240 }}>
       <Menu.Item key="insertNote">
@@ -139,7 +140,12 @@ export const AssistantMessage = (props: {
                 style={{ color: "#64645F" }}
                 className={"assist-action-item"}
                 onClick={() => {
-                  copyToClipboard(message?.content || "")
+                  const parsedText = message?.content?.replace(
+                    /\[citation]\(\d+\)/g,
+                    "",
+                  )
+
+                  copyToClipboard(parsedText || "")
                   Message.success("复制成功")
                 }}>
                 复制
@@ -151,8 +157,12 @@ export const AssistantMessage = (props: {
                   icon={<IconImport style={{ fontSize: 14 }} />}
                   style={{ color: "#64645F" }}
                   onClick={() => {
+                    const parsedText = message?.content?.replace(
+                      /\[citation]\(\d+\)/g,
+                      "",
+                    )
                     // editorEmitter.emit('insertBlow', message?.content || '');
-                    handleEditorOperation("insertBlow", message?.content || "")
+                    handleEditorOperation("insertBlow", parsedText || "")
                   }}>
                   插入笔记
                   <IconCaretDown />
