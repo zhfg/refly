@@ -1,11 +1,19 @@
+import { Tool, ToolParams } from '@langchain/core/tools';
+
 export enum LOCALE {
   ZH_CN = 'zh-CN',
   EN = 'en',
 }
 
-interface Props {
-  query: string;
+const DEFAULT_MAX_RESULTS = 10;
+
+export interface SearchOptions {
   locale: LOCALE;
+  maxResults?: number;
+}
+
+interface Props extends SearchOptions {
+  query: string;
 }
 
 interface Logger {
@@ -36,18 +44,17 @@ interface SearchResultContext {
   snippet: string;
 }
 
-export const SerperOnlineSearch = async (
+export const serperOnlineSearch = async (
   props: Props,
   ctx: Context = { logger: defaultLogger },
 ): Promise<SearchResultContext[]> => {
-  const { query, locale } = props;
+  const { query, locale, maxResults = DEFAULT_MAX_RESULTS } = props;
 
   let jsonContent: any = [];
   try {
-    const REFERENCE_COUNT = 8;
     const queryPayload = JSON.stringify({
       q: query,
-      num: REFERENCE_COUNT,
+      num: maxResults,
       hl: locale?.toLocaleLowerCase(),
       gl: locale?.toLocaleLowerCase() === LOCALE.ZH_CN?.toLocaleLowerCase() ? 'cn' : 'us',
     });
@@ -96,9 +103,48 @@ export const SerperOnlineSearch = async (
         });
       }
     }
-    return contexts.slice(0, REFERENCE_COUNT);
+    return contexts.slice(0, maxResults);
   } catch (e) {
     ctx.logger.error(`onlineSearch error encountered: ${e}`);
     return [];
   }
 };
+
+export interface SerperSearchParameters extends ToolParams {
+  /**
+   * The search options for the search using the SearchOptions interface
+   * from the duck-duck-scrape package.
+   */
+  searchOptions?: SearchOptions;
+  /**
+   * The maximum number of results to return from the search.
+   * Limiting to 10 to avoid context overload.
+   * @default 10
+   */
+}
+
+export class SerperSearch extends Tool {
+  private searchOptions?: SearchOptions;
+
+  constructor(params?: SerperSearchParameters) {
+    super(params ?? {});
+
+    const { searchOptions } = params ?? {};
+    this.searchOptions = searchOptions;
+  }
+
+  static lc_name() {
+    return 'SerperSearch';
+  }
+
+  name = 'serper-search';
+
+  description =
+    'A search engine. Useful for when you need to answer questions about current events. Input should be a search query.';
+
+  async _call(input: string): Promise<string> {
+    const results = await serperOnlineSearch({ query: input, ...this.searchOptions });
+
+    return JSON.stringify(results);
+  }
+}

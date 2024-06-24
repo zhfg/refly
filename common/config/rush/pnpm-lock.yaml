@@ -1738,6 +1738,9 @@ importers:
       '@langchain/openai':
         specifier: ~0.1.3
         version: 0.1.3
+      '@refly/openapi-schema':
+        specifier: workspace:*
+        version: link:../openapi-schema
       '@types/node':
         specifier: ~20.14.8
         version: 20.14.8
