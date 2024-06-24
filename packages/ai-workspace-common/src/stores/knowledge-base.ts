@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension';
 import type { CollectionListItem, CollectionDetail, ResourceDetail } from '@refly/openapi-schema';
+import { EditorInstance } from '@refly-packages/editor-core/components';
 
 export enum ActionSource {
   KnowledgeBase = 'knowledge-base',
@@ -22,6 +23,8 @@ export interface SkillState {
 }
 
 export type SelectedNamespace = 'resource-detail' | 'note';
+export type NoteServerStatus = 'disconnected' | 'connected';
+export type NoteSaveStatus = 'Saved' | 'Unsaved';
 
 interface KnowledgeBaseState {
   isSaveKnowledgeBaseModalVisible: boolean;
@@ -40,6 +43,12 @@ interface KnowledgeBaseState {
   activeTab: string;
   resourcePanelVisible: boolean;
   notePanelVisible: boolean;
+
+  // 笔记
+  editor: EditorInstance | null;
+  noteServerStatus: NoteServerStatus;
+  noteCharsCount: number;
+  noteSaveStatus: NoteSaveStatus;
 
   // 详情
   currentKnowledgeBase: null | CollectionDetail;
@@ -76,6 +85,10 @@ interface KnowledgeBaseState {
   updateActiveTab: (key: string) => void;
   updateResourcePanelVisible: (visible: boolean) => void;
   updateNotePanelVisible: (visible: boolean) => void;
+  updateNoteServerStatus: (status: NoteServerStatus) => void;
+  updateNoteSaveStatus: (status: NoteSaveStatus) => void;
+  updateNoteCharsCount: (count: number) => void;
+  updateEditor: (editor: EditorInstance) => void;
   resetState: () => void;
 }
 
@@ -93,6 +106,13 @@ export const defaultState = {
   activeTab: 'key1',
   resourcePanelVisible: true,
   notePanelVisible: false,
+
+  // notes
+  editor: null,
+  noteServerStatus: 'disconnected' as NoteServerStatus,
+  noteCharsCount: 0,
+  noteSaveStatus: 'Unsaved' as NoteSaveStatus,
+
   convModalVisible: false,
   kbModalVisible: false,
   sourceListModalVisible: false,
@@ -153,5 +173,11 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
     // tabs
     updateResourcePanelVisible: (visible: boolean) => set((state) => ({ ...state, resourcePanelVisible: visible })),
     updateNotePanelVisible: (visible: boolean) => set((state) => ({ ...state, notePanelVisible: visible })),
+
+    // notes
+    updateEditor: (editor: EditorInstance) => set((state) => ({ ...state, editor })),
+    updateNoteServerStatus: (status: NoteServerStatus) => set((state) => ({ ...state, noteServerStatus: status })),
+    updateNoteSaveStatus: (status: NoteSaveStatus) => set((state) => ({ ...state, noteSaveStatus: status })),
+    updateNoteCharsCount: (count: number) => set((state) => ({ ...state, noteCharsCount: count })),
   })),
 );

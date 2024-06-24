@@ -1,4 +1,4 @@
-import type { HandlerRequest, HandlerResponse } from '@/types/request';
+import type { HandlerRequest, HandlerResponse } from '@refly/common-types';
 
 export const apiRequest = async <TRequest = any, TResponse = any>(
   req: HandlerRequest<TRequest>,

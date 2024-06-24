@@ -1,4 +1,4 @@
-import { LOCALE } from './types';
+import { LOCALE } from '@refly/common-types';
 import dayjsConfig from './dayjsConfig';
 
 export function timestampFormat(timestamp: number = new Date().getTime(), language = 'cn') {

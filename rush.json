@@ -40,6 +40,16 @@
       "reviewCategory": "packages"
     },
     {
+      "packageName": "@refly/ai-sdk",
+      "projectFolder": "packages/ai-sdk",
+      "reviewCategory": "packages"
+    },
+    {
+      "packageName": "@refly/common-types",
+      "projectFolder": "packages/common-types",
+      "reviewCategory": "packages"
+    },
+    {
       "packageName": "@refly/editor-common",
       "projectFolder": "packages/editor-common",
       "reviewCategory": "packages"

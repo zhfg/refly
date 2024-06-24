@@ -1,8 +1,8 @@
 import { appConfig } from '@/utils/config';
 import { extRequest } from '@/utils/request';
 
-import type { HandlerRequest, HandlerResponse } from '@/types/request';
-import type { WebLinkItem } from '@/types';
+import type { HandlerRequest, HandlerResponse } from '@refly/common-types';
+import type { WebLinkItem } from '@refly/common-types';
 
 const handler = async (req: HandlerRequest<Partial<WebLinkItem>>): Promise<HandlerResponse<WebLinkItem>> => {
   console.log(req.body);

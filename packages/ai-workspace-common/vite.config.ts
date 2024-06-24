@@ -12,6 +12,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@refly-packages/ai-workspace-common': path.resolve(__dirname, './src'),
+      '@refly-packages/editor-component': path.resolve(__dirname, '../editor-common/src/components'),
+      '@refly-packages/editor-core': path.resolve(__dirname, '../editor-common/src/headless-core'),
     },
   },
 });

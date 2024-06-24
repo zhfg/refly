@@ -7,7 +7,7 @@ import {
   type Task,
   type GEN_TITLE,
   type CHAT,
-} from './types';
+} from '@refly/common-types';
 
 export const buildTask = (payload: Task): Task => {
   const { taskType, language = LANGUAGE.AUTO, locale, data = {}, createConvParam = {} } = payload;

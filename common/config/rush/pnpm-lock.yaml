@@ -27,13 +27,16 @@ importers:
         version: 2.13.0
       '@langchain/community':
         specifier: ~0.2.3
-        version: 0.2.3(@qdrant/js-client-rest@1.9.0)(ioredis@5.4.1)(jsonwebtoken@9.0.2)(lodash@4.17.21)(redis@4.6.13)(ws@8.17.0)
+        version: 0.2.3(@mozilla/readability@0.5.0)(@qdrant/js-client-rest@1.9.0)(ioredis@5.4.1)(jsonwebtoken@9.0.2)(lodash@4.17.21)(redis@4.6.13)(ws@8.17.0)
       '@langchain/core':
         specifier: ~0.2.2
         version: 0.2.2(openai@4.47.1)
       '@langchain/openai':
         specifier: ~0.0.34
         version: 0.0.34
+      '@mozilla/readability':
+        specifier: ^0.5.0
+        version: 0.5.0
       '@nestjs/bull':
         specifier: ~10.1.0
         version: 10.1.0(@nestjs/common@10.3.9)(@nestjs/core@10.3.9)(bull@4.12.2)
@@ -580,6 +583,9 @@ importers:
       '@arco-plugins/vite-react':
         specifier: ^1.3.3
         version: 1.3.3
+      '@refly/common-types':
+        specifier: workspace:*
+        version: link:../../packages/common-types
       '@types/chrome':
         specifier: 0.0.227
         version: 0.0.227
@@ -643,6 +649,9 @@ importers:
       '@refly/constants':
         specifier: workspace:*
         version: link:../../packages/constants
+      '@refly/editor-common':
+        specifier: workspace:*
+        version: link:../../packages/editor-common
       '@refly/openapi-schema':
         specifier: workspace:*
         version: link:../../packages/openapi-schema
@@ -655,6 +664,9 @@ importers:
       '@tailwindcss/forms':
         specifier: ^0.5.3
         version: 0.5.3(tailwindcss@3.2.6)
+      '@tailwindcss/typography':
+        specifier: ^0.5.10
+        version: 0.5.10(tailwindcss@3.2.6)
       '@types/is-hotkey':
         specifier: ~0.1.7
         version: 0.1.7
@@ -706,9 +718,6 @@ importers:
       md5:
         specifier: ^2.3.0
         version: 2.3.0
-      prettier:
-        specifier: ^3.2.5
-        version: 3.2.5
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -763,9 +772,15 @@ importers:
       tailwind-merge:
         specifier: ^2.2.2
         version: 2.2.2
+      tailwindcss-animate:
+        specifier: ^1.0.6
+        version: 1.0.6(tailwindcss@3.2.6)
       terser:
         specifier: ^5.30.4
         version: 5.30.4
+      use-debounce:
+        specifier: ^9.0.3
+        version: 9.0.3(react@18.2.0)
       uuid:
         specifier: ^9.0.0
         version: 9.0.1
@@ -824,6 +839,12 @@ importers:
       postcss:
         specifier: ^8.4.21
         version: 8.4.33
+      prettier:
+        specifier: ~3.3.2
+        version: 3.3.2
+      prettier-plugin-tailwindcss:
+        specifier: ~0.6.5
+        version: 0.6.5(prettier@3.3.2)
       sass:
         specifier: ^1.71.1
         version: 1.71.1
@@ -864,6 +885,76 @@ importers:
       wrangler:
         specifier: ^3.0.0
         version: 3.0.0
+
+  ../../packages/ai-sdk:
+    dependencies:
+      '@paralleldrive/cuid2':
+        specifier: ^2.2.2
+        version: 2.2.2
+      '@refly/common-types':
+        specifier: workspace:*
+        version: link:../common-types
+      '@refly/constants':
+        specifier: workspace:*
+        version: link:../constants
+      '@refly/openapi-schema':
+        specifier: workspace:*
+        version: link:../openapi-schema
+      '@refly/utils':
+        specifier: workspace:*
+        version: link:../utils
+      clsx:
+        specifier: ^2.1.0
+        version: 2.1.0
+      dayjs:
+        specifier: ~1.11.7
+        version: 1.11.7
+      js-cookie:
+        specifier: ^3.0.5
+        version: 3.0.5
+      md5:
+        specifier: ^2.3.0
+        version: 2.3.0
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
+      tailwind-merge:
+        specifier: ^2.2.2
+        version: 2.2.2
+      turndown:
+        specifier: ^7.1.3
+        version: 7.1.3
+      turndown-plugin-gfm:
+        specifier: ^1.0.2
+        version: 1.0.2
+      uuid:
+        specifier: ^9.0.0
+        version: 9.0.1
+      zustand:
+        specifier: ^4.5.1
+        version: 4.5.1(@types/react@18.2.66)(react@18.2.0)
+    devDependencies:
+      '@types/chrome':
+        specifier: 0.0.227
+        version: 0.0.227
+      '@types/node':
+        specifier: ~20.12.12
+        version: 20.12.12
+      '@types/react':
+        specifier: ^18.2.56
+        version: 18.2.66
+      '@types/react-dom':
+        specifier: ^18.2.19
+        version: 18.2.22
+      rimraf:
+        specifier: ~5.0.7
+        version: 5.0.7
+      typescript:
+        specifier: ^5
+        version: 5.3.3
 
   ../../packages/ai-workspace-common:
     dependencies:
@@ -987,6 +1078,9 @@ importers:
       dayjs:
         specifier: ~1.11.7
         version: 1.11.7
+      highlight.js:
+        specifier: ^11.9.0
+        version: 11.9.0
       hotkeys-js:
         specifier: ~3.10.2
         version: 3.10.2
@@ -1011,9 +1105,6 @@ importers:
       mitt:
         specifier: ~3.0.1
         version: 3.0.1
-      prettier:
-        specifier: ^3.2.5
-        version: 3.2.5
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -1077,6 +1168,9 @@ importers:
       tiptap-markdown:
         specifier: ^0.8.10
         version: 0.8.10(@tiptap/core@2.4.0)
+      use-debounce:
+        specifier: ^9.0.3
+        version: 9.0.3(react@18.2.0)
       uuid:
         specifier: ^9.0.0
         version: 9.0.1
@@ -1099,6 +1193,9 @@ importers:
       '@refly/arco-vite-plugin-react':
         specifier: workspace:*
         version: link:../plugin-vite-react
+      '@refly/common-types':
+        specifier: workspace:*
+        version: link:../common-types
       '@types/aos':
         specifier: ^3.0.7
         version: 3.0.7
@@ -1144,6 +1241,12 @@ importers:
       postcss:
         specifier: ^8.4.21
         version: 8.4.33
+      prettier:
+        specifier: ~3.3.2
+        version: 3.3.2
+      prettier-plugin-tailwindcss:
+        specifier: ~0.6.5
+        version: 0.6.5(prettier@3.3.2)
       sass:
         specifier: ^1.71.1
         version: 1.71.1
@@ -1160,6 +1263,70 @@ importers:
         specifier: workspace:*
         version: link:../wxt
 
+  ../../packages/common-types:
+    dependencies:
+      '@paralleldrive/cuid2':
+        specifier: ^2.2.2
+        version: 2.2.2
+      '@refly/constants':
+        specifier: workspace:*
+        version: link:../constants
+      '@refly/openapi-schema':
+        specifier: workspace:*
+        version: link:../openapi-schema
+      '@refly/utils':
+        specifier: workspace:*
+        version: link:../utils
+      clsx:
+        specifier: ^2.1.0
+        version: 2.1.0
+      dayjs:
+        specifier: ~1.11.7
+        version: 1.11.7
+      js-cookie:
+        specifier: ^3.0.5
+        version: 3.0.5
+      md5:
+        specifier: ^2.3.0
+        version: 2.3.0
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
+      tailwind-merge:
+        specifier: ^2.2.2
+        version: 2.2.2
+      turndown:
+        specifier: ^7.1.3
+        version: 7.1.3
+      turndown-plugin-gfm:
+        specifier: ^1.0.2
+        version: 1.0.2
+      uuid:
+        specifier: ^9.0.0
+        version: 9.0.1
+    devDependencies:
+      '@types/chrome':
+        specifier: 0.0.227
+        version: 0.0.227
+      '@types/node':
+        specifier: ~20.12.12
+        version: 20.12.12
+      '@types/react':
+        specifier: ^18.2.56
+        version: 18.2.66
+      '@types/react-dom':
+        specifier: ^18.2.19
+        version: 18.2.22
+      rimraf:
+        specifier: ~5.0.7
+        version: 5.0.7
+      typescript:
+        specifier: ^5
+        version: 5.3.3
+
   ../../packages/constants:
     devDependencies:
       rimraf:
@@ -1171,6 +1338,9 @@ importers:
 
   ../../packages/editor-common:
     dependencies:
+      '@arco-design/web-react':
+        specifier: ^2.62.1
+        version: 2.62.1(@types/react@18.2.66)(react-dom@18.2.0)(react@18.2.0)
       '@hocuspocus/provider':
         specifier: ^2.13.0
         version: 2.13.0(y-protocols@1.0.6)(yjs@13.6.16)
@@ -1192,6 +1362,18 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.0.2
         version: 1.0.2(@types/react@18.2.66)(react@18.2.0)
+      '@refly/ai-sdk':
+        specifier: workspace:*
+        version: link:../ai-sdk
+      '@refly/common-types':
+        specifier: workspace:*
+        version: link:../common-types
+      '@refly/utils':
+        specifier: workspace:*
+        version: link:../utils
+      '@tailwindcss/forms':
+        specifier: ^0.5.3
+        version: 0.5.3(tailwindcss@3.3.0)
       '@tailwindcss/typography':
         specifier: ^0.5.10
         version: 0.5.10(tailwindcss@3.3.0)
@@ -1288,6 +1470,9 @@ importers:
       cmdk:
         specifier: ^0.2.1
         version: 0.2.1(@types/react@18.2.66)(react-dom@18.2.0)(react@18.2.0)
+      copy-to-clipboard:
+        specifier: ~3.3.3
+        version: 3.3.3
       eventsource-parser:
         specifier: ^0.1.0
         version: 0.1.0
@@ -1306,6 +1491,9 @@ importers:
       markdown-it:
         specifier: ~14.1.0
         version: 14.1.0
+      mitt:
+        specifier: ~3.0.1
+        version: 3.0.1
       next:
         specifier: 14.1.0
         version: 14.1.0(react-dom@18.2.0)(react@18.2.0)
@@ -1321,6 +1509,12 @@ importers:
       postcss-nesting:
         specifier: ~12.1.5
         version: 12.1.5(postcss@8.4.31)
+      prettier:
+        specifier: ~3.3.2
+        version: 3.3.2
+      prettier-plugin-tailwindcss:
+        specifier: ~0.6.5
+        version: 0.6.5(prettier@3.3.2)
       prosemirror-markdown:
         specifier: ~1.13.0
         version: 1.13.0
@@ -1383,10 +1577,10 @@ importers:
         specifier: ~14.1.1
         version: 14.1.1
       '@types/react':
-        specifier: ^18.2.66
+        specifier: ^18.2.56
         version: 18.2.66
       '@types/react-dom':
-        specifier: ^18.2.22
+        specifier: ^18.2.19
         version: 18.2.22
       '@vitejs/plugin-react':
         specifier: ^4.2.1
@@ -1560,9 +1754,75 @@ importers:
       '@paralleldrive/cuid2':
         specifier: ^2.2.2
         version: 2.2.2
+      '@radix-ui/react-slot':
+        specifier: ^1.0.2
+        version: 1.0.2(@types/react@18.2.66)(react@18.2.0)
+      '@refly/common-types':
+        specifier: workspace:*
+        version: link:../common-types
       '@refly/constants':
         specifier: workspace:*
         version: link:../constants
+      '@refly/openapi-schema':
+        specifier: workspace:*
+        version: link:../openapi-schema
+      '@tiptap/core':
+        specifier: ~2.4.0
+        version: 2.4.0(@tiptap/pm@2.4.0)
+      '@tiptap/extension-code-block-lowlight':
+        specifier: ^2.2.6
+        version: 2.2.6(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)
+      '@tiptap/extension-color':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/extension-text-style@2.4.0)
+      '@tiptap/extension-highlight':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)
+      '@tiptap/extension-horizontal-rule':
+        specifier: ^2.1.7
+        version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)
+      '@tiptap/extension-image':
+        specifier: ~2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)
+      '@tiptap/extension-link':
+        specifier: ~2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)
+      '@tiptap/extension-list-item':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)
+      '@tiptap/extension-placeholder':
+        specifier: 2.0.3
+        version: 2.0.3(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)
+      '@tiptap/extension-task-item':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)
+      '@tiptap/extension-task-list':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)
+      '@tiptap/extension-text-style':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)
+      '@tiptap/extension-underline':
+        specifier: ^2.1.7
+        version: 2.1.7(@tiptap/core@2.4.0)
+      '@tiptap/extension-youtube':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)
+      '@tiptap/pm':
+        specifier: ^2.4.0
+        version: 2.4.0
+      '@tiptap/react':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)(react-dom@18.2.0)(react@18.2.0)
+      '@tiptap/starter-kit':
+        specifier: ^2.4.0
+        version: 2.4.0(@tiptap/pm@2.4.0)
+      '@tiptap/suggestion':
+        specifier: ^2.1.7
+        version: 2.1.7(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)
+      '@types/node':
+        specifier: 18.15.3
+        version: 18.15.3
       clsx:
         specifier: ^2.1.0
         version: 2.1.0
@@ -1572,9 +1832,24 @@ importers:
       js-cookie:
         specifier: ^3.0.5
         version: 3.0.5
+      markdown-it:
+        specifier: ~14.1.0
+        version: 14.1.0
       md5:
         specifier: ^2.3.0
         version: 2.3.0
+      prosemirror-markdown:
+        specifier: ~1.13.0
+        version: 1.13.0
+      prosemirror-model:
+        specifier: ~1.21.1
+        version: 1.21.1
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
       tailwind-merge:
         specifier: ^2.2.2
         version: 2.2.2
@@ -1587,13 +1862,28 @@ importers:
       uuid:
         specifier: ^9.0.0
         version: 9.0.1
+      y-prosemirror:
+        specifier: ~1.2.6
+        version: 1.2.6(prosemirror-model@1.21.1)(y-protocols@1.0.6)(yjs@13.6.16)
+      y-protocols:
+        specifier: ~1.0.6
+        version: 1.0.6(yjs@13.6.16)
+      yjs:
+        specifier: 13.6.16
+        version: 13.6.16
+      zustand:
+        specifier: ^4.5.1
+        version: 4.5.1(@types/react@18.2.66)(react@18.2.0)
     devDependencies:
       '@types/chrome':
         specifier: 0.0.227
         version: 0.0.227
-      '@types/node':
-        specifier: ~20.12.12
-        version: 20.12.12
+      '@types/react':
+        specifier: ^18.2.56
+        version: 18.2.66
+      '@types/react-dom':
+        specifier: ^18.2.19
+        version: 18.2.22
       rimraf:
         specifier: ~5.0.7
         version: 5.0.7
@@ -4501,7 +4791,7 @@ packages:
       - pyodide
     dev: false
 
-  /@langchain/community@0.2.3(@qdrant/js-client-rest@1.9.0)(ioredis@5.4.1)(jsonwebtoken@9.0.2)(lodash@4.17.21)(redis@4.6.13)(ws@8.17.0):
+  /@langchain/community@0.2.3(@mozilla/readability@0.5.0)(@qdrant/js-client-rest@1.9.0)(ioredis@5.4.1)(jsonwebtoken@9.0.2)(lodash@4.17.21)(redis@4.6.13)(ws@8.17.0):
     resolution: {integrity: sha512-8ynw+ck4mfd7v4oYV1MP9rau2dLfdubTSN3e/1AhrKstICejOT2iYv3+Y4J9H/niwWBd5VqUmJUhTmYUZK3WBg==}
     engines: {node: '>=18'}
     peerDependencies:
@@ -4866,6 +5156,7 @@ packages:
     dependencies:
       '@langchain/core': 0.2.2(openai@4.47.1)
       '@langchain/openai': 0.0.34
+      '@mozilla/readability': 0.5.0
       '@qdrant/js-client-rest': 1.9.0(typescript@5.2.2)
       binary-extensions: 2.3.0
       expr-eval: 2.0.2
@@ -8559,6 +8850,27 @@ packages:
       tailwindcss: 3.2.6(postcss@8.4.33)
     dev: false
 
+  /@tailwindcss/forms@0.5.3(tailwindcss@3.3.0):
+    resolution: {integrity: sha512-y5mb86JUoiUgBjY/o6FJSFZSEttfb3Q5gllE4xoKjAAD+vBrnIhE4dViwUuow3va8mpH4s9jyUbUbrRGoRdc2Q==}
+    peerDependencies:
+      tailwindcss: '>=3.0.0 || >= 3.0.0-alpha.1'
+    dependencies:
+      mini-svg-data-uri: 1.4.4
+      tailwindcss: 3.3.0(postcss@8.4.31)(ts-node@10.9.2)
+    dev: false
+
+  /@tailwindcss/typography@0.5.10(tailwindcss@3.2.6):
+    resolution: {integrity: sha512-Pe8BuPJQJd3FfRnm6H0ulKIGoMEQS+Vq01R6M5aCrFB/ccR/shT+0kXLjouGC1gFLm9hopTFN+DMP0pfwRWzPw==}
+    peerDependencies:
+      tailwindcss: '>=3.0.0 || insiders'
+    dependencies:
+      lodash.castarray: 4.4.0
+      lodash.isplainobject: 4.0.6
+      lodash.merge: 4.6.2
+      postcss-selector-parser: 6.0.10
+      tailwindcss: 3.2.6(postcss@8.4.33)
+    dev: false
+
   /@tailwindcss/typography@0.5.10(tailwindcss@3.3.0):
     resolution: {integrity: sha512-Pe8BuPJQJd3FfRnm6H0ulKIGoMEQS+Vq01R6M5aCrFB/ccR/shT+0kXLjouGC1gFLm9hopTFN+DMP0pfwRWzPw==}
     peerDependencies:
@@ -9299,7 +9611,7 @@ packages:
   /@types/jsonwebtoken@9.0.6:
     resolution: {integrity: sha512-/5hndP5dCjloafCXns6SZyESp3Ldq7YjH3zwzwczYnjxIT0Fqzk5ROSYVGfFyczIue7IUEj8hkvLbPoLQ18vQw==}
     dependencies:
-      '@types/node': 20.12.12
+      '@types/node': 20.14.2
     dev: true
 
   /@types/katex@0.11.1:
@@ -9539,7 +9851,7 @@ packages:
   /@types/pg@8.11.4:
     resolution: {integrity: sha512-yw3Bwbda6vO+NvI1Ue/YKOwtl31AYvvd/e73O3V4ZkNzuGpTDndLSyc0dQRB2xrQqDePd20pEGIfqSp/GH3pRw==}
     dependencies:
-      '@types/node': 18.16.12
+      '@types/node': 20.14.2
       pg-protocol: 1.6.1
       pg-types: 4.0.2
 
@@ -18887,6 +19199,60 @@ packages:
       fast-diff: 1.3.0
     dev: true
 
+  /prettier-plugin-tailwindcss@0.6.5(prettier@3.3.2):
+    resolution: {integrity: sha512-axfeOArc/RiGHjOIy9HytehlC0ZLeMaqY09mm8YCkMzznKiDkwFzOpBvtuhuv3xG5qB73+Mj7OCe2j/L1ryfuQ==}
+    engines: {node: '>=14.21.3'}
+    peerDependencies:
+      '@ianvs/prettier-plugin-sort-imports': '*'
+      '@prettier/plugin-pug': '*'
+      '@shopify/prettier-plugin-liquid': '*'
+      '@trivago/prettier-plugin-sort-imports': '*'
+      '@zackad/prettier-plugin-twig-melody': '*'
+      prettier: ^3.0
+      prettier-plugin-astro: '*'
+      prettier-plugin-css-order: '*'
+      prettier-plugin-import-sort: '*'
+      prettier-plugin-jsdoc: '*'
+      prettier-plugin-marko: '*'
+      prettier-plugin-organize-attributes: '*'
+      prettier-plugin-organize-imports: '*'
+      prettier-plugin-sort-imports: '*'
+      prettier-plugin-style-order: '*'
+      prettier-plugin-svelte: '*'
+    peerDependenciesMeta:
+      '@ianvs/prettier-plugin-sort-imports':
+        optional: true
+      '@prettier/plugin-pug':
+        optional: true
+      '@shopify/prettier-plugin-liquid':
+        optional: true
+      '@trivago/prettier-plugin-sort-imports':
+        optional: true
+      '@zackad/prettier-plugin-twig-melody':
+        optional: true
+      prettier-plugin-astro:
+        optional: true
+      prettier-plugin-css-order:
+        optional: true
+      prettier-plugin-import-sort:
+        optional: true
+      prettier-plugin-jsdoc:
+        optional: true
+      prettier-plugin-marko:
+        optional: true
+      prettier-plugin-organize-attributes:
+        optional: true
+      prettier-plugin-organize-imports:
+        optional: true
+      prettier-plugin-sort-imports:
+        optional: true
+      prettier-plugin-style-order:
+        optional: true
+      prettier-plugin-svelte:
+        optional: true
+    dependencies:
+      prettier: 3.3.2
+
   /prettier@2.3.2:
     resolution: {integrity: sha512-lnJzDfJ66zkMy58OL5/NY5zp70S7Nz6KqcKkXYzn2tMVrNxvbqaBpg7H3qHaLxCJ5lNMsGuM8+ohS7cZrthdLQ==}
     engines: {node: '>=10.13.0'}
@@ -18901,6 +19267,12 @@ packages:
 
   /prettier@3.2.5:
     resolution: {integrity: sha512-3/GWa9aOC0YeD7LUfvOG2NiDyhOWRvt1k+rcKhOuYnMY24iiCphgneUfJDyFXd6rZCAnuLBv6UeAULtrhT/F4A==}
+    engines: {node: '>=14'}
+    hasBin: true
+    dev: true
+
+  /prettier@3.3.2:
+    resolution: {integrity: sha512-rAVeHYMcv8ATV5d508CFdn+8/pHPpXeIid1DdrPwXnaAdH7cqjVbpJaT5eq4yRAFU/lsbwYwSF/n5iNrdJHPQA==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -21113,6 +21485,14 @@ packages:
     resolution: {integrity: sha512-tWANXsnmJzgw6mQ07nE3aCDkCK4QdT3ThPMCzawoYA2Pws7vSTCvz3Vrjg61jVUGfFZPJzxEP+NimbcW+EdaDw==}
     dependencies:
       '@babel/runtime': 7.24.5
+
+  /tailwindcss-animate@1.0.6(tailwindcss@3.2.6):
+    resolution: {integrity: sha512-4WigSGMvbl3gCCact62ZvOngA+PRqhAn7si3TQ3/ZuPuQZcIEtVap+ENSXbzWhpojKB8CpvnIsrwBu8/RnHtuw==}
+    peerDependencies:
+      tailwindcss: '>=3.0.0 || insiders'
+    dependencies:
+      tailwindcss: 3.2.6(postcss@8.4.33)
+    dev: false
 
   /tailwindcss-animate@1.0.6(tailwindcss@3.3.0):
     resolution: {integrity: sha512-4WigSGMvbl3gCCact62ZvOngA+PRqhAn7si3TQ3/ZuPuQZcIEtVap+ENSXbzWhpojKB8CpvnIsrwBu8/RnHtuw==}
@@ -23650,9 +24030,11 @@ time:
   /postcss-nesting@12.1.5: '2024-05-23T21:58:04.585Z'
   /postcss@8.4.31: '2023-09-28T22:15:08.722Z'
   /postcss@8.4.33: '2024-01-04T19:04:53.332Z'
+  /prettier-plugin-tailwindcss@0.6.5: '2024-06-17T15:39:25.742Z'
   /prettier@2.3.2: '2021-06-26T08:28:43.949Z'
   /prettier@3.2.4: '2024-01-17T10:15:25.179Z'
   /prettier@3.2.5: '2024-02-04T05:38:11.623Z'
+  /prettier@3.3.2: '2024-06-11T06:07:20.240Z'
   /prisma@5.0.0: '2023-07-11T16:26:33.616Z'
   /prompts@2.4.2: '2021-10-07T21:23:57.263Z'
   /prosemirror-markdown@1.13.0: '2024-05-20T19:38:54.847Z'
