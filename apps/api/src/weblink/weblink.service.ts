@@ -17,6 +17,7 @@ import { getExpectedTokenLenContent } from '../utils/token';
 import { CHANNEL_PROCESS_LINK_BY_USER, CHANNEL_PROCESS_LINK, QUEUE_WEBLINK } from '../utils/const';
 import { genLinkID, sha256Hash } from '../utils/id';
 import { normalizeURL } from '../utils/url';
+import { convertHTMLToMarkdown } from '@refly/utils';
 
 @Injectable()
 export class WeblinkService {
@@ -145,7 +146,7 @@ export class WeblinkService {
       const content = (await this.minio.downloadData(link.storageKey)).toString();
 
       const doc = {
-        pageContent: this.ragService.convertHTMLToMarkdown('ingest', content),
+        pageContent: convertHTMLToMarkdown('ingest', content),
         metadata: {
           title: link.title,
           source: link.url,
@@ -317,52 +318,6 @@ export class WeblinkService {
     this.logger.log('upload parsed doc to minio res: ' + JSON.stringify(res));
 
     return parsedDocStorageKey;
-  }
-
-  /**
-   * Chunking and embedding with idempotency when chunking failed or parser version is outdated
-   * @param weblink
-   * @param doc
-   * @returns
-   */
-  async genWeblinkChunkEmbedding(weblink: Weblink, doc: Document<SourceMeta>): Promise<Weblink> {
-    if (
-      weblink.chunkStorageKey &&
-      weblink.chunkStatus === 'finish' &&
-      weblink.parserVersion === PARSER_VERSION
-    ) {
-      this.logger.log(`weblink already indexed: ${weblink.url}, skip`);
-      return weblink;
-    }
-
-    // 并发控制，妥善处理多个并发请求处理同一个 url 的情况
-    const releaseLock = await this.redis.acquireLock(`weblink:index:${weblink.url}`);
-    if (!releaseLock) {
-      this.logger.log(`acquire index lock failed for weblink: ${weblink.url}`);
-      return weblink;
-    }
-
-    this.logger.log(`start to index weblink: ${weblink.url}`);
-
-    try {
-      const dataObjs = await this.ragService.indexContent(doc);
-      const chunkStorageKey = `chunks/${sha256Hash(weblink.url)}-${PARSER_VERSION}.avro`;
-      const res = await this.ragService.saveContentChunks(chunkStorageKey, { chunks: dataObjs });
-      this.logger.log(`upload ${dataObjs.length} chunk(s) to minio res: ` + JSON.stringify(res));
-
-      return this.prisma.weblink.update({
-        where: { id: weblink.id },
-        data: { chunkStorageKey, parserVersion: PARSER_VERSION, chunkStatus: 'finish' },
-      });
-    } catch (err) {
-      this.logger.error(`index weblink failed: ${err}`);
-      return this.prisma.weblink.update({
-        where: { id: weblink.id },
-        data: { chunkStatus: 'failed' },
-      });
-    } finally {
-      await releaseLock();
-    }
   }
 
   /**

@@ -1,53 +1,134 @@
-import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
-import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
-import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
-import { ChatMessage } from '@refly/openapi-schema';
-import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
-import { Avatar, Button, Spin, Message } from '@arco-design/web-react';
-import { IconCopy, IconQuote, IconRight } from '@arco-design/web-react/icon';
-import { useTranslation } from 'react-i18next';
+import { Markdown } from "@refly-packages/ai-workspace-common/components/markdown"
+import { useBuildThreadAndRun } from "@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run"
+import { useUserStore } from "@refly-packages/ai-workspace-common/stores/user"
+import { ChatMessage } from "@refly/openapi-schema"
+import { copyToClipboard } from "@refly-packages/ai-workspace-common/utils"
+import {
+  Avatar,
+  Button,
+  Spin,
+  Message,
+  Dropdown,
+  Menu,
+} from "@arco-design/web-react"
+import {
+  IconBook,
+  IconCaretDown,
+  IconCheckCircle,
+  IconCopy,
+  IconEdit,
+  IconImport,
+  IconQuote,
+  IconRight,
+} from "@arco-design/web-react/icon"
+import { useTranslation } from "react-i18next"
 // 自定义组件
-import { SourceList } from '@refly-packages/ai-workspace-common/components/source-list';
-import { safeParseJSON } from '../../../utils/parse';
+import { SourceList } from "@refly-packages/ai-workspace-common/components/source-list"
+import { safeParseJSON } from "../../../utils/parse"
+import {
+  EditorOperation,
+  editorEmitter,
+} from "@refly-packages/ai-workspace-common/utils/event-emitter/editor"
+import { useKnowledgeBaseStore } from "@refly-packages/ai-workspace-common/stores/knowledge-base"
 
 export const HumanMessage = (props: { message: Partial<ChatMessage> }) => {
-  const { message } = props;
+  const { message } = props
   return (
     <div className="ai-copilot-message human-message-container">
       <div className="human-message">
         <Markdown content={message?.content as string} />
       </div>
     </div>
-  );
-};
+  )
+}
 
 export const AssistantMessage = (props: {
-  message: Partial<ChatMessage>;
-  isPending: boolean;
-  isLastSession: boolean;
-  handleAskFollowing: (question?: string) => void;
+  message: Partial<ChatMessage>
+  isPending: boolean
+  isLastSession: boolean
+  handleAskFollowing: (question?: string) => void
 }) => {
-  const { message, isPending = false, isLastSession = false, handleAskFollowing } = props;
-  const { t } = useTranslation();
-  const sources = typeof message?.sources === 'string' ? safeParseJSON(message?.sources) : message?.sources;
+  const {
+    message,
+    isPending = false,
+    isLastSession = false,
+    handleAskFollowing,
+  } = props
+  const { t } = useTranslation()
+  const knowledgeBaseStore = useKnowledgeBaseStore()
+  const sources =
+    typeof message?.sources === "string"
+      ? safeParseJSON(message?.sources)
+      : message?.sources
   const relatedQuestions =
-    typeof message?.relatedQuestions === 'string'
+    typeof message?.relatedQuestions === "string"
       ? safeParseJSON(message?.relatedQuestions)
-      : message?.relatedQuestions;
+      : message?.relatedQuestions
+
+  // TODO: 移入新组件
+
+  const handleEditorOperation = (type: EditorOperation, content: string) => {
+    // editorEmitter.emit('insertBlow', message?.content);
+
+    if (type === "insertBlow" || type === "replaceSelection") {
+      const editor = knowledgeBaseStore.editor
+      const selection = editor.view.state.selection
+
+      if (!editor) return
+
+      editor
+        ?.chain()
+        .focus()
+        .insertContentAt(
+          {
+            from: selection.from,
+            to: selection.to,
+          },
+          content,
+        )
+        .run()
+    } else if (type === "createNewNote") {
+      editorEmitter.emit("createNewNote", content)
+    }
+  }
+
+  const dropList = (
+    <Menu
+      className={"output-locale-list-menu"}
+      onClickMenuItem={key => {
+        const parsedText = message?.content?.replace(/\[citation]\(\d+\)/g, "")
+        handleEditorOperation(key as EditorOperation, parsedText || "")
+      }}
+      style={{ width: 240 }}>
+      <Menu.Item key="insertNote">
+        <IconImport /> 插入笔记
+      </Menu.Item>
+      <Menu.Item key="insertNote">
+        <IconCheckCircle /> 替换选中
+      </Menu.Item>
+      <Menu.Item key="createNewNote">
+        <IconBook /> 创建新笔记
+      </Menu.Item>
+    </Menu>
+  )
 
   return (
-    <div className="ai-copilot-message assistant-message-container ">
+    <div className="ai-copilot-message assistant-message-container">
       <div className="session-source">
         {isPending || (sources || [])?.length > 0 ? (
           <div className="session-title-icon">
-            <IconQuote style={{ fontSize: 18, color: 'rgba(0, 0, 0, .5)' }} />
-            <p>{t('threadDetail.item.session.source')}</p>
+            <IconQuote style={{ fontSize: 18, color: "rgba(0, 0, 0, .5)" }} />
+            <p>{t("threadDetail.item.session.source")}</p>
           </div>
         ) : null}
       </div>
-      <SourceList isPending={isPending} sources={sources || []} isLastSession={isLastSession} />
+      <SourceList
+        isPending={isPending}
+        sources={sources || []}
+        isLastSession={isLastSession}
+      />
       <div className="assistant-message">
-        <Markdown content={message?.content as string} />
+        <Markdown content={message?.content as string} sources={sources} />
       </div>
       {!isPending && (
         <div className="ai-copilot-answer-action-container">
@@ -56,14 +137,37 @@ export const AssistantMessage = (props: {
               <Button
                 type="text"
                 icon={<IconCopy style={{ fontSize: 14 }} />}
-                style={{ color: '#64645F' }}
+                style={{ color: "#64645F" }}
+                className={"assist-action-item"}
                 onClick={() => {
-                  copyToClipboard(message?.content || '');
-                  Message.success('复制成功');
-                }}
-              >
+                  const parsedText = message?.content?.replace(
+                    /\[citation]\(\d+\)/g,
+                    "",
+                  )
+
+                  copyToClipboard(parsedText || "")
+                  Message.success("复制成功")
+                }}>
                 复制
               </Button>
+              <Dropdown droplist={dropList} position="bl">
+                <Button
+                  type="text"
+                  className={"assist-action-item"}
+                  icon={<IconImport style={{ fontSize: 14 }} />}
+                  style={{ color: "#64645F" }}
+                  onClick={() => {
+                    const parsedText = message?.content?.replace(
+                      /\[citation]\(\d+\)/g,
+                      "",
+                    )
+                    // editorEmitter.emit('insertBlow', message?.content || '');
+                    handleEditorOperation("insertBlow", parsedText || "")
+                  }}>
+                  插入笔记
+                  <IconCaretDown />
+                </Button>
+              </Dropdown>
             </div>
             <div className="session-answer-actionbar-right"></div>
           </div>
@@ -73,17 +177,20 @@ export const AssistantMessage = (props: {
         <div className="ai-copilot-related-question-container">
           <div className="ai-copilot-related-question-list">
             {relatedQuestions?.map((item, index) => (
-              <div className="ai-copilot-related-question-item" key={index} onClick={() => handleAskFollowing(item)}>
+              <div
+                className="ai-copilot-related-question-item"
+                key={index}
+                onClick={() => handleAskFollowing(item)}>
                 <p className="ai-copilot-related-question-title">{item}</p>
-                <IconRight style={{ color: 'rgba(0, 0, 0, 0.5)' }} />
+                <IconRight style={{ color: "rgba(0, 0, 0, 0.5)" }} />
               </div>
             ))}
           </div>
         </div>
       ) : null}
     </div>
-  );
-};
+  )
+}
 
 export const PendingMessage = () => {
   return (
@@ -92,37 +199,46 @@ export const PendingMessage = () => {
         <Spin dot size={4} />
       </div>
     </div>
-  );
-};
+  )
+}
 
 export const WelcomeMessage = () => {
-  const userStore = useUserStore();
-  const { runTask } = useBuildThreadAndRun();
-  const guessQuestions = ['总结选中内容要点', '脑暴写作灵感', '写一篇 Twitter 原创文章'];
+  const userStore = useUserStore()
+  const { runTask } = useBuildThreadAndRun()
+  const guessQuestions = [
+    "总结选中内容要点",
+    "脑暴写作灵感",
+    "写一篇 Twitter 原创文章",
+  ]
   return (
     <div className="ai-copilot-message welcome-message-container">
       <div className="welcome-message">
         <div className="welcome-message-user-container">
           <div className="user-container-avatar">
             <Avatar>
-              <img src={userStore?.userProfile?.avatar || ''} />
+              <img src={userStore?.userProfile?.avatar || ""} />
             </Avatar>
           </div>
-          <div className="user-container-title">Hello, {userStore?.userProfile?.name}</div>
+          <div className="user-container-title">
+            Hello, {userStore?.userProfile?.name}
+          </div>
         </div>
         <div className="welcome-message-text">How can I help you today?</div>
         <div className="welcome-message-guess-you-ask-container ai-copilot-related-question-container">
           <div className="guess-you-ask-assist"></div>
           <div className="guess-you-ask ai-copilot-related-question-lis">
             {guessQuestions?.map((item, index) => (
-              <div className="ai-copilot-related-question-item" key={index} onClick={() => runTask(item)}>
+              <div
+                className="ai-copilot-related-question-item"
+                key={index}
+                onClick={() => runTask(item)}>
                 <p className="ai-copilot-related-question-title">{item}</p>
-                <IconRight style={{ color: 'rgba(0, 0, 0, 0.5)' }} />
+                <IconRight style={{ color: "rgba(0, 0, 0, 0.5)" }} />
               </div>
             ))}
           </div>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

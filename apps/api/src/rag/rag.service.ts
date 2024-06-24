@@ -1,15 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import _ from 'lodash';
 import avro from 'avsc';
 import { LRUCache } from 'lru-cache';
 import { Document } from '@langchain/core/documents';
 import { TokenTextSplitter } from 'langchain/text_splitter';
 import { OpenAIEmbeddings } from '@langchain/openai';
-
-import { tables } from 'turndown-plugin-gfm';
-import TurndownService from 'turndown';
-import { cleanMarkdownForIngest, tidyMarkdown } from '../utils/markdown';
+import { cleanMarkdownForIngest } from '@refly/utils';
 
 import { User } from '@prisma/client';
 import { MinioService } from '../common/minio.service';
@@ -24,6 +20,7 @@ import {
 } from './rag.dto';
 import { QdrantService } from '../common/qdrant.service';
 import { Condition, PointStruct } from '../common/qdrant.dto';
+import { genResourceUuid, omit } from '../utils';
 
 const READER_URL = 'https://r.jina.ai/';
 
@@ -65,8 +62,6 @@ export class RAGService {
   private cache: LRUCache<string, ReaderResult>; // url -> reader result
   private logger = new Logger(RAGService.name);
 
-  turnDownPlugins = [tables];
-
   constructor(
     private config: ConfigService,
     private minio: MinioService,
@@ -85,73 +80,6 @@ export class RAGService {
       chunkOverlap: 400,
     });
     this.cache = new LRUCache({ max: 1000 });
-  }
-
-  getTurndown(mode: FormatMode) {
-    const turnDownService = new TurndownService({
-      headingStyle: 'atx',
-      bulletListMarker: '-',
-      codeBlockStyle: 'fenced',
-    });
-    if (mode === 'render') {
-      turnDownService.addRule('remove-irrelevant', {
-        filter: ['meta', 'style', 'script', 'noscript', 'link', 'textarea'],
-        replacement: () => '',
-      });
-    } else if (mode === 'ingest') {
-      turnDownService.addRule('remove-irrelevant', {
-        filter: ['meta', 'style', 'script', 'noscript', 'link', 'textarea', 'img'],
-        replacement: () => '',
-      });
-      turnDownService.addRule('unlink', {
-        filter: ['a'],
-        replacement: (content, node) => node.textContent,
-      });
-    }
-
-    return turnDownService;
-  }
-
-  convertHTMLToMarkdown(mode: FormatMode, html: string): string {
-    const toBeTurnedToMd = html;
-    let turnDownService = this.getTurndown(mode);
-    for (const plugin of this.turnDownPlugins) {
-      turnDownService = turnDownService.use(plugin);
-    }
-
-    let contentText = '';
-    if (toBeTurnedToMd) {
-      try {
-        contentText = turnDownService.turndown(toBeTurnedToMd).trim();
-      } catch (err) {
-        this.logger.error(`Turndown failed to run, retrying without plugins: ${err}`);
-        const vanillaTurnDownService = this.getTurndown('vanilla');
-        try {
-          contentText = vanillaTurnDownService.turndown(toBeTurnedToMd).trim();
-        } catch (err2) {
-          this.logger.error(`Turndown failed to run, giving up: ${err2}`);
-        }
-      }
-    }
-
-    if (
-      !contentText ||
-      (contentText.startsWith('<') && contentText.endsWith('>') && toBeTurnedToMd !== html)
-    ) {
-      try {
-        contentText = turnDownService.turndown(html);
-      } catch (err) {
-        this.logger.warn(`Turndown failed to run, retrying without plugins`, { err });
-        const vanillaTurnDownService = this.getTurndown('vanilla');
-        try {
-          contentText = vanillaTurnDownService.turndown(html);
-        } catch (err2) {
-          this.logger.warn(`Turndown failed to run, giving up`, { err: err2 });
-        }
-      }
-    }
-
-    return tidyMarkdown(contentText || '').trim();
   }
 
   async crawlFromRemoteReader(url: string): Promise<ReaderResult> {
@@ -199,6 +127,7 @@ export class RAGService {
 
   async indexContent(doc: Document<DocMeta>): Promise<ContentDataObj[]> {
     const { pageContent, metadata } = doc;
+    const { resourceId, collectionId } = metadata;
 
     const chunks = await this.chunkText(pageContent);
     const chunkEmbeds = await this.embeddings.embedDocuments(chunks);
@@ -206,12 +135,14 @@ export class RAGService {
     const dataObjs: ContentDataObj[] = [];
     for (let i = 0; i < chunks.length; i++) {
       dataObjs.push({
-        id: '', // leave it empty for future update
+        id: genResourceUuid(`${resourceId}-${i}`),
         url: metadata.url,
         type: ContentType.WEBLINK,
         title: metadata.title,
         content: chunks[i],
         vector: chunkEmbeds[i],
+        resourceId,
+        collectionId,
       });
     }
 
@@ -239,7 +170,7 @@ export class RAGService {
       id: chunk.id,
       vector: chunk.vector,
       payload: {
-        ..._.omit(chunk, ['id', 'vector']),
+        ...omit(chunk, ['id', 'vector']),
         tenantId: user.uid,
       },
     }));

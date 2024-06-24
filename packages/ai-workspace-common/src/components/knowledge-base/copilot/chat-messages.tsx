@@ -12,8 +12,6 @@ export const ChatMessages = (props: ChatMessagesProps) => {
   const messageStateStore = useMessageStateStore();
   const { runTask } = useBuildThreadAndRun();
 
-  console.log('chatStore.messages', chatStore.messages);
-
   return (
     <div className="ai-copilot-message-inner-container">
       {chatStore.messages.map((item, index) =>

@@ -2,12 +2,11 @@ import { useTranslation } from 'react-i18next';
 import { Dropdown, Menu, Typography, Message as message } from '@arco-design/web-react';
 import { useUserStore } from '@/stores/user';
 import { safeStringifyJSON } from '@refly/ai-workspace-common/utils/parse';
-import { LOCALE } from '@/types';
+import { LOCALE } from '@refly/common-types';
 // request
-import { type OutputLocale, enLocale, localeToLanguageName } from '@/utils/i18n';
+import { type OutputLocale, enLocale, localeToLanguageName } from '@refly/utils';
 // styles
 import './index.scss';
-import { storage } from 'wxt/storage';
 import { apiRequest } from '../../requests/apiRequest';
 
 export const OutputLocaleList = (props: { children: any }) => {

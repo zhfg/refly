@@ -9,7 +9,7 @@ import { safeParseJSON } from '@refly/ai-workspace-common/utils/parse';
 import { getPopupContainer } from '@/utils/ui';
 
 // requests
-import { ResourceType, type ResourceListItem } from '@/types';
+import { ResourceType, type ResourceListItem } from '@refly/common-types';
 import { apiRequest } from '@/requests/apiRequest';
 // utils
 

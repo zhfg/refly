@@ -1,4 +1,4 @@
-import { storage } from 'wxt/storage';
+import { storage } from '@refly/ai-workspace-common/utils/storage';
 import { safeParseJSON } from '@refly/ai-workspace-common/utils/parse';
 import { Runtime, browser } from 'wxt/browser';
 import { getLastActiveTab } from '@/utils/extension/tabs';

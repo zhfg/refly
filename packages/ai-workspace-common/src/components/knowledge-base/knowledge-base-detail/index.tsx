@@ -104,7 +104,14 @@ export const KnowledgeBaseDetail = (props: KnowledgeBaseDetailProps) => {
         ))}
       </Tabs>
       <PanelGroup direction="horizontal" className="knowledge-base-detail-panel-container">
-        <Panel defaultSize={minSize} minSize={minSize} maxSize={50} className="knowledge-base-detail-directory-panel">
+        <Panel
+          defaultSize={minSize}
+          minSize={minSize}
+          maxSize={50}
+          collapsedSize={0}
+          collapsible={true}
+          className="knowledge-base-detail-directory-panel"
+        >
           <KnowledgeBaseDirectory />
         </Panel>
         <PanelResizeHandle className="knowledge-base-detail-panel-resize" />
@@ -113,21 +120,7 @@ export const KnowledgeBaseDetail = (props: KnowledgeBaseDetailProps) => {
         </Panel>
       </PanelGroup>
       {knowledgeBaseStore?.kbModalVisible && knowledgeBaseStore.actionSource === ActionSource.KnowledgeBase ? (
-        <KnowledgeBaseListModal
-          title="知识库"
-          classNames="kb-list-modal"
-          placement="right"
-          width={360}
-          height="100%"
-          getPopupContainer={() => {
-            const container = getPopupContainer();
-            const elem = container?.querySelector('.knowledge-base-detail-container') as Element;
-
-            console.log('getPopupContainer knowledge', elem);
-
-            return elem;
-          }}
-        />
+        <KnowledgeBaseListModal title="知识库" classNames="kb-list-modal" placement="right" width={360} height="100%" />
       ) : null}
     </div>
   );

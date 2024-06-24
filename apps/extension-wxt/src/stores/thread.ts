@@ -1,7 +1,7 @@
-import { create } from "zustand";
-import { devtools } from "zustand/middleware";
-import type {} from "@redux-devtools/extension";
-import type { OutputLocale } from "@/utils/i18n";
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import type {} from '@redux-devtools/extension';
+import type { OutputLocale } from '@refly/utils';
 
 export interface Thread {
   convId: string;
@@ -45,10 +45,8 @@ export const useThreadStore = create<ThreadState>()(
         ...state,
         threads: state.threads.concat(newThreadList),
       })),
-    updateCurrentPage: (currentPage: number) =>
-      set((state) => ({ ...state, currentPage })),
-    updateHasMore: (hasMore: boolean) =>
-      set((state) => ({ ...state, hasMore })),
+    updateCurrentPage: (currentPage: number) => set((state) => ({ ...state, currentPage })),
+    updateHasMore: (hasMore: boolean) => set((state) => ({ ...state, hasMore })),
     resetState: () => set((state) => ({ ...state, ...defaultState })),
-  }))
+  })),
 );

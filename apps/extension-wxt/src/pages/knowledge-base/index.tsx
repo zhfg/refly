@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams } from '@refly/ai-workspace-common/utils/router';
 import { useResizePanel } from '@refly/ai-workspace-common/hooks/use-resize-panel';
 import { ErrorBoundary } from '@sentry/react';
+import { useKnowledgeBaseStore } from '@refly/ai-workspace-common/stores/knowledge-base';
 
 // 用于快速选择
 export const quickActionList = ['summary'];
@@ -24,10 +25,12 @@ export const quickActionList = ['summary'];
  * /knowledge-base 打开的是一体的，通过 query 参数显示 collection、note 或 copilot，都属于 knowledge base 里面的资源
  */
 const KnowledgeLibraryLayout = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const kbId = searchParams.get('kbId');
+  const resId = searchParams.get('resId');
   const userStore = useUserStore();
   const { t } = useTranslation();
+  const knowledgeBaseStore = useKnowledgeBaseStore();
 
   const [minSize] = useResizePanel({
     getGroupSelector: () => document.querySelector(`.workspace-panel-container`) as HTMLElement,
@@ -48,40 +51,17 @@ const KnowledgeLibraryLayout = () => {
         maxSize: 100,
       };
 
+  console.log('current resource', knowledgeBaseStore.currentResource);
+
   return (
     <ErrorBoundary>
       <div className="workspace-container" style={{}}>
         <div className="workspace-inner-container">
-          <PanelGroup direction="horizontal" className="workspace-panel-container">
-            {kbId ? (
-              <>
-                <Panel
-                  minSize={50}
-                  order={1}
-                  className="workspace-left-assist-panel"
-                  key="workspace-left-assist-panel"
-                  id="workspace-left-assist-panel"
-                >
-                  <KnowledgeBaseDetail />
-                </Panel>
-                <PanelResizeHandle
-                  className="workspace-panel-resize"
-                  key="workspace-panel-resize"
-                  id="workspace-panel-resize"
-                />
-              </>
-            ) : null}
-            <Panel
-              order={3}
-              className="workspace-content-panel"
-              {...copilotStyle}
-              minSize={minSize}
-              key="workspace-content-panel"
-              id="workspace-content-panel"
-            >
+          <div className="workspace-panel-container">
+            <div className="workspace-content-panel">
               <AICopilot />
-            </Panel>
-          </PanelGroup>
+            </div>
+          </div>
         </div>
       </div>
     </ErrorBoundary>

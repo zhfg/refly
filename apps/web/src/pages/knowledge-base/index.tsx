@@ -5,6 +5,7 @@ import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels"
 // 自定义组件
 import { KnowledgeBaseDetail } from "@refly/ai-workspace-common/components/knowledge-base/knowledge-base-detail"
 import { AICopilot } from "@refly/ai-workspace-common/components/knowledge-base/copilot"
+import { AINote } from "@refly/ai-workspace-common/components/knowledge-base/ai-note"
 // utils
 // 自定义方法
 // stores
@@ -18,7 +19,7 @@ import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
 import { useResizePanel } from "@refly/ai-workspace-common/hooks/use-resize-panel"
 import { ErrorBoundary } from "@sentry/react"
-import { getDefaultPopupContainer } from "@refly/ai-workspace-common/utils/ui"
+import { useKnowledgeBaseStore } from "@refly/ai-workspace-common/stores/knowledge-base"
 
 // 用于快速选择
 export const quickActionList = ["summary"]
@@ -32,7 +33,9 @@ const KnowledgeLibraryLayout = () => {
   const [token] = useCookie("_refly_ai_sid")
   const [searchParams] = useSearchParams()
   const kbId = searchParams.get("kbId")
+  const noteId = searchParams.get("noteId") || "tempNoteId"
   const userStore = useUserStore()
+  const knowledgeBaseStore = useKnowledgeBaseStore()
   const { t } = useTranslation()
 
   const [minSize] = useResizePanel({
@@ -84,17 +87,18 @@ const KnowledgeLibraryLayout = () => {
     }
   }, [token, userStore?.userProfile?.uid])
 
-  const copilotStyle = kbId
-    ? {
-        defaultSize: 20,
-        minSize: 20,
-        maxSize: 50,
-      }
-    : {
-        defaultSize: 100,
-        minSize: 100,
-        maxSize: 100,
-      }
+  const copilotStyle =
+    kbId && knowledgeBaseStore.resourcePanelVisible
+      ? {
+          defaultSize: 20,
+          minSize: 20,
+          maxSize: 50,
+        }
+      : {
+          defaultSize: 100,
+          minSize: 100,
+          maxSize: 100,
+        }
 
   return (
     <ErrorBoundary>
@@ -109,10 +113,10 @@ const KnowledgeLibraryLayout = () => {
           <PanelGroup
             direction="horizontal"
             className="workspace-panel-container">
-            {kbId ? (
+            {kbId && knowledgeBaseStore.resourcePanelVisible ? (
               <>
                 <Panel
-                  minSize={50}
+                  minSize={20}
                   order={1}
                   className="workspace-left-assist-panel"
                   key="workspace-left-assist-panel"
@@ -122,7 +126,24 @@ const KnowledgeLibraryLayout = () => {
                 <PanelResizeHandle
                   className="workspace-panel-resize"
                   key="workspace-panel-resize"
-                  id="workspace-panel-resize"
+                  id={`workspace-panel-resize-${kbId}`}
+                />
+              </>
+            ) : null}
+            {noteId && knowledgeBaseStore.notePanelVisible ? (
+              <>
+                <Panel
+                  minSize={minSize}
+                  order={2}
+                  className="workspace-content-panel"
+                  key="workspace-content-panel"
+                  id={`workspace-content-panel-note`}>
+                  <AINote />
+                </Panel>
+                <PanelResizeHandle
+                  className="workspace-panel-resize"
+                  key="workspace-panel-resize"
+                  id={`workspace-panel-resize-${noteId}`}
                 />
               </>
             ) : null}
@@ -132,7 +153,7 @@ const KnowledgeLibraryLayout = () => {
               {...copilotStyle}
               minSize={minSize}
               key="workspace-content-panel"
-              id="workspace-content-panel">
+              id="workspace-content-panel-copilot">
               <AICopilot />
             </Panel>
           </PanelGroup>

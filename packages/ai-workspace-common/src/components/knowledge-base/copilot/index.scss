@@ -10,12 +10,36 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 0 12px;
 
     .knowledge-base-detail-navigation-bar {
       display: flex;
       flex-direction: row;
       align-items: center;
+
+      .assist-action-item {
+        color: rgba(0, 0, 0, 0.5);
+        font-size: 12px;
+
+        &:hover,
+        &.active {
+          cursor: pointer;
+          background-color: #f1f1f0;
+          color: #00968f;
+        }
+      }
+
+      button.assist-action-item {
+        height: 24px;
+        padding: 0 4px;
+        border-radius: 8px;
+
+        &:hover,
+        &.active {
+          cursor: pointer;
+          background-color: #f1f1f0;
+          color: #00968f;
+        }
+      }
 
       .conv-meta {
         display: flex;
@@ -162,6 +186,34 @@
           margin-top: 8px;
           font-size: 14px;
 
+          .assist-action-item {
+            color: rgba(0, 0, 0, 0.5);
+            font-size: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            &:hover,
+            &.active {
+              cursor: pointer;
+              background-color: #f1f1f0;
+              color: #00968f;
+            }
+          }
+
+          button.assist-action-item {
+            height: 24px;
+            padding: 0 4px;
+            border-radius: 8px;
+
+            &:hover,
+            &.active {
+              cursor: pointer;
+              background-color: #f1f1f0;
+              color: #00968f;
+            }
+          }
+
           button {
             padding: 0 8px;
             font-size: 12px;
@@ -175,6 +227,9 @@
           .session-answer-actionbar-left {
             margin-left: -8px;
             font-size: 14px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
           }
         }
       }
@@ -344,6 +399,14 @@
         border-radius: 8px;
         background-color: transparent;
         max-width: 200px;
+      }
+    }
+
+    .context-state-card-footer {
+      margin-top: 12px;
+
+      button {
+        border-radius: 8px;
       }
     }
   }

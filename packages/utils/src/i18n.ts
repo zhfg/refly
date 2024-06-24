@@ -1,4 +1,4 @@
-import { LOCALE } from './types';
+import { LOCALE } from '@refly/common-types';
 
 export const languageNameToLocale = {
   en: {

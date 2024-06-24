@@ -1,4 +1,4 @@
-import resources from "@refly/ai-workspace-common/types/resource"
+import resources from "@refly/common-types"
 
 declare module "i18next" {
   interface CustomTypeOptions {

@@ -1,6 +1,7 @@
 import ReactDOM from 'react-dom/client';
 import { defineContentScript } from 'wxt/sandbox';
 import { createShadowRootUi } from 'wxt/client';
+import { MemoryRouter } from '@refly/ai-workspace-common/utils/router';
 
 import App from './App';
 import { setRuntime } from '@refly/ai-workspace-common/utils/env';
@@ -21,7 +22,11 @@ export default defineContentScript({
       append: 'before',
       onMount(container) {
         const root = ReactDOM.createRoot(container);
-        root.render(<App />);
+        root.render(
+          <MemoryRouter>
+            <App />
+          </MemoryRouter>,
+        );
         return root;
       },
       onRemove: (root) => {

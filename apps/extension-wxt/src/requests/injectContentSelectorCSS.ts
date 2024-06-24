@@ -1,20 +1,18 @@
-import type { HandlerRequest, HandlerResponse } from "@/types/request";
-import type { WebLinkItem, ListPageProps } from "@/types";
+import type { HandlerRequest, HandlerResponse } from '@refly/common-types';
+import type { WebLinkItem, ListPageProps } from '@refly/common-types';
 
-const handler = async (
-  req: HandlerRequest<ListPageProps>
-): Promise<HandlerResponse<void>> => {
+const handler = async (req: HandlerRequest<ListPageProps>): Promise<HandlerResponse<void>> => {
   console.log(`injectContent`, req.body);
 
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     const { id } = tabs[0];
-    console.log("currentTabid", id);
+    console.log('currentTabid', id);
 
     chrome.scripting
       .executeScript({
         target: { tabId: id as number },
         func: () => {
-          const style = document.createElement("style");
+          const style = document.createElement('style');
           style.textContent = `
           * {
           cursor: default !important;
@@ -40,11 +38,9 @@ const handler = async (
         },
       })
       .then(() => {
-        console.log("Inject content selector style success");
+        console.log('Inject content selector style success');
       })
-      .catch((err) =>
-        console.log(`Inject content selector style failed: ${err}`)
-      );
+      .catch((err) => console.log(`Inject content selector style failed: ${err}`));
   });
 
   return {

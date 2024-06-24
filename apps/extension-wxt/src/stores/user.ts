@@ -1,8 +1,8 @@
-import { create } from "zustand";
-import { devtools } from "zustand/middleware";
-import type {} from "@redux-devtools/extension";
-import { type User, LOCALE } from "@/types";
-import { type OutputLocale } from "@/utils/i18n";
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import type {} from '@redux-devtools/extension';
+import { type User, LOCALE } from '@refly/common-types';
+import { type OutputLocale } from '@refly/utils';
 
 export interface LocalSettings {
   uiLocale: LOCALE; // UI 相关的
@@ -32,12 +32,12 @@ export interface UserState {
 const getDefaultLocale = () => {
   const language = navigator.language;
 
-  if (language?.startsWith("en")) {
+  if (language?.startsWith('en')) {
     return LOCALE.EN;
   }
 
-  if (language?.startsWith("zh")) {
-    return "zh-CN";
+  if (language?.startsWith('zh')) {
+    return 'zh-CN';
   }
 
   return LOCALE.EN;
@@ -53,7 +53,7 @@ export const defaultState = {
   // messages: fakeMessages as any,
   isCheckingLoginStatus: false,
   userProfile: undefined,
-  token: "",
+  token: '',
   loginModalVisible: false,
   localSettings: { ...defaultLocalSettings }, // 默认使用浏览器的 navigator 获取语言，插件里面使用 chrome.i18n.detectLanguage
 };
@@ -62,15 +62,11 @@ export const useUserStore = create<UserState>()(
   devtools((set) => ({
     ...defaultState,
 
-    setIsCheckingLoginStatus: (val: boolean) =>
-      set((state) => ({ ...state, isCheckingLoginStatus: val })),
-    setUserProfile: (val?: User) =>
-      set((state) => ({ ...state, userProfile: val })),
+    setIsCheckingLoginStatus: (val: boolean) => set((state) => ({ ...state, isCheckingLoginStatus: val })),
+    setUserProfile: (val?: User) => set((state) => ({ ...state, userProfile: val })),
     setToken: (val?: string) => set((state) => ({ ...state, token: val })),
-    setLoginModalVisible: (val: boolean) =>
-      set((state) => ({ ...state, loginModalVisible: val })),
-    setLocalSettings: (val: LocalSettings) =>
-      set((state) => ({ ...state, localSettings: val })),
+    setLoginModalVisible: (val: boolean) => set((state) => ({ ...state, loginModalVisible: val })),
+    setLocalSettings: (val: LocalSettings) => set((state) => ({ ...state, localSettings: val })),
     resetState: () => set((state) => ({ ...state, ...defaultState })),
-  }))
+  })),
 );

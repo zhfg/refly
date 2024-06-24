@@ -70,8 +70,6 @@ export const ChatInput = (props: ChatInputProps) => {
     }
   };
 
-  console.log('messageState', messageStateStore.pendingFirstToken);
-
   return (
     <div className="ai-copilot-chat-input-container">
       <TextArea

@@ -5,10 +5,11 @@
     "jsx": "react-jsx",// path
     "paths": {
       "@/*": ["./src/*"],
-      "@refly/ai-workspace-common/*": ["./node_modules/@refly/ai-workspace-common/src/*"]
+      "@refly/ai-workspace-common/*": ["./node_modules/@refly/ai-workspace-common/src/*",  "../../packages/ai-workspace-common/src/*"],
+      "@refly/utils/*": ["./node_modules/@refly/utils/src/*",  "../../packages/utils/src/*"]
     }
   },
   "include": ["src", "tailwind.config.ts", "./node_modules/@refly/ai-workspace-common/src/components/workspace/content-panel", "../../packages/ai-workspace-common/src/components/workspace/knowledge-keyword-list", "../../packages/ai-workspace-common/src/components/workspace/left-assist-panel"],
   "exclude": ["node_modules", "dist"],
-  "references": [{"path": "./node_modules/@refly/ai-workspace-common/tsconfig.json"}]
+  "references": [{"path": "./node_modules/@refly/ai-workspace-common/tsconfig.json"}, { "path": "../../packages/ai-workspace-common/tsconfig.json"}, { "path": "../../packages/utils/tsconfig.json"}]
 }

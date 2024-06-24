@@ -1,4 +1,4 @@
-import type { Source, WebLinkItem } from './types';
+import { Weblink, Source } from '@refly/openapi-schema';
 
 export const buildSource = (): Source => {
   return {
@@ -12,7 +12,7 @@ export const buildSource = (): Source => {
 };
 
 // TODO: 这里需要新增一个方法用于处理 quickAction
-export const mapSourceFromWeblinkList = (weblinkList: { content: WebLinkItem; key: string | number }[]) => {
+export const mapSourceFromWeblinkList = (weblinkList: { content: Weblink; key: string | number }[]) => {
   return weblinkList?.map((item) => ({
     pageContent: item?.content?.originPageDescription,
     metadata: {

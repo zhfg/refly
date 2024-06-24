@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension';
 import type { CollectionListItem, CollectionDetail, ResourceDetail } from '@refly/openapi-schema';
+import { EditorInstance } from '@refly-packages/editor-core/components';
 
 export enum ActionSource {
   KnowledgeBase = 'knowledge-base',
@@ -17,6 +18,14 @@ export interface KnowledgeBaseTab {
   resourceId: string;
 }
 
+export interface SkillState {
+  [skillName: string]: any;
+}
+
+export type SelectedNamespace = 'resource-detail' | 'note';
+export type NoteServerStatus = 'disconnected' | 'connected';
+export type NoteSaveStatus = 'Saved' | 'Unsaved';
+
 interface KnowledgeBaseState {
   isSaveKnowledgeBaseModalVisible: boolean;
   knowledgeBaseList: CollectionListItem[];
@@ -27,10 +36,19 @@ interface KnowledgeBaseState {
 
   // selection
   currentSelectedText: string;
+  selectedNamespace: SelectedNamespace;
 
   // tabs
   tabs: KnowledgeBaseTab[];
   activeTab: string;
+  resourcePanelVisible: boolean;
+  notePanelVisible: boolean;
+
+  // 笔记
+  editor: EditorInstance | null;
+  noteServerStatus: NoteServerStatus;
+  noteCharsCount: number;
+  noteSaveStatus: NoteSaveStatus;
 
   // 详情
   currentKnowledgeBase: null | CollectionDetail;
@@ -45,6 +63,10 @@ interface KnowledgeBaseState {
   sourceListModalVisible: boolean;
   tempConvResources: ResourceDetail[];
 
+  // skills states
+  skillState: SkillState;
+  setSkillState: (newState: SkillState) => void;
+
   updateIsSaveKnowledgeBaseModalVisible: (isSaveKnowledgeBaseModalVisible: boolean) => void;
   updateIsRequesting: (isRequesting: boolean) => void;
   updateKnowledgeBaseList: (knowledgeBaseList: CollectionListItem[]) => void;
@@ -58,14 +80,22 @@ interface KnowledgeBaseState {
   updateSourceListModalVisible: (sourceListModalVisible: boolean) => void;
   updateTempConvResources: (tempConvResources: ResourceDetail[]) => void;
   updateSelectedText: (selectedText: string) => void;
+  updateSelectedNamespace: (selectedNamespace: SelectedNamespace) => void;
   updateTabs: (tabs: KnowledgeBaseTab[]) => void;
   updateActiveTab: (key: string) => void;
+  updateResourcePanelVisible: (visible: boolean) => void;
+  updateNotePanelVisible: (visible: boolean) => void;
+  updateNoteServerStatus: (status: NoteServerStatus) => void;
+  updateNoteSaveStatus: (status: NoteSaveStatus) => void;
+  updateNoteCharsCount: (count: number) => void;
+  updateEditor: (editor: EditorInstance) => void;
   resetState: () => void;
 }
 
 export const defaultState = {
   isSaveKnowledgeBaseModalVisible: false,
   currentSelectedText: '',
+  selectedNamespace: 'resource-detail' as SelectedNamespace,
   tabs: [
     {
       title: 'New Tab',
@@ -74,6 +104,15 @@ export const defaultState = {
     },
   ] as KnowledgeBaseTab[],
   activeTab: 'key1',
+  resourcePanelVisible: true,
+  notePanelVisible: false,
+
+  // notes
+  editor: null,
+  noteServerStatus: 'disconnected' as NoteServerStatus,
+  noteCharsCount: 0,
+  noteSaveStatus: 'Unsaved' as NoteSaveStatus,
+
   convModalVisible: false,
   kbModalVisible: false,
   sourceListModalVisible: false,
@@ -86,6 +125,9 @@ export const defaultState = {
   currentPage: 1,
   hasMore: true,
   isRequesting: false,
+
+  // skills
+  skillState: {},
 };
 
 export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
@@ -119,8 +161,23 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
     updateActionSource: (actionSource: ActionSource) => set((state) => ({ ...state, actionSource })),
     updateTempConvResources: (tempConvResources: ResourceDetail[]) => set((state) => ({ ...state, tempConvResources })),
     updateSelectedText: (selectedText: string) => set((state) => ({ ...state, currentSelectedText: selectedText })),
+    updateSelectedNamespace: (selectedNamespace: SelectedNamespace) =>
+      set((state) => ({ ...state, selectedNamespace })),
     updateTabs: (tabs: KnowledgeBaseTab[]) => set((state) => ({ ...state, tabs })),
     updateActiveTab: (key: string) => set((state) => ({ ...state, activeTab: key })),
     resetState: () => set((state) => ({ ...state, ...defaultState })),
+
+    // skill
+    setSkillState: (newState: SkillState) => set((state) => ({ ...state, skillState: newState })),
+
+    // tabs
+    updateResourcePanelVisible: (visible: boolean) => set((state) => ({ ...state, resourcePanelVisible: visible })),
+    updateNotePanelVisible: (visible: boolean) => set((state) => ({ ...state, notePanelVisible: visible })),
+
+    // notes
+    updateEditor: (editor: EditorInstance) => set((state) => ({ ...state, editor })),
+    updateNoteServerStatus: (status: NoteServerStatus) => set((state) => ({ ...state, noteServerStatus: status })),
+    updateNoteSaveStatus: (status: NoteSaveStatus) => set((state) => ({ ...state, noteSaveStatus: status })),
+    updateNoteCharsCount: (count: number) => set((state) => ({ ...state, noteCharsCount: count })),
   })),
 );

@@ -1,5 +1,4 @@
 import { Button, Spin } from '@arco-design/web-react';
-import { MemoryRouter } from '@refly/ai-workspace-common/utils/router';
 import { AppRouter } from '@/routes/index';
 import { createClient, client } from '@hey-api/client-fetch';
 
@@ -14,6 +13,7 @@ import '@/i18n/config';
 import { getEnv, getRuntime, setRuntime } from '@refly/ai-workspace-common/utils/env';
 import { useSiderStore } from '@refly/ai-workspace-common/stores/sider';
 import { useUserStore } from '@refly/ai-workspace-common/stores/user';
+import { useMockInAppResource } from '@/hooks/use-mock-in-app-resource';
 /**
  * 打开 popup 页面的规则
  * 1. 如果是
@@ -21,6 +21,9 @@ import { useUserStore } from '@refly/ai-workspace-common/stores/user';
 const App = () => {
   const siderStore = useSiderStore();
   const userStore = useUserStore();
+
+  // 在网页时，模拟在知识库的资源选中状态
+  useMockInAppResource();
 
   useEffect(() => {
     // 针对 sider open 来说，SidePanel 渲染则代表打开 sider，与 Popup/App.tsx 逻辑保持一致
@@ -39,9 +42,7 @@ const App = () => {
         <span>⌘B</span>
       </div> */}
         <div id="refly-app-main" className="main active">
-          <MemoryRouter>
-            <AppRouter />
-          </MemoryRouter>
+          <AppRouter />
         </div>
       </div>
     </Suspense>

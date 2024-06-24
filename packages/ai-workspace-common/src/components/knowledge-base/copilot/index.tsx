@@ -1,8 +1,10 @@
-import { Button } from '@arco-design/web-react';
+import { Button, Checkbox } from '@arco-design/web-react';
 
 // 自定义组件
 import {
   IconCaretDown,
+  IconEdit,
+  IconFile,
   IconFolder,
   IconHistory,
   IconMessage,
@@ -15,7 +17,7 @@ import './index.scss';
 import { SearchTargetSelector } from '@refly-packages/ai-workspace-common/components/search-target-selector';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
-import { ContextStateDisplay } from './context-state-display';
+import { ContextStateDisplay } from './context-state-display/index';
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
 import { useEffect, useState } from 'react';
 import { ChatInput } from './chat-input';
@@ -42,6 +44,10 @@ import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
 import { useResizeCopilot } from '@refly-packages/ai-workspace-common/hooks/use-resize-copilot';
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
+import { RegisterSkillComponent } from '@refly-packages/ai-workspace-common/skills/main-logic/register-skill-component';
+import { KnowledgeBaseNavHeader } from '@refly-packages/ai-workspace-common/components/knowledge-base/nav-header';
+import classNames from 'classnames';
+import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
 
 interface AICopilotProps {}
 
@@ -65,6 +71,9 @@ export const AICopilot = (props: AICopilotProps) => {
   const { t, i18n } = useTranslation();
   const uiLocale = i18n?.languages?.[0] as LOCALE;
   const outputLocale = userStore?.localSettings?.outputLocale;
+
+  // ai-note handler
+  useAINote();
 
   const handleSwitchSearchTarget = () => {
     if (showContextState) {
@@ -144,16 +153,38 @@ export const AICopilot = (props: AICopilotProps) => {
   }, [showContextState]);
   useResizeCopilot({ containerSelector: 'ai-copilot-container' });
 
-  console.log('ai-copilot convId', convId);
-
   return (
     <div className="ai-copilot-container">
       <div className="knowledge-base-detail-header">
         <div className="knowledge-base-detail-navigation-bar">
-          <div className="conv-meta">
-            <IconMessage style={{ color: 'rgba(0, 0, 0, .6)' }} />
-            <p className="conv-title">{conversationStore?.currentConversation?.title || '新会话'}</p>
-          </div>
+          <Checkbox key={'knowledge-base-resource-panel'} checked={knowledgeBaseStore.resourcePanelVisible}>
+            {({ checked }) => {
+              return (
+                <Button
+                  icon={<IconFile />}
+                  type="text"
+                  onClick={() => {
+                    knowledgeBaseStore.updateResourcePanelVisible(!knowledgeBaseStore.resourcePanelVisible);
+                  }}
+                  className={classNames('assist-action-item', { active: checked })}
+                ></Button>
+              );
+            }}
+          </Checkbox>
+          <Checkbox key={'knowledge-base-note-panel'} checked={knowledgeBaseStore.notePanelVisible}>
+            {({ checked }) => {
+              return (
+                <Button
+                  icon={<IconEdit />}
+                  type="text"
+                  onClick={() => {
+                    knowledgeBaseStore.updateNotePanelVisible(!knowledgeBaseStore.notePanelVisible);
+                  }}
+                  className={classNames('assist-action-item', { active: checked })}
+                ></Button>
+              );
+            }}
+          </Checkbox>
         </div>
         <div className="knowledge-base-detail-menu">
           {/* <Button
@@ -250,6 +281,9 @@ export const AICopilot = (props: AICopilotProps) => {
           resources={knowledgeBaseStore?.tempConvResources || []}
         />
       ) : null}
+
+      {/** 注册 Skill 相关内容，目前先收敛在 Copilot 内部，后续允许挂在在其他扩展点，比如笔记、reading */}
+      <RegisterSkillComponent />
     </div>
   );
 };
