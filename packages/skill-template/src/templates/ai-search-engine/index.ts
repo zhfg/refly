@@ -14,6 +14,7 @@ import { Source } from '@refly/openapi-schema';
 import { SystemMessage } from '@langchain/core/messages';
 import { HumanMessage } from '@langchain/core/messages';
 import { RunnableConfig } from '@langchain/core/runnables';
+import { ToolMessage } from '@langchain/core/messages';
 
 export enum LOCALE {
   ZH_CN = 'zh-CN',
@@ -28,7 +29,8 @@ interface GraphState {
   messages: BaseMessage[];
 
   // 运行动态添加的上下文
-  contextualUserQuery?: string; // 基于上下文改写 userQuery
+  contextualUserQuery: string; // 基于上下文改写 userQuery
+  sources: Source[]; // 搜索互联网得到的在线结果
 }
 
 const graphState: StateGraphArgs<GraphState>['channels'] = {
@@ -46,6 +48,14 @@ const graphState: StateGraphArgs<GraphState>['channels'] = {
   },
   messages: {
     reducer: (x: BaseMessage[], y: BaseMessage[]) => x.concat(y),
+    default: () => [],
+  },
+  contextualUserQuery: {
+    reducer: (left?: string, right?: string) => (right ? right : left || ''),
+    default: () => '',
+  },
+  sources: {
+    reducer: (left?: Source[], right?: Source[]) => (right ? right : left || []) as Source[],
     default: () => [],
   },
 };
@@ -92,15 +102,24 @@ function shouldMakeContextualUserQuery(state: GraphState): 'contextualUserQuery'
 }
 
 // Define the function that determines whether to continue or not
-function shouldContinue(state: GraphState): 'action' | typeof END {
-  const { messages } = state;
+function shouldContinue(state: GraphState): 'action' | 'generate' | typeof END {
+  const { messages = [], sources = [] } = state;
   const lastMessage = messages[messages.length - 1];
 
+  // 之前有 AI Messages，也有函数调用，那么就进入 generate
+  const hasFunctionCall = messages
+    ?.slice(0, messages?.length - 1)
+    .some((message) => (message as AIMessage)?.tool_calls && (message as AIMessage)?.tool_calls?.length > 0);
+  const lastMessageNoFunctionCall =
+    !(lastMessage as AIMessage)?.tool_calls || (lastMessage as AIMessage)?.tool_calls?.length === 0;
+
   // If there is no function call, then we finish
-  if (!(lastMessage as AIMessage)?.tool_calls || (lastMessage as AIMessage)?.tool_calls?.length === 0) {
-    return END;
-  } else {
+  if (sources?.length > 0) {
+    return 'generate';
+  } else if (!hasFunctionCall && !lastMessageNoFunctionCall) {
     return 'action';
+  } else {
+    return END;
   }
 }
 
@@ -118,16 +137,67 @@ const boundModel = new ChatOpenAI({ model: 'gpt-3.5-turbo', openAIApiKey: proces
   tools,
 );
 
-const callModel = async (state: GraphState, config?: RunnableConfig) => {
+const callAgentModel = async (state: GraphState, config?: RunnableConfig): Promise<Partial<GraphState>> => {
   // For versions of @langchain/core < 0.2.3, you must call `.stream()`
   // and aggregate the message from chunks instead of calling `.invoke()`.
 
-  const { userQuery, contextualUserQuery, locale, messages } = state;
+  const { userQuery, contextualUserQuery, locale, messages = [] } = state;
   const lastMessage = messages[messages.length - 1];
-  const function_call = lastMessage.additional_kwargs.function_call;
-  const onlineReleventDocs = JSON.parse(function_call.arguments);
+  const isToolMessage = (lastMessage as ToolMessage)?._getType() === 'tool';
 
-  const contextToCitationText = onlineReleventDocs
+  if (isToolMessage) {
+    const releventDocs = JSON.parse((lastMessage as ToolMessage)?.content as string) || [];
+    const sources: Source[] = releventDocs.map((item) => ({
+      pageContent: item.snippet,
+      score: -1,
+      metadata: {
+        source: item.url,
+        title: item.name,
+      },
+    }));
+
+    return { sources };
+  }
+
+  const getSystemPrompt = () => `# Role
+
+You are an exceptional Search Engineer, capable of accurately discerning user needs and leveraging the SerperSearch tool for web content searches. In addition, you have the ability to answer user queries using general knowledge.
+
+## Skills
+
+### Skill 1: Needs Analysis
+- Assess and determine the true needs behind user inquiries.
+- Utilize the SerperSearch tool when users request web content search.
+
+### Skill 2: Utilizing SerperSearch
+- Perform web content searches using the SerperSearch tool.
+- Return content that best matches user needs based on search results.
+
+### Skill 3: Knowledge-Based Answers
+- Address user queries using general knowledge when web searches are not required. 
+
+## Constraints
+- Handle only user requests related to searches or general knowledge queries.
+- Must use the SerperSearch tool when the user’s inquiry requires a web search.
+- Ensure accuracy and reliability when providing answers to general knowledge questions.`;
+
+  const responseMessage = await boundModel.invoke([
+    new SystemMessage(getSystemPrompt()),
+    new HumanMessage(
+      `The user's query is ${contextualUserQuery || userQuery}, please output answer in locale's ${locale} language:`,
+    ),
+  ]);
+
+  return { messages: [responseMessage] };
+};
+
+const generateAnswer = async (state: GraphState, config?: RunnableConfig) => {
+  // For versions of @langchain/core < 0.2.3, you must call `.stream()`
+  // and aggregate the message from chunks instead of calling `.invoke()`.
+
+  const { userQuery, contextualUserQuery, locale, sources = [] } = state;
+
+  const contextToCitationText = sources
     .map((item, index) => `[[citation:${index + 1}]] ${item?.pageContent}`)
     .join('\n\n');
 
@@ -149,7 +219,9 @@ Remember, don't blindly repeat the contexts verbatim. And here is the user quest
 
   const responseMessage = await boundModel.invoke([
     new SystemMessage(getSystemPrompt(contextToCitationText)),
-    new HumanMessage(`The user's query is ${userQuery}, please output answer in locale's ${locale} language:`),
+    new HumanMessage(
+      `The user's query is ${contextualUserQuery || userQuery}, please output answer in locale's ${locale} language:`,
+    ),
   ]);
 
   return { messages: [responseMessage] };
@@ -160,16 +232,18 @@ const toolNode = new ToolNode<GraphState>(tools);
 const workflow = new StateGraph<GraphState>({
   channels: graphState,
 })
-  .addNode('agent', callModel)
+  .addNode('agent', callAgentModel)
   .addNode('action', toolNode)
-  .addNode('contextualUserQuery', getContextualQuestion);
+  .addNode('generate', generateAnswer)
+  .addNode('getContextualUserQuery', getContextualQuestion);
 
 workflow.addConditionalEdges(START, shouldMakeContextualUserQuery);
-workflow.addEdge('contextualUserQuery', 'agent');
+workflow.addEdge('getContextualUserQuery', 'agent');
 // Conditional agent -> action OR agent -> END
 workflow.addConditionalEdges('agent', shouldContinue);
 // Always transition `action` -> `agent`
 workflow.addEdge('action', 'agent');
+workflow.addEdge('generate', END);
 
 // const memory = SqliteSaver.fromConnString(':memory:'); // Here we only save in-memory
 
