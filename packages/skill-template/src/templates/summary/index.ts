@@ -3,6 +3,7 @@ import { Document } from '@langchain/core/documents';
 import { BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 
 import { START, END, StateGraphArgs, StateGraph, Graph } from '@langchain/langgraph';
+import { BaseSkill } from 'src/base';
 
 type GraphState = {
   documents: Document[];
@@ -82,41 +83,45 @@ The content to be summarized is as follows:
 
 // Define a new graph
 
-async function generate(state: GraphState) {
-  console.log('---GENERATE---');
+class SummarySkill extends BaseSkill {
+  async generate(state: GraphState) {
+    this.engine.logger.log('---GENERATE---');
 
-  const { documents, locale } = state;
+    const { documents, locale } = state;
 
-  const contextToCitationText = documents.reduce((total, cur) => {
-    (total += `\n\n下面是网页 [${cur?.metadata?.title}](${cur?.metadata?.source}) 的内容\n\n`),
-      (total += `\n===\n${cur?.pageContent}\n===\n\n`);
+    const contextToCitationText = documents.reduce((total, cur) => {
+      (total += `\n\n下面是网页 [${cur?.metadata?.title}](${cur?.metadata?.source}) 的内容\n\n`),
+        (total += `\n===\n${cur?.pageContent}\n===\n\n`);
 
-    return total;
-  }, '');
+      return total;
+    }, '');
 
-  const llm = new ChatOpenAI({
-    modelName: 'gpt-3.5-turbo',
-    temperature: 0.9,
-    maxTokens: 1024,
-  });
+    const llm = new ChatOpenAI({
+      modelName: 'gpt-3.5-turbo',
+      temperature: 0.9,
+      maxTokens: 1024,
+    });
 
-  const prompt = systemPrompt.replace(`{text}`, contextToCitationText?.slice(0, 12000));
-  const responseMessage = await llm.invoke([
-    new SystemMessage(prompt),
-    new HumanMessage(`The context to be summarized is as follows: \n ===\n ${contextToCitationText} \n ===`),
-    new HumanMessage(`Please output the answer in ${locale} language:`),
-  ]);
+    const prompt = systemPrompt.replace(`{text}`, contextToCitationText?.slice(0, 12000));
+    const responseMessage = await llm.invoke([
+      new SystemMessage(prompt),
+      new HumanMessage(`The context to be summarized is as follows: \n ===\n ${contextToCitationText} \n ===`),
+      new HumanMessage(`Please output the answer in ${locale} language:`),
+    ]);
 
-  return { messages: [responseMessage] };
+    return { messages: [responseMessage] };
+  }
+
+  toRunnable() {
+    const workflow = new StateGraph<GraphState>({
+      channels: graphState,
+    })
+      .addNode('generate', this.generate)
+      .addEdge(START, 'generate')
+      .addEdge('generate', END);
+
+    return workflow.compile();
+  }
 }
 
-const model = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0.9, maxTokens: 1024 });
-
-const workflow = new StateGraph<GraphState>({
-  channels: graphState,
-})
-  .addNode('generate', generate)
-  .addEdge(START, 'generate')
-  .addEdge('generate', END);
-
-export const Summary = workflow.compile();
+export default SummarySkill;

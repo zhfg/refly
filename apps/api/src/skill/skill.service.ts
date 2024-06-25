@@ -1,19 +1,34 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { User } from '@prisma/client';
+import { Runnable } from '@langchain/core/runnables';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { Queue } from 'bull';
+import { InjectQueue } from '@nestjs/bull';
+import { Skill, SkillTrigger, User } from '@prisma/client';
 import {
   DeleteSkillRequest,
   DeleteSkillTriggerRequest,
   InvokeSkillRequest,
+  SkillTemplate,
   UpsertSkillRequest,
   UpsertSkillTriggerRequest,
 } from '@refly/openapi-schema';
-import { genSkillID, genSkillTriggerID } from '@refly/utils';
+import * as templateModule from '@refly/skill-template';
+import { genSkillID, genSkillLogID, genSkillTriggerID } from '@refly/utils';
 import { PrismaService } from 'src/common/prisma.service';
+import { QUEUE_SKILL } from 'src/utils';
+import { InvokeSkillJobData } from './skill.dto';
 
 @Injectable()
 export class SkillService {
-  constructor(private prisma: PrismaService, private config: ConfigService) {}
+  private logger = new Logger(SkillService.name);
+
+  constructor(
+    private prisma: PrismaService,
+    @InjectQueue(QUEUE_SKILL) private queue: Queue<InvokeSkillJobData>,
+  ) {}
+
+  listSkillTemplates(): SkillTemplate[] {
+    return templateModule.inventory;
+  }
 
   async listSkills(user: Pick<User, 'uid'>, param: { page: number; pageSize: number }) {
     const { page, pageSize } = param;
@@ -94,7 +109,10 @@ export class SkillService {
     ]);
   }
 
-  async invokeSkill(user: User, param: InvokeSkillRequest) {
+  async skillInvokePreCheck(
+    user: User,
+    param: InvokeSkillRequest,
+  ): Promise<{ skill: Skill; trigger: SkillTrigger; runnable: Runnable }> {
     const { skillId } = param;
     if (!skillId) {
       throw new BadRequestException('skill id is required');
@@ -105,8 +123,102 @@ export class SkillService {
     if (!skill) {
       throw new BadRequestException('skill not found');
     }
+    const trigger = await this.prisma.skillTrigger.findFirst({
+      where: {
+        skillId,
+        event: param.event,
+        uid: user.uid,
+        deletedAt: null,
+      },
+    });
+    if (!trigger) {
+      throw new BadRequestException('skill trigger not found');
+    }
 
-    // TODO: invoke the skill
+    const tpl = templateModule.inventory.find((i) => i.name === skill.skillTpl);
+    if (!tpl) {
+      throw new BadRequestException('skill template not found');
+    }
+    const runnable = templateModule[tpl.runnableName];
+    if (!runnable) {
+      throw new BadRequestException('skill runnable not found');
+    }
+    return { skill, trigger, runnable: templateModule[tpl.runnableName] };
+  }
+
+  async invokeSkill(user: User, param: InvokeSkillRequest) {
+    const { skill, trigger } = await this.skillInvokePreCheck(user, param);
+    const log = await this.prisma.skillLog.create({
+      data: {
+        logId: genSkillLogID(),
+        uid: user.uid,
+        skillId: skill.skillId,
+        skillName: skill.name,
+        mode: 'async',
+        context: JSON.stringify(param.context),
+        status: 'scheduling',
+        event: param.event,
+        triggerId: trigger.triggerId,
+      },
+    });
+
+    await this.queue.add({ ...param, uid: user.uid, skillLogId: log.logId });
+
+    return log;
+  }
+
+  async invokeSkillSync(param: InvokeSkillJobData) {
+    const user = await this.prisma.user.findFirst({ where: { uid: param.uid } });
+    if (!user) {
+      this.logger.warn(`user not found for uid when invoking skill: ${param.uid}`);
+      return;
+    }
+    const { skill, runnable } = await this.skillInvokePreCheck(user, param);
+
+    try {
+      await this.prisma.skillLog.update({
+        where: { logId: param.skillLogId },
+        data: { status: 'running' },
+      });
+      const res = await runnable.invoke(param.context, {
+        configurable: { ...JSON.parse(skill.config), ...param.config },
+      });
+
+      this.logger.log(`invoke skill result: ${JSON.stringify(res)}`);
+      await this.prisma.skillLog.update({
+        where: { logId: param.skillLogId },
+        data: { status: 'finish' },
+      });
+    } catch (err) {
+      this.logger.error(`invoke skill error: ${err.stack}`);
+      await this.prisma.skillLog.update({
+        where: { logId: param.skillLogId },
+        data: { status: 'failed' },
+      });
+    }
+  }
+
+  async streamInvokeSkill(user: User, param: InvokeSkillRequest) {
+    const { skill, trigger, runnable } = await this.skillInvokePreCheck(user, param);
+
+    await this.prisma.skillLog.create({
+      data: {
+        logId: genSkillLogID(),
+        uid: user.uid,
+        skillId: skill.skillId,
+        skillName: skill.name,
+        mode: 'stream',
+        context: JSON.stringify(param.context),
+        status: 'running',
+        event: param.event,
+        triggerId: trigger.triggerId,
+      },
+    });
+
+    return runnable.streamEvents(param.context, {
+      configurable: { ...JSON.parse(skill.config), ...param.config },
+      version: 'v1',
+    });
   }
 
   async listSkillTriggers(

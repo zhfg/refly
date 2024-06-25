@@ -1,4 +1,6 @@
-import { Tool, ToolParams } from '@langchain/core/tools';
+import { Tool } from '@langchain/core/tools';
+import { BaseToolParams } from 'src/base';
+import SkillEngine from 'src/engine';
 
 export enum LOCALE {
   ZH_CN = 'zh-CN',
@@ -16,39 +18,16 @@ interface Props extends SearchOptions {
   query: string;
 }
 
-interface Logger {
-  log: (...args: any[]) => void;
-  error: (...args: any[]) => void;
-  warn: (...args: any[]) => void;
-}
-
-interface Context {
-  logger: Logger;
-}
-
-const defaultLogger: Logger = {
-  log: (...args: any[]) => {
-    console.log(...args);
-  },
-  error: (...args: any[]) => {
-    console.error(...args);
-  },
-  warn: (...args: any[]) => {
-    console.warn(...args);
-  },
-};
-
 interface SearchResultContext {
   name: string;
   url: string;
   snippet: string;
 }
 
-export const serperOnlineSearch = async (
-  props: Props,
-  ctx: Context = { logger: defaultLogger },
-): Promise<SearchResultContext[]> => {
+export const serperOnlineSearch = async (props: Props, engine: SkillEngine): Promise<SearchResultContext[]> => {
   const { query, locale, maxResults = DEFAULT_MAX_RESULTS } = props;
+
+  engine.logger.log('SerperOnlineSearch', query, locale);
 
   let jsonContent: any = [];
   try {
@@ -105,12 +84,12 @@ export const serperOnlineSearch = async (
     }
     return contexts.slice(0, maxResults);
   } catch (e) {
-    ctx.logger.error(`onlineSearch error encountered: ${e}`);
+    engine.logger.error(`onlineSearch error encountered: ${e}`);
     return [];
   }
 };
 
-export interface SerperSearchParameters extends ToolParams {
+export interface SerperSearchParameters extends BaseToolParams {
   /**
    * The search options for the search using the SearchOptions interface
    * from the duck-duck-scrape package.
@@ -125,12 +104,15 @@ export interface SerperSearchParameters extends ToolParams {
 
 export class SerperSearch extends Tool {
   private searchOptions?: SearchOptions;
+  private engine: SkillEngine;
 
   constructor(params?: SerperSearchParameters) {
     super(params ?? {});
 
     const { searchOptions } = params ?? {};
     this.searchOptions = searchOptions;
+
+    this.engine = params.engine;
   }
 
   static lc_name() {
@@ -143,7 +125,7 @@ export class SerperSearch extends Tool {
     'A search engine. Useful for when you need to answer questions about current events. Input should be a search query.';
 
   async _call(input: string): Promise<string> {
-    const results = await serperOnlineSearch({ query: input, ...this.searchOptions });
+    const results = await serperOnlineSearch({ query: input, ...this.searchOptions }, this.engine);
 
     return JSON.stringify(results);
   }

@@ -377,25 +377,25 @@ model Skill {
 
 model SkillTrigger {
   /// primary key
-  pk        BigInt            @id @default(autoincrement())
+  pk        BigInt    @id @default(autoincrement())
   /// trigger id
-  triggerId String            @unique @map("trigger_id")
+  triggerId String    @unique @map("trigger_id")
   /// skill id
-  skillId   String            @map("skill_id")
+  skillId   String    @map("skill_id")
   /// owner uid
-  uid       String            @map("uid")
+  uid       String    @map("uid")
   /// trigger event
-  event     SkillTriggerEvent @map("event")
+  event     String    @map("event")
   /// crontab for cron trigger
-  crontab   String?           @map("crontab")
+  crontab   String?   @map("crontab")
   /// whether this skill is enabled
-  enabled   Boolean           @map("enabled")
+  enabled   Boolean   @map("enabled")
   /// create timestamp
-  createdAt DateTime          @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// update timestamp
-  updatedAt DateTime          @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
   /// deletion timestamp
-  deletedAt DateTime?         @map("deleted_at") @db.Timestamptz()
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz()
 
   @@index([skillId, deletedAt])
   @@map("skill_triggers")
@@ -404,21 +404,29 @@ model SkillTrigger {
 /// Running logs of skills.
 model SkillLog {
   /// primary key
-  pk        BigInt   @id @default(autoincrement())
+  pk        BigInt       @id @default(autoincrement())
   /// skill log id
-  logId     String   @unique @map("log_id")
+  logId     String       @unique @map("log_id")
   /// skill id
-  skillId   String   @map("skill_id")
+  skillId   String       @map("skill_id")
   /// skill name
-  skillName String   @map("skill_name")
+  skillName String       @map("skill_name")
+  /// mode for this skill run
+  mode      SkillRunMode @map("mode")
+  /// input context (JSON of `SkillContext`)
+  context   String       @map("context")
+  /// skill operation status
+  status    SkillStatus  @map("status")
+  /// skill trigger event
+  event     String       @map("event")
   /// skill trigger id
-  triggerId String   @map("trigger_id")
+  triggerId String       @map("trigger_id")
   /// uid of skill owner
-  uid       String   @map("uid")
+  uid       String       @map("uid")
   /// create timestamp
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamptz()
   /// update timestamp
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
 
   @@index([uid, updatedAt])
   @@map("skill_log")
@@ -508,14 +516,6 @@ enum ContentMetaType {
   form
 }
 
-enum SkillTriggerEvent {
-  resourceAdd
-  resourceUpdate
-  collectionAdd
-  collectionUpdate
-  cron
-}
-
 enum ParseSource {
   serverCrawl
   clientUpload
@@ -526,6 +526,18 @@ enum IndexStatus {
   processing
   finish
   failed
+}
+
+enum SkillStatus {
+  scheduling
+  running
+  finish
+  failed
+}
+
+enum SkillRunMode {
+  async
+  stream
 }
 
 enum MessageType {

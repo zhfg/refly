@@ -7,6 +7,7 @@ import { AIMessage, BaseMessage } from '@langchain/core/messages';
 import { SqliteSaver } from '@langchain/langgraph/checkpoint/sqlite';
 
 import { START, END, MessageGraph } from '@langchain/langgraph';
+import { BaseSkill } from 'src/base';
 
 // Define the function that determines whether to continue or not
 function shouldContinue(messages: BaseMessage[]): 'action' | typeof END {
@@ -22,20 +23,26 @@ function shouldContinue(messages: BaseMessage[]): 'action' | typeof END {
 
 // Define a new graph
 
-const tools = [new DuckDuckGoSearch({ maxResults: 3 })];
+class SearchAndAddResourceSkill extends BaseSkill {
+  toRunnable() {
+    const tools = [new DuckDuckGoSearch({ maxResults: 3 })];
 
-const model = new ChatOpenAI({ model: 'gpt-3.5-turbo', openAIApiKey: process.env.OPENAI_API_KEY }).bindTools(tools);
+    const model = new ChatOpenAI({ model: 'gpt-3.5-turbo', openAIApiKey: process.env.OPENAI_API_KEY }).bindTools(tools);
 
-const workflow = new MessageGraph().addNode('agent', model).addNode('action', new ToolNode<BaseMessage[]>(tools));
+    const workflow = new MessageGraph().addNode('agent', model).addNode('action', new ToolNode<BaseMessage[]>(tools));
 
-workflow.addEdge(START, 'agent');
-// Conditional agent -> action OR agent -> END
-workflow.addConditionalEdges('agent', shouldContinue);
-// Always transition `action` -> `agent`
-workflow.addEdge('action', 'agent');
+    workflow.addEdge(START, 'agent');
+    // Conditional agent -> action OR agent -> END
+    workflow.addConditionalEdges('agent', shouldContinue);
+    // Always transition `action` -> `agent`
+    workflow.addEdge('action', 'agent');
 
-const memory = SqliteSaver.fromConnString(':memory:'); // Here we only save in-memory
+    const memory = SqliteSaver.fromConnString(':memory:'); // Here we only save in-memory
 
-// Setting the interrupt means that any time an action is called, the machine will stop
-// export const SearchAndAddResource = workflow.compile({ checkpointer: memory, interruptBefore: ['action'] });
-export const SearchAndAddResource = workflow.compile({ checkpointer: memory });
+    // Setting the interrupt means that any time an action is called, the machine will stop
+    // export const SearchAndAddResource = workflow.compile({ checkpointer: memory, interruptBefore: ['action'] });
+    return workflow.compile({ checkpointer: memory });
+  }
+}
+
+export default SearchAndAddResourceSkill;
