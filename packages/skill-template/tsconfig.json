@@ -21,7 +21,6 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "inlineSources": true,
-    "lib": ["ESNext", "DOM", "DOM.Iterable"],
 
     // Set `sourceRoot` to  "/" to strip the build path prefix
     // from generated source code references.
