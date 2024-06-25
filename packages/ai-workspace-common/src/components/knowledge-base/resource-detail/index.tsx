@@ -12,7 +12,7 @@ import {
 // 请求
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // 类型
-import { ResourceDetail } from '@refly/openapi-schema';
+import { Resource } from '@refly/openapi-schema';
 import { useEffect, useState } from 'react';
 import { safeParseURL } from '@refly-packages/ai-workspace-common/utils/url';
 import { useListenToSelection } from '@refly-packages/ai-workspace-common/hooks/use-listen-to-selection';
@@ -27,7 +27,7 @@ export const KnowledgeBaseResourceDetail = () => {
   const resId = queryParams.get('resId');
   const kbId = queryParams.get('kbId');
 
-  const resourceDetail = knowledgeBaseStore?.currentResource as ResourceDetail;
+  const resourceDetail = knowledgeBaseStore?.currentResource as Resource;
 
   const handleGetDetail = async (resourceId: string) => {
     setIsFetching(true);
@@ -46,7 +46,7 @@ export const KnowledgeBaseResourceDetail = () => {
       }
 
       console.log('newRes', newRes);
-      const resource = newRes?.data as ResourceDetail;
+      const resource = newRes?.data as Resource;
       knowledgeBaseStore.updateResource(resource);
 
       setTimeout(() => {

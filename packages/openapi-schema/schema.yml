@@ -32,6 +32,12 @@ paths:
       description: List all resources
       operationId: listResources
       parameters:
+        - name: resourceId
+          in: query
+          description: Resource ID
+          schema:
+            type: string
+            example: r-g30e1b80b5g1itbemc0g5jj3
         - name: collectionId
           in: query
           description: Target collection ID
@@ -887,7 +893,7 @@ components:
       enum:
         - weblink
         - note
-    ResourceListItem:
+    Resource:
       type: object
       required:
         - resourceId
@@ -944,7 +950,10 @@ components:
           type: string
           format: date-time
           description: Collection creation time
-    CollectionListItem:
+        doc:
+          type: string
+          description: Document content for this resource
+    Collection:
       type: object
       required:
         - collectionId
@@ -976,24 +985,11 @@ components:
           type: string
           format: date-time
           description: Collection creation time
-    ResourceDetail:
-      allOf:
-        - $ref: '#/components/schemas/ResourceListItem'
-        - type: object
-          properties:
-            doc:
-              type: string
-              description: Document content for this resource
-    CollectionDetail:
-      allOf:
-        - $ref: '#/components/schemas/CollectionListItem'
-        - type: object
-          properties:
-            resources:
-              type: array
-              description: Collection resources
-              items:
-                $ref: '#/components/schemas/ResourceListItem'
+        resources:
+          type: array
+          description: Collection resources (only returned in detail API)
+          items:
+            $ref: '#/components/schemas/Resource'
     SkillTemplate:
       type: object
       description: Skill template
@@ -1011,8 +1007,6 @@ components:
       type: string
       description: Skill trigger event
       enum:
-        - copilotRun
-        - noteAsk
         - resourceAdd
         - resourceUpdate
         - collectionAdd
@@ -1803,7 +1797,7 @@ components:
         - type: object
           properties:
             data:
-              $ref: '#/components/schemas/ResourceListItem'
+              $ref: '#/components/schemas/Resource'
     DeleteResourceRequest:
       type: object
       required:
@@ -1822,7 +1816,7 @@ components:
               type: array
               description: Resource list
               items:
-                $ref: '#/components/schemas/ResourceListItem'
+                $ref: '#/components/schemas/Resource'
     GetResourceDetailResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -1831,7 +1825,7 @@ components:
             data:
               type: object
               description: Resource data
-              $ref: '#/components/schemas/ResourceDetail'
+              $ref: '#/components/schemas/Resource'
     UpsertCollectionRequest:
       type: object
       properties:
@@ -1857,7 +1851,7 @@ components:
         - type: object
           properties:
             data:
-              $ref: '#/components/schemas/CollectionListItem'
+              $ref: '#/components/schemas/Collection'
     DeleteCollectionRequest:
       type: object
       required:
@@ -1876,7 +1870,7 @@ components:
               type: array
               description: Collection list
               items:
-                $ref: '#/components/schemas/CollectionListItem'
+                $ref: '#/components/schemas/Collection'
     GetCollectionDetailResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -1885,7 +1879,7 @@ components:
             data:
               type: object
               description: Collection data
-              $ref: '#/components/schemas/CollectionDetail'
+              $ref: '#/components/schemas/Collection'
     ListSkillTemplateResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -1947,13 +1941,16 @@ components:
         skillId:
           type: string
           description: Skill ID to delete
-    SkillContext:
+    SkillInput:
       type: object
       description: Skill invocation context
       properties:
         query:
           type: string
           description: User query
+        locale:
+          type: string
+          description: User input locale
         convId:
           type: string
           description: Conversation ID (if passed, model output will be automatically appended to this conversation)
@@ -1975,20 +1972,17 @@ components:
     InvokeSkillRequest:
       type: object
       required:
-        - skillId
-        - event
-        - context
-        - config
+        - input
       properties:
+        input:
+          description: Skill input
+          $ref: '#/components/schemas/SkillInput'
         skillId:
           type: string
-          description: Skill ID to invoke
+          description: Skill ID to invoke (if not provided, skill auto-routing will be used)
         event:
           description: Skill trigger event
           $ref: '#/components/schemas/SkillTriggerEvent'
-        context:
-          description: Skill input context
-          $ref: '#/components/schemas/SkillContext'
         config:
           type: object
           description: Skill config (should conform to template config schema)

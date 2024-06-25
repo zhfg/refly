@@ -3,7 +3,9 @@ import { Document } from '@langchain/core/documents';
 import { BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 
 import { START, END, StateGraphArgs, StateGraph, Graph } from '@langchain/langgraph';
-import { BaseSkill } from 'src/base';
+import { BaseSkill } from '../../base';
+import { DynamicStructuredTool } from '@langchain/core/tools';
+import { SkillEngine } from '../../engine';
 
 type GraphState = {
   documents: Document[];
@@ -84,6 +86,10 @@ The content to be summarized is as follows:
 // Define a new graph
 
 class SummarySkill extends BaseSkill {
+  constructor(protected engine: SkillEngine) {
+    super(engine);
+  }
+
   async generate(state: GraphState) {
     this.engine.logger.log('---GENERATE---');
 

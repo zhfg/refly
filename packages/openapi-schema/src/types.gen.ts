@@ -28,7 +28,7 @@ export type ResourceMeta = {
  */
 export type ResourceType = 'weblink' | 'note';
 
-export type ResourceListItem = {
+export type Resource = {
   /**
    * Resource ID
    */
@@ -78,9 +78,13 @@ export type ResourceListItem = {
    * Collection creation time
    */
   updatedAt: string;
+  /**
+   * Document content for this resource
+   */
+  doc?: string;
 };
 
-export type CollectionListItem = {
+export type Collection = {
   /**
    * Collection ID
    */
@@ -105,20 +109,10 @@ export type CollectionListItem = {
    * Collection creation time
    */
   updatedAt: string;
-};
-
-export type ResourceDetail = ResourceListItem & {
   /**
-   * Document content for this resource
+   * Collection resources (only returned in detail API)
    */
-  doc?: string;
-};
-
-export type CollectionDetail = CollectionListItem & {
-  /**
-   * Collection resources
-   */
-  resources?: Array<ResourceListItem>;
+  resources?: Array<Resource>;
 };
 
 /**
@@ -144,14 +138,7 @@ export type SkillTemplate = {
 /**
  * Skill trigger event
  */
-export type SkillTriggerEvent =
-  | 'copilotRun'
-  | 'noteAsk'
-  | 'resourceAdd'
-  | 'resourceUpdate'
-  | 'collectionAdd'
-  | 'collectionUpdate'
-  | 'cron';
+export type SkillTriggerEvent = 'resourceAdd' | 'resourceUpdate' | 'collectionAdd' | 'collectionUpdate' | 'cron';
 
 /**
  * Skill triggers
@@ -922,7 +909,7 @@ export type UpsertResourceRequest = {
 };
 
 export type UpsertResourceResponse = BaseResponse & {
-  data?: ResourceListItem;
+  data?: Resource;
 };
 
 export type DeleteResourceRequest = {
@@ -936,14 +923,14 @@ export type ListResourceResponse = BaseResponse & {
   /**
    * Resource list
    */
-  data?: Array<ResourceListItem>;
+  data?: Array<Resource>;
 };
 
 export type GetResourceDetailResponse = BaseResponse & {
   /**
    * Resource data
    */
-  data?: ResourceDetail;
+  data?: Resource;
 };
 
 export type UpsertCollectionRequest = {
@@ -966,7 +953,7 @@ export type UpsertCollectionRequest = {
 };
 
 export type UpsertCollectionResponse = BaseResponse & {
-  data?: CollectionListItem;
+  data?: Collection;
 };
 
 export type DeleteCollectionRequest = {
@@ -980,14 +967,14 @@ export type ListCollectionResponse = BaseResponse & {
   /**
    * Collection list
    */
-  data?: Array<CollectionListItem>;
+  data?: Array<Collection>;
 };
 
 export type GetCollectionDetailResponse = BaseResponse & {
   /**
    * Collection data
    */
-  data?: CollectionDetail;
+  data?: Collection;
 };
 
 export type ListSkillTemplateResponse = BaseResponse & {
@@ -1043,11 +1030,15 @@ export type DeleteSkillRequest = {
 /**
  * Skill invocation context
  */
-export type SkillContext = {
+export type SkillInput = {
   /**
    * User query
    */
   query?: string;
+  /**
+   * User input locale
+   */
+  locale?: string;
   /**
    * Conversation ID (if passed, model output will be automatically appended to this conversation)
    */
@@ -1068,21 +1059,21 @@ export type SkillContext = {
 
 export type InvokeSkillRequest = {
   /**
-   * Skill ID to invoke
+   * Skill input
    */
-  skillId: string;
+  input: SkillInput;
+  /**
+   * Skill ID to invoke (if not provided, skill auto-routing will be used)
+   */
+  skillId?: string;
   /**
    * Skill trigger event
    */
-  event: SkillTriggerEvent;
-  /**
-   * Skill input context
-   */
-  context: SkillContext;
+  event?: SkillTriggerEvent;
   /**
    * Skill config (should conform to template config schema)
    */
-  config: {
+  config?: {
     [key: string]: unknown;
   };
 };
@@ -1312,6 +1303,10 @@ export type ListResourcesData = {
      * Page size
      */
     pageSize?: number;
+    /**
+     * Resource ID
+     */
+    resourceId?: string;
   };
 };
 

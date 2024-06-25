@@ -73,14 +73,14 @@ export class NoteWsGateway implements OnGatewayConnection {
         const resource = await this.prisma.resource.findFirst({
           where: { resourceId: documentName, deletedAt: null },
         });
-        if (resource.userId !== Number(payload.id)) {
+        if (resource.uid !== payload.uid) {
           throw new Error(`user not authorized: ${documentName}`);
         }
         if (resource.readOnly) {
           throw new Error(`read-only resource: ${documentName}`);
         }
-        const user = await this.prisma.user.findUnique({
-          where: { id: Number(payload.id) },
+        const user = await this.prisma.user.findFirst({
+          where: { uid: payload.uid },
         });
         if (!user) {
           throw new Error(`user not found`);

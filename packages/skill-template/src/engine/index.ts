@@ -7,11 +7,15 @@ import {
   UpsertResourceRequest,
 } from '@refly/openapi-schema';
 
+interface User {
+  uid: string;
+}
+
 export interface HandlersMap {
-  createResource: (req: UpsertResourceRequest) => Promise<CreateResourceResponse>;
-  updateResource: (req: UpsertResourceRequest) => Promise<UpdateResourceResponse>;
-  createCollection: (req: UpsertCollectionRequest) => Promise<CreateCollectionResponse>;
-  updateCollection: (req: UpsertCollectionRequest) => Promise<UpdateCollectionResponse>;
+  createResource: (user: User, req: UpsertResourceRequest) => Promise<CreateResourceResponse>;
+  updateResource: (user: User, req: UpsertResourceRequest) => Promise<UpdateResourceResponse>;
+  createCollection: (user: User, req: UpsertCollectionRequest) => Promise<CreateCollectionResponse>;
+  updateCollection: (user: User, req: UpsertCollectionRequest) => Promise<UpdateCollectionResponse>;
 }
 
 export interface Logger {
@@ -35,16 +39,6 @@ export interface Logger {
    */
   debug(message: any, context?: string): void;
   debug(message: any, ...optionalParams: [...any, string?]): void;
-  /**
-   * Write a 'verbose' level log.
-   */
-  verbose(message: any, context?: string): void;
-  verbose(message: any, ...optionalParams: [...any, string?]): void;
-  /**
-   * Write a 'fatal' level log.
-   */
-  fatal(message: any, context?: string): void;
-  fatal(message: any, ...optionalParams: [...any, string?]): void;
 }
 
 export interface SKillEngineConstructorParam {
@@ -52,8 +46,6 @@ export interface SKillEngineConstructorParam {
   logger: Logger;
 }
 
-class SkillEngine {
+export class SkillEngine {
   constructor(public logger: Logger, public handlers: HandlersMap) {}
 }
-
-export default SkillEngine;

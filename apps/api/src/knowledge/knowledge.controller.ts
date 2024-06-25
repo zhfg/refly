@@ -4,12 +4,10 @@ import {
   Get,
   Post,
   Query,
-  Req,
   UseGuards,
   ParseIntPipe,
   DefaultValuePipe,
   BadRequestException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import {
   UpsertCollectionRequest,
@@ -23,21 +21,13 @@ import {
   DeleteCollectionRequest,
   DeleteResourceRequest,
   DeleteResourceResponse,
-  ResourceListItem,
 } from '@refly/openapi-schema';
-import { Resource } from '@prisma/client';
+import { User as UserModel } from '@prisma/client';
 import { KnowledgeService } from './knowledge.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
-import { buildSuccessResponse, pick, omit } from '../utils';
-
-const convertResourcePoToListItem = (resource: Resource): ResourceListItem => {
-  return {
-    ...omit(resource, ['id', 'userId', 'storageKey', 'stateStorageKey', 'deletedAt']),
-    collabEnabled: !!resource.stateStorageKey,
-    createdAt: resource.createdAt.toJSON(),
-    updatedAt: resource.updatedAt.toJSON(),
-  };
-};
+import { buildSuccessResponse } from '../utils';
+import { User } from 'src/utils/decorators/user.decorator';
+import { collectionPO2DTO, resourcePO2DTO } from './knowledge.dto';
 
 @Controller('knowledge')
 export class KnowledgeController {
@@ -46,151 +36,135 @@ export class KnowledgeController {
   @UseGuards(JwtAuthGuard)
   @Get('collection/list')
   async listCollections(
-    @Req() req,
+    @User() user: UserModel,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListCollectionResponse> {
-    const colls = await this.knowledgeService.listCollections(req.user, { page, pageSize });
-    return buildSuccessResponse(
-      colls.map((coll) => ({
-        ...omit(coll, ['id', 'userId', 'deletedAt']),
-        createdAt: coll.createdAt.toJSON(),
-        updatedAt: coll.updatedAt.toJSON(),
-      })),
-    );
+    const colls = await this.knowledgeService.listCollections(user, { page, pageSize });
+    return buildSuccessResponse(colls.map((coll) => collectionPO2DTO(coll)));
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('collection/detail')
   async showCollectionDetail(
-    @Req() req,
+    @User() user: UserModel,
     @Query('collectionId') collectionId: string,
   ): Promise<GetCollectionDetailResponse> {
-    const coll = await this.knowledgeService.getCollectionDetail(collectionId);
-    if (coll.isPublic || coll.userId === req.user.id) {
-      return buildSuccessResponse({
-        ...omit(coll, ['userId']),
-        createdAt: coll.createdAt.toJSON(),
-        updatedAt: coll.updatedAt.toJSON(),
-      });
-    }
-    return buildSuccessResponse(null);
+    const coll = await this.knowledgeService.getCollectionDetail(user, { collectionId });
+    return buildSuccessResponse(collectionPO2DTO(coll));
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('collection/update')
   async updateCollection(
-    @Req() req,
+    @User() user: UserModel,
     @Body() body: UpsertCollectionRequest,
   ): Promise<UpsertCollectionResponse> {
-    if (!body.collectionId) {
+    const { collectionId } = body;
+    if (!collectionId) {
       throw new BadRequestException('collectionId is required');
     }
-    const collection = await this.knowledgeService.getCollectionDetail(body.collectionId);
-    if (collection.userId !== req.user.id) {
-      throw new UnauthorizedException();
+    const collection = await this.knowledgeService.getCollectionDetail(user, { collectionId });
+    if (!collection) {
+      throw new BadRequestException('Collection not found');
     }
 
-    const upserted = await this.knowledgeService.upsertCollection(req.user, body);
-    return buildSuccessResponse({
-      ...omit(upserted, ['id', 'userId', 'deletedAt']),
-      createdAt: upserted.createdAt.toJSON(),
-      updatedAt: upserted.updatedAt.toJSON(),
-    });
+    const upserted = await this.knowledgeService.upsertCollection(user, body);
+    return buildSuccessResponse(collectionPO2DTO(upserted));
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('collection/new')
   async createCollection(
-    @Req() req,
+    @User() user: UserModel,
     @Body() body: UpsertCollectionRequest,
   ): Promise<UpsertCollectionResponse> {
     if (body.collectionId) {
       throw new BadRequestException('collectionId is not allowed');
     }
-
-    const coll = await this.knowledgeService.upsertCollection(req.user, body);
-    return buildSuccessResponse({
-      ...pick(coll, ['collectionId', 'title', 'description', 'isPublic']),
-      createdAt: coll.createdAt.toJSON(),
-      updatedAt: coll.updatedAt.toJSON(),
-    });
+    const coll = await this.knowledgeService.upsertCollection(user, body);
+    return buildSuccessResponse(collectionPO2DTO(coll));
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('collection/delete')
-  async deleteCollection(@Req() req, @Body() body: DeleteCollectionRequest) {
+  async deleteCollection(@User() user: UserModel, @Body() body: DeleteCollectionRequest) {
     if (!body.collectionId) {
       throw new BadRequestException('collectionId is required');
     }
-    await this.knowledgeService.deleteCollection(req.user, body.collectionId);
+    await this.knowledgeService.deleteCollection(user, body.collectionId);
     return { data: body };
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('resource/list')
   async listResources(
-    @Req() req,
+    @User() user: UserModel,
     @Query('collectionId') collectionId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListResourceResponse> {
-    const resources = await this.knowledgeService.listResources({ collectionId, page, pageSize });
-    return buildSuccessResponse(resources.map((r) => convertResourcePoToListItem(r)));
+    const resources = await this.knowledgeService.listResources(user, {
+      collectionId,
+      page,
+      pageSize,
+    });
+    return buildSuccessResponse(resources.map((r) => resourcePO2DTO(r)));
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('resource/detail')
   async showResourceDetail(
-    @Req() req,
+    @User() user: UserModel,
     @Query('resourceId') resourceId: string,
   ): Promise<GetResourceDetailResponse> {
-    const resource = await this.knowledgeService.getResourceDetail(resourceId, true);
-    if (resource.isPublic || resource.userId === req.user.id) {
-      return buildSuccessResponse(omit(resource, ['userId']));
-    }
-    return buildSuccessResponse(null);
+    const resource = await this.knowledgeService.getResourceDetail(user, {
+      resourceId,
+      needDoc: true,
+    });
+    return buildSuccessResponse(resourcePO2DTO(resource));
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('resource/new')
   async createResource(
-    @Req() req,
+    @User() user: UserModel,
     @Body() body: UpsertResourceRequest,
   ): Promise<UpsertResourceResponse> {
-    const resource = await this.knowledgeService.createResource(req.user, body);
-    return buildSuccessResponse(convertResourcePoToListItem(resource));
+    const resource = await this.knowledgeService.createResource(user, body);
+    return buildSuccessResponse(resourcePO2DTO(resource));
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('resource/update')
   async updateResource(
-    @Req() req,
+    @User() user: UserModel,
     @Body() body: UpsertResourceRequest,
   ): Promise<UpsertResourceResponse> {
-    if (!body.resourceId) {
+    const { resourceId } = body;
+    if (!resourceId) {
       throw new BadRequestException('Resource ID is required');
     }
 
-    const resource = await this.knowledgeService.getResourceDetail(body.resourceId);
-    if (!resource || resource.userId !== req.user.id) {
+    const resource = await this.knowledgeService.getResourceDetail(user, { resourceId });
+    if (!resource) {
       throw new BadRequestException('Resource not found');
     }
 
-    const updated = await this.knowledgeService.updateResource(req.user, body);
-    return buildSuccessResponse(convertResourcePoToListItem(updated));
+    const updated = await this.knowledgeService.updateResource(user, body);
+    return buildSuccessResponse(resourcePO2DTO(updated));
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('resource/delete')
   async deleteResource(
-    @Req() req,
+    @User() user: UserModel,
     @Body() body: DeleteResourceRequest,
   ): Promise<DeleteResourceResponse> {
     if (!body.resourceId) {
       throw new BadRequestException('Resource ID is required');
     }
-    await this.knowledgeService.deleteResource(req.user, body.resourceId);
+    await this.knowledgeService.deleteResource(user, body.resourceId);
     return buildSuccessResponse(null);
   }
 }

@@ -1,6 +1,6 @@
 import { useKnowledgeBaseStore } from '@refly/ai-workspace-common/stores/knowledge-base';
 import { BackgroundMsgType, sendToBackground } from '@refly/ai-workspace-common/utils/extension/messaging';
-import { ResourceDetail, UpsertResourceRequest } from '@refly/openapi-schema';
+import { Resource, UpsertResourceRequest } from '@refly/openapi-schema';
 import { useEffect } from 'react';
 import { browser } from 'wxt/browser';
 import { useMatch } from '@refly/ai-workspace-common/utils/router';
@@ -39,7 +39,7 @@ export const useSyncWeblinkResourceMeta = async () => {
       content: pageContent || '',
     };
 
-    knowledgeBaseStore.updateResource(resource as ResourceDetail);
+    knowledgeBaseStore.updateResource(resource as Resource);
 
     sendToBackground(
       {

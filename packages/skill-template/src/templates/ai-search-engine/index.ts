@@ -15,16 +15,16 @@ import { SystemMessage } from '@langchain/core/messages';
 import { HumanMessage } from '@langchain/core/messages';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill } from 'src/base';
-import SkillEngine from 'src/engine';
+import { SkillEngine } from 'src/engine';
 import { ToolMessage } from '@langchain/core/messages';
-import { SkillContext, Source } from '@refly/openapi-schema';
+import { SkillInput, Source } from '@refly/openapi-schema';
 
 export enum LOCALE {
   ZH_CN = 'zh-CN',
   EN = 'en',
 }
 
-interface GraphState {
+type GraphState = SkillInput & {
   // 初始上下文
   userQuery: string;
   documents: Document[];
@@ -34,7 +34,7 @@ interface GraphState {
   // 运行动态添加的上下文
   contextualUserQuery: string; // 基于上下文改写 userQuery
   sources: Source[]; // 搜索互联网得到的在线结果
-}
+};
 
 class OnlineSearchSkill extends BaseSkill {
   private tools: Tool[] = [];
@@ -66,7 +66,7 @@ class OnlineSearchSkill extends BaseSkill {
     },
   };
 
-  constructor(protected engine: SkillEngine, protected context: SkillContext) {
+  constructor(protected engine: SkillEngine) {
     super(engine);
   }
 

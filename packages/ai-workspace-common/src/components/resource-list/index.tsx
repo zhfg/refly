@@ -4,13 +4,13 @@ import { IconSearch } from '@arco-design/web-react/icon';
 import { Divider, Input, Skeleton } from '@arco-design/web-react';
 import { useSearchableList } from '@refly-packages/ai-workspace-common/components/use-searchable-list';
 import { useEffect, useState } from 'react';
-import { ResourceDetail } from '@refly/openapi-schema';
+import { Resource } from '@refly/openapi-schema';
 // 组件
 import { ResourceItem } from './resource-item';
 import classNames from 'classnames';
 
 interface ResourceListProps {
-  resources: Partial<ResourceDetail>[];
+  resources: Partial<Resource>[];
   isFetching?: boolean;
   classNames?: string;
   placeholder: string;
@@ -25,7 +25,7 @@ interface ResourceListProps {
 export const ResourceList = (props: ResourceListProps) => {
   const { searchKey = 'title' } = props;
   const [searchVal, setSearchVal] = useState('');
-  const [resourceList, setResourceList, filter] = useSearchableList<ResourceDetail>(searchKey as keyof ResourceDetail, {
+  const [resourceList, setResourceList, filter] = useSearchableList<Resource>(searchKey as keyof Resource, {
     debounce: true,
     delay: 300,
   });
@@ -40,7 +40,7 @@ export const ResourceList = (props: ResourceListProps) => {
       ...item,
       title: item?.data?.title || '',
     }));
-    setResourceList(mappedDirectoryList as ResourceDetail[]);
+    setResourceList(mappedDirectoryList as Resource[]);
   }, [props?.resources?.length]);
 
   return (

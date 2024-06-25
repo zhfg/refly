@@ -33,7 +33,7 @@ export const $ResourceType = {
   enum: ['weblink', 'note'],
 } as const;
 
-export const $ResourceListItem = {
+export const $Resource = {
   type: 'object',
   required: [
     'resourceId',
@@ -103,10 +103,14 @@ export const $ResourceListItem = {
       format: 'date-time',
       description: 'Collection creation time',
     },
+    doc: {
+      type: 'string',
+      description: 'Document content for this resource',
+    },
   },
 } as const;
 
-export const $CollectionListItem = {
+export const $Collection = {
   type: 'object',
   required: ['collectionId', 'title', 'createdAt', 'updatedAt'],
   properties: {
@@ -140,44 +144,14 @@ export const $CollectionListItem = {
       format: 'date-time',
       description: 'Collection creation time',
     },
+    resources: {
+      type: 'array',
+      description: 'Collection resources (only returned in detail API)',
+      items: {
+        $ref: '#/components/schemas/Resource',
+      },
+    },
   },
-} as const;
-
-export const $ResourceDetail = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/ResourceListItem',
-    },
-    {
-      type: 'object',
-      properties: {
-        doc: {
-          type: 'string',
-          description: 'Document content for this resource',
-        },
-      },
-    },
-  ],
-} as const;
-
-export const $CollectionDetail = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/CollectionListItem',
-    },
-    {
-      type: 'object',
-      properties: {
-        resources: {
-          type: 'array',
-          description: 'Collection resources',
-          items: {
-            $ref: '#/components/schemas/ResourceListItem',
-          },
-        },
-      },
-    },
-  ],
 } as const;
 
 export const $SkillTemplate = {
@@ -202,7 +176,7 @@ export const $SkillTemplate = {
 export const $SkillTriggerEvent = {
   type: 'string',
   description: 'Skill trigger event',
-  enum: ['copilotRun', 'noteAsk', 'resourceAdd', 'resourceUpdate', 'collectionAdd', 'collectionUpdate', 'cron'],
+  enum: ['resourceAdd', 'resourceUpdate', 'collectionAdd', 'collectionUpdate', 'cron'],
 } as const;
 
 export const $SkillTrigger = {
@@ -1206,7 +1180,7 @@ export const $UpsertResourceResponse = {
       type: 'object',
       properties: {
         data: {
-          $ref: '#/components/schemas/ResourceListItem',
+          $ref: '#/components/schemas/Resource',
         },
       },
     },
@@ -1237,7 +1211,7 @@ export const $ListResourceResponse = {
           type: 'array',
           description: 'Resource list',
           items: {
-            $ref: '#/components/schemas/ResourceListItem',
+            $ref: '#/components/schemas/Resource',
           },
         },
       },
@@ -1256,7 +1230,7 @@ export const $GetResourceDetailResponse = {
         data: {
           type: 'object',
           description: 'Resource data',
-          $ref: '#/components/schemas/ResourceDetail',
+          $ref: '#/components/schemas/Resource',
         },
       },
     },
@@ -1298,7 +1272,7 @@ export const $UpsertCollectionResponse = {
       type: 'object',
       properties: {
         data: {
-          $ref: '#/components/schemas/CollectionListItem',
+          $ref: '#/components/schemas/Collection',
         },
       },
     },
@@ -1329,7 +1303,7 @@ export const $ListCollectionResponse = {
           type: 'array',
           description: 'Collection list',
           items: {
-            $ref: '#/components/schemas/CollectionListItem',
+            $ref: '#/components/schemas/Collection',
           },
         },
       },
@@ -1348,7 +1322,7 @@ export const $GetCollectionDetailResponse = {
         data: {
           type: 'object',
           description: 'Collection data',
-          $ref: '#/components/schemas/CollectionDetail',
+          $ref: '#/components/schemas/Collection',
         },
       },
     },
@@ -1454,13 +1428,17 @@ export const $DeleteSkillRequest = {
   },
 } as const;
 
-export const $SkillContext = {
+export const $SkillInput = {
   type: 'object',
   description: 'Skill invocation context',
   properties: {
     query: {
       type: 'string',
       description: 'User query',
+    },
+    locale: {
+      type: 'string',
+      description: 'User input locale',
     },
     convId: {
       type: 'string',
@@ -1492,19 +1470,19 @@ export const $SkillContext = {
 
 export const $InvokeSkillRequest = {
   type: 'object',
-  required: ['skillId', 'event', 'context', 'config'],
+  required: ['input'],
   properties: {
+    input: {
+      description: 'Skill input',
+      $ref: '#/components/schemas/SkillInput',
+    },
     skillId: {
       type: 'string',
-      description: 'Skill ID to invoke',
+      description: 'Skill ID to invoke (if not provided, skill auto-routing will be used)',
     },
     event: {
       description: 'Skill trigger event',
       $ref: '#/components/schemas/SkillTriggerEvent',
-    },
-    context: {
-      description: 'Skill input context',
-      $ref: '#/components/schemas/SkillContext',
     },
     config: {
       type: 'object',

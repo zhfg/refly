@@ -1,6 +1,6 @@
 import { Tool } from '@langchain/core/tools';
 import { BaseToolParams } from 'src/base';
-import SkillEngine from 'src/engine';
+import { SkillEngine } from 'src/engine';
 
 export enum LOCALE {
   ZH_CN = 'zh-CN',

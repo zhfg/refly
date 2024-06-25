@@ -2,15 +2,16 @@ import { BadRequestException, Injectable, Logger, UnauthorizedException } from '
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { readingTime } from 'reading-time-estimator';
-import { Prisma, Resource, User } from '@prisma/client';
+import { Prisma, Resource as ResourceModel, User } from '@prisma/client';
 import { RAGService } from '../rag/rag.service';
 import { PrismaService } from '../common/prisma.service';
 import { MinioService } from '../common/minio.service';
 import {
   UpsertCollectionRequest,
   UpsertResourceRequest,
-  ResourceDetail,
   ResourceMeta,
+  ListResourcesData,
+  ListCollectionsData,
 } from '@refly/openapi-schema';
 import { state2Markdown } from '@refly/utils';
 import { CHANNEL_FINALIZE_RESOURCE, QUEUE_RESOURCE } from '../utils';
@@ -29,45 +30,29 @@ export class KnowledgeService {
     @InjectQueue(QUEUE_RESOURCE) private queue: Queue<FinalizeResourceParam>,
   ) {}
 
-  async listCollections(user: User, params: { page: number; pageSize: number }) {
+  async listCollections(user: Pick<User, 'uid'>, params: ListCollectionsData['query']) {
     const { page, pageSize } = params;
     return this.prisma.collection.findMany({
-      where: { userId: user.id, deletedAt: null },
+      where: { uid: user.uid, deletedAt: null },
       orderBy: { updatedAt: 'desc' },
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
   }
 
-  async getCollectionDetail(collectionId: string) {
-    const data = await this.prisma.collection.findFirst({
+  async getCollectionDetail(user: Pick<User, 'uid'>, param: { collectionId: string }) {
+    const { collectionId } = param;
+    const coll = await this.prisma.collection.findFirst({
       where: { collectionId, deletedAt: null },
       include: { resources: { orderBy: { updatedAt: 'desc' } } },
     });
-    if (!data) {
-      return null;
+    if (!coll) {
+      throw new BadRequestException('Collection not found');
     }
-    return {
-      ...pick(data, [
-        'collectionId',
-        'userId',
-        'title',
-        'description',
-        'isPublic',
-        'createdAt',
-        'updatedAt',
-      ]),
-      resources: data.resources.map((r) => ({
-        ...omit(r, ['id', 'userId', 'deletedAt']),
-        collabEnabled: !!r.stateStorageKey,
-        createdAt: r.createdAt.toJSON(),
-        updatedAt: r.updatedAt.toJSON(),
-        data: JSON.parse(r.meta),
-      })),
-    };
+    return coll.isPublic || coll.uid === user.uid ? coll : null;
   }
 
-  async upsertCollection(user: User, param: UpsertCollectionRequest) {
+  async upsertCollection(user: Pick<User, 'uid'>, param: UpsertCollectionRequest) {
     if (!param.collectionId) {
       param.collectionId = genCollectionID();
     }
@@ -78,39 +63,35 @@ export class KnowledgeService {
         collectionId: param.collectionId,
         title: param.title,
         description: param.description,
-        userId: user.id,
+        uid: user.uid,
         isPublic: param.isPublic,
       },
       update: { ...omit(param, ['collectionId']) },
     });
   }
 
-  async deleteCollection(user: User, collectionId: string) {
+  async deleteCollection(user: Pick<User, 'uid'>, collectionId: string) {
     const coll = await this.prisma.collection.findFirst({
       where: { collectionId, deletedAt: null },
     });
     if (!coll) {
       throw new BadRequestException('Collection not found');
     }
-    if (coll.userId !== user.id) {
+    if (coll.uid !== user.uid) {
       throw new UnauthorizedException();
     }
 
-    // TODO: delete resources
-
     return this.prisma.collection.update({
-      where: { collectionId, userId: user.id },
+      where: { collectionId, uid: user.uid },
       data: { deletedAt: new Date() },
     });
   }
 
-  async listResources(param: {
-    resourceId?: string;
-    collectionId?: string;
-    page?: number;
-    pageSize?: number;
-  }): Promise<Resource[]> {
-    const { collectionId, page = 1, pageSize = 10 } = param;
+  async listResources(
+    user: Pick<User, 'uid'>,
+    param: ListResourcesData['query'],
+  ): Promise<ResourceModel[]> {
+    const { collectionId, resourceId, page = 1, pageSize = 10 } = param;
 
     // Query resources by collection
     if (collectionId) {
@@ -124,11 +105,13 @@ export class KnowledgeService {
           },
         },
       });
-      return data.length > 0 ? data[0].resources : [];
+      return data.length > 0 && (data[0].isPublic || data[0].uid === user.uid)
+        ? data[0].resources
+        : [];
     }
 
     const resources = await this.prisma.resource.findMany({
-      where: { resourceId: param.resourceId, deletedAt: null },
+      where: { resourceId, deletedAt: null },
       skip: (page - 1) * pageSize,
       take: pageSize,
       orderBy: { updatedAt: 'desc' },
@@ -141,39 +124,37 @@ export class KnowledgeService {
   }
 
   async getResourceDetail(
-    resourceId: string,
-    needDoc?: boolean,
-  ): Promise<ResourceDetail & { userId: number }> {
-    const resource = await this.prisma.resource.findFirst({
+    user: Pick<User, 'uid'>,
+    param: { resourceId: string; needDoc?: boolean },
+  ): Promise<ResourceModel & { doc?: string }> {
+    const { resourceId, needDoc } = param;
+    const resource: ResourceModel & { doc?: string } = await this.prisma.resource.findFirst({
       where: { resourceId, deletedAt: null },
     });
-    const detail: ResourceDetail & { userId: number } = {
-      ...omit(resource, ['id', 'storageKey', 'stateStorageKey']),
-      collabEnabled: !!resource.stateStorageKey,
-      createdAt: resource.createdAt.toJSON(),
-      updatedAt: resource.updatedAt.toJSON(),
-      data: JSON.parse(resource.meta),
-    };
+
+    if (!resource.isPublic && resource.uid !== user.uid) {
+      return null;
+    }
 
     if (needDoc) {
       if (resource.readOnly) {
-        const metadata = detail.data;
+        const metadata: ResourceMeta = JSON.parse(resource.meta);
         if (resource.storageKey || metadata.storageKey) {
           const buf = await this.minio.downloadData(resource.storageKey || metadata.storageKey);
-          detail.doc = buf.toString();
+          resource.doc = buf.toString();
         }
       } else {
         if (resource.stateStorageKey) {
           const buf = await this.minio.downloadData(resource.stateStorageKey);
-          detail.doc = state2Markdown(buf);
+          resource.doc = state2Markdown(buf);
         }
       }
     }
 
-    return detail;
+    return resource;
   }
 
-  async createResource(user: User, param: UpsertResourceRequest) {
+  async createResource(user: Pick<User, 'uid'>, param: UpsertResourceRequest) {
     param.resourceId = genResourceID();
 
     // If target collection not specified, create new one
@@ -209,7 +190,7 @@ export class KnowledgeService {
         resourceType: param.resourceType,
         meta: JSON.stringify(param.data),
         storageKey: param.storageKey,
-        userId: user.id,
+        uid: user.uid,
         isPublic: param.isPublic,
         readOnly: param.readOnly,
         title: param.title || 'Untitled',
@@ -219,7 +200,7 @@ export class KnowledgeService {
             where: { collectionId: param.collectionId },
             create: {
               title: param.collectionName || 'Default Collection',
-              userId: user.id,
+              uid: user.uid,
               collectionId: param.collectionId,
             },
           },
@@ -227,7 +208,7 @@ export class KnowledgeService {
       },
     });
 
-    await this.queue.add(CHANNEL_FINALIZE_RESOURCE, { ...param, userId: user.id });
+    await this.queue.add(CHANNEL_FINALIZE_RESOURCE, { ...param, uid: user.uid });
     // await this.finalizeResource(param);
 
     return res;
@@ -280,7 +261,7 @@ export class KnowledgeService {
     );
 
     await this.prisma.resource.update({
-      where: { resourceId, userId: user.id },
+      where: { resourceId, uid: user.uid },
       data: {
         storageKey: param.storageKey,
         wordCount: readingTime(param.content).words,
@@ -299,9 +280,9 @@ export class KnowledgeService {
    * save to vector store.
    */
   async finalizeResource(param: FinalizeResourceParam) {
-    const user = await this.prisma.user.findFirst({ where: { id: param.userId } });
+    const user = await this.prisma.user.findFirst({ where: { uid: param.uid } });
     if (!user) {
-      this.logger.warn(`User not found, userId: ${param.userId}`);
+      this.logger.warn(`User not found, userId: ${param.uid}`);
       return;
     }
 
@@ -311,14 +292,14 @@ export class KnowledgeService {
       console.error(err);
       this.logger.error(`finalize resource error: ${err}`);
       await this.prisma.resource.update({
-        where: { resourceId: param.resourceId, userId: user.id },
+        where: { resourceId: param.resourceId, uid: user.uid },
         data: { indexStatus: 'failed' },
       });
       throw err;
     }
   }
 
-  async updateResource(user: User, param: UpsertResourceRequest) {
+  async updateResource(user: Pick<User, 'uid'>, param: UpsertResourceRequest) {
     const updates: Prisma.ResourceUpdateInput = pick(param, ['title', 'isPublic', 'readOnly']);
     if (param.data) {
       updates.meta = JSON.stringify(param.data);
@@ -327,19 +308,19 @@ export class KnowledgeService {
       await this.minio.uploadData(param.storageKey, param.content);
     }
     return this.prisma.resource.update({
-      where: { resourceId: param.resourceId, userId: user.id },
+      where: { resourceId: param.resourceId, uid: user.uid },
       data: updates,
     });
   }
 
-  async deleteResource(user: User, resourceId: string) {
+  async deleteResource(user: Pick<User, 'uid'>, resourceId: string) {
     const resource = await this.prisma.resource.findFirst({
       where: { resourceId, deletedAt: null },
     });
     if (!resource) {
       throw new BadRequestException('Resource not found');
     }
-    if (resource.userId !== user.id) {
+    if (resource.uid !== user.uid) {
       throw new UnauthorizedException();
     }
 

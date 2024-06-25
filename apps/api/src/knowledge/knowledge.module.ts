@@ -19,5 +19,6 @@ import { QUEUE_RESOURCE } from '../utils';
   ],
   controllers: [KnowledgeController],
   providers: [KnowledgeService, ResourceProcessor, NoteWsGateway],
+  exports: [KnowledgeService],
 })
 export class KnowledgeModule {}

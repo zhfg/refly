@@ -7,7 +7,8 @@ import { AIMessage, BaseMessage } from '@langchain/core/messages';
 import { SqliteSaver } from '@langchain/langgraph/checkpoint/sqlite';
 
 import { START, END, MessageGraph } from '@langchain/langgraph';
-import { BaseSkill } from 'src/base';
+import { BaseSkill } from '../../base';
+import { SkillEngine } from '../../engine';
 
 // Define the function that determines whether to continue or not
 function shouldContinue(messages: BaseMessage[]): 'action' | typeof END {
@@ -24,6 +25,10 @@ function shouldContinue(messages: BaseMessage[]): 'action' | typeof END {
 // Define a new graph
 
 class SearchAndAddResourceSkill extends BaseSkill {
+  constructor(engine: SkillEngine) {
+    super(engine);
+  }
+
   toRunnable() {
     const tools = [new DuckDuckGoSearch({ maxResults: 3 })];
 

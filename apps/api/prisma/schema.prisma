@@ -288,8 +288,8 @@ model Resource {
   resourceId      String       @unique @map("resource_id")
   /// 资源类型
   resourceType    ResourceType @map("resource_type")
-  /// 用户主键
-  userId          Int          @map("user_id")
+  /// UID
+  uid             String       @map("uid")
   /// 字数
   wordCount       Int          @default(0) @map("word_count")
   /// 对象存储 key
@@ -317,7 +317,7 @@ model Resource {
   collections Collection[]
 
   @@index([resourceId])
-  @@index([userId, updatedAt])
+  @@index([uid, updatedAt])
   @@map("resources")
 }
 
@@ -331,8 +331,8 @@ model Collection {
   title        String    @map("title")
   /// 描述
   description  String?   @default("") @map("description")
-  /// 用户主键
-  userId       Int       @map("user_id")
+  /// UID
+  uid          String    @map("uid")
   /// 是否公开
   isPublic     Boolean   @default(false) @map("is_public")
   /// 创建时间
@@ -346,7 +346,7 @@ model Collection {
   resources Resource[]
 
   @@index([collectionId])
-  @@index([userId, updatedAt])
+  @@index([uid, updatedAt])
   @@map("collections")
 }
 
@@ -413,8 +413,8 @@ model SkillLog {
   skillName String       @map("skill_name")
   /// mode for this skill run
   mode      SkillRunMode @map("mode")
-  /// input context (JSON of `SkillContext`)
-  context   String       @map("context")
+  /// input (JSON of `SkillInput`)
+  input     String       @map("input")
   /// skill operation status
   status    SkillStatus  @map("status")
   /// skill trigger event

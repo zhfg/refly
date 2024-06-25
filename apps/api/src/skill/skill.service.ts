@@ -11,23 +11,46 @@ import {
   UpsertSkillRequest,
   UpsertSkillTriggerRequest,
 } from '@refly/openapi-schema';
-import * as templateModule from '@refly/skill-template';
+import { SkillEngine, inventory, getRunnable } from '@refly/skill-template';
 import { genSkillID, genSkillLogID, genSkillTriggerID } from '@refly/utils';
 import { PrismaService } from 'src/common/prisma.service';
-import { QUEUE_SKILL } from 'src/utils';
+import { QUEUE_SKILL, buildSuccessResponse } from 'src/utils';
 import { InvokeSkillJobData } from './skill.dto';
+import { KnowledgeService } from '../knowledge/knowledge.service';
+import { collectionPO2DTO, resourcePO2DTO } from '../knowledge/knowledge.dto';
 
 @Injectable()
 export class SkillService {
   private logger = new Logger(SkillService.name);
+  private skillEngine: SkillEngine;
 
   constructor(
     private prisma: PrismaService,
+    private knowledge: KnowledgeService,
     @InjectQueue(QUEUE_SKILL) private queue: Queue<InvokeSkillJobData>,
-  ) {}
+  ) {
+    this.skillEngine = new SkillEngine(this.logger, {
+      createResource: async (user, req) => {
+        const resource = await this.knowledge.createResource(user, req);
+        return buildSuccessResponse(resourcePO2DTO(resource));
+      },
+      updateResource: async (user, req) => {
+        const resource = await this.knowledge.updateResource(user, req);
+        return buildSuccessResponse(resourcePO2DTO(resource));
+      },
+      createCollection: async (user, req) => {
+        const coll = await this.knowledge.upsertCollection(user, req);
+        return buildSuccessResponse(collectionPO2DTO(coll));
+      },
+      updateCollection: async (user, req) => {
+        const coll = await this.knowledge.upsertCollection(user, req);
+        return buildSuccessResponse(collectionPO2DTO(coll));
+      },
+    });
+  }
 
   listSkillTemplates(): SkillTemplate[] {
-    return templateModule.inventory;
+    return inventory;
   }
 
   async listSkills(user: Pick<User, 'uid'>, param: { page: number; pageSize: number }) {
@@ -135,15 +158,11 @@ export class SkillService {
       throw new BadRequestException('skill trigger not found');
     }
 
-    const tpl = templateModule.inventory.find((i) => i.name === skill.skillTpl);
-    if (!tpl) {
-      throw new BadRequestException('skill template not found');
-    }
-    const runnable = templateModule[tpl.runnableName];
+    const runnable = getRunnable(this.skillEngine, skill.skillTpl);
     if (!runnable) {
       throw new BadRequestException('skill runnable not found');
     }
-    return { skill, trigger, runnable: templateModule[tpl.runnableName] };
+    return { skill, trigger, runnable };
   }
 
   async invokeSkill(user: User, param: InvokeSkillRequest) {
@@ -155,7 +174,7 @@ export class SkillService {
         skillId: skill.skillId,
         skillName: skill.name,
         mode: 'async',
-        context: JSON.stringify(param.context),
+        input: JSON.stringify(param.input),
         status: 'scheduling',
         event: param.event,
         triggerId: trigger.triggerId,
@@ -180,7 +199,7 @@ export class SkillService {
         where: { logId: param.skillLogId },
         data: { status: 'running' },
       });
-      const res = await runnable.invoke(param.context, {
+      const res = await runnable.invoke(param.input, {
         configurable: { ...JSON.parse(skill.config), ...param.config },
       });
 
@@ -208,14 +227,14 @@ export class SkillService {
         skillId: skill.skillId,
         skillName: skill.name,
         mode: 'stream',
-        context: JSON.stringify(param.context),
+        input: JSON.stringify(param.input),
         status: 'running',
         event: param.event,
         triggerId: trigger.triggerId,
       },
     });
 
-    return runnable.streamEvents(param.context, {
+    return runnable.streamEvents(param.input, {
       configurable: { ...JSON.parse(skill.config), ...param.config },
       version: 'v1',
     });

@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { sendToBackground } from '@refly/ai-workspace-common/utils/extension/messaging';
 import { getRuntime } from '@refly/ai-workspace-common/utils/env';
 import { handleGetAndWatchValue, useStorage } from '@/hooks/use-storage';
-import { ResourceDetail } from '@refly/openapi-schema';
+import { Resource } from '@refly/openapi-schema';
 import { useExtensionMessage } from '@/hooks/use-extension-message';
 
 export const useMockInAppResource = () => {
@@ -41,7 +41,7 @@ export const useMockInAppResource = () => {
       name: 'getCurrentMockResourceByTabId',
       type: 'others',
       source: runtime,
-    })) as { currentMockResource: ResourceDetail };
+    })) as { currentMockResource: Resource };
 
     if (res?.currentMockResource) {
       knowledgeBaseStore.updateResource(res?.currentMockResource);
