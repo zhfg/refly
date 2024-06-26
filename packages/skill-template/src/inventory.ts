@@ -12,11 +12,11 @@ interface InventoryItem {
 
 export const inventory: InventoryItem[] = [
   {
-    name: 'summary',
+    name: SummarySkill.name,
     skillClass: SummarySkill,
   },
   {
-    name: 'online-search',
+    name: OnlineSearchSkill.name,
     skillClass: OnlineSearchSkill,
   },
 ];

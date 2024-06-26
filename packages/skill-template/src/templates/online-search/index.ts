@@ -52,8 +52,6 @@ class OnlineSearchSkill extends BaseSkill {
     return await runnable.invoke(input);
   }
 
-  private tools: Tool[] = [];
-
   private graphState: StateGraphArgs<GraphState>['channels'] = {
     documents: {
       reducer: (left?: Document[], right?: Document[]) => (right ? right : left || []),
