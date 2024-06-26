@@ -34,7 +34,7 @@ class SearchAndAddResourceSkill extends BaseSkill {
     'Search Knowledge Base, and add resource. Useful for when you need to answer questions about current events. Input should be a search query.';
 
   schema = z.object({
-    userQuery: z.string(),
+    query: z.string(),
   });
 
   async _call(input: typeof this.graphState): Promise<string> {

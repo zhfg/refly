@@ -1,5 +1,5 @@
 import { Runnable } from '@langchain/core/runnables';
-import { ToolParams } from '@langchain/core/tools';
+import { DynamicStructuredTool, DynamicStructuredToolInput, ToolParams } from '@langchain/core/tools';
 import { SkillEngine } from './engine';
 import { StructuredTool } from '@langchain/core/tools';
 

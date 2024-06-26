@@ -10,7 +10,7 @@ export enum LOCALE {
 const DEFAULT_MAX_RESULTS = 10;
 
 export interface SearchOptions {
-  locale: LOCALE;
+  locale: string;
   maxResults?: number;
 }
 

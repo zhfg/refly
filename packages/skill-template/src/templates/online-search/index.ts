@@ -26,17 +26,15 @@ export enum LOCALE {
   EN = 'en',
 }
 
-type GraphState = SkillInput & {
+interface GraphState extends SkillInput {
   // 初始上下文
-  userQuery: string;
   documents: Document[];
-  locale: LOCALE;
   messages: BaseMessage[];
 
   // 运行动态添加的上下文
   contextualUserQuery: string; // 基于上下文改写 userQuery
   sources: Source[]; // 搜索互联网得到的在线结果
-};
+}
 
 class OnlineSearchSkill extends BaseSkill {
   name = 'online_search';
@@ -45,7 +43,7 @@ class OnlineSearchSkill extends BaseSkill {
     'A search engine. Useful for when you need to answer questions about current events. Input should be a search query.';
 
   schema = z.object({
-    userQuery: z.string(),
+    query: z.string().describe('The search query'),
   });
 
   async _call(input: typeof this.graphState): Promise<string> {
@@ -57,10 +55,6 @@ class OnlineSearchSkill extends BaseSkill {
   private tools: Tool[] = [];
 
   private graphState: StateGraphArgs<GraphState>['channels'] = {
-    userQuery: {
-      reducer: (left?: string, right?: string) => (right ? right : left || ''),
-      default: () => '',
-    },
     documents: {
       reducer: (left?: Document[], right?: Document[]) => (right ? right : left || []),
       default: () => [],
@@ -88,7 +82,7 @@ class OnlineSearchSkill extends BaseSkill {
   }
 
   async callAgentModel(state: GraphState, config?: RunnableConfig): Promise<Partial<GraphState>> {
-    const { userQuery, contextualUserQuery, locale, messages = [] } = state;
+    const { query, contextualUserQuery, locale, messages = [] } = state;
     const lastMessage = messages[messages.length - 1];
     const isToolMessage = (lastMessage as ToolMessage)?._getType() === 'tool';
 
@@ -140,7 +134,7 @@ class OnlineSearchSkill extends BaseSkill {
     const responseMessage = await boundModel.invoke([
       new SystemMessage(getSystemPrompt()),
       new HumanMessage(
-        `The user's query is ${contextualUserQuery || userQuery}, please output answer in locale's ${locale} language:`,
+        `The user's query is ${contextualUserQuery || query}, please output answer in locale's ${locale} language:`,
       ),
     ]);
 
@@ -148,9 +142,9 @@ class OnlineSearchSkill extends BaseSkill {
   }
 
   async getContextualQuestion(state: GraphState) {
-    const { locale, userQuery, messages } = state;
+    const { locale, query, messages } = state;
 
-    const getSystemPrompt = (locale: LOCALE) => `
+    const getSystemPrompt = (locale: string) => `
 ## Target
 Given a chat history and the latest user question
 which might reference context in the chat history, formulate a standalone question
@@ -171,7 +165,7 @@ just reformulate it if needed and otherwise return it as is.
     const contextualizeQChain = contextualizeQPrompt.pipe(llm).pipe(new StringOutputParser());
 
     const contextualUserQuery = await contextualizeQChain.invoke({
-      question: userQuery,
+      question: query,
       chatHistory: messages,
     });
 
@@ -215,7 +209,7 @@ just reformulate it if needed and otherwise return it as is.
     // For versions of @langchain/core < 0.2.3, you must call `.stream()`
     // and aggregate the message from chunks instead of calling `.invoke()`.
 
-    const { userQuery, contextualUserQuery, locale, sources = [] } = state;
+    const { query, contextualUserQuery, locale, sources = [] } = state;
 
     const contextToCitationText = sources
       .map((item, index) => `[[citation:${index + 1}]] ${item?.pageContent}`)
@@ -240,7 +234,7 @@ just reformulate it if needed and otherwise return it as is.
     const responseMessage = await llm.invoke([
       new SystemMessage(getSystemPrompt(contextToCitationText)),
       new HumanMessage(
-        `The user's query is ${contextualUserQuery || userQuery}, please output answer in locale's ${locale} language:`,
+        `The user's query is ${contextualUserQuery || query}, please output answer in locale's ${locale} language:`,
       ),
     ]);
 

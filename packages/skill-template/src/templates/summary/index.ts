@@ -4,16 +4,15 @@ import { BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messag
 
 import { START, END, StateGraphArgs, StateGraph, Graph } from '@langchain/langgraph';
 import { BaseSkill } from '../../base';
-import { DynamicStructuredTool } from '@langchain/core/tools';
 import { SkillEngine } from '../../engine';
 // schema
 import { z } from 'zod';
+import { SkillInput } from '@refly/openapi-schema';
 
-type GraphState = {
+interface GraphState extends SkillInput {
   documents: Document[];
-  locale: string;
   messages: BaseMessage[];
-};
+}
 
 // Define a new graph
 
@@ -49,7 +48,7 @@ class SummarySkill extends BaseSkill {
     super(engine);
   }
 
-  async generate(state: GraphState) {
+  generate = async (state: GraphState) => {
     this.engine.logger.log('---GENERATE---');
 
     const { documents, locale } = state;
@@ -130,7 +129,7 @@ The content to be summarized is as follows:
     ]);
 
     return { messages: [responseMessage] };
-  }
+  };
 
   toRunnable() {
     const workflow = new StateGraph<GraphState>({
