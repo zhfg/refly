@@ -1759,6 +1759,9 @@ importers:
       tsx:
         specifier: ^4.6.2
         version: 4.6.2
+      zod:
+        specifier: ~3.23.8
+        version: 3.23.8
     devDependencies:
       rimraf:
         specifier: ~5.0.7
@@ -16120,8 +16123,8 @@ packages:
       uuid: 9.0.1
       ws: 8.17.0
       yaml: 2.4.5
-      zod: 3.22.4
-      zod-to-json-schema: 3.23.1(zod@3.22.4)
+      zod: 3.23.8
+      zod-to-json-schema: 3.23.1(zod@3.23.8)
     transitivePeerDependencies:
       - encoding
       - openai
@@ -23530,4 +23533,5 @@ time:
   /y-protocols@1.0.6: '2023-09-18T08:18:54.061Z'
   /yjs@13.6.16: '2024-06-10T10:21:18.716Z'
   /zod@3.22.4: '2023-10-04T21:53:36.013Z'
+  /zod@3.23.8: '2024-05-08T19:13:04.545Z'
   /zustand@4.5.1: '2024-02-17T02:07:59.525Z'

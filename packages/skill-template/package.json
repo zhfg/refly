@@ -33,6 +33,7 @@
     "better-sqlite3": "~11.0.0",
     "dotenv": "~16.4.5",
     "@types/node": "~20.14.8",
-    "@refly/openapi-schema": "workspace:*"
+    "@refly/openapi-schema": "workspace:*",
+    "zod": "~3.23.8"
   }
 }

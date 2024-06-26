@@ -1,6 +1,8 @@
 require('dotenv').config();
 import { SkillEngine } from 'src/engine';
-import SearchAndAddResource from '../templates/ai-search-engine';
+import OnlineSearchSkill from '../templates/online-search';
+import { DynamicTool } from '@langchain/core/tools';
+import { DynamicStructuredTool } from '@langchain/core/tools';
 
 async function run() {
   const thread = { configurable: { thread_id: '4' } };
@@ -10,7 +12,7 @@ async function run() {
     createCollection: (user, req) => null,
     updateCollection: (user, req) => null,
   });
-  const skill = new SearchAndAddResource(engine);
+  const skill = new OnlineSearchSkill(engine);
   const runnable = skill.toRunnable();
   for await (const event of await runnable.stream(
     {
@@ -27,5 +29,3 @@ async function run() {
     }
   }
 }
-
-// run();

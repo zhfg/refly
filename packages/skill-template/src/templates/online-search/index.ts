@@ -10,6 +10,8 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 
 // tools
 import { SerperSearch } from '../../tools/serper-online-search';
+// schema
+import { z } from 'zod';
 // types
 import { SystemMessage } from '@langchain/core/messages';
 import { HumanMessage } from '@langchain/core/messages';
@@ -37,6 +39,21 @@ type GraphState = SkillInput & {
 };
 
 class OnlineSearchSkill extends BaseSkill {
+  name = 'online_search';
+
+  description =
+    'A search engine. Useful for when you need to answer questions about current events. Input should be a search query.';
+
+  schema = z.object({
+    userQuery: z.string(),
+  });
+
+  async _call(input: typeof this.graphState): Promise<string> {
+    const runnable = this.toRunnable();
+
+    return await runnable.invoke(input);
+  }
+
   private tools: Tool[] = [];
 
   private graphState: StateGraphArgs<GraphState>['channels'] = {
@@ -75,14 +92,13 @@ class OnlineSearchSkill extends BaseSkill {
     const lastMessage = messages[messages.length - 1];
     const isToolMessage = (lastMessage as ToolMessage)?._getType() === 'tool';
 
-    if (this.tools?.length === 0) {
-      this.tools = [new SerperSearch({ searchOptions: { maxResults: 8, locale }, engine: this.engine })];
-    }
+    // 这里是注册 tools 的描述，用于 Agent 调度
+    const tools = [new SerperSearch({ searchOptions: { maxResults: 8, locale }, engine: this.engine })];
 
     // For versions of @langchain/core < 0.2.3, you must call `.stream()`
     // and aggregate the message from chunks instead of calling `.invoke()`.
     const boundModel = new ChatOpenAI({ model: 'gpt-3.5-turbo', openAIApiKey: process.env.OPENAI_API_KEY }).bindTools(
-      this.tools,
+      tools,
     );
 
     if (isToolMessage) {
@@ -232,7 +248,10 @@ just reformulate it if needed and otherwise return it as is.
   }
 
   async callToolNode(state: GraphState, config?: RunnableConfig): Promise<Partial<GraphState>> {
-    const { messages = [] } = state;
+    const { messages = [], locale } = state;
+
+    // 这里是直接用于执行的 tool，tool as ToolNode 执行
+    const tools = [new SerperSearch({ searchOptions: { maxResults: 8, locale }, engine: this.engine })];
 
     const message = messages[messages.length - 1];
 
@@ -242,7 +261,7 @@ just reformulate it if needed and otherwise return it as is.
 
     const outputs = await Promise.all(
       (message as AIMessage).tool_calls?.map(async (call) => {
-        const tool = this.tools.find((tool) => tool.name === call.name);
+        const tool = tools.find((tool) => tool.name === call.name);
         if (tool === undefined) {
           throw new Error(`Tool ${call.name} not found.`);
         }
@@ -259,8 +278,6 @@ just reformulate it if needed and otherwise return it as is.
   }
 
   toRunnable(): Runnable<any, any, RunnableConfig> {
-    const toolNode = new ToolNode<GraphState>(this.tools);
-
     const workflow = new StateGraph<GraphState>({
       channels: this.graphState,
     })

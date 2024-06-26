@@ -10,6 +10,9 @@ import { START, END, MessageGraph } from '@langchain/langgraph';
 import { BaseSkill } from '../../base';
 import { SkillEngine } from '../../engine';
 
+// schema
+import { z } from 'zod';
+
 // Define the function that determines whether to continue or not
 function shouldContinue(messages: BaseMessage[]): 'action' | typeof END {
   const lastMessage = messages[messages.length - 1];
@@ -25,9 +28,26 @@ function shouldContinue(messages: BaseMessage[]): 'action' | typeof END {
 // Define a new graph
 
 class SearchAndAddResourceSkill extends BaseSkill {
+  name = 'search_and_add_resource';
+
+  description =
+    'Search Knowledge Base, and add resource. Useful for when you need to answer questions about current events. Input should be a search query.';
+
+  schema = z.object({
+    userQuery: z.string(),
+  });
+
+  async _call(input: typeof this.graphState): Promise<string> {
+    const runnable = this.toRunnable();
+
+    return await runnable.invoke(input);
+  }
+
   constructor(engine: SkillEngine) {
     super(engine);
   }
+
+  graphState = {};
 
   toRunnable() {
     const tools = [new DuckDuckGoSearch({ maxResults: 3 })];

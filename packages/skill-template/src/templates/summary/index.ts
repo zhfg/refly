@@ -6,6 +6,8 @@ import { START, END, StateGraphArgs, StateGraph, Graph } from '@langchain/langgr
 import { BaseSkill } from '../../base';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { SkillEngine } from '../../engine';
+// schema
+import { z } from 'zod';
 
 type GraphState = {
   documents: Document[];
@@ -13,22 +15,59 @@ type GraphState = {
   messages: BaseMessage[];
 };
 
-const graphState: StateGraphArgs<GraphState>['channels'] = {
-  documents: {
-    reducer: (left?: Document[], right?: Document[]) => (right ? right : left || []),
-    default: () => [],
-  },
-  locale: {
-    reducer: (left?: string, right?: string) => (right ? right : left || ''),
-    default: () => 'en',
-  },
-  messages: {
-    reducer: (x: BaseMessage[], y: BaseMessage[]) => x.concat(y),
-    default: () => [],
-  },
-};
+// Define a new graph
 
-const systemPrompt = `
+class SummarySkill extends BaseSkill {
+  name = 'content_summarizer';
+
+  description = 'Give a summary of the content of a web page';
+
+  schema = z.object({});
+
+  async _call(input: typeof this.graphState): Promise<string> {
+    const runnable = this.toRunnable();
+
+    return await runnable.invoke(input);
+  }
+
+  private graphState: StateGraphArgs<GraphState>['channels'] = {
+    documents: {
+      reducer: (left?: Document[], right?: Document[]) => (right ? right : left || []),
+      default: () => [],
+    },
+    locale: {
+      reducer: (left?: string, right?: string) => (right ? right : left || ''),
+      default: () => 'en',
+    },
+    messages: {
+      reducer: (x: BaseMessage[], y: BaseMessage[]) => x.concat(y),
+      default: () => [],
+    },
+  };
+
+  constructor(protected engine: SkillEngine) {
+    super(engine);
+  }
+
+  async generate(state: GraphState) {
+    this.engine.logger.log('---GENERATE---');
+
+    const { documents, locale } = state;
+
+    const contextToCitationText = documents.reduce((total, cur) => {
+      (total += `\n\n下面是网页 [${cur?.metadata?.title}](${cur?.metadata?.source}) 的内容\n\n`),
+        (total += `\n===\n${cur?.pageContent}\n===\n\n`);
+
+      return total;
+    }, '');
+
+    const llm = new ChatOpenAI({
+      modelName: 'gpt-3.5-turbo',
+      temperature: 0.9,
+      maxTokens: 1024,
+    });
+
+    const systemPrompt = `
 # Role
 You are a web content digester who focuses on quickly understanding and organizing the main content of web pages to provide users with streamlined and accurate summaries.
 
@@ -83,31 +122,6 @@ The content to be summarized is as follows:
 
 =====`;
 
-// Define a new graph
-
-class SummarySkill extends BaseSkill {
-  constructor(protected engine: SkillEngine) {
-    super(engine);
-  }
-
-  async generate(state: GraphState) {
-    this.engine.logger.log('---GENERATE---');
-
-    const { documents, locale } = state;
-
-    const contextToCitationText = documents.reduce((total, cur) => {
-      (total += `\n\n下面是网页 [${cur?.metadata?.title}](${cur?.metadata?.source}) 的内容\n\n`),
-        (total += `\n===\n${cur?.pageContent}\n===\n\n`);
-
-      return total;
-    }, '');
-
-    const llm = new ChatOpenAI({
-      modelName: 'gpt-3.5-turbo',
-      temperature: 0.9,
-      maxTokens: 1024,
-    });
-
     const prompt = systemPrompt.replace(`{text}`, contextToCitationText?.slice(0, 12000));
     const responseMessage = await llm.invoke([
       new SystemMessage(prompt),
@@ -120,7 +134,7 @@ class SummarySkill extends BaseSkill {
 
   toRunnable() {
     const workflow = new StateGraph<GraphState>({
-      channels: graphState,
+      channels: this.graphState,
     })
       .addNode('generate', this.generate)
       .addEdge(START, 'generate')

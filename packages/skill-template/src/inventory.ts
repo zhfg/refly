@@ -1,11 +1,13 @@
 import { BaseSkill } from './base';
 import SummarySkill from './templates/summary';
-import SearchAndAddResourceSkill from './templates/search-and-add-resource';
+import OnlineSearchSkill from './templates/online-search';
 import { SkillEngine } from './engine';
+import { Runnable } from '@langchain/core/runnables';
 
 interface InventoryItem {
   name: string;
   skillClass: new (engine: SkillEngine) => BaseSkill;
+  // TODO: 补充元数据
 }
 
 export const inventory: InventoryItem[] = [
@@ -14,12 +16,12 @@ export const inventory: InventoryItem[] = [
     skillClass: SummarySkill,
   },
   {
-    name: 'search-and-add-resource',
-    skillClass: SearchAndAddResourceSkill,
+    name: 'online-search',
+    skillClass: OnlineSearchSkill,
   },
 ];
 
-export const getRunnable = (engine: SkillEngine, name: string) => {
+export const getRunnable = (engine: SkillEngine, name: string): Runnable => {
   const item = inventory.find((i) => i.name === name);
   if (!item) {
     throw new Error(`skill not found: ${name}`);
