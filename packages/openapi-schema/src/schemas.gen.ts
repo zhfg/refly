@@ -264,6 +264,7 @@ export const $Skill = {
 export const $SkillLog = {
   type: 'object',
   description: 'Skill operation log',
+  required: ['logId', 'skillId', 'skillName', 'input', 'context', 'createdAt', 'updatedAt'],
   properties: {
     logId: {
       type: 'string',
@@ -281,6 +282,14 @@ export const $SkillLog = {
     triggerId: {
       type: 'string',
       description: 'Skill trigger ID',
+    },
+    input: {
+      description: 'Skill input',
+      $ref: '#/components/schemas/SkillInput',
+    },
+    context: {
+      description: 'Skill context',
+      $ref: '#/components/schemas/SkillContext',
     },
     createdAt: {
       type: 'string',
@@ -1430,12 +1439,20 @@ export const $DeleteSkillRequest = {
 
 export const $SkillInput = {
   type: 'object',
-  description: 'Skill invocation context',
+  description: 'Skill input',
+  required: ['query'],
   properties: {
     query: {
       type: 'string',
       description: 'User query',
     },
+  },
+} as const;
+
+export const $SkillContext = {
+  type: 'object',
+  description: 'Skill invocation context',
+  properties: {
     locale: {
       type: 'string',
       description: 'User input locale',
@@ -1475,6 +1492,10 @@ export const $InvokeSkillRequest = {
     input: {
       description: 'Skill input',
       $ref: '#/components/schemas/SkillInput',
+    },
+    context: {
+      description: 'Skill invocation context',
+      $ref: '#/components/schemas/SkillContext',
     },
     skillId: {
       type: 'string',

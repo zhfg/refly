@@ -215,27 +215,35 @@ export type SkillLog = {
   /**
    * Log ID
    */
-  logId?: string;
+  logId: string;
   /**
    * Skill ID
    */
-  skillId?: string;
+  skillId: string;
   /**
    * Skill name
    */
-  skillName?: string;
+  skillName: string;
   /**
    * Skill trigger ID
    */
   triggerId?: string;
   /**
+   * Skill input
+   */
+  input: SkillInput;
+  /**
+   * Skill context
+   */
+  context: SkillContext;
+  /**
    * Log creation time
    */
-  createdAt?: string;
+  createdAt: string;
   /**
    * Log update time
    */
-  updatedAt?: string;
+  updatedAt: string;
 };
 
 /**
@@ -1028,13 +1036,19 @@ export type DeleteSkillRequest = {
 };
 
 /**
- * Skill invocation context
+ * Skill input
  */
 export type SkillInput = {
   /**
    * User query
    */
-  query?: string;
+  query: string;
+};
+
+/**
+ * Skill invocation context
+ */
+export type SkillContext = {
   /**
    * User input locale
    */
@@ -1062,6 +1076,10 @@ export type InvokeSkillRequest = {
    * Skill input
    */
   input: SkillInput;
+  /**
+   * Skill invocation context
+   */
+  context?: SkillContext;
   /**
    * Skill ID to invoke (if not provided, skill auto-routing will be used)
    */

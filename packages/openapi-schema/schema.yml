@@ -1082,6 +1082,14 @@ components:
     SkillLog:
       type: object
       description: Skill operation log
+      required:
+        - logId
+        - skillId
+        - skillName
+        - input
+        - context
+        - createdAt
+        - updatedAt
       properties:
         logId:
           type: string
@@ -1096,6 +1104,12 @@ components:
         triggerId:
           type: string
           description: Skill trigger ID
+        input:
+          description: Skill input
+          $ref: '#/components/schemas/SkillInput'
+        context:
+          description: Skill context
+          $ref: '#/components/schemas/SkillContext'
         createdAt:
           type: string
           format: date-time
@@ -1943,11 +1957,17 @@ components:
           description: Skill ID to delete
     SkillInput:
       type: object
-      description: Skill invocation context
+      description: Skill input
+      required:
+        - query
       properties:
         query:
           type: string
           description: User query
+    SkillContext:
+      type: object
+      description: Skill invocation context
+      properties:
         locale:
           type: string
           description: User input locale
@@ -1977,6 +1997,9 @@ components:
         input:
           description: Skill input
           $ref: '#/components/schemas/SkillInput'
+        context:
+          description: Skill invocation context
+          $ref: '#/components/schemas/SkillContext'
         skillId:
           type: string
           description: Skill ID to invoke (if not provided, skill auto-routing will be used)

@@ -3,13 +3,13 @@ import { Document } from '@langchain/core/documents';
 import { BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 
 import { START, END, StateGraphArgs, StateGraph, Graph } from '@langchain/langgraph';
-import { BaseSkill } from '../../base';
+import { BaseSkill, BaseSkillState, baseStateGraphArgs } from '../../base';
 import { SkillEngine } from '../../engine';
 // schema
 import { z } from 'zod';
-import { SkillInput } from '@refly/openapi-schema';
+import { RunnableConfig } from '@langchain/core/runnables';
 
-interface GraphState extends SkillInput {
+interface GraphState extends BaseSkillState {
   documents: Document[];
   messages: BaseMessage[];
 }
@@ -23,20 +23,11 @@ class SummarySkill extends BaseSkill {
 
   schema = z.object({});
 
-  async _call(input: typeof this.graphState): Promise<string> {
-    const runnable = this.toRunnable();
-
-    return await runnable.invoke(input);
-  }
-
-  private graphState: StateGraphArgs<GraphState>['channels'] = {
+  graphState: StateGraphArgs<GraphState>['channels'] = {
+    ...baseStateGraphArgs,
     documents: {
       reducer: (left?: Document[], right?: Document[]) => (right ? right : left || []),
       default: () => [],
-    },
-    locale: {
-      reducer: (left?: string, right?: string) => (right ? right : left || ''),
-      default: () => 'en',
     },
     messages: {
       reducer: (x: BaseMessage[], y: BaseMessage[]) => x.concat(y),
@@ -48,7 +39,7 @@ class SummarySkill extends BaseSkill {
     super(engine);
   }
 
-  generate = async (state: GraphState) => {
+  generate = async (state: GraphState, config: RunnableConfig) => {
     this.engine.logger.log('---GENERATE---');
 
     const { documents, locale } = state;

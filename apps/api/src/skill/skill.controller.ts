@@ -12,12 +12,7 @@ import {
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { SkillService } from './skill.service';
 import { User } from 'src/utils/decorators/user.decorator';
-import {
-  User as UserModel,
-  Skill as SkillModel,
-  SkillTrigger as SkillTriggerModel,
-  SkillLog as SkillLogModel,
-} from '@prisma/client';
+import { User as UserModel } from '@prisma/client';
 import {
   DeleteSkillRequest,
   DeleteSkillResponse,
@@ -29,46 +24,18 @@ import {
   ListSkillResponse,
   ListSkillTemplateResponse,
   ListSkillTriggerResponse,
-  Skill,
-  SkillLog,
-  SkillTrigger,
-  SkillTriggerEvent,
   UpsertSkillRequest,
   UpsertSkillResponse,
   UpsertSkillTriggerResponse,
 } from '@refly/openapi-schema';
-import { buildSuccessResponse, omit } from 'src/utils';
+import { buildSuccessResponse } from 'src/utils';
 import { Response } from 'express';
 import { AIMessageChunk } from '@langchain/core/messages';
 import { ChatGenerationChunk } from '@langchain/core/outputs';
+import { toSkillDTO, toSkillLogDTO, toSkillTriggerDTO } from './skill.dto';
 
 const LLM_SPLIT = '__LLM_RESPONSE__';
 // const RELATED_SPLIT = '__RELATED_QUESTIONS__';
-
-function convertSkill(skill: SkillModel): Skill {
-  return {
-    ...omit(skill, ['pk', 'deletedAt']),
-    createdAt: skill.createdAt.toJSON(),
-    updatedAt: skill.updatedAt.toJSON(),
-  };
-}
-
-function convertSkillTrigger(trigger: SkillTriggerModel): SkillTrigger {
-  return {
-    ...omit(trigger, ['pk', 'deletedAt']),
-    event: trigger.event as SkillTriggerEvent,
-    createdAt: trigger.createdAt.toJSON(),
-    updatedAt: trigger.updatedAt.toJSON(),
-  };
-}
-
-function convertSkillLog(log: SkillLogModel): SkillLog {
-  return {
-    ...omit(log, ['pk']),
-    createdAt: log.createdAt.toJSON(),
-    updatedAt: log.updatedAt.toJSON(),
-  };
-}
 
 @Controller('skill')
 export class SkillController {
@@ -88,7 +55,7 @@ export class SkillController {
     @Query('page', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListSkillResponse> {
     const skills = await this.skillService.listSkills(user, { page, pageSize });
-    return buildSuccessResponse(skills.map((skill) => convertSkill(skill)));
+    return buildSuccessResponse(skills.map((skill) => toSkillDTO(skill)));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -99,8 +66,8 @@ export class SkillController {
   ): Promise<UpsertSkillResponse> {
     const { skill, triggers } = await this.skillService.createSkill(user, body);
     return buildSuccessResponse({
-      ...convertSkill(skill),
-      triggers: triggers.map((trigger) => convertSkillTrigger(trigger)),
+      ...toSkillDTO(skill),
+      triggers: triggers.map((trigger) => toSkillTriggerDTO(trigger)),
     });
   }
 
@@ -111,7 +78,7 @@ export class SkillController {
     @Body() body: UpsertSkillRequest,
   ): Promise<UpsertSkillResponse> {
     const skill = await this.skillService.updateSkill(user, body);
-    return buildSuccessResponse(convertSkill(skill));
+    return buildSuccessResponse(toSkillDTO(skill));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -172,7 +139,7 @@ export class SkillController {
       page,
       pageSize,
     });
-    return buildSuccessResponse(triggers.map((trigger) => convertSkillTrigger(trigger)));
+    return buildSuccessResponse(triggers.map((trigger) => toSkillTriggerDTO(trigger)));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -182,7 +149,7 @@ export class SkillController {
     @Body() body: UpsertSkillRequest,
   ): Promise<UpsertSkillTriggerResponse> {
     const trigger = await this.skillService.createSkillTrigger(user, body);
-    return buildSuccessResponse(convertSkillTrigger(trigger));
+    return buildSuccessResponse(toSkillTriggerDTO(trigger));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -192,7 +159,7 @@ export class SkillController {
     @Body() body: UpsertSkillRequest,
   ): Promise<UpsertSkillTriggerResponse> {
     const trigger = await this.skillService.updateSkillTrigger(user, body);
-    return buildSuccessResponse(convertSkillTrigger(trigger));
+    return buildSuccessResponse(toSkillTriggerDTO(trigger));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -218,6 +185,6 @@ export class SkillController {
       page,
       pageSize,
     });
-    return buildSuccessResponse(logs.map((log) => convertSkillLog(log)));
+    return buildSuccessResponse(logs.map((log) => toSkillLogDTO(log)));
   }
 }

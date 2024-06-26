@@ -22,7 +22,8 @@ async function run(name: string) {
       version: 'v1',
     },
   )) {
-    console.log(JSON.stringify(event));
+    console.log(JSON.stringify(event, null, 2));
+    console.log('------------------------------------');
     // for (const [key, val] of Object.entries(event)) {
     //   console.log('key: \n', key);
     //   console.log(`value: \n`, val);

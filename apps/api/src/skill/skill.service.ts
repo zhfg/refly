@@ -175,6 +175,8 @@ export class SkillService {
         skillName: skill.name,
         mode: 'async',
         input: JSON.stringify(param.input),
+        context: JSON.stringify(param.context),
+        overrideConfig: JSON.stringify(param.config),
         status: 'scheduling',
         event: param.event,
         triggerId: trigger.triggerId,
@@ -199,9 +201,12 @@ export class SkillService {
         where: { logId: param.skillLogId },
         data: { status: 'running' },
       });
-      const res = await runnable.invoke(param.input, {
-        configurable: { ...JSON.parse(skill.config), ...param.config },
-      });
+      const res = await runnable.invoke(
+        { ...param.input },
+        {
+          configurable: { ...JSON.parse(skill.config), ...param.config, ...param.context },
+        },
+      );
 
       this.logger.log(`invoke skill result: ${JSON.stringify(res)}`);
       await this.prisma.skillLog.update({
@@ -228,16 +233,21 @@ export class SkillService {
         skillName: skill.name,
         mode: 'stream',
         input: JSON.stringify(param.input),
+        context: JSON.stringify(param.context),
+        overrideConfig: JSON.stringify(param.config),
         status: 'running',
         event: param.event,
         triggerId: trigger.triggerId,
       },
     });
 
-    return runnable.streamEvents(param.input, {
-      configurable: { ...JSON.parse(skill.config), ...param.config },
-      version: 'v1',
-    });
+    return runnable.streamEvents(
+      { ...param.input },
+      {
+        configurable: { ...JSON.parse(skill.config), ...param.config, ...param.context },
+        version: 'v1',
+      },
+    );
   }
 
   async listSkillTriggers(

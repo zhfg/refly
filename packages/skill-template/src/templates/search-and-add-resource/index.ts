@@ -7,7 +7,7 @@ import { AIMessage, BaseMessage } from '@langchain/core/messages';
 import { SqliteSaver } from '@langchain/langgraph/checkpoint/sqlite';
 
 import { START, END, MessageGraph } from '@langchain/langgraph';
-import { BaseSkill } from '../../base';
+import { BaseSkill, baseStateGraphArgs } from '../../base';
 import { SkillEngine } from '../../engine';
 
 // schema
@@ -37,17 +37,11 @@ class SearchAndAddResourceSkill extends BaseSkill {
     query: z.string(),
   });
 
-  async _call(input: typeof this.graphState): Promise<string> {
-    const runnable = this.toRunnable();
-
-    return await runnable.invoke(input);
-  }
-
   constructor(engine: SkillEngine) {
     super(engine);
   }
 
-  graphState = {};
+  graphState = baseStateGraphArgs;
 
   toRunnable() {
     const tools = [new DuckDuckGoSearch({ maxResults: 3 })];

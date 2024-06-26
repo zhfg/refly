@@ -1,7 +1,6 @@
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
-import { Document } from '@langchain/core/documents';
 import { Tool } from '@langchain/core/tools';
 import { ChatOpenAI, OpenAI } from '@langchain/openai';
 
@@ -16,19 +15,18 @@ import { z } from 'zod';
 import { SystemMessage } from '@langchain/core/messages';
 import { HumanMessage } from '@langchain/core/messages';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
-import { BaseSkill } from 'src/base';
+import { BaseSkill, BaseSkillState, baseStateGraphArgs } from 'src/base';
 import { SkillEngine } from 'src/engine';
 import { ToolMessage } from '@langchain/core/messages';
-import { SkillInput, Source } from '@refly/openapi-schema';
+import { Source } from '@refly/openapi-schema';
 
 export enum LOCALE {
   ZH_CN = 'zh-CN',
   EN = 'en',
 }
 
-interface GraphState extends SkillInput {
+interface GraphState extends BaseSkillState {
   // 初始上下文
-  documents: Document[];
   messages: BaseMessage[];
 
   // 运行动态添加的上下文
@@ -46,21 +44,8 @@ class OnlineSearchSkill extends BaseSkill {
     query: z.string().describe('The search query'),
   });
 
-  async _call(input: typeof this.graphState): Promise<string> {
-    const runnable = this.toRunnable();
-
-    return await runnable.invoke(input);
-  }
-
-  private graphState: StateGraphArgs<GraphState>['channels'] = {
-    documents: {
-      reducer: (left?: Document[], right?: Document[]) => (right ? right : left || []),
-      default: () => [],
-    },
-    locale: {
-      reducer: (left?: string, right?: string) => (right ? right : left || '') as LOCALE,
-      default: () => 'en' as LOCALE,
-    },
+  graphState: StateGraphArgs<GraphState>['channels'] = {
+    ...baseStateGraphArgs,
     messages: {
       reducer: (x: BaseMessage[], y: BaseMessage[]) => x.concat(y),
       default: () => [],
