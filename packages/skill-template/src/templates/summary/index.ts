@@ -2,12 +2,10 @@ import { ChatOpenAI } from '@langchain/openai';
 import { Document } from '@langchain/core/documents';
 import { BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 
-import { START, END, StateGraphArgs, StateGraph, Graph } from '@langchain/langgraph';
-import { BaseSkill, BaseSkillState, baseStateGraphArgs } from '../../base';
-import { SkillEngine } from '../../engine';
+import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
+import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 // schema
 import { z } from 'zod';
-import { RunnableConfig } from '@langchain/core/runnables';
 
 interface GraphState extends BaseSkillState {
   documents: Document[];
@@ -18,6 +16,10 @@ interface GraphState extends BaseSkillState {
 
 class SummarySkill extends BaseSkill {
   name = 'content_summarizer';
+  displayName = {
+    en: 'Summary',
+    'zh-CN': '总结',
+  };
 
   description = 'Give a summary of the content of a web page';
 
@@ -35,14 +37,11 @@ class SummarySkill extends BaseSkill {
     },
   };
 
-  constructor(protected engine: SkillEngine) {
-    super(engine);
-  }
-
-  generate = async (state: GraphState, config: RunnableConfig) => {
+  async generate(state: GraphState, config?: SkillRunnableConfig) {
     this.engine.logger.log('---GENERATE---');
 
-    const { documents, locale } = state;
+    const { documents } = state;
+    const { locale = 'en' } = config?.configurable || {};
 
     const contextToCitationText = documents.reduce((total, cur) => {
       (total += `\n\n下面是网页 [${cur?.metadata?.title}](${cur?.metadata?.source}) 的内容\n\n`),
@@ -120,13 +119,13 @@ The content to be summarized is as follows:
     ]);
 
     return { messages: [responseMessage] };
-  };
+  }
 
   toRunnable() {
     const workflow = new StateGraph<GraphState>({
       channels: this.graphState,
     })
-      .addNode('generate', this.generate)
+      .addNode('generate', this.generate.bind(this))
       .addEdge(START, 'generate')
       .addEdge('generate', END);
 

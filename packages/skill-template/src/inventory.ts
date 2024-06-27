@@ -21,7 +21,9 @@ export const inventory: InventoryItem[] = [
   },
 ];
 
-export const getRunnable = (engine: SkillEngine, name: string): Runnable => {
+export type SkillName = (typeof inventory)[number]['name'];
+
+export const getRunnable = (engine: SkillEngine, name: SkillName): Runnable => {
   const item = inventory.find((i) => i.name === name);
   if (!item) {
     throw new Error(`skill not found: ${name}`);

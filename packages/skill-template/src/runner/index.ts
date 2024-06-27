@@ -1,27 +1,52 @@
 require('dotenv').config();
 import { SkillEngine } from 'src/engine';
-import { getRunnable } from '../inventory';
-import SummarySkill from 'src/templates/summary';
+import { SkillName, getRunnable } from '../inventory';
+import { EventEmitter } from 'node:events';
+import Scheduler from '../scheduler';
+import { SkillEventMap } from '../base';
 
-async function run(name: string) {
-  const thread = { configurable: { thread_id: '4' } };
+process.env.LANGCHAIN_CALLBACKS_BACKGROUND = 'true';
+process.env.LANGCHAIN_TRACING_V2 = 'true';
+process.env.LANGCHAIN_PROJECT = 'Refly Skill Runner';
+
+async function run(name: SkillName) {
+  const emitter = new EventEmitter<SkillEventMap>();
+  emitter.on('on_skill_start', (data) => {
+    console.log('------------------------------------');
+    console.log(`on_skill_start: ${JSON.stringify(data, null, 2)}`);
+    console.log('------------------------------------');
+  });
+  emitter.on('on_skill_stream', (data) => {
+    console.log('------------------------------------');
+    console.log(`on_skill_stream: ${JSON.stringify(data, null, 2)}`);
+    console.log('------------------------------------');
+  });
+  emitter.on('on_skill_end', (data) => {
+    console.log('------------------------------------');
+    console.log(`on_skill_end: ${JSON.stringify(data, null, 2)}`);
+    console.log('------------------------------------');
+  });
+
   const engine = new SkillEngine(console, {
     createResource: (user, req) => null,
     updateResource: (user, req) => null,
     createCollection: (user, req) => null,
     updateCollection: (user, req) => null,
   });
-  const runnable = getRunnable(engine, name);
-  for await (const event of await runnable.streamEvents(
+  // const runnable = getRunnable(engine, name);
+  const skill = new Scheduler(engine);
+  const runnable = skill.toRunnable();
+  for await (const event of runnable.streamEvents(
     {
-      query: 'Refly 是什么？',
+      query: '帮我搜索一下关于 Refly 的信息',
     },
     {
-      ...thread,
-      // streamMode: 'values',
+      configurable: { locale: 'zh-CN', emitter },
       version: 'v1',
     },
   )) {
+    if (event.event === 'on_chat_model_end') {
+    }
     console.log(JSON.stringify(event, null, 2));
     console.log('------------------------------------');
     // for (const [key, val] of Object.entries(event)) {
@@ -31,4 +56,4 @@ async function run(name: string) {
   }
 }
 
-run('summary');
+run('SummarySkill');

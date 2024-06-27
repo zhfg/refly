@@ -6,12 +6,13 @@ import {
   UpsertCollectionRequest,
   UpsertResourceRequest,
 } from '@refly/openapi-schema';
+import { EventEmitter } from 'node:events';
 
 interface User {
   uid: string;
 }
 
-export interface HandlersMap {
+export interface ReflyService {
   createResource: (user: User, req: UpsertResourceRequest) => Promise<CreateResourceResponse>;
   updateResource: (user: User, req: UpsertResourceRequest) => Promise<UpdateResourceResponse>;
   createCollection: (user: User, req: UpsertCollectionRequest) => Promise<CreateCollectionResponse>;
@@ -41,11 +42,6 @@ export interface Logger {
   debug(message: any, ...optionalParams: [...any, string?]): void;
 }
 
-export interface SKillEngineConstructorParam {
-  handlersMap: HandlersMap;
-  logger: Logger;
-}
-
 export class SkillEngine {
-  constructor(public logger: Logger, public handlers: HandlersMap) {}
+  constructor(public logger: Logger, public service: ReflyService) {}
 }

@@ -30,11 +30,9 @@ import {
 } from '@refly/openapi-schema';
 import { buildSuccessResponse } from 'src/utils';
 import { Response } from 'express';
-import { AIMessageChunk } from '@langchain/core/messages';
-import { ChatGenerationChunk } from '@langchain/core/outputs';
 import { toSkillDTO, toSkillLogDTO, toSkillTriggerDTO } from './skill.dto';
 
-const LLM_SPLIT = '__LLM_RESPONSE__';
+// const LLM_SPLIT = '__LLM_RESPONSE__';
 // const RELATED_SPLIT = '__RELATED_QUESTIONS__';
 
 @Controller('skill')
@@ -108,22 +106,12 @@ export class SkillController {
     @Body() body: InvokeSkillRequest,
     @Res() res: Response,
   ) {
-    const stream = await this.skillService.streamInvokeSkill(user, body);
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.status(200);
 
-    res.write(JSON.stringify([]));
-    res.write(LLM_SPLIT);
-
-    for await (const event of stream) {
-      if (event.event === 'on_llm_stream') {
-        const chunk: ChatGenerationChunk = event.data?.chunk;
-        const msg = chunk.message as AIMessageChunk;
-        if (msg.tool_call_chunks && msg.tool_call_chunks.length > 0) {
-          console.log(msg.tool_call_chunks);
-        } else {
-          res.write(msg.content || '');
-        }
-      }
-    }
+    await this.skillService.streamInvokeSkill(user, body, res);
   }
 
   @UseGuards(JwtAuthGuard)

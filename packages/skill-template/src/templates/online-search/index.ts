@@ -1,7 +1,5 @@
-import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
-import { Tool } from '@langchain/core/tools';
 import { ChatOpenAI, OpenAI } from '@langchain/openai';
 
 import { AIMessage, BaseMessage } from '@langchain/core/messages';
@@ -15,10 +13,10 @@ import { z } from 'zod';
 import { SystemMessage } from '@langchain/core/messages';
 import { HumanMessage } from '@langchain/core/messages';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
-import { BaseSkill, BaseSkillState, baseStateGraphArgs } from 'src/base';
+import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from 'src/base';
 import { SkillEngine } from 'src/engine';
 import { ToolMessage } from '@langchain/core/messages';
-import { Source } from '@refly/openapi-schema';
+import { SkillInput, Source } from '@refly/openapi-schema';
 
 export enum LOCALE {
   ZH_CN = 'zh-CN',
@@ -36,6 +34,11 @@ interface GraphState extends BaseSkillState {
 
 class OnlineSearchSkill extends BaseSkill {
   name = 'online_search';
+
+  displayName = {
+    en: 'Online Search',
+    'zh-CN': '在线搜索',
+  };
 
   description =
     'A search engine. Useful for when you need to answer questions about current events. Input should be a search query.';
@@ -60,12 +63,10 @@ class OnlineSearchSkill extends BaseSkill {
     },
   };
 
-  constructor(protected engine: SkillEngine) {
-    super(engine);
-  }
+  async callAgentModel(state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> {
+    const { query, contextualUserQuery, messages = [] } = state;
+    const { locale = 'en' } = config?.configurable || {};
 
-  async callAgentModel(state: GraphState, config?: RunnableConfig): Promise<Partial<GraphState>> {
-    const { query, contextualUserQuery, locale, messages = [] } = state;
     const lastMessage = messages[messages.length - 1];
     const isToolMessage = (lastMessage as ToolMessage)?._getType() === 'tool';
 
@@ -91,6 +92,8 @@ class OnlineSearchSkill extends BaseSkill {
 
       return { sources };
     }
+
+    this.emitEvent('on_skill_stream', `User query: ${contextualUserQuery || query}`);
 
     const getSystemPrompt = () => `# Role
   
@@ -124,8 +127,9 @@ class OnlineSearchSkill extends BaseSkill {
     return { messages: [responseMessage] };
   }
 
-  async getContextualQuestion(state: GraphState) {
-    const { locale, query, messages } = state;
+  async getContextualQuestion(state: GraphState, config?: SkillRunnableConfig) {
+    const { query, messages } = state;
+    const { locale = 'en' } = config?.configurable || {};
 
     const getSystemPrompt = (locale: string) => `
 ## Target
@@ -192,7 +196,8 @@ just reformulate it if needed and otherwise return it as is.
     // For versions of @langchain/core < 0.2.3, you must call `.stream()`
     // and aggregate the message from chunks instead of calling `.invoke()`.
 
-    const { query, contextualUserQuery, locale, sources = [] } = state;
+    const { query, contextualUserQuery, sources = [] } = state;
+    const { locale = 'en' } = config?.configurable || {};
 
     const contextToCitationText = sources
       .map((item, index) => `[[citation:${index + 1}]] ${item?.pageContent}`)
@@ -224,15 +229,16 @@ just reformulate it if needed and otherwise return it as is.
     return { messages: [responseMessage] };
   }
 
-  async callToolNode(state: GraphState, config?: RunnableConfig): Promise<Partial<GraphState>> {
-    const { messages = [], locale } = state;
+  async callToolNode(state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> {
+    const { messages = [] } = state;
+    const { locale = 'en' } = config?.configurable || {};
 
     // 这里是直接用于执行的 tool，tool as ToolNode 执行
     const tools = [new SerperSearch({ searchOptions: { maxResults: 8, locale }, engine: this.engine })];
 
     const message = messages[messages.length - 1];
 
-    if (message._getType() !== 'ai') {
+    if (message?._getType() !== 'ai') {
       throw new Error('ToolNode only accepts AIMessages as input.');
     }
 
@@ -242,6 +248,8 @@ just reformulate it if needed and otherwise return it as is.
         if (tool === undefined) {
           throw new Error(`Tool ${call.name} not found.`);
         }
+        this.emitEvent('on_skill_stream', `Start calling ${tool.name} with args: ${JSON.stringify(call.args)})}`);
+
         const output = await tool.invoke(call.args, config);
         return new ToolMessage({
           name: tool.name,
@@ -251,17 +259,19 @@ just reformulate it if needed and otherwise return it as is.
       }) ?? [],
     );
 
+    this.emitEvent('on_skill_stream', `Finished calling ${outputs.length} tools`);
+
     return { messages: outputs };
   }
 
-  toRunnable(): Runnable<any, any, RunnableConfig> {
+  toRunnable() {
     const workflow = new StateGraph<GraphState>({
       channels: this.graphState,
     })
-      .addNode('agent', this.callAgentModel)
-      .addNode('action', this.callToolNode)
-      .addNode('generate', this.generateAnswer)
-      .addNode('getContextualUserQuery', this.getContextualQuestion);
+      .addNode('agent', this.callAgentModel.bind(this))
+      .addNode('action', this.callToolNode.bind(this))
+      .addNode('generate', this.generateAnswer.bind(this))
+      .addNode('getContextualUserQuery', this.getContextualQuestion.bind(this));
 
     workflow.addConditionalEdges(START, this.shouldMakeContextualUserQuery);
     workflow.addEdge('getContextualUserQuery', 'agent');

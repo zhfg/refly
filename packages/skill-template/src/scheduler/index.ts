@@ -1,5 +1,3 @@
-import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
-import { StringOutputParser } from '@langchain/core/output_parsers';
 import { ChatOpenAI, OpenAI } from '@langchain/openai';
 
 import { AIMessage, BaseMessage } from '@langchain/core/messages';
@@ -13,11 +11,11 @@ import { z } from 'zod';
 import { SystemMessage } from '@langchain/core/messages';
 import { HumanMessage } from '@langchain/core/messages';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
-import { BaseSkill, BaseSkillState, baseStateGraphArgs } from '../base';
-import { SkillEngine } from '../engine';
+import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { ToolMessage } from '@langchain/core/messages';
 import { Source } from '@refly/openapi-schema';
-import { StructuredTool } from '@langchain/core/tools';
+import OnlineSearchSkill from '../templates/online-search';
+import SummarySkill from '../templates/summary';
 
 export enum LOCALE {
   ZH_CN = 'zh-CN',
@@ -31,11 +29,16 @@ interface GraphState extends BaseSkillState {
   // 运行动态添加的上下文
   contextualUserQuery: string; // 基于上下文改写 userQuery
   sources: Source[]; // 搜索互联网得到的在线结果
-  skillsMeta: StructuredTool[];
 }
 
 class Scheduler extends BaseSkill {
   name = 'scheduler';
+
+  displayName = {
+    en: 'Scheduler',
+    'zh-CN': '调度器',
+  };
+
   description = "Inference user's intent and run related skill";
 
   schema = z.object({
@@ -58,19 +61,13 @@ class Scheduler extends BaseSkill {
       reducer: (left?: Source[], right?: Source[]) => (right ? right : left || []) as Source[],
       default: () => [],
     },
-    // 用于 Scheduler 调度的 Skill 信息
-    skillsMeta: {
-      reducer: (left?: StructuredTool[], right?: StructuredTool[]) => (right ? right : left || []),
-      default: () => [],
-    },
   };
 
-  constructor(protected engine: SkillEngine) {
-    super(engine);
-  }
+  // Tools to be scheduled.
+  tools = [new OnlineSearchSkill(this.engine), new SummarySkill(this.engine)];
 
   /** TODO: 这里需要将 skill context 往下传递 */
-  async callSkill(state: GraphState, config?: RunnableConfig): Promise<Partial<GraphState>> {
+  callSkill = async (state: GraphState, config?: RunnableConfig): Promise<Partial<GraphState>> => {
     const { messages } = state;
     const message = messages[messages.length - 1];
 
@@ -80,12 +77,10 @@ class Scheduler extends BaseSkill {
 
     const outputs = await Promise.all(
       (message as AIMessage).tool_calls?.map(async (call) => {
-        const skillTemplate = inventory.find((skillTemplate) => skillTemplate.name === call.name);
-        if (skillTemplate === undefined) {
+        const tool = this.tools.find((tool) => tool.name === call.name);
+        if (!tool) {
           throw new Error(`Tool ${call.name} not found.`);
         }
-
-        const tool = getRunnable(this.engine, call?.name);
 
         const output = await tool.invoke(call.args, config);
         return new ToolMessage({
@@ -97,19 +92,17 @@ class Scheduler extends BaseSkill {
     );
 
     return { messages: outputs };
-  }
+  };
 
   /** TODO: 这里需要将 chatHistory 传入 */
-  async callScheduler(state: GraphState, config?: RunnableConfig): Promise<Partial<GraphState>> {
-    const { query, contextualUserQuery, locale, messages = [], skillsMeta = [] } = state;
-
-    // 这里是注册 tools 的描述，用于 Agent 调度
-    const tools = skillsMeta;
+  callScheduler = async (state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> => {
+    const { query, contextualUserQuery, messages = [] } = state;
+    const { locale = 'en' } = config?.configurable || {};
 
     // For versions of @langchain/core < 0.2.3, you must call `.stream()`
     // and aggregate the message from chunks instead of calling `.invoke()`.
     const boundModel = new ChatOpenAI({ model: 'gpt-3.5-turbo', openAIApiKey: process.env.OPENAI_API_KEY }).bindTools(
-      tools,
+      this.tools,
     );
 
     const getSystemPrompt = (locale: string) => `## Role
@@ -145,52 +138,11 @@ You are an AI intelligent response engine built by Refly AI that is specializing
     ]);
 
     return { messages: [responseMessage] };
-  }
-
-  async getContextualQuestion(state: GraphState) {
-    const { locale, query, messages } = state;
-
-    const getSystemPrompt = (locale: string) => `
-## Target
-Given a chat history and the latest user question
-which might reference context in the chat history, formulate a standalone question
-which can be understood without the chat history. Do NOT answer the question,
-just reformulate it if needed and otherwise return it as is.
-
-## Constraints
-**Please output answer in ${locale} language.**
-`;
-
-    // 构建总结的 Prompt，将 question + chatHistory 总结成
-    const contextualizeQPrompt = ChatPromptTemplate.fromMessages([
-      ['system', getSystemPrompt(locale)],
-      new MessagesPlaceholder('chatHistory'),
-      ['human', `The user's question is {question}, please output answer in ${locale} language:`],
-    ]);
-    const llm = new OpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0, openAIApiKey: process.env.OPENAI_API_KEY });
-    const contextualizeQChain = contextualizeQPrompt.pipe(llm).pipe(new StringOutputParser());
-
-    const contextualUserQuery = await contextualizeQChain.invoke({
-      question: query,
-      chatHistory: messages,
-    });
-
-    return { contextualUserQuery };
-  }
-
-  shouldMakeContextualUserQuery(state: GraphState): 'contextualUserQuery' | 'agent' {
-    const { messages } = state;
-
-    if (messages?.length === 0 || messages?.length === 1) {
-      return 'agent';
-    } else {
-      return 'contextualUserQuery';
-    }
-  }
+  };
 
   // Define the function that determines whether to continue or not
   shouldContinue(state: GraphState): 'skill' | typeof END {
-    const { messages = [], sources = [] } = state;
+    const { messages = [] } = state;
     const lastMessage = messages[messages.length - 1];
 
     const lastMessageNoFunctionCall =

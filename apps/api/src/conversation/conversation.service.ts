@@ -110,23 +110,16 @@ export class ConversationService {
     }
 
     if (initMessages.length > 0) {
-      await Promise.all([
-        this.addChatMessages(initMessages),
-        this.updateConversation(
-          conversation.id,
-          initMessages,
-          {
-            messageCount: { increment: 2 },
-            lastMessage: initMessages[initMessages.length - 1].content,
-          },
-          param?.locale as LOCALE,
-        ),
-      ]);
+      await this.addChatMessages(initMessages, conversation);
     }
 
     return conversation;
   }
 
+  /**
+   * TODO: no longer used, use delayed jobs to asynchronously update
+   * conversation titles.
+   */
   async updateConversation(
     conversationId: number,
     messages: { type: string; content: string }[],
@@ -142,10 +135,37 @@ export class ConversationService {
     });
   }
 
-  async addChatMessages(msgList: CreateChatMessageInput[]) {
-    return this.prisma.chatMessage.createMany({
-      data: msgList,
-    });
+  /**
+   * Add chat messages to a conversation.
+   * If conversation id (primary key) is not provided, a new one will be created.
+   * lastMessage and messageCount will be updated automatically.
+   * @param msgList chat messages
+   * @param conv existing conversation or new conversation
+   */
+  async addChatMessages(
+    msgList: CreateChatMessageInput[],
+    conv: Prisma.ConversationCreateInput & { id?: number },
+  ) {
+    if (msgList.length === 0) {
+      return;
+    }
+    if (!conv.id) {
+      // Create new conversation if pk is not provided
+      conv = await this.prisma.conversation.create({ data: conv });
+      msgList.forEach((msg) => {
+        msg.conversationId = conv.id;
+      });
+    }
+    return Promise.all([
+      this.prisma.chatMessage.createMany({ data: msgList }),
+      this.prisma.conversation.update({
+        where: { id: conv.id },
+        data: {
+          lastMessage: msgList[msgList.length - 1].content,
+          messageCount: { increment: msgList.length },
+        },
+      }),
+    ]);
   }
 
   async findConversationById(id: number) {
@@ -267,18 +287,7 @@ export class ConversationService {
       ];
 
       // post chat logic
-      await Promise.all([
-        this.addChatMessages(newMessages),
-        this.updateConversation(
-          conversation.id,
-          [...chatHistory, ...newMessages],
-          {
-            lastMessage: taskRes.answer,
-            messageCount: chatHistory.length + 2,
-          },
-          task?.locale as LOCALE,
-        ),
-      ]);
+      await this.addChatMessages(newMessages, conversation);
     }
   }
 

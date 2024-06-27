@@ -1,17 +1,19 @@
 export interface BaseStreamEvent {
   event: string;
-  name: string;
-  content: string;
+  content?: string;
 }
 
 export interface SkillMetadata {
-  skillId: string;
+  skillId?: string;
   skillName: string;
+  skillDisplayName: string;
 }
 
 export interface SkillEvent extends BaseStreamEvent {
   event: 'on_skill_start' | 'on_skill_stream' | 'on_skill_end';
-  metadata: SkillMetadata;
+  skillId?: string;
+  skillName: string;
+  skillDisplayName: string;
 }
 
 export interface OutputMessage extends BaseStreamEvent {

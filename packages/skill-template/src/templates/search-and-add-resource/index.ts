@@ -30,8 +30,12 @@ function shouldContinue(messages: BaseMessage[]): 'action' | typeof END {
 class SearchAndAddResourceSkill extends BaseSkill {
   name = 'search_and_add_resource';
 
-  description =
-    'Search Knowledge Base, and add resource. Useful for when you need to answer questions about current events. Input should be a search query.';
+  displayName = {
+    en: 'Search and Add Resource',
+    'zh-CN': '搜索并添加资源',
+  };
+
+  description = 'Search for a given topic, and add to Refly knowledge base.';
 
   schema = z.object({
     query: z.string(),
