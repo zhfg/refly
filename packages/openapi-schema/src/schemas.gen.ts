@@ -1499,7 +1499,7 @@ export const $InvokeSkillRequest = {
     },
     skillId: {
       type: 'string',
-      description: 'Skill ID to invoke (if not provided, skill auto-routing will be used)',
+      description: 'Skill ID to invoke (if not provided, skill scheduler will be used)',
     },
     event: {
       description: 'Skill trigger event',
@@ -1551,6 +1551,7 @@ export const $ListSkillTriggerResponse = {
 
 export const $UpsertSkillTriggerRequest = {
   type: 'object',
+  required: ['event'],
   properties: {
     skillId: {
       type: 'string',

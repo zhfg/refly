@@ -2,19 +2,25 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter } from 'node:events';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
-import { Skill, SkillTrigger, User } from '@prisma/client';
+import { Conversation, Skill, SkillRunMode, SkillTrigger, User } from '@prisma/client';
 import { Response } from 'express';
-import { ChatGenerationChunk } from '@langchain/core/dist/outputs';
 import { AIMessageChunk } from '@langchain/core/dist/messages';
 import {
   DeleteSkillRequest,
   DeleteSkillTriggerRequest,
   InvokeSkillRequest,
+  ListSkillsData,
   SkillTemplate,
   UpsertSkillRequest,
   UpsertSkillTriggerRequest,
 } from '@refly/openapi-schema';
-import { SkillEngine, inventory, SkillEventMap, SkillRunnableConfig } from '@refly/skill-template';
+import {
+  Scheduler,
+  SkillEngine,
+  inventory,
+  SkillEventMap,
+  SkillRunnableConfig,
+} from '@refly/skill-template';
 import { genSkillID, genSkillLogID, genSkillTriggerID } from '@refly/utils';
 import { PrismaService } from 'src/common/prisma.service';
 import { QUEUE_SKILL, buildSuccessResponse, writeSSEResponse } from 'src/utils';
@@ -22,7 +28,11 @@ import { InvokeSkillJobData } from './skill.dto';
 import { KnowledgeService } from '../knowledge/knowledge.service';
 import { collectionPO2DTO, resourcePO2DTO } from '../knowledge/knowledge.dto';
 import { ConversationService } from '../conversation/conversation.service';
-import Scheduler from '@refly/skill-template/src/scheduler';
+
+interface SkillPreCheckResult {
+  skill?: Skill;
+  trigger?: SkillTrigger;
+}
 
 @Injectable()
 export class SkillService {
@@ -81,7 +91,7 @@ export class SkillService {
           config: JSON.stringify(param.config),
         },
       }),
-      ...param.triggers?.map((trigger) =>
+      ...(param.triggers ?? []).map((trigger) =>
         this.prisma.skillTrigger.create({
           data: {
             skillId,
@@ -138,49 +148,62 @@ export class SkillService {
     ]);
   }
 
-  async skillInvokePreCheck(
-    user: User,
-    param: InvokeSkillRequest,
-  ): Promise<{ skill: Skill; trigger?: SkillTrigger }> {
+  async skillInvokePreCheck(user: User, param: InvokeSkillRequest): Promise<SkillPreCheckResult> {
+    const res: SkillPreCheckResult = {};
     const { skillId } = param;
-    if (!skillId) {
-      throw new BadRequestException('skill id is required');
-    }
-    const skill = await this.prisma.skill.findUnique({
-      where: { skillId, uid: user.uid, deletedAt: null },
-    });
-    if (!skill) {
-      throw new BadRequestException('skill not found');
-    }
-    const trigger = await this.prisma.skillTrigger.findFirst({
-      where: {
-        skillId,
-        event: param.event,
-        uid: user.uid,
-        deletedAt: null,
-      },
-    });
 
-    return { skill, trigger };
+    if (skillId) {
+      const skill = await this.prisma.skill.findUnique({
+        where: { skillId, uid: user.uid, deletedAt: null },
+      });
+      if (!skill) {
+        throw new BadRequestException(`skill not found: ${skillId}`);
+      }
+      res.skill = skill;
+
+      const trigger = await this.prisma.skillTrigger.findFirst({
+        where: {
+          skillId,
+          event: param.event,
+          uid: user.uid,
+          deletedAt: null,
+        },
+      });
+      if (trigger) {
+        res.trigger = trigger;
+      }
+    }
+
+    return res;
   }
 
-  async invokeSkill(user: User, param: InvokeSkillRequest) {
-    const { skill, trigger } = await this.skillInvokePreCheck(user, param);
-    const log = await this.prisma.skillLog.create({
+  async createLog(
+    user: User,
+    param: InvokeSkillRequest,
+    checkResult: SkillPreCheckResult,
+    mode: SkillRunMode,
+  ) {
+    const { skill, trigger } = checkResult;
+    return this.prisma.skillLog.create({
       data: {
         logId: genSkillLogID(),
         uid: user.uid,
-        skillId: skill.skillId,
-        skillName: skill.name,
-        mode: 'async',
+        skillId: skill?.skillId ?? '',
+        skillName: skill?.name ?? 'Scheduler',
+        mode,
         input: JSON.stringify(param.input),
-        context: JSON.stringify(param.context),
-        overrideConfig: JSON.stringify(param.config),
-        status: 'scheduling',
-        event: param.event,
-        triggerId: trigger.triggerId,
+        context: JSON.stringify(param.context ?? {}),
+        overrideConfig: JSON.stringify(param.config ?? {}),
+        status: mode === 'async' ? 'scheduling' : 'running',
+        event: param.event ?? '',
+        triggerId: trigger?.triggerId ?? '',
       },
     });
+  }
+
+  async invokeSkill(user: User, param: InvokeSkillRequest) {
+    const checkResult = await this.skillInvokePreCheck(user, param);
+    const log = await this.createLog(user, param, checkResult, 'async');
 
     await this.queue.add({ ...param, uid: user.uid, skillLogId: log.logId });
 
@@ -204,7 +227,12 @@ export class SkillService {
       const res = await scheduler.toRunnable().invoke(
         { ...param.input },
         {
-          configurable: { ...JSON.parse(skill.config), ...param.config, ...param.context },
+          configurable: {
+            ...JSON.parse(skill?.config ?? '{}'),
+            ...(param.config ?? {}),
+            ...param.context,
+            uid: user.uid,
+          } as SkillRunnableConfig,
         },
       );
 
@@ -225,26 +253,12 @@ export class SkillService {
   async streamInvokeSkill(user: User, param: InvokeSkillRequest, res: Response) {
     const { skill, trigger } = await this.skillInvokePreCheck(user, param);
 
-    const log = await this.prisma.skillLog.create({
-      data: {
-        logId: genSkillLogID(),
-        uid: user.uid,
-        skillId: skill.skillId,
-        skillName: skill.name,
-        mode: 'stream',
-        input: JSON.stringify(param.input),
-        context: JSON.stringify(param.context),
-        overrideConfig: JSON.stringify(param.config),
-        status: 'running',
-        event: param.event,
-        triggerId: trigger.triggerId,
-      },
-    });
+    const log = await this.createLog(user, param, { skill, trigger }, 'stream');
 
     const emitter = new EventEmitter<SkillEventMap>();
 
     emitter.on('on_skill_start', (data) => {
-      this.logger.log(`on_skill_start: ${JSON.stringify(data, null, 2)}`);
+      this.logger.log(`on_skill_start: ${JSON.stringify(data)}`);
       writeSSEResponse(res, {
         event: 'on_skill_start',
         skillName: data.name,
@@ -261,21 +275,23 @@ export class SkillService {
       });
       // TODO: save skill messages (need to aggregated for each skill)
     });
-    emitter.on('on_skill_end', (msg) => {
-      this.logger.log(`on_skill_end: ${JSON.stringify(msg)}`);
+    emitter.on('on_skill_end', (data) => {
+      this.logger.log(`on_skill_end: ${JSON.stringify(data)}`);
       writeSSEResponse(res, {
         event: 'on_skill_end',
-        skillName: msg.name,
-        skillDisplayName: msg.showName,
+        skillName: data.name,
+        skillDisplayName: data.showName,
       });
     });
 
     const scheduler = new Scheduler(this.skillEngine);
-    const stream = scheduler.toRunnable().streamEvents(
+    const runnable = scheduler.toRunnable();
+
+    for await (const event of runnable.streamEvents(
       { ...param.input },
       {
         configurable: {
-          ...JSON.parse(skill.config),
+          ...JSON.parse(skill?.config || '{}'),
           ...param.config,
           ...param.context,
           uid: user.uid,
@@ -283,35 +299,37 @@ export class SkillService {
         } as SkillRunnableConfig,
         version: 'v2',
       },
-    );
-
-    for await (const event of stream) {
+    )) {
       switch (event.event) {
         case 'on_chat_model_start':
           writeSSEResponse(res, { event: 'on_output_start' });
           break;
         case 'on_chat_model_stream':
-          const chunk: ChatGenerationChunk = event.data?.chunk;
-          const msg = chunk.message as AIMessageChunk;
-          if (msg.tool_call_chunks?.length === 0) {
+          const chunk: AIMessageChunk = event.data?.chunk;
+          if (chunk?.tool_call_chunks?.length === 0) {
             writeSSEResponse(res, {
               event: 'on_output_stream',
-              content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content),
+              content:
+                typeof chunk.content === 'string' ? chunk.content : JSON.stringify(chunk.content),
             });
           }
           break;
         case 'on_chat_model_end':
           writeSSEResponse(res, { event: 'on_output_end' });
-          const conversation = await this.conversation.findConversation(param.context?.convId);
+          const { convId } = param.context ?? {};
+          let conversation: Conversation | null = null;
+          if (convId) {
+            conversation = await this.conversation.findConversation(convId);
+          }
           await this.conversation.addChatMessages(
             [
               {
                 type: 'ai',
-                content: event.data.output,
+                content: JSON.stringify(event.data.output),
                 sources: '[]',
                 userId: user.id,
-                conversationId: conversation?.id,
-                locale: param.context?.locale || user.outputLocale,
+                conversationId: conversation?.id ?? 0,
+                locale: param.context?.locale ?? user.outputLocale ?? '',
               },
             ],
             {
@@ -324,17 +342,16 @@ export class SkillService {
       }
     }
 
+    res.end(``);
+
     await this.prisma.skillLog.update({
       where: { logId: log.logId },
       data: { status: 'finish' },
     });
   }
 
-  async listSkillTriggers(
-    user: Pick<User, 'uid'>,
-    param: { skillId: string; page: number; pageSize: number },
-  ) {
-    const { skillId, page, pageSize } = param;
+  async listSkillTriggers(user: Pick<User, 'uid'>, param: ListSkillsData['query']) {
+    const { skillId, page = 1, pageSize = 10 } = param!;
 
     return this.prisma.skillTrigger.findMany({
       where: { uid: user.uid, skillId, deletedAt: null },
@@ -345,6 +362,9 @@ export class SkillService {
   }
 
   async createSkillTrigger(user: User, param: UpsertSkillTriggerRequest) {
+    if (!param.skillId || !param.event) {
+      throw new BadRequestException('skill id and trigger id are required');
+    }
     return this.prisma.skillTrigger.create({
       data: {
         uid: user.uid,

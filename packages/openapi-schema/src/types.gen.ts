@@ -1081,7 +1081,7 @@ export type InvokeSkillRequest = {
    */
   context?: SkillContext;
   /**
-   * Skill ID to invoke (if not provided, skill auto-routing will be used)
+   * Skill ID to invoke (if not provided, skill scheduler will be used)
    */
   skillId?: string;
   /**
@@ -1122,7 +1122,7 @@ export type UpsertSkillTriggerRequest = {
   /**
    * Trigger event
    */
-  event?: SkillTriggerEvent;
+  event: SkillTriggerEvent;
   /**
    * Trigger crontab (only valid when event is `cron`)
    */
@@ -1462,6 +1462,10 @@ export type ListSkillsData = {
      * Page size
      */
     pageSize?: number;
+    /**
+     * Skill ID
+     */
+    skillId?: string;
   };
 };
 
@@ -1898,7 +1902,7 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/skill/instance/invoke': {
+  '/skill/invoke': {
     post: {
       req: InvokeSkillData;
       res: {
@@ -1909,7 +1913,7 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/skill/instance/streamInvoke': {
+  '/skill/streamInvoke': {
     post: {
       req: StreamInvokeSkillData;
       res: {

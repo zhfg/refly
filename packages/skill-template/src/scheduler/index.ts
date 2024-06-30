@@ -14,13 +14,8 @@ import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { ToolMessage } from '@langchain/core/messages';
 import { Source } from '@refly/openapi-schema';
-import OnlineSearchSkill from '../templates/online-search';
-import SummarySkill from '../templates/summary';
-
-export enum LOCALE {
-  ZH_CN = 'zh-CN',
-  EN = 'en',
-}
+import { OnlineSearchSkill } from '../templates/online-search';
+import { SummarySkill } from '../templates/summary';
 
 interface GraphState extends BaseSkillState {
   // 初始上下文
@@ -31,7 +26,7 @@ interface GraphState extends BaseSkillState {
   sources: Source[]; // 搜索互联网得到的在线结果
 }
 
-class Scheduler extends BaseSkill {
+export class Scheduler extends BaseSkill {
   name = 'scheduler';
 
   displayName = {
@@ -170,5 +165,3 @@ You are an AI intelligent response engine built by Refly AI that is specializing
     return workflow.compile();
   }
 }
-
-export default Scheduler;

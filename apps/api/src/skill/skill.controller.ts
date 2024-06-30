@@ -26,14 +26,12 @@ import {
   ListSkillTriggerResponse,
   UpsertSkillRequest,
   UpsertSkillResponse,
+  UpsertSkillTriggerRequest,
   UpsertSkillTriggerResponse,
 } from '@refly/openapi-schema';
 import { buildSuccessResponse } from 'src/utils';
 import { Response } from 'express';
 import { toSkillDTO, toSkillLogDTO, toSkillTriggerDTO } from './skill.dto';
-
-// const LLM_SPLIT = '__LLM_RESPONSE__';
-// const RELATED_SPLIT = '__RELATED_QUESTIONS__';
 
 @Controller('skill')
 export class SkillController {
@@ -90,7 +88,7 @@ export class SkillController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('/instance/invoke')
+  @Post('/invoke')
   async invokeSkill(
     @User() user: UserModel,
     @Body() body: InvokeSkillRequest,
@@ -100,7 +98,7 @@ export class SkillController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('/instance/streamInvoke')
+  @Post('/streamInvoke')
   async streamInvokeSkill(
     @User() user: UserModel,
     @Body() body: InvokeSkillRequest,
@@ -134,7 +132,7 @@ export class SkillController {
   @Post('/trigger/new')
   async createSkillTrigger(
     @User() user: UserModel,
-    @Body() body: UpsertSkillRequest,
+    @Body() body: UpsertSkillTriggerRequest,
   ): Promise<UpsertSkillTriggerResponse> {
     const trigger = await this.skillService.createSkillTrigger(user, body);
     return buildSuccessResponse(toSkillTriggerDTO(trigger));
@@ -144,7 +142,7 @@ export class SkillController {
   @Post('/trigger/update')
   async updateSkillTrigger(
     @User() user: UserModel,
-    @Body() body: UpsertSkillRequest,
+    @Body() body: UpsertSkillTriggerRequest,
   ): Promise<UpsertSkillTriggerResponse> {
     const trigger = await this.skillService.updateSkillTrigger(user, body);
     return buildSuccessResponse(toSkillTriggerDTO(trigger));

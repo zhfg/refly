@@ -27,7 +27,7 @@ function shouldContinue(messages: BaseMessage[]): 'action' | typeof END {
 
 // Define a new graph
 
-class SearchAndAddResourceSkill extends BaseSkill {
+export class SearchAndAddResourceSkill extends BaseSkill {
   name = 'search_and_add_resource';
 
   displayName = {
@@ -67,5 +67,3 @@ class SearchAndAddResourceSkill extends BaseSkill {
     return workflow.compile({ checkpointer: memory });
   }
 }
-
-export default SearchAndAddResourceSkill;

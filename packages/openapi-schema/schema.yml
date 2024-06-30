@@ -315,6 +315,11 @@ paths:
       description: List all skills
       operationId: listSkills
       parameters:
+        - name: skillId
+          in: query
+          description: Skill ID
+          schema:
+            type: string
         - name: page
           in: query
           description: Page number
@@ -398,7 +403,7 @@ paths:
                 $ref: '#/components/schemas/BaseResponse'
       security:
         - api_key: []
-  /skill/instance/invoke:
+  /skill/invoke:
     post:
       tags:
         - skill
@@ -419,7 +424,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InvokeSkillResponse'
-  /skill/instance/streamInvoke:
+  /skill/streamInvoke:
     post:
       tags:
         - skill
@@ -2002,7 +2007,7 @@ components:
           $ref: '#/components/schemas/SkillContext'
         skillId:
           type: string
-          description: Skill ID to invoke (if not provided, skill auto-routing will be used)
+          description: Skill ID to invoke (if not provided, skill scheduler will be used)
         event:
           description: Skill trigger event
           $ref: '#/components/schemas/SkillTriggerEvent'
@@ -2029,6 +2034,8 @@ components:
                 $ref: '#/components/schemas/SkillTrigger'
     UpsertSkillTriggerRequest:
       type: object
+      required:
+        - event
       properties:
         skillId:
           type: string

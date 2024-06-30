@@ -12,16 +12,9 @@ import { z } from 'zod';
 // types
 import { SystemMessage } from '@langchain/core/messages';
 import { HumanMessage } from '@langchain/core/messages';
-import { Runnable, RunnableConfig } from '@langchain/core/runnables';
-import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from 'src/base';
-import { SkillEngine } from 'src/engine';
+import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 import { ToolMessage } from '@langchain/core/messages';
-import { SkillInput, Source } from '@refly/openapi-schema';
-
-export enum LOCALE {
-  ZH_CN = 'zh-CN',
-  EN = 'en',
-}
+import { Source } from '@refly/openapi-schema';
 
 interface GraphState extends BaseSkillState {
   // 初始上下文
@@ -32,7 +25,7 @@ interface GraphState extends BaseSkillState {
   sources: Source[]; // 搜索互联网得到的在线结果
 }
 
-class OnlineSearchSkill extends BaseSkill {
+export class OnlineSearchSkill extends BaseSkill {
   name = 'online_search';
 
   displayName = {
@@ -191,7 +184,7 @@ just reformulate it if needed and otherwise return it as is.
     }
   }
 
-  async generateAnswer(state: GraphState, config?: RunnableConfig) {
+  async generateAnswer(state: GraphState, config?: SkillRunnableConfig) {
     const llm = new ChatOpenAI({ model: 'gpt-3.5-turbo', openAIApiKey: process.env.OPENAI_API_KEY });
     // For versions of @langchain/core < 0.2.3, you must call `.stream()`
     // and aggregate the message from chunks instead of calling `.invoke()`.
@@ -284,5 +277,3 @@ just reformulate it if needed and otherwise return it as is.
     return workflow.compile();
   }
 }
-
-export default OnlineSearchSkill;

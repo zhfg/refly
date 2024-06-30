@@ -278,7 +278,7 @@ export const deleteSkill = (options: Options<DeleteSkillData>) => {
 export const invokeSkill = (options: Options<InvokeSkillData>) => {
   return (options?.client ?? client).post<InvokeSkillResponse2, InvokeSkillError>({
     ...options,
-    url: '/skill/instance/invoke',
+    url: '/skill/invoke',
   });
 };
 
@@ -289,7 +289,7 @@ export const invokeSkill = (options: Options<InvokeSkillData>) => {
 export const streamInvokeSkill = (options: Options<StreamInvokeSkillData>) => {
   return (options?.client ?? client).post<StreamInvokeSkillResponse, StreamInvokeSkillError>({
     ...options,
-    url: '/skill/instance/streamInvoke',
+    url: '/skill/streamInvoke',
   });
 };
 

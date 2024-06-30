@@ -1,8 +1,8 @@
 require('dotenv').config();
 import { SkillEngine } from 'src/engine';
-import { SkillName, getRunnable } from '../inventory';
+import { SkillName } from '../inventory';
 import { EventEmitter } from 'node:events';
-import Scheduler from '../scheduler';
+import { Scheduler } from '../scheduler';
 import { SkillEventMap } from '../base';
 
 process.env.LANGCHAIN_CALLBACKS_BACKGROUND = 'true';
@@ -38,15 +38,15 @@ async function run(name: SkillName) {
   const runnable = skill.toRunnable();
   for await (const event of runnable.streamEvents(
     {
-      query: '帮我搜索一下关于 Refly 的信息',
+      query: 'hello',
     },
     {
       configurable: { locale: 'zh-CN', emitter },
-      version: 'v1',
+      version: 'v2',
     },
   )) {
-    if (event.event === 'on_chat_model_end') {
-    }
+    // if (event.event === 'on_chat_model_end') {
+    // }
     console.log(JSON.stringify(event, null, 2));
     console.log('------------------------------------');
     // for (const [key, val] of Object.entries(event)) {

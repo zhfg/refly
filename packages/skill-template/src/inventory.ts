@@ -1,6 +1,6 @@
 import { BaseSkill } from './base';
-import SummarySkill from './templates/summary';
-import OnlineSearchSkill from './templates/online-search';
+import { SummarySkill } from './templates/summary';
+import { OnlineSearchSkill } from './templates/online-search';
 import { SkillEngine } from './engine';
 import { Runnable } from '@langchain/core/runnables';
 

@@ -42,7 +42,7 @@ model User {
   /// 主键
   id            Int       @id @default(autoincrement())
   /// UID
-  uid           String?   @default("") @map("uid")
+  uid           String    @default("") @map("uid")
   /// 头像
   avatar        String?   @map("avatar")
   /// 用户名
@@ -289,7 +289,7 @@ model Resource {
   /// 资源类型
   resourceType    ResourceType @map("resource_type")
   /// UID
-  uid             String       @map("uid")
+  uid             String       @default("") @map("uid")
   /// 字数
   wordCount       Int          @default(0) @map("word_count")
   /// 对象存储 key
@@ -332,7 +332,7 @@ model Collection {
   /// 描述
   description  String?   @default("") @map("description")
   /// UID
-  uid          String    @map("uid")
+  uid          String    @default("") @map("uid")
   /// 是否公开
   isPublic     Boolean   @default(false) @map("is_public")
   /// 创建时间

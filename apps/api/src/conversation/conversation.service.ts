@@ -156,7 +156,8 @@ export class ConversationService {
         msg.conversationId = conv.id;
       });
     }
-    return Promise.all([
+
+    return this.prisma.$transaction([
       this.prisma.chatMessage.createMany({ data: msgList }),
       this.prisma.conversation.update({
         where: { id: conv.id },

@@ -14,7 +14,7 @@ interface GraphState extends BaseSkillState {
 
 // Define a new graph
 
-class SummarySkill extends BaseSkill {
+export class SummarySkill extends BaseSkill {
   name = 'content_summarizer';
   displayName = {
     en: 'Summary',
@@ -132,5 +132,3 @@ The content to be summarized is as follows:
     return workflow.compile();
   }
 }
-
-export default SummarySkill;
