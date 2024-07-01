@@ -311,9 +311,9 @@ paths:
     get:
       tags:
         - skill
-      summary: List skills
-      description: List all skills
-      operationId: listSkills
+      summary: List skill instances
+      description: List skill instances for a user
+      operationId: listSkillInstances
       parameters:
         - name: skillId
           in: query
@@ -338,20 +338,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListSkillResponse'
+                $ref: '#/components/schemas/ListSkillInstanceResponse'
   /skill/instance/new:
     post:
       tags:
         - skill
       summary: Create new skill
       description: Create a new skill
-      operationId: createSkill
+      operationId: createSkillInstance
       requestBody:
         description: Skill creation request
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpsertSkillRequest'
+              $ref: '#/components/schemas/UpsertSkillInstanceRequest'
         required: true
       responses:
         '200':
@@ -359,20 +359,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UpsertSkillTriggerResponse'
+                $ref: '#/components/schemas/UpsertSkillInstanceResponse'
   /skill/instance/update:
     post:
       tags:
         - skill
       summary: Update skill
       description: Update an existing skill
-      operationId: updateSkill
+      operationId: updateSkillInstance
       requestBody:
         description: Skill update request
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpsertSkillRequest'
+              $ref: '#/components/schemas/UpsertSkillInstanceRequest'
         required: true
       responses:
         '200':
@@ -380,20 +380,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UpsertSkillTriggerResponse'
+                $ref: '#/components/schemas/UpsertSkillInstanceResponse'
   /skill/instance/delete:
     post:
       tags:
         - skill
       summary: Delete skill
       description: Delete an existing skill
-      operationId: deleteSkill
+      operationId: deleteSkillInstance
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DeleteSkillRequest'
+              $ref: '#/components/schemas/DeleteSkillInstanceRequest'
       responses:
         '200':
           description: successful operation
@@ -1054,7 +1054,7 @@ components:
           type: string
           format: date-time
           description: Trigger update time
-    Skill:
+    SkillInstance:
       type: object
       description: Skill
       properties:
@@ -1909,7 +1909,7 @@ components:
               description: Skill template list
               items:
                 $ref: '#/components/schemas/SkillTemplate'
-    ListSkillResponse:
+    ListSkillInstanceResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
@@ -1918,25 +1918,26 @@ components:
               type: array
               description: Skill list
               items:
-                $ref: '#/components/schemas/Skill'
-    UpsertSkillRequest:
+                $ref: '#/components/schemas/SkillInstance'
+    UpsertSkillInstanceRequest:
       type: object
       required:
-        - name
-        - skillTpl
+        - skillName
+        - displayName
         - config
       properties:
-        name:
+        skillName:
           type: string
           description: Skill name
-          example: Twitter Scraping
+          example: online-search
+        displayName:
+          type: string
+          description: Skill display name
+          example: My Custom Skill
         skillId:
           type: string
           description: Skill ID (only used for update)
           example: s-g30e1b80b5g1itbemc0g5jj3
-        skillTpl:
-          type: string
-          description: Skill template name
         triggers:
           type: array
           description: Skill triggers
@@ -1945,14 +1946,14 @@ components:
         config:
           type: object
           description: Skill config (should conform to template config schema)
-    UpsertSkillResponse:
+    UpsertSkillInstanceResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
             data:
-              $ref: '#/components/schemas/Skill'
-    DeleteSkillRequest:
+              $ref: '#/components/schemas/SkillInstance'
+    DeleteSkillInstanceRequest:
       type: object
       required:
         - skillId
@@ -2007,7 +2008,7 @@ components:
           $ref: '#/components/schemas/SkillContext'
         skillId:
           type: string
-          description: Skill ID to invoke (if not provided, skill scheduler will be used)
+          description: Skill instance ID to invoke (if not provided, skill scheduler will be used)
         event:
           description: Skill trigger event
           $ref: '#/components/schemas/SkillTriggerEvent'

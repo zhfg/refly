@@ -1,12 +1,12 @@
 import {
   InvokeSkillRequest,
-  Skill,
+  SkillInstance,
   SkillLog,
   SkillTrigger,
   SkillTriggerEvent,
 } from '@refly/openapi-schema';
 import {
-  Skill as SkillModel,
+  SkillInstance as SkillModel,
   SkillTrigger as SkillTriggerModel,
   SkillLog as SkillLogModel,
 } from '@prisma/client';
@@ -17,7 +17,7 @@ export interface InvokeSkillJobData extends InvokeSkillRequest {
   skillLogId: string;
 }
 
-export function toSkillDTO(skill: SkillModel): Skill {
+export function toSkillDTO(skill: SkillModel): SkillInstance {
   return {
     ...omit(skill, ['pk', 'deletedAt']),
     createdAt: skill.createdAt.toJSON(),

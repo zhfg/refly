@@ -11,17 +11,22 @@ process.env.LANGCHAIN_PROJECT = 'Refly Skill Runner';
 
 async function run(name: SkillName) {
   const emitter = new EventEmitter<SkillEventMap>();
-  emitter.on('on_skill_start', (data) => {
+  emitter.on('start', (data) => {
     console.log('------------------------------------');
     console.log(`on_skill_start: ${JSON.stringify(data, null, 2)}`);
     console.log('------------------------------------');
   });
-  emitter.on('on_skill_stream', (data) => {
+  emitter.on('log', (data) => {
     console.log('------------------------------------');
-    console.log(`on_skill_stream: ${JSON.stringify(data, null, 2)}`);
+    console.log(`on_skill_log: ${JSON.stringify(data, null, 2)}`);
     console.log('------------------------------------');
   });
-  emitter.on('on_skill_end', (data) => {
+  emitter.on('structured_data', (data) => {
+    console.log('------------------------------------');
+    console.log(`on_skill_structured_data: ${JSON.stringify(data, null, 2)}`);
+    console.log('------------------------------------');
+  });
+  emitter.on('end', (data) => {
     console.log('------------------------------------');
     console.log(`on_skill_end: ${JSON.stringify(data, null, 2)}`);
     console.log('------------------------------------');

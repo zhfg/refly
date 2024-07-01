@@ -177,7 +177,7 @@ export type SkillTrigger = {
 /**
  * Skill
  */
-export type Skill = {
+export type SkillInstance = {
   /**
    * Skill name
    */
@@ -992,26 +992,26 @@ export type ListSkillTemplateResponse = BaseResponse & {
   data?: Array<SkillTemplate>;
 };
 
-export type ListSkillResponse = BaseResponse & {
+export type ListSkillInstanceResponse = BaseResponse & {
   /**
    * Skill list
    */
-  data?: Array<Skill>;
+  data?: Array<SkillInstance>;
 };
 
-export type UpsertSkillRequest = {
+export type UpsertSkillInstanceRequest = {
   /**
    * Skill name
    */
-  name: string;
+  skillName: string;
+  /**
+   * Skill display name
+   */
+  displayName: string;
   /**
    * Skill ID (only used for update)
    */
   skillId?: string;
-  /**
-   * Skill template name
-   */
-  skillTpl: string;
   /**
    * Skill triggers
    */
@@ -1024,11 +1024,11 @@ export type UpsertSkillRequest = {
   };
 };
 
-export type UpsertSkillResponse = BaseResponse & {
-  data?: Skill;
+export type UpsertSkillInstanceResponse = BaseResponse & {
+  data?: SkillInstance;
 };
 
-export type DeleteSkillRequest = {
+export type DeleteSkillInstanceRequest = {
   /**
    * Skill ID to delete
    */
@@ -1081,7 +1081,7 @@ export type InvokeSkillRequest = {
    */
   context?: SkillContext;
   /**
-   * Skill ID to invoke (if not provided, skill scheduler will be used)
+   * Skill instance ID to invoke (if not provided, skill scheduler will be used)
    */
   skillId?: string;
   /**
@@ -1452,7 +1452,7 @@ export type ListSkillTemplatesResponse = ListSkillTemplateResponse;
 
 export type ListSkillTemplatesError = unknown;
 
-export type ListSkillsData = {
+export type ListSkillInstancesData = {
   query?: {
     /**
      * Page number
@@ -1469,39 +1469,39 @@ export type ListSkillsData = {
   };
 };
 
-export type ListSkillsResponse = ListSkillResponse;
+export type ListSkillInstancesResponse = ListSkillInstanceResponse;
 
-export type ListSkillsError = unknown;
+export type ListSkillInstancesError = unknown;
 
-export type CreateSkillData = {
+export type CreateSkillInstanceData = {
   /**
    * Skill creation request
    */
-  body: UpsertSkillRequest;
+  body: UpsertSkillInstanceRequest;
 };
 
-export type CreateSkillResponse = UpsertSkillTriggerResponse;
+export type CreateSkillInstanceResponse = UpsertSkillInstanceResponse;
 
-export type CreateSkillError = unknown;
+export type CreateSkillInstanceError = unknown;
 
-export type UpdateSkillData = {
+export type UpdateSkillInstanceData = {
   /**
    * Skill update request
    */
-  body: UpsertSkillRequest;
+  body: UpsertSkillInstanceRequest;
 };
 
-export type UpdateSkillResponse = UpsertSkillTriggerResponse;
+export type UpdateSkillInstanceResponse = UpsertSkillInstanceResponse;
 
-export type UpdateSkillError = unknown;
+export type UpdateSkillInstanceError = unknown;
 
-export type DeleteSkillData = {
-  body: DeleteSkillRequest;
+export type DeleteSkillInstanceData = {
+  body: DeleteSkillInstanceRequest;
 };
 
-export type DeleteSkillResponse = BaseResponse;
+export type DeleteSkillInstanceResponse = BaseResponse;
 
-export type DeleteSkillError = unknown;
+export type DeleteSkillInstanceError = unknown;
 
 export type InvokeSkillData = {
   /**
@@ -1860,40 +1860,40 @@ export type $OpenApiTs = {
   };
   '/skill/instance/list': {
     get: {
-      req: ListSkillsData;
+      req: ListSkillInstancesData;
       res: {
         /**
          * successful operation
          */
-        '200': ListSkillResponse;
+        '200': ListSkillInstanceResponse;
       };
     };
   };
   '/skill/instance/new': {
     post: {
-      req: CreateSkillData;
+      req: CreateSkillInstanceData;
       res: {
         /**
          * successful operation
          */
-        '200': UpsertSkillTriggerResponse;
+        '200': UpsertSkillInstanceResponse;
       };
     };
   };
   '/skill/instance/update': {
     post: {
-      req: UpdateSkillData;
+      req: UpdateSkillInstanceData;
       res: {
         /**
          * successful operation
          */
-        '200': UpsertSkillTriggerResponse;
+        '200': UpsertSkillInstanceResponse;
       };
     };
   };
   '/skill/instance/delete': {
     post: {
-      req: DeleteSkillData;
+      req: DeleteSkillInstanceData;
       res: {
         /**
          * successful operation

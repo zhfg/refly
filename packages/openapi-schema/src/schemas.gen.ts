@@ -220,7 +220,7 @@ export const $SkillTrigger = {
   },
 } as const;
 
-export const $Skill = {
+export const $SkillInstance = {
   type: 'object',
   description: 'Skill',
   properties: {
@@ -1358,7 +1358,7 @@ export const $ListSkillTemplateResponse = {
   ],
 } as const;
 
-export const $ListSkillResponse = {
+export const $ListSkillInstanceResponse = {
   allOf: [
     {
       $ref: '#/components/schemas/BaseResponse',
@@ -1370,7 +1370,7 @@ export const $ListSkillResponse = {
           type: 'array',
           description: 'Skill list',
           items: {
-            $ref: '#/components/schemas/Skill',
+            $ref: '#/components/schemas/SkillInstance',
           },
         },
       },
@@ -1378,23 +1378,24 @@ export const $ListSkillResponse = {
   ],
 } as const;
 
-export const $UpsertSkillRequest = {
+export const $UpsertSkillInstanceRequest = {
   type: 'object',
-  required: ['name', 'skillTpl', 'config'],
+  required: ['skillName', 'displayName', 'config'],
   properties: {
-    name: {
+    skillName: {
       type: 'string',
       description: 'Skill name',
-      example: 'Twitter Scraping',
+      example: 'online-search',
+    },
+    displayName: {
+      type: 'string',
+      description: 'Skill display name',
+      example: 'My Custom Skill',
     },
     skillId: {
       type: 'string',
       description: 'Skill ID (only used for update)',
       example: 's-g30e1b80b5g1itbemc0g5jj3',
-    },
-    skillTpl: {
-      type: 'string',
-      description: 'Skill template name',
     },
     triggers: {
       type: 'array',
@@ -1410,7 +1411,7 @@ export const $UpsertSkillRequest = {
   },
 } as const;
 
-export const $UpsertSkillResponse = {
+export const $UpsertSkillInstanceResponse = {
   allOf: [
     {
       $ref: '#/components/schemas/BaseResponse',
@@ -1419,14 +1420,14 @@ export const $UpsertSkillResponse = {
       type: 'object',
       properties: {
         data: {
-          $ref: '#/components/schemas/Skill',
+          $ref: '#/components/schemas/SkillInstance',
         },
       },
     },
   ],
 } as const;
 
-export const $DeleteSkillRequest = {
+export const $DeleteSkillInstanceRequest = {
   type: 'object',
   required: ['skillId'],
   properties: {
@@ -1499,7 +1500,7 @@ export const $InvokeSkillRequest = {
     },
     skillId: {
       type: 'string',
-      description: 'Skill ID to invoke (if not provided, skill scheduler will be used)',
+      description: 'Skill instance ID to invoke (if not provided, skill scheduler will be used)',
     },
     event: {
       description: 'Skill trigger event',

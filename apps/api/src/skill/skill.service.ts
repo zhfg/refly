@@ -2,16 +2,16 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter } from 'node:events';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
-import { Conversation, Skill, SkillRunMode, SkillTrigger, User } from '@prisma/client';
+import { Conversation, SkillInstance, SkillRunMode, SkillTrigger, User } from '@prisma/client';
 import { Response } from 'express';
 import { AIMessageChunk } from '@langchain/core/dist/messages';
 import {
-  DeleteSkillRequest,
+  DeleteSkillInstanceRequest,
   DeleteSkillTriggerRequest,
   InvokeSkillRequest,
-  ListSkillsData,
+  ListSkillInstancesData,
   SkillTemplate,
-  UpsertSkillRequest,
+  UpsertSkillInstanceRequest,
   UpsertSkillTriggerRequest,
 } from '@refly/openapi-schema';
 import {
@@ -20,6 +20,7 @@ import {
   inventory,
   SkillEventMap,
   SkillRunnableConfig,
+  SkillRunnableMeta,
 } from '@refly/skill-template';
 import { genSkillID, genSkillLogID, genSkillTriggerID } from '@refly/utils';
 import { PrismaService } from 'src/common/prisma.service';
@@ -30,7 +31,7 @@ import { collectionPO2DTO, resourcePO2DTO } from '../knowledge/knowledge.dto';
 import { ConversationService } from '../conversation/conversation.service';
 
 interface SkillPreCheckResult {
-  skill?: Skill;
+  skill?: SkillInstance;
   trigger?: SkillTrigger;
 }
 
@@ -71,7 +72,7 @@ export class SkillService {
 
   async listSkills(user: Pick<User, 'uid'>, param: { page: number; pageSize: number }) {
     const { page, pageSize } = param;
-    return this.prisma.skill.findMany({
+    return this.prisma.skillInstance.findMany({
       where: { uid: user.uid, deletedAt: null },
       orderBy: { updatedAt: 'desc' },
       take: pageSize,
@@ -79,15 +80,15 @@ export class SkillService {
     });
   }
 
-  async createSkill(user: User, param: UpsertSkillRequest) {
+  async createSkill(user: User, param: UpsertSkillInstanceRequest) {
     const skillId = genSkillID();
     const [skill, ...triggers] = await this.prisma.$transaction([
-      this.prisma.skill.create({
+      this.prisma.skillInstance.create({
         data: {
           skillId,
           uid: user.uid,
-          name: param.name,
-          skillTpl: param.skillTpl,
+          skillName: param.skillName,
+          displayName: param.displayName ?? '',
           config: JSON.stringify(param.config),
         },
       }),
@@ -107,27 +108,27 @@ export class SkillService {
     return { skill, triggers };
   }
 
-  async updateSkill(user: User, param: UpsertSkillRequest) {
+  async updateSkill(user: User, param: UpsertSkillInstanceRequest) {
     if (!param.skillId) {
       throw new BadRequestException('skill id is required');
     }
-    const skill = await this.prisma.skill.update({
+    const skill = await this.prisma.skillInstance.update({
       where: { skillId: param.skillId, uid: user.uid },
       data: {
-        name: param.name,
-        skillTpl: param.skillTpl,
+        displayName: param.displayName,
+        skillName: param.skillName,
         config: JSON.stringify(param.config),
       },
     });
     return skill;
   }
 
-  async deleteSkill(user: User, param: DeleteSkillRequest) {
+  async deleteSkill(user: User, param: DeleteSkillInstanceRequest) {
     const { skillId } = param;
     if (!skillId) {
       throw new BadRequestException('skill id is required');
     }
-    const skill = await this.prisma.skill.findUnique({
+    const skill = await this.prisma.skillInstance.findUnique({
       where: { skillId, deletedAt: null },
     });
     if (!skill || skill.uid !== user.uid) {
@@ -141,7 +142,7 @@ export class SkillService {
         where: { skillId, uid: user.uid },
         data: { deletedAt },
       }),
-      this.prisma.skill.update({
+      this.prisma.skillInstance.update({
         where: { skillId, uid: user.uid },
         data: { deletedAt },
       }),
@@ -153,7 +154,7 @@ export class SkillService {
     const { skillId } = param;
 
     if (skillId) {
-      const skill = await this.prisma.skill.findUnique({
+      const skill = await this.prisma.skillInstance.findUnique({
         where: { skillId, uid: user.uid, deletedAt: null },
       });
       if (!skill) {
@@ -189,7 +190,7 @@ export class SkillService {
         logId: genSkillLogID(),
         uid: user.uid,
         skillId: skill?.skillId ?? '',
-        skillName: skill?.name ?? 'Scheduler',
+        skillName: skill?.skillName ?? 'Scheduler',
         mode,
         input: JSON.stringify(param.input),
         context: JSON.stringify(param.context ?? {}),
@@ -224,17 +225,18 @@ export class SkillService {
         data: { status: 'running' },
       });
       const scheduler = new Scheduler(this.skillEngine);
-      const res = await scheduler.toRunnable().invoke(
-        { ...param.input },
-        {
-          configurable: {
-            ...JSON.parse(skill?.config ?? '{}'),
-            ...(param.config ?? {}),
-            ...param.context,
-            uid: user.uid,
-          } as SkillRunnableConfig,
+      const config: SkillRunnableConfig = {
+        configurable: {
+          ...JSON.parse(skill?.config ?? '{}'),
+          ...(param.config ?? {}),
+          ...param.context,
+          uid: user.uid,
         },
-      );
+      };
+      if (skill) {
+        config.configurable.selectedSkill = skill.skillName;
+      }
+      const res = await scheduler.toRunnable().invoke({ ...param.input }, config);
 
       this.logger.log(`invoke skill result: ${JSON.stringify(res)}`);
       await this.prisma.skillLog.update({
@@ -257,87 +259,69 @@ export class SkillService {
 
     const emitter = new EventEmitter<SkillEventMap>();
 
-    emitter.on('on_skill_start', (data) => {
+    emitter.on('start', (data) => {
       this.logger.log(`on_skill_start: ${JSON.stringify(data)}`);
-      writeSSEResponse(res, {
-        event: 'on_skill_start',
-        skillName: data.name,
-        skillDisplayName: data.showName,
-      });
+      writeSSEResponse(res, data);
     });
-    emitter.on('on_skill_stream', (data) => {
-      this.logger.log(`on_skill_stream: ${JSON.stringify(data)}`);
-      writeSSEResponse(res, {
-        event: 'on_skill_stream',
-        skillName: data.name,
-        skillDisplayName: data.showName,
-        content: data.msg,
-      });
-      // TODO: save skill messages (need to aggregated for each skill)
-    });
-    emitter.on('on_skill_end', (data) => {
+    emitter.on('end', (data) => {
       this.logger.log(`on_skill_end: ${JSON.stringify(data)}`);
-      writeSSEResponse(res, {
-        event: 'on_skill_end',
-        skillName: data.name,
-        skillDisplayName: data.showName,
-      });
+      writeSSEResponse(res, data);
     });
 
     const scheduler = new Scheduler(this.skillEngine);
-    const runnable = scheduler.toRunnable();
 
-    for await (const event of runnable.streamEvents(
-      { ...param.input },
-      {
-        configurable: {
-          ...JSON.parse(skill?.config || '{}'),
-          ...param.config,
-          ...param.context,
-          uid: user.uid,
-          emitter,
-        } as SkillRunnableConfig,
-        version: 'v2',
+    const config: SkillRunnableConfig & { version: 'v1' | 'v2' } = {
+      configurable: {
+        ...JSON.parse(skill?.config ?? '{}'),
+        ...(param.config ?? {}),
+        ...param.context,
+        uid: user.uid,
+        emitter,
       },
-    )) {
+      version: 'v2',
+    };
+    if (skill) {
+      config.configurable.selectedSkill = skill.skillName;
+    }
+
+    for await (const event of scheduler.streamEvents({ ...param.input }, config)) {
       switch (event.event) {
-        case 'on_chat_model_start':
-          writeSSEResponse(res, { event: 'on_output_start' });
-          break;
         case 'on_chat_model_stream':
           const chunk: AIMessageChunk = event.data?.chunk;
+          const meta: SkillRunnableMeta = event.metadata;
           if (chunk?.tool_call_chunks?.length === 0) {
             writeSSEResponse(res, {
-              event: 'on_output_stream',
+              event: 'stream',
+              skillName: meta.skillName,
+              skillDisplayName: meta.skillDisplayName,
               content:
                 typeof chunk.content === 'string' ? chunk.content : JSON.stringify(chunk.content),
             });
           }
           break;
         case 'on_chat_model_end':
-          writeSSEResponse(res, { event: 'on_output_end' });
-          const { convId } = param.context ?? {};
-          let conversation: Conversation | null = null;
-          if (convId) {
-            conversation = await this.conversation.findConversation(convId);
-          }
-          await this.conversation.addChatMessages(
-            [
-              {
-                type: 'ai',
-                content: JSON.stringify(event.data.output),
-                sources: '[]',
-                userId: user.id,
-                conversationId: conversation?.id ?? 0,
-                locale: param.context?.locale ?? user.outputLocale ?? '',
-              },
-            ],
-            {
-              id: conversation?.id,
-              title: param.input.query,
-              userId: user.id,
-            },
-          );
+          // const { convId } = param.context ?? {};
+          // let conversation: Conversation | null = null;
+          // if (convId) {
+          //   conversation = await this.conversation.findConversation(convId);
+          // }
+          // await this.conversation.addChatMessages(
+          //   [
+          //     {
+          //       type: 'ai',
+          //       content: JSON.stringify(event.data.output),
+          //       sources: '[]',
+          //       userId: user.id,
+          //       conversationId: conversation?.id ?? 0,
+          //       locale: param.context?.locale ?? user.outputLocale ?? '',
+          //     },
+          //   ],
+          //   {
+          //     id: conversation?.id,
+          //     title: param.input.query,
+          //     userId: user.id,
+          //   },
+          // );
           break;
       }
     }
@@ -350,7 +334,7 @@ export class SkillService {
     });
   }
 
-  async listSkillTriggers(user: Pick<User, 'uid'>, param: ListSkillsData['query']) {
+  async listSkillTriggers(user: Pick<User, 'uid'>, param: ListSkillInstancesData['query']) {
     const { skillId, page = 1, pageSize = 10 } = param!;
 
     return this.prisma.skillTrigger.findMany({

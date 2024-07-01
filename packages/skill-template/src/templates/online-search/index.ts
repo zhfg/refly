@@ -86,7 +86,7 @@ export class OnlineSearchSkill extends BaseSkill {
       return { sources };
     }
 
-    this.emitEvent('on_skill_stream', `User query: ${contextualUserQuery || query}`);
+    this.emitEvent('log', `User query: ${contextualUserQuery || query}`);
 
     const getSystemPrompt = () => `# Role
   
@@ -241,7 +241,7 @@ just reformulate it if needed and otherwise return it as is.
         if (tool === undefined) {
           throw new Error(`Tool ${call.name} not found.`);
         }
-        this.emitEvent('on_skill_stream', `Start calling ${tool.name} with args: ${JSON.stringify(call.args)})}`);
+        this.emitEvent('log', `Start calling ${tool.name} with args: ${JSON.stringify(call.args)})}`);
 
         const output = await tool.invoke(call.args, config);
         return new ToolMessage({
@@ -252,7 +252,7 @@ just reformulate it if needed and otherwise return it as is.
       }) ?? [],
     );
 
-    this.emitEvent('on_skill_stream', `Finished calling ${outputs.length} tools`);
+    this.emitEvent('log', `Finished calling ${outputs.length} tools`);
 
     return { messages: outputs };
   }

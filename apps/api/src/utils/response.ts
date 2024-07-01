@@ -1,4 +1,4 @@
-import { OutputMessage, SkillEvent } from '@refly/common-types';
+import { SkillEvent } from '@refly/common-types';
 import { Response } from 'express';
 
 export const buildSuccessResponse = <T>(data?: T) => {
@@ -8,6 +8,6 @@ export const buildSuccessResponse = <T>(data?: T) => {
   };
 };
 
-export const writeSSEResponse = (res: Response, msg: SkillEvent | OutputMessage) => {
+export const writeSSEResponse = (res: Response, msg: SkillEvent) => {
   res.write(`data: ${JSON.stringify(msg)}\n\n`);
 };

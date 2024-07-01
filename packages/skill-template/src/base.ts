@@ -7,6 +7,7 @@ import { RunnableConfig } from '@langchain/core/runnables';
 import { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
 import { SkillContext, SkillInput } from '@refly/openapi-schema';
 import { EventEmitter } from 'node:stream';
+import { SkillEvent } from '@refly/common-types';
 
 export abstract class BaseSkill extends StructuredTool {
   config?: SkillRunnableConfig;
@@ -20,13 +21,15 @@ export abstract class BaseSkill extends StructuredTool {
 
   abstract toRunnable(): Runnable;
 
-  emitEvent(event: keyof SkillEventMap, msg?: string) {
+  emitEvent(event: keyof SkillEventMap, content?: string, options?: Partial<SkillEvent>) {
     const { locale = 'en', emitter } = this.config?.configurable || {};
     if (emitter) {
       emitter.emit(event, {
-        name: this.name,
-        showName: this.displayName[locale],
-        msg,
+        event,
+        skillName: this.name,
+        skillDisplayName: this.displayName[locale],
+        content,
+        ...options,
       });
     }
   }
@@ -39,9 +42,18 @@ export abstract class BaseSkill extends StructuredTool {
     this.config = config;
     const runnable = this.toRunnable();
 
-    this.emitEvent('on_skill_start');
-    const response = await runnable.invoke(input, config);
-    this.emitEvent('on_skill_end');
+    this.emitEvent('start');
+
+    const { locale = 'en' } = config.configurable ?? {};
+
+    const metadata: SkillRunnableMeta = {
+      ...config.metadata,
+      skillName: this.name,
+      skillDisplayName: this.displayName[locale],
+    };
+    const response = await runnable.invoke(input, { ...config, metadata });
+
+    this.emitEvent('end');
 
     return response;
   }
@@ -64,25 +76,26 @@ export const baseStateGraphArgs = {
   },
 };
 
-interface SkillEventData {
-  name: string;
-  showName: string;
-  skillId?: string;
-  msg: string;
+export interface SkillEventMap {
+  start: [data: SkillEvent];
+  end: [data: SkillEvent];
+  log: [data: SkillEvent];
+  structured_data: [data: SkillEvent];
 }
 
-export interface SkillEventMap {
-  on_skill_start: [data: SkillEventData];
-  on_skill_stream: [data: SkillEventData];
-  on_skill_end: [data: SkillEventData];
+export interface SkillRunnableMeta {
+  skillName?: string;
+  skillDisplayName?: string;
+  [key: string]: unknown;
 }
 
 export interface SkillRunnableConfig extends RunnableConfig {
-  configurable: SkillContext & {
+  configurable?: SkillContext & {
     uid: string;
     selectedSkill?: string;
     chatHistory?: string[];
     installedSkills?: string[];
     emitter: EventEmitter<SkillEventMap>;
   };
+  metadata?: SkillRunnableMeta;
 }

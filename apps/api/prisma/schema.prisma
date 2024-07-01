@@ -351,28 +351,28 @@ model Collection {
 }
 
 /// User-defined skills.
-model Skill {
+model SkillInstance {
   /// primary key
-  pk        BigInt    @id @default(autoincrement())
+  pk          BigInt    @id @default(autoincrement())
   /// skill id
-  skillId   String    @unique @map("skill_id")
-  /// skill template name
-  skillTpl  String    @map("skill_tpl")
-  /// skill name
-  name      String    @map("name")
+  skillId     String    @unique @map("skill_id")
+  /// skill name (correspond to names of skill templates)
+  skillName   String    @map("skill_name")
+  /// skill display name
+  displayName String    @default("") @map("display_name")
   /// uid of skill owner
-  uid       String    @map("uid")
+  uid         String    @map("uid")
   /// workflow configuration (JSON)
-  config    String    @map("config")
+  config      String    @default("{}") @map("config")
   /// create timestamp
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// update timestamp
-  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
   /// deletion timestamp
-  deletedAt DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz()
 
   @@index([uid, updatedAt])
-  @@map("skills")
+  @@map("skill_instances")
 }
 
 model SkillTrigger {

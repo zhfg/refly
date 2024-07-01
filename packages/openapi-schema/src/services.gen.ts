@@ -35,18 +35,18 @@ import type {
   ListSkillTemplatesData,
   ListSkillTemplatesError,
   ListSkillTemplatesResponse,
-  ListSkillsData,
-  ListSkillsError,
-  ListSkillsResponse,
-  CreateSkillData,
-  CreateSkillError,
-  CreateSkillResponse,
-  UpdateSkillData,
-  UpdateSkillError,
-  UpdateSkillResponse,
-  DeleteSkillData,
-  DeleteSkillError,
-  DeleteSkillResponse,
+  ListSkillInstancesData,
+  ListSkillInstancesError,
+  ListSkillInstancesResponse,
+  CreateSkillInstanceData,
+  CreateSkillInstanceError,
+  CreateSkillInstanceResponse,
+  UpdateSkillInstanceData,
+  UpdateSkillInstanceError,
+  UpdateSkillInstanceResponse,
+  DeleteSkillInstanceData,
+  DeleteSkillInstanceError,
+  DeleteSkillInstanceResponse,
   InvokeSkillData,
   InvokeSkillError,
   InvokeSkillResponse2,
@@ -228,11 +228,11 @@ export const listSkillTemplates = (options?: Options<ListSkillTemplatesData>) =>
 };
 
 /**
- * List skills
- * List all skills
+ * List skill instances
+ * List skill instances for a user
  */
-export const listSkills = (options?: Options<ListSkillsData>) => {
-  return (options?.client ?? client).get<ListSkillsResponse, ListSkillsError>({
+export const listSkillInstances = (options?: Options<ListSkillInstancesData>) => {
+  return (options?.client ?? client).get<ListSkillInstancesResponse, ListSkillInstancesError>({
     ...options,
     url: '/skill/instance/list',
   });
@@ -242,8 +242,8 @@ export const listSkills = (options?: Options<ListSkillsData>) => {
  * Create new skill
  * Create a new skill
  */
-export const createSkill = (options: Options<CreateSkillData>) => {
-  return (options?.client ?? client).post<CreateSkillResponse, CreateSkillError>({
+export const createSkillInstance = (options: Options<CreateSkillInstanceData>) => {
+  return (options?.client ?? client).post<CreateSkillInstanceResponse, CreateSkillInstanceError>({
     ...options,
     url: '/skill/instance/new',
   });
@@ -253,8 +253,8 @@ export const createSkill = (options: Options<CreateSkillData>) => {
  * Update skill
  * Update an existing skill
  */
-export const updateSkill = (options: Options<UpdateSkillData>) => {
-  return (options?.client ?? client).post<UpdateSkillResponse, UpdateSkillError>({
+export const updateSkillInstance = (options: Options<UpdateSkillInstanceData>) => {
+  return (options?.client ?? client).post<UpdateSkillInstanceResponse, UpdateSkillInstanceError>({
     ...options,
     url: '/skill/instance/update',
   });
@@ -264,8 +264,8 @@ export const updateSkill = (options: Options<UpdateSkillData>) => {
  * Delete skill
  * Delete an existing skill
  */
-export const deleteSkill = (options: Options<DeleteSkillData>) => {
-  return (options?.client ?? client).post<DeleteSkillResponse, DeleteSkillError>({
+export const deleteSkillInstance = (options: Options<DeleteSkillInstanceData>) => {
+  return (options?.client ?? client).post<DeleteSkillInstanceResponse, DeleteSkillInstanceError>({
     ...options,
     url: '/skill/instance/delete',
   });

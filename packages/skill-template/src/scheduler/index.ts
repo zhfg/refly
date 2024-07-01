@@ -1,4 +1,4 @@
-import { ChatOpenAI, OpenAI } from '@langchain/openai';
+import { ChatOpenAI } from '@langchain/openai';
 
 import { AIMessage, BaseMessage } from '@langchain/core/messages';
 import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
@@ -16,6 +16,7 @@ import { ToolMessage } from '@langchain/core/messages';
 import { Source } from '@refly/openapi-schema';
 import { OnlineSearchSkill } from '../templates/online-search';
 import { SummarySkill } from '../templates/summary';
+import { StructuredTool } from '@langchain/core/tools';
 
 interface GraphState extends BaseSkillState {
   // 初始上下文
@@ -62,7 +63,7 @@ export class Scheduler extends BaseSkill {
   tools = [new OnlineSearchSkill(this.engine), new SummarySkill(this.engine)];
 
   /** TODO: 这里需要将 skill context 往下传递 */
-  callSkill = async (state: GraphState, config?: RunnableConfig): Promise<Partial<GraphState>> => {
+  callSkill = async (state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { messages } = state;
     const message = messages[messages.length - 1];
 
@@ -92,14 +93,22 @@ export class Scheduler extends BaseSkill {
   /** TODO: 这里需要将 chatHistory 传入 */
   callScheduler = async (state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { query, contextualUserQuery, messages = [] } = state;
-    const { locale = 'en' } = config?.configurable || {};
+    const { locale = 'en', selectedSkill } = config?.configurable || {};
 
-    // For versions of @langchain/core < 0.2.3, you must call `.stream()`
-    // and aggregate the message from chunks instead of calling `.invoke()`.
-    const boundModel = new ChatOpenAI({ model: 'gpt-3.5-turbo', openAIApiKey: process.env.OPENAI_API_KEY }).bindTools(
-      this.tools,
-    );
+    // Pick tools to use
+    let toolsToUse: StructuredTool[] = this.tools;
+    if (selectedSkill) {
+      const selectedTools = this.tools.filter((tool) => tool.name === selectedSkill);
+      if (selectedTools) {
+        toolsToUse = selectedTools;
+      } else {
+        this.emitEvent('log', `Selected skill ${selectedSkill} not found. Fallback to scheduler.`);
+      }
+    }
 
+    const boundModel = new ChatOpenAI({ model: 'gpt-3.5-turbo' }).bindTools(toolsToUse);
+
+    // TODO: prompt 里面提示模型用户选择的技能，高优处理
     const getSystemPrompt = (locale: string) => `## Role
 You are an AI intelligent response engine built by Refly AI that is specializing in selecting the most suitable functions from a variety of options based on user requirements.
 

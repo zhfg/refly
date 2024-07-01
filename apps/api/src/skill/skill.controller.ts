@@ -14,18 +14,18 @@ import { SkillService } from './skill.service';
 import { User } from 'src/utils/decorators/user.decorator';
 import { User as UserModel } from '@prisma/client';
 import {
-  DeleteSkillRequest,
-  DeleteSkillResponse,
+  DeleteSkillInstanceRequest,
+  DeleteSkillInstanceResponse,
   DeleteSkillTriggerRequest,
   DeleteSkillTriggerResponse,
   InvokeSkillRequest,
   InvokeSkillResponse,
   ListSkillLogResponse,
-  ListSkillResponse,
+  ListSkillInstanceResponse,
   ListSkillTemplateResponse,
   ListSkillTriggerResponse,
-  UpsertSkillRequest,
-  UpsertSkillResponse,
+  UpsertSkillInstanceRequest,
+  UpsertSkillInstanceResponse,
   UpsertSkillTriggerRequest,
   UpsertSkillTriggerResponse,
 } from '@refly/openapi-schema';
@@ -45,11 +45,11 @@ export class SkillController {
 
   @UseGuards(JwtAuthGuard)
   @Get('/instance/list')
-  async listSkills(
+  async listSkillInstances(
     @User() user: UserModel,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('page', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
-  ): Promise<ListSkillResponse> {
+  ): Promise<ListSkillInstanceResponse> {
     const skills = await this.skillService.listSkills(user, { page, pageSize });
     return buildSuccessResponse(skills.map((skill) => toSkillDTO(skill)));
   }
@@ -58,8 +58,8 @@ export class SkillController {
   @Post('/instance/new')
   async createSkill(
     @User() user: UserModel,
-    @Body() body: UpsertSkillRequest,
-  ): Promise<UpsertSkillResponse> {
+    @Body() body: UpsertSkillInstanceRequest,
+  ): Promise<UpsertSkillInstanceResponse> {
     const { skill, triggers } = await this.skillService.createSkill(user, body);
     return buildSuccessResponse({
       ...toSkillDTO(skill),
@@ -71,8 +71,8 @@ export class SkillController {
   @Post('/instance/update')
   async updateSkill(
     @User() user: UserModel,
-    @Body() body: UpsertSkillRequest,
-  ): Promise<UpsertSkillResponse> {
+    @Body() body: UpsertSkillInstanceRequest,
+  ): Promise<UpsertSkillInstanceResponse> {
     const skill = await this.skillService.updateSkill(user, body);
     return buildSuccessResponse(toSkillDTO(skill));
   }
@@ -81,8 +81,8 @@ export class SkillController {
   @Post('/instance/delete')
   async deleteSkill(
     @User() user: UserModel,
-    @Body() body: DeleteSkillRequest,
-  ): Promise<DeleteSkillResponse> {
+    @Body() body: DeleteSkillInstanceRequest,
+  ): Promise<DeleteSkillInstanceResponse> {
     await this.skillService.deleteSkill(user, body);
     return buildSuccessResponse();
   }
