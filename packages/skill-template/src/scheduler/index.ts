@@ -1,10 +1,8 @@
 import { ChatOpenAI } from '@langchain/openai';
 
-import { AIMessage, BaseMessage } from '@langchain/core/messages';
+import { AIMessage, AIMessageChunk, BaseMessage } from '@langchain/core/messages';
 import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 
-// all template skill
-import { getRunnable, inventory } from '../inventory';
 // schema
 import { z } from 'zod';
 // types
@@ -16,7 +14,6 @@ import { ToolMessage } from '@langchain/core/messages';
 import { Source } from '@refly/openapi-schema';
 import { OnlineSearchSkill } from '../templates/online-search';
 import { SummarySkill } from '../templates/summary';
-import { StructuredTool } from '@langchain/core/tools';
 
 interface GraphState extends BaseSkillState {
   // 初始上下文
@@ -59,10 +56,30 @@ export class Scheduler extends BaseSkill {
     },
   };
 
-  // Tools to be scheduled.
-  tools = [new OnlineSearchSkill(this.engine), new SummarySkill(this.engine)];
+  // Skills to be scheduled.
+  skills = [new OnlineSearchSkill(this.engine), new SummarySkill(this.engine)];
 
-  /** TODO: 这里需要将 skill context 往下传递 */
+  isValidSkillName = (name: string) => {
+    return this.skills.some((skill) => skill.name === name);
+  };
+
+  directSkillCall = async (state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> => {
+    const { selectedSkill } = config?.configurable || {};
+
+    const tool = this.skills.find((tool) => tool.name === selectedSkill?.skillName);
+    if (!tool) {
+      throw new Error(`Tool ${selectedSkill} not found.`);
+    }
+
+    const output = await tool.invoke({ query: state.query }, config);
+    const message = new AIMessageChunk({
+      name: tool.name,
+      content: typeof output === 'string' ? output : JSON.stringify(output),
+    });
+
+    return { messages: [message] };
+  };
+
   callSkill = async (state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { messages } = state;
     const message = messages[messages.length - 1];
@@ -71,16 +88,28 @@ export class Scheduler extends BaseSkill {
       throw new Error('ToolNode only accepts AIMessages as input.');
     }
 
-    const outputs = await Promise.all(
-      (message as AIMessage).tool_calls?.map(async (call) => {
-        const tool = this.tools.find((tool) => tool.name === call.name);
+    const skillCalls = (message as AIMessage).tool_calls
+      ?.map((call) => {
+        const tool = this.skills.find((tool) => tool.name === call.name);
         if (!tool) {
-          throw new Error(`Tool ${call.name} not found.`);
+          return null;
         }
+        return { skill: tool, call };
+      })
+      .filter((call) => call);
 
-        const output = await tool.invoke(call.args, config);
+    if (!skillCalls) {
+      this.emitEvent('log', 'No skill calls to proceed.');
+      return {};
+    }
+
+    this.emitEvent('log', `Decide to call skills: ${skillCalls.map((call) => call.skill.name).join(', ')}`);
+
+    const outputs = await Promise.all(
+      skillCalls.map(async ({ skill, call }) => {
+        const output = await skill.invoke(call.args, config);
         return new ToolMessage({
-          name: tool.name,
+          name: skill.name,
           content: typeof output === 'string' ? output : JSON.stringify(output),
           tool_call_id: call.id!,
         });
@@ -93,20 +122,9 @@ export class Scheduler extends BaseSkill {
   /** TODO: 这里需要将 chatHistory 传入 */
   callScheduler = async (state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { query, contextualUserQuery, messages = [] } = state;
-    const { locale = 'en', selectedSkill } = config?.configurable || {};
+    const { locale = 'en' } = config?.configurable || {};
 
-    // Pick tools to use
-    let toolsToUse: StructuredTool[] = this.tools;
-    if (selectedSkill) {
-      const selectedTools = this.tools.filter((tool) => tool.name === selectedSkill);
-      if (selectedTools) {
-        toolsToUse = selectedTools;
-      } else {
-        this.emitEvent('log', `Selected skill ${selectedSkill} not found. Fallback to scheduler.`);
-      }
-    }
-
-    const boundModel = new ChatOpenAI({ model: 'gpt-3.5-turbo' }).bindTools(toolsToUse);
+    const boundModel = new ChatOpenAI({ model: 'gpt-3.5-turbo' }).bindTools(this.skills);
 
     // TODO: prompt 里面提示模型用户选择的技能，高优处理
     const getSystemPrompt = (locale: string) => `## Role
@@ -144,8 +162,22 @@ You are an AI intelligent response engine built by Refly AI that is specializing
     return { messages: [responseMessage] };
   };
 
+  shouldDirectCallSkill = (state: GraphState, config?: SkillRunnableConfig): 'direct' | 'scheduler' => {
+    const { selectedSkill } = config?.configurable || {};
+    if (!selectedSkill) {
+      return 'scheduler';
+    }
+
+    if (!this.isValidSkillName(selectedSkill.skillName)) {
+      this.emitEvent('log', `Selected skill ${selectedSkill} not found. Fallback to scheduler.`);
+      return 'scheduler';
+    }
+
+    return 'direct';
+  };
+
   // Define the function that determines whether to continue or not
-  shouldContinue(state: GraphState): 'skill' | typeof END {
+  shouldContinue = (state: GraphState): 'skill' | typeof END => {
     const { messages = [] } = state;
     const lastMessage = messages[messages.length - 1];
 
@@ -158,17 +190,19 @@ You are an AI intelligent response engine built by Refly AI that is specializing
     } else {
       return END;
     }
-  }
+  };
 
   toRunnable(): Runnable<any, any, RunnableConfig> {
     const workflow = new StateGraph<GraphState>({
       channels: this.graphState,
     })
+      .addNode('direct', this.directSkillCall)
       .addNode('scheduler', this.callScheduler)
       .addNode('skill', this.callSkill);
 
-    workflow.addEdge(START, 'scheduler');
+    workflow.addConditionalEdges(START, this.shouldDirectCallSkill);
     workflow.addConditionalEdges('scheduler', this.shouldContinue);
+    workflow.addEdge('direct', END);
     workflow.addEdge('skill', 'scheduler');
 
     return workflow.compile();

@@ -22,16 +22,23 @@ export abstract class BaseSkill extends StructuredTool {
   abstract toRunnable(): Runnable;
 
   emitEvent(event: keyof SkillEventMap, content?: string, options?: Partial<SkillEvent>) {
-    const { locale = 'en', emitter } = this.config?.configurable || {};
-    if (emitter) {
-      emitter.emit(event, {
-        event,
-        skillName: this.name,
-        skillDisplayName: this.displayName[locale],
-        content,
-        ...options,
-      });
+    const { locale = 'en', emitter, selectedSkill } = this.config?.configurable || {};
+
+    // Don't emit events for scheduler when skill is specified
+    if (!emitter || (selectedSkill && this.name === 'scheduler')) {
+      return;
     }
+
+    const eventData = {
+      event,
+      skillName: this.name,
+      skillDisplayName: this.displayName[locale],
+      content,
+      ...options,
+      ...selectedSkill,
+    };
+
+    emitter?.emit(event, eventData);
   }
 
   async _call(
@@ -44,13 +51,15 @@ export abstract class BaseSkill extends StructuredTool {
 
     this.emitEvent('start');
 
-    const { locale = 'en' } = config.configurable ?? {};
+    const { locale = 'en', selectedSkill } = config?.configurable ?? {};
 
     const metadata: SkillRunnableMeta = {
-      ...config.metadata,
+      ...config?.metadata,
       skillName: this.name,
       skillDisplayName: this.displayName[locale],
+      ...selectedSkill,
     };
+
     const response = await runnable.invoke(input, { ...config, metadata });
 
     this.emitEvent('end');
@@ -83,19 +92,21 @@ export interface SkillEventMap {
   structured_data: [data: SkillEvent];
 }
 
-export interface SkillRunnableMeta {
+export interface SkillInfo {
+  skillId?: string;
   skillName?: string;
   skillDisplayName?: string;
-  [key: string]: unknown;
 }
+
+export interface SkillRunnableMeta extends Record<string, unknown>, SkillInfo {}
 
 export interface SkillRunnableConfig extends RunnableConfig {
   configurable?: SkillContext & {
-    uid: string;
-    selectedSkill?: string;
+    uid?: string;
+    selectedSkill?: SkillInfo;
     chatHistory?: string[];
     installedSkills?: string[];
-    emitter: EventEmitter<SkillEventMap>;
+    emitter?: EventEmitter<SkillEventMap>;
   };
   metadata?: SkillRunnableMeta;
 }

@@ -19,7 +19,7 @@ export interface InvokeSkillJobData extends InvokeSkillRequest {
 
 export function toSkillDTO(skill: SkillModel): SkillInstance {
   return {
-    ...omit(skill, ['pk', 'deletedAt']),
+    ...omit(skill, ['pk', 'uid', 'deletedAt']),
     createdAt: skill.createdAt.toJSON(),
     updatedAt: skill.updatedAt.toJSON(),
   };
@@ -27,7 +27,7 @@ export function toSkillDTO(skill: SkillModel): SkillInstance {
 
 export function toSkillTriggerDTO(trigger: SkillTriggerModel): SkillTrigger {
   return {
-    ...omit(trigger, ['pk', 'deletedAt']),
+    ...omit(trigger, ['pk', 'uid', 'deletedAt']),
     event: trigger.event as SkillTriggerEvent,
     createdAt: trigger.createdAt.toJSON(),
     updatedAt: trigger.updatedAt.toJSON(),
@@ -36,7 +36,7 @@ export function toSkillTriggerDTO(trigger: SkillTriggerModel): SkillTrigger {
 
 export function toSkillLogDTO(log: SkillLogModel): SkillLog {
   return {
-    ...omit(log, ['pk']),
+    ...omit(log, ['pk', 'uid']),
     input: JSON.parse(log.input),
     context: JSON.parse(log.context),
     createdAt: log.createdAt.toJSON(),

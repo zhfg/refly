@@ -11,7 +11,6 @@
     "target": "es2017",
     "sourceMap": true,
     "outDir": "./dist",
-    "jsx": "react-jsx",
     "esModuleInterop": true,
     "incremental": true,
     "skipLibCheck": true,

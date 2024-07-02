@@ -17,7 +17,6 @@ import {
 import {
   Scheduler,
   SkillEngine,
-  inventory,
   SkillEventMap,
   SkillRunnableConfig,
   SkillRunnableMeta,
@@ -38,7 +37,7 @@ interface SkillPreCheckResult {
 @Injectable()
 export class SkillService {
   private logger = new Logger(SkillService.name);
-  private skillEngine: SkillEngine;
+  private scheduler: Scheduler;
 
   constructor(
     private prisma: PrismaService,
@@ -46,7 +45,7 @@ export class SkillService {
     private conversation: ConversationService,
     @InjectQueue(QUEUE_SKILL) private queue: Queue<InvokeSkillJobData>,
   ) {
-    this.skillEngine = new SkillEngine(this.logger, {
+    const skillEngine = new SkillEngine(this.logger, {
       createResource: async (user, req) => {
         const resource = await this.knowledge.createResource(user, req);
         return buildSuccessResponse(resourcePO2DTO(resource));
@@ -64,13 +63,18 @@ export class SkillService {
         return buildSuccessResponse(collectionPO2DTO(coll));
       },
     });
+    this.scheduler = new Scheduler(skillEngine);
   }
 
   listSkillTemplates(): SkillTemplate[] {
-    return inventory;
+    return this.scheduler.skills.map((skill) => ({
+      name: skill.name,
+      displayName: skill.displayName,
+      description: skill.description,
+    }));
   }
 
-  async listSkills(user: Pick<User, 'uid'>, param: { page: number; pageSize: number }) {
+  async listSkillInstances(user: Pick<User, 'uid'>, param: { page: number; pageSize: number }) {
     const { page, pageSize } = param;
     return this.prisma.skillInstance.findMany({
       where: { uid: user.uid, deletedAt: null },
@@ -80,7 +84,11 @@ export class SkillService {
     });
   }
 
-  async createSkill(user: User, param: UpsertSkillInstanceRequest) {
+  async createSkillInstance(user: User, param: UpsertSkillInstanceRequest) {
+    if (!this.scheduler.isValidSkillName(param.skillName)) {
+      throw new BadRequestException(`skill ${param.skillName} not found`);
+    }
+
     const skillId = genSkillID();
     const [skill, ...triggers] = await this.prisma.$transaction([
       this.prisma.skillInstance.create({
@@ -108,12 +116,16 @@ export class SkillService {
     return { skill, triggers };
   }
 
-  async updateSkill(user: User, param: UpsertSkillInstanceRequest) {
+  async updateSkillInstance(user: User, param: UpsertSkillInstanceRequest) {
     if (!param.skillId) {
       throw new BadRequestException('skill id is required');
     }
+    if (!this.scheduler.isValidSkillName(param.skillName)) {
+      throw new BadRequestException(`skill ${param.skillName} not found`);
+    }
+
     const skill = await this.prisma.skillInstance.update({
-      where: { skillId: param.skillId, uid: user.uid },
+      where: { skillId: param.skillId, uid: user.uid, deletedAt: null },
       data: {
         displayName: param.displayName,
         skillName: param.skillName,
@@ -123,7 +135,7 @@ export class SkillService {
     return skill;
   }
 
-  async deleteSkill(user: User, param: DeleteSkillInstanceRequest) {
+  async deleteSkillInstance(user: User, param: DeleteSkillInstanceRequest) {
     const { skillId } = param;
     if (!skillId) {
       throw new BadRequestException('skill id is required');
@@ -224,7 +236,6 @@ export class SkillService {
         where: { logId: param.skillLogId },
         data: { status: 'running' },
       });
-      const scheduler = new Scheduler(this.skillEngine);
       const config: SkillRunnableConfig = {
         configurable: {
           ...JSON.parse(skill?.config ?? '{}'),
@@ -234,9 +245,13 @@ export class SkillService {
         },
       };
       if (skill) {
-        config.configurable.selectedSkill = skill.skillName;
+        config.configurable.selectedSkill = {
+          skillId: skill.skillId,
+          skillName: skill.skillName,
+          skillDisplayName: skill.displayName,
+        };
       }
-      const res = await scheduler.toRunnable().invoke({ ...param.input }, config);
+      const res = await this.scheduler.invoke({ ...param.input }, config);
 
       this.logger.log(`invoke skill result: ${JSON.stringify(res)}`);
       await this.prisma.skillLog.update({
@@ -259,16 +274,8 @@ export class SkillService {
 
     const emitter = new EventEmitter<SkillEventMap>();
 
-    emitter.on('start', (data) => {
-      this.logger.log(`on_skill_start: ${JSON.stringify(data)}`);
-      writeSSEResponse(res, data);
-    });
-    emitter.on('end', (data) => {
-      this.logger.log(`on_skill_end: ${JSON.stringify(data)}`);
-      writeSSEResponse(res, data);
-    });
-
-    const scheduler = new Scheduler(this.skillEngine);
+    emitter.on('start', (data) => writeSSEResponse(res, data));
+    emitter.on('end', (data) => writeSSEResponse(res, data));
 
     const config: SkillRunnableConfig & { version: 'v1' | 'v2' } = {
       configurable: {
@@ -281,10 +288,14 @@ export class SkillService {
       version: 'v2',
     };
     if (skill) {
-      config.configurable.selectedSkill = skill.skillName;
+      config.configurable.selectedSkill = {
+        skillId: skill.skillId,
+        skillName: skill.skillName,
+        skillDisplayName: skill.displayName,
+      };
     }
 
-    for await (const event of scheduler.streamEvents({ ...param.input }, config)) {
+    for await (const event of this.scheduler.streamEvents({ ...param.input }, config)) {
       switch (event.event) {
         case 'on_chat_model_stream':
           const chunk: AIMessageChunk = event.data?.chunk;
@@ -292,6 +303,7 @@ export class SkillService {
           if (chunk?.tool_call_chunks?.length === 0) {
             writeSSEResponse(res, {
               event: 'stream',
+              skillId: meta.skillId,
               skillName: meta.skillName,
               skillDisplayName: meta.skillDisplayName,
               content:

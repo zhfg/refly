@@ -23,7 +23,9 @@ export class SummarySkill extends BaseSkill {
 
   description = 'Give a summary of the content of a web page';
 
-  schema = z.object({});
+  schema = z.object({
+    query: z.string().describe('The user query'),
+  });
 
   graphState: StateGraphArgs<GraphState>['channels'] = {
     ...baseStateGraphArgs,

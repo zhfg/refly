@@ -40,51 +40,7 @@ export class SkillController {
   @UseGuards(JwtAuthGuard)
   @Get('/template/list')
   async listSkillTemplates(): Promise<ListSkillTemplateResponse> {
-    return buildSuccessResponse();
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('/instance/list')
-  async listSkillInstances(
-    @User() user: UserModel,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('page', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
-  ): Promise<ListSkillInstanceResponse> {
-    const skills = await this.skillService.listSkills(user, { page, pageSize });
-    return buildSuccessResponse(skills.map((skill) => toSkillDTO(skill)));
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('/instance/new')
-  async createSkill(
-    @User() user: UserModel,
-    @Body() body: UpsertSkillInstanceRequest,
-  ): Promise<UpsertSkillInstanceResponse> {
-    const { skill, triggers } = await this.skillService.createSkill(user, body);
-    return buildSuccessResponse({
-      ...toSkillDTO(skill),
-      triggers: triggers.map((trigger) => toSkillTriggerDTO(trigger)),
-    });
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('/instance/update')
-  async updateSkill(
-    @User() user: UserModel,
-    @Body() body: UpsertSkillInstanceRequest,
-  ): Promise<UpsertSkillInstanceResponse> {
-    const skill = await this.skillService.updateSkill(user, body);
-    return buildSuccessResponse(toSkillDTO(skill));
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('/instance/delete')
-  async deleteSkill(
-    @User() user: UserModel,
-    @Body() body: DeleteSkillInstanceRequest,
-  ): Promise<DeleteSkillInstanceResponse> {
-    await this.skillService.deleteSkill(user, body);
-    return buildSuccessResponse();
+    return buildSuccessResponse(this.skillService.listSkillTemplates());
   }
 
   @UseGuards(JwtAuthGuard)
@@ -110,6 +66,50 @@ export class SkillController {
     res.status(200);
 
     await this.skillService.streamInvokeSkill(user, body, res);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/instance/list')
+  async listSkillInstances(
+    @User() user: UserModel,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('page', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
+  ): Promise<ListSkillInstanceResponse> {
+    const skills = await this.skillService.listSkillInstances(user, { page, pageSize });
+    return buildSuccessResponse(skills.map((skill) => toSkillDTO(skill)));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/instance/new')
+  async createSkillInstance(
+    @User() user: UserModel,
+    @Body() body: UpsertSkillInstanceRequest,
+  ): Promise<UpsertSkillInstanceResponse> {
+    const { skill, triggers } = await this.skillService.createSkillInstance(user, body);
+    return buildSuccessResponse({
+      ...toSkillDTO(skill),
+      triggers: triggers.map((trigger) => toSkillTriggerDTO(trigger)),
+    });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/instance/update')
+  async updateSkillInstance(
+    @User() user: UserModel,
+    @Body() body: UpsertSkillInstanceRequest,
+  ): Promise<UpsertSkillInstanceResponse> {
+    const skill = await this.skillService.updateSkillInstance(user, body);
+    return buildSuccessResponse(toSkillDTO(skill));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/instance/delete')
+  async deleteSkillInstance(
+    @User() user: UserModel,
+    @Body() body: DeleteSkillInstanceRequest,
+  ): Promise<DeleteSkillInstanceResponse> {
+    await this.skillService.deleteSkillInstance(user, body);
+    return buildSuccessResponse();
   }
 
   @UseGuards(JwtAuthGuard)

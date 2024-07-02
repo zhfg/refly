@@ -1,6 +1,5 @@
 require('dotenv').config();
 import { SkillEngine } from 'src/engine';
-import { SkillName } from '../inventory';
 import { EventEmitter } from 'node:events';
 import { Scheduler } from '../scheduler';
 import { SkillEventMap } from '../base';
@@ -9,7 +8,7 @@ process.env.LANGCHAIN_CALLBACKS_BACKGROUND = 'true';
 process.env.LANGCHAIN_TRACING_V2 = 'true';
 process.env.LANGCHAIN_PROJECT = 'Refly Skill Runner';
 
-async function run(name: SkillName) {
+async function run() {
   const emitter = new EventEmitter<SkillEventMap>();
   emitter.on('start', (data) => {
     console.log('------------------------------------');
@@ -33,10 +32,10 @@ async function run(name: SkillName) {
   });
 
   const engine = new SkillEngine(console, {
-    createResource: (user, req) => null,
-    updateResource: (user, req) => null,
-    createCollection: (user, req) => null,
-    updateCollection: (user, req) => null,
+    createResource: async (user, req) => null,
+    updateResource: async (user, req) => null,
+    createCollection: async (user, req) => null,
+    updateCollection: async (user, req) => null,
   });
   // const runnable = getRunnable(engine, name);
   const skill = new Scheduler(engine);
@@ -61,4 +60,4 @@ async function run(name: SkillName) {
   }
 }
 
-run('SummarySkill');
+run();

@@ -162,6 +162,10 @@ export const $SkillTemplate = {
       type: 'string',
       description: 'Skill template name',
     },
+    displayName: {
+      type: 'object',
+      description: 'Skill display name (key is locale and value is display name)',
+    },
     description: {
       type: 'string',
       description: 'Skill description',
@@ -223,19 +227,20 @@ export const $SkillTrigger = {
 export const $SkillInstance = {
   type: 'object',
   description: 'Skill',
+  required: ['skillName', 'displayName', 'skillId', 'createdAt', 'updatedAt'],
   properties: {
-    name: {
+    skillName: {
       type: 'string',
       description: 'Skill name',
+    },
+    displayName: {
+      type: 'string',
+      description: 'Skill display name',
     },
     skillId: {
       type: 'string',
       description: 'Skill ID',
       example: 'sk-g30e1b80b5g1itbemc0g5jj3',
-    },
-    skillTpl: {
-      type: 'string',
-      description: 'Skill template name',
     },
     triggers: {
       type: 'array',
@@ -1380,7 +1385,7 @@ export const $ListSkillInstanceResponse = {
 
 export const $UpsertSkillInstanceRequest = {
   type: 'object',
-  required: ['skillName', 'displayName', 'config'],
+  required: ['skillName', 'displayName'],
   properties: {
     skillName: {
       type: 'string',

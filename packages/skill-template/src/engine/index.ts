@@ -13,10 +13,10 @@ interface User {
 }
 
 export interface ReflyService {
-  createResource: (user: User, req: UpsertResourceRequest) => Promise<CreateResourceResponse>;
-  updateResource: (user: User, req: UpsertResourceRequest) => Promise<UpdateResourceResponse>;
-  createCollection: (user: User, req: UpsertCollectionRequest) => Promise<CreateCollectionResponse>;
-  updateCollection: (user: User, req: UpsertCollectionRequest) => Promise<UpdateCollectionResponse>;
+  createResource: (user: User, req: UpsertResourceRequest) => Promise<CreateResourceResponse | null>;
+  updateResource: (user: User, req: UpsertResourceRequest) => Promise<UpdateResourceResponse | null>;
+  createCollection: (user: User, req: UpsertCollectionRequest) => Promise<CreateCollectionResponse | null>;
+  updateCollection: (user: User, req: UpsertCollectionRequest) => Promise<UpdateCollectionResponse | null>;
 }
 
 export interface Logger {

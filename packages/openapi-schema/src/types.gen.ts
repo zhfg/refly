@@ -124,6 +124,12 @@ export type SkillTemplate = {
    */
   name?: string;
   /**
+   * Skill display name (key is locale and value is display name)
+   */
+  displayName?: {
+    [key: string]: unknown;
+  };
+  /**
    * Skill description
    */
   description?: string;
@@ -181,15 +187,15 @@ export type SkillInstance = {
   /**
    * Skill name
    */
-  name?: string;
+  skillName: string;
+  /**
+   * Skill display name
+   */
+  displayName: string;
   /**
    * Skill ID
    */
-  skillId?: string;
-  /**
-   * Skill template name
-   */
-  skillTpl?: string;
+  skillId: string;
   /**
    * Skill triggers
    */
@@ -201,11 +207,11 @@ export type SkillInstance = {
   /**
    * Skill creation time
    */
-  createdAt?: string;
+  createdAt: string;
   /**
    * Skill update time
    */
-  updatedAt?: string;
+  updatedAt: string;
 };
 
 /**
@@ -1019,7 +1025,7 @@ export type UpsertSkillInstanceRequest = {
   /**
    * Skill config (should conform to template config schema)
    */
-  config: {
+  config?: {
     [key: string]: unknown;
   };
 };
