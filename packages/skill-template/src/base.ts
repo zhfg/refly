@@ -94,8 +94,8 @@ export interface SkillEventMap {
 
 export interface SkillInfo {
   skillId?: string;
-  skillName?: string;
-  skillDisplayName?: string;
+  skillName: string;
+  skillDisplayName: string;
 }
 
 export interface SkillRunnableMeta extends Record<string, unknown>, SkillInfo {}

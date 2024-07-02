@@ -224,16 +224,16 @@ export const $SkillTrigger = {
   },
 } as const;
 
-export const $SkillInstance = {
+export const $SkillMeta = {
   type: 'object',
-  description: 'Skill',
-  required: ['skillName', 'displayName', 'skillId', 'createdAt', 'updatedAt'],
+  description: 'Skill metadata',
+  required: ['skillName', 'displayName'],
   properties: {
     skillName: {
       type: 'string',
       description: 'Skill name',
     },
-    displayName: {
+    skillDisplayName: {
       type: 'string',
       description: 'Skill display name',
     },
@@ -242,28 +242,44 @@ export const $SkillInstance = {
       description: 'Skill ID',
       example: 'sk-g30e1b80b5g1itbemc0g5jj3',
     },
-    triggers: {
-      type: 'array',
-      description: 'Skill triggers',
-      items: {
-        $ref: '#/components/schemas/SkillTrigger',
+  },
+} as const;
+
+export const $SkillInstance = {
+  type: 'object',
+  description: 'Skill',
+  required: ['skillName', 'displayName', 'skillId', 'createdAt', 'updatedAt'],
+  allOf: [
+    {
+      $ref: '#/components/schemas/SkillMeta',
+    },
+    {
+      type: 'object',
+      properties: {
+        triggers: {
+          type: 'array',
+          description: 'Skill triggers',
+          items: {
+            $ref: '#/components/schemas/SkillTrigger',
+          },
+        },
+        config: {
+          type: 'string',
+          description: 'Skill config',
+        },
+        createdAt: {
+          type: 'string',
+          format: 'date-time',
+          description: 'Skill creation time',
+        },
+        updatedAt: {
+          type: 'string',
+          format: 'date-time',
+          description: 'Skill update time',
+        },
       },
     },
-    config: {
-      type: 'string',
-      description: 'Skill config',
-    },
-    createdAt: {
-      type: 'string',
-      format: 'date-time',
-      description: 'Skill creation time',
-    },
-    updatedAt: {
-      type: 'string',
-      format: 'date-time',
-      description: 'Skill update time',
-    },
-  },
+  ],
 } as const;
 
 export const $SkillLog = {
@@ -418,6 +434,7 @@ export const $ChatMessage = {
   properties: {
     msgId: {
       type: 'string',
+      readOnly: true,
       description: 'Message ID',
       example: 'm-g30e1b80b5g1itbemc0g5jj3',
     },
@@ -430,12 +447,33 @@ export const $ChatMessage = {
       description: 'Message content',
       example: 'Hello',
     },
+    skillMeta: {
+      type: 'object',
+      description: 'Skill metadata',
+      $ref: '#/components/schemas/SkillMeta',
+    },
+    logs: {
+      type: 'array',
+      description: 'Message logs',
+      items: {
+        type: 'string',
+      },
+    },
+    structuredData: {
+      type: 'object',
+      description: 'Structured data output',
+      example: {
+        sources: ['Source'],
+        relatedQuestions: ['string'],
+      },
+    },
     relatedQuestions: {
       type: 'array',
       description: 'Related questions',
       items: {
         type: 'string',
       },
+      deprecated: true,
     },
     sources: {
       type: 'array',
@@ -443,6 +481,7 @@ export const $ChatMessage = {
       items: {
         $ref: '#/components/schemas/Source',
       },
+      deprecated: true,
     },
     selectedWeblinkConfig: {
       type: 'string',
@@ -1463,10 +1502,6 @@ export const $SkillContext = {
       type: 'string',
       description: 'User input locale',
     },
-    convId: {
-      type: 'string',
-      description: 'Conversation ID (if passed, model output will be automatically appended to this conversation)',
-    },
     resourceIds: {
       type: 'array',
       description: 'List of resource IDs',
@@ -1514,6 +1549,15 @@ export const $InvokeSkillRequest = {
     config: {
       type: 'object',
       description: 'Skill config (should conform to template config schema)',
+    },
+    convId: {
+      description: 'Conversation ID (will add messages to this conversation if provided)',
+      type: 'string',
+      example: 'cv-g30e1b80b5g1itbemc0g5jj3',
+    },
+    createConvParam: {
+      description: 'Create conversation parameters',
+      $ref: '#/components/schemas/CreateConversationRequest',
     },
   },
 } as const;

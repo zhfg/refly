@@ -22,12 +22,14 @@ import {
   SkillRunnableMeta,
 } from '@refly/skill-template';
 import { genSkillID, genSkillLogID, genSkillTriggerID } from '@refly/utils';
-import { PrismaService } from 'src/common/prisma.service';
-import { QUEUE_SKILL, buildSuccessResponse, writeSSEResponse } from 'src/utils';
+import { PrismaService } from '@/common/prisma.service';
+import { QUEUE_SKILL, buildSuccessResponse, writeSSEResponse } from '@/utils';
 import { InvokeSkillJobData } from './skill.dto';
-import { KnowledgeService } from '../knowledge/knowledge.service';
-import { collectionPO2DTO, resourcePO2DTO } from '../knowledge/knowledge.dto';
-import { ConversationService } from '../conversation/conversation.service';
+import { KnowledgeService } from '@/knowledge/knowledge.service';
+import { collectionPO2DTO, resourcePO2DTO } from '@/knowledge/knowledge.dto';
+import { ConversationService } from '@/conversation/conversation.service';
+import { MessageAggregator } from '@/utils/message';
+import { SkillEvent } from '@refly/common-types';
 
 interface SkillPreCheckResult {
   skill?: SkillInstance;
@@ -270,12 +272,36 @@ export class SkillService {
   async streamInvokeSkill(user: User, param: InvokeSkillRequest, res: Response) {
     const { skill, trigger } = await this.skillInvokePreCheck(user, param);
 
+    let chatConv: Conversation | null = null;
+    if (param.createConvParam) {
+      chatConv = await this.conversation.createConversation(
+        user,
+        param.createConvParam,
+        param.convId,
+      );
+    } else if (param.convId) {
+      // TODO: deprecate userId field
+      chatConv = await this.prisma.conversation.findFirst({
+        where: { userId: user.id, convId: param.convId },
+      });
+      if (!chatConv) {
+        throw new BadRequestException(`conversation not found: ${param.convId}`);
+      }
+    }
+
     const log = await this.createLog(user, param, { skill, trigger }, 'stream');
 
     const emitter = new EventEmitter<SkillEventMap>();
+    const msgAggregator = new MessageAggregator();
 
-    emitter.on('start', (data) => writeSSEResponse(res, data));
-    emitter.on('end', (data) => writeSSEResponse(res, data));
+    const emitterHandler = (data: SkillEvent) => {
+      writeSSEResponse(res, data);
+      msgAggregator.addSkillEvent(data);
+    };
+    emitter.on('start', emitterHandler);
+    emitter.on('end', emitterHandler);
+    emitter.on('log', emitterHandler);
+    emitter.on('structured_data', emitterHandler);
 
     const config: SkillRunnableConfig & { version: 'v1' | 'v2' } = {
       configurable: {
@@ -296,49 +322,52 @@ export class SkillService {
     }
 
     for await (const event of this.scheduler.streamEvents({ ...param.input }, config)) {
+      const runMeta = event.metadata as SkillRunnableMeta;
       switch (event.event) {
         case 'on_chat_model_stream':
           const chunk: AIMessageChunk = event.data?.chunk;
-          const meta: SkillRunnableMeta = event.metadata;
           if (chunk?.tool_call_chunks?.length === 0) {
             writeSSEResponse(res, {
               event: 'stream',
-              skillId: meta.skillId,
-              skillName: meta.skillName,
-              skillDisplayName: meta.skillDisplayName,
+              ...runMeta,
               content:
                 typeof chunk.content === 'string' ? chunk.content : JSON.stringify(chunk.content),
             });
           }
           break;
         case 'on_chat_model_end':
-          // const { convId } = param.context ?? {};
-          // let conversation: Conversation | null = null;
-          // if (convId) {
-          //   conversation = await this.conversation.findConversation(convId);
-          // }
-          // await this.conversation.addChatMessages(
-          //   [
-          //     {
-          //       type: 'ai',
-          //       content: JSON.stringify(event.data.output),
-          //       sources: '[]',
-          //       userId: user.id,
-          //       conversationId: conversation?.id ?? 0,
-          //       locale: param.context?.locale ?? user.outputLocale ?? '',
-          //     },
-          //   ],
-          //   {
-          //     id: conversation?.id,
-          //     title: param.input.query,
-          //     userId: user.id,
-          //   },
-          // );
+          msgAggregator.setContent(runMeta, event.data.output.content);
           break;
       }
     }
 
     res.end(``);
+
+    if (chatConv) {
+      await this.conversation.addChatMessages(
+        [
+          {
+            type: 'human',
+            content: param.input.query,
+            userId: user.id,
+            uid: user.uid,
+            conversationId: chatConv.id,
+            locale: param.context.locale ?? user.outputLocale,
+          },
+          ...msgAggregator.getMessages({
+            user,
+            conversationPk: chatConv.id,
+            locale: param.context.locale ?? user.outputLocale,
+          }),
+        ],
+        {
+          id: chatConv.id,
+          title: param.input.query,
+          userId: user.id,
+          uid: user.uid,
+        },
+      );
+    }
 
     await this.prisma.skillLog.update({
       where: { logId: log.logId },

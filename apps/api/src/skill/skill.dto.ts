@@ -10,7 +10,7 @@ import {
   SkillTrigger as SkillTriggerModel,
   SkillLog as SkillLogModel,
 } from '@prisma/client';
-import { omit } from 'src/utils';
+import { omit } from '@/utils';
 
 export interface InvokeSkillJobData extends InvokeSkillRequest {
   uid: string;

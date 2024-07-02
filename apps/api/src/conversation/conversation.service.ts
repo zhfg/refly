@@ -18,7 +18,7 @@ import { LlmService } from '../llm/llm.service';
 import { WeblinkService } from '../weblink/weblink.service';
 import { IterableReadableStream } from '@langchain/core/dist/utils/stream';
 import { BaseMessageChunk } from '@langchain/core/messages';
-import { genConvID } from '@refly/utils';
+import { genChatMessageID, genCollectionID, genConvID } from '@refly/utils';
 import { AigcService } from '../aigc/aigc.service';
 
 const LLM_SPLIT = '__LLM_RESPONSE__';
@@ -48,6 +48,7 @@ export class ConversationService {
         originPageUrl: param.originPageUrl,
         originPageTitle: param.originPageTitle,
         userId: user.id,
+        uid: user.uid,
       },
     });
 
@@ -63,6 +64,7 @@ export class ConversationService {
           content: getUserQuestion('summary'),
           sources: '[]',
           userId: user.id,
+          uid: user.uid,
           conversationId: conversation.id,
           locale: param.locale,
         },
@@ -76,6 +78,7 @@ export class ConversationService {
             },
           ]),
           userId: user.id,
+          uid: user.uid,
           conversationId: conversation.id,
           locale: param.locale,
           relatedQuestions: JSON.stringify(relatedQuestions),
@@ -95,6 +98,7 @@ export class ConversationService {
           content: content.title,
           sources: '[]',
           userId: user.id,
+          uid: user.uid,
           conversationId: conversation.id,
           locale: param.locale,
         },
@@ -103,6 +107,7 @@ export class ConversationService {
           content: content.content,
           sources: content.sources,
           userId: user.id,
+          uid: user.uid,
           conversationId: conversation.id,
           locale: param.locale,
         },
@@ -158,7 +163,9 @@ export class ConversationService {
     }
 
     return this.prisma.$transaction([
-      this.prisma.chatMessage.createMany({ data: msgList }),
+      this.prisma.chatMessage.createMany({
+        data: msgList.map((msg) => ({ ...msg, msgId: genChatMessageID() })),
+      }),
       this.prisma.conversation.update({
         where: { id: conv.id },
         data: {
@@ -268,6 +275,7 @@ export class ConversationService {
         {
           type: 'human',
           userId: user.id,
+          uid: user.uid,
           conversationId: conversation.id,
           content: query,
           sources: '',
@@ -280,6 +288,7 @@ export class ConversationService {
         {
           type: 'ai',
           userId: user.id,
+          uid: user.uid,
           conversationId: conversation.id,
           content: taskRes.answer,
           sources: JSON.stringify(taskRes.sources),

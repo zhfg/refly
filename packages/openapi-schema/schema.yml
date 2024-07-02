@@ -343,8 +343,8 @@ paths:
     post:
       tags:
         - skill
-      summary: Create new skill
-      description: Create a new skill
+      summary: Create new skill instance
+      description: Create a new skill instance for user
       operationId: createSkillInstance
       requestBody:
         description: Skill creation request
@@ -364,8 +364,8 @@ paths:
     post:
       tags:
         - skill
-      summary: Update skill
-      description: Update an existing skill
+      summary: Update skill instance
+      description: Update an existing skill instance
       operationId: updateSkillInstance
       requestBody:
         description: Skill update request
@@ -385,8 +385,8 @@ paths:
     post:
       tags:
         - skill
-      summary: Delete skill
-      description: Delete an existing skill
+      summary: Delete skill instance
+      description: Delete an existing skill instance
       operationId: deleteSkillInstance
       requestBody:
         required: true
@@ -641,7 +641,7 @@ paths:
     get:
       tags:
         - chat
-      summary: Get conversation
+      summary: Get conversation detail
       description: Get conversation detail
       operationId: getConversationDetail
       parameters:
@@ -1057,6 +1057,23 @@ components:
           type: string
           format: date-time
           description: Trigger update time
+    SkillMeta:
+      type: object
+      description: Skill metadata
+      required:
+        - skillName
+        - displayName
+      properties:
+        skillName:
+          type: string
+          description: Skill name
+        skillDisplayName:
+          type: string
+          description: Skill display name
+        skillId:
+          type: string
+          description: Skill ID
+          example: sk-g30e1b80b5g1itbemc0g5jj3
     SkillInstance:
       type: object
       description: Skill
@@ -1066,33 +1083,26 @@ components:
         - skillId
         - createdAt
         - updatedAt
-      properties:
-        skillName:
-          type: string
-          description: Skill name
-        displayName:
-          type: string
-          description: Skill display name
-        skillId:
-          type: string
-          description: Skill ID
-          example: sk-g30e1b80b5g1itbemc0g5jj3
-        triggers:
-          type: array
-          description: Skill triggers
-          items:
-            $ref: '#/components/schemas/SkillTrigger'
-        config:
-          type: string
-          description: Skill config
-        createdAt:
-          type: string
-          format: date-time
-          description: Skill creation time
-        updatedAt:
-          type: string
-          format: date-time
-          description: Skill update time
+      allOf:
+        - $ref: '#/components/schemas/SkillMeta'
+        - type: object
+          properties:
+            triggers:
+              type: array
+              description: Skill triggers
+              items:
+                $ref: '#/components/schemas/SkillTrigger'
+            config:
+              type: string
+              description: Skill config
+            createdAt:
+              type: string
+              format: date-time
+              description: Skill creation time
+            updatedAt:
+              type: string
+              format: date-time
+              description: Skill update time
     SkillLog:
       type: object
       description: Skill operation log
@@ -1230,6 +1240,7 @@ components:
       properties:
         msgId:
           type: string
+          readOnly: true
           description: Message ID
           example: m-g30e1b80b5g1itbemc0g5jj3
         type:
@@ -1239,16 +1250,33 @@ components:
           type: string
           description: Message content
           example: Hello
+        skillMeta:
+          type: object
+          description: Skill metadata
+          $ref: '#/components/schemas/SkillMeta'
+        logs:
+          type: array
+          description: Message logs
+          items:
+            type: string
+        structuredData:
+          type: object
+          description: Structured data output
+          example:
+            sources: [Source]
+            relatedQuestions: [string]
         relatedQuestions:
           type: array
           description: Related questions
           items:
             type: string
+          deprecated: true
         sources:
           type: array
           description: Related sources
           items:
             $ref: '#/components/schemas/Source'
+          deprecated: true
         selectedWeblinkConfig:
           type: string
           description: Selected weblink config (JSON)
@@ -1985,9 +2013,6 @@ components:
         locale:
           type: string
           description: User input locale
-        convId:
-          type: string
-          description: Conversation ID (if passed, model output will be automatically appended to this conversation)
         resourceIds:
           type: array
           description: List of resource IDs
@@ -2023,6 +2048,13 @@ components:
         config:
           type: object
           description: Skill config (should conform to template config schema)
+        convId:
+          description: Conversation ID (will add messages to this conversation if provided)
+          type: string
+          example: cv-g30e1b80b5g1itbemc0g5jj3
+        createConvParam:
+          description: Create conversation parameters
+          $ref: '#/components/schemas/CreateConversationRequest'
     InvokeSkillResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

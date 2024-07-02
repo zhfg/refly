@@ -181,9 +181,9 @@ export type SkillTrigger = {
 };
 
 /**
- * Skill
+ * Skill metadata
  */
-export type SkillInstance = {
+export type SkillMeta = {
   /**
    * Skill name
    */
@@ -191,11 +191,17 @@ export type SkillInstance = {
   /**
    * Skill display name
    */
-  displayName: string;
+  skillDisplayName?: string;
   /**
    * Skill ID
    */
-  skillId: string;
+  skillId?: string;
+};
+
+/**
+ * Skill
+ */
+export type SkillInstance = SkillMeta & {
   /**
    * Skill triggers
    */
@@ -204,6 +210,19 @@ export type SkillInstance = {
    * Skill config
    */
   config?: string;
+  /**
+   * Skill creation time
+   */
+  createdAt?: string;
+  /**
+   * Skill update time
+   */
+  updatedAt?: string;
+} & {
+  /**
+   * Skill ID
+   */
+  skillId: string;
   /**
    * Skill creation time
    */
@@ -353,7 +372,7 @@ export type ChatMessage = {
   /**
    * Message ID
    */
-  msgId: string;
+  readonly msgId: string;
   /**
    * Message type
    */
@@ -363,11 +382,27 @@ export type ChatMessage = {
    */
   content: string;
   /**
+   * Skill metadata
+   */
+  skillMeta?: SkillMeta;
+  /**
+   * Message logs
+   */
+  logs?: Array<string>;
+  /**
+   * Structured data output
+   */
+  structuredData?: {
+    [key: string]: unknown;
+  };
+  /**
    * Related questions
+   * @deprecated
    */
   relatedQuestions?: Array<string>;
   /**
    * Related sources
+   * @deprecated
    */
   sources?: Array<Source>;
   /**
@@ -1060,10 +1095,6 @@ export type SkillContext = {
    */
   locale?: string;
   /**
-   * Conversation ID (if passed, model output will be automatically appended to this conversation)
-   */
-  convId?: string;
-  /**
    * List of resource IDs
    */
   resourceIds?: Array<string>;
@@ -1100,6 +1131,14 @@ export type InvokeSkillRequest = {
   config?: {
     [key: string]: unknown;
   };
+  /**
+   * Conversation ID (will add messages to this conversation if provided)
+   */
+  convId?: string;
+  /**
+   * Create conversation parameters
+   */
+  createConvParam?: CreateConversationRequest;
 };
 
 export type InvokeSkillResponse = BaseResponse & {

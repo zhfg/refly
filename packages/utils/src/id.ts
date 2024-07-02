@@ -14,6 +14,10 @@ export function genConvID(): string {
   return 'cv-' + createId();
 }
 
+export function genChatMessageID(): string {
+  return 'cm-' + createId();
+}
+
 export function genResourceID(): string {
   return 'r-' + createId();
 }

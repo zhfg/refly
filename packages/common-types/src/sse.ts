@@ -4,5 +4,5 @@ export interface SkillEvent {
   skillId?: string;
   skillName: string;
   skillDisplayName: string;
-  componentName?: string;
+  structuredDataKey?: string;
 }

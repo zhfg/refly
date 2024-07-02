@@ -239,8 +239,8 @@ export const listSkillInstances = (options?: Options<ListSkillInstancesData>) =>
 };
 
 /**
- * Create new skill
- * Create a new skill
+ * Create new skill instance
+ * Create a new skill instance for user
  */
 export const createSkillInstance = (options: Options<CreateSkillInstanceData>) => {
   return (options?.client ?? client).post<CreateSkillInstanceResponse, CreateSkillInstanceError>({
@@ -250,8 +250,8 @@ export const createSkillInstance = (options: Options<CreateSkillInstanceData>) =
 };
 
 /**
- * Update skill
- * Update an existing skill
+ * Update skill instance
+ * Update an existing skill instance
  */
 export const updateSkillInstance = (options: Options<UpdateSkillInstanceData>) => {
   return (options?.client ?? client).post<UpdateSkillInstanceResponse, UpdateSkillInstanceError>({
@@ -261,8 +261,8 @@ export const updateSkillInstance = (options: Options<UpdateSkillInstanceData>) =
 };
 
 /**
- * Delete skill
- * Delete an existing skill
+ * Delete skill instance
+ * Delete an existing skill instance
  */
 export const deleteSkillInstance = (options: Options<DeleteSkillInstanceData>) => {
   return (options?.client ?? client).post<DeleteSkillInstanceResponse, DeleteSkillInstanceError>({
@@ -382,7 +382,7 @@ export const createConversation = (options: Options<CreateConversationData>) => 
 };
 
 /**
- * Get conversation
+ * Get conversation detail
  * Get conversation detail
  */
 export const getConversationDetail = (options: Options<GetConversationDetailData>) => {
