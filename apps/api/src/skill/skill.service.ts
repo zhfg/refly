@@ -23,7 +23,7 @@ import {
 } from '@refly/skill-template';
 import { genSkillID, genSkillLogID, genSkillTriggerID } from '@refly/utils';
 import { PrismaService } from '@/common/prisma.service';
-import { QUEUE_SKILL, buildSuccessResponse, writeSSEResponse } from '@/utils';
+import { QUEUE_SKILL, buildSuccessResponse, writeSSEResponse, pick } from '@/utils';
 import { InvokeSkillJobData } from './skill.dto';
 import { KnowledgeService } from '@/knowledge/knowledge.service';
 import { collectionPO2DTO, resourcePO2DTO } from '@/knowledge/knowledge.dto';
@@ -329,7 +329,7 @@ export class SkillService {
           if (chunk?.tool_call_chunks?.length === 0) {
             writeSSEResponse(res, {
               event: 'stream',
-              ...runMeta,
+              ...pick(runMeta, ['skillId', 'skillName', 'skillDisplayName']),
               content:
                 typeof chunk.content === 'string' ? chunk.content : JSON.stringify(chunk.content),
             });
