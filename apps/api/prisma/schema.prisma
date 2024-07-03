@@ -42,7 +42,7 @@ model User {
   /// 主键
   id            Int       @id @default(autoincrement())
   /// UID
-  uid           String?   @default("") @map("uid")
+  uid           String    @default("") @map("uid")
   /// 头像
   avatar        String?   @map("avatar")
   /// 用户名
@@ -117,6 +117,8 @@ model Conversation {
   convId          String?  @default("") @map("conv_id")
   /// 用户id
   userId          Int      @map("user_id")
+  /// UID
+  uid             String   @default("") @map("uid")
   /// 内容 id，指向 aigc_content 中的内容（已废弃）
   contentId       Int?     @map("content_id")
   /// 内容 id
@@ -144,34 +146,42 @@ model Conversation {
   @@map("conversations")
 }
 
-/// 对话消息
+/// Conversation messages
 model ChatMessage {
-  /// id为主键
+  /// Primary key
   id                    Int         @id @default(autoincrement())
-  /// 消息id
+  /// Message id
   msgId                 String?     @default("") @map("msg_id")
-  /// 会话id
+  /// Conversation PK
   conversationId        Int         @map("conversation_id")
-  /// 消息来源
+  /// Message type
   type                  MessageType @map("type")
-  /// 用户id
+  /// User PK
   userId                Int         @map("user_id")
-  /// 内容
+  /// UID
+  uid                   String      @default("") @map("uid")
+  /// Message content
   content               String      @map("content")
-  /// 引用文档来源，以 JSON 方式存储
-  sources               String?     @default("") @map("sources")
-  /// 语言设置
+  /// Skill metadata
+  skillMeta             String      @default("{}") @map("skill_meta")
+  /// JSON of retrieved sources (deprecated)
+  sources               String?     @default("[]") @map("sources")
+  /// Logs output
+  logs                  String      @default("[]") @map("logs")
+  /// Structured data output (JSON)
+  structuredData        String      @default("{}") @map("structured_data")
+  /// Locale setting
   locale                String?     @default("") @map("locale")
-  /// 相关问题
+  /// JSON of relation questions (deprecated)
   relatedQuestions      String?     @map("related_questions")
-  /// 创建时间
+  /// Create timestamp
   createdAt             DateTime    @default(now()) @map("created_at") @db.Timestamptz()
-  /// 更新时间
+  /// Update timestamp
   updatedAt             DateTime    @updatedAt @map("updated_at") @db.Timestamptz()
   /// 会话选中 Weblink 配置，未来可能会变，先使用 string 保存
   selectedWeblinkConfig String?     @map("selected_weblink_config")
 
-  /// 关联的对话
+  /// Related conversations
   conversation Conversation @relation(fields: [conversationId], references: [id])
 
   @@index([conversationId])
@@ -288,8 +298,8 @@ model Resource {
   resourceId      String       @unique @map("resource_id")
   /// 资源类型
   resourceType    ResourceType @map("resource_type")
-  /// 用户主键
-  userId          Int          @map("user_id")
+  /// UID
+  uid             String       @default("") @map("uid")
   /// 字数
   wordCount       Int          @default(0) @map("word_count")
   /// 对象存储 key
@@ -317,7 +327,7 @@ model Resource {
   collections Collection[]
 
   @@index([resourceId])
-  @@index([userId, updatedAt])
+  @@index([uid, updatedAt])
   @@map("resources")
 }
 
@@ -331,8 +341,8 @@ model Collection {
   title        String    @map("title")
   /// 描述
   description  String?   @default("") @map("description")
-  /// 用户主键
-  userId       Int       @map("user_id")
+  /// UID
+  uid          String    @default("") @map("uid")
   /// 是否公开
   isPublic     Boolean   @default(false) @map("is_public")
   /// 创建时间
@@ -346,8 +356,94 @@ model Collection {
   resources Resource[]
 
   @@index([collectionId])
-  @@index([userId, updatedAt])
+  @@index([uid, updatedAt])
   @@map("collections")
+}
+
+/// User-defined skills.
+model SkillInstance {
+  /// Primary key
+  pk          BigInt    @id @default(autoincrement())
+  /// Skill id
+  skillId     String    @unique @map("skill_id")
+  /// Skill name (correspond to names of skill templates)
+  skillName   String    @map("skill_name")
+  /// Skill display name
+  displayName String    @default("") @map("display_name")
+  /// UID of skill owner
+  uid         String    @map("uid")
+  /// Workflow configuration (JSON)
+  config      String    @default("{}") @map("config")
+  /// Create timestamp
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  /// Deletion timestamp
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz()
+
+  @@index([uid, updatedAt])
+  @@map("skill_instances")
+}
+
+model SkillTrigger {
+  /// Primary key
+  pk        BigInt    @id @default(autoincrement())
+  /// Trigger id
+  triggerId String    @unique @map("trigger_id")
+  /// Skill id
+  skillId   String    @map("skill_id")
+  /// Owner UID
+  uid       String    @map("uid")
+  /// Trigger event
+  event     String    @map("event")
+  /// Crontab for cron trigger
+  crontab   String?   @map("crontab")
+  /// Whether this skill is enabled
+  enabled   Boolean   @map("enabled")
+  /// Create timestamp
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  /// Deletion timestamp
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz()
+
+  @@index([skillId, deletedAt])
+  @@map("skill_triggers")
+}
+
+/// Running logs of skills.
+model SkillLog {
+  /// Primary key
+  pk             BigInt       @id @default(autoincrement())
+  /// Skill log id
+  logId          String       @unique @map("log_id")
+  /// Skill id
+  skillId        String       @map("skill_id")
+  /// Skill name
+  skillName      String       @map("skill_name")
+  /// Mode for this skill run
+  mode           SkillRunMode @map("mode")
+  /// Input (JSON of `SkillInput`)
+  input          String       @map("input")
+  /// Context (JSON of `SkillContext`)
+  context        String       @map("context")
+  /// Skill config to override
+  overrideConfig String       @map("override_config")
+  /// Skill operation status
+  status         SkillStatus  @map("status")
+  /// Skill trigger event
+  event          String       @map("event")
+  /// Skill trigger id
+  triggerId      String       @map("trigger_id")
+  /// UID of skill owner
+  uid            String       @map("uid")
+  /// Create timestamp
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([uid, updatedAt])
+  @@map("skill_log")
 }
 
 /// 生成内容
@@ -444,6 +540,18 @@ enum IndexStatus {
   processing
   finish
   failed
+}
+
+enum SkillStatus {
+  scheduling
+  running
+  finish
+  failed
+}
+
+enum SkillRunMode {
+  async
+  stream
 }
 
 enum MessageType {

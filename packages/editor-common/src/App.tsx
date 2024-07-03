@@ -61,7 +61,7 @@ function App() {
           initialContent={initialContent}
           extensions={extensions}
           onCreate={({ editor }) => (editorRef.current = editor)}
-          className="relative h-full w-full max-w-screen-lg border-muted  sm:rounded-lg"
+          className="relative w-full h-full max-w-screen-lg border-muted sm:rounded-lg"
           editorProps={{
             handleDOMEvents: {
               keydown: (_view, event) => handleCommandNavigation(event),

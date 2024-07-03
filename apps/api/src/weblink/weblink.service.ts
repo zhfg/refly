@@ -15,9 +15,9 @@ import { LlmService } from '../llm/llm.service';
 import { WeblinkData, WeblinkJobData } from './weblink.dto';
 import { getExpectedTokenLenContent } from '../utils/token';
 import { CHANNEL_PROCESS_LINK_BY_USER, CHANNEL_PROCESS_LINK, QUEUE_WEBLINK } from '../utils/const';
-import { genLinkID, sha256Hash } from '../utils/id';
+import { sha256Hash } from '../utils/id';
 import { normalizeURL } from '../utils/url';
-import { convertHTMLToMarkdown } from '@refly/utils';
+import { convertHTMLToMarkdown, genLinkID } from '@refly/utils';
 
 @Injectable()
 export class WeblinkService {

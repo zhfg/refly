@@ -28,7 +28,7 @@ export type ResourceMeta = {
  */
 export type ResourceType = 'weblink' | 'note';
 
-export type ResourceListItem = {
+export type Resource = {
   /**
    * Resource ID
    */
@@ -78,9 +78,13 @@ export type ResourceListItem = {
    * Collection creation time
    */
   updatedAt: string;
+  /**
+   * Document content for this resource
+   */
+  doc?: string;
 };
 
-export type CollectionListItem = {
+export type Collection = {
   /**
    * Collection ID
    */
@@ -105,20 +109,166 @@ export type CollectionListItem = {
    * Collection creation time
    */
   updatedAt: string;
+  /**
+   * Collection resources (only returned in detail API)
+   */
+  resources?: Array<Resource>;
 };
 
-export type ResourceDetail = ResourceListItem & {
+/**
+ * Skill template
+ */
+export type SkillTemplate = {
   /**
-   * Document content for this resource
+   * Skill template name
    */
-  doc?: string;
+  name?: string;
+  /**
+   * Skill display name (key is locale and value is display name)
+   */
+  displayName?: {
+    [key: string]: unknown;
+  };
+  /**
+   * Skill description
+   */
+  description?: string;
+  /**
+   * JSON schema for config
+   */
+  configSchema?: {
+    [key: string]: unknown;
+  };
 };
 
-export type CollectionDetail = CollectionListItem & {
+/**
+ * Skill trigger event
+ */
+export type SkillTriggerEvent = 'resourceAdd' | 'resourceUpdate' | 'collectionAdd' | 'collectionUpdate' | 'cron';
+
+/**
+ * Skill triggers
+ */
+export type SkillTrigger = {
   /**
-   * Collection resources
+   * Skill ID
    */
-  resources?: Array<ResourceListItem>;
+  skillId: string;
+  /**
+   * Trigger ID
+   */
+  triggerId: string;
+  /**
+   * Trigger event
+   */
+  event: SkillTriggerEvent;
+  /**
+   * Cron expression
+   */
+  crontab?: string;
+  /**
+   * Trigger enabled
+   */
+  enabled: boolean;
+  /**
+   * Trigger creation time
+   */
+  createdAt: string;
+  /**
+   * Trigger update time
+   */
+  updatedAt: string;
+};
+
+/**
+ * Skill metadata
+ */
+export type SkillMeta = {
+  /**
+   * Skill name
+   */
+  skillName: string;
+  /**
+   * Skill display name
+   */
+  skillDisplayName?: string;
+  /**
+   * Skill ID
+   */
+  skillId?: string;
+};
+
+/**
+ * Skill
+ */
+export type SkillInstance = SkillMeta & {
+  /**
+   * Skill triggers
+   */
+  triggers?: Array<SkillTrigger>;
+  /**
+   * Skill config
+   */
+  config?: string;
+  /**
+   * Skill creation time
+   */
+  createdAt?: string;
+  /**
+   * Skill update time
+   */
+  updatedAt?: string;
+} & {
+  /**
+   * Skill ID
+   */
+  skillId: string;
+  /**
+   * Skill creation time
+   */
+  createdAt: string;
+  /**
+   * Skill update time
+   */
+  updatedAt: string;
+};
+
+/**
+ * Skill operation log
+ */
+export type SkillLog = {
+  /**
+   * Log ID
+   */
+  logId: string;
+  /**
+   * Skill ID
+   */
+  skillId: string;
+  /**
+   * Skill name
+   */
+  skillName: string;
+  /**
+   * Skill trigger ID
+   */
+  triggerId?: string;
+  /**
+   * Skill input
+   */
+  input: SkillInput;
+  /**
+   * Skill context
+   */
+  context: SkillContext;
+  /**
+   * Log creation time
+   */
+  createdAt: string;
+  /**
+   * Log update time
+   */
+  updatedAt: string;
 };
 
 /**
@@ -222,7 +372,7 @@ export type ChatMessage = {
   /**
    * Message ID
    */
-  msgId: string;
+  readonly msgId: string;
   /**
    * Message type
    */
@@ -232,11 +382,27 @@ export type ChatMessage = {
    */
   content: string;
   /**
+   * Skill metadata
+   */
+  skillMeta?: SkillMeta;
+  /**
+   * Message logs
+   */
+  logs?: Array<string>;
+  /**
+   * Structured data output
+   */
+  structuredData?: {
+    [key: string]: unknown;
+  };
+  /**
    * Related questions
+   * @deprecated
    */
   relatedQuestions?: Array<string>;
   /**
    * Related sources
+   * @deprecated
    */
   sources?: Array<Source>;
   /**
@@ -792,7 +958,7 @@ export type UpsertResourceRequest = {
 };
 
 export type UpsertResourceResponse = BaseResponse & {
-  data?: ResourceListItem;
+  data?: Resource;
 };
 
 export type DeleteResourceRequest = {
@@ -806,14 +972,14 @@ export type ListResourceResponse = BaseResponse & {
   /**
    * Resource list
    */
-  data?: Array<ResourceListItem>;
+  data?: Array<Resource>;
 };
 
 export type GetResourceDetailResponse = BaseResponse & {
   /**
    * Resource data
    */
-  data?: ResourceDetail;
+  data?: Resource;
 };
 
 export type UpsertCollectionRequest = {
@@ -836,7 +1002,7 @@ export type UpsertCollectionRequest = {
 };
 
 export type UpsertCollectionResponse = BaseResponse & {
-  data?: CollectionListItem;
+  data?: Collection;
 };
 
 export type DeleteCollectionRequest = {
@@ -850,14 +1016,184 @@ export type ListCollectionResponse = BaseResponse & {
   /**
    * Collection list
    */
-  data?: Array<CollectionListItem>;
+  data?: Array<Collection>;
 };
 
 export type GetCollectionDetailResponse = BaseResponse & {
   /**
    * Collection data
    */
-  data?: CollectionDetail;
+  data?: Collection;
+};
+
+export type ListSkillTemplateResponse = BaseResponse & {
+  /**
+   * Skill template list
+   */
+  data?: Array<SkillTemplate>;
+};
+
+export type ListSkillInstanceResponse = BaseResponse & {
+  /**
+   * Skill list
+   */
+  data?: Array<SkillInstance>;
+};
+
+export type UpsertSkillInstanceRequest = {
+  /**
+   * Skill name
+   */
+  skillName: string;
+  /**
+   * Skill display name
+   */
+  displayName: string;
+  /**
+   * Skill ID (only used for update)
+   */
+  skillId?: string;
+  /**
+   * Skill triggers
+   */
+  triggers?: Array<UpsertSkillTriggerRequest>;
+  /**
+   * Skill config (should conform to template config schema)
+   */
+  config?: {
+    [key: string]: unknown;
+  };
+};
+
+export type UpsertSkillInstanceResponse = BaseResponse & {
+  data?: SkillInstance;
+};
+
+export type DeleteSkillInstanceRequest = {
+  /**
+   * Skill ID to delete
+   */
+  skillId: string;
+};
+
+/**
+ * Skill input
+ */
+export type SkillInput = {
+  /**
+   * User query
+   */
+  query: string;
+};
+
+/**
+ * Skill invocation context
+ */
+export type SkillContext = {
+  /**
+   * User input locale
+   */
+  locale?: string;
+  /**
+   * List of resource IDs
+   */
+  resourceIds?: Array<string>;
+  /**
+   * List of collection IDs
+   */
+  collectionIds?: Array<string>;
+  /**
+   * List of content
+   */
+  contentList?: Array<string>;
+};
+
+export type InvokeSkillRequest = {
+  /**
+   * Skill input
+   */
+  input: SkillInput;
+  /**
+   * Skill invocation context
+   */
+  context?: SkillContext;
+  /**
+   * Skill instance ID to invoke (if not provided, skill scheduler will be used)
+   */
+  skillId?: string;
+  /**
+   * Skill trigger event
+   */
+  event?: SkillTriggerEvent;
+  /**
+   * Skill config (should conform to template config schema)
+   */
+  config?: {
+    [key: string]: unknown;
+  };
+  /**
+   * Conversation ID (will add messages to this conversation if provided)
+   */
+  convId?: string;
+  /**
+   * Create conversation parameters
+   */
+  createConvParam?: CreateConversationRequest;
+};
+
+export type InvokeSkillResponse = BaseResponse & {
+  /**
+   * Skill log id
+   */
+  logId?: string;
+};
+
+export type ListSkillTriggerResponse = BaseResponse & {
+  /**
+   * Skill trigger list
+   */
+  data?: Array<SkillTrigger>;
+};
+
+export type UpsertSkillTriggerRequest = {
+  /**
+   * Skill ID (only used for updating triggers or adding triggers to an existing skill)
+   */
+  skillId?: string;
+  /**
+   * Trigger ID (only used for update)
+   */
+  triggerId?: string;
+  /**
+   * Trigger event
+   */
+  event: SkillTriggerEvent;
+  /**
+   * Trigger crontab (only valid when event is `cron`)
+   */
+  crontab?: string;
+  /**
+   * Whether this trigger is enabled
+   */
+  enabled?: boolean;
+};
+
+export type UpsertSkillTriggerResponse = BaseResponse & {
+  data?: SkillTrigger;
+};
+
+export type DeleteSkillTriggerRequest = {
+  /**
+   * Trigger ID to delete
+   */
+  triggerId: string;
+};
+
+export type ListSkillLogResponse = BaseResponse & {
+  /**
+   * Skill log list
+   */
+  data?: Array<SkillLog>;
 };
 
 export type CreateConversationRequest = {
@@ -1030,6 +1366,10 @@ export type ListResourcesData = {
      * Page size
      */
     pageSize?: number;
+    /**
+     * Resource ID
+     */
+    resourceId?: string;
   };
 };
 
@@ -1139,6 +1479,168 @@ export type DeleteCollectionData = {
 export type DeleteCollectionResponse = BaseResponse;
 
 export type DeleteCollectionError = unknown;
+
+export type ListSkillTemplatesData = {
+  query?: {
+    /**
+     * Page number
+     */
+    page?: number;
+    /**
+     * Page size
+     */
+    pageSize?: number;
+  };
+};
+
+export type ListSkillTemplatesResponse = ListSkillTemplateResponse;
+
+export type ListSkillTemplatesError = unknown;
+
+export type ListSkillInstancesData = {
+  query?: {
+    /**
+     * Page number
+     */
+    page?: number;
+    /**
+     * Page size
+     */
+    pageSize?: number;
+    /**
+     * Skill ID
+     */
+    skillId?: string;
+  };
+};
+
+export type ListSkillInstancesResponse = ListSkillInstanceResponse;
+
+export type ListSkillInstancesError = unknown;
+
+export type CreateSkillInstanceData = {
+  /**
+   * Skill creation request
+   */
+  body: UpsertSkillInstanceRequest;
+};
+
+export type CreateSkillInstanceResponse = UpsertSkillInstanceResponse;
+
+export type CreateSkillInstanceError = unknown;
+
+export type UpdateSkillInstanceData = {
+  /**
+   * Skill update request
+   */
+  body: UpsertSkillInstanceRequest;
+};
+
+export type UpdateSkillInstanceResponse = UpsertSkillInstanceResponse;
+
+export type UpdateSkillInstanceError = unknown;
+
+export type DeleteSkillInstanceData = {
+  body: DeleteSkillInstanceRequest;
+};
+
+export type DeleteSkillInstanceResponse = BaseResponse;
+
+export type DeleteSkillInstanceError = unknown;
+
+export type InvokeSkillData = {
+  /**
+   * Skill invocation request
+   */
+  body: InvokeSkillRequest;
+};
+
+export type InvokeSkillResponse2 = InvokeSkillResponse;
+
+export type InvokeSkillError = unknown;
+
+export type StreamInvokeSkillData = {
+  /**
+   * Skill invocation request
+   */
+  body: InvokeSkillRequest;
+};
+
+export type StreamInvokeSkillResponse = string;
+
+export type StreamInvokeSkillError = unknown;
+
+export type ListSkillTriggersData = {
+  query?: {
+    /**
+     * Page number
+     */
+    page?: number;
+    /**
+     * Page size
+     */
+    pageSize?: number;
+    /**
+     * Skill ID
+     */
+    skillId?: string;
+  };
+};
+
+export type ListSkillTriggersResponse = ListSkillTriggerResponse;
+
+export type ListSkillTriggersError = unknown;
+
+export type CreateSkillTriggerData = {
+  /**
+   * Skill trigger creation request
+   */
+  body: UpsertSkillTriggerRequest;
+};
+
+export type CreateSkillTriggerResponse = BaseResponse;
+
+export type CreateSkillTriggerError = unknown;
+
+export type UpdateSkillTriggerData = {
+  /**
+   * Skill trigger update request
+   */
+  body: UpsertSkillTriggerRequest;
+};
+
+export type UpdateSkillTriggerResponse = BaseResponse;
+
+export type UpdateSkillTriggerError = unknown;
+
+export type DeleteSkillTriggerData = {
+  body: DeleteSkillTriggerRequest;
+};
+
+export type DeleteSkillTriggerResponse = BaseResponse;
+
+export type DeleteSkillTriggerError = unknown;
+
+export type ListSkillLogsData = {
+  query?: {
+    /**
+     * Page number
+     */
+    page?: number;
+    /**
+     * Page size
+     */
+    pageSize?: number;
+    /**
+     * Skill ID
+     */
+    skillId?: string;
+  };
+};
+
+export type ListSkillLogsResponse = ListSkillLogResponse;
+
+export type ListSkillLogsError = unknown;
 
 export type ListConversationsResponse = ListConversationResponse;
 
@@ -1387,6 +1889,138 @@ export type $OpenApiTs = {
          * Successful operation
          */
         '200': BaseResponse;
+      };
+    };
+  };
+  '/skill/template/list': {
+    get: {
+      req: ListSkillTemplatesData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': ListSkillTemplateResponse;
+      };
+    };
+  };
+  '/skill/instance/list': {
+    get: {
+      req: ListSkillInstancesData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': ListSkillInstanceResponse;
+      };
+    };
+  };
+  '/skill/instance/new': {
+    post: {
+      req: CreateSkillInstanceData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': UpsertSkillInstanceResponse;
+      };
+    };
+  };
+  '/skill/instance/update': {
+    post: {
+      req: UpdateSkillInstanceData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': UpsertSkillInstanceResponse;
+      };
+    };
+  };
+  '/skill/instance/delete': {
+    post: {
+      req: DeleteSkillInstanceData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': BaseResponse;
+      };
+    };
+  };
+  '/skill/invoke': {
+    post: {
+      req: InvokeSkillData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': InvokeSkillResponse;
+      };
+    };
+  };
+  '/skill/streamInvoke': {
+    post: {
+      req: StreamInvokeSkillData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': string;
+      };
+    };
+  };
+  '/skill/trigger/list': {
+    get: {
+      req: ListSkillTriggersData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': ListSkillTriggerResponse;
+      };
+    };
+  };
+  '/skill/trigger/new': {
+    post: {
+      req: CreateSkillTriggerData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': BaseResponse;
+      };
+    };
+  };
+  '/skill/trigger/update': {
+    post: {
+      req: UpdateSkillTriggerData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': BaseResponse;
+      };
+    };
+  };
+  '/skill/trigger/delete': {
+    post: {
+      req: DeleteSkillTriggerData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': BaseResponse;
+      };
+    };
+  };
+  '/skill/log/list': {
+    get: {
+      req: ListSkillLogsData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': ListSkillLogResponse;
       };
     };
   };

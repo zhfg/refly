@@ -1,7 +1,7 @@
 import { Message as message } from '@arco-design/web-react';
 
 import { KnowledgeBaseTab, useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { ResourceDetail } from '@refly/openapi-schema';
+import { Resource } from '@refly/openapi-schema';
 import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 
 export const useKnowledgeBaseTabs = () => {
@@ -11,7 +11,7 @@ export const useKnowledgeBaseTabs = () => {
   const tabs = knowledgeBaseStore.tabs;
   const activeTab = knowledgeBaseStore.activeTab;
 
-  const handleAddTabWithResource = (resource?: Partial<ResourceDetail>) => {
+  const handleAddTabWithResource = (resource?: Partial<Resource>) => {
     const newTab: KnowledgeBaseTab = {
       title: resource?.title || '',
       key: resource?.resourceId || '',

@@ -33,9 +33,9 @@ export const CollabEditorCommand = () => {
           <EditorCommandItem
             value={item.title}
             onCommand={val => item.command(val)}
-            className="flex w-full items-center space-x-2 rounded-md px-2 py-1 text-left text-sm hover:bg-accent aria-selected:bg-accent"
+            className="flex items-center w-full px-2 py-1 space-x-2 text-sm text-left rounded-md hover:bg-accent aria-selected:bg-accent"
             key={item.title}>
-            <div className="flex h-10 w-10 items-center justify-center rounded-md border border-muted bg-background">
+            <div className="flex items-center justify-center w-10 h-10 border rounded-md border-muted bg-background">
               {item.icon}
             </div>
             <div>

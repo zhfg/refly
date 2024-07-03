@@ -11,37 +11,21 @@ import {
   Param,
   BadRequestException,
   UnauthorizedException,
+  NotFoundException,
 } from '@nestjs/common';
 import { Response } from 'express';
 import {
   CreateConversationRequest,
   CreateConversationResponse,
   ListConversationResponse,
-  Conversation as ConversationListItem,
   ChatRequest,
   GetConversationDetailResponse,
 } from '@refly/openapi-schema';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
 import { Conversation } from '@prisma/client';
-import { buildSuccessResponse, pick } from '../utils';
-
-const convertConversationToListItem = (conversation: Conversation): ConversationListItem => {
-  return {
-    ...pick(conversation, [
-      'convId',
-      'title',
-      'lastMessage',
-      'messageCount',
-      'cid',
-      'origin',
-      'originPageTitle',
-      'originPageUrl',
-    ]),
-    createdAt: conversation.createdAt.toJSON(),
-    updatedAt: conversation.updatedAt.toJSON(),
-  };
-};
+import { buildSuccessResponse } from '../utils';
+import { toConversationDTO } from '@/conversation/conversation.dto';
 
 @Controller('conversation')
 export class ConversationController {
@@ -56,7 +40,7 @@ export class ConversationController {
     @Body() body: CreateConversationRequest,
   ): Promise<CreateConversationResponse> {
     const conversation = await this.conversationService.createConversation(req.user, body);
-    return buildSuccessResponse(convertConversationToListItem(conversation));
+    return buildSuccessResponse(toConversationDTO(conversation));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -157,9 +141,7 @@ export class ConversationController {
       orderBy: { createdAt: 'desc' },
     });
 
-    return buildSuccessResponse(
-      conversationList.map((conv) => convertConversationToListItem(conv)),
-    );
+    return buildSuccessResponse(conversationList.map(toConversationDTO));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -169,6 +151,11 @@ export class ConversationController {
     @Param('convId') convId: string,
   ): Promise<GetConversationDetailResponse> {
     const data = await this.conversationService.findConversation(convId, true);
-    return buildSuccessResponse(data.userId === (req.user.id as number) ? data : {});
+    if (!data) {
+      throw new NotFoundException('conversation not found');
+    }
+    return buildSuccessResponse(
+      data?.userId === (req.user.id as number) ? toConversationDTO(data) : {},
+    );
   }
 }

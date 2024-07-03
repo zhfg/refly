@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 // 类型
-import { ResourceDetail } from '@refly/openapi-schema';
+import { Resource } from '@refly/openapi-schema';
 // 请求
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // 组件
@@ -97,7 +97,7 @@ export const KnowledgeBaseDirectory = () => {
         <ResourceList
           placeholder="搜索知识库..."
           isFetching={isFetching}
-          resources={resources as ResourceDetail[]}
+          resources={resources as Resource[]}
           handleItemClick={(item) => {
             navigate(`/knowledge-base?kbId=${item?.collectionId}&resId=${item?.resourceId}`);
           }}

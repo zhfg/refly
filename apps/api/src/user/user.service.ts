@@ -13,6 +13,10 @@ export class UserService {
     return this.prisma.user.findUnique({ where });
   }
 
+  async findUserByUID(uid: string): Promise<User> {
+    return this.prisma.user.findFirst({ where: { uid } });
+  }
+
   async create(data: Prisma.UserCreateInput) {
     return this.prisma.user.create({ data });
   }

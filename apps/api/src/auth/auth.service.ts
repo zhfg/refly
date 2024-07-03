@@ -6,7 +6,7 @@ import { User } from '@prisma/client';
 import { AccountService } from '../account/account.service';
 import { UserService } from '../user/user.service';
 import { JwtPayload } from './dto';
-import { genUID } from '../utils/id';
+import { genUID } from '@refly/utils';
 
 @Injectable()
 export class AuthService {
@@ -29,7 +29,7 @@ export class AuthService {
   }
 
   async login(user: User) {
-    const payload: JwtPayload = { id: String(user.id), email: user.email };
+    const payload: JwtPayload = { uid: user.uid, email: user.email };
     return {
       accessToken: this.jwtService.sign(payload, {
         secret: this.configService.get('auth.jwt.secret'),

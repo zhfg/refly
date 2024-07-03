@@ -33,7 +33,7 @@ export const $ResourceType = {
   enum: ['weblink', 'note'],
 } as const;
 
-export const $ResourceListItem = {
+export const $Resource = {
   type: 'object',
   required: [
     'resourceId',
@@ -103,10 +103,14 @@ export const $ResourceListItem = {
       format: 'date-time',
       description: 'Collection creation time',
     },
+    doc: {
+      type: 'string',
+      description: 'Document content for this resource',
+    },
   },
 } as const;
 
-export const $CollectionListItem = {
+export const $Collection = {
   type: 'object',
   required: ['collectionId', 'title', 'createdAt', 'updatedAt'],
   properties: {
@@ -140,44 +144,185 @@ export const $CollectionListItem = {
       format: 'date-time',
       description: 'Collection creation time',
     },
+    resources: {
+      type: 'array',
+      description: 'Collection resources (only returned in detail API)',
+      items: {
+        $ref: '#/components/schemas/Resource',
+      },
+    },
   },
 } as const;
 
-export const $ResourceDetail = {
+export const $SkillTemplate = {
+  type: 'object',
+  description: 'Skill template',
+  properties: {
+    name: {
+      type: 'string',
+      description: 'Skill template name',
+    },
+    displayName: {
+      type: 'object',
+      description: 'Skill display name (key is locale and value is display name)',
+    },
+    description: {
+      type: 'string',
+      description: 'Skill description',
+    },
+    configSchema: {
+      type: 'object',
+      description: 'JSON schema for config',
+    },
+  },
+} as const;
+
+export const $SkillTriggerEvent = {
+  type: 'string',
+  description: 'Skill trigger event',
+  enum: ['resourceAdd', 'resourceUpdate', 'collectionAdd', 'collectionUpdate', 'cron'],
+} as const;
+
+export const $SkillTrigger = {
+  type: 'object',
+  description: 'Skill triggers',
+  required: ['skillId', 'triggerId', 'event', 'enabled', 'createdAt', 'updatedAt'],
+  properties: {
+    skillId: {
+      type: 'string',
+      description: 'Skill ID',
+      example: 'sk-g30e1b80b5g1itbemc0g5jj3',
+    },
+    triggerId: {
+      type: 'string',
+      description: 'Trigger ID',
+      example: 'tr-g30e1b80b5g1itbemc0g5jj3',
+    },
+    event: {
+      description: 'Trigger event',
+      $ref: '#/components/schemas/SkillTriggerEvent',
+    },
+    crontab: {
+      type: 'string',
+      description: 'Cron expression',
+      example: '0 0 * * * *',
+    },
+    enabled: {
+      type: 'boolean',
+      description: 'Trigger enabled',
+    },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Trigger creation time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Trigger update time',
+    },
+  },
+} as const;
+
+export const $SkillMeta = {
+  type: 'object',
+  description: 'Skill metadata',
+  required: ['skillName', 'displayName'],
+  properties: {
+    skillName: {
+      type: 'string',
+      description: 'Skill name',
+    },
+    skillDisplayName: {
+      type: 'string',
+      description: 'Skill display name',
+    },
+    skillId: {
+      type: 'string',
+      description: 'Skill ID',
+      example: 'sk-g30e1b80b5g1itbemc0g5jj3',
+    },
+  },
+} as const;
+
+export const $SkillInstance = {
+  type: 'object',
+  description: 'Skill',
+  required: ['skillName', 'displayName', 'skillId', 'createdAt', 'updatedAt'],
   allOf: [
     {
-      $ref: '#/components/schemas/ResourceListItem',
+      $ref: '#/components/schemas/SkillMeta',
     },
     {
       type: 'object',
       properties: {
-        doc: {
+        triggers: {
+          type: 'array',
+          description: 'Skill triggers',
+          items: {
+            $ref: '#/components/schemas/SkillTrigger',
+          },
+        },
+        config: {
           type: 'string',
-          description: 'Document content for this resource',
+          description: 'Skill config',
+        },
+        createdAt: {
+          type: 'string',
+          format: 'date-time',
+          description: 'Skill creation time',
+        },
+        updatedAt: {
+          type: 'string',
+          format: 'date-time',
+          description: 'Skill update time',
         },
       },
     },
   ],
 } as const;
 
-export const $CollectionDetail = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/CollectionListItem',
+export const $SkillLog = {
+  type: 'object',
+  description: 'Skill operation log',
+  required: ['logId', 'skillId', 'skillName', 'input', 'context', 'createdAt', 'updatedAt'],
+  properties: {
+    logId: {
+      type: 'string',
+      description: 'Log ID',
+      example: 'lg-g30e1b80b5g1itbemc0g5jj3',
     },
-    {
-      type: 'object',
-      properties: {
-        resources: {
-          type: 'array',
-          description: 'Collection resources',
-          items: {
-            $ref: '#/components/schemas/ResourceListItem',
-          },
-        },
-      },
+    skillId: {
+      type: 'string',
+      description: 'Skill ID',
     },
-  ],
+    skillName: {
+      type: 'string',
+      description: 'Skill name',
+    },
+    triggerId: {
+      type: 'string',
+      description: 'Skill trigger ID',
+    },
+    input: {
+      description: 'Skill input',
+      $ref: '#/components/schemas/SkillInput',
+    },
+    context: {
+      description: 'Skill context',
+      $ref: '#/components/schemas/SkillContext',
+    },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Log creation time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Log update time',
+    },
+  },
 } as const;
 
 export const $SourceMeta = {
@@ -289,6 +434,7 @@ export const $ChatMessage = {
   properties: {
     msgId: {
       type: 'string',
+      readOnly: true,
       description: 'Message ID',
       example: 'm-g30e1b80b5g1itbemc0g5jj3',
     },
@@ -301,12 +447,33 @@ export const $ChatMessage = {
       description: 'Message content',
       example: 'Hello',
     },
+    skillMeta: {
+      type: 'object',
+      description: 'Skill metadata',
+      $ref: '#/components/schemas/SkillMeta',
+    },
+    logs: {
+      type: 'array',
+      description: 'Message logs',
+      items: {
+        type: 'string',
+      },
+    },
+    structuredData: {
+      type: 'object',
+      description: 'Structured data output',
+      example: {
+        sources: ['Source'],
+        relatedQuestions: ['string'],
+      },
+    },
     relatedQuestions: {
       type: 'array',
       description: 'Related questions',
       items: {
         type: 'string',
       },
+      deprecated: true,
     },
     sources: {
       type: 'array',
@@ -314,6 +481,7 @@ export const $ChatMessage = {
       items: {
         $ref: '#/components/schemas/Source',
       },
+      deprecated: true,
     },
     selectedWeblinkConfig: {
       type: 'string',
@@ -1065,7 +1233,7 @@ export const $UpsertResourceResponse = {
       type: 'object',
       properties: {
         data: {
-          $ref: '#/components/schemas/ResourceListItem',
+          $ref: '#/components/schemas/Resource',
         },
       },
     },
@@ -1096,7 +1264,7 @@ export const $ListResourceResponse = {
           type: 'array',
           description: 'Resource list',
           items: {
-            $ref: '#/components/schemas/ResourceListItem',
+            $ref: '#/components/schemas/Resource',
           },
         },
       },
@@ -1115,7 +1283,7 @@ export const $GetResourceDetailResponse = {
         data: {
           type: 'object',
           description: 'Resource data',
-          $ref: '#/components/schemas/ResourceDetail',
+          $ref: '#/components/schemas/Resource',
         },
       },
     },
@@ -1157,7 +1325,7 @@ export const $UpsertCollectionResponse = {
       type: 'object',
       properties: {
         data: {
-          $ref: '#/components/schemas/CollectionListItem',
+          $ref: '#/components/schemas/Collection',
         },
       },
     },
@@ -1188,7 +1356,7 @@ export const $ListCollectionResponse = {
           type: 'array',
           description: 'Collection list',
           items: {
-            $ref: '#/components/schemas/CollectionListItem',
+            $ref: '#/components/schemas/Collection',
           },
         },
       },
@@ -1207,7 +1375,301 @@ export const $GetCollectionDetailResponse = {
         data: {
           type: 'object',
           description: 'Collection data',
-          $ref: '#/components/schemas/CollectionDetail',
+          $ref: '#/components/schemas/Collection',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $ListSkillTemplateResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Skill template list',
+          items: {
+            $ref: '#/components/schemas/SkillTemplate',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $ListSkillInstanceResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Skill list',
+          items: {
+            $ref: '#/components/schemas/SkillInstance',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $UpsertSkillInstanceRequest = {
+  type: 'object',
+  required: ['skillName', 'displayName'],
+  properties: {
+    skillName: {
+      type: 'string',
+      description: 'Skill name',
+      example: 'online-search',
+    },
+    displayName: {
+      type: 'string',
+      description: 'Skill display name',
+      example: 'My Custom Skill',
+    },
+    skillId: {
+      type: 'string',
+      description: 'Skill ID (only used for update)',
+      example: 's-g30e1b80b5g1itbemc0g5jj3',
+    },
+    triggers: {
+      type: 'array',
+      description: 'Skill triggers',
+      items: {
+        $ref: '#/components/schemas/UpsertSkillTriggerRequest',
+      },
+    },
+    config: {
+      type: 'object',
+      description: 'Skill config (should conform to template config schema)',
+    },
+  },
+} as const;
+
+export const $UpsertSkillInstanceResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          $ref: '#/components/schemas/SkillInstance',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $DeleteSkillInstanceRequest = {
+  type: 'object',
+  required: ['skillId'],
+  properties: {
+    skillId: {
+      type: 'string',
+      description: 'Skill ID to delete',
+    },
+  },
+} as const;
+
+export const $SkillInput = {
+  type: 'object',
+  description: 'Skill input',
+  required: ['query'],
+  properties: {
+    query: {
+      type: 'string',
+      description: 'User query',
+    },
+  },
+} as const;
+
+export const $SkillContext = {
+  type: 'object',
+  description: 'Skill invocation context',
+  properties: {
+    locale: {
+      type: 'string',
+      description: 'User input locale',
+    },
+    resourceIds: {
+      type: 'array',
+      description: 'List of resource IDs',
+      items: {
+        type: 'string',
+      },
+    },
+    collectionIds: {
+      type: 'array',
+      description: 'List of collection IDs',
+      items: {
+        type: 'string',
+      },
+    },
+    contentList: {
+      type: 'array',
+      description: 'List of content',
+      items: {
+        type: 'string',
+      },
+    },
+  },
+} as const;
+
+export const $InvokeSkillRequest = {
+  type: 'object',
+  required: ['input'],
+  properties: {
+    input: {
+      description: 'Skill input',
+      $ref: '#/components/schemas/SkillInput',
+    },
+    context: {
+      description: 'Skill invocation context',
+      $ref: '#/components/schemas/SkillContext',
+    },
+    skillId: {
+      type: 'string',
+      description: 'Skill instance ID to invoke (if not provided, skill scheduler will be used)',
+    },
+    event: {
+      description: 'Skill trigger event',
+      $ref: '#/components/schemas/SkillTriggerEvent',
+    },
+    config: {
+      type: 'object',
+      description: 'Skill config (should conform to template config schema)',
+    },
+    convId: {
+      description: 'Conversation ID (will add messages to this conversation if provided)',
+      type: 'string',
+      example: 'cv-g30e1b80b5g1itbemc0g5jj3',
+    },
+    createConvParam: {
+      description: 'Create conversation parameters',
+      $ref: '#/components/schemas/CreateConversationRequest',
+    },
+  },
+} as const;
+
+export const $InvokeSkillResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        logId: {
+          type: 'string',
+          description: 'Skill log id',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $ListSkillTriggerResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Skill trigger list',
+          items: {
+            $ref: '#/components/schemas/SkillTrigger',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $UpsertSkillTriggerRequest = {
+  type: 'object',
+  required: ['event'],
+  properties: {
+    skillId: {
+      type: 'string',
+      description: 'Skill ID (only used for updating triggers or adding triggers to an existing skill)',
+      example: 'sk-g30e1b80b5g1itbemc0g5jj3',
+    },
+    triggerId: {
+      type: 'string',
+      description: 'Trigger ID (only used for update)',
+      example: 'tr-g30e1b80b5g1itbemc0g5jj3',
+    },
+    event: {
+      description: 'Trigger event',
+      $ref: '#/components/schemas/SkillTriggerEvent',
+    },
+    crontab: {
+      type: 'string',
+      description: 'Trigger crontab (only valid when event is `cron`)',
+      example: '0 0 1 * *',
+    },
+    enabled: {
+      type: 'boolean',
+      description: 'Whether this trigger is enabled',
+    },
+  },
+} as const;
+
+export const $UpsertSkillTriggerResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          $ref: '#/components/schemas/SkillTrigger',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $DeleteSkillTriggerRequest = {
+  type: 'object',
+  required: ['triggerId'],
+  properties: {
+    triggerId: {
+      type: 'string',
+      description: 'Trigger ID to delete',
+    },
+  },
+} as const;
+
+export const $ListSkillLogResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Skill log list',
+          items: {
+            $ref: '#/components/schemas/SkillLog',
+          },
         },
       },
     },

@@ -1,4 +1,4 @@
 export class JwtPayload {
-  id: string;
+  uid: string;
   email: string;
 }

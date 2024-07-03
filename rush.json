@@ -30,6 +30,11 @@
       "reviewCategory": "packages"
     },
     {
+      "packageName": "@refly/skill-template",
+      "projectFolder": "packages/skill-template",
+      "reviewCategory": "packages"
+    },
+    {
       "packageName": "@refly/utils",
       "projectFolder": "packages/utils",
       "reviewCategory": "packages"

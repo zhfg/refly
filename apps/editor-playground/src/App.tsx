@@ -11,7 +11,7 @@ import StarterKit from '@tiptap/starter-kit';
 import React, { useEffect, useMemo, useState } from 'react';
 import { client, createClient } from '@hey-api/client-fetch';
 import { Markdown } from 'tiptap-markdown';
-import { ResourceDetail, getResourceDetail } from '@refly/openapi-schema';
+import { Resource as ResourceDetail, getResourceDetail } from '@refly/openapi-schema';
 
 import './index.css';
 

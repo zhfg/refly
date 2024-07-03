@@ -1,4 +1,4 @@
-import { OutputLocale } from '@refly/utils';
+import { type OutputLocale } from '@refly/utils';
 import { Source } from '@refly/openapi-schema';
 
 export interface Mode {

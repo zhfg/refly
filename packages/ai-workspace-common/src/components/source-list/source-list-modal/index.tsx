@@ -7,7 +7,7 @@ import './index.scss';
 // 自定义组件
 import { ResourceList } from '@refly-packages/ai-workspace-common/components/resource-list';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
-import { ResourceDetail } from '@refly/openapi-schema';
+import { Resource } from '@refly/openapi-schema';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 interface SourceListModalProps {
@@ -16,7 +16,7 @@ interface SourceListModalProps {
   width?: number;
   height?: string;
   placement?: 'bottom' | 'left' | 'right' | 'top';
-  resources: Partial<ResourceDetail>[];
+  resources: Partial<Resource>[];
 }
 
 export const SourceListModal = (props: SourceListModalProps) => {

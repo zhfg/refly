@@ -13,6 +13,8 @@ servers:
 tags:
   - name: knowledge
     description: Knowledge base management endpoints
+  - name: skill
+    description: Skill management endpoints
   - name: chat
     description: Chatbot related endpoints
   - name: weblink
@@ -30,6 +32,12 @@ paths:
       description: List all resources
       operationId: listResources
       parameters:
+        - name: resourceId
+          in: query
+          description: Resource ID
+          schema:
+            type: string
+            example: r-g30e1b80b5g1itbemc0g5jj3
         - name: collectionId
           in: query
           description: Target collection ID
@@ -272,6 +280,303 @@ paths:
                 $ref: '#/components/schemas/BaseResponse'
       security:
         - api_key: []
+  /skill/template/list:
+    get:
+      tags:
+        - skill
+      summary: List skill templates
+      description: List all skill templates
+      operationId: listSkillTemplates
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: number
+            default: 1
+        - name: pageSize
+          in: query
+          description: Page size
+          schema:
+            type: number
+            default: 10
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListSkillTemplateResponse'
+  /skill/instance/list:
+    get:
+      tags:
+        - skill
+      summary: List skill instances
+      description: List skill instances for a user
+      operationId: listSkillInstances
+      parameters:
+        - name: skillId
+          in: query
+          description: Skill ID
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: number
+            default: 1
+        - name: pageSize
+          in: query
+          description: Page size
+          schema:
+            type: number
+            default: 10
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListSkillInstanceResponse'
+  /skill/instance/new:
+    post:
+      tags:
+        - skill
+      summary: Create new skill instance
+      description: Create a new skill instance for user
+      operationId: createSkillInstance
+      requestBody:
+        description: Skill creation request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertSkillInstanceRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertSkillInstanceResponse'
+  /skill/instance/update:
+    post:
+      tags:
+        - skill
+      summary: Update skill instance
+      description: Update an existing skill instance
+      operationId: updateSkillInstance
+      requestBody:
+        description: Skill update request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertSkillInstanceRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertSkillInstanceResponse'
+  /skill/instance/delete:
+    post:
+      tags:
+        - skill
+      summary: Delete skill instance
+      description: Delete an existing skill instance
+      operationId: deleteSkillInstance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteSkillInstanceRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+      security:
+        - api_key: []
+  /skill/invoke:
+    post:
+      tags:
+        - skill
+      summary: Invoke skill
+      description: Invoke a skill
+      operationId: invokeSkill
+      requestBody:
+        description: Skill invocation request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvokeSkillRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvokeSkillResponse'
+  /skill/streamInvoke:
+    post:
+      tags:
+        - skill
+      summary: Stream invoke skill
+      description: Invoke a skill and return SSE stream
+      operationId: streamInvokeSkill
+      requestBody:
+        description: Skill invocation request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvokeSkillRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/event-stream:
+              schema:
+                type: string
+  /skill/trigger/list:
+    get:
+      tags:
+        - skill
+      summary: List skill triggers
+      description: List all skill triggers
+      operationId: listSkillTriggers
+      parameters:
+        - name: skillId
+          in: query
+          description: Skill ID
+          schema:
+            type: string
+            example: sk-g30e1b80b5g1itbemc0g5jj3
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: number
+            default: 1
+        - name: pageSize
+          in: query
+          description: Page size
+          schema:
+            type: number
+            default: 10
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListSkillTriggerResponse'
+  /skill/trigger/new:
+    post:
+      tags:
+        - skill
+      summary: Create new trigger
+      description: Create a new trigger
+      operationId: createSkillTrigger
+      requestBody:
+        description: Skill trigger creation request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertSkillTriggerRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+  /skill/trigger/update:
+    post:
+      tags:
+        - skill
+      summary: Update trigger
+      description: Update an existing trigger
+      operationId: updateSkillTrigger
+      requestBody:
+        description: Skill trigger update request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertSkillTriggerRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+  /skill/trigger/delete:
+    post:
+      tags:
+        - skill
+      summary: Delete trigger
+      description: Delete an existing trigger
+      operationId: deleteSkillTrigger
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteSkillTriggerRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+      security:
+        - api_key: []
+  /skill/log/list:
+    get:
+      tags:
+        - skill
+      summary: Get skill logs
+      description: Get skill logs
+      operationId: listSkillLogs
+      parameters:
+        - name: skillId
+          in: query
+          description: Skill ID
+          schema:
+            type: string
+            example: sk-g30e1b80b5g1itbemc0g5jj3
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: number
+            default: 1
+        - name: pageSize
+          in: query
+          description: Page size
+          schema:
+            type: number
+            default: 10
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListSkillLogResponse'
+      security:
+        - api_key: []
   /conversation/list:
     get:
       tags:
@@ -336,7 +641,7 @@ paths:
     get:
       tags:
         - chat
-      summary: Get conversation
+      summary: Get conversation detail
       description: Get conversation detail
       operationId: getConversationDetail
       parameters:
@@ -593,7 +898,7 @@ components:
       enum:
         - weblink
         - note
-    ResourceListItem:
+    Resource:
       type: object
       required:
         - resourceId
@@ -650,7 +955,10 @@ components:
           type: string
           format: date-time
           description: Collection creation time
-    CollectionListItem:
+        doc:
+          type: string
+          description: Document content for this resource
+    Collection:
       type: object
       required:
         - collectionId
@@ -682,24 +990,158 @@ components:
           type: string
           format: date-time
           description: Collection creation time
-    ResourceDetail:
+        resources:
+          type: array
+          description: Collection resources (only returned in detail API)
+          items:
+            $ref: '#/components/schemas/Resource'
+    SkillTemplate:
+      type: object
+      description: Skill template
+      properties:
+        name:
+          type: string
+          description: Skill template name
+        displayName:
+          type: object
+          description: Skill display name (key is locale and value is display name)
+        description:
+          type: string
+          description: Skill description
+        configSchema:
+          type: object
+          description: JSON schema for config
+    SkillTriggerEvent:
+      type: string
+      description: Skill trigger event
+      enum:
+        - resourceAdd
+        - resourceUpdate
+        - collectionAdd
+        - collectionUpdate
+        - cron
+    SkillTrigger:
+      type: object
+      description: Skill triggers
+      required:
+        - skillId
+        - triggerId
+        - event
+        - enabled
+        - createdAt
+        - updatedAt
+      properties:
+        skillId:
+          type: string
+          description: Skill ID
+          example: sk-g30e1b80b5g1itbemc0g5jj3
+        triggerId:
+          type: string
+          description: Trigger ID
+          example: tr-g30e1b80b5g1itbemc0g5jj3
+        event:
+          description: Trigger event
+          $ref: '#/components/schemas/SkillTriggerEvent'
+        crontab:
+          type: string
+          description: Cron expression
+          example: '0 0 * * * *'
+        enabled:
+          type: boolean
+          description: Trigger enabled
+        createdAt:
+          type: string
+          format: date-time
+          description: Trigger creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Trigger update time
+    SkillMeta:
+      type: object
+      description: Skill metadata
+      required:
+        - skillName
+        - displayName
+      properties:
+        skillName:
+          type: string
+          description: Skill name
+        skillDisplayName:
+          type: string
+          description: Skill display name
+        skillId:
+          type: string
+          description: Skill ID
+          example: sk-g30e1b80b5g1itbemc0g5jj3
+    SkillInstance:
+      type: object
+      description: Skill
+      required:
+        - skillName
+        - displayName
+        - skillId
+        - createdAt
+        - updatedAt
       allOf:
-        - $ref: '#/components/schemas/ResourceListItem'
+        - $ref: '#/components/schemas/SkillMeta'
         - type: object
           properties:
-            doc:
-              type: string
-              description: Document content for this resource
-    CollectionDetail:
-      allOf:
-        - $ref: '#/components/schemas/CollectionListItem'
-        - type: object
-          properties:
-            resources:
+            triggers:
               type: array
-              description: Collection resources
+              description: Skill triggers
               items:
-                $ref: '#/components/schemas/ResourceListItem'
+                $ref: '#/components/schemas/SkillTrigger'
+            config:
+              type: string
+              description: Skill config
+            createdAt:
+              type: string
+              format: date-time
+              description: Skill creation time
+            updatedAt:
+              type: string
+              format: date-time
+              description: Skill update time
+    SkillLog:
+      type: object
+      description: Skill operation log
+      required:
+        - logId
+        - skillId
+        - skillName
+        - input
+        - context
+        - createdAt
+        - updatedAt
+      properties:
+        logId:
+          type: string
+          description: Log ID
+          example: lg-g30e1b80b5g1itbemc0g5jj3
+        skillId:
+          type: string
+          description: Skill ID
+        skillName:
+          type: string
+          description: Skill name
+        triggerId:
+          type: string
+          description: Skill trigger ID
+        input:
+          description: Skill input
+          $ref: '#/components/schemas/SkillInput'
+        context:
+          description: Skill context
+          $ref: '#/components/schemas/SkillContext'
+        createdAt:
+          type: string
+          format: date-time
+          description: Log creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Log update time
     SourceMeta:
       type: object
       description: Source metadata
@@ -798,6 +1240,7 @@ components:
       properties:
         msgId:
           type: string
+          readOnly: true
           description: Message ID
           example: m-g30e1b80b5g1itbemc0g5jj3
         type:
@@ -807,16 +1250,33 @@ components:
           type: string
           description: Message content
           example: Hello
+        skillMeta:
+          type: object
+          description: Skill metadata
+          $ref: '#/components/schemas/SkillMeta'
+        logs:
+          type: array
+          description: Message logs
+          items:
+            type: string
+        structuredData:
+          type: object
+          description: Structured data output
+          example:
+            sources: [Source]
+            relatedQuestions: [string]
         relatedQuestions:
           type: array
           description: Related questions
           items:
             type: string
+          deprecated: true
         sources:
           type: array
           description: Related sources
           items:
             $ref: '#/components/schemas/Source'
+          deprecated: true
         selectedWeblinkConfig:
           type: string
           description: Selected weblink config (JSON)
@@ -1393,7 +1853,7 @@ components:
         - type: object
           properties:
             data:
-              $ref: '#/components/schemas/ResourceListItem'
+              $ref: '#/components/schemas/Resource'
     DeleteResourceRequest:
       type: object
       required:
@@ -1412,7 +1872,7 @@ components:
               type: array
               description: Resource list
               items:
-                $ref: '#/components/schemas/ResourceListItem'
+                $ref: '#/components/schemas/Resource'
     GetResourceDetailResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -1421,7 +1881,7 @@ components:
             data:
               type: object
               description: Resource data
-              $ref: '#/components/schemas/ResourceDetail'
+              $ref: '#/components/schemas/Resource'
     UpsertCollectionRequest:
       type: object
       properties:
@@ -1447,7 +1907,7 @@ components:
         - type: object
           properties:
             data:
-              $ref: '#/components/schemas/CollectionListItem'
+              $ref: '#/components/schemas/Collection'
     DeleteCollectionRequest:
       type: object
       required:
@@ -1466,7 +1926,7 @@ components:
               type: array
               description: Collection list
               items:
-                $ref: '#/components/schemas/CollectionListItem'
+                $ref: '#/components/schemas/Collection'
     GetCollectionDetailResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -1475,7 +1935,192 @@ components:
             data:
               type: object
               description: Collection data
-              $ref: '#/components/schemas/CollectionDetail'
+              $ref: '#/components/schemas/Collection'
+    ListSkillTemplateResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Skill template list
+              items:
+                $ref: '#/components/schemas/SkillTemplate'
+    ListSkillInstanceResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Skill list
+              items:
+                $ref: '#/components/schemas/SkillInstance'
+    UpsertSkillInstanceRequest:
+      type: object
+      required:
+        - skillName
+        - displayName
+      properties:
+        skillName:
+          type: string
+          description: Skill name
+          example: online-search
+        displayName:
+          type: string
+          description: Skill display name
+          example: My Custom Skill
+        skillId:
+          type: string
+          description: Skill ID (only used for update)
+          example: s-g30e1b80b5g1itbemc0g5jj3
+        triggers:
+          type: array
+          description: Skill triggers
+          items:
+            $ref: '#/components/schemas/UpsertSkillTriggerRequest'
+        config:
+          type: object
+          description: Skill config (should conform to template config schema)
+    UpsertSkillInstanceResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/SkillInstance'
+    DeleteSkillInstanceRequest:
+      type: object
+      required:
+        - skillId
+      properties:
+        skillId:
+          type: string
+          description: Skill ID to delete
+    SkillInput:
+      type: object
+      description: Skill input
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          description: User query
+    SkillContext:
+      type: object
+      description: Skill invocation context
+      properties:
+        locale:
+          type: string
+          description: User input locale
+        resourceIds:
+          type: array
+          description: List of resource IDs
+          items:
+            type: string
+        collectionIds:
+          type: array
+          description: List of collection IDs
+          items:
+            type: string
+        contentList:
+          type: array
+          description: List of content
+          items:
+            type: string
+    InvokeSkillRequest:
+      type: object
+      required:
+        - input
+      properties:
+        input:
+          description: Skill input
+          $ref: '#/components/schemas/SkillInput'
+        context:
+          description: Skill invocation context
+          $ref: '#/components/schemas/SkillContext'
+        skillId:
+          type: string
+          description: Skill instance ID to invoke (if not provided, skill scheduler will be used)
+        event:
+          description: Skill trigger event
+          $ref: '#/components/schemas/SkillTriggerEvent'
+        config:
+          type: object
+          description: Skill config (should conform to template config schema)
+        convId:
+          description: Conversation ID (will add messages to this conversation if provided)
+          type: string
+          example: cv-g30e1b80b5g1itbemc0g5jj3
+        createConvParam:
+          description: Create conversation parameters
+          $ref: '#/components/schemas/CreateConversationRequest'
+    InvokeSkillResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            logId:
+              type: string
+              description: Skill log id
+    ListSkillTriggerResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Skill trigger list
+              items:
+                $ref: '#/components/schemas/SkillTrigger'
+    UpsertSkillTriggerRequest:
+      type: object
+      required:
+        - event
+      properties:
+        skillId:
+          type: string
+          description: Skill ID (only used for updating triggers or adding triggers to an existing skill)
+          example: sk-g30e1b80b5g1itbemc0g5jj3
+        triggerId:
+          type: string
+          description: Trigger ID (only used for update)
+          example: tr-g30e1b80b5g1itbemc0g5jj3
+        event:
+          description: Trigger event
+          $ref: '#/components/schemas/SkillTriggerEvent'
+        crontab:
+          type: string
+          description: Trigger crontab (only valid when event is `cron`)
+          example: 0 0 1 * *
+        enabled:
+          type: boolean
+          description: Whether this trigger is enabled
+    UpsertSkillTriggerResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/SkillTrigger'
+    DeleteSkillTriggerRequest:
+      type: object
+      required:
+        - triggerId
+      properties:
+        triggerId:
+          type: string
+          description: Trigger ID to delete
+    ListSkillLogResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Skill log list
+              items:
+                $ref: '#/components/schemas/SkillLog'
     CreateConversationRequest:
       type: object
       properties:

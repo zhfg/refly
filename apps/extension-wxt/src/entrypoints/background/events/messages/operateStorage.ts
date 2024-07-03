@@ -3,11 +3,11 @@ import { BackgroundMessage } from '@refly/ai-workspace-common/utils/extension/me
 import { getCurrentTab } from '@refly/ai-workspace-common/utils/extension/tabs';
 import { safeStringifyJSON } from '@refly/ai-workspace-common/utils/parse';
 import { storage } from '@refly/ai-workspace-common/utils/storage';
-import { ResourceDetail } from '@refly/openapi-schema';
+import { Resource } from '@refly/openapi-schema';
 
 // 存储 tab 相关的内容，包括 currentMockResource、未来存储 Tab 栈，模拟浏览器 Tab/主站知识库 Tab 做管理或同步
 export interface TabStorage {
-  currentMockResource: ResourceDetail;
+  currentMockResource: Resource;
 }
 
 // 按照 tabId_* 存储和处理

@@ -1,16 +1,17 @@
 {
   "compilerOptions": {
-    "module": "CommonJS",
-    "moduleResolution": "Node",
-    "declaration": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
-    "target": "ES2017",
+    "target": "es2017",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
+    "jsx": "react-jsx",
     "esModuleInterop": true,
     "incremental": true,
     "skipLibCheck": true,
@@ -24,10 +25,17 @@
     // Set `sourceRoot` to  "/" to strip the build path prefix
     // from generated source code references.
     // This improves issue grouping in Sentry.
+    "baseUrl": "./",
+    "rootDir": "./src",
     "sourceRoot": "/",
     "paths": {
-      "@refly/utils/*": ["../utils/src/*"],
-    }
+      "@refly-packages/editor-core/*": ["./src/headless-core/*"]
+    },
+    "composite": true,
+    "noEmit": false,
+    "declaration": true,
+    "declarationMap": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

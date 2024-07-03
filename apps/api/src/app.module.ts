@@ -16,6 +16,7 @@ import { ConversationModule } from './conversation/conversation.module';
 import configuration from './config/app.config';
 import { AppController } from './app.controller';
 import { KnowledgeModule } from './knowledge/knowledge.module';
+import { SkillModule } from './skill/skill.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { KnowledgeModule } from './knowledge/knowledge.module';
     AigcModule,
     RAGModule,
     KnowledgeModule,
+    SkillModule,
   ],
   controllers: [AppController],
 })

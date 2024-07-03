@@ -48,7 +48,7 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
       {hasCompletion && (
         <div className="flex max-h-[400px]">
           <ScrollArea>
-            <div className="prose prose-sm p-2 px-4">
+            <div className="p-2 px-4 prose-sm prose">
               <Markdown>{completion}</Markdown>
             </div>
           </ScrollArea>
@@ -56,10 +56,10 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
       )}
 
       {isLoading && (
-        <div className="flex h-12 w-full items-center px-4 text-sm font-medium text-muted-foreground text-purple-500">
-          <Magic className="mr-2 h-4 w-4 shrink-0" />
+        <div className="flex items-center w-full h-12 px-4 text-sm font-medium text-purple-500 text-muted-foreground">
+          <Magic className="w-4 h-4 mr-2 shrink-0" />
           AI is thinking
-          <div className="ml-2 mt-1">
+          <div className="mt-1 ml-2">
             <CrazySpinner />
           </div>
         </div>
@@ -82,7 +82,7 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
             />
             <Button
               size="icon"
-              className="absolute right-2 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-purple-500 hover:bg-purple-900"
+              className="absolute w-6 h-6 -translate-y-1/2 bg-purple-500 rounded-full right-2 top-1/2 hover:bg-purple-900"
               onClick={() => {
                 const slice = editor.state.selection.content()
                 const text = editor.storage.markdown.serializer.serialize(
@@ -100,7 +100,7 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
                   },
                 }).then(() => setInputValue(""))
               }}>
-              <ArrowUp className="h-4 w-4" />
+              <ArrowUp className="w-4 h-4" />
             </Button>
           </div>
           {hasCompletion ? (

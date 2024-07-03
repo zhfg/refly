@@ -38,7 +38,7 @@ const AICompletionCommands = ({
               .run()
             editorEmitter.emit("activeAskAI", false)
           }}>
-          <Check className="h-4 w-4 text-muted-foreground" />
+          <Check className="w-4 h-4 text-muted-foreground" />
           Replace selection
         </CommandItem>
         <CommandItem
@@ -56,7 +56,7 @@ const AICompletionCommands = ({
             editorEmitter.emit("activeAskAI", false)
             // onOpenChange(false)
           }}>
-          <TextQuote className="h-4 w-4 text-muted-foreground" />
+          <TextQuote className="w-4 h-4 text-muted-foreground" />
           Insert below
         </CommandItem>
       </CommandGroup>
@@ -64,7 +64,7 @@ const AICompletionCommands = ({
 
       <CommandGroup>
         <CommandItem onSelect={onDiscard} value="thrash" className="gap-2 px-4">
-          <TrashIcon className="h-4 w-4 text-muted-foreground" />
+          <TrashIcon className="w-4 h-4 text-muted-foreground" />
           Discard
         </CommandItem>
       </CommandGroup>
