@@ -6,7 +6,6 @@ import {
   UpsertCollectionRequest,
   UpsertResourceRequest,
 } from '@refly/openapi-schema';
-import { EventEmitter } from 'node:events';
 
 interface User {
   uid: string;

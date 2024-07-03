@@ -56,7 +56,7 @@ export class OnlineSearchSkill extends BaseSkill {
     },
   };
 
-  async callAgentModel(state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> {
+  callAgentModel = async (state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { query, contextualUserQuery, messages = [] } = state;
     const { locale = 'en' } = config?.configurable || {};
 
@@ -118,9 +118,9 @@ export class OnlineSearchSkill extends BaseSkill {
     ]);
 
     return { messages: [responseMessage] };
-  }
+  };
 
-  async getContextualQuestion(state: GraphState, config?: SkillRunnableConfig) {
+  getContextualQuestion = async (state: GraphState, config?: SkillRunnableConfig) => {
     const { query, messages } = state;
     const { locale = 'en' } = config?.configurable || {};
 
@@ -150,9 +150,9 @@ just reformulate it if needed and otherwise return it as is.
     });
 
     return { contextualUserQuery };
-  }
+  };
 
-  shouldMakeContextualUserQuery(state: GraphState): 'contextualUserQuery' | 'agent' {
+  shouldMakeContextualUserQuery = (state: GraphState): 'contextualUserQuery' | 'agent' => {
     const { messages } = state;
 
     if (messages?.length === 0 || messages?.length === 1) {
@@ -160,10 +160,10 @@ just reformulate it if needed and otherwise return it as is.
     } else {
       return 'contextualUserQuery';
     }
-  }
+  };
 
   // Define the function that determines whether to continue or not
-  shouldContinue(state: GraphState): 'action' | 'generate' | typeof END {
+  shouldContinue = (state: GraphState): 'action' | 'generate' | typeof END => {
     const { messages = [], sources = [] } = state;
     const lastMessage = messages[messages.length - 1];
 
@@ -182,9 +182,9 @@ just reformulate it if needed and otherwise return it as is.
     } else {
       return END;
     }
-  }
+  };
 
-  async generateAnswer(state: GraphState, config?: SkillRunnableConfig) {
+  generateAnswer = async (state: GraphState, config?: SkillRunnableConfig) => {
     const llm = new ChatOpenAI({ model: 'gpt-3.5-turbo', openAIApiKey: process.env.OPENAI_API_KEY });
     // For versions of @langchain/core < 0.2.3, you must call `.stream()`
     // and aggregate the message from chunks instead of calling `.invoke()`.
@@ -220,9 +220,9 @@ just reformulate it if needed and otherwise return it as is.
     ]);
 
     return { messages: [responseMessage] };
-  }
+  };
 
-  async callToolNode(state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> {
+  callToolNode = async (state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { messages = [] } = state;
     const { locale = 'en' } = config?.configurable || {};
 
@@ -255,16 +255,16 @@ just reformulate it if needed and otherwise return it as is.
     this.emitEvent('log', `Finished calling ${outputs.length} tools`);
 
     return { messages: outputs };
-  }
+  };
 
   toRunnable() {
     const workflow = new StateGraph<GraphState>({
       channels: this.graphState,
     })
-      .addNode('agent', this.callAgentModel.bind(this))
-      .addNode('action', this.callToolNode.bind(this))
-      .addNode('generate', this.generateAnswer.bind(this))
-      .addNode('getContextualUserQuery', this.getContextualQuestion.bind(this));
+      .addNode('agent', this.callAgentModel)
+      .addNode('action', this.callToolNode)
+      .addNode('generate', this.generateAnswer)
+      .addNode('getContextualUserQuery', this.getContextualQuestion);
 
     workflow.addConditionalEdges(START, this.shouldMakeContextualUserQuery);
     workflow.addEdge('getContextualUserQuery', 'agent');

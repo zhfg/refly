@@ -106,7 +106,7 @@ export class SerperSearch extends Tool {
   private searchOptions?: SearchOptions;
   private engine: SkillEngine;
 
-  constructor(params?: SerperSearchParameters) {
+  constructor(params: SerperSearchParameters) {
     super(params ?? {});
 
     const { searchOptions } = params ?? {};
@@ -119,7 +119,7 @@ export class SerperSearch extends Tool {
     return 'SerperSearch';
   }
 
-  name = 'serper-search';
+  name = 'serper_search';
 
   description =
     'A search engine. Useful for when you need to answer questions about current events. Input should be a search query.';
