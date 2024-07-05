@@ -57,7 +57,7 @@ export function emptyTransformJsFiles({
 
   const ast = parser.parse(code, {
     sourceType: 'module',
-    plugins: ['jsx'],
+    plugins: ['jsx', 'classProperties', 'classPrivateProperties', 'classPrivateMethods'],
   }) as any;
 
   return generate(ast, { sourceMaps, sourceFileName: id });
@@ -94,7 +94,7 @@ export function transformJsFiles({
 
   const ast = parser.parse(code, {
     sourceType: 'module',
-    plugins: ['jsx'],
+    plugins: ['jsx', 'classProperties', 'classPrivateProperties', 'classPrivateMethods'],
   }) as any;
 
   traverse(ast, {
