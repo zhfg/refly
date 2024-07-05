@@ -101,7 +101,7 @@ export const $Resource = {
     updatedAt: {
       type: 'string',
       format: 'date-time',
-      description: 'Collection creation time',
+      description: 'Collection update time',
     },
     doc: {
       type: 'string',
@@ -142,7 +142,7 @@ export const $Collection = {
     updatedAt: {
       type: 'string',
       format: 'date-time',
-      description: 'Collection creation time',
+      description: 'Collection update time',
     },
     resources: {
       type: 'array',
@@ -1981,6 +1981,92 @@ export const $GetUserTopicsResponse = {
         data: {
           description: 'User topics',
           $ref: '#/components/schemas/UserTopics',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $SearchDomain = {
+  type: 'string',
+  enum: ['resource', 'collection', 'conversation', 'skill'],
+} as const;
+
+export const $SearchRequest = {
+  type: 'object',
+  required: ['query', 'scope'],
+  properties: {
+    query: {
+      type: 'string',
+      description: 'Search query (if empty, return last updated data)',
+    },
+    scope: {
+      type: 'string',
+      description: 'Search scope',
+      enum: ['user', 'public'],
+    },
+    domains: {
+      type: 'array',
+      description: 'Search domains (if not specified, return all domains)',
+      items: {
+        $ref: '#/components/schemas/SearchDomain',
+      },
+    },
+    limit: {
+      type: 'number',
+      description: 'Search result limit for each domain',
+      default: 5,
+    },
+  },
+} as const;
+
+export const $SearchResult = {
+  type: 'object',
+  required: ['id', 'domain', 'title', 'createdAt', 'updatedAt'],
+  properties: {
+    id: {
+      type: 'string',
+      description: 'Search result ID to navigate to',
+    },
+    domain: {
+      description: 'Search result domain',
+      $ref: '#/components/schemas/SearchDomain',
+    },
+    title: {
+      type: 'string',
+      description: 'Search result title',
+    },
+    content: {
+      type: 'string',
+      description: 'Search result content',
+    },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Data creation time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Collection creation time',
+    },
+  },
+} as const;
+
+export const $SearchResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Search result',
+          items: {
+            $ref: '#/components/schemas/SearchResult',
+          },
         },
       },
     },

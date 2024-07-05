@@ -23,6 +23,8 @@ tags:
     description: AIGC relation endpoints
   - name: user
     description: User management endpoints
+  - name: search
+    description: Search related endpoints
 paths:
   /knowledge/resource/list:
     get:
@@ -870,6 +872,26 @@ paths:
                 $ref: '#/components/schemas/GetUserTopicsResponse'
       security:
         - api_key: []
+  /search:
+    post:
+      tags:
+        - search
+      summary: Search
+      description: Search for everything
+      operationId: search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
 components:
   schemas:
     ResourceMeta:
@@ -954,7 +976,7 @@ components:
         updatedAt:
           type: string
           format: date-time
-          description: Collection creation time
+          description: Collection update time
         doc:
           type: string
           description: Document content for this resource
@@ -989,7 +1011,7 @@ components:
         updatedAt:
           type: string
           format: date-time
-          description: Collection creation time
+          description: Collection update time
         resources:
           type: array
           description: Collection resources (only returned in detail API)
@@ -2302,6 +2324,76 @@ components:
             data:
               description: User topics
               $ref: '#/components/schemas/UserTopics'
+    SearchDomain:
+      type: string
+      enum:
+        - resource
+        - collection
+        - conversation
+        - skill
+    SearchRequest:
+      type: object
+      required:
+        - query
+        - scope
+      properties:
+        query:
+          type: string
+          description: Search query (if empty, return last updated data)
+        scope:
+          type: string
+          description: Search scope
+          enum:
+            - user
+            - public
+        domains:
+          type: array
+          description: Search domains (if not specified, return all domains)
+          items:
+            $ref: '#/components/schemas/SearchDomain'
+        limit:
+          type: number
+          description: Search result limit for each domain
+          default: 5
+    SearchResult:
+      type: object
+      required:
+        - id
+        - domain
+        - title
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: Search result ID to navigate to
+        domain:
+          description: Search result domain
+          $ref: '#/components/schemas/SearchDomain'
+        title:
+          type: string
+          description: Search result title
+        content:
+          type: string
+          description: Search result content
+        createdAt:
+          type: string
+          format: date-time
+          description: Data creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Collection creation time
+    SearchResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Search result
+              items:
+                $ref: '#/components/schemas/SearchResult'
   securitySchemes:
     api_key:
       type: apiKey

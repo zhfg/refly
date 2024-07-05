@@ -75,7 +75,7 @@ export type Resource = {
    */
   createdAt: string;
   /**
-   * Collection creation time
+   * Collection update time
    */
   updatedAt: string;
   /**
@@ -106,7 +106,7 @@ export type Collection = {
    */
   createdAt: string;
   /**
-   * Collection creation time
+   * Collection update time
    */
   updatedAt: string;
   /**
@@ -1349,6 +1349,66 @@ export type GetUserTopicsResponse = BaseResponse & {
   data?: UserTopics;
 };
 
+export type SearchDomain = 'resource' | 'collection' | 'conversation' | 'skill';
+
+export type SearchRequest = {
+  /**
+   * Search query (if empty, return last updated data)
+   */
+  query: string;
+  /**
+   * Search scope
+   */
+  scope: 'user' | 'public';
+  /**
+   * Search domains (if not specified, return all domains)
+   */
+  domains?: Array<SearchDomain>;
+  /**
+   * Search result limit for each domain
+   */
+  limit?: number;
+};
+
+/**
+ * Search scope
+ */
+export type scope = 'user' | 'public';
+
+export type SearchResult = {
+  /**
+   * Search result ID to navigate to
+   */
+  id: string;
+  /**
+   * Search result domain
+   */
+  domain: SearchDomain;
+  /**
+   * Search result title
+   */
+  title: string;
+  /**
+   * Search result content
+   */
+  content?: string;
+  /**
+   * Data creation time
+   */
+  createdAt: string;
+  /**
+   * Collection creation time
+   */
+  updatedAt: string;
+};
+
+export type SearchResponse = BaseResponse & {
+  /**
+   * Search result
+   */
+  data?: Array<SearchResult>;
+};
+
 export type ListResourcesData = {
   query?: {
     /**
@@ -1778,6 +1838,14 @@ export type GetUserTopicsResponse2 = GetUserTopicsResponse;
 
 export type GetUserTopicsError = unknown;
 
+export type SearchData = {
+  body: SearchRequest;
+};
+
+export type SearchResponse2 = SearchResponse;
+
+export type SearchError = unknown;
+
 export type $OpenApiTs = {
   '/knowledge/resource/list': {
     get: {
@@ -2156,6 +2224,17 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': GetUserTopicsResponse;
+      };
+    };
+  };
+  '/search': {
+    post: {
+      req: SearchData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': SearchResponse;
       };
     };
   };
