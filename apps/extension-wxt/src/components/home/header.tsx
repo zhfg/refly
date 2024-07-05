@@ -11,7 +11,7 @@ import { Avatar } from '@arco-design/web-react';
 // stores
 import { useSiderStore } from '@refly/ai-workspace-common/stores/sider';
 import { useNavigate } from '@refly/ai-workspace-common/utils/router';
-import { getClientOrigin } from '@/utils/url';
+import { getClientOrigin } from '@refly/utils/url';
 import { useUserStore } from '@/stores/user';
 import { useHomeStateStore } from '@/stores/home-state';
 import { useSelectedMark } from '@/hooks/use-selected-mark';

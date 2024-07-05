@@ -7,6 +7,7 @@ import { BackgroundMessage } from '@refly/ai-workspace-common/utils/extension/me
 import { createClient } from '@hey-api/client-fetch';
 import { getServerOrigin } from '@refly/ai-workspace-common/utils/url';
 import { getCookie } from '@/utils/cookie';
+import { appConfig } from '@refly/utils/config';
 
 /**
  * @deprecated

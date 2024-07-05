@@ -10,3 +10,4 @@ export * from './feed';
 export * from './digest';
 export * from './content-selector';
 export * from './sse';
+export * from './request';

@@ -3,7 +3,7 @@ import { extRequest } from '@/utils/request';
 
 import type { HandlerRequest, HandlerResponse } from '@refly/common-types';
 
-import { getServerlessWorkOrigin } from '@/utils/url';
+import { getServerlessWorkOrigin } from '@refly/utils/url';
 import { HtmlUploadRequest, HtmlUploadResult } from '@refly/common-types';
 
 const handler = async (req: HandlerRequest<HtmlUploadRequest>): Promise<HandlerResponse<HtmlUploadResult>> => {
@@ -12,7 +12,7 @@ const handler = async (req: HandlerRequest<HtmlUploadRequest>): Promise<HandlerR
   try {
     const BASEURL = getServerlessWorkOrigin();
 
-    const { pageContent = '', url = '', fileName = '' } = req.body;
+    const { pageContent = '', url = '', fileName = '' } = req.body as HtmlUploadRequest;
 
     const formData = new FormData();
     const blob = new Blob([pageContent], { type: 'text/html' });
