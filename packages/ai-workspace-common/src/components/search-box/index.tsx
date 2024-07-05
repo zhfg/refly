@@ -106,7 +106,7 @@ export const SearchBox = () => {
             onChange={(value) => {
               chatStore.setNewQAText(value);
             }}
-            placeholder={t('loggedHomePage.homePage.searchPlaceholder')}
+            placeholder={t('extension.loggedHomePage.homePage.searchPlaceholder')}
             onKeyDownCapture={(e) => handleKeyDown(e)}
             autoSize={{ minRows: 2, maxRows: 4 }}
             onFocus={() => setIsFocused(true)}

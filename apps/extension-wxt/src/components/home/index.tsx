@@ -74,7 +74,7 @@ const Home = (props: ChatProps) => {
     const { currentWeblink } = useWeblinkStore.getState();
 
     if (!newQAText) {
-      message.info(t('loggedHomePage.homePage.status.emptyNotify'));
+      message.info(t('extension.loggedHomePage.homePage.status.emptyNotify'));
       return;
     }
 
@@ -115,12 +115,14 @@ const Home = (props: ChatProps) => {
     const { showSelectedMarks } = useContentSelectorStore.getState();
     const { searchTarget } = useSearchStateStore.getState();
 
-    if (showSelectedMarks) return t('loggedHomePage.homePage.searchPlaceholder.currentSelectedContent');
+    if (showSelectedMarks) return t('extension.loggedHomePage.homePage.searchPlaceholder.currentSelectedContent');
     if (searchTarget === SearchTarget.SelectedPages)
-      return t('loggedHomePage.homePage.searchPlaceholder.selectedWeblink');
-    if (searchTarget === SearchTarget.CurrentPage) return t('loggedHomePage.homePage.searchPlaceholder.current');
-    if (searchTarget === SearchTarget.SearchEnhance) return t('loggedHomePage.homePage.searchPlaceholder.internet');
-    if (searchTarget === SearchTarget.All) return t('loggedHomePage.homePage.searchPlaceholder.all');
+      return t('extension.loggedHomePage.homePage.searchPlaceholder.selectedWeblink');
+    if (searchTarget === SearchTarget.CurrentPage)
+      return t('extension.loggedHomePage.homePage.searchPlaceholder.current');
+    if (searchTarget === SearchTarget.SearchEnhance)
+      return t('extension.loggedHomePage.homePage.searchPlaceholder.internet');
+    if (searchTarget === SearchTarget.All) return t('extension.loggedHomePage.homePage.searchPlaceholder.all');
   };
 
   // 自动聚焦输入框
@@ -157,7 +159,7 @@ const Home = (props: ChatProps) => {
     >
       <ChatHeader />
       <div className="home-content-container input-panel">
-        <div className="refly-slogan">{t('loggedHomePage.homePage.title')}</div>
+        <div className="refly-slogan">{t('extension.loggedHomePage.homePage.title')}</div>
         <div className="actions">
           {/* {messageStateStore.taskType === TASK_TYPE.CHAT &&
             messageStateStore?.pending && (

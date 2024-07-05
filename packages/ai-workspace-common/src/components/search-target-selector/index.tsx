@@ -51,23 +51,23 @@ export const SearchTargetSelector = (props: { classNames: string; selectorList?:
       }}
     >
       <Typography.Text type="secondary" style={{ marginLeft: 12 }}>
-        {t('loggedHomePage.homePage.searchScope.title')}
+        {t('extension.loggedHomePage.homePage.searchScope.title')}
       </Typography.Text>
       {selectorList?.includes(SearchTarget.CurrentPage) ? (
         <Menu.Item key={SearchTarget.CurrentPage}>
           <IconFile style={iconStyle} />
-          {t('loggedHomePage.homePage.searchScope.currentPage')}
+          {t('extension.loggedHomePage.homePage.searchScope.currentPage')}
         </Menu.Item>
       ) : null}
       {selectorList?.includes(SearchTarget.CurrentKnowledgeBase) ? (
         <Menu.Item key={SearchTarget.CurrentKnowledgeBase}>
           <IconFolder style={iconStyle} />
-          {t('loggedHomePage.homePage.searchScope.currentKnowledgeBase')}
+          {t('extension.loggedHomePage.homePage.searchScope.currentKnowledgeBase')}
         </Menu.Item>
       ) : null}
       <Menu.Item key={SearchTarget.All}>
         <IconCommon style={iconStyle} />
-        {t('loggedHomePage.homePage.searchScope.all')}
+        {t('extension.loggedHomePage.homePage.searchScope.all')}
       </Menu.Item>
       {/* <Menu.Item
         key={SearchTarget.SelectedPages}
@@ -79,7 +79,7 @@ export const SearchTargetSelector = (props: { classNames: string; selectorList?:
       </Menu.Item> */}
       <Menu.Item key={SearchTarget.SearchEnhance}>
         <IconCompass style={iconStyle} />
-        {t('loggedHomePage.homePage.searchScope.internet')}
+        {t('extension.loggedHomePage.homePage.searchScope.internet')}
       </Menu.Item>
       {/* <Menu.Item key={SearchTarget.None}>
         <IconDriveFile style={iconStyle} />
@@ -91,21 +91,21 @@ export const SearchTargetSelector = (props: { classNames: string; selectorList?:
   const getDisplayText = (searchTarget: SearchTarget) => {
     switch (searchTarget) {
       case SearchTarget.CurrentPage:
-        return t('loggedHomePage.homePage.searchScope.currentPage');
+        return t('extension.loggedHomePage.homePage.searchScope.currentPage');
       case SearchTarget.CurrentKnowledgeBase:
-        return t('loggedHomePage.homePage.searchScope.currentKnowledgeBase');
+        return t('extension.loggedHomePage.homePage.searchScope.currentKnowledgeBase');
 
       case SearchTarget.SelectedPages:
-        return t('loggedHomePage.homePage.searchScope.history');
+        return t('extension.loggedHomePage.homePage.searchScope.history');
       case SearchTarget.All:
-        return t('loggedHomePage.homePage.searchScope.all');
+        return t('extension.loggedHomePage.homePage.searchScope.all');
       case SearchTarget.SearchEnhance:
-        return t('loggedHomePage.homePage.searchScope.internet');
+        return t('extension.loggedHomePage.homePage.searchScope.internet');
       case SearchTarget.None:
-        return t('loggedHomePage.homePage.searchScope.none');
+        return t('extension.loggedHomePage.homePage.searchScope.none');
 
       default: {
-        return t('loggedHomePage.homePage.searchScope.all');
+        return t('extension.loggedHomePage.homePage.searchScope.all');
       }
     }
   };

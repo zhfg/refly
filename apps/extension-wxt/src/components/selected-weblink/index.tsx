@@ -39,7 +39,7 @@ export const SelectedWeblink = (props: SelectedWeblinkProps) => {
       <div className="selected-weblinks-inner-container">
         <div className="hint-item">
           <IconRightCircle style={{ color: 'rgba(0, 0, 0, .6)' }} />
-          <span>{t('loggedHomePage.homePage.selectedWeblink.title')}</span>
+          <span>{t('extension.loggedHomePage.homePage.selectedWeblink.title')}</span>
         </div>
         {selectedRow?.map((item, index) => (
           <Tag

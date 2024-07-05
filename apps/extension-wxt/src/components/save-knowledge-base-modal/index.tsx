@@ -149,7 +149,7 @@ export const SaveKnowledgeBaseModal = () => {
     console.log('res', res);
 
     if (!res?.success) {
-      message.error(t('loggedHomePage.homePage.weblinkList.list.fetchErr'));
+      message.error(t('extension.loggedHomePage.homePage.weblinkList.list.fetchErr'));
       knowledgeBaseStore.updateIsRequesting(false);
 
       return;
