@@ -118,7 +118,7 @@ const Home = () => {
       </Helmet>
       <div className="home-search-container">
         <div className="footer input-panel home-search-inner-container">
-          <div className="refly-slogan">{t('extension.loggedHomePage.homePage.title')}</div>
+          <div className="refly-slogan">{t('loggedHomePage.homePage.title')}</div>
           <div className="actions"></div>
 
           <div>
@@ -128,7 +128,7 @@ const Home = () => {
                 换一批推荐
               </Button> */}
               <Button icon={<IconHistory />} className="search-assist-btn" onClick={handleScrollToMemory}>
-                {t('extension.loggedHomePage.homePage.seeKnowledgeLibrary')}
+                {t('loggedHomePage.homePage.seeKnowledgeLibrary')}
               </Button>
             </div>
           </div>

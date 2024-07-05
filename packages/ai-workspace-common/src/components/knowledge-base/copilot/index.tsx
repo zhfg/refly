@@ -70,7 +70,8 @@ export const AICopilot = (props: AICopilotProps) => {
 
   const { t, i18n } = useTranslation();
   const uiLocale = i18n?.languages?.[0] as LOCALE;
-  const outputLocale = userStore?.localSettings?.outputLocale;
+  const outputLocale = userStore?.localSettings?.outputLocale || 'en';
+  console.log('uiLocale', uiLocale);
 
   // ai-note handler
   useAINote();

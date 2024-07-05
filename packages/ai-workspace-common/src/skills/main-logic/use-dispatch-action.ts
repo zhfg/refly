@@ -1,4 +1,4 @@
-import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { saveToKnowledgeBaseSkill } from '@refly-packages/ai-workspace-common/skills/skill-library/index';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
@@ -10,7 +10,7 @@ interface DispatchBody {
 
 export const useDispatchAction = () => {
   // 统一写入 skillState，不影响其他 skill，不影响应用主状态
-  const knowledgeBaseStore = useKnowledgeBaseStore();
+  const skillStore = useSkillStore();
   const skills = [saveToKnowledgeBaseSkill];
   const runtime = getRuntime();
 
@@ -19,7 +19,7 @@ export const useDispatchAction = () => {
 
   const dispatch = async <T>({ type, name, body }: DispatchBody) => {
     if (type === 'state') {
-      let { skillState } = useKnowledgeBaseStore.getState();
+      let { skillState } = useSkillStore.getState();
 
       if (!skillState) {
         skillState = {};
@@ -27,7 +27,7 @@ export const useDispatchAction = () => {
         skillState[name] = body;
       }
 
-      knowledgeBaseStore.setSkillState(skillState);
+      skillStore.setSkillState(skillState);
     }
   };
 

@@ -52,9 +52,9 @@ const WebLinkItem = (props: { weblink: Weblink }) => {
               <img className="icon" src={`https://www.google.com/s2/favicons?domain=${origin}&sz=${16}`} alt="" />
               <span className="text">{originPageTitle}</span>
               {indexStatus === 'finish' ? (
-                <Tag color="green">{t('extension.loggedHomePage.homePage.weblinkList.item.read')}</Tag>
+                <Tag color="green">{t('loggedHomePage.homePage.weblinkList.item.read')}</Tag>
               ) : (
-                <Tag color="orange">{t('extension.loggedHomePage.homePage.weblinkList.item.unread')}</Tag>
+                <Tag color="orange">{t('loggedHomePage.homePage.weblinkList.item.unread')}</Tag>
               )}
             </a>
           </div>
@@ -100,7 +100,7 @@ const PreviosWebsiteList = forwardRef(() => {
     });
 
     if (error || !res?.success) {
-      message.error(t('extension.loggedHomePage.homePage.weblinkList.list.fetchErr'));
+      message.error(t('loggedHomePage.homePage.weblinkList.list.fetchErr'));
       webLinkStore.updateIsRequest(false);
 
       return;
@@ -201,7 +201,7 @@ const PreviosWebsiteList = forwardRef(() => {
         headerStyle={{ justifyContent: 'center' }}
         title={
           <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <span style={{ fontWeight: 'bold' }}>{t('extension.loggedHomePage.homePage.weblinkList.title')}</span>
+            <span style={{ fontWeight: 'bold' }}>{t('loggedHomePage.homePage.weblinkList.title')}</span>
           </div>
         }
         visible={webLinkStore.isWebLinkListVisible}
@@ -209,7 +209,7 @@ const PreviosWebsiteList = forwardRef(() => {
         footer={
           <div className="weblink-footer-container">
             <p className="weblink-footer-selected">
-              {t('extension.loggedHomePage.homePage.weblinkList.selectedCnt', {
+              {t('loggedHomePage.homePage.weblinkList.selectedCnt', {
                 count: webLinkStore.selectedRow?.length,
               })}
             </p>
@@ -220,7 +220,7 @@ const PreviosWebsiteList = forwardRef(() => {
                 }}
                 style={{ marginRight: 8 }}
               >
-                {t('extension.loggedHomePage.homePage.weblinkList.drawer.cancel')}
+                {t('loggedHomePage.homePage.weblinkList.drawer.cancel')}
               </Button>
               <Button
                 type="primary"
@@ -228,7 +228,7 @@ const PreviosWebsiteList = forwardRef(() => {
                   webLinkStore.updateIsWebLinkListVisible(false);
                 }}
               >
-                {t('extension.loggedHomePage.homePage.weblinkList.drawer.confirm')}
+                {t('loggedHomePage.homePage.weblinkList.drawer.confirm')}
               </Button>
             </div>
           </div>

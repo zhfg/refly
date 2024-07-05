@@ -1,6 +1,6 @@
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { saveToKnowledgeBaseSkill } from '@refly-packages/ai-workspace-common/skills/skill-library/index';
-import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 
 interface BaseSingleSkillState {}
 
@@ -9,9 +9,9 @@ interface ModalSingleSkillState extends BaseSingleSkillState {
 }
 
 export const RegisterSkillComponent = () => {
-  const knowledgeBaseStore = useKnowledgeBaseStore();
+  const skillStore = useSkillStore();
 
-  const skillState = knowledgeBaseStore?.skillState;
+  const skillState = skillStore?.skillState;
   const skills = [saveToKnowledgeBaseSkill];
   const runtime = getRuntime();
 

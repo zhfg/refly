@@ -28,11 +28,11 @@ export const QuickAction = () => {
         <div className="selected-weblinks-inner-container">
           <div className="hint-item">
             <IconStar style={{ color: 'rgba(0, 0, 0, .6)' }} />
-            <span>{t('extension.loggedHomePage.homePage.recommendQuickAction.title')}</span>
+            <span>{t('loggedHomePage.homePage.recommendQuickAction.title')}</span>
           </div>
-          <IconTip text={t('extension.loggedHomePage.homePage.recommendQuickAction.summary.tip.title')}>
+          <IconTip text={t('loggedHomePage.homePage.recommendQuickAction.summary.tip.title')}>
             <Button onClick={handleSummary} style={{ fontSize: 12 }} shape="round" size="small">
-              {t('extension.loggedHomePage.homePage.recommendQuickAction.summary.title')}
+              {t('loggedHomePage.homePage.recommendQuickAction.summary.title')}
             </Button>
           </IconTip>
         </div>
