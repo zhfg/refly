@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "exports": {
     "import": "./src/index.ts",
-    "require": "./dist/cjs/index.js"
+    "require": "./src/index.ts"
   },
   "scripts": {
     "prebuild": "rimraf dist",

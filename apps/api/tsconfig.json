@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "module": "commonjs",
+    "moduleResolution": "node",
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
@@ -20,9 +21,14 @@
     "noFallthroughCasesInSwitch": false,
     "inlineSources": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@refly/skill-template/*": ["../../packages/skill-template/src/*"]
     },
-    "sourceRoot": "/"
+    "sourceRoot": "/",
+    "composite": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "references": [{
+    "path": "../../packages/skill-template/tsconfig.json"
+  }]
 }
