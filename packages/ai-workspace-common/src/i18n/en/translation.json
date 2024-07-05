@@ -325,6 +325,9 @@
     }
   },
   "threadDetail": {
+    "header": {
+      "newThread": "New Thread"
+    },
     "breadcrumb": {
       "threadLibrary": "Threads"
     },
@@ -359,13 +362,28 @@
         "placeholder": "Ask a follow-up question...",
         "searchScope": {
           "title": "Select Search Scope",
-          "all": "Whole Library",
+          "current": "Current WebPage",
+          "all": "Entire Knowledge Base",
           "selected": "Selected Web Page",
           "internet": "Internet Search"
         },
         "selectedWeblink": {
           "title": "Ask a Question Based on the Selected Web Page:"
-        }
+        },
+        "searchPlaceholder": {
+          "all": "Ask a question about the entire knowledge base...",
+          "selectedWeblink": "Ask a question about the selected web page...",
+          "current": "Ask a question about the current web page...",
+          "internet": "Enter keywords for an internet search...",
+          "currentSelectedContent": "Ask a question based on the currently selected content..."
+        },
+        "status": {
+          "emptyNotify": "The question field cannot be empty.",
+          "contentHandling": "Processing content...",
+          "createFailed": "Failed to create a new session!",
+          "contentHandleSuccessNotify": "Processing successful, redirecting to the session page...",
+          "contentHandleFailedNotify": "Processing failed!"
+        },
       }
     }
   },
