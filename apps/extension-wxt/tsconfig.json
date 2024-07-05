@@ -3,6 +3,7 @@
   "compilerOptions": {
     "allowImportingTsExtensions": true,
     "jsx": "react-jsx",// path
+    "useDefineForClassFields": true,
     "paths": {
       "@/*": ["./src/*"],
       "@refly/ai-workspace-common/*": ["./node_modules/@refly/ai-workspace-common/src/*",  "../../packages/ai-workspace-common/src/*"],
