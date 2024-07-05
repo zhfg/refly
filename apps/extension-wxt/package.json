@@ -90,6 +90,7 @@
     "@types/chrome": "0.0.227",
     "@types/node": "18.15.11",
     "prettier": "3.2.4",
-    "@refly/common-types": "workspace:*"
+    "@refly/common-types": "workspace:*",
+    "code-inspector-plugin": "~0.14.2"
   }
 }
