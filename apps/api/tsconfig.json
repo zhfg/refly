@@ -21,14 +21,11 @@
     "noFallthroughCasesInSwitch": false,
     "inlineSources": true,
     "paths": {
-      "@/*": ["./src/*"],
-      "@refly/skill-template/*": ["../../packages/skill-template/src/*"]
+      "@/*": ["./src/*"]
     },
     "sourceRoot": "/",
     "composite": true
   },
   "include": ["src/**/*"],
-  "references": [{
-    "path": "../../packages/skill-template/tsconfig.json"
-  }]
+  "exclude": ["node_modules", "dist", "./src/**/*.spec.ts"]
 }
