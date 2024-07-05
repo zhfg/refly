@@ -694,6 +694,9 @@ importers:
       clsx:
         specifier: ^2.1.0
         version: 2.1.0
+      code-inspector-plugin:
+        specifier: ~0.14.2
+        version: 0.14.2
       copy-to-clipboard:
         specifier: ~3.3.3
         version: 3.3.3
@@ -1731,7 +1734,7 @@ importers:
     dependencies:
       '@langchain/community':
         specifier: 0.2.12
-        version: 0.2.12(better-sqlite3@11.0.0)
+        version: 0.2.12(better-sqlite3@11.0.0)(duck-duck-scrape@2.2.5)
       '@langchain/core':
         specifier: 0.2.7
         version: 0.2.7
@@ -1753,6 +1756,9 @@ importers:
       dotenv:
         specifier: ~16.4.5
         version: 16.4.5
+      duck-duck-scrape:
+        specifier: ~2.2.5
+        version: 2.2.5
       tsx:
         specifier: ^4.6.2
         version: 4.6.2
@@ -4737,7 +4743,7 @@ packages:
       - pyodide
     dev: false
 
-  /@langchain/community@0.2.12(better-sqlite3@11.0.0):
+  /@langchain/community@0.2.12(better-sqlite3@11.0.0)(duck-duck-scrape@2.2.5):
     resolution: {integrity: sha512-bFhWNyPXqd/V2fduJ6BWipEkAQQHLnGs6IqKmxJMf7FvhN16DfhWK/PpPrNUltE/b5cl5gDuTzdpEsyvuw7fHg==}
     engines: {node: '>=18'}
     peerDependencies:
@@ -5107,6 +5113,7 @@ packages:
       '@langchain/openai': 0.1.3(langchain@0.2.3)
       better-sqlite3: 11.0.0
       binary-extensions: 2.3.0
+      duck-duck-scrape: 2.2.5
       expr-eval: 2.0.2
       flat: 5.0.2
       js-yaml: 4.1.0
@@ -9923,14 +9930,12 @@ packages:
       '@vue/shared': 3.3.10
       estree-walker: 2.0.2
       source-map-js: 1.2.0
-    dev: true
 
   /@vue/compiler-dom@3.3.10:
     resolution: {integrity: sha512-NCrqF5fm10GXZIK0GrEAauBqdy+F2LZRt3yNHzrYjpYBuRssQbuPLtSnSNjyR9luHKkWSH8we5LMB3g+4z2HvA==}
     dependencies:
       '@vue/compiler-core': 3.3.10
       '@vue/shared': 3.3.10
-    dev: true
 
   /@vue/compiler-sfc@3.3.10:
     resolution: {integrity: sha512-xpcTe7Rw7QefOTRFFTlcfzozccvjM40dT45JtrE3onGm/jBLZ0JhpKu3jkV7rbDFLeeagR/5RlJ2Y9SvyS0lAg==}
@@ -9997,7 +10002,6 @@ packages:
 
   /@vue/shared@3.3.10:
     resolution: {integrity: sha512-2y3Y2J1a3RhFa0WisHvACJR2ncvWiVHcP8t0Inxo+NKz+8RKO4ZV8eZgCxRgQoA6ITfV12L4E6POOL9HOU5nqw==}
-    dev: true
 
   /@webassemblyjs/ast@1.12.1:
     resolution: {integrity: sha512-EKfMUOPRRUTy5UII4qJDGPpqfwjOmZ5jeGFwid9mnoqIFK+e0vqoi1qH56JpmZSzEL53jKnNzScdmftJyG5xWg==}
@@ -10447,6 +10451,12 @@ packages:
     resolution: {integrity: sha512-eJFZ1YhRR8UN8eBLoNzcDPcy/jqjsg6I1AP+KvWQX80BqOSW1oJPJXDylPUEeMr2ZQvHgnQ//Lp6f3RQ1zI7HA==}
     dependencies:
       tslib: 2.6.3
+    dev: false
+
+  /async@2.6.4:
+    resolution: {integrity: sha512-mzo5dfJYwAn29PeiJ0zvwTo04zj8HDJj0Mn8TD7sno7q12prdbnasKJHhkm2c1LgrhlJ0teaea8860oxi51mGA==}
+    dependencies:
+      lodash: 4.17.21
     dev: false
 
   /async@3.2.5:
@@ -11004,6 +11014,14 @@ packages:
       escape-string-regexp: 1.0.5
       supports-color: 5.5.0
 
+  /chalk@4.1.1:
+    resolution: {integrity: sha512-diHzdDKxcU+bAsUboHLPEDQiw0qEe0qd7SYUn3HgcFlWgbDcfLGswOHYeGrHKzG9z6UYf01d9VFMfZxPM1xZSg==}
+    engines: {node: '>=10'}
+    dependencies:
+      ansi-styles: 4.3.0
+      supports-color: 7.2.0
+    dev: false
+
   /chalk@4.1.2:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
     engines: {node: '>=10'}
@@ -11260,6 +11278,23 @@ packages:
     resolution: {integrity: sha512-QVb0dM5HvG+uaxitm8wONl7jltx8dqhfU33DcqtOZcLSVIKSDDLDi7+0LbAKiyI8hD9u42m2YxXSkMGWThaecQ==}
     engines: {iojs: '>= 1.0.0', node: '>= 0.12.0'}
     dev: true
+
+  /code-inspector-core@0.14.2:
+    resolution: {integrity: sha512-YnOxgiXDXPOXDYmqVB9hQVVa94/uDk65fxG33r5aRilWXW7EPINBiV6KEqWqKKZO/MWiyXbUPx/mmL6IrR2KQw==}
+    dependencies:
+      '@vue/compiler-dom': 3.3.10
+      chalk: 4.1.2
+      portfinder: 1.0.32
+    dev: false
+
+  /code-inspector-plugin@0.14.2:
+    resolution: {integrity: sha512-FQAeTzA5nI7Q3x2HVdgOlenQC1DPDfGCoaM1tuhdLlXgTe34XpdV9dXD/wy4NqI2fIANwcNro30Kfg7Q1GavrQ==}
+    dependencies:
+      chalk: 4.1.1
+      code-inspector-core: 0.14.2
+      vite-code-inspector-plugin: 0.14.2
+      webpack-code-inspector-plugin: 0.14.2
+    dev: false
 
   /collect-v8-coverage@1.0.2:
     resolution: {integrity: sha512-lHl4d5/ONEbLlJvaJNtsF/Lz+WvB07u2ycqTYbdrq7UypDXailES4valYb2eWiJFxZlVmpGekfqoxQhzyFdT4Q==}
@@ -11690,6 +11725,12 @@ packages:
     dependencies:
       ms: 2.0.0
 
+  /debug@3.2.7:
+    resolution: {integrity: sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ==}
+    dependencies:
+      ms: 2.1.3
+    dev: false
+
   /debug@4.3.4:
     resolution: {integrity: sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==}
     engines: {node: '>=6.0'}
@@ -12011,6 +12052,13 @@ packages:
       nan: 2.20.0
     dev: false
     optional: true
+
+  /duck-duck-scrape@2.2.5:
+    resolution: {integrity: sha512-RTu/Ag5LhgD/j1l2zVGCwTINBoEYCffl58nMoBjtXWJG8tTex72h3gxpDjAr8jVqFaBvhgASNKTUsE31JeqYgw==}
+    dependencies:
+      html-entities: 2.5.2
+      needle: 3.3.1
+    dev: false
 
   /eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
@@ -13847,6 +13895,10 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       whatwg-encoding: 2.0.0
+    dev: false
+
+  /html-entities@2.5.2:
+    resolution: {integrity: sha512-K//PSRMQk4FZ78Kyau+mZurHn3FH0Vwr+H36eE0rPbeYkRRi9YxceYPhuN60UwWorxyKHhqoAJl2OFKa4BVtaA==}
     dev: false
 
   /html-escaper@2.0.2:
@@ -17135,7 +17187,6 @@ packages:
     dependencies:
       iconv-lite: 0.6.3
       sax: 1.4.1
-    optional: true
 
   /negotiator@0.6.3:
     resolution: {integrity: sha512-+EUsqGPLsM+j/zdChZjsnX51g4XrHFOIXwfnCVPGlQk/k5giakcKsuxCObBRu6DSm9opw/O6slWbJdghQM4bBg==}
@@ -18133,6 +18184,15 @@ packages:
     resolution: {integrity: sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==}
     engines: {node: '>=4'}
     dev: true
+
+  /portfinder@1.0.32:
+    resolution: {integrity: sha512-on2ZJVVDXRADWE6jnQaX0ioEylzgBpQk8r55NE4wjXW1ZxO+BgDlY6DXwj20i0V8eB4SenDQ00WEaxfiIQPcxg==}
+    engines: {node: '>= 0.12.0'}
+    dependencies:
+      async: 2.6.4
+      debug: 3.2.7
+      mkdirp: 0.5.6
+    dev: false
 
   /possible-typed-array-names@1.0.0:
     resolution: {integrity: sha512-d7Uw+eZoloe0EHDIYoe+bQ5WXnGMOpmiZFTuMWCwpjzzkL2nTjcKiAk4hh8TjnGye2TwWOk3UXucZ+3rbmBa8Q==}
@@ -21604,6 +21664,12 @@ packages:
       vfile-message: 3.1.4
     dev: false
 
+  /vite-code-inspector-plugin@0.14.2:
+    resolution: {integrity: sha512-k04yeefaMSjvZQW+GvxbzVjJb8fw5BycSrH7oNw6y3M11AwUlyqDmmL8OcO8b07ljhkPZ0bYVotfBCftXkYRyQ==}
+    dependencies:
+      code-inspector-core: 0.14.2
+    dev: false
+
   /vite-node@1.5.0(@types/node@20.14.8):
     resolution: {integrity: sha512-tV8h6gMj6vPzVCa7l+VGq9lwoJjW8Y79vst8QZZGiuRAfijU+EEWuc0kFpmndQrWhMMhet1jdSF+40KSZUqIIw==}
     engines: {node: ^18.0.0 || >=20.0.0}
@@ -22110,6 +22176,12 @@ packages:
   /webidl-conversions@7.0.0:
     resolution: {integrity: sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==}
     engines: {node: '>=12'}
+
+  /webpack-code-inspector-plugin@0.14.2:
+    resolution: {integrity: sha512-WQoOFuckY1dQp4xCgNfyzddER+6OMvedpaa+UMGlvu9Zqb1aSxHm9ss8qJo9OeuLkw41qiOlHvg9FGvST877uA==}
+    dependencies:
+      code-inspector-core: 0.14.2
+    dev: false
 
   /webpack-node-externals@3.0.0:
     resolution: {integrity: sha512-LnL6Z3GGDPht/AigwRh2dvL9PQPFQ8skEpVrWZXLWBYmqcaojHNN0onvHzie6rq7EWKrrBfPYqNEzTJgiwEQDQ==}
@@ -22788,6 +22860,7 @@ time:
   /clsx@1.2.1: '2022-07-06T00:06:46.535Z'
   /clsx@2.1.0: '2023-12-29T20:34:39.095Z'
   /cmdk@0.2.1: '2024-01-30T02:48:47.436Z'
+  /code-inspector-plugin@0.14.2: '2024-06-13T11:35:00.379Z'
   /consola@3.2.3: '2023-07-05T23:13:10.585Z'
   /cookie-parser@1.4.6: '2021-11-16T17:32:19.335Z'
   /copy-to-clipboard@3.3.3: '2022-11-13T21:14:04.484Z'
@@ -22795,6 +22868,7 @@ time:
   /defu@6.1.3: '2023-10-24T23:03:15.048Z'
   /dequal@2.0.3: '2022-07-11T23:29:04.965Z'
   /dotenv@16.4.5: '2024-02-20T03:33:38.563Z'
+  /duck-duck-scrape@2.2.5: '2023-12-04T16:40:59.365Z'
   /esbuild@0.13.2: '2021-09-23T13:30:02.647Z'
   /esbuild@0.19.5: '2023-10-17T05:11:26.283Z'
   /eslint-config-prettier@8.3.0: '2021-04-24T12:55:56.267Z'
