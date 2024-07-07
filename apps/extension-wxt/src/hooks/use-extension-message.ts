@@ -12,7 +12,7 @@ export const useExtensionMessage = <T>(
     sender: Runtime.MessageSender,
     sendResponse: (response?: any) => void,
   ) => {
-    console.log('listenToExtensionMessage', message);
+    // console.log('listenToExtensionMessage', message);
     if (message?.name === name) {
       setExtensionData(message);
       onCallback(sender, {

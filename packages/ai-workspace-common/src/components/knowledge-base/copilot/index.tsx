@@ -9,6 +9,7 @@ import {
   IconHistory,
   IconMessage,
   IconPlusCircle,
+  IconSettings,
   IconTranslate,
 } from '@arco-design/web-react/icon';
 // 自定义样式
@@ -48,6 +49,8 @@ import { RegisterSkillComponent } from '@refly-packages/ai-workspace-common/skil
 import { KnowledgeBaseNavHeader } from '@refly-packages/ai-workspace-common/components/knowledge-base/nav-header';
 import classNames from 'classnames';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
+import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
+import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 
 interface AICopilotProps {}
 
@@ -63,10 +66,11 @@ export const AICopilot = (props: AICopilotProps) => {
   const { runTask } = useBuildThreadAndRun();
   const searchStateStore = useSearchStateStore();
   const messageStateStore = useMessageStateStore();
+  const skillStore = useSkillStore();
 
   const convId = searchParams.get('convId');
   const { resetState } = useResetState();
-  const actualCopilotBodyHeight = copilotBodyHeight + (showContextCard ? contextCardHeight : 0);
+  const actualCopilotBodyHeight = copilotBodyHeight + (showContextCard ? contextCardHeight : 0) + 32;
 
   const { t, i18n } = useTranslation();
   const uiLocale = i18n?.languages?.[0] as LOCALE;
@@ -75,6 +79,7 @@ export const AICopilot = (props: AICopilotProps) => {
 
   // ai-note handler
   useAINote();
+  useSkillManagement({ shouldInit: true });
 
   const handleSwitchSearchTarget = () => {
     if (showContextState) {
@@ -245,15 +250,16 @@ export const AICopilot = (props: AICopilotProps) => {
             </div>
           </div>
 
-          {/* <div className="skill-container">
-            {["搜索", "写作", "翻译", "数据分析", "更多技能"].map(
-              (item, index) => (
-                <div key={index} className="skill-item">
-                  {item}
-                </div>
-              ),
-            )}
-          </div> */}
+          <div className="skill-container">
+            {skillStore?.skillInstances?.map((item, index) => (
+              <div key={index} className="skill-item">
+                {item?.displayName}
+              </div>
+            ))}
+            <div key="more" className="skill-item">
+              <IconSettings /> <p className="skill-title">技能管理</p>
+            </div>
+          </div>
           <div className="chat-input-container">
             <div className="chat-input-body">
               <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
