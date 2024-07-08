@@ -29,7 +29,7 @@ import {
   UpsertSkillTriggerRequest,
   UpsertSkillTriggerResponse,
 } from '@refly/openapi-schema';
-import { buildSuccessResponse } from 'src/utils';
+import { buildSuccessResponse } from '@/utils';
 import { Response } from 'express';
 import { toSkillDTO, toSkillLogDTO, toSkillTriggerDTO } from './skill.dto';
 
@@ -85,11 +85,13 @@ export class SkillController {
     @User() user: UserModel,
     @Body() body: UpsertSkillInstanceRequest,
   ): Promise<UpsertSkillInstanceResponse> {
-    const { skill, triggers } = await this.skillService.createSkillInstance(user, body);
-    return buildSuccessResponse({
-      ...toSkillDTO(skill),
-      triggers: triggers.map((trigger) => toSkillTriggerDTO(trigger)),
-    });
+    const skillInstanceList = await this.skillService.createSkillInstance(user, body);
+    return buildSuccessResponse(
+      skillInstanceList.map(({ skill, triggers }) => ({
+        ...toSkillDTO(skill),
+        triggers: triggers.map((trigger) => toSkillTriggerDTO(trigger)),
+      })),
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -98,8 +100,8 @@ export class SkillController {
     @User() user: UserModel,
     @Body() body: UpsertSkillInstanceRequest,
   ): Promise<UpsertSkillInstanceResponse> {
-    const skill = await this.skillService.updateSkillInstance(user, body);
-    return buildSuccessResponse(toSkillDTO(skill));
+    const instances = await this.skillService.updateSkillInstance(user, body);
+    return buildSuccessResponse(instances.map(toSkillDTO));
   }
 
   @UseGuards(JwtAuthGuard)

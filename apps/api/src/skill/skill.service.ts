@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter } from 'node:events';
 import { Queue } from 'bull';
+import pLimit from 'p-limit';
 import { InjectQueue } from '@nestjs/bull';
 import { Conversation, SkillInstance, SkillRunMode, SkillTrigger, User } from '@prisma/client';
 import { Response } from 'express';
@@ -87,54 +88,71 @@ export class SkillService {
   }
 
   async createSkillInstance(user: User, param: UpsertSkillInstanceRequest) {
-    if (!this.scheduler.isValidSkillName(param.skillName)) {
-      throw new BadRequestException(`skill ${param.skillName} not found`);
-    }
+    param.instanceList.forEach((instance) => {
+      if (!this.scheduler.isValidSkillName(instance.skillName)) {
+        throw new BadRequestException(`skill ${instance.skillName} not found`);
+      }
+    });
 
-    const skillId = genSkillID();
-    const [skill, ...triggers] = await this.prisma.$transaction([
-      this.prisma.skillInstance.create({
-        data: {
-          skillId,
-          uid: user.uid,
-          skillName: param.skillName,
-          displayName: param.displayName ?? '',
-          config: JSON.stringify(param.config),
-        },
+    const limit = pLimit(5);
+    const tasks = param.instanceList.map((instance) =>
+      limit(async () => {
+        const skillId = genSkillID();
+        const [skill, ...triggers] = await this.prisma.$transaction([
+          this.prisma.skillInstance.create({
+            data: {
+              skillId,
+              uid: user.uid,
+              skillName: instance.skillName,
+              displayName: instance.displayName ?? '',
+              config: JSON.stringify(instance.config),
+            },
+          }),
+          ...(instance.triggers ?? []).map((trigger) =>
+            this.prisma.skillTrigger.create({
+              data: {
+                skillId,
+                uid: user.uid,
+                triggerId: genSkillTriggerID(),
+                event: trigger.event,
+                crontab: trigger.crontab,
+                enabled: !!trigger.enabled,
+              },
+            }),
+          ),
+        ]);
+        return { skill, triggers };
       }),
-      ...(param.triggers ?? []).map((trigger) =>
-        this.prisma.skillTrigger.create({
-          data: {
-            skillId,
-            uid: user.uid,
-            triggerId: genSkillTriggerID(),
-            event: trigger.event,
-            crontab: trigger.crontab,
-            enabled: !!trigger.enabled,
-          },
-        }),
-      ),
-    ]);
-    return { skill, triggers };
+    );
+
+    return Promise.all(tasks);
   }
 
   async updateSkillInstance(user: User, param: UpsertSkillInstanceRequest) {
-    if (!param.skillId) {
-      throw new BadRequestException('skill id is required');
-    }
-    if (!this.scheduler.isValidSkillName(param.skillName)) {
-      throw new BadRequestException(`skill ${param.skillName} not found`);
-    }
-
-    const skill = await this.prisma.skillInstance.update({
-      where: { skillId: param.skillId, uid: user.uid, deletedAt: null },
-      data: {
-        displayName: param.displayName,
-        skillName: param.skillName,
-        config: JSON.stringify(param.config),
-      },
+    param.instanceList.forEach((instance) => {
+      if (!instance.skillId) {
+        throw new BadRequestException('skill id is required');
+      }
+      if (!this.scheduler.isValidSkillName(instance.skillName)) {
+        throw new BadRequestException(`skill ${instance.skillName} not found`);
+      }
     });
-    return skill;
+
+    const limit = pLimit(5);
+    const tasks = param.instanceList.map((instance) =>
+      limit(() =>
+        this.prisma.skillInstance.update({
+          where: { skillId: instance.skillId, uid: user.uid, deletedAt: null },
+          data: {
+            displayName: instance.displayName,
+            skillName: instance.skillName,
+            config: JSON.stringify(instance.config),
+          },
+        }),
+      ),
+    );
+
+    return Promise.all(tasks);
   }
 
   async deleteSkillInstance(user: User, param: DeleteSkillInstanceRequest) {

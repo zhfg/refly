@@ -1027,7 +1027,7 @@ export type ListSkillInstanceResponse = BaseResponse & {
   data?: Array<SkillInstance>;
 };
 
-export type UpsertSkillInstanceRequest = {
+export type SkillInstanceUpsertParam = {
   /**
    * Skill name
    */
@@ -1052,8 +1052,18 @@ export type UpsertSkillInstanceRequest = {
   };
 };
 
+export type UpsertSkillInstanceRequest = {
+  /**
+   * Skill instances to upsert
+   */
+  instanceList: Array<SkillInstanceUpsertParam>;
+};
+
 export type UpsertSkillInstanceResponse = BaseResponse & {
-  data?: SkillInstance;
+  /**
+   * Skill instance list
+   */
+  data?: Array<SkillInstance>;
 };
 
 export type DeleteSkillInstanceRequest = {
