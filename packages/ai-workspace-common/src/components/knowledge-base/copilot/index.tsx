@@ -70,7 +70,8 @@ export const AICopilot = (props: AICopilotProps) => {
 
   const convId = searchParams.get('convId');
   const { resetState } = useResetState();
-  const actualCopilotBodyHeight = copilotBodyHeight + (showContextCard ? contextCardHeight : 0) + 32;
+  const actualCopilotBodyHeight =
+    copilotBodyHeight + (showContextCard ? contextCardHeight : 0) + 32 + (skillStore?.selectedSkill ? 32 : 0);
 
   const { t, i18n } = useTranslation();
   const uiLocale = i18n?.languages?.[0] as LOCALE;
@@ -252,7 +253,13 @@ export const AICopilot = (props: AICopilotProps) => {
 
           <div className="skill-container">
             {skillStore?.skillInstances?.map((item, index) => (
-              <div key={index} className="skill-item">
+              <div
+                key={index}
+                className="skill-item"
+                onClick={() => {
+                  skillStore.setSelectedSkillInstalce(item);
+                }}
+              >
                 {item?.displayName}
               </div>
             ))}
@@ -260,7 +267,7 @@ export const AICopilot = (props: AICopilotProps) => {
               <IconSettings /> <p className="skill-title">技能管理</p>
             </div>
           </div>
-          <div className="chat-input-container">
+          <div className="chat-input-container" style={{ height: skillStore?.selectedSkill ? 125 + 32 : 125 }}>
             <div className="chat-input-body">
               <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
             </div>

@@ -14,9 +14,12 @@ interface SkillManageState {
   // skills states
   skillState: SkillState;
 
+  selectedSkill: SkillInstance | null;
+
   setSkillState: (newState: SkillState) => void;
   setSkillInstalces: (skillInstances: SkillInstance[]) => void;
   setSkillTemplates: (skillTemplates: SkillTemplate[]) => void;
+  setSelectedSkillInstalce: (skillInstance: SkillInstance) => void;
   resetState: () => void;
 }
 
@@ -25,6 +28,7 @@ export const defaultState = {
   skillInstances: [],
   skillTemplates: [],
   skillState: {} as SkillState,
+  selectedSkill: null,
 };
 
 export const useSkillStore = create<SkillManageState>()(
@@ -35,6 +39,8 @@ export const useSkillStore = create<SkillManageState>()(
     setSkillState: (newState: SkillState) => set((state) => ({ ...state, skillState: newState })),
     setSkillInstalces: (skillInstances: SkillInstance[]) => set((state) => ({ ...state, skillInstances })),
     setSkillTemplates: (skillTemplates: SkillTemplate[]) => set((state) => ({ ...state, skillTemplates })),
+    setSelectedSkillInstalce: (skillInstance: SkillInstance) =>
+      set((state) => ({ ...state, selectedSkill: skillInstance })),
     resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),
 );
