@@ -63,7 +63,7 @@ export const AICopilot = (props: AICopilotProps) => {
   const chatStore = useChatStore();
   const conversationStore = useConversationStore();
   const [isFetching, setIsFetching] = useState(false);
-  const { runTask } = useBuildThreadAndRun();
+  const { runSkill } = useBuildThreadAndRun();
   const searchStateStore = useSearchStateStore();
   const messageStateStore = useMessageStateStore();
   const skillStore = useSkillStore();
@@ -71,7 +71,7 @@ export const AICopilot = (props: AICopilotProps) => {
   const convId = searchParams.get('convId');
   const { resetState } = useResetState();
   const actualCopilotBodyHeight =
-    copilotBodyHeight + (showContextCard ? contextCardHeight : 0) + 32 + (skillStore?.selectedSkill ? 32 : 0);
+    copilotBodyHeight + (showContextCard ? contextCardHeight : 0) + 32 + (skillStore?.selectedSkill ? 32 : 0) - 16;
 
   const { t, i18n } = useTranslation();
   const uiLocale = i18n?.languages?.[0] as LOCALE;
@@ -131,7 +131,7 @@ export const AICopilot = (props: AICopilotProps) => {
       // 新会话，需要手动构建第一条消息
       if (isNewConversation && convId && newQAText) {
         // 更换成基于 task 的消息模式，核心是基于 task 来处理
-        runTask(newQAText);
+        runSkill(newQAText);
       } else if (convId) {
         handleGetThreadMessages(convId);
       }
@@ -267,7 +267,7 @@ export const AICopilot = (props: AICopilotProps) => {
               <IconSettings /> <p className="skill-title">技能管理</p>
             </div>
           </div>
-          <div className="chat-input-container" style={{ height: skillStore?.selectedSkill ? 125 + 32 : 125 }}>
+          <div className="chat-input-container" style={{ height: skillStore?.selectedSkill ? 117 + 32 : 117 }}>
             <div className="chat-input-body">
               <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
             </div>

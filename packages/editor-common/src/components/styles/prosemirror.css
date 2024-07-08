@@ -1,5 +1,8 @@
 .ProseMirror {
   @apply p-12 px-8 sm:px-12;
+
+  font-size: 14px;
+  color: #24292f;
 }
 
 .ProseMirror .is-editor-empty:first-child::before {

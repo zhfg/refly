@@ -3,7 +3,7 @@ import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { ChatMessage } from '@refly/openapi-schema';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
-import { Avatar, Button, Spin, Message, Dropdown, Menu } from '@arco-design/web-react';
+import { Avatar, Button, Spin, Message, Dropdown, Menu, Skeleton } from '@arco-design/web-react';
 import {
   IconBook,
   IconCaretDown,
@@ -36,11 +36,12 @@ export const HumanMessage = (props: { message: Partial<ChatMessage> }) => {
 
 export const AssistantMessage = (props: {
   message: Partial<ChatMessage>;
+  isPendingFirstToken: boolean;
   isPending: boolean;
   isLastSession: boolean;
   handleAskFollowing: (question?: string) => void;
 }) => {
-  const { message, isPending = false, isLastSession = false, handleAskFollowing } = props;
+  const { message, isPendingFirstToken = false, isPending, isLastSession = false, handleAskFollowing } = props;
   const { t } = useTranslation();
   const knowledgeBaseStore = useKnowledgeBaseStore();
   const sources = typeof message?.sources === 'string' ? safeParseJSON(message?.sources) : message?.sources;
@@ -100,18 +101,24 @@ export const AssistantMessage = (props: {
   return (
     <div className="ai-copilot-message assistant-message-container">
       <div className="session-source">
-        {isPending || (sources || [])?.length > 0 ? (
+        {(sources || [])?.length > 0 ? (
           <div className="session-title-icon">
             <IconQuote style={{ fontSize: 18, color: 'rgba(0, 0, 0, .5)' }} />
             <p>{t('threadDetail.item.session.source')}</p>
           </div>
         ) : null}
       </div>
-      <SourceList isPending={isPending} sources={sources || []} isLastSession={isLastSession} />
+      <SourceList isPendingFirstToken={isPendingFirstToken} sources={sources || []} isLastSession={isLastSession} />
       <div className="assistant-message">
-        <Markdown content={message?.content as string} sources={sources} />
+        {isLastSession && (isPendingFirstToken || message?.content === '') ? (
+          <>
+            <Skeleton animation></Skeleton>
+          </>
+        ) : (
+          <Markdown content={message?.content as string} sources={sources} />
+        )}
       </div>
-      {!isPending && (
+      {(!isPending || !isLastSession) && (
         <div className="ai-copilot-answer-action-container">
           <div className="session-answer-actionbar">
             <div className="session-answer-actionbar-left">
@@ -180,7 +187,7 @@ export const WelcomeMessage = () => {
   const userStore = useUserStore();
   const skillStore = useSkillStore();
   const { handleAddSkillInstance } = useSkillManagement();
-  const { runTask } = useBuildThreadAndRun();
+  const { runSkill } = useBuildThreadAndRun();
 
   const { localSettings } = userStore;
   const { skillInstances = [], skillTemplates = [] } = skillStore;
@@ -248,7 +255,7 @@ export const WelcomeMessage = () => {
             <div className="guess-you-ask-assist"></div>
             <div className="guess-you-ask ai-copilot-related-question-lis">
               {guessQuestions?.map((item, index) => (
-                <div className="ai-copilot-related-question-item" key={index} onClick={() => runTask(item)}>
+                <div className="ai-copilot-related-question-item" key={index} onClick={() => runSkill(item)}>
                   <p className="ai-copilot-related-question-title">{item}</p>
                   <IconRight style={{ color: 'rgba(0, 0, 0, 0.5)' }} />
                 </div>

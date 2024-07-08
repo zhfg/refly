@@ -10,7 +10,7 @@ interface ChatMessagesProps {}
 export const ChatMessages = (props: ChatMessagesProps) => {
   const chatStore = useChatStore();
   const messageStateStore = useMessageStateStore();
-  const { runTask } = useBuildThreadAndRun();
+  const { runSkill } = useBuildThreadAndRun();
 
   return (
     <div className="ai-copilot-message-inner-container">
@@ -22,9 +22,10 @@ export const ChatMessages = (props: ChatMessagesProps) => {
             message={item}
             key={index}
             isLastSession={index === chatStore.messages.length - 1}
+            isPendingFirstToken={messageStateStore?.pendingFirstToken as boolean}
             isPending={messageStateStore?.pending as boolean}
             handleAskFollowing={(question?: string) => {
-              runTask(question);
+              runSkill(question);
             }}
           />
         ),

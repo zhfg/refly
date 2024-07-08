@@ -1,8 +1,8 @@
-import { ChatMessage, ChatTaskType, MessageType, Source } from '@refly/openapi-schema';
+import { ChatMessage, ChatTaskType, MessageType, SkillInstance, Source } from '@refly/openapi-schema';
 import type { RelatedQuestion } from './session';
 
 export type MessageState = {
-  taskType?: ChatTaskType;
+  nowInvokeSkillId?: string;
   pendingMsg?: string;
   pendingFirstToken?: boolean; // 是否正在准备生成，如果收到第一个字符，即代表已经开始生生成
   pending?: boolean;

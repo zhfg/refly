@@ -27,7 +27,7 @@ export const ChatInput = (props: ChatInputProps) => {
   const conversationStore = useConversationStore();
   const messageStateStore = useMessageStateStore();
   const skillStore = useSkillStore();
-  const { runTask, emptyConvRunTask } = useBuildThreadAndRun();
+  const { runSkill, emptyConvRunTask } = useBuildThreadAndRun();
   // hooks
   const [isFocused, setIsFocused] = useState(false);
 
@@ -37,7 +37,7 @@ export const ChatInput = (props: ChatInputProps) => {
 
     if (messages?.length > 0) {
       // 追问阅读
-      runTask(newQAText);
+      runSkill(newQAText);
     } else {
       // 新会话阅读，先创建会话，然后进行跳转之后发起聊天
       emptyConvRunTask(newQAText);

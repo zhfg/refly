@@ -19,7 +19,7 @@ export const ResourceDetailSelectedContextPanel = () => {
   } = useCopilotContextState();
   const searchStateStore = useSearchStateStore();
   const knowledgeBaseStore = useKnowledgeBaseStore();
-  const { runTask } = useBuildThreadAndRun();
+  const { runSkill } = useBuildThreadAndRun();
 
   // skill
   const [skills] = useGetSkills();
@@ -55,7 +55,7 @@ export const ResourceDetailSelectedContextPanel = () => {
               size="mini"
               style={{ borderRadius: 8 }}
               onClick={() => {
-                runTask(getQuickActionPrompt('explain')?.prompt);
+                runSkill(getQuickActionPrompt('explain')?.prompt);
               }}
             >
               解释说明
@@ -67,7 +67,7 @@ export const ResourceDetailSelectedContextPanel = () => {
               size="mini"
               style={{ borderRadius: 8 }}
               onClick={() => {
-                runTask(getQuickActionPrompt('translate')?.prompt);
+                runSkill(getQuickActionPrompt('translate')?.prompt);
               }}
             >
               翻译

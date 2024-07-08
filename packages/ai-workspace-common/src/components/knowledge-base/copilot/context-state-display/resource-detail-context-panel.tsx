@@ -19,7 +19,7 @@ export const ResourceDetailContextPanel = () => {
   } = useCopilotContextState();
   const searchStateStore = useSearchStateStore();
   const knowledgeBaseStore = useKnowledgeBaseStore();
-  const { runTask } = useBuildThreadAndRun();
+  const { runSkill } = useBuildThreadAndRun();
 
   // skill
   const [skills] = useGetSkills();

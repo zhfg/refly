@@ -8,17 +8,17 @@ import { Source } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 
 export const QuickAction = () => {
-  const { runQuickActionTask } = useBuildThreadAndRun();
+  // const { runQuickActionTask } = useBuildThreadAndRun();
   const { t } = useTranslation();
 
   const handleSummary = () => {
     const { selectedRow } = useWeblinkStore.getState();
     const weblinkList = mapSourceFromWeblinkList(selectedRow);
-    runQuickActionTask({
-      filter: {
-        weblinkList: weblinkList as Source[],
-      },
-    });
+    // runQuickActionTask({
+    //   filter: {
+    //     weblinkList: weblinkList as Source[],
+    //   },
+    // });
   };
 
   return (
