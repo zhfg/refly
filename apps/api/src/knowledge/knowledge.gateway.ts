@@ -10,6 +10,7 @@ import { PrismaService } from '../common/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { JwtPayload } from '../auth/dto';
 import { Resource, User } from '@prisma/client';
+import { state2Markdown } from '@refly/utils';
 
 interface NoteContext {
   resource: Resource;
@@ -51,7 +52,10 @@ export class NoteWsGateway implements OnGatewayConnection {
               resource.stateStorageKey = `state/${resource.resourceId}`;
               await this.prisma.resource.update({
                 where: { resourceId: resource.resourceId },
-                data: { stateStorageKey: resource.stateStorageKey },
+                data: {
+                  content: state2Markdown(state),
+                  stateStorageKey: resource.stateStorageKey,
+                },
               });
             }
             await this.minio.uploadData(resource.stateStorageKey, state);

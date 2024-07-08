@@ -47,10 +47,6 @@ export type Resource = {
    */
   title: string;
   /**
-   * Resource description
-   */
-  description?: string;
-  /**
    * Resource metadata
    */
   data?: ResourceMeta;

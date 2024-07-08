@@ -4,19 +4,59 @@ import { PrismaService } from '@/common/prisma.service';
 import { SearchRequest, SearchResult } from '@refly/openapi-schema';
 import { RAGService } from '@/rag/rag.service';
 
+function extractLines(document: string, words: string[]): string[] {
+  // Split the document into an array of lines using regex
+  const lines = document.split(/\r?\n/);
+
+  // Create a case-insensitive regular expression from the words
+  const regex = new RegExp(words.join('|'), 'i');
+
+  // Filter the lines that match the regex
+  return lines.filter((line) => regex.test(line));
+}
+
 @Injectable()
 export class SearchService {
   constructor(private prisma: PrismaService, private rag: RAGService) {}
 
   async searchResources(user: User, req: SearchRequest): Promise<SearchResult[]> {
-    const results = await this.rag.retrieve(user, req);
+    const tokens = req.query.toLowerCase().split(/\W+/);
+    const results = await this.prisma.resource.findMany({
+      select: {
+        resourceId: true,
+        title: true,
+        content: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      where: {
+        uid: user.uid,
+        OR: [
+          ...tokens.map(
+            (token) =>
+              ({
+                title: { contains: token, mode: 'insensitive' },
+              } as Prisma.ResourceWhereInput),
+          ),
+          ...tokens.map(
+            (token) =>
+              ({
+                content: { contains: token, mode: 'insensitive' },
+              } as Prisma.ResourceWhereInput),
+          ),
+        ],
+      },
+      orderBy: { updatedAt: 'desc' },
+      take: req.limit || 5,
+    });
+
     return results.map((result) => ({
       id: result.resourceId,
       domain: 'resource',
       title: result.title,
-      content: result.content,
-      createdAt: '',
-      updatedAt: '',
+      content: extractLines(result.content, tokens).join('\n\n'),
+      createdAt: result.createdAt.toJSON(),
+      updatedAt: result.updatedAt.toJSON(),
     }));
   }
 
@@ -114,7 +154,20 @@ export class SearchService {
       },
       where: {
         uid: user.uid,
-        OR: tokens.map((token) => ({ displayName: { contains: token, mode: 'insensitive' } })),
+        OR: [
+          ...tokens.map(
+            (token) =>
+              ({
+                displayName: { contains: token, mode: 'insensitive' },
+              } as Prisma.SkillInstanceWhereInput),
+          ),
+          ...tokens.map(
+            (token) =>
+              ({
+                skillName: { contains: token, mode: 'insensitive' },
+              } as Prisma.SkillInstanceWhereInput),
+          ),
+        ],
       },
       take: req.limit || 5,
     });

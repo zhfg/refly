@@ -20,12 +20,12 @@ export const collectionPO2DTO = (
   };
 };
 
-export const resourcePO2DTO = (resource: ResourceModel & { doc?: string }): Resource => {
+export const resourcePO2DTO = (resource: ResourceModel): Resource => {
   if (!resource) {
     return null;
   }
   return {
-    ...omit(resource, ['id', 'uid', 'storageKey', 'stateStorageKey', 'deletedAt']),
+    ...omit(resource, ['id', 'uid', 'stateStorageKey', 'deletedAt']),
     data: JSON.parse(resource.meta),
     collabEnabled: !!resource.stateStorageKey,
     createdAt: resource.createdAt.toJSON(),

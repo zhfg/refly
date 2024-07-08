@@ -1,6 +1,6 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["tracing"]
+  previewFeatures = ["tracing", "omitApi"]
 }
 
 datasource db {
@@ -302,8 +302,8 @@ model Resource {
   uid             String       @default("") @map("uid")
   /// 字数
   wordCount       Int          @default(0) @map("word_count")
-  /// 对象存储 key
-  storageKey      String       @default("") @map("storage_key")
+  /// Content of resource
+  content         String       @default("") @map("content")
   /// Yjs 状态数据存储 key
   stateStorageKey String       @default("") @map("state_storage_key")
   /// 是否公开

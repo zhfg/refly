@@ -65,10 +65,6 @@ export const $Resource = {
       type: 'string',
       description: 'Resource title',
     },
-    description: {
-      type: 'string',
-      description: 'Resource description',
-    },
     data: {
       type: 'object',
       description: 'Resource metadata',

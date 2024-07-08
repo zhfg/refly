@@ -4,6 +4,7 @@ import avro from 'avsc';
 import { LRUCache } from 'lru-cache';
 import { Document } from '@langchain/core/documents';
 import { TokenTextSplitter } from 'langchain/text_splitter';
+import { Embeddings } from '@langchain/core/embeddings';
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { cleanMarkdownForIngest } from '@refly/utils';
 
@@ -57,7 +58,7 @@ export const PARSER_VERSION = '20240424';
 
 @Injectable()
 export class RAGService {
-  private embeddings: OpenAIEmbeddings;
+  private embeddings: Embeddings;
   private splitter: TokenTextSplitter;
   private cache: LRUCache<string, ReaderResult>; // url -> reader result
   private logger = new Logger(RAGService.name);
@@ -95,12 +96,13 @@ export class RAGService {
     );
 
     // TODO: error handling
+    // TODO: Jina token needs payment method
     const response = await fetch(READER_URL + url, {
       method: 'GET',
       headers: {
-        Authorization: this.config.get('rag.jinaToken')
-          ? `Bearer ${this.config.get('rag.jinaToken')}`
-          : undefined,
+        // Authorization: this.config.get('rag.jinaToken')
+        //   ? `Bearer ${this.config.get('rag.jinaToken')}`
+        //   : undefined,
         Accept: 'application/json',
       },
     });
@@ -190,6 +192,7 @@ export class RAGService {
   async retrieve(user: Pick<User, 'uid'>, param: HybridSearchParam): Promise<ContentPayload[]> {
     if (!param.vector) {
       param.vector = await this.embeddings.embedQuery(param.query);
+      // param.vector = Array(256).fill(0);
     }
 
     const conditions: Condition[] = [

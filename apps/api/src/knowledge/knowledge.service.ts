@@ -13,7 +13,6 @@ import {
   ListResourcesData,
   ListCollectionsData,
 } from '@refly/openapi-schema';
-import { state2Markdown } from '@refly/utils';
 import { CHANNEL_FINALIZE_RESOURCE, QUEUE_RESOURCE } from '../utils';
 import { genCollectionID, genResourceID, cleanMarkdownForIngest } from '@refly/utils';
 import { FinalizeResourceParam } from './knowledge.dto';
@@ -126,29 +125,15 @@ export class KnowledgeService {
   async getResourceDetail(
     user: Pick<User, 'uid'>,
     param: { resourceId: string; needDoc?: boolean },
-  ): Promise<ResourceModel & { doc?: string }> {
+  ) {
     const { resourceId, needDoc } = param;
-    const resource: ResourceModel & { doc?: string } = await this.prisma.resource.findFirst({
+    const resource = await this.prisma.resource.findFirst({
+      omit: { content: !needDoc },
       where: { resourceId, deletedAt: null },
     });
 
     if (!resource.isPublic && resource.uid !== user.uid) {
       return null;
-    }
-
-    if (needDoc) {
-      if (resource.readOnly) {
-        const metadata: ResourceMeta = JSON.parse(resource.meta);
-        if (resource.storageKey || metadata.storageKey) {
-          const buf = await this.minio.downloadData(resource.storageKey || metadata.storageKey);
-          resource.doc = buf.toString();
-        }
-      } else {
-        if (resource.stateStorageKey) {
-          const buf = await this.minio.downloadData(resource.stateStorageKey);
-          resource.doc = state2Markdown(buf);
-        }
-      }
     }
 
     return resource;
@@ -189,7 +174,7 @@ export class KnowledgeService {
         resourceId: param.resourceId,
         resourceType: param.resourceType,
         meta: JSON.stringify(param.data),
-        storageKey: param.storageKey,
+        content: param.content ?? '',
         uid: user.uid,
         isPublic: param.isPublic,
         readOnly: param.readOnly,
@@ -263,7 +248,7 @@ export class KnowledgeService {
     await this.prisma.resource.update({
       where: { resourceId, uid: user.uid },
       data: {
-        storageKey: param.storageKey,
+        content: param.content,
         wordCount: readingTime(param.content).words,
         indexStatus: 'finish',
         meta: JSON.stringify({

@@ -947,9 +947,6 @@ components:
         title:
           type: string
           description: Resource title
-        description:
-          type: string
-          description: Resource description
         data:
           type: object
           description: Resource metadata
