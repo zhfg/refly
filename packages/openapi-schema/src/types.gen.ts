@@ -191,7 +191,7 @@ export type SkillMeta = {
   /**
    * Skill display name
    */
-  skillDisplayName?: string;
+  skillDisplayName: string;
   /**
    * Skill ID
    */
@@ -210,19 +210,6 @@ export type SkillInstance = SkillMeta & {
    * Skill config
    */
   config?: string;
-  /**
-   * Skill creation time
-   */
-  createdAt?: string;
-  /**
-   * Skill update time
-   */
-  updatedAt?: string;
-} & {
-  /**
-   * Skill ID
-   */
-  skillId: string;
   /**
    * Skill creation time
    */

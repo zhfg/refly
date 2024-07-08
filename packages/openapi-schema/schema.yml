@@ -1062,7 +1062,7 @@ components:
       description: Skill metadata
       required:
         - skillName
-        - displayName
+        - skillDisplayName
       properties:
         skillName:
           type: string
@@ -1077,15 +1077,12 @@ components:
     SkillInstance:
       type: object
       description: Skill
-      required:
-        - skillName
-        - displayName
-        - skillId
-        - createdAt
-        - updatedAt
       allOf:
         - $ref: '#/components/schemas/SkillMeta'
         - type: object
+          required:
+            - createdAt
+            - updatedAt
           properties:
             triggers:
               type: array
