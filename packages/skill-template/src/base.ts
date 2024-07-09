@@ -9,6 +9,7 @@ import { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
 import { SkillContext, SkillInput, SkillMeta } from '@refly/openapi-schema';
 import { EventEmitter } from 'node:stream';
 import { SkillEvent } from '@refly/common-types';
+import { genSkillEventSpanID } from '@refly/utils';
 
 export abstract class BaseSkill extends StructuredTool {
   abstract displayName: Record<string, string>;
@@ -16,38 +17,36 @@ export abstract class BaseSkill extends StructuredTool {
 
   constructor(
     protected engine: SkillEngine,
-    protected config?: SkillRunnableConfig,
     protected params?: BaseToolParams,
+    protected defaultConfig?: SkillRunnableConfig,
   ) {
     super(params);
+    this.defaultConfig ??= { configurable: {} };
   }
 
+  /**
+   * Convert this skill to a LangChain runnable.
+   */
   abstract toRunnable(): Runnable;
 
-  templateSkillMeta(): SkillMeta {
-    const { locale = 'en' } = this.config?.configurable || {};
-    return {
-      skillName: this.name,
-      skillDisplayName: this.displayName[locale],
-    };
-  }
-
-  emitEvent(event: keyof SkillEventMap, content?: string, options?: Partial<SkillEvent>) {
-    const { emitter, selectedSkill } = this.config?.configurable || {};
+  /**
+   * Emit a skill event.
+   */
+  emitEvent(event: Omit<SkillEvent, 'skillName' | 'skillDisplayName'>, config?: SkillRunnableConfig) {
+    const { emitter, selectedSkill, spanId } = config?.configurable || {};
 
     // Don't emit events for scheduler when skill is specified
     if (!emitter || (selectedSkill && this.name === 'scheduler')) {
       return;
     }
 
-    const eventData = {
-      event,
-      content,
-      ...options,
+    const eventData: SkillEvent = {
+      ...event,
       ...selectedSkill,
+      spanId,
     };
 
-    emitter?.emit(event, eventData);
+    emitter?.emit(event.event, eventData);
   }
 
   async _call(
@@ -55,14 +54,18 @@ export abstract class BaseSkill extends StructuredTool {
     runManager?: CallbackManagerForToolRun,
     config?: SkillRunnableConfig,
   ): Promise<string> {
-    this.config = deepmerge()(this.config, config);
+    config = deepmerge()(this.defaultConfig, config);
+
+    // Ensure we get a new spanId for every skill call.
+    config.configurable.spanId = genSkillEventSpanID();
+
     const runnable = this.toRunnable();
 
-    this.emitEvent('start');
+    this.emitEvent({ event: 'start' });
 
-    const response = await runnable.invoke(input, this.config);
+    const response = await runnable.invoke(input, config);
 
-    this.emitEvent('end');
+    this.emitEvent({ event: 'end' });
 
     return response;
   }
@@ -89,6 +92,7 @@ export interface SkillEventMap {
   start: [data: SkillEvent];
   end: [data: SkillEvent];
   log: [data: SkillEvent];
+  stream: [data: SkillEvent];
   structured_data: [data: SkillEvent];
 }
 
@@ -102,6 +106,7 @@ export interface SkillRunnableMeta extends Record<string, unknown>, SkillInfo {}
 
 export interface SkillRunnableConfig extends RunnableConfig {
   configurable?: SkillContext & {
+    spanId?: string;
     uid?: string;
     selectedSkill?: SkillMeta;
     chatHistory?: string[];
