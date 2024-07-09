@@ -243,6 +243,43 @@ export class SkillService {
     return log;
   }
 
+  buildInvokeConfig(data: {
+    user: User;
+    skill: SkillInstance;
+    param: InvokeSkillRequest;
+    eventListener?: (data: SkillEvent) => void;
+  }): SkillRunnableConfig {
+    const { user, skill, param, eventListener } = data;
+
+    const config: SkillRunnableConfig = {
+      configurable: {
+        ...JSON.parse(skill?.config ?? '{}'),
+        ...(param.config ?? {}),
+        ...param.context,
+        uid: user.uid,
+      },
+    };
+
+    if (skill) {
+      config.configurable.selectedSkill = {
+        skillId: skill.skillId,
+        skillName: skill.skillName,
+        skillDisplayName: skill.displayName,
+      };
+    }
+
+    if (eventListener) {
+      const emitter = new EventEmitter<SkillEventMap>();
+      emitter.on('start', eventListener);
+      emitter.on('end', eventListener);
+      emitter.on('log', eventListener);
+      emitter.on('structured_data', eventListener);
+      config.configurable.emitter = emitter;
+    }
+
+    return config;
+  }
+
   async invokeSkillSync(param: InvokeSkillJobData) {
     const user = await this.prisma.user.findFirst({ where: { uid: param.uid } });
     if (!user) {
@@ -256,21 +293,7 @@ export class SkillService {
         where: { logId: param.skillLogId },
         data: { status: 'running' },
       });
-      const config: SkillRunnableConfig = {
-        configurable: {
-          ...JSON.parse(skill?.config ?? '{}'),
-          ...(param.config ?? {}),
-          ...param.context,
-          uid: user.uid,
-        },
-      };
-      if (skill) {
-        config.configurable.selectedSkill = {
-          skillId: skill.skillId,
-          skillName: skill.skillName,
-          skillDisplayName: skill.displayName,
-        };
-      }
+      const config = this.buildInvokeConfig({ user, skill, param });
       const res = await this.scheduler.invoke({ ...param.input }, config);
 
       this.logger.log(`invoke skill result: ${JSON.stringify(res)}`);
@@ -309,37 +332,21 @@ export class SkillService {
 
     const log = await this.createLog(user, param, { skill, trigger }, 'stream');
 
-    const emitter = new EventEmitter<SkillEventMap>();
     const msgAggregator = new MessageAggregator();
-
-    const emitterHandler = (data: SkillEvent) => {
-      writeSSEResponse(res, data);
-      msgAggregator.addSkillEvent(data);
-    };
-    emitter.on('start', emitterHandler);
-    emitter.on('end', emitterHandler);
-    emitter.on('log', emitterHandler);
-    emitter.on('structured_data', emitterHandler);
-
-    const config: SkillRunnableConfig & { version: 'v1' | 'v2' } = {
-      configurable: {
-        ...JSON.parse(skill?.config ?? '{}'),
-        ...(param.config ?? {}),
-        ...param.context,
-        uid: user.uid,
-        emitter,
+    const config = this.buildInvokeConfig({
+      user,
+      skill,
+      param,
+      eventListener: (data: SkillEvent) => {
+        writeSSEResponse(res, data);
+        msgAggregator.addSkillEvent(data);
       },
-      version: 'v2',
-    };
-    if (skill) {
-      config.configurable.selectedSkill = {
-        skillId: skill.skillId,
-        skillName: skill.skillName,
-        skillDisplayName: skill.displayName,
-      };
-    }
+    });
 
-    for await (const event of this.scheduler.streamEvents({ ...param.input }, config)) {
+    for await (const event of this.scheduler.streamEvents(
+      { ...param.input },
+      { ...config, version: 'v2' },
+    )) {
       const runMeta = event.metadata as SkillRunnableMeta;
       switch (event.event) {
         case 'on_chat_model_stream':

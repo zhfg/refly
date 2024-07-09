@@ -242,6 +242,10 @@ export const $SkillMeta = {
       description: 'Skill ID',
       example: 'sk-g30e1b80b5g1itbemc0g5jj3',
     },
+    config: {
+      type: 'string',
+      description: 'Skill config',
+    },
   },
 } as const;
 
@@ -262,10 +266,6 @@ export const $SkillInstance = {
           items: {
             $ref: '#/components/schemas/SkillTrigger',
           },
-        },
-        config: {
-          type: 'string',
-          description: 'Skill config',
         },
         createdAt: {
           type: 'string',

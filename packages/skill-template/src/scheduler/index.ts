@@ -1,4 +1,5 @@
 import { ChatOpenAI } from '@langchain/openai';
+import deepmerge from '@fastify/deepmerge';
 
 import { AIMessage, AIMessageChunk, BaseMessage } from '@langchain/core/messages';
 import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
@@ -56,8 +57,8 @@ export class Scheduler extends BaseSkill {
     },
   };
 
-  // Skills to be scheduled.
-  skills = [new OnlineSearchSkill(this.engine), new SummarySkill(this.engine)];
+  // Default skills to be scheduled (they are actually templates!).
+  skills: BaseSkill[] = [new OnlineSearchSkill(this.engine), new SummarySkill(this.engine)];
 
   isValidSkillName = (name: string) => {
     return this.skills.some((skill) => skill.name === name);
@@ -105,9 +106,22 @@ export class Scheduler extends BaseSkill {
 
     this.emitEvent('log', `Decide to call skills: ${skillCalls.map((call) => call.skill.name).join(', ')}`);
 
+    const { installedSkills = [] } = config?.configurable || {};
+    const skillInstanceMap = new Map(installedSkills.map((skill) => [skill.skillName, skill]));
+    const skillTemplateMap = new Map(this.skills.map((skillTpl) => [skillTpl.name, skillTpl.templateSkillMeta()]));
+
     const outputs = await Promise.all(
       skillCalls.map(async ({ skill, call }) => {
-        const output = await skill.invoke(call.args, config);
+        // Here we use deepmerge to inject skill metadata into the runnable config.
+        // We'll first try to use installed skill instance, if not found then fallback to skill template
+        const output = await skill.invoke(
+          call.args,
+          deepmerge()(config, {
+            configurable: {
+              selectedSkill: skillInstanceMap.get(skill.name) ?? skillTemplateMap.get(skill.name),
+            },
+          }),
+        );
         return new ToolMessage({
           name: skill.name,
           content: typeof output === 'string' ? output : JSON.stringify(output),
@@ -122,11 +136,15 @@ export class Scheduler extends BaseSkill {
   /** TODO: 这里需要将 chatHistory 传入 */
   callScheduler = async (state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { query, contextualUserQuery, messages = [] } = state;
-    const { locale = 'en' } = config?.configurable || {};
+    const { locale = 'en', installedSkills } = config?.configurable || {};
 
-    const boundModel = new ChatOpenAI({ model: 'gpt-3.5-turbo' }).bindTools(this.skills);
+    let tools = this.skills;
+    if (installedSkills) {
+      const toolMap = new Map(tools.map((tool) => [tool.name, tool]));
+      tools = installedSkills.map((skill) => toolMap.get(skill.skillName)!);
+    }
+    const boundModel = new ChatOpenAI({ model: 'gpt-3.5-turbo' }).bindTools(tools);
 
-    // TODO: prompt 里面提示模型用户选择的技能，高优处理
     const getSystemPrompt = (locale: string) => `## Role
 You are an AI intelligent response engine built by Refly AI that is specializing in selecting the most suitable functions from a variety of options based on user requirements.
 

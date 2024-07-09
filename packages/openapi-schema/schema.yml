@@ -1074,6 +1074,9 @@ components:
           type: string
           description: Skill ID
           example: sk-g30e1b80b5g1itbemc0g5jj3
+        config:
+          type: string
+          description: Skill config
     SkillInstance:
       type: object
       description: Skill
@@ -1089,9 +1092,6 @@ components:
               description: Skill triggers
               items:
                 $ref: '#/components/schemas/SkillTrigger'
-            config:
-              type: string
-              description: Skill config
             createdAt:
               type: string
               format: date-time
