@@ -139,7 +139,6 @@ export const useCommonAITask = (props: ChatProps) => {
     // 将 reply 加到 message-state
     chatTaskStore.setMessageState({
       pendingReplyMsg: replyMsg,
-      taskType: task?.taskType,
     });
 
     chatTaskStore.setMessages(messages.concat(questionMsg));
