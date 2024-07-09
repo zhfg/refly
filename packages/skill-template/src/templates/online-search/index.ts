@@ -86,10 +86,13 @@ export class OnlineSearchSkill extends BaseSkill {
       return { sources };
     }
 
-    this.emitEvent({
-      event: 'log',
-      content: `User query: ${contextualUserQuery || query}`,
-    });
+    this.emitEvent(
+      {
+        event: 'log',
+        content: `User query: ${contextualUserQuery || query}`,
+      },
+      config,
+    );
 
     const getSystemPrompt = () => `# Role
   
@@ -244,10 +247,13 @@ just reformulate it if needed and otherwise return it as is.
         if (tool === undefined) {
           throw new Error(`Tool ${call.name} not found.`);
         }
-        this.emitEvent({
-          event: 'log',
-          content: `Start calling ${tool.name} with args: ${JSON.stringify(call.args)})}`,
-        });
+        this.emitEvent(
+          {
+            event: 'log',
+            content: `Start calling ${tool.name} with args: ${JSON.stringify(call.args)})}`,
+          },
+          config,
+        );
 
         const output = await tool.invoke(call.args, config);
         return new ToolMessage({
@@ -258,10 +264,13 @@ just reformulate it if needed and otherwise return it as is.
       }) ?? [],
     );
 
-    this.emitEvent({
-      event: 'log',
-      content: `Finished calling ${outputs.length} tools`,
-    });
+    this.emitEvent(
+      {
+        event: 'log',
+        content: `Finished calling ${outputs.length} tools`,
+      },
+      config,
+    );
 
     return { messages: outputs };
   };

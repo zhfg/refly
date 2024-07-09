@@ -6,7 +6,7 @@ export interface SkillEvent {
   /**
    * The event span, which can be used to separate events into message groups
    */
-  spanId?: string;
+  spanId: string;
   /**
    * Event content.
    *

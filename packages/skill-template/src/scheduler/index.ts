@@ -1,7 +1,6 @@
 import { ChatOpenAI } from '@langchain/openai';
-import deepmerge from '@fastify/deepmerge';
 
-import { AIMessage, AIMessageChunk, BaseMessage } from '@langchain/core/messages';
+import { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
 import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 
 // schema
@@ -89,9 +88,11 @@ export class Scheduler extends BaseSkill {
   callSkill = async (state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { skillCalls } = state;
     if (!skillCalls) {
-      this.emitEvent({ event: 'log', content: 'No skill calls to proceed.' });
+      this.emitEvent({ event: 'log', content: 'No skill calls to proceed.' }, config);
       return {};
     }
+
+    const { locale = 'en' } = config?.configurable || {};
 
     // Pick the first skill to call
     const call = state.skillCalls[0];
@@ -100,19 +101,19 @@ export class Scheduler extends BaseSkill {
     const { installedSkills = [] } = config?.configurable || {};
     const skillInstance = installedSkills.find((skill) => skill.skillName === call.name);
     const skillTemplate = this.skills.find((skill) => skill.name === call.name);
-    const { locale = 'en' } = config?.configurable || {};
     const selectedSkill: SkillMeta = skillInstance ?? {
-      skillName: this.name,
-      skillDisplayName: this.displayName[locale],
+      skillName: skillTemplate.name,
+      skillDisplayName: skillTemplate.displayName[locale],
     };
 
     // Here we use deepmerge to inject skill metadata into the runnable config.
-    const output = await skillTemplate.invoke(
-      call.args,
-      deepmerge()(config, {
-        configurable: { selectedSkill },
-      }),
-    );
+    const output = await skillTemplate.invoke(call.args, {
+      ...config,
+      configurable: {
+        ...config?.configurable,
+        selectedSkill,
+      },
+    });
     const skillMessage = new ToolMessage({
       name: selectedSkill.skillName,
       content: typeof output === 'string' ? output : JSON.stringify(output),
@@ -168,10 +169,15 @@ You are an AI intelligent response engine built by Refly AI that is specializing
     ]);
     const { tool_calls: skillCalls } = responseMessage;
 
-    this.emitEvent({
-      event: 'log',
-      content: `Decide to call skills: ${skillCalls.map((call) => call.name).join(', ')}`,
-    });
+    if (skillCalls) {
+      this.emitEvent(
+        {
+          event: 'log',
+          content: `Decide to call skills: ${skillCalls.map((call) => call.name).join(', ')}`,
+        },
+        config,
+      );
+    }
 
     return { messages: [responseMessage], skillCalls };
   };
@@ -183,10 +189,13 @@ You are an AI intelligent response engine built by Refly AI that is specializing
     }
 
     if (!this.isValidSkillName(selectedSkill.skillName)) {
-      this.emitEvent({
-        event: 'log',
-        content: `Selected skill ${selectedSkill} not found. Fallback to scheduler.`,
-      });
+      this.emitEvent(
+        {
+          event: 'log',
+          content: `Selected skill ${selectedSkill.skillName} not found. Fallback to scheduler.`,
+        },
+        config,
+      );
       return 'scheduler';
     }
 

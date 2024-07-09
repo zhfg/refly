@@ -1758,9 +1758,6 @@ importers:
 
   ../../packages/skill-template:
     dependencies:
-      '@fastify/deepmerge':
-        specifier: ~2.0.0
-        version: 2.0.0
       '@langchain/community':
         specifier: 0.2.12
         version: 0.2.12(better-sqlite3@11.0.0)(duck-duck-scrape@2.2.5)
@@ -4083,11 +4080,6 @@ packages:
     resolution:
       { integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA== }
     engines: { node: '>=14' }
-
-  /@fastify/deepmerge@2.0.0:
-    resolution:
-      { integrity: sha512-fsaybTGDyQ5KpPsplQqb9yKdCf2x/pbNpMNk8Tvp3rRz7lVcupKysH4b2ELMN2P4Hak1+UqTYdTj/u4FNV2p0g== }
-    dev: false
 
   /@floating-ui/core@1.6.2:
     resolution:

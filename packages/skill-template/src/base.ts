@@ -1,6 +1,5 @@
 import { Runnable } from '@langchain/core/runnables';
 import { ToolParams } from '@langchain/core/tools';
-import deepmerge from '@fastify/deepmerge';
 import { SkillEngine } from './engine';
 import { StructuredTool } from '@langchain/core/tools';
 import { StateGraphArgs } from '@langchain/langgraph';
@@ -32,21 +31,21 @@ export abstract class BaseSkill extends StructuredTool {
   /**
    * Emit a skill event.
    */
-  emitEvent(event: Omit<SkillEvent, 'skillName' | 'skillDisplayName'>, config?: SkillRunnableConfig) {
+  emitEvent(data: Partial<SkillEvent>, config: SkillRunnableConfig) {
     const { emitter, selectedSkill, spanId } = config?.configurable || {};
 
-    // Don't emit events for scheduler when skill is specified
-    if (!emitter || (selectedSkill && this.name === 'scheduler')) {
+    if (!emitter) {
       return;
     }
 
     const eventData: SkillEvent = {
-      ...event,
-      ...selectedSkill,
+      event: data.event!,
       spanId,
+      ...selectedSkill,
+      ...data,
     };
 
-    emitter?.emit(event.event, eventData);
+    emitter.emit(data.event, eventData);
   }
 
   async _call(
@@ -54,18 +53,31 @@ export abstract class BaseSkill extends StructuredTool {
     runManager?: CallbackManagerForToolRun,
     config?: SkillRunnableConfig,
   ): Promise<string> {
-    config = deepmerge()(this.defaultConfig, config);
+    config ??= { configurable: {} };
+
+    // Ensure selectedSkill is not empty.
+    config.configurable.selectedSkill ??= {
+      skillName: this.name,
+      skillDisplayName: this.displayName[config.configurable.locale || 'en'],
+    };
 
     // Ensure we get a new spanId for every skill call.
     config.configurable.spanId = genSkillEventSpanID();
 
     const runnable = this.toRunnable();
 
-    this.emitEvent({ event: 'start' });
+    this.emitEvent({ event: 'start' }, config);
 
-    const response = await runnable.invoke(input, config);
+    const response = await runnable.invoke(input, {
+      ...config,
+      metadata: {
+        ...config.metadata,
+        ...config.configurable.selectedSkill,
+        spanId: config.configurable.spanId,
+      },
+    });
 
-    this.emitEvent({ event: 'end' });
+    this.emitEvent({ event: 'end' }, config);
 
     return response;
   }
@@ -96,13 +108,9 @@ export interface SkillEventMap {
   structured_data: [data: SkillEvent];
 }
 
-export interface SkillInfo {
-  skillId?: string;
-  skillName: string;
-  skillDisplayName: string;
+export interface SkillRunnableMeta extends Record<string, unknown>, SkillMeta {
+  spanId: string;
 }
-
-export interface SkillRunnableMeta extends Record<string, unknown>, SkillInfo {}
 
 export interface SkillRunnableConfig extends RunnableConfig {
   configurable?: SkillContext & {
@@ -113,4 +121,5 @@ export interface SkillRunnableConfig extends RunnableConfig {
     installedSkills?: SkillMeta[];
     emitter?: EventEmitter<SkillEventMap>;
   };
+  metadata?: SkillRunnableMeta;
 }

@@ -11,6 +11,7 @@ import {
   DeleteSkillTriggerRequest,
   InvokeSkillRequest,
   ListSkillInstancesData,
+  SkillMeta,
   SkillTemplate,
   UpsertSkillInstanceRequest,
   UpsertSkillTriggerRequest,
@@ -243,13 +244,21 @@ export class SkillService {
     return log;
   }
 
-  buildInvokeConfig(data: {
+  async buildInvokeConfig(data: {
     user: User;
     skill: SkillInstance;
     param: InvokeSkillRequest;
     eventListener?: (data: SkillEvent) => void;
-  }): SkillRunnableConfig {
+  }): Promise<SkillRunnableConfig> {
     const { user, skill, param, eventListener } = data;
+    const installedSkills: SkillMeta[] = (
+      await this.prisma.skillInstance.findMany({
+        where: { uid: user.uid, deletedAt: null },
+      })
+    ).map((s) => ({
+      ...pick(s, ['skillId', 'skillName', 'config']),
+      skillDisplayName: s.displayName,
+    }));
 
     const config: SkillRunnableConfig = {
       configurable: {
@@ -257,6 +266,7 @@ export class SkillService {
         ...(param.config ?? {}),
         ...param.context,
         uid: user.uid,
+        installedSkills,
       },
     };
 
@@ -293,7 +303,7 @@ export class SkillService {
         where: { logId: param.skillLogId },
         data: { status: 'running' },
       });
-      const config = this.buildInvokeConfig({ user, skill, param });
+      const config = await this.buildInvokeConfig({ user, skill, param });
       const res = await this.scheduler.invoke({ ...param.input }, config);
 
       this.logger.log(`invoke skill result: ${JSON.stringify(res)}`);
@@ -333,7 +343,7 @@ export class SkillService {
     const log = await this.createLog(user, param, { skill, trigger }, 'stream');
 
     const msgAggregator = new MessageAggregator();
-    const config = this.buildInvokeConfig({
+    const config = await this.buildInvokeConfig({
       user,
       skill,
       param,
@@ -351,10 +361,10 @@ export class SkillService {
       switch (event.event) {
         case 'on_chat_model_stream':
           const chunk: AIMessageChunk = event.data?.chunk;
-          if (chunk?.tool_call_chunks?.length === 0) {
+          if (chunk?.content && chunk?.tool_call_chunks?.length === 0) {
             writeSSEResponse(res, {
               event: 'stream',
-              ...pick(runMeta, ['skillId', 'skillName', 'skillDisplayName']),
+              ...pick(runMeta, ['spanId', 'skillId', 'skillName', 'skillDisplayName']),
               content:
                 typeof chunk.content === 'string' ? chunk.content : JSON.stringify(chunk.content),
             });
