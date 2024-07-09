@@ -227,7 +227,7 @@ export const $SkillTrigger = {
 export const $SkillMeta = {
   type: 'object',
   description: 'Skill metadata',
-  required: ['skillName', 'displayName'],
+  required: ['skillName', 'skillDisplayName'],
   properties: {
     skillName: {
       type: 'string',
@@ -248,13 +248,13 @@ export const $SkillMeta = {
 export const $SkillInstance = {
   type: 'object',
   description: 'Skill',
-  required: ['skillName', 'displayName', 'skillId', 'createdAt', 'updatedAt'],
   allOf: [
     {
       $ref: '#/components/schemas/SkillMeta',
     },
     {
       type: 'object',
+      required: ['createdAt', 'updatedAt'],
       properties: {
         triggers: {
           type: 'array',
@@ -1422,7 +1422,7 @@ export const $ListSkillInstanceResponse = {
   ],
 } as const;
 
-export const $UpsertSkillInstanceRequest = {
+export const $SkillInstanceUpsertParam = {
   type: 'object',
   required: ['skillName', 'displayName'],
   properties: {
@@ -1455,6 +1455,20 @@ export const $UpsertSkillInstanceRequest = {
   },
 } as const;
 
+export const $UpsertSkillInstanceRequest = {
+  type: 'object',
+  required: ['instanceList'],
+  properties: {
+    instanceList: {
+      type: 'array',
+      description: 'Skill instances to upsert',
+      items: {
+        $ref: '#/components/schemas/SkillInstanceUpsertParam',
+      },
+    },
+  },
+} as const;
+
 export const $UpsertSkillInstanceResponse = {
   allOf: [
     {
@@ -1464,7 +1478,11 @@ export const $UpsertSkillInstanceResponse = {
       type: 'object',
       properties: {
         data: {
-          $ref: '#/components/schemas/SkillInstance',
+          type: 'array',
+          description: 'Skill instance list',
+          items: {
+            $ref: '#/components/schemas/SkillInstance',
+          },
         },
       },
     },

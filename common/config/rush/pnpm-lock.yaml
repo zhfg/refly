@@ -160,6 +160,9 @@ importers:
       nestjs-pino:
         specifier: ^4.0.0
         version: 4.0.0(@nestjs/common@10.3.9)(pino-http@9.0.0)
+      p-limit:
+        specifier: 3.1.0
+        version: 3.1.0
       passport:
         specifier: ~0.6.0
         version: 0.6.0
@@ -17749,7 +17752,7 @@ packages:
     resolution: {integrity: sha512-/Eaoq+QyLSiXQ4lyYV23f14mZRQcXnxfHrN0vCai+ak9G0pp9iEQukIIZq5NccEvwRB8PUnZT0KsOoDCINS1qQ==}
     engines: {node: '>=18'}
     dependencies:
-      yocto-queue: 1.0.0
+      yocto-queue: 1.1.1
     dev: true
 
   /p-locate@4.1.0:
@@ -22641,8 +22644,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  /yocto-queue@1.0.0:
-    resolution: {integrity: sha512-9bnSc/HEW2uRy67wc+T8UwauLuPJVn28jb+GtJY16iiKWyvmYJRXVT4UamsAEGQfPohgr2q4Tq0sQbQlxTfi1g==}
+  /yocto-queue@1.1.1:
+    resolution: {integrity: sha512-b4JR1PFR10y1mKjhHY9LaGo6tmrgjit7hxVIeAmyMw3jegXR4dhYqLaQF5zMXZxY7tLpMyJeLjr1C4rLmkVe8g==}
     engines: {node: '>=12.20'}
     dev: true
 
@@ -22941,6 +22944,7 @@ time:
   /open@10.1.0: '2024-03-08T15:46:33.286Z'
   /openai@4.27.0: '2024-02-09T00:16:27.064Z'
   /ora@7.0.1: '2023-08-01T15:51:15.032Z'
+  /p-limit@3.1.0: '2020-11-25T07:42:37.364Z'
   /p-map@7.0.0: '2023-12-05T12:25:34.094Z'
   /p-retry@6.2.0: '2023-12-20T20:39:27.636Z'
   /p-timeout@6.1.2: '2023-06-12T18:41:51.967Z'
