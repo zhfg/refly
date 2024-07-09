@@ -94,6 +94,7 @@
         background-color: #00968f;
         color: #fff;
         font-size: 16px;
+        width: 100%;
 
         * {
           color: #fff;
@@ -105,6 +106,7 @@
         flex-direction: column;
         align-items: flex-end;
         margin-right: 12px;
+        width: calc(100% - 44px);
       }
 
       .message-name {
@@ -303,6 +305,44 @@
         color: #fff;
         font-size: 16px;
         color: rgba(0, 0, 0, 0.9);
+        width: 100%;
+      }
+
+      .message-log-container {
+        margin-bottom: 8px;
+      }
+
+      .message-log-item {
+        height: 32px;
+        width: 100%;
+        background-color: #fff;
+        border-radius: 8px;
+        border: 0.5px solid rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding-left: 12px;
+
+        .arco-spin-icon {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .message-log-content {
+          margin-left: 8px;
+          font-size: 12px;
+          color: rgba(0, 0, 0, 0.8);
+          min-width: 150px;
+          width: calc(100% - 60px);
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+
+        &:not(:first-child) {
+          margin-top: 4px;
+        }
       }
 
       .message-name-and-content {
@@ -310,6 +350,7 @@
         flex-direction: column;
         align-items: flex-start;
         margin-left: 12px;
+        width: calc(100% - 44px);
       }
 
       .message-name {

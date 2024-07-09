@@ -105,6 +105,15 @@ export const useBuildTask = () => {
   const onSkillStart = (skillEvent: SkillEvent) => {
     const { messages = [] } = useChatStore.getState();
 
+    const lastRelatedMessage = [...messages]
+      .reverse()
+      .find((item) => item?.skillMeta?.skillName === skillEvent?.skillName && item?.type === 'ai');
+
+    // 同一个技能只创建一条消息
+    if (lastRelatedMessage) {
+      return;
+    }
+
     // 每次 start 开启一条新的 msg
     const replyMsg = buildReplyMessage({
       content: '',

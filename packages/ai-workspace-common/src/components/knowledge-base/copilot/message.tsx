@@ -11,6 +11,7 @@ import {
   IconCopy,
   IconEdit,
   IconImport,
+  IconLoading,
   IconQuote,
   IconRight,
 } from '@arco-design/web-react/icon';
@@ -137,51 +138,67 @@ export const AssistantMessage = (props: {
             <div className="message-name-and-content">
               <span className="message-name">{profile?.name || 'pftom'}</span>
               <div className="assistant-message-content">
+                {isPending ? (
+                  <div className="message-log-item" style={{ marginBottom: 4 }}>
+                    <Spin size={12} />
+                    <p className="message-log-content">技能运行中...</p>
+                  </div>
+                ) : null}
+                {message?.logs?.length > 0 ? (
+                  <div className="message-log-container">
+                    {message?.logs?.map((log, index) => (
+                      <div className="message-log-item" key={index}>
+                        <IconCheckCircle style={{ fontSize: 12, color: 'green' }} />
+                        <p className="message-log-content">{log}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
                 <Markdown content={message?.content as string} sources={sources} />
               </div>
+              {(!isPending || !isLastSession) && (
+                <div className="ai-copilot-answer-action-container">
+                  <div className="session-answer-actionbar">
+                    <div className="session-answer-actionbar-left">
+                      <Button
+                        type="text"
+                        icon={<IconCopy style={{ fontSize: 14 }} />}
+                        style={{ color: '#64645F' }}
+                        className={'assist-action-item'}
+                        onClick={() => {
+                          const parsedText = message?.content?.replace(/\[citation]\(\d+\)/g, '');
+
+                          copyToClipboard(parsedText || '');
+                          Message.success('复制成功');
+                        }}
+                      >
+                        复制
+                      </Button>
+                      <Dropdown droplist={dropList} position="bl">
+                        <Button
+                          type="text"
+                          className={'assist-action-item'}
+                          icon={<IconImport style={{ fontSize: 14 }} />}
+                          style={{ color: '#64645F' }}
+                          onClick={() => {
+                            const parsedText = message?.content?.replace(/\[citation]\(\d+\)/g, '');
+                            // editorEmitter.emit('insertBlow', message?.content || '');
+                            handleEditorOperation('insertBlow', parsedText || '');
+                          }}
+                        >
+                          插入笔记
+                          <IconCaretDown />
+                        </Button>
+                      </Dropdown>
+                    </div>
+                    <div className="session-answer-actionbar-right"></div>
+                  </div>
+                </div>
+              )}
             </div>
           </>
         )}
       </div>
-      {(!isPending || !isLastSession) && (
-        <div className="ai-copilot-answer-action-container">
-          <div className="session-answer-actionbar">
-            <div className="session-answer-actionbar-left">
-              <Button
-                type="text"
-                icon={<IconCopy style={{ fontSize: 14 }} />}
-                style={{ color: '#64645F' }}
-                className={'assist-action-item'}
-                onClick={() => {
-                  const parsedText = message?.content?.replace(/\[citation]\(\d+\)/g, '');
-
-                  copyToClipboard(parsedText || '');
-                  Message.success('复制成功');
-                }}
-              >
-                复制
-              </Button>
-              <Dropdown droplist={dropList} position="bl">
-                <Button
-                  type="text"
-                  className={'assist-action-item'}
-                  icon={<IconImport style={{ fontSize: 14 }} />}
-                  style={{ color: '#64645F' }}
-                  onClick={() => {
-                    const parsedText = message?.content?.replace(/\[citation]\(\d+\)/g, '');
-                    // editorEmitter.emit('insertBlow', message?.content || '');
-                    handleEditorOperation('insertBlow', parsedText || '');
-                  }}
-                >
-                  插入笔记
-                  <IconCaretDown />
-                </Button>
-              </Dropdown>
-            </div>
-            <div className="session-answer-actionbar-right"></div>
-          </div>
-        </div>
-      )}
       {isLastSession && (relatedQuestions || []).length > 0 ? (
         <div className="ai-copilot-related-question-container">
           <div className="ai-copilot-related-question-list">
@@ -249,7 +266,7 @@ export const WelcomeMessage = () => {
                       <div className="skill-profile">
                         <Avatar size={24} style={{ backgroundColor: '#00d0b6' }}>
                           {/* <img src={profile?.avatar} /> */}
-                          {item?.displayName}
+                          {item?.displayName?.[localSettings.uiLocale] as string}
                         </Avatar>
                         <span className="skill-name">{item?.displayName?.[localSettings.uiLocale] as string}</span>
                       </div>
