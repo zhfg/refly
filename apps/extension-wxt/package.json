@@ -73,7 +73,9 @@
     "@refly/plugin-vite-encoding": "workspace:*",
     "@refly/plugin-vite-watcher": "workspace:*",
     "@refly/constants": "workspace:*",
-    "@refly/utils": "workspace:*"
+    "@refly/utils": "workspace:*",
+    "@headlessui/react": "~2.1.2",
+    "@heroicons/react": "~2.1.4"
   },
   "devDependencies": {
     "@types/react": "^18.2.46",

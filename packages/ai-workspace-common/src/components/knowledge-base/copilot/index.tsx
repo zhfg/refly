@@ -25,6 +25,7 @@ import { ChatInput } from './chat-input';
 import { ChatMessages } from './chat-messages';
 import { ConvListModal } from './conv-list-modal';
 import { KnowledgeBaseListModal } from './knowledge-base-list-modal';
+import { SkillManagementModal } from '@refly-packages/ai-workspace-common/components/skill/skill-management-modal';
 
 // requests
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
@@ -263,7 +264,13 @@ export const AICopilot = (props: AICopilotProps) => {
                 {item?.skillDisplayName}
               </div>
             ))}
-            <div key="more" className="skill-item">
+            <div
+              key="more"
+              className="skill-item"
+              onClick={() => {
+                skillStore.setSkillManagerModalVisible(true);
+              }}
+            >
               <IconSettings /> <p className="skill-title">技能管理</p>
             </div>
           </div>
@@ -298,6 +305,7 @@ export const AICopilot = (props: AICopilotProps) => {
 
       {/** 注册 Skill 相关内容，目前先收敛在 Copilot 内部，后续允许挂在在其他扩展点，比如笔记、reading */}
       <RegisterSkillComponent />
+      <SkillManagementModal />
     </div>
   );
 };

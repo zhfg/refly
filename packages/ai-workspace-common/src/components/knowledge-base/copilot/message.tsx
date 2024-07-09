@@ -23,6 +23,7 @@ import { EditorOperation, editorEmitter } from '@refly-packages/ai-workspace-com
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
+import { SkillManagement } from '@refly-packages/ai-workspace-common/components/skill/skill-management';
 
 export const HumanMessage = (props: { message: Partial<ChatMessage>; profile: { avatar: string; name: string } }) => {
   const { message, profile } = props;
@@ -125,7 +126,20 @@ export const AssistantMessage = (props: {
       <div className="assistant-message">
         {isLastSession && (isPendingFirstToken || message?.content === '') ? (
           <>
-            <Skeleton animation></Skeleton>
+            <>
+              <div className="message-avatar">
+                <Avatar size={32} style={{ backgroundColor: '#00d0b6' }}>
+                  {/* <img src={profile?.avatar} /> */}
+                  {profile?.avatar}
+                </Avatar>
+              </div>
+              <div className="message-name-and-content">
+                <span className="message-name">{profile?.name || 'pftom'}</span>
+                <div className="assistant-message-content">
+                  <Skeleton animation image={{ shape: 'circle' }} text={{ width: '90%' }}></Skeleton>
+                </div>
+              </div>
+            </>
           </>
         ) : (
           <>
@@ -251,45 +265,20 @@ export const WelcomeMessage = () => {
         </div>
         <div className="welcome-message-text">How can I help you today?</div>
         {needInstallSkillInstance ? (
-          <div className="welcome-message-skill-onboarding">
-            <div className="skill-recommend-and-manage">
-              <div className="manage-header">
-                <p className="skill-recommend-title">新增 Skill 推荐</p>
-                <Button className="manager-btn" type="text">
-                  管理助手
-                </Button>
-              </div>
-              <div className="skill-recommend-list">
-                {skillTemplates.map((item, index) => (
-                  <div className="skill-item" key={index}>
-                    <div className="skill-item-header">
-                      <div className="skill-profile">
-                        <Avatar size={24} style={{ backgroundColor: '#00d0b6' }}>
-                          {/* <img src={profile?.avatar} /> */}
-                          {item?.displayName?.[localSettings.uiLocale] as string}
-                        </Avatar>
-                        <span className="skill-name">{item?.displayName?.[localSettings.uiLocale] as string}</span>
-                      </div>
-                      <Button
-                        className="skill-installer"
-                        type="text"
-                        onClick={() => {
-                          handleAddSkillInstance(item?.name);
-                        }}
-                      >
-                        添加
-                      </Button>
-                    </div>
-                    <div className="skill-desc">{item?.description}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <div className="skill-onboarding">
             {skillInstances?.length === 0 ? (
               <div className="install-skill-hint">
                 <div className="install-skill-hint-container">
                   <p className="install-skill-hint-title">
-                    你还未添加任何助手，<Button type="text">点我添加 -&gt;</Button>
+                    你还未添加任何助手，
+                    <Button
+                      type="text"
+                      onClick={() => {
+                        skillStore.setSkillManagerModalVisible(true);
+                      }}
+                    >
+                      点我添加 -&gt;
+                    </Button>
                   </p>
                 </div>
               </div>

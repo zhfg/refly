@@ -16,10 +16,14 @@ interface SkillManageState {
 
   selectedSkill: SkillInstance | null;
 
+  // manage skill
+  skillManagerModalVisible: boolean;
+
   setSkillState: (newState: SkillState) => void;
   setSkillInstalces: (skillInstances: SkillInstance[]) => void;
   setSkillTemplates: (skillTemplates: SkillTemplate[]) => void;
   setSelectedSkillInstalce: (skillInstance: SkillInstance) => void;
+  setSkillManagerModalVisible: (visible: boolean) => void;
   resetState: () => void;
 }
 
@@ -29,6 +33,7 @@ export const defaultState = {
   skillTemplates: [],
   skillState: {} as SkillState,
   selectedSkill: null,
+  skillManagerModalVisible: false,
 };
 
 export const useSkillStore = create<SkillManageState>()(
@@ -41,6 +46,8 @@ export const useSkillStore = create<SkillManageState>()(
     setSkillTemplates: (skillTemplates: SkillTemplate[]) => set((state) => ({ ...state, skillTemplates })),
     setSelectedSkillInstalce: (skillInstance: SkillInstance) =>
       set((state) => ({ ...state, selectedSkill: skillInstance })),
+    setSkillManagerModalVisible: (visible: boolean) =>
+      set((state) => ({ ...state, skillManagerModalVisible: visible })),
     resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),
 );

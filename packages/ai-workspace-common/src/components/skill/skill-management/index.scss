@@ -1,0 +1,92 @@
+.skill-onboarding {
+  margin-top: 32px;
+
+  .manage-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+
+    .skill-recommend-title {
+      color: rgba(0, 0, 0, 0.5);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .manager-btn {
+      color: rgb(var(--primary-6));
+      font-size: 12px;
+      border-radius: 8px;
+      &:hover {
+        cursor: pointer;
+      }
+    }
+  }
+
+  .skill-recommend-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 4px;
+  }
+
+  .skill-item {
+    min-width: 170px;
+    flex: 1 1 calc(50% - 16px); /* 4 items per row with gap adjustment */
+    background-color: #fff;
+    border: 0.5px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 8px;
+
+    &:hover {
+      cursor: pointer;
+      // background-color: #dddddb;
+    }
+
+    .skill-item-header {
+      margin-bottom: 8px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .skill-profile {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .skill-name {
+      font-size: 14px;
+      font-weight: 500;
+      margin-left: 8px;
+      color: rgba(0, 0, 0, 0.8);
+    }
+
+    .skill-installer {
+      color: rgb(var(--primary-6));
+      border-radius: 8px;
+
+      &:hover {
+        cursor: pointer;
+      }
+    }
+
+    .skill-installer-uninstall {
+      color: rgb(var(--warning-6));
+    }
+
+    .skill-desc {
+      color: rgba(0, 0, 0, 0.5);
+      font-size: 12px;
+    }
+  }
+
+  .skill-item-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}

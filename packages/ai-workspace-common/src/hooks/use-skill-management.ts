@@ -36,8 +36,12 @@ export const useSkillManagement = ({ shouldInit = false }: { shouldInit: boolean
 
     if (!skillInstanceMeta) return;
 
+    message.loading({
+      content: '正在添加技能...',
+      duration: 1000,
+    });
+
     try {
-      message.loading('正在添加技能...');
       const { data } = await getClient().createSkillInstance({
         body: {
           instanceList: [
@@ -59,6 +63,35 @@ export const useSkillManagement = ({ shouldInit = false }: { shouldInit: boolean
     }
   };
 
+  const handleRemoveSkillInstance = async (skillName: string) => {
+    const { skillInstances = [] } = useSkillStore.getState();
+    const skill = skillInstances.find((item) => item?.skillName === skillName);
+    if (!skill?.skillId) return;
+
+    message.loading({
+      content: '正在移除技能...',
+      duration: 1000,
+    });
+    try {
+      const { data } = await getClient().deleteSkillInstance({
+        body: {
+          skillId: skill?.skillId,
+        },
+      });
+
+      if (data?.success) {
+        handleGetSkillInstances(); // 重新获取技能事例
+        message.success('技能移除成功');
+      }
+    } catch (err) {
+      console.log('remove skill instance error', err);
+      message.error('技能移除失败');
+    }
+
+    const newSkillInstances = skillInstances.filter((item) => item?.skillName !== skillName);
+    skillStore.setSkillInstalces(newSkillInstances);
+  };
+
   useEffect(() => {
     if (shouldInit) {
       handleGetSkillTemplates();
@@ -70,5 +103,6 @@ export const useSkillManagement = ({ shouldInit = false }: { shouldInit: boolean
     handleGetSkillInstances,
     handleGetSkillTemplates,
     handleAddSkillInstance,
+    handleRemoveSkillInstance,
   };
 };

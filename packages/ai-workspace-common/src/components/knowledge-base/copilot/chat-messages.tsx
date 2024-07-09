@@ -37,7 +37,7 @@ export const ChatMessages = (props: ChatMessagesProps) => {
         ),
       )}
       {chatStore?.messages?.length === 0 ? <WelcomeMessage /> : null}
-      {messageStateStore?.pending && messageStateStore?.pendingFirstToken ? <PendingMessage /> : null}
+      {/* {messageStateStore?.pending && messageStateStore?.pendingFirstToken ? <PendingMessage /> : null} */}
     </div>
   );
 };
