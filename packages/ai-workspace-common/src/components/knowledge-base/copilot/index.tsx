@@ -260,7 +260,7 @@ export const AICopilot = (props: AICopilotProps) => {
                   skillStore.setSelectedSkillInstalce(item);
                 }}
               >
-                {item?.displayName}
+                {item?.skillDisplayName}
               </div>
             ))}
             <div key="more" className="skill-item">

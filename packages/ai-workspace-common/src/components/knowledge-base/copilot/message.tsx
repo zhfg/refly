@@ -23,12 +23,22 @@ import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/store
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
 
-export const HumanMessage = (props: { message: Partial<ChatMessage> }) => {
-  const { message } = props;
+export const HumanMessage = (props: { message: Partial<ChatMessage>; profile: { avatar: string; name: string } }) => {
+  const { message, profile } = props;
   return (
     <div className="ai-copilot-message human-message-container">
       <div className="human-message">
-        <Markdown content={message?.content as string} />
+        <div className="message-name-and-content">
+          <span className="message-name">{profile?.name}</span>
+          <div className="human-message-content">
+            <Markdown content={message?.content as string} />
+          </div>
+        </div>
+        <div className="message-avatar">
+          <Avatar size={32}>
+            <img src={profile?.avatar} />
+          </Avatar>
+        </div>
       </div>
     </div>
   );
@@ -49,6 +59,8 @@ export const AssistantMessage = (props: {
     typeof message?.relatedQuestions === 'string'
       ? safeParseJSON(message?.relatedQuestions)
       : message?.relatedQuestions;
+
+  const profile = { name: message?.skillMeta?.skillDisplayName, avatar: message?.skillMeta?.skillDisplayName };
 
   // TODO: 移入新组件
 
@@ -115,7 +127,20 @@ export const AssistantMessage = (props: {
             <Skeleton animation></Skeleton>
           </>
         ) : (
-          <Markdown content={message?.content as string} sources={sources} />
+          <>
+            <div className="message-avatar">
+              <Avatar size={32} style={{ backgroundColor: '#00d0b6' }}>
+                {/* <img src={profile?.avatar} /> */}
+                {profile?.avatar}
+              </Avatar>
+            </div>
+            <div className="message-name-and-content">
+              <span className="message-name">{profile?.name || 'pftom'}</span>
+              <div className="assistant-message-content">
+                <Markdown content={message?.content as string} sources={sources} />
+              </div>
+            </div>
+          </>
         )}
       </div>
       {(!isPending || !isLastSession) && (
@@ -222,7 +247,10 @@ export const WelcomeMessage = () => {
                   <div className="skill-item" key={index}>
                     <div className="skill-item-header">
                       <div className="skill-profile">
-                        <Avatar size={24} />
+                        <Avatar size={24} style={{ backgroundColor: '#00d0b6' }}>
+                          {/* <img src={profile?.avatar} /> */}
+                          {item?.displayName}
+                        </Avatar>
                         <span className="skill-name">{item?.displayName?.[localSettings.uiLocale] as string}</span>
                       </div>
                       <Button

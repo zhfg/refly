@@ -40,8 +40,12 @@ export const useSkillManagement = ({ shouldInit = false }: { shouldInit: boolean
       message.loading('正在添加技能...');
       const { data } = await getClient().createSkillInstance({
         body: {
-          skillName: skillInstanceMeta.name,
-          displayName: skillInstanceMeta?.displayName?.[localSettings?.uiLocale] as string,
+          instanceList: [
+            {
+              skillName: skillInstanceMeta.name,
+              displayName: skillInstanceMeta?.displayName?.[localSettings?.uiLocale] as string,
+            },
+          ],
         },
       });
 
