@@ -34,6 +34,7 @@ import { collectionPO2DTO, resourcePO2DTO } from '@/knowledge/knowledge.dto';
 import { ConversationService } from '@/conversation/conversation.service';
 import { MessageAggregator } from '@/utils/message';
 import { SkillEvent } from '@refly/common-types';
+import { createLLMChatMessage } from '@/llm/schema';
 
 interface SkillPreCheckResult {
   skill?: SkillInstance;
@@ -255,9 +256,10 @@ export class SkillService {
     user: User;
     skill: SkillInstance;
     param: InvokeSkillRequest;
+    conversation?: Conversation;
     eventListener?: (data: SkillEvent) => void;
   }): Promise<SkillRunnableConfig> {
-    const { user, skill, param, eventListener } = data;
+    const { user, skill, param, conversation, eventListener } = data;
     const installedSkills: SkillMeta[] = (
       await this.prisma.skillInstance.findMany({
         where: { uid: user.uid, deletedAt: null },
@@ -285,12 +287,24 @@ export class SkillService {
       };
     }
 
+    if (conversation) {
+      const messages = await this.prisma.chatMessage.findMany({
+        where: { conversationId: conversation.id },
+        orderBy: { createdAt: 'asc' },
+      });
+      config.configurable.chatHistory = messages.map((m) =>
+        createLLMChatMessage(m.content, m.type),
+      );
+    }
+
     if (eventListener) {
       const emitter = new EventEmitter<SkillEventMap>();
+
       emitter.on('start', eventListener);
       emitter.on('end', eventListener);
       emitter.on('log', eventListener);
       emitter.on('structured_data', eventListener);
+
       config.configurable.emitter = emitter;
     }
 

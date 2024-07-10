@@ -1,5 +1,6 @@
 import { Runnable } from '@langchain/core/runnables';
 import { ToolParams } from '@langchain/core/tools';
+import { BaseMessage } from '@langchain/core/messages';
 import { SkillEngine } from './engine';
 import { StructuredTool } from '@langchain/core/tools';
 import { StateGraphArgs } from '@langchain/langgraph';
@@ -120,7 +121,7 @@ export interface SkillRunnableConfig extends RunnableConfig {
     uid?: string;
     selectedSkill?: SkillMeta;
     currentSkill?: SkillMeta;
-    chatHistory?: string[];
+    chatHistory?: BaseMessage[];
     installedSkills?: SkillMeta[];
     emitter?: EventEmitter<SkillEventMap>;
   };
