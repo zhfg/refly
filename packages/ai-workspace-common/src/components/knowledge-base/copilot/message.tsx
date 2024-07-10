@@ -139,7 +139,7 @@ export const AssistantMessage = (props: {
               <div className="message-name-and-content">
                 <span className="message-name">{profile?.name || 'pftom'}</span>
                 <div className="assistant-message-content">
-                  <Skeleton animation image={{ shape: 'circle' }} text={{ width: '90%' }}></Skeleton>
+                  <Skeleton animation text={{ width: '90%' }}></Skeleton>
                 </div>
               </div>
             </>

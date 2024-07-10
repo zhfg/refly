@@ -140,6 +140,11 @@ export const useBuildTask = () => {
     });
 
     chatStore.setMessages(messages.concat(replyMsg));
+
+    setTimeout(() => {
+      // 滑动到底部
+      scrollToBottom();
+    });
   };
 
   const onSkillThoughout = (skillEvent: SkillEvent) => {
