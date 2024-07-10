@@ -15,6 +15,7 @@ import { SkillMeta } from '@refly/openapi-schema';
 import { OnlineSearchSkill } from '../templates/online-search';
 import { SummarySkill } from '../templates/summary';
 import { ToolCall } from '@langchain/core/dist/messages/tool';
+import { randomUUID } from 'node:crypto';
 
 interface GraphState extends BaseSkillState {
   /**
@@ -66,16 +67,30 @@ export class Scheduler extends BaseSkill {
   };
 
   directSkillCall = async (state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> => {
-    const { selectedSkill } = config?.configurable || {};
+    const { selectedSkill, installedSkills } = config?.configurable || {};
 
-    const tool = this.skills.find((tool) => tool.name === selectedSkill?.skillName);
-    if (!tool) {
-      throw new Error(`Tool ${selectedSkill} not found.`);
+    const skillInstance = installedSkills.find((skill) => skill.skillName === selectedSkill.skillName);
+    if (!skillInstance) {
+      throw new Error(`Skill ${selectedSkill.skillName} not installed.`);
     }
 
-    const output = await tool.invoke({ query: state.query }, config);
+    const skillTemplate = this.skills.find((tool) => tool.name === selectedSkill.skillName);
+    if (!skillTemplate) {
+      throw new Error(`Skill ${selectedSkill} not found.`);
+    }
+
+    const output = await skillTemplate.invoke(
+      { query: state.query },
+      {
+        ...config,
+        configurable: {
+          ...config?.configurable,
+          currentSkill: skillInstance,
+        },
+      },
+    );
     const message = new AIMessageChunk({
-      name: tool.name,
+      name: skillTemplate.name,
       content: typeof output === 'string' ? output : JSON.stringify(output),
     });
 
@@ -101,7 +116,7 @@ export class Scheduler extends BaseSkill {
     const { installedSkills = [] } = config?.configurable || {};
     const skillInstance = installedSkills.find((skill) => skill.skillName === call.name);
     const skillTemplate = this.skills.find((skill) => skill.name === call.name);
-    const selectedSkill: SkillMeta = skillInstance ?? {
+    const currentSkill: SkillMeta = skillInstance ?? {
       skillName: skillTemplate.name,
       skillDisplayName: skillTemplate.displayName[locale],
     };
@@ -111,11 +126,11 @@ export class Scheduler extends BaseSkill {
       ...config,
       configurable: {
         ...config?.configurable,
-        selectedSkill,
+        currentSkill,
       },
     });
     const skillMessage = new ToolMessage({
-      name: selectedSkill.skillName,
+      name: currentSkill.skillName,
       content: typeof output === 'string' ? output : JSON.stringify(output),
       tool_call_id: call.id!,
     });
@@ -161,12 +176,22 @@ You are an AI intelligent response engine built by Refly AI that is specializing
 - Provide the optimized guidance immediately in your response without needing to explain or report it separately.
 `;
 
-    const responseMessage = await boundModel.invoke([
-      new SystemMessage(getSystemPrompt(locale)),
-      /** chat History */
-      ...messages,
-      new HumanMessage(`The user's intent is ${contextualUserQuery || query}`),
-    ]);
+    config = {
+      ...config,
+      configurable: {
+        ...config?.configurable,
+        spanId: randomUUID(), // generate new spanId for each scheduler call
+      },
+    };
+    const responseMessage = await boundModel.invoke(
+      [
+        new SystemMessage(getSystemPrompt(locale)),
+        /** chat History */
+        ...messages,
+        new HumanMessage(`The user's intent is ${contextualUserQuery || query}`),
+      ],
+      config,
+    );
     const { tool_calls: skillCalls } = responseMessage;
 
     if (skillCalls) {

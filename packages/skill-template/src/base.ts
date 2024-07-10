@@ -14,13 +14,8 @@ export abstract class BaseSkill extends StructuredTool {
   abstract displayName: Record<string, string>;
   abstract graphState: StateGraphArgs<BaseSkillState>['channels'];
 
-  constructor(
-    protected engine: SkillEngine,
-    protected params?: BaseToolParams,
-    protected defaultConfig?: SkillRunnableConfig,
-  ) {
+  constructor(protected engine: SkillEngine, protected params?: BaseToolParams) {
     super(params);
-    this.defaultConfig ??= { configurable: {} };
   }
 
   /**
@@ -32,16 +27,17 @@ export abstract class BaseSkill extends StructuredTool {
    * Emit a skill event.
    */
   emitEvent(data: Partial<SkillEvent>, config: SkillRunnableConfig) {
-    const { emitter, selectedSkill, spanId } = config?.configurable || {};
+    const { emitter, selectedSkill, currentSkill, spanId } = config?.configurable || {};
 
-    if (!emitter) {
+    // Don't emit events for scheduler when skill is specified
+    if (!emitter || (selectedSkill && this.name === 'scheduler')) {
       return;
     }
 
     const eventData: SkillEvent = {
       event: data.event!,
       spanId,
-      ...selectedSkill,
+      ...currentSkill,
       ...data,
     };
 
@@ -55,8 +51,8 @@ export abstract class BaseSkill extends StructuredTool {
   ): Promise<string> {
     config ??= { configurable: {} };
 
-    // Ensure selectedSkill is not empty.
-    config.configurable.selectedSkill ??= {
+    // Ensure currentSkill is not empty.
+    config.configurable.currentSkill ??= {
       skillName: this.name,
       skillDisplayName: this.displayName[config.configurable.locale || 'en'],
     };
@@ -72,7 +68,7 @@ export abstract class BaseSkill extends StructuredTool {
       ...config,
       metadata: {
         ...config.metadata,
-        ...config.configurable.selectedSkill,
+        ...config.configurable.currentSkill,
         spanId: config.configurable.spanId,
       },
     });
@@ -117,6 +113,7 @@ export interface SkillRunnableConfig extends RunnableConfig {
     spanId?: string;
     uid?: string;
     selectedSkill?: SkillMeta;
+    currentSkill?: SkillMeta;
     chatHistory?: string[];
     installedSkills?: SkillMeta[];
     emitter?: EventEmitter<SkillEventMap>;
