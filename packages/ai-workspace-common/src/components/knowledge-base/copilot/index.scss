@@ -306,6 +306,48 @@
         font-size: 16px;
         color: rgba(0, 0, 0, 0.9);
         width: 100%;
+
+        .message-log-collapse-container {
+          margin-bottom: 8px;
+
+          .message-log-collapse-header {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding-left: 12px;
+
+            .message-log-content {
+              margin-left: 8px;
+              font-size: 12px;
+            }
+          }
+
+          .arco-collapse-item-content {
+            padding: 0;
+            padding-top: 4px;
+            background-color: transparent;
+          }
+
+          .arco-collapse-item-header {
+            background-color: transparent;
+            padding: 0;
+            background-color: #fff;
+            border-radius: 8px;
+            height: 32px;
+            border: 0.5px solid rgba(0, 0, 0, 0.1);
+
+            .arco-spin-icon {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+            }
+          }
+
+          .arco-collapse-item-content-box {
+            padding: 0;
+            background-color: transparent;
+          }
+        }
       }
 
       .message-log-container {

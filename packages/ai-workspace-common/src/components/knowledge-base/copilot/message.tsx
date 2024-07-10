@@ -3,7 +3,7 @@ import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { ChatMessage } from '@refly/openapi-schema';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
-import { Avatar, Button, Spin, Message, Dropdown, Menu, Skeleton } from '@arco-design/web-react';
+import { Avatar, Button, Spin, Message, Dropdown, Menu, Skeleton, Collapse } from '@arco-design/web-react';
 import {
   IconBook,
   IconCaretDown,
@@ -46,6 +46,8 @@ export const HumanMessage = (props: { message: Partial<ChatMessage>; profile: { 
     </div>
   );
 };
+
+const CollapseItem = Collapse.Item;
 
 export const AssistantMessage = (props: {
   message: Partial<ClientChatMessage>;
@@ -153,29 +155,38 @@ export const AssistantMessage = (props: {
             <div className="message-name-and-content">
               <span className="message-name">{profile?.name || 'Refly 系统提示'}</span>
               <div className="assistant-message-content">
-                {message?.pending ? (
-                  <div className="message-log-item" style={{ marginBottom: 4 }}>
-                    <Spin size={12} />
-                    <p className="message-log-content">
-                      {message?.logs?.length > 0 ? message?.logs?.[message?.logs?.length - 1] : '技能运行中...'}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="message-log-item" style={{ marginBottom: 4 }}>
-                    <IconCheckCircle style={{ fontSize: 12, color: 'green' }} />
-                    <p className="message-log-content">技能已完成</p>
-                  </div>
-                )}
-                {message?.logs?.length > 0 ? (
-                  <div className="message-log-container">
-                    {message?.logs?.map((log, index) => (
-                      <div className="message-log-item" key={index}>
-                        <IconCheckCircle style={{ fontSize: 12, color: 'green' }} />
-                        <p className="message-log-content">{log}</p>
+                <Collapse bordered={false} expandIconPosition="right">
+                  <CollapseItem
+                    className={'message-log-collapse-container'}
+                    header={
+                      message?.pending ? (
+                        <div className="message-log-collapse-header">
+                          <Spin size={12} />
+                          <p className="message-log-content">
+                            {message?.logs?.length > 0 ? message?.logs?.[message?.logs?.length - 1] : '技能运行中...'}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="message-log-collapse-header">
+                          <IconCheckCircle style={{ fontSize: 12, color: 'green' }} />
+                          <p className="message-log-content">技能已完成，共 {message?.logs?.length} 条日志</p>
+                        </div>
+                      )
+                    }
+                    name="1"
+                  >
+                    {message?.logs?.length > 0 ? (
+                      <div className="message-log-container">
+                        {message?.logs?.map((log, index) => (
+                          <div className="message-log-item" key={index}>
+                            <IconCheckCircle style={{ fontSize: 12, color: 'green' }} />
+                            <p className="message-log-content">{log}</p>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                ) : null}
+                    ) : null}
+                  </CollapseItem>
+                </Collapse>
                 <Markdown content={message?.content as string} sources={sources} />
               </div>
               {(!isPending || !isLastSession) && (
