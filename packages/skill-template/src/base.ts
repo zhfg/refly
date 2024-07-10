@@ -62,7 +62,11 @@ export abstract class BaseSkill extends StructuredTool {
 
     const runnable = this.toRunnable();
 
-    this.emitEvent({ event: 'start' }, config);
+    // We manually send start and end events in scheduler workflow.
+    // So don't send these events here.
+    if (this.name !== 'scheduler') {
+      this.emitEvent({ event: 'start' }, config);
+    }
 
     const response = await runnable.invoke(input, {
       ...config,
@@ -73,7 +77,9 @@ export abstract class BaseSkill extends StructuredTool {
       },
     });
 
-    this.emitEvent({ event: 'end' }, config);
+    if (this.name !== 'scheduler') {
+      this.emitEvent({ event: 'end' }, config);
+    }
 
     return response;
   }

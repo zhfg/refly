@@ -9,13 +9,12 @@ import { z } from 'zod';
 import { SystemMessage } from '@langchain/core/messages';
 import { HumanMessage } from '@langchain/core/messages';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
-import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
+import { BaseSkill, BaseSkillState, SkillRunnableConfig, SkillRunnableMeta, baseStateGraphArgs } from '../base';
 import { ToolMessage } from '@langchain/core/messages';
 import { SkillMeta } from '@refly/openapi-schema';
-import { OnlineSearchSkill } from '../templates/online-search';
-import { SummarySkill } from '../templates/summary';
 import { ToolCall } from '@langchain/core/dist/messages/tool';
 import { randomUUID } from 'node:crypto';
+import { createSkillInventory } from '../inventory';
 
 interface GraphState extends BaseSkillState {
   /**
@@ -60,7 +59,10 @@ export class Scheduler extends BaseSkill {
   };
 
   // Default skills to be scheduled (they are actually templates!).
-  skills: BaseSkill[] = [new OnlineSearchSkill(this.engine), new SummarySkill(this.engine)];
+  skills: BaseSkill[] = createSkillInventory(this.engine);
+
+  // Scheduler config snapshot, should keep unchanged except for `spanId`.
+  configSnapshot?: SkillRunnableConfig;
 
   isValidSkillName = (name: string) => {
     return this.skills.some((skill) => skill.name === name);
@@ -142,7 +144,11 @@ export class Scheduler extends BaseSkill {
   /** TODO: 这里需要将 chatHistory 传入 */
   callScheduler = async (state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { query, contextualUserQuery, messages = [] } = state;
-    const { locale = 'en', installedSkills } = config?.configurable || {};
+
+    this.configSnapshot ??= config ?? { configurable: {} };
+    this.emitEvent({ event: 'start' }, this.configSnapshot);
+
+    const { locale = 'en', installedSkills, currentSkill, spanId } = this.configSnapshot.configurable;
 
     let tools = this.skills;
     if (installedSkills) {
@@ -176,13 +182,6 @@ You are an AI intelligent response engine built by Refly AI that is specializing
 - Provide the optimized guidance immediately in your response without needing to explain or report it separately.
 `;
 
-    config = {
-      ...config,
-      configurable: {
-        ...config?.configurable,
-        spanId: randomUUID(), // generate new spanId for each scheduler call
-      },
-    };
     const responseMessage = await boundModel.invoke(
       [
         new SystemMessage(getSystemPrompt(locale)),
@@ -190,19 +189,31 @@ You are an AI intelligent response engine built by Refly AI that is specializing
         ...messages,
         new HumanMessage(`The user's intent is ${contextualUserQuery || query}`),
       ],
-      config,
+      {
+        ...this.configSnapshot,
+        metadata: {
+          ...this.configSnapshot.metadata,
+          ...currentSkill,
+          spanId,
+        },
+      },
     );
     const { tool_calls: skillCalls } = responseMessage;
 
-    if (skillCalls) {
+    if (skillCalls.length > 0) {
       this.emitEvent(
         {
           event: 'log',
           content: `Decide to call skills: ${skillCalls.map((call) => call.name).join(', ')}`,
         },
-        config,
+        this.configSnapshot,
       );
     }
+
+    this.emitEvent({ event: 'end' }, this.configSnapshot);
+
+    // Regenerate new spanId for the next scheduler call.
+    this.configSnapshot.configurable.spanId = randomUUID();
 
     return { messages: [responseMessage], skillCalls };
   };

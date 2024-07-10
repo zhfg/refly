@@ -17,11 +17,13 @@ import {
   UpsertSkillTriggerRequest,
 } from '@refly/openapi-schema';
 import {
+  BaseSkill,
   Scheduler,
   SkillEngine,
   SkillEventMap,
   SkillRunnableConfig,
   SkillRunnableMeta,
+  createSkillInventory,
 } from '@refly/skill-template';
 import { genSkillID, genSkillLogID, genSkillTriggerID } from '@refly/utils';
 import { PrismaService } from '@/common/prisma.service';
@@ -41,7 +43,8 @@ interface SkillPreCheckResult {
 @Injectable()
 export class SkillService {
   private logger = new Logger(SkillService.name);
-  private scheduler: Scheduler;
+  private skillEngine: SkillEngine;
+  private skillInventory: BaseSkill[];
 
   constructor(
     private prisma: PrismaService,
@@ -49,7 +52,7 @@ export class SkillService {
     private conversation: ConversationService,
     @InjectQueue(QUEUE_SKILL) private queue: Queue<InvokeSkillJobData>,
   ) {
-    const skillEngine = new SkillEngine(this.logger, {
+    this.skillEngine = new SkillEngine(this.logger, {
       createResource: async (user, req) => {
         const resource = await this.knowledge.createResource(user, req);
         return buildSuccessResponse(resourcePO2DTO(resource));
@@ -67,15 +70,19 @@ export class SkillService {
         return buildSuccessResponse(collectionPO2DTO(coll));
       },
     });
-    this.scheduler = new Scheduler(skillEngine);
+    this.skillInventory = createSkillInventory(this.skillEngine);
   }
 
   listSkillTemplates(): SkillTemplate[] {
-    return this.scheduler.skills.map((skill) => ({
+    return this.skillInventory.map((skill) => ({
       name: skill.name,
       displayName: skill.displayName,
       description: skill.description,
     }));
+  }
+
+  isValidSkillName(name: string) {
+    return this.skillInventory.some((skill) => skill.name === name);
   }
 
   async listSkillInstances(user: Pick<User, 'uid'>, param: { page: number; pageSize: number }) {
@@ -90,7 +97,7 @@ export class SkillService {
 
   async createSkillInstance(user: User, param: UpsertSkillInstanceRequest) {
     param.instanceList.forEach((instance) => {
-      if (!this.scheduler.isValidSkillName(instance.skillName)) {
+      if (!this.isValidSkillName(instance.skillName)) {
         throw new BadRequestException(`skill ${instance.skillName} not found`);
       }
     });
@@ -134,7 +141,7 @@ export class SkillService {
       if (!instance.skillId) {
         throw new BadRequestException('skill id is required');
       }
-      if (!this.scheduler.isValidSkillName(instance.skillName)) {
+      if (!this.isValidSkillName(instance.skillName)) {
         throw new BadRequestException(`skill ${instance.skillName} not found`);
       }
     });
@@ -304,7 +311,8 @@ export class SkillService {
         data: { status: 'running' },
       });
       const config = await this.buildInvokeConfig({ user, skill, param });
-      const res = await this.scheduler.invoke({ ...param.input }, config);
+      const scheduler = new Scheduler(this.skillEngine);
+      const res = await scheduler.invoke({ ...param.input }, config);
 
       this.logger.log(`invoke skill result: ${JSON.stringify(res)}`);
       await this.prisma.skillLog.update({
@@ -352,8 +360,9 @@ export class SkillService {
         msgAggregator.addSkillEvent(data);
       },
     });
+    const scheduler = new Scheduler(this.skillEngine);
 
-    for await (const event of this.scheduler.streamEvents(
+    for await (const event of scheduler.streamEvents(
       { ...param.input },
       { ...config, version: 'v2' },
     )) {
