@@ -9,7 +9,7 @@ import { z } from 'zod';
 import { SystemMessage } from '@langchain/core/messages';
 import { HumanMessage } from '@langchain/core/messages';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
-import { BaseSkill, BaseSkillState, SkillRunnableConfig, SkillRunnableMeta, baseStateGraphArgs } from '../base';
+import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { ToolMessage } from '@langchain/core/messages';
 import { SkillMeta } from '@refly/openapi-schema';
 import { ToolCall } from '@langchain/core/dist/messages/tool';
@@ -141,14 +141,13 @@ export class Scheduler extends BaseSkill {
     return { messages: [skillMessage], skillCalls: state.skillCalls.slice(1) };
   };
 
-  /** TODO: 这里需要将 chatHistory 传入 */
   callScheduler = async (state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { query, contextualUserQuery, messages = [] } = state;
 
     this.configSnapshot ??= config ?? { configurable: {} };
     this.emitEvent({ event: 'start' }, this.configSnapshot);
 
-    const { locale = 'en', installedSkills, currentSkill, spanId } = this.configSnapshot.configurable;
+    const { locale = 'en', chatHistory = [], installedSkills, currentSkill, spanId } = this.configSnapshot.configurable;
 
     let tools = this.skills;
     if (installedSkills) {
@@ -185,7 +184,7 @@ You are an AI intelligent response engine built by Refly AI that is specializing
     const responseMessage = await boundModel.invoke(
       [
         new SystemMessage(getSystemPrompt(locale)),
-        /** chat History */
+        ...chatHistory,
         ...messages,
         new HumanMessage(`The user's intent is ${contextualUserQuery || query}`),
       ],
