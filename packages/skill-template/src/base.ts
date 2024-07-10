@@ -7,8 +7,8 @@ import { RunnableConfig } from '@langchain/core/runnables';
 import { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
 import { SkillContext, SkillInput, SkillMeta } from '@refly/openapi-schema';
 import { EventEmitter } from 'node:stream';
+import { randomUUID } from 'node:crypto';
 import { SkillEvent } from '@refly/common-types';
-import { genSkillEventSpanID } from '@refly/utils';
 
 export abstract class BaseSkill extends StructuredTool {
   abstract displayName: Record<string, string>;
@@ -62,7 +62,7 @@ export abstract class BaseSkill extends StructuredTool {
     };
 
     // Ensure we get a new spanId for every skill call.
-    config.configurable.spanId = genSkillEventSpanID();
+    config.configurable.spanId = randomUUID();
 
     const runnable = this.toRunnable();
 

@@ -38,10 +38,6 @@ export function genSkillLogID(): string {
   return 'lg-' + createId();
 }
 
-export function genSkillEventSpanID(): string {
-  return 'sep-' + createId();
-}
-
 export const genUniqueId = () => {
   const uuid = UUIDV4();
   const timestamp = new Date().getTime();
