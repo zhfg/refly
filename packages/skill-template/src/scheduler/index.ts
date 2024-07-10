@@ -1,6 +1,6 @@
 import { ChatOpenAI } from '@langchain/openai';
 
-import { AIMessage, AIMessageChunk, BaseMessage } from '@langchain/core/messages';
+import { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
 import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 
 // schema
@@ -11,17 +11,21 @@ import { HumanMessage } from '@langchain/core/messages';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { ToolMessage } from '@langchain/core/messages';
-import { Source } from '@refly/openapi-schema';
+import { SkillMeta } from '@refly/openapi-schema';
 import { OnlineSearchSkill } from '../templates/online-search';
 import { SummarySkill } from '../templates/summary';
+import { ToolCall } from '@langchain/core/dist/messages/tool';
 
 interface GraphState extends BaseSkillState {
-  // 初始上下文
+  /**
+   * Accumulated messages.
+   */
   messages: BaseMessage[];
-
-  // 运行动态添加的上下文
+  /**
+   * Skill calls to run.
+   */
+  skillCalls: ToolCall[];
   contextualUserQuery: string; // 基于上下文改写 userQuery
-  sources: Source[]; // 搜索互联网得到的在线结果
 }
 
 export class Scheduler extends BaseSkill {
@@ -44,20 +48,18 @@ export class Scheduler extends BaseSkill {
       reducer: (x: BaseMessage[], y: BaseMessage[]) => x.concat(y),
       default: () => [],
     },
-
-    // 运行动态添加的上下文
+    skillCalls: {
+      reducer: (x: ToolCall[], y: ToolCall[]) => y, // always update with newer value
+      default: () => [],
+    },
     contextualUserQuery: {
       reducer: (left?: string, right?: string) => (right ? right : left || ''),
       default: () => '',
     },
-    sources: {
-      reducer: (left?: Source[], right?: Source[]) => (right ? right : left || []) as Source[],
-      default: () => [],
-    },
   };
 
-  // Skills to be scheduled.
-  skills = [new OnlineSearchSkill(this.engine), new SummarySkill(this.engine)];
+  // Default skills to be scheduled (they are actually templates!).
+  skills: BaseSkill[] = [new OnlineSearchSkill(this.engine), new SummarySkill(this.engine)];
 
   isValidSkillName = (name: string) => {
     return this.skills.some((skill) => skill.name === name);
@@ -80,53 +82,60 @@ export class Scheduler extends BaseSkill {
     return { messages: [message] };
   };
 
+  /**
+   * Call the first scheduled skill within the state.
+   */
   callSkill = async (state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> => {
-    const { messages } = state;
-    const message = messages[messages.length - 1];
-
-    if (message._getType() !== 'ai') {
-      throw new Error('ToolNode only accepts AIMessages as input.');
-    }
-
-    const skillCalls = (message as AIMessage).tool_calls
-      ?.map((call) => {
-        const tool = this.skills.find((tool) => tool.name === call.name);
-        if (!tool) {
-          return null;
-        }
-        return { skill: tool, call };
-      })
-      .filter((call) => call);
-
+    const { skillCalls } = state;
     if (!skillCalls) {
-      this.emitEvent('log', 'No skill calls to proceed.');
+      this.emitEvent({ event: 'log', content: 'No skill calls to proceed.' }, config);
       return {};
     }
 
-    this.emitEvent('log', `Decide to call skills: ${skillCalls.map((call) => call.skill.name).join(', ')}`);
+    const { locale = 'en' } = config?.configurable || {};
 
-    const outputs = await Promise.all(
-      skillCalls.map(async ({ skill, call }) => {
-        const output = await skill.invoke(call.args, config);
-        return new ToolMessage({
-          name: skill.name,
-          content: typeof output === 'string' ? output : JSON.stringify(output),
-          tool_call_id: call.id!,
-        });
-      }) ?? [],
-    );
+    // Pick the first skill to call
+    const call = state.skillCalls[0];
 
-    return { messages: outputs };
+    // We'll first try to use installed skill instance, if not found then fallback to skill template
+    const { installedSkills = [] } = config?.configurable || {};
+    const skillInstance = installedSkills.find((skill) => skill.skillName === call.name);
+    const skillTemplate = this.skills.find((skill) => skill.name === call.name);
+    const selectedSkill: SkillMeta = skillInstance ?? {
+      skillName: skillTemplate.name,
+      skillDisplayName: skillTemplate.displayName[locale],
+    };
+
+    // Here we use deepmerge to inject skill metadata into the runnable config.
+    const output = await skillTemplate.invoke(call.args, {
+      ...config,
+      configurable: {
+        ...config?.configurable,
+        selectedSkill,
+      },
+    });
+    const skillMessage = new ToolMessage({
+      name: selectedSkill.skillName,
+      content: typeof output === 'string' ? output : JSON.stringify(output),
+      tool_call_id: call.id!,
+    });
+
+    // Dequeue the first skill call from the state
+    return { messages: [skillMessage], skillCalls: state.skillCalls.slice(1) };
   };
 
   /** TODO: 这里需要将 chatHistory 传入 */
   callScheduler = async (state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { query, contextualUserQuery, messages = [] } = state;
-    const { locale = 'en' } = config?.configurable || {};
+    const { locale = 'en', installedSkills } = config?.configurable || {};
 
-    const boundModel = new ChatOpenAI({ model: 'gpt-3.5-turbo' }).bindTools(this.skills);
+    let tools = this.skills;
+    if (installedSkills) {
+      const toolMap = new Map(tools.map((tool) => [tool.name, tool]));
+      tools = installedSkills.map((skill) => toolMap.get(skill.skillName)!);
+    }
+    const boundModel = new ChatOpenAI({ model: 'gpt-3.5-turbo' }).bindTools(tools);
 
-    // TODO: prompt 里面提示模型用户选择的技能，高优处理
     const getSystemPrompt = (locale: string) => `## Role
 You are an AI intelligent response engine built by Refly AI that is specializing in selecting the most suitable functions from a variety of options based on user requirements.
 
@@ -158,8 +167,19 @@ You are an AI intelligent response engine built by Refly AI that is specializing
       ...messages,
       new HumanMessage(`The user's intent is ${contextualUserQuery || query}`),
     ]);
+    const { tool_calls: skillCalls } = responseMessage;
 
-    return { messages: [responseMessage] };
+    if (skillCalls) {
+      this.emitEvent(
+        {
+          event: 'log',
+          content: `Decide to call skills: ${skillCalls.map((call) => call.name).join(', ')}`,
+        },
+        config,
+      );
+    }
+
+    return { messages: [responseMessage], skillCalls };
   };
 
   shouldDirectCallSkill = (state: GraphState, config?: SkillRunnableConfig): 'direct' | 'scheduler' => {
@@ -169,28 +189,41 @@ You are an AI intelligent response engine built by Refly AI that is specializing
     }
 
     if (!this.isValidSkillName(selectedSkill.skillName)) {
-      this.emitEvent('log', `Selected skill ${selectedSkill} not found. Fallback to scheduler.`);
+      this.emitEvent(
+        {
+          event: 'log',
+          content: `Selected skill ${selectedSkill.skillName} not found. Fallback to scheduler.`,
+        },
+        config,
+      );
       return 'scheduler';
     }
 
     return 'direct';
   };
 
-  // Define the function that determines whether to continue or not
-  shouldContinue = (state: GraphState): 'skill' | typeof END => {
-    const { messages = [] } = state;
-    const lastMessage = messages[messages.length - 1];
-
-    const lastMessageNoFunctionCall =
-      !(lastMessage as AIMessage)?.tool_calls || (lastMessage as AIMessage)?.tool_calls?.length === 0;
+  shouldCallSkill = (state: GraphState): 'skill' | typeof END => {
+    const { skillCalls = [] } = state;
 
     // If there is no function call, then we finish
-    if (!lastMessageNoFunctionCall) {
+    if (skillCalls.length > 0) {
       return 'skill';
     } else {
       return END;
     }
   };
+
+  onSkillCallFinish(state: GraphState, config?: SkillRunnableConfig): 'scheduler' | 'skill' {
+    const { skillCalls } = state;
+
+    // Still have skill calls to run
+    if (skillCalls.length > 0) {
+      return 'skill';
+    }
+
+    // All skill calls are finished, so we can return to the scheduler
+    return 'scheduler';
+  }
 
   toRunnable(): Runnable<any, any, RunnableConfig> {
     const workflow = new StateGraph<GraphState>({
@@ -200,10 +233,10 @@ You are an AI intelligent response engine built by Refly AI that is specializing
       .addNode('scheduler', this.callScheduler)
       .addNode('skill', this.callSkill);
 
-    workflow.addConditionalEdges(START, this.shouldDirectCallSkill);
-    workflow.addConditionalEdges('scheduler', this.shouldContinue);
     workflow.addEdge('direct', END);
-    workflow.addEdge('skill', 'scheduler');
+    workflow.addConditionalEdges(START, this.shouldDirectCallSkill);
+    workflow.addConditionalEdges('scheduler', this.shouldCallSkill);
+    workflow.addConditionalEdges('skill', this.onSkillCallFinish);
 
     return workflow.compile();
   }

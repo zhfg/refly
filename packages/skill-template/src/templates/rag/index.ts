@@ -190,7 +190,13 @@ export class RAG extends BaseSkill {
 
     const outputs = await Promise.all(
       (lastMessage as AIMessage).tool_calls?.map(async (call) => {
-        this.emitEvent('log', `Start calling ${tool.name} with args: ${JSON.stringify(call.args)})}`);
+        this.emitEvent(
+          {
+            event: 'log',
+            content: `Start calling ${tool.name} with args: ${JSON.stringify(call.args)})}`,
+          },
+          config,
+        );
 
         const output = await tool.invoke(call.args, config);
         return new ToolMessage({

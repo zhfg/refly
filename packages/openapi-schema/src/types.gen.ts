@@ -196,6 +196,10 @@ export type SkillMeta = {
    * Skill ID
    */
   skillId?: string;
+  /**
+   * Skill config
+   */
+  config?: string;
 };
 
 /**
@@ -206,10 +210,6 @@ export type SkillInstance = SkillMeta & {
    * Skill triggers
    */
   triggers?: Array<SkillTrigger>;
-  /**
-   * Skill config
-   */
-  config?: string;
   /**
    * Skill creation time
    */

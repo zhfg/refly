@@ -13,7 +13,8 @@
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:esm": "tsc -p tsconfig.esm.json",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsx ./src/runner/index.ts"
+    "start": "tsx ./src/runner/index.ts",
+    "postinstall": "pnpm build"
   },
   "devDependencies": {
     "typescript": "^5",

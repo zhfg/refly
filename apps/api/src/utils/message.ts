@@ -1,11 +1,11 @@
 import { SkillEvent } from '@refly/common-types';
-import { SkillInfo } from '@refly/skill-template';
 import { CreateChatMessageInput } from '@/conversation/conversation.dto';
 import { User } from '@prisma/client';
 import { SkillMeta } from '@refly/openapi-schema';
-import { pick } from 'lodash';
+import { SkillRunnableMeta } from '@refly/skill-template';
 
 interface MessageData {
+  skillMeta: SkillMeta;
   logs: string[];
   content: string;
   structuredData: Record<string, unknown>;
@@ -13,39 +13,35 @@ interface MessageData {
 
 export class MessageAggregator {
   /**
-   * Skill meta data, in the order of sending
+   * Span ID list, in the order of sending
    */
-  skillMetaList: SkillMeta[] = [];
+  spanIdList: string[] = [];
 
   /**
-   * Message data, with key being the skill name and value being the message
+   * Message data, with key being the spanId and value being the message
    */
   data: Record<string, MessageData> = {};
 
-  getOrInitData(skillName: string): MessageData {
-    return (
-      this.data[skillName] || {
-        logs: [],
-        content: '',
-        structuredData: {},
-      }
-    );
-  }
+  getOrInitData(event: SkillMeta & { spanId: string }): MessageData {
+    const { spanId, skillId, skillName, skillDisplayName } = event;
 
-  registerSkillName(meta: SkillMeta) {
-    if (!this.skillMetaList.some(({ skillName }) => meta.skillName === skillName)) {
-      this.skillMetaList.push(pick(meta, ['skillId', 'skillName', 'skillDisplayName']));
+    const messageData = this.data[spanId];
+    if (messageData) {
+      return messageData;
     }
-  }
 
-  addSkillEvent(event: SkillEvent) {
-    this.registerSkillName(event);
+    this.spanIdList.push(spanId);
 
-    const msg: MessageData = this.data[event.skillName] || {
+    return {
+      skillMeta: { skillId, skillName, skillDisplayName },
       logs: [],
       content: '',
       structuredData: {},
     };
+  }
+
+  addSkillEvent(event: SkillEvent) {
+    const msg: MessageData = this.getOrInitData(event);
     switch (event.event) {
       case 'log':
         msg.logs.push(event.content);
@@ -54,15 +50,13 @@ export class MessageAggregator {
         msg[event.structuredDataKey ?? 'default'] = event.content;
         break;
     }
-    this.data[event.skillName] = msg;
+    this.data[event.spanId] = msg;
   }
 
-  setContent(info: SkillInfo, content: string) {
-    this.registerSkillName(info);
-
-    const msg = this.getOrInitData(info.skillName);
+  setContent(meta: SkillRunnableMeta, content: string) {
+    const msg = this.getOrInitData(meta);
     msg.content = content;
-    this.data[info.skillName] = msg;
+    this.data[meta.spanId] = msg;
   }
 
   getMessages(param: {
@@ -72,13 +66,12 @@ export class MessageAggregator {
   }): CreateChatMessageInput[] {
     const { user, conversationPk, locale } = param;
 
-    return this.skillMetaList.map((meta) => {
-      const { skillName } = meta;
-      const { content, logs, structuredData } = this.data[skillName];
+    return this.spanIdList.map((spanId) => {
+      const { skillMeta, content, logs, structuredData } = this.data[spanId];
       return {
         type: 'ai',
         content,
-        skillMeta: JSON.stringify(meta),
+        skillMeta: JSON.stringify(skillMeta),
         logs: JSON.stringify(logs),
         structuredData: JSON.stringify(structuredData),
         userId: user.id,
