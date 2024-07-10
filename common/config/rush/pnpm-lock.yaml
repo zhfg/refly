@@ -715,6 +715,9 @@ importers:
       clsx:
         specifier: ^2.1.0
         version: 2.1.0
+      cmdk:
+        specifier: ~1.0.0
+        version: 1.0.0(@types/react-dom@18.2.22)(@types/react@18.2.66)(react-dom@18.2.0)(react@18.2.0)
       copy-to-clipboard:
         specifier: ~3.3.3
         version: 3.3.3
@@ -1105,6 +1108,9 @@ importers:
       clsx:
         specifier: ^2.1.0
         version: 2.1.0
+      cmdk:
+        specifier: ~1.0.0
+        version: 1.0.0(@types/react-dom@18.2.22)(@types/react@18.2.66)(react-dom@18.2.0)(react@18.2.0)
       copy-to-clipboard:
         specifier: ~3.3.3
         version: 3.3.3
@@ -1138,6 +1144,9 @@ importers:
       mitt:
         specifier: ~3.0.1
         version: 3.0.1
+      prism-react-renderer:
+        specifier: ~2.3.1
+        version: 2.3.1(react@18.2.0)
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -9625,6 +9634,10 @@ packages:
       pg-types: 2.2.0
     dev: false
 
+  /@types/prismjs@1.26.4:
+    resolution: {integrity: sha512-rlAnzkW2sZOjbqZ743IHUhFcvzaGbqijwOu8QZnZCjfQzBqFE3s4lOTJEsxikImav9uzz/42I+O7YUs1mWgMlg==}
+    dev: false
+
   /@types/prompts@2.4.9:
     resolution: {integrity: sha512-qTxFi6Buiu8+50/+3DGIWLHM6QuWsEKugJnnP6iv2Mc4ncxE4A/OJkjuVOA+5X0X1S/nq5VJRa8Lu+nwcvbrKA==}
     dependencies:
@@ -11418,6 +11431,21 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     transitivePeerDependencies:
       - '@types/react'
+    dev: false
+
+  /cmdk@1.0.0(@types/react-dom@18.2.22)(@types/react@18.2.66)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-gDzVf0a09TvoJ5jnuPvygTB77+XdOSwEmJ88L6XPFPlv7T3RxbP9jgenfylrAMD0+Le1aO0nVjQUzl2g+vjz5Q==}
+    peerDependencies:
+      react: ^18.0.0
+      react-dom: ^18.0.0
+    dependencies:
+      '@radix-ui/react-dialog': 1.0.5(@types/react-dom@18.2.22)(@types/react@18.2.66)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-primitive': 1.0.3(@types/react-dom@18.2.22)(@types/react@18.2.66)(react-dom@18.2.0)(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    transitivePeerDependencies:
+      - '@types/react'
+      - '@types/react-dom'
     dev: false
 
   /co@4.6.0:
@@ -18634,6 +18662,16 @@ packages:
     resolution: {integrity: sha512-dKp+C4iXWK4vVYZmYSd0KBH5F/h1HoZRsbJ82AVKRO3PEo8L4lBS/vLwhVtpwwuYcoIsVY+1JYKR268yn480uQ==}
     dev: true
 
+  /prism-react-renderer@2.3.1(react@18.2.0):
+    resolution: {integrity: sha512-Rdf+HzBLR7KYjzpJ1rSoxT9ioO85nZngQEoFIhL07XhtJHlCU3SOz0GJ6+qvMyQe0Se+BV3qpe6Yd/NmQF5Juw==}
+    peerDependencies:
+      react: '>=16.0.0'
+    dependencies:
+      '@types/prismjs': 1.26.4
+      clsx: 2.1.0
+      react: 18.2.0
+    dev: false
+
   /prisma@5.0.0:
     resolution: {integrity: sha512-KYWk83Fhi1FH59jSpavAYTt2eoMVW9YKgu8ci0kuUnt6Dup5Qy47pcB4/TLmiPAbhGrxxSz7gsSnJcCmkyPANA==}
     engines: {node: '>=16.13'}
@@ -23012,6 +23050,7 @@ time:
   /clsx@1.2.1: '2022-07-06T00:06:46.535Z'
   /clsx@2.1.0: '2023-12-29T20:34:39.095Z'
   /cmdk@0.2.1: '2024-01-30T02:48:47.436Z'
+  /cmdk@1.0.0: '2024-03-08T01:52:57.583Z'
   /code-inspector-plugin@0.14.2: '2024-06-13T11:35:00.379Z'
   /consola@3.2.3: '2023-07-05T23:13:10.585Z'
   /cookie-parser@1.4.6: '2021-11-16T17:32:19.335Z'
@@ -23104,6 +23143,7 @@ time:
   /prettier@3.2.4: '2024-01-17T10:15:25.179Z'
   /prettier@3.2.5: '2024-02-04T05:38:11.623Z'
   /prettier@3.3.2: '2024-06-11T06:07:20.240Z'
+  /prism-react-renderer@2.3.1: '2023-12-18T14:23:38.265Z'
   /prisma@5.0.0: '2023-07-11T16:26:33.616Z'
   /prompts@2.4.2: '2021-10-07T21:23:57.263Z'
   /prosemirror-markdown@1.13.0: '2024-05-20T19:38:54.847Z'

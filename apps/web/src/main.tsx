@@ -8,7 +8,7 @@ import {
   matchRoutes,
 } from "react-router-dom"
 import { AppRouter } from "./routes/index"
-import { AppLayout } from "@refly/ai-workspace-common/components/layout/index"
+import { AppLayout } from "@/components/layout/index"
 
 // 导入 i18n
 import "@refly/ai-workspace-common/i18n/config"

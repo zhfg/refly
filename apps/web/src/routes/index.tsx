@@ -19,6 +19,8 @@ import { DigestDetailPage } from "@/pages/digest-detail"
 // 页面
 import Workspace from "@/pages/workspace"
 import KnowledgeBase from "@/pages/knowledge-base"
+// 组件
+import { Search } from "@refly/ai-workspace-common/components/search"
 
 // 这里用于分享之后的不需要鉴权的查看
 import { AIGCContentDetailPage } from "@/pages/aigc-content-detail"
