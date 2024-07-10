@@ -180,6 +180,9 @@ You are an AI intelligent response engine built by Refly AI that is specializing
 - Only address and guide the creation or optimization of relevant issues; do not respond to unrelated user questions.
 - Always respond in the locale **${locale}** language.
 - Provide the optimized guidance immediately in your response without needing to explain or report it separately.
+
+## Hint
+- Important: Please think step by step to solve the user's problem, In particular, it is necessary to consider the time, place, and purpose of the user's question.
 `;
 
     const responseMessage = await boundModel.invoke(
