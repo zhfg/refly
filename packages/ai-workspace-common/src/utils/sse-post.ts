@@ -62,6 +62,7 @@ export const ssePost = async ({
   const reader = response.body!.getReader();
   const decoder = new TextDecoder('utf-8');
   let isSkillFirstMessage = true;
+  let bufferStr = '';
 
   const read = () => {
     let hasError = false;
@@ -73,42 +74,46 @@ export const ssePost = async ({
         return;
       }
 
-      const buffer = decoder.decode(result.value, { stream: true });
-      const lines = buffer.split('\n');
+      bufferStr += decoder.decode(result.value, { stream: true });
+      const lines = bufferStr.split('\n');
+      let skillEvent: SkillEvent;
 
       try {
-        lines
-          ?.filter((message) => message)
-          ?.forEach((message) => {
-            if (message.startsWith('data: ')) {
-              try {
-                const skillEvent = JSON.parse(message.substring(6)) as SkillEvent;
-
-                if (skillEvent?.event === 'start') {
-                  if (isSkillFirstMessage) {
-                    onSkillStart(skillEvent);
-                  }
-                } else if (skillEvent?.event === 'log') {
-                  onSkillThoughout(skillEvent);
-                } else if (skillEvent?.event === 'end') {
-                  onSkillEnd(skillEvent);
-                  isSkillFirstMessage = true;
-                } else if (skillEvent?.event === 'stream') {
-                  onSkillStream(skillEvent);
-                } else if (skillEvent?.event === 'structured_data') {
-                  onSkillStructedData(skillEvent);
-                }
-              } catch (err) {
-                onError(err);
-                onCompleted?.(true);
-                hasError = true;
-              }
+        lines?.forEach((message) => {
+          if (message.startsWith('data: ')) {
+            try {
+              skillEvent = JSON.parse(message.substring(6)) as SkillEvent;
+            } catch (err) {
+              console.log('ssePost 消息解析错误，静默失败：', err); // 这里只是解析错误，可以静默失败
+              return;
             }
-          });
+
+            // TODO 后续增加 skillEvent 可以处理错误的情况
+
+            if (skillEvent?.event === 'start') {
+              if (isSkillFirstMessage) {
+                onSkillStart(skillEvent);
+              }
+            } else if (skillEvent?.event === 'log') {
+              onSkillThoughout(skillEvent);
+            } else if (skillEvent?.event === 'end') {
+              onSkillEnd(skillEvent);
+              isSkillFirstMessage = true;
+            } else if (skillEvent?.event === 'stream') {
+              onSkillStream(skillEvent);
+            } else if (skillEvent?.event === 'structured_data') {
+              onSkillStructedData(skillEvent);
+            }
+          }
+        });
+
+        bufferStr = lines[lines.length - 1];
       } catch (err) {
         onError(err);
         onCompleted?.(true);
         hasError = true;
+
+        return;
       }
 
       if (!hasError) {

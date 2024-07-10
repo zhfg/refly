@@ -196,7 +196,5 @@ export const SourceList = (props: SourceListProps) => {
         ]}
       </div>
     </div>
-  ) : isPendingFirstToken && isLastSession ? (
-    <Skeleton animation></Skeleton>
   ) : null;
 };

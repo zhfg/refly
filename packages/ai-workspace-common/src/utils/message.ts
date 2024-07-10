@@ -1,4 +1,11 @@
-import { MessageDataType, MessageItemType, QuestionType, ReplyType, SystemAction } from '@refly/common-types';
+import {
+  ClientChatMessage,
+  MessageDataType,
+  MessageItemType,
+  QuestionType,
+  ReplyType,
+  SystemAction,
+} from '@refly/common-types';
 
 import { ChatMessage, MessageType } from '@refly/openapi-schema';
 import { genChatMessageID } from '@refly-packages/utils/id';
@@ -80,27 +87,20 @@ export const getRandomSuggestionsQuestion = (k: number) => {
   return randomReplies;
 };
 
-export const buildQuestionMessage = (data: Partial<ChatMessage>): ChatMessage => {
-  const { content = '', selectedWeblinkConfig = '', skillMeta } = data;
-
+export const buildQuestionMessage = (data: Partial<ClientChatMessage>): ClientChatMessage => {
   return {
+    ...data,
     msgId: genChatMessageID(),
     type: 'human',
-    content,
-    selectedWeblinkConfig,
-    skillMeta,
-  };
+  } as ClientChatMessage;
 };
 
-export const buildReplyMessage = (data: Partial<ChatMessage>): ChatMessage => {
-  const { content = '', skillMeta } = data;
-
+export const buildReplyMessage = (data: Partial<ClientChatMessage>): ClientChatMessage => {
   return {
+    ...data,
     type: 'ai',
     msgId: genChatMessageID(),
-    content,
-    skillMeta,
-  };
+  } as ClientChatMessage;
 };
 
 /**
@@ -108,13 +108,10 @@ export const buildReplyMessage = (data: Partial<ChatMessage>): ChatMessage => {
  *  1. 只用于前端展示，不保存在服务端
  *
  */
-export const buildErrorMessage = (data: Partial<ChatMessage>): ChatMessage => {
-  const { content = errorMessage, skillMeta } = data;
-
+export const buildErrorMessage = (data: Partial<ClientChatMessage>): ClientChatMessage => {
   return {
+    ...data,
     type: 'ai',
     msgId: genChatMessageID(),
-    content,
-    skillMeta,
-  };
+  } as ClientChatMessage;
 };

@@ -62,3 +62,8 @@ export const enum QuestionType {
 //   title?: string
 //   question?: string
 // }
+
+export interface ClientChatMessage extends ChatMessage {
+  pending?: boolean; // 该消息是否在流式处理中
+  spanId?: string; // 该消息在前端收发 SkillEvent 时对应的 spanId
+}

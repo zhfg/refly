@@ -13,9 +13,6 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [
-      // codeInspectorPlugin({
-      //   bundler: "vite",
-      // }),
       react(),
       tsconfigPaths(),
       vitePluginForArco({
@@ -25,6 +22,9 @@ export default defineConfig(({ mode }) => {
           "apps/extension-wxt/src",
           "packages/ai-workspace-common/src",
         ],
+      }),
+      codeInspectorPlugin({
+        bundler: "vite",
       }),
       ...(isDev
         ? []

@@ -107,9 +107,14 @@ export const useBuildTask = () => {
 
     const lastRelatedMessage = [...messages]
       .reverse()
-      .find((item) => item?.skillMeta?.skillName === skillEvent?.skillName && item?.type === 'ai');
+      .find(
+        (item) =>
+          item?.skillMeta?.skillName === skillEvent?.skillName &&
+          item?.type === 'ai' &&
+          item?.spanId === skillEvent?.spanId,
+      );
 
-    // 同一个技能只创建一条消息
+    // 同一个技能对应的 spanId 只创建一条消息
     if (lastRelatedMessage) {
       return;
     }
@@ -122,6 +127,8 @@ export const useBuildTask = () => {
         skillId: skillEvent?.skillId,
         skillDisplayName: skillEvent?.skillDisplayName,
       },
+      spanId: skillEvent?.spanId,
+      pending: true,
     });
 
     // 将 reply 加到 message-state
@@ -139,7 +146,12 @@ export const useBuildTask = () => {
     const { messages = [] } = useChatStore.getState();
     const lastRelatedMessage = [...messages]
       .reverse()
-      .find((item) => item?.skillMeta?.skillName === skillEvent?.skillName && item?.type === 'ai');
+      .find(
+        (item) =>
+          item?.skillMeta?.skillName === skillEvent?.skillName &&
+          item?.type === 'ai' &&
+          item?.spanId === skillEvent?.spanId,
+      );
     const lastRelatedMessageIndex = messages.findIndex((item) => item.msgId === lastRelatedMessage?.msgId);
 
     if (!lastRelatedMessage) {
@@ -161,7 +173,12 @@ export const useBuildTask = () => {
     const { pendingFirstToken } = useMessageStateStore.getState();
     const lastRelatedMessage = [...messages]
       .reverse()
-      .find((item) => item?.skillMeta?.skillName === skillEvent?.skillName && item?.type === 'ai');
+      .find(
+        (item) =>
+          item?.skillMeta?.skillName === skillEvent?.skillName &&
+          item?.type === 'ai' &&
+          item?.spanId === skillEvent?.spanId,
+      );
     const lastRelatedMessageIndex = messages.findIndex((item) => item.msgId === lastRelatedMessage?.msgId);
 
     if (!lastRelatedMessage) {
@@ -187,13 +204,23 @@ export const useBuildTask = () => {
     if (pendingFirstToken) {
       messageStateStore.setMessageState({ pendingFirstToken: false });
     }
+
+    setTimeout(() => {
+      // 滑动到底部
+      scrollToBottom();
+    });
   };
 
   const onSkillStructedData = (skillEvent: SkillEvent) => {
     const { messages = [] } = useChatStore.getState();
     const lastRelatedMessage = [...messages]
       .reverse()
-      .find((item) => item?.skillMeta?.skillName === skillEvent?.skillName && item?.type === 'ai');
+      .find(
+        (item) =>
+          item?.skillMeta?.skillName === skillEvent?.skillName &&
+          item?.type === 'ai' &&
+          item?.spanId === skillEvent?.spanId,
+      );
     const lastRelatedMessageIndex = messages.findIndex((item) => item.msgId === lastRelatedMessage?.msgId);
 
     if (!lastRelatedMessage) {
@@ -225,7 +252,26 @@ export const useBuildTask = () => {
     chatStore.setMessages(messages);
   };
 
-  const onSkillEnd = (skillEvent: SkillEvent) => {};
+  const onSkillEnd = (skillEvent: SkillEvent) => {
+    const { messages = [] } = useChatStore.getState();
+    const lastRelatedMessage = [...messages]
+      .reverse()
+      .find(
+        (item) =>
+          item?.skillMeta?.skillName === skillEvent?.skillName &&
+          item?.type === 'ai' &&
+          item?.spanId === skillEvent?.spanId,
+      );
+    const lastRelatedMessageIndex = messages.findIndex((item) => item.msgId === lastRelatedMessage?.msgId);
+
+    if (!lastRelatedMessage) {
+      return;
+    }
+
+    lastRelatedMessage.pending = false;
+    messages[lastRelatedMessageIndex] = lastRelatedMessage;
+    chatStore.setMessages(messages);
+  };
 
   const onError = (status: number) => {
     const currentChatState = useChatStore.getState();
@@ -239,7 +285,7 @@ export const useBuildTask = () => {
 
     // 构建一条错误消息放在末尾，而不是类似 loading 直接展示，因为要 error 停留在聊天列表里
     const errMsg = buildErrorMessage({
-      content: `发生错误，状态码：${status}`, // TODO: 优化错误信息的展示
+      content: `发生错误，错误信息：${status}`, // TODO: 优化错误信息的展示
     });
 
     chatStore.setMessages([...currentChatState.messages, { ...errMsg }]);

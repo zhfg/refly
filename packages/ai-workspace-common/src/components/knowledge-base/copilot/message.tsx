@@ -24,6 +24,7 @@ import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/store
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
 import { SkillManagement } from '@refly-packages/ai-workspace-common/components/skill/skill-management';
+import { ClientChatMessage } from '@refly/common-types';
 
 export const HumanMessage = (props: { message: Partial<ChatMessage>; profile: { avatar: string; name: string } }) => {
   const { message, profile } = props;
@@ -47,7 +48,7 @@ export const HumanMessage = (props: { message: Partial<ChatMessage>; profile: { 
 };
 
 export const AssistantMessage = (props: {
-  message: Partial<ChatMessage>;
+  message: Partial<ClientChatMessage>;
   isPendingFirstToken: boolean;
   isPending: boolean;
   isLastSession: boolean;
@@ -146,18 +147,25 @@ export const AssistantMessage = (props: {
             <div className="message-avatar">
               <Avatar size={32} style={{ backgroundColor: '#00d0b6' }}>
                 {/* <img src={profile?.avatar} /> */}
-                {profile?.avatar}
+                {profile?.avatar || '系统提示'}
               </Avatar>
             </div>
             <div className="message-name-and-content">
-              <span className="message-name">{profile?.name || 'pftom'}</span>
+              <span className="message-name">{profile?.name || 'Refly 系统提示'}</span>
               <div className="assistant-message-content">
-                {isPending ? (
+                {message?.pending ? (
                   <div className="message-log-item" style={{ marginBottom: 4 }}>
                     <Spin size={12} />
-                    <p className="message-log-content">技能运行中...</p>
+                    <p className="message-log-content">
+                      {message?.logs?.length > 0 ? message?.logs?.[message?.logs?.length - 1] : '技能运行中...'}
+                    </p>
                   </div>
-                ) : null}
+                ) : (
+                  <div className="message-log-item" style={{ marginBottom: 4 }}>
+                    <IconCheckCircle style={{ fontSize: 12, color: 'green' }} />
+                    <p className="message-log-content">技能已完成</p>
+                  </div>
+                )}
                 {message?.logs?.length > 0 ? (
                   <div className="message-log-container">
                     {message?.logs?.map((log, index) => (
