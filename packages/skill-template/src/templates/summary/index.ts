@@ -1,4 +1,3 @@
-import { ChatOpenAI } from '@langchain/openai';
 import { Document } from '@langchain/core/documents';
 import { BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 
@@ -52,8 +51,7 @@ export class SummarySkill extends BaseSkill {
       return total;
     }, '');
 
-    const llm = new ChatOpenAI({
-      modelName: 'gpt-3.5-turbo',
+    const llm = this.engine.chatModel({
       temperature: 0.9,
       maxTokens: 1024,
     });

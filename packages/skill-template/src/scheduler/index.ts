@@ -1,5 +1,3 @@
-import { ChatOpenAI } from '@langchain/openai';
-
 import { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
 import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 
@@ -68,7 +66,7 @@ export class Scheduler extends BaseSkill {
     return this.skills.some((skill) => skill.name === name);
   };
 
-  directSkillCall = async (state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> => {
+  directCallSkill = async (state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { selectedSkill, installedSkills } = config?.configurable || {};
 
     const skillInstance = installedSkills.find((skill) => skill.skillName === selectedSkill.skillName);
@@ -81,16 +79,20 @@ export class Scheduler extends BaseSkill {
       throw new Error(`Skill ${selectedSkill} not found.`);
     }
 
-    const output = await skillTemplate.invoke(
-      { query: state.query },
-      {
-        ...config,
-        configurable: {
-          ...config?.configurable,
-          currentSkill: skillInstance,
-        },
+    const skillConfig = {
+      ...config,
+      configurable: {
+        ...config?.configurable,
+        currentSkill: skillInstance,
       },
-    );
+    };
+
+    this.emitEvent({ event: 'start' }, skillConfig);
+    const output = await skillTemplate.invoke({ query: state.query }, skillConfig);
+
+    // We'll send end event in genRelatedQuestions node.
+    // So don't send it here.
+
     const message = new AIMessageChunk({
       name: skillTemplate.name,
       content: typeof output === 'string' ? output : JSON.stringify(output),
@@ -122,15 +124,19 @@ export class Scheduler extends BaseSkill {
       skillName: skillTemplate.name,
       skillDisplayName: skillTemplate.displayName[locale],
     };
-
-    // Here we use deepmerge to inject skill metadata into the runnable config.
-    const output = await skillTemplate.invoke(call.args, {
+    const skillConfig: SkillRunnableConfig = {
       ...config,
       configurable: {
         ...config?.configurable,
         currentSkill,
+        spanId: randomUUID(), // generate new spanId for each managed skill call
       },
-    });
+    };
+
+    this.emitEvent({ event: 'start' }, skillConfig);
+    const output = await skillTemplate.invoke(call.args, skillConfig);
+    this.emitEvent({ event: 'end' }, skillConfig);
+
     const skillMessage = new ToolMessage({
       name: currentSkill.skillName,
       content: typeof output === 'string' ? output : JSON.stringify(output),
@@ -154,7 +160,7 @@ export class Scheduler extends BaseSkill {
       const toolMap = new Map(tools.map((tool) => [tool.name, tool]));
       tools = installedSkills.map((skill) => toolMap.get(skill.skillName)!);
     }
-    const boundModel = new ChatOpenAI({ model: 'gpt-3.5-turbo' }).bindTools(tools);
+    const boundModel = this.engine.chatModel().bindTools(tools);
 
     const getSystemPrompt = (locale: string) => `## Role
 You are an AI intelligent response engine built by Refly AI that is specializing in selecting the most suitable functions from a variety of options based on user requirements.
@@ -207,14 +213,100 @@ You are an AI intelligent response engine built by Refly AI that is specializing
         },
         this.configSnapshot,
       );
+      this.emitEvent({ event: 'end' }, this.configSnapshot);
+
+      // Regenerate new spanId for the next scheduler call.
+      this.configSnapshot.configurable.spanId = randomUUID();
     }
 
-    this.emitEvent({ event: 'end' }, this.configSnapshot);
-
-    // Regenerate new spanId for the next scheduler call.
-    this.configSnapshot.configurable.spanId = randomUUID();
-
     return { messages: [responseMessage], skillCalls };
+  };
+
+  genRelatedQuestions = async (state: GraphState, config?: SkillRunnableConfig) => {
+    const { messages = [] } = state;
+    const { locale = 'en', selectedSkill } = config?.configurable || {};
+
+    const getSystemPrompt = (locale: string) => `## Role
+You are an SEO (Search Engine Optimization) expert, skilled at identifying key information from the provided context and proposing three semantically relevant recommended questions based on this information to help users gain a deeper understanding of the content.
+
+## Skills
+
+### Skill 1: Context Identification
+- Understand and analyze the given context to determine key information.
+
+### Skill 2: Recommending Questions
+- Propose three questions that best fit the context's semantics based on key information, to assist users in better understanding the content.
+- Format example:
+=====
+   - ❓ Recommended Question 1: <Question 1>
+   - ❓ Recommended Question 2: <Question 2>
+   - ❓ Recommended Question 3: <Question 3>
+=====
+
+## Emphasis
+
+- Questions should be **short, concise, and contextual**
+
+Generated question example:
+
+- What are some common English phrases used in button copy for internet products?
+- How can I write effective button copy in English for my internet product?
+- What are some best practices for writing button copy in English for internet products?
+
+> Up is only for examples, please output related questions in locale: ${locale} language
+
+## Limitations:
+- Only propose questions and answers related to the context.
+- Strictly adhere to the provided output format.
+- Always provide answers that match the user's query.
+- Begin the answer directly with the optimized prompt.
+  `;
+
+    const model = this.engine.chatModel({ temperature: 0.1 });
+
+    const runnable = model.withStructuredOutput(
+      z
+        .object({
+          recommend_ask_followup_question: z
+            .array(z.string())
+            .describe(`Generate three recommended follow-up questions in locale: ${locale} language`),
+        })
+        .describe(
+          `Understand and analyze the provided context to identify key information, and based on this ` +
+            `key information, formulate three questions that best align with the context's semantics ` +
+            `to assist users in gaining a better understanding of the content.`,
+        ),
+    );
+    const askFollowUpQuestion = await runnable.invoke([
+      new SystemMessage(getSystemPrompt(locale)),
+      ...messages,
+      new HumanMessage(`Please output answer in locale: ${locale} language:`),
+    ]);
+
+    const followUps = askFollowUpQuestion?.recommend_ask_followup_question || [];
+
+    const skillConfig = selectedSkill
+      ? {
+          ...config,
+          configurable: {
+            ...config?.configurable,
+            currentSkill: selectedSkill,
+          },
+        }
+      : this.configSnapshot;
+
+    this.emitEvent(
+      {
+        event: 'structured_data',
+        content: JSON.stringify(followUps),
+        structuredDataKey: 'relatedQuestions',
+        ...selectedSkill,
+      },
+      skillConfig,
+    );
+    this.emitEvent({ event: 'end' }, skillConfig);
+
+    return {};
   };
 
   shouldDirectCallSkill = (state: GraphState, config?: SkillRunnableConfig): 'direct' | 'scheduler' => {
@@ -237,15 +329,11 @@ You are an AI intelligent response engine built by Refly AI that is specializing
     return 'direct';
   };
 
-  shouldCallSkill = (state: GraphState): 'skill' | typeof END => {
+  shouldCallSkill = (state: GraphState): 'skill' | 'relatedQuestions' => {
     const { skillCalls = [] } = state;
 
-    // If there is no function call, then we finish
-    if (skillCalls.length > 0) {
-      return 'skill';
-    } else {
-      return END;
-    }
+    // If there is no skill call, then jump to relatedQuestions node
+    return skillCalls.length > 0 ? 'skill' : 'relatedQuestions';
   };
 
   onSkillCallFinish(state: GraphState, config?: SkillRunnableConfig): 'scheduler' | 'skill' {
@@ -264,14 +352,16 @@ You are an AI intelligent response engine built by Refly AI that is specializing
     const workflow = new StateGraph<GraphState>({
       channels: this.graphState,
     })
-      .addNode('direct', this.directSkillCall)
+      .addNode('direct', this.directCallSkill)
       .addNode('scheduler', this.callScheduler)
-      .addNode('skill', this.callSkill);
+      .addNode('skill', this.callSkill)
+      .addNode('relatedQuestions', this.genRelatedQuestions);
 
-    workflow.addEdge('direct', END);
     workflow.addConditionalEdges(START, this.shouldDirectCallSkill);
+    workflow.addEdge('direct', 'relatedQuestions');
     workflow.addConditionalEdges('scheduler', this.shouldCallSkill);
     workflow.addConditionalEdges('skill', this.onSkillCallFinish);
+    workflow.addEdge('relatedQuestions', END);
 
     return workflow.compile();
   }

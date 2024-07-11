@@ -47,7 +47,9 @@ export class MessageAggregator {
         msg.logs.push(event.content);
         break;
       case 'structured_data':
-        msg[event.structuredDataKey ?? 'default'] = event.content;
+        if (event.structuredDataKey) {
+          msg.structuredData[event.structuredDataKey] = event.content;
+        }
         break;
     }
     this.data[event.spanId] = msg;

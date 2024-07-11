@@ -35,6 +35,7 @@ import { ConversationService } from '@/conversation/conversation.service';
 import { MessageAggregator } from '@/utils/message';
 import { SkillEvent } from '@refly/common-types';
 import { createLLMChatMessage } from '@/llm/schema';
+import { ConfigService } from '@nestjs/config';
 
 interface SkillPreCheckResult {
   skill?: SkillInstance;
@@ -48,29 +49,34 @@ export class SkillService {
   private skillInventory: BaseSkill[];
 
   constructor(
+    private config: ConfigService,
     private prisma: PrismaService,
     private knowledge: KnowledgeService,
     private conversation: ConversationService,
     @InjectQueue(QUEUE_SKILL) private queue: Queue<InvokeSkillJobData>,
   ) {
-    this.skillEngine = new SkillEngine(this.logger, {
-      createResource: async (user, req) => {
-        const resource = await this.knowledge.createResource(user, req);
-        return buildSuccessResponse(resourcePO2DTO(resource));
+    this.skillEngine = new SkillEngine(
+      this.logger,
+      {
+        createResource: async (user, req) => {
+          const resource = await this.knowledge.createResource(user, req);
+          return buildSuccessResponse(resourcePO2DTO(resource));
+        },
+        updateResource: async (user, req) => {
+          const resource = await this.knowledge.updateResource(user, req);
+          return buildSuccessResponse(resourcePO2DTO(resource));
+        },
+        createCollection: async (user, req) => {
+          const coll = await this.knowledge.upsertCollection(user, req);
+          return buildSuccessResponse(collectionPO2DTO(coll));
+        },
+        updateCollection: async (user, req) => {
+          const coll = await this.knowledge.upsertCollection(user, req);
+          return buildSuccessResponse(collectionPO2DTO(coll));
+        },
       },
-      updateResource: async (user, req) => {
-        const resource = await this.knowledge.updateResource(user, req);
-        return buildSuccessResponse(resourcePO2DTO(resource));
-      },
-      createCollection: async (user, req) => {
-        const coll = await this.knowledge.upsertCollection(user, req);
-        return buildSuccessResponse(collectionPO2DTO(coll));
-      },
-      updateCollection: async (user, req) => {
-        const coll = await this.knowledge.upsertCollection(user, req);
-        return buildSuccessResponse(collectionPO2DTO(coll));
-      },
-    });
+      { defaultModel: this.config.get('skill.defaultModel') },
+    );
     this.skillInventory = createSkillInventory(this.skillEngine);
   }
 

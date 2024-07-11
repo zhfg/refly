@@ -14,11 +14,11 @@ export interface SearchOptions {
   maxResults?: number;
 }
 
-interface Props extends SearchOptions {
+export interface Props extends SearchOptions {
   query: string;
 }
 
-interface SearchResultContext {
+export interface SearchResultContext {
   name: string;
   url: string;
   snippet: string;
