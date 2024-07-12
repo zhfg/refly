@@ -7,9 +7,9 @@ import FeaturesKnowledgeBase from "@/assets/landing-page-images/features-knowled
 
 function FeaturesBlocks() {
   return (
-    <section>
-      <div className="box-content flex flex-col items-start w-full max-w-4xl pt-16 pb-24 mx-auto text-left border-b border-border2 sm:pt-20">
-        <div className="flex flex-col items-start mb-16">
+    <section className="px-6 sm:px-6 md:px-6 lg:px-0">
+      <div className="border-border2 mx-auto box-content flex w-full max-w-4xl flex-col items-start border-b pb-24 pt-16 text-left sm:pt-20">
+        <div className="mb-16 flex flex-col items-start">
           <div className="max-w-3xl">
             <h2 className="z-20 mb-4 text-[2rem] leading-[1.1] !tracking-[-0.1rem] sm:text-[3rem]">
               AI 知识库，AI 笔记，AI Copilot，
@@ -31,9 +31,9 @@ function FeaturesBlocks() {
             </p>
           </div>
         </div>
-        <div className="border rounded-lg rp-1 bg-elementGray border-border2 sm:rounded-xl sm:p-2">
+        <div className="rp-1 bg-elementGray border-border2 rounded-lg border sm:rounded-xl sm:p-2">
           <img
-            className="w-full mx-auto rounded-md shadow-heroImageInner"
+            className="shadow-heroImageInner mx-auto w-full rounded-md"
             src={FeaturesKnowledgeBase}
             width="1024"
             height="504"
@@ -41,8 +41,8 @@ function FeaturesBlocks() {
           />
         </div>
       </div>
-      <div className="box-content flex flex-col items-start w-full max-w-4xl pt-16 pb-24 mx-auto text-left border-b border-border2 sm:pt-20">
-        <div className="flex flex-col items-start mb-16">
+      <div className="border-border2 mx-auto box-content flex w-full max-w-4xl flex-col items-start border-b pb-24 pt-16 text-left sm:pt-20">
+        <div className="mb-16 flex flex-col items-start">
           <div className="max-w-3xl">
             <h2 className="z-20 mb-4 text-[2rem] leading-[1.1] !tracking-[-0.1rem] sm:text-[3rem]">
               连接你的任意数据源，
@@ -65,9 +65,9 @@ function FeaturesBlocks() {
             </p>
           </div>
         </div>
-        <div className="p-1 border rounded-lg bg-elementGray border-border2 sm:rounded-xl sm:p-2">
+        <div className="bg-elementGray border-border2 rounded-lg border p-1 sm:rounded-xl sm:p-2">
           <img
-            className="w-full mx-auto rounded-md shadow-heroImageInner"
+            className="shadow-heroImageInner mx-auto w-full rounded-md"
             src={FeaturesImport}
             width="1024"
             height="504"
@@ -75,8 +75,8 @@ function FeaturesBlocks() {
           />
         </div>
       </div>
-      <div className="box-content flex flex-col items-start w-full max-w-4xl pt-16 pb-24 mx-auto text-left border-b border-border2 sm:pt-20">
-        <div className="flex flex-col items-start mb-16">
+      <div className="border-border2 mx-auto box-content flex w-full max-w-4xl flex-col items-start border-b pb-24 pt-16 text-left sm:pt-20">
+        <div className="mb-16 flex flex-col items-start">
           <div className="max-w-3xl">
             <h2 className="z-20 mb-4 text-[2rem] leading-[1.1] !tracking-[-0.1rem] sm:text-[3rem]">
               通过 Agent 驱动的 Skill 集合，
@@ -99,9 +99,9 @@ function FeaturesBlocks() {
             </p>
           </div>
         </div>
-        <div className="border rounded-lg rp-1 bg-elementGray border-border2 sm:rounded-xl sm:p-2">
+        <div className="rp-1 bg-elementGray border-border2 rounded-lg border sm:rounded-xl sm:p-2">
           <img
-            className="w-full mx-auto rounded-md shadow-heroImageInner"
+            className="shadow-heroImageInner mx-auto w-full rounded-md"
             src={FeaturesAgent}
             width="1024"
             height="504"
@@ -109,8 +109,8 @@ function FeaturesBlocks() {
           />
         </div>
       </div>
-      <div className="box-content flex flex-col items-start w-full max-w-4xl pt-16 pb-24 mx-auto text-left border-b border-border2 sm:pt-20">
-        <div className="flex flex-col items-start mb-16">
+      <div className="border-border2 mx-auto box-content flex w-full max-w-4xl flex-col items-start border-b pb-24 pt-16 text-left sm:pt-20">
+        <div className="mb-16 flex flex-col items-start">
           <div className="max-w-3xl">
             <h2 className="z-20 mb-4 text-[2rem] leading-[1.1] !tracking-[-0.1rem] sm:text-[3rem]">
               感知上下文，有记忆
@@ -132,9 +132,9 @@ function FeaturesBlocks() {
             </p>
           </div>
         </div>
-        <div className="p-1 border rounded-lg bg-elementGray border-border2 sm:rounded-xl sm:p-2">
+        <div className="bg-elementGray border-border2 rounded-lg border p-1 sm:rounded-xl sm:p-2">
           <img
-            className="w-full mx-auto rounded-md shadow-heroImageInner"
+            className="shadow-heroImageInner mx-auto w-full rounded-md"
             src={FeaturesPrivateContext}
             width="1024"
             height="504"
@@ -142,8 +142,8 @@ function FeaturesBlocks() {
           />
         </div>
       </div>
-      <div className="box-content flex flex-col items-start w-full max-w-4xl pt-16 pb-24 mx-auto text-left border-b border-border2 sm:pt-20">
-        <div className="flex flex-col items-start mb-16">
+      <div className="border-border2 mx-auto box-content flex w-full max-w-4xl flex-col items-start border-b pb-24 pt-16 text-left sm:pt-20">
+        <div className="mb-16 flex flex-col items-start">
           <div className="max-w-3xl">
             <h2 className="z-20 mb-4 text-[2rem] leading-[1.1] !tracking-[-0.1rem] sm:text-[3rem]">
               网页，浏览器插件，应用内搜索
@@ -165,9 +165,9 @@ function FeaturesBlocks() {
             </p>
           </div>
         </div>
-        <div className="border rounded-lg rp-1 bg-elementGray border-border2 sm:rounded-xl sm:p-2">
+        <div className="rp-1 bg-elementGray border-border2 rounded-lg border sm:rounded-xl sm:p-2">
           <img
-            className="w-full mx-auto rounded-md shadow-heroImageInner"
+            className="shadow-heroImageInner mx-auto w-full rounded-md"
             src={FeaturesBigSearch}
             width="1024"
             height="504"

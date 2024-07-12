@@ -8,7 +8,7 @@ function Footer() {
   const { t } = useTranslation()
 
   return (
-    <footer>
+    <footer className="px-6 sm:px-6 md:px-6 lg:px-0">
       <div className="py-12 md:py-16">
         <div className="mx-auto max-w-4xl">
           {/* Top area: Blocks */}

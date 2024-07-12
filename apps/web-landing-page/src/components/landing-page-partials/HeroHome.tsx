@@ -62,7 +62,7 @@ function HeroHome() {
                 </div>
               </div>
 
-              <h1 className="mb-5 max-w-4xl text-[3rem] font-semibold leading-[0.9] !tracking-[-0.2rem] sm:mb-6 sm:text-[5rem]">
+              <h1 className="mb-5 flex max-w-4xl flex-col text-[3rem] font-semibold leading-[0.9] !tracking-[-0.2rem] sm:mb-6 sm:text-[5rem]">
                 <span className="span-wrap-styles">AI Native</span>
                 <span className="span-wrap-styles" style={{ marginTop: 12 }}>
                   知识操作系统
