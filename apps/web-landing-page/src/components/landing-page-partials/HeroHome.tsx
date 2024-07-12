@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils"
 
 import HeroImage from "@/assets/landing-page-images/hero-image-01.png"
 import AnimatedGradientText from "@/components/magicui/animated-gradient-text"
+import ShimmerButton from "@/components/magicui/shimmer-button"
 import AnimatedShinyText from "@/components/magicui/animated-shiny-text"
 import { ArrowRightIcon } from "lucide-react"
 import { useUserStore } from "@refly/ai-workspace-common/stores/user"
@@ -87,9 +88,9 @@ function HeroHome() {
               className="mx-auto max-w-xs sm:flex sm:max-w-none sm:justify-center"
               onClick={() => userStore.setWaitingListModalVisible(true)}>
               <div data-aos="fade-up" data-aos-delay="600">
-                <button className="align-self-start false relative flex h-11 min-w-[112px] cursor-pointer flex-row items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-black px-6 text-sm font-semibold text-white transition-transform ease-in hover:scale-[1.02]">
-                  加入等待 ⌛️ 列表！
-                </button>
+                <ShimmerButton className="transition-transform ease-in hover:scale-[1.02]">
+                  <span>加入等待 ⌛️ 列表！</span>
+                </ShimmerButton>
               </div>
             </div>
           </div>
