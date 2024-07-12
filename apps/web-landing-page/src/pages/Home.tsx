@@ -16,18 +16,18 @@ function Home() {
   const userStore = useUserStore()
 
   return (
-    <div className="flex flex-col min-h-screen overflow-hidden">
+    <div className="flex min-h-screen flex-col overflow-hidden bg-[#FCFCF9]">
       {/*  Site header */}
       <Header />
 
       {/*  Page content */}
       <main className="grow">
         {/*  Page illustration */}
-        <div
+        {/* <div
           className="relative h-0 max-w-6xl mx-auto pointer-events-none"
           aria-hidden="true">
           <PageIllustration />
-        </div>
+        </div> */}
 
         {/*  Page sections */}
         <HeroHome />

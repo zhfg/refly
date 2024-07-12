@@ -1,27 +1,39 @@
-import { cn } from "@/lib/utils"
+import React, { useState, useRef, useEffect } from 'react';
+import Modal from '../modal';
 
-import HeroImage from "@/assets/landing-page-images/hero-image-01.png"
-import AnimatedGradientText from "@/components/magicui/animated-gradient-text"
-import AnimatedShinyText from "@/components/magicui/animated-shiny-text"
-import { ArrowRightIcon } from "lucide-react"
+import HeroImage from '@/assets/landing-page-images/hero-image-01.jpg';
+import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import { useTranslation } from 'react-i18next';
 
 function HeroHome() {
+  const userStore = useUserStore();
+
+  const { t } = useTranslation();
+  // const [videoModalOpen, setVideoModalOpen] = useState(false)
+  // const video = useRef(null)
+
+  // useEffect(() => {
+  //   videoModalOpen ? video.current.play() : video.current.pause()
+  // }, [videoModalOpen])
+
   return (
     <section>
-      <div className="relative mx-auto max-w-4xl px-4">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 relative">
         {/* Illustration behind hero content */}
         <div
-          className="pointer-events-none absolute bottom-0 left-0 -ml-20 hidden lg:block"
+          className="absolute left-0 bottom-0 -ml-20 hidden lg:block pointer-events-none"
           aria-hidden="true"
           data-aos="fade-up"
-          data-aos-delay="400">
+          data-aos-delay="400"
+        >
           <svg
             className="max-w-full"
             width="564"
             height="552"
             viewBox="0 0 564 552"
             fill="none"
-            xmlns="http://www.w3.org/2000/svg">
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <defs>
               <linearGradient
                 id="illustration-02"
@@ -29,7 +41,8 @@ function HeroHome() {
                 y1="300.204"
                 x2="284.352"
                 y2="577.921"
-                gradientUnits="userSpaceOnUse">
+                gradientUnits="userSpaceOnUse"
+              >
                 <stop stopColor="#00968F" stopOpacity=".01" />
                 <stop offset="1" stopColor="#00968F" stopOpacity=".32" />
               </linearGradient>
@@ -44,66 +57,110 @@ function HeroHome() {
         </div>
 
         {/* Hero content */}
-        <div className="relative pb-10 pt-32 md:pb-16 md:pt-24">
+        <div className="relative pt-32 pb-10 md:pt-40 md:pb-16">
           {/* Section header */}
-          <div className="mx-auto max-w-3xl pb-8 text-center">
-            <div className="mb-7 flex flex-col items-center text-center sm:mb-6">
-              <div className="mb-5">
-                <div className="z-10 flex items-center justify-center">
-                  <div
-                    className={cn(
-                      "group rounded-full border border-black/5 bg-neutral-100 text-base text-white transition-all ease-in hover:cursor-pointer hover:bg-neutral-200 dark:border-white/5 dark:bg-neutral-900 dark:hover:bg-neutral-800",
-                    )}>
-                    <AnimatedShinyText className="inline-flex items-center justify-center px-4 py-1 transition ease-out hover:text-neutral-600 hover:duration-300 hover:dark:text-neutral-400">
-                      <span>✨ 即将到来，敬请期待！</span>
-                      <ArrowRightIcon className="size-3 ml-1 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
-                    </AnimatedShinyText>
-                  </div>
-                </div>
+          <div className="max-w-4xl mx-auto text-center pb-12 md:pb-16">
+            <h1 className="h1 mb-4" data-aos="fade-up">
+              {t('landingPage.slogan')}
+            </h1>
+            <p className="text-xl text-gray-400 mb-8" data-aos="fade-up" data-aos-delay="200">
+              {t('landingPage.description')}
+            </p>
+            <div className="max-w-xs mx-auto sm:max-w-none sm:flex sm:justify-center">
+              <div data-aos="fade-up" data-aos-delay="400">
+                <a
+                  onClick={() => {
+                    userStore.setLoginModalVisible(true);
+                  }}
+                  className="btn text-white bg-green-600 hover:bg-green-700 w-full mb-4 sm:w-auto sm:mb-0"
+                  href="#0"
+                >
+                  {t('landingPage.joinBtn')}
+                </a>
               </div>
-
-              <h1 className="mb-5 max-w-4xl text-[3rem] font-semibold leading-[0.9] !tracking-[-0.2rem] sm:mb-6 sm:text-[5rem]">
-                <span className="span-wrap-styles">AI Native</span>
-                <span className="span-wrap-styles" style={{ marginTop: 12 }}>
-                  知识操作系统
-                </span>
-              </h1>
-              <p className="flex max-w-[18rem] flex-col items-center gap-0.5 text-base !leading-[1.3] !tracking-[-0.02rem] sm:max-w-2xl sm:text-xl">
-                <span className="span-wrap-styles font-semibold">
-                  导入，阅读，写作，组织！
-                </span>
-                <span className="span-wrap-styles font-semibold">
-                  通过 Refly 的 AI 驱动的工作台，将想法转化为行动。
-                </span>
-              </p>
-            </div>
-            <div className="mx-auto max-w-xs sm:flex sm:max-w-none sm:justify-center">
               <div data-aos="fade-up" data-aos-delay="600">
                 <a
-                  className="align-self-start false relative flex h-11 min-w-[112px] cursor-pointer flex-row items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-black px-6 text-sm font-semibold text-white transition-transform ease-in hover:scale-[1.02]"
-                  href="#0">
-                  加入等待 ⌛️ 列表！
+                  className="btn text-white bg-gray-700 hover:bg-gray-800 w-full sm:w-auto sm:ml-4"
+                  href="https://chromewebstore.google.com/detail/lecbjbapfkinmikhadakbclblnemmjpd"
+                  target="_blank"
+                >
+                  {t('landingPage.downloadBtn')}
                 </a>
               </div>
             </div>
           </div>
 
           {/* Hero image */}
-          <div className="relative mt-12 flex justify-center overflow-visible sm:mt-10">
-            <div className="bg-elementGray border-border2 rounded-lg border p-1 sm:rounded-xl sm:p-2">
+          {/* <div> */}
+          {/* <div
+              className="relative flex justify-center items-center"
+              data-aos="fade-up"
+              data-aos-delay="200">
               <img
-                className="shadow-heroImageInner mx-auto w-full rounded-md"
+                className="mx-auto"
                 src={HeroImage}
                 width="1024"
                 height="504"
                 alt="Hero"
               />
-            </div>
-          </div>
+              <a
+                className="absolute group"
+                href="#0"
+                onClick={e => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setVideoModalOpen(true)
+                }}
+                aria-controls="modal">
+                <svg
+                  className="w-16 h-16 sm:w-20 sm:h-20 hover:opacity-75 transition duration-150 ease-in-out"
+                  viewBox="0 0 88 88"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient
+                      x1="78.169%"
+                      y1="9.507%"
+                      x2="24.434%"
+                      y2="90.469%"
+                      id="a">
+                      <stop stopColor="#EBF1F5" stopOpacity=".8" offset="0%" />
+                      <stop stopColor="#EBF1F5" offset="100%" />
+                    </linearGradient>
+                  </defs>
+                  <circle fill="url(#a)" cx="44" cy="44" r="44" />
+                  <path
+                    className="fill-current text-green-600"
+                    d="M52 44a.999.999 0 00-.427-.82l-10-7A1 1 0 0040 37V51a.999.999 0 001.573.82l10-7A.995.995 0 0052 44V44c0 .001 0 .001 0 0z"
+                  />
+                </svg>
+              </a>
+            </div> */}
+
+          {/* Modal */}
+          {/* <Modal
+              id="modal"
+              ariaLabel="modal-headline"
+              show={videoModalOpen}
+              handleClose={() => setVideoModalOpen(false)}>
+              <div className="relative pb-9/16">
+                <video
+                  ref={video}
+                  className="absolute w-full h-full"
+                  width="1920"
+                  height="1080"
+                  loop
+                  autoPlay
+                  controls>
+                  <source src="/videos/video.mp4" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            </Modal> */}
+          {/* </div> */}
         </div>
       </div>
     </section>
-  )
+  );
 }
 
-export default HeroHome
+export default HeroHome;

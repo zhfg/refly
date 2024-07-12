@@ -1,217 +1,178 @@
 import React from "react"
-import { useTranslation } from "react-i18next"
+import FeaturesImport from "@/assets/landing-page-images/features-import.png"
+import FeaturesBigSearch from "@/assets/landing-page-images/features-big-search.png"
+import FeaturesAgent from "@/assets/landing-page-images/features-agent.png"
+import FeaturesPrivateContext from "@/assets/landing-page-images/features-private-context.png"
+import FeaturesKnowledgeBase from "@/assets/landing-page-images/features-knowledgebase.png"
 
 function FeaturesBlocks() {
-  const { t } = useTranslation()
-
   return (
     <section>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="py-12 md:py-20">
-          {/* Section header */}
-          {/* <div className="max-w-3xl mx-auto text-center pb-12 md:pb-20">
-            <h2 className="h2 mb-4">
-              The majority our customers do not understand their workflows.
+      <div className="box-content flex flex-col items-start w-full max-w-4xl pt-16 pb-24 mx-auto text-left border-b border-border2 sm:pt-20">
+        <div className="flex flex-col items-start mb-16">
+          <div className="max-w-3xl">
+            <h2 className="z-20 mb-4 text-[2rem] leading-[1.1] !tracking-[-0.1rem] sm:text-[3rem]">
+              AI 知识库，AI 笔记，AI Copilot，
+              <span
+                className="feature-header-highlight"
+                style={{
+                  background: "#DEECDD",
+                  position: "relative",
+                  zIndex: 1,
+                }}>
+                你的 All-in-one 的知识管理操作系统
+              </span>
             </h2>
-            <p className="text-xl text-gray-400">
-              Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
-              officia deserunt mollit anim id est laborum.
+            <p className="max-w-3xl text-base !leading-[1.3] !tracking-[-0.03rem] sm:text-lg">
+              <span className="span-wrap-styles">
+                结合社区共创的 AI
+                技能，无论是文字、图片、视频或是播客，都能轻松高效地完成知识的导入、整理、消化和产出全流程，节省时间和减轻知识焦虑，获取前所未有的洞见。
+              </span>
             </p>
-          </div> */}
-
-          {/* Items */}
-          <div
-            className="max-w-sm mx-auto grid gap-8 md:grid-cols-2 lg:grid-cols-3 lg:gap-16 items-start md:max-w-2xl lg:max-w-none"
-            data-aos-id-blocks>
-            {/* 1st item */}
-            <div
-              className="relative flex flex-col items-center"
-              data-aos="fade-up"
-              data-aos-anchor="[data-aos-id-blocks]">
-              <svg
-                className="w-16 h-16 mb-4"
-                viewBox="0 0 64 64"
-                xmlns="http://www.w3.org/2000/svg">
-                <rect
-                  className="fill-current text-green-600"
-                  width="64"
-                  height="64"
-                  rx="32"
-                />
-                <path
-                  className="stroke-current text-green-100"
-                  d="M30 39.313l-4.18 2.197L27 34.628l-5-4.874 6.91-1.004L32 22.49l3.09 6.26L42 29.754l-3 2.924"
-                  strokeLinecap="square"
-                  strokeWidth="2"
-                  fill="none"
-                  fillRule="evenodd"
-                />
-                <path
-                  className="stroke-current text-green-300"
-                  d="M43 42h-9M43 37h-9"
-                  strokeLinecap="square"
-                  strokeWidth="2"
-                />
-              </svg>
-              <h4 className="h4 mb-2">{t("landingPage.featureOne.title")}</h4>
-              <p className="text-lg text-gray-400 text-center">
-                {t("landingPage.featureOne.description")}
-              </p>
-            </div>
-
-            {/* 2nd item */}
-            {/* <div
-              className="relative flex flex-col items-center"
-              data-aos="fade-up"
-              data-aos-delay="100"
-              data-aos-anchor="[data-aos-id-blocks]">
-              <svg
-                className="w-16 h-16 mb-4"
-                viewBox="0 0 64 64"
-                xmlns="http://www.w3.org/2000/svg">
-                <circle
-                  className="fill-current text-green-600"
-                  cx="32"
-                  cy="32"
-                  r="32"
-                />
-                <path
-                  className="stroke-current text-green-100"
-                  strokeWidth="2"
-                  strokeLinecap="square"
-                  d="M21 23h22v18H21z"
-                  fill="none"
-                  fillRule="evenodd"
-                />
-                <path
-                  className="stroke-current text-green-300"
-                  d="M26 28h12M26 32h12M26 36h5"
-                  strokeWidth="2"
-                  strokeLinecap="square"
-                />
-              </svg>
-              <h4 className="h4 mb-2">Instant Features</h4>
-              <p className="text-lg text-gray-400 text-center">
-                Duis aute irure dolor in reprehenderit in voluptate velit esse
-                cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-                cupidatat.
-              </p>
-            </div> */}
-
-            {/* 3rd item */}
-            <div
-              className="relative flex flex-col items-center"
-              data-aos="fade-up"
-              data-aos-delay="200"
-              data-aos-anchor="[data-aos-id-blocks]">
-              <svg
-                className="w-16 h-16 mb-4"
-                viewBox="0 0 64 64"
-                xmlns="http://www.w3.org/2000/svg">
-                <rect
-                  className="fill-current text-green-600"
-                  width="64"
-                  height="64"
-                  rx="32"
-                />
-                <g
-                  transform="translate(21 21)"
-                  strokeLinecap="square"
-                  strokeWidth="2"
-                  fill="none"
-                  fillRule="evenodd">
-                  <ellipse
-                    className="stroke-current text-green-300"
-                    cx="11"
-                    cy="11"
-                    rx="5.5"
-                    ry="11"
-                  />
-                  <path
-                    className="stroke-current text-green-100"
-                    d="M11 0v22M0 11h22"
-                  />
-                  <circle
-                    className="stroke-current text-green-100"
-                    cx="11"
-                    cy="11"
-                    r="11"
-                  />
-                </g>
-              </svg>
-              <h4 className="h4 mb-2"> {t("landingPage.featureTwo.title")}</h4>
-              <p className="text-lg text-gray-400 text-center">
-                {t("landingPage.featureTwo.description")}
-              </p>
-            </div>
-
-            {/* 4th item */}
-            <div
-              className="relative flex flex-col items-center"
-              data-aos="fade-up"
-              data-aos-delay="300"
-              data-aos-anchor="[data-aos-id-blocks]">
-              <svg
-                className="w-16 h-16 mb-4"
-                viewBox="0 0 64 64"
-                xmlns="http://www.w3.org/2000/svg">
-                <rect
-                  className="fill-current text-green-600"
-                  width="64"
-                  height="64"
-                  rx="32"
-                />
-                <g
-                  transform="translate(22 21)"
-                  strokeLinecap="square"
-                  strokeWidth="2"
-                  fill="none"
-                  fillRule="evenodd">
-                  <path
-                    className="stroke-current text-green-100"
-                    d="M17 22v-6.3a8.97 8.97 0 003-6.569A9.1 9.1 0 0011.262 0 9 9 0 002 9v1l-2 5 2 1v4a2 2 0 002 2h4a5 5 0 005-5v-5"
-                  />
-                  <circle
-                    className="stroke-current text-green-300"
-                    cx="13"
-                    cy="9"
-                    r="3"
-                  />
-                </g>
-              </svg>
-              <h4 className="h4 mb-2">{t("landingPage.featureThree.title")}</h4>
-              <p className="text-lg text-gray-400 text-center">
-                {t("landingPage.featureThree.description")}
-              </p>
-            </div>
-
-            {/* 5th item */}
-            {/* <div className="relative flex flex-col items-center" data-aos="fade-up" data-aos-delay="400" data-aos-anchor="[data-aos-id-blocks]">
-              <svg className="w-16 h-16 mb-4" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-                <rect className="fill-current text-green-600" width="64" height="64" rx="32" />
-                <g strokeLinecap="square" strokeWidth="2" fill="none" fillRule="evenodd">
-                  <path className="stroke-current text-green-100" d="M29 42h10.229a2 2 0 001.912-1.412l2.769-9A2 2 0 0042 29h-7v-4c0-2.373-1.251-3.494-2.764-3.86a1.006 1.006 0 00-1.236.979V26l-5 6" />
-                  <path className="stroke-current text-green-300" d="M22 30h4v12h-4z" />
-                </g>
-              </svg>
-              <h4 className="h4 mb-2">Instant Features</h4>
-              <p className="text-lg text-gray-400 text-center">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat.</p>
-            </div> */}
-
-            {/* 6th item */}
-            {/* <div className="relative flex flex-col items-center" data-aos="fade-up" data-aos-delay="500" data-aos-anchor="[data-aos-id-blocks]">
-              <svg className="w-16 h-16 mb-4" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-                <rect className="fill-current text-green-600" width="64" height="64" rx="32" />
-                <g transform="translate(21 22)" strokeLinecap="square" strokeWidth="2" fill="none" fillRule="evenodd">
-                  <path className="stroke-current text-green-300" d="M17 2V0M19.121 2.879l1.415-1.415M20 5h2M19.121 7.121l1.415 1.415M17 8v2M14.879 7.121l-1.415 1.415M14 5h-2M14.879 2.879l-1.415-1.415" />
-                  <circle className="stroke-current text-green-300" cx="17" cy="5" r="3" />
-                  <path className="stroke-current text-green-100" d="M8.86 1.18C3.8 1.988 0 5.6 0 10c0 5 4.9 9 11 9a10.55 10.55 0 003.1-.4L20 21l-.6-5.2a9.125 9.125 0 001.991-2.948" />
-                </g>
-              </svg>
-              <h4 className="h4 mb-2">Instant Features</h4>
-              <p className="text-lg text-gray-400 text-center">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat.</p>
-            </div> */}
           </div>
+        </div>
+        <div className="border rounded-lg rp-1 bg-elementGray border-border2 sm:rounded-xl sm:p-2">
+          <img
+            className="w-full mx-auto rounded-md shadow-heroImageInner"
+            src={FeaturesKnowledgeBase}
+            width="1024"
+            height="504"
+            alt="Hero"
+          />
+        </div>
+      </div>
+      <div className="box-content flex flex-col items-start w-full max-w-4xl pt-16 pb-24 mx-auto text-left border-b border-border2 sm:pt-20">
+        <div className="flex flex-col items-start mb-16">
+          <div className="max-w-3xl">
+            <h2 className="z-20 mb-4 text-[2rem] leading-[1.1] !tracking-[-0.1rem] sm:text-[3rem]">
+              连接你的任意数据源，
+              <span
+                className="feature-header-highlight"
+                style={{
+                  background: "#D5E5EE",
+                  position: "relative",
+                  zIndex: 1,
+                }}>
+                通过知识图谱建立知识联系
+              </span>
+            </h2>
+            <p className="max-w-3xl text-base !leading-[1.3] !tracking-[-0.03rem] sm:text-lg">
+              <span className="span-wrap-styles">
+                无论是 Notion、EverNote、Google Docs 还是本地文档，还是
+                Zapier、Retool、Dify 等已有的工作流平台，Refly
+                都能轻松融入您已有的知识流程，并借助强大的技能插件系统完成前所未有的工作
+              </span>
+            </p>
+          </div>
+        </div>
+        <div className="p-1 border rounded-lg bg-elementGray border-border2 sm:rounded-xl sm:p-2">
+          <img
+            className="w-full mx-auto rounded-md shadow-heroImageInner"
+            src={FeaturesImport}
+            width="1024"
+            height="504"
+            alt="Hero"
+          />
+        </div>
+      </div>
+      <div className="box-content flex flex-col items-start w-full max-w-4xl pt-16 pb-24 mx-auto text-left border-b border-border2 sm:pt-20">
+        <div className="flex flex-col items-start mb-16">
+          <div className="max-w-3xl">
+            <h2 className="z-20 mb-4 text-[2rem] leading-[1.1] !tracking-[-0.1rem] sm:text-[3rem]">
+              通过 Agent 驱动的 Skill 集合，
+              <span
+                className="feature-header-highlight"
+                style={{
+                  background: "#F3E1E9",
+                  position: "relative",
+                  zIndex: 1,
+                }}>
+                为你打造超级智能知识助手
+              </span>
+            </h2>
+            <p className="max-w-3xl text-base !leading-[1.3] !tracking-[-0.03rem] sm:text-lg">
+              <span className="span-wrap-styles">
+                通过AI 搜索，知识库智能检索，AI
+                笔记等超实用技能集合，主动触发或者通过事件触发技能，Human-in-the-loop
+                构建知识体系，基于大模型让知识「活起来」，构建知识体系
+              </span>
+            </p>
+          </div>
+        </div>
+        <div className="border rounded-lg rp-1 bg-elementGray border-border2 sm:rounded-xl sm:p-2">
+          <img
+            className="w-full mx-auto rounded-md shadow-heroImageInner"
+            src={FeaturesAgent}
+            width="1024"
+            height="504"
+            alt="Hero"
+          />
+        </div>
+      </div>
+      <div className="box-content flex flex-col items-start w-full max-w-4xl pt-16 pb-24 mx-auto text-left border-b border-border2 sm:pt-20">
+        <div className="flex flex-col items-start mb-16">
+          <div className="max-w-3xl">
+            <h2 className="z-20 mb-4 text-[2rem] leading-[1.1] !tracking-[-0.1rem] sm:text-[3rem]">
+              感知上下文，有记忆
+              <span
+                className="feature-header-highlight"
+                style={{
+                  background: "#ECE3D1",
+                  position: "relative",
+                  zIndex: 1,
+                }}>
+                更懂你，越用越智能的智能知识伙伴
+              </span>
+            </h2>
+            <p className="max-w-3xl text-base !leading-[1.3] !tracking-[-0.03rem] sm:text-lg">
+              <span className="span-wrap-styles">
+                按需记录你的历史对话，自动提取你的知识标签与爱好，Refly AI
+                感知你的信息、地点、时间与操作知识的行为特征，自动在下一次对话中运用这些知识，让你少打字确更懂你
+              </span>
+            </p>
+          </div>
+        </div>
+        <div className="p-1 border rounded-lg bg-elementGray border-border2 sm:rounded-xl sm:p-2">
+          <img
+            className="w-full mx-auto rounded-md shadow-heroImageInner"
+            src={FeaturesPrivateContext}
+            width="1024"
+            height="504"
+            alt="Hero"
+          />
+        </div>
+      </div>
+      <div className="box-content flex flex-col items-start w-full max-w-4xl pt-16 pb-24 mx-auto text-left border-b border-border2 sm:pt-20">
+        <div className="flex flex-col items-start mb-16">
+          <div className="max-w-3xl">
+            <h2 className="z-20 mb-4 text-[2rem] leading-[1.1] !tracking-[-0.1rem] sm:text-[3rem]">
+              网页，浏览器插件，应用内搜索
+              <span
+                className="feature-header-highlight"
+                style={{
+                  background: "#EBD4EB",
+                  position: "relative",
+                  zIndex: 1,
+                }}>
+                你的知识，触手可达
+              </span>
+            </h2>
+            <p className="max-w-3xl text-base !leading-[1.3] !tracking-[-0.03rem] sm:text-lg">
+              <span className="span-wrap-styles">
+                Refly
+                智能伙伴可以在任意网页通过快捷键唤醒，你可以与智能伙伴便捷对话，无论完成阅读或写作任务，还是查询自己的历史数据，她都能轻松胜任
+              </span>
+            </p>
+          </div>
+        </div>
+        <div className="border rounded-lg rp-1 bg-elementGray border-border2 sm:rounded-xl sm:p-2">
+          <img
+            className="w-full mx-auto rounded-md shadow-heroImageInner"
+            src={FeaturesBigSearch}
+            width="1024"
+            height="504"
+            alt="Hero"
+          />
         </div>
       </div>
     </section>
