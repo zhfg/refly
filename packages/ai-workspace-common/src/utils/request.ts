@@ -1,59 +1,59 @@
-import { getServerOrigin } from "./url"
+import { getServerOrigin } from '@refly/utils/url';
 
-const TIMEOUT = 40000
+const TIMEOUT = 40000;
 const DEFAULT_HEADER = {
-  "Content-Type": "application/json",
-}
-const COOKIE_TOKEN_FIELD = "_refly_ai_sid"
+  'Content-Type': 'application/json',
+};
+const COOKIE_TOKEN_FIELD = '_refly_ai_sid';
 
 export class ApiErr {
-  err_no: number
+  err_no: number;
 
-  err_msg: string
+  err_msg: string;
 
-  origin: any // 业务原始错误对象
+  origin: any; // 业务原始错误对象
 
   constructor(err_msg: string, err_no?: number, origin?: any) {
-    this.err_no = err_no || -1
-    this.err_msg = err_msg
-    this.origin = origin
+    this.err_no = err_no || -1;
+    this.err_msg = err_msg;
+    this.origin = origin;
   }
 }
 
 export function getDataErr(res: any) {
-  const { err_no, message, err_msg } = res
-  if (err_no === 0 || message === "success") {
-    return null
+  const { err_no, message, err_msg } = res;
+  if (err_no === 0 || message === 'success') {
+    return null;
   }
 
-  let errNo = 0
-  let errMsg = "unknown"
+  let errNo = 0;
+  let errMsg = 'unknown';
 
   if (err_no) {
     // api_external 错误码处理
-    errNo = err_no
-    errMsg = err_msg
-  } else if (message === "error") {
+    errNo = err_no;
+    errMsg = err_msg;
+  } else if (message === 'error') {
     // password接口错误码处理
-    errNo = res?.data?.error_code || errNo
-    errMsg = res?.data?.description || message
+    errNo = res?.data?.error_code || errNo;
+    errMsg = res?.data?.description || message;
   }
-  return new ApiErr(errMsg, errNo)
+  return new ApiErr(errMsg, errNo);
 }
 
 export const abortablePromise = (target: Promise<any>, timeout: number) => {
   const racePromise = new Promise((resolve, reject) => {
     setTimeout(() => {
-      reject(new ApiErr("timeout"))
-    }, timeout)
-  })
-  return Promise.race([target, racePromise])
-}
+      reject(new ApiErr('timeout'));
+    }, timeout);
+  });
+  return Promise.race([target, racePromise]);
+};
 
 export function getAuthTokenFromCookie() {
-  const value = `; ${document.cookie}`
-  const parts = value.split(`; ${COOKIE_TOKEN_FIELD}=`) || []
-  return parts.length === 2 ? parts.pop()!.split(";").shift() : ""
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${COOKIE_TOKEN_FIELD}=`) || [];
+  return parts.length === 2 ? parts.pop()!.split(';').shift() : '';
 }
 
 export async function request<T>(
@@ -61,78 +61,78 @@ export async function request<T>(
   opt: any,
   timeout: number = TIMEOUT,
 ): Promise<[ApiErr | undefined, T | undefined, any?]> {
-  let handledUrl = url
-  opt.method = (opt.method || "GET").toUpperCase()
-  if (!url.includes("//")) {
-    handledUrl = url
+  let handledUrl = url;
+  opt.method = (opt.method || 'GET').toUpperCase();
+  if (!url.includes('//')) {
+    handledUrl = url;
   }
-  console.log("url is ", handledUrl)
+  console.log('url is ', handledUrl);
   // 获取 header
   opt.headers = {
     ...DEFAULT_HEADER,
     ...opt.headers,
-  }
+  };
 
-  const token = getAuthTokenFromCookie()
+  const token = getAuthTokenFromCookie();
   if (token) {
-    opt.headers.Authorization = `Bearer ${token}`
+    opt.headers.Authorization = `Bearer ${token}`;
   }
 
-  if (opt.method === "GET") {
-    handledUrl = queryJoin(handledUrl, opt.body || "")
-    delete opt.body
+  if (opt.method === 'GET') {
+    handledUrl = queryJoin(handledUrl, opt.body || '');
+    delete opt.body;
   }
 
-  if (["POST", "PUT"].includes(opt.method) && typeof opt.body === "object") {
-    opt.body = JSON.stringify(opt.body)
+  if (['POST', 'PUT'].includes(opt.method) && typeof opt.body === 'object') {
+    opt.body = JSON.stringify(opt.body);
   }
-  console.log("request opt", opt)
+  console.log('request opt', opt);
 
   try {
-    const BASEURL = getServerOrigin()
+    const BASEURL = getServerOrigin();
     const res = await fetch(`${BASEURL}${handledUrl}`, {
       ...opt,
-    })
+    });
 
-    const jsonRes = await res.json()
-    console.log("request res", jsonRes)
+    const jsonRes = await res.json();
+    console.log('request res', jsonRes);
     if (res?.status >= 200 && res?.status < 300) {
-      const body = jsonRes.data || jsonRes
+      const body = jsonRes.data || jsonRes;
       // const err = getDataErr(body);
-      return [undefined, body]
+      return [undefined, body];
     } else {
-      return [new ApiErr(jsonRes.data || jsonRes), undefined]
+      return [new ApiErr(jsonRes.data || jsonRes), undefined];
     }
   } catch (err: any) {
-    return [new ApiErr(err.message), undefined]
+    return [new ApiErr(err.message), undefined];
   }
 }
 
-export const queryJoin = (url = "", query: QUERY | string) => {
-  const connect = url.includes("?") ? "&" : "?"
-  let str = ""
-  if (typeof query === "object") {
-    str = queryStringify(query)
+export const queryJoin = (url = '', query: QUERY | string) => {
+  const connect = url.includes('?') ? '&' : '?';
+  let str = '';
+  if (typeof query === 'object') {
+    str = queryStringify(query);
   } else {
-    str = query
+    str = query;
   }
-  return `${url}${str ? connect + str : ""}`
-}
+  return `${url}${str ? connect + str : ''}`;
+};
 
 export const queryStringify = (
   query: QUERY,
   doNotUseEmpty = true, // 是否拼接空对象
 ) => {
-  let str = ""
-  Object.keys(query).forEach(key => {
+  let str = '';
+  Object.keys(query).forEach((key) => {
     if (doNotUseEmpty && !query[key]) {
-      return
+      return;
     }
-    str += `${str ? "&" : ""}${key}=${encodeURIComponent(query[key])}`
-  })
-  return str
-}
+    str += `${str ? '&' : ''}${key}=${encodeURIComponent(query[key])}`;
+  });
+  return str;
+};
 
 interface QUERY {
-  [key: string]: any
+  [key: string]: any;
 }

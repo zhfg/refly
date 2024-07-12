@@ -24,10 +24,8 @@ import { useNavigate } from "react-router-dom"
 import type { Digest } from "@refly/openapi-schema"
 import { IconTip } from "@refly/ai-workspace-common/components/dashboard/icon-tip"
 import { copyToClipboard } from "@refly/ai-workspace-common/utils"
-import {
-  getClientOrigin,
-  safeParseURL,
-} from "@refly/ai-workspace-common/utils/url"
+import { safeParseURL } from "@refly/ai-workspace-common/utils/url"
+import { getClientOrigin } from "@refly/utils/url"
 // stores
 import { useDigestArchiveStore } from "@refly/ai-workspace-common/stores/digest-archive"
 // components

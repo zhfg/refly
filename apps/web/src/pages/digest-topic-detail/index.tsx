@@ -27,10 +27,7 @@ import { Digest } from "@refly/openapi-schema"
 import getClient from "@refly/ai-workspace-common/requests/proxiedRequest"
 import { IconTip } from "@refly/ai-workspace-common/components/dashboard/icon-tip"
 import { copyToClipboard } from "@refly/ai-workspace-common/utils"
-import {
-  getClientOrigin,
-  safeParseURL,
-} from "@refly/ai-workspace-common/utils/url"
+import { getClientOrigin } from "@refly/utils/url"
 import { useDigestTopicStore } from "@refly/ai-workspace-common/stores/digest-topics"
 // styles
 import "./index.scss"

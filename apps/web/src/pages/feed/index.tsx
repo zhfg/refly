@@ -28,7 +28,7 @@ import { Feed as IFeed } from "@refly/openapi-schema"
 import "./index.scss"
 // fake data
 import { copyToClipboard } from "@refly/ai-workspace-common/utils"
-import { getClientOrigin } from "@refly/ai-workspace-common/utils/url"
+import { getClientOrigin } from "@refly/utils/url"
 import { safeParseJSON } from "@refly/ai-workspace-common/utils/parse"
 // components
 import { EmptyFeedStatus } from "@refly/ai-workspace-common/components/empty-feed-status"

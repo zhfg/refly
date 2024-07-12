@@ -1,6 +1,6 @@
 import { fetchStream } from '@refly-packages/ai-workspace-common/utils/fetch-stream';
 import { getAuthTokenFromCookie } from './request';
-import { getServerOrigin } from './url';
+import { getServerOrigin } from '@refly/utils/url';
 import { InvokeSkillRequest } from '@refly/openapi-schema';
 import { SkillEvent } from '@refly/common-types';
 

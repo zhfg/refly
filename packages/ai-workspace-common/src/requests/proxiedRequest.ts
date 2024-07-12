@@ -3,7 +3,7 @@ import * as requestModule from '@refly/openapi-schema';
 
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { getAuthTokenFromCookie } from '@refly-packages/ai-workspace-common/utils/request';
-import { getServerOrigin } from '../utils/url';
+import { getServerOrigin } from '@refly/utils/url';
 import { sendToBackground } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 
 createClient({ baseUrl: getServerOrigin() + '/v1' });
