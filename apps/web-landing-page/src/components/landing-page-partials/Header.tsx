@@ -41,8 +41,14 @@ function Header() {
         style={{ paddingLeft: 0, paddingRight: 30 }}>
         <div className="mr-4 shrink-0" style={{ height: 45 }}>
           {/* Logo */}
-          <Link to="/" className="block" aria-label="Cruip">
+          <Link
+            to="/"
+            className="flex flex-row items-center"
+            aria-label="Cruip">
             <img src={Logo} style={{ width: 35 }} />
+            <span style={{ fontSize: 16, fontWeight: "bold", marginLeft: 8 }}>
+              Refly
+            </span>
           </Link>
         </div>
 
