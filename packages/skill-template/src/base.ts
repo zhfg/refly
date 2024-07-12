@@ -28,10 +28,9 @@ export abstract class BaseSkill extends StructuredTool {
    * Emit a skill event.
    */
   emitEvent(data: Partial<SkillEvent>, config: SkillRunnableConfig) {
-    const { emitter, selectedSkill, currentSkill, spanId } = config?.configurable || {};
+    const { emitter, currentSkill, spanId } = config?.configurable || {};
 
-    // Don't emit events for scheduler when skill is specified
-    if (!emitter || (selectedSkill && this.name === 'scheduler')) {
+    if (!emitter) {
       return;
     }
 
@@ -58,18 +57,10 @@ export abstract class BaseSkill extends StructuredTool {
       skillDisplayName: this.displayName[config.configurable.locale || 'en'],
     };
 
-    // Ensure we get a new spanId for every skill call.
-    config.configurable.spanId = randomUUID();
+    // Ensure spanId is not empty.
+    config.configurable.spanId ??= randomUUID();
 
-    const runnable = this.toRunnable();
-
-    // We manually send start and end events in scheduler workflow.
-    // So don't send these events here.
-    if (this.name !== 'scheduler') {
-      this.emitEvent({ event: 'start' }, config);
-    }
-
-    const response = await runnable.invoke(input, {
+    const response = await this.toRunnable().invoke(input, {
       ...config,
       metadata: {
         ...config.metadata,
@@ -77,10 +68,6 @@ export abstract class BaseSkill extends StructuredTool {
         spanId: config.configurable.spanId,
       },
     });
-
-    if (this.name !== 'scheduler') {
-      this.emitEvent({ event: 'end' }, config);
-    }
 
     return response;
   }

@@ -1,3 +1,4 @@
+import { ChatOpenAI, OpenAIChatInput } from '@langchain/openai';
 import {
   CreateCollectionResponse,
   CreateResourceResponse,
@@ -16,6 +17,10 @@ export interface ReflyService {
   updateResource: (user: User, req: UpsertResourceRequest) => Promise<UpdateResourceResponse | null>;
   createCollection: (user: User, req: UpsertCollectionRequest) => Promise<CreateCollectionResponse | null>;
   updateCollection: (user: User, req: UpsertCollectionRequest) => Promise<UpdateCollectionResponse | null>;
+}
+
+export interface SkillEngineOptions {
+  defaultModel?: string;
 }
 
 export interface Logger {
@@ -42,5 +47,19 @@ export interface Logger {
 }
 
 export class SkillEngine {
-  constructor(public logger: Logger, public service: ReflyService) {}
+  constructor(public logger: Logger, public service: ReflyService, private options?: SkillEngineOptions) {
+    this.options = {
+      defaultModel: 'gpt-3.5-turbo',
+      ...options,
+    };
+  }
+
+  chatModel(params?: Partial<OpenAIChatInput>): ChatOpenAI {
+    return new ChatOpenAI({
+      model: this.options.defaultModel,
+      apiKey: process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY,
+      configuration: { baseURL: 'https://openrouter.ai/api/v1' },
+      ...params,
+    });
+  }
 }
