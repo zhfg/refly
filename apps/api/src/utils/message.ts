@@ -63,10 +63,11 @@ export class MessageAggregator {
 
   getMessages(param: {
     user: User;
+    convId: string;
     conversationPk: number;
     locale: string;
   }): CreateChatMessageInput[] {
-    const { user, conversationPk, locale } = param;
+    const { user, conversationPk, convId, locale } = param;
 
     return this.spanIdList.map((spanId) => {
       const { skillMeta, content, logs, structuredData } = this.data[spanId];
@@ -78,6 +79,7 @@ export class MessageAggregator {
         structuredData: JSON.stringify(structuredData),
         userId: user.id,
         uid: user.uid,
+        convId,
         conversationId: conversationPk,
         locale,
       };

@@ -416,10 +416,12 @@ export class SkillService {
             userId: user.id,
             uid: user.uid,
             conversationId: chatConv.id,
+            convId: chatConv.convId,
             locale: param.context.locale ?? user.outputLocale,
           },
           ...msgAggregator.getMessages({
             user,
+            convId: chatConv.convId,
             conversationPk: chatConv.id,
             locale: param.context.locale ?? user.outputLocale,
           }),

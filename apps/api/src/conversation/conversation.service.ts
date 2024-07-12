@@ -18,7 +18,7 @@ import { LlmService } from '../llm/llm.service';
 import { WeblinkService } from '../weblink/weblink.service';
 import { IterableReadableStream } from '@langchain/core/dist/utils/stream';
 import { BaseMessageChunk } from '@langchain/core/messages';
-import { genChatMessageID, genCollectionID, genConvID } from '@refly/utils';
+import { genChatMessageID, genConvID } from '@refly/utils';
 import { AigcService } from '../aigc/aigc.service';
 
 const LLM_SPLIT = '__LLM_RESPONSE__';
@@ -63,6 +63,7 @@ export class ConversationService {
           type: 'human',
           content: getUserQuestion('summary'),
           sources: '[]',
+          convId: conversation.convId,
           userId: user.id,
           uid: user.uid,
           conversationId: conversation.id,
@@ -77,6 +78,7 @@ export class ConversationService {
               metadata: JSON.parse(weblink.pageMeta || '{}'),
             },
           ]),
+          convId: conversation.convId,
           userId: user.id,
           uid: user.uid,
           conversationId: conversation.id,
@@ -97,6 +99,7 @@ export class ConversationService {
           type: 'human',
           content: content.title,
           sources: '[]',
+          convId: conversation.convId,
           userId: user.id,
           uid: user.uid,
           conversationId: conversation.id,
@@ -106,6 +109,7 @@ export class ConversationService {
           type: 'ai',
           content: content.content,
           sources: content.sources,
+          convId: conversation.convId,
           userId: user.id,
           uid: user.uid,
           conversationId: conversation.id,
@@ -277,6 +281,7 @@ export class ConversationService {
           userId: user.id,
           uid: user.uid,
           conversationId: conversation.id,
+          convId: conversation.convId,
           content: query,
           sources: '',
           // 每次提问完在 human message 上加一个提问的 filter，这样之后追问时可以 follow 这个 filter 规则
@@ -290,6 +295,7 @@ export class ConversationService {
           userId: user.id,
           uid: user.uid,
           conversationId: conversation.id,
+          convId: conversation.convId,
           content: taskRes.answer,
           sources: JSON.stringify(taskRes.sources),
           relatedQuestions: JSON.stringify(taskRes.relatedQuestions),

@@ -152,7 +152,9 @@ model ChatMessage {
   id                    Int         @id @default(autoincrement())
   /// Message id
   msgId                 String?     @default("") @map("msg_id")
-  /// Conversation PK
+  /// Conversation ID
+  convId                String      @default("") @map("conv_id")
+  /// Conversation PK (deprecated)
   conversationId        Int         @map("conversation_id")
   /// Message type
   type                  MessageType @map("type")
