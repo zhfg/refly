@@ -1,5 +1,5 @@
 import { Resource, Source } from '@refly/openapi-schema';
-import { safeParseURL } from '@refly-packages/ai-workspace-common/utils/url';
+import { safeParseURL } from '@refly/utils/url';
 import { List, Popover, Skeleton, Tag, Typography } from '@arco-design/web-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';

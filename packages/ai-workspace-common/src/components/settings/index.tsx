@@ -7,7 +7,7 @@ import { Helmet } from 'react-helmet';
 import './index.scss';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
-import { getCookieOrigin, getExtensionId } from '@refly/utils/url';
+import { getClientOrigin, getCookieOrigin, getExtensionId } from '@refly/utils/url';
 // components
 import { UILocaleList } from '@refly-packages/ai-workspace-common/components/ui-locale-list';
 import { IconDown } from '@arco-design/web-react/icon';
@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { OutputLocaleList } from '../output-locale-list';
 import { LOCALE } from '@refly/constants';
 import { localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/i18n';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 export const Settings = () => {
   const [token, updateCookie, deleteCookie] = useCookie('_refly_ai_sid');
@@ -34,7 +35,6 @@ export const Settings = () => {
         console.log('delete cookie');
         localStorage.removeItem('refly-user-profile');
         localStorage.removeItem('refly-local-settings');
-        userStore.resetState();
 
         // 给插件发消息
         chrome.runtime?.sendMessage(getExtensionId(), {
@@ -43,7 +43,14 @@ export const Settings = () => {
 
         deleteCookie();
         Cookies.remove('_refly_ai_sid', { domain: getCookieOrigin() });
-        navigate('/');
+
+        if (getRuntime() === 'web') {
+          window.location.href = getClientOrigin(true); // 没有登录，直接跳转到登录页
+        } else {
+          navigate('/');
+        }
+
+        userStore.resetState();
       },
       onConfirm() {},
     });

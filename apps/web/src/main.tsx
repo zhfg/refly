@@ -14,7 +14,7 @@ import { AppLayout } from "@/components/layout/index"
 import "@refly/ai-workspace-common/i18n/config"
 import { Spin } from "@arco-design/web-react"
 import { getEnv, setRuntime } from "@refly/ai-workspace-common/utils/env"
-import { useUserStore } from "../../../packages/ai-workspace-common/src/stores/user"
+import { useUserStore } from "@refly/ai-workspace-common/stores/user"
 
 setRuntime("web")
 // dev for disable sentry as it will overload console.log result worse dev experience
