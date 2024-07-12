@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from "react"
 import { Link } from "react-router-dom"
 import Logo from "@/assets/logo.svg"
+import { useUserStore } from "@refly/ai-workspace-common/stores/user"
 
 function Header() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
+  const userStore = useUserStore()
 
   const trigger = useRef<HTMLButtonElement>(null)
   const mobileNav = useRef<HTMLElement>(null)
@@ -55,18 +57,22 @@ function Header() {
           {/* Desktop sign in links */}
           <ul className="flex grow flex-wrap items-center justify-end gap-2">
             <li>
-              <Link
-                to="/signin"
+              <button
+                onClick={() => {
+                  userStore.setWaitingListModalVisible(true)
+                }}
                 className="text-textGray undefined undefined bg-elementGray flex h-[1.9rem] items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 text-sm font-semibold ease-in">
                 登录
-              </Link>
+              </button>
             </li>
             <li>
-              <Link
-                to="/signup"
+              <button
+                onClick={() => {
+                  userStore.setWaitingListModalVisible(true)
+                }}
                 className="undefined undefined flex h-[1.9rem] items-center gap-1.5 whitespace-nowrap rounded-md bg-black px-2.5 text-sm font-semibold text-white ease-in">
                 注册
-              </Link>
+              </button>
             </li>
           </ul>
         </nav>

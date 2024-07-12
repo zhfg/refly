@@ -4,8 +4,11 @@ import HeroImage from "@/assets/landing-page-images/hero-image-01.png"
 import AnimatedGradientText from "@/components/magicui/animated-gradient-text"
 import AnimatedShinyText from "@/components/magicui/animated-shiny-text"
 import { ArrowRightIcon } from "lucide-react"
+import { useUserStore } from "@refly/ai-workspace-common/stores/user"
 
 function HeroHome() {
+  const userStore = useUserStore()
+
   return (
     <section>
       <div className="relative mx-auto max-w-4xl px-4">
@@ -51,6 +54,9 @@ function HeroHome() {
               <div className="mb-5">
                 <div className="z-10 flex items-center justify-center">
                   <div
+                    onClick={() => {
+                      userStore.setWaitingListModalVisible(true)
+                    }}
                     className={cn(
                       "group rounded-full border border-black/5 bg-neutral-100 text-base text-white transition-all ease-in hover:cursor-pointer hover:bg-neutral-200 dark:border-white/5 dark:bg-neutral-900 dark:hover:bg-neutral-800",
                     )}>
@@ -77,13 +83,13 @@ function HeroHome() {
                 </span>
               </p>
             </div>
-            <div className="mx-auto max-w-xs sm:flex sm:max-w-none sm:justify-center">
+            <div
+              className="mx-auto max-w-xs sm:flex sm:max-w-none sm:justify-center"
+              onClick={() => userStore.setWaitingListModalVisible(true)}>
               <div data-aos="fade-up" data-aos-delay="600">
-                <a
-                  className="align-self-start false relative flex h-11 min-w-[112px] cursor-pointer flex-row items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-black px-6 text-sm font-semibold text-white transition-transform ease-in hover:scale-[1.02]"
-                  href="#0">
+                <button className="align-self-start false relative flex h-11 min-w-[112px] cursor-pointer flex-row items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-black px-6 text-sm font-semibold text-white transition-transform ease-in hover:scale-[1.02]">
                   加入等待 ⌛️ 列表！
-                </a>
+                </button>
               </div>
             </div>
           </div>
