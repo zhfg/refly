@@ -2033,8 +2033,11 @@ export const $SearchResult = {
       description: 'Search result title',
     },
     content: {
-      type: 'string',
-      description: 'Search result content',
+      type: 'array',
+      description: 'Search result content list with highlight marks',
+      items: {
+        type: 'string',
+      },
     },
     createdAt: {
       type: 'string',

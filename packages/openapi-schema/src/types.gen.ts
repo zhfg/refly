@@ -1385,9 +1385,9 @@ export type SearchResult = {
    */
   title: string;
   /**
-   * Search result content
+   * Search result content list with highlight marks
    */
-  content?: string;
+  content?: Array<string>;
   /**
    * Data creation time
    */

@@ -1,26 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
+import { extract } from '@node-rs/jieba';
 import { PrismaService } from '@/common/prisma.service';
 import { SearchRequest, SearchResult } from '@refly/openapi-schema';
 import { RAGService } from '@/rag/rag.service';
 
-function extractLines(document: string, words: string[]): string[] {
-  // Split the document into an array of lines using regex
-  const lines = document.split(/\r?\n/);
-
-  // Create a case-insensitive regular expression from the words
-  const regex = new RegExp(words.join('|'), 'i');
-
-  // Filter the lines that match the regex
-  return lines.filter((line) => regex.test(line));
+interface ProcessedSearchRequest extends SearchRequest {
+  tokens: string[];
 }
 
 @Injectable()
 export class SearchService {
   constructor(private prisma: PrismaService, private rag: RAGService) {}
 
-  async searchResources(user: User, req: SearchRequest): Promise<SearchResult[]> {
-    const tokens = req.query.toLowerCase().split(/\W+/);
+  preprocessSearchRequest(req: SearchRequest): ProcessedSearchRequest {
+    return {
+      ...req,
+      tokens: extract(req.query, 5).map((item) => item.keyword),
+    };
+  }
+
+  async emptySearchResources(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
     const results = await this.prisma.resource.findMany({
       select: {
         resourceId: true,
@@ -31,20 +31,6 @@ export class SearchService {
       },
       where: {
         uid: user.uid,
-        OR: [
-          ...tokens.map(
-            (token) =>
-              ({
-                title: { contains: token, mode: 'insensitive' },
-              } as Prisma.ResourceWhereInput),
-          ),
-          ...tokens.map(
-            (token) =>
-              ({
-                content: { contains: token, mode: 'insensitive' },
-              } as Prisma.ResourceWhereInput),
-          ),
-        ],
       },
       orderBy: { updatedAt: 'desc' },
       take: req.limit || 5,
@@ -54,15 +40,60 @@ export class SearchService {
       id: result.resourceId,
       domain: 'resource',
       title: result.title,
-      content: extractLines(result.content, tokens).join('\n\n'),
+      content: [result.content.slice(0, 50) + '...'], // TODO: truncate in sql to reduce traffic
       createdAt: result.createdAt.toJSON(),
       updatedAt: result.updatedAt.toJSON(),
     }));
   }
 
-  async searchCollections(user: User, req: SearchRequest): Promise<SearchResult[]> {
-    const tokens = req.query.toLowerCase().split(/\W+/);
-    const colls = await this.prisma.collection.findMany({
+  async searchResources(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+    const tokens = req.tokens;
+
+    if (tokens.length === 0) {
+      return this.emptySearchResources(user, req);
+    }
+
+    interface ResourceResult {
+      resource_id: string;
+      created_at: string;
+      updated_at: string;
+      title: string;
+      content: string;
+    }
+    const tokenList = tokens.join(' ');
+    const tokenOrList = tokens.join(' OR ');
+    const resources = await this.prisma.$queryRaw<ResourceResult[]>`
+      SELECT   resource_id,
+               created_at,
+               updated_at,
+               pgroonga_highlight_html(
+                 title, pgroonga_query_extract_keywords(${tokenList}::TEXT)
+               ) AS title,
+               pgroonga_highlight_html(
+                 content, pgroonga_query_extract_keywords(${tokenList}::TEXT)
+               ) AS content
+      FROM     resources
+      WHERE    uid = ${user.uid}
+      AND      (title &@~ ${tokenList}::TEXT OR content &@~ ${tokenOrList}::TEXT)
+      ORDER BY pgroonga_score(tableoid, ctid) DESC,
+               updated_at DESC
+      LIMIT    ${req.limit || 5}
+    `;
+
+    return resources.map((resource) => ({
+      id: resource.resource_id,
+      domain: 'resource',
+      title: resource.title,
+      content: resource.content
+        .split(/\r?\n+/)
+        .filter((line) => /<span\b[^>]*>(.*?)<\/span>/gi.test(line)),
+      createdAt: resource.created_at,
+      updatedAt: resource.updated_at,
+    }));
+  }
+
+  async emptySearchCollections(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+    const collections = await this.prisma.collection.findMany({
       select: {
         collectionId: true,
         title: true,
@@ -70,108 +101,151 @@ export class SearchService {
         createdAt: true,
         updatedAt: true,
       },
-      where: {
-        uid: user.uid,
-        OR: [
-          ...tokens.map(
-            (token) =>
-              ({
-                title: { contains: token, mode: 'insensitive' },
-              } as Prisma.CollectionWhereInput),
-          ),
-          ...tokens.map(
-            (token) =>
-              ({
-                description: { contains: token, mode: 'insensitive' },
-              } as Prisma.CollectionWhereInput),
-          ),
-        ],
-      },
+      where: { uid: user.uid, deletedAt: null },
       orderBy: { updatedAt: 'desc' },
       take: req.limit || 5,
     });
-
-    return colls.map((coll) => ({
-      id: coll.collectionId,
+    return collections.map((collection) => ({
+      id: collection.collectionId,
       domain: 'collection',
-      title: coll.title,
-      content: coll.description,
-      createdAt: coll.createdAt.toJSON(),
-      updatedAt: coll.updatedAt.toJSON(),
+      title: collection.title,
+      createdAt: collection.createdAt.toJSON(),
+      updatedAt: collection.updatedAt.toJSON(),
     }));
   }
 
-  async searchConversations(user: User, req: SearchRequest): Promise<SearchResult[]> {
-    const tokens = req.query.toLowerCase().split(/\W+/);
-    const messages = await this.prisma.chatMessage.findMany({
-      select: {
-        conversationId: true,
-        content: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-      where: {
-        userId: user.id,
-        OR: tokens.map((token) => ({ content: { contains: token, mode: 'insensitive' } })),
-      },
-      take: req.limit || 5,
-    });
-    const conversations = await this.prisma.conversation.findMany({
-      where: {
-        userId: user.id,
-        id: {
-          in: messages.map((message) => message.conversationId),
-        },
-      },
-    });
-    const convMap = new Map(conversations.map((conversation) => [conversation.id, conversation]));
+  async searchCollections(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+    const tokens = req.tokens;
 
-    return messages
-      .map((message) => {
-        const conv = convMap.get(message.conversationId);
-        return conv
-          ? ({
-              id: conv.convId,
-              domain: 'conversation',
-              title: conv.title,
-              content: message.content,
-              createdAt: message.createdAt.toJSON(),
-              updatedAt: message.updatedAt.toJSON(),
-            } as SearchResult)
-          : null;
-      })
-      .filter((res) => res);
+    if (tokens.length === 0) {
+      return this.emptySearchCollections(user, req);
+    }
+
+    interface CollectionResult {
+      collection_id: string;
+      created_at: string;
+      updated_at: string;
+      title: string;
+      description: string;
+    }
+    const tokenList = tokens.join(' ');
+    const tokenOrList = tokens.join(' OR ');
+    const colls = await this.prisma.$queryRaw<CollectionResult[]>`
+      SELECT   collection_id,
+               created_at,
+               updated_at,
+               pgroonga_highlight_html(
+                 title, pgroonga_query_extract_keywords(${tokenList}::TEXT)
+               ) AS title,
+               pgroonga_highlight_html(
+                 description, pgroonga_query_extract_keywords(${tokenList}::TEXT)
+               ) AS description
+      FROM     collections
+      WHERE    uid = ${user.uid}
+      AND      (title &@~ ${tokenOrList}::TEXT OR description &@~ ${tokenOrList}::TEXT)
+      ORDER BY pgroonga_score(tableoid, ctid) DESC,
+               updated_at DESC
+      LIMIT    ${req.limit || 5}
+    `;
+
+    return colls.map((coll) => ({
+      id: coll.collection_id,
+      domain: 'collection',
+      title: coll.title,
+      content: [coll.description],
+      createdAt: coll.created_at,
+      updatedAt: coll.updated_at,
+    }));
   }
 
-  async searchSkills(user: User, req: SearchRequest): Promise<SearchResult[]> {
-    const tokens = req.query.toLowerCase().split(/\W+/);
-    const skills = await this.prisma.skillInstance.findMany({
+  async emptySearchConversations(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+    const conversations = await this.prisma.conversation.findMany({
       select: {
-        skillId: true,
-        displayName: true,
+        convId: true,
+        title: true,
+        lastMessage: true,
         createdAt: true,
         updatedAt: true,
       },
-      where: {
-        uid: user.uid,
-        OR: [
-          ...tokens.map(
-            (token) =>
-              ({
-                displayName: { contains: token, mode: 'insensitive' },
-              } as Prisma.SkillInstanceWhereInput),
-          ),
-          ...tokens.map(
-            (token) =>
-              ({
-                skillName: { contains: token, mode: 'insensitive' },
-              } as Prisma.SkillInstanceWhereInput),
-          ),
-        ],
-      },
+      where: { userId: user.id },
+      orderBy: { updatedAt: 'desc' },
       take: req.limit || 5,
     });
+    return conversations.map((conversation) => ({
+      id: conversation.convId,
+      domain: 'conversation',
+      title: conversation.title,
+      content: [conversation.lastMessage],
+      createdAt: conversation.createdAt.toJSON(),
+      updatedAt: conversation.updatedAt.toJSON(),
+    }));
+  }
 
+  async searchConversations(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+    const tokens = req.tokens;
+
+    if (tokens.length === 0) {
+      return this.emptySearchConversations(user, req);
+    }
+
+    interface MessageResult {
+      conversation_id: number;
+      content: string;
+    }
+    const tokenList = tokens.join(' ');
+    const tokenOrList = tokens.join(' OR ');
+    const messages = await this.prisma.$queryRaw<MessageResult[]>`
+      SELECT   conversation_id,
+               pgroonga_highlight_html(
+                 content, pgroonga_query_extract_keywords(${tokenList}::TEXT)
+               ) AS content
+      FROM     chat_messages
+      WHERE    user_id = ${user.id}
+      AND      content &@~ ${tokenOrList}::TEXT
+      ORDER BY pgroonga_score(tableoid, ctid) DESC
+    `;
+
+    interface ConversationResult {
+      id: number;
+      conv_id: string;
+      title: string;
+      created_at: string;
+      updated_at: string;
+    }
+    const ids = [...new Set(messages.map((message) => message.conversation_id))];
+    const conversations = await this.prisma.$queryRaw<ConversationResult[]>`
+      SELECT   id,
+               conv_id,
+               created_at,
+               updated_at,
+               pgroonga_highlight_html(
+                 title, pgroonga_query_extract_keywords(${tokenList}::TEXT)
+               ) AS title
+      FROM     conversations
+      WHERE    user_id = ${user.id}
+      AND      id IN (${Prisma.join(ids)})
+      ORDER BY updated_at DESC
+      LIMIT    ${req.limit || 5}
+    `;
+
+    return conversations.map((conversation) => ({
+      id: conversation.conv_id,
+      domain: 'conversation',
+      title: conversation.title,
+      content: messages
+        .filter((message) => message.conversation_id === conversation.id)
+        .map((message) => message.content),
+      createdAt: conversation.created_at,
+      updatedAt: conversation.updated_at,
+    }));
+  }
+
+  async emptySearchSkills(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+    const skills = await this.prisma.skillInstance.findMany({
+      where: { uid: user.uid, deletedAt: null },
+      orderBy: { updatedAt: 'desc' },
+      take: req.limit || 5,
+    });
     return skills.map((skill) => ({
       id: skill.skillId,
       domain: 'skill',
@@ -181,20 +255,61 @@ export class SearchService {
     }));
   }
 
+  async searchSkills(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+    const tokens = req.tokens;
+
+    if (tokens.length === 0) {
+      return this.emptySearchSkills(user, req);
+    }
+
+    interface SkillResult {
+      skill_id: string;
+      created_at: string;
+      updated_at: string;
+      content: string;
+    }
+    const tokenList = tokens.join(' ');
+    const tokenOrList = tokens.join(' OR ');
+    const skills = await this.prisma.$queryRaw<SkillResult[]>`
+      SELECT   skill_id,
+               created_at,
+               updated_at,
+               pgroonga_highlight_html(
+                 display_name, pgroonga_query_extract_keywords(${tokenList}::TEXT)
+               ) AS content
+      FROM     skill_instances
+      WHERE    uid = ${user.uid}
+      AND      deleted_at IS NULL
+      AND      display_name &@~ ${tokenOrList}::TEXT
+      ORDER BY pgroonga_score(tableoid, ctid) DESC,
+               updated_at DESC
+      LIMIT    ${req.limit || 5}
+    `;
+
+    return skills.map((skill) => ({
+      id: skill.skill_id,
+      domain: 'skill',
+      title: skill.content,
+      createdAt: skill.created_at,
+      updatedAt: skill.updated_at,
+    }));
+  }
+
   async search(user: User, req: SearchRequest): Promise<SearchResult[]> {
     req.domains ||= ['resource', 'collection', 'conversation', 'skill'];
+    const processedReq = this.preprocessSearchRequest(req);
 
     const results = await Promise.all(
       req.domains.map((domain) => {
         switch (domain) {
           case 'resource':
-            return this.searchResources(user, req);
+            return this.searchResources(user, processedReq);
           case 'collection':
-            return this.searchCollections(user, req);
+            return this.searchCollections(user, processedReq);
           case 'conversation':
-            return this.searchConversations(user, req);
+            return this.searchConversations(user, processedReq);
           case 'skill':
-            return this.searchSkills(user, req);
+            return this.searchSkills(user, processedReq);
           default:
             return [] as SearchResult[];
         }
