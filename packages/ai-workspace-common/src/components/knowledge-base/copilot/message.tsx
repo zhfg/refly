@@ -197,7 +197,7 @@ export const AssistantMessage = (props: {
                   }}
                 />
               ) : null}
-              {isLastSession && (relatedQuestions || []).length > 0 ? (
+              {(relatedQuestions || []).length > 0 ? (
                 <div className="ai-copilot-related-question-container">
                   {(relatedQuestions || [])?.length > 0 ? (
                     <div className="session-title-icon">
