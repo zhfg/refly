@@ -75,6 +75,11 @@
       "reviewCategory": "apps"
     },
     {
+      "packageName": "@refly/web-landing-page",
+      "projectFolder": "apps/web-landing-page",
+      "reviewCategory": "apps"
+    },
+    {
       "packageName": "@refly/extension-v2",
       "projectFolder": "apps/extension-wxt",
       "reviewCategory": "apps"

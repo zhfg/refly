@@ -387,17 +387,21 @@ export class SkillService {
       { ...config, version: 'v2' },
     )) {
       const runMeta = event.metadata as SkillRunnableMeta;
+      const chunk: AIMessageChunk = event.data?.chunk ?? event.data?.output;
+
+      // Ignore empty or tool call chunks
+      if (!chunk?.content || chunk?.tool_call_chunks?.length > 0) {
+        continue;
+      }
+
       switch (event.event) {
         case 'on_chat_model_stream':
-          const chunk: AIMessageChunk = event.data?.chunk;
-          if (chunk?.content && chunk?.tool_call_chunks?.length === 0) {
-            writeSSEResponse(res, {
-              event: 'stream',
-              ...pick(runMeta, ['spanId', 'skillId', 'skillName', 'skillDisplayName']),
-              content:
-                typeof chunk.content === 'string' ? chunk.content : JSON.stringify(chunk.content),
-            });
-          }
+          writeSSEResponse(res, {
+            event: 'stream',
+            ...pick(runMeta, ['spanId', 'skillId', 'skillName', 'skillDisplayName']),
+            content:
+              typeof chunk.content === 'string' ? chunk.content : JSON.stringify(chunk.content),
+          });
           break;
         case 'on_chat_model_end':
           msgAggregator.setContent(runMeta, event.data.output.content);

@@ -14,7 +14,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 // 类型
 import { Resource } from '@refly/openapi-schema';
 import { useEffect, useState } from 'react';
-import { safeParseURL } from '@refly-packages/ai-workspace-common/utils/url';
+import { safeParseURL } from '@refly/utils/url';
 import { useListenToSelection } from '@refly-packages/ai-workspace-common/hooks/use-listen-to-selection';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 

@@ -23,12 +23,14 @@ export interface UserState {
 
   // login modal
   loginModalVisible?: boolean;
+  waitingListModalVisible?: boolean; // 前期处理
 
   // method
   setIsCheckingLoginStatus: (val: boolean) => void;
   setUserProfile: (val?: UserSettings) => void;
   setToken: (val?: string) => void;
   setLoginModalVisible: (val: boolean) => void;
+  setWaitingListModalVisible: (val: boolean) => void;
   setLocalSettings: (val: LocalSettings) => void;
   setRuntime: (val: IRuntime) => void;
   resetState: () => void;
@@ -61,6 +63,7 @@ export const defaultState = {
   token: '',
   runtime: 'web' as IRuntime,
   loginModalVisible: false,
+  waitingListModalVisible: false,
   localSettings: { ...defaultLocalSettings }, // 默认使用浏览器的 navigator 获取语言，插件里面使用 chrome.i18n.detectLanguage
 };
 
@@ -72,6 +75,7 @@ export const useUserStore = create<UserState>()(
     setUserProfile: (val?: UserSettings) => set((state) => ({ ...state, userProfile: val })),
     setToken: (val?: string) => set((state) => ({ ...state, token: val })),
     setLoginModalVisible: (val: boolean) => set((state) => ({ ...state, loginModalVisible: val })),
+    setWaitingListModalVisible: (val: boolean) => set((state) => ({ ...state, waitingListModalVisible: val })),
     setLocalSettings: (val: LocalSettings) => set((state) => ({ ...state, localSettings: val })),
     setRuntime: (val: IRuntime) => set((state) => ({ ...state, runtime: val })),
     resetState: () => set((state) => ({ ...state, ...defaultState })),

@@ -1,68 +1,62 @@
-import { LOCALE } from "@refly/constants"
-import { time } from "@refly-packages/ai-workspace-common/utils/time"
+import { LOCALE } from '@refly/constants';
+import { time } from '@refly-packages/ai-workspace-common/utils/time';
 
 // styles
-import "./index.scss"
-import { IconBook, IconBulb, IconCompass } from "@arco-design/web-react/icon"
-import { Tag, Typography } from "@arco-design/web-react"
+import './index.scss';
+import { IconBook, IconBulb, IconCompass } from '@arco-design/web-react/icon';
+import { Tag, Typography } from '@arco-design/web-react';
 
-import { Resource } from "@refly/openapi-schema"
+import { Resource } from '@refly/openapi-schema';
 // 类型
-import { IndexStatus } from "@refly/openapi-schema"
+import { IndexStatus } from '@refly/openapi-schema';
 // 请求
-import { safeParseURL } from "@refly-packages/ai-workspace-common/utils/url"
-import { Markdown } from "../markdown"
-import classNames from "classnames"
-import { useNavigate } from "@refly-packages/ai-workspace-common/utils/router"
+import { safeParseURL } from '@refly/utils/url';
+import { Markdown } from '../markdown';
+import classNames from 'classnames';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 
 export const ResourceItem = (props: {
-  item: Partial<Resource>
-  index: number
-  showUtil?: boolean
-  showDesc?: boolean
-  showBtn?: { summary: boolean; markdown: boolean; externalOrigin: boolean }
-  btnProps?: { defaultActiveKeys: string[] }
-  handleItemClick: ({
-    resourceId,
-    collectionId,
-  }: {
-    resourceId: string
-    collectionId: string
-  }) => void
+  item: Partial<Resource>;
+  index: number;
+  showUtil?: boolean;
+  showDesc?: boolean;
+  showBtn?: { summary: boolean; markdown: boolean; externalOrigin: boolean };
+  btnProps?: { defaultActiveKeys: string[] };
+  handleItemClick: ({ resourceId, collectionId }: { resourceId: string; collectionId: string }) => void;
 }) => {
   const {
     item,
     index,
-    btnProps = { defaultActiveKeys: ["markdown"] },
+    btnProps = { defaultActiveKeys: ['markdown'] },
     showUtil = true,
     showDesc = true,
     showBtn = { summary: true, markdown: true, externalOrigin: true },
-  } = props
-  const navigate = useNavigate()
+  } = props;
+  const navigate = useNavigate();
 
   const getIndexStatusText = (indexStatus?: IndexStatus) => {
     switch (indexStatus) {
-      case "processing":
-        return "处理中"
-      case "failed":
-        return "处理失败"
+      case 'processing':
+        return '处理中';
+      case 'failed':
+        return '处理失败';
       default: {
-        return ""
+        return '';
       }
     }
-  }
+  };
 
   const getIndexStatusColor = (indexStatus?: IndexStatus) => {
     switch (indexStatus) {
-      case "processing":
-        return "orange"
-      case "failed":
-        return "red"
+      case 'processing':
+        return 'orange';
+      case 'failed':
+        return 'red';
       default: {
-        return ""
+        return '';
       }
     }
-  }
+  };
 
   return (
     <div
@@ -72,8 +66,9 @@ export const ResourceItem = (props: {
         props?.handleItemClick({
           collectionId: item?.collectionId as string,
           resourceId: item?.resourceId as string,
-        })
-      }}>
+        });
+      }}
+    >
       <div className="knowledge-base-directory-site-intro">
         <div className="site-intro-icon">
           <img
@@ -83,10 +78,7 @@ export const ResourceItem = (props: {
         </div>
         <div className="site-intro-content">
           <p className="site-intro-site-name">{item.data?.title}</p>
-          <a
-            className="site-intro-site-url"
-            href={item.data?.url}
-            target="_blank">
+          <a className="site-intro-site-url" href={item.data?.url} target="_blank">
             {item.data?.url}
           </a>
         </div>
@@ -95,35 +87,36 @@ export const ResourceItem = (props: {
       <div className="knowledge-base-directory-action">
         {showBtn?.summary ? (
           <div
-            className={classNames("action-summary", {
-              active: btnProps?.defaultActiveKeys?.includes("summary"),
-            })}>
+            className={classNames('action-summary', {
+              active: btnProps?.defaultActiveKeys?.includes('summary'),
+            })}
+          >
             <IconBulb />
             <span>AI Summary</span>
           </div>
         ) : null}
         {showBtn?.markdown ? (
           <div
-            className={classNames("action-markdown-content", {
-              active: btnProps?.defaultActiveKeys?.includes("markdown"),
-            })}>
+            className={classNames('action-markdown-content', {
+              active: btnProps?.defaultActiveKeys?.includes('markdown'),
+            })}
+          >
             <IconBook
               onClick={() => {
-                navigate(
-                  `/knowledge-base?kbId=${item?.collectionId}&resId=${item?.resourceId}`,
-                )
+                navigate(`/knowledge-base?kbId=${item?.collectionId}&resId=${item?.resourceId}`);
               }}
             />
           </div>
         ) : null}
         {showBtn?.externalOrigin ? (
           <div
-            className={classNames("action-external-origin-website", {
-              active: btnProps?.defaultActiveKeys?.includes("summary"),
-            })}>
+            className={classNames('action-external-origin-website', {
+              active: btnProps?.defaultActiveKeys?.includes('summary'),
+            })}
+          >
             <IconCompass
               onClick={() => {
-                window.open(item?.data?.url, "_blank")
+                window.open(item?.data?.url, '_blank');
               }}
             />
           </div>
@@ -137,10 +130,7 @@ export const ResourceItem = (props: {
               .fromNow()}
           </span>
           {getIndexStatusText(item?.indexStatus) ? (
-            <Tag
-              color={getIndexStatusColor(item?.indexStatus)}
-              style={{ marginLeft: 8 }}
-              size="small">
+            <Tag color={getIndexStatusColor(item?.indexStatus)} style={{ marginLeft: 8 }} size="small">
               {getIndexStatusText(item?.indexStatus)}
             </Tag>
           ) : null}
@@ -154,10 +144,10 @@ export const ResourceItem = (props: {
         ))}
       </div> */}
       {showDesc ? (
-        <div style={{ maxHeight: 200, overflowY: "scroll" }}>
-          <Markdown content={item?.description || ""} />
+        <div style={{ maxHeight: 200, overflowY: 'scroll' }}>
+          <Markdown content={item?.description || ''} />
         </div>
       ) : null}
     </div>
-  )
-}
+  );
+};
