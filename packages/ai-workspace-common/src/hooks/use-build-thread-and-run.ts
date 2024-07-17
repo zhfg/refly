@@ -178,7 +178,7 @@ export const useBuildThreadAndRun = () => {
         locale: localSettings?.outputLocale || LOCALE.EN,
       },
       convId: conv?.convId || '',
-      ...(conv?.messages?.length > 0 ? {} : { createConvParam: { ...conv } }),
+      ...(isFollowUpAsk ? {} : { createConvParam: { ...conv } }),
     };
     taskStore.setTask(task);
     // 开始提问
