@@ -180,6 +180,7 @@ export const AssistantMessage = (props: {
                 <Divider
                   style={{
                     borderBottomStyle: 'dashed',
+                    margin: '12px 0',
                   }}
                 />
               ) : null}
@@ -192,6 +193,7 @@ export const AssistantMessage = (props: {
                 <Divider
                   style={{
                     borderBottomStyle: 'dashed',
+                    margin: '12px 0',
                   }}
                 />
               ) : null}
