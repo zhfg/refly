@@ -1,9 +1,4 @@
 import React from "react"
-import FeaturesImport from "@/assets/landing-page-images/features-import.png"
-import FeaturesBigSearch from "@/assets/landing-page-images/features-big-search.png"
-import FeaturesAgent from "@/assets/landing-page-images/features-agent.png"
-import FeaturesPrivateContext from "@/assets/landing-page-images/features-private-context.png"
-import FeaturesKnowledgeBase from "@/assets/landing-page-images/features-knowledgebase.png"
 
 function FeaturesBlocks() {
   return (
@@ -34,7 +29,7 @@ function FeaturesBlocks() {
         <div className="rp-1 bg-elementGray border-border2 rounded-lg border sm:rounded-xl sm:p-2">
           <img
             className="shadow-heroImageInner mx-auto w-full rounded-md"
-            src={FeaturesKnowledgeBase}
+            src="https://static.refly.ai/landing/features-knowledgebase.png"
             width="1024"
             height="504"
             alt="Hero"
@@ -68,7 +63,7 @@ function FeaturesBlocks() {
         <div className="bg-elementGray border-border2 rounded-lg border p-1 sm:rounded-xl sm:p-2">
           <img
             className="shadow-heroImageInner mx-auto w-full rounded-md"
-            src={FeaturesImport}
+            src="https://static.refly.ai/landing/features-import.png"
             width="1024"
             height="504"
             alt="Hero"
@@ -102,7 +97,7 @@ function FeaturesBlocks() {
         <div className="rp-1 bg-elementGray border-border2 rounded-lg border sm:rounded-xl sm:p-2">
           <img
             className="shadow-heroImageInner mx-auto w-full rounded-md"
-            src={FeaturesAgent}
+            src="https://static.refly.ai/landing/features-agent.png"
             width="1024"
             height="504"
             alt="Hero"
@@ -135,7 +130,7 @@ function FeaturesBlocks() {
         <div className="bg-elementGray border-border2 rounded-lg border p-1 sm:rounded-xl sm:p-2">
           <img
             className="shadow-heroImageInner mx-auto w-full rounded-md"
-            src={FeaturesPrivateContext}
+            src="https://static.refly.ai/landing/features-private-context.png"
             width="1024"
             height="504"
             alt="Hero"
@@ -168,7 +163,7 @@ function FeaturesBlocks() {
         <div className="rp-1 bg-elementGray border-border2 rounded-lg border sm:rounded-xl sm:p-2">
           <img
             className="shadow-heroImageInner mx-auto w-full rounded-md"
-            src={FeaturesBigSearch}
+            src="https://static.refly.ai/landing/features-big-search.png"
             width="1024"
             height="504"
             alt="Hero"

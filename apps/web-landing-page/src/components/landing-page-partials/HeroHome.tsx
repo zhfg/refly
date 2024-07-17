@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils"
 
-import HeroImage from "@/assets/landing-page-images/hero-image-01.png"
 import AnimatedGradientText from "@/components/magicui/animated-gradient-text"
 import ShimmerButton from "@/components/magicui/shimmer-button"
 import AnimatedShinyText from "@/components/magicui/animated-shiny-text"
@@ -101,7 +100,7 @@ function HeroHome() {
             <div className="bg-elementGray border-border2 rounded-lg border p-1 sm:rounded-xl sm:p-2">
               <img
                 className="shadow-heroImageInner mx-auto w-full rounded-md"
-                src={HeroImage}
+                src="https://static.refly.ai/landing/hero-image-01.png"
                 width="1024"
                 height="504"
                 alt="Hero"
