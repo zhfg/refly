@@ -7,6 +7,7 @@ import {
   Modal,
   Divider,
   Typography,
+  Spin,
 } from "@arco-design/web-react"
 import React, { useEffect, useRef, useState } from "react"
 
@@ -33,6 +34,8 @@ export const WaitingListModal = (props: {
   from?: string
 }) => {
   const userStore = useUserStore()
+  const [loading, setLoading] = useState(true)
+  const timerRef = useRef<number>()
   const navigate = useNavigate()
   const loginWindowRef = useRef<Window | null>()
   const [token, updateCookie, deleteCookie] = useCookie("_refly_ai_sid")
@@ -100,6 +103,18 @@ export const WaitingListModal = (props: {
     }
   }, [])
 
+  useEffect(() => {
+    if (userStore.waitingListModalVisible && loading) {
+      timerRef.current = setTimeout(() => {
+        setLoading(false)
+      }, 2000)
+    }
+
+    return () => {
+      clearTimeout(timerRef.current)
+    }
+  }, [userStore?.waitingListModalVisible, loading])
+
   // props
   let modalProps: any = {}
 
@@ -129,24 +144,26 @@ export const WaitingListModal = (props: {
       }}
       style={{ width: "60%", background: "#fcfcf9", minHeight: 407 }}
       onCancel={() => userStore.setWaitingListModalVisible(false)}>
-      <div className="login-container" style={{ minHeight: 407 }}>
-        <div
-          id="getWaitlistContainer"
-          className="flex justify-center align-middle"
-          data-waitlist_id="18614"
-          data-widget_type="WIDGET_1"></div>
-        <Helmet>
-          <link
-            rel="stylesheet"
-            type="text/css"
-            id="getwaitlist-css"
-            href="https://prod-waitlist-widget.s3.us-east-2.amazonaws.com/getwaitlist.min.css"
-          />
-          <script
-            id="getwaitlist-js"
-            src="https://prod-waitlist-widget.s3.us-east-2.amazonaws.com/getwaitlist.min.js"></script>
-        </Helmet>
-      </div>
+      <Spin loading={loading} tip="加载中，请稍后..." style={{ width: "100%" }}>
+        <div className="login-container" style={{ minHeight: 407 }}>
+          <div
+            id="getWaitlistContainer"
+            className="flex justify-center align-middle"
+            data-waitlist_id="18614"
+            data-widget_type="WIDGET_1"></div>
+          <Helmet>
+            <link
+              rel="stylesheet"
+              type="text/css"
+              id="getwaitlist-css"
+              href="https://prod-waitlist-widget.s3.us-east-2.amazonaws.com/getwaitlist.min.css"
+            />
+            <script
+              id="getwaitlist-js"
+              src="https://prod-waitlist-widget.s3.us-east-2.amazonaws.com/getwaitlist.min.js"></script>
+          </Helmet>
+        </div>
+      </Spin>
     </Modal>
   )
 }

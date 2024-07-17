@@ -10,8 +10,6 @@ import Newsletter from "@/components/landing-page-partials/Newsletter"
 import Banner from "@/components/landing-page-partials/Banner"
 import Footer from "@/components/landing-page-partials/Footer"
 import { useUserStore } from "@refly/ai-workspace-common/stores/user"
-// import { LoginModal } from "@refly/ai-workspace-common/components/login-modal"
-import { WaitingListModal } from "@/components/waiting-list-modal"
 
 function Home() {
   const userStore = useUserStore()
@@ -40,7 +38,6 @@ function Home() {
 
       {/*  Site footer */}
       <Footer />
-      <WaitingListModal />
     </div>
   )
 }

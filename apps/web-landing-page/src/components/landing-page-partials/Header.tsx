@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from "react"
 import { Link } from "react-router-dom"
 import Logo from "@/assets/logo.svg"
 import { useUserStore } from "@refly/ai-workspace-common/stores/user"
+import { getClientOrigin } from "@refly/utils/url"
+import { IENV, getEnv } from "@refly/utils/env"
 
 function Header() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
@@ -9,6 +11,7 @@ function Header() {
 
   const trigger = useRef<HTMLButtonElement>(null)
   const mobileNav = useRef<HTMLElement>(null)
+  const isDev = getEnv() === IENV.DEVELOPMENT
 
   // close the mobile menu on click outside
   useEffect(() => {
@@ -74,6 +77,17 @@ function Header() {
                 注册
               </button>
             </li>
+            {isDev ? (
+              <li>
+                <button
+                  onClick={() => {
+                    userStore.setLoginModalVisible(true)
+                  }}
+                  className="undefined undefined flex h-[1.9rem] items-center gap-1.5 whitespace-nowrap rounded-md bg-black px-2.5 text-sm font-semibold text-white ease-in">
+                  本地登录
+                </button>
+              </li>
+            ) : null}
           </ul>
         </nav>
       </div>

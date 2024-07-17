@@ -8,6 +8,8 @@ import Privacy from "@/pages/pravicy"
 import Terms from "@/pages/terms"
 import Home from "@/pages/Home"
 import { Helmet } from "react-helmet"
+import { LoginModal } from "@refly/ai-workspace-common/components/login-modal"
+import { WaitingListModal } from "@/components/waiting-list-modal"
 
 // utils
 import { safeParseJSON } from "@refly/ai-workspace-common/utils/parse"
@@ -76,6 +78,8 @@ export const AppRouter = () => {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
       </Routes>
+      <WaitingListModal />
+      <LoginModal />
     </>
   )
 }

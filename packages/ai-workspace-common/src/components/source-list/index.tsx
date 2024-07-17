@@ -35,16 +35,14 @@ const SourceItem = ({ source, index }: { source: Source; index: number }) => {
       getPopupContainer={getPopupContainer}
       content={<SourceDetailContent source={source} index={index} />}
     >
-      <div className="relative flex flex-col gap-2 px-3 py-3 text-xs rounded-lg source-list-item" key={index}>
+      <div className="relative flex flex-col text-xs rounded-lg source-list-item" key={index}>
         <div className="overflow-hidden font-medium break-words text-ellipsis whitespace-nowrap text-zinc-950">
-          {source?.metadata?.title}
+          {index + 1} · {source?.metadata?.title}
+        </div>
+        <div className="flex-1 pl-2 overflow-hidden">
+          <div className="w-full overflow-hidden break-all text-ellipsis whitespace-nowrap text-zinc-400">{domain}</div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex-1 overflow-hidden">
-            <div className="w-full overflow-hidden break-all text-ellipsis whitespace-nowrap text-zinc-400">
-              {index + 1} - {domain}
-            </div>
-          </div>
           <div className="flex items-center flex-none">
             <img
               className="w-3 h-3"
@@ -70,6 +68,13 @@ const ViewMoreItem = ({ sources = [], extraCnt = 0 }: { sources: Source[]; extra
         knowledgeBaseStore.updateSourceListModalVisible(true);
       }}
     >
+      <div className="flex items-center gap-2">
+        <div className="flex-1 overflow-hidden">
+          <div className="w-full overflow-hidden font-medium break-all text-ellipsis whitespace-nowrap text-zinc-400 text-zinc-950">
+            查看更多 {extraCnt} 来源
+          </div>
+        </div>
+      </div>
       <div className="flex flex-wrap items-center gap-2 font-medium text-zinc-950">
         {sources?.map((item, index) => {
           const url = item?.metadata?.source;
@@ -84,13 +89,6 @@ const ViewMoreItem = ({ sources = [], extraCnt = 0 }: { sources: Source[]; extra
             />
           );
         })}
-      </div>
-      <div className="flex items-center gap-2">
-        <div className="flex-1 overflow-hidden">
-          <div className="w-full overflow-hidden font-medium break-all text-ellipsis whitespace-nowrap text-zinc-400 text-zinc-950">
-            查看更多 {extraCnt} 来源
-          </div>
-        </div>
       </div>
     </div>
   );
