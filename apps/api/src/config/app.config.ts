@@ -47,4 +47,7 @@ export default () => ({
   rag: {
     jinaToken: process.env.JINA_TOKEN,
   },
+  skill: {
+    defaultModel: process.env.REFLY_DEFAULT_MODEL || 'gpt-3.5-turbo',
+  },
 });

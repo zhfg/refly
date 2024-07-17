@@ -41,15 +41,15 @@ export const SelectedContentList = (props: SelectedContentListProps) => {
       <div className="selected-content-hint-item">
         <div className="selected-content-left-hint">
           <IconRightCircle style={{ color: 'rgba(0, 0, 0, .6)' }} />
-          <span>{t('loggedHomePage.homePage.selectedContent.title')}</span>
+          <span>{t('extension.loggedHomePage.homePage.selectedContent.title')}</span>
         </div>
         <div className="selected-content-right-hint">
           {marks?.length > 0 ? (
             <span onClick={() => handleRemoveAll()} style={{ marginRight: 12 }}>
-              {t('loggedHomePage.homePage.selectedContent.clear')}
+              {t('extension.loggedHomePage.homePage.selectedContent.clear')}
             </span>
           ) : null}
-          <span onClick={() => handleExit()}>{t('loggedHomePage.homePage.selectedContent.exit')}</span>
+          <span onClick={() => handleExit()}>{t('extension.loggedHomePage.homePage.selectedContent.exit')}</span>
         </div>
       </div>
       <div className="selected-content-list-container">
@@ -65,7 +65,7 @@ export const SelectedContentList = (props: SelectedContentListProps) => {
         {marks.length === 0 ? (
           <div className="empty-cover-container">
             <img src={EmptySVG} className="empty-cover" style={limitContainer ? { width: 60 } : { width: 100 }} />
-            <div>{t('loggedHomePage.homePage.selectedContent.empty')}</div>
+            <div>{t('extension.loggedHomePage.homePage.selectedContent.empty')}</div>
           </div>
         ) : null}
       </div>

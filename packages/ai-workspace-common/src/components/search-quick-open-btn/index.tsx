@@ -3,10 +3,13 @@ import { reflyEnv } from '@refly-packages/ai-workspace-common/utils/env';
 
 import './index.scss';
 import { useTranslation } from 'react-i18next';
+import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
+import { bigSearchQuickOpenEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/big-search-quick-open';
 
 export const SearchQuickOpenBtn = () => {
   // stores
-  const quickSearchStateStore = useQuickSearchStateStore();
+  // const quickSearchStateStore = useQuickSearchStateStore();
+  const searchStore = useSearchStore();
 
   const { t } = useTranslation();
 
@@ -15,7 +18,8 @@ export const SearchQuickOpenBtn = () => {
       <div
         className="search-quick-open-input"
         onClick={() => {
-          quickSearchStateStore.setVisible(true);
+          // quickSearchStateStore.setVisible(true);
+          bigSearchQuickOpenEmitter.emit('openSearch');
         }}
       >
         <div className="search-quick-open-text">{t('loggedHomePage.newThreadText')}</div>

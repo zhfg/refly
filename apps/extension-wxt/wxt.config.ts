@@ -6,6 +6,7 @@ import { pluginViteWatcher } from '@refly/plugin-vite-watcher';
 import postcssConfig from './postcss.config';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import path from 'path';
+import { codeInspectorPlugin } from 'code-inspector-plugin';
 
 const getFileAbsolutePath = (fileName: string) => {
   return path.join(__dirname, fileName);
@@ -33,6 +34,9 @@ export default defineConfig({
           theme: '@arco-themes/react-refly-ai',
           sourceMaps: true,
           filePatterns: ['apps/web/src', 'apps/extension-wxt/src', 'packages/ai-workspace-common/src'],
+        }),
+        codeInspectorPlugin({
+          bundler: 'vite',
         }),
         pluginViteWatcher({
           filesPath: extraWatchFiles,

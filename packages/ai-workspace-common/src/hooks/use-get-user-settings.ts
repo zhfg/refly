@@ -9,6 +9,8 @@ import { mapDefaultLocale } from '@refly-packages/ai-workspace-common/utils/loca
 import { useCookie } from 'react-use';
 import { LOCALE } from '@refly/constants';
 import { useTranslation } from 'react-i18next';
+import { getClientOrigin } from '@refly-packages/utils/url';
+import { getRuntime } from '../utils/env';
 
 export const useGetUserSettings = () => {
   const userStore = useUserStore();
@@ -18,8 +20,6 @@ export const useGetUserSettings = () => {
   const { i18n } = useTranslation();
 
   const routeLandingPageMatch = useMatch('/');
-  const routePrivacyPageMatch = useMatch('/privacy');
-  const routeTermsPageMatch = useMatch('/terms');
   const routeLoginPageMatch = useMatch('/login');
   const routeDigestDetailPageMatch = useMatch('/digest/:digestId');
   const routeFeedDetailPageMatch = useMatch('/feed/:feedId');
@@ -39,19 +39,10 @@ export const useGetUserSettings = () => {
         localStorage.removeItem('refly-user-profile');
         localStorage.removeItem('refly-local-settings');
 
-        if (
-          routeLandingPageMatch ||
-          routePrivacyPageMatch ||
-          routeTermsPageMatch ||
-          routeLoginPageMatch ||
-          routeDigestDetailPageMatch ||
-          routeFeedDetailPageMatch ||
-          routeAIGCContentDetailPageMatch ||
-          routeThreadDetailPageMatch
-        ) {
-          console.log('命中不需要鉴权页面，直接展示');
+        if (getRuntime() === 'web') {
+          window.location.href = getClientOrigin(true); // 没有登录，直接跳转到登录页
         } else {
-          navigate('/');
+          navigate('/'); // 插件等直接导航到首页
         }
       } else {
         userStore.setUserProfile(res?.data);
@@ -74,7 +65,7 @@ export const useGetUserSettings = () => {
           uiLocale = mapDefaultLocale((navigator?.language || LOCALE.EN) as LOCALE) as LOCALE;
           outputLocale = (navigator?.language || LOCALE.EN) as LOCALE;
           // 不阻塞写回用户配置
-          client.updateSettings({
+          getClient().updateSettings({
             body: { uiLocale, outputLocale },
           });
 
@@ -101,6 +92,12 @@ export const useGetUserSettings = () => {
       userStore.setToken('');
       localStorage.removeItem('refly-user-profile');
       localStorage.removeItem('refly-local-settings');
+
+      if (getRuntime() === 'web') {
+        window.location.href = getClientOrigin(true); // 没有登录，直接跳转到登录页
+      } else {
+        navigate('/'); // 插件等直接导航到首页
+      }
     }
   };
 

@@ -191,11 +191,15 @@ export type SkillMeta = {
   /**
    * Skill display name
    */
-  skillDisplayName?: string;
+  skillDisplayName: string;
   /**
    * Skill ID
    */
   skillId?: string;
+  /**
+   * Skill config
+   */
+  config?: string;
 };
 
 /**
@@ -206,23 +210,6 @@ export type SkillInstance = SkillMeta & {
    * Skill triggers
    */
   triggers?: Array<SkillTrigger>;
-  /**
-   * Skill config
-   */
-  config?: string;
-  /**
-   * Skill creation time
-   */
-  createdAt?: string;
-  /**
-   * Skill update time
-   */
-  updatedAt?: string;
-} & {
-  /**
-   * Skill ID
-   */
-  skillId: string;
   /**
    * Skill creation time
    */
@@ -1040,7 +1027,7 @@ export type ListSkillInstanceResponse = BaseResponse & {
   data?: Array<SkillInstance>;
 };
 
-export type UpsertSkillInstanceRequest = {
+export type SkillInstanceUpsertParam = {
   /**
    * Skill name
    */
@@ -1065,8 +1052,18 @@ export type UpsertSkillInstanceRequest = {
   };
 };
 
+export type UpsertSkillInstanceRequest = {
+  /**
+   * Skill instances to upsert
+   */
+  instanceList: Array<SkillInstanceUpsertParam>;
+};
+
 export type UpsertSkillInstanceResponse = BaseResponse & {
-  data?: SkillInstance;
+  /**
+   * Skill instance list
+   */
+  data?: Array<SkillInstance>;
 };
 
 export type DeleteSkillInstanceRequest = {

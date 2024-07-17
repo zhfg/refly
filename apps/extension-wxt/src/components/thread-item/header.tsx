@@ -9,11 +9,11 @@ import { Avatar, Button, Message as message } from '@arco-design/web-react';
 import { useSiderStore } from '@refly/ai-workspace-common/stores/sider';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '@/stores/user';
-import { getClientOrigin } from '@/utils/url';
+import { getClientOrigin } from '@refly/utils/url';
 import { IconClockCircle, IconHome, IconPlus, IconShareExternal } from '@arco-design/web-react/icon';
-import { time } from '@/utils/time';
+import { time } from '@refly/utils/time';
 // types
-import type { Conversation } from '@refly/common-types';
+import { Conversation } from '@refly/openapi-schema';
 // 第三方库
 import copyToClipboard from 'copy-to-clipboard';
 import { useHomeStateStore } from '@/stores/home-state';
@@ -69,13 +69,15 @@ export const Header = (props: ThreadHeaderProps) => {
         <span key={2} style={{ display: 'inline-block', marginRight: 12 }}>
           <IconClockCircle style={{ fontSize: 14, color: '#64645F' }} />
           <span className="thread-library-list-item-text" style={{ fontSize: uiLocale === LOCALE.EN ? 12 : 14 }}>
-            {time(props.thread?.updatedAt, uiLocale).utc().fromNow()}
+            {time(props.thread?.updatedAt as string, uiLocale)
+              .utc()
+              .fromNow()}
           </span>
         </span>
-        <IconTip text={t('loggedHomePage.homePage.header.close')}>
+        <IconTip text={t('extension.loggedHomePage.homePage.header.close')}>
           <img
             src={CloseGraySVG}
-            alt={t('loggedHomePage.homePage.header.close')}
+            alt={t('extension.loggedHomePage.homePage.header.close')}
             onClick={(_) => siderStore.setShowSider(false)}
           />
         </IconTip>

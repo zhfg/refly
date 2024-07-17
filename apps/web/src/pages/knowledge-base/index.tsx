@@ -14,7 +14,7 @@ import "./index.scss"
 import { useCookie } from "react-use"
 // types
 import { useUserStore } from "@refly/ai-workspace-common/stores/user"
-import { getExtensionId } from "@refly/ai-workspace-common/utils/url"
+import { getExtensionId } from "@refly/utils/url"
 import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
 import { useResizePanel } from "@refly/ai-workspace-common/hooks/use-resize-panel"

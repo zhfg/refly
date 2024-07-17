@@ -9,9 +9,8 @@ import { useWeblinkStore } from '@/stores/weblink';
 import { retryify } from '@/utils/retry';
 import type { WebLinkItem } from '@/components/weblink-list/types';
 import { useTranslation } from 'react-i18next';
-import type { ReturnType } from '@refly/common-types';
-import type { WeblinkMeta } from '@refly/common-types';
 import { apiRequest } from '@/requests/apiRequest';
+import { Weblink } from '@refly/openapi-schema';
 
 export const useStoreWeblink = () => {
   // 网页索引状态
@@ -51,9 +50,9 @@ export const useStoreWeblink = () => {
 
     // 将通知逻辑也涵盖了
     if (!res?.success) {
-      message.error(t('loggedHomePage.homePage.status.contentHandleFailedNotify'));
+      message.error(t('extension.loggedHomePage.homePage.status.contentHandleFailedNotify'));
     } else {
-      message.success(t('loggedHomePage.homePage.status.contentHandleSuccessNotify'));
+      message.success(t('extension.loggedHomePage.homePage.status.contentHandleSuccessNotify'));
     }
 
     return {
@@ -86,7 +85,7 @@ export const useStoreWeblink = () => {
 
   const preCheckForUploadWebsite = async (url: string) => {
     const { currentWeblink } = useWeblinkStore.getState();
-    const isProcessingParse = !currentWeblink || ['init', 'processing'].includes(currentWeblink?.parseStatus);
+    const isProcessingParse = !currentWeblink || ['init', 'processing'].includes(currentWeblink?.parseStatus!);
     const isFailedToServerCrawl = currentWeblink?.parseStatus === 'failed';
 
     // 直接遇到服务端爬取失败，则弹框提示用户
@@ -120,7 +119,7 @@ export const useStoreWeblink = () => {
     }
 
     // 如果还在上传中，直接报错，进行重试，并重试 5 秒/10 次
-    const isCurrentWeblinkStatusNotComplete = ['init', 'processing'].includes(pingData?.parseStatus);
+    const isCurrentWeblinkStatusNotComplete = ['init', 'processing'].includes(pingData?.parseStatus!);
     if (isCurrentWeblinkStatusNotComplete) {
       throw new Error('Weblink is processing...');
     }
@@ -138,13 +137,13 @@ export const useStoreWeblink = () => {
   };
 
   const handleUploadWebsite = async (url: string, needSave = false) => {
-    let pingRes: ReturnType<WebLinkItem>;
+    let pingRes: ReturnType<Weblink>;
     let res: ReturnType<any> = null as any;
 
     // setIsUpdatingWebiste(true)
     setUploadingStatus('loading'); // 标识处理过程
     const messageClose = message.loading({
-      content: t('loggedHomePage.homePage.status.contentHandling'),
+      content: t('extension.loggedHomePage.homePage.status.contentHandling'),
       duration: 0,
     });
 
@@ -176,7 +175,7 @@ export const useStoreWeblink = () => {
       // 否则直接出错，进行状态通知
       console.log('Retry preCheckForUploadWebsite failed', err);
       messageClose();
-      message.error(t('loggedHomePage.homePage.status.contentHandleFailedNotify'));
+      message.error(t('extension.loggedHomePage.homePage.status.contentHandleFailedNotify'));
 
       setUploadingStatus('normal');
       return { success: false };
@@ -209,7 +208,7 @@ export const useStoreWeblink = () => {
     setUploadingStatus('normal');
 
     messageClose();
-    message.success(t('loggedHomePage.homePage.status.contentHandleSuccessNotify'));
+    message.success(t('extension.loggedHomePage.homePage.status.contentHandleSuccessNotify'));
     return res;
   };
 

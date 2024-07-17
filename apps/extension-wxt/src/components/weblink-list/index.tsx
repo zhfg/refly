@@ -82,9 +82,9 @@ const WebLinkItem = (props: { weblink: WebLinkItem }) => {
               />
               <span className="text">{originPageTitle}</span>
               {chunkStatus === 'finish' ? (
-                <Tag color="green">{t('loggedHomePage.homePage.weblinkList.item.read')}</Tag>
+                <Tag color="green">{t('extension.loggedHomePage.homePage.weblinkList.item.read')}</Tag>
               ) : (
-                <Tag color="orange">{t('loggedHomePage.homePage.weblinkList.item.unread')}</Tag>
+                <Tag color="orange">{t('extension.loggedHomePage.homePage.weblinkList.item.unread')}</Tag>
               )}
             </a>
           </div>
@@ -135,7 +135,7 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
     });
 
     if (!res?.success) {
-      message.error(t('loggedHomePage.homePage.weblinkList.list.fetchErr'));
+      message.error(t('extension.loggedHomePage.homePage.weblinkList.list.fetchErr'));
       webLinkStore.updateIsRequest(false);
 
       return;
@@ -248,7 +248,7 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
         headerStyle={{ justifyContent: 'center' }}
         title={
           <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <span style={{ fontWeight: 'bold' }}>{t('loggedHomePage.homePage.weblinkList.title')}</span>
+            <span style={{ fontWeight: 'bold' }}>{t('extension.loggedHomePage.homePage.weblinkList.title')}</span>
           </div>
         }
         visible={webLinkStore.isWebLinkListVisible}
@@ -256,7 +256,7 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
         footer={
           <div className="weblink-footer-container">
             <p className="weblink-footer-selected">
-              {t('loggedHomePage.homePage.weblinkList.selectedCnt', '', {
+              {t('extension.loggedHomePage.homePage.weblinkList.selectedCnt', '', {
                 count: webLinkStore.selectedRow?.length,
               })}
             </p>
@@ -268,14 +268,14 @@ const PreviosWebsiteList = forwardRef((props: Props, ref) => {
                 }}
                 style={{ marginRight: 8 }}
               >
-                {t('loggedHomePage.homePage.weblinkList.drawer.confirm')}
+                {t('extension.loggedHomePage.homePage.weblinkList.drawer.confirm')}
               </Button>
               <Button
                 onClick={() => {
                   webLinkStore.updateIsWebLinkListVisible(false);
                 }}
               >
-                {t('loggedHomePage.homePage.weblinkList.drawer.cancel')}
+                {t('extension.loggedHomePage.homePage.weblinkList.drawer.cancel')}
               </Button>
             </div>
           </div>

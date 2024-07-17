@@ -6,12 +6,9 @@ import { Thread } from "@refly/ai-workspace-common/components/thread-item/thread
 import { ThreadLibrary } from "@refly/ai-workspace-common/components/thread-library"
 import { Settings } from "@refly/ai-workspace-common/components/settings/index"
 import { Login } from "@refly/ai-workspace-common/components/login/index"
-import LandingPage from "@/pages/landing-page"
 import { DigestToday } from "@/pages/digest-today"
 import { DigestTopics } from "@/pages/digest-topics/index"
 import { DigestTopicDetail } from "@/pages/digest-topic-detail/index"
-import Privacy from "@/pages/pravicy"
-import Terms from "@/pages/terms"
 import { DigestArchive } from "@/pages/digest-timeline"
 
 // digest 详情
@@ -27,6 +24,7 @@ import { useUserStore } from "@refly/ai-workspace-common/stores/user"
 import { useTranslation } from "react-i18next"
 import { useGetUserSettings } from "@refly/ai-workspace-common/hooks/use-get-user-settings"
 import { LOCALE } from "@refly/constants"
+import { Spin } from "@arco-design/web-react"
 
 export const AppRouter = (props: { layout?: any }) => {
   const { layout: Layout } = props
@@ -34,13 +32,6 @@ export const AppRouter = (props: { layout?: any }) => {
 
   const { i18n } = useTranslation()
   const language = i18n.languages?.[0]
-
-  // 不需要鉴权即可访问的路由
-  const routeLandingPageMatch = useMatch("/")
-  const routePrivacyPageMatch = useMatch("/privacy")
-  const routeTermsPageMatch = useMatch("/terms")
-  const routeLoginPageMatch = useMatch("/login")
-  // 导航相关
 
   // 获取 storage user profile
   const storageUserProfile = safeParseJSON(
@@ -67,19 +58,18 @@ export const AppRouter = (props: { layout?: any }) => {
     }
   }, [locale])
 
-  if (
-    (routeLandingPageMatch && !notShowLoginBtn) ||
-    routePrivacyPageMatch ||
-    routeTermsPageMatch ||
-    routeLoginPageMatch
-  ) {
+  if (!notShowLoginBtn) {
     return (
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/login" element={<Login />} />
-      </Routes>
+      <div
+        style={{
+          height: "100vh",
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}>
+        <Spin />
+      </div>
     )
   }
 

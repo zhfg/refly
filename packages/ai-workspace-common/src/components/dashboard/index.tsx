@@ -21,7 +21,7 @@ import { useCookie } from 'react-use';
 // types
 import { Weblink } from '@refly/openapi-schema';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
-import { getExtensionId } from '@refly-packages/ai-workspace-common/utils/url';
+import { getExtensionId } from '@refly/utils/url';
 import { useTranslation } from 'react-i18next';
 
 // 用于快速选择

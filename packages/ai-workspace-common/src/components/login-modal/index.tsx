@@ -16,7 +16,7 @@ import { safeParseJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 // styles
 import './index.scss';
 import { useCookie } from 'react-use';
-import { getServerOrigin } from '@refly-packages/ai-workspace-common/utils/url';
+import { getServerOrigin } from '@refly/utils/url';
 import { useTranslation } from 'react-i18next';
 
 export const LoginModal = (props: { visible?: boolean; from?: string }) => {

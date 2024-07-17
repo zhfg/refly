@@ -1,6 +1,7 @@
 import { fetchStream } from '@/utils/fetch-stream';
-import type { Source, RelatedQuestion, Task } from '@/types';
-import { getServerOrigin } from './url';
+import type { RelatedQuestion, Task } from '@refly/common-types';
+import { Source } from '@refly/openapi-schema';
+import { getServerOrigin } from '@refly/utils/url';
 import { getCookie } from './cookie';
 
 const LLM_SPLIT = '__LLM_RESPONSE__';

@@ -83,11 +83,34 @@
       justify-content: flex-end;
 
       .human-message {
+        display: flex;
+        flex-direction: row;
+      }
+
+      .human-message-content {
         padding: 8px 12px;
         border-radius: 8px;
         background-color: #f1f1f0;
+        background-color: #00968f;
+        color: #fff;
         font-size: 16px;
-        color: rgba(0, 0, 0, 0.9);
+        width: 100%;
+
+        * {
+          color: #fff;
+        }
+      }
+
+      .message-name-and-content {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        margin-right: 12px;
+        width: calc(100% - 44px);
+      }
+
+      .message-name {
+        margin-bottom: 4px;
       }
     }
 
@@ -111,6 +134,115 @@
         color: rgba(0, 0, 0, 0.5);
         margin-top: 10px;
       }
+
+      .install-skill-hint-container {
+        border-radius: 8px;
+        height: 46px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        background-color: #fff;
+        margin-top: 16px;
+
+        .install-skill-hint-title {
+          color: rgba(0, 0, 0, 0.5);
+
+          button {
+            border-radius: 8px;
+          }
+        }
+      }
+
+      .skill-onboarding {
+        margin-top: 32px;
+
+        .manage-header {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+
+          .skill-recommend-title {
+            color: rgba(0, 0, 0, 0.5);
+            font-size: 12px;
+            font-weight: 500;
+          }
+
+          .manager-btn {
+            color: rgb(var(--primary-6));
+            font-size: 12px;
+            border-radius: 8px;
+            &:hover {
+              cursor: pointer;
+            }
+          }
+        }
+
+        .skill-recommend-list {
+          display: flex;
+          flex-direction: row;
+          flex-wrap: wrap;
+          gap: 16px;
+          margin-top: 4px;
+        }
+
+        .skill-item {
+          min-width: 170px;
+          flex: 1 1 calc(50% - 16px); /* 4 items per row with gap adjustment */
+          background-color: #fff;
+          border: 1px solid rgba(0, 0, 0, 0.1);
+          border-radius: 8px;
+          padding: 8px;
+
+          &:hover {
+            cursor: pointer;
+            // background-color: #dddddb;
+          }
+
+          .skill-item-header {
+            margin-bottom: 8px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+          }
+
+          .skill-profile {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+          }
+
+          .skill-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-left: 8px;
+            color: rgba(0, 0, 0, 0.8);
+          }
+
+          .skill-installer {
+            color: rgb(var(--primary-6));
+            border-radius: 8px;
+
+            &:hover {
+              cursor: pointer;
+            }
+          }
+
+          .skill-desc {
+            color: rgba(0, 0, 0, 0.5);
+            font-size: 12px;
+          }
+        }
+
+        .skill-item-header {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+        }
+      }
     }
 
     .welcome-message-container,
@@ -119,19 +251,24 @@
         margin-top: 16px;
       }
 
+      .session-title-icon p {
+        color: rgba(0, 0, 0, 0.5);
+        font-weight: 500;
+      }
+
       .ai-copilot-related-question-item {
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
-        padding: 6px 12px;
+        // padding: 6px 12px;
         max-width: 70%;
 
-        background: #fcfcf9;
+        // background: #fcfcf9;
         box-sizing: border-box;
-        border: 1px solid rgba(0, 0, 0, 0.1);
+        // border: 1px solid rgba(0, 0, 0, 0.1);
 
-        box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.02);
+        // box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.02);
         border-radius: 8px;
 
         &:hover {
@@ -144,12 +281,13 @@
         }
 
         &:not(:first-child) {
-          margin-top: 8px;
+          margin-top: 4px;
         }
 
         .ai-copilot-related-question-title {
           font-size: 12px;
-          color: rgba(0, 0, 0, 1);
+          // color: rgba(0, 0, 0, 1);
+          color: #00968f;
         }
       }
     }
@@ -160,9 +298,111 @@
 
       .assistant-message {
         width: 100%;
+        color: rgba(0, 0, 0, 0.9);
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+      }
+
+      .assistant-message-content {
+        padding: 8px 12px;
+        border-radius: 8px;
+        background-color: #f1f1f0;
+        color: #fff;
         font-size: 16px;
         color: rgba(0, 0, 0, 0.9);
-        margin-top: 32px;
+        width: 100%;
+
+        .message-log-collapse-container {
+          margin-bottom: 8px;
+
+          .message-log-collapse-header {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding-left: 12px;
+
+            .message-log-content {
+              margin-left: 8px;
+              font-size: 12px;
+            }
+          }
+
+          .arco-collapse-item-content {
+            padding: 0;
+            padding-top: 4px;
+            background-color: transparent;
+          }
+
+          .arco-collapse-item-header {
+            background-color: transparent;
+            padding: 0;
+            background-color: #fff;
+            border-radius: 8px;
+            height: 32px;
+            border: 0.5px solid rgba(0, 0, 0, 0.1);
+
+            .arco-spin-icon {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+            }
+          }
+
+          .arco-collapse-item-content-box {
+            padding: 0;
+            background-color: transparent;
+          }
+        }
+      }
+
+      .message-log-container {
+        margin-bottom: 8px;
+      }
+
+      .message-log-item {
+        height: 32px;
+        width: 100%;
+        background-color: #fff;
+        border-radius: 8px;
+        border: 0.5px solid rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding-left: 12px;
+
+        .arco-spin-icon {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .message-log-content {
+          margin-left: 8px;
+          font-size: 12px;
+          color: rgba(0, 0, 0, 0.8);
+          min-width: 150px;
+          width: calc(100% - 60px);
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+
+        &:not(:first-child) {
+          margin-top: 4px;
+        }
+      }
+
+      .message-name-and-content {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        margin-left: 12px;
+        width: calc(100% - 44px);
+      }
+
+      .message-name {
+        margin-bottom: 4px;
       }
 
       .session-related-question {
@@ -171,9 +411,11 @@
 
       .session-source {
         width: 100%;
+        margin-bottom: 16px;
 
         .session-title-icon p {
           color: rgba(0, 0, 0, 0.5);
+          font-weight: 500;
         }
       }
 
@@ -288,6 +530,10 @@
           justify-content: center;
           font-size: 12px;
 
+          .skill-title {
+            margin-left: 4px;
+          }
+
           &:hover {
             cursor: pointer;
             background-color: #f1f1f0;
@@ -307,7 +553,7 @@
         border-radius: 8px;
         background-color: transparent;
         outline: transparent;
-        margin: 12px;
+        margin: 4px;
         margin-bottom: 0;
         box-sizing: border-box;
         width: calc(100% - 24px);
@@ -414,7 +660,45 @@
 
 .ai-copilot-chat-input-container {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+
+  .selected-skill {
+    height: 32px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    width: 100%;
+    background-color: #f1f1f0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+
+    .selected-skill-profile {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
+      .selected-skill-name {
+        font-weight: 600;
+      }
+
+      p {
+        font-size: 12px;
+        margin-left: 8px;
+      }
+    }
+
+    button {
+      height: 24px;
+      border-radius: 8px;
+    }
+  }
+
+  .ai-copilot-chat-input-body {
+    display: flex;
+    flex-direction: row;
+  }
 
   .ai-copilot-chat-input-action {
     display: flex;

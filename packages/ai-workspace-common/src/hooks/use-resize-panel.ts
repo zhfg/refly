@@ -23,7 +23,7 @@ export const useResizePanel = (props: ResizePanelProps) => {
         width -= resizeHandle.offsetWidth;
       });
 
-      console.log('initialMinPixelSize', width);
+      // console.log('initialMinPixelSize', width);
 
       setMinSize((initialMinPixelSize / width) * 100);
     });

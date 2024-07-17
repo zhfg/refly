@@ -1,8 +1,8 @@
-import { ChatMessage, ChatTaskType, MessageType, Source } from '@refly/openapi-schema';
+import { ChatMessage, ChatTaskType, MessageType, SkillInstance, Source } from '@refly/openapi-schema';
 import type { RelatedQuestion } from './session';
 
 export type MessageState = {
-  taskType?: ChatTaskType;
+  nowInvokeSkillId?: string;
   pendingMsg?: string;
   pendingFirstToken?: boolean; // 是否正在准备生成，如果收到第一个字符，即代表已经开始生生成
   pending?: boolean;
@@ -62,3 +62,8 @@ export const enum QuestionType {
 //   title?: string
 //   question?: string
 // }
+
+export interface ClientChatMessage extends ChatMessage {
+  pending?: boolean; // 该消息是否在流式处理中
+  spanId?: string; // 该消息在前端收发 SkillEvent 时对应的 spanId
+}

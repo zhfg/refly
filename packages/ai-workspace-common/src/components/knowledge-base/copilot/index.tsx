@@ -9,6 +9,7 @@ import {
   IconHistory,
   IconMessage,
   IconPlusCircle,
+  IconSettings,
   IconTranslate,
 } from '@arco-design/web-react/icon';
 // 自定义样式
@@ -24,6 +25,7 @@ import { ChatInput } from './chat-input';
 import { ChatMessages } from './chat-messages';
 import { ConvListModal } from './conv-list-modal';
 import { KnowledgeBaseListModal } from './knowledge-base-list-modal';
+import { SkillManagementModal } from '@refly-packages/ai-workspace-common/components/skill/skill-management-modal';
 
 // requests
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
@@ -48,6 +50,8 @@ import { RegisterSkillComponent } from '@refly-packages/ai-workspace-common/skil
 import { KnowledgeBaseNavHeader } from '@refly-packages/ai-workspace-common/components/knowledge-base/nav-header';
 import classNames from 'classnames';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
+import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
+import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 
 interface AICopilotProps {}
 
@@ -60,20 +64,24 @@ export const AICopilot = (props: AICopilotProps) => {
   const chatStore = useChatStore();
   const conversationStore = useConversationStore();
   const [isFetching, setIsFetching] = useState(false);
-  const { runTask } = useBuildThreadAndRun();
+  const { runSkill } = useBuildThreadAndRun();
   const searchStateStore = useSearchStateStore();
   const messageStateStore = useMessageStateStore();
+  const skillStore = useSkillStore();
 
   const convId = searchParams.get('convId');
   const { resetState } = useResetState();
-  const actualCopilotBodyHeight = copilotBodyHeight + (showContextCard ? contextCardHeight : 0);
+  const actualCopilotBodyHeight =
+    copilotBodyHeight + (showContextCard ? contextCardHeight : 0) + 32 + (skillStore?.selectedSkill ? 32 : 0) - 16;
 
   const { t, i18n } = useTranslation();
   const uiLocale = i18n?.languages?.[0] as LOCALE;
-  const outputLocale = userStore?.localSettings?.outputLocale;
+  const outputLocale = userStore?.localSettings?.outputLocale || 'en';
+  console.log('uiLocale', uiLocale);
 
   // ai-note handler
   useAINote();
+  useSkillManagement({ shouldInit: true });
 
   const handleSwitchSearchTarget = () => {
     if (showContextState) {
@@ -124,7 +132,7 @@ export const AICopilot = (props: AICopilotProps) => {
       // 新会话，需要手动构建第一条消息
       if (isNewConversation && convId && newQAText) {
         // 更换成基于 task 的消息模式，核心是基于 task 来处理
-        runTask(newQAText);
+        runSkill(newQAText);
       } else if (convId) {
         handleGetThreadMessages(convId);
       }
@@ -244,16 +252,29 @@ export const AICopilot = (props: AICopilotProps) => {
             </div>
           </div>
 
-          {/* <div className="skill-container">
-            {["搜索", "写作", "翻译", "数据分析", "更多技能"].map(
-              (item, index) => (
-                <div key={index} className="skill-item">
-                  {item}
-                </div>
-              ),
-            )}
-          </div> */}
-          <div className="chat-input-container">
+          <div className="skill-container">
+            {skillStore?.skillInstances?.map((item, index) => (
+              <div
+                key={index}
+                className="skill-item"
+                onClick={() => {
+                  skillStore.setSelectedSkillInstalce(item);
+                }}
+              >
+                {item?.skillDisplayName}
+              </div>
+            ))}
+            <div
+              key="more"
+              className="skill-item"
+              onClick={() => {
+                skillStore.setSkillManagerModalVisible(true);
+              }}
+            >
+              <IconSettings /> <p className="skill-title">技能管理</p>
+            </div>
+          </div>
+          <div className="chat-input-container" style={{ height: skillStore?.selectedSkill ? 117 + 32 : 117 }}>
             <div className="chat-input-body">
               <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
             </div>
@@ -284,6 +305,7 @@ export const AICopilot = (props: AICopilotProps) => {
 
       {/** 注册 Skill 相关内容，目前先收敛在 Copilot 内部，后续允许挂在在其他扩展点，比如笔记、reading */}
       <RegisterSkillComponent />
+      <SkillManagementModal />
     </div>
   );
 };

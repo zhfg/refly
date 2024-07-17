@@ -1062,7 +1062,7 @@ components:
       description: Skill metadata
       required:
         - skillName
-        - displayName
+        - skillDisplayName
       properties:
         skillName:
           type: string
@@ -1074,27 +1074,24 @@ components:
           type: string
           description: Skill ID
           example: sk-g30e1b80b5g1itbemc0g5jj3
+        config:
+          type: string
+          description: Skill config
     SkillInstance:
       type: object
       description: Skill
-      required:
-        - skillName
-        - displayName
-        - skillId
-        - createdAt
-        - updatedAt
       allOf:
         - $ref: '#/components/schemas/SkillMeta'
         - type: object
+          required:
+            - createdAt
+            - updatedAt
           properties:
             triggers:
               type: array
               description: Skill triggers
               items:
                 $ref: '#/components/schemas/SkillTrigger'
-            config:
-              type: string
-              description: Skill config
             createdAt:
               type: string
               format: date-time
@@ -1956,7 +1953,7 @@ components:
               description: Skill list
               items:
                 $ref: '#/components/schemas/SkillInstance'
-    UpsertSkillInstanceRequest:
+    SkillInstanceUpsertParam:
       type: object
       required:
         - skillName
@@ -1982,13 +1979,26 @@ components:
         config:
           type: object
           description: Skill config (should conform to template config schema)
+    UpsertSkillInstanceRequest:
+      type: object
+      required:
+        - instanceList
+      properties:
+        instanceList:
+          type: array
+          description: Skill instances to upsert
+          items:
+            $ref: '#/components/schemas/SkillInstanceUpsertParam'
     UpsertSkillInstanceResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
             data:
-              $ref: '#/components/schemas/SkillInstance'
+              type: array
+              description: Skill instance list
+              items:
+                $ref: '#/components/schemas/SkillInstance'
     DeleteSkillInstanceRequest:
       type: object
       required:

@@ -10,7 +10,7 @@ import {
   SkillTrigger as SkillTriggerModel,
   SkillLog as SkillLogModel,
 } from '@prisma/client';
-import { omit } from '@/utils';
+import { pick } from '@/utils';
 
 export interface InvokeSkillJobData extends InvokeSkillRequest {
   uid: string;
@@ -19,7 +19,9 @@ export interface InvokeSkillJobData extends InvokeSkillRequest {
 
 export function toSkillDTO(skill: SkillModel): SkillInstance {
   return {
-    ...omit(skill, ['pk', 'uid', 'deletedAt']),
+    ...pick(skill, ['skillId', 'skillName']),
+    skillDisplayName: skill.displayName,
+    config: JSON.parse(skill.config),
     createdAt: skill.createdAt.toJSON(),
     updatedAt: skill.updatedAt.toJSON(),
   };
@@ -27,7 +29,7 @@ export function toSkillDTO(skill: SkillModel): SkillInstance {
 
 export function toSkillTriggerDTO(trigger: SkillTriggerModel): SkillTrigger {
   return {
-    ...omit(trigger, ['pk', 'uid', 'deletedAt']),
+    ...pick(trigger, ['skillId', 'triggerId', 'crontab', 'enabled']),
     event: trigger.event as SkillTriggerEvent,
     createdAt: trigger.createdAt.toJSON(),
     updatedAt: trigger.updatedAt.toJSON(),
@@ -36,7 +38,7 @@ export function toSkillTriggerDTO(trigger: SkillTriggerModel): SkillTrigger {
 
 export function toSkillLogDTO(log: SkillLogModel): SkillLog {
   return {
-    ...omit(log, ['pk', 'uid']),
+    ...pick(log, ['logId', 'skillId', 'skillName', 'triggerId']),
     input: JSON.parse(log.input),
     context: JSON.parse(log.context),
     createdAt: log.createdAt.toJSON(),

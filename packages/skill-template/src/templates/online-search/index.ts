@@ -1,12 +1,11 @@
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
-import { ChatOpenAI, OpenAI } from '@langchain/openai';
 
 import { AIMessage, BaseMessage } from '@langchain/core/messages';
 import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 
 // tools
-import { SerperSearch } from '../../tools/serper-online-search';
+import { SearchResultContext, SerperSearch } from '../../tools/serper-online-search';
 // schema
 import { z } from 'zod';
 // types
@@ -68,12 +67,10 @@ export class OnlineSearchSkill extends BaseSkill {
 
     // For versions of @langchain/core < 0.2.3, you must call `.stream()`
     // and aggregate the message from chunks instead of calling `.invoke()`.
-    const boundModel = new ChatOpenAI({ model: 'gpt-3.5-turbo', openAIApiKey: process.env.OPENAI_API_KEY }).bindTools(
-      tools,
-    );
+    const boundModel = this.engine.chatModel().bindTools(tools);
 
     if (isToolMessage) {
-      const releventDocs = JSON.parse((lastMessage as ToolMessage)?.content as string) || [];
+      const releventDocs: SearchResultContext[] = JSON.parse((lastMessage as ToolMessage)?.content as string) || [];
       const sources: Source[] = releventDocs.map((item) => ({
         pageContent: item.snippet,
         score: -1,
@@ -82,11 +79,25 @@ export class OnlineSearchSkill extends BaseSkill {
           title: item.name,
         },
       }));
+      this.emitEvent(
+        {
+          event: 'structured_data',
+          content: JSON.stringify(sources),
+          structuredDataKey: 'sources',
+        },
+        config,
+      );
 
       return { sources };
     }
 
-    this.emitEvent('log', `User query: ${contextualUserQuery || query}`);
+    this.emitEvent(
+      {
+        event: 'log',
+        content: `User query: ${contextualUserQuery || query}`,
+      },
+      config,
+    );
 
     const getSystemPrompt = () => `# Role
   
@@ -141,7 +152,7 @@ just reformulate it if needed and otherwise return it as is.
       new MessagesPlaceholder('chatHistory'),
       ['human', `The user's question is {question}, please output answer in ${locale} language:`],
     ]);
-    const llm = new OpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0, openAIApiKey: process.env.OPENAI_API_KEY });
+    const llm = this.engine.chatModel({ temperature: 0 });
     const contextualizeQChain = contextualizeQPrompt.pipe(llm).pipe(new StringOutputParser());
 
     const contextualUserQuery = await contextualizeQChain.invoke({
@@ -185,7 +196,7 @@ just reformulate it if needed and otherwise return it as is.
   };
 
   generateAnswer = async (state: GraphState, config?: SkillRunnableConfig) => {
-    const llm = new ChatOpenAI({ model: 'gpt-3.5-turbo', openAIApiKey: process.env.OPENAI_API_KEY });
+    const llm = this.engine.chatModel();
     // For versions of @langchain/core < 0.2.3, you must call `.stream()`
     // and aggregate the message from chunks instead of calling `.invoke()`.
 
@@ -241,7 +252,13 @@ just reformulate it if needed and otherwise return it as is.
         if (tool === undefined) {
           throw new Error(`Tool ${call.name} not found.`);
         }
-        this.emitEvent('log', `Start calling ${tool.name} with args: ${JSON.stringify(call.args)})}`);
+        this.emitEvent(
+          {
+            event: 'log',
+            content: `Start calling ${tool.name} with args: ${JSON.stringify(call.args)})}`,
+          },
+          config,
+        );
 
         const output = await tool.invoke(call.args, config);
         return new ToolMessage({
@@ -252,7 +269,13 @@ just reformulate it if needed and otherwise return it as is.
       }) ?? [],
     );
 
-    this.emitEvent('log', `Finished calling ${outputs.length} tools`);
+    this.emitEvent(
+      {
+        event: 'log',
+        content: `Finished calling ${outputs.length} tools`,
+      },
+      config,
+    );
 
     return { messages: outputs };
   };

@@ -5,10 +5,10 @@ export const enum IENV {
   DEVELOPMENT = 'development',
 }
 
-export const getEnv = () => {
+export const getEnv = (): IENV => {
   const env = process.env.NODE_ENV;
 
-  return env;
+  return env as IENV;
 };
 
 export class ReflyEnv {

@@ -3,8 +3,7 @@ import { reflyEnv } from '@/utils/env';
 import hotKeys from 'hotkeys-js';
 import { useBuildTask } from '@refly/ai-workspace-common/hooks/use-build-task';
 import { useChatStore } from '@/stores/chat';
-import { LANGUAGE, LOCALE, TASK_TYPE, type Source, type Task } from '@/types';
-import { buildChatTask } from '@/utils/task';
+import { Source } from '@refly/openapi-schema';
 import { useWeblinkStore } from '@/stores/weblink';
 import { useUserStore } from '@/stores/user';
 import { apiRequest } from '@/requests/apiRequest';
@@ -72,15 +71,15 @@ export const useBindCommands = () => {
           score: -1, // 手工构造
         }));
 
-        const task = buildChatTask(
-          {
-            question: newQAText,
-            filter: { weblinkList: selectedWebLink },
-          },
-          localSettings.outputLocale,
-        );
+        // const task = buildChatTask(
+        //   {
+        //     question: newQAText,
+        //     filter: { weblinkList: selectedWebLink },
+        //   },
+        //   localSettings.outputLocale,
+        // );
 
-        buildTaskAndGenReponse(task);
+        // buildTaskAndGenReponse(task);
       },
     );
   };

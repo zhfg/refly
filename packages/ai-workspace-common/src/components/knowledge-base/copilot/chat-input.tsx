@@ -1,15 +1,16 @@
-import { Button, Input } from '@arco-design/web-react';
+import { Avatar, Button, Input } from '@arco-design/web-react';
 import { useRef, useState } from 'react';
 import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 // styles
 import './index.scss';
 import { useQuickSearchStateStore } from '@refly-packages/ai-workspace-common/stores/quick-search-state';
-import { IconSend } from '@arco-design/web-react/icon';
+import { IconClose, IconSend } from '@arco-design/web-react/icon';
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { buildConversation } from '@refly-packages/ai-workspace-common/utils/conversation';
 import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
+import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 
 const TextArea = Input.TextArea;
 
@@ -25,7 +26,8 @@ export const ChatInput = (props: ChatInputProps) => {
   const quickSearchStateStore = useQuickSearchStateStore();
   const conversationStore = useConversationStore();
   const messageStateStore = useMessageStateStore();
-  const { runTask, emptyConvRunTask } = useBuildThreadAndRun();
+  const skillStore = useSkillStore();
+  const { runSkill, emptyConvRunTask } = useBuildThreadAndRun();
   // hooks
   const [isFocused, setIsFocused] = useState(false);
 
@@ -35,7 +37,7 @@ export const ChatInput = (props: ChatInputProps) => {
 
     if (messages?.length > 0) {
       // 追问阅读
-      runTask(newQAText);
+      runSkill(newQAText);
     } else {
       // 新会话阅读，先创建会话，然后进行跳转之后发起聊天
       emptyConvRunTask(newQAText);
@@ -72,35 +74,55 @@ export const ChatInput = (props: ChatInputProps) => {
 
   return (
     <div className="ai-copilot-chat-input-container">
-      <TextArea
-        ref={inputRef}
-        autoFocus
-        value={chatStore?.newQAText}
-        onChange={(value) => {
-          chatStore.setNewQAText(value);
-        }}
-        onKeyDownCapture={(e) => handleKeyDown(e)}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        style={{
-          borderRadius: 8,
-          resize: 'none',
-        }}
-        placeholder={props.placeholder}
-        autoSize={props.autoSize}
-      ></TextArea>
-      <div className="ai-copilot-chat-input-action">
-        <Button
-          shape="circle"
-          loading={messageStateStore?.pending}
-          icon={<IconSend />}
-          disabled={messageStateStore?.pending}
-          className="search-btn"
-          style={{ color: '#FFF', background: '#00968F' }}
-          onClick={() => {
-            handleSendMessage();
+      {skillStore?.selectedSkill ? (
+        <div className="selected-skill">
+          <div className="selected-skill-profile">
+            <Avatar size={16} />
+            <p>
+              和 <span className="selected-skill-name">{skillStore?.selectedSkill?.skillDisplayName}</span> 聊聊
+            </p>
+          </div>
+          <div className="selected-skill-manage">
+            <Button
+              icon={<IconClose />}
+              onClick={() => {
+                skillStore.setSelectedSkillInstalce(null);
+              }}
+            ></Button>
+          </div>
+        </div>
+      ) : null}
+      <div className="ai-copilot-chat-input-body">
+        <TextArea
+          ref={inputRef}
+          autoFocus
+          value={chatStore?.newQAText}
+          onChange={(value) => {
+            chatStore.setNewQAText(value);
           }}
-        ></Button>
+          onKeyDownCapture={(e) => handleKeyDown(e)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          style={{
+            borderRadius: 8,
+            resize: 'none',
+          }}
+          placeholder={props.placeholder}
+          autoSize={props.autoSize}
+        ></TextArea>
+        <div className="ai-copilot-chat-input-action">
+          <Button
+            shape="circle"
+            loading={messageStateStore?.pending}
+            icon={<IconSend />}
+            disabled={messageStateStore?.pending}
+            className="search-btn"
+            style={{ color: '#FFF', background: '#00968F' }}
+            onClick={() => {
+              handleSendMessage();
+            }}
+          ></Button>
+        </div>
       </div>
     </div>
   );

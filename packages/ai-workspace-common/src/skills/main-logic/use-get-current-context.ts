@@ -3,6 +3,7 @@
  */
 
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 
 export const useGetCurrentContext = () => {
   const knowledgeBaseStore = useKnowledgeBaseStore();
@@ -11,7 +12,7 @@ export const useGetCurrentContext = () => {
   const currentKnowledgeBase = knowledgeBaseStore.currentKnowledgeBase;
 
   const getCurrentSkillState = (name) => {
-    const { skillState } = useKnowledgeBaseStore.getState();
+    const { skillState } = useSkillStore.getState();
 
     return skillState?.[name];
   };

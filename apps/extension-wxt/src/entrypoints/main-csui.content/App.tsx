@@ -23,7 +23,7 @@ import { checkPageUnsupported } from '@refly/ai-workspace-common/utils/extension
 // 加载国际化
 import '@/i18n/config';
 import { usePollingPingCurrentWeblink } from '@/hooks/use-polling-ping-current-weblink';
-import { SENTRY_DSN } from '@/utils/url';
+import { SENTRY_DSN } from '@refly/utils/url';
 import { useSiderBarOpen } from '@/hooks/use-sider-bar-open';
 
 // 样式

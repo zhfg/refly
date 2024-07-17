@@ -1,11 +1,9 @@
 import { Runtime, browser } from 'wxt/browser';
-import { TASK_STATUS } from '@/types';
+import { TASK_STATUS } from '@refly/common-types';
 import { getCookie } from '@/utils/cookie';
 import { getServerOrigin } from '@refly/ai-workspace-common/utils/url';
 import { getExtensionVersion } from '@/utils/version';
 import { fetchStream } from '@refly/ai-workspace-common/utils/fetch-stream';
-import { getRuntime } from '@refly/ai-workspace-common/utils/env';
-import { getCurrentTab } from '@refly/ai-workspace-common/utils/extension/tabs';
 
 const LLM_SPLIT = '__LLM_RESPONSE__';
 const RELATED_SPLIT = '__RELATED_QUESTIONS__';

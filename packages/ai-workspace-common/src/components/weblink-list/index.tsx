@@ -10,7 +10,7 @@ import { useWeblinkStore } from '@refly-packages/ai-workspace-common/stores/webl
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // styles
 import './index.scss';
-import { safeParseURL } from '@refly-packages/ai-workspace-common/utils/url';
+import { safeParseURL } from '@refly/utils/url';
 import { useTranslation } from 'react-i18next';
 import { LOCALE } from '@refly/constants';
 

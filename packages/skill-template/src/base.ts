@@ -1,44 +1,47 @@
 import { Runnable } from '@langchain/core/runnables';
 import { ToolParams } from '@langchain/core/tools';
+import { BaseMessage } from '@langchain/core/messages';
 import { SkillEngine } from './engine';
 import { StructuredTool } from '@langchain/core/tools';
 import { StateGraphArgs } from '@langchain/langgraph';
 import { RunnableConfig } from '@langchain/core/runnables';
 import { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
-import { SkillContext, SkillInput } from '@refly/openapi-schema';
+import { SkillContext, SkillInput, SkillMeta } from '@refly/openapi-schema';
 import { EventEmitter } from 'node:stream';
+import { randomUUID } from 'node:crypto';
 import { SkillEvent } from '@refly/common-types';
 
 export abstract class BaseSkill extends StructuredTool {
-  config?: SkillRunnableConfig;
-
   abstract displayName: Record<string, string>;
   abstract graphState: StateGraphArgs<BaseSkillState>['channels'];
 
-  constructor(protected engine: SkillEngine, params?: BaseToolParams) {
+  constructor(protected engine: SkillEngine, protected params?: BaseToolParams) {
     super(params);
   }
 
+  /**
+   * Convert this skill to a LangChain runnable.
+   */
   abstract toRunnable(): Runnable;
 
-  emitEvent(event: keyof SkillEventMap, content?: string, options?: Partial<SkillEvent>) {
-    const { locale = 'en', emitter, selectedSkill } = this.config?.configurable || {};
+  /**
+   * Emit a skill event.
+   */
+  emitEvent(data: Partial<SkillEvent>, config: SkillRunnableConfig) {
+    const { emitter, currentSkill, spanId } = config?.configurable || {};
 
-    // Don't emit events for scheduler when skill is specified
-    if (!emitter || (selectedSkill && this.name === 'scheduler')) {
+    if (!emitter) {
       return;
     }
 
-    const eventData = {
-      event,
-      skillName: this.name,
-      skillDisplayName: this.displayName[locale],
-      content,
-      ...options,
-      ...selectedSkill,
+    const eventData: SkillEvent = {
+      event: data.event!,
+      spanId,
+      ...currentSkill,
+      ...data,
     };
 
-    emitter?.emit(event, eventData);
+    emitter.emit(data.event, eventData);
   }
 
   async _call(
@@ -46,23 +49,25 @@ export abstract class BaseSkill extends StructuredTool {
     runManager?: CallbackManagerForToolRun,
     config?: SkillRunnableConfig,
   ): Promise<string> {
-    this.config = config;
-    const runnable = this.toRunnable();
+    config ??= { configurable: {} };
 
-    this.emitEvent('start');
-
-    const { locale = 'en', selectedSkill } = config?.configurable ?? {};
-
-    const metadata: SkillRunnableMeta = {
-      ...config?.metadata,
+    // Ensure currentSkill is not empty.
+    config.configurable.currentSkill ??= {
       skillName: this.name,
-      skillDisplayName: this.displayName[locale],
-      ...selectedSkill,
+      skillDisplayName: this.displayName[config.configurable.locale || 'en'],
     };
 
-    const response = await runnable.invoke(input, { ...config, metadata });
+    // Ensure spanId is not empty.
+    config.configurable.spanId ??= randomUUID();
 
-    this.emitEvent('end');
+    const response = await this.toRunnable().invoke(input, {
+      ...config,
+      metadata: {
+        ...config.metadata,
+        ...config.configurable.currentSkill,
+        spanId: config.configurable.spanId,
+      },
+    });
 
     return response;
   }
@@ -89,23 +94,22 @@ export interface SkillEventMap {
   start: [data: SkillEvent];
   end: [data: SkillEvent];
   log: [data: SkillEvent];
+  stream: [data: SkillEvent];
   structured_data: [data: SkillEvent];
 }
 
-export interface SkillInfo {
-  skillId?: string;
-  skillName: string;
-  skillDisplayName: string;
+export interface SkillRunnableMeta extends Record<string, unknown>, SkillMeta {
+  spanId: string;
 }
-
-export interface SkillRunnableMeta extends Record<string, unknown>, SkillInfo {}
 
 export interface SkillRunnableConfig extends RunnableConfig {
   configurable?: SkillContext & {
+    spanId?: string;
     uid?: string;
-    selectedSkill?: SkillInfo;
-    chatHistory?: string[];
-    installedSkills?: string[];
+    selectedSkill?: SkillMeta;
+    currentSkill?: SkillMeta;
+    chatHistory?: BaseMessage[];
+    installedSkills?: SkillMeta[];
     emitter?: EventEmitter<SkillEventMap>;
   };
   metadata?: SkillRunnableMeta;

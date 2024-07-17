@@ -1,10 +1,9 @@
 import { StringOutputParser } from '@langchain/core/output_parsers';
-import { MessageGraph, START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
+import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { z } from 'zod';
 import { AIMessage, BaseMessage, ToolMessage } from '@langchain/core/messages';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { ChatOpenAI } from '@langchain/openai';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 import { ReflySearch } from '@/tools/refly-search';
 
@@ -98,13 +97,7 @@ export class RAG extends BaseSkill {
     No: The docs are not relevant to the question.`,
     );
 
-    const model = new ChatOpenAI({
-      modelName: 'gpt-3.5-turbo',
-      temperature: 0,
-    }).bind({
-      tools: [tool],
-      tool_choice: tool,
-    });
+    const model = this.engine.chatModel({ temperature: 0 }).bind({ tools: [tool], tool_choice: tool });
 
     const chain = prompt.pipe(model);
 
@@ -156,10 +149,7 @@ export class RAG extends BaseSkill {
   agent = async (state: GraphState) => {
     console.log('---CALL AGENT---');
 
-    const model = new ChatOpenAI({
-      modelName: 'gpt-3.5-turbo',
-      temperature: 0,
-    }).bindTools([new ReflySearch({ engine: this.engine })]);
+    const model = this.engine.chatModel({ temperature: 0 }).bindTools([new ReflySearch({ engine: this.engine })]);
 
     const response = await model.invoke(state.query);
     // We can return just the response because it will be appended to the state.
@@ -190,7 +180,13 @@ export class RAG extends BaseSkill {
 
     const outputs = await Promise.all(
       (lastMessage as AIMessage).tool_calls?.map(async (call) => {
-        this.emitEvent('log', `Start calling ${tool.name} with args: ${JSON.stringify(call.args)})}`);
+        this.emitEvent(
+          {
+            event: 'log',
+            content: `Start calling ${tool.name} with args: ${JSON.stringify(call.args)})}`,
+          },
+          config,
+        );
 
         const output = await tool.invoke(call.args, config);
         return new ToolMessage({
@@ -223,10 +219,7 @@ export class RAG extends BaseSkill {
     );
 
     // Grader
-    const model = new ChatOpenAI({
-      modelName: 'gpt-3.5-turbo',
-      temperature: 0,
-    });
+    const model = this.engine.chatModel({ temperature: 0 });
     const response = await prompt.pipe(model).invoke({ question });
     return { messages: [response] };
   };
@@ -252,10 +245,7 @@ Context: {context}
 Answer:`,
     );
 
-    const llm = new ChatOpenAI({
-      modelName: 'gpt-3.5-turbo',
-      temperature: 0,
-    });
+    const llm = this.engine.chatModel({ temperature: 0 });
 
     const ragChain = prompt.pipe(llm).pipe(new StringOutputParser());
 

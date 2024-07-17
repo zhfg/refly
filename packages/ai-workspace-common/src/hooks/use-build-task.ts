@@ -1,97 +1,95 @@
-import { useCallback, useRef } from "react"
-import { useChatStore } from "@refly-packages/ai-workspace-common/stores/chat"
-import { useMessageStateStore } from "@refly-packages/ai-workspace-common/stores/message-state"
-import { useConversationStore } from "@refly-packages/ai-workspace-common/stores/conversation"
-import { Source } from "@refly/openapi-schema"
-import type { MessageState, RelatedQuestion } from "@refly/common-types"
-import { TASK_STATUS } from "@refly/common-types"
-import type { ChatTask } from "@refly/openapi-schema"
-import {
-  buildQuestionMessage,
-  buildReplyMessage,
-} from "@refly-packages/ai-workspace-common/utils/message"
+import { useCallback, useRef } from 'react';
+import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
+import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
+import { Source } from '@refly/openapi-schema';
+import type { MessageState, RelatedQuestion, SkillEvent } from '@refly/common-types';
+import { TASK_STATUS } from '@refly/common-types';
+import type { ChatTask, InvokeSkillRequest, ChatMessage } from '@refly/openapi-schema';
+import { buildQuestionMessage, buildReplyMessage } from '@refly-packages/ai-workspace-common/utils/message';
 
-import { buildErrorMessage } from "@refly-packages/ai-workspace-common/utils/message"
-import { scrollToBottom } from "@refly-packages/ai-workspace-common/utils/ui"
+import { buildErrorMessage } from '@refly-packages/ai-workspace-common/utils/message';
+import { scrollToBottom } from '@refly-packages/ai-workspace-common/utils/ui';
 
 // requests
-import { parseStreaming } from "@refly-packages/ai-workspace-common/utils/parse-streaming"
-import { Runtime } from "wxt/browser"
-import {
-  getPort,
-  removePort,
-} from "@refly-packages/ai-workspace-common/utils/extension/ports"
-import { safeParseJSON } from "@refly-packages/ai-workspace-common/utils/parse"
-import { useUserStore } from "@refly-packages/ai-workspace-common/stores/user"
-import { getRuntime } from "@refly-packages/ai-workspace-common/utils/env"
+import { ssePost } from '@refly-packages/ai-workspace-common/utils/sse-post';
+import { Runtime } from 'wxt/browser';
+import { getPort, removePort } from '@refly-packages/ai-workspace-common/utils/extension/ports';
+import { safeParseJSON } from '@refly-packages/ai-workspace-common/utils/parse';
+import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 // stores
 
 export const useBuildTask = () => {
-  const streamingChatPortRef = useRef<Runtime.Port>()
-  const chatStore = useChatStore()
-  const messageStateStore = useMessageStateStore()
-  const conversationStore = useConversationStore()
+  const streamingChatPortRef = useRef<Runtime.Port>();
+  const chatStore = useChatStore();
+  const messageStateStore = useMessageStateStore();
+  const conversationStore = useConversationStore();
   // 中断生成
-  const controllerRef = useRef<AbortController>()
+  const controllerRef = useRef<AbortController>();
 
-  const buildTaskAndGenReponse = (task: ChatTask) => {
-    console.log("buildTaskAndGenReponse", task)
-    const question = task.data?.question
-    const { messages = [] } = useChatStore.getState()
-    const { currentConversation } = useConversationStore.getState()
+  const buildTaskAndGenReponse = (task: InvokeSkillRequest) => {
+    console.log('buildTaskAndGenReponse', task);
+    const question = task?.input?.query;
+    const { messages = [] } = useChatStore.getState();
+    const { currentConversation } = useConversationStore.getState();
+    const { skillInstances = [], selectedSkill } = useSkillStore.getState();
 
     // 构建 filter, for follow ask question config
-    const weblinkList = task?.data?.filter?.weblinkList || []
-    const selectedWeblinkConfig = {
-      searchTarget: weblinkList?.length > 0 ? "selectedPages" : "all",
-      filter: weblinkList,
-    }
+    // const weblinkList =
+    // const selectedWeblinkConfig = {
+    //   searchTarget: weblinkList?.length > 0 ? 'selectedPages' : 'all',
+    //   filter: weblinkList,
+    // };
 
+    // Skill 和 Message 绑定，某条 AI Message 来自哪个 Skill
     const questionMsg = buildQuestionMessage({
-      convId: currentConversation?.convId || "",
       content: question,
-      selectedWeblinkConfig: JSON.stringify(selectedWeblinkConfig),
-    })
-    const replyMsg = buildReplyMessage({
-      convId: currentConversation?.convId || "",
-      content: "",
-      questionId: questionMsg?.msgId,
-    })
+      ...(selectedSkill
+        ? {
+            skillMeta: {
+              skillName: selectedSkill.skillName,
+              skillId: selectedSkill.skillId,
+              skillDisplayName: selectedSkill.skillDisplayName,
+            },
+          }
+        : {}),
+      // selectedWeblinkConfig: JSON.stringify(selectedWeblinkConfig), // 先 deprecated
+    });
     // 将 reply 加到 message-state
     messageStateStore.setMessageState({
-      pendingReplyMsg: replyMsg,
-      taskType: task?.taskType,
-    })
+      nowInvokeSkillId: task?.skillId,
+    });
 
-    chatStore.setMessages(messages.concat(questionMsg))
+    chatStore.setMessages(messages.concat(questionMsg));
 
-    handleGenResponse(task)
+    handleGenResponse(task);
 
     setTimeout(() => {
       // 滑动到底部
-      scrollToBottom()
-    })
-  }
+      scrollToBottom();
+    });
+  };
 
   const buildShutdownTaskAndGenResponse = () => {
-    controllerRef.current?.abort()
+    controllerRef.current?.abort();
     handleSendMessage({
       body: {
         type: TASK_STATUS.SHUTDOWN,
       },
-    })
-  }
+    });
+  };
 
   const handleGenResponse = useCallback(
-    (task: ChatTask) => {
+    (task: InvokeSkillRequest) => {
       // 发起一个 gen 请求，开始接收
       messageStateStore.setMessageState({
         pending: true,
         pendingFirstToken: true,
-        taskType: task?.taskType,
-        pendingMsg: "",
+        nowInvokeSkillId: task.skillId,
         error: false,
-      })
+      });
 
       // 直接发送 task
       handleSendMessage({
@@ -99,156 +97,264 @@ export const useBuildTask = () => {
           type: TASK_STATUS.START,
           payload: task,
         },
-      })
+      });
     },
     [conversationStore.currentConversation?.convId],
-  )
+  );
 
-  const onContent = (content: string) => {
-    const currentChatState = useChatStore.getState()
+  const onSkillStart = (skillEvent: SkillEvent) => {
+    const { messages = [] } = useChatStore.getState();
 
-    // 没有消息时，先创建
-    const lastMessage = currentChatState.messages.at(-1)
-    const savedMessage = currentChatState.messages.slice(0, -1)
+    const lastRelatedMessage = [...messages]
+      .reverse()
+      .find(
+        (item) =>
+          item?.skillMeta?.skillName === skillEvent?.skillName &&
+          item?.type === 'ai' &&
+          item?.spanId === skillEvent?.spanId,
+      );
 
-    lastMessage.content = content
-    chatStore.setMessages([...savedMessage, { ...lastMessage }])
-  }
-
-  const onSources = (sources: Source[]) => {
-    const currentMessageState = useMessageStateStore.getState()
-    const currentChatState = useChatStore.getState()
-
-    let lastMessage, savedMessage
-    if (currentMessageState.pendingFirstToken) {
-      lastMessage = currentMessageState.pendingReplyMsg
-      savedMessage = currentChatState.messages
-
-      lastMessage.content = ""
-      messageStateStore.setMessageState({ pendingFirstToken: false })
-    } else {
-      lastMessage = currentChatState.messages.at(-1)
-      savedMessage = currentChatState.messages.slice(0, -1)
+    // 同一个技能对应的 spanId 只创建一条消息
+    if (lastRelatedMessage) {
+      return;
     }
 
-    console.log("sourceWeblinkPayload", sources)
+    // 每次 start 开启一条新的 msg
+    const replyMsg = buildReplyMessage({
+      content: '',
+      skillMeta: {
+        skillName: skillEvent?.skillName,
+        skillId: skillEvent?.skillId,
+        skillDisplayName: skillEvent?.skillDisplayName,
+      },
+      spanId: skillEvent?.spanId,
+      pending: true,
+    });
+
+    // 将 reply 加到 message-state
     messageStateStore.setMessageState({
-      ...currentMessageState,
-      pendingFirstToken: false,
-      pendingSourceDocs: (currentMessageState.pendingSourceDocs || [])
-        ?.concat(sources)
-        ?.filter(item => item),
-    })
+      pendingReplyMsg: replyMsg,
+      pending: true, // 开始加载 skill 消息
+      pendingFirstToken: true, // 收到第一个字符
+      nowInvokeSkillId: skillEvent?.skillId,
+    });
 
-    console.log("sourceWeblinkPayload", currentChatState.messages)
+    chatStore.setMessages(messages.concat(replyMsg));
 
-    if (Array.isArray(lastMessage?.sources)) {
-      lastMessage.sources = lastMessage?.sources
-        ?.concat(sources || [])
-        ?.filter(item => item)
-    } else {
-      lastMessage.sources = [...sources]?.filter(item => item)
-    }
-    chatStore.setMessages([...savedMessage, { ...lastMessage }])
-
-    // 更新消息之后滚动到底部
     setTimeout(() => {
-      scrollToBottom()
-    }, 1000)
-  }
+      // 滑动到底部
+      scrollToBottom();
+    });
+  };
 
-  const onRelated = (related: RelatedQuestion[]) => {
-    const currentMessageState = useMessageStateStore.getState()
-    const currentChatState = useChatStore.getState()
+  const onSkillThoughout = (skillEvent: SkillEvent) => {
+    const { messages = [] } = useChatStore.getState();
+    const lastRelatedMessage = [...messages]
+      .reverse()
+      .find(
+        (item) =>
+          item?.skillMeta?.skillName === skillEvent?.skillName &&
+          item?.type === 'ai' &&
+          item?.spanId === skillEvent?.spanId,
+      );
+    const lastRelatedMessageIndex = messages.findIndex((item) => item.msgId === lastRelatedMessage?.msgId);
 
-    console.log("related question", related)
-    messageStateStore.setMessageState({
-      ...currentMessageState,
-      pending: false,
-      pendingFirstToken: true,
-      pendingRelatedQuestions: (
-        currentMessageState.pendingRelatedQuestions || []
-      )
-        ?.concat(related)
-        ?.filter(item => item),
-    })
-
-    const lastMessage = currentChatState.messages.at(-1)
-    const savedMessage = currentChatState.messages.slice(0, -1)
-
-    console.log("latest related question", lastMessage?.relatedQuestions)
-
-    if (Array.isArray(lastMessage?.relatedQuestions)) {
-      lastMessage.relatedQuestions = lastMessage?.relatedQuestions
-        ?.concat(related || [])
-        ?.filter(item => item)
-    } else {
-      lastMessage.relatedQuestions = [...related]?.filter(item => item)
+    if (!lastRelatedMessage) {
+      return;
     }
-    chatStore.setMessages([...savedMessage, { ...lastMessage }])
-  }
+
+    if (!lastRelatedMessage?.logs) {
+      lastRelatedMessage.logs = [skillEvent.content];
+    } else {
+      lastRelatedMessage.logs = lastRelatedMessage.logs.concat(skillEvent.content);
+    }
+
+    messages[lastRelatedMessageIndex] = lastRelatedMessage;
+    chatStore.setMessages(messages);
+  };
+
+  const onSkillStream = (skillEvent: SkillEvent) => {
+    const { messages = [] } = useChatStore.getState();
+    const { pendingFirstToken } = useMessageStateStore.getState();
+    const lastRelatedMessage = [...messages]
+      .reverse()
+      .find(
+        (item) =>
+          item?.skillMeta?.skillName === skillEvent?.skillName &&
+          item?.type === 'ai' &&
+          item?.spanId === skillEvent?.spanId,
+      );
+    const lastRelatedMessageIndex = messages.findIndex((item) => item.msgId === lastRelatedMessage?.msgId);
+
+    if (!lastRelatedMessage) {
+      return;
+    }
+
+    if (!lastRelatedMessage.content) {
+      lastRelatedMessage.content = '';
+    }
+
+    lastRelatedMessage.content += skillEvent.content;
+
+    // 处理 Citation 的序列号
+    lastRelatedMessage.content = lastRelatedMessage.content
+      .replace(/\[\[([cC])itation/g, '[citation')
+      .replace(/[cC]itation:(\d+)]]/g, 'citation:$1]')
+      .replace(/\[\[([cC]itation:\d+)]](?!])/g, `[$1]`)
+      .replace(/\[[cC]itation:(\d+)]/g, '[citation]($1)');
+
+    messages[lastRelatedMessageIndex] = lastRelatedMessage;
+    chatStore.setMessages(messages);
+
+    if (pendingFirstToken) {
+      messageStateStore.setMessageState({ pendingFirstToken: false });
+    }
+
+    setTimeout(() => {
+      // 滑动到底部
+      scrollToBottom();
+    });
+  };
+
+  const onSkillStructedData = (skillEvent: SkillEvent) => {
+    const { messages = [] } = useChatStore.getState();
+    const lastRelatedMessage = [...messages]
+      .reverse()
+      .find(
+        (item) =>
+          item?.skillMeta?.skillName === skillEvent?.skillName &&
+          item?.type === 'ai' &&
+          item?.spanId === skillEvent?.spanId,
+      );
+    const lastRelatedMessageIndex = messages.findIndex((item) => item.msgId === lastRelatedMessage?.msgId);
+
+    if (!lastRelatedMessage) {
+      return;
+    }
+
+    if (!lastRelatedMessage?.structuredData) {
+      lastRelatedMessage.structuredData = {};
+    }
+
+    const structuredData = safeParseJSON(skillEvent?.content);
+    if (!structuredData) {
+      return;
+    }
+
+    if (['sources', 'relatedQuestions'].includes(skillEvent?.structuredDataKey)) {
+      if (!lastRelatedMessage.structuredData[skillEvent.structuredDataKey]) {
+        lastRelatedMessage.structuredData[skillEvent.structuredDataKey] = [...(structuredData || [])];
+      } else {
+        lastRelatedMessage.structuredData[skillEvent.structuredDataKey] = (
+          lastRelatedMessage.structuredData[skillEvent.structuredDataKey] as Array<any>
+        )?.concat(...structuredData);
+      }
+    } else if (skillEvent?.structuredDataKey === 'AskUserForm') {
+      // TODO: 未来实现
+    }
+
+    messages[lastRelatedMessageIndex] = lastRelatedMessage;
+    chatStore.setMessages(messages);
+  };
+
+  const onSkillEnd = (skillEvent: SkillEvent) => {
+    const { messages = [] } = useChatStore.getState();
+    const lastRelatedMessage = [...messages]
+      .reverse()
+      .find(
+        (item) =>
+          item?.skillMeta?.skillName === skillEvent?.skillName &&
+          item?.type === 'ai' &&
+          item?.spanId === skillEvent?.spanId,
+      );
+    const lastRelatedMessageIndex = messages.findIndex((item) => item.msgId === lastRelatedMessage?.msgId);
+
+    if (!lastRelatedMessage) {
+      return;
+    }
+
+    lastRelatedMessage.pending = false;
+    messages[lastRelatedMessageIndex] = lastRelatedMessage;
+    chatStore.setMessages(messages);
+  };
 
   const onError = (status: number) => {
-    const currentChatState = useChatStore.getState()
-    console.log("status", status)
-    controllerRef.current?.abort()
+    const currentChatState = useChatStore.getState();
+    console.log('status', status);
+    controllerRef.current?.abort();
 
     const newMessageState: Partial<MessageState> = {
       pending: false,
       error: false,
-    }
+    };
 
     // 构建一条错误消息放在末尾，而不是类似 loading 直接展示，因为要 error 停留在聊天列表里
     const errMsg = buildErrorMessage({
-      convId: conversationStore.currentConversation?.convId || "",
-    })
+      content: `发生错误，错误信息：${status}`, // TODO: 优化错误信息的展示
+    });
 
-    chatStore.setMessages([...currentChatState.messages, { ...errMsg }])
+    chatStore.setMessages([...currentChatState.messages, { ...errMsg }]);
 
     // 更新消息之后滚动到底部
     setTimeout(() => {
-      scrollToBottom()
-    }, 1000)
+      scrollToBottom();
+    }, 1000);
 
-    newMessageState.error = true
-    newMessageState.pendingFirstToken = false
+    newMessageState.error = true;
+    newMessageState.pendingFirstToken = false;
 
     // 更新 messageState 的状态，然后直接结束，不走后面的流程
-    messageStateStore.setMessageState(newMessageState)
-  }
+    messageStateStore.setMessageState(newMessageState);
+  };
+
+  const onCompleted = () => {
+    messageStateStore.setMessageState({
+      pending: false,
+    });
+  };
+
+  const onStart = () => {
+    messageStateStore.setMessageState({
+      pending: true,
+    });
+  };
 
   const handleSendMessage = (payload: {
     body: {
-      type: TASK_STATUS
-      payload?: ChatTask
-    }
+      type: TASK_STATUS;
+      payload?: InvokeSkillRequest;
+    };
   }) => {
-    const { runtime } = useUserStore.getState()
-    console.log("handleSendMessage runtime", runtime)
-    if (runtime?.includes("extension")) {
-      return handleSendMessageFromExtension(payload)
+    const { runtime } = useUserStore.getState();
+    console.log('handleSendMessage runtime', runtime);
+    if (runtime?.includes('extension')) {
+      return handleSendMessageFromExtension(payload);
     } else {
-      return handleSendMessageFromWeb(payload)
+      return handleSendMessageFromWeb(payload);
     }
-  }
+  };
 
   const handleSendMessageFromWeb = (payload: {
     body: {
-      type: TASK_STATUS
-      payload?: ChatTask
-    }
+      type: TASK_STATUS;
+      payload?: InvokeSkillRequest;
+    };
   }) => {
-    controllerRef.current = new AbortController()
+    controllerRef.current = new AbortController();
 
-    parseStreaming(
-      controllerRef.current,
-      payload?.body?.payload,
-      onSources,
-      onContent,
-      onRelated,
+    ssePost({
+      controller: controllerRef.current,
+      payload: payload?.body?.payload,
+      onStart,
+      onSkillStart,
+      onSkillStream,
+      onSkillThoughout,
+      onSkillStructedData,
+      onSkillEnd,
+      onCompleted,
       onError,
-    )
-  }
+    });
+  };
 
   /**
    * For extension send message
@@ -256,44 +362,48 @@ export const useBuildTask = () => {
    * @returns
    */
   const handleStreamingMessage = (msg: { type: string; message: any }) => {
-    console.log("handleStreamingMessage", msg)
+    console.log('handleStreamingMessage', msg);
     switch (msg?.type) {
-      case "source":
-        return onSources(safeParseJSON(msg?.message))
-      case "content":
-        return onContent(msg?.message)
-      case "relatedQuestions":
-        return onRelated(safeParseJSON(msg?.message))
-      case "error":
-        return onError(msg?.message)
+      case 'start':
+        return onStart();
+      case 'skill-start':
+        return onSkillStart(msg?.message);
+      case 'skill-log':
+        return onSkillThoughout(msg?.message);
+      case 'skill-stream':
+        return onSkillStream(msg?.message);
+      case 'skill-end':
+        return onSkillEnd(msg?.message);
+      case 'skill-structuredData':
+        return onSkillStructedData(msg?.message);
+      case 'completed':
+        return onCompleted();
+      case 'error':
+        return onError(msg?.message);
     }
-  }
+  };
 
   const bindExtensionPorts = async () => {
-    const portRes = await getPort("streaming-chat" as never)
+    const portRes = await getPort('streaming-chat' as never);
     if (portRes?.isNew || !streamingChatPortRef.current) {
-      streamingChatPortRef.current = portRes.port
-      streamingChatPortRef.current?.onMessage?.removeListener?.(
-        handleStreamingMessage,
-      )
-      streamingChatPortRef.current?.onMessage.addListener(
-        handleStreamingMessage,
-      )
+      streamingChatPortRef.current = portRes.port;
+      streamingChatPortRef.current?.onMessage?.removeListener?.(handleStreamingMessage);
+      streamingChatPortRef.current?.onMessage.addListener(handleStreamingMessage);
     }
-  }
+  };
 
   const handleSendMessageFromExtension = async (payload: { body: any }) => {
-    await bindExtensionPorts()
+    await bindExtensionPorts();
 
     // 生成任务
     streamingChatPortRef.current?.postMessage({
       ...payload,
       source: getRuntime(),
-    })
-  }
+    });
+  };
 
   return {
     buildTaskAndGenReponse,
     buildShutdownTaskAndGenResponse,
-  }
-}
+  };
+};
