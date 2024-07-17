@@ -6,6 +6,7 @@ import ShimmerButton from "@/components/magicui/shimmer-button"
 import AnimatedShinyText from "@/components/magicui/animated-shiny-text"
 import { ArrowRightIcon } from "lucide-react"
 import { useUserStore } from "@refly/ai-workspace-common/stores/user"
+import "./hero-home.scss"
 
 function HeroHome() {
   const userStore = useUserStore()
@@ -89,7 +90,7 @@ function HeroHome() {
               onClick={() => userStore.setWaitingListModalVisible(true)}>
               <div data-aos="fade-up" data-aos-delay="600">
                 <ShimmerButton className="transition-transform ease-in hover:scale-[1.02]">
-                  <span>加入等待 ⌛️ 列表！</span>
+                  <span className="call-to-action">加入等待 ⌛️ 列表！</span>
                 </ShimmerButton>
               </div>
             </div>

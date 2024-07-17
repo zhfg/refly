@@ -19,6 +19,7 @@ export default defineConfig(({ mode }) => {
         theme: "@arco-themes/react-refly-ai",
         filePatterns: [
           "apps/web/src",
+          "apps/web-landing-page/src",
           "apps/extension-wxt/src",
           "packages/ai-workspace-common/src",
         ],
