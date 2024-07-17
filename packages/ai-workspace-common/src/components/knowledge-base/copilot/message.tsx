@@ -3,7 +3,7 @@ import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { ChatMessage, Source } from '@refly/openapi-schema';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
-import { Avatar, Button, Spin, Message, Dropdown, Menu, Skeleton, Collapse } from '@arco-design/web-react';
+import { Avatar, Button, Spin, Message, Dropdown, Menu, Skeleton, Collapse, Divider } from '@arco-design/web-react';
 import {
   IconBook,
   IconCaretDown,
@@ -176,11 +176,46 @@ export const AssistantMessage = (props: {
                   isLastSession={isLastSession}
                 />
               </div>
+              {(sources || [])?.length > 0 ? (
+                <Divider
+                  style={{
+                    borderBottomStyle: 'dashed',
+                  }}
+                />
+              ) : null}
               {isLastSession && isPendingFirstToken ? (
                 <Skeleton animation text={{ width: '90%' }}></Skeleton>
               ) : (
                 <Markdown content={message?.content as string} sources={sources} />
               )}
+              {(relatedQuestions || [])?.length > 0 ? (
+                <Divider
+                  style={{
+                    borderBottomStyle: 'dashed',
+                  }}
+                />
+              ) : null}
+              {isLastSession && (relatedQuestions || []).length > 0 ? (
+                <div className="ai-copilot-related-question-container">
+                  {(relatedQuestions || [])?.length > 0 ? (
+                    <div className="session-title-icon">
+                      <p>你可能还想问</p>
+                    </div>
+                  ) : null}
+                  <div className="ai-copilot-related-question-list">
+                    {relatedQuestions?.map((item, index) => (
+                      <div
+                        className="ai-copilot-related-question-item"
+                        key={index}
+                        onClick={() => handleAskFollowing(item)}
+                      >
+                        <p className="ai-copilot-related-question-title">{item}</p>
+                        {/* <IconRight style={{ color: 'rgba(0, 0, 0, 0.5)' }} /> */}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
             {(!isPending || !isLastSession) && (
               <div className="ai-copilot-answer-action-container">
@@ -224,18 +259,6 @@ export const AssistantMessage = (props: {
           </div>
         </>
       </div>
-      {isLastSession && (relatedQuestions || []).length > 0 ? (
-        <div className="ai-copilot-related-question-container">
-          <div className="ai-copilot-related-question-list">
-            {relatedQuestions?.map((item, index) => (
-              <div className="ai-copilot-related-question-item" key={index} onClick={() => handleAskFollowing(item)}>
-                <p className="ai-copilot-related-question-title">{item}</p>
-                <IconRight style={{ color: 'rgba(0, 0, 0, 0.5)' }} />
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 };
