@@ -2022,6 +2022,10 @@ export const $SearchResultMeta = {
     resourceType: {
       $ref: '#/components/schemas/ResourceType',
     },
+    collectionId: {
+      type: 'string',
+      description: 'Collection ID',
+    },
   },
 } as const;
 

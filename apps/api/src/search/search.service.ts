@@ -62,6 +62,7 @@ export class SearchService {
     interface ResourceResult {
       resource_id: string;
       resource_type: ResourceType;
+      collection_id: string;
       created_at: string;
       updated_at: string;
       title: string;
@@ -72,6 +73,7 @@ export class SearchService {
     const resources = await this.prisma.$queryRaw<ResourceResult[]>`
       SELECT   resource_id,
                resource_type,
+               collection_id,
                created_at,
                updated_at,
                pgroonga_highlight_html(
@@ -95,7 +97,10 @@ export class SearchService {
       content: resource.content
         .split(/\r?\n+/)
         .filter((line) => /<span\b[^>]*>(.*?)<\/span>/gi.test(line)),
-      metadata: { resourceType: resource.resource_type },
+      metadata: {
+        resourceType: resource.resource_type,
+        collectionId: resource.collection_id,
+      },
       createdAt: resource.created_at,
       updatedAt: resource.updated_at,
     }));

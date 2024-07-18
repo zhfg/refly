@@ -1,8 +1,14 @@
-import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { readingTime } from 'reading-time-estimator';
-import { Prisma, Resource as ResourceModel, User } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import { RAGService } from '../rag/rag.service';
 import { PrismaService } from '../common/prisma.service';
 import { MinioService } from '../common/minio.service';
@@ -41,14 +47,31 @@ export class KnowledgeService {
 
   async getCollectionDetail(user: Pick<User, 'uid'>, param: { collectionId: string }) {
     const { collectionId } = param;
+
     const coll = await this.prisma.collection.findFirst({
-      where: { collectionId, deletedAt: null },
-      include: { resources: { orderBy: { updatedAt: 'desc' } } },
+      where: { collectionId, uid: user.uid, deletedAt: null },
     });
     if (!coll) {
-      throw new BadRequestException('Collection not found');
+      throw new NotFoundException('Collection not found');
     }
-    return coll.isPublic || coll.uid === user.uid ? coll : null;
+
+    // Permission check
+    if (!coll.isPublic && coll.uid !== user.uid) {
+      return null;
+    }
+
+    let resources = await this.prisma.resource.findMany({
+      omit: { content: true },
+      where: { collectionId, deletedAt: null },
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    // If collection is read by other users, filter out resources that are not public
+    if (coll.isPublic && coll.uid !== user.uid) {
+      resources = resources.filter((r) => r.isPublic);
+    }
+
+    return { ...coll, resources };
   }
 
   async upsertCollection(user: Pick<User, 'uid'>, param: UpsertCollectionRequest) {
@@ -86,31 +109,22 @@ export class KnowledgeService {
     });
   }
 
-  async listResources(
-    user: Pick<User, 'uid'>,
-    param: ListResourcesData['query'],
-  ): Promise<ResourceModel[]> {
+  async listResources(user: Pick<User, 'uid'>, param: ListResourcesData['query']) {
     const { collectionId, resourceId, page = 1, pageSize = 10 } = param;
 
     // Query resources by collection
     if (collectionId) {
-      const data = await this.prisma.collection.findMany({
-        where: { collectionId, deletedAt: null },
-        include: {
-          resources: {
-            skip: (page - 1) * pageSize,
-            take: pageSize,
-            orderBy: { updatedAt: 'desc' },
-          },
-        },
+      return this.prisma.resource.findMany({
+        omit: { content: true },
+        where: { collectionId, deletedAt: null, OR: [{ isPublic: true }, { uid: user.uid }] },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        orderBy: { updatedAt: 'desc' },
       });
-      return data.length > 0 && (data[0].isPublic || data[0].uid === user.uid)
-        ? data[0].resources
-        : [];
     }
 
     const resources = await this.prisma.resource.findMany({
-      where: { resourceId, deletedAt: null },
+      where: { resourceId, uid: user.uid, deletedAt: null },
       skip: (page - 1) * pageSize,
       take: pageSize,
       orderBy: { updatedAt: 'desc' },
@@ -169,34 +183,36 @@ export class KnowledgeService {
       throw new BadRequestException('Invalid resource type');
     }
 
-    const res = await this.prisma.resource.create({
-      data: {
-        resourceId: param.resourceId,
-        resourceType: param.resourceType,
-        meta: JSON.stringify(param.data),
-        content: param.content ?? '',
-        uid: user.uid,
-        isPublic: param.isPublic,
-        readOnly: param.readOnly,
-        title: param.title || 'Untitled',
-        indexStatus: 'processing',
-        collections: {
-          connectOrCreate: {
-            where: { collectionId: param.collectionId },
-            create: {
-              title: param.collectionName || 'Default Collection',
-              uid: user.uid,
-              collectionId: param.collectionId,
-            },
-          },
+    const [resource] = await this.prisma.$transaction([
+      this.prisma.resource.create({
+        data: {
+          resourceId: param.resourceId,
+          resourceType: param.resourceType,
+          collectionId: param.collectionId,
+          meta: JSON.stringify(param.data),
+          content: param.content ?? '',
+          uid: user.uid,
+          isPublic: param.isPublic,
+          readOnly: param.readOnly,
+          title: param.title || 'Untitled',
+          indexStatus: 'processing',
         },
-      },
-    });
+      }),
+      this.prisma.collection.upsert({
+        where: { collectionId: param.collectionId },
+        create: {
+          title: param.collectionName || 'Default Collection',
+          uid: user.uid,
+          collectionId: param.collectionId,
+        },
+        update: {},
+      }),
+    ]);
 
     await this.queue.add(CHANNEL_FINALIZE_RESOURCE, { ...param, uid: user.uid });
     // await this.finalizeResource(param);
 
-    return res;
+    return resource;
   }
 
   async indexResource(user: User, param: UpsertResourceRequest) {

@@ -1373,6 +1373,10 @@ export type scope = 'user' | 'public';
 
 export type SearchResultMeta = {
   resourceType?: ResourceType;
+  /**
+   * Collection ID
+   */
+  collectionId?: string;
 };
 
 export type SearchResult = {

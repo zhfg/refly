@@ -94,7 +94,8 @@
     "jsonwebtoken": "~9.0.2",
     "express": "~4.19.2",
     "p-limit": "3.1.0",
-    "@node-rs/jieba": "~1.10.3"
+    "@node-rs/jieba": "~1.10.3",
+    "ts-toolbelt": "~9.6.0"
   },
   "devDependencies": {
     "@nestjs/cli": "~10.3.2",

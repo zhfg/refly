@@ -1,3 +1,4 @@
+import { O } from 'ts-toolbelt';
 import { Collection as CollectionModel, Resource as ResourceModel } from '@prisma/client';
 import { UpsertResourceRequest, Collection, Resource } from '@refly/openapi-schema';
 import { omit } from '../utils';
@@ -6,8 +7,10 @@ export type FinalizeResourceParam = UpsertResourceRequest & {
   uid: string;
 };
 
+type ResourceWithOptionalContent = O.Optional<ResourceModel, 'content'>;
+
 export const collectionPO2DTO = (
-  coll: CollectionModel & { resources?: ResourceModel[] },
+  coll: CollectionModel & { resources?: ResourceWithOptionalContent[] },
 ): Collection => {
   if (!coll) {
     return null;
@@ -20,7 +23,7 @@ export const collectionPO2DTO = (
   };
 };
 
-export const resourcePO2DTO = (resource: ResourceModel): Resource => {
+export const resourcePO2DTO = (resource: ResourceWithOptionalContent): Resource => {
   if (!resource) {
     return null;
   }
