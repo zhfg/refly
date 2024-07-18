@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import avro from 'avsc';
 import { LRUCache } from 'lru-cache';
 import { Document } from '@langchain/core/documents';
-import { TokenTextSplitter } from 'langchain/text_splitter';
+import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { Embeddings } from '@langchain/core/embeddings';
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { cleanMarkdownForIngest } from '@refly/utils';
@@ -12,16 +12,16 @@ import { User } from '@prisma/client';
 import { MinioService } from '../common/minio.service';
 import {
   HybridSearchParam,
-  ContentDataObj,
+  ContentNode,
   ContentData,
   ContentType,
   ContentPayload,
   ReaderResult,
   DocMeta,
 } from './rag.dto';
-import { QdrantService } from '../common/qdrant.service';
-import { Condition, PointStruct } from '../common/qdrant.dto';
-import { genResourceUuid, omit } from '../utils';
+import { QdrantService } from '@/common/qdrant.service';
+import { Condition, PointStruct } from '@/common/qdrant.dto';
+import { genResourceUuid } from '@/utils';
 
 const READER_URL = 'https://r.jina.ai/';
 
@@ -59,7 +59,7 @@ export const PARSER_VERSION = '20240424';
 @Injectable()
 export class RAGService {
   private embeddings: Embeddings;
-  private splitter: TokenTextSplitter;
+  private splitter: RecursiveCharacterTextSplitter;
   private cache: LRUCache<string, ReaderResult>; // url -> reader result
   private logger = new Logger(RAGService.name);
 
@@ -75,10 +75,9 @@ export class RAGService {
       timeout: 5000,
       maxRetries: 3,
     });
-    this.splitter = new TokenTextSplitter({
-      encodingName: 'cl100k_base',
-      chunkSize: 800,
-      chunkOverlap: 400,
+    this.splitter = RecursiveCharacterTextSplitter.fromLanguage('markdown', {
+      chunkSize: 1000,
+      chunkOverlap: 0,
     });
     this.cache = new LRUCache({ max: 1000 });
   }
@@ -127,28 +126,31 @@ export class RAGService {
     return await this.splitter.splitText(cleanMarkdownForIngest(text));
   }
 
-  async indexContent(doc: Document<DocMeta>): Promise<ContentDataObj[]> {
+  async indexContent(doc: Document<DocMeta>): Promise<ContentNode[]> {
     const { pageContent, metadata } = doc;
     const { resourceId, collectionId } = metadata;
 
     const chunks = await this.chunkText(pageContent);
     const chunkEmbeds = await this.embeddings.embedDocuments(chunks);
 
-    const dataObjs: ContentDataObj[] = [];
+    const nodes: ContentNode[] = [];
     for (let i = 0; i < chunks.length; i++) {
-      dataObjs.push({
+      nodes.push({
         id: genResourceUuid(`${resourceId}-${i}`),
-        url: metadata.url,
-        type: ContentType.WEBLINK,
-        title: metadata.title,
-        content: chunks[i],
         vector: chunkEmbeds[i],
-        resourceId,
-        collectionId,
+        payload: {
+          url: metadata.url,
+          seq: i,
+          type: ContentType.WEBLINK,
+          title: metadata.title,
+          content: chunks[i],
+          resourceId,
+          collectionId,
+        },
       });
     }
 
-    return dataObjs;
+    return nodes;
   }
 
   /**
@@ -172,7 +174,7 @@ export class RAGService {
       id: chunk.id,
       vector: chunk.vector,
       payload: {
-        ...omit(chunk, ['id', 'vector']),
+        ...chunk.payload,
         tenantId: user.uid,
       },
     }));
