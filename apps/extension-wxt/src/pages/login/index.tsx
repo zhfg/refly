@@ -7,7 +7,7 @@ import { useUserStore } from '@/stores/user';
 // 静态资源
 import Logo from '@/assets/logo.svg';
 import { getClientOrigin } from '@refly/utils/url';
-import { ChatHeader } from '@/components/home/header';
+import { ChatHeader } from '@/components/chat-header';
 import { useTranslation } from 'react-i18next';
 // styles
 import './index.scss';
