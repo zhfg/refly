@@ -2352,6 +2352,11 @@ components:
           type: number
           description: Search result limit for each domain
           default: 5
+    SearchResultMeta:
+      type: object
+      properties:
+        resourceType:
+          $ref: '#/components/schemas/ResourceType'
     SearchResult:
       type: object
       required:
@@ -2375,6 +2380,9 @@ components:
           description: Search result content list with highlight marks
           items:
             type: string
+        metadata:
+          description: Search result metadata
+          $ref: '#/components/schemas/SearchResultMeta'
         createdAt:
           type: string
           format: date-time

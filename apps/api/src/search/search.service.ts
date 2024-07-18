@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
 import { cut, extract } from '@node-rs/jieba';
 import { PrismaService } from '@/common/prisma.service';
-import { SearchRequest, SearchResult } from '@refly/openapi-schema';
+import { ResourceType, SearchRequest, SearchResult } from '@refly/openapi-schema';
 import { RAGService } from '@/rag/rag.service';
 
 interface ProcessedSearchRequest extends SearchRequest {
@@ -28,6 +28,7 @@ export class SearchService {
     const results = await this.prisma.resource.findMany({
       select: {
         resourceId: true,
+        resourceType: true,
         title: true,
         content: true,
         createdAt: true,
@@ -44,7 +45,8 @@ export class SearchService {
       id: result.resourceId,
       domain: 'resource',
       title: result.title,
-      content: [result.content.slice(0, 50) + '...'], // TODO: truncate in sql to reduce traffic
+      content: [result.content.slice(0, 250) + '...'], // TODO: truncate in sql to reduce traffic
+      metadata: { resourceType: result.resourceType },
       createdAt: result.createdAt.toJSON(),
       updatedAt: result.updatedAt.toJSON(),
     }));
@@ -59,6 +61,7 @@ export class SearchService {
 
     interface ResourceResult {
       resource_id: string;
+      resource_type: ResourceType;
       created_at: string;
       updated_at: string;
       title: string;
@@ -68,6 +71,7 @@ export class SearchService {
     const tokenOrList = tokens.join(' OR ');
     const resources = await this.prisma.$queryRaw<ResourceResult[]>`
       SELECT   resource_id,
+               resource_type,
                created_at,
                updated_at,
                pgroonga_highlight_html(
@@ -91,6 +95,7 @@ export class SearchService {
       content: resource.content
         .split(/\r?\n+/)
         .filter((line) => /<span\b[^>]*>(.*?)<\/span>/gi.test(line)),
+      metadata: { resourceType: resource.resource_type },
       createdAt: resource.created_at,
       updatedAt: resource.updated_at,
     }));

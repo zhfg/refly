@@ -6,6 +6,7 @@ export enum ContentType {
 
 export interface ContentPayload {
   url: string;
+  seq: number;
   type: ContentType;
   title: string;
   content: string;
@@ -13,13 +14,14 @@ export interface ContentPayload {
   collectionId?: string;
 }
 
-export interface ContentDataObj extends ContentPayload {
+export interface ContentNode {
   id: string;
   vector: number[];
+  payload: ContentPayload;
 }
 
 export interface ContentData {
-  chunks: ContentDataObj[];
+  chunks: ContentNode[];
 }
 
 export interface HybridSearchParam {

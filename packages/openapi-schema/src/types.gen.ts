@@ -1371,6 +1371,10 @@ export type SearchRequest = {
  */
 export type scope = 'user' | 'public';
 
+export type SearchResultMeta = {
+  resourceType?: ResourceType;
+};
+
 export type SearchResult = {
   /**
    * Search result ID to navigate to
@@ -1388,6 +1392,10 @@ export type SearchResult = {
    * Search result content list with highlight marks
    */
   content?: Array<string>;
+  /**
+   * Search result metadata
+   */
+  metadata?: SearchResultMeta;
   /**
    * Data creation time
    */

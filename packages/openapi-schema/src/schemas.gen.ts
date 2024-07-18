@@ -2016,6 +2016,15 @@ export const $SearchRequest = {
   },
 } as const;
 
+export const $SearchResultMeta = {
+  type: 'object',
+  properties: {
+    resourceType: {
+      $ref: '#/components/schemas/ResourceType',
+    },
+  },
+} as const;
+
 export const $SearchResult = {
   type: 'object',
   required: ['id', 'domain', 'title', 'createdAt', 'updatedAt'],
@@ -2038,6 +2047,10 @@ export const $SearchResult = {
       items: {
         type: 'string',
       },
+    },
+    metadata: {
+      description: 'Search result metadata',
+      $ref: '#/components/schemas/SearchResultMeta',
     },
     createdAt: {
       type: 'string',
