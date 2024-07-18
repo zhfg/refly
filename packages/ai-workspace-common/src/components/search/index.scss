@@ -485,12 +485,14 @@
     flex-direction: column;
     width: 320px;
     border: 1px solid var(--gray6);
-    background: var(--gray2);
+    background: var(--gray2) !important;
     border-radius: 8px;
+    padding: 0;
   }
 
   [cmdk-list] {
     padding: 8px;
+    height: auto;
     overflow: auto;
     overscroll-behavior: contain;
     transition: 100ms ease;
@@ -531,6 +533,7 @@
     svg {
       width: 16px;
       height: 16px;
+      margin: 0;
     }
 
     [cmdk-raycast-submenu-shortcuts] {
@@ -569,10 +572,10 @@
   }
 
   [cmdk-input] {
-    padding: 12px;
+    padding: 8px 16px;
     font-family: var(--font-sans);
     border: 0;
-    border-top: 1px solid var(--gray6);
+    border-top: 1px solid var(--gray6) !important;
     font-size: 13px;
     background: transparent;
     margin-top: auto;

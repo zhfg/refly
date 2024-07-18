@@ -127,7 +127,7 @@ export const KnowledgeBaseResourceDetail = () => {
         ) : (
           <div className="knowledge-base-resource-content">
             <div className="knowledge-base-resource-content-title">{resourceDetail?.title}</div>
-            <Markdown content={resourceDetail?.doc || ''}></Markdown>
+            <Markdown content={resourceDetail?.content || ''}></Markdown>
           </div>
         )}
       </div>

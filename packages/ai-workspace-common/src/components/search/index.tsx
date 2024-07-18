@@ -2,88 +2,192 @@ import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/searc
 import { Command } from 'cmdk';
 import * as Popover from '@radix-ui/react-popover';
 import { Logo, LinearIcon, FigmaIcon, SlackIcon, YouTubeIcon, RaycastIcon } from './icons';
+import {} from '@heroicons/react/24/outline';
+import {
+  IconSearch,
+  IconMessage,
+  IconFile,
+  IconApps,
+  IconBook,
+  IconEdit,
+  IconRobot,
+} from '@arco-design/web-react/icon';
+import { useDebouncedCallback } from 'use-debounce';
 
 import './index.scss';
-import React from 'react';
+import React, { useState } from 'react';
 import { Modal } from '@arco-design/web-react';
 
+// request
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+
 export const Search = () => {
-  const [value, setValue] = React.useState('linear');
+  const [value, setValue] = React.useState('');
+  const [searchValue, setSearchValue] = useState('');
+  const searchStore = useSearchStore();
+  const [displayMode, setDisplayMode] = useState<'search' | 'list'>('list');
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const listRef = React.useRef(null);
 
+  const handleBigSearchValueChange = async (searchVal: string) => {
+    setSearchValue(searchVal);
+    console.log('searchVal', searchVal);
+
+    // searchVal 为空的时候获取正常列表的内容
+    if (!searchVal) {
+      setDisplayMode('list');
+      debouncedSearch('');
+    } else {
+      // searchVal 不为空的时候获取搜索的内容
+      setDisplayMode('search');
+      debouncedSearch(searchVal);
+    }
+  };
+
+  const debouncedSearch = useDebouncedCallback(async (searchVal) => {
+    try {
+      const res = await getClient().search({
+        body: {
+          query: searchVal,
+          scope: 'user',
+        },
+      });
+
+      const resData = res?.data?.data || [];
+
+      // notes
+      const notes =
+        resData.filter((item) => item?.metadata?.resourceType === 'note' && item?.domain === 'resource') || [];
+      const readResources =
+        resData.filter((item) => item?.metadata?.resourceType !== 'note' && item?.domain === 'resource') || [];
+      const knowledgeBases = resData.filter((item) => item?.domain === 'collection') || [];
+      const convs = resData.filter((item) => item?.domain === 'conversation') || [];
+      const skills = resData.filter((item) => item?.domain === 'skill') || [];
+
+      searchStore.setSearchedRes({
+        notes,
+        readResources,
+        knowledgeBases,
+        convs,
+        skills,
+      });
+    } catch (err) {
+      console.log('big search err: ', err);
+    }
+  }, 200);
+
   React.useEffect(() => {
     inputRef?.current?.focus();
+    handleBigSearchValueChange('');
   }, []);
 
   return (
     <div className="raycast">
-      <Command value={value} onValueChange={(v) => setValue(v)}>
+      <Command
+        value={value}
+        onValueChange={(v) => {
+          setValue(v);
+        }}
+        loop
+      >
         <div cmdk-raycast-top-shine="" />
-        <Command.Input ref={inputRef} autoFocus placeholder="Search for apps and commands..." />
+        <Command.Input
+          ref={inputRef}
+          autoFocus
+          placeholder="Search for skills, resources, notes and more..."
+          value={searchValue}
+          onValueChange={(val) => handleBigSearchValueChange(val)}
+        />
         <hr cmdk-raycast-loader="" />
         <Command.List ref={listRef}>
-          <Command.Empty>No results found.</Command.Empty>
+          <Command.Empty>
+            <p>No results found</p>
+          </Command.Empty>
           <Command.Group heading="Suggestions">
-            <Item value="Linear" keywords={['issue', 'sprint']}>
-              <Logo>
-                <LinearIcon
-                  style={{
-                    width: 12,
-                    height: 12,
-                  }}
-                />
-              </Logo>
-              Linear
-            </Item>
-            <Item value="Figma" keywords={['design', 'ui', 'ux']}>
-              <Logo>
-                <FigmaIcon />
-              </Logo>
-              Figma
-            </Item>
-            <Item value="Slack" keywords={['chat', 'team', 'communication']}>
-              <Logo>
-                <SlackIcon />
-              </Logo>
-              Slack
-            </Item>
-            <Item value="YouTube" keywords={['video', 'watch', 'stream']}>
-              <Logo>
-                <YouTubeIcon />
-              </Logo>
-              YouTube
-            </Item>
-            <Item value="Raycast" keywords={['productivity', 'tools', 'apps']}>
-              <Logo>
-                <RaycastIcon />
-              </Logo>
-              Raycast
+            <Item value="newConv" keywords={['NewConv']}>
+              <IconMessage style={{ fontSize: 12 }} />
+              问问小飞
             </Item>
           </Command.Group>
-          <Command.Group heading="Commands">
-            <Item isCommand value="Clipboard History" keywords={['copy', 'paste', 'clipboard']}>
-              <Logo>
-                <ClipboardIcon />
-              </Logo>
-              Clipboard History
-            </Item>
-            <Item isCommand value="Import Extension" keywords={['import', 'extension']}>
-              <HammerIcon />
-              Import Extension
-            </Item>
-            <Item isCommand value="Manage Extensions" keywords={['manage', 'extension']}>
-              <HammerIcon />
-              Manage Extensions
-            </Item>
+
+          <Command.Group heading="技能">
+            {searchStore?.searchedSkills?.map((item, index) => (
+              <Item key={index} value={`skills-${index}-${item?.title}`}>
+                <IconRobot style={{ fontSize: 12 }} />
+                {item?.title}
+              </Item>
+            ))}
+            {displayMode === 'list' && searchStore?.searchedSkills?.length > 0 ? (
+              <Item value="allSkills" keywords={['AskKnowledgeBase']}>
+                <IconApps style={{ fontSize: 12 }} />
+                查看所有技能
+              </Item>
+            ) : null}
+          </Command.Group>
+          <Command.Group heading="笔记">
+            {searchStore?.searchedNotes?.map((item, index) => (
+              <Item key={index} value={`notes-${index}-${item?.title}`}>
+                <IconEdit style={{ fontSize: 12 }} />
+                {item?.title}
+              </Item>
+            ))}
+            {displayMode === 'list' && searchStore?.searchedNotes?.length > 0 ? (
+              <Item value="allNotes" keywords={['AskKnowledgeBase']}>
+                <IconApps style={{ fontSize: 12 }} />
+                查看所有笔记
+              </Item>
+            ) : null}
+          </Command.Group>
+
+          <Command.Group heading="阅读资源">
+            {searchStore?.searchedReadResources?.map((item, index) => (
+              <Item key={index} value={`readResources-${index}-${item?.title}`}>
+                <IconBook style={{ fontSize: 12 }} />
+                {item?.title}
+              </Item>
+            ))}
+            {displayMode === 'list' && searchStore?.searchedReadResources?.length > 0 ? (
+              <Item value="allReadResources" keywords={['AskKnowledgeBase']}>
+                <IconApps style={{ fontSize: 12 }} />
+                查看所有阅读资源
+              </Item>
+            ) : null}
+          </Command.Group>
+
+          <Command.Group heading="知识库">
+            {searchStore?.searchedKnowledgeBases?.map((item, index) => (
+              <Item key={index} value={`knowledgeBases-${index}-${item?.title}`}>
+                <IconFile style={{ fontSize: 12 }} />
+                {item?.title}
+              </Item>
+            ))}
+            {displayMode === 'list' && searchStore?.searchedKnowledgeBases?.length > 0 ? (
+              <Item value="allKnowledgeBases" keywords={['AskKnowledgeBase']}>
+                <IconApps style={{ fontSize: 12 }} />
+                查看所有知识库
+              </Item>
+            ) : null}
+          </Command.Group>
+
+          <Command.Group heading="会话">
+            {searchStore?.searchedConvs?.map((item, index) => (
+              <Item key={index} value={`convs-${index}-${item?.title}`}>
+                <IconMessage style={{ fontSize: 12 }} />
+                {item?.title}
+              </Item>
+            ))}
+            {displayMode === 'list' && searchStore?.searchedConvs?.length > 0 ? (
+              <Item value="allConvs" keywords={['AskKnowledgeBase']}>
+                <IconApps style={{ fontSize: 12 }} />
+                查看所有会话
+              </Item>
+            ) : null}
           </Command.Group>
         </Command.List>
 
         <div cmdk-raycast-footer="">
-          <RaycastLightIcon />
-
           <button cmdk-raycast-open-trigger="">
-            Open Application
+            执行技能或打开资源
             <kbd>↵</kbd>
           </button>
 
@@ -100,17 +204,24 @@ function Item({
   children,
   value,
   keywords,
-  isCommand = false,
+  meta,
 }: {
   children: React.ReactNode;
   value: string;
   keywords?: string[];
-  isCommand?: boolean;
+  meta?: string;
 }) {
+  const [isSelected, setSelected] = useState(false);
   return (
-    <Command.Item value={value} keywords={keywords} onSelect={() => {}}>
+    <Command.Item
+      value={value}
+      keywords={keywords}
+      onSelect={(selectedVal) => {
+        setSelected(selectedVal === value);
+      }}
+    >
       {children}
-      <span cmdk-raycast-meta="">{isCommand ? 'Command' : 'Application'}</span>
+      <span cmdk-raycast-meta="">{meta}</span>
     </Command.Item>
   );
 }
@@ -128,7 +239,7 @@ function SubCommand({
 
   React.useEffect(() => {
     function listener(e: KeyboardEvent) {
-      if (e.key === 'a' && e.metaKey) {
+      if (e.key === 'k' && e.metaKey) {
         e.preventDefault();
         setOpen((o) => !o);
       }
@@ -154,11 +265,11 @@ function SubCommand({
   }, [open, listRef]);
 
   return (
-    <Popover.Root open={open} onOpenChange={setOpen} modal>
+    <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger cmdk-raycast-subcommand-trigger="" onClick={() => setOpen(true)} aria-expanded={open}>
         Actions
         <kbd>⌘</kbd>
-        <kbd>A</kbd>
+        <kbd>K</kbd>
       </Popover.Trigger>
       <Popover.Content
         side="top"
@@ -176,7 +287,7 @@ function SubCommand({
             <Command.Group heading={selectedValue}>
               <SubItem shortcut="↵">
                 <WindowIcon />
-                Open Application
+                执行技能或打开资源
               </SubItem>
               <SubItem shortcut="⌘ ↵">
                 <FinderIcon />
