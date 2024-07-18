@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
-import { extract } from '@node-rs/jieba';
+import { cut, extract } from '@node-rs/jieba';
 import { PrismaService } from '@/common/prisma.service';
 import { SearchRequest, SearchResult } from '@refly/openapi-schema';
 import { RAGService } from '@/rag/rag.service';
@@ -14,10 +14,14 @@ export class SearchService {
   constructor(private prisma: PrismaService, private rag: RAGService) {}
 
   preprocessSearchRequest(req: SearchRequest): ProcessedSearchRequest {
-    return {
-      ...req,
-      tokens: extract(req.query, 5).map((item) => item.keyword),
-    };
+    let tokens = cut(req.query);
+    if (tokens.length > 5) {
+      const extractedTokens = extract(req.query, 5).map((item) => item.keyword);
+      if (extractedTokens.length > 0) {
+        tokens = extractedTokens;
+      }
+    }
+    return { ...req, tokens };
   }
 
   async emptySearchResources(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
@@ -204,6 +208,10 @@ export class SearchService {
       AND      content &@~ ${tokenOrList}::TEXT
       ORDER BY pgroonga_score(tableoid, ctid) DESC
     `;
+
+    if (messages.length === 0) {
+      return [];
+    }
 
     interface ConversationResult {
       id: number;
