@@ -2357,6 +2357,9 @@ components:
       properties:
         resourceType:
           $ref: '#/components/schemas/ResourceType'
+        collectionId:
+          type: string
+          description: Collection ID
     SearchResult:
       type: object
       required:
