@@ -77,7 +77,7 @@ export type Resource = {
   /**
    * Document content for this resource
    */
-  doc?: string;
+  content?: string;
 };
 
 export type Collection = {

@@ -974,7 +974,7 @@ components:
           type: string
           format: date-time
           description: Collection update time
-        doc:
+        content:
           type: string
           description: Document content for this resource
     Collection:

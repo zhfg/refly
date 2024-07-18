@@ -99,7 +99,7 @@ export const $Resource = {
       format: 'date-time',
       description: 'Collection update time',
     },
-    doc: {
+    content: {
       type: 'string',
       description: 'Document content for this resource',
     },
