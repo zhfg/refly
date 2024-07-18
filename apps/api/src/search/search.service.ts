@@ -28,6 +28,7 @@ export class SearchService {
     const results = await this.prisma.resource.findMany({
       select: {
         resourceId: true,
+        collectionId: true,
         resourceType: true,
         title: true,
         content: true,
@@ -46,7 +47,10 @@ export class SearchService {
       domain: 'resource',
       title: result.title,
       content: [result.content.slice(0, 250) + '...'], // TODO: truncate in sql to reduce traffic
-      metadata: { resourceType: result.resourceType },
+      metadata: {
+        resourceType: result.resourceType,
+        collectionId: result.collectionId,
+      },
       createdAt: result.createdAt.toJSON(),
       updatedAt: result.updatedAt.toJSON(),
     }));
