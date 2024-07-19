@@ -324,15 +324,16 @@ export const $SkillLog = {
 export const $SourceMeta = {
   type: 'object',
   description: 'Source metadata',
-  required: ['pageContent', 'score'],
   properties: {
     source: {
       type: 'string',
       description: 'Source URL',
+      deprecated: true,
     },
     title: {
       type: 'string',
       description: 'Source title',
+      deprecated: true,
     },
     publishedTime: {
       type: 'string',
@@ -404,7 +405,6 @@ export const $Source = {
     metadata: {
       type: 'object',
       description: 'Source metadata',
-      deprecated: true,
       $ref: '#/components/schemas/SourceMeta',
     },
     selections: {
@@ -1988,9 +1988,14 @@ export const $SearchDomain = {
   enum: ['resource', 'collection', 'conversation', 'skill'],
 } as const;
 
+export const $SearchMode = {
+  type: 'string',
+  enum: ['keyword', 'vector', 'hybrid'],
+} as const;
+
 export const $SearchRequest = {
   type: 'object',
-  required: ['query', 'scope'],
+  required: ['query'],
   properties: {
     query: {
       type: 'string',
@@ -2000,6 +2005,7 @@ export const $SearchRequest = {
       type: 'string',
       description: 'Search scope',
       enum: ['user', 'public'],
+      default: 'user',
     },
     domains: {
       type: 'array',
@@ -2007,6 +2013,12 @@ export const $SearchRequest = {
       items: {
         $ref: '#/components/schemas/SearchDomain',
       },
+    },
+    mode: {
+      type: 'string',
+      description: 'Search mode',
+      $ref: '#/components/schemas/SearchMode',
+      default: 'keyword',
     },
     limit: {
       type: 'number',
@@ -2020,7 +2032,14 @@ export const $SearchResultMeta = {
   type: 'object',
   properties: {
     resourceType: {
+      type: 'string',
+      description: 'Resource type',
       $ref: '#/components/schemas/ResourceType',
+    },
+    resourceMeta: {
+      type: 'object',
+      description: 'Resource metadata',
+      $ref: '#/components/schemas/ResourceMeta',
     },
     collectionId: {
       type: 'string',
@@ -2031,7 +2050,7 @@ export const $SearchResultMeta = {
 
 export const $SearchResult = {
   type: 'object',
-  required: ['id', 'domain', 'title', 'createdAt', 'updatedAt'],
+  required: ['id', 'domain', 'title'],
   properties: {
     id: {
       type: 'string',

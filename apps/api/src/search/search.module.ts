@@ -8,5 +8,6 @@ import { RAGModule } from '@/rag/rag.module';
   imports: [CommonModule, RAGModule],
   providers: [SearchService],
   controllers: [SearchController],
+  exports: [SearchService],
 })
 export class SearchModule {}

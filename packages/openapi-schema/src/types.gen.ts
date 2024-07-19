@@ -260,10 +260,12 @@ export type SkillLog = {
 export type SourceMeta = {
   /**
    * Source URL
+   * @deprecated
    */
   source?: string;
   /**
    * Source title
+   * @deprecated
    */
   title?: string;
   /**
@@ -334,7 +336,6 @@ export type Source = {
   score?: number;
   /**
    * Source metadata
-   * @deprecated
    */
   metadata?: SourceMeta;
   /**
@@ -1347,6 +1348,8 @@ export type GetUserTopicsResponse = BaseResponse & {
 
 export type SearchDomain = 'resource' | 'collection' | 'conversation' | 'skill';
 
+export type SearchMode = 'keyword' | 'vector' | 'hybrid';
+
 export type SearchRequest = {
   /**
    * Search query (if empty, return last updated data)
@@ -1355,11 +1358,15 @@ export type SearchRequest = {
   /**
    * Search scope
    */
-  scope: 'user' | 'public';
+  scope?: 'user' | 'public';
   /**
    * Search domains (if not specified, return all domains)
    */
   domains?: Array<SearchDomain>;
+  /**
+   * Search mode
+   */
+  mode?: SearchMode;
   /**
    * Search result limit for each domain
    */
@@ -1372,7 +1379,14 @@ export type SearchRequest = {
 export type scope = 'user' | 'public';
 
 export type SearchResultMeta = {
+  /**
+   * Resource type
+   */
   resourceType?: ResourceType;
+  /**
+   * Resource metadata
+   */
+  resourceMeta?: ResourceMeta;
   /**
    * Collection ID
    */
@@ -1403,11 +1417,11 @@ export type SearchResult = {
   /**
    * Data creation time
    */
-  createdAt: string;
+  createdAt?: string;
   /**
    * Collection creation time
    */
-  updatedAt: string;
+  updatedAt?: string;
 };
 
 export type SearchResponse = BaseResponse & {

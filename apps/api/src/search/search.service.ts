@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, User } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { cut, extract } from '@node-rs/jieba';
 import { PrismaService } from '@/common/prisma.service';
 import { ResourceType, SearchRequest, SearchResult } from '@refly/openapi-schema';
+import { SkillUser as User } from '@refly/skill-template';
 import { RAGService } from '@/rag/rag.service';
 
 interface ProcessedSearchRequest extends SearchRequest {
@@ -14,6 +15,15 @@ export class SearchService {
   constructor(private prisma: PrismaService, private rag: RAGService) {}
 
   preprocessSearchRequest(req: SearchRequest): ProcessedSearchRequest {
+    if (!req.limit || req.limit <= 0) {
+      req.limit = 5;
+    }
+    if (req.limit > 10) {
+      req.limit = 10;
+    }
+    req.mode ??= 'keyword';
+    req.domains ??= ['resource', 'collection', 'conversation', 'skill'];
+
     let tokens = cut(req.query);
     if (tokens.length > 5) {
       const extractedTokens = extract(req.query, 5).map((item) => item.keyword);
@@ -56,12 +66,11 @@ export class SearchService {
     }));
   }
 
-  async searchResources(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+  async searchResourcesByKeywords(
+    user: User,
+    req: ProcessedSearchRequest,
+  ): Promise<SearchResult[]> {
     const tokens = req.tokens;
-
-    if (tokens.length === 0) {
-      return this.emptySearchResources(user, req);
-    }
 
     interface ResourceResult {
       resource_id: string;
@@ -108,6 +117,40 @@ export class SearchService {
       createdAt: resource.created_at,
       updatedAt: resource.updated_at,
     }));
+  }
+
+  async searchResourcesByVector(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+    const nodes = await this.rag.retrieve(user, {
+      query: req.query,
+      limit: req.limit,
+    });
+    return nodes.map((node) => ({
+      id: node.resourceId,
+      domain: 'resource',
+      title: node.title,
+      content: [node.content],
+      metadata: {
+        resourceType: node.type,
+        collectionId: node.collectionId,
+      },
+    }));
+  }
+
+  async searchResources(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+    const tokens = req.tokens;
+
+    if (tokens.length === 0) {
+      return this.emptySearchResources(user, req);
+    }
+
+    switch (req.mode) {
+      case 'keyword':
+        return this.searchResourcesByKeywords(user, req);
+      case 'vector':
+        return this.searchResourcesByVector(user, req);
+      default:
+        return this.searchResourcesByKeywords(user, req);
+    }
   }
 
   async emptySearchCollections(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
@@ -185,7 +228,7 @@ export class SearchService {
         createdAt: true,
         updatedAt: true,
       },
-      where: { userId: user.id },
+      where: { uid: user.uid },
       orderBy: { updatedAt: 'desc' },
       take: req.limit || 5,
     });
@@ -218,7 +261,7 @@ export class SearchService {
                  content, pgroonga_query_extract_keywords(${tokenList}::TEXT)
                ) AS content
       FROM     chat_messages
-      WHERE    user_id = ${user.id}
+      WHERE    uid = ${user.uid}
       AND      content &@~ ${tokenOrList}::TEXT
       ORDER BY pgroonga_score(tableoid, ctid) DESC
     `;
@@ -244,7 +287,7 @@ export class SearchService {
                  title, pgroonga_query_extract_keywords(${tokenList}::TEXT)
                ) AS title
       FROM     conversations
-      WHERE    user_id = ${user.id}
+      WHERE    uid = ${user.uid}
       AND      id IN (${Prisma.join(ids)})
       ORDER BY updated_at DESC
       LIMIT    ${req.limit || 5}
@@ -318,7 +361,6 @@ export class SearchService {
   }
 
   async search(user: User, req: SearchRequest): Promise<SearchResult[]> {
-    req.domains ||= ['resource', 'collection', 'conversation', 'skill'];
     const processedReq = this.preprocessSearchRequest(req);
 
     const results = await Promise.all(

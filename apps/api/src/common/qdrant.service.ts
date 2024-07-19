@@ -16,7 +16,7 @@ export class QdrantService implements OnModuleInit {
       port: this.configService.getOrThrow('vectorStore.port'),
       apiKey: this.configService.get('vectorStore.apiKey') || undefined,
     });
-    this.collectionName = 'refly_content';
+    this.collectionName = 'refly_resource';
   }
 
   async onModuleInit() {
@@ -28,7 +28,10 @@ export class QdrantService implements OnModuleInit {
 
     if (!exists) {
       const res = await this.client.createCollection(this.collectionName, {
-        vectors: { size: 256, distance: 'Cosine' },
+        vectors: {
+          size: this.configService.getOrThrow<number>('vectorStore.vectorDim'),
+          distance: 'Cosine',
+        },
         hnsw_config: { payload_m: 16, m: 0 },
       });
       this.logger.log(`collection create success: ${res}`);

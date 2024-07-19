@@ -1161,16 +1161,15 @@ components:
     SourceMeta:
       type: object
       description: Source metadata
-      required:
-        - pageContent
-        - score
       properties:
         source:
           type: string
           description: Source URL
+          deprecated: true
         title:
           type: string
           description: Source title
+          deprecated: true
         publishedTime:
           type: string
           format: date-time
@@ -1232,7 +1231,6 @@ components:
         metadata:
           type: object
           description: Source metadata
-          deprecated: true
           $ref: '#/components/schemas/SourceMeta'
         selections:
           type: array
@@ -2328,11 +2326,16 @@ components:
         - collection
         - conversation
         - skill
+    SearchMode:
+      type: string
+      enum:
+        - keyword
+        - vector
+        - hybrid
     SearchRequest:
       type: object
       required:
         - query
-        - scope
       properties:
         query:
           type: string
@@ -2343,11 +2346,17 @@ components:
           enum:
             - user
             - public
+          default: user
         domains:
           type: array
           description: Search domains (if not specified, return all domains)
           items:
             $ref: '#/components/schemas/SearchDomain'
+        mode:
+          type: string
+          description: Search mode
+          $ref: '#/components/schemas/SearchMode'
+          default: keyword
         limit:
           type: number
           description: Search result limit for each domain
@@ -2356,7 +2365,13 @@ components:
       type: object
       properties:
         resourceType:
+          type: string
+          description: Resource type
           $ref: '#/components/schemas/ResourceType'
+        resourceMeta:
+          type: object
+          description: Resource metadata
+          $ref: '#/components/schemas/ResourceMeta'
         collectionId:
           type: string
           description: Collection ID
@@ -2366,8 +2381,6 @@ components:
         - id
         - domain
         - title
-        - createdAt
-        - updatedAt
       properties:
         id:
           type: string

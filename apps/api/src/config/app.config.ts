@@ -17,7 +17,7 @@ export default () => ({
     host: process.env.QDRANT_HOST || 'localhost',
     port: parseInt(process.env.QDRANT_PORT) || 6333,
     apiKey: process.env.QDRANT_API_KEY,
-    vectorDim: parseInt(process.env.REFLY_VEC_DIM) || 256,
+    vectorDim: parseInt(process.env.REFLY_VEC_DIM) || 1024,
   },
   serper: {
     apiKey: process.env.SERPER_API_KEY,
@@ -48,6 +48,6 @@ export default () => ({
     jinaToken: process.env.JINA_TOKEN,
   },
   skill: {
-    defaultModel: process.env.REFLY_DEFAULT_MODEL || 'gpt-3.5-turbo',
+    defaultModel: process.env.REFLY_DEFAULT_MODEL || 'gpt-4o-mini',
   },
 });

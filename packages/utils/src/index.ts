@@ -8,6 +8,5 @@ export * from './i18n';
 export * from './id';
 export * from './locale';
 export * from './parse';
-export * from './resource';
 export * from './time';
 export * from './editor';

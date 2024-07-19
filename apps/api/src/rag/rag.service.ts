@@ -14,7 +14,6 @@ import {
   HybridSearchParam,
   ContentNode,
   ContentData,
-  ContentType,
   ContentPayload,
   ReaderResult,
   DocMeta,
@@ -141,7 +140,7 @@ export class RAGService {
         payload: {
           url: metadata.url,
           seq: i,
-          type: ContentType.WEBLINK,
+          type: 'weblink',
           title: metadata.title,
           content: chunks[i],
           resourceId,

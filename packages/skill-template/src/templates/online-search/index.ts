@@ -72,12 +72,9 @@ export class OnlineSearchSkill extends BaseSkill {
     if (isToolMessage) {
       const releventDocs: SearchResultContext[] = JSON.parse((lastMessage as ToolMessage)?.content as string) || [];
       const sources: Source[] = releventDocs.map((item) => ({
+        url: item.url,
+        title: item.name,
         pageContent: item.snippet,
-        score: -1,
-        metadata: {
-          source: item.url,
-          title: item.name,
-        },
       }));
       this.emitEvent(
         {

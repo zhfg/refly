@@ -1,13 +1,10 @@
+import { ResourceType } from '@prisma/client';
 import { RetrieveFilter } from '@refly/openapi-schema';
-
-export enum ContentType {
-  WEBLINK = 'weblink',
-}
 
 export interface ContentPayload {
   url: string;
   seq: number;
-  type: ContentType;
+  type: ResourceType;
   title: string;
   content: string;
   resourceId?: string;
