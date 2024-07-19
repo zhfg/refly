@@ -154,13 +154,13 @@
     content-visibility: auto;
 
     cursor: pointer;
-    height: 48px;
+    min-height: 36px;
     border-radius: 8px;
     font-size: 14px;
     display: flex;
-    align-items: center;
     gap: 8px;
-    padding: 0 16px;
+    padding: 8px 16px;
+
     color: var(--gray11);
     user-select: none;
     will-change: background, color;
@@ -189,6 +189,7 @@
     svg {
       width: 18px;
       height: 18px;
+      margin-top: 2px;
     }
   }
 
@@ -447,5 +448,28 @@
     [cmdk-input] {
       font-size: 16px;
     }
+  }
+}
+
+.search-res-container {
+  max-width: calc(100% - 60px);
+
+  .search-res-title {
+    word-wrap: break-word;
+    color: rgba(0, 0, 0, 0.8);
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  .search-res-desc {
+    word-wrap: break-word;
+    margin-top: 4px;
+    color: rgba(0, 0, 0, 0.5);
+    font-size: 12px;
+  }
+
+  .keyword {
+    color: #00968f !important;
+    font-weight: bolder !important;
   }
 }

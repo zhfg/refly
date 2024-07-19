@@ -14,6 +14,7 @@ import {
   IconRobot,
 } from '@arco-design/web-react/icon';
 import { useDebouncedCallback } from 'use-debounce';
+import { defaultFilter } from './cmdk/filter';
 
 import './index.scss';
 import { Modal } from '@arco-design/web-react';
@@ -21,6 +22,7 @@ import { Modal } from '@arco-design/web-react';
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { SearchDomain, SearchRequest, SearchResult } from '@refly/openapi-schema';
+import { useNavigate } from 'react-router-dom';
 
 export const Search = () => {
   const ref = React.useRef<HTMLDivElement | null>(null);
@@ -92,7 +94,6 @@ export const Search = () => {
   const handleBigSearchValueChange = async (searchVal: string, activePage: string) => {
     setSearchValue(searchVal);
     const domain = getMappedPageToDomain(activePage);
-    console.log('searchVal', searchVal);
 
     // searchVal 为空的时候获取正常列表的内容
     if (!searchVal) {
@@ -155,10 +156,55 @@ export const Search = () => {
     }
   }, [activePage]);
 
+  const renderData = [
+    {
+      domain: 'skill',
+      heading: '技能',
+      data: searchStore.searchedSkills || [],
+      icon: <IconRobot style={{ fontSize: 12 }} />,
+    },
+    {
+      domain: 'note',
+      heading: '笔记',
+      data: searchStore.searchedNotes || [],
+      icon: <IconEdit style={{ fontSize: 12 }} />,
+    },
+    {
+      domain: 'readResources',
+      heading: '阅读资源',
+      data: searchStore.searchedReadResources || [],
+      icon: <IconBook style={{ fontSize: 12 }} />,
+    },
+    {
+      domain: 'knowledgeBases',
+      heading: '知识库',
+      data: searchStore.searchedKnowledgeBases || [],
+      icon: <IconFile style={{ fontSize: 12 }} />,
+    },
+    {
+      domain: 'convs',
+      heading: '会话',
+      data: searchStore.searchedConvs || [],
+      icon: <IconMessage style={{ fontSize: 12 }} />,
+    },
+  ];
+  const getRenderData = (domain: string) => {
+    return renderData?.find((item) => item.domain === domain);
+  };
+
   return (
     <div className="vercel">
       <Command
+        value={value}
+        onValueChange={setValue}
         ref={ref}
+        filter={(value, search, keywords) => {
+          if (value?.startsWith('refly-built-in')) {
+            return 1;
+          }
+
+          return defaultFilter(value, search, keywords);
+        }}
         onKeyDown={(e: React.KeyboardEvent) => {
           if (e.key === 'Enter') {
             bounce();
@@ -192,13 +238,15 @@ export const Search = () => {
         <Command.List>
           <Command.Empty>No results found.</Command.Empty>
           {activePage === 'home' && (
-            <Home displayMode={displayMode} pages={pages} setPages={(pages: string[]) => setPages(pages)} />
+            <Home
+              displayMode={displayMode}
+              pages={pages}
+              setPages={(pages: string[]) => setPages(pages)}
+              data={renderData}
+              activeValue={value}
+            />
           )}
-          {activePage === 'skills' && <Skills data={searchStore.searchedSkills} />}
-          {activePage === 'notes' && <Notes data={searchStore.searchedNotes} />}
-          {activePage === 'readResources' && <ReadResources data={searchStore.searchedReadResources} />}
-          {activePage === 'knowledgeBases' && <KnowledgeBases data={searchStore.searchedKnowledgeBases} />}
-          {activePage === 'convs' && <Convs data={searchStore.searchedConvs} />}
+          {activePage !== 'home' ? <DataList {...getRenderData(activePage)} activeValue={value} /> : null}
         </Command.List>
       </Command>
     </div>
@@ -209,12 +257,19 @@ function Home({
   pages,
   setPages,
   displayMode,
+  data,
+  activeValue,
 }: {
+  data: { domain: string; heading: string; data: SearchResult[]; icon: React.ReactNode }[];
   pages: string[];
   setPages: (pages: string[]) => void;
   displayMode: 'list' | 'search';
+  activeValue: string;
 }) {
+  const navigate = useNavigate();
   const searchStore = useSearchStore();
+
+  console.log('renderData', data);
 
   return (
     <>
@@ -235,20 +290,22 @@ function Home({
       </Command.Group> */}
       <Command.Group heading="建议">
         <Item
-          value="newConv"
+          value="refly-built-in-ask-ai"
           keywords={['NewConv']}
           shortcut="S A"
+          activeValue={activeValue}
           onSelect={() => {
             // searchProjects();
           }}
         >
           <IconMessage style={{ fontSize: 12 }} />
-          问问小飞
+          问问知识管家
         </Item>
         <Item
-          value="newAISearch"
+          value="refly-built-in-ai-search"
           keywords={['AISearch']}
           shortcut="S A"
+          activeValue={activeValue}
           onSelect={() => {
             // searchProjects();
           }}
@@ -257,172 +314,103 @@ function Home({
           AI 搜索
         </Item>
       </Command.Group>
-      <Command.Group heading="技能">
-        {searchStore?.searchedSkills?.slice(0, 5)?.map((item, index) => (
-          <Item key={index} value={`skills-${index}-${item?.title}`}>
-            <IconRobot style={{ fontSize: 12 }} />
-            {item?.title}
-          </Item>
-        ))}
-        {displayMode === 'list' && searchStore?.searchedSkills?.length > 0 ? (
-          <Item
-            value="allSkills"
-            keywords={['AskKnowledgeBase']}
-            onSelect={() => {
-              setPages([...pages, 'skills']);
-            }}
-          >
-            <IconApps style={{ fontSize: 12 }} />
-            查看所有技能
-          </Item>
-        ) : null}
-      </Command.Group>
-      <Command.Group heading="笔记">
-        {searchStore?.searchedNotes?.slice(0, 5)?.map((item, index) => (
-          <Item key={index} value={`notes-${index}-${item?.title}`}>
-            <IconEdit style={{ fontSize: 12 }} />
-            {item?.title}
-          </Item>
-        ))}
-        {displayMode === 'list' && searchStore?.searchedNotes?.length > 0 ? (
-          <Item
-            value="allNotes"
-            keywords={['AskKnowledgeBase']}
-            onSelect={() => {
-              setPages([...pages, 'notes']);
-            }}
-          >
-            <IconApps style={{ fontSize: 12 }} />
-            查看所有笔记
-          </Item>
-        ) : null}
-      </Command.Group>
+      {data
+        .filter((item) => item?.data?.length > 0)
+        .map((renderItem, index) => (
+          <Command.Group heading={renderItem?.heading}>
+            {renderItem?.data?.slice(0, 5)?.map((item, index) => (
+              <Item
+                key={index}
+                value={`${renderItem?.domain}-${index}-${item?.title}-${item?.content?.[0] || ''}`}
+                activeValue={activeValue}
+                onSelect={() => {
+                  if (renderItem?.domain === 'skill') {
+                  } else if (renderItem?.domain === 'note') {
+                    navigate(`/knowledge-base?noteId=${item?.id}`);
+                  } else if (renderItem?.domain === 'readResources') {
+                    navigate(`/knowledge-base?kbId=${item?.metadata?.collectionId}&resId=${item?.id}`);
+                  } else if (renderItem?.domain === 'knowledgeBases') {
+                    navigate(`/knowledge-base?kbId=${item?.id}`);
+                  } else if (renderItem?.domain === 'convs') {
+                    navigate(`/knowledge-base?convId=${item?.id}`);
+                  }
 
-      <Command.Group heading="阅读资源">
-        {searchStore?.searchedReadResources?.slice(0, 5)?.map((item, index) => (
-          <Item key={index} value={`readResources-${index}-${item?.title}`}>
-            <IconBook style={{ fontSize: 12 }} />
-            {item?.title}
-          </Item>
+                  searchStore.setIsSearchOpen(false);
+                }}
+              >
+                {renderItem?.icon}
+                <div className="search-res-container">
+                  <p className="search-res-title" dangerouslySetInnerHTML={{ __html: item?.title }}></p>
+                  {item?.content?.length > 0 && (
+                    <p className="search-res-desc" dangerouslySetInnerHTML={{ __html: item?.content?.[0] || '' }}></p>
+                  )}
+                </div>
+              </Item>
+            ))}
+            {displayMode === 'list' && renderItem?.data?.length > 0 ? (
+              <Item
+                value={`all${renderItem?.domain}`}
+                keywords={['']}
+                onSelect={() => {
+                  setPages([...pages, renderItem?.domain]);
+                }}
+                activeValue={activeValue}
+              >
+                <IconApps style={{ fontSize: 12 }} />
+                查看所有{renderItem?.heading}
+              </Item>
+            ) : null}
+          </Command.Group>
         ))}
-        {displayMode === 'list' && searchStore?.searchedReadResources?.length > 0 ? (
-          <Item
-            value="allReadResources"
-            keywords={['AskKnowledgeBase']}
-            onSelect={() => {
-              setPages([...pages, 'readResources']);
-            }}
-          >
-            <IconApps style={{ fontSize: 12 }} />
-            查看所有阅读资源
-          </Item>
-        ) : null}
-      </Command.Group>
-
-      <Command.Group heading="知识库">
-        {searchStore?.searchedKnowledgeBases?.slice(0, 5)?.map((item, index) => (
-          <Item key={index} value={`knowledgeBases-${index}-${item?.title}`}>
-            <IconFile style={{ fontSize: 12 }} />
-            {item?.title}
-          </Item>
-        ))}
-        {displayMode === 'list' && searchStore?.searchedKnowledgeBases?.length > 0 ? (
-          <Item
-            value="allKnowledgeBases"
-            keywords={['AskKnowledgeBase']}
-            onSelect={() => {
-              setPages([...pages, 'knowledgeBases']);
-            }}
-          >
-            <IconApps style={{ fontSize: 12 }} />
-            查看所有知识库
-          </Item>
-        ) : null}
-      </Command.Group>
-
-      <Command.Group heading="会话">
-        {searchStore?.searchedConvs?.slice(0, 5)?.map((item, index) => (
-          <Item key={index} value={`convs-${index}-${item?.title}`}>
-            <IconMessage style={{ fontSize: 12 }} />
-            {item?.title}
-          </Item>
-        ))}
-        {displayMode === 'list' && searchStore?.searchedConvs?.length > 0 ? (
-          <Item
-            value="allConvs"
-            keywords={['AskKnowledgeBase']}
-            onSelect={() => {
-              setPages([...pages, 'convs']);
-            }}
-          >
-            <IconApps style={{ fontSize: 12 }} />
-            查看所有会话
-          </Item>
-        ) : null}
-      </Command.Group>
     </>
   );
 }
 
-function Skills({ data }: { data: SearchResult[] }) {
-  return (
-    <>
-      {data?.map((item, index) => (
-        <Item key={index} value={`skills-${index}-${item?.title}`}>
-          <IconRobot style={{ fontSize: 12 }} />
-          {item?.title}
-        </Item>
-      ))}
-    </>
-  );
-}
+function DataList({
+  domain,
+  heading,
+  icon,
+  data,
+  activeValue,
+}: {
+  domain: string;
+  heading: string;
+  data: SearchResult[];
+  icon: React.ReactNode;
+  activeValue: string;
+}) {
+  const navigate = useNavigate();
+  const searchStore = useSearchStore();
 
-function Notes({ data }: { data: SearchResult[] }) {
   return (
     <>
       {data?.map((item, index) => (
-        <Item key={index} value={`convs-${index}-${item?.title}`}>
-          <IconMessage style={{ fontSize: 12 }} />
-          {item?.title}
-        </Item>
-      ))}
-    </>
-  );
-}
+        <Item
+          key={index}
+          value={`${domain}-${index}-${item?.title}-${item?.content?.[0] || ''}`}
+          activeValue={activeValue}
+          onSelect={() => {
+            if (domain === 'skill') {
+            } else if (domain === 'note') {
+              navigate(`/knowledge-base?noteId=${item?.id}`);
+            } else if (domain === 'readResources') {
+              navigate(`/knowledge-base?kbId=${item?.metadata?.collectionId}&resId=${item?.id}`);
+            } else if (domain === 'knowledgeBases') {
+              navigate(`/knowledge-base?kbId=${item?.id}`);
+            } else if (domain === 'convs') {
+              navigate(`/knowledge-base?convId=${item?.id}`);
+            }
 
-function ReadResources({ data }: { data: SearchResult[] }) {
-  return (
-    <>
-      {data?.map((item, index) => (
-        <Item key={index} value={`readResources-${index}-${item?.title}`}>
-          <IconBook style={{ fontSize: 12 }} />
-          {item?.title}
-        </Item>
-      ))}
-    </>
-  );
-}
-
-function KnowledgeBases({ data }: { data: SearchResult[] }) {
-  return (
-    <>
-      {data?.map((item, index) => (
-        <Item key={index} value={`knowledgeBases-${index}-${item?.title}`}>
-          <IconFile style={{ fontSize: 12 }} />
-          {item?.title}
-        </Item>
-      ))}
-    </>
-  );
-}
-
-function Convs({ data }: { data: SearchResult[] }) {
-  return (
-    <>
-      {data?.map((item, index) => (
-        <Item key={index} value={`convs-${index}-${item?.title}`}>
-          <IconMessage style={{ fontSize: 12 }} />
-          {item?.title}
+            searchStore.setIsSearchOpen(false);
+          }}
+        >
+          {icon}
+          <div className="search-res-container">
+            <p className="search-res-title" dangerouslySetInnerHTML={{ __html: item?.title }}></p>
+            {item?.content?.length > 0 && (
+              <p className="search-res-desc" dangerouslySetInnerHTML={{ __html: item?.content?.[0] || '' }}></p>
+            )}
+          </div>
         </Item>
       ))}
     </>
@@ -434,23 +422,35 @@ function Item({
   shortcut,
   value,
   keywords,
+  activeValue,
   onSelect = () => {},
 }: {
   children: React.ReactNode;
   shortcut?: string;
+  hoverShortcut?: string;
   value?: string;
   keywords?: string[];
+  activeValue?: string;
   onSelect?: (value: string) => void;
 }) {
+  const isActive = activeValue === value;
+  const hoverShortcut = '↵';
+
   return (
     <Command.Item onSelect={onSelect} value={value} keywords={keywords}>
       {children}
-      {shortcut && (
+      {isActive ? (
         <div cmdk-vercel-shortcuts="">
-          {shortcut.split(' ').map((key) => {
-            return <kbd key={key}>{key}</kbd>;
-          })}
+          <kbd>{hoverShortcut}</kbd>
         </div>
+      ) : (
+        shortcut && (
+          <div cmdk-vercel-shortcuts="">
+            {shortcut.split(' ').map((key) => {
+              return <kbd key={key}>{key}</kbd>;
+            })}
+          </div>
+        )
       )}
     </Command.Item>
   );
