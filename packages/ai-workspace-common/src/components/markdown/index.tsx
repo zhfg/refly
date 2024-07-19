@@ -43,7 +43,7 @@ export function PreCode(props: { children: any }) {
 export function ATag({ ...props }, sources: Source[]) {
   if (!props.href) return <></>;
   const source = sources[+props.href - 1];
-  if (!source) return <a href={props.href}>{props.href}</a>;
+  if (!source) return <a href={props.href}>{props.children}</a>;
   return (
     <span className="inline-block w-4">
       <Popover>
