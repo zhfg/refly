@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { cut, extract } from '@node-rs/jieba';
 import { PrismaService } from '@/common/prisma.service';
-import { ResourceType, SearchRequest, SearchResult } from '@refly/openapi-schema';
+import { ResourceMeta, ResourceType, SearchRequest, SearchResult } from '@refly/openapi-schema';
 import { SkillUser as User } from '@refly/skill-template';
 import { RAGService } from '@/rag/rag.service';
 
@@ -76,6 +76,7 @@ export class SearchService {
       resource_id: string;
       resource_type: ResourceType;
       collection_id: string;
+      meta: string;
       created_at: string;
       updated_at: string;
       title: string;
@@ -87,6 +88,7 @@ export class SearchService {
       SELECT   resource_id,
                resource_type,
                collection_id,
+               meta,
                created_at,
                updated_at,
                pgroonga_highlight_html(
@@ -111,6 +113,7 @@ export class SearchService {
         .split(/\r?\n+/)
         .filter((line) => /<span\b[^>]*>(.*?)<\/span>/gi.test(line)),
       metadata: {
+        resourceMeta: JSON.parse(resource.meta || '{}'),
         resourceType: resource.resource_type,
         collectionId: resource.collection_id,
       },
@@ -124,12 +127,28 @@ export class SearchService {
       query: req.query,
       limit: req.limit,
     });
+    if (nodes.length === 0) {
+      return [];
+    }
+
+    const resourceIds = [...new Set(nodes.map((node) => node.resourceId))];
+    const resources = await this.prisma.resource.findMany({
+      where: {
+        resourceId: { in: resourceIds },
+        deletedAt: null,
+      },
+    });
+    const resourceMap = new Map(
+      resources.map((resource) => [resource.resourceId, JSON.parse(resource.meta) as ResourceMeta]),
+    );
+
     return nodes.map((node) => ({
       id: node.resourceId,
       domain: 'resource',
       title: node.title,
       content: [node.content],
       metadata: {
+        resourceMeta: resourceMap.get(node.resourceId),
         resourceType: node.type,
         collectionId: node.collectionId,
       },

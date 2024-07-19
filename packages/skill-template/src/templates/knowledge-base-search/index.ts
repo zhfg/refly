@@ -1,12 +1,13 @@
-import { StringOutputParser } from '@langchain/core/output_parsers';
+import { z } from 'zod';
 import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
-import { z } from 'zod';
-import { BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { createStuffDocumentsChain } from 'langchain/chains/combine_documents';
+import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 import { ReflySearch } from '../../tools/refly-search';
 import { SearchResponse, Source } from '@refly/openapi-schema';
+import { StringOutputParser } from '@langchain/core/output_parsers';
 
 interface GraphState extends BaseSkillState {
   messages: BaseMessage[];
@@ -184,7 +185,11 @@ You are a skilled assistant proficient in answering diverse questions. Your core
     ]);
 
     const llm = this.engine.chatModel({ temperature: 0 });
-    const ragChain = prompt.pipe(llm);
+    const ragChain = await createStuffDocumentsChain({
+      llm,
+      prompt,
+      outputParser: new StringOutputParser(),
+    });
 
     const retrievedDocs = sources.map((res) => ({
       metadata: {
@@ -196,13 +201,13 @@ You are a skilled assistant proficient in answering diverse questions. Your core
       pageContent: res.pageContent,
     }));
 
-    const response = await ragChain.invoke({
+    const message = await ragChain.invoke({
       context: retrievedDocs,
       question: betterQuestion,
       chatHistory,
     });
 
-    return { messages: [response] };
+    return { messages: [new AIMessage(message)] };
   };
 
   toRunnable(): Runnable<any, any, RunnableConfig> {
