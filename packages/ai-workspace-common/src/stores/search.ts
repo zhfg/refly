@@ -14,6 +14,9 @@ export interface SearchState {
   convs: Conversation[];
   skills: SkillMeta[];
 
+  // 大搜菜单页
+  pages: string[];
+
   // 所有可搜索的资源
   searchedNotes: SearchResult[];
   searchedReadResources: SearchResult[];
@@ -41,12 +44,14 @@ export interface SearchState {
     convs: SearchResult[];
     skills: SearchResult[];
   }) => void;
+  setPages: (pages: string[]) => void;
   resetState: () => void;
 }
 
 export const defaultState = {
   isSearchOpen: false,
   notes: [],
+  pages: ['home'],
   readResources: [],
   knowledgeBases: [],
   convs: [],
@@ -77,6 +82,7 @@ export const useSearchStore = create<SearchState>()(
         searchedKnowledgeBases: data?.knowledgeBases,
         searchedSkills: data?.skills,
       })),
+    setPages: (pages: string[]) => set((state) => ({ ...state, pages })),
     resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),
 );

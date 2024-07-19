@@ -18,6 +18,8 @@ import { defaultFilter } from './cmdk/filter';
 
 import './index.scss';
 import { Modal } from '@arco-design/web-react';
+import { Home } from './home';
+import { DataList } from './data-list';
 
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
@@ -33,16 +35,16 @@ export const Search = () => {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const listRef = React.useRef(null);
 
-  const [pages, setPages] = React.useState<string[]>(['home']);
+  const pages = searchStore.pages;
+  const setPages = searchStore.setPages;
   const activePage = pages[pages.length - 1];
   const isHome = activePage === 'home';
 
   const popPage = React.useCallback(() => {
-    setPages((pages) => {
-      const x = [...pages];
-      x.splice(-1, 1);
-      return x;
-    });
+    const { pages } = useSearchStore.getState();
+    const x = [...pages];
+    x.splice(-1, 1);
+    setPages(x);
   }, []);
 
   const onKeyDown = React.useCallback(
@@ -151,9 +153,7 @@ export const Search = () => {
   React.useEffect(() => {
     inputRef?.current?.focus();
 
-    if (activePage === 'home') {
-      handleBigSearchValueChange('', 'home');
-    }
+    handleBigSearchValueChange('', activePage);
   }, [activePage]);
 
   const renderData = [
@@ -246,212 +246,11 @@ export const Search = () => {
               activeValue={value}
             />
           )}
-          {activePage !== 'home' ? <DataList {...getRenderData(activePage)} activeValue={value} /> : null}
+          {activePage !== 'home' ? (
+            <DataList displayMode={displayMode} {...getRenderData(activePage)} activeValue={value} />
+          ) : null}
         </Command.List>
       </Command>
     </div>
   );
 };
-
-function Home({
-  pages,
-  setPages,
-  displayMode,
-  data,
-  activeValue,
-}: {
-  data: { domain: string; heading: string; data: SearchResult[]; icon: React.ReactNode }[];
-  pages: string[];
-  setPages: (pages: string[]) => void;
-  displayMode: 'list' | 'search';
-  activeValue: string;
-}) {
-  const navigate = useNavigate();
-  const searchStore = useSearchStore();
-
-  console.log('renderData', data);
-
-  return (
-    <>
-      {/* <Command.Group heading="Projects">
-        <Item
-          shortcut="S P"
-          onSelect={() => {
-            searchProjects();
-          }}
-        >
-          <ProjectsIcon />
-          Search Projects...
-        </Item>
-        <Item>
-          <PlusIcon />
-          Create New Project...
-        </Item>
-      </Command.Group> */}
-      <Command.Group heading="建议">
-        <Item
-          value="refly-built-in-ask-ai"
-          keywords={['NewConv']}
-          shortcut="S A"
-          activeValue={activeValue}
-          onSelect={() => {
-            // searchProjects();
-          }}
-        >
-          <IconMessage style={{ fontSize: 12 }} />
-          问问知识管家
-        </Item>
-        <Item
-          value="refly-built-in-ai-search"
-          keywords={['AISearch']}
-          shortcut="S A"
-          activeValue={activeValue}
-          onSelect={() => {
-            // searchProjects();
-          }}
-        >
-          <IconSearch style={{ fontSize: 12 }} />
-          AI 搜索
-        </Item>
-      </Command.Group>
-      {data
-        .filter((item) => item?.data?.length > 0)
-        .map((renderItem, index) => (
-          <Command.Group heading={renderItem?.heading}>
-            {renderItem?.data?.slice(0, 5)?.map((item, index) => (
-              <Item
-                key={index}
-                value={`${renderItem?.domain}-${index}-${item?.title}-${item?.content?.[0] || ''}`}
-                activeValue={activeValue}
-                onSelect={() => {
-                  if (renderItem?.domain === 'skill') {
-                  } else if (renderItem?.domain === 'note') {
-                    navigate(`/knowledge-base?noteId=${item?.id}`);
-                  } else if (renderItem?.domain === 'readResources') {
-                    navigate(`/knowledge-base?kbId=${item?.metadata?.collectionId}&resId=${item?.id}`);
-                  } else if (renderItem?.domain === 'knowledgeBases') {
-                    navigate(`/knowledge-base?kbId=${item?.id}`);
-                  } else if (renderItem?.domain === 'convs') {
-                    navigate(`/knowledge-base?convId=${item?.id}`);
-                  }
-
-                  searchStore.setIsSearchOpen(false);
-                }}
-              >
-                {renderItem?.icon}
-                <div className="search-res-container">
-                  <p className="search-res-title" dangerouslySetInnerHTML={{ __html: item?.title }}></p>
-                  {item?.content?.length > 0 && (
-                    <p className="search-res-desc" dangerouslySetInnerHTML={{ __html: item?.content?.[0] || '' }}></p>
-                  )}
-                </div>
-              </Item>
-            ))}
-            {displayMode === 'list' && renderItem?.data?.length > 0 ? (
-              <Item
-                value={`all${renderItem?.domain}`}
-                keywords={['']}
-                onSelect={() => {
-                  setPages([...pages, renderItem?.domain]);
-                }}
-                activeValue={activeValue}
-              >
-                <IconApps style={{ fontSize: 12 }} />
-                查看所有{renderItem?.heading}
-              </Item>
-            ) : null}
-          </Command.Group>
-        ))}
-    </>
-  );
-}
-
-function DataList({
-  domain,
-  heading,
-  icon,
-  data,
-  activeValue,
-}: {
-  domain: string;
-  heading: string;
-  data: SearchResult[];
-  icon: React.ReactNode;
-  activeValue: string;
-}) {
-  const navigate = useNavigate();
-  const searchStore = useSearchStore();
-
-  return (
-    <>
-      {data?.map((item, index) => (
-        <Item
-          key={index}
-          value={`${domain}-${index}-${item?.title}-${item?.content?.[0] || ''}`}
-          activeValue={activeValue}
-          onSelect={() => {
-            if (domain === 'skill') {
-            } else if (domain === 'note') {
-              navigate(`/knowledge-base?noteId=${item?.id}`);
-            } else if (domain === 'readResources') {
-              navigate(`/knowledge-base?kbId=${item?.metadata?.collectionId}&resId=${item?.id}`);
-            } else if (domain === 'knowledgeBases') {
-              navigate(`/knowledge-base?kbId=${item?.id}`);
-            } else if (domain === 'convs') {
-              navigate(`/knowledge-base?convId=${item?.id}`);
-            }
-
-            searchStore.setIsSearchOpen(false);
-          }}
-        >
-          {icon}
-          <div className="search-res-container">
-            <p className="search-res-title" dangerouslySetInnerHTML={{ __html: item?.title }}></p>
-            {item?.content?.length > 0 && (
-              <p className="search-res-desc" dangerouslySetInnerHTML={{ __html: item?.content?.[0] || '' }}></p>
-            )}
-          </div>
-        </Item>
-      ))}
-    </>
-  );
-}
-
-function Item({
-  children,
-  shortcut,
-  value,
-  keywords,
-  activeValue,
-  onSelect = () => {},
-}: {
-  children: React.ReactNode;
-  shortcut?: string;
-  hoverShortcut?: string;
-  value?: string;
-  keywords?: string[];
-  activeValue?: string;
-  onSelect?: (value: string) => void;
-}) {
-  const isActive = activeValue === value;
-  const hoverShortcut = '↵';
-
-  return (
-    <Command.Item onSelect={onSelect} value={value} keywords={keywords}>
-      {children}
-      {isActive ? (
-        <div cmdk-vercel-shortcuts="">
-          <kbd>{hoverShortcut}</kbd>
-        </div>
-      ) : (
-        shortcut && (
-          <div cmdk-vercel-shortcuts="">
-            {shortcut.split(' ').map((key) => {
-              return <kbd key={key}>{key}</kbd>;
-            })}
-          </div>
-        )
-      )}
-    </Command.Item>
-  );
-}

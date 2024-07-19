@@ -19,6 +19,12 @@ export const BigSearchModal = () => {
     });
   }, []);
 
+  useEffect(() => {
+    if (!searchStore.isSearchOpen) {
+      searchStore.resetState();
+    }
+  }, [searchStore.isSearchOpen]);
+
   return (
     <Modal
       visible={searchStore.isSearchOpen}

@@ -9,6 +9,7 @@ import {
   IconHistory,
   IconMessage,
   IconPlusCircle,
+  IconSearch,
   IconSettings,
   IconTranslate,
 } from '@arco-design/web-react/icon';
@@ -52,6 +53,7 @@ import classNames from 'classnames';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
 import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
+import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 
 interface AICopilotProps {}
 
@@ -60,6 +62,7 @@ export const AICopilot = (props: AICopilotProps) => {
   const [copilotBodyHeight, setCopilotBodyHeight] = useState(215 - 32);
   const userStore = useUserStore();
   const knowledgeBaseStore = useKnowledgeBaseStore();
+  const searchStore = useSearchStore();
   const { contextCardHeight, showContextCard, showContextState, showSelectedTextContext } = useCopilotContextState();
   const chatStore = useChatStore();
   const conversationStore = useConversationStore();
@@ -193,6 +196,15 @@ export const AICopilot = (props: AICopilotProps) => {
               );
             }}
           </Checkbox>
+          <Button
+            icon={<IconSearch />}
+            type="text"
+            onClick={() => {
+              searchStore.setPages(searchStore.pages.concat('convs'));
+              searchStore.setIsSearchOpen(true);
+            }}
+            className={classNames('assist-action-item')}
+          ></Button>
         </div>
         <div className="knowledge-base-detail-menu">
           {/* <Button

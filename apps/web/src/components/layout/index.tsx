@@ -23,7 +23,6 @@ interface AppLayoutProps {
 export const AppLayout = (props: AppLayoutProps) => {
   // stores
   const userStore = useUserStore()
-  const searchStore = useSearchStore()
 
   // 绑定快捷键
   useBindCommands()
@@ -42,7 +41,7 @@ export const AppLayout = (props: AppLayoutProps) => {
         <Content>{props.children}</Content>
       </Layout>
       {userStore.loginModalVisible ? <LoginModal /> : null}
-      {searchStore.isSearchOpen ? <BigSearchModal /> : null}
+      <BigSearchModal />
     </Layout>
   )
 }
