@@ -11,6 +11,7 @@ import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/
 import { buildConversation } from '@refly-packages/ai-workspace-common/utils/conversation';
 import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
+import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 
 const TextArea = Input.TextArea;
 
@@ -23,7 +24,7 @@ export const ChatInput = (props: ChatInputProps) => {
   const inputRef = useRef<RefTextAreaType>(null);
   // stores
   const chatStore = useChatStore();
-  const quickSearchStateStore = useQuickSearchStateStore();
+  const searchStore = useSearchStore();
   const conversationStore = useConversationStore();
   const messageStateStore = useMessageStateStore();
   const skillStore = useSkillStore();
@@ -33,7 +34,7 @@ export const ChatInput = (props: ChatInputProps) => {
 
   const handleSendMessage = () => {
     const { messages, newQAText } = useChatStore.getState();
-    quickSearchStateStore.setVisible(false);
+    searchStore.setIsSearchOpen(false);
 
     if (messages?.length > 0) {
       // 追问阅读
@@ -68,7 +69,7 @@ export const ChatInput = (props: ChatInputProps) => {
 
     if (e.keyCode === 75 && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
-      quickSearchStateStore.setVisible(true);
+      searchStore.setIsSearchOpen(true);
     }
   };
 

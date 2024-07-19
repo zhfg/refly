@@ -29,6 +29,7 @@ export const resourcePO2DTO = (resource: ResourceWithOptionalContent): Resource 
   }
   return {
     ...omit(resource, ['id', 'uid', 'stateStorageKey', 'deletedAt']),
+    content: resource.content as string,
     data: JSON.parse(resource.meta),
     collabEnabled: !!resource.stateStorageKey,
     createdAt: resource.createdAt.toJSON(),

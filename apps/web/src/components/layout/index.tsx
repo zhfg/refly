@@ -23,7 +23,6 @@ interface AppLayoutProps {
 export const AppLayout = (props: AppLayoutProps) => {
   // stores
   const userStore = useUserStore()
-  const quickSearchStateStore = useQuickSearchStateStore()
   const searchStore = useSearchStore()
 
   // 绑定快捷键
@@ -43,7 +42,6 @@ export const AppLayout = (props: AppLayoutProps) => {
         <Content>{props.children}</Content>
       </Layout>
       {userStore.loginModalVisible ? <LoginModal /> : null}
-      {quickSearchStateStore.visible ? <QuickSearchModal /> : null}
       {searchStore.isSearchOpen ? <BigSearchModal /> : null}
     </Layout>
   )
