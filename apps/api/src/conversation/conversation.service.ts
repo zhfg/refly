@@ -191,7 +191,7 @@ export class ConversationService {
     });
 
     if (data && withMessages) {
-      data.messages?.sort((a, b) => a.id - b.id);
+      data.messages?.sort((a, b) => a.updatedAt.getTime() - b.updatedAt.getTime());
     }
 
     return data;
