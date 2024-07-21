@@ -1449,6 +1449,10 @@ export type ListResourcesData = {
      * Resource ID
      */
     resourceId?: string;
+    /**
+     * Resource type
+     */
+    resourceType?: ResourceType;
   };
 };
 

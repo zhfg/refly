@@ -110,13 +110,18 @@ export class KnowledgeService {
   }
 
   async listResources(user: Pick<User, 'uid'>, param: ListResourcesData['query']) {
-    const { collectionId, resourceId, page = 1, pageSize = 10 } = param;
+    const { collectionId, resourceId, resourceType, page = 1, pageSize = 10 } = param;
 
     // Query resources by collection
     if (collectionId) {
       return this.prisma.resource.findMany({
         omit: { content: true },
-        where: { collectionId, deletedAt: null, OR: [{ isPublic: true }, { uid: user.uid }] },
+        where: {
+          collectionId,
+          resourceType,
+          deletedAt: null,
+          OR: [{ isPublic: true }, { uid: user.uid }],
+        },
         skip: (page - 1) * pageSize,
         take: pageSize,
         orderBy: { updatedAt: 'desc' },
@@ -124,7 +129,8 @@ export class KnowledgeService {
     }
 
     const resources = await this.prisma.resource.findMany({
-      where: { resourceId, uid: user.uid, deletedAt: null },
+      omit: { content: true },
+      where: { resourceId, resourceType, uid: user.uid, deletedAt: null },
       skip: (page - 1) * pageSize,
       take: pageSize,
       orderBy: { updatedAt: 'desc' },
