@@ -120,11 +120,8 @@ export class KnowledgeController {
     @User() user: UserModel,
     @Query('resourceId') resourceId: string,
   ): Promise<GetResourceDetailResponse> {
-    const resource = await this.knowledgeService.getResourceDetail(user, {
-      resourceId,
-      needDoc: true,
-    });
-    return buildSuccessResponse(resourcePO2DTO(resource));
+    const resource = await this.knowledgeService.getResourceDetail(user, { resourceId });
+    return buildSuccessResponse(resourcePO2DTO(resource, true));
   }
 
   @UseGuards(JwtAuthGuard)

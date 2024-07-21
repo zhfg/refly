@@ -99,9 +99,13 @@ export const $Resource = {
       format: 'date-time',
       description: 'Collection update time',
     },
+    contentPreview: {
+      type: 'string',
+      description: 'Preview content for this resource',
+    },
     content: {
       type: 'string',
-      description: 'Document content for this resource',
+      description: 'Document content for this resource (only returned in detail API)',
     },
   },
 } as const;

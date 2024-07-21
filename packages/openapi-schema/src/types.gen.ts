@@ -75,7 +75,11 @@ export type Resource = {
    */
   updatedAt: string;
   /**
-   * Document content for this resource
+   * Preview content for this resource
+   */
+  contentPreview?: string;
+  /**
+   * Document content for this resource (only returned in detail API)
    */
   content?: string;
 };

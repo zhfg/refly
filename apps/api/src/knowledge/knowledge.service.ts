@@ -61,7 +61,6 @@ export class KnowledgeService {
     }
 
     let resources = await this.prisma.resource.findMany({
-      omit: { content: true },
       where: { collectionId, deletedAt: null },
       orderBy: { updatedAt: 'desc' },
     });
@@ -115,7 +114,6 @@ export class KnowledgeService {
     // Query resources by collection
     if (collectionId) {
       return this.prisma.resource.findMany({
-        omit: { content: true },
         where: {
           collectionId,
           resourceType,
@@ -129,7 +127,6 @@ export class KnowledgeService {
     }
 
     const resources = await this.prisma.resource.findMany({
-      omit: { content: true },
       where: { resourceId, resourceType, uid: user.uid, deletedAt: null },
       skip: (page - 1) * pageSize,
       take: pageSize,
@@ -142,13 +139,9 @@ export class KnowledgeService {
     }));
   }
 
-  async getResourceDetail(
-    user: Pick<User, 'uid'>,
-    param: { resourceId: string; needDoc?: boolean },
-  ) {
-    const { resourceId, needDoc } = param;
+  async getResourceDetail(user: Pick<User, 'uid'>, param: { resourceId: string }) {
+    const { resourceId } = param;
     const resource = await this.prisma.resource.findFirst({
-      omit: { content: !needDoc },
       where: { resourceId, deletedAt: null },
     });
 
