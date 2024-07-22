@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import type {} from '@redux-devtools/extension';
+
 import { LOCALE } from '@refly/constants';
 import { UserSettings } from '@refly/openapi-schema';
 import { OutputLocale } from '@refly-packages/ai-workspace-common/utils/i18n';

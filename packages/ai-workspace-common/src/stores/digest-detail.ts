@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import type {} from '@redux-devtools/extension';
+
 import { ContentDetail } from '@refly/openapi-schema';
 
 interface DigestDetailState {

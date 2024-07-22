@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import type {} from '@redux-devtools/extension';
+
 import type { Collection, Resource } from '@refly/openapi-schema';
 import { EditorInstance } from '@refly-packages/editor-core/components';
 

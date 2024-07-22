@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import type {} from '@redux-devtools/extension';
+
 import { SkillTemplate, SkillInstance } from '@refly/openapi-schema';
 
 export interface SkillState {
