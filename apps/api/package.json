@@ -28,11 +28,8 @@
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org refly-ai --project reflyd ./dist && sentry-cli sourcemaps upload --org refly-ai --project reflyd ./dist"
   },
   "dependencies": {
-    "@dqbd/tiktoken": "1.0.7",
-    "@esm2cjs/normalize-url": "^8.0.0",
     "@langchain/community": "~0.2.3",
     "@langchain/openai": "~0.0.34",
-    "@mozilla/readability": "^0.5.0",
     "@nestjs/bull": "~10.1.0",
     "@nestjs/common": "~10.3.9",
     "@nestjs/config": "~3.2.2",
