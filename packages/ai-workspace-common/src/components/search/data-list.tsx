@@ -26,6 +26,7 @@ import { SearchDomain, SearchRequest, SearchResult } from '@refly/openapi-schema
 import { useNavigate } from 'react-router-dom';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
 export function DataList({
   domain,
@@ -46,10 +47,8 @@ export function DataList({
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isRequesting, setIsRequesting] = useState(false);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const knowledgeBaseStore = useKnowledgeBaseStore();
+  const { jumpToKnowledgeBase, jumpToNote, jumpToReadResource, jumpToConv } = useKnowledgeBaseJumpNewPath();
 
-  const navigate = useNavigate();
   const searchStore = useSearchStore();
 
   const fetchNewData = async (queryPayload: any): Promise<{ success: boolean; data?: SearchResult[] }> => {
@@ -192,25 +191,26 @@ export function DataList({
           value={`${domain}-${index}-${item?.title}-${item?.content?.[0] || ''}`}
           activeValue={activeValue}
           onSelect={() => {
-            const newSearchParams = new URLSearchParams(searchParams);
-
             if (domain === 'skill') {
             } else if (domain === 'note') {
-              newSearchParams.set('noteId', item?.id);
-              knowledgeBaseStore.updateNotePanelVisible(true);
+              jumpToNote({
+                noteId: item?.id,
+              });
             } else if (domain === 'readResources') {
-              newSearchParams.set('kbId', item?.metadata?.collectionId);
-              newSearchParams.set('resId', item?.id);
-              knowledgeBaseStore.updateResourcePanelVisible(true);
+              jumpToReadResource({
+                kbId: item?.metadata?.collectionId,
+                resId: item?.id,
+              });
             } else if (domain === 'knowledgeBases') {
-              newSearchParams.set('kbId', item?.id);
-              knowledgeBaseStore.updateResourcePanelVisible(true);
+              jumpToKnowledgeBase({
+                kbId: item?.id,
+              });
             } else if (domain === 'convs') {
-              newSearchParams.set('convId', item?.id);
+              jumpToConv({
+                convId: item?.id,
+              });
             }
 
-            setSearchParams(newSearchParams);
-            navigate(`/knowledge-base?${newSearchParams.toString()}`);
             searchStore.setIsSearchOpen(false);
           }}
         >

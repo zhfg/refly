@@ -14,11 +14,12 @@ import { Resource } from '@refly/openapi-schema';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // 组件
 import { ResourceList } from '@refly-packages/ai-workspace-common/components/resource-list';
+import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
 export const KnowledgeBaseDirectory = () => {
   const [isFetching, setIsFetching] = useState(false);
   const knowledgeBaseStore = useKnowledgeBaseStore();
-  const navigate = useNavigate();
+  const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
 
   const [queryParams] = useSearchParams();
   const kbId = queryParams.get('kbId');
@@ -49,9 +50,10 @@ export const KnowledgeBaseDirectory = () => {
       if (!resourceId) {
         const firstResourceId = newRes?.data?.resources?.[0]?.resourceId;
         if (firstResourceId) {
-          queryParams.set('resId', firstResourceId);
-          queryParams.set('kbId', collectionId);
-          navigate(`/knowledge-base?${queryParams.toString()}`);
+          jumpToReadResource({
+            kbId: collectionId,
+            resId: firstResourceId,
+          });
         }
       }
     } catch (err) {
@@ -101,7 +103,10 @@ export const KnowledgeBaseDirectory = () => {
           isFetching={isFetching}
           resources={resources as Resource[]}
           handleItemClick={(item) => {
-            navigate(`/knowledge-base?kbId=${item?.collectionId}&resId=${item?.resourceId}`);
+            jumpToReadResource({
+              kbId: item?.collectionId,
+              resId: item?.resourceId,
+            });
           }}
         />
       </div>

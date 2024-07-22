@@ -31,6 +31,7 @@ import { safeParseJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 import { useCopilotContextState } from './use-copilot-context-state';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
+import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
 export const useBuildThreadAndRun = () => {
   const chatStore = useChatStore();
@@ -42,23 +43,8 @@ export const useBuildThreadAndRun = () => {
   const { t } = useTranslation();
   const { buildTaskAndGenReponse } = useBuildTask();
   const { currentResource, currentKnowledgeBase } = useCopilotContextState();
-  const [searchParams, setSearchParams] = useSearchParams();
   const knowledgeBaseStore = useKnowledgeBaseStore();
-
-  const jumpNewConvQuery = (convId: string) => {
-    const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.set('convId', convId);
-    setSearchParams(newSearchParams);
-    navigate(`/knowledge-base?${newSearchParams.toString()}`);
-  };
-
-  const jumpNewKnowledgeBase = (kbId: string) => {
-    const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.set('kbId', kbId);
-    newSearchParams.delete('resId');
-    setSearchParams(newSearchParams);
-    navigate(`/knowledge-base?${newSearchParams.toString()}`);
-  };
+  const { jumpToConv } = useKnowledgeBaseJumpNewPath();
 
   const emptyConvRunTask = (question: string, forceNewConv?: boolean) => {
     // 首先清空所有状态
@@ -70,7 +56,9 @@ export const useBuildThreadAndRun = () => {
     chatStore.setIsNewConversation(true);
     chatStore.setNewQAText(question);
 
-    jumpNewConvQuery(newConv?.convId);
+    jumpToConv({
+      convId: newConv?.convId,
+    });
   };
 
   const ensureConversationExist = (forceNewConv = false) => {
@@ -191,7 +179,5 @@ export const useBuildThreadAndRun = () => {
     runSkill,
     emptyConvRunTask,
     ensureConversationExist,
-    jumpNewConvQuery,
-    jumpNewKnowledgeBase,
   };
 };

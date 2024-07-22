@@ -13,7 +13,7 @@ import { IndexStatus } from '@refly/openapi-schema';
 import { safeParseURL } from '@refly/utils/url';
 import { Markdown } from '../markdown';
 import classNames from 'classnames';
-import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
+import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
 export const ResourceItem = (props: {
   item: Partial<Resource>;
@@ -32,7 +32,7 @@ export const ResourceItem = (props: {
     showDesc = true,
     showBtn = { summary: true, markdown: true, externalOrigin: true },
   } = props;
-  const navigate = useNavigate();
+  const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
 
   const getIndexStatusText = (indexStatus?: IndexStatus) => {
     switch (indexStatus) {
@@ -103,7 +103,10 @@ export const ResourceItem = (props: {
           >
             <IconBook
               onClick={() => {
-                navigate(`/knowledge-base?kbId=${item?.collectionId}&resId=${item?.resourceId}`);
+                jumpToReadResource({
+                  kbId: item?.collectionId,
+                  resId: item?.resourceId,
+                });
               }}
             />
           </div>
@@ -145,7 +148,7 @@ export const ResourceItem = (props: {
       </div> */}
       {showDesc ? (
         <div style={{ maxHeight: 200, overflowY: 'scroll' }}>
-          <Markdown content={item?.description || ''} />
+          <Markdown content={item?.content || ''} />
         </div>
       ) : null}
     </div>

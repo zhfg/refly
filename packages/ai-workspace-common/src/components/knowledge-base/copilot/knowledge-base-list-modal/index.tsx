@@ -8,6 +8,7 @@ import './index.scss';
 import { KnowledgeBaseList } from '@refly-packages/ai-workspace-common/components/knowledge-base-list';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
+import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
 interface KnowledgeBaseListModalProps {
   title: string;
@@ -20,7 +21,7 @@ interface KnowledgeBaseListModalProps {
 export const KnowledgeBaseListModal = (props: KnowledgeBaseListModalProps) => {
   const { t } = useTranslation();
   const knowledgeBaseStore = useKnowledgeBaseStore();
-  const { jumpNewKnowledgeBase } = useBuildThreadAndRun();
+  const { jumpToKnowledgeBase } = useKnowledgeBaseJumpNewPath();
 
   return (
     <Drawer
@@ -53,7 +54,9 @@ export const KnowledgeBaseListModal = (props: KnowledgeBaseListModalProps) => {
       <KnowledgeBaseList
         classNames={props.classNames}
         handleItemClick={(kbId) => {
-          jumpNewKnowledgeBase(kbId);
+          jumpToKnowledgeBase({
+            kbId,
+          });
           knowledgeBaseStore.updateKbModalVisible(false);
         }}
       />

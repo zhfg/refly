@@ -26,6 +26,7 @@ import { SearchDomain, SearchRequest, SearchResult } from '@refly/openapi-schema
 import { useNavigate } from 'react-router-dom';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
 export function Home({
   pages,
@@ -43,6 +44,7 @@ export function Home({
   const navigate = useNavigate();
   const searchStore = useSearchStore();
   const knowledgeBaseStore = useKnowledgeBaseStore();
+  const { jumpToKnowledgeBase, jumpToNote, jumpToReadResource } = useKnowledgeBaseJumpNewPath();
   const [searchParams, setSearchParams] = useSearchParams();
 
   console.log('renderData', data);
@@ -113,21 +115,22 @@ export function Home({
 
                   if (renderItem?.domain === 'skill') {
                   } else if (renderItem?.domain === 'note') {
-                    newSearchParams.set('noteId', item?.id);
-                    knowledgeBaseStore.updateNotePanelVisible(true);
+                    jumpToNote({
+                      noteId: item?.id,
+                    });
                   } else if (renderItem?.domain === 'readResources') {
-                    newSearchParams.set('kbId', item?.metadata?.collectionId);
-                    newSearchParams.set('resId', item?.id);
-                    knowledgeBaseStore.updateResourcePanelVisible(true);
+                    jumpToReadResource({
+                      kbId: item?.metadata?.collectionId,
+                      resId: item?.id,
+                    });
                   } else if (renderItem?.domain === 'knowledgeBases') {
-                    newSearchParams.set('kbId', item?.id);
-                    knowledgeBaseStore.updateResourcePanelVisible(true);
+                    jumpToKnowledgeBase({
+                      kbId: item?.id,
+                    });
                   } else if (renderItem?.domain === 'convs') {
                     newSearchParams.set('convId', item?.id);
                   }
 
-                  setSearchParams(newSearchParams);
-                  navigate(`/knowledge-base?${newSearchParams.toString()}`);
                   searchStore.setIsSearchOpen(false);
                 }}
               >
