@@ -280,7 +280,7 @@ Generated question example:
     const askFollowUpQuestion = await runnable.invoke([
       new SystemMessage(getSystemPrompt(locale)),
       ...messages,
-      new HumanMessage(`Please output answer in locale: ${locale} language:`),
+      new HumanMessage(`Please output answer in ${locale} language:`),
     ]);
 
     const followUps = askFollowUpQuestion?.recommend_ask_followup_question || [];

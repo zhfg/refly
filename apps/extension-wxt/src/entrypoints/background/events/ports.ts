@@ -1,7 +1,7 @@
 import { Runtime, browser } from 'wxt/browser';
 import { TASK_STATUS } from '@refly/common-types';
 import { getCookie } from '@/utils/cookie';
-import { getServerOrigin } from '@refly/ai-workspace-common/utils/url';
+import { getServerOrigin } from '@refly/utils/url';
 import { getExtensionVersion } from '@/utils/version';
 import { fetchStream } from '@refly/ai-workspace-common/utils/fetch-stream';
 

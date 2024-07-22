@@ -36,6 +36,7 @@ async function run() {
     updateResource: async (user, req) => null,
     createCollection: async (user, req) => null,
     updateCollection: async (user, req) => null,
+    search: async (user, req) => null,
   });
   // const runnable = getRunnable(engine, name);
   const skill = new Scheduler(engine);

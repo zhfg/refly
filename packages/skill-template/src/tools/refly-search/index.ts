@@ -1,11 +1,14 @@
 import { Tool } from '@langchain/core/tools';
-import { BaseToolParams } from '@/base';
-import { SkillEngine } from '@/engine';
+import { BaseToolParams } from '../../base';
+import { SkillEngine, SkillUser } from '../../engine';
 
-export interface ReflySearchParameters extends BaseToolParams {}
+export interface ReflySearchParameters extends BaseToolParams {
+  user: SkillUser;
+}
 
 export class ReflySearch extends Tool {
   private engine: SkillEngine;
+  private user: SkillUser;
 
   name = 'refly_search';
 
@@ -15,6 +18,7 @@ export class ReflySearch extends Tool {
     super(params);
 
     this.engine = params.engine;
+    this.user = params.user;
   }
 
   static lc_name() {
@@ -22,7 +26,11 @@ export class ReflySearch extends Tool {
   }
 
   async _call(input: string): Promise<string> {
-    // TODO: implement this
-    return '';
+    const res = await this.engine.service.search(this.user, {
+      query: input,
+      domains: ['resource'],
+      mode: 'vector',
+    });
+    return JSON.stringify(res);
   }
 }

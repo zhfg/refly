@@ -5,7 +5,7 @@ import { getCurrentTab, getLastActiveTab, saveLastActiveTab } from '@/utils/exte
 import * as requestModule from '@refly/openapi-schema';
 import { BackgroundMessage } from '@refly/ai-workspace-common/utils/extension/messaging';
 import { createClient } from '@hey-api/client-fetch';
-import { getServerOrigin } from '@refly/ai-workspace-common/utils/url';
+import { getServerOrigin } from '@refly/utils/url';
 import { getCookie } from '@/utils/cookie';
 import { appConfig } from '@refly/utils/config';
 

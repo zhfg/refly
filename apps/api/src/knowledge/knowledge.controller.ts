@@ -22,7 +22,7 @@ import {
   DeleteResourceRequest,
   DeleteResourceResponse,
 } from '@refly/openapi-schema';
-import { User as UserModel } from '@prisma/client';
+import { ResourceType, User as UserModel } from '@prisma/client';
 import { KnowledgeService } from './knowledge.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { buildSuccessResponse } from '../utils';
@@ -101,11 +101,13 @@ export class KnowledgeController {
   async listResources(
     @User() user: UserModel,
     @Query('collectionId') collectionId: string,
+    @Query('resourceType') resourceType: ResourceType,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListResourceResponse> {
     const resources = await this.knowledgeService.listResources(user, {
       collectionId,
+      resourceType,
       page,
       pageSize,
     });
@@ -118,11 +120,8 @@ export class KnowledgeController {
     @User() user: UserModel,
     @Query('resourceId') resourceId: string,
   ): Promise<GetResourceDetailResponse> {
-    const resource = await this.knowledgeService.getResourceDetail(user, {
-      resourceId,
-      needDoc: true,
-    });
-    return buildSuccessResponse(resourcePO2DTO(resource));
+    const resource = await this.knowledgeService.getResourceDetail(user, { resourceId });
+    return buildSuccessResponse(resourcePO2DTO(resource, true));
   }
 
   @UseGuards(JwtAuthGuard)

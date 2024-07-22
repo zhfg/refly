@@ -47,10 +47,6 @@ export type Resource = {
    */
   title: string;
   /**
-   * Resource description
-   */
-  description?: string;
-  /**
    * Resource metadata
    */
   data?: ResourceMeta;
@@ -75,13 +71,17 @@ export type Resource = {
    */
   createdAt: string;
   /**
-   * Collection creation time
+   * Collection update time
    */
   updatedAt: string;
   /**
-   * Document content for this resource
+   * Preview content for this resource
    */
-  doc?: string;
+  contentPreview?: string;
+  /**
+   * Document content for this resource (only returned in detail API)
+   */
+  content?: string;
 };
 
 export type Collection = {
@@ -106,7 +106,7 @@ export type Collection = {
    */
   createdAt: string;
   /**
-   * Collection creation time
+   * Collection update time
    */
   updatedAt: string;
   /**
@@ -264,10 +264,12 @@ export type SkillLog = {
 export type SourceMeta = {
   /**
    * Source URL
+   * @deprecated
    */
   source?: string;
   /**
    * Source title
+   * @deprecated
    */
   title?: string;
   /**
@@ -338,7 +340,6 @@ export type Source = {
   score?: number;
   /**
    * Source metadata
-   * @deprecated
    */
   metadata?: SourceMeta;
   /**
@@ -1349,6 +1350,91 @@ export type GetUserTopicsResponse = BaseResponse & {
   data?: UserTopics;
 };
 
+export type SearchDomain = 'resource' | 'collection' | 'conversation' | 'skill';
+
+export type SearchMode = 'keyword' | 'vector' | 'hybrid';
+
+export type SearchRequest = {
+  /**
+   * Search query (if empty, return last updated data)
+   */
+  query: string;
+  /**
+   * Search scope
+   */
+  scope?: 'user' | 'public';
+  /**
+   * Search domains (if not specified, return all domains)
+   */
+  domains?: Array<SearchDomain>;
+  /**
+   * Search mode
+   */
+  mode?: SearchMode;
+  /**
+   * Search result limit for each domain
+   */
+  limit?: number;
+};
+
+/**
+ * Search scope
+ */
+export type scope = 'user' | 'public';
+
+export type SearchResultMeta = {
+  /**
+   * Resource type
+   */
+  resourceType?: ResourceType;
+  /**
+   * Resource metadata
+   */
+  resourceMeta?: ResourceMeta;
+  /**
+   * Collection ID
+   */
+  collectionId?: string;
+};
+
+export type SearchResult = {
+  /**
+   * Search result ID to navigate to
+   */
+  id: string;
+  /**
+   * Search result domain
+   */
+  domain: SearchDomain;
+  /**
+   * Search result title
+   */
+  title: string;
+  /**
+   * Search result content list with highlight marks
+   */
+  content?: Array<string>;
+  /**
+   * Search result metadata
+   */
+  metadata?: SearchResultMeta;
+  /**
+   * Data creation time
+   */
+  createdAt?: string;
+  /**
+   * Collection creation time
+   */
+  updatedAt?: string;
+};
+
+export type SearchResponse = BaseResponse & {
+  /**
+   * Search result
+   */
+  data?: Array<SearchResult>;
+};
+
 export type ListResourcesData = {
   query?: {
     /**
@@ -1367,6 +1453,10 @@ export type ListResourcesData = {
      * Resource ID
      */
     resourceId?: string;
+    /**
+     * Resource type
+     */
+    resourceType?: ResourceType;
   };
 };
 
@@ -1778,6 +1868,14 @@ export type GetUserTopicsResponse2 = GetUserTopicsResponse;
 
 export type GetUserTopicsError = unknown;
 
+export type SearchData = {
+  body: SearchRequest;
+};
+
+export type SearchResponse2 = SearchResponse;
+
+export type SearchError = unknown;
+
 export type $OpenApiTs = {
   '/knowledge/resource/list': {
     get: {
@@ -2156,6 +2254,17 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': GetUserTopicsResponse;
+      };
+    };
+  };
+  '/search': {
+    post: {
+      req: SearchData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': SearchResponse;
       };
     };
   };

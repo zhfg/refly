@@ -1,7 +1,7 @@
 version: '3.4'
 services:
   db:
-    image: postgres:15
+    image: groonga/pgroonga:3.2.1-alpine-15
     ports:
       - 5432:5432
     restart: always

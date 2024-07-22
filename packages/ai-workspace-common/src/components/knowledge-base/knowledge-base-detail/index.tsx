@@ -13,12 +13,15 @@ import { ActionSource, useKnowledgeBaseStore } from '@refly-packages/ai-workspac
 import { KnowledgeBaseListModal } from '../copilot/knowledge-base-list-modal';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 import { getDefaultPopupContainer, getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
+import { IconSearch } from '@arco-design/web-react/icon';
+import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 
 const TabPane = Tabs.TabPane;
 
 interface KnowledgeBaseDetailProps {}
 
 export const KnowledgeBaseDetail = (props: KnowledgeBaseDetailProps) => {
+  const searchStore = useSearchStore();
   // directory minSize 270px ~ maxSize 50%
   const [minSize] = useResizePanel({
     getGroupSelector: () => {
@@ -92,6 +95,18 @@ export const KnowledgeBaseDetail = (props: KnowledgeBaseDetailProps) => {
               </div> */}
               <div className="knowledge-base-detail-nav-switcher">
                 <DefaultTabHeader {...props} />
+              </div>
+              <div className="">
+                <Button
+                  icon={<IconSearch />}
+                  type="text"
+                  shape="circle"
+                  className="nav-btn"
+                  onClick={() => {
+                    searchStore.setPages(searchStore.pages.concat('readResources'));
+                    searchStore.setIsSearchOpen(true);
+                  }}
+                ></Button>
               </div>
             </div>
           );

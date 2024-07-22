@@ -36,11 +36,12 @@ import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 // 图标
 import { AiOutlineWarning, AiOutlineFileWord } from 'react-icons/ai';
 import hljs from 'highlight.js';
+import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 
 const wsUrl = 'ws://localhost:1234';
 
-const CollaborativeEditor = ({ resourceDetail }: { resourceDetail: Resource }) => {
-  const { resourceId, doc } = resourceDetail;
+const CollaborativeEditor = ({ resourceDetail, readOnly }: { resourceDetail: Resource; readOnly: boolean }) => {
+  const { resourceId, content } = resourceDetail;
   const [collabEnabled, setCollabEnabled] = useState(resourceDetail.collabEnabled);
   const lastCursorPosRef = useRef<number>();
   const [token] = useCookie('_refly_ai_sid');
@@ -104,7 +105,7 @@ const CollaborativeEditor = ({ resourceDetail }: { resourceDetail: Resource }) =
     console.log('trying to set content');
     console.log('editor', editorRef.current);
     if (editorRef.current && !collabEnabled) {
-      editorRef.current.commands.setContent(doc || '');
+      editorRef.current.commands.setContent(content || '');
       setCollabEnabled(true);
       console.log('collaboration initialized!');
     }
@@ -115,7 +116,7 @@ const CollaborativeEditor = ({ resourceDetail }: { resourceDetail: Resource }) =
         console.log('cursor position', lastCursorPosRef.current);
       });
     }
-  }, [editorRef.current, collabEnabled, doc]);
+  }, [editorRef.current, collabEnabled, content]);
   useEffect(() => {
     editorEmitter.on('insertBlow', (content) => {
       const isFocused = editorRef.current?.isFocused;
@@ -156,6 +157,7 @@ const CollaborativeEditor = ({ resourceDetail }: { resourceDetail: Resource }) =
               editorRef.current = editor;
               knowledgeBaseStore.updateEditor(editor);
             }}
+            editable={!readOnly}
             className="relative w-full h-full max-w-screen-lg border-muted sm:rounded-lg"
             editorProps={{
               handleDOMEvents: {
@@ -191,6 +193,7 @@ export const AINote = () => {
   const resourceId = noteId;
   const [resourceDetail, setResourceDetail] = useState<Resource | null>(null);
   const knowledgeBaseStore = useKnowledgeBaseStore();
+  const searchStore = useSearchStore();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -246,15 +249,10 @@ export const AINote = () => {
             <Button
               icon={<IconSearch style={{ fontSize: 16 }} />}
               type="text"
-              onClick={() => {}}
-              className={'assist-action-item'}
-            ></Button>
-          </div>
-          <div className="conv-meta">
-            <Button
-              icon={<IconList style={{ fontSize: 16 }} />}
-              type="text"
-              onClick={() => {}}
+              onClick={() => {
+                searchStore.setPages(searchStore.pages.concat('note'));
+                searchStore.setIsSearchOpen(true);
+              }}
               className={'assist-action-item'}
             ></Button>
           </div>
@@ -269,13 +267,7 @@ export const AINote = () => {
         </div>
       </div>
       {/* <Button onClick={() => handleInitEmptyNote()}>添加笔记</Button> */}
-      {resourceId ? (
-        resourceDetail.readOnly ? (
-          <ReadonlyEditor resourceDetail={resourceDetail} />
-        ) : (
-          <CollaborativeEditor resourceDetail={resourceDetail} />
-        )
-      ) : null}
+      {resourceId ? <CollaborativeEditor resourceDetail={resourceDetail} readOnly={resourceDetail?.readOnly} /> : null}
     </div>
   );
 };

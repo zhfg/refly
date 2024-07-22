@@ -17,6 +17,7 @@ import configuration from './config/app.config';
 import { AppController } from './app.controller';
 import { KnowledgeModule } from './knowledge/knowledge.module';
 import { SkillModule } from './skill/skill.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { SkillModule } from './skill/skill.module';
     RAGModule,
     KnowledgeModule,
     SkillModule,
+    SearchModule,
   ],
   controllers: [AppController],
 })

@@ -36,6 +36,7 @@ import { MessageAggregator } from '@/utils/message';
 import { SkillEvent } from '@refly/common-types';
 import { createLLMChatMessage } from '@/llm/schema';
 import { ConfigService } from '@nestjs/config';
+import { SearchService } from '@/search/search.service';
 
 interface SkillPreCheckResult {
   skill?: SkillInstance;
@@ -51,6 +52,7 @@ export class SkillService {
   constructor(
     private config: ConfigService,
     private prisma: PrismaService,
+    private search: SearchService,
     private knowledge: KnowledgeService,
     private conversation: ConversationService,
     @InjectQueue(QUEUE_SKILL) private queue: Queue<InvokeSkillJobData>,
@@ -73,6 +75,10 @@ export class SkillService {
         updateCollection: async (user, req) => {
           const coll = await this.knowledge.upsertCollection(user, req);
           return buildSuccessResponse(collectionPO2DTO(coll));
+        },
+        search: async (user, req) => {
+          const result = await this.search.search(user, req);
+          return buildSuccessResponse(result);
         },
       },
       { defaultModel: this.config.get('skill.defaultModel') },
@@ -420,10 +426,12 @@ export class SkillService {
             userId: user.id,
             uid: user.uid,
             conversationId: chatConv.id,
+            convId: chatConv.convId,
             locale: param.context.locale ?? user.outputLocale,
           },
           ...msgAggregator.getMessages({
             user,
+            convId: chatConv.convId,
             conversationPk: chatConv.id,
             locale: param.context.locale ?? user.outputLocale,
           }),

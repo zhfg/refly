@@ -17,7 +17,6 @@ export const useBindCommands = () => {
   // const keyboardShortcutRef = useRef("")
   // const keyboardSendShortcutRef = useRef("")
   // const { buildTaskAndGenReponse } = useBuildTask()
-  const quickSearchStateStore = useQuickSearchStateStore();
   const searchStore = useSearchStore();
   const { isLoggedRef } = useIsLogin();
 

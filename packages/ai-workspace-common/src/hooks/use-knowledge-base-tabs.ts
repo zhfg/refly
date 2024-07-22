@@ -57,6 +57,7 @@ export const useKnowledgeBaseTabs = () => {
     knowledgeBaseStore.updateActiveTab(key);
     const tab = tabs?.find((tab) => tab?.key === key);
 
+    // TODO: 这里抽出 hooks 做通用的处理
     navigate(`/knowledge-base?kbId=${tab?.collectionId}&resId=${tab?.resourceId}`);
   };
 

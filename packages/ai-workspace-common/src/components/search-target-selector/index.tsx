@@ -146,7 +146,7 @@ export const SearchTargetSelector = (props: { classNames: string; selectorList?:
         className={props.classNames}
         shape="round"
       >
-        <span>{getDisplayText(searchStateStore.searchTarget)}</span>
+        {/* <span>{getDisplayText(searchStateStore.searchTarget)}</span> */}
         <IconCaretDown />
       </Button>
     </Dropdown>

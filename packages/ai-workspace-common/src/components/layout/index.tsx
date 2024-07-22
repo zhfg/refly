@@ -49,7 +49,7 @@ export const AppLayout = (props: AppLayoutProps) => {
         <Content>{props.children}</Content>
       </Layout>
       {userStore.loginModalVisible ? <LoginModal /> : null}
-      {quickSearchStateStore.visible ? <QuickSearchModal /> : null}
+      {/* {quickSearchStateStore.visible ? <QuickSearchModal /> : null} */}
     </Layout>
   );
 };

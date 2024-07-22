@@ -65,10 +65,6 @@ export const $Resource = {
       type: 'string',
       description: 'Resource title',
     },
-    description: {
-      type: 'string',
-      description: 'Resource description',
-    },
     data: {
       type: 'object',
       description: 'Resource metadata',
@@ -101,11 +97,15 @@ export const $Resource = {
     updatedAt: {
       type: 'string',
       format: 'date-time',
-      description: 'Collection creation time',
+      description: 'Collection update time',
     },
-    doc: {
+    contentPreview: {
       type: 'string',
-      description: 'Document content for this resource',
+      description: 'Preview content for this resource',
+    },
+    content: {
+      type: 'string',
+      description: 'Document content for this resource (only returned in detail API)',
     },
   },
 } as const;
@@ -142,7 +142,7 @@ export const $Collection = {
     updatedAt: {
       type: 'string',
       format: 'date-time',
-      description: 'Collection creation time',
+      description: 'Collection update time',
     },
     resources: {
       type: 'array',
@@ -328,15 +328,16 @@ export const $SkillLog = {
 export const $SourceMeta = {
   type: 'object',
   description: 'Source metadata',
-  required: ['pageContent', 'score'],
   properties: {
     source: {
       type: 'string',
       description: 'Source URL',
+      deprecated: true,
     },
     title: {
       type: 'string',
       description: 'Source title',
+      deprecated: true,
     },
     publishedTime: {
       type: 'string',
@@ -408,7 +409,6 @@ export const $Source = {
     metadata: {
       type: 'object',
       description: 'Source metadata',
-      deprecated: true,
       $ref: '#/components/schemas/SourceMeta',
     },
     selections: {
@@ -1981,6 +1981,131 @@ export const $GetUserTopicsResponse = {
         data: {
           description: 'User topics',
           $ref: '#/components/schemas/UserTopics',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $SearchDomain = {
+  type: 'string',
+  enum: ['resource', 'collection', 'conversation', 'skill'],
+} as const;
+
+export const $SearchMode = {
+  type: 'string',
+  enum: ['keyword', 'vector', 'hybrid'],
+} as const;
+
+export const $SearchRequest = {
+  type: 'object',
+  required: ['query'],
+  properties: {
+    query: {
+      type: 'string',
+      description: 'Search query (if empty, return last updated data)',
+    },
+    scope: {
+      type: 'string',
+      description: 'Search scope',
+      enum: ['user', 'public'],
+      default: 'user',
+    },
+    domains: {
+      type: 'array',
+      description: 'Search domains (if not specified, return all domains)',
+      items: {
+        $ref: '#/components/schemas/SearchDomain',
+      },
+    },
+    mode: {
+      type: 'string',
+      description: 'Search mode',
+      $ref: '#/components/schemas/SearchMode',
+      default: 'keyword',
+    },
+    limit: {
+      type: 'number',
+      description: 'Search result limit for each domain',
+      default: 5,
+    },
+  },
+} as const;
+
+export const $SearchResultMeta = {
+  type: 'object',
+  properties: {
+    resourceType: {
+      type: 'string',
+      description: 'Resource type',
+      $ref: '#/components/schemas/ResourceType',
+    },
+    resourceMeta: {
+      type: 'object',
+      description: 'Resource metadata',
+      $ref: '#/components/schemas/ResourceMeta',
+    },
+    collectionId: {
+      type: 'string',
+      description: 'Collection ID',
+    },
+  },
+} as const;
+
+export const $SearchResult = {
+  type: 'object',
+  required: ['id', 'domain', 'title'],
+  properties: {
+    id: {
+      type: 'string',
+      description: 'Search result ID to navigate to',
+    },
+    domain: {
+      description: 'Search result domain',
+      $ref: '#/components/schemas/SearchDomain',
+    },
+    title: {
+      type: 'string',
+      description: 'Search result title',
+    },
+    content: {
+      type: 'array',
+      description: 'Search result content list with highlight marks',
+      items: {
+        type: 'string',
+      },
+    },
+    metadata: {
+      description: 'Search result metadata',
+      $ref: '#/components/schemas/SearchResultMeta',
+    },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Data creation time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Collection creation time',
+    },
+  },
+} as const;
+
+export const $SearchResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Search result',
+          items: {
+            $ref: '#/components/schemas/SearchResult',
+          },
         },
       },
     },

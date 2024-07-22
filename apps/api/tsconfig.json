@@ -21,7 +21,8 @@
     "noFallthroughCasesInSwitch": false,
     "inlineSources": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@refly/skill-template/*": ["../../packages/skill-template/src/*"]
     },
     "sourceRoot": "/",
     "composite": true

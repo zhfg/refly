@@ -104,6 +104,9 @@ import type {
   UpdateSettingsResponse,
   GetUserTopicsError,
   GetUserTopicsResponse2,
+  SearchData,
+  SearchError,
+  SearchResponse2,
 } from './types.gen';
 
 /**
@@ -488,5 +491,16 @@ export const getUserTopics = (options?: Options) => {
   return (options?.client ?? client).get<GetUserTopicsResponse2, GetUserTopicsError>({
     ...options,
     url: '/user/topics',
+  });
+};
+
+/**
+ * Search
+ * Search for everything
+ */
+export const search = (options: Options<SearchData>) => {
+  return (options?.client ?? client).post<SearchResponse2, SearchError>({
+    ...options,
+    url: '/search',
   });
 };

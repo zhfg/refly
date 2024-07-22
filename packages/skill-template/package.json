@@ -13,8 +13,7 @@
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:esm": "tsc -p tsconfig.esm.json",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsx ./src/runner/index.ts",
-    "postinstall": "pnpm build"
+    "start": "tsx ./src/runner/index.ts"
   },
   "devDependencies": {
     "typescript": "^5",
@@ -25,6 +24,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "langchain": "0.2.7",
     "@langchain/langgraph": "0.0.23",
     "@langchain/community": "0.2.12",
     "@langchain/core": "0.2.7",

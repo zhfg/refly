@@ -19,6 +19,12 @@ export const BigSearchModal = () => {
     });
   }, []);
 
+  useEffect(() => {
+    if (!searchStore.isSearchOpen) {
+      searchStore.resetState();
+    }
+  }, [searchStore.isSearchOpen]);
+
   return (
     <Modal
       visible={searchStore.isSearchOpen}
@@ -26,7 +32,7 @@ export const BigSearchModal = () => {
       maskStyle={{ background: 'transparent' }}
       footer={null}
       closeIcon={null}
-      style={{ background: 'transparent', top: -100 }}
+      style={{ background: 'transparent', top: -100, width: 750 }}
     >
       <Search />
     </Modal>

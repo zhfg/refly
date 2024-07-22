@@ -1,6 +1,6 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["tracing"]
+  previewFeatures = ["tracing", "omitApi"]
 }
 
 datasource db {
@@ -152,7 +152,9 @@ model ChatMessage {
   id                    Int         @id @default(autoincrement())
   /// Message id
   msgId                 String?     @default("") @map("msg_id")
-  /// Conversation PK
+  /// Conversation ID
+  convId                String      @default("") @map("conv_id")
+  /// Conversation PK (deprecated)
   conversationId        Int         @map("conversation_id")
   /// Message type
   type                  MessageType @map("type")
@@ -300,10 +302,12 @@ model Resource {
   resourceType    ResourceType @map("resource_type")
   /// UID
   uid             String       @default("") @map("uid")
+  /// Collection ID
+  collectionId    String       @default("") @map("collection_id")
   /// 字数
   wordCount       Int          @default(0) @map("word_count")
-  /// 对象存储 key
-  storageKey      String       @default("") @map("storage_key")
+  /// Content of resource
+  content         String       @default("") @map("content")
   /// Yjs 状态数据存储 key
   stateStorageKey String       @default("") @map("state_storage_key")
   /// 是否公开
@@ -323,10 +327,7 @@ model Resource {
   /// 软删除标记
   deletedAt       DateTime?    @map("deleted_at") @db.Timestamptz()
 
-  /// 关联的知识集
-  collections Collection[]
-
-  @@index([resourceId])
+  @@index([collectionId])
   @@index([uid, updatedAt])
   @@map("resources")
 }
@@ -352,10 +353,6 @@ model Collection {
   /// 软删除标记
   deletedAt    DateTime? @map("deleted_at") @db.Timestamptz()
 
-  /// 包含的资源
-  resources Resource[]
-
-  @@index([collectionId])
   @@index([uid, updatedAt])
   @@map("collections")
 }

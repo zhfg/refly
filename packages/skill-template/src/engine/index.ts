@@ -2,21 +2,24 @@ import { ChatOpenAI, OpenAIChatInput } from '@langchain/openai';
 import {
   CreateCollectionResponse,
   CreateResourceResponse,
+  SearchRequest,
+  SearchResponse,
   UpdateCollectionResponse,
   UpdateResourceResponse,
   UpsertCollectionRequest,
   UpsertResourceRequest,
 } from '@refly/openapi-schema';
 
-interface User {
+export interface SkillUser {
   uid: string;
 }
 
 export interface ReflyService {
-  createResource: (user: User, req: UpsertResourceRequest) => Promise<CreateResourceResponse | null>;
-  updateResource: (user: User, req: UpsertResourceRequest) => Promise<UpdateResourceResponse | null>;
-  createCollection: (user: User, req: UpsertCollectionRequest) => Promise<CreateCollectionResponse | null>;
-  updateCollection: (user: User, req: UpsertCollectionRequest) => Promise<UpdateCollectionResponse | null>;
+  createResource: (user: SkillUser, req: UpsertResourceRequest) => Promise<CreateResourceResponse>;
+  updateResource: (user: SkillUser, req: UpsertResourceRequest) => Promise<UpdateResourceResponse>;
+  createCollection: (user: SkillUser, req: UpsertCollectionRequest) => Promise<CreateCollectionResponse>;
+  updateCollection: (user: SkillUser, req: UpsertCollectionRequest) => Promise<UpdateCollectionResponse>;
+  search: (user: SkillUser, req: SearchRequest) => Promise<SearchResponse>;
 }
 
 export interface SkillEngineOptions {
@@ -49,7 +52,7 @@ export interface Logger {
 export class SkillEngine {
   constructor(public logger: Logger, public service: ReflyService, private options?: SkillEngineOptions) {
     this.options = {
-      defaultModel: 'gpt-3.5-turbo',
+      defaultModel: 'gpt-4o-mini',
       ...options,
     };
   }
@@ -58,7 +61,7 @@ export class SkillEngine {
     return new ChatOpenAI({
       model: this.options.defaultModel,
       apiKey: process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY,
-      configuration: { baseURL: 'https://openrouter.ai/api/v1' },
+      configuration: { baseURL: process.env.OPENROUTER_API_KEY && 'https://openrouter.ai/api/v1' },
       ...params,
     });
   }
