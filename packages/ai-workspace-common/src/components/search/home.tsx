@@ -12,6 +12,7 @@ import {
   IconBook,
   IconEdit,
   IconRobot,
+  IconFolderAdd,
 } from '@arco-design/web-react/icon';
 import { useDebouncedCallback } from 'use-debounce';
 import { defaultFilter } from './cmdk/filter';
@@ -35,7 +36,14 @@ export function Home({
   data,
   activeValue,
 }: {
-  data: { domain: string; heading: string; data: SearchResult[]; icon: React.ReactNode }[];
+  data: {
+    domain: string;
+    heading: string;
+    data: SearchResult[];
+    icon: React.ReactNode;
+    action?: boolean;
+    actionHeading?: { create: string };
+  }[];
   pages: string[];
   setPages: (pages: string[]) => void;
   displayMode: 'list' | 'search';
@@ -154,6 +162,19 @@ export function Home({
               >
                 <IconApps style={{ fontSize: 12 }} />
                 查看所有{renderItem?.heading}
+              </Item>
+            ) : null}
+            {renderItem?.action ? (
+              <Item
+                value={`create${renderItem?.domain}`}
+                keywords={[`create${renderItem?.domain}`]}
+                onSelect={() => {
+                  setPages([...pages, renderItem?.domain]);
+                }}
+                activeValue={activeValue}
+              >
+                <IconFolderAdd style={{ fontSize: 12 }} />
+                {renderItem?.actionHeading?.create}
               </Item>
             ) : null}
           </Command.Group>

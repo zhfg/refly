@@ -160,30 +160,47 @@ export const Search = () => {
     {
       domain: 'skill',
       heading: '技能',
+      action: false, // 是否开启 action
       data: searchStore.searchedSkills || [],
       icon: <IconRobot style={{ fontSize: 12 }} />,
     },
     {
       domain: 'note',
       heading: '笔记',
+      action: true,
+      actionHeading: {
+        create: '创建新笔记',
+      },
       data: searchStore.searchedNotes || [],
       icon: <IconEdit style={{ fontSize: 12 }} />,
     },
     {
       domain: 'readResources',
       heading: '阅读资源',
+      action: true,
+      actionHeading: {
+        create: '添加阅读资源',
+      },
       data: searchStore.searchedReadResources || [],
       icon: <IconBook style={{ fontSize: 12 }} />,
     },
     {
       domain: 'knowledgeBases',
       heading: '知识库',
+      action: true,
+      actionHeading: {
+        create: '创建新知识库',
+      },
       data: searchStore.searchedKnowledgeBases || [],
       icon: <IconFile style={{ fontSize: 12 }} />,
     },
     {
       domain: 'convs',
       heading: '会话',
+      action: true,
+      actionHeading: {
+        create: '创建新会话',
+      },
       data: searchStore.searchedConvs || [],
       icon: <IconMessage style={{ fontSize: 12 }} />,
     },

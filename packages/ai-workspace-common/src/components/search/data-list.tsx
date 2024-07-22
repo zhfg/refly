@@ -12,6 +12,7 @@ import {
   IconBook,
   IconEdit,
   IconRobot,
+  IconFolderAdd,
 } from '@arco-design/web-react/icon';
 import { useDebouncedCallback } from 'use-debounce';
 import { defaultFilter } from './cmdk/filter';
@@ -185,44 +186,52 @@ export function DataList({
 
   return (
     <>
-      {stateDataList?.map((item, index) => (
-        <Item
-          key={index}
-          value={`${domain}-${index}-${item?.title}-${item?.content?.[0] || ''}`}
-          activeValue={activeValue}
-          onSelect={() => {
-            if (domain === 'skill') {
-            } else if (domain === 'note') {
-              jumpToNote({
-                noteId: item?.id,
-              });
-            } else if (domain === 'readResources') {
-              jumpToReadResource({
-                kbId: item?.metadata?.collectionId,
-                resId: item?.id,
-              });
-            } else if (domain === 'knowledgeBases') {
-              jumpToKnowledgeBase({
-                kbId: item?.id,
-              });
-            } else if (domain === 'convs') {
-              jumpToConv({
-                convId: item?.id,
-              });
-            }
-
-            searchStore.setIsSearchOpen(false);
-          }}
-        >
-          {icon}
-          <div className="search-res-container">
-            <p className="search-res-title" dangerouslySetInnerHTML={{ __html: item?.title }}></p>
-            {item?.content?.length > 0 && (
-              <p className="search-res-desc" dangerouslySetInnerHTML={{ __html: item?.content?.[0] || '' }}></p>
-            )}
-          </div>
+      <Command.Group heading="建议">
+        <Item value={`create${domain}`} keywords={[`create${domain}`]} onSelect={() => {}} activeValue={activeValue}>
+          <IconFolderAdd style={{ fontSize: 12 }} />
+          创建新{heading}
         </Item>
-      ))}
+      </Command.Group>
+      <Command.Group heading={heading}>
+        {stateDataList?.map((item, index) => (
+          <Item
+            key={index}
+            value={`${domain}-${index}-${item?.title}-${item?.content?.[0] || ''}`}
+            activeValue={activeValue}
+            onSelect={() => {
+              if (domain === 'skill') {
+              } else if (domain === 'note') {
+                jumpToNote({
+                  noteId: item?.id,
+                });
+              } else if (domain === 'readResources') {
+                jumpToReadResource({
+                  kbId: item?.metadata?.collectionId,
+                  resId: item?.id,
+                });
+              } else if (domain === 'knowledgeBases') {
+                jumpToKnowledgeBase({
+                  kbId: item?.id,
+                });
+              } else if (domain === 'convs') {
+                jumpToConv({
+                  convId: item?.id,
+                });
+              }
+
+              searchStore.setIsSearchOpen(false);
+            }}
+          >
+            {icon}
+            <div className="search-res-container">
+              <p className="search-res-title" dangerouslySetInnerHTML={{ __html: item?.title }}></p>
+              {item?.content?.length > 0 && (
+                <p className="search-res-desc" dangerouslySetInnerHTML={{ __html: item?.content?.[0] || '' }}></p>
+              )}
+            </div>
+          </Item>
+        ))}
+      </Command.Group>
       {hasMore && displayMode === 'list' ? (
         <div className="search-load-more">
           <Button type="text" loading={isRequesting} onClick={() => loadMore(currentPage)}>
