@@ -1,57 +1,57 @@
-import { useSearchParams } from "react-router-dom"
+import { useSearchParams } from "react-router-dom";
 // components
 /**
  * 只聚焦昨天、今天、这周、这个月最核心的内容，剩下的让用户去归档里面查看，能够对自己的工作有一个明确的感知
  */
 
-import { time } from "@refly/ai-workspace-common/utils/time"
+import { time } from "@refly/ai-workspace-common/utils/time";
 import {
   List,
   Skeleton,
   Typography,
   Message as message,
   DatePicker,
-} from "@arco-design/web-react"
+} from "@arco-design/web-react";
 import {
   IconClockCircle,
   IconLink,
   IconRightCircle,
   IconShareExternal,
   IconTag,
-} from "@arco-design/web-react/icon"
-import { useNavigate } from "react-router-dom"
+} from "@arco-design/web-react/icon";
+import { useNavigate } from "react-router-dom";
 // types
-import type { Digest } from "@refly/openapi-schema"
-import { IconTip } from "@refly/ai-workspace-common/components/dashboard/icon-tip"
-import { copyToClipboard } from "@refly/ai-workspace-common/utils"
-import { safeParseURL } from "@refly/utils/url"
-import { getClientOrigin } from "@refly/utils/url"
+import type { Digest } from "@refly/openapi-schema";
+import { IconTip } from "@refly/ai-workspace-common/components/dashboard/icon-tip";
+import { copyToClipboard } from "@refly/ai-workspace-common/utils";
+import { safeParseURL } from "@refly/utils/url";
+import { getClientOrigin } from "@refly/utils/url";
 // stores
-import { useDigestArchiveStore } from "@refly/ai-workspace-common/stores/digest-archive"
+import { useDigestArchiveStore } from "@refly/ai-workspace-common/stores/digest-archive";
 // components
-import { DigestHeader } from "@refly/ai-workspace-common/components/digest-common/header"
-import { useEffect, useState } from "react"
-import { EmptyDigestStatus } from "@refly/ai-workspace-common/components/empty-digest-archive-status"
+import { DigestHeader } from "@refly/ai-workspace-common/components/digest-common/header";
+import { useEffect, useState } from "react";
+import { EmptyDigestStatus } from "@refly/ai-workspace-common/components/empty-digest-archive-status";
 // utils
-import getClient from "@refly/ai-workspace-common/requests/proxiedRequest"
+import getClient from "@refly/ai-workspace-common/requests/proxiedRequest";
 // styles
-import "./index.scss"
-import { useTranslation } from "react-i18next"
-import { LOCALE } from "@refly/constants"
+import "./index.scss";
+import { useTranslation } from "react-i18next";
+import { LOCALE } from "@refly/common-types";
 
 export const DigestArchive = () => {
-  const [searchParams] = useSearchParams()
-  const [scrollLoading, setScrollLoading] = useState(<div></div>)
-  const digestArchiveStore = useDigestArchiveStore()
-  const navigate = useNavigate()
+  const [searchParams] = useSearchParams();
+  const [scrollLoading, setScrollLoading] = useState(<div></div>);
+  const digestArchiveStore = useDigestArchiveStore();
+  const navigate = useNavigate();
 
-  const dateType = searchParams.get("dateType")
-  const year = searchParams.get("y")
-  const month = searchParams.get("m")
-  const day = searchParams.get("d")
+  const dateType = searchParams.get("dateType");
+  const year = searchParams.get("y");
+  const month = searchParams.get("m");
+  const day = searchParams.get("d");
 
-  const { t, i18n } = useTranslation()
-  const language = i18n.languages?.[0]
+  const { t, i18n } = useTranslation();
+  const language = i18n.languages?.[0];
 
   const fetchData = async (currentPage = 1) => {
     try {
@@ -61,18 +61,20 @@ export const DigestArchive = () => {
             display: "flex",
             flexDirection: "column",
             width: "100%",
-          }}>
+          }}
+        >
           <Skeleton animation style={{ width: "100%" }}></Skeleton>
           <Skeleton
             animation
-            style={{ width: "100%", marginTop: 24 }}></Skeleton>
+            style={{ width: "100%", marginTop: 24 }}
+          ></Skeleton>
         </div>,
-      )
+      );
       if (!digestArchiveStore?.hasMore && currentPage !== 1) {
         setScrollLoading(
           <span>{t("knowledgeLibrary.archive.item.noMoreText")}</span>,
-        )
-        return
+        );
+        return;
       }
 
       // TODO: digest 联调，currentTopicDetail?.key
@@ -88,49 +90,49 @@ export const DigestArchive = () => {
             },
           },
         },
-      })
+      });
 
       if (error) {
-        throw error
+        throw error;
       }
 
-      digestArchiveStore.updateCurrentPage(currentPage)
+      digestArchiveStore.updateCurrentPage(currentPage);
 
       if (!newRes?.success) {
-        throw new Error(newRes?.errMsg)
+        throw new Error(newRes?.errMsg);
       }
       if (newRes?.data && newRes?.data?.length < digestArchiveStore?.pageSize) {
-        digestArchiveStore.updateHasMore(false)
+        digestArchiveStore.updateHasMore(false);
       }
 
-      console.log("newRes", newRes)
-      digestArchiveStore.updateDigestList(newRes?.data || [])
+      console.log("newRes", newRes);
+      digestArchiveStore.updateDigestList(newRes?.data || []);
     } catch (err) {
-      message.error(t("knowledgeLibrary.timeline.list.fetchErr"))
+      message.error(t("knowledgeLibrary.timeline.list.fetchErr"));
     } finally {
-      const { digestList, pageSize } = useDigestArchiveStore.getState()
+      const { digestList, pageSize } = useDigestArchiveStore.getState();
 
       if (digestList?.length === 0) {
         setScrollLoading(
           <EmptyDigestStatus
             date={{ year: year || "", month: month || "", day: day || "" }}
           />,
-        )
+        );
       } else if (digestList?.length > 0 && digestList?.length < pageSize) {
         setScrollLoading(
           <span>{t("knowledgeLibrary.archive.item.noMoreText")}</span>,
-        )
+        );
       }
     }
-  }
+  };
 
   useEffect(() => {
-    fetchData()
+    fetchData();
 
     return () => {
-      digestArchiveStore.resetState()
-    }
-  }, [dateType, day, year, month])
+      digestArchiveStore.resetState();
+    };
+  }, [dateType, day, year, month]);
 
   return (
     <div className="digest-archive-container">
@@ -153,7 +155,7 @@ export const DigestArchive = () => {
               <div className="digest-archive-time-picker">
                 <DatePicker
                   popupVisible={digestArchiveStore.datePopupVisible}
-                  onVisibleChange={visible =>
+                  onVisibleChange={(visible) =>
                     digestArchiveStore.updateDatePopupVisible(
                       visible as boolean,
                     )
@@ -161,15 +163,15 @@ export const DigestArchive = () => {
                   defaultValue={`${year}-${Number(month) >= 10 ? month : `0${month}`}-${Number(day) >= 10 ? day : `0${day}`}`}
                   style={{ width: 200 }}
                   onChange={(dateStr, date) => {
-                    const year = date.get("year")
-                    const month = date.get("month")
-                    const day = date.get("D")
+                    const year = date.get("year");
+                    const month = date.get("month");
+                    const day = date.get("D");
 
-                    console.log("day", day)
+                    console.log("day", day);
 
                     navigate(
                       `/?type=timeline&dateType=daily&y=${year}&m=${month + 1}&d=${day}`,
-                    )
+                    );
                   }}
                 />
               </div>
@@ -177,7 +179,7 @@ export const DigestArchive = () => {
           }
           dataSource={digestArchiveStore.digestList}
           scrollLoading={scrollLoading}
-          onReachBottom={currentPage => fetchData(currentPage)}
+          onReachBottom={(currentPage) => fetchData(currentPage)}
           noDataElement={
             <div>{t("knowledgeLibrary.archive.item.noMoreText")}</div>
           }
@@ -196,8 +198,9 @@ export const DigestArchive = () => {
                       key={1}
                       className="feed-list-item-continue-ask with-border with-hover"
                       onClick={() => {
-                        navigate(`/digest/${item?.contentId}`)
-                      }}>
+                        navigate(`/digest/${item?.contentId}`);
+                      }}
+                    >
                       <IconRightCircle
                         style={{ fontSize: 14, color: "#64645F" }}
                       />
@@ -212,11 +215,12 @@ export const DigestArchive = () => {
                         onClick={() => {
                           copyToClipboard(
                             `${getClientOrigin()}/content/${item?.contentId}`,
-                          )
+                          );
                           message.success(
                             t("knowledgeLibrary.archive.item.copyNotify"),
-                          )
-                        }}>
+                          );
+                        }}
+                      >
                         <IconShareExternal
                           style={{ fontSize: 14, color: "#64645F" }}
                         />
@@ -235,7 +239,8 @@ export const DigestArchive = () => {
                         borderRight: `1px solid #64645F`,
                         paddingRight: 12,
                         lineHeight: "10px",
-                      }}>
+                      }}
+                    >
                       <IconTag style={{ fontSize: 14, color: "#64645F" }} />
                       <span className="feed-list-item-text">
                         {item?.topic?.name}
@@ -245,8 +250,9 @@ export const DigestArchive = () => {
                       key={3}
                       className="feed-item-link"
                       onClick={() => {
-                        window.open(item?.weblinks?.[0]?.url, "_blank")
-                      }}>
+                        window.open(item?.weblinks?.[0]?.url, "_blank");
+                      }}
+                    >
                       <IconLink style={{ fontSize: 14, color: "#64645F" }} />
                       <span className="feed-list-item-text">
                         {safeParseURL(item?.weblinks?.[0]?.url)}{" "}
@@ -267,7 +273,8 @@ export const DigestArchive = () => {
                     </span>
                   </div>
                 </div>,
-              ]}>
+              ]}
+            >
               <List.Item.Meta
                 title={item.title}
                 description={
@@ -276,7 +283,8 @@ export const DigestArchive = () => {
                       rows: 2,
                       wrapper: "span",
                     }}
-                    style={{ color: "rgba(0, 0, 0, .4) !important" }}>
+                    style={{ color: "rgba(0, 0, 0, .4) !important" }}
+                  >
                     {item.abstract}
                   </Typography.Paragraph>
                 }
@@ -286,5 +294,5 @@ export const DigestArchive = () => {
         />
       </div>
     </div>
-  )
-}
+  );
+};

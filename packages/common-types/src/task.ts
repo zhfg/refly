@@ -1,4 +1,4 @@
-import { type OutputLocale } from '@refly/utils';
+import { type OutputLocale } from './i18n';
 import { Source } from '@refly/openapi-schema';
 
 export interface Mode {
@@ -26,11 +26,6 @@ export const enum TASK_TYPE {
 
 export const enum LANGUAGE {
   AUTO = 'auto',
-}
-
-export const enum LOCALE {
-  ZH_CN = 'zh-CN',
-  EN = 'en',
 }
 
 export const enum QUICK_ACTION_TYPE {

@@ -22,8 +22,7 @@
   ],
   "scripts": {
     "prebuild": "rm -fr lib types",
-    "build": "npx tsc",
-    "postinstall": "npm run build"
+    "build": "npx tsc"
   },
   "author": "arco-design",
   "license": "MIT",

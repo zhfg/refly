@@ -2,56 +2,56 @@
  * 只聚焦昨天、今天、这周、这个月最核心的内容，剩下的让用户去归档里面查看，能够对自己的工作有一个明确的感知
  */
 
-import { time } from "@refly/ai-workspace-common/utils/time"
+import { time } from "@refly/ai-workspace-common/utils/time";
 import {
   List,
   Skeleton,
   Typography,
   Message as message,
-} from "@arco-design/web-react"
+} from "@arco-design/web-react";
 import {
   IconClockCircle,
   IconLink,
   IconRightCircle,
   IconShareExternal,
   IconTag,
-} from "@arco-design/web-react/icon"
-import { useNavigate } from "react-router-dom"
+} from "@arco-design/web-react/icon";
+import { useNavigate } from "react-router-dom";
 // types
-import { Digest, Source } from "@refly/openapi-schema"
-import { IconTip } from "@refly/ai-workspace-common/components/dashboard/icon-tip"
-import { copyToClipboard } from "@refly/ai-workspace-common/utils"
-import { getClientOrigin } from "@refly/utils/url"
+import { Digest, Source } from "@refly/openapi-schema";
+import { IconTip } from "@refly/ai-workspace-common/components/dashboard/icon-tip";
+import { copyToClipboard } from "@refly/ai-workspace-common/utils";
+import { getClientOrigin } from "@refly/utils/url";
 // stores
 import {
   DigestType,
   useDigestStore,
-} from "@refly/ai-workspace-common/stores/digest"
+} from "@refly/ai-workspace-common/stores/digest";
 // components
-import { useEffect, useState } from "react"
-import { EmptyDigestStatus } from "@refly/ai-workspace-common/components/empty-digest-today-status"
+import { useEffect, useState } from "react";
+import { EmptyDigestStatus } from "@refly/ai-workspace-common/components/empty-digest-today-status";
 // utils
-import getClient from "@refly/ai-workspace-common/requests/proxiedRequest"
+import getClient from "@refly/ai-workspace-common/requests/proxiedRequest";
 // styles
-import "./index.scss"
-import { LOCALE } from "@refly/constants"
-import { useTranslation } from "react-i18next"
+import "./index.scss";
+import { LOCALE } from "@refly/common-types";
+import { useTranslation } from "react-i18next";
 
 export const getFirstSourceLink = (sources: Source[]) => {
-  return sources?.[0]?.metadata?.source
-}
+  return sources?.[0]?.metadata?.source;
+};
 
 export const DigestToday = () => {
-  const navigate = useNavigate()
-  const digestStore = useDigestStore()
+  const navigate = useNavigate();
+  const digestStore = useDigestStore();
   const [scrollLoading, setScrollLoading] = useState(
     <Skeleton animation style={{ width: "100%" }}></Skeleton>,
-  )
-  const { t, i18n } = useTranslation()
-  const language = i18n.languages?.[0]
+  );
+  const { t, i18n } = useTranslation();
+  const language = i18n.languages?.[0];
 
   const fetchData = async (currentPage = 1) => {
-    let newData: Digest[] = []
+    let newData: Digest[] = [];
 
     try {
       setScrollLoading(
@@ -60,20 +60,22 @@ export const DigestToday = () => {
             display: "flex",
             flexDirection: "column",
             width: "100%",
-          }}>
+          }}
+        >
           <Skeleton animation style={{ width: "100%" }}></Skeleton>
           <Skeleton
             animation
-            style={{ width: "100%", marginTop: 24 }}></Skeleton>
+            style={{ width: "100%", marginTop: 24 }}
+          ></Skeleton>
         </div>,
-      )
+      );
 
       if (!digestStore.today.hasMore && currentPage !== 1) {
         setScrollLoading(
           <span>{t("knowledgeLibrary.archive.item.noMoreText")}</span>,
-        )
+        );
 
-        return
+        return;
       }
 
       const { data: newRes, error } = await getClient().getDigestList({
@@ -82,58 +84,58 @@ export const DigestToday = () => {
           page: currentPage,
           pageSize: digestStore.today.pageSize,
         },
-      })
+      });
 
       if (error) {
-        throw error
+        throw error;
       }
 
       digestStore.updatePayload(
         { ...digestStore.today, currentPage },
         DigestType.TODAY,
-      )
+      );
 
       if (!newRes?.success) {
-        throw new Error(newRes?.errMsg)
+        throw new Error(newRes?.errMsg);
       }
       if (newRes?.data && newRes?.data?.length < digestStore.today?.pageSize) {
         digestStore.updatePayload(
           { ...digestStore.today, hasMore: false },
           DigestType.TODAY,
-        )
+        );
       }
 
-      console.log("newRes", newRes)
+      console.log("newRes", newRes);
       const newFeatureList = digestStore.today.featureList.concat(
         newRes?.data || [],
-      )
-      newData = newRes?.data || []
+      );
+      newData = newRes?.data || [];
       digestStore.updatePayload(
         { ...digestStore.today, featureList: newFeatureList },
         DigestType.TODAY,
-      )
+      );
     } catch (err) {
-      message.error(t("knowledgeLibrary.archive.list.fetchErr"))
+      message.error(t("knowledgeLibrary.archive.list.fetchErr"));
     } finally {
-      const { today } = useDigestStore.getState()
+      const { today } = useDigestStore.getState();
 
       if (today?.featureList?.length === 0) {
-        setScrollLoading(<EmptyDigestStatus />)
+        setScrollLoading(<EmptyDigestStatus />);
       } else if (newData?.length >= 0 && newData?.length < today?.pageSize) {
         setScrollLoading(
           <span>{t("knowledgeLibrary.archive.item.noMoreText")}</span>,
-        )
+        );
       }
     }
-  }
+  };
 
   useEffect(() => {
-    fetchData()
+    fetchData();
 
     return () => {
-      digestStore.resetState()
-    }
-  }, [])
+      digestStore.resetState();
+    };
+  }, []);
 
   return (
     <div className="today-container">
@@ -158,7 +160,7 @@ export const DigestToday = () => {
           // }
           dataSource={digestStore?.today?.featureList || []}
           scrollLoading={scrollLoading}
-          onReachBottom={currentPage => fetchData(currentPage)}
+          onReachBottom={(currentPage) => fetchData(currentPage)}
           render={(item: Digest) => (
             <List.Item
               key={item?.cid}
@@ -174,8 +176,9 @@ export const DigestToday = () => {
                       key={1}
                       className="feed-list-item-continue-ask with-border with-hover"
                       onClick={() => {
-                        navigate(`/digest/${item?.cid}`)
-                      }}>
+                        navigate(`/digest/${item?.cid}`);
+                      }}
+                    >
                       <IconRightCircle
                         style={{ fontSize: 14, color: "#64645F" }}
                       />
@@ -190,11 +193,12 @@ export const DigestToday = () => {
                         onClick={() => {
                           copyToClipboard(
                             `${getClientOrigin()}/content/${item?.contentId}`,
-                          )
+                          );
                           message.success(
                             t("knowledgeLibrary.archive.item.copyNotify"),
-                          )
-                        }}>
+                          );
+                        }}
+                      >
                         <IconShareExternal
                           style={{ fontSize: 14, color: "#64645F" }}
                         />
@@ -245,7 +249,8 @@ export const DigestToday = () => {
                     </span>
                   </div> */}
                 </div>,
-              ]}>
+              ]}
+            >
               <List.Item.Meta
                 title={item.title}
                 description={
@@ -254,7 +259,8 @@ export const DigestToday = () => {
                       rows: 2,
                       wrapper: "span",
                     }}
-                    style={{ color: "rgba(0, 0, 0, .4) !important" }}>
+                    style={{ color: "rgba(0, 0, 0, .4) !important" }}
+                  >
                     {item.abstract}
                   </Typography.Paragraph>
                 }
@@ -264,5 +270,5 @@ export const DigestToday = () => {
         />
       </div>
     </div>
-  )
-}
+  );
+};

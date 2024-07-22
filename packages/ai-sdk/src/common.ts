@@ -1,11 +1,10 @@
 import { useRef } from 'react';
 import { LOCALE, MessageState, RelatedQuestion, TASK_STATUS, TASK_TYPE } from '@refly/common-types';
 
-import { buildErrorMessage, buildQuestionMessage, buildReplyMessage } from '@refly/utils/message';
+import { buildErrorMessage, buildQuestionMessage, buildReplyMessage } from '@refly/utils';
 import { type ChatTask, type Source } from '@refly/openapi-schema';
-import { parseStreaming } from '@refly/utils/parse-streaming';
 import { useChatTaskStore } from './state';
-import { buildConversation } from '@refly/utils/conversation';
+import { buildConversation, parseStreaming } from '@refly/utils';
 
 // stores
 /**

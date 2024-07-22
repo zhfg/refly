@@ -6,7 +6,7 @@ import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 
 // types
-import { LOCALE } from '@refly/constants';
+import { LOCALE } from '@refly/common-types';
 
 // request
 import { IconLanguage, IconSend } from '@arco-design/web-react/icon';

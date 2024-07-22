@@ -91,9 +91,6 @@ importers:
       '@refly/common-types':
         specifier: workspace:*
         version: link:../../packages/common-types
-      '@refly/constants':
-        specifier: workspace:*
-        version: link:../../packages/constants
       '@refly/editor-common':
         specifier: workspace:*
         version: link:../../packages/editor-common
@@ -315,100 +312,6 @@ importers:
         specifier: ^5.0.0
         version: 5.3.3
 
-  ../../apps/editor-playground:
-    dependencies:
-      '@hey-api/client-fetch':
-        specifier: ~0.1.3
-        version: 0.1.3
-      '@hocuspocus/provider':
-        specifier: ^2.13.0
-        version: 2.13.0(y-protocols@1.0.6)(yjs@13.6.16)
-      '@refly/openapi-schema':
-        specifier: workspace:*
-        version: link:../../packages/openapi-schema
-      '@tiptap/extension-character-count':
-        specifier: ^2.4.0
-        version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)
-      '@tiptap/extension-collaboration':
-        specifier: ^2.4.0
-        version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)(y-prosemirror@1.2.6)
-      '@tiptap/extension-collaboration-cursor':
-        specifier: ^2.4.0
-        version: 2.4.0(@tiptap/core@2.4.0)(y-prosemirror@1.2.6)
-      '@tiptap/extension-color':
-        specifier: ^2.4.0
-        version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/extension-text-style@2.4.0)
-      '@tiptap/extension-highlight':
-        specifier: ^2.4.0
-        version: 2.4.0(@tiptap/core@2.4.0)
-      '@tiptap/extension-image':
-        specifier: ^2.4.0
-        version: 2.4.0(@tiptap/core@2.4.0)
-      '@tiptap/extension-link':
-        specifier: ^2.4.0
-        version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)
-      '@tiptap/extension-list-item':
-        specifier: ^2.4.0
-        version: 2.4.0(@tiptap/core@2.4.0)
-      '@tiptap/extension-task-item':
-        specifier: ^2.4.0
-        version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)
-      '@tiptap/extension-task-list':
-        specifier: ^2.4.0
-        version: 2.4.0(@tiptap/core@2.4.0)
-      '@tiptap/extension-text-style':
-        specifier: ^2.4.0
-        version: 2.4.0(@tiptap/core@2.4.0)
-      '@tiptap/pm':
-        specifier: ^2.4.0
-        version: 2.4.0
-      '@tiptap/react':
-        specifier: ^2.4.0
-        version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)(react-dom@18.2.0)(react@18.2.0)
-      '@tiptap/starter-kit':
-        specifier: ^2.4.0
-        version: 2.4.0(@tiptap/pm@2.4.0)
-      react:
-        specifier: ^18.2.0
-        version: 18.2.0
-      react-dom:
-        specifier: ^18.2.0
-        version: 18.2.0(react@18.2.0)
-      tiptap-markdown:
-        specifier: ^0.8.10
-        version: 0.8.10(@tiptap/core@2.4.0)
-    devDependencies:
-      '@types/react':
-        specifier: ^18.2.66
-        version: 18.2.66
-      '@types/react-dom':
-        specifier: ^18.2.22
-        version: 18.2.22
-      '@typescript-eslint/eslint-plugin':
-        specifier: ^7.2.0
-        version: 7.11.0(@typescript-eslint/parser@7.11.0)(eslint@8.57.0)(typescript@5.3.3)
-      '@typescript-eslint/parser':
-        specifier: ^7.2.0
-        version: 7.11.0(eslint@8.57.0)(typescript@5.3.3)
-      '@vitejs/plugin-react':
-        specifier: ^4.2.1
-        version: 4.2.1(vite@5.2.8)
-      eslint:
-        specifier: ^8.57.0
-        version: 8.57.0
-      eslint-plugin-react-hooks:
-        specifier: ^4.6.0
-        version: 4.6.0(eslint@8.57.0)
-      eslint-plugin-react-refresh:
-        specifier: ^0.4.6
-        version: 0.4.6(eslint@8.57.0)
-      typescript:
-        specifier: ^5.2.2
-        version: 5.3.3
-      vite:
-        specifier: ^5.2.0
-        version: 5.2.8(@types/node@18.15.11)(less@4.2.0)(sass@1.71.1)(terser@5.30.4)
-
   ../../apps/extension-wxt:
     dependencies:
       '@arco-design/web-react':
@@ -447,9 +350,9 @@ importers:
       '@refly/arco-vite-plugin-react':
         specifier: workspace:*
         version: link:../../packages/plugin-vite-react
-      '@refly/constants':
+      '@refly/common-types':
         specifier: workspace:*
-        version: link:../../packages/constants
+        version: link:../../packages/common-types
       '@refly/openapi-schema':
         specifier: workspace:*
         version: link:../../packages/openapi-schema
@@ -598,9 +501,6 @@ importers:
       '@arco-plugins/vite-react':
         specifier: ^1.3.3
         version: 1.3.3
-      '@refly/common-types':
-        specifier: workspace:*
-        version: link:../../packages/common-types
       '@types/chrome':
         specifier: 0.0.227
         version: 0.0.227
@@ -670,9 +570,9 @@ importers:
       '@refly/ai-workspace-common':
         specifier: workspace:*
         version: link:../../packages/ai-workspace-common
-      '@refly/constants':
+      '@refly/common-types':
         specifier: workspace:*
-        version: link:../../packages/constants
+        version: link:../../packages/common-types
       '@refly/editor-common':
         specifier: workspace:*
         version: link:../../packages/editor-common
@@ -914,9 +814,9 @@ importers:
       '@refly/ai-workspace-common':
         specifier: workspace:*
         version: link:../../packages/ai-workspace-common
-      '@refly/constants':
+      '@refly/common-types':
         specifier: workspace:*
-        version: link:../../packages/constants
+        version: link:../../packages/common-types
       '@refly/editor-common':
         specifier: workspace:*
         version: link:../../packages/editor-common
@@ -1174,9 +1074,6 @@ importers:
       '@refly/common-types':
         specifier: workspace:*
         version: link:../common-types
-      '@refly/constants':
-        specifier: workspace:*
-        version: link:../constants
       '@refly/openapi-schema':
         specifier: workspace:*
         version: link:../openapi-schema
@@ -1271,9 +1168,9 @@ importers:
       '@redux-devtools/extension':
         specifier: ^3.3.0
         version: 3.3.0
-      '@refly/constants':
+      '@refly/common-types':
         specifier: workspace:*
-        version: link:../constants
+        version: link:../common-types
       '@refly/editor-common':
         specifier: workspace:*
         version: link:../editor-common
@@ -1297,10 +1194,10 @@ importers:
         version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)
       '@tiptap/extension-collaboration':
         specifier: ^2.4.0
-        version: 2.4.0(@tiptap/pm@2.4.0)(y-prosemirror@1.2.6)
+        version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)(y-prosemirror@1.2.6)
       '@tiptap/extension-collaboration-cursor':
         specifier: ^2.4.0
-        version: 2.4.0(y-prosemirror@1.2.6)
+        version: 2.4.0(@tiptap/core@2.4.0)(y-prosemirror@1.2.6)
       '@tiptap/extension-color':
         specifier: ^2.4.0
         version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/extension-text-style@2.4.0)
@@ -1491,9 +1388,6 @@ importers:
       '@refly/arco-vite-plugin-react':
         specifier: workspace:*
         version: link:../plugin-vite-react
-      '@refly/common-types':
-        specifier: workspace:*
-        version: link:../common-types
       '@types/aos':
         specifier: ^3.0.7
         version: 3.0.7
@@ -1566,15 +1460,9 @@ importers:
       '@paralleldrive/cuid2':
         specifier: ^2.2.2
         version: 2.2.2
-      '@refly/constants':
-        specifier: workspace:*
-        version: link:../constants
       '@refly/openapi-schema':
         specifier: workspace:*
         version: link:../openapi-schema
-      '@refly/utils':
-        specifier: workspace:*
-        version: link:../utils
       clsx:
         specifier: ^2.1.0
         version: 2.1.0
@@ -1618,15 +1506,6 @@ importers:
       '@types/react-dom':
         specifier: ^18.2.19
         version: 18.2.22
-      rimraf:
-        specifier: ~5.0.7
-        version: 5.0.7
-      typescript:
-        specifier: ^5
-        version: 5.3.3
-
-  ../../packages/constants:
-    devDependencies:
       rimraf:
         specifier: ~5.0.7
         version: 5.0.7
@@ -2082,9 +1961,6 @@ importers:
       '@refly/common-types':
         specifier: workspace:*
         version: link:../common-types
-      '@refly/constants':
-        specifier: workspace:*
-        version: link:../constants
       '@refly/openapi-schema':
         specifier: workspace:*
         version: link:../openapi-schema
@@ -9428,15 +9304,6 @@ packages:
       y-prosemirror: 1.2.6(prosemirror-model@1.21.1)(y-protocols@1.0.6)(yjs@13.6.16)
     dev: false
 
-  /@tiptap/extension-collaboration-cursor@2.4.0(y-prosemirror@1.2.6):
-    resolution: {integrity: sha512-BTVy9FCTGdHxYieJ4lteVLrRY5qAPQyfunhMwakVf1NT3iU9quE6CaeaIwt6wEDJPMPPKzOHg1/ltSz9nIDe4A==}
-    peerDependencies:
-      '@tiptap/core': ^2.0.0
-      y-prosemirror: ^1.2.5
-    dependencies:
-      y-prosemirror: 1.2.6(prosemirror-model@1.21.1)(y-protocols@1.0.6)(yjs@13.6.16)
-    dev: false
-
   /@tiptap/extension-collaboration@2.4.0(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)(y-prosemirror@1.2.6):
     resolution: {integrity: sha512-achU+GU9tqxn3zsU61CbwWrCausf0U23MJIpo8vnywOIx6E955by6okHEHoUazLIGVFXVc5DBzBP7bf+Snzk0Q==}
     peerDependencies:
@@ -9445,17 +9312,6 @@ packages:
       y-prosemirror: ^1.2.5
     dependencies:
       '@tiptap/core': 2.4.0(@tiptap/pm@2.4.0)
-      '@tiptap/pm': 2.4.0
-      y-prosemirror: 1.2.6(prosemirror-model@1.21.1)(y-protocols@1.0.6)(yjs@13.6.16)
-    dev: false
-
-  /@tiptap/extension-collaboration@2.4.0(@tiptap/pm@2.4.0)(y-prosemirror@1.2.6):
-    resolution: {integrity: sha512-achU+GU9tqxn3zsU61CbwWrCausf0U23MJIpo8vnywOIx6E955by6okHEHoUazLIGVFXVc5DBzBP7bf+Snzk0Q==}
-    peerDependencies:
-      '@tiptap/core': ^2.0.0
-      '@tiptap/pm': ^2.0.0
-      y-prosemirror: ^1.2.5
-    dependencies:
       '@tiptap/pm': 2.4.0
       y-prosemirror: 1.2.6(prosemirror-model@1.21.1)(y-protocols@1.0.6)(yjs@13.6.16)
     dev: false

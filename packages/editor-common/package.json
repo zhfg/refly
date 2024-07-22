@@ -10,9 +10,7 @@
   },
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "pnpm run build:cjs && pnpm run build:esm",
-    "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build:esm": "tsc -p tsconfig.esm.json",
+    "build": "rimraf dist && tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "vite"
   },

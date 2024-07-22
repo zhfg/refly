@@ -21,7 +21,7 @@ import { useNavigate, useParams } from "react-router-dom"
 // stores
 import { useDigestTopicDetailStore } from "@refly/ai-workspace-common/stores/digest-topic-detail"
 // types
-import { LOCALE } from "@refly/constants"
+import { LOCALE } from "@refly/common-types"
 import { Digest } from "@refly/openapi-schema"
 // request
 import getClient from "@refly/ai-workspace-common/requests/proxiedRequest"
