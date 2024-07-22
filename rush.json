@@ -78,11 +78,6 @@
       "packageName": "@refly/extension-v2",
       "projectFolder": "apps/extension-wxt",
       "reviewCategory": "apps"
-    },
-    {
-      "packageName": "@refly/workers",
-      "projectFolder": "apps/workers",
-      "reviewCategory": "apps"
     }
   ]
 }
