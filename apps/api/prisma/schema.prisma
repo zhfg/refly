@@ -119,41 +119,69 @@ model ChatMessage {
 /// 知识库资源
 model Resource {
   /// 主键
-  id              BigInt       @id @default(autoincrement())
+  id           BigInt       @id @default(autoincrement())
   /// 资源项 id
-  resourceId      String       @unique @map("resource_id")
+  resourceId   String       @unique @map("resource_id")
   /// 资源类型
-  resourceType    ResourceType @map("resource_type")
+  resourceType ResourceType @map("resource_type")
   /// UID
-  uid             String       @default("") @map("uid")
+  uid          String       @default("") @map("uid")
   /// Collection ID
-  collectionId    String       @default("") @map("collection_id")
+  collectionId String       @default("") @map("collection_id")
   /// 字数
-  wordCount       Int          @default(0) @map("word_count")
+  wordCount    Int          @default(0) @map("word_count")
   /// Content of resource
-  content         String       @default("") @map("content")
-  /// Yjs 状态数据存储 key
-  stateStorageKey String       @default("") @map("state_storage_key")
+  content      String       @default("") @map("content")
   /// 是否公开
-  isPublic        Boolean      @default(false) @map("is_public")
+  isPublic     Boolean      @default(false) @map("is_public")
   /// 是否只读
-  readOnly        Boolean      @default(false) @map("read_only")
+  readOnly     Boolean      @default(false) @map("read_only")
   /// 索引状态
-  indexStatus     IndexStatus  @default(init) @map("index_status")
+  indexStatus  IndexStatus  @default(init) @map("index_status")
   /// 标题
-  title           String       @map("title")
+  title        String       @map("title")
   /// 资源元数据
-  meta            String       @map("meta")
+  meta         String       @map("meta")
   /// 创建时间
-  createdAt       DateTime     @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz()
   /// 更新时间
-  updatedAt       DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
   /// 软删除标记
-  deletedAt       DateTime?    @map("deleted_at") @db.Timestamptz()
+  deletedAt    DateTime?    @map("deleted_at") @db.Timestamptz()
 
-  @@index([collectionId])
-  @@index([uid, updatedAt])
+  @@index([collectionId, deletedAt, updatedAt])
+  @@index([uid, deletedAt, updatedAt])
   @@map("resources")
+}
+
+model Note {
+  /// Primary key
+  pk              BigInt    @id @default(autoincrement())
+  /// Note id
+  noteId          String    @unique @map("note_id")
+  /// UID
+  uid             String    @default("") @map("uid")
+  /// Note title
+  title           String    @map("title")
+  /// Word count
+  wordCount       Int       @default(0) @map("word_count")
+  /// Content of resource
+  content         String    @default("") @map("content")
+  /// Yjs state storage key
+  stateStorageKey String    @default("") @map("state_storage_key")
+  /// Whether this note is publicly accessible
+  isPublic        Boolean   @default(false) @map("is_public")
+  /// Whether this note is readonly
+  readOnly        Boolean   @default(false) @map("read_only")
+  /// Create timestamp
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  /// Soft delete timestamp
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz()
+
+  @@index([uid, deletedAt, updatedAt])
+  @@map("notes")
 }
 
 /// 知识集
