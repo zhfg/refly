@@ -15,8 +15,7 @@
   --editor-yellow-light: #fffae5;
   --editor-red: #ff5c33;
   --editor-red-light: #ffebe5;
-  --editor-shadow: 0px 12px 33px 0px rgba(0, 0, 0, 0.06),
-    0px 3.618px 9.949px 0px rgba(0, 0, 0, 0.04);
+  --editor-shadow: 0px 12px 33px 0px rgba(0, 0, 0, 0.06), 0px 3.618px 9.949px 0px rgba(0, 0, 0, 0.04);
 }
 
 /* Basic editor styles */
@@ -57,7 +56,7 @@
     background: #0d0d0d;
     border-radius: 0.5rem;
     color: #fff;
-    font-family: "JetBrainsMono", monospace;
+    font-family: 'JetBrainsMono', monospace;
     padding: 0.75rem 1rem;
 
     code {
@@ -92,7 +91,7 @@
     margin: 2rem 0;
   }
 
-  ul[data-type="taskList"] {
+  ul[data-type='taskList'] {
     list-style: none;
     padding: 0;
 
@@ -165,7 +164,7 @@
     &::before {
       background: rgba(#0d0d0d, 0.5);
       border-radius: 50%;
-      content: " ";
+      content: ' ';
       display: inline-block;
       flex: 0 0 auto;
       height: 0.5rem;
@@ -251,6 +250,34 @@
       display: flex;
       flex-direction: row;
       align-items: center;
+
+      .assist-action-item {
+        color: rgba(0, 0, 0, 0.5);
+        font-size: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        &:hover,
+        &.active {
+          cursor: pointer;
+          background-color: #f1f1f0;
+          color: #00968f;
+        }
+      }
+
+      button.assist-action-item {
+        height: 24px;
+        padding: 0 4px;
+        border-radius: 8px;
+
+        &:hover,
+        &.active {
+          cursor: pointer;
+          background-color: #f1f1f0;
+          color: #00968f;
+        }
+      }
     }
 
     .conv-meta {
@@ -275,33 +302,5 @@
   .ai-note-editor {
     height: calc(100vh - 40px - 12px - 12px);
     overflow-y: scroll;
-  }
-
-  .assist-action-item {
-    color: rgba(0, 0, 0, 0.5);
-    font-size: 12px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    &:hover,
-    &.active {
-      cursor: pointer;
-      background-color: #f1f1f0;
-      color: #00968f;
-    }
-  }
-
-  button.assist-action-item {
-    height: 24px;
-    padding: 0 4px;
-    border-radius: 8px;
-
-    &:hover,
-    &.active {
-      cursor: pointer;
-      background-color: #f1f1f0;
-      color: #00968f;
-    }
   }
 }
