@@ -24,6 +24,8 @@ import { Item } from './item';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { SearchDomain, SearchRequest, SearchResult } from '@refly/openapi-schema';
 import { useNavigate } from 'react-router-dom';
+import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
+import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 
 export function DataList({
   domain,
@@ -44,6 +46,8 @@ export function DataList({
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isRequesting, setIsRequesting] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const knowledgeBaseStore = useKnowledgeBaseStore();
 
   const navigate = useNavigate();
   const searchStore = useSearchStore();
@@ -188,17 +192,25 @@ export function DataList({
           value={`${domain}-${index}-${item?.title}-${item?.content?.[0] || ''}`}
           activeValue={activeValue}
           onSelect={() => {
+            const newSearchParams = new URLSearchParams(searchParams);
+
             if (domain === 'skill') {
             } else if (domain === 'note') {
-              navigate(`/knowledge-base?noteId=${item?.id}`);
+              newSearchParams.set('noteId', item?.id);
+              knowledgeBaseStore.updateNotePanelVisible(true);
             } else if (domain === 'readResources') {
-              navigate(`/knowledge-base?kbId=${item?.metadata?.collectionId}&resId=${item?.id}`);
+              newSearchParams.set('kbId', item?.metadata?.collectionId);
+              newSearchParams.set('resId', item?.id);
+              knowledgeBaseStore.updateResourcePanelVisible(true);
             } else if (domain === 'knowledgeBases') {
-              navigate(`/knowledge-base?kbId=${item?.id}`);
+              newSearchParams.set('kbId', item?.id);
+              knowledgeBaseStore.updateResourcePanelVisible(true);
             } else if (domain === 'convs') {
-              navigate(`/knowledge-base?convId=${item?.id}`);
+              newSearchParams.set('convId', item?.id);
             }
 
+            setSearchParams(newSearchParams);
+            navigate(`/knowledge-base?${newSearchParams.toString()}`);
             searchStore.setIsSearchOpen(false);
           }}
         >

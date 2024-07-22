@@ -73,9 +73,11 @@ export const AICopilot = (props: AICopilotProps) => {
   const skillStore = useSkillStore();
 
   const convId = searchParams.get('convId');
+  const noteId = searchParams.get('noteId');
+  const resId = searchParams.get('resId');
   const { resetState } = useResetState();
   const actualCopilotBodyHeight =
-    copilotBodyHeight + (showContextCard ? contextCardHeight : 0) + 32 + (skillStore?.selectedSkill ? 32 : 0) - 16;
+    copilotBodyHeight + (showContextCard ? contextCardHeight : 0) + (skillStore?.selectedSkill ? 32 : 0) - 16;
 
   const { t, i18n } = useTranslation();
   const uiLocale = i18n?.languages?.[0] as LOCALE;
@@ -168,28 +170,44 @@ export const AICopilot = (props: AICopilotProps) => {
     <div className="ai-copilot-container">
       <div className="knowledge-base-detail-header">
         <div className="knowledge-base-detail-navigation-bar">
-          <Checkbox key={'knowledge-base-resource-panel'} checked={knowledgeBaseStore.resourcePanelVisible}>
+          <Checkbox
+            key={'knowledge-base-resource-panel'}
+            checked={knowledgeBaseStore.resourcePanelVisible && resId ? true : false}
+          >
             {({ checked }) => {
               return (
                 <Button
                   icon={<IconFile />}
                   type="text"
                   onClick={() => {
-                    knowledgeBaseStore.updateResourcePanelVisible(!knowledgeBaseStore.resourcePanelVisible);
+                    if (!resId) {
+                      searchStore.setPages(searchStore.pages.concat('knowledgeBases'));
+                      searchStore.setIsSearchOpen(true);
+                    } else {
+                      knowledgeBaseStore.updateResourcePanelVisible(!knowledgeBaseStore.resourcePanelVisible);
+                    }
                   }}
                   className={classNames('assist-action-item', { active: checked })}
                 ></Button>
               );
             }}
           </Checkbox>
-          <Checkbox key={'knowledge-base-note-panel'} checked={knowledgeBaseStore.notePanelVisible}>
+          <Checkbox
+            key={'knowledge-base-note-panel'}
+            checked={knowledgeBaseStore.notePanelVisible && noteId ? true : false}
+          >
             {({ checked }) => {
               return (
                 <Button
                   icon={<IconEdit />}
                   type="text"
                   onClick={() => {
-                    knowledgeBaseStore.updateNotePanelVisible(!knowledgeBaseStore.notePanelVisible);
+                    if (!noteId) {
+                      searchStore.setPages(searchStore.pages.concat('note'));
+                      searchStore.setIsSearchOpen(true);
+                    } else {
+                      knowledgeBaseStore.updateNotePanelVisible(!knowledgeBaseStore.notePanelVisible);
+                    }
                   }}
                   className={classNames('assist-action-item', { active: checked })}
                 ></Button>
@@ -206,10 +224,27 @@ export const AICopilot = (props: AICopilotProps) => {
             className={classNames('assist-action-item')}
           ></Button>
         </div>
-        <div className="knowledge-base-detail-menu">
-          {/* <Button
+        <div className="knowledge-base-detail-navigation-bar">
+          <Button
+            icon={<IconHistory />}
             type="text"
-            icon={<IconMore style={{ fontSize: 16 }} />}></Button> */}
+            onClick={() => {
+              handleNewOpenConvList();
+            }}
+            className={classNames('assist-action-item')}
+          >
+            {/* 会话历史 */}
+          </Button>
+          <Button
+            icon={<IconPlusCircle />}
+            type="text"
+            onClick={() => {
+              handleNewTempConv();
+            }}
+            className={classNames('assist-action-item', 'mr-1')}
+          >
+            {/* 新会话 */}
+          </Button>
         </div>
       </div>
       <div
@@ -225,45 +260,6 @@ export const AICopilot = (props: AICopilotProps) => {
           </div>
         ) : null}
         <div className="ai-copilot-chat-container">
-          <div className="chat-setting-container">
-            <div className="chat-operation-container">
-              <Button
-                icon={<IconFolder />}
-                type="text"
-                onClick={() => {
-                  knowledgeBaseStore.updateActionSource(ActionSource.Conv);
-                  knowledgeBaseStore.updateKbModalVisible(true);
-                }}
-                className="chat-input-assist-action-item"
-              >
-                选择知识库
-                <IconCaretDown />
-              </Button>
-            </div>
-            <div className="conv-operation-container">
-              <Button
-                icon={<IconHistory />}
-                type="text"
-                onClick={() => {
-                  handleNewOpenConvList();
-                }}
-                className="chat-input-assist-action-item"
-              >
-                会话历史
-              </Button>
-              <Button
-                icon={<IconPlusCircle />}
-                type="text"
-                onClick={() => {
-                  handleNewTempConv();
-                }}
-                className="chat-input-assist-action-item"
-              >
-                新会话
-              </Button>
-            </div>
-          </div>
-
           <div className="skill-container">
             {skillStore?.skillInstances?.map((item, index) => (
               <div
@@ -295,7 +291,7 @@ export const AICopilot = (props: AICopilotProps) => {
 
               <OutputLocaleList>
                 <Button icon={<IconTranslate />} type="text" className="chat-input-assist-action-item">
-                  <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span>
+                  {/* <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span> */}
                   <IconCaretDown />
                 </Button>
               </OutputLocaleList>

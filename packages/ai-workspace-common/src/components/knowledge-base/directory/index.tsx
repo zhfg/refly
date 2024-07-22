@@ -49,7 +49,9 @@ export const KnowledgeBaseDirectory = () => {
       if (!resourceId) {
         const firstResourceId = newRes?.data?.resources?.[0]?.resourceId;
         if (firstResourceId) {
-          navigate(`/knowledge-base?kbId=${collectionId}&resId=${firstResourceId}`);
+          queryParams.set('resId', firstResourceId);
+          queryParams.set('kbId', collectionId);
+          navigate(`/knowledge-base?${queryParams.toString()}`);
         }
       }
     } catch (err) {

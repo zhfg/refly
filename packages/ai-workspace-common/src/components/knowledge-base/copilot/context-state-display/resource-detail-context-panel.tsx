@@ -47,31 +47,31 @@ export const ResourceDetailContextPanel = () => {
             {currentResource?.title}
           </Tag>
         </div>
-      </div>
-      <div className="context-state-card-footer">
-        <Button type="primary" size="mini">
-          快速总结
-        </Button>
-        {filterResourceContextSkill?.map((skill, index) => {
-          return (
-            <Button
-              type="primary"
-              size="mini"
-              style={{ marginLeft: 12 }}
-              onClick={() => {
-                dispatch({
-                  name: skill?.name,
-                  type: 'state',
-                  body: {
-                    modalVisible: true,
-                  },
-                });
-              }}
-            >
-              保存到知识库
-            </Button>
-          );
-        })}
+        <div className="context-state-card-footer">
+          <Button type="primary" size="mini">
+            快速总结
+          </Button>
+          {filterResourceContextSkill?.map((skill, index) => {
+            return (
+              <Button
+                type="primary"
+                size="mini"
+                style={{ marginLeft: 12 }}
+                onClick={() => {
+                  dispatch({
+                    name: skill?.name,
+                    type: 'state',
+                    body: {
+                      modalVisible: true,
+                    },
+                  });
+                }}
+              >
+                保存到知识库
+              </Button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

@@ -110,7 +110,7 @@ export const AssistantMessage = (props: {
       <Menu.Item key="insertNote">
         <IconImport /> 插入笔记
       </Menu.Item>
-      <Menu.Item key="insertNote">
+      <Menu.Item key="replaceSelection">
         <IconCheckCircle /> 替换选中
       </Menu.Item>
       <Menu.Item key="createNewNote">

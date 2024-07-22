@@ -16,7 +16,7 @@ const checkShowRelatedQuestion = (messsages: ChatMessage[] = []) => {
 };
 
 export const useCopilotContextState = () => {
-  const [contextCardHeight, setContextCardHeight] = useState(80);
+  const [contextCardHeight, setContextCardHeight] = useState(68);
   const searchStateStore = useSearchStateStore();
   const chatStore = useChatStore();
   const knowledgeBaseStore = useKnowledgeBaseStore();

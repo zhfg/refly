@@ -97,7 +97,7 @@ export const defaultState = {
   ] as KnowledgeBaseTab[],
   activeTab: 'key1',
   resourcePanelVisible: true,
-  notePanelVisible: false,
+  notePanelVisible: true,
 
   // notes
   editor: null,

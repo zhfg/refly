@@ -33,7 +33,7 @@ const KnowledgeLibraryLayout = () => {
   const [token] = useCookie("_refly_ai_sid")
   const [searchParams] = useSearchParams()
   const kbId = searchParams.get("kbId")
-  const noteId = searchParams.get("noteId") || "tempNoteId"
+  const noteId = searchParams.get("noteId")
   const userStore = useUserStore()
   const knowledgeBaseStore = useKnowledgeBaseStore()
   const { t } = useTranslation()
