@@ -109,40 +109,32 @@ model UserPreference {
   @@map("user_preferences")
 }
 
-// 会话模型
+// Conversation
 model Conversation {
-  /// 主键
+  /// Primary key
   id              Int      @id @default(autoincrement())
-  /// 对话id
-  convId          String?  @default("") @map("conv_id")
-  /// 用户id
-  userId          Int      @map("user_id")
+  /// Conversation ID
+  convId          String   @unique @default("") @map("conv_id")
   /// UID
   uid             String   @default("") @map("uid")
-  /// 内容 id，指向 aigc_content 中的内容（已废弃）
-  contentId       Int?     @map("content_id")
-  /// 内容 id
-  cid             String   @default("") @map("cid")
-  /// 会话标题
+  /// Conversation title
   title           String   @map("title")
-  /// 最后一条聊天记录
+  /// Last message content
   lastMessage     String   @default("") @map("last_message")
-  /// 消息数量
+  /// Message count
   messageCount    Int      @default(0) @map("message_count")
-  /// 会话来源 origin
+  /// Conversation origin page
   origin          String   @default("") @map("origin")
-  // 会话来源的 url
+  // Conversation origin page url
   originPageUrl   String   @default("") @map("origin_page_url")
-  /// 会话来源页面标题
+  /// Conversation source page title
   originPageTitle String   @default("") @map("origin_page_title")
-  /// 创建时间
+  /// Create timestamp
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  /// 更新时间
+  /// Update timestamp
   updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz()
 
-  messages ChatMessage[]
-
-  @@index([userId, updatedAt])
+  @@index([uid, updatedAt])
   @@map("conversations")
 }
 
@@ -151,31 +143,23 @@ model ChatMessage {
   /// Primary key
   id                    Int         @id @default(autoincrement())
   /// Message id
-  msgId                 String?     @default("") @map("msg_id")
+  msgId                 String      @default("") @map("msg_id")
   /// Conversation ID
   convId                String      @default("") @map("conv_id")
-  /// Conversation PK (deprecated)
-  conversationId        Int         @map("conversation_id")
   /// Message type
   type                  MessageType @map("type")
-  /// User PK
-  userId                Int         @map("user_id")
   /// UID
   uid                   String      @default("") @map("uid")
   /// Message content
   content               String      @map("content")
   /// Skill metadata
   skillMeta             String      @default("{}") @map("skill_meta")
-  /// JSON of retrieved sources (deprecated)
-  sources               String?     @default("[]") @map("sources")
   /// Logs output
   logs                  String      @default("[]") @map("logs")
   /// Structured data output (JSON)
   structuredData        String      @default("{}") @map("structured_data")
   /// Locale setting
   locale                String?     @default("") @map("locale")
-  /// JSON of relation questions (deprecated)
-  relatedQuestions      String?     @map("related_questions")
   /// Create timestamp
   createdAt             DateTime    @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
@@ -183,10 +167,7 @@ model ChatMessage {
   /// 会话选中 Weblink 配置，未来可能会变，先使用 string 保存
   selectedWeblinkConfig String?     @map("selected_weblink_config")
 
-  /// Related conversations
-  conversation Conversation @relation(fields: [conversationId], references: [id])
-
-  @@index([conversationId])
+  @@index([convId, updatedAt])
   @@map("chat_messages")
 }
 

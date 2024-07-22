@@ -1200,14 +1200,6 @@ export type CreateConversationRequest = {
    */
   title?: string;
   /**
-   * Related content ID
-   */
-  cid?: string;
-  /**
-   * Related link ID
-   */
-  linkId?: string;
-  /**
    * Conversation locale
    */
   locale?: string;
@@ -1733,28 +1725,6 @@ export type ListConversationsResponse = ListConversationResponse;
 
 export type ListConversationsError = unknown;
 
-export type ChatData = {
-  /**
-   * Chat request
-   */
-  body: ChatRequest;
-};
-
-export type ChatResponse = string;
-
-export type ChatError = unknown;
-
-export type CreateConversationData = {
-  /**
-   * Conversation creation request
-   */
-  body: CreateConversationRequest;
-};
-
-export type CreateConversationResponse2 = CreateConversationResponse;
-
-export type CreateConversationError = unknown;
-
 export type GetConversationDetailData = {
   path: {
     /**
@@ -2126,28 +2096,6 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': ListConversationResponse;
-      };
-    };
-  };
-  '/conversation/chat': {
-    post: {
-      req: ChatData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': string;
-      };
-    };
-  };
-  '/conversation/new': {
-    post: {
-      req: CreateConversationData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': CreateConversationResponse;
       };
     };
   };

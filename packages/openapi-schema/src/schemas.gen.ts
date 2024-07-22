@@ -1702,16 +1702,6 @@ export const $CreateConversationRequest = {
       description: 'Conversation title',
       example: 'My Conversation',
     },
-    cid: {
-      type: 'string',
-      description: 'Related content ID',
-      example: 'c-g30e1b80b5g1itbemc0g5jj3',
-    },
-    linkId: {
-      type: 'string',
-      description: 'Related link ID',
-      example: 'l-g30e1b80b5g1itbemc0g5jj3',
-    },
     locale: {
       type: 'string',
       description: 'Conversation locale',

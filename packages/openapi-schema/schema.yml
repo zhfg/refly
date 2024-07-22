@@ -601,50 +601,6 @@ paths:
                 $ref: '#/components/schemas/ListConversationResponse'
       security:
         - api_key: []
-  /conversation/chat:
-    post:
-      tags:
-        - chat
-      summary: Chat in a streaming style
-      description: Chat in a streaming style
-      operationId: chat
-      requestBody:
-        description: Chat request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ChatRequest'
-        required: true
-      responses:
-        '200':
-          description: successful operation
-          content:
-            text/event-stream:
-              schema:
-                type: string
-      security:
-        - api_key: []
-  /conversation/new:
-    post:
-      tags:
-        - chat
-      summary: Create new conversation
-      description: Create a new conversation
-      operationId: createConversation
-      requestBody:
-        description: Conversation creation request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateConversationRequest'
-        required: true
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CreateConversationResponse'
   /conversation/{convId}:
     get:
       tags:
@@ -2164,14 +2120,6 @@ components:
           type: string
           description: Conversation title
           example: My Conversation
-        cid:
-          type: string
-          description: Related content ID
-          example: c-g30e1b80b5g1itbemc0g5jj3
-        linkId:
-          type: string
-          description: Related link ID
-          example: l-g30e1b80b5g1itbemc0g5jj3
         locale:
           type: string
           description: Conversation locale

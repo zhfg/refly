@@ -70,12 +70,6 @@ import type {
   ListSkillLogsResponse,
   ListConversationsError,
   ListConversationsResponse,
-  ChatData,
-  ChatError,
-  ChatResponse,
-  CreateConversationData,
-  CreateConversationError,
-  CreateConversationResponse2,
   GetConversationDetailData,
   GetConversationDetailError,
   GetConversationDetailResponse2,
@@ -359,28 +353,6 @@ export const listConversations = (options?: Options) => {
   return (options?.client ?? client).get<ListConversationsResponse, ListConversationsError>({
     ...options,
     url: '/conversation/list',
-  });
-};
-
-/**
- * Chat in a streaming style
- * Chat in a streaming style
- */
-export const chat = (options: Options<ChatData>) => {
-  return (options?.client ?? client).post<ChatResponse, ChatError>({
-    ...options,
-    url: '/conversation/chat',
-  });
-};
-
-/**
- * Create new conversation
- * Create a new conversation
- */
-export const createConversation = (options: Options<CreateConversationData>) => {
-  return (options?.client ?? client).post<CreateConversationResponse2, CreateConversationError>({
-    ...options,
-    url: '/conversation/new',
   });
 };
 

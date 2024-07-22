@@ -301,7 +301,7 @@ export class SkillService {
 
     if (conversation) {
       const messages = await this.prisma.chatMessage.findMany({
-        where: { conversationId: conversation.id },
+        where: { convId: conversation.convId },
         orderBy: { createdAt: 'asc' },
       });
       config.configurable.chatHistory = messages.map((m) =>
@@ -359,15 +359,14 @@ export class SkillService {
 
     let chatConv: Conversation | null = null;
     if (param.createConvParam) {
-      chatConv = await this.conversation.createConversation(
+      chatConv = await this.conversation.upsertConversation(
         user,
         param.createConvParam,
         param.convId,
       );
     } else if (param.convId) {
-      // TODO: deprecate userId field
       chatConv = await this.prisma.conversation.findFirst({
-        where: { userId: user.id, convId: param.convId },
+        where: { uid: user.uid, convId: param.convId },
       });
       if (!chatConv) {
         throw new BadRequestException(`conversation not found: ${param.convId}`);
@@ -417,29 +416,25 @@ export class SkillService {
 
     res.end(``);
 
-    if (chatConv) {
+    if (chatConv?.convId) {
       await this.conversation.addChatMessages(
         [
           {
             type: 'human',
             content: param.input.query,
-            userId: user.id,
             uid: user.uid,
-            conversationId: chatConv.id,
             convId: chatConv.convId,
             locale: param.context.locale ?? user.outputLocale,
           },
           ...msgAggregator.getMessages({
             user,
             convId: chatConv.convId,
-            conversationPk: chatConv.id,
             locale: param.context.locale ?? user.outputLocale,
           }),
         ],
         {
-          id: chatConv.id,
+          convId: chatConv.convId,
           title: param.input.query,
-          userId: user.id,
           uid: user.uid,
         },
       );
