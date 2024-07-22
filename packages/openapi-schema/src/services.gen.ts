@@ -96,8 +96,6 @@ import type {
   UpdateSettingsData,
   UpdateSettingsError,
   UpdateSettingsResponse,
-  GetUserTopicsError,
-  GetUserTopicsResponse2,
   SearchData,
   SearchError,
   SearchResponse2,
@@ -452,17 +450,6 @@ export const updateSettings = (options: Options<UpdateSettingsData>) => {
   return (options?.client ?? client).put<UpdateSettingsResponse, UpdateSettingsError>({
     ...options,
     url: '/user/settings',
-  });
-};
-
-/**
- * Get user topics
- * Return topics for current user
- */
-export const getUserTopics = (options?: Options) => {
-  return (options?.client ?? client).get<GetUserTopicsResponse2, GetUserTopicsError>({
-    ...options,
-    url: '/user/topics',
   });
 };
 

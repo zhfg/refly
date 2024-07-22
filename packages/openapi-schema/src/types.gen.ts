@@ -13,10 +13,6 @@ export type ResourceMeta = {
    */
   title?: string;
   /**
-   * Weblink ID (if it already exists)
-   */
-  linkId?: string;
-  /**
    * Storage key for the weblink
    * @deprecated
    */
@@ -825,72 +821,6 @@ export type UserSettings = {
   outputLocale?: string;
 };
 
-export type TopicMeta = {
-  /**
-   * Topic ID
-   */
-  topicId?: string;
-  /**
-   * Topic key
-   */
-  key?: string;
-  /**
-   * Topic name
-   */
-  name?: string;
-  /**
-   * Topic description
-   */
-  description?: string;
-  /**
-   * Topic creation time
-   */
-  createdAt?: string;
-  /**
-   * Topic update time
-   */
-  updatedAt?: string;
-};
-
-export type Topic = {
-  /**
-   * Topic ID
-   * @deprecated
-   */
-  id?: number;
-  /**
-   * Topic score
-   */
-  score: number;
-  /**
-   * Topic key
-   */
-  topicKey: string;
-  /**
-   * Topic meta
-   */
-  topic: TopicMeta;
-  /**
-   * Topic creation time
-   */
-  createdAt: string;
-  /**
-   * Topic update time
-   */
-  updatedAt: string;
-};
-
-export type UserTopics = {
-  /**
-   * Topic list
-   */
-  list?: Array<Topic>;
-  /**
-   * Total count of topics
-   */
-  total: number;
-};
-
 export type BaseResponse = {
   /**
    * Whether the operation was successful
@@ -1333,13 +1263,6 @@ export type UpdateUserSettingsRequest = {
    * Output locale
    */
   outputLocale?: string;
-};
-
-export type GetUserTopicsResponse = BaseResponse & {
-  /**
-   * User topics
-   */
-  data?: UserTopics;
 };
 
 export type SearchDomain = 'resource' | 'collection' | 'conversation' | 'skill';
@@ -1834,10 +1757,6 @@ export type UpdateSettingsResponse = BaseResponse;
 
 export type UpdateSettingsError = unknown;
 
-export type GetUserTopicsResponse2 = GetUserTopicsResponse;
-
-export type GetUserTopicsError = unknown;
-
 export type SearchData = {
   body: SearchRequest;
 };
@@ -2192,16 +2111,6 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': BaseResponse;
-      };
-    };
-  };
-  '/user/topics': {
-    get: {
-      res: {
-        /**
-         * successful operation
-         */
-        '200': GetUserTopicsResponse;
       };
     };
   };

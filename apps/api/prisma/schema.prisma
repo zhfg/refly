@@ -1,6 +1,6 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["tracing", "omitApi"]
+  previewFeatures = ["tracing"]
 }
 
 datasource db {
@@ -25,17 +25,6 @@ model Account {
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
-}
-
-//邮箱
-model VerificationToken {
-  id         Int      @id @default(autoincrement())
-  identifier String   @map("identifier")
-  token      String   @unique @map("token")
-  expires    DateTime @map("expires") @db.Timestamptz()
-
-  @@unique([identifier, token])
-  @@map("verification_token")
 }
 
 model User {
@@ -63,50 +52,6 @@ model User {
   updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
 
   @@map("users")
-}
-
-/// 内容主题
-model Topic {
-  /// 主键
-  id          Int      @id @default(autoincrement())
-  /// 主题 id
-  topicId     String?  @default("") @map("topic_id")
-  /// 主题 key
-  key         String   @unique @map("key")
-  /// 多语言名称 JSON 字符串 (key: 语言, val: 名称)
-  name        String   @map("name")
-  /// 多语言描述 JSON 字符串 (key: 语言, val: 名称)
-  description String   @map("description")
-  /// 创建时间
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  /// 更新时间
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz()
-
-  userPreferences UserPreference[]
-
-  @@map("topics")
-}
-
-/// 用户喜好
-model UserPreference {
-  /// 主键
-  id        Int      @id @default(autoincrement())
-  /// 用户id
-  userId    Int      @map("user_id")
-  /// 主题key
-  topicKey  String   @map("topic_key")
-  /// 兴趣值
-  score     Float    @default(0) @map("score")
-  /// 创建时间
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  /// 更新时间
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz()
-  /// 关联的 topic
-  topic     Topic?   @relation(fields: [topicKey], references: [key])
-
-  @@unique([userId, topicKey])
-  @@index([topicKey])
-  @@map("user_preferences")
 }
 
 // Conversation
@@ -169,108 +114,6 @@ model ChatMessage {
 
   @@index([convId, updatedAt])
   @@map("chat_messages")
-}
-
-/// 用户访问网页记录
-model UserWeblink {
-  /// id为主键
-  id                    Int      @id @default(autoincrement())
-  /// 关联的链接 id
-  weblinkId             Int      @map("weblink_id")
-  /// 网页链接
-  url                   String   @map("url")
-  /// 会话来源 origin
-  origin                String   @default("") @map("origin")
-  /// 用户id
-  userId                Int      @map("user_id")
-  // 会话来源的 url
-  originPageUrl         String   @default("") @map("origin_page_url")
-  /// 会话来源页面标题
-  originPageTitle       String   @default("") @map("origin_page_title")
-  /// 会话来源页面的描述
-  originPageDescription String   @default("") @map("origin_page_description")
-  /// 最近访问时间
-  lastVisitTime         DateTime @default(now()) @map("last_visit_time") @db.Timestamptz()
-  /// 访问次数
-  visitTimes            Int      @default(0) @map("visit_times")
-  /// 总阅读时长（单位秒）
-  totalReadTime         Int      @default(0) @map("total_read_time")
-  /// 创建时间
-  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  /// 更新时间
-  updatedAt             DateTime @updatedAt @map("updated_at") @db.Timestamptz()
-
-  @@unique([userId, url])
-  @@map("user_weblinks")
-}
-
-/// 网页数据
-model Weblink {
-  /// id为主键
-  id                  Int         @id @default(autoincrement())
-  /// 网页id
-  linkId              String?     @default("") @map("link_id")
-  /// 网页链接
-  url                 String      @unique @map("url")
-  /// 页面内容 (deprecated)
-  pageContent         String      @map("page_content")
-  /// 对象存储 key (html)
-  storageKey          String      @default("") @map("storage_key")
-  /// 内容解析来源
-  parseSource         ParseSource @default(serverCrawl) @map("parse_source")
-  /// 页面元数据, JSON 存储
-  pageMeta            String      @map("page_meta")
-  /// 内容元数据, JSON 存储
-  contentMeta         String      @map("content_meta")
-  /// 解析策略版本，格式统一为 YYYYMMDD
-  parserVersion       String?     @default("00000000") @map("parser_version")
-  /// 解析状态
-  parseStatus         IndexStatus @default(init) @map("parse_status")
-  /// 解析后文档存储 key (markdown)
-  parsedDocStorageKey String?     @default("") @map("parsed_doc_storage_key")
-  /// 切块状态
-  chunkStatus         IndexStatus @default(init) @map("chunk_status")
-  /// 切块后数据存储 key (avro)
-  chunkStorageKey     String?     @default("") @map("chunk_storage_key")
-  /// 网页内容总结
-  summary             String?     @default("") @map("summary")
-  /// 相关问题
-  relatedQuestions    String[]    @default([]) @map("related_questions")
-  /// 上次解析时间
-  lastParseTime       DateTime?   @default(now()) @map("last_parse_time") @db.Timestamptz()
-  /// 创建时间
-  createdAt           DateTime    @default(now()) @map("created_at") @db.Timestamptz()
-  /// 更新时间
-  updatedAt           DateTime    @updatedAt @map("updated_at") @db.Timestamptz()
-
-  contents AigcContent[]
-
-  @@map("weblinks")
-}
-
-model WeblinkUserMark {
-  /// id为主键
-  id               Int      @id @default(autoincrement())
-  /// 网页 id
-  weblinkId        Int      @map("weblink_id")
-  /// 用户 id
-  userId           Int      @map("user_id")
-  /// 网页 host
-  linkHost         String   @map("link_host")
-  /// 选中元素
-  selector         String   @map("selector")
-  /// 插件版本
-  extensionVersion String   @map("extension_version")
-  /// 标记类型
-  markType         String   @map("mark_type")
-  /// 创建时间
-  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  /// 更新时间
-  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz()
-
-  @@index([weblinkId, userId])
-  @@index([weblinkId, selector])
-  @@map("weblink_user_marks")
 }
 
 /// 知识库资源
@@ -424,88 +267,9 @@ model SkillLog {
   @@map("skill_log")
 }
 
-/// 生成内容
-model AigcContent {
-  /// 主键
-  id         Int               @id @default(autoincrement())
-  /// 内容id
-  cid        String?           @default("") @map("cid")
-  /// 标题
-  title      String            @map("title")
-  /// 摘要
-  abstract   String            @default("") @map("abstract")
-  /// 内容
-  content    String            @map("content")
-  /// 元数据, JSON 存储
-  meta       String            @map("meta")
-  /// 来源类型
-  sourceType ContentSourceType @map("source_type")
-  /// 引用文档来源，JSON 字符串
-  sources    String?           @default("") @map("sources")
-  /// 创建时间
-  createdAt  DateTime          @default(now()) @map("created_at") @db.Timestamptz()
-  /// 更新时间
-  updatedAt  DateTime          @updatedAt @map("updated_at") @db.Timestamptz()
-  /// 关联的链接 id
-  weblinkId  Int?              @map("weblink_id")
-  /// 输入内容 id
-  inputIds   Int[]             @map("input_ids")
-  /// 输出内容 id
-  outputIds  Int[]             @map("output_ids")
-
-  /// 关联的链接
-  weblink     Weblink?      @relation(fields: [weblinkId], references: [id])
-  /// 关联的摘要
-  userDigests UserDigest[]
-  /// 输入内容
-  inputs      AigcContent[] @relation("content_graph")
-  /// 输出内容
-  outputs     AigcContent[] @relation("content_graph")
-
-  @@index([weblinkId])
-  @@map("aigc_contents")
-}
-
-/// 用户回顾
-model UserDigest {
-  /// 主键
-  id        Int         @id @default(autoincrement())
-  /// 摘要 id
-  digestId  String?     @default("") @map("digest_id")
-  /// 用户 id
-  userId    Int         @map("user_id")
-  /// 日期 (YYYY-MM-DD)
-  date      String      @map("date")
-  /// 主题
-  topicKey  String      @map("topic_key")
-  /// 回顾内容 id
-  contentId Int         @unique @map("content_id")
-  /// 创建时间
-  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz()
-  /// 更新时间
-  updatedAt DateTime    @updatedAt @map("updated_at") @db.Timestamptz()
-  /// 关联的回顾内容
-  content   AigcContent @relation(fields: [contentId], references: [id])
-
-  // @@unique([userId, date, topicKey])
-  @@map("user_digests")
-}
-
 enum ResourceType {
   weblink
   note
-}
-
-enum ContentSourceType {
-  weblink
-  digest
-  aigc
-}
-
-enum ContentMetaType {
-  topic
-  entity
-  form
 }
 
 enum ParseSource {

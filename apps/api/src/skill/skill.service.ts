@@ -3,7 +3,15 @@ import { EventEmitter } from 'node:events';
 import { Queue } from 'bull';
 import pLimit from 'p-limit';
 import { InjectQueue } from '@nestjs/bull';
-import { Conversation, SkillInstance, SkillRunMode, SkillTrigger, User } from '@prisma/client';
+import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
+import {
+  Conversation,
+  SkillInstance,
+  SkillRunMode,
+  SkillTrigger,
+  User,
+  MessageType,
+} from '@prisma/client';
 import { Response } from 'express';
 import { AIMessageChunk } from '@langchain/core/dist/messages';
 import {
@@ -34,13 +42,27 @@ import { collectionPO2DTO, resourcePO2DTO } from '@/knowledge/knowledge.dto';
 import { ConversationService } from '@/conversation/conversation.service';
 import { MessageAggregator } from '@/utils/message';
 import { SkillEvent } from '@refly/common-types';
-import { createLLMChatMessage } from '@/llm/schema';
 import { ConfigService } from '@nestjs/config';
 import { SearchService } from '@/search/search.service';
 
 interface SkillPreCheckResult {
   skill?: SkillInstance;
   trigger?: SkillTrigger;
+}
+
+export type LLMChatMessage = AIMessage | HumanMessage | SystemMessage;
+
+export function createLLMChatMessage(content: string, type: MessageType): LLMChatMessage {
+  switch (type) {
+    case 'ai':
+      return new AIMessage({ content });
+    case 'human':
+      return new HumanMessage({ content });
+    case 'system':
+      return new SystemMessage({ content });
+    default:
+      throw new Error(`invalid message source: ${type}`);
+  }
 }
 
 @Injectable()
