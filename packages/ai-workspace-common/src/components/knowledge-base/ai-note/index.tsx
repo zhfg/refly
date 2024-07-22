@@ -220,7 +220,7 @@ export const AINote = () => {
             <p className="conv-title">{resourceDetail?.title || '新笔记'}</p>
           </div>
         </div>
-        <div className="knowledge-base-detail-menu">
+        <div className="knowledge-base-detail-menu knowledge-base-detail-navigation-bar">
           {resourceId && knowledgeBaseStore.noteServerStatus === 'connected' ? (
             <div className="conv-meta" style={{ marginRight: 8 }}>
               <AiOutlineFileWord style={{ color: 'rgba(0, 0, 0, .4)' }} />
@@ -247,7 +247,7 @@ export const AINote = () => {
           ) : null}
           <div className="conv-meta">
             <Button
-              icon={<IconSearch style={{ fontSize: 16 }} />}
+              icon={<IconSearch style={{ fontSize: 12 }} />}
               type="text"
               onClick={() => {
                 searchStore.setPages(searchStore.pages.concat('note'));
@@ -258,7 +258,7 @@ export const AINote = () => {
           </div>
           <div className="conv-meta">
             <Button
-              icon={<IconMore style={{ fontSize: 16 }} />}
+              icon={<IconMore style={{ fontSize: 12 }} />}
               type="text"
               onClick={() => {}}
               className={'assist-action-item'}
