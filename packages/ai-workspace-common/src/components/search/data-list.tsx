@@ -48,7 +48,7 @@ export function DataList({
   searchValue: string;
   displayMode: 'list' | 'search';
   setValue: (val: string) => void;
-  onItemClick: (item: SearchResult) => void;
+  onItemClick?: (item: SearchResult) => void;
 }) {
   const [stateDataList, setStateDataList] = useState<SearchResult[]>(data || []);
   const [currentPage, setCurrentPage] = useState(1);

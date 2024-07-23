@@ -27,6 +27,8 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { Resource, SearchDomain, SearchRequest, SearchResult, SkillInstance, SkillMeta } from '@refly/openapi-schema';
 import { useNavigate } from 'react-router-dom';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
+import { RenderItem } from '@refly-packages/ai-workspace-common/components/search/types';
 
 export const Search = () => {
   const ref = React.useRef<HTMLDivElement | null>(null);
@@ -40,6 +42,8 @@ export const Search = () => {
 
   // skill
   const [selectedSkill, setSelectedSkill] = useState<SkillMeta>();
+  // notes
+  const { handleInitEmptyNote } = useAINote();
 
   // 整体处理
   const { jumpToKnowledgeBase, jumpToNote, jumpToReadResource, jumpToConv } = useKnowledgeBaseJumpNewPath();
@@ -164,7 +168,7 @@ export const Search = () => {
     handleBigSearchValueChange('', activePage);
   }, [activePage]);
 
-  const renderData = [
+  const renderData: RenderItem[] = [
     {
       domain: 'skill',
       heading: '技能',
@@ -196,7 +200,10 @@ export const Search = () => {
         });
         searchStore.setIsSearchOpen(false);
       },
-      onCreateClick: () => {},
+      onCreateClick: async () => {
+        await handleInitEmptyNote('New note');
+        searchStore.setIsSearchOpen(false);
+      },
     },
     {
       domain: 'readResources',

@@ -152,10 +152,10 @@ export function Home({
             ) : null}
             {renderItem?.action ? (
               <Item
-                value={`create${renderItem?.domain}`}
-                keywords={[`create${renderItem?.domain}`]}
+                value={`create ${renderItem?.domain}`}
+                keywords={[`create ${renderItem?.domain}`]}
                 onSelect={() => {
-                  setPages([...pages, renderItem?.domain]);
+                  renderItem?.onCreateClick();
                 }}
                 activeValue={activeValue}
               >

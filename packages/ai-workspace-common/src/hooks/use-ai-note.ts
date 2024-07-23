@@ -8,7 +8,7 @@ import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/store
 import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
-export const useAINote = () => {
+export const useAINote = (shouldInitListener = false) => {
   const knowledgeBaseStore = useKnowledgeBaseStore();
   const { jumpToNote } = useKnowledgeBaseJumpNewPath();
 
@@ -33,8 +33,14 @@ export const useAINote = () => {
   };
 
   useEffect(() => {
-    editorEmitter.on('createNewNote', (content: string) => {
-      handleInitEmptyNote(content);
-    });
-  }, []);
+    if (shouldInitListener) {
+      editorEmitter.on('createNewNote', (content: string) => {
+        handleInitEmptyNote(content);
+      });
+    }
+  }, [shouldInitListener]);
+
+  return {
+    handleInitEmptyNote,
+  };
 };

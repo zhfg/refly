@@ -8,4 +8,5 @@ export interface RenderItem {
   action?: boolean;
   actionHeading?: { create: string };
   onItemClick?: (item: SearchResult) => void;
+  onCreateClick?: () => void;
 }

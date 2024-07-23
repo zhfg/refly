@@ -88,11 +88,11 @@ const CollaborativeEditor = ({ resourceDetail, readOnly }: { resourceDetail: Res
     knowledgeBaseStore.updateNoteSaveStatus('Saved');
   }, 500);
 
-  useEffect(() => {
-    const content = window.localStorage.getItem('novel-content');
-    if (content) setInitialContent(JSON.parse(content));
-    else setInitialContent(defaultEditorContent);
-  }, []);
+  // useEffect(() => {
+  //   const content = window.localStorage.getItem('novel-content');
+  //   if (content) setInitialContent(JSON.parse(content));
+  //   else setInitialContent(defaultEditorContent);
+  // }, []);
 
   useEffect(() => {
     // Update status changes

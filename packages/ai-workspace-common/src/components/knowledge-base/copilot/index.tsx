@@ -85,7 +85,7 @@ export const AICopilot = (props: AICopilotProps) => {
   console.log('uiLocale', uiLocale);
 
   // ai-note handler
-  useAINote();
+  useAINote(true);
   useSkillManagement({ shouldInit: true });
 
   const handleSwitchSearchTarget = () => {
