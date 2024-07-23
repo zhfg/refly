@@ -6,14 +6,17 @@ export const useKnowledgeBaseJumpNewPath = () => {
   const knowledgeBaseStore = useKnowledgeBaseStore();
   const navigate = useNavigate();
 
-  const jumpToNote = ({ noteId, baseUrl = '' }: { noteId; baseUrl?: string }) => {
+  const jumpToNote = ({ noteId, baseUrl = '' }: { noteId; baseUrl?: string }, extraQuery?: Record<string, string>) => {
     searchParams.set('noteId', noteId);
     setSearchParams(searchParams);
     navigate(`${baseUrl}/knowledge-base?${searchParams.toString()}`);
     knowledgeBaseStore.updateNotePanelVisible(true);
   };
 
-  const jumpToKnowledgeBase = ({ kbId, baseUrl = '' }: { kbId: string; baseUrl?: string }) => {
+  const jumpToKnowledgeBase = (
+    { kbId, baseUrl = '' }: { kbId: string; baseUrl?: string },
+    extraQuery?: Record<string, string>,
+  ) => {
     searchParams.set('kbId', kbId);
     setSearchParams(searchParams);
     navigate(`${baseUrl}/knowledge-base?${searchParams.toString()}`);

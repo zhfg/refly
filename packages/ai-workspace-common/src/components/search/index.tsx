@@ -34,6 +34,7 @@ export const Search = () => {
   const [displayMode, setDisplayMode] = useState<'search' | 'list'>('list');
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const listRef = React.useRef(null);
+  const [isComposing, setIsComposing] = useState(false);
 
   const pages = searchStore.pages;
   const setPages = searchStore.setPages;
@@ -68,9 +69,9 @@ export const Search = () => {
         if (ref.current) {
           ref.current.style.transform = '';
         }
-      }, 100);
 
-      setSearchValue('');
+        // setSearchValue('');
+      }, 100);
     }
   }
 
@@ -93,8 +94,7 @@ export const Search = () => {
     }
   };
 
-  const handleBigSearchValueChange = async (searchVal: string, activePage: string) => {
-    setSearchValue(searchVal);
+  const handleBigSearchValueChange = (searchVal: string, activePage: string) => {
     const domain = getMappedPageToDomain(activePage);
 
     // searchVal 为空的时候获取正常列表的内容
@@ -222,8 +222,12 @@ export const Search = () => {
 
           return defaultFilter(value, search, keywords);
         }}
-        onKeyDown={(e: React.KeyboardEvent) => {
-          if (e.key === 'Enter') {
+        onCompositionStart={(e) => console.log('composition start')}
+        onCompositionUpdate={(e) => console.log('composition update')}
+        onCompositionEnd={(e) => console.log('composition end')}
+        onKeyDownCapture={(e: React.KeyboardEvent) => {
+          if (e.key === 'Enter' && !isComposing) {
+            console.log('keydown', searchValue);
             bounce();
           }
 
@@ -248,23 +252,42 @@ export const Search = () => {
         <Command.Input
           autoFocus
           ref={inputRef}
-          placeholder="Search for skills, notes, resources and more..."
           value={searchValue}
-          onValueChange={(val) => handleBigSearchValueChange(val, activePage)}
+          placeholder="Search for skills, notes, resources and more..."
+          onCompositionStart={(e) => {
+            setIsComposing(true);
+          }}
+          onCompositionUpdate={(e) => console.log('composition update')}
+          onCompositionEnd={(e) => {
+            setIsComposing(false);
+          }}
+          onValueChange={(val) => {
+            console.log('value change', val);
+            setSearchValue(val);
+            handleBigSearchValueChange(val, activePage);
+          }}
         />
         <Command.List>
           <Command.Empty>No results found.</Command.Empty>
           {activePage === 'home' && (
             <Home
+              key={'search'}
               displayMode={displayMode}
               pages={pages}
               setPages={(pages: string[]) => setPages(pages)}
               data={renderData}
               activeValue={value}
+              searchValue={searchValue}
             />
           )}
           {activePage !== 'home' ? (
-            <DataList displayMode={displayMode} {...getRenderData(activePage)} activeValue={value} />
+            <DataList
+              key="data-list"
+              displayMode={displayMode}
+              {...getRenderData(activePage)}
+              activeValue={value}
+              searchValue={searchValue}
+            />
           ) : null}
         </Command.List>
       </Command>

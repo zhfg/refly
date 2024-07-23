@@ -120,10 +120,10 @@ export const Thread = () => {
       const { task } = useTaskStore.getState();
 
       // 新会话，需要手动构建第一条消息
-      if (chatStore.isNewConversation && currentConversation?.convId) {
+      if (conversationStore.isNewConversation && currentConversation?.convId) {
         // 更换成基于 task 的消息模式，核心是基于 task 来处理
         buildTaskAndGenReponse(task);
-      } else if (chatStore.isAskFollowUpNewConversation && currentConversation?.convId) {
+      } else if (conversationStore.isAskFollowUpNewConversation && currentConversation?.convId) {
         // 先获取会话
         await handleGetThreadMessages(threadId);
         // 然后构建 followup question

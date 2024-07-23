@@ -46,14 +46,16 @@ export const useBuildThreadAndRun = () => {
   const knowledgeBaseStore = useKnowledgeBaseStore();
   const { jumpToConv } = useKnowledgeBaseJumpNewPath();
 
-  const emptyConvRunTask = (question: string, forceNewConv?: boolean) => {
+  const emptyConvRunSkill = (question: string, forceNewConv?: boolean) => {
     // 首先清空所有状态
-    resetState();
+    if (forceNewConv) {
+      resetState();
+    }
 
     const newConv = ensureConversationExist(forceNewConv);
     console.log('emptyConvTask', newConv);
     conversationStore.setCurrentConversation(newConv);
-    chatStore.setIsNewConversation(true);
+    conversationStore.setIsNewConversation(true);
     chatStore.setNewQAText(question);
 
     jumpToConv({
@@ -177,7 +179,7 @@ export const useBuildThreadAndRun = () => {
 
   return {
     runSkill,
-    emptyConvRunTask,
+    emptyConvRunSkill,
     ensureConversationExist,
   };
 };

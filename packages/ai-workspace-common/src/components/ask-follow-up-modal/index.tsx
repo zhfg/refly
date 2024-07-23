@@ -71,7 +71,7 @@ export const AskFollowUpModal = (props: SummaryModalProps) => {
 
       // 更新新的 newQAText，for 新会话跳转使用
       chatStore.setNewQAText(question);
-      chatStore.setIsAskFollowUpNewConversation(true);
+      conversationStore.setIsAskFollowUpNewConversation(true);
 
       message.success({
         content: t('contentDetail.item.askFollow.successNotify'),

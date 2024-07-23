@@ -28,6 +28,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useBigSearchQuickAction } from '@refly-packages/ai-workspace-common/hooks/use-big-search-quick-action';
 
 export function Home({
   pages,
@@ -35,6 +36,7 @@ export function Home({
   displayMode,
   data,
   activeValue,
+  searchValue,
 }: {
   data: {
     domain: string;
@@ -48,14 +50,16 @@ export function Home({
   setPages: (pages: string[]) => void;
   displayMode: 'list' | 'search';
   activeValue: string;
+  searchValue: string;
 }) {
   const navigate = useNavigate();
   const searchStore = useSearchStore();
   const knowledgeBaseStore = useKnowledgeBaseStore();
   const { jumpToKnowledgeBase, jumpToNote, jumpToReadResource } = useKnowledgeBaseJumpNewPath();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { triggerSkillQuickAction } = useBigSearchQuickAction();
 
-  console.log('renderData', data);
+  console.log('searchValue', searchValue);
 
   return (
     <>
@@ -80,7 +84,8 @@ export function Home({
           keywords={['NewConv']}
           activeValue={activeValue}
           onSelect={() => {
-            // searchProjects();
+            triggerSkillQuickAction(searchValue);
+            searchStore.setIsSearchOpen(false);
           }}
         >
           <IconMessage style={{ fontSize: 12 }} />
@@ -112,7 +117,7 @@ export function Home({
       {data
         .filter((item) => item?.data?.length > 0)
         .map((renderItem, index) => (
-          <Command.Group heading={renderItem?.heading}>
+          <Command.Group heading={renderItem?.heading} key={index}>
             {renderItem?.data?.slice(0, 5)?.map((item, index) => (
               <Item
                 key={index}

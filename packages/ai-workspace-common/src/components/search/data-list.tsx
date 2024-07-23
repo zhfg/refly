@@ -35,6 +35,7 @@ export function DataList({
   icon,
   data,
   activeValue,
+  searchValue,
   displayMode,
 }: {
   domain: string;
@@ -42,6 +43,7 @@ export function DataList({
   data: SearchResult[];
   icon: React.ReactNode;
   activeValue: string;
+  searchValue: string;
   displayMode: 'list' | 'search';
 }) {
   const [stateDataList, setStateDataList] = useState<SearchResult[]>(data || []);
