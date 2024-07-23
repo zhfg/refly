@@ -17,7 +17,7 @@ import { EmptyDigestStatus } from '@refly-packages/ai-workspace-common/component
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // styles
 import './index.scss';
-import { LOCALE } from '@refly/constants';
+import { LOCALE } from '@refly/common-types';
 import { Collection, Source } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';

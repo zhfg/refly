@@ -1,11 +1,6 @@
 name: Deploy Web To Staging
 
 on:
-  push:
-    branches-ignore:
-      - release
-    paths:
-      - 'apps/web/**'
   workflow_dispatch:
 
 jobs:

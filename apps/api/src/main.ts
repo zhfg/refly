@@ -12,8 +12,8 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 
 import tracer from './tracer';
-import { setTraceID } from './middleware/set-trace-id';
-import { GlobalExceptionFilter } from './filters/global-exception.filter';
+import { setTraceID } from './utils/middleware/set-trace-id';
+import { GlobalExceptionFilter } from './utils/filters/global-exception.filter';
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN,

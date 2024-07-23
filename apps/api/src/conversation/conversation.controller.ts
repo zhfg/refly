@@ -4,27 +4,24 @@ import {
   Get,
   Post,
   Query,
-  Request,
   UseGuards,
   Body,
-  Res,
   Param,
-  BadRequestException,
-  UnauthorizedException,
+  ParseIntPipe,
+  DefaultValuePipe,
   NotFoundException,
 } from '@nestjs/common';
-import { Response } from 'express';
 import {
   CreateConversationRequest,
   CreateConversationResponse,
   ListConversationResponse,
-  ChatRequest,
   GetConversationDetailResponse,
 } from '@refly/openapi-schema';
-import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
+import { User as UserModel } from '@prisma/client';
+import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
-import { Conversation } from '@prisma/client';
-import { buildSuccessResponse } from '../utils';
+import { buildSuccessResponse } from '@/utils';
+import { User } from '@/utils/decorators/user.decorator';
 import { toConversationDTO } from '@/conversation/conversation.dto';
 
 @Controller('conversation')
@@ -36,108 +33,24 @@ export class ConversationController {
   @UseGuards(JwtAuthGuard)
   @Post('new')
   async createConversation(
-    @Request() req,
+    @User() user: UserModel,
     @Body() body: CreateConversationRequest,
   ): Promise<CreateConversationResponse> {
-    const conversation = await this.conversationService.createConversation(req.user, body);
+    const conversation = await this.conversationService.upsertConversation(user, body);
     return buildSuccessResponse(toConversationDTO(conversation));
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('chat')
-  async chatV2(@Request() req, @Res() res: Response, @Body() body: ChatRequest) {
-    const { task } = body;
-
-    if (task.taskType === 'chat' && !task.data?.question) {
-      throw new BadRequestException('query cannot be empty for chat task');
-    }
-
-    if (!task.convId) {
-      throw new BadRequestException('convId cannot be empty');
-    }
-
-    let chatConv: Conversation;
-    if (!task.dryRun) {
-      let conversation: Conversation = await this.conversationService.findConversation(task.convId);
-
-      if (conversation) {
-        if (conversation.userId !== req.user.id) {
-          throw new UnauthorizedException('cannot access this conversation');
-        }
-      } else {
-        if (!task.createConvParam) {
-          throw new BadRequestException('createConvParam cannot be empty');
-        }
-        conversation = await this.conversationService.createConversation(
-          req.user,
-          {
-            ...task.createConvParam,
-            title: task.data?.question,
-          },
-          task.convId,
-        );
-      }
-
-      chatConv = conversation;
-    }
-
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.status(200);
-
-    await this.conversationService.chat(res, req.user, chatConv, task);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post(':conversationId/chat')
-  async chat(
-    @Request() req,
-    @Param('conversationId') conversationId = '',
-    @Body() body: ChatRequest,
-    @Res() res: Response,
-  ) {
-    if (!conversationId || !Number(conversationId)) {
-      throw new BadRequestException('invalid conversation id');
-    }
-
-    const id = Number(conversationId);
-    const conversation = await this.conversationService.findConversationById(id);
-
-    if (!conversation) {
-      throw new BadRequestException('conversation not found: ' + id);
-    }
-
-    const { task } = body;
-    if (!task) {
-      throw new BadRequestException('task cannot be empty');
-    }
-    if (task.taskType === 'chat' && !task.data?.question) {
-      throw new BadRequestException('query cannot be empty for chat task');
-    }
-
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.status(200);
-
-    await this.conversationService.chat(res, req.user, conversation, body.task);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('list')
   async listConversation(
-    @Request() req,
-    @Query('page') page = '1',
-    @Query('pageSize') pageSize = '10',
+    @User() user: UserModel,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListConversationResponse> {
-    const parsedPage = parseInt(page);
-    const parsedPageSize = parseInt(pageSize);
-
     const conversationList = await this.conversationService.getConversations({
-      skip: (parsedPage - 1) * parsedPageSize,
-      take: parsedPageSize,
-      where: { userId: req.user.id },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      where: { uid: user.uid },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -147,15 +60,13 @@ export class ConversationController {
   @UseGuards(JwtAuthGuard)
   @Get(':convId')
   async showConversationDetail(
-    @Request() req,
+    @User() user: UserModel,
     @Param('convId') convId: string,
   ): Promise<GetConversationDetailResponse> {
-    const data = await this.conversationService.findConversation(convId, true);
-    if (!data) {
+    const data = await this.conversationService.getConversationDetail(user, convId);
+    if (!data?.convId) {
       throw new NotFoundException('conversation not found');
     }
-    return buildSuccessResponse(
-      data?.userId === (req.user.id as number) ? toConversationDTO(data) : {},
-    );
+    return buildSuccessResponse(toConversationDTO(data));
   }
 }

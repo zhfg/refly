@@ -1,11 +1,6 @@
 name: Deploy Web To Prod
 
 on:
-  push:
-    branches:
-      - release
-    paths:
-      - 'apps/web/**'
   workflow_dispatch:
 
 jobs:

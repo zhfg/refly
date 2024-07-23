@@ -13,10 +13,6 @@ export type ResourceMeta = {
    */
   title?: string;
   /**
-   * Weblink ID (if it already exists)
-   */
-  linkId?: string;
-  /**
    * Storage key for the weblink
    * @deprecated
    */
@@ -593,207 +589,6 @@ export type ChatTaskResponse = {
  */
 export type IndexStatus = 'init' | 'processing' | 'finish' | 'failed' | 'unavailable';
 
-/**
- * Weblink parse source
- */
-export type ParseSource = 'serverCrawl' | 'clientUpload';
-
-export type PingWeblinkData = {
-  /**
-   * Weblink ID
-   */
-  linkId?: string;
-  /**
-   * Weblink parse status
-   */
-  parseStatus?: IndexStatus;
-  /**
-   * Weblink chunking status
-   */
-  chunkStatus?: IndexStatus;
-  /**
-   * Summary of the weblink
-   */
-  summary?: string;
-  /**
-   * Related questions for this weblink summary
-   */
-  relatedQuestions?: Array<string>;
-  /**
-   * Weblink parse source
-   */
-  parseSource?: ParseSource;
-};
-
-export type Weblink = {
-  /**
-   * Weblink ID
-   */
-  linkId?: string;
-  /**
-   * Weblink URL
-   */
-  url?: string;
-  /**
-   * Weblink title
-   */
-  title?: string;
-  /**
-   * Weblink document storage key
-   */
-  storageKey?: string;
-  /**
-   * Origin page host
-   */
-  origin?: string;
-  /**
-   * Origin page title
-   */
-  originPageTitle?: string;
-  /**
-   * Origin page url
-   */
-  originPageUrl?: string;
-  /**
-   * Origin page description
-   */
-  originPageDescription?: string;
-  /**
-   * Weblink visit count
-   */
-  visitCount?: number;
-  /**
-   * UNIX timestamp for last visit time
-   */
-  lastVisitTime?: number;
-  /**
-   * Read time in seconds
-   */
-  readTime?: number;
-  /**
-   * Weblink index status
-   */
-  indexStatus?: IndexStatus;
-  /**
-   * Weblink creation time
-   */
-  createdAt?: string;
-  /**
-   * Weblink update time
-   */
-  updatedAt?: string;
-};
-
-export type Content = {
-  /**
-   * Content ID
-   */
-  cid: string;
-  /**
-   * Content ID
-   */
-  contentId: string;
-  /**
-   * Content title
-   */
-  title: string;
-  /**
-   * Content abstract
-   */
-  abstract?: string;
-  /**
-   * Content metadata
-   */
-  meta?: string;
-  /**
-   * Content creation time
-   */
-  createdAt: string;
-  /**
-   * Content update time
-   */
-  updatedAt: string;
-};
-
-export type ContentMetaRecord = {
-  /**
-   * Meta key
-   */
-  key: string;
-  /**
-   * Meta name
-   */
-  name: string;
-  /**
-   * Meta relativity score
-   */
-  score: number;
-  /**
-   * Reason for classification
-   */
-  reason: string;
-};
-
-export type ContentMeta = {
-  /**
-   * Topic list
-   */
-  topics?: Array<ContentMetaRecord>;
-  /**
-   * Content type list
-   */
-  contentType?: Array<ContentMetaRecord>;
-  /**
-   * Content format list
-   */
-  formats?: Array<ContentMetaRecord>;
-};
-
-export type ContentDetail = Content & {
-  /**
-   * Content
-   */
-  content?: string;
-  /**
-   * Content source list (JSON)
-   */
-  sources?: string;
-  /**
-   * Content input list
-   */
-  inputs?: Array<ContentDetail>;
-  /**
-   * Content metadata
-   */
-  meta?: ContentMeta;
-};
-
-export type Digest = Content & {
-  /**
-   * Topic key
-   */
-  topicKey: string;
-  /**
-   * User ID
-   */
-  uid?: string;
-  /**
-   * Digest date
-   */
-  date: string;
-};
-
-export type Feed = Content & {
-  /**
-   * Read count
-   */
-  readCount?: number;
-  /**
-   * Ask follow count
-   */
-  askFollow?: number;
-};
-
 export type UserSettings = {
   /**
    * User ID
@@ -823,72 +618,6 @@ export type UserSettings = {
    * User output locale
    */
   outputLocale?: string;
-};
-
-export type TopicMeta = {
-  /**
-   * Topic ID
-   */
-  topicId?: string;
-  /**
-   * Topic key
-   */
-  key?: string;
-  /**
-   * Topic name
-   */
-  name?: string;
-  /**
-   * Topic description
-   */
-  description?: string;
-  /**
-   * Topic creation time
-   */
-  createdAt?: string;
-  /**
-   * Topic update time
-   */
-  updatedAt?: string;
-};
-
-export type Topic = {
-  /**
-   * Topic ID
-   * @deprecated
-   */
-  id?: number;
-  /**
-   * Topic score
-   */
-  score: number;
-  /**
-   * Topic key
-   */
-  topicKey: string;
-  /**
-   * Topic meta
-   */
-  topic: TopicMeta;
-  /**
-   * Topic creation time
-   */
-  createdAt: string;
-  /**
-   * Topic update time
-   */
-  updatedAt: string;
-};
-
-export type UserTopics = {
-  /**
-   * Topic list
-   */
-  list?: Array<Topic>;
-  /**
-   * Total count of topics
-   */
-  total: number;
 };
 
 export type BaseResponse = {
@@ -1200,14 +929,6 @@ export type CreateConversationRequest = {
    */
   title?: string;
   /**
-   * Related content ID
-   */
-  cid?: string;
-  /**
-   * Related link ID
-   */
-  linkId?: string;
-  /**
    * Conversation locale
    */
   locale?: string;
@@ -1253,34 +974,6 @@ export type GetConversationDetailResponse = BaseResponse & {
   data?: Conversation;
 };
 
-export type PingWeblinkResponse = BaseResponse & {
-  /**
-   * Weblink ping result
-   */
-  data?: PingWeblinkData;
-};
-
-export type StoreWeblinkRequest = {
-  /**
-   * Weblink list
-   */
-  data?: Array<Weblink>;
-};
-
-export type ListWeblinkResponse = BaseResponse & {
-  /**
-   * Weblink list
-   */
-  data?: Array<Weblink>;
-};
-
-export type ListFeedResponse = BaseResponse & {
-  /**
-   * Feed list
-   */
-  data?: Array<Feed>;
-};
-
 export type ListDigestRequest = {
   /**
    * Page number
@@ -1318,20 +1011,6 @@ export type ListDigestRequest = {
   };
 };
 
-export type ListDigestResponse = BaseResponse & {
-  /**
-   * Digest list
-   */
-  data?: Array<Digest>;
-};
-
-export type GetContentDetailResponse = BaseResponse & {
-  /**
-   * Content data
-   */
-  data?: ContentDetail;
-};
-
 export type UpdateUserSettingsRequest = {
   /**
    * UI locale
@@ -1341,13 +1020,6 @@ export type UpdateUserSettingsRequest = {
    * Output locale
    */
   outputLocale?: string;
-};
-
-export type GetUserTopicsResponse = BaseResponse & {
-  /**
-   * User topics
-   */
-  data?: UserTopics;
 };
 
 export type SearchDomain = 'resource' | 'collection' | 'conversation' | 'skill';
@@ -1733,28 +1405,6 @@ export type ListConversationsResponse = ListConversationResponse;
 
 export type ListConversationsError = unknown;
 
-export type ChatData = {
-  /**
-   * Chat request
-   */
-  body: ChatRequest;
-};
-
-export type ChatResponse = string;
-
-export type ChatError = unknown;
-
-export type CreateConversationData = {
-  /**
-   * Conversation creation request
-   */
-  body: CreateConversationRequest;
-};
-
-export type CreateConversationResponse2 = CreateConversationResponse;
-
-export type CreateConversationError = unknown;
-
 export type GetConversationDetailData = {
   path: {
     /**
@@ -1768,90 +1418,6 @@ export type GetConversationDetailResponse2 = GetConversationDetailResponse;
 
 export type GetConversationDetailError = unknown;
 
-export type PingWeblinkData2 = {
-  query: {
-    /**
-     * Weblink URL
-     */
-    url: string;
-  };
-};
-
-export type PingWeblinkResponse2 = PingWeblinkResponse;
-
-export type PingWeblinkError = unknown;
-
-export type StoreWeblinkData = {
-  body: StoreWeblinkRequest;
-};
-
-export type StoreWeblinkResponse = BaseResponse;
-
-export type StoreWeblinkError = unknown;
-
-export type ListWeblinksData = {
-  query?: {
-    /**
-     * Weblink ID
-     */
-    linkId?: string;
-    /**
-     * Page number
-     */
-    page?: number;
-    /**
-     * Page size
-     */
-    pageSize?: number;
-    /**
-     * Weblink URL
-     */
-    url?: string;
-  };
-};
-
-export type ListWeblinksResponse = ListWeblinkResponse;
-
-export type ListWeblinksError = unknown;
-
-export type GetFeedListData = {
-  query?: {
-    /**
-     * Page number
-     */
-    page?: number;
-    /**
-     * Page size
-     */
-    pageSize?: number;
-  };
-};
-
-export type GetFeedListResponse = ListFeedResponse;
-
-export type GetFeedListError = unknown;
-
-export type GetDigestListData = {
-  body: ListDigestRequest;
-};
-
-export type GetDigestListResponse = ListDigestResponse;
-
-export type GetDigestListError = unknown;
-
-export type GetContentDetailData = {
-  path: {
-    /**
-     * Content ID
-     */
-    cid: string;
-  };
-};
-
-export type GetContentDetailResponse2 = GetContentDetailResponse;
-
-export type GetContentDetailError = unknown;
-
 export type GetSettingsResponse = UserSettings;
 
 export type GetSettingsError = unknown;
@@ -1863,10 +1429,6 @@ export type UpdateSettingsData = {
 export type UpdateSettingsResponse = BaseResponse;
 
 export type UpdateSettingsError = unknown;
-
-export type GetUserTopicsResponse2 = GetUserTopicsResponse;
-
-export type GetUserTopicsError = unknown;
 
 export type SearchData = {
   body: SearchRequest;
@@ -2129,28 +1691,6 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/conversation/chat': {
-    post: {
-      req: ChatData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': string;
-      };
-    };
-  };
-  '/conversation/new': {
-    post: {
-      req: CreateConversationData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': CreateConversationResponse;
-      };
-    };
-  };
   '/conversation/{convId}': {
     get: {
       req: GetConversationDetailData;
@@ -2159,72 +1699,6 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': GetConversationDetailResponse;
-      };
-    };
-  };
-  '/weblink/ping': {
-    get: {
-      req: PingWeblinkData2;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': PingWeblinkResponse;
-      };
-    };
-  };
-  '/weblink/store': {
-    post: {
-      req: StoreWeblinkData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/weblink/list': {
-    get: {
-      req: ListWeblinksData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ListWeblinkResponse;
-      };
-    };
-  };
-  '/aigc/feed': {
-    get: {
-      req: GetFeedListData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ListFeedResponse;
-      };
-    };
-  };
-  '/aigc/digest': {
-    post: {
-      req: GetDigestListData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ListDigestResponse;
-      };
-    };
-  };
-  '/aigc/content/{cid}': {
-    get: {
-      req: GetContentDetailData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': GetContentDetailResponse;
       };
     };
   };
@@ -2244,16 +1718,6 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': BaseResponse;
-      };
-    };
-  };
-  '/user/topics': {
-    get: {
-      res: {
-        /**
-         * successful operation
-         */
-        '200': GetUserTopicsResponse;
       };
     };
   };

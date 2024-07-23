@@ -7,7 +7,7 @@ import { LocalSettings, defaultLocalSettings, useUserStore } from '@refly-packag
 import { safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 import { mapDefaultLocale } from '@refly-packages/ai-workspace-common/utils/locale';
 import { useCookie } from 'react-use';
-import { LOCALE } from '@refly/constants';
+import { LOCALE } from '@refly/common-types';
 import { useTranslation } from 'react-i18next';
 import { getClientOrigin } from '@refly-packages/utils/url';
 import { getRuntime } from '../utils/env';

@@ -1,4 +1,7 @@
-import { LOCALE } from '@refly/common-types';
+export const enum LOCALE {
+  ZH_CN = 'zh-CN',
+  EN = 'en',
+}
 
 export const languageNameToLocale = {
   en: {

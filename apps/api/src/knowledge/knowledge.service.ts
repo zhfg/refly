@@ -171,9 +171,9 @@ export class KnowledgeService {
       if (!param.data) {
         throw new BadRequestException('data is required');
       }
-      const { url, linkId, title } = param.data;
-      if (!url && !linkId) {
-        throw new BadRequestException('url or linkId is required');
+      const { url, title } = param.data;
+      if (!url) {
+        throw new BadRequestException('url is required');
       }
       param.title ||= title;
     } else if (param.resourceType === 'note') {
@@ -216,20 +216,9 @@ export class KnowledgeService {
 
   async indexResource(user: User, param: UpsertResourceRequest) {
     const { resourceId, collectionId } = param;
-    const { url, linkId, storageKey, title } = param.data;
+    const { url, storageKey, title } = param.data;
     param.storageKey ||= storageKey;
     param.content ||= '';
-
-    if (linkId) {
-      const weblink = await this.prisma.weblink.findFirst({
-        where: { linkId },
-      });
-      if (!weblink) {
-        this.logger.warn(`weblink not found for linkId: ${linkId}, fallback to server crawl`);
-      } else {
-        param.storageKey = weblink.parsedDocStorageKey;
-      }
-    }
 
     if (param.storageKey) {
       param.content = (await this.minio.downloadData(param.storageKey)).toString();

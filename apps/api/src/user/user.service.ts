@@ -35,18 +35,4 @@ export class UserService {
   }) {
     return this.prisma.user.upsert(args);
   }
-
-  async getUserPreferences(params: { userId: number }) {
-    return this.prisma.userPreference.findMany({
-      where: { ...params },
-      orderBy: { score: 'desc' },
-      include: { topic: true },
-    });
-  }
-
-  async countUserPreferences(params: { userId: number }) {
-    return this.prisma.userPreference.count({
-      where: { ...params },
-    });
-  }
 }

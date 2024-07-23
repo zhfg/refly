@@ -5,11 +5,6 @@
   "nodeSupportedVersionRange": ">=20.0.0",
   "projects": [
     {
-      "packageName": "@refly/constants",
-      "projectFolder": "packages/constants",
-      "reviewCategory": "packages"
-    },
-    {
       "packageName": "@refly/openapi-schema",
       "projectFolder": "packages/openapi-schema",
       "reviewCategory": "packages"
@@ -82,16 +77,6 @@
     {
       "packageName": "@refly/extension-v2",
       "projectFolder": "apps/extension-wxt",
-      "reviewCategory": "apps"
-    },
-    {
-      "packageName": "@refly/editor-playground",
-      "projectFolder": "apps/editor-playground",
-      "reviewCategory": "apps"
-    },
-    {
-      "packageName": "@refly/workers",
-      "projectFolder": "apps/workers",
       "reviewCategory": "apps"
     }
   ]

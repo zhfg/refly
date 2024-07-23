@@ -8,7 +8,7 @@ import { useTaskStore } from '@refly-packages/ai-workspace-common/stores/task';
 import { useLocation, useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 // 类型
-import { LOCALE } from '@refly/constants';
+import { LOCALE } from '@refly/common-types';
 import {
   QuickActionTaskPayload,
   ChatTask,
