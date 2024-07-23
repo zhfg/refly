@@ -9,16 +9,7 @@ import { useLocation, useNavigate, useSearchParams } from '@refly-packages/ai-wo
 
 // 类型
 import { LOCALE } from '@refly/common-types';
-import {
-  QuickActionTaskPayload,
-  ChatTask,
-  ContentMeta,
-  Source,
-  Conversation,
-  ChatMessage as Message,
-  InvokeSkillRequest,
-  SkillInstance,
-} from '@refly/openapi-schema';
+import { Source, ChatMessage as Message, InvokeSkillRequest } from '@refly/openapi-schema';
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { useWeblinkStore } from '@refly-packages/ai-workspace-common/stores/weblink';
 // request

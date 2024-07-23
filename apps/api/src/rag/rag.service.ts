@@ -16,7 +16,7 @@ import {
   ContentData,
   ContentPayload,
   ReaderResult,
-  DocMeta,
+  NodeMeta,
 } from './rag.dto';
 import { QdrantService } from '@/common/qdrant.service';
 import { Condition, PointStruct } from '@/common/qdrant.dto';
@@ -125,9 +125,9 @@ export class RAGService {
     return await this.splitter.splitText(cleanMarkdownForIngest(text));
   }
 
-  async indexContent(doc: Document<DocMeta>): Promise<ContentNode[]> {
+  async indexContent(doc: Document<NodeMeta>): Promise<ContentNode[]> {
     const { pageContent, metadata } = doc;
-    const { resourceId, collectionId } = metadata;
+    const { resourceId } = metadata;
 
     const chunks = await this.chunkText(pageContent);
     const chunkEmbeds = await this.embeddings.embedDocuments(chunks);
@@ -138,13 +138,9 @@ export class RAGService {
         id: genResourceUuid(`${resourceId}-${i}`),
         vector: chunkEmbeds[i],
         payload: {
-          url: metadata.url,
+          ...metadata,
           seq: i,
-          type: 'weblink',
-          title: metadata.title,
           content: chunks[i],
-          resourceId,
-          collectionId,
         },
       });
     }

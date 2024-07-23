@@ -17,6 +17,21 @@ import type {
   DeleteResourceData,
   DeleteResourceError,
   DeleteResourceResponse,
+  ListNotesData,
+  ListNotesError,
+  ListNotesResponse,
+  GetNoteDetailData,
+  GetNoteDetailError,
+  GetNoteDetailResponse2,
+  UpdateNoteData,
+  UpdateNoteError,
+  UpdateNoteResponse,
+  CreateNoteData,
+  CreateNoteError,
+  CreateNoteResponse,
+  DeleteNoteData,
+  DeleteNoteError,
+  DeleteNoteResponse,
   ListCollectionsData,
   ListCollectionsError,
   ListCollectionsResponse,
@@ -135,6 +150,61 @@ export const deleteResource = (options: Options<DeleteResourceData>) => {
   return (options?.client ?? client).post<DeleteResourceResponse, DeleteResourceError>({
     ...options,
     url: '/knowledge/resource/delete',
+  });
+};
+
+/**
+ * List user notes
+ * List all notes for a user
+ */
+export const listNotes = (options?: Options<ListNotesData>) => {
+  return (options?.client ?? client).get<ListNotesResponse, ListNotesError>({
+    ...options,
+    url: '/knowledge/note/list',
+  });
+};
+
+/**
+ * Get note detail
+ * Return note detail
+ */
+export const getNoteDetail = (options: Options<GetNoteDetailData>) => {
+  return (options?.client ?? client).get<GetNoteDetailResponse2, GetNoteDetailError>({
+    ...options,
+    url: '/knowledge/note/detail',
+  });
+};
+
+/**
+ * Update note
+ * Update an existing note
+ */
+export const updateNote = (options: Options<UpdateNoteData>) => {
+  return (options?.client ?? client).post<UpdateNoteResponse, UpdateNoteError>({
+    ...options,
+    url: '/knowledge/note/update',
+  });
+};
+
+/**
+ * Create new note
+ * Create a new note
+ */
+export const createNote = (options: Options<CreateNoteData>) => {
+  return (options?.client ?? client).post<CreateNoteResponse, CreateNoteError>({
+    ...options,
+    url: '/knowledge/note/new',
+  });
+};
+
+/**
+ * Delete note
+ * Delete an existing note
+ */
+export const deleteNote = (options: Options<DeleteNoteData>) => {
+  return (options?.client ?? client).post<DeleteNoteResponse, DeleteNoteError>({
+    ...options,
+    url: '/knowledge/note/delete',
   });
 };
 

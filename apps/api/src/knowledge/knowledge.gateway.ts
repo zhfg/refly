@@ -9,56 +9,63 @@ import { MinioService } from '../common/minio.service';
 import { PrismaService } from '../common/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { JwtPayload } from '../auth/dto';
-import { Resource, User } from '@prisma/client';
+import { Note, User } from '@prisma/client';
 import { state2Markdown } from '@refly/utils';
+import { RAGService } from '@/rag/rag.service';
 
 interface NoteContext {
-  resource: Resource;
+  note: Note;
   user: User;
 }
 
-@WebSocketGateway(1234, {
-  cors: {
-    origin: '*',
-  },
-})
+@WebSocketGateway()
 export class NoteWsGateway implements OnGatewayConnection {
   private server: Hocuspocus;
   private logger = new Logger(NoteWsGateway.name);
 
   constructor(
     private minio: MinioService,
+    private rag: RAGService,
     private prisma: PrismaService,
     private config: ConfigService,
   ) {
     this.server = Server.configure({
-      port: 1234,
+      port: config.get<number>('wsPort'),
       extensions: [
         new HocuspocusLogger(),
         new Database({
           fetch: async ({ context }: { context: NoteContext }) => {
-            const { resource } = context;
-            if (!resource.stateStorageKey) return null;
+            const { note } = context;
+            if (!note.stateStorageKey) return null;
             try {
-              return await this.minio.downloadData(resource.stateStorageKey);
+              return await this.minio.downloadData(note.stateStorageKey);
             } catch (err) {
-              this.logger.error(`fetch state failed for ${resource}, err: ${err.stack}`);
+              this.logger.error(`fetch state failed for ${note}, err: ${err.stack}`);
               return null;
             }
           },
           store: async ({ state, context }: { state: Buffer; context: NoteContext }) => {
-            const { resource } = context;
-            if (!resource.stateStorageKey) {
-              resource.stateStorageKey = `state/${resource.resourceId}`;
-              await this.prisma.resource.update({
-                where: { resourceId: resource.resourceId },
-                data: {
-                  content: state2Markdown(state),
-                  stateStorageKey: resource.stateStorageKey,
-                },
-              });
-            }
-            await this.minio.uploadData(resource.stateStorageKey, state);
+            const { note, user } = context;
+            note.stateStorageKey ||= `state/${note.noteId}`;
+
+            const { noteId, stateStorageKey } = note;
+            const content = state2Markdown(state);
+
+            await Promise.all([
+              this.prisma.note.update({
+                where: { noteId },
+                data: { content, stateStorageKey },
+              }),
+              this.minio.uploadData(stateStorageKey, state),
+
+              // TODO: put this in delayed queue
+              this.rag.saveDataForUser(user, {
+                chunks: await this.rag.indexContent({
+                  pageContent: content,
+                  metadata: { noteId: note.noteId },
+                }),
+              }),
+            ]);
           },
         }),
       ],
@@ -74,14 +81,14 @@ export class NoteWsGateway implements OnGatewayConnection {
           payload = decoded as JwtPayload;
         }
 
-        const resource = await this.prisma.resource.findFirst({
-          where: { resourceId: documentName, deletedAt: null },
+        const note = await this.prisma.note.findFirst({
+          where: { noteId: documentName, deletedAt: null },
         });
-        if (resource.uid !== payload.uid) {
+        if (note.uid !== payload.uid) {
           throw new Error(`user not authorized: ${documentName}`);
         }
-        if (resource.readOnly) {
-          throw new Error(`read-only resource: ${documentName}`);
+        if (note.readOnly) {
+          throw new Error(`read-only note: ${documentName}`);
         }
         const user = await this.prisma.user.findFirst({
           where: { uid: payload.uid },
@@ -91,7 +98,7 @@ export class NoteWsGateway implements OnGatewayConnection {
         }
 
         // Set contextual data to use it in other hooks
-        return { user, resource } as NoteContext;
+        return { user, note } as NoteContext;
       },
     });
   }

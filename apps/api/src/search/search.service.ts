@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { cut, extract } from '@node-rs/jieba';
 import { PrismaService } from '@/common/prisma.service';
@@ -131,7 +131,7 @@ export class SearchService {
       return [];
     }
 
-    const resourceIds = [...new Set(nodes.map((node) => node.resourceId))];
+    const resourceIds = [...new Set(nodes.map((node) => node.resourceId).filter((id) => !!id))];
     const resources = await this.prisma.resource.findMany({
       where: {
         resourceId: { in: resourceIds },
@@ -149,7 +149,7 @@ export class SearchService {
       content: [node.content],
       metadata: {
         resourceMeta: resourceMap.get(node.resourceId),
-        resourceType: node.type,
+        resourceType: node.resourceType,
         collectionId: node.collectionId,
       },
     }));
@@ -167,8 +167,111 @@ export class SearchService {
         return this.searchResourcesByKeywords(user, req);
       case 'vector':
         return this.searchResourcesByVector(user, req);
+      case 'hybrid':
+        throw new BadRequestException('Not implemented');
       default:
         return this.searchResourcesByKeywords(user, req);
+    }
+  }
+
+  async emptySearchNotes(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+    const notes = await this.prisma.note.findMany({
+      select: {
+        noteId: true,
+        title: true,
+        content: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      where: { uid: user.uid, deletedAt: null },
+      orderBy: { updatedAt: 'desc' },
+      take: req.limit || 5,
+    });
+    return notes.map((note) => ({
+      id: note.noteId,
+      domain: 'note',
+      title: note.title,
+      content: [note.content ? note.content.slice(0, 250) + '...' : ''],
+      createdAt: note.createdAt.toJSON(),
+      updatedAt: note.updatedAt.toJSON(),
+    }));
+  }
+
+  async searchNotesByKeywords(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+    const tokens = req.tokens;
+
+    interface NoteResult {
+      note_id: string;
+      created_at: string;
+      updated_at: string;
+      title: string;
+      content: string;
+    }
+    const tokenList = tokens.join(' ');
+    const tokenOrList = tokens.join(' OR ');
+    const notes = await this.prisma.$queryRaw<NoteResult[]>`
+      SELECT   note_id,
+               created_at,
+               updated_at,
+               pgroonga_highlight_html(
+                 title, pgroonga_query_extract_keywords(${tokenList}::TEXT)
+               ) AS title,
+               pgroonga_highlight_html(
+                 content, pgroonga_query_extract_keywords(${tokenList}::TEXT)
+               ) AS content
+      FROM     notes
+      WHERE    uid = ${user.uid}
+      AND      (title &@~ ${tokenList}::TEXT OR content &@~ ${tokenOrList}::TEXT)
+      ORDER BY pgroonga_score(tableoid, ctid) DESC,
+               updated_at DESC
+      LIMIT    ${req.limit || 5}
+    `;
+
+    return notes.map((note) => ({
+      id: note.note_id,
+      domain: 'note',
+      title: note.title,
+      content: note.content
+        .split(/\r?\n+/)
+        .filter((line) => /<span\b[^>]*>(.*?)<\/span>/gi.test(line)),
+      createdAt: note.created_at,
+      updatedAt: note.updated_at,
+    }));
+  }
+
+  async searchNotesByVector(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+    const nodes = await this.rag.retrieve(user, {
+      query: req.query,
+      limit: req.limit,
+    });
+    if (nodes.length === 0) {
+      return [];
+    }
+
+    return nodes.map((node) => ({
+      id: node.noteId,
+      domain: 'note',
+      title: node.title,
+      content: [node.content],
+    }));
+  }
+
+  async searchNotes(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+    const tokens = req.tokens;
+
+    if (tokens.length === 0) {
+      return this.emptySearchNotes(user, req);
+    }
+
+    switch (req.mode) {
+      case 'keyword':
+        return this.searchNotesByKeywords(user, req);
+      case 'vector':
+        return this.searchNotesByVector(user, req);
+      case 'hybrid':
+        throw new BadRequestException('Not implemented');
+      default:
+        return this.searchNotesByKeywords(user, req);
     }
   }
 
@@ -387,6 +490,8 @@ export class SearchService {
         switch (domain) {
           case 'resource':
             return this.searchResources(user, processedReq);
+          case 'note':
+            return this.searchNotes(user, processedReq);
           case 'collection':
             return this.searchCollections(user, processedReq);
           case 'conversation':

@@ -55,14 +55,6 @@ export type Resource = {
    */
   isPublic: boolean;
   /**
-   * Whether this resource is read-only
-   */
-  readOnly: boolean;
-  /**
-   * Whether this resource is collaborative
-   */
-  collabEnabled: boolean;
-  /**
    * Collection creation time
    */
   createdAt: string;
@@ -75,9 +67,40 @@ export type Resource = {
    */
   contentPreview?: string;
   /**
-   * Document content for this resource (only returned in detail API)
+   * Document content for this resource (only returned in getNoteDetail API)
    */
   content?: string;
+};
+
+export type Note = {
+  /**
+   * Note ID
+   */
+  noteId: string;
+  /**
+   * Note title
+   */
+  title: string;
+  /**
+   * Note content (only returned in detail api)
+   */
+  content?: string;
+  /**
+   * Whether this note is read-only
+   */
+  readOnly: boolean;
+  /**
+   * Whether this note is public
+   */
+  isPublic: boolean;
+  /**
+   * Note creation time
+   */
+  createdAt: string;
+  /**
+   * Note update time
+   */
+  updatedAt: string;
 };
 
 export type Collection = {
@@ -699,6 +722,50 @@ export type GetResourceDetailResponse = BaseResponse & {
   data?: Resource;
 };
 
+export type ListNoteResponse = BaseResponse & {
+  /**
+   * Note list
+   */
+  data?: Array<Note>;
+};
+
+export type GetNoteDetailResponse = BaseResponse & {
+  /**
+   * Note data
+   */
+  data?: Note;
+};
+
+export type UpsertNoteRequest = {
+  /**
+   * Note title
+   */
+  title: string;
+  /**
+   * Note ID (only used for update)
+   */
+  noteId?: string;
+  /**
+   * Whether this note is read-only
+   */
+  readOnly?: boolean;
+  /**
+   * Whether this note is public
+   */
+  isPublic?: boolean;
+};
+
+export type UpsertNoteResponse = BaseResponse & {
+  data?: Note;
+};
+
+export type DeleteNoteRequest = {
+  /**
+   * Note ID to delete
+   */
+  noteId: string;
+};
+
 export type UpsertCollectionRequest = {
   /**
    * Collection ID (only used for update)
@@ -1022,7 +1089,7 @@ export type UpdateUserSettingsRequest = {
   outputLocale?: string;
 };
 
-export type SearchDomain = 'resource' | 'collection' | 'conversation' | 'skill';
+export type SearchDomain = 'resource' | 'note' | 'collection' | 'conversation' | 'skill';
 
 export type SearchMode = 'keyword' | 'vector' | 'hybrid';
 
@@ -1178,6 +1245,66 @@ export type DeleteResourceData = {
 export type DeleteResourceResponse = BaseResponse;
 
 export type DeleteResourceError = unknown;
+
+export type ListNotesData = {
+  query?: {
+    /**
+     * Page number
+     */
+    page?: number;
+    /**
+     * Page size
+     */
+    pageSize?: number;
+  };
+};
+
+export type ListNotesResponse = ListNoteResponse;
+
+export type ListNotesError = unknown;
+
+export type GetNoteDetailData = {
+  query: {
+    /**
+     * Note ID to retrieve
+     */
+    noteId: string;
+  };
+};
+
+export type GetNoteDetailResponse2 = GetNoteDetailResponse;
+
+export type GetNoteDetailError = unknown;
+
+export type UpdateNoteData = {
+  /**
+   * Note update request
+   */
+  body: UpsertNoteRequest;
+};
+
+export type UpdateNoteResponse = UpsertNoteResponse;
+
+export type UpdateNoteError = unknown;
+
+export type CreateNoteData = {
+  /**
+   * Note creation request
+   */
+  body: UpsertNoteRequest;
+};
+
+export type CreateNoteResponse = UpsertNoteResponse;
+
+export type CreateNoteError = unknown;
+
+export type DeleteNoteData = {
+  body: DeleteNoteRequest;
+};
+
+export type DeleteNoteResponse = BaseResponse;
+
+export type DeleteNoteError = unknown;
 
 export type ListCollectionsData = {
   query?: {
@@ -1486,6 +1613,61 @@ export type $OpenApiTs = {
   '/knowledge/resource/delete': {
     post: {
       req: DeleteResourceData;
+      res: {
+        /**
+         * Successful operation
+         */
+        '200': BaseResponse;
+      };
+    };
+  };
+  '/knowledge/note/list': {
+    get: {
+      req: ListNotesData;
+      res: {
+        /**
+         * Successful operation
+         */
+        '200': ListNoteResponse;
+      };
+    };
+  };
+  '/knowledge/note/detail': {
+    get: {
+      req: GetNoteDetailData;
+      res: {
+        /**
+         * Successful operation
+         */
+        '200': GetNoteDetailResponse;
+      };
+    };
+  };
+  '/knowledge/note/update': {
+    post: {
+      req: UpdateNoteData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': UpsertNoteResponse;
+      };
+    };
+  };
+  '/knowledge/note/new': {
+    post: {
+      req: CreateNoteData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': UpsertNoteResponse;
+      };
+    };
+  };
+  '/knowledge/note/delete': {
+    post: {
+      req: DeleteNoteData;
       res: {
         /**
          * Successful operation

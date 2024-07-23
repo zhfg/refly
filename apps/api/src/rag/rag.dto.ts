@@ -1,14 +1,20 @@
 import { ResourceType } from '@prisma/client';
-import { RetrieveFilter } from '@refly/openapi-schema';
 
-export interface ContentPayload {
-  url: string;
-  seq: number;
-  type: ResourceType;
+type ContentNodeType = 'resource' | 'note';
+
+export interface NodeMeta {
   title: string;
-  content: string;
+  nodeType: ContentNodeType;
+  url?: string;
+  noteId?: string;
   resourceId?: string;
+  resourceType?: ResourceType;
   collectionId?: string;
+}
+
+export interface ContentPayload extends NodeMeta {
+  seq: number;
+  content: string;
 }
 
 export interface ContentNode {
@@ -19,6 +25,14 @@ export interface ContentNode {
 
 export interface ContentData {
   chunks: ContentNode[];
+}
+
+export interface RetrieveFilter {
+  nodeTypes?: ContentNodeType[];
+  urls?: string[];
+  noteIds?: string[];
+  resourceIds?: string[];
+  collectionIds?: string[];
 }
 
 export interface HybridSearchParam {
@@ -37,11 +51,4 @@ export interface ReaderResult {
     content: string;
     publishedTime?: string;
   };
-}
-
-export interface DocMeta {
-  title?: string;
-  url?: string;
-  collectionId?: string;
-  resourceId?: string;
 }

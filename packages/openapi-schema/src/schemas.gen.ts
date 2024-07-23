@@ -30,17 +30,7 @@ export const $ResourceType = {
 
 export const $Resource = {
   type: 'object',
-  required: [
-    'resourceId',
-    'resourceType',
-    'title',
-    'isPublic',
-    'readOnly',
-    'collabEnabled',
-    'indexStatus',
-    'createdAt',
-    'updatedAt',
-  ],
+  required: ['resourceId', 'resourceType', 'title', 'isPublic', 'indexStatus', 'createdAt', 'updatedAt'],
   properties: {
     resourceId: {
       type: 'string',
@@ -74,16 +64,6 @@ export const $Resource = {
       description: 'Whether this resource is public',
       default: false,
     },
-    readOnly: {
-      type: 'boolean',
-      description: 'Whether this resource is read-only',
-      default: false,
-    },
-    collabEnabled: {
-      type: 'boolean',
-      description: 'Whether this resource is collaborative',
-      default: false,
-    },
     createdAt: {
       type: 'string',
       format: 'date-time',
@@ -100,7 +80,46 @@ export const $Resource = {
     },
     content: {
       type: 'string',
-      description: 'Document content for this resource (only returned in detail API)',
+      description: 'Document content for this resource (only returned in getNoteDetail API)',
+    },
+  },
+} as const;
+
+export const $Note = {
+  type: 'object',
+  required: ['noteId', 'title', 'readOnly', 'isPublic', 'createdAt', 'updatedAt'],
+  properties: {
+    noteId: {
+      type: 'string',
+      description: 'Note ID',
+      example: 'n-g30e1b80b5g1itbemc0g5jj3',
+    },
+    title: {
+      type: 'string',
+      description: 'Note title',
+      example: 'My note',
+    },
+    content: {
+      type: 'string',
+      description: 'Note content (only returned in detail api)',
+    },
+    readOnly: {
+      type: 'boolean',
+      description: 'Whether this note is read-only',
+    },
+    isPublic: {
+      type: 'boolean',
+      description: 'Whether this note is public',
+    },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Note creation time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Note update time',
     },
   },
 } as const;
@@ -911,6 +930,99 @@ export const $GetResourceDetailResponse = {
   ],
 } as const;
 
+export const $ListNoteResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Note list',
+          items: {
+            $ref: '#/components/schemas/Note',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $GetNoteDetailResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Note data',
+          $ref: '#/components/schemas/Note',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $UpsertNoteRequest = {
+  type: 'object',
+  required: ['title'],
+  properties: {
+    title: {
+      type: 'string',
+      description: 'Note title',
+      example: 'My Note',
+    },
+    noteId: {
+      type: 'string',
+      description: 'Note ID (only used for update)',
+      example: 'n-g30e1b80b5g1itbemc0g5jj3',
+    },
+    readOnly: {
+      type: 'boolean',
+      description: 'Whether this note is read-only',
+      default: false,
+    },
+    isPublic: {
+      type: 'boolean',
+      description: 'Whether this note is public',
+      default: false,
+    },
+  },
+} as const;
+
+export const $UpsertNoteResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          $ref: '#/components/schemas/Note',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $DeleteNoteRequest = {
+  type: 'object',
+  required: ['noteId'],
+  properties: {
+    noteId: {
+      type: 'string',
+      description: 'Note ID to delete',
+      example: 'n-g30e1b80b5g1itbemc0g5jj3',
+    },
+  },
+} as const;
+
 export const $UpsertCollectionRequest = {
   type: 'object',
   properties: {
@@ -1474,7 +1586,7 @@ export const $UpdateUserSettingsRequest = {
 
 export const $SearchDomain = {
   type: 'string',
-  enum: ['resource', 'collection', 'conversation', 'skill'],
+  enum: ['resource', 'note', 'collection', 'conversation', 'skill'],
 } as const;
 
 export const $SearchMode = {
