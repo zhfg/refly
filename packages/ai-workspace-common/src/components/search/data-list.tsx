@@ -37,6 +37,8 @@ export function DataList({
   activeValue,
   searchValue,
   displayMode,
+  setValue,
+  onItemClick,
 }: {
   domain: string;
   heading: string;
@@ -45,6 +47,8 @@ export function DataList({
   activeValue: string;
   searchValue: string;
   displayMode: 'list' | 'search';
+  setValue: (val: string) => void;
+  onItemClick: (item: SearchResult) => void;
 }) {
   const [stateDataList, setStateDataList] = useState<SearchResult[]>(data || []);
   const [currentPage, setCurrentPage] = useState(1);
@@ -185,6 +189,9 @@ export function DataList({
   useEffect(() => {
     setStateDataList(data);
   }, [data]);
+  useEffect(() => {
+    setValue(`create${domain}`);
+  }, [domain]);
 
   return (
     <>
@@ -201,26 +208,7 @@ export function DataList({
             value={`${domain}-${index}-${item?.title}-${item?.content?.[0] || ''}`}
             activeValue={activeValue}
             onSelect={() => {
-              if (domain === 'skill') {
-              } else if (domain === 'note') {
-                jumpToNote({
-                  noteId: item?.id,
-                });
-              } else if (domain === 'readResources') {
-                jumpToReadResource({
-                  kbId: item?.metadata?.collectionId,
-                  resId: item?.id,
-                });
-              } else if (domain === 'knowledgeBases') {
-                jumpToKnowledgeBase({
-                  kbId: item?.id,
-                });
-              } else if (domain === 'convs') {
-                jumpToConv({
-                  convId: item?.id,
-                });
-              }
-
+              onItemClick(item);
               searchStore.setIsSearchOpen(false);
             }}
           >

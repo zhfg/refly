@@ -20,11 +20,13 @@ import './index.scss';
 import { Modal } from '@arco-design/web-react';
 import { Home } from './home';
 import { DataList } from './data-list';
+import { Skill } from './skill';
 
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { SearchDomain, SearchRequest, SearchResult } from '@refly/openapi-schema';
+import { Resource, SearchDomain, SearchRequest, SearchResult, SkillInstance, SkillMeta } from '@refly/openapi-schema';
 import { useNavigate } from 'react-router-dom';
+import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
 export const Search = () => {
   const ref = React.useRef<HTMLDivElement | null>(null);
@@ -35,6 +37,12 @@ export const Search = () => {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const listRef = React.useRef(null);
   const [isComposing, setIsComposing] = useState(false);
+
+  // skill
+  const [selectedSkill, setSelectedSkill] = useState<SkillMeta>();
+
+  // 整体处理
+  const { jumpToKnowledgeBase, jumpToNote, jumpToReadResource, jumpToConv } = useKnowledgeBaseJumpNewPath();
 
   const pages = searchStore.pages;
   const setPages = searchStore.setPages;
@@ -70,7 +78,7 @@ export const Search = () => {
           ref.current.style.transform = '';
         }
 
-        // setSearchValue('');
+        setSearchValue('');
       }, 100);
     }
   }
@@ -163,6 +171,15 @@ export const Search = () => {
       action: false, // 是否开启 action
       data: searchStore.searchedSkills || [],
       icon: <IconRobot style={{ fontSize: 12 }} />,
+      onItemClick: (item: SearchResult) => {
+        const skill: SkillMeta = {
+          skillDisplayName: item?.title,
+          skillName: item?.title,
+          skillId: item?.id,
+        };
+        setSelectedSkill(skill);
+        setPages([...pages, 'skill-execute']);
+      },
     },
     {
       domain: 'note',
@@ -173,6 +190,13 @@ export const Search = () => {
       },
       data: searchStore.searchedNotes || [],
       icon: <IconEdit style={{ fontSize: 12 }} />,
+      onItemClick: (item: SearchResult) => {
+        jumpToNote({
+          noteId: item?.id,
+        });
+        searchStore.setIsSearchOpen(false);
+      },
+      onCreateClick: () => {},
     },
     {
       domain: 'readResources',
@@ -183,6 +207,14 @@ export const Search = () => {
       },
       data: searchStore.searchedReadResources || [],
       icon: <IconBook style={{ fontSize: 12 }} />,
+      onItemClick: (item: SearchResult) => {
+        jumpToReadResource({
+          kbId: item?.metadata?.collectionId,
+          resId: item?.id,
+        });
+        searchStore.setIsSearchOpen(false);
+      },
+      onCreateClick: async () => {},
     },
     {
       domain: 'knowledgeBases',
@@ -193,6 +225,13 @@ export const Search = () => {
       },
       data: searchStore.searchedKnowledgeBases || [],
       icon: <IconFile style={{ fontSize: 12 }} />,
+      onItemClick: (item: SearchResult) => {
+        jumpToKnowledgeBase({
+          kbId: item?.id,
+        });
+        searchStore.setIsSearchOpen(false);
+      },
+      onCreateClick: async () => {},
     },
     {
       domain: 'convs',
@@ -203,10 +242,28 @@ export const Search = () => {
       },
       data: searchStore.searchedConvs || [],
       icon: <IconMessage style={{ fontSize: 12 }} />,
+      onItemClick: (item: SearchResult) => {
+        jumpToConv({
+          convId: item?.id,
+        });
+        searchStore.setIsSearchOpen(false);
+      },
+      onCreateClick: async () => {},
     },
   ];
   const getRenderData = (domain: string) => {
     return renderData?.find((item) => item.domain === domain);
+  };
+
+  const getInputPlaceholder = (domain: string) => {
+    if (domain === 'home') {
+      return `直接提问或搜索技能，笔记，资源，知识库，会话...`;
+    } else if (domain === 'skill-execute') {
+      return `输入你想要提问的问题，并基于此问题执行技能`;
+    } else {
+      const data = getRenderData(domain);
+      return `搜索 ${data?.heading}...`;
+    }
   };
 
   return (
@@ -253,7 +310,7 @@ export const Search = () => {
           autoFocus
           ref={inputRef}
           value={searchValue}
-          placeholder="Search for skills, notes, resources and more..."
+          placeholder={getInputPlaceholder(activePage)}
           onCompositionStart={(e) => {
             setIsComposing(true);
           }}
@@ -277,16 +334,27 @@ export const Search = () => {
               setPages={(pages: string[]) => setPages(pages)}
               data={renderData}
               activeValue={value}
+              setValue={setValue}
               searchValue={searchValue}
             />
           )}
-          {activePage !== 'home' ? (
+          {activePage !== 'home' && activePage !== 'skill-execute' ? (
             <DataList
               key="data-list"
               displayMode={displayMode}
               {...getRenderData(activePage)}
               activeValue={value}
               searchValue={searchValue}
+              setValue={setValue}
+            />
+          ) : null}
+          {activePage === 'skill-execute' ? (
+            <Skill
+              key="skill"
+              activeValue={value}
+              searchValue={searchValue}
+              setValue={setValue}
+              selectedSkill={selectedSkill}
             />
           ) : null}
         </Command.List>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Command } from 'cmdk';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 import * as Popover from '@radix-ui/react-popover';
@@ -29,6 +29,8 @@ import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/route
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useBigSearchQuickAction } from '@refly-packages/ai-workspace-common/hooks/use-big-search-quick-action';
+import { RenderItem } from '@refly-packages/ai-workspace-common/components/search/types';
+import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 
 export function Home({
   pages,
@@ -37,20 +39,15 @@ export function Home({
   data,
   activeValue,
   searchValue,
+  setValue,
 }: {
-  data: {
-    domain: string;
-    heading: string;
-    data: SearchResult[];
-    icon: React.ReactNode;
-    action?: boolean;
-    actionHeading?: { create: string };
-  }[];
+  data: RenderItem[];
   pages: string[];
   setPages: (pages: string[]) => void;
   displayMode: 'list' | 'search';
   activeValue: string;
   searchValue: string;
+  setValue: (val: string) => void;
 }) {
   const navigate = useNavigate();
   const searchStore = useSearchStore();
@@ -58,8 +55,11 @@ export function Home({
   const { jumpToKnowledgeBase, jumpToNote, jumpToReadResource } = useKnowledgeBaseJumpNewPath();
   const [searchParams, setSearchParams] = useSearchParams();
   const { triggerSkillQuickAction } = useBigSearchQuickAction();
+  const skillStore = useSkillStore();
 
-  console.log('searchValue', searchValue);
+  useEffect(() => {
+    setValue('refly-built-in-ask-ai');
+  }, []);
 
   return (
     <>
@@ -86,6 +86,7 @@ export function Home({
           onSelect={() => {
             triggerSkillQuickAction(searchValue);
             searchStore.setIsSearchOpen(false);
+            skillStore.setSelectedSkillInstalce(null);
           }}
         >
           <IconMessage style={{ fontSize: 12 }} />
@@ -124,27 +125,7 @@ export function Home({
                 value={`${renderItem?.domain}-${index}-${item?.title}-${item?.content?.[0] || ''}`}
                 activeValue={activeValue}
                 onSelect={() => {
-                  const newSearchParams = new URLSearchParams(searchParams);
-
-                  if (renderItem?.domain === 'skill') {
-                  } else if (renderItem?.domain === 'note') {
-                    jumpToNote({
-                      noteId: item?.id,
-                    });
-                  } else if (renderItem?.domain === 'readResources') {
-                    jumpToReadResource({
-                      kbId: item?.metadata?.collectionId,
-                      resId: item?.id,
-                    });
-                  } else if (renderItem?.domain === 'knowledgeBases') {
-                    jumpToKnowledgeBase({
-                      kbId: item?.id,
-                    });
-                  } else if (renderItem?.domain === 'convs') {
-                    newSearchParams.set('convId', item?.id);
-                  }
-
-                  searchStore.setIsSearchOpen(false);
+                  renderItem?.onItemClick(item);
                 }}
               >
                 {renderItem?.icon}
