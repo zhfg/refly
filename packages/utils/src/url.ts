@@ -57,10 +57,6 @@ export const getClientOrigin = (isLandingPage = false) => {
   }
 };
 
-export function getExtensionUrl(url: any) {
-  return chrome?.runtime.getURL(url);
-}
-
 export function safeParseURL(url: string) {
   try {
     const urlObj = new URL(url);

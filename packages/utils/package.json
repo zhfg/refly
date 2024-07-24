@@ -12,15 +12,13 @@
     "build": "pnpm run build:cjs && pnpm run build:esm",
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:esm": "tsc -p tsconfig.esm.json",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "npm run build"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@paralleldrive/cuid2": "^2.2.2",
-    "@refly/constants": "workspace:*",
     "@refly/openapi-schema": "workspace:*",
     "@refly/common-types": "workspace:*",
     "clsx": "^2.1.0",

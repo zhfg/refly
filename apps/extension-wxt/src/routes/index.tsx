@@ -6,7 +6,7 @@ import KnowledgeBase from '@/pages/knowledge-base';
 // 自定义组件
 import { Login } from '@/pages/login';
 import { useUserStore } from '@refly/ai-workspace-common/stores/user';
-import { LOCALE } from '@refly/constants';
+import { LOCALE } from '@refly/common-types';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 // requests

@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Dropdown, Menu, Typography, Message as message } from '@arco-design/web-react';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/parse';
-import { LOCALE } from '@refly/constants';
+import { LOCALE } from '@refly/common-types';
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { OutputLocale, enLocale, localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/i18n';

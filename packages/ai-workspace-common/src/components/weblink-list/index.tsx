@@ -12,7 +12,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import './index.scss';
 import { safeParseURL } from '@refly/utils/url';
 import { useTranslation } from 'react-i18next';
-import { LOCALE } from '@refly/constants';
+import { LOCALE } from '@refly/common-types';
 
 const WebLinkItem = (props: { weblink: Weblink }) => {
   const {

@@ -10,7 +10,7 @@ import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // types
-import { LOCALE } from '@refly/constants';
+import { LOCALE } from '@refly/common-types';
 import { Conversation } from '@refly/openapi-schema';
 import './index.scss';
 // components

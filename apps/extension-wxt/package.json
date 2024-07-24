@@ -72,7 +72,7 @@
     "vite-plugin-encoding": "~1.0.0",
     "@refly/plugin-vite-encoding": "workspace:*",
     "@refly/plugin-vite-watcher": "workspace:*",
-    "@refly/constants": "workspace:*",
+    "@refly/common-types": "workspace:*",
     "@refly/utils": "workspace:*",
     "@headlessui/react": "~2.1.2",
     "@heroicons/react": "~2.1.4"

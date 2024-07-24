@@ -1,11 +1,6 @@
 name: Deploy API To Prod
 
 on:
-  push:
-    branches:
-      - release
-    paths:
-      - 'apps/api/**'
   workflow_dispatch:
 
 jobs:

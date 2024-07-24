@@ -1,4 +1,4 @@
-import { LOCALE } from '@refly/constants';
+import { LOCALE } from '@refly/common-types';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 
 // styles

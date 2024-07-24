@@ -6,14 +6,12 @@ export interface CreateChatMessageInput {
   type: MessageType;
   sources?: string;
   content: string;
-  userId: number;
   convId: string;
   skillMeta?: string;
   uid: string;
   logs?: string;
   structuredData?: string;
   locale?: string;
-  conversationId: number;
   relatedQuestions?: string;
   selectedWeblinkConfig?: string;
 }
@@ -35,7 +33,6 @@ export function toChatMessageDTO(message: ChatMessageModel): ChatMessage {
     dto.skillMeta = JSON.parse(message.skillMeta || '{}');
     dto.logs = JSON.parse(message.logs || '[]');
     dto.structuredData = JSON.parse(message.structuredData || '{}');
-    dto.relatedQuestions = JSON.parse(message.relatedQuestions || '[]');
   }
   return dto;
 }
@@ -49,7 +46,6 @@ export function toConversationDTO(
       'title',
       'lastMessage',
       'messageCount',
-      'cid',
       'origin',
       'originPageTitle',
       'originPageUrl',

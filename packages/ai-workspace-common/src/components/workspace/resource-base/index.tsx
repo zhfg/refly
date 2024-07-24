@@ -10,7 +10,7 @@ import { IconMore, IconBook } from '@arco-design/web-react/icon';
 
 import { EmptyDigestStatus } from '@refly-packages/ai-workspace-common/components/empty-digest-today-status';
 
-import { LOCALE } from '@refly/constants';
+import { LOCALE } from '@refly/common-types';
 import './index.scss';
 
 interface ResourceBaseProps {

@@ -22,17 +22,12 @@
     "noFallthroughCasesInSwitch": false,
     "inlineSources": true,
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
-
-    // Set `sourceRoot` to  "/" to strip the build path prefix
-    // from generated source code references.
-    // This improves issue grouping in Sentry.
     "baseUrl": "./",
     "rootDir": "./src",
     "sourceRoot": "/",
     "paths": {
       "@refly-packages/editor-core/*": ["./src/headless-core/*"],
-      "@refly-packages/editor-component/*": ["./src/components/*"],
-      "@refly/utils/*": ["../utils/src/*"]
+      "@refly-packages/editor-component/*": ["./src/components/*"]
     },
     "composite": true,
     "noEmit": false,
@@ -40,5 +35,5 @@
     "declarationMap": true
   },
   "include": ["src/**/*"],
-  "exclude": ["**/node_modules/**", "dist"],
+  "exclude": ["**/node_modules/**", "dist"]
 }

@@ -16,7 +16,7 @@ import { safeParseJSON } from "@refly/ai-workspace-common/utils/parse"
 import { useUserStore } from "@refly/ai-workspace-common/stores/user"
 import { useTranslation } from "react-i18next"
 import { useGetUserSettings } from "@/hooks/use-get-user-settings"
-import { LOCALE } from "@refly/constants"
+import { LOCALE } from "@refly/common-types"
 
 // 样式
 import "aos/dist/aos.css"

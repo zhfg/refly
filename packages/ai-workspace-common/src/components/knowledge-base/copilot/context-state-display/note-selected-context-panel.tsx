@@ -8,8 +8,8 @@ import { IconCloseCircle, IconFontColors, IconMore } from '@arco-design/web-reac
 import { useResizeBox } from '@refly-packages/ai-workspace-common/hooks/use-resize-box';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { useTranslation } from 'react-i18next';
-import { LOCALE } from '@refly/constants';
-import { languageNameToLocale } from '@refly/utils';
+import { LOCALE } from '@refly/common-types';
+import { languageNameToLocale } from '@refly/common-types';
 import { writingSkills } from '@refly/utils/ai-writing';
 
 // resize hook
