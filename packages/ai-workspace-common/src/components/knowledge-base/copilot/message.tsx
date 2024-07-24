@@ -126,7 +126,7 @@ export const AssistantMessage = (props: {
           <div className="message-avatar">
             <Avatar size={32} style={{ backgroundColor: '#00d0b6' }}>
               {/* <img src={profile?.avatar} /> */}
-              {profile?.avatar || '系统提示'}
+              {profile?.avatar || '知识管家'}
             </Avatar>
           </div>
           <div className="message-name-and-content">

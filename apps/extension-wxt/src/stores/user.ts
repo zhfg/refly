@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import type {} from '@redux-devtools/extension';
+
 import { type User, LOCALE } from '@refly/common-types';
 import { type OutputLocale } from '@refly/utils';
 

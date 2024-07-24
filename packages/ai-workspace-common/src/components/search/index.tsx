@@ -20,11 +20,15 @@ import './index.scss';
 import { Modal } from '@arco-design/web-react';
 import { Home } from './home';
 import { DataList } from './data-list';
+import { Skill } from './skill';
 
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { SearchDomain, SearchRequest, SearchResult } from '@refly/openapi-schema';
+import { Resource, SearchDomain, SearchRequest, SearchResult, SkillInstance, SkillMeta } from '@refly/openapi-schema';
 import { useNavigate } from 'react-router-dom';
+import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
+import { RenderItem } from '@refly-packages/ai-workspace-common/components/search/types';
 
 export const Search = () => {
   const ref = React.useRef<HTMLDivElement | null>(null);
@@ -34,6 +38,15 @@ export const Search = () => {
   const [displayMode, setDisplayMode] = useState<'search' | 'list'>('list');
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const listRef = React.useRef(null);
+  const [isComposing, setIsComposing] = useState(false);
+
+  // skill
+  const [selectedSkill, setSelectedSkill] = useState<SkillMeta>();
+  // notes
+  const { handleInitEmptyNote } = useAINote();
+
+  // 整体处理
+  const { jumpToKnowledgeBase, jumpToNote, jumpToReadResource, jumpToConv } = useKnowledgeBaseJumpNewPath();
 
   const pages = searchStore.pages;
   const setPages = searchStore.setPages;
@@ -68,9 +81,9 @@ export const Search = () => {
         if (ref.current) {
           ref.current.style.transform = '';
         }
-      }, 100);
 
-      setSearchValue('');
+        setSearchValue('');
+      }, 100);
     }
   }
 
@@ -93,8 +106,7 @@ export const Search = () => {
     }
   };
 
-  const handleBigSearchValueChange = async (searchVal: string, activePage: string) => {
-    setSearchValue(searchVal);
+  const handleBigSearchValueChange = (searchVal: string, activePage: string) => {
     const domain = getMappedPageToDomain(activePage);
 
     // searchVal 为空的时候获取正常列表的内容
@@ -156,40 +168,109 @@ export const Search = () => {
     handleBigSearchValueChange('', activePage);
   }, [activePage]);
 
-  const renderData = [
+  const renderData: RenderItem[] = [
     {
       domain: 'skill',
       heading: '技能',
+      action: false, // 是否开启 action
       data: searchStore.searchedSkills || [],
       icon: <IconRobot style={{ fontSize: 12 }} />,
+      onItemClick: (item: SearchResult) => {
+        const skill: SkillMeta = {
+          skillDisplayName: item?.title,
+          skillName: item?.title,
+          skillId: item?.id,
+        };
+        setSelectedSkill(skill);
+        setPages([...pages, 'skill-execute']);
+      },
     },
     {
       domain: 'note',
       heading: '笔记',
+      action: true,
+      actionHeading: {
+        create: '创建新笔记',
+      },
       data: searchStore.searchedNotes || [],
       icon: <IconEdit style={{ fontSize: 12 }} />,
+      onItemClick: (item: SearchResult) => {
+        jumpToNote({
+          noteId: item?.id,
+        });
+        searchStore.setIsSearchOpen(false);
+      },
+      onCreateClick: async () => {
+        await handleInitEmptyNote('New note');
+        searchStore.setIsSearchOpen(false);
+      },
     },
     {
       domain: 'readResources',
       heading: '阅读资源',
+      action: true,
+      actionHeading: {
+        create: '添加阅读资源',
+      },
       data: searchStore.searchedReadResources || [],
       icon: <IconBook style={{ fontSize: 12 }} />,
+      onItemClick: (item: SearchResult) => {
+        jumpToReadResource({
+          kbId: item?.metadata?.collectionId,
+          resId: item?.id,
+        });
+        searchStore.setIsSearchOpen(false);
+      },
+      onCreateClick: async () => {},
     },
     {
       domain: 'knowledgeBases',
       heading: '知识库',
+      action: true,
+      actionHeading: {
+        create: '创建新知识库',
+      },
       data: searchStore.searchedKnowledgeBases || [],
       icon: <IconFile style={{ fontSize: 12 }} />,
+      onItemClick: (item: SearchResult) => {
+        jumpToKnowledgeBase({
+          kbId: item?.id,
+        });
+        searchStore.setIsSearchOpen(false);
+      },
+      onCreateClick: async () => {},
     },
     {
       domain: 'convs',
       heading: '会话',
+      action: true,
+      actionHeading: {
+        create: '创建新会话',
+      },
       data: searchStore.searchedConvs || [],
       icon: <IconMessage style={{ fontSize: 12 }} />,
+      onItemClick: (item: SearchResult) => {
+        jumpToConv({
+          convId: item?.id,
+        });
+        searchStore.setIsSearchOpen(false);
+      },
+      onCreateClick: async () => {},
     },
   ];
   const getRenderData = (domain: string) => {
     return renderData?.find((item) => item.domain === domain);
+  };
+
+  const getInputPlaceholder = (domain: string) => {
+    if (domain === 'home') {
+      return `直接提问或搜索技能，笔记，资源，知识库，会话...`;
+    } else if (domain === 'skill-execute') {
+      return `输入你想要提问的问题，并基于此问题执行技能`;
+    } else {
+      const data = getRenderData(domain);
+      return `搜索 ${data?.heading}...`;
+    }
   };
 
   return (
@@ -205,8 +286,12 @@ export const Search = () => {
 
           return defaultFilter(value, search, keywords);
         }}
-        onKeyDown={(e: React.KeyboardEvent) => {
-          if (e.key === 'Enter') {
+        onCompositionStart={(e) => console.log('composition start')}
+        onCompositionUpdate={(e) => console.log('composition update')}
+        onCompositionEnd={(e) => console.log('composition end')}
+        onKeyDownCapture={(e: React.KeyboardEvent) => {
+          if (e.key === 'Enter' && !isComposing) {
+            console.log('keydown', searchValue);
             bounce();
           }
 
@@ -231,23 +316,53 @@ export const Search = () => {
         <Command.Input
           autoFocus
           ref={inputRef}
-          placeholder="Search for skills, notes, resources and more..."
           value={searchValue}
-          onValueChange={(val) => handleBigSearchValueChange(val, activePage)}
+          placeholder={getInputPlaceholder(activePage)}
+          onCompositionStart={(e) => {
+            setIsComposing(true);
+          }}
+          onCompositionUpdate={(e) => console.log('composition update')}
+          onCompositionEnd={(e) => {
+            setIsComposing(false);
+          }}
+          onValueChange={(val) => {
+            console.log('value change', val);
+            setSearchValue(val);
+            handleBigSearchValueChange(val, activePage);
+          }}
         />
         <Command.List>
           <Command.Empty>No results found.</Command.Empty>
           {activePage === 'home' && (
             <Home
+              key={'search'}
               displayMode={displayMode}
               pages={pages}
               setPages={(pages: string[]) => setPages(pages)}
               data={renderData}
               activeValue={value}
+              setValue={setValue}
+              searchValue={searchValue}
             />
           )}
-          {activePage !== 'home' ? (
-            <DataList displayMode={displayMode} {...getRenderData(activePage)} activeValue={value} />
+          {activePage !== 'home' && activePage !== 'skill-execute' ? (
+            <DataList
+              key="data-list"
+              displayMode={displayMode}
+              {...getRenderData(activePage)}
+              activeValue={value}
+              searchValue={searchValue}
+              setValue={setValue}
+            />
+          ) : null}
+          {activePage === 'skill-execute' ? (
+            <Skill
+              key="skill"
+              activeValue={value}
+              searchValue={searchValue}
+              setValue={setValue}
+              selectedSkill={selectedSkill}
+            />
           ) : null}
         </Command.List>
       </Command>

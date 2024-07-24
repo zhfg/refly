@@ -1,59 +1,57 @@
-import { create } from "zustand"
-import { devtools } from "zustand/middleware"
-import type {} from "@redux-devtools/extension"
-import { Conversation, CreateConversationRequest } from "@refly/openapi-schema"
-import { ConversationOperation } from "@refly/common-types"
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import type {} from '@redux-devtools/extension';
+import { Conversation, CreateConversationRequest } from '@refly/openapi-schema';
+import { ConversationOperation } from '@refly/common-types';
 
 interface ConversationState {
   // state
-  currentConversation: Conversation | null
-  conversationList: Conversation[]
+  currentConversation: Conversation | null;
+  conversationList: Conversation[];
+  isNewConversation: boolean;
+  isAskFollowUpNewConversation: boolean;
 
   // method
-  setConversationList: (conversationList: Conversation[]) => void
-  setCurrentConversation: (val: Conversation) => void
-  updateConversation: (
-    operationType: ConversationOperation,
-    payload: Partial<Conversation>,
-  ) => void
-  resetState: () => void
+  setConversationList: (conversationList: Conversation[]) => void;
+  setCurrentConversation: (val: Conversation) => void;
+  updateConversation: (operationType: ConversationOperation, payload: Partial<Conversation>) => void;
+  setIsNewConversation: (val: boolean) => void;
+  setIsAskFollowUpNewConversation: (val: boolean) => void;
+  resetState: () => void;
 }
 
 const defaultState = {
   currentConversation: null,
   conversationList: [],
-}
+  isNewConversation: false, // 标识是否是新创建的会话，还是老会话
+  isAskFollowUpNewConversation: false, // 标识是基于 AIGCContent 创建的新会话
+};
 
 export const useConversationStore = create<ConversationState>()(
-  devtools(set => ({
+  devtools((set) => ({
     ...defaultState,
 
-    setConversationList: (val: Conversation[]) =>
-      set({ conversationList: val }),
-    setCurrentConversation: (val: Conversation) =>
-      set({ currentConversation: val }),
-    updateConversation: (
-      operationType: ConversationOperation,
-      payload: Partial<Conversation>,
-    ) =>
-      set(state => {
-        const conversationList = state.conversationList
-        let newConversationList = conversationList
+    setConversationList: (val: Conversation[]) => set({ conversationList: val }),
+    setCurrentConversation: (val: Conversation) => set({ currentConversation: val }),
+    updateConversation: (operationType: ConversationOperation, payload: Partial<Conversation>) =>
+      set((state) => {
+        const conversationList = state.conversationList;
+        let newConversationList = conversationList;
 
         switch (operationType) {
           case ConversationOperation.CREATE: {
-            const { title = "新会话", origin, originPageTitle } = payload
+            const { title = '新会话', origin, originPageTitle } = payload;
             const newConversation = {
-              title: title ?? "新会话",
+              title: title ?? '新会话',
               origin,
               originPageTitle,
               readEnhanceArticle: null,
               readEnhanceIndexStatus: null,
-            } as CreateConversationRequest
+            } as CreateConversationRequest;
 
-            newConversationList = [newConversation].concat(conversationList)
+            newConversationList = [newConversation].concat(conversationList);
 
-            break
+            break;
           }
 
           case ConversationOperation.DELETE: {
@@ -62,7 +60,7 @@ export const useConversationStore = create<ConversationState>()(
             //   item => item.convId !== convId,
             // )
 
-            break
+            break;
           }
 
           case ConversationOperation.UPDATE: {
@@ -75,15 +73,17 @@ export const useConversationStore = create<ConversationState>()(
             //   return item
             // })
 
-            break
+            break;
           }
         }
 
         return {
           ...state,
           conversationList: newConversationList,
-        }
+        };
       }),
-    resetState: () => set(state => ({ ...state, ...defaultState })),
+    setIsNewConversation: (val: boolean) => set({ isNewConversation: val }),
+    setIsAskFollowUpNewConversation: (val: boolean) => set({ isAskFollowUpNewConversation: val }),
+    resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),
-)
+);

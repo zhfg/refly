@@ -12,6 +12,7 @@ import {
   IconBook,
   IconEdit,
   IconRobot,
+  IconFolderAdd,
 } from '@arco-design/web-react/icon';
 import { useDebouncedCallback } from 'use-debounce';
 import { defaultFilter } from './cmdk/filter';
@@ -26,6 +27,7 @@ import { SearchDomain, SearchRequest, SearchResult } from '@refly/openapi-schema
 import { useNavigate } from 'react-router-dom';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
 export function DataList({
   domain,
@@ -33,23 +35,27 @@ export function DataList({
   icon,
   data,
   activeValue,
+  searchValue,
   displayMode,
+  setValue,
+  onItemClick,
 }: {
   domain: string;
   heading: string;
   data: SearchResult[];
   icon: React.ReactNode;
   activeValue: string;
+  searchValue: string;
   displayMode: 'list' | 'search';
+  setValue: (val: string) => void;
+  onItemClick?: (item: SearchResult) => void;
 }) {
   const [stateDataList, setStateDataList] = useState<SearchResult[]>(data || []);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isRequesting, setIsRequesting] = useState(false);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const knowledgeBaseStore = useKnowledgeBaseStore();
+  const { jumpToKnowledgeBase, jumpToNote, jumpToReadResource, jumpToConv } = useKnowledgeBaseJumpNewPath();
 
-  const navigate = useNavigate();
   const searchStore = useSearchStore();
 
   const fetchNewData = async (queryPayload: any): Promise<{ success: boolean; data?: SearchResult[] }> => {
@@ -183,46 +189,39 @@ export function DataList({
   useEffect(() => {
     setStateDataList(data);
   }, [data]);
+  useEffect(() => {
+    setValue(`create${domain}`);
+  }, [domain]);
 
   return (
     <>
-      {stateDataList?.map((item, index) => (
-        <Item
-          key={index}
-          value={`${domain}-${index}-${item?.title}-${item?.content?.[0] || ''}`}
-          activeValue={activeValue}
-          onSelect={() => {
-            const newSearchParams = new URLSearchParams(searchParams);
-
-            if (domain === 'skill') {
-            } else if (domain === 'note') {
-              newSearchParams.set('noteId', item?.id);
-              knowledgeBaseStore.updateNotePanelVisible(true);
-            } else if (domain === 'readResources') {
-              newSearchParams.set('kbId', item?.metadata?.collectionId);
-              newSearchParams.set('resId', item?.id);
-              knowledgeBaseStore.updateResourcePanelVisible(true);
-            } else if (domain === 'knowledgeBases') {
-              newSearchParams.set('kbId', item?.id);
-              knowledgeBaseStore.updateResourcePanelVisible(true);
-            } else if (domain === 'convs') {
-              newSearchParams.set('convId', item?.id);
-            }
-
-            setSearchParams(newSearchParams);
-            navigate(`/knowledge-base?${newSearchParams.toString()}`);
-            searchStore.setIsSearchOpen(false);
-          }}
-        >
-          {icon}
-          <div className="search-res-container">
-            <p className="search-res-title" dangerouslySetInnerHTML={{ __html: item?.title }}></p>
-            {item?.content?.length > 0 && (
-              <p className="search-res-desc" dangerouslySetInnerHTML={{ __html: item?.content?.[0] || '' }}></p>
-            )}
-          </div>
+      <Command.Group heading="建议">
+        <Item value={`create${domain}`} keywords={[`create${domain}`]} onSelect={() => {}} activeValue={activeValue}>
+          <IconFolderAdd style={{ fontSize: 12 }} />
+          创建新{heading}
         </Item>
-      ))}
+      </Command.Group>
+      <Command.Group heading={heading}>
+        {stateDataList?.map((item, index) => (
+          <Item
+            key={index}
+            value={`${domain}-${index}-${item?.title}-${item?.content?.[0] || ''}`}
+            activeValue={activeValue}
+            onSelect={() => {
+              onItemClick(item);
+              searchStore.setIsSearchOpen(false);
+            }}
+          >
+            {icon}
+            <div className="search-res-container">
+              <p className="search-res-title" dangerouslySetInnerHTML={{ __html: item?.title }}></p>
+              {item?.content?.length > 0 && (
+                <p className="search-res-desc" dangerouslySetInnerHTML={{ __html: item?.content?.[0] || '' }}></p>
+              )}
+            </div>
+          </Item>
+        ))}
+      </Command.Group>
       {hasMore && displayMode === 'list' ? (
         <div className="search-load-more">
           <Button type="text" loading={isRequesting} onClick={() => loadMore(currentPage)}>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Command } from 'cmdk';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 import * as Popover from '@radix-ui/react-popover';
@@ -12,6 +12,7 @@ import {
   IconBook,
   IconEdit,
   IconRobot,
+  IconFolderAdd,
 } from '@arco-design/web-react/icon';
 import { useDebouncedCallback } from 'use-debounce';
 import { defaultFilter } from './cmdk/filter';
@@ -26,6 +27,10 @@ import { SearchDomain, SearchRequest, SearchResult } from '@refly/openapi-schema
 import { useNavigate } from 'react-router-dom';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useBigSearchQuickAction } from '@refly-packages/ai-workspace-common/hooks/use-big-search-quick-action';
+import { RenderItem } from '@refly-packages/ai-workspace-common/components/search/types';
+import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 
 export function Home({
   pages,
@@ -33,19 +38,28 @@ export function Home({
   displayMode,
   data,
   activeValue,
+  searchValue,
+  setValue,
 }: {
-  data: { domain: string; heading: string; data: SearchResult[]; icon: React.ReactNode }[];
+  data: RenderItem[];
   pages: string[];
   setPages: (pages: string[]) => void;
   displayMode: 'list' | 'search';
   activeValue: string;
+  searchValue: string;
+  setValue: (val: string) => void;
 }) {
   const navigate = useNavigate();
   const searchStore = useSearchStore();
   const knowledgeBaseStore = useKnowledgeBaseStore();
+  const { jumpToKnowledgeBase, jumpToNote, jumpToReadResource } = useKnowledgeBaseJumpNewPath();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { triggerSkillQuickAction } = useBigSearchQuickAction();
+  const skillStore = useSkillStore();
 
-  console.log('renderData', data);
+  useEffect(() => {
+    setValue('refly-built-in-ask-ai');
+  }, []);
 
   return (
     <>
@@ -70,7 +84,9 @@ export function Home({
           keywords={['NewConv']}
           activeValue={activeValue}
           onSelect={() => {
-            // searchProjects();
+            triggerSkillQuickAction(searchValue);
+            searchStore.setIsSearchOpen(false);
+            skillStore.setSelectedSkillInstalce(null);
           }}
         >
           <IconMessage style={{ fontSize: 12 }} />
@@ -102,33 +118,14 @@ export function Home({
       {data
         .filter((item) => item?.data?.length > 0)
         .map((renderItem, index) => (
-          <Command.Group heading={renderItem?.heading}>
+          <Command.Group heading={renderItem?.heading} key={index}>
             {renderItem?.data?.slice(0, 5)?.map((item, index) => (
               <Item
                 key={index}
                 value={`${renderItem?.domain}-${index}-${item?.title}-${item?.content?.[0] || ''}`}
                 activeValue={activeValue}
                 onSelect={() => {
-                  const newSearchParams = new URLSearchParams(searchParams);
-
-                  if (renderItem?.domain === 'skill') {
-                  } else if (renderItem?.domain === 'note') {
-                    newSearchParams.set('noteId', item?.id);
-                    knowledgeBaseStore.updateNotePanelVisible(true);
-                  } else if (renderItem?.domain === 'readResources') {
-                    newSearchParams.set('kbId', item?.metadata?.collectionId);
-                    newSearchParams.set('resId', item?.id);
-                    knowledgeBaseStore.updateResourcePanelVisible(true);
-                  } else if (renderItem?.domain === 'knowledgeBases') {
-                    newSearchParams.set('kbId', item?.id);
-                    knowledgeBaseStore.updateResourcePanelVisible(true);
-                  } else if (renderItem?.domain === 'convs') {
-                    newSearchParams.set('convId', item?.id);
-                  }
-
-                  setSearchParams(newSearchParams);
-                  navigate(`/knowledge-base?${newSearchParams.toString()}`);
-                  searchStore.setIsSearchOpen(false);
+                  renderItem?.onItemClick(item);
                 }}
               >
                 {renderItem?.icon}
@@ -151,6 +148,19 @@ export function Home({
               >
                 <IconApps style={{ fontSize: 12 }} />
                 查看所有{renderItem?.heading}
+              </Item>
+            ) : null}
+            {renderItem?.action ? (
+              <Item
+                value={`create ${renderItem?.domain}`}
+                keywords={[`create ${renderItem?.domain}`]}
+                onSelect={() => {
+                  renderItem?.onCreateClick();
+                }}
+                activeValue={activeValue}
+              >
+                <IconFolderAdd style={{ fontSize: 12 }} />
+                {renderItem?.actionHeading?.create}
               </Item>
             ) : null}
           </Command.Group>

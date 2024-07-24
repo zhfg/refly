@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import type {} from '@redux-devtools/extension';
 
 import { Digest } from '@refly/openapi-schema';
 

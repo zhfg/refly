@@ -85,7 +85,7 @@ export const AICopilot = (props: AICopilotProps) => {
   console.log('uiLocale', uiLocale);
 
   // ai-note handler
-  useAINote();
+  useAINote(true);
   useSkillManagement({ shouldInit: true });
 
   const handleSwitchSearchTarget = () => {
@@ -132,7 +132,8 @@ export const AICopilot = (props: AICopilotProps) => {
   const handleConvTask = async (convId: string) => {
     try {
       setIsFetching(true);
-      const { isNewConversation, newQAText } = useChatStore.getState();
+      const { newQAText } = useChatStore.getState();
+      const { isNewConversation } = useConversationStore.getState();
 
       // 新会话，需要手动构建第一条消息
       if (isNewConversation && convId && newQAText) {
@@ -149,7 +150,7 @@ export const AICopilot = (props: AICopilotProps) => {
     setIsFetching(false);
 
     // reset state
-    chatStore.setIsNewConversation(false);
+    conversationStore.setIsNewConversation(false);
   };
 
   useEffect(() => {

@@ -3,9 +3,11 @@ import { Message as message } from '@arco-design/web-react';
 import { KnowledgeBaseTab, useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { Resource } from '@refly/openapi-schema';
 import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
+import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
 export const useKnowledgeBaseTabs = () => {
   const knowledgeBaseStore = useKnowledgeBaseStore();
+  const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
   const navigate = useNavigate();
 
   const tabs = knowledgeBaseStore.tabs;
@@ -57,8 +59,10 @@ export const useKnowledgeBaseTabs = () => {
     knowledgeBaseStore.updateActiveTab(key);
     const tab = tabs?.find((tab) => tab?.key === key);
 
-    // TODO: 这里抽出 hooks 做通用的处理
-    navigate(`/knowledge-base?kbId=${tab?.collectionId}&resId=${tab?.resourceId}`);
+    jumpToReadResource({
+      kbId: tab?.collectionId || '',
+      resId: tab?.resourceId || '',
+    });
   };
 
   return {

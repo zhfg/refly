@@ -22,7 +22,6 @@ interface SourceListModalProps {
 export const SourceListModal = (props: SourceListModalProps) => {
   const { t } = useTranslation();
   const knowledgeBaseStore = useKnowledgeBaseStore();
-  const { jumpNewKnowledgeBase } = useBuildThreadAndRun();
 
   return (
     <Drawer

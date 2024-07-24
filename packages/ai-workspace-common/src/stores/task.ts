@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import type {} from '@redux-devtools/extension';
 import { Conversation, InvokeSkillRequest, ChatTask as Task } from '@refly/openapi-schema';
 import { ConversationOperation } from '@refly/common-types';
 

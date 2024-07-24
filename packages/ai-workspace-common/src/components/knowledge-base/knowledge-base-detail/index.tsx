@@ -96,12 +96,12 @@ export const KnowledgeBaseDetail = (props: KnowledgeBaseDetailProps) => {
               <div className="knowledge-base-detail-nav-switcher">
                 <DefaultTabHeader {...props} />
               </div>
-              <div className="">
+              <div className="knowledge-base-detail-navigation-bar">
                 <Button
                   icon={<IconSearch />}
                   type="text"
                   shape="circle"
-                  className="nav-btn"
+                  className="assist-action-item"
                   onClick={() => {
                     searchStore.setPages(searchStore.pages.concat('readResources'));
                     searchStore.setIsSearchOpen(true);

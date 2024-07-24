@@ -32,7 +32,7 @@ export const SearchBox = () => {
   const quickSearchStateStore = useQuickSearchStateStore();
   const searchTargetStore = useSearchStateStore();
   const userStore = useUserStore();
-  const { emptyConvRunTask } = useBuildThreadAndRun();
+  const { emptyConvRunSkill } = useBuildThreadAndRun();
   // hooks
   const [isFocused, setIsFocused] = useState(false);
 
@@ -43,7 +43,7 @@ export const SearchBox = () => {
   const handleSendMessage = () => {
     const question = chatStore?.newQAText || '';
     quickSearchStateStore.setVisible(false);
-    emptyConvRunTask(question, true);
+    emptyConvRunSkill(question, true);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

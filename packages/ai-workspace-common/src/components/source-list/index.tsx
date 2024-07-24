@@ -15,6 +15,7 @@ import { SourceListModal } from './source-list-modal';
 import { mapSourceToResource } from '@refly-packages/ai-workspace-common/utils/resource';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
+import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
 interface SourceListProps {
   sources: Source[];
@@ -102,6 +103,7 @@ export const ResourceItem = (props: {
 }) => {
   const { item, index, showDesc = false } = props;
   const { handleAddTabWithResource } = useKnowledgeBaseTabs();
+  const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
   const navigate = useNavigate();
 
   return (
@@ -125,7 +127,10 @@ export const ResourceItem = (props: {
         <div className="action-markdown-content knowledge-base-directory-action-item">
           <IconBook
             onClick={() => {
-              navigate(`/knowledge-base?kbId=${item?.collectionId}&resId=${item?.resourceId}`);
+              jumpToReadResource({
+                kbId: item?.collectionId,
+                resId: item?.resourceId,
+              });
             }}
           />
         </div>

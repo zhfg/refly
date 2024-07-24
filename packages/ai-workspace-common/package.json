@@ -96,7 +96,8 @@
     "cmdk": "~1.0.0",
     "prism-react-renderer": "~2.3.1",
     "@radix-ui/react-dialog": "~1.1.1",
-    "@radix-ui/react-primitive": "~2.0.0"
+    "@radix-ui/react-primitive": "~2.0.0",
+    "qs": "~6.12.3"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",

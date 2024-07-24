@@ -33,6 +33,11 @@ export const ResourceDetailSelectedContextPanel = () => {
           <IconFontColors />
           <span className="context-state-card-header-title">指定内容问答</span>
         </div>
+        <div className="context-state-resource-item">
+          <Tag icon={<IconFontColors />} bordered className="context-state-resource-item-tag">
+            {currentSelectedText}
+          </Tag>
+        </div>
         <div className="context-state-card-header-right">
           <IconCloseCircle
             onClick={() => {
@@ -43,11 +48,6 @@ export const ResourceDetailSelectedContextPanel = () => {
         </div>
       </div>
       <div className="context-state-card-body">
-        <div className="context-state-resource-item">
-          <Tag icon={<IconFontColors />} bordered className="context-state-resource-item-tag">
-            {currentSelectedText}
-          </Tag>
-        </div>
         <div className="context-state-action-list">
           <div className="context-state-action-item">
             <Button

@@ -13,7 +13,11 @@ import { EmptyDigestStatus } from '@refly-packages/ai-workspace-common/component
 import { LOCALE } from '@refly/common-types';
 import './index.scss';
 
-export const ResourceBase = () => {
+interface ResourceBaseProps {
+  handleItemClick: (kbId: string, resId: string) => void;
+}
+
+export const ResourceBase = (props: ResourceBaseProps) => {
   const navigate = useNavigate();
   const { i18n } = useTranslation();
   const language = i18n.languages?.[0];
@@ -41,31 +45,31 @@ export const ResourceBase = () => {
   }, []);
 
   return (
-    <div className="resource-base flex flex-wrap">
+    <div className="flex flex-wrap resource-base">
       {resourceList.length === 0 ? (
         <EmptyDigestStatus />
       ) : (
         resourceList.map((item: Resource) => {
           return (
             <div
-              className="resource-item w-72 p-4 m-3 rounded-lg border border-black/8 hover:bg-gray-500/10"
+              className="p-4 m-3 border rounded-lg resource-item w-72 border-black/8 hover:bg-gray-500/10"
               key={item.resourceId}
               onClick={() => {
-                navigate(`/knowledge-base?kbId=${item.collectionId}&resId=${item.resourceId}`);
+                props.handleItemClick(item?.collectionId, item?.resourceId);
               }}
             >
-              <div className="resource-img bg-emerald-200 rounded-lg"></div>
+              <div className="rounded-lg resource-img bg-emerald-200"></div>
 
               <div className="h-40 overflow-hidden">
-                <div className="resource-url flex mt-3 mb-1">
-                  <div className="resource-icon flex items-center justify-center shrink-0 rounded-lg border border-black/8">
+                <div className="flex mt-3 mb-1 resource-url">
+                  <div className="flex items-center justify-center border rounded-lg resource-icon shrink-0 border-black/8">
                     <img
                       src={`https://www.google.com/s2/favicons?domain=${item?.data?.url}&sz=${32}`}
                       alt={item?.data?.title}
                     />
                   </div>
                   <a
-                    className="resource-url-text ml-2 hover:text-blue-600"
+                    className="ml-2 resource-url-text hover:text-blue-600"
                     href="#"
                     onClick={(e) => {
                       e.stopPropagation();

@@ -2,6 +2,7 @@ import { useMatch, useNavigate, useSearchParams } from '@refly/ai-workspace-comm
 import { useKnowledgeBaseStore } from '@refly/ai-workspace-common/stores/knowledge-base';
 import { useEffect } from 'react';
 import { sendToBackground } from '@refly/ai-workspace-common/utils/extension/messaging';
+import { useKnowledgeBaseJumpNewPath } from '@refly/ai-workspace-common/hooks/use-jump-new-path';
 import { getRuntime } from '@refly/ai-workspace-common/utils/env';
 import { handleGetAndWatchValue, useStorage } from '@/hooks/use-storage';
 import { Resource } from '@refly/openapi-schema';
@@ -11,6 +12,8 @@ export const useMockInAppResource = () => {
   const navigate = useNavigate();
   const knowledgeBaseStore = useKnowledgeBaseStore();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
+
   const [pageOnActivated] = useExtensionMessage<{ name: string }>('refly-status-check', (_, { send }) => {
     // send({ name: 'refly-status-check' });
     console.log('pageOnActivated', { name: 'refly-status-check' });
@@ -27,11 +30,10 @@ export const useMockInAppResource = () => {
    * 在这之前，已经在初始
    */
   const handleFakeKBRouteJump = () => {
-    const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.set('kbId', 'tempKbId');
-    newSearchParams.set('resId', 'tempResId');
-    setSearchParams(newSearchParams);
-    navigate(`/knowledge-base?${newSearchParams.toString()}`);
+    jumpToReadResource({
+      kbId: 'tempKbId',
+      resId: 'tempResId',
+    });
   };
 
   // 获取 resources
