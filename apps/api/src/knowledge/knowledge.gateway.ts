@@ -62,7 +62,7 @@ export class NoteWsGateway implements OnGatewayConnection {
               this.rag.saveDataForUser(user, {
                 chunks: await this.rag.indexContent({
                   pageContent: content,
-                  metadata: { noteId: note.noteId },
+                  metadata: { nodeType: 'note', title: note.title, noteId: note.noteId },
                 }),
               }),
             ]);

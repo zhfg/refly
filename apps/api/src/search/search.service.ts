@@ -126,6 +126,7 @@ export class SearchService {
     const nodes = await this.rag.retrieve(user, {
       query: req.query,
       limit: req.limit,
+      filter: { nodeTypes: ['resource'] },
     });
     if (nodes.length === 0) {
       return [];
@@ -243,6 +244,7 @@ export class SearchService {
     const nodes = await this.rag.retrieve(user, {
       query: req.query,
       limit: req.limit,
+      filter: { nodeTypes: ['note'] },
     });
     if (nodes.length === 0) {
       return [];

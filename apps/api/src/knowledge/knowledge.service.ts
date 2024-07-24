@@ -217,7 +217,7 @@ export class KnowledgeService {
   }
 
   async indexResource(user: User, param: UpsertResourceRequest) {
-    const { resourceId, collectionId } = param;
+    const { resourceType, resourceId, collectionId } = param;
     const { url, storageKey, title } = param.data;
     param.storageKey ||= storageKey;
     param.content ||= '';
@@ -242,7 +242,7 @@ export class KnowledgeService {
     if (param.content) {
       const chunks = await this.ragService.indexContent({
         pageContent: cleanMarkdownForIngest(param.content),
-        metadata: { url, title, collectionId, resourceId },
+        metadata: { nodeType: 'resource', url, title, collectionId, resourceType, resourceId },
       });
       await this.ragService.saveDataForUser(user, { chunks });
     }
@@ -316,7 +316,7 @@ export class KnowledgeService {
     }
 
     return Promise.all([
-      this.ragService.deleteResourceData(user, resourceId),
+      this.ragService.deleteResourceNodes(user, resourceId),
       this.prisma.resource.update({
         where: { resourceId },
         data: { deletedAt: new Date() },
@@ -375,7 +375,8 @@ export class KnowledgeService {
     }
 
     return Promise.all([
-      this.ragService.deleteResourceData(user, noteId), // TODO
+      this.ragService.deleteNoteNodes(user, noteId),
+      this.minio.removeObject(note.stateStorageKey),
       this.prisma.note.update({
         where: { noteId },
         data: { deletedAt: new Date() },

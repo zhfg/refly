@@ -42,4 +42,8 @@ export class MinioService implements OnModuleInit {
   async uploadData(key: string, data: string | Buffer) {
     return this.client.putObject(this.bucketName, key, data);
   }
+
+  async removeObject(key: string) {
+    return this.client.removeObject(this.bucketName, key);
+  }
 }
