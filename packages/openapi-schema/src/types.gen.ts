@@ -82,7 +82,11 @@ export type Note = {
    */
   title: string;
   /**
-   * Note content (only returned in detail api)
+   * Note content preview
+   */
+  contentPreview?: string;
+  /**
+   * Full note content (only returned in detail api)
    */
   content?: string;
   /**

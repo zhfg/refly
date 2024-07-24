@@ -22,7 +22,7 @@ export class SearchService {
       req.limit = 10;
     }
     req.mode ??= 'keyword';
-    req.domains ??= ['resource', 'collection', 'conversation', 'skill'];
+    req.domains ??= ['resource', 'note', 'collection', 'conversation', 'skill'];
 
     let tokens = cut(req.query);
     if (tokens.length > 5) {

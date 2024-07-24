@@ -18,23 +18,21 @@ interface ResourceBaseProps {
 }
 
 export const ResourceBase = (props: ResourceBaseProps) => {
-  const navigate = useNavigate();
   const { i18n } = useTranslation();
   const language = i18n.languages?.[0];
 
-  const [resourceList, setResourceList] = useState([]);
+  const [resourceList, setResourceList] = useState<Resource[]>([]);
   const getResourceList = async () => {
-    const res: any =
-      (await getClient().listResources({
-        query: {
-          resourceType: 'weblink',
-        },
-      })) || {};
+    const res = await getClient().listResources({
+      query: {
+        resourceType: 'weblink',
+      },
+    });
     const listData: Resource[] = res?.data?.data || [];
     setResourceList(listData);
   };
 
-  const handleClickLink = (url) => {
+  const handleClickLink = (url: string) => {
     if (url) {
       window.open(url, '_blank');
     }
@@ -49,7 +47,7 @@ export const ResourceBase = (props: ResourceBaseProps) => {
       {resourceList.length === 0 ? (
         <EmptyDigestStatus />
       ) : (
-        resourceList.map((item: Resource) => {
+        resourceList.map((item) => {
           return (
             <div
               className="p-4 m-3 border rounded-lg resource-item w-72 border-black/8 hover:bg-gray-500/10"

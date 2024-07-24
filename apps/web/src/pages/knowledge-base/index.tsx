@@ -66,8 +66,6 @@ const KnowledgeLibraryLayout = () => {
     console.log("dashboard close")
   }
 
-  // TODO: 临时关闭，用于开发调试
-  console.log("token", token)
   useEffect(() => {
     if (!(token || userStore?.userProfile?.uid)) return
 
@@ -88,7 +86,8 @@ const KnowledgeLibraryLayout = () => {
   }, [token, userStore?.userProfile?.uid])
 
   const copilotStyle =
-    kbId && knowledgeBaseStore.resourcePanelVisible
+    (kbId && knowledgeBaseStore.resourcePanelVisible) ||
+    (noteId && knowledgeBaseStore.notePanelVisible)
       ? {
           defaultSize: 20,
           minSize: 20,

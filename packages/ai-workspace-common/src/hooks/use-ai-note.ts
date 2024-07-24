@@ -13,19 +13,16 @@ export const useAINote = (shouldInitListener = false) => {
   const { jumpToNote } = useKnowledgeBaseJumpNewPath();
 
   const handleInitEmptyNote = async (content: string) => {
-    const res = await getClient().createResource({
+    const res = await getClient().createNote({
       body: {
-        resourceType: 'note',
         title: 'New Article',
-        data: {},
-        content,
       },
     });
 
     if (!res?.data?.success) {
       Message.error(`创建笔记失败，请重试！`);
     }
-    const noteId = res?.data?.data?.resourceId;
+    const noteId = res?.data?.data?.noteId;
     jumpToNote({
       noteId,
     });

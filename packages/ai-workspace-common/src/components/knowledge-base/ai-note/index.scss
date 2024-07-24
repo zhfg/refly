@@ -44,6 +44,7 @@
   h4,
   h5,
   h6 {
+    color: #0d0d0d;
     line-height: 1.1;
   }
 
@@ -81,6 +82,7 @@
   }
 
   blockquote {
+    color: #707070;
     border-left: 2px solid rgba(#0d0d0d, 0.1);
     padding-left: 1rem;
   }
@@ -117,6 +119,8 @@
   border-radius: 0.75rem;
   color: #0d0d0d;
   display: flex;
+  justify-content: center;
+  align-items: center;
   flex-direction: column;
 
   .tiptap {

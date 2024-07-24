@@ -87,8 +87,6 @@ const Home = () => {
     });
   };
 
-  // TODO: 临时关闭，用于开发调试
-  console.log('token', token);
   useEffect(() => {
     if (!(token || userStore?.userProfile?.uid)) return;
 

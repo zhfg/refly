@@ -1,9 +1,6 @@
-import StarterKit from '@tiptap/starter-kit';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Markdown } from 'tiptap-markdown';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { Resource } from '@refly/openapi-schema';
-import { useLocation, useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
+import { Note, Resource } from '@refly/openapi-schema';
 
 import './index.scss';
 import { useCookie } from 'react-use';
@@ -37,12 +34,11 @@ import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import { AiOutlineWarning, AiOutlineFileWord } from 'react-icons/ai';
 import hljs from 'highlight.js';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
+import { getWsServerOrigin } from '@refly-packages/utils/url';
 
-const wsUrl = 'ws://localhost:1234';
-
-const CollaborativeEditor = ({ resourceDetail, readOnly }: { resourceDetail: Resource; readOnly: boolean }) => {
-  const { resourceId, content } = resourceDetail;
-  const [collabEnabled, setCollabEnabled] = useState(resourceDetail.collabEnabled);
+const CollaborativeEditor = ({ note, readOnly }: { note: Note; readOnly: boolean }) => {
+  const { noteId, content } = note;
+  const [collabEnabled, setCollabEnabled] = useState(true);
   const lastCursorPosRef = useRef<number>();
   const [token] = useCookie('_refly_ai_sid');
   const knowledgeBaseStore = useKnowledgeBaseStore();
@@ -52,11 +48,11 @@ const CollaborativeEditor = ({ resourceDetail, readOnly }: { resourceDetail: Res
   // 准备 extensions
   const websocketProvider = useMemo(() => {
     return new HocuspocusProvider({
-      url: wsUrl,
-      name: resourceId,
+      url: getWsServerOrigin(),
+      name: noteId,
       token,
     });
-  }, [resourceId]);
+  }, [noteId]);
   const extensions = [
     ...defaultExtensions,
     slashCommand,
@@ -88,12 +84,6 @@ const CollaborativeEditor = ({ resourceDetail, readOnly }: { resourceDetail: Res
     knowledgeBaseStore.updateNoteSaveStatus('Saved');
   }, 500);
 
-  // useEffect(() => {
-  //   const content = window.localStorage.getItem('novel-content');
-  //   if (content) setInitialContent(JSON.parse(content));
-  //   else setInitialContent(defaultEditorContent);
-  // }, []);
-
   useEffect(() => {
     // Update status changes
     websocketProvider.on('status', (event) => {
@@ -117,6 +107,7 @@ const CollaborativeEditor = ({ resourceDetail, readOnly }: { resourceDetail: Res
       });
     }
   }, [editorRef.current, collabEnabled, content]);
+
   useEffect(() => {
     editorEmitter.on('insertBlow', (content) => {
       const isFocused = editorRef.current?.isFocused;
@@ -148,7 +139,7 @@ const CollaborativeEditor = ({ resourceDetail, readOnly }: { resourceDetail: Res
 
   return (
     <div className="editor ai-note-editor">
-      <div className="relative w-full h-full max-w-screen-lg">
+      <div className="w-full h-full max-w-screen-lg">
         <EditorRoot>
           <EditorContent
             initialContent={initialContent}
@@ -158,7 +149,7 @@ const CollaborativeEditor = ({ resourceDetail, readOnly }: { resourceDetail: Res
               knowledgeBaseStore.updateEditor(editor);
             }}
             editable={!readOnly}
-            className="relative w-full h-full max-w-screen-lg border-muted sm:rounded-lg"
+            className="w-full h-full max-w-screen-lg border-muted sm:rounded-lg"
             editorProps={{
               handleDOMEvents: {
                 keydown: (_view, event) => handleCommandNavigation(event),
@@ -190,24 +181,23 @@ const CollaborativeEditor = ({ resourceDetail, readOnly }: { resourceDetail: Res
 export const AINote = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const noteId = searchParams.get('noteId');
-  const resourceId = noteId;
-  const [resourceDetail, setResourceDetail] = useState<Resource | null>(null);
+  const [note, setNote] = useState<Note | null>(null);
   const knowledgeBaseStore = useKnowledgeBaseStore();
   const searchStore = useSearchStore();
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data } = await getClient().getResourceDetail({
-        query: { resourceId },
+      const { data } = await getClient().getNoteDetail({
+        query: { noteId },
       });
       if (data?.data) {
-        setResourceDetail(data?.data);
+        setNote(data?.data);
       }
     };
     fetchData();
-  }, [resourceId]);
+  }, [noteId]);
 
-  if (!resourceDetail) {
+  if (!note) {
     return <p>Loading...</p>;
   }
 
@@ -217,11 +207,11 @@ export const AINote = () => {
         <div className="knowledge-base-detail-navigation-bar">
           <div className="conv-meta">
             <IconEdit style={{ color: 'rgba(0, 0, 0, .6)' }} />
-            <p className="conv-title">{resourceDetail?.title || '新笔记'}</p>
+            <p className="conv-title">{note?.title || '新笔记'}</p>
           </div>
         </div>
         <div className="knowledge-base-detail-menu knowledge-base-detail-navigation-bar">
-          {resourceId && knowledgeBaseStore.noteServerStatus === 'connected' ? (
+          {noteId && knowledgeBaseStore.noteServerStatus === 'connected' ? (
             <div className="conv-meta" style={{ marginRight: 8 }}>
               <AiOutlineFileWord style={{ color: 'rgba(0, 0, 0, .4)' }} />
               <p className="conv-title" style={{ color: 'rgba(0, 0, 0, .4)' }}>
@@ -229,7 +219,7 @@ export const AINote = () => {
               </p>
             </div>
           ) : null}
-          {resourceId && knowledgeBaseStore.noteServerStatus === 'disconnected' ? (
+          {noteId && knowledgeBaseStore.noteServerStatus === 'disconnected' ? (
             <div className="conv-meta" style={{ marginRight: 8 }}>
               <AiOutlineWarning style={{ color: 'rgba(0, 0, 0, .4)' }} />
               <p className="conv-title" style={{ color: 'rgba(0, 0, 0, .4)' }}>
@@ -237,7 +227,7 @@ export const AINote = () => {
               </p>
             </div>
           ) : null}
-          {resourceId && knowledgeBaseStore.noteServerStatus === 'connected' ? (
+          {noteId && knowledgeBaseStore.noteServerStatus === 'connected' ? (
             <div className="conv-meta" style={{ marginRight: 8 }}>
               <IconClockCircle style={{ color: 'rgba(0, 0, 0, .4)' }} />
               <p className="conv-title" style={{ color: 'rgba(0, 0, 0, .4)' }}>
@@ -267,7 +257,7 @@ export const AINote = () => {
         </div>
       </div>
       {/* <Button onClick={() => handleInitEmptyNote()}>添加笔记</Button> */}
-      {resourceId ? <CollaborativeEditor resourceDetail={resourceDetail} readOnly={resourceDetail?.readOnly} /> : null}
+      {noteId ? <CollaborativeEditor note={note} readOnly={note?.readOnly} /> : null}
     </div>
   );
 };

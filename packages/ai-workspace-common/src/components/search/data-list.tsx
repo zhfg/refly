@@ -76,7 +76,7 @@ export function DataList({
 
       return { success: true, data };
     } else if (domain === 'note') {
-      const res = await getClient().listResources({
+      const res = await getClient().listNotes({
         query: {
           ...queryPayload,
         },
@@ -85,13 +85,10 @@ export function DataList({
       if (!res?.data?.success) return { success: false };
       const data = res?.data?.data?.map((item) => {
         return {
-          id: item?.resourceId,
+          id: item?.noteId,
           title: item?.title,
           content: [item?.content?.slice(0, 30) + '...'],
-          metadata: {
-            collectionId: item?.collectionId,
-            resourceType: 'note',
-          },
+          metadata: {},
         } as SearchResult;
       });
 

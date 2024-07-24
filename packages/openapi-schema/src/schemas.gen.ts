@@ -99,9 +99,13 @@ export const $Note = {
       description: 'Note title',
       example: 'My note',
     },
+    contentPreview: {
+      type: 'string',
+      description: 'Note content preview',
+    },
     content: {
       type: 'string',
-      description: 'Note content (only returned in detail api)',
+      description: 'Full note content (only returned in detail api)',
     },
     readOnly: {
       type: 'boolean',

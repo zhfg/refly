@@ -91,8 +91,8 @@ export const Search = () => {
     switch (activePage) {
       case 'home':
         return '';
-      case 'notes':
-        return 'resource';
+      case 'note':
+        return 'note';
       case 'readSesources':
         return 'resource';
       case 'knowledgeBases':
@@ -108,6 +108,7 @@ export const Search = () => {
 
   const handleBigSearchValueChange = (searchVal: string, activePage: string) => {
     const domain = getMappedPageToDomain(activePage);
+    console.log('activePage:', activePage, domain);
 
     // searchVal 为空的时候获取正常列表的内容
     if (!searchVal) {
@@ -140,10 +141,8 @@ export const Search = () => {
         const resData = res?.data?.data || [];
 
         // notes
-        const notes =
-          resData.filter((item) => item?.metadata?.resourceType === 'note' && item?.domain === 'resource') || [];
-        const readResources =
-          resData.filter((item) => item?.metadata?.resourceType !== 'note' && item?.domain === 'resource') || [];
+        const notes = resData.filter((item) => item?.domain === 'note') || [];
+        const readResources = resData.filter((item) => item?.domain === 'resource') || [];
         const knowledgeBases = resData.filter((item) => item?.domain === 'collection') || [];
         const convs = resData.filter((item) => item?.domain === 'conversation') || [];
         const skills = resData.filter((item) => item?.domain === 'skill') || [];

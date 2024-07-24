@@ -719,8 +719,8 @@ importers:
         specifier: ^3.0.7
         version: 3.0.7
       '@types/chrome':
-        specifier: 0.0.227
-        version: 0.0.227
+        specifier: ~0.0.269
+        version: 0.0.269
       '@types/node':
         specifier: 18.15.11
         version: 18.15.11
@@ -9420,6 +9420,13 @@ packages:
 
   /@types/chrome@0.0.227:
     resolution: {integrity: sha512-l1sVnf/1wZ/oNPw5X7OJMZjQlqVf3tPO50aE/aETHQRbrYhlHZkwv7lcuOWCimRSkFdHvAW4M+RIBAZACblXng==}
+    dependencies:
+      '@types/filesystem': 0.0.36
+      '@types/har-format': 1.2.15
+    dev: true
+
+  /@types/chrome@0.0.269:
+    resolution: {integrity: sha512-vF7x8YywnhXX2F06njQ/OE7a3Qeful43C5GUOsUksXWk89WoSFUU3iLeZW8lDpVO9atm8iZIEiLQTRC3H7NOXQ==}
     dependencies:
       '@types/filesystem': 0.0.36
       '@types/har-format': 1.2.15
@@ -23042,6 +23049,7 @@ time:
   /@tiptap/suggestion@2.1.7: '2023-08-23T16:45:32.004Z'
   /@types/aos@3.0.7: '2023-11-06T23:14:52.940Z'
   /@types/chrome@0.0.227: '2023-03-29T16:33:09.277Z'
+  /@types/chrome@0.0.269: '2024-07-23T23:09:04.109Z'
   /@types/cookie-parser@1.4.3: '2022-04-27T10:31:41.045Z'
   /@types/express@4.17.13: '2021-07-06T20:49:45.161Z'
   /@types/fs-extra@11.0.4: '2023-11-07T20:15:59.748Z'
