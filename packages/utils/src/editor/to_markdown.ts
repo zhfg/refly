@@ -152,13 +152,13 @@ export const defaultMarkdownSerializer = new MarkdownSerializer(
     },
   },
   {
-    em: {
+    italic: {
       open: '*',
       close: '*',
       mixable: true,
       expelEnclosingWhitespace: true,
     },
-    strong: {
+    bold: {
       open: '**',
       close: '**',
       mixable: true,

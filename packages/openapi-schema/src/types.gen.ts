@@ -744,7 +744,7 @@ export type UpsertNoteRequest = {
   /**
    * Note title
    */
-  title: string;
+  title?: string;
   /**
    * Note ID (only used for update)
    */

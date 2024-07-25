@@ -3,6 +3,8 @@ import { devtools } from 'zustand/middleware';
 
 import { Collection, Conversation, Resource, SearchResult, SkillMeta } from '@refly/openapi-schema';
 
+type SearchPage = 'notes' | 'readResources' | 'knowledgeBases' | 'convs' | 'skills';
+
 export interface SearchState {
   // state
   isSearchOpen: boolean;
@@ -82,7 +84,7 @@ export const useSearchStore = create<SearchState>()(
         searchedKnowledgeBases: data?.knowledgeBases,
         searchedSkills: data?.skills,
       })),
-    setPages: (pages: string[]) => set((state) => ({ ...state, pages })),
+    setPages: (pages: SearchPage[]) => set((state) => ({ ...state, pages })),
     resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),
 );

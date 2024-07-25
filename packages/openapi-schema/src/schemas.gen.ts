@@ -974,7 +974,6 @@ export const $GetNoteDetailResponse = {
 
 export const $UpsertNoteRequest = {
   type: 'object',
-  required: ['title'],
   properties: {
     title: {
       type: 'string',

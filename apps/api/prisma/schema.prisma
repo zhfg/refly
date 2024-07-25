@@ -162,7 +162,7 @@ model Note {
   /// UID
   uid             String    @default("") @map("uid")
   /// Note title
-  title           String    @map("title")
+  title           String    @default("Untitled") @map("title")
   /// Word count
   wordCount       Int       @default(0) @map("word_count")
   /// Content of resource

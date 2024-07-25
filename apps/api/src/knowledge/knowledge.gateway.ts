@@ -59,12 +59,12 @@ export class NoteWsGateway implements OnGatewayConnection {
               this.minio.uploadData(stateStorageKey, state),
 
               // TODO: put this in delayed queue
-              this.rag.saveDataForUser(user, {
-                chunks: await this.rag.indexContent({
-                  pageContent: content,
-                  metadata: { nodeType: 'note', title: note.title, noteId: note.noteId },
-                }),
-              }),
+              // this.rag.saveDataForUser(user, {
+              //   chunks: await this.rag.indexContent({
+              //     pageContent: content,
+              //     metadata: { nodeType: 'note', title: note.title, noteId: note.noteId },
+              //   }),
+              // }),
             ]);
           },
         }),

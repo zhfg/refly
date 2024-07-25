@@ -1566,8 +1566,6 @@ components:
               $ref: '#/components/schemas/Note'
     UpsertNoteRequest:
       type: object
-      required:
-        - title
       properties:
         title:
           type: string
