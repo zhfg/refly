@@ -39,6 +39,7 @@ export function DataList({
   displayMode,
   setValue,
   onItemClick,
+  onCreateClick,
 }: {
   domain: string;
   heading: string;
@@ -49,6 +50,7 @@ export function DataList({
   displayMode: 'list' | 'search';
   setValue: (val: string) => void;
   onItemClick?: (item: SearchResult) => void;
+  onCreateClick?: () => void;
 }) {
   const [stateDataList, setStateDataList] = useState<SearchResult[]>(data || []);
   const [currentPage, setCurrentPage] = useState(1);
@@ -193,7 +195,12 @@ export function DataList({
   return (
     <>
       <Command.Group heading="建议">
-        <Item value={`create${domain}`} keywords={[`create${domain}`]} onSelect={() => {}} activeValue={activeValue}>
+        <Item
+          value={`create${domain}`}
+          keywords={[`create${domain}`]}
+          onSelect={() => onCreateClick()}
+          activeValue={activeValue}
+        >
           <IconFolderAdd style={{ fontSize: 12 }} />
           创建新{heading}
         </Item>

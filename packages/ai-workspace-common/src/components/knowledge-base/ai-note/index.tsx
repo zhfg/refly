@@ -19,6 +19,7 @@ import {
 } from '@refly-packages/editor-component/advanced-editor';
 import { EditorRoot } from '@refly-packages/editor-core/components';
 import { EditorContent, type JSONContent, EditorInstance } from '@refly-packages/editor-core/components';
+import { NoteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/note-dropdown-menu';
 import { ImageResizer, handleCommandNavigation } from '@refly-packages/editor-core/extensions';
 import { defaultExtensions } from '@refly-packages/editor-component/extensions';
 import { uploadFn } from '@refly-packages/editor-component/image-upload';
@@ -228,6 +229,7 @@ export const AINote = () => {
       const { data } = await getClient().getNoteDetail({
         query: { noteId },
       });
+      console.log('setNote', data?.data);
       if (data?.data) {
         setNote(data?.data);
       }
@@ -311,12 +313,7 @@ export const AINote = () => {
             ></Button>
           </div>
           <div className="conv-meta">
-            <Button
-              icon={<IconMore style={{ fontSize: 16 }} />}
-              type="text"
-              onClick={() => {}}
-              className={'assist-action-item'}
-            ></Button>
+            <NoteDropdownMenu note={note} />
           </div>
         </div>
       </div>

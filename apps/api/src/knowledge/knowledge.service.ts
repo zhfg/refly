@@ -374,13 +374,18 @@ export class KnowledgeService {
       throw new UnauthorizedException();
     }
 
-    return Promise.all([
+    const cleanups: Promise<any>[] = [
       this.ragService.deleteNoteNodes(user, noteId),
-      this.minio.removeObject(note.stateStorageKey),
       this.prisma.note.update({
         where: { noteId },
         data: { deletedAt: new Date() },
       }),
-    ]);
+    ];
+
+    if (note.stateStorageKey) {
+      cleanups.push(this.minio.removeObject(note.stateStorageKey));
+    }
+
+    await Promise.all(cleanups);
   }
 }
