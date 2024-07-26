@@ -8,11 +8,13 @@ import { useUserStore } from "@refly/ai-workspace-common/stores/user"
 import { LoginModal } from "@refly/ai-workspace-common/components/login-modal/index"
 import { QuickSearchModal } from "@refly/ai-workspace-common/components/quick-search-modal"
 import { BigSearchModal } from "@refly/ai-workspace-common/components/search/modal"
+import { ImportResourceModal } from "@refly/ai-workspace-common/components/import-resource"
 
 // stores
 import { useQuickSearchStateStore } from "@refly/ai-workspace-common/stores/quick-search-state"
 import { useBindCommands } from "@refly/ai-workspace-common/hooks/use-bind-commands"
 import { useSearchStore } from "@refly/ai-workspace-common/stores/search"
+import { useImportResourceStore } from "@refly/ai-workspace-common/stores/import-resource"
 
 const Content = Layout.Content
 
@@ -23,6 +25,7 @@ interface AppLayoutProps {
 export const AppLayout = (props: AppLayoutProps) => {
   // stores
   const userStore = useUserStore()
+  const importResourceStore = useImportResourceStore()
 
   // 绑定快捷键
   useBindCommands()
@@ -42,6 +45,9 @@ export const AppLayout = (props: AppLayoutProps) => {
       </Layout>
       {userStore.loginModalVisible ? <LoginModal /> : null}
       <BigSearchModal />
+      {importResourceStore.importResourceModalVisible ? (
+        <ImportResourceModal />
+      ) : null}
     </Layout>
   )
 }
