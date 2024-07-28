@@ -36,13 +36,12 @@ import hljs from 'highlight.js';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 import { getWsServerOrigin } from '@refly-packages/utils/url';
 
-const CollaborativeEditor = ({ note }: { note: Note }) => {
-  const { noteId, content, readOnly } = note;
+const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) => {
+  const { readOnly } = note;
   const lastCursorPosRef = useRef<number>();
   const [token] = useCookie('_refly_ai_sid');
   const knowledgeBaseStore = useKnowledgeBaseStore();
   const editorRef = useRef<EditorInstance>();
-  const [initialContent, setInitialContent] = useState<null | JSONContent>(null);
 
   // 准备 extensions
   const websocketProvider = useMemo(() => {
@@ -52,6 +51,7 @@ const CollaborativeEditor = ({ note }: { note: Note }) => {
       token,
     });
   }, [noteId]);
+
   const extensions = [
     ...defaultExtensions,
     slashCommand,
@@ -88,23 +88,22 @@ const CollaborativeEditor = ({ note }: { note: Note }) => {
     websocketProvider.on('status', (event) => {
       knowledgeBaseStore.updateNoteServerStatus(event.status);
     });
+
+    return () => {
+      console.log('destroy ws provider and editor for note id', noteId);
+      websocketProvider.destroy();
+      editorRef.current.destroy();
+    };
   }, []);
 
   useEffect(() => {
-    console.log('trying to set content');
-    console.log('editor', editorRef.current);
-    if (editorRef.current && readOnly) {
-      editorRef.current.commands.setContent(content || '');
-      console.log('collaboration initialized!');
-    }
-
     if (editorRef.current && !readOnly) {
       editorRef.current.on('blur', () => {
         lastCursorPosRef.current = editorRef.current?.view?.state?.selection?.$head?.pos;
         console.log('cursor position', lastCursorPosRef.current);
       });
     }
-  }, [editorRef.current, readOnly, content]);
+  }, [editorRef.current, readOnly]);
 
   useEffect(() => {
     editorEmitter.on('insertBlow', (content) => {
@@ -143,7 +142,6 @@ const CollaborativeEditor = ({ note }: { note: Note }) => {
       <div className="w-full h-full max-w-screen-lg">
         <EditorRoot>
           <EditorContent
-            initialContent={initialContent}
             extensions={extensions}
             onCreate={({ editor }) => {
               editorRef.current = editor;
@@ -180,28 +178,11 @@ const CollaborativeEditor = ({ note }: { note: Note }) => {
 
 interface AINoteHeaderProps {
   note: Note;
+  onTitleChange: (newTitle: string) => void;
 }
 
 export const AINoteHeader = (props: AINoteHeaderProps) => {
-  const { note } = props;
-  const [title, setTitle] = useState(note.title);
-
-  const debouncedUpdate = useDebouncedCallback(async (newTitle: string) => {
-    const res = await getClient().updateNote({
-      body: {
-        noteId: note.noteId,
-        title: newTitle,
-      },
-    });
-    if (res.error) {
-      console.error(res.error);
-      return;
-    }
-  }, 1000);
-
-  useEffect(() => {
-    debouncedUpdate(title);
-  }, [title, debouncedUpdate]);
+  const { note, onTitleChange } = props;
 
   return (
     <div className="mx-4 mt-8 flex justify-center align-middle">
@@ -209,8 +190,8 @@ export const AINoteHeader = (props: AINoteHeaderProps) => {
         <Input
           className="bg-transparent text-3xl font-bold focus:border-transparent focus:bg-transparent"
           placeholder="Enter The Title"
-          value={title}
-          onChange={(val) => setTitle(val)}
+          value={note.title}
+          onChange={onTitleChange}
         />
       </div>
     </div>
@@ -250,6 +231,24 @@ export const AINote = () => {
       updateNote(note);
     }
   }, [note]);
+
+  const debouncedUpdateTitle = useDebouncedCallback(async (newTitle: string) => {
+    const res = await getClient().updateNote({
+      body: {
+        noteId: note.noteId,
+        title: newTitle,
+      },
+    });
+    if (res.error) {
+      console.error(res.error);
+      return;
+    }
+  }, 500);
+
+  const onTitleChange = (newTitle: string) => {
+    setNote({ ...note, title: newTitle });
+    debouncedUpdateTitle(newTitle);
+  };
 
   if (!note) {
     return <p>Loading...</p>;
@@ -319,8 +318,8 @@ export const AINote = () => {
       </div>
       {noteId ? (
         <div className="ai-note-editor">
-          <AINoteHeader note={note} />
-          <CollaborativeEditor note={note} />
+          <AINoteHeader note={note} onTitleChange={onTitleChange} />
+          <CollaborativeEditor key={noteId} noteId={noteId} note={note} />
         </div>
       ) : null}
     </div>

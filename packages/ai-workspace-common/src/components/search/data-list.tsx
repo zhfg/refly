@@ -1,21 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Command } from 'cmdk';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
-import * as Popover from '@radix-ui/react-popover';
-import { Logo, LinearIcon, FigmaIcon, SlackIcon, YouTubeIcon, RaycastIcon } from './icons';
 import {} from '@heroicons/react/24/outline';
-import {
-  IconSearch,
-  IconMessage,
-  IconFile,
-  IconApps,
-  IconBook,
-  IconEdit,
-  IconRobot,
-  IconFolderAdd,
-} from '@arco-design/web-react/icon';
-import { useDebouncedCallback } from 'use-debounce';
-import { defaultFilter } from './cmdk/filter';
+import { IconFolderAdd } from '@arco-design/web-react/icon';
 
 import './index.scss';
 import { Button, Modal } from '@arco-design/web-react';
@@ -23,10 +10,7 @@ import { Item } from './item';
 
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { SearchDomain, SearchRequest, SearchResult } from '@refly/openapi-schema';
-import { useNavigate } from 'react-router-dom';
-import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
-import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { SearchResult } from '@refly/openapi-schema';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
 export function DataList({
