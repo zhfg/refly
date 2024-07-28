@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { useTranslation } from 'react-i18next';
 
@@ -7,6 +6,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 
 import { Resource } from '@refly/openapi-schema';
 import { IconMore, IconBook } from '@arco-design/web-react/icon';
+import { CardBox } from '../card-box';
 
 import { EmptyDigestStatus } from '@refly-packages/ai-workspace-common/components/empty-digest-today-status';
 
@@ -49,8 +49,7 @@ export const ResourceBase = (props: ResourceBaseProps) => {
       ) : (
         resourceList.map((item) => {
           return (
-            <div
-              className="p-4 m-3 border rounded-lg resource-item w-72 border-black/8 hover:bg-gray-500/10"
+            <CardBox
               key={item.resourceId}
               onClick={() => {
                 props.handleItemClick(item?.collectionId, item?.resourceId);
@@ -93,7 +92,7 @@ export const ResourceBase = (props: ResourceBaseProps) => {
                   <IconMore style={{ color: '#819292', marginLeft: '12px', cursor: 'pointer' }} />
                 </div>
               </div>
-            </div>
+            </CardBox>
           );
         })
       )}

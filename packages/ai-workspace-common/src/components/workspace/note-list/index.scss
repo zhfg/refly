@@ -1,0 +1,17 @@
+.note-list {
+  word-break: break-all;
+  overflow: scroll;
+  height: 100%;
+  padding: 16px;
+  .icon-box {
+    margin-right: 12px;
+    width: 48px;
+    height: 40px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+  .note-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

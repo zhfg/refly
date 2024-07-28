@@ -5,7 +5,9 @@ import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import { Note } from '@refly/openapi-schema';
-import { IconMore, IconBook } from '@arco-design/web-react/icon';
+import { IconBook, IconFile } from '@arco-design/web-react/icon';
+import { CardBox } from '../card-box';
+import { NoteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/note-dropdown-menu';
 
 import { EmptyDigestStatus } from '@refly-packages/ai-workspace-common/components/empty-digest-today-status';
 
@@ -40,17 +42,20 @@ export const NoteList = (props: NoteListProps) => {
       ) : (
         noteList.map((item) => {
           return (
-            <div
-              className="p-4 m-3 border rounded-lg resource-item w-72 border-black/8 hover:bg-gray-500/10"
+            <CardBox
               key={item.noteId}
               onClick={() => {
                 props.handleItemClick(item.noteId);
               }}
             >
-              <div className="rounded-lg resource-img bg-emerald-200"></div>
 
               <div className="h-40 overflow-hidden">
-                <div className="text-sm text-black/80 font-medium mb-1.5">{item.title}</div>
+                <div className="flex items-center mb-1.5">
+                  <div className="icon-box flex items-center justify-center rounded-lg resource-icon shrink-0 border-black/8">
+                    <IconFile style={{ fontSize: '32px'}} />
+                  </div>
+                  <div className="note-title flex items-center text-sm text-black/80 font-medium h-10">{item.title}</div>
+                </div>
                 <div className="text-xs text-black/50">{item?.content}</div>
               </div>
 
@@ -63,10 +68,10 @@ export const NoteList = (props: NoteListProps) => {
                 <div>
                   {/* TODO: 添加事件 */}
                   <IconBook style={{ color: '#819292', cursor: 'pointer' }} />
-                  <IconMore style={{ color: '#819292', marginLeft: '12px', cursor: 'pointer' }} />
+                  <NoteDropdownMenu note={item} />
                 </div>
               </div>
-            </div>
+            </CardBox>
           );
         })
       )}

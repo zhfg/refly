@@ -14,12 +14,12 @@ const iconStyle = {
 };
 
 interface DropListProps {
-  setPopupVisible: (visible: boolean) => void;
+  handleCancle: (e: any) => void;
   handleDeleteClick: (e: any) => void;
 }
 
 const DropList = (props: DropListProps) => {
-  const { setPopupVisible, handleDeleteClick } = props;
+  const { handleCancle, handleDeleteClick } = props;
 
   return (
     <Menu>
@@ -28,11 +28,13 @@ const DropList = (props: DropListProps) => {
           focusLock
           title="确定删除该笔记吗？"
           position="br"
-          onOk={handleDeleteClick}
-          onCancel={() => setPopupVisible(false)}
+          onOk={(e) => { handleDeleteClick(e) }}
+          onCancel={(e) => { handleCancle(e) }}
         >
-          <IconDelete style={iconStyle} />
-          删除
+          <div onClick={(e) => e.stopPropagation()}>
+            <IconDelete style={iconStyle} />
+            删除
+          </div>
         </Popconfirm>
       </Menu.Item>
     </Menu>
@@ -49,6 +51,7 @@ export const NoteDropdownMenu = (props: NoteDropdownMenuProps) => {
   const [popupVisible, setPopupVisible] = useState(false);
 
   const handleDeleteClick = async (e: MouseEvent) => {
+    e.stopPropagation();
     const { error } = await getClient().deleteNote({ body: { noteId: note.noteId } });
     setPopupVisible(false);
     if (error) {
@@ -60,7 +63,17 @@ export const NoteDropdownMenu = (props: NoteDropdownMenuProps) => {
     }
   };
 
-  const droplist = DropList({ setPopupVisible, handleDeleteClick });
+  const handleCancle = (e: MouseEvent) => {
+    e.stopPropagation();
+    setPopupVisible(false)
+  };
+
+  const handleIconClick = (e) => {
+    e.stopPropagation();
+    setPopupVisible(!popupVisible);
+  }
+
+  const droplist = DropList({ handleCancle, handleDeleteClick });
 
   return (
     <Dropdown
@@ -72,7 +85,7 @@ export const NoteDropdownMenu = (props: NoteDropdownMenuProps) => {
       <Button
         icon={<IconMore style={{ fontSize: 16 }} />}
         type="text"
-        onClick={() => setPopupVisible(!popupVisible)}
+        onClick={(e) => handleIconClick(e)}
         className={'assist-action-item'}
       ></Button>
     </Dropdown>
