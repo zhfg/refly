@@ -33,13 +33,7 @@ export const ContentPanel = () => {
           />
         </TabPanel>
         <TabPanel key="knowledge-notes" title={t('workspace.contentPanel.tabPanel.note')}>
-          <NoteList
-            handleItemClick={(noteId) => {
-              jumpToNote({
-                noteId,
-              });
-            }}
-          />
+          <NoteList />
         </TabPanel>
         <TabPanel key="knowledge-collection" title={t('workspace.contentPanel.tabPanel.collection')}>
           <KnowledgeBaseList

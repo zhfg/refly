@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import wordsCount from 'words-count';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { Note } from '@refly/openapi-schema';
 
@@ -7,7 +8,7 @@ import { useCookie } from 'react-use';
 import { Button, Divider, Input, Switch } from '@arco-design/web-react';
 import { IconLock, IconUnlock } from '@arco-design/web-react/icon';
 import { useSearchParams } from 'react-router-dom';
-import { IconClockCircle, IconEdit, IconList, IconMenu, IconMore, IconSearch } from '@arco-design/web-react/icon';
+import { IconClockCircle, IconEdit, IconSearch } from '@arco-design/web-react/icon';
 import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useListenToSelection } from '@refly-packages/ai-workspace-common/hooks/use-listen-to-selection';
@@ -76,7 +77,8 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
 
   const debouncedUpdates = useDebouncedCallback(async (editor: EditorInstance) => {
     const json = editor.getJSON();
-    knowledgeBaseStore.updateNoteCharsCount(editor.storage.characterCount.words());
+    const markdown = editor.storage.markdown.getMarkdown();
+    knowledgeBaseStore.updateNoteCharsCount(wordsCount(markdown));
     window.localStorage.setItem('html-content', highlightCodeblocks(editor.getHTML()));
     window.localStorage.setItem('novel-content', JSON.stringify(json));
     window.localStorage.setItem('markdown', editor.storage.markdown.getMarkdown());
@@ -90,7 +92,7 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
     });
 
     return () => {
-      console.log('destroy ws provider and editor for note id', noteId);
+      websocketProvider.forceSync();
       websocketProvider.destroy();
       editorRef.current.destroy();
     };
@@ -131,8 +133,11 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
   useListenToSelection(`ai-note-editor`, 'note');
 
   useEffect(() => {
-    console.log('editor readonly', readOnly);
     if (editorRef.current) {
+      if (readOnly) {
+        // ensure we sync the content just before setting the editor to readonly
+        websocketProvider.forceSync();
+      }
       editorRef.current.setOptions({ editable: !readOnly });
     }
   }, [readOnly]);
@@ -160,7 +165,6 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
               },
             }}
             onUpdate={({ editor }) => {
-              console.log('edito json', editor.getJSON());
               debouncedUpdates(editor);
               knowledgeBaseStore.updateNoteSaveStatus('Unsaved');
             }}
@@ -210,7 +214,6 @@ export const AINote = () => {
       const { data } = await getClient().getNoteDetail({
         query: { noteId },
       });
-      console.log('setNote', data?.data);
       if (data?.data) {
         setNote(data?.data);
       }

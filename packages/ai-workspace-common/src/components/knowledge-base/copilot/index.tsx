@@ -193,22 +193,14 @@ export const AICopilot = (props: AICopilotProps) => {
               );
             }}
           </Checkbox>
-          <Checkbox
-            key={'knowledge-base-note-panel'}
-            checked={knowledgeBaseStore.notePanelVisible && noteId ? true : false}
-          >
+          <Checkbox key={'knowledge-base-note-panel'} checked={knowledgeBaseStore.notePanelVisible}>
             {({ checked }) => {
               return (
                 <Button
                   icon={<IconEdit />}
                   type="text"
                   onClick={() => {
-                    if (!noteId) {
-                      searchStore.setPages(searchStore.pages.concat('note'));
-                      searchStore.setIsSearchOpen(true);
-                    } else {
-                      knowledgeBaseStore.updateNotePanelVisible(!knowledgeBaseStore.notePanelVisible);
-                    }
+                    knowledgeBaseStore.updateNotePanelVisible(!knowledgeBaseStore.notePanelVisible);
                   }}
                   className={classNames('assist-action-item', { active: checked })}
                 ></Button>

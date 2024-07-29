@@ -87,9 +87,6 @@ export class NoteWsGateway implements OnGatewayConnection {
         if (note.uid !== payload.uid) {
           throw new Error(`user not authorized: ${documentName}`);
         }
-        if (note.readOnly) {
-          throw new Error(`read-only note: ${documentName}`);
-        }
         const user = await this.prisma.user.findFirst({
           where: { uid: payload.uid },
         });

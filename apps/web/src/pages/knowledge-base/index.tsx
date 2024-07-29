@@ -130,7 +130,7 @@ const KnowledgeLibraryLayout = () => {
             {knowledgeBaseStore.notePanelVisible ? (
               <>
                 <Panel
-                  minSize={minSize}
+                  minSize={20}
                   order={2}
                   className="workspace-content-panel"
                   key="workspace-content-panel"

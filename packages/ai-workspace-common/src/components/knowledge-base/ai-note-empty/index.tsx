@@ -1,51 +1,23 @@
-import { useEffect, useState } from 'react';
-import { Divider, Typography } from '@arco-design/web-react';
-import { Note } from '@refly/openapi-schema';
+import { Divider, Typography, Button } from '@arco-design/web-react';
+import { IconPlus } from '@arco-design/web-react/icon';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { useNavigate } from 'react-router-dom';
+import { NoteList } from '@refly-packages/ai-workspace-common/components/workspace/note-list';
 
-const { Title, Paragraph, Text } = Typography;
+const { Title, Paragraph } = Typography;
 
 export const AINoteEmpty = (props: {}) => {
-  const navigate = useNavigate();
   const { handleInitEmptyNote } = useAINote();
-
-  const [noteList, setNoteList] = useState<Note[]>([]);
-  const getNoteList = async () => {
-    const res = await getClient().listNotes({
-      query: {},
-    });
-    const listData: Note[] = res?.data?.data || [];
-    setNoteList(listData);
-  };
-
-  useEffect(() => {
-    getNoteList();
-  }, []);
 
   return (
     <div className="mx-4 mt-16 flex justify-center align-middle">
       <div className="w-full h-full max-w-screen-lg">
-        <Title className="text-3xl font-bold">暂无笔记</Title>
-        <Paragraph className="text-green-400 hover:font-bold" onClick={() => handleInitEmptyNote('New note')}>
+        {/* <Title className="text-3xl font-bold ml-8 mb-8">暂无笔记</Title> */}
+        <Button className="text-green-400 ml-8" icon={<IconPlus />} onClick={() => handleInitEmptyNote('New note')}>
           创建新笔记
-        </Paragraph>
+        </Button>
         <Divider />
-        <Paragraph>打开最近笔记</Paragraph>
-        {noteList.map((item) => {
-          return (
-            <Text
-              className="text-green-400 hover:font-bold"
-              key={item.noteId}
-              onClick={() => {
-                navigate(`/knowledge-base?noteId=${item.noteId}`);
-              }}
-            >
-              {item.title}
-            </Text>
-          );
-        })}
+        <Paragraph className="text-gray-500 ml-8">打开最近笔记</Paragraph>
+        <NoteList />
       </div>
     </div>
   );
