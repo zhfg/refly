@@ -6,6 +6,8 @@ import { Note } from '@refly/openapi-schema';
 // 请求
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useNavigate } from 'react-router-dom';
+import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
+import { useNoteTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
 
 const iconStyle = {
   marginRight: 8,
@@ -28,8 +30,12 @@ const DropList = (props: DropListProps) => {
           focusLock
           title="确定删除该笔记吗？"
           position="br"
-          onOk={(e) => { handleDeleteClick(e) }}
-          onCancel={(e) => { handleCancle(e) }}
+          onOk={(e) => {
+            handleDeleteClick(e);
+          }}
+          onCancel={(e) => {
+            handleCancle(e);
+          }}
         >
           <div onClick={(e) => e.stopPropagation()}>
             <IconDelete style={iconStyle} />
@@ -49,6 +55,8 @@ export const NoteDropdownMenu = (props: NoteDropdownMenuProps) => {
   const { note } = props;
   const navigate = useNavigate();
   const [popupVisible, setPopupVisible] = useState(false);
+  const noteStore = useNoteStore();
+  const { handleDeleteTab } = useNoteTabs();
 
   const handleDeleteClick = async (e: MouseEvent) => {
     e.stopPropagation();
@@ -59,19 +67,23 @@ export const NoteDropdownMenu = (props: NoteDropdownMenuProps) => {
       Message.error({ content: `删除失败` });
     } else {
       Message.success({ content: '删除成功' });
-      navigate('/knowledge-base?noteId=');
+      handleDeleteTab(note.noteId);
+
+      // if (noteStore.notePanelVisible) {
+      //   navigate('/knowledge-base');
+      // }
     }
   };
 
   const handleCancle = (e: MouseEvent) => {
     e.stopPropagation();
-    setPopupVisible(false)
+    setPopupVisible(false);
   };
 
   const handleIconClick = (e) => {
     e.stopPropagation();
     setPopupVisible(!popupVisible);
-  }
+  };
 
   const droplist = DropList({ handleCancle, handleDeleteClick });
 
@@ -86,7 +98,7 @@ export const NoteDropdownMenu = (props: NoteDropdownMenuProps) => {
         icon={<IconMore style={{ fontSize: 16 }} />}
         type="text"
         onClick={(e) => handleIconClick(e)}
-        className={'assist-action-item'}
+        className="text-gray-500"
       ></Button>
     </Dropdown>
   );

@@ -21,6 +21,7 @@ import { useSearchParams } from "react-router-dom"
 import { useResizePanel } from "@refly/ai-workspace-common/hooks/use-resize-panel"
 import { ErrorBoundary } from "@sentry/react"
 import { useKnowledgeBaseStore } from "@refly/ai-workspace-common/stores/knowledge-base"
+import { useNoteStore } from "@refly/ai-workspace-common/stores/note"
 
 /**
  *
@@ -34,6 +35,7 @@ const KnowledgeLibraryLayout = () => {
   const noteId = searchParams.get("noteId")
   const userStore = useUserStore()
   const knowledgeBaseStore = useKnowledgeBaseStore()
+  const noteStore = useNoteStore()
   const { t } = useTranslation()
 
   const [minSize] = useResizePanel({
@@ -85,7 +87,7 @@ const KnowledgeLibraryLayout = () => {
 
   const copilotStyle =
     (kbId && knowledgeBaseStore.resourcePanelVisible) ||
-    (noteId && knowledgeBaseStore.notePanelVisible)
+    (noteId && noteStore.notePanelVisible)
       ? {
           defaultSize: 20,
           minSize: 20,
@@ -127,7 +129,7 @@ const KnowledgeLibraryLayout = () => {
                 />
               </>
             ) : null}
-            {knowledgeBaseStore.notePanelVisible ? (
+            {noteStore.notePanelVisible ? (
               <>
                 <Panel
                   minSize={20}

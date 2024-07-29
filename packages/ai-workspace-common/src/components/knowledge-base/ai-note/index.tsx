@@ -1,16 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import wordsCount from 'words-count';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { Note } from '@refly/openapi-schema';
 
 import './index.scss';
 import { useCookie } from 'react-use';
-import { Button, Divider, Input, Switch } from '@arco-design/web-react';
+import { Button, Divider, Input, Spin, Switch, Tabs } from '@arco-design/web-react';
 import { IconLock, IconUnlock } from '@arco-design/web-react/icon';
 import { useSearchParams } from 'react-router-dom';
 import { IconClockCircle, IconEdit, IconSearch } from '@arco-design/web-react/icon';
 import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
-import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useListenToSelection } from '@refly-packages/ai-workspace-common/hooks/use-listen-to-selection';
 // 编辑器组件
 import {
@@ -36,12 +35,15 @@ import { AiOutlineWarning, AiOutlineFileWord } from 'react-icons/ai';
 import hljs from 'highlight.js';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 import { getWsServerOrigin } from '@refly-packages/utils/url';
+import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
+import { useNoteTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
+import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
 
 const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) => {
   const { readOnly } = note;
   const lastCursorPosRef = useRef<number>();
   const [token] = useCookie('_refly_ai_sid');
-  const knowledgeBaseStore = useKnowledgeBaseStore();
+  const noteStore = useNoteStore();
   const editorRef = useRef<EditorInstance>();
 
   // 准备 extensions
@@ -78,17 +80,17 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
   const debouncedUpdates = useDebouncedCallback(async (editor: EditorInstance) => {
     const json = editor.getJSON();
     const markdown = editor.storage.markdown.getMarkdown();
-    knowledgeBaseStore.updateNoteCharsCount(wordsCount(markdown));
+    noteStore.updateNoteCharsCount(wordsCount(markdown));
     window.localStorage.setItem('html-content', highlightCodeblocks(editor.getHTML()));
     window.localStorage.setItem('novel-content', JSON.stringify(json));
     window.localStorage.setItem('markdown', editor.storage.markdown.getMarkdown());
-    knowledgeBaseStore.updateNoteSaveStatus('Saved');
+    noteStore.updateNoteSaveStatus('Saved');
   }, 500);
 
   useEffect(() => {
     // Update status changes
     websocketProvider.on('status', (event) => {
-      knowledgeBaseStore.updateNoteServerStatus(event.status);
+      noteStore.updateNoteServerStatus(event.status);
     });
 
     return () => {
@@ -143,14 +145,14 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
   }, [readOnly]);
 
   return (
-    <div className="editor ">
+    <div className="editor">
       <div className="w-full h-full max-w-screen-lg">
         <EditorRoot>
           <EditorContent
             extensions={extensions}
             onCreate={({ editor }) => {
               editorRef.current = editor;
-              knowledgeBaseStore.updateEditor(editor);
+              noteStore.updateEditor(editor);
             }}
             editable={!readOnly}
             className="w-full h-full max-w-screen-lg border-muted sm:rounded-lg"
@@ -166,7 +168,7 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
             }}
             onUpdate={({ editor }) => {
               debouncedUpdates(editor);
-              knowledgeBaseStore.updateNoteSaveStatus('Unsaved');
+              noteStore.updateNoteSaveStatus('Unsaved');
             }}
             slotAfter={<ImageResizer />}
           >
@@ -175,6 +177,61 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
             <CollabGenAIBlockMenu />
           </EditorContent>
         </EditorRoot>
+      </div>
+    </div>
+  );
+};
+
+interface AINoteStatusBarProps {
+  note: Note;
+}
+
+export const AINoteStatusBar = (props: AINoteStatusBarProps) => {
+  const { note } = props;
+  const { noteId } = note;
+  const noteStore = useNoteStore();
+
+  return (
+    <div className="note-status-bar">
+      <div className="note-status-bar-menu">
+        {noteId && noteStore.noteServerStatus === 'connected' ? (
+          <div className="note-status-bar-item">
+            <AiOutlineFileWord />
+            <p className="conv-title">共 {noteStore.noteCharsCount} 字</p>
+          </div>
+        ) : null}
+        {noteId && noteStore.noteServerStatus === 'disconnected' ? (
+          <div className="note-status-bar-item">
+            <Divider type="vertical" />
+            <AiOutlineWarning />
+            <p className="conv-title">服务已断开</p>
+          </div>
+        ) : null}
+        {noteId && noteStore.noteServerStatus === 'connected' ? (
+          <div className="note-status-bar-item">
+            <Divider type="vertical" />
+            <IconClockCircle />
+            <p className="conv-title">{noteStore.noteSaveStatus === 'Saved' ? `笔记已自动保存` : `笔记保存中...`}</p>
+          </div>
+        ) : null}
+      </div>
+      <div className="note-status-bar-menu">
+        {noteId ? (
+          <div className="note-status-bar-item">
+            {note.readOnly ? <IconLock /> : <IconUnlock />}
+            <p className="conv-title mr-2">{note.readOnly ? '只读' : '编辑'}</p>
+            <Switch
+              type="round"
+              size="small"
+              checked={note.readOnly}
+              onChange={(readOnly) => noteStore.updateCurrentNote({ ...note, readOnly })}
+            />
+          </div>
+        ) : null}
+        <div className="note-status-bar-item">
+          <Divider type="vertical" />
+          <NoteDropdownMenu note={note} />
+        </div>
       </div>
     </div>
   );
@@ -203,43 +260,45 @@ export const AINoteHeader = (props: AINoteHeaderProps) => {
 };
 
 export const AINote = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const noteId = searchParams.get('noteId');
-  const [note, setNote] = useState<Note | null>(null);
-  const knowledgeBaseStore = useKnowledgeBaseStore();
+
+  const { handleInitEmptyNote } = useAINote();
+  const noteStore = useNoteStore();
+  const note = noteStore.currentNote;
+  const prevNote = useRef<Note>();
+
   const searchStore = useSearchStore();
+
+  const { tabs, activeTab, setActiveTab, handleAddTab, handleDeleteTab, handleUpdateTabTitle } = useNoteTabs();
 
   useEffect(() => {
     const fetchData = async () => {
       const { data } = await getClient().getNoteDetail({
         query: { noteId },
       });
-      if (data?.data) {
-        setNote(data?.data);
+      const note = data?.data;
+      if (note) {
+        noteStore.updateCurrentNote(note);
+        noteStore.updateIsRequesting(false);
+        handleAddTab({
+          title: note.title,
+          key: note.noteId,
+          content: note.contentPreview || '',
+          noteId: note.noteId,
+        });
       }
     };
     fetchData();
   }, [noteId]);
 
-  useEffect(() => {
-    const updateNote = async (note: Note) => {
-      const { error } = await getClient().updateNote({
-        body: { noteId: note.noteId, readOnly: note.readOnly },
-      });
-      if (error) {
-        console.error(error);
-      }
-    };
-    if (note) {
-      updateNote(note);
-    }
-  }, [note]);
-
-  const debouncedUpdateTitle = useDebouncedCallback(async (newTitle: string) => {
+  const debouncedUpdateNote = useDebouncedCallback(async (note: Note) => {
     const res = await getClient().updateNote({
       body: {
         noteId: note.noteId,
-        title: newTitle,
+        title: note.title,
+        readOnly: note.readOnly,
+        isPublic: note.isPublic,
       },
     });
     if (res.error) {
@@ -248,83 +307,67 @@ export const AINote = () => {
     }
   }, 500);
 
+  useEffect(() => {
+    if (note && prevNote.current?.noteId === note.noteId) {
+      debouncedUpdateNote(note);
+    }
+    prevNote.current = note;
+  }, [note, debouncedUpdateNote]);
+
   const onTitleChange = (newTitle: string) => {
-    setNote({ ...note, title: newTitle });
-    debouncedUpdateTitle(newTitle);
+    noteStore.updateCurrentNote({ ...note, title: newTitle });
+    handleUpdateTabTitle(note.noteId, newTitle);
   };
 
   if (!note) {
-    return <p>Loading...</p>;
+    return <Spin dot block className="h-full w-full flex justify-center items-center" />;
   }
 
   return (
     <div className="ai-note-container">
-      <div className="knowledge-base-detail-header">
-        <div className="knowledge-base-detail-navigation-bar">
-          <div className="conv-meta">
-            <IconEdit style={{ color: 'rgba(0, 0, 0, .6)' }} />
-            <p className="conv-title">{note?.title || '新笔记'}</p>
-          </div>
-        </div>
-        <div className="knowledge-base-detail-menu knowledge-base-detail-navigation-bar">
-          {noteId && knowledgeBaseStore.noteServerStatus === 'connected' ? (
-            <div className="conv-meta">
-              <AiOutlineFileWord />
-              <p className="conv-title">共 {knowledgeBaseStore.noteCharsCount} 字</p>
+      <Tabs
+        editable
+        type="card-gutter"
+        className="note-detail-tab-container"
+        activeTab={activeTab}
+        onDeleteTab={handleDeleteTab}
+        onAddTab={() => handleInitEmptyNote('')}
+        onChange={setActiveTab}
+        renderTabHeader={(props, DefaultTabHeader) => {
+          return (
+            <div className="note-detail-header">
+              <div className="note-detail-nav-switcher">
+                <DefaultTabHeader {...props} />
+              </div>
+              <div className="note-detail-navigation-bar">
+                <Button
+                  icon={<IconSearch style={{ fontSize: 16 }} />}
+                  type="text"
+                  shape="circle"
+                  className="assist-action-item"
+                  onClick={() => {
+                    searchStore.setPages(searchStore.pages.concat('note'));
+                    searchStore.setIsSearchOpen(true);
+                  }}
+                ></Button>
+              </div>
             </div>
-          ) : null}
-          {noteId && knowledgeBaseStore.noteServerStatus === 'disconnected' ? (
-            <div className="conv-meta">
-              <Divider type="vertical" />
-              <AiOutlineWarning />
-              <p className="conv-title">服务已断开</p>
-            </div>
-          ) : null}
-          {noteId && knowledgeBaseStore.noteServerStatus === 'connected' ? (
-            <div className="conv-meta">
-              <Divider type="vertical" />
-              <IconClockCircle />
-              <p className="conv-title">
-                {knowledgeBaseStore.noteSaveStatus === 'Saved' ? `笔记已自动保存` : `笔记保存中...`}
-              </p>
-            </div>
-          ) : null}
-          {noteId ? (
-            <div className="conv-meta">
-              <Divider type="vertical" />
-              {note.readOnly ? <IconLock /> : <IconUnlock />}
-              <p className="conv-title mr-2">{note.readOnly ? '只读' : '编辑'}</p>
-              <Switch
-                type="round"
-                size="small"
-                checked={note.readOnly}
-                onChange={(readOnly) => setNote({ ...note, readOnly })}
-              />
-            </div>
-          ) : null}
-          <div className="conv-meta">
-            <Divider type="vertical" />
-            <Button
-              icon={<IconSearch style={{ fontSize: 16 }} />}
-              type="text"
-              onClick={() => {
-                searchStore.setPages(searchStore.pages.concat('note'));
-                searchStore.setIsSearchOpen(true);
-              }}
-              className={'assist-action-item'}
-            ></Button>
-          </div>
-          <div className="conv-meta">
-            <NoteDropdownMenu note={note} />
-          </div>
-        </div>
-      </div>
-      {noteId ? (
+          );
+        }}
+      >
+        {tabs.map((tab, i) => (
+          <Tabs.TabPane destroyOnHide key={tab.key} title={tab.title}>
+            <div></div>
+          </Tabs.TabPane>
+        ))}
+      </Tabs>
+      {note ? (
         <div className="ai-note-editor">
           <AINoteHeader note={note} onTitleChange={onTitleChange} />
           <CollaborativeEditor key={noteId} noteId={noteId} note={note} />
         </div>
       ) : null}
+      {note ? <AINoteStatusBar note={note} /> : null}
     </div>
   );
 };
