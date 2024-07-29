@@ -10,7 +10,7 @@
   padding: 0 16px;
   width: 100%;
   height: calc(100vh - 64px - 66px);
-  overflow-y: scroll;
+  overflow-y: auto;
 
   .arco-list-header {
     border-bottom: 1px solid transparent;

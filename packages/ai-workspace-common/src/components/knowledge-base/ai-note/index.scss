@@ -306,6 +306,6 @@
 
   .ai-note-editor {
     height: calc(100vh - 40px - 14px - 14px);
-    overflow-y: scroll;
+    overflow-y: auto;
   }
 }

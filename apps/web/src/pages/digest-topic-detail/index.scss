@@ -6,7 +6,7 @@
 
   .topics-list {
     height: calc(100vh - 28px);
-    overflow-y: scroll;
+    overflow-y: auto;
     padding: 0 74px;
   }
 
@@ -69,7 +69,7 @@
 .feed-list {
   width: 100%;
   height: calc(100vh - 28px);
-  overflow-y: scroll;
+  overflow-y: auto;
 
   .feed-item-link {
     &:hover {
