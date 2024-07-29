@@ -13,7 +13,7 @@
 .digest-list {
   padding: 0 16px;
   width: 100%;
-  height: calc(100vh - 100px);
+  height: calc(100vh - 60px);
   padding: 0 60px;
   overflow-y: auto;
 
@@ -62,12 +62,11 @@
 
 .knowledge-base-list-container {
   .knowledge-base-list {
-    padding: 0 45px;
+    padding: 0 16px;
   }
 
   .knowledge-base-list-item-container {
     .arco-list-item-main {
-      padding: 12px;
       border-radius: 8px;
 
       &:hover {

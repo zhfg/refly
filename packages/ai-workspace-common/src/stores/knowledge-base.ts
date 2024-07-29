@@ -132,7 +132,7 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
       set((state) => ({ ...state, selectedNamespace })),
     updateTabs: (tabs: KnowledgeBaseTab[]) => set((state) => ({ ...state, tabs })),
     updateActiveTab: (key: string) => set((state) => ({ ...state, activeTab: key })),
-    resetState: () => set((state) => ({ ...state, ...defaultState })),
+    resetState: () => set((state) => ({ ...state, knowledgeBaseList: [] })),
 
     // tabs
     updateResourcePanelVisible: (visible: boolean) => set((state) => ({ ...state, resourcePanelVisible: visible })),

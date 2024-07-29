@@ -43,18 +43,13 @@ export const NoteList = (props: NoteListProps) => {
       ) : (
         noteList.map((item) => {
           return (
-            <CardBox key={item.noteId} onClick={() => jumpToNote({ noteId: item.noteId })}>
-              <div className="h-40 overflow-hidden">
-                <div className="flex items-center mb-1.5">
-                  <div className="icon-box flex items-center justify-center rounded-lg resource-icon shrink-0 border-black/8">
-                    <IconFile style={{ fontSize: '32px' }} />
-                  </div>
-                  <div className="note-title flex items-center text-sm text-black/80 font-medium h-10">
-                    {item.title}
-                  </div>
-                </div>
-                <div className="text-xs text-black/50">{item?.content}</div>
-              </div>
+            <CardBox
+              key={item.noteId}
+              cardData={item}
+              cardIcon={<IconFile style={{ fontSize: '32px', strokeWidth: 3}} />}
+              type="note"
+              onClick={() => jumpToNote({ noteId: item.noteId })}
+            >
 
               <div className="flex items-center justify-between mt-6">
                 <div className="text-xs text-black/40">
