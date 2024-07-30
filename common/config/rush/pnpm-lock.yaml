@@ -597,6 +597,9 @@ importers:
       aos:
         specifier: ^3.0.0-beta.6
         version: 3.0.0-beta.6
+      cheerio:
+        specifier: ~1.0.0-rc.12
+        version: 1.0.0-rc.12
       classnames:
         specifier: ^2.5.1
         version: 2.5.1
@@ -636,6 +639,9 @@ importers:
       qs:
         specifier: ~6.12.3
         version: 6.12.3
+      rate-limiter-flexible:
+        specifier: ~5.0.3
+        version: 5.0.3
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -1209,6 +1215,9 @@ importers:
       aos:
         specifier: ^3.0.0-beta.6
         version: 3.0.0-beta.6
+      cheerio:
+        specifier: ~1.0.0-rc.12
+        version: 1.0.0-rc.12
       classnames:
         specifier: ^2.5.1
         version: 2.5.1
@@ -1257,6 +1266,9 @@ importers:
       qs:
         specifier: ~6.12.3
         version: 6.12.3
+      rate-limiter-flexible:
+        specifier: ~5.0.3
+        version: 5.0.3
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -11437,6 +11449,30 @@ packages:
       get-func-name: 2.0.2
     dev: true
 
+  /cheerio-select@2.1.0:
+    resolution: {integrity: sha512-9v9kG0LvzrlcungtnJtpGNxY+fzECQKhK4EGJX2vByejiMX84MFNQw4UxPJl3bFbTMw+Dfs37XaIkCwTZfLh4g==}
+    dependencies:
+      boolbase: 1.0.0
+      css-select: 5.1.0
+      css-what: 6.1.0
+      domelementtype: 2.3.0
+      domhandler: 5.0.3
+      domutils: 3.1.0
+    dev: false
+
+  /cheerio@1.0.0-rc.12:
+    resolution: {integrity: sha512-VqR8m68vM46BNnuZ5NtnGBKIE/DfN0cRIzg9n40EIq9NOv90ayxLBXA8fXC5gquFRGJSTRqBq25Jt2ECLR431Q==}
+    engines: {node: '>= 6'}
+    dependencies:
+      cheerio-select: 2.1.0
+      dom-serializer: 2.0.0
+      domhandler: 5.0.3
+      domutils: 3.1.0
+      htmlparser2: 8.0.2
+      parse5: 7.1.2
+      parse5-htmlparser2-tree-adapter: 7.0.0
+    dev: false
+
   /chokidar@3.5.3:
     resolution: {integrity: sha512-Dr3sfKRP6oTcjf2JmUmFJfeVMvXBdegxB0iVQ5eb2V10uFJUCAS8OByZdVAyVb8xXNz3GjjTgj9kLWsZTqE6kw==}
     engines: {node: '>= 8.10.0'}
@@ -14271,6 +14307,15 @@ packages:
     resolution: {integrity: sha512-KknJ50kTInJ7qIScF3jeaFRpMpE8/lfiTdzf/twXyPBLAGrLRTmkz3AdTnKeh40X8k9L2fdYwEp/42WGXIRGcg==}
     dependencies:
       void-elements: 3.1.0
+    dev: false
+
+  /htmlparser2@8.0.2:
+    resolution: {integrity: sha512-GYdjWKDkbRLkZ5geuHs5NY1puJ+PXwP7+fHPRz06Eirsb9ugf6d8kkXav6ADhcODhFFPMIXyxkxSuMf3D6NCFA==}
+    dependencies:
+      domelementtype: 2.3.0
+      domhandler: 5.0.3
+      domutils: 3.1.0
+      entities: 4.5.0
     dev: false
 
   /htmlparser2@9.1.0:
@@ -18238,6 +18283,13 @@ packages:
       parse5: 6.0.1
     dev: false
 
+  /parse5-htmlparser2-tree-adapter@7.0.0:
+    resolution: {integrity: sha512-B77tOZrqqfUfnVcOrUvfdLbz4pu4RopLD/4vmu3HUPswwTA8OH0EMW9BlWR2B0RCoiZRAHEUu7IxeP1Pd1UU+g==}
+    dependencies:
+      domhandler: 5.0.3
+      parse5: 7.1.2
+    dev: false
+
   /parse5@5.1.1:
     resolution: {integrity: sha512-ugq4DFI0Ptb+WWjAdOK16+u/nHfiIrcE+sh8kZMaM0WllQKLI9rOUq6c2b7cwPkXdzfQESqvoqK6ug7U/Yyzug==}
     dev: false
@@ -19226,6 +19278,10 @@ packages:
   /range-parser@1.2.1:
     resolution: {integrity: sha512-Hrgsx+orqoygnmhFbKaHE6c296J+HTAQXoxEF6gNupROmmGJRoyzfG3ccAveqCBrwr/2yxQ5BVd/GTl5agOwSg==}
     engines: {node: '>= 0.6'}
+
+  /rate-limiter-flexible@5.0.3:
+    resolution: {integrity: sha512-lWx2y8NBVlTOLPyqs+6y7dxfEpT6YFqKy3MzWbCy95sTTOhOuxufP2QvRyOHpfXpB9OUJPbVLybw3z3AVAS5fA==}
+    dev: false
 
   /raw-body@2.5.2:
     resolution: {integrity: sha512-8zGqypfENjCIqGhgXToC8aB2r7YrBX+AQAfIPs/Mlk+BtPTztOvTS01NRW/3Eh60J+a48lt8qsCzirQ6loCVfA==}
@@ -23092,6 +23148,7 @@ time:
   /bull@4.12.2: '2024-01-17T17:18:36.016Z'
   /c12@1.5.1: '2023-10-19T11:58:04.576Z'
   /cac@6.7.14: '2022-08-29T03:02:03.481Z'
+  /cheerio@1.0.0-rc.12: '2022-06-26T13:33:54.305Z'
   /chokidar@3.5.3: '2022-01-18T07:42:19.335Z'
   /ci-info@4.0.0: '2023-10-29T06:41:23.336Z'
   /class-variance-authority@0.7.0: '2023-07-17T15:20:39.737Z'
@@ -23201,6 +23258,7 @@ time:
   /publint@0.2.6: '2023-12-01T16:16:15.031Z'
   /publish-browser-extension@2.1.3: '2024-02-23T20:55:02.471Z'
   /qs@6.12.3: '2024-07-08T23:54:45.404Z'
+  /rate-limiter-flexible@5.0.3: '2024-04-28T13:39:12.866Z'
   /react-dom@18.2.0: '2022-06-14T19:46:48.370Z'
   /react-draggable@4.4.5: '2022-04-26T18:04:09.131Z'
   /react-error-boundary@4.0.13: '2024-03-01T02:06:29.880Z'

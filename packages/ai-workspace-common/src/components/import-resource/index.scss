@@ -28,5 +28,191 @@
     height: 100%;
     border-top-right-radius: 0px;
     border-bottom-right-radius: 0px;
+
+    .left-panel-header-title {
+      font-size: 18px;
+      padding-top: 24px;
+      padding-left: 12px;
+      padding-right: 12px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
+      .left-panel-header-title-text {
+        margin-left: 12px;
+        font-weight: bold;
+      }
+    }
+
+    .left-panel-menu {
+      background-color: transparent;
+      padding-top: 0;
+      padding: 0 4px;
+
+      .left-panel-menu-title {
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.5);
+        margin-bottom: 8px;
+        font-weight: bold;
+      }
+
+      .left-panel-menu-item {
+        background-color: transparent;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        &:hover {
+          background-color: #dddddb !important;
+        }
+
+        &.arco-menu-selected {
+          background-color: #dddddb !important;
+        }
+      }
+    }
   }
+
+  .import-resource-right-panel {
+    flex: 1;
+    padding: 0 40px;
+    height: 100%;
+    overflow-y: auto;
+
+    .intergation-container {
+      padding-top: 32px;
+      position: relative;
+      height: 100%;
+
+      .intergration-header {
+        font-size: 18px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        .intergration-header-title {
+          font-weight: bold;
+        }
+      }
+    }
+
+    .intergation-body {
+      max-width: 712px;
+    }
+
+    .intergation-body-result {
+      margin-top: 24px;
+    }
+
+    .intergation-body-result-title {
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.5);
+      font-weight: bold;
+    }
+
+    // 各个 intergrations 的特点
+    .intergation-import-from-weblink {
+      .intergation-result-list {
+        margin-top: 12px;
+      }
+
+      .intergation-result-list-item {
+        border-radius: 0;
+
+        .arco-list-item {
+          padding: 12px !important;
+        }
+
+        .arco-list-item-action > li:not(:last-child) {
+          margin-right: 8px;
+        }
+      }
+
+      .assist-action-item {
+        color: rgba(0, 0, 0, 0.5);
+        font-size: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 32px;
+
+        &:hover,
+        &.active {
+          cursor: pointer;
+          background-color: #f1f1f0;
+          color: #00968f;
+        }
+      }
+
+      button.assist-action-item {
+        height: 24px;
+        padding: 0 4px;
+        border-radius: 8px;
+
+        &:hover,
+        &.active {
+          cursor: pointer;
+          background-color: #f1f1f0;
+          color: #00968f;
+        }
+      }
+    }
+  }
+
+  // common
+  .menu-item-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    background-color: #f1f1f0;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    margin-right: 8px;
+
+    svg {
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+  }
+
+  .intergation-footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    bottom: 0;
+    padding: 16px 0;
+    border-top: 1px solid var(--color-neutral-3);
+    border-radius: 0;
+    width: 100%;
+  }
+
+  .footer-location {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    .footer-count {
+      color: #00968f;
+      font-weight: bold;
+    }
+
+    .text-item {
+      width: auto;
+      white-space: nowrap;
+    }
+
+    .kg-selector {
+      margin-left: 18px;
+      width: 300px;
+    }
+  }
+}
+
+.keyword {
+  color: #00968f;
 }
