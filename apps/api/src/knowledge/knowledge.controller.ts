@@ -21,6 +21,7 @@ import {
   DeleteCollectionRequest,
   DeleteResourceRequest,
   DeleteResourceResponse,
+  BatchCreateResourceResponse,
 } from '@refly/openapi-schema';
 import { ResourceType, User as UserModel } from '@prisma/client';
 import { KnowledgeService } from './knowledge.service';
@@ -132,6 +133,16 @@ export class KnowledgeController {
   ): Promise<UpsertResourceResponse> {
     const resource = await this.knowledgeService.createResource(user, body);
     return buildSuccessResponse(resourcePO2DTO(resource));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('resource/batch')
+  async importResource(
+    @User() user: UserModel,
+    @Body() body: UpsertResourceRequest[],
+  ): Promise<BatchCreateResourceResponse> {
+    const resources = await this.knowledgeService.batchCreateResource(user, body);
+    return buildSuccessResponse(resources.map((r) => resourcePO2DTO(r)));
   }
 
   @UseGuards(JwtAuthGuard)
