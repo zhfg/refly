@@ -54,6 +54,7 @@ import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note
 import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
+import { ContextPanel } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel';
 
 interface AICopilotProps {}
 
@@ -288,7 +289,8 @@ export const AICopilot = (props: AICopilotProps) => {
               <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
             </div>
             <div className="chat-input-assist-action">
-              {!showSelectedTextContext ? <SearchTargetSelector classNames="chat-input-assist-action-item" /> : null}
+              {/* {!showSelectedTextContext ? <SearchTargetSelector classNames="chat-input-assist-action-item" /> : null} */}
+              <ContextPanel />
 
               <OutputLocaleList>
                 <Button icon={<IconTranslate />} type="text" className="chat-input-assist-action-item">
