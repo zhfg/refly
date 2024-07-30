@@ -17,6 +17,7 @@ import {
   IconTwitter,
   IconLanguage,
   IconImport,
+  IconMessage,
 } from "@arco-design/web-react/icon"
 // 静态资源
 import Logo from "@/assets/logo.svg"
@@ -131,6 +132,11 @@ export const SiderLayout = () => {
         break
       }
 
+      case "ThreadLibrary": {
+        navigate(`/thread`)
+        break
+      }
+
       case "DownloadExtension": {
         // 下载浏览器插件
         window.open(
@@ -198,6 +204,10 @@ export const SiderLayout = () => {
               <span className="sider-menu-title">
                 {t("loggedHomePage.siderMenu.homePage")}
               </span>
+            </MenuItem>
+            <MenuItem key="ThreadLibrary" className="custom-menu-item">
+              <IconMessage style={{ fontSize: 20 }} />
+              <span className="sider-menu-title">会话</span>
             </MenuItem>
             {/* <MenuItem key='Explore' ><IconHome style={{ fontSize: 20 }} />主页</MenuItem> */}
             {/* <MenuItem key="Digest" className="custom-menu-item">

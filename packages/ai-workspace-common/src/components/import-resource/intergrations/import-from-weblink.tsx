@@ -8,6 +8,7 @@ import {
   Skeleton,
   Select,
   Message as message,
+  Affix,
 } from '@arco-design/web-react';
 import { IconLink, IconBranch, IconClose } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
@@ -186,109 +187,115 @@ export const ImportFromWeblink = () => {
 
   return (
     <div className="intergation-container intergation-import-from-weblink">
-      <div className="intergration-header">
-        <span className="menu-item-icon">
-          <IconLink />
-        </span>
-        <span className="intergration-header-title">网页链接</span>
-      </div>
-      <Divider />
-      <div className="intergation-body">
-        <div className="intergation-body-action">
-          <TextArea
-            placeholder="输入或粘贴网页链接，每行一个...."
-            rows={4}
-            autoSize={{
-              minRows: 4,
-              maxRows: 4,
-            }}
-            value={linkStr}
-            onChange={(value) => setLinkStr(value)}
-          />
-          <Button
-            type="primary"
-            long
-            style={{ marginTop: 16 }}
-            onClick={() => {
-              scrapeLink(linkStr);
-            }}
-          >
-            添加
-          </Button>
-        </div>
-        <div className="intergation-body-result">
-          <h2 className="intergation-body-result-title">待处理列表</h2>
-          <div className="intergation-result-list">
-            {scrapeLinkLoading ? <Skeleton /> : null}
-            {importResourceStore.scrapeLinks?.length > 0 ? (
-              <List
-                style={{ width: 700, marginBottom: 48, border: 'none' }}
-                dataSource={importResourceStore?.scrapeLinks}
-                render={(item, index) => <RenderItem item={item} key={index} />}
+      <div className="intergation-content">
+        <div className="intergation-operation-container">
+          <div className="intergration-header">
+            <span className="menu-item-icon">
+              <IconLink />
+            </span>
+            <span className="intergration-header-title">网页链接</span>
+          </div>
+          <Divider />
+          <div className="intergation-body">
+            <div className="intergation-body-action">
+              <TextArea
+                placeholder="输入或粘贴网页链接，每行一个...."
+                rows={4}
+                autoSize={{
+                  minRows: 4,
+                  maxRows: 4,
+                }}
+                value={linkStr}
+                onChange={(value) => setLinkStr(value)}
               />
-            ) : null}
+              <Button
+                type="primary"
+                long
+                style={{ marginTop: 16 }}
+                onClick={() => {
+                  scrapeLink(linkStr);
+                }}
+              >
+                添加
+              </Button>
+            </div>
+            <div className="intergation-body-result">
+              <h2 className="intergation-body-result-title">待处理列表</h2>
+              <div className="intergation-result-list">
+                {scrapeLinkLoading ? <Skeleton /> : null}
+                {importResourceStore.scrapeLinks?.length > 0 ? (
+                  <List
+                    style={{ width: 700, marginBottom: 48, border: 'none' }}
+                    dataSource={importResourceStore?.scrapeLinks}
+                    render={(item, index) => <RenderItem item={item} key={index} />}
+                  />
+                ) : null}
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div className="intergation-footer">
-        <div className="footer-location">
-          <p className="footer-count text-item">共 {importResourceStore?.scrapeLinks?.length} 个</p>
-          <p style={{ margin: '0 8px' }} className="text-item">
-            {' '}
-            |{' '}
-          </p>
-          <p className="text-item">保存至 </p>
-          <Select
-            size="large"
-            placeholder="选择保存知识库"
-            showSearch
-            className={'kg-selector'}
-            // value={searchValue}
-            defaultValue={'new-collection'}
-            onInputValueChange={(value) => {
-              handleValueChange(value);
-            }}
-            onChange={(value) => {
-              console.log('value', value);
-              if (!value) return;
-              //   handleValueChange(value);
-              if (value === 'new-collection') {
-                importResourceStore.setSelectedCollectionId('new-collection');
-              } else {
-                const id = value.split('-')[2];
-                importResourceStore.setSelectedCollectionId(id);
-              }
-            }}
-            dropdownRender={(menu) => (
-              <div>
-                {menu}
-                {mode === 'fetch' && hasMore ? (
-                  <div className="search-load-more">
-                    <Button type="text" loading={isRequesting} onClick={() => loadMore(currentPage)}>
-                      加载更多
-                    </Button>
-                  </div>
-                ) : null}
-              </div>
-            )}
-          >
-            <Option key="new-collection" value="new-collection">
-              新建知识库
-            </Option>
-            {dataList?.map((item, index) => (
-              <Option key={`${item?.id}-${index}`} value={index + '-' + item?.title + '-' + item?.id}>
-                <span dangerouslySetInnerHTML={{ __html: item?.title }}></span>
+      <Affix offsetBottom={0} target={() => document.querySelector('.import-resource-right-panel') as HTMLElement}>
+        <div className="intergation-footer">
+          <div className="footer-location">
+            <p className="footer-count text-item">共 {importResourceStore?.scrapeLinks?.length} 个</p>
+            <p style={{ margin: '0 8px' }} className="text-item">
+              {' '}
+              |{' '}
+            </p>
+            <p className="text-item">保存至 </p>
+            <Select
+              size="large"
+              placeholder="选择保存知识库"
+              showSearch
+              className={'kg-selector'}
+              // value={searchValue}
+              defaultValue={'new-collection'}
+              onInputValueChange={(value) => {
+                handleValueChange(value);
+              }}
+              onChange={(value) => {
+                console.log('value', value);
+                if (!value) return;
+                //   handleValueChange(value);
+                if (value === 'new-collection') {
+                  importResourceStore.setSelectedCollectionId('new-collection');
+                } else {
+                  const id = value.split('-')[2];
+                  importResourceStore.setSelectedCollectionId(id);
+                }
+              }}
+              dropdownRender={(menu) => (
+                <div>
+                  {menu}
+                  {mode === 'fetch' && hasMore ? (
+                    <div className="search-load-more">
+                      <Button type="text" loading={isRequesting} onClick={() => loadMore(currentPage)}>
+                        加载更多
+                      </Button>
+                    </div>
+                  ) : null}
+                </div>
+              )}
+            >
+              <Option key="new-collection" value="new-collection">
+                新建知识库
               </Option>
-            ))}
-          </Select>
+              {dataList?.map((item, index) => (
+                <Option key={`${item?.id}-${index}`} value={index + '-' + item?.title + '-' + item?.id}>
+                  <span dangerouslySetInnerHTML={{ __html: item?.title }}></span>
+                </Option>
+              ))}
+            </Select>
+          </div>
+          <div className="footer-action">
+            <Button style={{ width: 72, marginRight: 8 }}>取消</Button>
+            <Button type="primary" style={{ width: 100 }} onClick={handleSave}>
+              保存
+            </Button>
+          </div>
         </div>
-        <div className="footer-action">
-          <Button style={{ width: 72, marginRight: 8 }}>取消</Button>
-          <Button type="primary" style={{ width: 100 }} onClick={handleSave}>
-            保存
-          </Button>
-        </div>
-      </div>
+      </Affix>
     </div>
   );
 };

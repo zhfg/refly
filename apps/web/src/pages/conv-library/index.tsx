@@ -23,7 +23,9 @@ export const ConvLibrary = () => {
           {t("productName")} | {t("tabMeta.threadLibrary.title")}
         </title>
       </Helmet>
-      <div>{t("tabMeta.threadLibrary.title")}</div>
+      <Typography.Title heading={4} style={{ padding: `0 60px` }}>
+        {t("tabMeta.threadLibrary.title")}
+      </Typography.Title>
       <ConvList
         classNames=""
         handleConvItemClick={convId => {
