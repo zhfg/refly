@@ -143,6 +143,31 @@ paths:
                 $ref: '#/components/schemas/UpsertResourceResponse'
       security:
         - api_key: []
+  /knowledge/resource/batch:
+    post:
+      tags:
+        - knowledge
+      summary: Batch create new resources
+      description: Batch create a new resource
+      operationId: batchCreateResource
+      requestBody:
+        description: Resource creation request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/UpsertResourceRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertResourceResponse'
+      security:
+        - api_key: []
   /knowledge/resource/delete:
     post:
       tags:
@@ -1374,6 +1399,16 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/Resource'
+    BatchCreateResourceResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Resource list
+              items:
+                $ref: '#/components/schemas/Resource'
     DeleteResourceRequest:
       type: object
       required:

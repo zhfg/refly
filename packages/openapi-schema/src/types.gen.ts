@@ -678,6 +678,13 @@ export type UpsertResourceResponse = BaseResponse & {
   data?: Resource;
 };
 
+export type BatchCreateResourceResponse = BaseResponse & {
+  /**
+   * Resource list
+   */
+  data?: Array<Resource>;
+};
+
 export type DeleteResourceRequest = {
   /**
    * Resource ID to delete
@@ -1171,6 +1178,17 @@ export type CreateResourceResponse = UpsertResourceResponse;
 
 export type CreateResourceError = unknown;
 
+export type BatchCreateResourceData = {
+  /**
+   * Resource creation request
+   */
+  body: Array<UpsertResourceRequest>;
+};
+
+export type BatchCreateResourceResponse2 = UpsertResourceResponse;
+
+export type BatchCreateResourceError = unknown;
+
 export type DeleteResourceData = {
   body: DeleteResourceRequest;
 };
@@ -1475,6 +1493,17 @@ export type $OpenApiTs = {
   '/knowledge/resource/new': {
     post: {
       req: CreateResourceData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': UpsertResourceResponse;
+      };
+    };
+  };
+  '/knowledge/resource/batch': {
+    post: {
+      req: BatchCreateResourceData;
       res: {
         /**
          * successful operation

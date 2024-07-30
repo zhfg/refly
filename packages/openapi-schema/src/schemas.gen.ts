@@ -861,6 +861,26 @@ export const $UpsertResourceResponse = {
   ],
 } as const;
 
+export const $BatchCreateResourceResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Resource list',
+          items: {
+            $ref: '#/components/schemas/Resource',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
 export const $DeleteResourceRequest = {
   type: 'object',
   required: ['resourceId'],
