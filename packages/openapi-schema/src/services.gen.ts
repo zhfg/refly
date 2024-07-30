@@ -14,6 +14,9 @@ import type {
   CreateResourceData,
   CreateResourceError,
   CreateResourceResponse,
+  BatchCreateResourceData,
+  BatchCreateResourceError,
+  BatchCreateResourceResponse2,
   DeleteResourceData,
   DeleteResourceError,
   DeleteResourceResponse,
@@ -124,6 +127,17 @@ export const createResource = (options: Options<CreateResourceData>) => {
   return (options?.client ?? client).post<CreateResourceResponse, CreateResourceError>({
     ...options,
     url: '/knowledge/resource/new',
+  });
+};
+
+/**
+ * Batch create new resources
+ * Batch create a new resource
+ */
+export const batchCreateResource = (options: Options<BatchCreateResourceData>) => {
+  return (options?.client ?? client).post<BatchCreateResourceResponse2, BatchCreateResourceError>({
+    ...options,
+    url: '/knowledge/resource/batch',
   });
 };
 
