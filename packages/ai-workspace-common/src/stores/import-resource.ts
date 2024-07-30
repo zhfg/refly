@@ -18,13 +18,18 @@ interface ImportResourceState {
   // scrape
   scrapeLinks: LinkMeta[];
 
+  // save to collection
+  selectedCollectionId: string;
+
   setImportResourceModalVisible: (visible: boolean) => void;
   setScapeLinks: (links: LinkMeta[]) => void;
+  setSelectedCollectionId: (id: string) => void;
   resetState: () => void;
 }
 
 export const defaultState = {
   scrapeLinks: [],
+  selectedCollectionId: '',
   importResourceModalVisible: false,
 };
 
@@ -35,6 +40,7 @@ export const useImportResourceStore = create<ImportResourceState>()(
     setImportResourceModalVisible: (visible: boolean) =>
       set((state) => ({ ...state, importResourceModalVisible: visible })),
     setScapeLinks: (links: LinkMeta[]) => set((state) => ({ ...state, scrapeLinks: links })),
+    setSelectedCollectionId: (id: string) => set((state) => ({ ...state, selectedCollectionId: id })),
     resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),
 );

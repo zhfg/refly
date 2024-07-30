@@ -8,7 +8,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 export const useFetchOrSearchList = ({
   fetchData,
 }: {
-  fetchData?: (payload: { pageSize: number; page: number }) => Promise<{ success: boolean; data?: T[] }>;
+  fetchData?: (payload: { pageSize: number; page: number }) => Promise<{ success: boolean; data?: SearchResult[] }>;
 }) => {
   const [mode, setMode] = useState<'fetch' | 'search'>('fetch');
   // fetch

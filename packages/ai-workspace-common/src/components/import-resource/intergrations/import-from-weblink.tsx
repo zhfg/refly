@@ -1,4 +1,14 @@
-import { Button, Divider, Input, List, Avatar, Checkbox, Skeleton, Select, Message } from '@arco-design/web-react';
+import {
+  Button,
+  Divider,
+  Input,
+  List,
+  Avatar,
+  Checkbox,
+  Skeleton,
+  Select,
+  Message as message,
+} from '@arco-design/web-react';
 import { IconLink, IconBranch, IconClose } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
 import { useEffect, useState } from 'react';
@@ -11,7 +21,13 @@ import { genUniqueId } from '@refly-packages/utils/id';
 import { LinkMeta, useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { Collection } from '@refly/openapi-schema';
+import {
+  BatchCreateResourceData,
+  Collection,
+  CreateResourceData,
+  SearchResult,
+  UpsertResourceRequest,
+} from '@refly/openapi-schema';
 import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-or-search-list';
 
 const { TextArea } = Input;
@@ -21,6 +37,9 @@ export const ImportFromWeblink = () => {
   const [linkStr, setLinkStr] = useState('');
   const [scrapeLinkLoading, setScrapeLinkLoading] = useState(false);
   const importResourceStore = useImportResourceStore();
+
+  //
+  const [saveLoading, setSaveLoading] = useState(false);
 
   // search
   const [searchValue, setSearchValue] = useState('new-collection');
@@ -34,7 +53,12 @@ export const ImportFromWeblink = () => {
         },
       });
 
-      return { success: res?.data?.success, data: res?.data?.data };
+      const data: SearchResult[] = (res?.data?.data || []).map((item) => ({
+        id: item?.collectionId,
+        title: item?.title,
+        domain: 'collection',
+      }));
+      return { success: res?.data?.success, data };
     },
   });
 
@@ -117,15 +141,43 @@ export const ImportFromWeblink = () => {
   };
 
   const handleSave = async () => {
-    const { scrapeLinks } = useImportResourceStore.getState();
+    setSaveLoading(true);
+    const { scrapeLinks, selectedCollectionId } = useImportResourceStore.getState();
+
     if (scrapeLinks?.length === 0) {
-      Message.warning('你还未添加任何链接！');
+      message.warning('你还未添加任何链接！');
     }
 
+    const batchCreateResourceData: UpsertResourceRequest[] = scrapeLinks.map((link) => {
+      return {
+        resourceType: 'weblink',
+        data: {
+          url: link?.url,
+          title: link?.title,
+        },
+        collectionId: selectedCollectionId === 'new-collection' ? undefined : selectedCollectionId,
+      };
+    });
+
     try {
-      // const res = await getClient().createResource({
-      // })
-    } catch (err) {}
+      const res = await getClient().batchCreateResource({
+        body: batchCreateResourceData,
+      });
+
+      if (!res?.data?.success) {
+        setSaveLoading(false);
+        message.error('保存失败');
+        return;
+      }
+
+      message.success('保存成功');
+      importResourceStore.setScapeLinks([]);
+      setLinkStr('');
+    } catch (err) {
+      message.error('保存失败');
+    }
+
+    setSaveLoading(false);
   };
 
   useEffect(() => {
@@ -196,6 +248,17 @@ export const ImportFromWeblink = () => {
             onInputValueChange={(value) => {
               handleValueChange(value);
             }}
+            onChange={(value) => {
+              console.log('value', value);
+              if (!value) return;
+              //   handleValueChange(value);
+              if (value === 'new-collection') {
+                importResourceStore.setSelectedCollectionId('new-collection');
+              } else {
+                const id = value.split('-')[2];
+                importResourceStore.setSelectedCollectionId(id);
+              }
+            }}
             dropdownRender={(menu) => (
               <div>
                 {menu}
@@ -213,7 +276,7 @@ export const ImportFromWeblink = () => {
               新建知识库
             </Option>
             {dataList?.map((item, index) => (
-              <Option key={`${item?.id}-${index}`} value={item?.title + '-' + index}>
+              <Option key={`${item?.id}-${index}`} value={index + '-' + item?.title + '-' + item?.id}>
                 <span dangerouslySetInnerHTML={{ __html: item?.title }}></span>
               </Option>
             ))}
@@ -256,6 +319,15 @@ const RenderItem = (props: { item: LinkMeta }) => {
           type="text"
           className="assist-action-item"
           onClick={() => {
+            window.open(item?.url, '_blank');
+          }}
+        >
+          <IconLink />
+        </Button>,
+        <Button
+          type="text"
+          className="assist-action-item"
+          onClick={() => {
             const newLinks = importResourceStore?.scrapeLinks?.filter((link) => {
               return link?.key !== item?.key;
             });
@@ -270,7 +342,14 @@ const RenderItem = (props: { item: LinkMeta }) => {
     >
       <List.Item.Meta
         avatar={<Avatar shape="square">{<img src={item?.image} style={{ objectFit: 'contain' }} />}</Avatar>}
-        title={item.title}
+        title={
+          <p className="intergation-result-intro">
+            <span className="intergation-result-url" onClick={() => window.open(item?.url, '_blank')}>
+              {item?.url}
+            </span>
+            <p>{item?.isError ? <span className="text-red-500">抓取失败</span> : item?.title}</p>
+          </p>
+        }
         description={item.description}
       />
     </List.Item>
