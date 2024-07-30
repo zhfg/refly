@@ -26,7 +26,7 @@ export const ResourceBase = (props: ResourceBaseProps) => {
   const [queryParam, setQueryParam] = useState({
     pageSize: 10,
     page: 1,
-    hasMore: true
+    hasMore: true,
   });
 
   const [scrollLoading, setScrollLoading] = useState(<Skeleton animation style={{ width: '100%' }}></Skeleton>);
@@ -58,7 +58,7 @@ export const ResourceBase = (props: ResourceBaseProps) => {
         query: {
           resourceType: 'weblink',
           ...queryParam,
-          page: currentPage
+          page: currentPage,
         },
       });
 
@@ -68,7 +68,7 @@ export const ResourceBase = (props: ResourceBaseProps) => {
       setQueryParam({
         page: currentPage,
         hasMore: !!listData.length,
-        pageSize: queryParam.pageSize
+        pageSize: queryParam.pageSize,
       });
     } catch (err) {
       message.error(t('knowledgeLibrary.archive.list.fetchErr'));
@@ -83,12 +83,9 @@ export const ResourceBase = (props: ResourceBaseProps) => {
 
   const cardIcon = (item: Resource) => {
     return (
-      <img
-        src={`https://www.google.com/s2/favicons?domain=${item?.data?.url}&sz=${32}`}
-        alt={item?.data?.title}
-      />
+      <img src={`https://www.google.com/s2/favicons?domain=${item?.data?.url}&sz=${32}`} alt={item?.data?.title} />
     );
-  }
+  };
 
   useEffect(() => {
     fetchData();
@@ -97,57 +94,57 @@ export const ResourceBase = (props: ResourceBaseProps) => {
   return (
     <>
       <List
-          grid={{
-            sm: 24,
-            md: 12,
-            lg: 8,
-            xl: 6,
-          }}
-          className="resource-base"
-          wrapperStyle={{ width: '100%' }}
-          bordered={false}
-          pagination={false}
-          offsetBottom={200}
-          dataSource={resourceList || []}
-          scrollLoading={scrollLoading}
-          onReachBottom={(currentPage) => fetchData(currentPage)}
-          render={(item: Resource, key) => (
-            <List.Item
-              key={item?.resourceId + key}
-              style={{
-                padding: '0',
-              }}
-              actionLayout="vertical"
-              onClick={() => {
-                props.handleItemClick(item?.collectionId, item?.resourceId);
-              }}
-              actions={[
-                <CardBox
-                  key={item.resourceId}
-                  cardData={item}
-                  cardIcon={cardIcon(item)}
-                  type="resource"
-                  onClick={() => {
-                    props.handleItemClick(item?.collectionId, item?.resourceId);
-                  }}
-                >
-                  <div className="flex items-center justify-between mt-6">
-                    <div className="text-xs text-black/40">
-                      {time(item.updatedAt, language as LOCALE)
-                        .utc()
-                        .fromNow()}
-                    </div>
-                    <div>
-                      <IconBook style={{ color: '#819292', cursor: 'pointer' }} />
-                      <IconMore style={{ color: '#819292', marginLeft: '12px', cursor: 'pointer' }} />
-                    </div>
+        grid={{
+          sm: 24,
+          md: 12,
+          lg: 8,
+          xl: 6,
+        }}
+        className="resource-base"
+        wrapperStyle={{ width: '100%' }}
+        bordered={false}
+        pagination={false}
+        offsetBottom={200}
+        dataSource={resourceList || []}
+        scrollLoading={scrollLoading}
+        onReachBottom={(currentPage) => fetchData(currentPage)}
+        render={(item: Resource, key) => (
+          <List.Item
+            key={item?.resourceId + key}
+            style={{
+              padding: '0',
+              width: '100%',
+            }}
+            actionLayout="vertical"
+            onClick={() => {
+              props.handleItemClick(item?.collectionId, item?.resourceId);
+            }}
+            actions={[
+              <CardBox
+                key={item.resourceId}
+                cardData={item}
+                cardIcon={cardIcon(item)}
+                type="resource"
+                onClick={() => {
+                  props.handleItemClick(item?.collectionId, item?.resourceId);
+                }}
+              >
+                <div className="flex items-center justify-between mt-6">
+                  <div className="text-xs text-black/40">
+                    {time(item.updatedAt, language as LOCALE)
+                      .utc()
+                      .fromNow()}
                   </div>
-                </CardBox>
-              ]}
-            >
-            </List.Item>
-          )}
-        />
+                  <div>
+                    <IconBook style={{ color: '#819292', cursor: 'pointer' }} />
+                    <IconMore style={{ color: '#819292', marginLeft: '12px', cursor: 'pointer' }} />
+                  </div>
+                </div>
+              </CardBox>,
+            ]}
+          ></List.Item>
+        )}
+      />
     </>
   );
 };

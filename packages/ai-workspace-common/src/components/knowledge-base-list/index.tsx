@@ -79,7 +79,7 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
       data = newRes.data?.data || [];
       newData = currentPage === 1 ? data : knowledgeBaseStore.knowledgeBaseList.concat(data);
       knowledgeBaseStore.updateKnowledgeBaseList(newData);
-      knowledgeBaseStore.updateHasMore(!!data.length);
+      knowledgeBaseStore.updateHasMore(data.length < knowledgeBaseStore.pageSize);
     } catch (err) {
       message.error(t('knowledgeLibrary.archive.list.fetchErr'));
     } finally {
@@ -100,7 +100,6 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
   return (
     <div className={classNames('today-container', 'knowledge-base-list-container', props.classNames)}>
       <div className="today-feature-container">
-        
         <List
           grid={{
             sm: 24,
@@ -128,7 +127,14 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
                 props.handleItemClick(item?.collectionId);
               }}
               actions={[
-                <CardBox cardData={item} type="knowledge" cardIcon={<IconBook style={{ fontSize: '32px', strokeWidth: 3}} />} onClick={() => {props.handleItemClick(item?.collectionId);}}>
+                <CardBox
+                  cardData={item}
+                  type="knowledge"
+                  cardIcon={<IconBook style={{ fontSize: '32px', strokeWidth: 3 }} />}
+                  onClick={() => {
+                    props.handleItemClick(item?.collectionId);
+                  }}
+                >
                   <div className="flex items-center justify-between mt-6">
                     <div className="text-xs text-black/40">
                       {time(item.updatedAt, language as LOCALE)
@@ -147,15 +153,14 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
                             message.success(t('knowledgeLibrary.archive.item.copyNotify'));
                           }}
                         >
-                         <IconMore style={{ color: '#819292', marginLeft: '12px', cursor: 'pointer' }} />
+                          <IconMore style={{ color: '#819292', marginLeft: '12px', cursor: 'pointer' }} />
                         </span>
                       </IconTip>
                     </div>
                   </div>
-                </CardBox>
+                </CardBox>,
               ]}
-            >
-            </List.Item>
+            ></List.Item>
           )}
         />
       </div>

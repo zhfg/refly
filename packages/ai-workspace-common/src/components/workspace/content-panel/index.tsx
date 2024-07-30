@@ -16,7 +16,7 @@ const TabPanel = Tabs.TabPane;
 
 export const ContentPanel = () => {
   const { t } = useTranslation();
-  const { jumpToKnowledgeBase, jumpToNote, jumpToReadResource, jumpToConv } = useKnowledgeBaseJumpNewPath();
+  const { jumpToKnowledgeBase, jumpToReadResource, jumpToConv } = useKnowledgeBaseJumpNewPath();
 
   return (
     <div className="content-panel-container">

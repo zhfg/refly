@@ -1,8 +1,11 @@
 .note-list {
   word-break: break-all;
-  overflow: auto;
-  height: 100%;
-  padding: 16px;
+  padding: 0 16px;
+  width: 100%;
+  max-height: calc(100vh - 400px);
+  padding: 0 60px;
+  // overflow-y: scroll;
+
   .icon-box {
     margin-right: 12px;
     width: 48px;
