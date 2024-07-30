@@ -172,6 +172,7 @@ export const ImportFromWeblink = () => {
 
       message.success('保存成功');
       importResourceStore.setScapeLinks([]);
+      importResourceStore.setImportResourceModalVisible(false);
       setLinkStr('');
     } catch (err) {
       message.error('保存失败');
@@ -255,7 +256,7 @@ export const ImportFromWeblink = () => {
               if (value === 'new-collection') {
                 importResourceStore.setSelectedCollectionId('new-collection');
               } else {
-                const id = value.split('-')[2];
+                const id = value.split('_')[2];
                 importResourceStore.setSelectedCollectionId(id);
               }
             }}
@@ -276,7 +277,7 @@ export const ImportFromWeblink = () => {
               新建知识库
             </Option>
             {dataList?.map((item, index) => (
-              <Option key={`${item?.id}-${index}`} value={index + '-' + item?.title + '-' + item?.id}>
+              <Option key={`${item?.id}_${index}`} value={index + '_' + item?.title + '_' + item?.id}>
                 <span dangerouslySetInnerHTML={{ __html: item?.title }}></span>
               </Option>
             ))}
