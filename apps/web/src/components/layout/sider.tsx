@@ -1,4 +1,11 @@
-import { Avatar, Divider, Layout, Menu, Tag } from "@arco-design/web-react"
+import {
+  Avatar,
+  Button,
+  Divider,
+  Layout,
+  Menu,
+  Tag,
+} from "@arco-design/web-react"
 import {
   useLocation,
   useNavigate,
@@ -9,6 +16,8 @@ import {
   IconDownload,
   IconTwitter,
   IconLanguage,
+  IconImport,
+  IconMessage,
 } from "@arco-design/web-react/icon"
 // 静态资源
 import Logo from "@/assets/logo.svg"
@@ -20,6 +29,7 @@ import { SearchQuickOpenBtn } from "@refly-packages/ai-workspace-common/componen
 import { useTranslation } from "react-i18next"
 import { openGetStartDocument } from "@refly/ai-workspace-common/utils"
 import { UILocaleList } from "@refly/ai-workspace-common/components/ui-locale-list"
+import { useImportResourceStore } from "@refly/ai-workspace-common/stores/import-resource"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -42,6 +52,7 @@ export const SiderLayout = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const userStore = useUserStore()
+  const importResourceStore = useImportResourceStore()
   const isGuideDetail = location.pathname.includes("guide/")
 
   const { t } = useTranslation()
@@ -121,6 +132,11 @@ export const SiderLayout = () => {
         break
       }
 
+      case "ThreadLibrary": {
+        navigate(`/thread`)
+        break
+      }
+
       case "DownloadExtension": {
         // 下载浏览器插件
         window.open(
@@ -154,6 +170,17 @@ export const SiderLayout = () => {
           </div>
         </div>
         <SearchQuickOpenBtn />
+        <div className="sider-import-container">
+          <button
+            className="sider-import-btn"
+            onClick={() =>
+              importResourceStore.setImportResourceModalVisible(true)
+            }>
+            <IconImport style={{ fontSize: 20 }} />
+            <span className="sider-menu-title">添加资源</span>
+          </button>
+        </div>
+
         <Menu
           style={{
             width: 220,
@@ -171,12 +198,16 @@ export const SiderLayout = () => {
                 {t("loggedHomePage.siderMenu.news")}
               </span>
             </MenuItem> */}
-            <Divider />
+            <Divider style={{ margin: "16px 0" }} />
             <MenuItem key="Workspace" className="custom-menu-item">
               <IconHome style={{ fontSize: 20 }} />
               <span className="sider-menu-title">
                 {t("loggedHomePage.siderMenu.homePage")}
               </span>
+            </MenuItem>
+            <MenuItem key="ThreadLibrary" className="custom-menu-item">
+              <IconMessage style={{ fontSize: 20 }} />
+              <span className="sider-menu-title">会话</span>
             </MenuItem>
             {/* <MenuItem key='Explore' ><IconHome style={{ fontSize: 20 }} />主页</MenuItem> */}
             {/* <MenuItem key="Digest" className="custom-menu-item">

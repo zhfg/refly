@@ -26,7 +26,7 @@
   }
 
   .sider-menu-nav {
-    height: calc(100% - 74px - 55px);
+    height: calc(100% - 74px - 55px - 56px);
 
     .arco-menu-inner {
       display: flex;
@@ -198,6 +198,34 @@
         color: #fff;
         transition: background-color 0.5s;
         // transition: color 0.5s;
+      }
+    }
+  }
+
+  .sider-import-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    .sider-import-btn {
+      width: 200px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 0 14px;
+      color: rgba(0, 0, 0, 0.6);
+
+      &:hover {
+        background-color: rgb(232, 232, 227) !important ;
+      }
+
+      .sider-menu-title {
+        margin-left: 12px;
+        font-weight: bold;
       }
     }
   }

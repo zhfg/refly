@@ -98,7 +98,9 @@
     "@radix-ui/react-dialog": "~1.1.1",
     "@radix-ui/react-primitive": "~2.0.0",
     "qs": "~6.12.3",
-    "words-count": "~2.0.2"
+    "words-count": "~2.0.2",
+    "rate-limiter-flexible": "~5.0.3",
+    "cheerio": "~1.0.0-rc.12"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",

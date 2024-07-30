@@ -6,6 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Queue } from 'bull';
+import pLimit from 'p-limit';
 import { InjectQueue } from '@nestjs/bull';
 import { readingTime } from 'reading-time-estimator';
 import { Prisma, User } from '@prisma/client';
@@ -160,6 +161,17 @@ export class KnowledgeService {
     // If target collection not specified, create new one
     if (!param.collectionId) {
       param.collectionId = genCollectionID();
+
+      await this.prisma.collection.upsert({
+        where: { collectionId: param.collectionId },
+        create: {
+          title: param.collectionName || 'Default Collection',
+          uid: user.uid,
+          collectionId: param.collectionId,
+        },
+        update: {},
+      });
+
       this.logger.log(
         `create new collection for user ${user.uid}, collection id: ${param.collectionId}`,
       );
@@ -184,36 +196,54 @@ export class KnowledgeService {
       throw new BadRequestException('Invalid resource type');
     }
 
-    const [resource] = await this.prisma.$transaction([
-      this.prisma.resource.create({
-        data: {
-          resourceId: param.resourceId,
-          resourceType: param.resourceType,
-          collectionId: param.collectionId,
-          meta: JSON.stringify(param.data),
-          content: param.content ?? '',
-          uid: user.uid,
-          isPublic: param.isPublic,
-          readOnly: param.readOnly,
-          title: param.title || 'Untitled',
-          indexStatus: 'processing',
-        },
-      }),
-      this.prisma.collection.upsert({
-        where: { collectionId: param.collectionId },
-        create: {
-          title: param.collectionName || 'Default Collection',
-          uid: user.uid,
-          collectionId: param.collectionId,
-        },
-        update: {},
-      }),
-    ]);
+    const resource = await this.prisma.resource.create({
+      data: {
+        resourceId: param.resourceId,
+        resourceType: param.resourceType,
+        collectionId: param.collectionId,
+        meta: JSON.stringify(param.data),
+        content: param.content ?? '',
+        uid: user.uid,
+        isPublic: param.isPublic,
+        readOnly: param.readOnly,
+        title: param.title || 'Untitled',
+        indexStatus: 'processing',
+      },
+    });
 
     await this.queue.add(CHANNEL_FINALIZE_RESOURCE, { ...param, uid: user.uid });
     // await this.finalizeResource(param);
 
     return resource;
+  }
+
+  async batchCreateResource(user: User, params: UpsertResourceRequest[]) {
+    // Create a new collection for all new resources without collectionId specified
+    if (params.some((param) => !param.collectionId)) {
+      const newColletionId = genCollectionID();
+      const newCollectionName = params.find((param) => !param.collectionId)?.collectionName;
+
+      await this.prisma.collection.create({
+        data: {
+          title: newCollectionName || 'Default Collection',
+          uid: user.uid,
+          collectionId: newColletionId,
+        },
+      });
+      this.logger.log(
+        `create new collection for user ${user.uid}, collection id: ${newColletionId}`,
+      );
+
+      params.forEach((param) => {
+        if (!param.collectionId) {
+          param.collectionId = newColletionId;
+        }
+      });
+    }
+
+    const limit = pLimit(5);
+    const tasks = params.map((param) => limit(async () => await this.createResource(user, param)));
+    return Promise.all(tasks);
   }
 
   async indexResource(user: User, param: UpsertResourceRequest) {
