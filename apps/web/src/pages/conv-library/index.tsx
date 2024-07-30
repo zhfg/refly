@@ -4,7 +4,7 @@ import "./index.scss"
 import { ConvList } from "@refly/ai-workspace-common/components/conv-list"
 import { useTranslation } from "react-i18next"
 import { useKnowledgeBaseJumpNewPath } from "@refly/ai-workspace-common/hooks/use-jump-new-path"
-import { Typography } from "@arco-design/web-react"
+import { Button, Typography } from "@arco-design/web-react"
 
 export const ConvLibrary = () => {
   const { t } = useTranslation()
@@ -23,9 +23,21 @@ export const ConvLibrary = () => {
           {t("productName")} | {t("tabMeta.threadLibrary.title")}
         </title>
       </Helmet>
-      <Typography.Title heading={4} style={{ padding: `0 60px` }}>
-        {t("tabMeta.threadLibrary.title")}
-      </Typography.Title>
+      <div className="conv-library-header">
+        <Typography.Title heading={4}>
+          {t("tabMeta.threadLibrary.title")}
+        </Typography.Title>
+        <Button
+          type="primary"
+          style={{ width: 120, borderRadius: 8 }}
+          onClick={() =>
+            jumpToConv({
+              convId: "",
+            })
+          }>
+          新会话
+        </Button>
+      </div>
       <ConvList
         classNames=""
         handleConvItemClick={convId => {

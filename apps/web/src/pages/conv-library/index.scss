@@ -39,6 +39,14 @@
   }
 }
 
+.conv-library-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 60px;
+}
+
 .arco-list-item-action {
   align-items: center;
   flex-wrap: wrap !important;
