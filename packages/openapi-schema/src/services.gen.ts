@@ -50,6 +50,29 @@ import type {
   DeleteCollectionData,
   DeleteCollectionError,
   DeleteCollectionResponse,
+  ListLabelClassesError,
+  ListLabelClassesResponse2,
+  CreateLabelClassData,
+  CreateLabelClassError,
+  CreateLabelClassResponse,
+  UpdateLabelClassData,
+  UpdateLabelClassError,
+  UpdateLabelClassResponse,
+  DeleteLabelClassData,
+  DeleteLabelClassError,
+  DeleteLabelClassResponse,
+  ListLabelInstancesData,
+  ListLabelInstancesError,
+  ListLabelInstancesResponse2,
+  CreateLabelInstanceData,
+  CreateLabelInstanceError,
+  CreateLabelInstanceResponse,
+  UpdateLabelInstanceData,
+  UpdateLabelInstanceError,
+  UpdateLabelInstanceResponse,
+  DeleteLabelInstanceData,
+  DeleteLabelInstanceError,
+  DeleteLabelInstanceResponse,
   ListSkillTemplatesData,
   ListSkillTemplatesError,
   ListSkillTemplatesResponse,
@@ -274,6 +297,94 @@ export const deleteCollection = (options: Options<DeleteCollectionData>) => {
   return (options?.client ?? client).post<DeleteCollectionResponse, DeleteCollectionError>({
     ...options,
     url: '/knowledge/collection/delete',
+  });
+};
+
+/**
+ * List label classes
+ * List all label classes
+ */
+export const listLabelClasses = (options?: Options) => {
+  return (options?.client ?? client).get<ListLabelClassesResponse2, ListLabelClassesError>({
+    ...options,
+    url: '/label/class/list',
+  });
+};
+
+/**
+ * Create new label class
+ * Create a new label class
+ */
+export const createLabelClass = (options: Options<CreateLabelClassData>) => {
+  return (options?.client ?? client).post<CreateLabelClassResponse, CreateLabelClassError>({
+    ...options,
+    url: '/label/class/new',
+  });
+};
+
+/**
+ * Update label class
+ * Update an existing label class
+ */
+export const updateLabelClass = (options: Options<UpdateLabelClassData>) => {
+  return (options?.client ?? client).post<UpdateLabelClassResponse, UpdateLabelClassError>({
+    ...options,
+    url: '/label/class/update',
+  });
+};
+
+/**
+ * Delete label class
+ * Delete an existing label class
+ */
+export const deleteLabelClass = (options: Options<DeleteLabelClassData>) => {
+  return (options?.client ?? client).post<DeleteLabelClassResponse, DeleteLabelClassError>({
+    ...options,
+    url: '/label/class/delete',
+  });
+};
+
+/**
+ * List labels
+ * List all label instances
+ */
+export const listLabelInstances = (options?: Options<ListLabelInstancesData>) => {
+  return (options?.client ?? client).get<ListLabelInstancesResponse2, ListLabelInstancesError>({
+    ...options,
+    url: '/label/instance/list',
+  });
+};
+
+/**
+ * Create new label instance
+ * Create new label instance
+ */
+export const createLabelInstance = (options: Options<CreateLabelInstanceData>) => {
+  return (options?.client ?? client).post<CreateLabelInstanceResponse, CreateLabelInstanceError>({
+    ...options,
+    url: '/label/instance/new',
+  });
+};
+
+/**
+ * Update label
+ * Update an existing label instance
+ */
+export const updateLabelInstance = (options: Options<UpdateLabelInstanceData>) => {
+  return (options?.client ?? client).post<UpdateLabelInstanceResponse, UpdateLabelInstanceError>({
+    ...options,
+    url: '/label/instance/update',
+  });
+};
+
+/**
+ * Delete label
+ * Delete an existing label
+ */
+export const deleteLabelInstance = (options: Options<DeleteLabelInstanceData>) => {
+  return (options?.client ?? client).post<DeleteLabelInstanceResponse, DeleteLabelInstanceError>({
+    ...options,
+    url: '/label/instance/delete',
   });
 };
 

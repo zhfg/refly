@@ -69,6 +69,10 @@ export type Resource = {
    * Document content for this resource (only returned in getNoteDetail API)
    */
   content?: string;
+  /**
+   * Resource labels
+   */
+  labels?: Array<LabelInstance>;
 };
 
 export type Note = {
@@ -104,6 +108,10 @@ export type Note = {
    * Note update time
    */
   updatedAt: string;
+  /**
+   * Note labels
+   */
+  labels?: Array<LabelInstance>;
 };
 
 export type Collection = {
@@ -135,6 +143,51 @@ export type Collection = {
    * Collection resources (only returned in detail API)
    */
   resources?: Array<Resource>;
+  /**
+   * Note labels
+   */
+  labels?: Array<LabelInstance>;
+};
+
+/**
+ * Entity type
+ */
+export type EntityType = 'resource' | 'collection' | 'note';
+
+/**
+ * Label class
+ */
+export type LabelClass = {
+  /**
+   * Label class ID
+   */
+  labelClassId: string;
+  /**
+   * Label class name
+   */
+  name: string;
+  /**
+   * Label icon
+   */
+  icon?: string;
+  /**
+   * Label creation instruction prompt
+   */
+  prompt?: string;
+};
+
+/**
+ * Label instances related to resources, collections, etc.
+ */
+export type LabelInstance = LabelClass & {
+  /**
+   * Label ID
+   */
+  labelId: string;
+  /**
+   * Label value
+   */
+  value: string;
 };
 
 /**
@@ -820,6 +873,75 @@ export type GetCollectionDetailResponse = BaseResponse & {
   data?: Collection;
 };
 
+export type ListLabelClassesResponse = BaseResponse & {
+  /**
+   * Label class list
+   */
+  data?: Array<LabelClass>;
+};
+
+export type UpsertLabelClassRequest = {
+  /**
+   * Label class name
+   */
+  name?: string;
+};
+
+export type UpsertLabelClassResponse = BaseResponse & {
+  /**
+   * Label class upserted
+   */
+  data?: LabelClass;
+};
+
+export type DeleteLabelClassRequest = {
+  /**
+   * Label class ID to delete
+   */
+  labelClassId: string;
+};
+
+export type ListLabelInstancesResponse = BaseResponse & {
+  /**
+   * Label list
+   */
+  data?: Array<LabelInstance>;
+};
+
+export type UpsertLabelInstanceRequest = {
+  /**
+   * Label key
+   */
+  key?: string;
+  /**
+   * Label value
+   */
+  value?: string;
+  /**
+   * Label display name
+   */
+  displayName?: string;
+  /**
+   * Label entity type
+   */
+  entityType?: EntityType;
+  /**
+   * Label entity ID
+   */
+  entityId?: string;
+};
+
+export type UpsertLabelInstanceResponse = BaseResponse & {
+  data?: LabelInstance;
+};
+
+export type DeleteLabelInstanceRequest = {
+  /**
+   * Label ID to delete
+   */
+  labelId: string;
+};
+
 export type ListSkillTemplateResponse = BaseResponse & {
   /**
    * Skill template list
@@ -1391,6 +1513,103 @@ export type DeleteCollectionResponse = BaseResponse;
 
 export type DeleteCollectionError = unknown;
 
+export type ListLabelClassesResponse2 = ListLabelClassesResponse;
+
+export type ListLabelClassesError = unknown;
+
+export type CreateLabelClassData = {
+  /**
+   * Label class creation request
+   */
+  body: UpsertLabelClassRequest;
+};
+
+export type CreateLabelClassResponse = UpsertLabelClassResponse;
+
+export type CreateLabelClassError = unknown;
+
+export type UpdateLabelClassData = {
+  /**
+   * Label class update request
+   */
+  body: UpsertLabelClassRequest;
+};
+
+export type UpdateLabelClassResponse = UpsertLabelClassResponse;
+
+export type UpdateLabelClassError = unknown;
+
+export type DeleteLabelClassData = {
+  body: DeleteLabelClassRequest;
+};
+
+export type DeleteLabelClassResponse = BaseResponse;
+
+export type DeleteLabelClassError = unknown;
+
+export type ListLabelInstancesData = {
+  query?: {
+    /**
+     * Entity type to retrieve
+     */
+    entityId?: string;
+    /**
+     * Entity type to retrieve
+     */
+    entityType?: EntityType;
+    /**
+     * Label key
+     */
+    key?: string;
+    /**
+     * Page number
+     */
+    page?: number;
+    /**
+     * Page size
+     */
+    pageSize?: number;
+    /**
+     * Label value
+     */
+    value?: string;
+  };
+};
+
+export type ListLabelInstancesResponse2 = ListLabelInstancesResponse;
+
+export type ListLabelInstancesError = unknown;
+
+export type CreateLabelInstanceData = {
+  /**
+   * Label instance creation request
+   */
+  body: UpsertLabelInstanceRequest;
+};
+
+export type CreateLabelInstanceResponse = UpsertLabelInstanceResponse;
+
+export type CreateLabelInstanceError = unknown;
+
+export type UpdateLabelInstanceData = {
+  /**
+   * Label update request
+   */
+  body: UpsertLabelInstanceRequest;
+};
+
+export type UpdateLabelInstanceResponse = UpsertLabelInstanceResponse;
+
+export type UpdateLabelInstanceError = unknown;
+
+export type DeleteLabelInstanceData = {
+  body: DeleteLabelInstanceRequest;
+};
+
+export type DeleteLabelInstanceResponse = BaseResponse;
+
+export type DeleteLabelInstanceError = unknown;
+
 export type ListSkillTemplatesData = {
   query?: {
     /**
@@ -1759,6 +1978,93 @@ export type $OpenApiTs = {
   '/knowledge/collection/delete': {
     post: {
       req: DeleteCollectionData;
+      res: {
+        /**
+         * Successful operation
+         */
+        '200': BaseResponse;
+      };
+    };
+  };
+  '/label/class/list': {
+    get: {
+      res: {
+        /**
+         * successful operation
+         */
+        '200': ListLabelClassesResponse;
+      };
+    };
+  };
+  '/label/class/new': {
+    post: {
+      req: CreateLabelClassData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': UpsertLabelClassResponse;
+      };
+    };
+  };
+  '/label/class/update': {
+    post: {
+      req: UpdateLabelClassData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': UpsertLabelClassResponse;
+      };
+    };
+  };
+  '/label/class/delete': {
+    post: {
+      req: DeleteLabelClassData;
+      res: {
+        /**
+         * Successful operation
+         */
+        '200': BaseResponse;
+      };
+    };
+  };
+  '/label/instance/list': {
+    get: {
+      req: ListLabelInstancesData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': ListLabelInstancesResponse;
+      };
+    };
+  };
+  '/label/instance/new': {
+    post: {
+      req: CreateLabelInstanceData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': UpsertLabelInstanceResponse;
+      };
+    };
+  };
+  '/label/instance/update': {
+    post: {
+      req: UpdateLabelInstanceData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': UpsertLabelInstanceResponse;
+      };
+    };
+  };
+  '/label/instance/delete': {
+    post: {
+      req: DeleteLabelInstanceData;
       res: {
         /**
          * Successful operation

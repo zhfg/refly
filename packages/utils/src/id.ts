@@ -10,6 +10,14 @@ export function genLinkID(): string {
   return 'l-' + createId();
 }
 
+export function genLabelClassID(): string {
+  return 'lc-' + createId();
+}
+
+export function genLabelID(): string {
+  return 'lb-' + createId();
+}
+
 export function genConvID(): string {
   return 'cv-' + createId();
 }

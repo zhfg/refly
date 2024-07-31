@@ -295,10 +295,70 @@ model SkillLog {
   @@map("skill_log")
 }
 
+model LabelClass {
+  /// Primary key
+  pk           BigInt          @id @default(autoincrement())
+  /// Label class ID
+  labelClassId String          @unique @map("label_class_id")
+  /// UID
+  uid          String          @map("uid")
+  /// Label kind icon
+  icon         String          @default("") @map("icon")
+  /// Label class name
+  name         String          @map("name")
+  /// Label creation instruction prompt
+  prompt       String          @map("prompt")
+  /// Create timestamp
+  createdAt    DateTime        @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt    DateTime        @updatedAt @map("updated_at") @db.Timestamptz()
+  /// Deletion timestamp
+  deletedAt    DateTime?       @map("deleted_at") @db.Timestamptz()
+  /// Related labels
+  labels       LabelInstance[]
+
+  @@index([uid, deletedAt, updatedAt])
+  @@map("label_classes")
+}
+
+model LabelInstance {
+  /// Primary key
+  pk           BigInt     @id @default(autoincrement())
+  /// Label ID
+  labelId      String     @unique @map("label_id")
+  /// Label class
+  labelClass   LabelClass @relation(fields: [labelClassId], references: [labelClassId])
+  /// Label class ID
+  labelClassId String     @map("label_class_id")
+  /// Label value
+  value        String     @map("value")
+  /// Entity type this label belongs to
+  entityType   EntityType @map("entity_type")
+  /// Entity ID this label belongs to (resourceId, collectionId, etc.)
+  entityId     String     @map("entity_id")
+  /// UID
+  uid          String     @map("uid")
+  /// Create timestamp
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz()
+  /// Deletion timestamp
+  deletedAt    DateTime?  @map("deleted_at") @db.Timestamptz()
+
+  @@index([entityType, entityId])
+  @@map("label_instances")
+}
+
 enum ResourceType {
   weblink
   note // deprecated
   text
+}
+
+enum EntityType {
+  resource
+  collection
+  note
 }
 
 enum ParseSource {

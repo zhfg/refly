@@ -81,6 +81,13 @@ export const $Resource = {
       type: 'string',
       description: 'Document content for this resource (only returned in getNoteDetail API)',
     },
+    labels: {
+      type: 'array',
+      description: 'Resource labels',
+      items: {
+        $ref: '#/components/schemas/LabelInstance',
+      },
+    },
   },
 } as const;
 
@@ -123,6 +130,13 @@ export const $Note = {
       type: 'string',
       format: 'date-time',
       description: 'Note update time',
+    },
+    labels: {
+      type: 'array',
+      description: 'Note labels',
+      items: {
+        $ref: '#/components/schemas/LabelInstance',
+      },
     },
   },
 } as const;
@@ -168,7 +182,74 @@ export const $Collection = {
         $ref: '#/components/schemas/Resource',
       },
     },
+    labels: {
+      type: 'array',
+      description: 'Note labels',
+      items: {
+        $ref: '#/components/schemas/LabelInstance',
+      },
+    },
   },
+} as const;
+
+export const $EntityType = {
+  type: 'string',
+  description: 'Entity type',
+  enum: ['resource', 'collection', 'note'],
+} as const;
+
+export const $LabelClass = {
+  type: 'object',
+  description: 'Label class',
+  required: ['labelClassId', 'name'],
+  properties: {
+    labelClassId: {
+      type: 'string',
+      description: 'Label class ID',
+      example: 'lc-g30e1b80b5g1itbemc0g5jj3',
+    },
+    name: {
+      type: 'string',
+      description: 'Label class name',
+      example: 'Related Dataset',
+    },
+    icon: {
+      type: 'string',
+      description: 'Label icon',
+      example: 'IconBulb',
+    },
+    prompt: {
+      type: 'string',
+      description: 'Label creation instruction prompt',
+      example: 'Extract labels for the tech-related keywords',
+    },
+  },
+} as const;
+
+export const $LabelInstance = {
+  type: 'object',
+  description: 'Label instances related to resources, collections, etc.',
+  allOf: [
+    {
+      $ref: '#/components/schemas/LabelClass',
+    },
+    {
+      type: 'object',
+      required: ['labelId', 'key', 'value', 'displayName'],
+      properties: {
+        labelId: {
+          type: 'string',
+          description: 'Label ID',
+          example: 'lb-g30e1b80b5g1itbemc0g5jj3',
+        },
+        value: {
+          type: 'string',
+          description: 'Label value',
+          example: 'HotPotQA',
+        },
+      },
+    },
+  ],
 } as const;
 
 export const $SkillTemplate = {
@@ -1135,6 +1216,143 @@ export const $GetCollectionDetailResponse = {
       },
     },
   ],
+} as const;
+
+export const $ListLabelClassesResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Label class list',
+          items: {
+            $ref: '#/components/schemas/LabelClass',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $UpsertLabelClassRequest = {
+  type: 'object',
+  properties: {
+    name: {
+      type: 'string',
+      description: 'Label class name',
+      example: 'My Class',
+    },
+  },
+} as const;
+
+export const $UpsertLabelClassResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          description: 'Label class upserted',
+          $ref: '#/components/schemas/LabelClass',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $DeleteLabelClassRequest = {
+  type: 'object',
+  required: ['labelClassId'],
+  properties: {
+    labelClassId: {
+      type: 'string',
+      description: 'Label class ID to delete',
+      example: 'lc-g30e1b80b5g1itbemc0g5jj3',
+    },
+  },
+} as const;
+
+export const $ListLabelInstancesResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Label list',
+          items: {
+            $ref: '#/components/schemas/LabelInstance',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $UpsertLabelInstanceRequest = {
+  type: 'object',
+  properties: {
+    key: {
+      type: 'string',
+      description: 'Label key',
+      example: 'my-key',
+    },
+    value: {
+      type: 'string',
+      description: 'Label value',
+      example: 'my-value',
+    },
+    displayName: {
+      type: 'string',
+      description: 'Label display name',
+      example: 'My Label',
+    },
+    entityType: {
+      description: 'Label entity type',
+      $ref: '#/components/schemas/EntityType',
+    },
+    entityId: {
+      description: 'Label entity ID',
+      type: 'string',
+    },
+  },
+} as const;
+
+export const $UpsertLabelInstanceResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          $ref: '#/components/schemas/LabelInstance',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $DeleteLabelInstanceRequest = {
+  type: 'object',
+  required: ['labelId'],
+  properties: {
+    labelId: {
+      type: 'string',
+      description: 'Label ID to delete',
+      example: 'lb-g30e1b80b5g1itbemc0g5jj3',
+    },
+  },
 } as const;
 
 export const $ListSkillTemplateResponse = {

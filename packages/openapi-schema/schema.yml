@@ -13,6 +13,8 @@ servers:
 tags:
   - name: knowledge
     description: Knowledge base management endpoints
+  - name: label
+    description: Label management endpoints
   - name: skill
     description: Skill management endpoints
   - name: chat
@@ -428,6 +430,197 @@ paths:
                 $ref: '#/components/schemas/BaseResponse'
       security:
         - api_key: []
+  /label/class/list:
+    get:
+      tags:
+        - label
+      summary: List label classes
+      description: List all label classes
+      operationId: listLabelClasses
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListLabelClassesResponse'
+      security:
+        - api_key: []
+  /label/class/new:
+    post:
+      tags:
+        - label
+      summary: Create new label class
+      description: Create a new label class
+      operationId: createLabelClass
+      requestBody:
+        description: Label class creation request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertLabelClassRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertLabelClassResponse'
+  /label/class/update:
+    post:
+      tags:
+        - label
+      summary: Update label class
+      description: Update an existing label class
+      operationId: updateLabelClass
+      requestBody:
+        description: Label class update request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertLabelClassRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertLabelClassResponse'
+  /label/class/delete:
+    post:
+      tags:
+        - label
+      summary: Delete label class
+      description: Delete an existing label class
+      operationId: deleteLabelClass
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteLabelClassRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+  /label/instance/list:
+    get:
+      tags:
+        - label
+      summary: List labels
+      description: List all label instances
+      operationId: listLabelInstances
+      parameters:
+        - name: entityType
+          in: query
+          description: Entity type to retrieve
+          schema:
+            description: Label entity type
+            $ref: '#/components/schemas/EntityType'
+        - name: entityId
+          in: query
+          description: Entity type to retrieve
+          schema:
+            type: string
+            example: cl-g30e1b80b5g1itbemc0g5jj3
+        - name: key
+          in: query
+          description: Label key
+          schema:
+            type: string
+            example: related_dataset
+        - name: value
+          in: query
+          description: Label value
+          schema:
+            type: string
+            example: HotPotQA
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: number
+            default: 1
+        - name: pageSize
+          in: query
+          description: Page size
+          schema:
+            type: number
+            default: 10
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListLabelInstancesResponse'
+  /label/instance/new:
+    post:
+      tags:
+        - label
+      summary: Create new label instance
+      description: Create new label instance
+      operationId: createLabelInstance
+      requestBody:
+        description: Label instance creation request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertLabelInstanceRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertLabelInstanceResponse'
+  /label/instance/update:
+    post:
+      tags:
+        - label
+      summary: Update label
+      description: Update an existing label instance
+      operationId: updateLabelInstance
+      requestBody:
+        description: Label update request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertLabelInstanceRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertLabelInstanceResponse'
+  /label/instance/delete:
+    post:
+      tags:
+        - label
+      summary: Delete label
+      description: Delete an existing label
+      operationId: deleteLabelInstance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteLabelInstanceRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
   /skill/template/list:
     get:
       tags:
@@ -893,6 +1086,11 @@ components:
         content:
           type: string
           description: Document content for this resource (only returned in getNoteDetail API)
+        labels:
+          type: array
+          description: Resource labels
+          items:
+            $ref: '#/components/schemas/LabelInstance'
     Note:
       type: object
       required:
@@ -931,6 +1129,11 @@ components:
           type: string
           format: date-time
           description: Note update time
+        labels:
+          type: array
+          description: Note labels
+          items:
+            $ref: '#/components/schemas/LabelInstance'
     Collection:
       type: object
       required:
@@ -968,6 +1171,61 @@ components:
           description: Collection resources (only returned in detail API)
           items:
             $ref: '#/components/schemas/Resource'
+        labels:
+          type: array
+          description: Note labels
+          items:
+            $ref: '#/components/schemas/LabelInstance'
+    EntityType:
+      type: string
+      description: Entity type
+      enum:
+        - resource
+        - collection
+        - note
+    LabelClass:
+      type: object
+      description: Label class
+      required:
+        - labelClassId
+        - name
+      properties:
+        labelClassId:
+          type: string
+          description: Label class ID
+          example: lc-g30e1b80b5g1itbemc0g5jj3
+        name:
+          type: string
+          description: Label class name
+          example: Related Dataset
+        icon:
+          type: string
+          description: Label icon
+          example: IconBulb
+        prompt:
+          type: string
+          description: Label creation instruction prompt
+          example: Extract labels for the tech-related keywords
+    LabelInstance:
+      type: object
+      description: Label instances related to resources, collections, etc.
+      allOf:
+        - $ref: '#/components/schemas/LabelClass'
+        - type: object
+          required:
+            - labelId
+            - key
+            - value
+            - displayName
+          properties:
+            labelId:
+              type: string
+              description: Label ID
+              example: lb-g30e1b80b5g1itbemc0g5jj3
+            value:
+              type: string
+              description: Label value
+              example: HotPotQA
     SkillTemplate:
       type: object
       description: Skill template
@@ -1686,6 +1944,87 @@ components:
               type: object
               description: Collection data
               $ref: '#/components/schemas/Collection'
+    ListLabelClassesResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Label class list
+              items:
+                $ref: '#/components/schemas/LabelClass'
+    UpsertLabelClassRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Label class name
+          example: My Class
+    UpsertLabelClassResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              description: Label class upserted
+              $ref: '#/components/schemas/LabelClass'
+    DeleteLabelClassRequest:
+      type: object
+      required:
+        - labelClassId
+      properties:
+        labelClassId:
+          type: string
+          description: Label class ID to delete
+          example: lc-g30e1b80b5g1itbemc0g5jj3
+    ListLabelInstancesResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Label list
+              items:
+                $ref: '#/components/schemas/LabelInstance'
+    UpsertLabelInstanceRequest:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Label key
+          example: my-key
+        value:
+          type: string
+          description: Label value
+          example: my-value
+        displayName:
+          type: string
+          description: Label display name
+          example: My Label
+        entityType:
+          description: Label entity type
+          $ref: '#/components/schemas/EntityType'
+        entityId:
+          description: Label entity ID
+          type: string
+    UpsertLabelInstanceResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/LabelInstance'
+    DeleteLabelInstanceRequest:
+      type: object
+      required:
+        - labelId
+      properties:
+        labelId:
+          type: string
+          description: Label ID to delete
+          example: lb-g30e1b80b5g1itbemc0g5jj3
     ListSkillTemplateResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
