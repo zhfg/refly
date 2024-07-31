@@ -87,11 +87,17 @@
         "note": "笔记",
         "collection": "知识库",
         "thread": "会话"
+      },
+      "newButton": {
+        "resource": "新资源",
+        "note": "新笔记",
+        "collection": "新知识库"
       }
     }
   },
   "loggedHomePage": {
     "newThreadText": "新会话",
+    "newThreadTextForWorkSpace": "提问、搜索或输入 / 或 @ 调用技能执行任务",
     "homePage": {
       "title": "知识，在此繁茂",
       "searchPlaceholder": "输入搜索内容...",

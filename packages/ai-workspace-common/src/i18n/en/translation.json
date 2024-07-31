@@ -87,6 +87,11 @@
         "note": "Notes",
         "collection": "Collections",
         "thread": "Threads"
+      },
+      "newButton": {
+        "resource": "New Resource",
+        "note": "New Note",
+        "collection": "New Collection"
       }
     }
   },
