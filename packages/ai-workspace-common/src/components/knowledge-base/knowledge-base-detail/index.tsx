@@ -38,38 +38,6 @@ export const KnowledgeBaseDetail = (props: KnowledgeBaseDetailProps) => {
 
   return (
     <div className="knowledge-base-detail-container">
-      {/* <div className="knowledge-base-detail-header">
-        <div className="knowledge-base-detail-navigation-bar">
-          <Breadcrumb>
-            <BreadcrumbItem href="/">工作台</BreadcrumbItem>
-            <BreadcrumbItem
-              href={`/knowledge-base/`}
-              className="breadcrum-description">
-              知识库
-            </BreadcrumbItem>
-          </Breadcrumb>
-        </div>
-        <div className="knowledge-base-detail-nav-switcher">
-          <Button
-            icon={<IconFolder />}
-            type="text"
-            onClick={() => {
-              knowledgeBaseStore.updateActionSource(ActionSource.KnowledgeBase)
-              knowledgeBaseStore.updateKbModalVisible(true)
-            }}
-            className="chat-input-assist-action-item">
-            <p className="assist-action-title">
-              {knowledgeBaseStore?.currentKnowledgeBase?.title || "选择知识库"}
-            </p>
-            <IconCaretDown />
-          </Button>
-        </div>
-        <div className="knowledge-base-detail-menu">
-          <Button
-            type="text"
-            icon={<IconMore style={{ fontSize: 16 }} />}></Button>
-        </div>
-      </div> */}
       <Tabs
         editable
         className="knowledge-base-detail-tab-container"
@@ -81,18 +49,6 @@ export const KnowledgeBaseDetail = (props: KnowledgeBaseDetailProps) => {
         renderTabHeader={(props, DefaultTabHeader) => {
           return (
             <div className="knowledge-base-detail-header">
-              {/* <div className="knowledge-base-detail-navigation-bar">
-                <Button
-                  icon={<IconArrowLeft />}
-                  type="text"
-                  shape="circle"
-                  className="nav-btn"></Button>
-                <Button
-                  icon={<IconArrowRight />}
-                  type="text"
-                  shape="circle"
-                  className="nav-btn"></Button>
-              </div> */}
               <div className="knowledge-base-detail-nav-switcher">
                 <DefaultTabHeader {...props} />
               </div>

@@ -1,14 +1,11 @@
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { Drawer } from '@arco-design/web-react';
-import { useTranslation } from 'react-i18next';
 // 样式
 import './index.scss';
 
 // 自定义组件
 import { KnowledgeBaseList } from '@refly-packages/ai-workspace-common/components/knowledge-base-list';
-import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
-import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
 interface KnowledgeBaseListModalProps {
   title: string;
@@ -19,9 +16,7 @@ interface KnowledgeBaseListModalProps {
 }
 
 export const KnowledgeBaseListModal = (props: KnowledgeBaseListModalProps) => {
-  const { t } = useTranslation();
   const knowledgeBaseStore = useKnowledgeBaseStore();
-  const { jumpToKnowledgeBase } = useKnowledgeBaseJumpNewPath();
 
   return (
     <Drawer
@@ -51,15 +46,7 @@ export const KnowledgeBaseListModal = (props: KnowledgeBaseListModalProps) => {
         knowledgeBaseStore.updateKbModalVisible(false);
       }}
     >
-      <KnowledgeBaseList
-        classNames={props.classNames}
-        handleItemClick={(kbId) => {
-          jumpToKnowledgeBase({
-            kbId,
-          });
-          knowledgeBaseStore.updateKbModalVisible(false);
-        }}
-      />
+      <KnowledgeBaseList />
     </Drawer>
   );
 };

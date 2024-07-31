@@ -4,6 +4,7 @@ import { useDebouncedCallback } from 'use-debounce';
 
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 
 export const useFetchOrSearchList = ({
   fetchData,
@@ -12,48 +13,10 @@ export const useFetchOrSearchList = ({
 }) => {
   const [mode, setMode] = useState<'fetch' | 'search'>('fetch');
   // fetch
-  const [dataList, setDataList] = useState<SearchResult[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [isRequesting, setIsRequesting] = useState(false);
-
-  const loadMore = async (currentPage?: number, mode?: 'fetch' | 'search') => {
-    if (isRequesting || !hasMore) return;
-
-    // 获取数据
-    const queryPayload = {
-      pageSize: 10,
-      page: currentPage + 1,
-    };
-
-    try {
-      setIsRequesting(true);
-      setCurrentPage(currentPage + 1);
-
-      const res = await fetchData(queryPayload);
-
-      if (!res?.success) {
-        setIsRequesting(false);
-
-        return;
-      }
-
-      // 处理分页
-      if (res?.data?.length < 10) {
-        setHasMore(false);
-      }
-
-      if (currentPage === 0) {
-        setDataList([...(res?.data || [])]);
-      } else {
-        setDataList([...dataList, ...(res?.data || [])]);
-      }
-      setIsRequesting(false);
-    } catch (err) {
-      console.log('fetch data list error', err);
-      setIsRequesting(false);
-    }
-  };
+  const { hasMore, setHasMore, loadMore, dataList, setDataList, currentPage, setCurrentPage, isRequesting } =
+    useFetchDataList({
+      fetchData,
+    });
 
   const debouncedSearch: ({ searchVal, domains }: { searchVal: string; domains?: Array<SearchDomain> }) => any =
     useDebouncedCallback(async ({ searchVal, domains }: { searchVal: string; domains?: Array<SearchDomain> }) => {
@@ -79,7 +42,7 @@ export const useFetchOrSearchList = ({
     if (!searchVal) {
       setDataList([]);
       setMode('fetch');
-      loadMore(0);
+      loadMore();
     } else {
       setMode('search');
       debouncedSearch({

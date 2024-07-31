@@ -476,7 +476,7 @@ img {
   width: 100%;
 
   .home-content-container {
-    overflow-y: scroll;
+    overflow-y: auto;
     background-color: #fcfcf9;
     padding: 0.5em 1em;
     height: calc(100vh - 130px);
@@ -579,7 +579,7 @@ img {
 }
 
 .main .footer {
-  overflow-y: scroll;
+  overflow-y: auto;
   background-color: #fcfcf9;
   padding: 0.5em 1em;
   position: fixed;

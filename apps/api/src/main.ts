@@ -6,7 +6,6 @@ import helmet from 'helmet';
 import * as Sentry from '@sentry/node';
 import { nodeProfilingIntegration } from '@sentry/profiling-node';
 import { Logger } from 'nestjs-pino';
-import { WsAdapter } from '@nestjs/platform-ws';
 
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
@@ -14,6 +13,7 @@ import { ConfigService } from '@nestjs/config';
 import tracer from './tracer';
 import { setTraceID } from './utils/middleware/set-trace-id';
 import { GlobalExceptionFilter } from './utils/filters/global-exception.filter';
+import { CustomWsAdapter } from '@/utils/adapters/ws-adapter';
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
@@ -26,6 +26,7 @@ Sentry.init({
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const logger = app.get(Logger);
+  const configService = app.get(ConfigService);
 
   process.on('uncaughtException', (err) => {
     Sentry.captureException(err);
@@ -44,12 +45,12 @@ async function bootstrap() {
   app.use(helmet());
   app.enableCors();
   app.use(cookieParser());
-  app.useWebSocketAdapter(new WsAdapter(app));
+  app.useWebSocketAdapter(new CustomWsAdapter(app, configService.get<number>('wsPort')));
   app.useGlobalFilters(new GlobalExceptionFilter());
   app.setGlobalPrefix('/v1', { exclude: ['/'] });
 
   tracer.start();
-  const configService = app.get(ConfigService);
+
   await app.listen(configService.get('port'));
 }
 bootstrap();

@@ -1,9 +1,8 @@
 import { useEffect } from "react"
 import { Helmet } from "react-helmet"
-import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels"
+import { PanelGroup, Panel } from "react-resizable-panels"
 
 // 自定义组件
-import { LeftAssistPanel } from "@refly/ai-workspace-common/components/workspace/left-assist-panel"
 import { ContentPanel } from "@refly/ai-workspace-common/components/workspace/content-panel"
 // utils
 // 自定义方法
@@ -15,9 +14,6 @@ import { useCookie } from "react-use"
 import { useUserStore } from "@refly/ai-workspace-common/stores/user"
 import { getExtensionId } from "@refly/utils/url"
 import { useTranslation } from "react-i18next"
-
-// 用于快速选择
-export const quickActionList = ["summary"]
 
 const Workspace = () => {
   const [token] = useCookie("_refly_ai_sid")
@@ -45,8 +41,6 @@ const Workspace = () => {
     console.log("dashboard close")
   }
 
-  // TODO: 临时关闭，用于开发调试
-  console.log("token", token)
   useEffect(() => {
     if (!(token || userStore?.userProfile?.uid)) return
 
@@ -78,14 +72,6 @@ const Workspace = () => {
         <PanelGroup
           direction="horizontal"
           className="workspace-panel-container">
-          {/* <Panel
-            defaultSize={20}
-            minSize={20}
-            maxSize={50}
-            className="workspace-left-assist-panel">
-            <LeftAssistPanel />
-          </Panel>
-          <PanelResizeHandle className="workspace-panel-resize" /> */}
           <Panel minSize={50} className="workspace-content-panel">
             <ContentPanel />
           </Panel>

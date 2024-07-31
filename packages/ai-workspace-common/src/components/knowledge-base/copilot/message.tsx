@@ -107,7 +107,7 @@ export const AssistantMessage = (props: {
       }}
       style={{ width: 240 }}
     >
-      <Menu.Item key="insertNote">
+      <Menu.Item key="insertBlow">
         <IconImport /> 插入笔记
       </Menu.Item>
       <Menu.Item key="replaceSelection">

@@ -54,6 +54,7 @@ import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note
 import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
+import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 
 interface AICopilotProps {}
 
@@ -62,6 +63,7 @@ export const AICopilot = (props: AICopilotProps) => {
   const [copilotBodyHeight, setCopilotBodyHeight] = useState(215 - 32);
   const userStore = useUserStore();
   const knowledgeBaseStore = useKnowledgeBaseStore();
+  const noteStore = useNoteStore();
   const searchStore = useSearchStore();
   const { contextCardHeight, showContextCard, showContextState, showSelectedTextContext } = useCopilotContextState();
   const chatStore = useChatStore();
@@ -193,22 +195,14 @@ export const AICopilot = (props: AICopilotProps) => {
               );
             }}
           </Checkbox>
-          <Checkbox
-            key={'knowledge-base-note-panel'}
-            checked={knowledgeBaseStore.notePanelVisible && noteId ? true : false}
-          >
+          <Checkbox key={'knowledge-base-note-panel'} checked={noteStore.notePanelVisible}>
             {({ checked }) => {
               return (
                 <Button
                   icon={<IconEdit />}
                   type="text"
                   onClick={() => {
-                    if (!noteId) {
-                      searchStore.setPages(searchStore.pages.concat('note'));
-                      searchStore.setIsSearchOpen(true);
-                    } else {
-                      knowledgeBaseStore.updateNotePanelVisible(!knowledgeBaseStore.notePanelVisible);
-                    }
+                    noteStore.updateNotePanelVisible(!noteStore.notePanelVisible);
                   }}
                   className={classNames('assist-action-item', { active: checked })}
                 ></Button>

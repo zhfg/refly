@@ -1,6 +1,7 @@
 {
   "files.associations": {
-    "*.json": "jsonc"
+    "*.json": "jsonc",
+    "*.css": "tailwindcss"
   },
   "typescript.preferences.importModuleSpecifier": "non-relative",
   "tailwindCSS.includeLanguages": {

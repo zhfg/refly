@@ -80,6 +80,14 @@
         "title": "Knowledge Category",
         "seeMore": "See more categories"
       }
+    },
+    "contentPanel": {
+      "tabPanel": {
+        "resource": "Resources",
+        "note": "Notes",
+        "collection": "Collections",
+        "thread": "Threads"
+      }
     }
   },
   "loggedHomePage": {

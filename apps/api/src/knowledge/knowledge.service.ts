@@ -19,9 +19,11 @@ import {
   ResourceMeta,
   ListResourcesData,
   ListCollectionsData,
+  ListNotesData,
+  UpsertNoteRequest,
 } from '@refly/openapi-schema';
 import { CHANNEL_FINALIZE_RESOURCE, QUEUE_RESOURCE } from '../utils';
-import { genCollectionID, genResourceID, cleanMarkdownForIngest } from '@refly/utils';
+import { genCollectionID, genResourceID, cleanMarkdownForIngest, genNoteID } from '@refly/utils';
 import { FinalizeResourceParam } from './knowledge.dto';
 import { pick, omit } from '../utils';
 
@@ -245,7 +247,7 @@ export class KnowledgeService {
   }
 
   async indexResource(user: User, param: UpsertResourceRequest) {
-    const { resourceId, collectionId } = param;
+    const { resourceType, resourceId, collectionId } = param;
     const { url, storageKey, title } = param.data;
     param.storageKey ||= storageKey;
     param.content ||= '';
@@ -270,7 +272,7 @@ export class KnowledgeService {
     if (param.content) {
       const chunks = await this.ragService.indexContent({
         pageContent: cleanMarkdownForIngest(param.content),
-        metadata: { url, title, collectionId, resourceId },
+        metadata: { nodeType: 'resource', url, title, collectionId, resourceType, resourceId },
       });
       await this.ragService.saveDataForUser(user, { chunks });
     }
@@ -344,11 +346,76 @@ export class KnowledgeService {
     }
 
     return Promise.all([
-      this.ragService.deleteResourceData(user, resourceId),
+      this.ragService.deleteResourceNodes(user, resourceId),
       this.prisma.resource.update({
         where: { resourceId },
         data: { deletedAt: new Date() },
       }),
     ]);
+  }
+
+  async listNotes(user: Pick<User, 'uid'>, param: ListNotesData['query']) {
+    const { page = 1, pageSize = 10 } = param;
+    return this.prisma.note.findMany({
+      where: {
+        uid: user.uid,
+        deletedAt: null,
+      },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      orderBy: { updatedAt: 'desc' },
+    });
+  }
+
+  async getNoteDetail(user: Pick<User, 'uid'>, noteId: string) {
+    const note = await this.prisma.note.findFirst({
+      where: { noteId, uid: user.uid, deletedAt: null },
+    });
+    if (!note) {
+      throw new BadRequestException('Note not found');
+    }
+    return note;
+  }
+
+  async upsertNote(user: Pick<User, 'uid'>, param: UpsertNoteRequest) {
+    param.noteId ||= genNoteID();
+
+    return this.prisma.note.upsert({
+      where: { noteId: param.noteId },
+      create: {
+        noteId: param.noteId,
+        title: param.title,
+        uid: user.uid,
+        readOnly: param.readOnly ?? false,
+        isPublic: param.isPublic ?? false,
+      },
+      update: param,
+    });
+  }
+
+  async deleteNote(user: Pick<User, 'uid'>, noteId: string) {
+    const note = await this.prisma.note.findFirst({
+      where: { noteId, deletedAt: null },
+    });
+    if (!note) {
+      throw new BadRequestException('Note not found');
+    }
+    if (note.uid !== user.uid) {
+      throw new UnauthorizedException();
+    }
+
+    const cleanups: Promise<any>[] = [
+      this.ragService.deleteNoteNodes(user, noteId),
+      this.prisma.note.update({
+        where: { noteId },
+        data: { deletedAt: new Date() },
+      }),
+    ];
+
+    if (note.stateStorageKey) {
+      cleanups.push(this.minio.removeObject(note.stateStorageKey));
+    }
+
+    await Promise.all(cleanups);
   }
 }

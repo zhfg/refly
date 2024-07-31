@@ -30,7 +30,7 @@
       "@refly/utils/*": ["../utils/src/*"]
     },
     "composite": true,
-    "noEmit": false,
+    "noEmit": true,
     "declaration": true,
     "declarationMap": true
   },

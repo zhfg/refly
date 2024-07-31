@@ -2,13 +2,11 @@ import { Message as message } from '@arco-design/web-react';
 
 import { KnowledgeBaseTab, useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { Resource } from '@refly/openapi-schema';
-import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
 export const useKnowledgeBaseTabs = () => {
   const knowledgeBaseStore = useKnowledgeBaseStore();
   const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
-  const navigate = useNavigate();
 
   const tabs = knowledgeBaseStore.tabs;
   const activeTab = knowledgeBaseStore.activeTab;
@@ -17,7 +15,7 @@ export const useKnowledgeBaseTabs = () => {
     const newTab: KnowledgeBaseTab = {
       title: resource?.title || '',
       key: resource?.resourceId || '',
-      content: resource?.description || '',
+      content: resource?.contentPreview || '',
       collectionId: resource?.collectionId || '',
       resourceId: resource?.resourceId || '',
     };

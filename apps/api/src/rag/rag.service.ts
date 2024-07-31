@@ -16,7 +16,7 @@ import {
   ContentData,
   ContentPayload,
   ReaderResult,
-  DocMeta,
+  NodeMeta,
 } from './rag.dto';
 import { QdrantService } from '@/common/qdrant.service';
 import { Condition, PointStruct } from '@/common/qdrant.dto';
@@ -125,9 +125,10 @@ export class RAGService {
     return await this.splitter.splitText(cleanMarkdownForIngest(text));
   }
 
-  async indexContent(doc: Document<DocMeta>): Promise<ContentNode[]> {
+  async indexContent(doc: Document<NodeMeta>): Promise<ContentNode[]> {
     const { pageContent, metadata } = doc;
-    const { resourceId, collectionId } = metadata;
+    const { nodeType, noteId, resourceId } = metadata;
+    const docId = nodeType === 'note' ? noteId : resourceId;
 
     const chunks = await this.chunkText(pageContent);
     const chunkEmbeds = await this.embeddings.embedDocuments(chunks);
@@ -135,16 +136,12 @@ export class RAGService {
     const nodes: ContentNode[] = [];
     for (let i = 0; i < chunks.length; i++) {
       nodes.push({
-        id: genResourceUuid(`${resourceId}-${i}`),
+        id: genResourceUuid(`${docId}-${i}`),
         vector: chunkEmbeds[i],
         payload: {
-          url: metadata.url,
+          ...metadata,
           seq: i,
-          type: 'weblink',
-          title: metadata.title,
           content: chunks[i],
-          resourceId,
-          collectionId,
         },
       });
     }
@@ -181,11 +178,20 @@ export class RAGService {
     return this.qdrant.batchSaveData(points);
   }
 
-  async deleteResourceData(user: Pick<User, 'uid'>, resourceId: string) {
+  async deleteResourceNodes(user: Pick<User, 'uid'>, resourceId: string) {
     return this.qdrant.batchDelete({
       must: [
         { key: 'tenantId', match: { value: user.uid } },
         { key: 'resourceId', match: { value: resourceId } },
+      ],
+    });
+  }
+
+  async deleteNoteNodes(user: Pick<User, 'uid'>, noteId: string) {
+    return this.qdrant.batchDelete({
+      must: [
+        { key: 'tenantId', match: { value: user.uid } },
+        { key: 'noteId', match: { value: noteId } },
       ],
     });
   }
@@ -203,10 +209,22 @@ export class RAGService {
       },
     ];
 
+    if (param.filter?.nodeTypes?.length > 0) {
+      conditions.push({
+        key: 'nodeType',
+        match: { any: param.filter?.nodeTypes },
+      });
+    }
     if (param.filter?.urls?.length > 0) {
       conditions.push({
         key: 'url',
         match: { any: param.filter?.urls },
+      });
+    }
+    if (param.filter?.noteIds?.length > 0) {
+      conditions.push({
+        key: 'noteId',
+        match: { any: param.filter?.noteIds },
       });
     }
     if (param.filter?.resourceIds?.length > 0) {

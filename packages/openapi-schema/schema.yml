@@ -17,10 +17,6 @@ tags:
     description: Skill management endpoints
   - name: chat
     description: Chatbot related endpoints
-  - name: weblink
-    description: Weblink related endpoints
-  - name: aigc
-    description: AIGC relation endpoints
   - name: user
     description: User management endpoints
   - name: search
@@ -181,6 +177,125 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/DeleteResourceRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+      security:
+        - api_key: []
+  /knowledge/note/list:
+    get:
+      tags:
+        - knowledge
+      summary: List user notes
+      description: List all notes for a user
+      operationId: listNotes
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          required: false
+          schema:
+            type: number
+            default: 1
+        - name: pageSize
+          in: query
+          description: Page size
+          required: false
+          schema:
+            type: number
+            default: 10
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListNoteResponse'
+  /knowledge/note/detail:
+    get:
+      tags:
+        - knowledge
+      summary: Get note detail
+      description: Return note detail
+      operationId: getNoteDetail
+      parameters:
+        - name: noteId
+          in: query
+          description: Note ID to retrieve
+          required: true
+          schema:
+            type: string
+            example: n-g30e1b80b5g1itbemc0g5jj3
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetNoteDetailResponse'
+  /knowledge/note/update:
+    post:
+      tags:
+        - knowledge
+      summary: Update note
+      description: Update an existing note
+      operationId: updateNote
+      requestBody:
+        description: Note update request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertNoteRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertNoteResponse'
+      security:
+        - api_key: []
+  /knowledge/note/new:
+    post:
+      tags:
+        - knowledge
+      summary: Create new note
+      description: Create a new note
+      operationId: createNote
+      requestBody:
+        description: Note creation request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertNoteRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertNoteResponse'
+      security:
+        - api_key: []
+  /knowledge/note/delete:
+    post:
+      tags:
+        - knowledge
+      summary: Delete note
+      description: Delete an existing note
+      operationId: deleteNote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteNoteRequest'
       responses:
         '200':
           description: Successful operation
@@ -736,8 +851,6 @@ components:
         - resourceType
         - title
         - isPublic
-        - readOnly
-        - collabEnabled
         - indexStatus
         - createdAt
         - updatedAt
@@ -752,7 +865,6 @@ components:
         collectionId:
           type: string
           description: Collection ID
-          deprecated: true
         title:
           type: string
           description: Resource title
@@ -767,14 +879,6 @@ components:
           type: boolean
           description: Whether this resource is public
           default: false
-        readOnly:
-          type: boolean
-          description: Whether this resource is read-only
-          default: false
-        collabEnabled:
-          type: boolean
-          description: Whether this resource is collaborative
-          default: false
         createdAt:
           type: string
           format: date-time
@@ -788,7 +892,45 @@ components:
           description: Preview content for this resource
         content:
           type: string
-          description: Document content for this resource (only returned in detail API)
+          description: Document content for this resource (only returned in getNoteDetail API)
+    Note:
+      type: object
+      required:
+        - noteId
+        - title
+        - readOnly
+        - isPublic
+        - createdAt
+        - updatedAt
+      properties:
+        noteId:
+          type: string
+          description: Note ID
+          example: n-g30e1b80b5g1itbemc0g5jj3
+        title:
+          type: string
+          description: Note title
+          example: My note
+        contentPreview:
+          type: string
+          description: Note content preview
+        content:
+          type: string
+          description: Full note content (only returned in detail api)
+        readOnly:
+          type: boolean
+          description: Whether this note is read-only
+        isPublic:
+          type: boolean
+          description: Whether this note is public
+        createdAt:
+          type: string
+          format: date-time
+          description: Note creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Note update time
     Collection:
       type: object
       required:
@@ -1437,6 +1579,60 @@ components:
               type: object
               description: Resource data
               $ref: '#/components/schemas/Resource'
+    ListNoteResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Note list
+              items:
+                $ref: '#/components/schemas/Note'
+    GetNoteDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              description: Note data
+              $ref: '#/components/schemas/Note'
+    UpsertNoteRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Note title
+          example: My Note
+        noteId:
+          type: string
+          description: Note ID (only used for update)
+          example: n-g30e1b80b5g1itbemc0g5jj3
+        readOnly:
+          type: boolean
+          description: Whether this note is read-only
+          default: false
+        isPublic:
+          type: boolean
+          description: Whether this note is public
+          default: false
+    UpsertNoteResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Note'
+    DeleteNoteRequest:
+      type: object
+      required:
+        - noteId
+      properties:
+        noteId:
+          type: string
+          description: Note ID to delete
+          example: n-g30e1b80b5g1itbemc0g5jj3
     UpsertCollectionRequest:
       type: object
       properties:
@@ -1792,6 +1988,7 @@ components:
       type: string
       enum:
         - resource
+        - note
         - collection
         - conversation
         - skill

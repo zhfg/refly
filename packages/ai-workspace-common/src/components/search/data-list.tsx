@@ -1,21 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Command } from 'cmdk';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
-import * as Popover from '@radix-ui/react-popover';
-import { Logo, LinearIcon, FigmaIcon, SlackIcon, YouTubeIcon, RaycastIcon } from './icons';
 import {} from '@heroicons/react/24/outline';
-import {
-  IconSearch,
-  IconMessage,
-  IconFile,
-  IconApps,
-  IconBook,
-  IconEdit,
-  IconRobot,
-  IconFolderAdd,
-} from '@arco-design/web-react/icon';
-import { useDebouncedCallback } from 'use-debounce';
-import { defaultFilter } from './cmdk/filter';
+import { IconFolderAdd } from '@arco-design/web-react/icon';
 
 import './index.scss';
 import { Button, Modal } from '@arco-design/web-react';
@@ -23,10 +10,7 @@ import { Item } from './item';
 
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { SearchDomain, SearchRequest, SearchResult } from '@refly/openapi-schema';
-import { useNavigate } from 'react-router-dom';
-import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
-import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { SearchResult } from '@refly/openapi-schema';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
 export function DataList({
@@ -39,6 +23,7 @@ export function DataList({
   displayMode,
   setValue,
   onItemClick,
+  onCreateClick,
 }: {
   domain: string;
   heading: string;
@@ -49,6 +34,7 @@ export function DataList({
   displayMode: 'list' | 'search';
   setValue: (val: string) => void;
   onItemClick?: (item: SearchResult) => void;
+  onCreateClick?: () => void;
 }) {
   const [stateDataList, setStateDataList] = useState<SearchResult[]>(data || []);
   const [currentPage, setCurrentPage] = useState(1);
@@ -76,7 +62,7 @@ export function DataList({
 
       return { success: true, data };
     } else if (domain === 'note') {
-      const res = await getClient().listResources({
+      const res = await getClient().listNotes({
         query: {
           ...queryPayload,
         },
@@ -85,13 +71,10 @@ export function DataList({
       if (!res?.data?.success) return { success: false };
       const data = res?.data?.data?.map((item) => {
         return {
-          id: item?.resourceId,
+          id: item?.noteId,
           title: item?.title,
           content: [item?.content?.slice(0, 30) + '...'],
-          metadata: {
-            collectionId: item?.collectionId,
-            resourceType: 'note',
-          },
+          metadata: {},
         } as SearchResult;
       });
 
@@ -196,7 +179,12 @@ export function DataList({
   return (
     <>
       <Command.Group heading="建议">
-        <Item value={`create${domain}`} keywords={[`create${domain}`]} onSelect={() => {}} activeValue={activeValue}>
+        <Item
+          value={`create${domain}`}
+          keywords={[`create${domain}`]}
+          onSelect={() => onCreateClick()}
+          activeValue={activeValue}
+        >
           <IconFolderAdd style={{ fontSize: 12 }} />
           创建新{heading}
         </Item>

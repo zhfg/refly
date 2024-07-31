@@ -1,8 +1,10 @@
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 export const useKnowledgeBaseJumpNewPath = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const noteStore = useNoteStore();
   const knowledgeBaseStore = useKnowledgeBaseStore();
   const navigate = useNavigate();
 
@@ -10,7 +12,7 @@ export const useKnowledgeBaseJumpNewPath = () => {
     searchParams.set('noteId', noteId);
     setSearchParams(searchParams);
     navigate(`${baseUrl}/knowledge-base?${searchParams.toString()}`);
-    knowledgeBaseStore.updateNotePanelVisible(true);
+    noteStore.updateNotePanelVisible(true);
   };
 
   const jumpToKnowledgeBase = (

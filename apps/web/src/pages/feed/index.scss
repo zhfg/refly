@@ -22,7 +22,7 @@
 .feed-list {
   width: 100%;
   height: calc(100vh - 28px);
-  overflow-y: scroll;
+  overflow-y: auto;
 
   .arco-list-content {
     padding: 0 60px;

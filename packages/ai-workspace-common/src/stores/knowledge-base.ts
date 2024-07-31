@@ -19,8 +19,6 @@ export interface KnowledgeBaseTab {
 }
 
 export type SelectedNamespace = 'resource-detail' | 'note';
-export type NoteServerStatus = 'disconnected' | 'connected';
-export type NoteSaveStatus = 'Saved' | 'Unsaved';
 
 interface KnowledgeBaseState {
   isSaveKnowledgeBaseModalVisible: boolean;
@@ -38,13 +36,6 @@ interface KnowledgeBaseState {
   tabs: KnowledgeBaseTab[];
   activeTab: string;
   resourcePanelVisible: boolean;
-  notePanelVisible: boolean;
-
-  // 笔记
-  editor: EditorInstance | null;
-  noteServerStatus: NoteServerStatus;
-  noteCharsCount: number;
-  noteSaveStatus: NoteSaveStatus;
 
   // 详情
   currentKnowledgeBase: null | Collection;
@@ -76,11 +67,6 @@ interface KnowledgeBaseState {
   updateTabs: (tabs: KnowledgeBaseTab[]) => void;
   updateActiveTab: (key: string) => void;
   updateResourcePanelVisible: (visible: boolean) => void;
-  updateNotePanelVisible: (visible: boolean) => void;
-  updateNoteServerStatus: (status: NoteServerStatus) => void;
-  updateNoteSaveStatus: (status: NoteSaveStatus) => void;
-  updateNoteCharsCount: (count: number) => void;
-  updateEditor: (editor: EditorInstance) => void;
   resetState: () => void;
 }
 
@@ -97,14 +83,6 @@ export const defaultState = {
   ] as KnowledgeBaseTab[],
   activeTab: 'key1',
   resourcePanelVisible: true,
-  notePanelVisible: true,
-
-  // notes
-  editor: null,
-  noteServerStatus: 'disconnected' as NoteServerStatus,
-  noteCharsCount: 0,
-  noteSaveStatus: 'Unsaved' as NoteSaveStatus,
-
   convModalVisible: false,
   kbModalVisible: false,
   sourceListModalVisible: false,
@@ -154,16 +132,10 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
       set((state) => ({ ...state, selectedNamespace })),
     updateTabs: (tabs: KnowledgeBaseTab[]) => set((state) => ({ ...state, tabs })),
     updateActiveTab: (key: string) => set((state) => ({ ...state, activeTab: key })),
-    resetState: () => set((state) => ({ ...state, ...defaultState })),
+    resetState: () => set((state) => ({ ...state, knowledgeBaseList: [] })),
 
     // tabs
     updateResourcePanelVisible: (visible: boolean) => set((state) => ({ ...state, resourcePanelVisible: visible })),
     updateNotePanelVisible: (visible: boolean) => set((state) => ({ ...state, notePanelVisible: visible })),
-
-    // notes
-    updateEditor: (editor: EditorInstance) => set((state) => ({ ...state, editor })),
-    updateNoteServerStatus: (status: NoteServerStatus) => set((state) => ({ ...state, noteServerStatus: status })),
-    updateNoteSaveStatus: (status: NoteSaveStatus) => set((state) => ({ ...state, noteSaveStatus: status })),
-    updateNoteCharsCount: (count: number) => set((state) => ({ ...state, noteCharsCount: count })),
   })),
 );

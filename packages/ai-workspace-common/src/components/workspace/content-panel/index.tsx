@@ -1,55 +1,63 @@
-import { Tabs } from '@arco-design/web-react';
+import { useRef, useState } from 'react';
+import { Affix, Radio } from '@arco-design/web-react';
+import { useTranslation } from 'react-i18next';
 
-// 自定义组件
-import { KnowledgeBaseList } from '@refly-packages/ai-workspace-common/components/knowledge-base-list';
 import { WorkSpaceSearch } from '../work-space-search';
-import { ResourceBase } from '../resource-base';
+import { ResourceList } from '@refly-packages/ai-workspace-common/components/workspace/resource-list';
+import { NoteList } from '@refly-packages/ai-workspace-common/components/workspace/note-list';
+import { KnowledgeBaseList } from '@refly-packages/ai-workspace-common/components/knowledge-base-list';
 
-// 自定义组件
-import { IconFolder, IconRobot } from '@arco-design/web-react/icon';
-import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import './index.scss';
-import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import classNames from 'classnames';
 
-const TabPanel = Tabs.TabPane;
+const RadioGroup = Radio.Group;
 
-export const ContentPanel = () => {
-  const navigate = useNavigate();
-  const { jumpToKnowledgeBase, jumpToNote, jumpToReadResource, jumpToConv } = useKnowledgeBaseJumpNewPath();
+const Content = (props: { val: string }) => {
+  switch (props.val) {
+    case 'knowledge-resource':
+      return <ResourceList />;
+    case 'knowledge-notes':
+      return <NoteList />;
+    case 'knowledge-collection':
+      return <KnowledgeBaseList />;
+    default:
+      return <ResourceList />;
+  }
+};
+
+const ContentHeader = (props: { setVal: (val: string) => void; hitTop: boolean }) => {
+  const { t } = useTranslation();
+  const { setVal, hitTop } = props;
 
   return (
-    <div className="content-panel-container">
+    <div className={classNames('content-panel-header', { 'content-panel-header-hit-top': hitTop }, 'h-16 pt-3')}>
+      <RadioGroup
+        type="button"
+        size="large"
+        className="content-panel-radio-group"
+        defaultValue="knowledge-resource"
+        onChange={(val) => setVal(val)}
+      >
+        <Radio value="knowledge-resource">{t('workspace.contentPanel.tabPanel.resource')}</Radio>
+        <Radio value="knowledge-notes">{t('workspace.contentPanel.tabPanel.note')}</Radio>
+        <Radio value="knowledge-collection">{t('workspace.contentPanel.tabPanel.collection')}</Radio>
+      </RadioGroup>
+    </div>
+  );
+};
+
+export const ContentPanel = () => {
+  const ref = useRef();
+  const [val, setVal] = useState('knowledge-resource');
+  const [hitTop, setHitTop] = useState(false);
+
+  return (
+    <div className="content-panel-container" ref={ref}>
       <WorkSpaceSearch />
-      <Tabs defaultActiveTab="knowledge-resource">
-        <TabPanel key="knowledge-resource" title={<span>资源</span>}>
-          <ResourceBase
-            handleItemClick={(kbId, resId) => {
-              jumpToReadResource({
-                kbId,
-                resId,
-              });
-            }}
-          />
-        </TabPanel>
-        <TabPanel key="knowledge-notes" title={<span>笔记</span>}>
-          <KnowledgeBaseList
-            handleItemClick={(noteId) => {
-              jumpToNote({
-                noteId,
-              });
-            }}
-          />
-        </TabPanel>
-        <TabPanel key="knowledge-collection" title={<span>知识库</span>}>
-          <KnowledgeBaseList
-            handleItemClick={(kbId) => {
-              jumpToKnowledgeBase({
-                kbId,
-              });
-            }}
-          />
-        </TabPanel>
-      </Tabs>
+      <Affix offsetTop={0} target={() => ref.current} onChange={setHitTop}>
+        <ContentHeader setVal={setVal} hitTop={hitTop} />
+      </Affix>
+      <Content val={val} />
     </div>
   );
 };
