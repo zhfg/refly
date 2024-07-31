@@ -20,7 +20,7 @@ export const NoteList = () => {
   const { i18n } = useTranslation();
   const language = i18n.languages?.[0];
 
-  const { dataList, loadMore, hasMore, isRequesting } = useFetchDataList({
+  const { dataList, setDataList, loadMore, hasMore, isRequesting } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listNotes({
         query: queryPayload,
@@ -52,7 +52,6 @@ export const NoteList = () => {
       wrapperStyle={{ width: '100%' }}
       bordered={false}
       pagination={false}
-      offsetBottom={50}
       dataSource={dataList}
       scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
       render={(item: Note, key) => (
@@ -67,7 +66,7 @@ export const NoteList = () => {
           actions={[
             <CardBox
               cardData={item}
-              type="knowledge"
+              type="note"
               cardIcon={<IconBook style={{ fontSize: '32px', strokeWidth: 3 }} />}
               onClick={() => jumpToNote({ noteId: item.noteId })}
             >
@@ -79,7 +78,10 @@ export const NoteList = () => {
                 </div>
                 <div className="flex items-center">
                   <IconBook style={{ color: '#819292', cursor: 'pointer' }} />
-                  <NoteDropdownMenu note={item} />
+                  <NoteDropdownMenu
+                    note={item}
+                    postDeleteNote={(note) => setDataList(dataList.filter((n) => n.noteId !== note.noteId))}
+                  />
                 </div>
               </div>
             </CardBox>,

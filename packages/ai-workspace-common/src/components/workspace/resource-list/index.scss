@@ -1,13 +1,12 @@
-.resource-base {
+.resource-list {
   position: relative;
   word-break: break-all;
   width: 100%;
-  height: calc(100vh - 380px);
   overflow-y: auto;
-}
 
-.arco-list-item-action {
-  li {
-    width: 100%;
+  .arco-list-item-action {
+    li {
+      width: 100%;
+    }
   }
 }

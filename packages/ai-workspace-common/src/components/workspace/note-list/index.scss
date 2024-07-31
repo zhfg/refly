@@ -1,7 +1,6 @@
 .note-list {
   word-break: break-all;
   width: 100%;
-  max-height: calc(100vh - 400px);
 
   .icon-box {
     margin-right: 12px;
@@ -9,9 +8,14 @@
     height: 40px;
     border: 1px solid rgba(0, 0, 0, 0.08);
   }
+
   .note-title {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .arco-list-content {
+    width: 100%;
   }
 }

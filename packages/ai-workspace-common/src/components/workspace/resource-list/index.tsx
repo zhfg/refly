@@ -57,7 +57,7 @@ export const ResourceList = () => {
         lg: 8,
         xl: 6,
       }}
-      className="resource-base"
+      className="resource-list"
       wrapperStyle={{ width: '100%' }}
       bordered={false}
       pagination={false}

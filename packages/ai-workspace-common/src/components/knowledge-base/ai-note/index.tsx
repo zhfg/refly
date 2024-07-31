@@ -38,6 +38,7 @@ import { getWsServerOrigin } from '@refly-packages/utils/url';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 import { useNoteTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
+import { AINoteEmpty } from '@refly-packages/ai-workspace-common/components/knowledge-base/ai-note-empty';
 
 const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) => {
   const { readOnly } = note;
@@ -190,6 +191,7 @@ export const AINoteStatusBar = (props: AINoteStatusBarProps) => {
   const { note } = props;
   const { noteId } = note;
   const noteStore = useNoteStore();
+  const { handleDeleteTab } = useNoteTabs();
 
   return (
     <div className="note-status-bar">
@@ -230,7 +232,7 @@ export const AINoteStatusBar = (props: AINoteStatusBarProps) => {
         ) : null}
         <div className="note-status-bar-item">
           <Divider type="vertical" />
-          <NoteDropdownMenu note={note} />
+          <NoteDropdownMenu note={note} postDeleteNote={(note) => handleDeleteTab(note.noteId)} />
         </div>
       </div>
     </div>
@@ -273,6 +275,12 @@ export const AINote = () => {
   const { tabs, activeTab, setActiveTab, handleAddTab, handleDeleteTab, handleUpdateTabTitle } = useNoteTabs();
 
   useEffect(() => {
+    return () => {
+      noteStore.updateNotePanelVisible(false);
+    };
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
       const { data } = await getClient().getNoteDetail({
         query: { noteId },
@@ -289,7 +297,9 @@ export const AINote = () => {
         });
       }
     };
-    fetchData();
+    if (noteId) {
+      fetchData();
+    }
   }, [noteId]);
 
   const debouncedUpdateNote = useDebouncedCallback(async (note: Note) => {
@@ -314,14 +324,18 @@ export const AINote = () => {
     prevNote.current = note;
   }, [note, debouncedUpdateNote]);
 
-  const onTitleChange = (newTitle: string) => {
-    noteStore.updateCurrentNote({ ...note, title: newTitle });
-    handleUpdateTabTitle(note.noteId, newTitle);
-  };
+  if (noteId === undefined || noteId == null || noteId === '') {
+    return <AINoteEmpty />;
+  }
 
   if (!note) {
     return <Spin dot block className="h-full w-full flex justify-center items-center" />;
   }
+
+  const onTitleChange = (newTitle: string) => {
+    noteStore.updateCurrentNote({ ...note, title: newTitle });
+    handleUpdateTabTitle(note.noteId, newTitle);
+  };
 
   return (
     <div className="ai-note-container">

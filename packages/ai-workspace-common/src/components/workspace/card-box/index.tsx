@@ -5,26 +5,41 @@ import './index.scss';
 
 interface CardBoxBaseProps {
   type: string;
-  cardData: Resource | Note | Collection;
   cardIcon?: ReactNode;
   children?: ReactNode;
   onClick: () => void;
 }
 
+interface ResourceCardProps extends CardBoxBaseProps {
+  type: 'resource';
+  cardData: Resource;
+}
+
+interface NoteCardProps extends CardBoxBaseProps {
+  type: 'note';
+  cardData: Note;
+}
+
+interface CollectionCardProps extends CardBoxBaseProps {
+  type: 'collection';
+  cardData: Collection;
+}
+
 const contentKey = {
   resource: 'contentPreview',
   note: 'content',
-  knowledge: 'description',
+  collection: 'description',
 };
 
-export const CardBox = (props: CardBoxBaseProps) => {
+export const CardBox = (props: ResourceCardProps | NoteCardProps | CollectionCardProps) => {
   const handleClickLink = (url: string) => {
     if (url) {
       window.open(url, '_blank');
     }
   };
 
-  const { cardData, children, onClick } = props;
+  const { children, onClick } = props;
+
   return (
     <div className="p-4 m-3 border rounded-lg card-box border-black/8 hover:bg-gray-500/10" onClick={() => onClick()}>
       {props.type === 'resource' && <div className="card-img rounded-lg bg-emerald-200"></div>}
@@ -40,17 +55,21 @@ export const CardBox = (props: CardBoxBaseProps) => {
               href="#"
               onClick={(e) => {
                 e.stopPropagation();
-                handleClickLink(cardData?.data?.url);
+                handleClickLink(props.cardData.data?.url);
               }}
             >
-              {cardData?.data?.url}
+              {props?.cardData.data?.url}
             </a>
           ) : (
-            <div className="note-title flex items-center text-sm text-black/80 font-medium h-10">{cardData?.title}</div>
+            <div className="note-title flex items-center text-sm text-black/80 font-medium h-10">
+              {props.cardData?.title}
+            </div>
           )}
         </div>
-        {props.type === 'resource' && <div className="text-sm text-black/80 font-medium mb-1.5">{cardData?.title}</div>}
-        <div className="text-xs text-black/50">{cardData?.[contentKey[props.type]]}</div>
+        {props.type === 'resource' && (
+          <div className="text-sm text-black/80 font-medium mb-1.5">{props.cardData?.title}</div>
+        )}
+        <div className="text-xs text-black/50">{props.cardData?.[contentKey[props.type]]}</div>
       </div>
 
       {children}

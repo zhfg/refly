@@ -2,4 +2,18 @@
   height: 100vh;
   overflow: auto;
   padding: 0 10%;
+
+  .content-panel-radio-group {
+    margin-left: 12px;
+    margin-bottom: 16px;
+
+    label {
+      width: 80px;
+      text-align: center;
+    }
+  }
+}
+
+.cotent-panel-header {
+  background-color: #fcfcf9;
 }

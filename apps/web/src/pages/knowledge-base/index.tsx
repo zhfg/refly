@@ -6,7 +6,6 @@ import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels"
 import { KnowledgeBaseDetail } from "@refly/ai-workspace-common/components/knowledge-base/knowledge-base-detail"
 import { AICopilot } from "@refly/ai-workspace-common/components/knowledge-base/copilot"
 import { AINote } from "@refly/ai-workspace-common/components/knowledge-base/ai-note"
-import { AINoteEmpty } from "@refly/ai-workspace-common/components/knowledge-base/ai-note-empty"
 // utils
 // 自定义方法
 // stores
@@ -86,8 +85,7 @@ const KnowledgeLibraryLayout = () => {
   }, [token, userStore?.userProfile?.uid])
 
   const copilotStyle =
-    (kbId && knowledgeBaseStore.resourcePanelVisible) ||
-    (noteId && noteStore.notePanelVisible)
+    knowledgeBaseStore.resourcePanelVisible || noteStore.notePanelVisible
       ? {
           defaultSize: 20,
           minSize: 20,
@@ -132,12 +130,12 @@ const KnowledgeLibraryLayout = () => {
             {noteStore.notePanelVisible ? (
               <>
                 <Panel
-                  minSize={20}
+                  minSize={30}
                   order={2}
                   className="workspace-content-panel"
                   key="workspace-content-panel"
                   id={`workspace-content-panel-note`}>
-                  {noteId ? <AINote /> : <AINoteEmpty />}
+                  <AINote />
                 </Panel>
                 <PanelResizeHandle
                   className="workspace-panel-resize"

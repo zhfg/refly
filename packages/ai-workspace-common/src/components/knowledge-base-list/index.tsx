@@ -60,7 +60,6 @@ export const KnowledgeBaseList = () => {
       wrapperStyle={{ width: '100%' }}
       bordered={false}
       pagination={false}
-      offsetBottom={200}
       dataSource={dataList}
       scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
       render={(item: Collection, key) => (
@@ -77,7 +76,7 @@ export const KnowledgeBaseList = () => {
           actions={[
             <CardBox
               cardData={item}
-              type="knowledge"
+              type="collection"
               cardIcon={<IconBook style={{ fontSize: '32px', strokeWidth: 3 }} />}
               onClick={() => {
                 jumpToKnowledgeBase({ kbId: item?.collectionId });

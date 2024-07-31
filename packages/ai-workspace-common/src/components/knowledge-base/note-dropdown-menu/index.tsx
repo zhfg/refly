@@ -16,12 +16,12 @@ const iconStyle = {
 };
 
 interface DropListProps {
-  handleCancle: (e: any) => void;
+  handleCancel: (e: any) => void;
   handleDeleteClick: (e: any) => void;
 }
 
 const DropList = (props: DropListProps) => {
-  const { handleCancle, handleDeleteClick } = props;
+  const { handleCancel, handleDeleteClick } = props;
 
   return (
     <Menu>
@@ -34,7 +34,7 @@ const DropList = (props: DropListProps) => {
             handleDeleteClick(e);
           }}
           onCancel={(e) => {
-            handleCancle(e);
+            handleCancel(e);
           }}
         >
           <div onClick={(e) => e.stopPropagation()}>
@@ -49,33 +49,31 @@ const DropList = (props: DropListProps) => {
 
 interface NoteDropdownMenuProps {
   note: Note;
+  postDeleteNote?: (note: Note) => void;
 }
 
 export const NoteDropdownMenu = (props: NoteDropdownMenuProps) => {
-  const { note } = props;
-  const navigate = useNavigate();
+  const { note, postDeleteNote } = props;
   const [popupVisible, setPopupVisible] = useState(false);
-  const noteStore = useNoteStore();
-  const { handleDeleteTab } = useNoteTabs();
 
   const handleDeleteClick = async (e: MouseEvent) => {
     e.stopPropagation();
     const { error } = await getClient().deleteNote({ body: { noteId: note.noteId } });
     setPopupVisible(false);
+
     if (error) {
       console.error(error);
       Message.error({ content: `删除失败` });
     } else {
       Message.success({ content: '删除成功' });
-      handleDeleteTab(note.noteId);
+    }
 
-      // if (noteStore.notePanelVisible) {
-      //   navigate('/knowledge-base');
-      // }
+    if (postDeleteNote) {
+      postDeleteNote(note);
     }
   };
 
-  const handleCancle = (e: MouseEvent) => {
+  const handleCancel = (e: MouseEvent) => {
     e.stopPropagation();
     setPopupVisible(false);
   };
@@ -85,7 +83,7 @@ export const NoteDropdownMenu = (props: NoteDropdownMenuProps) => {
     setPopupVisible(!popupVisible);
   };
 
-  const droplist = DropList({ handleCancle, handleDeleteClick });
+  const droplist = DropList({ handleCancel, handleDeleteClick });
 
   return (
     <Dropdown

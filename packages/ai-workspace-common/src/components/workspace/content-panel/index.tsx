@@ -1,4 +1,5 @@
-import { Tabs } from '@arco-design/web-react';
+import { useRef, useState } from 'react';
+import { Affix, Radio } from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
 
 import { WorkSpaceSearch } from '../work-space-search';
@@ -8,25 +9,53 @@ import { KnowledgeBaseList } from '@refly-packages/ai-workspace-common/component
 
 import './index.scss';
 
-const TabPanel = Tabs.TabPane;
+const RadioGroup = Radio.Group;
 
-export const ContentPanel = () => {
+const Content = (props: { val: string }) => {
+  switch (props.val) {
+    case 'knowledge-resource':
+      return <ResourceList />;
+    case 'knowledge-notes':
+      return <NoteList />;
+    case 'knowledge-collection':
+      return <KnowledgeBaseList />;
+    default:
+      return <ResourceList />;
+  }
+};
+
+const ContentHeader = (props: { setVal: (val: string) => void }) => {
   const { t } = useTranslation();
+  const { setVal } = props;
 
   return (
-    <div className="content-panel-container">
+    <div className="cotent-panel-header h-16 pt-3">
+      <RadioGroup
+        type="button"
+        size="large"
+        className="content-panel-radio-group"
+        defaultValue="knowledge-resource"
+        onChange={(val) => setVal(val)}
+      >
+        <Radio value="knowledge-resource">{t('workspace.contentPanel.tabPanel.resource')}</Radio>
+        <Radio value="knowledge-notes">{t('workspace.contentPanel.tabPanel.note')}</Radio>
+        <Radio value="knowledge-collection">{t('workspace.contentPanel.tabPanel.collection')}</Radio>
+      </RadioGroup>
+    </div>
+  );
+};
+
+export const ContentPanel = () => {
+  const ref = useRef();
+  const [val, setVal] = useState('knowledge-resource');
+
+  return (
+    <div className="content-panel-container" ref={ref}>
       <WorkSpaceSearch />
-      <Tabs defaultActiveTab="knowledge-resource">
-        <TabPanel key="knowledge-resource" title={t('workspace.contentPanel.tabPanel.resource')}>
-          <ResourceList />
-        </TabPanel>
-        <TabPanel key="knowledge-notes" title={t('workspace.contentPanel.tabPanel.note')}>
-          <NoteList />
-        </TabPanel>
-        <TabPanel key="knowledge-collection" title={t('workspace.contentPanel.tabPanel.collection')}>
-          <KnowledgeBaseList />
-        </TabPanel>
-      </Tabs>
+      <Affix offsetTop={0} target={() => ref.current}>
+        <ContentHeader setVal={setVal} />
+      </Affix>
+      <Content val={val} />
     </div>
   );
 };

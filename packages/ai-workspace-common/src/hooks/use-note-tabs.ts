@@ -35,23 +35,20 @@ export const useNoteTabs = () => {
   const handleDeleteTab = (key: string) => {
     const index = tabs.findIndex((x) => x.key === key);
     const newTabs = tabs.slice(0, index).concat(tabs.slice(index + 1));
+    noteStore.updateTabs(newTabs);
 
-    if (newTabs.length === 0) {
+    if (newTabs.length === 0 && noteStore.notePanelVisible) {
       jumpToNote({ noteId: '' });
-      return '';
     }
 
     if (key === activeTab && index > -1 && newTabs.length) {
       const activeTab = newTabs[index] ? newTabs[index].key : newTabs[index - 1].key;
       noteStore.updateActiveTab(activeTab);
-      jumpToNote({ noteId: activeTab });
-      return activeTab;
-    }
 
-    if (index > -1) {
-      noteStore.updateTabs(newTabs);
+      if (noteStore.notePanelVisible) {
+        jumpToNote({ noteId: activeTab });
+      }
     }
-    return '';
   };
 
   const handleUpdateTabTitle = (key: string, title: string) => {
