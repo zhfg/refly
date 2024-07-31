@@ -44,7 +44,6 @@ export const $Resource = {
     collectionId: {
       type: 'string',
       description: 'Collection ID',
-      deprecated: true,
     },
     title: {
       type: 'string',

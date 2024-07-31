@@ -865,7 +865,6 @@ components:
         collectionId:
           type: string
           description: Collection ID
-          deprecated: true
         title:
           type: string
           description: Resource title

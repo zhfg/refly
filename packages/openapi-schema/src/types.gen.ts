@@ -35,7 +35,6 @@ export type Resource = {
   resourceType: ResourceType;
   /**
    * Collection ID
-   * @deprecated
    */
   collectionId?: string;
   /**
