@@ -28,11 +28,12 @@ import { ResourceType, SearchDomain, SearchResult } from '@refly/openapi-schema'
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 export const BasePopover = (props: { children: React.ReactNode; content: React.ReactNode }) => {
+  const {} = props;
+
   return (
     <Popover
       color="#FCFCF9"
       position="right"
-      // popupVisible
       content={props.content}
       className="context-panel-popover"
       getPopupContainer={() => getPopupContainer()}
@@ -109,7 +110,12 @@ export const Content = (props: ContentProps) => {
           <span style={{ marginLeft: 8 }}>{props.title}</span>
         </div>
         <div className="header-right">
-          <IconClose />
+          {/* <Button
+            type="text"
+            className="assist-action-item"
+          >
+            <IconClose />
+          </Button> */}
         </div>
       </div>
       <div className="context-content-body popover-content-body">

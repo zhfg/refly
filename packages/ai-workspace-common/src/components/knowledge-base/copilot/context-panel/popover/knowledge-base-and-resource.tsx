@@ -26,7 +26,7 @@ export const KnowledgeBasePopover = () => {
       content={<Content domain="collection" title="导入知识库" searchPlaceholder="搜索知识库" fetchData={fetchData} />}
     >
       <div className="context-tree-node-extra">
-        <Button type="text" className="context-tree-node-extra-btn">
+        <Button type="text" className="context-tree-node-extra-btn ">
           <span>添加</span>
         </Button>
       </div>

@@ -4,57 +4,87 @@ import { IconClose, IconStorage } from '@arco-design/web-react/icon';
 // styles
 import './index.scss';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // utils
-import { searchData, searchDataKeys } from './utils';
+import {
+  buildEnvContext,
+  getTotalRealCheckedContext,
+  initalExpandedKeys,
+  initialCheckedKeys,
+  searchData,
+  searchDataKeys,
+} from './utils';
 
 // popover
 import { KnowledgeBasePopover } from './popover/knowledge-base-and-resource';
 import { NotePopover } from './popover/note';
 import { ResourcePopover } from './popover/resource';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
+import { title } from 'process';
 
 const TreeNode = Tree.Node;
 
 export const ContextPanel = () => {
+  const { checkedKeys, contextPanelPopoverVisible, setContextPanelPopoverVisible } = useContextPanelStore();
+  // TODO: 添加笔记相关逻辑
+  const { currentKnowledgeBase, currentResource, currentNote } = useCopilotContextState();
+  const propsInitialCheckedKeys = initialCheckedKeys?.filter((key) => {
+    if (!currentKnowledgeBase?.collectionId && key.startsWith('currentPage-currentKnowledgeBase')) {
+      return false;
+    }
+
+    if (!currentResource?.resourceId && key.startsWith('currentPage-currentResource')) {
+      return false;
+    }
+
+    // TODO 笔记
+    if (!currentNote?.resourceId && key.startsWith('currentPage-currentNote')) {
+      return false;
+    }
+
+    return true;
+  });
+
   return (
     <Popover
       color="#FCFCF9"
-      popupVisible
-      content={<ContextContent />}
+      popupVisible={contextPanelPopoverVisible}
+      content={<ContextContent initialCheckedKeys={propsInitialCheckedKeys} />}
       className="context-panel-popover"
       getPopupContainer={() => getPopupContainer()}
     >
-      <Badge count={10} dotStyle={{ backgroundColor: '#00968F', fontSize: 8, fontWeight: 'bold' }}>
-        <Button icon={<IconStorage />} type="text" className="chat-input-assist-action-item"></Button>
+      <Badge
+        count={getTotalRealCheckedContext(checkedKeys)}
+        dotStyle={{ backgroundColor: '#00968F', fontSize: 8, fontWeight: 'bold' }}
+      >
+        <Button
+          icon={<IconStorage />}
+          type="text"
+          className="chat-input-assist-action-item"
+          onClick={() => {
+            setContextPanelPopoverVisible(true);
+          }}
+        ></Button>
       </Badge>
     </Popover>
   );
 };
 
-const ContextContent = () => {
+const ContextContent = (props: { initialCheckedKeys: string[] }) => {
   // 同步通信的状态
   const contextPanelStore = useContextPanelStore();
+  const { checkedKeys, expandedKeys, setCheckedKeys, setExpandedKeys } = contextPanelStore;
+  // 感知 route/页面状态
+  // TODO: 添加笔记
+  const { currentKnowledgeBase, currentResource } = useCopilotContextState();
 
   const TreeData: TreeProps['treeData'] = [
     {
       title: '当前页面',
       key: 'currentPage',
-      children: [
-        {
-          title: '当前资源',
-          key: 'currentPage-currentResource',
-        },
-        {
-          title: '当前知识库',
-          key: 'currentPage-currentKnowledgeBase',
-        },
-        {
-          title: '当前笔记',
-          key: 'currentPage-currentNote',
-        },
-      ],
+      children: buildEnvContext(currentKnowledgeBase, currentResource, null),
     },
     {
       title: '资源',
@@ -88,30 +118,16 @@ const ContextContent = () => {
     },
   ];
   //   console.log('contextPanelStore, ', contextPanelStore.selectedCollections);
+  //   const { treeData, setTreeData } = useContextPanelStore();
   const [treeData, setTreeData] = useState(TreeData);
+  //   const treeData = contextPanelStore.treeData;
+  //   const setTreeData = contextPanelStore.setTreeData;
   const [inputValue, setInputValue] = useState('');
 
-  const initialCheckedKeys = [
-    'currentPage-currentResource',
-    'currentPage-currentKnowledgeBase',
-    'currentPage-currentNote',
-  ];
-  const initalExpandedKeys = ['currentPage', 'resource', 'knowledgeBase', 'note'];
-  const [selectedKeys, setSelectedKeys] = useState([]);
-  const [checkedKeys, setCheckedKeys] = useState(initialCheckedKeys);
-  const [expandedKeys, setExpandedKeys] = useState(initalExpandedKeys);
+  console.log('treeData', treeData);
 
-  const handleConfirm = async () => {};
-  const getTotalRealCheckedContext = (checkedKeys: string[]) => {
-    const filteredKeys = checkedKeys.filter((key) => {
-      if (initalExpandedKeys.includes(key)) {
-        return false;
-      }
-
-      return true;
-    });
-
-    return filteredKeys?.length || 0;
+  const handleConfirm = async () => {
+    contextPanelStore.setContextPanelPopoverVisible(false);
   };
 
   useEffect(() => {
@@ -125,13 +141,27 @@ const ContextContent = () => {
 
   // 同步 treeData
   useEffect(() => {
+    contextPanelStore.setTreeData(TreeData);
     setTreeData(TreeData);
-    setExpandedKeys(initalExpandedKeys);
+    contextPanelStore.setExpandedKeys(initalExpandedKeys);
   }, [
     contextPanelStore.selectedCollections?.length,
     contextPanelStore.selectedResources?.length,
     contextPanelStore.selectedNotes?.length,
   ]);
+  useEffect(() => {
+    contextPanelStore.setTreeData(TreeData);
+    setTreeData(TreeData);
+  }, [currentKnowledgeBase, currentResource]);
+  useEffect(() => {
+    if (contextPanelStore?.checkedKeys?.length === 0) {
+      console.log('checkedKeys', props.initialCheckedKeys);
+      contextPanelStore.setCheckedKeys(props.initialCheckedKeys);
+    }
+  }, []);
+  useEffect(() => {
+    contextPanelStore.setExpandedKeys(initalExpandedKeys);
+  }, []);
 
   return (
     <div className="context-content-container">
@@ -141,7 +171,9 @@ const ContextContent = () => {
           <span style={{ marginLeft: 8 }}>选择上下文</span>
         </div>
         <div className="header-right">
-          <IconClose />
+          <Button type="text" onClick={handleConfirm} className="assist-action-item">
+            <IconClose />
+          </Button>
         </div>
       </div>
       <div className="context-content-body">
@@ -246,7 +278,11 @@ const ContextContent = () => {
             </Checkbox>
           </div>
           <div className="footer-action">
-            <Button type="primary" style={{ width: 62, height: 32, borderRadius: 8 }} onClick={handleConfirm}>
+            <Button
+              type="primary"
+              style={{ width: 62, height: 28, borderRadius: 8, fontSize: 12 }}
+              onClick={handleConfirm}
+            >
               保存
             </Button>
           </div>

@@ -30,6 +30,31 @@
     }
   }
 
+  .assist-action-item {
+    color: rgba(0, 0, 0, 0.5);
+    font-size: 12px;
+
+    &:hover,
+    &.active {
+      cursor: pointer;
+      background-color: #f1f1f0;
+      color: #00968f;
+    }
+  }
+
+  button.assist-action-item {
+    height: 24px;
+    padding: 0 4px;
+    border-radius: 8px;
+
+    &:hover,
+    &.active {
+      cursor: pointer;
+      background-color: #f1f1f0;
+      color: #00968f;
+    }
+  }
+
   .context-content-header {
     display: flex;
     flex-direction: row;
