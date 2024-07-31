@@ -39,3 +39,23 @@ export function searchDataKeys(inputValue, TreeData: TreeProps['treeData']) {
 
   return loop(TreeData);
 }
+
+export function getSelectedData(selectedKeys, TreeData: TreeProps['treeData']) {
+  const loop = (data: TreeProps['treeData']) => {
+    const result = [];
+    data.forEach((item) => {
+      if (selectedKeys.includes(item.key as string)) {
+        result.push(item);
+      } else if (item.children) {
+        const filterData = loop(item.children);
+
+        if (filterData.length) {
+          result.push([...filterData]);
+        }
+      }
+    });
+    return result;
+  };
+
+  return loop(TreeData);
+}

@@ -19,12 +19,13 @@ import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui'
 import { useEffect, useState } from 'react';
 
 // utils
-import { searchData, searchDataKeys } from '../utils';
+import { getSelectedData } from '../utils';
 import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-or-search-list';
 
 // requests
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { ResourceType, SearchDomain, SearchResult } from '@refly/openapi-schema';
+import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 export const BasePopover = (props: { children: React.ReactNode; content: React.ReactNode }) => {
   return (
@@ -65,6 +66,9 @@ export const Content = (props: ContentProps) => {
   const [selectedKeys, setSelectedKeys] = useState([]);
   const [checkedKeys, setCheckedKeys] = useState([]);
 
+  // 上升状态，用于上层面板的控制
+  const contextPanelStore = useContextPanelStore();
+
   const handleConfirm = async () => {};
 
   // useEffect(() => {
@@ -83,6 +87,19 @@ export const Content = (props: ContentProps) => {
   useEffect(() => {
     setTreeData(handledTreeData);
   }, [handledTreeData]);
+
+  // 上升状态，更新状态到 context panel 中用于控制
+  useEffect(() => {
+    const selectedData = getSelectedData(checkedKeys, treeData);
+    console.log('selectedData', selectedData, props, checkedKeys, treeData);
+    if (props.domain === 'collection') {
+      contextPanelStore.setSelectedCollections(selectedData);
+    } else if (props.domain === 'resource' && props.resourceType === 'note') {
+      contextPanelStore.setSelectedNotes(selectedData);
+    } else if (props.domain === 'resource' && props.resourceType === 'weblink') {
+      contextPanelStore.setSelectedResources(selectedData);
+    }
+  }, [checkedKeys, treeData, props.domain, props.resourceType]);
 
   return (
     <div className="context-content-container">

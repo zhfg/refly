@@ -13,6 +13,7 @@ import { searchData, searchDataKeys } from './utils';
 import { KnowledgeBasePopover } from './popover/knowledge-base-and-resource';
 import { NotePopover } from './popover/note';
 import { ResourcePopover } from './popover/resource';
+import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 const TreeNode = Tree.Node;
 
@@ -33,6 +34,9 @@ export const ContextPanel = () => {
 };
 
 const ContextContent = () => {
+  // 同步通信的状态
+  const contextPanelStore = useContextPanelStore();
+
   const TreeData: TreeProps['treeData'] = [
     {
       title: '当前页面',
@@ -41,36 +45,49 @@ const ContextContent = () => {
         {
           title: '当前资源',
           key: 'currentPage-currentResource',
-          selected: true,
         },
         {
           title: '当前知识库',
           key: 'currentPage-currentKnowledgeBase',
-          selected: true,
         },
         {
           title: '当前笔记',
           key: 'currentPage-currentNote',
-          selected: true,
         },
       ],
     },
     {
       title: '资源',
       key: 'resource',
-      children: [],
+      children: contextPanelStore?.selectedResources?.map((item) => {
+        return {
+          key: 'resource-' + item?.key,
+          title: item?.title,
+        };
+      }),
     },
     {
       title: '知识库',
       key: 'knowledgeBase',
-      children: [],
+      children: contextPanelStore?.selectedCollections?.map((item) => {
+        return {
+          key: 'knowledgeBase-' + item?.key,
+          title: item?.title,
+        };
+      }),
     },
     {
       title: '笔记',
       key: 'note',
-      children: [],
+      children: contextPanelStore?.selectedNotes?.map((item) => {
+        return {
+          key: `note-` + item?.key,
+          title: item?.title,
+        };
+      }),
     },
   ];
+  //   console.log('contextPanelStore, ', contextPanelStore.selectedCollections);
   const [treeData, setTreeData] = useState(TreeData);
   const [inputValue, setInputValue] = useState('');
 
@@ -79,12 +96,23 @@ const ContextContent = () => {
     'currentPage-currentKnowledgeBase',
     'currentPage-currentNote',
   ];
-  const initalExpandedKeys = ['currentPage'];
+  const initalExpandedKeys = ['currentPage', 'resource', 'knowledgeBase', 'note'];
   const [selectedKeys, setSelectedKeys] = useState([]);
   const [checkedKeys, setCheckedKeys] = useState(initialCheckedKeys);
   const [expandedKeys, setExpandedKeys] = useState(initalExpandedKeys);
 
   const handleConfirm = async () => {};
+  const getTotalRealCheckedContext = (checkedKeys: string[]) => {
+    const filteredKeys = checkedKeys.filter((key) => {
+      if (initalExpandedKeys.includes(key)) {
+        return false;
+      }
+
+      return true;
+    });
+
+    return filteredKeys?.length || 0;
+  };
 
   useEffect(() => {
     if (!inputValue) {
@@ -94,6 +122,16 @@ const ContextContent = () => {
       setTreeData(result);
     }
   }, [inputValue]);
+
+  // 同步 treeData
+  useEffect(() => {
+    setTreeData(TreeData);
+    setExpandedKeys(initalExpandedKeys);
+  }, [
+    contextPanelStore.selectedCollections?.length,
+    contextPanelStore.selectedResources?.length,
+    contextPanelStore.selectedNotes?.length,
+  ]);
 
   return (
     <div className="context-content-container">
@@ -121,7 +159,10 @@ const ContextContent = () => {
           blockNode
           checkable
           checkedKeys={checkedKeys}
-          onCheck={(checkedKeys) => setCheckedKeys(checkedKeys)}
+          expandedKeys={expandedKeys}
+          onCheck={(checkedKeys) => {
+            setCheckedKeys(checkedKeys);
+          }}
           showLine
           renderExtra={(node) => {
             if (node._key === 'knowledgeBase') {
@@ -138,12 +179,31 @@ const ContextContent = () => {
 
             return null;
           }}
-          renderTitle={({ title }: { title: string }) => {
+          renderTitle={(node) => {
+            const title = (node?.title as string) || '';
+            const key = (node?._key as string) || '';
+            let extraCntTxt = '';
+
+            if (key === 'resource') {
+              const len = checkedKeys?.filter((item) => item?.startsWith('resource-')).length;
+              extraCntTxt += `（已选择 ${len}）`;
+            } else if (key === 'note') {
+              const len = checkedKeys?.filter((item) => item?.startsWith('note-')).length;
+              extraCntTxt += `（已选择 ${len}）`;
+            } else if (key === 'knowledgeBase') {
+              const len = checkedKeys?.filter((item) => item?.startsWith('knowledgeBase-')).length;
+              extraCntTxt += `（已选择 ${len}）`;
+            }
+
             if (inputValue) {
               const index = title.toLowerCase().indexOf(inputValue.toLowerCase());
 
               if (index === -1) {
-                return title;
+                return (
+                  <span>
+                    {title} {extraCntTxt ? <span style={{ color: 'rgb(var(--primary-6))' }}>{extraCntTxt}</span> : null}
+                  </span>
+                );
               }
 
               const prefix = title.substr(0, index);
@@ -155,11 +215,16 @@ const ContextContent = () => {
                     {title.substr(index, inputValue.length)}
                   </span>
                   {suffix}
+                  {extraCntTxt}
                 </span>
               );
             }
 
-            return title;
+            return (
+              <span>
+                {title} {extraCntTxt ? <span style={{ color: 'rgb(var(--primary-6))' }}>{extraCntTxt}</span> : null}
+              </span>
+            );
           }}
         ></Tree>
       </div>
@@ -177,7 +242,7 @@ const ContextContent = () => {
                 }
               }}
             >
-              <span className="footer-count text-item">已选择（{checkedKeys?.length}）</span>
+              <span className="footer-count text-item">已选择（{getTotalRealCheckedContext(checkedKeys)}）</span>
             </Checkbox>
           </div>
           <div className="footer-action">
