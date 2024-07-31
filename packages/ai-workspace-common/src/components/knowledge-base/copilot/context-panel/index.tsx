@@ -1,4 +1,4 @@
-import { Button, Badge, Popover, Tree, Input, Affix, Divider, Checkbox } from '@arco-design/web-react';
+import { Button, Badge, Popover, Tree, Input, Affix, Divider, Checkbox, TreeProps } from '@arco-design/web-react';
 import { IconClose, IconStorage } from '@arco-design/web-react/icon';
 
 // styles
@@ -6,81 +6,15 @@ import './index.scss';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { useEffect, useState } from 'react';
 
+// utils
+import { searchData, searchDataKeys } from './utils';
+
+// popover
+import { KnowledgeBasePopover } from './popover/knowledge-base-and-resource';
+import { NotePopover } from './popover/note';
+import { ResourcePopover } from './popover/resource';
+
 const TreeNode = Tree.Node;
-const TreeData = [
-  {
-    title: '当前页面',
-    key: 'currentPage',
-    children: [
-      {
-        title: 'Branch 0-0-1',
-        key: '0-0-1',
-        children: [
-          {
-            title: 'Leaf 0-0-1-1',
-            key: '0-0-1-1',
-          },
-          {
-            title: 'Leaf 0-0-1-2',
-            key: '0-0-1-2',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    title: '知识库 & 资源',
-    key: '0-1',
-    children: [
-      {
-        title: 'Branch 0-1-1',
-        key: '0-1-1',
-        children: [
-          {
-            title: 'Leaf 0-1-1-0',
-            key: '0-1-1-0',
-          },
-        ],
-      },
-      {
-        title: 'Branch 0-1-2',
-        key: '0-1-2',
-        children: [
-          {
-            title: 'Leaf 0-1-2-0',
-            key: '0-1-2-0',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    title: '笔记',
-    key: '0-2',
-    children: [
-      {
-        title: 'Branch 0-1-1',
-        key: '0-2-1',
-        children: [
-          {
-            title: 'Leaf 0-2-1-0',
-            key: '0-2-1-0',
-          },
-        ],
-      },
-      {
-        title: 'Branch 0-2-2',
-        key: '0-2-2',
-        children: [
-          {
-            title: 'Leaf 0-2-2-0',
-            key: '0-2-2-0',
-          },
-        ],
-      },
-    ],
-  },
-];
 
 export const ContextPanel = () => {
   return (
@@ -99,8 +33,56 @@ export const ContextPanel = () => {
 };
 
 const ContextContent = () => {
+  const TreeData: TreeProps['treeData'] = [
+    {
+      title: '当前页面',
+      key: 'currentPage',
+      children: [
+        {
+          title: '当前资源',
+          key: 'currentPage-currentResource',
+          selected: true,
+        },
+        {
+          title: '当前知识库',
+          key: 'currentPage-currentKnowledgeBase',
+          selected: true,
+        },
+        {
+          title: '当前笔记',
+          key: 'currentPage-currentNote',
+          selected: true,
+        },
+      ],
+    },
+    {
+      title: '资源',
+      key: 'resource',
+      children: [],
+    },
+    {
+      title: '知识库',
+      key: 'knowledgeBase',
+      children: [],
+    },
+    {
+      title: '笔记',
+      key: 'note',
+      children: [],
+    },
+  ];
   const [treeData, setTreeData] = useState(TreeData);
   const [inputValue, setInputValue] = useState('');
+
+  const initialCheckedKeys = [
+    'currentPage-currentResource',
+    'currentPage-currentKnowledgeBase',
+    'currentPage-currentNote',
+  ];
+  const initalExpandedKeys = ['currentPage'];
+  const [selectedKeys, setSelectedKeys] = useState([]);
+  const [checkedKeys, setCheckedKeys] = useState(initialCheckedKeys);
+  const [expandedKeys, setExpandedKeys] = useState(initalExpandedKeys);
 
   const handleConfirm = async () => {};
 
@@ -108,7 +90,7 @@ const ContextContent = () => {
     if (!inputValue) {
       setTreeData(TreeData);
     } else {
-      const result = searchData(inputValue);
+      const result = searchData(inputValue, TreeData);
       setTreeData(result);
     }
   }, [inputValue]);
@@ -118,7 +100,7 @@ const ContextContent = () => {
       <div className="context-content-header">
         <div className="header-left">
           <IconStorage />
-          <span>选择上下文</span>
+          <span style={{ marginLeft: 8 }}>选择上下文</span>
         </div>
         <div className="header-right">
           <IconClose />
@@ -138,6 +120,24 @@ const ContextContent = () => {
           treeData={treeData}
           blockNode
           checkable
+          checkedKeys={checkedKeys}
+          onCheck={(checkedKeys) => setCheckedKeys(checkedKeys)}
+          showLine
+          renderExtra={(node) => {
+            if (node._key === 'knowledgeBase') {
+              return <KnowledgeBasePopover />;
+            }
+
+            if (node._key === 'resource') {
+              return <ResourcePopover />;
+            }
+
+            if (node._key === 'note') {
+              return <NotePopover />;
+            }
+
+            return null;
+          }}
           renderTitle={({ title }: { title: string }) => {
             if (inputValue) {
               const index = title.toLowerCase().indexOf(inputValue.toLowerCase());
@@ -166,8 +166,18 @@ const ContextContent = () => {
       <Affix offsetBottom={0} target={() => document.querySelector('.context-content-container') as HTMLElement}>
         <div className="context-content-footer">
           <div className="footer-location">
-            <Checkbox>
-              <span className="footer-count text-item">已选择</span>
+            <Checkbox
+              checked={checkedKeys?.length > 0}
+              onChange={() => {
+                if (checkedKeys?.length > 0) {
+                  setCheckedKeys([]);
+                } else {
+                  const allCheckedKeys = searchDataKeys('', treeData);
+                  setCheckedKeys(allCheckedKeys);
+                }
+              }}
+            >
+              <span className="footer-count text-item">已选择（{checkedKeys?.length}）</span>
             </Checkbox>
           </div>
           <div className="footer-action">
@@ -180,23 +190,3 @@ const ContextContent = () => {
     </div>
   );
 };
-
-function searchData(inputValue) {
-  const loop = (data) => {
-    const result = [];
-    data.forEach((item) => {
-      if (item.title.toLowerCase().indexOf(inputValue.toLowerCase()) > -1) {
-        result.push({ ...item });
-      } else if (item.children) {
-        const filterData = loop(item.children);
-
-        if (filterData.length) {
-          result.push({ ...item, children: filterData });
-        }
-      }
-    });
-    return result;
-  };
-
-  return loop(TreeData);
-}

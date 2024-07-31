@@ -253,7 +253,7 @@ export const ImportFromWeblink = () => {
               // value={searchValue}
               defaultValue={'new-collection'}
               onInputValueChange={(value) => {
-                handleValueChange(value);
+                handleValueChange(value, ['collection']);
               }}
               onChange={(value) => {
                 console.log('value', value);

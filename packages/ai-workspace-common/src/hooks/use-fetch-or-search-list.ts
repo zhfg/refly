@@ -62,7 +62,7 @@ export const useFetchOrSearchList = ({
           body: {
             query: searchVal,
             scope: 'user',
-            domains: domains,
+            domains,
           },
         });
 
@@ -75,7 +75,7 @@ export const useFetchOrSearchList = ({
       }
     }, 200);
 
-  const handleValueChange = async (searchVal: string) => {
+  const handleValueChange = async (searchVal: string, domains: SearchDomain[]) => {
     if (!searchVal) {
       setDataList([]);
       setMode('fetch');
@@ -84,7 +84,7 @@ export const useFetchOrSearchList = ({
       setMode('search');
       debouncedSearch({
         searchVal,
-        domains: ['collection'],
+        domains,
       });
       setHasMore(true);
       setCurrentPage(1);

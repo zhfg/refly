@@ -44,6 +44,12 @@
     padding: 16px 12px;
     height: calc(100% - 72px - 10px);
     overflow-y: auto;
+
+    .context-tree-node-extra {
+      .context-tree-node-extra-btn {
+        border-radius: 8px;
+      }
+    }
   }
 
   .context-content-footer {
@@ -69,6 +75,7 @@
     .footer-count {
       color: #00968f;
       font-size: 12px;
+      font-weight: bold;
     }
 
     .text-item {
