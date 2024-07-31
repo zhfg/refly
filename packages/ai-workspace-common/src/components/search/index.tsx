@@ -1,43 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Command } from 'cmdk';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
-import * as Popover from '@radix-ui/react-popover';
-import { Logo, LinearIcon, FigmaIcon, SlackIcon, YouTubeIcon, RaycastIcon } from './icons';
 import {} from '@heroicons/react/24/outline';
-import {
-  IconSearch,
-  IconMessage,
-  IconFile,
-  IconApps,
-  IconBook,
-  IconEdit,
-  IconRobot,
-} from '@arco-design/web-react/icon';
+import { IconMessage, IconFile, IconBook, IconEdit, IconRobot } from '@arco-design/web-react/icon';
 import { useDebouncedCallback } from 'use-debounce';
 import { defaultFilter } from './cmdk/filter';
 
 import './index.scss';
-import { Modal } from '@arco-design/web-react';
 import { Home } from './home';
 import { DataList } from './data-list';
 import { Skill } from './skill';
 
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { Resource, SearchDomain, SearchRequest, SearchResult, SkillInstance, SkillMeta } from '@refly/openapi-schema';
-import { useNavigate } from 'react-router-dom';
+import { SearchDomain, SearchResult, SkillMeta } from '@refly/openapi-schema';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
 import { RenderItem } from '@refly-packages/ai-workspace-common/components/search/types';
+import classNames from 'classnames';
 
-export const Search = () => {
+export interface SearchProps extends React.ComponentProps<'div'> {
+  showList?: boolean;
+  onClickOutside?: () => void;
+}
+
+export const Search = (props: SearchProps) => {
+  const { showList, onClickOutside, ...divProps } = props;
+
   const ref = React.useRef<HTMLDivElement | null>(null);
   const [searchValue, setSearchValue] = useState('');
   const [value, setValue] = React.useState('');
   const searchStore = useSearchStore();
   const [displayMode, setDisplayMode] = useState<'search' | 'list'>('list');
   const inputRef = React.useRef<HTMLInputElement | null>(null);
-  const listRef = React.useRef(null);
   const [isComposing, setIsComposing] = useState(false);
 
   // skill
@@ -161,11 +156,25 @@ export const Search = () => {
     200,
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     inputRef?.current?.focus();
 
     handleBigSearchValueChange('', activePage);
   }, [activePage]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: any) => {
+      // Click was outside the component
+      if (ref.current && !ref.current.contains(event.target) && onClickOutside) {
+        onClickOutside();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const renderData: RenderItem[] = [
     {
@@ -273,7 +282,7 @@ export const Search = () => {
   };
 
   return (
-    <div className="vercel">
+    <div {...divProps} className={classNames('vercel', divProps.className)}>
       <Command
         value={value}
         onValueChange={setValue}
@@ -285,6 +294,7 @@ export const Search = () => {
 
           return defaultFilter(value, search, keywords);
         }}
+        className={classNames(showList ? 'search-active' : '')}
         onCompositionStart={(e) => console.log('composition start')}
         onCompositionUpdate={(e) => console.log('composition update')}
         onCompositionEnd={(e) => console.log('composition end')}
@@ -330,40 +340,42 @@ export const Search = () => {
             handleBigSearchValueChange(val, activePage);
           }}
         />
-        <Command.List>
-          <Command.Empty>No results found.</Command.Empty>
-          {activePage === 'home' && (
-            <Home
-              key={'search'}
-              displayMode={displayMode}
-              pages={pages}
-              setPages={(pages: string[]) => setPages(pages)}
-              data={renderData}
-              activeValue={value}
-              setValue={setValue}
-              searchValue={searchValue}
-            />
-          )}
-          {activePage !== 'home' && activePage !== 'skill-execute' ? (
-            <DataList
-              key="data-list"
-              displayMode={displayMode}
-              {...getRenderData(activePage)}
-              activeValue={value}
-              searchValue={searchValue}
-              setValue={setValue}
-            />
-          ) : null}
-          {activePage === 'skill-execute' ? (
-            <Skill
-              key="skill"
-              activeValue={value}
-              searchValue={searchValue}
-              setValue={setValue}
-              selectedSkill={selectedSkill}
-            />
-          ) : null}
-        </Command.List>
+        {showList ? (
+          <Command.List>
+            <Command.Empty>No results found.</Command.Empty>
+            {activePage === 'home' && (
+              <Home
+                key={'search'}
+                displayMode={displayMode}
+                pages={pages}
+                setPages={(pages: string[]) => setPages(pages)}
+                data={renderData}
+                activeValue={value}
+                setValue={setValue}
+                searchValue={searchValue}
+              />
+            )}
+            {activePage !== 'home' && activePage !== 'skill-execute' ? (
+              <DataList
+                key="data-list"
+                displayMode={displayMode}
+                {...getRenderData(activePage)}
+                activeValue={value}
+                searchValue={searchValue}
+                setValue={setValue}
+              />
+            ) : null}
+            {activePage === 'skill-execute' ? (
+              <Skill
+                key="skill"
+                activeValue={value}
+                searchValue={searchValue}
+                setValue={setValue}
+                selectedSkill={selectedSkill}
+              />
+            ) : null}
+          </Command.List>
+        ) : null}
       </Command>
     </div>
   );

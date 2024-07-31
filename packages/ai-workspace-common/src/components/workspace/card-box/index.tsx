@@ -41,9 +41,7 @@ export const CardBox = (props: ResourceCardProps | NoteCardProps | CollectionCar
   const { children, onClick } = props;
 
   return (
-    <div className="p-4 m-3 border rounded-lg card-box border-black/8 hover:bg-gray-500/10" onClick={() => onClick()}>
-      {props.type === 'resource' && <div className="card-img rounded-lg bg-emerald-200"></div>}
-
+    <div className="p-4 m-3 border rounded-lg card-box border-black/8" onClick={() => onClick()}>
       <div className="h-40 overflow-hidden">
         <div className="flex mt-3 mb-1 resource-url">
           <div className="flex items-center justify-center border rounded-lg card-icon-box shrink-0 border-black/8">
@@ -51,7 +49,7 @@ export const CardBox = (props: ResourceCardProps | NoteCardProps | CollectionCar
           </div>
           {props.type === 'resource' ? (
             <a
-              className="ml-2 resource-url-text hover:text-blue-600"
+              className="ml-2 text-xs"
               href="#"
               onClick={(e) => {
                 e.stopPropagation();

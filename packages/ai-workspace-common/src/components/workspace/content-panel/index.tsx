@@ -8,6 +8,7 @@ import { NoteList } from '@refly-packages/ai-workspace-common/components/workspa
 import { KnowledgeBaseList } from '@refly-packages/ai-workspace-common/components/knowledge-base-list';
 
 import './index.scss';
+import classNames from 'classnames';
 
 const RadioGroup = Radio.Group;
 
@@ -24,12 +25,12 @@ const Content = (props: { val: string }) => {
   }
 };
 
-const ContentHeader = (props: { setVal: (val: string) => void }) => {
+const ContentHeader = (props: { setVal: (val: string) => void; hitTop: boolean }) => {
   const { t } = useTranslation();
-  const { setVal } = props;
+  const { setVal, hitTop } = props;
 
   return (
-    <div className="cotent-panel-header h-16 pt-3">
+    <div className={classNames('content-panel-header', { 'content-panel-header-hit-top': hitTop }, 'h-16 pt-3')}>
       <RadioGroup
         type="button"
         size="large"
@@ -48,12 +49,13 @@ const ContentHeader = (props: { setVal: (val: string) => void }) => {
 export const ContentPanel = () => {
   const ref = useRef();
   const [val, setVal] = useState('knowledge-resource');
+  const [hitTop, setHitTop] = useState(false);
 
   return (
     <div className="content-panel-container" ref={ref}>
       <WorkSpaceSearch />
-      <Affix offsetTop={0} target={() => ref.current}>
-        <ContentHeader setVal={setVal} />
+      <Affix offsetTop={0} target={() => ref.current} onChange={setHitTop}>
+        <ContentHeader setVal={setVal} hitTop={hitTop} />
       </Affix>
       <Content val={val} />
     </div>

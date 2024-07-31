@@ -58,7 +58,8 @@ export const NoteList = () => {
         <List.Item
           key={item?.noteId + key}
           style={{
-            padding: '20px 0',
+            padding: '0',
+            width: '100%',
           }}
           className="knowledge-base-list-item-container"
           actionLayout="vertical"

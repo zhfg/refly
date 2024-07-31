@@ -34,7 +34,7 @@ export const BigSearchModal = () => {
       closeIcon={null}
       style={{ background: 'transparent', top: -100, width: 750 }}
     >
-      {searchStore?.isSearchOpen ? <Search /> : null}
+      {searchStore?.isSearchOpen ? <Search showList /> : null}
     </Modal>
   );
 };
