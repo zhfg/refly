@@ -41,8 +41,8 @@
     Helvetica,
     Arial,
     sans-serif,
-    "Apple Color Emoji",
-    "Segoe UI Emoji";
+    'Apple Color Emoji',
+    'Segoe UI Emoji';
 }
 
 * + * {
@@ -472,7 +472,7 @@
 }
 
 .main .footer {
-  overflow-y: scroll;
+  overflow-y: auto;
   background-color: #fcfcf9;
   padding: 0.5em 1em;
 

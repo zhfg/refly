@@ -361,11 +361,21 @@
       "message": {
         "question": "Website Summary"
       },
-        "action": {
-          "askFollow": {
-            "title": "Continue in the conversation"
-          }
+      "action": {
+        "askFollow": {
+          "title": "Continue in the conversation"
         }
+      }
+    }
+  },
+  "workspace": {
+    "contentPanel": {
+      "tabPanel": {
+        "resource": "Resources",
+        "note": "Notes",
+        "collection": "Collections",
+        "thread": "Threads"
+      }
     }
   },
   "hooks": {

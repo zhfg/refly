@@ -44,6 +44,7 @@
   h4,
   h5,
   h6 {
+    color: #0d0d0d;
     line-height: 1.1;
   }
 
@@ -81,6 +82,7 @@
   }
 
   blockquote {
+    color: #707070;
     border-left: 2px solid rgba(#0d0d0d, 0.1);
     padding-left: 1rem;
   }
@@ -117,6 +119,8 @@
   border-radius: 0.75rem;
   color: #0d0d0d;
   display: flex;
+  justify-content: center;
+  align-items: center;
   flex-direction: column;
 
   .tiptap {
@@ -236,63 +240,197 @@
 }
 
 .ai-note-container {
-  .knowledge-base-detail-header {
-    height: 40px;
+  position: relative;
+  height: 100%;
+
+  .note-detail-tab-container {
+    &.arco-tabs-card > .arco-tabs-content,
+    &.arco-tabs-card-gutter > .arco-tabs-content {
+      border: none;
+      padding: 0;
+    }
+
+    .note-detail-header {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 40px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+      .note-detail-navigation-bar {
+        .nav-btn {
+          color: rgba(0, 0, 0, 0.5);
+          font-size: 12px;
+          height: 32px;
+
+          &:hover {
+            background-color: #f1f1f0;
+          }
+
+          &:not(:first-child) {
+            margin-left: 8px;
+          }
+        }
+
+        .assist-action-item {
+          color: rgba(0, 0, 0, 0.5);
+          font-size: 12px;
+
+          &:hover,
+          &.active {
+            cursor: pointer;
+            background-color: #f1f1f0;
+            color: #00968f;
+          }
+        }
+
+        button.assist-action-item {
+          height: 30px;
+          padding: 0 4px;
+          border-radius: 8px;
+
+          &:hover,
+          &.active {
+            cursor: pointer;
+            background-color: #f1f1f0;
+            color: #00968f;
+          }
+        }
+      }
+
+      .note-detail-nav-switcher {
+        width: calc(100% - 105px);
+        margin-left: 0;
+
+        .arco-tabs-header-nav {
+          width: 100%;
+        }
+      }
+
+      .arco-tabs-header {
+        transform: translateY(4px);
+      }
+
+      .arco-tabs-header-title {
+        border: none;
+        border-radius: 8px;
+        background-color: transparent;
+        position: relative;
+        margin-left: 2px;
+        margin-right: 2px;
+
+        .arco-tabs-header-title-text {
+          max-width: 200px;
+          overflow: hidden; /* 隐藏溢出内容 */
+          white-space: nowrap; /* 禁止换行 */
+          text-overflow: ellipsis; /* 超出内容显示省略号 */
+        }
+
+        &:not(:first-child):before {
+          content: '';
+          clear: both;
+          position: absolute;
+          left: 0;
+          width: 2px;
+          height: 40%;
+          background-color: rgba(0, 0, 0, 0.1);
+          display: block;
+        }
+
+        &:hover {
+          background-color: #f1f1f0;
+
+          &::before {
+            background-color: transparent;
+          }
+
+          & + .arco-tabs-header-title {
+            &::before {
+              background-color: transparent;
+            }
+          }
+        }
+
+        .arco-tabs-header-title-text {
+          font-size: 12px;
+        }
+      }
+
+      .arco-tabs-header-nav::before {
+        background-color: transparent;
+        height: 0;
+      }
+
+      .arco-tabs-header-wrapper {
+        &::before,
+        &::after {
+          border: 1px solid gray;
+        }
+      }
+
+      .arco-tabs-header-title-active {
+        position: relative;
+        background-color: #f3f3ee;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+
+        &:hover {
+          .arco-icon-hover::before {
+            background-color: #c9cdd4;
+          }
+        }
+
+        &::before {
+          content: '';
+          clear: both;
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          width: 100% !important;
+          height: 2px !important;
+          background-color: #00968f !important;
+          display: block;
+        }
+
+        & + .arco-tabs-header-title {
+          &::before {
+            background-color: transparent;
+          }
+        }
+      }
+    }
+  }
+
+  .note-status-bar {
+    z-index: 100;
+    position: absolute;
+    bottom: 0;
+    left: 0;
     width: 100%;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    height: 40px;
+    background-color: rgba(255, 255, 255, 1);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
     padding: 0 12px;
 
-    .knowledge-base-detail-navigation-bar {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-
-      .assist-action-item {
-        color: rgba(0, 0, 0, 0.5);
-        font-size: 12px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-
-        &:hover,
-        &.active {
-          cursor: pointer;
-          background-color: #f1f1f0;
-          color: #00968f;
-        }
-      }
-
-      button.assist-action-item {
-        height: 24px;
-        padding: 0 4px;
-        border-radius: 8px;
-
-        &:hover,
-        &.active {
-          cursor: pointer;
-          background-color: #f1f1f0;
-          color: #00968f;
-        }
-      }
-    }
-
-    .conv-meta {
+    .note-status-bar-item {
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.5);
       display: flex;
       flex-direction: row;
       align-items: center;
 
       .conv-title {
-        font-size: 12px;
-        color: rgba(0, 0, 0, 0.6);
+        font-size: 14px;
         margin-left: 4px;
       }
     }
 
-    .knowledge-base-detail-menu {
+    .note-status-bar-menu {
       display: flex;
       flex-direction: row;
       align-items: center;
@@ -300,7 +438,7 @@
   }
 
   .ai-note-editor {
-    height: calc(100vh - 40px - 12px - 12px);
-    overflow-y: scroll;
+    height: calc(100vh - 40px - 14px - 14px - 20px);
+    overflow-y: auto;
   }
 }

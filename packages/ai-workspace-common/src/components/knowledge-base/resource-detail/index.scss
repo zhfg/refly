@@ -1,7 +1,7 @@
 .knowledge-base-resource-detail-container {
   padding: 24px 32px;
   height: calc(100vh - 60px);
-  overflow-y: scroll;
+  overflow-y: auto;
   overflow-x: hidden;
 
   .knowledge-base-resource-meta {

@@ -21,6 +21,11 @@ import {
   DeleteCollectionRequest,
   DeleteResourceRequest,
   DeleteResourceResponse,
+  ListNoteResponse,
+  GetNoteDetailResponse,
+  UpsertNoteResponse,
+  UpsertNoteRequest,
+  DeleteNoteRequest,
   BatchCreateResourceResponse,
 } from '@refly/openapi-schema';
 import { ResourceType, User as UserModel } from '@prisma/client';
@@ -28,7 +33,7 @@ import { KnowledgeService } from './knowledge.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { buildSuccessResponse } from '../utils';
 import { User } from 'src/utils/decorators/user.decorator';
-import { collectionPO2DTO, resourcePO2DTO } from './knowledge.dto';
+import { collectionPO2DTO, notePO2DTO, resourcePO2DTO } from './knowledge.dto';
 
 @Controller('knowledge')
 export class KnowledgeController {
@@ -176,5 +181,56 @@ export class KnowledgeController {
     }
     await this.knowledgeService.deleteResource(user, body.resourceId);
     return buildSuccessResponse(null);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('note/list')
+  async listNotes(
+    @User() user: UserModel,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
+  ): Promise<ListNoteResponse> {
+    const notes = await this.knowledgeService.listNotes(user, { page, pageSize });
+    return buildSuccessResponse(notes.map((note) => notePO2DTO(note)));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('note/detail')
+  async showNoteDetail(
+    @User() user: UserModel,
+    @Query('noteId') noteId: string,
+  ): Promise<GetNoteDetailResponse> {
+    const note = await this.knowledgeService.getNoteDetail(user, noteId);
+    return buildSuccessResponse(notePO2DTO(note, true));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('note/new')
+  async createNote(
+    @User() user: UserModel,
+    @Body() body: UpsertNoteRequest,
+  ): Promise<UpsertNoteResponse> {
+    const note = await this.knowledgeService.upsertNote(user, body);
+    return buildSuccessResponse(notePO2DTO(note));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('note/update')
+  async updateNote(@User() user: UserModel, @Body() body: UpsertNoteRequest) {
+    if (!body.noteId) {
+      throw new BadRequestException('Note ID is required');
+    }
+    const note = await this.knowledgeService.upsertNote(user, body);
+    return buildSuccessResponse(notePO2DTO(note));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('note/delete')
+  async deleteNote(@User() user: UserModel, @Body() body: DeleteNoteRequest) {
+    if (!body.noteId) {
+      throw new BadRequestException('Note ID is required');
+    }
+    await this.knowledgeService.deleteNote(user, body.noteId);
+    return buildSuccessResponse({});
   }
 }

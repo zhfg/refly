@@ -20,9 +20,7 @@ import { useSearchParams } from "react-router-dom"
 import { useResizePanel } from "@refly/ai-workspace-common/hooks/use-resize-panel"
 import { ErrorBoundary } from "@sentry/react"
 import { useKnowledgeBaseStore } from "@refly/ai-workspace-common/stores/knowledge-base"
-
-// 用于快速选择
-export const quickActionList = ["summary"]
+import { useNoteStore } from "@refly/ai-workspace-common/stores/note"
 
 /**
  *
@@ -36,6 +34,7 @@ const KnowledgeLibraryLayout = () => {
   const noteId = searchParams.get("noteId")
   const userStore = useUserStore()
   const knowledgeBaseStore = useKnowledgeBaseStore()
+  const noteStore = useNoteStore()
   const { t } = useTranslation()
 
   const [minSize] = useResizePanel({
@@ -66,8 +65,6 @@ const KnowledgeLibraryLayout = () => {
     console.log("dashboard close")
   }
 
-  // TODO: 临时关闭，用于开发调试
-  console.log("token", token)
   useEffect(() => {
     if (!(token || userStore?.userProfile?.uid)) return
 
@@ -88,7 +85,7 @@ const KnowledgeLibraryLayout = () => {
   }, [token, userStore?.userProfile?.uid])
 
   const copilotStyle =
-    kbId && knowledgeBaseStore.resourcePanelVisible
+    knowledgeBaseStore.resourcePanelVisible || noteStore.notePanelVisible
       ? {
           defaultSize: 20,
           minSize: 20,
@@ -130,10 +127,10 @@ const KnowledgeLibraryLayout = () => {
                 />
               </>
             ) : null}
-            {noteId && knowledgeBaseStore.notePanelVisible ? (
+            {noteStore.notePanelVisible ? (
               <>
                 <Panel
-                  minSize={minSize}
+                  minSize={30}
                   order={2}
                   className="workspace-content-panel"
                   key="workspace-content-panel"

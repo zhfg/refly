@@ -6,12 +6,10 @@ import { useUserStore } from "@refly/ai-workspace-common/stores/user"
 
 // 组件
 import { LoginModal } from "@refly/ai-workspace-common/components/login-modal/index"
-import { QuickSearchModal } from "@refly/ai-workspace-common/components/quick-search-modal"
 import { BigSearchModal } from "@refly/ai-workspace-common/components/search/modal"
 import { ImportResourceModal } from "@refly/ai-workspace-common/components/import-resource"
 
 // stores
-import { useQuickSearchStateStore } from "@refly/ai-workspace-common/stores/quick-search-state"
 import { useBindCommands } from "@refly/ai-workspace-common/hooks/use-bind-commands"
 import { useSearchStore } from "@refly/ai-workspace-common/stores/search"
 import { useImportResourceStore } from "@refly/ai-workspace-common/stores/import-resource"
@@ -38,7 +36,7 @@ export const AppLayout = (props: AppLayoutProps) => {
         style={{
           height: "calc(100vh - 16px)",
           flexGrow: 1,
-          overflowY: "scroll",
+          overflowY: "auto",
           width: `calc(100% - 200px - 16px)`,
         }}>
         <Content>{props.children}</Content>

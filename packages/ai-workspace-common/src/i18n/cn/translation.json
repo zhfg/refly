@@ -80,6 +80,14 @@
         "title": "知识归类",
         "seeMore": "查看更多分类"
       }
+    },
+    "contentPanel": {
+      "tabPanel": {
+        "resource": "资源",
+        "note": "笔记",
+        "collection": "知识库",
+        "thread": "会话"
+      }
     }
   },
   "loggedHomePage": {
@@ -146,7 +154,7 @@
       "status": {
         "createFailed": "创建新会话失败！"
       }
-    },  
+    },
     "siderMenu": {
       "homePage": "工作台",
       "news": "新特性",
@@ -190,9 +198,7 @@
       "seeOther": "查看其他日期内容"
     }
   },
-  "unloginHomePage": {
-
-  },
+  "unloginHomePage": {},
   "topics": {
     "breadcrumb": {
       "homePage": "主页",
@@ -296,7 +302,7 @@
       "noMoreText": "已经到底啦~",
       "askFollow": {
         "emptyNotify": "追问内容不能为空！",
-        "successNotify":  "创建会话成功！页面跳转中...",
+        "successNotify": "创建会话成功！页面跳转中...",
         "errorNotify": "创建会话失败！请重试",
         "modal": {
           "title": "确认创建会话",
@@ -344,7 +350,7 @@
       "askFollow": {
         "btnText": "点击进行追问",
         "emptyNotify": "追问内容不能为空！",
-        "successNotify":  "创建会话成功！页面跳转中...",
+        "successNotify": "创建会话成功！页面跳转中...",
         "errorNotify": "创建会话失败！请重试",
         "modal": {
           "title": "确认创建会话",

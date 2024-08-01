@@ -54,7 +54,7 @@ export const KnowledgeBaseResourceDetail = () => {
         const newTab: KnowledgeBaseTab = {
           title: resource?.title || '',
           key: resource?.resourceId || '',
-          content: resource?.description || '',
+          content: resource?.contentPreview || '',
           collectionId: kbId || '',
           resourceId: resource?.resourceId || '',
         };

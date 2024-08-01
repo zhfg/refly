@@ -5,11 +5,11 @@ const overrideLocalDev = false;
 export let SENTRY_DSN =
   'https://3a105c6104e4c4de3ead00dc11f16623@o4507205453414400.ingest.us.sentry.io/4507209639133184';
 
-export const PROD_DOMAIN = 'https://www.refly.ai';
-export const DEV_DOMAIN = 'https://production-test.refly.ai';
-
 export const SERVER_PROD_DOMAIN = 'https://api.refly.ai';
 export const SERVER_DEV_DOMAIN = 'http://localhost:3000';
+
+export const WS_SERVER_PROD_DOMAIN = 'wss://api.refly.ai:1234';
+export const WS_SERVER_DEV_DOMAIN = 'ws://localhost:1234';
 
 export const CLIENT_PROD_LANDING_PAGE_DOMAIN = 'https://www.refly.ai';
 export const CLIENT_PROD_APP_DOMAIN = 'https://app.refly.ai';
@@ -43,6 +43,13 @@ export const getServerOrigin = () => {
     return CLIENT_DEV_COOKIE_DOMAIN;
   }
   return getEnv() === IENV.DEVELOPMENT ? SERVER_DEV_DOMAIN : SERVER_PROD_DOMAIN;
+};
+
+export const getWsServerOrigin = () => {
+  if (overrideLocalDev) {
+    return WS_SERVER_DEV_DOMAIN;
+  }
+  return getEnv() === IENV.DEVELOPMENT ? WS_SERVER_DEV_DOMAIN : WS_SERVER_PROD_DOMAIN;
 };
 
 export const getClientOrigin = (isLandingPage = false) => {

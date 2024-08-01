@@ -183,7 +183,7 @@ export const ImportFromWeblink = () => {
   };
 
   useEffect(() => {
-    loadMore(0);
+    loadMore();
   }, []);
 
   return (
@@ -271,7 +271,7 @@ export const ImportFromWeblink = () => {
                   {menu}
                   {mode === 'fetch' && hasMore ? (
                     <div className="search-load-more">
-                      <Button type="text" loading={isRequesting} onClick={() => loadMore(currentPage)}>
+                      <Button type="text" loading={isRequesting} onClick={() => loadMore()}>
                         加载更多
                       </Button>
                     </div>

@@ -1,11 +1,4 @@
-import {
-  Avatar,
-  Button,
-  Divider,
-  Layout,
-  Menu,
-  Tag,
-} from "@arco-design/web-react"
+import { Avatar, Divider, Layout, Menu, Tag } from "@arco-design/web-react"
 import {
   useLocation,
   useNavigate,
@@ -170,16 +163,6 @@ export const SiderLayout = () => {
           </div>
         </div>
         <SearchQuickOpenBtn />
-        <div className="sider-import-container">
-          <button
-            className="sider-import-btn"
-            onClick={() =>
-              importResourceStore.setImportResourceModalVisible(true)
-            }>
-            <IconImport style={{ fontSize: 20 }} />
-            <span className="sider-menu-title">添加资源</span>
-          </button>
-        </div>
 
         <Menu
           style={{
@@ -198,6 +181,15 @@ export const SiderLayout = () => {
                 {t("loggedHomePage.siderMenu.news")}
               </span>
             </MenuItem> */}
+            <MenuItem
+              key="Import"
+              className="custom-menu-item"
+              onClick={() =>
+                importResourceStore.setImportResourceModalVisible(true)
+              }>
+              <IconImport style={{ fontSize: 20 }} />
+              <span className="sider-menu-title">添加资源</span>
+            </MenuItem>
             <Divider style={{ margin: "16px 0" }} />
             <MenuItem key="Workspace" className="custom-menu-item">
               <IconHome style={{ fontSize: 20 }} />

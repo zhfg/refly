@@ -63,7 +63,7 @@
     display: flex;
     flex-direction: row;
     width: calc(100% - 70px);
-    overflow-x: scroll;
+    overflow-x: auto;
   }
 
   .trending-topics-language-en {
