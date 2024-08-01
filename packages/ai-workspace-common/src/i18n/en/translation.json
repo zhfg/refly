@@ -156,7 +156,9 @@
       "threadLibrary": "Threads",
       "explore": "Explore",
       "getHelp": "Get Help",
-      "download": "Download Extension"
+      "download": "Download Extension",
+      "newResource": "New Resource",
+      "settings": "Settings"
     }
   },
   "knowledgeLibrary": {

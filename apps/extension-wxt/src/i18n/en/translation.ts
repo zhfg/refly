@@ -111,6 +111,7 @@ export const translation = {
         threadLibrary: 'Threads',
         getHelp: 'Get Help',
         download: 'Download Extension',
+        newResource: 'New Resource',
       },
     },
   },

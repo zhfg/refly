@@ -1,11 +1,12 @@
 .app-sider {
-  padding: 4px;
+  padding: 0;
   background-color: #f3f3ee;
   height: 100vh;
   box-sizing: border-box;
 
   .sider-header {
     height: 100%;
+    box-sizing: border-box;
 
     .logo {
       display: flex;
@@ -23,6 +24,11 @@
       font-size: 10px;
       margin-left: 0;
     }
+  }
+  .sider-header-collapse {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   .sider-menu-nav {
@@ -50,14 +56,15 @@
     z-index: 100000;
   }
 
+  .logo-box {
+    position: relative;
+    margin: 16px 12px 24px 12px;
+  }
+
   .logo {
     &:hover {
       cursor: pointer;
     }
-
-    margin-left: 16px;
-    margin-top: 16px;
-    margin-bottom: 24px;
 
     display: flex;
     flex-direction: row;
@@ -88,9 +95,10 @@
     background-color: transparent;
   }
 
-  .arco-menu-item {
-    display: flex;
-    align-items: center;
+  .arco-menu-collapse {
+    .custom-menu-item {
+      padding: 0 0 0 10px;
+    }
   }
 
   .custom-menu-item:hover {
@@ -100,8 +108,7 @@
 
   .setting-menu-item {
     .menu-settings {
-      padding: 4px 8px;
-      margin-left: -8px;
+      padding: 0;
 
       &:hover {
         background-color: rgba(232, 232, 227) !important;
@@ -130,13 +137,17 @@
       }
     }
   }
+  .setting-menu-item-collapse {
+    .menu-settings {
+      padding: 0;
+      margin-left: -8px;
+    }
+  }
 
   .menu-setting-container {
     display: flex;
-    flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 12px;
 
     svg {
       margin-right: 0px !important;
