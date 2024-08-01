@@ -32,7 +32,13 @@ const Content = (props: { val: string }) => {
 const NewFileDropList = (props: { handleCreateButtonClick: (type: string) => void }) => {
   const { t } = useTranslation();
   return (
-    <Menu>
+    <Menu
+      style={{
+        border: '1px solid rgba(0, 0, 0, 0.1)',
+        boxShadow: '0px 2px 6px 0px rgba(0, 0, 0, 0.1)',
+        borderRadius: '8px',
+      }}
+    >
       {['resource', 'note', 'collection'].map((item) => {
         return (
           <Menu.Item key={item} onClick={() => props.handleCreateButtonClick(item)}>
