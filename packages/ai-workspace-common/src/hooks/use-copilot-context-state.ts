@@ -43,9 +43,12 @@ export const useCopilotContextState = () => {
 
   const showResourceContext = showContextState && isCurrentPageSelected;
   const showKnowledgeBaseContext = showContextState && isCurrentKnowledgeBaseSelected;
-  const showSelectedTextContext = showContextState && isCurrentSelectedText;
 
-  const showContextCard = showSelectedTextContext;
+  // 明确打开的展示
+  const showContextCard = knowledgeBaseStore.showContextCard;
+  const showSelectedTextContext = showContextState && showContextCard;
+  // 是否有内容正在选中
+  const showSelectedText = !!currentSelectedText;
 
   // 是否展示 related questions
   const showRelatedQuestions = checkShowRelatedQuestion(chatStore?.messages);
@@ -68,6 +71,7 @@ export const useCopilotContextState = () => {
     showRelatedQuestions,
     showKnowledgeBaseContext,
     showSelectedTextContext,
+    showSelectedText,
     currentResource,
     currentNote,
     currentKnowledgeBase,

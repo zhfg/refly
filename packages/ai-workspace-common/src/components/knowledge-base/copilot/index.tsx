@@ -6,6 +6,7 @@ import {
   IconEdit,
   IconFile,
   IconFolder,
+  IconFontColors,
   IconHistory,
   IconMessage,
   IconPlusCircle,
@@ -58,6 +59,7 @@ import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/searc
 import { ContextPanel } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 import { useDynamicInitContextPanelState } from '@refly-packages/ai-workspace-common/hooks/use-init-context-panel-state';
+import { ContextActionBtn } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/context-action-btn';
 
 interface AICopilotProps {}
 
@@ -274,6 +276,7 @@ export const AICopilot = (props: AICopilotProps) => {
                   <IconCaretDown />
                 </Button>
               </OutputLocaleList>
+              <ContextActionBtn />
             </div>
           </div>
         </div>

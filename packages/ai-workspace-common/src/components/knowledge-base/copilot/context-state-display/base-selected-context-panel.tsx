@@ -55,10 +55,11 @@ export const BaseSelectedContextPanel = (props: BaseSelectedContextPanelProps) =
               type="round"
               size="small"
               checked={enableMultiSelect}
+              style={{ marginRight: 4 }}
               onChange={(value) => {
                 knowledgeBaseStore.updateEnableMultiSelect(value);
                 if (currentSelectedContentList?.length === 0) {
-                  knowledgeBaseStore.updateCurrentSelectedContentList([currentSelectedText]);
+                  knowledgeBaseStore.updateCurrentSelectedContentList(currentSelectedText ? [currentSelectedText] : []);
                 }
               }}
             />
@@ -71,6 +72,7 @@ export const BaseSelectedContextPanel = (props: BaseSelectedContextPanelProps) =
                 onClick={() => {
                   knowledgeBaseStore.updateSelectedText('');
                   searchStateStore.setSearchTarget(SearchTarget.CurrentPage);
+                  knowledgeBaseStore.setShowContextCard(false);
                 }}
               />
             }
@@ -86,12 +88,16 @@ export const BaseSelectedContextPanel = (props: BaseSelectedContextPanelProps) =
               </Tag>
             </div>
           ))
-        ) : (
+        ) : currentSelectedText ? (
           <div className="context-state-resource-item">
             <Tag icon={<IconFontColors />} bordered className="context-state-resource-item-tag">
               {currentSelectedText}
             </Tag>
           </div>
+        ) : (
+          <span className="text-gray-500" style={{ fontSize: 12 }}>
+            暂无选中内容...
+          </span>
         )}
       </div>
       <div className="context-state-card-footer">{skillContent}</div>

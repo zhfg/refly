@@ -33,6 +33,7 @@ interface KnowledgeBaseState {
   selectedNamespace: SelectedNamespace;
   enableMultiSelect: boolean; // 支持多选
   currentSelectedContentList: string[]; // 多选内容
+  showContextCard: boolean;
 
   // tabs
   tabs: KnowledgeBaseTab[];
@@ -74,6 +75,7 @@ interface KnowledgeBaseState {
   updateSelectedNamespace: (selectedNamespace: SelectedNamespace) => void;
   updateEnableMultiSelect: (enableMultiSelect: boolean) => void;
   updateCurrentSelectedContentList: (currentSelectedContentList: string[]) => void;
+  setShowContextCard: (showContextCard: boolean) => void;
   resetSelectedContextState: () => void;
 }
 
@@ -87,6 +89,7 @@ export const defaultSelectedContextState = {
 export const defaultState = {
   isSaveKnowledgeBaseModalVisible: false,
   ...defaultSelectedContextState,
+  showContextCard: false,
   tabs: [
     {
       title: 'New Tab',
@@ -155,6 +158,7 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
     updateEnableMultiSelect: (enableMultiSelect: boolean) => set((state) => ({ ...state, enableMultiSelect })),
     updateCurrentSelectedContentList: (currentSelectedContentList: string[]) =>
       set((state) => ({ ...state, currentSelectedContentList })),
+    setShowContextCard: (showContextCard: boolean) => set((state) => ({ ...state, showContextCard })),
     resetSelectedContextState: () => set((state) => ({ ...state, ...defaultSelectedContextState })),
   })),
 );
