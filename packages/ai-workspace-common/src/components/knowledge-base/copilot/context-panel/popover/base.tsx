@@ -81,7 +81,7 @@ export const Content = (props: ContentProps) => {
 
   // 获取知识库
   useEffect(() => {
-    loadMore(0);
+    loadMore();
   }, []);
   useEffect(() => {
     setTreeData(handledTreeData);
