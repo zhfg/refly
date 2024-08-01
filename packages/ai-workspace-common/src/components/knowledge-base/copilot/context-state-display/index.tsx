@@ -5,6 +5,8 @@ import { ResourceDetailSelectedContextPanel } from '@refly-packages/ai-workspace
 import { ResourceDetailContextPanel } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/resource-detail-context-panel';
 import { KnowledgeBaseContextPanel } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/knowledge-base-context-panel';
 
+// styles
+import './index.scss';
 // context components
 
 export const ContextStateDisplay = () => {

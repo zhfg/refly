@@ -189,7 +189,7 @@
         }
 
         .skill-item {
-          min-width: 170px;
+          width: 70px;
           flex: 1 1 calc(50% - 16px); /* 4 items per row with gap adjustment */
           background-color: #fff;
           border: 1px solid rgba(0, 0, 0, 0.1);
@@ -524,7 +524,7 @@
 
         .skill-item {
           height: 24px;
-          padding: 0 8px;
+          width: 80px;
           border-radius: 8px;
           border: 1px solid rgba(0, 0, 0, 0.12);
           display: flex;
@@ -538,7 +538,8 @@
           }
 
           .skill-item-title {
-            max-width: 112px;
+            display: inline-block;
+            max-width: calc(100% - 8px);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -596,76 +597,6 @@
             background-color: #f1f1f0;
           }
         }
-      }
-    }
-  }
-}
-
-.ai-copilot-context-state-display-container {
-  margin: 0 12px;
-  padding: 8px 8px;
-  background: #fcfcf9;
-  box-shadow: 0px 2px 26px 0px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-
-  .context-state-card {
-    .context-state-card-header {
-      display: flex;
-      flex-direction: row;
-      width: 100%;
-      justify-content: space-between;
-
-      .context-state-card-header-title {
-        padding-left: 8px;
-      }
-
-      .context-state-card-header-left {
-        font-size: 10px;
-        color: rgba(0, 0, 0, 0.5);
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-      }
-
-      .context-state-card-header-right {
-        font-size: 16px;
-        color: rgba(0, 0, 0, 0.3);
-
-        &:hover {
-          cursor: pointer;
-        }
-      }
-    }
-
-    .context-state-card-body {
-      margin-top: 4px;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-
-      .context-state-resource-item-tag {
-        border-radius: 8px;
-        background-color: transparent;
-        max-width: 200px;
-      }
-    }
-
-    .context-state-card-footer {
-      .context-state-action-list {
-        display: flex;
-        flex-direction: row;
-        margin-top: 12px;
-
-        .context-state-action-item {
-          &:not(:first-child) {
-            margin-left: 8px;
-          }
-        }
-      }
-
-      button {
-        border-radius: 8px;
       }
     }
   }

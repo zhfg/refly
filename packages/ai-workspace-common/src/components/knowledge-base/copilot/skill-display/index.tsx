@@ -22,6 +22,7 @@ export const SkillDisplay = () => {
     initialContainCnt: 3,
     paddingSize: 0,
     placeholderWidth: 100,
+    itemSize: 80,
   });
 
   return (

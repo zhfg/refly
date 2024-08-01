@@ -75,7 +75,13 @@ export const useBuildThreadAndRun = () => {
   // TODO: support content list
   const buildSkillContext = (): SkillContext => {
     const { localSettings } = useUserStore.getState();
-    const { currentKnowledgeBase, currentResource, currentSelectedText = '' } = useKnowledgeBaseStore.getState();
+    const {
+      currentKnowledgeBase,
+      currentResource,
+      currentSelectedText = '',
+      enableMultiSelect,
+      currentSelectedContentList = [],
+    } = useKnowledgeBaseStore.getState();
     const { currentNote } = useNoteStore.getState();
     const { checkedKeys } = useContextPanelStore.getState();
     const mapDomainEnvIds = {
@@ -108,9 +114,11 @@ export const useBuildThreadAndRun = () => {
       return Array.from(new Set(ids?.filter((id) => !!id)));
     };
 
+    const contentList = enableMultiSelect ? currentSelectedContentList : [currentSelectedText];
+
     let context: SkillContext = {
       locale: localSettings?.outputLocale || LOCALE.EN,
-      contentList: [currentSelectedText]?.filter((item) => !!item),
+      contentList: contentList?.filter((item) => !!item),
       collectionIds: getIds('collection', checkedKeys),
       resourceIds: getIds('resource', checkedKeys),
       noteIds: getIds('note', checkedKeys),

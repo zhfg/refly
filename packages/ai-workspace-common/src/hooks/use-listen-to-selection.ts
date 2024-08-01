@@ -9,6 +9,7 @@ export const useListenToSelection = (selector: string, namespace: SelectedNamesp
   const searchStateStore = useSearchStateStore();
 
   const timerForMouseEvent = () => {
+    const { enableMultiSelect, currentSelectedContentList } = useKnowledgeBaseStore.getState();
     const selection = window.getSelection();
     const text = selection?.toString();
 
@@ -16,9 +17,10 @@ export const useListenToSelection = (selector: string, namespace: SelectedNamesp
       knowledgeBaseStore.updateSelectedText(text);
       knowledgeBaseStore.updateSelectedNamespace(namespace);
       searchStateStore.setSearchTarget(SearchTarget.CurrentPage);
-      console.log('updateSelectedText', text);
-    } else {
-      knowledgeBaseStore.updateSelectedText('');
+
+      if (enableMultiSelect) {
+        knowledgeBaseStore.updateCurrentSelectedContentList(currentSelectedContentList.concat(text));
+      }
     }
   };
 

@@ -31,6 +31,8 @@ interface KnowledgeBaseState {
   // selection
   currentSelectedText: string;
   selectedNamespace: SelectedNamespace;
+  enableMultiSelect: boolean; // 支持多选
+  currentSelectedContentList: string[]; // 多选内容
 
   // tabs
   tabs: KnowledgeBaseTab[];
@@ -62,18 +64,29 @@ interface KnowledgeBaseState {
   updateKbModalVisible: (kbModalVisible: boolean) => void;
   updateSourceListModalVisible: (sourceListModalVisible: boolean) => void;
   updateTempConvResources: (tempConvResources: Resource[]) => void;
-  updateSelectedText: (selectedText: string) => void;
-  updateSelectedNamespace: (selectedNamespace: SelectedNamespace) => void;
   updateTabs: (tabs: KnowledgeBaseTab[]) => void;
   updateActiveTab: (key: string) => void;
   updateResourcePanelVisible: (visible: boolean) => void;
   resetState: () => void;
+
+  // context 面板相关的内容
+  updateSelectedText: (selectedText: string) => void;
+  updateSelectedNamespace: (selectedNamespace: SelectedNamespace) => void;
+  updateEnableMultiSelect: (enableMultiSelect: boolean) => void;
+  updateCurrentSelectedContentList: (currentSelectedContentList: string[]) => void;
+  resetSelectedContextState: () => void;
 }
+
+export const defaultSelectedContextState = {
+  currentSelectedText: '',
+  selectedNamespace: 'resource-detail' as SelectedNamespace,
+  enableMultiSelect: false,
+  currentSelectedContentList: [],
+};
 
 export const defaultState = {
   isSaveKnowledgeBaseModalVisible: false,
-  currentSelectedText: '',
-  selectedNamespace: 'resource-detail' as SelectedNamespace,
+  ...defaultSelectedContextState,
   tabs: [
     {
       title: 'New Tab',
@@ -127,9 +140,7 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
     updateIsRequesting: (isRequesting: boolean) => set((state) => ({ ...state, isRequesting })),
     updateActionSource: (actionSource: ActionSource) => set((state) => ({ ...state, actionSource })),
     updateTempConvResources: (tempConvResources: Resource[]) => set((state) => ({ ...state, tempConvResources })),
-    updateSelectedText: (selectedText: string) => set((state) => ({ ...state, currentSelectedText: selectedText })),
-    updateSelectedNamespace: (selectedNamespace: SelectedNamespace) =>
-      set((state) => ({ ...state, selectedNamespace })),
+
     updateTabs: (tabs: KnowledgeBaseTab[]) => set((state) => ({ ...state, tabs })),
     updateActiveTab: (key: string) => set((state) => ({ ...state, activeTab: key })),
     resetState: () => set((state) => ({ ...state, knowledgeBaseList: [] })),
@@ -137,5 +148,13 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
     // tabs
     updateResourcePanelVisible: (visible: boolean) => set((state) => ({ ...state, resourcePanelVisible: visible })),
     updateNotePanelVisible: (visible: boolean) => set((state) => ({ ...state, notePanelVisible: visible })),
+
+    updateSelectedText: (selectedText: string) => set((state) => ({ ...state, currentSelectedText: selectedText })),
+    updateSelectedNamespace: (selectedNamespace: SelectedNamespace) =>
+      set((state) => ({ ...state, selectedNamespace })),
+    updateEnableMultiSelect: (enableMultiSelect: boolean) => set((state) => ({ ...state, enableMultiSelect })),
+    updateCurrentSelectedContentList: (currentSelectedContentList: string[]) =>
+      set((state) => ({ ...state, currentSelectedContentList })),
+    resetSelectedContextState: () => set((state) => ({ ...state, ...defaultSelectedContextState })),
   })),
 );
