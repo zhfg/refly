@@ -105,7 +105,7 @@ export const useBuildThreadAndRun = () => {
         ids.push(mapDomainEnvIds?.[domain] || '');
       }
 
-      return ids?.filter((id) => !!id);
+      return Array.from(new Set(ids?.filter((id) => !!id)));
     };
 
     let context: SkillContext = {
@@ -113,7 +113,7 @@ export const useBuildThreadAndRun = () => {
       contentList: [currentSelectedText]?.filter((item) => !!item),
       collectionIds: getIds('collection', checkedKeys),
       resourceIds: getIds('resource', checkedKeys),
-      // TODO: support note
+      noteIds: getIds('note', checkedKeys),
     };
 
     return context;

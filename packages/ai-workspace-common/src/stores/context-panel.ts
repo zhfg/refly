@@ -15,6 +15,8 @@ export interface LinkMeta {
 }
 
 interface ContextPanelState {
+  envContextInitMap: { resource: boolean; collection: boolean; note: boolean };
+
   contextPanelPopoverVisible: boolean;
   importPopoverVisible: boolean;
 
@@ -28,6 +30,7 @@ interface ContextPanelState {
   checkedKeys: string[];
   expandedKeys: string[];
 
+  setEnvContextInitMap: (envContextInitMap: Partial<{ resource: boolean; collection: boolean; note: boolean }>) => void;
   setContextPanelPopoverVisible: (visible: boolean) => void;
   setImportPopoverVisible: (visible: boolean) => void;
   setSelectedResources: (resources: TreeProps['treeData']) => void;
@@ -40,6 +43,7 @@ interface ContextPanelState {
 }
 
 export const defaultState = {
+  envContextInitMap: { resource: false, collection: false, note: false },
   contextPanelPopoverVisible: false,
   importPopoverVisible: false,
   selectedResources: [],
@@ -55,6 +59,8 @@ export const useContextPanelStore = create<ContextPanelState>()(
   devtools((set) => ({
     ...defaultState,
 
+    setEnvContextInitMap: (envContextInitMap: { resource: boolean; collection: boolean; note: boolean }) =>
+      set((state) => ({ ...state, envContextInitMap: { ...state.envContextInitMap, ...envContextInitMap } })),
     setContextPanelPopoverVisible: (visible: boolean) =>
       set((state) => ({ ...state, contextPanelPopoverVisible: visible })),
     setImportPopoverVisible: (visible: boolean) => set((state) => ({ ...state, importPopoverVisible: visible })),

@@ -27,10 +27,11 @@ export const useCopilotContextState = () => {
   const [queryParams] = useSearchParams();
   const resId = queryParams.get('resId');
   const kbId = queryParams.get('kbId');
+  const noteId = queryParams.get('noteId');
   const currentSelectedText = knowledgeBaseStore?.currentSelectedText;
 
   // 优先级: text > resource > knowledgeBase > all
-  const showContextState = !!resId || !!kbId || !!currentSelectedText;
+  const showContextState = !!resId || !!kbId || !!currentSelectedText || !!noteId;
   const isCurrentSelectedText = !!currentSelectedText;
   const isCurrentPageSelected = searchStateStore?.searchTarget === SearchTarget.CurrentPage && !isCurrentSelectedText;
   const isCurrentKnowledgeBaseSelected =

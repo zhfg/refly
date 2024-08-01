@@ -27,28 +27,12 @@ const TreeNode = Tree.Node;
 
 export const ContextPanel = () => {
   const { checkedKeys, contextPanelPopoverVisible, setContextPanelPopoverVisible } = useContextPanelStore();
-  const { currentKnowledgeBase, currentResource, currentNote } = useCopilotContextState();
-  const propsInitialCheckedKeys = initialCheckedKeys?.filter((key) => {
-    if (!currentKnowledgeBase?.collectionId && key.startsWith('currentPage-collection')) {
-      return false;
-    }
-
-    if (!currentResource?.resourceId && key.startsWith('currentPage-resource')) {
-      return false;
-    }
-
-    if (!currentNote?.noteId && key.startsWith('currentPage-note')) {
-      return false;
-    }
-
-    return true;
-  });
 
   return (
     <Popover
       color="#FCFCF9"
       popupVisible={contextPanelPopoverVisible}
-      content={<ContextContent initialCheckedKeys={propsInitialCheckedKeys} />}
+      content={<ContextContent />}
       className="context-panel-popover"
       getPopupContainer={() => getPopupContainer()}
     >
@@ -69,10 +53,10 @@ export const ContextPanel = () => {
   );
 };
 
-const ContextContent = (props: { initialCheckedKeys: string[] }) => {
+const ContextContent = () => {
   // 同步通信的状态
   const contextPanelStore = useContextPanelStore();
-  const { checkedKeys, expandedKeys, setCheckedKeys, setExpandedKeys } = contextPanelStore;
+  const { checkedKeys, expandedKeys, setCheckedKeys, setExpandedKeys, setEnvContextInitMap } = contextPanelStore;
   // 感知 route/页面状态
   const { currentKnowledgeBase, currentResource, currentNote } = useCopilotContextState();
 
@@ -150,12 +134,6 @@ const ContextContent = (props: { initialCheckedKeys: string[] }) => {
     setTreeData(TreeData);
   }, [currentKnowledgeBase, currentResource]);
   useEffect(() => {
-    if (contextPanelStore?.checkedKeys?.length === 0) {
-      console.log('checkedKeys', props.initialCheckedKeys);
-      contextPanelStore.setCheckedKeys(props.initialCheckedKeys);
-    }
-  }, []);
-  useEffect(() => {
     contextPanelStore.setExpandedKeys(initalExpandedKeys);
   }, []);
 
@@ -188,7 +166,12 @@ const ContextContent = (props: { initialCheckedKeys: string[] }) => {
           checkable
           checkedKeys={checkedKeys}
           expandedKeys={expandedKeys}
-          onCheck={(checkedKeys) => {
+          onCheck={(checkedKeys, { checked, node }) => {
+            if (initialCheckedKeys?.includes(node.key)) {
+              const domain = node?.key?.split('-')[1];
+              setEnvContextInitMap({ [domain]: true });
+            }
+
             setCheckedKeys(checkedKeys);
           }}
           showLine

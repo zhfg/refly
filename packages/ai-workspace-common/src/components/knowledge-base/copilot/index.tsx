@@ -56,6 +56,7 @@ import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill'
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 import { ContextPanel } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
+import { useDynamicInitContextPanelState } from '@refly-packages/ai-workspace-common/hooks/use-init-context-panel-state';
 
 interface AICopilotProps {}
 
@@ -169,6 +170,7 @@ export const AICopilot = (props: AICopilotProps) => {
     handleSwitchSearchTarget();
   }, [showContextState]);
   useResizeCopilot({ containerSelector: 'ai-copilot-container' });
+  useDynamicInitContextPanelState(); // 动态根据页面状态更新上下文面板状态
 
   return (
     <div className="ai-copilot-container">
