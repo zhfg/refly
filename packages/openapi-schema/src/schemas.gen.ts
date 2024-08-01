@@ -1289,6 +1289,13 @@ export const $SkillContext = {
         type: 'string',
       },
     },
+    noteIds: {
+      type: 'array',
+      description: 'List of note IDs',
+      items: {
+        type: 'string',
+      },
+    },
     contentList: {
       type: 'array',
       description: 'List of content',

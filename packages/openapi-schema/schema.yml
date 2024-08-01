@@ -1787,6 +1787,11 @@ components:
           description: List of collection IDs
           items:
             type: string
+        noteIds:
+          type: array
+          description: List of note IDs
+          items:
+            type: string 
         contentList:
           type: array
           description: List of content
