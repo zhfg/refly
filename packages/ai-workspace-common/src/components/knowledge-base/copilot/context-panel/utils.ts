@@ -1,5 +1,5 @@
 import { TreeProps } from '@arco-design/web-react';
-import { Collection, Resource } from '@refly/openapi-schema';
+import { Collection, Note, Resource } from '@refly/openapi-schema';
 
 export function searchData(inputValue, TreeData) {
   const loop = (data) => {
@@ -80,7 +80,7 @@ export const getTotalRealCheckedContext = (checkedKeys: string[]) => {
   return filteredKeys?.length || 0;
 };
 
-export const buildEnvContext = (currentKnowledgeBase: Collection, currentResource: Resource, currentNote: Resource) => {
+export const buildEnvContext = (currentKnowledgeBase: Collection, currentResource: Resource, currentNote: Note) => {
   let envContextArr = [];
 
   if (currentResource?.resourceId) {
@@ -95,7 +95,7 @@ export const buildEnvContext = (currentKnowledgeBase: Collection, currentResourc
       key: `currentPage-currentKnowledgeBase`,
     });
   }
-  if (currentNote?.resourceId) {
+  if (currentNote?.noteId) {
     envContextArr.push({
       title: `当前笔记：${currentNote?.title}`,
       key: `currentPage-currentNote`,

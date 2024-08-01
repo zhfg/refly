@@ -7,33 +7,23 @@ import { SearchResult } from '@refly/openapi-schema';
 
 export const NotePopover = () => {
   const fetchData = async (queryPayload) => {
-    const res = await getClient().listResources({
+    const res = await getClient().listNotes({
       query: {
         ...queryPayload,
-        resourceType: 'note',
       },
     });
 
     const data: SearchResult[] = (res?.data?.data || []).map((item) => ({
-      id: item?.resourceId,
+      id: item?.noteId,
       title: item?.title,
-      domain: 'resource',
-      metadata: { collectionId: item?.collectionId, resourceType: 'note' },
+      domain: 'note',
     }));
     return { success: res?.data?.success, data };
   };
 
   return (
     <BasePopover
-      content={
-        <Content
-          domain="resource"
-          resourceType="note"
-          title="导入笔记"
-          searchPlaceholder="搜索笔记"
-          fetchData={fetchData}
-        />
-      }
+      content={<Content domain="note" title="导入笔记" searchPlaceholder="搜索笔记" fetchData={fetchData} />}
     >
       <div className="context-tree-node-extra">
         <Button type="text" className="context-tree-node-extra-btn">

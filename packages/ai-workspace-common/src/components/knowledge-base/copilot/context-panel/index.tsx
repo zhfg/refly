@@ -22,13 +22,11 @@ import { NotePopover } from './popover/note';
 import { ResourcePopover } from './popover/resource';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
-import { title } from 'process';
 
 const TreeNode = Tree.Node;
 
 export const ContextPanel = () => {
   const { checkedKeys, contextPanelPopoverVisible, setContextPanelPopoverVisible } = useContextPanelStore();
-  // TODO: 添加笔记相关逻辑
   const { currentKnowledgeBase, currentResource, currentNote } = useCopilotContextState();
   const propsInitialCheckedKeys = initialCheckedKeys?.filter((key) => {
     if (!currentKnowledgeBase?.collectionId && key.startsWith('currentPage-currentKnowledgeBase')) {
@@ -39,8 +37,7 @@ export const ContextPanel = () => {
       return false;
     }
 
-    // TODO 笔记
-    if (!currentNote?.resourceId && key.startsWith('currentPage-currentNote')) {
+    if (!currentNote?.noteId && key.startsWith('currentPage-currentNote')) {
       return false;
     }
 
@@ -77,14 +74,13 @@ const ContextContent = (props: { initialCheckedKeys: string[] }) => {
   const contextPanelStore = useContextPanelStore();
   const { checkedKeys, expandedKeys, setCheckedKeys, setExpandedKeys } = contextPanelStore;
   // 感知 route/页面状态
-  // TODO: 添加笔记
-  const { currentKnowledgeBase, currentResource } = useCopilotContextState();
+  const { currentKnowledgeBase, currentResource, currentNote } = useCopilotContextState();
 
   const TreeData: TreeProps['treeData'] = [
     {
       title: '当前页面',
       key: 'currentPage',
-      children: buildEnvContext(currentKnowledgeBase, currentResource, null),
+      children: buildEnvContext(currentKnowledgeBase, currentResource, currentNote),
     },
     {
       title: '资源',

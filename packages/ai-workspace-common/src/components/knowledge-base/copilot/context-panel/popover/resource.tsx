@@ -25,15 +25,7 @@ export const ResourcePopover = () => {
 
   return (
     <BasePopover
-      content={
-        <Content
-          domain="resource"
-          resourceType="weblink"
-          title="导入资源"
-          searchPlaceholder="搜索知识库"
-          fetchData={fetchData}
-        />
-      }
+      content={<Content domain="resource" title="导入资源" searchPlaceholder="搜索知识库" fetchData={fetchData} />}
     >
       <div className="context-tree-node-extra">
         <Button type="text" className="context-tree-node-extra-btn">

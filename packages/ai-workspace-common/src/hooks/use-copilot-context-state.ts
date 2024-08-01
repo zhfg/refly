@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
+import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 
 const checkShowRelatedQuestion = (messsages: ChatMessage[] = []) => {
   const message = messsages?.[messsages.length - 1];
@@ -21,6 +22,7 @@ export const useCopilotContextState = () => {
   const searchStateStore = useSearchStateStore();
   const chatStore = useChatStore();
   const knowledgeBaseStore = useKnowledgeBaseStore();
+  const noteStore = useNoteStore();
 
   const [queryParams] = useSearchParams();
   const resId = queryParams.get('resId');
@@ -36,7 +38,7 @@ export const useCopilotContextState = () => {
 
   const currentResource = knowledgeBaseStore.currentResource;
   const currentKnowledgeBase = knowledgeBaseStore.currentKnowledgeBase;
-  const currentNote = null;
+  const currentNote = noteStore.currentNote;
 
   const showResourceContext = showContextState && isCurrentPageSelected;
   const showKnowledgeBaseContext = showContextState && isCurrentKnowledgeBaseSelected;

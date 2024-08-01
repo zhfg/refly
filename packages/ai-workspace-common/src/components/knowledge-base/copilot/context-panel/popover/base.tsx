@@ -23,8 +23,7 @@ import { getSelectedData } from '../utils';
 import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-or-search-list';
 
 // requests
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { ResourceType, SearchDomain, SearchResult } from '@refly/openapi-schema';
+import { SearchDomain, SearchResult } from '@refly/openapi-schema';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 export const BasePopover = (props: { children: React.ReactNode; content: React.ReactNode }) => {
@@ -44,7 +43,6 @@ export const BasePopover = (props: { children: React.ReactNode; content: React.R
 };
 
 export interface ContentProps {
-  resourceType?: ResourceType;
   domain: SearchDomain;
   searchPlaceholder: string;
   title: string;
@@ -95,12 +93,12 @@ export const Content = (props: ContentProps) => {
     console.log('selectedData', selectedData, props, checkedKeys, treeData);
     if (props.domain === 'collection') {
       contextPanelStore.setSelectedCollections(selectedData);
-    } else if (props.domain === 'resource' && props.resourceType === 'note') {
+    } else if (props.domain === 'note') {
       contextPanelStore.setSelectedNotes(selectedData);
-    } else if (props.domain === 'resource' && props.resourceType === 'weblink') {
+    } else if (props.domain === 'resource') {
       contextPanelStore.setSelectedResources(selectedData);
     }
-  }, [checkedKeys, treeData, props.domain, props.resourceType]);
+  }, [checkedKeys, treeData, props.domain]);
 
   return (
     <div className="context-content-container">
