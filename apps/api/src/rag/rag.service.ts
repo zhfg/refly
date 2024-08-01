@@ -6,6 +6,7 @@ import { Document } from '@langchain/core/documents';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { Embeddings } from '@langchain/core/embeddings';
 import { OpenAIEmbeddings } from '@langchain/openai';
+import { FireworksEmbeddings } from '@langchain/community/embeddings/fireworks';
 import { cleanMarkdownForIngest } from '@refly/utils';
 
 import { User } from '@prisma/client';
@@ -67,13 +68,22 @@ export class RAGService {
     private minio: MinioService,
     private qdrant: QdrantService,
   ) {
-    this.embeddings = new OpenAIEmbeddings({
-      modelName: 'text-embedding-3-large',
-      batchSize: 512,
-      dimensions: this.config.getOrThrow('vectorStore.vectorDim'),
-      timeout: 5000,
-      maxRetries: 3,
-    });
+    if (process.env.NODE_ENV === 'development') {
+      this.embeddings = new FireworksEmbeddings({
+        modelName: 'nomic-ai/nomic-embed-text-v1.5',
+        batchSize: 512,
+        maxRetries: 3,
+      });
+    } else {
+      this.embeddings = new OpenAIEmbeddings({
+        modelName: 'text-embedding-3-large',
+        batchSize: 512,
+        dimensions: this.config.getOrThrow('vectorStore.vectorDim'),
+        timeout: 5000,
+        maxRetries: 3,
+      });
+    }
+
     this.splitter = RecursiveCharacterTextSplitter.fromLanguage('markdown', {
       chunkSize: 1000,
       chunkOverlap: 0,
