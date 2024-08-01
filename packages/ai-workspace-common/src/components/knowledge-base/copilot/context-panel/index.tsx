@@ -29,15 +29,15 @@ export const ContextPanel = () => {
   const { checkedKeys, contextPanelPopoverVisible, setContextPanelPopoverVisible } = useContextPanelStore();
   const { currentKnowledgeBase, currentResource, currentNote } = useCopilotContextState();
   const propsInitialCheckedKeys = initialCheckedKeys?.filter((key) => {
-    if (!currentKnowledgeBase?.collectionId && key.startsWith('currentPage-currentKnowledgeBase')) {
+    if (!currentKnowledgeBase?.collectionId && key.startsWith('currentPage-collection')) {
       return false;
     }
 
-    if (!currentResource?.resourceId && key.startsWith('currentPage-currentResource')) {
+    if (!currentResource?.resourceId && key.startsWith('currentPage-resource')) {
       return false;
     }
 
-    if (!currentNote?.noteId && key.startsWith('currentPage-currentNote')) {
+    if (!currentNote?.noteId && key.startsWith('currentPage-note')) {
       return false;
     }
 
@@ -94,10 +94,10 @@ const ContextContent = (props: { initialCheckedKeys: string[] }) => {
     },
     {
       title: '知识库',
-      key: 'knowledgeBase',
+      key: 'collection',
       children: contextPanelStore?.selectedCollections?.map((item) => {
         return {
-          key: 'knowledgeBase-' + item?.key,
+          key: 'collection-' + item?.key,
           title: item?.title,
         };
       }),
@@ -193,7 +193,7 @@ const ContextContent = (props: { initialCheckedKeys: string[] }) => {
           }}
           showLine
           renderExtra={(node) => {
-            if (node._key === 'knowledgeBase') {
+            if (node._key === 'collection') {
               return <KnowledgeBasePopover />;
             }
 
@@ -218,8 +218,8 @@ const ContextContent = (props: { initialCheckedKeys: string[] }) => {
             } else if (key === 'note') {
               const len = checkedKeys?.filter((item) => item?.startsWith('note-')).length;
               extraCntTxt += `（已选择 ${len}）`;
-            } else if (key === 'knowledgeBase') {
-              const len = checkedKeys?.filter((item) => item?.startsWith('knowledgeBase-')).length;
+            } else if (key === 'collection') {
+              const len = checkedKeys?.filter((item) => item?.startsWith('collection-')).length;
               extraCntTxt += `（已选择 ${len}）`;
             }
 

@@ -9,7 +9,7 @@ import { useLocation, useNavigate, useSearchParams } from '@refly-packages/ai-wo
 
 // 类型
 import { LOCALE } from '@refly/common-types';
-import { Source, ChatMessage as Message, InvokeSkillRequest } from '@refly/openapi-schema';
+import { Source, ChatMessage as Message, InvokeSkillRequest, SkillContext, SearchDomain } from '@refly/openapi-schema';
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { useWeblinkStore } from '@refly-packages/ai-workspace-common/stores/weblink';
 // request
@@ -23,6 +23,8 @@ import { useCopilotContextState } from './use-copilot-context-state';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 
 export const useBuildThreadAndRun = () => {
   const chatStore = useChatStore();
@@ -70,16 +72,51 @@ export const useBuildThreadAndRun = () => {
     return currentConversation;
   };
 
-  const getSelectedWeblinkConfig = (
-    messages: Message[] = [],
-  ): {
-    searchTarget: SearchTarget;
-    filter: Source[];
-  } => {
-    // 这里是获取第一个，早期简化策略，因为一开始设置之后，后续设置就保留
-    const lastHumanMessage = messages?.find((item) => item.type === 'human');
+  // TODO: support content list
+  const buildSkillContext = (): SkillContext => {
+    const { localSettings } = useUserStore.getState();
+    const { currentKnowledgeBase, currentResource, currentSelectedText = '' } = useKnowledgeBaseStore.getState();
+    const { currentNote } = useNoteStore.getState();
+    const { checkedKeys } = useContextPanelStore.getState();
+    const mapDomainEnvIds = {
+      collection: currentKnowledgeBase?.collectionId || '',
+      resource: currentResource?.resourceId || '',
+      note: currentNote?.noteId || '',
+    };
 
-    return safeParseJSON(lastHumanMessage?.selectedWeblinkConfig);
+    // collections
+    const getIds = (domain: SearchDomain, checkedKeys: string[]) => {
+      // for select collection context `collection-collection_1_${item?.id}`, get last item.id
+      let ids: string[] = checkedKeys
+        ?.filter((key: string = '') => {
+          if (key?.startsWith(`${domain}-`)) {
+            return true;
+          }
+
+          return false;
+        })
+        .map((key) => {
+          const id = key?.split('_')?.slice(-1)?.[0];
+          return id;
+        });
+
+      // for env context, just check `currentPage-currentKnowledgeBase` checked
+      if (checkedKeys?.includes(`currentPage-${domain}`)) {
+        ids.push(mapDomainEnvIds?.[domain] || '');
+      }
+
+      return ids?.filter((id) => !!id);
+    };
+
+    let context: SkillContext = {
+      locale: localSettings?.outputLocale || LOCALE.EN,
+      contentList: [currentSelectedText]?.filter((item) => !!item),
+      collectionIds: getIds('collection', checkedKeys),
+      resourceIds: getIds('resource', checkedKeys),
+      // TODO: support note
+    };
+
+    return context;
   };
 
   const runSkill = (comingQuestion: string) => {
@@ -90,62 +127,9 @@ export const useBuildThreadAndRun = () => {
     const question = comingQuestion;
     const isFollowUpAsk = messages?.length > 0;
 
-    const { searchTarget } = useSearchStateStore.getState();
-    const { currentSelectedText, currentResource } = useKnowledgeBaseStore.getState();
-    const { localSettings } = useUserStore.getState();
-
     // 创建新会话并跳转
     const conv = ensureConversationExist();
-
-    let selectedWebLink: Source[] = [];
-    let resourceIds: string[] = [];
-    let collectionIds: string[] = [];
-
-    if (searchTarget === SearchTarget.SelectedPages) {
-      if (isFollowUpAsk) {
-        const selectedWeblinkConfig = getSelectedWeblinkConfig(messages);
-        // 选中多个资源
-        if (selectedWeblinkConfig?.filter?.length > 0) {
-          selectedWebLink = selectedWeblinkConfig?.filter;
-        }
-      } else {
-        const { selectedRow } = useWeblinkStore.getState();
-        selectedWebLink = selectedRow?.map((item) => ({
-          pageContent: '',
-          metadata: {
-            title: item?.content?.originPageTitle || '',
-            source: item?.content?.originPageUrl || '',
-          },
-          score: -1, // 手工构造
-        }));
-      }
-    } else if (searchTarget === SearchTarget.CurrentPage) {
-      // 如果有选中内容，直接使用选中的内容
-      if (currentSelectedText) {
-        selectedWebLink = [
-          {
-            pageContent: '',
-            metadata: {
-              title: currentResource?.title as string,
-              source: currentResource?.data?.url as string,
-            },
-            score: -1, // 手工构造
-            selections: [
-              {
-                type: 'text',
-                xPath: '',
-                content: currentSelectedText || '',
-              },
-            ],
-          },
-        ];
-      } else {
-        // 否则选中当前资源
-        resourceIds = [currentResource?.resourceId || ''];
-      }
-    } else if (searchTarget === SearchTarget.CurrentKnowledgeBase) {
-      collectionIds = [currentKnowledgeBase?.collectionId || ''];
-    }
+    const skillContext = buildSkillContext();
 
     // 设置当前的任务类型及会话 id
     const task: InvokeSkillRequest = {
@@ -153,11 +137,7 @@ export const useBuildThreadAndRun = () => {
       input: {
         query: question,
       },
-      context: {
-        collectionIds,
-        resourceIds,
-        locale: localSettings?.outputLocale || LOCALE.EN,
-      },
+      context: skillContext,
       convId: conv?.convId || '',
       ...(isFollowUpAsk ? {} : { createConvParam: { ...conv } }),
     };

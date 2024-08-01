@@ -62,12 +62,8 @@ export function getSelectedData(selectedKeys, TreeData: TreeProps['treeData']) {
   return loop(TreeData);
 }
 
-export const initialCheckedKeys = [
-  'currentPage-currentResource',
-  'currentPage-currentKnowledgeBase',
-  'currentPage-currentNote',
-];
-export const initalExpandedKeys = ['currentPage', 'resource', 'knowledgeBase', 'note'];
+export const initialCheckedKeys = ['currentPage-resource', 'currentPage-collection', 'currentPage-note'];
+export const initalExpandedKeys = ['currentPage', 'resource', 'collection', 'note'];
 export const getTotalRealCheckedContext = (checkedKeys: string[]) => {
   const filteredKeys = checkedKeys.filter((key) => {
     if (initalExpandedKeys.includes(key)) {
@@ -86,19 +82,19 @@ export const buildEnvContext = (currentKnowledgeBase: Collection, currentResourc
   if (currentResource?.resourceId) {
     envContextArr.push({
       title: `当前资源：${currentResource?.title}`,
-      key: `currentPage-currentResource`,
+      key: `currentPage-resource`,
     });
   }
   if (currentKnowledgeBase?.collectionId) {
     envContextArr.push({
       title: `当前知识库：${currentKnowledgeBase?.title}`,
-      key: `currentPage-currentKnowledgeBase`,
+      key: `currentPage-collection`,
     });
   }
   if (currentNote?.noteId) {
     envContextArr.push({
       title: `当前笔记：${currentNote?.title}`,
-      key: `currentPage-currentNote`,
+      key: `currentPage-note`,
     });
   }
 
