@@ -5,4 +5,13 @@
     width: 45px;
     height: 45px;
   }
+
+  .vercel [cmdk-root] {
+    border-width: 3px;
+    box-shadow: var(--cmdk-shadow);
+  }
+
+  .vercel .search-active {
+    border-width: 1px !important;
+  }
 }
