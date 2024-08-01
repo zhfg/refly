@@ -267,7 +267,7 @@ export const AICopilot = (props: AICopilotProps) => {
                   skillStore.setSelectedSkillInstalce(item);
                 }}
               >
-                {item?.skillDisplayName}
+                <span className="skill-item-title">{item?.skillDisplayName}</span>
               </div>
             ))}
             <div
@@ -277,7 +277,7 @@ export const AICopilot = (props: AICopilotProps) => {
                 skillStore.setSkillManagerModalVisible(true);
               }}
             >
-              <IconSettings /> <p className="skill-title">技能管理</p>
+              <IconSettings /> <p className="skill-title">管理</p>
             </div>
           </div>
           <div className="chat-input-container" style={{ height: skillStore?.selectedSkill ? 117 + 32 : 117 }}>

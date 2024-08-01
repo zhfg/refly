@@ -195,6 +195,9 @@
           border: 1px solid rgba(0, 0, 0, 0.1);
           border-radius: 8px;
           padding: 8px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
 
           &:hover {
             cursor: pointer;
@@ -532,6 +535,13 @@
 
           .skill-title {
             margin-left: 4px;
+          }
+
+          .skill-item-title {
+            max-width: 112px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
           }
 
           &:hover {
