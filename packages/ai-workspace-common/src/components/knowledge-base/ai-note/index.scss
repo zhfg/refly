@@ -252,9 +252,10 @@
 
     .note-detail-header {
       display: flex;
-      justify-content: space-around;
+      justify-content: space-between;
       align-items: center;
       height: 40px;
+      padding: 0 4px;
       border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 
       .note-detail-navigation-bar {
@@ -409,7 +410,7 @@
     left: 0;
     width: 100%;
     height: 40px;
-    background-color: rgba(255, 255, 255, 1);
+    background-color: #fcfcf9;
     border-top: 1px solid rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: row;
