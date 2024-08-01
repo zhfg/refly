@@ -139,7 +139,7 @@ export const useBuildThreadAndRun = () => {
       },
       context: skillContext,
       convId: conv?.convId || '',
-      ...(isFollowUpAsk ? {} : { createConvParam: { ...conv } }),
+      ...(isFollowUpAsk ? {} : { createConvParam: { ...conv, title: question } }),
     };
     taskStore.setTask(task);
     // 开始提问

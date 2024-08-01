@@ -112,7 +112,7 @@ export const useCommonAITask = (props: ChatProps) => {
       },
       locale: config?.locale || LOCALE.EN,
       convId: conv?.convId || '',
-      ...(conv?.messages?.length > 0 ? {} : { createConvParam: { ...conv } }),
+      ...(conv?.messages?.length > 0 ? {} : { createConvParam: { ...conv, title: question } }),
     };
 
     // 构建消息
