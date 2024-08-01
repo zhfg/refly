@@ -24,7 +24,7 @@ export const SkillDisplay = () => {
           skillStore.setSkillManagerModalVisible(true);
         }}
       >
-        <IconSettings /> <p className="skill-title">管理</p>
+        <IconSettings /> <p className="skill-title skill-item-title">管理</p>
       </div>
     </div>
   );

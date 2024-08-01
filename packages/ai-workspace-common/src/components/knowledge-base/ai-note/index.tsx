@@ -357,9 +357,9 @@ export const AINote = () => {
               </div>
               <div className="note-detail-navigation-bar">
                 <Button
-                  icon={<IconSearch style={{ fontSize: 16 }} />}
+                  icon={<IconSearch />}
                   type="text"
-                  shape="circle"
+                  style={{ marginRight: 4 }}
                   className="assist-action-item"
                   onClick={() => {
                     searchStore.setPages(searchStore.pages.concat('note'));
