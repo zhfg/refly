@@ -27,6 +27,7 @@ import { ChatMessages } from './chat-messages';
 import { ConvListModal } from './conv-list-modal';
 import { KnowledgeBaseListModal } from './knowledge-base-list-modal';
 import { SkillManagementModal } from '@refly-packages/ai-workspace-common/components/skill/skill-management-modal';
+import { SkillDisplay } from './skill-display';
 
 // requests
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
@@ -258,28 +259,7 @@ export const AICopilot = (props: AICopilotProps) => {
           </div>
         ) : null}
         <div className="ai-copilot-chat-container">
-          <div className="skill-container">
-            {skillStore?.skillInstances?.map((item, index) => (
-              <div
-                key={index}
-                className="skill-item"
-                onClick={() => {
-                  skillStore.setSelectedSkillInstalce(item);
-                }}
-              >
-                <span className="skill-item-title">{item?.skillDisplayName}</span>
-              </div>
-            ))}
-            <div
-              key="more"
-              className="skill-item"
-              onClick={() => {
-                skillStore.setSkillManagerModalVisible(true);
-              }}
-            >
-              <IconSettings /> <p className="skill-title">管理</p>
-            </div>
-          </div>
+          <SkillDisplay />
           <div className="chat-input-container" style={{ height: skillStore?.selectedSkill ? 117 + 32 : 117 }}>
             <div className="chat-input-body">
               <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />

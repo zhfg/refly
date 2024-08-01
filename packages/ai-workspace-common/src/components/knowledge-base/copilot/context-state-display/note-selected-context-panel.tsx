@@ -108,6 +108,8 @@ export const NoteSelectedContextPanel = () => {
             {currentSelectedText}
           </Tag>
         </div>
+      </div>
+      <div className="context-state-card-footer">
         <div className="context-state-action-list">
           {writingSkills.slice(0, containCnt).map((skill, index) => (
             <div className="context-state-action-item" key={index}>
@@ -134,7 +136,6 @@ export const NoteSelectedContextPanel = () => {
           )}
         </div>
       </div>
-      <div className="context-state-card-footer"></div>
     </div>
   );
 };

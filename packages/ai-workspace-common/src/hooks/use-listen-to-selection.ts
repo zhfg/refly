@@ -16,6 +16,7 @@ export const useListenToSelection = (selector: string, namespace: SelectedNamesp
       knowledgeBaseStore.updateSelectedText(text);
       knowledgeBaseStore.updateSelectedNamespace(namespace);
       searchStateStore.setSearchTarget(SearchTarget.CurrentPage);
+      console.log('updateSelectedText', text);
     } else {
       knowledgeBaseStore.updateSelectedText('');
     }

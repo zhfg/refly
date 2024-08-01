@@ -16,6 +16,7 @@ export const ContextStateDisplay = () => {
       {showSelectedTextContext && knowledgeBaseStore.selectedNamespace === 'resource-detail' ? (
         <ResourceDetailSelectedContextPanel />
       ) : null}
+      {showSelectedTextContext && knowledgeBaseStore.selectedNamespace === 'note' ? <NoteSelectedContextPanel /> : null}
     </div>
   );
 };
