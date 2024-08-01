@@ -18,7 +18,7 @@ const checkShowRelatedQuestion = (messsages: ChatMessage[] = []) => {
 };
 
 export const useCopilotContextState = () => {
-  const [contextCardHeight, setContextCardHeight] = useState(68);
+  const [contextCardHeight, setContextCardHeight] = useState(104);
   const searchStateStore = useSearchStateStore();
   const chatStore = useChatStore();
   const knowledgeBaseStore = useKnowledgeBaseStore();
@@ -45,7 +45,7 @@ export const useCopilotContextState = () => {
   const showKnowledgeBaseContext = showContextState && isCurrentKnowledgeBaseSelected;
   const showSelectedTextContext = showContextState && isCurrentSelectedText;
 
-  const showContextCard = showResourceContext || showKnowledgeBaseContext || showSelectedTextContext;
+  const showContextCard = showSelectedTextContext;
 
   // 是否展示 related questions
   const showRelatedQuestions = checkShowRelatedQuestion(chatStore?.messages);

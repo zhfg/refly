@@ -644,6 +644,14 @@
       align-items: center;
       justify-content: space-between;
 
+      .context-state-resource-item-tag {
+        border-radius: 8px;
+        background-color: transparent;
+        max-width: 200px;
+      }
+    }
+
+    .context-state-card-footer {
       .context-state-action-list {
         display: flex;
         flex-direction: row;
@@ -656,14 +664,6 @@
         }
       }
 
-      .context-state-resource-item-tag {
-        border-radius: 8px;
-        background-color: transparent;
-        max-width: 200px;
-      }
-    }
-
-    .context-state-card-footer {
       button {
         border-radius: 8px;
       }
