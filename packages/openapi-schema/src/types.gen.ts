@@ -907,6 +907,10 @@ export type SkillContext = {
    */
   collectionIds?: Array<string>;
   /**
+   * List of note IDs
+   */
+  noteIds?: Array<string>;
+  /**
    * List of content
    */
   contentList?: Array<string>;

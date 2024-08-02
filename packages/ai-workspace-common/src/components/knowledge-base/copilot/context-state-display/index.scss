@@ -1,0 +1,109 @@
+.ai-copilot-context-state-display-container {
+  margin: 0 12px;
+  padding: 8px 8px;
+  background: #fcfcf9;
+  box-shadow: 0px 2px 26px 0px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+
+  .context-state-card {
+    .context-state-card-header {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      justify-content: space-between;
+
+      .context-state-card-header-title {
+        padding-left: 8px;
+      }
+
+      .context-state-card-header-left {
+        font-size: 10px;
+        color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+      }
+
+      .context-state-card-header-right {
+        font-size: 16px;
+        color: rgba(0, 0, 0, 0.3);
+
+        &:hover {
+          cursor: pointer;
+        }
+      }
+    }
+
+    .context-state-card-body {
+      margin-top: 4px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      width: 100%;
+      overflow-x: auto;
+      gap: 4px;
+
+      .context-state-resource-item-tag {
+        border-radius: 8px;
+        background-color: transparent;
+        max-width: 200px;
+      }
+    }
+
+    .context-state-card-footer {
+      .context-state-action-list {
+        display: flex;
+        flex-direction: row;
+        margin-top: 12px;
+        gap: 8px;
+
+        .context-state-action-item {
+          width: 60px;
+          border-radius: 8px;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
+          padding: 0;
+
+          span {
+            width: calc(100% - 8px);
+            display: inline-block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+        }
+      }
+
+      button {
+        border-radius: 8px;
+      }
+    }
+  }
+
+  .assist-action-item {
+    color: rgba(0, 0, 0, 0.5);
+    font-size: 12px;
+
+    &:hover,
+    &.active {
+      cursor: pointer;
+      background-color: #f1f1f0;
+      color: #00968f;
+    }
+  }
+
+  button.assist-action-item {
+    height: 24px;
+    padding: 0 4px;
+    border-radius: 8px;
+
+    &:hover,
+    &.active {
+      cursor: pointer;
+      background-color: #f1f1f0;
+      color: #00968f;
+    }
+  }
+}

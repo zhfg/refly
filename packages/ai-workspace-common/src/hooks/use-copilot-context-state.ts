@@ -5,6 +5,8 @@ import { ChatMessage } from '@refly/openapi-schema';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
+import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
+import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 
 const checkShowRelatedQuestion = (messsages: ChatMessage[] = []) => {
   const message = messsages?.[messsages.length - 1];
@@ -16,18 +18,20 @@ const checkShowRelatedQuestion = (messsages: ChatMessage[] = []) => {
 };
 
 export const useCopilotContextState = () => {
-  const [contextCardHeight, setContextCardHeight] = useState(68);
+  const [contextCardHeight, setContextCardHeight] = useState(104);
   const searchStateStore = useSearchStateStore();
   const chatStore = useChatStore();
   const knowledgeBaseStore = useKnowledgeBaseStore();
+  const noteStore = useNoteStore();
 
   const [queryParams] = useSearchParams();
   const resId = queryParams.get('resId');
   const kbId = queryParams.get('kbId');
+  const noteId = queryParams.get('noteId');
   const currentSelectedText = knowledgeBaseStore?.currentSelectedText;
 
   // 优先级: text > resource > knowledgeBase > all
-  const showContextState = !!resId || !!kbId || !!currentSelectedText;
+  const showContextState = !!resId || !!kbId || !!currentSelectedText || !!noteId;
   const isCurrentSelectedText = !!currentSelectedText;
   const isCurrentPageSelected = searchStateStore?.searchTarget === SearchTarget.CurrentPage && !isCurrentSelectedText;
   const isCurrentKnowledgeBaseSelected =
@@ -35,12 +39,16 @@ export const useCopilotContextState = () => {
 
   const currentResource = knowledgeBaseStore.currentResource;
   const currentKnowledgeBase = knowledgeBaseStore.currentKnowledgeBase;
+  const currentNote = noteStore.currentNote;
 
   const showResourceContext = showContextState && isCurrentPageSelected;
   const showKnowledgeBaseContext = showContextState && isCurrentKnowledgeBaseSelected;
-  const showSelectedTextContext = showContextState && isCurrentSelectedText;
 
-  const showContextCard = showResourceContext || showKnowledgeBaseContext || showSelectedTextContext;
+  // 明确打开的展示
+  const showContextCard = knowledgeBaseStore.showContextCard;
+  const showSelectedTextContext = showContextState && showContextCard;
+  // 是否有内容正在选中
+  const showSelectedText = !!currentSelectedText;
 
   // 是否展示 related questions
   const showRelatedQuestions = checkShowRelatedQuestion(chatStore?.messages);
@@ -63,7 +71,9 @@ export const useCopilotContextState = () => {
     showRelatedQuestions,
     showKnowledgeBaseContext,
     showSelectedTextContext,
+    showSelectedText,
     currentResource,
+    currentNote,
     currentKnowledgeBase,
     currentSelectedText,
     contextCardHeight,
