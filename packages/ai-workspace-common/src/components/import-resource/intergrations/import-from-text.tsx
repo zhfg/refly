@@ -71,10 +71,8 @@ export const ImportFromText = () => {
     }
 
     const createResourceData: UpsertResourceRequest = {
-      resourceType: 'weblink',
-      data: {
-        title: copiedTextPayload?.title,
-      },
+      resourceType: 'text',
+      title: copiedTextPayload?.title,
       content: copiedTextPayload?.content,
       collectionId: selectedCollectionId === 'new-collection' ? undefined : selectedCollectionId,
     };
