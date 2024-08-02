@@ -147,6 +147,7 @@ export const ImportFromWeblink = () => {
 
     if (scrapeLinks?.length === 0) {
       message.warning('你还未添加任何链接！');
+      return;
     }
 
     const batchCreateResourceData: UpsertResourceRequest[] = scrapeLinks.map((link) => {

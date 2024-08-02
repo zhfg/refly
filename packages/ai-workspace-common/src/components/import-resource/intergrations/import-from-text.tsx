@@ -67,6 +67,7 @@ export const ImportFromText = () => {
 
     if (!copiedTextPayload?.content || !copiedTextPayload?.title) {
       message.warning('标题和文本内容不能为空！');
+      return;
     }
 
     const createResourceData: UpsertResourceRequest = {
