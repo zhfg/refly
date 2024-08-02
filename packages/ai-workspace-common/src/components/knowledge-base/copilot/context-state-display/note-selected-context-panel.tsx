@@ -37,6 +37,7 @@ export const NoteSelectedContextPanel = () => {
     },
     initialContainCnt: writingSkills.length,
     paddingSize: 0,
+    itemSize: 60,
     placeholderWidth: 120,
   });
 
