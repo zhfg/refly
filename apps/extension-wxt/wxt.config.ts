@@ -15,7 +15,7 @@ const getFileAbsolutePath = (fileName: string) => {
 const extraWatchFiles = [
   getFileAbsolutePath('./node_modules/@refly/ai-workspace-common/src'),
   getFileAbsolutePath('../../packages/ai-workspace-common/src'),
-  getFileAbsolutePath('./src/entrypoints/sidepanel'),
+  getFileAbsolutePath('./src/entrypoints/'),
 ];
 
 // See https://wxt.dev/api/config.html

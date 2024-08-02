@@ -60,10 +60,15 @@ import { ContextPanel } from '@refly-packages/ai-workspace-common/components/kno
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 import { useDynamicInitContextPanelState } from '@refly-packages/ai-workspace-common/hooks/use-init-context-panel-state';
 import { ContextActionBtn } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/context-action-btn';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 interface AICopilotProps {}
 
 export const AICopilot = (props: AICopilotProps) => {
+  // 所属的环境
+  const runtime = getRuntime();
+  const isWeb = runtime === 'web';
+
   const [searchParams] = useSearchParams();
   const [copilotBodyHeight, setCopilotBodyHeight] = useState(215 - 32);
   const userStore = useUserStore();
@@ -179,51 +184,55 @@ export const AICopilot = (props: AICopilotProps) => {
     <div className="ai-copilot-container">
       <div className="knowledge-base-detail-header">
         <div className="knowledge-base-detail-navigation-bar">
-          <Checkbox
-            key={'knowledge-base-resource-panel'}
-            checked={knowledgeBaseStore.resourcePanelVisible && resId ? true : false}
-          >
-            {({ checked }) => {
-              return (
+          {isWeb
+            ? [
+                <Checkbox
+                  key={'knowledge-base-resource-panel'}
+                  checked={knowledgeBaseStore.resourcePanelVisible && resId ? true : false}
+                >
+                  {({ checked }) => {
+                    return (
+                      <Button
+                        icon={<IconFile />}
+                        type="text"
+                        onClick={() => {
+                          if (!resId) {
+                            searchStore.setPages(searchStore.pages.concat('knowledgeBases'));
+                            searchStore.setIsSearchOpen(true);
+                          } else {
+                            knowledgeBaseStore.updateResourcePanelVisible(!knowledgeBaseStore.resourcePanelVisible);
+                          }
+                        }}
+                        className={classNames('assist-action-item', { active: checked })}
+                      ></Button>
+                    );
+                  }}
+                </Checkbox>,
+                <Checkbox key={'knowledge-base-note-panel'} checked={noteStore.notePanelVisible}>
+                  {({ checked }) => {
+                    return (
+                      <Button
+                        icon={<IconEdit />}
+                        type="text"
+                        onClick={() => {
+                          noteStore.updateNotePanelVisible(!noteStore.notePanelVisible);
+                        }}
+                        className={classNames('assist-action-item', { active: checked })}
+                      ></Button>
+                    );
+                  }}
+                </Checkbox>,
                 <Button
-                  icon={<IconFile />}
+                  icon={<IconSearch />}
                   type="text"
                   onClick={() => {
-                    if (!resId) {
-                      searchStore.setPages(searchStore.pages.concat('knowledgeBases'));
-                      searchStore.setIsSearchOpen(true);
-                    } else {
-                      knowledgeBaseStore.updateResourcePanelVisible(!knowledgeBaseStore.resourcePanelVisible);
-                    }
+                    searchStore.setPages(searchStore.pages.concat('convs'));
+                    searchStore.setIsSearchOpen(true);
                   }}
-                  className={classNames('assist-action-item', { active: checked })}
-                ></Button>
-              );
-            }}
-          </Checkbox>
-          <Checkbox key={'knowledge-base-note-panel'} checked={noteStore.notePanelVisible}>
-            {({ checked }) => {
-              return (
-                <Button
-                  icon={<IconEdit />}
-                  type="text"
-                  onClick={() => {
-                    noteStore.updateNotePanelVisible(!noteStore.notePanelVisible);
-                  }}
-                  className={classNames('assist-action-item', { active: checked })}
-                ></Button>
-              );
-            }}
-          </Checkbox>
-          <Button
-            icon={<IconSearch />}
-            type="text"
-            onClick={() => {
-              searchStore.setPages(searchStore.pages.concat('convs'));
-              searchStore.setIsSearchOpen(true);
-            }}
-            className={classNames('assist-action-item')}
-          ></Button>
+                  className={classNames('assist-action-item')}
+                ></Button>,
+              ]
+            : null}
         </div>
         <div className="knowledge-base-detail-navigation-bar">
           <Button
