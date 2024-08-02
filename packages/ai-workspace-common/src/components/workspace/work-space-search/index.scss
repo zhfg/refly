@@ -9,6 +9,10 @@
   .vercel [cmdk-root] {
     border-width: 1px;
     box-shadow: var(--cmdk-shadow);
+
+    [cmdk-input] {
+      border-bottom: none;
+    }
   }
 
   .vercel .search-active {
