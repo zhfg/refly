@@ -14,7 +14,7 @@ export const ScrollLoading = (props: ScrollLoadingProps) => {
   const { t } = useTranslation();
 
   if (!hasMore) {
-    return <span>{t('knowledgeLibrary.archive.item.noMoreText')}</span>;
+    return <span style={{ marginBottom: 32 }}>{t('knowledgeLibrary.archive.item.noMoreText')}</span>;
   }
 
   if (isRequesting) {
@@ -32,5 +32,9 @@ export const ScrollLoading = (props: ScrollLoadingProps) => {
     );
   }
 
-  return <Button onClick={() => loadMore()}>加载更多</Button>;
+  return (
+    <Button onClick={() => loadMore()} style={{ marginBottom: 32 }}>
+      加载更多
+    </Button>
+  );
 };

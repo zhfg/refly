@@ -25,6 +25,7 @@ import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill'
 import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
 import { SkillManagement } from '@refly-packages/ai-workspace-common/components/skill/skill-management';
 import { ClientChatMessage } from '@refly/common-types';
+import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 
 export const HumanMessage = (props: { message: Partial<ChatMessage>; profile: { avatar: string; name: string } }) => {
   const { message, profile } = props;
@@ -58,7 +59,7 @@ export const AssistantMessage = (props: {
 }) => {
   const { message, isPendingFirstToken = false, isPending, isLastSession = false, handleAskFollowing } = props;
   const { t } = useTranslation();
-  const knowledgeBaseStore = useKnowledgeBaseStore();
+  const noteStore = useNoteStore();
   console.log('message', message);
   let sources =
     typeof message?.structuredData?.['sources'] === 'string'
@@ -77,7 +78,7 @@ export const AssistantMessage = (props: {
     // editorEmitter.emit('insertBlow', message?.content);
 
     if (type === 'insertBlow' || type === 'replaceSelection') {
-      const editor = knowledgeBaseStore.editor;
+      const editor = noteStore.editor;
       const selection = editor.view.state.selection;
 
       if (!editor) return;

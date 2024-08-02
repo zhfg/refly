@@ -6,6 +6,7 @@ import {
   IconEdit,
   IconFile,
   IconFolder,
+  IconFontColors,
   IconHistory,
   IconMessage,
   IconPlusCircle,
@@ -27,6 +28,7 @@ import { ChatMessages } from './chat-messages';
 import { ConvListModal } from './conv-list-modal';
 import { KnowledgeBaseListModal } from './knowledge-base-list-modal';
 import { SkillManagementModal } from '@refly-packages/ai-workspace-common/components/skill/skill-management-modal';
+import { SkillDisplay } from './skill-display';
 
 // requests
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
@@ -54,7 +56,10 @@ import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note
 import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
+import { ContextPanel } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
+import { useDynamicInitContextPanelState } from '@refly-packages/ai-workspace-common/hooks/use-init-context-panel-state';
+import { ContextActionBtn } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/context-action-btn';
 
 interface AICopilotProps {}
 
@@ -168,6 +173,7 @@ export const AICopilot = (props: AICopilotProps) => {
     handleSwitchSearchTarget();
   }, [showContextState]);
   useResizeCopilot({ containerSelector: 'ai-copilot-container' });
+  useDynamicInitContextPanelState(); // 动态根据页面状态更新上下文面板状态
 
   return (
     <div className="ai-copilot-container">
@@ -255,34 +261,14 @@ export const AICopilot = (props: AICopilotProps) => {
           </div>
         ) : null}
         <div className="ai-copilot-chat-container">
-          <div className="skill-container">
-            {skillStore?.skillInstances?.map((item, index) => (
-              <div
-                key={index}
-                className="skill-item"
-                onClick={() => {
-                  skillStore.setSelectedSkillInstalce(item);
-                }}
-              >
-                {item?.skillDisplayName}
-              </div>
-            ))}
-            <div
-              key="more"
-              className="skill-item"
-              onClick={() => {
-                skillStore.setSkillManagerModalVisible(true);
-              }}
-            >
-              <IconSettings /> <p className="skill-title">技能管理</p>
-            </div>
-          </div>
+          <SkillDisplay />
           <div className="chat-input-container" style={{ height: skillStore?.selectedSkill ? 117 + 32 : 117 }}>
             <div className="chat-input-body">
               <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
             </div>
             <div className="chat-input-assist-action">
-              {!showSelectedTextContext ? <SearchTargetSelector classNames="chat-input-assist-action-item" /> : null}
+              {/* {!showSelectedTextContext ? <SearchTargetSelector classNames="chat-input-assist-action-item" /> : null} */}
+              <ContextPanel />
 
               <OutputLocaleList>
                 <Button icon={<IconTranslate />} type="text" className="chat-input-assist-action-item">
@@ -290,6 +276,7 @@ export const AICopilot = (props: AICopilotProps) => {
                   <IconCaretDown />
                 </Button>
               </OutputLocaleList>
+              <ContextActionBtn />
             </div>
           </div>
         </div>

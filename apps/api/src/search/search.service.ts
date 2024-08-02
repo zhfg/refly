@@ -374,13 +374,13 @@ export class SearchService {
     }
 
     interface MessageResult {
-      conversation_id: number;
+      conv_id: string;
       content: string;
     }
     const tokenList = tokens.join(' ');
     const tokenOrList = tokens.join(' OR ');
     const messages = await this.prisma.$queryRaw<MessageResult[]>`
-      SELECT   conversation_id,
+      SELECT   conv_id,
                pgroonga_highlight_html(
                  content, pgroonga_query_extract_keywords(${tokenList}::TEXT)
                ) AS content
@@ -401,7 +401,7 @@ export class SearchService {
       created_at: string;
       updated_at: string;
     }
-    const ids = [...new Set(messages.map((message) => message.conversation_id))];
+    const convIds = [...new Set(messages.map((message) => message.conv_id))];
     const conversations = await this.prisma.$queryRaw<ConversationResult[]>`
       SELECT   id,
                conv_id,
@@ -412,7 +412,7 @@ export class SearchService {
                ) AS title
       FROM     conversations
       WHERE    uid = ${user.uid}
-      AND      id IN (${Prisma.join(ids)})
+      AND      conv_id IN (${Prisma.join(convIds)})
       ORDER BY updated_at DESC
       LIMIT    ${req.limit || 5}
     `;
@@ -422,7 +422,7 @@ export class SearchService {
       domain: 'conversation',
       title: conversation.title,
       content: messages
-        .filter((message) => message.conversation_id === conversation.id)
+        .filter((message) => message.conv_id === conversation.conv_id)
         .map((message) => message.content),
       createdAt: conversation.created_at,
       updatedAt: conversation.updated_at,

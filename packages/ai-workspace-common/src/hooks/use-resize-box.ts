@@ -12,10 +12,18 @@ interface ResizePanelProps {
   paddingSize: number;
   initialContainCnt: number;
   placeholderWidth: number;
+  itemSize: number;
 }
 
 export const useResizeBox = (props: ResizePanelProps) => {
-  const { getGroupSelector, getResizeSelector, paddingSize = 0, initialContainCnt, placeholderWidth } = props;
+  const {
+    getGroupSelector,
+    getResizeSelector,
+    paddingSize = 0,
+    initialContainCnt,
+    placeholderWidth,
+    itemSize = 60,
+  } = props;
   const [containCnt, setContainCnt] = useState(initialContainCnt);
 
   useLayoutEffect(() => {
@@ -30,15 +38,9 @@ export const useResizeBox = (props: ResizePanelProps) => {
       let canContainIndex = 0;
       width -= placeholderWidth;
       width -= 2 * paddingSize;
-      resizeHandles.forEach((resizeHandle) => {
-        const itemWidth = resizeHandle.getBoundingClientRect()?.width || 0;
-        console.log('resizeHandle width', itemWidth);
-        if (width > itemWidth && itemWidth !== 0) {
-          canContainIndex++;
-          width -= itemWidth;
-        }
-      });
+      canContainIndex = Math.floor(width / itemSize);
 
+      console.log('canContainIndex', canContainIndex);
       setContainCnt(canContainIndex);
     });
     observer.observe(panelGroup);
