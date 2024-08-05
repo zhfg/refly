@@ -44,15 +44,49 @@ const getNavSelectedKeys = (pathname = "") => {
   return "Workspace"
 }
 
-const SiderLogo = (props: { navigate: (path: string) => void }) => {
-  const { navigate } = props
+const SiderLogo = (props: {
+  collapse: boolean
+  navigate: (path: string) => void
+}) => {
+  const { navigate, collapse } = props
   return (
-    <div className="logo" onClick={() => navigate("/")}>
-      <img src={Logo} alt="Refly" />
-      <span>Refly </span>
-      <Tag color="#00968F" className="logo-beta" size="small">
-        Beta
-      </Tag>
+    <div
+      className="logo-box"
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}>
+      <div className="logo" onClick={() => navigate("/")}>
+        <img src={Logo} alt="Refly" />
+        {!collapse && (
+          <>
+            <span>Refly </span>
+            <Tag color="#00968F" className="logo-beta" size="small">
+              Beta
+            </Tag>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+const CollapseBtn = (props: {
+  collapse: boolean
+  setCollapse: (collapse: boolean) => void
+}) => {
+  const { collapse, setCollapse } = props
+  return (
+    <div
+      className={`collapse-btn ${collapse ? "collapse-btn--collapsed" : ""}`}
+      onClick={() => setCollapse(!collapse)}>
+      {collapse ? (
+        <IconMenuUnfold style={{ fontSize: 20, color: "#666666" }} />
+      ) : (
+        <IconMenuFold style={{ fontSize: 20, color: "#666666" }} />
+      )}
     </div>
   )
 }
@@ -237,24 +271,7 @@ export const SiderLayout = () => {
       width={collapse ? 90 : 220}>
       <div
         className={`sider-header ${collapse ? "sider-header-collapse" : ""}`}>
-        <div
-          className="logo-box"
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}>
-          {!collapse && <SiderLogo navigate={path => navigate(path)} />}
-
-          <div className="collapse-btn" onClick={() => setCollapse(!collapse)}>
-            {collapse ? (
-              <IconMenuUnfold style={{ fontSize: 20 }} />
-            ) : (
-              <IconMenuFold style={{ fontSize: 20 }} />
-            )}
-          </div>
-        </div>
+        <SiderLogo navigate={path => navigate(path)} collapse={collapse} />
         <SearchQuickOpenBtn collapse={collapse} />
 
         <Menu
@@ -356,6 +373,10 @@ export const SiderLayout = () => {
             </MenuItem>
           </div>
         </Menu>
+        <CollapseBtn
+          collapse={collapse}
+          setCollapse={() => setCollapse(!collapse)}
+        />
       </div>
     </Sider>
   )
