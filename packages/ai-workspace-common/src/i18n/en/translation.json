@@ -93,6 +93,17 @@
         "note": "New Note",
         "collection": "New Collection"
       }
+    },
+    "newKnowledgeModal": {
+      "modalTitle": "Create New Knowledge Base",
+      "titlePlaceholder": "Enter a title for your knowledge base",
+      "title": "Title",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter a description for your knowledge base",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "successful": "Created successfully",
+      "failed": "Failed to create"
     }
   },
   "loggedHomePage": {

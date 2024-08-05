@@ -93,6 +93,17 @@
         "note": "新笔记",
         "collection": "新知识库"
       }
+    },
+    "newKnowledgeModal": {
+      "modalTitle": "新增知识库",
+      "titlePlaceholder": "请输入知识库标题",
+      "title": "标题",
+      "description": "描述",
+      "descriptionPlaceholder": "请输入知识库描述",
+      "cancel": "取消",
+      "confirm": "确认",
+      "successful": "创建成功",
+      "failed": "创建失败"
     }
   },
   "loggedHomePage": {

@@ -9,6 +9,7 @@ import { NoteList } from '@refly-packages/ai-workspace-common/components/workspa
 import { KnowledgeBaseList } from '@refly-packages/ai-workspace-common/components/knowledge-base-list';
 import { SearchQuickOpenBtn } from '@refly-packages/ai-workspace-common/components/search-quick-open-btn';
 import { useImportResourceStore } from '@refly/ai-workspace-common/stores/import-resource';
+import { useImportKnowledgeModal } from '@refly/ai-workspace-common/stores/import-knowledge-modal';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
 
 import './index.scss';
@@ -53,6 +54,7 @@ const NewFileDropList = (props: { handleCreateButtonClick: (type: string) => voi
 const NewFileButton = (props: { val: string }) => {
   const { t } = useTranslation();
   const importResourceStore = useImportResourceStore();
+  const importKnowledgeModal = useImportKnowledgeModal();
   const { handleInitEmptyNote } = useAINote();
 
   const handleCreateButtonClick = (type: string) => {
@@ -63,7 +65,7 @@ const NewFileButton = (props: { val: string }) => {
       importResourceStore.setImportResourceModalVisible(true);
     }
     if (type === 'collection') {
-      // TODO: '创建知识库'
+      importKnowledgeModal.setShowNewKnowledgeModal(true);
     }
   };
 
