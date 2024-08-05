@@ -304,8 +304,10 @@ model LabelClass {
   uid          String          @map("uid")
   /// Label kind icon
   icon         String          @default("") @map("icon")
-  /// Label class name
+  /// Label class name (must be unique for a single user)
   name         String          @map("name")
+  /// Label display name
+  displayName  String          @map("display_name")
   /// Label creation instruction prompt
   prompt       String          @map("prompt")
   /// Create timestamp
@@ -317,6 +319,7 @@ model LabelClass {
   /// Related labels
   labels       LabelInstance[]
 
+  @@unique([uid, name])
   @@index([uid, deletedAt, updatedAt])
   @@map("label_classes")
 }

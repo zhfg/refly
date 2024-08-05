@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Queue } from 'bull';
 import pLimit from 'p-limit';
 import { InjectQueue } from '@nestjs/bull';
@@ -73,7 +67,12 @@ export class KnowledgeService {
       resources = resources.filter((r) => r.isPublic);
     }
 
-    return { ...coll, resources };
+    const labels = await this.prisma.labelInstance.findMany({
+      where: { entityType: 'collection', entityId: collectionId, deletedAt: null },
+      include: { labelClass: true },
+    });
+
+    return { ...coll, resources, labels };
   }
 
   async upsertCollection(user: Pick<User, 'uid'>, param: UpsertCollectionRequest) {
@@ -95,20 +94,30 @@ export class KnowledgeService {
   }
 
   async deleteCollection(user: Pick<User, 'uid'>, collectionId: string) {
+    const { uid } = user;
     const coll = await this.prisma.collection.findFirst({
-      where: { collectionId, deletedAt: null },
+      where: { collectionId, uid, deletedAt: null },
     });
     if (!coll) {
       throw new BadRequestException('Collection not found');
     }
-    if (coll.uid !== user.uid) {
-      throw new UnauthorizedException();
-    }
 
-    return this.prisma.collection.update({
-      where: { collectionId, uid: user.uid },
-      data: { deletedAt: new Date() },
+    await this.prisma.$transaction([
+      this.prisma.collection.update({
+        where: { collectionId, uid, deletedAt: null },
+        data: { deletedAt: new Date() },
+      }),
+      this.prisma.labelInstance.updateMany({
+        where: { entityType: 'collection', entityId: collectionId, uid, deletedAt: null },
+        data: { deletedAt: new Date() },
+      }),
+    ]);
+
+    // Delete all resources
+    const resources = await this.prisma.resource.findMany({
+      where: { collectionId, uid, deletedAt: null },
     });
+    await Promise.all(resources.map((r) => this.deleteResource(user, r.resourceId)));
   }
 
   async listResources(user: Pick<User, 'uid'>, param: ListResourcesData['query']) {
@@ -152,7 +161,12 @@ export class KnowledgeService {
       return null;
     }
 
-    return resource;
+    const labels = await this.prisma.labelInstance.findMany({
+      where: { entityType: 'resource', entityId: resourceId, deletedAt: null },
+      include: { labelClass: true },
+    });
+
+    return { ...resource, labels };
   }
 
   async createResource(user: Pick<User, 'uid'>, param: UpsertResourceRequest) {
@@ -336,20 +350,22 @@ export class KnowledgeService {
   }
 
   async deleteResource(user: Pick<User, 'uid'>, resourceId: string) {
+    const { uid } = user;
     const resource = await this.prisma.resource.findFirst({
-      where: { resourceId, deletedAt: null },
+      where: { resourceId, uid, deletedAt: null },
     });
     if (!resource) {
       throw new BadRequestException('Resource not found');
-    }
-    if (resource.uid !== user.uid) {
-      throw new UnauthorizedException();
     }
 
     return Promise.all([
       this.ragService.deleteResourceNodes(user, resourceId),
       this.prisma.resource.update({
-        where: { resourceId },
+        where: { resourceId, uid, deletedAt: null },
+        data: { deletedAt: new Date() },
+      }),
+      this.prisma.labelInstance.updateMany({
+        where: { entityType: 'resource', entityId: resourceId, uid, deletedAt: null },
         data: { deletedAt: new Date() },
       }),
     ]);
@@ -375,7 +391,13 @@ export class KnowledgeService {
     if (!note) {
       throw new BadRequestException('Note not found');
     }
-    return note;
+
+    const labels = await this.prisma.labelInstance.findMany({
+      where: { entityType: 'note', entityId: noteId, deletedAt: null },
+      include: { labelClass: true },
+    });
+
+    return { ...note, labels };
   }
 
   async upsertNote(user: Pick<User, 'uid'>, param: UpsertNoteRequest) {
@@ -395,20 +417,22 @@ export class KnowledgeService {
   }
 
   async deleteNote(user: Pick<User, 'uid'>, noteId: string) {
+    const { uid } = user;
     const note = await this.prisma.note.findFirst({
-      where: { noteId, deletedAt: null },
+      where: { noteId, uid, deletedAt: null },
     });
     if (!note) {
       throw new BadRequestException('Note not found');
-    }
-    if (note.uid !== user.uid) {
-      throw new UnauthorizedException();
     }
 
     const cleanups: Promise<any>[] = [
       this.ragService.deleteNoteNodes(user, noteId),
       this.prisma.note.update({
         where: { noteId },
+        data: { deletedAt: new Date() },
+      }),
+      this.prisma.labelInstance.updateMany({
+        where: { entityType: 'note', entityId: noteId, uid, deletedAt: null },
         data: { deletedAt: new Date() },
       }),
     ];

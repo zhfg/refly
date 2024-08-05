@@ -201,7 +201,7 @@ export const $EntityType = {
 export const $LabelClass = {
   type: 'object',
   description: 'Label class',
-  required: ['labelClassId', 'name'],
+  required: ['labelClassId', 'name', 'displayName', 'createdAt', 'updatedAt'],
   properties: {
     labelClassId: {
       type: 'string',
@@ -213,6 +213,11 @@ export const $LabelClass = {
       description: 'Label class name',
       example: 'Related Dataset',
     },
+    displayName: {
+      type: 'string',
+      description: 'Label class display name',
+      example: 'Label display name',
+    },
     icon: {
       type: 'string',
       description: 'Label icon',
@@ -223,33 +228,44 @@ export const $LabelClass = {
       description: 'Label creation instruction prompt',
       example: 'Extract labels for the tech-related keywords',
     },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Label class creation time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Label class update time',
+    },
   },
 } as const;
 
 export const $LabelInstance = {
   type: 'object',
   description: 'Label instances related to resources, collections, etc.',
-  allOf: [
-    {
+  required: ['labelId', 'labelClassId', 'value'],
+  properties: {
+    labelId: {
+      type: 'string',
+      description: 'Label instance ID',
+      example: 'lb-g30e1b80b5g1itbemc0g5jj3',
+    },
+    labelClassId: {
+      type: 'string',
+      description: 'Label class ID',
+      example: 'lc-g30e1b80b5g1itbemc0g5jj3',
+    },
+    labelClass: {
+      description: 'Label class',
       $ref: '#/components/schemas/LabelClass',
     },
-    {
-      type: 'object',
-      required: ['labelId', 'key', 'value', 'displayName'],
-      properties: {
-        labelId: {
-          type: 'string',
-          description: 'Label ID',
-          example: 'lb-g30e1b80b5g1itbemc0g5jj3',
-        },
-        value: {
-          type: 'string',
-          description: 'Label value',
-          example: 'HotPotQA',
-        },
-      },
+    value: {
+      type: 'string',
+      description: 'Label value',
+      example: 'HotPotQA',
     },
-  ],
+  },
 } as const;
 
 export const $SkillTemplate = {
@@ -1238,13 +1254,60 @@ export const $ListLabelClassesResponse = {
   ],
 } as const;
 
-export const $UpsertLabelClassRequest = {
+export const $CreateLabelClassRequest = {
   type: 'object',
+  required: ['name', 'displayName', 'prompt'],
   properties: {
     name: {
       type: 'string',
       description: 'Label class name',
+      example: 'my_class',
+    },
+    displayName: {
+      type: 'string',
+      description: 'Label display name',
       example: 'My Class',
+    },
+    icon: {
+      type: 'string',
+      description: 'Label icon',
+      example: 'IconBulb',
+    },
+    prompt: {
+      type: 'string',
+      description: 'Label creation instruction prompt',
+      example: 'Extract labels for the tech-related keywords',
+    },
+  },
+} as const;
+
+export const $UpdateLabelClassRequest = {
+  type: 'object',
+  required: ['labelClassId'],
+  properties: {
+    labelClassId: {
+      type: 'string',
+      description: 'Label class ID',
+    },
+    name: {
+      type: 'string',
+      description: 'Label class name',
+      example: 'My Class',
+    },
+    displayName: {
+      type: 'string',
+      description: 'Label display name',
+      example: 'My Class',
+    },
+    icon: {
+      type: 'string',
+      description: 'Label icon',
+      example: 'IconBulb',
+    },
+    prompt: {
+      type: 'string',
+      description: 'Label creation instruction prompt',
+      example: 'Extract labels for the tech-related keywords',
     },
   },
 } as const;
@@ -1298,23 +1361,19 @@ export const $ListLabelInstancesResponse = {
   ],
 } as const;
 
-export const $UpsertLabelInstanceRequest = {
+export const $CreateLabelInstanceRequest = {
   type: 'object',
+  required: ['labelClassId', 'value', 'entityType', 'entityId'],
   properties: {
-    key: {
+    labelClassId: {
       type: 'string',
-      description: 'Label key',
-      example: 'my-key',
+      description: 'Label class ID',
+      example: 'lc-g30e1b80b5g1itbemc0g5jj3',
     },
     value: {
       type: 'string',
       description: 'Label value',
       example: 'my-value',
-    },
-    displayName: {
-      type: 'string',
-      description: 'Label display name',
-      example: 'My Label',
     },
     entityType: {
       description: 'Label entity type',
@@ -1323,6 +1382,20 @@ export const $UpsertLabelInstanceRequest = {
     entityId: {
       description: 'Label entity ID',
       type: 'string',
+    },
+  },
+} as const;
+
+export const $UpdateLabelInstanceRequest = {
+  type: 'object',
+  properties: {
+    labelId: {
+      type: 'string',
+      description: 'Label ID to update',
+    },
+    value: {
+      type: 'string',
+      description: 'Updated label value',
     },
   },
 } as const;
@@ -1769,50 +1842,6 @@ export const $GetConversationDetailResponse = {
       },
     },
   ],
-} as const;
-
-export const $ListDigestRequest = {
-  type: 'object',
-  properties: {
-    page: {
-      type: 'number',
-      description: 'Page number',
-      default: 1,
-    },
-    pageSize: {
-      type: 'number',
-      description: 'Page size',
-      default: 10,
-    },
-    filter: {
-      type: 'object',
-      description: 'Digest query filter',
-      properties: {
-        date: {
-          type: 'object',
-          description: 'Date filter',
-          properties: {
-            year: {
-              type: 'number',
-              description: 'Year',
-            },
-            month: {
-              type: 'number',
-              description: 'Month',
-            },
-            day: {
-              type: 'number',
-              description: 'Day',
-            },
-          },
-        },
-        topic: {
-          type: 'string',
-          description: 'Topic filter',
-        },
-      },
-    },
-  },
 } as const;
 
 export const $UpdateUserSettingsRequest = {

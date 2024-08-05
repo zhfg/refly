@@ -1,1 +1,20 @@
-export const labelPO2DTO = (label: Label) => {};
+import { pick } from '@/utils';
+import { LabelClass as LabelClassModel, LabelInstance as LabelInstanceModel } from '@prisma/client';
+import { LabelClass, LabelInstance } from '@refly/openapi-schema';
+
+export const labelClassPO2DTO = (lc: LabelClassModel): LabelClass => {
+  return {
+    ...pick(lc, ['labelClassId', 'name', 'displayName', 'icon', 'prompt']),
+    createdAt: lc.createdAt.toJSON(),
+    updatedAt: lc.updatedAt.toJSON(),
+  };
+};
+
+export const labelPO2DTO = (
+  label: LabelInstanceModel & { labelClass?: LabelClassModel },
+): LabelInstance => {
+  return {
+    ...pick(label, ['labelId', 'labelClassId', 'value']),
+    ...(label.labelClass ? { labelClass: labelClassPO2DTO(label.labelClass) } : {}),
+  };
+};

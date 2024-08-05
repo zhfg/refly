@@ -52,7 +52,7 @@ export class KnowledgeController {
 
   @UseGuards(JwtAuthGuard)
   @Get('collection/detail')
-  async showCollectionDetail(
+  async getCollectionDetail(
     @User() user: UserModel,
     @Query('collectionId') collectionId: string,
   ): Promise<GetCollectionDetailResponse> {

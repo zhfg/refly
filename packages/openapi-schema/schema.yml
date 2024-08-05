@@ -437,6 +437,19 @@ paths:
       summary: List label classes
       description: List all label classes
       operationId: listLabelClasses
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: number
+            default: 1
+        - name: pageSize
+          in: query
+          description: Page size
+          schema:
+            type: number
+            default: 10
       responses:
         '200':
           description: successful operation
@@ -458,7 +471,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpsertLabelClassRequest'
+              $ref: '#/components/schemas/CreateLabelClassRequest'
         required: true
       responses:
         '200':
@@ -479,7 +492,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpsertLabelClassRequest'
+              $ref: '#/components/schemas/UpdateLabelClassRequest'
         required: true
       responses:
         '200':
@@ -528,12 +541,12 @@ paths:
           schema:
             type: string
             example: cl-g30e1b80b5g1itbemc0g5jj3
-        - name: key
+        - name: classId
           in: query
-          description: Label key
+          description: Label class ID
           schema:
             type: string
-            example: related_dataset
+            example: lc-g30e1b80b5g1itbemc0g5jj3
         - name: value
           in: query
           description: Label value
@@ -571,7 +584,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpsertLabelInstanceRequest'
+              $ref: '#/components/schemas/CreateLabelInstanceRequest'
         required: true
       responses:
         '200':
@@ -592,7 +605,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpsertLabelInstanceRequest'
+              $ref: '#/components/schemas/UpdateLabelInstanceRequest'
         required: true
       responses:
         '200':
@@ -1189,6 +1202,9 @@ components:
       required:
         - labelClassId
         - name
+        - displayName
+        - createdAt
+        - updatedAt
       properties:
         labelClassId:
           type: string
@@ -1198,6 +1214,10 @@ components:
           type: string
           description: Label class name
           example: Related Dataset
+        displayName:
+          type: string
+          description: Label class display name
+          example: Label display name
         icon:
           type: string
           description: Label icon
@@ -1206,26 +1226,37 @@ components:
           type: string
           description: Label creation instruction prompt
           example: Extract labels for the tech-related keywords
+        createdAt:
+          type: string
+          format: date-time
+          description: Label class creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Label class update time
     LabelInstance:
       type: object
       description: Label instances related to resources, collections, etc.
-      allOf:
-        - $ref: '#/components/schemas/LabelClass'
-        - type: object
-          required:
-            - labelId
-            - key
-            - value
-            - displayName
-          properties:
-            labelId:
-              type: string
-              description: Label ID
-              example: lb-g30e1b80b5g1itbemc0g5jj3
-            value:
-              type: string
-              description: Label value
-              example: HotPotQA
+      required:
+        - labelId
+        - labelClassId
+        - value
+      properties:
+        labelId:
+          type: string
+          description: Label instance ID
+          example: lb-g30e1b80b5g1itbemc0g5jj3
+        labelClassId:
+          type: string
+          description: Label class ID
+          example: lc-g30e1b80b5g1itbemc0g5jj3
+        labelClass:
+          description: Label class
+          $ref: '#/components/schemas/LabelClass'
+        value:
+          type: string
+          description: Label value
+          example: HotPotQA
     SkillTemplate:
       type: object
       description: Skill template
@@ -1954,13 +1985,53 @@ components:
               description: Label class list
               items:
                 $ref: '#/components/schemas/LabelClass'
-    UpsertLabelClassRequest:
+    CreateLabelClassRequest:
       type: object
+      required:
+        - name
+        - displayName
+        - prompt
       properties:
         name:
           type: string
           description: Label class name
+          example: my_class
+        displayName:
+          type: string
+          description: Label display name
           example: My Class
+        icon:
+          type: string
+          description: Label icon
+          example: IconBulb
+        prompt:
+          type: string
+          description: Label creation instruction prompt
+          example: Extract labels for the tech-related keywords
+    UpdateLabelClassRequest:
+      type: object
+      required:
+        - labelClassId
+      properties:
+        labelClassId:
+          type: string
+          description: Label class ID
+        name:
+          type: string
+          description: Label class name
+          example: My Class
+        displayName:
+          type: string
+          description: Label display name
+          example: My Class
+        icon:
+          type: string
+          description: Label icon
+          example: IconBulb
+        prompt:
+          type: string
+          description: Label creation instruction prompt
+          example: Extract labels for the tech-related keywords
     UpsertLabelClassResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -1988,27 +2059,37 @@ components:
               description: Label list
               items:
                 $ref: '#/components/schemas/LabelInstance'
-    UpsertLabelInstanceRequest:
+    CreateLabelInstanceRequest:
       type: object
+      required:
+        - labelClassId
+        - value
+        - entityType
+        - entityId
       properties:
-        key:
+        labelClassId:
           type: string
-          description: Label key
-          example: my-key
+          description: Label class ID
+          example: lc-g30e1b80b5g1itbemc0g5jj3
         value:
           type: string
           description: Label value
           example: my-value
-        displayName:
-          type: string
-          description: Label display name
-          example: My Label
         entityType:
           description: Label entity type
           $ref: '#/components/schemas/EntityType'
         entityId:
           description: Label entity ID
           type: string
+    UpdateLabelInstanceRequest:
+      type: object
+      properties:
+        labelId:
+          type: string
+          description: Label ID to update
+        value:
+          type: string
+          description: Updated label value
     UpsertLabelInstanceResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -2285,37 +2366,6 @@ components:
               type: object
               description: Conversation data
               $ref: '#/components/schemas/Conversation'
-    ListDigestRequest:
-      type: object
-      properties:
-        page:
-          type: number
-          description: Page number
-          default: 1
-        pageSize:
-          type: number
-          description: Page size
-          default: 10
-        filter:
-          type: object
-          description: Digest query filter
-          properties:
-            date:
-              type: object
-              description: Date filter
-              properties:
-                year:
-                  type: number
-                  description: Year
-                month:
-                  type: number
-                  description: Month
-                day:
-                  type: number
-                  description: Day
-            topic:
-              type: string
-              description: Topic filter
     UpdateUserSettingsRequest:
       type: object
       properties:

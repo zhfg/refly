@@ -14,8 +14,8 @@ export function genLabelClassID(): string {
   return 'lc-' + createId();
 }
 
-export function genLabelID(): string {
-  return 'lb-' + createId();
+export function genLabelInstanceID(): string {
+  return 'li-' + createId();
 }
 
 export function genConvID(): string {

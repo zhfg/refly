@@ -50,6 +50,7 @@ import type {
   DeleteCollectionData,
   DeleteCollectionError,
   DeleteCollectionResponse,
+  ListLabelClassesData,
   ListLabelClassesError,
   ListLabelClassesResponse2,
   CreateLabelClassData,
@@ -304,7 +305,7 @@ export const deleteCollection = (options: Options<DeleteCollectionData>) => {
  * List label classes
  * List all label classes
  */
-export const listLabelClasses = (options?: Options) => {
+export const listLabelClasses = (options?: Options<ListLabelClassesData>) => {
   return (options?.client ?? client).get<ListLabelClassesResponse2, ListLabelClassesError>({
     ...options,
     url: '/label/class/list',

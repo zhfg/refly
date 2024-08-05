@@ -73,7 +73,7 @@ export class SkillController {
   async listSkillInstances(
     @User() user: UserModel,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('page', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListSkillInstanceResponse> {
     const skills = await this.skillService.listSkillInstances(user, { page, pageSize });
     return buildSuccessResponse(skills.map((skill) => toSkillDTO(skill)));
@@ -120,7 +120,7 @@ export class SkillController {
     @User() user: UserModel,
     @Query('skillId') skillId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('page', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListSkillTriggerResponse> {
     const triggers = await this.skillService.listSkillTriggers(user, {
       skillId,
@@ -166,7 +166,7 @@ export class SkillController {
     @User() user: UserModel,
     @Query('skillId') skillId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('page', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListSkillLogResponse> {
     const logs = await this.skillService.listSkillLogs(user, {
       skillId: skillId || undefined,
