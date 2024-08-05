@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
-import type { Collection, Resource } from '@refly/openapi-schema';
+import type { Collection, Resource, SearchDomain } from '@refly/openapi-schema';
 import { EditorInstance } from '@refly-packages/editor-core/components';
 
 export enum ActionSource {
@@ -18,9 +18,10 @@ export interface KnowledgeBaseTab {
   resourceId: string;
 }
 
-export type SelectedNamespace = 'resource-detail' | 'note';
+export type ContextDomain = 'weblink' | 'resource' | 'note' | 'collection' | 'selected-text';
 
-interface KnowledgeBaseState {
+export type SelectedNamespace = 'resource-detail' | 'note';
+export interface KnowledgeBaseState {
   isSaveKnowledgeBaseModalVisible: boolean;
   knowledgeBaseList: Collection[];
   pageSize: number;
@@ -28,12 +29,15 @@ interface KnowledgeBaseState {
   hasMore: boolean;
   isRequesting: boolean;
 
-  // selection
+  // selection text
   currentSelectedText: string;
   selectedNamespace: SelectedNamespace;
   enableMultiSelect: boolean; // 支持多选
   currentSelectedContentList: string[]; // 多选内容
-  showContextCard: boolean;
+
+  // 上下文
+  showContextCard: boolean; // 资源、笔记、weblink、知识库、选中内容等
+  contextDomain: ContextDomain;
 
   // tabs
   tabs: KnowledgeBaseTab[];
@@ -70,12 +74,16 @@ interface KnowledgeBaseState {
   updateResourcePanelVisible: (visible: boolean) => void;
   resetState: () => void;
 
-  // context 面板相关的内容
+  // selected text context 面板相关的内容
   updateSelectedText: (selectedText: string) => void;
   updateSelectedNamespace: (selectedNamespace: SelectedNamespace) => void;
   updateEnableMultiSelect: (enableMultiSelect: boolean) => void;
   updateCurrentSelectedContentList: (currentSelectedContentList: string[]) => void;
-  setShowContextCard: (showContextCard: boolean) => void;
+
+  // context card
+  setShowContextCard: (showcontextCard: boolean) => void;
+  setContextDomain: (contextDomain: ContextDomain) => void;
+
   resetSelectedContextState: () => void;
 }
 
@@ -86,10 +94,15 @@ export const defaultSelectedContextState = {
   currentSelectedContentList: [],
 };
 
+export const defaultCurrentContext = {
+  contextDomain: 'resource' as ContextDomain,
+  showContextCard: false,
+};
+
 export const defaultState = {
   isSaveKnowledgeBaseModalVisible: false,
   ...defaultSelectedContextState,
-  showContextCard: false,
+  ...defaultCurrentContext,
   tabs: [
     {
       title: 'New Tab',
@@ -152,13 +165,18 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
     updateResourcePanelVisible: (visible: boolean) => set((state) => ({ ...state, resourcePanelVisible: visible })),
     updateNotePanelVisible: (visible: boolean) => set((state) => ({ ...state, notePanelVisible: visible })),
 
+    // selected text
     updateSelectedText: (selectedText: string) => set((state) => ({ ...state, currentSelectedText: selectedText })),
     updateSelectedNamespace: (selectedNamespace: SelectedNamespace) =>
       set((state) => ({ ...state, selectedNamespace })),
     updateEnableMultiSelect: (enableMultiSelect: boolean) => set((state) => ({ ...state, enableMultiSelect })),
     updateCurrentSelectedContentList: (currentSelectedContentList: string[]) =>
       set((state) => ({ ...state, currentSelectedContentList })),
+
+    // context card
+    setContextDomain: (contextDomain: ContextDomain) => set((state) => ({ ...state, contextDomain })),
     setShowContextCard: (showContextCard: boolean) => set((state) => ({ ...state, showContextCard })),
+
     resetSelectedContextState: () => set((state) => ({ ...state, ...defaultSelectedContextState })),
   })),
 );

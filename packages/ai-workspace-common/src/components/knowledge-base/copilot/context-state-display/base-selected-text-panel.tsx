@@ -13,7 +13,7 @@ interface BaseSelectedContextPanelProps {
   skillContent: React.ReactNode;
 }
 
-export const BaseSelectedContextPanel = (props: BaseSelectedContextPanelProps) => {
+export const BaseSelectedTextPanel = (props: BaseSelectedContextPanelProps) => {
   const { title, skillContent } = props;
   const { currentSelectedText } = useCopilotContextState();
   const knowledgeBaseStore = useKnowledgeBaseStore();
@@ -22,6 +22,7 @@ export const BaseSelectedContextPanel = (props: BaseSelectedContextPanelProps) =
 
   // skill
   const [skills] = useGetSkills();
+  const hasContent = currentSelectedText?.length > 0 || (enableMultiSelect && currentSelectedContentList?.length > 0);
 
   return (
     <div className="context-state-card context-state-current-page">
@@ -100,7 +101,7 @@ export const BaseSelectedContextPanel = (props: BaseSelectedContextPanelProps) =
           </span>
         )}
       </div>
-      <div className="context-state-card-footer">{skillContent}</div>
+      {hasContent ? <div className="context-state-card-footer">{skillContent}</div> : null}
     </div>
   );
 };

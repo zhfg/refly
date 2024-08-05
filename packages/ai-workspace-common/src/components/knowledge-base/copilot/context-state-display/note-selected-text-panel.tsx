@@ -7,13 +7,13 @@ import { useTranslation } from 'react-i18next';
 import { LOCALE } from '@refly/common-types';
 import { languageNameToLocale } from '@refly/common-types';
 import { writingSkills } from '@refly/utils/ai-writing';
-import { BaseSelectedContextPanel } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/base-selected-context-panel';
+import { BaseSelectedTextPanel } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/base-selected-text-panel';
 
 // resize hook
 const SubMenu = Menu.SubMenu;
 const MenuItem = Menu.Item;
 
-export const NoteSelectedContextPanel = () => {
+export const NoteSelectedTextPanel = () => {
   const { runSkill } = useBuildThreadAndRun();
 
   const { t, i18n } = useTranslation();
@@ -114,7 +114,7 @@ export const NoteSelectedContextPanel = () => {
   );
   return (
     <div className="note-selected-context-panel">
-      <BaseSelectedContextPanel title="选中笔记内容问答" skillContent={skillContent} />
+      <BaseSelectedTextPanel title="选中笔记内容问答" skillContent={skillContent} />
     </div>
   );
 };

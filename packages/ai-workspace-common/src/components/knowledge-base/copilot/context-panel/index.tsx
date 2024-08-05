@@ -43,7 +43,7 @@ export const ContextPanel = () => {
         <Button
           icon={<IconStorage />}
           type="text"
-          className="chat-input-assist-action-item"
+          className="assist-action-item"
           onClick={() => {
             setContextPanelPopoverVisible(true);
           }}
