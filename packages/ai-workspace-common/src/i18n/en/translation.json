@@ -104,6 +104,13 @@
       "confirm": "Confirm",
       "successful": "Created successfully",
       "failed": "Failed to create"
+    },
+    "deleteDropdownMenu": {
+      "successful": "删除成功！",
+      "failed": "删除失败！",
+      "deleteConfirmForNote": "确定删除该笔记吗？",
+      "deleteConfirmForKnowledgeBase": "确定删除该知识库吗？",
+      "delete": "删除"
     }
   },
   "loggedHomePage": {

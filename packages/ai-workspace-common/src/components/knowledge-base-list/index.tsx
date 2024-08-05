@@ -9,6 +9,7 @@ import { getClientOrigin } from '@refly/utils/url';
 import { useEffect } from 'react';
 import { CardBox } from '@refly-packages/ai-workspace-common/components/workspace/card-box';
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
+import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
 // utils
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // styles
@@ -28,7 +29,7 @@ export const KnowledgeBaseList = () => {
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
 
-  const { dataList, loadMore, hasMore, isRequesting } = useFetchDataList({
+  const { dataList, setDataList, loadMore, hasMore, isRequesting } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listCollections({
         query: queryPayload,
@@ -90,7 +91,6 @@ export const KnowledgeBaseList = () => {
                     .fromNow()}
                 </div>
                 <div className="flex items-center">
-                  <IconBook style={{ color: '#819292', cursor: 'pointer' }} />
                   <IconTip text={t('knowledgeLibrary.archive.item.copy')}>
                     <span
                       key={1}
@@ -100,9 +100,16 @@ export const KnowledgeBaseList = () => {
                         message.success(t('knowledgeLibrary.archive.item.copyNotify'));
                       }}
                     >
-                      <IconMore style={{ color: '#819292', marginLeft: '12px', cursor: 'pointer' }} />
+                      <IconBook style={{ color: '#819292', cursor: 'pointer' }} />
                     </span>
                   </IconTip>
+                  <DeleteDropdownMenu
+                    type="knowledgeBase"
+                    data={item}
+                    postDeleteList={(collection: Collection) =>
+                      setDataList(dataList.filter((n) => n.collectionId !== collection.collectionId))
+                    }
+                  />
                 </div>
               </div>
             </CardBox>,

@@ -30,10 +30,13 @@ export const NewKnowledgeModal = () => {
             setConfirmLoading(false);
             return;
           });
-        console.log(result);
-        Message.success(t('workspace.newKnowledgeModal.successful'));
         setConfirmLoading(false);
-        importKnowledgeModal.setShowNewKnowledgeModal(false);
+        if (result?.error) {
+          Message.error(t('workspace.newKnowledgeModal.failed'));
+        } else {
+          importKnowledgeModal.setShowNewKnowledgeModal(false);
+          Message.success(t('workspace.newKnowledgeModal.successful'));
+        }
       })
       .catch((err) => {
         console.log(err);

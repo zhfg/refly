@@ -2,12 +2,11 @@ import { IconDelete, IconMore } from '@arco-design/web-react/icon';
 import { Dropdown, Menu, Button, Popconfirm, Message } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
 // 类型
-import { Note } from '@refly/openapi-schema';
+import { Note, Collection } from '@refly/openapi-schema';
 // 请求
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { useNavigate } from 'react-router-dom';
-import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
-import { useNoteTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
+
+import { useTranslation } from 'react-i18next';
 
 const iconStyle = {
   marginRight: 8,
@@ -16,19 +15,23 @@ const iconStyle = {
 };
 
 interface DropListProps {
+  type: string;
   handleCancel: (e: any) => void;
   handleDeleteClick: (e: any) => void;
 }
 
 const DropList = (props: DropListProps) => {
-  const { handleCancel, handleDeleteClick } = props;
+  const { handleCancel, handleDeleteClick, type } = props;
+  const { t } = useTranslation();
 
   return (
     <Menu>
       <Menu.Item key="1">
         <Popconfirm
           focusLock
-          title="确定删除该笔记吗？"
+          title={t(
+            `workspace.deleteDropdownMenu.deleteConfirmFor${type.replace(type[0], type[0].toLocaleUpperCase())}`,
+          )}
           position="br"
           onOk={(e) => {
             handleDeleteClick(e);
@@ -39,7 +42,7 @@ const DropList = (props: DropListProps) => {
         >
           <div onClick={(e) => e.stopPropagation()}>
             <IconDelete style={iconStyle} />
-            删除
+            {t('workspace.deleteDropdownMenu.delete')}
           </div>
         </Popconfirm>
       </Menu.Item>
@@ -47,29 +50,48 @@ const DropList = (props: DropListProps) => {
   );
 };
 
-interface NoteDropdownMenuProps {
-  note: Note;
-  postDeleteNote?: (note: Note) => void;
+interface DeleteDropdownMenuProps {
+  postDeleteList?: (note: Note | Collection) => void;
 }
 
-export const NoteDropdownMenu = (props: NoteDropdownMenuProps) => {
-  const { note, postDeleteNote } = props;
+interface NotePros extends DeleteDropdownMenuProps {
+  type: 'note';
+  data: Note;
+}
+
+interface KnowledgeBasePros extends DeleteDropdownMenuProps {
+  type: 'knowledgeBase';
+  data: Collection;
+}
+
+export const DeleteDropdownMenu = (props: NotePros | KnowledgeBasePros) => {
+  const { type, data, postDeleteList } = props;
   const [popupVisible, setPopupVisible] = useState(false);
+  const { t } = useTranslation();
 
   const handleDeleteClick = async (e: MouseEvent) => {
     e.stopPropagation();
-    const { error } = await getClient().deleteNote({ body: { noteId: note.noteId } });
-    setPopupVisible(false);
-
-    if (error) {
-      console.error(error);
-      Message.error({ content: `删除失败` });
-    } else {
-      Message.success({ content: '删除成功' });
+    let resultError: unknown;
+    if (type === 'note') {
+      const { error } = await getClient().deleteNote({ body: { noteId: data.noteId } });
+      resultError = error;
+    }
+    if (type === 'knowledgeBase') {
+      const { error } = await getClient().deleteCollection({ body: { collectionId: data.collectionId } });
+      resultError = error;
     }
 
-    if (postDeleteNote) {
-      postDeleteNote(note);
+    setPopupVisible(false);
+
+    if (resultError) {
+      console.error(resultError);
+      Message.error({ content: t('workspace.deleteDropdownMenu.failed') });
+    } else {
+      Message.success({ content: t('workspace.deleteDropdownMenu.successful') });
+    }
+
+    if (postDeleteList) {
+      postDeleteList(data);
     }
   };
 
@@ -83,7 +105,7 @@ export const NoteDropdownMenu = (props: NoteDropdownMenuProps) => {
     setPopupVisible(!popupVisible);
   };
 
-  const droplist = DropList({ handleCancel, handleDeleteClick });
+  const droplist = DropList({ handleCancel, handleDeleteClick, type });
 
   return (
     <Dropdown

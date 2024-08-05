@@ -15,6 +15,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 // 组件
 import { ResourceList } from '@refly-packages/ai-workspace-common/components/resource-list';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
 
 export const KnowledgeBaseDirectory = () => {
   const [isFetching, setIsFetching] = useState(false);
@@ -95,7 +96,9 @@ export const KnowledgeBaseDirectory = () => {
             </div>
           </div>
         </div>
-        <div className="intro-menu">{/* <IconMore /> */}</div>
+        {knowledgeBaseStore?.currentKnowledgeBase && (
+          <DeleteDropdownMenu type="knowledgeBase" data={knowledgeBaseStore?.currentKnowledgeBase} />
+        )}
       </div>
       <div className="knowledge-base-directory-list-container">
         <ResourceList

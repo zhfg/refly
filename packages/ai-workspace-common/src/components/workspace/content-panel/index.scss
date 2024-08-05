@@ -1,6 +1,8 @@
 .content-panel-container {
   height: 100%;
   overflow: auto;
+  word-break: break-all;
+  word-wrap: break-word;
 
   .content-panel-radio-group {
     margin-left: 12px;
