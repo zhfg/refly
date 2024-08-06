@@ -59,9 +59,9 @@ import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/searc
 import { ContextPanel } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 import { useDynamicInitContextPanelState } from '@refly-packages/ai-workspace-common/hooks/use-init-context-panel-state';
-import { SelectedTextContextActionBtn } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/selected-text-context-action-btn';
+import { SelectedTextContextActionBtn } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display//action-btn/selected-text-context-action-btn';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { CurrentContextActionBtn } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/current-context-action-btn';
+import { CurrentContextActionBtn } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/action-btn/current-context-action-btn';
 
 interface AICopilotProps {}
 

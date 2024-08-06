@@ -6,7 +6,7 @@ import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui'
 import { useTranslation } from 'react-i18next';
 import { LOCALE } from '@refly/common-types';
 import { languageNameToLocale } from '@refly/common-types';
-import { BaseContextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/base-context-card';
+import { BaseContextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/context-card/base-context-card';
 import { useGetCurrentEnvContext } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-env-context';
 
 // resize hook
