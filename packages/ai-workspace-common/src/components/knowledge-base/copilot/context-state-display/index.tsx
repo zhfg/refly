@@ -25,7 +25,7 @@ export const ContextStateDisplay = () => {
   const isExtension = runtime !== 'web';
   const renderCompList = [];
 
-  if (isExtension) {
+  if (isExtension && !isSelectedTextCard) {
     renderCompList.push(<WeblinkContextCard key="weblink-context-card" />);
   } else {
     if (isSelectedTextCard) {

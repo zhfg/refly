@@ -17,7 +17,6 @@ import {
 // 自定义样式
 import './index.scss';
 // 自定义组件
-import { SearchTargetSelector } from '@refly-packages/ai-workspace-common/components/search-target-selector';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { ContextStateDisplay } from './context-state-display/index';
@@ -278,7 +277,6 @@ export const AICopilot = (props: AICopilotProps) => {
                 <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
               </div>
               <div className="chat-input-assist-action">
-                {/* {!showSelectedTextContext ? <SearchTargetSelector classNames="chat-input-assist-action-item" /> : null} */}
                 <ContextPanel />
                 <CurrentContextActionBtn />
                 <SelectedTextContextActionBtn />

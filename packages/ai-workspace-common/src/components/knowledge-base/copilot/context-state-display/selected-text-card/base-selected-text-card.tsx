@@ -56,7 +56,7 @@ export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
               type="round"
               size="small"
               checked={enableMultiSelect}
-              style={{ marginRight: 4 }}
+              style={{ marginRight: 4, background: 'var(--color-fill-4)' }}
               onChange={(value) => {
                 knowledgeBaseStore.updateEnableMultiSelect(value);
                 if (currentSelectedContentList?.length === 0) {

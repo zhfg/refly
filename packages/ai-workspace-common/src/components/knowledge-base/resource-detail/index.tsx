@@ -78,8 +78,6 @@ export const KnowledgeBaseResourceDetail = memo(() => {
     }
   }, [resId]);
 
-  console.log('resourceDetail?.content', resourceDetail?.content);
-
   return (
     <div className="knowledge-base-resource-detail-container">
       <div className="knowledge-base-resource-detail-body">
