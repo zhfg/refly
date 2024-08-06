@@ -2,7 +2,6 @@ import { useEffect } from "react"
 import { Route, Routes } from "react-router-dom"
 
 // 自定义组件
-import { Thread } from "@refly/ai-workspace-common/components/thread-item/thread"
 import { ConvLibrary } from "@/pages/conv-library"
 import { Settings } from "@refly/ai-workspace-common/components/settings/index"
 import { Login } from "@refly/ai-workspace-common/components/login/index"
@@ -74,7 +73,6 @@ export const AppRouter = (props: { layout?: any }) => {
         <Route path="/login" element={<Login />} />
         {/* <Route path="/feed" element={<Feed />} /> */}
         {/* <Route path="/feed/:feedId" element={<FeedDetailPage />} /> */}
-        <Route path="/thread/:threadId" element={<Thread />} />
         <Route path="/thread" element={<ConvLibrary />} />
         <Route path="/settings" element={<Settings />} />
       </Routes>
