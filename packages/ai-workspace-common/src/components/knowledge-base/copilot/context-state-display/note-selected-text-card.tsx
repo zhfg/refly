@@ -8,6 +8,7 @@ import { LOCALE } from '@refly/common-types';
 import { languageNameToLocale } from '@refly/common-types';
 import { writingSkills } from '@refly/utils/ai-writing';
 import { BaseSelectedTextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/base-selected-text-card';
+import { useGetCurrentSelectedText } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-selected-text';
 
 // resize hook
 const SubMenu = Menu.SubMenu;
@@ -15,6 +16,8 @@ const MenuItem = Menu.Item;
 
 export const NoteSelectedTextCard = () => {
   const { runSkill } = useBuildThreadAndRun();
+  const { hasContent } = useGetCurrentSelectedText();
+  const disabled = !hasContent;
 
   const { t, i18n } = useTranslation();
   const uiLocale = (i18n?.languages?.[0] as LOCALE) || LOCALE.EN;
@@ -81,6 +84,7 @@ export const NoteSelectedTextCard = () => {
     </Menu>
   );
 
+  const skillLen = writingSkills.length;
   const skillContent = (
     <div className="context-state-action-list">
       {writingSkills.slice(0, containCnt).map((skill, index) => (
@@ -89,6 +93,7 @@ export const NoteSelectedTextCard = () => {
           size="mini"
           className="context-state-action-item"
           key={index}
+          disabled={disabled}
           style={{ borderRadius: 8 }}
           onClick={() => {
             runSkill(skill?.prompt);
@@ -97,7 +102,7 @@ export const NoteSelectedTextCard = () => {
           {skill.title}
         </Button>
       ))}
-      {containCnt === writingSkills.length ? null : (
+      {containCnt >= writingSkills.length || skillLen === 0 ? null : (
         <Dropdown droplist={dropList}>
           <Button
             type="primary"

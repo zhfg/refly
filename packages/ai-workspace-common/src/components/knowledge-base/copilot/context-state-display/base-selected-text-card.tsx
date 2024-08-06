@@ -96,12 +96,14 @@ export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
             </Tag>
           </div>
         ) : (
-          <span className="text-gray-500" style={{ fontSize: 12 }}>
-            暂无选中内容...
-          </span>
+          <div className="context-state-resource-item">
+            <span className="text-gray-500" style={{ fontSize: 12 }}>
+              暂无选中内容...
+            </span>
+          </div>
         )}
       </div>
-      {hasContent ? <div className="context-state-card-footer">{skillContent}</div> : null}
+      <div className="context-state-card-footer">{skillContent}</div>
     </div>
   );
 };

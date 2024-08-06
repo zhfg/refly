@@ -265,28 +265,30 @@ export const AICopilot = (props: AICopilotProps) => {
         <ChatMessages />
       </div>
       <div className="ai-copilot-body" style={{ height: actualCopilotBodyHeight }}>
-        {showContextCard ? (
-          <div className="ai-copilot-context-display">
-            <ContextStateDisplay />
-          </div>
-        ) : null}
-        <div className="ai-copilot-chat-container">
-          <SkillDisplay />
-          <div className="chat-input-container" style={{ height: skillStore?.selectedSkill ? 117 + 32 : 117 }}>
-            <div className="chat-input-body">
-              <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
+        <div className="ai-copilot-body-inner-container">
+          {showContextCard ? (
+            <div className="ai-copilot-context-display">
+              <ContextStateDisplay />
             </div>
-            <div className="chat-input-assist-action">
-              {/* {!showSelectedTextContext ? <SearchTargetSelector classNames="chat-input-assist-action-item" /> : null} */}
-              <ContextPanel />
-              <CurrentContextActionBtn />
-              <SelectedTextContextActionBtn />
-              <OutputLocaleList>
-                <Button icon={<IconTranslate />} type="text" className="assist-action-item">
-                  {/* <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span> */}
-                  <IconCaretDown />
-                </Button>
-              </OutputLocaleList>
+          ) : null}
+          <div className="ai-copilot-chat-container">
+            <SkillDisplay />
+            <div className="chat-input-container">
+              <div className="chat-input-body">
+                <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
+              </div>
+              <div className="chat-input-assist-action">
+                {/* {!showSelectedTextContext ? <SearchTargetSelector classNames="chat-input-assist-action-item" /> : null} */}
+                <ContextPanel />
+                <CurrentContextActionBtn />
+                <SelectedTextContextActionBtn />
+                <OutputLocaleList>
+                  <Button icon={<IconTranslate />} type="text" className="assist-action-item">
+                    {/* <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span> */}
+                    <IconCaretDown />
+                  </Button>
+                </OutputLocaleList>
+              </div>
             </div>
           </div>
         </div>
