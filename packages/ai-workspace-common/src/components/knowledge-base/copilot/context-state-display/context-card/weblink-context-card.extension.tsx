@@ -1,5 +1,5 @@
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
-import { Button, Tag, Dropdown, Menu, Tooltip, Switch } from '@arco-design/web-react';
+import { Button, Tag, Dropdown, Menu, Tooltip, Switch, Divider } from '@arco-design/web-react';
 import { IconCloseCircle, IconFontColors, IconList, IconMore } from '@arco-design/web-react/icon';
 import { useResizeBox } from '@refly-packages/ai-workspace-common/hooks/use-resize-box';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
@@ -8,23 +8,29 @@ import { LOCALE } from '@refly/common-types';
 import { languageNameToLocale } from '@refly/common-types';
 import { BaseContextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/context-card/base-context-card';
 import { useGetCurrentEnvContext } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-env-context';
+import { useDispatchAction } from '@refly-packages/ai-workspace-common/skills/main-logic/use-dispatch-action';
 
 // resize hook
 const SubMenu = Menu.SubMenu;
 const MenuItem = Menu.Item;
 
 // TODO: 目前先写死，后续支持动态添加
-const collectionSkills = [
+const resourceSkills = [
   {
-    prompt: '相似知识库',
-    key: 'relatedCollection',
-    title: '相似知识库',
-    group: 'editOrReviewSelection',
+    prompt: '总结',
+    key: 'summary',
+    title: '总结',
+  },
+  {
+    prompt: '相关内容',
+    key: 'relatedResource',
+    title: '相关内容',
   },
 ];
 
-export const KnowledgeBaseContextCard = () => {
+export const WeblinkContextCard = () => {
   const { runSkill } = useBuildThreadAndRun();
+  const { dispatch } = useDispatchAction();
   const { hasContent } = useGetCurrentEnvContext();
   const disabled = !hasContent;
 
@@ -47,7 +53,7 @@ export const KnowledgeBaseContextCard = () => {
 
       return elems;
     },
-    initialContainCnt: collectionSkills.length,
+    initialContainCnt: resourceSkills.length,
     paddingSize: 0,
     itemSize: 60,
     placeholderWidth: 120,
@@ -57,7 +63,7 @@ export const KnowledgeBaseContextCard = () => {
 
   const dropList = (
     <Menu>
-      {collectionSkills.slice(containCnt).map((skill, index) => {
+      {resourceSkills.slice(containCnt).map((skill, index) => {
         return (
           <MenuItem
             key={`${skill.key}`}
@@ -72,10 +78,30 @@ export const KnowledgeBaseContextCard = () => {
     </Menu>
   );
 
-  const skillLen = collectionSkills.length;
+  const skillLen = resourceSkills.length;
   const skillContent = (
     <div className="context-state-action-list">
-      {collectionSkills.slice(0, containCnt).map((skill, index) => (
+      <Button
+        type="primary"
+        size="mini"
+        className="context-state-action-item"
+        disabled={disabled}
+        style={{ borderRadius: 8 }}
+        onClick={() => {
+          // 保存相关逻辑
+          dispatch({
+            name: 'saveToKnowledgeBase',
+            type: 'state',
+            body: {
+              modalVisible: true,
+            },
+          });
+        }}
+      >
+        保存
+      </Button>
+      <Divider type="vertical" style={{ margin: '0 4px' }} />
+      {resourceSkills.slice(0, containCnt).map((skill, index) => (
         <Button
           type="outline"
           size="mini"
@@ -93,7 +119,7 @@ export const KnowledgeBaseContextCard = () => {
       {containCnt >= skillLen || skillLen === 0 ? null : (
         <Dropdown droplist={dropList}>
           <Button
-            type="outline"
+            type="primary"
             size="mini"
             className="context-state-action-item"
             icon={<IconMore />}
@@ -105,9 +131,10 @@ export const KnowledgeBaseContextCard = () => {
       )}
     </div>
   );
+
   return (
     <div className="note-selected-context-panel">
-      <BaseContextCard title="当前知识库快捷操作" skillContent={skillContent} />
+      <BaseContextCard title="当前网页快捷操作" skillContent={skillContent} />
     </div>
   );
 };

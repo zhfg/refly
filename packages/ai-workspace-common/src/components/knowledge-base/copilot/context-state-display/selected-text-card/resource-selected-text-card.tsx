@@ -28,7 +28,7 @@ export const ResourceSelectedTextCard = () => {
     <div className="context-state-action-list">
       {skillList.map((item, index) => (
         <Button
-          type="primary"
+          type="outline"
           size="mini"
           className="context-state-action-item"
           style={{ borderRadius: 8 }}

@@ -3,6 +3,7 @@ import { devtools } from 'zustand/middleware';
 
 import type { Collection, Resource, SearchDomain } from '@refly/openapi-schema';
 import { EditorInstance } from '@refly-packages/editor-core/components';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 export enum ActionSource {
   KnowledgeBase = 'knowledge-base',
@@ -96,7 +97,7 @@ export const defaultSelectedContextState = {
 
 export const defaultCurrentContext = {
   contextDomain: 'resource' as ContextDomain,
-  showContextCard: false,
+  showContextCard: getRuntime() !== 'web' ? true : false, // 插件状态下自动打开
 };
 
 export const defaultState = {

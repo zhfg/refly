@@ -81,7 +81,7 @@ export const ResourceContextCard = () => {
     <div className="context-state-action-list">
       {resourceSkills.slice(0, containCnt).map((skill, index) => (
         <Button
-          type="primary"
+          type="outline"
           size="mini"
           className="context-state-action-item"
           key={index}
@@ -97,7 +97,7 @@ export const ResourceContextCard = () => {
       {containCnt >= skillLen || skillLen === 0 ? null : (
         <Dropdown droplist={dropList}>
           <Button
-            type="primary"
+            type="outline"
             size="mini"
             className="context-state-action-item"
             icon={<IconMore />}

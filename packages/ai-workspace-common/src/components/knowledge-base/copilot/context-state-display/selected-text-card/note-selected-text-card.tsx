@@ -89,7 +89,7 @@ export const NoteSelectedTextCard = () => {
     <div className="context-state-action-list">
       {writingSkills.slice(0, containCnt).map((skill, index) => (
         <Button
-          type="primary"
+          type="outline"
           size="mini"
           className="context-state-action-item"
           key={index}
@@ -105,7 +105,7 @@ export const NoteSelectedTextCard = () => {
       {containCnt >= writingSkills.length || skillLen === 0 ? null : (
         <Dropdown droplist={dropList}>
           <Button
-            type="primary"
+            type="outline"
             size="mini"
             className="context-state-action-item"
             icon={<IconMore />}
