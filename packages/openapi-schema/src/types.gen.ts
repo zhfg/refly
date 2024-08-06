@@ -237,9 +237,14 @@ export type SkillTemplate = {
 };
 
 /**
- * Skill trigger event
+ * Skill trigger type
  */
-export type SkillTriggerEvent = 'resourceAdd' | 'resourceUpdate' | 'collectionAdd' | 'collectionUpdate' | 'cron';
+export type SkillTriggerType = 'event' | 'cron';
+
+/**
+ * Event type
+ */
+export type EventType = 'create' | 'update' | 'delete';
 
 /**
  * Skill triggers
@@ -254,9 +259,17 @@ export type SkillTrigger = {
    */
   triggerId: string;
   /**
-   * Trigger event
+   * Trigger type
    */
-  event: SkillTriggerEvent;
+  triggerType: SkillTriggerType;
+  /**
+   * Event entity type (only required when trigger type is `event`)
+   */
+  eventEntityType?: EntityType;
+  /**
+   * Event type (only required when trigger type is `event`)
+   */
+  eventType?: EventType;
   /**
    * Cron expression
    */
@@ -1114,10 +1127,6 @@ export type InvokeSkillRequest = {
    */
   skillId?: string;
   /**
-   * Skill trigger event
-   */
-  event?: SkillTriggerEvent;
-  /**
    * Skill config (should conform to template config schema)
    */
   config?: {
@@ -1157,9 +1166,17 @@ export type UpsertSkillTriggerRequest = {
    */
   triggerId?: string;
   /**
-   * Trigger event
+   * Trigger type
    */
-  event: SkillTriggerEvent;
+  triggerType: SkillTriggerType;
+  /**
+   * Event entity type (only required when trigger type is `event`)
+   */
+  eventEntityType?: EntityType;
+  /**
+   * Event type (only required when trigger type is `event`)
+   */
+  eventType?: EventType;
   /**
    * Trigger crontab (only valid when event is `cron`)
    */

@@ -1273,22 +1273,26 @@ components:
         configSchema:
           type: object
           description: JSON schema for config
-    SkillTriggerEvent:
+    SkillTriggerType:
       type: string
-      description: Skill trigger event
+      description: Skill trigger type
       enum:
-        - resourceAdd
-        - resourceUpdate
-        - collectionAdd
-        - collectionUpdate
+        - event
         - cron
+    EventType:
+      type: string
+      description: Event type
+      enum:
+        - create
+        - update
+        - delete
     SkillTrigger:
       type: object
       description: Skill triggers
       required:
         - skillId
         - triggerId
-        - event
+        - triggerType
         - enabled
         - createdAt
         - updatedAt
@@ -1301,9 +1305,15 @@ components:
           type: string
           description: Trigger ID
           example: tr-g30e1b80b5g1itbemc0g5jj3
-        event:
-          description: Trigger event
-          $ref: '#/components/schemas/SkillTriggerEvent'
+        triggerType:
+          description: Trigger type
+          $ref: '#/components/schemas/SkillTriggerType'
+        eventEntityType:
+          description: Event entity type (only required when trigger type is `event`)
+          $ref: '#/components/schemas/EntityType'
+        eventType:
+          description: Event type (only required when trigger type is `event`)
+          $ref: '#/components/schemas/EventType'
         crontab:
           type: string
           description: Cron expression
@@ -2230,9 +2240,6 @@ components:
         skillId:
           type: string
           description: Skill instance ID to invoke (if not provided, skill scheduler will be used)
-        event:
-          description: Skill trigger event
-          $ref: '#/components/schemas/SkillTriggerEvent'
         config:
           type: object
           description: Skill config (should conform to template config schema)
@@ -2264,7 +2271,7 @@ components:
     UpsertSkillTriggerRequest:
       type: object
       required:
-        - event
+        - triggerType
       properties:
         skillId:
           type: string
@@ -2274,9 +2281,15 @@ components:
           type: string
           description: Trigger ID (only used for update)
           example: tr-g30e1b80b5g1itbemc0g5jj3
-        event:
-          description: Trigger event
-          $ref: '#/components/schemas/SkillTriggerEvent'
+        triggerType:
+          description: Trigger type
+          $ref: '#/components/schemas/SkillTriggerType'
+        eventEntityType:
+          description: Event entity type (only required when trigger type is `event`)
+          $ref: '#/components/schemas/EntityType'
+        eventType:
+          description: Event type (only required when trigger type is `event`)
+          $ref: '#/components/schemas/EventType'
         crontab:
           type: string
           description: Trigger crontab (only valid when event is `cron`)

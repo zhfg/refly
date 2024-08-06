@@ -291,16 +291,22 @@ export const $SkillTemplate = {
   },
 } as const;
 
-export const $SkillTriggerEvent = {
+export const $SkillTriggerType = {
   type: 'string',
-  description: 'Skill trigger event',
-  enum: ['resourceAdd', 'resourceUpdate', 'collectionAdd', 'collectionUpdate', 'cron'],
+  description: 'Skill trigger type',
+  enum: ['event', 'cron'],
+} as const;
+
+export const $EventType = {
+  type: 'string',
+  description: 'Event type',
+  enum: ['create', 'update', 'delete'],
 } as const;
 
 export const $SkillTrigger = {
   type: 'object',
   description: 'Skill triggers',
-  required: ['skillId', 'triggerId', 'event', 'enabled', 'createdAt', 'updatedAt'],
+  required: ['skillId', 'triggerId', 'triggerType', 'enabled', 'createdAt', 'updatedAt'],
   properties: {
     skillId: {
       type: 'string',
@@ -312,9 +318,17 @@ export const $SkillTrigger = {
       description: 'Trigger ID',
       example: 'tr-g30e1b80b5g1itbemc0g5jj3',
     },
-    event: {
-      description: 'Trigger event',
-      $ref: '#/components/schemas/SkillTriggerEvent',
+    triggerType: {
+      description: 'Trigger type',
+      $ref: '#/components/schemas/SkillTriggerType',
+    },
+    eventEntityType: {
+      description: 'Event entity type (only required when trigger type is `event`)',
+      $ref: '#/components/schemas/EntityType',
+    },
+    eventType: {
+      description: 'Event type (only required when trigger type is `event`)',
+      $ref: '#/components/schemas/EventType',
     },
     crontab: {
       type: 'string',
@@ -1613,10 +1627,6 @@ export const $InvokeSkillRequest = {
       type: 'string',
       description: 'Skill instance ID to invoke (if not provided, skill scheduler will be used)',
     },
-    event: {
-      description: 'Skill trigger event',
-      $ref: '#/components/schemas/SkillTriggerEvent',
-    },
     config: {
       type: 'object',
       description: 'Skill config (should conform to template config schema)',
@@ -1672,7 +1682,7 @@ export const $ListSkillTriggerResponse = {
 
 export const $UpsertSkillTriggerRequest = {
   type: 'object',
-  required: ['event'],
+  required: ['triggerType'],
   properties: {
     skillId: {
       type: 'string',
@@ -1684,9 +1694,17 @@ export const $UpsertSkillTriggerRequest = {
       description: 'Trigger ID (only used for update)',
       example: 'tr-g30e1b80b5g1itbemc0g5jj3',
     },
-    event: {
-      description: 'Trigger event',
-      $ref: '#/components/schemas/SkillTriggerEvent',
+    triggerType: {
+      description: 'Trigger type',
+      $ref: '#/components/schemas/SkillTriggerType',
+    },
+    eventEntityType: {
+      description: 'Event entity type (only required when trigger type is `event`)',
+      $ref: '#/components/schemas/EntityType',
+    },
+    eventType: {
+      description: 'Event type (only required when trigger type is `event`)',
+      $ref: '#/components/schemas/EventType',
     },
     crontab: {
       type: 'string',

@@ -16,6 +16,7 @@ import { KnowledgeModule } from './knowledge/knowledge.module';
 import { SkillModule } from './skill/skill.module';
 import { SearchModule } from './search/search.module';
 import { LabelModule } from './label/label.module';
+import { EventModule } from './event/event.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { LabelModule } from './label/label.module';
     SkillModule,
     SearchModule,
     LabelModule,
+    EventModule,
   ],
   controllers: [AppController],
 })

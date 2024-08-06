@@ -1,10 +1,4 @@
-import {
-  InvokeSkillRequest,
-  SkillInstance,
-  SkillLog,
-  SkillTrigger,
-  SkillTriggerEvent,
-} from '@refly/openapi-schema';
+import { InvokeSkillRequest, SkillInstance, SkillLog, SkillTrigger } from '@refly/openapi-schema';
 import {
   SkillInstance as SkillModel,
   SkillTrigger as SkillTriggerModel,
@@ -29,8 +23,15 @@ export function toSkillDTO(skill: SkillModel): SkillInstance {
 
 export function toSkillTriggerDTO(trigger: SkillTriggerModel): SkillTrigger {
   return {
-    ...pick(trigger, ['skillId', 'triggerId', 'crontab', 'enabled']),
-    event: trigger.event as SkillTriggerEvent,
+    ...pick(trigger, [
+      'skillId',
+      'triggerType',
+      'eventEntityType',
+      'eventType',
+      'triggerId',
+      'crontab',
+      'enabled',
+    ]),
     createdAt: trigger.createdAt.toJSON(),
     updatedAt: trigger.updatedAt.toJSON(),
   };

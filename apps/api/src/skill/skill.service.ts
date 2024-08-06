@@ -65,6 +65,18 @@ export function createLLMChatMessage(content: string, type: MessageType): LLMCha
   }
 }
 
+function validateUpsertSkillTriggerRequest(param: UpsertSkillTriggerRequest) {
+  if (param.triggerType === 'event') {
+    if (!param.eventType || !param.eventEntityType) {
+      throw new BadRequestException('invalid event trigger config');
+    }
+  } else if (param.triggerType === 'cron') {
+    if (!param.crontab) {
+      throw new BadRequestException('invalid cron trigger config');
+    }
+  }
+}
+
 @Injectable()
 export class SkillService {
   private logger = new Logger(SkillService.name);
@@ -131,23 +143,28 @@ export class SkillService {
   }
 
   async createSkillInstance(user: User, param: UpsertSkillInstanceRequest) {
-    param.instanceList.forEach((instance) => {
+    const { uid } = user;
+    const { instanceList } = param;
+
+    instanceList.forEach((instance) => {
       if (!this.isValidSkillName(instance.skillName)) {
         throw new BadRequestException(`skill ${instance.skillName} not found`);
       }
+
+      instance.triggers?.forEach((trigger) => validateUpsertSkillTriggerRequest(trigger));
     });
 
     const limit = pLimit(5);
-    const tasks = param.instanceList.map((instance) =>
+    const tasks = instanceList.map((instance) =>
       limit(async () => {
         const skillId = genSkillID();
         const [skill, ...triggers] = await this.prisma.$transaction([
           this.prisma.skillInstance.create({
             data: {
               skillId,
-              uid: user.uid,
+              uid,
               skillName: instance.skillName,
-              displayName: instance.displayName ?? '',
+              displayName: instance.displayName || 'Untitled Skill',
               config: JSON.stringify(instance.config),
             },
           }),
@@ -155,10 +172,9 @@ export class SkillService {
             this.prisma.skillTrigger.create({
               data: {
                 skillId,
-                uid: user.uid,
+                uid,
                 triggerId: genSkillTriggerID(),
-                event: trigger.event,
-                crontab: trigger.crontab,
+                ...pick(trigger, ['triggerType', 'eventEntityType', 'eventType', 'crontab']),
                 enabled: !!trigger.enabled,
               },
             }),
@@ -236,18 +252,6 @@ export class SkillService {
         throw new BadRequestException(`skill not found: ${skillId}`);
       }
       res.skill = skill;
-
-      const trigger = await this.prisma.skillTrigger.findFirst({
-        where: {
-          skillId,
-          event: param.event,
-          uid: user.uid,
-          deletedAt: null,
-        },
-      });
-      if (trigger) {
-        res.trigger = trigger;
-      }
     }
 
     return res;
@@ -271,7 +275,6 @@ export class SkillService {
         context: JSON.stringify(param.context ?? {}),
         overrideConfig: JSON.stringify(param.config ?? {}),
         status: mode === 'async' ? 'scheduling' : 'running',
-        event: param.event ?? '',
         triggerId: trigger?.triggerId ?? '',
       },
     });
@@ -480,16 +483,21 @@ export class SkillService {
   }
 
   async createSkillTrigger(user: User, param: UpsertSkillTriggerRequest) {
-    if (!param.skillId || !param.event) {
+    const { uid } = user;
+    const { skillId } = param;
+
+    if (!param.skillId) {
       throw new BadRequestException('skill id and trigger id are required');
     }
+
+    validateUpsertSkillTriggerRequest(param);
+
     return this.prisma.skillTrigger.create({
       data: {
-        uid: user.uid,
-        skillId: param.skillId,
+        uid,
+        skillId,
         triggerId: genSkillTriggerID(),
-        event: param.event,
-        crontab: param.crontab,
+        ...pick(param, ['skillId', 'triggerType', 'crontab', 'eventEntityType', 'eventType']),
         enabled: !!param.enabled,
       },
     });
@@ -497,9 +505,9 @@ export class SkillService {
 
   async updateSkillTrigger(user: User, param: UpsertSkillTriggerRequest) {
     return this.prisma.skillTrigger.update({
-      where: { triggerId: param.triggerId, uid: user.uid },
+      where: { triggerId: param.triggerId, uid: user.uid, deletedAt: null },
       data: {
-        event: param.event,
+        ...pick(param, ['triggerType', 'eventEntityType', 'eventType', 'crontab', 'enabled']),
         crontab: param.crontab,
         enabled: !!param.enabled,
       },
@@ -507,14 +515,15 @@ export class SkillService {
   }
 
   async deleteSkillTrigger(user: User, param: DeleteSkillTriggerRequest) {
+    const { uid } = user;
     const { triggerId } = param;
     if (!triggerId) {
       throw new BadRequestException('skill id and trigger id are required');
     }
-    const trigger = await this.prisma.skillTrigger.findUnique({
-      where: { triggerId, deletedAt: null },
+    const trigger = await this.prisma.skillTrigger.findFirst({
+      where: { triggerId, uid, deletedAt: null },
     });
-    if (!trigger || trigger.uid !== user.uid) {
+    if (!trigger || trigger.uid !== uid) {
       throw new BadRequestException('trigger not found');
     }
     await this.prisma.skillTrigger.update({

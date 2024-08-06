@@ -6,6 +6,10 @@ export function genUID(): string {
   return 'u-' + createId();
 }
 
+export function genEventID(): string {
+  return 'ev-' + createId();
+}
+
 export function genLinkID(): string {
   return 'l-' + createId();
 }

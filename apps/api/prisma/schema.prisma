@@ -236,25 +236,29 @@ model SkillInstance {
 
 model SkillTrigger {
   /// Primary key
-  pk        BigInt    @id @default(autoincrement())
+  pk              BigInt           @id @default(autoincrement())
   /// Trigger id
-  triggerId String    @unique @map("trigger_id")
+  triggerId       String           @unique @map("trigger_id")
+  /// Trigger type
+  triggerType     SkillTriggerType @map("trigger_type")
   /// Skill id
-  skillId   String    @map("skill_id")
+  skillId         String           @map("skill_id")
   /// Owner UID
-  uid       String    @map("uid")
-  /// Trigger event
-  event     String    @map("event")
-  /// Crontab for cron trigger
-  crontab   String?   @map("crontab")
+  uid             String           @map("uid")
+  /// Event entity type (required when triggerType is `event`)
+  eventEntityType EntityType?      @map("event_entity_type")
+  /// Event type (required when triggerType is `event`)
+  eventType       EventType?       @map("event_type")
+  /// Crontab for cron trigger (required when triggerType is `cron`)
+  crontab         String?          @map("crontab")
   /// Whether this skill is enabled
-  enabled   Boolean   @map("enabled")
+  enabled         Boolean          @map("enabled")
   /// Create timestamp
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
-  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt       DateTime         @updatedAt @map("updated_at") @db.Timestamptz()
   /// Deletion timestamp
-  deletedAt DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt       DateTime?        @map("deleted_at") @db.Timestamptz()
 
   @@index([skillId, deletedAt])
   @@map("skill_triggers")
@@ -280,8 +284,6 @@ model SkillLog {
   overrideConfig String       @map("override_config")
   /// Skill operation status
   status         SkillStatus  @map("status")
-  /// Skill trigger event
-  event          String       @map("event")
   /// Skill trigger id
   triggerId      String       @map("trigger_id")
   /// UID of skill owner
@@ -352,9 +354,30 @@ model LabelInstance {
   @@map("label_instances")
 }
 
+model EventRecord {
+  /// Primary key
+  pk         BigInt     @id @default(autoincrement())
+  /// Event ID
+  eventId    String     @unique @map("event_id")
+  /// UID
+  uid        String     @map("uid")
+  /// Entity type related to this event
+  entityType EntityType @map("entity_type")
+  /// Entity ID related to this event
+  entityId   String     @map("entity_id")
+  /// Event type
+  eventType  EventType  @map("event_type")
+  /// Create timestamp
+  createdAt  DateTime   @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt  DateTime   @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([uid, createdAt])
+  @@map("event_records")
+}
+
 enum ResourceType {
   weblink
-  note // deprecated
   text
 }
 
@@ -362,6 +385,12 @@ enum EntityType {
   resource
   collection
   note
+}
+
+enum EventType {
+  create
+  update
+  delete
 }
 
 enum ParseSource {
@@ -386,6 +415,11 @@ enum SkillStatus {
 enum SkillRunMode {
   async
   stream
+}
+
+enum SkillTriggerType {
+  event
+  cron
 }
 
 enum MessageType {
