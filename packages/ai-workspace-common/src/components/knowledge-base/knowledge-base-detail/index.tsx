@@ -87,10 +87,10 @@ export const KnowledgeBaseDetail = (props: KnowledgeBaseDetailProps) => {
       </Tabs>
       <PanelGroup direction="horizontal" className="knowledge-base-detail-panel-container">
         <Panel
-          defaultSize={minSize}
-          minSize={minSize}
+          // defaultSize={minSize}
+          // minSize={minSize}
           maxSize={50}
-          collapsedSize={0}
+          // collapsedSize={0}
           collapsible={true}
           className="knowledge-base-detail-directory-panel"
         >
