@@ -1,25 +1,19 @@
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
-import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
-import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
-import { getQuickActionPrompt } from '@refly-packages/ai-workspace-common/utils/quickActionPrompt';
-import { Button, Tag, Dropdown, Menu } from '@arco-design/web-react';
-import { IconCloseCircle, IconFontColors, IconMore } from '@arco-design/web-react/icon';
+import { Button, Tag, Dropdown, Menu, Tooltip, Switch } from '@arco-design/web-react';
+import { IconCloseCircle, IconFontColors, IconList, IconMore } from '@arco-design/web-react/icon';
 import { useResizeBox } from '@refly-packages/ai-workspace-common/hooks/use-resize-box';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { useTranslation } from 'react-i18next';
 import { LOCALE } from '@refly/common-types';
 import { languageNameToLocale } from '@refly/common-types';
 import { writingSkills } from '@refly/utils/ai-writing';
+import { BaseSelectedContextPanel } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/base-selected-context-panel';
 
 // resize hook
 const SubMenu = Menu.SubMenu;
 const MenuItem = Menu.Item;
 
 export const NoteSelectedContextPanel = () => {
-  const { currentSelectedText } = useCopilotContextState();
-  const searchStateStore = useSearchStateStore();
-  const knowledgeBaseStore = useKnowledgeBaseStore();
   const { runSkill } = useBuildThreadAndRun();
 
   const { t, i18n } = useTranslation();
@@ -31,13 +25,13 @@ export const NoteSelectedContextPanel = () => {
   const [containCnt] = useResizeBox({
     getGroupSelector: () => {
       const container = getPopupContainer();
-      const elem = container.querySelector('.context-state-card');
+      const elem = container?.querySelector('.context-state-action-list');
 
       return elem as HTMLElement;
     },
     getResizeSelector: () => {
       const container = getPopupContainer();
-      const elems = container.querySelectorAll('.context-state-action-item') as NodeListOf<HTMLElement>;
+      const elems = container?.querySelectorAll('.context-state-action-item') as NodeListOf<HTMLElement>;
 
       return elems;
     },
@@ -86,55 +80,40 @@ export const NoteSelectedContextPanel = () => {
     </Menu>
   );
 
+  const skillContent = (
+    <div className="context-state-action-list">
+      {writingSkills.slice(0, containCnt).map((skill, index) => (
+        <Button
+          type="primary"
+          size="mini"
+          className="context-state-action-item"
+          key={index}
+          style={{ borderRadius: 8 }}
+          onClick={() => {
+            runSkill(skill?.prompt);
+          }}
+        >
+          {skill.title}
+        </Button>
+      ))}
+      {containCnt === writingSkills.length ? null : (
+        <Dropdown droplist={dropList}>
+          <Button
+            type="primary"
+            size="mini"
+            className="context-state-action-item"
+            icon={<IconMore />}
+            style={{ borderRadius: 8, paddingLeft: 8 }}
+          >
+            更多
+          </Button>
+        </Dropdown>
+      )}
+    </div>
+  );
   return (
-    <div className="context-state-card context-state-current-page">
-      <div className="context-state-card-header">
-        <div className="context-state-card-header-left">
-          <IconFontColors />
-          <span className="context-state-card-header-title">基于选中笔记操作</span>
-        </div>
-        <div className="context-state-card-header-right">
-          <IconCloseCircle
-            onClick={() => {
-              knowledgeBaseStore.updateSelectedText('');
-              searchStateStore.setSearchTarget(SearchTarget.CurrentPage);
-            }}
-          />
-        </div>
-      </div>
-      <div className="context-state-card-body">
-        <div className="context-state-resource-item">
-          <Tag icon={<IconFontColors />} bordered className="context-state-resource-item-tag">
-            {currentSelectedText}
-          </Tag>
-        </div>
-        <div className="context-state-action-list">
-          {writingSkills.slice(0, containCnt).map((skill, index) => (
-            <div className="context-state-action-item" key={index}>
-              <Button
-                type="primary"
-                size="mini"
-                style={{ borderRadius: 8 }}
-                onClick={() => {
-                  runSkill(skill?.prompt);
-                }}
-              >
-                {skill.title}
-              </Button>
-            </div>
-          ))}
-          {containCnt === writingSkills.length ? null : (
-            <div className="context-state-action-item">
-              <Dropdown droplist={dropList}>
-                <Button type="primary" size="mini" icon={<IconMore />} style={{ borderRadius: 8 }}>
-                  更多
-                </Button>
-              </Dropdown>
-            </div>
-          )}
-        </div>
-      </div>
-      <div className="context-state-card-footer"></div>
+    <div className="note-selected-context-panel">
+      <BaseSelectedContextPanel title="选中笔记内容问答" skillContent={skillContent} />
     </div>
   );
 };

@@ -221,7 +221,7 @@ export const AINoteStatusBar = (props: AINoteStatusBarProps) => {
         {noteId ? (
           <div className="note-status-bar-item">
             {note.readOnly ? <IconLock /> : <IconUnlock />}
-            <p className="conv-title mr-2">{note.readOnly ? '只读' : '编辑'}</p>
+            <p className="mr-2 conv-title">{note.readOnly ? '只读' : '编辑'}</p>
             <Switch
               type="round"
               size="small"
@@ -248,10 +248,10 @@ export const AINoteHeader = (props: AINoteHeaderProps) => {
   const { note, onTitleChange } = props;
 
   return (
-    <div className="mx-4 mt-8 flex justify-center align-middle">
+    <div className="flex justify-center mx-4 mt-8 align-middle">
       <div className="w-full h-full max-w-screen-lg">
         <Input
-          className="bg-transparent text-3xl font-bold focus:border-transparent focus:bg-transparent"
+          className="text-3xl font-bold bg-transparent focus:border-transparent focus:bg-transparent"
           placeholder="Enter The Title"
           value={note.title}
           onChange={onTitleChange}
@@ -299,6 +299,8 @@ export const AINote = () => {
     };
     if (noteId) {
       fetchData();
+    } else {
+      noteStore.updateCurrentNote(null);
     }
   }, [noteId]);
 
@@ -329,7 +331,7 @@ export const AINote = () => {
   }
 
   if (!note) {
-    return <Spin dot block className="h-full w-full flex justify-center items-center" />;
+    return <Spin dot block className="flex items-center justify-center w-full h-full" />;
   }
 
   const onTitleChange = (newTitle: string) => {
@@ -355,9 +357,9 @@ export const AINote = () => {
               </div>
               <div className="note-detail-navigation-bar">
                 <Button
-                  icon={<IconSearch style={{ fontSize: 16 }} />}
+                  icon={<IconSearch />}
                   type="text"
-                  shape="circle"
+                  style={{ marginRight: 4 }}
                   className="assist-action-item"
                   onClick={() => {
                     searchStore.setPages(searchStore.pages.concat('note'));

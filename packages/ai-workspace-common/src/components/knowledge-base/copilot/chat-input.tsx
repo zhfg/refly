@@ -1,17 +1,18 @@
-import { Avatar, Button, Input } from '@arco-design/web-react';
+import { Avatar, Button, Divider, Input, Tooltip } from '@arco-design/web-react';
 import { useRef, useState } from 'react';
 import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 // styles
 import './index.scss';
 import { useQuickSearchStateStore } from '@refly-packages/ai-workspace-common/stores/quick-search-state';
-import { IconClose, IconSend } from '@arco-design/web-react/icon';
+import { IconClose, IconFontColors, IconSend } from '@arco-design/web-react/icon';
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { buildConversation } from '@refly-packages/ai-workspace-common/utils/conversation';
 import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
+import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
 
 const TextArea = Input.TextArea;
 
@@ -29,6 +30,7 @@ export const ChatInput = (props: ChatInputProps) => {
   const messageStateStore = useMessageStateStore();
   const skillStore = useSkillStore();
   const { runSkill, emptyConvRunSkill } = useBuildThreadAndRun();
+  const { showSelectedText } = useCopilotContextState();
   // hooks
   const [isFocused, setIsFocused] = useState(false);
 

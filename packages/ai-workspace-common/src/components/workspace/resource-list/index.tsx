@@ -27,10 +27,7 @@ export const ResourceList = () => {
   const { dataList, loadMore, hasMore, isRequesting, reload } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listResources({
-        query: {
-          ...queryPayload,
-          resourceType: 'weblink',
-        },
+        query: queryPayload,
       });
       return res?.data;
     },
