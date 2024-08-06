@@ -110,7 +110,7 @@ const KnowledgeLibraryLayout = () => {
           <PanelGroup
             direction="horizontal"
             className="workspace-panel-container">
-            {kbId && knowledgeBaseStore.resourcePanelVisible ? (
+            {knowledgeBaseStore.resourcePanelVisible ? (
               <>
                 <Panel
                   minSize={20}

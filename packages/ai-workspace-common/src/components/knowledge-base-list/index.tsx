@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useReloadListState } from '@refly/ai-workspace-common/stores/reload-list-state';
 
 export const getFirstSourceLink = (sources: Source[]) => {
   return sources?.[0]?.metadata?.source;
@@ -29,7 +30,9 @@ export const KnowledgeBaseList = () => {
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
 
-  const { dataList, setDataList, loadMore, hasMore, isRequesting } = useFetchDataList({
+  const reloadListState = useReloadListState();
+
+  const { dataList, setDataList, loadMore, reload, hasMore, isRequesting } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listCollections({
         query: queryPayload,
@@ -42,6 +45,13 @@ export const KnowledgeBaseList = () => {
   useEffect(() => {
     loadMore();
   }, []);
+
+  useEffect(() => {
+    if (reloadListState.reloadKnowledgeBaseList) {
+      reload();
+      reloadListState.setReloadKnowledgeBaseList(false);
+    }
+  }, [reloadListState.reloadKnowledgeBaseList]);
 
   const { jumpToKnowledgeBase } = useKnowledgeBaseJumpNewPath();
 

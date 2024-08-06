@@ -2,10 +2,12 @@ import { Divider, Button } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
 import { NoteList } from '@refly-packages/ai-workspace-common/components/workspace/note-list';
+import { useKnowledgeBaseStore } from '@refly/ai-workspace-common/stores/knowledge-base';
 import './index.scss';
 
 export const AINoteEmpty = () => {
   const { handleInitEmptyNote } = useAINote();
+  const knowledgeBaseStore = useKnowledgeBaseStore();
 
   return (
     <div className="ai-note-empty w-full mt-16 flex justify-center items-center overflow-auto">
@@ -16,12 +18,16 @@ export const AINoteEmpty = () => {
         </Button>
         <Divider />
         <NoteList
-          listGrid={{
-            sm: 48,
-            md: 24,
-            lg: 16,
-            xl: 12,
-          }}
+          listGrid={
+            knowledgeBaseStore.resourcePanelVisible
+              ? {
+                  sm: 48,
+                  md: 24,
+                  lg: 16,
+                  xl: 12,
+                }
+              : null
+          }
         />
       </div>
     </div>

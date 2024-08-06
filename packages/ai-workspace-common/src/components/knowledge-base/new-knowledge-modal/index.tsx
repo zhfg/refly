@@ -1,6 +1,8 @@
 import { Modal, Form, Input, Message } from '@arco-design/web-react';
 import { useState } from 'react';
 import { useImportKnowledgeModal } from '@refly/ai-workspace-common/stores/import-knowledge-modal';
+import { useReloadListState } from '@refly/ai-workspace-common/stores/reload-list-state';
+
 // 请求
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
@@ -11,6 +13,7 @@ const TextArea = Input.TextArea;
 
 export const NewKnowledgeModal = () => {
   const { t } = useTranslation();
+  const reloadListState = useReloadListState();
   const importKnowledgeModal = useImportKnowledgeModal();
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [form] = Form.useForm();
@@ -36,6 +39,7 @@ export const NewKnowledgeModal = () => {
         } else {
           importKnowledgeModal.setShowNewKnowledgeModal(false);
           Message.success(t('workspace.newKnowledgeModal.successful'));
+          reloadListState.setReloadKnowledgeBaseList(true);
         }
       })
       .catch((err) => {
