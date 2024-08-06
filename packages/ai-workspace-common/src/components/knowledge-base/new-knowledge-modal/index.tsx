@@ -1,7 +1,7 @@
 import { Modal, Form, Input, Message } from '@arco-design/web-react';
 import { useState, useEffect } from 'react';
-import { useImportKnowledgeModal } from '@refly/ai-workspace-common/stores/import-knowledge-modal';
-import { useReloadListState } from '@refly/ai-workspace-common/stores/reload-list-state';
+import { useImportKnowledgeModal } from '@refly-packages/ai-workspace-common/stores/import-knowledge-modal';
+import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 
 // 请求
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';

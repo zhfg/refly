@@ -2,19 +2,19 @@ import { Layout } from "@arco-design/web-react"
 
 import { SiderLayout } from "./sider"
 import "./index.scss"
-import { useUserStore } from "@refly/ai-workspace-common/stores/user"
+import { useUserStore } from "@refly-packages/ai-workspace-common/stores/user"
 
 // 组件
-import { LoginModal } from "@refly/ai-workspace-common/components/login-modal/index"
-import { BigSearchModal } from "@refly/ai-workspace-common/components/search/modal"
-import { ImportResourceModal } from "@refly/ai-workspace-common/components/import-resource"
+import { LoginModal } from "@refly-packages/ai-workspace-common/components/login-modal/index"
+import { BigSearchModal } from "@refly-packages/ai-workspace-common/components/search/modal"
+import { ImportResourceModal } from "@refly-packages/ai-workspace-common/components/import-resource"
 import { NewKnowledgeModal } from "@refly-packages/ai-workspace-common/components/knowledge-base/new-knowledge-modal"
 
 // stores
-import { useBindCommands } from "@refly/ai-workspace-common/hooks/use-bind-commands"
-import { useSearchStore } from "@refly/ai-workspace-common/stores/search"
-import { useImportResourceStore } from "@refly/ai-workspace-common/stores/import-resource"
-import { useImportKnowledgeModal } from "@refly/ai-workspace-common/stores/import-knowledge-modal"
+import { useBindCommands } from "@refly-packages/ai-workspace-common/hooks/use-bind-commands"
+import { useSearchStore } from "@refly-packages/ai-workspace-common/stores/search"
+import { useImportResourceStore } from "@refly-packages/ai-workspace-common/stores/import-resource"
+import { useImportKnowledgeModal } from "@refly-packages/ai-workspace-common/stores/import-knowledge-modal"
 
 const Content = Layout.Content
 

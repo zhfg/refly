@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
-import { useReloadListState } from '@refly/ai-workspace-common/stores/reload-list-state';
+import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 
 export const getFirstSourceLink = (sources: Source[]) => {
   return sources?.[0]?.metadata?.source;

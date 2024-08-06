@@ -3,18 +3,18 @@ import { Route, Routes } from "react-router-dom"
 
 // 自定义组件
 import { ConvLibrary } from "@/pages/conv-library"
-import { Settings } from "@refly/ai-workspace-common/components/settings/index"
-import { Login } from "@refly/ai-workspace-common/components/login/index"
+import { Settings } from "@refly-packages/ai-workspace-common/components/settings/index"
+import { Login } from "@refly-packages/ai-workspace-common/components/login/index"
 
 // 页面
 import Workspace from "@/pages/workspace"
 import KnowledgeBase from "@/pages/knowledge-base"
 
 // 这里用于分享之后的不需要鉴权的查看
-import { safeParseJSON } from "@refly/ai-workspace-common/utils/parse"
-import { useUserStore } from "@refly/ai-workspace-common/stores/user"
+import { safeParseJSON } from "@refly-packages/ai-workspace-common/utils/parse"
+import { useUserStore } from "@refly-packages/ai-workspace-common/stores/user"
 import { useTranslation } from "react-i18next"
-import { useGetUserSettings } from "@refly/ai-workspace-common/hooks/use-get-user-settings"
+import { useGetUserSettings } from "@refly-packages/ai-workspace-common/hooks/use-get-user-settings"
 import { LOCALE } from "@refly/common-types"
 import { Spin } from "@arco-design/web-react"
 

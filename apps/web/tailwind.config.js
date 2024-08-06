@@ -4,7 +4,7 @@ export default {
   content: [
     "./index.html",
     "./src/**/*.{js,jsx,ts,tsx}",
-    "./node_modules/@refly/ai-workspace-common/src/**/*.{js,jsx,ts,tsx}",
+    "./node_modules/@refly-packages/ai-workspace-common/src/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
     extend: {

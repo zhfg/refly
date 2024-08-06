@@ -9,7 +9,7 @@ import Testimonials from "@/components/landing-page-partials/Testimonials"
 import Newsletter from "@/components/landing-page-partials/Newsletter"
 import Banner from "@/components/landing-page-partials/Banner"
 import Footer from "@/components/landing-page-partials/Footer"
-import { useUserStore } from "@refly/ai-workspace-common/stores/user"
+import { useUserStore } from "@refly-packages/ai-workspace-common/stores/user"
 
 function Home() {
   const userStore = useUserStore()

@@ -1,8 +1,8 @@
 import { Divider, Button } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { KnowledgeBaseList } from '@refly-packages/ai-workspace-common/components/knowledge-base-list';
-import { useImportKnowledgeModal } from '@refly/ai-workspace-common/stores/import-knowledge-modal';
-import { useNoteStore } from '@refly/ai-workspace-common/stores/note';
+import { useImportKnowledgeModal } from '@refly-packages/ai-workspace-common/stores/import-knowledge-modal';
+import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 import './index.scss';
 import { useEffect } from 'react';
 

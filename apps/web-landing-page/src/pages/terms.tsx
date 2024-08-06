@@ -7,7 +7,7 @@ import Testimonials from "@/components/landing-page-partials/Testimonials"
 import Newsletter from "@/components/landing-page-partials/Newsletter"
 import Banner from "@/components/landing-page-partials/Banner"
 import Footer from "@/components/landing-page-partials/Footer"
-import { Markdown } from "@refly/ai-workspace-common/components/markdown"
+import { Markdown } from "@refly-packages/ai-workspace-common/components/markdown"
 
 const termsMdText = `# ReflyAI Terms of Service
 
@@ -65,7 +65,7 @@ If you have any questions about these Terms, please contact us at [pftom@qq.com]
 
 const Terms = () => {
   return (
-    <div className="flex flex-col min-h-screen overflow-hidden">
+    <div className="flex min-h-screen flex-col overflow-hidden">
       {/*  Site header */}
       <Header showLogin={false} />
 
@@ -73,14 +73,14 @@ const Terms = () => {
       <main className="grow">
         {/*  Page illustration */}
         <div
-          className="relative h-0 max-w-6xl mx-auto pointer-events-none"
+          className="pointer-events-none relative mx-auto h-0 max-w-6xl"
           aria-hidden="true">
           <PageIllustration />
         </div>
 
         <section>
-          <div className="relative max-w-6xl px-4 mx-auto sm:px-6">
-            <div className="relative pt-24 pb-10 md:pb-16 md:pt-32">
+          <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
+            <div className="relative pb-10 pt-24 md:pb-16 md:pt-32">
               <Markdown content={termsMdText} />
             </div>
           </div>

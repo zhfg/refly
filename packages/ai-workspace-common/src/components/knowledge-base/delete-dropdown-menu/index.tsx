@@ -7,7 +7,7 @@ import { Note, Collection } from '@refly/openapi-schema';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import { useTranslation } from 'react-i18next';
-import { useImportKnowledgeModal } from '@refly/ai-workspace-common/stores/import-knowledge-modal';
+import { useImportKnowledgeModal } from '@refly-packages/ai-workspace-common/stores/import-knowledge-modal';
 
 const iconStyle = {
   marginRight: 8,

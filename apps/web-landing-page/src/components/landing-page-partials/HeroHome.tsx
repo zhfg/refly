@@ -4,7 +4,7 @@ import AnimatedGradientText from "@/components/magicui/animated-gradient-text"
 import ShimmerButton from "@/components/magicui/shimmer-button"
 import AnimatedShinyText from "@/components/magicui/animated-shiny-text"
 import { ArrowRightIcon } from "lucide-react"
-import { useUserStore } from "@refly/ai-workspace-common/stores/user"
+import { useUserStore } from "@refly-packages/ai-workspace-common/stores/user"
 import "./hero-home.scss"
 
 function HeroHome() {

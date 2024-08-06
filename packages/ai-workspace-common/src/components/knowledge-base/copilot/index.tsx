@@ -38,7 +38,8 @@ import { useConversationStore } from '@refly-packages/ai-workspace-common/stores
 import { useResetState } from '@refly-packages/ai-workspace-common/hooks/use-reset-state';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { delay } from '@refly-packages/ai-workspace-common/utils/delay';
-import { ActionSource, useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { ActionSource } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useKnowledgeBaseStore } from '../../../stores/knowledge-base';
 // utils
 import { LOCALE } from '@refly/common-types';
 import { localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/i18n';
@@ -83,6 +84,8 @@ export const AICopilot = (props: AICopilotProps) => {
   const searchStateStore = useSearchStateStore();
   const messageStateStore = useMessageStateStore();
   const skillStore = useSkillStore();
+
+  console.log('useKnowledgeBaseStore state update from packages', knowledgeBaseStore.resourcePanelVisible);
 
   const convId = searchParams.get('convId');
   const noteId = searchParams.get('noteId');
