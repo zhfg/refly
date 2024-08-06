@@ -4,16 +4,13 @@ import {
   Input,
   List,
   Avatar,
-  Checkbox,
   Skeleton,
   Select,
   Message as message,
   Affix,
 } from '@arco-design/web-react';
-import { IconLink, IconBranch, IconClose } from '@arco-design/web-react/icon';
-import classNames from 'classnames';
+import { IconLink, IconClose } from '@arco-design/web-react/icon';
 import { useEffect, useState } from 'react';
-import { RateLimiterMemory } from 'rate-limiter-flexible';
 import cherrio from 'cheerio';
 
 // utils
@@ -22,13 +19,7 @@ import { genUniqueId } from '@refly-packages/utils/id';
 import { LinkMeta, useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import {
-  BatchCreateResourceData,
-  Collection,
-  CreateResourceData,
-  SearchResult,
-  UpsertResourceRequest,
-} from '@refly/openapi-schema';
+import { SearchResult, UpsertResourceRequest } from '@refly/openapi-schema';
 import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-or-search-list';
 import { useReloadListState } from '@refly/ai-workspace-common/stores/reload-list-state';
 
@@ -41,11 +32,10 @@ export const ImportFromWeblink = () => {
   const importResourceStore = useImportResourceStore();
   const reloadListState = useReloadListState();
 
+  console.log('select collection id', importResourceStore.selectedCollectionId);
+
   //
   const [saveLoading, setSaveLoading] = useState(false);
-
-  // search
-  const [searchValue, setSearchValue] = useState('new-collection');
 
   // 列表获取
   const { loadMore, hasMore, dataList, isRequesting, currentPage, handleValueChange, mode } = useFetchOrSearchList({
@@ -260,14 +250,11 @@ export const ImportFromWeblink = () => {
                 handleValueChange(value);
               }}
               onChange={(value) => {
-                console.log('value', value);
                 if (!value) return;
-                //   handleValueChange(value);
                 if (value === 'new-collection') {
                   importResourceStore.setSelectedCollectionId('new-collection');
                 } else {
-                  const id = value.split('-')[2];
-                  importResourceStore.setSelectedCollectionId(id);
+                  importResourceStore.setSelectedCollectionId(value);
                 }
               }}
               dropdownRender={(menu) => (
@@ -286,8 +273,8 @@ export const ImportFromWeblink = () => {
               <Option key="new-collection" value="new-collection">
                 新建知识库
               </Option>
-              {dataList?.map((item, index) => (
-                <Option key={`${item?.id}-${index}`} value={index + '_' + item?.title + '_' + item?.id}>
+              {dataList?.map((item) => (
+                <Option key={item?.id} value={item?.id}>
                   <span dangerouslySetInnerHTML={{ __html: item?.title }}></span>
                 </Option>
               ))}
@@ -306,27 +293,12 @@ export const ImportFromWeblink = () => {
 };
 
 const RenderItem = (props: { item: LinkMeta }) => {
-  const [checked, setChecked] = useState(false);
   const importResourceStore = useImportResourceStore();
   const { item } = props;
 
   return (
     <List.Item
       actions={[
-        // <Checkbox key={'knowledge-base-resource-panel'} checked={checked}>
-        //   {({ checked }) => {
-        //     return (
-        //       <Button
-        //         icon={<IconBranch />}
-        //         type="text"
-        //         onClick={() => {
-        //           setChecked(!checked);
-        //         }}
-        //         className={classNames('assist-action-item', { active: checked })}
-        //       ></Button>
-        //     );
-        //   }}
-        // </Checkbox>,
         <Button
           type="text"
           className="assist-action-item"
