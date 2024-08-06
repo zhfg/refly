@@ -4,6 +4,7 @@ import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stor
 
 // 组件
 import { ImportFromWeblink } from './intergrations/import-from-weblink';
+import { ImportFromText } from './intergrations/import-from-text';
 
 // 样式
 import './index.scss';
@@ -58,6 +59,7 @@ export const ImportResourceModal = () => {
         </div>
         <div className="import-resource-right-panel">
           {selectedMenuItem === 'import-from-weblink' ? <ImportFromWeblink /> : null}
+          {selectedMenuItem === 'import-from-paste-text' ? <ImportFromText /> : null}
         </div>
       </div>
     </Modal>

@@ -297,7 +297,8 @@ model SkillLog {
 
 enum ResourceType {
   weblink
-  note
+  note // deprecated
+  text
 }
 
 enum ParseSource {

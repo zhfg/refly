@@ -37,6 +37,7 @@ const ContentHeader = (props: { setVal: (val: string) => void; hitTop: boolean }
         className="content-panel-radio-group"
         defaultValue="knowledge-resource"
         onChange={(val) => setVal(val)}
+        style={{ borderRadius: 8 }}
       >
         <Radio value="knowledge-resource">{t('workspace.contentPanel.tabPanel.resource')}</Radio>
         <Radio value="knowledge-notes">{t('workspace.contentPanel.tabPanel.note')}</Radio>

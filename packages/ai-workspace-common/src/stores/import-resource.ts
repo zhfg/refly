@@ -17,17 +17,20 @@ interface ImportResourceState {
 
   // scrape
   scrapeLinks: LinkMeta[];
+  copiedTextPayload: { content: string; title: string };
 
   // save to collection
   selectedCollectionId: string;
 
   setImportResourceModalVisible: (visible: boolean) => void;
   setScapeLinks: (links: LinkMeta[]) => void;
+  setCopiedTextPayload: (payload: Partial<{ content: string; title: string }>) => void;
   setSelectedCollectionId: (id: string) => void;
   resetState: () => void;
 }
 
 export const defaultState = {
+  copiedTextPayload: { content: '', title: '' },
   scrapeLinks: [],
   selectedCollectionId: '',
   importResourceModalVisible: false,
@@ -40,6 +43,8 @@ export const useImportResourceStore = create<ImportResourceState>()(
     setImportResourceModalVisible: (visible: boolean) =>
       set((state) => ({ ...state, importResourceModalVisible: visible })),
     setScapeLinks: (links: LinkMeta[]) => set((state) => ({ ...state, scrapeLinks: links })),
+    setCopiedTextPayload: (payload: Partial<{ content: string; title: string }>) =>
+      set((state) => ({ ...state, copiedTextPayload: { ...state.copiedTextPayload, ...payload } })),
     setSelectedCollectionId: (id: string) => set((state) => ({ ...state, selectedCollectionId: id })),
     resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),

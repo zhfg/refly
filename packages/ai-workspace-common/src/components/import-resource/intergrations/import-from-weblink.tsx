@@ -147,6 +147,7 @@ export const ImportFromWeblink = () => {
 
     if (scrapeLinks?.length === 0) {
       message.warning('你还未添加任何链接！');
+      return;
     }
 
     const batchCreateResourceData: UpsertResourceRequest[] = scrapeLinks.map((link) => {
@@ -290,7 +291,12 @@ export const ImportFromWeblink = () => {
             </Select>
           </div>
           <div className="footer-action">
-            <Button style={{ width: 72, marginRight: 8 }}>取消</Button>
+            <Button
+              style={{ width: 72, marginRight: 8 }}
+              onClick={() => importResourceStore.setImportResourceModalVisible(false)}
+            >
+              取消
+            </Button>
             <Button type="primary" style={{ width: 100 }} onClick={handleSave}>
               保存
             </Button>

@@ -25,7 +25,7 @@ export const $ResourceMeta = {
 export const $ResourceType = {
   type: 'string',
   description: 'Resource type',
-  enum: ['weblink', 'note'],
+  enum: ['weblink', 'text'],
 } as const;
 
 export const $Resource = {
@@ -816,7 +816,7 @@ export const $BaseResponse = {
 
 export const $UpsertResourceRequest = {
   type: 'object',
-  required: ['resourceType', 'data'],
+  required: ['resourceType'],
   properties: {
     resourceType: {
       description: 'Resource type',

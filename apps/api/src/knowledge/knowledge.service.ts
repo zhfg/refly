@@ -190,8 +190,13 @@ export class KnowledgeService {
         throw new BadRequestException('url is required');
       }
       param.title ||= title;
-    } else if (param.resourceType === 'note') {
-      // do nothing
+    } else if (param.resourceType === 'text') {
+      if (!param.content) {
+        throw new BadRequestException('content is required for text resource');
+      }
+      if (param.content.length > 10000) {
+        throw new BadRequestException('content is too long');
+      }
     } else {
       throw new BadRequestException('Invalid resource type');
     }
@@ -201,7 +206,7 @@ export class KnowledgeService {
         resourceId: param.resourceId,
         resourceType: param.resourceType,
         collectionId: param.collectionId,
-        meta: JSON.stringify(param.data),
+        meta: JSON.stringify(param.data || {}),
         content: param.content ?? '',
         uid: user.uid,
         isPublic: param.isPublic,
@@ -247,8 +252,8 @@ export class KnowledgeService {
   }
 
   async indexResource(user: User, param: UpsertResourceRequest) {
-    const { resourceType, resourceId, collectionId } = param;
-    const { url, storageKey, title } = param.data;
+    const { resourceType, resourceId, collectionId, data = {} } = param;
+    const { url, storageKey, title } = data;
     param.storageKey ||= storageKey;
     param.content ||= '';
 
@@ -260,10 +265,6 @@ export class KnowledgeService {
         param.content = data.content;
         param.title ||= data.title;
       }
-
-      param.storageKey = `resource/${resourceId}`;
-      const res = await this.minio.uploadData(param.storageKey, param.content);
-      this.logger.log(`upload resource ${param.storageKey} success, res: ${JSON.stringify(res)}`);
     }
 
     // TODO: 减少不必要的重复插入
