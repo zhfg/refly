@@ -1,10 +1,10 @@
 import ReactDOM from 'react-dom/client';
 import { defineContentScript } from 'wxt/sandbox';
 import { createShadowRootUi } from 'wxt/client';
-import { MemoryRouter } from '@refly/ai-workspace-common/utils/router';
+import { MemoryRouter } from '@refly-packages/ai-workspace-common/utils/router';
 
 import App from './App';
-import { setRuntime } from '@refly/ai-workspace-common/utils/env';
+import { setRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 export default defineContentScript({
   matches: ['<all_urls>'],

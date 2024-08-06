@@ -1,8 +1,8 @@
 import { tempTabState } from '@/entrypoints/background/index';
-import { BackgroundMessage } from '@refly/ai-workspace-common/utils/extension/messaging';
-import { getCurrentTab } from '@refly/ai-workspace-common/utils/extension/tabs';
-import { safeParseJSON } from '@refly/ai-workspace-common/utils/parse';
-import { storage } from '@refly/ai-workspace-common/utils/storage';
+import { BackgroundMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import { getCurrentTab } from '@refly-packages/ai-workspace-common/utils/extension/tabs';
+import { safeParseJSON } from '@refly-packages/ai-workspace-common/utils/parse';
+import { storage } from '@refly-packages/ai-workspace-common/utils/storage';
 import { browser } from 'wxt/browser';
 
 export const handleOtherMessage = async (msg: BackgroundMessage) => {

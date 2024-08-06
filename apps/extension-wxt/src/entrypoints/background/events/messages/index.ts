@@ -1,8 +1,8 @@
 import { handleRequestReflect } from '@/entrypoints/background/events/messages/apiRequest';
 import { handleOperateTabStorage } from '@/entrypoints/background/events/messages/operateStorage';
 import { handleRegisterEvent } from '@/entrypoints/background/events/messages/registerEvent';
-import { BackgroundMessage } from '@refly/ai-workspace-common/utils/extension/messaging';
-import { saveLastActiveTab } from '@refly/ai-workspace-common/utils/extension/tabs';
+import { BackgroundMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import { saveLastActiveTab } from '@refly-packages/ai-workspace-common/utils/extension/tabs';
 import { Runtime } from 'wxt/browser';
 import { handleOtherMessage } from './others';
 

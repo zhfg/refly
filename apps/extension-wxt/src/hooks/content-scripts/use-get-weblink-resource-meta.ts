@@ -1,10 +1,10 @@
-import { useKnowledgeBaseStore } from '@refly/ai-workspace-common/stores/knowledge-base';
-import { BackgroundMsgType, sendToBackground } from '@refly/ai-workspace-common/utils/extension/messaging';
+import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { BackgroundMsgType, sendToBackground } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { Resource, UpsertResourceRequest } from '@refly/openapi-schema';
 import { useEffect } from 'react';
 import { browser } from 'wxt/browser';
-import { useMatch } from '@refly/ai-workspace-common/utils/router';
-import { getRuntime } from '@refly/ai-workspace-common/utils/env';
+import { useMatch } from '@refly-packages/ai-workspace-common/utils/router';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { getReadabilityHtml } from '@/utils/readability';
 import { useExtensionMessage } from '../use-extension-message';
 

@@ -1,22 +1,22 @@
 import { useEffect, useTransition } from 'react';
-import { useMatch, useNavigate } from '@refly/ai-workspace-common/utils/router';
+import { useMatch, useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 
 // request
-import { LocalSettings, defaultLocalSettings, useUserStore } from '@refly/ai-workspace-common/stores/user';
-import { safeParseJSON, safeStringifyJSON } from '@refly/ai-workspace-common/utils/parse';
+import { LocalSettings, defaultLocalSettings, useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import { safeParseJSON, safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 
 import { LOCALE } from '@refly/common-types';
 import { useTranslation } from 'react-i18next';
 import { Message as message } from '@arco-design/web-react';
-import { useSiderStore } from '@refly/ai-workspace-common/stores/sider';
+import { useSiderStore } from '@refly-packages/ai-workspace-common/stores/sider';
 import { mapDefaultLocale } from '@/utils/locale';
-import { storage } from '@refly/ai-workspace-common/utils/storage';
+import { storage } from '@refly-packages/ai-workspace-common/utils/storage';
 import { useStorage } from './use-storage';
 // request
-import getClient from '@refly/ai-workspace-common/requests/proxiedRequest';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useExtensionMessage } from './use-extension-message';
 import { checkBrowserArc } from '@/utils/browser';
-import { getRuntime } from '@refly/ai-workspace-common/utils/env';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { UserSettings } from '@refly/openapi-schema';
 
 interface ExternalLoginPayload {

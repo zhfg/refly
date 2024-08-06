@@ -3,7 +3,7 @@ import { TASK_STATUS, SkillEvent } from '@refly/common-types';
 import { getCookie } from '@/utils/cookie';
 import { getServerOrigin } from '@refly/utils/url';
 import { getExtensionVersion } from '@/utils/version';
-import { ssePost } from '@refly/ai-workspace-common/utils/sse-post';
+import { ssePost } from '@refly-packages/ai-workspace-common/utils/sse-post';
 
 let abortController: AbortController;
 

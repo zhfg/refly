@@ -1,4 +1,4 @@
-import { BackgroundMessage } from '@refly/ai-workspace-common/utils/extension/messaging';
+import { BackgroundMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { Runtime, Tabs, browser } from 'wxt/browser';
 
 export const handleRegisterSidePanel = async (msg: BackgroundMessage) => {

@@ -9,16 +9,16 @@ import { useProcessLoginNotify } from '@/hooks/use-process-login-notify';
 import { useBindCommands } from '@/hooks/use-bind-commands';
 import { useSetContainerDimension } from '@/hooks/use-set-container-dimension';
 // stores
-import { useSiderStore } from '@refly/ai-workspace-common/stores/sider';
+import { useSiderStore } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useQuickActionStore } from '@/stores/quick-action';
-import { useUserStore } from '@refly/ai-workspace-common/stores/user';
+import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 
 // 组件
 import { Message, Spin } from '@arco-design/web-react';
 import { AppRouter } from '@/routes/index';
 
 // utils
-import { checkPageUnsupported } from '@refly/ai-workspace-common/utils/extension/check';
+import { checkPageUnsupported } from '@refly-packages/ai-workspace-common/utils/extension/check';
 
 // 加载国际化
 import '@/i18n/config';
@@ -28,10 +28,10 @@ import { useSiderBarOpen } from '@/hooks/use-sider-bar-open';
 // 样式
 import '@/styles/style.css';
 import './App.scss';
-import { getPopupContainer } from '@refly/ai-workspace-common/utils/ui';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { checkBrowserArc } from '@/utils/browser';
 // 设置 runtime 环境
-import { getEnv, setRuntime } from '@refly/ai-workspace-common/utils/env';
+import { getEnv, setRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useSyncWeblinkResourceMeta } from '@/hooks/content-scripts/use-get-weblink-resource-meta';
 import { useMockInAppResource } from '@/hooks/use-mock-in-app-resource';
 const Sentry = _Sentry;

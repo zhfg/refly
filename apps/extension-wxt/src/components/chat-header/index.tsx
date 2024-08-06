@@ -9,8 +9,8 @@ import FullScreenSVG from '@/assets/side/full-screen.svg';
 import { IconTip } from '@/components/icon-tip';
 import { Avatar } from '@arco-design/web-react';
 // stores
-import { useSiderStore } from '@refly/ai-workspace-common/stores/sider';
-import { useNavigate } from '@refly/ai-workspace-common/utils/router';
+import { useSiderStore } from '@refly-packages/ai-workspace-common/stores/sider';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import { getClientOrigin } from '@refly/utils/url';
 import { useUserStore } from '@/stores/user';
 import { useHomeStateStore } from '@/stores/home-state';

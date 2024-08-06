@@ -1,6 +1,6 @@
 import React, { type Dispatch, useEffect, useRef, useState } from 'react';
 // stores
-import { useSiderStore } from '@refly/ai-workspace-common/stores/sider';
+import { useSiderStore } from '@refly-packages/ai-workspace-common/stores/sider';
 
 export const useSetContainerDimension = () => {
   const siderStore = useSiderStore();

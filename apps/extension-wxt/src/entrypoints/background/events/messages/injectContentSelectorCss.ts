@@ -1,4 +1,4 @@
-import { BackgroundMessage } from '@refly/ai-workspace-common/utils/extension/messaging';
+import { BackgroundMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 
 export const handleInjectContentSelectorCss = async (msg: BackgroundMessage) => {
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {

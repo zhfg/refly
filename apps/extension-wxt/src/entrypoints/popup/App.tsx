@@ -11,8 +11,8 @@ import { IconRefresh, IconBulb } from '@arco-design/web-react/icon';
 import Logo from '@/assets/logo.svg';
 import { useStorage } from '@/hooks/use-storage';
 import { browser } from 'wxt/browser';
-import { getCurrentTab } from '@refly/ai-workspace-common/utils/extension/tabs';
-import { checkPageUnsupported } from '@refly/ai-workspace-common/utils/extension/check';
+import { getCurrentTab } from '@refly-packages/ai-workspace-common/utils/extension/tabs';
+import { checkPageUnsupported } from '@refly-packages/ai-workspace-common/utils/extension/check';
 
 /**
  * 打开 popup 页面的规则

@@ -1,6 +1,6 @@
-import { getRuntime } from '@refly/ai-workspace-common/utils/env';
-import { sendToBackground } from '@refly/ai-workspace-common/utils/extension/messaging';
-import { storage } from '@refly/ai-workspace-common/utils/storage';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { sendToBackground } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import { storage } from '@refly-packages/ai-workspace-common/utils/storage';
 
 export const checkBrowserArc = async () => {
   try {

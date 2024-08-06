@@ -5,7 +5,7 @@ import { fakeKnowledgeBaseList } from '@/fake-data/knowledge-base';
 import { useStoreWeblink } from '@/hooks/use-store-weblink';
 import { useKnowledgeBaseStore } from '@/stores/knowledge-base';
 import { delay } from '@/utils/delay';
-import { safeParseJSON } from '@refly/ai-workspace-common/utils/parse';
+import { safeParseJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 import { getPopupContainer } from '@/utils/ui';
 
 // requests

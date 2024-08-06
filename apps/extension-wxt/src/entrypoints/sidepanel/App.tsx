@@ -10,9 +10,9 @@ import { Suspense, useEffect } from 'react';
 // 加载国际化
 import '@/i18n/config';
 // 加载 runtime 设置
-import { getEnv, getRuntime, setRuntime } from '@refly/ai-workspace-common/utils/env';
-import { useSiderStore } from '@refly/ai-workspace-common/stores/sider';
-import { useUserStore } from '@refly/ai-workspace-common/stores/user';
+import { getEnv, getRuntime, setRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { useSiderStore } from '@refly-packages/ai-workspace-common/stores/sider';
+import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useMockInAppResource } from '@/hooks/use-mock-in-app-resource';
 /**
  * 打开 popup 页面的规则

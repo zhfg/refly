@@ -2,7 +2,7 @@ import { onExternalMessage } from './events/externalMessage';
 import { onActivated } from './events/activated';
 import { onMessage } from './events/messages/index';
 import { onPort } from './events/ports';
-import { setRuntime } from '@refly/ai-workspace-common/utils/env';
+import { setRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { browser } from 'wxt/browser';
 import { defineBackground } from 'wxt/sandbox';
 import { getCurrentTab } from '@/utils/extension/tabs';

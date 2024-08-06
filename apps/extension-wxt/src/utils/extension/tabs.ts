@@ -1,5 +1,5 @@
 import { browser, Tabs } from 'wxt/browser';
-import { storage } from '@refly/ai-workspace-common/utils/storage';
+import { storage } from '@refly-packages/ai-workspace-common/utils/storage';
 
 // 构造一个本地的版本，可以快速获取
 export let localLastActiveTab = {} as Tabs.Tab;
