@@ -13,6 +13,8 @@ import { ScrollLoading } from '../scroll-loading';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
+import { useReloadListState } from '@refly/ai-workspace-common/stores/reload-list-state';
+
 import { LOCALE } from '@refly/common-types';
 import './index.scss';
 
@@ -20,13 +22,12 @@ export const ResourceList = () => {
   const { i18n } = useTranslation();
   const language = i18n.languages?.[0];
 
-  const { dataList, loadMore, hasMore, isRequesting } = useFetchDataList({
+  const reloadListState = useReloadListState();
+
+  const { dataList, loadMore, hasMore, isRequesting, reload } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listResources({
-        query: {
-          ...queryPayload,
-          resourceType: 'weblink',
-        },
+        query: queryPayload,
       });
       return res?.data;
     },
@@ -36,6 +37,13 @@ export const ResourceList = () => {
   useEffect(() => {
     loadMore();
   }, []);
+
+  useEffect(() => {
+    if (reloadListState.reloadResourceList) {
+      reload();
+      reloadListState.setReloadResourceList(false);
+    }
+  }, [reloadListState.reloadResourceList]);
 
   const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
 

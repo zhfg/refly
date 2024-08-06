@@ -843,7 +843,7 @@ components:
       description: Resource type
       enum:
         - weblink
-        - note
+        - text
     Resource:
       type: object
       required:
@@ -1496,7 +1496,6 @@ components:
       type: object
       required:
         - resourceType
-        - data
       properties:
         resourceType:
           description: Resource type
@@ -1791,7 +1790,7 @@ components:
           type: array
           description: List of note IDs
           items:
-            type: string 
+            type: string
         contentList:
           type: array
           description: List of content

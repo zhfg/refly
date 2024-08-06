@@ -22,7 +22,7 @@ export type ResourceMeta = {
 /**
  * Resource type
  */
-export type ResourceType = 'weblink' | 'note';
+export type ResourceType = 'weblink' | 'text';
 
 export type Resource = {
   /**
@@ -681,7 +681,7 @@ export type UpsertResourceRequest = {
   /**
    * Resource metadata
    */
-  data: ResourceMeta;
+  data?: ResourceMeta;
   /**
    * Storage key for the resource
    */

@@ -6,6 +6,7 @@ import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 // 自定义组件
 import { KnowledgeBaseDirectory } from '../directory';
 import { KnowledgeBaseResourceDetail } from '../resource-detail';
+import { KnowledgeBaseDetailEmpty } from '../knowledge-base-detail-empty';
 // 样式
 import './index.scss';
 import { useResizePanel } from '@refly-packages/ai-workspace-common/hooks/use-resize-panel';
@@ -15,6 +16,7 @@ import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/
 import { getDefaultPopupContainer, getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { IconSearch } from '@arco-design/web-react/icon';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
+import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 const TabPane = Tabs.TabPane;
 
@@ -22,6 +24,9 @@ interface KnowledgeBaseDetailProps {}
 
 export const KnowledgeBaseDetail = (props: KnowledgeBaseDetailProps) => {
   const searchStore = useSearchStore();
+
+  const [queryParams] = useSearchParams();
+  const kbId = queryParams.get('kbId');
   // directory minSize 270px ~ maxSize 50%
   const [minSize] = useResizePanel({
     getGroupSelector: () => {
@@ -38,6 +43,9 @@ export const KnowledgeBaseDetail = (props: KnowledgeBaseDetailProps) => {
     kbModalVisible: state.kbModalVisible,
     actionSource: state.actionSource,
   }));
+  if (!kbId || kbId === 'undefined' || kbId === 'null') {
+    return <KnowledgeBaseDetailEmpty />;
+  }
 
   return (
     <div className="knowledge-base-detail-container">

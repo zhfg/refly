@@ -111,6 +111,7 @@ export const translation = {
         threadLibrary: '会话库',
         getHelp: '获得帮助',
         download: '下载插件',
+        newResource: '添加资源',
       },
     },
   },

@@ -10,13 +10,22 @@ import { IconBook } from '@arco-design/web-react/icon';
 import { CardBox } from '../card-box';
 import { ScrollLoading } from '../scroll-loading';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
-import { NoteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/note-dropdown-menu';
+import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 
 import { LOCALE } from '@refly/common-types';
 import './index.scss';
+interface NoteListProps {
+  listGrid?: {
+    sm: number;
+    md: number;
+    lg: number;
+    xl: number;
+  };
+}
 
-export const NoteList = () => {
+export const NoteList = (props: NoteListProps) => {
+  const { listGrid } = props;
   const { i18n } = useTranslation();
   const language = i18n.languages?.[0];
 
@@ -42,12 +51,14 @@ export const NoteList = () => {
 
   return (
     <List
-      grid={{
-        sm: 24,
-        md: 12,
-        lg: 8,
-        xl: 6,
-      }}
+      grid={
+        listGrid || {
+          sm: 24,
+          md: 12,
+          lg: 8,
+          xl: 6,
+        }
+      }
       className="workspace-list note-list"
       wrapperStyle={{ width: '100%' }}
       bordered={false}
@@ -79,9 +90,10 @@ export const NoteList = () => {
                 </div>
                 <div className="flex items-center">
                   <IconBook style={{ color: '#819292', cursor: 'pointer' }} />
-                  <NoteDropdownMenu
-                    note={item}
-                    postDeleteNote={(note) => setDataList(dataList.filter((n) => n.noteId !== note.noteId))}
+                  <DeleteDropdownMenu
+                    type="note"
+                    data={item}
+                    postDeleteList={(note) => setDataList(dataList.filter((n) => n.noteId !== note.noteId))}
                   />
                 </div>
               </div>

@@ -60,6 +60,41 @@ export const useFetchDataList = <T = any>({
     }
   };
 
+  const reload = async () => {
+    setHasMore(true);
+    setCurrentPage(1);
+    // 获取数据
+    const queryPayload = {
+      pageSize,
+      page: 1,
+    };
+    try {
+      setIsRequesting(true);
+      setCurrentPage(2);
+
+      const res = await fetchData(queryPayload);
+
+      if (!res?.success) {
+        setIsRequesting(false);
+
+        return;
+      }
+
+      // If this page contains fewer data than pageSize, it is the last page
+      if (res?.data?.length < pageSize) {
+        setHasMore(false);
+      }
+      setDataList([...(res?.data || [])]);
+    } catch (err) {
+      console.error('fetch data list error', err);
+      if (showErrMsg) {
+        message.error(t('knowledgeLibrary.archive.list.fetchErr'));
+      }
+    } finally {
+      setIsRequesting(false);
+    }
+  };
+
   return {
     hasMore,
     setHasMore,
@@ -70,5 +105,6 @@ export const useFetchDataList = <T = any>({
     isRequesting,
     setIsRequesting,
     loadMore,
+    reload,
   };
 };

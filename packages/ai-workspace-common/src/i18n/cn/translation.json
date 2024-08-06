@@ -87,11 +87,39 @@
         "note": "笔记",
         "collection": "知识库",
         "thread": "会话"
+      },
+      "newButton": {
+        "resource": "新资源",
+        "note": "新笔记",
+        "collection": "新知识库"
       }
+    },
+    "newKnowledgeModal": {
+      "modalTitle": "新增知识库",
+      "editModalTitle": "编辑知识库",
+      "titlePlaceholder": "请输入知识库标题",
+      "title": "标题",
+      "description": "描述",
+      "descriptionPlaceholder": "请输入知识库描述",
+      "cancel": "取消",
+      "confirm": "确认",
+      "successful": "创建成功",
+      "failed": "创建失败",
+      "editSuccessful": "修改成功",
+      "editFailed": "修改失败"
+    },
+    "deleteDropdownMenu": {
+      "successful": "删除成功！",
+      "failed": "删除失败！",
+      "deleteConfirmForNote": "确定删除该笔记吗？",
+      "deleteConfirmForKnowledgeBase": "确定删除该知识库吗？",
+      "delete": "删除",
+      "edit": "编辑"
     }
   },
   "loggedHomePage": {
     "newThreadText": "新会话",
+    "newThreadTextForWorkSpace": "提问、搜索或输入 / 或 @ 调用技能执行任务",
     "homePage": {
       "title": "知识，在此繁茂",
       "searchPlaceholder": "输入搜索内容...",
@@ -159,9 +187,11 @@
       "homePage": "工作台",
       "news": "新特性",
       "explore": "探索",
-      "threadLibrary": "会话库",
+      "threadLibrary": "会话",
       "getHelp": "获得帮助",
-      "download": "下载插件"
+      "download": "下载插件",
+      "newResource": "添加资源",
+      "settings": "设置"
     }
   },
   "knowledgeLibrary": {

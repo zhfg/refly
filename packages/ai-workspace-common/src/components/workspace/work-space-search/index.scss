@@ -1,17 +1,25 @@
 .work-space-search {
-  padding-top: 150px;
-  padding-bottom: 120px;
+  padding-top: 10%;
+  padding-bottom: 5%;
   .logo {
-    width: 45px;
-    height: 45px;
+    width: 86px;
+    height: 86px;
   }
 
   .vercel [cmdk-root] {
-    border-width: 3px;
+    border-width: 1px;
     box-shadow: var(--cmdk-shadow);
+
+    [cmdk-input] {
+      border-bottom: none;
+    }
   }
 
   .vercel .search-active {
     border-width: 1px !important;
+
+    [cmdk-input] {
+      border-bottom: 1px solid var(--gray6);
+    }
   }
 }
