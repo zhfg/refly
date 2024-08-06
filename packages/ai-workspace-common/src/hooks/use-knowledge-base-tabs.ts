@@ -40,7 +40,10 @@ export const useKnowledgeBaseTabs = () => {
     const newTabs = tabs.slice(0, index).concat(tabs.slice(index + 1));
 
     if (tabs?.length === 1) {
-      message.warning('至少保留一个标签页！');
+      jumpToReadResource({
+        kbId: '',
+        resId: '',
+      });
       return;
     }
 

@@ -8,11 +8,13 @@ import { useUserStore } from "@refly/ai-workspace-common/stores/user"
 import { LoginModal } from "@refly/ai-workspace-common/components/login-modal/index"
 import { BigSearchModal } from "@refly/ai-workspace-common/components/search/modal"
 import { ImportResourceModal } from "@refly/ai-workspace-common/components/import-resource"
+import { NewKnowledgeModal } from "@refly-packages/ai-workspace-common/components/knowledge-base/new-knowledge-modal"
 
 // stores
 import { useBindCommands } from "@refly/ai-workspace-common/hooks/use-bind-commands"
 import { useSearchStore } from "@refly/ai-workspace-common/stores/search"
 import { useImportResourceStore } from "@refly/ai-workspace-common/stores/import-resource"
+import { useImportKnowledgeModal } from "@refly/ai-workspace-common/stores/import-knowledge-modal"
 
 const Content = Layout.Content
 
@@ -24,6 +26,7 @@ export const AppLayout = (props: AppLayoutProps) => {
   // stores
   const userStore = useUserStore()
   const importResourceStore = useImportResourceStore()
+  const importKnowledgeModal = useImportKnowledgeModal()
 
   // 绑定快捷键
   useBindCommands()
@@ -46,6 +49,7 @@ export const AppLayout = (props: AppLayoutProps) => {
       {importResourceStore.importResourceModalVisible ? (
         <ImportResourceModal />
       ) : null}
+      {importKnowledgeModal.showNewKnowledgeModal && <NewKnowledgeModal />}
     </Layout>
   )
 }

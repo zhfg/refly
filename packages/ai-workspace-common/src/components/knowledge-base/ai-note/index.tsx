@@ -19,7 +19,7 @@ import {
 } from '@refly-packages/editor-component/advanced-editor';
 import { EditorRoot } from '@refly-packages/editor-core/components';
 import { EditorContent, type JSONContent, EditorInstance } from '@refly-packages/editor-core/components';
-import { NoteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/note-dropdown-menu';
+import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
 import { ImageResizer, handleCommandNavigation } from '@refly-packages/editor-core/extensions';
 import { defaultExtensions } from '@refly-packages/editor-component/extensions';
 import { uploadFn } from '@refly-packages/editor-component/image-upload';
@@ -232,7 +232,7 @@ export const AINoteStatusBar = (props: AINoteStatusBarProps) => {
         ) : null}
         <div className="note-status-bar-item">
           <Divider type="vertical" />
-          <NoteDropdownMenu note={note} postDeleteNote={(note) => handleDeleteTab(note.noteId)} />
+          <DeleteDropdownMenu type="note" data={note} postDeleteList={(note: Note) => handleDeleteTab(note.noteId)} />
         </div>
       </div>
     </div>

@@ -13,6 +13,7 @@ export const useKnowledgeBaseJumpNewPath = () => {
     setSearchParams(searchParams);
     navigate(`${baseUrl}/knowledge-base?${searchParams.toString()}`);
     noteStore.updateNotePanelVisible(true);
+    knowledgeBaseStore.updateResourcePanelVisible(false);
   };
 
   const jumpToKnowledgeBase = (
@@ -23,6 +24,7 @@ export const useKnowledgeBaseJumpNewPath = () => {
     setSearchParams(searchParams);
     navigate(`${baseUrl}/knowledge-base?${searchParams.toString()}`);
     knowledgeBaseStore.updateResourcePanelVisible(true);
+    noteStore.updateNotePanelVisible(false);
   };
 
   const jumpToReadResource = ({ kbId, resId, baseUrl = '' }: { kbId: string; resId: string; baseUrl?: string }) => {
