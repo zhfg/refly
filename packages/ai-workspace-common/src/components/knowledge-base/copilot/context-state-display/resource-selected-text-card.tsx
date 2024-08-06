@@ -1,9 +1,9 @@
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
-import { BaseSelectedTextPanel } from './base-selected-text-panel';
+import { BaseSelectedTextCard } from './base-selected-text-card';
 import { getQuickActionPrompt } from '@refly-packages/ai-workspace-common/utils/quickActionPrompt';
 import { Button } from '@arco-design/web-react';
 
-export const ResourceDetailSelectedTextPanel = () => {
+export const ResourceSelectedTextCard = () => {
   const { runSkill } = useBuildThreadAndRun();
 
   const skillList = [
@@ -39,5 +39,5 @@ export const ResourceDetailSelectedTextPanel = () => {
     </div>
   );
 
-  return <BaseSelectedTextPanel title="选中资源内容问答" skillContent={skillContent} />;
+  return <BaseSelectedTextCard title="选中资源内容问答" skillContent={skillContent} />;
 };

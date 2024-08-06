@@ -34,7 +34,10 @@ export const KnowledgeBaseDetail = (props: KnowledgeBaseDetailProps) => {
   });
 
   const { tabs, activeTab, setActiveTab, handleDeleteTab } = useKnowledgeBaseTabs();
-  const knowledgeBaseStore = useKnowledgeBaseStore();
+  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
+    kbModalVisible: state.kbModalVisible,
+    actionSource: state.actionSource,
+  }));
 
   return (
     <div className="knowledge-base-detail-container">

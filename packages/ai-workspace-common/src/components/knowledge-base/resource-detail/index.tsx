@@ -13,14 +13,17 @@ import {
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // 类型
 import { Resource } from '@refly/openapi-schema';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { safeParseURL } from '@refly/utils/url';
 import { useListenToSelection } from '@refly-packages/ai-workspace-common/hooks/use-listen-to-selection';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 
-export const KnowledgeBaseResourceDetail = () => {
+export const KnowledgeBaseResourceDetail = memo(() => {
   const [isFetching, setIsFetching] = useState(false);
-  const knowledgeBaseStore = useKnowledgeBaseStore();
+  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
+    currentResource: state.currentResource,
+    updateResource: state.updateResource,
+  }));
   const { handleAddTab } = useKnowledgeBaseTabs();
 
   const [queryParams] = useSearchParams();
@@ -74,6 +77,8 @@ export const KnowledgeBaseResourceDetail = () => {
       handleGetDetail(resId as string);
     }
   }, [resId]);
+
+  console.log('resourceDetail?.content', resourceDetail?.content);
 
   return (
     <div className="knowledge-base-resource-detail-container">
@@ -133,4 +138,4 @@ export const KnowledgeBaseResourceDetail = () => {
       </div>
     </div>
   );
-};
+});

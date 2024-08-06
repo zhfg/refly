@@ -1,5 +1,5 @@
 import { TreeNodeProps, TreeProps } from '@arco-design/web-react';
-import { SearchResult } from '@refly/openapi-schema';
+import { SearchDomain, SearchResult } from '@refly/openapi-schema';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
@@ -30,6 +30,9 @@ interface ContextPanelState {
   checkedKeys: string[];
   expandedKeys: string[];
 
+  // context card 的处理
+  nowSelectedContextDomain: SearchDomain;
+
   setEnvContextInitMap: (envContextInitMap: Partial<{ resource: boolean; collection: boolean; note: boolean }>) => void;
   setContextPanelPopoverVisible: (visible: boolean) => void;
   setImportPopoverVisible: (visible: boolean) => void;
@@ -39,11 +42,13 @@ interface ContextPanelState {
   setTreeData: (treeData: TreeProps['treeData']) => void;
   setCheckedKeys: (keys: string[]) => void;
   setExpandedKeys: (keys: string[]) => void;
+  setNowSelectedContextDomain: (domain: SearchDomain) => void;
   resetState: () => void;
 }
 
 export const defaultState = {
   envContextInitMap: { resource: false, collection: false, note: false },
+  nowSelectedContextDomain: 'resource' as SearchDomain,
   contextPanelPopoverVisible: false,
   importPopoverVisible: false,
   selectedResources: [],
@@ -72,6 +77,8 @@ export const useContextPanelStore = create<ContextPanelState>()(
     setTreeData: (treeData: TreeProps['treeData']) => set((state) => ({ ...state, treeData })),
     setCheckedKeys: (keys: string[]) => set((state) => ({ ...state, checkedKeys: keys })),
     setExpandedKeys: (keys: string[]) => set((state) => ({ ...state, expandedKeys: keys })),
+    setNowSelectedContextDomain: (domain: SearchDomain) =>
+      set((state) => ({ ...state, nowSelectedContextDomain: domain })),
     resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),
 );

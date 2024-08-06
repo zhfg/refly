@@ -6,15 +6,27 @@ import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui'
 import { useTranslation } from 'react-i18next';
 import { LOCALE } from '@refly/common-types';
 import { languageNameToLocale } from '@refly/common-types';
-import { writingSkills } from '@refly/utils/ai-writing';
-import { BaseSelectedTextPanel } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/base-selected-text-panel';
+import { BaseContextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/base-context-card';
+import { useGetCurrentEnvContext } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-env-context';
 
 // resize hook
 const SubMenu = Menu.SubMenu;
 const MenuItem = Menu.Item;
 
-export const NoteSelectedTextPanel = () => {
+// TODO: 目前先写死，后续支持动态添加
+const collectionSkills = [
+  {
+    prompt: '相似知识库',
+    key: 'relatedCollection',
+    title: '相似知识库',
+    group: 'editOrReviewSelection',
+  },
+];
+
+export const KnowledgeBaseContextCard = () => {
   const { runSkill } = useBuildThreadAndRun();
+  const { hasContent } = useGetCurrentEnvContext();
+  const disabled = !hasContent;
 
   const { t, i18n } = useTranslation();
   const uiLocale = (i18n?.languages?.[0] as LOCALE) || LOCALE.EN;
@@ -35,7 +47,7 @@ export const NoteSelectedTextPanel = () => {
 
       return elems;
     },
-    initialContainCnt: writingSkills.length,
+    initialContainCnt: collectionSkills.length,
     paddingSize: 0,
     itemSize: 60,
     placeholderWidth: 120,
@@ -45,50 +57,31 @@ export const NoteSelectedTextPanel = () => {
 
   const dropList = (
     <Menu>
-      {writingSkills.slice(containCnt).map((skill, index) => {
-        if (skill?.itemList && skill?.itemList?.length > 0) {
-          return (
-            <SubMenu key={`${skill.key}`} title={skill?.title}>
-              {skill?.itemList?.map((subSkill, subIndex) => (
-                <MenuItem
-                  key={`${skill.key}_${subIndex}`}
-                  onClick={() => {
-                    if (skill?.key === 'translate') {
-                      runSkill(skill?.prompt?.replace(`{${skill?.variable || ''}}`, localeList?.[subSkill]));
-                    } else {
-                      runSkill(skill?.prompt?.replace(`{${skill?.variable || ''}}`, subSkill));
-                    }
-                  }}
-                >
-                  {subSkill}
-                </MenuItem>
-              ))}
-            </SubMenu>
-          );
-        } else {
-          return (
-            <MenuItem
-              key={`${skill.key}`}
-              onClick={() => {
-                runSkill(skill?.prompt);
-              }}
-            >
-              {skill.title}
-            </MenuItem>
-          );
-        }
+      {collectionSkills.slice(containCnt).map((skill, index) => {
+        return (
+          <MenuItem
+            key={`${skill.key}`}
+            onClick={() => {
+              runSkill(skill?.prompt);
+            }}
+          >
+            {skill.title}
+          </MenuItem>
+        );
       })}
     </Menu>
   );
 
+  const skillLen = collectionSkills.length;
   const skillContent = (
     <div className="context-state-action-list">
-      {writingSkills.slice(0, containCnt).map((skill, index) => (
+      {collectionSkills.slice(0, containCnt).map((skill, index) => (
         <Button
           type="primary"
           size="mini"
           className="context-state-action-item"
           key={index}
+          disabled={disabled}
           style={{ borderRadius: 8 }}
           onClick={() => {
             runSkill(skill?.prompt);
@@ -97,7 +90,7 @@ export const NoteSelectedTextPanel = () => {
           {skill.title}
         </Button>
       ))}
-      {containCnt === writingSkills.length ? null : (
+      {containCnt >= skillLen || skillLen === 0 ? null : (
         <Dropdown droplist={dropList}>
           <Button
             type="primary"
@@ -114,7 +107,7 @@ export const NoteSelectedTextPanel = () => {
   );
   return (
     <div className="note-selected-context-panel">
-      <BaseSelectedTextPanel title="选中笔记内容问答" skillContent={skillContent} />
+      <BaseContextCard title="当前知识库快捷操作" skillContent={skillContent} />
     </div>
   );
 };

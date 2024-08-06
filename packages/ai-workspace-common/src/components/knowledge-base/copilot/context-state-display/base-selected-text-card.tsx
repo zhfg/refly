@@ -8,12 +8,12 @@ import { IconCloseCircle, IconFile, IconFolder, IconFontColors, IconRefresh } fr
 import { useGetSkills } from '@refly-packages/ai-workspace-common/skills/main-logic/use-get-skills';
 import { useDispatchAction } from '@refly-packages/ai-workspace-common/skills/main-logic/use-dispatch-action';
 
-interface BaseSelectedContextPanelProps {
+interface BaseSelectedTextCardProps {
   title: string;
   skillContent: React.ReactNode;
 }
 
-export const BaseSelectedTextPanel = (props: BaseSelectedContextPanelProps) => {
+export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
   const { title, skillContent } = props;
   const { currentSelectedText } = useCopilotContextState();
   const knowledgeBaseStore = useKnowledgeBaseStore();
