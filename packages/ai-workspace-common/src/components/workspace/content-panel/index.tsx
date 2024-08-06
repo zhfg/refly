@@ -66,6 +66,7 @@ const NewFileButton = (props: { val: string }) => {
     }
     if (type === 'collection') {
       importKnowledgeModal.setShowNewKnowledgeModal(true);
+      importKnowledgeModal.setEditCollection(null);
     }
   };
 

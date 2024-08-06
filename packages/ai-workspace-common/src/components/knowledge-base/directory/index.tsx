@@ -8,6 +8,7 @@ import { Message as message } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useReloadListState } from '@refly/ai-workspace-common/stores/reload-list-state';
 // 类型
 import { Resource } from '@refly/openapi-schema';
 // 请求
@@ -19,6 +20,7 @@ import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/componen
 
 export const KnowledgeBaseDirectory = () => {
   const [isFetching, setIsFetching] = useState(false);
+  const reloadKnowledgeBaseState = useReloadListState();
   const knowledgeBaseStore = useKnowledgeBaseStore();
   const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
 
@@ -65,10 +67,16 @@ export const KnowledgeBaseDirectory = () => {
 
   useEffect(() => {
     if (kbId) {
-      console.log('params kbId', kbId);
       handleGetDetail(kbId as string, resId as string);
     }
   }, [kbId, resId]);
+
+  useEffect(() => {
+    if (reloadKnowledgeBaseState.reloadKnowledgeBaseList) {
+      reloadKnowledgeBaseState.setReloadKnowledgeBaseList(false);
+      handleGetDetail(kbId as string, resId as string);
+    }
+  }, [reloadKnowledgeBaseState.reloadKnowledgeBaseList]);
 
   // 添加 collectionId
   const resources = knowledgeBaseStore?.currentKnowledgeBase?.resources?.map((item) => ({

@@ -96,6 +96,7 @@
     },
     "newKnowledgeModal": {
       "modalTitle": "新增知识库",
+      "editModalTitle": "编辑知识库",
       "titlePlaceholder": "请输入知识库标题",
       "title": "标题",
       "description": "描述",
@@ -103,14 +104,17 @@
       "cancel": "取消",
       "confirm": "确认",
       "successful": "创建成功",
-      "failed": "创建失败"
+      "failed": "创建失败",
+      "editSuccessful": "修改成功",
+      "editFailed": "修改失败"
     },
     "deleteDropdownMenu": {
       "successful": "删除成功！",
       "failed": "删除失败！",
       "deleteConfirmForNote": "确定删除该笔记吗？",
       "deleteConfirmForKnowledgeBase": "确定删除该知识库吗？",
-      "delete": "删除"
+      "delete": "删除",
+      "edit": "编辑"
     }
   },
   "loggedHomePage": {

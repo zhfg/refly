@@ -25,10 +25,18 @@ import { useReloadListState } from '@refly/ai-workspace-common/stores/reload-lis
 export const getFirstSourceLink = (sources: Source[]) => {
   return sources?.[0]?.metadata?.source;
 };
-
-export const KnowledgeBaseList = () => {
+interface KnowledgeBaseListProps {
+  listGrid?: {
+    sm: number;
+    md: number;
+    lg: number;
+    xl: number;
+  };
+}
+export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
+  const { listGrid } = props;
 
   const reloadListState = useReloadListState();
 
@@ -61,12 +69,14 @@ export const KnowledgeBaseList = () => {
 
   return (
     <List
-      grid={{
-        sm: 24,
-        md: 12,
-        lg: 8,
-        xl: 6,
-      }}
+      grid={
+        listGrid || {
+          sm: 24,
+          md: 12,
+          lg: 8,
+          xl: 6,
+        }
+      }
       className="knowledge-base-list workspace-list"
       wrapperStyle={{ width: '100%' }}
       bordered={false}

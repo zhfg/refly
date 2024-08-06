@@ -26,4 +26,12 @@
 
 .work-space-top-search {
   margin-bottom: 0;
+  margin-left: 16px;
+  .search-quick-open-input {
+    width: 450px;
+    padding: 8px 24px;
+    .search-quick-open-text {
+      font-weight: normal;
+    }
+  }
 }

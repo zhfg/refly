@@ -1,5 +1,5 @@
 import { Modal, Form, Input, Message } from '@arco-design/web-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useImportKnowledgeModal } from '@refly/ai-workspace-common/stores/import-knowledge-modal';
 import { useReloadListState } from '@refly/ai-workspace-common/stores/reload-list-state';
 
@@ -17,6 +17,7 @@ export const NewKnowledgeModal = () => {
   const importKnowledgeModal = useImportKnowledgeModal();
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [form] = Form.useForm();
+  const editCollection = importKnowledgeModal.editCollection;
 
   function onOk() {
     form
@@ -24,22 +25,30 @@ export const NewKnowledgeModal = () => {
       .then(async (res) => {
         console.log(res);
         setConfirmLoading(true);
-        const result = await getClient()
-          .createCollection({
-            body: res,
-          })
-          .catch((err) => {
-            Message.error(t('workspace.newKnowledgeModal.failed'));
-            setConfirmLoading(false);
-            return;
-          });
-        setConfirmLoading(false);
-        if (result?.error) {
-          Message.error(t('workspace.newKnowledgeModal.failed'));
-        } else {
-          importKnowledgeModal.setShowNewKnowledgeModal(false);
-          Message.success(t('workspace.newKnowledgeModal.successful'));
-          reloadListState.setReloadKnowledgeBaseList(true);
+        let result = null;
+        try {
+          if (editCollection) {
+            const reqBody = { ...editCollection, ...res };
+            delete reqBody.resources;
+            result = await getClient().updateCollection({
+              body: reqBody,
+            });
+          } else {
+            result = await getClient().createCollection({
+              body: res,
+            });
+          }
+          setConfirmLoading(false);
+          if (result?.error) {
+            Message.error(t(`workspace.newKnowledgeModal.${editCollection ? 'editFailed' : 'failed'}`));
+          } else {
+            importKnowledgeModal.setShowNewKnowledgeModal(false);
+            Message.success(t(`workspace.newKnowledgeModal.${editCollection ? 'editSuccessful' : 'successful'}`));
+            reloadListState.setReloadKnowledgeBaseList(true);
+          }
+        } catch (error) {
+          Message.error(t(`workspace.newKnowledgeModal.${editCollection ? 'editFailed' : 'failed'}`));
+          setConfirmLoading(false);
         }
       })
       .catch((err) => {
@@ -56,10 +65,17 @@ export const NewKnowledgeModal = () => {
     },
   };
 
+  useEffect(() => {
+    if (importKnowledgeModal.showNewKnowledgeModal && editCollection) {
+      const { title, description } = editCollection;
+      form.setFieldsValue({ title, description });
+    }
+  }, [importKnowledgeModal.showNewKnowledgeModal]);
+
   return (
     <div>
       <Modal
-        title={t('workspace.newKnowledgeModal.modalTitle')}
+        title={t(`workspace.newKnowledgeModal.${editCollection ? 'editModalTitle' : 'modalTitle'}`)}
         visible={importKnowledgeModal.showNewKnowledgeModal}
         onOk={onOk}
         confirmLoading={confirmLoading}
