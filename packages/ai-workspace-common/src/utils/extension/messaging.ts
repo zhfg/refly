@@ -1,6 +1,11 @@
 import { IRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
-export type BackgroundMsgType = 'apiRequest' | 'others' | 'registerEvent' | 'operateTabStorage';
+export type BackgroundMsgType =
+  | 'apiRequest'
+  | 'others'
+  | 'registerEvent'
+  | 'operateTabStorage'
+  | 'injectContentSelectorCss';
 
 export interface BackgroundMessage {
   name: string;

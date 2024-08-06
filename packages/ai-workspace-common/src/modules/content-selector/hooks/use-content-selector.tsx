@@ -1,8 +1,8 @@
 import classNames from 'classnames';
 import { useEffect, useRef } from 'react';
-import type { Mark } from '@/types';
+import type { Mark } from '@refly/common-types';
 import getXPath from 'get-xpath';
-import { safeStringifyJSON } from '@refly/ai-workspace-common/utils/parse';
+import { safeStringifyJSON } from '@refly-packages/utils/parse';
 // import { getContentFromHtmlSelector } from "@/utils/weblink"
 
 function getElementType(element) {
@@ -34,7 +34,7 @@ function getElementType(element) {
 
 export const useContentSelector = () => {
   const statusRef = useRef(true);
-  const markRef = useRef<HTMLDivElement>();
+  const markRef = useRef<HTMLDivElement>(undefined);
   const targetList = useRef<Element[]>([]);
   const markListRef = useRef<Mark[]>([]);
   const showContentSelectorRef = useRef<boolean>(false);

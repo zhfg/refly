@@ -22,7 +22,6 @@ import { checkPageUnsupported } from '@refly/ai-workspace-common/utils/extension
 
 // 加载国际化
 import '@/i18n/config';
-import { usePollingPingCurrentWeblink } from '@/hooks/use-polling-ping-current-weblink';
 import { SENTRY_DSN } from '@refly/utils/url';
 import { useSiderBarOpen } from '@/hooks/use-sider-bar-open';
 
@@ -68,8 +67,6 @@ const App = () => {
   useSetContainerDimension();
   // 处理登录状态
   useProcessLoginNotify();
-  // 用于登录状态下，Ping 网页前置的处理状态
-  usePollingPingCurrentWeblink();
   // 在挂载时记录当前资源,Only for Content Script
   useSyncWeblinkResourceMeta();
   // 在网页时，模拟在知识库的资源选中状态

@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { useContentSelectorStore } from '@/stores/content-selector';
-import { safeParseJSON } from '@refly/ai-workspace-common/utils/parse';
-import { apiRequest } from '@/requests/apiRequest';
+import { safeParseJSON } from '@refly-packages/utils/parse';
+import { sendToBackground } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 // stores
 
 export const useSelectedMark = () => {
@@ -27,8 +28,10 @@ export const useSelectedMark = () => {
     }
 
     if (!contentSelectorStore?.isInjectStyles) {
-      apiRequest({
+      sendToBackground({
+        type: 'injectContentSelectorCss',
         name: 'injectContentSelectorCSS',
+        source: getRuntime(),
       });
 
       contentSelectorStore?.setIsInjectStyles(true);
