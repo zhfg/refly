@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Message as message } from '@arco-design/web-react';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
@@ -6,9 +6,10 @@ import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 
 export const useSkillManagement = ({ shouldInit = false }: { shouldInit: boolean } = { shouldInit: false }) => {
   const skillStore = useSkillStore();
+  const stopDuplicateRef = useRef(false);
 
   const handleGetSkillInstances = async () => {
-    const { data, error } = await getClient().listSkillInstances();
+    const { data, error } = (await getClient().listSkillInstances()) || {};
 
     if (data?.data) {
       console.log('skill instances', data?.data);
@@ -19,7 +20,7 @@ export const useSkillManagement = ({ shouldInit = false }: { shouldInit: boolean
   };
 
   const handleGetSkillTemplates = async () => {
-    const { data, error } = await getClient().listSkillTemplates();
+    const { data, error } = (await getClient().listSkillTemplates()) || {};
 
     if (data?.data) {
       console.log('skill templates', data?.data);
@@ -93,7 +94,11 @@ export const useSkillManagement = ({ shouldInit = false }: { shouldInit: boolean
   };
 
   useEffect(() => {
-    if (shouldInit) {
+    // 避免运行多次
+    if (shouldInit && !stopDuplicateRef.current) {
+      if (!stopDuplicateRef.current) {
+        stopDuplicateRef.current = true;
+      }
       handleGetSkillTemplates();
       handleGetSkillInstances();
     }
