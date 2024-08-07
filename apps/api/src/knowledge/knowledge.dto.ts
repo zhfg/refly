@@ -4,7 +4,14 @@ import {
   Note as NoteModel,
   LabelInstance,
 } from '@prisma/client';
-import { UpsertResourceRequest, Collection, Resource, Note } from '@refly/openapi-schema';
+import {
+  UpsertResourceRequest,
+  Collection,
+  Resource,
+  Note,
+  ResourceType,
+  IndexStatus,
+} from '@refly/openapi-schema';
 import { omit } from '@/utils';
 import { pick } from 'lodash';
 import { labelPO2DTO } from '@/label/label.dto';
@@ -36,7 +43,9 @@ export const resourcePO2DTO = (
     return null;
   }
   const res: Resource = {
-    ...omit(resource, ['id', 'uid', 'content', 'deletedAt']),
+    ...pick(resource, ['resourceId', 'title', 'isPublic']),
+    resourceType: resource.resourceType as ResourceType,
+    indexStatus: resource.indexStatus as IndexStatus,
     contentPreview: resource.content ? resource.content.slice(0, 250) + '...' : '',
     data: JSON.parse(resource.meta),
     labels: resource.labels?.map((label) => labelPO2DTO(label)),

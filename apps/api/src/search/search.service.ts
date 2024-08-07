@@ -58,7 +58,7 @@ export class SearchService {
       title: result.title,
       content: [result.content.slice(0, 250) + '...'], // TODO: truncate in sql to reduce traffic
       metadata: {
-        resourceType: result.resourceType,
+        resourceType: result.resourceType as ResourceType,
         collectionId: result.collectionId,
       },
       createdAt: result.createdAt.toJSON(),

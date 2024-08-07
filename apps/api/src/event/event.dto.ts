@@ -1,4 +1,4 @@
-import { EntityType, EventType } from '@prisma/client';
+import { EntityType, EventType } from '@refly/openapi-schema';
 
 export interface ReportEventData {
   uid: string;

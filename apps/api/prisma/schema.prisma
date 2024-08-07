@@ -119,35 +119,35 @@ model ChatMessage {
 /// 知识库资源
 model Resource {
   /// 主键
-  id           BigInt       @id @default(autoincrement())
+  id           BigInt    @id @default(autoincrement())
   /// 资源项 id
-  resourceId   String       @unique @map("resource_id")
+  resourceId   String    @unique @map("resource_id")
   /// 资源类型
-  resourceType ResourceType @map("resource_type")
+  resourceType String    @default("") @map("resource_type")
   /// UID
-  uid          String       @map("uid")
+  uid          String    @map("uid")
   /// Collection ID
-  collectionId String       @default("") @map("collection_id")
+  collectionId String    @default("") @map("collection_id")
   /// 字数
-  wordCount    Int          @default(0) @map("word_count")
+  wordCount    Int       @default(0) @map("word_count")
   /// Content of resource
-  content      String       @default("") @map("content")
+  content      String    @default("") @map("content")
   /// 是否公开
-  isPublic     Boolean      @default(false) @map("is_public")
+  isPublic     Boolean   @default(false) @map("is_public")
   /// 是否只读
-  readOnly     Boolean      @default(false) @map("read_only")
+  readOnly     Boolean   @default(false) @map("read_only")
   /// 索引状态
-  indexStatus  IndexStatus  @default(init) @map("index_status")
+  indexStatus  String    @default("init") @map("index_status")
   /// 标题
-  title        String       @map("title")
+  title        String    @map("title")
   /// 资源元数据
-  meta         String       @map("meta")
+  meta         String    @map("meta")
   /// 创建时间
-  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// 更新时间
-  updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
   /// 软删除标记
-  deletedAt    DateTime?    @map("deleted_at") @db.Timestamptz()
+  deletedAt    DateTime? @map("deleted_at") @db.Timestamptz()
 
   @@index([collectionId, deletedAt, updatedAt])
   @@index([uid, deletedAt, updatedAt])
@@ -160,7 +160,7 @@ model Note {
   /// Note id
   noteId          String    @unique @map("note_id")
   /// UID
-  uid             String    @default("") @map("uid")
+  uid             String    @map("uid")
   /// Note title
   title           String    @default("Untitled") @map("title")
   /// Word count
@@ -236,29 +236,29 @@ model SkillInstance {
 
 model SkillTrigger {
   /// Primary key
-  pk              BigInt           @id @default(autoincrement())
+  pk              BigInt    @id @default(autoincrement())
   /// Trigger id
-  triggerId       String           @unique @map("trigger_id")
+  triggerId       String    @unique @map("trigger_id")
   /// Trigger type
-  triggerType     SkillTriggerType @map("trigger_type")
+  triggerType     String    @map("trigger_type")
   /// Skill id
-  skillId         String           @map("skill_id")
+  skillId         String    @map("skill_id")
   /// Owner UID
-  uid             String           @map("uid")
+  uid             String    @map("uid")
   /// Event entity type (required when triggerType is `event`)
-  eventEntityType EntityType?      @map("event_entity_type")
+  eventEntityType String?   @map("event_entity_type")
   /// Event type (required when triggerType is `event`)
-  eventType       EventType?       @map("event_type")
+  eventType       String?   @map("event_type")
   /// Crontab for cron trigger (required when triggerType is `cron`)
-  crontab         String?          @map("crontab")
+  crontab         String?   @map("crontab")
   /// Whether this skill is enabled
-  enabled         Boolean          @map("enabled")
+  enabled         Boolean   @map("enabled")
   /// Create timestamp
-  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
-  updatedAt       DateTime         @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
   /// Deletion timestamp
-  deletedAt       DateTime?        @map("deleted_at") @db.Timestamptz()
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz()
 
   @@index([skillId, deletedAt])
   @@map("skill_triggers")
@@ -338,7 +338,7 @@ model LabelInstance {
   /// Label value
   value        String     @map("value")
   /// Entity type this label belongs to
-  entityType   EntityType @map("entity_type")
+  entityType   String     @map("entity_type")
   /// Entity ID this label belongs to (resourceId, collectionId, etc.)
   entityId     String     @map("entity_id")
   /// UID
@@ -356,53 +356,29 @@ model LabelInstance {
 
 model EventRecord {
   /// Primary key
-  pk         BigInt     @id @default(autoincrement())
+  pk         BigInt   @id @default(autoincrement())
   /// Event ID
-  eventId    String     @unique @map("event_id")
+  eventId    String   @unique @map("event_id")
   /// UID
-  uid        String     @map("uid")
+  uid        String   @map("uid")
   /// Entity type related to this event
-  entityType EntityType @map("entity_type")
+  entityType String   @map("entity_type")
   /// Entity ID related to this event
-  entityId   String     @map("entity_id")
+  entityId   String   @map("entity_id")
   /// Event type
-  eventType  EventType  @map("event_type")
+  eventType  String   @map("event_type")
   /// Create timestamp
-  createdAt  DateTime   @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
-  updatedAt  DateTime   @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz()
 
   @@index([uid, createdAt])
   @@map("event_records")
 }
 
-enum ResourceType {
-  weblink
-  text
-}
-
-enum EntityType {
-  resource
-  collection
-  note
-}
-
-enum EventType {
-  create
-  update
-  delete
-}
-
 enum ParseSource {
   serverCrawl
   clientUpload
-}
-
-enum IndexStatus {
-  init
-  processing
-  finish
-  failed
 }
 
 enum SkillStatus {
@@ -415,11 +391,6 @@ enum SkillStatus {
 enum SkillRunMode {
   async
   stream
-}
-
-enum SkillTriggerType {
-  event
-  cron
 }
 
 enum MessageType {

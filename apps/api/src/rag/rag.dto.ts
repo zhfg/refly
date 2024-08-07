@@ -1,4 +1,4 @@
-import { ResourceType } from '@prisma/client';
+import { ResourceType } from '@refly/openapi-schema';
 
 type ContentNodeType = 'resource' | 'note';
 
