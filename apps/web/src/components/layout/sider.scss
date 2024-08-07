@@ -25,9 +25,12 @@
       margin-left: 0;
     }
     .collapse-btn {
+      height: 38px;
       margin-right: 20px;
       display: flex;
       justify-content: flex-end;
+      align-items: center;
+      cursor: pointer;
     }
     .collapse-btn--collapsed {
       margin-right: 0;
@@ -40,7 +43,7 @@
   }
 
   .sider-menu-nav {
-    height: calc(100% - 74px - 55px);
+    height: calc(100% - 74px - 55px - 38px);
 
     .arco-menu-inner {
       display: flex;
