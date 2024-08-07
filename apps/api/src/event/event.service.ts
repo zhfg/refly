@@ -1,32 +1,15 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { Queue } from 'bull';
-import { InjectQueue } from '@nestjs/bull';
-import { QUEUE_EVENT } from '@/utils';
+import { Injectable, Logger } from '@nestjs/common';
 import { ReportEventData } from '@/event/event.dto';
 import { PrismaService } from '@/common/prisma.service';
 import { genEventID } from '@refly/utils';
-import { ModuleRef } from '@nestjs/core';
 import { SkillService } from '@/skill/skill.service';
 import { SkillContext } from '@refly/openapi-schema';
 
 @Injectable()
-export class EventService implements OnModuleInit {
+export class EventService {
   private logger = new Logger(EventService.name);
-  private skillSvc: SkillService;
 
-  constructor(
-    private prisma: PrismaService,
-    private moduleRef: ModuleRef,
-    @InjectQueue(QUEUE_EVENT) private queue: Queue<ReportEventData>,
-  ) {}
-
-  onModuleInit() {
-    this.skillSvc = this.moduleRef.get(SkillService, { strict: false });
-  }
-
-  async report(data: ReportEventData) {
-    await this.queue.add(data);
-  }
+  constructor(private prisma: PrismaService, private skillService: SkillService) {}
 
   async handleEvent(data: ReportEventData) {
     const { uid, entityType, entityId, eventType } = data;
@@ -71,7 +54,7 @@ export class EventService implements OnModuleInit {
       });
       await Promise.all(
         skills.map((skill) =>
-          this.skillSvc.invokeSkill(user, {
+          this.skillService.invokeSkill(user, {
             input: { query: '' },
             skillId: skill.skillId,
             context: skillContext,

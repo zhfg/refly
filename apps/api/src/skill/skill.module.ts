@@ -20,5 +20,6 @@ import { QUEUE_SKILL } from '@/utils';
   ],
   providers: [SkillService],
   controllers: [SkillController],
+  exports: [SkillService],
 })
 export class SkillModule {}

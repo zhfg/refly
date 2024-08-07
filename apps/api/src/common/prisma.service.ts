@@ -1,13 +1,15 @@
-import { EventService } from '@/event/event.service';
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
-import { PrismaClient } from '@prisma/client';
+import { ReportEventData } from '@/event/event.dto';
+import { CHANNEL_REPORT_EVENT, QUEUE_EVENT } from '@/utils';
+import { getQueueToken } from '@nestjs/bull';
+import { Injectable, Logger, OnModuleInit, Provider } from '@nestjs/common';
+import { Collection, Prisma, PrismaClient } from '@prisma/client';
+import { Queue } from 'bull';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
   private logger = new Logger(PrismaService.name);
 
-  constructor(private moduleRef: ModuleRef) {
+  constructor() {
     super({
       log: [
         {
@@ -19,132 +21,110 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   }
 
   async onModuleInit() {
-    const eventSvc = this.moduleRef.resolve(EventService);
-    console.log('eventSvc', eventSvc);
-    // const eventSvc = this.eventSvc;
-
     // this.$on('query' as never, (e: any) => {
     //   this.logger.log(`query: ${e.query}, param: ${e.params}, duration: ${e.duration}ms`);
     // });
     await this.$connect();
     this.logger.log('Connected to database');
-
-    // this.$extends({
-    //   query: {
-    //     collection: {
-    //       async $allOperations({ operation, args, query }) {
-    //         switch (operation) {
-    //           case 'create':
-    //             const res = await query(args);
-    //             await eventSvc.report({
-    //               uid: args.data.uid,
-    //               eventType: 'create',
-    //               entityType: 'collection',
-    //               entityId: args.data.collectionId,
-    //             });
-    //             return res;
-
-    //           case 'createMany':
-    //             const resMany = await query(args);
-    //             if (Array.isArray(args.data)) {
-    //               await Promise.all(
-    //                 args.data.map((d) =>
-    //                   eventSvc.report({
-    //                     uid: d.uid,
-    //                     eventType: 'create',
-    //                     entityType: 'collection',
-    //                     entityId: d.collectionId,
-    //                   }),
-    //                 ),
-    //               );
-    //             } else {
-    //               await eventSvc.report({
-    //                 uid: args.data.uid,
-    //                 eventType: 'create',
-    //                 entityType: 'collection',
-    //                 entityId: args.data.collectionId,
-    //               });
-    //             }
-    //             return resMany;
-
-    //           case 'createManyAndReturn':
-    //             const resManyAndReturn = await query(args);
-    //             if (Array.isArray(args.data)) {
-    //               await Promise.all(
-    //                 args.data.map((d) =>
-    //                   eventSvc.report({
-    //                     uid: d.uid,
-    //                     eventType: 'create',
-    //                     entityType: 'collection',
-    //                     entityId: d.collectionId,
-    //                   }),
-    //                 ),
-    //               );
-    //             } else {
-    //               await eventSvc.report({
-    //                 uid: args.data.uid,
-    //                 eventType: 'create',
-    //                 entityType: 'collection',
-    //                 entityId: args.data.collectionId,
-    //               });
-    //             }
-    //             return resManyAndReturn;
-
-    //           case 'update':
-    //             const resUpdate = await query(args);
-    //             await eventSvc.report({
-    //               uid: typeof args.data.uid === 'string' ? args.data.uid : args.data.uid.set,
-    //               eventType: 'update',
-    //               entityType: 'collection',
-    //               entityId:
-    //                 typeof args.data.collectionId === 'string'
-    //                   ? args.data.collectionId
-    //                   : args.data.collectionId.set,
-    //             });
-    //             return resUpdate;
-
-    //           case 'updateMany':
-    //             const resUpdateMany = await query(args);
-    //             await eventSvc.report({
-    //               uid: typeof args.data.uid === 'string' ? args.data.uid : args.data.uid.set,
-    //               eventType: 'update',
-    //               entityType: 'collection',
-    //               entityId:
-    //                 typeof args.data.collectionId === 'string'
-    //                   ? args.data.collectionId
-    //                   : args.data.collectionId.set,
-    //             });
-    //             return resUpdateMany;
-
-    //           case 'upsert':
-    //             const createdAt =
-    //               typeof args.create?.createdAt === 'string'
-    //                 ? new Date(args.create.createdAt)
-    //                 : args.create?.createdAt;
-    //             const resUpsert = await query(args);
-    //             if ((resUpsert['createdAt'] as Date).getTime() === createdAt.getTime()) {
-    //               await eventSvc.report({
-    //                 uid: args.create.uid,
-    //                 eventType: 'create',
-    //                 entityType: 'collection',
-    //                 entityId: args.create.collectionId,
-    //               });
-    //             } else if (Object.keys(args.update).length > 0) {
-    //               await eventSvc.report({
-    //                 uid: args.create.uid,
-    //                 eventType: 'update',
-    //                 entityType: 'collection',
-    //                 entityId: args.create.collectionId,
-    //               });
-    //             }
-
-    //             return resUpsert;
-    //           default:
-    //             return query(args);
-    //         }
-    //       },
-    //     },
-    //   },
-    // });
   }
 }
+
+const registerClientExtensions = (client: PrismaClient, queue: Queue<ReportEventData>) => {
+  const sendCollectionCreateEvent = async (coll: Pick<Collection, 'uid' | 'collectionId'>) => {
+    try {
+      await queue.add(CHANNEL_REPORT_EVENT, {
+        uid: coll.uid,
+        eventType: 'create',
+        entityType: 'collection',
+        entityId: coll.collectionId,
+      });
+    } catch (e) {
+      console.error(e); // TODO: use service logger (but how?)
+    }
+  };
+
+  const sendCollectionUpdateEvent = async (coll: {
+    uid: string | Prisma.StringFieldUpdateOperationsInput;
+    collectionId: string | Prisma.StringFieldUpdateOperationsInput;
+  }) => {
+    try {
+      await queue.add(CHANNEL_REPORT_EVENT, {
+        uid: typeof coll.uid === 'string' ? coll.uid : coll.uid.set,
+        eventType: 'create',
+        entityType: 'collection',
+        entityId: typeof coll.collectionId === 'string' ? coll.collectionId : coll.collectionId.set,
+      });
+    } catch (e) {
+      console.error(e); // TODO: use service logger (but how?)
+    }
+  };
+
+  return client.$extends({
+    query: {
+      collection: {
+        async create({ args, query }) {
+          const res = await query(args);
+          await sendCollectionCreateEvent(args.data);
+          return res;
+        },
+        async createMany({ args, query }) {
+          const res = await query(args);
+          if (Array.isArray(args.data)) {
+            await Promise.all(args.data.map((d) => sendCollectionCreateEvent(d)));
+          } else {
+            await sendCollectionCreateEvent(args.data);
+          }
+          return res;
+        },
+        async createManyAndReturn({ args, query }) {
+          const res = await query(args);
+          if (Array.isArray(args.data)) {
+            await Promise.all(args.data.map((d) => sendCollectionCreateEvent(d)));
+          } else {
+            await sendCollectionCreateEvent(args.data);
+          }
+          return res;
+        },
+        async update({ args, query }) {
+          const res = await query(args);
+          const { uid, collectionId } = res;
+          await sendCollectionUpdateEvent({ uid, collectionId });
+          return res;
+        },
+        async updateMany({ args, query }) {
+          const res = await query(args);
+          if (Array.isArray(args.data)) {
+            await Promise.all(args.data.map((d) => sendCollectionUpdateEvent(d)));
+          } else {
+            await sendCollectionUpdateEvent({
+              uid: args.data.uid,
+              collectionId: args.data.collectionId,
+            });
+          }
+          return res;
+        },
+        async upsert({ args, query }) {
+          args.create.createdAt = new Date();
+          const res = await query(args);
+
+          if (new Date(res['createdAt'] as string).getTime() === args.create.createdAt.getTime()) {
+            await sendCollectionCreateEvent(args.create);
+          } else if (Object.keys(args.update).length > 0) {
+            const { uid, collectionId } = res;
+            await sendCollectionUpdateEvent({ uid, collectionId });
+          }
+
+          return res;
+        },
+      },
+    },
+  });
+};
+
+export const PrismaProvider: Provider = {
+  provide: PrismaService,
+  useFactory: (queue: Queue<ReportEventData>) => {
+    return registerClientExtensions(new PrismaService(), queue);
+  },
+  inject: [getQueueToken(QUEUE_EVENT)],
+};

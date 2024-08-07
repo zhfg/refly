@@ -125,7 +125,7 @@ model Resource {
   /// 资源类型
   resourceType ResourceType @map("resource_type")
   /// UID
-  uid          String       @default("") @map("uid")
+  uid          String       @map("uid")
   /// Collection ID
   collectionId String       @default("") @map("collection_id")
   /// 字数
@@ -193,9 +193,9 @@ model Collection {
   /// 标题
   title        String    @map("title")
   /// 描述
-  description  String?   @default("") @map("description")
+  description  String    @default("") @map("description")
   /// UID
-  uid          String    @default("") @map("uid")
+  uid          String    @map("uid")
   /// 是否公开
   isPublic     Boolean   @default(false) @map("is_public")
   /// 创建时间
