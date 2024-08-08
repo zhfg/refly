@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { User } from '@prisma/client';
 import { PrismaService } from '@/common/prisma.service';
 import {
   CreateLabelClassRequest,
@@ -10,6 +9,7 @@ import {
   ListLabelInstancesData,
   UpdateLabelClassRequest,
   UpdateLabelInstanceRequest,
+  User,
 } from '@refly/openapi-schema';
 import { genLabelClassID, genLabelInstanceID } from '@refly/utils';
 import { pick } from '@/utils';
@@ -105,12 +105,13 @@ export class LabelService {
   }
 
   async createLabelInstance(user: User, param: CreateLabelInstanceRequest) {
-    return this.prisma.labelInstance.create({
-      data: {
+    return this.prisma.labelInstance.createManyAndReturn({
+      data: param.valueList.map((value) => ({
         labelId: genLabelInstanceID(),
+        ...pick(param, ['labelClassId', 'entityId', 'entityType']),
         uid: user.uid,
-        ...param,
-      },
+        value,
+      })),
       include: { labelClass: true },
     });
   }

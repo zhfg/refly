@@ -66,8 +66,8 @@ export class Scheduler extends BaseSkill {
     return this.skills.some((skill) => skill.name === name);
   };
 
-  directCallSkill = async (state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> => {
-    const { selectedSkill, installedSkills } = config?.configurable || {};
+  directCallSkill = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
+    const { selectedSkill, installedSkills } = config.configurable || {};
 
     const skillInstance = installedSkills.find((skill) => skill.skillName === selectedSkill.skillName);
     if (!skillInstance) {
@@ -82,7 +82,7 @@ export class Scheduler extends BaseSkill {
     const skillConfig = {
       ...config,
       configurable: {
-        ...config?.configurable,
+        ...config.configurable,
         currentSkill: skillInstance,
       },
     };
@@ -104,20 +104,20 @@ export class Scheduler extends BaseSkill {
   /**
    * Call the first scheduled skill within the state.
    */
-  callSkill = async (state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> => {
+  callSkill = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { skillCalls } = state;
     if (!skillCalls) {
       this.emitEvent({ event: 'log', content: 'No skill calls to proceed.' }, config);
       return {};
     }
 
-    const { locale = 'en' } = config?.configurable || {};
+    const { locale = 'en' } = config.configurable || {};
 
     // Pick the first skill to call
     const call = state.skillCalls[0];
 
     // We'll first try to use installed skill instance, if not found then fallback to skill template
-    const { installedSkills = [] } = config?.configurable || {};
+    const { installedSkills = [] } = config.configurable || {};
     const skillInstance = installedSkills.find((skill) => skill.skillName === call.name);
     const skillTemplate = this.skills.find((skill) => skill.name === call.name);
     const currentSkill: SkillMeta = skillInstance ?? {
@@ -127,7 +127,7 @@ export class Scheduler extends BaseSkill {
     const skillConfig: SkillRunnableConfig = {
       ...config,
       configurable: {
-        ...config?.configurable,
+        ...config.configurable,
         currentSkill,
         spanId: randomUUID(), // generate new spanId for each managed skill call
       },
@@ -147,10 +147,10 @@ export class Scheduler extends BaseSkill {
     return { messages: [skillMessage], skillCalls: state.skillCalls.slice(1) };
   };
 
-  callScheduler = async (state: GraphState, config?: SkillRunnableConfig): Promise<Partial<GraphState>> => {
+  callScheduler = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { query, contextualUserQuery, messages = [] } = state;
 
-    this.configSnapshot ??= config ?? { configurable: {} };
+    this.configSnapshot ??= config;
     this.emitEvent({ event: 'start' }, this.configSnapshot);
 
     const { locale = 'en', chatHistory = [], installedSkills, currentSkill, spanId } = this.configSnapshot.configurable;
@@ -222,9 +222,9 @@ You are an AI intelligent response engine built by Refly AI that is specializing
     return { messages: [responseMessage], skillCalls };
   };
 
-  genRelatedQuestions = async (state: GraphState, config?: SkillRunnableConfig) => {
+  genRelatedQuestions = async (state: GraphState, config: SkillRunnableConfig) => {
     const { messages = [] } = state;
-    const { locale = 'en', selectedSkill } = config?.configurable || {};
+    const { locale = 'en', selectedSkill } = config.configurable || {};
 
     const getSystemPrompt = (locale: string) => `## Role
 You are an SEO (Search Engine Optimization) expert, skilled at identifying key information from the provided context and proposing three semantically relevant recommended questions based on this information to help users gain a deeper understanding of the content.
@@ -289,7 +289,7 @@ Generated question example:
       ? {
           ...config,
           configurable: {
-            ...config?.configurable,
+            ...config.configurable,
             currentSkill: selectedSkill,
           },
         }
@@ -309,8 +309,8 @@ Generated question example:
     return {};
   };
 
-  shouldDirectCallSkill = (state: GraphState, config?: SkillRunnableConfig): 'direct' | 'scheduler' => {
-    const { selectedSkill } = config?.configurable || {};
+  shouldDirectCallSkill = (state: GraphState, config: SkillRunnableConfig): 'direct' | 'scheduler' => {
+    const { selectedSkill } = config.configurable || {};
     if (!selectedSkill) {
       return 'scheduler';
     }
@@ -336,7 +336,7 @@ Generated question example:
     return skillCalls.length > 0 ? 'skill' : 'relatedQuestions';
   };
 
-  onSkillCallFinish(state: GraphState, config?: SkillRunnableConfig): 'scheduler' | 'skill' {
+  onSkillCallFinish(state: GraphState, config: SkillRunnableConfig): 'scheduler' | 'skill' {
     const { skillCalls } = state;
 
     // Still have skill calls to run

@@ -9,7 +9,7 @@ import { OpenAIEmbeddings } from '@langchain/openai';
 import { FireworksEmbeddings } from '@langchain/community/embeddings/fireworks';
 import { cleanMarkdownForIngest } from '@refly/utils';
 
-import { User } from '@prisma/client';
+import { User } from '@refly/openapi-schema';
 import { MinioService } from '../common/minio.service';
 import {
   HybridSearchParam,
@@ -175,7 +175,7 @@ export class RAGService {
     return ContentAvroType.fromBuffer(buf) as ContentData;
   }
 
-  async saveDataForUser(user: Pick<User, 'id' | 'uid'>, data: ContentData) {
+  async saveDataForUser(user: User, data: ContentData) {
     const points: PointStruct[] = data.chunks.map((chunk) => ({
       id: chunk.id,
       vector: chunk.vector,
@@ -188,7 +188,7 @@ export class RAGService {
     return this.qdrant.batchSaveData(points);
   }
 
-  async deleteResourceNodes(user: Pick<User, 'uid'>, resourceId: string) {
+  async deleteResourceNodes(user: User, resourceId: string) {
     return this.qdrant.batchDelete({
       must: [
         { key: 'tenantId', match: { value: user.uid } },
@@ -197,7 +197,7 @@ export class RAGService {
     });
   }
 
-  async deleteNoteNodes(user: Pick<User, 'uid'>, noteId: string) {
+  async deleteNoteNodes(user: User, noteId: string) {
     return this.qdrant.batchDelete({
       must: [
         { key: 'tenantId', match: { value: user.uid } },
@@ -206,7 +206,7 @@ export class RAGService {
     });
   }
 
-  async retrieve(user: Pick<User, 'uid'>, param: HybridSearchParam): Promise<ContentPayload[]> {
+  async retrieve(user: User, param: HybridSearchParam): Promise<ContentPayload[]> {
     if (!param.vector) {
       param.vector = await this.embeddings.embedQuery(param.query);
       // param.vector = Array(256).fill(0);

@@ -705,7 +705,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpsertSkillInstanceRequest'
+              $ref: '#/components/schemas/CreateSkillInstanceRequest'
         required: true
       responses:
         '200':
@@ -713,7 +713,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UpsertSkillInstanceResponse'
+                $ref: '#/components/schemas/CreateSkillInstanceResponse'
   /skill/instance/update:
     post:
       tags:
@@ -726,7 +726,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpsertSkillInstanceRequest'
+              $ref: '#/components/schemas/UpdateSkillInstanceRequest'
         required: true
       responses:
         '200':
@@ -734,7 +734,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UpsertSkillInstanceResponse'
+                $ref: '#/components/schemas/UpdateSkillInstanceResponse'
   /skill/instance/delete:
     post:
       tags:
@@ -844,7 +844,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpsertSkillTriggerRequest'
+              $ref: '#/components/schemas/CreateSkillTriggerRequest'
         required: true
       responses:
         '200':
@@ -852,7 +852,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BaseResponse'
+                $ref: '#/components/schemas/CreateSkillTriggerResponse'
   /skill/trigger/update:
     post:
       tags:
@@ -865,7 +865,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpsertSkillTriggerRequest'
+              $ref: '#/components/schemas/UpdateSkillTriggerRequest'
         required: true
       responses:
         '200':
@@ -873,7 +873,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BaseResponse'
+                $ref: '#/components/schemas/UpdateSkillTriggerResponse'
   /skill/trigger/delete:
     post:
       tags:
@@ -1028,6 +1028,15 @@ paths:
                 $ref: '#/components/schemas/SearchResponse'
 components:
   schemas:
+    User:
+      type: object
+      description: Refly user
+      required:
+        - uid
+      properties:
+        uid:
+          type: string
+          description: UID
     ResourceMeta:
       type: object
       description: Resource metadata
@@ -2073,7 +2082,7 @@ components:
       type: object
       required:
         - labelClassId
-        - value
+        - valueList
         - entityType
         - entityId
       properties:
@@ -2081,10 +2090,12 @@ components:
           type: string
           description: Label class ID
           example: lc-g30e1b80b5g1itbemc0g5jj3
-        value:
-          type: string
-          description: Label value
-          example: my-value
+        valueList:
+          type: array
+          description: Label value list
+          items:
+            type: string
+            example: label-1
         entityType:
           description: Label entity type
           $ref: '#/components/schemas/EntityType'
@@ -2106,7 +2117,10 @@ components:
         - type: object
           properties:
             data:
-              $ref: '#/components/schemas/LabelInstance'
+              type: array
+              description: Label instance upserted
+              items:
+                $ref: '#/components/schemas/LabelInstance'
     DeleteLabelInstanceRequest:
       type: object
       required:
@@ -2136,7 +2150,7 @@ components:
               description: Skill list
               items:
                 $ref: '#/components/schemas/SkillInstance'
-    SkillInstanceUpsertParam:
+    SkillInstanceCreateParam:
       type: object
       required:
         - skillName
@@ -2150,19 +2164,10 @@ components:
           type: string
           description: Skill display name
           example: My Custom Skill
-        skillId:
-          type: string
-          description: Skill ID (only used for update)
-          example: s-g30e1b80b5g1itbemc0g5jj3
-        triggers:
-          type: array
-          description: Skill triggers
-          items:
-            $ref: '#/components/schemas/UpsertSkillTriggerRequest'
         config:
           type: object
           description: Skill config (should conform to template config schema)
-    UpsertSkillInstanceRequest:
+    CreateSkillInstanceRequest:
       type: object
       required:
         - instanceList
@@ -2171,8 +2176,8 @@ components:
           type: array
           description: Skill instances to upsert
           items:
-            $ref: '#/components/schemas/SkillInstanceUpsertParam'
-    UpsertSkillInstanceResponse:
+            $ref: '#/components/schemas/SkillInstanceCreateParam'
+    CreateSkillInstanceResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
@@ -2182,6 +2187,34 @@ components:
               description: Skill instance list
               items:
                 $ref: '#/components/schemas/SkillInstance'
+    UpdateSkillInstanceRequest:
+      type: object
+      required:
+        - skillId
+      properties:
+        skillId:
+          type: string
+          description: Skill ID
+          example: s-g30e1b80b5g1itbemc0g5jj3
+        skillName:
+          type: string
+          description: Skill name
+          example: online-search
+        displayName:
+          type: string
+          description: Skill display name
+          example: My Custom Skill
+        config:
+          type: object
+          description: Skill config (should conform to template config schema)
+    UpdateSkillInstanceResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              description: Skill instance list
+              $ref: '#/components/schemas/SkillInstance'
     DeleteSkillInstanceRequest:
       type: object
       required:
@@ -2268,15 +2301,57 @@ components:
               description: Skill trigger list
               items:
                 $ref: '#/components/schemas/SkillTrigger'
-    UpsertSkillTriggerRequest:
+    SkillTriggerCreateParam:
       type: object
       required:
+        - skillId
         - triggerType
       properties:
         skillId:
           type: string
-          description: Skill ID (only used for updating triggers or adding triggers to an existing skill)
+          description: Skill ID
           example: sk-g30e1b80b5g1itbemc0g5jj3
+        triggerType:
+          description: Trigger type
+          $ref: '#/components/schemas/SkillTriggerType'
+        eventEntityType:
+          description: Event entity type (only required when trigger type is `event`)
+          $ref: '#/components/schemas/EntityType'
+        eventType:
+          description: Event type (only required when trigger type is `event`)
+          $ref: '#/components/schemas/EventType'
+        crontab:
+          type: string
+          description: Trigger crontab (only valid when event is `cron`)
+          example: 0 0 1 * *
+        enabled:
+          type: boolean
+          description: Whether this trigger is enabled
+    CreateSkillTriggerRequest:
+      type: object
+      required:
+        - triggerList
+      properties:
+        triggerList:
+          type: array
+          description: Skill triggers to upsert
+          items:
+            $ref: '#/components/schemas/SkillTriggerCreateParam'
+    CreateSkillTriggerResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Skill trigger list
+              items:
+                $ref: '#/components/schemas/SkillTrigger'
+    UpdateSkillTriggerRequest:
+      type: object
+      required:
+        - triggerId
+      properties:
         triggerId:
           type: string
           description: Trigger ID (only used for update)
@@ -2297,12 +2372,13 @@ components:
         enabled:
           type: boolean
           description: Whether this trigger is enabled
-    UpsertSkillTriggerResponse:
+    UpdateSkillTriggerResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
             data:
+              description: Updated skill trigger
               $ref: '#/components/schemas/SkillTrigger'
     DeleteSkillTriggerRequest:
       type: object

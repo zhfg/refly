@@ -104,9 +104,9 @@ export class KnowledgeBaseSearch extends BaseSkill {
    * @param config - The configuration for the runnable.
    * @returns - The updated state with the new message added to the list of messages.
    */
-  retrieve = async (state: GraphState, config?: SkillRunnableConfig) => {
+  retrieve = async (state: GraphState, config: SkillRunnableConfig) => {
     const { betterQuestion } = state;
-    const { uid } = config?.configurable || {};
+    const { user } = config;
 
     if (!betterQuestion) {
       throw new Error('betterQuestion is empty!');
@@ -120,7 +120,7 @@ export class KnowledgeBaseSearch extends BaseSkill {
       config,
     );
 
-    const tool = new ReflySearch({ engine: this.engine, user: { uid } });
+    const tool = new ReflySearch({ engine: this.engine, user });
     const output = await tool.invoke(betterQuestion, config);
     const searchResp = JSON.parse(output) as SearchResponse;
 

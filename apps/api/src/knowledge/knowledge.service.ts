@@ -3,7 +3,7 @@ import { Queue } from 'bull';
 import pLimit from 'p-limit';
 import { InjectQueue } from '@nestjs/bull';
 import { readingTime } from 'reading-time-estimator';
-import { Prisma, User } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { RAGService } from '../rag/rag.service';
 import { PrismaService } from '../common/prisma.service';
 import { MinioService } from '../common/minio.service';
@@ -15,6 +15,7 @@ import {
   ListCollectionsData,
   ListNotesData,
   UpsertNoteRequest,
+  User,
 } from '@refly/openapi-schema';
 import { CHANNEL_FINALIZE_RESOURCE, QUEUE_RESOURCE } from '../utils';
 import { genCollectionID, genResourceID, cleanMarkdownForIngest, genNoteID } from '@refly/utils';
@@ -32,7 +33,7 @@ export class KnowledgeService {
     @InjectQueue(QUEUE_RESOURCE) private queue: Queue<FinalizeResourceParam>,
   ) {}
 
-  async listCollections(user: Pick<User, 'uid'>, params: ListCollectionsData['query']) {
+  async listCollections(user: User, params: ListCollectionsData['query']) {
     const { page, pageSize } = params;
     return this.prisma.collection.findMany({
       where: { uid: user.uid, deletedAt: null },
@@ -42,7 +43,7 @@ export class KnowledgeService {
     });
   }
 
-  async getCollectionDetail(user: Pick<User, 'uid'>, param: { collectionId: string }) {
+  async getCollectionDetail(user: User, param: { collectionId: string }) {
     const { collectionId } = param;
 
     const coll = await this.prisma.collection.findFirst({
@@ -75,7 +76,7 @@ export class KnowledgeService {
     return { ...coll, resources, labels };
   }
 
-  async upsertCollection(user: Pick<User, 'uid'>, param: UpsertCollectionRequest) {
+  async upsertCollection(user: User, param: UpsertCollectionRequest) {
     if (!param.collectionId) {
       param.collectionId = genCollectionID();
     }
@@ -93,7 +94,7 @@ export class KnowledgeService {
     });
   }
 
-  async deleteCollection(user: Pick<User, 'uid'>, collectionId: string) {
+  async deleteCollection(user: User, collectionId: string) {
     const { uid } = user;
     const coll = await this.prisma.collection.findFirst({
       where: { collectionId, uid, deletedAt: null },
@@ -120,7 +121,7 @@ export class KnowledgeService {
     await Promise.all(resources.map((r) => this.deleteResource(user, r.resourceId)));
   }
 
-  async listResources(user: Pick<User, 'uid'>, param: ListResourcesData['query']) {
+  async listResources(user: User, param: ListResourcesData['query']) {
     const { collectionId, resourceId, resourceType, page = 1, pageSize = 10 } = param;
 
     // Query resources by collection
@@ -151,7 +152,7 @@ export class KnowledgeService {
     }));
   }
 
-  async getResourceDetail(user: Pick<User, 'uid'>, param: { resourceId: string }) {
+  async getResourceDetail(user: User, param: { resourceId: string }) {
     const { resourceId } = param;
     const resource = await this.prisma.resource.findFirst({
       where: { resourceId, deletedAt: null },
@@ -169,7 +170,7 @@ export class KnowledgeService {
     return { ...resource, labels };
   }
 
-  async createResource(user: Pick<User, 'uid'>, param: UpsertResourceRequest) {
+  async createResource(user: User, param: UpsertResourceRequest) {
     param.resourceId = genResourceID();
 
     // If target collection not specified, create new one
@@ -335,7 +336,7 @@ export class KnowledgeService {
     }
   }
 
-  async updateResource(user: Pick<User, 'uid'>, param: UpsertResourceRequest) {
+  async updateResource(user: User, param: UpsertResourceRequest) {
     const updates: Prisma.ResourceUpdateInput = pick(param, ['title', 'isPublic', 'readOnly']);
     if (param.data) {
       updates.meta = JSON.stringify(param.data);
@@ -349,7 +350,7 @@ export class KnowledgeService {
     });
   }
 
-  async deleteResource(user: Pick<User, 'uid'>, resourceId: string) {
+  async deleteResource(user: User, resourceId: string) {
     const { uid } = user;
     const resource = await this.prisma.resource.findFirst({
       where: { resourceId, uid, deletedAt: null },
@@ -371,7 +372,7 @@ export class KnowledgeService {
     ]);
   }
 
-  async listNotes(user: Pick<User, 'uid'>, param: ListNotesData['query']) {
+  async listNotes(user: User, param: ListNotesData['query']) {
     const { page = 1, pageSize = 10 } = param;
     return this.prisma.note.findMany({
       where: {
@@ -384,7 +385,7 @@ export class KnowledgeService {
     });
   }
 
-  async getNoteDetail(user: Pick<User, 'uid'>, noteId: string) {
+  async getNoteDetail(user: User, noteId: string) {
     const note = await this.prisma.note.findFirst({
       where: { noteId, uid: user.uid, deletedAt: null },
     });
@@ -400,7 +401,7 @@ export class KnowledgeService {
     return { ...note, labels };
   }
 
-  async upsertNote(user: Pick<User, 'uid'>, param: UpsertNoteRequest) {
+  async upsertNote(user: User, param: UpsertNoteRequest) {
     param.noteId ||= genNoteID();
 
     return this.prisma.note.upsert({
@@ -416,7 +417,7 @@ export class KnowledgeService {
     });
   }
 
-  async deleteNote(user: Pick<User, 'uid'>, noteId: string) {
+  async deleteNote(user: User, noteId: string) {
     const { uid } = user;
     const note = await this.prisma.note.findFirst({
       where: { noteId, uid, deletedAt: null },

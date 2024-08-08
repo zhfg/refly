@@ -102,8 +102,8 @@ export class LabelController {
     @User() user: UserModel,
     @Body() body: CreateLabelInstanceRequest,
   ): Promise<UpsertLabelInstanceResponse> {
-    const label = await this.labelService.createLabelInstance(user, body);
-    return buildSuccessResponse(labelPO2DTO(label));
+    const labels = await this.labelService.createLabelInstance(user, body);
+    return buildSuccessResponse(labels.map((label) => labelPO2DTO(label)));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -113,7 +113,7 @@ export class LabelController {
     @Body() body: UpdateLabelInstanceRequest,
   ): Promise<UpsertLabelInstanceResponse> {
     const label = await this.labelService.updateLabelInstance(user, body);
-    return buildSuccessResponse(labelPO2DTO(label));
+    return buildSuccessResponse([labelPO2DTO(label)]);
   }
 
   @UseGuards(JwtAuthGuard)

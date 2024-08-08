@@ -7,5 +7,6 @@ import { CommonModule } from '@/common/common.module';
   imports: [CommonModule],
   controllers: [LabelController],
   providers: [LabelService],
+  exports: [LabelService],
 })
 export class LabelModule {}

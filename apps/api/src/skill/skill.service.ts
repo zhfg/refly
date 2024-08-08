@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter } from 'node:events';
 import { Queue } from 'bull';
-import pLimit from 'p-limit';
 import { InjectQueue } from '@nestjs/bull';
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import {
@@ -11,18 +10,22 @@ import {
   SkillTrigger,
   User,
   MessageType,
+  Prisma,
 } from '@prisma/client';
 import { Response } from 'express';
 import { AIMessageChunk } from '@langchain/core/dist/messages';
 import {
+  CreateSkillInstanceRequest,
+  CreateSkillTriggerRequest,
   DeleteSkillInstanceRequest,
   DeleteSkillTriggerRequest,
   InvokeSkillRequest,
   ListSkillInstancesData,
   SkillMeta,
   SkillTemplate,
-  UpsertSkillInstanceRequest,
-  UpsertSkillTriggerRequest,
+  SkillTriggerCreateParam,
+  UpdateSkillInstanceRequest,
+  UpdateSkillTriggerRequest,
 } from '@refly/openapi-schema';
 import {
   BaseSkill,
@@ -35,7 +38,13 @@ import {
 } from '@refly/skill-template';
 import { genSkillID, genSkillLogID, genSkillTriggerID } from '@refly/utils';
 import { PrismaService } from '@/common/prisma.service';
-import { QUEUE_SKILL, buildSuccessResponse, writeSSEResponse, pick } from '@/utils';
+import {
+  QUEUE_SKILL,
+  buildSuccessResponse,
+  writeSSEResponse,
+  pick,
+  CHANNEL_INVOKE_SKILL,
+} from '@/utils';
 import { InvokeSkillJobData } from './skill.dto';
 import { KnowledgeService } from '@/knowledge/knowledge.service';
 import { collectionPO2DTO, resourcePO2DTO } from '@/knowledge/knowledge.dto';
@@ -44,6 +53,8 @@ import { MessageAggregator } from '@/utils/message';
 import { SkillEvent } from '@refly/common-types';
 import { ConfigService } from '@nestjs/config';
 import { SearchService } from '@/search/search.service';
+import { LabelService } from '@/label/label.service';
+import { labelClassPO2DTO, labelPO2DTO } from '@/label/label.dto';
 
 interface SkillPreCheckResult {
   skill?: SkillInstance;
@@ -65,7 +76,7 @@ export function createLLMChatMessage(content: string, type: MessageType): LLMCha
   }
 }
 
-function validateUpsertSkillTriggerRequest(param: UpsertSkillTriggerRequest) {
+function validateSkillTriggerCreateParam(param: SkillTriggerCreateParam) {
   if (param.triggerType === 'event') {
     if (!param.eventType || !param.eventEntityType) {
       throw new BadRequestException('invalid event trigger config');
@@ -86,6 +97,7 @@ export class SkillService {
   constructor(
     private config: ConfigService,
     private prisma: PrismaService,
+    private label: LabelService,
     private search: SearchService,
     private knowledge: KnowledgeService,
     private conversation: ConversationService,
@@ -94,6 +106,10 @@ export class SkillService {
     this.skillEngine = new SkillEngine(
       this.logger,
       {
+        getResourceDetail: async (user, req) => {
+          const resource = await this.knowledge.getResourceDetail(user, req);
+          return buildSuccessResponse(resourcePO2DTO(resource));
+        },
         createResource: async (user, req) => {
           const resource = await this.knowledge.createResource(user, req);
           return buildSuccessResponse(resourcePO2DTO(resource));
@@ -109,6 +125,14 @@ export class SkillService {
         updateCollection: async (user, req) => {
           const coll = await this.knowledge.upsertCollection(user, req);
           return buildSuccessResponse(collectionPO2DTO(coll));
+        },
+        createLabelClass: async (user, req) => {
+          const labelClass = await this.label.createLabelClass(user, req);
+          return buildSuccessResponse(labelClassPO2DTO(labelClass));
+        },
+        createLabelInstance: async (user, req) => {
+          const labels = await this.label.createLabelInstance(user, req);
+          return buildSuccessResponse(labels.map((label) => labelPO2DTO(label)));
         },
         search: async (user, req) => {
           const result = await this.search.search(user, req);
@@ -142,7 +166,7 @@ export class SkillService {
     });
   }
 
-  async createSkillInstance(user: User, param: UpsertSkillInstanceRequest) {
+  async createSkillInstance(user: User, param: CreateSkillInstanceRequest) {
     const { uid } = user;
     const { instanceList } = param;
 
@@ -150,68 +174,40 @@ export class SkillService {
       if (!this.isValidSkillName(instance.skillName)) {
         throw new BadRequestException(`skill ${instance.skillName} not found`);
       }
-
-      instance.triggers?.forEach((trigger) => validateUpsertSkillTriggerRequest(trigger));
     });
 
-    const limit = pLimit(5);
-    const tasks = instanceList.map((instance) =>
-      limit(async () => {
-        const skillId = genSkillID();
-        const [skill, ...triggers] = await this.prisma.$transaction([
-          this.prisma.skillInstance.create({
-            data: {
-              skillId,
-              uid,
-              skillName: instance.skillName,
-              displayName: instance.displayName || 'Untitled Skill',
-              config: JSON.stringify(instance.config),
-            },
-          }),
-          ...(instance.triggers ?? []).map((trigger) =>
-            this.prisma.skillTrigger.create({
-              data: {
-                skillId,
-                uid,
-                triggerId: genSkillTriggerID(),
-                ...pick(trigger, ['triggerType', 'eventEntityType', 'eventType', 'crontab']),
-                enabled: !!trigger.enabled,
-              },
-            }),
-          ),
-        ]);
-        return { skill, triggers };
-      }),
-    );
-
-    return Promise.all(tasks);
+    return this.prisma.skillInstance.createManyAndReturn({
+      data: instanceList.map((instance) => ({
+        skillId: genSkillID(),
+        uid,
+        skillName: instance.skillName,
+        displayName: instance.displayName || 'Untitled Skill',
+        config: JSON.stringify(instance.config),
+      })),
+    });
   }
 
-  async updateSkillInstance(user: User, param: UpsertSkillInstanceRequest) {
-    param.instanceList.forEach((instance) => {
-      if (!instance.skillId) {
-        throw new BadRequestException('skill id is required');
-      }
-      if (!this.isValidSkillName(instance.skillName)) {
-        throw new BadRequestException(`skill ${instance.skillName} not found`);
-      }
+  async updateSkillInstance(user: User, param: UpdateSkillInstanceRequest) {
+    if (!param.skillId) {
+      throw new BadRequestException('skill id is required');
+    }
+    if (param.skillName && !this.isValidSkillName(param.skillName)) {
+      throw new BadRequestException(`skill ${param.skillName} not found`);
+    }
+
+    const updates: Prisma.SkillInstanceUpdateInput = {
+      ...pick(param, ['displayName', 'skillName']),
+      ...(param.config ? { config: JSON.stringify(param.config) } : {}),
+    };
+
+    if (Object.keys(updates).length === 0) {
+      this.logger.log(`no updates for skill instance ${param.skillId}, skip`);
+    }
+
+    return this.prisma.skillInstance.update({
+      where: { skillId: param.skillId, uid: user.uid, deletedAt: null },
+      data: updates,
     });
-
-    const limit = pLimit(5);
-    const tasks = param.instanceList.map((instance) =>
-      limit(() =>
-        this.prisma.skillInstance.update({
-          where: { skillId: instance.skillId, uid: user.uid, deletedAt: null },
-          data: {
-            displayName: instance.displayName,
-            skillName: instance.skillName,
-            config: JSON.stringify(instance.config),
-          },
-        }),
-      ),
-    );
-
-    return Promise.all(tasks);
   }
 
   async deleteSkillInstance(user: User, param: DeleteSkillInstanceRequest) {
@@ -284,7 +280,7 @@ export class SkillService {
     const checkResult = await this.skillInvokePreCheck(user, param);
     const log = await this.createLog(user, param, checkResult, 'async');
 
-    await this.queue.add({ ...param, uid: user.uid, skillLogId: log.logId });
+    await this.queue.add(CHANNEL_INVOKE_SKILL, { ...param, uid: user.uid, skillLogId: log.logId });
 
     return log;
   }
@@ -314,6 +310,7 @@ export class SkillService {
         uid: user.uid,
         installedSkills,
       },
+      user,
     };
 
     if (skill) {
@@ -482,28 +479,26 @@ export class SkillService {
     });
   }
 
-  async createSkillTrigger(user: User, param: UpsertSkillTriggerRequest) {
+  async createSkillTrigger(user: User, param: CreateSkillTriggerRequest) {
     const { uid } = user;
-    const { skillId } = param;
 
-    if (!param.skillId) {
-      throw new BadRequestException('skill id and trigger id are required');
+    if (param.triggerList.length === 0) {
+      throw new BadRequestException('trigger list is empty');
     }
 
-    validateUpsertSkillTriggerRequest(param);
+    param.triggerList.forEach((trigger) => validateSkillTriggerCreateParam(trigger));
 
-    return this.prisma.skillTrigger.create({
-      data: {
+    return this.prisma.skillTrigger.createManyAndReturn({
+      data: param.triggerList.map((trigger) => ({
         uid,
-        skillId,
         triggerId: genSkillTriggerID(),
-        ...pick(param, ['skillId', 'triggerType', 'crontab', 'eventEntityType', 'eventType']),
-        enabled: !!param.enabled,
-      },
+        ...pick(trigger, ['skillId', 'triggerType', 'crontab', 'eventEntityType', 'eventType']),
+        enabled: !!trigger.enabled,
+      })),
     });
   }
 
-  async updateSkillTrigger(user: User, param: UpsertSkillTriggerRequest) {
+  async updateSkillTrigger(user: User, param: UpdateSkillTriggerRequest) {
     return this.prisma.skillTrigger.update({
       where: { triggerId: param.triggerId, uid: user.uid, deletedAt: null },
       data: {

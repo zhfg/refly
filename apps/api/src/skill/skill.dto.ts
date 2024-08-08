@@ -8,7 +8,7 @@ import {
   SkillTriggerType,
 } from '@refly/openapi-schema';
 import {
-  SkillInstance as SkillModel,
+  SkillInstance as SkillInstanceModel,
   SkillTrigger as SkillTriggerModel,
   SkillLog as SkillLogModel,
 } from '@prisma/client';
@@ -19,7 +19,7 @@ export interface InvokeSkillJobData extends InvokeSkillRequest {
   skillLogId: string;
 }
 
-export function toSkillDTO(skill: SkillModel): SkillInstance {
+export function skillInstancePO2DTO(skill: SkillInstanceModel): SkillInstance {
   return {
     ...pick(skill, ['skillId', 'skillName']),
     skillDisplayName: skill.displayName,
@@ -29,7 +29,7 @@ export function toSkillDTO(skill: SkillModel): SkillInstance {
   };
 }
 
-export function toSkillTriggerDTO(trigger: SkillTriggerModel): SkillTrigger {
+export function skillTriggerPO2DTO(trigger: SkillTriggerModel): SkillTrigger {
   return {
     ...pick(trigger, ['skillId', 'triggerId', 'crontab', 'enabled']),
     triggerType: trigger.triggerType as SkillTriggerType,
@@ -40,7 +40,7 @@ export function toSkillTriggerDTO(trigger: SkillTriggerModel): SkillTrigger {
   };
 }
 
-export function toSkillLogDTO(log: SkillLogModel): SkillLog {
+export function skillLogPO2DTO(log: SkillLogModel): SkillLog {
   return {
     ...pick(log, ['logId', 'skillId', 'skillName', 'triggerId']),
     input: JSON.parse(log.input),

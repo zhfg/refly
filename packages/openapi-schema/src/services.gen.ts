@@ -82,10 +82,10 @@ import type {
   ListSkillInstancesResponse,
   CreateSkillInstanceData,
   CreateSkillInstanceError,
-  CreateSkillInstanceResponse,
+  CreateSkillInstanceResponse2,
   UpdateSkillInstanceData,
   UpdateSkillInstanceError,
-  UpdateSkillInstanceResponse,
+  UpdateSkillInstanceResponse2,
   DeleteSkillInstanceData,
   DeleteSkillInstanceError,
   DeleteSkillInstanceResponse,
@@ -100,10 +100,10 @@ import type {
   ListSkillTriggersResponse,
   CreateSkillTriggerData,
   CreateSkillTriggerError,
-  CreateSkillTriggerResponse,
+  CreateSkillTriggerResponse2,
   UpdateSkillTriggerData,
   UpdateSkillTriggerError,
-  UpdateSkillTriggerResponse,
+  UpdateSkillTriggerResponse2,
   DeleteSkillTriggerData,
   DeleteSkillTriggerError,
   DeleteSkillTriggerResponse,
@@ -416,7 +416,7 @@ export const listSkillInstances = (options?: Options<ListSkillInstancesData>) =>
  * Create a new skill instance for user
  */
 export const createSkillInstance = (options: Options<CreateSkillInstanceData>) => {
-  return (options?.client ?? client).post<CreateSkillInstanceResponse, CreateSkillInstanceError>({
+  return (options?.client ?? client).post<CreateSkillInstanceResponse2, CreateSkillInstanceError>({
     ...options,
     url: '/skill/instance/new',
   });
@@ -427,7 +427,7 @@ export const createSkillInstance = (options: Options<CreateSkillInstanceData>) =
  * Update an existing skill instance
  */
 export const updateSkillInstance = (options: Options<UpdateSkillInstanceData>) => {
-  return (options?.client ?? client).post<UpdateSkillInstanceResponse, UpdateSkillInstanceError>({
+  return (options?.client ?? client).post<UpdateSkillInstanceResponse2, UpdateSkillInstanceError>({
     ...options,
     url: '/skill/instance/update',
   });
@@ -482,7 +482,7 @@ export const listSkillTriggers = (options?: Options<ListSkillTriggersData>) => {
  * Create a new trigger
  */
 export const createSkillTrigger = (options: Options<CreateSkillTriggerData>) => {
-  return (options?.client ?? client).post<CreateSkillTriggerResponse, CreateSkillTriggerError>({
+  return (options?.client ?? client).post<CreateSkillTriggerResponse2, CreateSkillTriggerError>({
     ...options,
     url: '/skill/trigger/new',
   });
@@ -493,7 +493,7 @@ export const createSkillTrigger = (options: Options<CreateSkillTriggerData>) => 
  * Update an existing trigger
  */
 export const updateSkillTrigger = (options: Options<UpdateSkillTriggerData>) => {
-  return (options?.client ?? client).post<UpdateSkillTriggerResponse, UpdateSkillTriggerError>({
+  return (options?.client ?? client).post<UpdateSkillTriggerResponse2, UpdateSkillTriggerError>({
     ...options,
     url: '/skill/trigger/update',
   });

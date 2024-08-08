@@ -1,14 +1,15 @@
 import { Tool } from '@langchain/core/tools';
+import { User } from '@refly/openapi-schema';
 import { BaseToolParams } from '../../base';
-import { SkillEngine, SkillUser } from '../../engine';
+import { SkillEngine } from '../../engine';
 
 export interface ReflySearchParameters extends BaseToolParams {
-  user: SkillUser;
+  user: User;
 }
 
 export class ReflySearch extends Tool {
   private engine: SkillEngine;
-  private user: SkillUser;
+  private user: User;
 
   name = 'refly_search';
 

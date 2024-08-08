@@ -2,8 +2,13 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { cut, extract } from '@node-rs/jieba';
 import { PrismaService } from '@/common/prisma.service';
-import { ResourceMeta, ResourceType, SearchRequest, SearchResult } from '@refly/openapi-schema';
-import { SkillUser as User } from '@refly/skill-template';
+import {
+  ResourceMeta,
+  ResourceType,
+  SearchRequest,
+  SearchResult,
+  User,
+} from '@refly/openapi-schema';
 import { RAGService } from '@/rag/rag.service';
 
 interface ProcessedSearchRequest extends SearchRequest {

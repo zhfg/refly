@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-import { Prisma, User, Conversation } from '@prisma/client';
-import { CreateConversationRequest } from '@refly/openapi-schema';
+import { Prisma, Conversation } from '@prisma/client';
+import { CreateConversationRequest, User } from '@refly/openapi-schema';
 
 import { PrismaService } from '@/common/prisma.service';
 import { CreateChatMessageInput } from './conversation.dto';

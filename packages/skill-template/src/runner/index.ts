@@ -32,10 +32,13 @@ async function run() {
   });
 
   const engine = new SkillEngine(console, {
+    getResourceDetail: async (user, req) => null,
     createResource: async (user, req) => null,
     updateResource: async (user, req) => null,
     createCollection: async (user, req) => null,
     updateCollection: async (user, req) => null,
+    createLabelClass: async (user, req) => null,
+    createLabelInstance: async (user, req) => null,
     search: async (user, req) => null,
   });
   // const runnable = getRunnable(engine, name);
