@@ -18,6 +18,10 @@ import { safeParseURL } from '@refly/utils/url';
 import { useListenToSelection } from '@refly-packages/ai-workspace-common/hooks/use-listen-to-selection';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 
+// content selector
+import { useContentSelector } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-content-selector';
+import '@refly-packages/ai-workspace-common/modules/content-selector/styles/content-selector.scss';
+
 export const KnowledgeBaseResourceDetail = memo(() => {
   const [isFetching, setIsFetching] = useState(false);
   const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
@@ -25,6 +29,11 @@ export const KnowledgeBaseResourceDetail = memo(() => {
     updateResource: state.updateResource,
   }));
   const { handleAddTab } = useKnowledgeBaseTabs();
+  // 初始块选择
+  const { initMessageListener, contentSelectorElem } = useContentSelector(
+    'knowledge-base-resource-detail-container',
+    'resource-detail',
+  );
 
   const [queryParams] = useSearchParams();
   const resId = queryParams.get('resId');
@@ -77,6 +86,10 @@ export const KnowledgeBaseResourceDetail = memo(() => {
       handleGetDetail(resId as string);
     }
   }, [resId]);
+  // 初始化块选择
+  useEffect(() => {
+    initMessageListener();
+  }, []);
 
   return (
     <div className="knowledge-base-resource-detail-container">
@@ -134,6 +147,7 @@ export const KnowledgeBaseResourceDetail = memo(() => {
           </div>
         )}
       </div>
+      {contentSelectorElem}
     </div>
   );
 });

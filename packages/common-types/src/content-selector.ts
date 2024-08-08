@@ -22,7 +22,7 @@ export interface Data {
 }
 
 export interface SyncMarkEvent {
-  name: 'syncMarkEvent';
+  name: 'syncMarkEvent' | 'syncMarkEventFromSelector';
   body: {
     type: 'add' | 'remove' | 'reset';
     mark?: Mark;

@@ -9,6 +9,7 @@ import {
   onMessage,
 } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { SelectedNamespace } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 // import { getContentFromHtmlSelector } from "@/utils/weblink"
 
 function getElementType(element) {
@@ -38,7 +39,7 @@ function getElementType(element) {
   }
 }
 
-export const useContentSelector = () => {
+export const useContentSelector = (selector: string | null, namespace: SelectedNamespace) => {
   const statusRef = useRef(true);
   const markRef = useRef<HTMLDivElement>(undefined);
   const targetList = useRef<Element[]>([]);
@@ -84,29 +85,11 @@ export const useContentSelector = () => {
     return mark;
   };
 
-  const contentSelectorElem = (
-    <div className="refly-content-selector-container">
-      <div
-        ref={markRef}
-        style={{
-          backgroundColor: '#4d53e826 !important',
-          position: 'absolute',
-          top: 0,
-          bottom: 0,
-          left: 0,
-          right: 0,
-          pointerEvents: 'none',
-        }}
-        className={classNames('refly-content-selector-mark', 'refly-content-selector-mark--active')}
-      ></div>
-    </div>
-  );
-
-  const syncMarkEvent = (event: SyncMarkEvent) => {
+  const syncMarkEvent = (event: Partial<SyncMarkEvent>) => {
     const { type, mark } = event.body;
     // 发送给 refly-main-app
     const msg: BackgroundMessage = {
-      name: event.name,
+      name: 'syncMarkEventFromSelector',
       body: {
         type,
         mark: { type: mark?.type, data: mark?.data, xPath: mark?.xPath },
@@ -147,10 +130,17 @@ export const useContentSelector = () => {
       const rect = (target as Element)?.getBoundingClientRect();
       const mark = markRef.current;
 
-      mark.style.top = window.scrollY + rect.top + 'px';
-      mark.style.left = window.scrollX + rect.left + 'px';
-      mark.style.width = rect.width + 'px';
-      mark.style.height = rect.height + 'px';
+      const width = rect.width || 0;
+      const height = rect.height || 0;
+      const top = rect.top || 0;
+      const left = rect.left || 0;
+      // console.log('rect', , rect.height, rect.top, rect.left);
+
+      // console.log('top', window.scrollY + rect.top);
+      mark.style.top = window.scrollY + top + 'px';
+      mark.style.left = window.scrollX + left + 'px';
+      mark.style.width = width + 'px';
+      mark.style.height = height + 'px';
       mark.style.background = `#00968F26 !important`;
       mark.style.zIndex = '99999999';
     }
@@ -176,13 +166,28 @@ export const useContentSelector = () => {
       console.log('markListRef.current', markListRef.current);
 
       // 发送给 refly-main-app
-      const msg: SyncMarkEvent = {
-        name: 'syncMarkEvent',
+      const msg: Partial<SyncMarkEvent> = {
         body: markEvent,
       };
       console.log('contentSelectorClickHandler', safeStringifyJSON(msg));
       syncMarkEvent(msg);
     }
+  };
+
+  const initDomEventListener = () => {
+    const containerElem = selector ? document.querySelector(`.${selector}`) : document.body;
+
+    containerElem.addEventListener('mousemove', contentActionHandler);
+    containerElem.addEventListener('click', contentSelectorClickHandler, {
+      capture: true,
+    });
+  };
+
+  const removeDomEventListener = () => {
+    const containerElem = selector ? document.querySelector(`.${selector}`) : document.body;
+
+    containerElem.removeEventListener('mousemove', contentActionHandler);
+    containerElem.removeEventListener('click', contentSelectorClickHandler, { capture: true });
   };
 
   const contentSelectorStatusHandler = (event: MessageEvent<any>) => {
@@ -192,20 +197,15 @@ export const useContentSelector = () => {
       const { type } = (data as SyncStatusEvent)?.body;
 
       if (type === 'start') {
-        document.body.addEventListener('mousemove', contentActionHandler);
-        document.body.addEventListener('click', contentSelectorClickHandler, {
-          capture: true,
-        });
+        initDomEventListener();
         showContentSelectorRef.current = true;
       } else if (type === 'reset') {
         resetStyle();
-        document.body.removeEventListener('mousemove', contentActionHandler);
-        document.body.removeEventListener('click', contentSelectorClickHandler, { capture: true });
+        removeDomEventListener();
         showContentSelectorRef.current = false;
       } else if (type === 'stop') {
         resetMarkStyle();
-        document.body.removeEventListener('mousemove', contentActionHandler);
-        document.body.removeEventListener('click', contentSelectorClickHandler, { capture: true });
+        removeDomEventListener();
         showContentSelectorRef.current = false;
       }
     }
@@ -221,21 +221,63 @@ export const useContentSelector = () => {
     }
   };
 
+  const injectContentSelectorCss = () => {
+    const style = document.createElement('style');
+    style.textContent = `
+        * {
+        cursor: default !important;
+      }
+      .refly-content-selector-mark {
+        cursor: pointer !important;
+      }
+      .refly-content-selector-mark:hover {
+        background-color: #00968F26 !important;
+        border-radius: 4px;
+      }
+
+      .refly-content-selected-target {
+        background-color: #00968F26 !important;
+        border-radius: 4px;
+      }
+        `;
+    document.head.appendChild(style);
+  };
+
   const initMessageListener = () => {
-    window.addEventListener('message', contentSelectorStatusHandler);
+    injectContentSelectorCss();
     onMessage(contentSelectorStatusHandler, getRuntime()).then((clearEvent) => {
       messageListenerEventRef.current = clearEvent;
     });
 
     return () => {
       messageListenerEventRef.current?.();
-      document.body.removeEventListener('mousemove', contentActionHandler);
-      document.body.removeEventListener('click', contentSelectorClickHandler);
+      removeDomEventListener();
     };
   };
 
+  const contentSelectorElem = (
+    <div className="refly-content-selector-container">
+      <div
+        ref={markRef}
+        style={{
+          backgroundColor: '#4d53e826 !important',
+          position: 'fixed',
+          top: 0,
+          bottom: 0,
+          left: 0,
+          right: 0,
+          width: 0,
+          height: 0,
+          pointerEvents: 'none',
+        }}
+        className={classNames('refly-content-selector-mark', 'refly-content-selector-mark--active')}
+      ></div>
+    </div>
+  );
+
   return {
     contentSelectorElem,
+    injectContentSelectorCss,
     initMessageListener,
   };
 };

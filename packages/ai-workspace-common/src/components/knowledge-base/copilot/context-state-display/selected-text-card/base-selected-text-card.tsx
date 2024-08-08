@@ -91,7 +91,7 @@ export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
       <div className="context-state-card-body">
         {enableMultiSelect ? (
           currentSelectedMarks.map((item, index) => (
-            <div className="context-state-resource-item">
+            <div className="context-state-resource-item" key={index}>
               <Tag
                 icon={item?.xPath ? <IconHighlight /> : <IconFontColors />}
                 bordered

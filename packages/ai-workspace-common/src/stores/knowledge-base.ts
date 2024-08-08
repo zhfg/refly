@@ -22,7 +22,7 @@ export interface KnowledgeBaseTab {
 
 export type ContextDomain = 'weblink' | 'resource' | 'note' | 'collection' | 'selected-text';
 
-export type SelectedNamespace = 'resource-detail' | 'note';
+export type SelectedNamespace = 'resource-detail' | 'note' | 'extension-weblink'; // weblink 代表是在插件里面
 export interface KnowledgeBaseState {
   isSaveKnowledgeBaseModalVisible: boolean;
   knowledgeBaseList: Collection[];

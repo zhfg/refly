@@ -91,8 +91,13 @@ export const sendToContentScript = sendToWebpageMainWorld;
 // 同时处理各种情况，support web pages，兼容 web 中 copilot 与内容的交互
 export const sendMessage = async (message: BackgroundMessage, needResponse = true) => {
   const fromRuntime = message?.source;
+  let browser;
   try {
-    const { browser } = await import('wxt/browser');
+    if (fromRuntime !== 'web') {
+      const { browser: _browser } = await import('wxt/browser');
+      browser = _browser;
+    }
+
     const waitForResponse = new Promise((resolve) => {
       const listener = (response: any) => {
         // console.log('sendToBackground response', response);
@@ -105,7 +110,7 @@ export const sendMessage = async (message: BackgroundMessage, needResponse = tru
             window.removeEventListener('message', listener);
           }
 
-          resolve(response?.body);
+          resolve(response?.currentTarget ? response?.data?.body : response?.body);
         }
       };
 
@@ -124,6 +129,11 @@ export const sendMessage = async (message: BackgroundMessage, needResponse = tru
       if (activeTabId) {
         await browser.tabs.sendMessage(activeTabId, message);
       }
+
+      // 这里兼容 sidepanel 给 background 发消息
+      if (browser?.runtime?.sendMessage) {
+        await browser.runtime.sendMessage(message);
+      }
     } else if (fromRuntime === 'extension-csui') {
       if (window?.postMessage) {
         window.postMessage(message, '*');
@@ -131,6 +141,10 @@ export const sendMessage = async (message: BackgroundMessage, needResponse = tru
 
       if (browser?.runtime?.sendMessage) {
         await browser.runtime.sendMessage(message);
+      }
+    } else if (fromRuntime === 'web') {
+      if (window?.postMessage) {
+        window.postMessage(message, '*');
       }
     }
 
@@ -143,19 +157,31 @@ export const sendMessage = async (message: BackgroundMessage, needResponse = tru
   }
 };
 
-export const onMessage = async (callback: (message: any) => void, fromRuntime: IRuntime) => {
-  const { browser } = await import('wxt/browser');
+export const onMessage = async (_callback: (message: any) => void, fromRuntime: IRuntime) => {
+  let callback = _callback;
+  let windowCallback = (event: MessageEvent) => {
+    callback(event?.data);
+  };
+  let browser;
+  if (fromRuntime !== 'web') {
+    const { browser: _browser } = await import('wxt/browser');
+    browser = _browser;
+  }
 
   if (['extension-sidepanel', 'extension-background'].includes(fromRuntime)) {
     browser.runtime.onMessage.addListener(callback);
   } else if (fromRuntime === 'extension-csui') {
     // 1. csui -> csui 2. background/sidepanel -> csui
     if (window?.addEventListener) {
-      window.addEventListener('message', callback);
+      window.addEventListener('message', windowCallback);
     }
 
     if (browser?.runtime?.onMessage) {
       browser.runtime.onMessage.addListener(callback);
+    }
+  } else if (fromRuntime === 'web') {
+    if (window?.addEventListener) {
+      window.addEventListener('message', windowCallback);
     }
   }
 
@@ -164,11 +190,15 @@ export const onMessage = async (callback: (message: any) => void, fromRuntime: I
       browser.runtime.onMessage.removeListener(callback);
     } else if (fromRuntime === 'extension-csui') {
       if (window?.addEventListener) {
-        window.removeEventListener('message', callback);
+        window.removeEventListener('message', windowCallback);
       }
 
       if (browser?.runtime?.onMessage) {
         browser.runtime.onMessage.removeListener(callback);
+      }
+    } else if (fromRuntime === 'web') {
+      if (window?.addEventListener) {
+        window.removeEventListener('message', windowCallback);
       }
     }
   };

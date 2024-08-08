@@ -1,0 +1,35 @@
+* {
+  cursor: default !important;
+}
+
+.refly-content-selector-container {
+  .refly-content-selector-mark {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    border-radius: 8px;
+    background-color: #00968f26 !important;
+  }
+}
+
+.refly-content-selector-mark {
+  cursor: pointer !important;
+}
+.refly-content-selector-mark:hover {
+  background-color: #00968f26 !important;
+  border-radius: 4px;
+}
+input,
+textarea {
+  pointer-events: none;
+}
+
+.refly-content-selected-target {
+  background-color: #00968f26 !important;
+  border-radius: 4px;
+}

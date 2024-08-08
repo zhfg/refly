@@ -40,12 +40,19 @@ import { useNoteTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
 import { AINoteEmpty } from '@refly-packages/ai-workspace-common/components/knowledge-base/ai-note-empty';
 
+// content selector
+import { useContentSelector } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-content-selector';
+import '@refly-packages/ai-workspace-common/modules/content-selector/styles/content-selector.scss';
+
 const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) => {
   const { readOnly } = note;
   const lastCursorPosRef = useRef<number>();
   const [token] = useCookie('_refly_ai_sid');
   const noteStore = useNoteStore();
   const editorRef = useRef<EditorInstance>();
+
+  // 初始块选择
+  const { initMessageListener, contentSelectorElem } = useContentSelector('ai-note-editor', 'note');
 
   // 准备 extensions
   const websocketProvider = useMemo(() => {
@@ -133,7 +140,12 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
     });
   }, []);
 
+  // 初始化自由选择
   useListenToSelection(`ai-note-editor`, 'note');
+  // 初始化块选择
+  useEffect(() => {
+    initMessageListener();
+  }, []);
 
   useEffect(() => {
     if (editorRef.current) {
@@ -179,6 +191,7 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
           </EditorContent>
         </EditorRoot>
       </div>
+      {contentSelectorElem}
     </div>
   );
 };

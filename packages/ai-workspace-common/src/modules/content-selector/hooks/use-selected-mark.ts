@@ -31,7 +31,8 @@ export const useSelectedMark = () => {
     const { body, name } = data || {};
 
     console.log('contentSelectedHandler', data);
-    if (name === 'syncMarkEvent') {
+    if (name === 'syncMarkEventFromSelector') {
+      // 代表从 content-selector-app 获取信息
       const { marks = [] } = useContentSelectorStore.getState();
       const { currentSelectedMarks, enableMultiSelect, currentSelectedMark } = useKnowledgeBaseStore.getState();
       const { type, mark } = body || {};
@@ -65,13 +66,14 @@ export const useSelectedMark = () => {
   const handleInitContentSelectorListener = () => {
     const { isInjectStyles } = useContentSelectorStore.getState();
     contentSelectorStore.setShowContentSelector(true);
+    const runtime = getRuntime();
 
-    if (!isInjectStyles) {
+    if (!isInjectStyles && runtime !== 'web') {
       // TODO: 这里需要持有持久状态，不能光靠前端临时状态保持，因为 sidepanel 会被关闭
-      sendToBackground({
+      sendMessage({
         type: 'injectContentSelectorCss',
         name: 'injectContentSelectorCss',
-        source: getRuntime(),
+        source: runtime,
       });
 
       contentSelectorStore?.setIsInjectStyles(true);
@@ -86,7 +88,7 @@ export const useSelectedMark = () => {
 
     sendMessage({
       ...event,
-      source: getRuntime(),
+      source: runtime,
     });
   };
 
