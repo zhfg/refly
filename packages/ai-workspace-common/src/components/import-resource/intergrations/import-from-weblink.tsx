@@ -22,6 +22,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { SearchResult, UpsertResourceRequest } from '@refly/openapi-schema';
 import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-or-search-list';
 import { useReloadListState } from '@refly/ai-workspace-common/stores/reload-list-state';
+import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 const { TextArea } = Input;
 const Option = Select.Option;
@@ -31,6 +32,9 @@ export const ImportFromWeblink = () => {
   const [scrapeLinkLoading, setScrapeLinkLoading] = useState(false);
   const importResourceStore = useImportResourceStore();
   const reloadListState = useReloadListState();
+
+  const [queryParams] = useSearchParams();
+  const kbId = queryParams.get('kbId');
 
   console.log('select collection id', importResourceStore.selectedCollectionId);
 
@@ -167,8 +171,10 @@ export const ImportFromWeblink = () => {
       message.success('保存成功');
       importResourceStore.setScapeLinks([]);
       importResourceStore.setImportResourceModalVisible(false);
-      reloadListState.setReloadKnowledgeBaseList(true);
-      reloadListState.setReloadResourceList(true);
+      if (selectedCollectionId === kbId) {
+        reloadListState.setReloadKnowledgeBaseList(true);
+        reloadListState.setReloadResourceList(true);
+      }
       setLinkStr('');
     } catch (err) {
       message.error('保存失败');
@@ -179,6 +185,11 @@ export const ImportFromWeblink = () => {
 
   useEffect(() => {
     loadMore();
+    importResourceStore.setSelectedCollectionId(kbId);
+    return () => {
+      /* reset selectedCollectionId after modal hide */
+      importResourceStore.setSelectedCollectionId('');
+    };
   }, []);
 
   return (
@@ -245,8 +256,7 @@ export const ImportFromWeblink = () => {
               placeholder="选择保存知识库"
               showSearch
               className={'kg-selector'}
-              // value={searchValue}
-              defaultValue={'new-collection'}
+              defaultValue={`${kbId || 'new-collection'}`}
               onInputValueChange={(value) => {
                 handleValueChange(value, ['collection']);
               }}

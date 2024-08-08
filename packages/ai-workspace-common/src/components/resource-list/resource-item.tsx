@@ -15,14 +15,18 @@ import { Markdown } from '../markdown';
 import classNames from 'classnames';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
+import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
+
 export const ResourceItem = (props: {
-  item: Partial<Resource>;
+  item: Resource;
   index: number;
   showUtil?: boolean;
   showDesc?: boolean;
   showBtn?: { summary: boolean; markdown: boolean; externalOrigin: boolean };
+  canDelete?: boolean;
   btnProps?: { defaultActiveKeys: string[] };
   handleItemClick: ({ resourceId, collectionId }: { resourceId: string; collectionId: string }) => void;
+  handleItemDelete?: (resource: Resource) => void;
 }) => {
   const {
     item,
@@ -31,6 +35,7 @@ export const ResourceItem = (props: {
     showUtil = true,
     showDesc = true,
     showBtn = { summary: true, markdown: true, externalOrigin: true },
+    canDelete,
   } = props;
   const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
 
@@ -82,6 +87,13 @@ export const ResourceItem = (props: {
             {item.data?.url}
           </a>
         </div>
+        {canDelete && (
+          <DeleteDropdownMenu
+            data={item}
+            type="resource"
+            postDeleteList={(item: Resource) => props.handleItemDelete(item)}
+          />
+        )}
       </div>
       <div className="knowledge-base-directory-title">{item.data?.title}</div>
       <div className="knowledge-base-directory-action">
@@ -139,13 +151,6 @@ export const ResourceItem = (props: {
           ) : null}
         </div>
       ) : null}
-      {/* <div className="knowledge-base-directory-keyword-list">
-        {(item?.data?.keywords || [])?.map((keyword, index) => (
-          <div className="knowledge-base-directory-keyword-item" key={index}>
-            <span>{keyword}</span>
-          </div>
-        ))}
-      </div> */}
       {showDesc ? (
         <div style={{ maxHeight: 200, overflowY: 'scroll' }}>
           <Markdown content={item?.content || ''} />
