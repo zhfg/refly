@@ -4,6 +4,7 @@ import { devtools } from 'zustand/middleware';
 import type { Collection, Resource, SearchDomain } from '@refly/openapi-schema';
 import { EditorInstance } from '@refly-packages/editor-core/components';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { Mark } from '@refly/common-types';
 
 export enum ActionSource {
   KnowledgeBase = 'knowledge-base',
@@ -31,10 +32,10 @@ export interface KnowledgeBaseState {
   isRequesting: boolean;
 
   // selection text
-  currentSelectedText: string;
+  currentSelectedMark: Mark;
   selectedNamespace: SelectedNamespace;
   enableMultiSelect: boolean; // 支持多选
-  currentSelectedContentList: string[]; // 多选内容
+  currentSelectedMarks: Mark[]; // 多选内容
 
   // 上下文
   showContextCard: boolean; // 资源、笔记、weblink、知识库、选中内容等
@@ -76,10 +77,10 @@ export interface KnowledgeBaseState {
   resetState: () => void;
 
   // selected text context 面板相关的内容
-  updateSelectedText: (selectedText: string) => void;
+  updateCurrentSelectedMark: (mark: Mark) => void;
   updateSelectedNamespace: (selectedNamespace: SelectedNamespace) => void;
   updateEnableMultiSelect: (enableMultiSelect: boolean) => void;
-  updateCurrentSelectedContentList: (currentSelectedContentList: string[]) => void;
+  updateCurrentSelectedMarks: (marks: Mark[]) => void;
 
   // context card
   setShowContextCard: (showcontextCard: boolean) => void;
@@ -89,10 +90,10 @@ export interface KnowledgeBaseState {
 }
 
 export const defaultSelectedContextState = {
-  currentSelectedText: '',
+  currentSelectedMark: null as Mark,
   selectedNamespace: 'resource-detail' as SelectedNamespace,
   enableMultiSelect: false,
-  currentSelectedContentList: [],
+  currentSelectedMarks: [] as Mark[],
 };
 
 export const defaultCurrentContext = {
@@ -167,12 +168,11 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
     updateNotePanelVisible: (visible: boolean) => set((state) => ({ ...state, notePanelVisible: visible })),
 
     // selected text
-    updateSelectedText: (selectedText: string) => set((state) => ({ ...state, currentSelectedText: selectedText })),
+    updateCurrentSelectedMark: (mark: Mark) => set((state) => ({ ...state, currentSelectedMark: mark })),
     updateSelectedNamespace: (selectedNamespace: SelectedNamespace) =>
       set((state) => ({ ...state, selectedNamespace })),
     updateEnableMultiSelect: (enableMultiSelect: boolean) => set((state) => ({ ...state, enableMultiSelect })),
-    updateCurrentSelectedContentList: (currentSelectedContentList: string[]) =>
-      set((state) => ({ ...state, currentSelectedContentList })),
+    updateCurrentSelectedMarks: (marks: Mark[]) => set((state) => ({ ...state, currentSelectedMarks: marks })),
 
     // context card
     setContextDomain: (contextDomain: ContextDomain) => set((state) => ({ ...state, contextDomain })),

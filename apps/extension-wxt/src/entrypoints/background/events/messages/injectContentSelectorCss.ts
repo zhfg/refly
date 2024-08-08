@@ -20,6 +20,7 @@ export const handleInjectContentSelectorCss = async (msg: BackgroundMessage) => 
             .refly-content-selector-mark:hover {
               background-color: #00968F26 !important;
               border-radius: 4px;
+              z-index: 99999999;
             }
             input,
             textarea {
@@ -29,6 +30,7 @@ export const handleInjectContentSelectorCss = async (msg: BackgroundMessage) => 
             .refly-content-selected-target {
               background-color: #00968F26 !important;
               border-radius: 4px;
+              z-index: 99999999;
             }
               `;
           document.head.appendChild(style);

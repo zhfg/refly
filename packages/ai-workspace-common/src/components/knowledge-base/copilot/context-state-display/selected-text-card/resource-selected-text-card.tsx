@@ -2,11 +2,11 @@ import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/
 import { BaseSelectedTextCard } from './base-selected-text-card';
 import { getQuickActionPrompt } from '@refly-packages/ai-workspace-common/utils/quickActionPrompt';
 import { Button } from '@arco-design/web-react';
-import { useGetCurrentSelectedText } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-selected-text';
+import { useGetCurrentSelectedMark } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-selected-text';
 
 export const ResourceSelectedTextCard = () => {
   const { runSkill } = useBuildThreadAndRun();
-  const { hasContent } = useGetCurrentSelectedText();
+  const { hasContent } = useGetCurrentSelectedMark();
   const disabled = !hasContent;
 
   const skillList = [
@@ -30,6 +30,7 @@ export const ResourceSelectedTextCard = () => {
         <Button
           type="outline"
           size="mini"
+          key={index}
           className="context-state-action-item"
           style={{ borderRadius: 8 }}
           disabled={disabled}

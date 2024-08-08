@@ -1,95 +1,166 @@
 import { useEffect, useRef } from 'react';
-import { useContentSelectorStore } from '@/stores/content-selector';
-import { safeParseJSON } from '@refly-packages/utils/parse';
-import { sendToBackground } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import { useContentSelectorStore } from '../stores/content-selector';
+import {
+  onMessage,
+  sendToBackground,
+  sendToContentScript,
+  sendMessage,
+  BackgroundMessage,
+} from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import type { Mark, SyncMarkEvent, SyncStatusEvent } from '@refly/common-types';
+import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+
 // stores
 
+// 与 selectedText 一起控制最终的选中
 export const useSelectedMark = () => {
   const contentSelectorStore = useContentSelectorStore();
-  const { setMarks, setShowSelectedMarks, resetState } = useContentSelectorStore();
+  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
+    currentSelectedMark: state.currentSelectedMark,
+    currentSelectedMarks: state.currentSelectedMarks,
+    updateCurrentSelectedMarks: state.updateCurrentSelectedMarks,
+    updateCurrentSelectedMark: state.updateCurrentSelectedMark,
+  }));
+  const { setMarks, resetState } = useContentSelectorStore();
+  const messageListenerEventRef = useRef<any>();
 
   // 从 content-selector-app 获取信息，以此和 main-app 解耦合
   const contentSelectedHandler = (event: MessageEvent<any>) => {
-    const data = event?.data || {};
-    if (data?.name === 'syncSelectedMark') {
-      const marks = safeParseJSON(data?.payload?.marks);
+    const data = event as any as SyncMarkEvent;
+    const { body, name } = data || {};
 
-      contentSelectorStore.setMarks(marks);
+    console.log('contentSelectedHandler', data);
+    if (name === 'syncMarkEvent') {
+      const { marks = [] } = useContentSelectorStore.getState();
+      const { currentSelectedMarks, enableMultiSelect, currentSelectedMark } = useKnowledgeBaseStore.getState();
+      const { type, mark } = body || {};
+
+      // enableMultiSelect 只是打开生效状态，不影响实际选中
+      if (type === 'remove') {
+        const newMarks = marks.filter((item) => item?.xPath !== mark?.xPath);
+        contentSelectorStore.setMarks(newMarks);
+
+        const newCurrentSelectedMarks = currentSelectedMarks.filter((item) => item?.xPath !== mark?.xPath);
+        knowledgeBaseStore.updateCurrentSelectedMarks(newCurrentSelectedMarks);
+
+        knowledgeBaseStore.updateCurrentSelectedMark(null);
+      } else if (type === 'add') {
+        const newMarks = [...marks, mark];
+        contentSelectorStore.setMarks(newMarks);
+
+        const newCurrentSelectedMarks = [...currentSelectedMarks, mark];
+        knowledgeBaseStore.updateCurrentSelectedMarks(newCurrentSelectedMarks);
+
+        knowledgeBaseStore.updateCurrentSelectedMark(mark);
+      } else if (type === 'reset') {
+        // 这里代表一起清空
+        contentSelectorStore.setMarks([]);
+        knowledgeBaseStore.updateCurrentSelectedMarks([]);
+        knowledgeBaseStore.updateCurrentSelectedMark(null);
+      }
     }
   };
 
-  const handleToggleContentSelector = (showContentSelector: boolean) => {
-    contentSelectorStore.setShowContentSelector(showContentSelector);
+  const handleInitContentSelectorListener = () => {
+    const { isInjectStyles } = useContentSelectorStore.getState();
+    contentSelectorStore.setShowContentSelector(true);
 
-    // 这里打开
-    if (!contentSelectorStore.showContentSelector) {
-      contentSelectorStore.setShowSelectedMarks(true);
-    }
-
-    if (!contentSelectorStore?.isInjectStyles) {
+    if (!isInjectStyles) {
+      // TODO: 这里需要持有持久状态，不能光靠前端临时状态保持，因为 sidepanel 会被关闭
       sendToBackground({
         type: 'injectContentSelectorCss',
-        name: 'injectContentSelectorCSS',
+        name: 'injectContentSelectorCss',
         source: getRuntime(),
       });
 
       contentSelectorStore?.setIsInjectStyles(true);
     }
 
-    window.postMessage({
-      name: 'setShowContentSelector',
-      payload: {
-        showContentSelector,
+    const event: SyncStatusEvent = {
+      name: 'syncStatusEvent',
+      body: {
+        type: 'start',
       },
+    };
+
+    sendMessage({
+      ...event,
+      source: getRuntime(),
+    });
+  };
+
+  const handleStopContentSelectorListener = () => {
+    contentSelectorStore.setShowContentSelector(false);
+
+    const event: SyncStatusEvent = {
+      name: 'syncStatusEvent',
+      body: {
+        type: 'stop',
+      },
+    };
+    sendMessage({
+      ...event,
+      source: getRuntime(),
     });
   };
 
   const handleRemoveMark = (xPath: string) => {
-    window.postMessage({
-      name: 'removeSelectedMark',
-      payload: {
-        xPath,
-      },
+    const { marks } = useContentSelectorStore.getState();
+    const mark = marks.find((item) => item?.xPath === xPath);
+    const event: SyncMarkEvent = { body: { type: 'remove', mark }, name: 'syncMarkEvent' };
+    sendMessage({
+      ...event,
+      source: getRuntime(),
     });
 
-    const { marks } = useContentSelectorStore.getState();
     const newMarks = marks.filter((item) => item?.xPath !== xPath);
     setMarks(newMarks);
   };
 
-  const handleRemoveAll = () => {
-    window.postMessage({
-      name: 'removeAllSelectedMark',
+  const handleRemoveAllMarks = () => {
+    const event: SyncMarkEvent = { body: { type: 'reset' }, name: 'syncMarkEvent' };
+    setMarks([]);
+    sendMessage({
+      ...event,
+      source: getRuntime(),
     });
   };
 
-  const handleExit = () => {
-    handleRemoveAll();
+  const handleReset = () => {
+    contentSelectorStore.setShowContentSelector(false);
 
-    setShowSelectedMarks(false);
-  };
+    const event: SyncStatusEvent = {
+      name: 'syncStatusEvent',
+      body: {
+        type: 'reset',
+      },
+    };
+    sendMessage({
+      ...event,
+      source: getRuntime(),
+    });
 
-  const handleResetState = () => {
-    handleToggleContentSelector(false);
-
+    handleRemoveAllMarks();
     resetState();
-    handleExit();
   };
 
-  useEffect(() => {
-    window.addEventListener('message', contentSelectedHandler);
+  const initMessageListener = () => {
+    onMessage(contentSelectedHandler, getRuntime()).then((clearEvent) => {
+      messageListenerEventRef.current = clearEvent;
+    });
 
     return () => {
-      document.body.removeEventListener('message', contentSelectedHandler);
+      messageListenerEventRef.current?.(); // clear event
     };
-  }, []);
+  };
 
   return {
-    handleToggleContentSelector,
-    handleExit,
-    handleRemoveAll,
-    handleResetState,
+    handleInitContentSelectorListener,
+    handleStopContentSelectorListener,
+    handleReset,
+    handleRemoveAllMarks,
     handleRemoveMark,
+    initMessageListener,
   };
 };

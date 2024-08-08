@@ -4,9 +4,19 @@ import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/store
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { getQuickActionPrompt } from '@refly-packages/ai-workspace-common/utils/quickActionPrompt';
 import { Button, Switch, Tag, Tooltip } from '@arco-design/web-react';
-import { IconCloseCircle, IconFile, IconFolder, IconFontColors, IconRefresh } from '@arco-design/web-react/icon';
+import {
+  IconCloseCircle,
+  IconFile,
+  IconFolder,
+  IconFontColors,
+  IconHighlight,
+  IconRefresh,
+} from '@arco-design/web-react/icon';
 import { useGetSkills } from '@refly-packages/ai-workspace-common/skills/main-logic/use-get-skills';
 import { useDispatchAction } from '@refly-packages/ai-workspace-common/skills/main-logic/use-dispatch-action';
+import { ContentSelectorBtn } from '@refly-packages/ai-workspace-common/modules/content-selector/components/content-selector-btn';
+import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
+import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
 
 interface BaseSelectedTextCardProps {
   title: string;
@@ -15,14 +25,15 @@ interface BaseSelectedTextCardProps {
 
 export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
   const { title, skillContent } = props;
-  const { currentSelectedText } = useCopilotContextState();
   const knowledgeBaseStore = useKnowledgeBaseStore();
-  const { enableMultiSelect, currentSelectedContentList = [] } = knowledgeBaseStore;
+  const { enableMultiSelect, currentSelectedMarks = [], currentSelectedMark } = knowledgeBaseStore;
+  const { marks = [] } = useContentSelectorStore();
   const searchStateStore = useSearchStateStore();
+  const { handleReset } = useSelectedMark();
 
   // skill
   const [skills] = useGetSkills();
-  const hasContent = currentSelectedText?.length > 0 || (enableMultiSelect && currentSelectedContentList?.length > 0);
+  const hasContent = currentSelectedMark || (enableMultiSelect && currentSelectedMarks?.length > 0);
 
   return (
     <div className="context-state-card context-state-current-page">
@@ -31,11 +42,7 @@ export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
           <IconFontColors />
           <span className="context-state-card-header-title">
             {title}{' '}
-            {enableMultiSelect ? (
-              <span style={{ color: '#00968F' }}>（共 {currentSelectedContentList.length} 个）</span>
-            ) : (
-              ``
-            )}
+            {enableMultiSelect ? <span style={{ color: '#00968F' }}>（共 {currentSelectedMarks.length} 个）</span> : ``}
           </span>
         </div>
         <div className="context-state-card-header-right">
@@ -47,10 +54,12 @@ export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
               <IconRefresh
                 onClick={() => {
                   knowledgeBaseStore.resetSelectedContextState();
+                  handleReset();
                 }}
               />
             }
           ></Button>
+          <ContentSelectorBtn />
           <Tooltip content="多选">
             <Switch
               type="round"
@@ -59,8 +68,8 @@ export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
               style={{ marginRight: 4, background: 'var(--color-fill-4)' }}
               onChange={(value) => {
                 knowledgeBaseStore.updateEnableMultiSelect(value);
-                if (currentSelectedContentList?.length === 0) {
-                  knowledgeBaseStore.updateCurrentSelectedContentList(currentSelectedText ? [currentSelectedText] : []);
+                if (currentSelectedMarks?.length === 0) {
+                  knowledgeBaseStore.updateCurrentSelectedMarks(currentSelectedMark ? [currentSelectedMark] : []);
                 }
               }}
             />
@@ -71,8 +80,7 @@ export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
             icon={
               <IconCloseCircle
                 onClick={() => {
-                  knowledgeBaseStore.updateSelectedText('');
-                  searchStateStore.setSearchTarget(SearchTarget.CurrentPage);
+                  knowledgeBaseStore.updateCurrentSelectedMark(null);
                   knowledgeBaseStore.setShowContextCard(false);
                 }}
               />
@@ -82,17 +90,25 @@ export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
       </div>
       <div className="context-state-card-body">
         {enableMultiSelect ? (
-          currentSelectedContentList.map((item, index) => (
+          currentSelectedMarks.map((item, index) => (
             <div className="context-state-resource-item">
-              <Tag icon={<IconFontColors />} bordered className="context-state-resource-item-tag">
-                {item}
+              <Tag
+                icon={item?.xPath ? <IconHighlight /> : <IconFontColors />}
+                bordered
+                className="context-state-resource-item-tag"
+              >
+                {item?.data}
               </Tag>
             </div>
           ))
-        ) : currentSelectedText ? (
+        ) : currentSelectedMark ? (
           <div className="context-state-resource-item">
-            <Tag icon={<IconFontColors />} bordered className="context-state-resource-item-tag">
-              {currentSelectedText}
+            <Tag
+              icon={currentSelectedMark?.xPath ? <IconHighlight /> : <IconFontColors />}
+              bordered
+              className="context-state-resource-item-tag"
+            >
+              {currentSelectedMark?.data}
             </Tag>
           </div>
         ) : (

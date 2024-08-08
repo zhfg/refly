@@ -101,7 +101,7 @@ export const AICopilot = (props: AICopilotProps) => {
 
   // ai-note handler
   useAINote(true);
-  useSkillManagement({ shouldInit: true });
+  const { handleGetSkillInstances, handleGetSkillTemplates } = useSkillManagement();
 
   const handleSwitchSearchTarget = () => {
     if (showContextState) {
@@ -182,6 +182,12 @@ export const AICopilot = (props: AICopilotProps) => {
   }, [showContextState]);
   useResizeCopilot({ containerSelector: 'ai-copilot-container' });
   useDynamicInitContextPanelState(); // 动态根据页面状态更新上下文面板状态
+  useEffect(() => {
+    handleGetSkillInstances();
+    handleGetSkillTemplates();
+  }, []);
+
+  console.log('showContextCard', showContextCard);
 
   return (
     <div className="ai-copilot-container">

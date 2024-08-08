@@ -14,8 +14,8 @@ import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import { getClientOrigin } from '@refly/utils/url';
 import { useUserStore } from '@/stores/user';
 import { useHomeStateStore } from '@/stores/home-state';
-import { useSelectedMark } from '@/hooks/use-selected-mark';
 import { useTranslation } from 'react-i18next';
+import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
 
 export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
   const { onlyShowClose = false } = props;
@@ -23,7 +23,7 @@ export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
   const navigate = useNavigate();
   const { userProfile } = useUserStore();
   const homeStateStore = useHomeStateStore();
-  const { handleResetState } = useSelectedMark();
+  const { handleReset } = useSelectedMark();
 
   const { t } = useTranslation();
 
@@ -82,7 +82,7 @@ export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
             alt={t('extension.loggedHomePage.homePage.header.close')}
             onClick={(_) => {
               siderStore.setShowSider(false);
-              handleResetState();
+              handleReset();
             }}
           />
         </IconTip>

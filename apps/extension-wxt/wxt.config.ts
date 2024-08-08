@@ -12,10 +12,10 @@ const getFileAbsolutePath = (fileName: string) => {
   return path.join(__dirname, fileName);
 };
 
-const extraWatchFiles = [
-  getFileAbsolutePath('../../packages/ai-workspace-common/src'),
-  getFileAbsolutePath('./src/entrypoints/'),
-];
+// const extraWatchFiles = [
+//   getFileAbsolutePath('../../packages/ai-workspace-common/src'),
+//   getFileAbsolutePath('./src/entrypoints/'),
+// ];
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
@@ -37,9 +37,9 @@ export default defineConfig({
         codeInspectorPlugin({
           bundler: 'vite',
         }),
-        pluginViteWatcher({
-          filesPath: extraWatchFiles,
-        }),
+        // pluginViteWatcher({
+        //   filesPath: extraWatchFiles,
+        // }),
       ],
       css: {
         postcss: postcssConfig,

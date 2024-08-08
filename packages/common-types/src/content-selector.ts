@@ -20,3 +20,20 @@ export interface Data {
   marks: Mark[];
   userId: string; // 是否需要 by User 保存，到时候可以推荐给其他人是这个人的策略
 }
+
+export interface SyncMarkEvent {
+  name: 'syncMarkEvent';
+  body: {
+    type: 'add' | 'remove' | 'reset';
+    mark?: Mark;
+  };
+}
+
+export interface SyncStatusEvent {
+  name: 'syncStatusEvent';
+  body: {
+    type: 'start' | 'update' | 'stop' | 'reset';
+    enableMultiSelect?: boolean;
+    showContentSelector?: boolean;
+  };
+}

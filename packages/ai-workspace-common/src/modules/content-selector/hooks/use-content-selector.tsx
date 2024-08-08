@@ -1,8 +1,14 @@
 import classNames from 'classnames';
 import { useEffect, useRef } from 'react';
-import type { Mark } from '@refly/common-types';
+import type { Mark, SyncMarkEvent, SyncStatusEvent } from '@refly/common-types';
 import getXPath from 'get-xpath';
 import { safeStringifyJSON } from '@refly-packages/utils/parse';
+import {
+  BackgroundMessage,
+  sendMessage,
+  onMessage,
+} from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 // import { getContentFromHtmlSelector } from "@/utils/weblink"
 
 function getElementType(element) {
@@ -38,6 +44,7 @@ export const useContentSelector = () => {
   const targetList = useRef<Element[]>([]);
   const markListRef = useRef<Mark[]>([]);
   const showContentSelectorRef = useRef<boolean>(false);
+  const messageListenerEventRef = useRef<any>();
 
   const buildMark = (target: HTMLElement) => {
     const content = target.innerText;
@@ -64,12 +71,17 @@ export const useContentSelector = () => {
     (target as Element)?.classList.add('refly-content-selected-target');
     // 添加到 list 方便后续统一的处理
     targetList.current = targetList.current.concat(target as Element);
+
+    return mark;
   };
 
   const removeMark = (target: HTMLElement, xPath: string) => {
+    const mark = markListRef.current?.find((item) => item?.xPath === xPath);
     markListRef.current = markListRef.current.filter((item) => item.xPath !== xPath);
     (target as Element)?.classList.remove('refly-content-selected-target');
     targetList.current = targetList.current.filter((item) => item != target);
+
+    return mark;
   };
 
   const contentSelectorElem = (
@@ -90,35 +102,46 @@ export const useContentSelector = () => {
     </div>
   );
 
-  const syncMessageResetMarks = () => {
+  const syncMarkEvent = (event: SyncMarkEvent) => {
+    const { type, mark } = event.body;
     // 发送给 refly-main-app
-    const msg = {
-      name: 'syncSelectedMark',
-      payload: {
-        marks: safeStringifyJSON(markListRef.current),
+    const msg: BackgroundMessage = {
+      name: event.name,
+      body: {
+        type,
+        mark: { type: mark?.type, data: mark?.data, xPath: mark?.xPath },
       },
+      source: getRuntime(),
     };
     console.log('contentSelectorClickHandler', safeStringifyJSON(msg));
-    window.postMessage(msg);
+    sendMessage(msg);
   };
 
-  const resetStyle = () => {
+  const resetMarkStyle = () => {
     // mark style
     const mark = markRef.current;
 
+    // TODO: 后续改成 react 组件渲染，带来更多自由度，目前现跑通 PoC
     mark.style.top = '0px';
     mark.style.left = '0px';
     mark.style.width = '0px';
     mark.style.height = '0px';
+    mark.style.width = '0px';
+    mark.style.height = '0px';
+  };
 
+  const resetStyle = () => {
+    resetMarkStyle();
     // selected list style
     targetList.current.forEach((item) => item?.classList?.remove('refly-content-selected-target'));
+    targetList.current = [];
     markListRef.current = [];
   };
 
   const contentActionHandler = (ev: MouseEvent) => {
     ev.stopImmediatePropagation();
 
+    console.log('contentActionHandler', ev, statusRef, markRef, showContentSelectorRef);
     if (statusRef.current && markRef.current && showContentSelectorRef.current) {
       const { target } = ev;
       const rect = (target as Element)?.getBoundingClientRect();
@@ -128,7 +151,8 @@ export const useContentSelector = () => {
       mark.style.left = window.scrollX + rect.left + 'px';
       mark.style.width = rect.width + 'px';
       mark.style.height = rect.height + 'px';
-      mark.style.backgroundColor = `#4d53e826 !important`;
+      mark.style.background = `#00968F26 !important`;
+      mark.style.zIndex = '99999999';
     }
   };
 
@@ -136,75 +160,82 @@ export const useContentSelector = () => {
     ev.stopImmediatePropagation();
     ev.preventDefault();
     ev.stopPropagation();
+    let markEvent: { type: 'remove' | 'add'; mark: Mark };
 
     if (statusRef.current && markRef.current && showContentSelectorRef.current) {
       const { target } = ev;
 
       if ((target as Element)?.classList.contains('refly-content-selected-target')) {
-        removeMark(target as HTMLElement, getXPath(target));
+        const mark = removeMark(target as HTMLElement, getXPath(target));
+        markEvent = { type: 'remove', mark };
       } else {
-        addMark(target as HTMLElement);
+        const mark = addMark(target as HTMLElement);
+        markEvent = { type: 'add', mark };
       }
 
       console.log('markListRef.current', markListRef.current);
+
       // 发送给 refly-main-app
-      const msg = {
-        name: 'syncSelectedMark',
-        payload: {
-          marks: safeStringifyJSON(
-            markListRef.current?.map(({ target, ...extra }) => ({ ...extra })), // 去掉 target，因为会产生循环引用
-          ),
-        },
+      const msg: SyncMarkEvent = {
+        name: 'syncMarkEvent',
+        body: markEvent,
       };
       console.log('contentSelectorClickHandler', safeStringifyJSON(msg));
-      window.postMessage(msg);
+      syncMarkEvent(msg);
     }
   };
 
   const contentSelectorStatusHandler = (event: MessageEvent<any>) => {
-    const data = event?.data || {};
-    if (data?.name === 'setShowContentSelector') {
-      showContentSelectorRef.current = data?.payload?.showContentSelector || false;
+    const data = event as any as BackgroundMessage;
+    console.log('contentSelectorStatusHandler data', event, getRuntime());
+    if ((data as SyncStatusEvent)?.name === 'syncStatusEvent') {
+      const { type } = (data as SyncStatusEvent)?.body;
 
-      if (data?.payload?.showContentSelector) {
+      if (type === 'start') {
         document.body.addEventListener('mousemove', contentActionHandler);
         document.body.addEventListener('click', contentSelectorClickHandler, {
           capture: true,
         });
-      } else {
-        document.body.removeEventListener('message', contentSelectorClickHandler);
-        document.body.removeEventListener('click', contentSelectorClickHandler, { capture: true });
-      }
-
-      // 取消的话直接取消 classList
-      if (!data?.payload?.showContentSelector) {
+        showContentSelectorRef.current = true;
+      } else if (type === 'reset') {
         resetStyle();
+        document.body.removeEventListener('mousemove', contentActionHandler);
+        document.body.removeEventListener('click', contentSelectorClickHandler, { capture: true });
+        showContentSelectorRef.current = false;
+      } else if (type === 'stop') {
+        resetMarkStyle();
+        document.body.removeEventListener('mousemove', contentActionHandler);
+        document.body.removeEventListener('click', contentSelectorClickHandler, { capture: true });
+        showContentSelectorRef.current = false;
       }
     }
 
-    if (data?.name === 'removeSelectedMark') {
-      const xPath = data?.payload?.xPath || '';
-      const target = markListRef.current.find((item) => item.xPath === xPath)?.target;
-      removeMark(target as HTMLElement, xPath);
-    }
+    if ((data as SyncMarkEvent)?.name === 'syncMarkEvent') {
+      const { mark, type } = (data as SyncMarkEvent)?.body;
 
-    if (data?.name === 'removeAllSelectedMark') {
-      resetStyle();
-      syncMessageResetMarks();
+      if (type === 'remove') {
+        const xPath = mark?.xPath || '';
+        const target = markListRef.current.find((item) => item.xPath === xPath)?.target;
+        removeMark(target as HTMLElement, xPath);
+      }
     }
   };
 
-  useEffect(() => {
+  const initMessageListener = () => {
     window.addEventListener('message', contentSelectorStatusHandler);
+    onMessage(contentSelectorStatusHandler, getRuntime()).then((clearEvent) => {
+      messageListenerEventRef.current = clearEvent;
+    });
 
     return () => {
-      document.body.removeEventListener('mousemove', contentSelectorStatusHandler);
-      document.body.removeEventListener('message', contentSelectorClickHandler);
+      messageListenerEventRef.current?.();
+      document.body.removeEventListener('mousemove', contentActionHandler);
       document.body.removeEventListener('click', contentSelectorClickHandler);
     };
-  }, []);
+  };
 
   return {
     contentSelectorElem,
+    initMessageListener,
   };
 };

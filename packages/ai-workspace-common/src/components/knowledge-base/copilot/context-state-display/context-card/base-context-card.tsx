@@ -60,8 +60,6 @@ export const BaseContextCard = (props: BaseContextPanelProps) => {
             icon={
               <IconCloseCircle
                 onClick={() => {
-                  knowledgeBaseStore.updateSelectedText('');
-                  searchStateStore.setSearchTarget(SearchTarget.CurrentPage);
                   knowledgeBaseStore.setShowContextCard(false);
                 }}
               />

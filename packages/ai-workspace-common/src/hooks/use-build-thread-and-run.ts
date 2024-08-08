@@ -78,9 +78,9 @@ export const useBuildThreadAndRun = () => {
     const {
       currentKnowledgeBase,
       currentResource,
-      currentSelectedText = '',
+      currentSelectedMark,
       enableMultiSelect,
-      currentSelectedContentList = [],
+      currentSelectedMarks = [],
     } = useKnowledgeBaseStore.getState();
     const { currentNote } = useNoteStore.getState();
     const { checkedKeys } = useContextPanelStore.getState();
@@ -114,7 +114,9 @@ export const useBuildThreadAndRun = () => {
       return Array.from(new Set(ids?.filter((id) => !!id)));
     };
 
-    const contentList = enableMultiSelect ? currentSelectedContentList : [currentSelectedText];
+    const contentList = enableMultiSelect
+      ? currentSelectedMarks.map((item) => item?.data)
+      : [currentSelectedMark?.data];
 
     let context: SkillContext = {
       locale: localSettings?.outputLocale || LOCALE.EN,
@@ -153,7 +155,7 @@ export const useBuildThreadAndRun = () => {
     // 开始提问
     buildTaskAndGenReponse(task as InvokeSkillRequest);
     chatStore.setNewQAText('');
-    knowledgeBaseStore.updateSelectedText('');
+    knowledgeBaseStore.updateCurrentSelectedMark(null);
   };
 
   return {

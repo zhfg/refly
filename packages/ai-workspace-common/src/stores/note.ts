@@ -22,7 +22,6 @@ export type NoteSaveStatus = 'Saved' | 'Unsaved';
 
 interface NoteBaseState {
   currentNote: Note | null;
-  currentSelectedText: string;
   isRequesting: boolean;
 
   // tabs
@@ -38,7 +37,6 @@ interface NoteBaseState {
 
   updateCurrentNote: (note: Note) => void;
   updateIsRequesting: (isRequesting: boolean) => void;
-  updateSelectedText: (selectedText: string) => void;
   updateTabs: (tabs: NoteTab[]) => void;
   updateActiveTab: (key: string) => void;
   updateNotePanelVisible: (visible: boolean) => void;
@@ -49,7 +47,6 @@ interface NoteBaseState {
 }
 
 export const defaultState = {
-  currentSelectedText: '',
   currentNote: null as null | Note,
   tabs: [],
   activeTab: 'key1',
@@ -69,7 +66,6 @@ export const useNoteStore = create<NoteBaseState>()(
 
     updateCurrentNote: (note) => set((state) => ({ ...state, currentNote: note })),
     updateIsRequesting: (isRequesting: boolean) => set((state) => ({ ...state, isRequesting })),
-    updateSelectedText: (selectedText: string) => set((state) => ({ ...state, currentSelectedText: selectedText })),
     updateTabs: (tabs: NoteTab[]) => set((state) => ({ ...state, tabs })),
     updateActiveTab: (key: string) => set((state) => ({ ...state, activeTab: key })),
 

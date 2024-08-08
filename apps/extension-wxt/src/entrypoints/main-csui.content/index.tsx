@@ -3,7 +3,7 @@ import { defineContentScript } from 'wxt/sandbox';
 import { createShadowRootUi } from 'wxt/client';
 import { MemoryRouter } from '@refly-packages/ai-workspace-common/utils/router';
 
-import App from './App';
+// import App from './App';
 import { setRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 export default defineContentScript({
@@ -22,11 +22,12 @@ export default defineContentScript({
       append: 'before',
       onMount(container) {
         const root = ReactDOM.createRoot(container);
-        root.render(
-          <MemoryRouter>
-            <App />
-          </MemoryRouter>,
-        );
+        // root.render(
+        //   <MemoryRouter>
+        //     <App />
+        //   </MemoryRouter>,
+        // );
+        root.render(<></>);
         return root;
       },
       onRemove: (root) => {

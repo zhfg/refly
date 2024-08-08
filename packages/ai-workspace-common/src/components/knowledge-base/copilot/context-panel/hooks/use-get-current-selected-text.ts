@@ -3,18 +3,18 @@ import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/store
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { useGetSkills } from '@refly-packages/ai-workspace-common/skills/main-logic/use-get-skills';
 
-export const useGetCurrentSelectedText = () => {
-  const { currentSelectedText } = useCopilotContextState();
+export const useGetCurrentSelectedMark = () => {
+  const { currentSelectedMark } = useCopilotContextState();
   const knowledgeBaseStore = useKnowledgeBaseStore();
-  const { enableMultiSelect, currentSelectedContentList = [] } = knowledgeBaseStore;
+  const { enableMultiSelect, currentSelectedMarks = [] } = knowledgeBaseStore;
   const searchStateStore = useSearchStateStore();
 
   // skill
   const [skills] = useGetSkills();
-  const hasContent = currentSelectedText?.length > 0 || (enableMultiSelect && currentSelectedContentList?.length > 0);
+  const hasContent = currentSelectedMark || (enableMultiSelect && currentSelectedMarks?.length > 0);
 
   return {
     hasContent,
-    currentSelectedText,
+    currentSelectedMark,
   };
 };

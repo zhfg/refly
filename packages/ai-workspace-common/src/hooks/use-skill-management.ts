@@ -6,7 +6,6 @@ import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 
 export const useSkillManagement = ({ shouldInit = false }: { shouldInit: boolean } = { shouldInit: false }) => {
   const skillStore = useSkillStore();
-  const stopDuplicateRef = useRef(false);
 
   const handleGetSkillInstances = async () => {
     const { data, error } = (await getClient().listSkillInstances()) || {};
@@ -92,17 +91,6 @@ export const useSkillManagement = ({ shouldInit = false }: { shouldInit: boolean
     const newSkillInstances = skillInstances.filter((item) => item?.skillName !== skillName);
     skillStore.setSkillInstalces(newSkillInstances);
   };
-
-  useEffect(() => {
-    // 避免运行多次
-    if (shouldInit && !stopDuplicateRef.current) {
-      if (!stopDuplicateRef.current) {
-        stopDuplicateRef.current = true;
-      }
-      handleGetSkillTemplates();
-      handleGetSkillInstances();
-    }
-  }, [shouldInit]);
 
   return {
     handleGetSkillInstances,

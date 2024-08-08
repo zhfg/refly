@@ -8,7 +8,7 @@ import { LOCALE } from '@refly/common-types';
 import { languageNameToLocale } from '@refly/common-types';
 import { writingSkills } from '@refly/utils/ai-writing';
 import { BaseSelectedTextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/selected-text-card/base-selected-text-card';
-import { useGetCurrentSelectedText } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-selected-text';
+import { useGetCurrentSelectedMark } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-selected-text';
 
 // resize hook
 const SubMenu = Menu.SubMenu;
@@ -16,7 +16,7 @@ const MenuItem = Menu.Item;
 
 export const NoteSelectedTextCard = () => {
   const { runSkill } = useBuildThreadAndRun();
-  const { hasContent } = useGetCurrentSelectedText();
+  const { hasContent } = useGetCurrentSelectedMark();
   const disabled = !hasContent;
 
   const { t, i18n } = useTranslation();

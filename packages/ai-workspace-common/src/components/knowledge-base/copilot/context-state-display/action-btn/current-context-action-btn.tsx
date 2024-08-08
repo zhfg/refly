@@ -6,15 +6,15 @@ import classNames from 'classnames';
 export const CurrentContextActionBtn = () => {
   const {
     enableMultiSelect,
-    currentSelectedContentList,
-    currentSelectedText,
+    currentSelectedMarks,
+    currentSelectedMark,
     setShowContextCard,
     showContextCard,
     contextDomain,
     setContextDomain,
   } = useKnowledgeBaseStore();
 
-  const count = enableMultiSelect ? currentSelectedContentList.length : currentSelectedText ? 1 : 0;
+  const count = enableMultiSelect ? currentSelectedMarks.length : currentSelectedMark ? 1 : 0;
   const isContextActionActive =
     showContextCard && ['collection', 'resource', 'note', 'weblink'].includes(contextDomain);
 

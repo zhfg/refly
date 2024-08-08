@@ -6,15 +6,15 @@ import classNames from 'classnames';
 export const SelectedTextContextActionBtn = () => {
   const {
     enableMultiSelect,
-    currentSelectedContentList,
-    currentSelectedText,
+    currentSelectedMarks,
+    currentSelectedMark,
     showContextCard,
     contextDomain,
     setContextDomain,
     setShowContextCard,
   } = useKnowledgeBaseStore();
 
-  const count = enableMultiSelect ? currentSelectedContentList.length : currentSelectedText ? 1 : 0;
+  const count = enableMultiSelect ? currentSelectedMarks.length : currentSelectedMark ? 1 : 0;
   const showSelectedTextCard = showContextCard && contextDomain === 'selected-text';
 
   return (

@@ -1,39 +1,37 @@
+import { getLastActiveTab } from '@/utils/extension/tabs';
 import type { HandlerRequest, HandlerResponse } from '@refly/common-types';
-import type { WebLinkItem, ListPageProps } from '@refly/common-types';
+import type { ListPageProps } from '@refly/common-types';
 
 const handler = async (req: HandlerRequest<ListPageProps>): Promise<HandlerResponse<void>> => {
   console.log(`injectContent`, req.body);
 
-  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-    const { id } = tabs[0];
-    console.log('currentTabid', id);
-
+  const injectStyles = (id: number) => {
     chrome.scripting
       .executeScript({
-        target: { tabId: id as number },
+        target: { tabId: id },
         func: () => {
           const style = document.createElement('style');
           style.textContent = `
-          * {
-          cursor: default !important;
-        }
-        .refly-content-selector-mark {
-          cursor: pointer !important;
-        }
-        .refly-content-selector-mark:hover {
-          background-color: #00968F26 !important;
-          border-radius: 4px;
-        }
-        input,
-        textarea {
-          pointer-events: none;
-        }
+        * {
+        cursor: default !important;
+      }
+      .refly-content-selector-mark {
+        cursor: pointer !important;
+      }
+      .refly-content-selector-mark:hover {
+        background-color: #00968F26 !important;
+        border-radius: 4px;
+      }
+      input,
+      textarea {
+        pointer-events: none;
+      }
 
-        .refly-content-selected-target {
-          background-color: #00968F26 !important;
-          border-radius: 4px;
-        }
-          `;
+      .refly-content-selected-target {
+        background-color: #00968F26 !important;
+        border-radius: 4px;
+      }
+        `;
           document.head.appendChild(style);
         },
       })
@@ -41,6 +39,21 @@ const handler = async (req: HandlerRequest<ListPageProps>): Promise<HandlerRespo
         console.log('Inject content selector style success');
       })
       .catch((err) => console.log(`Inject content selector style failed: ${err}`));
+  };
+
+  const tabs = (await chrome.tabs.query({ active: true, currentWindow: true })) || [];
+  if (Array.isArray(tabs) && tabs?.length > 0) {
+    injectStyles(tabs?.[0]?.id as number);
+  } else {
+    const lastActiveTab = await getLastActiveTab();
+
+    if (lastActiveTab?.id) {
+      injectStyles(lastActiveTab?.id);
+    }
+  }
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    const { id } = tabs?.[0];
+    console.log('currentTabid', id);
   });
 
   return {
