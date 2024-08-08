@@ -844,6 +844,7 @@ components:
       enum:
         - weblink
         - text
+        - note
     Resource:
       type: object
       required:

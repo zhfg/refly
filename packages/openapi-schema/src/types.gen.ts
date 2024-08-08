@@ -22,7 +22,7 @@ export type ResourceMeta = {
 /**
  * Resource type
  */
-export type ResourceType = 'weblink' | 'text';
+export type ResourceType = 'weblink' | 'text' | 'note';
 
 export type Resource = {
   /**
