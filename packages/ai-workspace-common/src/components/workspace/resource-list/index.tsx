@@ -8,7 +8,10 @@ import { List, Empty } from '@arco-design/web-react';
 
 import { Resource } from '@refly/openapi-schema';
 import { IconMore, IconBook } from '@arco-design/web-react/icon';
+
 import { CardBox } from '../card-box';
+import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
+
 import { ScrollLoading } from '../scroll-loading';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
@@ -24,7 +27,7 @@ export const ResourceList = () => {
 
   const reloadListState = useReloadListState();
 
-  const { dataList, loadMore, hasMore, isRequesting, reload } = useFetchDataList({
+  const { dataList, loadMore, hasMore, isRequesting, reload, setDataList } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listResources({
         query: queryPayload,
@@ -100,8 +103,14 @@ export const ResourceList = () => {
                     .fromNow()}
                 </div>
                 <div>
-                  <IconBook style={{ color: '#819292', cursor: 'pointer' }} />
-                  <IconMore style={{ color: '#819292', marginLeft: '12px', cursor: 'pointer' }} />
+                  {/* <IconBook style={{ color: '#819292', cursor: 'pointer' }} /> */}
+                  <DeleteDropdownMenu
+                    data={item}
+                    type="resource"
+                    postDeleteList={(resource: Resource) =>
+                      setDataList(dataList.filter((n) => n.resourceId !== resource.resourceId))
+                    }
+                  />
                 </div>
               </div>
             </CardBox>,

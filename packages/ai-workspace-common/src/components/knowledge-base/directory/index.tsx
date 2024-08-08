@@ -85,12 +85,18 @@ export const KnowledgeBaseDirectory = () => {
     collectionId: kbId,
   }));
 
-  const { handleDeleteTabsWithCollectionId } = useKnowledgeBaseTabs();
+  const { handleDeleteTabsWithCollectionId, handleDeleteTab } = useKnowledgeBaseTabs();
   const handleDeleteKnowledgeBase = () => {
     const { collectionId } = knowledgeBaseStore?.currentKnowledgeBase;
     if (collectionId) {
       handleDeleteTabsWithCollectionId(collectionId);
     }
+  };
+
+  const handleDeleteResource = (item: Resource) => {
+    const { resourceId } = item;
+    handleDeleteTab(resourceId);
+    reloadKnowledgeBaseState.setReloadKnowledgeBaseList(true);
   };
 
   return (
@@ -126,6 +132,9 @@ export const KnowledgeBaseDirectory = () => {
           placeholder="搜索知识库..."
           isFetching={isFetching}
           resources={resources as Resource[]}
+          canDelete={true}
+          showAdd={true}
+          handleItemDelete={(item) => handleDeleteResource(item)}
           handleItemClick={(item) => {
             jumpToReadResource({
               kbId: item?.collectionId,

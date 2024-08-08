@@ -2,7 +2,7 @@ import { IconDelete, IconMore, IconEdit } from '@arco-design/web-react/icon';
 import { Dropdown, Menu, Button, Popconfirm, Message } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
 // 类型
-import { Note, Collection } from '@refly/openapi-schema';
+import { Note, Collection, Resource } from '@refly/openapi-schema';
 // 请求
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
@@ -28,7 +28,15 @@ const DropList = (props: DropListProps) => {
 
   return (
     <Menu>
-      <Menu.Item key="1">
+      {type === 'knowledgeBase' && (
+        <Menu.Item key="edit">
+          <div onClick={(e) => handlEditKnowledgeBase(e)}>
+            <IconEdit style={iconStyle} />
+            {t('workspace.deleteDropdownMenu.edit')}
+          </div>
+        </Menu.Item>
+      )}
+      <Menu.Item key="delete">
         <Popconfirm
           focusLock
           title={t(
@@ -48,20 +56,12 @@ const DropList = (props: DropListProps) => {
           </div>
         </Popconfirm>
       </Menu.Item>
-      {type === 'knowledgeBase' && (
-        <Menu.Item key="2">
-          <div onClick={(e) => handlEditKnowledgeBase(e)}>
-            <IconEdit style={iconStyle} />
-            {t('workspace.deleteDropdownMenu.edit')}
-          </div>
-        </Menu.Item>
-      )}
     </Menu>
   );
 };
 
 interface DeleteDropdownMenuProps {
-  postDeleteList?: (note: Note | Collection) => void;
+  postDeleteList?: (note: Note | Collection | Resource) => void;
 }
 
 interface NotePros extends DeleteDropdownMenuProps {
@@ -74,7 +74,12 @@ interface KnowledgeBasePros extends DeleteDropdownMenuProps {
   data: Collection;
 }
 
-export const DeleteDropdownMenu = (props: NotePros | KnowledgeBasePros) => {
+interface ResourcePros extends DeleteDropdownMenuProps {
+  type: 'resource';
+  data: Resource;
+}
+
+export const DeleteDropdownMenu = (props: NotePros | KnowledgeBasePros | ResourcePros) => {
   const { type, data, postDeleteList } = props;
   const [popupVisible, setPopupVisible] = useState(false);
   const { t } = useTranslation();
@@ -90,6 +95,10 @@ export const DeleteDropdownMenu = (props: NotePros | KnowledgeBasePros) => {
     }
     if (type === 'knowledgeBase') {
       const { error } = await getClient().deleteCollection({ body: { collectionId: data.collectionId } });
+      resultError = error;
+    }
+    if (type === 'resource') {
+      const { error } = await getClient().deleteResource({ body: { resourceId: data.resourceId } });
       resultError = error;
     }
 
