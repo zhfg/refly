@@ -84,6 +84,12 @@ function validateSkillTriggerCreateParam(param: SkillTriggerCreateParam) {
   }
 }
 
+interface CreateSkillJobData extends InvokeSkillRequest {
+  skill?: SkillInstance;
+  triggerId?: string;
+  convId?: string;
+}
+
 interface SkillInvocationData {
   user: User;
   param: InvokeSkillRequest;
@@ -259,11 +265,8 @@ export class SkillService {
     return null;
   }
 
-  async createJob(
-    user: User,
-    param: InvokeSkillRequest & { skill?: SkillInstance; triggerId?: string },
-  ) {
-    const { sessionType, input, context, config, skill, triggerId } = param;
+  async createJob(user: User, param: CreateSkillJobData) {
+    const { input, context, config, skill, triggerId, convId } = param;
     return this.prisma.skillJob.create({
       data: {
         jobId: genSkillJobID(),
@@ -271,12 +274,12 @@ export class SkillService {
         skillId: skill?.skillId ?? '',
         skillName: skill?.skillName ?? 'Scheduler',
         skillDisplayName: skill?.displayName ?? 'Scheduler',
-        sessionType,
         input: JSON.stringify(input),
         context: JSON.stringify(context ?? {}),
         overrideConfig: JSON.stringify(config ?? {}),
-        status: sessionType === 'offline' ? 'scheduling' : 'running',
+        status: 'running',
         triggerId,
+        convId,
       },
     });
   }
@@ -386,6 +389,7 @@ export class SkillService {
         param.createConvParam,
         param.convId,
       );
+      param.convId = data.conversation.convId;
     } else if (param.convId) {
       data.conversation = await this.prisma.conversation.findFirst({
         where: { uid: user.uid, convId: param.convId },
@@ -399,6 +403,7 @@ export class SkillService {
       const job = await this.createJob(user, { ...param, skill, triggerId });
       jobId = job.jobId;
     }
+    data.job = await this.prisma.skillJob.findFirst({ where: { jobId } });
 
     try {
       await this._invokeSkill(data);
@@ -421,7 +426,7 @@ export class SkillService {
   }
 
   private async _invokeSkill(data: SkillInvocationData) {
-    const { user, param, conversation, skill, res } = data;
+    const { user, param, conversation, skill, res, job } = data;
 
     const msgAggregator = new MessageAggregator();
     const config = await this.buildInvokeConfig({
@@ -466,29 +471,31 @@ export class SkillService {
       }
     }
 
-    if (conversation?.convId) {
-      await this.conversation.addChatMessages(
-        [
-          {
-            type: 'human',
-            content: param.input.query,
-            uid: user.uid,
-            convId: conversation.convId,
-            locale: param.context.locale,
-          },
-          ...msgAggregator.getMessages({
-            user,
-            convId: conversation.convId,
-            locale: param.context.locale,
-          }),
-        ],
+    await this.conversation.addChatMessages(
+      [
         {
-          convId: conversation.convId,
-          title: param.input.query,
+          type: 'human',
+          content: param.input.query,
           uid: user.uid,
+          convId: conversation?.convId,
+          jobId: job?.jobId,
+          locale: param.context.locale,
         },
-      );
-    }
+        ...msgAggregator.getMessages({
+          user,
+          convId: conversation?.convId,
+          jobId: job?.jobId,
+          locale: param.context.locale,
+        }),
+      ],
+      conversation
+        ? {
+            convId: conversation.convId,
+            title: param.input.query,
+            uid: user.uid,
+          }
+        : null,
+    );
   }
 
   async listSkillTriggers(user: User, param: ListSkillInstancesData['query']) {

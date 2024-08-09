@@ -277,8 +277,6 @@ model SkillJob {
   skillName        String   @map("skill_name")
   /// Skill display name
   skillDisplayName String   @map("skill_display_name")
-  /// Session (refer to `SkillSessionType`)
-  sessionType      String   @map("session_type")
   /// Input (JSON of `SkillInput`)
   input            String   @map("input")
   /// Context (JSON of `SkillContext`)
@@ -291,6 +289,8 @@ model SkillJob {
   triggerId        String   @default("") @map("trigger_id")
   /// UID of skill owner
   uid              String   @map("uid")
+  /// Conversation ID
+  convId           String   @default("") @map("conv_id")
   /// Create timestamp
   createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp

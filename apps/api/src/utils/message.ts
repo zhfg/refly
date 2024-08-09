@@ -60,8 +60,13 @@ export class MessageAggregator {
     this.data[meta.spanId] = msg;
   }
 
-  getMessages(param: { user: User; convId: string; locale: string }): CreateChatMessageInput[] {
-    const { user, convId, locale } = param;
+  getMessages(param: {
+    user: User;
+    convId: string;
+    jobId: string;
+    locale: string;
+  }): CreateChatMessageInput[] {
+    const { user, convId, jobId, locale } = param;
 
     return this.spanIdList.map((spanId) => {
       const { skillMeta, content, logs, structuredData } = this.data[spanId];
@@ -73,6 +78,7 @@ export class MessageAggregator {
         structuredData: JSON.stringify(structuredData),
         uid: user.uid,
         convId,
+        jobId,
         locale,
       };
     });

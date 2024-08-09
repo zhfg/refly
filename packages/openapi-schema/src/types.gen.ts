@@ -359,13 +359,13 @@ export type SkillJob = {
    */
   skillDisplayName: string;
   /**
-   * Session type
-   */
-  sessionType: SessionType;
-  /**
    * Skill job status
    */
   jobStatus: SkillJobStatus;
+  /**
+   * Conversation ID
+   */
+  convId?: string;
   /**
    * Skill trigger ID
    */
@@ -1164,12 +1164,11 @@ export type SkillContext = {
    * List of content
    */
   contentList?: Array<string>;
+  /**
+   * List of URLs
+   */
+  urls?: Array<string>;
 };
-
-/**
- * Skill invocation session type
- */
-export type SessionType = 'conversation' | 'offline';
 
 /**
  * Skill job status
@@ -1195,10 +1194,6 @@ export type InvokeSkillRequest = {
   config?: {
     [key: string]: unknown;
   };
-  /**
-   * Skill session type
-   */
-  sessionType?: SessionType;
   /**
    * Conversation ID (will add messages to this conversation if provided)
    */
@@ -1934,10 +1929,6 @@ export type ListSkillJobsData = {
      * Page size
      */
     pageSize?: number;
-    /**
-     * Session type
-     */
-    sessionType?: SessionType;
     /**
      * Skill ID
      */

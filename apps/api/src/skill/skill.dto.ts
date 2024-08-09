@@ -2,7 +2,6 @@ import {
   EntityType,
   EventType,
   InvokeSkillRequest,
-  SessionType,
   SkillInstance,
   SkillJob,
   SkillJobStatus,
@@ -46,8 +45,7 @@ export function skillTriggerPO2DTO(trigger: SkillTriggerModel): SkillTrigger {
 
 export function skillJobPO2DTO(job: SkillJobModel & { messages?: ChatMessage }): SkillJob {
   return {
-    ...pick(job, ['jobId', 'skillId', 'skillName', 'skillDisplayName', 'triggerId']),
-    sessionType: job.sessionType as SessionType,
+    ...pick(job, ['jobId', 'skillId', 'skillName', 'skillDisplayName', 'triggerId', 'convId']),
     jobStatus: job.status as SkillJobStatus,
     input: JSON.parse(job.input),
     context: JSON.parse(job.context),

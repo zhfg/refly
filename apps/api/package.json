@@ -9,7 +9,7 @@
     "build": "prisma generate && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "prisma:generate": "prisma format && prisma generate",
-    "sync-db-schema": "node -r ts-node/register --env-file=.env scripts/sync-db-schema.ts",
+    "sync-db-schema": "prisma format && prisma generate &&node -r ts-node/register --env-file=.env scripts/sync-db-schema.ts",
     "start": "nest start",
     "dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",

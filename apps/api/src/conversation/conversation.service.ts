@@ -47,28 +47,23 @@ export class ConversationService {
    */
   async addChatMessages(
     msgList: CreateChatMessageInput[],
-    convParam: Prisma.ConversationCreateInput,
+    convParam?: Prisma.ConversationCreateInput,
   ) {
     if (msgList.length === 0) {
       return;
     }
 
-    const { convId } = convParam;
-    if (!convId) {
-      this.logger.warn('No convId provided, skip add messages');
-      return;
-    }
+    let convUpserts: Prisma.ConversationUpsertArgs | null = null;
 
-    // Create new conversation if pk is not provided
-    msgList.forEach((msg) => {
-      msg.convId = convId;
-    });
+    if (convParam?.convId) {
+      const { convId } = convParam;
 
-    return this.prisma.$transaction([
-      this.prisma.chatMessage.createMany({
-        data: msgList.map((msg) => ({ ...msg, msgId: genChatMessageID() })),
-      }),
-      this.prisma.conversation.upsert({
+      // Create new conversation if pk is not provided
+      msgList.forEach((msg) => {
+        msg.convId = convId;
+      });
+
+      convUpserts = {
         where: { convId },
         create: {
           ...convParam,
@@ -79,7 +74,14 @@ export class ConversationService {
           lastMessage: msgList[msgList.length - 1].content,
           messageCount: { increment: msgList.length },
         },
+      };
+    }
+
+    return this.prisma.$transaction([
+      this.prisma.chatMessage.createMany({
+        data: msgList.map((msg) => ({ ...msg, msgId: genChatMessageID() })),
       }),
+      ...(convUpserts ? [this.prisma.conversation.upsert(convUpserts)] : []),
     ]);
   }
 

@@ -430,7 +430,6 @@ export const $SkillJob = {
     'skillId',
     'skillName',
     'skillDisplayName',
-    'sessionType',
     'jobStatus',
     'input',
     'context',
@@ -455,13 +454,13 @@ export const $SkillJob = {
       type: 'string',
       description: 'Skill display name',
     },
-    sessionType: {
-      description: 'Session type',
-      $ref: '#/components/schemas/SessionType',
-    },
     jobStatus: {
       description: 'Skill job status',
       $ref: '#/components/schemas/SkillJobStatus',
+    },
+    convId: {
+      type: 'string',
+      description: 'Conversation ID',
     },
     triggerId: {
       type: 'string',
@@ -1693,13 +1692,14 @@ export const $SkillContext = {
         type: 'string',
       },
     },
+    urls: {
+      type: 'array',
+      description: 'List of URLs',
+      items: {
+        type: 'string',
+      },
+    },
   },
-} as const;
-
-export const $SessionType = {
-  type: 'string',
-  description: 'Skill invocation session type',
-  enum: ['conversation', 'offline'],
 } as const;
 
 export const $SkillJobStatus = {
@@ -1727,10 +1727,6 @@ export const $InvokeSkillRequest = {
     config: {
       type: 'object',
       description: 'Skill config (should conform to template config schema)',
-    },
-    sessionType: {
-      description: 'Skill session type',
-      $ref: '#/components/schemas/SessionType',
     },
     convId: {
       description: 'Conversation ID (will add messages to this conversation if provided)',

@@ -910,12 +910,6 @@ paths:
           schema:
             type: string
             example: sk-g30e1b80b5g1itbemc0g5jj3
-        - name: sessionType
-          in: query
-          description: Session type
-          schema:
-            type: string
-            $ref: '#/components/schemas/SessionType'
         - name: jobStatus
           in: query
           description: Job status
@@ -1422,7 +1416,6 @@ components:
         - skillId
         - skillName
         - skillDisplayName
-        - sessionType
         - jobStatus
         - input
         - context
@@ -1442,12 +1435,12 @@ components:
         skillDisplayName:
           type: string
           description: Skill display name
-        sessionType:
-          description: Session type
-          $ref: '#/components/schemas/SessionType'
         jobStatus:
           description: Skill job status
           $ref: '#/components/schemas/SkillJobStatus'
+        convId:
+          type: string
+          description: Conversation ID
         triggerId:
           type: string
           description: Skill trigger ID
@@ -2313,12 +2306,11 @@ components:
           description: List of content
           items:
             type: string
-    SessionType:
-      type: string
-      description: Skill invocation session type
-      enum:
-        - conversation
-        - offline
+        urls:
+          type: array
+          description: List of URLs
+          items:
+            type: string
     SkillJobStatus:
       type: string
       description: Skill job status
@@ -2344,9 +2336,6 @@ components:
         config:
           type: object
           description: Skill config (should conform to template config schema)
-        sessionType:
-          description: Skill session type
-          $ref: '#/components/schemas/SessionType'
         convId:
           description: Conversation ID (will add messages to this conversation if provided)
           type: string
