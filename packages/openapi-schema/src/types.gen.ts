@@ -339,13 +339,13 @@ export type SkillInstance = SkillMeta & {
 };
 
 /**
- * Skill operation log
+ * Skill job record
  */
-export type SkillLog = {
+export type SkillJob = {
   /**
-   * Log ID
+   * Job ID
    */
-  logId: string;
+  jobId: string;
   /**
    * Skill ID
    */
@@ -354,6 +354,18 @@ export type SkillLog = {
    * Skill name
    */
   skillName: string;
+  /**
+   * Skill display name
+   */
+  skillDisplayName: string;
+  /**
+   * Session type
+   */
+  sessionType: SessionType;
+  /**
+   * Skill job status
+   */
+  jobStatus: SkillJobStatus;
   /**
    * Skill trigger ID
    */
@@ -367,13 +379,17 @@ export type SkillLog = {
    */
   context: SkillContext;
   /**
-   * Log creation time
+   * Job creation time
    */
   createdAt: string;
   /**
-   * Log update time
+   * Job update time
    */
   updatedAt: string;
+  /**
+   * Job messages (only returned in detail API)
+   */
+  messages?: Array<ChatMessage>;
 };
 
 /**
@@ -479,6 +495,10 @@ export type ChatMessage = {
    * Message ID
    */
   readonly msgId: string;
+  /**
+   * Skill job ID
+   */
+  jobId?: string;
   /**
    * Message type
    */
@@ -1146,6 +1166,16 @@ export type SkillContext = {
   contentList?: Array<string>;
 };
 
+/**
+ * Skill invocation session type
+ */
+export type SessionType = 'conversation' | 'offline';
+
+/**
+ * Skill job status
+ */
+export type SkillJobStatus = 'scheduling' | 'running' | 'finish' | 'failed';
+
 export type InvokeSkillRequest = {
   /**
    * Skill input
@@ -1166,6 +1196,10 @@ export type InvokeSkillRequest = {
     [key: string]: unknown;
   };
   /**
+   * Skill session type
+   */
+  sessionType?: SessionType;
+  /**
    * Conversation ID (will add messages to this conversation if provided)
    */
   convId?: string;
@@ -1177,9 +1211,9 @@ export type InvokeSkillRequest = {
 
 export type InvokeSkillResponse = BaseResponse & {
   /**
-   * Skill log id
+   * Skill job ID
    */
-  logId?: string;
+  jobId?: string;
 };
 
 export type ListSkillTriggerResponse = BaseResponse & {
@@ -1271,11 +1305,18 @@ export type DeleteSkillTriggerRequest = {
   triggerId: string;
 };
 
-export type ListSkillLogResponse = BaseResponse & {
+export type ListSkillJobsResponse = BaseResponse & {
   /**
-   * Skill log list
+   * Skill job list
    */
-  data?: Array<SkillLog>;
+  data?: Array<SkillJob>;
+};
+
+export type GetSkillJobDetailResponse = BaseResponse & {
+  /**
+   * Skill job
+   */
+  data?: SkillJob;
 };
 
 export type CreateConversationRequest = {
@@ -1879,8 +1920,12 @@ export type DeleteSkillTriggerResponse = BaseResponse;
 
 export type DeleteSkillTriggerError = unknown;
 
-export type ListSkillLogsData = {
+export type ListSkillJobsData = {
   query?: {
+    /**
+     * Job status
+     */
+    jobStatus?: SkillJobStatus;
     /**
      * Page number
      */
@@ -1890,15 +1935,32 @@ export type ListSkillLogsData = {
      */
     pageSize?: number;
     /**
+     * Session type
+     */
+    sessionType?: SessionType;
+    /**
      * Skill ID
      */
     skillId?: string;
   };
 };
 
-export type ListSkillLogsResponse = ListSkillLogResponse;
+export type ListSkillJobsResponse2 = ListSkillJobsResponse;
 
-export type ListSkillLogsError = unknown;
+export type ListSkillJobsError = unknown;
+
+export type GetSkillJobDetailData = {
+  query?: {
+    /**
+     * Job ID
+     */
+    jobId?: string;
+  };
+};
+
+export type GetSkillJobDetailResponse2 = GetSkillJobDetailResponse;
+
+export type GetSkillJobDetailError = unknown;
 
 export type ListConversationsResponse = ListConversationResponse;
 
@@ -2323,14 +2385,25 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/skill/log/list': {
+  '/skill/job/list': {
     get: {
-      req: ListSkillLogsData;
+      req: ListSkillJobsData;
       res: {
         /**
          * successful operation
          */
-        '200': ListSkillLogResponse;
+        '200': ListSkillJobsResponse;
+      };
+    };
+  };
+  '/skill/job/detail': {
+    get: {
+      req: GetSkillJobDetailData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': GetSkillJobDetailResponse;
       };
     };
   };

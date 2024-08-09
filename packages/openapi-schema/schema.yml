@@ -896,13 +896,13 @@ paths:
                 $ref: '#/components/schemas/BaseResponse'
       security:
         - api_key: []
-  /skill/log/list:
+  /skill/job/list:
     get:
       tags:
         - skill
-      summary: Get skill logs
-      description: Get skill logs
-      operationId: listSkillLogs
+      summary: Get skill jobs
+      description: Get skill jobs
+      operationId: listSkillJobs
       parameters:
         - name: skillId
           in: query
@@ -910,6 +910,18 @@ paths:
           schema:
             type: string
             example: sk-g30e1b80b5g1itbemc0g5jj3
+        - name: sessionType
+          in: query
+          description: Session type
+          schema:
+            type: string
+            $ref: '#/components/schemas/SessionType'
+        - name: jobStatus
+          in: query
+          description: Job status
+          schema:
+            type: string
+            $ref: '#/components/schemas/SkillJobStatus'
         - name: page
           in: query
           description: Page number
@@ -928,9 +940,30 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListSkillLogResponse'
+                $ref: '#/components/schemas/ListSkillJobsResponse'
       security:
         - api_key: []
+  /skill/job/detail:
+    get:
+      tags:
+        - skill
+      summary: Get skill job detail
+      description: Get skill job detail
+      operationId: getSkillJobDetail
+      parameters:
+        - name: jobId
+          in: query
+          description: Job ID
+          schema:
+            type: string
+            example: sj-g30e1b80b5g1itbemc0g5jj3
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetSkillJobDetailResponse'
   /conversation/list:
     get:
       tags:
@@ -1381,28 +1414,40 @@ components:
               type: string
               format: date-time
               description: Skill update time
-    SkillLog:
+    SkillJob:
       type: object
-      description: Skill operation log
+      description: Skill job record
       required:
-        - logId
+        - jobId
         - skillId
         - skillName
+        - skillDisplayName
+        - sessionType
+        - jobStatus
         - input
         - context
         - createdAt
         - updatedAt
       properties:
-        logId:
+        jobId:
           type: string
-          description: Log ID
-          example: lg-g30e1b80b5g1itbemc0g5jj3
+          description: Job ID
+          example: sj-g30e1b80b5g1itbemc0g5jj3
         skillId:
           type: string
           description: Skill ID
         skillName:
           type: string
           description: Skill name
+        skillDisplayName:
+          type: string
+          description: Skill display name
+        sessionType:
+          description: Session type
+          $ref: '#/components/schemas/SessionType'
+        jobStatus:
+          description: Skill job status
+          $ref: '#/components/schemas/SkillJobStatus'
         triggerId:
           type: string
           description: Skill trigger ID
@@ -1415,11 +1460,16 @@ components:
         createdAt:
           type: string
           format: date-time
-          description: Log creation time
+          description: Job creation time
         updatedAt:
           type: string
           format: date-time
-          description: Log update time
+          description: Job update time
+        messages:
+          type: array
+          description: Job messages (only returned in detail API)
+          items:
+            $ref: '#/components/schemas/ChatMessage'
     SourceMeta:
       type: object
       description: Source metadata
@@ -1519,6 +1569,10 @@ components:
           readOnly: true
           description: Message ID
           example: m-g30e1b80b5g1itbemc0g5jj3
+        jobId:
+          type: string
+          description: Skill job ID
+          example: sj-g30e1b80b5g1itbemc0g5jj3
         type:
           description: Message type
           $ref: '#/components/schemas/MessageType'
@@ -2259,6 +2313,20 @@ components:
           description: List of content
           items:
             type: string
+    SessionType:
+      type: string
+      description: Skill invocation session type
+      enum:
+        - conversation
+        - offline
+    SkillJobStatus:
+      type: string
+      description: Skill job status
+      enum:
+        - scheduling
+        - running
+        - finish
+        - failed
     InvokeSkillRequest:
       type: object
       required:
@@ -2276,6 +2344,9 @@ components:
         config:
           type: object
           description: Skill config (should conform to template config schema)
+        sessionType:
+          description: Skill session type
+          $ref: '#/components/schemas/SessionType'
         convId:
           description: Conversation ID (will add messages to this conversation if provided)
           type: string
@@ -2288,9 +2359,9 @@ components:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
-            logId:
+            jobId:
               type: string
-              description: Skill log id
+              description: Skill job ID
     ListSkillTriggerResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -2388,16 +2459,24 @@ components:
         triggerId:
           type: string
           description: Trigger ID to delete
-    ListSkillLogResponse:
+    ListSkillJobsResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
             data:
               type: array
-              description: Skill log list
+              description: Skill job list
               items:
-                $ref: '#/components/schemas/SkillLog'
+                $ref: '#/components/schemas/SkillJob'
+    GetSkillJobDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              description: Skill job
+              $ref: '#/components/schemas/SkillJob'
     CreateConversationRequest:
       type: object
       properties:

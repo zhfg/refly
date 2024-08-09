@@ -6,11 +6,10 @@ import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages
 import {
   Conversation,
   SkillInstance,
-  SkillRunMode,
   SkillTrigger,
-  User,
   MessageType,
   Prisma,
+  SkillJob,
 } from '@prisma/client';
 import { Response } from 'express';
 import { AIMessageChunk } from '@langchain/core/dist/messages';
@@ -21,11 +20,13 @@ import {
   DeleteSkillTriggerRequest,
   InvokeSkillRequest,
   ListSkillInstancesData,
+  ListSkillJobsData,
   SkillMeta,
   SkillTemplate,
   SkillTriggerCreateParam,
   UpdateSkillInstanceRequest,
   UpdateSkillTriggerRequest,
+  User,
 } from '@refly/openapi-schema';
 import {
   BaseSkill,
@@ -36,14 +37,14 @@ import {
   SkillRunnableMeta,
   createSkillInventory,
 } from '@refly/skill-template';
-import { genSkillID, genSkillLogID, genSkillTriggerID } from '@refly/utils';
+import { genSkillID, genSkillJobID, genSkillTriggerID } from '@refly/utils';
 import { PrismaService } from '@/common/prisma.service';
 import {
+  CHANNEL_INVOKE_SKILL,
   QUEUE_SKILL,
   buildSuccessResponse,
   writeSSEResponse,
   pick,
-  CHANNEL_INVOKE_SKILL,
 } from '@/utils';
 import { InvokeSkillJobData } from './skill.dto';
 import { KnowledgeService } from '@/knowledge/knowledge.service';
@@ -55,11 +56,6 @@ import { ConfigService } from '@nestjs/config';
 import { SearchService } from '@/search/search.service';
 import { LabelService } from '@/label/label.service';
 import { labelClassPO2DTO, labelPO2DTO } from '@/label/label.dto';
-
-interface SkillPreCheckResult {
-  skill?: SkillInstance;
-  trigger?: SkillTrigger;
-}
 
 export type LLMChatMessage = AIMessage | HumanMessage | SystemMessage;
 
@@ -86,6 +82,16 @@ function validateSkillTriggerCreateParam(param: SkillTriggerCreateParam) {
       throw new BadRequestException('invalid cron trigger config');
     }
   }
+}
+
+interface SkillInvocationData {
+  user: User;
+  param: InvokeSkillRequest;
+  res?: Response;
+  job?: SkillJob;
+  conversation?: Conversation;
+  skill?: SkillInstance;
+  trigger?: SkillTrigger;
 }
 
 @Injectable()
@@ -156,7 +162,7 @@ export class SkillService {
     return this.skillInventory.some((skill) => skill.name === name);
   }
 
-  async listSkillInstances(user: Pick<User, 'uid'>, param: { page: number; pageSize: number }) {
+  async listSkillInstances(user: User, param: ListSkillInstancesData['query']) {
     const { page, pageSize } = param;
     return this.prisma.skillInstance.findMany({
       where: { uid: user.uid, deletedAt: null },
@@ -236,8 +242,7 @@ export class SkillService {
     ]);
   }
 
-  async skillInvokePreCheck(user: User, param: InvokeSkillRequest): Promise<SkillPreCheckResult> {
-    const res: SkillPreCheckResult = {};
+  async skillInvokePreCheck(user: User, param: InvokeSkillRequest): Promise<SkillInstance | null> {
     const { skillId } = param;
 
     if (skillId) {
@@ -247,42 +252,46 @@ export class SkillService {
       if (!skill) {
         throw new BadRequestException(`skill not found: ${skillId}`);
       }
-      res.skill = skill;
+      return skill;
     }
 
-    return res;
+    // Skill not specified, use scheduler
+    return null;
   }
 
-  async createLog(
+  async createJob(
     user: User,
-    param: InvokeSkillRequest,
-    checkResult: SkillPreCheckResult,
-    mode: SkillRunMode,
+    param: InvokeSkillRequest & { skill?: SkillInstance; triggerId?: string },
   ) {
-    const { skill, trigger } = checkResult;
-    return this.prisma.skillLog.create({
+    const { sessionType, input, context, config, skill, triggerId } = param;
+    return this.prisma.skillJob.create({
       data: {
-        logId: genSkillLogID(),
+        jobId: genSkillJobID(),
         uid: user.uid,
         skillId: skill?.skillId ?? '',
         skillName: skill?.skillName ?? 'Scheduler',
-        mode,
-        input: JSON.stringify(param.input),
-        context: JSON.stringify(param.context ?? {}),
-        overrideConfig: JSON.stringify(param.config ?? {}),
-        status: mode === 'async' ? 'scheduling' : 'running',
-        triggerId: trigger?.triggerId ?? '',
+        skillDisplayName: skill?.displayName ?? 'Scheduler',
+        sessionType,
+        input: JSON.stringify(input),
+        context: JSON.stringify(context ?? {}),
+        overrideConfig: JSON.stringify(config ?? {}),
+        status: sessionType === 'offline' ? 'scheduling' : 'running',
+        triggerId,
       },
     });
   }
 
-  async invokeSkill(user: User, param: InvokeSkillRequest) {
-    const checkResult = await this.skillInvokePreCheck(user, param);
-    const log = await this.createLog(user, param, checkResult, 'async');
+  async sendInvokeSkillTask(user: User, param: InvokeSkillRequest) {
+    const skill = await this.skillInvokePreCheck(user, param);
+    const job = await this.createJob(user, { ...param, skill });
 
-    await this.queue.add(CHANNEL_INVOKE_SKILL, { ...param, uid: user.uid, skillLogId: log.logId });
+    await this.queue.add(CHANNEL_INVOKE_SKILL, {
+      ...param,
+      uid: user.uid,
+      jobId: job.jobId,
+    });
 
-    return log;
+    return job;
   }
 
   async buildInvokeConfig(data: {
@@ -345,57 +354,74 @@ export class SkillService {
     return config;
   }
 
-  async invokeSkillSync(param: InvokeSkillJobData) {
-    const user = await this.prisma.user.findFirst({ where: { uid: param.uid } });
+  async invokeSkillFromQueue(param: InvokeSkillJobData) {
+    const { uid, jobId, triggerId } = param;
+    const user = await this.prisma.user.findFirst({ where: { uid } });
     if (!user) {
-      this.logger.warn(`user not found for uid when invoking skill: ${param.uid}`);
+      this.logger.warn(`user not found for uid ${uid} when invoking skill: ${uid}`);
       return;
     }
-    const { skill } = await this.skillInvokePreCheck(user, param);
 
-    try {
-      await this.prisma.skillLog.update({
-        where: { logId: param.skillLogId },
-        data: { status: 'running' },
-      });
-      const config = await this.buildInvokeConfig({ user, skill, param });
-      const scheduler = new Scheduler(this.skillEngine);
-      const res = await scheduler.invoke({ ...param.input }, config);
-
-      this.logger.log(`invoke skill result: ${JSON.stringify(res)}`);
-      await this.prisma.skillLog.update({
-        where: { logId: param.skillLogId },
-        data: { status: 'finish' },
-      });
-    } catch (err) {
-      this.logger.error(`invoke skill error: ${err.stack}`);
-      await this.prisma.skillLog.update({
-        where: { logId: param.skillLogId },
-        data: { status: 'failed' },
-      });
-    }
+    await this.streamInvokeSkill(user, param, null, jobId, triggerId);
   }
 
-  async streamInvokeSkill(user: User, param: InvokeSkillRequest, res: Response) {
-    const { skill, trigger } = await this.skillInvokePreCheck(user, param);
+  async streamInvokeSkill(
+    user: User,
+    param: InvokeSkillRequest,
+    res?: Response,
+    jobId?: string,
+    triggerId?: string,
+  ) {
+    const skill = await this.skillInvokePreCheck(user, param);
 
-    let chatConv: Conversation | null = null;
+    const data: SkillInvocationData = {
+      user,
+      param,
+      res,
+      skill,
+    };
     if (param.createConvParam) {
-      chatConv = await this.conversation.upsertConversation(
+      data.conversation = await this.conversation.upsertConversation(
         user,
         param.createConvParam,
         param.convId,
       );
     } else if (param.convId) {
-      chatConv = await this.prisma.conversation.findFirst({
+      data.conversation = await this.prisma.conversation.findFirst({
         where: { uid: user.uid, convId: param.convId },
       });
-      if (!chatConv) {
+      if (!data.conversation) {
         throw new BadRequestException(`conversation not found: ${param.convId}`);
       }
     }
 
-    const log = await this.createLog(user, param, { skill, trigger }, 'stream');
+    if (!jobId) {
+      const job = await this.createJob(user, { ...param, skill, triggerId });
+      jobId = job.jobId;
+    }
+
+    try {
+      await this._invokeSkill(data);
+      await this.prisma.skillJob.update({
+        where: { jobId },
+        data: { status: 'finish' },
+      });
+    } catch (err) {
+      this.logger.error(`invoke skill error: ${err.stack}`);
+
+      await this.prisma.skillJob.update({
+        where: { jobId },
+        data: { status: 'failed' },
+      });
+    } finally {
+      if (res) {
+        res.end(``);
+      }
+    }
+  }
+
+  private async _invokeSkill(data: SkillInvocationData) {
+    const { user, param, conversation, skill, res } = data;
 
     const msgAggregator = new MessageAggregator();
     const config = await this.buildInvokeConfig({
@@ -403,7 +429,9 @@ export class SkillService {
       skill,
       param,
       eventListener: (data: SkillEvent) => {
-        writeSSEResponse(res, data);
+        if (res) {
+          writeSSEResponse(res, data);
+        }
         msgAggregator.addSkillEvent(data);
       },
     });
@@ -423,12 +451,14 @@ export class SkillService {
 
       switch (event.event) {
         case 'on_chat_model_stream':
-          writeSSEResponse(res, {
-            event: 'stream',
-            ...pick(runMeta, ['spanId', 'skillId', 'skillName', 'skillDisplayName']),
-            content:
-              typeof chunk.content === 'string' ? chunk.content : JSON.stringify(chunk.content),
-          });
+          if (res) {
+            writeSSEResponse(res, {
+              event: 'stream',
+              ...pick(runMeta, ['spanId', 'skillId', 'skillName', 'skillDisplayName']),
+              content:
+                typeof chunk.content === 'string' ? chunk.content : JSON.stringify(chunk.content),
+            });
+          }
           break;
         case 'on_chat_model_end':
           msgAggregator.setContent(runMeta, event.data.output.content);
@@ -436,39 +466,32 @@ export class SkillService {
       }
     }
 
-    res.end(``);
-
-    if (chatConv?.convId) {
+    if (conversation?.convId) {
       await this.conversation.addChatMessages(
         [
           {
             type: 'human',
             content: param.input.query,
             uid: user.uid,
-            convId: chatConv.convId,
-            locale: param.context.locale ?? user.outputLocale,
+            convId: conversation.convId,
+            locale: param.context.locale,
           },
           ...msgAggregator.getMessages({
             user,
-            convId: chatConv.convId,
-            locale: param.context.locale ?? user.outputLocale,
+            convId: conversation.convId,
+            locale: param.context.locale,
           }),
         ],
         {
-          convId: chatConv.convId,
+          convId: conversation.convId,
           title: param.input.query,
           uid: user.uid,
         },
       );
     }
-
-    await this.prisma.skillLog.update({
-      where: { logId: log.logId },
-      data: { status: 'finish' },
-    });
   }
 
-  async listSkillTriggers(user: Pick<User, 'uid'>, param: ListSkillInstancesData['query']) {
+  async listSkillTriggers(user: User, param: ListSkillInstancesData['query']) {
     const { skillId, page = 1, pageSize = 10 } = param!;
 
     return this.prisma.skillTrigger.findMany({
@@ -527,16 +550,24 @@ export class SkillService {
     });
   }
 
-  async listSkillLogs(
-    user: Pick<User, 'uid'>,
-    param: { skillId?: string; page: number; pageSize: number },
-  ) {
-    const { skillId, page, pageSize } = param;
-    return this.prisma.skillLog.findMany({
+  async listSkillJobs(user: Pick<User, 'uid'>, param: ListSkillJobsData['query']) {
+    const { skillId, page, pageSize } = param ?? {};
+    return this.prisma.skillJob.findMany({
       where: { uid: user.uid, skillId },
       orderBy: { updatedAt: 'desc' },
       take: pageSize,
       skip: (page - 1) * pageSize,
+    });
+  }
+
+  async getSkillJobDetail(user: User, jobId: string) {
+    if (!jobId) {
+      throw new BadRequestException('job id is required');
+    }
+
+    const { uid } = user;
+    return this.prisma.skillJob.findUnique({
+      where: { uid, jobId },
     });
   }
 }

@@ -50,8 +50,8 @@ export function genSkillTriggerID(): string {
   return 'tr-' + createId();
 }
 
-export function genSkillLogID(): string {
-  return 'lg-' + createId();
+export function genSkillJobID(): string {
+  return 'sj-' + createId();
 }
 
 export const genUniqueId = () => {

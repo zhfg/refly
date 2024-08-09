@@ -2,21 +2,25 @@ import {
   EntityType,
   EventType,
   InvokeSkillRequest,
+  SessionType,
   SkillInstance,
-  SkillLog,
+  SkillJob,
+  SkillJobStatus,
   SkillTrigger,
   SkillTriggerType,
 } from '@refly/openapi-schema';
 import {
   SkillInstance as SkillInstanceModel,
   SkillTrigger as SkillTriggerModel,
-  SkillLog as SkillLogModel,
+  SkillJob as SkillJobModel,
+  ChatMessage,
 } from '@prisma/client';
 import { pick } from '@/utils';
 
 export interface InvokeSkillJobData extends InvokeSkillRequest {
   uid: string;
-  skillLogId: string;
+  jobId?: string;
+  triggerId?: string;
 }
 
 export function skillInstancePO2DTO(skill: SkillInstanceModel): SkillInstance {
@@ -40,12 +44,14 @@ export function skillTriggerPO2DTO(trigger: SkillTriggerModel): SkillTrigger {
   };
 }
 
-export function skillLogPO2DTO(log: SkillLogModel): SkillLog {
+export function skillJobPO2DTO(job: SkillJobModel & { messages?: ChatMessage }): SkillJob {
   return {
-    ...pick(log, ['logId', 'skillId', 'skillName', 'triggerId']),
-    input: JSON.parse(log.input),
-    context: JSON.parse(log.context),
-    createdAt: log.createdAt.toJSON(),
-    updatedAt: log.updatedAt.toJSON(),
+    ...pick(job, ['jobId', 'skillId', 'skillName', 'skillDisplayName', 'triggerId']),
+    sessionType: job.sessionType as SessionType,
+    jobStatus: job.status as SkillJobStatus,
+    input: JSON.parse(job.input),
+    context: JSON.parse(job.context),
+    createdAt: job.createdAt.toJSON(),
+    updatedAt: job.updatedAt.toJSON(),
   };
 }

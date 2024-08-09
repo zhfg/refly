@@ -91,6 +91,8 @@ model ChatMessage {
   msgId                 String      @default("") @map("msg_id")
   /// Conversation ID
   convId                String      @default("") @map("conv_id")
+  /// Skill job ID
+  jobId                 String      @default("") @map("job_id")
   /// Message type
   type                  MessageType @map("type")
   /// UID
@@ -264,37 +266,38 @@ model SkillTrigger {
   @@map("skill_triggers")
 }
 
-/// Running logs of skills.
-model SkillLog {
+model SkillJob {
   /// Primary key
-  pk             BigInt       @id @default(autoincrement())
-  /// Skill log id
-  logId          String       @unique @map("log_id")
+  pk               BigInt   @id @default(autoincrement())
+  /// Skill job id
+  jobId            String   @unique @map("job_id")
   /// Skill id
-  skillId        String       @map("skill_id")
+  skillId          String   @map("skill_id")
   /// Skill name
-  skillName      String       @map("skill_name")
-  /// Mode for this skill run
-  mode           SkillRunMode @map("mode")
+  skillName        String   @map("skill_name")
+  /// Skill display name
+  skillDisplayName String   @map("skill_display_name")
+  /// Session (refer to `SkillSessionType`)
+  sessionType      String   @map("session_type")
   /// Input (JSON of `SkillInput`)
-  input          String       @map("input")
+  input            String   @map("input")
   /// Context (JSON of `SkillContext`)
-  context        String       @map("context")
+  context          String   @map("context")
   /// Skill config to override
-  overrideConfig String       @map("override_config")
-  /// Skill operation status
-  status         SkillStatus  @map("status")
+  overrideConfig   String   @map("override_config")
+  /// Skill job status (refer to `SkillJobStatus`)
+  status           String   @map("status")
   /// Skill trigger id
-  triggerId      String       @map("trigger_id")
+  triggerId        String   @default("") @map("trigger_id")
   /// UID of skill owner
-  uid            String       @map("uid")
+  uid              String   @map("uid")
   /// Create timestamp
-  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
-  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz()
 
   @@index([uid, updatedAt])
-  @@map("skill_log")
+  @@map("skill_jobs")
 }
 
 model LabelClass {
@@ -374,23 +377,6 @@ model EventRecord {
 
   @@index([uid, createdAt])
   @@map("event_records")
-}
-
-enum ParseSource {
-  serverCrawl
-  clientUpload
-}
-
-enum SkillStatus {
-  scheduling
-  running
-  finish
-  failed
-}
-
-enum SkillRunMode {
-  async
-  stream
 }
 
 enum MessageType {

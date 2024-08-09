@@ -107,9 +107,12 @@ import type {
   DeleteSkillTriggerData,
   DeleteSkillTriggerError,
   DeleteSkillTriggerResponse,
-  ListSkillLogsData,
-  ListSkillLogsError,
-  ListSkillLogsResponse,
+  ListSkillJobsData,
+  ListSkillJobsError,
+  ListSkillJobsResponse2,
+  GetSkillJobDetailData,
+  GetSkillJobDetailError,
+  GetSkillJobDetailResponse2,
   ListConversationsError,
   ListConversationsResponse,
   GetConversationDetailData,
@@ -511,13 +514,24 @@ export const deleteSkillTrigger = (options: Options<DeleteSkillTriggerData>) => 
 };
 
 /**
- * Get skill logs
- * Get skill logs
+ * Get skill jobs
+ * Get skill jobs
  */
-export const listSkillLogs = (options?: Options<ListSkillLogsData>) => {
-  return (options?.client ?? client).get<ListSkillLogsResponse, ListSkillLogsError>({
+export const listSkillJobs = (options?: Options<ListSkillJobsData>) => {
+  return (options?.client ?? client).get<ListSkillJobsResponse2, ListSkillJobsError>({
     ...options,
-    url: '/skill/log/list',
+    url: '/skill/job/list',
+  });
+};
+
+/**
+ * Get skill job detail
+ * Get skill job detail
+ */
+export const getSkillJobDetail = (options?: Options<GetSkillJobDetailData>) => {
+  return (options?.client ?? client).get<GetSkillJobDetailResponse2, GetSkillJobDetailError>({
+    ...options,
+    url: '/skill/job/detail',
   });
 };
 

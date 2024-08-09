@@ -422,15 +422,26 @@ export const $SkillInstance = {
   ],
 } as const;
 
-export const $SkillLog = {
+export const $SkillJob = {
   type: 'object',
-  description: 'Skill operation log',
-  required: ['logId', 'skillId', 'skillName', 'input', 'context', 'createdAt', 'updatedAt'],
+  description: 'Skill job record',
+  required: [
+    'jobId',
+    'skillId',
+    'skillName',
+    'skillDisplayName',
+    'sessionType',
+    'jobStatus',
+    'input',
+    'context',
+    'createdAt',
+    'updatedAt',
+  ],
   properties: {
-    logId: {
+    jobId: {
       type: 'string',
-      description: 'Log ID',
-      example: 'lg-g30e1b80b5g1itbemc0g5jj3',
+      description: 'Job ID',
+      example: 'sj-g30e1b80b5g1itbemc0g5jj3',
     },
     skillId: {
       type: 'string',
@@ -439,6 +450,18 @@ export const $SkillLog = {
     skillName: {
       type: 'string',
       description: 'Skill name',
+    },
+    skillDisplayName: {
+      type: 'string',
+      description: 'Skill display name',
+    },
+    sessionType: {
+      description: 'Session type',
+      $ref: '#/components/schemas/SessionType',
+    },
+    jobStatus: {
+      description: 'Skill job status',
+      $ref: '#/components/schemas/SkillJobStatus',
     },
     triggerId: {
       type: 'string',
@@ -455,12 +478,19 @@ export const $SkillLog = {
     createdAt: {
       type: 'string',
       format: 'date-time',
-      description: 'Log creation time',
+      description: 'Job creation time',
     },
     updatedAt: {
       type: 'string',
       format: 'date-time',
-      description: 'Log update time',
+      description: 'Job update time',
+    },
+    messages: {
+      type: 'array',
+      description: 'Job messages (only returned in detail API)',
+      items: {
+        $ref: '#/components/schemas/ChatMessage',
+      },
     },
   },
 } as const;
@@ -577,6 +607,11 @@ export const $ChatMessage = {
       readOnly: true,
       description: 'Message ID',
       example: 'm-g30e1b80b5g1itbemc0g5jj3',
+    },
+    jobId: {
+      type: 'string',
+      description: 'Skill job ID',
+      example: 'sj-g30e1b80b5g1itbemc0g5jj3',
     },
     type: {
       description: 'Message type',
@@ -1661,6 +1696,18 @@ export const $SkillContext = {
   },
 } as const;
 
+export const $SessionType = {
+  type: 'string',
+  description: 'Skill invocation session type',
+  enum: ['conversation', 'offline'],
+} as const;
+
+export const $SkillJobStatus = {
+  type: 'string',
+  description: 'Skill job status',
+  enum: ['scheduling', 'running', 'finish', 'failed'],
+} as const;
+
 export const $InvokeSkillRequest = {
   type: 'object',
   required: ['input'],
@@ -1680,6 +1727,10 @@ export const $InvokeSkillRequest = {
     config: {
       type: 'object',
       description: 'Skill config (should conform to template config schema)',
+    },
+    sessionType: {
+      description: 'Skill session type',
+      $ref: '#/components/schemas/SessionType',
     },
     convId: {
       description: 'Conversation ID (will add messages to this conversation if provided)',
@@ -1701,9 +1752,9 @@ export const $InvokeSkillResponse = {
     {
       type: 'object',
       properties: {
-        logId: {
+        jobId: {
           type: 'string',
-          description: 'Skill log id',
+          description: 'Skill job ID',
         },
       },
     },
@@ -1858,7 +1909,7 @@ export const $DeleteSkillTriggerRequest = {
   },
 } as const;
 
-export const $ListSkillLogResponse = {
+export const $ListSkillJobsResponse = {
   allOf: [
     {
       $ref: '#/components/schemas/BaseResponse',
@@ -1868,10 +1919,27 @@ export const $ListSkillLogResponse = {
       properties: {
         data: {
           type: 'array',
-          description: 'Skill log list',
+          description: 'Skill job list',
           items: {
-            $ref: '#/components/schemas/SkillLog',
+            $ref: '#/components/schemas/SkillJob',
           },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $GetSkillJobDetailResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          description: 'Skill job',
+          $ref: '#/components/schemas/SkillJob',
         },
       },
     },

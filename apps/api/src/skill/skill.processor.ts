@@ -16,6 +16,6 @@ export class SkillProcessor {
   async handleInvokeSkill(job: Job<InvokeSkillJobData>) {
     this.logger.log(`[handleInvokeSkill] job: ${JSON.stringify(job)}`);
 
-    await this.skillService.invokeSkillSync(job.data);
+    await this.skillService.invokeSkillFromQueue(job.data);
   }
 }

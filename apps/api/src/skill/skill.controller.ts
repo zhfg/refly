@@ -20,7 +20,6 @@ import {
   DeleteSkillTriggerResponse,
   InvokeSkillRequest,
   InvokeSkillResponse,
-  ListSkillLogResponse,
   ListSkillInstanceResponse,
   ListSkillTemplateResponse,
   ListSkillTriggerResponse,
@@ -32,10 +31,12 @@ import {
   CreateSkillTriggerResponse,
   UpdateSkillTriggerRequest,
   UpdateSkillTriggerResponse,
+  ListSkillJobsResponse,
+  GetSkillJobDetailResponse,
 } from '@refly/openapi-schema';
 import { buildSuccessResponse } from '@/utils';
 import { Response } from 'express';
-import { skillInstancePO2DTO, skillLogPO2DTO, skillTriggerPO2DTO } from './skill.dto';
+import { skillInstancePO2DTO, skillJobPO2DTO, skillTriggerPO2DTO } from './skill.dto';
 
 @Controller('skill')
 export class SkillController {
@@ -53,8 +54,8 @@ export class SkillController {
     @User() user: UserModel,
     @Body() body: InvokeSkillRequest,
   ): Promise<InvokeSkillResponse> {
-    await this.skillService.invokeSkill(user, body);
-    return buildSuccessResponse();
+    const { jobId } = await this.skillService.sendInvokeSkillTask(user, body);
+    return buildSuccessResponse({ jobId });
   }
 
   @UseGuards(JwtAuthGuard)
@@ -160,18 +161,28 @@ export class SkillController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('/log/list')
-  async listSkillLogs(
+  @Get('/job/list')
+  async listSkillJobs(
     @User() user: UserModel,
     @Query('skillId') skillId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
-  ): Promise<ListSkillLogResponse> {
-    const logs = await this.skillService.listSkillLogs(user, {
+  ): Promise<ListSkillJobsResponse> {
+    const logs = await this.skillService.listSkillJobs(user, {
       skillId: skillId || undefined,
       page,
       pageSize,
     });
-    return buildSuccessResponse(logs.map((log) => skillLogPO2DTO(log)));
+    return buildSuccessResponse(logs.map((log) => skillJobPO2DTO(log)));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/job/detail')
+  async getSkillJobDetail(
+    @User() user: UserModel,
+    @Query('jobId') jobId: string,
+  ): Promise<GetSkillJobDetailResponse> {
+    const job = await this.skillService.getSkillJobDetail(user, jobId);
+    return buildSuccessResponse(skillJobPO2DTO(job));
   }
 }

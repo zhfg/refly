@@ -1,7 +1,6 @@
 import { SkillEvent } from '@refly/common-types';
 import { CreateChatMessageInput } from '@/conversation/conversation.dto';
-import { User } from '@prisma/client';
-import { SkillMeta } from '@refly/openapi-schema';
+import { SkillMeta, User } from '@refly/openapi-schema';
 import { SkillRunnableMeta } from '@refly/skill-template';
 
 interface MessageData {

@@ -1,15 +1,21 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { Queue } from 'bull';
 import { ReportEventData } from '@/event/event.dto';
 import { PrismaService } from '@/common/prisma.service';
 import { genEventID } from '@refly/utils';
-import { SkillService } from '@/skill/skill.service';
 import { SkillContext } from '@refly/openapi-schema';
+import { InjectQueue } from '@nestjs/bull';
+import { CHANNEL_INVOKE_SKILL, QUEUE_SKILL } from '@/utils';
+import { InvokeSkillJobData } from '@/skill/skill.dto';
 
 @Injectable()
 export class EventService {
   private logger = new Logger(EventService.name);
 
-  constructor(private prisma: PrismaService, private skillService: SkillService) {}
+  constructor(
+    private prisma: PrismaService,
+    @InjectQueue(QUEUE_SKILL) private queue: Queue<InvokeSkillJobData>,
+  ) {}
 
   async handleEvent(data: ReportEventData) {
     const { uid, entityType, entityId, eventType } = data;
@@ -52,14 +58,21 @@ export class EventService {
       const skills = await this.prisma.skillInstance.findMany({
         where: { skillId: { in: triggers.map((trigger) => trigger.skillId) } },
       });
-      await Promise.all(
-        skills.map((skill) =>
-          this.skillService.invokeSkill(user, {
-            input: { query: '' },
+      const skillToTriggerMap = new Map<string, string>(
+        triggers.map((trigger) => [trigger.skillId, trigger.triggerId]),
+      );
+
+      await this.queue.addBulk(
+        skills.map((skill) => ({
+          name: CHANNEL_INVOKE_SKILL,
+          data: {
+            input: { query: '' }, // TODO: support configurable input for triggers
             skillId: skill.skillId,
             context: skillContext,
-          }),
-        ),
+            triggerId: skillToTriggerMap.get(skill.skillId),
+            uid: user.uid,
+          },
+        })),
       );
     }
   }
