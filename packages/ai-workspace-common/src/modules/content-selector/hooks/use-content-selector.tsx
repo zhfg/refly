@@ -1,7 +1,6 @@
 import classNames from 'classnames';
 import { useEffect, useRef } from 'react';
-import type { Mark, SyncMarkEvent, SyncStatusEvent } from '@refly/common-types';
-import getXPath from 'get-xpath';
+import type { Mark, MarkScope, SyncMarkEvent, SyncMarkEventType, SyncStatusEvent } from '@refly/common-types';
 import { safeStringifyJSON } from '@refly-packages/utils/parse';
 import {
   BackgroundMessage,
@@ -11,33 +10,9 @@ import {
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { SelectedNamespace } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 // import { getContentFromHtmlSelector } from "@/utils/weblink"
-
-function getElementType(element) {
-  // 检查元素是否为 table 元素
-  if (element.tagName.toLowerCase() === 'table') {
-    return 'table';
-  }
-  // 检查元素是否为 a 标签(链接)
-  else if (element.tagName.toLowerCase() === 'a') {
-    return 'link';
-  }
-  // 检查元素是否为 img 标签(图像)
-  else if (element.tagName.toLowerCase() === 'img') {
-    return 'image';
-  }
-  // 检查元素是否为 video 标签
-  else if (element.tagName.toLowerCase() === 'video') {
-    return 'video';
-  }
-  // 检查元素是否为 audio 标签
-  else if (element.tagName.toLowerCase() === 'audio') {
-    return 'audio';
-  }
-  // 如果以上都不是,则认为是文本元素
-  else {
-    return 'text';
-  }
-}
+import { getElementType } from '../utils';
+import { genContentSelectorID } from '@refly-packages/utils/id';
+import { getMarkdown } from '@refly/utils/html2md';
 
 export const useContentSelector = (selector: string | null, namespace: SelectedNamespace) => {
   const statusRef = useRef(true);
@@ -46,15 +21,17 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
   const markListRef = useRef<Mark[]>([]);
   const showContentSelectorRef = useRef<boolean>(false);
   const messageListenerEventRef = useRef<any>();
+  const selectorScopeRef = useRef<MarkScope>('block');
 
   const buildMark = (target: HTMLElement) => {
-    const content = target.innerText;
+    const content = getMarkdown(target);
 
     const mark: Mark = {
       type: getElementType(target),
       data: content,
       target,
-      xPath: getXPath(target),
+      xPath: genContentSelectorID(),
+      scope: selectorScopeRef.current,
     };
 
     // console.log(
@@ -88,13 +65,13 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
   const syncMarkEvent = (event: Partial<SyncMarkEvent>) => {
     const { type, mark } = event.body;
     // 发送给 refly-main-app
-    const msg: BackgroundMessage = {
-      name: 'syncMarkEventFromSelector',
+    const msg: BackgroundMessage<{ type: SyncMarkEventType; mark: Mark }> = {
+      source: getRuntime(),
+      name: 'syncMarkEvent',
       body: {
         type,
-        mark: { type: mark?.type, data: mark?.data, xPath: mark?.xPath },
+        mark: { type: mark?.type, data: mark?.data, xPath: mark?.xPath, scope: selectorScopeRef.current },
       },
-      source: getRuntime(),
     };
     console.log('contentSelectorClickHandler', safeStringifyJSON(msg));
     sendMessage(msg);
@@ -121,13 +98,32 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
     markListRef.current = [];
   };
 
-  const contentActionHandler = (ev: MouseEvent) => {
+  const isMouseOutsideContainer = (ev: MouseEvent) => {
+    const { target } = ev;
+    const containerElem = selector ? document.querySelector(`.${selector}`) : document.body;
+    return !containerElem.contains(target as Node);
+  };
+
+  const onMouseMove = (ev: MouseEvent) => {
     ev.stopImmediatePropagation();
 
+    console.log('isMouseOutsideContainer', isMouseOutsideContainer(ev), selector);
+
+    if (isMouseOutsideContainer(ev)) {
+      return;
+    }
+
     console.log('contentActionHandler', ev, statusRef, markRef, showContentSelectorRef);
-    if (statusRef.current && markRef.current && showContentSelectorRef.current) {
+    if (
+      statusRef.current &&
+      markRef.current &&
+      showContentSelectorRef.current &&
+      selectorScopeRef.current === 'block'
+    ) {
       const { target } = ev;
       const rect = (target as Element)?.getBoundingClientRect();
+      const containerElem = selector ? document.querySelector(`.${selector}`) : document.body;
+      const containerRect = containerElem.getBoundingClientRect();
       const mark = markRef.current;
 
       const width = rect.width || 0;
@@ -135,10 +131,13 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
       const top = rect.top || 0;
       const left = rect.left || 0;
       // console.log('rect', , rect.height, rect.top, rect.left);
+      // container 的 top 和 left 是相对于 document 的
+      const containerTop = containerRect.top || 0;
+      const containerLeft = containerRect.left || 0;
 
       // console.log('top', window.scrollY + rect.top);
-      mark.style.top = window.scrollY + top + 'px';
-      mark.style.left = window.scrollX + left + 'px';
+      mark.style.top = window.scrollY + top - containerTop + 'px';
+      mark.style.left = window.scrollX + left - containerLeft + 'px';
       mark.style.width = width + 'px';
       mark.style.height = height + 'px';
       mark.style.background = `#00968F26 !important`;
@@ -146,17 +145,21 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
     }
   };
 
-  const contentSelectorClickHandler = (ev: MouseEvent) => {
+  const onContentClick = (ev: MouseEvent) => {
     ev.stopImmediatePropagation();
     ev.preventDefault();
     ev.stopPropagation();
     let markEvent: { type: 'remove' | 'add'; mark: Mark };
 
+    if (isMouseOutsideContainer(ev)) {
+      return;
+    }
+
     if (statusRef.current && markRef.current && showContentSelectorRef.current) {
       const { target } = ev;
 
       if ((target as Element)?.classList.contains('refly-content-selected-target')) {
-        const mark = removeMark(target as HTMLElement, getXPath(target));
+        const mark = removeMark(target as HTMLElement, genContentSelectorID());
         markEvent = { type: 'remove', mark };
       } else {
         const mark = addMark(target as HTMLElement);
@@ -174,30 +177,74 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
     }
   };
 
-  const initDomEventListener = () => {
+  const onMouseDownUpEvent = (ev: MouseEvent) => {
+    ev.stopImmediatePropagation();
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    if (isMouseOutsideContainer(ev)) {
+      return;
+    }
+
+    const selection = window.getSelection();
+    const text = selection?.toString();
+
+    let markEvent: { type: 'remove' | 'add'; mark: Mark };
+
+    if (statusRef.current && markRef.current && showContentSelectorRef.current) {
+      if (text && text?.trim()?.length > 0) {
+        const range = selection.getRangeAt(0);
+        const newNode = document.createElement('span');
+        range.surroundContents(newNode);
+
+        const mark = addMark(newNode);
+        markEvent = { type: 'add', mark };
+
+        const msg: Partial<SyncMarkEvent> = {
+          body: markEvent,
+        };
+        syncMarkEvent(msg);
+      }
+    }
+  };
+
+  const initBlockDomEventListener = () => {
     const containerElem = selector ? document.querySelector(`.${selector}`) : document.body;
 
-    containerElem.addEventListener('mousemove', contentActionHandler);
-    containerElem.addEventListener('click', contentSelectorClickHandler, {
+    containerElem.addEventListener('mousemove', onMouseMove);
+    containerElem.addEventListener('click', onContentClick, {
       capture: true,
     });
+  };
+
+  const initInlineDomEventListener = () => {
+    const containerElem = selector ? document.querySelector(`.${selector}`) : document.body;
+
+    // containerElem.addEventListener('mousedown', onMouseDownUpEvent);
+    containerElem.addEventListener('mouseup', onMouseDownUpEvent);
   };
 
   const removeDomEventListener = () => {
     const containerElem = selector ? document.querySelector(`.${selector}`) : document.body;
 
-    containerElem.removeEventListener('mousemove', contentActionHandler);
-    containerElem.removeEventListener('click', contentSelectorClickHandler, { capture: true });
+    containerElem.removeEventListener('mousemove', onMouseMove);
+    containerElem.removeEventListener('click', onContentClick, { capture: true });
+    containerElem.removeEventListener('mouseup', onMouseDownUpEvent);
   };
 
-  const contentSelectorStatusHandler = (event: MessageEvent<any>) => {
+  const onStatusHandler = (event: MessageEvent<any>) => {
     const data = event as any as BackgroundMessage;
     console.log('contentSelectorStatusHandler data', event, getRuntime());
     if ((data as SyncStatusEvent)?.name === 'syncStatusEvent') {
-      const { type } = (data as SyncStatusEvent)?.body;
+      const { type, scope } = (data as SyncStatusEvent)?.body;
 
       if (type === 'start') {
-        initDomEventListener();
+        selectorScopeRef.current = scope; // 每次开启都动态的处理 scope
+        if (scope === 'block') {
+          initBlockDomEventListener();
+        } else {
+          initInlineDomEventListener();
+        }
         showContentSelectorRef.current = true;
       } else if (type === 'reset') {
         resetStyle();
@@ -210,7 +257,7 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
       }
     }
 
-    if ((data as SyncMarkEvent)?.name === 'syncMarkEvent') {
+    if ((data as SyncMarkEvent)?.name === 'syncMarkEventBack') {
       const { mark, type } = (data as SyncMarkEvent)?.body;
 
       if (type === 'remove') {
@@ -245,7 +292,7 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
 
   const initMessageListener = () => {
     injectContentSelectorCss();
-    onMessage(contentSelectorStatusHandler, getRuntime()).then((clearEvent) => {
+    onMessage(onStatusHandler, getRuntime()).then((clearEvent) => {
       messageListenerEventRef.current = clearEvent;
     });
 
@@ -255,28 +302,32 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
     };
   };
 
-  const contentSelectorElem = (
-    <div className="refly-content-selector-container">
-      <div
-        ref={markRef}
-        style={{
-          backgroundColor: '#4d53e826 !important',
-          position: 'fixed',
-          top: 0,
-          bottom: 0,
-          left: 0,
-          right: 0,
-          width: 0,
-          height: 0,
-          pointerEvents: 'none',
-        }}
-        className={classNames('refly-content-selector-mark', 'refly-content-selector-mark--active')}
-      ></div>
-    </div>
-  );
+  const initContentSelectorElem = () => {
+    // 处理多处引用问题
+
+    return (
+      <div className="refly-content-selector-container">
+        <div
+          ref={markRef}
+          style={{
+            backgroundColor: '#4d53e826 !important',
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            width: 0,
+            height: 0,
+            pointerEvents: 'none',
+          }}
+          className={classNames('refly-content-selector-mark', 'refly-content-selector-mark--active')}
+        ></div>
+      </div>
+    );
+  };
 
   return {
-    contentSelectorElem,
+    initContentSelectorElem,
     injectContentSelectorCss,
     initMessageListener,
   };

@@ -52,7 +52,10 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
   const editorRef = useRef<EditorInstance>();
 
   // 初始块选择
-  const { initMessageListener, contentSelectorElem } = useContentSelector('ai-note-editor', 'note');
+  const { initMessageListener, initContentSelectorElem } = useContentSelector(
+    'ai-note-editor-content-container',
+    'note',
+  );
 
   // 准备 extensions
   const websocketProvider = useMemo(() => {
@@ -158,8 +161,9 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
   }, [readOnly]);
 
   return (
-    <div className="editor">
-      <div className="w-full h-full max-w-screen-lg">
+    <div className="ai-note-editor-content-container">
+      {initContentSelectorElem()}
+      <div className="w-full max-w-screen-lg h-full">
         <EditorRoot>
           <EditorContent
             extensions={extensions}
@@ -168,7 +172,7 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
               noteStore.updateEditor(editor);
             }}
             editable={!readOnly}
-            className="w-full h-full max-w-screen-lg border-muted sm:rounded-lg"
+            className="w-full max-w-screen-lg h-full border-muted sm:rounded-lg"
             editorProps={{
               handleDOMEvents: {
                 keydown: (_view, event) => handleCommandNavigation(event),
@@ -191,7 +195,6 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
           </EditorContent>
         </EditorRoot>
       </div>
-      {contentSelectorElem}
     </div>
   );
 };
@@ -262,7 +265,7 @@ export const AINoteHeader = (props: AINoteHeaderProps) => {
 
   return (
     <div className="flex justify-center mx-4 mt-8 align-middle">
-      <div className="w-full h-full max-w-screen-lg">
+      <div className="w-full max-w-screen-lg h-full">
         <Input
           className="text-3xl font-bold bg-transparent focus:border-transparent focus:bg-transparent"
           placeholder="Enter The Title"
@@ -344,7 +347,7 @@ export const AINote = () => {
   }
 
   if (!note) {
-    return <Spin dot block className="flex items-center justify-center w-full h-full" />;
+    return <Spin dot block className="flex justify-center items-center w-full h-full" />;
   }
 
   const onTitleChange = (newTitle: string) => {

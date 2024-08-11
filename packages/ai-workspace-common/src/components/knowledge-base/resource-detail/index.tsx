@@ -30,7 +30,7 @@ export const KnowledgeBaseResourceDetail = memo(() => {
   }));
   const { handleAddTab } = useKnowledgeBaseTabs();
   // 初始块选择
-  const { initMessageListener, contentSelectorElem } = useContentSelector(
+  const { initMessageListener, initContentSelectorElem } = useContentSelector(
     'knowledge-base-resource-detail-container',
     'resource-detail',
   );
@@ -93,6 +93,7 @@ export const KnowledgeBaseResourceDetail = memo(() => {
 
   return (
     <div className="knowledge-base-resource-detail-container">
+      {initContentSelectorElem()}
       <div className="knowledge-base-resource-detail-body">
         {isFetching ? (
           <div style={{ margin: '20px auto' }}>
@@ -147,7 +148,6 @@ export const KnowledgeBaseResourceDetail = memo(() => {
           </div>
         )}
       </div>
-      {contentSelectorElem}
     </div>
   );
 });

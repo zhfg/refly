@@ -8,9 +8,9 @@ export type BackgroundMsgType =
   | 'operateTabStorage'
   | 'injectContentSelectorCss';
 
-export interface BackgroundMessage {
+export interface BackgroundMessage<T = any> {
   name: string;
-  body?: any;
+  body?: T;
   type?: BackgroundMsgType;
   source: IRuntime;
   target?: any;

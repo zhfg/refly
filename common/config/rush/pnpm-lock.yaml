@@ -1903,6 +1903,9 @@ importers:
 
   ../../packages/utils:
     dependencies:
+      '@mozilla/readability':
+        specifier: ^0.5.0
+        version: 0.5.0
       '@paralleldrive/cuid2':
         specifier: ^2.2.2
         version: 2.2.2
@@ -1987,6 +1990,9 @@ importers:
       md5:
         specifier: ^2.3.0
         version: 2.3.0
+      node-html-parser:
+        specifier: ^6.1.13
+        version: 6.1.13
       prosemirror-markdown:
         specifier: ~1.13.0
         version: 1.13.0

@@ -57,7 +57,9 @@
     "@tiptap/extension-youtube": "^2.4.0",
     "@tiptap/suggestion": "^2.1.7",
     "@types/node": "18.15.3",
-    "@tiptap/core": "~2.4.0"
+    "@tiptap/core": "~2.4.0",
+    "node-html-parser": "^6.1.13",
+    "@mozilla/readability": "^0.5.0"
   },
   "devDependencies": {
     "@types/chrome": "0.0.227",

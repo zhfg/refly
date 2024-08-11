@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { browser } from 'wxt/browser';
 import { useMatch } from '@refly-packages/ai-workspace-common/utils/router';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { getReadabilityHtml } from '@/utils/readability';
+import { getReadabilityHtml } from '@refly/utils/html2md';
 import { useExtensionMessage } from '../use-extension-message';
 
 /**
@@ -24,7 +24,7 @@ export const useSyncWeblinkResourceMeta = async () => {
     /**
      * TODO: @mrcfps replace pageContent to markdown
      */
-    const pageContent = getReadabilityHtml();
+    const pageContent = getReadabilityHtml(document);
     const resource: Partial<UpsertResourceRequest> = {
       resourceId: 'tempResId',
       title: document?.title || '',

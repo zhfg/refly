@@ -4,7 +4,7 @@ import {
   onMessage,
   sendToBackground,
   sendToContentScript,
-  sendMessage,
+  sendMessage, // Added this import
   BackgroundMessage,
 } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
@@ -31,7 +31,7 @@ export const useSelectedMark = () => {
     const { body, name } = data || {};
 
     console.log('contentSelectedHandler', data);
-    if (name === 'syncMarkEventFromSelector') {
+    if (name === 'syncMarkEvent') {
       // 代表从 content-selector-app 获取信息
       const { marks = [] } = useContentSelectorStore.getState();
       const { currentSelectedMarks, enableMultiSelect, currentSelectedMark } = useKnowledgeBaseStore.getState();
@@ -64,7 +64,7 @@ export const useSelectedMark = () => {
   };
 
   const handleInitContentSelectorListener = () => {
-    const { isInjectStyles } = useContentSelectorStore.getState();
+    const { isInjectStyles, scope } = useContentSelectorStore.getState();
     contentSelectorStore.setShowContentSelector(true);
     const runtime = getRuntime();
 
@@ -83,6 +83,7 @@ export const useSelectedMark = () => {
       name: 'syncStatusEvent',
       body: {
         type: 'start',
+        scope,
       },
     };
 
@@ -93,12 +94,14 @@ export const useSelectedMark = () => {
   };
 
   const handleStopContentSelectorListener = () => {
+    const { scope } = useContentSelectorStore.getState();
     contentSelectorStore.setShowContentSelector(false);
 
     const event: SyncStatusEvent = {
       name: 'syncStatusEvent',
       body: {
         type: 'stop',
+        scope,
       },
     };
     sendMessage({
@@ -110,7 +113,7 @@ export const useSelectedMark = () => {
   const handleRemoveMark = (xPath: string) => {
     const { marks } = useContentSelectorStore.getState();
     const mark = marks.find((item) => item?.xPath === xPath);
-    const event: SyncMarkEvent = { body: { type: 'remove', mark }, name: 'syncMarkEvent' };
+    const event: SyncMarkEvent = { body: { type: 'remove', mark }, name: 'syncMarkEventBack' };
     sendMessage({
       ...event,
       source: getRuntime(),
@@ -121,7 +124,7 @@ export const useSelectedMark = () => {
   };
 
   const handleRemoveAllMarks = () => {
-    const event: SyncMarkEvent = { body: { type: 'reset' }, name: 'syncMarkEvent' };
+    const event: SyncMarkEvent = { body: { type: 'reset' }, name: 'syncMarkEventBack' };
     setMarks([]);
     sendMessage({
       ...event,
@@ -130,12 +133,14 @@ export const useSelectedMark = () => {
   };
 
   const handleReset = () => {
+    const { scope } = useContentSelectorStore.getState();
     contentSelectorStore.setShowContentSelector(false);
 
     const event: SyncStatusEvent = {
       name: 'syncStatusEvent',
       body: {
         type: 'reset',
+        scope,
       },
     };
     sendMessage({
