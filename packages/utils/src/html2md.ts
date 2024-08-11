@@ -1,6 +1,6 @@
 import { parse } from 'node-html-parser';
 import { Readability } from '@mozilla/readability';
-import { convertHTMLToMarkdown } from 'src/editor';
+import { convertHTMLToMarkdown } from './editor';
 
 export const removeUnusedHtmlNode = () => {
   const $ = parse(document?.documentElement?.innerHTML);
@@ -25,16 +25,16 @@ export const removeUnusedHtmlNode = () => {
   return html;
 };
 
-export const getReadabilityHtml = (element: Document) => {
+export const getReadabilityHtml = (node: Document | HTMLElement) => {
   try {
-    const parsed = new Readability(element.cloneNode(true)).parse();
+    const parsed = new Readability(node.cloneNode(true) as Document).parse();
     return parsed?.content;
   } catch (err) {
     return removeUnusedHtmlNode();
   }
 };
 
-export const getMarkdown = (element: Document) => {
+export const getMarkdown = (element: Document | HTMLElement) => {
   const html = getReadabilityHtml(element);
   const md = convertHTMLToMarkdown('render', html);
   return md;
