@@ -9,6 +9,7 @@ export default defineContentScript({
   matches: ['<all_urls>'],
   // 2. Set cssInjectionMode
   cssInjectionMode: 'ui',
+  excludeMatches: ['https://refly.ai/*', 'https://api.refly.ai/*', 'https://www.refly.ai/*', 'http://localhost:5173/*'],
 
   async main(ctx) {
     setRuntime('extension-csui');
