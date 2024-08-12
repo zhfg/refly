@@ -1,6 +1,7 @@
+import { INLINE_SELECTED_MARK_ID } from '@refly-packages/ai-workspace-common/modules/content-selector/utils';
 import { getMarkdown } from '@refly-packages/utils/html2md';
 
-export function highlightSelection(selector: string, xPath: string) {
+export function highlightSelection(xPath: string) {
   const selection = window.getSelection();
   const selectedNodes = [];
 
@@ -10,8 +11,7 @@ export function highlightSelection(selector: string, xPath: string) {
 
     selectedTextNodes.forEach(({ node, text, startOffset, endOffset }) => {
       const span = document.createElement('span');
-      span.classList.add(selector);
-      span.setAttribute('data-refly-selected-mark-id', xPath);
+      span.setAttribute(INLINE_SELECTED_MARK_ID, xPath);
       span.textContent = text; // 将选中的文本内容放入 span 中
 
       const newNode = node.splitText(startOffset);
@@ -66,20 +66,26 @@ function getTextNodesInRange(range) {
   return Array.from(new Set(textNodes));
 }
 
-// 辅助函数：获取下一个节点
-function getNextNode(node) {
-  if (node.firstChild) return node.firstChild;
-  while (node) {
-    if (node.nextSibling) return node.nextSibling;
-    node = node.parentNode;
-  }
-  return null;
+export function removeHighlight(xPath: string) {
+  const highlightedSpans = document.querySelectorAll(`span[${INLINE_SELECTED_MARK_ID}="${xPath}"]`);
+
+  highlightedSpans.forEach((span) => {
+    const parent = span.parentNode;
+    const textContent = span.textContent;
+
+    // 创建一个新的文本节点来替换 span
+    const textNode = document.createTextNode(textContent);
+    parent.replaceChild(textNode, span);
+
+    // 尝试合并相邻的文本节点
+    parent.normalize();
+  });
 }
 
 export function getSelectionNodesMarkdown() {
   const selection = window.getSelection();
   const range = selection.getRangeAt(0);
-  const fragment = range.extractContents();
+  const fragment = range.cloneRange().cloneContents();
   const mdText = getMarkdown(fragment);
 
   return mdText;

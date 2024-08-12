@@ -13,6 +13,8 @@ import { SelectedNamespace } from '@refly-packages/ai-workspace-common/stores/kn
 import { getElementType } from '../utils';
 import { genContentSelectorID } from '@refly-packages/utils/id';
 import { getMarkdown } from '@refly/utils/html2md';
+import { BLOCK_SELECTED_MARK_ID, INLINE_SELECTED_MARK_ID } from '../utils/index';
+import { removeHighlight } from '../utils/highlight-selection';
 
 // utils
 import { highlightSelection, getSelectionNodesMarkdown } from '../utils/highlight-selection';
@@ -35,26 +37,56 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
       scope: selectorScopeRef.current,
     };
 
-    // console.log(
-    //   "getContentFromHtmlSelector",
-    //   getContentFromHtmlSelector(getCSSPath(target)),
-    // )
-
     return mark;
   };
 
   const addMark = (mark: Mark, target: HTMLElement | HTMLElement[]) => {
     markListRef.current = markListRef.current.concat(mark);
-    (target as Element)?.classList.add('refly-content-selected-target');
     // 添加到 list 方便后续统一的处理
     targetList.current = targetList.current.concat(target as Element);
   };
 
-  const removeMark = (target: HTMLElement, xPath: string) => {
+  const addInlineMark = () => {
+    const xPath = genContentSelectorID();
+    const content = getSelectionNodesMarkdown();
+    const selectionNodes = highlightSelection(xPath);
+
+    const type = 'text' as ElementType;
+    const mark = buildMark(type, content, xPath);
+    addMark(mark, selectionNodes);
+
+    return mark;
+  };
+
+  const addBlockMark = (target: HTMLElement) => {
+    const type = getElementType(target);
+    const xPath = genContentSelectorID();
+    target.setAttribute(BLOCK_SELECTED_MARK_ID, xPath);
+    const mark = buildMark(type, getMarkdown(target as HTMLElement), xPath);
+    addMark(mark, target);
+
+    return mark;
+  };
+
+  const removeInlineMark = (target: HTMLElement, markXPath?: string) => {
+    const xPath = markXPath || target.getAttribute(INLINE_SELECTED_MARK_ID);
     const mark = markListRef.current?.find((item) => item?.xPath === xPath);
     markListRef.current = markListRef.current.filter((item) => item.xPath !== xPath);
-    (target as Element)?.classList.remove('refly-content-selected-target');
-    targetList.current = targetList.current.filter((item) => item != target);
+
+    removeHighlight(xPath);
+    targetList.current = targetList.current.filter((item) => item.getAttribute(INLINE_SELECTED_MARK_ID) !== xPath);
+
+    return mark;
+  };
+
+  const removeBlockMark = (target: HTMLElement, markXPath?: string) => {
+    const xPath = markXPath || target.getAttribute(BLOCK_SELECTED_MARK_ID);
+
+    const mark = markListRef.current?.find((item) => item?.xPath === xPath);
+    markListRef.current = markListRef.current.filter((item) => item.xPath !== xPath);
+
+    (target as Element)?.removeAttribute(BLOCK_SELECTED_MARK_ID);
+    targetList.current = targetList.current.filter((item) => item.getAttribute(BLOCK_SELECTED_MARK_ID) !== xPath);
 
     return mark;
   };
@@ -90,7 +122,13 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
   const resetStyle = () => {
     resetMarkStyle();
     // selected list style
-    targetList.current.forEach((item) => item?.classList?.remove('refly-content-selected-target'));
+    targetList.current.forEach((item) => {
+      if (item.getAttribute(BLOCK_SELECTED_MARK_ID)) {
+        removeBlockMark(item as HTMLElement);
+      } else if (item.getAttribute(INLINE_SELECTED_MARK_ID)) {
+        removeInlineMark(item as HTMLElement);
+      }
+    });
     targetList.current = [];
     markListRef.current = [];
   };
@@ -164,23 +202,23 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
     if (statusRef.current && markRef.current && showContentSelectorRef.current) {
       const { target } = ev;
 
-      if ((target as Element)?.classList.contains('refly-content-selected-target')) {
-        const mark = removeMark(target as HTMLElement, genContentSelectorID());
+      console.log('onContentClick');
+
+      if ((target as Element)?.getAttribute(BLOCK_SELECTED_MARK_ID)) {
+        const mark = removeBlockMark(target as HTMLElement);
+        markEvent = { type: 'remove', mark };
+      } else if ((target as Element)?.getAttribute(INLINE_SELECTED_MARK_ID)) {
+        const mark = removeInlineMark(target as HTMLElement);
         markEvent = { type: 'remove', mark };
       } else {
-        const type = getElementType(target);
-        const mark = buildMark(type, getMarkdown(target as HTMLElement), genContentSelectorID());
-        addMark(mark, target as HTMLElement);
+        const mark = addBlockMark(target as HTMLElement);
         markEvent = { type: 'add', mark };
       }
-
-      console.log('markListRef.current', markListRef.current);
 
       // 发送给 refly-main-app
       const msg: Partial<SyncMarkEvent> = {
         body: markEvent,
       };
-      console.log('contentSelectorClickHandler', safeStringifyJSON(msg));
       syncMarkEvent(msg);
     }
   };
@@ -197,17 +235,13 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
     const selection = window.getSelection();
     const text = selection?.toString();
 
+    console.log('onMouseDownUpEvent');
+
     let markEvent: { type: 'remove' | 'add'; mark: Mark };
 
     if (statusRef.current && markRef.current && showContentSelectorRef.current) {
       if (text && text?.trim()?.length > 0) {
-        const xPath = genContentSelectorID();
-        const selectionNodes = highlightSelection('refly-content-selected-target', xPath);
-
-        const type = 'text' as ElementType;
-        const content = getSelectionNodesMarkdown();
-        const mark = buildMark(type, content, xPath);
-        addMark(mark, selectionNodes);
+        const mark = addInlineMark();
         markEvent = { type: 'add', mark };
 
         const msg: Partial<SyncMarkEvent> = {
@@ -269,6 +303,10 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
           removeDomEventListener();
         }
 
+        if (scope === 'inline') {
+          resetMarkStyle(); // 自由选择时不需要 mark style
+        }
+
         selectorScopeRef.current = scope; // 每次开启都动态的处理 scope
         initDomEventListener();
       } else if (type === 'reset') {
@@ -288,33 +326,17 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
       if (type === 'remove') {
         const xPath = mark?.xPath || '';
         const target = markListRef.current.find((item) => item.xPath === xPath)?.target;
-        removeMark(target as HTMLElement, xPath);
+
+        if (mark?.scope === 'block') {
+          removeBlockMark(target as HTMLElement, xPath);
+        } else {
+          removeInlineMark(target as HTMLElement, xPath);
+        }
       }
     }
   };
 
-  const injectContentSelectorCss = () => {
-    const style = document.createElement('style');
-    style.textContent = `
-        * {
-        cursor: default !important;
-      }
-      .refly-content-selector-mark {
-        cursor: pointer !important;
-      }
-      .refly-content-selector-mark:hover {
-        background-color: #00968F26 !important;
-      }
-
-      .refly-content-selected-target {
-        background-color: #00968F26 !important;
-      }
-        `;
-    document.head.appendChild(style);
-  };
-
   const initMessageListener = () => {
-    // injectContentSelectorCss();
     onMessage(onStatusHandler, getRuntime()).then((clearEvent) => {
       messageListenerEventRef.current = clearEvent;
     });
@@ -351,7 +373,6 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
 
   return {
     initContentSelectorElem,
-    injectContentSelectorCss,
     initMessageListener,
   };
 };

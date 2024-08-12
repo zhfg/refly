@@ -26,3 +26,6 @@ export function getElementType(element) {
     return 'text';
   }
 }
+
+export const INLINE_SELECTED_MARK_ID = 'data-refly-inline-selected-mark-id';
+export const BLOCK_SELECTED_MARK_ID = 'data-refly-block-selected-mark-id';

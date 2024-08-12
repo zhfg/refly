@@ -32,8 +32,9 @@ export const KnowledgeBaseResourceDetail = memo(() => {
   }));
   const { handleAddTab } = useKnowledgeBaseTabs();
   // 初始块选择
-  const { showContentSelector } = useContentSelectorStore((state) => ({
+  const { showContentSelector, scope } = useContentSelectorStore((state) => ({
     showContentSelector: state.showContentSelector,
+    scope: state.scope,
   }));
   const { initMessageListener, initContentSelectorElem } = useContentSelector(
     'knowledge-base-resource-content',
@@ -147,7 +148,11 @@ export const KnowledgeBaseResourceDetail = memo(() => {
           </div>
         ) : (
           <div
-            className={classNames('knowledge-base-resource-content', { 'selector-mode-active': showContentSelector })}
+            className={classNames('knowledge-base-resource-content', {
+              'refly-selector-mode-active': showContentSelector,
+              'refly-block-selector-mode': scope === 'block',
+              'refly-inline-selector-mode': scope === 'inline',
+            })}
           >
             {initContentSelectorElem()}
             <div className="knowledge-base-resource-content-title">{resourceDetail?.title}</div>

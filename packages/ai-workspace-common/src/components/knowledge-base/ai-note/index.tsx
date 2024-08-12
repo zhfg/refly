@@ -53,8 +53,9 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
   const noteStore = useNoteStore();
   const editorRef = useRef<EditorInstance>();
 
-  const { showContentSelector } = useContentSelectorStore((state) => ({
+  const { showContentSelector, scope } = useContentSelectorStore((state) => ({
     showContentSelector: state.showContentSelector,
+    scope: state.scope,
   }));
   // 初始块选择
   const { initMessageListener, initContentSelectorElem } = useContentSelector(
@@ -166,7 +167,13 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
   }, [readOnly]);
 
   return (
-    <div className={classNames('ai-note-editor-content-container', { 'selector-mode-active': showContentSelector })}>
+    <div
+      className={classNames('ai-note-editor-content-container', {
+        'refly-selector-mode-active': showContentSelector,
+        'refly-block-selector-mode': scope === 'block',
+        'refly-inline-selector-mode': scope === 'inline',
+      })}
+    >
       {initContentSelectorElem()}
       <div className="w-full max-w-screen-lg h-full">
         <EditorRoot>

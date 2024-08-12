@@ -37,12 +37,12 @@ export const ContentSelectorBtn = (props: ContentSelectorBtnProps) => {
       handleStopContentSelectorListener();
     } else {
       handleInitContentSelectorListener();
-    }
 
-    // 将 note 切入只读模式
-    const { currentNote } = useNoteStore.getState();
-    noteStore.updateCurrentNote({ ...currentNote, readOnly: true });
-    message.info('开启选择内容提问，笔记已进入只读模式');
+      // 将 note 切入只读模式
+      const { currentNote } = useNoteStore.getState();
+      noteStore.updateCurrentNote({ ...currentNote, readOnly: true });
+      message.info('开启选择内容提问，笔记已进入只读模式');
+    }
   };
 
   const baseStyle = {
