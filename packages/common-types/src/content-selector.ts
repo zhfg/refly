@@ -10,6 +10,7 @@ export interface Mark {
   target?: HTMLElement;
   xPath: string; // 该元素对应的 xPath 路径，这个可以当做唯一 id
   scope: MarkScope; // 是块级还是内联元素
+  cleanup?: () => void; // 清理函数
 }
 
 export interface Selection {

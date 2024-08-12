@@ -1,5 +1,6 @@
 import classNames from 'classnames';
 import { useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import type { Mark, MarkScope, SyncMarkEvent, SyncMarkEventType, SyncStatusEvent } from '@refly/common-types';
 import { safeStringifyJSON } from '@refly-packages/utils/parse';
 import {
@@ -19,6 +20,7 @@ import { removeHighlight } from '../utils/highlight-selection';
 // utils
 import { highlightSelection, getSelectionNodesMarkdown } from '../utils/highlight-selection';
 import { ElementType } from '../utils';
+import HoverMenu from '@refly-packages/ai-workspace-common/modules/content-selector/components/hover-menu';
 
 export const useContentSelector = (selector: string | null, namespace: SelectedNamespace) => {
   const statusRef = useRef(true);
@@ -46,6 +48,82 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
     targetList.current = targetList.current.concat(target as Element);
   };
 
+  const addHoverMenu = (target: HTMLElement, xPath: string, type: 'block' | 'inline') => {
+    // 创建一个容器来放置React组件
+    const menuContainer = document.createElement('div');
+    menuContainer.style.position = 'fixed';
+    menuContainer.style.zIndex = '1000';
+    menuContainer.style.opacity = '0';
+    menuContainer.style.transition = 'opacity 0.3s ease-in-out';
+    document.body.appendChild(menuContainer);
+
+    let hideTimeout: NodeJS.Timeout;
+
+    // 使用React渲染hover菜单
+    const renderMenu = () => {
+      clearTimeout(hideTimeout);
+      const rect = target.getBoundingClientRect();
+      menuContainer.style.top = `${window.scrollY + rect.top - 30}px`;
+      menuContainer.style.left = `${window.scrollX + rect.left + rect.width / 2}px`;
+      menuContainer.style.opacity = '1';
+
+      ReactDOM.render(
+        <HoverMenu
+          onDelete={() => {
+            let markEvent: { type: 'remove' | 'add'; mark: Mark };
+            let mark: Mark;
+            if (type === 'block') {
+              mark = removeBlockMark(target, xPath);
+            } else {
+              mark = removeInlineMark(target, xPath);
+            }
+            markEvent = { type: 'remove', mark };
+            const msg: Partial<SyncMarkEvent> = {
+              body: markEvent,
+            };
+            syncMarkEvent(msg);
+            cleanup();
+          }}
+          onMouseEnter={() => clearTimeout(hideTimeout)}
+          onMouseLeave={() => removeHoverMenu()}
+        />,
+        menuContainer,
+      );
+    };
+
+    const removeHoverMenu = () => {
+      hideTimeout = setTimeout(() => {
+        ReactDOM.unmountComponentAtNode(menuContainer);
+        menuContainer.style.opacity = '0';
+      }, 300);
+    };
+
+    // 添加全局点击事件监听器
+    const handleGlobalClick = (event: MouseEvent) => {
+      if (!target.contains(event.target as Node) && !menuContainer.contains(event.target as Node)) {
+        removeHoverMenu();
+      }
+    };
+
+    // 添加鼠标事件监听器
+    target.addEventListener('mouseenter', renderMenu);
+    target.addEventListener('mouseleave', removeHoverMenu);
+    document.addEventListener('click', handleGlobalClick);
+
+    const cleanup = () => {
+      removeHoverMenu();
+      target.removeEventListener('mouseenter', renderMenu);
+      document.removeEventListener('click', handleGlobalClick);
+
+      if (menuContainer) {
+        ReactDOM.unmountComponentAtNode(menuContainer);
+        document.body.removeChild(menuContainer);
+      }
+    };
+
+    return cleanup;
+  };
+
   const addInlineMark = () => {
     const xPath = genContentSelectorID();
     const content = getSelectionNodesMarkdown();
@@ -63,8 +141,8 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
     const xPath = genContentSelectorID();
     target.setAttribute(BLOCK_SELECTED_MARK_ID, xPath);
     const mark = buildMark(type, getMarkdown(target as HTMLElement), xPath);
-    addMark(mark, target);
-
+    const cleanup = addHoverMenu(target, xPath, 'block'); // 添加 hover 菜单
+    addMark({ ...mark, cleanup }, target);
     return mark;
   };
 
@@ -87,6 +165,9 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
 
     (target as Element)?.removeAttribute(BLOCK_SELECTED_MARK_ID);
     targetList.current = targetList.current.filter((item) => item.getAttribute(BLOCK_SELECTED_MARK_ID) !== xPath);
+
+    // 执行清理函数
+    mark?.cleanup?.();
 
     return mark;
   };
@@ -370,6 +451,12 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
       </div>
     );
   };
+
+  useEffect(() => {
+    return () => {
+      resetStyle(); // 清理
+    };
+  }, []);
 
   return {
     initContentSelectorElem,
