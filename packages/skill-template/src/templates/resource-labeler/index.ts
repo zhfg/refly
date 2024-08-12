@@ -68,12 +68,13 @@ export class ResourceLabelerSkill extends BaseSkill {
     }
   };
 
-  checkResourceValid = (state: GraphState): 'prepareLabelClass' | typeof END => {
+  checkResourceValid = (state: GraphState, config: SkillRunnableConfig): 'prepareLabelClass' | typeof END => {
     const { resource } = state;
 
     if (resource?.content) {
       return 'prepareLabelClass';
     } else {
+      this.emitEvent({ event: 'log', content: `Resource content is empty, skip labeling` }, config);
       return END;
     }
   };

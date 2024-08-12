@@ -120,7 +120,7 @@ export class SkillService {
       {
         getResourceDetail: async (user, req) => {
           const resource = await this.knowledge.getResourceDetail(user, req);
-          return buildSuccessResponse(resourcePO2DTO(resource));
+          return buildSuccessResponse(resourcePO2DTO(resource, true));
         },
         createResource: async (user, req) => {
           const resource = await this.knowledge.createResource(user, req);

@@ -43,7 +43,7 @@ export const resourcePO2DTO = (
     return null;
   }
   const res: Resource = {
-    ...pick(resource, ['resourceId', 'title', 'isPublic']),
+    ...pick(resource, ['resourceId', 'collectionId', 'title', 'isPublic', 'readOnly']),
     resourceType: resource.resourceType as ResourceType,
     indexStatus: resource.indexStatus as IndexStatus,
     contentPreview: resource.content ? resource.content.slice(0, 250) + '...' : '',
