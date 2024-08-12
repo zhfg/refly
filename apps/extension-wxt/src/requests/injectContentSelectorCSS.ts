@@ -17,13 +17,9 @@ const handler = async (req: HandlerRequest<ListPageProps>): Promise<HandlerRespo
       }
       .refly-content-selector-mark {
         cursor: pointer !important;
-      }
-      .refly-content-selector-mark:hover {
-        color: unset !important;
-        border-bottom: 2px solid rgb(255, 212, 0) !important;
         background-color: #ffd40024 !important;
-        cursor: pointer !important;
       }
+        
       input,
       textarea {
         pointer-events: none;
@@ -35,6 +31,14 @@ const handler = async (req: HandlerRequest<ListPageProps>): Promise<HandlerRespo
         background-color: #ffd40024 !important;
         cursor: pointer !important;
       }
+
+      [data-refly-inline-selected-mark-id],
+      [data-refly-block-selected-mark-id] {
+        color: unset !important;
+        border-bottom: 2px solid rgb(255, 212, 0) !important;
+      background-color: #ffd40024 !important;
+      cursor: pointer !important;
+}
         `;
           document.head.appendChild(style);
         },

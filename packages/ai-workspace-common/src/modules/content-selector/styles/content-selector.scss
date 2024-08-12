@@ -58,3 +58,9 @@
     cursor: text !important;
   }
 }
+
+.refly-selector-hover-menu {
+  &:hover {
+    cursor: pointer;
+  }
+}

@@ -48,7 +48,16 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
     targetList.current = targetList.current.concat(target as Element);
   };
 
-  const addHoverMenu = (target: HTMLElement, xPath: string, type: 'block' | 'inline') => {
+  const addHoverMenu = (
+    { target, rect }: { target?: HTMLElement; rect?: DOMRect },
+    {
+      onClick,
+      selected,
+    }: {
+      onClick: () => void;
+      selected: boolean;
+    },
+  ) => {
     // 创建一个容器来放置React组件
     const menuContainer = document.createElement('div');
     menuContainer.style.position = 'fixed';
@@ -62,28 +71,21 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
     // 使用React渲染hover菜单
     const renderMenu = () => {
       clearTimeout(hideTimeout);
-      const rect = target.getBoundingClientRect();
-      menuContainer.style.top = `${window.scrollY + rect.top - 30}px`;
-      menuContainer.style.left = `${window.scrollX + rect.left + rect.width / 2}px`;
-      menuContainer.style.opacity = '1';
+      if (rect) {
+        menuContainer.style.top = `${rect.top - 30}px`;
+        menuContainer.style.left = `${rect.left + rect.width / 2}px`;
+        menuContainer.style.opacity = '1';
+      } else {
+        const rect = target.getBoundingClientRect();
+        menuContainer.style.top = `${window.scrollY + rect.top - 30}px`;
+        menuContainer.style.left = `${window.scrollX + rect.left + rect.width / 2}px`;
+        menuContainer.style.opacity = '1';
+      }
 
       ReactDOM.render(
         <HoverMenu
-          onDelete={() => {
-            let markEvent: { type: 'remove' | 'add'; mark: Mark };
-            let mark: Mark;
-            if (type === 'block') {
-              mark = removeBlockMark(target, xPath);
-            } else {
-              mark = removeInlineMark(target, xPath);
-            }
-            markEvent = { type: 'remove', mark };
-            const msg: Partial<SyncMarkEvent> = {
-              body: markEvent,
-            };
-            syncMarkEvent(msg);
-            cleanup();
-          }}
+          onClick={onClick}
+          selected={selected}
           onMouseEnter={() => clearTimeout(hideTimeout)}
           onMouseLeave={() => removeHoverMenu()}
         />,
@@ -98,42 +100,106 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
       }, 300);
     };
 
-    // 添加全局点击事件监听器
-    const handleGlobalClick = (event: MouseEvent) => {
-      if (!target.contains(event.target as Node) && !menuContainer.contains(event.target as Node)) {
-        removeHoverMenu();
-      }
-    };
-
     // 添加鼠标事件监听器
-    target.addEventListener('mouseenter', renderMenu);
-    target.addEventListener('mouseleave', removeHoverMenu);
-    document.addEventListener('click', handleGlobalClick);
+    if (rect) {
+      renderMenu();
+    } else {
+      target.addEventListener('mouseenter', renderMenu);
+      target.addEventListener('mouseleave', removeHoverMenu);
+    }
 
     const cleanup = () => {
       removeHoverMenu();
-      target.removeEventListener('mouseenter', renderMenu);
-      document.removeEventListener('click', handleGlobalClick);
+
+      if (!rect) {
+        target?.removeEventListener('mouseenter', renderMenu);
+        target?.removeEventListener('mouseleave', removeHoverMenu);
+      }
 
       if (menuContainer) {
         ReactDOM.unmountComponentAtNode(menuContainer);
-        document.body.removeChild(menuContainer);
+        try {
+          document?.body?.removeChild(menuContainer);
+        } catch (err) {
+          console.error('remove menuContainer error', err);
+        }
       }
     };
 
     return cleanup;
   };
 
+  const addHoverMenuToNode = (node: HTMLElement, xPath: string) => {
+    let cleanup: () => void;
+
+    const removeHighlight = () => {
+      const allNodes = document.querySelectorAll(`[${INLINE_SELECTED_MARK_ID}="${xPath}"]`);
+      allNodes.forEach((node) => {
+        const nodeCleanup = (node as any).__hoverMenuCleanup;
+        if (typeof nodeCleanup === 'function') {
+          nodeCleanup();
+        }
+
+        const parent = node.parentNode;
+        const textNode = document.createTextNode(node.textContent);
+        parent.replaceChild(textNode, node);
+        parent.normalize();
+      });
+
+      const mark = removeInlineMark(node, xPath);
+      syncRemoveMarkEvent(mark);
+    };
+
+    cleanup = addHoverMenu(
+      { target: node },
+      {
+        onClick: removeHighlight,
+        selected: true,
+      },
+    );
+
+    // 将 cleanup 函数存储在节点上
+    (node as any).__hoverMenuCleanup = cleanup;
+
+    return cleanup;
+  };
+
   const addInlineMark = () => {
-    const xPath = genContentSelectorID();
-    const content = getSelectionNodesMarkdown();
-    const selectionNodes = highlightSelection(xPath);
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
 
-    const type = 'text' as ElementType;
-    const mark = buildMark(type, content, xPath);
-    addMark(mark, selectionNodes);
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
 
-    return mark;
+    const confirmAddMark = () => {
+      const xPath = genContentSelectorID();
+      const content = getSelectionNodesMarkdown();
+      const selectionNodes = highlightSelection(xPath);
+
+      const type = 'text' as ElementType;
+      const mark = buildMark(type, content, xPath);
+      addMark({ ...mark, cleanup }, selectionNodes);
+
+      const markEvent = { type: 'add' as SyncMarkEventType, mark };
+      const msg: Partial<SyncMarkEvent> = {
+        body: markEvent,
+      };
+      syncMarkEvent(msg);
+
+      selectionNodes.forEach((node) => {
+        addHoverMenuToNode(node, xPath);
+      });
+
+      cleanup();
+    };
+
+    const cleanup = addHoverMenu(
+      { rect },
+      {
+        onClick: confirmAddMark,
+        selected: false,
+      },
+    );
   };
 
   const addBlockMark = (target: HTMLElement) => {
@@ -141,7 +207,17 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
     const xPath = genContentSelectorID();
     target.setAttribute(BLOCK_SELECTED_MARK_ID, xPath);
     const mark = buildMark(type, getMarkdown(target as HTMLElement), xPath);
-    const cleanup = addHoverMenu(target, xPath, 'block'); // 添加 hover 菜单
+    const cleanup = addHoverMenu(
+      { target },
+      {
+        onClick: () => {
+          const mark = removeBlockMark(target, xPath);
+          syncRemoveMarkEvent(mark);
+          cleanup();
+        },
+        selected: true,
+      },
+    ); // 添加 hover 菜单
     addMark({ ...mark, cleanup }, target);
     return mark;
   };
@@ -150,9 +226,10 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
     const xPath = markXPath || target.getAttribute(INLINE_SELECTED_MARK_ID);
     const mark = markListRef.current?.find((item) => item?.xPath === xPath);
     markListRef.current = markListRef.current.filter((item) => item.xPath !== xPath);
-
-    removeHighlight(xPath);
     targetList.current = targetList.current.filter((item) => item.getAttribute(INLINE_SELECTED_MARK_ID) !== xPath);
+
+    // 执行清理函数
+    mark?.cleanup?.();
 
     return mark;
   };
@@ -170,6 +247,22 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
     mark?.cleanup?.();
 
     return mark;
+  };
+
+  const syncRemoveMarkEvent = (mark: Mark) => {
+    const markEvent = { type: 'remove' as SyncMarkEventType, mark };
+    const msg: Partial<SyncMarkEvent> = {
+      body: markEvent,
+    };
+    syncMarkEvent(msg);
+  };
+
+  const syncAddMarkEvent = (mark: Mark) => {
+    const markEvent = { type: 'add' as SyncMarkEventType, mark };
+    const msg: Partial<SyncMarkEvent> = {
+      body: markEvent,
+    };
+    syncMarkEvent(msg);
   };
 
   const syncMarkEvent = (event: Partial<SyncMarkEvent>) => {
@@ -286,11 +379,9 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
       console.log('onContentClick');
 
       if ((target as Element)?.getAttribute(BLOCK_SELECTED_MARK_ID)) {
-        const mark = removeBlockMark(target as HTMLElement);
-        markEvent = { type: 'remove', mark };
+        //
       } else if ((target as Element)?.getAttribute(INLINE_SELECTED_MARK_ID)) {
-        const mark = removeInlineMark(target as HTMLElement);
-        markEvent = { type: 'remove', mark };
+        //
       } else {
         const mark = addBlockMark(target as HTMLElement);
         markEvent = { type: 'add', mark };
@@ -318,17 +409,9 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
 
     console.log('onMouseDownUpEvent');
 
-    let markEvent: { type: 'remove' | 'add'; mark: Mark };
-
     if (statusRef.current && markRef.current && showContentSelectorRef.current) {
       if (text && text?.trim()?.length > 0) {
-        const mark = addInlineMark();
-        markEvent = { type: 'add', mark };
-
-        const msg: Partial<SyncMarkEvent> = {
-          body: markEvent,
-        };
-        syncMarkEvent(msg);
+        addInlineMark();
       }
     }
   };

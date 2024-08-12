@@ -1,17 +1,19 @@
 import React from 'react';
 import { Button } from '@arco-design/web-react';
 import { IconDelete } from '@arco-design/web-react/icon';
+import { AiOutlineHighlight } from 'react-icons/ai';
 
 interface HoverMenuProps {
-  onDelete: () => void;
+  onClick: () => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
+  selected: boolean;
 }
 
-const HoverMenu: React.FC<HoverMenuProps> = ({ onDelete, onMouseEnter, onMouseLeave }) => {
+const HoverMenu: React.FC<HoverMenuProps> = ({ onClick, onMouseEnter, onMouseLeave, selected }) => {
   return (
     <div
-      className="hover-menu"
+      className="refly-selector-hover-menu"
       style={{
         position: 'absolute',
         right: '0',
@@ -23,8 +25,8 @@ const HoverMenu: React.FC<HoverMenuProps> = ({ onDelete, onMouseEnter, onMouseLe
     >
       <Button
         type="text"
-        icon={<IconDelete />}
-        onClick={onDelete}
+        icon={selected ? <IconDelete /> : <AiOutlineHighlight />}
+        onClick={onClick}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
         size="mini"
