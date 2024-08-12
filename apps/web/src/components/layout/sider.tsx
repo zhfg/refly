@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { Avatar, Divider, Layout, Menu, Tag } from "@arco-design/web-react"
 import {
   useLocation,
@@ -11,6 +12,8 @@ import {
   IconLanguage,
   IconImport,
   IconMessage,
+  IconMenuFold,
+  IconMenuUnfold,
 } from "@arco-design/web-react/icon"
 // 静态资源
 import Logo from "@/assets/logo.svg"
@@ -41,7 +44,124 @@ const getNavSelectedKeys = (pathname = "") => {
   return "Workspace"
 }
 
+const SiderLogo = (props: {
+  collapse: boolean
+  navigate: (path: string) => void
+}) => {
+  const { navigate, collapse } = props
+  return (
+    <div
+      className="logo-box"
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}>
+      <div className="logo" onClick={() => navigate("/")}>
+        <img src={Logo} alt="Refly" />
+        {!collapse && (
+          <>
+            <span>Refly </span>
+            <Tag color="#00968F" className="logo-beta" size="small">
+              Beta
+            </Tag>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+const CollapseBtn = (props: {
+  collapse: boolean
+  setCollapse: (collapse: boolean) => void
+}) => {
+  const { collapse, setCollapse } = props
+  return (
+    <div
+      className={`collapse-btn ${collapse ? "collapse-btn--collapsed" : ""}`}
+      onClick={() => setCollapse(!collapse)}>
+      {collapse ? (
+        <IconMenuUnfold style={{ fontSize: 20, color: "#666666" }} />
+      ) : (
+        <IconMenuFold style={{ fontSize: 20, color: "#666666" }} />
+      )}
+    </div>
+  )
+}
+
+const MenuItemContent = (props: {
+  icon?: React.ReactNode
+  title: string
+  collapse?: boolean
+}) => {
+  return (
+    <div className="flex">
+      <div className="flex flex-1 flex-nowrap items-center">
+        {props.icon}
+        <span className="sider-menu-title">{props.title}</span>
+      </div>
+    </div>
+  )
+}
+
+const MenuItemTooltipContent = (props: { title: string }) => {
+  return <div>{props.title}</div>
+}
+
+const SettingItem = (props: { navigate: (path: string) => void }) => {
+  const { navigate } = props
+  const userStore = useUserStore()
+  return (
+    <div className="flex flex-1 items-center justify-between">
+      <div
+        className="menu-settings"
+        onClick={() => {
+          navigate("/settings")
+        }}>
+        <Avatar size={32}>
+          <img src={userStore?.userProfile?.avatar || ""} alt="user-avatar" />
+        </Avatar>
+        <span className="username">{userStore?.userProfile?.name}</span>
+      </div>
+      <div>
+        <span
+          className="setting-language-icon"
+          style={{ display: "inline-block", marginRight: "8px" }}>
+          <UILocaleList>
+            <IconLanguage
+              style={{
+                fontSize: 20,
+              }}
+            />
+          </UILocaleList>
+        </span>
+        <span
+          className="setting-icon"
+          onClick={() => {
+            navigate("/settings")
+          }}>
+          <IconSettings style={{ fontSize: 20 }} />
+        </span>
+      </div>
+    </div>
+  )
+}
+
+// const SiderMenuItem = (props: { icon?: React.ReactNode; title: string }) => {
+//   const { icon, title } = props
+//   return (
+//     <MenuItem
+//       className="custom-menu-item"
+//       renderItemInTooltip={() => <MenuItemTooltipContent title={title} />}>
+//       <MenuItemContent icon={icon} title={title} />
+//     </MenuItem>
+//   )
+// }
+
 export const SiderLayout = () => {
+  const [collapse, setCollapse] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
   const userStore = useUserStore()
@@ -146,23 +266,13 @@ export const SiderLayout = () => {
   }
 
   return (
-    <Sider className={`app-sider ${isGuideDetail ? "fixed" : ""}`} width={220}>
-      <div className="sider-header">
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-between",
-          }}>
-          <div className="logo" onClick={() => navigate("/")}>
-            <img src={Logo} alt="Refly" />
-            <span>Refly </span>
-            <Tag color="#00968F" className="logo-beta" size="small">
-              Beta
-            </Tag>
-          </div>
-        </div>
-        <SearchQuickOpenBtn />
+    <Sider
+      className={`app-sider ${isGuideDetail ? "fixed" : ""}`}
+      width={collapse ? 90 : 220}>
+      <div
+        className={`sider-header ${collapse ? "sider-header-collapse" : ""}`}>
+        <SiderLogo navigate={path => navigate(path)} collapse={collapse} />
+        <SearchQuickOpenBtn collapse={collapse} />
 
         <Menu
           style={{
@@ -170,109 +280,103 @@ export const SiderLayout = () => {
             backgroundColor: "transparent",
             borderRight: "none",
           }}
+          collapse={collapse}
           defaultSelectedKeys={["Workspace"]}
           className="sider-menu-nav"
           selectedKeys={[selectedKey]}
+          tooltipProps={{}}
           onClickMenuItem={handleNavClick}>
-          <div className="sider-header">
-            {/* <MenuItem key="News" className="custom-menu-item">
-              <IconThunderbolt style={{ fontSize: 20 }} />
-              <span className="sider-menu-title">
-                {t("loggedHomePage.siderMenu.news")}
-              </span>
-            </MenuItem> */}
+          <div className="sider-center">
+            <MenuItem
+              key="Workspace"
+              className="custom-menu-item"
+              renderItemInTooltip={() => (
+                <MenuItemTooltipContent
+                  title={t("loggedHomePage.siderMenu.homePage")}
+                />
+              )}>
+              <MenuItemContent
+                icon={<IconHome style={{ fontSize: 20 }} />}
+                title={t("loggedHomePage.siderMenu.homePage")}
+              />
+            </MenuItem>
             <MenuItem
               key="Import"
               className="custom-menu-item"
+              renderItemInTooltip={() => (
+                <MenuItemTooltipContent
+                  title={t("loggedHomePage.siderMenu.newResource")}
+                />
+              )}
               onClick={() =>
                 importResourceStore.setImportResourceModalVisible(true)
               }>
-              <IconImport style={{ fontSize: 20 }} />
-              <span className="sider-menu-title">添加资源</span>
+              <MenuItemContent
+                icon={<IconImport style={{ fontSize: 20 }} />}
+                title={t("loggedHomePage.siderMenu.newResource")}
+              />
             </MenuItem>
-            <Divider style={{ margin: "16px 0" }} />
-            <MenuItem key="Workspace" className="custom-menu-item">
-              <IconHome style={{ fontSize: 20 }} />
-              <span className="sider-menu-title">
-                {t("loggedHomePage.siderMenu.homePage")}
-              </span>
+            <MenuItem
+              key="ThreadLibrary"
+              className="custom-menu-item"
+              renderItemInTooltip={() => (
+                <MenuItemTooltipContent
+                  title={t("loggedHomePage.siderMenu.threadLibrary")}
+                />
+              )}>
+              <MenuItemContent
+                icon={<IconMessage style={{ fontSize: 20 }} />}
+                title={t("loggedHomePage.siderMenu.threadLibrary")}
+              />
             </MenuItem>
-            <MenuItem key="ThreadLibrary" className="custom-menu-item">
-              <IconMessage style={{ fontSize: 20 }} />
-              <span className="sider-menu-title">会话</span>
-            </MenuItem>
-            {/* <MenuItem key='Explore' ><IconHome style={{ fontSize: 20 }} />主页</MenuItem> */}
-            {/* <MenuItem key="Digest" className="custom-menu-item">
-              <IconHistory style={{ fontSize: 20 }} />
-              <span className="sider-menu-title">回忆</span>
-            </MenuItem> */}
-            {/* <MenuItem key="Explore" className="custom-menu-item">
-              <IconFire style={{ fontSize: 20 }} />
-              <span className="sider-menu-title">
-                {t("loggedHomePage.siderMenu.explore")}
-              </span>
-            </MenuItem> */}
           </div>
+
           <div className="sider-footer">
-            <MenuItem key="GetHelp" className="custom-menu-item">
-              <IconTwitter style={{ fontSize: 20 }} />
-              <span className="sider-menu-title">
-                {t("loggedHomePage.siderMenu.getHelp")}
-              </span>
-            </MenuItem>
             {!!userStore.userProfile?.uid && (
-              <>
-                <Divider style={{ margin: "8px 0" }} />
-                <MenuItem
-                  key="Settings"
-                  className="menu-setting-container setting-menu-item">
-                  <div
-                    className="menu-settings"
-                    onClick={() => {
-                      navigate("/settings")
-                    }}>
-                    <Avatar size={32}>
-                      <img
-                        src={userStore?.userProfile?.avatar || ""}
-                        alt="user-avatar"
-                      />
-                    </Avatar>
-                    <span className="username">
-                      {userStore?.userProfile?.name}
-                    </span>
-                  </div>
-                  <div>
-                    <span
-                      className="setting-language-icon"
-                      style={{ display: "inline-block", marginRight: "8px" }}>
-                      <UILocaleList>
-                        <IconLanguage
-                          style={{
-                            fontSize: 20,
-                          }}
-                        />
-                      </UILocaleList>
-                    </span>
-                    <span
-                      className="setting-icon"
-                      onClick={() => {
-                        navigate("/settings")
-                      }}>
-                      <IconSettings style={{ fontSize: 20 }} />
-                    </span>
-                  </div>
-                </MenuItem>
-              </>
+              <MenuItem
+                key="Settings"
+                className={`menu-setting-container setting-menu-item ${collapse ? "setting-menu-item-collapse" : ""}`}
+                renderItemInTooltip={() => (
+                  <MenuItemTooltipContent
+                    title={t("loggedHomePage.siderMenu.settings")}
+                  />
+                )}>
+                <SettingItem navigate={path => navigate(path)}></SettingItem>
+              </MenuItem>
             )}
             <Divider style={{ margin: "8px 0" }} />
-            <MenuItem key="DownloadExtension" className="custom-menu-item">
-              <IconDownload style={{ fontSize: 20 }} />
-              <span className="sider-menu-title">
-                {t("loggedHomePage.siderMenu.download")}
-              </span>
+            <MenuItem
+              key="GetHelp"
+              className="custom-menu-item"
+              renderItemInTooltip={() => (
+                <MenuItemTooltipContent
+                  title={t("loggedHomePage.siderMenu.getHelp")}
+                />
+              )}>
+              <MenuItemContent
+                icon={<IconTwitter style={{ fontSize: 20 }} />}
+                title={t("loggedHomePage.siderMenu.getHelp")}
+              />
+            </MenuItem>
+            <MenuItem
+              key="DownloadExtension"
+              className="custom-menu-item"
+              renderItemInTooltip={() => (
+                <MenuItemTooltipContent
+                  title={t("loggedHomePage.siderMenu.download")}
+                />
+              )}>
+              <MenuItemContent
+                icon={<IconDownload style={{ fontSize: 20 }} />}
+                title={t("loggedHomePage.siderMenu.download")}
+              />
             </MenuItem>
           </div>
         </Menu>
+        <CollapseBtn
+          collapse={collapse}
+          setCollapse={() => setCollapse(!collapse)}
+        />
       </div>
     </Sider>
   )

@@ -9,6 +9,7 @@ import { getClientOrigin } from '@refly/utils/url';
 import { useEffect } from 'react';
 import { CardBox } from '@refly-packages/ai-workspace-common/components/workspace/card-box';
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
+import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
 // utils
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // styles
@@ -19,16 +20,27 @@ import { useTranslation } from 'react-i18next';
 
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useReloadListState } from '@refly/ai-workspace-common/stores/reload-list-state';
 
 export const getFirstSourceLink = (sources: Source[]) => {
   return sources?.[0]?.metadata?.source;
 };
-
-export const KnowledgeBaseList = () => {
+interface KnowledgeBaseListProps {
+  listGrid?: {
+    sm: number;
+    md: number;
+    lg: number;
+    xl: number;
+  };
+}
+export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
+  const { listGrid } = props;
 
-  const { dataList, loadMore, hasMore, isRequesting } = useFetchDataList({
+  const reloadListState = useReloadListState();
+
+  const { dataList, setDataList, loadMore, reload, hasMore, isRequesting } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listCollections({
         query: queryPayload,
@@ -42,6 +54,13 @@ export const KnowledgeBaseList = () => {
     loadMore();
   }, []);
 
+  useEffect(() => {
+    if (reloadListState.reloadKnowledgeBaseList) {
+      reload();
+      reloadListState.setReloadKnowledgeBaseList(false);
+    }
+  }, [reloadListState.reloadKnowledgeBaseList]);
+
   const { jumpToKnowledgeBase } = useKnowledgeBaseJumpNewPath();
 
   if (dataList.length === 0) {
@@ -50,12 +69,14 @@ export const KnowledgeBaseList = () => {
 
   return (
     <List
-      grid={{
-        sm: 24,
-        md: 12,
-        lg: 8,
-        xl: 6,
-      }}
+      grid={
+        listGrid || {
+          sm: 24,
+          md: 12,
+          lg: 8,
+          xl: 6,
+        }
+      }
       className="knowledge-base-list workspace-list"
       wrapperStyle={{ width: '100%' }}
       bordered={false}
@@ -90,7 +111,6 @@ export const KnowledgeBaseList = () => {
                     .fromNow()}
                 </div>
                 <div className="flex items-center">
-                  <IconBook style={{ color: '#819292', cursor: 'pointer' }} />
                   <IconTip text={t('knowledgeLibrary.archive.item.copy')}>
                     <span
                       key={1}
@@ -100,9 +120,16 @@ export const KnowledgeBaseList = () => {
                         message.success(t('knowledgeLibrary.archive.item.copyNotify'));
                       }}
                     >
-                      <IconMore style={{ color: '#819292', marginLeft: '12px', cursor: 'pointer' }} />
+                      <IconBook style={{ color: '#819292', cursor: 'pointer' }} />
                     </span>
                   </IconTip>
+                  <DeleteDropdownMenu
+                    type="knowledgeBase"
+                    data={item}
+                    postDeleteList={(collection: Collection) =>
+                      setDataList(dataList.filter((n) => n.collectionId !== collection.collectionId))
+                    }
+                  />
                 </div>
               </div>
             </CardBox>,

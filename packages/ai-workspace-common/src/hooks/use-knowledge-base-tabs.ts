@@ -40,17 +40,38 @@ export const useKnowledgeBaseTabs = () => {
     const newTabs = tabs.slice(0, index).concat(tabs.slice(index + 1));
 
     if (tabs?.length === 1) {
-      message.warning('至少保留一个标签页！');
+      knowledgeBaseStore.resetTabs();
+      jumpToReadResource({
+        kbId: '',
+        resId: '',
+      });
       return;
     }
 
     if (key === activeTab && index > -1 && newTabs.length) {
-      knowledgeBaseStore.updateActiveTab(newTabs[index] ? newTabs[index].key : newTabs[index - 1].key);
+      const activeKey = newTabs[index] ? newTabs[index].key : newTabs[index - 1].key;
+      knowledgeBaseStore.updateActiveTab(activeKey);
+      setActiveTab(activeKey);
     }
 
     if (index > -1) {
       knowledgeBaseStore.updateTabs(newTabs);
     }
+  };
+
+  const handleDeleteTabsWithCollectionId = (collectionId: string) => {
+    const newTabs = tabs?.filter((tab) => tab?.collectionId !== collectionId);
+    if (newTabs?.length === 0) {
+      knowledgeBaseStore.resetTabs();
+      jumpToReadResource({
+        kbId: '',
+        resId: '',
+      });
+      return;
+    }
+    knowledgeBaseStore.updateActiveTab(newTabs[0].key);
+    setActiveTab(newTabs[0].key);
+    knowledgeBaseStore.updateTabs(newTabs);
   };
 
   const setActiveTab = (key: string) => {
@@ -70,5 +91,6 @@ export const useKnowledgeBaseTabs = () => {
     handleDeleteTab,
     setActiveTab,
     handleAddTabWithResource,
+    handleDeleteTabsWithCollectionId,
   };
 };

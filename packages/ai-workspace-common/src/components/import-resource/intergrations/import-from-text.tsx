@@ -30,6 +30,8 @@ import {
   UpsertResourceRequest,
 } from '@refly/openapi-schema';
 import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-or-search-list';
+import { useReloadListState } from '@refly/ai-workspace-common/stores/reload-list-state';
+import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 const { TextArea } = Input;
 const Option = Select.Option;
@@ -37,6 +39,10 @@ const Option = Select.Option;
 export const ImportFromText = () => {
   const [linkStr, setLinkStr] = useState('');
   const importResourceStore = useImportResourceStore();
+
+  const reloadListState = useReloadListState();
+  const [queryParams] = useSearchParams();
+  const kbId = queryParams.get('kbId');
 
   //
   const [saveLoading, setSaveLoading] = useState(false);
@@ -64,7 +70,6 @@ export const ImportFromText = () => {
   const handleSave = async () => {
     setSaveLoading(true);
     const { copiedTextPayload, selectedCollectionId } = useImportResourceStore.getState();
-
     if (!copiedTextPayload?.content || !copiedTextPayload?.title) {
       message.warning('标题和文本内容不能为空！');
       return;
@@ -91,6 +96,10 @@ export const ImportFromText = () => {
       message.success('保存成功');
       importResourceStore.setCopiedTextPayload({ title: '', content: '' });
       importResourceStore.setImportResourceModalVisible(false);
+      if (!kbId || (kbId && selectedCollectionId === kbId)) {
+        reloadListState.setReloadKnowledgeBaseList(true);
+        reloadListState.setReloadResourceList(true);
+      }
       setLinkStr('');
     } catch (err) {
       message.error('保存失败');
@@ -98,6 +107,15 @@ export const ImportFromText = () => {
 
     setSaveLoading(false);
   };
+
+  useEffect(() => {
+    loadMore();
+    importResourceStore.setSelectedCollectionId(kbId);
+    return () => {
+      /* reset selectedCollectionId after modal hide */
+      importResourceStore.setSelectedCollectionId('');
+    };
+  }, []);
 
   return (
     <div className="intergation-container intergation-import-from-weblink">
@@ -144,8 +162,7 @@ export const ImportFromText = () => {
               placeholder="选择保存知识库"
               showSearch
               className={'kg-selector'}
-              // value={searchValue}
-              defaultValue={'new-collection'}
+              defaultValue={`${kbId || 'new-collection'}`}
               onInputValueChange={(value) => {
                 handleValueChange(value);
               }}
@@ -156,8 +173,7 @@ export const ImportFromText = () => {
                 if (value === 'new-collection') {
                   importResourceStore.setSelectedCollectionId('new-collection');
                 } else {
-                  const id = value.split('-')[2];
-                  importResourceStore.setSelectedCollectionId(id);
+                  importResourceStore.setSelectedCollectionId(value);
                 }
               }}
               dropdownRender={(menu) => (
@@ -177,7 +193,7 @@ export const ImportFromText = () => {
                 新建知识库
               </Option>
               {dataList?.map((item, index) => (
-                <Option key={`${item?.id}-${index}`} value={index + '_' + item?.title + '_' + item?.id}>
+                <Option key={`${item?.id}-${index}`} value={item?.id}>
                   <span dangerouslySetInnerHTML={{ __html: item?.title }}></span>
                 </Option>
               ))}

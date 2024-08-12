@@ -69,6 +69,7 @@ interface KnowledgeBaseState {
   updateActiveTab: (key: string) => void;
   updateResourcePanelVisible: (visible: boolean) => void;
   resetState: () => void;
+  resetTabs: () => void;
 
   // context 面板相关的内容
   updateSelectedText: (selectedText: string) => void;
@@ -147,6 +148,20 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
     updateTabs: (tabs: KnowledgeBaseTab[]) => set((state) => ({ ...state, tabs })),
     updateActiveTab: (key: string) => set((state) => ({ ...state, activeTab: key })),
     resetState: () => set((state) => ({ ...state, knowledgeBaseList: [] })),
+    resetTabs: () =>
+      set((state) => ({
+        ...state,
+        activeTab: 'key1',
+        tabs: [
+          {
+            title: 'New Tab',
+            key: 'key1',
+            content: 'Content of Tab Pane 1',
+            collectionId: '',
+            resourceId: '',
+          },
+        ],
+      })),
 
     // tabs
     updateResourcePanelVisible: (visible: boolean) => set((state) => ({ ...state, resourcePanelVisible: visible })),

@@ -1,12 +1,23 @@
 .search-quick-open-container {
   margin-bottom: 16px;
 
+  .quick-search-btn-collapse {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 38px;
+    height: 38px;
+    background: #dddddb;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
   .search-quick-open-input {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    margin: 0 16px;
-    padding: 8px 8px 8px 16px;
+    padding: 8px;
+    margin: 0 12px;
     border-radius: 8px;
     border: 1px solid hsla(60, 11%, 83%, 0.5);
     background-color: rgb(252, 252, 249);

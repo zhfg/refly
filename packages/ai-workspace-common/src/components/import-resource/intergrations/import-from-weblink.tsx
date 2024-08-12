@@ -4,16 +4,13 @@ import {
   Input,
   List,
   Avatar,
-  Checkbox,
   Skeleton,
   Select,
   Message as message,
   Affix,
 } from '@arco-design/web-react';
-import { IconLink, IconBranch, IconClose } from '@arco-design/web-react/icon';
-import classNames from 'classnames';
+import { IconLink, IconClose } from '@arco-design/web-react/icon';
 import { useEffect, useState } from 'react';
-import { RateLimiterMemory } from 'rate-limiter-flexible';
 import cherrio from 'cheerio';
 
 // utils
@@ -22,14 +19,10 @@ import { genUniqueId } from '@refly-packages/utils/id';
 import { LinkMeta, useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import {
-  BatchCreateResourceData,
-  Collection,
-  CreateResourceData,
-  SearchResult,
-  UpsertResourceRequest,
-} from '@refly/openapi-schema';
+import { SearchResult, UpsertResourceRequest } from '@refly/openapi-schema';
 import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-or-search-list';
+import { useReloadListState } from '@refly/ai-workspace-common/stores/reload-list-state';
+import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 const { TextArea } = Input;
 const Option = Select.Option;
@@ -38,12 +31,15 @@ export const ImportFromWeblink = () => {
   const [linkStr, setLinkStr] = useState('');
   const [scrapeLinkLoading, setScrapeLinkLoading] = useState(false);
   const importResourceStore = useImportResourceStore();
+  const reloadListState = useReloadListState();
+
+  const [queryParams] = useSearchParams();
+  const kbId = queryParams.get('kbId');
+
+  console.log('select collection id', importResourceStore.selectedCollectionId);
 
   //
   const [saveLoading, setSaveLoading] = useState(false);
-
-  // search
-  const [searchValue, setSearchValue] = useState('new-collection');
 
   // 列表获取
   const { loadMore, hasMore, dataList, isRequesting, currentPage, handleValueChange, mode } = useFetchOrSearchList({
@@ -175,6 +171,10 @@ export const ImportFromWeblink = () => {
       message.success('保存成功');
       importResourceStore.setScapeLinks([]);
       importResourceStore.setImportResourceModalVisible(false);
+      if (!kbId || (kbId && selectedCollectionId === kbId)) {
+        reloadListState.setReloadKnowledgeBaseList(true);
+        reloadListState.setReloadResourceList(true);
+      }
       setLinkStr('');
     } catch (err) {
       message.error('保存失败');
@@ -185,6 +185,11 @@ export const ImportFromWeblink = () => {
 
   useEffect(() => {
     loadMore();
+    importResourceStore.setSelectedCollectionId(kbId);
+    return () => {
+      /* reset selectedCollectionId after modal hide */
+      importResourceStore.setSelectedCollectionId('');
+    };
   }, []);
 
   return (
@@ -251,20 +256,16 @@ export const ImportFromWeblink = () => {
               placeholder="选择保存知识库"
               showSearch
               className={'kg-selector'}
-              // value={searchValue}
-              defaultValue={'new-collection'}
+              defaultValue={`${kbId || 'new-collection'}`}
               onInputValueChange={(value) => {
                 handleValueChange(value, ['collection']);
               }}
               onChange={(value) => {
-                console.log('value', value);
                 if (!value) return;
-                //   handleValueChange(value);
                 if (value === 'new-collection') {
                   importResourceStore.setSelectedCollectionId('new-collection');
                 } else {
-                  const id = value.split('-')[2];
-                  importResourceStore.setSelectedCollectionId(id);
+                  importResourceStore.setSelectedCollectionId(value);
                 }
               }}
               dropdownRender={(menu) => (
@@ -283,8 +284,8 @@ export const ImportFromWeblink = () => {
               <Option key="new-collection" value="new-collection">
                 新建知识库
               </Option>
-              {dataList?.map((item, index) => (
-                <Option key={`${item?.id}-${index}`} value={index + '_' + item?.title + '_' + item?.id}>
+              {dataList?.map((item) => (
+                <Option key={item?.id} value={item?.id}>
                   <span dangerouslySetInnerHTML={{ __html: item?.title }}></span>
                 </Option>
               ))}
@@ -308,27 +309,12 @@ export const ImportFromWeblink = () => {
 };
 
 const RenderItem = (props: { item: LinkMeta }) => {
-  const [checked, setChecked] = useState(false);
   const importResourceStore = useImportResourceStore();
   const { item } = props;
 
   return (
     <List.Item
       actions={[
-        // <Checkbox key={'knowledge-base-resource-panel'} checked={checked}>
-        //   {({ checked }) => {
-        //     return (
-        //       <Button
-        //         icon={<IconBranch />}
-        //         type="text"
-        //         onClick={() => {
-        //           setChecked(!checked);
-        //         }}
-        //         className={classNames('assist-action-item', { active: checked })}
-        //       ></Button>
-        //     );
-        //   }}
-        // </Checkbox>,
         <Button
           type="text"
           className="assist-action-item"

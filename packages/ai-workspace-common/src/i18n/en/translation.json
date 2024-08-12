@@ -87,7 +87,35 @@
         "note": "Notes",
         "collection": "Collections",
         "thread": "Threads"
+      },
+      "newButton": {
+        "resource": "New Resource",
+        "note": "New Note",
+        "collection": "New Collection"
       }
+    },
+    "newKnowledgeModal": {
+      "modalTitle": "Create New Knowledge Base",
+      "editModalTitle": "Edit the Knowledge Base",
+      "titlePlaceholder": "Enter a title for your knowledge base",
+      "title": "Title",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter a description for your knowledge base",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "successful": "Created successfully",
+      "failed": "Failed to create",
+      "editSuccessful": "Modifyed successfully",
+      "editFailed": "Failed to modify"
+    },
+    "deleteDropdownMenu": {
+      "successful": "Deleted successfully!",
+      "failed": "Failed to delete",
+      "deleteConfirmForNote": "Are you sure you want to delete this note?",
+      "deleteConfirmForKnowledgeBase": "Are you sure you want to delete this knowledge base?",
+      "deleteConfirmForResource": "Are you sure you want to delete this resource?",
+      "delete": "Delete",
+      "edit": "Edit"
     }
   },
   "loggedHomePage": {
@@ -151,7 +179,9 @@
       "threadLibrary": "Threads",
       "explore": "Explore",
       "getHelp": "Get Help",
-      "download": "Download Extension"
+      "download": "Download Extension",
+      "newResource": "New Resource",
+      "settings": "Settings"
     }
   },
   "knowledgeLibrary": {

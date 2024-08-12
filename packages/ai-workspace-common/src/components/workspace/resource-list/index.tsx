@@ -8,10 +8,15 @@ import { List, Empty } from '@arco-design/web-react';
 
 import { Resource } from '@refly/openapi-schema';
 import { IconMore, IconBook } from '@arco-design/web-react/icon';
+
 import { CardBox } from '../card-box';
+import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
+
 import { ScrollLoading } from '../scroll-loading';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+
+import { useReloadListState } from '@refly/ai-workspace-common/stores/reload-list-state';
 
 import { LOCALE } from '@refly/common-types';
 import './index.scss';
@@ -20,7 +25,9 @@ export const ResourceList = () => {
   const { i18n } = useTranslation();
   const language = i18n.languages?.[0];
 
-  const { dataList, loadMore, hasMore, isRequesting } = useFetchDataList({
+  const reloadListState = useReloadListState();
+
+  const { dataList, loadMore, hasMore, isRequesting, reload, setDataList } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listResources({
         query: queryPayload,
@@ -33,6 +40,13 @@ export const ResourceList = () => {
   useEffect(() => {
     loadMore();
   }, []);
+
+  useEffect(() => {
+    if (reloadListState.reloadResourceList) {
+      reload();
+      reloadListState.setReloadResourceList(false);
+    }
+  }, [reloadListState.reloadResourceList]);
 
   const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
 
@@ -89,8 +103,14 @@ export const ResourceList = () => {
                     .fromNow()}
                 </div>
                 <div>
-                  <IconBook style={{ color: '#819292', cursor: 'pointer' }} />
-                  <IconMore style={{ color: '#819292', marginLeft: '12px', cursor: 'pointer' }} />
+                  {/* <IconBook style={{ color: '#819292', cursor: 'pointer' }} /> */}
+                  <DeleteDropdownMenu
+                    data={item}
+                    type="resource"
+                    postDeleteList={(resource: Resource) =>
+                      setDataList(dataList.filter((n) => n.resourceId !== resource.resourceId))
+                    }
+                  />
                 </div>
               </div>
             </CardBox>,

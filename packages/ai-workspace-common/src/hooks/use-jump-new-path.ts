@@ -13,6 +13,7 @@ export const useKnowledgeBaseJumpNewPath = () => {
     setSearchParams(searchParams);
     navigate(`${baseUrl}/knowledge-base?${searchParams.toString()}`);
     noteStore.updateNotePanelVisible(true);
+    knowledgeBaseStore.updateResourcePanelVisible(false);
   };
 
   const jumpToKnowledgeBase = (
@@ -20,9 +21,10 @@ export const useKnowledgeBaseJumpNewPath = () => {
     extraQuery?: Record<string, string>,
   ) => {
     searchParams.set('kbId', kbId);
-    setSearchParams(searchParams);
+    setSearchParams(searchParams.toString());
     navigate(`${baseUrl}/knowledge-base?${searchParams.toString()}`);
     knowledgeBaseStore.updateResourcePanelVisible(true);
+    noteStore.updateNotePanelVisible(false);
   };
 
   const jumpToReadResource = ({ kbId, resId, baseUrl = '' }: { kbId: string; resId: string; baseUrl?: string }) => {
