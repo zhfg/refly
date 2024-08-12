@@ -171,7 +171,7 @@ export const ImportFromWeblink = () => {
       message.success('保存成功');
       importResourceStore.setScapeLinks([]);
       importResourceStore.setImportResourceModalVisible(false);
-      if (selectedCollectionId === kbId) {
+      if (!kbId || (kbId && selectedCollectionId === kbId)) {
         reloadListState.setReloadKnowledgeBaseList(true);
         reloadListState.setReloadResourceList(true);
       }
