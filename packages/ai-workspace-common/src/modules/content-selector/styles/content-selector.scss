@@ -12,8 +12,7 @@
     width: 0;
     height: 0;
     pointer-events: none;
-    border-radius: 8px;
-    background-color: #00968f26 !important;
+    background-color: #ffd40024 !important;
   }
 }
 
@@ -21,8 +20,10 @@
   cursor: pointer !important;
 }
 .refly-content-selector-mark:hover {
-  background-color: #00968f26 !important;
-  border-radius: 4px;
+  color: unset !important;
+  border-bottom: 2px solid rgb(255, 212, 0) !important;
+  background-color: #ffd40024 !important;
+  cursor: pointer !important;
 }
 input,
 textarea {
@@ -30,6 +31,15 @@ textarea {
 }
 
 .refly-content-selected-target {
-  background-color: #00968f26 !important;
-  border-radius: 4px;
+  color: unset !important;
+  border-bottom: 2px solid rgb(255, 212, 0) !important;
+  background-color: #ffd40024 !important;
+  cursor: pointer !important;
+}
+
+.selector-mode-active {
+  a {
+    pointer-events: none !important;
+    user-select: text !important;
+  }
 }

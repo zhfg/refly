@@ -1,4 +1,4 @@
-import { Button, Checkbox, Divider, Dropdown, Menu } from '@arco-design/web-react';
+import { Button, Checkbox, Divider, Dropdown, Menu, Message as message } from '@arco-design/web-react';
 import { IconCaretDown, IconFontColors, IconHighlight } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
@@ -8,13 +8,17 @@ import { useContentSelectorStore } from '../../stores/content-selector';
 import './index.scss';
 import { IconTip } from '@refly-packages/ai-workspace-common/components/dashboard/icon-tip';
 import { useEffect } from 'react';
-import { MarkScope } from '@refly/common-types';
+import { MarkScope, SyncStatusEvent } from '@refly/common-types';
+import { BackgroundMessage, sendMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 
 interface ContentSelectorBtnProps {}
 
 const { Item } = Menu;
 
 export const ContentSelectorBtn = (props: ContentSelectorBtnProps) => {
+  const noteStore = useNoteStore();
   const contentSelectorStore = useContentSelectorStore((state) => ({
     showContentSelector: state.showContentSelector,
     scope: state.scope,
@@ -34,6 +38,11 @@ export const ContentSelectorBtn = (props: ContentSelectorBtnProps) => {
     } else {
       handleInitContentSelectorListener();
     }
+
+    // 将 note 切入只读模式
+    const { currentNote } = useNoteStore.getState();
+    noteStore.updateCurrentNote({ ...currentNote, readOnly: true });
+    message.info('开启选择内容提问，笔记已进入只读模式');
   };
 
   const baseStyle = {
@@ -46,6 +55,14 @@ export const ContentSelectorBtn = (props: ContentSelectorBtnProps) => {
     <Menu
       onClickMenuItem={(key) => {
         contentSelectorStore.setScope(key as MarkScope);
+        const event: SyncStatusEvent = {
+          name: 'syncStatusEvent',
+          body: {
+            type: 'update',
+            scope: key as MarkScope,
+          },
+        };
+        sendMessage({ ...event, source: getRuntime() });
       }}
     >
       <Item key="inline">自由选择</Item>

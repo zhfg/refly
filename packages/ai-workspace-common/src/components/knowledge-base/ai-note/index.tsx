@@ -43,6 +43,8 @@ import { AINoteEmpty } from '@refly-packages/ai-workspace-common/components/know
 // content selector
 import { useContentSelector } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-content-selector';
 import '@refly-packages/ai-workspace-common/modules/content-selector/styles/content-selector.scss';
+import classNames from 'classnames';
+import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
 
 const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) => {
   const { readOnly } = note;
@@ -51,6 +53,9 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
   const noteStore = useNoteStore();
   const editorRef = useRef<EditorInstance>();
 
+  const { showContentSelector } = useContentSelectorStore((state) => ({
+    showContentSelector: state.showContentSelector,
+  }));
   // 初始块选择
   const { initMessageListener, initContentSelectorElem } = useContentSelector(
     'ai-note-editor-content-container',
@@ -161,7 +166,7 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
   }, [readOnly]);
 
   return (
-    <div className="ai-note-editor-content-container">
+    <div className={classNames('ai-note-editor-content-container', { 'selector-mode-active': showContentSelector })}>
       {initContentSelectorElem()}
       <div className="w-full max-w-screen-lg h-full">
         <EditorRoot>

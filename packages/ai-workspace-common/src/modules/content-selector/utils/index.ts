@@ -1,3 +1,5 @@
+export type ElementType = 'table' | 'link' | 'image' | 'video' | 'audio' | 'text';
+
 export function getElementType(element) {
   // 检查元素是否为 table 元素
   if (element.tagName.toLowerCase() === 'table') {

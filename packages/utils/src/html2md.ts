@@ -25,7 +25,7 @@ export const removeUnusedHtmlNode = () => {
   return html;
 };
 
-export const getReadabilityHtml = (node: Document | HTMLElement) => {
+export const getReadabilityHtml = (node: Document | HTMLElement | DocumentFragment) => {
   try {
     const parsed = new Readability(node.cloneNode(true) as Document).parse();
     return parsed?.content;
@@ -34,7 +34,7 @@ export const getReadabilityHtml = (node: Document | HTMLElement) => {
   }
 };
 
-export const getMarkdown = (element: Document | HTMLElement) => {
+export const getMarkdown = (element: Document | HTMLElement | DocumentFragment) => {
   const html = getReadabilityHtml(element);
   const md = convertHTMLToMarkdown('render', html);
   return md;

@@ -14,6 +14,10 @@ import { getElementType } from '../utils';
 import { genContentSelectorID } from '@refly-packages/utils/id';
 import { getMarkdown } from '@refly/utils/html2md';
 
+// utils
+import { highlightSelection, getSelectionNodesMarkdown } from '../utils/highlight-selection';
+import { ElementType } from '../utils';
+
 export const useContentSelector = (selector: string | null, namespace: SelectedNamespace) => {
   const statusRef = useRef(true);
   const markRef = useRef<HTMLDivElement>(undefined);
@@ -23,14 +27,11 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
   const messageListenerEventRef = useRef<any>();
   const selectorScopeRef = useRef<MarkScope>('block');
 
-  const buildMark = (target: HTMLElement) => {
-    const content = getMarkdown(target);
-
+  const buildMark = (type: ElementType, content: string, xPath: string) => {
     const mark: Mark = {
-      type: getElementType(target),
+      type,
       data: content,
-      target,
-      xPath: genContentSelectorID(),
+      xPath,
       scope: selectorScopeRef.current,
     };
 
@@ -42,15 +43,11 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
     return mark;
   };
 
-  const addMark = (target: HTMLElement) => {
-    const mark = buildMark(target);
-
+  const addMark = (mark: Mark, target: HTMLElement | HTMLElement[]) => {
     markListRef.current = markListRef.current.concat(mark);
     (target as Element)?.classList.add('refly-content-selected-target');
     // 添加到 list 方便后续统一的处理
     targetList.current = targetList.current.concat(target as Element);
-
-    return mark;
   };
 
   const removeMark = (target: HTMLElement, xPath: string) => {
@@ -99,9 +96,18 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
   };
 
   const isMouseOutsideContainer = (ev: MouseEvent) => {
-    const { target } = ev;
     const containerElem = selector ? document.querySelector(`.${selector}`) : document.body;
-    return !containerElem.contains(target as Node);
+    const containerRect = containerElem.getBoundingClientRect();
+    const x = ev.clientX;
+    const y = ev.clientY;
+
+    return false;
+
+    if (x < containerRect.left || x > containerRect.right || y < containerRect.top || y > containerRect.bottom) {
+      return true;
+    } else {
+      return false;
+    }
   };
 
   const onMouseMove = (ev: MouseEvent) => {
@@ -140,7 +146,7 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
       mark.style.left = window.scrollX + left - containerLeft + 'px';
       mark.style.width = width + 'px';
       mark.style.height = height + 'px';
-      mark.style.background = `#00968F26 !important`;
+      mark.style.background = `#ffd40024 !important`;
       mark.style.zIndex = '99999999';
     }
   };
@@ -162,7 +168,9 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
         const mark = removeMark(target as HTMLElement, genContentSelectorID());
         markEvent = { type: 'remove', mark };
       } else {
-        const mark = addMark(target as HTMLElement);
+        const type = getElementType(target);
+        const mark = buildMark(type, getMarkdown(target as HTMLElement), genContentSelectorID());
+        addMark(mark, target as HTMLElement);
         markEvent = { type: 'add', mark };
       }
 
@@ -193,11 +201,13 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
 
     if (statusRef.current && markRef.current && showContentSelectorRef.current) {
       if (text && text?.trim()?.length > 0) {
-        const range = selection.getRangeAt(0);
-        const newNode = document.createElement('span');
-        range.surroundContents(newNode);
+        const xPath = genContentSelectorID();
+        const selectionNodes = highlightSelection('refly-content-selected-target', xPath);
 
-        const mark = addMark(newNode);
+        const type = 'text' as ElementType;
+        const content = getSelectionNodesMarkdown();
+        const mark = buildMark(type, content, xPath);
+        addMark(mark, selectionNodes);
         markEvent = { type: 'add', mark };
 
         const msg: Partial<SyncMarkEvent> = {
@@ -224,6 +234,14 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
     containerElem.addEventListener('mouseup', onMouseDownUpEvent);
   };
 
+  const initDomEventListener = () => {
+    if (selectorScopeRef.current === 'block') {
+      initBlockDomEventListener();
+    } else {
+      initInlineDomEventListener();
+    }
+  };
+
   const removeDomEventListener = () => {
     const containerElem = selector ? document.querySelector(`.${selector}`) : document.body;
 
@@ -240,12 +258,19 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
 
       if (type === 'start') {
         selectorScopeRef.current = scope; // 每次开启都动态的处理 scope
-        if (scope === 'block') {
-          initBlockDomEventListener();
-        } else {
-          initInlineDomEventListener();
-        }
+        initDomEventListener();
         showContentSelectorRef.current = true;
+      } else if (type === 'update') {
+        if (!showContentSelectorRef.current) {
+          return;
+        }
+
+        if (selectorScopeRef.current !== scope) {
+          removeDomEventListener();
+        }
+
+        selectorScopeRef.current = scope; // 每次开启都动态的处理 scope
+        initDomEventListener();
       } else if (type === 'reset') {
         resetStyle();
         removeDomEventListener();
@@ -279,19 +304,17 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
       }
       .refly-content-selector-mark:hover {
         background-color: #00968F26 !important;
-        border-radius: 4px;
       }
 
       .refly-content-selected-target {
         background-color: #00968F26 !important;
-        border-radius: 4px;
       }
         `;
     document.head.appendChild(style);
   };
 
   const initMessageListener = () => {
-    injectContentSelectorCss();
+    // injectContentSelectorCss();
     onMessage(onStatusHandler, getRuntime()).then((clearEvent) => {
       messageListenerEventRef.current = clearEvent;
     });
@@ -310,7 +333,7 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
         <div
           ref={markRef}
           style={{
-            backgroundColor: '#4d53e826 !important',
+            backgroundColor: '#ffd40024 !important',
             position: 'absolute',
             top: 0,
             bottom: 0,

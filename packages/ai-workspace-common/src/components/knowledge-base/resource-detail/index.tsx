@@ -21,6 +21,8 @@ import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/
 // content selector
 import { useContentSelector } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-content-selector';
 import '@refly-packages/ai-workspace-common/modules/content-selector/styles/content-selector.scss';
+import classNames from 'classnames';
+import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
 
 export const KnowledgeBaseResourceDetail = memo(() => {
   const [isFetching, setIsFetching] = useState(false);
@@ -30,8 +32,11 @@ export const KnowledgeBaseResourceDetail = memo(() => {
   }));
   const { handleAddTab } = useKnowledgeBaseTabs();
   // 初始块选择
+  const { showContentSelector } = useContentSelectorStore((state) => ({
+    showContentSelector: state.showContentSelector,
+  }));
   const { initMessageListener, initContentSelectorElem } = useContentSelector(
-    'knowledge-base-resource-detail-container',
+    'knowledge-base-resource-content',
     'resource-detail',
   );
 
@@ -79,7 +84,7 @@ export const KnowledgeBaseResourceDetail = memo(() => {
     setIsFetching(false);
   };
 
-  useListenToSelection(`knowledge-base-resource-detail-container`, 'resource-detail');
+  // useListenToSelection(`knowledge-base-resource-detail-container`, 'resource-detail');
   useEffect(() => {
     if (resId) {
       console.log('params resId', resId);
@@ -92,8 +97,7 @@ export const KnowledgeBaseResourceDetail = memo(() => {
   }, []);
 
   return (
-    <div className="knowledge-base-resource-detail-container">
-      {initContentSelectorElem()}
+    <div className={classNames('knowledge-base-resource-detail-container')}>
       <div className="knowledge-base-resource-detail-body">
         {isFetching ? (
           <div style={{ margin: '20px auto' }}>
@@ -142,7 +146,10 @@ export const KnowledgeBaseResourceDetail = memo(() => {
             <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
           </div>
         ) : (
-          <div className="knowledge-base-resource-content">
+          <div
+            className={classNames('knowledge-base-resource-content', { 'selector-mode-active': showContentSelector })}
+          >
+            {initContentSelectorElem()}
             <div className="knowledge-base-resource-content-title">{resourceDetail?.title}</div>
             <Markdown content={resourceDetail?.content || ''}></Markdown>
           </div>
