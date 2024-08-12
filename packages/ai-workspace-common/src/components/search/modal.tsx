@@ -32,7 +32,8 @@ export const BigSearchModal = () => {
       maskStyle={{ background: 'transparent' }}
       footer={null}
       closeIcon={null}
-      style={{ background: 'transparent', top: -100, width: 750 }}
+      alignCenter={false}
+      style={{ background: 'transparent', top: '10%', width: 750 }}
     >
       {searchStore?.isSearchOpen ? <Search showList /> : null}
     </Modal>

@@ -96,7 +96,7 @@ export const ImportFromText = () => {
       message.success('保存成功');
       importResourceStore.setCopiedTextPayload({ title: '', content: '' });
       importResourceStore.setImportResourceModalVisible(false);
-      if (selectedCollectionId === kbId) {
+      if (!kbId || (kbId && selectedCollectionId === kbId)) {
         reloadListState.setReloadKnowledgeBaseList(true);
         reloadListState.setReloadResourceList(true);
       }
