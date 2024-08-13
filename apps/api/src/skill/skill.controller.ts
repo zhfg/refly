@@ -77,10 +77,11 @@ export class SkillController {
   @Get('/instance/list')
   async listSkillInstances(
     @User() user: UserModel,
+    @Query('skillId') skillId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListSkillInstanceResponse> {
-    const skills = await this.skillService.listSkillInstances(user, { page, pageSize });
+    const skills = await this.skillService.listSkillInstances(user, { skillId, page, pageSize });
     return buildSuccessResponse(skills.map((skill) => skillInstancePO2DTO(skill)));
   }
 
