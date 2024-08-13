@@ -314,10 +314,6 @@ export type SkillMeta = {
    * Skill ID
    */
   skillId?: string;
-  /**
-   * Skill config
-   */
-  config?: string;
 };
 
 /**
@@ -350,10 +346,6 @@ export type SkillJob = {
    * Skill ID
    */
   skillId: string;
-  /**
-   * Skill name
-   */
-  skillName: string;
   /**
    * Skill display name
    */
@@ -1077,12 +1069,6 @@ export type SkillInstanceCreateParam = {
    * Skill description
    */
   description?: string;
-  /**
-   * Skill config (should conform to template config schema)
-   */
-  config?: {
-    [key: string]: unknown;
-  };
 };
 
 export type CreateSkillInstanceRequest = {
@@ -1105,19 +1091,13 @@ export type UpdateSkillInstanceRequest = {
    */
   skillId: string;
   /**
-   * Skill name
-   */
-  skillName?: string;
-  /**
    * Skill display name
    */
   displayName?: string;
   /**
-   * Skill config (should conform to template config schema)
+   * Skill description
    */
-  config?: {
-    [key: string]: unknown;
-  };
+  description?: string;
 };
 
 export type UpdateSkillInstanceResponse = BaseResponse & {
@@ -1192,12 +1172,6 @@ export type InvokeSkillRequest = {
    * Skill instance ID to invoke (if not provided, skill scheduler will be used)
    */
   skillId?: string;
-  /**
-   * Skill config (should conform to template config schema)
-   */
-  config?: {
-    [key: string]: unknown;
-  };
   /**
    * Conversation ID (will add messages to this conversation if provided)
    */

@@ -3,14 +3,7 @@ import { EventEmitter } from 'node:events';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
-import {
-  Conversation,
-  SkillInstance,
-  SkillTrigger,
-  MessageType,
-  Prisma,
-  SkillJob,
-} from '@prisma/client';
+import { Conversation, SkillInstance, SkillTrigger, MessageType, SkillJob } from '@prisma/client';
 import { Response } from 'express';
 import { AIMessageChunk } from '@langchain/core/dist/messages';
 import {
@@ -195,32 +188,22 @@ export class SkillService {
         uid,
         tplName: instance.tplName,
         displayName: instance.displayName || 'Untitled Skill',
-        config: JSON.stringify(instance.config),
         description: instance.description,
       })),
     });
   }
 
   async updateSkillInstance(user: User, param: UpdateSkillInstanceRequest) {
-    if (!param.skillId) {
+    const { uid } = user;
+    const { skillId, displayName, description } = param;
+
+    if (!skillId) {
       throw new BadRequestException('skill id is required');
-    }
-    if (param.skillName && !this.isValidSkillName(param.skillName)) {
-      throw new BadRequestException(`skill ${param.skillName} not found`);
-    }
-
-    const updates: Prisma.SkillInstanceUpdateInput = {
-      ...pick(param, ['displayName', 'skillName']),
-      ...(param.config ? { config: JSON.stringify(param.config) } : {}),
-    };
-
-    if (Object.keys(updates).length === 0) {
-      this.logger.log(`no updates for skill instance ${param.skillId}, skip`);
     }
 
     return this.prisma.skillInstance.update({
-      where: { skillId: param.skillId, uid: user.uid, deletedAt: null },
-      data: updates,
+      where: { skillId, uid, deletedAt: null },
+      data: { displayName, description },
     });
   }
 
@@ -268,17 +251,15 @@ export class SkillService {
   }
 
   async createJob(user: User, param: CreateSkillJobData) {
-    const { input, context, config, skill, triggerId, convId } = param;
+    const { input, context, skill, triggerId, convId } = param;
     return this.prisma.skillJob.create({
       data: {
         jobId: genSkillJobID(),
         uid: user.uid,
         skillId: skill?.skillId ?? '',
-        skillName: skill?.tplName ?? 'Scheduler',
         skillDisplayName: skill?.displayName ?? 'Scheduler',
         input: JSON.stringify(input),
         context: JSON.stringify(context ?? {}),
-        overrideConfig: JSON.stringify(config ?? {}),
         status: 'running',
         triggerId,
         convId,
@@ -316,7 +297,6 @@ export class SkillService {
     const config: SkillRunnableConfig = {
       configurable: {
         ...JSON.parse(skill?.config ?? '{}'),
-        ...(param.config ?? {}),
         ...param.context,
         convId: param.convId,
         uid: user.uid,

@@ -275,16 +275,12 @@ model SkillJob {
   jobId            String   @unique @map("job_id")
   /// Skill id
   skillId          String   @map("skill_id")
-  /// Skill name
-  skillName        String   @map("skill_name")
   /// Skill display name
   skillDisplayName String   @map("skill_display_name")
   /// Input (JSON of `SkillInput`)
   input            String   @map("input")
   /// Context (JSON of `SkillContext`)
   context          String   @map("context")
-  /// Skill config to override
-  overrideConfig   String   @map("override_config")
   /// Skill job status (refer to `SkillJobStatus`)
   status           String   @map("status")
   /// Skill trigger id

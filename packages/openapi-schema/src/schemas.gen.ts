@@ -387,10 +387,6 @@ export const $SkillMeta = {
       description: 'Skill ID',
       example: 'sk-g30e1b80b5g1itbemc0g5jj3',
     },
-    config: {
-      type: 'string',
-      description: 'Skill config',
-    },
   },
 } as const;
 
@@ -427,17 +423,7 @@ export const $SkillInstance = {
 export const $SkillJob = {
   type: 'object',
   description: 'Skill job record',
-  required: [
-    'jobId',
-    'skillId',
-    'skillName',
-    'skillDisplayName',
-    'jobStatus',
-    'input',
-    'context',
-    'createdAt',
-    'updatedAt',
-  ],
+  required: ['jobId', 'skillId', 'skillDisplayName', 'jobStatus', 'input', 'context', 'createdAt', 'updatedAt'],
   properties: {
     jobId: {
       type: 'string',
@@ -447,10 +433,6 @@ export const $SkillJob = {
     skillId: {
       type: 'string',
       description: 'Skill ID',
-    },
-    skillName: {
-      type: 'string',
-      description: 'Skill name',
     },
     skillDisplayName: {
       type: 'string',
@@ -1539,7 +1521,7 @@ export const $ListSkillInstanceResponse = {
 
 export const $SkillInstanceCreateParam = {
   type: 'object',
-  required: ['skillName', 'displayName'],
+  required: ['displayName'],
   properties: {
     tplName: {
       type: 'string',
@@ -1554,10 +1536,6 @@ export const $SkillInstanceCreateParam = {
     description: {
       type: 'string',
       description: 'Skill description',
-    },
-    config: {
-      type: 'object',
-      description: 'Skill config (should conform to template config schema)',
     },
   },
 } as const;
@@ -1605,19 +1583,14 @@ export const $UpdateSkillInstanceRequest = {
       description: 'Skill ID',
       example: 's-g30e1b80b5g1itbemc0g5jj3',
     },
-    skillName: {
-      type: 'string',
-      description: 'Skill name',
-      example: 'online-search',
-    },
     displayName: {
       type: 'string',
       description: 'Skill display name',
       example: 'My Custom Skill',
     },
-    config: {
-      type: 'object',
-      description: 'Skill config (should conform to template config schema)',
+    description: {
+      type: 'string',
+      description: 'Skill description',
     },
   },
 } as const;
@@ -1729,10 +1702,6 @@ export const $InvokeSkillRequest = {
     skillId: {
       type: 'string',
       description: 'Skill instance ID to invoke (if not provided, skill scheduler will be used)',
-    },
-    config: {
-      type: 'object',
-      description: 'Skill config (should conform to template config schema)',
     },
     convId: {
       description: 'Conversation ID (will add messages to this conversation if provided)',

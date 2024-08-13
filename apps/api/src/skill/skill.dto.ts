@@ -26,7 +26,6 @@ export interface InvokeSkillJobData extends InvokeSkillRequest {
 export function skillInstancePO2DTO(skill: SkillInstanceModel): SkillInstance {
   return {
     ...pick(skill, ['skillId', 'tplName', 'displayName', 'description']),
-    config: JSON.parse(skill.config),
     createdAt: skill.createdAt.toJSON(),
     updatedAt: skill.updatedAt.toJSON(),
   };
@@ -45,7 +44,7 @@ export function skillTriggerPO2DTO(trigger: SkillTriggerModel): SkillTrigger {
 
 export function skillJobPO2DTO(job: SkillJobModel & { messages?: ChatMessageModel[] }): SkillJob {
   return {
-    ...pick(job, ['jobId', 'skillId', 'skillName', 'skillDisplayName', 'triggerId', 'convId']),
+    ...pick(job, ['jobId', 'skillId', 'skillDisplayName', 'triggerId', 'convId']),
     messages: job.messages?.map(toChatMessageDTO) ?? [],
     jobStatus: job.status as SkillJobStatus,
     input: JSON.parse(job.input),

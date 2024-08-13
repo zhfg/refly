@@ -1414,7 +1414,6 @@ components:
       required:
         - jobId
         - skillId
-        - skillName
         - skillDisplayName
         - jobStatus
         - input
@@ -1429,9 +1428,6 @@ components:
         skillId:
           type: string
           description: Skill ID
-        skillName:
-          type: string
-          description: Skill name
         skillDisplayName:
           type: string
           description: Skill display name
@@ -2242,14 +2238,13 @@ components:
           type: string
           description: Skill ID
           example: s-g30e1b80b5g1itbemc0g5jj3
-        skillName:
-          type: string
-          description: Skill name
-          example: online-search
         displayName:
           type: string
           description: Skill display name
           example: My Custom Skill
+        description:
+          type: string
+          description: Skill description
     UpdateSkillInstanceResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
