@@ -105,6 +105,10 @@ export class LabelService {
   }
 
   async createLabelInstance(user: User, param: CreateLabelInstanceRequest) {
+    if (param.valueList?.length === 0) {
+      throw new BadRequestException('valueList is required');
+    }
+
     return this.prisma.labelInstance.createManyAndReturn({
       data: param.valueList.map((value) => ({
         labelId: genLabelInstanceID(),

@@ -101,13 +101,6 @@ export const $Resource = {
       type: 'string',
       description: 'Document content for this resource (only returned in getNoteDetail API)',
     },
-    labels: {
-      type: 'array',
-      description: 'Resource labels',
-      items: {
-        $ref: '#/components/schemas/LabelInstance',
-      },
-    },
   },
 } as const;
 
@@ -151,13 +144,6 @@ export const $Note = {
       format: 'date-time',
       description: 'Note update time',
     },
-    labels: {
-      type: 'array',
-      description: 'Note labels',
-      items: {
-        $ref: '#/components/schemas/LabelInstance',
-      },
-    },
   },
 } as const;
 
@@ -200,13 +186,6 @@ export const $Collection = {
       description: 'Collection resources (only returned in detail API)',
       items: {
         $ref: '#/components/schemas/Resource',
-      },
-    },
-    labels: {
-      type: 'array',
-      description: 'Note labels',
-      items: {
-        $ref: '#/components/schemas/LabelInstance',
       },
     },
   },

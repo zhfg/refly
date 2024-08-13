@@ -68,12 +68,7 @@ export class KnowledgeService {
       resources = resources.filter((r) => r.isPublic);
     }
 
-    const labels = await this.prisma.labelInstance.findMany({
-      where: { entityType: 'collection', entityId: collectionId, deletedAt: null },
-      include: { labelClass: true },
-    });
-
-    return { ...coll, resources, labels };
+    return { ...coll, resources };
   }
 
   async upsertCollection(user: User, param: UpsertCollectionRequest) {
@@ -162,12 +157,7 @@ export class KnowledgeService {
       return null;
     }
 
-    const labels = await this.prisma.labelInstance.findMany({
-      where: { entityType: 'resource', entityId: resourceId, deletedAt: null },
-      include: { labelClass: true },
-    });
-
-    return { ...resource, labels };
+    return resource;
   }
 
   async createResource(user: User, param: UpsertResourceRequest) {
@@ -393,12 +383,7 @@ export class KnowledgeService {
       throw new BadRequestException('Note not found');
     }
 
-    const labels = await this.prisma.labelInstance.findMany({
-      where: { entityType: 'note', entityId: noteId, deletedAt: null },
-      include: { labelClass: true },
-    });
-
-    return { ...note, labels };
+    return note;
   }
 
   async upsertNote(user: User, param: UpsertNoteRequest) {

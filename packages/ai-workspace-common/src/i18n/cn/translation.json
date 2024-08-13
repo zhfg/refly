@@ -108,6 +108,22 @@
       "editSuccessful": "修改成功",
       "editFailed": "修改失败"
     },
+    "newLabelModal": {
+      "modalTitle": "新增标签",
+      "labelClass": "标签类",
+      "labelClassPlaceholder": "请选择标签类",
+      "labelClassValidateMessage": "标签类不能为空",
+      "valueList": "标签",
+      "valueListPlaceholder": "输入标签，回车可添加多个",
+      "valueListValidateMessage": "至少输入一个标签",
+      "title": "标题",
+      "cancel": "取消",
+      "confirm": "确认",
+      "successful": "创建成功",
+      "failed": "创建失败",
+      "editSuccessful": "修改成功",
+      "editFailed": "修改失败"
+    },
     "deleteDropdownMenu": {
       "successful": "删除成功！",
       "failed": "删除失败！",

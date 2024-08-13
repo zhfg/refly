@@ -87,10 +87,6 @@ export type Resource = {
    * Document content for this resource (only returned in getNoteDetail API)
    */
   content?: string;
-  /**
-   * Resource labels
-   */
-  labels?: Array<LabelInstance>;
 };
 
 export type Note = {
@@ -126,10 +122,6 @@ export type Note = {
    * Note update time
    */
   updatedAt: string;
-  /**
-   * Note labels
-   */
-  labels?: Array<LabelInstance>;
 };
 
 export type Collection = {
@@ -161,10 +153,6 @@ export type Collection = {
    * Collection resources (only returned in detail API)
    */
   resources?: Array<Resource>;
-  /**
-   * Note labels
-   */
-  labels?: Array<LabelInstance>;
 };
 
 /**

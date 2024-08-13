@@ -108,6 +108,18 @@
       "editSuccessful": "Modifyed successfully",
       "editFailed": "Failed to modify"
     },
+    "newLabelModal": {
+      "modalTitle": "Create New Label",
+      "editModalTitle": "Edit the Label",
+      "titlePlaceholder": "Enter a title for your label",
+      "title": "Title",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter a description for your label",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "successful": "Label created successfully",
+      "failed": "Failed to create label"
+    },
     "deleteDropdownMenu": {
       "successful": "Deleted successfully!",
       "failed": "Failed to delete",
