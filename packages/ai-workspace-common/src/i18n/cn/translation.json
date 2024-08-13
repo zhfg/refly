@@ -192,7 +192,8 @@
       "getHelp": "获得帮助",
       "download": "下载插件",
       "newResource": "添加资源",
-      "settings": "设置"
+      "settings": "设置",
+      "skill": "技能"
     }
   },
   "knowledgeLibrary": {
@@ -294,6 +295,29 @@
       "title": "暂无无会话，赶紧下载插件或访问首页提问吧~",
       "download": "下载插件",
       "goHome": "去首页搜索或提问"
+    }
+  },
+  "skill": {
+    "tab": {
+      "skillInstances": "已添加技能",
+      "skillTemplate": "技能市场"
+    },
+    "newSkillModal": {
+      "title": "创建技能",
+      "name": "名称",
+      "namePlaceholder": "请输入技能名称",
+      "description": "描述",
+      "descriptionPlaceholder": "请输入技能描述",
+      "cancel": "取消",
+      "confirm": "确定",
+      "putErr": "技能添加失败，请尝试重试！",
+      "putSuccess": "技能添加成功"
+    },
+    "skillDetail": {
+      "run": "运行",
+      "delete": "删除",
+      "jobs": "运行记录",
+      "triggers": "触发器"
     }
   },
   "settings": {

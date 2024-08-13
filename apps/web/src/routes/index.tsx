@@ -16,6 +16,8 @@ import { DigestDetailPage } from "@/pages/digest-detail"
 // 页面
 import Workspace from "@/pages/workspace"
 import KnowledgeBase from "@/pages/knowledge-base"
+import Skill from "@/pages/skill"
+import SkillDetailPage from "@/pages/skill-detail"
 
 // 这里用于分享之后的不需要鉴权的查看
 import { AIGCContentDetailPage } from "@/pages/aigc-content-detail"
@@ -91,6 +93,8 @@ export const AppRouter = (props: { layout?: any }) => {
         />
         <Route path="/thread/:threadId" element={<Thread />} />
         <Route path="/thread" element={<ConvLibrary />} />
+        <Route path="/skill" element={<Skill />} />
+        <Route path="/skill-detail" element={<SkillDetailPage />} />
         <Route path="/settings" element={<Settings />} />
         {/** dateType: daily/weekly/monthly/yearly */}
         <Route

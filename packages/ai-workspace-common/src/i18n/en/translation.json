@@ -181,7 +181,8 @@
       "getHelp": "Get Help",
       "download": "Download Extension",
       "newResource": "New Resource",
-      "settings": "Settings"
+      "settings": "Settings",
+      "skill": "Skills"
     }
   },
   "knowledgeLibrary": {
@@ -277,6 +278,29 @@
       "title": "No conversations at the moment. Download the plugin or visit the home page to ask a question!",
       "download": "Download Plugin",
       "goHome": "Go to Home Page to Search or Ask a Question"
+    }
+  },
+  "skill": {
+    "tab": {
+      "skillInstances": "Skill Instances",
+      "skillTemplate": "Skill templates"
+    },
+    "newSkillModal": {
+      "title": "Add New Skill",
+      "name": "Name",
+      "namePlaceholder": "Please enter the name of the skill",
+      "description": "Description",
+      "descriptionPlaceholder": "Please enter the description of the skill",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "putErr": "Failed to add the skill. Please try again.",
+      "putSuccess": "Skill added successfully"
+    },
+    "skillDetail": {
+      "run": "Run",
+      "delete": "Delete",
+      "jobs": "Running Logs",
+      "triggers": "Triggers"
     }
   },
   "threadItem": {
