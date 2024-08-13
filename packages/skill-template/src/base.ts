@@ -113,6 +113,7 @@ export interface SkillRunnableMeta extends Record<string, unknown>, SkillMeta {
 export interface SkillRunnableConfig extends RunnableConfig {
   configurable?: SkillContext & {
     spanId?: string;
+    convId?: string;
     selectedSkill?: SkillMeta;
     currentSkill?: SkillMeta;
     chatHistory?: BaseMessage[];

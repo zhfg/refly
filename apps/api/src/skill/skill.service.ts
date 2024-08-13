@@ -56,6 +56,7 @@ import { ConfigService } from '@nestjs/config';
 import { SearchService } from '@/search/search.service';
 import { LabelService } from '@/label/label.service';
 import { labelClassPO2DTO, labelPO2DTO } from '@/label/label.dto';
+import { CreateChatMessageInput } from '@/conversation/conversation.dto';
 
 export type LLMChatMessage = AIMessage | HumanMessage | SystemMessage;
 
@@ -319,6 +320,7 @@ export class SkillService {
         ...JSON.parse(skill?.config ?? '{}'),
         ...(param.config ?? {}),
         ...param.context,
+        convId: param.convId,
         uid: user.uid,
         installedSkills,
       },
@@ -472,23 +474,27 @@ export class SkillService {
       }
     }
 
+    const msgList: CreateChatMessageInput[] = msgAggregator.getMessages({
+      user,
+      convId: conversation?.convId,
+      jobId: job?.jobId,
+      locale: param.context.locale,
+    });
+
+    // If human query is provided, add it to the beginning of the message list
+    if (param.input.query) {
+      msgList.unshift({
+        type: 'human',
+        content: param.input.query,
+        uid: user.uid,
+        convId: conversation?.convId,
+        jobId: job?.jobId,
+        locale: param.context.locale,
+      });
+    }
+
     await this.conversation.addChatMessages(
-      [
-        {
-          type: 'human',
-          content: param.input.query,
-          uid: user.uid,
-          convId: conversation?.convId,
-          jobId: job?.jobId,
-          locale: param.context.locale,
-        },
-        ...msgAggregator.getMessages({
-          user,
-          convId: conversation?.convId,
-          jobId: job?.jobId,
-          locale: param.context.locale,
-        }),
-      ],
+      msgList,
       conversation
         ? {
             convId: conversation.convId,
@@ -574,8 +580,16 @@ export class SkillService {
     }
 
     const { uid } = user;
-    return this.prisma.skillJob.findUnique({
-      where: { uid, jobId },
-    });
+    const [job, messages] = await Promise.all([
+      this.prisma.skillJob.findUnique({
+        where: { uid, jobId },
+      }),
+      this.prisma.chatMessage.findMany({
+        where: { uid, jobId },
+        orderBy: { createdAt: 'asc' },
+      }),
+    ]);
+
+    return { ...job, messages };
   }
 }
