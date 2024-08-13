@@ -217,10 +217,12 @@ model SkillInstance {
   pk          BigInt    @id @default(autoincrement())
   /// Skill id
   skillId     String    @unique @map("skill_id")
-  /// Skill name (correspond to names of skill templates)
-  skillName   String    @map("skill_name")
+  /// Skill template name
+  tplName     String    @default("") @map("skill_name")
   /// Skill display name
   displayName String    @default("") @map("display_name")
+  /// Skill description
+  description String    @default("") @map("description")
   /// UID of skill owner
   uid         String    @map("uid")
   /// Workflow configuration (JSON)

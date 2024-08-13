@@ -237,19 +237,13 @@ export type SkillTemplate = {
    */
   name: string;
   /**
-   * Skill display name
+   * Skill template display name
    */
   displayName: string;
   /**
-   * Skill description
+   * Skill template description
    */
   description?: string;
-  /**
-   * JSON schema for config
-   */
-  configSchema?: {
-    [key: string]: unknown;
-  };
 };
 
 /**
@@ -309,13 +303,13 @@ export type SkillTrigger = {
  */
 export type SkillMeta = {
   /**
-   * Skill template name
-   */
-  name: string;
-  /**
    * Skill display name
    */
   displayName: string;
+  /**
+   * Skill template name
+   */
+  tplName?: string;
   /**
    * Skill ID
    */
@@ -331,9 +325,9 @@ export type SkillMeta = {
  */
 export type SkillInstance = SkillMeta & {
   /**
-   * Skill triggers
+   * Skill instance description
    */
-  triggers?: Array<SkillTrigger>;
+  description?: string;
   /**
    * Skill creation time
    */
@@ -1072,13 +1066,17 @@ export type ListSkillInstanceResponse = BaseResponse & {
 
 export type SkillInstanceCreateParam = {
   /**
-   * Skill name
+   * Skill template name
    */
-  skillName: string;
+  tplName?: string;
   /**
    * Skill display name
    */
   displayName: string;
+  /**
+   * Skill description
+   */
+  description?: string;
   /**
    * Skill config (should conform to template config schema)
    */

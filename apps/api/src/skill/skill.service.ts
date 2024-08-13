@@ -170,9 +170,9 @@ export class SkillService {
   }
 
   async listSkillInstances(user: User, param: ListSkillInstancesData['query']) {
-    const { page, pageSize } = param;
+    const { skillId, page, pageSize } = param;
     return this.prisma.skillInstance.findMany({
-      where: { uid: user.uid, deletedAt: null },
+      where: { skillId, uid: user.uid, deletedAt: null },
       orderBy: { updatedAt: 'desc' },
       take: pageSize,
       skip: (page - 1) * pageSize,
@@ -184,8 +184,8 @@ export class SkillService {
     const { instanceList } = param;
 
     instanceList.forEach((instance) => {
-      if (!this.isValidSkillName(instance.skillName)) {
-        throw new BadRequestException(`skill ${instance.skillName} not found`);
+      if (!this.isValidSkillName(instance.tplName)) {
+        throw new BadRequestException(`skill ${instance.tplName} not found`);
       }
     });
 
@@ -193,9 +193,10 @@ export class SkillService {
       data: instanceList.map((instance) => ({
         skillId: genSkillID(),
         uid,
-        skillName: instance.skillName,
+        tplName: instance.tplName,
         displayName: instance.displayName || 'Untitled Skill',
         config: JSON.stringify(instance.config),
+        description: instance.description,
       })),
     });
   }
@@ -273,7 +274,7 @@ export class SkillService {
         jobId: genSkillJobID(),
         uid: user.uid,
         skillId: skill?.skillId ?? '',
-        skillName: skill?.skillName ?? 'Scheduler',
+        skillName: skill?.tplName ?? 'Scheduler',
         skillDisplayName: skill?.displayName ?? 'Scheduler',
         input: JSON.stringify(input),
         context: JSON.stringify(context ?? {}),
@@ -310,10 +311,7 @@ export class SkillService {
       await this.prisma.skillInstance.findMany({
         where: { uid: user.uid, deletedAt: null },
       })
-    ).map((s) => ({
-      ...pick(s, ['skillId', 'displayName', 'config']),
-      name: s.skillName,
-    }));
+    ).map((s) => pick(s, ['skillId', 'tplName', 'displayName', 'config']));
 
     const config: SkillRunnableConfig = {
       configurable: {
@@ -328,11 +326,7 @@ export class SkillService {
     };
 
     if (skill) {
-      config.configurable.selectedSkill = {
-        skillId: skill.skillId,
-        name: skill.skillName,
-        displayName: skill.displayName,
-      };
+      config.configurable.selectedSkill = skill;
     }
 
     if (conversation) {

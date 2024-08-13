@@ -55,7 +55,7 @@ export abstract class BaseSkill extends StructuredTool {
 
     // Ensure currentSkill is not empty.
     config.configurable.currentSkill ??= {
-      name: this.name,
+      tplName: this.name,
       displayName: this.displayName[config.configurable.locale || 'en'],
     };
 

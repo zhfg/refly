@@ -69,12 +69,12 @@ export class Scheduler extends BaseSkill {
   directCallSkill = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { selectedSkill, installedSkills } = config.configurable || {};
 
-    const skillInstance = installedSkills.find((skill) => skill.name === selectedSkill.name);
+    const skillInstance = installedSkills.find((skill) => skill.tplName === selectedSkill.tplName);
     if (!skillInstance) {
-      throw new Error(`Skill ${selectedSkill.name} not installed.`);
+      throw new Error(`Skill ${selectedSkill.tplName} not installed.`);
     }
 
-    const skillTemplate = this.skills.find((tool) => tool.name === selectedSkill.name);
+    const skillTemplate = this.skills.find((tool) => tool.name === selectedSkill.tplName);
     if (!skillTemplate) {
       throw new Error(`Skill ${selectedSkill} not found.`);
     }
@@ -118,10 +118,10 @@ export class Scheduler extends BaseSkill {
 
     // We'll first try to use installed skill instance, if not found then fallback to skill template
     const { installedSkills = [] } = config.configurable || {};
-    const skillInstance = installedSkills.find((skill) => skill.name === call.name);
+    const skillInstance = installedSkills.find((skill) => skill.tplName === call.name);
     const skillTemplate = this.skills.find((skill) => skill.name === call.name);
     const currentSkill: SkillMeta = skillInstance ?? {
-      name: skillTemplate.name,
+      tplName: skillTemplate.name,
       displayName: skillTemplate.displayName[locale],
     };
     const skillConfig: SkillRunnableConfig = {
@@ -138,7 +138,7 @@ export class Scheduler extends BaseSkill {
     this.emitEvent({ event: 'end' }, skillConfig);
 
     const skillMessage = new ToolMessage({
-      name: currentSkill.name,
+      name: currentSkill.tplName,
       content: typeof output === 'string' ? output : JSON.stringify(output),
       tool_call_id: call.id!,
     });
@@ -158,7 +158,7 @@ export class Scheduler extends BaseSkill {
     let tools = this.skills;
     if (installedSkills) {
       const toolMap = new Map(tools.map((tool) => [tool.name, tool]));
-      tools = installedSkills.map((skill) => toolMap.get(skill.name)!);
+      tools = installedSkills.map((skill) => toolMap.get(skill.tplName)!);
     }
     const boundModel = this.engine.chatModel().bindTools(tools);
 
@@ -315,11 +315,11 @@ Generated question example:
       return 'scheduler';
     }
 
-    if (!this.isValidSkillName(selectedSkill.name)) {
+    if (!this.isValidSkillName(selectedSkill.tplName)) {
       this.emitEvent(
         {
           event: 'log',
-          content: `Selected skill ${selectedSkill.name} not found. Fallback to scheduler.`,
+          content: `Selected skill ${selectedSkill.tplName} not found. Fallback to scheduler.`,
         },
         config,
       );
@@ -329,11 +329,23 @@ Generated question example:
     return 'direct';
   };
 
-  shouldCallSkill = (state: GraphState): 'skill' | 'relatedQuestions' => {
+  shouldCallSkill = (state: GraphState, config: SkillRunnableConfig): 'skill' | 'relatedQuestions' | typeof END => {
     const { skillCalls = [] } = state;
+    const { convId } = this.configSnapshot?.configurable ?? config.configurable;
+
+    if (skillCalls.length > 0) {
+      return 'skill';
+    }
 
     // If there is no skill call, then jump to relatedQuestions node
-    return skillCalls.length > 0 ? 'skill' : 'relatedQuestions';
+    return convId ? 'relatedQuestions' : END;
+  };
+
+  onDirectSkillCallFinish = (state: GraphState, config: SkillRunnableConfig): 'relatedQuestions' | typeof END => {
+    const { convId } = config.configurable || {};
+
+    // Only generate related questions in a conversation
+    return convId ? 'relatedQuestions' : END;
   };
 
   onSkillCallFinish(state: GraphState, config: SkillRunnableConfig): 'scheduler' | 'skill' {
@@ -358,7 +370,7 @@ Generated question example:
       .addNode('relatedQuestions', this.genRelatedQuestions);
 
     workflow.addConditionalEdges(START, this.shouldDirectCallSkill);
-    workflow.addEdge('direct', 'relatedQuestions');
+    workflow.addConditionalEdges('direct', this.onDirectSkillCallFinish);
     workflow.addConditionalEdges('scheduler', this.shouldCallSkill);
     workflow.addConditionalEdges('skill', this.onSkillCallFinish);
     workflow.addEdge('relatedQuestions', END);

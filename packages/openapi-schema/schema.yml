@@ -1311,13 +1311,10 @@ components:
           description: Skill template name
         displayName:
           type: string
-          description: Skill display name
+          description: Skill template display name
         description:
           type: string
-          description: Skill description
-        configSchema:
-          type: object
-          description: JSON schema for config
+          description: Skill template description
     SkillTriggerType:
       type: string
       description: Skill trigger type
@@ -1378,22 +1375,18 @@ components:
       type: object
       description: Skill metadata
       required:
-        - name
         - displayName
       properties:
-        name:
-          type: string
-          description: Skill template name
         displayName:
           type: string
           description: Skill display name
+        tplName:
+          type: string
+          description: Skill template name
         skillId:
           type: string
           description: Skill ID
           example: sk-g30e1b80b5g1itbemc0g5jj3
-        config:
-          type: string
-          description: Skill config
     SkillInstance:
       type: object
       description: Skill
@@ -1404,11 +1397,9 @@ components:
             - createdAt
             - updatedAt
           properties:
-            triggers:
-              type: array
-              description: Skill triggers
-              items:
-                $ref: '#/components/schemas/SkillTrigger'
+            description:
+              type: string
+              description: Skill instance description
             createdAt:
               type: string
               format: date-time
@@ -2209,20 +2200,19 @@ components:
     SkillInstanceCreateParam:
       type: object
       required:
-        - skillName
         - displayName
       properties:
-        skillName:
+        tplName:
           type: string
-          description: Skill name
+          description: Skill template name
           example: online-search
         displayName:
           type: string
           description: Skill display name
           example: My Custom Skill
-        config:
-          type: object
-          description: Skill config (should conform to template config schema)
+        description:
+          type: string
+          description: Skill description
     CreateSkillInstanceRequest:
       type: object
       required:
@@ -2260,9 +2250,6 @@ components:
           type: string
           description: Skill display name
           example: My Custom Skill
-        config:
-          type: object
-          description: Skill config (should conform to template config schema)
     UpdateSkillInstanceResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -2342,9 +2329,6 @@ components:
         skillId:
           type: string
           description: Skill instance ID to invoke (if not provided, skill scheduler will be used)
-        config:
-          type: object
-          description: Skill config (should conform to template config schema)
         convId:
           description: Conversation ID (will add messages to this conversation if provided)
           type: string

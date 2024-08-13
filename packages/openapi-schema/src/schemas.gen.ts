@@ -299,15 +299,11 @@ export const $SkillTemplate = {
     },
     displayName: {
       type: 'string',
-      description: 'Skill display name',
+      description: 'Skill template display name',
     },
     description: {
       type: 'string',
-      description: 'Skill description',
-    },
-    configSchema: {
-      type: 'object',
-      description: 'JSON schema for config',
+      description: 'Skill template description',
     },
   },
 } as const;
@@ -376,15 +372,15 @@ export const $SkillTrigger = {
 export const $SkillMeta = {
   type: 'object',
   description: 'Skill metadata',
-  required: ['name', 'displayName'],
+  required: ['displayName'],
   properties: {
-    name: {
-      type: 'string',
-      description: 'Skill template name',
-    },
     displayName: {
       type: 'string',
       description: 'Skill display name',
+    },
+    tplName: {
+      type: 'string',
+      description: 'Skill template name',
     },
     skillId: {
       type: 'string',
@@ -409,12 +405,9 @@ export const $SkillInstance = {
       type: 'object',
       required: ['createdAt', 'updatedAt'],
       properties: {
-        triggers: {
-          type: 'array',
-          description: 'Skill triggers',
-          items: {
-            $ref: '#/components/schemas/SkillTrigger',
-          },
+        description: {
+          type: 'string',
+          description: 'Skill instance description',
         },
         createdAt: {
           type: 'string',
@@ -1548,15 +1541,19 @@ export const $SkillInstanceCreateParam = {
   type: 'object',
   required: ['skillName', 'displayName'],
   properties: {
-    skillName: {
+    tplName: {
       type: 'string',
-      description: 'Skill name',
+      description: 'Skill template name',
       example: 'online-search',
     },
     displayName: {
       type: 'string',
       description: 'Skill display name',
       example: 'My Custom Skill',
+    },
+    description: {
+      type: 'string',
+      description: 'Skill description',
     },
     config: {
       type: 'object',
