@@ -24,8 +24,9 @@ export interface InvokeSkillJobData extends InvokeSkillRequest {
 
 export function skillInstancePO2DTO(skill: SkillInstanceModel): SkillInstance {
   return {
-    ...pick(skill, ['skillId', 'skillName']),
-    skillDisplayName: skill.displayName,
+    skillId: skill.skillId,
+    name: skill.skillName,
+    displayName: skill.displayName,
     config: JSON.parse(skill.config),
     createdAt: skill.createdAt.toJSON(),
     updatedAt: skill.updatedAt.toJSON(),

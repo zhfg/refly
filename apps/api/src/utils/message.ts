@@ -21,8 +21,8 @@ export class MessageAggregator {
    */
   data: Record<string, MessageData> = {};
 
-  getOrInitData(event: SkillMeta & { spanId: string }): MessageData {
-    const { spanId, skillId, skillName, skillDisplayName } = event;
+  getOrInitData(event: Pick<SkillEvent, 'spanId' | 'skillMeta'>): MessageData {
+    const { spanId, skillMeta } = event;
 
     const messageData = this.data[spanId];
     if (messageData) {
@@ -32,7 +32,7 @@ export class MessageAggregator {
     this.spanIdList.push(spanId);
 
     return {
-      skillMeta: { skillId, skillName, skillDisplayName },
+      skillMeta,
       logs: [],
       content: '',
       structuredData: {},
@@ -55,7 +55,7 @@ export class MessageAggregator {
   }
 
   setContent(meta: SkillRunnableMeta, content: string) {
-    const msg = this.getOrInitData(meta);
+    const msg = this.getOrInitData({ skillMeta: meta, spanId: meta.spanId });
     msg.content = content;
     this.data[meta.spanId] = msg;
   }

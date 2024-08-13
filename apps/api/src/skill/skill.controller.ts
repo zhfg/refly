@@ -44,8 +44,8 @@ export class SkillController {
 
   @UseGuards(JwtAuthGuard)
   @Get('/template/list')
-  async listSkillTemplates(): Promise<ListSkillTemplateResponse> {
-    return buildSuccessResponse(this.skillService.listSkillTemplates());
+  async listSkillTemplates(@User() user: UserModel): Promise<ListSkillTemplateResponse> {
+    return buildSuccessResponse(this.skillService.listSkillTemplates(user));
   }
 
   @UseGuards(JwtAuthGuard)

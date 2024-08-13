@@ -56,7 +56,7 @@ export function DataList({
       const data = res?.data?.data?.map((item) => {
         return {
           id: item?.skillId,
-          title: item?.skillDisplayName,
+          title: item?.displayName,
         } as SearchResult;
       });
 

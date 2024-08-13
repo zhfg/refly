@@ -156,10 +156,10 @@ export class SkillService {
     this.skillInventory = createSkillInventory(this.skillEngine);
   }
 
-  listSkillTemplates(): SkillTemplate[] {
+  listSkillTemplates(user: User): SkillTemplate[] {
     return this.skillInventory.map((skill) => ({
       name: skill.name,
-      displayName: skill.displayName,
+      displayName: skill.displayName[user.uiLocale || 'en'],
       description: skill.description,
     }));
   }
@@ -310,8 +310,8 @@ export class SkillService {
         where: { uid: user.uid, deletedAt: null },
       })
     ).map((s) => ({
-      ...pick(s, ['skillId', 'skillName', 'config']),
-      skillDisplayName: s.displayName,
+      ...pick(s, ['skillId', 'displayName', 'config']),
+      name: s.skillName,
     }));
 
     const config: SkillRunnableConfig = {
@@ -328,8 +328,8 @@ export class SkillService {
     if (skill) {
       config.configurable.selectedSkill = {
         skillId: skill.skillId,
-        skillName: skill.skillName,
-        skillDisplayName: skill.displayName,
+        name: skill.skillName,
+        displayName: skill.displayName,
       };
     }
 
@@ -459,7 +459,8 @@ export class SkillService {
           if (res) {
             writeSSEResponse(res, {
               event: 'stream',
-              ...pick(runMeta, ['spanId', 'skillId', 'skillName', 'skillDisplayName']),
+              skillMeta: runMeta,
+              spanId: runMeta.spanId,
               content:
                 typeof chunk.content === 'string' ? chunk.content : JSON.stringify(chunk.content),
             });
@@ -558,9 +559,9 @@ export class SkillService {
   }
 
   async listSkillJobs(user: Pick<User, 'uid'>, param: ListSkillJobsData['query']) {
-    const { skillId, page, pageSize } = param ?? {};
+    const { skillId, jobStatus, page, pageSize } = param ?? {};
     return this.prisma.skillJob.findMany({
-      where: { uid: user.uid, skillId },
+      where: { uid: user.uid, skillId, status: jobStatus },
       orderBy: { updatedAt: 'desc' },
       take: pageSize,
       skip: (page - 1) * pageSize,

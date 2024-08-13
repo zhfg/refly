@@ -35,7 +35,7 @@ export const SkillDisplay = () => {
             skillStore.setSelectedSkillInstalce(item);
           }}
         >
-          <span className="skill-item-title">{item?.skillDisplayName}</span>
+          <span className="skill-item-title">{item?.displayName}</span>
         </div>
       ))}
       <div

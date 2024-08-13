@@ -49,9 +49,9 @@ export const useBuildTask = () => {
       ...(selectedSkill
         ? {
             skillMeta: {
-              skillName: selectedSkill.skillName,
+              name: selectedSkill.name,
               skillId: selectedSkill.skillId,
-              skillDisplayName: selectedSkill.skillDisplayName,
+              displayName: selectedSkill.displayName,
             },
           }
         : {}),
@@ -109,7 +109,7 @@ export const useBuildTask = () => {
       .reverse()
       .find(
         (item) =>
-          item?.skillMeta?.skillName === skillEvent?.skillName &&
+          item?.skillMeta?.name === skillEvent?.skillMeta?.name &&
           item?.type === 'ai' &&
           item?.spanId === skillEvent?.spanId,
       );
@@ -122,11 +122,7 @@ export const useBuildTask = () => {
     // 每次 start 开启一条新的 msg
     const replyMsg = buildReplyMessage({
       content: '',
-      skillMeta: {
-        skillName: skillEvent?.skillName,
-        skillId: skillEvent?.skillId,
-        skillDisplayName: skillEvent?.skillDisplayName,
-      },
+      skillMeta: skillEvent.skillMeta,
       spanId: skillEvent?.spanId,
       pending: true,
     });
@@ -136,7 +132,7 @@ export const useBuildTask = () => {
       pendingReplyMsg: replyMsg,
       pending: true, // 开始加载 skill 消息
       pendingFirstToken: true, // 收到第一个字符
-      nowInvokeSkillId: skillEvent?.skillId,
+      nowInvokeSkillId: skillEvent?.skillMeta?.skillId,
     });
 
     chatStore.setMessages(messages.concat(replyMsg));
@@ -153,7 +149,7 @@ export const useBuildTask = () => {
       .reverse()
       .find(
         (item) =>
-          item?.skillMeta?.skillName === skillEvent?.skillName &&
+          item?.skillMeta?.name === skillEvent?.skillMeta?.name &&
           item?.type === 'ai' &&
           item?.spanId === skillEvent?.spanId,
       );
@@ -180,7 +176,7 @@ export const useBuildTask = () => {
       .reverse()
       .find(
         (item) =>
-          item?.skillMeta?.skillName === skillEvent?.skillName &&
+          item?.skillMeta?.name === skillEvent?.skillMeta?.name &&
           item?.type === 'ai' &&
           item?.spanId === skillEvent?.spanId,
       );
@@ -222,7 +218,7 @@ export const useBuildTask = () => {
       .reverse()
       .find(
         (item) =>
-          item?.skillMeta?.skillName === skillEvent?.skillName &&
+          item?.skillMeta?.name === skillEvent?.skillMeta?.name &&
           item?.type === 'ai' &&
           item?.spanId === skillEvent?.spanId,
       );
@@ -263,7 +259,7 @@ export const useBuildTask = () => {
       .reverse()
       .find(
         (item) =>
-          item?.skillMeta?.skillName === skillEvent?.skillName &&
+          item?.skillMeta?.name === skillEvent?.skillMeta?.name &&
           item?.type === 'ai' &&
           item?.spanId === skillEvent?.spanId,
       );

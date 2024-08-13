@@ -185,8 +185,8 @@ export const Search = (props: SearchProps) => {
       icon: <IconRobot style={{ fontSize: 12 }} />,
       onItemClick: (item: SearchResult) => {
         const skill: SkillMeta = {
-          skillDisplayName: item?.title,
-          skillName: item?.title,
+          displayName: item?.title,
+          name: item?.title,
           skillId: item?.id,
         };
         setSelectedSkill(skill);

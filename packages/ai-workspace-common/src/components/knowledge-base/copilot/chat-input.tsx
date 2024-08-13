@@ -82,7 +82,7 @@ export const ChatInput = (props: ChatInputProps) => {
           <div className="selected-skill-profile">
             <Avatar size={16} />
             <p>
-              和 <span className="selected-skill-name">{skillStore?.selectedSkill?.skillDisplayName}</span> 聊聊
+              和 <span className="selected-skill-name">{skillStore?.selectedSkill?.displayName}</span> 聊聊
             </p>
           </div>
           <div className="selected-skill-manage">

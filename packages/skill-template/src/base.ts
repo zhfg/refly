@@ -37,7 +37,7 @@ export abstract class BaseSkill extends StructuredTool {
     const eventData: SkillEvent = {
       event: data.event!,
       spanId,
-      ...currentSkill,
+      skillMeta: currentSkill,
       ...data,
     };
 
@@ -55,8 +55,8 @@ export abstract class BaseSkill extends StructuredTool {
 
     // Ensure currentSkill is not empty.
     config.configurable.currentSkill ??= {
-      skillName: this.name,
-      skillDisplayName: this.displayName[config.configurable.locale || 'en'],
+      name: this.name,
+      displayName: this.displayName[config.configurable.locale || 'en'],
     };
 
     // Ensure spanId is not empty.

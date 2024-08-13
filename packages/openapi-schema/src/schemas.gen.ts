@@ -9,6 +9,14 @@ export const $User = {
       type: 'string',
       description: 'UID',
     },
+    uiLocale: {
+      type: 'string',
+      description: 'UI locale',
+    },
+    outputLocale: {
+      type: 'string',
+      description: 'Output locale',
+    },
   },
 } as const;
 
@@ -283,14 +291,15 @@ export const $LabelInstance = {
 export const $SkillTemplate = {
   type: 'object',
   description: 'Skill template',
+  required: ['name', 'displayName'],
   properties: {
     name: {
       type: 'string',
       description: 'Skill template name',
     },
     displayName: {
-      type: 'object',
-      description: 'Skill display name (key is locale and value is display name)',
+      type: 'string',
+      description: 'Skill display name',
     },
     description: {
       type: 'string',
@@ -367,13 +376,13 @@ export const $SkillTrigger = {
 export const $SkillMeta = {
   type: 'object',
   description: 'Skill metadata',
-  required: ['skillName', 'skillDisplayName'],
+  required: ['name', 'displayName'],
   properties: {
-    skillName: {
+    name: {
       type: 'string',
-      description: 'Skill name',
+      description: 'Skill template name',
     },
-    skillDisplayName: {
+    displayName: {
       type: 'string',
       description: 'Skill display name',
     },

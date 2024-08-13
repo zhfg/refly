@@ -69,12 +69,12 @@ export class Scheduler extends BaseSkill {
   directCallSkill = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { selectedSkill, installedSkills } = config.configurable || {};
 
-    const skillInstance = installedSkills.find((skill) => skill.skillName === selectedSkill.skillName);
+    const skillInstance = installedSkills.find((skill) => skill.name === selectedSkill.name);
     if (!skillInstance) {
-      throw new Error(`Skill ${selectedSkill.skillName} not installed.`);
+      throw new Error(`Skill ${selectedSkill.name} not installed.`);
     }
 
-    const skillTemplate = this.skills.find((tool) => tool.name === selectedSkill.skillName);
+    const skillTemplate = this.skills.find((tool) => tool.name === selectedSkill.name);
     if (!skillTemplate) {
       throw new Error(`Skill ${selectedSkill} not found.`);
     }
@@ -118,11 +118,11 @@ export class Scheduler extends BaseSkill {
 
     // We'll first try to use installed skill instance, if not found then fallback to skill template
     const { installedSkills = [] } = config.configurable || {};
-    const skillInstance = installedSkills.find((skill) => skill.skillName === call.name);
+    const skillInstance = installedSkills.find((skill) => skill.name === call.name);
     const skillTemplate = this.skills.find((skill) => skill.name === call.name);
     const currentSkill: SkillMeta = skillInstance ?? {
-      skillName: skillTemplate.name,
-      skillDisplayName: skillTemplate.displayName[locale],
+      name: skillTemplate.name,
+      displayName: skillTemplate.displayName[locale],
     };
     const skillConfig: SkillRunnableConfig = {
       ...config,
@@ -138,7 +138,7 @@ export class Scheduler extends BaseSkill {
     this.emitEvent({ event: 'end' }, skillConfig);
 
     const skillMessage = new ToolMessage({
-      name: currentSkill.skillName,
+      name: currentSkill.name,
       content: typeof output === 'string' ? output : JSON.stringify(output),
       tool_call_id: call.id!,
     });
@@ -158,7 +158,7 @@ export class Scheduler extends BaseSkill {
     let tools = this.skills;
     if (installedSkills) {
       const toolMap = new Map(tools.map((tool) => [tool.name, tool]));
-      tools = installedSkills.map((skill) => toolMap.get(skill.skillName)!);
+      tools = installedSkills.map((skill) => toolMap.get(skill.name)!);
     }
     const boundModel = this.engine.chatModel().bindTools(tools);
 
@@ -315,11 +315,11 @@ Generated question example:
       return 'scheduler';
     }
 
-    if (!this.isValidSkillName(selectedSkill.skillName)) {
+    if (!this.isValidSkillName(selectedSkill.name)) {
       this.emitEvent(
         {
           event: 'log',
-          content: `Selected skill ${selectedSkill.skillName} not found. Fallback to scheduler.`,
+          content: `Selected skill ${selectedSkill.name} not found. Fallback to scheduler.`,
         },
         config,
       );

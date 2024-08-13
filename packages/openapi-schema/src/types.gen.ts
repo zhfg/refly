@@ -8,6 +8,14 @@ export type User = {
    * UID
    */
   uid: string;
+  /**
+   * UI locale
+   */
+  uiLocale?: string;
+  /**
+   * Output locale
+   */
+  outputLocale?: string;
 };
 
 /**
@@ -227,13 +235,11 @@ export type SkillTemplate = {
   /**
    * Skill template name
    */
-  name?: string;
+  name: string;
   /**
-   * Skill display name (key is locale and value is display name)
+   * Skill display name
    */
-  displayName?: {
-    [key: string]: unknown;
-  };
+  displayName: string;
   /**
    * Skill description
    */
@@ -303,13 +309,13 @@ export type SkillTrigger = {
  */
 export type SkillMeta = {
   /**
-   * Skill name
+   * Skill template name
    */
-  skillName: string;
+  name: string;
   /**
    * Skill display name
    */
-  skillDisplayName: string;
+  displayName: string;
   /**
    * Skill ID
    */
