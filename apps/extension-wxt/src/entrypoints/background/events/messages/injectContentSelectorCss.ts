@@ -10,28 +10,35 @@ export const handleInjectContentSelectorCss = async (msg: BackgroundMessage) => 
         target: { tabId: id as number },
         func: () => {
           const style = document.createElement('style');
+          style.setAttribute('data-id', 'refly-selected-mark-injected-css');
           style.textContent = `
-              * {
-              cursor: default !important;
-            }
-            .refly-content-selector-mark {
-              cursor: pointer !important;
-            }
-            .refly-content-selector-mark:hover {
-              background-color: #00968F26 !important;
-              border-radius: 4px;
-              z-index: 99999999;
-            }
-            input,
-            textarea {
-              pointer-events: none;
-            }
-    
-            .refly-content-selected-target {
-              background-color: #00968F26 !important;
-              border-radius: 4px;
-              z-index: 99999999;
-            }
+            * {
+                cursor: default !important;
+                  }
+                  .refly-content-selector-mark {
+                    cursor: pointer !important;
+                    background-color: #ffd40024 !important;
+                  }
+                    
+                  input,
+                  textarea {
+                    pointer-events: none;
+                  }
+
+                  .refly-content-selected-target {
+                    color: unset !important;
+                    border-bottom: 2px solid rgb(255, 212, 0) !important;
+                    background-color: #ffd40024 !important;
+                    cursor: pointer !important;
+                  }
+
+                  [data-refly-inline-selected-mark-id],
+                  [data-refly-block-selected-mark-id] {
+                    color: unset !important;
+                    border-bottom: 2px solid rgb(255, 212, 0) !important;
+                  background-color: #ffd40024 !important;
+                  cursor: pointer !important;
+              }
               `;
           document.head.appendChild(style);
         },

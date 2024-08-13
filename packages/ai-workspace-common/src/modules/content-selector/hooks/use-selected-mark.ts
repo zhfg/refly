@@ -68,16 +68,16 @@ export const useSelectedMark = () => {
     contentSelectorStore.setShowContentSelector(true);
     const runtime = getRuntime();
 
-    if (!isInjectStyles && runtime !== 'web') {
-      // TODO: 这里需要持有持久状态，不能光靠前端临时状态保持，因为 sidepanel 会被关闭
-      sendMessage({
-        type: 'injectContentSelectorCss',
-        name: 'injectContentSelectorCss',
-        source: runtime,
-      });
+    // if (runtime !== 'web') {
+    //   // TODO: 这里需要持有持久状态，不能光靠前端临时状态保持，因为 sidepanel 会被关闭
+    //   sendMessage({
+    //     type: 'injectContentSelectorCss',
+    //     name: 'injectContentSelectorCss',
+    //     source: runtime,
+    //   });
 
-      contentSelectorStore?.setIsInjectStyles(true);
-    }
+    //   contentSelectorStore?.setIsInjectStyles(true);
+    // }
 
     const event: SyncStatusEvent = {
       name: 'syncStatusEvent',

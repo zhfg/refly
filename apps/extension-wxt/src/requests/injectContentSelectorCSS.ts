@@ -11,6 +11,7 @@ const handler = async (req: HandlerRequest<ListPageProps>): Promise<HandlerRespo
         target: { tabId: id },
         func: () => {
           const style = document.createElement('style');
+          style.setAttribute('data-id', 'refly-selected-mark-injected-css');
           style.textContent = `
         * {
         cursor: default !important;
@@ -38,7 +39,7 @@ const handler = async (req: HandlerRequest<ListPageProps>): Promise<HandlerRespo
         border-bottom: 2px solid rgb(255, 212, 0) !important;
       background-color: #ffd40024 !important;
       cursor: pointer !important;
-}
+} 
         `;
           document.head.appendChild(style);
         },

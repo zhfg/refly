@@ -11,3 +11,11 @@
     background-color: #ffd40024 !important;
   }
 }
+
+[data-refly-inline-selected-mark-id],
+[data-refly-block-selected-mark-id] {
+  color: unset !important;
+  border-bottom: 2px solid rgb(255, 212, 0) !important;
+  background-color: #ffd40024 !important;
+  cursor: pointer !important;
+}

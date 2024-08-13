@@ -60,6 +60,7 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
   ) => {
     // 创建一个容器来放置React组件
     const menuContainer = document.createElement('div');
+    menuContainer.setAttribute('data-id', 'refly-content-selector-hover-menu');
     menuContainer.style.position = 'fixed';
     menuContainer.style.zIndex = '1000';
     menuContainer.style.opacity = '0';
@@ -77,8 +78,8 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
         menuContainer.style.opacity = '1';
       } else {
         const rect = target.getBoundingClientRect();
-        menuContainer.style.top = `${window.scrollY + rect.top - 30}px`;
-        menuContainer.style.left = `${window.scrollX + rect.left + rect.width / 2}px`;
+        menuContainer.style.top = `${rect.top - 30}px`;
+        menuContainer.style.left = `${rect.left + rect.width / 2}px`;
         menuContainer.style.opacity = '1';
       }
 
@@ -354,8 +355,8 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
       const containerLeft = containerRect.left || 0;
 
       // console.log('top', window.scrollY + rect.top);
-      mark.style.top = window.scrollY + top - containerTop + 'px';
-      mark.style.left = window.scrollX + left - containerLeft + 'px';
+      mark.style.top = top - containerTop + 'px';
+      mark.style.left = left - containerLeft + 'px';
       mark.style.width = width + 'px';
       mark.style.height = height + 'px';
       mark.style.background = `#ffd40024 !important`;
