@@ -144,13 +144,24 @@ export const useBuildThreadAndRun = () => {
       return Array.from(new Set(urls));
     };
 
-    const contentList = enableMultiSelect
-      ? currentSelectedMarks.map((item) => item?.data)
-      : [currentSelectedMark?.data];
+    const getContentList = () => {
+      let contentList = [];
+      if (checkedKeys?.includes(`currentPage-resource`) && getRuntime() !== 'web') {
+        contentList.push(currentResource?.content || '');
+      }
+
+      if (enableMultiSelect) {
+        contentList = contentList.concat(currentSelectedMarks.map((item) => item?.data));
+      } else {
+        contentList.push(currentSelectedMark?.data);
+      }
+
+      return contentList;
+    };
 
     let context: SkillContext = {
       locale: localSettings?.outputLocale || LOCALE.EN,
-      contentList: contentList?.filter((item) => !!item),
+      contentList: getContentList(),
       collectionIds: getIds('collection', checkedKeys),
       resourceIds: getIds('resource', checkedKeys),
       noteIds: getIds('note', checkedKeys),
