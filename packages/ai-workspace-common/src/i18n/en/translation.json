@@ -1,6 +1,10 @@
 {
   "language": "English",
   "productName": "Refly",
+  "common": {
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",
     "content": "We are dedicated to enhancing the stability and efficiency of our services. To achieve this, we have scheduled a system maintenance that will take place from 21:00 to 23:00 Beijing Time. During this period, our services will be temporarily unavailable. For our users in Seattle, this maintenance corresponds to 05:00 to 07:00 AM local time, taking into account the current daylight saving time adjustments. We apologize for any inconvenience this may cause and appreciate your understanding and support."
@@ -94,6 +98,14 @@
         "collection": "New Collection"
       }
     },
+    "labelGroup": {
+      "addLabel": "Click to add labels",
+      "addLabelTitle": "Add labels",
+      "getLabelFailed": "Failed to get labels",
+      "deleteConfirmText": "Are you sure to delete this label?",
+      "deleteFailed": "Failed to delete label",
+      "deleteSuccessful": "Label deleted successfully"
+    },
     "newKnowledgeModal": {
       "modalTitle": "Create New Knowledge Base",
       "editModalTitle": "Edit the Knowledge Base",
@@ -105,20 +117,24 @@
       "confirm": "Confirm",
       "successful": "Created successfully",
       "failed": "Failed to create",
-      "editSuccessful": "Modifyed successfully",
+      "editSuccessful": "Modified successfully",
       "editFailed": "Failed to modify"
     },
     "newLabelModal": {
       "modalTitle": "Create New Label",
-      "editModalTitle": "Edit the Label",
-      "titlePlaceholder": "Enter a title for your label",
+      "labelClass": "Class",
+      "labelClassPlaceholder": "Please select label class",
+      "labelClassValidateMessage": "Label class cannot be empty",
+      "valueList": "Labels",
+      "valueListPlaceholder": "Input label. Press enter to add multiple labels",
+      "valueListValidateMessage": "Please input at least one label",
       "title": "Title",
-      "description": "Description",
-      "descriptionPlaceholder": "Enter a description for your label",
       "cancel": "Cancel",
       "confirm": "Confirm",
-      "successful": "Label created successfully",
-      "failed": "Failed to create label"
+      "successful": "Create successfully",
+      "failed": "Failed to create",
+      "editSuccessful": "Modified successfully",
+      "editFailed": "Failed to modify"
     },
     "deleteDropdownMenu": {
       "successful": "Deleted successfully!",
