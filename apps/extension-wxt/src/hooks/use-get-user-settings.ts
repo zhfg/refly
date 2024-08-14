@@ -15,7 +15,7 @@ import { useStorage } from './use-storage';
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useExtensionMessage } from './use-extension-message';
-import { checkBrowserArc } from '@/utils/browser';
+// import { checkBrowserArc } from '@/utils/browser';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { UserSettings } from '@refly/openapi-schema';
 
@@ -222,7 +222,7 @@ export const useGetUserSettings = () => {
   const handleExtensionMessage = (request: any) => {
     if (request?.name === 'refly-status-check' && getRuntime() === 'extension-csui') {
       getLoginStatus();
-      checkBrowserArc();
+      // checkBrowserArc();
     }
   };
 
