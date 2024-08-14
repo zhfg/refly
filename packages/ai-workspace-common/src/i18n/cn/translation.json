@@ -3,7 +3,13 @@
   "productName": "Refly",
   "common": {
     "confirm": "确认",
-    "cancel": "取消"
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "save": "保存",
+    "putErr": "操作失败，请尝试重试！",
+    "putSuccess": "操作成功",
+    "deleteConfirmMessage": "确定删除？"
   },
   "systemMaintenanceShutdown": {
     "title": "尊敬的用户，您好！",
@@ -342,6 +348,16 @@
       "putErr": "操作失败，请尝试重试！",
       "putSuccess": "操作成功"
     },
+    "instanceInvokeModal": {
+      "title": "运行技能",
+      "question": "问题",
+      "resource": "资源",
+      "collection": "知识库",
+      "note": "笔记",
+      "input": "请输入{{name}}",
+      "select": "请选择{{name}}",
+      "inputUrl": "请输入链接，每行一个..."
+    },
     "skillDetail": {
       "run": "运行",
       "delete": "删除",
@@ -501,15 +517,5 @@
     "part2": "😉"
   },
   "userMessagesUnread_one": "您有 {{count}} 条未读消息。",
-  "userMessagesUnread_other": "您有 {{count}} 条未读消息。",
-  "common": {
-    "cancel": "取消",
-    "confirm": "确定",
-    "delete": "删除",
-    "edit": "编辑",
-    "save": "保存",
-    "putErr": "操作失败，请尝试重试！",
-    "putSuccess": "操作成功",
-    "deleteConfirmMessage": "确定删除？"
-  }
+  "userMessagesUnread_other": "您有 {{count}} 条未读消息。"
 }

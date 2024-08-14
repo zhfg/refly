@@ -3,7 +3,13 @@
   "productName": "Refly",
   "common": {
     "confirm": "Confirm",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "save": "Save",
+    "putErr": "Failed to perform operation. Please try again!",
+    "putSuccess": "Operation Successful",
+    "deleteConfirmMessage": "Are you sure you want to delete?"
   },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",
@@ -502,15 +508,5 @@
     "part2": "😉"
   },
   "userMessagesUnread_one": "You have {{count}} unread message.",
-  "userMessagesUnread_other": "You have {{count}} unread messages.",
-  "common": {
-    "cancel": "Cancel",
-    "confirm": "Confirm",
-    "delete": "Delete",
-    "edit": "Edit",
-    "save": "Save",
-    "putErr": "Failed to perform operation. Please try again!",
-    "putSuccess": "Operation Successful",
-    "deleteConfirmMessage": "Are you sure you want to delete?"
-  }
+  "userMessagesUnread_other": "You have {{count}} unread messages."
 }

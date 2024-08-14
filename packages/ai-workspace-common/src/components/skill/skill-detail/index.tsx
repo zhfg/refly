@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
 import { SkillJobs } from '@refly-packages/ai-workspace-common/components/skill/skill-jobs';
 import { SkillTriggers } from '@refly-packages/ai-workspace-common/components/skill/skill-triggers';
+import { InstanceInvokeModal } from '@refly-packages/ai-workspace-common/components/skill/instance-invoke-modal';
+
 // store
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
@@ -50,6 +52,8 @@ const SkillDetail = () => {
 
   const [skillDetail, setSkillDetail] = useState<SkillInstance>();
   const [val, setVal] = useState('jobs');
+  const [reloadJobList, setReloadJobList] = useState(false);
+  const [reloadTriggers, setReloadTriggers] = useState(false);
   const handleGetSkillInstances = async () => {
     const { data, error } = await getClient().listSkillInstances({
       query: {
@@ -63,6 +67,11 @@ const SkillDetail = () => {
     } else {
       console.log('get skill instances error', error);
     }
+  };
+
+  const [invokeModalVisible, setInvokeModalVisible] = useState(false);
+  const handleSkillInvoke = () => {
+    setInvokeModalVisible(true);
   };
 
   useEffect(() => {
@@ -93,7 +102,7 @@ const SkillDetail = () => {
                 {skillDetail?.description}
               </Typography.Paragraph>
               <div className="skill-action">
-                <Button type="primary" style={{ borderRadius: 4 }}>
+                <Button type="primary" style={{ borderRadius: 4 }} onClick={handleSkillInvoke}>
                   <IconPlayArrow />
                   运行
                 </Button>
@@ -106,10 +115,22 @@ const SkillDetail = () => {
           </div>
           <div className="skill-detail__content-bottom">
             <ContentTab setVal={setVal} val={val} />
-            <div className="skill-detail__content-list">{val === 'jobs' ? <SkillJobs /> : <SkillTriggers />}</div>
+            <div className="skill-detail__content-list">
+              {val === 'jobs' ? (
+                <SkillJobs reloadList={reloadJobList} setReloadList={setReloadJobList} />
+              ) : (
+                <SkillTriggers reloadList={reloadTriggers} />
+              )}
+            </div>
           </div>
         </div>
       </div>
+      <InstanceInvokeModal
+        data={skillDetail}
+        visible={invokeModalVisible}
+        setVisible={setInvokeModalVisible}
+        postConfirmCallback={() => setReloadJobList(true)}
+      />
     </div>
   );
 };

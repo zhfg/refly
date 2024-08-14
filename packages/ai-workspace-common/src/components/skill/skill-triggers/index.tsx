@@ -15,12 +15,16 @@ import { SkillJob } from '@refly/openapi-schema';
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
 import { List, Empty, Typography } from '@arco-design/web-react';
 import { IconLeft, IconPlayArrow, IconDelete } from '@arco-design/web-react/icon';
-
-export const SkillTriggers = () => {
+interface SkillTriggersProps {
+  reloadList?: boolean;
+  setReloadList?: (val: boolean) => void;
+}
+export const SkillTriggers = (props: SkillTriggersProps) => {
   const [searchParams] = useSearchParams();
   const skillId = searchParams.get('skillId') as string;
+  const { reloadList, setReloadList } = props;
 
-  const { dataList, loadMore, hasMore, isRequesting } = useFetchDataList({
+  const { dataList, loadMore, hasMore, isRequesting, reload } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listSkillTriggers({
         query: { ...queryPayload, skillId },
@@ -33,6 +37,13 @@ export const SkillTriggers = () => {
   useEffect(() => {
     loadMore();
   }, []);
+
+  useEffect(() => {
+    if (reloadList) {
+      reload();
+      setReloadList(false);
+    }
+  }, [reloadList]);
 
   if (dataList.length === 0) {
     return <Empty description="请先配置触发器" />;

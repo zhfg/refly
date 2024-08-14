@@ -12,6 +12,7 @@ import './skill-item.scss';
 import { SkillTemplate, SkillInstance } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { InstanceInvokeModal } from '@refly-packages/ai-workspace-common/components/skill/instance-invoke-modal';
 
 const FormItem = Form.Item;
 const TextArea = Input.TextArea;
@@ -53,6 +54,11 @@ export const SkillItem = (props: SkillTempProsp | SkillInsProsp) => {
   };
 
   const [visible, setVisible] = useState(false);
+  const [invokeModalVisible, setInvokeModalVisible] = useState(false);
+  const handleClickInvoke = (e) => {
+    e.stopPropagation();
+    setInvokeModalVisible(true);
+  };
 
   return (
     <div id={`skillItem${itemKey}`}>
@@ -84,7 +90,13 @@ export const SkillItem = (props: SkillTempProsp | SkillInsProsp) => {
         </div>
 
         <div className="skill-item__action">
-          {showExecute && <IconPlayCircle className="skill-item__action-icon" style={{ strokeWidth: 3 }} />}
+          {showExecute && (
+            <IconPlayCircle
+              className="skill-item__action-icon"
+              style={{ strokeWidth: 3 }}
+              onClick={(e) => handleClickInvoke(e)}
+            />
+          )}
           {isInstalled ? (
             <InstanceDropdownMenu
               data={data}
@@ -115,6 +127,7 @@ export const SkillItem = (props: SkillTempProsp | SkillInsProsp) => {
         setVisible={(val) => setVisible(val)}
         postConfirmCallback={refreshList}
       />
+      <InstanceInvokeModal visible={invokeModalVisible} setVisible={(val) => setInvokeModalVisible(val)} data={data} />
     </div>
   );
 };

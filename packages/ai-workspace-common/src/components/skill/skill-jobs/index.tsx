@@ -15,12 +15,16 @@ import { SkillJob } from '@refly/openapi-schema';
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
 import { List, Empty, Typography } from '@arco-design/web-react';
 import { IconLeft, IconPlayArrow, IconDelete } from '@arco-design/web-react/icon';
-
-export const SkillJobs = () => {
+interface SkillJobsProps {
+  reloadList?: boolean;
+  setReloadList?: (val: boolean) => void;
+}
+export const SkillJobs = (props: SkillJobsProps) => {
+  const { reloadList, setReloadList } = props;
   const [searchParams] = useSearchParams();
   const skillId = searchParams.get('skillId') as string;
 
-  const { dataList, setDataList, loadMore, hasMore, isRequesting } = useFetchDataList({
+  const { dataList, setDataList, loadMore, hasMore, isRequesting, reload } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listSkillJobs({
         query: { ...queryPayload, skillId },
@@ -33,6 +37,13 @@ export const SkillJobs = () => {
   useEffect(() => {
     loadMore();
   }, []);
+
+  useEffect(() => {
+    if (reloadList) {
+      reload();
+      setReloadList(false);
+    }
+  }, [reloadList]);
 
   if (dataList.length === 0) {
     return <Empty description="暂无运行记录" />;
