@@ -18,7 +18,6 @@ import { Message, Spin } from '@arco-design/web-react';
 import { AppRouter } from '@/routes/index';
 
 // utils
-import { checkPageUnsupported } from '@refly-packages/ai-workspace-common/utils/extension/check';
 
 // 加载国际化
 import '@/i18n/config';
@@ -29,7 +28,6 @@ import { useSiderBarOpen } from '@/hooks/use-sider-bar-open';
 import '@/styles/style.css';
 import './App.scss';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
-import { checkBrowserArc } from '@/utils/browser';
 // 设置 runtime 环境
 import { getEnv, setRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useSyncWeblinkResourceMeta } from '@/hooks/content-scripts/use-get-weblink-resource-meta';
@@ -67,8 +65,6 @@ const App = () => {
   useSetContainerDimension();
   // 处理登录状态
   useProcessLoginNotify();
-  // 在挂载时记录当前资源,Only for Content Script
-  useSyncWeblinkResourceMeta();
   // 在网页时，模拟在知识库的资源选中状态
   useMockInAppResource();
 
@@ -79,15 +75,6 @@ const App = () => {
     });
   }, []);
   useEffect(() => {
-    /**
-     * 如果决定是否使用 SidePanel 还是 Content Script UI？
-     *
-     * 1. 如果页面支持 CSUI 注入，判断是否是 Arc，直接处理
-     * 2. 如果不支持 CSUI 注入，比如 extension://url，则打开 Popup 要求跳转到支持页面，然后处理
-     */
-    if (!checkPageUnsupported(location.href)) {
-      checkBrowserArc();
-    }
     setRuntime('extension-csui');
     userStore.setRuntime('extension-csui');
   }, []);

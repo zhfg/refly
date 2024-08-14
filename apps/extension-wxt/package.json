@@ -40,7 +40,7 @@
     "i18next": "^23.11.2",
     "is-hotkey": "~0.2.0",
     "katex": "0.15.6",
-    "lodash.throttle": "^4.1.1",
+    "lodash.throttle": "~4.1.1",
     "md5": "^2.3.0",
     "p-retry": "^6.2.0",
     "p-timeout": "^6.1.2",
@@ -73,7 +73,8 @@
     "@refly/common-types": "workspace:*",
     "@refly/utils": "workspace:*",
     "@headlessui/react": "~2.1.2",
-    "@heroicons/react": "~2.1.4"
+    "@heroicons/react": "~2.1.4",
+    "lodash.debounce": "~4.0.8"
   },
   "devDependencies": {
     "@types/react": "^18.2.46",

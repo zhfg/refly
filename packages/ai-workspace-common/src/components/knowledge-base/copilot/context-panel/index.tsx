@@ -4,7 +4,7 @@ import { IconClose, IconStorage } from '@arco-design/web-react/icon';
 // styles
 import './index.scss';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 
 // utils
 import {
@@ -22,43 +22,90 @@ import { NotePopover } from './popover/note';
 import { ResourcePopover } from './popover/resource';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { WeblinkPopover } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/popover/weblink.extension';
+import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 
 const TreeNode = Tree.Node;
 
-export const ContextPanel = () => {
-  const { checkedKeys, contextPanelPopoverVisible, setContextPanelPopoverVisible } = useContextPanelStore();
+export const ContextContentWithBadge = memo(() => {
+  const { checkedKeys } = useContextPanelStore((state) => ({
+    checkedKeys: state.checkedKeys,
+  }));
+
+  return (
+    <Badge
+      count={getTotalRealCheckedContext(checkedKeys)}
+      dotStyle={{ backgroundColor: '#00968F', fontSize: 8, fontWeight: 'bold' }}
+    >
+      <WrappedContextPanel />
+    </Badge>
+  );
+});
+
+const WrappedContextPanel = memo(() => {
+  console.log('rerender context panel wrapper');
+  return <ContextPanel />;
+});
+
+export const ContextPanel = memo(() => {
+  const setContextPanelPopoverVisible = useContextPanelStore((state) => state.setContextPanelPopoverVisible);
+  const contextPanelPopoverVisible = useContextPanelStore((state) => state.contextPanelPopoverVisible);
+  console.log('rerender context panel');
 
   return (
     <Popover
       color="#FCFCF9"
-      popupVisible={contextPanelPopoverVisible}
+      // popupVisible={contextPanelPopoverVisible}
+      // content={contextPanelPopoverVisible ? <ContextContent /> : null}
       content={<ContextContent />}
       className="context-panel-popover"
       getPopupContainer={() => getPopupContainer()}
     >
-      <Badge
-        count={getTotalRealCheckedContext(checkedKeys)}
-        dotStyle={{ backgroundColor: '#00968F', fontSize: 8, fontWeight: 'bold' }}
-      >
-        <Button
-          icon={<IconStorage />}
-          type="text"
-          className="assist-action-item"
-          onClick={() => {
-            setContextPanelPopoverVisible(true);
-          }}
-        ></Button>
-      </Badge>
+      <Button
+        icon={<IconStorage />}
+        type="text"
+        className="assist-action-item"
+        // onClick={() => {
+        //   setContextPanelPopoverVisible(true);
+        // }}
+      ></Button>
     </Popover>
   );
-};
+});
 
-const ContextContent = () => {
+const getState = (state) => ({
+  checkedKeys: state.checkedKeys,
+  expandedKeys: state.expandedKeys,
+  setCheckedKeys: state.setCheckedKeys,
+  setExpandedKeys: state.setExpandedKeys,
+  setEnvContextInitMap: state.setEnvContextInitMap,
+  selectedResources: state.selectedResources,
+  selectedCollections: state.selectedCollections,
+  selectedNotes: state.selectedNotes,
+  selectedWeblinks: state.selectedWeblinks,
+  setContextPanelPopoverVisible: state.setContextPanelPopoverVisible,
+});
+
+const ContextContent = memo(() => {
   // 同步通信的状态
-  const contextPanelStore = useContextPanelStore();
-  const { checkedKeys, expandedKeys, setCheckedKeys, setExpandedKeys, setEnvContextInitMap } = contextPanelStore;
+  const {
+    checkedKeys,
+    expandedKeys,
+    setCheckedKeys,
+    setExpandedKeys,
+    setEnvContextInitMap,
+    selectedResources,
+    selectedCollections,
+    selectedNotes,
+    selectedWeblinks,
+  } = useContextPanelStore(getState);
   // 感知 route/页面状态
-  const { currentKnowledgeBase, currentResource, currentNote } = useCopilotContextState();
+  const currentKnowledgeBase = useKnowledgeBaseStore((state) => state.currentKnowledgeBase);
+  const currentResource = useKnowledgeBaseStore((state) => state.currentResource);
+  const currentNote = useNoteStore((state) => state.currentNote);
+  console.log('rerender context content');
 
   const TreeData: TreeProps['treeData'] = [
     {
@@ -69,7 +116,7 @@ const ContextContent = () => {
     {
       title: '资源',
       key: 'resource',
-      children: contextPanelStore?.selectedResources?.map((item) => {
+      children: selectedResources?.map((item) => {
         return {
           key: 'resource-' + item?.key,
           title: item?.title,
@@ -79,7 +126,7 @@ const ContextContent = () => {
     {
       title: '知识库',
       key: 'collection',
-      children: contextPanelStore?.selectedCollections?.map((item) => {
+      children: selectedCollections?.map((item) => {
         return {
           key: 'collection-' + item?.key,
           title: item?.title,
@@ -89,7 +136,7 @@ const ContextContent = () => {
     {
       title: '笔记',
       key: 'note',
-      children: contextPanelStore?.selectedNotes?.map((item) => {
+      children: selectedNotes?.map((item) => {
         return {
           key: `note-` + item?.key,
           title: item?.title,
@@ -97,18 +144,97 @@ const ContextContent = () => {
       }),
     },
   ];
-  //   console.log('contextPanelStore, ', contextPanelStore.selectedCollections);
+
+  const runtime = getRuntime();
+  if (runtime === 'extension-sidepanel' || runtime === 'extension-csui') {
+    TreeData.push({
+      title: '浏览器标签',
+      key: 'weblink',
+      children: selectedWeblinks?.map((item) => {
+        return {
+          key: `weblink-` + item?.id,
+          title: item?.title,
+        };
+      }),
+    });
+  }
+
+  //   console.log('contextPanelStore, ',selectedCollections);
   //   const { treeData, setTreeData } = useContextPanelStore();
   const [treeData, setTreeData] = useState(TreeData);
-  //   const treeData = contextPanelStore.treeData;
-  //   const setTreeData = contextPanelStore.setTreeData;
   const [inputValue, setInputValue] = useState('');
 
   console.log('treeData', treeData);
 
-  const handleConfirm = async () => {
-    contextPanelStore.setContextPanelPopoverVisible(false);
-  };
+  // const handleConfirm = async () => {
+  //   setContextPanelPopoverVisible(false);
+  // };
+
+  const renderExtra = useCallback((node) => {
+    console.log('rerender extra', node);
+    if (node._key === 'collection') {
+      return <KnowledgeBasePopover />;
+    }
+    if (node._key === 'resource') {
+      return <ResourcePopover />;
+    }
+    if (node._key === 'note') {
+      return <NotePopover />;
+    }
+    if (node._key === 'weblink') {
+      console.log('rerender weblink');
+      return <WeblinkPopover />;
+    }
+    return null;
+  }, []);
+  const renderTitle = useCallback((node) => {
+    const title = (node?.title as string) || '';
+    const key = (node?._key as string) || '';
+    let extraCntTxt = '';
+
+    if (key === 'resource') {
+      const len = checkedKeys?.filter((item) => item?.startsWith('resource-')).length;
+      extraCntTxt += `（已选择 ${len}）`;
+    } else if (key === 'note') {
+      const len = checkedKeys?.filter((item) => item?.startsWith('note-')).length;
+      extraCntTxt += `（已选择 ${len}）`;
+    } else if (key === 'collection') {
+      const len = checkedKeys?.filter((item) => item?.startsWith('collection-')).length;
+      extraCntTxt += `（已选择 ${len}）`;
+    } else if (key === 'weblink') {
+      const len = checkedKeys?.filter((item) => item?.startsWith('weblink-')).length;
+      extraCntTxt += `（已选择 ${len}）`;
+    }
+
+    if (inputValue) {
+      const index = title.toLowerCase().indexOf(inputValue.toLowerCase());
+
+      if (index === -1) {
+        return (
+          <span>
+            {title} {extraCntTxt ? <span style={{ color: 'rgb(var(--primary-6))' }}>{extraCntTxt}</span> : null}
+          </span>
+        );
+      }
+
+      const prefix = title.substr(0, index);
+      const suffix = title.substr(index + inputValue.length);
+      return (
+        <span>
+          {prefix}
+          <span style={{ color: 'var(--color-primary-light-4)' }}>{title.substr(index, inputValue.length)}</span>
+          {suffix}
+          {extraCntTxt}
+        </span>
+      );
+    }
+
+    return (
+      <span>
+        {title} {extraCntTxt ? <span style={{ color: 'rgb(var(--primary-6))' }}>{extraCntTxt}</span> : null}
+      </span>
+    );
+  }, []);
 
   useEffect(() => {
     if (!inputValue) {
@@ -121,20 +247,14 @@ const ContextContent = () => {
 
   // 同步 treeData
   useEffect(() => {
-    contextPanelStore.setTreeData(TreeData);
     setTreeData(TreeData);
-    contextPanelStore.setExpandedKeys(initalExpandedKeys);
-  }, [
-    contextPanelStore.selectedCollections?.length,
-    contextPanelStore.selectedResources?.length,
-    contextPanelStore.selectedNotes?.length,
-  ]);
+    setExpandedKeys(initalExpandedKeys);
+  }, [selectedCollections?.length, selectedResources?.length, selectedNotes?.length, selectedWeblinks?.length]);
   useEffect(() => {
-    contextPanelStore.setTreeData(TreeData);
     setTreeData(TreeData);
   }, [currentKnowledgeBase, currentResource]);
   useEffect(() => {
-    contextPanelStore.setExpandedKeys(initalExpandedKeys);
+    setExpandedKeys(initalExpandedKeys);
   }, []);
 
   return (
@@ -145,9 +265,9 @@ const ContextContent = () => {
           <span style={{ marginLeft: 8 }}>选择上下文</span>
         </div>
         <div className="header-right">
-          <Button type="text" onClick={handleConfirm} className="assist-action-item">
+          {/* <Button type="text" onClick={handleConfirm} className="assist-action-item">
             <IconClose />
-          </Button>
+          </Button> */}
         </div>
       </div>
       <div className="context-content-body">
@@ -175,68 +295,8 @@ const ContextContent = () => {
             setCheckedKeys(checkedKeys);
           }}
           showLine
-          renderExtra={(node) => {
-            if (node._key === 'collection') {
-              return <KnowledgeBasePopover />;
-            }
-
-            if (node._key === 'resource') {
-              return <ResourcePopover />;
-            }
-
-            if (node._key === 'note') {
-              return <NotePopover />;
-            }
-
-            return null;
-          }}
-          renderTitle={(node) => {
-            const title = (node?.title as string) || '';
-            const key = (node?._key as string) || '';
-            let extraCntTxt = '';
-
-            if (key === 'resource') {
-              const len = checkedKeys?.filter((item) => item?.startsWith('resource-')).length;
-              extraCntTxt += `（已选择 ${len}）`;
-            } else if (key === 'note') {
-              const len = checkedKeys?.filter((item) => item?.startsWith('note-')).length;
-              extraCntTxt += `（已选择 ${len}）`;
-            } else if (key === 'collection') {
-              const len = checkedKeys?.filter((item) => item?.startsWith('collection-')).length;
-              extraCntTxt += `（已选择 ${len}）`;
-            }
-
-            if (inputValue) {
-              const index = title.toLowerCase().indexOf(inputValue.toLowerCase());
-
-              if (index === -1) {
-                return (
-                  <span>
-                    {title} {extraCntTxt ? <span style={{ color: 'rgb(var(--primary-6))' }}>{extraCntTxt}</span> : null}
-                  </span>
-                );
-              }
-
-              const prefix = title.substr(0, index);
-              const suffix = title.substr(index + inputValue.length);
-              return (
-                <span>
-                  {prefix}
-                  <span style={{ color: 'var(--color-primary-light-4)' }}>
-                    {title.substr(index, inputValue.length)}
-                  </span>
-                  {suffix}
-                  {extraCntTxt}
-                </span>
-              );
-            }
-
-            return (
-              <span>
-                {title} {extraCntTxt ? <span style={{ color: 'rgb(var(--primary-6))' }}>{extraCntTxt}</span> : null}
-              </span>
-            );
-          }}
+          renderExtra={renderExtra}
+          renderTitle={renderTitle}
         ></Tree>
       </div>
       <Affix offsetBottom={0} target={() => document.querySelector('.context-content-container') as HTMLElement}>
@@ -257,16 +317,16 @@ const ContextContent = () => {
             </Checkbox>
           </div>
           <div className="footer-action">
-            <Button
+            {/* <Button
               type="primary"
               style={{ width: 62, height: 28, borderRadius: 8, fontSize: 12 }}
               onClick={handleConfirm}
             >
               保存
-            </Button>
+            </Button> */}
           </div>
         </div>
       </Affix>
     </div>
   );
-};
+});

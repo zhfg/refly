@@ -63,7 +63,7 @@ export function getSelectedData(selectedKeys, TreeData: TreeProps['treeData']) {
 }
 
 export const initialCheckedKeys = ['currentPage-resource', 'currentPage-collection', 'currentPage-note'];
-export const initalExpandedKeys = ['currentPage', 'resource', 'collection', 'note'];
+export const initalExpandedKeys = ['currentPage', 'resource', 'collection', 'note', 'weblink'];
 export const getTotalRealCheckedContext = (checkedKeys: string[]) => {
   const filteredKeys = checkedKeys.filter((key) => {
     if (initalExpandedKeys.includes(key)) {

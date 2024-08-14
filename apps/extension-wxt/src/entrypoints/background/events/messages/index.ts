@@ -6,6 +6,7 @@ import { saveLastActiveTab } from '@refly-packages/ai-workspace-common/utils/ext
 import { Runtime } from 'wxt/browser';
 import { handleOtherMessage } from './others';
 import { handleInjectContentSelectorCss } from '@/entrypoints/background/events/messages/injectContentSelectorCss';
+import { handleGetOpenedTabs } from '@/entrypoints/background/events/messages/getOpenedTabs';
 
 export const onMessage = async (
   msg: BackgroundMessage,
@@ -36,5 +37,9 @@ export const onMessage = async (
 
   if (msg.type === 'injectContentSelectorCss') {
     return await handleInjectContentSelectorCss(msg);
+  }
+
+  if (msg.type === 'getOpenedTabs') {
+    return await handleGetOpenedTabs(msg);
   }
 };

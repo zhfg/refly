@@ -9,32 +9,24 @@ const injectSelectorCSS = () => {
   const style = document.createElement('style');
   style.setAttribute('data-id', 'refly-selected-mark-injected-css');
   style.textContent = `
-            * {
-                cursor: default !important;
-                  }
-                  .refly-content-selector-mark {
-                    cursor: pointer !important;
-                    background-color: #ffd40024 !important;
-                  }
-                    
-                  input,
-                  textarea {
-                    pointer-events: none;
-                  }
+              .refly-content-selector-mark {
+                cursor: pointer !important;
+                background-color: #ffd40024 !important;
+              } 
 
-                  .refly-content-selected-target {
-                    color: unset !important;
-                    border-bottom: 2px solid rgb(255, 212, 0) !important;
-                    background-color: #ffd40024 !important;
-                    cursor: pointer !important;
-                  }
+              .refly-content-selected-target {
+                color: unset !important;
+                border-bottom: 2px solid rgb(255, 212, 0) !important;
+                background-color: #ffd40024 !important;
+                cursor: pointer !important;
+              }
 
-                  [data-refly-inline-selected-mark-id],
-                  [data-refly-block-selected-mark-id] {
-                    color: unset !important;
-                    border-bottom: 2px solid rgb(255, 212, 0) !important;
-                  background-color: #ffd40024 !important;
-                  cursor: pointer !important;
+              [data-refly-inline-selected-mark-id],
+              [data-refly-block-selected-mark-id] {
+                color: unset !important;
+                border-bottom: 2px solid rgb(255, 212, 0) !important;
+              background-color: #ffd40024 !important;
+              cursor: pointer !important;
               }
               `;
   document.head.appendChild(style);

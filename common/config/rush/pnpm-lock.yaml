@@ -407,8 +407,11 @@ importers:
       katex:
         specifier: 0.15.6
         version: 0.15.6
+      lodash.debounce:
+        specifier: ~4.0.8
+        version: 4.0.8
       lodash.throttle:
-        specifier: ^4.1.1
+        specifier: ~4.1.1
         version: 4.1.1
       md5:
         specifier: ^2.3.0
@@ -1251,6 +1254,9 @@ importers:
       katex:
         specifier: 0.15.6
         version: 0.15.6
+      lodash.debounce:
+        specifier: ~4.0.8
+        version: 4.0.8
       lodash.throttle:
         specifier: ^4.1.1
         version: 4.1.1
@@ -22650,6 +22656,7 @@ time:
   /less@4.2.0: '2023-08-05T17:18:15.731Z'
   /linkedom@0.16.1: '2023-10-24T07:33:01.147Z'
   /lint-staged@15.2.0: '2023-12-03T17:26:21.980Z'
+  /lodash.debounce@4.0.8: '2016-08-13T17:37:49.793Z'
   /lodash.merge@4.6.2: '2019-07-10T00:19:41.667Z'
   /lodash.throttle@4.1.1: '2016-08-13T17:45:38.195Z'
   /lodash@4.17.21: '2021-02-20T15:42:16.891Z'

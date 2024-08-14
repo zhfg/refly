@@ -451,8 +451,8 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
 
   const onStatusHandler = (event: MessageEvent<any>) => {
     const data = event as any as BackgroundMessage;
-    console.log('contentSelectorStatusHandler data', event, getRuntime());
     if ((data as SyncStatusEvent)?.name === 'syncStatusEvent') {
+      console.log('contentSelectorStatusHandler data', event, getRuntime());
       const { type, scope } = (data as SyncStatusEvent)?.body;
 
       if (type === 'start') {

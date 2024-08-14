@@ -6,17 +6,28 @@ import { useDebouncedCallback } from 'use-debounce';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 
+export type ListMode = 'fetch' | 'search';
+
 export const useFetchOrSearchList = ({
   fetchData,
 }: {
   fetchData?: (payload: { pageSize: number; page: number }) => Promise<{ success: boolean; data?: SearchResult[] }>;
 }) => {
-  const [mode, setMode] = useState<'fetch' | 'search'>('fetch');
+  const [mode, setMode] = useState<ListMode>('fetch');
   // fetch
-  const { hasMore, setHasMore, loadMore, dataList, setDataList, currentPage, setCurrentPage, isRequesting } =
-    useFetchDataList({
-      fetchData,
-    });
+  const {
+    hasMore,
+    setHasMore,
+    loadMore,
+    dataList,
+    setDataList,
+    currentPage,
+    setCurrentPage,
+    isRequesting,
+    resetState,
+  } = useFetchDataList({
+    fetchData,
+  });
 
   const debouncedSearch: ({ searchVal, domains }: { searchVal: string; domains?: Array<SearchDomain> }) => any =
     useDebouncedCallback(async ({ searchVal, domains }: { searchVal: string; domains?: Array<SearchDomain> }) => {
@@ -55,6 +66,7 @@ export const useFetchOrSearchList = ({
   };
 
   return {
+    resetState,
     mode,
     setMode,
     hasMore,

@@ -24,6 +24,8 @@ interface ContextPanelState {
   selectedResources: TreeProps['treeData'];
   selectedCollections: TreeProps['treeData'];
   selectedNotes: TreeProps['treeData'];
+  // extension only
+  selectedWeblinks: TreeProps['treeData'];
 
   // 处理记录去重后的选择 id
   treeData: TreeProps['treeData'];
@@ -39,6 +41,7 @@ interface ContextPanelState {
   setSelectedResources: (resources: TreeProps['treeData']) => void;
   setSelectedCollections: (collections: TreeProps['treeData']) => void;
   setSelectedNotes: (notes: TreeProps['treeData']) => void;
+  setSelectedWeblinks: (weblinks: TreeProps['treeData']) => void;
   setTreeData: (treeData: TreeProps['treeData']) => void;
   setCheckedKeys: (keys: string[]) => void;
   setExpandedKeys: (keys: string[]) => void;
@@ -54,6 +57,7 @@ export const defaultState = {
   selectedResources: [],
   selectedCollections: [],
   selectedNotes: [],
+  selectedWeblinks: [],
   allSelectedIds: [],
   treeData: [],
   checkedKeys: [],
@@ -72,6 +76,7 @@ export const useContextPanelStore = create<ContextPanelState>()(
     setSelectedResources: (resources: SearchResult[]) => set((state) => ({ ...state, selectedResources: resources })),
     setSelectedCollections: (collections: SearchResult[]) =>
       set((state) => ({ ...state, selectedCollections: collections })),
+    setSelectedWeblinks: (weblinks: SearchResult[]) => set((state) => ({ ...state, selectedWeblinks: weblinks })),
     setSelectedNotes: (notes: SearchResult[]) => set((state) => ({ ...state, selectedNotes: notes })),
     setAllSelectedIds: (ids: string[]) => set((state) => ({ ...state, allSelectedIds: ids })),
     setTreeData: (treeData: TreeProps['treeData']) => set((state) => ({ ...state, treeData })),

@@ -14,6 +14,7 @@ import { getEnv, getRuntime, setRuntime } from '@refly-packages/ai-workspace-com
 import { useSiderStore } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useMockInAppResource } from '@/hooks/use-mock-in-app-resource';
+import { useSyncWeblinkResourceMeta } from '@/hooks/content-scripts/use-get-weblink-resource-meta';
 /**
  * 打开 popup 页面的规则
  * 1. 如果是
