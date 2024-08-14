@@ -67,6 +67,8 @@ export const LabelModal = (props: LabelModalProps) => {
       unmountOnExit
       visible={visible}
       onOk={onOk}
+      okText={t('common.confirm')}
+      cancelText={t('common.cancel')}
       onCancel={() => setVisible(false)}
       title={t('workspace.newLabelModal.modalTitle')}
     >

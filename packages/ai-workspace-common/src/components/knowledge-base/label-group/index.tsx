@@ -1,13 +1,16 @@
-import { EntityType, LabelInstance } from '@refly/openapi-schema';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Skeleton, Message as message, Tag, Popconfirm, Button } from '@arco-design/web-react';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { LabelModal } from '@refly-packages/ai-workspace-common/components/knowledge-base/label-modal';
 import { IconPlus, IconTag } from '@arco-design/web-react/icon';
+import { EntityType, LabelInstance } from '@refly/openapi-schema';
 import './index.scss';
 
 const LabelTag = (props: { label: LabelInstance; deleteLabel: (labelId: string) => Promise<void> }) => {
   const { label, deleteLabel } = props;
+
+  const { t } = useTranslation();
   const [popconfirmVisible, setPopconfirmVisible] = useState(false);
 
   const handleDeleteLabel = async (labelId: string) => {
@@ -18,7 +21,10 @@ const LabelTag = (props: { label: LabelInstance; deleteLabel: (labelId: string) 
   return (
     <Popconfirm
       key={label.labelId}
-      title="确认删除该标签吗?"
+      position="bottom"
+      title={t('workspace.labelGroup.deleteConfirmText')}
+      okText={t('common.confirm')}
+      cancelText={t('common.cancel')}
       popupVisible={popconfirmVisible}
       onCancel={() => setPopconfirmVisible(false)}
       onOk={() => handleDeleteLabel(label.labelId)}
@@ -44,6 +50,8 @@ interface LabelGroupProps {
 
 export const LabelGroup = (props: LabelGroupProps) => {
   const { entityId, entityType } = props;
+
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [labels, setLabels] = useState<LabelInstance[]>([]);
   const [labelModalVisible, setLabelModalVisible] = useState(false);
@@ -61,7 +69,7 @@ export const LabelGroup = (props: LabelGroupProps) => {
       setLabels(data.data ?? []);
     } else {
       console.error(error);
-      message.success(`获取标签失败`);
+      message.success(t('workspace.labelGroup.getLabelFailed'));
     }
     setLoading(false);
   };
@@ -76,10 +84,10 @@ export const LabelGroup = (props: LabelGroupProps) => {
     });
     if (error) {
       console.error(error);
-      message.success(`标签删除失败`);
+      message.success(t('workspace.labelGroup.deleteFailed'));
     } else {
       setLabels(labels.filter((label) => label.labelId !== labelId));
-      message.success(`标签删除成功`);
+      message.success(t('workspace.labelGroup.deleteSuccessful'));
     }
   };
 
@@ -98,12 +106,12 @@ export const LabelGroup = (props: LabelGroupProps) => {
       ))}
       <Button
         size="mini"
-        title="添加标签"
+        title={labels?.length > 0 && t('workspace.labelGroup.addLabelTitle')}
         style={{ borderRadius: '999px' }}
         icon={<IconPlus />}
         onClick={() => setLabelModalVisible(true)}
       >
-        {labels?.length === 0 && '点击添加标签'}
+        {labels?.length === 0 && t('workspace.labelGroup.addLabel')}
       </Button>
       <LabelModal
         visible={labelModalVisible}
