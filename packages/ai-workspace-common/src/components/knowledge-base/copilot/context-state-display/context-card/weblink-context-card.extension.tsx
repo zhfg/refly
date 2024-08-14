@@ -9,6 +9,10 @@ import { languageNameToLocale } from '@refly/common-types';
 import { BaseContextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/context-card/base-context-card';
 import { useGetCurrentEnvContext } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-env-context';
 import { useDispatchAction } from '@refly-packages/ai-workspace-common/skills/main-logic/use-dispatch-action';
+import { safeParseURL } from '@refly-packages/utils/url';
+import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useMemo } from 'react';
+import { MemorizedImgIcon } from '@refly-packages/ai-workspace-common/components/memorizedImgIcon';
 
 // resize hook
 const SubMenu = Menu.SubMenu;
@@ -32,6 +36,7 @@ export const WeblinkContextCard = () => {
   const { runSkill } = useBuildThreadAndRun();
   const { dispatch } = useDispatchAction();
   const { hasContent } = useGetCurrentEnvContext();
+  const currentResource = useKnowledgeBaseStore((state) => state.currentResource);
   const disabled = !hasContent;
 
   const { t, i18n } = useTranslation();
@@ -132,9 +137,11 @@ export const WeblinkContextCard = () => {
     </div>
   );
 
+  const icon = <MemorizedImgIcon url={currentResource?.data?.url} />;
+
   return (
     <div className="note-selected-context-panel">
-      <BaseContextCard title="当前网页快捷操作" skillContent={skillContent} />
+      <BaseContextCard title="当前网页快捷操作" skillContent={skillContent} icon={icon} />
     </div>
   );
 };

@@ -50,6 +50,9 @@ export const KnowledgeBasePopover = () => {
           loadMore={loadMore}
           dataList={dataList}
           resetState={resetState}
+          renderTitle={({ title }) => {
+            return <span dangerouslySetInnerHTML={{ __html: title }}></span>;
+          }}
         />
       }
     >

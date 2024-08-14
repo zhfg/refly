@@ -7,18 +7,20 @@ import { useDispatchAction } from '@refly-packages/ai-workspace-common/skills/ma
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useGetCurrentEnvContext } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-env-context';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { safeParseURL } from '@refly-packages/utils/url';
 
 // hooks
 
 interface BaseContextPanelProps {
-  title: string;
+  title: React.ReactNode;
   skillContent: React.ReactNode;
+  icon?: React.ReactNode;
 }
 
 const Option = Select.Option;
 
 export const BaseContextCard = (props: BaseContextPanelProps) => {
-  const { title, skillContent } = props;
+  const { title, skillContent, icon = <IconFontColors /> } = props;
   const knowledgeBaseStore = useKnowledgeBaseStore();
   const { setNowSelectedContextDomain } = useContextPanelStore();
   const searchStateStore = useSearchStateStore();
@@ -70,7 +72,7 @@ export const BaseContextCard = (props: BaseContextPanelProps) => {
       <div className="context-state-card-body">
         {hasContent ? (
           <div className="context-state-resource-item">
-            <Tag icon={<IconFontColors />} bordered className="context-state-resource-item-tag">
+            <Tag icon={icon} bordered className="context-state-resource-item-tag">
               {nowSelectedEnvContext?.data?.title}
             </Tag>
           </div>

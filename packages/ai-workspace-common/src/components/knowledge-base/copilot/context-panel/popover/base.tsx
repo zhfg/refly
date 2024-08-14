@@ -48,6 +48,7 @@ export interface ContentProps {
   domain: ContextPanelDomain;
   hasMore: boolean;
   mode: ListMode;
+  renderTitle: ({ title }: { title: string }) => React.ReactNode;
   resetState: () => void;
   isRequesting: boolean;
   currentPage: number;
@@ -71,6 +72,7 @@ export const Content = memo((props: ContentProps) => {
     updateSelectState,
     handleValueChange,
     resetState,
+    renderTitle,
   } = props;
   const handledTreeData = dataList.map((item, index) => {
     return {
@@ -146,9 +148,7 @@ export const Content = memo((props: ContentProps) => {
           checkedKeys={checkedKeys}
           onCheck={(checkedKeys) => setCheckedKeys(checkedKeys)}
           showLine
-          renderTitle={({ title }: { title: string }) => {
-            return <span dangerouslySetInnerHTML={{ __html: title }}></span>;
-          }}
+          renderTitle={renderTitle}
         ></Tree>
       </div>
       <div>
