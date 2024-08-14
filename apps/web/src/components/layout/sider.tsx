@@ -11,9 +11,10 @@ import {
   IconTwitter,
   IconLanguage,
   IconImport,
-  IconMessage,
   IconMenuFold,
   IconMenuUnfold,
+  IconRobot,
+  IconHistory,
 } from "@arco-design/web-react/icon"
 // 静态资源
 import Logo from "@/assets/logo.svg"
@@ -275,16 +276,19 @@ export const SiderLayout = () => {
   interface SiderCenterProps {
     key: string
     name: string
+    icon: React.ReactNode
     onClick?: () => void
   }
   const siderCenter: SiderCenterProps[] = [
     {
       key: "Workspace",
       name: "homePage",
+      icon: <IconHome style={{ fontSize: 20 }} />,
     },
     {
       key: "Import",
       name: "newResource",
+      icon: <IconImport style={{ fontSize: 20 }} />,
       onClick: () => {
         importResourceStore.setImportResourceModalVisible(true)
       },
@@ -292,10 +296,12 @@ export const SiderLayout = () => {
     {
       key: "Skill",
       name: "skill",
+      icon: <IconRobot style={{ fontSize: 20 }} />,
     },
     {
       key: "ThreadLibrary",
       name: "threadLibrary",
+      icon: <IconHistory style={{ fontSize: 20 }} />,
     },
   ]
   return (
@@ -332,7 +338,7 @@ export const SiderLayout = () => {
                   )}
                   onClick={item.onClick}>
                   <MenuItemContent
-                    icon={<IconHome style={{ fontSize: 20 }} />}
+                    icon={item.icon}
                     title={t(`loggedHomePage.siderMenu.${item.name}`)}
                   />
                 </MenuItem>
