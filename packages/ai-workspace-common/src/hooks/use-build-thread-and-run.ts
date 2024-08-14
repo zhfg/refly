@@ -25,6 +25,7 @@ import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill'
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 export const useBuildThreadAndRun = () => {
   const chatStore = useChatStore();
@@ -107,7 +108,7 @@ export const useBuildThreadAndRun = () => {
         });
 
       // for env context, just check `currentPage-currentKnowledgeBase` checked
-      if (checkedKeys?.includes(`currentPage-${domain}`)) {
+      if (checkedKeys?.includes(`currentPage-${domain}`) && getRuntime() === 'web') {
         ids.push(mapDomainEnvIds?.[domain] || '');
       }
 
@@ -135,6 +136,10 @@ export const useBuildThreadAndRun = () => {
           return ids?.includes(id);
         })
         .map((item) => item?.metadata?.resourceMeta?.url);
+
+      if (checkedKeys?.includes(`currentPage-resource`) && getRuntime() !== 'web') {
+        urls.push(currentResource?.data?.url);
+      }
 
       return Array.from(new Set(urls));
     };
