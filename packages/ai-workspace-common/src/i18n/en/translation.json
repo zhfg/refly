@@ -298,15 +298,16 @@
       "skillTemplate": "Skill templates"
     },
     "newSkillModal": {
-      "title": "Add New Skill",
+      "newTitle": "Add New Skill",
+      "updateTitle": "Update Skill",
       "name": "Name",
       "namePlaceholder": "Please enter the name of the skill",
       "description": "Description",
       "descriptionPlaceholder": "Please enter the description of the skill",
       "cancel": "Cancel",
       "confirm": "Confirm",
-      "putErr": "Failed to add the skill. Please try again.",
-      "putSuccess": "Skill added successfully"
+      "putErr": "Failed. Please try again.",
+      "putSuccess": "successfully"
     },
     "skillDetail": {
       "run": "Run",
@@ -485,5 +486,15 @@
     "part2": "😉"
   },
   "userMessagesUnread_one": "You have {{count}} unread message.",
-  "userMessagesUnread_other": "You have {{count}} unread messages."
+  "userMessagesUnread_other": "You have {{count}} unread messages.",
+  "common": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "save": "Save",
+    "putErr": "Failed to perform operation. Please try again!",
+    "putSuccess": "Operation Successful",
+    "deleteConfirmMessage": "Are you sure you want to delete?"
+  }
 }

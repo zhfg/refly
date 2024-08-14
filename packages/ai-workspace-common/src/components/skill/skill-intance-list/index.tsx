@@ -13,7 +13,7 @@ import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/wo
 import { List, Empty } from '@arco-design/web-react';
 
 export const SkillInstanceList = () => {
-  const { dataList, loadMore, hasMore, isRequesting } = useFetchDataList({
+  const { dataList, loadMore, setDataList, hasMore, isRequesting, reload } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listSkillInstances({
         query: queryPayload,
@@ -55,7 +55,15 @@ export const SkillInstanceList = () => {
           actionLayout="vertical"
           onClick={() => {}}
         >
-          <SkillItem data={item} source="instance" isInstalled={true} showExecute={true} />
+          <SkillItem
+            itemKey={key}
+            data={item}
+            source="instance"
+            isInstalled={true}
+            showExecute={true}
+            refreshList={reload}
+            postDeleteList={(item: SkillInstance) => setDataList(dataList.filter((n) => n.skillId !== item.skillId))}
+          />
         </List.Item>
       )}
     />

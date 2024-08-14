@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { Avatar, Button, Popconfirm, Typography, Divider, Modal, Form, Input, Message } from '@arco-design/web-react';
 import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
+import { InstanceDropdownMenu } from '../instance-dropdown-menu';
+import { NewSkillInstanceModal } from '../new-instance-modal';
 
 import { IconUser, IconPlayCircle, IconPlus, IconDelete } from '@arco-design/web-react/icon';
 
@@ -17,8 +19,11 @@ const TextArea = Input.TextArea;
 type source = 'instance' | 'template';
 interface SkillItemProps {
   source: source;
+  itemKey: number;
   isInstalled: boolean;
   showExecute?: boolean;
+  refreshList?: () => void;
+  postDeleteList?: (data: SkillInstance) => void;
 }
 interface SkillTempProsp extends SkillItemProps {
   data: SkillTemplate;
@@ -31,10 +36,10 @@ export const SkillItem = (props: SkillTempProsp | SkillInsProsp) => {
   const navigate = useNavigate();
   const { localSettings } = userStore;
   const { handleAddSkillInstance, handleRemoveSkillInstance } = useSkillManagement();
-  const { data, isInstalled, showExecute, source } = props;
+  const { data, isInstalled, showExecute, source, itemKey, refreshList, postDeleteList } = props;
 
   const getSkillItemPopupContainer = () => {
-    const elem = document.getElementById('skillItem');
+    const elem = document.getElementById(`skillItem${itemKey}`);
 
     return elem as HTMLElement;
   };
@@ -48,75 +53,9 @@ export const SkillItem = (props: SkillTempProsp | SkillInsProsp) => {
   };
 
   const [visible, setVisible] = useState(false);
-  const NewSkillInstanceModal = () => {
-    const { t } = useTranslation();
-    const [confirmLoading, setConfirmLoading] = useState(false);
-    const [form] = Form.useForm();
-    const onOk = (res) => {
-      form.validate().then((res) => {
-        setConfirmLoading(true);
-        setTimeout(() => {
-          console.log(res);
-          Message.success(t('skill.newSkillModal.putSuccess'));
-          setVisible(false);
-          setConfirmLoading(false);
-        }, 1500);
-      });
-    };
-    const formItemLayout = {
-      labelCol: {
-        span: 4,
-      },
-      wrapperCol: {
-        span: 20,
-      },
-    };
-    return (
-      <Modal
-        title={t('skill.newSkillModal.title')}
-        visible={visible}
-        onOk={onOk}
-        confirmLoading={confirmLoading}
-        onCancel={() => setVisible(false)}
-      >
-        <Form
-          {...formItemLayout}
-          form={form}
-          labelCol={{
-            style: { flexBasis: 90 },
-          }}
-          wrapperCol={{
-            style: { flexBasis: 'calc(100% - 90px)' },
-          }}
-        >
-          <FormItem
-            label={t('skill.newSkillModal.name')}
-            required
-            field="name"
-            rules={[{ required: true, message: t('skill.newSkillModal.namePlaceholder') }]}
-          >
-            <Input placeholder={t('skill.newSkillModal.namePlaceholder')} maxLength={10} showWordLimit />
-          </FormItem>
-          <FormItem
-            label={t('skill.newSkillModal.description')}
-            required
-            field="description"
-            rules={[{ required: true, message: t('skill.newSkillModal.descriptionPlaceholder') }]}
-          >
-            <TextArea
-              placeholder={t('skill.newSkillModal.descriptionPlaceholder')}
-              maxLength={500}
-              showWordLimit
-              style={{ minHeight: 84 }}
-            />
-          </FormItem>
-        </Form>
-      </Modal>
-    );
-  };
 
   return (
-    <div id="skillItem">
+    <div id={`skillItem${itemKey}`}>
       <div className="skill-item" onClick={goSkillDetail}>
         <div className="skill-item__header">
           <div className="skill-item__profile">
@@ -147,22 +86,12 @@ export const SkillItem = (props: SkillTempProsp | SkillInsProsp) => {
         <div className="skill-item__action">
           {showExecute && <IconPlayCircle className="skill-item__action-icon" style={{ strokeWidth: 3 }} />}
           {isInstalled ? (
-            <Popconfirm
-              title="移除确认？"
-              content={`确定移除技能 ${data?.displayName} 吗？`}
-              getPopupContainer={getSkillItemPopupContainer}
-              onOk={() => {
-                handleRemoveSkillInstance(data?.displayName);
-              }}
-            >
-              <IconDelete
-                className="skill-item__action-icon"
-                style={{ strokeWidth: 3 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-              />
-            </Popconfirm>
+            <InstanceDropdownMenu
+              data={data}
+              setUpdateModal={(val) => setVisible(val)}
+              postDeleteList={postDeleteList}
+              getSkillItemPopupContainer={getSkillItemPopupContainer}
+            />
           ) : (
             <Button
               className="skill-item__action-btn skill-installer-install"
@@ -179,7 +108,13 @@ export const SkillItem = (props: SkillTempProsp | SkillInsProsp) => {
           )}
         </div>
       </div>
-      <NewSkillInstanceModal />
+      <NewSkillInstanceModal
+        type={source === 'template' ? 'new' : 'update'}
+        data={data}
+        visible={visible}
+        setVisible={(val) => setVisible(val)}
+        postConfirmCallback={refreshList}
+      />
     </div>
   );
 };

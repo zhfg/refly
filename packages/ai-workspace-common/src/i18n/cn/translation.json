@@ -319,15 +319,16 @@
       "skillTemplate": "技能市场"
     },
     "newSkillModal": {
-      "title": "创建技能",
+      "newTitle": "创建技能",
+      "updateTitle": "更新技能",
       "name": "名称",
       "namePlaceholder": "请输入技能名称",
       "description": "描述",
       "descriptionPlaceholder": "请输入技能描述",
       "cancel": "取消",
       "confirm": "确定",
-      "putErr": "技能添加失败，请尝试重试！",
-      "putSuccess": "技能添加成功"
+      "putErr": "操作失败，请尝试重试！",
+      "putSuccess": "操作成功"
     },
     "skillDetail": {
       "run": "运行",
@@ -488,5 +489,15 @@
     "part2": "😉"
   },
   "userMessagesUnread_one": "您有 {{count}} 条未读消息。",
-  "userMessagesUnread_other": "您有 {{count}} 条未读消息。"
+  "userMessagesUnread_other": "您有 {{count}} 条未读消息。",
+  "common": {
+    "cancel": "取消",
+    "confirm": "确定",
+    "delete": "删除",
+    "edit": "编辑",
+    "save": "保存",
+    "putErr": "操作失败，请尝试重试！",
+    "putSuccess": "操作成功",
+    "deleteConfirmMessage": "确定删除？"
+  }
 }

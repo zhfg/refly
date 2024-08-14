@@ -20,8 +20,8 @@ import { IconLeft, IconPlayArrow, IconDelete } from '@arco-design/web-react/icon
 
 const RadioGroup = Radio.Group;
 
-const ContentTab = (props: { setVal: (val: string) => void }) => {
-  const { setVal } = props;
+const ContentTab = (props: { val: string; setVal: (val: string) => void }) => {
+  const { setVal, val } = props;
   const { t } = useTranslation();
   return (
     <div className="skill-detail__content-tab">
@@ -39,6 +39,7 @@ const ContentTab = (props: { setVal: (val: string) => void }) => {
           {t('skill.skillDetail.triggers')}
         </Radio>
       </RadioGroup>
+      {val === 'triggers' && <Button>添加触发器</Button>}
     </div>
   );
 };
@@ -104,7 +105,7 @@ const SkillDetail = () => {
             </div>
           </div>
           <div className="skill-detail__content-bottom">
-            <ContentTab setVal={setVal} />
+            <ContentTab setVal={setVal} val={val} />
             <div className="skill-detail__content-list">{val === 'jobs' ? <SkillJobs /> : <SkillTriggers />}</div>
           </div>
         </div>

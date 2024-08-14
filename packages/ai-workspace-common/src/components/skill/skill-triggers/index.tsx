@@ -20,7 +20,7 @@ export const SkillTriggers = () => {
   const [searchParams] = useSearchParams();
   const skillId = searchParams.get('skillId') as string;
 
-  const { dataList, setDataList, loadMore, hasMore, isRequesting } = useFetchDataList({
+  const { dataList, loadMore, hasMore, isRequesting } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listSkillTriggers({
         query: { ...queryPayload, skillId },
@@ -35,7 +35,7 @@ export const SkillTriggers = () => {
   }, []);
 
   if (dataList.length === 0) {
-    return <Empty description="请先配置触发机制" />;
+    return <Empty description="请先配置触发器" />;
   }
   return (
     <List

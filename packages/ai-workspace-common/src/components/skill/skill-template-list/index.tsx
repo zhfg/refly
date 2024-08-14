@@ -55,7 +55,7 @@ export const SkillTemplateList = () => {
           actionLayout="vertical"
           onClick={() => {}}
         >
-          <SkillItem data={item} source="template" isInstalled={false} showExecute={false} />
+          <SkillItem itemKey={key} data={item} source="template" isInstalled={false} showExecute={false} />
         </List.Item>
       )}
     />
