@@ -30,7 +30,6 @@ export const ChatInput = (props: ChatInputProps) => {
   const messageStateStore = useMessageStateStore();
   const skillStore = useSkillStore();
   const { runSkill, emptyConvRunSkill } = useBuildThreadAndRun();
-  const { showSelectedText } = useCopilotContextState();
   // hooks
   const [isFocused, setIsFocused] = useState(false);
 

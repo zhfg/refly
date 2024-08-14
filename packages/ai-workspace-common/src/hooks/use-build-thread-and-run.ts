@@ -8,7 +8,7 @@ import { useTaskStore } from '@refly-packages/ai-workspace-common/stores/task';
 import { useLocation, useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 // 类型
-import { LOCALE } from '@refly/common-types';
+import { ContextPanelDomain, LOCALE } from '@refly/common-types';
 import { Source, ChatMessage as Message, InvokeSkillRequest, SkillContext, SearchDomain } from '@refly/openapi-schema';
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { useWeblinkStore } from '@refly-packages/ai-workspace-common/stores/weblink';
@@ -83,7 +83,7 @@ export const useBuildThreadAndRun = () => {
       currentSelectedMarks = [],
     } = useKnowledgeBaseStore.getState();
     const { currentNote } = useNoteStore.getState();
-    const { checkedKeys } = useContextPanelStore.getState();
+    const { checkedKeys, selectedWeblinks } = useContextPanelStore.getState();
     const mapDomainEnvIds = {
       collection: currentKnowledgeBase?.collectionId || '',
       resource: currentResource?.resourceId || '',
@@ -91,7 +91,7 @@ export const useBuildThreadAndRun = () => {
     };
 
     // collections
-    const getIds = (domain: SearchDomain, checkedKeys: string[]) => {
+    const getIds = (domain: ContextPanelDomain, checkedKeys: string[]) => {
       // for select collection context `collection-collection_1_${item?.id}`, get last item.id
       let ids: string[] = checkedKeys
         ?.filter((key: string = '') => {
@@ -114,6 +114,31 @@ export const useBuildThreadAndRun = () => {
       return Array.from(new Set(ids?.filter((id) => !!id)));
     };
 
+    const getUrls = (domain: ContextPanelDomain, checkedKeys: string[]) => {
+      let ids: string[] = checkedKeys
+        ?.filter((key: string = '') => {
+          if (key?.startsWith(`${domain}-`)) {
+            return true;
+          }
+
+          return false;
+        })
+        .map((key) => {
+          const id = key?.split('_')?.slice(-1)?.[0];
+          return id;
+        });
+
+      ids = Array.from(new Set(ids?.filter((id) => !!id)));
+      const urls = selectedWeblinks
+        ?.filter((item) => {
+          const id = item?.key?.split('_')?.slice(-1)?.[0];
+          return ids?.includes(id);
+        })
+        .map((item) => item?.metadata?.resourceMeta?.url);
+
+      return Array.from(new Set(urls));
+    };
+
     const contentList = enableMultiSelect
       ? currentSelectedMarks.map((item) => item?.data)
       : [currentSelectedMark?.data];
@@ -124,6 +149,7 @@ export const useBuildThreadAndRun = () => {
       collectionIds: getIds('collection', checkedKeys),
       resourceIds: getIds('resource', checkedKeys),
       noteIds: getIds('note', checkedKeys),
+      urls: getUrls('weblink', checkedKeys),
     };
 
     return context;

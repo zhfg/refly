@@ -1303,6 +1303,13 @@ export const $SkillContext = {
         type: 'string',
       },
     },
+    urls: {
+      type: 'array',
+      description: 'List of content',
+      items: {
+        type: 'string',
+      },
+    },
   },
 } as const;
 

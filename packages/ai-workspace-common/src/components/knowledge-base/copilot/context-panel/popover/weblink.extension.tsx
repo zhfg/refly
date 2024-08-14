@@ -35,19 +35,17 @@ export const WeblinkPopover = memo(() => {
         id: item?.id,
         title: item?.title,
         domain: 'weblink' as SearchDomain,
+        metadata: {
+          resourceMeta: {
+            url: item?.url,
+          },
+        },
       }));
       return { success: true, data };
     },
   });
   const [treeData, setTreeData] = useState(dataList);
   const [inputValue, setInputValue] = useState('');
-
-  const handledTreeData = dataList.map((item, index) => {
-    return {
-      title: item?.title,
-      key: `weblink_${index}_${item?.id}`,
-    };
-  });
 
   const updateSelectState = (data: SearchResult[]) => {
     setSelectedWeblinks(data);

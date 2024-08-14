@@ -107,7 +107,7 @@ const ContextContent = memo(() => {
   const currentNote = useNoteStore((state) => state.currentNote);
   console.log('rerender context content');
 
-  const TreeData: TreeProps['treeData'] = [
+  let TreeData: TreeProps['treeData'] = [
     {
       title: '当前页面',
       key: 'currentPage',
@@ -147,12 +147,12 @@ const ContextContent = memo(() => {
 
   const runtime = getRuntime();
   if (runtime === 'extension-sidepanel' || runtime === 'extension-csui') {
-    TreeData.push({
+    TreeData = TreeData.concat({
       title: '浏览器标签',
       key: 'weblink',
       children: selectedWeblinks?.map((item) => {
         return {
-          key: `weblink-` + item?.id,
+          key: `weblink-` + item?.key,
           title: item?.title,
         };
       }),
@@ -187,7 +187,8 @@ const ContextContent = memo(() => {
     }
     return null;
   }, []);
-  const renderTitle = useCallback((node) => {
+
+  const renderTitle = (node, checkedKeys) => {
     const title = (node?.title as string) || '';
     const key = (node?._key as string) || '';
     let extraCntTxt = '';
@@ -202,6 +203,7 @@ const ContextContent = memo(() => {
       const len = checkedKeys?.filter((item) => item?.startsWith('collection-')).length;
       extraCntTxt += `（已选择 ${len}）`;
     } else if (key === 'weblink') {
+      // console.log('render title', key, title, checkedKeys);
       const len = checkedKeys?.filter((item) => item?.startsWith('weblink-')).length;
       extraCntTxt += `（已选择 ${len}）`;
     }
@@ -234,7 +236,7 @@ const ContextContent = memo(() => {
         {title} {extraCntTxt ? <span style={{ color: 'rgb(var(--primary-6))' }}>{extraCntTxt}</span> : null}
       </span>
     );
-  }, []);
+  };
 
   useEffect(() => {
     if (!inputValue) {
@@ -252,7 +254,7 @@ const ContextContent = memo(() => {
   }, [selectedCollections?.length, selectedResources?.length, selectedNotes?.length, selectedWeblinks?.length]);
   useEffect(() => {
     setTreeData(TreeData);
-  }, [currentKnowledgeBase, currentResource]);
+  }, [currentKnowledgeBase, currentResource, currentNote]);
   useEffect(() => {
     setExpandedKeys(initalExpandedKeys);
   }, []);
@@ -292,11 +294,12 @@ const ContextContent = memo(() => {
               setEnvContextInitMap({ [domain]: true });
             }
 
+            // console.log('main context panel', checkedKeys);
             setCheckedKeys(checkedKeys);
           }}
           showLine
           renderExtra={renderExtra}
-          renderTitle={renderTitle}
+          renderTitle={(node) => renderTitle(node, checkedKeys)}
         ></Tree>
       </div>
       <Affix offsetBottom={0} target={() => document.querySelector('.context-content-container') as HTMLElement}>

@@ -914,6 +914,10 @@ export type SkillContext = {
    * List of content
    */
   contentList?: Array<string>;
+  /**
+   * List of content
+   */
+  urls?: Array<string>;
 };
 
 export type InvokeSkillRequest = {

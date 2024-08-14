@@ -78,6 +78,7 @@ export const Content = memo((props: ContentProps) => {
     return {
       title: item?.title,
       key: `${props?.domain}_${index}_${item?.id}`,
+      metadata: item?.metadata,
     };
   });
   const [treeData, setTreeData] = useState(handledTreeData);

@@ -1797,6 +1797,11 @@ components:
           description: List of content
           items:
             type: string
+        urls:
+          type: array
+          description: List of content
+          items:
+            type: string
     InvokeSkillRequest:
       type: object
       required:
