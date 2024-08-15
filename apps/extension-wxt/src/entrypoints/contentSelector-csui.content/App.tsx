@@ -11,5 +11,5 @@ export const App = () => {
     initMessageListener();
   }, []);
 
-  return <>{initContentSelectorElem()}</>;
+  return <div className="main">{initContentSelectorElem()}</div>;
 };

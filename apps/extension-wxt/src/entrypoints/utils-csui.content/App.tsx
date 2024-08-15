@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-// 使用方法
+
+import './App.scss';
 
 // hooks
 // 设置 runtime 环境

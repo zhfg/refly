@@ -18,6 +18,12 @@ import { removeHighlight } from '../utils/highlight-selection';
 import { highlightSelection, getSelectionNodesMarkdown } from '../utils/highlight-selection';
 import { ElementType } from '../utils';
 import HoverMenu from '@refly-packages/ai-workspace-common/modules/content-selector/components/hover-menu';
+import { getPopupContainer } from '../utils/get-popup-container';
+
+export const getContainerElem = (selector: string | null) => {
+  const container = getPopupContainer();
+  return selector ? container.querySelector(`.${selector}`) : container;
+};
 
 export const useContentSelector = (selector: string | null, namespace: SelectedNamespace) => {
   const statusRef = useRef(true);
@@ -56,13 +62,15 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
     },
   ) => {
     // 创建一个容器来放置React组件
+    const containerElem = getContainerElem(selector);
+
     const menuContainer = document.createElement('div');
     menuContainer.setAttribute('data-id', 'refly-content-selector-hover-menu');
     menuContainer.style.position = 'fixed';
     menuContainer.style.zIndex = '1000';
     menuContainer.style.opacity = '0';
     menuContainer.style.transition = 'opacity 0.3s ease-in-out';
-    document.body.appendChild(menuContainer);
+    containerElem?.appendChild?.(menuContainer);
 
     let hideTimeout: NodeJS.Timeout;
 
@@ -117,7 +125,7 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
       if (menuContainer) {
         ReactDOM.unmountComponentAtNode(menuContainer);
         try {
-          document?.body?.removeChild(menuContainer);
+          containerElem?.removeChild(menuContainer);
         } catch (err) {
           console.error('remove menuContainer error', err);
         }
@@ -348,8 +356,8 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
       const left = rect.left || 0;
       // console.log('rect', , rect.height, rect.top, rect.left);
       // container 的 top 和 left 是相对于 document 的
-      const containerTop = containerRect.top || 0;
-      const containerLeft = containerRect.left || 0;
+      const containerTop = selector ? containerRect.top || 0 : 0;
+      const containerLeft = selector ? containerRect.left || 0 : 0;
 
       // console.log('top', window.scrollY + rect.top);
       mark.style.top = top - containerTop + 'px';
