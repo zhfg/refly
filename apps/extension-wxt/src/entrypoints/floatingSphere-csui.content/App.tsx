@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Button, Tooltip, Trigger } from '@arco-design/web-react';
+import { Button, Tooltip, Trigger, Message, Link } from '@arco-design/web-react';
 
 import { reflyEnv } from '@/utils/env';
 
@@ -8,6 +8,8 @@ import Logo from '@/assets/logo.svg';
 import './App.scss';
 import classNames from 'classnames';
 import { IconBulb, IconHighlight, IconSave } from '@arco-design/web-react/icon';
+import { useSaveCurrentWeblinkAsResource } from '@/hooks/use-save-resource';
+import { delay } from '@refly/utils/delay';
 
 const getPopupContainer = () => {
   const elem = document
@@ -20,6 +22,7 @@ const getPopupContainer = () => {
 export const App = () => {
   const siderStore = useSiderStore();
   const [selectedText, setSelectedText] = useState<string>('');
+  const { saveResource } = useSaveCurrentWeblinkAsResource();
   // 加载快捷键
   const [shortcut, setShortcut] = useState<string>(reflyEnv.getOsType() === 'OSX' ? '⌘ J' : 'Ctrl J');
   const [isDragging, setIsDragging] = useState(false);
@@ -41,6 +44,11 @@ export const App = () => {
     }
   };
 
+  useEffect(() => {
+    Message.config({
+      getContainer: () => getPopupContainer() as HTMLElement,
+    });
+  }, []);
   useEffect(() => {
     // 设置初始位置
     bottomDistanceRef.current = window.innerHeight * 0.25; // 距离底部 25% 的位置
@@ -119,7 +127,51 @@ export const App = () => {
     setIsHovered(false);
   };
 
-  console.log('dropdownPosition', dropdownPosition);
+  const handleSaveResource = async () => {
+    const close = Message.loading({
+      content: '保存中...',
+      duration: 0,
+      style: {
+        borderRadius: 8,
+        background: '#fcfcf9',
+      },
+    });
+    const { success, url } = await saveResource();
+
+    await delay(2000);
+    close();
+    await delay(200);
+
+    if (success) {
+      Message.success({
+        content: (
+          <span>
+            保存成功，点击{' '}
+            <Link href={url} target="_blank" style={{ borderRadius: 4 }} hoverable>
+              链接
+            </Link>{' '}
+            查看
+          </span>
+        ),
+        duration: 5000,
+        style: {
+          borderRadius: 8,
+          background: '#fcfcf9',
+        },
+        closable: true,
+      });
+    } else {
+      Message.error({
+        content: '保存失败，请尝试重新保存',
+        duration: 3000,
+        style: {
+          borderRadius: 8,
+          background: '#fcfcf9',
+        },
+      });
+    }
+  };
+
   const Dropdown = () => {
     return (
       <div
@@ -158,6 +210,7 @@ export const App = () => {
               shape="circle"
               icon={<IconSave />}
               size="small"
+              onClick={handleSaveResource}
               className="refly-floating-sphere-dropdown-item assist-action-item"
             ></Button>
           </Tooltip>
