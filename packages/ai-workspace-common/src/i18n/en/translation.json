@@ -331,10 +331,20 @@
       "putErr": "Failed. Please try again.",
       "putSuccess": "successfully"
     },
+    "instanceInvokeModal": {
+      "title": "Run Skill",
+      "question": "Question",
+      "resource": "Resource",
+      "collection": "Collection",
+      "note": "Note",
+      "input": "Please enter {{name}}",
+      "select": "Please select {{name}}",
+      "inputUrl": "Please enter valid URLs"
+    },
     "skillDetail": {
       "run": "Run",
       "delete": "Delete",
-      "jobs": "Running Logs",
+      "jobs": "Jobs",
       "triggers": "Triggers"
     }
   },

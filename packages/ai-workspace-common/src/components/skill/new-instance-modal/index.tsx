@@ -103,6 +103,7 @@ export const NewSkillInstanceModal = (props: NewSkillInstanceModalProps) => {
         >
           <TextArea
             placeholder={t('skill.newSkillModal.descriptionPlaceholder')}
+            autoSize
             maxLength={500}
             showWordLimit
             style={{ minHeight: 84 }}

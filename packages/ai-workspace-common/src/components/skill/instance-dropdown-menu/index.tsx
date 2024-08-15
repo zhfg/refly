@@ -57,7 +57,7 @@ const DropList = (props: DropListProps) => {
 interface InstanceDropdownMenuProps {
   postDeleteList?: (data: SkillInstance) => void;
   setUpdateModal: (val: boolean) => void;
-  getSkillItemPopupContainer: () => HTMLElement;
+  getSkillItemPopupContainer?: () => HTMLElement;
   data: SkillInstance;
 }
 

@@ -54,5 +54,10 @@
       align-items: center;
       justify-content: space-between;
     }
+    .skill-action {
+      &__invoke {
+        margin-right: 12px;
+      }
+    }
   }
 }

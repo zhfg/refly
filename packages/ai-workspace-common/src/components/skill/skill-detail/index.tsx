@@ -6,6 +6,8 @@ import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/us
 import { SkillJobs } from '@refly-packages/ai-workspace-common/components/skill/skill-jobs';
 import { SkillTriggers } from '@refly-packages/ai-workspace-common/components/skill/skill-triggers';
 import { InstanceInvokeModal } from '@refly-packages/ai-workspace-common/components/skill/instance-invoke-modal';
+import { InstanceDropdownMenu } from '@refly-packages/ai-workspace-common/components/skill/instance-dropdown-menu';
+import { NewSkillInstanceModal } from '@refly-packages/ai-workspace-common/components/skill/new-instance-modal';
 
 // store
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
@@ -47,11 +49,14 @@ const ContentTab = (props: { val: string; setVal: (val: string) => void }) => {
 };
 
 const SkillDetail = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const skillId = searchParams.get('skillId') as string;
 
   const [skillDetail, setSkillDetail] = useState<SkillInstance>();
   const [val, setVal] = useState('jobs');
+  const [visible, setVisible] = useState(false);
+
   const [reloadJobList, setReloadJobList] = useState(false);
   const [reloadTriggers, setReloadTriggers] = useState(false);
   const handleGetSkillInstances = async () => {
@@ -69,15 +74,19 @@ const SkillDetail = () => {
     }
   };
 
+  const postDelete = () => {
+    window.history.back();
+  };
+
   const [invokeModalVisible, setInvokeModalVisible] = useState(false);
   const handleSkillInvoke = () => {
     setInvokeModalVisible(true);
   };
 
   useEffect(() => {
-    console.log('skillId', skillId);
     handleGetSkillInstances();
   }, []);
+
   return (
     <div className="skill-detail">
       <div className="skill-detail__header">
@@ -102,17 +111,28 @@ const SkillDetail = () => {
                 {skillDetail?.description}
               </Typography.Paragraph>
               <div className="skill-action">
-                <Button type="primary" style={{ borderRadius: 4 }} onClick={handleSkillInvoke}>
+                <Button
+                  className="skill-action__invoke"
+                  type="primary"
+                  style={{ borderRadius: 4 }}
+                  onClick={handleSkillInvoke}
+                >
                   <IconPlayArrow />
-                  运行
+                  {t('skill.skillDetail.run')}
                 </Button>
-                <Button style={{ marginLeft: 12, borderRadius: 4 }}>
+                <InstanceDropdownMenu
+                  data={skillDetail}
+                  setUpdateModal={(visible) => setVisible(visible)}
+                  postDeleteList={postDelete}
+                />
+                {/* <Button style={{ marginLeft: 12, borderRadius: 4 }}>
                   <IconDelete />
-                  删除
-                </Button>
+                  {t('skill.skillDetail.delete')}
+                </Button> */}
               </div>
             </div>
           </div>
+
           <div className="skill-detail__content-bottom">
             <ContentTab setVal={setVal} val={val} />
             <div className="skill-detail__content-list">
@@ -130,6 +150,13 @@ const SkillDetail = () => {
         visible={invokeModalVisible}
         setVisible={setInvokeModalVisible}
         postConfirmCallback={() => setReloadJobList(true)}
+      />
+      <NewSkillInstanceModal
+        type="update"
+        data={skillDetail}
+        visible={visible}
+        setVisible={(val) => setVisible(val)}
+        postConfirmCallback={() => handleGetSkillInstances()}
       />
     </div>
   );

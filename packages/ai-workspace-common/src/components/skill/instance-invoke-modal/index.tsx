@@ -160,7 +160,7 @@ export const InstanceInvokeModal = (props: InstanceInvokeModalProps) => {
             rows={4}
             autoSize={{
               minRows: 4,
-              maxRows: 4,
+              maxRows: 10,
             }}
             value={linkStr}
             onChange={(value) => setLinkStr(value)}

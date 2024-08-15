@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
-import { Avatar, Button, Popconfirm, Typography, Divider, Modal, Form, Input, Message } from '@arco-design/web-react';
+import { Avatar, Button, Typography, Divider, Form, Input } from '@arco-design/web-react';
 import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
-import { InstanceDropdownMenu } from '../instance-dropdown-menu';
-import { NewSkillInstanceModal } from '../new-instance-modal';
+import { InstanceDropdownMenu } from '@refly-packages/ai-workspace-common/components/skill/instance-dropdown-menu';
+import { NewSkillInstanceModal } from '@refly-packages/ai-workspace-common/components/skill/new-instance-modal';
 
 import { IconUser, IconPlayCircle, IconPlus, IconDelete } from '@arco-design/web-react/icon';
 
@@ -109,7 +109,6 @@ export const SkillItem = (props: SkillTempProsp | SkillInsProsp) => {
               className="skill-item__action-btn skill-installer-install"
               type="outline"
               onClick={(e) => {
-                // handleAddSkillInstance(data?.name);
                 e.stopPropagation();
                 setVisible(true);
               }}
