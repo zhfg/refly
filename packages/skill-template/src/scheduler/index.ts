@@ -9,6 +9,7 @@ import { HumanMessage } from '@langchain/core/messages';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { ToolMessage } from '@langchain/core/messages';
+import { pick } from '@refly/utils';
 import { SkillInvocationConfig, SkillMeta } from '@refly/openapi-schema';
 import { ToolCall } from '@langchain/core/dist/messages/tool';
 import { randomUUID } from 'node:crypto';
@@ -84,11 +85,11 @@ export class Scheduler extends BaseSkill {
       throw new Error(`Skill ${selectedSkill} not found.`);
     }
 
-    const skillConfig = {
+    const skillConfig: SkillRunnableConfig = {
       ...config,
       configurable: {
         ...config.configurable,
-        currentSkill: skillInstance,
+        currentSkill: pick(skillInstance, ['skillId', 'tplName', 'displayName']),
       },
     };
 
@@ -125,10 +126,12 @@ export class Scheduler extends BaseSkill {
     const { installedSkills = [] } = config.configurable || {};
     const skillInstance = installedSkills.find((skill) => skill.tplName === call.name);
     const skillTemplate = this.skills.find((skill) => skill.name === call.name);
-    const currentSkill: SkillMeta = skillInstance ?? {
-      tplName: skillTemplate.name,
-      displayName: skillTemplate.displayName[locale],
-    };
+    const currentSkill: SkillMeta = skillInstance
+      ? pick(skillInstance, ['skillId', 'tplName', 'displayName'])
+      : {
+          tplName: skillTemplate.name,
+          displayName: skillTemplate.displayName[locale],
+        };
     const skillConfig: SkillRunnableConfig = {
       ...config,
       configurable: {
@@ -305,7 +308,6 @@ Generated question example:
         event: 'structured_data',
         content: JSON.stringify(followUps),
         structuredDataKey: 'relatedQuestions',
-        ...selectedSkill,
       },
       skillConfig,
     );

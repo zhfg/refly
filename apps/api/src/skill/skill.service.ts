@@ -305,7 +305,7 @@ export class SkillService {
     };
 
     if (skill) {
-      config.configurable.selectedSkill = skill;
+      config.configurable.selectedSkill = pick(skill, ['skillId', 'tplName', 'displayName']);
     }
 
     if (conversation) {
