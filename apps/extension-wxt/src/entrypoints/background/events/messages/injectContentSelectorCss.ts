@@ -1,17 +1,19 @@
 import { BackgroundMessage } from '@refly/common-types';
+import { browser } from 'wxt/browser';
 
 export const handleInjectContentSelectorCss = async (msg: BackgroundMessage) => {
-  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+  try {
+    const tabs = await browser.tabs.query({ active: true, currentWindow: true });
     const { id } = tabs[0];
+
     console.log('currentTabid', id);
 
-    chrome.scripting
-      .executeScript({
-        target: { tabId: id as number },
-        func: () => {
-          const style = document.createElement('style');
-          style.setAttribute('data-id', 'refly-selected-mark-injected-css');
-          style.textContent = `
+    await browser.scripting.executeScript({
+      target: { tabId: id as number },
+      func: () => {
+        const style = document.createElement('style');
+        style.setAttribute('data-id', 'refly-selected-mark-injected-css');
+        style.textContent = `
             * {
                 cursor: default !important;
                   }
@@ -40,14 +42,13 @@ export const handleInjectContentSelectorCss = async (msg: BackgroundMessage) => 
                   cursor: pointer !important;
               }
               `;
-          document.head.appendChild(style);
-        },
-      })
-      .then(() => {
-        console.log('Inject content selector style success');
-      })
-      .catch((err) => console.log(`Inject content selector style failed: ${err}`));
-  });
+        document.head.appendChild(style);
+      },
+    });
+    console.log('Inject content selector style success');
+  } catch (err) {
+    console.log(`Inject content selector style failed: ${err}`);
+  }
 
   return {
     success: true,

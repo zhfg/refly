@@ -18,6 +18,7 @@ import { useExtensionMessage } from './use-extension-message';
 // import { checkBrowserArc } from '@/utils/browser';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { UserSettings } from '@refly/openapi-schema';
+import { browser } from 'wxt/browser';
 
 interface ExternalLoginPayload {
   name: string;
@@ -227,10 +228,10 @@ export const useGetUserSettings = () => {
   };
 
   useEffect(() => {
-    chrome.runtime.onMessage.addListener(handleExtensionMessage);
+    browser.runtime.onMessage.addListener(handleExtensionMessage);
 
     return () => {
-      chrome.runtime.onMessage.removeListener(handleExtensionMessage);
+      browser.runtime.onMessage.removeListener(handleExtensionMessage);
     };
   }, []);
 

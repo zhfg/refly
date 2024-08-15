@@ -1,19 +1,20 @@
-import { useEffect } from "react"
+import { useEffect } from 'react';
+import { browser } from 'wxt/browser';
 
 export const useProcessLoginNotify = () => {
   // 收到消息之后，关闭窗口
   const handleExtensionMessage = (request: any) => {
-    console.log("activate useProcessLoginNotify", request)
-    if (request?.data?.name === "refly-login-notify") {
-      window.close()
+    console.log('activate useProcessLoginNotify', request);
+    if (request?.data?.name === 'refly-login-notify') {
+      window.close();
     }
-  }
+  };
 
   useEffect(() => {
-    chrome.runtime.onMessage.addListener(handleExtensionMessage)
+    browser.runtime.onMessage.addListener(handleExtensionMessage);
 
     return () => {
-      chrome.runtime.onMessage.removeListener(handleExtensionMessage)
-    }
-  }, [])
-}
+      browser.runtime.onMessage.removeListener(handleExtensionMessage);
+    };
+  }, []);
+};

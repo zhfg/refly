@@ -52,7 +52,7 @@ export const sendToWebpageMainWorld = async (
     });
 
     if (['extension-sidepanel', 'extension-background'].includes(fromRuntime)) {
-      const tabs = await browser.tabs.query({ active: true });
+      const tabs = await browser.tabs.query({ active: true, currentWindow: true });
       const activeTabId = tabs?.[0]?.id;
       if (activeTabId) {
         await browser.tabs.sendMessage(activeTabId, message);
@@ -113,7 +113,7 @@ export const sendMessage: (message: BackgroundMessage, needResponse?: boolean) =
       });
 
       if (['extension-sidepanel', 'extension-background'].includes(fromRuntime)) {
-        const tabs = await browser.tabs.query({ active: true });
+        const tabs = await browser.tabs.query({ active: true, currentWindow: true });
         const activeTabId = tabs?.[0]?.id;
         if (activeTabId) {
           await browser.tabs.sendMessage(activeTabId, message);
