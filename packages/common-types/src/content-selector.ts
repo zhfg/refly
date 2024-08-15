@@ -1,4 +1,5 @@
 import { Source } from '@refly/openapi-schema';
+import { SyncMarkEventName } from './extension-messaging';
 
 export type MarkScope = 'block' | 'inline';
 
@@ -30,7 +31,7 @@ export interface Data {
 export type SyncMarkEventType = 'add' | 'remove' | 'reset';
 
 export interface SyncMarkEvent {
-  name: 'syncMarkEvent' | 'syncMarkEventBack';
+  name: SyncMarkEventName; //'syncMarkEvent' | 'syncMarkEventBack';
   body: {
     type: SyncMarkEventType;
     mark?: Mark;
@@ -40,7 +41,7 @@ export interface SyncMarkEvent {
 export type SyncStatusEventType = 'start' | 'update' | 'stop' | 'reset';
 
 export interface SyncStatusEvent {
-  name: 'syncStatusEvent';
+  name: SyncMarkEventName;
   body: {
     type: SyncStatusEventType;
     scope: MarkScope;

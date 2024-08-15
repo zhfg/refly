@@ -20,7 +20,7 @@ export const WeblinkPopover = memo(() => {
       console.log('load more welink');
       const res = (await sendMessage({
         name: 'getOpenedTabs',
-        type: 'getOpenedTabs',
+        type: 'others',
         source: getRuntime(),
       })) as {
         tabs: {

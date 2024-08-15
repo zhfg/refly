@@ -1,14 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { useContentSelectorStore } from '../stores/content-selector';
 import {
   onMessage,
-  sendToBackground,
-  sendToContentScript,
   sendMessage, // Added this import
-  BackgroundMessage,
 } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import type { Mark, SyncMarkEvent, SyncStatusEvent } from '@refly/common-types';
+import type { SyncMarkEvent, SyncStatusEvent } from '@refly/common-types';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 
 // stores
@@ -80,7 +77,7 @@ export const useSelectedMark = () => {
     // }
 
     const event: SyncStatusEvent = {
-      name: 'syncStatusEvent',
+      name: 'syncMarkStatusEvent',
       body: {
         type: 'start',
         scope,
@@ -98,7 +95,7 @@ export const useSelectedMark = () => {
     contentSelectorStore.setShowContentSelector(false);
 
     const event: SyncStatusEvent = {
-      name: 'syncStatusEvent',
+      name: 'syncMarkStatusEvent',
       body: {
         type: 'stop',
         scope,
@@ -137,7 +134,7 @@ export const useSelectedMark = () => {
     contentSelectorStore.setShowContentSelector(false);
 
     const event: SyncStatusEvent = {
-      name: 'syncStatusEvent',
+      name: 'syncMarkStatusEvent',
       body: {
         type: 'reset',
         scope,

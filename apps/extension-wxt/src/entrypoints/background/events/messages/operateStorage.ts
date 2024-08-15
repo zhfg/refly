@@ -1,5 +1,5 @@
 import { tempTabState } from '@/entrypoints/background';
-import { BackgroundMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import { BackgroundMessage } from '@refly/common-types';
 import { getCurrentTab } from '@refly-packages/ai-workspace-common/utils/extension/tabs';
 import { safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 import { storage } from '@refly-packages/ai-workspace-common/utils/storage';

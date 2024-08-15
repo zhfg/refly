@@ -3,11 +3,8 @@ import { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import type { Mark, MarkScope, SyncMarkEvent, SyncMarkEventType, SyncStatusEvent } from '@refly/common-types';
 import { safeStringifyJSON } from '@refly-packages/utils/parse';
-import {
-  BackgroundMessage,
-  sendMessage,
-  onMessage,
-} from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import { sendMessage, onMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import { BackgroundMessage } from '@refly/common-types';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { SelectedNamespace } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 // import { getContentFromHtmlSelector } from "@/utils/weblink"
@@ -451,7 +448,7 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
 
   const onStatusHandler = (event: MessageEvent<any>) => {
     const data = event as any as BackgroundMessage;
-    if ((data as SyncStatusEvent)?.name === 'syncStatusEvent') {
+    if ((data as SyncStatusEvent)?.name === 'syncMarkStatusEvent') {
       console.log('contentSelectorStatusHandler data', event, getRuntime());
       const { type, scope } = (data as SyncStatusEvent)?.body;
 

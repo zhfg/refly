@@ -1,23 +1,6 @@
-import { IRuntime, setRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { getLastActiveTab } from '@refly-packages/ai-workspace-common/utils/extension/tabs';
 import throttle from 'lodash.throttle';
-
-export type BackgroundMsgType =
-  | 'apiRequest'
-  | 'others'
-  | 'registerEvent'
-  | 'operateTabStorage'
-  | 'injectContentSelectorCss'
-  | 'getOpenedTabs';
-
-export interface BackgroundMessage<T = any> {
-  name: string;
-  body?: T;
-  type?: BackgroundMsgType;
-  source: IRuntime;
-  target?: any;
-  args?: any;
-}
+import { BackgroundMessage, IRuntime } from '@refly/common-types';
 
 export const sendToBackground = async (message: BackgroundMessage, needResponse = true) => {
   try {

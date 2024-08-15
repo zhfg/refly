@@ -1,9 +1,10 @@
+import { handleGetOpenedTabs } from '@/entrypoints/background/events/messages/getOpenedTabs';
 import { tempTabState } from '@/entrypoints/background/index';
-import { BackgroundMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { getCurrentTab } from '@refly-packages/ai-workspace-common/utils/extension/tabs';
 import { safeParseJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 import { storage } from '@refly-packages/ai-workspace-common/utils/storage';
 import { browser } from 'wxt/browser';
+import { BackgroundMessage } from '@refly/common-types';
 
 export const handleOtherMessage = async (msg: BackgroundMessage) => {
   if (msg?.name === 'getTabId') {
@@ -41,5 +42,12 @@ export const handleOtherMessage = async (msg: BackgroundMessage) => {
         body: { currentMockResource },
       });
     }
+  }
+
+  if (msg?.name === 'getOpenedTabs') {
+    return await handleGetOpenedTabs(msg);
+  }
+
+  if (msg?.name === 'openCopilot') {
   }
 };

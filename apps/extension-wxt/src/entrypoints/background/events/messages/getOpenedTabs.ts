@@ -1,4 +1,5 @@
-import { BackgroundMessage, sendMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import { sendMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import { BackgroundMessage } from '@refly/common-types';
 
 export const handleGetOpenedTabs = async (msg: BackgroundMessage) => {
   try {
@@ -13,7 +14,7 @@ export const handleGetOpenedTabs = async (msg: BackgroundMessage) => {
     console.log('mappedTabs', mappedTabs);
     sendMessage({
       name: 'getOpenedTabs',
-      type: 'getOpenedTabs',
+      type: 'others',
       body: {
         tabs: mappedTabs,
       },

@@ -1,12 +1,11 @@
 import { handleRequestReflect } from '@/entrypoints/background/events/messages/apiRequest';
 import { handleOperateTabStorage } from '@/entrypoints/background/events/messages/operateStorage';
 import { handleRegisterEvent } from '@/entrypoints/background/events/messages/registerEvent';
-import { BackgroundMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import { BackgroundMessage } from '@refly/common-types';
 import { saveLastActiveTab } from '@refly-packages/ai-workspace-common/utils/extension/tabs';
 import { Runtime } from 'wxt/browser';
 import { handleOtherMessage } from './others';
 import { handleInjectContentSelectorCss } from '@/entrypoints/background/events/messages/injectContentSelectorCss';
-import { handleGetOpenedTabs } from '@/entrypoints/background/events/messages/getOpenedTabs';
 
 export const onMessage = async (
   msg: BackgroundMessage,
@@ -37,9 +36,5 @@ export const onMessage = async (
 
   if (msg.type === 'injectContentSelectorCss') {
     return await handleInjectContentSelectorCss(msg);
-  }
-
-  if (msg.type === 'getOpenedTabs') {
-    return await handleGetOpenedTabs(msg);
   }
 };

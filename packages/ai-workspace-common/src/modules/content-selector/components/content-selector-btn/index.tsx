@@ -9,7 +9,7 @@ import './index.scss';
 import { IconTip } from '@refly-packages/ai-workspace-common/components/dashboard/icon-tip';
 import { useEffect } from 'react';
 import { MarkScope, SyncStatusEvent } from '@refly/common-types';
-import { BackgroundMessage, sendMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import { sendMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 

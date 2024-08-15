@@ -1,4 +1,4 @@
-import { BackgroundMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import { BackgroundMessage } from '@refly/common-types';
 import { getCurrentTab, getLastActiveTab } from './tabs';
 import { browser } from 'wxt/browser';
 
