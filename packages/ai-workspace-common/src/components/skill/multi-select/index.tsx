@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 // components
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
@@ -6,33 +7,35 @@ import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import { Select, Button } from '@arco-design/web-react';
+
 const Option = Select.Option;
 
 const config = {
-  resource: {
+  resourceIds: {
     method: 'listResources',
     display: 'title',
     key: 'resourceId',
   },
-  note: {
+  noteIds: {
     method: 'listNotes',
     display: 'title',
     key: 'noteId',
   },
-  collection: {
+  collectionIds: {
     method: 'listCollections',
     display: 'title',
     key: 'collectionId',
   },
 };
 
-type OptionType = 'resource' | 'note' | 'collection';
 interface MultiSelectProps {
-  type: OptionType;
+  type: keyof typeof config;
   placeholder?: string;
   onValueChange: (value: string[]) => void;
 }
+
 export const MultiSelect = (props: MultiSelectProps) => {
+  const { t } = useTranslation();
   const { placeholder, type, onValueChange } = props;
 
   const { dataList, loadMore, setDataList, hasMore, isRequesting } = useFetchDataList({
@@ -51,9 +54,9 @@ export const MultiSelect = (props: MultiSelectProps) => {
 
   return (
     <Select
+      allowClear
       size="large"
       mode="multiple"
-      allowCreate
       placeholder={placeholder}
       onChange={(value) => {
         onValueChange(value);
@@ -64,7 +67,7 @@ export const MultiSelect = (props: MultiSelectProps) => {
           {hasMore ? (
             <div className="search-load-more">
               <Button type="text" loading={isRequesting} onClick={() => loadMore()}>
-                加载更多
+                {t('common.loadMore')}
               </Button>
             </div>
           ) : null}

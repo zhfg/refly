@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 // components
 import { MultiSelect } from '../multi-select';
@@ -6,9 +6,10 @@ import { useTranslation } from 'react-i18next';
 // store
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
-import { SkillInstance } from '@refly/openapi-schema';
+import { SkillInstance, SkillInvocationRule } from '@refly/openapi-schema';
+import { Modal, Form, Input, Message, FormInstance } from '@arco-design/web-react';
+import { TFunction } from 'i18next';
 
-import { Modal, Form, Input, Message } from '@arco-design/web-react';
 const FormItem = Form.Item;
 const TextArea = Input.TextArea;
 
@@ -27,48 +28,88 @@ interface InstanceInvokeModalProps {
   setVisible: (val: boolean) => void;
   postConfirmCallback?: () => void;
 }
+
+const InvokeOptionComponent = (props: {
+  rule: SkillInvocationRule;
+  form: FormInstance;
+  t: TFunction;
+}): React.ReactNode => {
+  const { rule, form, t } = props;
+
+  if (rule.key === 'query') {
+    return <Input placeholder={t('skill.instanceInvokeModal.placeholder.query')} maxLength={100} showWordLimit />;
+  }
+
+  if (rule.key === 'resourceIds' || rule.key === 'noteIds' || rule.key === 'collectionIds') {
+    return (
+      <MultiSelect
+        type={rule.key}
+        placeholder={t(`skill.instanceInvokeModal.placeholder.${rule.key}`)}
+        onValueChange={(val) => {
+          form.setFieldValue(rule.key, val);
+        }}
+      />
+    );
+  }
+
+  if (rule.key === 'contentList') {
+    return (
+      <TextArea
+        placeholder={t('skill.instanceInvokeModal.placeholder.contentList')}
+        rows={4}
+        autoSize={{
+          minRows: 4,
+          maxRows: 10,
+        }}
+      />
+    );
+  }
+
+  if (rule.key === 'urls') {
+    return (
+      <TextArea
+        placeholder={t('skill.instanceInvokeModal.placeholder.urls')}
+        rows={4}
+        autoSize={{
+          minRows: 4,
+          maxRows: 10,
+        }}
+      />
+    );
+  }
+
+  return null;
+};
+
 export const InstanceInvokeModal = (props: InstanceInvokeModalProps) => {
   const { visible, data, setVisible, postConfirmCallback } = props;
   const { t } = useTranslation();
   const [confirmLoading, setConfirmLoading] = useState(false);
-  const [linkStr, setLinkStr] = useState('');
   const [form] = Form.useForm();
 
-  const optionItems = [
-    {
-      name: 'resource',
-      required: true,
-      rules: [
-        {
-          type: 'array',
-          minLength: 1,
-          message: t('skill.instanceInvokeModal.select', {
-            name: t(`skill.instanceInvokeModal.resource`),
-          }),
-        },
-      ],
-    },
-    {
-      name: 'note',
-      required: false,
-      rules: null,
-    },
-    {
-      name: 'collection',
-      required: false,
-      rules: null,
-    },
-  ];
+  const { inputRules = [], contextRules = [] } = data?.invocationConfig || {};
+  const optionItems = [...inputRules, ...contextRules].map((rule) => ({
+    key: rule.key,
+    required: rule.required,
+    formComp: InvokeOptionComponent({ rule, form, t }),
+  }));
+
   const onOk = () => {
     form.validate().then(async (res) => {
-      const { query, resourceIds, noteIds, collectionIds } = res;
+      const { query, resourceIds, noteIds, collectionIds, contentList, urls } = res;
       setConfirmLoading(true);
       try {
         const { error: resultError } = await getClient().invokeSkill({
           body: {
             skillId: data.skillId,
             input: { query },
-            context: { resourceIds, noteIds, collectionIds, urls: [] },
+            context: {
+              resourceIds,
+              noteIds,
+              collectionIds,
+              contentList: contentList?.split(/\n\s*\n/),
+              urls: urls?.split(/\n\s*\n/),
+            },
           },
         });
         if (resultError) {
@@ -94,78 +135,28 @@ export const InstanceInvokeModal = (props: InstanceInvokeModalProps) => {
       title={t('skill.instanceInvokeModal.title')}
       visible={visible}
       onOk={onOk}
+      okText={t('common.confirm')}
+      cancelText={t('common.cancel')}
       confirmLoading={confirmLoading}
       onCancel={() => setVisible(false)}
     >
       <Form
         {...formItemLayout}
         form={form}
-        initialValues={{
-          resourceIds: [],
-          noteIds: [],
-          collectionIds: [],
-        }}
         labelCol={{
-          style: { flexBasis: 90 },
+          style: { flexBasis: 100 },
         }}
         wrapperCol={{
-          style: { flexBasis: 'calc(100% - 90px)' },
+          style: { flexBasis: 'calc(100% - 100px)' },
         }}
       >
-        <FormItem
-          label={t('skill.instanceInvokeModal.question')}
-          required
-          field="query"
-          rules={[
-            {
-              required: true,
-              message: t('skill.instanceInvokeModal.input', { name: t('skill.instanceInvokeModal.question') }),
-            },
-          ]}
-        >
-          <Input
-            placeholder={t('skill.instanceInvokeModal.input', {
-              name: t('skill.instanceInvokeModal.question'),
-            })}
-            maxLength={50}
-            showWordLimit
-          />
-        </FormItem>
-
-        {optionItems.map(({ name, required, rules }) => {
+        {optionItems.map(({ key, required, formComp }) => {
           return (
-            <FormItem
-              key={name}
-              required={required}
-              rules={rules}
-              field={name + 'Ids'}
-              label={t(`skill.instanceInvokeModal.${name}`)}
-            >
-              <MultiSelect
-                type={name}
-                placeholder={t('skill.instanceInvokeModal.select', {
-                  name: t(`skill.instanceInvokeModal.${name}`),
-                })}
-                onValueChange={(val) => {
-                  form.setFieldValue(name + 'Ids', val);
-                }}
-              />
+            <FormItem label={t(`skill.instanceInvokeModal.formLabel.${key}`)} key={key} required={required} field={key}>
+              {formComp}
             </FormItem>
           );
         })}
-
-        <FormItem label={t('skill.newSkillModal.description')}>
-          <TextArea
-            placeholder={t('skill.instanceInvokeModal.inputUrl')}
-            rows={4}
-            autoSize={{
-              minRows: 4,
-              maxRows: 10,
-            }}
-            value={linkStr}
-            onChange={(value) => setLinkStr(value)}
-          />
-        </FormItem>
       </Form>
     </Modal>
   );

@@ -7,6 +7,7 @@
     "delete": "Delete",
     "edit": "Edit",
     "save": "Save",
+    "loadMore": "Load More",
     "putErr": "Failed to perform operation. Please try again!",
     "putSuccess": "Operation Successful",
     "deleteConfirmMessage": "Are you sure you want to delete?"
@@ -333,13 +334,22 @@
     },
     "instanceInvokeModal": {
       "title": "Run Skill",
-      "question": "Question",
-      "resource": "Resource",
-      "collection": "Collection",
-      "note": "Note",
-      "input": "Please enter {{name}}",
-      "select": "Please select {{name}}",
-      "inputUrl": "Please enter valid URLs"
+      "formLabel": {
+        "query": "Question",
+        "resourceIds": "Resource",
+        "noteIds": "Note",
+        "collectionIds": "Collection",
+        "contentList": "Content",
+        "urls": "URLs"
+      },
+      "placeholder": {
+        "query": "Please enter question",
+        "resourceIds": "Please select resource",
+        "noteIds": "Please select note",
+        "collectionIds": "Please select collection",
+        "contentList": "Please enter or paste content",
+        "urls": "Please enter URLs, one per line"
+      }
     },
     "skillDetail": {
       "run": "Run",
