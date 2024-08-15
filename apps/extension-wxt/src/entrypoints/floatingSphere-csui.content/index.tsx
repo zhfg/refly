@@ -1,9 +1,9 @@
-import { defineContentScript } from 'wxt/sandbox';
 import ReactDOM from 'react-dom/client';
+import { defineContentScript } from 'wxt/sandbox';
+import { createShadowRootUi } from 'wxt/client';
+import { App } from './App';
 
 import { setRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { createShadowRootUi } from 'wxt/client';
-import App from './App';
 
 export default defineContentScript({
   matches: ['<all_urls>'],
@@ -15,14 +15,17 @@ export default defineContentScript({
     setRuntime('extension-csui');
 
     console.log('ctx', ctx);
+    let removeInjectCSS: () => void;
     // 3. Define your UI`
     const ui = await createShadowRootUi(ctx, {
-      name: 'refly-utils-app',
+      name: 'refly-float-sphere',
       position: 'inline',
-      append: 'before',
+      append: 'last',
       onMount(container) {
+        // 渲染 selector
         const root = ReactDOM.createRoot(container);
         root.render(<App />);
+
         return root;
       },
       onRemove: (root) => {
@@ -30,7 +33,7 @@ export default defineContentScript({
       },
     });
 
-    // // 4. Mount the UI
+    // 4. Mount the UI
     ui.mount();
   },
 });
