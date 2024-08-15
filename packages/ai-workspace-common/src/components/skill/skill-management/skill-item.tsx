@@ -62,37 +62,37 @@ export const SkillItem = (props: SkillTempProsp | SkillInsProsp) => {
 
   return (
     <div id={`skillItem${itemKey}`}>
-      <div className="skill-item" onClick={goSkillDetail}>
-        <div className="skill-item__header">
-          <div className="skill-item__profile">
+      <div className="skill-list-item" onClick={goSkillDetail}>
+        <div className="skill-list-item__header">
+          <div className="skill-list-item__profile">
             <Avatar size={40} shape="square" style={{ backgroundColor: '#00d0b6', borderRadius: 8 }}>
               {data?.displayName}
             </Avatar>
           </div>
-          <div className="skill-item__title">
-            <div className="skill-item__title-name">{data?.displayName}</div>
-            <div className="skill-item__title-info">
-              <span className="skill-item__title-info-item">
+          <div className="skill-list-item__title">
+            <div className="skill-list-item__title-name">{data?.displayName}</div>
+            <div className="skill-list-item__title-info">
+              <span className="skill-list-item__title-info-item">
                 <IconUser /> 99
               </span>
               <Divider type="vertical" />
-              <span className="skill-item__title-info-item">
+              <span className="skill-list-item__title-info-item">
                 <IconPlayCircle /> 1k
               </span>
             </div>
           </div>
         </div>
 
-        <div className="skill-item__desc">
+        <div className="skill-list-item__desc">
           <Typography.Paragraph ellipsis={{ rows: 3 }} style={{ lineHeight: 1.51 }}>
             {data?.description}
           </Typography.Paragraph>
         </div>
 
-        <div className="skill-item__action">
+        <div className="skill-list-item__action">
           {showExecute && (
             <IconPlayCircle
-              className="skill-item__action-icon"
+              className="skill-list-item__action-icon"
               style={{ strokeWidth: 3 }}
               onClick={(e) => handleClickInvoke(e)}
             />
@@ -106,7 +106,7 @@ export const SkillItem = (props: SkillTempProsp | SkillInsProsp) => {
             />
           ) : (
             <Button
-              className="skill-item__action-btn skill-installer-install"
+              className="skill-list-item__action-btn skill-installer-install"
               type="outline"
               onClick={(e) => {
                 e.stopPropagation();
