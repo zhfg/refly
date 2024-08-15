@@ -214,25 +214,25 @@ model Collection {
 /// User-defined skills.
 model SkillInstance {
   /// Primary key
-  pk          BigInt    @id @default(autoincrement())
+  pk               BigInt    @id @default(autoincrement())
   /// Skill id
-  skillId     String    @unique @map("skill_id")
+  skillId          String    @unique @map("skill_id")
   /// Skill template name
-  tplName     String    @default("") @map("skill_name")
+  tplName          String    @default("") @map("skill_name")
   /// Skill display name
-  displayName String    @default("") @map("display_name")
+  displayName      String    @default("") @map("display_name")
   /// Skill description
-  description String    @default("") @map("description")
+  description      String    @default("") @map("description")
   /// UID of skill owner
-  uid         String    @map("uid")
-  /// Workflow configuration (JSON)
-  config      String    @default("{}") @map("config")
+  uid              String    @map("uid")
+  /// Skill invocation config (JSON)
+  invocationConfig String    @default("{}") @map("invocation_config")
   /// Create timestamp
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
   /// Deletion timestamp
-  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt        DateTime? @map("deleted_at") @db.Timestamptz()
 
   @@index([uid, updatedAt])
   @@map("skill_instances")
@@ -249,12 +249,14 @@ model SkillTrigger {
   skillId         String    @map("skill_id")
   /// Owner UID
   uid             String    @map("uid")
-  /// Event entity type (required when triggerType is `event`)
-  eventEntityType String?   @map("event_entity_type")
-  /// Event type (required when triggerType is `event`)
-  eventType       String?   @map("event_type")
-  /// Crontab for cron trigger (required when triggerType is `cron`)
-  crontab         String?   @map("crontab")
+  /// Simple event name
+  simpleEventName String?   @map("simple_event_name")
+  /// Timer config (required when triggerType is `timer`)
+  timerConfig     String?   @map("timer_config")
+  /// Skill input
+  input           String?   @map("input")
+  /// Skill context
+  context         String?   @map("context")
   /// Whether this skill is enabled
   enabled         Boolean   @map("enabled")
   /// Create timestamp
@@ -353,28 +355,6 @@ model LabelInstance {
 
   @@index([entityType, entityId])
   @@map("label_instances")
-}
-
-model EventRecord {
-  /// Primary key
-  pk         BigInt   @id @default(autoincrement())
-  /// Event ID
-  eventId    String   @unique @map("event_id")
-  /// UID
-  uid        String   @map("uid")
-  /// Entity type related to this event
-  entityType String   @map("entity_type")
-  /// Entity ID related to this event
-  entityId   String   @map("entity_id")
-  /// Event type
-  eventType  String   @map("event_type")
-  /// Create timestamp
-  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  /// Update timestamp
-  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz()
-
-  @@index([uid, createdAt])
-  @@map("event_records")
 }
 
 enum MessageType {

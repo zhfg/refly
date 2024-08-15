@@ -67,13 +67,13 @@ export function createLLMChatMessage(content: string, type: MessageType): LLMCha
 }
 
 function validateSkillTriggerCreateParam(param: SkillTriggerCreateParam) {
-  if (param.triggerType === 'event') {
-    if (!param.eventType || !param.eventEntityType) {
+  if (param.triggerType === 'simpleEvent') {
+    if (!param.simpleEventName) {
       throw new BadRequestException('invalid event trigger config');
     }
-  } else if (param.triggerType === 'cron') {
-    if (!param.crontab) {
-      throw new BadRequestException('invalid cron trigger config');
+  } else if (param.triggerType === 'timer') {
+    if (!param.timerConfig) {
+      throw new BadRequestException('invalid timer trigger config');
     }
   }
 }
@@ -158,10 +158,6 @@ export class SkillService {
     }));
   }
 
-  isValidSkillName(name: string) {
-    return this.skillInventory.some((skill) => skill.name === name);
-  }
-
   async listSkillInstances(user: User, param: ListSkillInstancesData['query']) {
     const { skillId, page, pageSize } = param;
     return this.prisma.skillInstance.findMany({
@@ -175,20 +171,25 @@ export class SkillService {
   async createSkillInstance(user: User, param: CreateSkillInstanceRequest) {
     const { uid } = user;
     const { instanceList } = param;
+    const tplConfigMap = new Map<string, BaseSkill>();
 
     instanceList.forEach((instance) => {
-      if (!this.isValidSkillName(instance.tplName)) {
+      if (!instance.displayName) {
+        throw new BadRequestException('skill display name is required');
+      }
+      const tpl = this.skillInventory.find((tpl) => tpl.name === instance.tplName);
+      if (!tpl) {
         throw new BadRequestException(`skill ${instance.tplName} not found`);
       }
+      tplConfigMap.set(instance.tplName, tpl);
     });
 
     return this.prisma.skillInstance.createManyAndReturn({
       data: instanceList.map((instance) => ({
         skillId: genSkillID(),
         uid,
-        tplName: instance.tplName,
-        displayName: instance.displayName || 'Untitled Skill',
-        description: instance.description,
+        ...pick(instance, ['tplName', 'displayName', 'description']),
+        invocationConfig: JSON.stringify(tplConfigMap.get(instance.tplName)?.invocationConfig),
       })),
     });
   }
@@ -292,14 +293,12 @@ export class SkillService {
       await this.prisma.skillInstance.findMany({
         where: { uid: user.uid, deletedAt: null },
       })
-    ).map((s) => pick(s, ['skillId', 'tplName', 'displayName', 'config']));
+    ).map((s) => pick(s, ['skillId', 'tplName', 'displayName']));
 
     const config: SkillRunnableConfig = {
       configurable: {
-        ...JSON.parse(skill?.config ?? '{}'),
         ...param.context,
         convId: param.convId,
-        uid: user.uid,
         installedSkills,
       },
       user,
@@ -452,7 +451,6 @@ export class SkillService {
       user,
       convId: conversation?.convId,
       jobId: job?.jobId,
-      locale: param.context.locale,
     });
 
     // If human query is provided, add it to the beginning of the message list
@@ -463,7 +461,6 @@ export class SkillService {
         uid: user.uid,
         convId: conversation?.convId,
         jobId: job?.jobId,
-        locale: param.context.locale,
       });
     }
 
@@ -503,19 +500,32 @@ export class SkillService {
       data: param.triggerList.map((trigger) => ({
         uid,
         triggerId: genSkillTriggerID(),
-        ...pick(trigger, ['skillId', 'triggerType', 'crontab', 'eventEntityType', 'eventType']),
+        ...pick(trigger, ['skillId', 'triggerType', 'simpleEventName']),
+        ...{
+          timerConfig: trigger.timerConfig ? JSON.stringify(trigger.timerConfig) : undefined,
+          input: trigger.input ? JSON.stringify(trigger.input) : undefined,
+          context: trigger.context ? JSON.stringify(trigger.context) : undefined,
+        },
         enabled: !!trigger.enabled,
       })),
     });
   }
 
   async updateSkillTrigger(user: User, param: UpdateSkillTriggerRequest) {
+    const { uid } = user;
+    const { triggerId } = param;
+    if (!triggerId) {
+      throw new BadRequestException('trigger id is required');
+    }
     return this.prisma.skillTrigger.update({
-      where: { triggerId: param.triggerId, uid: user.uid, deletedAt: null },
+      where: { triggerId, uid, deletedAt: null },
       data: {
-        ...pick(param, ['triggerType', 'eventEntityType', 'eventType', 'crontab', 'enabled']),
-        crontab: param.crontab,
-        enabled: !!param.enabled,
+        ...pick(param, ['triggerType', 'enabled', 'simpleEventName']),
+        ...{
+          timerConfig: param.timerConfig ? JSON.stringify(param.timerConfig) : undefined,
+          input: param.input ? JSON.stringify(param.input) : undefined,
+          context: param.context ? JSON.stringify(param.context) : undefined,
+        },
       },
     });
   }

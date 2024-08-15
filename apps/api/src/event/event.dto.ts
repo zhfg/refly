@@ -1,8 +1,8 @@
-import { EntityType, EventType } from '@refly/openapi-schema';
+import { EntityType, SimpleEventName } from '@refly/openapi-schema';
 
-export interface ReportEventData {
+export interface SimpleEventData {
   uid: string;
+  name: SimpleEventName;
   entityType: EntityType;
   entityId: string;
-  eventType: EventType;
 }

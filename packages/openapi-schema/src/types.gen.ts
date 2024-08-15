@@ -237,12 +237,45 @@ export type SkillTemplate = {
 /**
  * Skill trigger type
  */
-export type SkillTriggerType = 'event' | 'cron';
+export type SkillTriggerType = 'timer' | 'simpleEvent';
 
 /**
- * Event type
+ * Simple event name
  */
-export type EventType = 'create' | 'update' | 'delete';
+export type SimpleEventName = 'onResourceReady';
+
+export type SimpleEvent = {
+  /**
+   * Simple event name
+   */
+  name: SimpleEventName;
+  /**
+   * Simple event display name (key is locale, value is display name)
+   */
+  displayName: {
+    [key: string]: unknown;
+  };
+  /**
+   * Context keys to provide
+   */
+  provideContextKeys: Array<SkillContextKey>;
+};
+
+export type TimerTriggerConfig = {
+  /**
+   * Time to run
+   */
+  datetime: string;
+  /**
+   * Repeat interval
+   */
+  repeat?: 'day' | 'week' | 'month' | 'year';
+};
+
+/**
+ * Repeat interval
+ */
+export type repeat = 'day' | 'week' | 'month' | 'year';
 
 /**
  * Skill triggers
@@ -261,17 +294,21 @@ export type SkillTrigger = {
    */
   triggerType: SkillTriggerType;
   /**
-   * Event entity type (only required when trigger type is `event`)
+   * Simple event name (only required when trigger type is `simpleEvent`)
    */
-  eventEntityType?: EntityType;
+  simpleEventName?: SimpleEventName;
   /**
-   * Event type (only required when trigger type is `event`)
+   * Timer config (only required when trigger type is `timer`)
    */
-  eventType?: EventType;
+  timerConfig?: TimerTriggerConfig;
   /**
-   * Cron expression
+   * Skill input
    */
-  crontab?: string;
+  input?: SkillInput;
+  /**
+   * Skill context
+   */
+  context?: SkillContext;
   /**
    * Trigger enabled
    */
@@ -312,6 +349,10 @@ export type SkillInstance = SkillMeta & {
    * Skill instance description
    */
   description?: string;
+  /**
+   * Skill invocation config
+   */
+  invocationConfig: SkillInvocationConfig;
   /**
    * Skill creation time
    */
@@ -1109,17 +1150,13 @@ export type SkillInput = {
   /**
    * User query
    */
-  query: string;
+  query?: string;
 };
 
 /**
  * Skill invocation context
  */
 export type SkillContext = {
-  /**
-   * User input locale
-   */
-  locale?: string;
   /**
    * List of resource IDs
    */
@@ -1142,6 +1179,32 @@ export type SkillContext = {
   urls?: Array<string>;
 };
 
+export type SkillInputKey = 'query';
+
+export type SkillContextKey = 'resourceIds' | 'collectionIds' | 'noteIds' | 'contentList' | 'urls';
+
+export type SkillInvocationRule = {
+  /**
+   * Field key
+   */
+  key: SkillInputKey | SkillContextKey;
+  /**
+   * Whether the key is required
+   */
+  required?: boolean;
+};
+
+export type SkillInvocationConfig = {
+  /**
+   * Skill input rules
+   */
+  inputRules: Array<SkillInvocationRule>;
+  /**
+   * Skill context rules
+   */
+  contextRules: Array<SkillInvocationRule>;
+};
+
 /**
  * Skill job status
  */
@@ -1151,7 +1214,7 @@ export type InvokeSkillRequest = {
   /**
    * Skill input
    */
-  input: SkillInput;
+  input?: SkillInput;
   /**
    * Skill invocation context
    */
@@ -1194,17 +1257,21 @@ export type SkillTriggerCreateParam = {
    */
   triggerType: SkillTriggerType;
   /**
-   * Event entity type (only required when trigger type is `event`)
+   * Simple event name (only required when trigger type is `simpleEvent`)
    */
-  eventEntityType?: EntityType;
+  simpleEventName?: SimpleEventName;
   /**
-   * Event type (only required when trigger type is `event`)
+   * Timer config (only required when trigger type is `timer`)
    */
-  eventType?: EventType;
+  timerConfig?: TimerTriggerConfig;
   /**
-   * Trigger crontab (only valid when event is `cron`)
+   * Skill input
    */
-  crontab?: string;
+  input?: SkillInput;
+  /**
+   * Skill invocation context
+   */
+  context?: SkillContext;
   /**
    * Whether this trigger is enabled
    */
@@ -1225,31 +1292,11 @@ export type CreateSkillTriggerResponse = BaseResponse & {
   data?: Array<SkillTrigger>;
 };
 
-export type UpdateSkillTriggerRequest = {
+export type UpdateSkillTriggerRequest = SkillTriggerCreateParam & {
   /**
-   * Trigger ID (only used for update)
+   * Trigger ID
    */
   triggerId: string;
-  /**
-   * Trigger type
-   */
-  triggerType?: SkillTriggerType;
-  /**
-   * Event entity type (only required when trigger type is `event`)
-   */
-  eventEntityType?: EntityType;
-  /**
-   * Event type (only required when trigger type is `event`)
-   */
-  eventType?: EventType;
-  /**
-   * Trigger crontab (only valid when event is `cron`)
-   */
-  crontab?: string;
-  /**
-   * Whether this trigger is enabled
-   */
-  enabled?: boolean;
 };
 
 export type UpdateSkillTriggerResponse = BaseResponse & {

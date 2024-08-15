@@ -1,7 +1,7 @@
 export const QUEUE_WEBLINK = 'weblink';
 export const QUEUE_RESOURCE = 'resource';
 export const QUEUE_SKILL = 'skill';
-export const QUEUE_EVENT = 'event';
+export const QUEUE_SIMPLE_EVENT = 'simpleEvent';
 
 export const CHANNEL_PROCESS_LINK = 'processLink';
 export const CHANNEL_PROCESS_LINK_BY_USER = 'processLinkByUser';

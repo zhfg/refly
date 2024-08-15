@@ -290,13 +290,52 @@ export const $SkillTemplate = {
 export const $SkillTriggerType = {
   type: 'string',
   description: 'Skill trigger type',
-  enum: ['event', 'cron'],
+  enum: ['timer', 'simpleEvent'],
 } as const;
 
-export const $EventType = {
+export const $SimpleEventName = {
   type: 'string',
-  description: 'Event type',
-  enum: ['create', 'update', 'delete'],
+  description: 'Simple event name',
+  enum: ['onResourceReady'],
+} as const;
+
+export const $SimpleEvent = {
+  type: 'object',
+  required: ['name', 'displayName', 'provideContextKeys'],
+  properties: {
+    name: {
+      description: 'Simple event name',
+      $ref: '#/components/schemas/SimpleEventName',
+    },
+    displayName: {
+      type: 'object',
+      description: 'Simple event display name (key is locale, value is display name)',
+    },
+    provideContextKeys: {
+      type: 'array',
+      description: 'Context keys to provide',
+      items: {
+        $ref: '#/components/schemas/SkillContextKey',
+      },
+    },
+  },
+} as const;
+
+export const $TimerTriggerConfig = {
+  type: 'object',
+  required: ['datetime'],
+  properties: {
+    datetime: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Time to run',
+    },
+    repeat: {
+      type: 'string',
+      description: 'Repeat interval',
+      enum: ['day', 'week', 'month', 'year'],
+    },
+  },
 } as const;
 
 export const $SkillTrigger = {
@@ -318,18 +357,21 @@ export const $SkillTrigger = {
       description: 'Trigger type',
       $ref: '#/components/schemas/SkillTriggerType',
     },
-    eventEntityType: {
-      description: 'Event entity type (only required when trigger type is `event`)',
-      $ref: '#/components/schemas/EntityType',
+    simpleEventName: {
+      description: 'Simple event name (only required when trigger type is `simpleEvent`)',
+      $ref: '#/components/schemas/SimpleEventName',
     },
-    eventType: {
-      description: 'Event type (only required when trigger type is `event`)',
-      $ref: '#/components/schemas/EventType',
+    timerConfig: {
+      description: 'Timer config (only required when trigger type is `timer`)',
+      $ref: '#/components/schemas/TimerTriggerConfig',
     },
-    crontab: {
-      type: 'string',
-      description: 'Cron expression',
-      example: '0 0 * * * *',
+    input: {
+      description: 'Skill input',
+      $ref: '#/components/schemas/SkillInput',
+    },
+    context: {
+      description: 'Skill context',
+      $ref: '#/components/schemas/SkillContext',
     },
     enabled: {
       type: 'boolean',
@@ -378,11 +420,15 @@ export const $SkillInstance = {
     },
     {
       type: 'object',
-      required: ['createdAt', 'updatedAt'],
+      required: ['createdAt', 'updatedAt', 'invocationConfig'],
       properties: {
         description: {
           type: 'string',
           description: 'Skill instance description',
+        },
+        invocationConfig: {
+          description: 'Skill invocation config',
+          $ref: '#/components/schemas/SkillInvocationConfig',
         },
         createdAt: {
           type: 'string',
@@ -1605,7 +1651,6 @@ export const $DeleteSkillInstanceRequest = {
 export const $SkillInput = {
   type: 'object',
   description: 'Skill input',
-  required: ['query'],
   properties: {
     query: {
       type: 'string',
@@ -1618,10 +1663,6 @@ export const $SkillContext = {
   type: 'object',
   description: 'Skill invocation context',
   properties: {
-    locale: {
-      type: 'string',
-      description: 'User input locale',
-    },
     resourceIds: {
       type: 'array',
       description: 'List of resource IDs',
@@ -1660,6 +1701,60 @@ export const $SkillContext = {
   },
 } as const;
 
+export const $SkillInputKey = {
+  type: 'string',
+  enum: ['query'],
+} as const;
+
+export const $SkillContextKey = {
+  type: 'string',
+  enum: ['resourceIds', 'collectionIds', 'noteIds', 'contentList', 'urls'],
+} as const;
+
+export const $SkillInvocationRule = {
+  type: 'object',
+  required: ['key'],
+  properties: {
+    key: {
+      type: 'string',
+      description: 'Field key',
+      oneOf: [
+        {
+          $ref: '#/components/schemas/SkillInputKey',
+        },
+        {
+          $ref: '#/components/schemas/SkillContextKey',
+        },
+      ],
+    },
+    required: {
+      type: 'boolean',
+      description: 'Whether the key is required',
+    },
+  },
+} as const;
+
+export const $SkillInvocationConfig = {
+  type: 'object',
+  required: ['inputRules', 'contextRules'],
+  properties: {
+    inputRules: {
+      type: 'array',
+      description: 'Skill input rules',
+      items: {
+        $ref: '#/components/schemas/SkillInvocationRule',
+      },
+    },
+    contextRules: {
+      type: 'array',
+      description: 'Skill context rules',
+      items: {
+        $ref: '#/components/schemas/SkillInvocationRule',
+      },
+    },
+  },
+} as const;
+
 export const $SkillJobStatus = {
   type: 'string',
   description: 'Skill job status',
@@ -1668,7 +1763,6 @@ export const $SkillJobStatus = {
 
 export const $InvokeSkillRequest = {
   type: 'object',
-  required: ['input'],
   properties: {
     input: {
       description: 'Skill input',
@@ -1744,18 +1838,21 @@ export const $SkillTriggerCreateParam = {
       description: 'Trigger type',
       $ref: '#/components/schemas/SkillTriggerType',
     },
-    eventEntityType: {
-      description: 'Event entity type (only required when trigger type is `event`)',
-      $ref: '#/components/schemas/EntityType',
+    simpleEventName: {
+      description: 'Simple event name (only required when trigger type is `simpleEvent`)',
+      $ref: '#/components/schemas/SimpleEventName',
     },
-    eventType: {
-      description: 'Event type (only required when trigger type is `event`)',
-      $ref: '#/components/schemas/EventType',
+    timerConfig: {
+      description: 'Timer config (only required when trigger type is `timer`)',
+      $ref: '#/components/schemas/TimerTriggerConfig',
     },
-    crontab: {
-      type: 'string',
-      description: 'Trigger crontab (only valid when event is `cron`)',
-      example: '0 0 1 * *',
+    input: {
+      description: 'Skill input',
+      $ref: '#/components/schemas/SkillInput',
+    },
+    context: {
+      description: 'Skill invocation context',
+      $ref: '#/components/schemas/SkillContext',
     },
     enabled: {
       type: 'boolean',
@@ -1799,36 +1896,22 @@ export const $CreateSkillTriggerResponse = {
 } as const;
 
 export const $UpdateSkillTriggerRequest = {
-  type: 'object',
-  required: ['triggerId'],
-  properties: {
-    triggerId: {
-      type: 'string',
-      description: 'Trigger ID (only used for update)',
-      example: 'tr-g30e1b80b5g1itbemc0g5jj3',
+  allOf: [
+    {
+      $ref: '#/components/schemas/SkillTriggerCreateParam',
     },
-    triggerType: {
-      description: 'Trigger type',
-      $ref: '#/components/schemas/SkillTriggerType',
+    {
+      type: 'object',
+      required: ['triggerId'],
+      properties: {
+        triggerId: {
+          type: 'string',
+          description: 'Trigger ID',
+          example: 'tr-g30e1b80b5g1itbemc0g5jj3',
+        },
+      },
     },
-    eventEntityType: {
-      description: 'Event entity type (only required when trigger type is `event`)',
-      $ref: '#/components/schemas/EntityType',
-    },
-    eventType: {
-      description: 'Event type (only required when trigger type is `event`)',
-      $ref: '#/components/schemas/EventType',
-    },
-    crontab: {
-      type: 'string',
-      description: 'Trigger crontab (only valid when event is `cron`)',
-      example: '0 0 1 * *',
-    },
-    enabled: {
-      type: 'boolean',
-      description: 'Whether this trigger is enabled',
-    },
-  },
+  ],
 } as const;
 
 export const $UpdateSkillTriggerResponse = {

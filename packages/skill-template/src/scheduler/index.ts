@@ -9,7 +9,7 @@ import { HumanMessage } from '@langchain/core/messages';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { ToolMessage } from '@langchain/core/messages';
-import { SkillMeta } from '@refly/openapi-schema';
+import { SkillInvocationConfig, SkillMeta } from '@refly/openapi-schema';
 import { ToolCall } from '@langchain/core/dist/messages/tool';
 import { randomUUID } from 'node:crypto';
 import { createSkillInventory } from '../inventory';
@@ -32,6 +32,11 @@ export class Scheduler extends BaseSkill {
   displayName = {
     en: 'Scheduler',
     'zh-CN': 'Refly 知识管家',
+  };
+
+  invocationConfig: SkillInvocationConfig = {
+    inputRules: [{ key: 'query', required: true }],
+    contextRules: [],
   };
 
   description = "Inference user's intent and run related skill";

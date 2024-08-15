@@ -17,10 +17,11 @@ import {
   UpsertNoteRequest,
   User,
 } from '@refly/openapi-schema';
-import { CHANNEL_FINALIZE_RESOURCE, QUEUE_RESOURCE } from '../utils';
+import { CHANNEL_FINALIZE_RESOURCE, QUEUE_SIMPLE_EVENT, QUEUE_RESOURCE } from '../utils';
 import { genCollectionID, genResourceID, cleanMarkdownForIngest, genNoteID } from '@refly/utils';
 import { FinalizeResourceParam } from './knowledge.dto';
 import { pick, omit } from '../utils';
+import { SimpleEventData } from '@/event/event.dto';
 
 @Injectable()
 export class KnowledgeService {
@@ -31,6 +32,7 @@ export class KnowledgeService {
     private minio: MinioService,
     private ragService: RAGService,
     @InjectQueue(QUEUE_RESOURCE) private queue: Queue<FinalizeResourceParam>,
+    @InjectQueue(QUEUE_SIMPLE_EVENT) private simpleEventQueue: Queue<SimpleEventData>,
   ) {}
 
   async listCollections(user: User, params: ListCollectionsData['query']) {
@@ -315,6 +317,12 @@ export class KnowledgeService {
 
     try {
       await this.indexResource(user, param);
+      await this.simpleEventQueue.add({
+        entityType: 'resource',
+        entityId: param.resourceId,
+        name: 'onResourceReady',
+        uid: user.uid,
+      });
     } catch (err) {
       console.error(err);
       this.logger.error(`finalize resource error: ${err}`);

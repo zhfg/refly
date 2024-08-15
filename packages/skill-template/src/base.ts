@@ -6,13 +6,14 @@ import { StructuredTool } from '@langchain/core/tools';
 import { StateGraphArgs } from '@langchain/langgraph';
 import { RunnableConfig } from '@langchain/core/runnables';
 import { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
-import { SkillContext, SkillInput, SkillMeta, User } from '@refly/openapi-schema';
+import { SkillContext, SkillInput, SkillInvocationConfig, SkillMeta, User } from '@refly/openapi-schema';
 import { EventEmitter } from 'node:stream';
 import { randomUUID } from 'node:crypto';
 import { SkillEvent } from '@refly/common-types';
 
 export abstract class BaseSkill extends StructuredTool {
   abstract displayName: Record<string, string>;
+  abstract invocationConfig: SkillInvocationConfig;
   abstract graphState: StateGraphArgs<BaseSkillState>['channels'];
 
   constructor(protected engine: SkillEngine, protected params?: BaseToolParams) {
@@ -114,6 +115,7 @@ export interface SkillRunnableConfig extends RunnableConfig {
   configurable?: SkillContext & {
     spanId?: string;
     convId?: string;
+    locale?: string;
     selectedSkill?: SkillMeta;
     currentSkill?: SkillMeta;
     chatHistory?: BaseMessage[];
