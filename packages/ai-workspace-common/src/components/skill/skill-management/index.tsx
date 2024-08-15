@@ -26,7 +26,7 @@ export const SkillManagement = () => {
       <div className="skill-recommend-and-manage">
         <div className="skill-recommend-list">
           {skillTemplates.map((item, index) => (
-            <SkillItem key={index} source="instance" data={item} isInstalled={checkIsInstalled(item)} />
+            <SkillItem key={index} itemKey={index} source="instance" data={item} isInstalled={checkIsInstalled(item)} />
           ))}
         </div>
       </div>

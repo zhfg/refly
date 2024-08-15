@@ -13,8 +13,12 @@ import './index.scss';
 import { SkillJob } from '@refly/openapi-schema';
 
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
-import { List, Empty, Typography } from '@arco-design/web-react';
-import { IconLeft, IconPlayArrow, IconDelete } from '@arco-design/web-react/icon';
+import { List, Empty, Typography, Grid, Divider } from '@arco-design/web-react';
+import { IconCheckCircle, IconLoading, IconCloseCircle, IconSchedule, IconDelete } from '@arco-design/web-react/icon';
+
+const Row = Grid.Row;
+const Col = Grid.Col;
+
 interface SkillJobsProps {
   reloadList?: boolean;
   setReloadList?: (val: boolean) => void;
@@ -45,6 +49,52 @@ export const SkillJobs = (props: SkillJobsProps) => {
     }
   }, [reloadList]);
 
+  const JobStatus = (props: { status: string }) => {
+    switch (props.status) {
+      case 'finish':
+        return <IconCheckCircle style={{ color: '#00B42A' }} />;
+      case 'failed':
+        return <IconCloseCircle style={{ color: '#D80101' }} />;
+      case 'running':
+        return <IconLoading style={{ color: '#C9A300' }} />;
+      default:
+        return null;
+    }
+  };
+
+  const JobCard = (props: { job: SkillJob }) => {
+    const { job } = props;
+    const { collectionIds, noteIds, resourceIds, urls } = job.context;
+    return (
+      <div className="skill-jobs__card">
+        <Row align="center" justify="center">
+          <Col span={2} className="skill-jobs__card-col">
+            <JobStatus status={job.jobStatus} />
+          </Col>
+          <Col span={1} className="skill-jobs__card-col">
+            <Divider type="vertical" />
+          </Col>
+          <Col span={4}>
+            <div className="skill-jobs__card-event">
+              <IconSchedule />
+              <Typography.Paragraph ellipsis={{ rows: 1 }} style={{ marginBottom: 0, marginLeft: 8 }}>
+                每天 21:00
+              </Typography.Paragraph>
+            </div>
+          </Col>
+          <Col span={1}>
+            <Divider type="vertical" />
+          </Col>
+          <Col span={16}>
+            <div className="skill-jobs__card-right">
+              <div>{job.skillDisplayName}</div>
+            </div>
+          </Col>
+        </Row>
+      </div>
+    );
+  };
+
   if (dataList.length === 0) {
     return <Empty description="暂无运行记录" />;
   }
@@ -53,6 +103,7 @@ export const SkillJobs = (props: SkillJobsProps) => {
       className="skill-jobs"
       wrapperStyle={{ width: '100%' }}
       bordered={false}
+      split={false}
       pagination={false}
       dataSource={dataList}
       scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
@@ -63,11 +114,10 @@ export const SkillJobs = (props: SkillJobsProps) => {
             padding: '0',
             width: '100%',
           }}
-          className="skill-jobs__list-item"
           actionLayout="vertical"
           onClick={() => {}}
         >
-          {item.skillDisplayName}
+          <JobCard job={item} />
         </List.Item>
       )}
     />

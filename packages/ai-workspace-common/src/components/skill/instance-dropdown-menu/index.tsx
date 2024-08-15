@@ -1,12 +1,15 @@
 import { IconDelete, IconMore, IconEdit } from '@arco-design/web-react/icon';
 import { Dropdown, Menu, Button, Popconfirm, Message } from '@arco-design/web-react';
 import { useState } from 'react';
+import { useLocation, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
+import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 // 类型
 import { SkillInstance } from '@refly/openapi-schema';
 // 请求
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import { useTranslation } from 'react-i18next';
+import SkillDetail from '@refly-packages/ai-workspace-common/components/skill/skill-detail';
 
 const iconStyle = {
   marginRight: 8,
@@ -65,6 +68,10 @@ export const InstanceDropdownMenu = (props: InstanceDropdownMenuProps) => {
   const { data, postDeleteList, setUpdateModal, getSkillItemPopupContainer } = props;
   const [popupVisible, setPopupVisible] = useState(false);
   const { t } = useTranslation();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const skillId = searchParams.get('skillId') as string;
+  const skillStore = useSkillStore();
 
   const handlUpdateInstance = (e: MouseEvent) => {
     e.stopPropagation();
@@ -85,6 +92,12 @@ export const InstanceDropdownMenu = (props: InstanceDropdownMenuProps) => {
 
     if (postDeleteList) {
       postDeleteList(data);
+    }
+    if (location.pathname === '/skill-detail' && skillId === data.skillId) {
+      window.history.back();
+      if (skillStore.skillManagerModalVisible) {
+        skillStore.setSkillManagerModalVisible(false);
+      }
     }
   };
 

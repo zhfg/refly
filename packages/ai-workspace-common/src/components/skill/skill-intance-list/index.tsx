@@ -12,7 +12,10 @@ import { SkillInstance } from '@refly/openapi-schema';
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
 import { List, Empty } from '@arco-design/web-react';
 
-export const SkillInstanceList = () => {
+interface SkillInstanceListProps {
+  canGoDetail?: boolean;
+}
+export const SkillInstanceList = (props: SkillInstanceListProps) => {
   const { dataList, loadMore, setDataList, hasMore, isRequesting, reload } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listSkillInstances({
@@ -59,6 +62,7 @@ export const SkillInstanceList = () => {
             itemKey={key}
             data={item}
             source="instance"
+            canGoDetail={props.canGoDetail}
             isInstalled={true}
             showExecute={true}
             refreshList={reload}

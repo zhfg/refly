@@ -74,10 +74,6 @@ const SkillDetail = () => {
     }
   };
 
-  const postDelete = () => {
-    window.history.back();
-  };
-
   const [invokeModalVisible, setInvokeModalVisible] = useState(false);
   const handleSkillInvoke = () => {
     setInvokeModalVisible(true);
@@ -120,15 +116,7 @@ const SkillDetail = () => {
                   <IconPlayArrow />
                   {t('skill.skillDetail.run')}
                 </Button>
-                <InstanceDropdownMenu
-                  data={skillDetail}
-                  setUpdateModal={(visible) => setVisible(visible)}
-                  postDeleteList={postDelete}
-                />
-                {/* <Button style={{ marginLeft: 12, borderRadius: 4 }}>
-                  <IconDelete />
-                  {t('skill.skillDetail.delete')}
-                </Button> */}
+                <InstanceDropdownMenu data={skillDetail} setUpdateModal={(visible) => setVisible(visible)} />
               </div>
             </div>
           </div>

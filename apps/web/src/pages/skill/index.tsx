@@ -5,14 +5,18 @@ import { useTranslation } from "react-i18next"
 import { SkillInstanceList } from "@refly/ai-workspace-common/components/skill/skill-intance-list"
 import { SkillTemplateList } from "@refly/ai-workspace-common/components/skill/skill-template-list"
 
+import { useSearchParams } from "@refly-packages/ai-workspace-common/utils/router"
 import "./index.scss"
 
 import { Radio } from "@arco-design/web-react"
 
 const RadioGroup = Radio.Group
 
-const ContentHeader = (props: { setVal: (val: string) => void }) => {
-  const { setVal } = props
+const ContentHeader = (props: {
+  val: string
+  setVal: (val: string) => void
+}) => {
+  const { setVal, val } = props
   const { t } = useTranslation()
   return (
     <div className="skill-list__header flex items-center">
@@ -20,7 +24,7 @@ const ContentHeader = (props: { setVal: (val: string) => void }) => {
         type="button"
         size="large"
         className="skill-list__tabs"
-        defaultValue="intance"
+        defaultValue={val}
         onChange={val => setVal(val)}>
         <Radio value="intance" style={{ whiteSpace: "nowrap" }}>
           {t("skill.tab.skillInstances")}
@@ -34,13 +38,21 @@ const ContentHeader = (props: { setVal: (val: string) => void }) => {
 }
 
 const Skill = () => {
-  const [val, setVal] = useState("intance")
+  const [searchParams] = useSearchParams()
+  const tab = searchParams.get("tab") as string
+  const [val, setVal] = useState(
+    ["template", "instance"].includes(tab) ? tab : "intance",
+  )
 
   return (
     <div className="skill-list">
-      <ContentHeader setVal={setVal} />
+      <ContentHeader setVal={setVal} val={val} />
       <div className="skill-list__content">
-        {val === "intance" ? <SkillInstanceList /> : <SkillTemplateList />}
+        {val === "intance" ? (
+          <SkillInstanceList canGoDetail={true} />
+        ) : (
+          <SkillTemplateList />
+        )}
       </div>
     </div>
   )

@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
-import { Avatar, Button, Typography, Divider, Form, Input } from '@arco-design/web-react';
+import { Avatar, Button, Typography, Divider } from '@arco-design/web-react';
 import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
 import { InstanceDropdownMenu } from '@refly-packages/ai-workspace-common/components/skill/instance-dropdown-menu';
 import { NewSkillInstanceModal } from '@refly-packages/ai-workspace-common/components/skill/new-instance-modal';
 
-import { IconUser, IconPlayCircle, IconPlus, IconDelete } from '@arco-design/web-react/icon';
+import { IconUser, IconPlayCircle, IconPlus } from '@arco-design/web-react/icon';
 
 // 样式
 import './skill-item.scss';
@@ -14,15 +14,13 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { InstanceInvokeModal } from '@refly-packages/ai-workspace-common/components/skill/instance-invoke-modal';
 
-const FormItem = Form.Item;
-const TextArea = Input.TextArea;
-
 type source = 'instance' | 'template';
 interface SkillItemProps {
   source: source;
   itemKey: number;
   isInstalled: boolean;
   showExecute?: boolean;
+  canGoDetail?: boolean;
   refreshList?: () => void;
   postDeleteList?: (data: SkillInstance) => void;
 }
@@ -37,7 +35,7 @@ export const SkillItem = (props: SkillTempProsp | SkillInsProsp) => {
   const navigate = useNavigate();
   const { localSettings } = userStore;
   const { handleAddSkillInstance, handleRemoveSkillInstance } = useSkillManagement();
-  const { data, isInstalled, showExecute, source, itemKey, refreshList, postDeleteList } = props;
+  const { data, isInstalled, showExecute, source, itemKey, canGoDetail, refreshList, postDeleteList } = props;
 
   const getSkillItemPopupContainer = () => {
     const elem = document.getElementById(`skillItem${itemKey}`);
@@ -47,7 +45,7 @@ export const SkillItem = (props: SkillTempProsp | SkillInsProsp) => {
 
   const goSkillDetail = () => {
     const { skillId } = data;
-    if (source === 'template' || !skillId) {
+    if (source === 'template' || !skillId || !canGoDetail) {
       return;
     }
     navigate(`/skill-detail?skillId=${skillId}`);
