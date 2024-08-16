@@ -4,21 +4,6 @@ import { sendToBackground } from '@refly-packages/ai-workspace-common/utils/exte
 let isArc: boolean | undefined;
 export const checkBrowserArc = async () => {
   try {
-    if (isArc) {
-      sendToBackground({
-        type: 'registerEvent',
-        name: 'unregisterSidePanel',
-        body: {
-          isArc: true,
-        },
-        source: getRuntime(),
-      });
-    }
-
-    if (isArc !== undefined) {
-      return isArc;
-    }
-
     console.log('parent', window.parent);
     isArc = getComputedStyle(window.parent?.document.documentElement).getPropertyValue('--arc-palette-title')
       ? true

@@ -13,6 +13,8 @@ export const useToggleCopilot = () => {
     const isCopilotOpen = isCopilotOpenRef.current;
     isCopilotOpenRef.current = !isCopilotOpen;
 
+    await handleCheckArcBrowser();
+
     if (isArcBrowserRef.current) {
       sendMessage({
         type: 'others',
