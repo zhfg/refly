@@ -23,6 +23,8 @@ tags:
     description: User management endpoints
   - name: search
     description: Search related endpoints
+  - name: misc
+    description: Miscellaneous endpoints
 paths:
   /knowledge/resource/list:
     get:
@@ -1053,6 +1055,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SearchResponse'
+  /misc/scrape:
+    post:
+      tags:
+        - misc
+      summary: Scrape
+      description: Scrape a weblink
+      operationId: scrape
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScrapeWeblinkRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScrapeWeblinkResponse'
 components:
   schemas:
     User:
@@ -2668,6 +2690,34 @@ components:
               description: Search result
               items:
                 $ref: '#/components/schemas/SearchResult'
+    ScrapeWeblinkRequest:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          description: Weblink URL
+    ScrapeWeblinkResult:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Weblink title
+        description:
+          type: string
+          description: Weblink description
+        image:
+          type: string
+          description: Weblink image
+    ScrapeWeblinkResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              description: Weblink scrape result
+              $ref: '#/components/schemas/ScrapeWeblinkResult'
   securitySchemes:
     api_key:
       type: apiKey

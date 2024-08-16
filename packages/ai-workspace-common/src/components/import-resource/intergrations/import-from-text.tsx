@@ -1,43 +1,20 @@
-import {
-  Button,
-  Divider,
-  Input,
-  List,
-  Avatar,
-  Checkbox,
-  Skeleton,
-  Select,
-  Message as message,
-  Affix,
-} from '@arco-design/web-react';
-import { IconLink, IconBranch, IconClose, IconPen } from '@arco-design/web-react/icon';
-import classNames from 'classnames';
+import { Button, Divider, Input, Select, Message as message, Affix } from '@arco-design/web-react';
+import { IconPen } from '@arco-design/web-react/icon';
 import { useEffect, useState } from 'react';
-import { RateLimiterMemory } from 'rate-limiter-flexible';
-import cherrio from 'cheerio';
 
 // utils
-import { isUrl } from '@refly/utils/isUrl';
-import { genUniqueId } from '@refly-packages/utils/id';
-import { LinkMeta, useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
+import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import {
-  BatchCreateResourceData,
-  Collection,
-  CreateResourceData,
-  SearchResult,
-  UpsertResourceRequest,
-} from '@refly/openapi-schema';
+import { SearchResult, UpsertResourceRequest } from '@refly/openapi-schema';
 import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-or-search-list';
-import { useReloadListState } from '@refly/ai-workspace-common/stores/reload-list-state';
+import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 const { TextArea } = Input;
 const Option = Select.Option;
 
 export const ImportFromText = () => {
-  const [linkStr, setLinkStr] = useState('');
   const importResourceStore = useImportResourceStore();
 
   const reloadListState = useReloadListState();
@@ -47,10 +24,7 @@ export const ImportFromText = () => {
   //
   const [saveLoading, setSaveLoading] = useState(false);
 
-  // search
-  const [searchValue, setSearchValue] = useState('new-collection');
-
-  const { loadMore, hasMore, dataList, isRequesting, currentPage, handleValueChange, mode } = useFetchOrSearchList({
+  const { loadMore, hasMore, dataList, isRequesting, handleValueChange, mode } = useFetchOrSearchList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listCollections({
         query: {
@@ -100,7 +74,6 @@ export const ImportFromText = () => {
         reloadListState.setReloadKnowledgeBaseList(true);
         reloadListState.setReloadResourceList(true);
       }
-      setLinkStr('');
     } catch (err) {
       message.error('保存失败');
     }
@@ -164,7 +137,7 @@ export const ImportFromText = () => {
               className={'kg-selector'}
               defaultValue={`${kbId || 'new-collection'}`}
               onInputValueChange={(value) => {
-                handleValueChange(value);
+                handleValueChange(value, ['collection']);
               }}
               onChange={(value) => {
                 console.log('value', value);

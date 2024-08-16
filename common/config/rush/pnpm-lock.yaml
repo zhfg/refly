@@ -21,7 +21,7 @@ importers:
         version: 2.13.0(y-protocols@1.0.6)(yjs@13.6.16)
       '@langchain/community':
         specifier: ~0.2.3
-        version: 0.2.12(@qdrant/js-client-rest@1.9.0)(ioredis@5.4.1)(jsonwebtoken@9.0.2)(lodash@4.17.21)(redis@4.6.13)(ws@8.17.0)
+        version: 0.2.12(@qdrant/js-client-rest@1.9.0)(cheerio@1.0.0)(ioredis@5.4.1)(jsonwebtoken@9.0.2)(lodash@4.17.21)(redis@4.6.13)(ws@8.17.0)
       '@langchain/core':
         specifier: ~0.2.2
         version: 0.2.7(langchain@0.2.7)
@@ -118,6 +118,9 @@ importers:
       bull:
         specifier: ^4.12.2
         version: 4.12.2
+      cheerio:
+        specifier: ~1.0.0
+        version: 1.0.0
       cookie-parser:
         specifier: ~1.4.6
         version: 1.4.6
@@ -138,7 +141,7 @@ importers:
         version: 9.0.2
       langchain:
         specifier: ~0.2.2
-        version: 0.2.7(ioredis@5.4.1)(redis@4.6.13)(ws@8.17.0)
+        version: 0.2.7(cheerio@1.0.0)(ioredis@5.4.1)(redis@4.6.13)(ws@8.17.0)
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -600,9 +603,6 @@ importers:
       aos:
         specifier: ^3.0.0-beta.6
         version: 3.0.0-beta.6
-      cheerio:
-        specifier: ~1.0.0-rc.12
-        version: 1.0.0-rc.12
       classnames:
         specifier: ^2.5.1
         version: 2.5.1
@@ -1218,9 +1218,6 @@ importers:
       aos:
         specifier: ^3.0.0-beta.6
         version: 3.0.0-beta.6
-      cheerio:
-        specifier: ~1.0.0-rc.12
-        version: 1.0.0-rc.12
       classnames:
         specifier: ^2.5.1
         version: 2.5.1
@@ -1883,7 +1880,7 @@ importers:
         version: 2.2.5
       langchain:
         specifier: 0.2.7
-        version: 0.2.7(ioredis@5.4.1)(redis@4.6.13)(ws@8.17.0)
+        version: 0.2.7(cheerio@1.0.0)(ioredis@5.4.1)(redis@4.6.13)(ws@8.17.0)
       tsx:
         specifier: ^4.6.2
         version: 4.6.2
@@ -4347,7 +4344,7 @@ packages:
     resolution: {integrity: sha512-4JQNk+3mVzK3xh2rqd6RB4J46qUR19azEHBneZyTZM+c456qOrbbM/5xcR8huNCCcbVt7+UmizG6GuUvPvKUYg==}
     dev: true
 
-  /@langchain/community@0.2.12(@qdrant/js-client-rest@1.9.0)(ioredis@5.4.1)(jsonwebtoken@9.0.2)(lodash@4.17.21)(redis@4.6.13)(ws@8.17.0):
+  /@langchain/community@0.2.12(@qdrant/js-client-rest@1.9.0)(cheerio@1.0.0)(ioredis@5.4.1)(jsonwebtoken@9.0.2)(lodash@4.17.21)(redis@4.6.13)(ws@8.17.0):
     resolution: {integrity: sha512-bFhWNyPXqd/V2fduJ6BWipEkAQQHLnGs6IqKmxJMf7FvhN16DfhWK/PpPrNUltE/b5cl5gDuTzdpEsyvuw7fHg==}
     engines: {node: '>=18'}
     peerDependencies:
@@ -4717,12 +4714,13 @@ packages:
       '@langchain/openai': 0.1.3(langchain@0.2.3)
       '@qdrant/js-client-rest': 1.9.0(typescript@5.3.3)
       binary-extensions: 2.3.0
+      cheerio: 1.0.0
       expr-eval: 2.0.2
       flat: 5.0.2
       ioredis: 5.4.1
       js-yaml: 4.1.0
       jsonwebtoken: 9.0.2
-      langchain: 0.2.3(ioredis@5.4.1)(redis@4.6.13)(ws@8.17.0)
+      langchain: 0.2.3(cheerio@1.0.0)(ioredis@5.4.1)(redis@4.6.13)(ws@8.17.0)
       langsmith: 0.1.32(@langchain/core@0.2.7)(langchain@0.2.3)
       lodash: 4.17.21
       redis: 4.6.13
@@ -5115,7 +5113,7 @@ packages:
       expr-eval: 2.0.2
       flat: 5.0.2
       js-yaml: 4.1.0
-      langchain: 0.2.3(ioredis@5.4.1)(redis@4.6.13)(ws@8.17.0)
+      langchain: 0.2.3(cheerio@1.0.0)(ioredis@5.4.1)(redis@4.6.13)(ws@8.17.0)
       langsmith: 0.1.32(@langchain/core@0.2.7)(langchain@0.2.3)
       uuid: 9.0.1
       zod: 3.23.8
@@ -11272,17 +11270,21 @@ packages:
       domutils: 3.1.0
     dev: false
 
-  /cheerio@1.0.0-rc.12:
-    resolution: {integrity: sha512-VqR8m68vM46BNnuZ5NtnGBKIE/DfN0cRIzg9n40EIq9NOv90ayxLBXA8fXC5gquFRGJSTRqBq25Jt2ECLR431Q==}
-    engines: {node: '>= 6'}
+  /cheerio@1.0.0:
+    resolution: {integrity: sha512-quS9HgjQpdaXOvsZz82Oz7uxtXiy6UIsIQcpBj7HRw2M63Skasm9qlDocAM7jNuaxdhpPU7c4kJN+gA5MCu4ww==}
+    engines: {node: '>=18.17'}
     dependencies:
       cheerio-select: 2.1.0
       dom-serializer: 2.0.0
       domhandler: 5.0.3
       domutils: 3.1.0
-      htmlparser2: 8.0.2
+      encoding-sniffer: 0.2.0
+      htmlparser2: 9.1.0
       parse5: 7.1.2
       parse5-htmlparser2-tree-adapter: 7.0.0
+      parse5-parser-stream: 7.1.2
+      undici: 6.19.7
+      whatwg-mimetype: 4.0.0
     dev: false
 
   /chokidar@3.5.3:
@@ -12271,6 +12273,13 @@ packages:
   /encodeurl@1.0.2:
     resolution: {integrity: sha512-TPJXq8JqFaVYm2CWmPvnP2Iyo4ZSM7/QKcSmuMLDObfpH5fi7RUGmd/rTDf+rut/saiDiQEeVTNgAmJEdAOx0w==}
     engines: {node: '>= 0.8'}
+
+  /encoding-sniffer@0.2.0:
+    resolution: {integrity: sha512-ju7Wq1kg04I3HtiYIOrUrdfdDvkyO9s5XM8QAj/bN61Yo/Vb4vgJxy5vi4Yxk01gWHbrofpPtpxM8bKger9jhg==}
+    dependencies:
+      iconv-lite: 0.6.3
+      whatwg-encoding: 3.1.1
+    dev: false
 
   /end-of-stream@1.4.4:
     resolution: {integrity: sha512-+uw1inIHVPQoaVuHzRyXd21icM+cnt4CzD5rW+NC1wjOUSTOs+Te7FOv7AhN7vS9x/oIyhLP5PR1H+phQAHu5Q==}
@@ -14060,15 +14069,6 @@ packages:
       void-elements: 3.1.0
     dev: false
 
-  /htmlparser2@8.0.2:
-    resolution: {integrity: sha512-GYdjWKDkbRLkZ5geuHs5NY1puJ+PXwP7+fHPRz06Eirsb9ugf6d8kkXav6ADhcODhFFPMIXyxkxSuMf3D6NCFA==}
-    dependencies:
-      domelementtype: 2.3.0
-      domhandler: 5.0.3
-      domutils: 3.1.0
-      entities: 4.5.0
-    dev: false
-
   /htmlparser2@9.1.0:
     resolution: {integrity: sha512-5zfg6mHUoaer/97TxnGpxmbR7zJtPwIYFMZ/H5ucTlPZhKvtum05yiPK3Mgai3a0DyVxv7qYqoweaEd2nrYQzQ==}
     dependencies:
@@ -15458,7 +15458,7 @@ packages:
     engines: {node: '>=6'}
     dev: false
 
-  /langchain@0.2.3(ioredis@5.4.1)(redis@4.6.13)(ws@8.17.0):
+  /langchain@0.2.3(cheerio@1.0.0)(ioredis@5.4.1)(redis@4.6.13)(ws@8.17.0):
     resolution: {integrity: sha512-T9xR7zd+Nj0oXy6WoYKmZLy0DlQiDLFPGYWdOXDxy+AvqlujoPdVQgDSpdqiOHvAjezrByAoKxoHCz5XMwTP/Q==}
     engines: {node: '>=18'}
     peerDependencies:
@@ -15618,6 +15618,7 @@ packages:
       '@langchain/openai': 0.0.34(langchain@0.2.3)
       '@langchain/textsplitters': 0.0.3(langchain@0.2.3)
       binary-extensions: 2.3.0
+      cheerio: 1.0.0
       ioredis: 5.4.1
       js-tiktoken: 1.0.12
       js-yaml: 4.1.0
@@ -15638,7 +15639,7 @@ packages:
       - openai
     dev: false
 
-  /langchain@0.2.7(ioredis@5.4.1)(redis@4.6.13)(ws@8.17.0):
+  /langchain@0.2.7(cheerio@1.0.0)(ioredis@5.4.1)(redis@4.6.13)(ws@8.17.0):
     resolution: {integrity: sha512-VtEcl1xBiebsbnXJMOqlK+H7IvD7EK/UUk6k2HG77mtqTViiv1AR5T/ivHlUrL1ATKitMHz24mAYJKMHeNrzYA==}
     engines: {node: '>=18'}
     peerDependencies:
@@ -15798,6 +15799,7 @@ packages:
       '@langchain/openai': 0.1.3(langchain@0.2.7)
       '@langchain/textsplitters': 0.0.3(langchain@0.2.7)
       binary-extensions: 2.3.0
+      cheerio: 1.0.0
       ioredis: 5.4.1
       js-tiktoken: 1.0.12
       js-yaml: 4.1.0
@@ -15839,7 +15841,7 @@ packages:
       '@langchain/core': 0.2.7(langchain@0.2.3)
       '@types/uuid': 9.0.8
       commander: 10.0.1
-      langchain: 0.2.3(ioredis@5.4.1)(redis@4.6.13)(ws@8.17.0)
+      langchain: 0.2.3(cheerio@1.0.0)(ioredis@5.4.1)(redis@4.6.13)(ws@8.17.0)
       p-queue: 6.6.2
       p-retry: 4.6.2
       uuid: 9.0.1
@@ -15862,7 +15864,7 @@ packages:
       '@langchain/core': 0.2.7(langchain@0.2.3)(openai@4.52.0)
       '@types/uuid': 9.0.8
       commander: 10.0.1
-      langchain: 0.2.3(ioredis@5.4.1)(redis@4.6.13)(ws@8.17.0)
+      langchain: 0.2.3(cheerio@1.0.0)(ioredis@5.4.1)(redis@4.6.13)(ws@8.17.0)
       openai: 4.52.0
       p-queue: 6.6.2
       p-retry: 4.6.2
@@ -15886,7 +15888,7 @@ packages:
       '@langchain/core': 0.2.7(langchain@0.2.7)
       '@types/uuid': 9.0.8
       commander: 10.0.1
-      langchain: 0.2.7(ioredis@5.4.1)(redis@4.6.13)(ws@8.17.0)
+      langchain: 0.2.7(cheerio@1.0.0)(ioredis@5.4.1)(redis@4.6.13)(ws@8.17.0)
       p-queue: 6.6.2
       p-retry: 4.6.2
       uuid: 9.0.1
@@ -15909,7 +15911,7 @@ packages:
       '@langchain/core': 0.2.7(langchain@0.2.7)(openai@4.52.0)
       '@types/uuid': 9.0.8
       commander: 10.0.1
-      langchain: 0.2.7(ioredis@5.4.1)(redis@4.6.13)(ws@8.17.0)
+      langchain: 0.2.7(cheerio@1.0.0)(ioredis@5.4.1)(redis@4.6.13)(ws@8.17.0)
       openai: 4.52.0
       p-queue: 6.6.2
       p-retry: 4.6.2
@@ -17897,6 +17899,12 @@ packages:
     resolution: {integrity: sha512-B77tOZrqqfUfnVcOrUvfdLbz4pu4RopLD/4vmu3HUPswwTA8OH0EMW9BlWR2B0RCoiZRAHEUu7IxeP1Pd1UU+g==}
     dependencies:
       domhandler: 5.0.3
+      parse5: 7.1.2
+    dev: false
+
+  /parse5-parser-stream@7.1.2:
+    resolution: {integrity: sha512-JyeQc9iwFLn5TbvvqACIF/VXG6abODeB3Fwmv/TGdLk2LfbWkaySGY72at4+Ty7EkPZj854u4CrICqNk2qIbow==}
+    dependencies:
       parse5: 7.1.2
     dev: false
 
@@ -21270,6 +21278,11 @@ packages:
       '@fastify/busboy': 2.1.1
     dev: false
 
+  /undici@6.19.7:
+    resolution: {integrity: sha512-HR3W/bMGPSr90i8AAp2C4DM3wChFdJPLrWYpIS++LxS8K+W535qftjt+4MyjNYHeWabMj1nvtmLIi7l++iq91A==}
+    engines: {node: '>=18.17'}
+    dev: false
+
   /unified@10.1.2:
     resolution: {integrity: sha512-pUSWAi/RAnVy1Pif2kAoeWNBa3JVrx0MId2LASj8G+7AiHWoKZNTomq6LG326T68U7/e263X6fTdcXIy7XnF7Q==}
     dependencies:
@@ -22056,10 +22069,22 @@ packages:
       - uglify-js
     dev: true
 
+  /whatwg-encoding@3.1.1:
+    resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
+    engines: {node: '>=18'}
+    dependencies:
+      iconv-lite: 0.6.3
+    dev: false
+
   /whatwg-mimetype@3.0.0:
     resolution: {integrity: sha512-nt+N2dzIutVRxARx1nghPKGv1xHikU7HKdfafKkLNLindmPU/ch3U31NOCGGA/dmPcmb1VlofO0vnKAcsm0o/Q==}
     engines: {node: '>=12'}
     dev: true
+
+  /whatwg-mimetype@4.0.0:
+    resolution: {integrity: sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg==}
+    engines: {node: '>=18'}
+    dev: false
 
   /whatwg-url@5.0.0:
     resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
@@ -22593,7 +22618,7 @@ time:
   /bull@4.12.2: '2024-01-17T17:18:36.016Z'
   /c12@1.5.1: '2023-10-19T11:58:04.576Z'
   /cac@6.7.14: '2022-08-29T03:02:03.481Z'
-  /cheerio@1.0.0-rc.12: '2022-06-26T13:33:54.305Z'
+  /cheerio@1.0.0: '2024-08-09T19:01:41.740Z'
   /chokidar@3.5.3: '2022-01-18T07:42:19.335Z'
   /ci-info@4.0.0: '2023-10-29T06:41:23.336Z'
   /class-variance-authority@0.7.0: '2023-07-17T15:20:39.737Z'

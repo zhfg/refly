@@ -1474,6 +1474,35 @@ export type SearchResponse = BaseResponse & {
   data?: Array<SearchResult>;
 };
 
+export type ScrapeWeblinkRequest = {
+  /**
+   * Weblink URL
+   */
+  url: string;
+};
+
+export type ScrapeWeblinkResult = {
+  /**
+   * Weblink title
+   */
+  title?: string;
+  /**
+   * Weblink description
+   */
+  description?: string;
+  /**
+   * Weblink image
+   */
+  image?: string;
+};
+
+export type ScrapeWeblinkResponse = BaseResponse & {
+  /**
+   * Weblink scrape result
+   */
+  data?: ScrapeWeblinkResult;
+};
+
 export type ListResourcesData = {
   query?: {
     /**
@@ -2003,6 +2032,14 @@ export type SearchResponse2 = SearchResponse;
 
 export type SearchError = unknown;
 
+export type ScrapeData = {
+  body: ScrapeWeblinkRequest;
+};
+
+export type ScrapeResponse = ScrapeWeblinkResponse;
+
+export type ScrapeError = unknown;
+
 export type $OpenApiTs = {
   '/knowledge/resource/list': {
     get: {
@@ -2459,6 +2496,17 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': SearchResponse;
+      };
+    };
+  };
+  '/misc/scrape': {
+    post: {
+      req: ScrapeData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': ScrapeWeblinkResponse;
       };
     };
   };

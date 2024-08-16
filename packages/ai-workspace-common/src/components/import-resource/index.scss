@@ -115,14 +115,15 @@
       font-weight: bold;
     }
 
-    // 各个 intergrations 的特点
     .intergation-import-from-weblink {
       .intergation-result-list {
-        margin-top: 12px;
+        // margin-top: 12px;
       }
 
       .intergation-result-list-item {
         border-radius: 0;
+        border-bottom: 1px solid #f1f1f0;
+        padding: 10px 0;
 
         .arco-list-item {
           padding: 12px !important;

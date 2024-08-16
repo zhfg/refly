@@ -1,17 +1,17 @@
 import {
   Button,
   Divider,
+  Empty,
   Input,
   List,
   Avatar,
-  Skeleton,
   Select,
   Message as message,
   Affix,
+  Spin,
 } from '@arco-design/web-react';
 import { IconLink, IconClose } from '@arco-design/web-react/icon';
 import { useEffect, useState } from 'react';
-import cherrio from 'cheerio';
 
 // utils
 import { isUrl } from '@refly/utils/isUrl';
@@ -21,7 +21,7 @@ import { LinkMeta, useImportResourceStore } from '@refly-packages/ai-workspace-c
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { SearchResult, UpsertResourceRequest } from '@refly/openapi-schema';
 import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-or-search-list';
-import { useReloadListState } from '@refly/ai-workspace-common/stores/reload-list-state';
+import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 const { TextArea } = Input;
@@ -29,20 +29,21 @@ const Option = Select.Option;
 
 export const ImportFromWeblink = () => {
   const [linkStr, setLinkStr] = useState('');
-  const [scrapeLinkLoading, setScrapeLinkLoading] = useState(false);
   const importResourceStore = useImportResourceStore();
   const reloadListState = useReloadListState();
 
   const [queryParams] = useSearchParams();
   const kbId = queryParams.get('kbId');
 
-  console.log('select collection id', importResourceStore.selectedCollectionId);
+  const { selectedCollectionId, scrapeLinks = [] } = importResourceStore;
+
+  console.log('select collection id', selectedCollectionId);
 
   //
   const [saveLoading, setSaveLoading] = useState(false);
 
   // 列表获取
-  const { loadMore, hasMore, dataList, isRequesting, currentPage, handleValueChange, mode } = useFetchOrSearchList({
+  const { loadMore, hasMore, dataList, isRequesting, handleValueChange, mode } = useFetchOrSearchList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listCollections({
         query: {
@@ -62,30 +63,13 @@ export const ImportFromWeblink = () => {
   const scrapeSingleUrl = async (key: string, url: string) => {
     const { scrapeLinks } = useImportResourceStore.getState();
     try {
-      const res = await fetch(url);
-      const html = await res.text();
-      const $ = cherrio.load(html);
+      const { data, error } = await getClient().scrape({ body: { url } });
 
-      // 获取 OG title
-      const title = $('meta[property="og:title"]').attr('content') || $('title').text();
-
-      // 获取 OG description
-      const description =
-        $('meta[property="og:description"]').attr('content') || $('meta[name="description"]').attr('content');
-
-      // 获取 OG image
-      // 获取 OG image 或第一张合适的图片
-      let image = $('meta[property="og:image"]').attr('content');
-      if (!image) {
-        // 如果没有 og:image，获取第一张以 http 或 https 开头的图片
-        $('img').each((index, element) => {
-          const src = $(element).attr('src');
-          if (src && (src.startsWith('http://') || src.startsWith('https://'))) {
-            image = src;
-            return false; // 跳出 each 循环
-          }
-        });
+      if (error) {
+        throw error;
       }
+
+      const { title, description, image } = data?.data ?? {};
 
       const newLinks = scrapeLinks.map((link) => {
         if (link?.key === key) {
@@ -97,7 +81,7 @@ export const ImportFromWeblink = () => {
 
         return link;
       });
-      importResourceStore.setScapeLinks(newLinks);
+      importResourceStore.setScrapeLinks(newLinks);
     } catch (err) {
       console.log('fetch url error, silent ignore');
       const newLinks = scrapeLinks.map((link) => {
@@ -107,34 +91,34 @@ export const ImportFromWeblink = () => {
 
         return link;
       });
-      importResourceStore.setScapeLinks(newLinks);
+      importResourceStore.setScrapeLinks(newLinks);
     }
   };
 
   const scrapeLink = async (linkStr: string) => {
-    setScrapeLinkLoading(true);
-
     try {
       const links: LinkMeta[] = linkStr
         .split('\n')
         .filter((str) => str && isUrl(str))
         .map((url) => ({
-          url,
+          url: url.trim(),
           key: genUniqueId(),
           isHandled: false,
         }));
 
       if (links?.length === 0) {
+        message.warning('请输入有效的网页链接，以 http 或 https 开头');
         return;
       }
 
-      importResourceStore.setScapeLinks(links);
+      importResourceStore.setScrapeLinks(scrapeLinks.concat(links));
+      setLinkStr('');
 
-      // 开始爬取信息
+      // Scrape the link information
       await Promise.all(links.map((link) => scrapeSingleUrl(link.key, link.url)));
-    } catch (err) {}
-
-    setScrapeLinkLoading(false);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleSave = async () => {
@@ -169,7 +153,7 @@ export const ImportFromWeblink = () => {
       }
 
       message.success('保存成功');
-      importResourceStore.setScapeLinks([]);
+      importResourceStore.setScrapeLinks([]);
       importResourceStore.setImportResourceModalVisible(false);
       if (!kbId || (kbId && selectedCollectionId === kbId)) {
         reloadListState.setReloadKnowledgeBaseList(true);
@@ -206,7 +190,7 @@ export const ImportFromWeblink = () => {
           <div className="intergation-body">
             <div className="intergation-body-action">
               <TextArea
-                placeholder="输入或粘贴网页链接，每行一个...."
+                placeholder="输入或粘贴有效的网页链接，每行一个...."
                 rows={4}
                 autoSize={{
                   minRows: 4,
@@ -219,6 +203,7 @@ export const ImportFromWeblink = () => {
                 type="primary"
                 long
                 style={{ marginTop: 16 }}
+                disabled={!linkStr}
                 onClick={() => {
                   scrapeLink(linkStr);
                 }}
@@ -229,14 +214,15 @@ export const ImportFromWeblink = () => {
             <div className="intergation-body-result">
               <h2 className="intergation-body-result-title">待处理列表</h2>
               <div className="intergation-result-list">
-                {scrapeLinkLoading ? <Skeleton /> : null}
-                {importResourceStore.scrapeLinks?.length > 0 ? (
+                {scrapeLinks?.length > 0 ? (
                   <List
                     style={{ width: 700, marginBottom: 48, border: 'none' }}
-                    dataSource={importResourceStore?.scrapeLinks}
+                    dataSource={scrapeLinks}
                     render={(item, index) => <RenderItem item={item} key={index} />}
                   />
-                ) : null}
+                ) : (
+                  <Empty />
+                )}
               </div>
             </div>
           </div>
@@ -245,7 +231,7 @@ export const ImportFromWeblink = () => {
       <Affix offsetBottom={0} target={() => document.querySelector('.import-resource-right-panel') as HTMLElement}>
         <div className="intergation-footer">
           <div className="footer-location">
-            <p className="footer-count text-item">共 {importResourceStore?.scrapeLinks?.length} 个</p>
+            <p className="footer-count text-item">共 {scrapeLinks?.length} 个</p>
             <p style={{ margin: '0 8px' }} className="text-item">
               {' '}
               |{' '}
@@ -298,7 +284,13 @@ export const ImportFromWeblink = () => {
             >
               取消
             </Button>
-            <Button type="primary" style={{ width: 100 }} onClick={handleSave}>
+            <Button
+              type="primary"
+              style={{ width: 100 }}
+              onClick={handleSave}
+              disabled={scrapeLinks.length === 0}
+              loading={saveLoading}
+            >
               保存
             </Button>
           </div>
@@ -313,45 +305,49 @@ const RenderItem = (props: { item: LinkMeta }) => {
   const { item } = props;
 
   return (
-    <List.Item
-      actions={[
-        <Button
-          type="text"
-          className="assist-action-item"
-          onClick={() => {
-            window.open(item?.url, '_blank');
-          }}
-        >
-          <IconLink />
-        </Button>,
-        <Button
-          type="text"
-          className="assist-action-item"
-          onClick={() => {
-            const newLinks = importResourceStore?.scrapeLinks?.filter((link) => {
-              return link?.key !== item?.key;
-            });
+    <Spin loading={!item.isHandled && !item.isError} style={{ width: '100%', minHeight: 80 }}>
+      <List.Item
+        actions={[
+          <Button
+            type="text"
+            className="assist-action-item"
+            onClick={() => {
+              window.open(item?.url, '_blank');
+            }}
+          >
+            <IconLink />
+          </Button>,
+          <Button
+            type="text"
+            className="assist-action-item"
+            onClick={() => {
+              const newLinks = importResourceStore?.scrapeLinks?.filter((link) => {
+                return link?.key !== item?.key;
+              });
 
-            importResourceStore.setScapeLinks(newLinks);
-          }}
-        >
-          <IconClose />
-        </Button>,
-      ]}
-      className="intergation-result-list-item"
-    >
-      <List.Item.Meta
-        avatar={<Avatar shape="square">{<img src={item?.image} style={{ objectFit: 'contain' }} />}</Avatar>}
-        title={
-          <p className="intergation-result-intro">
-            <span className="intergation-result-url" onClick={() => window.open(item?.url, '_blank')}>
-              {item?.url}
-            </span>
-            <p>{item?.isError ? <span className="text-red-500">抓取失败</span> : item?.title}</p>
-          </p>
-        }
-        description={item.description}
-      />
-    </List.Item>
+              importResourceStore.setScrapeLinks(newLinks);
+            }}
+          >
+            <IconClose />
+          </Button>,
+        ]}
+        className="intergation-result-list-item"
+      >
+        <List.Item.Meta
+          avatar={<Avatar shape="square">{<img src={item?.image} style={{ objectFit: 'contain' }} />}</Avatar>}
+          title={
+            <div className="intergation-result-intro">
+              <p>
+                <span className="intergation-result-url" onClick={() => window.open(item?.url, '_blank')}>
+                  {item?.url}
+                </span>
+              </p>
+              <p>{item?.isError ? <span className="text-red-500">抓取失败</span> : item?.title}</p>
+            </div>
+          }
+          description={item.description}
+        />
+      </List.Item>
+    </Spin>
   );
 };

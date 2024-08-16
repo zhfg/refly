@@ -126,6 +126,9 @@ import type {
   SearchData,
   SearchError,
   SearchResponse2,
+  ScrapeData,
+  ScrapeError,
+  ScrapeResponse,
 } from './types.gen';
 
 /**
@@ -587,5 +590,16 @@ export const search = (options: Options<SearchData>) => {
   return (options?.client ?? client).post<SearchResponse2, SearchError>({
     ...options,
     url: '/search',
+  });
+};
+
+/**
+ * Scrape
+ * Scrape a weblink
+ */
+export const scrape = (options: Options<ScrapeData>) => {
+  return (options?.client ?? client).post<ScrapeResponse, ScrapeError>({
+    ...options,
+    url: '/misc/scrape',
   });
 };

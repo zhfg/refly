@@ -2216,3 +2216,49 @@ export const $SearchResponse = {
     },
   ],
 } as const;
+
+export const $ScrapeWeblinkRequest = {
+  type: 'object',
+  required: ['url'],
+  properties: {
+    url: {
+      type: 'string',
+      description: 'Weblink URL',
+    },
+  },
+} as const;
+
+export const $ScrapeWeblinkResult = {
+  type: 'object',
+  properties: {
+    title: {
+      type: 'string',
+      description: 'Weblink title',
+    },
+    description: {
+      type: 'string',
+      description: 'Weblink description',
+    },
+    image: {
+      type: 'string',
+      description: 'Weblink image',
+    },
+  },
+} as const;
+
+export const $ScrapeWeblinkResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          description: 'Weblink scrape result',
+          $ref: '#/components/schemas/ScrapeWeblinkResult',
+        },
+      },
+    },
+  ],
+} as const;

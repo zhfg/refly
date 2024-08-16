@@ -17,6 +17,7 @@ import { SkillModule } from './skill/skill.module';
 import { SearchModule } from './search/search.module';
 import { LabelModule } from './label/label.module';
 import { EventModule } from './event/event.module';
+import { MiscModule } from './misc/misc.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { EventModule } from './event/event.module';
     SearchModule,
     LabelModule,
     EventModule,
+    MiscModule,
   ],
   controllers: [AppController],
 })

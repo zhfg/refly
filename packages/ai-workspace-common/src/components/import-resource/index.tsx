@@ -18,13 +18,14 @@ export const ImportResourceModal = () => {
 
   return (
     <Modal
+      unmountOnExit
       visible={importResourceStore.importResourceModalVisible}
       footer={null}
       onCancel={() => {
         importResourceStore.setImportResourceModalVisible(false);
       }}
       className="import-resource-modal"
-      style={{ width: '60%', height: 'calc(100% - 240px)', minHeight: 250, minWidth: 1000 }}
+      style={{ height: 'calc(100vh - 360px)', minHeight: 500, minWidth: 1000, maxWidth: 1200 }}
     >
       <div className="import-resource-container">
         <div className="import-resource-left-panel">
