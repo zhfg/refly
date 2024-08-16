@@ -13,6 +13,7 @@ export type CopilotMsgName =
   | 'toggleCopilotCSUI'
   | 'toggleCopilot'
   | 'toggleCopilotSidePanel'
+  | 'toggleCopilotFromPopup'
   | 'checkSidePanelOpenStatus';
 export type SidePanelMsgName = 'registerSidePanel' | 'unregisterSidePanel';
 export type MessageName =

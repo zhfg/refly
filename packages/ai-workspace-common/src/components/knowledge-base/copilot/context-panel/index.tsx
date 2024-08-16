@@ -171,7 +171,7 @@ const ContextContent = memo(() => {
   // };
 
   const renderExtra = useCallback((node) => {
-    console.log('rerender extra', node);
+    // console.log('rerender extra', node);
     if (node._key === 'collection') {
       return <KnowledgeBasePopover />;
     }
@@ -182,7 +182,7 @@ const ContextContent = memo(() => {
       return <NotePopover />;
     }
     if (node._key === 'weblink') {
-      console.log('rerender weblink');
+      // console.log('rerender weblink');
       return <WeblinkPopover />;
     }
     return null;
