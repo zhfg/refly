@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { CommonModule } from '../common/common.module';
+import { CommonModule } from '@/common/common.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { UserModule } from '../user/user.module';
-import { AccountModule } from '../account/account.module';
+import { UserModule } from '@/user/user.module';
+import { AccountModule } from '@/account/account.module';
 
 import { AuthService } from './auth.service';
 import { LocalStrategy } from './strategy/local.strategy';
@@ -21,15 +21,16 @@ import { GoogleOauthStrategy } from './strategy/google-oauth.strategy';
     CommonModule,
     UserModule,
     PassportModule.register({
-      session: true, // TODO: 确认这个配置是否合理
+      session: true,
     }),
     JwtModule.registerAsync({
       useFactory: async (configService: ConfigService) => ({
         // available options: https://github.com/auth0/node-jsonwebtoken#usage
         secret: configService.get('auth.jwt.secret'),
-        signOptions: {
-          expiresIn: configService.get('auth.jwt.expiresIn'),
-        },
+        signOptions:
+          process.env.NODE_ENV === 'development'
+            ? undefined // never expire in development
+            : { expiresIn: configService.get('auth.jwt.expiresIn') },
       }),
       imports: [ConfigModule],
       inject: [ConfigService],
