@@ -54,15 +54,16 @@ const App = () => {
     return;
   };
 
-  const handleRunRefly = async () => {
+  const handleToggleCopilot = async () => {
     const activeTab = await getCurrentTab();
     setCurrentTabUrl(activeTab?.url || '');
     currentTabUrlRef.current = activeTab?.url || '';
-    console.log('activeTab', activeTab);
 
     if (activeTab) {
-      console.log('activeTab', browser.tabs.sendMessage);
-      const res = await browser.tabs.sendMessage(activeTab?.id as number, { name: 'runRefly', toggle: !isSideBarOpen });
+      const res = await browser.tabs.sendMessage(activeTab?.id as number, {
+        name: 'toggleCopilotFromPopup',
+        toggle: !isSideBarOpen,
+      });
 
       setIsSideBarOpen(!isSideBarOpen);
 
@@ -83,7 +84,7 @@ const App = () => {
   };
 
   const handleViewCreate = async () => {
-    await handleRunRefly();
+    await handleToggleCopilot();
     handleCheckPageUnsupport();
   };
 

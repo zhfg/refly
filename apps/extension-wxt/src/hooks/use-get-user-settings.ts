@@ -8,7 +8,7 @@ import { safeParseJSON, safeStringifyJSON } from '@refly-packages/ai-workspace-c
 import { LOCALE } from '@refly/common-types';
 import { useTranslation } from 'react-i18next';
 import { Message as message } from '@arco-design/web-react';
-import { useSiderStore } from '@refly-packages/ai-workspace-common/stores/sider';
+import { useCopilotStore } from '@/modules/toggle-copilot/stores/copilot';
 import { mapDefaultLocale } from '@/utils/locale';
 import { storage } from '@refly-packages/ai-workspace-common/utils/storage';
 import { useStorage } from './use-storage';
@@ -32,7 +32,7 @@ interface ExternalLoginPayload {
 export const useGetUserSettings = () => {
   const userStore = useUserStore();
   const navigate = useNavigate();
-  const siderStore = useSiderStore();
+  const copilotStore = useCopilotStore();
 
   const [messageData] = useExtensionMessage<ExternalLoginPayload>('refly-login-notify', (req, res) => {
     res.send('recevied msg');
@@ -214,10 +214,10 @@ export const useGetUserSettings = () => {
 
   // 监听打开关闭
   useEffect(() => {
-    if (siderStore?.showSider) {
+    if (copilotStore?.isCopilotOpen) {
       getLoginStatus();
     }
-  }, [siderStore?.showSider]);
+  }, [copilotStore?.isCopilotOpen]);
 
   // 收到消息之后，关闭窗口，保活检查
   const handleExtensionMessage = (request: any) => {

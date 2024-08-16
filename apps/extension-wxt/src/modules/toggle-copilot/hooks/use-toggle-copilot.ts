@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { useSiderStore } from '@/stores/sider';
 import { sendMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import pTimeout from 'p-timeout';

@@ -9,7 +9,7 @@ import FullScreenSVG from '@/assets/side/full-screen.svg';
 import { IconTip } from '@/components/icon-tip';
 import { Avatar } from '@arco-design/web-react';
 // stores
-import { useSiderStore } from '@refly-packages/ai-workspace-common/stores/sider';
+import { useCopilotStore } from '@/modules/toggle-copilot/stores/copilot';
 import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import { getClientOrigin } from '@refly/utils/url';
 import { useUserStore } from '@/stores/user';
@@ -19,7 +19,7 @@ import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/con
 
 export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
   const { onlyShowClose = false } = props;
-  const siderStore = useSiderStore();
+  const copilotStore = useCopilotStore();
   const navigate = useNavigate();
   const { userProfile } = useUserStore();
   const homeStateStore = useHomeStateStore();
@@ -81,7 +81,7 @@ export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
             src={CloseGraySVG}
             alt={t('extension.loggedHomePage.homePage.header.close')}
             onClick={(_) => {
-              siderStore.setShowSider(false);
+              copilotStore.setIsCopilotOpen(false);
               handleReset();
             }}
           />

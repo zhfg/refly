@@ -10,7 +10,7 @@ import { Suspense, useEffect, useRef } from 'react';
 import '@/i18n/config';
 // 加载 runtime 设置
 import { setRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { useSiderStore } from '@refly-packages/ai-workspace-common/stores/sider';
+import { useCopilotStore } from '@/modules/toggle-copilot/stores/copilot';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useMockInAppResource } from '@/hooks/use-mock-in-app-resource';
 import { useToggleSidePanel } from '@/modules/toggle-copilot/hooks/use-handle-toggle-side-panel';
@@ -19,7 +19,7 @@ import { useToggleSidePanel } from '@/modules/toggle-copilot/hooks/use-handle-to
  * 1. 如果是
  */
 const App = () => {
-  const siderStore = useSiderStore();
+  const copilotStore = useCopilotStore();
   const userStore = useUserStore();
   const { initMessageListener } = useToggleSidePanel();
 
@@ -28,7 +28,7 @@ const App = () => {
 
   useEffect(() => {
     // 针对 sider open 来说，SidePanel 渲染则代表打开 sider，与 Popup/App.tsx 逻辑保持一致
-    siderStore.setShowSider(true);
+    copilotStore.setIsCopilotOpen(true);
     setRuntime('extension-sidepanel');
     userStore.setRuntime('extension-sidepanel');
   }, []);
