@@ -5,7 +5,7 @@ import { storage } from '@refly-packages/ai-workspace-common/utils/storage';
 export const checkBrowserArc = async () => {
   try {
     const storageValue = await storage.getItem('sync:isArc');
-    if (storageValue) return;
+    if (storageValue || typeof storageValue === 'boolean') return storageValue as boolean;
 
     console.log('parent', window.parent);
     const isArc = getComputedStyle(window.parent?.document.documentElement).getPropertyValue('--arc-palette-title')
@@ -25,7 +25,10 @@ export const checkBrowserArc = async () => {
         source: getRuntime(),
       });
     }
+
+    return isArc;
   } catch (err) {
     console.log('checkBrowserArc err: ', err);
+    return false;
   }
 };

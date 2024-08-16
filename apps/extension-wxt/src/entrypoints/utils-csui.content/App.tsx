@@ -18,7 +18,6 @@ const App = () => {
       checkBrowserArc();
     }
   }, []);
-
   useEffect(() => {
     setRuntime('extension-csui');
   }, []);

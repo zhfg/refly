@@ -5,16 +5,19 @@ export type BackgroundMsgType =
   | 'others'
   | 'registerEvent'
   | 'operateTabStorage'
-  | 'injectContentSelectorCss';
+  | 'injectContentSelectorCss'
+  | 'toggleCopilot';
 
 export type SyncMarkEventName = 'syncMarkEvent' | 'syncMarkEventBack' | 'syncMarkStatusEvent';
+export type CopilotMsgName = 'toggleCopilotCSUI' | 'toggleCopilot' | 'toggleCopilotSidePanel';
 export type MessageName =
-  | 'openCopilot'
   | 'getOpenedTabs'
   | 'getCurrentMockResourceByTabId'
   | 'getTabId'
   | 'currentMockResource'
   | 'registerSidePanel'
+  | 'sidePanelHeartBeat'
+  | CopilotMsgName
   | SyncMarkEventName;
 
 export interface BackgroundMessage<T = any> {

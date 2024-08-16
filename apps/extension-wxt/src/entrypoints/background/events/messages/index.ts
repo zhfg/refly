@@ -6,6 +6,7 @@ import { saveLastActiveTab } from '@refly-packages/ai-workspace-common/utils/ext
 import { Runtime } from 'wxt/browser';
 import { handleOtherMessage } from './others';
 import { handleInjectContentSelectorCss } from '@/entrypoints/background/events/messages/injectContentSelectorCss';
+// import { handleToggleCopilot } from '@/entrypoints/background/events/messages/toggleCopilot';
 
 export const onMessage = async (
   msg: BackgroundMessage,
@@ -37,4 +38,8 @@ export const onMessage = async (
   if (msg.type === 'injectContentSelectorCss') {
     return await handleInjectContentSelectorCss(msg);
   }
+
+  // if (msg.type === 'toggleCopilot') {
+  //   return handleToggleCopilot(msg);
+  // }
 };

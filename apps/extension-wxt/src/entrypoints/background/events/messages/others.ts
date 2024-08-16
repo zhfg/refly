@@ -47,7 +47,4 @@ export const handleOtherMessage = async (msg: BackgroundMessage) => {
   if (msg?.name === 'getOpenedTabs') {
     return await handleGetOpenedTabs(msg);
   }
-
-  if (msg?.name === 'openCopilot') {
-  }
 };

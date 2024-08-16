@@ -2,11 +2,11 @@ import { onExternalMessage } from './events/externalMessage';
 import { onActivated } from './events/activated';
 import { onMessage } from './events/messages/index';
 import { onPort } from './events/ports';
-import { setRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { browser } from 'wxt/browser';
 import { defineBackground } from 'wxt/sandbox';
-import { getCurrentTab } from '@/utils/extension/tabs';
-import { onDetached } from '@/entrypoints/background/events/detached';
+import { onDetached } from './events/detached';
+import { handleToggleCopilotSidePanel } from './events/messages/toggleCopilot';
+import { Runtime } from 'wxt/browser';
 
 export const tempTabState: { [key: string]: string } = {};
 
@@ -16,5 +16,10 @@ export default defineBackground(() => {
   browser.tabs.onActivated.addListener(onActivated);
   browser.tabs.onDetached.addListener(onDetached);
   browser.runtime.onMessage.addListener(onMessage);
+  browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (msg.type === 'toggleCopilot' && msg.name === 'toggleCopilotSidePanel') {
+      return handleToggleCopilotSidePanel(msg, sender);
+    }
+  });
   browser.runtime.onConnect.addListener(onPort);
 });

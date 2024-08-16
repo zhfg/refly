@@ -1,15 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
-import { Button, Tooltip, Trigger, Message, Link } from '@arco-design/web-react';
-
+import { Button, Tooltip, Message, Link } from '@arco-design/web-react';
 import { reflyEnv } from '@/utils/env';
 
-import { useSiderStore } from '@/stores/sider';
 import Logo from '@/assets/logo.svg';
 import './App.scss';
 import classNames from 'classnames';
 import { IconBulb, IconHighlight, IconSave } from '@arco-design/web-react/icon';
 import { useSaveCurrentWeblinkAsResource } from '@/hooks/use-save-resource';
 import { delay } from '@refly/utils/delay';
+import { useOpenCopilot } from '@/hooks/use-open-copilot';
 
 const getPopupContainer = () => {
   const elem = document
@@ -20,9 +19,9 @@ const getPopupContainer = () => {
 };
 
 export const App = () => {
-  const siderStore = useSiderStore();
   const [selectedText, setSelectedText] = useState<string>('');
   const { saveResource } = useSaveCurrentWeblinkAsResource();
+  const { handleToogleCopilot } = useOpenCopilot();
   // 加载快捷键
   const [shortcut, setShortcut] = useState<string>(reflyEnv.getOsType() === 'OSX' ? '⌘ J' : 'Ctrl J');
   const [isDragging, setIsDragging] = useState(false);
@@ -43,50 +42,6 @@ export const App = () => {
       bottomDistanceRef.current = window.innerHeight - clampedY - sphereHeight;
     }
   };
-
-  useEffect(() => {
-    Message.config({
-      getContainer: () => getPopupContainer() as HTMLElement,
-    });
-  }, []);
-  useEffect(() => {
-    // 设置初始位置
-    bottomDistanceRef.current = window.innerHeight * 0.25; // 距离底部 25% 的位置
-    const initialY = window.innerHeight - bottomDistanceRef.current - (sphereRef.current?.offsetHeight || 0);
-    updateSpherePosition(initialY);
-
-    const handleResize = () => {
-      const newY = window.innerHeight - bottomDistanceRef.current - (sphereRef.current?.offsetHeight || 0);
-      updateSpherePosition(newY);
-      updateDropdownPosition();
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (isDragging && sphereRef.current) {
-        const dy = e.clientY - dragStartPos.current.y;
-        const newY = dragStartPos.current.offsetY + dy;
-        updateSpherePosition(newY);
-        updateDropdownPosition();
-      }
-    };
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isDragging]);
 
   const updateDropdownPosition = () => {
     if (sphereRef.current && dropdownRef.current) {
@@ -219,6 +174,50 @@ export const App = () => {
     );
   };
 
+  useEffect(() => {
+    Message.config({
+      getContainer: () => getPopupContainer() as HTMLElement,
+    });
+  }, []);
+  useEffect(() => {
+    // 设置初始位置
+    bottomDistanceRef.current = window.innerHeight * 0.25; // 距离底部 25% 的位置
+    const initialY = window.innerHeight - bottomDistanceRef.current - (sphereRef.current?.offsetHeight || 0);
+    updateSpherePosition(initialY);
+
+    const handleResize = () => {
+      const newY = window.innerHeight - bottomDistanceRef.current - (sphereRef.current?.offsetHeight || 0);
+      updateSpherePosition(newY);
+      updateDropdownPosition();
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging && sphereRef.current) {
+        const dy = e.clientY - dragStartPos.current.y;
+        const newY = dragStartPos.current.offsetY + dy;
+        updateSpherePosition(newY);
+        updateDropdownPosition();
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
+
   return (
     <div className="refly-floating-sphere-entry-container">
       <div
@@ -237,7 +236,7 @@ export const App = () => {
             onMouseDown={handleDragStart}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-            onClick={(_) => siderStore.setShowSider(!siderStore.showSider)}
+            onClick={(_) => handleToogleCopilot()}
           >
             <img src={Logo} alt="唤起 Refly" style={{ width: 25, height: 25 }} />
             <span className="refly-floating-sphere-entry-shortcut">{shortcut}</span>

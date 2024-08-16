@@ -4,7 +4,7 @@ import { createClient, client } from '@hey-api/client-fetch';
 
 import '@/styles/style.css';
 import './App.scss';
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 
 // i18n
 // 加载国际化
@@ -15,6 +15,9 @@ import { useSiderStore } from '@refly-packages/ai-workspace-common/stores/sider'
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useMockInAppResource } from '@/hooks/use-mock-in-app-resource';
 import { useSyncWeblinkResourceMeta } from '@/hooks/content-scripts/use-get-weblink-resource-meta';
+import { setSyncStorage } from '@refly-packages/ai-workspace-common/utils/storage';
+import { onMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import { BackgroundMessage, CopilotMsgName } from '@refly/common-types';
 /**
  * 打开 popup 页面的规则
  * 1. 如果是
@@ -22,6 +25,26 @@ import { useSyncWeblinkResourceMeta } from '@/hooks/content-scripts/use-get-webl
 const App = () => {
   const siderStore = useSiderStore();
   const userStore = useUserStore();
+  const messageListenerEventRef = useRef<any>();
+
+  const onStatusHandler = (event: MessageEvent<any>) => {
+    const data = event as any as BackgroundMessage;
+    const { name } = data || {};
+
+    if ((name as CopilotMsgName) === 'toggleCopilotSidePanel') {
+      window.close();
+    }
+  };
+
+  const initMessageListener = () => {
+    onMessage(onStatusHandler, getRuntime()).then((clearEvent) => {
+      messageListenerEventRef.current = clearEvent;
+    });
+
+    return () => {
+      messageListenerEventRef.current?.();
+    };
+  };
 
   // 在网页时，模拟在知识库的资源选中状态
   useMockInAppResource();
@@ -31,6 +54,9 @@ const App = () => {
     siderStore.setShowSider(true);
     setRuntime('extension-sidepanel');
     userStore.setRuntime('extension-sidepanel');
+  }, []);
+  useEffect(() => {
+    initMessageListener();
   }, []);
 
   return (
