@@ -1,7 +1,7 @@
 import { BackgroundMessage } from '@refly/common-types';
-import { Runtime, Tabs, browser } from 'wxt/browser';
-import { storage } from 'wxt/storage';
+import { browser } from 'wxt/browser';
 
+let isSetSidePanel: boolean | undefined;
 export const handleRegisterSidePanel = async (msg: BackgroundMessage) => {
   console.log('handleRegisterSidePanel', msg);
 
@@ -9,17 +9,15 @@ export const handleRegisterSidePanel = async (msg: BackgroundMessage) => {
     const path = browser.runtime.getURL('/popup.html');
     browser.action.onClicked.addListener(async () => {
       console.log('action click');
-      browser.browserAction.openPopup();
       browser.action.openPopup();
     });
     browser.action.setPopup({ popup: path });
     console.log('register popup success');
   } else {
-    const isSetSidePanel = await storage.getItem('local:isSetSidePanel');
-    if (isSetSidePanel) {
+    if (typeof isSetSidePanel === 'boolean' && isSetSidePanel) {
       return;
     } else {
-      await storage.setItem('local:isSetSidePanel', true);
+      isSetSidePanel = true;
     }
     // @ts-ignore
     browser?.sidePanel
