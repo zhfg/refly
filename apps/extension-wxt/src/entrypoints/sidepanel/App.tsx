@@ -1,6 +1,5 @@
-import { Button, Spin } from '@arco-design/web-react';
+import { Spin } from '@arco-design/web-react';
 import { AppRouter } from '@/routes/index';
-import { createClient, client } from '@hey-api/client-fetch';
 
 import '@/styles/style.css';
 import './App.scss';
@@ -10,14 +9,11 @@ import { Suspense, useEffect, useRef } from 'react';
 // 加载国际化
 import '@/i18n/config';
 // 加载 runtime 设置
-import { getEnv, getRuntime, setRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { setRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useSiderStore } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useMockInAppResource } from '@/hooks/use-mock-in-app-resource';
-import { useSyncWeblinkResourceMeta } from '@/hooks/content-scripts/use-get-weblink-resource-meta';
-import { setSyncStorage } from '@refly-packages/ai-workspace-common/utils/storage';
-import { onMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
-import { BackgroundMessage, CopilotMsgName } from '@refly/common-types';
+import { useToggleSidePanel } from '@/modules/toggle-copilot/hooks/use-handle-toggle-side-panel';
 /**
  * 打开 popup 页面的规则
  * 1. 如果是
@@ -25,26 +21,7 @@ import { BackgroundMessage, CopilotMsgName } from '@refly/common-types';
 const App = () => {
   const siderStore = useSiderStore();
   const userStore = useUserStore();
-  const messageListenerEventRef = useRef<any>();
-
-  const onStatusHandler = (event: MessageEvent<any>) => {
-    const data = event as any as BackgroundMessage;
-    const { name } = data || {};
-
-    if ((name as CopilotMsgName) === 'toggleCopilotSidePanel') {
-      window.close();
-    }
-  };
-
-  const initMessageListener = () => {
-    onMessage(onStatusHandler, getRuntime()).then((clearEvent) => {
-      messageListenerEventRef.current = clearEvent;
-    });
-
-    return () => {
-      messageListenerEventRef.current?.();
-    };
-  };
+  const { initMessageListener } = useToggleSidePanel();
 
   // 在网页时，模拟在知识库的资源选中状态
   useMockInAppResource();
@@ -62,12 +39,6 @@ const App = () => {
   return (
     <Suspense fallback={<Spin style={{ marginTop: '200px auto' }} />}>
       <div className="light app-container">
-        {/* <div
-        className={quickActionStore.selectedText ? "entry active" : "entry"}
-        onClick={(_) => siderStore.setShowSider(!siderStore.showSider)}>
-        <img src={Logo} alt="唤起 Refly" style={{ width: 25, height: 25 }} />
-        <span>⌘B</span>
-      </div> */}
         <div id="refly-app-main" className="main active">
           <AppRouter />
         </div>

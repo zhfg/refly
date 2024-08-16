@@ -8,7 +8,7 @@ import classNames from 'classnames';
 import { IconBulb, IconHighlight, IconSave } from '@arco-design/web-react/icon';
 import { useSaveCurrentWeblinkAsResource } from '@/hooks/use-save-resource';
 import { delay } from '@refly/utils/delay';
-import { useOpenCopilot } from '@/hooks/use-open-copilot';
+import { useToggleCopilot } from '@/modules/toggle-copilot/hooks/use-toggle-copilot';
 
 const getPopupContainer = () => {
   const elem = document
@@ -21,7 +21,7 @@ const getPopupContainer = () => {
 export const App = () => {
   const [selectedText, setSelectedText] = useState<string>('');
   const { saveResource } = useSaveCurrentWeblinkAsResource();
-  const { handleToogleCopilot } = useOpenCopilot();
+  const { handleToggleCopilot } = useToggleCopilot();
   // 加载快捷键
   const [shortcut, setShortcut] = useState<string>(reflyEnv.getOsType() === 'OSX' ? '⌘ J' : 'Ctrl J');
   const [isDragging, setIsDragging] = useState(false);
@@ -236,7 +236,7 @@ export const App = () => {
             onMouseDown={handleDragStart}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-            onClick={(_) => handleToogleCopilot()}
+            onClick={(_) => handleToggleCopilot()}
           >
             <img src={Logo} alt="唤起 Refly" style={{ width: 25, height: 25 }} />
             <span className="refly-floating-sphere-entry-shortcut">{shortcut}</span>

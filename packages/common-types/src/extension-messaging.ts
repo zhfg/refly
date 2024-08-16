@@ -9,7 +9,11 @@ export type BackgroundMsgType =
   | 'toggleCopilot';
 
 export type SyncMarkEventName = 'syncMarkEvent' | 'syncMarkEventBack' | 'syncMarkStatusEvent';
-export type CopilotMsgName = 'toggleCopilotCSUI' | 'toggleCopilot' | 'toggleCopilotSidePanel';
+export type CopilotMsgName =
+  | 'toggleCopilotCSUI'
+  | 'toggleCopilot'
+  | 'toggleCopilotSidePanel'
+  | 'checkSidePanelOpenStatus';
 export type MessageName =
   | 'getOpenedTabs'
   | 'getCurrentMockResourceByTabId'
