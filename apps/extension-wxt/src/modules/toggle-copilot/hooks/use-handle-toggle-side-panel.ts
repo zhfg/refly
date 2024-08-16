@@ -6,7 +6,7 @@ import { useRef } from 'react';
 export const useToggleSidePanel = () => {
   const messageListenerEventRef = useRef<any>();
 
-  const onStatusHandler = (event: MessageEvent<any>) => {
+  const onMessageHandler = (event: MessageEvent<any>) => {
     const data = event as any as BackgroundMessage;
     const { name } = data || {};
 
@@ -27,7 +27,7 @@ export const useToggleSidePanel = () => {
   };
 
   const initMessageListener = () => {
-    onMessage(onStatusHandler, getRuntime()).then((clearEvent) => {
+    onMessage(onMessageHandler, getRuntime()).then((clearEvent) => {
       messageListenerEventRef.current = clearEvent;
     });
 

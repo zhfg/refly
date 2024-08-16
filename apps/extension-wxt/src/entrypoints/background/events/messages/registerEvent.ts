@@ -29,8 +29,22 @@ export const handleRegisterSidePanel = async (msg: BackgroundMessage) => {
   }
 };
 
+export const handleUnregisterSidePanel = async (msg: BackgroundMessage) => {
+  // @ts-ignore
+  browser?.sidePanel
+    .setPanelBehavior({ openPanelOnActionClick: false })
+    .then(() => {
+      console.log('unregister sidePanel success');
+    })
+    .catch((error: any) => console.error(`sidePanel unregister error: `, error));
+};
+
 export const handleRegisterEvent = async (msg: BackgroundMessage) => {
   if (msg?.name === 'registerSidePanel') {
     handleRegisterSidePanel(msg);
+  }
+
+  if (msg?.name === 'unregisterSidePanel') {
+    handleUnregisterSidePanel(msg);
   }
 };

@@ -5,24 +5,21 @@ import { useSwitchTheme } from '@/hooks/use-switch-theme';
 
 // hooks
 import { useProcessLoginNotify } from '@/hooks/use-process-login-notify';
+import { useToggleCSUI } from '@/modules/toggle-copilot/hooks/use-handle-toggle-csui';
 // import { useRegisterMouseEvent } from "../hooks/use-register-mouse-event"
 import { useBindCommands } from '@/hooks/use-bind-commands';
 import { useSetContainerDimension } from '@/hooks/use-set-container-dimension';
 // stores
-import { useSiderStore } from '@refly-packages/ai-workspace-common/stores/sider';
-import { useQuickActionStore } from '@/stores/quick-action';
+import { useCopilotStore } from '@/modules/toggle-copilot/stores/copilot';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 
 // 组件
 import { Message, Spin } from '@arco-design/web-react';
 import { AppRouter } from '@/routes/index';
 
-// utils
-
 // 加载国际化
 import '@/i18n/config';
 import { SENTRY_DSN } from '@refly/utils/url';
-import { useSiderBarOpen } from '@/hooks/use-sider-bar-open';
 
 // 样式
 import '@/styles/style.css';
@@ -30,7 +27,6 @@ import './App.scss';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 // 设置 runtime 环境
 import { getEnv, setRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { useSyncWeblinkResourceMeta } from '@/hooks/content-scripts/use-get-weblink-resource-meta';
 import { useMockInAppResource } from '@/hooks/use-mock-in-app-resource';
 const Sentry = _Sentry;
 
@@ -48,15 +44,11 @@ if (process.env.NODE_ENV !== 'development') {
 
 const App = () => {
   // 打开聊天窗口的方式
-  const siderStore = useSiderStore();
-  const quickActionStore = useQuickActionStore();
+  const copilotStore = useCopilotStore();
+  const { initMessageListener } = useToggleCSUI();
 
   const userStore = useUserStore();
 
-  // 注册 mouse event
-  // useRegisterMouseEvent()
-  // 监听打开与关闭侧边栏消息
-  useSiderBarOpen();
   // 绑定快捷键，后续允许用户自定义快捷键
   useBindCommands();
   // 设定主题样式
@@ -77,18 +69,13 @@ const App = () => {
   useEffect(() => {
     setRuntime('extension-csui');
     userStore.setRuntime('extension-csui');
+    initMessageListener();
   }, []);
 
   return (
     <Suspense fallback={<Spin style={{ marginTop: '200px auto' }} />}>
       <div className="light app-container">
-        {/* <div
-        className={quickActionStore.selectedText ? "entry active" : "entry"}
-        onClick={(_) => siderStore.setShowSider(!siderStore.showSider)}>
-        <img src={Logo} alt="唤起 Refly" style={{ width: 25, height: 25 }} />
-        <span>⌘B</span>
-      </div> */}
-        <div id="refly-app-main" className={siderStore.showSider ? 'main active' : 'main'}>
+        <div id="refly-app-main" className={copilotStore.isCopilotOpen ? 'main active' : 'main'}>
           <AppRouter />
         </div>
       </div>

@@ -14,15 +14,16 @@ export type CopilotMsgName =
   | 'toggleCopilot'
   | 'toggleCopilotSidePanel'
   | 'checkSidePanelOpenStatus';
+export type SidePanelMsgName = 'registerSidePanel' | 'unregisterSidePanel';
 export type MessageName =
   | 'getOpenedTabs'
   | 'getCurrentMockResourceByTabId'
   | 'getTabId'
   | 'currentMockResource'
-  | 'registerSidePanel'
   | 'sidePanelHeartBeat'
   | CopilotMsgName
-  | SyncMarkEventName;
+  | SyncMarkEventName
+  | SidePanelMsgName;
 
 export interface BackgroundMessage<T = any> {
   name: MessageName;
