@@ -6,7 +6,7 @@ import { StructuredTool } from '@langchain/core/tools';
 import { StateGraphArgs } from '@langchain/langgraph';
 import { RunnableConfig } from '@langchain/core/runnables';
 import { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
-import { SkillContext, SkillInput, SkillInvocationConfig, SkillMeta, User } from '@refly/openapi-schema';
+import { PopulatedSkillContext, SkillInput, SkillInvocationConfig, SkillMeta, User } from '@refly/openapi-schema';
 import { EventEmitter } from 'node:stream';
 import { randomUUID } from 'node:crypto';
 import { SkillEvent } from '@refly/common-types';
@@ -112,7 +112,7 @@ export interface SkillRunnableMeta extends Record<string, unknown>, SkillMeta {
 }
 
 export interface SkillRunnableConfig extends RunnableConfig {
-  configurable?: SkillContext & {
+  configurable?: PopulatedSkillContext & {
     spanId?: string;
     convId?: string;
     locale?: string;

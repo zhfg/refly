@@ -1,4 +1,4 @@
-import { Processor } from '@nestjs/bull';
+import { Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
 
@@ -12,6 +12,7 @@ export class EventProcessor {
 
   constructor(private eventService: EventService) {}
 
+  @Process()
   async processSimpleEvent(job: Job<SimpleEventData>) {
     this.logger.log(`[processSimpleEvent] job: ${JSON.stringify(job)}`);
 

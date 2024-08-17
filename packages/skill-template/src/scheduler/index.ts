@@ -36,14 +36,14 @@ export class Scheduler extends BaseSkill {
   };
 
   invocationConfig: SkillInvocationConfig = {
-    inputRules: [{ key: 'query', required: true }],
+    inputRules: [{ key: 'query' }],
     contextRules: [],
   };
 
   description = "Inference user's intent and run related skill";
 
   schema = z.object({
-    query: z.string().describe('The search query'),
+    query: z.string().optional().describe('The search query'),
   });
 
   graphState: StateGraphArgs<GraphState>['channels'] = {

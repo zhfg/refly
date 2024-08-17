@@ -286,6 +286,10 @@ export type SkillTrigger = {
    */
   skillId: string;
   /**
+   * Trigger display name
+   */
+  displayName: string;
+  /**
    * Trigger ID
    */
   triggerId: string;
@@ -384,13 +388,13 @@ export type SkillJob = {
    */
   jobStatus: SkillJobStatus;
   /**
-   * Conversation ID
+   * Related conversation
    */
-  convId?: string;
+  conversation?: Conversation;
   /**
-   * Skill trigger ID
+   * Skill trigger
    */
-  triggerId?: string;
+  trigger?: SkillTrigger;
   /**
    * Skill input
    */
@@ -398,7 +402,7 @@ export type SkillJob = {
   /**
    * Skill context
    */
-  context: SkillContext;
+  context: PopulatedSkillContext;
   /**
    * Job creation time
    */
@@ -586,10 +590,6 @@ export type Conversation = {
    * Number of chat messages in this conversation
    */
   messageCount?: number;
-  /**
-   * Related content ID
-   */
-  cid?: string;
   /**
    * Conversation locale
    */
@@ -796,13 +796,13 @@ export type BaseResponse = {
 
 export type UpsertResourceRequest = {
   /**
+   * Resource title
+   */
+  title: string;
+  /**
    * Resource type
    */
   resourceType: ResourceType;
-  /**
-   * Resource title
-   */
-  title?: string;
   /**
    * Resource ID (only used for update)
    */
@@ -1179,6 +1179,21 @@ export type SkillContext = {
   urls?: Array<string>;
 };
 
+export type PopulatedSkillContext = SkillContext & {
+  /**
+   * List of resources
+   */
+  resources?: Array<Resource>;
+  /**
+   * List of collections
+   */
+  collections?: Array<Collection>;
+  /**
+   * List of notes
+   */
+  notes?: Array<Note>;
+};
+
 export type SkillInputKey = 'query';
 
 export type SkillContextKey = 'resourceIds' | 'collectionIds' | 'noteIds' | 'contentList' | 'urls';
@@ -1231,6 +1246,10 @@ export type InvokeSkillRequest = {
    * Create conversation parameters
    */
   createConvParam?: CreateConversationRequest;
+  /**
+   * Trigger ID (typically you don't need to provide this)
+   */
+  triggerId?: string;
 };
 
 export type InvokeSkillResponse = BaseResponse & {
@@ -1252,6 +1271,10 @@ export type SkillTriggerCreateParam = {
    * Skill ID
    */
   skillId: string;
+  /**
+   * Trigger display name
+   */
+  displayName: string;
   /**
    * Trigger type
    */

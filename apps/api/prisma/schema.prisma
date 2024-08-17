@@ -218,7 +218,7 @@ model SkillInstance {
   /// Skill id
   skillId          String    @unique @map("skill_id")
   /// Skill template name
-  tplName          String    @default("") @map("skill_name")
+  tplName          String    @default("") @map("tpl_name")
   /// Skill display name
   displayName      String    @default("") @map("display_name")
   /// Skill description
@@ -241,6 +241,8 @@ model SkillInstance {
 model SkillTrigger {
   /// Primary key
   pk              BigInt    @id @default(autoincrement())
+  /// Trigger display name
+  displayName     String    @default("") @map("display_name")
   /// Trigger id
   triggerId       String    @unique @map("trigger_id")
   /// Trigger type
@@ -279,6 +281,8 @@ model SkillJob {
   skillId          String   @map("skill_id")
   /// Skill display name
   skillDisplayName String   @map("skill_display_name")
+  /// UID of skill owner
+  uid              String   @map("uid")
   /// Input (JSON of `SkillInput`)
   input            String   @map("input")
   /// Context (JSON of `SkillContext`)
@@ -286,11 +290,9 @@ model SkillJob {
   /// Skill job status (refer to `SkillJobStatus`)
   status           String   @map("status")
   /// Skill trigger id
-  triggerId        String   @default("") @map("trigger_id")
-  /// UID of skill owner
-  uid              String   @map("uid")
+  triggerId        String?  @map("trigger_id")
   /// Conversation ID
-  convId           String   @default("") @map("conv_id")
+  convId           String?  @map("conv_id")
   /// Create timestamp
   createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp

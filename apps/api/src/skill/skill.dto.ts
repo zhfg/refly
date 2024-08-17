@@ -11,15 +11,15 @@ import {
   SkillInstance as SkillInstanceModel,
   SkillTrigger as SkillTriggerModel,
   SkillJob as SkillJobModel,
+  Conversation as ConversationModel,
   ChatMessage as ChatMessageModel,
 } from '@prisma/client';
 import { pick } from '@/utils';
-import { toChatMessageDTO } from '@/conversation/conversation.dto';
+import { toChatMessageDTO, toConversationDTO } from '@/conversation/conversation.dto';
 
 export interface InvokeSkillJobData extends InvokeSkillRequest {
   uid: string;
   jobId?: string;
-  triggerId?: string;
 }
 
 export function skillInstancePO2DTO(skill: SkillInstanceModel): SkillInstance {
@@ -33,22 +33,28 @@ export function skillInstancePO2DTO(skill: SkillInstanceModel): SkillInstance {
 
 export function skillTriggerPO2DTO(trigger: SkillTriggerModel): SkillTrigger {
   return {
-    ...pick(trigger, ['skillId', 'triggerId', 'enabled']),
-    ...{
-      simpleEventName: trigger.simpleEventName as SimpleEventName,
-      timerConfig: trigger.timerConfig ? JSON.parse(trigger.timerConfig) : undefined,
-      input: trigger.input ? JSON.parse(trigger.input) : undefined,
-      context: trigger.context ? JSON.parse(trigger.context) : undefined,
-    },
+    ...pick(trigger, ['skillId', 'displayName', 'triggerId', 'enabled']),
     triggerType: trigger.triggerType as SkillTriggerType,
+    simpleEventName: trigger.simpleEventName as SimpleEventName,
+    timerConfig: trigger.timerConfig ? JSON.parse(trigger.timerConfig) : undefined,
+    input: trigger.input ? JSON.parse(trigger.input) : undefined,
+    context: trigger.context ? JSON.parse(trigger.context) : undefined,
     createdAt: trigger.createdAt.toJSON(),
     updatedAt: trigger.updatedAt.toJSON(),
   };
 }
 
-export function skillJobPO2DTO(job: SkillJobModel & { messages?: ChatMessageModel[] }): SkillJob {
+export function skillJobPO2DTO(
+  job: SkillJobModel & {
+    conversation?: ConversationModel;
+    trigger?: SkillTriggerModel;
+    messages?: ChatMessageModel[];
+  },
+): SkillJob {
   return {
     ...pick(job, ['jobId', 'skillId', 'skillDisplayName', 'triggerId', 'convId']),
+    trigger: job.trigger ? skillTriggerPO2DTO(job.trigger) : undefined,
+    conversation: job.conversation ? toConversationDTO(job.conversation) : undefined,
     messages: job.messages?.map(toChatMessageDTO) ?? [],
     jobStatus: job.status as SkillJobStatus,
     input: JSON.parse(job.input),

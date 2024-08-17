@@ -14,6 +14,8 @@ import {
   InvokeSkillRequest,
   ListSkillInstancesData,
   ListSkillJobsData,
+  PopulatedSkillContext,
+  SkillContext,
   SkillMeta,
   SkillTemplate,
   SkillTriggerCreateParam,
@@ -41,7 +43,7 @@ import {
 } from '@/utils';
 import { InvokeSkillJobData } from './skill.dto';
 import { KnowledgeService } from '@/knowledge/knowledge.service';
-import { collectionPO2DTO, resourcePO2DTO } from '@/knowledge/knowledge.dto';
+import { collectionPO2DTO, notePO2DTO, resourcePO2DTO } from '@/knowledge/knowledge.dto';
 import { ConversationService } from '@/conversation/conversation.service';
 import { MessageAggregator } from '@/utils/message';
 import { SkillEvent } from '@refly/common-types';
@@ -79,6 +81,7 @@ function validateSkillTriggerCreateParam(param: SkillTriggerCreateParam) {
 }
 
 interface CreateSkillJobData extends InvokeSkillRequest {
+  context?: PopulatedSkillContext;
   skill?: SkillInstance;
   triggerId?: string;
   convId?: string;
@@ -251,7 +254,51 @@ export class SkillService {
     return null;
   }
 
-  async createJob(user: User, param: CreateSkillJobData) {
+  /**
+   * Populate skill context with actual collections, resources and notes.
+   * These data can be used in skill invocation.
+   */
+  async populateSkillContext(user: User, context: SkillContext): Promise<PopulatedSkillContext> {
+    const { uid } = user;
+    const pContext: PopulatedSkillContext = { ...context };
+
+    // Populate collections
+    if (pContext.collectionIds?.length > 0) {
+      const collections = await this.prisma.collection.findMany({
+        where: { collectionId: { in: pContext.collectionIds }, uid, deletedAt: null },
+      });
+      if (collections.length === 0) {
+        throw new BadRequestException(`collection not found: ${pContext.collectionIds}`);
+      }
+      pContext.collections = collections.map((c) => collectionPO2DTO(c));
+    }
+
+    // Populate resources
+    if (pContext.resourceIds?.length > 0) {
+      const resources = await this.prisma.resource.findMany({
+        where: { resourceId: { in: pContext.resourceIds }, uid, deletedAt: null },
+      });
+      if (resources.length === 0) {
+        throw new BadRequestException(`resource not found: ${pContext.resourceIds}`);
+      }
+      pContext.resources = resources.map((r) => resourcePO2DTO(r, true));
+    }
+
+    // Populate notes
+    if (pContext.noteIds?.length > 0) {
+      const notes = await this.prisma.note.findMany({
+        where: { noteId: { in: pContext.noteIds }, uid, deletedAt: null },
+      });
+      if (notes.length === 0) {
+        throw new BadRequestException(`note not found: ${pContext.noteIds}`);
+      }
+      pContext.notes = notes.map((n) => notePO2DTO(n));
+    }
+
+    return pContext;
+  }
+
+  async createSkillJob(user: User, param: CreateSkillJobData) {
     const { input, context, skill, triggerId, convId } = param;
     return this.prisma.skillJob.create({
       data: {
@@ -270,7 +317,9 @@ export class SkillService {
 
   async sendInvokeSkillTask(user: User, param: InvokeSkillRequest) {
     const skill = await this.skillInvokePreCheck(user, param);
-    const job = await this.createJob(user, { ...param, skill });
+    param.context = await this.populateSkillContext(user, param.context);
+
+    const job = await this.createSkillJob(user, { ...param, skill });
 
     await this.queue.add(CHANNEL_INVOKE_SKILL, {
       ...param,
@@ -279,6 +328,17 @@ export class SkillService {
     });
 
     return job;
+  }
+
+  async invokeSkillFromQueue(param: InvokeSkillJobData) {
+    const { uid, jobId } = param;
+    const user = await this.prisma.user.findFirst({ where: { uid } });
+    if (!user) {
+      this.logger.warn(`user not found for uid ${uid} when invoking skill: ${uid}`);
+      return;
+    }
+
+    await this.streamInvokeSkill(user, param, null, jobId);
   }
 
   async buildInvokeConfig(data: {
@@ -332,24 +392,7 @@ export class SkillService {
     return config;
   }
 
-  async invokeSkillFromQueue(param: InvokeSkillJobData) {
-    const { uid, jobId, triggerId } = param;
-    const user = await this.prisma.user.findFirst({ where: { uid } });
-    if (!user) {
-      this.logger.warn(`user not found for uid ${uid} when invoking skill: ${uid}`);
-      return;
-    }
-
-    await this.streamInvokeSkill(user, param, null, jobId, triggerId);
-  }
-
-  async streamInvokeSkill(
-    user: User,
-    param: InvokeSkillRequest,
-    res?: Response,
-    jobId?: string,
-    triggerId?: string,
-  ) {
+  async streamInvokeSkill(user: User, param: InvokeSkillRequest, res?: Response, jobId?: string) {
     const skill = await this.skillInvokePreCheck(user, param);
 
     const data: SkillInvocationData = {
@@ -375,10 +418,11 @@ export class SkillService {
     }
 
     if (!jobId) {
-      const job = await this.createJob(user, { ...param, skill, triggerId });
-      jobId = job.jobId;
+      data.job = await this.createSkillJob(user, { ...data.param, skill });
+      jobId = data.job.jobId;
+    } else {
+      data.job = await this.prisma.skillJob.findFirst({ where: { jobId } });
     }
-    data.job = await this.prisma.skillJob.findFirst({ where: { jobId } });
 
     try {
       await this._invokeSkill(data);
@@ -402,6 +446,8 @@ export class SkillService {
 
   private async _invokeSkill(data: SkillInvocationData) {
     const { user, param, conversation, skill, res, job } = data;
+
+    param.input ??= { query: '' };
 
     const msgAggregator = new MessageAggregator();
     const config = await this.buildInvokeConfig({
@@ -500,6 +546,7 @@ export class SkillService {
       data: param.triggerList.map((trigger) => ({
         uid,
         triggerId: genSkillTriggerID(),
+        displayName: trigger.displayName,
         ...pick(trigger, ['skillId', 'triggerType', 'simpleEventName']),
         ...{
           timerConfig: trigger.timerConfig ? JSON.stringify(trigger.timerConfig) : undefined,
@@ -548,14 +595,35 @@ export class SkillService {
     });
   }
 
-  async listSkillJobs(user: Pick<User, 'uid'>, param: ListSkillJobsData['query']) {
+  async listSkillJobs(user: User, param: ListSkillJobsData['query']) {
     const { skillId, jobStatus, page, pageSize } = param ?? {};
-    return this.prisma.skillJob.findMany({
+    const jobs = await this.prisma.skillJob.findMany({
       where: { uid: user.uid, skillId, status: jobStatus },
       orderBy: { updatedAt: 'desc' },
       take: pageSize,
       skip: (page - 1) * pageSize,
     });
+
+    const triggerIds = [...new Set(jobs.map((job) => job.triggerId).filter(Boolean))];
+    const convIds = [...new Set(jobs.map((job) => job.convId).filter(Boolean))];
+
+    const [triggers, convs] = await Promise.all([
+      this.prisma.skillTrigger.findMany({
+        where: { triggerId: { in: triggerIds }, uid: user.uid, deletedAt: null },
+      }),
+      this.prisma.conversation.findMany({
+        where: { convId: { in: convIds }, uid: user.uid },
+      }),
+    ]);
+
+    const triggerMap = new Map(triggers.map((trigger) => [trigger.triggerId, trigger]));
+    const convMap = new Map(convs.map((conv) => [conv.convId, conv]));
+
+    return jobs.map((job) => ({
+      ...job,
+      trigger: triggerMap.get(job.triggerId),
+      conversation: convMap.get(job.convId),
+    }));
   }
 
   async getSkillJobDetail(user: User, jobId: string) {

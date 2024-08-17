@@ -1,4 +1,4 @@
-import { START, END, StateGraphArgs, StateGraph, Graph } from '@langchain/langgraph';
+import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 
 // schema
 import { z } from 'zod';
@@ -6,10 +6,9 @@ import { z } from 'zod';
 import { SystemMessage } from '@langchain/core/messages';
 import { HumanMessage } from '@langchain/core/messages';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
-import { LabelClass, Resource, SkillInvocationConfig } from '@refly/openapi-schema';
+import { LabelClass, SkillInvocationConfig } from '@refly/openapi-schema';
 
 interface GraphState extends BaseSkillState {
-  resource: Resource;
   labelClass: LabelClass;
   labels: string[];
 }
@@ -33,10 +32,6 @@ export class ResourceLabelerSkill extends BaseSkill {
 
   graphState: StateGraphArgs<GraphState>['channels'] = {
     ...baseStateGraphArgs,
-    resource: {
-      reducer: (left?: Resource, right?: Resource) => (right ? right : left || null),
-      default: () => null,
-    },
     labelClass: {
       reducer: (left?: LabelClass, right?: LabelClass) => (right ? right : left || null),
       default: () => null,
@@ -47,41 +42,20 @@ export class ResourceLabelerSkill extends BaseSkill {
     },
   };
 
-  loadResource = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
-    const { resourceIds } = config?.configurable || {};
-
-    if (resourceIds.length === 0) {
-      this.emitEvent({ event: 'log', content: 'No resource selected' }, config);
-      return {};
-    }
-
-    const { user } = config;
-
-    try {
-      const res = await this.engine.service.getResourceDetail(user, { resourceId: resourceIds[0] });
-      if (!res.success) {
-        this.emitEvent({ event: 'log', content: `Get resource ${resourceIds[0]} failed` }, config);
-        return {};
-      }
-
-      this.emitEvent({ event: 'log', content: `Load resource content success: ${res.data?.title}` }, config);
-      return { resource: res.data };
-    } catch (err) {
-      this.engine.logger.error(`Get resource ${resourceIds[0]} encounter err: ${err.stack}`);
-      this.emitEvent({ event: 'log', content: `Get resource ${resourceIds[0]} encounter err: ${err}` }, config);
-      return {};
-    }
-  };
-
   checkResourceValid = (state: GraphState, config: SkillRunnableConfig): 'prepareLabelClass' | typeof END => {
-    const { resource } = state;
+    const { resources = [] } = config?.configurable || {};
 
-    if (resource?.content) {
-      return 'prepareLabelClass';
-    } else {
+    if (resources.length === 0) {
+      this.emitEvent({ event: 'log', content: `No resource selected` }, config);
+      return END;
+    }
+
+    if (!resources[0].content) {
       this.emitEvent({ event: 'log', content: `Resource content is empty, skip labeling` }, config);
       return END;
     }
+
+    return 'prepareLabelClass';
   };
 
   prepareLabelClass = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
@@ -99,8 +73,10 @@ export class ResourceLabelerSkill extends BaseSkill {
       return {};
     }
 
-    const { name, displayName } = labelClass;
-    this.emitEvent({ event: 'log', content: `Label class ready: ${displayName} (${name})` }, config);
+    this.emitEvent(
+      { event: 'log', content: `Label class ready: ${labelClass.displayName} (${labelClass.name})` },
+      config,
+    );
 
     return { labelClass };
   };
@@ -115,8 +91,8 @@ export class ResourceLabelerSkill extends BaseSkill {
   };
 
   generateLabels = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
-    const { resource } = state;
-    const { locale = 'en' } = config?.configurable || {};
+    const { resources, locale = 'en' } = config?.configurable || {};
+    const resource = resources[0];
 
     const getSystemPrompt = (title: string, content: string) => `# Role
 You are a sharp expert in textual content classification, proficient in identifying textual information and categorizing it correctly. Your sole task is to interpret the text, provide the corresponding classification, and justify the categorization.
@@ -165,8 +141,10 @@ Content: ${content}
   };
 
   bindLabels = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
-    const { resource, labelClass, labels } = state;
-    const { user } = config;
+    const { labelClass, labels } = state;
+    const { user, configurable } = config;
+    const { resources } = configurable;
+    const resource = resources[0];
 
     const { data, success } = await this.engine.service.createLabelInstance(user, {
       labelClassId: labelClass.labelClassId,
@@ -189,13 +167,11 @@ Content: ${content}
     const workflow = new StateGraph<GraphState>({
       channels: this.graphState,
     })
-      .addNode('loadResource', this.loadResource)
       .addNode('prepareLabelClass', this.prepareLabelClass)
       .addNode('generateLabels', this.generateLabels)
       .addNode('bindLabels', this.bindLabels);
 
-    workflow.addEdge(START, 'loadResource');
-    workflow.addConditionalEdges('loadResource', this.checkResourceValid);
+    workflow.addConditionalEdges(START, this.checkResourceValid);
     workflow.addConditionalEdges('prepareLabelClass', this.checkLabelClassValid);
     workflow.addEdge('generateLabels', 'bindLabels');
     workflow.addEdge('bindLabels', END);

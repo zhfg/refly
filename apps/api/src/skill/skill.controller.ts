@@ -70,6 +70,7 @@ export class SkillController {
     res.setHeader('Connection', 'keep-alive');
     res.status(200);
 
+    body.context = await this.skillService.populateSkillContext(user, body.context);
     await this.skillService.streamInvokeSkill(user, body, res);
   }
 
@@ -169,12 +170,12 @@ export class SkillController {
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListSkillJobsResponse> {
-    const logs = await this.skillService.listSkillJobs(user, {
+    const jobs = await this.skillService.listSkillJobs(user, {
       skillId: skillId || undefined,
       page,
       pageSize,
     });
-    return buildSuccessResponse(logs.map((log) => skillJobPO2DTO(log)));
+    return buildSuccessResponse(jobs.map((log) => skillJobPO2DTO(log)));
   }
 
   @UseGuards(JwtAuthGuard)

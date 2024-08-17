@@ -341,12 +341,17 @@ export const $TimerTriggerConfig = {
 export const $SkillTrigger = {
   type: 'object',
   description: 'Skill triggers',
-  required: ['skillId', 'triggerId', 'triggerType', 'enabled', 'createdAt', 'updatedAt'],
+  required: ['skillId', 'displayName', 'triggerId', 'triggerType', 'enabled', 'createdAt', 'updatedAt'],
   properties: {
     skillId: {
       type: 'string',
       description: 'Skill ID',
       example: 'sk-g30e1b80b5g1itbemc0g5jj3',
+    },
+    displayName: {
+      type: 'string',
+      description: 'Trigger display name',
+      example: 'My trigger',
     },
     triggerId: {
       type: 'string',
@@ -467,13 +472,13 @@ export const $SkillJob = {
       description: 'Skill job status',
       $ref: '#/components/schemas/SkillJobStatus',
     },
-    convId: {
-      type: 'string',
-      description: 'Conversation ID',
+    conversation: {
+      description: 'Related conversation',
+      $ref: '#/components/schemas/Conversation',
     },
-    triggerId: {
-      type: 'string',
-      description: 'Skill trigger ID',
+    trigger: {
+      description: 'Skill trigger',
+      $ref: '#/components/schemas/SkillTrigger',
     },
     input: {
       description: 'Skill input',
@@ -481,7 +486,7 @@ export const $SkillJob = {
     },
     context: {
       description: 'Skill context',
-      $ref: '#/components/schemas/SkillContext',
+      $ref: '#/components/schemas/PopulatedSkillContext',
     },
     createdAt: {
       type: 'string',
@@ -706,11 +711,6 @@ export const $Conversation = {
       type: 'number',
       description: 'Number of chat messages in this conversation',
       example: 42,
-    },
-    cid: {
-      type: 'string',
-      description: 'Related content ID',
-      example: 'c-g30e1b80b5g1itbemc0g5jj3',
     },
     locale: {
       description: 'Conversation locale',
@@ -982,16 +982,16 @@ export const $BaseResponse = {
 
 export const $UpsertResourceRequest = {
   type: 'object',
-  required: ['resourceType'],
+  required: ['title', 'resourceType'],
   properties: {
-    resourceType: {
-      description: 'Resource type',
-      $ref: '#/components/schemas/ResourceType',
-    },
     title: {
       type: 'string',
       description: 'Resource title',
       example: 'My Resource',
+    },
+    resourceType: {
+      description: 'Resource type',
+      $ref: '#/components/schemas/ResourceType',
     },
     resourceId: {
       type: 'string',
@@ -1701,6 +1701,40 @@ export const $SkillContext = {
   },
 } as const;
 
+export const $PopulatedSkillContext = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/SkillContext',
+    },
+    {
+      type: 'object',
+      properties: {
+        resources: {
+          type: 'array',
+          description: 'List of resources',
+          items: {
+            $ref: '#/components/schemas/Resource',
+          },
+        },
+        collections: {
+          type: 'array',
+          description: 'List of collections',
+          items: {
+            $ref: '#/components/schemas/Collection',
+          },
+        },
+        notes: {
+          type: 'array',
+          description: 'List of notes',
+          items: {
+            $ref: '#/components/schemas/Note',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
 export const $SkillInputKey = {
   type: 'string',
   enum: ['query'],
@@ -1785,6 +1819,10 @@ export const $InvokeSkillRequest = {
       description: 'Create conversation parameters',
       $ref: '#/components/schemas/CreateConversationRequest',
     },
+    triggerId: {
+      description: "Trigger ID (typically you don't need to provide this)",
+      type: 'string',
+    },
   },
 } as const;
 
@@ -1827,12 +1865,17 @@ export const $ListSkillTriggerResponse = {
 
 export const $SkillTriggerCreateParam = {
   type: 'object',
-  required: ['skillId', 'triggerType'],
+  required: ['skillId', 'displayName', 'triggerType'],
   properties: {
     skillId: {
       type: 'string',
       description: 'Skill ID',
       example: 'sk-g30e1b80b5g1itbemc0g5jj3',
+    },
+    displayName: {
+      type: 'string',
+      description: 'Trigger display name',
+      example: 'My trigger',
     },
     triggerType: {
       description: 'Trigger type',

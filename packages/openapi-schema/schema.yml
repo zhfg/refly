@@ -1373,6 +1373,7 @@ components:
       description: Skill triggers
       required:
         - skillId
+        - displayName
         - triggerId
         - triggerType
         - enabled
@@ -1383,6 +1384,10 @@ components:
           type: string
           description: Skill ID
           example: sk-g30e1b80b5g1itbemc0g5jj3
+        displayName:
+          type: string
+          description: Trigger display name
+          example: My trigger
         triggerId:
           type: string
           description: Trigger ID
@@ -1480,18 +1485,18 @@ components:
         jobStatus:
           description: Skill job status
           $ref: '#/components/schemas/SkillJobStatus'
-        convId:
-          type: string
-          description: Conversation ID
-        triggerId:
-          type: string
-          description: Skill trigger ID
+        conversation:
+          description: Related conversation
+          $ref: '#/components/schemas/Conversation'
+        trigger:
+          description: Skill trigger
+          $ref: '#/components/schemas/SkillTrigger'
         input:
           description: Skill input
           $ref: '#/components/schemas/SkillInput'
         context:
           description: Skill context
-          $ref: '#/components/schemas/SkillContext'
+          $ref: '#/components/schemas/PopulatedSkillContext'
         createdAt:
           type: string
           format: date-time
@@ -1673,10 +1678,6 @@ components:
           type: number
           description: Number of chat messages in this conversation
           example: 42
-        cid:
-          type: string
-          description: Related content ID
-          example: c-g30e1b80b5g1itbemc0g5jj3
         locale:
           description: Conversation locale
           type: string
@@ -1892,15 +1893,16 @@ components:
     UpsertResourceRequest:
       type: object
       required:
+        - title
         - resourceType
       properties:
-        resourceType:
-          description: Resource type
-          $ref: '#/components/schemas/ResourceType'
         title:
           type: string
           description: Resource title
           example: My Resource
+        resourceType:
+          description: Resource type
+          $ref: '#/components/schemas/ResourceType'
         resourceId:
           type: string
           description: Resource ID (only used for update)
@@ -2343,6 +2345,26 @@ components:
           description: List of URLs
           items:
             type: string
+    PopulatedSkillContext:
+      allOf:
+        - $ref: '#/components/schemas/SkillContext'
+        - type: object
+          properties:
+            resources:
+              type: array
+              description: List of resources
+              items:
+                $ref: '#/components/schemas/Resource'
+            collections:
+              type: array
+              description: List of collections
+              items:
+                $ref: '#/components/schemas/Collection'
+            notes:
+              type: array
+              description: List of notes
+              items:
+                $ref: '#/components/schemas/Note'
     SkillInputKey:
       type: string
       enum:
@@ -2412,6 +2434,9 @@ components:
         createConvParam:
           description: Create conversation parameters
           $ref: '#/components/schemas/CreateConversationRequest'
+        triggerId:
+          description: Trigger ID (typically you don't need to provide this)
+          type: string
     InvokeSkillResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -2434,12 +2459,17 @@ components:
       type: object
       required:
         - skillId
+        - displayName
         - triggerType
       properties:
         skillId:
           type: string
           description: Skill ID
           example: sk-g30e1b80b5g1itbemc0g5jj3
+        displayName:
+          type: string
+          description: Trigger display name
+          example: My trigger
         triggerType:
           description: Trigger type
           $ref: '#/components/schemas/SkillTriggerType'
