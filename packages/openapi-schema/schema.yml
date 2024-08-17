@@ -1351,6 +1351,15 @@ components:
           description: Context keys to provide
           items:
             $ref: '#/components/schemas/SkillContextKey'
+    TimerInterval:
+      type: string
+      description: Timer interval
+      enum:
+        - hour
+        - day
+        - week
+        - month
+        - year
     TimerTriggerConfig:
       type: object
       required:
@@ -1360,14 +1369,10 @@ components:
           type: string
           format: date-time
           description: Time to run
-        repeat:
+        repeatInterval:
           type: string
           description: Repeat interval
-          enum:
-            - day
-            - week
-            - month
-            - year
+          $ref: '#/components/schemas/TimerInterval'
     SkillTrigger:
       type: object
       description: Skill triggers

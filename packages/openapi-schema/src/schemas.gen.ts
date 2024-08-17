@@ -321,6 +321,12 @@ export const $SimpleEvent = {
   },
 } as const;
 
+export const $TimerInterval = {
+  type: 'string',
+  description: 'Timer interval',
+  enum: ['hour', 'day', 'week', 'month', 'year'],
+} as const;
+
 export const $TimerTriggerConfig = {
   type: 'object',
   required: ['datetime'],
@@ -330,10 +336,10 @@ export const $TimerTriggerConfig = {
       format: 'date-time',
       description: 'Time to run',
     },
-    repeat: {
+    repeatInterval: {
       type: 'string',
       description: 'Repeat interval',
-      enum: ['day', 'week', 'month', 'year'],
+      $ref: '#/components/schemas/TimerInterval',
     },
   },
 } as const;

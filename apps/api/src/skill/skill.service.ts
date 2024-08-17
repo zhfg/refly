@@ -5,7 +5,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { Conversation, SkillInstance, SkillTrigger, MessageType, SkillJob } from '@prisma/client';
 import { Response } from 'express';
-import { AIMessageChunk } from '@langchain/core/dist/messages';
+import { AIMessageChunk, BaseMessage } from '@langchain/core/dist/messages';
 import {
   CreateSkillInstanceRequest,
   CreateSkillTriggerRequest,
@@ -19,6 +19,8 @@ import {
   SkillMeta,
   SkillTemplate,
   SkillTriggerCreateParam,
+  TimerInterval,
+  TimerTriggerConfig,
   UpdateSkillInstanceRequest,
   UpdateSkillTriggerRequest,
   User,
@@ -53,9 +55,7 @@ import { LabelService } from '@/label/label.service';
 import { labelClassPO2DTO, labelPO2DTO } from '@/label/label.dto';
 import { CreateChatMessageInput } from '@/conversation/conversation.dto';
 
-export type LLMChatMessage = AIMessage | HumanMessage | SystemMessage;
-
-export function createLLMChatMessage(content: string, type: MessageType): LLMChatMessage {
+export function createLangchainMessage(content: string, type: MessageType): BaseMessage {
   switch (type) {
     case 'ai':
       return new AIMessage({ content });
@@ -374,7 +374,7 @@ export class SkillService {
         orderBy: { createdAt: 'asc' },
       });
       config.configurable.chatHistory = messages.map((m) =>
-        createLLMChatMessage(m.content, m.type),
+        createLangchainMessage(m.content, m.type),
       );
     }
 
@@ -533,6 +533,66 @@ export class SkillService {
     });
   }
 
+  async startTimerTrigger(user: User, trigger: SkillTrigger) {
+    if (!trigger.timerConfig) {
+      this.logger.warn(`No timer config found for trigger: ${trigger.triggerId}, cannot start it`);
+      return;
+    }
+
+    if (trigger.bullJobId) {
+      this.logger.warn(`Trigger already bind to a bull job: ${trigger.triggerId}, skip start it`);
+      return;
+    }
+
+    const timerConfig: TimerTriggerConfig = JSON.parse(trigger.timerConfig || '{}');
+    const { datetime, repeatInterval } = timerConfig;
+
+    const repeatIntervalToMillis: Record<TimerInterval, number> = {
+      hour: 60 * 60 * 1000,
+      day: 24 * 60 * 60 * 1000,
+      week: 7 * 24 * 60 * 60 * 1000,
+      month: 30 * 24 * 60 * 60 * 1000,
+      year: 365 * 24 * 60 * 60 * 1000,
+    };
+
+    const job = await this.queue.add(
+      CHANNEL_INVOKE_SKILL,
+      {
+        input: JSON.parse(trigger.input || '{}'),
+        context: JSON.parse(trigger.context || '{}'),
+        skillId: trigger.skillId,
+        triggerId: trigger.triggerId,
+        uid: user.uid,
+      },
+      {
+        delay: new Date(datetime).getTime() - new Date().getTime(),
+        repeat: repeatInterval ? { every: repeatIntervalToMillis[repeatInterval] } : undefined,
+      },
+    );
+
+    return this.prisma.skillTrigger.update({
+      where: { triggerId: trigger.triggerId },
+      data: { bullJobId: String(job.id) },
+    });
+  }
+
+  async stopTimerTrigger(user: User, trigger: SkillTrigger) {
+    if (!trigger.bullJobId) {
+      this.logger.warn(`No bull job found for trigger: ${trigger.triggerId}, cannot stop it`);
+      return;
+    }
+
+    const jobToRemove = await this.queue.getJob(trigger.bullJobId);
+    if (jobToRemove) {
+      await jobToRemove.remove();
+    }
+
+    await this.prisma.skillTrigger.update({
+      where: { triggerId: trigger.triggerId },
+      data: { bullJobId: null },
+    });
+  }
+
   async createSkillTrigger(user: User, param: CreateSkillTriggerRequest) {
     const { uid } = user;
 
@@ -542,7 +602,7 @@ export class SkillService {
 
     param.triggerList.forEach((trigger) => validateSkillTriggerCreateParam(trigger));
 
-    return this.prisma.skillTrigger.createManyAndReturn({
+    const triggers = await this.prisma.skillTrigger.createManyAndReturn({
       data: param.triggerList.map((trigger) => ({
         uid,
         triggerId: genSkillTriggerID(),
@@ -556,6 +616,14 @@ export class SkillService {
         enabled: !!trigger.enabled,
       })),
     });
+
+    triggers.forEach(async (trigger) => {
+      if (trigger.triggerType === 'timer' && trigger.enabled) {
+        await this.startTimerTrigger(user, trigger);
+      }
+    });
+
+    return triggers;
   }
 
   async updateSkillTrigger(user: User, param: UpdateSkillTriggerRequest) {
@@ -564,7 +632,8 @@ export class SkillService {
     if (!triggerId) {
       throw new BadRequestException('trigger id is required');
     }
-    return this.prisma.skillTrigger.update({
+
+    const trigger = await this.prisma.skillTrigger.update({
       where: { triggerId, uid, deletedAt: null },
       data: {
         ...pick(param, ['triggerType', 'enabled', 'simpleEventName']),
@@ -575,6 +644,16 @@ export class SkillService {
         },
       },
     });
+
+    if (trigger.triggerType === 'timer') {
+      if (trigger.enabled && !trigger.bullJobId) {
+        await this.startTimerTrigger(user, trigger);
+      } else if (!trigger.enabled && trigger.bullJobId) {
+        await this.stopTimerTrigger(user, trigger);
+      }
+    }
+
+    return trigger;
   }
 
   async deleteSkillTrigger(user: User, param: DeleteSkillTriggerRequest) {
@@ -589,6 +668,11 @@ export class SkillService {
     if (!trigger || trigger.uid !== uid) {
       throw new BadRequestException('trigger not found');
     }
+
+    if (trigger.bullJobId) {
+      await this.stopTimerTrigger(user, trigger);
+    }
+
     await this.prisma.skillTrigger.update({
       where: { triggerId: trigger.triggerId, uid: user.uid },
       data: { deletedAt: new Date() },

@@ -261,6 +261,11 @@ export type SimpleEvent = {
   provideContextKeys: Array<SkillContextKey>;
 };
 
+/**
+ * Timer interval
+ */
+export type TimerInterval = 'hour' | 'day' | 'week' | 'month' | 'year';
+
 export type TimerTriggerConfig = {
   /**
    * Time to run
@@ -269,13 +274,8 @@ export type TimerTriggerConfig = {
   /**
    * Repeat interval
    */
-  repeat?: 'day' | 'week' | 'month' | 'year';
+  repeatInterval?: TimerInterval;
 };
-
-/**
- * Repeat interval
- */
-export type repeat = 'day' | 'week' | 'month' | 'year';
 
 /**
  * Skill triggers

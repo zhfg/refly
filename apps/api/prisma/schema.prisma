@@ -261,6 +261,8 @@ model SkillTrigger {
   context         String?   @map("context")
   /// Whether this skill is enabled
   enabled         Boolean   @map("enabled")
+  /// Bull job id (for timer trigger)
+  bullJobId       String?   @map("bull_job_id")
   /// Create timestamp
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
