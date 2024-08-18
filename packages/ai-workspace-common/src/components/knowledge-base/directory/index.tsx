@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
+import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 // 类型
 import { Resource } from '@refly/openapi-schema';
 // 请求
@@ -84,6 +85,20 @@ export const KnowledgeBaseDirectory = () => {
     collectionId: kbId,
   }));
 
+  const { handleDeleteTabsWithCollectionId, handleDeleteTab } = useKnowledgeBaseTabs();
+  const handleDeleteKnowledgeBase = () => {
+    const { collectionId } = knowledgeBaseStore?.currentKnowledgeBase;
+    if (collectionId) {
+      handleDeleteTabsWithCollectionId(collectionId);
+    }
+  };
+
+  const handleDeleteResource = (item: Resource) => {
+    const { resourceId } = item;
+    handleDeleteTab(resourceId);
+    reloadKnowledgeBaseState.setReloadKnowledgeBaseList(true);
+  };
+
   return (
     <div className="knowledge-base-directory-container">
       <div className="knowledge-base-directory-intro">
@@ -105,7 +120,11 @@ export const KnowledgeBaseDirectory = () => {
           </div>
         </div>
         {knowledgeBaseStore?.currentKnowledgeBase && (
-          <DeleteDropdownMenu type="knowledgeBase" data={knowledgeBaseStore?.currentKnowledgeBase} />
+          <DeleteDropdownMenu
+            type="knowledgeBase"
+            data={knowledgeBaseStore?.currentKnowledgeBase}
+            postDeleteList={handleDeleteKnowledgeBase}
+          />
         )}
       </div>
       <div className="knowledge-base-directory-list-container">
@@ -113,6 +132,9 @@ export const KnowledgeBaseDirectory = () => {
           placeholder="搜索知识库..."
           isFetching={isFetching}
           resources={resources as Resource[]}
+          canDelete={true}
+          showAdd={true}
+          handleItemDelete={(item) => handleDeleteResource(item)}
           handleItemClick={(item) => {
             jumpToReadResource({
               kbId: item?.collectionId,

@@ -1,12 +1,14 @@
 // styles
 import './index.scss';
-import { IconSearch } from '@arco-design/web-react/icon';
+import { IconSearch, IconPlus } from '@arco-design/web-react/icon';
 import { Divider, Input, Skeleton } from '@arco-design/web-react';
 import { useSearchableList } from '@refly-packages/ai-workspace-common/components/use-searchable-list';
 import { useEffect, useState } from 'react';
 import { Resource } from '@refly/openapi-schema';
+
 // 组件
 import { ResourceItem } from './resource-item';
+import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import classNames from 'classnames';
 
 interface ResourceListProps {
@@ -19,11 +21,14 @@ interface ResourceListProps {
   showUtil?: boolean;
   showDesc?: boolean;
   showBtn?: { summary: boolean; markdown: boolean; externalOrigin: boolean };
+  canDelete?: boolean;
+  showAdd?: boolean;
   handleItemClick: (payload: { collectionId: string; resourceId: string }) => void;
+  handleItemDelete?: (resource: Resource) => void;
 }
 
 export const ResourceList = (props: ResourceListProps) => {
-  const { searchKey = 'title' } = props;
+  const { searchKey = 'title', showAdd } = props;
   const [searchVal, setSearchVal] = useState('');
   const [resourceList, setResourceList, filter] = useSearchableList<Resource>(searchKey as keyof Resource, {
     debounce: true,
@@ -33,6 +38,18 @@ export const ResourceList = (props: ResourceListProps) => {
   const handleChange = (val: string) => {
     filter(val);
     setSearchVal(val);
+  };
+
+  const AddResourceBtn = () => {
+    const importResourceStore = useImportResourceStore();
+    const handleAddResource = () => {
+      importResourceStore.setImportResourceModalVisible(true);
+    };
+    return (
+      <div className="add-resource-btn" onClick={handleAddResource}>
+        <IconPlus />
+      </div>
+    );
   };
 
   useEffect(() => {
@@ -46,15 +63,19 @@ export const ResourceList = (props: ResourceListProps) => {
   return (
     <div className={classNames('knowledge-base-resource-list-container', props.classNames)}>
       <div className="knowledge-base-directory-search-container">
-        <Input
-          placeholder={props?.placeholder || ''}
-          allowClear
-          className="knowledge-base-directory-search"
-          style={{ height: 32, borderRadius: '8px' }}
-          value={searchVal}
-          prefix={<IconSearch />}
-          onChange={handleChange}
-        />
+        <div className="knowledge-base-directory-search-container-inner">
+          <Input
+            placeholder={props?.placeholder || ''}
+            allowClear
+            className="knowledge-base-directory-search"
+            style={{ height: 32, borderRadius: '8px' }}
+            value={searchVal}
+            prefix={<IconSearch />}
+            onChange={handleChange}
+          />
+          {showAdd && <AddResourceBtn />}
+        </div>
+
         <Divider />
       </div>
       <div className="knowledge-base-directory-list">
@@ -74,7 +95,9 @@ export const ResourceList = (props: ResourceListProps) => {
               showUtil={props.showUtil}
               showDesc={props.showDesc}
               showBtn={props.showBtn}
+              canDelete={props.canDelete}
               handleItemClick={props.handleItemClick}
+              handleItemDelete={(item) => props.handleItemDelete(item)}
             />
           ))
         )}

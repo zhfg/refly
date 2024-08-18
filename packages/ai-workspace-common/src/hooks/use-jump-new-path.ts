@@ -23,7 +23,7 @@ export const useKnowledgeBaseJumpNewPath = () => {
     extraQuery?: Record<string, string>,
   ) => {
     searchParams.set('kbId', kbId);
-    setSearchParams(searchParams);
+    setSearchParams(searchParams.toString());
     navigate(`${baseUrl}/knowledge-base?${searchParams.toString()}`);
     knowledgeBaseStore.updateResourcePanelVisible(true);
     noteStore.updateNotePanelVisible(false);
