@@ -25,7 +25,7 @@ export const $ResourceMeta = {
 export const $ResourceType = {
   type: 'string',
   description: 'Resource type',
-  enum: ['weblink', 'text'],
+  enum: ['weblink', 'text', 'note'],
 } as const;
 
 export const $Resource = {
@@ -1297,6 +1297,13 @@ export const $SkillContext = {
       },
     },
     contentList: {
+      type: 'array',
+      description: 'List of content',
+      items: {
+        type: 'string',
+      },
+    },
+    urls: {
       type: 'array',
       description: 'List of content',
       items: {

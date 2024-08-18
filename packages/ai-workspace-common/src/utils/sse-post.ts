@@ -1,11 +1,13 @@
-import { fetchStream } from '@refly-packages/ai-workspace-common/utils/fetch-stream';
 import { getAuthTokenFromCookie } from './request';
 import { getServerOrigin } from '@refly/utils/url';
 import { InvokeSkillRequest } from '@refly/openapi-schema';
 import { SkillEvent } from '@refly/common-types';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { getCookie } from '@refly-packages/ai-workspace-common/utils/cookie';
 
 export const ssePost = async ({
   controller,
+  token,
   payload,
   onStart,
   onSkillThoughout,
@@ -17,6 +19,7 @@ export const ssePost = async ({
   onCompleted,
 }: {
   controller: AbortController;
+  token: string;
   payload: InvokeSkillRequest;
   onStart: () => void;
   onSkillThoughout: (event: SkillEvent) => void;
@@ -39,7 +42,7 @@ export const ssePost = async ({
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${getAuthTokenFromCookie()}`,
+      Authorization: `Bearer ${token}`,
     },
     signal: controller.signal,
     body: JSON.stringify(payload),

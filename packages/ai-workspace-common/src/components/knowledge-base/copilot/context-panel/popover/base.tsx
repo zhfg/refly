@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import {
   Button,
   Badge,
@@ -20,17 +20,19 @@ import { useEffect, useState } from 'react';
 
 // utils
 import { getSelectedData } from '../utils';
-import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-or-search-list';
+import { ListMode, useFetchOrSearchList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-or-search-list';
 
 // requests
-import { SearchDomain, SearchResult } from '@refly/openapi-schema';
+import { SearchResult } from '@refly/openapi-schema';
+import { ContextPanelDomain } from '@refly/common-types';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
-export const BasePopover = (props: { children: React.ReactNode; content: React.ReactNode }) => {
+export const BasePopover = memo((props: { children: React.ReactNode; content: React.ReactNode }) => {
   const {} = props;
 
   return (
     <Popover
+      unmountOnExit
       color="#FCFCF9"
       position="right"
       content={props.content}
@@ -40,33 +42,48 @@ export const BasePopover = (props: { children: React.ReactNode; content: React.R
       {props.children}
     </Popover>
   );
-};
+});
 
 export interface ContentProps {
-  domain: SearchDomain;
+  domain: ContextPanelDomain;
+  hasMore: boolean;
+  mode: ListMode;
+  renderTitle: ({ title }: { title: string }) => React.ReactNode;
+  resetState: () => void;
+  isRequesting: boolean;
+  currentPage: number;
+  loadMore: (page?: number) => void;
+  updateSelectState: (data: SearchResult[]) => void;
+  handleValueChange: (val: string, domains: ContextPanelDomain[]) => void;
+  dataList: SearchResult[];
   searchPlaceholder: string;
   title: string;
   fetchData?: (payload: { pageSize: number; page: number }) => Promise<{ success: boolean; data?: SearchResult[] }>;
 }
 
-export const Content = (props: ContentProps) => {
-  const { loadMore, hasMore, dataList, isRequesting, currentPage, handleValueChange, mode } = useFetchOrSearchList({
-    fetchData: props.fetchData,
-  });
+export const Content = memo((props: ContentProps) => {
+  const {
+    mode,
+    hasMore,
+    isRequesting,
+    currentPage,
+    dataList,
+    loadMore,
+    updateSelectState,
+    handleValueChange,
+    resetState,
+    renderTitle,
+  } = props;
   const handledTreeData = dataList.map((item, index) => {
     return {
       title: item?.title,
       key: `${props?.domain}_${index}_${item?.id}`,
+      metadata: item?.metadata,
     };
   });
   const [treeData, setTreeData] = useState(handledTreeData);
-  const [inputValue, setInputValue] = useState('');
 
-  const [selectedKeys, setSelectedKeys] = useState([]);
   const [checkedKeys, setCheckedKeys] = useState([]);
-
-  // 上升状态，用于上层面板的控制
-  const contextPanelStore = useContextPanelStore();
 
   const handleConfirm = async () => {};
 
@@ -79,26 +96,25 @@ export const Content = (props: ContentProps) => {
   //   }
   // }, [inputValue, treeData]);
 
-  // 获取知识库
-  useEffect(() => {
-    loadMore();
-  }, []);
+  console.log('handledTreeData', handledTreeData);
   useEffect(() => {
     setTreeData(handledTreeData);
-  }, [handledTreeData]);
+  }, [handledTreeData?.length]);
 
   // 上升状态，更新状态到 context panel 中用于控制
   useEffect(() => {
     const selectedData = getSelectedData(checkedKeys, treeData);
+    updateSelectState(selectedData);
     console.log('selectedData', selectedData, props, checkedKeys, treeData);
-    if (props.domain === 'collection') {
-      contextPanelStore.setSelectedCollections(selectedData);
-    } else if (props.domain === 'note') {
-      contextPanelStore.setSelectedNotes(selectedData);
-    } else if (props.domain === 'resource') {
-      contextPanelStore.setSelectedResources(selectedData);
-    }
   }, [checkedKeys, treeData, props.domain]);
+
+  useEffect(() => {
+    loadMore();
+
+    return () => {
+      resetState();
+    };
+  }, []);
 
   return (
     <div className="context-content-container">
@@ -133,9 +149,7 @@ export const Content = (props: ContentProps) => {
           checkedKeys={checkedKeys}
           onCheck={(checkedKeys) => setCheckedKeys(checkedKeys)}
           showLine
-          renderTitle={({ title }: { title: string }) => {
-            return <span dangerouslySetInnerHTML={{ __html: title }}></span>;
-          }}
+          renderTitle={renderTitle}
         ></Tree>
       </div>
       <div>
@@ -173,4 +187,4 @@ export const Content = (props: ContentProps) => {
       </Affix> */}
     </div>
   );
-};
+});

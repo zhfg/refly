@@ -8,8 +8,8 @@ import { ResourceList } from '@refly-packages/ai-workspace-common/components/wor
 import { NoteList } from '@refly-packages/ai-workspace-common/components/workspace/note-list';
 import { KnowledgeBaseList } from '@refly-packages/ai-workspace-common/components/knowledge-base-list';
 import { SearchQuickOpenBtn } from '@refly-packages/ai-workspace-common/components/search-quick-open-btn';
-import { useImportResourceStore } from '@refly/ai-workspace-common/stores/import-resource';
-import { useImportKnowledgeModal } from '@refly/ai-workspace-common/stores/import-knowledge-modal';
+import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
+import { useImportKnowledgeModal } from '@refly-packages/ai-workspace-common/stores/import-knowledge-modal';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
 
 import './index.scss';

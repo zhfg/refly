@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useNavigate, useMatch } from '@refly/ai-workspace-common/utils/router';
+import { useNavigate, useMatch } from '@refly-packages/ai-workspace-common/utils/router';
 import classNames from 'classnames';
 import { IconSearch, IconStorage } from '@arco-design/web-react/icon';
 // stores
@@ -11,15 +11,15 @@ import { useGetUserSettings } from '@/hooks/use-get-user-settings';
 import { LOCALE } from '@/types';
 // components
 import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
-import { AICopilot } from '@refly/ai-workspace-common/components/knowledge-base/copilot';
-import { EmptyFeedStatus } from '@refly/ai-workspace-common/components/empty-feed-status';
+import { AICopilot } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot';
+import { EmptyFeedStatus } from '@refly-packages/ai-workspace-common/components/empty-feed-status';
 // utils
-import { useResizePanel } from '@refly/ai-workspace-common/hooks/use-resize-panel';
+import { useResizePanel } from '@refly-packages/ai-workspace-common/hooks/use-resize-panel';
 import Home from './home';
 import { ErrorBoundary } from '@sentry/react';
 // styles
 import './router.scss';
-import { getPopupContainer } from '@refly/ai-workspace-common/utils/ui';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 interface ContentRouterProps {}
 

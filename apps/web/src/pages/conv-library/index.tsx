@@ -1,9 +1,9 @@
 import { Helmet } from "react-helmet"
 import "./index.scss"
 // components
-import { ConvList } from "@refly/ai-workspace-common/components/conv-list"
+import { ConvList } from "@refly-packages/ai-workspace-common/components/conv-list"
 import { useTranslation } from "react-i18next"
-import { useKnowledgeBaseJumpNewPath } from "@refly/ai-workspace-common/hooks/use-jump-new-path"
+import { useKnowledgeBaseJumpNewPath } from "@refly-packages/ai-workspace-common/hooks/use-jump-new-path"
 import { Button, Typography } from "@arco-design/web-react"
 
 export const ConvLibrary = () => {

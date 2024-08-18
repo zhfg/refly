@@ -22,7 +22,7 @@ export type ResourceMeta = {
 /**
  * Resource type
  */
-export type ResourceType = 'weblink' | 'text';
+export type ResourceType = 'weblink' | 'text' | 'note';
 
 export type Resource = {
   /**
@@ -914,6 +914,10 @@ export type SkillContext = {
    * List of content
    */
   contentList?: Array<string>;
+  /**
+   * List of content
+   */
+  urls?: Array<string>;
 };
 
 export type InvokeSkillRequest = {

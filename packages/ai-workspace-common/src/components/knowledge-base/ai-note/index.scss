@@ -114,14 +114,11 @@
   }
 }
 
-.editor {
+.ai-note-editor-content-container {
   background-color: transparent;
   border-radius: 0.75rem;
   color: #0d0d0d;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+  position: relative;
 
   .tiptap {
     padding: 0;

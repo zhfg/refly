@@ -10,9 +10,12 @@ import {
 import { AppRouter } from "./routes/index"
 
 // 导入 i18n
-import "@refly/ai-workspace-common/i18n/config"
+import "@refly-packages/ai-workspace-common/i18n/config"
 import { Spin } from "@arco-design/web-react"
-import { getEnv, setRuntime } from "@refly/ai-workspace-common/utils/env"
+import {
+  getEnv,
+  setRuntime,
+} from "@refly-packages/ai-workspace-common/utils/env"
 import { useUserStore } from "../../../packages/ai-workspace-common/src/stores/user"
 
 setRuntime("web")

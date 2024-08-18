@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react"
 import { Link } from "react-router-dom"
 import Logo from "@/assets/logo.svg"
-import { useUserStore } from "@refly/ai-workspace-common/stores/user"
+import { useUserStore } from "@refly-packages/ai-workspace-common/stores/user"
 import { getClientOrigin } from "@refly/utils/url"
 import { IENV, getEnv } from "@refly/utils/env"
 

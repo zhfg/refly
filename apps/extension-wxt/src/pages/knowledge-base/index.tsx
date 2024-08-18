@@ -1,20 +1,20 @@
 import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 
 // 自定义组件
-import { KnowledgeBaseDetail } from '@refly/ai-workspace-common/components/knowledge-base/knowledge-base-detail';
-import { AICopilot } from '@refly/ai-workspace-common/components/knowledge-base/copilot';
+import { KnowledgeBaseDetail } from '@refly-packages/ai-workspace-common/components/knowledge-base/knowledge-base-detail';
+import { AICopilot } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot';
 // utils
 // 自定义方法
 // stores
 // scss
 import './index.scss';
 // types
-import { useUserStore } from '@refly/ai-workspace-common/stores/user';
+import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from '@refly/ai-workspace-common/utils/router';
-import { useResizePanel } from '@refly/ai-workspace-common/hooks/use-resize-panel';
+import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
+import { useResizePanel } from '@refly-packages/ai-workspace-common/hooks/use-resize-panel';
 import { ErrorBoundary } from '@sentry/react';
-import { useKnowledgeBaseStore } from '@refly/ai-workspace-common/stores/knowledge-base';
+import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 
 // 用于快速选择
 export const quickActionList = ['summary'];

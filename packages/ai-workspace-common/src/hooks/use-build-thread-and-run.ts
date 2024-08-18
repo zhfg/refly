@@ -8,7 +8,7 @@ import { useTaskStore } from '@refly-packages/ai-workspace-common/stores/task';
 import { useLocation, useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 // 类型
-import { LOCALE } from '@refly/common-types';
+import { ContextPanelDomain, LOCALE } from '@refly/common-types';
 import { Source, ChatMessage as Message, InvokeSkillRequest, SkillContext, SearchDomain } from '@refly/openapi-schema';
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { useWeblinkStore } from '@refly-packages/ai-workspace-common/stores/weblink';
@@ -25,6 +25,7 @@ import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill'
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 export const useBuildThreadAndRun = () => {
   const chatStore = useChatStore();
@@ -78,12 +79,12 @@ export const useBuildThreadAndRun = () => {
     const {
       currentKnowledgeBase,
       currentResource,
-      currentSelectedText = '',
+      currentSelectedMark,
       enableMultiSelect,
-      currentSelectedContentList = [],
+      currentSelectedMarks = [],
     } = useKnowledgeBaseStore.getState();
     const { currentNote } = useNoteStore.getState();
-    const { checkedKeys } = useContextPanelStore.getState();
+    const { checkedKeys, selectedWeblinks } = useContextPanelStore.getState();
     const mapDomainEnvIds = {
       collection: currentKnowledgeBase?.collectionId || '',
       resource: currentResource?.resourceId || '',
@@ -91,7 +92,7 @@ export const useBuildThreadAndRun = () => {
     };
 
     // collections
-    const getIds = (domain: SearchDomain, checkedKeys: string[]) => {
+    const getIds = (domain: ContextPanelDomain, checkedKeys: string[]) => {
       // for select collection context `collection-collection_1_${item?.id}`, get last item.id
       let ids: string[] = checkedKeys
         ?.filter((key: string = '') => {
@@ -107,21 +108,64 @@ export const useBuildThreadAndRun = () => {
         });
 
       // for env context, just check `currentPage-currentKnowledgeBase` checked
-      if (checkedKeys?.includes(`currentPage-${domain}`)) {
+      if (checkedKeys?.includes(`currentPage-${domain}`) && getRuntime() === 'web') {
         ids.push(mapDomainEnvIds?.[domain] || '');
       }
 
       return Array.from(new Set(ids?.filter((id) => !!id)));
     };
 
-    const contentList = enableMultiSelect ? currentSelectedContentList : [currentSelectedText];
+    const getUrls = (domain: ContextPanelDomain, checkedKeys: string[]) => {
+      let ids: string[] = checkedKeys
+        ?.filter((key: string = '') => {
+          if (key?.startsWith(`${domain}-`)) {
+            return true;
+          }
+
+          return false;
+        })
+        .map((key) => {
+          const id = key?.split('_')?.slice(-1)?.[0];
+          return id;
+        });
+
+      ids = Array.from(new Set(ids?.filter((id) => !!id)));
+      const urls = selectedWeblinks
+        ?.filter((item) => {
+          const id = item?.key?.split('_')?.slice(-1)?.[0];
+          return ids?.includes(id);
+        })
+        .map((item) => item?.metadata?.resourceMeta?.url);
+
+      if (checkedKeys?.includes(`currentPage-resource`) && getRuntime() !== 'web') {
+        urls.push(currentResource?.data?.url);
+      }
+
+      return Array.from(new Set(urls));
+    };
+
+    const getContentList = () => {
+      let contentList = [];
+      if (checkedKeys?.includes(`currentPage-resource`) && getRuntime() !== 'web') {
+        contentList.push(currentResource?.content || '');
+      }
+
+      if (enableMultiSelect) {
+        contentList = contentList.concat(currentSelectedMarks.map((item) => item?.data));
+      } else {
+        contentList.push(currentSelectedMark?.data);
+      }
+
+      return contentList;
+    };
 
     let context: SkillContext = {
       locale: localSettings?.outputLocale || LOCALE.EN,
-      contentList: contentList?.filter((item) => !!item),
+      contentList: getContentList(),
       collectionIds: getIds('collection', checkedKeys),
       resourceIds: getIds('resource', checkedKeys),
       noteIds: getIds('note', checkedKeys),
+      urls: getUrls('weblink', checkedKeys),
     };
 
     return context;
@@ -153,7 +197,7 @@ export const useBuildThreadAndRun = () => {
     // 开始提问
     buildTaskAndGenReponse(task as InvokeSkillRequest);
     chatStore.setNewQAText('');
-    knowledgeBaseStore.updateSelectedText('');
+    knowledgeBaseStore.updateCurrentSelectedMark(null);
   };
 
   return {

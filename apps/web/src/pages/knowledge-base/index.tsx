@@ -3,9 +3,9 @@ import { Helmet } from "react-helmet"
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels"
 
 // 自定义组件
-import { KnowledgeBaseDetail } from "@refly/ai-workspace-common/components/knowledge-base/knowledge-base-detail"
-import { AICopilot } from "@refly/ai-workspace-common/components/knowledge-base/copilot"
-import { AINote } from "@refly/ai-workspace-common/components/knowledge-base/ai-note"
+import { KnowledgeBaseDetail } from "@refly-packages/ai-workspace-common/components/knowledge-base/knowledge-base-detail"
+import { AICopilot } from "@refly-packages/ai-workspace-common/components/knowledge-base/copilot"
+import { AINote } from "@refly-packages/ai-workspace-common/components/knowledge-base/ai-note"
 // utils
 // 自定义方法
 // stores
@@ -13,14 +13,14 @@ import { AINote } from "@refly/ai-workspace-common/components/knowledge-base/ai-
 import "./index.scss"
 import { useCookie } from "react-use"
 // types
-import { useUserStore } from "@refly/ai-workspace-common/stores/user"
+import { useUserStore } from "@refly-packages/ai-workspace-common/stores/user"
 import { getExtensionId } from "@refly/utils/url"
 import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
-import { useResizePanel } from "@refly/ai-workspace-common/hooks/use-resize-panel"
+import { useResizePanel } from "@refly-packages/ai-workspace-common/hooks/use-resize-panel"
 import { ErrorBoundary } from "@sentry/react"
-import { useKnowledgeBaseStore } from "@refly/ai-workspace-common/stores/knowledge-base"
-import { useNoteStore } from "@refly/ai-workspace-common/stores/note"
+import { useKnowledgeBaseStore } from "@refly-packages/ai-workspace-common/stores/knowledge-base"
+import { useNoteStore } from "@refly-packages/ai-workspace-common/stores/note"
 
 /**
  *

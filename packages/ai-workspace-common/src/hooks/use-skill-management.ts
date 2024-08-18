@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Message as message } from '@arco-design/web-react';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
@@ -8,7 +8,7 @@ export const useSkillManagement = ({ shouldInit = false }: { shouldInit: boolean
   const skillStore = useSkillStore();
 
   const handleGetSkillInstances = async () => {
-    const { data, error } = await getClient().listSkillInstances();
+    const { data, error } = (await getClient().listSkillInstances()) || {};
 
     if (data?.data) {
       console.log('skill instances', data?.data);
@@ -19,7 +19,7 @@ export const useSkillManagement = ({ shouldInit = false }: { shouldInit: boolean
   };
 
   const handleGetSkillTemplates = async () => {
-    const { data, error } = await getClient().listSkillTemplates();
+    const { data, error } = (await getClient().listSkillTemplates()) || {};
 
     if (data?.data) {
       console.log('skill templates', data?.data);
@@ -91,13 +91,6 @@ export const useSkillManagement = ({ shouldInit = false }: { shouldInit: boolean
     const newSkillInstances = skillInstances.filter((item) => item?.skillName !== skillName);
     skillStore.setSkillInstalces(newSkillInstances);
   };
-
-  useEffect(() => {
-    if (shouldInit) {
-      handleGetSkillTemplates();
-      handleGetSkillInstances();
-    }
-  }, [shouldInit]);
 
   return {
     handleGetSkillInstances,

@@ -844,6 +844,7 @@ components:
       enum:
         - weblink
         - text
+        - note
     Resource:
       type: object
       required:
@@ -1792,6 +1793,11 @@ components:
           items:
             type: string
         contentList:
+          type: array
+          description: List of content
+          items:
+            type: string
+        urls:
           type: array
           description: List of content
           items:

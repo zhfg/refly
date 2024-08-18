@@ -1,16 +1,23 @@
 import { Source } from '@refly/openapi-schema';
+import { SyncMarkEventName } from './extension-messaging';
+
+export type MarkScope = 'block' | 'inline';
+
+export type TextType = 'text' | 'table' | 'link' | 'image' | 'video' | 'audio';
 
 export interface Mark {
-  type: 'text' | 'table' | 'link' | 'image' | 'video' | 'audio'; // 内容类型
+  type: TextType; // 内容类型
   data: string;
-  target: HTMLElement;
+  target?: HTMLElement;
   xPath: string; // 该元素对应的 xPath 路径，这个可以当做唯一 id
+  scope: MarkScope; // 是块级还是内联元素
+  cleanup?: () => void; // 清理函数
 }
 
 export interface Selection {
   xPath: string;
   content: string;
-  type: 'text' | 'table' | 'link' | 'image' | 'video' | 'audio';
+  type: TextType;
 }
 
 export interface Data {
@@ -19,4 +26,26 @@ export interface Data {
   source: Source; // 网页 Meta
   marks: Mark[];
   userId: string; // 是否需要 by User 保存，到时候可以推荐给其他人是这个人的策略
+}
+
+export type SyncMarkEventType = 'add' | 'remove' | 'reset';
+
+export interface SyncMarkEvent {
+  name: SyncMarkEventName; //'syncMarkEvent' | 'syncMarkEventBack';
+  body: {
+    type: SyncMarkEventType;
+    mark?: Mark;
+  };
+}
+
+export type SyncStatusEventType = 'start' | 'update' | 'stop' | 'reset';
+
+export interface SyncStatusEvent {
+  name: SyncMarkEventName;
+  body: {
+    type: SyncStatusEventType;
+    scope: MarkScope;
+    enableMultiSelect?: boolean;
+    showContentSelector?: boolean;
+  };
 }

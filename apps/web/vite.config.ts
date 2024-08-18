@@ -42,10 +42,6 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
-        "@refly/ai-workspace-common": path.resolve(
-          __dirname,
-          "../../packages/ai-workspace-common/src",
-        ),
         "@refly-packages/ai-workspace-common": path.resolve(
           __dirname,
           "../../packages/ai-workspace-common/src",

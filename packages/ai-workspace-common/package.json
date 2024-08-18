@@ -100,7 +100,9 @@
     "qs": "~6.12.3",
     "words-count": "~2.0.2",
     "rate-limiter-flexible": "~5.0.3",
-    "cheerio": "~1.0.0-rc.12"
+    "cheerio": "~1.0.0-rc.12",
+    "get-xpath": "^3.1.0",
+    "lodash.debounce": "~4.0.8"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",

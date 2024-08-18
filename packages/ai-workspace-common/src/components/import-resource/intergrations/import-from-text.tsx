@@ -30,7 +30,7 @@ import {
   UpsertResourceRequest,
 } from '@refly/openapi-schema';
 import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-or-search-list';
-import { useReloadListState } from '@refly/ai-workspace-common/stores/reload-list-state';
+import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 const { TextArea } = Input;

@@ -8,7 +8,7 @@ import { Message as message } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { useReloadListState } from '@refly/ai-workspace-common/stores/reload-list-state';
+import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 // 类型
 import { Resource } from '@refly/openapi-schema';

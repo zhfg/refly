@@ -16,7 +16,7 @@ import { ScrollLoading } from '../scroll-loading';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
-import { useReloadListState } from '@refly/ai-workspace-common/stores/reload-list-state';
+import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 
 import { LOCALE } from '@refly/common-types';
 import './index.scss';

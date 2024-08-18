@@ -3,7 +3,6 @@ import { Modal, Message as message } from '@arco-design/web-react';
 import { useState } from 'react';
 import { delay } from '@/utils/delay';
 // utils
-import { getReadabilityHtml } from '@/utils/readability';
 import { v4 as uuidV4 } from 'uuid';
 import { useWeblinkStore } from '@/stores/weblink';
 import { retryify } from '@/utils/retry';
@@ -11,6 +10,7 @@ import type { WebLinkItem } from '@/components/weblink-list/types';
 import { useTranslation } from 'react-i18next';
 import { apiRequest } from '@/requests/apiRequest';
 import { Weblink } from '@refly/openapi-schema';
+import { getReadabilityHtml } from '@refly/utils/html2md';
 
 export const useStoreWeblink = () => {
   // 网页索引状态
@@ -18,7 +18,7 @@ export const useStoreWeblink = () => {
   const { t } = useTranslation();
 
   const handleClientUploadHtml = async (url: string) => {
-    const pageContent = getReadabilityHtml();
+    const pageContent = getReadabilityHtml(document);
 
     // 先上传到 worker 获取 storageKey
     const uniqueId = uuidV4();
