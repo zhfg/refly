@@ -28,7 +28,7 @@ export const onMessage = async (
   }
 
   if (msg.type === 'operateTabStorage') {
-    return await handleOperateTabStorage(msg);
+    return await handleOperateTabStorage(msg, sender);
   }
 
   if (msg.type === 'others') {
