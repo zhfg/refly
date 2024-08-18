@@ -9,10 +9,9 @@ import './App.scss';
 import { IconRefresh, IconBulb } from '@arco-design/web-react/icon';
 
 import Logo from '@/assets/logo.svg';
-import { useStorage } from '@/hooks/use-storage';
 import { browser } from 'wxt/browser';
-import { getCurrentTab } from '@refly/ai-workspace-common/utils/extension/tabs';
-import { checkPageUnsupported } from '@refly/ai-workspace-common/utils/extension/check';
+import { getCurrentTab } from '@refly-packages/ai-workspace-common/utils/extension/tabs';
+import { checkPageUnsupported } from '@refly-packages/ai-workspace-common/utils/extension/check';
 
 /**
  * 打开 popup 页面的规则
@@ -21,7 +20,6 @@ import { checkPageUnsupported } from '@refly/ai-workspace-common/utils/extension
 const App = () => {
   const osType = reflyEnv.getOsType();
   const openSidePanelBtnRef = useRef<HTMLButtonElement>();
-  const [isSideBarOpen, setIsSideBarOpen] = useStorage<boolean>('isSideBarOpen', false, 'sync');
 
   const [currentTabUrl, setCurrentTabUrl] = useState('');
   const currentTabUrlRef = useRef('');
@@ -54,17 +52,15 @@ const App = () => {
     return;
   };
 
-  const handleRunRefly = async () => {
+  const handleToggleCopilot = async () => {
     const activeTab = await getCurrentTab();
     setCurrentTabUrl(activeTab?.url || '');
     currentTabUrlRef.current = activeTab?.url || '';
-    console.log('activeTab', activeTab);
 
     if (activeTab) {
-      console.log('activeTab', browser.tabs.sendMessage);
-      const res = await browser.tabs.sendMessage(activeTab?.id as number, { name: 'runRefly', toggle: !isSideBarOpen });
-
-      setIsSideBarOpen(!isSideBarOpen);
+      const res = await browser.tabs.sendMessage(activeTab?.id as number, {
+        name: 'toggleCopilotFromPopup',
+      });
 
       setTimeout(() => {
         if (res) {
@@ -83,7 +79,7 @@ const App = () => {
   };
 
   const handleViewCreate = async () => {
-    await handleRunRefly();
+    await handleToggleCopilot();
     handleCheckPageUnsupport();
   };
 

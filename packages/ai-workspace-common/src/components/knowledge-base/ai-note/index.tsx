@@ -40,12 +40,28 @@ import { useNoteTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
 import { AINoteEmpty } from '@refly-packages/ai-workspace-common/components/knowledge-base/ai-note-empty';
 
+// content selector
+import { useContentSelector } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-content-selector';
+import '@refly-packages/ai-workspace-common/modules/content-selector/styles/content-selector.scss';
+import classNames from 'classnames';
+import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
+
 const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) => {
   const { readOnly } = note;
   const lastCursorPosRef = useRef<number>();
   const [token] = useCookie('_refly_ai_sid');
   const noteStore = useNoteStore();
   const editorRef = useRef<EditorInstance>();
+
+  const { showContentSelector, scope } = useContentSelectorStore((state) => ({
+    showContentSelector: state.showContentSelector,
+    scope: state.scope,
+  }));
+  // 初始块选择
+  const { initMessageListener, initContentSelectorElem } = useContentSelector(
+    'ai-note-editor-content-container',
+    'note',
+  );
 
   // 准备 extensions
   const websocketProvider = useMemo(() => {
@@ -133,7 +149,12 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
     });
   }, []);
 
+  // 初始化自由选择
   useListenToSelection(`ai-note-editor`, 'note');
+  // 初始化块选择
+  useEffect(() => {
+    initMessageListener();
+  }, []);
 
   useEffect(() => {
     if (editorRef.current) {
@@ -146,8 +167,15 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
   }, [readOnly]);
 
   return (
-    <div className="editor">
-      <div className="w-full h-full max-w-screen-lg">
+    <div
+      className={classNames('ai-note-editor-content-container', {
+        'refly-selector-mode-active': showContentSelector,
+        'refly-block-selector-mode': scope === 'block',
+        'refly-inline-selector-mode': scope === 'inline',
+      })}
+    >
+      {initContentSelectorElem()}
+      <div className="w-full max-w-screen-lg h-full">
         <EditorRoot>
           <EditorContent
             extensions={extensions}
@@ -156,7 +184,7 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
               noteStore.updateEditor(editor);
             }}
             editable={!readOnly}
-            className="w-full h-full max-w-screen-lg border-muted sm:rounded-lg"
+            className="w-full max-w-screen-lg h-full border-muted sm:rounded-lg"
             editorProps={{
               handleDOMEvents: {
                 keydown: (_view, event) => handleCommandNavigation(event),
@@ -249,7 +277,7 @@ export const AINoteHeader = (props: AINoteHeaderProps) => {
 
   return (
     <div className="flex justify-center mx-4 mt-8 align-middle">
-      <div className="w-full h-full max-w-screen-lg">
+      <div className="w-full max-w-screen-lg h-full">
         <Input
           className="text-3xl font-bold bg-transparent focus:border-transparent focus:bg-transparent"
           placeholder="Enter The Title"
@@ -331,7 +359,7 @@ export const AINote = () => {
   }
 
   if (!note) {
-    return <Spin dot block className="flex items-center justify-center w-full h-full" />;
+    return <Spin dot block className="flex justify-center items-center w-full h-full" />;
   }
 
   const onTitleChange = (newTitle: string) => {

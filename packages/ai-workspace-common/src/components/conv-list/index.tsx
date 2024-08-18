@@ -14,7 +14,6 @@ import { LOCALE } from '@refly/common-types';
 import { Conversation } from '@refly/openapi-schema';
 import './index.scss';
 // components
-import { EmptyThreadLibraryStatus } from '@refly-packages/ai-workspace-common/components/empty-thread-library-status';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
 
@@ -79,7 +78,7 @@ export const ConvList = (props: ConvListProps) => {
       const { threads, pageSize } = useThreadStore.getState();
 
       if (threads?.length === 0) {
-        setScrollLoading(<EmptyThreadLibraryStatus />);
+        setScrollLoading(<div>暂无内容...</div>);
       } else if (threads?.length > 0 && threads?.length < pageSize) {
         setScrollLoading(<span>{t('threadLibrary.footer.noMoreText')}~</span>);
       }

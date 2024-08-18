@@ -1,7 +1,7 @@
-import { storage } from '@refly/ai-workspace-common/utils/storage';
-import { safeParseJSON } from '@refly/ai-workspace-common/utils/parse';
+import { storage } from '@refly-packages/ai-workspace-common/utils/storage';
+import { safeParseJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 import { Runtime, browser } from 'wxt/browser';
-import { getLastActiveTab } from '@/utils/extension/tabs';
+import { getLastActiveTab } from '@refly-packages/ai-workspace-common/utils/extension/tabs';
 
 export const onExternalMessage = async (
   msg: any,

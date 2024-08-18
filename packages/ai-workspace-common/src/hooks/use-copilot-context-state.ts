@@ -28,27 +28,21 @@ export const useCopilotContextState = () => {
   const resId = queryParams.get('resId');
   const kbId = queryParams.get('kbId');
   const noteId = queryParams.get('noteId');
-  const currentSelectedText = knowledgeBaseStore?.currentSelectedText;
+  const currentSelectedMark = knowledgeBaseStore?.currentSelectedMark;
 
   // 优先级: text > resource > knowledgeBase > all
-  const showContextState = !!resId || !!kbId || !!currentSelectedText || !!noteId;
-  const isCurrentSelectedText = !!currentSelectedText;
-  const isCurrentPageSelected = searchStateStore?.searchTarget === SearchTarget.CurrentPage && !isCurrentSelectedText;
-  const isCurrentKnowledgeBaseSelected =
-    searchStateStore?.searchTarget === SearchTarget.CurrentKnowledgeBase && !isCurrentSelectedText;
+  const showContextState = !!resId || !!kbId || !!currentSelectedMark || !!noteId;
 
   const currentResource = knowledgeBaseStore.currentResource;
   const currentKnowledgeBase = knowledgeBaseStore.currentKnowledgeBase;
   const currentNote = noteStore.currentNote;
 
-  const showResourceContext = showContextState && isCurrentPageSelected;
-  const showKnowledgeBaseContext = showContextState && isCurrentKnowledgeBaseSelected;
-
-  // 明确打开的展示
-  const showContextCard = knowledgeBaseStore.showContextCard;
-  const showSelectedTextContext = showContextState && showContextCard;
   // 是否有内容正在选中
-  const showSelectedText = !!currentSelectedText;
+  const showSelectedMark = !!currentSelectedMark;
+
+  // 是否展示 contextCard
+  const showContextCard = knowledgeBaseStore.showContextCard;
+  const contextDomain = knowledgeBaseStore.contextDomain;
 
   // 是否展示 related questions
   const showRelatedQuestions = checkShowRelatedQuestion(chatStore?.messages);
@@ -62,20 +56,18 @@ export const useCopilotContextState = () => {
 
   useEffect(() => {
     calcContextCardHeight();
-  }, [showResourceContext, showKnowledgeBaseContext, showSelectedTextContext]);
+  }, [showContextCard]);
 
   return {
     showContextCard,
+    contextDomain,
     showContextState,
-    showResourceContext,
     showRelatedQuestions,
-    showKnowledgeBaseContext,
-    showSelectedTextContext,
-    showSelectedText,
+    showSelectedMark,
     currentResource,
     currentNote,
     currentKnowledgeBase,
-    currentSelectedText,
+    currentSelectedMark,
     contextCardHeight,
   };
 };

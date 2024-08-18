@@ -24,9 +24,10 @@ import { safeParseJSON } from "@refly-packages/ai-workspace-common/utils/parse"
 // components
 import { SearchQuickOpenBtn } from "@refly-packages/ai-workspace-common/components/search-quick-open-btn"
 import { useTranslation } from "react-i18next"
-import { openGetStartDocument } from "@refly/ai-workspace-common/utils"
-import { UILocaleList } from "@refly/ai-workspace-common/components/ui-locale-list"
-import { useImportResourceStore } from "@refly/ai-workspace-common/stores/import-resource"
+import { openGetStartDocument } from "@refly-packages/ai-workspace-common/utils"
+import { UILocaleList } from "@refly-packages/ai-workspace-common/components/ui-locale-list"
+import { useImportResourceStore } from "@refly-packages/ai-workspace-common/stores/import-resource"
+import { useKnowledgeBaseStore } from "@refly-packages/ai-workspace-common/stores/knowledge-base"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -170,6 +171,12 @@ export const SiderLayout = () => {
   const userStore = useUserStore()
   const importResourceStore = useImportResourceStore()
   const isGuideDetail = location.pathname.includes("guide/")
+  const { resourcePanelVisible } = useKnowledgeBaseStore()
+
+  console.log(
+    "useKnowledgeBaseStore state update from app web",
+    resourcePanelVisible,
+  )
 
   const { t } = useTranslation()
 

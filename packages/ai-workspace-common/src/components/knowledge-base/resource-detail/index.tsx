@@ -13,16 +13,34 @@ import {
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // 类型
 import { Resource } from '@refly/openapi-schema';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { safeParseURL } from '@refly/utils/url';
 import { useListenToSelection } from '@refly-packages/ai-workspace-common/hooks/use-listen-to-selection';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 import { LabelGroup } from '@refly-packages/ai-workspace-common/components/knowledge-base/label-group';
 
-export const KnowledgeBaseResourceDetail = () => {
+// content selector
+import { useContentSelector } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-content-selector';
+import '@refly-packages/ai-workspace-common/modules/content-selector/styles/content-selector.scss';
+import classNames from 'classnames';
+import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
+
+export const KnowledgeBaseResourceDetail = memo(() => {
   const [isFetching, setIsFetching] = useState(false);
-  const knowledgeBaseStore = useKnowledgeBaseStore();
+  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
+    currentResource: state.currentResource,
+    updateResource: state.updateResource,
+  }));
   const { handleAddTab } = useKnowledgeBaseTabs();
+  // 初始块选择
+  const { showContentSelector, scope } = useContentSelectorStore((state) => ({
+    showContentSelector: state.showContentSelector,
+    scope: state.scope,
+  }));
+  const { initMessageListener, initContentSelectorElem } = useContentSelector(
+    'knowledge-base-resource-content',
+    'resource-detail',
+  );
 
   const [queryParams] = useSearchParams();
   const resId = queryParams.get('resId');
@@ -68,13 +86,17 @@ export const KnowledgeBaseResourceDetail = () => {
     setIsFetching(false);
   };
 
-  useListenToSelection(`knowledge-base-resource-detail-container`, 'resource-detail');
+  // useListenToSelection(`knowledge-base-resource-detail-container`, 'resource-detail');
   useEffect(() => {
     if (resId) {
       console.log('params resId', resId);
       handleGetDetail(resId as string);
     }
   }, [resId]);
+  // 初始化块选择
+  useEffect(() => {
+    initMessageListener();
+  }, []);
 
   return (
     <div className="knowledge-base-resource-detail-container">
@@ -121,7 +143,14 @@ export const KnowledgeBaseResourceDetail = () => {
               <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
             </div>
           ) : (
-            <div className="knowledge-base-resource-content">
+            <div
+              className={classNames('knowledge-base-resource-content', {
+                'refly-selector-mode-active': showContentSelector,
+                'refly-block-selector-mode': scope === 'block',
+                'refly-inline-selector-mode': scope === 'inline',
+              })}
+            >
+              {initContentSelectorElem()}
               <div className="knowledge-base-resource-content-title">{resourceDetail?.title}</div>
               <Markdown content={resourceDetail?.content || ''}></Markdown>
             </div>
@@ -134,4 +163,4 @@ export const KnowledgeBaseResourceDetail = () => {
       )}
     </div>
   );
-};
+});

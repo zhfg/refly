@@ -4,7 +4,7 @@ import type {} from '@redux-devtools/extension';
 import { LOCALE } from '@refly/common-types';
 import { UserSettings } from '@refly/openapi-schema';
 import { OutputLocale } from '@refly-packages/ai-workspace-common/utils/i18n';
-import { IRuntime } from '../utils/env';
+import { IRuntime } from '@refly/common-types';
 
 export interface LocalSettings {
   uiLocale: LOCALE; // UI 相关的

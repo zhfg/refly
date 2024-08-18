@@ -39,7 +39,10 @@ export const KnowledgeBaseDetail = (props: KnowledgeBaseDetailProps) => {
   });
 
   const { tabs, activeTab, setActiveTab, handleDeleteTab } = useKnowledgeBaseTabs();
-  const knowledgeBaseStore = useKnowledgeBaseStore();
+  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
+    kbModalVisible: state.kbModalVisible,
+    actionSource: state.actionSource,
+  }));
   if (!kbId || kbId === 'undefined' || kbId === 'null') {
     return <KnowledgeBaseDetailEmpty />;
   }
@@ -84,10 +87,10 @@ export const KnowledgeBaseDetail = (props: KnowledgeBaseDetailProps) => {
       </Tabs>
       <PanelGroup direction="horizontal" className="knowledge-base-detail-panel-container">
         <Panel
-          defaultSize={minSize}
-          minSize={minSize}
+          // defaultSize={minSize}
+          // minSize={minSize}
           maxSize={50}
-          collapsedSize={0}
+          // collapsedSize={0}
           collapsible={true}
           className="knowledge-base-detail-directory-panel"
         >

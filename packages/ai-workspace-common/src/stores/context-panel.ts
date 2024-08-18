@@ -1,5 +1,5 @@
 import { TreeNodeProps, TreeProps } from '@arco-design/web-react';
-import { SearchResult } from '@refly/openapi-schema';
+import { SearchDomain, SearchResult } from '@refly/openapi-schema';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
@@ -24,11 +24,16 @@ interface ContextPanelState {
   selectedResources: TreeProps['treeData'];
   selectedCollections: TreeProps['treeData'];
   selectedNotes: TreeProps['treeData'];
+  // extension only
+  selectedWeblinks: TreeProps['treeData'];
 
   // 处理记录去重后的选择 id
   treeData: TreeProps['treeData'];
   checkedKeys: string[];
   expandedKeys: string[];
+
+  // context card 的处理
+  nowSelectedContextDomain: SearchDomain;
 
   setEnvContextInitMap: (envContextInitMap: Partial<{ resource: boolean; collection: boolean; note: boolean }>) => void;
   setContextPanelPopoverVisible: (visible: boolean) => void;
@@ -36,19 +41,23 @@ interface ContextPanelState {
   setSelectedResources: (resources: TreeProps['treeData']) => void;
   setSelectedCollections: (collections: TreeProps['treeData']) => void;
   setSelectedNotes: (notes: TreeProps['treeData']) => void;
+  setSelectedWeblinks: (weblinks: TreeProps['treeData']) => void;
   setTreeData: (treeData: TreeProps['treeData']) => void;
   setCheckedKeys: (keys: string[]) => void;
   setExpandedKeys: (keys: string[]) => void;
+  setNowSelectedContextDomain: (domain: SearchDomain) => void;
   resetState: () => void;
 }
 
 export const defaultState = {
   envContextInitMap: { resource: false, collection: false, note: false },
+  nowSelectedContextDomain: 'resource' as SearchDomain,
   contextPanelPopoverVisible: false,
   importPopoverVisible: false,
   selectedResources: [],
   selectedCollections: [],
   selectedNotes: [],
+  selectedWeblinks: [],
   allSelectedIds: [],
   treeData: [],
   checkedKeys: [],
@@ -67,11 +76,14 @@ export const useContextPanelStore = create<ContextPanelState>()(
     setSelectedResources: (resources: SearchResult[]) => set((state) => ({ ...state, selectedResources: resources })),
     setSelectedCollections: (collections: SearchResult[]) =>
       set((state) => ({ ...state, selectedCollections: collections })),
+    setSelectedWeblinks: (weblinks: SearchResult[]) => set((state) => ({ ...state, selectedWeblinks: weblinks })),
     setSelectedNotes: (notes: SearchResult[]) => set((state) => ({ ...state, selectedNotes: notes })),
     setAllSelectedIds: (ids: string[]) => set((state) => ({ ...state, allSelectedIds: ids })),
     setTreeData: (treeData: TreeProps['treeData']) => set((state) => ({ ...state, treeData })),
     setCheckedKeys: (keys: string[]) => set((state) => ({ ...state, checkedKeys: keys })),
     setExpandedKeys: (keys: string[]) => set((state) => ({ ...state, expandedKeys: keys })),
+    setNowSelectedContextDomain: (domain: SearchDomain) =>
+      set((state) => ({ ...state, nowSelectedContextDomain: domain })),
     resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),
 );

@@ -60,7 +60,6 @@ export const AssistantMessage = (props: {
   const { message, isPendingFirstToken = false, isPending, isLastSession = false, handleAskFollowing } = props;
   const { t } = useTranslation();
   const noteStore = useNoteStore();
-  console.log('message', message);
   let sources =
     typeof message?.structuredData?.['sources'] === 'string'
       ? safeParseJSON(message?.structuredData?.['sources'])

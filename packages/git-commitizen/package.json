@@ -1,0 +1,15 @@
+{
+    "name": "@refly/git-commitizen",
+    "version": "0.0.0",
+    "private": true,
+    "license": "MIT",
+    "bin": "./index.js",
+    "devDependencies": {
+        "commitizen": "^4.2.4",
+        "cz-conventional-changelog": "^3.3.0"
+    },
+    "publishConfig": {
+      "access": "public"
+    }
+  }
+  

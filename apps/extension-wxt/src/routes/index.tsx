@@ -1,11 +1,11 @@
-import { Route, Routes, useMatch } from '@refly/ai-workspace-common/utils/router';
+import { Route, Routes, useMatch } from '@refly-packages/ai-workspace-common/utils/router';
 
 // 页面
 import KnowledgeBase from '@/pages/knowledge-base';
 
 // 自定义组件
 import { Login } from '@/pages/login';
-import { useUserStore } from '@refly/ai-workspace-common/stores/user';
+import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { LOCALE } from '@refly/common-types';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';

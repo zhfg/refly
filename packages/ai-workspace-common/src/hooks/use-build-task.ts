@@ -19,6 +19,7 @@ import { safeParseJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
+import { getAuthTokenFromCookie } from '@refly-packages/utils/request';
 // stores
 
 export const useBuildTask = () => {
@@ -341,6 +342,7 @@ export const useBuildTask = () => {
     ssePost({
       controller: controllerRef.current,
       payload: payload?.body?.payload,
+      token: getAuthTokenFromCookie(),
       onStart,
       onSkillStart,
       onSkillStream,
@@ -364,7 +366,7 @@ export const useBuildTask = () => {
         return onStart();
       case 'skill-start':
         return onSkillStart(msg?.message);
-      case 'skill-log':
+      case 'skill-thought':
         return onSkillThoughout(msg?.message);
       case 'skill-stream':
         return onSkillStream(msg?.message);
@@ -381,14 +383,21 @@ export const useBuildTask = () => {
 
   const bindExtensionPorts = async () => {
     const portRes = await getPort('streaming-chat' as never);
-    if (portRes?.isNew || !streamingChatPortRef.current) {
+    if (portRes?.port) {
       streamingChatPortRef.current = portRes.port;
       streamingChatPortRef.current?.onMessage?.removeListener?.(handleStreamingMessage);
       streamingChatPortRef.current?.onMessage.addListener(handleStreamingMessage);
     }
   };
 
+  const unbindExtensionPorts = async () => {
+    streamingChatPortRef.current?.onMessage.removeListener?.(handleStreamingMessage);
+    await removePort('streaming-chat');
+    streamingChatPortRef.current = null;
+  };
+
   const handleSendMessageFromExtension = async (payload: { body: any }) => {
+    await unbindExtensionPorts();
     await bindExtensionPorts();
 
     // 生成任务

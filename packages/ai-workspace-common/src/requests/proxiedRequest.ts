@@ -5,6 +5,7 @@ import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { getAuthTokenFromCookie } from '@refly-packages/ai-workspace-common/utils/request';
 import { getServerOrigin } from '@refly/utils/url';
 import { sendToBackground } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import { MessageName } from '@refly/common-types';
 
 createClient({ baseUrl: getServerOrigin() + '/v1' });
 
@@ -30,7 +31,7 @@ const wrapFunctions = (module: any) => {
 
         try {
           const res = await sendToBackground({
-            name: String(key),
+            name: String(key) as MessageName,
             type: 'apiRequest',
             source: getRuntime(),
             target: module,

@@ -32,7 +32,8 @@
   .knowledge-base-directory-list {
     height: calc(100% - 68px - 8px);
     overflow-y: auto;
-    overflow-x: hidden;
+    min-width: 200px;
+    overflow-x: auto;
     padding: 0 12px;
 
     .resource-utility-info {

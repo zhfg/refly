@@ -1,10 +1,12 @@
 import { handleRequestReflect } from '@/entrypoints/background/events/messages/apiRequest';
 import { handleOperateTabStorage } from '@/entrypoints/background/events/messages/operateStorage';
 import { handleRegisterEvent } from '@/entrypoints/background/events/messages/registerEvent';
-import { BackgroundMessage } from '@refly/ai-workspace-common/utils/extension/messaging';
-import { saveLastActiveTab } from '@refly/ai-workspace-common/utils/extension/tabs';
+import { BackgroundMessage } from '@refly/common-types';
+import { saveLastActiveTab } from '@refly-packages/ai-workspace-common/utils/extension/tabs';
 import { Runtime } from 'wxt/browser';
 import { handleOtherMessage } from './others';
+import { handleInjectContentSelectorCss } from '@/entrypoints/background/events/messages/injectContentSelectorCss';
+// import { handleToggleCopilot } from '@/entrypoints/background/events/messages/toggleCopilot';
 
 export const onMessage = async (
   msg: BackgroundMessage,
@@ -26,10 +28,18 @@ export const onMessage = async (
   }
 
   if (msg.type === 'operateTabStorage') {
-    return await handleOperateTabStorage(msg);
+    return await handleOperateTabStorage(msg, sender);
   }
 
   if (msg.type === 'others') {
     return await handleOtherMessage(msg);
   }
+
+  if (msg.type === 'injectContentSelectorCss') {
+    return await handleInjectContentSelectorCss(msg);
+  }
+
+  // if (msg.type === 'toggleCopilot') {
+  //   return handleToggleCopilot(msg);
+  // }
 };

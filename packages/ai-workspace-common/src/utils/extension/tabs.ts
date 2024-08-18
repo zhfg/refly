@@ -5,7 +5,7 @@ import { storage } from '@refly-packages/ai-workspace-common/utils/storage';
 export let localLastActiveTab = {} as Tabs.Tab;
 
 export const getCurrentTab = async () => {
-  const tabs = await browser.tabs.query({ active: true });
+  const tabs = await browser.tabs.query({ active: true, currentWindow: true });
   return tabs[0] as Tabs.Tab;
 };
 

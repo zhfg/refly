@@ -1,91 +1,58 @@
 import React, { type Dispatch, useEffect, useRef, useState } from 'react';
 import { reflyEnv } from '@/utils/env';
 import hotKeys from 'hotkeys-js';
-import { useBuildTask } from '@refly/ai-workspace-common/hooks/use-build-task';
+import { useBuildTask } from '@refly-packages/ai-workspace-common/hooks/use-build-task';
 import { useChatStore } from '@/stores/chat';
 import { Source } from '@refly/openapi-schema';
 import { useWeblinkStore } from '@/stores/weblink';
 import { useUserStore } from '@/stores/user';
 import { apiRequest } from '@/requests/apiRequest';
+import { useCopilotStore } from '@/modules/toggle-copilot/stores/copilot';
 
 export const useBindCommands = () => {
   // 快捷键相关
+  const copilotStore = useCopilotStore();
   const softKeyboardShortcutsEnabledRef = useRef(true);
   const keyboardShortcutRef = useRef('');
   const keyboardSendShortcutRef = useRef('');
   const { buildTaskAndGenReponse } = useBuildTask();
 
-  const loadCommands = async () => {
-    const commands = await apiRequest({
-      name: 'getAllCommands',
-    });
-    commands?.data?.forEach((command) => {
-      if (command?.name === '_execute_action' && command?.shortcut) {
-        keyboardShortcutRef.current = command?.shortcut;
-      }
-    });
+  // const loadCommands = async () => {
+  //   const commands = await apiRequest({
+  //     name: 'getAllCommands',
+  //   });
+  //   commands?.data?.forEach((command) => {
+  //     if (command?.name === '_execute_action' && command?.shortcut) {
+  //       keyboardShortcutRef.current = command?.shortcut;
+  //     }
+  //   });
 
-    const osType = reflyEnv.getOsType();
-    if (!keyboardShortcutRef.current && softKeyboardShortcutsEnabledRef.current) {
-      const defaultShortcutKey = reflyEnv.getDefaultShortcutKey();
-      keyboardShortcutRef.current = osType === 'OSX' ? `Command+${defaultShortcutKey}` : `Ctrl+${defaultShortcutKey}`;
-    }
+  //   const osType = reflyEnv.getOsType();
+  //   if (!keyboardShortcutRef.current && softKeyboardShortcutsEnabledRef.current) {
+  //     const defaultShortcutKey = reflyEnv.getDefaultShortcutKey();
+  //     keyboardShortcutRef.current = osType === 'OSX' ? `Command+${defaultShortcutKey}` : `Ctrl+${defaultShortcutKey}`;
+  //   }
 
-    if (!keyboardSendShortcutRef.current) {
-      const defaultSendShortcutKey = reflyEnv.getDefaultSendShortcutKey();
-      keyboardSendShortcutRef.current =
-        osType === 'OSX' ? `Command+${defaultSendShortcutKey}` : `Ctrl+${defaultSendShortcutKey}`;
-    }
+  //   if (!keyboardSendShortcutRef.current) {
+  //     const defaultSendShortcutKey = reflyEnv.getDefaultSendShortcutKey();
+  //     keyboardSendShortcutRef.current =
+  //       osType === 'OSX' ? `Command+${defaultSendShortcutKey}` : `Ctrl+${defaultSendShortcutKey}`;
+  //   }
 
-    handleBindHotkey();
-  };
+  //   handleBindHotkey();
+  // };
+
   const handleBindHotkey = () => {
-    hotKeys(keyboardShortcutRef.current, { capture: true }, (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      // setIsShowSide((prevState) => !prevState)
+    hotKeys('command+j, ctrl+j', () => {
+      console.log('hit hotkey');
+
+      const { isCopilotOpen } = useCopilotStore.getState();
+      copilotStore.setIsCopilotOpen(!isCopilotOpen);
     });
-
-    const elem = document.querySelector('#refly-main-app')?.shadowRoot?.querySelector('.message-input');
-    hotKeys(
-      keyboardSendShortcutRef.current,
-      {
-        capture: true,
-        element: elem as HTMLElement,
-      },
-      (e) => {
-        console.log('command');
-        e.preventDefault();
-        e.stopPropagation();
-
-        const { newQAText } = useChatStore.getState();
-        const { selectedRow } = useWeblinkStore.getState();
-        const { localSettings } = useUserStore.getState();
-
-        const selectedWebLink: Source[] = selectedRow?.map((item) => ({
-          pageContent: '',
-          metadata: {
-            title: item?.content?.originPageTitle,
-            source: item?.content?.originPageUrl,
-          },
-          score: -1, // 手工构造
-        }));
-
-        // const task = buildChatTask(
-        //   {
-        //     question: newQAText,
-        //     filter: { weblinkList: selectedWebLink },
-        //   },
-        //   localSettings.outputLocale,
-        // );
-
-        // buildTaskAndGenReponse(task);
-      },
-    );
   };
 
   useEffect(() => {
-    loadCommands();
+    handleBindHotkey();
 
     return () => {};
   }, []);

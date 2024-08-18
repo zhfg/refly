@@ -1,9 +1,9 @@
-import { useMatch, useNavigate, useSearchParams } from '@refly/ai-workspace-common/utils/router';
-import { useKnowledgeBaseStore } from '@refly/ai-workspace-common/stores/knowledge-base';
+import { useMatch, useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
+import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useEffect } from 'react';
-import { sendToBackground } from '@refly/ai-workspace-common/utils/extension/messaging';
-import { useKnowledgeBaseJumpNewPath } from '@refly/ai-workspace-common/hooks/use-jump-new-path';
-import { getRuntime } from '@refly/ai-workspace-common/utils/env';
+import { sendToBackground } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { handleGetAndWatchValue, useStorage } from '@/hooks/use-storage';
 import { Resource } from '@refly/openapi-schema';
 import { useExtensionMessage } from '@/hooks/use-extension-message';

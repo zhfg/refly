@@ -1,5 +1,5 @@
 import { Tooltip } from '@arco-design/web-react';
-import { getPopupContainer } from '@refly/ai-workspace-common/utils/ui';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 type IconTipPosition = 'top' | 'br' | 'rt' | 'tr' | 'tl' | 'bottom' | 'bl' | 'left' | 'lt' | 'lb' | 'right' | 'rb';
 

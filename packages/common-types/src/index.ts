@@ -12,3 +12,6 @@ export * from './content-selector';
 export * from './sse';
 export * from './request';
 export * from './i18n';
+export * from './context-panel';
+export * from './env';
+export * from './extension-messaging';

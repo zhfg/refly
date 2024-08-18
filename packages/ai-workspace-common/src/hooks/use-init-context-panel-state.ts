@@ -24,16 +24,28 @@ export const useDynamicInitContextPanelState = () => {
     const { checkedKeys } = useContextPanelStore.getState();
     // 动态添加 checkedKeys
     const needInitialCheckedKeys = initialCheckedKeys?.filter((key) => {
-      if ((!kbId && key.startsWith('currentPage-collection')) || envContextInitMap?.collection) {
-        return false;
+      if (key.startsWith('currentPage-collection')) {
+        if (!kbId || envContextInitMap?.collection || !currentKnowledgeBase) {
+          return false;
+        }
+
+        return true;
       }
 
-      if ((!resId && key.startsWith('currentPage-resource')) || envContextInitMap?.resource) {
-        return false;
+      if (key.startsWith('currentPage-resource')) {
+        if (!resId || envContextInitMap?.resource || !currentResource) {
+          return false;
+        }
+
+        return true;
       }
 
-      if ((!noteId && key.startsWith('currentPage-note')) || envContextInitMap?.note) {
-        return false;
+      if (key.startsWith('currentPage-note')) {
+        if (!noteId || envContextInitMap?.note || !currentNote) {
+          return false;
+        }
+
+        return true;
       }
 
       return true;
@@ -61,5 +73,5 @@ export const useDynamicInitContextPanelState = () => {
 
       setCheckedKeys([...afterRmovedCheckedKeys, ...needAddedCheckedKeys]);
     }
-  }, [noteId, resId, kbId]);
+  }, [noteId, resId, kbId, currentKnowledgeBase, currentNote, currentResource]);
 };

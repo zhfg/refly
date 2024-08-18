@@ -1,5 +1,6 @@
 import { SelectedNamespace, useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
+import { Mark } from '@refly/common-types';
 import { useEffect, useRef } from 'react';
 
 export const useListenToSelection = (selector: string, namespace: SelectedNamespace) => {
@@ -9,17 +10,18 @@ export const useListenToSelection = (selector: string, namespace: SelectedNamesp
   const searchStateStore = useSearchStateStore();
 
   const timerForMouseEvent = () => {
-    const { enableMultiSelect, currentSelectedContentList } = useKnowledgeBaseStore.getState();
+    const { enableMultiSelect, currentSelectedMarks } = useKnowledgeBaseStore.getState();
     const selection = window.getSelection();
     const text = selection?.toString();
 
     if (text && text?.trim()?.length > 0) {
-      knowledgeBaseStore.updateSelectedText(text);
+      const mark = { type: 'text', data: text } as Mark;
+      knowledgeBaseStore.updateCurrentSelectedMark(mark);
       knowledgeBaseStore.updateSelectedNamespace(namespace);
       searchStateStore.setSearchTarget(SearchTarget.CurrentPage);
 
       if (enableMultiSelect) {
-        knowledgeBaseStore.updateCurrentSelectedContentList(currentSelectedContentList.concat(text));
+        knowledgeBaseStore.updateCurrentSelectedMarks(currentSelectedMarks.concat(mark));
       }
     }
   };

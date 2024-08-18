@@ -45,7 +45,7 @@ export const $ResourceMeta = {
 export const $ResourceType = {
   type: 'string',
   description: 'Resource type',
-  enum: ['weblink', 'text'],
+  enum: ['weblink', 'text', 'note'],
 } as const;
 
 export const $Resource = {

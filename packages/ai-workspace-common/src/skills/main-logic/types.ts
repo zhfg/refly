@@ -1,4 +1,4 @@
-import { IRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { IRuntime } from '@refly/common-types';
 
 export type AppScope = 'resource.context' | 'knowledgebase.context' | 'skill';
 export type AppPosition = 'modal' | 'popover' | 'popconfirm';

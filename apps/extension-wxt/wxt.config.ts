@@ -12,11 +12,10 @@ const getFileAbsolutePath = (fileName: string) => {
   return path.join(__dirname, fileName);
 };
 
-const extraWatchFiles = [
-  getFileAbsolutePath('./node_modules/@refly/ai-workspace-common/src'),
-  getFileAbsolutePath('../../packages/ai-workspace-common/src'),
-  getFileAbsolutePath('./src/entrypoints/sidepanel'),
-];
+// const extraWatchFiles = [
+//   getFileAbsolutePath('../../packages/ai-workspace-common/src'),
+//   getFileAbsolutePath('./src/entrypoints/'),
+// ];
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
@@ -38,9 +37,9 @@ export default defineConfig({
         codeInspectorPlugin({
           bundler: 'vite',
         }),
-        pluginViteWatcher({
-          filesPath: extraWatchFiles,
-        }),
+        // pluginViteWatcher({
+        //   filesPath: extraWatchFiles,
+        // }),
       ],
       css: {
         postcss: postcssConfig,
@@ -48,7 +47,6 @@ export default defineConfig({
       resolve: {
         alias: {
           '@': path.resolve(__dirname, './src'),
-          '@refly/ai-workspace-common': path.resolve(__dirname, '../../packages/ai-workspace-common/src'),
           '@refly-packages/ai-workspace-common': path.resolve(__dirname, '../../packages/ai-workspace-common/src'),
           '@refly/utils': path.resolve(__dirname, '../../packages/utils/src'),
         },

@@ -1,3 +1,5 @@
+import { IRuntime } from '@refly/common-types';
+
 export const enum IENV {
   PRODUCTION = 'production',
   STAGING = 'staging',
@@ -10,8 +12,6 @@ export const getEnv = () => {
 
   return env;
 };
-
-export type IRuntime = 'web' | 'extension-csui' | 'extension-sidepanel' | 'extension-background';
 
 let runtime: IRuntime;
 

@@ -5,7 +5,12 @@ import { Resource } from '@refly/openapi-schema';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
 export const useKnowledgeBaseTabs = () => {
-  const knowledgeBaseStore = useKnowledgeBaseStore();
+  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
+    tabs: state.tabs,
+    activeTab: state.activeTab,
+    updateTabs: state.updateTabs,
+    updateActiveTab: state.updateActiveTab,
+  }));
   const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
 
   const tabs = knowledgeBaseStore.tabs;

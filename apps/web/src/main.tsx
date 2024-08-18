@@ -11,10 +11,13 @@ import { AppRouter } from "./routes/index"
 import { AppLayout } from "@/components/layout/index"
 
 // 导入 i18n
-import "@refly/ai-workspace-common/i18n/config"
+import "@refly-packages/ai-workspace-common/i18n/config"
 import { Spin } from "@arco-design/web-react"
-import { getEnv, setRuntime } from "@refly/ai-workspace-common/utils/env"
-import { useUserStore } from "@refly/ai-workspace-common/stores/user"
+import {
+  getEnv,
+  setRuntime,
+} from "@refly-packages/ai-workspace-common/utils/env"
+import { useUserStore } from "@refly-packages/ai-workspace-common/stores/user"
 
 setRuntime("web")
 // dev for disable sentry as it will overload console.log result worse dev experience

@@ -1,5 +1,5 @@
 import { IconLoading } from '@arco-design/web-react/icon';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Message as message } from '@arco-design/web-react';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
@@ -89,59 +89,61 @@ export function ATag({ ...props }, sources: Source[]) {
   );
 }
 
-export function Markdown(
-  props: {
-    content: string;
-    loading?: boolean;
-    fontSize?: number;
-    sources?: Source[];
-  } & React.DOMAttributes<HTMLDivElement>,
-) {
-  const mdRef = useRef<HTMLDivElement>(null);
+export const Markdown = memo(
+  (
+    props: {
+      content: string;
+      loading?: boolean;
+      fontSize?: number;
+      sources?: Source[];
+    } & React.DOMAttributes<HTMLDivElement>,
+  ) => {
+    const mdRef = useRef<HTMLDivElement>(null);
 
-  const md = mdRef.current;
-  const rendered = useRef(true); // disable lazy loading for bad ux
-  const [counter, setCounter] = useState(0);
+    const md = mdRef.current;
+    const rendered = useRef(true); // disable lazy loading for bad ux
+    const [counter, setCounter] = useState(0);
 
-  useEffect(() => {
-    // to triggr rerender
-    setCounter(counter + 1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.loading]);
+    useEffect(() => {
+      // to triggr rerender
+      setCounter(counter + 1);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.loading]);
 
-  const shouldLoading = props.loading;
-  const parsedContent = props.content
-    ?.replace(/\[\[([cC])itation/g, '[citation')
-    .replace(/[cC]itation:(\d+)]]/g, 'citation:$1]')
-    .replace(/\[\[([cC]itation:\d+)]](?!])/g, `[$1]`)
-    .replace(/\[[cC]itation:(\d+)]/g, '[citation]($1)');
+    const shouldLoading = props.loading;
+    const parsedContent = props.content
+      ?.replace(/\[\[([cC])itation/g, '[citation')
+      .replace(/[cC]itation:(\d+)]]/g, 'citation:$1]')
+      .replace(/\[\[([cC]itation:\d+)]](?!])/g, `[$1]`)
+      .replace(/\[[cC]itation:(\d+)]/g, '[citation]($1)');
 
-  return (
-    <div className="markdown-body" style={{ fontSize: `${props.fontSize ?? 14}px` }} ref={mdRef}>
-      {shouldLoading ? (
-        <IconLoading />
-      ) : (
-        <ReactMarkdown
-          remarkPlugins={[RemarkMath, RemarkGfm, RemarkBreaks]}
-          rehypePlugins={[
-            RehypeKatex,
-            [
-              RehypeHighlight,
-              {
-                detect: false,
-                ignoreMissing: true,
-              },
-            ],
-          ]}
-          components={{
-            pre: PreCode,
-            a: (args) => ATag(args, props?.sources || []),
-          }}
-          linkTarget={'_blank'}
-        >
-          {parsedContent}
-        </ReactMarkdown>
-      )}
-    </div>
-  );
-}
+    return (
+      <div className="markdown-body" style={{ fontSize: `${props.fontSize ?? 14}px` }} ref={mdRef}>
+        {shouldLoading ? (
+          <IconLoading />
+        ) : (
+          <ReactMarkdown
+            remarkPlugins={[RemarkMath, RemarkGfm, RemarkBreaks]}
+            rehypePlugins={[
+              RehypeKatex,
+              [
+                RehypeHighlight,
+                {
+                  detect: false,
+                  ignoreMissing: true,
+                },
+              ],
+            ]}
+            components={{
+              pre: PreCode,
+              a: (args) => ATag(args, props?.sources || []),
+            }}
+            linkTarget={'_blank'}
+          >
+            {parsedContent}
+          </ReactMarkdown>
+        )}
+      </div>
+    );
+  },
+);

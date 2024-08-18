@@ -1,8 +1,10 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
-import type { Collection, Resource } from '@refly/openapi-schema';
+import type { Collection, Resource, SearchDomain } from '@refly/openapi-schema';
 import { EditorInstance } from '@refly-packages/editor-core/components';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { Mark } from '@refly/common-types';
 
 export enum ActionSource {
   KnowledgeBase = 'knowledge-base',
@@ -18,9 +20,10 @@ export interface KnowledgeBaseTab {
   resourceId: string;
 }
 
-export type SelectedNamespace = 'resource-detail' | 'note';
+export type ContextDomain = 'weblink' | 'resource' | 'note' | 'collection' | 'selected-text';
 
-interface KnowledgeBaseState {
+export type SelectedNamespace = 'resource-detail' | 'note' | 'extension-weblink'; // weblink 代表是在插件里面
+export interface KnowledgeBaseState {
   isSaveKnowledgeBaseModalVisible: boolean;
   knowledgeBaseList: Collection[];
   pageSize: number;
@@ -28,12 +31,15 @@ interface KnowledgeBaseState {
   hasMore: boolean;
   isRequesting: boolean;
 
-  // selection
-  currentSelectedText: string;
+  // selection text
+  currentSelectedMark: Mark;
   selectedNamespace: SelectedNamespace;
   enableMultiSelect: boolean; // 支持多选
-  currentSelectedContentList: string[]; // 多选内容
-  showContextCard: boolean;
+  currentSelectedMarks: Mark[]; // 多选内容
+
+  // 上下文
+  showContextCard: boolean; // 资源、笔记、weblink、知识库、选中内容等
+  contextDomain: ContextDomain;
 
   // tabs
   tabs: KnowledgeBaseTab[];
@@ -71,26 +77,35 @@ interface KnowledgeBaseState {
   resetState: () => void;
   resetTabs: () => void;
 
-  // context 面板相关的内容
-  updateSelectedText: (selectedText: string) => void;
+  // selected text context 面板相关的内容
+  updateCurrentSelectedMark: (mark: Mark) => void;
   updateSelectedNamespace: (selectedNamespace: SelectedNamespace) => void;
   updateEnableMultiSelect: (enableMultiSelect: boolean) => void;
-  updateCurrentSelectedContentList: (currentSelectedContentList: string[]) => void;
-  setShowContextCard: (showContextCard: boolean) => void;
+  updateCurrentSelectedMarks: (marks: Mark[]) => void;
+
+  // context card
+  setShowContextCard: (showcontextCard: boolean) => void;
+  setContextDomain: (contextDomain: ContextDomain) => void;
+
   resetSelectedContextState: () => void;
 }
 
 export const defaultSelectedContextState = {
-  currentSelectedText: '',
+  currentSelectedMark: null as Mark,
   selectedNamespace: 'resource-detail' as SelectedNamespace,
   enableMultiSelect: false,
-  currentSelectedContentList: [],
+  currentSelectedMarks: [] as Mark[],
+};
+
+export const defaultCurrentContext = {
+  contextDomain: 'resource' as ContextDomain,
+  showContextCard: getRuntime() !== 'web' ? true : false, // 插件状态下自动打开
 };
 
 export const defaultState = {
   isSaveKnowledgeBaseModalVisible: false,
   ...defaultSelectedContextState,
-  showContextCard: false,
+  ...defaultCurrentContext,
   tabs: [
     {
       title: 'New Tab',
@@ -167,13 +182,17 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
     updateResourcePanelVisible: (visible: boolean) => set((state) => ({ ...state, resourcePanelVisible: visible })),
     updateNotePanelVisible: (visible: boolean) => set((state) => ({ ...state, notePanelVisible: visible })),
 
-    updateSelectedText: (selectedText: string) => set((state) => ({ ...state, currentSelectedText: selectedText })),
+    // selected text
+    updateCurrentSelectedMark: (mark: Mark) => set((state) => ({ ...state, currentSelectedMark: mark })),
     updateSelectedNamespace: (selectedNamespace: SelectedNamespace) =>
       set((state) => ({ ...state, selectedNamespace })),
     updateEnableMultiSelect: (enableMultiSelect: boolean) => set((state) => ({ ...state, enableMultiSelect })),
-    updateCurrentSelectedContentList: (currentSelectedContentList: string[]) =>
-      set((state) => ({ ...state, currentSelectedContentList })),
+    updateCurrentSelectedMarks: (marks: Mark[]) => set((state) => ({ ...state, currentSelectedMarks: marks })),
+
+    // context card
+    setContextDomain: (contextDomain: ContextDomain) => set((state) => ({ ...state, contextDomain })),
     setShowContextCard: (showContextCard: boolean) => set((state) => ({ ...state, showContextCard })),
+
     resetSelectedContextState: () => set((state) => ({ ...state, ...defaultSelectedContextState })),
   })),
 );

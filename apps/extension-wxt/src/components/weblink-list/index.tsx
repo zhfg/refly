@@ -30,12 +30,12 @@ import { LOCALE, type Conversation } from '@/types';
 import { time } from '@/utils/time';
 // stores
 import { useWeblinkStore } from '@/stores/weblink';
-import { safeParseUrl } from '@refly/ai-workspace-common/utils/parse';
+import { safeParseUrl } from '@refly-packages/ai-workspace-common/utils/parse';
 import { useTranslation } from 'react-i18next';
 // styles
 import './index.scss';
 import { apiRequest } from '@/requests/apiRequest';
-import { getPopupContainer } from '@refly/ai-workspace-common/utils/ui';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 type Props = {};
 

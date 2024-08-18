@@ -78,6 +78,11 @@
       "packageName": "@refly/extension-v2",
       "projectFolder": "apps/extension-wxt",
       "reviewCategory": "apps"
+    },
+    {
+      "packageName": "@refly/git-commitizen",
+      "projectFolder": "packages/git-commitizen",
+      "reviewCategory": "packages"
     }
   ]
 }

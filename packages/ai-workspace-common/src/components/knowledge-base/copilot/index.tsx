@@ -17,7 +17,6 @@ import {
 // 自定义样式
 import './index.scss';
 // 自定义组件
-import { SearchTargetSelector } from '@refly-packages/ai-workspace-common/components/search-target-selector';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { ContextStateDisplay } from './context-state-display/index';
@@ -39,7 +38,8 @@ import { useConversationStore } from '@refly-packages/ai-workspace-common/stores
 import { useResetState } from '@refly-packages/ai-workspace-common/hooks/use-reset-state';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { delay } from '@refly-packages/ai-workspace-common/utils/delay';
-import { ActionSource, useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { ActionSource } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useKnowledgeBaseStore } from '../../../stores/knowledge-base';
 // utils
 import { LOCALE } from '@refly/common-types';
 import { localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/i18n';
@@ -56,21 +56,27 @@ import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note
 import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
-import { ContextPanel } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel';
+import { ContextContentWithBadge } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 import { useDynamicInitContextPanelState } from '@refly-packages/ai-workspace-common/hooks/use-init-context-panel-state';
-import { ContextActionBtn } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/context-action-btn';
+import { SelectedTextContextActionBtn } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display//action-btn/selected-text-context-action-btn';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { CurrentContextActionBtn } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/action-btn/current-context-action-btn';
 
 interface AICopilotProps {}
 
 export const AICopilot = (props: AICopilotProps) => {
+  // 所属的环境
+  const runtime = getRuntime();
+  const isWeb = runtime === 'web';
+
   const [searchParams] = useSearchParams();
   const [copilotBodyHeight, setCopilotBodyHeight] = useState(215 - 32);
   const userStore = useUserStore();
   const knowledgeBaseStore = useKnowledgeBaseStore();
   const noteStore = useNoteStore();
   const searchStore = useSearchStore();
-  const { contextCardHeight, showContextCard, showContextState, showSelectedTextContext } = useCopilotContextState();
+  const { contextCardHeight, showContextCard, showContextState } = useCopilotContextState();
   const chatStore = useChatStore();
   const conversationStore = useConversationStore();
   const [isFetching, setIsFetching] = useState(false);
@@ -78,6 +84,8 @@ export const AICopilot = (props: AICopilotProps) => {
   const searchStateStore = useSearchStateStore();
   const messageStateStore = useMessageStateStore();
   const skillStore = useSkillStore();
+
+  console.log('useKnowledgeBaseStore state update from packages', knowledgeBaseStore.resourcePanelVisible);
 
   const convId = searchParams.get('convId');
   const noteId = searchParams.get('noteId');
@@ -93,7 +101,7 @@ export const AICopilot = (props: AICopilotProps) => {
 
   // ai-note handler
   useAINote(true);
-  useSkillManagement({ shouldInit: true });
+  const { handleGetSkillInstances, handleGetSkillTemplates } = useSkillManagement();
 
   const handleSwitchSearchTarget = () => {
     if (showContextState) {
@@ -174,56 +182,66 @@ export const AICopilot = (props: AICopilotProps) => {
   }, [showContextState]);
   useResizeCopilot({ containerSelector: 'ai-copilot-container' });
   useDynamicInitContextPanelState(); // 动态根据页面状态更新上下文面板状态
+  useEffect(() => {
+    handleGetSkillInstances();
+    handleGetSkillTemplates();
+  }, []);
+
+  console.log('showContextCard', showContextCard);
 
   return (
     <div className="ai-copilot-container">
       <div className="knowledge-base-detail-header">
         <div className="knowledge-base-detail-navigation-bar">
-          <Checkbox
-            key={'knowledge-base-resource-panel'}
-            checked={knowledgeBaseStore.resourcePanelVisible && resId ? true : false}
-          >
-            {({ checked }) => {
-              return (
+          {isWeb
+            ? [
+                <Checkbox
+                  key={'knowledge-base-resource-panel'}
+                  checked={knowledgeBaseStore.resourcePanelVisible && resId ? true : false}
+                >
+                  {({ checked }) => {
+                    return (
+                      <Button
+                        icon={<IconFile />}
+                        type="text"
+                        onClick={() => {
+                          if (!resId) {
+                            searchStore.setPages(searchStore.pages.concat('knowledgeBases'));
+                            searchStore.setIsSearchOpen(true);
+                          } else {
+                            knowledgeBaseStore.updateResourcePanelVisible(!knowledgeBaseStore.resourcePanelVisible);
+                          }
+                        }}
+                        className={classNames('assist-action-item', { active: checked })}
+                      ></Button>
+                    );
+                  }}
+                </Checkbox>,
+                <Checkbox key={'knowledge-base-note-panel'} checked={noteStore.notePanelVisible}>
+                  {({ checked }) => {
+                    return (
+                      <Button
+                        icon={<IconEdit />}
+                        type="text"
+                        onClick={() => {
+                          noteStore.updateNotePanelVisible(!noteStore.notePanelVisible);
+                        }}
+                        className={classNames('assist-action-item', { active: checked })}
+                      ></Button>
+                    );
+                  }}
+                </Checkbox>,
                 <Button
-                  icon={<IconFile />}
+                  icon={<IconSearch />}
                   type="text"
                   onClick={() => {
-                    if (!resId) {
-                      searchStore.setPages(searchStore.pages.concat('knowledgeBases'));
-                      searchStore.setIsSearchOpen(true);
-                    } else {
-                      knowledgeBaseStore.updateResourcePanelVisible(!knowledgeBaseStore.resourcePanelVisible);
-                    }
+                    searchStore.setPages(searchStore.pages.concat('convs'));
+                    searchStore.setIsSearchOpen(true);
                   }}
-                  className={classNames('assist-action-item', { active: checked })}
-                ></Button>
-              );
-            }}
-          </Checkbox>
-          <Checkbox key={'knowledge-base-note-panel'} checked={noteStore.notePanelVisible}>
-            {({ checked }) => {
-              return (
-                <Button
-                  icon={<IconEdit />}
-                  type="text"
-                  onClick={() => {
-                    noteStore.updateNotePanelVisible(!noteStore.notePanelVisible);
-                  }}
-                  className={classNames('assist-action-item', { active: checked })}
-                ></Button>
-              );
-            }}
-          </Checkbox>
-          <Button
-            icon={<IconSearch />}
-            type="text"
-            onClick={() => {
-              searchStore.setPages(searchStore.pages.concat('convs'));
-              searchStore.setIsSearchOpen(true);
-            }}
-            className={classNames('assist-action-item')}
-          ></Button>
+                  className={classNames('assist-action-item')}
+                ></Button>,
+              ]
+            : null}
         </div>
         <div className="knowledge-base-detail-navigation-bar">
           <Button
@@ -255,28 +273,29 @@ export const AICopilot = (props: AICopilotProps) => {
         <ChatMessages />
       </div>
       <div className="ai-copilot-body" style={{ height: actualCopilotBodyHeight }}>
-        {showContextCard ? (
-          <div className="ai-copilot-context-display">
-            <ContextStateDisplay />
-          </div>
-        ) : null}
-        <div className="ai-copilot-chat-container">
-          <SkillDisplay />
-          <div className="chat-input-container" style={{ height: skillStore?.selectedSkill ? 117 + 32 : 117 }}>
-            <div className="chat-input-body">
-              <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
+        <div className="ai-copilot-body-inner-container">
+          {showContextCard ? (
+            <div className="ai-copilot-context-display">
+              <ContextStateDisplay />
             </div>
-            <div className="chat-input-assist-action">
-              {/* {!showSelectedTextContext ? <SearchTargetSelector classNames="chat-input-assist-action-item" /> : null} */}
-              <ContextPanel />
-
-              <OutputLocaleList>
-                <Button icon={<IconTranslate />} type="text" className="chat-input-assist-action-item">
-                  {/* <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span> */}
-                  <IconCaretDown />
-                </Button>
-              </OutputLocaleList>
-              <ContextActionBtn />
+          ) : null}
+          <div className="ai-copilot-chat-container">
+            <SkillDisplay />
+            <div className="chat-input-container">
+              <div className="chat-input-body">
+                <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
+              </div>
+              <div className="chat-input-assist-action">
+                <ContextContentWithBadge />
+                <CurrentContextActionBtn />
+                <SelectedTextContextActionBtn />
+                <OutputLocaleList>
+                  <Button icon={<IconTranslate />} type="text" className="assist-action-item">
+                    {/* <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span> */}
+                    <IconCaretDown />
+                  </Button>
+                </OutputLocaleList>
+              </div>
             </div>
           </div>
         </div>

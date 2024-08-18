@@ -8,7 +8,7 @@ import { Resource } from '@refly/openapi-schema';
 
 // 组件
 import { ResourceItem } from './resource-item';
-import { useImportResourceStore } from '@refly/ai-workspace-common/stores/import-resource';
+import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import classNames from 'classnames';
 
 interface ResourceListProps {
