@@ -52,10 +52,6 @@ export type Resource = {
    */
   resourceType: ResourceType;
   /**
-   * Collection ID
-   */
-  collectionId?: string;
-  /**
    * Resource title
    */
   title: string;
@@ -87,6 +83,10 @@ export type Resource = {
    * Document content for this resource (only returned in getNoteDetail API)
    */
   content?: string;
+  /**
+   * Collections this resource belongs to (only returned in getResourceDetail API)
+   */
+  collections?: Array<Collection>;
 };
 
 export type Note = {
@@ -936,6 +936,28 @@ export type UpsertCollectionResponse = BaseResponse & {
   data?: Collection;
 };
 
+export type AddResourceToCollectionRequest = {
+  /**
+   * Resource ID
+   */
+  resourceId: string;
+  /**
+   * Collection ID
+   */
+  collectionId: string;
+};
+
+export type RemoveResourceFromCollectionRequest = {
+  /**
+   * Resource ID
+   */
+  resourceId: string;
+  /**
+   * Collection ID
+   */
+  collectionId: string;
+};
+
 export type DeleteCollectionRequest = {
   /**
    * Collection ID to delete
@@ -1529,10 +1551,6 @@ export type ScrapeWeblinkResponse = BaseResponse & {
 export type ListResourcesData = {
   query?: {
     /**
-     * Target collection ID
-     */
-    collectionId?: string;
-    /**
      * Page number
      */
     page?: number;
@@ -1720,6 +1738,22 @@ export type CreateCollectionData = {
 export type CreateCollectionResponse = BaseResponse;
 
 export type CreateCollectionError = unknown;
+
+export type AddResourceToCollectionData = {
+  body: AddResourceToCollectionRequest;
+};
+
+export type AddResourceToCollectionResponse = BaseResponse;
+
+export type AddResourceToCollectionError = unknown;
+
+export type RemoveResourceFromCollectionData = {
+  body: RemoveResourceFromCollectionRequest;
+};
+
+export type RemoveResourceFromCollectionResponse = BaseResponse;
+
+export type RemoveResourceFromCollectionError = unknown;
 
 export type DeleteCollectionData = {
   body: DeleteCollectionRequest;
@@ -2221,6 +2255,28 @@ export type $OpenApiTs = {
   '/knowledge/collection/new': {
     post: {
       req: CreateCollectionData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': BaseResponse;
+      };
+    };
+  };
+  '/knowledge/collection/addResource': {
+    post: {
+      req: AddResourceToCollectionData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': BaseResponse;
+      };
+    };
+  };
+  '/knowledge/collection/removeResource': {
+    post: {
+      req: RemoveResourceFromCollectionData;
       res: {
         /**
          * successful operation

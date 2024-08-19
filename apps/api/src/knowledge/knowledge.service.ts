@@ -17,6 +17,8 @@ import {
   UpsertNoteRequest,
   User,
   GetResourceDetailData,
+  AddResourceToCollectionRequest,
+  RemoveResourceFromCollectionRequest,
 } from '@refly/openapi-schema';
 import { CHANNEL_FINALIZE_RESOURCE, QUEUE_SIMPLE_EVENT, QUEUE_RESOURCE } from '../utils';
 import { genCollectionID, genResourceID, cleanMarkdownForIngest, genNoteID } from '@refly/utils';
@@ -83,6 +85,22 @@ export class KnowledgeService {
     });
   }
 
+  async addResourceToCollection(user: User, param: AddResourceToCollectionRequest) {
+    const { resourceId, collectionId } = param;
+    return this.prisma.collection.update({
+      where: { collectionId, uid: user.uid, deletedAt: null },
+      data: { resources: { connect: { resourceId } } },
+    });
+  }
+
+  async removeResourceFromCollection(user: User, param: RemoveResourceFromCollectionRequest) {
+    const { resourceId, collectionId } = param;
+    return this.prisma.collection.update({
+      where: { collectionId, uid: user.uid, deletedAt: null },
+      data: { resources: { disconnect: { resourceId } } },
+    });
+  }
+
   async deleteCollection(user: User, collectionId: string) {
     const { uid } = user;
     const coll = await this.prisma.collection.findFirst({
@@ -138,25 +156,6 @@ export class KnowledgeService {
   async createResource(user: User, param: UpsertResourceRequest) {
     param.resourceId = genResourceID();
 
-    // If target collection not specified, create new one
-    if (!param.collectionId) {
-      param.collectionId = genCollectionID();
-
-      await this.prisma.collection.upsert({
-        where: { collectionId: param.collectionId },
-        create: {
-          title: param.collectionName || 'Default Collection',
-          uid: user.uid,
-          collectionId: param.collectionId,
-        },
-        update: {},
-      });
-
-      this.logger.log(
-        `create new collection for user ${user.uid}, collection id: ${param.collectionId}`,
-      );
-    }
-
     if (param.readOnly === undefined) {
       param.readOnly = param.resourceType === 'weblink';
     }
@@ -192,6 +191,16 @@ export class KnowledgeService {
         readOnly: param.readOnly,
         title: param.title || 'Untitled',
         indexStatus: 'processing',
+        collections: {
+          connectOrCreate: {
+            where: { collectionId: param.collectionId },
+            create: {
+              collectionId: param.collectionId,
+              title: param.collectionName || 'Default Collection',
+              uid: user.uid,
+            },
+          },
+        },
       },
     });
 
@@ -231,7 +240,7 @@ export class KnowledgeService {
   }
 
   async indexResource(user: User, param: UpsertResourceRequest) {
-    const { resourceType, resourceId, collectionId, data = {} } = param;
+    const { resourceType, resourceId, data = {} } = param;
     const { url, storageKey, title } = data;
     param.storageKey ||= storageKey;
     param.content ||= '';
@@ -252,7 +261,7 @@ export class KnowledgeService {
     if (param.content) {
       const chunks = await this.ragService.indexContent({
         pageContent: cleanMarkdownForIngest(param.content),
-        metadata: { nodeType: 'resource', url, title, collectionId, resourceType, resourceId },
+        metadata: { nodeType: 'resource', url, title, resourceType, resourceId },
       });
       await this.ragService.saveDataForUser(user, { chunks });
     }

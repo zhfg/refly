@@ -61,10 +61,6 @@ export const $Resource = {
       description: 'Resource type',
       $ref: '#/components/schemas/ResourceType',
     },
-    collectionId: {
-      type: 'string',
-      description: 'Collection ID',
-    },
     title: {
       type: 'string',
       description: 'Resource title',
@@ -100,6 +96,13 @@ export const $Resource = {
     content: {
       type: 'string',
       description: 'Document content for this resource (only returned in getNoteDetail API)',
+    },
+    collections: {
+      type: 'array',
+      description: 'Collections this resource belongs to (only returned in getResourceDetail API)',
+      items: {
+        $ref: '#/components/schemas/Collection',
+      },
     },
   },
 } as const;
@@ -1257,6 +1260,36 @@ export const $UpsertCollectionResponse = {
       },
     },
   ],
+} as const;
+
+export const $AddResourceToCollectionRequest = {
+  type: 'object',
+  required: ['resourceId', 'collectionId'],
+  properties: {
+    resourceId: {
+      type: 'string',
+      description: 'Resource ID',
+    },
+    collectionId: {
+      type: 'string',
+      description: 'Collection ID',
+    },
+  },
+} as const;
+
+export const $RemoveResourceFromCollectionRequest = {
+  type: 'object',
+  required: ['resourceId', 'collectionId'],
+  properties: {
+    resourceId: {
+      type: 'string',
+      description: 'Resource ID',
+    },
+    collectionId: {
+      type: 'string',
+      description: 'Collection ID',
+    },
+  },
 } as const;
 
 export const $DeleteCollectionRequest = {
