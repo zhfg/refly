@@ -9,7 +9,6 @@ export interface NodeMeta {
   noteId?: string;
   resourceId?: string;
   resourceType?: ResourceType;
-  collectionId?: string;
 }
 
 export interface ContentPayload extends NodeMeta {

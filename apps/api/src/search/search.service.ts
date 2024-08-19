@@ -43,7 +43,6 @@ export class SearchService {
     const results = await this.prisma.resource.findMany({
       select: {
         resourceId: true,
-        collectionId: true,
         resourceType: true,
         title: true,
         content: true,
@@ -64,7 +63,6 @@ export class SearchService {
       content: [result.content.slice(0, 250) + '...'], // TODO: truncate in sql to reduce traffic
       metadata: {
         resourceType: result.resourceType as ResourceType,
-        collectionId: result.collectionId,
       },
       createdAt: result.createdAt.toJSON(),
       updatedAt: result.updatedAt.toJSON(),
@@ -80,7 +78,6 @@ export class SearchService {
     interface ResourceResult {
       resource_id: string;
       resource_type: ResourceType;
-      collection_id: string;
       meta: string;
       created_at: string;
       updated_at: string;
@@ -92,7 +89,6 @@ export class SearchService {
     const resources = await this.prisma.$queryRaw<ResourceResult[]>`
       SELECT   resource_id,
                resource_type,
-               collection_id,
                meta,
                created_at,
                updated_at,
@@ -120,7 +116,6 @@ export class SearchService {
       metadata: {
         resourceMeta: JSON.parse(resource.meta || '{}'),
         resourceType: resource.resource_type,
-        collectionId: resource.collection_id,
       },
       createdAt: resource.created_at,
       updatedAt: resource.updated_at,
@@ -156,7 +151,6 @@ export class SearchService {
       metadata: {
         resourceMeta: resourceMap.get(node.resourceId),
         resourceType: node.resourceType,
-        collectionId: node.collectionId,
       },
     }));
   }
