@@ -1,17 +1,9 @@
-import { useState, useEffect } from "react"
 import { ErrorBoundary } from "@sentry/react"
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels"
 
 // components
-import SkillDetail from "@refly/ai-workspace-common/components/skill/skill-detail"
-import { AICopilot } from "@refly/ai-workspace-common/components/knowledge-base/copilot"
-import { useTranslation } from "react-i18next"
-import { useSkillManagement } from "@refly-packages/ai-workspace-common/hooks/use-skill-management"
-// store
-import { useSkillStore } from "@refly-packages/ai-workspace-common/stores/skill"
-import { useUserStore } from "@refly-packages/ai-workspace-common/stores/user"
-
-import { useSearchParams } from "@refly-packages/ai-workspace-common/utils/router"
+import SkillDetail from "@refly-packages/ai-workspace-common/components/skill/skill-detail"
+import { AICopilot } from "@refly-packages/ai-workspace-common/components/knowledge-base/copilot"
 
 import "./index.scss"
 

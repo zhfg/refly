@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 // components
-import { SkillItem } from '@refly/ai-workspace-common/components/skill/skill-management/skill-item';
+import { SkillItem } from '@refly-packages/ai-workspace-common/components/skill/skill-management/skill-item';
 // store
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 

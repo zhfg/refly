@@ -2,8 +2,8 @@ import { useState } from "react"
 
 // components
 import { useTranslation } from "react-i18next"
-import { SkillInstanceList } from "@refly/ai-workspace-common/components/skill/skill-intance-list"
-import { SkillTemplateList } from "@refly/ai-workspace-common/components/skill/skill-template-list"
+import { SkillInstanceList } from "@refly-packages/ai-workspace-common/components/skill/skill-intance-list"
+import { SkillTemplateList } from "@refly-packages/ai-workspace-common/components/skill/skill-template-list"
 
 import { useSearchParams } from "@refly-packages/ai-workspace-common/utils/router"
 import "./index.scss"
