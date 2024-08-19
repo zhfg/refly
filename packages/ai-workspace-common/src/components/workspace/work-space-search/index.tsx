@@ -21,6 +21,11 @@ export const WorkSpaceSearch = () => {
       <div className="relative h-20 w-[750px]">
         <Search
           showList={showList}
+          onSearchValueChange={(value) => {
+            if (value && !showList) {
+              setShowList(true);
+            }
+          }}
           style={{ width: '750px', position: 'absolute', top: '-10%', zIndex: 1000, margin: 'auto' }}
           onClick={() => setShowList(true)}
           onClickOutside={() => setShowList(false)}
