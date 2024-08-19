@@ -42,7 +42,7 @@ const KnowledgeLibraryLayout = () => {
       document.querySelector(`.workspace-panel-container`) as HTMLElement,
     getResizeSelector: () =>
       document.querySelectorAll(`.workspace-panel-resize`),
-    initialMinSize: 24,
+    initialMinSize: 30,
     initialMinPixelSize: 310,
   })
 
@@ -82,7 +82,14 @@ const KnowledgeLibraryLayout = () => {
         window.close()
       }, 500)
     }
-  }, [token, userStore?.userProfile?.uid])
+
+    if (kbId) {
+      knowledgeBaseStore.updateResourcePanelVisible(true)
+    }
+    if (noteId) {
+      noteStore.updateNotePanelVisible(true)
+    }
+  }, [token, userStore?.userProfile?.uid, kbId, noteId])
 
   const copilotStyle =
     knowledgeBaseStore.resourcePanelVisible || noteStore.notePanelVisible
@@ -148,7 +155,7 @@ const KnowledgeLibraryLayout = () => {
               order={3}
               className="workspace-content-panel"
               {...copilotStyle}
-              minSize={minSize}
+              minSize={30}
               key="workspace-content-panel"
               id="workspace-content-panel-copilot">
               <AICopilot />

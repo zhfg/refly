@@ -1,6 +1,7 @@
 .ai-copilot-container {
   position: relative;
   height: 100%;
+  width: 100%;
 
   .knowledge-base-detail-header {
     height: 40px;
@@ -69,6 +70,8 @@
     height: calc(100vh - 264px);
     overflow-y: auto;
     padding: 0 12px 24px;
+    margin: 0 auto;
+    max-width: 1024px;
 
     .ai-copilot-message {
       width: 100%;
@@ -485,6 +488,9 @@
     position: absolute;
     bottom: 0;
     width: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 1024px;
     height: 215px;
 
     .ai-copilot-body-inner-container {
