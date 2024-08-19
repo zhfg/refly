@@ -636,7 +636,7 @@ export class SkillService {
     const trigger = await this.prisma.skillTrigger.update({
       where: { triggerId, uid, deletedAt: null },
       data: {
-        ...pick(param, ['triggerType', 'enabled', 'simpleEventName']),
+        ...pick(param, ['triggerType', 'displayName', 'enabled', 'simpleEventName']),
         ...{
           timerConfig: param.timerConfig ? JSON.stringify(param.timerConfig) : undefined,
           input: param.input ? JSON.stringify(param.input) : undefined,
