@@ -16,6 +16,7 @@ import {
   ListNotesData,
   UpsertNoteRequest,
   User,
+  GetResourceDetailData,
 } from '@refly/openapi-schema';
 import { CHANNEL_FINALIZE_RESOURCE, QUEUE_SIMPLE_EVENT, QUEUE_RESOURCE } from '../utils';
 import { genCollectionID, genResourceID, cleanMarkdownForIngest, genNoteID } from '@refly/utils';
@@ -50,6 +51,7 @@ export class KnowledgeService {
 
     const coll = await this.prisma.collection.findFirst({
       where: { collectionId, uid: user.uid, deletedAt: null },
+      include: { resources: true },
     });
     if (!coll) {
       throw new NotFoundException('Collection not found');
@@ -60,17 +62,7 @@ export class KnowledgeService {
       return null;
     }
 
-    let resources = await this.prisma.resource.findMany({
-      where: { collectionId, deletedAt: null },
-      orderBy: { updatedAt: 'desc' },
-    });
-
-    // If collection is read by other users, filter out resources that are not public
-    if (coll.isPublic && coll.uid !== user.uid) {
-      resources = resources.filter((r) => r.isPublic);
-    }
-
-    return { ...coll, resources };
+    return coll;
   }
 
   async upsertCollection(user: User, param: UpsertCollectionRequest) {
@@ -110,31 +102,10 @@ export class KnowledgeService {
         data: { deletedAt: new Date() },
       }),
     ]);
-
-    // Delete all resources
-    const resources = await this.prisma.resource.findMany({
-      where: { collectionId, uid, deletedAt: null },
-    });
-    await Promise.all(resources.map((r) => this.deleteResource(user, r.resourceId)));
   }
 
   async listResources(user: User, param: ListResourcesData['query']) {
-    const { collectionId, resourceId, resourceType, page = 1, pageSize = 10 } = param;
-
-    // Query resources by collection
-    if (collectionId) {
-      return this.prisma.resource.findMany({
-        where: {
-          collectionId,
-          resourceType,
-          deletedAt: null,
-          OR: [{ isPublic: true }, { uid: user.uid }],
-        },
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-        orderBy: { updatedAt: 'desc' },
-      });
-    }
+    const { resourceId, resourceType, page = 1, pageSize = 10 } = param;
 
     const resources = await this.prisma.resource.findMany({
       where: { resourceId, resourceType, uid: user.uid, deletedAt: null },
@@ -149,10 +120,12 @@ export class KnowledgeService {
     }));
   }
 
-  async getResourceDetail(user: User, param: { resourceId: string }) {
+  async getResourceDetail(user: User, param: GetResourceDetailData['query']) {
     const { resourceId } = param;
+
     const resource = await this.prisma.resource.findFirst({
       where: { resourceId, deletedAt: null },
+      include: { collections: true },
     });
 
     if (!resource.isPublic && resource.uid !== user.uid) {
@@ -212,7 +185,6 @@ export class KnowledgeService {
       data: {
         resourceId: param.resourceId,
         resourceType: param.resourceType,
-        collectionId: param.collectionId,
         meta: JSON.stringify(param.data || {}),
         content: param.content ?? '',
         uid: user.uid,
