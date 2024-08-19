@@ -168,14 +168,14 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
 
   return (
     <div
-      className={classNames('ai-note-editor-content-container', {
+      className={classNames('w-full', 'ai-note-editor-content-container', {
         'refly-selector-mode-active': showContentSelector,
         'refly-block-selector-mode': scope === 'block',
         'refly-inline-selector-mode': scope === 'inline',
       })}
     >
       {initContentSelectorElem()}
-      <div className="w-full max-w-screen-lg h-full">
+      <div className="w-full h-full">
         <EditorRoot>
           <EditorContent
             extensions={extensions}
@@ -184,7 +184,7 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
               noteStore.updateEditor(editor);
             }}
             editable={!readOnly}
-            className="w-full max-w-screen-lg h-full border-muted sm:rounded-lg"
+            className="w-full h-full border-muted sm:rounded-lg"
             editorProps={{
               handleDOMEvents: {
                 keydown: (_view, event) => handleCommandNavigation(event),
@@ -276,8 +276,8 @@ export const AINoteHeader = (props: AINoteHeaderProps) => {
   const { note, onTitleChange } = props;
 
   return (
-    <div className="flex justify-center mx-4 mt-8 align-middle">
-      <div className="w-full max-w-screen-lg h-full">
+    <div className="w-full">
+      <div className="max-w-screen-lg mt-4 mx-2">
         <Input
           className="text-3xl font-bold bg-transparent focus:border-transparent focus:bg-transparent"
           placeholder="Enter The Title"
@@ -309,7 +309,10 @@ export const AINote = () => {
   }, []);
 
   useEffect(() => {
+    noteStore.updateNotePanelVisible(true);
+
     const fetchData = async () => {
+      noteStore.updateIsRequesting(true);
       const { data } = await getClient().getNoteDetail({
         query: { noteId },
       });
@@ -330,6 +333,11 @@ export const AINote = () => {
     } else {
       noteStore.updateCurrentNote(null);
     }
+
+    return () => {
+      noteStore.updateIsRequesting(false);
+      noteStore.updateNotePanelVisible(false);
+    };
   }, [noteId]);
 
   const debouncedUpdateNote = useDebouncedCallback(async (note: Note) => {
