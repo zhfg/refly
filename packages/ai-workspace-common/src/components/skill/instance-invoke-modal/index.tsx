@@ -1,17 +1,15 @@
 import { useState } from 'react';
 
 // components
-import { MultiSelect } from '../multi-select';
+import { InvokeOptionComponent } from '@refly-packages/ai-workspace-common/components/skill/RuleOptionComponent';
 import { useTranslation } from 'react-i18next';
 // store
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
-import { SkillInstance, SkillInvocationRule } from '@refly/openapi-schema';
-import { Modal, Form, Input, Message, FormInstance } from '@arco-design/web-react';
-import { TFunction } from 'i18next';
+import { SkillInstance } from '@refly/openapi-schema';
+import { Modal, Form, Message } from '@arco-design/web-react';
 
 const FormItem = Form.Item;
-const TextArea = Input.TextArea;
 
 const formItemLayout = {
   labelCol: {
@@ -28,58 +26,6 @@ interface InstanceInvokeModalProps {
   setVisible: (val: boolean) => void;
   postConfirmCallback?: () => void;
 }
-
-const InvokeOptionComponent = (props: {
-  rule: SkillInvocationRule;
-  form: FormInstance;
-  t: TFunction;
-}): React.ReactNode => {
-  const { rule, form, t } = props;
-
-  if (rule.key === 'query') {
-    return <Input placeholder={t('skill.instanceInvokeModal.placeholder.query')} maxLength={100} showWordLimit />;
-  }
-
-  if (rule.key === 'resourceIds' || rule.key === 'noteIds' || rule.key === 'collectionIds') {
-    return (
-      <MultiSelect
-        type={rule.key}
-        placeholder={t(`skill.instanceInvokeModal.placeholder.${rule.key}`)}
-        onValueChange={(val) => {
-          form.setFieldValue(rule.key, val);
-        }}
-      />
-    );
-  }
-
-  if (rule.key === 'contentList') {
-    return (
-      <TextArea
-        placeholder={t('skill.instanceInvokeModal.placeholder.contentList')}
-        rows={4}
-        autoSize={{
-          minRows: 4,
-          maxRows: 10,
-        }}
-      />
-    );
-  }
-
-  if (rule.key === 'urls') {
-    return (
-      <TextArea
-        placeholder={t('skill.instanceInvokeModal.placeholder.urls')}
-        rows={4}
-        autoSize={{
-          minRows: 4,
-          maxRows: 10,
-        }}
-      />
-    );
-  }
-
-  return null;
-};
 
 export const InstanceInvokeModal = (props: InstanceInvokeModalProps) => {
   const { visible, data, setVisible, postConfirmCallback } = props;

@@ -9,7 +9,6 @@ import { SkillInstance } from '@refly/openapi-schema';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import { useTranslation } from 'react-i18next';
-import SkillDetail from '@refly-packages/ai-workspace-common/components/skill/skill-detail';
 
 const iconStyle = {
   marginRight: 8,

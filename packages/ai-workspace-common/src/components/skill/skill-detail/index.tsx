@@ -2,14 +2,15 @@ import { useState, useEffect } from 'react';
 
 // components
 import { useTranslation } from 'react-i18next';
-import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
 import { SkillJobs } from '@refly-packages/ai-workspace-common/components/skill/skill-jobs';
 import { SkillTriggers } from '@refly-packages/ai-workspace-common/components/skill/skill-triggers';
 import { InstanceInvokeModal } from '@refly-packages/ai-workspace-common/components/skill/instance-invoke-modal';
 import { InstanceDropdownMenu } from '@refly-packages/ai-workspace-common/components/skill/instance-dropdown-menu';
 import { NewSkillInstanceModal } from '@refly-packages/ai-workspace-common/components/skill/new-instance-modal';
+import { NewTriggersModal } from '@refly-packages/ai-workspace-common/components/skill/new-triggers-modal';
 
 // store
+import { useImportNewTriggerModal } from '@refly-packages/ai-workspace-common/stores/import-new-trigger-modal';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
@@ -20,13 +21,19 @@ import './index.scss';
 import { SkillInstance } from '@refly/openapi-schema';
 
 import { Radio, Avatar, Button, Typography } from '@arco-design/web-react';
-import { IconLeft, IconPlayArrow, IconDelete } from '@arco-design/web-react/icon';
+import { IconLeft, IconPlayArrow, IconPlus } from '@arco-design/web-react/icon';
 
 const RadioGroup = Radio.Group;
 
 const ContentTab = (props: { val: string; setVal: (val: string) => void }) => {
   const { setVal, val } = props;
   const { t } = useTranslation();
+  const importNewTriggerModal = useImportNewTriggerModal();
+
+  const addTrigger = () => {
+    importNewTriggerModal.setShowtriggerModall(true);
+  };
+
   return (
     <div className="skill-detail__content-tab">
       <RadioGroup
@@ -43,7 +50,13 @@ const ContentTab = (props: { val: string; setVal: (val: string) => void }) => {
           {t('skill.skillDetail.triggers')}
         </Radio>
       </RadioGroup>
-      {val === 'triggers' && <Button>添加触发器</Button>}
+
+      {val === 'triggers' && (
+        <Button type="primary" className="add-trigger-btn" onClick={addTrigger}>
+          <IconPlus />
+          添加触发器
+        </Button>
+      )}
     </div>
   );
 };
@@ -146,6 +159,7 @@ const SkillDetail = () => {
         setVisible={(val) => setVisible(val)}
         postConfirmCallback={() => handleGetSkillInstances()}
       />
+      <NewTriggersModal data={skillDetail} />
     </div>
   );
 };

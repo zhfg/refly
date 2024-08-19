@@ -2,29 +2,37 @@ import { useState, useEffect } from 'react';
 
 // components
 import { useTranslation } from 'react-i18next';
-import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
 // store
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
+import { useCreateTrigger } from '@refly-packages/ai-workspace-common/hooks/use-create-trigger';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
+import { useImportNewTriggerModal } from '@refly-packages/ai-workspace-common/stores/import-new-trigger-modal';
 
 import './index.scss';
-import { SkillJob } from '@refly/openapi-schema';
+import { SkillTrigger } from '@refly/openapi-schema';
 
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
-import { List, Empty, Typography } from '@arco-design/web-react';
-import { IconLeft, IconPlayArrow, IconDelete } from '@arco-design/web-react/icon';
+import { List, Empty, Grid, Divider, Switch, Popconfirm } from '@arco-design/web-react';
+import { IconDelete, IconSchedule, IconThunderbolt, IconTool } from '@arco-design/web-react/icon';
+
+const Row = Grid.Row;
+const Col = Grid.Col;
+
 interface SkillTriggersProps {
   reloadList?: boolean;
   setReloadList?: (val: boolean) => void;
 }
+
 export const SkillTriggers = (props: SkillTriggersProps) => {
+  const createTrigger = useCreateTrigger();
+  const importNewTriggerModal = useImportNewTriggerModal();
   const [searchParams] = useSearchParams();
   const skillId = searchParams.get('skillId') as string;
   const { reloadList, setReloadList } = props;
 
-  const { dataList, loadMore, hasMore, isRequesting, reload } = useFetchDataList({
+  const { dataList, loadMore, hasMore, isRequesting, setDataList, reload } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listSkillTriggers({
         query: { ...queryPayload, skillId },
@@ -34,40 +42,127 @@ export const SkillTriggers = (props: SkillTriggersProps) => {
     pageSize: 12,
   });
 
+  const TriggerCard = (props: { trigger: SkillTrigger }) => {
+    const { t } = useTranslation();
+    const { trigger } = props;
+    const { simpleEventName, timerConfig } = trigger;
+    let eventType = 'simpleEvent';
+    let eventMessage = t(`skill.newTriggerModal.${simpleEventName}`);
+    if (timerConfig) {
+      eventType = 'timer';
+      eventMessage = t(`skill.newTriggerModal.${timerConfig.repeatInterval}`) + ' ' + timerConfig.datetime;
+    }
+    const updateTriggerStatus = async (val: boolean) => {
+      const error = await createTrigger.updateTriggerStatus(trigger, val);
+      if (!error) {
+        reload();
+      }
+    };
+    const handleUpdateTrigger = () => {
+      importNewTriggerModal.setTrigger(trigger);
+      importNewTriggerModal.setShowtriggerModall(true);
+    };
+
+    const deleteTrigger = async () => {
+      const error = await createTrigger.deleteTrigger(trigger);
+      if (!error) {
+        setDataList(dataList.filter((n: SkillTrigger) => n.triggerId !== trigger.triggerId));
+      }
+    };
+
+    return (
+      <div className="skill-triggers__card">
+        <Row align="center" justify="center">
+          <Col span={4} className="skill-triggers__card-col ellipsis">
+            {trigger.displayName}
+          </Col>
+
+          <Col span={1}>
+            <Divider type="vertical" />
+          </Col>
+
+          <Col span={4} className="skill-triggers__card-col">
+            {eventType === 'timer' && (
+              <div>
+                <IconSchedule style={{ marginRight: 8 }} />
+                {t('skill.newTriggerModal.timer')}
+              </div>
+            )}
+
+            {eventType === 'simpleEvent' && (
+              <div>
+                <IconThunderbolt style={{ marginRight: 8 }} />
+                {t('skill.newTriggerModal.simpleEvent')}
+              </div>
+            )}
+          </Col>
+
+          <Col span={1}>
+            <Divider type="vertical" />
+          </Col>
+
+          <Col span={14} className="skill-triggers__card-right">
+            <div>{eventMessage}</div>
+            <div className="actions">
+              <Switch
+                className="actions-item"
+                type="round"
+                size="small"
+                checked={trigger.enabled}
+                onChange={(val) => updateTriggerStatus(val)}
+              />
+              <IconTool
+                className="actions-item"
+                style={{ fontSize: 16, margin: '0 20px' }}
+                onClick={handleUpdateTrigger}
+              />
+              <Popconfirm focusLock title={t('common.deleteConfirmMessage')} position="br" onOk={deleteTrigger}>
+                <IconDelete className="actions-item" style={{ fontSize: 16 }} />
+              </Popconfirm>
+            </div>
+          </Col>
+        </Row>
+      </div>
+    );
+  };
+
   useEffect(() => {
     loadMore();
   }, []);
 
   useEffect(() => {
-    if (reloadList) {
+    console.log('importNewTriggerModal.reloadTriggerList]', importNewTriggerModal.reloadTriggerList);
+    if (importNewTriggerModal.reloadTriggerList) {
       reload();
-      setReloadList(false);
+      importNewTriggerModal.setReloadTriggerList(false);
     }
-  }, [reloadList]);
+  }, [importNewTriggerModal.reloadTriggerList]);
 
   if (dataList.length === 0) {
     return <Empty description="请先配置触发器" />;
   }
+
   return (
     <List
       className="skill-triggers"
       wrapperStyle={{ width: '100%' }}
       bordered={false}
+      split={false}
       pagination={false}
       dataSource={dataList}
       scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
-      render={(item: SkillJob, key) => (
+      render={(item: SkillTrigger, key) => (
         <List.Item
-          key={item?.jobId + key}
+          key={item?.triggerId + key}
           style={{
             padding: '0',
             width: '100%',
           }}
-          className="skill-jobs__list-item"
+          className="skill-triggers__list-item"
           actionLayout="vertical"
           onClick={() => {}}
         >
-          {item.skillDisplayName}
+          <TriggerCard trigger={item} />
         </List.Item>
       )}
     />

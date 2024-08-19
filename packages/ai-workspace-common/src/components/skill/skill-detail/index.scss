@@ -54,6 +54,10 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      .add-trigger-btn {
+        border-radius: 8px;
+        padding: 0 10px;
+      }
     }
     .skill-action {
       &__invoke {

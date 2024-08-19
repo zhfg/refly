@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { time } from '@refly-packages/ai-workspace-common/utils/time';
 
 // components
 import { useTranslation } from 'react-i18next';
@@ -11,18 +12,34 @@ import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-
 
 import './index.scss';
 import { SkillJob } from '@refly/openapi-schema';
+import { LOCALE } from '@refly/common-types';
 
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
 import { List, Empty, Typography, Grid, Divider } from '@arco-design/web-react';
-import { IconCheckCircle, IconLoading, IconCloseCircle, IconSchedule, IconDelete } from '@arco-design/web-react/icon';
+import {
+  IconCheckCircle,
+  IconLoading,
+  IconCloseCircle,
+  IconSchedule,
+  IconMessage,
+  IconThunderbolt,
+  IconFolderAdd,
+  IconStorage,
+  IconFile,
+  IconLink,
+  IconRefresh,
+} from '@arco-design/web-react/icon';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
+
+type eventType = 'conversation' | 'timer' | 'simpleEvent';
 
 interface SkillJobsProps {
   reloadList?: boolean;
   setReloadList?: (val: boolean) => void;
 }
+
 export const SkillJobs = (props: SkillJobsProps) => {
   const { reloadList, setReloadList } = props;
   const [searchParams] = useSearchParams();
@@ -62,9 +79,65 @@ export const SkillJobs = (props: SkillJobsProps) => {
     }
   };
 
+  const TriggerEvent = (props: { evenT: eventType; eventMessage: string }) => {
+    return (
+      <div className="skill-jobs__card-event">
+        {props.evenT === 'conversation' && <IconMessage />}
+        {props.evenT === 'timer' && <IconSchedule />}
+        {props.evenT === 'simpleEvent' && <IconThunderbolt />}
+        <div className="ellipsis">{props.eventMessage || '手动运行'}</div>
+      </div>
+    );
+  };
+
+  type cType = 'collections' | 'notes' | 'resources' | 'urls';
+  const ContextAttachment = (props: { contextType: cType; contentList: string[] }) => {
+    const { contextType, contentList = [] } = props;
+    const Icon = (props: { type: cType }) => {
+      switch (props.type) {
+        case 'collections':
+          return <IconFolderAdd style={{ marginRight: 8 }} />;
+        case 'notes':
+          return <IconFile style={{ marginRight: 8 }} />;
+        case 'resources':
+          return <IconStorage style={{ marginRight: 8 }} />;
+        case 'urls':
+          return <IconLink style={{ marginRight: 8 }} />;
+        default:
+          return null;
+      }
+    };
+
+    return (
+      <div className="skill-jobs__card-context">
+        <Icon type={contextType} />
+        <div>
+          {contentList.map((item, index) => (
+            <Typography.Text key={item + index} ellipsis={{ rows: 1 }} style={{ marginBottom: 0, marginLeft: 8 }}>
+              {item}
+            </Typography.Text>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   const JobCard = (props: { job: SkillJob }) => {
+    const { i18n } = useTranslation();
+    const language = i18n.languages?.[0];
     const { job } = props;
-    const { collectionIds, noteIds, resourceIds, urls } = job.context;
+    let eventT: eventType = null;
+    let eventMessage = '';
+    const { conversation, trigger, updatedAt } = job;
+    if (conversation) {
+      eventT = 'conversation';
+      eventMessage = conversation.title;
+    } else if (trigger) {
+      eventT = trigger.triggerType;
+      eventMessage = trigger.simpleEventName;
+    }
+
+    const { collections, notes, resources, urls } = job.context;
     return (
       <div className="skill-jobs__card">
         <Row align="center" justify="center">
@@ -75,19 +148,31 @@ export const SkillJobs = (props: SkillJobsProps) => {
             <Divider type="vertical" />
           </Col>
           <Col span={4}>
-            <div className="skill-jobs__card-event">
-              <IconSchedule />
-              <Typography.Paragraph ellipsis={{ rows: 1 }} style={{ marginBottom: 0, marginLeft: 8 }}>
-                每天 21:00
-              </Typography.Paragraph>
-            </div>
+            <TriggerEvent evenT={eventT} eventMessage={eventMessage} />
           </Col>
           <Col span={1}>
             <Divider type="vertical" />
           </Col>
           <Col span={16}>
             <div className="skill-jobs__card-right">
-              <div>{job.skillDisplayName}</div>
+              <div className="skill-jobs__card-contexts">
+                {collections?.length && (
+                  <ContextAttachment contextType="collections" contentList={collections.map((item) => item.title)} />
+                )}
+                {resources?.length && (
+                  <ContextAttachment contextType="collections" contentList={resources.map((item) => item.title)} />
+                )}
+                {notes?.length && (
+                  <ContextAttachment contextType="notes" contentList={notes.map((item) => item.title)} />
+                )}
+                {urls?.length && <ContextAttachment contextType="urls" contentList={urls} />}
+              </div>
+              <div className="skill-jobs__card-update-time">
+                {time(updatedAt, language as LOCALE)
+                  .utc()
+                  .fromNow()}
+                <IconRefresh style={{ marginLeft: 32, color: '#666666' }} />
+              </div>
             </div>
           </Col>
         </Row>

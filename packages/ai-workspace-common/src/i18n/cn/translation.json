@@ -349,6 +349,30 @@
       "putErr": "操作失败，请尝试重试！",
       "putSuccess": "操作成功"
     },
+    "newTriggerModal": {
+      "newTitle": "创建触发器",
+      "updateTitle": "更新触发器",
+      "name": "名称",
+      "namePlaceholder": "请输入触发器名称",
+      "triggerType": "类型",
+      "triggerTypePlaceholder": "请选择触发器类型",
+      "timer": "定时触发",
+      "simpleEvent": "事件触发",
+      "onResourceReady": "资源准备就绪",
+      "timerConfig": "时间",
+      "timerConfigPlaceholder": "请选择运行时间",
+      "repeatInterval": "重复",
+      "repeatIntervalPlaceholder": "请选择重复间隔",
+      "resource": "资源",
+      "resourcePlaceholder": "请选择资源",
+      "event": "事件",
+      "eventPlaceholder": "请选择事件",
+      "hour": "每小时",
+      "day": "每天",
+      "week": "每周",
+      "month": "每月",
+      "year": "每年"
+    },
     "instanceInvokeModal": {
       "title": "运行技能",
       "formLabel": {
