@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 // store
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
-import { SkillInstance } from '@refly/openapi-schema';
+import { SkillInstance, SkillTrigger } from '@refly/openapi-schema';
 
 import { Modal, Form, Input, Message, Select, DatePicker } from '@arco-design/web-react';
 const FormItem = Form.Item;
@@ -25,6 +25,14 @@ const formItemLayout = {
 
 const triggerType = ['timer', 'simpleEvent'];
 const repeatInterval = ['hour', 'day', 'week', 'month', 'year'];
+const fromFieldMap = {
+  query: 'input.query',
+  resourceIds: 'context.resourceIds',
+  noteIds: 'context.noteIds',
+  collectionIds: 'context.collectionIds',
+  contentList: 'input.contentList',
+  urls: 'input.urls',
+};
 
 interface NewTriggersModalProps {
   data: SkillInstance;
@@ -43,21 +51,30 @@ export const NewTriggersModal = (props: NewTriggersModalProps) => {
   const optionItems = [...inputRules, ...contextRules].map((rule) => ({
     key: rule.key,
     required: rule.required,
-    formComp: InvokeOptionComponent({ rule, form, t }),
+    formComp: InvokeOptionComponent({ rule, form, t, fieldMap: fromFieldMap }),
   }));
 
   const onOk = () => {
     form.validate().then(async (res) => {
-      console.log('res', res);
+      console.log('res111', res);
+      const { contentList, urls } = res?.context || {};
+      const qrams = {
+        ...res,
+        context: {
+          ...res?.context,
+          contentList: contentList?.split(/\n\s*\n/),
+          urls: urls?.split(/\n\s*\n/),
+        },
+      };
       setConfirmLoading(true);
       let resultError: unknown;
       try {
         if (!importNewTriggerModal.trigger) {
-          const error = await createTrigger.createTrigger({ ...res, skillId: data.skillId });
+          const error = await createTrigger.createTrigger({ ...qrams, skillId: data.skillId });
           resultError = error;
         } else {
           const error = await createTrigger.updateTrigger({
-            ...res,
+            ...qrams,
             triggerId: importNewTriggerModal.trigger.triggerId,
           });
           resultError = error;
@@ -84,7 +101,28 @@ export const NewTriggersModal = (props: NewTriggersModalProps) => {
       form.clearFields();
     } else {
       if (importNewTriggerModal.trigger) {
-        form.setFieldsValue(importNewTriggerModal.trigger);
+        const trigger = importNewTriggerModal.trigger;
+        console.log('importNewTriggerModal.trigger', trigger);
+        const { context } = trigger;
+
+        const formValue = {
+          ...trigger,
+          context: {
+            ...context,
+            contentList: context?.contentList?.join('\n'),
+            urls: context?.urls?.join('\n'),
+          },
+        };
+
+        // if (!('urls' in context)) {
+        //   delete formValue.context.urls;
+        // }
+        // if (!('contentList' in context)) {
+        //   delete formValue.context.contentList;
+        // }
+        console.log('formValue', formValue);
+
+        form.setFieldsValue(formValue);
         setTriggerType(importNewTriggerModal.trigger.triggerType);
       }
     }
@@ -167,7 +205,7 @@ export const NewTriggersModal = (props: NewTriggersModalProps) => {
                   label={t(`skill.instanceInvokeModal.formLabel.${key}`)}
                   key={key}
                   required={required}
-                  field={key}
+                  field={fromFieldMap[key]}
                 >
                   {formComp}
                 </FormItem>

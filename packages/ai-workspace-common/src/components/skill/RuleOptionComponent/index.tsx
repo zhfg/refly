@@ -13,8 +13,9 @@ export const InvokeOptionComponent = (props: {
   rule: SkillInvocationRule;
   form: FormInstance;
   t: TFunction;
+  fieldMap?: Object;
 }): React.ReactNode => {
-  const { rule, form, t } = props;
+  const { rule, form, t, fieldMap } = props;
 
   if (rule.key === 'query') {
     return <Input placeholder={t('skill.instanceInvokeModal.placeholder.query')} maxLength={100} showWordLimit />;
@@ -22,13 +23,16 @@ export const InvokeOptionComponent = (props: {
 
   if (rule.key === 'resourceIds' || rule.key === 'noteIds' || rule.key === 'collectionIds') {
     return (
-      <MultiSelect
-        type={rule.key}
-        placeholder={t(`skill.instanceInvokeModal.placeholder.${rule.key}`)}
-        onValueChange={(val) => {
-          form.setFieldValue(rule.key, val);
-        }}
-      />
+      <>
+        <MultiSelect
+          defaultValue={form.getFieldValue(fieldMap ? fieldMap[rule.key] : rule.key)}
+          type={rule.key}
+          placeholder={t(`skill.instanceInvokeModal.placeholder.${rule.key}`)}
+          onValueChange={(val) => {
+            form.setFieldValue(fieldMap ? fieldMap[rule.key] : rule.key, val);
+          }}
+        />
+      </>
     );
   }
 

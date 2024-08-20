@@ -63,7 +63,11 @@ import { SelectedTextContextActionBtn } from '@refly-packages/ai-workspace-commo
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { CurrentContextActionBtn } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/action-btn/current-context-action-btn';
 
-interface AICopilotProps {}
+interface AICopilotProps {
+  disable?: boolean;
+  source?: string;
+  jobId?: string;
+}
 
 export const AICopilot = (props: AICopilotProps) => {
   // 所属的环境
@@ -98,6 +102,12 @@ export const AICopilot = (props: AICopilotProps) => {
   const uiLocale = i18n?.languages?.[0] as LOCALE;
   const outputLocale = userStore?.localSettings?.outputLocale || 'en';
   console.log('uiLocale', uiLocale);
+
+  const { disable, jobId, source } = props;
+
+  const isFromSkillJob = () => {
+    return source === 'skillJob';
+  };
 
   // ai-note handler
   useAINote(true);
@@ -144,6 +154,23 @@ export const AICopilot = (props: AICopilotProps) => {
     chatStore.setMessages(res.data.messages);
   };
 
+  const getThreadMessagesByJobId = async (jobId: string) => {
+    const { data: res, error } = await getClient().getSkillJobDetail({
+      query: {
+        jobId,
+      },
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    // 清空之前的状态
+    resetState();
+
+    chatStore.setMessages(res?.data?.messages || []);
+  };
+
   const handleConvTask = async (convId: string) => {
     try {
       setIsFetching(true);
@@ -169,20 +196,28 @@ export const AICopilot = (props: AICopilotProps) => {
   };
 
   useEffect(() => {
-    if (convId) {
+    if (convId && !isFromSkillJob()) {
       handleConvTask(convId);
+    }
+
+    if (jobId && isFromSkillJob()) {
+      getThreadMessagesByJobId(jobId);
     }
 
     return () => {
       chatStore.setMessages([]);
     };
-  }, [convId]);
+  }, [convId, jobId]);
+
   useEffect(() => {
     handleSwitchSearchTarget();
   }, [showContextState]);
+
   useResizeCopilot({ containerSelector: 'ai-copilot-container' });
   useDynamicInitContextPanelState(); // 动态根据页面状态更新上下文面板状态
+
   useEffect(() => {
+    if (isFromSkillJob()) return;
     handleGetSkillInstances();
     handleGetSkillTemplates();
   }, []);
@@ -192,114 +227,121 @@ export const AICopilot = (props: AICopilotProps) => {
   return (
     <div className="ai-copilot-container">
       <div className="knowledge-base-detail-header">
-        <div className="knowledge-base-detail-navigation-bar">
-          {isWeb
-            ? [
-                <Checkbox
-                  key={'knowledge-base-resource-panel'}
-                  checked={knowledgeBaseStore.resourcePanelVisible && resId ? true : false}
-                >
-                  {({ checked }) => {
-                    return (
-                      <Button
-                        icon={<IconFile />}
-                        type="text"
-                        onClick={() => {
-                          if (!resId) {
-                            searchStore.setPages(searchStore.pages.concat('knowledgeBases'));
-                            searchStore.setIsSearchOpen(true);
-                          } else {
-                            knowledgeBaseStore.updateResourcePanelVisible(!knowledgeBaseStore.resourcePanelVisible);
-                          }
-                        }}
-                        className={classNames('assist-action-item', { active: checked })}
-                      ></Button>
-                    );
-                  }}
-                </Checkbox>,
-                <Checkbox key={'knowledge-base-note-panel'} checked={noteStore.notePanelVisible}>
-                  {({ checked }) => {
-                    return (
-                      <Button
-                        icon={<IconEdit />}
-                        type="text"
-                        onClick={() => {
-                          noteStore.updateNotePanelVisible(!noteStore.notePanelVisible);
-                        }}
-                        className={classNames('assist-action-item', { active: checked })}
-                      ></Button>
-                    );
-                  }}
-                </Checkbox>,
-                <Button
-                  icon={<IconSearch />}
-                  type="text"
-                  onClick={() => {
-                    searchStore.setPages(searchStore.pages.concat('convs'));
-                    searchStore.setIsSearchOpen(true);
-                  }}
-                  className={classNames('assist-action-item')}
-                ></Button>,
-              ]
-            : null}
-        </div>
-        <div className="knowledge-base-detail-navigation-bar">
-          <Button
-            icon={<IconHistory />}
-            type="text"
-            onClick={() => {
-              handleNewOpenConvList();
-            }}
-            className={classNames('assist-action-item')}
-          >
-            {/* 会话历史 */}
-          </Button>
-          <Button
-            icon={<IconPlusCircle />}
-            type="text"
-            onClick={() => {
-              handleNewTempConv();
-            }}
-            className={classNames('assist-action-item', 'mr-1')}
-          >
-            {/* 新会话 */}
-          </Button>
-        </div>
+        {!disable && (
+          <>
+            <div className="knowledge-base-detail-navigation-bar">
+              {isWeb
+                ? [
+                    <Checkbox
+                      key={'knowledge-base-resource-panel'}
+                      checked={knowledgeBaseStore.resourcePanelVisible && resId ? true : false}
+                    >
+                      {({ checked }) => {
+                        return (
+                          <Button
+                            icon={<IconFile />}
+                            type="text"
+                            onClick={() => {
+                              if (!resId) {
+                                searchStore.setPages(searchStore.pages.concat('knowledgeBases'));
+                                searchStore.setIsSearchOpen(true);
+                              } else {
+                                knowledgeBaseStore.updateResourcePanelVisible(!knowledgeBaseStore.resourcePanelVisible);
+                              }
+                            }}
+                            className={classNames('assist-action-item', { active: checked })}
+                          ></Button>
+                        );
+                      }}
+                    </Checkbox>,
+                    <Checkbox key={'knowledge-base-note-panel'} checked={noteStore.notePanelVisible}>
+                      {({ checked }) => {
+                        return (
+                          <Button
+                            icon={<IconEdit />}
+                            type="text"
+                            onClick={() => {
+                              noteStore.updateNotePanelVisible(!noteStore.notePanelVisible);
+                            }}
+                            className={classNames('assist-action-item', { active: checked })}
+                          ></Button>
+                        );
+                      }}
+                    </Checkbox>,
+                    <Button
+                      icon={<IconSearch />}
+                      type="text"
+                      onClick={() => {
+                        searchStore.setPages(searchStore.pages.concat('convs'));
+                        searchStore.setIsSearchOpen(true);
+                      }}
+                      className={classNames('assist-action-item')}
+                    ></Button>,
+                  ]
+                : null}
+            </div>
+            <div className="knowledge-base-detail-navigation-bar">
+              <Button
+                icon={<IconHistory />}
+                type="text"
+                onClick={() => {
+                  handleNewOpenConvList();
+                }}
+                className={classNames('assist-action-item')}
+              >
+                {/* 会话历史 */}
+              </Button>
+              <Button
+                icon={<IconPlusCircle />}
+                type="text"
+                onClick={() => {
+                  handleNewTempConv();
+                }}
+                className={classNames('assist-action-item', 'mr-1')}
+              >
+                {/* 新会话 */}
+              </Button>
+            </div>
+          </>
+        )}
       </div>
       <div
         className="ai-copilot-message-container"
-        style={{ height: `calc(100vh - ${actualCopilotBodyHeight}px - 50px)` }}
+        style={{ height: `calc(100vh - ${disable ? 16 : actualCopilotBodyHeight}px - 50px)` }}
       >
-        <ChatMessages />
+        <ChatMessages disable={disable} />
       </div>
-      <div className="ai-copilot-body" style={{ height: actualCopilotBodyHeight }}>
-        <div className="ai-copilot-body-inner-container">
-          {showContextCard ? (
-            <div className="ai-copilot-context-display">
-              <ContextStateDisplay />
-            </div>
-          ) : null}
-          <div className="ai-copilot-chat-container">
-            <SkillDisplay />
-            <div className="chat-input-container">
-              <div className="chat-input-body">
-                <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
+      {!disable && (
+        <div className="ai-copilot-body" style={{ height: actualCopilotBodyHeight }}>
+          <div className="ai-copilot-body-inner-container">
+            {showContextCard ? (
+              <div className="ai-copilot-context-display">
+                <ContextStateDisplay />
               </div>
-              <div className="chat-input-assist-action">
-                <ContextContentWithBadge />
-                <CurrentContextActionBtn />
-                <SelectedTextContextActionBtn />
-                <OutputLocaleList>
-                  <Button icon={<IconTranslate />} type="text" className="assist-action-item">
-                    {/* <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span> */}
-                    <IconCaretDown />
-                  </Button>
-                </OutputLocaleList>
+            ) : null}
+            <div className="ai-copilot-chat-container">
+              <SkillDisplay />
+              <div className="chat-input-container">
+                <div className="chat-input-body">
+                  <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
+                </div>
+                <div className="chat-input-assist-action">
+                  <ContextContentWithBadge />
+                  <CurrentContextActionBtn />
+                  <SelectedTextContextActionBtn />
+                  <OutputLocaleList>
+                    <Button icon={<IconTranslate />} type="text" className="assist-action-item">
+                      {/* <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span> */}
+                      <IconCaretDown />
+                    </Button>
+                  </OutputLocaleList>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
+
       {knowledgeBaseStore?.convModalVisible ? <ConvListModal title="会话库" classNames="conv-list-modal" /> : null}
       {knowledgeBaseStore?.kbModalVisible && knowledgeBaseStore.actionSource === ActionSource.Conv ? (
         <KnowledgeBaseListModal title="知识库" classNames="kb-list-modal" />

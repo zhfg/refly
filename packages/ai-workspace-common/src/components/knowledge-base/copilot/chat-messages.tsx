@@ -6,7 +6,9 @@ import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 
-interface ChatMessagesProps {}
+interface ChatMessagesProps {
+  disable?: boolean;
+}
 
 export const ChatMessages = (props: ChatMessagesProps) => {
   const chatStore = useChatStore();
@@ -19,12 +21,14 @@ export const ChatMessages = (props: ChatMessagesProps) => {
       {chatStore.messages.map((item, index) =>
         item?.type === 'human' ? (
           <HumanMessage
+            disable={props.disable}
             message={item}
             key={index}
             profile={{ avatar: userStore?.userProfile?.avatar, name: userStore?.userProfile?.name }}
           />
         ) : (
           <AssistantMessage
+            disable={props.disable}
             message={item}
             key={index}
             isLastSession={index === chatStore.messages.length - 1}

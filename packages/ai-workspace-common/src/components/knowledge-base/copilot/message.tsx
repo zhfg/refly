@@ -27,7 +27,11 @@ import { SkillManagement } from '@refly-packages/ai-workspace-common/components/
 import { ClientChatMessage } from '@refly/common-types';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 
-export const HumanMessage = (props: { message: Partial<ChatMessage>; profile: { avatar: string; name: string } }) => {
+export const HumanMessage = (props: {
+  message: Partial<ChatMessage>;
+  profile: { avatar: string; name: string };
+  disable?: boolean;
+}) => {
   const { message, profile } = props;
   return (
     <div className="ai-copilot-message human-message-container">
@@ -55,9 +59,10 @@ export const AssistantMessage = (props: {
   isPendingFirstToken: boolean;
   isPending: boolean;
   isLastSession: boolean;
+  disable?: boolean;
   handleAskFollowing: (question?: string) => void;
 }) => {
-  const { message, isPendingFirstToken = false, isPending, isLastSession = false, handleAskFollowing } = props;
+  const { message, isPendingFirstToken = false, isPending, isLastSession = false, disable, handleAskFollowing } = props;
   const { t } = useTranslation();
   const noteStore = useNoteStore();
   let sources =
@@ -219,7 +224,7 @@ export const AssistantMessage = (props: {
                 </div>
               ) : null}
             </div>
-            {(!isPending || !isLastSession) && (
+            {!disable && (!isPending || !isLastSession) && (
               <div className="ai-copilot-answer-action-container">
                 <div className="session-answer-actionbar">
                   <div className="session-answer-actionbar-left">

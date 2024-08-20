@@ -31,12 +31,13 @@ const config = {
 interface MultiSelectProps {
   type: keyof typeof config;
   placeholder?: string;
+  defaultValue?: string[];
   onValueChange: (value: string[]) => void;
 }
 
 export const MultiSelect = (props: MultiSelectProps) => {
   const { t } = useTranslation();
-  const { placeholder, type, onValueChange } = props;
+  const { placeholder, type, defaultValue, onValueChange } = props;
 
   const { dataList, loadMore, setDataList, hasMore, isRequesting } = useFetchDataList({
     fetchData: async (queryPayload) => {
@@ -58,6 +59,7 @@ export const MultiSelect = (props: MultiSelectProps) => {
       size="large"
       mode="multiple"
       placeholder={placeholder}
+      defaultValue={defaultValue || []}
       onChange={(value) => {
         onValueChange(value);
       }}

@@ -20,17 +20,13 @@ import { IconDelete, IconSchedule, IconThunderbolt, IconTool } from '@arco-desig
 const Row = Grid.Row;
 const Col = Grid.Col;
 
-interface SkillTriggersProps {
-  reloadList?: boolean;
-  setReloadList?: (val: boolean) => void;
-}
+interface SkillTriggersProps {}
 
 export const SkillTriggers = (props: SkillTriggersProps) => {
   const createTrigger = useCreateTrigger();
   const importNewTriggerModal = useImportNewTriggerModal();
   const [searchParams] = useSearchParams();
   const skillId = searchParams.get('skillId') as string;
-  const { reloadList, setReloadList } = props;
 
   const { dataList, loadMore, hasMore, isRequesting, setDataList, reload } = useFetchDataList({
     fetchData: async (queryPayload) => {
