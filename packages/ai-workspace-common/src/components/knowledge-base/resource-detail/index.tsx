@@ -1,10 +1,10 @@
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
-import { IconBulb, IconCodepen, IconPlus, IconTag } from '@arco-design/web-react/icon';
+import { IconBulb, IconCodepen, IconFolder } from '@arco-design/web-react/icon';
 
 // 自定义样式
 import './index.scss';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
-import { Skeleton, Message as message, Empty, Tag, Popconfirm, Button } from '@arco-design/web-react';
+import { Skeleton, Message as message, Empty, Tag } from '@arco-design/web-react';
 import {
   type KnowledgeBaseTab,
   useKnowledgeBaseStore,
@@ -15,7 +15,6 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { Resource } from '@refly/openapi-schema';
 import { memo, useEffect, useState } from 'react';
 import { safeParseURL } from '@refly/utils/url';
-import { useListenToSelection } from '@refly-packages/ai-workspace-common/hooks/use-listen-to-selection';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 import { LabelGroup } from '@refly-packages/ai-workspace-common/components/knowledge-base/label-group';
 
@@ -24,6 +23,7 @@ import { useContentSelector } from '@refly-packages/ai-workspace-common/modules/
 import '@refly-packages/ai-workspace-common/modules/content-selector/styles/content-selector.scss';
 import classNames from 'classnames';
 import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
+import ResourceCollectionList from '@refly-packages/ai-workspace-common/components/knowledge-base/resource-detail/resource-collection-list';
 
 export const KnowledgeBaseResourceDetail = memo(() => {
   const [isFetching, setIsFetching] = useState(false);
@@ -44,7 +44,6 @@ export const KnowledgeBaseResourceDetail = memo(() => {
 
   const [queryParams] = useSearchParams();
   const resId = queryParams.get('resId');
-  const kbId = queryParams.get('kbId');
 
   const resourceDetail = knowledgeBaseStore?.currentResource as Resource;
 
@@ -74,7 +73,6 @@ export const KnowledgeBaseResourceDetail = memo(() => {
           title: resource?.title || '',
           key: resource?.resourceId || '',
           content: resource?.contentPreview || '',
-          collectionId: kbId || '',
           resourceId: resource?.resourceId || '',
         };
         handleAddTab(newTab);
@@ -86,13 +84,13 @@ export const KnowledgeBaseResourceDetail = memo(() => {
     setIsFetching(false);
   };
 
-  // useListenToSelection(`knowledge-base-resource-detail-container`, 'resource-detail');
   useEffect(() => {
     if (resId) {
       console.log('params resId', resId);
       handleGetDetail(resId as string);
     }
   }, [resId]);
+
   // 初始化块选择
   useEffect(() => {
     initMessageListener();
@@ -133,6 +131,7 @@ export const KnowledgeBaseResourceDetail = memo(() => {
                   <span className="action-summary-text">知识图谱</span>
                 </div>
               </div>
+              {resourceDetail && <ResourceCollectionList collections={resourceDetail.collections} />}
               {resourceDetail && <LabelGroup entityId={resourceDetail.resourceId} entityType={'resource'} />}
             </div>
           )}

@@ -31,7 +31,6 @@ export const useMockInAppResource = () => {
    */
   const handleFakeKBRouteJump = () => {
     jumpToReadResource({
-      kbId: 'tempKbId',
       resId: 'tempResId',
     });
   };

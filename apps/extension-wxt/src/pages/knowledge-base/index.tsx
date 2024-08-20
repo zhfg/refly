@@ -1,7 +1,4 @@
-import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
-
 // 自定义组件
-import { KnowledgeBaseDetail } from '@refly-packages/ai-workspace-common/components/knowledge-base/knowledge-base-detail';
 import { AICopilot } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot';
 // utils
 // 自定义方法

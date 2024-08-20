@@ -55,7 +55,6 @@ export const KnowledgeBaseDirectory = () => {
         const firstResourceId = newRes?.data?.resources?.[0]?.resourceId;
         if (firstResourceId) {
           jumpToReadResource({
-            kbId: collectionId,
             resId: firstResourceId,
           });
         }
@@ -137,7 +136,6 @@ export const KnowledgeBaseDirectory = () => {
           handleItemDelete={(item) => handleDeleteResource(item)}
           handleItemClick={(item) => {
             jumpToReadResource({
-              kbId: item?.collectionId,
               resId: item?.resourceId,
             });
           }}
