@@ -50,6 +50,30 @@ import type {
   DeleteCollectionData,
   DeleteCollectionError,
   DeleteCollectionResponse,
+  ListLabelClassesData,
+  ListLabelClassesError,
+  ListLabelClassesResponse2,
+  CreateLabelClassData,
+  CreateLabelClassError,
+  CreateLabelClassResponse,
+  UpdateLabelClassData,
+  UpdateLabelClassError,
+  UpdateLabelClassResponse,
+  DeleteLabelClassData,
+  DeleteLabelClassError,
+  DeleteLabelClassResponse,
+  ListLabelInstancesData,
+  ListLabelInstancesError,
+  ListLabelInstancesResponse2,
+  CreateLabelInstanceData,
+  CreateLabelInstanceError,
+  CreateLabelInstanceResponse,
+  UpdateLabelInstanceData,
+  UpdateLabelInstanceError,
+  UpdateLabelInstanceResponse,
+  DeleteLabelInstanceData,
+  DeleteLabelInstanceError,
+  DeleteLabelInstanceResponse,
   ListSkillTemplatesData,
   ListSkillTemplatesError,
   ListSkillTemplatesResponse,
@@ -58,10 +82,10 @@ import type {
   ListSkillInstancesResponse,
   CreateSkillInstanceData,
   CreateSkillInstanceError,
-  CreateSkillInstanceResponse,
+  CreateSkillInstanceResponse2,
   UpdateSkillInstanceData,
   UpdateSkillInstanceError,
-  UpdateSkillInstanceResponse,
+  UpdateSkillInstanceResponse2,
   DeleteSkillInstanceData,
   DeleteSkillInstanceError,
   DeleteSkillInstanceResponse,
@@ -76,16 +100,19 @@ import type {
   ListSkillTriggersResponse,
   CreateSkillTriggerData,
   CreateSkillTriggerError,
-  CreateSkillTriggerResponse,
+  CreateSkillTriggerResponse2,
   UpdateSkillTriggerData,
   UpdateSkillTriggerError,
-  UpdateSkillTriggerResponse,
+  UpdateSkillTriggerResponse2,
   DeleteSkillTriggerData,
   DeleteSkillTriggerError,
   DeleteSkillTriggerResponse,
-  ListSkillLogsData,
-  ListSkillLogsError,
-  ListSkillLogsResponse,
+  ListSkillJobsData,
+  ListSkillJobsError,
+  ListSkillJobsResponse2,
+  GetSkillJobDetailData,
+  GetSkillJobDetailError,
+  GetSkillJobDetailResponse2,
   ListConversationsError,
   ListConversationsResponse,
   GetConversationDetailData,
@@ -99,6 +126,9 @@ import type {
   SearchData,
   SearchError,
   SearchResponse2,
+  ScrapeData,
+  ScrapeError,
+  ScrapeResponse,
 } from './types.gen';
 
 /**
@@ -278,6 +308,94 @@ export const deleteCollection = (options: Options<DeleteCollectionData>) => {
 };
 
 /**
+ * List label classes
+ * List all label classes
+ */
+export const listLabelClasses = (options?: Options<ListLabelClassesData>) => {
+  return (options?.client ?? client).get<ListLabelClassesResponse2, ListLabelClassesError>({
+    ...options,
+    url: '/label/class/list',
+  });
+};
+
+/**
+ * Create new label class
+ * Create a new label class
+ */
+export const createLabelClass = (options: Options<CreateLabelClassData>) => {
+  return (options?.client ?? client).post<CreateLabelClassResponse, CreateLabelClassError>({
+    ...options,
+    url: '/label/class/new',
+  });
+};
+
+/**
+ * Update label class
+ * Update an existing label class
+ */
+export const updateLabelClass = (options: Options<UpdateLabelClassData>) => {
+  return (options?.client ?? client).post<UpdateLabelClassResponse, UpdateLabelClassError>({
+    ...options,
+    url: '/label/class/update',
+  });
+};
+
+/**
+ * Delete label class
+ * Delete an existing label class
+ */
+export const deleteLabelClass = (options: Options<DeleteLabelClassData>) => {
+  return (options?.client ?? client).post<DeleteLabelClassResponse, DeleteLabelClassError>({
+    ...options,
+    url: '/label/class/delete',
+  });
+};
+
+/**
+ * List labels
+ * List all label instances
+ */
+export const listLabelInstances = (options?: Options<ListLabelInstancesData>) => {
+  return (options?.client ?? client).get<ListLabelInstancesResponse2, ListLabelInstancesError>({
+    ...options,
+    url: '/label/instance/list',
+  });
+};
+
+/**
+ * Create new label instance
+ * Create new label instance
+ */
+export const createLabelInstance = (options: Options<CreateLabelInstanceData>) => {
+  return (options?.client ?? client).post<CreateLabelInstanceResponse, CreateLabelInstanceError>({
+    ...options,
+    url: '/label/instance/new',
+  });
+};
+
+/**
+ * Update label
+ * Update an existing label instance
+ */
+export const updateLabelInstance = (options: Options<UpdateLabelInstanceData>) => {
+  return (options?.client ?? client).post<UpdateLabelInstanceResponse, UpdateLabelInstanceError>({
+    ...options,
+    url: '/label/instance/update',
+  });
+};
+
+/**
+ * Delete label
+ * Delete an existing label
+ */
+export const deleteLabelInstance = (options: Options<DeleteLabelInstanceData>) => {
+  return (options?.client ?? client).post<DeleteLabelInstanceResponse, DeleteLabelInstanceError>({
+    ...options,
+    url: '/label/instance/delete',
+  });
+};
+
+/**
  * List skill templates
  * List all skill templates
  */
@@ -304,7 +422,7 @@ export const listSkillInstances = (options?: Options<ListSkillInstancesData>) =>
  * Create a new skill instance for user
  */
 export const createSkillInstance = (options: Options<CreateSkillInstanceData>) => {
-  return (options?.client ?? client).post<CreateSkillInstanceResponse, CreateSkillInstanceError>({
+  return (options?.client ?? client).post<CreateSkillInstanceResponse2, CreateSkillInstanceError>({
     ...options,
     url: '/skill/instance/new',
   });
@@ -315,7 +433,7 @@ export const createSkillInstance = (options: Options<CreateSkillInstanceData>) =
  * Update an existing skill instance
  */
 export const updateSkillInstance = (options: Options<UpdateSkillInstanceData>) => {
-  return (options?.client ?? client).post<UpdateSkillInstanceResponse, UpdateSkillInstanceError>({
+  return (options?.client ?? client).post<UpdateSkillInstanceResponse2, UpdateSkillInstanceError>({
     ...options,
     url: '/skill/instance/update',
   });
@@ -370,7 +488,7 @@ export const listSkillTriggers = (options?: Options<ListSkillTriggersData>) => {
  * Create a new trigger
  */
 export const createSkillTrigger = (options: Options<CreateSkillTriggerData>) => {
-  return (options?.client ?? client).post<CreateSkillTriggerResponse, CreateSkillTriggerError>({
+  return (options?.client ?? client).post<CreateSkillTriggerResponse2, CreateSkillTriggerError>({
     ...options,
     url: '/skill/trigger/new',
   });
@@ -381,7 +499,7 @@ export const createSkillTrigger = (options: Options<CreateSkillTriggerData>) => 
  * Update an existing trigger
  */
 export const updateSkillTrigger = (options: Options<UpdateSkillTriggerData>) => {
-  return (options?.client ?? client).post<UpdateSkillTriggerResponse, UpdateSkillTriggerError>({
+  return (options?.client ?? client).post<UpdateSkillTriggerResponse2, UpdateSkillTriggerError>({
     ...options,
     url: '/skill/trigger/update',
   });
@@ -399,13 +517,24 @@ export const deleteSkillTrigger = (options: Options<DeleteSkillTriggerData>) => 
 };
 
 /**
- * Get skill logs
- * Get skill logs
+ * Get skill jobs
+ * Get skill jobs
  */
-export const listSkillLogs = (options?: Options<ListSkillLogsData>) => {
-  return (options?.client ?? client).get<ListSkillLogsResponse, ListSkillLogsError>({
+export const listSkillJobs = (options?: Options<ListSkillJobsData>) => {
+  return (options?.client ?? client).get<ListSkillJobsResponse2, ListSkillJobsError>({
     ...options,
-    url: '/skill/log/list',
+    url: '/skill/job/list',
+  });
+};
+
+/**
+ * Get skill job detail
+ * Get skill job detail
+ */
+export const getSkillJobDetail = (options?: Options<GetSkillJobDetailData>) => {
+  return (options?.client ?? client).get<GetSkillJobDetailResponse2, GetSkillJobDetailError>({
+    ...options,
+    url: '/skill/job/detail',
   });
 };
 
@@ -461,5 +590,16 @@ export const search = (options: Options<SearchData>) => {
   return (options?.client ?? client).post<SearchResponse2, SearchError>({
     ...options,
     url: '/search',
+  });
+};
+
+/**
+ * Scrape
+ * Scrape a weblink
+ */
+export const scrape = (options: Options<ScrapeData>) => {
+  return (options?.client ?? client).post<ScrapeResponse, ScrapeError>({
+    ...options,
+    url: '/misc/scrape',
   });
 };

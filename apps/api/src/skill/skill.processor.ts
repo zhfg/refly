@@ -13,9 +13,9 @@ export class SkillProcessor {
   constructor(private skillService: SkillService) {}
 
   @Process(CHANNEL_INVOKE_SKILL)
-  async handleFinalizeResource(job: Job<InvokeSkillJobData>) {
-    this.logger.log(`[handleFinalizeResource] job: ${JSON.stringify(job)}`);
+  async handleInvokeSkill(job: Job<InvokeSkillJobData>) {
+    this.logger.log(`[handleInvokeSkill] job: ${JSON.stringify(job)}`);
 
-    await this.skillService.invokeSkillSync(job.data);
+    await this.skillService.invokeSkillFromQueue(job.data);
   }
 }

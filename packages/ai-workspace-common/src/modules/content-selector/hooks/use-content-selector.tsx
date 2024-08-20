@@ -7,12 +7,10 @@ import { sendMessage, onMessage } from '@refly-packages/ai-workspace-common/util
 import { BackgroundMessage } from '@refly/common-types';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { SelectedNamespace } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-// import { getContentFromHtmlSelector } from "@/utils/weblink"
 import { getElementType } from '../utils';
 import { genContentSelectorID } from '@refly-packages/utils/id';
 import { getMarkdown } from '@refly/utils/html2md';
 import { BLOCK_SELECTED_MARK_ID, INLINE_SELECTED_MARK_ID } from '../utils/index';
-import { removeHighlight } from '../utils/highlight-selection';
 
 // utils
 import { highlightSelection, getSelectionNodesMarkdown } from '../utils/highlight-selection';
@@ -289,6 +287,8 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
   const resetMarkStyle = () => {
     // mark style
     const mark = markRef.current;
+
+    if (!mark) return;
 
     // TODO: 后续改成 react 组件渲染，带来更多自由度，目前现跑通 PoC
     mark.style.top = '0px';

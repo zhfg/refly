@@ -9,9 +9,9 @@ import {
   ParseIntPipe,
   Res,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
+import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { SkillService } from './skill.service';
-import { User } from 'src/utils/decorators/user.decorator';
+import { User } from '@/utils/decorators/user.decorator';
 import { User as UserModel } from '@prisma/client';
 import {
   DeleteSkillInstanceRequest,
@@ -20,18 +20,23 @@ import {
   DeleteSkillTriggerResponse,
   InvokeSkillRequest,
   InvokeSkillResponse,
-  ListSkillLogResponse,
   ListSkillInstanceResponse,
   ListSkillTemplateResponse,
   ListSkillTriggerResponse,
-  UpsertSkillInstanceRequest,
-  UpsertSkillInstanceResponse,
-  UpsertSkillTriggerRequest,
-  UpsertSkillTriggerResponse,
+  CreateSkillInstanceRequest,
+  CreateSkillInstanceResponse,
+  UpdateSkillInstanceRequest,
+  UpdateSkillInstanceResponse,
+  CreateSkillTriggerRequest,
+  CreateSkillTriggerResponse,
+  UpdateSkillTriggerRequest,
+  UpdateSkillTriggerResponse,
+  ListSkillJobsResponse,
+  GetSkillJobDetailResponse,
 } from '@refly/openapi-schema';
 import { buildSuccessResponse } from '@/utils';
 import { Response } from 'express';
-import { toSkillDTO, toSkillLogDTO, toSkillTriggerDTO } from './skill.dto';
+import { skillInstancePO2DTO, skillJobPO2DTO, skillTriggerPO2DTO } from './skill.dto';
 
 @Controller('skill')
 export class SkillController {
@@ -39,8 +44,8 @@ export class SkillController {
 
   @UseGuards(JwtAuthGuard)
   @Get('/template/list')
-  async listSkillTemplates(): Promise<ListSkillTemplateResponse> {
-    return buildSuccessResponse(this.skillService.listSkillTemplates());
+  async listSkillTemplates(@User() user: UserModel): Promise<ListSkillTemplateResponse> {
+    return buildSuccessResponse(this.skillService.listSkillTemplates(user));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -49,8 +54,8 @@ export class SkillController {
     @User() user: UserModel,
     @Body() body: InvokeSkillRequest,
   ): Promise<InvokeSkillResponse> {
-    await this.skillService.invokeSkill(user, body);
-    return buildSuccessResponse();
+    const { jobId } = await this.skillService.sendInvokeSkillTask(user, body);
+    return buildSuccessResponse({ jobId });
   }
 
   @UseGuards(JwtAuthGuard)
@@ -65,6 +70,7 @@ export class SkillController {
     res.setHeader('Connection', 'keep-alive');
     res.status(200);
 
+    body.context = await this.skillService.populateSkillContext(user, body.context);
     await this.skillService.streamInvokeSkill(user, body, res);
   }
 
@@ -72,36 +78,32 @@ export class SkillController {
   @Get('/instance/list')
   async listSkillInstances(
     @User() user: UserModel,
+    @Query('skillId') skillId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('page', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListSkillInstanceResponse> {
-    const skills = await this.skillService.listSkillInstances(user, { page, pageSize });
-    return buildSuccessResponse(skills.map((skill) => toSkillDTO(skill)));
+    const skills = await this.skillService.listSkillInstances(user, { skillId, page, pageSize });
+    return buildSuccessResponse(skills.map((skill) => skillInstancePO2DTO(skill)));
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('/instance/new')
   async createSkillInstance(
     @User() user: UserModel,
-    @Body() body: UpsertSkillInstanceRequest,
-  ): Promise<UpsertSkillInstanceResponse> {
+    @Body() body: CreateSkillInstanceRequest,
+  ): Promise<CreateSkillInstanceResponse> {
     const skillInstanceList = await this.skillService.createSkillInstance(user, body);
-    return buildSuccessResponse(
-      skillInstanceList.map(({ skill, triggers }) => ({
-        ...toSkillDTO(skill),
-        triggers: triggers.map((trigger) => toSkillTriggerDTO(trigger)),
-      })),
-    );
+    return buildSuccessResponse(skillInstanceList.map((skill) => skillInstancePO2DTO(skill)));
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('/instance/update')
   async updateSkillInstance(
     @User() user: UserModel,
-    @Body() body: UpsertSkillInstanceRequest,
-  ): Promise<UpsertSkillInstanceResponse> {
-    const instances = await this.skillService.updateSkillInstance(user, body);
-    return buildSuccessResponse(instances.map(toSkillDTO));
+    @Body() body: UpdateSkillInstanceRequest,
+  ): Promise<UpdateSkillInstanceResponse> {
+    const skillInstance = await this.skillService.updateSkillInstance(user, body);
+    return buildSuccessResponse(skillInstancePO2DTO(skillInstance));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -120,34 +122,34 @@ export class SkillController {
     @User() user: UserModel,
     @Query('skillId') skillId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('page', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListSkillTriggerResponse> {
     const triggers = await this.skillService.listSkillTriggers(user, {
       skillId,
       page,
       pageSize,
     });
-    return buildSuccessResponse(triggers.map((trigger) => toSkillTriggerDTO(trigger)));
+    return buildSuccessResponse(triggers.map((trigger) => skillTriggerPO2DTO(trigger)));
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('/trigger/new')
   async createSkillTrigger(
     @User() user: UserModel,
-    @Body() body: UpsertSkillTriggerRequest,
-  ): Promise<UpsertSkillTriggerResponse> {
-    const trigger = await this.skillService.createSkillTrigger(user, body);
-    return buildSuccessResponse(toSkillTriggerDTO(trigger));
+    @Body() body: CreateSkillTriggerRequest,
+  ): Promise<CreateSkillTriggerResponse> {
+    const triggers = await this.skillService.createSkillTrigger(user, body);
+    return buildSuccessResponse(triggers.map((trigger) => skillTriggerPO2DTO(trigger)));
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('/trigger/update')
   async updateSkillTrigger(
     @User() user: UserModel,
-    @Body() body: UpsertSkillTriggerRequest,
-  ): Promise<UpsertSkillTriggerResponse> {
+    @Body() body: UpdateSkillTriggerRequest,
+  ): Promise<UpdateSkillTriggerResponse> {
     const trigger = await this.skillService.updateSkillTrigger(user, body);
-    return buildSuccessResponse(toSkillTriggerDTO(trigger));
+    return buildSuccessResponse(skillTriggerPO2DTO(trigger));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -161,18 +163,28 @@ export class SkillController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('/log/list')
-  async listSkillLogs(
+  @Get('/job/list')
+  async listSkillJobs(
     @User() user: UserModel,
     @Query('skillId') skillId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('page', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
-  ): Promise<ListSkillLogResponse> {
-    const logs = await this.skillService.listSkillLogs(user, {
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
+  ): Promise<ListSkillJobsResponse> {
+    const jobs = await this.skillService.listSkillJobs(user, {
       skillId: skillId || undefined,
       page,
       pageSize,
     });
-    return buildSuccessResponse(logs.map((log) => toSkillLogDTO(log)));
+    return buildSuccessResponse(jobs.map((log) => skillJobPO2DTO(log)));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/job/detail')
+  async getSkillJobDetail(
+    @User() user: UserModel,
+    @Query('jobId') jobId: string,
+  ): Promise<GetSkillJobDetailResponse> {
+    const job = await this.skillService.getSkillJobDetail(user, jobId);
+    return buildSuccessResponse(skillJobPO2DTO(job));
   }
 }

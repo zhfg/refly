@@ -6,13 +6,14 @@ import { StructuredTool } from '@langchain/core/tools';
 import { StateGraphArgs } from '@langchain/langgraph';
 import { RunnableConfig } from '@langchain/core/runnables';
 import { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
-import { SkillContext, SkillInput, SkillMeta } from '@refly/openapi-schema';
+import { PopulatedSkillContext, SkillInput, SkillInvocationConfig, SkillMeta, User } from '@refly/openapi-schema';
 import { EventEmitter } from 'node:stream';
 import { randomUUID } from 'node:crypto';
 import { SkillEvent } from '@refly/common-types';
 
 export abstract class BaseSkill extends StructuredTool {
   abstract displayName: Record<string, string>;
+  abstract invocationConfig: SkillInvocationConfig;
   abstract graphState: StateGraphArgs<BaseSkillState>['channels'];
 
   constructor(protected engine: SkillEngine, protected params?: BaseToolParams) {
@@ -37,7 +38,7 @@ export abstract class BaseSkill extends StructuredTool {
     const eventData: SkillEvent = {
       event: data.event!,
       spanId,
-      ...currentSkill,
+      skillMeta: currentSkill,
       ...data,
     };
 
@@ -49,12 +50,14 @@ export abstract class BaseSkill extends StructuredTool {
     runManager?: CallbackManagerForToolRun,
     config?: SkillRunnableConfig,
   ): Promise<string> {
-    config ??= { configurable: {} };
+    if (!config) {
+      throw new Error('skill config is required');
+    }
 
     // Ensure currentSkill is not empty.
     config.configurable.currentSkill ??= {
-      skillName: this.name,
-      skillDisplayName: this.displayName[config.configurable.locale || 'en'],
+      tplName: this.name,
+      displayName: this.displayName[config.configurable.locale || 'en'],
     };
 
     // Ensure spanId is not empty.
@@ -77,9 +80,15 @@ export interface BaseToolParams extends ToolParams {
   engine: SkillEngine;
 }
 
-export interface BaseSkillState extends SkillInput {}
+export interface BaseSkillState extends SkillInput {
+  messages: BaseMessage[];
+}
 
 export const baseStateGraphArgs = {
+  messages: {
+    reducer: (x: BaseMessage[], y: BaseMessage[]) => x.concat(y),
+    default: () => [],
+  },
   query: {
     reducer: (left: string, right: string) => (right ? right : left || ''),
     default: () => '',
@@ -103,14 +112,16 @@ export interface SkillRunnableMeta extends Record<string, unknown>, SkillMeta {
 }
 
 export interface SkillRunnableConfig extends RunnableConfig {
-  configurable?: SkillContext & {
+  configurable?: PopulatedSkillContext & {
     spanId?: string;
-    uid?: string;
+    convId?: string;
+    locale?: string;
     selectedSkill?: SkillMeta;
     currentSkill?: SkillMeta;
     chatHistory?: BaseMessage[];
     installedSkills?: SkillMeta[];
     emitter?: EventEmitter<SkillEventMap>;
   };
+  user: User;
   metadata?: SkillRunnableMeta;
 }

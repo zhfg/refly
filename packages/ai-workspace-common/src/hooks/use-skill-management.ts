@@ -46,7 +46,7 @@ export const useSkillManagement = ({ shouldInit = false }: { shouldInit: boolean
         body: {
           instanceList: [
             {
-              skillName: skillInstanceMeta.name,
+              tplName: skillInstanceMeta.name,
               displayName: skillInstanceMeta?.displayName?.[localSettings?.uiLocale] as string,
             },
           ],

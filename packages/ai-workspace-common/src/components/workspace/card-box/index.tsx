@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-
+import { Typography } from '@arco-design/web-react';
 import { Resource, Note, Collection } from '@refly/openapi-schema';
 import './index.scss';
 
@@ -59,15 +59,19 @@ export const CardBox = (props: ResourceCardProps | NoteCardProps | CollectionCar
               {props?.cardData.data?.url}
             </a>
           ) : (
-            <div className="note-title flex items-center text-sm text-black/80 font-medium h-10">
+            <Typography.Text ellipsis={{ rows: 2 }} style={{ marginBottom: 0, marginLeft: 8, fontWeight: 500 }}>
               {props.cardData?.title}
-            </div>
+            </Typography.Text>
           )}
         </div>
         {props.type === 'resource' && (
-          <div className="text-sm text-black/80 font-medium mb-1.5">{props.cardData?.title}</div>
+          <Typography.Text ellipsis={{ rows: 2 }} style={{ marginBottom: 0, fontWeight: 500 }}>
+            {props.cardData?.title}
+          </Typography.Text>
         )}
-        <div className="text-xs text-black/50">{props.cardData?.[contentKey[props.type]]}</div>
+        <Typography.Text ellipsis={{ rows: 4 }} style={{ marginBottom: 0 }}>
+          {props.cardData?.[contentKey[props.type]]}
+        </Typography.Text>
       </div>
 
       {children}

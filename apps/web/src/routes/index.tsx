@@ -9,6 +9,8 @@ import { Login } from "@refly-packages/ai-workspace-common/components/login/inde
 // 页面
 import Workspace from "@/pages/workspace"
 import KnowledgeBase from "@/pages/knowledge-base"
+import Skill from "@/pages/skill"
+import SkillDetailPage from "@/pages/skill-detail"
 
 // 这里用于分享之后的不需要鉴权的查看
 import { safeParseJSON } from "@refly-packages/ai-workspace-common/utils/parse"
@@ -74,6 +76,8 @@ export const AppRouter = (props: { layout?: any }) => {
         {/* <Route path="/feed" element={<Feed />} /> */}
         {/* <Route path="/feed/:feedId" element={<FeedDetailPage />} /> */}
         <Route path="/thread" element={<ConvLibrary />} />
+        <Route path="/skill" element={<Skill />} />
+        <Route path="/skill-detail" element={<SkillDetailPage />} />
         <Route path="/settings" element={<Settings />} />
       </Routes>
     </Layout>

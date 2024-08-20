@@ -1,5 +1,4 @@
-import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
-import { cnGuessQuestions, enGuessQuestions } from '@refly-packages/ai-workspace-common/utils/guess-question';
+import { useEffect } from 'react';
 import { Button, Tabs } from '@arco-design/web-react';
 import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 
@@ -42,7 +41,17 @@ export const KnowledgeBaseDetail = (props: KnowledgeBaseDetailProps) => {
   const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
     kbModalVisible: state.kbModalVisible,
     actionSource: state.actionSource,
+    updateResourcePanelVisible: state.updateResourcePanelVisible,
   }));
+
+  useEffect(() => {
+    knowledgeBaseStore.updateResourcePanelVisible(true);
+
+    return () => {
+      knowledgeBaseStore.updateResourcePanelVisible(false);
+    };
+  }, [kbId]);
+
   if (!kbId || kbId === 'undefined' || kbId === 'null') {
     return <KnowledgeBaseDetailEmpty />;
   }
@@ -89,7 +98,7 @@ export const KnowledgeBaseDetail = (props: KnowledgeBaseDetailProps) => {
         <Panel
           // defaultSize={minSize}
           // minSize={minSize}
-          maxSize={50}
+          maxSize={30}
           // collapsedSize={0}
           collapsible={true}
           className="knowledge-base-detail-directory-panel"

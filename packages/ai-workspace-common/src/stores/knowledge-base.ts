@@ -114,7 +114,7 @@ export const defaultState = {
     },
   ] as KnowledgeBaseTab[],
   activeTab: 'key1',
-  resourcePanelVisible: true,
+  resourcePanelVisible: false,
   convModalVisible: false,
   kbModalVisible: false,
   sourceListModalVisible: false,

@@ -14,10 +14,12 @@ export const ConvLibrary = () => {
     <div
       style={{
         height: "100%",
+        width: "100%",
+        maxWidth: "1024px",
+        margin: "0 auto",
         display: "flex",
         flexDirection: "column",
       }}>
-      {/* <Header /> */}
       <Helmet>
         <title>
           {t("productName")} | {t("tabMeta.threadLibrary.title")}

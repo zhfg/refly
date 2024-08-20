@@ -50,8 +50,8 @@ export const defaultState = {
   currentNote: null as null | Note,
   tabs: [],
   activeTab: 'key1',
-  notePanelVisible: true,
-  isRequesting: true,
+  notePanelVisible: false,
+  isRequesting: false,
 
   // notes
   editor: null,

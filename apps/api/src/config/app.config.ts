@@ -18,7 +18,7 @@ export default () => ({
     host: process.env.QDRANT_HOST || 'localhost',
     port: parseInt(process.env.QDRANT_PORT) || 6333,
     apiKey: process.env.QDRANT_API_KEY,
-    vectorDim: parseInt(process.env.REFLY_VEC_DIM) || 1024,
+    vectorDim: parseInt(process.env.REFLY_VEC_DIM) || 768,
   },
   serper: {
     apiKey: process.env.SERPER_API_KEY,

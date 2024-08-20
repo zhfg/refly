@@ -2,8 +2,16 @@ import {
   Collection as CollectionModel,
   Resource as ResourceModel,
   Note as NoteModel,
+  LabelInstance,
 } from '@prisma/client';
-import { UpsertResourceRequest, Collection, Resource, Note } from '@refly/openapi-schema';
+import {
+  UpsertResourceRequest,
+  Collection,
+  Resource,
+  Note,
+  ResourceType,
+  IndexStatus,
+} from '@refly/openapi-schema';
 import { omit } from '@/utils';
 import { pick } from 'lodash';
 
@@ -12,7 +20,7 @@ export type FinalizeResourceParam = UpsertResourceRequest & {
 };
 
 export const collectionPO2DTO = (
-  coll: CollectionModel & { resources?: ResourceModel[] },
+  coll: CollectionModel & { resources?: ResourceModel[]; labels?: LabelInstance[] },
 ): Collection => {
   if (!coll) {
     return null;
@@ -25,12 +33,17 @@ export const collectionPO2DTO = (
   };
 };
 
-export const resourcePO2DTO = (resource: ResourceModel, showFullContent?: boolean): Resource => {
+export const resourcePO2DTO = (
+  resource: ResourceModel & { labels?: LabelInstance[] },
+  showFullContent?: boolean,
+): Resource => {
   if (!resource) {
     return null;
   }
   const res: Resource = {
-    ...omit(resource, ['id', 'uid', 'content', 'deletedAt']),
+    ...pick(resource, ['resourceId', 'collectionId', 'title', 'isPublic', 'readOnly']),
+    resourceType: resource.resourceType as ResourceType,
+    indexStatus: resource.indexStatus as IndexStatus,
     contentPreview: resource.content ? resource.content.slice(0, 250) + '...' : '',
     data: JSON.parse(resource.meta),
     createdAt: resource.createdAt.toJSON(),
@@ -42,7 +55,10 @@ export const resourcePO2DTO = (resource: ResourceModel, showFullContent?: boolea
   return res;
 };
 
-export const notePO2DTO = (note: NoteModel, showFullContent?: boolean): Note => {
+export const notePO2DTO = (
+  note: NoteModel & { labels?: LabelInstance[] },
+  showFullContent?: boolean,
+): Note => {
   if (!note) {
     return null;
   }

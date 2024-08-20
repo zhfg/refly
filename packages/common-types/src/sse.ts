@@ -1,3 +1,5 @@
+import { SkillMeta } from '@refly/openapi-schema';
+
 export interface SkillEvent {
   /**
    * The event type
@@ -17,17 +19,9 @@ export interface SkillEvent {
    */
   content?: string;
   /**
-   * Skill instance id.
+   * Skill metadata
    */
-  skillId?: string;
-  /**
-   * Skill template name.
-   */
-  skillName: string;
-  /**
-   * Skill display name.
-   */
-  skillDisplayName: string;
+  skillMeta: SkillMeta;
   /**
    * Key for structured data, such as `relatedQuestions` and `sources`.
    * Only present when `event` is `structured_data`.

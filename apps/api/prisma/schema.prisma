@@ -91,6 +91,8 @@ model ChatMessage {
   msgId                 String      @default("") @map("msg_id")
   /// Conversation ID
   convId                String      @default("") @map("conv_id")
+  /// Skill job ID
+  jobId                 String      @default("") @map("job_id")
   /// Message type
   type                  MessageType @map("type")
   /// UID
@@ -119,35 +121,35 @@ model ChatMessage {
 /// 知识库资源
 model Resource {
   /// 主键
-  id           BigInt       @id @default(autoincrement())
+  id           BigInt    @id @default(autoincrement())
   /// 资源项 id
-  resourceId   String       @unique @map("resource_id")
+  resourceId   String    @unique @map("resource_id")
   /// 资源类型
-  resourceType ResourceType @map("resource_type")
+  resourceType String    @default("") @map("resource_type")
   /// UID
-  uid          String       @default("") @map("uid")
+  uid          String    @map("uid")
   /// Collection ID
-  collectionId String       @default("") @map("collection_id")
+  collectionId String    @default("") @map("collection_id")
   /// 字数
-  wordCount    Int          @default(0) @map("word_count")
+  wordCount    Int       @default(0) @map("word_count")
   /// Content of resource
-  content      String       @default("") @map("content")
+  content      String    @default("") @map("content")
   /// 是否公开
-  isPublic     Boolean      @default(false) @map("is_public")
+  isPublic     Boolean   @default(false) @map("is_public")
   /// 是否只读
-  readOnly     Boolean      @default(false) @map("read_only")
+  readOnly     Boolean   @default(false) @map("read_only")
   /// 索引状态
-  indexStatus  IndexStatus  @default(init) @map("index_status")
+  indexStatus  String    @default("init") @map("index_status")
   /// 标题
-  title        String       @map("title")
+  title        String    @map("title")
   /// 资源元数据
-  meta         String       @map("meta")
+  meta         String    @map("meta")
   /// 创建时间
-  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// 更新时间
-  updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
   /// 软删除标记
-  deletedAt    DateTime?    @map("deleted_at") @db.Timestamptz()
+  deletedAt    DateTime? @map("deleted_at") @db.Timestamptz()
 
   @@index([collectionId, deletedAt, updatedAt])
   @@index([uid, deletedAt, updatedAt])
@@ -160,7 +162,7 @@ model Note {
   /// Note id
   noteId          String    @unique @map("note_id")
   /// UID
-  uid             String    @default("") @map("uid")
+  uid             String    @map("uid")
   /// Note title
   title           String    @default("Untitled") @map("title")
   /// Word count
@@ -193,9 +195,9 @@ model Collection {
   /// 标题
   title        String    @map("title")
   /// 描述
-  description  String?   @default("") @map("description")
+  description  String    @default("") @map("description")
   /// UID
-  uid          String    @default("") @map("uid")
+  uid          String    @map("uid")
   /// 是否公开
   isPublic     Boolean   @default(false) @map("is_public")
   /// 创建时间
@@ -212,23 +214,25 @@ model Collection {
 /// User-defined skills.
 model SkillInstance {
   /// Primary key
-  pk          BigInt    @id @default(autoincrement())
+  pk               BigInt    @id @default(autoincrement())
   /// Skill id
-  skillId     String    @unique @map("skill_id")
-  /// Skill name (correspond to names of skill templates)
-  skillName   String    @map("skill_name")
+  skillId          String    @unique @map("skill_id")
+  /// Skill template name
+  tplName          String    @default("") @map("tpl_name")
   /// Skill display name
-  displayName String    @default("") @map("display_name")
+  displayName      String    @default("") @map("display_name")
+  /// Skill description
+  description      String    @default("") @map("description")
   /// UID of skill owner
-  uid         String    @map("uid")
-  /// Workflow configuration (JSON)
-  config      String    @default("{}") @map("config")
+  uid              String    @map("uid")
+  /// Skill invocation config (JSON)
+  invocationConfig String    @default("{}") @map("invocation_config")
   /// Create timestamp
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
   /// Deletion timestamp
-  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt        DateTime? @map("deleted_at") @db.Timestamptz()
 
   @@index([uid, updatedAt])
   @@map("skill_instances")
@@ -236,93 +240,125 @@ model SkillInstance {
 
 model SkillTrigger {
   /// Primary key
-  pk        BigInt    @id @default(autoincrement())
+  pk              BigInt    @id @default(autoincrement())
+  /// Trigger display name
+  displayName     String    @default("") @map("display_name")
   /// Trigger id
-  triggerId String    @unique @map("trigger_id")
+  triggerId       String    @unique @map("trigger_id")
+  /// Trigger type
+  triggerType     String    @map("trigger_type")
   /// Skill id
-  skillId   String    @map("skill_id")
+  skillId         String    @map("skill_id")
   /// Owner UID
-  uid       String    @map("uid")
-  /// Trigger event
-  event     String    @map("event")
-  /// Crontab for cron trigger
-  crontab   String?   @map("crontab")
+  uid             String    @map("uid")
+  /// Simple event name
+  simpleEventName String?   @map("simple_event_name")
+  /// Timer config (required when triggerType is `timer`)
+  timerConfig     String?   @map("timer_config")
+  /// Skill input
+  input           String?   @map("input")
+  /// Skill context
+  context         String?   @map("context")
   /// Whether this skill is enabled
-  enabled   Boolean   @map("enabled")
+  enabled         Boolean   @map("enabled")
+  /// Bull job id (for timer trigger)
+  bullJobId       String?   @map("bull_job_id")
   /// Create timestamp
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
-  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
   /// Deletion timestamp
-  deletedAt DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz()
 
   @@index([skillId, deletedAt])
   @@map("skill_triggers")
 }
 
-/// Running logs of skills.
-model SkillLog {
+model SkillJob {
   /// Primary key
-  pk             BigInt       @id @default(autoincrement())
-  /// Skill log id
-  logId          String       @unique @map("log_id")
+  pk               BigInt   @id @default(autoincrement())
+  /// Skill job id
+  jobId            String   @unique @map("job_id")
   /// Skill id
-  skillId        String       @map("skill_id")
-  /// Skill name
-  skillName      String       @map("skill_name")
-  /// Mode for this skill run
-  mode           SkillRunMode @map("mode")
-  /// Input (JSON of `SkillInput`)
-  input          String       @map("input")
-  /// Context (JSON of `SkillContext`)
-  context        String       @map("context")
-  /// Skill config to override
-  overrideConfig String       @map("override_config")
-  /// Skill operation status
-  status         SkillStatus  @map("status")
-  /// Skill trigger event
-  event          String       @map("event")
-  /// Skill trigger id
-  triggerId      String       @map("trigger_id")
+  skillId          String   @map("skill_id")
+  /// Skill display name
+  skillDisplayName String   @map("skill_display_name")
   /// UID of skill owner
-  uid            String       @map("uid")
+  uid              String   @map("uid")
+  /// Input (JSON of `SkillInput`)
+  input            String   @map("input")
+  /// Context (JSON of `SkillContext`)
+  context          String   @map("context")
+  /// Skill job status (refer to `SkillJobStatus`)
+  status           String   @map("status")
+  /// Skill trigger id
+  triggerId        String?  @map("trigger_id")
+  /// Conversation ID
+  convId           String?  @map("conv_id")
   /// Create timestamp
-  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
-  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz()
 
   @@index([uid, updatedAt])
-  @@map("skill_log")
+  @@map("skill_jobs")
 }
 
-enum ResourceType {
-  weblink
-  note // deprecated
-  text
+model LabelClass {
+  /// Primary key
+  pk           BigInt          @id @default(autoincrement())
+  /// Label class ID
+  labelClassId String          @unique @map("label_class_id")
+  /// UID
+  uid          String          @map("uid")
+  /// Label kind icon
+  icon         String          @default("") @map("icon")
+  /// Label class name (must be unique for a single user)
+  name         String          @map("name")
+  /// Label display name
+  displayName  String          @map("display_name")
+  /// Label creation instruction prompt
+  prompt       String          @map("prompt")
+  /// Create timestamp
+  createdAt    DateTime        @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt    DateTime        @updatedAt @map("updated_at") @db.Timestamptz()
+  /// Deletion timestamp
+  deletedAt    DateTime?       @map("deleted_at") @db.Timestamptz()
+  /// Related labels
+  labels       LabelInstance[]
+
+  @@unique([uid, name])
+  @@index([uid, deletedAt, updatedAt])
+  @@map("label_classes")
 }
 
-enum ParseSource {
-  serverCrawl
-  clientUpload
-}
+model LabelInstance {
+  /// Primary key
+  pk           BigInt     @id @default(autoincrement())
+  /// Label ID
+  labelId      String     @unique @map("label_id")
+  /// Label class
+  labelClass   LabelClass @relation(fields: [labelClassId], references: [labelClassId])
+  /// Label class ID
+  labelClassId String     @map("label_class_id")
+  /// Label value
+  value        String     @map("value")
+  /// Entity type this label belongs to
+  entityType   String     @map("entity_type")
+  /// Entity ID this label belongs to (resourceId, collectionId, etc.)
+  entityId     String     @map("entity_id")
+  /// UID
+  uid          String     @map("uid")
+  /// Create timestamp
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz()
+  /// Deletion timestamp
+  deletedAt    DateTime?  @map("deleted_at") @db.Timestamptz()
 
-enum IndexStatus {
-  init
-  processing
-  finish
-  failed
-}
-
-enum SkillStatus {
-  scheduling
-  running
-  finish
-  failed
-}
-
-enum SkillRunMode {
-  async
-  stream
+  @@index([entityType, entityId])
+  @@map("label_instances")
 }
 
 enum MessageType {

@@ -26,9 +26,10 @@ import {
   UpsertNoteResponse,
   UpsertNoteRequest,
   DeleteNoteRequest,
+  ResourceType,
   BatchCreateResourceResponse,
 } from '@refly/openapi-schema';
-import { ResourceType, User as UserModel } from '@prisma/client';
+import { User as UserModel } from '@prisma/client';
 import { KnowledgeService } from './knowledge.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { buildSuccessResponse } from '../utils';
@@ -52,7 +53,7 @@ export class KnowledgeController {
 
   @UseGuards(JwtAuthGuard)
   @Get('collection/detail')
-  async showCollectionDetail(
+  async getCollectionDetail(
     @User() user: UserModel,
     @Query('collectionId') collectionId: string,
   ): Promise<GetCollectionDetailResponse> {

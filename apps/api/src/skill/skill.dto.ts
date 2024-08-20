@@ -1,47 +1,65 @@
 import {
   InvokeSkillRequest,
+  SimpleEventName,
   SkillInstance,
-  SkillLog,
+  SkillJob,
+  SkillJobStatus,
   SkillTrigger,
-  SkillTriggerEvent,
+  SkillTriggerType,
 } from '@refly/openapi-schema';
 import {
-  SkillInstance as SkillModel,
+  SkillInstance as SkillInstanceModel,
   SkillTrigger as SkillTriggerModel,
-  SkillLog as SkillLogModel,
+  SkillJob as SkillJobModel,
+  Conversation as ConversationModel,
+  ChatMessage as ChatMessageModel,
 } from '@prisma/client';
 import { pick } from '@/utils';
+import { toChatMessageDTO, toConversationDTO } from '@/conversation/conversation.dto';
 
 export interface InvokeSkillJobData extends InvokeSkillRequest {
   uid: string;
-  skillLogId: string;
+  jobId?: string;
 }
 
-export function toSkillDTO(skill: SkillModel): SkillInstance {
+export function skillInstancePO2DTO(skill: SkillInstanceModel): SkillInstance {
   return {
-    ...pick(skill, ['skillId', 'skillName']),
-    skillDisplayName: skill.displayName,
-    config: JSON.parse(skill.config),
+    ...pick(skill, ['skillId', 'tplName', 'displayName', 'description']),
+    invocationConfig: JSON.parse(skill.invocationConfig),
     createdAt: skill.createdAt.toJSON(),
     updatedAt: skill.updatedAt.toJSON(),
   };
 }
 
-export function toSkillTriggerDTO(trigger: SkillTriggerModel): SkillTrigger {
+export function skillTriggerPO2DTO(trigger: SkillTriggerModel): SkillTrigger {
   return {
-    ...pick(trigger, ['skillId', 'triggerId', 'crontab', 'enabled']),
-    event: trigger.event as SkillTriggerEvent,
+    ...pick(trigger, ['skillId', 'displayName', 'triggerId', 'enabled']),
+    triggerType: trigger.triggerType as SkillTriggerType,
+    simpleEventName: trigger.simpleEventName as SimpleEventName,
+    timerConfig: trigger.timerConfig ? JSON.parse(trigger.timerConfig) : undefined,
+    input: trigger.input ? JSON.parse(trigger.input) : undefined,
+    context: trigger.context ? JSON.parse(trigger.context) : undefined,
     createdAt: trigger.createdAt.toJSON(),
     updatedAt: trigger.updatedAt.toJSON(),
   };
 }
 
-export function toSkillLogDTO(log: SkillLogModel): SkillLog {
+export function skillJobPO2DTO(
+  job: SkillJobModel & {
+    conversation?: ConversationModel;
+    trigger?: SkillTriggerModel;
+    messages?: ChatMessageModel[];
+  },
+): SkillJob {
   return {
-    ...pick(log, ['logId', 'skillId', 'skillName', 'triggerId']),
-    input: JSON.parse(log.input),
-    context: JSON.parse(log.context),
-    createdAt: log.createdAt.toJSON(),
-    updatedAt: log.updatedAt.toJSON(),
+    ...pick(job, ['jobId', 'skillId', 'skillDisplayName', 'triggerId', 'convId']),
+    trigger: job.trigger ? skillTriggerPO2DTO(job.trigger) : undefined,
+    conversation: job.conversation ? toConversationDTO(job.conversation) : undefined,
+    messages: job.messages?.map(toChatMessageDTO) ?? [],
+    jobStatus: job.status as SkillJobStatus,
+    input: JSON.parse(job.input),
+    context: JSON.parse(job.context),
+    createdAt: job.createdAt.toJSON(),
+    updatedAt: job.updatedAt.toJSON(),
   };
 }

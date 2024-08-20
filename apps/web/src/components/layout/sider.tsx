@@ -11,9 +11,10 @@ import {
   IconTwitter,
   IconLanguage,
   IconImport,
-  IconMessage,
   IconMenuFold,
   IconMenuUnfold,
+  IconRobot,
+  IconHistory,
 } from "@arco-design/web-react/icon"
 // 静态资源
 import Logo from "@/assets/logo.svg"
@@ -40,6 +41,8 @@ const getNavSelectedKeys = (pathname = "") => {
     return "Feed"
   } else if (pathname.includes("thread")) {
     return "ThreadLibrary"
+  } else if (pathname.includes("skill")) {
+    return "Skill"
   }
 
   return "Workspace"
@@ -252,6 +255,11 @@ export const SiderLayout = () => {
         break
       }
 
+      case "Skill": {
+        navigate(`/skill`)
+        break
+      }
+
       case "ThreadLibrary": {
         navigate(`/thread`)
         break
@@ -272,6 +280,37 @@ export const SiderLayout = () => {
     }
   }
 
+  interface SiderCenterProps {
+    key: string
+    name: string
+    icon: React.ReactNode
+    onClick?: () => void
+  }
+  const siderCenter: SiderCenterProps[] = [
+    {
+      key: "Workspace",
+      name: "homePage",
+      icon: <IconHome style={{ fontSize: 20 }} />,
+    },
+    {
+      key: "Import",
+      name: "newResource",
+      icon: <IconImport style={{ fontSize: 20 }} />,
+      onClick: () => {
+        importResourceStore.setImportResourceModalVisible(true)
+      },
+    },
+    {
+      key: "Skill",
+      name: "skill",
+      icon: <IconRobot style={{ fontSize: 20 }} />,
+    },
+    {
+      key: "ThreadLibrary",
+      name: "threadLibrary",
+      icon: <IconHistory style={{ fontSize: 20 }} />,
+    },
+  ]
   return (
     <Sider
       className={`app-sider ${isGuideDetail ? "fixed" : ""}`}
@@ -294,48 +333,24 @@ export const SiderLayout = () => {
           tooltipProps={{}}
           onClickMenuItem={handleNavClick}>
           <div className="sider-center">
-            <MenuItem
-              key="Workspace"
-              className="custom-menu-item"
-              renderItemInTooltip={() => (
-                <MenuItemTooltipContent
-                  title={t("loggedHomePage.siderMenu.homePage")}
-                />
-              )}>
-              <MenuItemContent
-                icon={<IconHome style={{ fontSize: 20 }} />}
-                title={t("loggedHomePage.siderMenu.homePage")}
-              />
-            </MenuItem>
-            <MenuItem
-              key="Import"
-              className="custom-menu-item"
-              renderItemInTooltip={() => (
-                <MenuItemTooltipContent
-                  title={t("loggedHomePage.siderMenu.newResource")}
-                />
-              )}
-              onClick={() =>
-                importResourceStore.setImportResourceModalVisible(true)
-              }>
-              <MenuItemContent
-                icon={<IconImport style={{ fontSize: 20 }} />}
-                title={t("loggedHomePage.siderMenu.newResource")}
-              />
-            </MenuItem>
-            <MenuItem
-              key="ThreadLibrary"
-              className="custom-menu-item"
-              renderItemInTooltip={() => (
-                <MenuItemTooltipContent
-                  title={t("loggedHomePage.siderMenu.threadLibrary")}
-                />
-              )}>
-              <MenuItemContent
-                icon={<IconMessage style={{ fontSize: 20 }} />}
-                title={t("loggedHomePage.siderMenu.threadLibrary")}
-              />
-            </MenuItem>
+            {siderCenter.map(item => {
+              return (
+                <MenuItem
+                  key={item.key}
+                  className="custom-menu-item"
+                  renderItemInTooltip={() => (
+                    <MenuItemTooltipContent
+                      title={t(`loggedHomePage.siderMenu.${item.name}`)}
+                    />
+                  )}
+                  onClick={item.onClick}>
+                  <MenuItemContent
+                    icon={item.icon}
+                    title={t(`loggedHomePage.siderMenu.${item.name}`)}
+                  />
+                </MenuItem>
+              )
+            })}
           </div>
 
           <div className="sider-footer">

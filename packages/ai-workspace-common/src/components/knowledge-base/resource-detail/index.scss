@@ -49,7 +49,7 @@
       align-items: center;
       gap: 8px;
       margin-top: 8px;
-      font-size: 10px;
+      font-size: 12px;
 
       .action-summary {
         display: flex;
@@ -82,6 +82,18 @@
           background-color: #000;
           color: #fff;
         }
+      }
+    }
+
+    .knowledge-base-directory-label {
+      margin: 14px 0;
+
+      .knowledge-base-directory-label-item {
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        background-color: rgba(0, 0, 0, 0);
+        margin-right: 6px;
+        margin-bottom: 4px;
       }
     }
 

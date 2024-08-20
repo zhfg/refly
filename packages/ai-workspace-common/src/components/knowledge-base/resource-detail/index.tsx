@@ -1,10 +1,10 @@
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
-import { IconBulb, IconCodepen } from '@arco-design/web-react/icon';
+import { IconBulb, IconCodepen, IconPlus, IconTag } from '@arco-design/web-react/icon';
 
 // 自定义样式
 import './index.scss';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
-import { Skeleton, Message as message, Empty } from '@arco-design/web-react';
+import { Skeleton, Message as message, Empty, Tag, Popconfirm, Button } from '@arco-design/web-react';
 import {
   type KnowledgeBaseTab,
   useKnowledgeBaseStore,
@@ -17,6 +17,7 @@ import { memo, useEffect, useState } from 'react';
 import { safeParseURL } from '@refly/utils/url';
 import { useListenToSelection } from '@refly-packages/ai-workspace-common/hooks/use-listen-to-selection';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
+import { LabelGroup } from '@refly-packages/ai-workspace-common/components/knowledge-base/label-group';
 
 // content selector
 import { useContentSelector } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-content-selector';
@@ -132,6 +133,7 @@ export const KnowledgeBaseResourceDetail = memo(() => {
                   <span className="action-summary-text">知识图谱</span>
                 </div>
               </div>
+              {resourceDetail && <LabelGroup entityId={resourceDetail.resourceId} entityType={'resource'} />}
             </div>
           )}
           {isFetching ? (

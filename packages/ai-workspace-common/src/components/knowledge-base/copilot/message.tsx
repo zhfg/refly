@@ -69,7 +69,7 @@ export const AssistantMessage = (props: {
       ? safeParseJSON(message?.structuredData?.['relatedQuestions'])
       : (message?.structuredData?.['relatedQuestions'] as Array<string>);
 
-  const profile = { name: message?.skillMeta?.skillDisplayName, avatar: message?.skillMeta?.skillDisplayName };
+  const profile = { name: message?.skillMeta?.displayName, avatar: message?.skillMeta?.displayName };
 
   // TODO: 移入新组件
 

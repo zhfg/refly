@@ -22,10 +22,11 @@ import classNames from 'classnames';
 export interface SearchProps extends React.ComponentProps<'div'> {
   showList?: boolean;
   onClickOutside?: () => void;
+  onSearchValueChange?: (value: string) => void;
 }
 
 export const Search = (props: SearchProps) => {
-  const { showList, onClickOutside, ...divProps } = props;
+  const { showList, onClickOutside, onSearchValueChange, ...divProps } = props;
 
   const ref = React.useRef<HTMLDivElement | null>(null);
   const [searchValue, setSearchValue] = useState('');
@@ -185,8 +186,8 @@ export const Search = (props: SearchProps) => {
       icon: <IconRobot style={{ fontSize: 12 }} />,
       onItemClick: (item: SearchResult) => {
         const skill: SkillMeta = {
-          skillDisplayName: item?.title,
-          skillName: item?.title,
+          displayName: item?.title,
+          tplName: item?.title,
           skillId: item?.id,
         };
         setSelectedSkill(skill);
@@ -335,47 +336,47 @@ export const Search = (props: SearchProps) => {
             setIsComposing(false);
           }}
           onValueChange={(val) => {
-            console.log('value change', val);
+            if (onSearchValueChange) {
+              onSearchValueChange(val);
+            }
             setSearchValue(val);
             handleBigSearchValueChange(val, activePage);
           }}
         />
-        {showList ? (
-          <Command.List>
-            <Command.Empty>No results found.</Command.Empty>
-            {activePage === 'home' && (
-              <Home
-                key={'search'}
-                displayMode={displayMode}
-                pages={pages}
-                setPages={(pages: string[]) => setPages(pages)}
-                data={renderData}
-                activeValue={value}
-                setValue={setValue}
-                searchValue={searchValue}
-              />
-            )}
-            {activePage !== 'home' && activePage !== 'skill-execute' ? (
-              <DataList
-                key="data-list"
-                displayMode={displayMode}
-                {...getRenderData(activePage)}
-                activeValue={value}
-                searchValue={searchValue}
-                setValue={setValue}
-              />
-            ) : null}
-            {activePage === 'skill-execute' ? (
-              <Skill
-                key="skill"
-                activeValue={value}
-                searchValue={searchValue}
-                setValue={setValue}
-                selectedSkill={selectedSkill}
-              />
-            ) : null}
-          </Command.List>
-        ) : null}
+        <Command.List style={{ display: showList ? 'inherit' : 'none' }}>
+          <Command.Empty>No results found.</Command.Empty>
+          {activePage === 'home' && (
+            <Home
+              key={'search'}
+              displayMode={displayMode}
+              pages={pages}
+              setPages={(pages: string[]) => setPages(pages)}
+              data={renderData}
+              activeValue={value}
+              setValue={setValue}
+              searchValue={searchValue}
+            />
+          )}
+          {activePage !== 'home' && activePage !== 'skill-execute' ? (
+            <DataList
+              key="data-list"
+              displayMode={displayMode}
+              {...getRenderData(activePage)}
+              activeValue={value}
+              searchValue={searchValue}
+              setValue={setValue}
+            />
+          ) : null}
+          {activePage === 'skill-execute' ? (
+            <Skill
+              key="skill"
+              activeValue={value}
+              searchValue={searchValue}
+              setValue={setValue}
+              selectedSkill={selectedSkill}
+            />
+          ) : null}
+        </Command.List>
       </Command>
     </div>
   );

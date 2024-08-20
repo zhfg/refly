@@ -1,7 +1,6 @@
 import { SkillEvent } from '@refly/common-types';
 import { CreateChatMessageInput } from '@/conversation/conversation.dto';
-import { User } from '@prisma/client';
-import { SkillMeta } from '@refly/openapi-schema';
+import { SkillMeta, User } from '@refly/openapi-schema';
 import { SkillRunnableMeta } from '@refly/skill-template';
 
 interface MessageData {
@@ -22,8 +21,8 @@ export class MessageAggregator {
    */
   data: Record<string, MessageData> = {};
 
-  getOrInitData(event: SkillMeta & { spanId: string }): MessageData {
-    const { spanId, skillId, skillName, skillDisplayName } = event;
+  getOrInitData(event: Pick<SkillEvent, 'spanId' | 'skillMeta'>): MessageData {
+    const { spanId, skillMeta } = event;
 
     const messageData = this.data[spanId];
     if (messageData) {
@@ -33,7 +32,7 @@ export class MessageAggregator {
     this.spanIdList.push(spanId);
 
     return {
-      skillMeta: { skillId, skillName, skillDisplayName },
+      skillMeta,
       logs: [],
       content: '',
       structuredData: {},
@@ -56,13 +55,13 @@ export class MessageAggregator {
   }
 
   setContent(meta: SkillRunnableMeta, content: string) {
-    const msg = this.getOrInitData(meta);
+    const msg = this.getOrInitData({ skillMeta: meta, spanId: meta.spanId });
     msg.content = content;
     this.data[meta.spanId] = msg;
   }
 
-  getMessages(param: { user: User; convId: string; locale: string }): CreateChatMessageInput[] {
-    const { user, convId, locale } = param;
+  getMessages(param: { user: User; convId: string; jobId: string }): CreateChatMessageInput[] {
+    const { user, convId, jobId } = param;
 
     return this.spanIdList.map((spanId) => {
       const { skillMeta, content, logs, structuredData } = this.data[spanId];
@@ -74,7 +73,7 @@ export class MessageAggregator {
         structuredData: JSON.stringify(structuredData),
         uid: user.uid,
         convId,
-        locale,
+        jobId,
       };
     });
   }

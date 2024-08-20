@@ -6,7 +6,8 @@ export interface CreateChatMessageInput {
   type: MessageType;
   sources?: string;
   content: string;
-  convId: string;
+  convId?: string;
+  jobId?: string;
   skillMeta?: string;
   uid: string;
   logs?: string;

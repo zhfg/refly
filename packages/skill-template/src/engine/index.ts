@@ -1,25 +1,30 @@
 import { ChatOpenAI, OpenAIChatInput } from '@langchain/openai';
 import {
   CreateCollectionResponse,
+  CreateLabelClassRequest,
+  CreateLabelClassResponse,
+  CreateLabelInstanceRequest,
+  CreateLabelInstanceResponse,
   CreateResourceResponse,
+  GetResourceDetailResponse,
   SearchRequest,
   SearchResponse,
   UpdateCollectionResponse,
   UpdateResourceResponse,
   UpsertCollectionRequest,
   UpsertResourceRequest,
+  User,
 } from '@refly/openapi-schema';
 
-export interface SkillUser {
-  uid: string;
-}
-
 export interface ReflyService {
-  createResource: (user: SkillUser, req: UpsertResourceRequest) => Promise<CreateResourceResponse>;
-  updateResource: (user: SkillUser, req: UpsertResourceRequest) => Promise<UpdateResourceResponse>;
-  createCollection: (user: SkillUser, req: UpsertCollectionRequest) => Promise<CreateCollectionResponse>;
-  updateCollection: (user: SkillUser, req: UpsertCollectionRequest) => Promise<UpdateCollectionResponse>;
-  search: (user: SkillUser, req: SearchRequest) => Promise<SearchResponse>;
+  getResourceDetail: (user: User, req: { resourceId: string }) => Promise<GetResourceDetailResponse>;
+  createResource: (user: User, req: UpsertResourceRequest) => Promise<CreateResourceResponse>;
+  updateResource: (user: User, req: UpsertResourceRequest) => Promise<UpdateResourceResponse>;
+  createCollection: (user: User, req: UpsertCollectionRequest) => Promise<CreateCollectionResponse>;
+  updateCollection: (user: User, req: UpsertCollectionRequest) => Promise<UpdateCollectionResponse>;
+  createLabelClass: (user: User, req: CreateLabelClassRequest) => Promise<CreateLabelClassResponse>;
+  createLabelInstance: (user: User, req: CreateLabelInstanceRequest) => Promise<CreateLabelInstanceResponse>;
+  search: (user: User, req: SearchRequest) => Promise<SearchResponse>;
 }
 
 export interface SkillEngineOptions {

@@ -1,15 +1,9 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Queue } from 'bull';
 import pLimit from 'p-limit';
 import { InjectQueue } from '@nestjs/bull';
 import { readingTime } from 'reading-time-estimator';
-import { Prisma, User } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { RAGService } from '../rag/rag.service';
 import { PrismaService } from '../common/prisma.service';
 import { MinioService } from '../common/minio.service';
@@ -21,11 +15,13 @@ import {
   ListCollectionsData,
   ListNotesData,
   UpsertNoteRequest,
+  User,
 } from '@refly/openapi-schema';
-import { CHANNEL_FINALIZE_RESOURCE, QUEUE_RESOURCE } from '../utils';
+import { CHANNEL_FINALIZE_RESOURCE, QUEUE_SIMPLE_EVENT, QUEUE_RESOURCE } from '../utils';
 import { genCollectionID, genResourceID, cleanMarkdownForIngest, genNoteID } from '@refly/utils';
 import { FinalizeResourceParam } from './knowledge.dto';
 import { pick, omit } from '../utils';
+import { SimpleEventData } from '@/event/event.dto';
 
 @Injectable()
 export class KnowledgeService {
@@ -36,9 +32,10 @@ export class KnowledgeService {
     private minio: MinioService,
     private ragService: RAGService,
     @InjectQueue(QUEUE_RESOURCE) private queue: Queue<FinalizeResourceParam>,
+    @InjectQueue(QUEUE_SIMPLE_EVENT) private simpleEventQueue: Queue<SimpleEventData>,
   ) {}
 
-  async listCollections(user: Pick<User, 'uid'>, params: ListCollectionsData['query']) {
+  async listCollections(user: User, params: ListCollectionsData['query']) {
     const { page, pageSize } = params;
     return this.prisma.collection.findMany({
       where: { uid: user.uid, deletedAt: null },
@@ -48,7 +45,7 @@ export class KnowledgeService {
     });
   }
 
-  async getCollectionDetail(user: Pick<User, 'uid'>, param: { collectionId: string }) {
+  async getCollectionDetail(user: User, param: { collectionId: string }) {
     const { collectionId } = param;
 
     const coll = await this.prisma.collection.findFirst({
@@ -76,7 +73,7 @@ export class KnowledgeService {
     return { ...coll, resources };
   }
 
-  async upsertCollection(user: Pick<User, 'uid'>, param: UpsertCollectionRequest) {
+  async upsertCollection(user: User, param: UpsertCollectionRequest) {
     if (!param.collectionId) {
       param.collectionId = genCollectionID();
     }
@@ -94,24 +91,34 @@ export class KnowledgeService {
     });
   }
 
-  async deleteCollection(user: Pick<User, 'uid'>, collectionId: string) {
+  async deleteCollection(user: User, collectionId: string) {
+    const { uid } = user;
     const coll = await this.prisma.collection.findFirst({
-      where: { collectionId, deletedAt: null },
+      where: { collectionId, uid, deletedAt: null },
     });
     if (!coll) {
       throw new BadRequestException('Collection not found');
     }
-    if (coll.uid !== user.uid) {
-      throw new UnauthorizedException();
-    }
 
-    return this.prisma.collection.update({
-      where: { collectionId, uid: user.uid },
-      data: { deletedAt: new Date() },
+    await this.prisma.$transaction([
+      this.prisma.collection.update({
+        where: { collectionId, uid, deletedAt: null },
+        data: { deletedAt: new Date() },
+      }),
+      this.prisma.labelInstance.updateMany({
+        where: { entityType: 'collection', entityId: collectionId, uid, deletedAt: null },
+        data: { deletedAt: new Date() },
+      }),
+    ]);
+
+    // Delete all resources
+    const resources = await this.prisma.resource.findMany({
+      where: { collectionId, uid, deletedAt: null },
     });
+    await Promise.all(resources.map((r) => this.deleteResource(user, r.resourceId)));
   }
 
-  async listResources(user: Pick<User, 'uid'>, param: ListResourcesData['query']) {
+  async listResources(user: User, param: ListResourcesData['query']) {
     const { collectionId, resourceId, resourceType, page = 1, pageSize = 10 } = param;
 
     // Query resources by collection
@@ -142,7 +149,7 @@ export class KnowledgeService {
     }));
   }
 
-  async getResourceDetail(user: Pick<User, 'uid'>, param: { resourceId: string }) {
+  async getResourceDetail(user: User, param: { resourceId: string }) {
     const { resourceId } = param;
     const resource = await this.prisma.resource.findFirst({
       where: { resourceId, deletedAt: null },
@@ -155,7 +162,7 @@ export class KnowledgeService {
     return resource;
   }
 
-  async createResource(user: Pick<User, 'uid'>, param: UpsertResourceRequest) {
+  async createResource(user: User, param: UpsertResourceRequest) {
     param.resourceId = genResourceID();
 
     // If target collection not specified, create new one
@@ -310,6 +317,12 @@ export class KnowledgeService {
 
     try {
       await this.indexResource(user, param);
+      await this.simpleEventQueue.add({
+        entityType: 'resource',
+        entityId: param.resourceId,
+        name: 'onResourceReady',
+        uid: user.uid,
+      });
     } catch (err) {
       console.error(err);
       this.logger.error(`finalize resource error: ${err}`);
@@ -321,7 +334,7 @@ export class KnowledgeService {
     }
   }
 
-  async updateResource(user: Pick<User, 'uid'>, param: UpsertResourceRequest) {
+  async updateResource(user: User, param: UpsertResourceRequest) {
     const updates: Prisma.ResourceUpdateInput = pick(param, ['title', 'isPublic', 'readOnly']);
     if (param.data) {
       updates.meta = JSON.stringify(param.data);
@@ -335,27 +348,29 @@ export class KnowledgeService {
     });
   }
 
-  async deleteResource(user: Pick<User, 'uid'>, resourceId: string) {
+  async deleteResource(user: User, resourceId: string) {
+    const { uid } = user;
     const resource = await this.prisma.resource.findFirst({
-      where: { resourceId, deletedAt: null },
+      where: { resourceId, uid, deletedAt: null },
     });
     if (!resource) {
       throw new BadRequestException('Resource not found');
-    }
-    if (resource.uid !== user.uid) {
-      throw new UnauthorizedException();
     }
 
     return Promise.all([
       this.ragService.deleteResourceNodes(user, resourceId),
       this.prisma.resource.update({
-        where: { resourceId },
+        where: { resourceId, uid, deletedAt: null },
+        data: { deletedAt: new Date() },
+      }),
+      this.prisma.labelInstance.updateMany({
+        where: { entityType: 'resource', entityId: resourceId, uid, deletedAt: null },
         data: { deletedAt: new Date() },
       }),
     ]);
   }
 
-  async listNotes(user: Pick<User, 'uid'>, param: ListNotesData['query']) {
+  async listNotes(user: User, param: ListNotesData['query']) {
     const { page = 1, pageSize = 10 } = param;
     return this.prisma.note.findMany({
       where: {
@@ -368,17 +383,18 @@ export class KnowledgeService {
     });
   }
 
-  async getNoteDetail(user: Pick<User, 'uid'>, noteId: string) {
+  async getNoteDetail(user: User, noteId: string) {
     const note = await this.prisma.note.findFirst({
       where: { noteId, uid: user.uid, deletedAt: null },
     });
     if (!note) {
       throw new BadRequestException('Note not found');
     }
+
     return note;
   }
 
-  async upsertNote(user: Pick<User, 'uid'>, param: UpsertNoteRequest) {
+  async upsertNote(user: User, param: UpsertNoteRequest) {
     param.noteId ||= genNoteID();
 
     return this.prisma.note.upsert({
@@ -394,21 +410,23 @@ export class KnowledgeService {
     });
   }
 
-  async deleteNote(user: Pick<User, 'uid'>, noteId: string) {
+  async deleteNote(user: User, noteId: string) {
+    const { uid } = user;
     const note = await this.prisma.note.findFirst({
-      where: { noteId, deletedAt: null },
+      where: { noteId, uid, deletedAt: null },
     });
     if (!note) {
       throw new BadRequestException('Note not found');
-    }
-    if (note.uid !== user.uid) {
-      throw new UnauthorizedException();
     }
 
     const cleanups: Promise<any>[] = [
       this.ragService.deleteNoteNodes(user, noteId),
       this.prisma.note.update({
         where: { noteId },
+        data: { deletedAt: new Date() },
+      }),
+      this.prisma.labelInstance.updateMany({
+        where: { entityType: 'note', entityId: noteId, uid, deletedAt: null },
         data: { deletedAt: new Date() },
       }),
     ];

@@ -1,6 +1,17 @@
 {
   "language": "English",
   "productName": "Refly",
+  "common": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "save": "Save",
+    "loadMore": "Load More",
+    "putErr": "Failed to perform operation. Please try again!",
+    "putSuccess": "Operation Successful",
+    "deleteConfirmMessage": "Are you sure you want to delete?"
+  },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",
     "content": "We are dedicated to enhancing the stability and efficiency of our services. To achieve this, we have scheduled a system maintenance that will take place from 21:00 to 23:00 Beijing Time. During this period, our services will be temporarily unavailable. For our users in Seattle, this maintenance corresponds to 05:00 to 07:00 AM local time, taking into account the current daylight saving time adjustments. We apologize for any inconvenience this may cause and appreciate your understanding and support."
@@ -94,6 +105,14 @@
         "collection": "New Collection"
       }
     },
+    "labelGroup": {
+      "addLabel": "Click to add labels",
+      "addLabelTitle": "Add labels",
+      "getLabelFailed": "Failed to get labels",
+      "deleteConfirmText": "Are you sure to delete this label?",
+      "deleteFailed": "Failed to delete label",
+      "deleteSuccessful": "Label deleted successfully"
+    },
     "newKnowledgeModal": {
       "modalTitle": "Create New Knowledge Base",
       "editModalTitle": "Edit the Knowledge Base",
@@ -105,7 +124,23 @@
       "confirm": "Confirm",
       "successful": "Created successfully",
       "failed": "Failed to create",
-      "editSuccessful": "Modifyed successfully",
+      "editSuccessful": "Modified successfully",
+      "editFailed": "Failed to modify"
+    },
+    "newLabelModal": {
+      "modalTitle": "Create New Label",
+      "labelClass": "Class",
+      "labelClassPlaceholder": "Please select label class",
+      "labelClassValidateMessage": "Label class cannot be empty",
+      "valueList": "Labels",
+      "valueListPlaceholder": "Input label. Press enter to add multiple labels",
+      "valueListValidateMessage": "Please input at least one label",
+      "title": "Title",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "successful": "Create successfully",
+      "failed": "Failed to create",
+      "editSuccessful": "Modified successfully",
       "editFailed": "Failed to modify"
     },
     "deleteDropdownMenu": {
@@ -181,7 +216,8 @@
       "getHelp": "Get Help",
       "download": "Download Extension",
       "newResource": "New Resource",
-      "settings": "Settings"
+      "settings": "Settings",
+      "skill": "Skills"
     }
   },
   "knowledgeLibrary": {
@@ -277,6 +313,75 @@
       "title": "No conversations at the moment. Download the plugin or visit the home page to ask a question!",
       "download": "Download Plugin",
       "goHome": "Go to Home Page to Search or Ask a Question"
+    }
+  },
+  "skill": {
+    "tab": {
+      "skillInstances": "Skill Instances",
+      "skillTemplate": "Skill templates"
+    },
+    "newSkillModal": {
+      "newTitle": "Add New Skill",
+      "updateTitle": "Update Skill",
+      "name": "Name",
+      "namePlaceholder": "Please enter the name of the skill",
+      "description": "Description",
+      "descriptionPlaceholder": "Please enter the description of the skill",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "putErr": "Failed. Please try again.",
+      "putSuccess": "successfully"
+    },
+    "newTriggerModal": {
+      "newTitle": "Add New Trigger",
+      "updateTitle": "Update Trigger",
+      "name": "Name",
+      "namePlaceholder": "Please enter the name of the trigger",
+      "triggerType": "Trigger Type",
+      "triggerTypePlaceholder": "Please select the type of the trigger",
+      "timer": "Timer",
+      "simpleEvent": "Simple Event",
+      "onResourceReady": "On Resource Ready",
+      "timerConfig": "Time",
+      "timerConfigPlaceholder": "Please select the time of the trigger",
+      "repeatInterval": "Repeat Interval",
+      "repeatIntervalPlaceholder": "Please select the interval of the trigger",
+      "resource": "Resource",
+      "resourcePlaceholder": "Please select the resource of the trigger",
+      "event": "Event",
+      "eventPlaceholder": "Please select the event of the trigger",
+      "hour": "Every Hour",
+      "day": "Every Day",
+      "week": "Every Week",
+      "month": "Every Month",
+      "year": "Every Year"
+    },
+    "instanceInvokeModal": {
+      "title": "Run Skill",
+      "formLabel": {
+        "query": "Question",
+        "resourceIds": "Resource",
+        "noteIds": "Note",
+        "collectionIds": "Collection",
+        "contentList": "Content",
+        "urls": "URLs"
+      },
+      "placeholder": {
+        "query": "Please enter question",
+        "resourceIds": "Please select resource",
+        "noteIds": "Please select note",
+        "collectionIds": "Please select collection",
+        "contentList": "Please enter or paste content",
+        "urls": "Please enter URLs, one per line"
+      }
+    },
+    "skillDetail": {
+      "run": "Run",
+      "delete": "Delete",
+      "jobs": "Jobs",
+      "triggers": "Triggers",
+      "addTrigger": "Add Trigger",
+      "back": "Back"
     }
   },
   "threadItem": {

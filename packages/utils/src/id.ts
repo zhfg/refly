@@ -6,8 +6,20 @@ export function genUID(): string {
   return 'u-' + createId();
 }
 
+export function genEventID(): string {
+  return 'ev-' + createId();
+}
+
 export function genLinkID(): string {
   return 'l-' + createId();
+}
+
+export function genLabelClassID(): string {
+  return 'lc-' + createId();
+}
+
+export function genLabelInstanceID(): string {
+  return 'li-' + createId();
 }
 
 export function genConvID(): string {
@@ -38,8 +50,8 @@ export function genSkillTriggerID(): string {
   return 'tr-' + createId();
 }
 
-export function genSkillLogID(): string {
-  return 'lg-' + createId();
+export function genSkillJobID(): string {
+  return 'sj-' + createId();
 }
 
 export function genContentSelectorID(): string {

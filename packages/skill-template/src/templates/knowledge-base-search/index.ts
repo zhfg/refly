@@ -6,7 +6,7 @@ import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 import { ReflySearch } from '../../tools/refly-search';
-import { SearchResponse, Source } from '@refly/openapi-schema';
+import { SearchResponse, Source, SkillInvocationConfig } from '@refly/openapi-schema';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 
 interface GraphState extends BaseSkillState {
@@ -27,6 +27,11 @@ export class KnowledgeBaseSearch extends BaseSkill {
   displayName = {
     en: 'Knowledge Base Search',
     'zh-CN': '知识库搜索',
+  };
+
+  invocationConfig: SkillInvocationConfig = {
+    inputRules: [{ key: 'query', required: true }],
+    contextRules: [],
   };
 
   description = 'Search for relevant information in the knowledge base and generate answer.';
@@ -104,9 +109,9 @@ export class KnowledgeBaseSearch extends BaseSkill {
    * @param config - The configuration for the runnable.
    * @returns - The updated state with the new message added to the list of messages.
    */
-  retrieve = async (state: GraphState, config?: SkillRunnableConfig) => {
+  retrieve = async (state: GraphState, config: SkillRunnableConfig) => {
     const { betterQuestion } = state;
-    const { uid } = config?.configurable || {};
+    const { user } = config;
 
     if (!betterQuestion) {
       throw new Error('betterQuestion is empty!');
@@ -120,7 +125,7 @@ export class KnowledgeBaseSearch extends BaseSkill {
       config,
     );
 
-    const tool = new ReflySearch({ engine: this.engine, user: { uid } });
+    const tool = new ReflySearch({ engine: this.engine, user });
     const output = await tool.invoke(betterQuestion, config);
     const searchResp = JSON.parse(output) as SearchResponse;
 

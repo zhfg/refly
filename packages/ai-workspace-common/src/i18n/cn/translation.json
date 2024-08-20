@@ -1,6 +1,17 @@
 {
   "language": "简体中文",
   "productName": "Refly",
+  "common": {
+    "confirm": "确认",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "save": "保存",
+    "loadMore": "加载更多",
+    "putErr": "操作失败，请尝试重试！",
+    "putSuccess": "操作成功",
+    "deleteConfirmMessage": "确定删除？"
+  },
   "systemMaintenanceShutdown": {
     "title": "尊敬的用户，您好！",
     "content": "为了提供更加稳定和高效的服务，我们计划在北京时间 21:00 至 23:00 期间对系统进行例行维护。在此期间，虽然您仍可以访问我们的产品页面，但服务将暂时无法使用。我们对由此给您带来的任何不便深表歉意，并感谢您的理解和支持。"
@@ -94,6 +105,14 @@
         "collection": "新知识库"
       }
     },
+    "labelGroup": {
+      "addLabel": "点击添加标签",
+      "addLabelTitle": "添加标签",
+      "getLabelFailed": "获取标签失败",
+      "deleteConfirmText": "确认删除该标签吗?",
+      "deleteFailed": "标签删除失败",
+      "deleteSuccessful": "标签删除成功"
+    },
     "newKnowledgeModal": {
       "modalTitle": "新增知识库",
       "editModalTitle": "编辑知识库",
@@ -101,6 +120,22 @@
       "title": "标题",
       "description": "描述",
       "descriptionPlaceholder": "请输入知识库描述",
+      "cancel": "取消",
+      "confirm": "确认",
+      "successful": "创建成功",
+      "failed": "创建失败",
+      "editSuccessful": "修改成功",
+      "editFailed": "修改失败"
+    },
+    "newLabelModal": {
+      "modalTitle": "新增标签",
+      "labelClass": "标签类",
+      "labelClassPlaceholder": "请选择标签类",
+      "labelClassValidateMessage": "标签类不能为空",
+      "valueList": "标签",
+      "valueListPlaceholder": "输入标签，回车可添加多个",
+      "valueListValidateMessage": "至少输入一个标签",
+      "title": "标题",
       "cancel": "取消",
       "confirm": "确认",
       "successful": "创建成功",
@@ -192,7 +227,8 @@
       "getHelp": "获得帮助",
       "download": "下载插件",
       "newResource": "添加资源",
-      "settings": "设置"
+      "settings": "设置",
+      "skill": "技能"
     }
   },
   "knowledgeLibrary": {
@@ -294,6 +330,75 @@
       "title": "暂无无会话，赶紧下载插件或访问首页提问吧~",
       "download": "下载插件",
       "goHome": "去首页搜索或提问"
+    }
+  },
+  "skill": {
+    "tab": {
+      "skillInstances": "已添加技能",
+      "skillTemplate": "技能市场"
+    },
+    "newSkillModal": {
+      "newTitle": "创建技能",
+      "updateTitle": "更新技能",
+      "name": "名称",
+      "namePlaceholder": "请输入技能名称",
+      "description": "描述",
+      "descriptionPlaceholder": "请输入技能描述",
+      "cancel": "取消",
+      "confirm": "确定",
+      "putErr": "操作失败，请尝试重试！",
+      "putSuccess": "操作成功"
+    },
+    "newTriggerModal": {
+      "newTitle": "创建触发器",
+      "updateTitle": "更新触发器",
+      "name": "名称",
+      "namePlaceholder": "请输入触发器名称",
+      "triggerType": "类型",
+      "triggerTypePlaceholder": "请选择触发器类型",
+      "timer": "定时触发",
+      "simpleEvent": "事件触发",
+      "onResourceReady": "资源准备就绪",
+      "timerConfig": "时间",
+      "timerConfigPlaceholder": "请选择运行时间",
+      "repeatInterval": "重复",
+      "repeatIntervalPlaceholder": "请选择重复间隔",
+      "resource": "资源",
+      "resourcePlaceholder": "请选择资源",
+      "event": "事件",
+      "eventPlaceholder": "请选择事件",
+      "hour": "每小时",
+      "day": "每天",
+      "week": "每周",
+      "month": "每月",
+      "year": "每年"
+    },
+    "instanceInvokeModal": {
+      "title": "运行技能",
+      "formLabel": {
+        "query": "问题",
+        "resourceIds": "资源",
+        "noteIds": "笔记",
+        "collectionIds": "知识库",
+        "contentList": "内容",
+        "urls": "链接列表"
+      },
+      "placeholder": {
+        "query": "请输入问题",
+        "resourceIds": "请选择资源",
+        "noteIds": "请选择笔记",
+        "collectionIds": "请选择知识库",
+        "contentList": "请输入或粘贴内容",
+        "urls": "请输入链接，每行一个..."
+      }
+    },
+    "skillDetail": {
+      "run": "运行",
+      "delete": "删除",
+      "jobs": "运行记录",
+      "triggers": "触发器",
+      "addTrigger": "添加触发器",
+      "back": "返回技能管理"
     }
   },
   "settings": {
