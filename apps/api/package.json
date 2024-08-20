@@ -70,7 +70,6 @@
     "uuid": "^9.0.1",
     "@refly/common-types": "workspace:*",
     "@refly/openapi-schema": "workspace:*",
-    "@refly/editor-common": "workspace:*",
     "@refly/utils": "workspace:*",
     "@refly/skill-template": "workspace:*",
     "@langchain/core": "~0.2.2",

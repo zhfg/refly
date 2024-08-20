@@ -91,9 +91,6 @@ importers:
       '@refly/common-types':
         specifier: workspace:*
         version: link:../../packages/common-types
-      '@refly/editor-common':
-        specifier: workspace:*
-        version: link:../../packages/editor-common
       '@refly/openapi-schema':
         specifier: workspace:*
         version: link:../../packages/openapi-schema
