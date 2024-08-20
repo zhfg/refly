@@ -8,29 +8,36 @@
     &:hover {
       background-color: #eee;
     }
+    &.disabled {
+      cursor: not-allowed;
+    }
     &-col {
       text-align: center;
     }
     &-event {
       display: flex;
       align-items: center;
+      .event-icon {
+        margin-right: 8px;
+      }
+      .event-message {
+        width: calc(100% - 22px);
+      }
     }
-    &-right {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    &-contexts {
+      width: 100%;
     }
     &-context {
+      width: 100%;
       padding: 4px 0;
       display: flex;
       align-items: center;
-    }
-    &-update-time {
-      margin-left: 24px;
-      display: flex;
-      align-items: center;
-      flex-wrap: nowrap;
-      color: #808080;
+      &-content {
+        width: calc(100% - 40px);
+        .context-item {
+          width: 100%;
+        }
+      }
     }
     .ellipsis {
       overflow: hidden;

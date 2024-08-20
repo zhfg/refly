@@ -396,7 +396,9 @@
       "run": "运行",
       "delete": "删除",
       "jobs": "运行记录",
-      "triggers": "触发器"
+      "triggers": "触发器",
+      "addTrigger": "添加触发器",
+      "back": "返回技能管理"
     }
   },
   "settings": {

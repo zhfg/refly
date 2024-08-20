@@ -50,7 +50,7 @@ export const SkillTriggers = (props: SkillTriggersProps) => {
     let eventMessage = t(`skill.newTriggerModal.${simpleEventName}`);
     if (timerConfig) {
       eventType = 'timer';
-      eventMessage = t(`skill.newTriggerModal.${timerConfig.repeatInterval}`) + ' ' + timerConfig.datetime;
+      eventMessage = timerConfig.datetime + `（${t(`skill.newTriggerModal.${timerConfig.repeatInterval}`)}）`;
     }
     const updateTriggerStatus = async (val: boolean) => {
       const error = await createTrigger.updateTriggerStatus(trigger, val);

@@ -379,7 +379,9 @@
       "run": "Run",
       "delete": "Delete",
       "jobs": "Jobs",
-      "triggers": "Triggers"
+      "triggers": "Triggers",
+      "addTrigger": "Add Trigger",
+      "back": "Back"
     }
   },
   "threadItem": {

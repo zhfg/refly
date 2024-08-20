@@ -54,7 +54,7 @@ const ContentTab = (props: { val: string; setVal: (val: string) => void }) => {
       {val === 'triggers' && (
         <Button type="primary" className="add-trigger-btn" onClick={addTrigger}>
           <IconPlus />
-          添加触发器
+          {t('skill.skillDetail.addTrigger')}
         </Button>
       )}
     </div>
@@ -101,7 +101,7 @@ const SkillDetail = () => {
       <div className="skill-detail__header">
         <div className="skill-detail__back" onClick={() => window.history.back()}>
           <IconLeft className="skill-detail__back-icon" />
-          返回技能管理
+          {t('skill.skillDetail.back')}
         </div>
       </div>
 

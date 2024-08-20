@@ -79,6 +79,7 @@ export const InstanceInvokeModal = (props: InstanceInvokeModalProps) => {
   return (
     <Modal
       title={t('skill.instanceInvokeModal.title')}
+      style={{ width: 600 }}
       visible={visible}
       onOk={onOk}
       okText={t('common.confirm')}
@@ -86,16 +87,7 @@ export const InstanceInvokeModal = (props: InstanceInvokeModalProps) => {
       confirmLoading={confirmLoading}
       onCancel={() => setVisible(false)}
     >
-      <Form
-        {...formItemLayout}
-        form={form}
-        labelCol={{
-          style: { flexBasis: 100 },
-        }}
-        wrapperCol={{
-          style: { flexBasis: 'calc(100% - 100px)' },
-        }}
-      >
+      <Form {...formItemLayout} form={form}>
         {optionItems.map(({ key, required, formComp }) => {
           return (
             <FormItem label={t(`skill.instanceInvokeModal.formLabel.${key}`)} key={key} required={required} field={key}>

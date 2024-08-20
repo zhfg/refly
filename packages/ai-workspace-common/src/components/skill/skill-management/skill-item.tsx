@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { Avatar, Button, Typography, Divider } from '@arco-design/web-react';
-import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
 import { InstanceDropdownMenu } from '@refly-packages/ai-workspace-common/components/skill/instance-dropdown-menu';
 import { NewSkillInstanceModal } from '@refly-packages/ai-workspace-common/components/skill/new-instance-modal';
 
@@ -10,7 +8,6 @@ import { IconUser, IconPlayCircle, IconPlus } from '@arco-design/web-react/icon'
 // 样式
 import './skill-item.scss';
 import { SkillTemplate, SkillInstance } from '@refly/openapi-schema';
-import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { InstanceInvokeModal } from '@refly-packages/ai-workspace-common/components/skill/instance-invoke-modal';
 
@@ -31,10 +28,7 @@ interface SkillInsProsp extends SkillItemProps {
   data: SkillInstance;
 }
 export const SkillItem = (props: SkillTempProsp | SkillInsProsp) => {
-  const userStore = useUserStore();
   const navigate = useNavigate();
-  const { localSettings } = userStore;
-  const { handleAddSkillInstance, handleRemoveSkillInstance } = useSkillManagement();
   const { data, isInstalled, showExecute, source, itemKey, canGoDetail, refreshList, postDeleteList } = props;
 
   const getSkillItemPopupContainer = () => {

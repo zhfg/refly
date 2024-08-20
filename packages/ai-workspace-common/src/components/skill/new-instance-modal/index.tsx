@@ -61,6 +61,7 @@ export const NewSkillInstanceModal = (props: NewSkillInstanceModalProps) => {
       form.setFieldsValue({ displayName, description });
     }
   }, [visible]);
+
   const formItemLayout = {
     labelCol: {
       span: 4,
@@ -69,24 +70,17 @@ export const NewSkillInstanceModal = (props: NewSkillInstanceModalProps) => {
       span: 20,
     },
   };
+
   return (
     <Modal
       title={t(`skill.newSkillModal.${type}Title`)}
+      style={{ width: 800 }}
       visible={visible}
       onOk={onOk}
       confirmLoading={confirmLoading}
       onCancel={() => setVisible(false)}
     >
-      <Form
-        {...formItemLayout}
-        form={form}
-        labelCol={{
-          style: { flexBasis: 90 },
-        }}
-        wrapperCol={{
-          style: { flexBasis: 'calc(100% - 90px)' },
-        }}
-      >
+      <Form {...formItemLayout} form={form}>
         <FormItem
           label={t('skill.newSkillModal.name')}
           required

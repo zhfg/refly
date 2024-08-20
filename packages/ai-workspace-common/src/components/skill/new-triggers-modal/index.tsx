@@ -16,10 +16,10 @@ const Option = Select.Option;
 
 const formItemLayout = {
   labelCol: {
-    span: 4,
+    span: 5,
   },
   wrapperCol: {
-    span: 20,
+    span: 19,
   },
 };
 
@@ -79,6 +79,7 @@ export const NewTriggersModal = (props: NewTriggersModalProps) => {
 
   useEffect(() => {
     if (!importNewTriggerModal.showtriggerModal) {
+      setTriggerType('');
       importNewTriggerModal.setTrigger(null);
       form.clearFields();
     } else {
@@ -92,21 +93,13 @@ export const NewTriggersModal = (props: NewTriggersModalProps) => {
   return (
     <Modal
       title={t(`skill.newTriggerModal.${importNewTriggerModal.trigger ? 'update' : 'new'}Title`)}
+      style={{ width: 700 }}
       visible={importNewTriggerModal.showtriggerModal}
       onOk={onOk}
       confirmLoading={confirmLoading}
       onCancel={() => importNewTriggerModal.setShowtriggerModall(false)}
     >
-      <Form
-        {...formItemLayout}
-        form={form}
-        labelCol={{
-          style: { flexBasis: 90 },
-        }}
-        wrapperCol={{
-          style: { flexBasis: 'calc(100% - 90px)' },
-        }}
-      >
+      <Form {...formItemLayout} form={form}>
         <FormItem
           label={t('skill.newTriggerModal.name')}
           required
