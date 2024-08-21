@@ -21,7 +21,7 @@ import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/route
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { ContextStateDisplay } from './context-state-display/index';
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { ChatInput } from './chat-input';
 import { ChatMessages } from './chat-messages';
 import { ConvListModal } from './conv-list-modal';
@@ -65,25 +65,63 @@ import { CurrentContextActionBtn } from '@refly-packages/ai-workspace-common/com
 
 interface AICopilotProps {}
 
-export const AICopilot = (props: AICopilotProps) => {
+export const AICopilot = memo((props: AICopilotProps) => {
   // 所属的环境
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
 
   const [searchParams] = useSearchParams();
   const [copilotBodyHeight, setCopilotBodyHeight] = useState(215 - 32);
-  const userStore = useUserStore();
-  const knowledgeBaseStore = useKnowledgeBaseStore();
-  const noteStore = useNoteStore();
-  const searchStore = useSearchStore();
+  const userStore = useUserStore((state) => ({
+    localSettings: state.localSettings,
+  }));
+  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
+    resourcePanelVisible: state.resourcePanelVisible,
+    kbModalVisible: state.kbModalVisible,
+    actionSource: state.actionSource,
+    tempConvResources: state.tempConvResources,
+    updateConvModalVisible: state.updateConvModalVisible,
+    updateResourcePanelVisible: state.updateResourcePanelVisible,
+    currentKnowledgeBase: state.currentKnowledgeBase,
+    convModalVisible: state.convModalVisible,
+    sourceListModalVisible: state.sourceListModalVisible,
+  }));
+  const noteStore = useNoteStore((state) => ({
+    notePanelVisible: state.notePanelVisible,
+    updateNotePanelVisible: state.updateNotePanelVisible,
+  }));
+  const searchStore = useSearchStore((state) => ({
+    pages: state.pages,
+    isSearchOpen: state.isSearchOpen,
+    setPages: state.setPages,
+    setIsSearchOpen: state.setIsSearchOpen,
+  }));
   const { contextCardHeight, showContextCard, showContextState } = useCopilotContextState();
-  const chatStore = useChatStore();
-  const conversationStore = useConversationStore();
+  const chatStore = useChatStore((state) => ({
+    messages: state.messages,
+    resetState: state.resetState,
+    setMessages: state.setMessages,
+  }));
+  const conversationStore = useConversationStore((state) => ({
+    isNewConversation: state.isNewConversation,
+    currentConversation: state.currentConversation,
+    resetState: state.resetState,
+    setCurrentConversation: state.setCurrentConversation,
+    setIsNewConversation: state.setIsNewConversation,
+  }));
   const [isFetching, setIsFetching] = useState(false);
   const { runSkill } = useBuildThreadAndRun();
-  const searchStateStore = useSearchStateStore();
-  const messageStateStore = useMessageStateStore();
-  const skillStore = useSkillStore();
+  const searchStateStore = useSearchStateStore((state) => ({
+    searchTarget: state.searchTarget,
+  }));
+  const messageStateStore = useMessageStateStore((state) => ({
+    pending: state.pending,
+    pendingFirstToken: state.pendingFirstToken,
+    resetState: state.resetState,
+  }));
+  const skillStore = useSkillStore((state) => ({
+    selectedSkill: state.selectedSkill,
+  }));
 
   console.log('useKnowledgeBaseStore state update from packages', knowledgeBaseStore.resourcePanelVisible);
 
@@ -102,12 +140,6 @@ export const AICopilot = (props: AICopilotProps) => {
   // ai-note handler
   useAINote(true);
   const { handleGetSkillInstances, handleGetSkillTemplates } = useSkillManagement();
-
-  const handleSwitchSearchTarget = () => {
-    if (showContextState) {
-      searchStateStore.setSearchTarget(SearchTarget.CurrentPage);
-    }
-  };
 
   const handleNewTempConv = () => {
     conversationStore.resetState();
@@ -177,9 +209,6 @@ export const AICopilot = (props: AICopilotProps) => {
       chatStore.setMessages([]);
     };
   }, [convId]);
-  useEffect(() => {
-    handleSwitchSearchTarget();
-  }, [showContextState]);
   useResizeCopilot({ containerSelector: 'ai-copilot-container' });
   useDynamicInitContextPanelState(); // 动态根据页面状态更新上下文面板状态
   useEffect(() => {
@@ -317,4 +346,4 @@ export const AICopilot = (props: AICopilotProps) => {
       <SkillManagementModal />
     </div>
   );
-};
+});

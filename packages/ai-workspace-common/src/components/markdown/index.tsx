@@ -58,24 +58,24 @@ export function ATag({ ...props }, sources: Source[]) {
         <PopoverContent
           align={'start'}
           style={{ backgroundColor: '#fcfcf9' }}
-          className="flex flex-col max-w-screen-md gap-2 text-xs shadow-transparent ring-4 ring-zinc-50"
+          className="flex flex-col gap-2 max-w-screen-md text-xs ring-4 shadow-transparent ring-zinc-50"
         >
-          <div className="overflow-hidden font-medium text-ellipsis whitespace-nowrap">{source.metadata?.title}</div>
+          <div className="overflow-hidden font-medium whitespace-nowrap text-ellipsis">{source.metadata?.title}</div>
           <div className="flex gap-4">
             <div className="flex-1">
               <div className="break-words line-clamp-4 text-zinc-500">{source.pageContent}</div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="flex-1 overflow-hidden">
-              <div className="overflow-hidden text-blue-500 text-ellipsis whitespace-nowrap">
+          <div className="flex gap-2 items-center">
+            <div className="overflow-hidden flex-1">
+              <div className="overflow-hidden text-blue-500 whitespace-nowrap text-ellipsis">
                 <a title={source.metadata?.title} href={source.metadata?.source} target="_blank">
                   {source.metadata?.source}
                 </a>
               </div>
             </div>
-            <div className="relative flex items-center flex-none">
+            <div className="flex relative flex-none items-center">
               <img
                 className="w-3 h-3"
                 alt={source.metadata?.source}
@@ -111,7 +111,7 @@ export const Markdown = memo(
     }, [props.loading]);
 
     const shouldLoading = props.loading;
-    const parsedContent = props.content
+    const parsedContent = (props?.content || '')
       ?.replace(/\[\[([cC])itation/g, '[citation')
       .replace(/[cC]itation:(\d+)]]/g, 'citation:$1]')
       .replace(/\[\[([cC]itation:\d+)]](?!])/g, `[$1]`)

@@ -5,7 +5,7 @@ import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 // styles
 import './index.scss';
 import { useQuickSearchStateStore } from '@refly-packages/ai-workspace-common/stores/quick-search-state';
-import { IconClose, IconFontColors, IconSend } from '@arco-design/web-react/icon';
+import { IconClose, IconFontColors, IconPause, IconSend, IconStop } from '@arco-design/web-react/icon';
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { buildConversation } from '@refly-packages/ai-workspace-common/utils/conversation';
@@ -29,7 +29,7 @@ export const ChatInput = (props: ChatInputProps) => {
   const conversationStore = useConversationStore();
   const messageStateStore = useMessageStateStore();
   const skillStore = useSkillStore();
-  const { runSkill, emptyConvRunSkill } = useBuildThreadAndRun();
+  const { runSkill, emptyConvRunSkill, buildShutdownTaskAndGenResponse } = useBuildThreadAndRun();
   // hooks
   const [isFocused, setIsFocused] = useState(false);
 
@@ -42,8 +42,12 @@ export const ChatInput = (props: ChatInputProps) => {
       runSkill(newQAText);
     } else {
       // 新会话阅读，先创建会话，然后进行跳转之后发起聊天
-      emptyConvRunSkill(newQAText);
+      emptyConvRunSkill(newQAText, true);
     }
+  };
+
+  const handleAbort = () => {
+    buildShutdownTaskAndGenResponse();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -113,17 +117,29 @@ export const ChatInput = (props: ChatInputProps) => {
           autoSize={props.autoSize}
         ></TextArea>
         <div className="ai-copilot-chat-input-action">
-          <Button
-            shape="circle"
-            loading={messageStateStore?.pending}
-            icon={<IconSend />}
-            disabled={messageStateStore?.pending}
-            className="search-btn"
-            style={{ color: '#FFF', background: '#00968F' }}
-            onClick={() => {
-              handleSendMessage();
-            }}
-          ></Button>
+          {messageStateStore?.pending ? (
+            <Button
+              shape="circle"
+              icon={<IconPause />}
+              className="search-btn"
+              style={{ color: '#FFF', background: '#000' }}
+              onClick={() => {
+                handleAbort();
+              }}
+            ></Button>
+          ) : (
+            <Button
+              shape="circle"
+              loading={messageStateStore?.pending}
+              icon={<IconSend />}
+              disabled={messageStateStore?.pending}
+              className="search-btn"
+              style={{ color: '#FFF', background: '#00968F' }}
+              onClick={() => {
+                handleSendMessage();
+              }}
+            ></Button>
+          )}
         </div>
       </div>
     </div>

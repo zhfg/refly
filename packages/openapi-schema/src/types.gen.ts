@@ -1177,6 +1177,10 @@ export type SkillContext = {
    * List of URLs
    */
   urls?: Array<string>;
+  /**
+   * user selected output locale
+   */
+  locale?: string;
 };
 
 export type PopulatedSkillContext = SkillContext & {

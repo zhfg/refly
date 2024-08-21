@@ -399,6 +399,9 @@
       "triggers": "触发器",
       "addTrigger": "添加触发器",
       "back": "返回技能管理"
+    },
+    "skillRunStatus": {
+      "error": "发生错误，错误信息：{{error}}"
     }
   },
   "settings": {

@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { memo, useEffect } from "react"
 import { Helmet } from "react-helmet"
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels"
 
@@ -27,14 +27,22 @@ import { useNoteStore } from "@refly-packages/ai-workspace-common/stores/note"
  * 分层架构设计：AI Workspace -> AI Knowledge Base (Knowledge Collecton + AI Note + AI Copilot)
  * /knowledge-base 打开的是一体的，通过 query 参数显示 collection、note 或 copilot，都属于 knowledge base 里面的资源
  */
-const KnowledgeLibraryLayout = () => {
+const KnowledgeLibraryLayout = memo(() => {
   const [token] = useCookie("_refly_ai_sid")
   const [searchParams] = useSearchParams()
   const kbId = searchParams.get("kbId")
   const noteId = searchParams.get("noteId")
-  const userStore = useUserStore()
-  const knowledgeBaseStore = useKnowledgeBaseStore()
-  const noteStore = useNoteStore()
+  const userStore = useUserStore(state => ({
+    userProfile: state.userProfile,
+  }))
+  const knowledgeBaseStore = useKnowledgeBaseStore(state => ({
+    resourcePanelVisible: state.resourcePanelVisible,
+    updateResourcePanelVisible: state.updateResourcePanelVisible,
+  }))
+  const noteStore = useNoteStore(state => ({
+    notePanelVisible: state.notePanelVisible,
+    updateNotePanelVisible: state.updateNotePanelVisible,
+  }))
   const { t } = useTranslation()
 
   const [minSize] = useResizePanel({
@@ -50,8 +58,9 @@ const KnowledgeLibraryLayout = () => {
     status: "success" | "failed",
     token?: string,
   ) => {
+    const { browser } = await import("wxt/browser")
     try {
-      await chrome.runtime.sendMessage(getExtensionId(), {
+      await browser.runtime.sendMessage(getExtensionId(), {
         name: "refly-login-notify",
         body: {
           status,
@@ -165,6 +174,6 @@ const KnowledgeLibraryLayout = () => {
       </div>
     </ErrorBoundary>
   )
-}
+})
 
 export default KnowledgeLibraryLayout

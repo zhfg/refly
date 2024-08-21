@@ -28,16 +28,21 @@ import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 export const useBuildThreadAndRun = () => {
-  const chatStore = useChatStore();
-  const conversationStore = useConversationStore();
+  const chatStore = useChatStore((state) => ({
+    setNewQAText: state.setNewQAText,
+  }));
+  const conversationStore = useConversationStore((state) => ({
+    setCurrentConversation: state.setCurrentConversation,
+    setIsNewConversation: state.setIsNewConversation,
+  }));
   const { resetState } = useResetState();
-  const taskStore = useTaskStore();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { t } = useTranslation();
-  const { buildTaskAndGenReponse } = useBuildTask();
-  const { currentResource, currentKnowledgeBase } = useCopilotContextState();
-  const knowledgeBaseStore = useKnowledgeBaseStore();
+  const taskStore = useTaskStore((state) => ({
+    setTask: state.setTask,
+  }));
+  const { buildTaskAndGenReponse, buildShutdownTaskAndGenResponse } = useBuildTask();
+  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
+    updateCurrentSelectedMark: state.updateCurrentSelectedMark,
+  }));
   const { jumpToConv } = useKnowledgeBaseJumpNewPath();
 
   const emptyConvRunSkill = (question: string, forceNewConv?: boolean) => {
@@ -204,5 +209,6 @@ export const useBuildThreadAndRun = () => {
     runSkill,
     emptyConvRunSkill,
     ensureConversationExist,
+    buildShutdownTaskAndGenResponse,
   };
 };

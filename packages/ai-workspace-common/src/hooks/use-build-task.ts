@@ -3,8 +3,8 @@ import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
 import { Source } from '@refly/openapi-schema';
-import type { MessageState, RelatedQuestion, SkillEvent } from '@refly/common-types';
-import { TASK_STATUS } from '@refly/common-types';
+import type { MessageState, OutputLocale, RelatedQuestion, SkillEvent } from '@refly/common-types';
+import { LOCALE, TASK_STATUS } from '@refly/common-types';
 import type { ChatTask, InvokeSkillRequest, ChatMessage } from '@refly/openapi-schema';
 import { buildQuestionMessage, buildReplyMessage } from '@refly-packages/ai-workspace-common/utils/message';
 
@@ -20,13 +20,23 @@ import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { getAuthTokenFromCookie } from '@refly-packages/utils/request';
+import { useTranslation } from 'react-i18next';
 // stores
 
 export const useBuildTask = () => {
   const streamingChatPortRef = useRef<Runtime.Port>();
-  const chatStore = useChatStore();
-  const messageStateStore = useMessageStateStore();
-  const conversationStore = useConversationStore();
+  const chatStore = useChatStore((state) => ({
+    setMessages: state.setMessages,
+  }));
+  const messageStateStore = useMessageStateStore((state) => ({
+    setMessageState: state.setMessageState,
+    resetState: state.resetState,
+  }));
+  const conversationStore = useConversationStore((state) => ({
+    setCurrentConversation: state.setCurrentConversation,
+    setIsNewConversation: state.setIsNewConversation,
+    currentConversation: state.currentConversation,
+  }));
   // 中断生成
   const controllerRef = useRef<AbortController>();
 
@@ -37,26 +47,18 @@ export const useBuildTask = () => {
     const { currentConversation } = useConversationStore.getState();
     const { skillInstances = [], selectedSkill } = useSkillStore.getState();
 
-    // 构建 filter, for follow ask question config
-    // const weblinkList =
-    // const selectedWeblinkConfig = {
-    //   searchTarget: weblinkList?.length > 0 ? 'selectedPages' : 'all',
-    //   filter: weblinkList,
-    // };
-
     // Skill 和 Message 绑定，某条 AI Message 来自哪个 Skill
     const questionMsg = buildQuestionMessage({
       content: question,
       ...(selectedSkill
         ? {
             skillMeta: {
-              name: selectedSkill.name,
+              tplName: selectedSkill.tplName,
               skillId: selectedSkill.skillId,
               displayName: selectedSkill.displayName,
             },
           }
         : {}),
-      // selectedWeblinkConfig: JSON.stringify(selectedWeblinkConfig), // 先 deprecated
     });
     // 将 reply 加到 message-state
     messageStateStore.setMessageState({
@@ -70,15 +72,6 @@ export const useBuildTask = () => {
     setTimeout(() => {
       // 滑动到底部
       scrollToBottom();
-    });
-  };
-
-  const buildShutdownTaskAndGenResponse = () => {
-    controllerRef.current?.abort();
-    handleSendMessage({
-      body: {
-        type: TASK_STATUS.SHUTDOWN,
-      },
     });
   };
 
@@ -110,7 +103,7 @@ export const useBuildTask = () => {
       .reverse()
       .find(
         (item) =>
-          item?.skillMeta?.name === skillEvent?.skillMeta?.name &&
+          item?.skillMeta?.tplName === skillEvent?.skillMeta?.tplName &&
           item?.type === 'ai' &&
           item?.spanId === skillEvent?.spanId,
       );
@@ -150,7 +143,7 @@ export const useBuildTask = () => {
       .reverse()
       .find(
         (item) =>
-          item?.skillMeta?.name === skillEvent?.skillMeta?.name &&
+          item?.skillMeta?.tplName === skillEvent?.skillMeta?.tplName &&
           item?.type === 'ai' &&
           item?.spanId === skillEvent?.spanId,
       );
@@ -177,7 +170,7 @@ export const useBuildTask = () => {
       .reverse()
       .find(
         (item) =>
-          item?.skillMeta?.name === skillEvent?.skillMeta?.name &&
+          item?.skillMeta?.tplName === skillEvent?.skillMeta?.tplName &&
           item?.type === 'ai' &&
           item?.spanId === skillEvent?.spanId,
       );
@@ -219,7 +212,7 @@ export const useBuildTask = () => {
       .reverse()
       .find(
         (item) =>
-          item?.skillMeta?.name === skillEvent?.skillMeta?.name &&
+          item?.skillMeta?.tplName === skillEvent?.skillMeta?.tplName &&
           item?.type === 'ai' &&
           item?.spanId === skillEvent?.spanId,
       );
@@ -260,7 +253,7 @@ export const useBuildTask = () => {
       .reverse()
       .find(
         (item) =>
-          item?.skillMeta?.name === skillEvent?.skillMeta?.name &&
+          item?.skillMeta?.tplName === skillEvent?.skillMeta?.tplName &&
           item?.type === 'ai' &&
           item?.spanId === skillEvent?.spanId,
       );
@@ -275,10 +268,9 @@ export const useBuildTask = () => {
     chatStore.setMessages(messages);
   };
 
-  const onError = (status: number) => {
+  const buildErrMsgAndAppendToChat = (msg: string) => {
     const currentChatState = useChatStore.getState();
     console.log('status', status);
-    controllerRef.current?.abort();
 
     const newMessageState: Partial<MessageState> = {
       pending: false,
@@ -287,21 +279,46 @@ export const useBuildTask = () => {
 
     // 构建一条错误消息放在末尾，而不是类似 loading 直接展示，因为要 error 停留在聊天列表里
     const errMsg = buildErrorMessage({
-      content: `发生错误，错误信息：${status}`, // TODO: 优化错误信息的展示
+      content: msg, // TODO: 优化错误信息的展示
     });
 
     chatStore.setMessages([...currentChatState.messages, { ...errMsg }]);
-
-    // 更新消息之后滚动到底部
-    setTimeout(() => {
-      scrollToBottom();
-    }, 1000);
 
     newMessageState.error = true;
     newMessageState.pendingFirstToken = false;
 
     // 更新 messageState 的状态，然后直接结束，不走后面的流程
     messageStateStore.setMessageState(newMessageState);
+  };
+
+  const buildShutdownTaskAndGenResponse = (msg?: string) => {
+    const { localSettings } = useUserStore.getState();
+    const locale = localSettings?.outputLocale as OutputLocale;
+    try {
+      controllerRef.current?.abort();
+    } catch (err) {}
+
+    const errorMsg = msg || (locale.includes('zh') ? '你已经终止了技能运行' : 'You have terminated the skill run');
+    // handleSendMessage({
+    //   body: {
+    //     type: TASK_STATUS.SHUTDOWN,
+    //   },
+    // });
+    buildErrMsgAndAppendToChat(errorMsg);
+    messageStateStore.resetState();
+    // 更新消息之后滚动到底部
+    setTimeout(() => {
+      scrollToBottom();
+    }, 1000);
+  };
+
+  const onError = (msg: string) => {
+    // if it is aborted, do nothing
+    if (controllerRef.current?.signal?.aborted) {
+      return;
+    }
+
+    buildShutdownTaskAndGenResponse(msg);
   };
 
   const onCompleted = () => {

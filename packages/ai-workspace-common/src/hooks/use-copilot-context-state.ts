@@ -5,7 +5,6 @@ import { ChatMessage } from '@refly/openapi-schema';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
-import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 
 const checkShowRelatedQuestion = (messsages: ChatMessage[] = []) => {
@@ -19,10 +18,19 @@ const checkShowRelatedQuestion = (messsages: ChatMessage[] = []) => {
 
 export const useCopilotContextState = () => {
   const [contextCardHeight, setContextCardHeight] = useState(104);
-  const searchStateStore = useSearchStateStore();
-  const chatStore = useChatStore();
-  const knowledgeBaseStore = useKnowledgeBaseStore();
-  const noteStore = useNoteStore();
+  const chatStore = useChatStore((state) => ({
+    messages: state.messages,
+  }));
+  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
+    showContextCard: state.showContextCard,
+    contextDomain: state.contextDomain,
+    currentKnowledgeBase: state.currentKnowledgeBase,
+    currentResource: state.currentResource,
+    currentSelectedMark: state.currentSelectedMark,
+  }));
+  const noteStore = useNoteStore((state) => ({
+    currentNote: state.currentNote,
+  }));
 
   const [queryParams] = useSearchParams();
   const resId = queryParams.get('resId');

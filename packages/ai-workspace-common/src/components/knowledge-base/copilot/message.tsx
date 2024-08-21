@@ -26,244 +26,257 @@ import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/us
 import { SkillManagement } from '@refly-packages/ai-workspace-common/components/skill/skill-management';
 import { ClientChatMessage } from '@refly/common-types';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
+import { memo } from 'react';
 
-export const HumanMessage = (props: { message: Partial<ChatMessage>; profile: { avatar: string; name: string } }) => {
-  const { message, profile } = props;
-  return (
-    <div className="ai-copilot-message human-message-container">
-      <div className="human-message">
-        <div className="message-name-and-content">
-          <span className="message-name">{profile?.name}</span>
-          <div className="human-message-content">
-            <Markdown content={message?.content as string} />
+export const HumanMessage = memo(
+  (props: { message: Partial<ChatMessage>; profile: { avatar: string; name: string } }) => {
+    const { message, profile } = props;
+    return (
+      <div className="ai-copilot-message human-message-container">
+        <div className="human-message">
+          <div className="message-name-and-content">
+            <span className="message-name">{profile?.name}</span>
+            <div className="human-message-content">
+              <Markdown content={message?.content as string} />
+            </div>
+          </div>
+          <div className="message-avatar">
+            <Avatar size={32}>
+              <img src={profile?.avatar} />
+            </Avatar>
           </div>
         </div>
-        <div className="message-avatar">
-          <Avatar size={32}>
-            <img src={profile?.avatar} />
-          </Avatar>
-        </div>
       </div>
-    </div>
-  );
-};
+    );
+  },
+);
 
 const CollapseItem = Collapse.Item;
 
-export const AssistantMessage = (props: {
-  message: Partial<ClientChatMessage>;
-  isPendingFirstToken: boolean;
-  isPending: boolean;
-  isLastSession: boolean;
-  handleAskFollowing: (question?: string) => void;
-}) => {
-  const { message, isPendingFirstToken = false, isPending, isLastSession = false, handleAskFollowing } = props;
-  const { t } = useTranslation();
-  const noteStore = useNoteStore();
-  let sources =
-    typeof message?.structuredData?.['sources'] === 'string'
-      ? safeParseJSON(message?.structuredData?.['sources'])
-      : (message?.structuredData?.['sources'] as Source[]);
-  let relatedQuestions =
-    typeof message?.structuredData?.['relatedQuestions'] === 'string'
-      ? safeParseJSON(message?.structuredData?.['relatedQuestions'])
-      : (message?.structuredData?.['relatedQuestions'] as Array<string>);
+export const AssistantMessage = memo(
+  (props: {
+    message: Partial<ClientChatMessage>;
+    isPendingFirstToken: boolean;
+    isPending: boolean;
+    isLastSession: boolean;
+    handleAskFollowing: (question?: string) => void;
+  }) => {
+    const { message, isPendingFirstToken = false, isPending, isLastSession = false, handleAskFollowing } = props;
+    const { t } = useTranslation();
+    const noteStoreEditor = useNoteStore((state) => state.editor);
+    let sources =
+      typeof message?.structuredData?.['sources'] === 'string'
+        ? safeParseJSON(message?.structuredData?.['sources'])
+        : (message?.structuredData?.['sources'] as Source[]);
+    let relatedQuestions =
+      typeof message?.structuredData?.['relatedQuestions'] === 'string'
+        ? safeParseJSON(message?.structuredData?.['relatedQuestions'])
+        : (message?.structuredData?.['relatedQuestions'] as Array<string>);
 
-  const profile = { name: message?.skillMeta?.displayName, avatar: message?.skillMeta?.displayName };
+    const profile = { name: message?.skillMeta?.displayName, avatar: message?.skillMeta?.displayName };
 
-  // TODO: 移入新组件
+    // TODO: 移入新组件
+    console.log(
+      'rerender assistant message',
+      message,
+      isPendingFirstToken,
+      isPending,
+      isLastSession,
+      handleAskFollowing,
+    );
 
-  const handleEditorOperation = (type: EditorOperation, content: string) => {
-    // editorEmitter.emit('insertBlow', message?.content);
+    const handleEditorOperation = (type: EditorOperation, content: string) => {
+      // editorEmitter.emit('insertBlow', message?.content);
 
-    if (type === 'insertBlow' || type === 'replaceSelection') {
-      const editor = noteStore.editor;
-      const selection = editor.view.state.selection;
+      if (type === 'insertBlow' || type === 'replaceSelection') {
+        const editor = noteStoreEditor;
+        const selection = editor.view.state.selection;
 
-      if (!editor) return;
+        if (!editor) return;
 
-      editor
-        ?.chain()
-        .focus()
-        .insertContentAt(
-          {
-            from: selection.from,
-            to: selection.to,
-          },
-          content,
-        )
-        .run();
-    } else if (type === 'createNewNote') {
-      editorEmitter.emit('createNewNote', content);
-    }
-  };
+        editor
+          ?.chain()
+          .focus()
+          .insertContentAt(
+            {
+              from: selection.from,
+              to: selection.to,
+            },
+            content,
+          )
+          .run();
+      } else if (type === 'createNewNote') {
+        editorEmitter.emit('createNewNote', content);
+      }
+    };
 
-  const dropList = (
-    <Menu
-      className={'output-locale-list-menu'}
-      onClickMenuItem={(key) => {
-        const parsedText = message?.content?.replace(/\[citation]\(\d+\)/g, '');
-        handleEditorOperation(key as EditorOperation, parsedText || '');
-      }}
-      style={{ width: 240 }}
-    >
-      <Menu.Item key="insertBlow">
-        <IconImport /> 插入笔记
-      </Menu.Item>
-      <Menu.Item key="replaceSelection">
-        <IconCheckCircle /> 替换选中
-      </Menu.Item>
-      <Menu.Item key="createNewNote">
-        <IconBook /> 创建新笔记
-      </Menu.Item>
-    </Menu>
-  );
+    const dropList = (
+      <Menu
+        className={'output-locale-list-menu'}
+        onClickMenuItem={(key) => {
+          const parsedText = message?.content?.replace(/\[citation]\(\d+\)/g, '');
+          handleEditorOperation(key as EditorOperation, parsedText || '');
+        }}
+        style={{ width: 240 }}
+      >
+        <Menu.Item key="insertBlow">
+          <IconImport /> 插入笔记
+        </Menu.Item>
+        <Menu.Item key="replaceSelection">
+          <IconCheckCircle /> 替换选中
+        </Menu.Item>
+        <Menu.Item key="createNewNote">
+          <IconBook /> 创建新笔记
+        </Menu.Item>
+      </Menu>
+    );
 
-  return (
-    <div className="ai-copilot-message assistant-message-container">
-      <div className="assistant-message">
-        <>
-          <div className="message-avatar">
-            <Avatar size={32} style={{ backgroundColor: '#00d0b6' }}>
-              {/* <img src={profile?.avatar} /> */}
-              {profile?.avatar || '知识管家'}
-            </Avatar>
-          </div>
-          <div className="message-name-and-content">
-            <span className="message-name">{profile?.name || 'Refly 系统提示'}</span>
-            <div className="assistant-message-content">
-              <Collapse bordered={false} expandIconPosition="right">
-                <CollapseItem
-                  className={'message-log-collapse-container'}
-                  header={
-                    message?.pending ? (
-                      <div className="message-log-collapse-header">
-                        <Spin size={12} />
-                        <p className="message-log-content">
-                          {message?.logs?.length > 0 ? message?.logs?.[message?.logs?.length - 1] : '技能运行中...'}
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="message-log-collapse-header">
-                        <IconCheckCircle style={{ fontSize: 12, color: 'green' }} />
-                        <p className="message-log-content">技能已完成，共 {message?.logs?.length} 条日志</p>
-                      </div>
-                    )
-                  }
-                  name="1"
-                >
-                  {message?.logs?.length > 0 ? (
-                    <div className="message-log-container">
-                      {message?.logs?.map((log, index) => (
-                        <div className="message-log-item" key={index}>
+    return (
+      <div className="ai-copilot-message assistant-message-container">
+        <div className="assistant-message">
+          <>
+            <div className="message-avatar">
+              <Avatar size={32} style={{ backgroundColor: '#00d0b6' }}>
+                {/* <img src={profile?.avatar} /> */}
+                {profile?.avatar || '知识管家'}
+              </Avatar>
+            </div>
+            <div className="message-name-and-content">
+              <span className="message-name">{profile?.name || 'Refly 系统提示'}</span>
+              <div className="assistant-message-content">
+                <Collapse bordered={false} expandIconPosition="right">
+                  <CollapseItem
+                    className={'message-log-collapse-container'}
+                    header={
+                      message?.pending ? (
+                        <div className="message-log-collapse-header">
+                          <Spin size={12} />
+                          <p className="message-log-content">
+                            {message?.logs?.length > 0 ? message?.logs?.[message?.logs?.length - 1] : '技能运行中...'}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="message-log-collapse-header">
                           <IconCheckCircle style={{ fontSize: 12, color: 'green' }} />
-                          <p className="message-log-content">{log}</p>
+                          <p className="message-log-content">技能已完成，共 {message?.logs?.length} 条日志</p>
+                        </div>
+                      )
+                    }
+                    name="1"
+                  >
+                    {message?.logs?.length > 0 ? (
+                      <div className="message-log-container">
+                        {message?.logs?.map((log, index) => (
+                          <div className="message-log-item" key={index}>
+                            <IconCheckCircle style={{ fontSize: 12, color: 'green' }} />
+                            <p className="message-log-content">{log}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+                  </CollapseItem>
+                </Collapse>
+                <div className="session-source">
+                  {(sources || [])?.length > 0 ? (
+                    <div className="session-title-icon">
+                      <p>{t('threadDetail.item.session.source')}</p>
+                    </div>
+                  ) : null}
+                  <SourceList
+                    isPendingFirstToken={isPendingFirstToken}
+                    sources={sources || []}
+                    isLastSession={isLastSession}
+                  />
+                </div>
+                {(sources || [])?.length > 0 ? (
+                  <Divider
+                    style={{
+                      borderBottomStyle: 'dashed',
+                      margin: '12px 0',
+                    }}
+                  />
+                ) : null}
+                {isLastSession && isPendingFirstToken ? (
+                  <Skeleton animation text={{ width: '90%' }}></Skeleton>
+                ) : (
+                  <Markdown content={message?.content as string} sources={sources} />
+                )}
+                {(relatedQuestions || [])?.length > 0 ? (
+                  <Divider
+                    style={{
+                      borderBottomStyle: 'dashed',
+                      margin: '12px 0',
+                    }}
+                  />
+                ) : null}
+                {(relatedQuestions || []).length > 0 ? (
+                  <div className="ai-copilot-related-question-container">
+                    {(relatedQuestions || [])?.length > 0 ? (
+                      <div className="session-title-icon">
+                        <p>你可能还想问</p>
+                      </div>
+                    ) : null}
+                    <div className="ai-copilot-related-question-list">
+                      {relatedQuestions?.map((item, index) => (
+                        <div
+                          className="ai-copilot-related-question-item"
+                          key={index}
+                          onClick={() => handleAskFollowing(item)}
+                        >
+                          <p className="ai-copilot-related-question-title">{item}</p>
+                          {/* <IconRight style={{ color: 'rgba(0, 0, 0, 0.5)' }} /> */}
                         </div>
                       ))}
                     </div>
-                  ) : null}
-                </CollapseItem>
-              </Collapse>
-              <div className="session-source">
-                {(sources || [])?.length > 0 ? (
-                  <div className="session-title-icon">
-                    <p>{t('threadDetail.item.session.source')}</p>
                   </div>
                 ) : null}
-                <SourceList
-                  isPendingFirstToken={isPendingFirstToken}
-                  sources={sources || []}
-                  isLastSession={isLastSession}
-                />
               </div>
-              {(sources || [])?.length > 0 ? (
-                <Divider
-                  style={{
-                    borderBottomStyle: 'dashed',
-                    margin: '12px 0',
-                  }}
-                />
-              ) : null}
-              {isLastSession && isPendingFirstToken ? (
-                <Skeleton animation text={{ width: '90%' }}></Skeleton>
-              ) : (
-                <Markdown content={message?.content as string} sources={sources} />
-              )}
-              {(relatedQuestions || [])?.length > 0 ? (
-                <Divider
-                  style={{
-                    borderBottomStyle: 'dashed',
-                    margin: '12px 0',
-                  }}
-                />
-              ) : null}
-              {(relatedQuestions || []).length > 0 ? (
-                <div className="ai-copilot-related-question-container">
-                  {(relatedQuestions || [])?.length > 0 ? (
-                    <div className="session-title-icon">
-                      <p>你可能还想问</p>
-                    </div>
-                  ) : null}
-                  <div className="ai-copilot-related-question-list">
-                    {relatedQuestions?.map((item, index) => (
-                      <div
-                        className="ai-copilot-related-question-item"
-                        key={index}
-                        onClick={() => handleAskFollowing(item)}
-                      >
-                        <p className="ai-copilot-related-question-title">{item}</p>
-                        {/* <IconRight style={{ color: 'rgba(0, 0, 0, 0.5)' }} /> */}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-            </div>
-            {(!isPending || !isLastSession) && (
-              <div className="ai-copilot-answer-action-container">
-                <div className="session-answer-actionbar">
-                  <div className="session-answer-actionbar-left">
-                    <Button
-                      type="text"
-                      icon={<IconCopy style={{ fontSize: 14 }} />}
-                      style={{ color: '#64645F' }}
-                      className={'assist-action-item'}
-                      onClick={() => {
-                        const parsedText = message?.content?.replace(/\[citation]\(\d+\)/g, '');
-
-                        copyToClipboard(parsedText || '');
-                        Message.success('复制成功');
-                      }}
-                    >
-                      复制
-                    </Button>
-                    <Dropdown droplist={dropList} position="bl">
+              {(!isPending || !isLastSession) && (
+                <div className="ai-copilot-answer-action-container">
+                  <div className="session-answer-actionbar">
+                    <div className="session-answer-actionbar-left">
                       <Button
                         type="text"
-                        className={'assist-action-item'}
-                        icon={<IconImport style={{ fontSize: 14 }} />}
+                        icon={<IconCopy style={{ fontSize: 14 }} />}
                         style={{ color: '#64645F' }}
+                        className={'assist-action-item'}
                         onClick={() => {
                           const parsedText = message?.content?.replace(/\[citation]\(\d+\)/g, '');
-                          // editorEmitter.emit('insertBlow', message?.content || '');
-                          handleEditorOperation('insertBlow', parsedText || '');
+
+                          copyToClipboard(parsedText || '');
+                          Message.success('复制成功');
                         }}
                       >
-                        插入笔记
-                        <IconCaretDown />
+                        复制
                       </Button>
-                    </Dropdown>
+                      <Dropdown droplist={dropList} position="bl">
+                        <Button
+                          type="text"
+                          className={'assist-action-item'}
+                          icon={<IconImport style={{ fontSize: 14 }} />}
+                          style={{ color: '#64645F' }}
+                          onClick={() => {
+                            const parsedText = message?.content?.replace(/\[citation]\(\d+\)/g, '');
+                            // editorEmitter.emit('insertBlow', message?.content || '');
+                            handleEditorOperation('insertBlow', parsedText || '');
+                          }}
+                        >
+                          插入笔记
+                          <IconCaretDown />
+                        </Button>
+                      </Dropdown>
+                    </div>
+                    <div className="session-answer-actionbar-right"></div>
                   </div>
-                  <div className="session-answer-actionbar-right"></div>
                 </div>
-              </div>
-            )}
-          </div>
-        </>
+              )}
+            </div>
+          </>
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  },
+);
 
 export const PendingMessage = () => {
   return (

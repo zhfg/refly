@@ -71,7 +71,6 @@ export abstract class BaseSkill extends StructuredTool {
         spanId: config.configurable.spanId,
       },
     });
-
     return response;
   }
 }

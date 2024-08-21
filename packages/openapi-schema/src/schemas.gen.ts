@@ -1704,6 +1704,13 @@ export const $SkillContext = {
         type: 'string',
       },
     },
+    locale: {
+      type: 'string',
+      description: 'user selected output locale',
+      items: {
+        type: 'string',
+      },
+    },
   },
 } as const;
 

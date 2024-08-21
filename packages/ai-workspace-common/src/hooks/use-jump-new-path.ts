@@ -4,7 +4,9 @@ import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-commo
 
 export const useKnowledgeBaseJumpNewPath = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const noteStore = useNoteStore();
+  const noteStore = useNoteStore((state) => ({
+    updateNotePanelVisible: state.updateNotePanelVisible,
+  }));
   const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
     updateResourcePanelVisible: state.updateResourcePanelVisible,
   }));

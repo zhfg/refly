@@ -2351,6 +2351,11 @@ components:
           description: List of URLs
           items:
             type: string
+        locale:
+          type: string
+          description: user selected output locale
+          items:
+            type: string
     PopulatedSkillContext:
       allOf:
         - $ref: '#/components/schemas/SkillContext'
