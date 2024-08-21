@@ -5,7 +5,7 @@ import { BasePopover, Content } from './base';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { SearchResult } from '@refly/openapi-schema';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-or-search-list';
+import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/hooks';
 import { useEffect } from 'react';
 
 export const NotePopover = () => {

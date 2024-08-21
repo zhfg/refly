@@ -1,5 +1,5 @@
 // components
-import { MultiSelect } from '@refly-packages/ai-workspace-common/components/skill/multi-select';
+import { SearchSelect } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
 // store
 
 import { SkillInvocationRule } from '@refly/openapi-schema';
@@ -8,6 +8,12 @@ import { Input, FormInstance } from '@arco-design/web-react';
 import { TFunction } from 'i18next';
 
 const TextArea = Input.TextArea;
+
+const ruleKeyToSearchDomain = {
+  resourceIds: 'resource',
+  noteIds: 'note',
+  collectionIds: 'collection',
+} as const;
 
 export const InvokeOptionComponent = (props: {
   rule: SkillInvocationRule;
@@ -24,11 +30,12 @@ export const InvokeOptionComponent = (props: {
   if (rule.key === 'resourceIds' || rule.key === 'noteIds' || rule.key === 'collectionIds') {
     return (
       <>
-        <MultiSelect
+        <SearchSelect
+          mode="multiple"
+          domain={ruleKeyToSearchDomain[rule.key]}
           defaultValue={form.getFieldValue(fieldMap ? fieldMap[rule.key] : rule.key)}
-          type={rule.key}
           placeholder={t(`skill.instanceInvokeModal.placeholder.${rule.key}`)}
-          onValueChange={(val) => {
+          onChange={(val) => {
             form.setFieldValue(fieldMap ? fieldMap[rule.key] : rule.key, val);
           }}
         />

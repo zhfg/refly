@@ -6,7 +6,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { SearchDomain, SearchResult } from '@refly/openapi-schema';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { memo, useCallback, useEffect, useState } from 'react';
-import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-or-search-list';
+import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/hooks';
 import { sendMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { searchData } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/utils';

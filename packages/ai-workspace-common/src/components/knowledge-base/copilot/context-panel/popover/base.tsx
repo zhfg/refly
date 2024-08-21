@@ -20,7 +20,7 @@ import { useEffect, useState } from 'react';
 
 // utils
 import { getSelectedData } from '../utils';
-import { ListMode, useFetchOrSearchList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-or-search-list';
+import { ListMode } from '@refly-packages/ai-workspace-common/modules/entity-selector/hooks';
 
 // requests
 import { SearchResult } from '@refly/openapi-schema';

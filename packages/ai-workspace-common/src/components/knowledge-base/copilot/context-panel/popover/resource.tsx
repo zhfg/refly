@@ -6,7 +6,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { SearchResult } from '@refly/openapi-schema';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useEffect } from 'react';
-import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-or-search-list';
+import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/hooks';
 
 export const ResourcePopover = () => {
   const { setSelectedResources } = useContextPanelStore((state) => ({

@@ -5,15 +5,28 @@ import { useDebouncedCallback } from 'use-debounce';
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
+import { DataFetcher, domainToFetchData } from '@refly-packages/ai-workspace-common/modules/entity-selector/utils';
 
 export type ListMode = 'fetch' | 'search';
 
 export const useFetchOrSearchList = ({
+  domain,
   fetchData,
+  pageSize = 10,
 }: {
-  fetchData?: (payload: { pageSize: number; page: number }) => Promise<{ success: boolean; data?: SearchResult[] }>;
+  domain?: SearchDomain;
+  fetchData?: DataFetcher;
+  pageSize?: number;
 }) => {
   const [mode, setMode] = useState<ListMode>('fetch');
+
+  if (!fetchData) {
+    fetchData = domainToFetchData[domain];
+    if (!fetchData) {
+      throw new Error(`Domain ${domain} not supported`);
+    }
+  }
+
   // fetch
   const {
     hasMore,
@@ -27,6 +40,7 @@ export const useFetchOrSearchList = ({
     resetState,
   } = useFetchDataList({
     fetchData,
+    pageSize,
   });
 
   const debouncedSearch: ({ searchVal, domains }: { searchVal: string; domains?: Array<SearchDomain> }) => any =
@@ -42,10 +56,9 @@ export const useFetchOrSearchList = ({
 
         const resData = res?.data?.data || [];
 
-        console.log('resData', resData);
         setDataList(resData);
       } catch (err) {
-        console.log('big search err: ', err);
+        console.error('debounced search err: ', err);
       }
     }, 200);
 

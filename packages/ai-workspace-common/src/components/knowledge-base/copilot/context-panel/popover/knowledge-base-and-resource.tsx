@@ -4,7 +4,7 @@ import { BasePopover, Content } from './base';
 // requests
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { SearchResult } from '@refly/openapi-schema';
-import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-or-search-list';
+import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/hooks';
 import { useEffect } from 'react';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 

@@ -530,6 +530,22 @@
       }
     }
   },
+  "entitySelector": {
+    "placeholder": {
+      "collection": "Select Collection",
+      "resource": "Select Resource",
+      "note": "Select Note",
+      "skill": "Select Skill",
+      "conversation": "Select Conversation"
+    },
+    "createEntity": {
+      "collection": "New Collection",
+      "resource": "New Resource",
+      "note": "New Note",
+      "skill": "New Skill",
+      "conversation": "New Conversation"
+    }
+  },
   "components": {
     "markdown": {
       "copySuccess": "Content Copied to Clipboard"
