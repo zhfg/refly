@@ -1264,7 +1264,7 @@ export const $UpsertCollectionResponse = {
 
 export const $AddResourceToCollectionRequest = {
   type: 'object',
-  required: ['resourceId', 'collectionId'],
+  required: ['collectionId', 'resourceIds'],
   properties: {
     collectionId: {
       type: 'string',
@@ -1282,7 +1282,7 @@ export const $AddResourceToCollectionRequest = {
 
 export const $RemoveResourceFromCollectionRequest = {
   type: 'object',
-  required: ['resourceId', 'collectionId'],
+  required: ['collectionId', 'resourceIds'],
   properties: {
     collectionId: {
       type: 'string',

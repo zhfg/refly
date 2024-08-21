@@ -944,7 +944,7 @@ export type AddResourceToCollectionRequest = {
   /**
    * Resource ID list
    */
-  resourceIds?: Array<string>;
+  resourceIds: Array<string>;
 };
 
 export type RemoveResourceFromCollectionRequest = {
@@ -955,7 +955,7 @@ export type RemoveResourceFromCollectionRequest = {
   /**
    * Resource ID list
    */
-  resourceIds?: Array<string>;
+  resourceIds: Array<string>;
 };
 
 export type DeleteCollectionRequest = {

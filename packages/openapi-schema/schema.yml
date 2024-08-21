@@ -2106,8 +2106,8 @@ components:
     AddResourceToCollectionRequest:
       type: object
       required:
-        - resourceId
         - collectionId
+        - resourceIds
       properties:
         collectionId:
           type: string
@@ -2120,8 +2120,8 @@ components:
     RemoveResourceFromCollectionRequest:
       type: object
       required:
-        - resourceId
         - collectionId
+        - resourceIds
       properties:
         collectionId:
           type: string
