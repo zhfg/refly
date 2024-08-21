@@ -547,6 +547,10 @@ export type ChatMessage = {
     [key: string]: unknown;
   };
   /**
+   * Errors
+   */
+  errors?: Array<string>;
+  /**
    * Related questions
    * @deprecated
    */
