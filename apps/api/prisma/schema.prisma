@@ -105,6 +105,8 @@ model ChatMessage {
   logs                  String      @default("[]") @map("logs")
   /// Structured data output (JSON)
   structuredData        String      @default("{}") @map("structured_data")
+  /// Errors
+  errors                String?     @map("errors")
   /// Locale setting
   locale                String?     @default("") @map("locale")
   /// Create timestamp

@@ -34,6 +34,7 @@ export function toChatMessageDTO(message: ChatMessageModel): ChatMessage {
     dto.skillMeta = JSON.parse(message.skillMeta || '{}');
     dto.logs = JSON.parse(message.logs || '[]');
     dto.structuredData = JSON.parse(message.structuredData || '{}');
+    dto.errors = JSON.parse(message.errors || '[]');
   }
   return dto;
 }
