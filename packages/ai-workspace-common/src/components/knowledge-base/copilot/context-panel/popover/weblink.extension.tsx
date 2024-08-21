@@ -2,7 +2,6 @@ import { Button } from '@arco-design/web-react';
 import { BasePopover, Content } from './base';
 
 // requests
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { SearchDomain, SearchResult } from '@refly/openapi-schema';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { memo, useCallback, useEffect, useState } from 'react';
