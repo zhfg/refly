@@ -97,6 +97,7 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
           }}
           actions={[
             <CardBox
+              index={key}
               cardData={item}
               type="collection"
               cardIcon={<IconBook style={{ fontSize: '32px', strokeWidth: 3 }} />}
@@ -129,6 +130,7 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
                     postDeleteList={(collection: Collection) =>
                       setDataList(dataList.filter((n) => n.collectionId !== collection.collectionId))
                     }
+                    getPopupContainer={() => document.getElementById(`collection-${key}`) as HTMLElement}
                   />
                 </div>
               </div>

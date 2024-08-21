@@ -83,18 +83,19 @@ export const SkillItem = (props: SkillTempProsp | SkillInsProsp) => {
 
         <div className="skill-list-item__action">
           {showExecute && (
-            <IconPlayCircle
-              className="skill-list-item__action-icon"
-              style={{ strokeWidth: 3 }}
+            <Button
+              icon={<IconPlayCircle style={{ strokeWidth: 3 }} />}
+              type="text"
               onClick={(e) => handleClickInvoke(e)}
-            />
+              className="skill-list-item__action-icon"
+            ></Button>
           )}
           {isInstalled ? (
             <InstanceDropdownMenu
               data={data}
               setUpdateModal={(val) => setVisible(val)}
               postDeleteList={postDeleteList}
-              getSkillItemPopupContainer={getSkillItemPopupContainer}
+              getPopupContainer={getSkillItemPopupContainer}
             />
           ) : (
             <Button

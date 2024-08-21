@@ -1,0 +1,14 @@
+.resource-collection-list {
+  .resource-collection-list-item {
+    background-color: transparent;
+
+    &:hover {
+      cursor: pointer;
+      background-color: #f0f0f0;
+    }
+  }
+
+  .active {
+    background-color: #f2f2f2;
+  }
+}

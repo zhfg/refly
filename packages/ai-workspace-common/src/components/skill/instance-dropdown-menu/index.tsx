@@ -20,14 +20,15 @@ interface DropListProps {
   handleCancel: (e: any) => void;
   handlUpdateInstance: (e: any) => void;
   handleDeleteInstance?: (e: any) => void;
+  getPopupContainer?: () => HTMLElement;
 }
 
 const DropList = (props: DropListProps) => {
-  const { handleCancel, handlUpdateInstance, handleDeleteInstance } = props;
+  const { handleCancel, handlUpdateInstance, handleDeleteInstance, getPopupContainer } = props;
   const { t } = useTranslation();
 
   return (
-    <Menu>
+    <Menu onClick={(e) => e.stopPropagation()}>
       <Menu.Item key="edit">
         <div onClick={(e) => handlUpdateInstance(e)}>
           <IconEdit style={iconStyle} />
@@ -39,6 +40,7 @@ const DropList = (props: DropListProps) => {
           focusLock
           title={t('common.deleteConfirmMessage')}
           position="br"
+          getPopupContainer={getPopupContainer}
           onOk={(e) => {
             handleDeleteInstance(e);
           }}
@@ -59,12 +61,12 @@ const DropList = (props: DropListProps) => {
 interface InstanceDropdownMenuProps {
   postDeleteList?: (data: SkillInstance) => void;
   setUpdateModal: (val: boolean) => void;
-  getSkillItemPopupContainer?: () => HTMLElement;
+  getPopupContainer?: () => HTMLElement;
   data: SkillInstance;
 }
 
 export const InstanceDropdownMenu = (props: InstanceDropdownMenuProps) => {
-  const { data, postDeleteList, setUpdateModal, getSkillItemPopupContainer } = props;
+  const { data, postDeleteList, setUpdateModal, getPopupContainer } = props;
   const [popupVisible, setPopupVisible] = useState(false);
   const { t } = useTranslation();
   const location = useLocation();
@@ -110,7 +112,7 @@ export const InstanceDropdownMenu = (props: InstanceDropdownMenuProps) => {
     setPopupVisible(!popupVisible);
   };
 
-  const droplist = DropList({ handleCancel, handlUpdateInstance, handleDeleteInstance });
+  const droplist = DropList({ handleCancel, handlUpdateInstance, handleDeleteInstance, getPopupContainer });
 
   return (
     <Dropdown
@@ -118,7 +120,7 @@ export const InstanceDropdownMenu = (props: InstanceDropdownMenuProps) => {
       popupVisible={popupVisible}
       droplist={droplist}
       triggerProps={{ onClickOutside: () => setPopupVisible(false) }}
-      getPopupContainer={getSkillItemPopupContainer}
+      getPopupContainer={getPopupContainer}
     >
       <Button
         icon={<IconMore style={{ fontSize: 16 }} />}

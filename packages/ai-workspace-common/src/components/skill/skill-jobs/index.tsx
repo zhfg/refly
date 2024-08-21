@@ -3,12 +3,12 @@ import { time } from '@refly-packages/ai-workspace-common/utils/time';
 
 // components
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 // store
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
+import { useSkillJobForCopilot } from '@refly-packages/ai-workspace-common/stores/skill-job-for-copilot';
 
 import './index.scss';
 import { SkillJob } from '@refly/openapi-schema';
@@ -42,6 +42,7 @@ interface SkillJobsProps {
 
 export const SkillJobs = (props: SkillJobsProps) => {
   const { reloadList, setReloadList } = props;
+  const skillJobForCopilot = useSkillJobForCopilot();
   const [searchParams, setSearchParams] = useSearchParams();
   const skillId = searchParams.get('skillId') as string;
 
@@ -139,14 +140,14 @@ export const SkillJobs = (props: SkillJobsProps) => {
     }
 
     const handleClickJob = () => {
-      const { conversation } = job;
-      if (!conversation?.convId) return;
-      setSearchParams({ skillId, convId: conversation.convId });
+      const { jobId } = job;
+      if (!jobId) return;
+      skillJobForCopilot.setJobId(jobId);
     };
 
     const { collections, notes, resources, urls } = job.context;
     return (
-      <div className={`skill-jobs__card ${!conversation?.convId ? 'disabled' : ''}`} onClick={handleClickJob}>
+      <div className="skill-jobs__card" onClick={handleClickJob}>
         <Row align="center" justify="center">
           <Col span={1} className="skill-jobs__card-col">
             <JobStatus status={job.jobStatus} />
@@ -169,7 +170,7 @@ export const SkillJobs = (props: SkillJobsProps) => {
                 <ContextAttachment contextType="collections" contentList={resources.map((item) => item.title)} />
               )}
               {notes?.length && <ContextAttachment contextType="notes" contentList={notes.map((item) => item.title)} />}
-              {urls?.length && <ContextAttachment contextType="urls" contentList={urls} />}
+              {urls?.length ? <ContextAttachment contextType="urls" contentList={urls} /> : null}
             </div>
           </Col>
           <Col span={4} className="skill-jobs__card-col">

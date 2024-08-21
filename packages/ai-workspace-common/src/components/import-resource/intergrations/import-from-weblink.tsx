@@ -1,15 +1,4 @@
-import {
-  Button,
-  Divider,
-  Empty,
-  Input,
-  List,
-  Avatar,
-  Select,
-  Message as message,
-  Affix,
-  Spin,
-} from '@arco-design/web-react';
+import { Button, Divider, Empty, Input, List, Avatar, Message as message, Affix, Spin } from '@arco-design/web-react';
 import { IconLink, IconClose } from '@arco-design/web-react/icon';
 import { useEffect, useState } from 'react';
 
@@ -19,13 +8,12 @@ import { genUniqueId } from '@refly-packages/utils/id';
 import { LinkMeta, useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { SearchResult, UpsertResourceRequest } from '@refly/openapi-schema';
-import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-or-search-list';
+import { UpsertResourceRequest } from '@refly/openapi-schema';
+import { SearchSelect } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
 import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 const { TextArea } = Input;
-const Option = Select.Option;
 
 export const ImportFromWeblink = () => {
   const [linkStr, setLinkStr] = useState('');
@@ -39,26 +27,7 @@ export const ImportFromWeblink = () => {
 
   console.log('select collection id', selectedCollectionId);
 
-  //
   const [saveLoading, setSaveLoading] = useState(false);
-
-  // 列表获取
-  const { loadMore, hasMore, dataList, isRequesting, handleValueChange, mode } = useFetchOrSearchList({
-    fetchData: async (queryPayload) => {
-      const res = await getClient().listCollections({
-        query: {
-          ...queryPayload,
-        },
-      });
-
-      const data: SearchResult[] = (res?.data?.data || []).map((item) => ({
-        id: item?.collectionId,
-        title: item?.title,
-        domain: 'collection',
-      }));
-      return { success: res?.data?.success, data };
-    },
-  });
 
   const scrapeSingleUrl = async (key: string, url: string) => {
     const { scrapeLinks } = useImportResourceStore.getState();
@@ -133,6 +102,7 @@ export const ImportFromWeblink = () => {
     const batchCreateResourceData: UpsertResourceRequest[] = scrapeLinks.map((link) => {
       return {
         resourceType: 'weblink',
+        title: link?.title,
         data: {
           url: link?.url,
           title: link?.title,
@@ -168,7 +138,6 @@ export const ImportFromWeblink = () => {
   };
 
   useEffect(() => {
-    loadMore();
     importResourceStore.setSelectedCollectionId(kbId);
     return () => {
       /* reset selectedCollectionId after modal hide */
@@ -237,15 +206,10 @@ export const ImportFromWeblink = () => {
               |{' '}
             </p>
             <p className="text-item">保存至 </p>
-            <Select
-              size="large"
-              placeholder="选择保存知识库"
-              showSearch
-              className={'kg-selector'}
-              defaultValue={`${kbId || 'new-collection'}`}
-              onInputValueChange={(value) => {
-                handleValueChange(value, ['collection']);
-              }}
+            <SearchSelect
+              domain="collection"
+              className="kg-selector"
+              allowCreateNewEntity
               onChange={(value) => {
                 if (!value) return;
                 if (value === 'new-collection') {
@@ -254,28 +218,7 @@ export const ImportFromWeblink = () => {
                   importResourceStore.setSelectedCollectionId(value);
                 }
               }}
-              dropdownRender={(menu) => (
-                <div>
-                  {menu}
-                  {mode === 'fetch' && hasMore ? (
-                    <div className="search-load-more">
-                      <Button type="text" loading={isRequesting} onClick={() => loadMore()}>
-                        加载更多
-                      </Button>
-                    </div>
-                  ) : null}
-                </div>
-              )}
-            >
-              <Option key="new-collection" value="new-collection">
-                新建知识库
-              </Option>
-              {dataList?.map((item) => (
-                <Option key={item?.id} value={item?.id}>
-                  <span dangerouslySetInnerHTML={{ __html: item?.title }}></span>
-                </Option>
-              ))}
-            </Select>
+            />
           </div>
           <div className="footer-action">
             <Button

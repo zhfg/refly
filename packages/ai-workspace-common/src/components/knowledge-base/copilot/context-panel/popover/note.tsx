@@ -2,11 +2,9 @@ import { Button } from '@arco-design/web-react';
 import { BasePopover, Content } from './base';
 
 // requests
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { SearchResult } from '@refly/openapi-schema';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-or-search-list';
-import { useEffect } from 'react';
+import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/hooks';
 
 export const NotePopover = () => {
   const { setSelectedNotes } = useContextPanelStore((state) => ({
@@ -14,20 +12,7 @@ export const NotePopover = () => {
   }));
   const { loadMore, hasMore, dataList, isRequesting, currentPage, handleValueChange, mode, resetState } =
     useFetchOrSearchList({
-      fetchData: async (queryPayload) => {
-        const res = await getClient().listNotes({
-          query: {
-            ...queryPayload,
-          },
-        });
-
-        const data: SearchResult[] = (res?.data?.data || []).map((item) => ({
-          id: item?.noteId,
-          title: item?.title,
-          domain: 'note',
-        }));
-        return { success: res?.data?.success, data };
-      },
+      domain: 'note',
     });
 
   const updateSelectState = (data: SearchResult[]) => {

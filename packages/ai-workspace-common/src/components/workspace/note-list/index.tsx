@@ -78,6 +78,7 @@ export const NoteList = (props: NoteListProps) => {
           actions={[
             <CardBox
               cardData={item}
+              index={key}
               type="note"
               cardIcon={<IconBook style={{ fontSize: '32px', strokeWidth: 3 }} />}
               onClick={() => jumpToNote({ noteId: item.noteId })}
@@ -94,6 +95,7 @@ export const NoteList = (props: NoteListProps) => {
                     type="note"
                     data={item}
                     postDeleteList={(note) => setDataList(dataList.filter((n) => n.noteId !== note.noteId))}
+                    getPopupContainer={() => document.getElementById(`note-${key}`) as HTMLElement}
                   />
                 </div>
               </div>
