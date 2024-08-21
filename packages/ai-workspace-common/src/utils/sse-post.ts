@@ -30,6 +30,8 @@ export const ssePost = async ({
   onError?: (status: any) => void;
   onCompleted?: (val?: boolean) => void;
 }) => {
+  let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
+
   try {
     const response = await fetch(`${getServerOrigin()}/v1/skill/streamInvoke`, {
       method: 'POST',
@@ -47,22 +49,23 @@ export const ssePost = async ({
       return;
     }
 
-    const reader = response.body!.getReader();
+    reader = response.body!.getReader();
     const decoder = new TextDecoder('utf-8');
     let isSkillFirstMessage = true;
     let bufferStr = '';
 
-    const read = () => {
+    const read = async () => {
       let hasError = false;
+      try {
+        const { done, value } = await reader?.read();
 
-      reader?.read().then((result) => {
-        if (result?.done) {
+        if (done) {
           onCompleted?.();
 
           return;
         }
 
-        bufferStr += decoder.decode(result.value, { stream: true });
+        bufferStr += decoder.decode(value, { stream: true });
         const lines = bufferStr.split('\n');
         let skillEvent: SkillEvent;
 
@@ -105,12 +108,19 @@ export const ssePost = async ({
         }
 
         if (!hasError) {
-          read();
+          await read();
         }
-      });
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          console.log('Read operation aborted');
+          onError?.('Request was aborted');
+          hasError = true;
+          return;
+        }
+      }
     };
 
-    read();
+    await read();
   } catch (error) {
     if (error.name === 'AbortError') {
       console.log('Fetch aborted');
@@ -118,6 +128,16 @@ export const ssePost = async ({
     } else {
       console.error('Fetch error:', error);
       onError?.(error.message);
+    }
+  } finally {
+    // 清理资源
+    if (reader) {
+      try {
+        await reader.cancel();
+      } catch (cancelError) {
+        console.error('Error cancelling reader:', cancelError);
+      }
+      reader.releaseLock();
     }
   }
 };

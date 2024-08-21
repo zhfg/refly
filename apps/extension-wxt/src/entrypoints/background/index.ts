@@ -10,6 +10,21 @@ import { Runtime } from 'wxt/browser';
 
 export const tempTabState: { [key: string]: string } = {};
 
+let lastUniqueId = '';
+export const getLastUniqueId = () => {
+  return lastUniqueId;
+};
+export const setLastUniqueId = (uniqueId: string) => {
+  lastUniqueId = uniqueId;
+};
+export let abortControllerMap = new Map<string, AbortController>();
+export const setAbortController = (controller: AbortController, uniqueId: string) => {
+  abortControllerMap.set(uniqueId, controller);
+
+  return controller;
+};
+export const getAbortController = (uniqueId: string) => abortControllerMap.get(uniqueId);
+
 export default defineBackground(() => {
   // 接收 refly 官网的消息，了解登录的状态
   browser.runtime.onMessageExternal.addListener(onExternalMessage);

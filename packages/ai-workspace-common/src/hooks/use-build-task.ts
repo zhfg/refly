@@ -21,10 +21,15 @@ import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { getAuthTokenFromCookie } from '@refly-packages/utils/request';
 import { useTranslation } from 'react-i18next';
+import { genUniqueId } from '@refly-packages/utils/id';
 // stores
 
+const globalStreamingChatPortRef = { current: null as Runtime.Port | null };
+const globalAbortControllerRef = { current: null as AbortController | null };
+const globalIsAbortedRef = { current: false as boolean };
+let uniqueId = genUniqueId();
+
 export const useBuildTask = () => {
-  const streamingChatPortRef = useRef<Runtime.Port>();
   const chatStore = useChatStore((state) => ({
     setMessages: state.setMessages,
   }));
@@ -37,8 +42,6 @@ export const useBuildTask = () => {
     setIsNewConversation: state.setIsNewConversation,
     currentConversation: state.currentConversation,
   }));
-  // 中断生成
-  const controllerRef = useRef<AbortController>();
 
   const buildTaskAndGenReponse = (task: InvokeSkillRequest) => {
     console.log('buildTaskAndGenReponse', task);
@@ -293,10 +296,26 @@ export const useBuildTask = () => {
   const buildShutdownTaskAndGenResponse = (msg?: string) => {
     const { localSettings } = useUserStore.getState();
     const locale = localSettings?.outputLocale as OutputLocale;
+
+    // extension and web all support abort
     try {
-      controllerRef.current?.abort();
+      globalAbortControllerRef.current?.abort();
+      globalIsAbortedRef.current = true;
     } catch (err) {
       console.log('shutdown error', err);
+    }
+
+    console.log('streamingChatPortRef.current', globalStreamingChatPortRef.current);
+    const runtime = getRuntime();
+    if (runtime?.includes('extension')) {
+      // extension 需要发送一个 abort 事件
+      globalStreamingChatPortRef.current?.postMessage({
+        body: {
+          type: TASK_STATUS.SHUTDOWN,
+        },
+        source: runtime,
+        uniqueId,
+      });
     }
 
     // last message pending to false, and set error to true
@@ -304,16 +323,10 @@ export const useBuildTask = () => {
     const lastMessage = messages[messages.length - 1];
     if (lastMessage?.pending) {
       lastMessage.pending = false;
-      lastMessage.isError = true;
     }
     chatStore.setMessages([...messages.slice(0, -1), lastMessage]);
 
-    const errorMsg = msg || (locale.includes('zh') ? '你已经终止了技能运行' : 'You have terminated the skill run');
-    // handleSendMessage({
-    //   body: {
-    //     type: TASK_STATUS.SHUTDOWN,
-    //   },
-    // });
+    const errorMsg = msg || (locale?.includes('zh') ? '你已经终止了技能运行' : 'You have terminated the skill run');
     buildErrMsgAndAppendToChat(errorMsg);
     messageStateStore.resetState();
     // 更新消息之后滚动到底部
@@ -323,9 +336,17 @@ export const useBuildTask = () => {
   };
 
   const onError = (msg: string) => {
-    // if it is aborted, do nothing
-    if (controllerRef.current?.signal?.aborted) {
-      return;
+    const runtime = getRuntime();
+
+    if (runtime?.includes('extension')) {
+      if (globalIsAbortedRef.current) {
+        return;
+      }
+    } else {
+      // if it is aborted, do nothing
+      if (globalAbortControllerRef.current?.signal?.aborted) {
+        return;
+      }
     }
 
     buildShutdownTaskAndGenResponse(msg);
@@ -364,10 +385,10 @@ export const useBuildTask = () => {
       payload?: InvokeSkillRequest;
     };
   }) => {
-    controllerRef.current = new AbortController();
+    globalAbortControllerRef.current = new AbortController();
 
     ssePost({
-      controller: controllerRef.current,
+      controller: globalAbortControllerRef.current,
       payload: payload?.body?.payload,
       token: getAuthTokenFromCookie(),
       onStart,
@@ -411,26 +432,30 @@ export const useBuildTask = () => {
   const bindExtensionPorts = async () => {
     const portRes = await getPort('streaming-chat' as never);
     if (portRes?.port) {
-      streamingChatPortRef.current = portRes.port;
-      streamingChatPortRef.current?.onMessage?.removeListener?.(handleStreamingMessage);
-      streamingChatPortRef.current?.onMessage.addListener(handleStreamingMessage);
+      globalStreamingChatPortRef.current = portRes.port;
+      globalStreamingChatPortRef.current?.onMessage?.removeListener?.(handleStreamingMessage);
+      globalStreamingChatPortRef.current?.onMessage.addListener(handleStreamingMessage);
     }
   };
 
   const unbindExtensionPorts = async () => {
-    streamingChatPortRef.current?.onMessage.removeListener?.(handleStreamingMessage);
+    globalStreamingChatPortRef.current?.onMessage.removeListener?.(handleStreamingMessage);
     await removePort('streaming-chat');
-    streamingChatPortRef.current = null;
+    globalStreamingChatPortRef.current = null;
   };
 
   const handleSendMessageFromExtension = async (payload: { body: any }) => {
     await unbindExtensionPorts();
     await bindExtensionPorts();
 
+    uniqueId = genUniqueId(); // 每次使用最新的
+    globalIsAbortedRef.current = false;
+
     // 生成任务
-    streamingChatPortRef.current?.postMessage({
+    globalStreamingChatPortRef.current?.postMessage({
       ...payload,
       source: getRuntime(),
+      uniqueId,
     });
   };
 

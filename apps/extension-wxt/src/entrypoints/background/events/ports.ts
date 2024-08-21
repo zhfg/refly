@@ -4,19 +4,26 @@ import { getCookie } from '@/utils/cookie';
 import { getServerOrigin } from '@refly/utils/url';
 import { getExtensionVersion } from '@/utils/version';
 import { ssePost } from '@refly-packages/ai-workspace-common/utils/sse-post';
+import { getAbortController, getLastUniqueId, setAbortController, setLastUniqueId } from '../index';
 
-let abortController: AbortController;
-
-export const handleStreamingChat = async (req: { body: any }, res: { send: (response?: any) => void }) => {
+export const handleStreamingChat = async (
+  req: { body: any; uniqueId: string },
+  res: { send: (response?: any) => void },
+) => {
   const { type, payload } = req?.body || {};
+  const { uniqueId } = req;
   console.log('receive request', req.body);
+  setLastUniqueId(uniqueId);
 
   try {
     if (type === TASK_STATUS.START) {
       // 确保上一次是 aborted 了
-      abortController?.abort?.();
+      const previousController = getAbortController(uniqueId);
+      if (previousController) {
+        previousController.abort();
+      }
 
-      abortController = new AbortController();
+      const abortController = setAbortController(new AbortController(), uniqueId);
 
       // TODO: 这里未来要优化
       const cookie = (await getCookie()) as string;
@@ -70,25 +77,47 @@ export const handleStreamingChat = async (req: { body: any }, res: { send: (resp
           });
         },
       });
+
+      console.log('after abortController', abortController);
     } else if (type === TASK_STATUS.SHUTDOWN) {
-      // TODO: 实现终止与重试
-      abortController.abort();
+      const abortController = getAbortController(uniqueId);
+
+      if (abortController) {
+        abortController?.abort?.();
+      }
     }
   } catch (err) {
     console.log('err', err);
-    // 最终也需要 abort 确保关闭
-    abortController?.abort?.();
+    try {
+      const abortController = getAbortController(uniqueId);
+      if (!abortController?.signal?.aborted) {
+        abortController?.abort?.();
+      }
+    } catch (err) {
+      console.log('err', err);
+    }
   }
 };
 
 export const onPort = async (port: Runtime.Port) => {
   port.onMessage.addListener(async (message: any, comingPort: Runtime.Port) => {
+    console.log('onPort', message, comingPort);
     if (comingPort.name === 'streaming-chat') {
       return handleStreamingChat(message, {
         send: async (msg: any) => {
           port?.postMessage(msg);
         },
       });
+    }
+  });
+
+  port.onDisconnect.addListener(() => {
+    // clear abortController
+    const abortController = getAbortController(getLastUniqueId());
+    try {
+      abortController?.abort?.();
+    } catch (err) {
+      console.log('err', err);
     }
   });
 };
