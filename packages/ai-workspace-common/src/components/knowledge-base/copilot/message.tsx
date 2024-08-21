@@ -3,7 +3,18 @@ import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { ChatMessage, Source } from '@refly/openapi-schema';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
-import { Avatar, Button, Spin, Message, Dropdown, Menu, Skeleton, Collapse, Divider } from '@arco-design/web-react';
+import {
+  Avatar,
+  Button,
+  Spin,
+  Message,
+  Dropdown,
+  Menu,
+  Skeleton,
+  Collapse,
+  Divider,
+  Typography,
+} from '@arco-design/web-react';
 import {
   IconBook,
   IconCaretDown,
@@ -152,13 +163,17 @@ export const AssistantMessage = memo(
                         <div className="message-log-collapse-header">
                           <Spin size={12} />
                           <p className="message-log-content">
-                            {message?.logs?.length > 0 ? message?.logs?.[message?.logs?.length - 1] : '技能运行中...'}
+                            <Typography.Ellipsis>
+                              {message?.logs?.length > 0 ? message?.logs?.[message?.logs?.length - 1] : '技能运行中...'}
+                            </Typography.Ellipsis>
                           </p>
                         </div>
                       ) : (
                         <div className="message-log-collapse-header">
                           <IconCheckCircle style={{ fontSize: 12, color: 'green' }} />
-                          <p className="message-log-content">技能已完成，共 {message?.logs?.length} 条日志</p>
+                          <p className="message-log-content">
+                            <Typography.Ellipsis>技能已完成，共 {message?.logs?.length} 条日志</Typography.Ellipsis>
+                          </p>
                         </div>
                       )
                     }
@@ -169,7 +184,9 @@ export const AssistantMessage = memo(
                         {message?.logs?.map((log, index) => (
                           <div className="message-log-item" key={index}>
                             <IconCheckCircle style={{ fontSize: 12, color: 'green' }} />
-                            <p className="message-log-content">{log}</p>
+                            <p className="message-log-content">
+                              <Typography.Ellipsis>{log}</Typography.Ellipsis>
+                            </p>
                           </div>
                         ))}
                       </div>
