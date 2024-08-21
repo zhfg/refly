@@ -127,6 +127,8 @@ model Resource {
   resourceType String       @default("") @map("resource_type")
   /// UID
   uid          String       @map("uid")
+  /// Collection ID
+  collectionId String    @default("") @map("collection_id")
   /// Word count
   wordCount    Int          @default(0) @map("word_count")
   /// Content of resource
