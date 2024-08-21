@@ -99,7 +99,7 @@ export const defaultSelectedContextState = {
 
 export const defaultCurrentContext = {
   contextDomain: 'resource' as ContextDomain,
-  showContextCard: getRuntime() !== 'web' ? true : false, // 插件状态下自动打开
+  showContextCard: false, // 插件状态下自动打开
 };
 
 export const defaultState = {

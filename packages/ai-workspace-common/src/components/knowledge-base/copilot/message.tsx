@@ -15,17 +15,7 @@ import {
   Divider,
   Typography,
 } from '@arco-design/web-react';
-import {
-  IconBook,
-  IconCaretDown,
-  IconCheckCircle,
-  IconCopy,
-  IconEdit,
-  IconImport,
-  IconLoading,
-  IconQuote,
-  IconRight,
-} from '@arco-design/web-react/icon';
+import { IconBook, IconCaretDown, IconCheckCircle, IconCopy, IconImport, IconRight } from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
 // 自定义组件
 import { SourceList } from '@refly-packages/ai-workspace-common/components/source-list';
@@ -38,6 +28,7 @@ import { SkillManagement } from '@refly-packages/ai-workspace-common/components/
 import { ClientChatMessage } from '@refly/common-types';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 import { memo } from 'react';
+import classNames from 'classnames';
 
 export const HumanMessage = memo(
   (props: { message: Partial<ChatMessage>; profile: { avatar: string; name: string } }) => {
@@ -149,15 +140,15 @@ export const AssistantMessage = memo(
             <div className="message-avatar">
               <Avatar size={32} style={{ backgroundColor: '#00d0b6' }}>
                 {/* <img src={profile?.avatar} /> */}
-                {profile?.avatar || '知识管家'}
+                {profile?.avatar || 'Refly 知识管家'}
               </Avatar>
             </div>
             <div className="message-name-and-content">
-              <span className="message-name">{profile?.name || 'Refly 系统提示'}</span>
+              <span className="message-name">{profile?.name || 'Refly 知识管家'}</span>
               <div className="assistant-message-content">
                 <Collapse bordered={false} expandIconPosition="right">
                   <CollapseItem
-                    className={'message-log-collapse-container'}
+                    className={classNames('message-log-collapse-container')}
                     header={
                       message?.pending ? (
                         <div className="message-log-collapse-header">
@@ -171,8 +162,10 @@ export const AssistantMessage = memo(
                       ) : (
                         <div className="message-log-collapse-header">
                           <IconCheckCircle style={{ fontSize: 12, color: 'green' }} />
-                          <p className="message-log-content">
-                            <Typography.Ellipsis>技能已完成，共 {message?.logs?.length} 条日志</Typography.Ellipsis>
+                          <p className={classNames('message-log-content')}>
+                            <Typography.Ellipsis>
+                              技能已完成，共 {message?.logs?.length || 0} 条日志
+                            </Typography.Ellipsis>
                           </p>
                         </div>
                       )

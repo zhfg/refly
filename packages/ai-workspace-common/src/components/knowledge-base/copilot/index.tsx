@@ -85,6 +85,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
     currentKnowledgeBase: state.currentKnowledgeBase,
     convModalVisible: state.convModalVisible,
     sourceListModalVisible: state.sourceListModalVisible,
+    setShowContextCard: state.setShowContextCard,
   }));
   const noteStore = useNoteStore((state) => ({
     notePanelVisible: state.notePanelVisible,
@@ -96,7 +97,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
     setPages: state.setPages,
     setIsSearchOpen: state.setIsSearchOpen,
   }));
-  const { contextCardHeight, showContextCard, showContextState } = useCopilotContextState();
+  const { contextCardHeight, computedShowContextCard, showContextState } = useCopilotContextState();
   const chatStore = useChatStore((state) => ({
     messages: state.messages,
     resetState: state.resetState,
@@ -130,7 +131,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
   const resId = searchParams.get('resId');
   const { resetState } = useResetState();
   const actualCopilotBodyHeight =
-    copilotBodyHeight + (showContextCard ? contextCardHeight : 0) + (skillStore?.selectedSkill ? 32 : 0) - 16;
+    copilotBodyHeight + (computedShowContextCard ? contextCardHeight : 0) + (skillStore?.selectedSkill ? 32 : 0) - 16;
 
   const { t, i18n } = useTranslation();
   const uiLocale = i18n?.languages?.[0] as LOCALE;
@@ -215,8 +216,15 @@ export const AICopilot = memo((props: AICopilotProps) => {
     handleGetSkillInstances();
     handleGetSkillTemplates();
   }, []);
+  useEffect(() => {
+    const runtime = getRuntime();
 
-  console.log('showContextCard', showContextCard);
+    if (runtime === 'web') {
+      knowledgeBaseStore.setShowContextCard(false);
+    }
+  }, []);
+
+  console.log('computedShowContextCard', computedShowContextCard);
 
   return (
     <div className="ai-copilot-container">
@@ -303,7 +311,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
       </div>
       <div className="ai-copilot-body" style={{ height: actualCopilotBodyHeight }}>
         <div className="ai-copilot-body-inner-container">
-          {showContextCard ? (
+          {computedShowContextCard ? (
             <div className="ai-copilot-context-display">
               <ContextStateDisplay />
             </div>

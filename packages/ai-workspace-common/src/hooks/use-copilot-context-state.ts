@@ -27,9 +27,11 @@ export const useCopilotContextState = () => {
     currentKnowledgeBase: state.currentKnowledgeBase,
     currentResource: state.currentResource,
     currentSelectedMark: state.currentSelectedMark,
+    resourcePanelVisible: state.resourcePanelVisible,
   }));
   const noteStore = useNoteStore((state) => ({
     currentNote: state.currentNote,
+    notePanelVisible: state.notePanelVisible,
   }));
 
   const [queryParams] = useSearchParams();
@@ -48,8 +50,15 @@ export const useCopilotContextState = () => {
   // 是否有内容正在选中
   const showSelectedMark = !!currentSelectedMark;
 
+  // const getShowContextCard = () => {
+  //   if (!knowledgeBaseStore.showContextCard) return false;
+  //   if (!knowledgeBaseStore.resourcePanelVisible && !noteStore.notePanelVisible) return false;
+
+  //   return true;
+  // };
+
   // 是否展示 contextCard
-  const showContextCard = knowledgeBaseStore.showContextCard;
+  const computedShowContextCard = knowledgeBaseStore.showContextCard;
   const contextDomain = knowledgeBaseStore.contextDomain;
 
   // 是否展示 related questions
@@ -64,10 +73,10 @@ export const useCopilotContextState = () => {
 
   useEffect(() => {
     calcContextCardHeight();
-  }, [showContextCard]);
+  }, [computedShowContextCard]);
 
   return {
-    showContextCard,
+    computedShowContextCard,
     contextDomain,
     showContextState,
     showRelatedQuestions,

@@ -38,7 +38,7 @@ export const ChatMessages = memo((props: ChatMessagesProps) => {
             profile={{ avatar: userProfile?.avatar, name: userProfile?.name }}
           />
         );
-      } else {
+      } else if (item?.type === 'ai') {
         return (
           <AssistantMessage
             message={item}

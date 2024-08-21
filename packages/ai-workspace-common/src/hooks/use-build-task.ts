@@ -270,7 +270,6 @@ export const useBuildTask = () => {
 
   const buildErrMsgAndAppendToChat = (msg: string) => {
     const currentChatState = useChatStore.getState();
-    console.log('status', status);
 
     const newMessageState: Partial<MessageState> = {
       pending: false,
@@ -296,7 +295,18 @@ export const useBuildTask = () => {
     const locale = localSettings?.outputLocale as OutputLocale;
     try {
       controllerRef.current?.abort();
-    } catch (err) {}
+    } catch (err) {
+      console.log('shutdown error', err);
+    }
+
+    // last message pending to false, and set error to true
+    const { messages = [] } = useChatStore.getState();
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage?.pending) {
+      lastMessage.pending = false;
+      lastMessage.isError = true;
+    }
+    chatStore.setMessages([...messages.slice(0, -1), lastMessage]);
 
     const errorMsg = msg || (locale.includes('zh') ? '你已经终止了技能运行' : 'You have terminated the skill run');
     // handleSendMessage({
