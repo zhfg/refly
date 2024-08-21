@@ -53,7 +53,6 @@ import { ConfigService } from '@nestjs/config';
 import { SearchService } from '@/search/search.service';
 import { LabelService } from '@/label/label.service';
 import { labelClassPO2DTO, labelPO2DTO } from '@/label/label.dto';
-import { CreateChatMessageInput } from '@/conversation/conversation.dto';
 
 export function createLangchainMessage(content: string, type: MessageType): BaseMessage {
   switch (type) {
@@ -384,6 +383,7 @@ export class SkillService {
       emitter.on('start', eventListener);
       emitter.on('end', eventListener);
       emitter.on('log', eventListener);
+      emitter.on('error', eventListener);
       emitter.on('structured_data', eventListener);
 
       config.configurable.emitter = emitter;
@@ -449,12 +449,48 @@ export class SkillService {
 
     param.input ??= { query: '' };
 
+    const convParam = conversation
+      ? {
+          convId: conversation.convId,
+          title: param.input.query,
+          uid: user.uid,
+        }
+      : null;
+
+    if (param.input.query) {
+      await this.conversation.addChatMessages(
+        [
+          {
+            type: 'human',
+            content: param.input.query,
+            uid: user.uid,
+            convId: conversation?.convId,
+            jobId: job?.jobId,
+          },
+        ],
+        convParam,
+      );
+    }
+
+    let aborted = false;
+
+    if (res) {
+      res.on('close', () => {
+        this.logger.log('[response] Skill invocation aborted due to client disconnect');
+        aborted = true;
+      });
+    }
+
     const msgAggregator = new MessageAggregator();
     const config = await this.buildInvokeConfig({
       user,
       skill,
       param,
       eventListener: (data: SkillEvent) => {
+        if (aborted) {
+          this.logger.warn(`skill invocation aborted, ignore event: ${JSON.stringify(data)}`);
+          return;
+        }
         if (res) {
           writeSSEResponse(res, data);
         }
@@ -463,63 +499,61 @@ export class SkillService {
     });
     const scheduler = new Scheduler(this.skillEngine);
 
-    for await (const event of scheduler.streamEvents(
-      { ...param.input },
-      { ...config, version: 'v2' },
-    )) {
-      const runMeta = event.metadata as SkillRunnableMeta;
-      const chunk: AIMessageChunk = event.data?.chunk ?? event.data?.output;
+    let runMeta: SkillRunnableMeta | null = null;
 
-      // Ignore empty or tool call chunks
-      if (!chunk?.content || chunk?.tool_call_chunks?.length > 0) {
-        continue;
-      }
-
-      switch (event.event) {
-        case 'on_chat_model_stream':
-          if (res) {
-            writeSSEResponse(res, {
-              event: 'stream',
-              skillMeta: runMeta,
+    try {
+      for await (const event of scheduler.streamEvents(
+        { ...param.input },
+        { ...config, version: 'v2' },
+      )) {
+        if (aborted) {
+          if (runMeta) {
+            msgAggregator.addSkillEvent({
+              event: 'error',
               spanId: runMeta.spanId,
-              content:
-                typeof chunk.content === 'string' ? chunk.content : JSON.stringify(chunk.content),
+              skillMeta: runMeta,
+              content: 'AbortError',
             });
+            msgAggregator.abort();
           }
-          break;
-        case 'on_chat_model_end':
-          msgAggregator.setContent(runMeta, event.data.output.content);
-          break;
+          throw new Error('AbortError');
+        }
+
+        runMeta = event.metadata as SkillRunnableMeta;
+        const chunk: AIMessageChunk = event.data?.chunk ?? event.data?.output;
+
+        // Ignore empty or tool call chunks
+        if (!chunk?.content || chunk?.tool_call_chunks?.length > 0) {
+          continue;
+        }
+
+        switch (event.event) {
+          case 'on_chat_model_stream':
+            if (res) {
+              writeSSEResponse(res, {
+                event: 'stream',
+                skillMeta: runMeta,
+                spanId: runMeta.spanId,
+                content:
+                  typeof chunk.content === 'string' ? chunk.content : JSON.stringify(chunk.content),
+              });
+            }
+            break;
+          case 'on_chat_model_end':
+            msgAggregator.setContent(runMeta, event.data.output.content);
+            break;
+        }
       }
+    } finally {
+      await this.conversation.addChatMessages(
+        msgAggregator.getMessages({
+          user,
+          convId: conversation?.convId,
+          jobId: job?.jobId,
+        }),
+        convParam,
+      );
     }
-
-    const msgList: CreateChatMessageInput[] = msgAggregator.getMessages({
-      user,
-      convId: conversation?.convId,
-      jobId: job?.jobId,
-    });
-
-    // If human query is provided, add it to the beginning of the message list
-    if (param.input.query) {
-      msgList.unshift({
-        type: 'human',
-        content: param.input.query,
-        uid: user.uid,
-        convId: conversation?.convId,
-        jobId: job?.jobId,
-      });
-    }
-
-    await this.conversation.addChatMessages(
-      msgList,
-      conversation
-        ? {
-            convId: conversation.convId,
-            title: param.input.query,
-            uid: user.uid,
-          }
-        : null,
-    );
   }
 
   async listSkillTriggers(user: User, param: ListSkillInstancesData['query']) {

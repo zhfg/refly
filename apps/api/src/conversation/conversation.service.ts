@@ -4,7 +4,6 @@ import { Prisma, Conversation } from '@prisma/client';
 import { CreateConversationRequest, User } from '@refly/openapi-schema';
 
 import { PrismaService } from '@/common/prisma.service';
-import { CreateChatMessageInput } from './conversation.dto';
 import { genChatMessageID, genConvID } from '@refly/utils';
 
 @Injectable()
@@ -46,7 +45,7 @@ export class ConversationService {
    * @param conv existing conversation or new conversation
    */
   async addChatMessages(
-    msgList: CreateChatMessageInput[],
+    msgList: Prisma.ChatMessageCreateManyInput[],
     convParam?: Prisma.ConversationCreateInput,
   ) {
     if (msgList.length === 0) {
