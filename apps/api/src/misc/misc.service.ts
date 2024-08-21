@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ScrapeWeblinkRequest, ScrapeWeblinkResult } from '@refly/openapi-schema';
+import { safeParseURL } from '@refly/utils';
 import { load } from 'cheerio';
 
 @Injectable()
@@ -31,6 +32,10 @@ export class MiscService {
           return false; // break forEach loop
         }
       });
+    }
+    if (!image) {
+      const domain = safeParseURL(url);
+      image = `https://www.google.com/s2/favicons?domain=${domain}&sz=${16}`;
     }
 
     return {
