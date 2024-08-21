@@ -106,6 +106,7 @@ export const KnowledgeBaseResourceDetail = memo(() => {
             </div>
           ) : (
             <div className="knowledge-base-resource-meta">
+              <ResourceCollectionList collections={resourceDetail?.collections} />
               <div className="knowledge-base-directory-site-intro">
                 <div className="site-intro-icon">
                   <img
@@ -131,7 +132,6 @@ export const KnowledgeBaseResourceDetail = memo(() => {
                   <span className="action-summary-text">知识图谱</span>
                 </div>
               </div>
-              {resourceDetail && <ResourceCollectionList collections={resourceDetail.collections} />}
               {resourceDetail && <LabelGroup entityId={resourceDetail.resourceId} entityType={'resource'} />}
             </div>
           )}

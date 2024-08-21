@@ -105,6 +105,10 @@
         "collection": "新知识库"
       }
     },
+    "resourceCollectionList": {
+      "addToCollection": "添加到知识库",
+      "removeConfirmText": "确认要从此知识库移除吗?"
+    },
     "labelGroup": {
       "addLabel": "点击添加标签",
       "addLabelTitle": "添加标签",

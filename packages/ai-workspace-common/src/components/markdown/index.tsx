@@ -118,7 +118,7 @@ export const Markdown = memo(
       .replace(/\[[cC]itation:(\d+)]/g, '[citation]($1)');
 
     return (
-      <div className="markdown-body" style={{ fontSize: `${props.fontSize ?? 14}px` }} ref={mdRef}>
+      <div className="markdown-body" style={{ fontSize: `${props.fontSize ?? 16}px` }} ref={mdRef}>
         {shouldLoading ? (
           <IconLoading />
         ) : (

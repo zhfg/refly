@@ -105,6 +105,10 @@
         "collection": "New Collection"
       }
     },
+    "resourceCollectionList": {
+      "addToCollection": "Add to Collection",
+      "removeConfirmText": "Are you sure to remove this resource from the collection?"
+    },
     "labelGroup": {
       "addLabel": "Click to add labels",
       "addLabelTitle": "Add labels",
