@@ -92,12 +92,16 @@ const SkillDetail = () => {
     setInvokeModalVisible(true);
   };
 
+  const getPopupContainer = () => {
+    return document.getElementById('skill-detail-action') as HTMLElement;
+  };
+
   useEffect(() => {
     handleGetSkillInstances();
   }, []);
 
   return (
-    <div className="skill-detail">
+    <div className="skill-detail" id="skill-detail">
       <div className="skill-detail__header">
         <div className="skill-detail__back" onClick={() => window.history.back()}>
           <IconLeft className="skill-detail__back-icon" />
@@ -119,7 +123,7 @@ const SkillDetail = () => {
               <Typography.Paragraph className="skill-desc" ellipsis={{ rows: 3 }} style={{ lineHeight: 1.51 }}>
                 {skillDetail?.description}
               </Typography.Paragraph>
-              <div className="skill-action">
+              <div className="skill-action" id="skill-detail-action">
                 <Button
                   className="skill-action__invoke"
                   type="primary"
@@ -129,7 +133,11 @@ const SkillDetail = () => {
                   <IconPlayArrow />
                   {t('skill.skillDetail.run')}
                 </Button>
-                <InstanceDropdownMenu data={skillDetail} setUpdateModal={(visible) => setVisible(visible)} />
+                <InstanceDropdownMenu
+                  data={skillDetail}
+                  setUpdateModal={(visible) => setVisible(visible)}
+                  getPopupContainer={getPopupContainer}
+                />
               </div>
             </div>
           </div>

@@ -88,6 +88,7 @@ export const ResourceList = () => {
           }}
           actions={[
             <CardBox
+              index={key}
               key={item.resourceId}
               cardData={item}
               cardIcon={cardIcon(item)}
@@ -110,6 +111,7 @@ export const ResourceList = () => {
                     postDeleteList={(resource: Resource) =>
                       setDataList(dataList.filter((n) => n.resourceId !== resource.resourceId))
                     }
+                    getPopupContainer={() => document.getElementById(`resource-${key}`) as HTMLElement}
                   />
                 </div>
               </div>

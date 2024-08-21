@@ -170,7 +170,7 @@ export const SkillJobs = (props: SkillJobsProps) => {
                 <ContextAttachment contextType="collections" contentList={resources.map((item) => item.title)} />
               )}
               {notes?.length && <ContextAttachment contextType="notes" contentList={notes.map((item) => item.title)} />}
-              {urls?.length && <ContextAttachment contextType="urls" contentList={urls} />}
+              {urls?.length ? <ContextAttachment contextType="urls" contentList={urls} /> : null}
             </div>
           </Col>
           <Col span={4} className="skill-jobs__card-col">

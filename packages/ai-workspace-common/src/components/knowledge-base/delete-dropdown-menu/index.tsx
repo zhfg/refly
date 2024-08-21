@@ -20,14 +20,15 @@ interface DropListProps {
   handleCancel: (e: any) => void;
   handleDeleteClick: (e: any) => void;
   handlEditKnowledgeBase?: (e: any) => void;
+  getPopupContainer?: () => HTMLElement;
 }
 
 const DropList = (props: DropListProps) => {
-  const { handleCancel, handleDeleteClick, handlEditKnowledgeBase, type } = props;
+  const { handleCancel, handleDeleteClick, handlEditKnowledgeBase, type, getPopupContainer } = props;
   const { t } = useTranslation();
 
   return (
-    <Menu>
+    <Menu onClick={(e) => e.stopPropagation()}>
       {type === 'knowledgeBase' && (
         <Menu.Item key="edit">
           <div onClick={(e) => handlEditKnowledgeBase(e)}>
@@ -39,6 +40,7 @@ const DropList = (props: DropListProps) => {
       <Menu.Item key="delete">
         <Popconfirm
           focusLock
+          getPopupContainer={getPopupContainer}
           title={t(
             `workspace.deleteDropdownMenu.deleteConfirmFor${type.replace(type[0], type[0].toLocaleUpperCase())}`,
           )}
@@ -62,6 +64,7 @@ const DropList = (props: DropListProps) => {
 
 interface DeleteDropdownMenuProps {
   postDeleteList?: (note: Note | Collection | Resource) => void;
+  getPopupContainer?: () => HTMLElement;
 }
 
 interface NotePros extends DeleteDropdownMenuProps {
@@ -80,7 +83,7 @@ interface ResourcePros extends DeleteDropdownMenuProps {
 }
 
 export const DeleteDropdownMenu = (props: NotePros | KnowledgeBasePros | ResourcePros) => {
-  const { type, data, postDeleteList } = props;
+  const { type, data, postDeleteList, getPopupContainer } = props;
   const [popupVisible, setPopupVisible] = useState(false);
   const { t } = useTranslation();
 
@@ -132,7 +135,7 @@ export const DeleteDropdownMenu = (props: NotePros | KnowledgeBasePros | Resourc
     setPopupVisible(!popupVisible);
   };
 
-  const droplist = DropList({ handleCancel, handleDeleteClick, handlEditKnowledgeBase, type });
+  const droplist = DropList({ handleCancel, handleDeleteClick, handlEditKnowledgeBase, type, getPopupContainer });
 
   return (
     <Dropdown
@@ -140,6 +143,7 @@ export const DeleteDropdownMenu = (props: NotePros | KnowledgeBasePros | Resourc
       popupVisible={popupVisible}
       droplist={droplist}
       triggerProps={{ onClickOutside: () => setPopupVisible(false) }}
+      getPopupContainer={getPopupContainer}
     >
       <Button
         icon={<IconMore style={{ fontSize: 16 }} />}

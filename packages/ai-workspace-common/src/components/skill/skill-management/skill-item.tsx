@@ -95,7 +95,7 @@ export const SkillItem = (props: SkillTempProsp | SkillInsProsp) => {
               data={data}
               setUpdateModal={(val) => setVisible(val)}
               postDeleteList={postDeleteList}
-              getSkillItemPopupContainer={getSkillItemPopupContainer}
+              getPopupContainer={getSkillItemPopupContainer}
             />
           ) : (
             <Button
