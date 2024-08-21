@@ -86,18 +86,36 @@ export class KnowledgeService {
   }
 
   async addResourceToCollection(user: User, param: AddResourceToCollectionRequest) {
-    const { resourceId, collectionId } = param;
+    const { resourceIds = [], collectionId } = param;
+
+    if (resourceIds.length === 0) {
+      throw new BadRequestException('resourceIds is required');
+    }
+
     return this.prisma.collection.update({
       where: { collectionId, uid: user.uid, deletedAt: null },
-      data: { resources: { connect: { resourceId } } },
+      data: {
+        resources: {
+          connect: resourceIds.map((resourceId) => ({ resourceId })),
+        },
+      },
     });
   }
 
   async removeResourceFromCollection(user: User, param: RemoveResourceFromCollectionRequest) {
-    const { resourceId, collectionId } = param;
+    const { resourceIds = [], collectionId } = param;
+
+    if (resourceIds.length === 0) {
+      throw new BadRequestException('resourceIds is required');
+    }
+
     return this.prisma.collection.update({
       where: { collectionId, uid: user.uid, deletedAt: null },
-      data: { resources: { disconnect: { resourceId } } },
+      data: {
+        resources: {
+          disconnect: resourceIds.map((resourceId) => ({ resourceId })),
+        },
+      },
     });
   }
 

@@ -938,24 +938,24 @@ export type UpsertCollectionResponse = BaseResponse & {
 
 export type AddResourceToCollectionRequest = {
   /**
-   * Resource ID
-   */
-  resourceId: string;
-  /**
    * Collection ID
    */
   collectionId: string;
+  /**
+   * Resource ID list
+   */
+  resourceIds?: Array<string>;
 };
 
 export type RemoveResourceFromCollectionRequest = {
   /**
-   * Resource ID
-   */
-  resourceId: string;
-  /**
    * Collection ID
    */
   collectionId: string;
+  /**
+   * Resource ID list
+   */
+  resourceIds?: Array<string>;
 };
 
 export type DeleteCollectionRequest = {

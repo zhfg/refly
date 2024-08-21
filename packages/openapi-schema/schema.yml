@@ -2109,24 +2109,28 @@ components:
         - resourceId
         - collectionId
       properties:
-        resourceId:
-          type: string
-          description: Resource ID
         collectionId:
           type: string
           description: Collection ID
+        resourceIds:
+          type: array
+          description: Resource ID list
+          items:
+            type: string
     RemoveResourceFromCollectionRequest:
       type: object
       required:
         - resourceId
         - collectionId
       properties:
-        resourceId:
-          type: string
-          description: Resource ID
         collectionId:
           type: string
           description: Collection ID
+        resourceIds:
+          type: array
+          description: Resource ID list
+          items:
+            type: string
     DeleteCollectionRequest:
       type: object
       required:

@@ -1266,13 +1266,16 @@ export const $AddResourceToCollectionRequest = {
   type: 'object',
   required: ['resourceId', 'collectionId'],
   properties: {
-    resourceId: {
-      type: 'string',
-      description: 'Resource ID',
-    },
     collectionId: {
       type: 'string',
       description: 'Collection ID',
+    },
+    resourceIds: {
+      type: 'array',
+      description: 'Resource ID list',
+      items: {
+        type: 'string',
+      },
     },
   },
 } as const;
@@ -1281,13 +1284,16 @@ export const $RemoveResourceFromCollectionRequest = {
   type: 'object',
   required: ['resourceId', 'collectionId'],
   properties: {
-    resourceId: {
-      type: 'string',
-      description: 'Resource ID',
-    },
     collectionId: {
       type: 'string',
       description: 'Collection ID',
+    },
+    resourceIds: {
+      type: 'array',
+      description: 'Resource ID list',
+      items: {
+        type: 'string',
+      },
     },
   },
 } as const;
