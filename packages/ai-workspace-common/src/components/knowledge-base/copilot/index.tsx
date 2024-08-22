@@ -65,13 +65,20 @@ import { CurrentContextActionBtn } from '@refly-packages/ai-workspace-common/com
 
 interface AICopilotProps {}
 
+const skillContainerPadding = 8;
+const skillContainerHeight = 24 + 2 * skillContainerPadding;
+const selectedSkillContainerHeight = 32;
+const inputContainerHeight = 115;
+const chatContainerPadding = 8;
+const layoutContainerPadding = 16;
+const knowledgeBaseDetailHeaderHeight = 40;
+
 export const AICopilot = memo((props: AICopilotProps) => {
   // 所属的环境
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
 
   const [searchParams] = useSearchParams();
-  const [copilotBodyHeight, setCopilotBodyHeight] = useState(215 - 32);
   const userStore = useUserStore((state) => ({
     localSettings: state.localSettings,
   }));
@@ -130,8 +137,16 @@ export const AICopilot = memo((props: AICopilotProps) => {
   const noteId = searchParams.get('noteId');
   const resId = searchParams.get('resId');
   const { resetState } = useResetState();
-  const actualCopilotBodyHeight =
-    copilotBodyHeight + (computedShowContextCard ? contextCardHeight : 0) + (skillStore?.selectedSkill ? 32 : 0) - 16;
+
+  const actualChatContainerHeight =
+    inputContainerHeight + (skillStore?.selectedSkill ? selectedSkillContainerHeight : 0);
+
+  const actualOperationContainerHeight =
+    actualChatContainerHeight +
+    (computedShowContextCard ? contextCardHeight : 0) +
+    skillContainerHeight +
+    2 * chatContainerPadding;
+  console.log('actualCopilotBodyHeight', actualChatContainerHeight, actualOperationContainerHeight);
 
   const { t, i18n } = useTranslation();
   const uiLocale = i18n?.languages?.[0] as LOCALE;
@@ -303,35 +318,37 @@ export const AICopilot = memo((props: AICopilotProps) => {
           </Button>
         </div>
       </div>
-      <div
-        className="ai-copilot-message-container"
-        style={{ height: `calc(100vh - ${actualCopilotBodyHeight}px - 50px)` }}
-      >
-        <ChatMessages />
-      </div>
-      <div className="ai-copilot-body" style={{ height: actualCopilotBodyHeight }}>
-        <div className="ai-copilot-body-inner-container">
-          {computedShowContextCard ? (
-            <div className="ai-copilot-context-display">
-              <ContextStateDisplay />
-            </div>
-          ) : null}
-          <div className="ai-copilot-chat-container">
-            <SkillDisplay />
-            <div className="chat-input-container">
-              <div className="chat-input-body">
-                <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
+      <div className="ai-copilot-body-container">
+        <div
+          className="ai-copilot-message-container"
+          style={{ height: `calc(100% - ${actualOperationContainerHeight}px)` }}
+        >
+          <ChatMessages />
+        </div>
+        <div className="ai-copilot-operation-container" style={{ height: actualOperationContainerHeight }}>
+          <div className="ai-copilot-operation-body">
+            {computedShowContextCard ? (
+              <div className="ai-copilot-context-display">
+                <ContextStateDisplay />
               </div>
-              <div className="chat-input-assist-action">
-                <ContextContentWithBadge />
-                <CurrentContextActionBtn />
-                <SelectedTextContextActionBtn />
-                <OutputLocaleList>
-                  <Button icon={<IconTranslate />} type="text" className="assist-action-item">
-                    {/* <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span> */}
-                    <IconCaretDown />
-                  </Button>
-                </OutputLocaleList>
+            ) : null}
+            <SkillDisplay />
+            <div className="ai-copilot-chat-container">
+              <div className="chat-input-container" style={{ height: actualChatContainerHeight }}>
+                <div className="chat-input-body">
+                  <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
+                </div>
+                <div className="chat-input-assist-action">
+                  <ContextContentWithBadge />
+                  <CurrentContextActionBtn />
+                  <SelectedTextContextActionBtn />
+                  <OutputLocaleList>
+                    <Button icon={<IconTranslate />} type="text" className="assist-action-item">
+                      {/* <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span> */}
+                      <IconCaretDown />
+                    </Button>
+                  </OutputLocaleList>
+                </div>
               </div>
             </div>
           </div>
