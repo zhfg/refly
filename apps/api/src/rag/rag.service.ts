@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import avro from 'avsc';
 import { LRUCache } from 'lru-cache';
@@ -10,7 +10,7 @@ import { FireworksEmbeddings } from '@langchain/community/embeddings/fireworks';
 import { cleanMarkdownForIngest } from '@refly/utils';
 
 import { User } from '@refly/openapi-schema';
-import { MinioService } from '../common/minio.service';
+import { MINIO_INTERNAL, MinioService } from '@/common/minio.service';
 import {
   HybridSearchParam,
   ContentNode,
@@ -21,7 +21,7 @@ import {
 } from './rag.dto';
 import { QdrantService } from '@/common/qdrant.service';
 import { Condition, PointStruct } from '@/common/qdrant.dto';
-import { genResourceUuid } from '@/utils';
+import { genResourceUuid, streamToBuffer } from '@/utils';
 
 const READER_URL = 'https://r.jina.ai/';
 
@@ -65,8 +65,8 @@ export class RAGService {
 
   constructor(
     private config: ConfigService,
-    private minio: MinioService,
     private qdrant: QdrantService,
+    @Inject(MINIO_INTERNAL) private minio: MinioService,
   ) {
     if (process.env.NODE_ENV === 'development') {
       this.embeddings = new FireworksEmbeddings({
@@ -164,15 +164,16 @@ export class RAGService {
    */
   async saveContentChunks(storageKey: string, data: ContentData) {
     const buf = ContentAvroType.toBuffer(data);
-    return this.minio.uploadData(storageKey, buf);
+    return this.minio.client.putObject(storageKey, buf);
   }
 
   /**
    * Load content chunks from object storage.
    */
   async loadContentChunks(storageKey: string) {
-    const buf = await this.minio.downloadData(storageKey);
-    return ContentAvroType.fromBuffer(buf) as ContentData;
+    const readable = await this.minio.client.getObject(storageKey);
+    const buffer = await streamToBuffer(readable);
+    return ContentAvroType.fromBuffer(buffer) as ContentData;
   }
 
   async saveDataForUser(user: User, data: ContentData) {
