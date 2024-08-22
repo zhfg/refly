@@ -11,6 +11,9 @@
     align-items: center;
     justify-content: space-between;
     padding: 16px 12px 0;
+    .delete-button {
+      margin-left: 12px;
+    }
 
     .intro-body {
       display: flex;

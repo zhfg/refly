@@ -39,7 +39,7 @@ export const KnowledgeBaseDetail = () => {
     };
   }, [resId]);
 
-  if (!resId || resId === 'undefined' || resId === 'null') {
+  if ((!resId || resId === 'undefined' || resId === 'null') && (!kbId || kbId === 'undefined' || kbId === 'null')) {
     return <KnowledgeBaseDetailEmpty />;
   }
 

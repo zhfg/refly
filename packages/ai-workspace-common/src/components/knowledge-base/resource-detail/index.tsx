@@ -31,6 +31,7 @@ export const KnowledgeBaseResourceDetail = memo(() => {
   const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
     currentResource: state.currentResource,
     updateResource: state.updateResource,
+    resetTabs: state.resetTabs,
   }));
   const { handleAddTab } = useKnowledgeBaseTabs();
   // 初始块选择
@@ -109,6 +110,12 @@ export const KnowledgeBaseResourceDetail = memo(() => {
       handleGetDetail(resId as string);
     }
   }, [resId]);
+
+  useEffect(() => {
+    if (kbId && !resId) {
+      knowledgeBaseStore.resetTabs();
+    }
+  }, [kbId]);
 
   // 初始化块选择
   useEffect(() => {

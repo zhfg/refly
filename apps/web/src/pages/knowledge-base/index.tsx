@@ -92,6 +92,12 @@ const KnowledgeLibraryLayout = () => {
     }
   }, [token, userStore?.userProfile?.uid, resId, noteId])
 
+  useEffect(() => {
+    if (kbId) {
+      knowledgeBaseStore.updateResourcePanelVisible(true)
+    }
+  }, [])
+
   const copilotStyle =
     knowledgeBaseStore.resourcePanelVisible || noteStore.notePanelVisible
       ? {

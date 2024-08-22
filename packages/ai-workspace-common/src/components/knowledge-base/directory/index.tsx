@@ -6,7 +6,7 @@ import './index.scss';
 import { IconFile } from '@arco-design/web-react/icon';
 import { Message as message } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
-import { useNavigate, useLocation, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
+import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 // 类型
@@ -25,9 +25,9 @@ export const KnowledgeBaseDirectory = () => {
   const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
 
   const [queryParams] = useSearchParams();
-  const location = useLocation();
   const kbId = queryParams.get('kbId');
   const resId = queryParams.get('resId');
+  const navigate = useNavigate();
 
   const handleGetDetail = async (collectionId: string, resourceId: string) => {
     setIsFetching(true);
@@ -90,7 +90,7 @@ export const KnowledgeBaseDirectory = () => {
     if (resId) {
       url = `/knowledge-base?resId=${resId}`;
     }
-    window.location.replace(url);
+    navigate(url, { replace: true });
   };
 
   const handleDeleteResource = (item: RemoveResourceFromCollectionRequest) => {

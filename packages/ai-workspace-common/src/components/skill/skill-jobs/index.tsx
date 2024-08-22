@@ -7,15 +7,15 @@ import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
-import { useSkillJobForCopilot } from '@refly-packages/ai-workspace-common/stores/skill-job-for-copilot';
 
 import './index.scss';
 import { SkillJob } from '@refly/openapi-schema';
 import { LOCALE } from '@refly/common-types';
 
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
-import { List, Empty, Typography, Grid, Divider } from '@arco-design/web-react';
+import { List, Empty, Grid, Divider } from '@arco-design/web-react';
 import {
   IconCheckCircle,
   IconLoading,
@@ -42,8 +42,8 @@ interface SkillJobsProps {
 
 export const SkillJobs = (props: SkillJobsProps) => {
   const { reloadList, setReloadList } = props;
-  const skillJobForCopilot = useSkillJobForCopilot();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const skillId = searchParams.get('skillId') as string;
 
   const { dataList, setDataList, loadMore, hasMore, isRequesting, reload } = useFetchDataList({
@@ -142,7 +142,7 @@ export const SkillJobs = (props: SkillJobsProps) => {
     const handleClickJob = () => {
       const { jobId } = job;
       if (!jobId) return;
-      skillJobForCopilot.setJobId(jobId);
+      navigate(`/skill-detail?skillId=${skillId}&jobId=${jobId}`, { replace: true });
     };
 
     const { collections, notes, resources, urls } = job.context;

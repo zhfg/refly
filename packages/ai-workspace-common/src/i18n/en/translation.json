@@ -159,6 +159,7 @@
     }
   },
   "knowledgeBase": {
+    "keepOneWindow": "Keep at least one window",
     "resourceCollectionAssociativeModal": {
       "resourceTitle": "Associate Resources",
       "collectionTitle": "Associate Collection",

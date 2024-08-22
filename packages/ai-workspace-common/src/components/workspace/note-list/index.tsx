@@ -90,7 +90,6 @@ export const NoteList = (props: NoteListProps) => {
                     .fromNow()}
                 </div>
                 <div className="flex items-center">
-                  <IconBook style={{ color: '#819292', cursor: 'pointer' }} />
                   <DeleteDropdownMenu
                     type="note"
                     data={item}

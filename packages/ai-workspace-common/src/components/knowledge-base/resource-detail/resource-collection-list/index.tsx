@@ -97,7 +97,7 @@ const ResourceCollectionList = ({ collections = [], updateCallback }: ResourceCo
       <Button
         size="mini"
         className="bg-transparent"
-        title={collections?.length > 0 && t('workspace.resourceCollectionList.addToCollection')}
+        title={collections?.length > 0 ? t('workspace.resourceCollectionList.addToCollection') : ''}
         style={{ borderRadius: '999px' }}
         icon={<IconFolderAdd />}
         onClick={() => setVisible(true)}
