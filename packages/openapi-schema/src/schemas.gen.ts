@@ -661,6 +661,13 @@ export const $ChatMessage = {
         relatedQuestions: ['string'],
       },
     },
+    errors: {
+      type: 'array',
+      description: 'Errors',
+      items: {
+        type: 'string',
+      },
+    },
     relatedQuestions: {
       type: 'array',
       description: 'Related questions',
