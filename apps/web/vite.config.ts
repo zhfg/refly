@@ -25,6 +25,7 @@ export default defineConfig(({ mode }) => {
       }),
       codeInspectorPlugin({
         bundler: "vite",
+        editor: "code",
       }),
       ...(isDev
         ? []
