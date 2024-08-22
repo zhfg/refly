@@ -45,6 +45,7 @@
 }
 
 .knowledge-base-directory-item {
+  position: relative;
   padding: 12px;
   border-radius: 8px;
 
@@ -63,7 +64,7 @@
       }
     }
   }
-  button {
+  .delete-button {
     margin-right: -12px;
   }
 

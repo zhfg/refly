@@ -17,6 +17,7 @@ import { memo, useEffect, useState } from 'react';
 import { safeParseURL } from '@refly/utils/url';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 import { LabelGroup } from '@refly-packages/ai-workspace-common/components/knowledge-base/label-group';
+import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 
 // content selector
 import { useContentSelector } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-content-selector';
@@ -44,6 +45,8 @@ export const KnowledgeBaseResourceDetail = memo(() => {
 
   const [queryParams] = useSearchParams();
   const resId = queryParams.get('resId');
+  const kbId = queryParams.get('kbId');
+  const reloadKnowledgeBaseState = useReloadListState();
 
   const resourceDetail = knowledgeBaseStore?.currentResource as Resource;
 
@@ -84,6 +87,22 @@ export const KnowledgeBaseResourceDetail = memo(() => {
     setIsFetching(false);
   };
 
+  const handleUpdateCollections = (collectionId: string) => {
+    if (resId) {
+      handleGetDetail(resId as string);
+    }
+    if (collectionId === kbId) {
+      reloadKnowledgeBaseState.setReloadKnowledgeBaseList(true);
+    }
+  };
+
+  useEffect(() => {
+    if (resId && reloadKnowledgeBaseState.reloadResourceDetail) {
+      handleGetDetail(resId as string);
+    }
+    reloadKnowledgeBaseState.setReloadResourceDetail(false);
+  }, [reloadKnowledgeBaseState.reloadResourceDetail]);
+
   useEffect(() => {
     if (resId) {
       console.log('params resId', resId);
@@ -106,7 +125,10 @@ export const KnowledgeBaseResourceDetail = memo(() => {
             </div>
           ) : (
             <div className="knowledge-base-resource-meta">
-              <ResourceCollectionList collections={resourceDetail?.collections} />
+              <ResourceCollectionList
+                collections={resourceDetail?.collections}
+                updateCallback={(collectionId) => handleUpdateCollections(collectionId)}
+              />
               <div className="knowledge-base-directory-site-intro">
                 <div className="site-intro-icon">
                   <img

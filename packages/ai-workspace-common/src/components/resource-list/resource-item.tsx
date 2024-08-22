@@ -6,7 +6,7 @@ import './index.scss';
 import { IconBook, IconBulb, IconCompass } from '@arco-design/web-react/icon';
 import { Tag, Typography } from '@arco-design/web-react';
 
-import { Resource } from '@refly/openapi-schema';
+import { Resource, RemoveResourceFromCollectionRequest } from '@refly/openapi-schema';
 // 类型
 import { IndexStatus } from '@refly/openapi-schema';
 // 请求
@@ -19,6 +19,7 @@ import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/componen
 
 export const ResourceItem = (props: {
   item: Resource;
+  collectionId?: string;
   index: number;
   showUtil?: boolean;
   showDesc?: boolean;
@@ -26,7 +27,7 @@ export const ResourceItem = (props: {
   canDelete?: boolean;
   btnProps?: { defaultActiveKeys: string[] };
   handleItemClick: ({ resourceId, collectionId }: { resourceId: string; collectionId: string }) => void;
-  handleItemDelete?: (resource: Resource) => void;
+  handleItemDelete?: (resource: RemoveResourceFromCollectionRequest) => void;
 }) => {
   const {
     item,
@@ -36,6 +37,7 @@ export const ResourceItem = (props: {
     showDesc = true,
     showBtn = { summary: true, markdown: true, externalOrigin: true },
     canDelete,
+    collectionId,
   } = props;
   const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
 
@@ -65,11 +67,12 @@ export const ResourceItem = (props: {
 
   return (
     <div
+      id={`directory-resource-item-${item?.resourceId}`}
       className="knowledge-base-directory-item"
       key={index}
       onClick={() => {
         props?.handleItemClick({
-          collectionId: item?.collectionId as string,
+          collectionId: collectionId as string,
           resourceId: item?.resourceId as string,
         });
       }}
@@ -89,9 +92,10 @@ export const ResourceItem = (props: {
         </div>
         {canDelete && (
           <DeleteDropdownMenu
-            data={item}
-            type="resource"
-            postDeleteList={(item: Resource) => props.handleItemDelete(item)}
+            data={{ resourceIds: [item?.resourceId], collectionId: collectionId }}
+            type="resourceCollection"
+            postDeleteList={(item: RemoveResourceFromCollectionRequest) => props.handleItemDelete(item)}
+            getPopupContainer={() => document.getElementById(`directory-resource-item-${item?.resourceId}`)}
           />
         )}
       </div>

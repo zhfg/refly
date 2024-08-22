@@ -153,8 +153,19 @@
       "deleteConfirmForNote": "Are you sure you want to delete this note?",
       "deleteConfirmForKnowledgeBase": "Are you sure you want to delete this knowledge base?",
       "deleteConfirmForResource": "Are you sure you want to delete this resource?",
+      "deleteConfirmForResourceCollection": "Are you sure to remove this resource from the collection?",
       "delete": "Delete",
       "edit": "Edit"
+    }
+  },
+  "knowledgeBase": {
+    "resourceCollectionAssociativeModal": {
+      "resourceTitle": "Associate Resources",
+      "collectionTitle": "Associate Collection",
+      "resource": "Resource",
+      "collection": "Collection",
+      "resourcePlaceholder": "Please select resources",
+      "collectionPlaceholder": "Please select Collection"
     }
   },
   "loggedHomePage": {
