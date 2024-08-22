@@ -53,7 +53,7 @@ export class KnowledgeService {
 
     const coll = await this.prisma.collection.findFirst({
       where: { collectionId, uid: user.uid, deletedAt: null },
-      include: { resources: true },
+      include: { resources: { where: { deletedAt: null } } },
     });
     if (!coll) {
       throw new NotFoundException('Collection not found');
@@ -161,7 +161,7 @@ export class KnowledgeService {
 
     const resource = await this.prisma.resource.findFirst({
       where: { resourceId, deletedAt: null },
-      include: { collections: true },
+      include: { collections: { where: { deletedAt: null } } },
     });
 
     if (!resource.isPublic && resource.uid !== user.uid) {
