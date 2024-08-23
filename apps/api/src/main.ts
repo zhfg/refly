@@ -3,6 +3,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
+
 import * as Sentry from '@sentry/node';
 import { nodeProfilingIntegration } from '@sentry/profiling-node';
 import { Logger } from 'nestjs-pino';
@@ -12,6 +13,7 @@ import { ConfigService } from '@nestjs/config';
 
 import tracer from './tracer';
 import { setTraceID } from './utils/middleware/set-trace-id';
+import { slowdown } from './utils/middleware/slowdown';
 import { GlobalExceptionFilter } from './utils/filters/global-exception.filter';
 import { CustomWsAdapter } from '@/utils/adapters/ws-adapter';
 
@@ -42,6 +44,7 @@ async function bootstrap() {
 
   app.useLogger(logger);
   app.use(setTraceID);
+  app.use(slowdown);
   app.use(helmet());
   app.enableCors();
   app.use(cookieParser());
