@@ -125,7 +125,7 @@ export class KnowledgeBaseSearch extends BaseSkill {
       config,
     );
 
-    // TODO: implement given resourceIds and collectionIds q&a
+    // TODO: implement given resourceIds and collectionIds q&a @mrcfps
     const { resourceIds, collectionIds } = config?.configurable || {};
 
     const tool = new ReflySearch({ engine: this.engine, user });
