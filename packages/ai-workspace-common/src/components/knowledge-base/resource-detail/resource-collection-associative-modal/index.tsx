@@ -74,7 +74,7 @@ export const ResourceCollectionAssociativeModal = (props: ResourceCollectionAsso
   return (
     <Modal
       title={t(`knowledgeBase.resourceCollectionAssociativeModal.${domain}Title`)}
-      style={{ width: 800 }}
+      style={{ width: 600 }}
       visible={visible}
       okText={t(`common.confirm`)}
       cancelText={t(`common.cancel`)}
@@ -92,6 +92,7 @@ export const ResourceCollectionAssociativeModal = (props: ResourceCollectionAsso
           ]}
         >
           <SearchSelect
+            allowCreateNewEntity
             domain={domain}
             mode={mode}
             placeholder={t(`knowledgeBase.resourceCollectionAssociativeModal.${domain}Placeholder`)}
