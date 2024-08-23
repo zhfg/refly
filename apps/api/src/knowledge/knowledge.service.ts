@@ -212,14 +212,7 @@ export class KnowledgeService {
         ...(param.collectionId
           ? {
               collections: {
-                connectOrCreate: {
-                  where: { collectionId: param.collectionId },
-                  create: {
-                    collectionId: param.collectionId,
-                    title: param.collectionName || 'Default Collection',
-                    uid: user.uid,
-                  },
-                },
+                connect: { collectionId: param.collectionId },
               },
             }
           : {}),
