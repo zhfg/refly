@@ -22,6 +22,7 @@ import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill'
 import { getAuthTokenFromCookie } from '@refly-packages/utils/request';
 import { useTranslation } from 'react-i18next';
 import { genUniqueId } from '@refly-packages/utils/id';
+import { markdownCitationParse } from '@refly-packages/utils/parse';
 // stores
 
 const globalStreamingChatPortRef = { current: null as Runtime.Port | null };
@@ -190,11 +191,7 @@ export const useBuildTask = () => {
     lastRelatedMessage.content += skillEvent.content;
 
     // 处理 Citation 的序列号
-    lastRelatedMessage.content = lastRelatedMessage.content
-      .replace(/\[\[([cC])itation/g, '[citation')
-      .replace(/[cC]itation:(\d+)]]/g, 'citation:$1]')
-      .replace(/\[\[([cC]itation:\d+)]](?!])/g, `[$1]`)
-      .replace(/\[[cC]itation:(\d+)]/g, '[citation]($1)');
+    lastRelatedMessage.content = markdownCitationParse(lastRelatedMessage.content);
 
     messages[lastRelatedMessageIndex] = lastRelatedMessage;
     chatStore.setMessages(messages);

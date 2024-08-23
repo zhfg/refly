@@ -13,6 +13,8 @@ import RemarkBreaks from 'remark-breaks';
 import RemarkGfm from 'remark-gfm';
 import RemarkMath from 'remark-math';
 
+import { markdownCitationParse } from '@refly/utils';
+
 // styles
 import './styles/markdown.scss';
 import './styles/highlight.scss';
@@ -111,12 +113,7 @@ export const Markdown = memo(
     }, [props.loading]);
 
     const shouldLoading = props.loading;
-    const parsedContent = (props?.content || '')
-      ?.replace(/\[\[([cC])itation/g, '([citation')
-      .replace(/[cC]itation:(\d+)]]/g, 'citation:$1]')
-      .replace(/\[\[([cC]itation:\d+)]](?!])/g, `[$1]`)
-      .replace(/\[[cC]itation:(\d+)]/g, '[citation]($1)')
-      .replace(/【[cC]itation:(\d+)】/g, '[citation]($1)');
+    const parsedContent = markdownCitationParse(props?.content || '');
 
     return (
       <div className="markdown-body" style={{ fontSize: `${props.fontSize ?? 14}px` }} ref={mdRef}>

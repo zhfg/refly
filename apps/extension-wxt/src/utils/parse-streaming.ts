@@ -3,6 +3,7 @@ import type { RelatedQuestion, Task } from '@refly/common-types';
 import { Source } from '@refly/openapi-schema';
 import { getServerOrigin } from '@refly/utils/url';
 import { getCookie } from './cookie';
+import { markdownCitationParse } from '@refly/utils/parse';
 
 const LLM_SPLIT = '__LLM_RESPONSE__';
 const RELATED_SPLIT = '__RELATED_QUESTIONS__';
@@ -37,13 +38,7 @@ export const parseStreaming = async (
     return;
   }
   const markdownParse = (text: string) => {
-    onMarkdown(
-      text
-        .replace(/\[\[([cC])itation/g, '[citation')
-        .replace(/[cC]itation:(\d+)]]/g, 'citation:$1]')
-        .replace(/\[\[([cC]itation:\d+)]](?!])/g, `[$1]`)
-        .replace(/\[[cC]itation:(\d+)]/g, '[citation]($1)'),
-    );
+    onMarkdown(markdownCitationParse(text));
   };
   fetchStream(
     response,
