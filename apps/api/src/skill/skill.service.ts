@@ -486,6 +486,7 @@ export class SkillService {
       user,
       skill,
       param,
+      conversation,
       eventListener: (data: SkillEvent) => {
         if (aborted) {
           this.logger.warn(`skill invocation aborted, ignore event: ${JSON.stringify(data)}`);
