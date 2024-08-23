@@ -808,13 +808,9 @@ export type UpsertResourceRequest = {
    */
   resourceId?: string;
   /**
-   * Collection ID (will create new collection if empty)
+   * Collection ID (will add to the collection if given)
    */
   collectionId?: string;
-  /**
-   * Collection name
-   */
-  collectionName?: string;
   /**
    * Resource metadata
    */
@@ -1724,7 +1720,7 @@ export type UpdateCollectionData = {
   body: UpsertCollectionRequest;
 };
 
-export type UpdateCollectionResponse = BaseResponse;
+export type UpdateCollectionResponse = UpsertCollectionResponse;
 
 export type UpdateCollectionError = unknown;
 
@@ -1735,7 +1731,7 @@ export type CreateCollectionData = {
   body: UpsertCollectionRequest;
 };
 
-export type CreateCollectionResponse = BaseResponse;
+export type CreateCollectionResponse = UpsertCollectionResponse;
 
 export type CreateCollectionError = unknown;
 
@@ -2248,7 +2244,7 @@ export type $OpenApiTs = {
         /**
          * successful operation
          */
-        '200': BaseResponse;
+        '200': UpsertCollectionResponse;
       };
     };
   };
@@ -2259,7 +2255,7 @@ export type $OpenApiTs = {
         /**
          * successful operation
          */
-        '200': BaseResponse;
+        '200': UpsertCollectionResponse;
       };
     };
   };

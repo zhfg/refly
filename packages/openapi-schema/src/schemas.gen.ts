@@ -1009,13 +1009,8 @@ export const $UpsertResourceRequest = {
     },
     collectionId: {
       type: 'string',
-      description: 'Collection ID (will create new collection if empty)',
+      description: 'Collection ID (will add to the collection if given)',
       example: 'cl-g30e1b80b5g1itbemc0g5jj3',
-    },
-    collectionName: {
-      type: 'string',
-      description: 'Collection name',
-      example: 'New Collection',
     },
     data: {
       description: 'Resource metadata',
