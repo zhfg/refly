@@ -124,16 +124,18 @@ export const ResourceItem = (props: {
       </div>
       <div className="knowledge-base-directory-title">{item.data?.title}</div>
       <div className="knowledge-base-directory-action">
-        <div className="action-markdown-content knowledge-base-directory-action-item">
-          <IconBook
-            onClick={() => {
-              jumpToReadResource({
-                kbId: item?.collectionId,
-                resId: item?.resourceId,
-              });
-            }}
-          />
-        </div>
+        {item?.resourceId ? (
+          <div className="action-markdown-content knowledge-base-directory-action-item">
+            <IconBook
+              onClick={() => {
+                jumpToReadResource({
+                  kbId: item?.collectionId,
+                  resId: item?.resourceId,
+                });
+              }}
+            />
+          </div>
+        ) : null}
         <div className="action-external-origin-website knowledge-base-directory-action-item">
           <IconCompass
             onClick={() => {

@@ -109,7 +109,7 @@ export const ResourceItem = memo(
               <span>AI Summary</span>
             </div>
           ) : null}
-          {showBtn?.markdown ? (
+          {showBtn?.markdown && item?.resourceId ? (
             <div
               className={classNames('action-markdown-content', {
                 active: btnProps?.defaultActiveKeys?.includes('markdown'),
