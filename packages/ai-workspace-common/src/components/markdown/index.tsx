@@ -50,7 +50,7 @@ export function ATag({ ...props }, sources: Source[]) {
         <PopoverTrigger asChild>
           <span
             title={source.metadata?.title}
-            className="inline-block h-6 w-6 origin-top-left scale-[60%] transform cursor-pointer rounded-full bg-zinc-300 text-center font-medium no-underline hover:bg-zinc-400"
+            className="inline-block h-6 !w-6 origin-top-left scale-[60%] transform cursor-pointer rounded-full bg-zinc-300 text-center font-medium no-underline hover:bg-zinc-400"
           >
             {props.href}
           </span>
@@ -60,7 +60,7 @@ export function ATag({ ...props }, sources: Source[]) {
           style={{ backgroundColor: '#fcfcf9' }}
           className="flex flex-col gap-2 max-w-screen-md text-xs ring-4 shadow-transparent ring-zinc-50"
         >
-          <div className="overflow-hidden font-medium whitespace-nowrap text-ellipsis">{source.metadata?.title}</div>
+          <div className="overflow-hidden font-medium whitespace-nowrap text-ellipsis">{source.title}</div>
           <div className="flex gap-4">
             <div className="flex-1">
               <div className="break-words line-clamp-4 text-zinc-500">{source.pageContent}</div>
@@ -70,16 +70,16 @@ export function ATag({ ...props }, sources: Source[]) {
           <div className="flex gap-2 items-center">
             <div className="overflow-hidden flex-1">
               <div className="overflow-hidden text-blue-500 whitespace-nowrap text-ellipsis">
-                <a title={source.metadata?.title} href={source.metadata?.source} target="_blank">
-                  {source.metadata?.source}
+                <a title={source?.title} href={source?.url} target="_blank">
+                  {source?.url}
                 </a>
               </div>
             </div>
             <div className="flex relative flex-none items-center">
               <img
                 className="w-3 h-3"
-                alt={source.metadata?.source}
-                src={`https://www.google.com/s2/favicons?domain=${source.metadata?.source}&sz=${16}`}
+                alt={source?.url}
+                src={`https://www.google.com/s2/favicons?domain=${source?.url}&sz=${16}`}
               />
             </div>
           </div>
@@ -112,10 +112,10 @@ export const Markdown = memo(
 
     const shouldLoading = props.loading;
     const parsedContent = (props?.content || '')
-      ?.replace(/\[\[([cC])itation/g, '[citation')
-      .replace(/[cC]itation:(\d+)]]/g, 'citation:$1]')
-      .replace(/\[\[([cC]itation:\d+)]](?!])/g, `[$1]`)
-      .replace(/\[[cC]itation:(\d+)]/g, '[citation]($1)');
+      ?.replace(/(\[|【)(\[|【)([cC])itation/g, '([citation')
+      .replace(/[cC]itation:(\d+)(]|】)(]|】)/g, 'citation:$1]')
+      .replace(/(\[|【)(\[|【)([cC]itation:\d+)(]|】)(]|】)(?!])/g, `[$3]`)
+      .replace(/(\[|【)[cC]itation:(\d+)(]|】)/g, '[citation]($2)');
 
     return (
       <div className="markdown-body" style={{ fontSize: `${props.fontSize ?? 14}px` }} ref={mdRef}>

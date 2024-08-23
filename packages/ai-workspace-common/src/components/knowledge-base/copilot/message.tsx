@@ -30,6 +30,8 @@ import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 import { memo } from 'react';
 import classNames from 'classnames';
 
+const citationRegex = /\([|【)citation()|】)]\(\d+\)/g;
+
 export const HumanMessage = memo(
   (props: { message: Partial<ChatMessage>; profile: { avatar: string; name: string } }) => {
     const { message, profile } = props;
@@ -116,7 +118,7 @@ export const AssistantMessage = memo(
       <Menu
         className={'output-locale-list-menu'}
         onClickMenuItem={(key) => {
-          const parsedText = message?.content?.replace(/\[citation]\(\d+\)/g, '');
+          const parsedText = message?.content?.replace(citationRegex, '');
           handleEditorOperation(key as EditorOperation, parsedText || '');
         }}
         style={{ width: 240 }}
@@ -251,7 +253,7 @@ export const AssistantMessage = memo(
                         style={{ color: '#64645F' }}
                         className={'assist-action-item'}
                         onClick={() => {
-                          const parsedText = message?.content?.replace(/\[citation]\(\d+\)/g, '');
+                          const parsedText = message?.content?.replace(citationRegex, '');
 
                           copyToClipboard(parsedText || '');
                           Message.success('复制成功');
@@ -266,7 +268,7 @@ export const AssistantMessage = memo(
                           icon={<IconImport style={{ fontSize: 14 }} />}
                           style={{ color: '#64645F' }}
                           onClick={() => {
-                            const parsedText = message?.content?.replace(/\[citation]\(\d+\)/g, '');
+                            const parsedText = message?.content?.replace(citationRegex, '');
                             // editorEmitter.emit('insertBlow', message?.content || '');
                             handleEditorOperation('insertBlow', parsedText || '');
                           }}
