@@ -23,7 +23,6 @@ export const KnowledgeBaseDetail = () => {
   const [queryParams] = useSearchParams();
   const resId = queryParams.get('resId');
   const kbId = queryParams.get('kbId');
-  const [isLeftPanelVisible, setIsLeftPanelVisible] = useState(true);
   const [leftPanelSize, setLeftPanelSize] = useState(30);
 
   const { tabs, activeTab, setActiveTab, handleDeleteTab } = useKnowledgeBaseTabs();
