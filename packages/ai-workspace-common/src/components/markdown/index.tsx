@@ -112,10 +112,11 @@ export const Markdown = memo(
 
     const shouldLoading = props.loading;
     const parsedContent = (props?.content || '')
-      ?.replace(/(\[|【)(\[|【)([cC])itation/g, '([citation')
-      .replace(/[cC]itation:(\d+)(]|】)(]|】)/g, 'citation:$1]')
-      .replace(/(\[|【)(\[|【)([cC]itation:\d+)(]|】)(]|】)(?!])/g, `[$3]`)
-      .replace(/(\[|【)[cC]itation:(\d+)(]|】)/g, '[citation]($2)');
+      ?.replace(/\[\[([cC])itation/g, '([citation')
+      .replace(/[cC]itation:(\d+)]]/g, 'citation:$1]')
+      .replace(/\[\[([cC]itation:\d+)]](?!])/g, `[$1]`)
+      .replace(/\[[cC]itation:(\d+)]/g, '[citation]($1)')
+      .replace(/【[cC]itation:(\d+)】/g, '[citation]($1)');
 
     return (
       <div className="markdown-body" style={{ fontSize: `${props.fontSize ?? 14}px` }} ref={mdRef}>
