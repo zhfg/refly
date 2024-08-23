@@ -252,6 +252,7 @@
     width: 1px;
     background-color: rgba(0, 0, 0, 0.08);
     position: relative;
+
     .toggle-left-panel-btn {
       position: absolute;
       width: 30px;
@@ -268,6 +269,7 @@
       border: 1px solid rgba(0, 0, 0, 0.08);
       background: #ffffff;
       cursor: pointer;
+
       &:hover {
         background-color: #f0f0f0;
       }

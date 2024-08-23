@@ -93,7 +93,7 @@ export const NoteList = (props: NoteListProps) => {
                   <DeleteDropdownMenu
                     type="note"
                     data={item}
-                    postDeleteList={(note) => setDataList(dataList.filter((n) => n.noteId !== note.noteId))}
+                    postDeleteList={(note: Note) => setDataList(dataList.filter((n) => n.noteId !== note.noteId))}
                     getPopupContainer={() => document.getElementById(`note-${key}`) as HTMLElement}
                   />
                 </div>

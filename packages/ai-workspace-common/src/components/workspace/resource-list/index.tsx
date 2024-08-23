@@ -7,7 +7,6 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { List, Empty } from '@arco-design/web-react';
 
 import { Resource } from '@refly/openapi-schema';
-import { IconMore, IconBook } from '@arco-design/web-react/icon';
 
 import { CardBox } from '../card-box';
 import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
@@ -84,7 +83,7 @@ export const ResourceList = () => {
           }}
           actionLayout="vertical"
           onClick={() => {
-            jumpToReadResource({ kbId: item?.collectionId, resId: item?.resourceId });
+            jumpToReadResource({ resId: item?.resourceId });
           }}
           actions={[
             <CardBox
@@ -94,7 +93,7 @@ export const ResourceList = () => {
               cardIcon={cardIcon(item)}
               type="resource"
               onClick={() => {
-                jumpToReadResource({ kbId: item?.collectionId, resId: item?.resourceId });
+                jumpToReadResource({ resId: item?.resourceId });
               }}
             >
               <div className="flex items-center justify-between mt-6">
