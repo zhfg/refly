@@ -209,16 +209,20 @@ export class KnowledgeService {
         readOnly: param.readOnly,
         title: param.title || 'Untitled',
         indexStatus: 'processing',
-        collections: {
-          connectOrCreate: {
-            where: { collectionId: param.collectionId },
-            create: {
-              collectionId: param.collectionId,
-              title: param.collectionName || 'Default Collection',
-              uid: user.uid,
-            },
-          },
-        },
+        ...(param.collectionId
+          ? {
+              collections: {
+                connectOrCreate: {
+                  where: { collectionId: param.collectionId },
+                  create: {
+                    collectionId: param.collectionId,
+                    title: param.collectionName || 'Default Collection',
+                    uid: user.uid,
+                  },
+                },
+              },
+            }
+          : {}),
       },
     });
 
@@ -229,29 +233,6 @@ export class KnowledgeService {
   }
 
   async batchCreateResource(user: User, params: UpsertResourceRequest[]) {
-    // Create a new collection for all new resources without collectionId specified
-    if (params.some((param) => !param.collectionId)) {
-      const newColletionId = genCollectionID();
-      const newCollectionName = params.find((param) => !param.collectionId)?.collectionName;
-
-      await this.prisma.collection.create({
-        data: {
-          title: newCollectionName || 'Default Collection',
-          uid: user.uid,
-          collectionId: newColletionId,
-        },
-      });
-      this.logger.log(
-        `create new collection for user ${user.uid}, collection id: ${newColletionId}`,
-      );
-
-      params.forEach((param) => {
-        if (!param.collectionId) {
-          param.collectionId = newColletionId;
-        }
-      });
-    }
-
     const limit = pLimit(5);
     const tasks = params.map((param) => limit(async () => await this.createResource(user, param)));
     return Promise.all(tasks);
@@ -273,7 +254,21 @@ export class KnowledgeService {
       }
     }
 
-    // TODO: 减少不必要的重复插入
+    await this.prisma.resource.update({
+      where: { resourceId, uid: user.uid },
+      data: {
+        content: param.content,
+        wordCount: readingTime(param.content).words,
+        title: param.title,
+        meta: JSON.stringify({
+          url,
+          title: param.title,
+          storageKey: param.storageKey,
+        } as ResourceMeta),
+      },
+    });
+
+    // TODO: remove unnecessary duplicate insertions
 
     // ensure the document is for ingestion use
     if (param.content) {
@@ -290,22 +285,13 @@ export class KnowledgeService {
 
     await this.prisma.resource.update({
       where: { resourceId, uid: user.uid },
-      data: {
-        content: param.content,
-        wordCount: readingTime(param.content).words,
-        indexStatus: 'finish',
-        meta: JSON.stringify({
-          url,
-          title: param.title,
-          storageKey: param.storageKey,
-        } as ResourceMeta),
-      },
+      data: { indexStatus: 'finish' },
     });
   }
 
   /**
-   * Process resource after inserted, including connecting with weblink and
-   * save to vector store.
+   * Process resource after being inserted, including scraping actual content, chunking and
+   * save embeddings to vector store.
    */
   async finalizeResource(param: FinalizeResourceParam) {
     const user = await this.prisma.user.findFirst({ where: { uid: param.uid } });
