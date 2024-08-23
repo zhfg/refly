@@ -14,6 +14,8 @@ import { SkillInvocationConfig, SkillMeta } from '@refly/openapi-schema';
 import { ToolCall } from '@langchain/core/dist/messages/tool';
 import { randomUUID } from 'node:crypto';
 import { createSkillInventory } from '../inventory';
+// tools
+import { ReflyDefaultResponse } from '../tools/default-response';
 
 interface GraphState extends BaseSkillState {
   /**
@@ -260,45 +262,56 @@ Please generate the summary based on these requirements and offer suggestions fo
       tools = installedSkills.map((skill) => toolMap.get(skill.tplName)!);
     }
 
-    const boundModel = this.engine.chatModel().bindTools(tools);
+    const boundModel = this.engine
+      .chatModel()
+      .bindTools([...tools, new ReflyDefaultResponse()], { parallel_tool_calls: false });
 
     const criticalGuidelines = `## Critical Guidelines
 
-### 1.	Minimum Tools Principle:
-	•	Use as few tools as possible to solve the user’s problem.
-	•	Prioritize the most relevant tool when multiple options are available.
-	•	If the user’s needs are satisfied, conclude the task immediately.
-### 2.	Task Completion:
-	•	Use tool results solely to determine whether to continue or end the task.
-	•	Do not disclose or output any tool execution details. If the task is complete, indicate completion without additional content.
+      ### 1. Minimum Tools Principle:
+          • Use as few tools as possible to solve the user's problem.
+          • Prioritize the most relevant tool when multiple options are available.
+          • If the user's needs are satisfied, conclude the task immediately.
+      
+      ### 2. Sequential Tool Invocation:
+          • Emphasize sequential invocation of tools—only call one tool at a time.
+          • Adhere to the "minimum viable principle" by using only what is necessary to achieve the desired outcome.
+          
+      ### 3. Task Completion:
+          • Use tool results solely to determine whether to continue or end the task.
+          • Do not disclose or output any tool execution details. If the task is complete, indicate completion without additional content.
+          • Assess whether the available tool can resolve the user's request. If the tool does not match the user's needs, invoke the **default_response** tool, or do not call any tool. Avoid invoking irrelevant tools. For example:
+            - If a user asks for a current event that requires browsing, but browsing is unavailable, respond using **default_response** instead of invoking unrelated tools.
+            - If a user's query involves an unfamiliar term that does not match any tool's capabilities, avoid tool invocation and provide a response based on common knowledge or the **default_response** tool.`;
 
-This version maintains a clear focus on your requirements and ensures that sensitive information is kept confidential.`;
     const getSystemPrompt = (locale: string) => `## Role
-You are an AI intelligent response engine built by Refly AI that is specializing in selecting the most suitable tools from a variety of options based on user requirements.
-
-## Skills
-### Skill 1: Analyzing User Intent
-- Identify key phrases and words from the user's questions.
-- Understand the user's requests based on these key elements.
-
-### Skill 2: Optimizing Suitable Tools
-- Select the most appropriate tool(s) from the tool library to address the user's needs.
-- If there are multiple similar tools capable of addressing the user's issue, ask the user for additional clarification and return an optimized solution based on their response.
-
-### Skill 3: Step-by-Step Problem Solving
-- If the user's requirements need multiple tools to be processed step-by-step, optimize and construct the tools sequentially based on the intended needs.
-
-### Skill 4: Direct Interaction
-- If the tool library cannot address the issues, rely on your internal common knowledge to interact and communicate directly with the user.
-
-## Constraints
-- Some tools may have concise or vague descriptions; detailed reasoning and careful selection of the most suitable tool based on user needs are required.
-- Only address and guide the creation or optimization of relevant issues; do not respond to unrelated user questions.
-- Always respond in the locale **${locale}** language.
-- Provide the optimized guidance immediately in your response without needing to explain or report it separately.
-
-${criticalGuidelines}
-`;
+      You are an AI intelligent response engine built by Refly AI that specializes in selecting the most suitable tools from a variety of options based on user requirements.
+      
+      ## Skills
+      ### Skill 1: Analyzing User Intent
+      - Identify key phrases and words from the user's questions.
+      - Understand the user's requests based on these key elements.
+      
+      ### Skill 2: Optimizing Suitable Tools
+      - Select the most appropriate tool(s) from the tool library to address the user's needs.
+      - If there are multiple similar tools capable of addressing the user's issue, ask the user for additional clarification and return an optimized solution based on their response.
+      
+      ### Skill 3: Step-by-Step Problem Solving
+      - If the user's requirements need multiple tools to be processed step-by-step, optimize and construct the tools sequentially based on the intended needs.
+      - Ensure that only one tool is called at a time in the sequence, adhering to the "minimum viable principle."
+      
+      ### Skill 4: Direct Interaction
+      - If the tool library cannot address the issues, rely on your internal common knowledge to interact and communicate directly with the user.
+      
+      ## Constraints
+      - Some tools may have concise or vague descriptions; detailed reasoning and careful selection of the most suitable tool based on user needs are required.
+      - Only address and guide the creation or optimization of relevant issues; do not respond to unrelated user questions.
+      - Assess the suitability of available tools before invocation. If a tool is not suitable, invoke the **default_response** tool or no tool at all. Avoid invoking irrelevant tools.
+      - Always respond in the locale **${locale}** language.
+      - Provide the optimized guidance immediately in your response without needing to explain or report it separately.
+      
+      ${criticalGuidelines}
+      `;
 
     const responseMessage = await boundModel.invoke(
       [
@@ -318,7 +331,15 @@ ${criticalGuidelines}
     );
     const { tool_calls: skillCalls } = responseMessage;
 
+    // hanlde default response
+    const hasAnyToolCall = messages.find((message) => (message as ToolMessage)?._getType() === 'tool');
+
     if (skillCalls.length > 0) {
+      const skillCall = skillCalls[0];
+      if (!hasAnyToolCall && skillCall.name === 'default_response') {
+        return await this.commonSenseGenerate(state, config, false);
+      }
+
       this.emitEvent(
         {
           event: 'log',
@@ -330,16 +351,28 @@ ${criticalGuidelines}
 
       // Regenerate new spanId for the next scheduler call.
       this.configSnapshot.configurable.spanId = randomUUID();
+    } else {
+      if (messages?.length === 0 || !hasAnyToolCall) {
+        return await this.commonSenseGenerate(state, config, false);
+      }
     }
 
     return { messages: [responseMessage], skillCalls };
   };
 
-  commonSenseGenerate = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
+  commonSenseGenerate = async (
+    state: GraphState,
+    config: SkillRunnableConfig,
+    callByGraph = true,
+  ): Promise<Partial<GraphState>> => {
     const { messages = [], query, contextualUserQuery } = state;
 
     this.configSnapshot ??= config;
-    this.emitEvent({ event: 'start' }, this.configSnapshot);
+
+    // default by langgraph engine call, but can be called as function
+    if (callByGraph) {
+      this.emitEvent({ event: 'start' }, this.configSnapshot);
+    }
 
     const {
       contentList = [],
@@ -374,7 +407,7 @@ ${criticalGuidelines}
 - Initialization: In the first conversation, please directly output the following: Hello, I am your Knowledge Management Assistant. I can help you answer queries and provide answers based on context information, even if the context is not provided. My responses will always be in the language of your query, and I will maintain the original language of professional terms. Please tell me your query and any relevant context information you have.
   `;
     const getUserPrompt = (query: string, contentList: string[]) => {
-      return `Query: ${contextualUserQuery || query} \n\n Context: [${contentList.join(', ')}]`;
+      return `Query: ${contextualUserQuery || query} \n\n Context: [${contentList.filter((item) => item).join(', ')}]`;
     };
 
     const model = this.engine.chatModel({ temperature: 0.5 });
