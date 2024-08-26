@@ -1,6 +1,13 @@
 import { BaseSkill } from './base';
 import { SkillEngine } from './engine';
-import { KnowledgeBaseSearch, OnlineSearchSkill, SummarySkill, ResourceLabelerSkill } from './templates';
+import {
+  KnowledgeBaseSearch,
+  OnlineSearchSkill,
+  SummarySkill,
+  ResourceLabelerSkill,
+  CreateFormalEmailSkill,
+  CreateGitDiffCommitSkill,
+} from './templates';
 
 export const createSkillInventory = (engine: SkillEngine): BaseSkill[] => {
   return [
@@ -8,5 +15,7 @@ export const createSkillInventory = (engine: SkillEngine): BaseSkill[] => {
     new OnlineSearchSkill(engine),
     new SummarySkill(engine),
     new ResourceLabelerSkill(engine),
+    new CreateFormalEmailSkill(engine),
+    new CreateGitDiffCommitSkill(engine),
   ];
 };

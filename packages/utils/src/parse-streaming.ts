@@ -3,7 +3,7 @@ import type { RelatedQuestion } from '@refly/common-types';
 import { getAuthTokenFromCookie } from './request';
 import { getServerOrigin } from './url';
 import { Source, ChatTask } from '@refly/openapi-schema';
-import { markdownCitationParse } from 'src/parse';
+import { markdownCitationParse } from './parse';
 
 const LLM_SPLIT = '__LLM_RESPONSE__';
 const RELATED_SPLIT = '__RELATED_QUESTIONS__';
