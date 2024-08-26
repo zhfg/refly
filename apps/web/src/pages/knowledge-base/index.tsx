@@ -31,6 +31,7 @@ const KnowledgeLibraryLayout = () => {
   const [token] = useCookie("_refly_ai_sid")
   const [searchParams] = useSearchParams()
   const kbId = searchParams.get("kbId")
+  const resId = searchParams.get("resId")
   const noteId = searchParams.get("noteId")
   const userStore = useUserStore()
   const knowledgeBaseStore = useKnowledgeBaseStore()
@@ -83,13 +84,19 @@ const KnowledgeLibraryLayout = () => {
       }, 500)
     }
 
-    if (kbId) {
+    if (resId) {
       knowledgeBaseStore.updateResourcePanelVisible(true)
     }
     if (noteId) {
       noteStore.updateNotePanelVisible(true)
     }
-  }, [token, userStore?.userProfile?.uid, kbId, noteId])
+  }, [token, userStore?.userProfile?.uid, resId, noteId])
+
+  useEffect(() => {
+    if (kbId) {
+      knowledgeBaseStore.updateResourcePanelVisible(true)
+    }
+  }, [])
 
   const copilotStyle =
     knowledgeBaseStore.resourcePanelVisible || noteStore.notePanelVisible

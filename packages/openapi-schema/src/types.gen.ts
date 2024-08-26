@@ -52,10 +52,6 @@ export type Resource = {
    */
   resourceType: ResourceType;
   /**
-   * Collection ID
-   */
-  collectionId?: string;
-  /**
    * Resource title
    */
   title: string;
@@ -87,6 +83,10 @@ export type Resource = {
    * Document content for this resource (only returned in getNoteDetail API)
    */
   content?: string;
+  /**
+   * Collections this resource belongs to (only returned in getResourceDetail API)
+   */
+  collections?: Array<Collection>;
 };
 
 export type Note = {
@@ -808,13 +808,9 @@ export type UpsertResourceRequest = {
    */
   resourceId?: string;
   /**
-   * Collection ID (will create new collection if empty)
+   * Collection ID (will add to the collection if given)
    */
   collectionId?: string;
-  /**
-   * Collection name
-   */
-  collectionName?: string;
   /**
    * Resource metadata
    */
@@ -934,6 +930,28 @@ export type UpsertCollectionRequest = {
 
 export type UpsertCollectionResponse = BaseResponse & {
   data?: Collection;
+};
+
+export type AddResourceToCollectionRequest = {
+  /**
+   * Collection ID
+   */
+  collectionId: string;
+  /**
+   * Resource ID list
+   */
+  resourceIds: Array<string>;
+};
+
+export type RemoveResourceFromCollectionRequest = {
+  /**
+   * Collection ID
+   */
+  collectionId: string;
+  /**
+   * Resource ID list
+   */
+  resourceIds: Array<string>;
 };
 
 export type DeleteCollectionRequest = {
@@ -1529,10 +1547,6 @@ export type ScrapeWeblinkResponse = BaseResponse & {
 export type ListResourcesData = {
   query?: {
     /**
-     * Target collection ID
-     */
-    collectionId?: string;
-    /**
      * Page number
      */
     page?: number;
@@ -1706,7 +1720,7 @@ export type UpdateCollectionData = {
   body: UpsertCollectionRequest;
 };
 
-export type UpdateCollectionResponse = BaseResponse;
+export type UpdateCollectionResponse = UpsertCollectionResponse;
 
 export type UpdateCollectionError = unknown;
 
@@ -1717,9 +1731,25 @@ export type CreateCollectionData = {
   body: UpsertCollectionRequest;
 };
 
-export type CreateCollectionResponse = BaseResponse;
+export type CreateCollectionResponse = UpsertCollectionResponse;
 
 export type CreateCollectionError = unknown;
+
+export type AddResourceToCollectionData = {
+  body: AddResourceToCollectionRequest;
+};
+
+export type AddResourceToCollectionResponse = BaseResponse;
+
+export type AddResourceToCollectionError = unknown;
+
+export type RemoveResourceFromCollectionData = {
+  body: RemoveResourceFromCollectionRequest;
+};
+
+export type RemoveResourceFromCollectionResponse = BaseResponse;
+
+export type RemoveResourceFromCollectionError = unknown;
 
 export type DeleteCollectionData = {
   body: DeleteCollectionRequest;
@@ -2214,13 +2244,35 @@ export type $OpenApiTs = {
         /**
          * successful operation
          */
-        '200': BaseResponse;
+        '200': UpsertCollectionResponse;
       };
     };
   };
   '/knowledge/collection/new': {
     post: {
       req: CreateCollectionData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': UpsertCollectionResponse;
+      };
+    };
+  };
+  '/knowledge/collection/addResource': {
+    post: {
+      req: AddResourceToCollectionData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': BaseResponse;
+      };
+    };
+  };
+  '/knowledge/collection/removeResource': {
+    post: {
+      req: RemoveResourceFromCollectionData;
       res: {
         /**
          * successful operation

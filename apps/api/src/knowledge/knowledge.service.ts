@@ -16,6 +16,9 @@ import {
   ListNotesData,
   UpsertNoteRequest,
   User,
+  GetResourceDetailData,
+  AddResourceToCollectionRequest,
+  RemoveResourceFromCollectionRequest,
 } from '@refly/openapi-schema';
 import { CHANNEL_FINALIZE_RESOURCE, QUEUE_SIMPLE_EVENT, QUEUE_RESOURCE } from '../utils';
 import { genCollectionID, genResourceID, cleanMarkdownForIngest, genNoteID } from '@refly/utils';
@@ -50,6 +53,7 @@ export class KnowledgeService {
 
     const coll = await this.prisma.collection.findFirst({
       where: { collectionId, uid: user.uid, deletedAt: null },
+      include: { resources: { where: { deletedAt: null } } },
     });
     if (!coll) {
       throw new NotFoundException('Collection not found');
@@ -60,17 +64,7 @@ export class KnowledgeService {
       return null;
     }
 
-    let resources = await this.prisma.resource.findMany({
-      where: { collectionId, deletedAt: null },
-      orderBy: { updatedAt: 'desc' },
-    });
-
-    // If collection is read by other users, filter out resources that are not public
-    if (coll.isPublic && coll.uid !== user.uid) {
-      resources = resources.filter((r) => r.isPublic);
-    }
-
-    return { ...coll, resources };
+    return coll;
   }
 
   async upsertCollection(user: User, param: UpsertCollectionRequest) {
@@ -88,6 +82,40 @@ export class KnowledgeService {
         isPublic: param.isPublic,
       },
       update: { ...omit(param, ['collectionId']) },
+    });
+  }
+
+  async addResourceToCollection(user: User, param: AddResourceToCollectionRequest) {
+    const { resourceIds = [], collectionId } = param;
+
+    if (resourceIds.length === 0) {
+      throw new BadRequestException('resourceIds is required');
+    }
+
+    return this.prisma.collection.update({
+      where: { collectionId, uid: user.uid, deletedAt: null },
+      data: {
+        resources: {
+          connect: resourceIds.map((resourceId) => ({ resourceId })),
+        },
+      },
+    });
+  }
+
+  async removeResourceFromCollection(user: User, param: RemoveResourceFromCollectionRequest) {
+    const { resourceIds = [], collectionId } = param;
+
+    if (resourceIds.length === 0) {
+      throw new BadRequestException('resourceIds is required');
+    }
+
+    return this.prisma.collection.update({
+      where: { collectionId, uid: user.uid, deletedAt: null },
+      data: {
+        resources: {
+          disconnect: resourceIds.map((resourceId) => ({ resourceId })),
+        },
+      },
     });
   }
 
@@ -110,31 +138,10 @@ export class KnowledgeService {
         data: { deletedAt: new Date() },
       }),
     ]);
-
-    // Delete all resources
-    const resources = await this.prisma.resource.findMany({
-      where: { collectionId, uid, deletedAt: null },
-    });
-    await Promise.all(resources.map((r) => this.deleteResource(user, r.resourceId)));
   }
 
   async listResources(user: User, param: ListResourcesData['query']) {
-    const { collectionId, resourceId, resourceType, page = 1, pageSize = 10 } = param;
-
-    // Query resources by collection
-    if (collectionId) {
-      return this.prisma.resource.findMany({
-        where: {
-          collectionId,
-          resourceType,
-          deletedAt: null,
-          OR: [{ isPublic: true }, { uid: user.uid }],
-        },
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-        orderBy: { updatedAt: 'desc' },
-      });
-    }
+    const { resourceId, resourceType, page = 1, pageSize = 10 } = param;
 
     const resources = await this.prisma.resource.findMany({
       where: { resourceId, resourceType, uid: user.uid, deletedAt: null },
@@ -149,10 +156,12 @@ export class KnowledgeService {
     }));
   }
 
-  async getResourceDetail(user: User, param: { resourceId: string }) {
+  async getResourceDetail(user: User, param: GetResourceDetailData['query']) {
     const { resourceId } = param;
+
     const resource = await this.prisma.resource.findFirst({
       where: { resourceId, deletedAt: null },
+      include: { collections: { where: { deletedAt: null } } },
     });
 
     if (!resource.isPublic && resource.uid !== user.uid) {
@@ -164,25 +173,6 @@ export class KnowledgeService {
 
   async createResource(user: User, param: UpsertResourceRequest) {
     param.resourceId = genResourceID();
-
-    // If target collection not specified, create new one
-    if (!param.collectionId) {
-      param.collectionId = genCollectionID();
-
-      await this.prisma.collection.upsert({
-        where: { collectionId: param.collectionId },
-        create: {
-          title: param.collectionName || 'Default Collection',
-          uid: user.uid,
-          collectionId: param.collectionId,
-        },
-        update: {},
-      });
-
-      this.logger.log(
-        `create new collection for user ${user.uid}, collection id: ${param.collectionId}`,
-      );
-    }
 
     if (param.readOnly === undefined) {
       param.readOnly = param.resourceType === 'weblink';
@@ -212,7 +202,6 @@ export class KnowledgeService {
       data: {
         resourceId: param.resourceId,
         resourceType: param.resourceType,
-        collectionId: param.collectionId,
         meta: JSON.stringify(param.data || {}),
         content: param.content ?? '',
         uid: user.uid,
@@ -220,6 +209,13 @@ export class KnowledgeService {
         readOnly: param.readOnly,
         title: param.title || 'Untitled',
         indexStatus: 'processing',
+        ...(param.collectionId
+          ? {
+              collections: {
+                connect: { collectionId: param.collectionId },
+              },
+            }
+          : {}),
       },
     });
 
@@ -230,36 +226,13 @@ export class KnowledgeService {
   }
 
   async batchCreateResource(user: User, params: UpsertResourceRequest[]) {
-    // Create a new collection for all new resources without collectionId specified
-    if (params.some((param) => !param.collectionId)) {
-      const newColletionId = genCollectionID();
-      const newCollectionName = params.find((param) => !param.collectionId)?.collectionName;
-
-      await this.prisma.collection.create({
-        data: {
-          title: newCollectionName || 'Default Collection',
-          uid: user.uid,
-          collectionId: newColletionId,
-        },
-      });
-      this.logger.log(
-        `create new collection for user ${user.uid}, collection id: ${newColletionId}`,
-      );
-
-      params.forEach((param) => {
-        if (!param.collectionId) {
-          param.collectionId = newColletionId;
-        }
-      });
-    }
-
     const limit = pLimit(5);
     const tasks = params.map((param) => limit(async () => await this.createResource(user, param)));
     return Promise.all(tasks);
   }
 
   async indexResource(user: User, param: UpsertResourceRequest) {
-    const { resourceType, resourceId, collectionId, data = {} } = param;
+    const { resourceType, resourceId, data = {} } = param;
     const { url, storageKey, title } = data;
     param.storageKey ||= storageKey;
     param.content ||= '';
@@ -274,13 +247,27 @@ export class KnowledgeService {
       }
     }
 
-    // TODO: 减少不必要的重复插入
+    await this.prisma.resource.update({
+      where: { resourceId, uid: user.uid },
+      data: {
+        content: param.content,
+        wordCount: readingTime(param.content).words,
+        title: param.title,
+        meta: JSON.stringify({
+          url,
+          title: param.title,
+          storageKey: param.storageKey,
+        } as ResourceMeta),
+      },
+    });
+
+    // TODO: remove unnecessary duplicate insertions
 
     // ensure the document is for ingestion use
     if (param.content) {
       const chunks = await this.ragService.indexContent({
         pageContent: cleanMarkdownForIngest(param.content),
-        metadata: { nodeType: 'resource', url, title, collectionId, resourceType, resourceId },
+        metadata: { nodeType: 'resource', url, title, resourceType, resourceId },
       });
       await this.ragService.saveDataForUser(user, { chunks });
     }
@@ -291,22 +278,13 @@ export class KnowledgeService {
 
     await this.prisma.resource.update({
       where: { resourceId, uid: user.uid },
-      data: {
-        content: param.content,
-        wordCount: readingTime(param.content).words,
-        indexStatus: 'finish',
-        meta: JSON.stringify({
-          url,
-          title: param.title,
-          storageKey: param.storageKey,
-        } as ResourceMeta),
-      },
+      data: { indexStatus: 'finish' },
     });
   }
 
   /**
-   * Process resource after inserted, including connecting with weblink and
-   * save to vector store.
+   * Process resource after being inserted, including scraping actual content, chunking and
+   * save embeddings to vector store.
    */
   async finalizeResource(param: FinalizeResourceParam) {
     const user = await this.prisma.user.findFirst({ where: { uid: param.uid } });

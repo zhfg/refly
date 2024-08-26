@@ -11,6 +11,10 @@
   }
 
   .knowledge-base-resource-meta {
+    width: 95%;
+    max-width: 1024px;
+    margin: 0 auto;
+
     .knowledge-base-directory-site-intro {
       display: flex;
       flex-direction: row;
@@ -136,6 +140,9 @@
   .knowledge-base-resource-content {
     margin-top: 24px;
     position: relative;
+    width: 95%;
+    max-width: 1024px;
+    margin: 0 auto;
 
     .knowledge-base-resource-content-title {
       width: 100%;

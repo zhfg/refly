@@ -700,8 +700,8 @@ importers:
         specifier: ^5.30.4
         version: 5.30.4
       use-debounce:
-        specifier: ^9.0.3
-        version: 9.0.3(react@18.2.0)
+        specifier: ^10.0.3
+        version: 10.0.3(react@18.2.0)
       uuid:
         specifier: ^9.0.0
         version: 9.0.1
@@ -950,8 +950,8 @@ importers:
         specifier: ^5.30.4
         version: 5.30.4
       use-debounce:
-        specifier: ^9.0.3
-        version: 9.0.3(react@18.2.0)
+        specifier: ^10.0.3
+        version: 10.0.3(react@18.2.0)
       uuid:
         specifier: ^9.0.0
         version: 9.0.1
@@ -1330,8 +1330,8 @@ importers:
         specifier: ^0.8.10
         version: 0.8.10(@tiptap/core@2.4.0)
       use-debounce:
-        specifier: ^9.0.3
-        version: 9.0.3(react@18.2.0)
+        specifier: ^10.0.3
+        version: 10.0.3(react@18.2.0)
       uuid:
         specifier: ^9.0.0
         version: 9.0.1
@@ -1680,8 +1680,8 @@ importers:
         specifier: ^0.1.2
         version: 0.1.2(@types/react@18.2.66)(react@18.2.0)
       use-debounce:
-        specifier: ^9.0.3
-        version: 9.0.3(react@18.2.0)
+        specifier: ^10.0.3
+        version: 10.0.3(react@18.2.0)
       y-prosemirror:
         specifier: ~1.2.6
         version: 1.2.6(prosemirror-model@1.21.1)(y-protocols@1.0.6)(yjs@13.6.16)
@@ -21932,11 +21932,11 @@ packages:
       tslib: 2.6.3
     dev: false
 
-  /use-debounce@9.0.3(react@18.2.0):
-    resolution: {integrity: sha512-FhtlbDtDXILJV7Lix5OZj5yX/fW1tzq+VrvK1fnT2bUrPOGruU9Rw8NCEn+UI9wopfERBEZAOQ8lfeCJPllgnw==}
-    engines: {node: '>= 10.0.0'}
+  /use-debounce@10.0.3(react@18.2.0):
+    resolution: {integrity: sha512-DxQSI9ZKso689WM1mjgGU3ozcxU1TJElBJ3X6S4SMzMNcm2lVH0AHmyXB+K7ewjz2BSUKJTDqTcwtSMRfB89dg==}
+    engines: {node: '>= 16.0.0'}
     peerDependencies:
-      react: '>=16.8.0'
+      react: '*'
     dependencies:
       react: 18.2.0
     dev: false
@@ -23256,7 +23256,7 @@ time:
   /typescript@4.5.2: '2021-11-17T18:34:54.786Z'
   /typescript@5.3.3: '2023-12-06T19:07:51.067Z'
   /unimport@3.4.0: '2023-09-26T08:20:39.645Z'
-  /use-debounce@9.0.3: '2023-01-13T00:00:57.764Z'
+  /use-debounce@10.0.3: '2024-08-17T10:24:30.491Z'
   /uuid@9.0.1: '2023-09-12T08:56:35.205Z'
   /vite-plugin-encoding@1.0.0: '2022-03-02T01:30:34.776Z'
   /vite-tsconfig-paths@4.3.2: '2024-03-13T21:43:50.415Z'

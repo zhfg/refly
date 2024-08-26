@@ -30,7 +30,7 @@ import { SkillManagementModal } from '@refly-packages/ai-workspace-common/compon
 import { SkillDisplay } from './skill-display';
 
 // requests
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClixent from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 // state
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
@@ -155,20 +155,26 @@ export const AICopilot = (props: AICopilotProps) => {
   };
 
   const getThreadMessagesByJobId = async (jobId: string) => {
-    const { data: res, error } = await getClient().getSkillJobDetail({
-      query: {
-        jobId,
-      },
-    });
+    setIsFetching(true);
+    try {
+      const { data: res, error } = await getClient().getSkillJobDetail({
+        query: {
+          jobId,
+        },
+      });
 
-    if (error) {
-      throw error;
+      if (error) {
+        throw error;
+      }
+
+      // 清空之前的状态
+      resetState();
+
+      setIsFetching(false);
+      chatStore.setMessages(res?.data?.messages || []);
+    } catch (error) {
+      console.log('getThreadMessagesByJobId error', error);
     }
-
-    // 清空之前的状态
-    resetState();
-
-    chatStore.setMessages(res?.data?.messages || []);
   };
 
   const handleConvTask = async (convId: string) => {
@@ -309,7 +315,7 @@ export const AICopilot = (props: AICopilotProps) => {
         className="ai-copilot-message-container"
         style={{ height: `calc(100vh - ${disable ? 16 : actualCopilotBodyHeight}px - 50px)` }}
       >
-        <ChatMessages disable={disable} />
+        <ChatMessages disable={disable} loading={isFetching} />
       </div>
       {!disable && (
         <div className="ai-copilot-body" style={{ height: actualCopilotBodyHeight }}>

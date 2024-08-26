@@ -105,6 +105,10 @@
         "collection": "New Collection"
       }
     },
+    "resourceCollectionList": {
+      "addToCollection": "Add to Collection",
+      "removeConfirmText": "Are you sure to remove this resource from the collection?"
+    },
     "labelGroup": {
       "addLabel": "Click to add labels",
       "addLabelTitle": "Add labels",
@@ -149,8 +153,20 @@
       "deleteConfirmForNote": "Are you sure you want to delete this note?",
       "deleteConfirmForKnowledgeBase": "Are you sure you want to delete this knowledge base?",
       "deleteConfirmForResource": "Are you sure you want to delete this resource?",
+      "deleteConfirmForResourceCollection": "Are you sure to remove this resource from the collection?",
       "delete": "Delete",
       "edit": "Edit"
+    }
+  },
+  "knowledgeBase": {
+    "keepOneWindow": "Keep at least one window",
+    "resourceCollectionAssociativeModal": {
+      "resourceTitle": "Add Resources",
+      "collectionTitle": "Add To Collection",
+      "resource": "Resource",
+      "collection": "Collection",
+      "resourcePlaceholder": "Please select resources",
+      "collectionPlaceholder": "Please select Collection"
     }
   },
   "loggedHomePage": {
@@ -215,7 +231,7 @@
       "explore": "Explore",
       "getHelp": "Get Help",
       "download": "Download Extension",
-      "newResource": "New Resource",
+      "newResource": "Import Resource",
       "settings": "Settings",
       "skill": "Skills"
     }

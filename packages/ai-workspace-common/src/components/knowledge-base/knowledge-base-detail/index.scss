@@ -140,6 +140,10 @@
     }
   }
 
+  .knowledge-base-detail-resource-panel {
+    overflow: auto !important;
+  }
+
   .knowledge-base-detail-header {
     height: 40px;
     width: 100%;
@@ -247,6 +251,36 @@
   .knowledge-base-detail-panel-resize {
     width: 1px;
     background-color: rgba(0, 0, 0, 0.08);
+    position: relative;
+
+    .toggle-left-panel-btn {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      left: -15px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      background: #ffffff;
+      cursor: pointer;
+
+      &:hover {
+        background-color: #f0f0f0;
+      }
+    }
+
+    &.left-panel-hidden {
+      .toggle-left-panel-btn {
+        padding-left: 10px;
+        left: -12px;
+      }
+    }
 
     &:hover {
       background-color: #00968f;

@@ -32,20 +32,28 @@ export const useFetchOrSearchList = ({
     hasMore,
     setHasMore,
     loadMore,
-    dataList,
-    setDataList,
     currentPage,
     setCurrentPage,
-    isRequesting,
+    dataList: fetchList,
+    setDataList: setFetchList,
+    isRequesting: fetchRequesting,
     resetState,
   } = useFetchDataList({
     fetchData,
     pageSize,
   });
 
+  // we store search list in a separate state to avoid re-fetching the list
+  // when switching between fetch and search mode
+  const [searchList, setSearchList] = useState<SearchResult[]>([]);
+
+  // whether search is requesting
+  const [searchRequesting, setSearchRequesting] = useState(false);
+
   const debouncedSearch: ({ searchVal, domains }: { searchVal: string; domains?: Array<SearchDomain> }) => any =
     useDebouncedCallback(async ({ searchVal, domains }: { searchVal: string; domains?: Array<SearchDomain> }) => {
       try {
+        setSearchRequesting(true);
         const res = await getClient().search({
           body: {
             query: searchVal,
@@ -56,17 +64,17 @@ export const useFetchOrSearchList = ({
 
         const resData = res?.data?.data || [];
 
-        setDataList(resData);
+        setSearchList(resData);
       } catch (err) {
         console.error('debounced search err: ', err);
+      } finally {
+        setSearchRequesting(false);
       }
     }, 200);
 
   const handleValueChange = async (searchVal: string, domains: SearchDomain[]) => {
     if (!searchVal) {
-      setDataList([]);
       setMode('fetch');
-      loadMore();
     } else {
       setMode('search');
       debouncedSearch({
@@ -84,9 +92,10 @@ export const useFetchOrSearchList = ({
     setMode,
     hasMore,
     loadMore,
-    dataList,
+    dataList: mode === 'search' ? searchList : fetchList,
+    setDataList: mode === 'search' ? setSearchList : setFetchList,
     currentPage,
-    isRequesting,
+    isRequesting: fetchRequesting || searchRequesting,
     debouncedSearch,
     handleValueChange,
   };

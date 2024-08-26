@@ -26,11 +26,9 @@ export const useKnowledgeBaseJumpNewPath = () => {
     setSearchParams(searchParams.toString());
     navigate(`${baseUrl}/knowledge-base?${searchParams.toString()}`);
     knowledgeBaseStore.updateResourcePanelVisible(true);
-    noteStore.updateNotePanelVisible(false);
   };
 
-  const jumpToReadResource = ({ kbId, resId, baseUrl = '' }: { kbId: string; resId: string; baseUrl?: string }) => {
-    searchParams.set('kbId', kbId);
+  const jumpToReadResource = ({ resId, baseUrl = '' }: { resId: string; baseUrl?: string }) => {
     searchParams.set('resId', resId);
     setSearchParams(searchParams);
     navigate(`${baseUrl}/knowledge-base?${searchParams.toString()}`);

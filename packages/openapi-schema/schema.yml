@@ -46,12 +46,6 @@ paths:
           schema:
             type: string
             $ref: '#/components/schemas/ResourceType'
-        - name: collectionId
-          in: query
-          description: Target collection ID
-          schema:
-            type: string
-            example: cl-g30e1b80b5g1itbemc0g5jj3
         - name: page
           in: query
           description: Page number
@@ -384,7 +378,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BaseResponse'
+                $ref: '#/components/schemas/UpsertCollectionResponse'
       security:
         - api_key: []
   /knowledge/collection/new:
@@ -401,6 +395,50 @@ paths:
             schema:
               $ref: '#/components/schemas/UpsertCollectionRequest'
         required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertCollectionResponse'
+      security:
+        - api_key: []
+  /knowledge/collection/addResource:
+    post:
+      tags:
+        - knowledge
+      summary: Add resource to collection
+      description: Add an existing resource to a collection
+      operationId: addResourceToCollection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddResourceToCollectionRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+      security:
+        - api_key: []
+  /knowledge/collection/removeResource:
+    post:
+      tags:
+        - knowledge
+      summary: Remove resource from collection
+      description: Remove an existing resource from a collection
+      operationId: removeResourceFromCollection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemoveResourceFromCollectionRequest'
       responses:
         '200':
           description: successful operation
@@ -1133,9 +1171,6 @@ components:
         resourceType:
           description: Resource type
           $ref: '#/components/schemas/ResourceType'
-        collectionId:
-          type: string
-          description: Collection ID
         title:
           type: string
           description: Resource title
@@ -1164,6 +1199,11 @@ components:
         content:
           type: string
           description: Document content for this resource (only returned in getNoteDetail API)
+        collections:
+          type: array
+          description: Collections this resource belongs to (only returned in getResourceDetail API)
+          items:
+            $ref: '#/components/schemas/Collection'
     Note:
       type: object
       required:
@@ -1915,12 +1955,8 @@ components:
           example: r-g30e1b80b5g1itbemc0g5jj3
         collectionId:
           type: string
-          description: Collection ID (will create new collection if empty)
+          description: Collection ID (will add to the collection if given)
           example: cl-g30e1b80b5g1itbemc0g5jj3
-        collectionName:
-          type: string
-          description: Collection name
-          example: New Collection
         data:
           description: Resource metadata
           $ref: '#/components/schemas/ResourceMeta'
@@ -2063,6 +2099,34 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/Collection'
+    AddResourceToCollectionRequest:
+      type: object
+      required:
+        - collectionId
+        - resourceIds
+      properties:
+        collectionId:
+          type: string
+          description: Collection ID
+        resourceIds:
+          type: array
+          description: Resource ID list
+          items:
+            type: string
+    RemoveResourceFromCollectionRequest:
+      type: object
+      required:
+        - collectionId
+        - resourceIds
+      properties:
+        collectionId:
+          type: string
+          description: Collection ID
+        resourceIds:
+          type: array
+          description: Resource ID list
+          items:
+            type: string
     DeleteCollectionRequest:
       type: object
       required:

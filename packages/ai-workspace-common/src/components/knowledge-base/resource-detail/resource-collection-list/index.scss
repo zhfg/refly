@@ -1,4 +1,9 @@
 .resource-collection-list {
+  display: flex;
+  flex-wrap: wrap;
+  .tag-wrap {
+    margin-bottom: 4px;
+  }
   .resource-collection-list-item {
     background-color: transparent;
 

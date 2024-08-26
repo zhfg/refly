@@ -96,7 +96,7 @@ export const NewKnowledgeModal = () => {
             field="title"
             rules={[{ required: true, message: t('workspace.newKnowledgeModal.titlePlaceholder') }]}
           >
-            <Input maxLength={200} showWordLimit placeholder={t('workspace.newKnowledgeModal.titlePlaceholder')} />
+            <Input maxLength={100} showWordLimit placeholder={t('workspace.newKnowledgeModal.titlePlaceholder')} />
           </FormItem>
           <FormItem label={t('workspace.newKnowledgeModal.description')} field="description">
             <TextArea

@@ -27,7 +27,7 @@ export const SkillTemplateList = () => {
     loadMore();
   }, []);
 
-  if (dataList.length === 0) {
+  if (dataList.length === 0 && !isRequesting) {
     return <Empty description="暂无数据" />;
   }
   return (
@@ -42,6 +42,7 @@ export const SkillTemplateList = () => {
       wrapperStyle={{ width: '100%' }}
       bordered={false}
       pagination={false}
+      loading={isRequesting}
       dataSource={dataList}
       scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
       render={(item: SkillTemplate, key) => (

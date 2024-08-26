@@ -7,15 +7,34 @@ import { getServerOrigin } from '@refly/utils/url';
 import { sendToBackground } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { MessageName } from '@refly/common-types';
 
+// 添加一个全局loading状态管理函数
+let loadingCount = 0;
+const setGlobalLoading = (isLoading: boolean) => {
+  if (isLoading) {
+    loadingCount++;
+  } else {
+    loadingCount = Math.max(0, loadingCount - 1);
+  }
+  // 这里可以触发UI更新,例如:
+  dispatchEvent(new CustomEvent('globalLoadingChange', { detail: { isLoading: loadingCount > 0 } }));
+};
+
 createClient({ baseUrl: getServerOrigin() + '/v1' });
 
 client.interceptors.request.use((request) => {
   console.log('intercept request:', request);
+  // setGlobalLoading(true);
   const token = getAuthTokenFromCookie();
   if (token) {
     request.headers.set('Authorization', `Bearer ${token}`);
   }
   return request;
+});
+
+client.interceptors.response.use((response) => {
+  console.log('intercept response:', response);
+  // setGlobalLoading(false);
+  return response;
 });
 
 const wrapFunctions = (module: any) => {

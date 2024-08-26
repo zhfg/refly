@@ -107,7 +107,7 @@ export const ImportFromWeblink = () => {
           url: link?.url,
           title: link?.title,
         },
-        collectionId: selectedCollectionId === 'new-collection' ? undefined : selectedCollectionId,
+        collectionId: selectedCollectionId,
       };
     });
 
@@ -212,11 +212,7 @@ export const ImportFromWeblink = () => {
               allowCreateNewEntity
               onChange={(value) => {
                 if (!value) return;
-                if (value === 'new-collection') {
-                  importResourceStore.setSelectedCollectionId('new-collection');
-                } else {
-                  importResourceStore.setSelectedCollectionId(value);
-                }
+                importResourceStore.setSelectedCollectionId(value);
               }}
             />
           </div>

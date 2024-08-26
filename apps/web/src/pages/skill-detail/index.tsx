@@ -1,5 +1,7 @@
+import { useEffect } from "react"
 import { ErrorBoundary } from "@sentry/react"
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels"
+import { useSearchParams } from "@refly-packages/ai-workspace-common/utils/router"
 
 // components
 import SkillDetail from "@refly-packages/ai-workspace-common/components/skill/skill-detail"
@@ -8,14 +10,16 @@ import { AICopilot } from "@refly-packages/ai-workspace-common/components/knowle
 import { useSkillJobForCopilot } from "@refly-packages/ai-workspace-common/stores/skill-job-for-copilot"
 
 import "./index.scss"
-import { useEffect } from "react"
 
 const SkillDetailPage = () => {
   const skillJobForCopilot = useSkillJobForCopilot()
+  const [searchParams] = useSearchParams()
+  const jobId = searchParams.get("jobId") as string
 
   useEffect(() => {
-    skillJobForCopilot.setJobId("")
-  }, [])
+    skillJobForCopilot.setJobId(jobId)
+  }, [jobId])
+
   return (
     <ErrorBoundary>
       <div className="skill-detail-page">

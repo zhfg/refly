@@ -7,6 +7,7 @@
 
   .context-state-card {
     .context-state-card-selector {
+      width: calc(100% - 30px);
       .arco-select-view {
         height: 24px;
         display: flex;
@@ -39,6 +40,7 @@
         display: flex;
         flex-direction: row;
         align-items: center;
+        width: 60%;
 
         &:hover {
           cursor: pointer;

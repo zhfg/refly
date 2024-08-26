@@ -134,7 +134,7 @@ export const SkillTriggers = (props: SkillTriggersProps) => {
     }
   }, [importNewTriggerModal.reloadTriggerList]);
 
-  if (dataList.length === 0) {
+  if (dataList.length === 0 && !isRequesting) {
     return <Empty description="请先配置触发器" />;
   }
 
@@ -146,6 +146,7 @@ export const SkillTriggers = (props: SkillTriggersProps) => {
       split={false}
       pagination={false}
       dataSource={dataList}
+      loading={isRequesting}
       scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
       render={(item: SkillTrigger, key) => (
         <List.Item

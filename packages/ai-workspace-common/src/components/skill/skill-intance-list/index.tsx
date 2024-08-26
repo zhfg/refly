@@ -30,7 +30,7 @@ export const SkillInstanceList = (props: SkillInstanceListProps) => {
     loadMore();
   }, []);
 
-  if (dataList.length === 0) {
+  if (dataList.length === 0 && !isRequesting) {
     return <Empty description="暂无技能实例" />;
   }
   return (
@@ -46,6 +46,7 @@ export const SkillInstanceList = (props: SkillInstanceListProps) => {
       bordered={false}
       pagination={false}
       dataSource={dataList}
+      loading={isRequesting}
       scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
       render={(item: SkillInstance, key) => (
         <List.Item

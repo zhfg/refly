@@ -7,7 +7,6 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { List, Empty } from '@arco-design/web-react';
 
 import { Resource } from '@refly/openapi-schema';
-import { IconMore, IconBook } from '@arco-design/web-react/icon';
 
 import { CardBox } from '../card-box';
 import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
@@ -50,7 +49,7 @@ export const ResourceList = () => {
 
   const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
 
-  if (dataList.length === 0) {
+  if (dataList.length === 0 && !isRequesting) {
     return <Empty />;
   }
 
@@ -75,6 +74,7 @@ export const ResourceList = () => {
       offsetBottom={200}
       dataSource={dataList}
       scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
+      loading={isRequesting}
       render={(item: Resource, key) => (
         <List.Item
           key={item?.resourceId + key}
@@ -84,7 +84,7 @@ export const ResourceList = () => {
           }}
           actionLayout="vertical"
           onClick={() => {
-            jumpToReadResource({ kbId: item?.collectionId, resId: item?.resourceId });
+            jumpToReadResource({ resId: item?.resourceId });
           }}
           actions={[
             <CardBox
@@ -94,7 +94,7 @@ export const ResourceList = () => {
               cardIcon={cardIcon(item)}
               type="resource"
               onClick={() => {
-                jumpToReadResource({ kbId: item?.collectionId, resId: item?.resourceId });
+                jumpToReadResource({ resId: item?.resourceId });
               }}
             >
               <div className="flex items-center justify-between mt-6">

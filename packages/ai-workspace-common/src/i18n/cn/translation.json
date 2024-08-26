@@ -105,6 +105,10 @@
         "collection": "新知识库"
       }
     },
+    "resourceCollectionList": {
+      "addToCollection": "添加到知识库",
+      "removeConfirmText": "确认要从此知识库移除吗?"
+    },
     "labelGroup": {
       "addLabel": "点击添加标签",
       "addLabelTitle": "添加标签",
@@ -149,8 +153,20 @@
       "deleteConfirmForNote": "确定删除该笔记吗？",
       "deleteConfirmForKnowledgeBase": "确定删除该知识库吗？",
       "deleteConfirmForResource": "确定删除该资源吗？",
+      "deleteConfirmForResourceCollection": "确认要从知识库移除吗?",
       "delete": "删除",
       "edit": "编辑"
+    }
+  },
+  "knowledgeBase": {
+    "keepOneWindow": "至少保留一个窗口",
+    "resourceCollectionAssociativeModal": {
+      "resourceTitle": "添加资源",
+      "collectionTitle": "添加到知识库",
+      "resource": "资源",
+      "collection": "知识库",
+      "resourcePlaceholder": "请选择资源",
+      "collectionPlaceholder": "请选择知识库"
     }
   },
   "loggedHomePage": {
@@ -226,7 +242,7 @@
       "threadLibrary": "会话",
       "getHelp": "获得帮助",
       "download": "下载插件",
-      "newResource": "添加资源",
+      "newResource": "导入资源",
       "settings": "设置",
       "skill": "技能"
     }
