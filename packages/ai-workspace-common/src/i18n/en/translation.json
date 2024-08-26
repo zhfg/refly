@@ -161,8 +161,8 @@
   "knowledgeBase": {
     "keepOneWindow": "Keep at least one window",
     "resourceCollectionAssociativeModal": {
-      "resourceTitle": "Associate Resources",
-      "collectionTitle": "Associate Collection",
+      "resourceTitle": "Add Resources",
+      "collectionTitle": "Add To Collection",
       "resource": "Resource",
       "collection": "Collection",
       "resourcePlaceholder": "Please select resources",
@@ -231,7 +231,7 @@
       "explore": "Explore",
       "getHelp": "Get Help",
       "download": "Download Extension",
-      "newResource": "New Resource",
+      "newResource": "Import Resource",
       "settings": "Settings",
       "skill": "Skills"
     }

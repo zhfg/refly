@@ -92,7 +92,6 @@ export const ResourceCollectionAssociativeModal = (props: ResourceCollectionAsso
           ]}
         >
           <SearchSelect
-            allowCreateNewEntity
             domain={domain}
             mode={mode}
             placeholder={t(`knowledgeBase.resourceCollectionAssociativeModal.${domain}Placeholder`)}
