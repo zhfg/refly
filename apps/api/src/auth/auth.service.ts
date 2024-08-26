@@ -92,8 +92,16 @@ export class AuthService {
       return user;
     }
 
-    // Insert or update user (based on email)
-    const { url: avatar } = await this.miscService.dumpFileFromURL(photos[0].value);
+    // download avatar if profile photo exists
+    let avatar: string;
+    try {
+      if (photos?.length > 0) {
+        avatar = (await this.miscService.dumpFileFromURL(photos[0].value)).url;
+      }
+    } catch (e) {
+      this.logger.warn(`failed to download avatar: ${e}`);
+    }
+
     const newUser = await this.prisma.user.create({
       data: {
         name: displayName,
