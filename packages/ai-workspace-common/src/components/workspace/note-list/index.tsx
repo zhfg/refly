@@ -45,12 +45,13 @@ export const NoteList = (props: NoteListProps) => {
 
   const { jumpToNote } = useKnowledgeBaseJumpNewPath();
 
-  if (dataList.length === 0) {
+  if (dataList.length === 0 && !isRequesting) {
     return <Empty />;
   }
 
   return (
     <List
+      loading={isRequesting}
       grid={
         listGrid || {
           sm: 24,

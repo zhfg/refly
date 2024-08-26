@@ -184,7 +184,7 @@ export const SkillJobs = (props: SkillJobsProps) => {
     );
   };
 
-  if (dataList.length === 0) {
+  if (dataList.length === 0 && !isRequesting) {
     return <Empty description="暂无运行记录" />;
   }
   return (
@@ -195,6 +195,7 @@ export const SkillJobs = (props: SkillJobsProps) => {
       split={false}
       pagination={false}
       dataSource={dataList}
+      loading={isRequesting}
       scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
       render={(item: SkillJob, key) => (
         <List.Item

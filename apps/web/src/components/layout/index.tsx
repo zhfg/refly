@@ -1,4 +1,5 @@
-import { Layout } from "@arco-design/web-react"
+import { Layout, Spin } from "@arco-design/web-react"
+import { useState, useEffect } from "react"
 
 import { SiderLayout } from "./sider"
 import "./index.scss"
@@ -31,19 +32,41 @@ export const AppLayout = (props: AppLayoutProps) => {
   // 绑定快捷键
   useBindCommands()
 
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    const handleLoadingChange = (event: CustomEvent) => {
+      setIsLoading(event.detail.isLoading)
+    }
+
+    window.addEventListener(
+      "globalLoadingChange",
+      handleLoadingChange as EventListener,
+    )
+
+    return () => {
+      window.removeEventListener(
+        "globalLoadingChange",
+        handleLoadingChange as EventListener,
+      )
+    }
+  }, [])
+
   return (
     <Layout className="app-layout main">
       <SiderLayout />
-      <Layout
-        className="content-layout"
-        style={{
-          height: "calc(100vh - 16px)",
-          flexGrow: 1,
-          overflowY: "auto",
-          width: `calc(100% - 200px - 16px)`,
-        }}>
-        <Content>{props.children}</Content>
-      </Layout>
+      <Spin loading={isLoading} style={{ width: `calc(100% - 200px - 16px)` }}>
+        <Layout
+          className="content-layout"
+          style={{
+            height: "calc(100vh - 16px)",
+            flexGrow: 1,
+            overflowY: "auto",
+            width: `100%`,
+          }}>
+          <Content>{props.children}</Content>
+        </Layout>
+      </Spin>
       {userStore.loginModalVisible ? <LoginModal /> : null}
       <BigSearchModal />
       {importResourceStore.importResourceModalVisible ? (

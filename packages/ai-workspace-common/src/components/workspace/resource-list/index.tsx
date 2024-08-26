@@ -49,7 +49,7 @@ export const ResourceList = () => {
 
   const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
 
-  if (dataList.length === 0) {
+  if (dataList.length === 0 && !isRequesting) {
     return <Empty />;
   }
 
@@ -74,6 +74,7 @@ export const ResourceList = () => {
       offsetBottom={200}
       dataSource={dataList}
       scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
+      loading={isRequesting}
       render={(item: Resource, key) => (
         <List.Item
           key={item?.resourceId + key}
