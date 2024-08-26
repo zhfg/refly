@@ -203,7 +203,7 @@ just reformulate it if needed and otherwise return it as is.
     // and aggregate the message from chunks instead of calling `.invoke()`.
 
     const { query, contextualUserQuery, sources = [] } = state;
-    const { locale = 'en' } = config?.configurable || {};
+    const { locale = 'en', chatHistory = [] } = config?.configurable || {};
 
     const contextToCitationText = sources
       .map((item, index) => `[[citation:${index + 1}]] ${item?.pageContent}`)
@@ -227,6 +227,7 @@ just reformulate it if needed and otherwise return it as is.
 
     const responseMessage = await llm.invoke([
       new SystemMessage(getSystemPrompt(contextToCitationText)),
+      ...chatHistory,
       new HumanMessage(
         `The user's query is ${contextualUserQuery || query}, please output answer in locale's ${locale} language:`,
       ),

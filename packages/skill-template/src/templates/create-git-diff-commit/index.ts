@@ -47,7 +47,7 @@ export class CreateGitDiffCommitSkill extends BaseSkill {
   async generate(state: GraphState, config?: SkillRunnableConfig) {
     this.engine.logger.log('---GENERATE GIT DIFF COMMIT---');
 
-    const { locale = 'en', contentList = [] } = config?.configurable || {};
+    const { locale = 'en', chatHistory = [] } = config?.configurable || {};
     const query = state.query || '';
 
     const llm = this.engine.chatModel({
@@ -83,7 +83,7 @@ git commit -m "<commit_message>"
 For the current changes, replace \`<file_name>\` with \`temp.py\` and \`<commit_message>\` with \`Added --newswitch switch to temp.py to do newswitch behavior\`:
 
 git add temp.py 
-git commit -m "Added --newswitch switch to temp.py to do newswitch behavior"
+git commit -m "feat: Added --newswitch switch to temp.py to do newswitch behavior"
 #EndTemplate
 
 # INPUT
@@ -96,6 +96,7 @@ Please generate the appropriate Git commands and commit message based on the pro
 
     const responseMessage = await llm.invoke([
       new SystemMessage(prompt),
+      ...chatHistory,
       new HumanMessage(
         `Generate Git commands and commit message based on the provided information in ${locale} language.`,
       ),

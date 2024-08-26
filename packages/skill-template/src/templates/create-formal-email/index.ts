@@ -47,7 +47,7 @@ export class CreateFormalEmailSkill extends BaseSkill {
   async generate(state: GraphState, config?: SkillRunnableConfig) {
     this.engine.logger.log('---GENERATE---');
 
-    const { locale = 'en', contentList = [] } = config?.configurable || {};
+    const { locale = 'en', contentList = [], chatHistory = [] } = config?.configurable || {};
     const query = state.query || '';
 
     const llm = this.engine.chatModel({
@@ -126,6 +126,7 @@ Please craft an email based on the user's query and the provided context (if any
 
     const responseMessage = await llm.invoke([
       new SystemMessage(prompt),
+      ...chatHistory,
       new HumanMessage(`Please write an email based on the provided query and context in ${locale} language.`),
     ]);
 
