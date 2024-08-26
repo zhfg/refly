@@ -2367,8 +2367,14 @@ export const $UploadResponse = {
       type: 'object',
       properties: {
         data: {
-          type: 'string',
-          description: 'File URL',
+          type: 'object',
+          description: 'File upload result',
+          properties: {
+            url: {
+              type: 'string',
+              description: 'File URL',
+            },
+          },
         },
       },
     },

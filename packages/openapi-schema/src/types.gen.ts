@@ -1553,9 +1553,14 @@ export type UploadRequest = {
 
 export type UploadResponse = BaseResponse & {
   /**
-   * File URL
+   * File upload result
    */
-  data?: string;
+  data?: {
+    /**
+     * File URL
+     */
+    url?: string;
+  };
 };
 
 export type ListResourcesData = {

@@ -2863,8 +2863,12 @@ components:
         - type: object
           properties:
             data:
-              type: string
-              description: File URL
+              type: object
+              description: File upload result
+              properties:
+                url:
+                  type: string
+                  description: File URL
   securitySchemes:
     api_key:
       type: apiKey

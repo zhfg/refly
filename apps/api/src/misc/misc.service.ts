@@ -1,5 +1,5 @@
 import { Inject, Injectable, StreamableFile } from '@nestjs/common';
-import { ScrapeWeblinkRequest, ScrapeWeblinkResult } from '@refly/openapi-schema';
+import { ScrapeWeblinkRequest, ScrapeWeblinkResult, UploadResponse } from '@refly/openapi-schema';
 import { safeParseURL } from '@refly/utils';
 import { load } from 'cheerio';
 import { MINIO_EXTERNAL, MinioService } from '@/common/minio.service';
@@ -48,12 +48,14 @@ export class MiscService {
     };
   }
 
-  async uploadFile(file: Express.Multer.File): Promise<string> {
+  async uploadFile(file: Express.Multer.File): Promise<UploadResponse['data']> {
     const objectKey = randomUUID();
     await this.minio.client.putObject(`static/${objectKey}`, file.buffer, {
       'Content-Type': file.mimetype,
     });
-    return `${this.config.get('staticEndpoint')}${objectKey}`;
+    return {
+      url: `${this.config.get('staticEndpoint')}${objectKey}`,
+    };
   }
 
   async getFileStream(objectKey: string): Promise<StreamableFile> {
