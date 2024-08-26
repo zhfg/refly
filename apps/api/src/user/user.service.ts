@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../common/prisma.service';
-import { UpdateUserSettingsRequest } from '@refly/openapi-schema';
+import { PrismaService } from '@/common/prisma.service';
+import { UpdateUserSettingsRequest, User } from '@refly/openapi-schema';
 
 @Injectable()
 export class UserService {
@@ -8,9 +8,9 @@ export class UserService {
 
   constructor(private prisma: PrismaService) {}
 
-  async updateSettings(uid: number, data: UpdateUserSettingsRequest) {
+  async updateSettings(user: User, data: UpdateUserSettingsRequest) {
     return this.prisma.user.update({
-      where: { id: uid },
+      where: { uid: user.uid },
       data: { ...data },
     });
   }

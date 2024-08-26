@@ -1,8 +1,9 @@
-import { Controller, Logger, Get, Post, Res, Request, UseGuards } from '@nestjs/common';
+import { Controller, Logger, Get, Post, Res, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
-import { User } from '@prisma/client';
+import { User as UserModel } from '@prisma/client';
 
+import { User } from '@/utils/decorators/user.decorator';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guard/local-auth.guard';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
@@ -17,27 +18,25 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() req) {
-    return this.authService.login(req.user);
+  async login(@User() user: UserModel) {
+    return this.authService.login(user);
   }
 
   @UseGuards(GithubOauthGuard)
   @Get('github')
   async github() {
-    // guard 自动处理
+    // auth guard will automatically handle this
   }
 
   @UseGuards(GoogleOauthGuard)
   @Get('google')
   async google() {
-    // guard 自动处理
+    // auth guard will automatically handle this
   }
 
   @UseGuards(GithubOauthGuard)
   @Get('callback')
-  async githubAuthCallback(@Request() req, @Res() res: Response) {
-    const user = req.user as User;
-
+  async githubAuthCallback(@User() user: UserModel, @Res() res: Response) {
     this.logger.log(`github oauth callback success, req.user = ${user.email}`);
 
     const { accessToken } = await this.authService.login(user);
@@ -52,9 +51,7 @@ export class AuthController {
 
   @UseGuards(GoogleOauthGuard)
   @Get('callback/google')
-  async googleAuthCallback(@Request() req, @Res() res: Response) {
-    const user = req.user as User;
-
+  async googleAuthCallback(@User() user: UserModel, @Res() res: Response) {
     this.logger.log(`google oauth callback success, req.user = ${user.email}`);
 
     const { accessToken } = await this.authService.login(user);
@@ -67,8 +64,8 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('getUserInfo')
-  getUserInfo(@Request() req) {
-    this.logger.log(`getUserInfo success, req.user = ${req.user.email}`);
-    return req.user;
+  getUserInfo(@User() user: UserModel) {
+    this.logger.log(`getUserInfo success, req.user = ${user.email}`);
+    return user;
   }
 }
