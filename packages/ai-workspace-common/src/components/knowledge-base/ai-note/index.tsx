@@ -9,7 +9,7 @@ import { Button, Divider, Input, Spin, Switch, Tabs } from '@arco-design/web-rea
 import { IconLock, IconUnlock } from '@arco-design/web-react/icon';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { IconClockCircle, IconEdit, IconSearch } from '@arco-design/web-react/icon';
+import { IconClockCircle, IconSearch } from '@arco-design/web-react/icon';
 import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
 import { useListenToSelection } from '@refly-packages/ai-workspace-common/hooks/use-listen-to-selection';
 // 编辑器组件
@@ -58,13 +58,13 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
     showContentSelector: state.showContentSelector,
     scope: state.scope,
   }));
-  // 初始块选择
+
+  // initial block selection
   const { initMessageListener, initContentSelectorElem } = useContentSelector(
     'ai-note-editor-content-container',
     'note',
   );
 
-  // 准备 extensions
   const websocketProvider = useMemo(() => {
     return new HocuspocusProvider({
       url: getWsServerOrigin(),
@@ -84,7 +84,7 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
     }),
   ];
 
-  //Apply Codeblock Highlighting on the HTML from editor.getHTML()
+  // Apply Codeblock Highlighting on the HTML from editor.getHTML()
   const highlightCodeblocks = (content: string) => {
     const doc = new DOMParser().parseFromString(content, 'text/html');
     doc.querySelectorAll('pre code').forEach((el) => {
