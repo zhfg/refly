@@ -34,10 +34,11 @@ export class MinioService implements OnModuleInit {
         const value = target[prop];
         if (typeof value === 'function') {
           return (...args: any[]) => {
-            if (value.length > args.length) {
+            try {
               return value.call(target, this.config.bucket, ...args);
+            } catch (error) {
+              return value.call(target, ...args);
             }
-            return value.call(target, ...args);
           };
         }
         return value;
