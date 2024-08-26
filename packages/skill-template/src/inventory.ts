@@ -7,6 +7,9 @@ import {
   ResourceLabelerSkill,
   CreateFormalEmailSkill,
   CreateGitDiffCommitSkill,
+  BasicSummarySkill,
+  ExplainTermsSkill,
+  TranslateSkill,
 } from './templates';
 
 export const createSkillInventory = (engine: SkillEngine): BaseSkill[] => {
@@ -17,5 +20,8 @@ export const createSkillInventory = (engine: SkillEngine): BaseSkill[] => {
     new ResourceLabelerSkill(engine),
     new CreateFormalEmailSkill(engine),
     new CreateGitDiffCommitSkill(engine),
+    new BasicSummarySkill(engine),
+    new ExplainTermsSkill(engine),
+    new TranslateSkill(engine),
   ];
 };

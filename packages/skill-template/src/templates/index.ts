@@ -4,3 +4,6 @@ export * from './online-search';
 export * from './resource-labeler';
 export * from './create-formal-email';
 export * from './create-git-diff-commit';
+export * from './basic-summary';
+export * from './explain-terms';
+export * from './translate';
