@@ -48,7 +48,19 @@ export class MiscService {
     };
   }
 
-  async uploadFile(file: Express.Multer.File): Promise<UploadResponse['data']> {
+  async dumpFileFromURL(url: string): Promise<UploadResponse['data']> {
+    const res = await fetch(url);
+    const buffer = await res.arrayBuffer();
+
+    return await this.uploadFile({
+      buffer: Buffer.from(buffer),
+      mimetype: res.headers.get('Content-Type') || 'application/octet-stream',
+    });
+  }
+
+  async uploadFile(
+    file: Pick<Express.Multer.File, 'buffer' | 'mimetype'>,
+  ): Promise<UploadResponse['data']> {
     const objectKey = randomUUID();
     await this.minio.client.putObject(`static/${objectKey}`, file.buffer, {
       'Content-Type': file.mimetype,

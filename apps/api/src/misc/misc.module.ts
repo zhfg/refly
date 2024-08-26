@@ -8,5 +8,6 @@ import { CommonModule } from '@/common/common.module';
   imports: [CommonModule, ConfigModule],
   controllers: [MiscController],
   providers: [MiscService],
+  exports: [MiscService],
 })
 export class MiscModule {}

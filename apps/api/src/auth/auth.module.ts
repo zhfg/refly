@@ -2,10 +2,9 @@ import { Module } from '@nestjs/common';
 
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CommonModule } from '@/common/common.module';
+import { MiscModule } from '@/misc/misc.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { UserModule } from '@/user/user.module';
-import { AccountModule } from '@/account/account.module';
 
 import { AuthService } from './auth.service';
 import { LocalStrategy } from './strategy/local.strategy';
@@ -17,9 +16,8 @@ import { GoogleOauthStrategy } from './strategy/google-oauth.strategy';
 @Module({
   imports: [
     ConfigModule,
-    AccountModule,
     CommonModule,
-    UserModule,
+    MiscModule,
     PassportModule.register({
       session: true,
     }),
