@@ -3,7 +3,6 @@ import {
   EditorCommandEmpty,
   EditorCommandItem,
   EditorCommandList,
-  EditorContent,
 } from '@refly-packages/editor-core/components';
 import { useState } from 'react';
 import { ColorSelector } from './selectors/color-selector';
@@ -14,11 +13,8 @@ import { Separator } from './ui/separator';
 import GenerativeMenuSwitch from './generative/generative-menu-switch';
 import GenerativeBlockMenu from './generative/generative-block-menu';
 import { TextButtons } from './selectors/text-buttons';
-import { SaveButton } from './selectors/save-buttons';
-import { AIBtnSelector } from './selectors/ai-btn-selector';
 import { suggestionItems } from './slash-command';
 
-// 样式
 import './styles/globals.css';
 import './styles/prosemirror.css';
 
@@ -50,7 +46,6 @@ export const CollabEditorCommand = () => {
 
 export const CollabGenAIMenuSwitch = () => {
   const [openNode, setOpenNode] = useState(false);
-  const [openAIBtn, setOpenAIBtn] = useState(false);
   const [openColor, setOpenColor] = useState(false);
   const [openLink, setOpenLink] = useState(false);
   const [openAI, setOpenAI] = useState(false);
@@ -64,8 +59,6 @@ export const CollabGenAIMenuSwitch = () => {
       <TextButtons />
       <Separator orientation="vertical" />
       <ColorSelector open={openColor} onOpenChange={setOpenColor} />
-      <Separator orientation="vertical" />
-      <SaveButton onOpenChange={setOpenAI} />
     </GenerativeMenuSwitch>
   );
 };
