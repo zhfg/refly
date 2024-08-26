@@ -10,6 +10,7 @@ import {
   Res,
   UseInterceptors,
   UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { MiscService } from '@/misc/misc.service';
@@ -33,6 +34,9 @@ export class MiscController {
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   async uploadStaticFile(@UploadedFile() file: Express.Multer.File): Promise<UploadResponse> {
+    if (!file) {
+      throw new BadRequestException('No file uploaded.');
+    }
     const result = await this.miscService.uploadFile(file);
     return buildSuccessResponse(result);
   }

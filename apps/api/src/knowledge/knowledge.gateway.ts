@@ -42,7 +42,9 @@ export class NoteWsGateway implements OnGatewayConnection {
               const readable = await this.minio.client.getObject(note.stateStorageKey);
               return await streamToBuffer(readable);
             } catch (err) {
-              this.logger.error(`fetch state failed for ${note}, err: ${err.stack}`);
+              this.logger.error(
+                `fetch state failed for ${note.stateStorageKey}, err: ${err.stack}`,
+              );
               return null;
             }
           },
