@@ -313,6 +313,12 @@ export class SkillService {
 
   async createSkillJob(user: User, param: CreateSkillJobData) {
     const { input, context, skill, triggerId, convId } = param;
+
+    // remove actual content from context to save storage
+    const contextCopy: PopulatedSkillContext = JSON.parse(JSON.stringify(context ?? {}));
+    contextCopy.resources?.forEach((resource) => (resource.content = ''));
+    contextCopy.notes?.forEach((note) => (note.content = ''));
+
     return this.prisma.skillJob.create({
       data: {
         jobId: genSkillJobID(),
@@ -320,7 +326,7 @@ export class SkillService {
         skillId: skill?.skillId ?? '',
         skillDisplayName: skill?.displayName ?? 'Scheduler',
         input: JSON.stringify(input),
-        context: JSON.stringify(context ?? {}),
+        context: JSON.stringify(contextCopy ?? {}),
         status: 'running',
         triggerId,
         convId,
