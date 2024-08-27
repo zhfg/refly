@@ -292,7 +292,9 @@ export class SkillService {
       if (resources.length === 0) {
         throw new BadRequestException(`resource not found: ${pContext.resourceIds}`);
       }
-      pContext.resources = resources.map((r) => resourcePO2DTO(r, true));
+      pContext.resources = (pContext.externalResources ?? []).concat(
+        resources.map((r) => resourcePO2DTO(r, true)),
+      );
     }
 
     // Populate notes
