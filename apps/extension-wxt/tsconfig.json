@@ -7,7 +7,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "@refly-packages/ai-workspace-common/*": ["../../packages/ai-workspace-common/src/*"],
-      "@refly/utils/*": ["./node_modules/@refly/utils/src/*",  "../../packages/utils/src/*"]
+      "@refly/utils/*": ["../../packages/utils/src/*"]
     }
   },
   "include": ["src", "tailwind.config.ts", "./node_modules/@refly-packages/ai-workspace-common/src/components/workspace/content-panel", "../../packages/ai-workspace-common/src/components/workspace/knowledge-keyword-list", "../../packages/ai-workspace-common/src/components/workspace/left-assist-panel", "../../packages/ai-workspace-common/src/modules/content-selector/use-content-selector.tsx"],

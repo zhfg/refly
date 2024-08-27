@@ -1,7 +1,11 @@
+import tailwindNesting from 'tailwindcss/nesting';
 import tailwind from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
+import { Plugin, Processor } from 'postcss';
 import tailwindConfig from './tailwind.config';
 
-export default {
-  plugins: [tailwind(tailwindConfig), autoprefixer()],
+const config: { plugins: (Plugin | Processor)[] } = {
+  plugins: [tailwindNesting, tailwind(tailwindConfig), autoprefixer()],
 };
+
+export default config;

@@ -4,7 +4,7 @@ export default {
   content: [
     './index.html',
     './src/**/*.{js,jsx,ts,tsx}',
-    './node_modules/@refly-packages/ai-workspace-common/src/**/*.{js,jsx,ts,tsx}',
+    '../../packages/ai-workspace-common/src/**/*.{js,jsx,ts,tsx}',
   ],
   theme: {
     extend: {
@@ -71,4 +71,7 @@ export default {
     },
   },
   plugins: [forms],
+  corePlugins: {
+    preflight: false,
+  },
 };
