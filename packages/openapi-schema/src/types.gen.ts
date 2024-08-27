@@ -44,7 +44,7 @@ export type ResourceType = 'weblink' | 'text' | 'note';
 
 export type Resource = {
   /**
-   * Resource ID
+   * Resource ID (empty if it's external)
    */
   resourceId: string;
   /**
@@ -62,11 +62,11 @@ export type Resource = {
   /**
    * Resource index status
    */
-  indexStatus: IndexStatus;
+  indexStatus?: IndexStatus;
   /**
    * Whether this resource is public
    */
-  isPublic: boolean;
+  isPublic?: boolean;
   /**
    * Collection creation time
    */
@@ -1184,6 +1184,10 @@ export type SkillContext = {
    */
   resourceIds?: Array<string>;
   /**
+   * List of external resources
+   */
+  externalResources?: Array<Resource>;
+  /**
    * List of collection IDs
    */
   collectionIds?: Array<string>;
@@ -1207,7 +1211,7 @@ export type SkillContext = {
 
 export type PopulatedSkillContext = SkillContext & {
   /**
-   * List of resources
+   * List of resources (both internal and external)
    */
   resources?: Array<Resource>;
   /**

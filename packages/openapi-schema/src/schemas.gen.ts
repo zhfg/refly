@@ -50,11 +50,11 @@ export const $ResourceType = {
 
 export const $Resource = {
   type: 'object',
-  required: ['resourceId', 'resourceType', 'title', 'isPublic', 'indexStatus', 'createdAt', 'updatedAt'],
+  required: ['resourceId', 'resourceType', 'title', 'createdAt', 'updatedAt'],
   properties: {
     resourceId: {
       type: 'string',
-      description: 'Resource ID',
+      description: "Resource ID (empty if it's external)",
       example: 'r-g30e1b80b5g1itbemc0g5jj3',
     },
     resourceType: {
@@ -1717,6 +1717,13 @@ export const $SkillContext = {
         type: 'string',
       },
     },
+    externalResources: {
+      type: 'array',
+      description: 'List of external resources',
+      items: {
+        $ref: '#/components/schemas/Resource',
+      },
+    },
     collectionIds: {
       type: 'array',
       description: 'List of collection IDs',
@@ -1765,7 +1772,7 @@ export const $PopulatedSkillContext = {
       properties: {
         resources: {
           type: 'array',
-          description: 'List of resources',
+          description: 'List of resources (both internal and external)',
           items: {
             $ref: '#/components/schemas/Resource',
           },
