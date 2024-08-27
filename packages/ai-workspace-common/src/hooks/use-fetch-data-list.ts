@@ -95,6 +95,13 @@ export const useFetchDataList = <T = any>({
     }
   };
 
+  const resetState = () => {
+    setDataList([]);
+    setCurrentPage(1);
+    setHasMore(true);
+    setIsRequesting(false);
+  };
+
   return {
     hasMore,
     setHasMore,
@@ -106,5 +113,6 @@ export const useFetchDataList = <T = any>({
     setIsRequesting,
     loadMore,
     reload,
+    resetState,
   };
 };

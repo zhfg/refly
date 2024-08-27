@@ -25,7 +25,7 @@ export const ImportResourceModal = () => {
         importResourceStore.setImportResourceModalVisible(false);
       }}
       className="import-resource-modal"
-      style={{ height: 'calc(100vh - 360px)', minHeight: 500, minWidth: 1000, maxWidth: 1200 }}
+      style={{ height: '70%', minHeight: 500, maxHeight: 700, minWidth: 1000, maxWidth: 1200 }}
     >
       <div className="import-resource-container">
         <div className="import-resource-left-panel">

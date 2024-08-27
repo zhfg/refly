@@ -30,7 +30,7 @@ import { SkillManagementModal } from '@refly-packages/ai-workspace-common/compon
 import { SkillDisplay } from './skill-display';
 
 // requests
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClixent from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 // state
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
@@ -42,6 +42,7 @@ import { ActionSource } from '@refly-packages/ai-workspace-common/stores/knowled
 import { useKnowledgeBaseStore } from '../../../stores/knowledge-base';
 // utils
 import { LOCALE } from '@refly/common-types';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/i18n';
 import { OutputLocaleList } from '@refly-packages/ai-workspace-common/components/output-locale-list';
 import { useTranslation } from 'react-i18next';
@@ -63,7 +64,11 @@ import { SelectedTextContextActionBtn } from '@refly-packages/ai-workspace-commo
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { CurrentContextActionBtn } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/action-btn/current-context-action-btn';
 
-interface AICopilotProps {}
+interface AICopilotProps {
+  disable?: boolean;
+  source?: string;
+  jobId?: string;
+}
 
 const skillContainerPadding = 8;
 const skillContainerHeight = 24 + 2 * skillContainerPadding;
@@ -153,6 +158,12 @@ export const AICopilot = memo((props: AICopilotProps) => {
   const outputLocale = userStore?.localSettings?.outputLocale || 'en';
   console.log('uiLocale', uiLocale);
 
+  const { disable, jobId, source } = props;
+
+  const isFromSkillJob = () => {
+    return source === 'skillJob';
+  };
+
   // ai-note handler
   useAINote(true);
   const { handleGetSkillInstances, handleGetSkillTemplates } = useSkillManagement();
@@ -192,6 +203,29 @@ export const AICopilot = memo((props: AICopilotProps) => {
     chatStore.setMessages(res.data.messages);
   };
 
+  const getThreadMessagesByJobId = async (jobId: string) => {
+    setIsFetching(true);
+    try {
+      const { data: res, error } = await getClient().getSkillJobDetail({
+        query: {
+          jobId,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // 清空之前的状态
+      resetState();
+
+      setIsFetching(false);
+      chatStore.setMessages(res?.data?.messages || []);
+    } catch (error) {
+      console.log('getThreadMessagesByJobId error', error);
+    }
+  };
+
   const handleConvTask = async (convId: string) => {
     try {
       setIsFetching(true);
@@ -217,17 +251,23 @@ export const AICopilot = memo((props: AICopilotProps) => {
   };
 
   useEffect(() => {
-    if (convId) {
+    if (convId && !isFromSkillJob()) {
       handleConvTask(convId);
+    }
+
+    if (jobId && isFromSkillJob()) {
+      getThreadMessagesByJobId(jobId);
     }
 
     return () => {
       chatStore.setMessages([]);
     };
-  }, [convId]);
+  }, [convId, jobId]);
   useResizeCopilot({ containerSelector: 'ai-copilot-container' });
   useDynamicInitContextPanelState(); // 动态根据页面状态更新上下文面板状态
+
   useEffect(() => {
+    if (isFromSkillJob()) return;
     handleGetSkillInstances();
     handleGetSkillTemplates();
   }, []);
@@ -244,86 +284,90 @@ export const AICopilot = memo((props: AICopilotProps) => {
   return (
     <div className="ai-copilot-container">
       <div className="knowledge-base-detail-header">
-        <div className="knowledge-base-detail-navigation-bar">
-          {isWeb
-            ? [
-                <Checkbox
-                  key={'knowledge-base-resource-panel'}
-                  checked={knowledgeBaseStore.resourcePanelVisible && resId ? true : false}
-                >
-                  {({ checked }) => {
-                    return (
-                      <Button
-                        icon={<IconFile />}
-                        type="text"
-                        onClick={() => {
-                          if (!resId) {
-                            searchStore.setPages(searchStore.pages.concat('knowledgeBases'));
-                            searchStore.setIsSearchOpen(true);
-                          } else {
-                            knowledgeBaseStore.updateResourcePanelVisible(!knowledgeBaseStore.resourcePanelVisible);
-                          }
-                        }}
-                        className={classNames('assist-action-item', { active: checked })}
-                      ></Button>
-                    );
-                  }}
-                </Checkbox>,
-                <Checkbox key={'knowledge-base-note-panel'} checked={noteStore.notePanelVisible}>
-                  {({ checked }) => {
-                    return (
-                      <Button
-                        icon={<IconEdit />}
-                        type="text"
-                        onClick={() => {
-                          noteStore.updateNotePanelVisible(!noteStore.notePanelVisible);
-                        }}
-                        className={classNames('assist-action-item', { active: checked })}
-                      ></Button>
-                    );
-                  }}
-                </Checkbox>,
-                <Button
-                  icon={<IconSearch />}
-                  type="text"
-                  onClick={() => {
-                    searchStore.setPages(searchStore.pages.concat('convs'));
-                    searchStore.setIsSearchOpen(true);
-                  }}
-                  className={classNames('assist-action-item')}
-                ></Button>,
-              ]
-            : null}
-        </div>
-        <div className="knowledge-base-detail-navigation-bar">
-          <Button
-            icon={<IconHistory />}
-            type="text"
-            onClick={() => {
-              handleNewOpenConvList();
-            }}
-            className={classNames('assist-action-item')}
-          >
-            {/* 会话历史 */}
-          </Button>
-          <Button
-            icon={<IconPlusCircle />}
-            type="text"
-            onClick={() => {
-              handleNewTempConv();
-            }}
-            className={classNames('assist-action-item', 'mr-1')}
-          >
-            {/* 新会话 */}
-          </Button>
-        </div>
+        {!disable && (
+          <>
+            <div className="knowledge-base-detail-navigation-bar">
+              {isWeb
+                ? [
+                    <Checkbox
+                      key={'knowledge-base-resource-panel'}
+                      checked={knowledgeBaseStore.resourcePanelVisible && resId ? true : false}
+                    >
+                      {({ checked }) => {
+                        return (
+                          <Button
+                            icon={<IconFile />}
+                            type="text"
+                            onClick={() => {
+                              if (!resId) {
+                                searchStore.setPages(searchStore.pages.concat('knowledgeBases'));
+                                searchStore.setIsSearchOpen(true);
+                              } else {
+                                knowledgeBaseStore.updateResourcePanelVisible(!knowledgeBaseStore.resourcePanelVisible);
+                              }
+                            }}
+                            className={classNames('assist-action-item', { active: checked })}
+                          ></Button>
+                        );
+                      }}
+                    </Checkbox>,
+                    <Checkbox key={'knowledge-base-note-panel'} checked={noteStore.notePanelVisible}>
+                      {({ checked }) => {
+                        return (
+                          <Button
+                            icon={<IconEdit />}
+                            type="text"
+                            onClick={() => {
+                              noteStore.updateNotePanelVisible(!noteStore.notePanelVisible);
+                            }}
+                            className={classNames('assist-action-item', { active: checked })}
+                          ></Button>
+                        );
+                      }}
+                    </Checkbox>,
+                    <Button
+                      icon={<IconSearch />}
+                      type="text"
+                      onClick={() => {
+                        searchStore.setPages(searchStore.pages.concat('convs'));
+                        searchStore.setIsSearchOpen(true);
+                      }}
+                      className={classNames('assist-action-item')}
+                    ></Button>,
+                  ]
+                : null}
+            </div>
+            <div className="knowledge-base-detail-navigation-bar">
+              <Button
+                icon={<IconHistory />}
+                type="text"
+                onClick={() => {
+                  handleNewOpenConvList();
+                }}
+                className={classNames('assist-action-item')}
+              >
+                {/* 会话历史 */}
+              </Button>
+              <Button
+                icon={<IconPlusCircle />}
+                type="text"
+                onClick={() => {
+                  handleNewTempConv();
+                }}
+                className={classNames('assist-action-item', 'mr-1')}
+              >
+                {/* 新会话 */}
+              </Button>
+            </div>
+          </>
+        )}
       </div>
       <div className="ai-copilot-body-container">
         <div
           className="ai-copilot-message-container"
           style={{ height: `calc(100% - ${actualOperationContainerHeight}px)` }}
         >
-          <ChatMessages />
+          <ChatMessages disable={disable} loading={isFetching} />
         </div>
         <div className="ai-copilot-operation-container" style={{ height: actualOperationContainerHeight }}>
           <div className="ai-copilot-operation-body">
@@ -354,6 +398,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
           </div>
         </div>
       </div>
+
       {knowledgeBaseStore?.convModalVisible ? <ConvListModal title="会话库" classNames="conv-list-modal" /> : null}
       {knowledgeBaseStore?.kbModalVisible && knowledgeBaseStore.actionSource === ActionSource.Conv ? (
         <KnowledgeBaseListModal title="知识库" classNames="kb-list-modal" />

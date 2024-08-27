@@ -45,12 +45,13 @@ export const NoteList = (props: NoteListProps) => {
 
   const { jumpToNote } = useKnowledgeBaseJumpNewPath();
 
-  if (dataList.length === 0) {
+  if (dataList.length === 0 && !isRequesting) {
     return <Empty />;
   }
 
   return (
     <List
+      loading={isRequesting}
       grid={
         listGrid || {
           sm: 24,
@@ -78,6 +79,7 @@ export const NoteList = (props: NoteListProps) => {
           actions={[
             <CardBox
               cardData={item}
+              index={key}
               type="note"
               cardIcon={<IconBook style={{ fontSize: '32px', strokeWidth: 3 }} />}
               onClick={() => jumpToNote({ noteId: item.noteId })}
@@ -89,11 +91,11 @@ export const NoteList = (props: NoteListProps) => {
                     .fromNow()}
                 </div>
                 <div className="flex items-center">
-                  <IconBook style={{ color: '#819292', cursor: 'pointer' }} />
                   <DeleteDropdownMenu
                     type="note"
                     data={item}
-                    postDeleteList={(note) => setDataList(dataList.filter((n) => n.noteId !== note.noteId))}
+                    postDeleteList={(note: Note) => setDataList(dataList.filter((n) => n.noteId !== note.noteId))}
+                    getPopupContainer={() => document.getElementById(`note-${key}`) as HTMLElement}
                   />
                 </div>
               </div>

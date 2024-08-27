@@ -2,10 +2,8 @@ import { Button } from '@arco-design/web-react';
 import { BasePopover, Content } from './base';
 
 // requests
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { SearchResult } from '@refly/openapi-schema';
-import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-or-search-list';
-import { useEffect } from 'react';
+import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/hooks';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 export const KnowledgeBasePopover = () => {
@@ -14,20 +12,7 @@ export const KnowledgeBasePopover = () => {
   }));
   const { loadMore, hasMore, dataList, isRequesting, currentPage, handleValueChange, mode, resetState } =
     useFetchOrSearchList({
-      fetchData: async (queryPayload) => {
-        const res = await getClient().listCollections({
-          query: {
-            ...queryPayload,
-          },
-        });
-
-        const data: SearchResult[] = (res?.data?.data || []).map((item) => ({
-          id: item?.collectionId,
-          title: item?.title,
-          domain: 'collection',
-        }));
-        return { success: res?.data?.success, data };
-      },
+      domain: 'collection',
     });
 
   const updateSelectState = (data: SearchResult[]) => {

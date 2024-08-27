@@ -116,7 +116,7 @@ export const Markdown = memo(
     const parsedContent = markdownCitationParse(props?.content || '');
 
     return (
-      <div className="markdown-body" style={{ fontSize: `${props.fontSize ?? 14}px` }} ref={mdRef}>
+      <div className="markdown-body" style={{ fontSize: `${props.fontSize ?? 16}px` }} ref={mdRef}>
         {shouldLoading ? (
           <IconLoading />
         ) : (

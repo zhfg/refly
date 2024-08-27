@@ -11,8 +11,6 @@ import { NewTriggersModal } from '@refly-packages/ai-workspace-common/components
 
 // store
 import { useImportNewTriggerModal } from '@refly-packages/ai-workspace-common/stores/import-new-trigger-modal';
-import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
-import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
@@ -20,7 +18,7 @@ import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/route
 import './index.scss';
 import { SkillInstance } from '@refly/openapi-schema';
 
-import { Radio, Avatar, Button, Typography } from '@arco-design/web-react';
+import { Radio, Avatar, Button, Typography, Spin } from '@arco-design/web-react';
 import { IconLeft, IconPlayArrow, IconPlus } from '@arco-design/web-react/icon';
 
 const RadioGroup = Radio.Group;
@@ -69,21 +67,26 @@ const SkillDetail = () => {
   const [skillDetail, setSkillDetail] = useState<SkillInstance>();
   const [val, setVal] = useState('jobs');
   const [visible, setVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const [reloadJobList, setReloadJobList] = useState(false);
-  const [reloadTriggers, setReloadTriggers] = useState(false);
   const handleGetSkillInstances = async () => {
-    const { data, error } = await getClient().listSkillInstances({
-      query: {
-        skillId,
-      },
-    });
+    setLoading(true);
+    try {
+      const { data, error } = await getClient().listSkillInstances({
+        query: {
+          skillId,
+        },
+      });
 
-    if (data?.data) {
-      console.log('skill instances', data?.data);
-      setSkillDetail(data?.data[0]);
-    } else {
-      console.log('get skill instances error', error);
+      if (data?.data) {
+        console.log('skill instances', data?.data);
+        setSkillDetail(data?.data[0]);
+      } else {
+        console.log('get skill instances error', error);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -92,12 +95,16 @@ const SkillDetail = () => {
     setInvokeModalVisible(true);
   };
 
+  const getPopupContainer = () => {
+    return document.getElementById('skill-detail-action') as HTMLElement;
+  };
+
   useEffect(() => {
     handleGetSkillInstances();
   }, []);
 
   return (
-    <div className="skill-detail">
+    <div className="skill-detail" id="skill-detail">
       <div className="skill-detail__header">
         <div className="skill-detail__back" onClick={() => window.history.back()}>
           <IconLeft className="skill-detail__back-icon" />
@@ -105,47 +112,60 @@ const SkillDetail = () => {
         </div>
       </div>
 
-      <div className="skill-detail__content">
-        <div className="skill-detail__content-wrap">
-          <div className="skill-detail__content-top">
-            <Avatar className="skill-avatar" shape="square" size={140}>
-              <img
-                alt="avatar"
-                src="//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/3ee5f13fb09879ecb5185e440cef6eb9.png~tplv-uwbnlip3yd-webp.webp"
-              />
-            </Avatar>
-            <div className="skill-detail__content-top-info">
-              <div className="skill-name">{skillDetail?.displayName}</div>
-              <Typography.Paragraph className="skill-desc" ellipsis={{ rows: 3 }} style={{ lineHeight: 1.51 }}>
-                {skillDetail?.description}
-              </Typography.Paragraph>
-              <div className="skill-action">
-                <Button
-                  className="skill-action__invoke"
-                  type="primary"
-                  style={{ borderRadius: 4 }}
-                  onClick={handleSkillInvoke}
-                >
-                  <IconPlayArrow />
-                  {t('skill.skillDetail.run')}
-                </Button>
-                <InstanceDropdownMenu data={skillDetail} setUpdateModal={(visible) => setVisible(visible)} />
+      <Spin
+        dot
+        loading={loading}
+        style={{ width: '100%', height: '100%', backgroundColor: '#fff' }}
+        className="skill-detail__content"
+      >
+        {loading ? (
+          <div className="skill-detail__content-wrap"></div>
+        ) : (
+          <div className="skill-detail__content-wrap">
+            <div className="skill-detail__content-top">
+              <Avatar className="skill-avatar" shape="square" size={140}>
+                <img
+                  alt="avatar"
+                  src="//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/3ee5f13fb09879ecb5185e440cef6eb9.png~tplv-uwbnlip3yd-webp.webp"
+                />
+              </Avatar>
+              <div className="skill-detail__content-top-info">
+                <div className="skill-name">{skillDetail?.displayName}</div>
+                <Typography.Paragraph className="skill-desc" ellipsis={{ rows: 3 }} style={{ lineHeight: 1.51 }}>
+                  {skillDetail?.description}
+                </Typography.Paragraph>
+                <div className="skill-action" id="skill-detail-action">
+                  <Button
+                    className="skill-action__invoke"
+                    type="primary"
+                    style={{ borderRadius: 4 }}
+                    onClick={handleSkillInvoke}
+                  >
+                    <IconPlayArrow />
+                    {t('skill.skillDetail.run')}
+                  </Button>
+                  <InstanceDropdownMenu
+                    data={skillDetail}
+                    setUpdateModal={(visible) => setVisible(visible)}
+                    getPopupContainer={getPopupContainer}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="skill-detail__content-bottom">
+              <ContentTab setVal={setVal} val={val} />
+              <div className="skill-detail__content-list">
+                {val === 'jobs' ? (
+                  <SkillJobs reloadList={reloadJobList} setReloadList={setReloadJobList} />
+                ) : (
+                  <SkillTriggers />
+                )}
               </div>
             </div>
           </div>
-
-          <div className="skill-detail__content-bottom">
-            <ContentTab setVal={setVal} val={val} />
-            <div className="skill-detail__content-list">
-              {val === 'jobs' ? (
-                <SkillJobs reloadList={reloadJobList} setReloadList={setReloadJobList} />
-              ) : (
-                <SkillTriggers reloadList={reloadTriggers} />
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+        )}
+      </Spin>
       <InstanceInvokeModal
         data={skillDetail}
         visible={invokeModalVisible}

@@ -9,8 +9,12 @@ import { memo, useCallback } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { MessageState } from '@refly/common-types';
 import { ChatMessage } from '@refly/openapi-schema';
+import { Skeleton } from '@arco-design/web-react';
 
-interface ChatMessagesProps {}
+interface ChatMessagesProps {
+  disable?: boolean;
+  loading?: boolean;
+}
 
 const messageStateSelector = (state: MessageState) => {
   return {
@@ -26,6 +30,16 @@ export const ChatMessages = memo((props: ChatMessagesProps) => {
   const userProfile = useUserStore(useShallow((state) => state.userProfile));
   const messageStateStore = useMessageStateStore(useShallow(messageStateSelector));
   const { runSkill } = useBuildThreadAndRun();
+  const { loading } = props;
+
+  const LoadingSkeleton = () => {
+    return (
+      <div style={{ padding: '20px 0' }}>
+        <Skeleton animation />
+        <Skeleton animation style={{ marginTop: '20px' }} />
+      </div>
+    );
+  };
 
   const lastMessage = messages[messages.length - 1];
   const renderMessage = useCallback(
@@ -34,6 +48,7 @@ export const ChatMessages = memo((props: ChatMessagesProps) => {
         return (
           <HumanMessage
             message={item}
+            disable={props?.disable}
             key={item?.msgId}
             profile={{ avatar: userProfile?.avatar, name: userProfile?.name }}
           />
@@ -41,12 +56,15 @@ export const ChatMessages = memo((props: ChatMessagesProps) => {
       } else if (item?.type === 'ai') {
         return (
           <AssistantMessage
+            disable={props?.disable}
             message={item}
             key={item?.msgId}
             isLastSession={index === messages.length - 1}
             isPendingFirstToken={messageStateStore?.pendingFirstToken as boolean}
             isPending={messageStateStore?.pending as boolean}
-            handleAskFollowing={runSkill}
+            handleAskFollowing={(question?: string) => {
+              runSkill(question);
+            }}
           />
         );
       }
@@ -56,8 +74,8 @@ export const ChatMessages = memo((props: ChatMessagesProps) => {
 
   return (
     <div className="ai-copilot-message-inner-container">
-      {messages.map(renderMessage)}
-      {messages?.length === 0 ? <WelcomeMessage /> : null}
+      {loading ? <LoadingSkeleton /> : messages.map(renderMessage)}
+      {messages?.length === 0 && !loading ? <WelcomeMessage /> : null}
       {/* {messageStateStore?.pending && messageStateStore?.pendingFirstToken ? <PendingMessage /> : null} */}
     </div>
   );

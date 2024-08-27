@@ -16,7 +16,6 @@ export interface KnowledgeBaseTab {
   title: string;
   key: string;
   content: string;
-  collectionId: string;
   resourceId: string;
 }
 

@@ -4,9 +4,9 @@ import { time } from '@refly-packages/ai-workspace-common/utils/time';
 // styles
 import './index.scss';
 import { IconBook, IconBulb, IconCompass } from '@arco-design/web-react/icon';
-import { Tag, Typography } from '@arco-design/web-react';
+import { Tag } from '@arco-design/web-react';
 
-import { Resource } from '@refly/openapi-schema';
+import { Resource, RemoveResourceFromCollectionRequest } from '@refly/openapi-schema';
 // 类型
 import { IndexStatus } from '@refly/openapi-schema';
 // 请求
@@ -21,6 +21,7 @@ import { memo } from 'react';
 export const ResourceItem = memo(
   (props: {
     item: Resource;
+    collectionId?: string;
     index: number;
     showUtil?: boolean;
     showDesc?: boolean;
@@ -28,7 +29,7 @@ export const ResourceItem = memo(
     canDelete?: boolean;
     btnProps?: { defaultActiveKeys: string[] };
     handleItemClick: ({ resourceId, collectionId }: { resourceId: string; collectionId: string }) => void;
-    handleItemDelete?: (resource: Resource) => void;
+    handleItemDelete?: (resource: RemoveResourceFromCollectionRequest) => void;
   }) => {
     const {
       item,
@@ -38,6 +39,7 @@ export const ResourceItem = memo(
       showDesc = true,
       showBtn = { summary: true, markdown: true, externalOrigin: true },
       canDelete,
+      collectionId,
     } = props;
     const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
 
@@ -67,11 +69,12 @@ export const ResourceItem = memo(
 
     return (
       <div
+        id={`directory-resource-item-${item?.resourceId}`}
         className="knowledge-base-directory-item"
         key={index}
         onClick={() => {
           props?.handleItemClick({
-            collectionId: item?.collectionId as string,
+            collectionId: collectionId as string,
             resourceId: item?.resourceId as string,
           });
         }}
@@ -91,9 +94,10 @@ export const ResourceItem = memo(
           </div>
           {canDelete && (
             <DeleteDropdownMenu
-              data={item}
-              type="resource"
-              postDeleteList={(item: Resource) => props.handleItemDelete(item)}
+              data={{ resourceIds: [item?.resourceId], collectionId: collectionId }}
+              type="resourceCollection"
+              postDeleteList={(item: RemoveResourceFromCollectionRequest) => props.handleItemDelete(item)}
+              getPopupContainer={() => document.getElementById(`directory-resource-item-${item?.resourceId}`)}
             />
           )}
         </div>
@@ -118,27 +122,26 @@ export const ResourceItem = memo(
               <IconBook
                 onClick={() => {
                   jumpToReadResource({
-                    kbId: item?.collectionId,
                     resId: item?.resourceId,
                   });
                 }}
               />
             </div>
           ) : null}
-          {showBtn?.externalOrigin ? (
-            <div
-              className={classNames('action-external-origin-website', {
-                active: btnProps?.defaultActiveKeys?.includes('summary'),
-              })}
-            >
-              <IconCompass
-                onClick={() => {
-                  window.open(item?.data?.url, '_blank');
-                }}
-              />
-            </div>
-          ) : null}
         </div>
+        {showBtn?.externalOrigin ? (
+          <div
+            className={classNames('action-external-origin-website', {
+              active: btnProps?.defaultActiveKeys?.includes('summary'),
+            })}
+          >
+            <IconCompass
+              onClick={() => {
+                window.open(item?.data?.url, '_blank');
+              }}
+            />
+          </div>
+        ) : null}
         {showUtil ? (
           <div className="resource-utility-info">
             <span>

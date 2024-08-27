@@ -1,4 +1,4 @@
-import { Button, Divider, Input, Select, Message as message, Affix } from '@arco-design/web-react';
+import { Button, Divider, Input, Message as message, Affix } from '@arco-design/web-react';
 import { IconPen } from '@arco-design/web-react/icon';
 import { useEffect, useState } from 'react';
 
@@ -6,13 +6,12 @@ import { useEffect, useState } from 'react';
 import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { SearchResult, UpsertResourceRequest } from '@refly/openapi-schema';
-import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-or-search-list';
+import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
+import { SearchSelect } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
 
 const { TextArea } = Input;
-const Option = Select.Option;
 
 export const ImportFromText = () => {
   const importResourceStore = useImportResourceStore();
@@ -23,23 +22,6 @@ export const ImportFromText = () => {
 
   //
   const [saveLoading, setSaveLoading] = useState(false);
-
-  const { loadMore, hasMore, dataList, isRequesting, handleValueChange, mode } = useFetchOrSearchList({
-    fetchData: async (queryPayload) => {
-      const res = await getClient().listCollections({
-        query: {
-          ...queryPayload,
-        },
-      });
-
-      const data: SearchResult[] = (res?.data?.data || []).map((item) => ({
-        id: item?.collectionId,
-        title: item?.title,
-        domain: 'collection',
-      }));
-      return { success: res?.data?.success, data };
-    },
-  });
 
   const handleSave = async () => {
     setSaveLoading(true);
@@ -53,7 +35,7 @@ export const ImportFromText = () => {
       resourceType: 'text',
       title: copiedTextPayload?.title,
       content: copiedTextPayload?.content,
-      collectionId: selectedCollectionId === 'new-collection' ? undefined : selectedCollectionId,
+      collectionId: selectedCollectionId,
     };
 
     try {
@@ -82,7 +64,6 @@ export const ImportFromText = () => {
   };
 
   useEffect(() => {
-    loadMore();
     importResourceStore.setSelectedCollectionId(kbId);
     return () => {
       /* reset selectedCollectionId after modal hide */
@@ -130,47 +111,15 @@ export const ImportFromText = () => {
         <div className="intergation-footer">
           <div className="footer-location">
             <p className="text-item">保存至 </p>
-            <Select
-              size="large"
-              placeholder="选择保存知识库"
-              showSearch
-              className={'kg-selector'}
-              defaultValue={`${kbId || 'new-collection'}`}
-              onInputValueChange={(value) => {
-                handleValueChange(value, ['collection']);
-              }}
+            <SearchSelect
+              domain="collection"
+              className="kg-selector"
+              allowCreateNewEntity
               onChange={(value) => {
-                console.log('value', value);
                 if (!value) return;
-                //   handleValueChange(value);
-                if (value === 'new-collection') {
-                  importResourceStore.setSelectedCollectionId('new-collection');
-                } else {
-                  importResourceStore.setSelectedCollectionId(value);
-                }
+                importResourceStore.setSelectedCollectionId(value);
               }}
-              dropdownRender={(menu) => (
-                <div>
-                  {menu}
-                  {mode === 'fetch' && hasMore ? (
-                    <div className="search-load-more">
-                      <Button type="text" loading={isRequesting} onClick={() => loadMore()}>
-                        加载更多
-                      </Button>
-                    </div>
-                  ) : null}
-                </div>
-              )}
-            >
-              <Option key="new-collection" value="new-collection">
-                新建知识库
-              </Option>
-              {dataList?.map((item, index) => (
-                <Option key={`${item?.id}-${index}`} value={item?.id}>
-                  <span dangerouslySetInnerHTML={{ __html: item?.title }}></span>
-                </Option>
-              ))}
-            </Select>
+            />
           </div>
           <div className="footer-action">
             <Button

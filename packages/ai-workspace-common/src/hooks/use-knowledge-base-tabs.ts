@@ -3,13 +3,16 @@ import { Message as message } from '@arco-design/web-react';
 import { KnowledgeBaseTab, useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { Resource } from '@refly/openapi-schema';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useTranslation } from 'react-i18next';
 
 export const useKnowledgeBaseTabs = () => {
+  const { t } = useTranslation();
   const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
     tabs: state.tabs,
     activeTab: state.activeTab,
     updateTabs: state.updateTabs,
     updateActiveTab: state.updateActiveTab,
+    resetTabs: state.resetTabs,
   }));
   const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
 
@@ -45,11 +48,7 @@ export const useKnowledgeBaseTabs = () => {
     const newTabs = tabs.slice(0, index).concat(tabs.slice(index + 1));
 
     if (tabs?.length === 1) {
-      knowledgeBaseStore.resetTabs();
-      jumpToReadResource({
-        kbId: '',
-        resId: '',
-      });
+      message.warning(t('knowledgeBase.keepOneWindow'));
       return;
     }
 
@@ -62,21 +61,6 @@ export const useKnowledgeBaseTabs = () => {
     if (index > -1) {
       knowledgeBaseStore.updateTabs(newTabs);
     }
-  };
-
-  const handleDeleteTabsWithCollectionId = (collectionId: string) => {
-    const newTabs = tabs?.filter((tab) => tab?.collectionId !== collectionId);
-    if (newTabs?.length === 0) {
-      knowledgeBaseStore.resetTabs();
-      jumpToReadResource({
-        kbId: '',
-        resId: '',
-      });
-      return;
-    }
-    knowledgeBaseStore.updateActiveTab(newTabs[0].key);
-    setActiveTab(newTabs[0].key);
-    knowledgeBaseStore.updateTabs(newTabs);
   };
 
   const setActiveTab = (key: string) => {
@@ -96,6 +80,5 @@ export const useKnowledgeBaseTabs = () => {
     handleDeleteTab,
     setActiveTab,
     handleAddTabWithResource,
-    handleDeleteTabsWithCollectionId,
   };
 };

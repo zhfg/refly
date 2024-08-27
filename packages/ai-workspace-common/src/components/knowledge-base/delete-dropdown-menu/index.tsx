@@ -2,7 +2,7 @@ import { IconDelete, IconMore, IconEdit } from '@arco-design/web-react/icon';
 import { Dropdown, Menu, Button, Popconfirm, Message } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
 // 类型
-import { Note, Collection, Resource } from '@refly/openapi-schema';
+import { Note, Collection, Resource, RemoveResourceFromCollectionRequest } from '@refly/openapi-schema';
 // 请求
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
@@ -20,14 +20,15 @@ interface DropListProps {
   handleCancel: (e: any) => void;
   handleDeleteClick: (e: any) => void;
   handlEditKnowledgeBase?: (e: any) => void;
+  getPopupContainer?: () => HTMLElement;
 }
 
 const DropList = (props: DropListProps) => {
-  const { handleCancel, handleDeleteClick, handlEditKnowledgeBase, type } = props;
+  const { handleCancel, handleDeleteClick, handlEditKnowledgeBase, type, getPopupContainer } = props;
   const { t } = useTranslation();
 
   return (
-    <Menu>
+    <Menu onClick={(e) => e.stopPropagation()}>
       {type === 'knowledgeBase' && (
         <Menu.Item key="edit">
           <div onClick={(e) => handlEditKnowledgeBase(e)}>
@@ -39,6 +40,7 @@ const DropList = (props: DropListProps) => {
       <Menu.Item key="delete">
         <Popconfirm
           focusLock
+          getPopupContainer={getPopupContainer}
           title={t(
             `workspace.deleteDropdownMenu.deleteConfirmFor${type.replace(type[0], type[0].toLocaleUpperCase())}`,
           )}
@@ -61,7 +63,8 @@ const DropList = (props: DropListProps) => {
 };
 
 interface DeleteDropdownMenuProps {
-  postDeleteList?: (note: Note | Collection | Resource) => void;
+  postDeleteList?: (note: Note | Collection | Resource | RemoveResourceFromCollectionRequest) => void;
+  getPopupContainer?: () => HTMLElement;
 }
 
 interface NotePros extends DeleteDropdownMenuProps {
@@ -79,8 +82,13 @@ interface ResourcePros extends DeleteDropdownMenuProps {
   data: Resource;
 }
 
-export const DeleteDropdownMenu = (props: NotePros | KnowledgeBasePros | ResourcePros) => {
-  const { type, data, postDeleteList } = props;
+interface ResourceCollectionPros extends DeleteDropdownMenuProps {
+  type: 'resourceCollection';
+  data?: RemoveResourceFromCollectionRequest;
+}
+
+export const DeleteDropdownMenu = (props: NotePros | KnowledgeBasePros | ResourcePros | ResourceCollectionPros) => {
+  const { type, data, postDeleteList, getPopupContainer } = props;
   const [popupVisible, setPopupVisible] = useState(false);
   const { t } = useTranslation();
 
@@ -99,6 +107,10 @@ export const DeleteDropdownMenu = (props: NotePros | KnowledgeBasePros | Resourc
     }
     if (type === 'resource') {
       const { error } = await getClient().deleteResource({ body: { resourceId: data.resourceId } });
+      resultError = error;
+    }
+    if (type === 'resourceCollection') {
+      const { error } = await getClient().removeResourceFromCollection({ body: { ...data } });
       resultError = error;
     }
 
@@ -132,7 +144,7 @@ export const DeleteDropdownMenu = (props: NotePros | KnowledgeBasePros | Resourc
     setPopupVisible(!popupVisible);
   };
 
-  const droplist = DropList({ handleCancel, handleDeleteClick, handlEditKnowledgeBase, type });
+  const droplist = DropList({ handleCancel, handleDeleteClick, handlEditKnowledgeBase, type, getPopupContainer });
 
   return (
     <Dropdown
@@ -140,12 +152,13 @@ export const DeleteDropdownMenu = (props: NotePros | KnowledgeBasePros | Resourc
       popupVisible={popupVisible}
       droplist={droplist}
       triggerProps={{ onClickOutside: () => setPopupVisible(false) }}
+      getPopupContainer={getPopupContainer}
     >
       <Button
         icon={<IconMore style={{ fontSize: 16 }} />}
         type="text"
         onClick={(e) => handleIconClick(e)}
-        className="text-gray-500"
+        className="text-gray-500 delete-button"
       ></Button>
     </Dropdown>
   );

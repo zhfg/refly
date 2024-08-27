@@ -120,40 +120,40 @@ model ChatMessage {
   @@map("chat_messages")
 }
 
-/// 知识库资源
 model Resource {
-  /// 主键
-  id           BigInt    @id @default(autoincrement())
-  /// 资源项 id
-  resourceId   String    @unique @map("resource_id")
-  /// 资源类型
-  resourceType String    @default("") @map("resource_type")
+  /// Primary key
+  id           BigInt       @id @default(autoincrement())
+  /// Resource id
+  resourceId   String       @unique @map("resource_id")
+  /// Resource type
+  resourceType String       @default("") @map("resource_type")
   /// UID
-  uid          String    @map("uid")
+  uid          String       @map("uid")
   /// Collection ID
-  collectionId String    @default("") @map("collection_id")
-  /// 字数
-  wordCount    Int       @default(0) @map("word_count")
+  collectionId String       @default("") @map("collection_id")
+  /// Word count
+  wordCount    Int          @default(0) @map("word_count")
   /// Content of resource
-  content      String    @default("") @map("content")
-  /// 是否公开
-  isPublic     Boolean   @default(false) @map("is_public")
-  /// 是否只读
-  readOnly     Boolean   @default(false) @map("read_only")
-  /// 索引状态
-  indexStatus  String    @default("init") @map("index_status")
-  /// 标题
-  title        String    @map("title")
-  /// 资源元数据
-  meta         String    @map("meta")
-  /// 创建时间
-  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz()
-  /// 更新时间
-  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
-  /// 软删除标记
-  deletedAt    DateTime? @map("deleted_at") @db.Timestamptz()
+  content      String       @default("") @map("content")
+  /// Whether this resource is publicly accessible
+  isPublic     Boolean      @default(false) @map("is_public")
+  /// Whether this resource is readonly
+  readOnly     Boolean      @default(false) @map("read_only")
+  /// Index status
+  indexStatus  String       @default("init") @map("index_status")
+  /// Title
+  title        String       @map("title")
+  /// Resource metadata
+  meta         String       @map("meta")
+  /// Create timestamp
+  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
+  /// Soft delete timestamp
+  deletedAt    DateTime?    @map("deleted_at") @db.Timestamptz()
+  /// Related collections
+  collections  Collection[]
 
-  @@index([collectionId, deletedAt, updatedAt])
   @@index([uid, deletedAt, updatedAt])
   @@map("resources")
 }
@@ -188,26 +188,27 @@ model Note {
   @@map("notes")
 }
 
-/// 知识集
 model Collection {
-  /// 主键
-  id           BigInt    @id @default(autoincrement())
-  /// 知识集 id
-  collectionId String    @unique @map("collection_id")
-  /// 标题
-  title        String    @map("title")
-  /// 描述
-  description  String    @default("") @map("description")
+  /// Primary key
+  id           BigInt     @id @default(autoincrement())
+  /// Collection id
+  collectionId String     @unique @map("collection_id")
+  /// Collection title
+  title        String     @map("title")
+  /// Collection description
+  description  String?    @map("description")
   /// UID
-  uid          String    @map("uid")
-  /// 是否公开
-  isPublic     Boolean   @default(false) @map("is_public")
-  /// 创建时间
-  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz()
-  /// 更新时间
-  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
-  /// 软删除标记
-  deletedAt    DateTime? @map("deleted_at") @db.Timestamptz()
+  uid          String     @map("uid")
+  /// Whether this collection is public
+  isPublic     Boolean    @default(false) @map("is_public")
+  /// Create timestamp
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz()
+  /// Soft delete timestamp
+  deletedAt    DateTime?  @map("deleted_at") @db.Timestamptz()
+  /// Related resources
+  resources    Resource[]
 
   @@index([uid, updatedAt])
   @@map("collections")

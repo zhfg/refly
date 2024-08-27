@@ -4,15 +4,18 @@ import { IconSearch, IconPlus } from '@arco-design/web-react/icon';
 import { Divider, Input, Skeleton } from '@arco-design/web-react';
 import { useSearchableList } from '@refly-packages/ai-workspace-common/components/use-searchable-list';
 import { useEffect, useState } from 'react';
-import { Resource } from '@refly/openapi-schema';
+import { Resource, RemoveResourceFromCollectionRequest } from '@refly/openapi-schema';
+import { useSearchParams } from 'react-router-dom';
 
 // 组件
+import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
+import { ResourceCollectionAssociativeModal } from '@refly-packages/ai-workspace-common/components/knowledge-base/resource-detail/resource-collection-associative-modal';
 import { ResourceItem } from './resource-item';
-import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import classNames from 'classnames';
 
 interface ResourceListProps {
   resources: Partial<Resource>[];
+  collectionId?: string;
   isFetching?: boolean;
   classNames?: string;
   placeholder: string;
@@ -24,12 +27,16 @@ interface ResourceListProps {
   canDelete?: boolean;
   showAdd?: boolean;
   handleItemClick: (payload: { collectionId: string; resourceId: string }) => void;
-  handleItemDelete?: (resource: Resource) => void;
+  handleItemDelete?: (resource: RemoveResourceFromCollectionRequest) => void;
 }
 
 export const ResourceList = (props: ResourceListProps) => {
   const { searchKey = 'title', showAdd } = props;
   const [searchVal, setSearchVal] = useState('');
+  const [visible, setVisible] = useState(false);
+  const reloadKnowledgeBaseState = useReloadListState();
+  const [searchParams] = useSearchParams();
+  const resId = searchParams.get('resId');
   const [resourceList, setResourceList, filter] = useSearchableList<Resource>(searchKey as keyof Resource, {
     debounce: true,
     delay: 300,
@@ -41,12 +48,8 @@ export const ResourceList = (props: ResourceListProps) => {
   };
 
   const AddResourceBtn = () => {
-    const importResourceStore = useImportResourceStore();
-    const handleAddResource = () => {
-      importResourceStore.setImportResourceModalVisible(true);
-    };
     return (
-      <div className="add-resource-btn" onClick={handleAddResource}>
+      <div className="add-resource-btn" onClick={() => setVisible(true)}>
         <IconPlus />
       </div>
     );
@@ -90,6 +93,7 @@ export const ResourceList = (props: ResourceListProps) => {
             <ResourceItem
               key={index}
               index={index}
+              collectionId={props.collectionId}
               item={item}
               btnProps={props.btnProps}
               showUtil={props.showUtil}
@@ -102,6 +106,18 @@ export const ResourceList = (props: ResourceListProps) => {
           ))
         )}
       </div>
+      <ResourceCollectionAssociativeModal
+        domain="resource"
+        mode="multiple"
+        visible={visible}
+        setVisible={setVisible}
+        postConfirmCallback={(value: string[]) => {
+          if (value.length > 0 && value.includes(resId)) {
+            reloadKnowledgeBaseState.setReloadResourceDetail(true);
+          }
+          reloadKnowledgeBaseState.setReloadKnowledgeBaseList(true);
+        }}
+      />
     </div>
   );
 };

@@ -47,6 +47,12 @@ import type {
   CreateCollectionData,
   CreateCollectionError,
   CreateCollectionResponse,
+  AddResourceToCollectionData,
+  AddResourceToCollectionError,
+  AddResourceToCollectionResponse,
+  RemoveResourceFromCollectionData,
+  RemoveResourceFromCollectionError,
+  RemoveResourceFromCollectionResponse,
   DeleteCollectionData,
   DeleteCollectionError,
   DeleteCollectionResponse,
@@ -293,6 +299,28 @@ export const createCollection = (options: Options<CreateCollectionData>) => {
   return (options?.client ?? client).post<CreateCollectionResponse, CreateCollectionError>({
     ...options,
     url: '/knowledge/collection/new',
+  });
+};
+
+/**
+ * Add resource to collection
+ * Add an existing resource to a collection
+ */
+export const addResourceToCollection = (options: Options<AddResourceToCollectionData>) => {
+  return (options?.client ?? client).post<AddResourceToCollectionResponse, AddResourceToCollectionError>({
+    ...options,
+    url: '/knowledge/collection/addResource',
+  });
+};
+
+/**
+ * Remove resource from collection
+ * Remove an existing resource from a collection
+ */
+export const removeResourceFromCollection = (options: Options<RemoveResourceFromCollectionData>) => {
+  return (options?.client ?? client).post<RemoveResourceFromCollectionResponse, RemoveResourceFromCollectionError>({
+    ...options,
+    url: '/knowledge/collection/removeResource',
   });
 };
 

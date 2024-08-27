@@ -4,6 +4,7 @@ import { Resource, Note, Collection } from '@refly/openapi-schema';
 import './index.scss';
 
 interface CardBoxBaseProps {
+  index: number;
   type: string;
   cardIcon?: ReactNode;
   children?: ReactNode;
@@ -41,7 +42,11 @@ export const CardBox = (props: ResourceCardProps | NoteCardProps | CollectionCar
   const { children, onClick } = props;
 
   return (
-    <div className="p-4 m-3 border rounded-lg card-box border-black/8" onClick={() => onClick()}>
+    <div
+      className="p-4 m-3 border rounded-lg card-box border-black/8"
+      id={`${props.type}-${props.index}`}
+      onClick={() => onClick()}
+    >
       <div className="h-40 overflow-hidden">
         <div className="flex mt-3 mb-1 resource-url">
           <div className="flex items-center justify-center border rounded-lg card-icon-box shrink-0 border-black/8">

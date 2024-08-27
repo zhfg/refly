@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Tabs } from '@arco-design/web-react';
 import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 
@@ -8,34 +8,22 @@ import { KnowledgeBaseResourceDetail } from '../resource-detail';
 import { KnowledgeBaseDetailEmpty } from '../knowledge-base-detail-empty';
 // 样式
 import './index.scss';
-import { useResizePanel } from '@refly-packages/ai-workspace-common/hooks/use-resize-panel';
 import { ActionSource, useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { KnowledgeBaseListModal } from '../copilot/knowledge-base-list-modal';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
-import { getDefaultPopupContainer, getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
-import { IconSearch } from '@arco-design/web-react/icon';
+import { IconSearch, IconLeft, IconRight } from '@arco-design/web-react/icon';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 const TabPane = Tabs.TabPane;
 
-interface KnowledgeBaseDetailProps {}
-
-export const KnowledgeBaseDetail = (props: KnowledgeBaseDetailProps) => {
+export const KnowledgeBaseDetail = () => {
   const searchStore = useSearchStore();
 
   const [queryParams] = useSearchParams();
+  const resId = queryParams.get('resId');
   const kbId = queryParams.get('kbId');
-  // directory minSize 270px ~ maxSize 50%
-  const [minSize] = useResizePanel({
-    getGroupSelector: () => {
-      return document.querySelector('.knowledge-base-detail-panel-container');
-    },
-    getResizeSelector: () =>
-      document.querySelectorAll('.knowledge-base-detail-panel-resize') as NodeListOf<HTMLElement>,
-    initialMinSize: 24,
-    initialMinPixelSize: 270,
-  });
+  const [leftPanelSize, setLeftPanelSize] = useState(30);
 
   const { tabs, activeTab, setActiveTab, handleDeleteTab } = useKnowledgeBaseTabs();
   const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
@@ -50,9 +38,9 @@ export const KnowledgeBaseDetail = (props: KnowledgeBaseDetailProps) => {
     return () => {
       knowledgeBaseStore.updateResourcePanelVisible(false);
     };
-  }, [kbId]);
+  }, [resId]);
 
-  if (!kbId || kbId === 'undefined' || kbId === 'null') {
+  if ((!resId || resId === 'undefined' || resId === 'null') && (!kbId || kbId === 'undefined' || kbId === 'null')) {
     return <KnowledgeBaseDetailEmpty />;
   }
 
@@ -95,17 +83,33 @@ export const KnowledgeBaseDetail = (props: KnowledgeBaseDetailProps) => {
         ))}
       </Tabs>
       <PanelGroup direction="horizontal" className="knowledge-base-detail-panel-container">
-        <Panel
-          // defaultSize={minSize}
-          // minSize={minSize}
-          maxSize={30}
-          // collapsedSize={0}
-          collapsible={true}
-          className="knowledge-base-detail-directory-panel"
-        >
-          <KnowledgeBaseDirectory />
-        </Panel>
-        <PanelResizeHandle className="knowledge-base-detail-panel-resize" />
+        {kbId ? (
+          <>
+            <Panel
+              maxSize={30}
+              collapsible={true}
+              className="knowledge-base-detail-directory-panel"
+              style={{ flex: `${leftPanelSize} 1 0px` }}
+              onResize={(size) => setLeftPanelSize(size)}
+            >
+              <KnowledgeBaseDirectory />
+            </Panel>
+            <PanelResizeHandle
+              className={`knowledge-base-detail-panel-resize ${leftPanelSize === 0 ? 'left-panel-hidden' : ''}`}
+            >
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLeftPanelSize(leftPanelSize === 0 ? 30 : 0);
+                }}
+                className="toggle-left-panel-btn"
+              >
+                {leftPanelSize === 0 ? <IconRight /> : <IconLeft />}
+              </div>
+            </PanelResizeHandle>
+          </>
+        ) : null}
+
         <Panel className="knowledge-base-detail-resource-panel" minSize={50}>
           <KnowledgeBaseResourceDetail />
         </Panel>

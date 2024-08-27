@@ -28,6 +28,8 @@ import {
   DeleteNoteRequest,
   ResourceType,
   BatchCreateResourceResponse,
+  AddResourceToCollectionRequest,
+  RemoveResourceFromCollectionRequest,
 } from '@refly/openapi-schema';
 import { User as UserModel } from '@prisma/client';
 import { KnowledgeService } from './knowledge.service';
@@ -94,6 +96,26 @@ export class KnowledgeController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Post('collection/addResource')
+  async addResourceToCollection(
+    @User() user: UserModel,
+    @Body() body: AddResourceToCollectionRequest,
+  ) {
+    await this.knowledgeService.addResourceToCollection(user, body);
+    return buildSuccessResponse();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('collection/removeResource')
+  async removeResourceFromCollection(
+    @User() user: UserModel,
+    @Body() body: RemoveResourceFromCollectionRequest,
+  ) {
+    await this.knowledgeService.removeResourceFromCollection(user, body);
+    return buildSuccessResponse();
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('collection/delete')
   async deleteCollection(@User() user: UserModel, @Body() body: DeleteCollectionRequest) {
     if (!body.collectionId) {
@@ -107,13 +129,11 @@ export class KnowledgeController {
   @Get('resource/list')
   async listResources(
     @User() user: UserModel,
-    @Query('collectionId') collectionId: string,
     @Query('resourceType') resourceType: ResourceType,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListResourceResponse> {
     const resources = await this.knowledgeService.listResources(user, {
-      collectionId,
       resourceType,
       page,
       pageSize,

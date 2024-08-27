@@ -61,10 +61,6 @@ export const $Resource = {
       description: 'Resource type',
       $ref: '#/components/schemas/ResourceType',
     },
-    collectionId: {
-      type: 'string',
-      description: 'Collection ID',
-    },
     title: {
       type: 'string',
       description: 'Resource title',
@@ -100,6 +96,13 @@ export const $Resource = {
     content: {
       type: 'string',
       description: 'Document content for this resource (only returned in getNoteDetail API)',
+    },
+    collections: {
+      type: 'array',
+      description: 'Collections this resource belongs to (only returned in getResourceDetail API)',
+      items: {
+        $ref: '#/components/schemas/Collection',
+      },
     },
   },
 } as const;
@@ -1013,13 +1016,8 @@ export const $UpsertResourceRequest = {
     },
     collectionId: {
       type: 'string',
-      description: 'Collection ID (will create new collection if empty)',
+      description: 'Collection ID (will add to the collection if given)',
       example: 'cl-g30e1b80b5g1itbemc0g5jj3',
-    },
-    collectionName: {
-      type: 'string',
-      description: 'Collection name',
-      example: 'New Collection',
     },
     data: {
       description: 'Resource metadata',
@@ -1264,6 +1262,42 @@ export const $UpsertCollectionResponse = {
       },
     },
   ],
+} as const;
+
+export const $AddResourceToCollectionRequest = {
+  type: 'object',
+  required: ['collectionId', 'resourceIds'],
+  properties: {
+    collectionId: {
+      type: 'string',
+      description: 'Collection ID',
+    },
+    resourceIds: {
+      type: 'array',
+      description: 'Resource ID list',
+      items: {
+        type: 'string',
+      },
+    },
+  },
+} as const;
+
+export const $RemoveResourceFromCollectionRequest = {
+  type: 'object',
+  required: ['collectionId', 'resourceIds'],
+  properties: {
+    collectionId: {
+      type: 'string',
+      description: 'Collection ID',
+    },
+    resourceIds: {
+      type: 'array',
+      description: 'Resource ID list',
+      items: {
+        type: 'string',
+      },
+    },
+  },
 } as const;
 
 export const $DeleteCollectionRequest = {

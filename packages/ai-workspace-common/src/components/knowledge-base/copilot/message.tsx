@@ -33,7 +33,7 @@ import classNames from 'classnames';
 const citationRegex = /\([|【)citation()|】)]\(\d+\)/g;
 
 export const HumanMessage = memo(
-  (props: { message: Partial<ChatMessage>; profile: { avatar: string; name: string } }) => {
+  (props: { message: Partial<ChatMessage>; profile: { avatar: string; name: string }; disable?: boolean }) => {
     const { message, profile } = props;
     return (
       <div className="ai-copilot-message human-message-container">
@@ -63,9 +63,17 @@ export const AssistantMessage = memo(
     isPendingFirstToken: boolean;
     isPending: boolean;
     isLastSession: boolean;
+    disable?: boolean;
     handleAskFollowing: (question?: string) => void;
   }) => {
-    const { message, isPendingFirstToken = false, isPending, isLastSession = false, handleAskFollowing } = props;
+    const {
+      message,
+      isPendingFirstToken = false,
+      isPending,
+      isLastSession = false,
+      disable,
+      handleAskFollowing,
+    } = props;
     const { t } = useTranslation();
     const noteStoreEditor = useNoteStore((state) => state.editor);
     let sources =
@@ -243,7 +251,7 @@ export const AssistantMessage = memo(
                   </div>
                 ) : null}
               </div>
-              {(!isPending || !isLastSession) && (
+              {!disable && (!isPending || !isLastSession) && (
                 <div className="ai-copilot-answer-action-container">
                   <div className="session-answer-actionbar">
                     <div className="session-answer-actionbar-left">

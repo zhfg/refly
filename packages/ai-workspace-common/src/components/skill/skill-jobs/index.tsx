@@ -3,11 +3,11 @@ import { time } from '@refly-packages/ai-workspace-common/utils/time';
 
 // components
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 // store
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 
 import './index.scss';
@@ -15,7 +15,7 @@ import { SkillJob } from '@refly/openapi-schema';
 import { LOCALE } from '@refly/common-types';
 
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
-import { List, Empty, Typography, Grid, Divider } from '@arco-design/web-react';
+import { List, Empty, Grid, Divider } from '@arco-design/web-react';
 import {
   IconCheckCircle,
   IconLoading,
@@ -42,7 +42,8 @@ interface SkillJobsProps {
 
 export const SkillJobs = (props: SkillJobsProps) => {
   const { reloadList, setReloadList } = props;
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const skillId = searchParams.get('skillId') as string;
 
   const { dataList, setDataList, loadMore, hasMore, isRequesting, reload } = useFetchDataList({
@@ -139,14 +140,14 @@ export const SkillJobs = (props: SkillJobsProps) => {
     }
 
     const handleClickJob = () => {
-      const { conversation } = job;
-      if (!conversation?.convId) return;
-      setSearchParams({ skillId, convId: conversation.convId });
+      const { jobId } = job;
+      if (!jobId) return;
+      navigate(`/skill-detail?skillId=${skillId}&jobId=${jobId}`, { replace: true });
     };
 
     const { collections, notes, resources, urls } = job.context;
     return (
-      <div className={`skill-jobs__card ${!conversation?.convId ? 'disabled' : ''}`} onClick={handleClickJob}>
+      <div className="skill-jobs__card" onClick={handleClickJob}>
         <Row align="center" justify="center">
           <Col span={1} className="skill-jobs__card-col">
             <JobStatus status={job.jobStatus} />
@@ -169,7 +170,7 @@ export const SkillJobs = (props: SkillJobsProps) => {
                 <ContextAttachment contextType="collections" contentList={resources.map((item) => item.title)} />
               )}
               {notes?.length && <ContextAttachment contextType="notes" contentList={notes.map((item) => item.title)} />}
-              {urls?.length && <ContextAttachment contextType="urls" contentList={urls} />}
+              {urls?.length ? <ContextAttachment contextType="urls" contentList={urls} /> : null}
             </div>
           </Col>
           <Col span={4} className="skill-jobs__card-col">
@@ -183,7 +184,7 @@ export const SkillJobs = (props: SkillJobsProps) => {
     );
   };
 
-  if (dataList.length === 0) {
+  if (dataList.length === 0 && !isRequesting) {
     return <Empty description="暂无运行记录" />;
   }
   return (
@@ -194,6 +195,7 @@ export const SkillJobs = (props: SkillJobsProps) => {
       split={false}
       pagination={false}
       dataSource={dataList}
+      loading={isRequesting}
       scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
       render={(item: SkillJob, key) => (
         <List.Item
