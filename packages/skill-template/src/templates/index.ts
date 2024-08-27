@@ -10,3 +10,4 @@ export * from './translate';
 export * from './find-related-with-content';
 export * from './find-related-with-note';
 export * from './find-related-with-resource';
+export * from './writing';
