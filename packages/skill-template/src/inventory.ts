@@ -10,6 +10,9 @@ import {
   BasicSummarySkill,
   ExplainTermsSkill,
   TranslateSkill,
+  FindRelatedContent,
+  FindRelatedWithNote,
+  FindRelatedWithResource,
 } from './templates';
 
 export const createSkillInventory = (engine: SkillEngine): BaseSkill[] => {
@@ -23,5 +26,8 @@ export const createSkillInventory = (engine: SkillEngine): BaseSkill[] => {
     new BasicSummarySkill(engine),
     new ExplainTermsSkill(engine),
     new TranslateSkill(engine),
+    new FindRelatedContent(engine),
+    new FindRelatedWithNote(engine),
+    new FindRelatedWithResource(engine),
   ];
 };

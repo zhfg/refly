@@ -114,6 +114,18 @@ export class SkillService {
     this.skillEngine = new SkillEngine(
       this.logger,
       {
+        getNoteDetail: async (user, noteId) => {
+          const note = await this.knowledge.getNoteDetail(user, noteId);
+          return buildSuccessResponse(notePO2DTO(note));
+        },
+        createNote: async (user, req) => {
+          const note = await this.knowledge.upsertNote(user, req);
+          return buildSuccessResponse(notePO2DTO(note));
+        },
+        listNotes: async (user, param) => {
+          const notes = await this.knowledge.listNotes(user, param);
+          return buildSuccessResponse(notes.map((note) => notePO2DTO(note)));
+        },
         getResourceDetail: async (user, req) => {
           const resource = await this.knowledge.getResourceDetail(user, req);
           return buildSuccessResponse(resourcePO2DTO(resource, true));

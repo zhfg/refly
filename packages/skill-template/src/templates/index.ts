@@ -7,3 +7,6 @@ export * from './create-git-diff-commit';
 export * from './basic-summary';
 export * from './explain-terms';
 export * from './translate';
+export * from './find-related-with-content';
+export * from './find-related-with-note';
+export * from './find-related-with-resource';

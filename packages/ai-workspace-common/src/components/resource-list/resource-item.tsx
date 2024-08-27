@@ -128,20 +128,20 @@ export const ResourceItem = memo(
               />
             </div>
           ) : null}
+          {showBtn?.externalOrigin ? (
+            <div
+              className={classNames('action-external-origin-website', {
+                active: btnProps?.defaultActiveKeys?.includes('summary'),
+              })}
+            >
+              <IconCompass
+                onClick={() => {
+                  window.open(item?.data?.url, '_blank');
+                }}
+              />
+            </div>
+          ) : null}
         </div>
-        {showBtn?.externalOrigin ? (
-          <div
-            className={classNames('action-external-origin-website', {
-              active: btnProps?.defaultActiveKeys?.includes('summary'),
-            })}
-          >
-            <IconCompass
-              onClick={() => {
-                window.open(item?.data?.url, '_blank');
-              }}
-            />
-          </div>
-        ) : null}
         {showUtil ? (
           <div className="resource-utility-info">
             <span>

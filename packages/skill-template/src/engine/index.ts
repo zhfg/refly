@@ -14,9 +14,18 @@ import {
   UpsertCollectionRequest,
   UpsertResourceRequest,
   User,
+  GetNoteDetailResponse,
+  UpsertNoteRequest,
+  CreateNoteResponse,
+  UpdateNoteResponse,
+  ListNotesData,
+  ListNotesResponse,
 } from '@refly/openapi-schema';
 
 export interface ReflyService {
+  getNoteDetail: (user: User, noteId: string) => Promise<GetNoteDetailResponse>;
+  createNote: (user: User, req: UpsertNoteRequest) => Promise<CreateNoteResponse>;
+  listNotes: (user: User, param: ListNotesData['query']) => Promise<ListNotesResponse>;
   getResourceDetail: (user: User, req: { resourceId: string }) => Promise<GetResourceDetailResponse>;
   createResource: (user: User, req: UpsertResourceRequest) => Promise<CreateResourceResponse>;
   updateResource: (user: User, req: UpsertResourceRequest) => Promise<UpdateResourceResponse>;
