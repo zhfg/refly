@@ -14,19 +14,19 @@ interface GraphState extends BaseSkillState {
 
 // Define a new graph
 
-export class BasicSummarySkill extends BaseSkill {
-  name = 'basic_content_summarizer';
+export class BasicSummaryWithResourceSkill extends BaseSkill {
+  name = 'basic_summary_with_resource';
   displayName = {
-    en: 'Basic Summary',
-    'zh-CN': '基础总结',
+    en: 'Basic Summary with Resource',
+    'zh-CN': '基于选中资源的总结',
   };
 
   invocationConfig: SkillInvocationConfig = {
     inputRules: [{ key: 'query' }],
-    contextRules: [{ key: 'contentList' }],
+    contextRules: [{ key: 'resourceIds' }],
   };
 
-  description = 'Give a summary of the content of a web page';
+  description = 'Give a summary of the selected resource';
 
   schema = z.object({
     query: z.string().describe('The user query'),
@@ -48,7 +48,14 @@ export class BasicSummarySkill extends BaseSkill {
     this.engine.logger.log('---GENERATE---');
 
     const { documents } = state;
-    const { locale = 'en', contentList = [], resourceIds = [], noteIds = [] } = config?.configurable || {};
+    const { user } = config;
+    const { locale = 'en', contentList = [] } = config?.configurable || {};
+
+    const { resourceIds = [] } = config?.configurable || {};
+    const lastResourceId = resourceIds[resourceIds.length - 1];
+    const lastResource = await this.engine.service.getResourceDetail(user, {
+      resourceId: lastResourceId,
+    });
 
     // 1. build context text
     const contextToCitationText = documents.reduce((total, cur) => {
@@ -59,7 +66,7 @@ export class BasicSummarySkill extends BaseSkill {
     }, '');
 
     // 1.1 contentList
-    const contentListText = contentList.map((item, index) => `${index + 1}. ${item}`).join('\n');
+    const contentListText = lastResource?.data?.content;
     // 1.2 handle resourceIds one by one
 
     // 1.3 handle noteIds one by one
