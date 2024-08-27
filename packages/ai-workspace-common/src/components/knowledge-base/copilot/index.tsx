@@ -233,7 +233,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
       const { isNewConversation } = useConversationStore.getState();
 
       // 新会话，需要手动构建第一条消息
-      if (isNewConversation && convId && newQAText) {
+      if (isNewConversation && convId) {
         // 更换成基于 task 的消息模式，核心是基于 task 来处理
         runSkill(newQAText);
       } else if (convId) {
