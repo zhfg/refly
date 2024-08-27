@@ -1,5 +1,5 @@
 import { getMarkdown } from '@refly/utils/html2md';
-import { BackgroundMsgType, sendToBackground } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import { sendMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 export const saveMockedResource = async () => {
@@ -21,11 +21,13 @@ export const saveMockedResource = async () => {
     content: pageContent || '',
   };
 
-  sendToBackground(
+  sendMessage(
     {
       name: 'currentMockResource',
-      type: 'operateTabStorage',
-      body: resource,
+      type: 'syncInfo',
+      body: {
+        currentMockResource: resource,
+      },
       source: getRuntime(),
     },
     false,

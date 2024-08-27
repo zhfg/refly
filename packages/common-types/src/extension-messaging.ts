@@ -4,7 +4,7 @@ export type BackgroundMsgType =
   | 'apiRequest'
   | 'others'
   | 'registerEvent'
-  | 'operateTabStorage'
+  | 'syncInfo'
   | 'injectContentSelectorCss'
   | 'toggleCopilot';
 
@@ -22,6 +22,7 @@ export type MessageName =
   | 'getTabId'
   | 'currentMockResource'
   | 'sidePanelHeartBeat'
+  | 'reflyStatusCheck'
   | CopilotMsgName
   | SyncMarkEventName
   | SidePanelMsgName;

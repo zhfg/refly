@@ -383,8 +383,8 @@ export const AICopilot = memo((props: AICopilotProps) => {
                   <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
                 </div>
                 <div className="chat-input-assist-action">
-                  <ContextContentWithBadge />
                   <CurrentContextActionBtn />
+                  <ContextContentWithBadge />
                   <SelectedTextContextActionBtn />
                   <OutputLocaleList>
                     <Button icon={<IconTranslate />} type="text" className="assist-action-item">

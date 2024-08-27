@@ -48,6 +48,8 @@ const App = () => {
   const { initMessageListener } = useToggleCSUI();
 
   const userStore = useUserStore();
+  // 在网页时，模拟在知识库的资源选中状态
+  const { initMessageListener: initMockMessageListener } = useMockInAppResource();
 
   // 绑定快捷键，后续允许用户自定义快捷键
   useBindCommands();
@@ -57,8 +59,6 @@ const App = () => {
   useSetContainerDimension();
   // 处理登录状态
   useProcessLoginNotify();
-  // 在网页时，模拟在知识库的资源选中状态
-  useMockInAppResource();
 
   // 设置 Message 通知的 container
   useEffect(() => {
@@ -70,6 +70,7 @@ const App = () => {
     setRuntime('extension-csui');
     userStore.setRuntime('extension-csui');
     initMessageListener();
+    initMockMessageListener();
   }, []);
 
   return (
