@@ -40,9 +40,9 @@ export const useBuildThreadAndRun = () => {
     setTask: state.setTask,
   }));
   const { buildTaskAndGenReponse, buildShutdownTaskAndGenResponse } = useBuildTask();
-  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
-    updateCurrentSelectedMark: state.updateCurrentSelectedMark,
-  }));
+  // const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
+  //   updateCurrentSelectedMark: state.updateCurrentSelectedMark,
+  // }));
   const { jumpToConv } = useKnowledgeBaseJumpNewPath();
 
   const emptyConvRunSkill = (question: string, forceNewConv?: boolean) => {
@@ -202,7 +202,7 @@ export const useBuildThreadAndRun = () => {
     // 开始提问
     buildTaskAndGenReponse(task as InvokeSkillRequest);
     chatStore.setNewQAText('');
-    knowledgeBaseStore.updateCurrentSelectedMark(null);
+    // knowledgeBaseStore.updateCurrentSelectedMark(null);
   };
 
   return {
