@@ -95,7 +95,6 @@ export const SearchSelect = (props: SearchSelectProps) => {
       allowClear
       showSearch
       placeholder={t(`entitySelector.placeholder.${domain}`)}
-      value={value}
       defaultValue={defaultValue}
       filterOption={false}
       popupVisible={popupVisible}
