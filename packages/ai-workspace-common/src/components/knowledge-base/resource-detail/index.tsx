@@ -119,8 +119,12 @@ export const KnowledgeBaseResourceDetail = memo(() => {
 
   // 初始化块选择
   useEffect(() => {
-    initMessageListener();
-  }, []);
+    const remove = initMessageListener();
+
+    return () => {
+      remove();
+    };
+  }, [resId]);
 
   return (
     <div className="knowledge-base-resource-detail-container">

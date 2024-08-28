@@ -449,6 +449,8 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
   const removeDomEventListener = () => {
     const containerElem = selector ? document.querySelector(`.${selector}`) : document.body;
 
+    if (!containerElem) return;
+
     containerElem.removeEventListener('mousemove', onMouseMove);
     containerElem.removeEventListener('click', onContentClick, { capture: true });
     containerElem.removeEventListener('mouseup', onMouseDownUpEvent);
