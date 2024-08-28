@@ -5,6 +5,10 @@ import { AssistantMessage, HumanMessage, PendingMessage, WelcomeMessage } from '
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import { memo, useCallback } from 'react';
+import { useShallow } from 'zustand/react/shallow';
+import { MessageState } from '@refly/common-types';
+import { ChatMessage } from '@refly/openapi-schema';
 import { Skeleton } from '@arco-design/web-react';
 
 interface ChatMessagesProps {
@@ -12,10 +16,19 @@ interface ChatMessagesProps {
   loading?: boolean;
 }
 
-export const ChatMessages = (props: ChatMessagesProps) => {
-  const chatStore = useChatStore();
-  const userStore = useUserStore();
-  const messageStateStore = useMessageStateStore();
+const messageStateSelector = (state: MessageState) => {
+  return {
+    pending: state.pending,
+    pendingFirstToken: state.pendingFirstToken,
+  };
+};
+
+const useMessages = () => useChatStore(useShallow((state) => state.messages));
+
+export const ChatMessages = memo((props: ChatMessagesProps) => {
+  const messages = useMessages();
+  const userProfile = useUserStore(useShallow((state) => state.userProfile));
+  const messageStateStore = useMessageStateStore(useShallow(messageStateSelector));
   const { runSkill } = useBuildThreadAndRun();
   const { loading } = props;
 
@@ -28,36 +41,42 @@ export const ChatMessages = (props: ChatMessagesProps) => {
     );
   };
 
+  const lastMessage = messages[messages.length - 1];
+  const renderMessage = useCallback(
+    (item: ChatMessage, index: number) => {
+      if (item?.type === 'human') {
+        return (
+          <HumanMessage
+            message={item}
+            disable={props?.disable}
+            key={item?.msgId}
+            profile={{ avatar: userProfile?.avatar, name: userProfile?.name }}
+          />
+        );
+      } else if (item?.type === 'ai') {
+        return (
+          <AssistantMessage
+            disable={props?.disable}
+            message={item}
+            key={item?.msgId}
+            isLastSession={index === messages.length - 1}
+            isPendingFirstToken={messageStateStore?.pendingFirstToken as boolean}
+            isPending={messageStateStore?.pending as boolean}
+            handleAskFollowing={(question?: string) => {
+              runSkill(question);
+            }}
+          />
+        );
+      }
+    },
+    [messages.length, lastMessage?.type, messageStateStore.pending, messageStateStore.pendingFirstToken],
+  );
+
   return (
     <div className="ai-copilot-message-inner-container">
-      {loading ? (
-        <LoadingSkeleton />
-      ) : (
-        chatStore.messages.map((item, index) =>
-          item?.type === 'human' ? (
-            <HumanMessage
-              disable={props.disable}
-              message={item}
-              key={index}
-              profile={{ avatar: userStore?.userProfile?.avatar, name: userStore?.userProfile?.name }}
-            />
-          ) : (
-            <AssistantMessage
-              disable={props.disable}
-              message={item}
-              key={index}
-              isLastSession={index === chatStore.messages.length - 1}
-              isPendingFirstToken={messageStateStore?.pendingFirstToken as boolean}
-              isPending={messageStateStore?.pending as boolean}
-              handleAskFollowing={(question?: string) => {
-                runSkill(question);
-              }}
-            />
-          ),
-        )
-      )}
-      {chatStore?.messages?.length === 0 && !loading ? <WelcomeMessage /> : null}
+      {loading ? <LoadingSkeleton /> : messages.map(renderMessage)}
+      {messages?.length === 0 && !loading ? <WelcomeMessage /> : null}
       {/* {messageStateStore?.pending && messageStateStore?.pendingFirstToken ? <PendingMessage /> : null} */}
     </div>
   );
-};
+});

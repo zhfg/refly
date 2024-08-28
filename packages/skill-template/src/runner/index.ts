@@ -32,6 +32,9 @@ async function run() {
   });
 
   const engine = new SkillEngine(console, {
+    getNoteDetail: async (user, noteId) => null,
+    createNote: async (user, req) => null,
+    listNotes: async (user, param) => null,
     getResourceDetail: async (user, req) => null,
     createResource: async (user, req) => null,
     updateResource: async (user, req) => null,

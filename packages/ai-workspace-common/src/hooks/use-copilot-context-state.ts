@@ -5,7 +5,6 @@ import { ChatMessage } from '@refly/openapi-schema';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
-import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 
 const checkShowRelatedQuestion = (messsages: ChatMessage[] = []) => {
@@ -19,10 +18,21 @@ const checkShowRelatedQuestion = (messsages: ChatMessage[] = []) => {
 
 export const useCopilotContextState = () => {
   const [contextCardHeight, setContextCardHeight] = useState(104);
-  const searchStateStore = useSearchStateStore();
-  const chatStore = useChatStore();
-  const knowledgeBaseStore = useKnowledgeBaseStore();
-  const noteStore = useNoteStore();
+  const chatStore = useChatStore((state) => ({
+    messages: state.messages,
+  }));
+  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
+    showContextCard: state.showContextCard,
+    contextDomain: state.contextDomain,
+    currentKnowledgeBase: state.currentKnowledgeBase,
+    currentResource: state.currentResource,
+    currentSelectedMark: state.currentSelectedMark,
+    resourcePanelVisible: state.resourcePanelVisible,
+  }));
+  const noteStore = useNoteStore((state) => ({
+    currentNote: state.currentNote,
+    notePanelVisible: state.notePanelVisible,
+  }));
 
   const [queryParams] = useSearchParams();
   const resId = queryParams.get('resId');
@@ -40,8 +50,15 @@ export const useCopilotContextState = () => {
   // 是否有内容正在选中
   const showSelectedMark = !!currentSelectedMark;
 
+  // const getShowContextCard = () => {
+  //   if (!knowledgeBaseStore.showContextCard) return false;
+  //   if (!knowledgeBaseStore.resourcePanelVisible && !noteStore.notePanelVisible) return false;
+
+  //   return true;
+  // };
+
   // 是否展示 contextCard
-  const showContextCard = knowledgeBaseStore.showContextCard;
+  const computedShowContextCard = knowledgeBaseStore.showContextCard;
   const contextDomain = knowledgeBaseStore.contextDomain;
 
   // 是否展示 related questions
@@ -56,10 +73,10 @@ export const useCopilotContextState = () => {
 
   useEffect(() => {
     calcContextCardHeight();
-  }, [showContextCard]);
+  }, [computedShowContextCard]);
 
   return {
-    showContextCard,
+    computedShowContextCard,
     contextDomain,
     showContextState,
     showRelatedQuestions,

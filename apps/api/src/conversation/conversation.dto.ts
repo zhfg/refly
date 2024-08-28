@@ -1,21 +1,6 @@
-import { ChatMessage, Conversation, MessageType } from '@refly/openapi-schema';
+import { ChatMessage, Conversation } from '@refly/openapi-schema';
 import { ChatMessage as ChatMessageModel, Conversation as ConversationModel } from '@prisma/client';
 import { pick } from '@/utils';
-
-export interface CreateChatMessageInput {
-  type: MessageType;
-  sources?: string;
-  content: string;
-  convId?: string;
-  jobId?: string;
-  skillMeta?: string;
-  uid: string;
-  logs?: string;
-  structuredData?: string;
-  locale?: string;
-  relatedQuestions?: string;
-  selectedWeblinkConfig?: string;
-}
 
 export interface Mode {
   id: string;
@@ -34,6 +19,7 @@ export function toChatMessageDTO(message: ChatMessageModel): ChatMessage {
     dto.skillMeta = JSON.parse(message.skillMeta || '{}');
     dto.logs = JSON.parse(message.logs || '[]');
     dto.structuredData = JSON.parse(message.structuredData || '{}');
+    dto.errors = JSON.parse(message.errors || '[]');
   }
   return dto;
 }

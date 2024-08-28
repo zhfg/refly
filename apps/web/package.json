@@ -68,7 +68,8 @@
     "@heroicons/react": "~2.1.4",
     "cmdk": "~1.0.0",
     "qs": "~6.12.3",
-    "rate-limiter-flexible": "~5.0.3"
+    "rate-limiter-flexible": "~5.0.3",
+    "wxt": "workspace:*"
   },
   "devDependencies": {
     "@refly/arco-vite-plugin-react": "workspace:*",

@@ -460,6 +460,9 @@
       "emptyTriggers": "请先配置触发器",
       "emptyInstances": "暂无技能实例",
       "emptyTemplates": "暂无技能模板"
+    },
+    "skillRunStatus": {
+      "error": "发生错误，错误信息：{{error}}"
     }
   },
   "settings": {

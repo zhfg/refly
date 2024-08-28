@@ -56,7 +56,7 @@ export const ContentSelectorBtn = (props: ContentSelectorBtnProps) => {
       onClickMenuItem={(key) => {
         contentSelectorStore.setScope(key as MarkScope);
         const event: SyncStatusEvent = {
-          name: 'syncStatusEvent',
+          name: 'syncMarkStatusEvent',
           body: {
             type: 'update',
             scope: key as MarkScope,
@@ -87,21 +87,10 @@ export const ContentSelectorBtn = (props: ContentSelectorBtnProps) => {
       {({ checked }) => {
         return (
           <Button
-            icon={
-              contentSelectorStore.scope === 'block' ? (
-                <IconHighlight
-                  onClick={() => {
-                    handleClick();
-                  }}
-                />
-              ) : (
-                <IconFontColors
-                  onClick={() => {
-                    handleClick();
-                  }}
-                />
-              )
-            }
+            onClick={() => {
+              handleClick();
+            }}
+            icon={contentSelectorStore.scope === 'block' ? <IconHighlight /> : <IconFontColors />}
             type="text"
             style={{ marginRight: 4 }}
             className={classNames('assist-action-item', { active: checked })}

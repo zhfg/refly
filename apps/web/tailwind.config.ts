@@ -126,4 +126,7 @@ export default {
     },
   },
   plugins: [forms, animate, typography],
+  corePlugins: {
+    preflight: false,
+  },
 }

@@ -221,7 +221,7 @@ export const useGetUserSettings = () => {
 
   // 收到消息之后，关闭窗口，保活检查
   const handleExtensionMessage = (request: any) => {
-    if (request?.name === 'refly-status-check' && getRuntime() === 'extension-csui') {
+    if (request?.name === 'reflyStatusCheck' && getRuntime() === 'extension-csui') {
       getLoginStatus();
       // checkBrowserArc();
     }

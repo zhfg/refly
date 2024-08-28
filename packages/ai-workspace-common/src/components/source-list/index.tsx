@@ -36,15 +36,15 @@ const SourceItem = ({ source, index }: { source: Source; index: number }) => {
       getPopupContainer={getPopupContainer}
       content={<SourceDetailContent source={source} index={index} />}
     >
-      <div className="relative flex flex-col text-xs rounded-lg source-list-item" key={index}>
-        <div className="overflow-hidden font-medium break-words text-ellipsis whitespace-nowrap text-zinc-950">
+      <div className="flex relative flex-col text-xs rounded-lg source-list-item" key={index}>
+        <div className="overflow-hidden font-medium whitespace-nowrap break-words text-ellipsis text-zinc-950">
           {index + 1} · {source?.title}
         </div>
-        <div className="flex-1 pl-2 overflow-hidden">
-          <div className="w-full overflow-hidden break-all text-ellipsis whitespace-nowrap text-zinc-400">{domain}</div>
+        <div className="overflow-hidden flex-1 pl-2">
+          <div className="overflow-hidden w-full whitespace-nowrap break-all text-ellipsis text-zinc-400">{domain}</div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center flex-none">
+        <div className="flex gap-2 items-center">
+          <div className="flex flex-none items-center">
             <img
               className="w-3 h-3"
               alt={domain}
@@ -63,20 +63,20 @@ const ViewMoreItem = ({ sources = [], extraCnt = 0 }: { sources: Source[]; extra
 
   return (
     <div
-      className="relative flex flex-col gap-2 px-3 py-3 text-xs rounded-lg source-list-item"
+      className="flex relative flex-col gap-2 px-3 py-3 text-xs rounded-lg source-list-item"
       onClick={() => {
         knowledgeBaseStore.updateTempConvResources(mappedResources as Resource[]);
         knowledgeBaseStore.updateSourceListModalVisible(true);
       }}
     >
-      <div className="flex items-center gap-2">
-        <div className="flex-1 overflow-hidden">
-          <div className="w-full overflow-hidden font-medium break-all text-ellipsis whitespace-nowrap text-zinc-400 text-zinc-950">
+      <div className="flex gap-2 items-center">
+        <div className="overflow-hidden flex-1">
+          <div className="overflow-hidden w-full font-medium whitespace-nowrap break-all text-ellipsis text-zinc-400 text-zinc-950">
             查看更多 {extraCnt} 来源
           </div>
         </div>
       </div>
-      <div className="flex flex-wrap items-center gap-2 font-medium text-zinc-950">
+      <div className="flex flex-wrap gap-2 items-center font-medium text-zinc-950">
         {sources?.map((item, index) => {
           const url = item?.url;
           const domain = safeParseURL(url || '');
@@ -124,16 +124,18 @@ export const ResourceItem = (props: {
       </div>
       <div className="knowledge-base-directory-title">{item.data?.title}</div>
       <div className="knowledge-base-directory-action">
-        <div className="action-markdown-content knowledge-base-directory-action-item">
-          <IconBook
-            onClick={() => {
-              jumpToReadResource({
-                kbId: item?.collectionId,
-                resId: item?.resourceId,
-              });
-            }}
-          />
-        </div>
+        {item?.resourceId ? (
+          <div className="action-markdown-content knowledge-base-directory-action-item">
+            <IconBook
+              onClick={() => {
+                jumpToReadResource({
+                  kbId: item?.collectionId,
+                  resId: item?.resourceId,
+                });
+              }}
+            />
+          </div>
+        ) : null}
         <div className="action-external-origin-website knowledge-base-directory-action-item">
           <IconCompass
             onClick={() => {
@@ -144,7 +146,7 @@ export const ResourceItem = (props: {
       </div>
       {showDesc ? (
         <div style={{ maxHeight: 300, overflowY: 'scroll', marginTop: 16 }}>
-          <Markdown content={item?.description || ''} />
+          <Markdown content={item?.content || ''} />
         </div>
       ) : null}
     </div>
@@ -160,7 +162,7 @@ const SourceDetailContent = (props: { source: Source; index: number }) => {
       url: source?.url || '',
       title: source?.title,
     },
-    description: source?.pageContent || '',
+    content: source?.pageContent || '',
   };
 
   return (

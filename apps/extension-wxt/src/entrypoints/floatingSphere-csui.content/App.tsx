@@ -7,8 +7,8 @@ import './App.scss';
 import classNames from 'classnames';
 import { IconBulb, IconHighlight, IconSave } from '@arco-design/web-react/icon';
 import { useSaveCurrentWeblinkAsResource } from '@/hooks/use-save-resource';
-import { delay } from '@refly/utils/delay';
 import { useToggleCopilot } from '@/modules/toggle-copilot/hooks/use-toggle-copilot';
+import { delay } from '@/utils/delay';
 
 const getPopupContainer = () => {
   const elem = document

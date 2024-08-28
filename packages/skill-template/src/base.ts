@@ -71,7 +71,6 @@ export abstract class BaseSkill extends StructuredTool {
         spanId: config.configurable.spanId,
       },
     });
-
     return response;
   }
 }
@@ -105,6 +104,7 @@ export interface SkillEventMap {
   log: [data: SkillEvent];
   stream: [data: SkillEvent];
   structured_data: [data: SkillEvent];
+  error: [data: SkillEvent];
 }
 
 export interface SkillRunnableMeta extends Record<string, unknown>, SkillMeta {

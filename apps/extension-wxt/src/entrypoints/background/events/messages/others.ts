@@ -25,25 +25,6 @@ export const handleOtherMessage = async (msg: BackgroundMessage) => {
     }
   }
 
-  if (msg?.name === 'getCurrentMockResourceByTabId') {
-    const lastActiveTab = await getCurrentTab();
-    if (!lastActiveTab?.id) return;
-
-    const currentMockResource = safeParseJSON(tempTabState?.[`${lastActiveTab?.id}_currentMockResource`]);
-
-    if (msg?.source === 'extension-csui') {
-      browser.tabs.sendMessage(lastActiveTab?.id as number, {
-        name: msg?.name,
-        body: { currentMockResource },
-      });
-    } else if (msg?.source === 'extension-sidepanel') {
-      browser.runtime.sendMessage({
-        name: msg?.name,
-        body: { currentMockResource },
-      });
-    }
-  }
-
   if (msg?.name === 'getOpenedTabs') {
     return await handleGetOpenedTabs(msg);
   }

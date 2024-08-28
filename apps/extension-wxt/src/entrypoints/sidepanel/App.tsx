@@ -24,7 +24,7 @@ const App = () => {
   const { initMessageListener } = useToggleSidePanel();
 
   // 在网页时，模拟在知识库的资源选中状态
-  useMockInAppResource();
+  const { initMessageListener: initMockMessageListener } = useMockInAppResource();
 
   useEffect(() => {
     // 针对 sider open 来说，SidePanel 渲染则代表打开 sider，与 Popup/App.tsx 逻辑保持一致
@@ -34,6 +34,7 @@ const App = () => {
   }, []);
   useEffect(() => {
     initMessageListener();
+    initMockMessageListener();
   }, []);
 
   return (

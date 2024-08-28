@@ -21,7 +21,7 @@ import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/route
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { ContextStateDisplay } from './context-state-display/index';
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { ChatInput } from './chat-input';
 import { ChatMessages } from './chat-messages';
 import { ConvListModal } from './conv-list-modal';
@@ -42,6 +42,7 @@ import { ActionSource } from '@refly-packages/ai-workspace-common/stores/knowled
 import { useKnowledgeBaseStore } from '../../../stores/knowledge-base';
 // utils
 import { LOCALE } from '@refly/common-types';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/i18n';
 import { OutputLocaleList } from '@refly-packages/ai-workspace-common/components/output-locale-list';
 import { useTranslation } from 'react-i18next';
@@ -69,25 +70,71 @@ interface AICopilotProps {
   jobId?: string;
 }
 
-export const AICopilot = (props: AICopilotProps) => {
+const skillContainerPadding = 8;
+const skillContainerHeight = 24 + 2 * skillContainerPadding;
+const selectedSkillContainerHeight = 32;
+const inputContainerHeight = 115;
+const chatContainerPadding = 8;
+const layoutContainerPadding = 16;
+const knowledgeBaseDetailHeaderHeight = 40;
+
+export const AICopilot = memo((props: AICopilotProps) => {
   // 所属的环境
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
 
   const [searchParams] = useSearchParams();
-  const [copilotBodyHeight, setCopilotBodyHeight] = useState(215 - 32);
-  const userStore = useUserStore();
-  const knowledgeBaseStore = useKnowledgeBaseStore();
-  const noteStore = useNoteStore();
-  const searchStore = useSearchStore();
-  const { contextCardHeight, showContextCard, showContextState } = useCopilotContextState();
-  const chatStore = useChatStore();
-  const conversationStore = useConversationStore();
+  const userStore = useUserStore((state) => ({
+    localSettings: state.localSettings,
+  }));
+  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
+    resourcePanelVisible: state.resourcePanelVisible,
+    kbModalVisible: state.kbModalVisible,
+    actionSource: state.actionSource,
+    tempConvResources: state.tempConvResources,
+    updateConvModalVisible: state.updateConvModalVisible,
+    updateResourcePanelVisible: state.updateResourcePanelVisible,
+    currentKnowledgeBase: state.currentKnowledgeBase,
+    convModalVisible: state.convModalVisible,
+    sourceListModalVisible: state.sourceListModalVisible,
+    setShowContextCard: state.setShowContextCard,
+  }));
+  const noteStore = useNoteStore((state) => ({
+    notePanelVisible: state.notePanelVisible,
+    updateNotePanelVisible: state.updateNotePanelVisible,
+  }));
+  const searchStore = useSearchStore((state) => ({
+    pages: state.pages,
+    isSearchOpen: state.isSearchOpen,
+    setPages: state.setPages,
+    setIsSearchOpen: state.setIsSearchOpen,
+  }));
+  const { contextCardHeight, computedShowContextCard, showContextState } = useCopilotContextState();
+  const chatStore = useChatStore((state) => ({
+    messages: state.messages,
+    resetState: state.resetState,
+    setMessages: state.setMessages,
+  }));
+  const conversationStore = useConversationStore((state) => ({
+    isNewConversation: state.isNewConversation,
+    currentConversation: state.currentConversation,
+    resetState: state.resetState,
+    setCurrentConversation: state.setCurrentConversation,
+    setIsNewConversation: state.setIsNewConversation,
+  }));
   const [isFetching, setIsFetching] = useState(false);
   const { runSkill } = useBuildThreadAndRun();
-  const searchStateStore = useSearchStateStore();
-  const messageStateStore = useMessageStateStore();
-  const skillStore = useSkillStore();
+  const searchStateStore = useSearchStateStore((state) => ({
+    searchTarget: state.searchTarget,
+  }));
+  const messageStateStore = useMessageStateStore((state) => ({
+    pending: state.pending,
+    pendingFirstToken: state.pendingFirstToken,
+    resetState: state.resetState,
+  }));
+  const skillStore = useSkillStore((state) => ({
+    selectedSkill: state.selectedSkill,
+  }));
 
   console.log('useKnowledgeBaseStore state update from packages', knowledgeBaseStore.resourcePanelVisible);
 
@@ -95,8 +142,16 @@ export const AICopilot = (props: AICopilotProps) => {
   const noteId = searchParams.get('noteId');
   const resId = searchParams.get('resId');
   const { resetState } = useResetState();
-  const actualCopilotBodyHeight =
-    copilotBodyHeight + (showContextCard ? contextCardHeight : 0) + (skillStore?.selectedSkill ? 32 : 0) - 16;
+
+  const actualChatContainerHeight =
+    inputContainerHeight + (skillStore?.selectedSkill ? selectedSkillContainerHeight : 0);
+
+  const actualOperationContainerHeight =
+    actualChatContainerHeight +
+    (computedShowContextCard ? contextCardHeight : 0) +
+    skillContainerHeight +
+    2 * chatContainerPadding;
+  console.log('actualCopilotBodyHeight', actualChatContainerHeight, actualOperationContainerHeight);
 
   const { t, i18n } = useTranslation();
   const uiLocale = i18n?.languages?.[0] as LOCALE;
@@ -112,12 +167,6 @@ export const AICopilot = (props: AICopilotProps) => {
   // ai-note handler
   useAINote(true);
   const { handleGetSkillInstances, handleGetSkillTemplates } = useSkillManagement();
-
-  const handleSwitchSearchTarget = () => {
-    if (showContextState) {
-      searchStateStore.setSearchTarget(SearchTarget.CurrentPage);
-    }
-  };
 
   const handleNewTempConv = () => {
     conversationStore.resetState();
@@ -184,7 +233,7 @@ export const AICopilot = (props: AICopilotProps) => {
       const { isNewConversation } = useConversationStore.getState();
 
       // 新会话，需要手动构建第一条消息
-      if (isNewConversation && convId && newQAText) {
+      if (isNewConversation && convId) {
         // 更换成基于 task 的消息模式，核心是基于 task 来处理
         runSkill(newQAText);
       } else if (convId) {
@@ -214,11 +263,6 @@ export const AICopilot = (props: AICopilotProps) => {
       chatStore.setMessages([]);
     };
   }, [convId, jobId]);
-
-  useEffect(() => {
-    handleSwitchSearchTarget();
-  }, [showContextState]);
-
   useResizeCopilot({ containerSelector: 'ai-copilot-container' });
   useDynamicInitContextPanelState(); // 动态根据页面状态更新上下文面板状态
 
@@ -227,8 +271,15 @@ export const AICopilot = (props: AICopilotProps) => {
     handleGetSkillInstances();
     handleGetSkillTemplates();
   }, []);
+  useEffect(() => {
+    const runtime = getRuntime();
 
-  console.log('showContextCard', showContextCard);
+    if (runtime === 'web') {
+      knowledgeBaseStore.setShowContextCard(false);
+    }
+  }, []);
+
+  console.log('computedShowContextCard', computedShowContextCard);
 
   return (
     <div className="ai-copilot-container">
@@ -311,29 +362,29 @@ export const AICopilot = (props: AICopilotProps) => {
           </>
         )}
       </div>
-      <div
-        className="ai-copilot-message-container"
-        style={{ height: `calc(100vh - ${disable ? 16 : actualCopilotBodyHeight}px - 50px)` }}
-      >
-        <ChatMessages disable={disable} loading={isFetching} />
-      </div>
-      {!disable && (
-        <div className="ai-copilot-body" style={{ height: actualCopilotBodyHeight }}>
-          <div className="ai-copilot-body-inner-container">
-            {showContextCard ? (
+      <div className="ai-copilot-body-container">
+        <div
+          className="ai-copilot-message-container"
+          style={{ height: `calc(100% - ${actualOperationContainerHeight}px)` }}
+        >
+          <ChatMessages disable={disable} loading={isFetching} />
+        </div>
+        <div className="ai-copilot-operation-container" style={{ height: actualOperationContainerHeight }}>
+          <div className="ai-copilot-operation-body">
+            {computedShowContextCard ? (
               <div className="ai-copilot-context-display">
                 <ContextStateDisplay />
               </div>
             ) : null}
+            <SkillDisplay />
             <div className="ai-copilot-chat-container">
-              <SkillDisplay />
-              <div className="chat-input-container">
+              <div className="chat-input-container" style={{ height: actualChatContainerHeight }}>
                 <div className="chat-input-body">
                   <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
                 </div>
                 <div className="chat-input-assist-action">
-                  <ContextContentWithBadge />
                   <CurrentContextActionBtn />
+                  <ContextContentWithBadge />
                   <SelectedTextContextActionBtn />
                   <OutputLocaleList>
                     <Button icon={<IconTranslate />} type="text" className="assist-action-item">
@@ -346,7 +397,7 @@ export const AICopilot = (props: AICopilotProps) => {
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       {knowledgeBaseStore?.convModalVisible ? <ConvListModal title="会话库" classNames="conv-list-modal" /> : null}
       {knowledgeBaseStore?.kbModalVisible && knowledgeBaseStore.actionSource === ActionSource.Conv ? (
@@ -365,4 +416,4 @@ export const AICopilot = (props: AICopilotProps) => {
       <SkillManagementModal />
     </div>
   );
-};
+});

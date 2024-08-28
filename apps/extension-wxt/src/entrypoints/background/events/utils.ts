@@ -6,7 +6,7 @@ export const sendHeartBeatMessage = (activeInfo: Tabs.OnActivatedActiveInfoType)
     // 兼容 sidePanel 和 Content Script
     browser.tabs
       .sendMessage(activeInfo.tabId, {
-        name: 'refly-status-check',
+        name: 'reflyStatusCheck',
       })
       .catch((err) => {
         console.log('send heart beat content script error: ', err);
@@ -14,7 +14,7 @@ export const sendHeartBeatMessage = (activeInfo: Tabs.OnActivatedActiveInfoType)
 
     browser.runtime
       .sendMessage({
-        name: 'refly-status-check',
+        name: 'reflyStatusCheck',
       })
       .catch((err) => {
         console.log('send heart beat sidePanel error: ', err);

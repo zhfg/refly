@@ -30,100 +30,114 @@ export const ssePost = async ({
   onError?: (status: any) => void;
   onCompleted?: (val?: boolean) => void;
 }) => {
-  // const response = await getClient().streamInvokeSkill({
-  //   body: payload,
-  //   signal: controller.signal,
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //   },
-  //   method: 'POST',
-  // });
-  const response = await fetch(`${getServerOrigin()}/v1/skill/streamInvoke`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    signal: controller.signal,
-    body: JSON.stringify(payload),
-  });
-  if (response.status !== 200) {
-    onError?.(response.status as number);
-    return;
-  }
+  let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
 
-  // const markdownParse = (text: string) => {
-  //   onMarkdown(
-  //     text
-  // .replace(/\[\[([cC])itation/g, '[citation')
-  // .replace(/[cC]itation:(\d+)]]/g, 'citation:$1]')
-  // .replace(/\[\[([cC]itation:\d+)]](?!])/g, `[$1]`)
-  // .replace(/\[[cC]itation:(\d+)]/g, '[citation]($1)'),
-  //   );
-  // };
-
-  const reader = response.body!.getReader();
-  const decoder = new TextDecoder('utf-8');
-  let isSkillFirstMessage = true;
-  let bufferStr = '';
-
-  const read = () => {
-    let hasError = false;
-
-    reader?.read().then((result) => {
-      if (result?.done) {
-        onCompleted?.();
-
-        return;
-      }
-
-      bufferStr += decoder.decode(result.value, { stream: true });
-      const lines = bufferStr.split('\n');
-      let skillEvent: SkillEvent;
-
-      try {
-        lines?.forEach((message) => {
-          if (message.startsWith('data: ')) {
-            try {
-              skillEvent = JSON.parse(message.substring(6)) as SkillEvent;
-            } catch (err) {
-              console.log('ssePost 消息解析错误，静默失败：', err); // 这里只是解析错误，可以静默失败
-              return;
-            }
-
-            // TODO 后续增加 skillEvent 可以处理错误的情况
-
-            if (skillEvent?.event === 'start') {
-              if (isSkillFirstMessage) {
-                onSkillStart(skillEvent);
-              }
-            } else if (skillEvent?.event === 'log') {
-              onSkillThoughout(skillEvent);
-            } else if (skillEvent?.event === 'end') {
-              onSkillEnd(skillEvent);
-              isSkillFirstMessage = true;
-            } else if (skillEvent?.event === 'stream') {
-              onSkillStream(skillEvent);
-            } else if (skillEvent?.event === 'structured_data') {
-              onSkillStructedData(skillEvent);
-            }
-          }
-        });
-
-        bufferStr = lines[lines.length - 1];
-      } catch (err) {
-        onError(err);
-        onCompleted?.(true);
-        hasError = true;
-
-        return;
-      }
-
-      if (!hasError) {
-        read();
-      }
+  try {
+    const response = await fetch(`${getServerOrigin()}/v1/skill/streamInvoke`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      signal: controller.signal,
+      body: JSON.stringify(payload),
     });
-  };
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Server error:', response.status, errorText);
+      onError?.(errorText || `HTTP error! status: ${response.status}`);
+      return;
+    }
 
-  read();
+    reader = response.body!.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let isSkillFirstMessage = true;
+    let bufferStr = '';
+
+    const read = async () => {
+      let hasError = false;
+      try {
+        const { done, value } = await reader?.read();
+
+        if (done) {
+          onCompleted?.();
+
+          return;
+        }
+
+        bufferStr += decoder.decode(value, { stream: true });
+        const lines = bufferStr.split('\n');
+        let skillEvent: SkillEvent;
+
+        try {
+          lines?.forEach((message) => {
+            if (message.startsWith('data: ')) {
+              try {
+                skillEvent = JSON.parse(message.substring(6)) as SkillEvent;
+              } catch (err) {
+                console.log('ssePost 消息解析错误，静默失败：', err); // 这里只是解析错误，可以静默失败
+                return;
+              }
+
+              // TODO 后续增加 skillEvent 可以处理错误的情况
+
+              if (skillEvent?.event === 'start') {
+                if (isSkillFirstMessage) {
+                  onSkillStart(skillEvent);
+                }
+              } else if (skillEvent?.event === 'log') {
+                onSkillThoughout(skillEvent);
+              } else if (skillEvent?.event === 'end') {
+                onSkillEnd(skillEvent);
+                isSkillFirstMessage = true;
+              } else if (skillEvent?.event === 'stream') {
+                onSkillStream(skillEvent);
+              } else if (skillEvent?.event === 'structured_data') {
+                onSkillStructedData(skillEvent);
+              }
+            }
+          });
+
+          bufferStr = lines[lines.length - 1];
+        } catch (err) {
+          onError(err);
+          onCompleted?.(true);
+          hasError = true;
+
+          return;
+        }
+
+        if (!hasError) {
+          await read();
+        }
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          console.log('Read operation aborted');
+          onError?.('Request was aborted');
+          hasError = true;
+          return;
+        }
+      }
+    };
+
+    await read();
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      console.log('Fetch aborted');
+      onError?.('Request was aborted');
+    } else {
+      console.error('Fetch error:', error);
+      onError?.(error.message);
+    }
+  } finally {
+    // 清理资源
+    if (reader) {
+      try {
+        await reader.cancel();
+      } catch (cancelError) {
+        console.error('Error cancelling reader:', cancelError);
+      }
+      reader.releaseLock();
+    }
+  }
 };

@@ -150,8 +150,6 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
     });
   }, []);
 
-  // 初始化自由选择
-  useListenToSelection(`ai-note-editor`, 'note');
   // 初始化块选择
   useEffect(() => {
     initMessageListener();
@@ -285,7 +283,7 @@ export const AINoteHeader = (props: AINoteHeaderProps) => {
 
   return (
     <div className="w-full">
-      <div className="max-w-screen-lg mt-4 mx-2">
+      <div className="mx-2 mt-4 max-w-screen-lg">
         <Input
           className="text-3xl font-bold bg-transparent focus:border-transparent focus:bg-transparent"
           placeholder="Enter The Title"

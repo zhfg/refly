@@ -4,7 +4,9 @@ import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-commo
 
 export const useKnowledgeBaseJumpNewPath = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const noteStore = useNoteStore();
+  const noteStore = useNoteStore((state) => ({
+    updateNotePanelVisible: state.updateNotePanelVisible,
+  }));
   const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
     updateResourcePanelVisible: state.updateResourcePanelVisible,
   }));
@@ -35,6 +37,19 @@ export const useKnowledgeBaseJumpNewPath = () => {
     knowledgeBaseStore.updateResourcePanelVisible(true);
   };
 
+  const removeKbAndResId = ({ baseUrl = '' }: { baseUrl?: string }) => {
+    searchParams.delete('kbId');
+    searchParams.delete('resId');
+    setSearchParams(searchParams);
+    navigate(`${baseUrl}/knowledge-base?${searchParams.toString()}`);
+  };
+
+  const removeNoteId = ({ baseUrl = '' }: { baseUrl?: string }) => {
+    searchParams.delete('noteId');
+    setSearchParams(searchParams);
+    navigate(`${baseUrl}/knowledge-base?${searchParams.toString()}`);
+  };
+
   const jumpToConv = ({ convId, baseUrl = '' }: { convId: string; baseUrl?: string }) => {
     searchParams.set('convId', convId);
     setSearchParams(searchParams);
@@ -46,5 +61,7 @@ export const useKnowledgeBaseJumpNewPath = () => {
     jumpToKnowledgeBase,
     jumpToReadResource,
     jumpToConv,
+    removeKbAndResId,
+    removeNoteId,
   };
 };

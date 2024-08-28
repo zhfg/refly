@@ -35,7 +35,7 @@ export const BasePopover = memo((props: { children: React.ReactNode; content: Re
       unmountOnExit
       color="#FCFCF9"
       position="right"
-      content={props.content}
+      content={props?.content || ''}
       className="context-panel-popover"
       getPopupContainer={() => getPopupContainer()}
     >

@@ -27,6 +27,7 @@ export class ReflySearch extends Tool {
   }
 
   async _call(input: string): Promise<string> {
+    // TODO: implement given resourceIds and collectionIds q&a @mrcfps
     const res = await this.engine.service.search(this.user, {
       query: input,
       domains: ['resource'],

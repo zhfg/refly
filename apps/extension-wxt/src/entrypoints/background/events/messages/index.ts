@@ -1,5 +1,4 @@
 import { handleRequestReflect } from '@/entrypoints/background/events/messages/apiRequest';
-import { handleOperateTabStorage } from '@/entrypoints/background/events/messages/operateStorage';
 import { handleRegisterEvent } from '@/entrypoints/background/events/messages/registerEvent';
 import { BackgroundMessage } from '@refly/common-types';
 import { saveLastActiveTab } from '@refly-packages/ai-workspace-common/utils/extension/tabs';
@@ -25,10 +24,6 @@ export const onMessage = async (
 
   if (msg.type === 'registerEvent') {
     return await handleRegisterEvent(msg);
-  }
-
-  if (msg.type === 'operateTabStorage') {
-    return await handleOperateTabStorage(msg, sender);
   }
 
   if (msg.type === 'others') {

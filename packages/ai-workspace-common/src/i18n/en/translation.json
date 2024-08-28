@@ -443,7 +443,11 @@
       "emptyJobs": "No Jobs",
       "emptyTriggers": "Please configure triggers first",
       "emptyInstances": "No Skill Instances",
-      "emptyTemplates": "No Skill Templates"
+"emptyTemplates": "No Skill Templates"
+    },
+    "skillRunStatus": {
+      "error": "An error occurred, error message: {{error}}"
+     
     }
   },
   "threadItem": {

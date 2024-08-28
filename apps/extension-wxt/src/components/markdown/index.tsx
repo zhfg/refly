@@ -1,21 +1,21 @@
-import { IconLoading } from "@arco-design/web-react/icon";
-import { useEffect, useRef, useState } from "react";
-import ReactMarkdown from "react-markdown";
-import { Message as message } from "@arco-design/web-react";
+import { IconLoading } from '@arco-design/web-react/icon';
+import { useEffect, useRef, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import { Message as message } from '@arco-design/web-react';
 
-import "katex/dist/katex.min.css";
-import "./markdown.scss";
-import "./highlight.scss";
+import 'katex/dist/katex.min.css';
+import './markdown.scss';
+import './highlight.scss';
 
-import copyToClipboard from "copy-to-clipboard";
-import RehypeHighlight from "rehype-highlight";
-import RehypeKatex from "rehype-katex";
-import RemarkBreaks from "remark-breaks";
-import RemarkGfm from "remark-gfm";
-import RemarkMath from "remark-math";
-import { Popover, PopoverContent, PopoverTrigger } from "./popover";
-import type { Source } from "@/types";
-import { useTranslation } from "react-i18next";
+import copyToClipboard from 'copy-to-clipboard';
+import RehypeHighlight from 'rehype-highlight';
+import RehypeKatex from 'rehype-katex';
+import RemarkBreaks from 'remark-breaks';
+import RemarkGfm from 'remark-gfm';
+import RemarkMath from 'remark-math';
+import { Popover, PopoverContent, PopoverTrigger } from './popover';
+import type { Source } from '@/types';
+import { useTranslation } from 'react-i18next';
 
 export function PreCode(props: { children: any }) {
   const ref = useRef<HTMLPreElement>(null);
@@ -30,7 +30,7 @@ export function PreCode(props: { children: any }) {
           if (ref.current) {
             const code = ref.current.innerText;
             copyToClipboard(code);
-            message.success(t("components.markdown.copySuccess"));
+            message.success(t('components.markdown.copySuccess'));
           }
         }}
       ></span>
@@ -55,36 +55,28 @@ export function ATag({ ...props }, sources: Source[]) {
           </span>
         </PopoverTrigger>
         <PopoverContent
-          align={"start"}
-          style={{ backgroundColor: "#fcfcf9" }}
-          className="max-w-screen-md flex flex-col gap-2 shadow-transparent ring-zinc-50 ring-4 text-xs"
+          align={'start'}
+          style={{ backgroundColor: '#fcfcf9' }}
+          className="flex flex-col gap-2 max-w-screen-md text-xs ring-4 shadow-transparent ring-zinc-50"
         >
-          <div className="text-ellipsis overflow-hidden whitespace-nowrap font-medium">
-            {source.metadata?.title}
-          </div>
+          <div className="overflow-hidden font-medium whitespace-nowrap text-ellipsis">{source.metadata?.title}</div>
           <div className="flex gap-4">
             <div className="flex-1">
-              <div className="line-clamp-4 text-zinc-500 break-words">
-                {source.pageContent}
-              </div>
+              <div className="break-words line-clamp-4 text-zinc-500">{source.pageContent}</div>
             </div>
           </div>
 
           <div className="flex gap-2 items-center">
-            <div className="flex-1 overflow-hidden">
-              <div className="text-ellipsis text-blue-500 overflow-hidden whitespace-nowrap">
-                <a
-                  title={source.metadata?.title}
-                  href={source.metadata?.source}
-                  target="_blank"
-                >
+            <div className="overflow-hidden flex-1">
+              <div className="overflow-hidden text-blue-500 whitespace-nowrap text-ellipsis">
+                <a title={source.metadata?.title} href={source.metadata?.source} target="_blank">
                   {source.metadata?.source}
                 </a>
               </div>
             </div>
-            <div className="flex-none flex items-center relative">
+            <div className="flex relative flex-none items-center">
               <img
-                className="h-3 w-3"
+                className="w-3 h-3"
                 alt={source.metadata?.source}
                 src={`https://www.google.com/s2/favicons?domain=${source.metadata?.source}&sz=${16}`}
               />
@@ -102,7 +94,7 @@ export function Markdown(
     loading?: boolean;
     fontSize?: number;
     sources?: Source[];
-  } & React.DOMAttributes<HTMLDivElement>
+  } & React.DOMAttributes<HTMLDivElement>,
 ) {
   const mdRef = useRef<HTMLDivElement>(null);
 
@@ -119,11 +111,7 @@ export function Markdown(
   const shouldLoading = props.loading;
 
   return (
-    <div
-      className="markdown-body"
-      style={{ fontSize: `${props.fontSize ?? 14}px` }}
-      ref={mdRef}
-    >
+    <div className="markdown-body" style={{ fontSize: `${props.fontSize ?? 14}px` }} ref={mdRef}>
       {shouldLoading ? (
         <IconLoading />
       ) : (
@@ -143,9 +131,9 @@ export function Markdown(
             pre: PreCode,
             a: (args) => ATag(args, props?.sources || []),
           }}
-          linkTarget={"_blank"}
+          linkTarget={'_blank'}
         >
-          {props.content}
+          {props?.content || ''}
         </ReactMarkdown>
       )}
     </div>

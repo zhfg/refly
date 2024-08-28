@@ -4,7 +4,7 @@ export interface SkillEvent {
   /**
    * The event type
    */
-  event: 'start' | 'end' | 'stream' | 'log' | 'structured_data';
+  event: 'start' | 'end' | 'stream' | 'log' | 'structured_data' | 'error';
   /**
    * The event span, which can be used to separate events into message groups
    */
@@ -16,6 +16,7 @@ export interface SkillEvent {
    * - For `stream` events, `content` will typically be a single token chunk.
    * - For `log` events, `content` will be the log message.
    * - For `structured_data` events, `content` will be serialized JSON data.
+   * - For `error` events, `content` will be the error message.
    */
   content?: string;
   /**

@@ -14,7 +14,7 @@ import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 // context components
 
 export const ContextStateDisplay = () => {
-  const { contextDomain, showContextCard } = useCopilotContextState();
+  const { contextDomain, computedShowContextCard } = useCopilotContextState();
   const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
     selectedNamespace: state.selectedNamespace,
   }));
@@ -25,7 +25,7 @@ export const ContextStateDisplay = () => {
   const isExtension = runtime !== 'web';
   const renderCompList = [];
 
-  console.log('isSelectedTextCard', isSelectedTextCard, isExtension, showContextCard);
+  console.log('isSelectedTextCard', isSelectedTextCard, isExtension, computedShowContextCard);
 
   if (isExtension && !isSelectedTextCard) {
     renderCompList.push(<WeblinkContextCard key="weblink-context-card" />);

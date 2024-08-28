@@ -57,6 +57,8 @@
     cursor: pointer;
 
     .knowledge-base-directory-action {
+      margin-bottom: 8px;
+
       .action-summary {
         background-color: #dddddb;
       }
@@ -110,6 +112,7 @@
     gap: 8px;
     margin-top: 8px;
     font-size: 10px;
+    margin-bottom: 8px;
 
     .action-summary {
       display: flex;

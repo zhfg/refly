@@ -19,6 +19,9 @@ import {
 } from "@refly-packages/ai-workspace-common/utils/env"
 import { useUserStore } from "@refly-packages/ai-workspace-common/stores/user"
 
+// styles
+import "@/styles/style.css"
+
 setRuntime("web")
 // dev for disable sentry as it will overload console.log result worse dev experience
 if (process.env.NODE_ENV !== "development") {
