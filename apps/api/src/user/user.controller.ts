@@ -1,9 +1,11 @@
-import { Controller, Logger, Get, Body, Request, UseGuards, Put } from '@nestjs/common';
+import { Controller, Logger, Get, Body, UseGuards, Put } from '@nestjs/common';
 
-import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { UserService } from './user.service';
+import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
+import { User } from '@/utils/decorators/user.decorator';
 import { BaseResponse, UpdateUserSettingsRequest, UserSettings } from '@refly/openapi-schema';
-import { buildSuccessResponse, pick } from '../utils';
+import { buildSuccessResponse, pick } from '@/utils';
+import { User as UserModel } from '@prisma/client';
 
 @Controller('user')
 export class UserController {
@@ -13,26 +15,21 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get('settings')
-  getSettings(@Request() req): UserSettings {
-    this.logger.log(`getSettings success, req.user = ${req.user.email}`);
-    return pick(req.user, [
-      'uid',
-      'avatar',
-      'name',
-      'email',
-      'emailVerified',
-      'uiLocale',
-      'outputLocale',
-    ]);
+  getSettings(@User() user: UserModel): UserSettings {
+    this.logger.log(`getSettings success, req.user = ${user.email}`);
+    return {
+      ...pick(user, ['uid', 'avatar', 'name', 'email', 'uiLocale', 'outputLocale']),
+      emailVerified: !!user.emailVerified,
+    };
   }
 
   @UseGuards(JwtAuthGuard)
   @Put('settings')
   async updateSettings(
-    @Request() req,
+    @User() user: UserModel,
     @Body() body: UpdateUserSettingsRequest,
   ): Promise<BaseResponse> {
-    await this.userService.updateSettings(req.user.id, body);
+    await this.userService.updateSettings(user, body);
     return buildSuccessResponse();
   }
 }

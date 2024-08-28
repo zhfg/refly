@@ -1113,6 +1113,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ScrapeWeblinkResponse'
+  /misc/upload:
+    post:
+      tags:
+        - misc
+      summary: Upload
+      description: Upload a file
+      operationId: upload
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UploadRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResponse'
+  /misc/static/{fileName}:
+    get:
+      tags:
+        - misc
+      summary: Serve static
+      description: Serve static files (only for local testing)
+      operationId: serveStatic
+      responses:
+        '200':
+          description: successful operation
 components:
   schemas:
     User:
@@ -2831,6 +2861,27 @@ components:
             data:
               description: Weblink scrape result
               $ref: '#/components/schemas/ScrapeWeblinkResult'
+    UploadRequest:
+      type: object
+      required:
+        - file
+      properties:
+        file:
+          type: string
+          format: binary
+          description: File to upload
+    UploadResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              description: File upload result
+              properties:
+                url:
+                  type: string
+                  description: File URL
   securitySchemes:
     api_key:
       type: apiKey

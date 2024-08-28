@@ -6,7 +6,6 @@ import api from '@opentelemetry/api';
 
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
-import { AccountModule } from './account/account.module';
 import { RAGModule } from './rag/rag.module';
 import { ConversationModule } from './conversation/conversation.module';
 
@@ -55,7 +54,6 @@ import { MiscModule } from './misc/misc.module';
     AuthModule,
     ConversationModule,
     UserModule,
-    AccountModule,
     RAGModule,
     KnowledgeModule,
     SkillModule,

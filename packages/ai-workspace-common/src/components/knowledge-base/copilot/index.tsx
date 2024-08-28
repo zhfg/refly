@@ -30,7 +30,7 @@ import { SkillManagementModal } from '@refly-packages/ai-workspace-common/compon
 import { SkillDisplay } from './skill-display';
 
 // requests
-import getClixent from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 // state
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
