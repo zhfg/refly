@@ -6,10 +6,18 @@
   @apply w-full max-w-md transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all;
 }
 
-.skill-management-modal {
-  &__top-btn {
-    padding: 8px;
-    display: flex;
-    justify-content: flex-end;
+.skill-management-modal-wrap {
+  :nth-child(2) {
+    height: 100%;
+  }
+
+  .skill-management-modal {
+    height: calc(100% - 40px);
+    overflow-y: auto;
+    &__top-btn {
+      padding: 8px;
+      display: flex;
+      justify-content: flex-end;
+    }
   }
 }

@@ -33,7 +33,8 @@ export const SkillManagementModal = (props: any) => {
 
         return elem;
       }}
-      style={{ width: '80%', minHeight: '80vh' }}
+      style={{ width: '80%', height: '80%' }}
+      className="skill-management-modal-wrap"
       footer={null}
       onCancel={onCancel}
       escToExit
