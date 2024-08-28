@@ -61,7 +61,7 @@ function App() {
           initialContent={initialContent}
           extensions={extensions}
           onCreate={({ editor }) => (editorRef.current = editor)}
-          className="relative w-full h-full max-w-screen-lg border-muted sm:rounded-lg"
+          className="relative w-full max-w-screen-lg h-full border-muted sm:rounded-lg"
           editorProps={{
             handleDOMEvents: {
               keydown: (_view, event) => handleCommandNavigation(event),
@@ -69,7 +69,7 @@ function App() {
             handlePaste: (view, event) => handleImagePaste(view, event, uploadFn),
             handleDrop: (view, event, _slice, moved) => handleImageDrop(view, event, moved, uploadFn),
             attributes: {
-              class: 'prose prose-lg prose-headings:font-title font-default focus:outline-none max-w-full',
+              class: 'prose prose-md prose-headings:font-title font-default focus:outline-none max-w-full',
             },
           }}
           onUpdate={({ editor }) => {

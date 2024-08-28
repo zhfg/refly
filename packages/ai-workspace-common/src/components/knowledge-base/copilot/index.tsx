@@ -42,7 +42,6 @@ import { ActionSource } from '@refly-packages/ai-workspace-common/stores/knowled
 import { useKnowledgeBaseStore } from '../../../stores/knowledge-base';
 // utils
 import { LOCALE } from '@refly/common-types';
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/i18n';
 import { OutputLocaleList } from '@refly-packages/ai-workspace-common/components/output-locale-list';
 import { useTranslation } from 'react-i18next';

@@ -11,6 +11,22 @@ export default {
   ],
   theme: {
     extend: {
+      typography: {
+        DEFAULT: {
+          css: {
+            img: {
+              // 移除所有图片样式
+              margin: "0",
+              padding: "0",
+              border: "none",
+              boxShadow: "none",
+              display: "inline",
+              width: "auto",
+              height: "auto",
+            },
+          },
+        },
+      },
       colors: {
         gray: {
           100: "#EBF1F5",

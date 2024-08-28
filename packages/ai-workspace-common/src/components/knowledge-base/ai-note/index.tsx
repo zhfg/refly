@@ -152,8 +152,12 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
 
   // 初始化块选择
   useEffect(() => {
-    initMessageListener();
-  }, []);
+    const remove = initMessageListener();
+
+    return () => {
+      remove();
+    };
+  }, [noteId]);
 
   useEffect(() => {
     if (editorRef.current) {
@@ -191,7 +195,7 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
               handlePaste: (view, event) => handleImagePaste(view, event, uploadFn),
               handleDrop: (view, event, _slice, moved) => handleImageDrop(view, event, moved, uploadFn),
               attributes: {
-                class: 'prose prose-lg prose-headings:font-title font-default focus:outline-none max-w-full',
+                class: 'prose prose-md prose-headings:font-title font-default focus:outline-none max-w-full',
               },
             }}
             onUpdate={({ editor }) => {
