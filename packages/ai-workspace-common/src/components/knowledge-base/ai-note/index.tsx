@@ -51,7 +51,16 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
   const { readOnly } = note;
   const lastCursorPosRef = useRef<number>();
   const [token] = useCookie('_refly_ai_sid');
-  const noteStore = useNoteStore();
+  const noteStore = useNoteStore((state) => ({
+    updateNoteCharsCount: state.updateNoteCharsCount,
+    updateNoteSaveStatus: state.updateNoteSaveStatus,
+    updateNoteServerStatus: state.updateNoteServerStatus,
+    updateEditor: state.updateEditor,
+    updateBeforeSelectionNoteContent: state.updateBeforeSelectionNoteContent,
+    updateAfterSelectionNoteContent: state.updateAfterSelectionNoteContent,
+    updateLastCursorPosRef: state.updateLastCursorPosRef,
+    updateCurrentSelectionContent: state.updateCurrentSelectionContent,
+  }));
   const editorRef = useRef<EditorInstance>();
 
   const { showContentSelector, scope } = useContentSelectorStore((state) => ({
@@ -122,7 +131,25 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
     if (editorRef.current && !readOnly) {
       editorRef.current.on('blur', () => {
         lastCursorPosRef.current = editorRef.current?.view?.state?.selection?.$head?.pos;
+
+        const editor = editorRef.current;
+        const { state } = editor?.view || {};
+        const { selection } = state || {};
+        const { from, to } = selection || {};
+
+        const prevSelectionContent = editor?.state?.doc?.textBetween(0, from);
+        const afterSelectionContent = editor?.state?.doc?.textBetween(to, editor?.state?.doc?.content?.size);
+        const selectedContent = editor?.state?.doc?.textBetween(from, to);
+
+        noteStore.updateLastCursorPosRef(lastCursorPosRef.current);
+        noteStore.updateCurrentSelectionContent(selectedContent);
+        noteStore.updateBeforeSelectionNoteContent(prevSelectionContent);
+        noteStore.updateAfterSelectionNoteContent(afterSelectionContent);
+
         console.log('cursor position', lastCursorPosRef.current);
+        console.log('Content before cursor:', prevSelectionContent);
+        console.log('Content after cursor:', afterSelectionContent);
+        console.log('Selected content:', selectedContent);
       });
     }
   }, [editorRef.current, readOnly]);
