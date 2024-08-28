@@ -3,25 +3,25 @@ import { Profile } from 'passport';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
-import { AccountService } from '../account/account.service';
-import { UserService } from '../user/user.service';
 import { JwtPayload } from './dto';
 import { genUID } from '@refly/utils';
+import { PrismaService } from '@/common/prisma.service';
+import { MiscService } from '@/misc/misc.service';
 
 @Injectable()
 export class AuthService {
   private logger = new Logger(AuthService.name);
 
   constructor(
+    private prisma: PrismaService,
     private configService: ConfigService,
-    private accountService: AccountService,
-    private userService: UserService,
     private jwtService: JwtService,
+    private miscService: MiscService,
   ) {}
 
   async validateEmailPass(email: string, pass: string) {
-    const user = await this.userService.findUnique({ email });
-    this.logger.log('validate user:', user);
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    this.logger.log('validate user:', user, pass);
     if (user) {
       return user;
     }
@@ -38,7 +38,7 @@ export class AuthService {
   }
 
   /**
-   * 通用 OAuth 鉴权逻辑
+   * General OAuth logic
    * @param accessToken
    * @param refreshToken
    * @param profile
@@ -51,19 +51,23 @@ export class AuthService {
     );
     const { provider, id, emails, displayName, photos } = profile;
 
-    // 先查找是否存在认证记录
-    const account = await this.accountService.findUnique({
-      provider_providerAccountId: {
-        provider,
-        providerAccountId: id,
+    // Check if there is an authentication account record
+    const account = await this.prisma.account.findUnique({
+      where: {
+        provider_providerAccountId: {
+          provider,
+          providerAccountId: id,
+        },
       },
     });
 
-    // 如果有认证账户，且存在对应的用户，则直接返回
+    // If there is an authentication account record and corresponding user, return directly
     if (account) {
       this.logger.log(`account found for provider ${provider}, account id: ${id}`);
-      const user = await this.userService.findUnique({
-        id: account.userId,
+      const user = await this.prisma.user.findUnique({
+        where: {
+          id: account.userId,
+        },
       });
       if (user) {
         return user;
@@ -74,33 +78,49 @@ export class AuthService {
       );
     }
 
-    // oauth 账号无对应邮箱，认证报错
-    // TODO: 优化错误提示码
+    // oauth profile returns no email, this is invalid
+    // TODO: Optimize error code
     if (emails?.length === 0) {
       throw new UnauthorizedException('emails is empty, invalid oauth');
     }
     const email = emails[0].value;
 
-    // 插入或更新用户（根据 email 判断）
-    const newUser = await this.userService.upsert({
+    const user = await this.prisma.user.findUnique({
       where: { email },
-      create: {
+    });
+    if (user) {
+      return user;
+    }
+
+    // download avatar if profile photo exists
+    let avatar: string;
+    try {
+      if (photos?.length > 0) {
+        avatar = (await this.miscService.dumpFileFromURL(photos[0].value)).url;
+      }
+    } catch (e) {
+      this.logger.warn(`failed to download avatar: ${e}`);
+    }
+
+    const newUser = await this.prisma.user.create({
+      data: {
         name: displayName,
         uid: genUID(),
         email,
-        avatar: photos?.length > 0 ? photos[0].value : undefined,
+        avatar,
       },
-      update: {}, // 不做任何更新
     });
-    this.logger.log(`user upserted: ${newUser.id}`);
+    this.logger.log(`user created: ${newUser.uid}`);
 
-    const newAccount = await this.accountService.create({
-      type: 'oauth',
-      userId: newUser.id,
-      provider,
-      providerAccountId: id,
-      accessToken: accessToken,
-      refreshToken: refreshToken,
+    const newAccount = await this.prisma.account.create({
+      data: {
+        type: 'oauth',
+        userId: newUser.id,
+        provider,
+        providerAccountId: id,
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+      },
     });
     this.logger.log(`new account created: ${newAccount.id}`);
 

@@ -2345,3 +2345,38 @@ export const $ScrapeWeblinkResponse = {
     },
   ],
 } as const;
+
+export const $UploadRequest = {
+  type: 'object',
+  required: ['file'],
+  properties: {
+    file: {
+      type: 'string',
+      format: 'binary',
+      description: 'File to upload',
+    },
+  },
+} as const;
+
+export const $UploadResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'File upload result',
+          properties: {
+            url: {
+              type: 'string',
+              description: 'File URL',
+            },
+          },
+        },
+      },
+    },
+  ],
+} as const;

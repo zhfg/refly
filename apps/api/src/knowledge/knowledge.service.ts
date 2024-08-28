@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Queue } from 'bull';
 import pLimit from 'p-limit';
 import { InjectQueue } from '@nestjs/bull';
@@ -6,7 +6,7 @@ import { readingTime } from 'reading-time-estimator';
 import { Prisma } from '@prisma/client';
 import { RAGService } from '../rag/rag.service';
 import { PrismaService } from '../common/prisma.service';
-import { MinioService } from '../common/minio.service';
+import { MINIO_INTERNAL, MinioService } from '../common/minio.service';
 import {
   UpsertCollectionRequest,
   UpsertResourceRequest,
@@ -20,7 +20,12 @@ import {
   AddResourceToCollectionRequest,
   RemoveResourceFromCollectionRequest,
 } from '@refly/openapi-schema';
-import { CHANNEL_FINALIZE_RESOURCE, QUEUE_SIMPLE_EVENT, QUEUE_RESOURCE } from '../utils';
+import {
+  CHANNEL_FINALIZE_RESOURCE,
+  QUEUE_SIMPLE_EVENT,
+  QUEUE_RESOURCE,
+  streamToString,
+} from '../utils';
 import { genCollectionID, genResourceID, cleanMarkdownForIngest, genNoteID } from '@refly/utils';
 import { FinalizeResourceParam } from './knowledge.dto';
 import { pick, omit } from '../utils';
@@ -32,8 +37,8 @@ export class KnowledgeService {
 
   constructor(
     private prisma: PrismaService,
-    private minio: MinioService,
     private ragService: RAGService,
+    @Inject(MINIO_INTERNAL) private minio: MinioService,
     @InjectQueue(QUEUE_RESOURCE) private queue: Queue<FinalizeResourceParam>,
     @InjectQueue(QUEUE_SIMPLE_EVENT) private simpleEventQueue: Queue<SimpleEventData>,
   ) {}
@@ -238,7 +243,8 @@ export class KnowledgeService {
     param.content ||= '';
 
     if (param.storageKey) {
-      param.content = (await this.minio.downloadData(param.storageKey)).toString();
+      const readable = await this.minio.client.getObject(param.storageKey);
+      param.content = await streamToString(readable);
     } else {
       if (!param.content && url) {
         const { data } = await this.ragService.crawlFromRemoteReader(url);
@@ -318,7 +324,7 @@ export class KnowledgeService {
       updates.meta = JSON.stringify(param.data);
     }
     if (param.content) {
-      await this.minio.uploadData(param.storageKey, param.content);
+      await this.minio.client.putObject(param.storageKey, param.content);
     }
     return this.prisma.resource.update({
       where: { resourceId: param.resourceId, uid: user.uid },
@@ -410,7 +416,7 @@ export class KnowledgeService {
     ];
 
     if (note.stateStorageKey) {
-      cleanups.push(this.minio.removeObject(note.stateStorageKey));
+      cleanups.push(this.minio.client.removeObject(note.stateStorageKey));
     }
 
     await Promise.all(cleanups);

@@ -1,17 +1,18 @@
 import { Request } from 'express';
-import { Logger } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import jwt from 'jsonwebtoken';
 import { Server, Hocuspocus } from '@hocuspocus/server';
 import { Logger as HocuspocusLogger } from '@hocuspocus/extension-logger';
 import { Database } from '@hocuspocus/extension-database';
 import { OnGatewayConnection, WebSocketGateway } from '@nestjs/websockets';
-import { MinioService } from '../common/minio.service';
-import { PrismaService } from '../common/prisma.service';
+import { MINIO_INTERNAL, MinioService } from '@/common/minio.service';
+import { PrismaService } from '@/common/prisma.service';
 import { ConfigService } from '@nestjs/config';
-import { JwtPayload } from '../auth/dto';
+import { JwtPayload } from '@/auth/dto';
 import { Note, User } from '@prisma/client';
 import { state2Markdown } from '@refly/utils';
 import { RAGService } from '@/rag/rag.service';
+import { streamToBuffer } from '@/utils';
 
 interface NoteContext {
   note: Note;
@@ -24,10 +25,10 @@ export class NoteWsGateway implements OnGatewayConnection {
   private logger = new Logger(NoteWsGateway.name);
 
   constructor(
-    private minio: MinioService,
     private rag: RAGService,
     private prisma: PrismaService,
     private config: ConfigService,
+    @Inject(MINIO_INTERNAL) private minio: MinioService,
   ) {
     this.server = Server.configure({
       port: config.get<number>('wsPort'),
@@ -38,14 +39,17 @@ export class NoteWsGateway implements OnGatewayConnection {
             const { note } = context;
             if (!note.stateStorageKey) return null;
             try {
-              return await this.minio.downloadData(note.stateStorageKey);
+              const readable = await this.minio.client.getObject(note.stateStorageKey);
+              return await streamToBuffer(readable);
             } catch (err) {
-              this.logger.error(`fetch state failed for ${note}, err: ${err.stack}`);
+              this.logger.error(
+                `fetch state failed for ${note.stateStorageKey}, err: ${err.stack}`,
+              );
               return null;
             }
           },
           store: async ({ state, context }: { state: Buffer; context: NoteContext }) => {
-            const { note, user } = context;
+            const { note } = context;
             note.stateStorageKey ||= `state/${note.noteId}`;
 
             const { noteId, stateStorageKey } = note;
@@ -56,7 +60,7 @@ export class NoteWsGateway implements OnGatewayConnection {
                 where: { noteId },
                 data: { content, stateStorageKey },
               }),
-              this.minio.uploadData(stateStorageKey, state),
+              this.minio.client.putObject(stateStorageKey, state),
 
               // TODO: put this in delayed queue
               // this.rag.saveDataForUser(user, {

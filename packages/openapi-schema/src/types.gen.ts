@@ -1544,6 +1544,25 @@ export type ScrapeWeblinkResponse = BaseResponse & {
   data?: ScrapeWeblinkResult;
 };
 
+export type UploadRequest = {
+  /**
+   * File to upload
+   */
+  file: Blob | File;
+};
+
+export type UploadResponse = BaseResponse & {
+  /**
+   * File upload result
+   */
+  data?: {
+    /**
+     * File URL
+     */
+    url?: string;
+  };
+};
+
 export type ListResourcesData = {
   query?: {
     /**
@@ -2093,6 +2112,16 @@ export type ScrapeResponse = ScrapeWeblinkResponse;
 
 export type ScrapeError = unknown;
 
+export type UploadData = unknown;
+
+export type UploadResponse2 = UploadResponse;
+
+export type UploadError = unknown;
+
+export type ServeStaticResponse = unknown;
+
+export type ServeStaticError = unknown;
+
 export type $OpenApiTs = {
   '/knowledge/resource/list': {
     get: {
@@ -2582,6 +2611,27 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': ScrapeWeblinkResponse;
+      };
+    };
+  };
+  '/misc/upload': {
+    post: {
+      req: UploadData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': UploadResponse;
+      };
+    };
+  };
+  '/misc/static/{fileName}': {
+    get: {
+      res: {
+        /**
+         * successful operation
+         */
+        '200': unknown;
       };
     };
   };
