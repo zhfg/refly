@@ -152,8 +152,12 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
 
   // 初始化块选择
   useEffect(() => {
-    initMessageListener();
-  }, []);
+    const remove = initMessageListener();
+
+    return () => {
+      remove();
+    };
+  }, [noteId]);
 
   useEffect(() => {
     if (editorRef.current) {
