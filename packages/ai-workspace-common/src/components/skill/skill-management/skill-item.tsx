@@ -94,7 +94,7 @@ export const SkillItem = (props: SkillTempProsp | SkillInsProsp) => {
           )}
           {isInstalled ? (
             <InstanceDropdownMenu
-              data={data}
+              data={data as SkillInstance}
               setUpdateModal={(val) => setVisible(val)}
               postDeleteList={postDeleteList}
               getPopupContainer={getSkillItemPopupContainer}
@@ -121,7 +121,11 @@ export const SkillItem = (props: SkillTempProsp | SkillInsProsp) => {
         setVisible={(val) => setVisible(val)}
         postConfirmCallback={refreshList}
       />
-      <InstanceInvokeModal visible={invokeModalVisible} setVisible={(val) => setInvokeModalVisible(val)} data={data} />
+      <InstanceInvokeModal
+        visible={invokeModalVisible}
+        setVisible={(val) => setInvokeModalVisible(val)}
+        data={data as SkillInstance}
+      />
     </div>
   );
 };

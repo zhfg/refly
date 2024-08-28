@@ -15,6 +15,8 @@ import { IconArrowRight, IconSearch } from '@arco-design/web-react/icon';
 import { useSearchableList } from '@refly-packages/ai-workspace-common/components/use-searchable-list';
 import { useNavigate } from 'react-router-dom';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
+// styles
+import './index.scss';
 
 interface SkillInstanceListProps {
   canGoDetail?: boolean;
@@ -61,13 +63,13 @@ export const SkillInstanceList = (props: SkillInstanceListProps) => {
     return <Empty description={t('skill.skillDetail.emptyInstances')} />;
   }
   return (
-    <>
-      <div className="skill-management-modal__top-container">
+    <div className="skill-instance-list">
+      <div className="skill-instance-list__top-container">
         <div className="skill-search-container">
           <Input
             placeholder={t('skill.skillManagement.searchPlaceholder') || ''}
             allowClear
-            className="knowledge-base-directory-search"
+            className="skill-instance-list__search"
             style={{ height: 32, borderRadius: '8px' }}
             value={searchVal}
             prefix={<IconSearch />}
@@ -117,6 +119,6 @@ export const SkillInstanceList = (props: SkillInstanceListProps) => {
           </List.Item>
         )}
       />
-    </>
+    </div>
   );
 };

@@ -1,0 +1,18 @@
+.skill-instance-list {
+  &__top-container {
+    padding: 8px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    .skill-instance-list__search {
+      .arco-input-inner-wrapper {
+        border-radius: 8px;
+      }
+      .arco-input {
+        font-size: 12px;
+      }
+    }
+  }
+}
