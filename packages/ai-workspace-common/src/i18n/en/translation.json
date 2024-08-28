@@ -378,6 +378,9 @@
       "skillTemplate": "Skill templates"
     },
     "createFromTemplate": "Create from template",
+    "skillManagement": {
+      "searchPlaceholder": "Search for skill"
+    },
     "newSkillModal": {
       "newTitle": "Add New Skill",
       "updateTitle": "Update Skill",

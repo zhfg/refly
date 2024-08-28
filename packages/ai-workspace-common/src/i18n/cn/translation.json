@@ -393,6 +393,9 @@
       "skillInstances": "已添加技能",
       "skillTemplate": "技能市场"
     },
+    "skillManagement": {
+      "searchPlaceholder": "搜索技能"
+    },
     "createFromTemplate": "从模板创建",
     "newSkillModal": {
       "newTitle": "创建技能",

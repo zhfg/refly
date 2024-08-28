@@ -14,10 +14,22 @@
   .skill-management-modal {
     height: calc(100% - 40px);
     overflow-y: auto;
-    &__top-btn {
+
+    &__top-container {
       padding: 8px;
       display: flex;
-      justify-content: flex-end;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+
+      .knowledge-base-directory-search {
+        .arco-input-inner-wrapper {
+          border-radius: 8px;
+        }
+        .arco-input {
+          font-size: 12px;
+        }
+      }
     }
   }
 }
