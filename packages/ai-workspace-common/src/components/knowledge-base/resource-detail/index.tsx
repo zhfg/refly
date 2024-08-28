@@ -4,7 +4,7 @@ import { IconBulb, IconCodepen, IconFolder } from '@arco-design/web-react/icon';
 // 自定义样式
 import './index.scss';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
-import { Skeleton, Message as message, Empty, Tag } from '@arco-design/web-react';
+import { Skeleton, Message as message, Empty, Affix } from '@arco-design/web-react';
 import {
   type KnowledgeBaseTab,
   useKnowledgeBaseStore,
@@ -132,10 +132,12 @@ export const KnowledgeBaseResourceDetail = memo(() => {
             </div>
           ) : (
             <div className="knowledge-base-resource-meta">
-              <ResourceCollectionList
-                collections={resourceDetail?.collections}
-                updateCallback={(collectionId) => handleUpdateCollections(collectionId)}
-              />
+              <Affix offsetTop={48.1}>
+                <ResourceCollectionList
+                  collections={resourceDetail?.collections}
+                  updateCallback={(collectionId) => handleUpdateCollections(collectionId)}
+                />
+              </Affix>
               <div className="knowledge-base-directory-site-intro">
                 <div className="site-intro-icon">
                   <img

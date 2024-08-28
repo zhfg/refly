@@ -13,11 +13,12 @@ interface SearchSelectProps extends SelectProps {
   domain: SearchDomain;
   fetchData?: DataFetcher;
   allowCreateNewEntity?: boolean;
+  defaultValue?: any;
 }
 
 export const SearchSelect = (props: SearchSelectProps) => {
   const { t } = useTranslation();
-  const { domain, fetchData, allowCreateNewEntity = false, onChange, onSelect, ...selectProps } = props;
+  const { domain, fetchData, allowCreateNewEntity = false, defaultValue, onChange, onSelect, ...selectProps } = props;
 
   const { loadMore, dataList, setDataList, isRequesting, handleValueChange, resetState, mode } = useFetchOrSearchList({
     domain,
@@ -33,6 +34,7 @@ export const SearchSelect = (props: SearchSelectProps) => {
   }));
 
   useEffect(() => {
+    console.log('defaultValue', defaultValue);
     loadMore();
     return () => {
       resetState();
@@ -58,7 +60,7 @@ export const SearchSelect = (props: SearchSelectProps) => {
     }
   }, 100);
 
-  const [value, setValue] = useState<any>(undefined);
+  const [value, setValue] = useState<any>(defaultValue);
   const [popupVisible, setPopupVisible] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
 
@@ -93,6 +95,8 @@ export const SearchSelect = (props: SearchSelectProps) => {
       allowClear
       showSearch
       placeholder={t(`entitySelector.placeholder.${domain}`)}
+      value={value}
+      defaultValue={defaultValue}
       filterOption={false}
       popupVisible={popupVisible}
       options={options}

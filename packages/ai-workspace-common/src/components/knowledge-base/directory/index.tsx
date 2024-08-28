@@ -5,7 +5,7 @@ import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import './index.scss';
 import { IconFile } from '@arco-design/web-react/icon';
 import { Message as message } from '@arco-design/web-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
@@ -30,6 +30,8 @@ export const KnowledgeBaseDirectory = () => {
   const kbId = queryParams.get('kbId');
   const resId = queryParams.get('resId');
   const navigate = useNavigate();
+  const introRef = useRef<HTMLDivElement>(null);
+  const [introHeight, setIntroHeight] = useState(0);
 
   const handleGetDetail = async (collectionId: string, resourceId: string) => {
     setIsFetching(true);
@@ -66,6 +68,26 @@ export const KnowledgeBaseDirectory = () => {
     }
     setIsFetching(false);
   };
+
+  const updateIntroHeight = useCallback(() => {
+    if (introRef.current) {
+      const height = introRef.current.getBoundingClientRect().height;
+      setIntroHeight(height);
+    }
+  }, []);
+
+  useEffect(() => {
+    updateIntroHeight();
+
+    const resizeObserver = new ResizeObserver(updateIntroHeight);
+    if (introRef.current) {
+      resizeObserver.observe(introRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [updateIntroHeight]);
 
   useEffect(() => {
     if (kbId) {
@@ -104,7 +126,7 @@ export const KnowledgeBaseDirectory = () => {
 
   return (
     <div className="knowledge-base-directory-container">
-      <div className="knowledge-base-directory-intro">
+      <div className="knowledge-base-directory-intro" ref={introRef}>
         <div className="intro-body">
           <div className="intro-icon">
             <IconFile style={{ fontSize: 28, color: 'rgba(0, 0, 0, .5)' }} />
@@ -134,7 +156,7 @@ export const KnowledgeBaseDirectory = () => {
           />
         )}
       </div>
-      <div className="knowledge-base-directory-list-container">
+      <div className="knowledge-base-directory-list-container" style={{ height: `calc(100% - ${introHeight}px)` }}>
         <ResourceList
           placeholder={t('knowledgeBase.directory.searchPlaceholder')}
           isFetching={isFetching}

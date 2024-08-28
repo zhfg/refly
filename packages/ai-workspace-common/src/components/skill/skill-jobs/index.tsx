@@ -45,7 +45,9 @@ export const SkillJobs = (props: SkillJobsProps) => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const skillId = searchParams.get('skillId') as string;
+  const jobId = searchParams.get('jobId') as string;
   const { t } = useTranslation();
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(jobId);
 
   const { dataList, setDataList, loadMore, hasMore, isRequesting, reload } = useFetchDataList({
     fetchData: async (queryPayload) => {
@@ -67,6 +69,10 @@ export const SkillJobs = (props: SkillJobsProps) => {
       setReloadList(false);
     }
   }, [reloadList]);
+
+  useEffect(() => {
+    setSelectedJobId(jobId);
+  }, [jobId]);
 
   const JobStatus = (props: { status: string }) => {
     switch (props.status) {
@@ -152,7 +158,10 @@ export const SkillJobs = (props: SkillJobsProps) => {
 
     const { collections, notes, resources, urls } = job.context;
     return (
-      <div className="skill-jobs__card" onClick={handleClickJob}>
+      <div
+        className={`skill-jobs__card ${selectedJobId === job.jobId ? 'skill-jobs__card--selected' : ''}`}
+        onClick={handleClickJob}
+      >
         <Row align="center" justify="center">
           <Col span={1} className="skill-jobs__card-col">
             <JobStatus status={job.jobStatus} />

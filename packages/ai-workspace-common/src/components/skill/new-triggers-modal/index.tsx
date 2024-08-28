@@ -208,6 +208,7 @@ export const NewTriggersModal = (props: NewTriggersModalProps) => {
                   key={key}
                   required={required}
                   field={fromFieldMap[key]}
+                  rules={[{ required: true, message: t('common.required') }]}
                 >
                   {formComp}
                 </FormItem>
