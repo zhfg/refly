@@ -11,10 +11,11 @@ import { SkillTemplate, SkillInstance } from '@refly/openapi-schema';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { InstanceInvokeModal } from '@refly-packages/ai-workspace-common/components/skill/instance-invoke-modal';
+import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
+import { SkillInstanceListSource } from '@refly-packages/ai-workspace-common/components/skill/skill-intance-list';
 
-type source = 'instance' | 'template';
 interface SkillItemProps {
-  source: source;
+  source: SkillInstanceListSource;
   itemKey: number;
   isInstalled: boolean;
   showExecute?: boolean;
@@ -30,6 +31,9 @@ interface SkillInsProsp extends SkillItemProps {
 }
 export const SkillItem = (props: SkillTempProsp | SkillInsProsp) => {
   const navigate = useNavigate();
+  const setSelectedSkillInstalce = useSkillStore((state) => state.setSelectedSkillInstalce);
+  const setSkillManagerModalVisible = useSkillStore((state) => state.setSkillManagerModalVisible);
+
   const { data, isInstalled, showExecute, source, itemKey, canGoDetail, refreshList, postDeleteList } = props;
   const { t } = useTranslation();
 
@@ -40,7 +44,16 @@ export const SkillItem = (props: SkillTempProsp | SkillInsProsp) => {
   };
 
   const goSkillDetail = () => {
-    const { skillId } = data;
+    const { skillId } = data as SkillInstance;
+
+    // click from skill-management-modal, set selectedSkill for copilot
+    if (source === 'skill-management-modal') {
+      setSelectedSkillInstalce(data as SkillInstance);
+      setSkillManagerModalVisible(false);
+
+      return;
+    }
+
     if (source === 'template' || !skillId || !canGoDetail) {
       return;
     }

@@ -30,7 +30,7 @@ export const SkillManagementModal = (props: any) => {
       escToExit
     >
       <div className="skill-management-modal">
-        <SkillInstanceList />
+        <SkillInstanceList source="skill-management-modal" />
       </div>
     </Modal>
   );

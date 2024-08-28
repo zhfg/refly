@@ -18,8 +18,11 @@ import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill'
 // styles
 import './index.scss';
 
+export type SkillInstanceListSource = 'instance' | 'template' | 'skill-management-modal';
+
 interface SkillInstanceListProps {
   canGoDetail?: boolean;
+  source?: SkillInstanceListSource;
 }
 export const SkillInstanceList = (props: SkillInstanceListProps) => {
   const { t } = useTranslation();
@@ -109,7 +112,7 @@ export const SkillInstanceList = (props: SkillInstanceListProps) => {
             <SkillItem
               itemKey={key}
               data={item}
-              source="instance"
+              source={props.source}
               canGoDetail={props.canGoDetail}
               isInstalled={true}
               showExecute={true}

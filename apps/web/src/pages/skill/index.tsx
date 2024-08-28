@@ -1,11 +1,14 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 // components
 import { useTranslation } from "react-i18next"
 import { SkillInstanceList } from "@refly-packages/ai-workspace-common/components/skill/skill-intance-list"
 import { SkillTemplateList } from "@refly-packages/ai-workspace-common/components/skill/skill-template-list"
 
-import { useSearchParams } from "@refly-packages/ai-workspace-common/utils/router"
+import {
+  useNavigate,
+  useSearchParams,
+} from "@refly-packages/ai-workspace-common/utils/router"
 import "./index.scss"
 
 import { Radio } from "@arco-design/web-react"
@@ -25,8 +28,9 @@ const ContentHeader = (props: {
         size="large"
         className="skill-list__tabs"
         defaultValue={val}
+        value={val}
         onChange={val => setVal(val)}>
-        <Radio value="intance" style={{ whiteSpace: "nowrap" }}>
+        <Radio value="instance" style={{ whiteSpace: "nowrap" }}>
           {t("skill.tab.skillInstances")}
         </Radio>
         <Radio value="template" style={{ whiteSpace: "nowrap" }}>
@@ -39,17 +43,31 @@ const ContentHeader = (props: {
 
 const Skill = () => {
   const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   const tab = searchParams.get("tab") as string
   const [val, setVal] = useState(
-    ["template", "instance"].includes(tab) ? tab : "intance",
+    ["template", "instance"].includes(tab) ? tab : "instance",
   )
+
+  useEffect(() => {
+    if (["template", "instance"].includes(tab)) {
+      setVal(tab)
+    }
+  }, [tab])
 
   return (
     <div className="skill-list">
-      <ContentHeader setVal={setVal} val={val} />
+      <ContentHeader
+        setVal={val => {
+          searchParams.set("tab", val)
+          navigate(`/skill?${searchParams.toString()}`)
+          setVal(val)
+        }}
+        val={val}
+      />
       <div className="skill-list__content">
-        {val === "intance" ? (
-          <SkillInstanceList canGoDetail={true} />
+        {val === "instance" ? (
+          <SkillInstanceList canGoDetail={true} source="instance" />
         ) : (
           <SkillTemplateList />
         )}
