@@ -99,7 +99,7 @@ export const KnowledgeBaseDetail = () => {
             >
               <div
                 onClick={(e) => {
-                  e.stopPropagation();
+                  // e.stopPropagation();
                   setLeftPanelSize(leftPanelSize === 0 ? 30 : 0);
                 }}
                 className="toggle-left-panel-btn"
