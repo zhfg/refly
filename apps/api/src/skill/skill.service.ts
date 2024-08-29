@@ -14,6 +14,7 @@ import {
   InvokeSkillRequest,
   ListSkillInstancesData,
   ListSkillJobsData,
+  ListSkillTemplatesData,
   PopulatedSkillContext,
   SkillContext,
   SkillMeta,
@@ -173,12 +174,15 @@ export class SkillService {
     this.skillInventory = createSkillInventory(this.skillEngine);
   }
 
-  listSkillTemplates(user: User): SkillTemplate[] {
-    return this.skillInventory.map((skill) => ({
+  listSkillTemplates(user: User, param: ListSkillTemplatesData['query']): SkillTemplate[] {
+    const { page, pageSize } = param;
+    const templates = this.skillInventory.map((skill) => ({
       name: skill.name,
       displayName: skill.displayName[user.uiLocale || 'en'],
       description: skill.description,
     }));
+
+    return templates.slice((page - 1) * pageSize, page * pageSize);
   }
 
   async listSkillInstances(user: User, param: ListSkillInstancesData['query']) {
