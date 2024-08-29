@@ -79,28 +79,6 @@ export function Home({
           <IconMessage style={{ fontSize: 12 }} />
           {t('loggedHomePage.quickSearch.home.askAI')}
         </Item>
-        <Item
-          value="refly-built-in-ai-online-search"
-          keywords={['AISearch']}
-          activeValue={activeValue}
-          onSelect={() => {
-            // searchProjects();
-          }}
-        >
-          <IconSearch style={{ fontSize: 12 }} />
-          {t('loggedHomePage.quickSearch.home.onlineSearch')}
-        </Item>
-        <Item
-          value="refly-built-in-ai-knowledgebase-search"
-          keywords={['AISearch']}
-          activeValue={activeValue}
-          onSelect={() => {
-            // searchProjects();
-          }}
-        >
-          <IconSearch style={{ fontSize: 12 }} />
-          {t('loggedHomePage.quickSearch.home.collectionSearch')}
-        </Item>
       </Command.Group>
       {data
         .filter((item) => item?.data?.length > 0)
