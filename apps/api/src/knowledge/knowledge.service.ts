@@ -208,7 +208,7 @@ export class KnowledgeService {
         resourceId: param.resourceId,
         resourceType: param.resourceType,
         meta: JSON.stringify(param.data || {}),
-        content: param.content ?? '',
+        content: param.content?.replace(/x00/g, '') ?? '',
         uid: user.uid,
         isPublic: param.isPublic,
         readOnly: param.readOnly,
@@ -252,6 +252,9 @@ export class KnowledgeService {
         param.title ||= data.title;
       }
     }
+
+    // Remove invalid UTF-8 byte sequences
+    param.content = param.content?.replace(/x00/g, '') ?? '';
 
     await this.prisma.resource.update({
       where: { resourceId, uid: user.uid },
