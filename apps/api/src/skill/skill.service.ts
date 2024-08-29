@@ -3,7 +3,7 @@ import { EventEmitter } from 'node:events';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
-import { Conversation, SkillInstance, SkillTrigger, MessageType, SkillJob } from '@prisma/client';
+import { Conversation, SkillInstance, SkillTrigger, SkillJob, ChatMessage } from '@prisma/client';
 import { Response } from 'express';
 import { AIMessageChunk, BaseMessage } from '@langchain/core/dist/messages';
 import {
@@ -54,16 +54,25 @@ import { SearchService } from '@/search/search.service';
 import { LabelService } from '@/label/label.service';
 import { labelClassPO2DTO, labelPO2DTO } from '@/label/label.dto';
 
-export function createLangchainMessage(content: string, type: MessageType): BaseMessage {
-  switch (type) {
+export function createLangchainMessage(message: ChatMessage): BaseMessage {
+  const messageData = {
+    content: message.content,
+    additional_kwargs: {
+      logs: JSON.parse(message.logs),
+      skillMeta: JSON.parse(message.skillMeta),
+      structuredData: JSON.parse(message.structuredData),
+    },
+  };
+
+  switch (message.type) {
     case 'ai':
-      return new AIMessage({ content });
+      return new AIMessage(messageData);
     case 'human':
-      return new HumanMessage({ content });
+      return new HumanMessage(messageData);
     case 'system':
-      return new SystemMessage({ content });
+      return new SystemMessage(messageData);
     default:
-      throw new Error(`invalid message source: ${type}`);
+      throw new Error(`invalid message source: ${message.type}`);
   }
 }
 
@@ -392,9 +401,7 @@ export class SkillService {
         where: { convId: conversation.convId },
         orderBy: { createdAt: 'asc' },
       });
-      config.configurable.chatHistory = messages.map((m) =>
-        createLangchainMessage(m.content, m.type),
-      );
+      config.configurable.chatHistory = messages.map((m) => createLangchainMessage(m));
     }
 
     if (eventListener) {
