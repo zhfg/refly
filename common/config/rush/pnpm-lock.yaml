@@ -1890,6 +1890,9 @@ importers:
       duck-duck-scrape:
         specifier: ~2.2.5
         version: 2.2.5
+      is-url:
+        specifier: ~1.2.4
+        version: 1.2.4
       langchain:
         specifier: 0.2.16
         version: 0.2.16(@langchain/community@0.2.27)
@@ -14955,6 +14958,10 @@ packages:
     resolution: {integrity: sha512-43r2mRvz+8JRIKnWJ+3j8JtjRKZ6GmjzfaE/qiBJnikNnYv/6bagRJ1kUhNk8R5EX/GkobD+r+sfxCPJsiKBLQ==}
     engines: {node: '>=12'}
 
+  /is-url@1.2.4:
+    resolution: {integrity: sha512-ITvGim8FhRiYe4IQ5uHSkj7pVaPDrCTkNd3yq3cV7iZAcJdHTUMPMEHcqSOy9xZ9qFenQCvi+2wjH9a1nXqHww==}
+    dev: false
+
   /is-utf8@0.2.1:
     resolution: {integrity: sha512-rMYPYvCzsXywIsldgLaSoPlw5PfoB/ssr7hY4pLfcodrA5M/eArza1a9VmTiNIBNMjOGr1Ow9mTyU2o69U6U9Q==}
     dev: true
@@ -23079,6 +23086,7 @@ time:
   /i18next@23.11.2: '2024-04-14T13:03:01.731Z'
   /ioredis@5.4.1: '2024-04-17T15:49:58.087Z'
   /is-hotkey@0.2.0: '2020-11-24T14:43:01.562Z'
+  /is-url@1.2.4: '2018-03-26T18:25:54.933Z'
   /is-wsl@3.0.0: '2023-08-08T19:10:05.984Z'
   /jest@29.5.0: '2023-03-06T13:33:57.077Z'
   /jiti@1.21.0: '2023-10-30T17:33:36.397Z'
