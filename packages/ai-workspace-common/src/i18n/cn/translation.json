@@ -394,7 +394,13 @@
       "skillTemplate": "技能市场"
     },
     "skillManagement": {
-      "searchPlaceholder": "搜索技能"
+      "searchPlaceholder": "搜索技能",
+      "removedFromTop": "已从置顶列表中移除",
+      "toppedSuccessfully": "已置顶",
+      "toppedLimit": "置顶技能已达上限，请先取消置顶再重新置顶",
+      "alreadyTopped": "已置顶",
+      "addToTop": "置顶",
+      "removeFromTop": "取消置顶"
     },
     "createFromTemplate": "从模板创建",
     "newSkillModal": {

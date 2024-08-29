@@ -7,12 +7,15 @@
 }
 
 .skill-management-modal-wrap {
-  :nth-child(2) {
-    height: 100%;
-  }
-
   .skill-management-modal {
-    height: calc(100% - 40px);
+    height: calc(80vh - 48px - 48px);
     overflow-y: auto;
+    &-top {
+      border-radius: 12px;
+      border: 1px dashed rgba(var(--gray-4));
+      background-color: rgba(var(--gray-1));
+      padding: 12px 0;
+      margin: 0 12px 12px;
+    }
   }
 }

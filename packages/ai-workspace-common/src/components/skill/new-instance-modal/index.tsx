@@ -16,7 +16,7 @@ interface NewSkillInstanceModalProps {
   data?: SkillInstance | SkillTemplate;
   visible: boolean;
   setVisible: (val: boolean) => void;
-  postConfirmCallback: () => void;
+  postConfirmCallback?: () => void;
 }
 export const NewSkillInstanceModal = (props: NewSkillInstanceModalProps) => {
   const { type, visible, data, setVisible, postConfirmCallback } = props;

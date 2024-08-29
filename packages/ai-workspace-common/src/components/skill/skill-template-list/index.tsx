@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 // components
-import { SkillItem } from '@refly-packages/ai-workspace-common/components/skill/skill-management/skill-item';
+import { TemplateItem } from '@refly-packages/ai-workspace-common/components/skill/skill-template-list/template-item';
 // store
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
@@ -100,7 +100,7 @@ export const SkillTemplateList = () => {
             actionLayout="vertical"
             onClick={() => {}}
           >
-            <SkillItem itemKey={key} data={item} source="template" isInstalled={false} showExecute={false} />
+            <TemplateItem itemKey={key} data={item} source="template" />
           </List.Item>
         )}
       />

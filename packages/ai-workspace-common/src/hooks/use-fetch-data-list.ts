@@ -61,35 +61,16 @@ export const useFetchDataList = <T = any>({
   };
 
   const reload = async () => {
-    setHasMore(true);
-    setCurrentPage(1);
-    // 获取数据
-    const queryPayload = {
-      pageSize,
-      page: 1,
-    };
     try {
       setIsRequesting(true);
-      setCurrentPage(2);
-
-      const res = await fetchData(queryPayload);
-
-      if (!res?.success) {
-        setIsRequesting(false);
-
-        return;
+      const res = await fetchData({ pageSize, page: 1 });
+      if (res?.success) {
+        setDataList(res.data || []);
+        setCurrentPage(2);
+        setHasMore(res.data.length >= pageSize);
       }
-
-      // If this page contains fewer data than pageSize, it is the last page
-      if (res?.data?.length < pageSize) {
-        setHasMore(false);
-      }
-      setDataList([...(res?.data || [])]);
     } catch (err) {
-      console.error('fetch data list error', err);
-      if (showErrMsg) {
-        message.error(t('knowledgeLibrary.archive.list.fetchErr'));
-      }
+      console.error('重新加载数据失败', err);
     } finally {
       setIsRequesting(false);
     }

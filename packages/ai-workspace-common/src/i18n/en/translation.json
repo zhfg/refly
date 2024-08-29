@@ -379,7 +379,13 @@
     },
     "createFromTemplate": "Create from template",
     "skillManagement": {
-      "searchPlaceholder": "Search for skill"
+      "searchPlaceholder": "Search for skill",
+      "removedFromTop": "Removed from the top list",
+      "toppedSuccessfully": "Topped successfully",
+      "toppedLimit": "Topped skill limit reached, please cancel the top first",
+      "alreadyTopped": "Already topped",
+      "addToTop": "Top",
+      "removeFromTop": "Cancel top"
     },
     "newSkillModal": {
       "newTitle": "Add New Skill",
@@ -446,11 +452,10 @@
       "emptyJobs": "No Jobs",
       "emptyTriggers": "Please configure triggers first",
       "emptyInstances": "No Skill Instances",
-"emptyTemplates": "No Skill Templates"
+      "emptyTemplates": "No Skill Templates"
     },
     "skillRunStatus": {
       "error": "An error occurred, error message: {{error}}"
-     
     }
   },
   "threadItem": {
