@@ -112,6 +112,9 @@ export class ArxivSummarySkill extends BaseSkill {
 
     // check if the url is https://arxiv.org/abs/2406.18532 or pdf version: https://arxiv.org/pdf/2406.18532
     const pdfUrl = url.includes('abs') ? url.replace('abs', 'pdf') : url;
+
+    this.emitEvent({ event: 'log', content: '获取 pdf 内容中' }, config);
+
     const response = await fetch(READER_URL + pdfUrl, {
       method: 'GET',
       headers: {
@@ -122,14 +125,17 @@ export class ArxivSummarySkill extends BaseSkill {
       },
     });
     if (response.status !== 200) {
+      this.emitEvent({ event: 'log', content: '获取 pdf 内容失败' }, config);
       throw new Error(`call remote reader failed: ${response.status} ${response.statusText} ${response.text}`);
     }
 
     const data = (await response.json()) as { data: { title: string; content: string; url: string }; code: number };
     if (!data) {
+      this.emitEvent({ event: 'log', content: '获取 pdf 内容失败' }, config);
       throw new Error(`invalid data from remote reader: ${response.text}`);
     }
 
+    this.emitEvent({ event: 'log', content: '获取 pdf 内容成功' }, config);
     // add to resource for knowledge qa
     if (data?.data?.content?.length > 0) {
       const { user } = config;
@@ -137,6 +143,7 @@ export class ArxivSummarySkill extends BaseSkill {
 
       // add to resource for knowledge qa
       try {
+        this.emitEvent({ event: 'log', content: '保存到知识库中...' }, config);
         await this.engine.service.createResource(user, {
           resourceType: 'text',
           content: data?.data?.content,
@@ -146,7 +153,9 @@ export class ArxivSummarySkill extends BaseSkill {
           },
           title: data?.data?.title,
         });
+        this.emitEvent({ event: 'log', content: '保存到知识库成功' }, config);
       } catch (error) {
+        this.emitEvent({ event: 'log', content: '保存到知识库失败' }, config);
         this.engine.logger.error('create resource failed', error);
       }
     }
@@ -217,12 +226,14 @@ Please provide a summary that meets the above requirements with ${locale} langua
         .describe(`Generate the summary based on these requirements and offer suggestions for the next steps.`),
     );
 
+    this.emitEvent({ event: 'log', content: '语义处理 pdf 中...' }, config);
     const splitter = new TokenTextSplitter({
       chunkSize: 10000,
       chunkOverlap: 250,
     });
     const splittedDocs = await splitter.createDocuments([data?.data?.content]);
 
+    this.emitEvent({ event: 'log', content: '总结中...' }, config);
     const intermediateResults = await Promise.all(
       splittedDocs.map(async (doc) => {
         const prompt = await mapPrompt.format({ text: doc.pageContent });
@@ -237,6 +248,8 @@ Please provide a summary that meets the above requirements with ${locale} langua
     // 执行 combine 步骤（流式输出）
     const summary = (await combineChain.stream({ text: combinedText })) as any as string;
     console.log('summary', summary);
+
+    this.emitEvent({ event: 'log', content: '总结成功' }, config);
 
     return { messages: [new AIMessage({ content: summary })] };
   }
