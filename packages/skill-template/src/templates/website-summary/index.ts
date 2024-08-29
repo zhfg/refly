@@ -8,9 +8,10 @@ import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } fr
 import { z } from 'zod';
 import { SearchResponse, SkillInvocationConfig } from '@refly/openapi-schema';
 import { TokenTextSplitter } from 'langchain/text_splitter';
-import { LLMChain, loadSummarizationChain } from 'langchain/chains';
+import { loadSummarizationChain } from 'langchain/chains';
 import { PromptTemplate } from '@langchain/core/prompts';
-import { scrapeWeblink } from '@refly/utils';
+import { LLMChain } from 'langchain/chains';
+import isUrl from 'is-url';
 
 interface GraphState extends BaseSkillState {
   documents: Document[];
@@ -37,11 +38,11 @@ async function fetchPDF(url) {
   return pdfBlob;
 }
 
-export class ArxivSummarySkill extends BaseSkill {
-  name = 'arxiv_summary';
+export class WebsiteSummarySkill extends BaseSkill {
+  name = 'website_summary';
   displayName = {
-    en: 'Arxiv Summary',
-    'zh-CN': 'Arxiv 总结',
+    en: 'Website Summary',
+    'zh-CN': '网站总结',
   };
 
   invocationConfig: SkillInvocationConfig = {
@@ -49,7 +50,7 @@ export class ArxivSummarySkill extends BaseSkill {
     contextRules: [{ key: 'contentList' }],
   };
 
-  description = 'Give a summary of the arxiv content';
+  description = 'Give a summary of the website content';
 
   schema = z.object({
     query: z.string().describe('The user query'),
@@ -111,11 +112,10 @@ export class ArxivSummarySkill extends BaseSkill {
     const url = query || urls[urls.length - 1];
 
     // check if the url is https://arxiv.org/abs/2406.18532 or pdf version: https://arxiv.org/pdf/2406.18532
-    const pdfUrl = url.includes('abs') ? url.replace('abs', 'pdf') : url;
 
-    this.emitEvent({ event: 'log', content: '获取 pdf 内容中' }, config);
+    this.emitEvent({ event: 'log', content: '获取网页内容中' }, config);
 
-    const response = await fetch(READER_URL + pdfUrl, {
+    const response = await fetch(READER_URL + url, {
       method: 'GET',
       headers: {
         // Authorization: this.config.get('rag.jinaToken')
@@ -125,21 +125,21 @@ export class ArxivSummarySkill extends BaseSkill {
       },
     });
     if (response.status !== 200) {
-      this.emitEvent({ event: 'log', content: '获取 pdf 内容失败' }, config);
+      this.emitEvent({ event: 'log', content: '获取网页内容失败' }, config);
       throw new Error(`call remote reader failed: ${response.status} ${response.statusText} ${response.text}`);
     }
 
     const data = (await response.json()) as { data: { title: string; content: string; url: string }; code: number };
     if (!data) {
-      this.emitEvent({ event: 'log', content: '获取 pdf 内容失败' }, config);
+      this.emitEvent({ event: 'log', content: '获取网页内容失败' }, config);
       throw new Error(`invalid data from remote reader: ${response.text}`);
     }
 
     this.emitEvent({ event: 'log', content: '获取 pdf 内容成功' }, config);
+
     // add to resource for knowledge qa
     if (data?.data?.content?.length > 0) {
       const { user } = config;
-      const websiteUrl = url.includes('abs') ? url : url.replace('pdf', 'abs');
 
       // add to resource for knowledge qa
       try {
@@ -148,7 +148,7 @@ export class ArxivSummarySkill extends BaseSkill {
           resourceType: 'text',
           content: data?.data?.content,
           data: {
-            url: websiteUrl,
+            url,
             title: data?.data?.title,
           },
           title: data?.data?.title,
@@ -163,6 +163,7 @@ export class ArxivSummarySkill extends BaseSkill {
     const llm = this.engine.chatModel({
       temperature: 0.5,
     });
+
     const mapPrompt = new PromptTemplate({
       template: `请用 ${locale} 语言简要总结以下文本的主要内容：
     
@@ -172,47 +173,23 @@ export class ArxivSummarySkill extends BaseSkill {
       inputVariables: ['text'],
     });
     const combinePrompt = new PromptTemplate({
-      template: `You are an AI assistant specializing in summarizing academic papers for first-year university students. Your goal is to provide a clear, concise, and easy-to-understand summary of research papers. Please use the following format to provide a summary in ${locale} language:
-
-# {text}
-
-## Key Points
-
-### Research Question
-[What is the main problem or question the paper addresses?]
-
-### Background
-[Briefly explain the context and importance of this research]
-
-### Methodology
-[Describe the main methods or approaches used in simple terms]
-
-### Key Findings
-[What are the most important results or discoveries?]
-
-### Significance
-[Explain why these findings are important and their potential impact]
-
-## Simplified Explanation
-[Imagine you're explaining this paper to a first-year student. Use analogies or everyday examples to make complex concepts more accessible if possible.]
-
-## Key Terms
-[List and briefly define 3-5 important technical terms or concepts from the paper. Keep these terms in their original language.]
+      template: `You are a Comprehensive Webpage Summary Expert. Your task is to provide a detailed summary of the given webpage content.
 
 Guidelines:
-- Summarize in ${locale} language, but keep technical terms, proper nouns, and paper titles in their original language.
-- Explain complex ideas in simple terms, avoiding jargon whenever possible.
-- If numerical results are mentioned, present them clearly and explain their significance.
-- Keep the summary between 300-400 words to ensure readability.
+1. Summarize the main ideas and supporting details of the webpage.
+2. Present core viewpoints in a list format with bold one-sentence summaries and explanations.
+3. Ensure the summary is thorough yet concise and accessible.
+4. Output the summary in the ${locale} language.
+5. Keep technical terms and proper nouns in their original language.
 
-Remember, the goal is to help a first-year student quickly grasp the core ideas and importance of the paper.
-
-Input text:
-"""
+Input text to summarize:
 {text}
-"""
 
-Please provide a summary that meets the above requirements with ${locale} language, include summary title`,
+Please provide:
+1. A comprehensive summary
+2. A list of core viewpoints
+
+Remember to use ${locale} for the summary and explanations, but keep technical terms and proper nouns in their original language.`,
       inputVariables: ['text'],
     });
 
@@ -225,6 +202,8 @@ Please provide a summary that meets the above requirements with ${locale} langua
         })
         .describe(`Generate the summary based on these requirements and offer suggestions for the next steps.`),
     );
+
+    const combineChain = new LLMChain({ llm, prompt: combinePrompt });
 
     this.emitEvent({ event: 'log', content: '语义处理 pdf 中...' }, config);
     const splitter = new TokenTextSplitter({
@@ -242,8 +221,6 @@ Please provide a summary that meets the above requirements with ${locale} langua
       }),
     );
     const combinedText = intermediateResults.join('\n\n');
-
-    const combineChain = new LLMChain({ llm, prompt: combinePrompt });
 
     // 执行 combine 步骤（流式输出）
     const summary = (await combineChain.stream({ text: combinedText })) as any as string;

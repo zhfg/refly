@@ -49,17 +49,18 @@ export const useBuildTask = () => {
     const question = task?.input?.query;
     const { messages = [] } = useChatStore.getState();
     const { currentConversation } = useConversationStore.getState();
-    const { skillInstances = [], selectedSkill } = useSkillStore.getState();
+    const { skillInstances = [] } = useSkillStore.getState();
 
+    const selectedSkillInstance = skillInstances.find((item) => item.skillId === task.skillId);
     // Skill 和 Message 绑定，某条 AI Message 来自哪个 Skill
     const questionMsg = buildQuestionMessage({
       content: question,
-      ...(selectedSkill
+      ...(selectedSkillInstance
         ? {
             skillMeta: {
-              tplName: selectedSkill.tplName,
-              skillId: selectedSkill.skillId,
-              displayName: selectedSkill.displayName,
+              tplName: selectedSkillInstance.tplName,
+              skillId: selectedSkillInstance.skillId,
+              displayName: selectedSkillInstance.displayName,
             },
           }
         : {}),

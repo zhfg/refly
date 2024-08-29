@@ -31,6 +31,9 @@ export const useBuildThreadAndRun = () => {
   const chatStore = useChatStore((state) => ({
     setNewQAText: state.setNewQAText,
   }));
+  const skillStore = useSkillStore((state) => ({
+    setSelectedSkillInstalce: state.setSelectedSkillInstalce,
+  }));
   const conversationStore = useConversationStore((state) => ({
     setCurrentConversation: state.setCurrentConversation,
     setIsNewConversation: state.setIsNewConversation,
@@ -202,6 +205,7 @@ export const useBuildThreadAndRun = () => {
     // 开始提问
     buildTaskAndGenReponse(task as InvokeSkillRequest);
     chatStore.setNewQAText('');
+    skillStore.setSelectedSkillInstalce(null);
     // knowledgeBaseStore.updateCurrentSelectedMark(null);
   };
 
