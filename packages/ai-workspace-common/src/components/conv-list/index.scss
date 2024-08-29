@@ -8,7 +8,7 @@
 
 .thread-library-list {
   width: 100%;
-  height: calc(100vh - 28px);
+  height: calc(100vh - 60px - 16px);
   overflow-y: auto;
 
   .arco-list-content {
@@ -29,7 +29,7 @@
   }
 
   .arco-list-content {
-    padding: 0 60px;
+    padding: 0 140px;
   }
 
   .thread-library-list-item {

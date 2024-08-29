@@ -11,15 +11,7 @@ export const ConvLibrary = () => {
   const { jumpToConv } = useKnowledgeBaseJumpNewPath()
 
   return (
-    <div
-      style={{
-        height: "100%",
-        width: "100%",
-        maxWidth: "1024px",
-        margin: "0 auto",
-        display: "flex",
-        flexDirection: "column",
-      }}>
+    <div>
       <Helmet>
         <title>
           {t("productName")} | {t("tabMeta.threadLibrary.title")}

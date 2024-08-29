@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 
 // components
@@ -58,6 +58,29 @@ export const SkillJobs = (props: SkillJobsProps) => {
     },
     pageSize: 12,
   });
+
+  const [hasRunningJob, setHasRunningJob] = useState(false);
+  const checkRunningJobs = useCallback(() => {
+    return dataList.some((job) => job.jobStatus === 'running');
+  }, [dataList]);
+
+  useEffect(() => {
+    setHasRunningJob(checkRunningJobs());
+  }, [dataList, checkRunningJobs]);
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    if (hasRunningJob) {
+      intervalId = setInterval(() => {
+        reload();
+      }, 2000); // 每2秒刷新一次
+    }
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [hasRunningJob, reload]);
 
   useEffect(() => {
     loadMore();
