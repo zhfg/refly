@@ -11,6 +11,11 @@
   height: calc(100vh - 60px - 16px);
   overflow-y: auto;
 
+  .arco-list-scroll-loading {
+    max-width: 1024px;
+    margin: 0 auto;
+  }
+
   .arco-list-content {
     width: 100%;
   }
@@ -33,6 +38,8 @@
   }
 
   .thread-library-list-item {
+    max-width: 1024px;
+    margin: 0 auto;
     &:hover {
       cursor: pointer;
     }

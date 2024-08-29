@@ -6,14 +6,19 @@
   font-weight: bold;
 }
 
+.conv-library-header-container {
+  padding: 0 140px;
+  height: 60px;
+  box-sizing: border-box;
+}
+
 .conv-library-header {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding: 0 140px;
-  height: 60px;
-  box-sizing: border-box;
+  max-width: 1024px;
+  margin: 0 auto;
 }
 
 .arco-list-item-action {

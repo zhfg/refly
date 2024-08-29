@@ -17,20 +17,22 @@ export const ConvLibrary = () => {
           {t("productName")} | {t("tabMeta.threadLibrary.title")}
         </title>
       </Helmet>
-      <div className="conv-library-header">
-        <Typography.Title heading={4}>
-          {t("tabMeta.threadLibrary.title")}
-        </Typography.Title>
-        <Button
-          type="primary"
-          style={{ width: 120, borderRadius: 8 }}
-          onClick={() =>
-            jumpToConv({
-              convId: "",
-            })
-          }>
-          {t("threadLibrary.newThread")}
-        </Button>
+      <div className="conv-library-header-container">
+        <div className="conv-library-header">
+          <Typography.Title heading={4}>
+            {t("tabMeta.threadLibrary.title")}
+          </Typography.Title>
+          <Button
+            type="primary"
+            style={{ width: 120, borderRadius: 8 }}
+            onClick={() =>
+              jumpToConv({
+                convId: "",
+              })
+            }>
+            {t("threadLibrary.newThread")}
+          </Button>
+        </div>
       </div>
       <ConvList
         classNames=""
