@@ -128,7 +128,7 @@ export class KnowledgeBaseSearch extends BaseSkill {
     // TODO: implement given resourceIds and collectionIds q&a @mrcfps
     const { resourceIds, collectionIds } = config?.configurable || {};
 
-    const tool = new ReflySearch({ engine: this.engine, user });
+    const tool = new ReflySearch({ engine: this.engine, user, domains: ['resource'], mode: 'vector' });
     const output = await tool.invoke(betterQuestion, config);
     const searchResp = JSON.parse(output) as SearchResponse;
 

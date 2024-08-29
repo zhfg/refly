@@ -196,9 +196,9 @@ export class KnowledgeService {
       if (!param.content) {
         throw new BadRequestException('content is required for text resource');
       }
-      if (param.content.length > 10000) {
-        throw new BadRequestException('content is too long');
-      }
+      // if (param.content.length > 10000) {
+      //   throw new BadRequestException('content is too long');
+      // }
     } else {
       throw new BadRequestException('Invalid resource type');
     }

@@ -85,7 +85,8 @@
     "@node-rs/jieba": "~1.10.3",
     "y-protocols": "^1.0.6",
     "yjs": "^13.6.8",
-    "cheerio": "~1.0.0"
+    "cheerio": "~1.0.0",
+    "pdf-parse": "~1.1.1"
   },
   "devDependencies": {
     "@nestjs/cli": "~10.3.2",

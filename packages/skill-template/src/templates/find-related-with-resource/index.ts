@@ -79,7 +79,7 @@ export class FindRelatedWithResource extends BaseSkill {
 
     // TODO: implement given resourceIds and collectionIds q&a @mrcfps
 
-    const tool = new ReflySearch({ engine: this.engine, user });
+    const tool = new ReflySearch({ engine: this.engine, user, domains: [], mode: 'vector' });
     const output = await tool.invoke(content, config);
     const searchResp = JSON.parse(output) as SearchResponse;
 

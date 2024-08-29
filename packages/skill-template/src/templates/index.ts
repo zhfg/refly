@@ -13,3 +13,4 @@ export * from './find-related-with-content';
 export * from './find-related-with-note';
 export * from './find-related-with-resource';
 export * from './writing';
+export * from './arxiv-summary';

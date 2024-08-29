@@ -242,7 +242,6 @@ export const AICopilot = memo((props: AICopilotProps) => {
       console.log('thread error');
     }
 
-    await delay(1500);
     setIsFetching(false);
 
     // reset state

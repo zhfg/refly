@@ -11,3 +11,4 @@ export * from './parse-streaming';
 export * from './message';
 export * from './typesafe';
 export * from './url';
+export * from './scrape-weblink';
