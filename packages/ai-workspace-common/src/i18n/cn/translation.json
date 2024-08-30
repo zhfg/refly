@@ -12,7 +12,8 @@
     "putErr": "操作失败，请尝试重试！",
     "putSuccess": "操作成功",
     "deleteConfirmMessage": "确定删除？",
-    "multiSelect": "多选"
+    "multiSelect": "多选",
+    "required": "必填项"
   },
   "systemMaintenanceShutdown": {
     "title": "尊敬的用户，您好！",
@@ -459,7 +460,9 @@
       "emptyJobs": "暂无运行记录",
       "emptyTriggers": "请先配置触发器",
       "emptyInstances": "暂无技能实例",
-      "emptyTemplates": "暂无技能模板"
+      "emptyTemplates": "暂无技能模板",
+      "enable": "启用",
+      "disable": "禁用"
     },
     "skillRunStatus": {
       "error": "发生错误，错误信息：{{error}}"

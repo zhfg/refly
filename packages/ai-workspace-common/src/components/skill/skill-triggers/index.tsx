@@ -85,7 +85,6 @@ export const SkillTriggers = (props: SkillTriggersProps) => {
                 {t('skill.newTriggerModal.timer')}
               </div>
             )}
-
             {eventType === 'simpleEvent' && (
               <div>
                 <IconThunderbolt style={{ marginRight: 8 }} />
@@ -135,7 +134,6 @@ export const SkillTriggers = (props: SkillTriggersProps) => {
   }, []);
 
   useEffect(() => {
-    console.log('importNewTriggerModal.reloadTriggerList]', importNewTriggerModal.reloadTriggerList);
     if (importNewTriggerModal.reloadTriggerList) {
       reload();
       importNewTriggerModal.setReloadTriggerList(false);

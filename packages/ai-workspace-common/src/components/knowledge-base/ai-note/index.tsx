@@ -425,8 +425,10 @@ export const AINote = () => {
       </Tabs>
       {note ? (
         <div className="ai-note-editor">
-          <AINoteHeader note={note} onTitleChange={onTitleChange} />
-          <CollaborativeEditor key={noteId} noteId={noteId} note={note} />
+          <div className="ai-note-editor-container">
+            <AINoteHeader note={note} onTitleChange={onTitleChange} />
+            <CollaborativeEditor key={noteId} noteId={noteId} note={note} />
+          </div>
         </div>
       ) : null}
       {note ? <AINoteStatusBar note={note} /> : null}

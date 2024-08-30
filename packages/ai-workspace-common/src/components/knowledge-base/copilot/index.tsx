@@ -364,38 +364,40 @@ export const AICopilot = memo((props: AICopilotProps) => {
       <div className="ai-copilot-body-container">
         <div
           className="ai-copilot-message-container"
-          style={{ height: `calc(100% - ${actualOperationContainerHeight}px)` }}
+          style={{ height: `calc(100% - ${disable ? 0 : actualOperationContainerHeight}px)` }}
         >
           <ChatMessages disable={disable} loading={isFetching} />
         </div>
-        <div className="ai-copilot-operation-container" style={{ height: actualOperationContainerHeight }}>
-          <div className="ai-copilot-operation-body">
-            {computedShowContextCard ? (
-              <div className="ai-copilot-context-display">
-                <ContextStateDisplay />
-              </div>
-            ) : null}
-            <SkillDisplay />
-            <div className="ai-copilot-chat-container">
-              <div className="chat-input-container" style={{ height: actualChatContainerHeight }}>
-                <div className="chat-input-body">
-                  <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
+        {!disable && (
+          <div className="ai-copilot-operation-container" style={{ height: actualOperationContainerHeight }}>
+            <div className="ai-copilot-operation-body">
+              {computedShowContextCard ? (
+                <div className="ai-copilot-context-display">
+                  <ContextStateDisplay />
                 </div>
-                <div className="chat-input-assist-action">
-                  <CurrentContextActionBtn />
-                  <ContextContentWithBadge />
-                  <SelectedTextContextActionBtn />
-                  <OutputLocaleList>
-                    <Button icon={<IconTranslate />} type="text" className="assist-action-item">
-                      {/* <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span> */}
-                      <IconCaretDown />
-                    </Button>
-                  </OutputLocaleList>
+              ) : null}
+              <SkillDisplay />
+              <div className="ai-copilot-chat-container">
+                <div className="chat-input-container" style={{ height: actualChatContainerHeight }}>
+                  <div className="chat-input-body">
+                    <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
+                  </div>
+                  <div className="chat-input-assist-action">
+                    <CurrentContextActionBtn />
+                    <ContextContentWithBadge />
+                    <SelectedTextContextActionBtn />
+                    <OutputLocaleList>
+                      <Button icon={<IconTranslate />} type="text" className="assist-action-item">
+                        {/* <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span> */}
+                        <IconCaretDown />
+                      </Button>
+                    </OutputLocaleList>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {knowledgeBaseStore?.convModalVisible ? <ConvListModal title="会话库" classNames="conv-list-modal" /> : null}

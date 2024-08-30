@@ -3,8 +3,10 @@
 }
 
 .knowledge-base-directory-container {
+  position: relative;
   min-width: 200px;
   overflow-x: auto;
+  height: calc(100vh - 56px);
   .knowledge-base-directory-intro {
     display: flex;
     flex-direction: row;
@@ -41,7 +43,7 @@
     overflow-x: auto;
   }
   .knowledge-base-directory-list-container {
-    height: calc(100vh - 125px);
+    position: relative;
     min-width: 200px;
     overflow-x: auto;
   }

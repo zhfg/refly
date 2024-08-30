@@ -42,6 +42,10 @@
     align-items: center;
   }
 
+  .arco-menu-selected {
+    background-color: #e8e8e2 !important;
+  }
+
   .sider-menu-nav {
     height: calc(100% - 74px - 55px - 38px);
 
