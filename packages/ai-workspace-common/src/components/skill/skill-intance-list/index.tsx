@@ -65,9 +65,6 @@ export const SkillInstanceList = (props: SkillInstanceListProps) => {
     setSkillList(dataList);
   }, [dataList]);
 
-  if (dataList.length === 0 && !isRequesting) {
-    return <Empty description={t('skill.skillDetail.emptyInstances')} />;
-  }
   return (
     <div className="skill-instance-list">
       <div className="skill-instance-list__top-container">
@@ -88,42 +85,48 @@ export const SkillInstanceList = (props: SkillInstanceListProps) => {
         </Button>
       </div>
 
-      <List
-        className="skill-instance-list"
-        grid={{
-          sm: 42,
-          md: 16,
-          lg: 10,
-          xl: 8,
-        }}
-        wrapperStyle={{ width: '100%', height: '100%' }}
-        bordered={false}
-        pagination={false}
-        dataSource={skillList}
-        loading={isRequesting}
-        scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
-        render={(item: SkillInstance, key) => (
-          <List.Item
-            key={key}
-            style={{
-              padding: '0',
-              width: '100%',
-            }}
-            className="skill-instance-list__item"
-            actionLayout="vertical"
-            onClick={() => {}}
-          >
-            <InstanceItem
-              itemKey={key}
-              data={item}
-              source={props.source}
-              canGoDetail={canGoDetail}
-              refreshList={reload}
-              postDeleteList={(item: SkillInstance) => setDataList(dataList.filter((n) => n.skillId !== item.skillId))}
-            />
-          </List.Item>
-        )}
-      />
+      {skillList.length === 0 && !isRequesting ? (
+        <Empty description={t('skill.skillDetail.emptyInstances')} />
+      ) : (
+        <List
+          className="skill-instance-list"
+          grid={{
+            sm: 42,
+            md: 16,
+            lg: 10,
+            xl: 8,
+          }}
+          wrapperStyle={{ width: '100%', height: '100%' }}
+          bordered={false}
+          pagination={false}
+          dataSource={skillList}
+          loading={isRequesting}
+          scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
+          render={(item: SkillInstance, key) => (
+            <List.Item
+              key={key}
+              style={{
+                padding: '0',
+                width: '100%',
+              }}
+              className="skill-instance-list__item"
+              actionLayout="vertical"
+              onClick={() => {}}
+            >
+              <InstanceItem
+                itemKey={key}
+                data={item}
+                source={props.source}
+                canGoDetail={canGoDetail}
+                refreshList={reload}
+                postDeleteList={(item: SkillInstance) =>
+                  setDataList(dataList.filter((n) => n.skillId !== item.skillId))
+                }
+              />
+            </List.Item>
+          )}
+        />
+      )}
     </div>
   );
 };
