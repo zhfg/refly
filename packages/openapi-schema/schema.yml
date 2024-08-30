@@ -1438,9 +1438,6 @@ components:
         value:
           type: string
           description: Option value
-        label:
-          type: string
-          description: Option label, with auto-selected locale
         labelDict:
           type: object
           description: Option label (key is locale, value is label)
@@ -1456,6 +1453,8 @@ components:
       required:
         - key
         - inputMode
+        - labelDict
+        - descriptionDict
       properties:
         key:
           type: string
@@ -1467,17 +1466,11 @@ components:
           type: boolean
           description: Whether this config is required
           default: false
-        label:
-          type: string
-          description: Config label, with auto-selected locale
         labelDict:
           type: object
           description: Config label (key is locale, value is label)
           additionalProperties:
             type: string
-        description:
-          type: string
-          description: Config description, with auto-selected locale
         descriptionDict:
           type: object
           description: Config description (key is locale, value is description)
@@ -2570,6 +2563,9 @@ components:
         description:
           type: string
           description: Skill description
+        tplConfig:
+          description: Skill template config
+          $ref: '#/components/schemas/SkillTemplateConfig'
     UpdateSkillInstanceResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

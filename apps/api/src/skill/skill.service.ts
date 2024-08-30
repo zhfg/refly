@@ -234,18 +234,22 @@ export class SkillService {
         skillId: genSkillID(),
         uid,
         ...pick(instance, ['tplName', 'displayName', 'description']),
-        tplConfig: JSON.stringify(instance.tplConfig ?? {}),
-        configSchema: JSON.stringify(tplConfigMap.get(instance.tplName)?.configSchema ?? {}),
-        invocationConfig: JSON.stringify(
-          tplConfigMap.get(instance.tplName)?.invocationConfig ?? {},
-        ),
+        ...{
+          tplConfig: instance.tplConfig ? JSON.stringify(instance.tplConfig) : undefined,
+          configSchema: tplConfigMap.get(instance.tplName)?.configSchema
+            ? JSON.stringify(tplConfigMap.get(instance.tplName)?.configSchema)
+            : undefined,
+          invocationConfig: tplConfigMap.get(instance.tplName)?.invocationConfig
+            ? JSON.stringify(tplConfigMap.get(instance.tplName)?.invocationConfig)
+            : undefined,
+        },
       })),
     });
   }
 
   async updateSkillInstance(user: User, param: UpdateSkillInstanceRequest) {
     const { uid } = user;
-    const { skillId, displayName, description } = param;
+    const { skillId } = param;
 
     if (!skillId) {
       throw new BadRequestException('skill id is required');
@@ -253,7 +257,10 @@ export class SkillService {
 
     return this.prisma.skillInstance.update({
       where: { skillId, uid, deletedAt: null },
-      data: { displayName, description },
+      data: {
+        ...pick(param, ['displayName', 'description']),
+        tplConfig: param.tplConfig ? JSON.stringify(param.tplConfig) : undefined,
+      },
     });
   }
 

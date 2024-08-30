@@ -5,20 +5,16 @@ import {
   IconCaretDown,
   IconEdit,
   IconFile,
-  IconFolder,
-  IconFontColors,
   IconHistory,
-  IconMessage,
   IconPlusCircle,
   IconSearch,
-  IconSettings,
   IconTranslate,
 } from '@arco-design/web-react/icon';
 // 自定义样式
 import './index.scss';
 // 自定义组件
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
-import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
+import { useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { ContextStateDisplay } from './context-state-display/index';
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
 import { memo, useEffect, useState } from 'react';
@@ -34,12 +30,11 @@ import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
 import { useResetState } from '@refly-packages/ai-workspace-common/hooks/use-reset-state';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
-import { delay } from '@refly-packages/ai-workspace-common/utils/delay';
 import { ActionSource } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useKnowledgeBaseStore } from '../../../stores/knowledge-base';
 // utils
 import { LOCALE } from '@refly/common-types';
-import { localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/i18n';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { OutputLocaleList } from '@refly-packages/ai-workspace-common/components/output-locale-list';
 import { useTranslation } from 'react-i18next';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
