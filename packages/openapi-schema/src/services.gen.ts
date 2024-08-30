@@ -92,6 +92,12 @@ import type {
   UpdateSkillInstanceData,
   UpdateSkillInstanceError,
   UpdateSkillInstanceResponse2,
+  PinSkillInstanceData,
+  PinSkillInstanceError,
+  PinSkillInstanceResponse,
+  UnpinSkillInstanceData,
+  UnpinSkillInstanceError,
+  UnpinSkillInstanceResponse,
   DeleteSkillInstanceData,
   DeleteSkillInstanceError,
   DeleteSkillInstanceResponse,
@@ -469,6 +475,28 @@ export const updateSkillInstance = (options: Options<UpdateSkillInstanceData>) =
   return (options?.client ?? client).post<UpdateSkillInstanceResponse2, UpdateSkillInstanceError>({
     ...options,
     url: '/skill/instance/update',
+  });
+};
+
+/**
+ * Pin skill instance
+ * Pin an existing skill instance
+ */
+export const pinSkillInstance = (options: Options<PinSkillInstanceData>) => {
+  return (options?.client ?? client).post<PinSkillInstanceResponse, PinSkillInstanceError>({
+    ...options,
+    url: '/skill/instance/pin',
+  });
+};
+
+/**
+ * Unpin skill instance
+ * Unpin an existing skill instance
+ */
+export const unpinSkillInstance = (options: Options<UnpinSkillInstanceData>) => {
+  return (options?.client ?? client).post<UnpinSkillInstanceResponse, UnpinSkillInstanceError>({
+    ...options,
+    url: '/skill/instance/unpin',
   });
 };
 

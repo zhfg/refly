@@ -714,6 +714,12 @@ paths:
           description: Skill ID
           schema:
             type: string
+        - name: sortByPin
+          in: query
+          description: Whether to sort by pinned skill instances
+          schema:
+            type: boolean
+            default: false
         - name: page
           in: query
           description: Page number
@@ -775,6 +781,46 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UpdateSkillInstanceResponse'
+  /skill/instance/pin:
+    post:
+      tags:
+        - skill
+      summary: Pin skill instance
+      description: Pin an existing skill instance
+      operationId: pinSkillInstance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PinSkillInstanceRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+  /skill/instance/unpin:
+    post:
+      tags:
+        - skill
+      summary: Unpin skill instance
+      description: Unpin an existing skill instance
+      operationId: unpinSkillInstance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnpinSkillInstanceRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
   /skill/instance/delete:
     post:
       tags:
@@ -1643,6 +1689,10 @@ components:
             invocationConfig:
               description: Skill invocation config
               $ref: '#/components/schemas/SkillInvocationConfig'
+            pinnedAt:
+              type: string
+              format: date-time
+              description: Skill pinned time
             createdAt:
               type: string
               format: date-time
@@ -2528,6 +2578,22 @@ components:
             data:
               description: Skill instance list
               $ref: '#/components/schemas/SkillInstance'
+    PinSkillInstanceRequest:
+      type: object
+      required:
+        - skillId
+      properties:
+        skillId:
+          type: string
+          description: Skill ID to pin
+    UnpinSkillInstanceRequest:
+      type: object
+      required:
+        - skillId
+      properties:
+        skillId:
+          type: string
+          description: Skill ID to unpin
     DeleteSkillInstanceRequest:
       type: object
       required:

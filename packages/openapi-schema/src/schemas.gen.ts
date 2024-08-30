@@ -601,6 +601,11 @@ export const $SkillInstance = {
           description: 'Skill invocation config',
           $ref: '#/components/schemas/SkillInvocationConfig',
         },
+        pinnedAt: {
+          type: 'string',
+          format: 'date-time',
+          description: 'Skill pinned time',
+        },
         createdAt: {
           type: 'string',
           format: 'date-time',
@@ -1847,6 +1852,28 @@ export const $UpdateSkillInstanceResponse = {
       },
     },
   ],
+} as const;
+
+export const $PinSkillInstanceRequest = {
+  type: 'object',
+  required: ['skillId'],
+  properties: {
+    skillId: {
+      type: 'string',
+      description: 'Skill ID to pin',
+    },
+  },
+} as const;
+
+export const $UnpinSkillInstanceRequest = {
+  type: 'object',
+  required: ['skillId'],
+  properties: {
+    skillId: {
+      type: 'string',
+      description: 'Skill ID to unpin',
+    },
+  },
 } as const;
 
 export const $DeleteSkillInstanceRequest = {

@@ -480,6 +480,10 @@ export type SkillInstance = SkillMeta & {
    */
   invocationConfig: SkillInvocationConfig;
   /**
+   * Skill pinned time
+   */
+  pinnedAt?: string;
+  /**
    * Skill creation time
    */
   createdAt: string;
@@ -1288,6 +1292,20 @@ export type UpdateSkillInstanceResponse = BaseResponse & {
   data?: SkillInstance;
 };
 
+export type PinSkillInstanceRequest = {
+  /**
+   * Skill ID to pin
+   */
+  skillId: string;
+};
+
+export type UnpinSkillInstanceRequest = {
+  /**
+   * Skill ID to unpin
+   */
+  skillId: string;
+};
+
 export type DeleteSkillInstanceRequest = {
   /**
    * Skill ID to delete
@@ -2092,6 +2110,10 @@ export type ListSkillInstancesData = {
      * Skill ID
      */
     skillId?: string;
+    /**
+     * Whether to sort by pinned skill instances
+     */
+    sortByPin?: boolean;
   };
 };
 
@@ -2120,6 +2142,22 @@ export type UpdateSkillInstanceData = {
 export type UpdateSkillInstanceResponse2 = UpdateSkillInstanceResponse;
 
 export type UpdateSkillInstanceError = unknown;
+
+export type PinSkillInstanceData = {
+  body: PinSkillInstanceRequest;
+};
+
+export type PinSkillInstanceResponse = BaseResponse;
+
+export type PinSkillInstanceError = unknown;
+
+export type UnpinSkillInstanceData = {
+  body: UnpinSkillInstanceRequest;
+};
+
+export type UnpinSkillInstanceResponse = BaseResponse;
+
+export type UnpinSkillInstanceError = unknown;
 
 export type DeleteSkillInstanceData = {
   body: DeleteSkillInstanceRequest;
@@ -2623,6 +2661,28 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': UpdateSkillInstanceResponse;
+      };
+    };
+  };
+  '/skill/instance/pin': {
+    post: {
+      req: PinSkillInstanceData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': BaseResponse;
+      };
+    };
+  };
+  '/skill/instance/unpin': {
+    post: {
+      req: UnpinSkillInstanceData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': BaseResponse;
       };
     };
   };

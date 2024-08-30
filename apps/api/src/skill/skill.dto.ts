@@ -28,6 +28,7 @@ export function skillInstancePO2DTO(skill: SkillInstanceModel): SkillInstance {
     invocationConfig: JSON.parse(skill.invocationConfig),
     tplConfig: JSON.parse(skill.tplConfig),
     tplConfigSchema: JSON.parse(skill.configSchema),
+    pinnedAt: skill.pinnedAt?.toJSON(),
     createdAt: skill.createdAt.toJSON(),
     updatedAt: skill.updatedAt.toJSON(),
   };

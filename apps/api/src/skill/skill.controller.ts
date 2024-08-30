@@ -8,6 +8,7 @@ import {
   DefaultValuePipe,
   ParseIntPipe,
   Res,
+  ParseBoolPipe,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { SkillService } from './skill.service';
@@ -33,6 +34,10 @@ import {
   UpdateSkillTriggerResponse,
   ListSkillJobsResponse,
   GetSkillJobDetailResponse,
+  PinSkillInstanceRequest,
+  PinSkillInstanceResponse,
+  UnpinSkillInstanceRequest,
+  UnpinSkillInstanceResponse,
 } from '@refly/openapi-schema';
 import { buildSuccessResponse } from '@/utils';
 import { Response } from 'express';
@@ -82,10 +87,16 @@ export class SkillController {
   async listSkillInstances(
     @User() user: UserModel,
     @Query('skillId') skillId: string,
+    @Query('sortByPin', new DefaultValuePipe(false), ParseBoolPipe) sortByPin: boolean,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListSkillInstanceResponse> {
-    const skills = await this.skillService.listSkillInstances(user, { skillId, page, pageSize });
+    const skills = await this.skillService.listSkillInstances(user, {
+      skillId,
+      sortByPin,
+      page,
+      pageSize,
+    });
     return buildSuccessResponse(skills.map((skill) => skillInstancePO2DTO(skill)));
   }
 
@@ -107,6 +118,26 @@ export class SkillController {
   ): Promise<UpdateSkillInstanceResponse> {
     const skillInstance = await this.skillService.updateSkillInstance(user, body);
     return buildSuccessResponse(skillInstancePO2DTO(skillInstance));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/instance/pin')
+  async pinSkillInstance(
+    @User() user: UserModel,
+    @Body() body: PinSkillInstanceRequest,
+  ): Promise<PinSkillInstanceResponse> {
+    await this.skillService.pinSkillInstance(user, body);
+    return buildSuccessResponse();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/instance/unpin')
+  async unpinSkillInstance(
+    @User() user: UserModel,
+    @Body() body: UnpinSkillInstanceRequest,
+  ): Promise<UnpinSkillInstanceResponse> {
+    await this.skillService.unpinSkillInstance(user, body);
+    return buildSuccessResponse();
   }
 
   @UseGuards(JwtAuthGuard)

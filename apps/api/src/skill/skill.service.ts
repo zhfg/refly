@@ -3,7 +3,14 @@ import { EventEmitter } from 'node:events';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
-import { Conversation, SkillInstance, SkillTrigger, SkillJob, ChatMessage } from '@prisma/client';
+import {
+  Prisma,
+  Conversation,
+  SkillInstance,
+  SkillTrigger,
+  SkillJob,
+  ChatMessage,
+} from '@prisma/client';
 import { Response } from 'express';
 import { AIMessageChunk, BaseMessage } from '@langchain/core/dist/messages';
 import {
@@ -15,6 +22,8 @@ import {
   ListSkillInstancesData,
   ListSkillJobsData,
   ListSkillTemplatesData,
+  ListSkillTriggersData,
+  PinSkillInstanceRequest,
   PopulatedSkillContext,
   SkillContext,
   SkillMeta,
@@ -22,6 +31,7 @@ import {
   SkillTriggerCreateParam,
   TimerInterval,
   TimerTriggerConfig,
+  UnpinSkillInstanceRequest,
   UpdateSkillInstanceRequest,
   UpdateSkillTriggerRequest,
   User,
@@ -188,10 +198,16 @@ export class SkillService {
   }
 
   async listSkillInstances(user: User, param: ListSkillInstancesData['query']) {
-    const { skillId, page, pageSize } = param;
+    const { skillId, sortByPin, page, pageSize } = param;
+
+    const orderBy: Prisma.SkillInstanceOrderByWithRelationInput[] = [{ updatedAt: 'desc' }];
+    if (sortByPin) {
+      orderBy.unshift({ pinnedAt: { sort: 'desc', nulls: 'last' } });
+    }
+
     return this.prisma.skillInstance.findMany({
       where: { skillId, uid: user.uid, deletedAt: null },
-      orderBy: { updatedAt: 'desc' },
+      orderBy,
       take: pageSize,
       skip: (page - 1) * pageSize,
     });
@@ -238,6 +254,34 @@ export class SkillService {
     return this.prisma.skillInstance.update({
       where: { skillId, uid, deletedAt: null },
       data: { displayName, description },
+    });
+  }
+
+  async pinSkillInstance(user: User, param: PinSkillInstanceRequest) {
+    const { uid } = user;
+    const { skillId } = param;
+
+    if (!skillId) {
+      throw new BadRequestException('skill id is required');
+    }
+
+    return this.prisma.skillInstance.update({
+      where: { skillId, uid, deletedAt: null },
+      data: { pinnedAt: new Date() },
+    });
+  }
+
+  async unpinSkillInstance(user: User, param: UnpinSkillInstanceRequest) {
+    const { uid } = user;
+    const { skillId } = param;
+
+    if (!skillId) {
+      throw new BadRequestException('skill id is required');
+    }
+
+    return this.prisma.skillInstance.update({
+      where: { skillId, uid, deletedAt: null },
+      data: { pinnedAt: null },
     });
   }
 
@@ -607,7 +651,7 @@ export class SkillService {
     }
   }
 
-  async listSkillTriggers(user: User, param: ListSkillInstancesData['query']) {
+  async listSkillTriggers(user: User, param: ListSkillTriggersData['query']) {
     const { skillId, page = 1, pageSize = 10 } = param!;
 
     return this.prisma.skillTrigger.findMany({

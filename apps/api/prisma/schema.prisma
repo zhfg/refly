@@ -234,6 +234,8 @@ model SkillInstance {
   configSchema     String    @default("{}") @map("config_schema")
   /// Skill template config (JSON)
   tplConfig        String    @default("{}") @map("tpl_config")
+  /// Whether this skill is pinned
+  pinnedAt         DateTime? @map("pinned_at") @db.Timestamptz()
   /// Create timestamp
   createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
