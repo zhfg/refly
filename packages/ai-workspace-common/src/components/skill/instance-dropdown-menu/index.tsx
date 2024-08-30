@@ -39,7 +39,7 @@ const DropList = (props: DropListProps) => {
         <Popconfirm
           focusLock
           title={t('common.deleteConfirmMessage')}
-          position="br"
+          position="tr"
           okText={t('common.confirm')}
           cancelText={t('common.cancel')}
           getPopupContainer={getPopupContainer}

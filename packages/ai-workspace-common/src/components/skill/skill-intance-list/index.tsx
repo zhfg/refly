@@ -23,18 +23,16 @@ export type SkillInstanceListSource = 'instance' | 'template' | 'skill-managemen
 interface SkillInstanceListProps {
   canGoDetail?: boolean;
   source?: SkillInstanceListSource;
-  isTopSkill?: boolean;
-  topSkillList?: SkillInstance[];
 }
 
 export const SkillInstanceList = (props: SkillInstanceListProps) => {
-  const { isTopSkill, topSkillList } = props;
+  const { source, canGoDetail } = props;
   const { t } = useTranslation();
   const setSkillManagerModalVisible = useSkillStore((state) => state.setSkillManagerModalVisible);
   const { dataList, loadMore, setDataList, hasMore, isRequesting, reload } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listSkillInstances({
-        query: queryPayload,
+        query: { ...queryPayload, sortByPin: source === 'skill-management-modal' },
       });
       return res?.data;
     },
@@ -60,43 +58,35 @@ export const SkillInstanceList = (props: SkillInstanceListProps) => {
   };
 
   useEffect(() => {
-    if (isTopSkill) {
-      return;
-    }
     loadMore();
   }, []);
 
   useEffect(() => {
-    if (isTopSkill) {
-      return;
-    }
     setSkillList(dataList);
   }, [dataList]);
 
-  if (dataList.length === 0 && !isRequesting && !isTopSkill) {
+  if (dataList.length === 0 && !isRequesting) {
     return <Empty description={t('skill.skillDetail.emptyInstances')} />;
   }
   return (
     <div className="skill-instance-list">
-      {!isTopSkill ? (
-        <div className="skill-instance-list__top-container">
-          <div className="skill-search-container">
-            <Input
-              placeholder={t('skill.skillManagement.searchPlaceholder') || ''}
-              allowClear
-              className="skill-instance-list__search"
-              style={{ height: 32, borderRadius: '8px' }}
-              value={searchVal}
-              prefix={<IconSearch />}
-              onChange={handleChange}
-            />
-          </div>
-          <Button type="primary" style={{ borderRadius: 8, height: 32 }} onClick={goSkillList}>
-            <IconArrowRight />
-            {t('skill.tab.skillTemplate')}
-          </Button>
+      <div className="skill-instance-list__top-container">
+        <div className="skill-search-container">
+          <Input
+            placeholder={t('skill.skillManagement.searchPlaceholder') || ''}
+            allowClear
+            className="skill-instance-list__search"
+            style={{ height: 32, borderRadius: '8px' }}
+            value={searchVal}
+            prefix={<IconSearch />}
+            onChange={handleChange}
+          />
         </div>
-      ) : null}
+        <Button type="primary" style={{ borderRadius: 8, height: 32 }} onClick={goSkillList}>
+          <IconArrowRight />
+          {t('skill.tab.skillTemplate')}
+        </Button>
+      </div>
 
       <List
         className="skill-instance-list"
@@ -106,14 +96,12 @@ export const SkillInstanceList = (props: SkillInstanceListProps) => {
           lg: 10,
           xl: 8,
         }}
-        wrapperStyle={{ width: '100%' }}
+        wrapperStyle={{ width: '100%', height: '100%' }}
         bordered={false}
         pagination={false}
-        dataSource={isTopSkill ? topSkillList || [] : skillList}
+        dataSource={skillList}
         loading={isRequesting}
-        scrollLoading={
-          isTopSkill ? null : <ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />
-        }
+        scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
         render={(item: SkillInstance, key) => (
           <List.Item
             key={key}
@@ -129,8 +117,7 @@ export const SkillInstanceList = (props: SkillInstanceListProps) => {
               itemKey={key}
               data={item}
               source={props.source}
-              canGoDetail={props.canGoDetail}
-              isTopSkill={isTopSkill}
+              canGoDetail={canGoDetail}
               refreshList={reload}
               postDeleteList={(item: SkillInstance) => setDataList(dataList.filter((n) => n.skillId !== item.skillId))}
             />

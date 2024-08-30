@@ -3,7 +3,9 @@ import { Avatar, Button, Typography, Message as message, Tooltip } from '@arco-d
 import { InstanceDropdownMenu } from '@refly-packages/ai-workspace-common/components/skill/instance-dropdown-menu';
 import { NewSkillInstanceModal } from '@refly-packages/ai-workspace-common/components/skill/new-instance-modal';
 
-import { IconPlayCircle, IconToTop, IconToBottom } from '@arco-design/web-react/icon';
+import { IconPlayCircle, IconDoubleUp, IconDoubleDown } from '@arco-design/web-react/icon';
+import { LuPin, LuPinOff } from 'react-icons/lu';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 // 样式
 import './index.scss';
@@ -12,14 +14,12 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { InstanceInvokeModal } from '@refly-packages/ai-workspace-common/components/skill/instance-invoke-modal';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
-import { useHandleTopSkills } from '@refly-packages/ai-workspace-common/stores/handle-top-skills';
 import { SkillInstanceListSource } from '@refly-packages/ai-workspace-common/components/skill/skill-intance-list';
 
 interface InstanceItemProps {
   data: SkillInstance;
   itemKey: number;
   canGoDetail?: boolean;
-  isTopSkill?: boolean;
   source?: SkillInstanceListSource;
   refreshList?: () => void;
   postDeleteList?: (data: SkillInstance) => void;
@@ -30,12 +30,11 @@ export const InstanceItem = (props: InstanceItemProps) => {
   const setSelectedSkillInstalce = useSkillStore((state) => state.setSelectedSkillInstalce);
   const setSkillManagerModalVisible = useSkillStore((state) => state.setSkillManagerModalVisible);
 
-  const { data, itemKey, canGoDetail, isTopSkill, source, refreshList, postDeleteList } = props;
+  const { data, itemKey, canGoDetail, source, refreshList, postDeleteList } = props;
   const { t } = useTranslation();
-  const handleTopSkills = useHandleTopSkills();
 
   const getInstanceItemPopupContainer = () => {
-    const elem = document.getElementById(`instanceItem${itemKey}${isTopSkill ? '-top' : ''}`);
+    const elem = document.getElementById(`instanceItem${itemKey}`);
 
     return elem as HTMLElement;
   };
@@ -47,7 +46,6 @@ export const InstanceItem = (props: InstanceItemProps) => {
     if (source === 'skill-management-modal') {
       setSelectedSkillInstalce(data);
       setSkillManagerModalVisible(false);
-
       return;
     }
 
@@ -57,31 +55,24 @@ export const InstanceItem = (props: InstanceItemProps) => {
     navigate(`/skill-detail?skillId=${skillId}`);
   };
 
-  const handleTopSkill = (e) => {
-    e.stopPropagation();
-    const skill = data as SkillInstance;
-    let topSkills = JSON.parse(localStorage.getItem('topSkills') || '[]');
-
-    if (isTopSkill) {
-      // 如果已经是置顶技能,则从列表中移除
-      topSkills = topSkills.filter((topSkill) => topSkill.skillId !== skill.skillId);
-      localStorage.setItem('topSkills', JSON.stringify(topSkills));
-      message.success(t('skill.skillManagement.removedFromTop'));
+  const handlePinSkill = async () => {
+    const { error } = await getClient()[data.pinnedAt ? 'unpinSkillInstance' : 'pinSkillInstance']({
+      body: { skillId: data.skillId },
+    });
+    if (error) {
+      message.error(t('common.putErr'));
     } else {
-      if (topSkills.length >= 5) {
-        message.info(t('skill.skillManagement.toppedLimit'));
-        return;
-      }
-      const isAlreadyTopped = topSkills.some((topSkill: SkillInstance) => topSkill.skillId === skill.skillId);
-      if (!isAlreadyTopped) {
-        topSkills.push(skill);
-        localStorage.setItem('topSkills', JSON.stringify(topSkills));
-        message.success(t('skill.skillManagement.toppedSuccessfully'));
-      } else {
-        message.info(t('skill.skillManagement.alreadyTopped'));
+      message.success(t('common.putSuccess'));
+      if (refreshList) {
+        refreshList();
       }
     }
-    handleTopSkills.setShouldUpdate(true);
+  };
+
+  const handleTopSkill = (e) => {
+    e.stopPropagation();
+
+    handlePinSkill();
   };
 
   const [visible, setVisible] = useState(false);
@@ -92,9 +83,11 @@ export const InstanceItem = (props: InstanceItemProps) => {
   };
 
   return (
-    <div id={`instanceItem${itemKey}${isTopSkill ? '-top' : ''}`}>
+    <div id={`instanceItem${itemKey}`}>
       <div
-        className={`instance-item ${source === 'skill-management-modal' ? 'instance-item-management' : ''}`}
+        className={`instance-item ${source === 'skill-management-modal' ? 'instance-item-management' : ''} ${
+          data.pinnedAt && source === 'skill-management-modal' ? 'instance-item-pinned' : ''
+        }`}
         onClick={goSkillDetail}
       >
         <div className="instance-item__header">
@@ -135,22 +128,22 @@ export const InstanceItem = (props: InstanceItemProps) => {
 
           {source === 'skill-management-modal' && (
             <Tooltip
-              content={isTopSkill ? t('skill.skillManagement.removeFromTop') : t('skill.skillManagement.addToTop')}
+              content={data.pinnedAt ? t('skill.skillManagement.removeFromTop') : t('skill.skillManagement.addToTop')}
             >
               <Button
                 className="instance-item__action-icon"
                 type="text"
-                icon={isTopSkill ? <IconToBottom /> : <IconToTop />}
+                icon={data.pinnedAt ? <LuPinOff /> : <LuPin />}
                 onClick={(e) => handleTopSkill(e)}
               />
             </Tooltip>
           )}
 
           <InstanceDropdownMenu
-            data={data as SkillInstance}
+            data={data}
             setUpdateModal={(val) => setVisible(val)}
             postDeleteList={postDeleteList}
-            getPopupContainer={!isTopSkill && getInstanceItemPopupContainer}
+            getPopupContainer={getInstanceItemPopupContainer}
           />
         </div>
       </div>

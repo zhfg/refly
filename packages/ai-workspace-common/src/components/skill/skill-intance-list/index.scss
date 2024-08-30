@@ -1,4 +1,5 @@
 .skill-instance-list {
+  height: 100%;
   &__top-container {
     padding: 8px;
     display: flex;
@@ -16,6 +17,7 @@
     }
   }
   .instance-item {
+    position: relative;
     word-break: break-all;
     padding: 16px;
     margin: 8px;
@@ -23,6 +25,9 @@
     border-radius: 8px;
     border: 0.5px solid rgba(0, 0, 0, 0.1);
     box-shadow: 0px 2px 14px 0px rgba(0, 0, 0, 0.08);
+    &-pinned {
+      background-color: #eeeeee;
+    }
     &-management {
       display: flex;
       justify-content: space-between;
@@ -31,7 +36,7 @@
 
     &:hover {
       cursor: pointer;
-      background: #eeeeee;
+      background: #f8f5f5;
     }
 
     &__header {
