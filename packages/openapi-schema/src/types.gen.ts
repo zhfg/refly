@@ -230,10 +230,6 @@ export type SelectOption = {
    */
   value: string;
   /**
-   * Option label, with auto-selected locale
-   */
-  label?: string;
-  /**
    * Option label (key is locale, value is label)
    */
   labelDict?: {
@@ -262,23 +258,15 @@ export type DynamicConfigItem = {
    */
   required?: boolean;
   /**
-   * Config label, with auto-selected locale
-   */
-  label?: string;
-  /**
    * Config label (key is locale, value is label)
    */
-  labelDict?: {
+  labelDict: {
     [key: string]: string;
   };
   /**
-   * Config description, with auto-selected locale
-   */
-  description?: string;
-  /**
    * Config description (key is locale, value is description)
    */
-  descriptionDict?: {
+  descriptionDict: {
     [key: string]: string;
   };
   /**

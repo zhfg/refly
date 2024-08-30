@@ -285,10 +285,6 @@ export const $SelectOption = {
       type: 'string',
       description: 'Option value',
     },
-    label: {
-      type: 'string',
-      description: 'Option label, with auto-selected locale',
-    },
     labelDict: {
       type: 'object',
       description: 'Option label (key is locale, value is label)',
@@ -307,7 +303,7 @@ export const $SelectOption = {
 export const $DynamicConfigItem = {
   type: 'object',
   description: 'Dynamic config item',
-  required: ['key', 'inputMode'],
+  required: ['key', 'inputMode', 'labelDict', 'descriptionDict'],
   properties: {
     key: {
       type: 'string',
@@ -322,20 +318,12 @@ export const $DynamicConfigItem = {
       description: 'Whether this config is required',
       default: false,
     },
-    label: {
-      type: 'string',
-      description: 'Config label, with auto-selected locale',
-    },
     labelDict: {
       type: 'object',
       description: 'Config label (key is locale, value is label)',
       additionalProperties: {
         type: 'string',
       },
-    },
-    description: {
-      type: 'string',
-      description: 'Config description, with auto-selected locale',
     },
     descriptionDict: {
       type: 'object',

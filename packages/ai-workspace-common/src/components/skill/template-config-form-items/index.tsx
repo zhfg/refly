@@ -23,10 +23,14 @@ const ConfigItem = (props: {
 }): React.ReactNode => {
   const { item, form, field, locale, configValue } = props;
 
+  if (!item) {
+    return null;
+  }
+
   if (item.inputMode === 'input') {
     return (
       <Input
-        placeholder={item.description}
+        placeholder={item.descriptionDict[locale]}
         defaultValue={String(configValue?.value)}
         onChange={(val) =>
           form.setFieldValue(field, {
