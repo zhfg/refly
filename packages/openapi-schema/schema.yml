@@ -2563,6 +2563,9 @@ components:
         description:
           type: string
           description: Skill description
+        tplConfig:
+          description: Skill template config
+          $ref: '#/components/schemas/SkillTemplateConfig'
     UpdateSkillInstanceResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

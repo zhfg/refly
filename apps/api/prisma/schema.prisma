@@ -229,11 +229,11 @@ model SkillInstance {
   /// UID of skill owner
   uid              String    @map("uid")
   /// Skill invocation config (JSON)
-  invocationConfig String    @default("{}") @map("invocation_config")
+  invocationConfig String?   @map("invocation_config")
   /// Skill config schema (JSON)
-  configSchema     String    @default("{}") @map("config_schema")
+  configSchema     String?   @map("config_schema")
   /// Skill template config (JSON)
-  tplConfig        String    @default("{}") @map("tpl_config")
+  tplConfig        String?   @map("tpl_config")
   /// Whether this skill is pinned
   pinnedAt         DateTime? @map("pinned_at") @db.Timestamptz()
   /// Create timestamp
@@ -301,7 +301,7 @@ model SkillJob {
   /// Context (JSON of `SkillContext`)
   context          String   @map("context")
   /// Skill template config (JSON)
-  tplConfig        String   @default("{}") @map("tpl_config")
+  tplConfig        String?  @map("tpl_config")
   /// Skill job status (refer to `SkillJobStatus`)
   status           String   @map("status")
   /// Skill trigger id

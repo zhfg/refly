@@ -1822,6 +1822,10 @@ export const $UpdateSkillInstanceRequest = {
       type: 'string',
       description: 'Skill description',
     },
+    tplConfig: {
+      description: 'Skill template config',
+      $ref: '#/components/schemas/SkillTemplateConfig',
+    },
   },
 } as const;
 

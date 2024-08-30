@@ -1271,6 +1271,10 @@ export type UpdateSkillInstanceRequest = {
    * Skill description
    */
   description?: string;
+  /**
+   * Skill template config
+   */
+  tplConfig?: SkillTemplateConfig;
 };
 
 export type UpdateSkillInstanceResponse = BaseResponse & {
