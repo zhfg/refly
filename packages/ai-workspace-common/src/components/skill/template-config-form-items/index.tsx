@@ -14,6 +14,10 @@ const getFormField = (fieldPrefix: string, key: string) => {
   return `${fieldPrefix ? fieldPrefix + '.' : ''}${key}`;
 };
 
+const getDictValue = (dict: { [key: string]: string }, locale: string) => {
+  return dict?.[locale] || dict?.en;
+};
+
 const ConfigItem = (props: {
   item: DynamicConfigItem;
   form: FormInstance;
@@ -27,15 +31,18 @@ const ConfigItem = (props: {
     return null;
   }
 
+  const label = getDictValue(item.labelDict, locale);
+  const placeholder = getDictValue(item.descriptionDict, locale);
+
   if (item.inputMode === 'input') {
     return (
       <Input
-        placeholder={item.descriptionDict[locale]}
+        placeholder={placeholder}
         defaultValue={String(configValue?.value)}
         onChange={(val) =>
           form.setFieldValue(field, {
             value: val,
-            label: item.labelDict[locale],
+            label,
             displayValue: String(val),
           } as DynamicConfigValue)
         }
@@ -51,7 +58,7 @@ const ConfigItem = (props: {
         onChange={(val) =>
           form.setFieldValue(field, {
             value: val,
-            label: item.labelDict[locale],
+            label,
             displayValue: String(val),
           } as DynamicConfigValue)
         }
@@ -60,21 +67,23 @@ const ConfigItem = (props: {
   }
 
   if (item.inputMode === 'select' || item.inputMode === 'multiSelect') {
-    const optionValToDisplay = new Map(item.options.map((option) => [option.value, option.labelDict[locale]]));
+    const optionValToDisplay = new Map(
+      item.options.map((option) => [option.value, getDictValue(option.labelDict, locale)]),
+    );
 
     return (
       <Select
         {...(item.inputMode === 'multiSelect' ? { mode: 'multiple' } : {})}
         options={item.options.map((option) => ({
-          label: option.labelDict[locale],
+          label: getDictValue(option.labelDict, locale),
           value: option.value,
         }))}
         defaultValue={configValue?.value}
-        placeholder={item.descriptionDict[locale]}
+        placeholder={placeholder}
         onChange={(val) =>
           form.setFieldValue(field, {
             value: val,
-            label: item.labelDict[locale],
+            label,
             displayValue: Array.isArray(val)
               ? val.map((v) => optionValToDisplay.get(v)).join(',')
               : optionValToDisplay.get(val),
