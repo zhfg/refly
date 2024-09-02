@@ -6,7 +6,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 
 import { Note } from '@refly/openapi-schema';
 import { List, Empty } from '@arco-design/web-react';
-import { IconBook } from '@arco-design/web-react/icon';
+import { PiNotepad } from 'react-icons/pi';
 import { CardBox } from '../card-box';
 import { ScrollLoading } from '../scroll-loading';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
@@ -81,7 +81,7 @@ export const NoteList = (props: NoteListProps) => {
               cardData={item}
               index={key}
               type="note"
-              cardIcon={<IconBook style={{ fontSize: '32px', strokeWidth: 3 }} />}
+              cardIcon={<PiNotepad style={{ fontSize: '32px' }} />}
               onClick={() => jumpToNote({ noteId: item.noteId })}
             >
               <div className="flex items-center justify-between mt-6">

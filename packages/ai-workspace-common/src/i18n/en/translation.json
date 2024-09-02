@@ -7,6 +7,7 @@
     "delete": "Delete",
     "edit": "Edit",
     "save": "Save",
+    "add": "Add",
     "loadMore": "Load More",
     "more": "More",
     "putErr": "Failed to perform operation. Please try again!",
@@ -16,7 +17,8 @@
     "input": "Input",
     "context": "Context",
     "templateConfig": "Template Config",
-    "required": "This item is required"
+    "required": "This item is required",
+    "empty": "No content"
   },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",
@@ -190,6 +192,24 @@
       "readOnly": "Read Only",
       "edit": "Edit",
       "serviceDisconnected": "Service Disconnected"
+    }
+  },
+  "resource": {
+    "import": {
+      "title": "Resource Integration",
+      "fromWeblink": "Web Link",
+      "webLinkPlaceholer": "Enter or paste valid web links, one per line...",
+      "fromText": "Copy Text",
+      "linkFormatError": "Please enter a valid web link starting with http or https",
+      "emptyLink": "You haven't added any links yet!",
+      "waitingList": "Pending List",
+      "linkCount": "Total {{count}} links",
+      "saveTo": "Save to",
+      "scrapeError": "Scraping failed",
+      "integration": "Integration",
+      "emptyText": "Title and text content cannot be empty!",
+      "textTitlePlaceholder": "Enter title",
+      "textContentPlaceholder": "Enter or paste text"
     }
   },
   "loggedHomePage": {

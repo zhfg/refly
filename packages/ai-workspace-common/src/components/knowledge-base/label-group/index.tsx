@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Skeleton, Message as message, Tag, Popconfirm, Button } from '@arco-design/web-react';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { LabelModal } from '@refly-packages/ai-workspace-common/components/knowledge-base/label-modal';
-import { IconPlus, IconTag } from '@arco-design/web-react/icon';
+import { HiPlus } from 'react-icons/hi2';
+import { HiOutlineTag } from 'react-icons/hi';
 import { EntityType, LabelInstance } from '@refly/openapi-schema';
 import './index.scss';
 
@@ -32,7 +33,7 @@ const LabelTag = (props: { label: LabelInstance; deleteLabel: (labelId: string) 
     >
       <Tag
         closable
-        icon={<IconTag />}
+        icon={<HiOutlineTag style={{ transform: 'translateY(2px)' }} />}
         visible={true}
         className="label-group-item"
         onClose={() => setPopconfirmVisible(true)}
@@ -108,7 +109,7 @@ export const LabelGroup = (props: LabelGroupProps) => {
         size="mini"
         title={labels?.length > 0 && t('workspace.labelGroup.addLabelTitle')}
         style={{ borderRadius: '999px' }}
-        icon={<IconPlus />}
+        icon={<HiPlus size={13} strokeWidth={1} />}
         onClick={() => setLabelModalVisible(true)}
       >
         {labels?.length === 0 && t('workspace.labelGroup.addLabel')}

@@ -10,10 +10,12 @@ import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { SearchSelect } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
+import { useTranslation } from 'react-i18next';
 
 const { TextArea } = Input;
 
 export const ImportFromText = () => {
+  const { t } = useTranslation();
   const importResourceStore = useImportResourceStore();
 
   const reloadListState = useReloadListState();
@@ -27,7 +29,7 @@ export const ImportFromText = () => {
     setSaveLoading(true);
     const { copiedTextPayload, selectedCollectionId } = useImportResourceStore.getState();
     if (!copiedTextPayload?.content || !copiedTextPayload?.title) {
-      message.warning('标题和文本内容不能为空！');
+      message.warning(t('resource.import.emptyText'));
       return;
     }
 
@@ -45,11 +47,11 @@ export const ImportFromText = () => {
 
       if (!res?.data?.success) {
         setSaveLoading(false);
-        message.error('保存失败');
+        message.error(t('common.putErr'));
         return;
       }
 
-      message.success('保存成功');
+      message.success(t('common.putSuccess'));
       importResourceStore.setCopiedTextPayload({ title: '', content: '' });
       importResourceStore.setImportResourceModalVisible(false);
       if (!kbId || (kbId && selectedCollectionId === kbId)) {
@@ -57,7 +59,7 @@ export const ImportFromText = () => {
         reloadListState.setReloadResourceList(true);
       }
     } catch (err) {
-      message.error('保存失败');
+      message.error(t('common.putErr'));
     }
 
     setSaveLoading(false);
@@ -79,18 +81,18 @@ export const ImportFromText = () => {
             <span className="menu-item-icon">
               <IconPen />
             </span>
-            <span className="intergration-header-title">复制文本</span>
+            <span className="intergration-header-title">{t('resource.import.fromText')}</span>
           </div>
           <Divider />
           <div className="intergation-body">
             <div className="intergation-body-action">
               <Input
-                placeholder="输入标题"
+                placeholder={t('resource.import.textTitlePlaceholder')}
                 value={importResourceStore.copiedTextPayload?.title}
                 onChange={(value) => importResourceStore.setCopiedTextPayload({ title: value })}
               />
               <TextArea
-                placeholder="输入或粘贴文本"
+                placeholder={t('resource.import.textContentPlaceholder')}
                 rows={4}
                 autoSize={{
                   minRows: 4,
@@ -110,7 +112,7 @@ export const ImportFromText = () => {
       <Affix offsetBottom={0} target={() => document.querySelector('.import-resource-right-panel') as HTMLElement}>
         <div className="intergation-footer">
           <div className="footer-location">
-            <p className="text-item">保存至 </p>
+            <p className="text-item">{t('resource.import.saveTo')} </p>
             <SearchSelect
               domain="collection"
               className="kg-selector"
@@ -126,10 +128,10 @@ export const ImportFromText = () => {
               style={{ width: 72, marginRight: 8 }}
               onClick={() => importResourceStore.setImportResourceModalVisible(false)}
             >
-              取消
+              {t('common.cancel')}
             </Button>
             <Button type="primary" style={{ width: 100 }} onClick={handleSave}>
-              保存
+              {t('common.save')}
             </Button>
           </div>
         </div>

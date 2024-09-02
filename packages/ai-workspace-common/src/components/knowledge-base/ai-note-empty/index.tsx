@@ -1,5 +1,5 @@
 import { Divider, Button } from '@arco-design/web-react';
-import { IconPlus } from '@arco-design/web-react/icon';
+import { HiOutlinePlus } from 'react-icons/hi2';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
 import { NoteList } from '@refly-packages/ai-workspace-common/components/workspace/note-list';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
@@ -14,7 +14,11 @@ export const AINoteEmpty = () => {
     <div className="flex items-center justify-center w-full mt-16 overflow-auto ai-note-empty">
       <div className="w-full h-full max-w-screen-lg">
         {/* <Title className="mb-8 ml-8 text-3xl font-bold">暂无笔记</Title> */}
-        <Button className="ml-8 text-green-400" icon={<IconPlus />} onClick={() => handleInitEmptyNote('New note')}>
+        <Button
+          className="ml-8 text-green-400"
+          icon={<HiOutlinePlus />}
+          onClick={() => handleInitEmptyNote('New note')}
+        >
           {t('knowledgeBase.note.newNote')}
         </Button>
         <Divider />

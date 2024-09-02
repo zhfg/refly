@@ -7,6 +7,7 @@
     "delete": "删除",
     "edit": "编辑",
     "save": "保存",
+    "add": "添加",
     "loadMore": "加载更多",
     "more": "更多",
     "putErr": "操作失败，请尝试重试！",
@@ -16,7 +17,8 @@
     "input": "输入",
     "context": "上下文",
     "templateConfig": "模板配置",
-    "required": "必填项"
+    "required": "必填项",
+    "empty": "暂无内容"
   },
   "systemMaintenanceShutdown": {
     "title": "尊敬的用户，您好！",
@@ -190,6 +192,24 @@
       "readOnly": "只读",
       "edit": "编辑",
       "serviceDisconnected": "服务已断开"
+    }
+  },
+  "resource": {
+    "import": {
+      "title": "资源集成",
+      "fromWeblink": "网页链接",
+      "webLinkPlaceholer": "输入或粘贴有效的网页链接，每行一个....",
+      "fromText": "复制文本",
+      "linkFormatError": "请输入有效的网页链接，以 http 或 https 开头",
+      "emptyLink": "你还未添加任何链接！",
+      "waitingList": "待处理列表",
+      "linkCount": "共 {{count}} 个",
+      "saveTo": "保存至",
+      "scrapeError": "抓取失败",
+      "integration": "集成",
+      "emptyText": "标题和文本内容不能为空！",
+      "textTitlePlaceholder": "输入标题",
+      "textContentPlaceholder": "输入或粘贴文本"
     }
   },
   "loggedHomePage": {

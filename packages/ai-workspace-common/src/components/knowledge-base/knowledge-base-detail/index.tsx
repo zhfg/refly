@@ -11,7 +11,9 @@ import './index.scss';
 import { ActionSource, useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { KnowledgeBaseListModal } from '../copilot/knowledge-base-list-modal';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
-import { IconSearch, IconLeft, IconRight } from '@arco-design/web-react/icon';
+import { HiOutlineSearch } from 'react-icons/hi';
+import { HiChevronLeft, HiChevronRight } from 'react-icons/hi2';
+
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
@@ -62,7 +64,7 @@ export const KnowledgeBaseDetail = () => {
               </div>
               <div className="knowledge-base-detail-navigation-bar">
                 <Button
-                  icon={<IconSearch />}
+                  icon={<HiOutlineSearch />}
                   type="text"
                   shape="circle"
                   className="assist-action-item"
@@ -104,7 +106,7 @@ export const KnowledgeBaseDetail = () => {
                 }}
                 className="toggle-left-panel-btn"
               >
-                {leftPanelSize === 0 ? <IconRight /> : <IconLeft />}
+                {leftPanelSize === 0 ? <HiChevronRight /> : <HiChevronLeft />}
               </div>
             </PanelResizeHandle>
           </>
