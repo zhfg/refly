@@ -5,6 +5,9 @@
     padding: 18px 24px;
     border-radius: 8px;
     border: solid 1px #f0f0f0;
+    &--selected {
+      background-color: #f2f3f5;
+    }
     &:hover {
       background-color: #eee;
     }

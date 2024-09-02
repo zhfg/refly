@@ -100,13 +100,6 @@ export const ConvList = (props: ConvListProps) => {
       className={classNames('thread-library-list', props.classNames)}
       wrapperStyle={{ width: '100%' }}
       bordered={false}
-      // header={
-      //   <div className="feed-title-container">
-      //     <p className="feed-title">
-      //       <span>{t("threadLibrary.title")}</span>
-      //     </p>
-      //   </div>
-      // }
       pagination={false}
       offsetBottom={50}
       dataSource={threadStore?.threads}

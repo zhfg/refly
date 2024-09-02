@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 
 // components
@@ -45,7 +45,9 @@ export const SkillJobs = (props: SkillJobsProps) => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const skillId = searchParams.get('skillId') as string;
+  const jobId = searchParams.get('jobId') as string;
   const { t } = useTranslation();
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(jobId);
 
   const { dataList, setDataList, loadMore, hasMore, isRequesting, reload } = useFetchDataList({
     fetchData: async (queryPayload) => {
@@ -57,6 +59,29 @@ export const SkillJobs = (props: SkillJobsProps) => {
     pageSize: 12,
   });
 
+  const [hasRunningJob, setHasRunningJob] = useState(false);
+  const checkRunningJobs = useCallback(() => {
+    return dataList.some((job) => job.jobStatus === 'running');
+  }, [dataList]);
+
+  useEffect(() => {
+    setHasRunningJob(checkRunningJobs());
+  }, [dataList, checkRunningJobs]);
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    if (hasRunningJob) {
+      intervalId = setInterval(() => {
+        reload();
+      }, 2000); // 每2秒刷新一次
+    }
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [hasRunningJob, reload]);
+
   useEffect(() => {
     loadMore();
   }, []);
@@ -67,6 +92,10 @@ export const SkillJobs = (props: SkillJobsProps) => {
       setReloadList(false);
     }
   }, [reloadList]);
+
+  useEffect(() => {
+    setSelectedJobId(jobId);
+  }, [jobId]);
 
   const JobStatus = (props: { status: string }) => {
     switch (props.status) {
@@ -152,7 +181,10 @@ export const SkillJobs = (props: SkillJobsProps) => {
 
     const { collections, notes, resources, urls } = job.context;
     return (
-      <div className="skill-jobs__card" onClick={handleClickJob}>
+      <div
+        className={`skill-jobs__card ${selectedJobId === job.jobId ? 'skill-jobs__card--selected' : ''}`}
+        onClick={handleClickJob}
+      >
         <Row align="center" justify="center">
           <Col span={1} className="skill-jobs__card-col">
             <JobStatus status={job.jobStatus} />

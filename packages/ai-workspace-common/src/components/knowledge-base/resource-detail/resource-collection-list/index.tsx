@@ -48,6 +48,14 @@ const ResourceCollectionList = ({ collections = [], updateCallback }: ResourceCo
       }
     };
 
+    const handleTagClick = () => {
+      if (coll.collectionId === kbId) {
+        jumpToKnowledgeBase({ kbId: '' });
+      } else {
+        jumpToKnowledgeBase({ kbId: coll.collectionId });
+      }
+    };
+
     const handleCancel = (e) => {
       e.stopPropagation();
       setPopconfirmVisible(false);
@@ -72,7 +80,7 @@ const ResourceCollectionList = ({ collections = [], updateCallback }: ResourceCo
             })}
             visible={true}
             icon={<IconFolder />}
-            onClick={() => jumpToKnowledgeBase({ kbId: coll.collectionId })}
+            onClick={handleTagClick}
             onClose={(e) => {
               e.stopPropagation();
               setPopconfirmVisible(true);

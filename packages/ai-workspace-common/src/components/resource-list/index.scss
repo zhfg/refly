@@ -1,9 +1,10 @@
 .knowledge-base-resource-list-container {
   height: 100%;
   .knowledge-base-directory-search-container {
-    padding: 0 12px;
+    padding: 12px 12px 0 12px;
+    height: 84px;
+    box-sizing: border-box;
     .knowledge-base-directory-search-container-inner {
-      margin-top: 12px;
       display: flex;
       align-items: center;
       .add-resource-btn {
@@ -33,7 +34,7 @@
   }
 
   .knowledge-base-directory-list {
-    height: calc(100% - 68px - 8px);
+    height: calc(100% - 84px);
     overflow-y: auto;
     min-width: 200px;
     overflow-x: auto;
@@ -50,7 +51,11 @@
 .knowledge-base-directory-item {
   position: relative;
   padding: 12px;
+  margin-bottom: 8px;
   border-radius: 8px;
+  &--selected {
+    background-color: #f1f1f0;
+  }
 
   &:hover {
     background-color: #f1f1f0;
