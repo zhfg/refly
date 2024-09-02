@@ -7,7 +7,6 @@
 
   &__input {
     width: 100%;
-    padding: 0px 8px;
     font-size: 14px;
 
     &:focus {
@@ -25,13 +24,6 @@
   &__radio-group {
     display: flex;
     flex-direction: column;
-    margin-top: -20px;
-    margin-bottom: 20px;
-
-    label {
-      height: 36px;
-      margin-bottom: 20px;
-    }
   }
 
   &__radio-option {

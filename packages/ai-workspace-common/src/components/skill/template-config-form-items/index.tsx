@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Input, Form, FormInstance, InputNumber, Select } from '@arco-design/web-react';
 import {
   DynamicConfigItem,
@@ -7,6 +7,7 @@ import {
   SkillTemplateConfigSchema,
 } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
+import { FormHeader } from '@refly-packages/ai-workspace-common/components/skill/form-header';
 
 const FormItem = Form.Item;
 
@@ -101,31 +102,51 @@ export const TemplateConfigFormItems = (props: {
   form: FormInstance;
   tplConfig?: SkillTemplateConfig;
   fieldPrefix?: string;
+  headerTitle?: string;
 }) => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
+  const [collapsed, setCollapsed] = useState(false);
   const locale = i18n.languages?.[0] || 'en';
 
-  const { schema, form, fieldPrefix = '', tplConfig } = props;
+  const { schema, form, fieldPrefix = '', tplConfig, headerTitle } = props;
   const { items } = schema;
+
+  if (!items?.length) {
+    return null;
+  }
 
   useEffect(() => {
     if (tplConfig) {
       Object.entries(tplConfig).forEach(([key, value]) => {
-        form.setFieldValue(getFormField(fieldPrefix, key), value);
+        const field = getFormField(fieldPrefix, key);
+        console.log(`field`, field);
+        form.setFieldValue(field, value);
       });
     }
   }, [form, tplConfig, fieldPrefix]);
 
   return (
-    <div className="template-config-form-items">
-      {items.map((item) => {
-        const field = getFormField(fieldPrefix, item.key);
-        return (
-          <FormItem label={item.labelDict[locale]} key={item.key} required={item.required} field={field}>
-            <ConfigItem item={item} form={form} field={field} locale={locale} configValue={tplConfig?.[item.key]} />
-          </FormItem>
-        );
-      })}
+    <div style={{ marginTop: 16 }}>
+      <FormHeader title={headerTitle} enableCollapse collapsed={collapsed} onCollapseChange={setCollapsed} />
+      {items?.length > 0 && !collapsed ? (
+        <div className="template-config-form-items">
+          {items.map((item, index) => {
+            const field = getFormField(fieldPrefix, item.key);
+            return (
+              <FormItem label={item.labelDict[locale]} key={item.key} required={item.required} field={field}>
+                <ConfigItem
+                  key={index}
+                  item={item}
+                  form={form}
+                  field={field}
+                  locale={locale}
+                  configValue={tplConfig?.[item.key]}
+                />
+              </FormItem>
+            );
+          })}
+        </div>
+      ) : null}
     </div>
   );
 };

@@ -10,6 +10,9 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { SkillInstance } from '@refly/openapi-schema';
 import { Collapse, Modal, Form, Message } from '@arco-design/web-react';
 
+// styles
+import './index.scss';
+
 const CollapseItem = Collapse.Item;
 
 const formItemLayout = {
@@ -84,31 +87,38 @@ export const InstanceInvokeModal = (props: InstanceInvokeModalProps) => {
       confirmLoading={confirmLoading}
       onCancel={() => setVisible(false)}
     >
-      <Form {...formItemLayout} form={form}>
-        <Collapse bordered={false} defaultActiveKey={['input', 'context']}>
-          {input?.rules?.length > 0 && (
-            <CollapseItem name="input" header={t('common.input')}>
-              <InvocationFormItems ruleGroup={data?.invocationConfig.input} form={form} t={t} fieldPrefix="input" />
-            </CollapseItem>
-          )}
+      <Form {...formItemLayout} form={form} className="instance-invoke-modal-container">
+        {input?.rules?.length > 0 && (
+          <InvocationFormItems
+            headerTitle={t('common.input')}
+            ruleGroup={data?.invocationConfig.input}
+            form={form}
+            t={t}
+            fieldPrefix="input"
+          />
+        )}
 
-          {context?.rules?.length > 0 && (
-            <CollapseItem name="context" header={t('common.context')}>
-              <InvocationFormItems ruleGroup={data?.invocationConfig.context} form={form} t={t} fieldPrefix="context" />
-            </CollapseItem>
-          )}
+        {context?.rules?.length > 0 && (
+          <div style={{ marginTop: 16 }}>
+            <InvocationFormItems
+              headerTitle={t('common.context')}
+              ruleGroup={data?.invocationConfig.context}
+              form={form}
+              t={t}
+              fieldPrefix="context"
+            />
+          </div>
+        )}
 
-          {tplConfigSchema?.items?.length > 0 && (
-            <CollapseItem name="templateConfig" header={t('common.templateConfig')}>
-              <TemplateConfigFormItems
-                schema={tplConfigSchema}
-                form={form}
-                tplConfig={tplConfig}
-                fieldPrefix="tplConfig"
-              />
-            </CollapseItem>
-          )}
-        </Collapse>
+        {tplConfigSchema?.items?.length > 0 && (
+          <TemplateConfigFormItems
+            headerTitle={t('common.templateConfig')}
+            schema={tplConfigSchema}
+            form={form}
+            tplConfig={tplConfig}
+            fieldPrefix="tplConfig"
+          />
+        )}
       </Form>
     </Modal>
   );

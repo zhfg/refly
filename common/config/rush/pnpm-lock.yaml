@@ -315,8 +315,8 @@ importers:
         specifier: ^2.62.1
         version: 2.62.1(@types/react@18.2.66)(react-dom@18.2.0)(react@18.2.0)
       '@arco-themes/react-refly-ai':
-        specifier: 0.0.2
-        version: 0.0.2(@arco-design/web-react@2.62.1)
+        specifier: 0.0.3
+        version: 0.0.3(@arco-design/web-react@2.62.1)
       '@headlessui/react':
         specifier: ~2.1.2
         version: 2.1.2(react-dom@18.2.0)(react@18.2.0)
@@ -541,8 +541,8 @@ importers:
         specifier: ^2.47.1
         version: 2.62.1(@types/react@18.2.66)(react-dom@18.2.0)(react@18.2.0)
       '@arco-themes/react-refly-ai':
-        specifier: 0.0.2
-        version: 0.0.2(@arco-design/web-react@2.62.1)
+        specifier: 0.0.3
+        version: 0.0.3(@arco-design/web-react@2.62.1)
       '@headlessui/react':
         specifier: ~2.1.2
         version: 2.1.2(react-dom@18.2.0)(react@18.2.0)
@@ -794,8 +794,8 @@ importers:
         specifier: ^2.47.1
         version: 2.62.1(@types/react@18.2.66)(react-dom@18.2.0)(react@18.2.0)
       '@arco-themes/react-refly-ai':
-        specifier: 0.0.2
-        version: 0.0.2(@arco-design/web-react@2.62.1)
+        specifier: 0.0.3
+        version: 0.0.3(@arco-design/web-react@2.62.1)
       '@headlessui/react':
         specifier: ~2.1.2
         version: 2.1.2(react-dom@18.2.0)(react@18.2.0)
@@ -1102,8 +1102,8 @@ importers:
         specifier: ^2.47.1
         version: 2.62.1(@types/react@18.2.66)(react-dom@18.2.0)(react@18.2.0)
       '@arco-themes/react-refly-ai':
-        specifier: 0.0.2
-        version: 0.0.2(@arco-design/web-react@2.62.1)
+        specifier: 0.0.3
+        version: 0.0.3(@arco-design/web-react@2.62.1)
       '@headlessui/react':
         specifier: ~2.1.2
         version: 2.1.2(react-dom@18.2.0)(react@18.2.0)
@@ -2446,10 +2446,10 @@ packages:
       - supports-color
     dev: true
 
-  /@arco-themes/react-refly-ai@0.0.2(@arco-design/web-react@2.62.1):
-    resolution: {integrity: sha512-zYhABtGsjBB50CMn5CK6VlesWrWRx8A3K0atS+43oucKfvdk4mzm+pGUYuhEfFEmOnw3eJMuwH8XDOvLBzloZQ==}
+  /@arco-themes/react-refly-ai@0.0.3(@arco-design/web-react@2.62.1):
+    resolution: {integrity: sha512-bC/j6M6xe9Jm16+XM2n8nKFs+4Rcmr0d8wSeY8vZ2HEZ65sz5cmK9nCCJzwl5fJkJKjBGgtMx5i+TysbPYahXw==}
     peerDependencies:
-      '@arco-design/web-react': ^2.61.2
+      '@arco-design/web-react': ^2.64.0
     dependencies:
       '@arco-design/web-react': 2.62.1(@types/react@18.2.66)(react-dom@18.2.0)(react@18.2.0)
     dev: false
@@ -22905,7 +22905,7 @@ time:
   /@aklinker1/rollup-plugin-visualizer@5.12.0: '2024-02-23T21:32:00.751Z'
   /@arco-design/web-react@2.62.1: '2024-05-17T10:00:38.867Z'
   /@arco-plugins/vite-react@1.3.3: '2022-12-13T07:21:25.144Z'
-  /@arco-themes/react-refly-ai@0.0.2: '2024-03-30T07:51:50.168Z'
+  /@arco-themes/react-refly-ai@0.0.3: '2024-09-02T07:13:58.517Z'
   /@babel/generator@7.12.11: '2020-12-15T23:59:31.118Z'
   /@babel/helper-module-imports@7.12.5: '2020-11-03T22:34:28.374Z'
   /@babel/parser@7.12.11: '2020-12-15T23:59:16.808Z'

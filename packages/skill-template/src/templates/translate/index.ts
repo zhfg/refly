@@ -6,6 +6,8 @@ import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } fr
 // schema
 import { z } from 'zod';
 import { SkillInvocationConfig, SkillTemplateConfigSchema } from '@refly/openapi-schema';
+// utils
+import { languageNameToLocale, localeToLanguageName, zhCNLocale } from '@refly/common-types';
 
 interface GraphState extends BaseSkillState {
   documents: Document[];
@@ -13,6 +15,14 @@ interface GraphState extends BaseSkillState {
 }
 
 // Define a new graph
+const zhLocaleDict = languageNameToLocale?.['zh-CN'] || {};
+const localeOptionList = Object.values(zhLocaleDict).map((val: keyof typeof zhCNLocale) => ({
+  labelDict: {
+    en: localeToLanguageName?.['en']?.[val],
+    'zh-CN': localeToLanguageName?.['zh-CN']?.[val],
+  },
+  value: val as string,
+}));
 
 export class TranslateSkill extends BaseSkill {
   name = 'translate';
@@ -22,7 +32,21 @@ export class TranslateSkill extends BaseSkill {
   };
 
   configSchema: SkillTemplateConfigSchema = {
-    items: [],
+    items: [
+      {
+        key: 'targetLanguage',
+        inputMode: 'select',
+        labelDict: {
+          en: 'Target Language',
+          'zh-CN': '目标语言',
+        },
+        descriptionDict: {
+          en: 'The language to translate to',
+          'zh-CN': '翻译的目标语言',
+        },
+        options: localeOptionList,
+      },
+    ],
   };
 
   invocationConfig: SkillInvocationConfig = {
