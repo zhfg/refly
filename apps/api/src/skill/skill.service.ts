@@ -433,13 +433,13 @@ export class SkillService {
     await this.streamInvokeSkill(user, param, null, jobId);
   }
 
-  async invokeSkillFromApi(user: User, param: InvokeSkillRequest) {
+  async invokeSkillFromApi(user: User, param: InvokeSkillRequest, res: Response) {
     const skill = await this.skillInvokePreCheck(user, param);
 
     param.context = await this.populateSkillContext(user, param.context);
     param.tplConfig = { ...JSON.parse(skill?.tplConfig ?? '{}'), ...param.tplConfig };
 
-    return this.streamInvokeSkill(user, param);
+    return this.streamInvokeSkill(user, param, res);
   }
 
   async buildInvokeConfig(data: {
@@ -463,7 +463,7 @@ export class SkillService {
         convId: param.convId,
         tplConfig: param.tplConfig,
       },
-      user,
+      user: pick(user, ['uid', 'uiLocale', 'outputLocale']),
     };
 
     if (skill) {
