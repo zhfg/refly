@@ -30,6 +30,8 @@ interface InstanceInvokeModalProps {
 
 export const InstanceInvokeModal = (props: InstanceInvokeModalProps) => {
   const { visible, data, setVisible, postConfirmCallback } = props;
+  const { invocationConfig = {}, tplConfigSchema, tplConfig } = data ?? {};
+  const { input, context } = invocationConfig;
   const { t } = useTranslation();
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [form] = Form.useForm();
@@ -84,22 +86,28 @@ export const InstanceInvokeModal = (props: InstanceInvokeModalProps) => {
     >
       <Form {...formItemLayout} form={form}>
         <Collapse bordered={false} defaultActiveKey={['input', 'context']}>
-          <CollapseItem name="input" header={t('common.input')}>
-            <InvocationFormItems ruleGroup={data?.invocationConfig.input} form={form} t={t} fieldPrefix="input" />
-          </CollapseItem>
+          {input?.rules?.length > 0 && (
+            <CollapseItem name="input" header={t('common.input')}>
+              <InvocationFormItems ruleGroup={data?.invocationConfig.input} form={form} t={t} fieldPrefix="input" />
+            </CollapseItem>
+          )}
 
-          <CollapseItem name="context" header={t('common.context')}>
-            <InvocationFormItems ruleGroup={data?.invocationConfig.context} form={form} t={t} fieldPrefix="context" />
-          </CollapseItem>
+          {context?.rules?.length > 0 && (
+            <CollapseItem name="context" header={t('common.context')}>
+              <InvocationFormItems ruleGroup={data?.invocationConfig.context} form={form} t={t} fieldPrefix="context" />
+            </CollapseItem>
+          )}
 
-          <CollapseItem name="templateConfig" header={t('common.templateConfig')}>
-            <TemplateConfigFormItems
-              schema={data?.tplConfigSchema}
-              form={form}
-              tplConfig={data?.tplConfig}
-              fieldPrefix="tplConfig"
-            />
-          </CollapseItem>
+          {tplConfigSchema?.items?.length > 0 && (
+            <CollapseItem name="templateConfig" header={t('common.templateConfig')}>
+              <TemplateConfigFormItems
+                schema={tplConfigSchema}
+                form={form}
+                tplConfig={tplConfig}
+                fieldPrefix="tplConfig"
+              />
+            </CollapseItem>
+          )}
         </Collapse>
       </Form>
     </Modal>

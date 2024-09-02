@@ -6,37 +6,10 @@
   font-weight: bold;
 }
 
-.thread-library-list {
-  width: 100%;
-  height: calc(100vh - 28px);
-  overflow-y: scroll;
-
-  .arco-list-content {
-    width: 100%;
-  }
-
-  .arco-list-item {
-    padding: 13px 0px !important;
-  }
-
-  .arco-list-header {
-    border-bottom: 1px solid transparent;
-    padding: 0;
-
-    .thread-library-title {
-      margin-left: -20px;
-    }
-  }
-
-  .arco-list-content {
-    padding: 0 60px;
-  }
-
-  .thread-library-list-item {
-    &:hover {
-      cursor: pointer;
-    }
-  }
+.conv-library-header-container {
+  padding: 0 140px;
+  height: 60px;
+  box-sizing: border-box;
 }
 
 .conv-library-header {
@@ -44,7 +17,8 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding: 0 60px;
+  max-width: 1024px;
+  margin: 0 auto;
 }
 
 .arco-list-item-action {

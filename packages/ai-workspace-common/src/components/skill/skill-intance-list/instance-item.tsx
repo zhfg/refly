@@ -3,8 +3,8 @@ import { Avatar, Button, Typography, Message as message, Tooltip } from '@arco-d
 import { InstanceDropdownMenu } from '@refly-packages/ai-workspace-common/components/skill/instance-dropdown-menu';
 import { NewSkillInstanceModal } from '@refly-packages/ai-workspace-common/components/skill/new-instance-modal';
 
-import { IconPlayCircle, IconDoubleUp, IconDoubleDown } from '@arco-design/web-react/icon';
-import { LuPin, LuPinOff } from 'react-icons/lu';
+import { HiOutlinePlay } from 'react-icons/hi2';
+import { BsPinAngle, BsPinAngleFill } from 'react-icons/bs';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 // 样式
@@ -120,7 +120,7 @@ export const InstanceItem = (props: InstanceItemProps) => {
 
         <div className="instance-item__action">
           <Button
-            icon={<IconPlayCircle style={{ strokeWidth: 3 }} />}
+            icon={<HiOutlinePlay />}
             type="text"
             onClick={(e) => handleClickInvoke(e)}
             className="instance-item__action-icon"
@@ -133,7 +133,7 @@ export const InstanceItem = (props: InstanceItemProps) => {
               <Button
                 className="instance-item__action-icon"
                 type="text"
-                icon={data.pinnedAt ? <LuPinOff /> : <LuPin />}
+                icon={data.pinnedAt ? <BsPinAngleFill /> : <BsPinAngle />}
                 onClick={(e) => handleTopSkill(e)}
               />
             </Tooltip>
