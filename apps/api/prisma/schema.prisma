@@ -9,18 +9,27 @@ datasource db {
 }
 
 model Account {
-  id                Int      @id @default(autoincrement())
-  userId            Int      @map("user_id")
+  /// Primary key
+  pk                BigInt   @id @default(autoincrement())
+  /// UID
+  uid               String   @default("") @map("uid")
+  /// Account type
   type              String   @map("type")
+  /// Provider  
   provider          String   @map("provider")
+  /// Provider account ID
   providerAccountId String   @map("provider_account_id")
+  /// Refresh token
   refreshToken      String?  @map("refresh_token")
+  /// Access token
   accessToken       String?  @map("access_token")
+  /// Token expiration timestamp
   expiresAt         Int?     @map("expires_at")
+  /// Scope
   scope             String?  @map("scope")
-  /// 创建时间
+  /// Create timestamp
   createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  /// 更新时间
+  /// Update timestamp
   updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz()
 
   @@unique([provider, providerAccountId])
@@ -28,27 +37,29 @@ model Account {
 }
 
 model User {
-  /// 主键
-  id            Int       @id @default(autoincrement())
+  /// Primary key
+  pk            BigInt    @id @default(autoincrement())
   /// UID
   uid           String    @unique @map("uid")
-  /// 头像
+  /// Avatar url
   avatar        String?   @map("avatar")
-  /// 用户名
+  /// Username
   name          String?   @map("name")
-  /// 邮箱
+  /// Nickname
+  nickname      String?   @map("nickname")
+  /// Email
   email         String?   @unique @map("email")
-  /// 邮箱是否已验证
+  /// Email verified timestamp
   emailVerified DateTime? @map("email_verified") @db.Timestamptz()
-  /// 密码
+  /// Password
   password      String?   @map("password")
-  /// 界面语言设置
-  uiLocale      String?   @default("") @map("ui_locale")
-  /// 输出语言设置
-  outputLocale  String?   @default("") @map("output_locale")
-  /// 创建时间
+  /// UI language setting
+  uiLocale      String?   @map("ui_locale")
+  /// Output language setting
+  outputLocale  String?   @map("output_locale")
+  /// Create timestamp
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
-  /// 更新时间
+  /// Update timestamp
   updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
 
   @@map("users")
@@ -57,7 +68,7 @@ model User {
 // Conversation
 model Conversation {
   /// Primary key
-  id              Int      @id @default(autoincrement())
+  pk              BigInt   @id @default(autoincrement())
   /// Conversation ID
   convId          String   @unique @default("") @map("conv_id")
   /// UID
@@ -86,7 +97,7 @@ model Conversation {
 /// Conversation messages
 model ChatMessage {
   /// Primary key
-  id                    Int         @id @default(autoincrement())
+  pk                    BigInt      @id @default(autoincrement())
   /// Message id
   msgId                 String      @default("") @map("msg_id")
   /// Conversation ID
@@ -122,7 +133,7 @@ model ChatMessage {
 
 model Resource {
   /// Primary key
-  id           BigInt       @id @default(autoincrement())
+  pk           BigInt       @id @default(autoincrement())
   /// Resource id
   resourceId   String       @unique @map("resource_id")
   /// Resource type
@@ -190,7 +201,7 @@ model Note {
 
 model Collection {
   /// Primary key
-  id           BigInt     @id @default(autoincrement())
+  pk           BigInt     @id @default(autoincrement())
   /// Collection id
   collectionId String     @unique @map("collection_id")
   /// Collection title

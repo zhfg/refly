@@ -12,8 +12,7 @@ import {
   ResourceType,
   IndexStatus,
 } from '@refly/openapi-schema';
-import { omit } from '@/utils';
-import { pick } from 'lodash';
+import { pick } from '@/utils';
 
 export type FinalizeResourceParam = UpsertResourceRequest & {
   uid: string;
@@ -26,7 +25,7 @@ export const collectionPO2DTO = (
     return null;
   }
   return {
-    ...omit(coll, ['id', 'uid', 'deletedAt']),
+    ...pick(coll, ['collectionId', 'title', 'description', 'isPublic']),
     createdAt: coll.createdAt.toJSON(),
     updatedAt: coll.updatedAt.toJSON(),
     resources: coll.resources?.map((resource) => resourcePO2DTO(resource)),

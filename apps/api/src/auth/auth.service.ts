@@ -66,16 +66,14 @@ export class AuthService {
       this.logger.log(`account found for provider ${provider}, account id: ${id}`);
       const user = await this.prisma.user.findUnique({
         where: {
-          id: account.userId,
+          uid: account.uid,
         },
       });
       if (user) {
         return user;
       }
 
-      this.logger.log(
-        `user ${account.userId} not found for provider ${provider} account id: ${id}`,
-      );
+      this.logger.log(`user ${account.uid} not found for provider ${provider} account id: ${id}`);
     }
 
     // oauth profile returns no email, this is invalid
@@ -115,14 +113,14 @@ export class AuthService {
     const newAccount = await this.prisma.account.create({
       data: {
         type: 'oauth',
-        userId: newUser.id,
+        uid: newUser.uid,
         provider,
         providerAccountId: id,
         accessToken: accessToken,
         refreshToken: refreshToken,
       },
     });
-    this.logger.log(`new account created: ${newAccount.id}`);
+    this.logger.log(`new account created for ${newAccount.uid}`);
 
     return newUser;
   }
