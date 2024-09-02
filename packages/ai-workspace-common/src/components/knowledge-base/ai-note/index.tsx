@@ -6,12 +6,11 @@ import { Note } from '@refly/openapi-schema';
 import './index.scss';
 import { useCookie } from 'react-use';
 import { Button, Divider, Input, Spin, Switch, Tabs } from '@arco-design/web-react';
-import { IconLock, IconUnlock } from '@arco-design/web-react/icon';
+import { HiOutlineLockClosed, HiOutlineLockOpen, HiOutlineClock } from 'react-icons/hi2';
+import { HiOutlineSearch } from 'react-icons/hi';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { IconClockCircle, IconSearch } from '@arco-design/web-react/icon';
 import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
-import { useListenToSelection } from '@refly-packages/ai-workspace-common/hooks/use-listen-to-selection';
 // 编辑器组件
 import {
   CollabEditorCommand,
@@ -271,7 +270,7 @@ export const AINoteStatusBar = (props: AINoteStatusBarProps) => {
         {noteId && noteStore.noteServerStatus === 'connected' ? (
           <div className="note-status-bar-item">
             <Divider type="vertical" />
-            <IconClockCircle />
+            <HiOutlineClock />
             <p className="conv-title">
               {noteStore.noteSaveStatus === 'Saved'
                 ? t('knowledgeBase.note.autoSaved')
@@ -283,7 +282,7 @@ export const AINoteStatusBar = (props: AINoteStatusBarProps) => {
       <div className="note-status-bar-menu">
         {noteId ? (
           <div className="note-status-bar-item">
-            {note.readOnly ? <IconLock /> : <IconUnlock />}
+            {note.readOnly ? <HiOutlineLockClosed /> : <HiOutlineLockOpen />}
             <p className="mr-2 conv-title">
               {note.readOnly ? t('knowledgeBase.note.readOnly') : t('knowledgeBase.note.edit')}
             </p>
@@ -430,7 +429,7 @@ export const AINote = () => {
               </div>
               <div className="note-detail-navigation-bar">
                 <Button
-                  icon={<IconSearch />}
+                  icon={<HiOutlineSearch />}
                   type="text"
                   style={{ marginRight: 4 }}
                   className="assist-action-item"

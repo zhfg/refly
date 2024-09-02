@@ -5,7 +5,8 @@ import { SearchDomain } from '@refly/openapi-schema';
 import { SelectProps } from '@arco-design/web-react/es/Select/interface';
 import { DataFetcher } from '@refly-packages/ai-workspace-common/modules/entity-selector/utils';
 import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/hooks';
-import { IconLoading, IconPlus } from '@arco-design/web-react/icon';
+import { HiOutlinePlus } from 'react-icons/hi2';
+import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { useDebouncedCallback } from 'use-debounce';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
@@ -78,7 +79,7 @@ export const SearchSelect = (props: SearchSelectProps) => {
     setCreateLoading(false);
 
     if (!data || error) {
-      Message.error(t('common.error.putErr'));
+      Message.error(t('common.putErr'));
       return;
     }
 
@@ -146,7 +147,7 @@ export const SearchSelect = (props: SearchSelectProps) => {
                   size="mini"
                   onClick={handleCreateNewEntity}
                 >
-                  {createLoading ? <IconLoading /> : <IconPlus />}
+                  {createLoading ? <AiOutlineLoading3Quarters /> : <HiOutlinePlus />}
                   {t(`entitySelector.createEntity.${domain}`)}
                 </Button>
               </div>

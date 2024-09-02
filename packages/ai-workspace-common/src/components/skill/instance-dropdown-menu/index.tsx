@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next';
 const iconStyle = {
   marginRight: 8,
   fontSize: 16,
-  transform: 'translateY(1px)',
+  transform: 'translateY(3px)',
 };
 
 interface DropListProps {
@@ -41,7 +41,7 @@ const DropList = (props: DropListProps) => {
         <Popconfirm
           focusLock
           title={t('common.deleteConfirmMessage')}
-          position="lb"
+          position="br"
           okText={t('common.confirm')}
           cancelText={t('common.cancel')}
           getPopupContainer={getPopupContainer}

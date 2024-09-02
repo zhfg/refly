@@ -1,5 +1,6 @@
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
-import { IconBulb, IconCodepen, IconFolder } from '@arco-design/web-react/icon';
+import { HiOutlineLightBulb } from 'react-icons/hi2';
+import { AiOutlineCodepen } from 'react-icons/ai';
 
 // 自定义样式
 import './index.scss';
@@ -25,8 +26,10 @@ import '@refly-packages/ai-workspace-common/modules/content-selector/styles/cont
 import classNames from 'classnames';
 import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
 import ResourceCollectionList from '@refly-packages/ai-workspace-common/components/knowledge-base/resource-detail/resource-collection-list';
+import { useTranslation } from 'react-i18next';
 
 export const KnowledgeBaseResourceDetail = memo(() => {
+  const { t } = useTranslation();
   const [isFetching, setIsFetching] = useState(false);
   const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
     currentResource: state.currentResource,
@@ -158,12 +161,12 @@ export const KnowledgeBaseResourceDetail = memo(() => {
               </div>
               <div className="knowledge-base-directory-action">
                 <div className="action-summary">
-                  <IconBulb />
+                  <HiOutlineLightBulb />
                   <span className="action-summary-text">AI Summary</span>
                 </div>
 
                 <div className="action-summary">
-                  <IconCodepen />
+                  <AiOutlineCodepen />
                   <span className="action-summary-text">知识图谱</span>
                 </div>
               </div>
@@ -192,7 +195,7 @@ export const KnowledgeBaseResourceDetail = memo(() => {
         </div>
       ) : (
         <div className="knowledge-base-resource-detail-empty">
-          <Empty description="该知识库暂无内容" />
+          <Empty description={t('common.empty')} />
         </div>
       )}
     </div>

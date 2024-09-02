@@ -1,21 +1,25 @@
 import { useState } from "react"
-import { Avatar, Divider, Layout, Menu, Tag } from "@arco-design/web-react"
+import {
+  Avatar,
+  Divider,
+  Layout,
+  Menu,
+  Tag,
+  Tooltip,
+} from "@arco-design/web-react"
 import {
   useLocation,
   useNavigate,
 } from "@refly-packages/ai-workspace-common/utils/router"
+import { HiOutlineHome, HiLanguage } from "react-icons/hi2"
+import { LuSettings, LuDownload } from "react-icons/lu"
+import { RiRobot2Line, RiHistoryLine } from "react-icons/ri"
 import {
-  IconHome,
-  IconSettings,
-  IconDownload,
-  IconTwitter,
-  IconLanguage,
-  IconImport,
-  IconMenuFold,
-  IconMenuUnfold,
-  IconRobot,
-  IconHistory,
-} from "@arco-design/web-react/icon"
+  AiOutlineTwitter,
+  AiOutlineImport,
+  AiOutlineMenuFold,
+  AiOutlineMenuUnfold,
+} from "react-icons/ai"
 // 静态资源
 import Logo from "@/assets/logo.svg"
 import "./sider.scss"
@@ -51,17 +55,11 @@ const getNavSelectedKeys = (pathname = "") => {
 const SiderLogo = (props: {
   collapse: boolean
   navigate: (path: string) => void
+  setCollapse: (collapse: boolean) => void
 }) => {
-  const { navigate, collapse } = props
+  const { navigate, collapse, setCollapse } = props
   return (
-    <div
-      className="logo-box"
-      style={{
-        display: "flex",
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}>
+    <div className="logo-box">
       <div className="logo" onClick={() => navigate("/")}>
         <img src={Logo} alt="Refly" />
         {!collapse && (
@@ -73,23 +71,15 @@ const SiderLogo = (props: {
           </>
         )}
       </div>
-    </div>
-  )
-}
-
-const CollapseBtn = (props: {
-  collapse: boolean
-  setCollapse: (collapse: boolean) => void
-}) => {
-  const { collapse, setCollapse } = props
-  return (
-    <div
-      className={`collapse-btn ${collapse ? "collapse-btn--collapsed" : ""}`}
-      onClick={() => setCollapse(!collapse)}>
-      {collapse ? (
-        <IconMenuUnfold style={{ fontSize: 20, color: "#666666" }} />
-      ) : (
-        <IconMenuFold style={{ fontSize: 20, color: "#666666" }} />
+      {!collapse && (
+        <div className="collapse-btn" onClick={() => setCollapse(true)}>
+          <Tooltip position="right" content="Collapse">
+            <AiOutlineMenuFold
+              className="arco-icon"
+              style={{ fontSize: 20, color: "#666666" }}
+            />
+          </Tooltip>
+        </div>
       )}
     </div>
   )
@@ -97,7 +87,7 @@ const CollapseBtn = (props: {
 
 const MenuItemContent = (props: {
   icon?: React.ReactNode
-  title: string
+  title?: string
   collapse?: boolean
 }) => {
   return (
@@ -134,7 +124,8 @@ const SettingItem = (props: { navigate: (path: string) => void }) => {
           className="setting-language-icon"
           style={{ display: "inline-block", marginRight: "8px" }}>
           <UILocaleList>
-            <IconLanguage
+            <HiLanguage
+              className="arco-icon"
               style={{
                 fontSize: 20,
               }}
@@ -146,23 +137,12 @@ const SettingItem = (props: { navigate: (path: string) => void }) => {
           onClick={() => {
             navigate("/settings")
           }}>
-          <IconSettings style={{ fontSize: 20 }} />
+          <LuSettings className="arco-icon" style={{ fontSize: 20 }} />
         </span>
       </div>
     </div>
   )
 }
-
-// const SiderMenuItem = (props: { icon?: React.ReactNode; title: string }) => {
-//   const { icon, title } = props
-//   return (
-//     <MenuItem
-//       className="custom-menu-item"
-//       renderItemInTooltip={() => <MenuItemTooltipContent title={title} />}>
-//       <MenuItemContent icon={icon} title={title} />
-//     </MenuItem>
-//   )
-// }
 
 export const SiderLayout = () => {
   const [collapse, setCollapse] = useState(false)
@@ -274,6 +254,11 @@ export const SiderLayout = () => {
         break
       }
 
+      case "Expand": {
+        setCollapse(false)
+        break
+      }
+
       default: {
         break
       }
@@ -290,12 +275,12 @@ export const SiderLayout = () => {
     {
       key: "Workspace",
       name: "homePage",
-      icon: <IconHome style={{ fontSize: 20 }} />,
+      icon: <HiOutlineHome className="arco-icon" style={{ fontSize: 20 }} />,
     },
     {
       key: "Import",
       name: "newResource",
-      icon: <IconImport style={{ fontSize: 20 }} />,
+      icon: <AiOutlineImport className="arco-icon" style={{ fontSize: 20 }} />,
       onClick: () => {
         importResourceStore.setImportResourceModalVisible(true)
       },
@@ -303,12 +288,12 @@ export const SiderLayout = () => {
     {
       key: "Skill",
       name: "skill",
-      icon: <IconRobot style={{ fontSize: 20 }} />,
+      icon: <RiRobot2Line className="arco-icon" style={{ fontSize: 20 }} />,
     },
     {
       key: "ThreadLibrary",
       name: "threadLibrary",
-      icon: <IconHistory style={{ fontSize: 20 }} />,
+      icon: <RiHistoryLine className="arco-icon" style={{ fontSize: 20 }} />,
     },
   ]
   return (
@@ -317,7 +302,12 @@ export const SiderLayout = () => {
       width={collapse ? 90 : 220}>
       <div
         className={`sider-header ${collapse ? "sider-header-collapse" : ""}`}>
-        <SiderLogo navigate={path => navigate(path)} collapse={collapse} />
+        <SiderLogo
+          navigate={path => navigate(path)}
+          collapse={collapse}
+          setCollapse={() => setCollapse(!collapse)}
+        />
+
         <SearchQuickOpenBtn collapse={collapse} />
 
         <Menu
@@ -354,6 +344,27 @@ export const SiderLayout = () => {
           </div>
 
           <div className="sider-footer">
+            {collapse && (
+              <MenuItem
+                key="Expand"
+                className="custom-menu-item"
+                renderItemInTooltip={() => (
+                  <MenuItemTooltipContent
+                    title={t("loggedHomePage.siderMenu.expand")}
+                  />
+                )}>
+                <MenuItemContent
+                  icon={
+                    <AiOutlineMenuUnfold
+                      className="arco-icon"
+                      style={{ fontSize: 20 }}
+                    />
+                  }
+                  title={t("loggedHomePage.siderMenu.expand")}
+                />
+              </MenuItem>
+            )}
+
             {!!userStore.userProfile?.uid && (
               <MenuItem
                 key="Settings"
@@ -376,7 +387,12 @@ export const SiderLayout = () => {
                 />
               )}>
               <MenuItemContent
-                icon={<IconTwitter style={{ fontSize: 20 }} />}
+                icon={
+                  <AiOutlineTwitter
+                    className="arco-icon"
+                    style={{ fontSize: 20 }}
+                  />
+                }
                 title={t("loggedHomePage.siderMenu.getHelp")}
               />
             </MenuItem>
@@ -389,16 +405,14 @@ export const SiderLayout = () => {
                 />
               )}>
               <MenuItemContent
-                icon={<IconDownload style={{ fontSize: 20 }} />}
+                icon={
+                  <LuDownload className="arco-icon" style={{ fontSize: 20 }} />
+                }
                 title={t("loggedHomePage.siderMenu.download")}
               />
             </MenuItem>
           </div>
         </Menu>
-        <CollapseBtn
-          collapse={collapse}
-          setCollapse={() => setCollapse(!collapse)}
-        />
       </div>
     </Sider>
   )

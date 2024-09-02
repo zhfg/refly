@@ -4,16 +4,7 @@ import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/searc
 import * as Popover from '@radix-ui/react-popover';
 import { Logo, LinearIcon, FigmaIcon, SlackIcon, YouTubeIcon, RaycastIcon } from './icons';
 import {} from '@heroicons/react/24/outline';
-import {
-  IconSearch,
-  IconMessage,
-  IconFile,
-  IconApps,
-  IconBook,
-  IconEdit,
-  IconRobot,
-  IconFolderAdd,
-} from '@arco-design/web-react/icon';
+import { IconMessage, IconApps, IconFolderAdd } from '@arco-design/web-react/icon';
 import { useDebouncedCallback } from 'use-debounce';
 import { defaultFilter } from './cmdk/filter';
 

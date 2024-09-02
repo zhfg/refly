@@ -1,4 +1,5 @@
-import { IconDelete, IconMore, IconEdit } from '@arco-design/web-react/icon';
+import { RiDeleteBinLine, RiMoreFill } from 'react-icons/ri';
+import { TbEdit } from 'react-icons/tb';
 import { Dropdown, Menu, Button, Popconfirm, Message } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
 // 类型
@@ -12,7 +13,7 @@ import { useImportKnowledgeModal } from '@refly-packages/ai-workspace-common/sto
 const iconStyle = {
   marginRight: 8,
   fontSize: 16,
-  transform: 'translateY(1px)',
+  transform: 'translateY(3px)',
 };
 
 type positionType = 'left' | 'tr' | 'br' | 'tl' | 'bl' | 'top' | 'bottom' | 'right' | 'lb' | 'rb' | 'lt' | 'rt';
@@ -35,7 +36,7 @@ const DropList = (props: DropListProps) => {
       {type === 'knowledgeBase' && (
         <Menu.Item key="edit">
           <div onClick={(e) => handlEditKnowledgeBase(e)}>
-            <IconEdit style={iconStyle} />
+            <TbEdit style={iconStyle} />
             {t('workspace.deleteDropdownMenu.edit')}
           </div>
         </Menu.Item>
@@ -56,7 +57,7 @@ const DropList = (props: DropListProps) => {
           }}
         >
           <div onClick={(e) => e.stopPropagation()}>
-            <IconDelete style={iconStyle} />
+            <RiDeleteBinLine style={iconStyle} />
             {t('workspace.deleteDropdownMenu.delete')}
           </div>
         </Popconfirm>
@@ -166,7 +167,7 @@ export const DeleteDropdownMenu = (props: NotePros | KnowledgeBasePros | Resourc
       getPopupContainer={getPopupContainer}
     >
       <Button
-        icon={<IconMore style={{ fontSize: 16 }} />}
+        icon={<RiMoreFill style={{ fontSize: 16 }} />}
         type="text"
         onClick={(e) => handleIconClick(e)}
         className="text-gray-500 delete-button"

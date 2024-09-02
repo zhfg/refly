@@ -19,7 +19,7 @@ import './index.scss';
 import { SkillInstance } from '@refly/openapi-schema';
 
 import { Radio, Avatar, Button, Typography, Spin } from '@arco-design/web-react';
-import { IconLeft, IconPlayArrow, IconPlus } from '@arco-design/web-react/icon';
+import { HiOutlinePlay, HiOutlinePlus, HiMiniArrowUturnLeft } from 'react-icons/hi2';
 
 const RadioGroup = Radio.Group;
 
@@ -51,7 +51,7 @@ const ContentTab = (props: { val: string; setVal: (val: string) => void }) => {
 
       {val === 'triggers' && (
         <Button type="primary" className="add-trigger-btn" onClick={addTrigger}>
-          <IconPlus />
+          <HiOutlinePlus />
           {t('skill.skillDetail.addTrigger')}
         </Button>
       )}
@@ -107,7 +107,7 @@ const SkillDetail = () => {
     <div className="skill-detail" id="skill-detail">
       <div className="skill-detail__header">
         <div className="skill-detail__back" onClick={() => window.history.back()}>
-          <IconLeft className="skill-detail__back-icon" />
+          <HiMiniArrowUturnLeft className="skill-detail__back-icon" />
           {t('skill.skillDetail.back')}
         </div>
       </div>
@@ -143,7 +143,7 @@ const SkillDetail = () => {
                     style={{ borderRadius: 4 }}
                     onClick={handleSkillInvoke}
                   >
-                    <IconPlayArrow />
+                    <HiOutlinePlay />
                     {t('skill.skillDetail.run')}
                   </Button>
                   <InstanceDropdownMenu

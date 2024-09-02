@@ -3,7 +3,8 @@ import classNames from 'classnames';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button, Divider, Tag, Popconfirm, Message } from '@arco-design/web-react';
-import { IconFolder, IconFolderAdd, IconPlus } from '@arco-design/web-react/icon';
+import { HiOutlineFolder, HiFolderPlus } from 'react-icons/hi2';
+
 import { Collection } from '@refly/openapi-schema';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { ResourceCollectionAssociativeModal } from '@refly-packages/ai-workspace-common/components/knowledge-base/resource-detail/resource-collection-associative-modal';
@@ -79,7 +80,7 @@ const ResourceCollectionList = ({ collections = [], updateCallback }: ResourceCo
               active: coll.collectionId === kbId,
             })}
             visible={true}
-            icon={<IconFolder />}
+            icon={<HiOutlineFolder />}
             onClick={handleTagClick}
             onClose={(e) => {
               e.stopPropagation();
@@ -95,7 +96,7 @@ const ResourceCollectionList = ({ collections = [], updateCallback }: ResourceCo
   };
 
   return (
-    <div className="mb-4 resource-collection-list">
+    <div className="resource-collection-list">
       {collections.map((coll) => (
         <div className="tag-wrap" key={coll.collectionId}>
           <TagItem coll={coll} />
@@ -107,7 +108,7 @@ const ResourceCollectionList = ({ collections = [], updateCallback }: ResourceCo
         className="bg-transparent"
         title={collections?.length > 0 ? t('workspace.resourceCollectionList.addToCollection') : ''}
         style={{ borderRadius: '999px' }}
-        icon={<IconFolderAdd />}
+        icon={<HiFolderPlus size={13} />}
         onClick={() => setVisible(true)}
       >
         {collections?.length === 0 && t('workspace.resourceCollectionList.addToCollection')}
