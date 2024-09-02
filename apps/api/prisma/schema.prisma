@@ -41,14 +41,14 @@ model User {
   pk            BigInt    @id @default(autoincrement())
   /// UID
   uid           String    @unique @map("uid")
-  /// Avatar url
-  avatar        String?   @map("avatar")
   /// Username
-  name          String?   @map("name")
+  name          String    @unique @map("name")
   /// Nickname
   nickname      String?   @map("nickname")
   /// Email
   email         String?   @unique @map("email")
+  /// Avatar url
+  avatar        String?   @map("avatar")
   /// Email verified timestamp
   emailVerified DateTime? @map("email_verified") @db.Timestamptz()
   /// Password

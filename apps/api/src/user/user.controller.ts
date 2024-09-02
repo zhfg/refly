@@ -1,9 +1,14 @@
-import { Controller, Logger, Get, Body, UseGuards, Put } from '@nestjs/common';
+import { Controller, Logger, Get, Body, UseGuards, Put, Query } from '@nestjs/common';
 
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { User } from '@/utils/decorators/user.decorator';
-import { BaseResponse, UpdateUserSettingsRequest, UserSettings } from '@refly/openapi-schema';
+import {
+  BaseResponse,
+  CheckUsernameResponse,
+  UpdateUserSettingsRequest,
+  UserSettings,
+} from '@refly/openapi-schema';
 import { buildSuccessResponse, pick } from '@/utils';
 import { User as UserModel } from '@prisma/client';
 
@@ -18,7 +23,7 @@ export class UserController {
   getSettings(@User() user: UserModel): UserSettings {
     this.logger.log(`getSettings success, req.user = ${user.email}`);
     return {
-      ...pick(user, ['uid', 'avatar', 'name', 'email', 'uiLocale', 'outputLocale']),
+      ...pick(user, ['uid', 'avatar', 'name', 'nickname', 'email', 'uiLocale', 'outputLocale']),
       emailVerified: !!user.emailVerified,
     };
   }
@@ -31,5 +36,12 @@ export class UserController {
   ): Promise<BaseResponse> {
     await this.userService.updateSettings(user, body);
     return buildSuccessResponse();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('checkUsername')
+  async checkUsername(@Query('name') name: string): Promise<CheckUsernameResponse> {
+    const user = await this.userService.checkUsername(name);
+    return buildSuccessResponse({ available: !user });
   }
 }

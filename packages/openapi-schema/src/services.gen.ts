@@ -135,6 +135,9 @@ import type {
   UpdateSettingsData,
   UpdateSettingsError,
   UpdateSettingsResponse,
+  CheckUsernameData,
+  CheckUsernameError,
+  CheckUsernameResponse2,
   SearchData,
   SearchError,
   SearchResponse2,
@@ -640,6 +643,17 @@ export const updateSettings = (options: Options<UpdateSettingsData>) => {
   return (options?.client ?? client).put<UpdateSettingsResponse, UpdateSettingsError>({
     ...options,
     url: '/user/settings',
+  });
+};
+
+/**
+ * Check username
+ * Check if a username is available
+ */
+export const checkUsername = (options: Options<CheckUsernameData>) => {
+  return (options?.client ?? client).get<CheckUsernameResponse2, CheckUsernameError>({
+    ...options,
+    url: '/user/checkUsername',
   });
 };
 

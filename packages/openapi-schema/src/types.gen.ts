@@ -884,9 +884,13 @@ export type UserSettings = {
    */
   avatar: string;
   /**
-   * User name
+   * Username (can only contains letters, numbers, and underscores)
    */
   name: string;
+  /**
+   * User nickname
+   */
+  nickname?: string;
   /**
    * User email
    */
@@ -903,6 +907,10 @@ export type UserSettings = {
    * User output locale
    */
   outputLocale?: string;
+};
+
+export type GetUserSettingsResponse = BaseResponse & {
+  data?: UserSettings;
 };
 
 export type BaseResponse = {
@@ -1604,6 +1612,14 @@ export type GetConversationDetailResponse = BaseResponse & {
 
 export type UpdateUserSettingsRequest = {
   /**
+   * User name
+   */
+  name?: string;
+  /**
+   * User nickname
+   */
+  nickname?: string;
+  /**
    * UI locale
    */
   uiLocale?: string;
@@ -1611,6 +1627,20 @@ export type UpdateUserSettingsRequest = {
    * Output locale
    */
   outputLocale?: string;
+};
+
+export type CheckUserNameResult = {
+  /**
+   * Whether the username is available
+   */
+  available?: boolean;
+};
+
+export type CheckUsernameResponse = BaseResponse & {
+  /**
+   * Username check result
+   */
+  data?: CheckUserNameResult;
 };
 
 export type SearchDomain = 'resource' | 'note' | 'collection' | 'conversation' | 'skill';
@@ -2287,7 +2317,7 @@ export type GetConversationDetailResponse2 = GetConversationDetailResponse;
 
 export type GetConversationDetailError = unknown;
 
-export type GetSettingsResponse = UserSettings;
+export type GetSettingsResponse = GetUserSettingsResponse;
 
 export type GetSettingsError = unknown;
 
@@ -2298,6 +2328,19 @@ export type UpdateSettingsData = {
 export type UpdateSettingsResponse = BaseResponse;
 
 export type UpdateSettingsError = unknown;
+
+export type CheckUsernameData = {
+  query: {
+    /**
+     * Username
+     */
+    name: string;
+  };
+};
+
+export type CheckUsernameResponse2 = CheckUsernameResponse;
+
+export type CheckUsernameError = unknown;
 
 export type SearchData = {
   body: SearchRequest;
@@ -2804,7 +2847,7 @@ export type $OpenApiTs = {
         /**
          * successful operation
          */
-        '200': UserSettings;
+        '200': GetUserSettingsResponse;
       };
     };
     put: {
@@ -2814,6 +2857,17 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': BaseResponse;
+      };
+    };
+  };
+  '/user/checkUsername': {
+    get: {
+      req: CheckUsernameData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': CheckUsernameResponse;
       };
     };
   };
