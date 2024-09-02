@@ -217,6 +217,93 @@ export type LabelInstance = {
 };
 
 /**
+ * Data input mode
+ */
+export type InputMode = 'input' | 'inputNumber' | 'select' | 'multiSelect';
+
+/**
+ * Select option
+ */
+export type SelectOption = {
+  /**
+   * Option value
+   */
+  value: string;
+  /**
+   * Option label (key is locale, value is label)
+   */
+  labelDict?: {
+    [key: string]: string;
+  };
+  /**
+   * Whether this option is disabled
+   */
+  disabled?: boolean;
+};
+
+/**
+ * Dynamic config item
+ */
+export type DynamicConfigItem = {
+  /**
+   * Config key
+   */
+  key: string;
+  /**
+   * Config input mode
+   */
+  inputMode: InputMode;
+  /**
+   * Whether this config is required
+   */
+  required?: boolean;
+  /**
+   * Config label (key is locale, value is label)
+   */
+  labelDict: {
+    [key: string]: string;
+  };
+  /**
+   * Config description (key is locale, value is description)
+   */
+  descriptionDict: {
+    [key: string]: string;
+  };
+  /**
+   * Config options
+   */
+  options?: Array<SelectOption>;
+};
+
+/**
+ * Dynamic config value
+ */
+export type DynamicConfigValue = {
+  /**
+   * Config key label
+   */
+  label: string;
+  /**
+   * Config value
+   */
+  value: string | number | Array<string>;
+  /**
+   * Config display value
+   */
+  displayValue: string;
+};
+
+/**
+ * Skill template config schema
+ */
+export type SkillTemplateConfigSchema = {
+  /**
+   * Config items
+   */
+  items: Array<DynamicConfigItem>;
+};
+
+/**
  * Skill template
  */
 export type SkillTemplate = {
@@ -232,6 +319,10 @@ export type SkillTemplate = {
    * Skill template description
    */
   description?: string;
+  /**
+   * Skill template config schema
+   */
+  configSchema?: SkillTemplateConfigSchema;
 };
 
 /**
@@ -314,6 +405,10 @@ export type SkillTrigger = {
    */
   context?: SkillContext;
   /**
+   * Skill template config
+   */
+  tplConfig?: SkillTemplateConfig;
+  /**
    * Trigger enabled
    */
   enabled: boolean;
@@ -346,6 +441,13 @@ export type SkillMeta = {
 };
 
 /**
+ * Skill template config (key is config item key, value is config value)
+ */
+export type SkillTemplateConfig = {
+  [key: string]: DynamicConfigValue;
+};
+
+/**
  * Skill
  */
 export type SkillInstance = SkillMeta & {
@@ -354,9 +456,21 @@ export type SkillInstance = SkillMeta & {
    */
   description?: string;
   /**
+   * Skill template config
+   */
+  tplConfig?: SkillTemplateConfig;
+  /**
+   * Skill template config schema
+   */
+  tplConfigSchema?: SkillTemplateConfigSchema;
+  /**
    * Skill invocation config
    */
   invocationConfig: SkillInvocationConfig;
+  /**
+   * Skill pinned time
+   */
+  pinnedAt?: string;
   /**
    * Skill creation time
    */
@@ -403,6 +517,10 @@ export type SkillJob = {
    * Skill context
    */
   context: PopulatedSkillContext;
+  /**
+   * Skill template config
+   */
+  tplConfig?: SkillTemplateConfig;
   /**
    * Job creation time
    */
@@ -1120,6 +1238,10 @@ export type SkillInstanceCreateParam = {
    * Skill description
    */
   description?: string;
+  /**
+   * Skill template config
+   */
+  tplConfig?: SkillTemplateConfig;
 };
 
 export type CreateSkillInstanceRequest = {
@@ -1149,6 +1271,10 @@ export type UpdateSkillInstanceRequest = {
    * Skill description
    */
   description?: string;
+  /**
+   * Skill template config
+   */
+  tplConfig?: SkillTemplateConfig;
 };
 
 export type UpdateSkillInstanceResponse = BaseResponse & {
@@ -1156,6 +1282,20 @@ export type UpdateSkillInstanceResponse = BaseResponse & {
    * Skill instance list
    */
   data?: SkillInstance;
+};
+
+export type PinSkillInstanceRequest = {
+  /**
+   * Skill ID to pin
+   */
+  skillId: string;
+};
+
+export type UnpinSkillInstanceRequest = {
+  /**
+   * Skill ID to unpin
+   */
+  skillId: string;
 };
 
 export type DeleteSkillInstanceRequest = {
@@ -1226,7 +1366,13 @@ export type PopulatedSkillContext = SkillContext & {
 
 export type SkillInputKey = 'query';
 
-export type SkillContextKey = 'resourceIds' | 'collectionIds' | 'noteIds' | 'contentList' | 'urls';
+export type SkillContextKey =
+  | 'resourceIds'
+  | 'externalResources'
+  | 'collectionIds'
+  | 'noteIds'
+  | 'contentList'
+  | 'urls';
 
 export type SkillInvocationRule = {
   /**
@@ -1234,20 +1380,37 @@ export type SkillInvocationRule = {
    */
   key: SkillInputKey | SkillContextKey;
   /**
-   * Whether the key is required
+   * Maximum number of items
+   */
+  limit?: number;
+  /**
+   * Whether this key is required (default is false)
    */
   required?: boolean;
 };
 
+export type InvocationRuleGroupRelation = 'regular' | 'mutuallyExclusive';
+
+export type SkillInvocationRuleGroup = {
+  /**
+   * Skill invocation rules
+   */
+  rules: Array<SkillInvocationRule>;
+  /**
+   * Group relation
+   */
+  relation?: InvocationRuleGroupRelation;
+};
+
 export type SkillInvocationConfig = {
   /**
-   * Skill input rules
+   * Skill input rule group
    */
-  inputRules: Array<SkillInvocationRule>;
+  input?: SkillInvocationRuleGroup;
   /**
-   * Skill context rules
+   * Skill context rule group
    */
-  contextRules: Array<SkillInvocationRule>;
+  context?: SkillInvocationRuleGroup;
 };
 
 /**
@@ -1264,6 +1427,10 @@ export type InvokeSkillRequest = {
    * Skill invocation context
    */
   context?: SkillContext;
+  /**
+   * Skill template config
+   */
+  tplConfig?: SkillTemplateConfig;
   /**
    * Skill instance ID to invoke (if not provided, skill scheduler will be used)
    */
@@ -1325,6 +1492,10 @@ export type SkillTriggerCreateParam = {
    * Skill invocation context
    */
   context?: SkillContext;
+  /**
+   * Skill template config
+   */
+  tplConfig?: SkillTemplateConfig;
   /**
    * Whether this trigger is enabled
    */
@@ -1931,6 +2102,10 @@ export type ListSkillInstancesData = {
      * Skill ID
      */
     skillId?: string;
+    /**
+     * Whether to sort by pinned skill instances
+     */
+    sortByPin?: boolean;
   };
 };
 
@@ -1959,6 +2134,22 @@ export type UpdateSkillInstanceData = {
 export type UpdateSkillInstanceResponse2 = UpdateSkillInstanceResponse;
 
 export type UpdateSkillInstanceError = unknown;
+
+export type PinSkillInstanceData = {
+  body: PinSkillInstanceRequest;
+};
+
+export type PinSkillInstanceResponse = BaseResponse;
+
+export type PinSkillInstanceError = unknown;
+
+export type UnpinSkillInstanceData = {
+  body: UnpinSkillInstanceRequest;
+};
+
+export type UnpinSkillInstanceResponse = BaseResponse;
+
+export type UnpinSkillInstanceError = unknown;
 
 export type DeleteSkillInstanceData = {
   body: DeleteSkillInstanceRequest;
@@ -2462,6 +2653,28 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': UpdateSkillInstanceResponse;
+      };
+    };
+  };
+  '/skill/instance/pin': {
+    post: {
+      req: PinSkillInstanceData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': BaseResponse;
+      };
+    };
+  };
+  '/skill/instance/unpin': {
+    post: {
+      req: UnpinSkillInstanceData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': BaseResponse;
       };
     };
   };

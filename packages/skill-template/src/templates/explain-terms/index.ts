@@ -5,7 +5,7 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 // schema
 import { z } from 'zod';
-import { SkillInvocationConfig } from '@refly/openapi-schema';
+import { SkillInvocationConfig, SkillTemplateConfigSchema } from '@refly/openapi-schema';
 
 interface GraphState extends BaseSkillState {
   documents: Document[];
@@ -21,9 +21,17 @@ export class ExplainTermsSkill extends BaseSkill {
     'zh-CN': '解释术语',
   };
 
+  configSchema: SkillTemplateConfigSchema = {
+    items: [],
+  };
+
   invocationConfig: SkillInvocationConfig = {
-    inputRules: [{ key: 'query' }],
-    contextRules: [{ key: 'contentList' }],
+    input: {
+      rules: [{ key: 'query' }],
+    },
+    context: {
+      rules: [{ key: 'contentList' }],
+    },
   };
 
   description = 'Explain the terms in the content';

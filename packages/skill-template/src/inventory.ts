@@ -13,8 +13,6 @@ import {
   ExplainTermsSkill,
   TranslateSkill,
   FindRelatedContent,
-  FindRelatedWithNote,
-  FindRelatedWithResource,
   BrainstormIdeasSkill,
   ChangeToneSkill,
   ContinueWritingSkill,
@@ -27,6 +25,8 @@ import {
   LanguageSimplificationSkill,
   MakeShorterSkill,
   MakeLongerSkill,
+  ArxivSummarySkill,
+  WebsiteSummarySkill,
 } from './templates';
 
 export const createSkillInventory = (engine: SkillEngine): BaseSkill[] => {
@@ -43,8 +43,6 @@ export const createSkillInventory = (engine: SkillEngine): BaseSkill[] => {
     new ExplainTermsSkill(engine),
     new TranslateSkill(engine),
     new FindRelatedContent(engine),
-    new FindRelatedWithNote(engine),
-    new FindRelatedWithResource(engine),
     new BrainstormIdeasSkill(engine),
     new ChangeToneSkill(engine),
     new ContinueWritingSkill(engine),
@@ -57,5 +55,7 @@ export const createSkillInventory = (engine: SkillEngine): BaseSkill[] => {
     new LanguageSimplificationSkill(engine),
     new MakeShorterSkill(engine),
     new MakeLongerSkill(engine),
+    new ArxivSummarySkill(engine),
+    new WebsiteSummarySkill(engine),
   ];
 };

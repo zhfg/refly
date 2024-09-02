@@ -108,6 +108,7 @@ export const ResourceList = () => {
                   <DeleteDropdownMenu
                     data={item}
                     type="resource"
+                    deleteConfirmPosition="lb"
                     postDeleteList={(resource: Resource) =>
                       setDataList(dataList.filter((n) => n.resourceId !== resource.resourceId))
                     }

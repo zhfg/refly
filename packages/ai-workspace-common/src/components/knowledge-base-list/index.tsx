@@ -127,6 +127,7 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
                   </IconTip>
                   <DeleteDropdownMenu
                     type="knowledgeBase"
+                    deleteConfirmPosition="lb"
                     data={item}
                     postDeleteList={(collection: Collection) =>
                       setDataList(dataList.filter((n) => n.collectionId !== collection.collectionId))

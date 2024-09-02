@@ -3,7 +3,14 @@ import { EventEmitter } from 'node:events';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
-import { Conversation, SkillInstance, SkillTrigger, MessageType, SkillJob } from '@prisma/client';
+import {
+  Prisma,
+  Conversation,
+  SkillInstance,
+  SkillTrigger,
+  SkillJob,
+  ChatMessage,
+} from '@prisma/client';
 import { Response } from 'express';
 import { AIMessageChunk, BaseMessage } from '@langchain/core/dist/messages';
 import {
@@ -14,6 +21,9 @@ import {
   InvokeSkillRequest,
   ListSkillInstancesData,
   ListSkillJobsData,
+  ListSkillTemplatesData,
+  ListSkillTriggersData,
+  PinSkillInstanceRequest,
   PopulatedSkillContext,
   SkillContext,
   SkillMeta,
@@ -21,6 +31,7 @@ import {
   SkillTriggerCreateParam,
   TimerInterval,
   TimerTriggerConfig,
+  UnpinSkillInstanceRequest,
   UpdateSkillInstanceRequest,
   UpdateSkillTriggerRequest,
   User,
@@ -54,16 +65,25 @@ import { SearchService } from '@/search/search.service';
 import { LabelService } from '@/label/label.service';
 import { labelClassPO2DTO, labelPO2DTO } from '@/label/label.dto';
 
-export function createLangchainMessage(content: string, type: MessageType): BaseMessage {
-  switch (type) {
+export function createLangchainMessage(message: ChatMessage): BaseMessage {
+  const messageData = {
+    content: message.content,
+    additional_kwargs: {
+      logs: JSON.parse(message.logs),
+      skillMeta: JSON.parse(message.skillMeta),
+      structuredData: JSON.parse(message.structuredData),
+    },
+  };
+
+  switch (message.type) {
     case 'ai':
-      return new AIMessage({ content });
+      return new AIMessage(messageData);
     case 'human':
-      return new HumanMessage({ content });
+      return new HumanMessage(messageData);
     case 'system':
-      return new SystemMessage({ content });
+      return new SystemMessage(messageData);
     default:
-      throw new Error(`invalid message source: ${type}`);
+      throw new Error(`invalid message source: ${message.type}`);
   }
 }
 
@@ -164,19 +184,30 @@ export class SkillService {
     this.skillInventory = createSkillInventory(this.skillEngine);
   }
 
-  listSkillTemplates(user: User): SkillTemplate[] {
-    return this.skillInventory.map((skill) => ({
+  listSkillTemplates(user: User, param: ListSkillTemplatesData['query']): SkillTemplate[] {
+    const { page, pageSize } = param;
+    const locale = user.uiLocale || 'en';
+    const templates = this.skillInventory.map((skill) => ({
       name: skill.name,
-      displayName: skill.displayName[user.uiLocale || 'en'],
+      displayName: skill.displayName[locale],
       description: skill.description,
+      configSchema: skill.configSchema,
     }));
+
+    return templates.slice((page - 1) * pageSize, page * pageSize);
   }
 
   async listSkillInstances(user: User, param: ListSkillInstancesData['query']) {
-    const { skillId, page, pageSize } = param;
+    const { skillId, sortByPin, page, pageSize } = param;
+
+    const orderBy: Prisma.SkillInstanceOrderByWithRelationInput[] = [{ updatedAt: 'desc' }];
+    if (sortByPin) {
+      orderBy.unshift({ pinnedAt: { sort: 'desc', nulls: 'last' } });
+    }
+
     return this.prisma.skillInstance.findMany({
       where: { skillId, uid: user.uid, deletedAt: null },
-      orderBy: { updatedAt: 'desc' },
+      orderBy,
       take: pageSize,
       skip: (page - 1) * pageSize,
     });
@@ -203,14 +234,22 @@ export class SkillService {
         skillId: genSkillID(),
         uid,
         ...pick(instance, ['tplName', 'displayName', 'description']),
-        invocationConfig: JSON.stringify(tplConfigMap.get(instance.tplName)?.invocationConfig),
+        ...{
+          tplConfig: instance.tplConfig ? JSON.stringify(instance.tplConfig) : undefined,
+          configSchema: tplConfigMap.get(instance.tplName)?.configSchema
+            ? JSON.stringify(tplConfigMap.get(instance.tplName)?.configSchema)
+            : undefined,
+          invocationConfig: tplConfigMap.get(instance.tplName)?.invocationConfig
+            ? JSON.stringify(tplConfigMap.get(instance.tplName)?.invocationConfig)
+            : undefined,
+        },
       })),
     });
   }
 
   async updateSkillInstance(user: User, param: UpdateSkillInstanceRequest) {
     const { uid } = user;
-    const { skillId, displayName, description } = param;
+    const { skillId } = param;
 
     if (!skillId) {
       throw new BadRequestException('skill id is required');
@@ -218,7 +257,38 @@ export class SkillService {
 
     return this.prisma.skillInstance.update({
       where: { skillId, uid, deletedAt: null },
-      data: { displayName, description },
+      data: {
+        ...pick(param, ['displayName', 'description']),
+        tplConfig: param.tplConfig ? JSON.stringify(param.tplConfig) : undefined,
+      },
+    });
+  }
+
+  async pinSkillInstance(user: User, param: PinSkillInstanceRequest) {
+    const { uid } = user;
+    const { skillId } = param;
+
+    if (!skillId) {
+      throw new BadRequestException('skill id is required');
+    }
+
+    return this.prisma.skillInstance.update({
+      where: { skillId, uid, deletedAt: null },
+      data: { pinnedAt: new Date() },
+    });
+  }
+
+  async unpinSkillInstance(user: User, param: UnpinSkillInstanceRequest) {
+    const { uid } = user;
+    const { skillId } = param;
+
+    if (!skillId) {
+      throw new BadRequestException('skill id is required');
+    }
+
+    return this.prisma.skillInstance.update({
+      where: { skillId, uid, deletedAt: null },
+      data: { pinnedAt: null },
     });
   }
 
@@ -327,6 +397,7 @@ export class SkillService {
         skillDisplayName: skill?.displayName ?? 'Scheduler',
         input: JSON.stringify(input),
         context: JSON.stringify(contextCopy ?? {}),
+        tplConfig: JSON.stringify(param.tplConfig ?? {}),
         status: 'running',
         triggerId,
         convId,
@@ -336,7 +407,9 @@ export class SkillService {
 
   async sendInvokeSkillTask(user: User, param: InvokeSkillRequest) {
     const skill = await this.skillInvokePreCheck(user, param);
+
     param.context = await this.populateSkillContext(user, param.context);
+    param.tplConfig = { ...JSON.parse(skill?.tplConfig ?? '{}'), ...param.tplConfig };
 
     const job = await this.createSkillJob(user, { ...param, skill });
 
@@ -360,6 +433,15 @@ export class SkillService {
     await this.streamInvokeSkill(user, param, null, jobId);
   }
 
+  async invokeSkillFromApi(user: User, param: InvokeSkillRequest) {
+    const skill = await this.skillInvokePreCheck(user, param);
+
+    param.context = await this.populateSkillContext(user, param.context);
+    param.tplConfig = { ...JSON.parse(skill?.tplConfig ?? '{}'), ...param.tplConfig };
+
+    return this.streamInvokeSkill(user, param);
+  }
+
   async buildInvokeConfig(data: {
     user: User;
     skill: SkillInstance;
@@ -377,8 +459,9 @@ export class SkillService {
     const config: SkillRunnableConfig = {
       configurable: {
         ...param.context,
-        convId: param.convId,
         installedSkills,
+        convId: param.convId,
+        tplConfig: param.tplConfig,
       },
       user,
     };
@@ -392,9 +475,7 @@ export class SkillService {
         where: { convId: conversation.convId },
         orderBy: { createdAt: 'asc' },
       });
-      config.configurable.chatHistory = messages.map((m) =>
-        createLangchainMessage(m.content, m.type),
-      );
+      config.configurable.chatHistory = messages.map((m) => createLangchainMessage(m));
     }
 
     if (eventListener) {
@@ -577,7 +658,7 @@ export class SkillService {
     }
   }
 
-  async listSkillTriggers(user: User, param: ListSkillInstancesData['query']) {
+  async listSkillTriggers(user: User, param: ListSkillTriggersData['query']) {
     const { skillId, page = 1, pageSize = 10 } = param!;
 
     return this.prisma.skillTrigger.findMany({
@@ -615,6 +696,7 @@ export class SkillService {
       {
         input: JSON.parse(trigger.input || '{}'),
         context: JSON.parse(trigger.context || '{}'),
+        tplConfig: JSON.parse(trigger.tplConfig || '{}'),
         skillId: trigger.skillId,
         triggerId: trigger.triggerId,
         uid: user.uid,
@@ -667,6 +749,7 @@ export class SkillService {
           timerConfig: trigger.timerConfig ? JSON.stringify(trigger.timerConfig) : undefined,
           input: trigger.input ? JSON.stringify(trigger.input) : undefined,
           context: trigger.context ? JSON.stringify(trigger.context) : undefined,
+          tplConfig: trigger.tplConfig ? JSON.stringify(trigger.tplConfig) : undefined,
         },
         enabled: !!trigger.enabled,
       })),
@@ -696,6 +779,7 @@ export class SkillService {
           timerConfig: param.timerConfig ? JSON.stringify(param.timerConfig) : undefined,
           input: param.input ? JSON.stringify(param.input) : undefined,
           context: param.context ? JSON.stringify(param.context) : undefined,
+          tplConfig: param.tplConfig ? JSON.stringify(param.tplConfig) : undefined,
         },
       },
     });

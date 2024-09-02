@@ -15,8 +15,11 @@ const iconStyle = {
   transform: 'translateY(1px)',
 };
 
+type positionType = 'left' | 'tr' | 'br' | 'tl' | 'bl' | 'top' | 'bottom' | 'right' | 'lb' | 'rb' | 'lt' | 'rt';
+
 interface DropListProps {
   type: string;
+  position?: positionType;
   handleCancel: (e: any) => void;
   handleDeleteClick: (e: any) => void;
   handlEditKnowledgeBase?: (e: any) => void;
@@ -24,7 +27,7 @@ interface DropListProps {
 }
 
 const DropList = (props: DropListProps) => {
-  const { handleCancel, handleDeleteClick, handlEditKnowledgeBase, type, getPopupContainer } = props;
+  const { handleCancel, handleDeleteClick, handlEditKnowledgeBase, type, getPopupContainer, position } = props;
   const { t } = useTranslation();
 
   return (
@@ -41,12 +44,10 @@ const DropList = (props: DropListProps) => {
         <Popconfirm
           focusLock
           getPopupContainer={getPopupContainer}
-          title={t(
-            `workspace.deleteDropdownMenu.deleteConfirmFor${type.replace(type[0], type[0].toLocaleUpperCase())}`,
-          )}
+          title={t(`common.deleteConfirmMessage`)}
           okText={t('common.confirm')}
           cancelText={t('common.cancel')}
-          position="br"
+          position={position || 'br'}
           onOk={(e) => {
             handleDeleteClick(e);
           }}
@@ -67,6 +68,7 @@ const DropList = (props: DropListProps) => {
 interface DeleteDropdownMenuProps {
   postDeleteList?: (note: Note | Collection | Resource | RemoveResourceFromCollectionRequest) => void;
   getPopupContainer?: () => HTMLElement;
+  deleteConfirmPosition?: positionType;
 }
 
 interface NotePros extends DeleteDropdownMenuProps {
@@ -90,7 +92,7 @@ interface ResourceCollectionPros extends DeleteDropdownMenuProps {
 }
 
 export const DeleteDropdownMenu = (props: NotePros | KnowledgeBasePros | ResourcePros | ResourceCollectionPros) => {
-  const { type, data, postDeleteList, getPopupContainer } = props;
+  const { type, data, postDeleteList, getPopupContainer, deleteConfirmPosition } = props;
   const [popupVisible, setPopupVisible] = useState(false);
   const { t } = useTranslation();
 
@@ -146,7 +148,14 @@ export const DeleteDropdownMenu = (props: NotePros | KnowledgeBasePros | Resourc
     setPopupVisible(!popupVisible);
   };
 
-  const droplist = DropList({ handleCancel, handleDeleteClick, handlEditKnowledgeBase, type, getPopupContainer });
+  const droplist = DropList({
+    type,
+    position: deleteConfirmPosition,
+    handleCancel,
+    handleDeleteClick,
+    handlEditKnowledgeBase,
+    getPopupContainer,
+  });
 
   return (
     <Dropdown

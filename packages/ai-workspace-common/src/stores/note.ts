@@ -35,6 +35,11 @@ interface NoteBaseState {
   noteCharsCount: number;
   noteSaveStatus: NoteSaveStatus;
 
+  beforeSelectionNoteContent: string;
+  afterSelectionNoteContent: string;
+  currentSelectionContent: string;
+  lastCursorPosRef: number | null;
+
   updateCurrentNote: (note: Note) => void;
   updateIsRequesting: (isRequesting: boolean) => void;
   updateTabs: (tabs: NoteTab[]) => void;
@@ -44,6 +49,10 @@ interface NoteBaseState {
   updateNoteSaveStatus: (status: NoteSaveStatus) => void;
   updateNoteCharsCount: (count: number) => void;
   updateEditor: (editor: EditorInstance) => void;
+  updateBeforeSelectionNoteContent: (content: string) => void;
+  updateAfterSelectionNoteContent: (content: string) => void;
+  updateLastCursorPosRef: (pos: number) => void;
+  updateCurrentSelectionContent: (content: string) => void;
 }
 
 export const defaultState = {
@@ -58,6 +67,12 @@ export const defaultState = {
   noteServerStatus: 'disconnected' as NoteServerStatus,
   noteCharsCount: 0,
   noteSaveStatus: 'Unsaved' as NoteSaveStatus,
+
+  // note selection status content, main for skill consume
+  beforeSelectionNoteContent: '',
+  afterSelectionNoteContent: '',
+  lastCursorPosRef: null,
+  currentSelectionContent: '',
 };
 
 export const useNoteStore = create<NoteBaseState>()(
@@ -77,5 +92,12 @@ export const useNoteStore = create<NoteBaseState>()(
     updateNoteServerStatus: (status: NoteServerStatus) => set((state) => ({ ...state, noteServerStatus: status })),
     updateNoteSaveStatus: (status: NoteSaveStatus) => set((state) => ({ ...state, noteSaveStatus: status })),
     updateNoteCharsCount: (count: number) => set((state) => ({ ...state, noteCharsCount: count })),
+    updateBeforeSelectionNoteContent: (content: string) =>
+      set((state) => ({ ...state, beforeSelectionNoteContent: content })),
+    updateAfterSelectionNoteContent: (content: string) =>
+      set((state) => ({ ...state, afterSelectionNoteContent: content })),
+    updateLastCursorPosRef: (pos: number) => set((state) => ({ ...state, lastCursorPosRef: pos })),
+    updateCurrentSelectionContent: (content: string) =>
+      set((state) => ({ ...state, currentSelectionContent: content })),
   })),
 );

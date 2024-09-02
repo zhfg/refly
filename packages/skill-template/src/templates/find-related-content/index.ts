@@ -4,34 +4,78 @@ import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { AIMessage, BaseMessage, SystemMessage } from '@langchain/core/messages';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 import { ReflySearch } from '../../tools/refly-search';
-import { SearchResponse, Source, SkillInvocationConfig } from '@refly/openapi-schema';
+import {
+  SearchResponse,
+  Source,
+  SkillInvocationConfig,
+  SkillTemplateConfigSchema,
+  SearchDomain,
+} from '@refly/openapi-schema';
 
 interface GraphState extends BaseSkillState {
   messages: BaseMessage[];
-  /**
-   * Optimized query for semantic retrieval.
-   */
-  betterQuestion: string;
   /**
    * Retrieved sources from the knowledge base.
    */
   sources: Source[];
 }
 
-export class FindRelatedWithResource extends BaseSkill {
-  name = 'find_related_with_resource';
+export class FindRelatedContent extends BaseSkill {
+  name = 'find_related_content';
 
   displayName = {
-    en: 'Find Related With Resource',
-    'zh-CN': '查找相关资源',
+    en: 'Find Related Content',
+    'zh-CN': '查找相关内容',
+  };
+
+  configSchema: SkillTemplateConfigSchema = {
+    items: [
+      {
+        key: 'domains',
+        inputMode: 'multiSelect',
+        labelDict: {
+          en: 'Search Domains',
+          'zh-CN': '搜索范围',
+        },
+        descriptionDict: {
+          en: 'The domains to search related content',
+          'zh-CN': '搜索相关内容的范围',
+        },
+        options: [
+          {
+            value: 'resource',
+            labelDict: {
+              en: 'Resource',
+              'zh-CN': '资源',
+            },
+          },
+          {
+            value: 'note',
+            labelDict: {
+              en: 'Note',
+              'zh-CN': '笔记',
+            },
+          },
+        ],
+      },
+    ],
   };
 
   invocationConfig: SkillInvocationConfig = {
-    inputRules: [{ key: 'query', required: true }],
-    contextRules: [],
+    input: {
+      rules: [{ key: 'query' }],
+    },
+    context: {
+      rules: [
+        { key: 'resourceIds', limit: 1 },
+        { key: 'noteIds', limit: 1 },
+        { key: 'contentList', limit: 1 },
+      ],
+      relation: 'mutuallyExclusive',
+    },
   };
 
-  description = 'Search for relevant information in the knowledge base.';
+  description = 'Find related content from the knowledge base.';
 
   schema = z.object({
     query: z.string().describe('The search query'),
@@ -42,10 +86,6 @@ export class FindRelatedWithResource extends BaseSkill {
     messages: {
       reducer: (x: BaseMessage[], y: BaseMessage[]) => x.concat(y),
       default: () => [],
-    },
-    betterQuestion: {
-      reducer: (left?: string, right?: string) => (right ? right : left || ''),
-      default: () => '',
     },
     sources: {
       reducer: (left?: Source[], right?: Source[]) => (right ? right : left || []) as Source[],
@@ -62,12 +102,17 @@ export class FindRelatedWithResource extends BaseSkill {
   retrieve = async (state: GraphState, config: SkillRunnableConfig) => {
     const { user } = config;
 
-    const { resourceIds = [] } = config?.configurable || {};
-    const lastResourceId = resourceIds[resourceIds.length - 1];
-    const lastResource = await this.engine.service.getResourceDetail(user, {
-      resourceId: lastResourceId,
-    });
-    const content = lastResource?.data?.content;
+    const { resources, notes, contentList, tplConfig = {} } = config?.configurable || {};
+
+    let content = '';
+
+    if (resources?.length > 0) {
+      content = resources[0].content;
+    } else if (notes?.length > 0) {
+      content = notes[0].content;
+    } else if (contentList?.length > 0) {
+      content = contentList.join('\n\n');
+    }
 
     this.emitEvent(
       {
@@ -79,7 +124,12 @@ export class FindRelatedWithResource extends BaseSkill {
 
     // TODO: implement given resourceIds and collectionIds q&a @mrcfps
 
-    const tool = new ReflySearch({ engine: this.engine, user });
+    const tool = new ReflySearch({
+      engine: this.engine,
+      user,
+      domains: tplConfig.domains.value as SearchDomain[],
+      mode: 'vector',
+    });
     const output = await tool.invoke(content, config);
     const searchResp = JSON.parse(output) as SearchResponse;
 
@@ -90,7 +140,7 @@ export class FindRelatedWithResource extends BaseSkill {
     const sources: Source[] = searchResp.data?.map((result) => ({
       url: result.metadata?.resourceMeta?.url,
       title: result.title,
-      pageContent: result.content.join('\n'),
+      pageContent: result.content?.join('\n'),
       metadata: {
         resourceId: result.id,
         resourceName: result.title,

@@ -13,6 +13,9 @@
     "putSuccess": "Operation Successful",
     "deleteConfirmMessage": "Are you sure you want to delete?",
     "multiSelect": "Multi-select",
+    "input": "Input",
+    "context": "Context",
+    "templateConfig": "Template Config",
     "required": "This item is required"
   },
   "systemMaintenanceShutdown": {
@@ -379,6 +382,15 @@
       "skillTemplate": "Skill templates"
     },
     "createFromTemplate": "Create from template",
+    "skillManagement": {
+      "searchPlaceholder": "Search for skill",
+      "removedFromTop": "Removed from the top list",
+      "toppedSuccessfully": "Topped successfully",
+      "toppedLimit": "Topped skill limit reached, please cancel the top first",
+      "alreadyTopped": "Already topped",
+      "addToTop": "Top",
+      "removeFromTop": "Cancel top"
+    },
     "newSkillModal": {
       "newTitle": "Add New Skill",
       "updateTitle": "Update Skill",
@@ -389,18 +401,20 @@
       "cancel": "Cancel",
       "confirm": "Confirm",
       "putErr": "Failed. Please try again.",
-      "putSuccess": "successfully"
+      "putSuccess": "successfully",
+      "basicInfo": "Basic Info"
     },
     "newTriggerModal": {
       "newTitle": "Add New Trigger",
       "updateTitle": "Update Trigger",
+      "triggerConfig": "Trigger Config",
       "name": "Name",
       "namePlaceholder": "Please enter the name of the trigger",
       "triggerType": "Trigger Type",
       "triggerTypePlaceholder": "Please select the type of the trigger",
       "timer": "Timer",
       "simpleEvent": "Simple Event",
-      "onResourceReady": "On Resource Ready",
+      "onResourceReady": "When resource is ready",
       "timerConfig": "Time",
       "timerConfigPlaceholder": "Please select the time of the trigger",
       "repeatInterval": "Repeat Interval",
@@ -432,7 +446,9 @@
         "collectionIds": "Please select collection",
         "contentList": "Please enter or paste content",
         "urls": "Please enter URLs, one per line"
-      }
+      },
+      "invokeConfig": "Invocation Config",
+      "templateConfig": "Template Config"
     },
     "skillDetail": {
       "run": "Run",
@@ -444,7 +460,6 @@
       "emptyJobs": "No Jobs",
       "emptyTriggers": "Please configure triggers first",
       "emptyInstances": "No Skill Instances",
-      "emptyTemplates": "No Skill Templates",
       "enable": "Enable",
       "disable": "Disable"
     },

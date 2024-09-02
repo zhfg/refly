@@ -714,6 +714,12 @@ paths:
           description: Skill ID
           schema:
             type: string
+        - name: sortByPin
+          in: query
+          description: Whether to sort by pinned skill instances
+          schema:
+            type: boolean
+            default: false
         - name: page
           in: query
           description: Page number
@@ -775,6 +781,46 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UpdateSkillInstanceResponse'
+  /skill/instance/pin:
+    post:
+      tags:
+        - skill
+      summary: Pin skill instance
+      description: Pin an existing skill instance
+      operationId: pinSkillInstance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PinSkillInstanceRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+  /skill/instance/unpin:
+    post:
+      tags:
+        - skill
+      summary: Unpin skill instance
+      description: Unpin an existing skill instance
+      operationId: unpinSkillInstance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnpinSkillInstanceRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
   /skill/instance/delete:
     post:
       tags:
@@ -1375,6 +1421,99 @@ components:
           type: string
           description: Label value
           example: HotPotQA
+    InputMode:
+      type: string
+      description: Data input mode
+      enum:
+        - input
+        - inputNumber
+        - select
+        - multiSelect
+    SelectOption:
+      type: object
+      description: Select option
+      required:
+        - value
+      properties:
+        value:
+          type: string
+          description: Option value
+        labelDict:
+          type: object
+          description: Option label (key is locale, value is label)
+          additionalProperties:
+            type: string
+        disabled:
+          type: boolean
+          description: Whether this option is disabled
+          default: false
+    DynamicConfigItem:
+      type: object
+      description: Dynamic config item
+      required:
+        - key
+        - inputMode
+        - labelDict
+        - descriptionDict
+      properties:
+        key:
+          type: string
+          description: Config key
+        inputMode:
+          description: Config input mode
+          $ref: '#/components/schemas/InputMode'
+        required:
+          type: boolean
+          description: Whether this config is required
+          default: false
+        labelDict:
+          type: object
+          description: Config label (key is locale, value is label)
+          additionalProperties:
+            type: string
+        descriptionDict:
+          type: object
+          description: Config description (key is locale, value is description)
+          additionalProperties:
+            type: string
+        options:
+          type: array
+          description: Config options
+          items:
+            $ref: '#/components/schemas/SelectOption'
+    DynamicConfigValue:
+      type: object
+      description: Dynamic config value
+      required:
+        - label
+        - value
+        - displayValue
+      properties:
+        label:
+          type: string
+          description: Config key label
+        value:
+          oneOf:
+            - type: string
+            - type: number
+            - type: array
+              items:
+                type: string
+          description: Config value
+        displayValue:
+          type: string
+          description: Config display value
+    SkillTemplateConfigSchema:
+      type: object
+      description: Skill template config schema
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          description: Config items
+          items:
+            $ref: '#/components/schemas/DynamicConfigItem'
     SkillTemplate:
       type: object
       description: Skill template
@@ -1391,6 +1530,9 @@ components:
         description:
           type: string
           description: Skill template description
+        configSchema:
+          description: Skill template config schema
+          $ref: '#/components/schemas/SkillTemplateConfigSchema'
     SkillTriggerType:
       type: string
       description: Skill trigger type
@@ -1481,6 +1623,9 @@ components:
         context:
           description: Skill context
           $ref: '#/components/schemas/SkillContext'
+        tplConfig:
+          description: Skill template config
+          $ref: '#/components/schemas/SkillTemplateConfig'
         enabled:
           type: boolean
           description: Trigger enabled
@@ -1508,6 +1653,12 @@ components:
           type: string
           description: Skill ID
           example: sk-g30e1b80b5g1itbemc0g5jj3
+    SkillTemplateConfig:
+      type: object
+      description: Skill template config (key is config item key, value is config value)
+      additionalProperties:
+        description: Skill template config value
+        $ref: '#/components/schemas/DynamicConfigValue'
     SkillInstance:
       type: object
       description: Skill
@@ -1522,9 +1673,19 @@ components:
             description:
               type: string
               description: Skill instance description
+            tplConfig:
+              description: Skill template config
+              $ref: '#/components/schemas/SkillTemplateConfig'
+            tplConfigSchema:
+              description: Skill template config schema
+              $ref: '#/components/schemas/SkillTemplateConfigSchema'
             invocationConfig:
               description: Skill invocation config
               $ref: '#/components/schemas/SkillInvocationConfig'
+            pinnedAt:
+              type: string
+              format: date-time
+              description: Skill pinned time
             createdAt:
               type: string
               format: date-time
@@ -1571,6 +1732,9 @@ components:
         context:
           description: Skill context
           $ref: '#/components/schemas/PopulatedSkillContext'
+        tplConfig:
+          description: Skill template config
+          $ref: '#/components/schemas/SkillTemplateConfig'
         createdAt:
           type: string
           format: date-time
@@ -2360,6 +2524,9 @@ components:
         description:
           type: string
           description: Skill description
+        tplConfig:
+          description: Skill template config
+          $ref: '#/components/schemas/SkillTemplateConfig'
     CreateSkillInstanceRequest:
       type: object
       required:
@@ -2396,6 +2563,9 @@ components:
         description:
           type: string
           description: Skill description
+        tplConfig:
+          description: Skill template config
+          $ref: '#/components/schemas/SkillTemplateConfig'
     UpdateSkillInstanceResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -2404,6 +2574,22 @@ components:
             data:
               description: Skill instance list
               $ref: '#/components/schemas/SkillInstance'
+    PinSkillInstanceRequest:
+      type: object
+      required:
+        - skillId
+      properties:
+        skillId:
+          type: string
+          description: Skill ID to pin
+    UnpinSkillInstanceRequest:
+      type: object
+      required:
+        - skillId
+      properties:
+        skillId:
+          type: string
+          description: Skill ID to unpin
     DeleteSkillInstanceRequest:
       type: object
       required:
@@ -2486,6 +2672,7 @@ components:
       type: string
       enum:
         - resourceIds
+        - externalResources
         - collectionIds
         - noteIds
         - contentList
@@ -2501,25 +2688,42 @@ components:
           oneOf:
             - $ref: '#/components/schemas/SkillInputKey'
             - $ref: '#/components/schemas/SkillContextKey'
+        limit:
+          type: number
+          description: Maximum number of items
+          default: 10
         required:
           type: boolean
-          description: Whether the key is required
-    SkillInvocationConfig:
+          description: Whether this key is required (default is false)
+    InvocationRuleGroupRelation:
+      type: string
+      enum:
+        - regular
+        - mutuallyExclusive
+    SkillInvocationRuleGroup:
       type: object
       required:
-        - inputRules
-        - contextRules
+        - rules
       properties:
-        inputRules:
+        rules:
           type: array
-          description: Skill input rules
+          description: Skill invocation rules
           items:
             $ref: '#/components/schemas/SkillInvocationRule'
-        contextRules:
-          type: array
-          description: Skill context rules
-          items:
-            $ref: '#/components/schemas/SkillInvocationRule'
+        relation:
+          type: string
+          description: Group relation
+          default: regular
+          $ref: '#/components/schemas/InvocationRuleGroupRelation'
+    SkillInvocationConfig:
+      type: object
+      properties:
+        input:
+          description: Skill input rule group
+          $ref: '#/components/schemas/SkillInvocationRuleGroup'
+        context:
+          description: Skill context rule group
+          $ref: '#/components/schemas/SkillInvocationRuleGroup'
     SkillJobStatus:
       type: string
       description: Skill job status
@@ -2537,6 +2741,9 @@ components:
         context:
           description: Skill invocation context
           $ref: '#/components/schemas/SkillContext'
+        tplConfig:
+          description: Skill template config
+          $ref: '#/components/schemas/SkillTemplateConfig'
         skillId:
           type: string
           description: Skill instance ID to invoke (if not provided, skill scheduler will be used)
@@ -2598,6 +2805,9 @@ components:
         context:
           description: Skill invocation context
           $ref: '#/components/schemas/SkillContext'
+        tplConfig:
+          description: Skill template config
+          $ref: '#/components/schemas/SkillTemplateConfig'
         enabled:
           type: boolean
           description: Whether this trigger is enabled

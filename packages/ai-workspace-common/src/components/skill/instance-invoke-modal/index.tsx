@@ -1,15 +1,16 @@
 import { useState } from 'react';
 
 // components
-import { InvokeOptionComponent } from '@refly-packages/ai-workspace-common/components/skill/RuleOptionComponent';
+import { InvocationFormItems } from '@refly-packages/ai-workspace-common/components/skill/invocation-form-items';
+import { TemplateConfigFormItems } from '@refly-packages/ai-workspace-common/components/skill/template-config-form-items';
 import { useTranslation } from 'react-i18next';
 // store
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import { SkillInstance } from '@refly/openapi-schema';
-import { Modal, Form, Message } from '@arco-design/web-react';
+import { Collapse, Modal, Form, Message } from '@arco-design/web-react';
 
-const FormItem = Form.Item;
+const CollapseItem = Collapse.Item;
 
 const formItemLayout = {
   labelCol: {
@@ -29,33 +30,29 @@ interface InstanceInvokeModalProps {
 
 export const InstanceInvokeModal = (props: InstanceInvokeModalProps) => {
   const { visible, data, setVisible, postConfirmCallback } = props;
+  const { invocationConfig = {}, tplConfigSchema, tplConfig } = data ?? {};
+  const { input, context } = invocationConfig;
   const { t } = useTranslation();
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [form] = Form.useForm();
 
-  const { inputRules = [], contextRules = [] } = data?.invocationConfig || {};
-  const optionItems = [...inputRules, ...contextRules].map((rule) => ({
-    key: rule.key,
-    required: rule.required,
-    formComp: InvokeOptionComponent({ rule, form, t }),
-  }));
-
   const onOk = () => {
     form.validate().then(async (res) => {
-      const { query, resourceIds, noteIds, collectionIds, contentList, urls } = res;
+      const { input, context, tplConfig } = res;
+      const { contentList, urls } = context;
+
       setConfirmLoading(true);
       try {
         const { error: resultError } = await getClient().invokeSkill({
           body: {
             skillId: data.skillId,
-            input: { query },
+            input,
             context: {
-              resourceIds,
-              noteIds,
-              collectionIds,
+              ...context,
               contentList: contentList?.split(/\n\s*\n/),
               urls: urls?.split(/\n\s*\n/),
             },
+            tplConfig,
           },
         });
         if (resultError) {
@@ -79,7 +76,7 @@ export const InstanceInvokeModal = (props: InstanceInvokeModalProps) => {
   return (
     <Modal
       title={t('skill.instanceInvokeModal.title')}
-      style={{ width: 600 }}
+      style={{ width: 750 }}
       visible={visible}
       onOk={onOk}
       okText={t('common.confirm')}
@@ -88,13 +85,30 @@ export const InstanceInvokeModal = (props: InstanceInvokeModalProps) => {
       onCancel={() => setVisible(false)}
     >
       <Form {...formItemLayout} form={form}>
-        {optionItems.map(({ key, required, formComp }) => {
-          return (
-            <FormItem label={t(`skill.instanceInvokeModal.formLabel.${key}`)} key={key} required={required} field={key}>
-              {formComp}
-            </FormItem>
-          );
-        })}
+        <Collapse bordered={false} defaultActiveKey={['input', 'context']}>
+          {input?.rules?.length > 0 && (
+            <CollapseItem name="input" header={t('common.input')}>
+              <InvocationFormItems ruleGroup={data?.invocationConfig.input} form={form} t={t} fieldPrefix="input" />
+            </CollapseItem>
+          )}
+
+          {context?.rules?.length > 0 && (
+            <CollapseItem name="context" header={t('common.context')}>
+              <InvocationFormItems ruleGroup={data?.invocationConfig.context} form={form} t={t} fieldPrefix="context" />
+            </CollapseItem>
+          )}
+
+          {tplConfigSchema?.items?.length > 0 && (
+            <CollapseItem name="templateConfig" header={t('common.templateConfig')}>
+              <TemplateConfigFormItems
+                schema={tplConfigSchema}
+                form={form}
+                tplConfig={tplConfig}
+                fieldPrefix="tplConfig"
+              />
+            </CollapseItem>
+          )}
+        </Collapse>
       </Form>
     </Modal>
   );

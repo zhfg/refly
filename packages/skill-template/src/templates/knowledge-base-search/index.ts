@@ -6,7 +6,7 @@ import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 import { ReflySearch } from '../../tools/refly-search';
-import { SearchResponse, Source, SkillInvocationConfig } from '@refly/openapi-schema';
+import { SearchResponse, Source, SkillInvocationConfig, SkillTemplateConfigSchema } from '@refly/openapi-schema';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 
 interface GraphState extends BaseSkillState {
@@ -29,9 +29,17 @@ export class KnowledgeBaseSearch extends BaseSkill {
     'zh-CN': '知识库搜索',
   };
 
+  configSchema: SkillTemplateConfigSchema = {
+    items: [],
+  };
+
   invocationConfig: SkillInvocationConfig = {
-    inputRules: [{ key: 'query', required: true }],
-    contextRules: [],
+    input: {
+      rules: [{ key: 'query', required: true }],
+    },
+    context: {
+      rules: [],
+    },
   };
 
   description = 'Search for relevant information in the knowledge base and generate answer.';
@@ -128,7 +136,7 @@ export class KnowledgeBaseSearch extends BaseSkill {
     // TODO: implement given resourceIds and collectionIds q&a @mrcfps
     const { resourceIds, collectionIds } = config?.configurable || {};
 
-    const tool = new ReflySearch({ engine: this.engine, user });
+    const tool = new ReflySearch({ engine: this.engine, user, domains: ['resource'], mode: 'vector' });
     const output = await tool.invoke(betterQuestion, config);
     const searchResp = JSON.parse(output) as SearchResponse;
 
