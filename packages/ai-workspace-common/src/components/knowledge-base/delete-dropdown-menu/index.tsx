@@ -15,7 +15,7 @@ const iconStyle = {
   transform: 'translateY(1px)',
 };
 
-type positionType = 'left' | 'tr' | 'br' | 'tl' | 'bl' | 'top' | 'bottom' | 'right';
+type positionType = 'left' | 'tr' | 'br' | 'tl' | 'bl' | 'top' | 'bottom' | 'right' | 'lb' | 'rb' | 'lt' | 'rt';
 
 interface DropListProps {
   type: string;
@@ -44,9 +44,7 @@ const DropList = (props: DropListProps) => {
         <Popconfirm
           focusLock
           getPopupContainer={getPopupContainer}
-          title={t(
-            `workspace.deleteDropdownMenu.deleteConfirmFor${type.replace(type[0], type[0].toLocaleUpperCase())}`,
-          )}
+          title={t(`common.deleteConfirmMessage`)}
           okText={t('common.confirm')}
           cancelText={t('common.cancel')}
           position={position || 'br'}

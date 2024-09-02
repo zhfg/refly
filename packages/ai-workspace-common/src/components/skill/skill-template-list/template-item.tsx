@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Avatar, Button, Typography, Message as message, Tooltip } from '@arco-design/web-react';
 import { NewSkillInstanceModal } from '@refly-packages/ai-workspace-common/components/skill/new-instance-modal';
 
-import { IconPlus } from '@arco-design/web-react/icon';
+import { RiAddLargeLine } from 'react-icons/ri';
 
 // 样式
 import './index.scss';
@@ -51,7 +51,7 @@ export const TemplateItem = (props: TemplateItemProps) => {
               setVisible(true);
             }}
           >
-            <IconPlus />
+            <RiAddLargeLine />
             {t('skill.createFromTemplate')}
           </Button>
         </div>

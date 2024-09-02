@@ -1,4 +1,6 @@
-import { IconDelete, IconMore, IconEdit } from '@arco-design/web-react/icon';
+import { RiDeleteBinLine, RiMoreFill } from 'react-icons/ri';
+import { TbEdit } from 'react-icons/tb';
+
 import { Dropdown, Menu, Button, Popconfirm, Message } from '@arco-design/web-react';
 import { useState } from 'react';
 import { useLocation, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
@@ -31,7 +33,7 @@ const DropList = (props: DropListProps) => {
     <Menu onClick={(e) => e.stopPropagation()}>
       <Menu.Item key="edit">
         <div onClick={(e) => handlUpdateInstance(e)}>
-          <IconEdit style={iconStyle} />
+          <TbEdit style={iconStyle} />
           {t('common.edit')}
         </div>
       </Menu.Item>
@@ -39,7 +41,7 @@ const DropList = (props: DropListProps) => {
         <Popconfirm
           focusLock
           title={t('common.deleteConfirmMessage')}
-          position="tr"
+          position="lb"
           okText={t('common.confirm')}
           cancelText={t('common.cancel')}
           getPopupContainer={getPopupContainer}
@@ -51,7 +53,7 @@ const DropList = (props: DropListProps) => {
           }}
         >
           <div onClick={(e) => e.stopPropagation()}>
-            <IconDelete style={iconStyle} />
+            <RiDeleteBinLine style={iconStyle} />
             {t('common.delete')}
           </div>
         </Popconfirm>
@@ -125,7 +127,7 @@ export const InstanceDropdownMenu = (props: InstanceDropdownMenuProps) => {
       getPopupContainer={getPopupContainer}
     >
       <Button
-        icon={<IconMore style={{ fontSize: 16 }} />}
+        icon={<RiMoreFill style={{ fontSize: 16 }} />}
         type="text"
         onClick={(e) => handleIconClick(e)}
         className="text-gray-500"

@@ -27,7 +27,12 @@ export const AINoteEmpty = () => {
                   lg: 16,
                   xl: 12,
                 }
-              : null
+              : {
+                  sm: 42,
+                  md: 16,
+                  lg: 10,
+                  xl: 8,
+                }
           }
         />
       </div>

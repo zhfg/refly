@@ -11,7 +11,8 @@ import { SkillTemplate } from '@refly/openapi-schema';
 
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
 import { List, Empty, Button, Input } from '@arco-design/web-react';
-import { IconArrowRight, IconSearch } from '@arco-design/web-react/icon';
+import { HiMiniArrowUturnRight } from 'react-icons/hi2';
+import { HiSearch } from 'react-icons/hi';
 import { useSearchableList } from '@refly-packages/ai-workspace-common/components/use-searchable-list';
 import { useNavigate } from 'react-router-dom';
 
@@ -57,7 +58,7 @@ export const SkillTemplateList = () => {
             className="skill-instance-list__search"
             style={{ height: 32, borderRadius: '8px' }}
             value={searchVal}
-            prefix={<IconSearch />}
+            prefix={<HiSearch />}
             onChange={handleChange}
           />
         </div>
@@ -68,7 +69,7 @@ export const SkillTemplateList = () => {
             navigate('/skill?tab=instance');
           }}
         >
-          <IconArrowRight />
+          <HiMiniArrowUturnRight />
           {t('skill.tab.skillInstances')}
         </Button>
       </div>
