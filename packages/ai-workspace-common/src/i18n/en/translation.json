@@ -178,7 +178,7 @@
     },
     "directory": {
       "resourceCount": "{{count}} contents",
-      "searchPlaceholder": "Search Knowledge Base..."
+      "searchPlaceholder": "Search resource..."
     },
     "quickSearch": {
       "suggest": "Suggestions",
@@ -297,7 +297,9 @@
       "download": "Download Extension",
       "newResource": "Import Resource",
       "settings": "Settings",
-      "skill": "Skills"
+      "skill": "Skills",
+      "collapse": "Collapse",
+      "expand": "Expand"
     }
   },
   "knowledgeLibrary": {

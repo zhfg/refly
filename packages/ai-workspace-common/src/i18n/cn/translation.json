@@ -178,7 +178,7 @@
     },
     "directory": {
       "resourceCount": "{{count}} 个内容",
-      "searchPlaceholder": "搜索知识库..."
+      "searchPlaceholder": "搜索资源..."
     },
     "quickSearch": {
       "suggest": "建议",
@@ -307,7 +307,9 @@
       "download": "下载插件",
       "newResource": "导入资源",
       "settings": "设置",
-      "skill": "技能"
+      "skill": "技能",
+      "collapse": "折叠",
+      "expand": "展开"
     }
   },
   "knowledgeLibrary": {

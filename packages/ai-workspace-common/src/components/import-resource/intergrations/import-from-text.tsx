@@ -1,5 +1,5 @@
 import { Button, Divider, Input, Message as message, Affix } from '@arco-design/web-react';
-import { IconPen } from '@arco-design/web-react/icon';
+import { HiOutlinePencil } from 'react-icons/hi';
 import { useEffect, useState } from 'react';
 
 // utils
@@ -79,7 +79,7 @@ export const ImportFromText = () => {
         <div className="intergation-operation-container">
           <div className="intergration-header">
             <span className="menu-item-icon">
-              <IconPen />
+              <HiOutlinePencil />
             </span>
             <span className="intergration-header-title">{t('resource.import.fromText')}</span>
           </div>

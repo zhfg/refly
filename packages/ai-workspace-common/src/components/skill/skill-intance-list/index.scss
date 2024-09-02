@@ -1,11 +1,14 @@
 .skill-instance-list {
   height: 100%;
+  position: relative;
   &__top-container {
+    height: 50px;
     padding: 8px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    box-sizing: border-box;
 
     .skill-instance-list__search {
       .arco-input-inner-wrapper {
@@ -94,6 +97,13 @@
           cursor: pointer;
         }
       }
+    }
+  }
+  .arco-spin {
+    position: relative;
+    height: calc(100% - 50px);
+    .arco-spin-children {
+      height: 100%;
     }
   }
 }

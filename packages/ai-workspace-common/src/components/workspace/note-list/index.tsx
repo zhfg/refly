@@ -93,7 +93,6 @@ export const NoteList = (props: NoteListProps) => {
                 <div className="flex items-center">
                   <DeleteDropdownMenu
                     type="note"
-                    deleteConfirmPosition="lb"
                     data={item}
                     postDeleteList={(note: Note) => setDataList(dataList.filter((n) => n.noteId !== note.noteId))}
                     getPopupContainer={() => document.getElementById(`note-${key}`) as HTMLElement}

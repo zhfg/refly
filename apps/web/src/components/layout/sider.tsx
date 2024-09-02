@@ -1,5 +1,12 @@
 import { useState } from "react"
-import { Avatar, Divider, Layout, Menu, Tag } from "@arco-design/web-react"
+import {
+  Avatar,
+  Divider,
+  Layout,
+  Menu,
+  Tag,
+  Tooltip,
+} from "@arco-design/web-react"
 import {
   useLocation,
   useNavigate,
@@ -48,17 +55,11 @@ const getNavSelectedKeys = (pathname = "") => {
 const SiderLogo = (props: {
   collapse: boolean
   navigate: (path: string) => void
+  setCollapse: (collapse: boolean) => void
 }) => {
-  const { navigate, collapse } = props
+  const { navigate, collapse, setCollapse } = props
   return (
-    <div
-      className="logo-box"
-      style={{
-        display: "flex",
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}>
+    <div className="logo-box">
       <div className="logo" onClick={() => navigate("/")}>
         <img src={Logo} alt="Refly" />
         {!collapse && (
@@ -70,29 +71,15 @@ const SiderLogo = (props: {
           </>
         )}
       </div>
-    </div>
-  )
-}
-
-const CollapseBtn = (props: {
-  collapse: boolean
-  setCollapse: (collapse: boolean) => void
-}) => {
-  const { collapse, setCollapse } = props
-  return (
-    <div
-      className={`collapse-btn ${collapse ? "collapse-btn--collapsed" : ""}`}
-      onClick={() => setCollapse(!collapse)}>
-      {collapse ? (
-        <AiOutlineMenuUnfold
-          className="arco-icon"
-          style={{ fontSize: 20, color: "#666666" }}
-        />
-      ) : (
-        <AiOutlineMenuFold
-          className="arco-icon"
-          style={{ fontSize: 20, color: "#666666" }}
-        />
+      {!collapse && (
+        <div className="collapse-btn" onClick={() => setCollapse(true)}>
+          <Tooltip position="right" content="Collapse">
+            <AiOutlineMenuFold
+              className="arco-icon"
+              style={{ fontSize: 20, color: "#666666" }}
+            />
+          </Tooltip>
+        </div>
       )}
     </div>
   )
@@ -100,7 +87,7 @@ const CollapseBtn = (props: {
 
 const MenuItemContent = (props: {
   icon?: React.ReactNode
-  title: string
+  title?: string
   collapse?: boolean
 }) => {
   return (
@@ -267,6 +254,11 @@ export const SiderLayout = () => {
         break
       }
 
+      case "Expand": {
+        setCollapse(false)
+        break
+      }
+
       default: {
         break
       }
@@ -310,7 +302,12 @@ export const SiderLayout = () => {
       width={collapse ? 90 : 220}>
       <div
         className={`sider-header ${collapse ? "sider-header-collapse" : ""}`}>
-        <SiderLogo navigate={path => navigate(path)} collapse={collapse} />
+        <SiderLogo
+          navigate={path => navigate(path)}
+          collapse={collapse}
+          setCollapse={() => setCollapse(!collapse)}
+        />
+
         <SearchQuickOpenBtn collapse={collapse} />
 
         <Menu
@@ -347,6 +344,27 @@ export const SiderLayout = () => {
           </div>
 
           <div className="sider-footer">
+            {collapse && (
+              <MenuItem
+                key="Expand"
+                className="custom-menu-item"
+                renderItemInTooltip={() => (
+                  <MenuItemTooltipContent
+                    title={t("loggedHomePage.siderMenu.expand")}
+                  />
+                )}>
+                <MenuItemContent
+                  icon={
+                    <AiOutlineMenuUnfold
+                      className="arco-icon"
+                      style={{ fontSize: 20 }}
+                    />
+                  }
+                  title={t("loggedHomePage.siderMenu.expand")}
+                />
+              </MenuItem>
+            )}
+
             {!!userStore.userProfile?.uid && (
               <MenuItem
                 key="Settings"
@@ -395,10 +413,6 @@ export const SiderLayout = () => {
             </MenuItem>
           </div>
         </Menu>
-        <CollapseBtn
-          collapse={collapse}
-          setCollapse={() => setCollapse(!collapse)}
-        />
       </div>
     </Sider>
   )
