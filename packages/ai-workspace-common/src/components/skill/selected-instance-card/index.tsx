@@ -4,14 +4,53 @@ import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill'
 
 import './index.scss';
 import { InstanceInvokeForm } from '@refly-packages/ai-workspace-common/components/skill/instance-invoke-form';
+import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
+
+// hooks
+import { useBuildSkillContext } from '@refly-packages/ai-workspace-common/hooks/use-build-skill-context';
+import { SkillContext, SkillInstance } from '@refly/openapi-schema';
 
 export const SelectedInstanceCard = () => {
+  // content for fill skill form
+  const { newQAText } = useChatStore((state) => ({
+    newQAText: state.newQAText,
+  })); // fill query in the basic config
+  const { buildSkillContext } = useBuildSkillContext();
+
   const [form] = Form.useForm();
 
   const skillStore = useSkillStore((state) => ({
     selectedSkill: state.selectedSkill,
     setSelectedSkillInstalce: state.setSelectedSkillInstalce,
   }));
+
+  // TODO: fill context with default value @mrcfps
+  const getSkillInstanceWithFillContext = (
+    skill: SkillInstance,
+    {
+      query,
+      context,
+    }: {
+      query: string;
+      context: SkillContext;
+    },
+  ) => {
+    return {
+      ...skill,
+      invocationConfig: {
+        ...skill.invocationConfig,
+        input: {
+          ...skill.invocationConfig.input,
+          query,
+        },
+      },
+    };
+  };
+
+  const skillInstanceWithFillContext = getSkillInstanceWithFillContext(skillStore.selectedSkill, {
+    query: newQAText,
+    context: buildSkillContext(),
+  });
 
   const onOk = async () => {};
 
