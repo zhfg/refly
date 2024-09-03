@@ -77,10 +77,10 @@ export const SelectedInstanceCard = () => {
       // use copilot runSkill to run skill instance from copilot
       if (messages?.length > 0) {
         // 追问阅读
-        runSkill(newQAText, skillContext);
+        runSkill(newQAText, { skillContext, tplConfig });
       } else {
         // 新会话阅读，先创建会话，然后进行跳转之后发起聊天
-        emptyConvRunSkill(newQAText, true, skillContext);
+        emptyConvRunSkill(newQAText, true, { skillContext, tplConfig });
       }
     } catch (err) {
       Message.error({ content: t('common.putErr') });

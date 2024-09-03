@@ -5,7 +5,14 @@ import { useResetState } from './use-reset-state';
 import { useTaskStore } from '@refly-packages/ai-workspace-common/stores/task';
 
 // 类型
-import { Source, ChatMessage as Message, InvokeSkillRequest, SkillContext, SearchDomain } from '@refly/openapi-schema';
+import {
+  Source,
+  ChatMessage as Message,
+  InvokeSkillRequest,
+  SkillContext,
+  SearchDomain,
+  SkillTemplateConfig,
+} from '@refly/openapi-schema';
 // request
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { OutputLocale } from '@refly-packages/ai-workspace-common/utils/i18n';
@@ -19,7 +26,7 @@ export const useBuildThreadAndRun = () => {
   const { buildSkillContext } = useBuildSkillContext();
   const chatStore = useChatStore((state) => ({
     setNewQAText: state.setNewQAText,
-    setSkillContext: state.setSkillContext,
+    setInvokeParams: state.setInvokeParams,
   }));
   const skillStore = useSkillStore((state) => ({
     setSelectedSkillInstance: state.setSelectedSkillInstance,
@@ -38,7 +45,11 @@ export const useBuildThreadAndRun = () => {
   // }));
   const { jumpToConv } = useKnowledgeBaseJumpNewPath();
 
-  const emptyConvRunSkill = (question: string, forceNewConv?: boolean, _skillContext?: SkillContext) => {
+  const emptyConvRunSkill = (
+    question: string,
+    forceNewConv?: boolean,
+    invokeParams?: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig },
+  ) => {
     // 首先清空所有状态
     if (forceNewConv) {
       resetState();
@@ -49,7 +60,7 @@ export const useBuildThreadAndRun = () => {
     conversationStore.setCurrentConversation(newConv);
     conversationStore.setIsNewConversation(true);
     chatStore.setNewQAText(question);
-    chatStore.setSkillContext(_skillContext); // for selected skill instance from copilot
+    chatStore.setInvokeParams(invokeParams);
 
     jumpToConv({
       convId: newConv?.convId,
@@ -72,7 +83,10 @@ export const useBuildThreadAndRun = () => {
     return currentConversation;
   };
 
-  const runSkill = (comingQuestion: string, _skillContext?: SkillContext) => {
+  const runSkill = (
+    comingQuestion: string,
+    invokeParams?: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig },
+  ) => {
     // support ask follow up question
     const { messages = [] } = useChatStore.getState();
     const { selectedSkill } = useSkillStore.getState();
@@ -82,7 +96,7 @@ export const useBuildThreadAndRun = () => {
 
     // 创建新会话并跳转
     const conv = ensureConversationExist();
-    const skillContext = _skillContext || buildSkillContext();
+    const skillContext = invokeParams?.skillContext || buildSkillContext();
 
     // 设置当前的任务类型及会话 id
     const task: InvokeSkillRequest = {
@@ -92,6 +106,7 @@ export const useBuildThreadAndRun = () => {
       },
       context: skillContext,
       convId: conv?.convId || '',
+      tplConfig: invokeParams?.tplConfig,
       ...(isFollowUpAsk ? {} : { createConvParam: { ...conv, title: question } }),
     };
     taskStore.setTask(task);
