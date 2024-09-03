@@ -6,7 +6,6 @@ import {
 } from "@refly-packages/ai-workspace-common/utils/router"
 import {
   IconHome,
-  IconSettings,
   IconDownload,
   IconTwitter,
   IconLanguage,
@@ -28,6 +27,7 @@ import { openGetStartDocument } from "@refly-packages/ai-workspace-common/utils"
 import { UILocaleList } from "@refly-packages/ai-workspace-common/components/ui-locale-list"
 import { useImportResourceStore } from "@refly-packages/ai-workspace-common/stores/import-resource"
 import { useKnowledgeBaseStore } from "@refly-packages/ai-workspace-common/stores/knowledge-base"
+import { SiderMenuSettingList } from "@refly-packages/ai-workspace-common/components/sider-menu-setting-list"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -114,55 +114,33 @@ const MenuItemTooltipContent = (props: { title: string }) => {
   return <div>{props.title}</div>
 }
 
-const SettingItem = (props: { navigate: (path: string) => void }) => {
-  const { navigate } = props
+const SettingItem = () => {
   const userStore = useUserStore()
   return (
     <div className="flex flex-1 items-center justify-between">
-      <div
-        className="menu-settings"
-        onClick={() => {
-          navigate("/settings")
-        }}>
-        <Avatar size={32}>
-          <img src={userStore?.userProfile?.avatar || ""} alt="user-avatar" />
-        </Avatar>
-        <span className="username">{userStore?.userProfile?.name}</span>
-      </div>
+      <SiderMenuSettingList>
+        <div className="menu-settings">
+          <Avatar size={32}>
+            <img src={userStore?.userProfile?.avatar || ""} alt="user-avatar" />
+          </Avatar>
+          <span className="username">
+            <span>{userStore?.userProfile?.nickname}</span>
+          </span>
+        </div>
+      </SiderMenuSettingList>
+
       <div>
         <span
           className="setting-language-icon"
-          style={{ display: "inline-block", marginRight: "8px" }}>
+          style={{ display: "inline-block" }}>
           <UILocaleList>
-            <IconLanguage
-              style={{
-                fontSize: 20,
-              }}
-            />
+            <IconLanguage style={{ fontSize: 20 }} />
           </UILocaleList>
-        </span>
-        <span
-          className="setting-icon"
-          onClick={() => {
-            navigate("/settings")
-          }}>
-          <IconSettings style={{ fontSize: 20 }} />
         </span>
       </div>
     </div>
   )
 }
-
-// const SiderMenuItem = (props: { icon?: React.ReactNode; title: string }) => {
-//   const { icon, title } = props
-//   return (
-//     <MenuItem
-//       className="custom-menu-item"
-//       renderItemInTooltip={() => <MenuItemTooltipContent title={title} />}>
-//       <MenuItemContent icon={icon} title={title} />
-//     </MenuItem>
-//   )
-// }
 
 export const SiderLayout = () => {
   const [collapse, setCollapse] = useState(false)
@@ -363,7 +341,7 @@ export const SiderLayout = () => {
                     title={t("loggedHomePage.siderMenu.settings")}
                   />
                 )}>
-                <SettingItem navigate={path => navigate(path)}></SettingItem>
+                <SettingItem></SettingItem>
               </MenuItem>
             )}
             <Divider style={{ margin: "8px 0" }} />

@@ -28,12 +28,12 @@ export const useGetUserSettings = () => {
 
   const getLoginStatus = async () => {
     try {
-      const res = await getClient().getSettings();
+      const { error, data: res } = await getClient().getSettings();
       let { localSettings } = useUserStore.getState();
 
       console.log('loginStatus', res);
 
-      if (res.error || !res.data) {
+      if (error || !res.data) {
         userStore.setUserProfile(undefined);
         userStore.setToken('');
         localStorage.removeItem('refly-user-profile');
@@ -45,8 +45,8 @@ export const useGetUserSettings = () => {
           navigate('/'); // 插件等直接导航到首页
         }
       } else {
-        userStore.setUserProfile(res?.data);
-        localStorage.setItem('refly-user-profile', safeStringifyJSON(res?.data));
+        userStore.setUserProfile(res.data);
+        localStorage.setItem('refly-user-profile', safeStringifyJSON(res.data));
 
         // 增加 localSettings
         let uiLocale = mapDefaultLocale(res?.data?.uiLocale as LOCALE) as LOCALE;

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Dropdown, Menu, Typography, Message as message } from '@arco-design/web-react';
+import { Dropdown, Menu, Message as message } from '@arco-design/web-react';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 import { LOCALE } from '@refly/common-types';
@@ -10,7 +10,7 @@ import { OutputLocale, enLocale, localeToLanguageName } from '@refly-packages/ai
 import './index.scss';
 import { getDefaultPopupContainer, getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
-export const OutputLocaleList = (props: { children: any }) => {
+export const OutputLocaleList = (props: { children: any; showTitle?: boolean }) => {
   // i18n
   const { t, i18n } = useTranslation();
   const uiLocale = i18n?.languages?.[0] as LOCALE;
@@ -42,11 +42,13 @@ export const OutputLocaleList = (props: { children: any }) => {
       onClickMenuItem={(key) => changeLang(key as OutputLocale)}
       style={{ width: 240 }}
     >
-      <Typography.Text type="secondary" style={{ marginLeft: 12 }}>
-        {t('settings.outputLocale.title')}
-      </Typography.Text>
+      {props.showTitle && (
+        <div className="output-locale-list-menu-title">{t('settings.language.outputLocale.title')}</div>
+      )}
       {enLocale.map((item: OutputLocale) => (
-        <Menu.Item key={item}>{localeToLanguageName?.[uiLocale]?.[item]}</Menu.Item>
+        <Menu.Item key={item} className={`output-locale-list-menu-item ${item === outputLocale ? 'active' : ''}`}>
+          {localeToLanguageName?.[uiLocale]?.[item]}
+        </Menu.Item>
       ))}
     </Menu>
   );
@@ -55,6 +57,7 @@ export const OutputLocaleList = (props: { children: any }) => {
     <Dropdown
       droplist={dropList}
       position="bl"
+      trigger="click"
       getPopupContainer={() => {
         return getPopupContainer();
       }}
