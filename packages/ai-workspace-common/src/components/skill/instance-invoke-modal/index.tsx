@@ -9,6 +9,9 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { SkillInstance } from '@refly/openapi-schema';
 import { Modal, Form, Message } from '@arco-design/web-react';
 
+// styles
+import './index.scss';
+
 interface InstanceInvokeModalProps {
   data: SkillInstance;
   visible: boolean;
@@ -63,18 +66,21 @@ export const InstanceInvokeModal = (props: InstanceInvokeModalProps) => {
   return (
     <Modal
       title={t('skill.instanceInvokeModal.title')}
-      style={{ width: 750 }}
+      style={{ width: 750, height: `60vh` }}
       visible={visible}
       footer={null}
+      className="instance-invoke-modal"
       onCancel={() => setVisible(false)}
     >
-      <InstanceInvokeForm
-        onOk={onOk}
-        form={form}
-        data={data}
-        setVisible={setVisible}
-        postConfirmCallback={postConfirmCallback}
-      />
+      <div className="instance-invoke-modal-content">
+        <InstanceInvokeForm
+          onOk={onOk}
+          form={form}
+          data={data}
+          setVisible={setVisible}
+          postConfirmCallback={postConfirmCallback}
+        />
+      </div>
     </Modal>
   );
 };
