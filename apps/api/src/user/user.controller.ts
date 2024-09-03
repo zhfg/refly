@@ -6,8 +6,8 @@ import { User } from '@/utils/decorators/user.decorator';
 import {
   BaseResponse,
   CheckUsernameResponse,
+  GetUserSettingsResponse,
   UpdateUserSettingsRequest,
-  UserSettings,
 } from '@refly/openapi-schema';
 import { buildSuccessResponse, pick } from '@/utils';
 import { User as UserModel } from '@prisma/client';
@@ -20,12 +20,13 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get('settings')
-  getSettings(@User() user: UserModel): UserSettings {
+  getSettings(@User() user: UserModel): GetUserSettingsResponse {
     this.logger.log(`getSettings success, req.user = ${user.email}`);
-    return {
+    const settings = {
       ...pick(user, ['uid', 'avatar', 'name', 'nickname', 'email', 'uiLocale', 'outputLocale']),
       emailVerified: !!user.emailVerified,
     };
+    return { success: true, data: settings, ...settings };
   }
 
   @UseGuards(JwtAuthGuard)
