@@ -79,8 +79,9 @@ export class TranslateSkill extends BaseSkill {
   async generate(state: GraphState, config?: SkillRunnableConfig) {
     this.engine.logger.log('---GENERATE---');
 
-    const { locale = 'en', contentList = [], chatHistory = [] } = config?.configurable || {};
+    const { locale = 'en', contentList = [], chatHistory = [], tplConfig = {} } = config?.configurable || {};
     const query = state.query || '';
+    const targetLanguage = (tplConfig?.targetLanguage?.value || locale) as string;
 
     const llm = this.engine.chatModel({
       temperature: 0.2,
@@ -89,29 +90,32 @@ export class TranslateSkill extends BaseSkill {
     const systemPrompt = `You are a professional translator. Your task is to translate the given content into the specified target language. Ensure that the translation is accurate, natural, and maintains the original meaning and tone.
 
 # INPUT
-Content to translate:
-"""
+Content to translate (with three "---" as separator, **only need to translate the content between the separator, not include the separator**):
+---
 {context}
-"""
+---
 
 Target language: {targetLanguage}
+
+User query (may be empty): {query}
 
 # INSTRUCTIONS
 1. Translate the content into the target language.
 2. Maintain the original formatting and structure.
 3. If there are any culturally specific terms or idioms, provide appropriate translations or explanations in parentheses.
+4. Consider the user's query as additional instructions for the translation task.
+5. Directly output the translated content without any additional comments or explanations.
 
 # OUTPUT
 Provide only the translated content without any additional comments or explanations.`;
 
     const contextString = contentList.join('\n\n');
-    const prompt = systemPrompt.replace('{context}', contextString).replace('{targetLanguage}', query);
+    const prompt = systemPrompt
+      .replace('{context}', contextString)
+      .replace('{targetLanguage}', targetLanguage)
+      .replace('{query}', query);
 
-    const responseMessage = await llm.invoke([
-      new SystemMessage(prompt),
-      ...chatHistory,
-      new HumanMessage(`Please translate the provided content into ${query}.`),
-    ]);
+    const responseMessage = await llm.invoke([new HumanMessage(prompt)]);
 
     return { messages: [responseMessage] };
   }
