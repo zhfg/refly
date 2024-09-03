@@ -104,6 +104,8 @@ model ChatMessage {
   convId                String      @default("") @map("conv_id")
   /// Skill job ID
   jobId                 String      @default("") @map("job_id")
+  /// Span id
+  spanId                String?     @map("span_id")
   /// Message type
   type                  MessageType @map("type")
   /// UID
@@ -118,6 +120,10 @@ model ChatMessage {
   structuredData        String      @default("{}") @map("structured_data")
   /// Errors
   errors                String?     @map("errors")
+  /// Tool calls (JSON array)
+  toolCalls             String?     @map("tool_calls")
+  /// Token usage summary
+  tokenUsage            String?     @map("token_usage")
   /// Locale setting
   locale                String?     @default("") @map("locale")
   /// Create timestamp
@@ -129,6 +135,42 @@ model ChatMessage {
 
   @@index([convId, updatedAt])
   @@map("chat_messages")
+}
+
+model TokenUsage {
+  /// Primary key
+  pk               BigInt   @id @default(autoincrement())
+  /// UID
+  uid              String   @map("uid")
+  /// Conversation ID
+  convId           String   @map("conv_id")
+  /// Skill job ID
+  jobId            String   @map("job_id")
+  /// Span id
+  spanId           String   @map("span_id")
+  /// Model tier
+  tier             String   @map("tier")
+  /// Model provider
+  modelProvider    String   @map("model_provider")
+  /// Model name
+  modelName        String   @map("model_name")
+  /// Input tokens
+  inputTokens      Int      @default(0) @map("input_tokens")
+  /// Output tokens
+  outputTokens     Int      @default(0) @map("output_tokens")
+  /// Skill id
+  skillId          String   @map("skill_id")
+  /// Skill template name
+  skillTplName     String   @map("skill_tpl_name")
+  /// Skill display name
+  skillDisplayName String   @map("skill_display_name")
+  /// Create timestamp
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([uid, createdAt])
+  @@map("token_usages")
 }
 
 model Resource {

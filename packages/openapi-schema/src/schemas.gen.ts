@@ -842,6 +842,40 @@ export const $MessageType = {
   enum: ['ai', 'human', 'system'],
 } as const;
 
+export const $ModelTier = {
+  type: 'string',
+  description: 'Model tier',
+  enum: ['t1', 't2'],
+} as const;
+
+export const $TokenUsageItem = {
+  type: 'object',
+  description: 'Token usage item',
+  required: ['tier', 'modelName', 'modelProvider', 'inputTokens', 'outputTokens'],
+  properties: {
+    tier: {
+      type: 'string',
+      description: 'Model tier',
+    },
+    modelName: {
+      type: 'string',
+      description: 'Model name',
+    },
+    modelProvider: {
+      type: 'string',
+      description: 'Model provider',
+    },
+    inputTokens: {
+      type: 'number',
+      description: 'Input tokens',
+    },
+    outputTokens: {
+      type: 'number',
+      description: 'Output tokens',
+    },
+  },
+} as const;
+
 export const $ChatMessage = {
   type: 'object',
   description: 'Chat message',
@@ -909,6 +943,13 @@ export const $ChatMessage = {
         $ref: '#/components/schemas/Source',
       },
       deprecated: true,
+    },
+    tokenUsage: {
+      type: 'array',
+      description: 'Token usage',
+      items: {
+        $ref: '#/components/schemas/TokenUsageItem',
+      },
     },
     selectedWeblinkConfig: {
       type: 'string',

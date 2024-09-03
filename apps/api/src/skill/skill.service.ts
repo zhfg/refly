@@ -47,7 +47,7 @@ import {
   SkillRunnableMeta,
   createSkillInventory,
 } from '@refly/skill-template';
-import { genSkillID, genSkillJobID, genSkillTriggerID } from '@refly/utils';
+import { genSkillID, genSkillJobID, genSkillTriggerID, getModelTier } from '@refly/utils';
 import { PrismaService } from '@/common/prisma.service';
 import {
   CHANNEL_INVOKE_SKILL,
@@ -619,7 +619,7 @@ export class SkillService {
 
     if (res) {
       res.on('close', () => {
-        this.logger.log('[response] Skill invocation aborted due to client disconnect');
+        this.logger.log('skill invocation aborted due to client disconnect');
         aborted = true;
       });
     }
@@ -666,11 +666,6 @@ export class SkillService {
         runMeta = event.metadata as SkillRunnableMeta;
         const chunk: AIMessageChunk = event.data?.chunk ?? event.data?.output;
 
-        // Ignore empty or tool call chunks
-        if (!chunk?.content || chunk?.tool_call_chunks?.length > 0) {
-          continue;
-        }
-
         switch (event.event) {
           case 'on_chat_model_stream':
             if (res) {
@@ -678,13 +673,30 @@ export class SkillService {
                 event: 'stream',
                 skillMeta: runMeta,
                 spanId: runMeta.spanId,
-                content:
-                  typeof chunk.content === 'string' ? chunk.content : JSON.stringify(chunk.content),
+                content: chunk.content.toString(),
               });
             }
             break;
           case 'on_chat_model_end':
-            msgAggregator.setContent(runMeta, event.data.output.content);
+            if (runMeta && chunk) {
+              const usage = await this.prisma.tokenUsage.create({
+                data: {
+                  uid: user.uid,
+                  convId: conversation?.convId,
+                  jobId: job?.jobId,
+                  spanId: runMeta.spanId,
+                  tier: getModelTier(String(runMeta.ls_model_name)),
+                  modelProvider: String(runMeta.ls_provider),
+                  modelName: String(runMeta.ls_model_name),
+                  inputTokens: chunk.usage_metadata?.input_tokens ?? 0,
+                  outputTokens: chunk.usage_metadata?.output_tokens ?? 0,
+                  skillId: skill?.skillId,
+                  skillTplName: skill?.tplName,
+                  skillDisplayName: skill?.displayName,
+                },
+              });
+              msgAggregator.handleStreamEndEvent(runMeta, chunk, usage);
+            }
             break;
         }
       }

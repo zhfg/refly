@@ -676,6 +676,37 @@ export type Source = {
 export type MessageType = 'ai' | 'human' | 'system';
 
 /**
+ * Model tier
+ */
+export type ModelTier = 't1' | 't2';
+
+/**
+ * Token usage item
+ */
+export type TokenUsageItem = {
+  /**
+   * Model tier
+   */
+  tier: string;
+  /**
+   * Model name
+   */
+  modelName: string;
+  /**
+   * Model provider
+   */
+  modelProvider: string;
+  /**
+   * Input tokens
+   */
+  inputTokens: number;
+  /**
+   * Output tokens
+   */
+  outputTokens: number;
+};
+
+/**
  * Chat message
  */
 export type ChatMessage = {
@@ -723,6 +754,10 @@ export type ChatMessage = {
    * @deprecated
    */
   sources?: Array<Source>;
+  /**
+   * Token usage
+   */
+  tokenUsage?: Array<TokenUsageItem>;
   /**
    * Selected weblink config (JSON)
    */

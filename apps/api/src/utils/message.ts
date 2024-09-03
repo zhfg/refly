@@ -1,7 +1,10 @@
 import { SkillEvent } from '@refly/common-types';
-import { Prisma } from '@prisma/client';
-import { SkillMeta, User } from '@refly/openapi-schema';
+import { Prisma, TokenUsage } from '@prisma/client';
+import { SkillMeta, TokenUsageItem, User } from '@refly/openapi-schema';
 import { SkillRunnableMeta } from '@refly/skill-template';
+import { AIMessageChunk } from '@langchain/core/dist/messages';
+import { ToolCall } from '@langchain/core/dist/messages/tool';
+import { aggregateTokenUsage, pick } from '@refly/utils';
 
 interface MessageData {
   skillMeta: SkillMeta;
@@ -9,6 +12,8 @@ interface MessageData {
   content: string;
   structuredData: Record<string, unknown>;
   errors: string[];
+  toolCalls: ToolCall[];
+  usageItems: TokenUsageItem[];
 }
 
 export class MessageAggregator {
@@ -43,6 +48,8 @@ export class MessageAggregator {
       content: '',
       structuredData: {},
       errors: [],
+      toolCalls: [],
+      usageItems: [],
     };
   }
 
@@ -72,13 +79,19 @@ export class MessageAggregator {
     this.data[event.spanId] = msg;
   }
 
-  setContent(meta: SkillRunnableMeta, content: string) {
+  handleStreamEndEvent(meta: SkillRunnableMeta, chunk: AIMessageChunk, usage: TokenUsage) {
     if (this.aborted) {
       return;
     }
 
     const msg = this.getOrInitData({ skillMeta: meta, spanId: meta.spanId });
-    msg.content = content;
+
+    msg.content += chunk.content.toString();
+    msg.toolCalls.push(...chunk.tool_calls);
+    msg.usageItems.push(
+      pick(usage, ['tier', 'modelName', 'modelProvider', 'inputTokens', 'outputTokens']),
+    );
+
     this.data[meta.spanId] = msg;
   }
 
@@ -90,7 +103,10 @@ export class MessageAggregator {
     const { user, convId, jobId } = param;
 
     return this.spanIdList.map((spanId) => {
-      const { skillMeta, content, logs, structuredData, errors } = this.data[spanId];
+      const { skillMeta, content, logs, structuredData, errors, toolCalls, usageItems } =
+        this.data[spanId];
+      const aggregatedUsage = aggregateTokenUsage(usageItems);
+
       return {
         type: 'ai',
         content,
@@ -98,9 +114,12 @@ export class MessageAggregator {
         logs: JSON.stringify(logs),
         structuredData: JSON.stringify(structuredData),
         errors: JSON.stringify(errors),
+        toolCalls: JSON.stringify(toolCalls),
+        tokenUsage: JSON.stringify(aggregatedUsage),
         uid: user.uid,
         convId,
         jobId,
+        spanId,
       };
     });
   }

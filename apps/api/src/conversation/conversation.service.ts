@@ -78,7 +78,7 @@ export class ConversationService {
 
     return this.prisma.$transaction([
       this.prisma.chatMessage.createManyAndReturn({
-        data: msgList.map((msg) => ({ ...msg, msgId: genChatMessageID() })),
+        data: msgList.map((msg) => ({ ...msg, msgId: msg.msgId || genChatMessageID() })),
       }),
       ...(convUpserts ? [this.prisma.conversation.upsert(convUpserts)] : []),
     ]);
