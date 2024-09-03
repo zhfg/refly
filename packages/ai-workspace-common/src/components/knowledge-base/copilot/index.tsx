@@ -107,6 +107,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
     messages: state.messages,
     resetState: state.resetState,
     setMessages: state.setMessages,
+    setSkillContext: state.setSkillContext,
   }));
   const conversationStore = useConversationStore((state) => ({
     isNewConversation: state.isNewConversation,
@@ -127,7 +128,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
   }));
   const skillStore = useSkillStore((state) => ({
     selectedSkill: state.selectedSkill,
-    setSelectedSkillInstalce: state.setSelectedSkillInstalce,
+    setSelectedSkillInstance: state.setSelectedSkillInstance,
   }));
 
   console.log('useKnowledgeBaseStore state update from packages', knowledgeBaseStore.resourcePanelVisible);
@@ -223,13 +224,13 @@ export const AICopilot = memo((props: AICopilotProps) => {
   const handleConvTask = async (convId: string) => {
     try {
       setIsFetching(true);
-      const { newQAText } = useChatStore.getState();
+      const { newQAText, _skillContext } = useChatStore.getState();
       const { isNewConversation } = useConversationStore.getState();
 
       // 新会话，需要手动构建第一条消息
       if (isNewConversation && convId) {
         // 更换成基于 task 的消息模式，核心是基于 task 来处理
-        runSkill(newQAText);
+        runSkill(newQAText, _skillContext);
       } else if (convId) {
         handleGetThreadMessages(convId);
       }
@@ -241,6 +242,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
 
     // reset state
     conversationStore.setIsNewConversation(false);
+    chatStore.setSkillContext(undefined);
   };
 
   useEffect(() => {

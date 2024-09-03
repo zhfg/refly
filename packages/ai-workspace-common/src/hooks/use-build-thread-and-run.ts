@@ -19,9 +19,10 @@ export const useBuildThreadAndRun = () => {
   const { buildSkillContext } = useBuildSkillContext();
   const chatStore = useChatStore((state) => ({
     setNewQAText: state.setNewQAText,
+    setSkillContext: state.setSkillContext,
   }));
   const skillStore = useSkillStore((state) => ({
-    setSelectedSkillInstalce: state.setSelectedSkillInstalce,
+    setSelectedSkillInstance: state.setSelectedSkillInstance,
   }));
   const conversationStore = useConversationStore((state) => ({
     setCurrentConversation: state.setCurrentConversation,
@@ -37,7 +38,7 @@ export const useBuildThreadAndRun = () => {
   // }));
   const { jumpToConv } = useKnowledgeBaseJumpNewPath();
 
-  const emptyConvRunSkill = (question: string, forceNewConv?: boolean) => {
+  const emptyConvRunSkill = (question: string, forceNewConv?: boolean, _skillContext?: SkillContext) => {
     // 首先清空所有状态
     if (forceNewConv) {
       resetState();
@@ -48,6 +49,7 @@ export const useBuildThreadAndRun = () => {
     conversationStore.setCurrentConversation(newConv);
     conversationStore.setIsNewConversation(true);
     chatStore.setNewQAText(question);
+    chatStore.setSkillContext(_skillContext); // for selected skill instance from copilot
 
     jumpToConv({
       convId: newConv?.convId,
@@ -70,7 +72,7 @@ export const useBuildThreadAndRun = () => {
     return currentConversation;
   };
 
-  const runSkill = (comingQuestion: string) => {
+  const runSkill = (comingQuestion: string, _skillContext?: SkillContext) => {
     // support ask follow up question
     const { messages = [] } = useChatStore.getState();
     const { selectedSkill } = useSkillStore.getState();
@@ -80,7 +82,7 @@ export const useBuildThreadAndRun = () => {
 
     // 创建新会话并跳转
     const conv = ensureConversationExist();
-    const skillContext = buildSkillContext();
+    const skillContext = _skillContext || buildSkillContext();
 
     // 设置当前的任务类型及会话 id
     const task: InvokeSkillRequest = {
@@ -96,7 +98,7 @@ export const useBuildThreadAndRun = () => {
     // 开始提问
     buildTaskAndGenReponse(task as InvokeSkillRequest);
     chatStore.setNewQAText('');
-    skillStore.setSelectedSkillInstalce(null);
+    skillStore.setSelectedSkillInstance(null);
     // knowledgeBaseStore.updateCurrentSelectedMark(null);
   };
 

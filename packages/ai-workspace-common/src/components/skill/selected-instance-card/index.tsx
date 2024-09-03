@@ -1,4 +1,4 @@
-import { Avatar, Button, Form } from '@arco-design/web-react';
+import { Avatar, Button, Form, Message } from '@arco-design/web-react';
 import { IconClose } from '@arco-design/web-react/icon';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 
@@ -9,6 +9,10 @@ import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 // hooks
 import { useBuildSkillContext } from '@refly-packages/ai-workspace-common/hooks/use-build-skill-context';
 import { SkillContext, SkillInstance } from '@refly/openapi-schema';
+// requests
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { useTranslation } from 'react-i18next';
+import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 
 export const SelectedInstanceCard = () => {
   // content for fill skill form
@@ -16,13 +20,16 @@ export const SelectedInstanceCard = () => {
     newQAText: state.newQAText,
   })); // fill query in the basic config
   const { buildSkillContext } = useBuildSkillContext();
+  const { runSkill, emptyConvRunSkill } = useBuildThreadAndRun();
 
   const [form] = Form.useForm();
+  const { t } = useTranslation();
 
   const skillStore = useSkillStore((state) => ({
     selectedSkill: state.selectedSkill,
-    setSelectedSkillInstalce: state.setSelectedSkillInstalce,
+    setSelectedSkillInstance: state.setSelectedSkillInstance,
   }));
+  const data = skillStore.selectedSkill;
 
   // TODO: fill context with default value @mrcfps
   const getSkillInstanceWithFillContext = (
@@ -52,7 +59,33 @@ export const SelectedInstanceCard = () => {
     context: buildSkillContext(),
   });
 
-  const onOk = async () => {};
+  const onOk = async () => {
+    try {
+      const res = await form.validate();
+      const { messages } = useChatStore.getState();
+
+      const { input, context, tplConfig } = res;
+      const { contentList, urls } = context;
+
+      const skillContext: SkillContext = {
+        ...context,
+        contentList: contentList?.split(/\n\s*\n/),
+        urls: urls?.split(/\n\s*\n/),
+      };
+      const newQAText = input?.query || '';
+
+      // use copilot runSkill to run skill instance from copilot
+      if (messages?.length > 0) {
+        // 追问阅读
+        runSkill(newQAText, skillContext);
+      } else {
+        // 新会话阅读，先创建会话，然后进行跳转之后发起聊天
+        emptyConvRunSkill(newQAText, true, skillContext);
+      }
+    } catch (err) {
+      Message.error({ content: t('common.putErr') });
+    }
+  };
 
   return (
     <div className="selected-instance-card-container">
@@ -68,7 +101,7 @@ export const SelectedInstanceCard = () => {
             <Button
               icon={<IconClose />}
               onClick={() => {
-                skillStore.setSelectedSkillInstalce(null);
+                skillStore.setSelectedSkillInstance(null);
               }}
             ></Button>
           </div>
@@ -77,9 +110,9 @@ export const SelectedInstanceCard = () => {
           <InstanceInvokeForm
             form={form}
             onOk={onOk}
-            data={skillStore.selectedSkill}
+            data={data}
             setVisible={(val) => {
-              skillStore.setSelectedSkillInstalce(null);
+              skillStore.setSelectedSkillInstance(null);
             }}
           />
         </div>
