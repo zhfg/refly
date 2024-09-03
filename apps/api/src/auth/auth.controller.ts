@@ -6,7 +6,6 @@ import { User as UserModel } from '@prisma/client';
 import { User } from '@/utils/decorators/user.decorator';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guard/local-auth.guard';
-import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { GithubOauthGuard } from './guard/github-oauth.guard';
 import { GoogleOauthGuard } from './guard/google-oauth.guard';
 
@@ -60,12 +59,5 @@ export class AuthController {
         domain: this.configService.get('auth.cookieDomain'),
       })
       .redirect(this.configService.get('auth.redirectUrl'));
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('getUserInfo')
-  getUserInfo(@User() user: UserModel) {
-    this.logger.log(`getUserInfo success, req.user = ${user.email}`);
-    return user;
   }
 }
