@@ -15,7 +15,7 @@ export const useBigSearchQuickAction = () => {
 
   const triggerSkillQuickAction = (question: string, skill?: SkillInstance) => {
     if (skill) {
-      skillStore.setSelectedSkillInstalce(skill);
+      skillStore.setSelectedSkillInstance(skill);
     }
     emptyConvRunSkill(question, true);
   };

@@ -64,7 +64,7 @@ export function Home({
           onSelect={() => {
             triggerSkillQuickAction(searchValue);
             searchStore.setIsSearchOpen(false);
-            skillStore.setSelectedSkillInstalce(null);
+            skillStore.setSelectedSkillInstance(null);
           }}
         >
           <IconMessage style={{ fontSize: 12 }} />

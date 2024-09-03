@@ -32,7 +32,7 @@ export const SkillDisplay = () => {
           key={index}
           className="skill-item"
           onClick={() => {
-            skillStore.setSelectedSkillInstalce(item);
+            skillStore.setSelectedSkillInstance(item);
           }}
         >
           <span className="skill-item-title">{item?.displayName}</span>

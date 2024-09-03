@@ -92,7 +92,7 @@ export const ChatInput = (props: ChatInputProps) => {
             <Button
               icon={<IconClose />}
               onClick={() => {
-                skillStore.setSelectedSkillInstalce(null);
+                skillStore.setSelectedSkillInstance(null);
               }}
             ></Button>
           </div>
