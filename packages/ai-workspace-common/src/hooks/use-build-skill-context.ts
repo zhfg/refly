@@ -1,25 +1,23 @@
 // 类型
 import { ContextPanelDomain, LOCALE } from '@refly/common-types';
-import { SkillContext } from '@refly/openapi-schema';
+import { Resource, SkillContext } from '@refly/openapi-schema';
 // request
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { useGetCurrentSelectedMark } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-selected-text';
 
 export const useBuildSkillContext = () => {
+  const { getFinalUsedMarks } = useGetCurrentSelectedMark();
   const buildSkillContext = (): SkillContext => {
     const { localSettings } = useUserStore.getState();
-    const {
-      currentKnowledgeBase,
-      currentResource,
-      currentSelectedMark,
-      enableMultiSelect,
-      currentSelectedMarks = [],
-    } = useKnowledgeBaseStore.getState();
+    const { currentKnowledgeBase, currentResource } = useKnowledgeBaseStore.getState();
+    const contextPanelStore = useContextPanelStore.getState();
     const { currentNote } = useNoteStore.getState();
-    const { checkedKeys, selectedWeblinks } = useContextPanelStore.getState();
+    const { checkedKeys, selectedWeblinks, currentSelectedMark, enableMultiSelect, currentSelectedMarks } =
+      contextPanelStore;
     const mapDomainEnvIds = {
       collection: currentKnowledgeBase?.collectionId || '',
       resource: currentResource?.resourceId || '',
@@ -81,17 +79,35 @@ export const useBuildSkillContext = () => {
 
     const getContentList = () => {
       let contentList = [];
-      if (checkedKeys?.includes(`currentPage-resource`) && getRuntime() !== 'web') {
-        contentList.push(currentResource?.content || '');
-      }
+      const finalUsedMarks = getFinalUsedMarks(contextPanelStore);
 
       if (enableMultiSelect) {
-        contentList = contentList.concat(currentSelectedMarks.map((item) => item?.data));
+        contentList = (finalUsedMarks || []).map((item) => item?.data);
       } else {
         contentList.push(currentSelectedMark?.data);
       }
 
       return contentList;
+    };
+
+    const getExternalResources = () => {
+      const externalResources: Resource[] = [];
+      if (checkedKeys?.includes(`currentPage-resource`) && getRuntime() !== 'web') {
+        externalResources.push({
+          resourceType: 'text',
+          title: currentResource?.title || '',
+          resourceId: '',
+          data: {
+            url: currentResource?.data?.url || '',
+          },
+          content: currentResource?.content || '',
+          contentPreview: currentResource?.contentPreview || '',
+          createdAt: currentResource?.createdAt || '',
+          updatedAt: currentResource?.updatedAt || '',
+        });
+      }
+
+      return externalResources;
     };
 
     let context: SkillContext = {
@@ -101,6 +117,7 @@ export const useBuildSkillContext = () => {
       resourceIds: getIds('resource', checkedKeys),
       noteIds: getIds('note', checkedKeys),
       urls: getUrls('weblink', checkedKeys),
+      externalResources: getExternalResources(),
     };
 
     return context;

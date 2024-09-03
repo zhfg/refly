@@ -659,6 +659,7 @@
   "copilot": {
     "quickActions": "Quick Actions",
     "baseContextCard": {
+      "title": "Environment Context Quick Actions",
       "resourceContextCard": {
         "title": "Quick Actions for Current Resource",
         "summary": {
@@ -749,6 +750,18 @@
           "prompt": "Write a social media post",
           "title": "Write a Social Media Post"
         }
+      }
+    },
+    "selectedTextCard": {
+      "title": "Selected Text Context Panel",
+      "placeholder": "No quick actions for selected text...",
+      "options": {
+        "resource": "Selected Resource Content",
+        "note": "Selected Note Content",
+        "noteCursorSelection": "Note Cursor Selection",
+        "noteBeforeCursorSelection": "Note Cursor Before Selection",
+        "noteAfterCursorSelection": "Note Cursor After Selection",
+        "conversation": "Selected Conversation Content"
       }
     },
     "chatInput": {

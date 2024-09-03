@@ -44,7 +44,7 @@ export const KnowledgeBaseResourceDetail = memo(() => {
   }));
   const { initMessageListener, initContentSelectorElem } = useContentSelector(
     'knowledge-base-resource-content',
-    'resource-detail',
+    'resource',
   );
 
   const [queryParams] = useSearchParams();

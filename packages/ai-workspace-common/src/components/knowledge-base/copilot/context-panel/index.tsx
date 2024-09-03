@@ -109,7 +109,7 @@ const ContextContent = memo(() => {
 
   let TreeData: TreeProps['treeData'] = [
     {
-      title: '当前页面',
+      title: '环境上下文',
       key: 'currentPage',
       children: buildEnvContext(currentKnowledgeBase, currentResource, currentNote),
     },

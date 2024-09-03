@@ -671,6 +671,7 @@
   "copilot": {
     "quickActions": "快捷操作",
     "baseContextCard": {
+      "title": "环境上下文快捷操作",
       "resourceContextCard": {
         "title": "当前资源快捷操作",
         "summary": {
@@ -761,6 +762,18 @@
           "prompt": "撰写社交媒体文章",
           "title": "撰写社交媒体文章"
         }
+      }
+    },
+    "selectedTextCard": {
+      "title": "选中内容上下文面板",
+      "placeholder": "暂无可快捷操作的选中内容...",
+      "options": {
+        "resource": "选中资源内容",
+        "note": "选中笔记内容",
+        "noteCursorSelection": "笔记光标选中内容",
+        "noteBeforeCursorSelection": "笔记光标前内容",
+        "noteAfterCursorSelection": "笔记光标后内容",
+        "conversation": "选中会话内容"
       }
     },
     "chatInput": {

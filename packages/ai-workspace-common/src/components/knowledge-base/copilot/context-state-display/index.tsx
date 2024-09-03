@@ -11,15 +11,19 @@ import { WeblinkContextCard } from '@refly-packages/ai-workspace-common/componen
 import './index.scss';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { HybridSelectedTextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/selected-text-card/hybrid-selected-text-card';
 // context components
 
 export const ContextStateDisplay = () => {
   const { contextDomain, computedShowContextCard } = useCopilotContextState();
-  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
+  const contextPanelStore = useContextPanelStore((state) => ({
+    nowSelectedContextDomain: state.nowSelectedContextDomain,
     selectedNamespace: state.selectedNamespace,
+    selectedTextCardDomain: state.selectedTextCardDomain,
   }));
-  const { nowSelectedContextDomain } = useContextPanelStore();
   const runtime = getRuntime();
+
+  const { nowSelectedContextDomain } = contextPanelStore;
 
   const isSelectedTextCard = contextDomain === 'selected-text';
   const isExtension = runtime !== 'web';
@@ -31,12 +35,8 @@ export const ContextStateDisplay = () => {
     renderCompList.push(<WeblinkContextCard key="weblink-context-card" />);
   } else {
     if (isSelectedTextCard) {
-      const { selectedNamespace } = knowledgeBaseStore;
-      if (selectedNamespace === 'resource-detail') {
-        renderCompList.push(<ResourceSelectedTextCard key="resource-selected-text-card" />);
-      } else if (selectedNamespace === 'note') {
-        renderCompList.push(<NoteSelectedTextCard key="note-selected-text-card" />);
-      }
+      // use one component to render all selected text card
+      renderCompList.push(<ResourceSelectedTextCard key="resource-selected-text-card" />);
     } else {
       if (nowSelectedContextDomain === 'resource') {
         renderCompList.push(<ResourceContextCard key="resource-context-card" />);

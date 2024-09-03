@@ -56,6 +56,7 @@ import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { CurrentContextActionBtn } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/action-btn/current-context-action-btn';
 import { InstanceInvokeForm } from '@refly-packages/ai-workspace-common/components/skill/instance-invoke-form';
 import { SelectedInstanceCard } from '@refly-packages/ai-workspace-common/components/skill/selected-instance-card';
+import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 interface AICopilotProps {
   disable?: boolean;
@@ -90,6 +91,8 @@ export const AICopilot = memo((props: AICopilotProps) => {
     currentKnowledgeBase: state.currentKnowledgeBase,
     convModalVisible: state.convModalVisible,
     sourceListModalVisible: state.sourceListModalVisible,
+  }));
+  const contextPanelStore = useContextPanelStore((state) => ({
     setShowContextCard: state.setShowContextCard,
   }));
   const noteStore = useNoteStore((state) => ({
@@ -270,7 +273,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
     const runtime = getRuntime();
 
     if (runtime === 'web') {
-      knowledgeBaseStore.setShowContextCard(false);
+      contextPanelStore.setShowContextCard(false);
     }
   }, []);
 

@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
+import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 const checkShowRelatedQuestion = (messsages: ChatMessage[] = []) => {
   const message = messsages?.[messsages.length - 1];
@@ -21,12 +22,14 @@ export const useCopilotContextState = () => {
   const chatStore = useChatStore((state) => ({
     messages: state.messages,
   }));
-  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
+  const contextPanelStore = useContextPanelStore((state) => ({
     showContextCard: state.showContextCard,
     contextDomain: state.contextDomain,
+    currentSelectedMark: state.currentSelectedMark,
+  }));
+  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
     currentKnowledgeBase: state.currentKnowledgeBase,
     currentResource: state.currentResource,
-    currentSelectedMark: state.currentSelectedMark,
     resourcePanelVisible: state.resourcePanelVisible,
   }));
   const noteStore = useNoteStore((state) => ({
@@ -38,7 +41,7 @@ export const useCopilotContextState = () => {
   const resId = queryParams.get('resId');
   const kbId = queryParams.get('kbId');
   const noteId = queryParams.get('noteId');
-  const currentSelectedMark = knowledgeBaseStore?.currentSelectedMark;
+  const currentSelectedMark = contextPanelStore?.currentSelectedMark;
 
   // 优先级: text > resource > knowledgeBase > all
   const showContextState = !!resId || !!kbId || !!currentSelectedMark || !!noteId;
@@ -58,8 +61,8 @@ export const useCopilotContextState = () => {
   // };
 
   // 是否展示 contextCard
-  const computedShowContextCard = knowledgeBaseStore.showContextCard;
-  const contextDomain = knowledgeBaseStore.contextDomain;
+  const computedShowContextCard = contextPanelStore.showContextCard;
+  const contextDomain = contextPanelStore.contextDomain;
 
   // 是否展示 related questions
   const showRelatedQuestions = checkShowRelatedQuestion(chatStore?.messages);
