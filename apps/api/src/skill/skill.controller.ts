@@ -79,7 +79,7 @@ export class SkillController {
     res.setHeader('Connection', 'keep-alive');
     res.status(200);
 
-    await this.skillService.invokeSkillFromApi(user, body);
+    await this.skillService.invokeSkillFromApi(user, body, res);
   }
 
   @UseGuards(JwtAuthGuard)
