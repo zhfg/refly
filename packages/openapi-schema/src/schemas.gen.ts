@@ -2042,6 +2042,14 @@ export const $SkillInvocationRule = {
       description: 'Default value',
       items: {
         type: 'string',
+        enum: [
+          'resource',
+          'note',
+          'extension-weblink',
+          'noteCursorSelection',
+          'noteBeforeCursorSelection',
+          'noteAfterCursorSelection',
+        ],
       },
     },
     required: {

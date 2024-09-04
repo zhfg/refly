@@ -2748,6 +2748,13 @@ components:
           description: Default value
           items:
             type: string
+            enum:
+              - resource
+              - note
+              - extension-weblink
+              - noteCursorSelection
+              - noteBeforeCursorSelection
+              - noteAfterCursorSelection
         required:
           type: boolean
           description: Whether this key is required (default is false)

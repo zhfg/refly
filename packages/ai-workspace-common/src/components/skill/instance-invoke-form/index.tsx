@@ -57,7 +57,7 @@ export const InstanceInvokeForm = (props: InstanceInvokeProps) => {
       )}
 
       {context?.rules?.length > 0 && (
-        <div style={{ marginTop: 16 }}>
+        <div>
           <InvocationFormItems
             headerTitle={t('common.context')}
             headerIcon={<BiBookContent />}

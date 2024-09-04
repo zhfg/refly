@@ -1398,7 +1398,14 @@ export type SkillInvocationRule = {
   /**
    * Default value
    */
-  defaultValue?: Array<string>;
+  defaultValue?: Array<
+    | 'resource'
+    | 'note'
+    | 'extension-weblink'
+    | 'noteCursorSelection'
+    | 'noteBeforeCursorSelection'
+    | 'noteAfterCursorSelection'
+  >;
   /**
    * Whether this key is required (default is false)
    */

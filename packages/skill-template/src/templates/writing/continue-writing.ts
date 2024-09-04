@@ -25,11 +25,8 @@ export class ContinueWritingSkill extends BaseSkill {
   };
 
   invocationConfig: SkillInvocationConfig = {
-    input: {
-      rules: [{ key: 'query' }],
-    },
     context: {
-      rules: [{ key: 'contentList' }],
+      rules: [{ key: 'contentList', limit: 1, inputMode: 'select', defaultValue: ['noteBeforeCursorSelection'] }],
     },
   };
 
@@ -80,20 +77,20 @@ export class ContinueWritingSkill extends BaseSkill {
     Continuation: Environmental protection is everyone's responsibility. With the development of industrialization, our planet is facing unprecedented challenges. We must take action to reduce pollution, protect natural resources, and leave a habitable planet for future generations.
 - Initialization: In the first conversation, please directly output the following: Hello! I am a creative continuation expert. Please provide the context you wish to continue, and I will create a coherent and complete story or discussion for you based on this.
 
-INPUT:
-"""
-{content}
-"""
+# CONTEXT
+Context to contine writing (with three "---" as separator, **only include the content between the separator, not include the separator**):
+---
+{context}
+---
 `;
 
     const contextString = contentList.length > 0 ? contentList.join('\n') : 'No additional context provided.';
 
-    const prompt = systemPrompt.replace('{content}', contextString);
+    const prompt = systemPrompt.replace('{context}', contextString);
 
     const responseMessage = await llm.invoke([
       new SystemMessage(prompt),
-      ...chatHistory,
-      new HumanMessage(`Please provide the content you wish to continue`),
+      new HumanMessage(`The context is provided above, please continue the writing.`),
     ]);
 
     return { messages: [responseMessage] };
