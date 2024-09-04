@@ -287,7 +287,8 @@
       "download": "下载插件",
       "newResource": "导入资源",
       "settings": "设置",
-      "skill": "技能"
+      "skill": "技能",
+      "logout": "登出"
     }
   },
   "knowledgeLibrary": {
@@ -486,19 +487,40 @@
   },
   "settings": {
     "title": "设置",
-    "uiLocale": {
-      "title": "界面语言"
+    "tabs": {
+      "account": "账号",
+      "language": "语言"
     },
-    "outputLocale": {
-      "title": "对话语言",
-      "description": "AI 将按照此语言设置回答您的问题。您可以在对话中单独设置语言以覆盖此选项。"
-    },
+
     "account": {
-      "title": "账号",
+      "title": "我的账号",
+      "avatar": "头像",
+      "name": "用户名",
+      "namePlaceholder": "请输入用户名",
+      "nickname": "昵称",
+      "nameValidationError": "用户名只能包含字母、数字和下划线，且长度不能超过30个字符",
+      "nicknamePlaceholder": "请输入昵称",
+      "email": "邮箱",
+      "emailPlaceholder": "请输入邮箱",
+      "update": "更新",
+      "updateError": "更新用户信息失败，请重试",
+      "updateSuccess": "更新用户信息成功",
+      "nameInvalid": "该用户名已被占用",
+
       "logout": "退出登录",
       "logoutConfirmation": {
         "title": "退出登录",
         "message": "确定退出登录吗？"
+      }
+    },
+    "language": {
+      "title": "语言设置",
+      "uiLocale": {
+        "title": "界面语言"
+      },
+      "outputLocale": {
+        "title": "对话语言",
+        "description": "AI 将按照此语言设置回答您的问题。您可以在对话中单独设置语言以覆盖此选项。"
       }
     },
     "action": {

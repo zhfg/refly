@@ -8,7 +8,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 // styles
 import './index.scss';
 
-export const UILocaleList = (props: { children: any }) => {
+export const UILocaleList = (props: { children: React.ReactNode; width?: number }) => {
   // i18n
   const { t, i18n } = useTranslation();
   const userStore = useUserStore();
@@ -40,15 +40,25 @@ export const UILocaleList = (props: { children: any }) => {
   console.log('用户当前的界面语言', i18n.languages?.[0]);
 
   const dropList = (
-    <Menu className={'ui-locale-list-menu'} onClickMenuItem={(key) => changeLang(key as LOCALE)} style={{ width: 120 }}>
-      <Menu.Item key="zh-CN">简体中文</Menu.Item>
-      <Menu.Item key="en">English</Menu.Item>
+    <Menu
+      className={'ui-locale-list-menu'}
+      onClickMenuItem={(key) => changeLang(key as LOCALE)}
+      style={{ width: props?.width || 120 }}
+    >
+      <Menu.Item key="zh-CN" className={`ui-locale-list-menu-item ${i18n.languages?.[0] === 'zh-CN' ? 'active' : ''}`}>
+        简体中文
+      </Menu.Item>
+      <Menu.Item key="en" className={`ui-locale-list-menu-item ${i18n.languages?.[0] === 'en' ? 'active' : ''}`}>
+        English
+      </Menu.Item>
     </Menu>
   );
 
   return (
-    <Dropdown droplist={dropList} position="bl">
-      {props.children}
-    </Dropdown>
+    <div className="ui-locale-list">
+      <Dropdown droplist={dropList} trigger="click" position="bl">
+        {props.children}
+      </Dropdown>
+    </div>
   );
 };

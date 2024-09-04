@@ -7,34 +7,6 @@ import { BackgroundMessage } from '@refly/common-types';
 import { createClient } from '@hey-api/client-fetch';
 import { getServerOrigin } from '@refly/utils/url';
 import { getCookie } from '@/utils/cookie';
-import { appConfig } from '@refly/utils/config';
-
-/**
- * @deprecated
- */
-export const handleRequest = async (msg: HandlerRequest<any>) => {
-  const lastActiveTab = await getLastActiveTab();
-  const url = appConfig?.url[msg.name as keyof typeof appConfig.url] || '';
-  const [err, userRes] = await extRequest(url as string, { ...msg });
-  let messageRes = {} as HandlerResponse<any>;
-
-  if (err) {
-    messageRes = {
-      success: false,
-      errMsg: err,
-    };
-  } else {
-    messageRes = {
-      success: true,
-      data: userRes,
-    };
-  }
-
-  await browser.tabs.sendMessage(lastActiveTab?.id as number, {
-    name: msg?.name,
-    body: messageRes,
-  });
-};
 
 const client = createClient({ baseUrl: getServerOrigin() + '/v1' });
 

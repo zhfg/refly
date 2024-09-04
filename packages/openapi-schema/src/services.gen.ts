@@ -135,6 +135,9 @@ import type {
   UpdateSettingsData,
   UpdateSettingsError,
   UpdateSettingsResponse,
+  CheckSettingsFieldData,
+  CheckSettingsFieldError,
+  CheckSettingsFieldResponse2,
   SearchData,
   SearchError,
   SearchResponse2,
@@ -640,6 +643,17 @@ export const updateSettings = (options: Options<UpdateSettingsData>) => {
   return (options?.client ?? client).put<UpdateSettingsResponse, UpdateSettingsError>({
     ...options,
     url: '/user/settings',
+  });
+};
+
+/**
+ * Check settings field
+ * Given a settings field, check if the given value is valid
+ */
+export const checkSettingsField = (options: Options<CheckSettingsFieldData>) => {
+  return (options?.client ?? client).get<CheckSettingsFieldResponse2, CheckSettingsFieldError>({
+    ...options,
+    url: '/user/checkSettingsField',
   });
 };
 

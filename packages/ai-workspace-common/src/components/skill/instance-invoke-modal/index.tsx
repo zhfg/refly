@@ -38,8 +38,9 @@ export const InstanceInvokeModal = (props: InstanceInvokeModalProps) => {
 
   const onOk = () => {
     form.validate().then(async (res) => {
+      console.log(res);
       const { input, context, tplConfig } = res;
-      const { contentList, urls } = context;
+      const { contentList, urls } = context || {};
 
       setConfirmLoading(true);
       try {

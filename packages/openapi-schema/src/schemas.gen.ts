@@ -1103,11 +1103,16 @@ export const $UserSettings = {
     avatar: {
       type: 'string',
       description: 'User avatar',
-      example: 'https://www.gstatic.com/webp/gallery/1.jpg',
+      example: 'https://static.refly.ai/avatar/1.jpg',
     },
     name: {
       type: 'string',
-      description: 'User name',
+      description: 'Username (can only contains letters, numbers, and underscores)',
+      example: 'john_doe',
+    },
+    nickname: {
+      type: 'string',
+      description: 'User nickname',
       example: 'John Doe',
     },
     email: {
@@ -1131,6 +1136,22 @@ export const $UserSettings = {
       example: 'en',
     },
   },
+} as const;
+
+export const $GetUserSettingsResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          $ref: '#/components/schemas/UserSettings',
+        },
+      },
+    },
+  ],
 } as const;
 
 export const $BaseResponse = {
@@ -2398,6 +2419,16 @@ export const $GetConversationDetailResponse = {
 export const $UpdateUserSettingsRequest = {
   type: 'object',
   properties: {
+    name: {
+      type: 'string',
+      description: 'User name',
+      example: 'john_name',
+    },
+    nickname: {
+      type: 'string',
+      description: 'User nickname',
+      example: 'John Doe',
+    },
     uiLocale: {
       type: 'string',
       description: 'UI locale',
@@ -2409,6 +2440,42 @@ export const $UpdateUserSettingsRequest = {
       example: 'en',
     },
   },
+} as const;
+
+export const $CheckSettingsFieldResult = {
+  type: 'object',
+  required: ['field', 'value', 'available'],
+  properties: {
+    field: {
+      type: 'string',
+      description: 'Settings field',
+    },
+    value: {
+      type: 'string',
+      description: 'Settings field value',
+    },
+    available: {
+      type: 'boolean',
+      description: 'Whether the field value is available',
+    },
+  },
+} as const;
+
+export const $CheckSettingsFieldResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          description: 'Settings field check result',
+          $ref: '#/components/schemas/CheckSettingsFieldResult',
+        },
+      },
+    },
+  ],
 } as const;
 
 export const $SearchDomain = {

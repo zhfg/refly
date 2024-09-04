@@ -377,7 +377,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
                     <CurrentContextActionBtn />
                     <ContextContentWithBadge />
                     <SelectedTextContextActionBtn />
-                    <OutputLocaleList>
+                    <OutputLocaleList showTitle>
                       <Button icon={<IconTranslate />} type="text" className="assist-action-item">
                         {/* <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span> */}
                         <IconCaretDown />
