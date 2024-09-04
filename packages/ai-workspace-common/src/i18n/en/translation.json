@@ -506,7 +506,7 @@
       "update": "Update",
       "updateError": "Failed to update user information. Please try again!",
       "updateSuccess": "User information updated successfully!",
-      "usernameInvalid": "The username is taken",
+      "nameInvalid": "The username is taken",
 
       "logout": "Log Out",
       "logoutConfirmation": {

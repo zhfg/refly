@@ -18,6 +18,13 @@ export const AccountSetting = () => {
 
   const [nameStatus, setNameStatus] = useState<'error' | 'success' | 'warning' | 'validating'>('success');
   const [nameMessage, setNameMessage] = useState('');
+  const [emailStatus, setEmailStatus] = useState<'error' | 'success' | 'warning' | 'validating'>('success');
+  const [emailMessage, setEmailMessage] = useState('');
+
+  const statusMap = {
+    name: { status: nameStatus, setStatus: setNameStatus, setMessage: setNameMessage },
+    email: { status: emailStatus, setStatus: setEmailStatus, setMessage: setEmailMessage },
+  };
 
   const checkUsername = async (name: string) => {
     try {
@@ -28,29 +35,31 @@ export const AccountSetting = () => {
     }
   };
 
-  const validateName = async (value: string) => {
+  const validateField = async (value: string, field: 'name' | 'email') => {
+    const { setStatus, setMessage } = statusMap[field];
     if (!value) {
-      setNameStatus('error');
-      setNameMessage(t('settings.account.namePlaceholder'));
+      setStatus('error');
+      setMessage(t(`settings.account.${field}Placeholder`));
       return;
     }
     if (!/^[a-zA-Z0-9_]{1,30}$/.test(value)) {
-      setNameStatus('error');
-      setNameMessage(t('settings.account.nameValidationError'));
+      setStatus('error');
+      setMessage(t(`settings.account.${field}ValidationError`));
       return;
     }
-    setNameMessage(t(''));
+    setMessage(t(''));
+
     const isAvailable = await checkUsername(value);
     if (!isAvailable) {
-      setNameStatus('error');
-      setNameMessage(t('settings.account.usernameInvalid'));
+      setStatus('error');
+      setMessage(t(`settings.account.${field}Invalid`));
     } else {
-      setNameStatus('success');
-      setNameMessage('');
+      setStatus('success');
+      setMessage('');
     }
   };
 
-  const debouncedValidateName = useDebouncedCallback(validateName, 300);
+  const debouncedValidateField = useDebouncedCallback(validateField, 300);
 
   const handleUpdate = () => {
     if (nameStatus === 'error') {
@@ -130,7 +139,7 @@ export const AccountSetting = () => {
               addBefore="@"
               placeholder={t('settings.account.namePlaceholder')}
               onChange={(value) => {
-                debouncedValidateName(value);
+                debouncedValidateField(value, 'name');
               }}
             />
           </FormItem>

@@ -316,7 +316,7 @@ export const SiderLayout = () => {
           <div className="sider-center">
             {siderCenter.map(item => {
               return (
-                <>
+                <div key={item.key}>
                   <MenuItem
                     key={item.key}
                     className="custom-menu-item"
@@ -331,8 +331,13 @@ export const SiderLayout = () => {
                       title={t(`loggedHomePage.siderMenu.${item.name}`)}
                     />
                   </MenuItem>
-                  {item.showDivider && <Divider style={{ margin: "8px 0" }} />}
-                </>
+                  {item.showDivider && (
+                    <Divider
+                      key={item.key + "divider"}
+                      style={{ margin: "8px 0" }}
+                    />
+                  )}
+                </div>
               )
             })}
           </div>
