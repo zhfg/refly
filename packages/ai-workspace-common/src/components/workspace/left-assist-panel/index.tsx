@@ -27,7 +27,7 @@ export const LeftAssistPanel = () => {
             />
           </Avatar>
           <p className="user-welcome-title">
-            {t('workspace.leftPanel.welcomeTitle')} {userStore?.userProfile?.name}
+            {t('workspace.leftPanel.welcomeTitle')} {userStore?.userProfile?.nickname}
           </p>
         </div>
         <div className="welcome-question">

@@ -16,7 +16,7 @@ export const WorkSpaceSearch = () => {
     <div className="work-space-search flex flex-col justify-center items-center">
       <img className="logo" src={Logo} alt="Refly" />
       <div className="text-2xl my-8 font-medium">
-        Hello {userStore?.userProfile?.name},<span className="text-black/50"> How can I help you today?</span>
+        Hello {userStore?.userProfile?.nickname},<span className="text-black/50"> How can I help you today?</span>
       </div>
       <div className="relative h-20 w-[750px]">
         <Search

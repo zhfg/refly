@@ -119,7 +119,7 @@ const SettingItem = () => {
   return (
     <div className="flex flex-1 items-center justify-between">
       <SiderMenuSettingList>
-        <div className="menu-settings">
+        <div className="menu-settings user-profile">
           <Avatar size={32}>
             <img src={userStore?.userProfile?.avatar || ""} alt="user-avatar" />
           </Avatar>
