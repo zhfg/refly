@@ -13,6 +13,7 @@ import { SkillContext, SkillInstance } from '@refly/openapi-schema';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useTranslation } from 'react-i18next';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
+import { CONTENT_LIST_BREAK } from '@refly-packages/ai-workspace-common/components/skill/content-list-form-item';
 
 export const SelectedInstanceCard = () => {
   // content for fill skill form
@@ -69,8 +70,8 @@ export const SelectedInstanceCard = () => {
 
       const skillContext: SkillContext = {
         ...context,
-        contentList: contentList?.split(/\n\s*\n/),
-        urls: urls?.split(/\n\s*\n/),
+        contentList: contentList?.split(CONTENT_LIST_BREAK),
+        urls: urls?.split(CONTENT_LIST_BREAK),
       };
       const newQAText = input?.query || '';
 

@@ -47,7 +47,7 @@ export const useGetCurrentSelectedMark = () => {
         data: currentSelectionContent,
         xPath: '',
         scope: 'block',
-        namespace: 'noteCursor',
+        namespace: 'noteCursorSelection',
       });
     }
     if (selectedTextCardDomain.includes('noteBeforeCursorSelection') && beforeSelectionNoteContent) {
@@ -56,7 +56,7 @@ export const useGetCurrentSelectedMark = () => {
         data: beforeSelectionNoteContent,
         xPath: '',
         scope: 'block',
-        namespace: 'noteCursor',
+        namespace: 'noteBeforeCursorSelection',
       });
     }
     if (selectedTextCardDomain.includes('noteAfterCursorSelection') && afterSelectionNoteContent) {
@@ -65,7 +65,7 @@ export const useGetCurrentSelectedMark = () => {
         data: afterSelectionNoteContent,
         xPath: '',
         scope: 'block',
-        namespace: 'noteCursor',
+        namespace: 'noteAfterCursorSelection',
       });
     }
 

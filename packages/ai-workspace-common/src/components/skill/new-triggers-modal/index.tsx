@@ -139,6 +139,7 @@ export const NewTriggersModal = (props: NewTriggersModalProps) => {
 
         <InvocationFormItems
           headerTitle={t('common.context')}
+          selectTooltipTitle={t('common.selectContext')}
           ruleGroup={data?.invocationConfig.context}
           form={form}
           t={t}

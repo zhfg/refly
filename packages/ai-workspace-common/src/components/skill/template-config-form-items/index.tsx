@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { FormHeader } from '@refly-packages/ai-workspace-common/components/skill/form-header';
 
 const FormItem = Form.Item;
+const TextArea = Input.TextArea;
 
 const getFormField = (fieldPrefix: string, key: string) => {
   return `${fieldPrefix ? fieldPrefix + '.' : ''}${key}`;
@@ -39,7 +40,28 @@ const ConfigItem = (props: {
     return (
       <Input
         placeholder={placeholder}
+        defaultValue={String(configValue?.value || '') || ''}
+        onChange={(val) =>
+          form.setFieldValue(field, {
+            value: val,
+            label,
+            displayValue: String(val),
+          } as DynamicConfigValue)
+        }
+      />
+    );
+  }
+
+  if (item.inputMode === 'inputTextArea') {
+    return (
+      <TextArea
+        placeholder={placeholder}
         defaultValue={String(configValue?.value)}
+        rows={4}
+        autoSize={{
+          minRows: 4,
+          maxRows: 10,
+        }}
         onChange={(val) =>
           form.setFieldValue(field, {
             value: val,
@@ -133,7 +155,13 @@ export const TemplateConfigFormItems = (props: {
           {items.map((item, index) => {
             const field = getFormField(fieldPrefix, item.key);
             return (
-              <FormItem label={item.labelDict[locale]} key={item.key} required={item.required} field={field}>
+              <FormItem
+                layout="vertical"
+                label={item.labelDict[locale]}
+                key={item.key}
+                required={item.required}
+                field={field}
+              >
                 <ConfigItem
                   key={index}
                   item={item}

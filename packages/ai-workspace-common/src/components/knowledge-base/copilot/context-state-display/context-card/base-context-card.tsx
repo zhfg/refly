@@ -1,7 +1,14 @@
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { Button, Switch, Tag, Tooltip, Select } from '@arco-design/web-react';
-import { IconCloseCircle, IconFile, IconFolder, IconFontColors, IconRefresh } from '@arco-design/web-react/icon';
+import {
+  IconCloseCircle,
+  IconFile,
+  IconFilter,
+  IconFolder,
+  IconFontColors,
+  IconRefresh,
+} from '@arco-design/web-react/icon';
 import { useGetSkills } from '@refly-packages/ai-workspace-common/skills/main-logic/use-get-skills';
 import { useDispatchAction } from '@refly-packages/ai-workspace-common/skills/main-logic/use-dispatch-action';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
@@ -41,25 +48,7 @@ export const BaseContextCard = (props: BaseContextPanelProps) => {
       <div className="context-state-card-header">
         <div className="context-state-card-header-left">
           <IconFontColors />
-          {currentEnvContextKeys?.length > 0 && !isExtension ? (
-            <Tooltip content={t('copilot.baseContextCard.title')}>
-              <Select
-                bordered={false}
-                className="context-state-card-selector"
-                value={nowSelectedEnvContext?.key}
-                onChange={(val) => {
-                  setNowSelectedContextDomain(val);
-                }}
-                autoWidth={{ minWidth: 100, maxWidth: 150 }}
-              >
-                {currentEnvContextKeys.map((item, index) => (
-                  <Option key={item?.key} value={item?.key}>
-                    <span style={{ fontSize: 12 }}>{item?.data?.title}</span>
-                  </Option>
-                ))}
-              </Select>
-            </Tooltip>
-          ) : null}
+          <span className="context-state-card-header-title">{t('copilot.baseContextCard.title')}</span>
         </div>
         <div className="context-state-card-header-right">
           <Button
@@ -90,7 +79,29 @@ export const BaseContextCard = (props: BaseContextPanelProps) => {
           </div>
         )}
       </div>
-      <div className="context-state-card-footer">{skillContent}</div>
+      <div className="context-state-card-quick-action">{skillContent}</div>
+      <div className="context-state-card-footer">
+        <IconFilter />
+        {currentEnvContextKeys?.length > 0 && !isExtension ? (
+          <Tooltip content={t('copilot.baseContextCard.title')}>
+            <Select
+              bordered={false}
+              className="context-state-card-selector"
+              value={nowSelectedEnvContext?.key}
+              onChange={(val) => {
+                setNowSelectedContextDomain(val);
+              }}
+              autoWidth={{ minWidth: 100, maxWidth: 150 }}
+            >
+              {currentEnvContextKeys.map((item, index) => (
+                <Option key={item?.key} value={item?.key}>
+                  <span style={{ fontSize: 12 }}>{item?.data?.title}</span>
+                </Option>
+              ))}
+            </Select>
+          </Tooltip>
+        ) : null}
+      </div>
     </div>
   );
 };

@@ -9,7 +9,21 @@ export type TextType = 'text' | 'table' | 'link' | 'image' | 'video' | 'audio';
  * 1. extension-weblink: represent the weblink in the extension
  * 2. noteCursor: represent the note cursor related selection
  */
-export type SelectedNamespace = 'resource' | 'note' | 'extension-weblink' | 'noteCursor';
+export type SelectedNamespace =
+  | 'resource'
+  | 'note'
+  | 'extension-weblink'
+  | 'noteCursorSelection'
+  | 'noteBeforeCursorSelection'
+  | 'noteAfterCursorSelection';
+export const selectedNamespace = [
+  'resource',
+  'note',
+  'extension-weblink',
+  'noteCursorSelection',
+  'noteBeforeCursorSelection',
+  'noteAfterCursorSelection',
+];
 export type ContextDomain = 'weblink' | 'resource' | 'note' | 'collection' | 'selected-text';
 // selected text card domain
 export type SelectedTextCardDomain =

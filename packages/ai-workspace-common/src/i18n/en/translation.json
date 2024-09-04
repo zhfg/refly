@@ -18,7 +18,8 @@
     "context": "Context",
     "templateConfig": "Template Config",
     "required": "This item is required",
-    "empty": "No content"
+    "empty": "No content",
+    "selectContext": "Select Context"
   },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",
@@ -466,8 +467,21 @@
         "resourceIds": "Please select resource",
         "noteIds": "Please select note",
         "collectionIds": "Please select collection",
-        "contentList": "Please enter or paste content",
+        "contentList": {
+          "select": "Please select content",
+          "textarea": "Please enter or paste content"
+        },
         "urls": "Please enter URLs, one per line"
+      },
+      "context": {
+        "contentList": {
+          "resource": "Resource",
+          "note": "Note",
+          "extension-weblink": "Web Link",
+          "noteCursorSelection": "Note Cursor Selection",
+          "noteBeforeCursorSelection": "Note Before Cursor Selection",
+          "noteAfterCursorSelection": "Note After Cursor Selection"
+        }
       },
       "invokeConfig": "Invocation Config",
       "templateConfig": "Template Config"
@@ -660,6 +674,7 @@
     "quickActions": "Quick Actions",
     "baseContextCard": {
       "title": "Environment Context Quick Actions",
+      "filterTitle": "Filter Environment Context",
       "resourceContextCard": {
         "title": "Quick Actions for Current Resource",
         "summary": {
@@ -753,7 +768,8 @@
       }
     },
     "selectedTextCard": {
-      "title": "Selected Text Context Panel",
+      "title": "Selected Text Quick Actions",
+      "filterTitle": "Filter Selected Content",
       "placeholder": "No quick actions for selected text...",
       "options": {
         "resource": "Selected Resource Content",

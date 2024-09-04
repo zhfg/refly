@@ -32,6 +32,7 @@ export const BasicInfoFormItems = () => {
           <FormItem
             label={t('skill.newSkillModal.name')}
             required
+            layout="vertical"
             field="displayName"
             rules={[{ required: true, message: t('skill.newSkillModal.namePlaceholder') }]}
           >
@@ -40,6 +41,7 @@ export const BasicInfoFormItems = () => {
           <FormItem
             label={t('skill.newSkillModal.description')}
             required
+            layout="vertical"
             field="description"
             rules={[{ required: true, message: t('skill.newSkillModal.descriptionPlaceholder') }]}
           >

@@ -6,6 +6,7 @@ import { SkillInvocationRule, SkillInvocationRuleGroup } from '@refly/openapi-sc
 import { FormHeader } from '@refly-packages/ai-workspace-common/components/skill/form-header';
 
 import './index.scss';
+import { ContentListFormItem } from '@refly-packages/ai-workspace-common/components/skill/content-list-form-item';
 
 const FormItem = Form.Item;
 const TextArea = Input.TextArea;
@@ -64,7 +65,19 @@ const InvokeOption = (props: {
     );
   }
 
-  if (rule.key === 'contentList' || rule.key === 'urls') {
+  if (rule.key === 'contentList') {
+    return (
+      <ContentListFormItem
+        {...commonProps}
+        rule={rule}
+        onChange={(value) => {
+          onChange(value);
+        }}
+      />
+    );
+  }
+
+  if (rule.key === 'urls') {
     return (
       <TextArea
         {...commonProps}
@@ -89,10 +102,11 @@ interface InvokeOptionGroupProps {
   t: TFunction;
   fieldPrefix?: string;
   headerTitle?: string;
+  selectTooltipTitle?: string;
 }
 
 export const InvocationFormItems = (props: InvokeOptionGroupProps) => {
-  const { ruleGroup, form, t, fieldPrefix, headerTitle } = props;
+  const { ruleGroup, form, t, fieldPrefix, headerTitle, selectTooltipTitle } = props;
   const { rules, relation } = ruleGroup;
   const resourceOptions = rules.map((rule) => ({
     label: t(`skill.instanceInvokeModal.formLabel.${rule.key}`),
@@ -118,6 +132,7 @@ export const InvocationFormItems = (props: InvokeOptionGroupProps) => {
           options={resourceOptions}
           enableSelect
           enableCollapse
+          selectTooltipTitle={selectTooltipTitle}
           collapsed={collapsed}
           onSelectChange={(value: string) => {
             setSelectedResource(value);
@@ -177,6 +192,7 @@ export const InvocationFormItems = (props: InvokeOptionGroupProps) => {
         <>
           {rules.map((rule) => (
             <FormItem
+              layout="vertical"
               label={t(`skill.instanceInvokeModal.formLabel.${rule.key}`)}
               key={rule.key}
               required={rule.required}

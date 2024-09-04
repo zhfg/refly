@@ -98,6 +98,7 @@ export const NewSkillInstanceModal = (props: NewSkillInstanceModalProps) => {
       <Form {...formItemLayout} form={form}>
         <BasicInfoFormItems />
         <TemplateConfigFormItems
+          headerTitle={t('common.templateConfig')}
           schema={configSchema}
           form={form}
           fieldPrefix="tplConfig"

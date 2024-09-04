@@ -55,6 +55,7 @@ export const InstanceInvokeForm = (props: InstanceInvokeProps) => {
         <div style={{ marginTop: 16 }}>
           <InvocationFormItems
             headerTitle={t('common.context')}
+            selectTooltipTitle={t('common.selectContext')}
             ruleGroup={data?.invocationConfig.context}
             form={form}
             t={t}

@@ -66,10 +66,11 @@ interface AICopilotProps {
 
 const skillContainerPadding = 8;
 const skillContainerHeight = 24 + 2 * skillContainerPadding;
-const selectedSkillContainerHeight = 32;
+// const selectedSkillContainerHeight = 32;
 const inputContainerHeight = 115;
 const chatContainerPadding = 8;
 const layoutContainerPadding = 16;
+const selectedSkillContainerHeight = 270 + 32 + 2 * chatContainerPadding;
 const knowledgeBaseDetailHeaderHeight = 40;
 
 export const AICopilot = memo((props: AICopilotProps) => {
@@ -110,7 +111,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
     messages: state.messages,
     resetState: state.resetState,
     setMessages: state.setMessages,
-    setSkillContext: state.setSkillContext,
+    setInvokeParams: state.setInvokeParams,
   }));
   const conversationStore = useConversationStore((state) => ({
     isNewConversation: state.isNewConversation,
@@ -141,14 +142,14 @@ export const AICopilot = memo((props: AICopilotProps) => {
   const resId = searchParams.get('resId');
   const { resetState } = useResetState();
 
-  const actualChatContainerHeight =
-    inputContainerHeight + (skillStore?.selectedSkill ? selectedSkillContainerHeight : 0);
+  const actualChatContainerHeight = inputContainerHeight;
 
-  const actualOperationContainerHeight =
-    actualChatContainerHeight +
-    (computedShowContextCard ? contextCardHeight : 0) +
-    skillContainerHeight +
-    2 * chatContainerPadding;
+  const actualOperationContainerHeight = skillStore.selectedSkill
+    ? selectedSkillContainerHeight
+    : actualChatContainerHeight +
+      (computedShowContextCard ? contextCardHeight : 0) +
+      skillContainerHeight +
+      2 * chatContainerPadding;
   console.log('actualCopilotBodyHeight', actualChatContainerHeight, actualOperationContainerHeight);
 
   const { t, i18n } = useTranslation();
@@ -245,7 +246,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
 
     // reset state
     conversationStore.setIsNewConversation(false);
-    chatStore.setSkillContext(undefined);
+    chatStore.setInvokeParams({});
   };
 
   useEffect(() => {
@@ -385,9 +386,9 @@ export const AICopilot = memo((props: AICopilotProps) => {
                       <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
                     </div>
                     <div className="chat-input-assist-action">
+                      <SelectedTextContextActionBtn />
                       <CurrentContextActionBtn />
                       <ContextContentWithBadge />
-                      <SelectedTextContextActionBtn />
                       <OutputLocaleList>
                         <Button icon={<IconTranslate />} type="text" className="assist-action-item">
                           {/* <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span> */}

@@ -20,6 +20,7 @@ interface FormHeaderProps {
   onSelectChange?: (value: string | string[]) => void;
   onCollapseChange?: (collapsed: boolean) => void;
   collapsed?: boolean;
+  selectTooltipTitle?: string;
 }
 
 export const FormHeader: React.FC<FormHeaderProps> = ({
@@ -31,6 +32,7 @@ export const FormHeader: React.FC<FormHeaderProps> = ({
   onSelectChange,
   onCollapseChange,
   collapsed = false,
+  selectTooltipTitle,
 }) => {
   const [isMultiSelect, setIsMultiSelect] = useState(enableMultiSelect);
   const { t } = useTranslation();
@@ -77,7 +79,7 @@ export const FormHeader: React.FC<FormHeaderProps> = ({
         {enableSelect && (
           <>
             {!isMultiSelect && (
-              <Tooltip content="选择待使用上下文">
+              <Tooltip content={selectTooltipTitle}>
                 <Select
                   size="mini"
                   className="context-selector"

@@ -7,6 +7,7 @@ import { Button, Select, Switch, Tag, Tooltip } from '@arco-design/web-react';
 import {
   IconCloseCircle,
   IconFile,
+  IconFilter,
   IconFolder,
   IconFontColors,
   IconHighlight,
@@ -37,7 +38,8 @@ interface BaseSelectedTextCardProps {
 const { Option } = Select;
 
 const getIcon = (mark: Mark) => {
-  if (mark.namespace === 'noteCursor') {
+  // include noteCursorSelection, noteBeforeCursorSelection, noteAfterCursorSelection
+  if (mark.namespace?.includes('cursor')) {
     return <IconFontColors />;
   }
 
@@ -86,25 +88,8 @@ export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
     <div className="context-state-card context-state-current-page">
       <div className="context-state-card-header">
         <div className="context-state-card-header-left">
-          <Tooltip content={t('copilot.selectedTextCard.title')}>
-            <Select
-              bordered={false}
-              mode="multiple"
-              maxTagCount={1}
-              className="context-state-card-selector"
-              value={contextPanelStore.selectedTextCardDomain}
-              onChange={(val) => {
-                contextPanelStore.setSelectedTextCardDomain(val);
-              }}
-              autoWidth={{ minWidth: 180, maxWidth: 200 }}
-            >
-              {(isWeb ? selectedTextCardDomainWeb : selectedTextCardDomainExtension).map((item, index) => (
-                <Option key={item?.key} value={item?.key}>
-                  <span style={{ fontSize: 12 }}>{item?.labelDict[locale]}</span>
-                </Option>
-              ))}
-            </Select>
-          </Tooltip>
+          <IconFontColors />
+          <span className="context-state-card-header-title">{t('copilot.selectedTextCard.title')} </span>
         </div>
         <div className="context-state-card-header-right">
           <Button
@@ -172,7 +157,30 @@ export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
           </div>
         ) : null}
       </div>
-      <div className="context-state-card-footer">{skillContent}</div>
+      <div className="context-state-card-quick-action">{skillContent}</div>
+      <div className="context-state-card-footer">
+        <IconFilter />
+        <Tooltip content={t('copilot.selectedTextCard.filterTitle')}>
+          <Select
+            // bordered={false}
+            mode="multiple"
+            maxTagCount={1}
+            className="context-state-card-selector"
+            value={contextPanelStore.selectedTextCardDomain}
+            onChange={(val) => {
+              contextPanelStore.setSelectedTextCardDomain(val);
+            }}
+            allowClear
+            autoWidth={{ minWidth: 266, maxWidth: 340 }}
+          >
+            {(isWeb ? selectedTextCardDomainWeb : selectedTextCardDomainExtension).map((item, index) => (
+              <Option key={item?.key} value={item?.key}>
+                <span style={{ fontSize: 12 }}>{item?.labelDict[locale]}</span>
+              </Option>
+            ))}
+          </Select>
+        </Tooltip>
+      </div>
     </div>
   );
 };
