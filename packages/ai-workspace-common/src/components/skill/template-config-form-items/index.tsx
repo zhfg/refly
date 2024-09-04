@@ -142,7 +142,10 @@ export const TemplateConfigFormItems = (props: {
       Object.entries(tplConfig).forEach(([key, value]) => {
         const field = getFormField(fieldPrefix, key);
         console.log(`field`, field);
-        form.setFieldValue(field, value);
+
+        if (value) {
+          form.setFieldValue(field, value);
+        }
       });
     }
   }, [form, tplConfig, fieldPrefix]);
@@ -159,8 +162,19 @@ export const TemplateConfigFormItems = (props: {
                 layout="vertical"
                 label={item.labelDict[locale]}
                 key={item.key}
-                required={item.required}
                 field={field}
+                required={item.required}
+                rules={[
+                  {
+                    validator(value, cb) {
+                      if (!value && item?.required) {
+                        return cb(t('common.emptyInput'));
+                      }
+
+                      return cb();
+                    },
+                  },
+                ]}
               >
                 <ConfigItem
                   key={index}

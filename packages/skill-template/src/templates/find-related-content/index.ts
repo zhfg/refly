@@ -41,6 +41,7 @@ export class FindRelatedContent extends BaseSkill {
           en: 'The domains to search related content',
           'zh-CN': '搜索相关内容的范围',
         },
+        required: true,
         options: [
           {
             value: 'resource',
@@ -63,7 +64,7 @@ export class FindRelatedContent extends BaseSkill {
 
   invocationConfig: SkillInvocationConfig = {
     input: {
-      rules: [{ key: 'query' }],
+      rules: [{ key: 'query', required: true }],
     },
     context: {
       rules: [

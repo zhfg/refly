@@ -122,7 +122,7 @@ export const InvocationFormItems = (props: InvokeOptionGroupProps) => {
   const [ruleValues, setRuleValues] = useState<Record<string, string>>({});
 
   const selectedRule = rules.find((rule) => rule.key === selectedResource);
-  console.log('rules', rules, selectedRule, relation, collapsed);
+  // console.log('rules', rules, selectedRule, relation, collapsed);
 
   if (relation === 'mutuallyExclusive') {
     return (
@@ -157,6 +157,17 @@ export const InvocationFormItems = (props: InvokeOptionGroupProps) => {
               label={t(`skill.instanceInvokeModal.formLabel.${selectedRule.key}`)}
               key={selectedRule.key}
               required={selectedRule.required}
+              rules={[
+                {
+                  validator(value, cb) {
+                    if (!value && selectedRule?.required) {
+                      return cb(t('common.emptyInput'));
+                    }
+
+                    return cb();
+                  },
+                },
+              ]}
               field={getFormField(fieldPrefix, selectedRule.key)}
             >
               <div style={{ opacity: selectedKey === selectedRule.key ? 1 : 0.5 }}>
@@ -196,6 +207,17 @@ export const InvocationFormItems = (props: InvokeOptionGroupProps) => {
               label={t(`skill.instanceInvokeModal.formLabel.${rule.key}`)}
               key={rule.key}
               required={rule.required}
+              rules={[
+                {
+                  validator(value, cb) {
+                    if (!value && rule?.required) {
+                      return cb(t('common.emptyInput'));
+                    }
+
+                    return cb();
+                  },
+                },
+              ]}
               field={getFormField(fieldPrefix, rule.key)}
             >
               <InvokeOption

@@ -19,7 +19,8 @@
     "templateConfig": "Template Config",
     "required": "This item is required",
     "empty": "No content",
-    "selectContext": "Select Context"
+    "selectContext": "Select Context",
+    "emptyInput": "Please input content"
   },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",

@@ -86,14 +86,14 @@ export const AssistantMessage = memo(
     const profile = { name: message?.skillMeta?.displayName, avatar: message?.skillMeta?.displayName };
 
     // TODO: 移入新组件
-    console.log(
-      'rerender assistant message',
-      message,
-      isPendingFirstToken,
-      isPending,
-      isLastSession,
-      handleAskFollowing,
-    );
+    // console.log(
+    //   'rerender assistant message',
+    //   message,
+    //   isPendingFirstToken,
+    //   isPending,
+    //   isLastSession,
+    //   handleAskFollowing,
+    // );
 
     const handleEditorOperation = (type: EditorOperation, content: string) => {
       // editorEmitter.emit('insertBlow', message?.content);
