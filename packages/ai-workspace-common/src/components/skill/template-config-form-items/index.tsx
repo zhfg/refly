@@ -125,12 +125,13 @@ export const TemplateConfigFormItems = (props: {
   tplConfig?: SkillTemplateConfig;
   fieldPrefix?: string;
   headerTitle?: string;
+  headerIcon?: React.ReactNode;
 }) => {
   const { i18n, t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
   const locale = i18n.languages?.[0] || 'en';
 
-  const { schema, form, fieldPrefix = '', tplConfig, headerTitle } = props;
+  const { schema, form, fieldPrefix = '', tplConfig, headerTitle, headerIcon } = props;
   const { items } = schema;
 
   if (!items?.length) {
@@ -152,7 +153,13 @@ export const TemplateConfigFormItems = (props: {
 
   return (
     <div style={{ marginTop: 16 }}>
-      <FormHeader title={headerTitle} enableCollapse collapsed={collapsed} onCollapseChange={setCollapsed} />
+      <FormHeader
+        title={headerTitle}
+        icon={headerIcon}
+        enableCollapse
+        collapsed={collapsed}
+        onCollapseChange={setCollapsed}
+      />
       {items?.length > 0 && !collapsed ? (
         <div className="template-config-form-items">
           {items.map((item, index) => {
@@ -179,6 +186,7 @@ export const TemplateConfigFormItems = (props: {
                 <ConfigItem
                   key={index}
                   item={item}
+                  headerIcon={headerIcon}
                   form={form}
                   field={field}
                   locale={locale}

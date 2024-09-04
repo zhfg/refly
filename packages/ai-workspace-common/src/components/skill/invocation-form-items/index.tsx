@@ -102,11 +102,12 @@ interface InvokeOptionGroupProps {
   t: TFunction;
   fieldPrefix?: string;
   headerTitle?: string;
+  headerIcon?: React.ReactNode;
   selectTooltipTitle?: string;
 }
 
 export const InvocationFormItems = (props: InvokeOptionGroupProps) => {
-  const { ruleGroup, form, t, fieldPrefix, headerTitle, selectTooltipTitle } = props;
+  const { ruleGroup, form, t, fieldPrefix, headerTitle, selectTooltipTitle, headerIcon } = props;
   const { rules, relation } = ruleGroup;
   const resourceOptions = rules.map((rule) => ({
     label: t(`skill.instanceInvokeModal.formLabel.${rule.key}`),
@@ -129,6 +130,7 @@ export const InvocationFormItems = (props: InvokeOptionGroupProps) => {
       <>
         <FormHeader
           title={headerTitle}
+          icon={headerIcon}
           options={resourceOptions}
           enableSelect
           enableCollapse
@@ -156,6 +158,7 @@ export const InvocationFormItems = (props: InvokeOptionGroupProps) => {
             <FormItem
               label={t(`skill.instanceInvokeModal.formLabel.${selectedRule.key}`)}
               key={selectedRule.key}
+              layout="vertical"
               required={selectedRule.required}
               rules={[
                 {
@@ -193,6 +196,7 @@ export const InvocationFormItems = (props: InvokeOptionGroupProps) => {
     <div>
       <FormHeader
         title={headerTitle}
+        icon={headerIcon}
         options={resourceOptions}
         enableCollapse
         collapsed={collapsed}

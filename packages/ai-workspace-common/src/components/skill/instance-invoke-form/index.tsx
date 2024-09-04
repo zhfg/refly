@@ -10,6 +10,10 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { SkillInstance } from '@refly/openapi-schema';
 import { Collapse, Modal, Form, Message, Button, FormInstance } from '@arco-design/web-react';
 
+import { BiBookContent } from 'react-icons/bi';
+import { LuFormInput } from 'react-icons/lu';
+import { FaWpforms } from 'react-icons/fa';
+
 // styles
 import './index.scss';
 
@@ -44,6 +48,7 @@ export const InstanceInvokeForm = (props: InstanceInvokeProps) => {
       {input?.rules?.length > 0 && (
         <InvocationFormItems
           headerTitle={t('common.input')}
+          headerIcon={<LuFormInput />}
           ruleGroup={data?.invocationConfig.input}
           form={form}
           t={t}
@@ -55,6 +60,7 @@ export const InstanceInvokeForm = (props: InstanceInvokeProps) => {
         <div style={{ marginTop: 16 }}>
           <InvocationFormItems
             headerTitle={t('common.context')}
+            headerIcon={<BiBookContent />}
             selectTooltipTitle={t('common.selectContext')}
             ruleGroup={data?.invocationConfig.context}
             form={form}
@@ -67,6 +73,7 @@ export const InstanceInvokeForm = (props: InstanceInvokeProps) => {
       {tplConfigSchema?.items?.length > 0 && (
         <TemplateConfigFormItems
           headerTitle={t('common.templateConfig')}
+          headerIcon={<FaWpforms />}
           schema={tplConfigSchema}
           form={form}
           tplConfig={tplConfig}
