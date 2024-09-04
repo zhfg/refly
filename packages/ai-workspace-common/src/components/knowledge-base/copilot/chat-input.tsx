@@ -13,6 +13,7 @@ import { useConversationStore } from '@refly-packages/ai-workspace-common/stores
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
+import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
 
 const TextArea = Input.TextArea;
 
@@ -83,7 +84,12 @@ export const ChatInput = (props: ChatInputProps) => {
       {skillStore?.selectedSkill ? (
         <div className="selected-skill">
           <div className="selected-skill-profile">
-            <Avatar size={16} />
+            <SkillAvatar
+              size={20}
+              shape="circle"
+              icon={skillStore?.selectedSkill?.icon}
+              displayName={skillStore?.selectedSkill?.displayName}
+            />
             <p>
               和 <span className="selected-skill-name">{skillStore?.selectedSkill?.displayName}</span> 聊聊
             </p>

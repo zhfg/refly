@@ -8,6 +8,7 @@ import { InstanceInvokeModal } from '@refly-packages/ai-workspace-common/compone
 import { InstanceDropdownMenu } from '@refly-packages/ai-workspace-common/components/skill/instance-dropdown-menu';
 import { NewSkillInstanceModal } from '@refly-packages/ai-workspace-common/components/skill/new-instance-modal';
 import { NewTriggersModal } from '@refly-packages/ai-workspace-common/components/skill/new-triggers-modal';
+import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
 
 // store
 import { useImportNewTriggerModal } from '@refly-packages/ai-workspace-common/stores/import-new-trigger-modal';
@@ -125,12 +126,8 @@ const SkillDetail = () => {
         <div className="skill-detail__content">
           <div className="skill-detail__content-wrap">
             <div className="skill-detail__content-top">
-              <Avatar className="skill-avatar" shape="square" size={140}>
-                <img
-                  alt="avatar"
-                  src="//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/3ee5f13fb09879ecb5185e440cef6eb9.png~tplv-uwbnlip3yd-webp.webp"
-                />
-              </Avatar>
+              <SkillAvatar icon={skillDetail?.icon} size={140} displayName={skillDetail?.displayName} />
+
               <div className="skill-detail__content-top-info">
                 <div className="skill-name">{skillDetail?.displayName}</div>
                 <Typography.Paragraph className="skill-desc" ellipsis={{ rows: 3 }} style={{ lineHeight: 1.51 }}>
