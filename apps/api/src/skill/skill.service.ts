@@ -190,6 +190,7 @@ export class SkillService {
     const templates = this.skillInventory.map((skill) => ({
       name: skill.name,
       displayName: skill.displayName[locale],
+      icon: skill.icon,
       description: skill.description,
       configSchema: skill.configSchema,
     }));
@@ -234,6 +235,7 @@ export class SkillService {
         skillId: genSkillID(),
         uid,
         ...pick(instance, ['tplName', 'displayName', 'description']),
+        icon: JSON.stringify(instance.icon ?? tplConfigMap.get(instance.tplName)?.icon),
         ...{
           tplConfig: instance.tplConfig ? JSON.stringify(instance.tplConfig) : undefined,
           configSchema: tplConfigMap.get(instance.tplName)?.configSchema

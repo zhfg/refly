@@ -221,9 +221,8 @@ export const $LabelClass = {
       example: 'Label display name',
     },
     icon: {
-      type: 'string',
       description: 'Label icon',
-      example: 'IconBulb',
+      $ref: '#/components/schemas/Icon',
     },
     prompt: {
       type: 'string',
@@ -390,6 +389,27 @@ export const $SkillTemplateConfigSchema = {
   },
 } as const;
 
+export const $IconType = {
+  type: 'string',
+  description: 'Icon type',
+  enum: ['emoji', 'image'],
+} as const;
+
+export const $Icon = {
+  type: 'object',
+  description: 'Icon',
+  properties: {
+    type: {
+      description: 'Icon type',
+      $ref: '#/components/schemas/IconType',
+    },
+    value: {
+      type: 'string',
+      description: 'Icon value',
+    },
+  },
+} as const;
+
 export const $SkillTemplate = {
   type: 'object',
   description: 'Skill template',
@@ -406,6 +426,10 @@ export const $SkillTemplate = {
     description: {
       type: 'string',
       description: 'Skill template description',
+    },
+    icon: {
+      description: 'Skill template icon',
+      $ref: '#/components/schemas/Icon',
     },
     configSchema: {
       description: 'Skill template config schema',
@@ -576,6 +600,10 @@ export const $SkillInstance = {
         description: {
           type: 'string',
           description: 'Skill instance description',
+        },
+        icon: {
+          description: 'Skill instance icon',
+          $ref: '#/components/schemas/Icon',
         },
         tplConfig: {
           description: 'Skill template config',
@@ -1560,9 +1588,8 @@ export const $CreateLabelClassRequest = {
       example: 'My Class',
     },
     icon: {
-      type: 'string',
       description: 'Label icon',
-      example: 'IconBulb',
+      $ref: '#/components/schemas/Icon',
     },
     prompt: {
       type: 'string',
@@ -1591,9 +1618,8 @@ export const $UpdateLabelClassRequest = {
       example: 'My Class',
     },
     icon: {
-      type: 'string',
       description: 'Label icon',
-      example: 'IconBulb',
+      $ref: '#/components/schemas/Icon',
     },
     prompt: {
       type: 'string',
@@ -1784,6 +1810,10 @@ export const $SkillInstanceCreateParam = {
       type: 'string',
       description: 'Skill description',
     },
+    icon: {
+      description: 'Skill instance icon',
+      $ref: '#/components/schemas/Icon',
+    },
     tplConfig: {
       description: 'Skill template config',
       $ref: '#/components/schemas/SkillTemplateConfig',
@@ -1842,6 +1872,10 @@ export const $UpdateSkillInstanceRequest = {
     description: {
       type: 'string',
       description: 'Skill description',
+    },
+    icon: {
+      description: 'Skill instance icon',
+      $ref: '#/components/schemas/Icon',
     },
     tplConfig: {
       description: 'Skill template config',

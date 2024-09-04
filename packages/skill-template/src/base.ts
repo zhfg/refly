@@ -14,6 +14,7 @@ import {
   SkillMeta,
   User,
   SkillTemplateConfig,
+  Icon,
 } from '@refly/openapi-schema';
 import { EventEmitter } from 'node:stream';
 import { randomUUID } from 'node:crypto';
@@ -24,6 +25,10 @@ export abstract class BaseSkill extends StructuredTool {
    * Skill display name
    */
   abstract displayName: Record<string, string>;
+  /**
+   * Skill template icon
+   */
+  icon: Icon = { type: 'emoji', value: '🔧' };
   /**
    * Skill template config schema
    */

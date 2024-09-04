@@ -41,9 +41,13 @@ export class LabelService {
       create: {
         labelClassId: genLabelClassID(),
         uid: user.uid,
-        ...param,
+        icon: JSON.stringify(param.icon),
+        ...pick(param, ['name', 'displayName', 'prompt']),
       },
-      update: pick(param, ['icon', 'displayName', 'prompt']),
+      update: {
+        icon: JSON.stringify(param.icon),
+        ...pick(param, ['displayName', 'prompt']),
+      },
     });
   }
 
@@ -58,7 +62,10 @@ export class LabelService {
     }
     return this.prisma.labelClass.update({
       where: { labelClassId: param.labelClassId, uid: user.uid },
-      data: param,
+      data: {
+        icon: JSON.stringify(param.icon),
+        ...pick(param, ['displayName', 'prompt']),
+      },
     });
   }
 
