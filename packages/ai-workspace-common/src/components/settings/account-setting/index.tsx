@@ -28,7 +28,7 @@ export const AccountSetting = () => {
 
   const checkUsername = async (name: string) => {
     try {
-      const { data } = await getClient().checkUsername({ query: { name } });
+      const { data } = await getClient().checkSettingsField({ query: { field: 'name', value: name } });
       return data?.data?.available;
     } catch (error) {
       return false;

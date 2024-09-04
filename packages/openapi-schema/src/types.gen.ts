@@ -1629,18 +1629,26 @@ export type UpdateUserSettingsRequest = {
   outputLocale?: string;
 };
 
-export type CheckUserNameResult = {
+export type CheckSettingsFieldResult = {
   /**
-   * Whether the username is available
+   * Settings field
    */
-  available?: boolean;
+  field: string;
+  /**
+   * Settings field value
+   */
+  value: string;
+  /**
+   * Whether the field value is available
+   */
+  available: boolean;
 };
 
-export type CheckUsernameResponse = BaseResponse & {
+export type CheckSettingsFieldResponse = BaseResponse & {
   /**
-   * Username check result
+   * Settings field check result
    */
-  data?: CheckUserNameResult;
+  data?: CheckSettingsFieldResult;
 };
 
 export type SearchDomain = 'resource' | 'note' | 'collection' | 'conversation' | 'skill';
@@ -2329,18 +2337,22 @@ export type UpdateSettingsResponse = BaseResponse;
 
 export type UpdateSettingsError = unknown;
 
-export type CheckUsernameData = {
+export type CheckSettingsFieldData = {
   query: {
     /**
-     * Username
+     * Settings field
      */
-    name: string;
+    field: 'name' | 'email';
+    /**
+     * Field value
+     */
+    value: string;
   };
 };
 
-export type CheckUsernameResponse2 = CheckUsernameResponse;
+export type CheckSettingsFieldResponse2 = CheckSettingsFieldResponse;
 
-export type CheckUsernameError = unknown;
+export type CheckSettingsFieldError = unknown;
 
 export type SearchData = {
   body: SearchRequest;
@@ -2860,14 +2872,14 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/user/checkUsername': {
+  '/user/checkSettingsField': {
     get: {
-      req: CheckUsernameData;
+      req: CheckSettingsFieldData;
       res: {
         /**
          * successful operation
          */
-        '200': CheckUsernameResponse;
+        '200': CheckSettingsFieldResponse;
       };
     };
   };

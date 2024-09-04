@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma.service';
-import { UpdateUserSettingsRequest, User } from '@refly/openapi-schema';
+import { CheckSettingsFieldData, UpdateUserSettingsRequest, User } from '@refly/openapi-schema';
+import { pick } from '@refly/utils';
 
 @Injectable()
 export class UserService {
@@ -11,11 +12,19 @@ export class UserService {
   async updateSettings(user: User, data: UpdateUserSettingsRequest) {
     return this.prisma.user.update({
       where: { uid: user.uid },
-      data: { ...data },
+      data: pick(data, ['name', 'nickname', 'uiLocale', 'outputLocale']),
     });
   }
 
-  async checkUsername(name: string) {
-    return this.prisma.user.findUnique({ where: { name } });
+  async checkSettingsField(user: User, param: CheckSettingsFieldData['query']) {
+    const { field, value } = param;
+    const otherUser = await this.prisma.user.findFirst({
+      where: { [field]: value, uid: { not: user.uid } },
+    });
+    return {
+      field,
+      value,
+      available: !otherUser,
+    };
   }
 }

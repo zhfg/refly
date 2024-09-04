@@ -5,7 +5,7 @@ import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { User } from '@/utils/decorators/user.decorator';
 import {
   BaseResponse,
-  CheckUsernameResponse,
+  CheckSettingsFieldResponse,
   GetUserSettingsResponse,
   UpdateUserSettingsRequest,
 } from '@refly/openapi-schema';
@@ -40,9 +40,13 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('checkUsername')
-  async checkUsername(@Query('name') name: string): Promise<CheckUsernameResponse> {
-    const user = await this.userService.checkUsername(name);
-    return buildSuccessResponse({ available: !user });
+  @Get('checkSettingsField')
+  async checkSettingsField(
+    @User() user: UserModel,
+    @Query('field') field: 'name' | 'email',
+    @Query('value') value: string,
+  ): Promise<CheckSettingsFieldResponse> {
+    const result = await this.userService.checkSettingsField(user, { field, value });
+    return buildSuccessResponse(result);
   }
 }

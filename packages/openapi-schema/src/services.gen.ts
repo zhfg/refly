@@ -135,9 +135,9 @@ import type {
   UpdateSettingsData,
   UpdateSettingsError,
   UpdateSettingsResponse,
-  CheckUsernameData,
-  CheckUsernameError,
-  CheckUsernameResponse2,
+  CheckSettingsFieldData,
+  CheckSettingsFieldError,
+  CheckSettingsFieldResponse2,
   SearchData,
   SearchError,
   SearchResponse2,
@@ -647,13 +647,13 @@ export const updateSettings = (options: Options<UpdateSettingsData>) => {
 };
 
 /**
- * Check username
- * Check if a username is available
+ * Check settings field
+ * Given a settings field, check if the given value is valid
  */
-export const checkUsername = (options: Options<CheckUsernameData>) => {
-  return (options?.client ?? client).get<CheckUsernameResponse2, CheckUsernameError>({
+export const checkSettingsField = (options: Options<CheckSettingsFieldData>) => {
+  return (options?.client ?? client).get<CheckSettingsFieldResponse2, CheckSettingsFieldError>({
     ...options,
-    url: '/user/checkUsername',
+    url: '/user/checkSettingsField',
   });
 };
 

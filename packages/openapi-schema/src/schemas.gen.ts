@@ -2442,17 +2442,26 @@ export const $UpdateUserSettingsRequest = {
   },
 } as const;
 
-export const $CheckUserNameResult = {
+export const $CheckSettingsFieldResult = {
   type: 'object',
+  required: ['field', 'value', 'available'],
   properties: {
+    field: {
+      type: 'string',
+      description: 'Settings field',
+    },
+    value: {
+      type: 'string',
+      description: 'Settings field value',
+    },
     available: {
       type: 'boolean',
-      description: 'Whether the username is available',
+      description: 'Whether the field value is available',
     },
   },
 } as const;
 
-export const $CheckUsernameResponse = {
+export const $CheckSettingsFieldResponse = {
   allOf: [
     {
       $ref: '#/components/schemas/BaseResponse',
@@ -2461,8 +2470,8 @@ export const $CheckUsernameResponse = {
       type: 'object',
       properties: {
         data: {
-          description: 'Username check result',
-          $ref: '#/components/schemas/CheckUserNameResult',
+          description: 'Settings field check result',
+          $ref: '#/components/schemas/CheckSettingsFieldResult',
         },
       },
     },

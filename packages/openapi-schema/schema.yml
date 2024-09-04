@@ -1119,17 +1119,26 @@ paths:
                 $ref: '#/components/schemas/BaseResponse'
       security:
         - api_key: []
-  /user/checkUsername:
+  /user/checkSettingsField:
     get:
       tags:
         - user
-      summary: Check username
-      description: Check if a username is available
-      operationId: checkUsername
+      summary: Check settings field
+      description: Given a settings field, check if the given value is valid
+      operationId: checkSettingsField
       parameters:
-        - name: name
+        - name: field
           in: query
-          description: Username
+          description: Settings field
+          required: true
+          schema:
+            type: string
+            enum:
+              - name
+              - email
+        - name: value
+          in: query
+          description: Field value
           required: true
           schema:
             type: string
@@ -1139,7 +1148,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CheckUsernameResponse'
+                $ref: '#/components/schemas/CheckSettingsFieldResponse'
   /search:
     post:
       tags:
@@ -2984,20 +2993,30 @@ components:
           type: string
           description: Output locale
           example: en
-    CheckUserNameResult:
+    CheckSettingsFieldResult:
       type: object
+      required:
+        - field
+        - value
+        - available
       properties:
+        field:
+          type: string
+          description: Settings field
+        value:
+          type: string
+          description: Settings field value
         available:
           type: boolean
-          description: Whether the username is available
-    CheckUsernameResponse:
+          description: Whether the field value is available
+    CheckSettingsFieldResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
             data:
-              description: Username check result
-              $ref: '#/components/schemas/CheckUserNameResult'
+              description: Settings field check result
+              $ref: '#/components/schemas/CheckSettingsFieldResult'
     SearchDomain:
       type: string
       enum:
