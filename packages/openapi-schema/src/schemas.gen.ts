@@ -398,6 +398,7 @@ export const $IconType = {
 export const $Icon = {
   type: 'object',
   description: 'Icon',
+  required: ['type', 'value'],
   properties: {
     type: {
       description: 'Icon type',
@@ -574,6 +575,10 @@ export const $SkillMeta = {
       description: 'Skill ID',
       example: 'sk-g30e1b80b5g1itbemc0g5jj3',
     },
+    icon: {
+      description: 'Skill icon',
+      $ref: '#/components/schemas/Icon',
+    },
   },
 } as const;
 
@@ -600,10 +605,6 @@ export const $SkillInstance = {
         description: {
           type: 'string',
           description: 'Skill instance description',
-        },
-        icon: {
-          description: 'Skill instance icon',
-          $ref: '#/components/schemas/Icon',
         },
         tplConfig: {
           description: 'Skill template config',

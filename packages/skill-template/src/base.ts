@@ -84,6 +84,7 @@ export abstract class BaseSkill extends StructuredTool {
     config.configurable.currentSkill ??= {
       tplName: this.name,
       displayName: this.displayName[config.configurable.locale || 'en'],
+      icon: this.icon,
     };
 
     // Ensure spanId is not empty.

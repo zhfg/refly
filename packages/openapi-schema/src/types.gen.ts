@@ -315,11 +315,11 @@ export type Icon = {
   /**
    * Icon type
    */
-  type?: IconType;
+  type: IconType;
   /**
    * Icon value
    */
-  value?: string;
+  value: string;
 };
 
 /**
@@ -461,6 +461,10 @@ export type SkillMeta = {
    * Skill ID
    */
   skillId?: string;
+  /**
+   * Skill icon
+   */
+  icon?: Icon;
 };
 
 /**
@@ -478,10 +482,6 @@ export type SkillInstance = SkillMeta & {
    * Skill instance description
    */
   description?: string;
-  /**
-   * Skill instance icon
-   */
-  icon?: Icon;
   /**
    * Skill template config
    */

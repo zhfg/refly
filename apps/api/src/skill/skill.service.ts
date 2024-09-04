@@ -456,7 +456,10 @@ export class SkillService {
       await this.prisma.skillInstance.findMany({
         where: { uid: user.uid, deletedAt: null },
       })
-    ).map((s) => pick(s, ['skillId', 'tplName', 'displayName']));
+    ).map((s) => ({
+      ...pick(s, ['skillId', 'tplName', 'displayName']),
+      icon: JSON.parse(s.icon),
+    }));
 
     const config: SkillRunnableConfig = {
       configurable: {
@@ -469,7 +472,10 @@ export class SkillService {
     };
 
     if (skill) {
-      config.configurable.selectedSkill = pick(skill, ['skillId', 'tplName', 'displayName']);
+      config.configurable.selectedSkill = {
+        ...pick(skill, ['skillId', 'tplName', 'displayName']),
+        icon: JSON.parse(skill.icon),
+      };
     }
 
     if (conversation) {
