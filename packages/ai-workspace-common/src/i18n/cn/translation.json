@@ -488,8 +488,8 @@
   "settings": {
     "title": "设置",
     "tabs": {
-      "account": "账号设置",
-      "language": "语言设置"
+      "account": "账号",
+      "language": "语言"
     },
 
     "account": {

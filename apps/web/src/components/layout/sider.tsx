@@ -262,22 +262,25 @@ export const SiderLayout = () => {
     key: string
     name: string
     icon: React.ReactNode
+    showDivider?: boolean
     onClick?: () => void
   }
   const siderCenter: SiderCenterProps[] = [
+    {
+      key: "Import",
+      name: "newResource",
+      icon: <IconImport style={{ fontSize: 20 }} />,
+      showDivider: true,
+      onClick: () => {
+        importResourceStore.setImportResourceModalVisible(true)
+      },
+    },
     {
       key: "Workspace",
       name: "homePage",
       icon: <IconHome style={{ fontSize: 20 }} />,
     },
-    {
-      key: "Import",
-      name: "newResource",
-      icon: <IconImport style={{ fontSize: 20 }} />,
-      onClick: () => {
-        importResourceStore.setImportResourceModalVisible(true)
-      },
-    },
+
     {
       key: "Skill",
       name: "skill",
@@ -313,20 +316,23 @@ export const SiderLayout = () => {
           <div className="sider-center">
             {siderCenter.map(item => {
               return (
-                <MenuItem
-                  key={item.key}
-                  className="custom-menu-item"
-                  renderItemInTooltip={() => (
-                    <MenuItemTooltipContent
+                <>
+                  <MenuItem
+                    key={item.key}
+                    className="custom-menu-item"
+                    renderItemInTooltip={() => (
+                      <MenuItemTooltipContent
+                        title={t(`loggedHomePage.siderMenu.${item.name}`)}
+                      />
+                    )}
+                    onClick={item.onClick}>
+                    <MenuItemContent
+                      icon={item.icon}
                       title={t(`loggedHomePage.siderMenu.${item.name}`)}
                     />
-                  )}
-                  onClick={item.onClick}>
-                  <MenuItemContent
-                    icon={item.icon}
-                    title={t(`loggedHomePage.siderMenu.${item.name}`)}
-                  />
-                </MenuItem>
+                  </MenuItem>
+                  {item.showDivider && <Divider style={{ margin: "8px 0" }} />}
+                </>
               )
             })}
           </div>
