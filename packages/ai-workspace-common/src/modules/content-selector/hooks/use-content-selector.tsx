@@ -6,7 +6,7 @@ import { safeStringifyJSON } from '@refly-packages/utils/parse';
 import { sendMessage, onMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { BackgroundMessage } from '@refly/common-types';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { SelectedNamespace } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { SelectedNamespace } from '@refly/common-types';
 import { getElementType } from '../utils';
 import { genContentSelectorID } from '@refly-packages/utils/id';
 import { getMarkdown } from '@refly/utils/html2md';
@@ -38,6 +38,7 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
       data: content,
       xPath,
       scope: selectorScopeRef.current,
+      namespace,
     };
 
     return mark;
@@ -277,7 +278,13 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
       name: 'syncMarkEvent',
       body: {
         type,
-        mark: { type: mark?.type, data: mark?.data, xPath: mark?.xPath, scope: selectorScopeRef.current },
+        mark: {
+          type: mark?.type,
+          data: mark?.data,
+          xPath: mark?.xPath,
+          scope: selectorScopeRef.current,
+          namespace: mark?.namespace,
+        },
       },
     };
     console.log('contentSelectorClickHandler', safeStringifyJSON(msg));

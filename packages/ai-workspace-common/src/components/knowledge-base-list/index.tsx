@@ -1,6 +1,7 @@
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { List, Message as message, Empty } from '@arco-design/web-react';
-import { IconBook, IconMore } from '@arco-design/web-react/icon';
+import { FaRegCopy } from 'react-icons/fa6';
+import { HiOutlineBookOpen } from 'react-icons/hi2';
 // types
 import { IconTip } from '@refly-packages/ai-workspace-common/components/dashboard/icon-tip';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
@@ -101,7 +102,7 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
               index={key}
               cardData={item}
               type="collection"
-              cardIcon={<IconBook style={{ fontSize: '32px', strokeWidth: 3 }} />}
+              cardIcon={<HiOutlineBookOpen style={{ fontSize: '32px' }} />}
               onClick={() => {
                 jumpToKnowledgeBase({ kbId: item?.collectionId });
               }}
@@ -122,12 +123,11 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
                         message.success(t('knowledgeLibrary.archive.item.copyNotify'));
                       }}
                     >
-                      <IconBook style={{ color: '#819292', cursor: 'pointer' }} />
+                      <FaRegCopy style={{ color: '#819292', cursor: 'pointer' }} />
                     </span>
                   </IconTip>
                   <DeleteDropdownMenu
                     type="knowledgeBase"
-                    deleteConfirmPosition="lb"
                     data={item}
                     postDeleteList={(collection: Collection) =>
                       setDataList(dataList.filter((n) => n.collectionId !== collection.collectionId))

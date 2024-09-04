@@ -8,11 +8,11 @@ export const useSkillManagement = ({ shouldInit = false }: { shouldInit: boolean
   const skillStore = useSkillStore();
 
   const handleGetSkillInstances = async () => {
-    const { data, error } = (await getClient().listSkillInstances()) || {};
+    const { data, error } = (await getClient().listSkillInstances({ query: { sortByPin: true } })) || {};
 
     if (data?.data) {
       console.log('skill instances', data?.data);
-      skillStore.setSkillInstalces(data?.data);
+      skillStore.setSkillInstances(data?.data);
     } else {
       console.log('get skill instances error', error);
     }
@@ -89,7 +89,7 @@ export const useSkillManagement = ({ shouldInit = false }: { shouldInit: boolean
     }
 
     const newSkillInstances = skillInstances.filter((item) => item?.skillName !== skillName);
-    skillStore.setSkillInstalces(newSkillInstances);
+    skillStore.setSkillInstances(newSkillInstances);
   };
 
   return {

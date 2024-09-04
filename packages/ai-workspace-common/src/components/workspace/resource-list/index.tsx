@@ -71,7 +71,6 @@ export const ResourceList = () => {
       wrapperStyle={{ width: '100%' }}
       bordered={false}
       pagination={false}
-      offsetBottom={200}
       dataSource={dataList}
       scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
       loading={isRequesting}
@@ -104,11 +103,9 @@ export const ResourceList = () => {
                     .fromNow()}
                 </div>
                 <div>
-                  {/* <IconBook style={{ color: '#819292', cursor: 'pointer' }} /> */}
                   <DeleteDropdownMenu
                     data={item}
                     type="resource"
-                    deleteConfirmPosition="lb"
                     postDeleteList={(resource: Resource) =>
                       setDataList(dataList.filter((n) => n.resourceId !== resource.resourceId))
                     }

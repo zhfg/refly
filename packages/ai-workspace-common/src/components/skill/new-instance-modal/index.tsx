@@ -9,6 +9,7 @@ import { SkillInstance, SkillTemplate } from '@refly/openapi-schema';
 
 import { Collapse, Modal, Form, Input, Message } from '@arco-design/web-react';
 import { TemplateConfigFormItems } from '@refly-packages/ai-workspace-common/components/skill/template-config-form-items';
+import { BasicInfoFormItems } from '../basic-info-form-items';
 
 const CollapseItem = Collapse.Item;
 const FormItem = Form.Item;
@@ -95,43 +96,14 @@ export const NewSkillInstanceModal = (props: NewSkillInstanceModalProps) => {
       onCancel={() => setVisible(false)}
     >
       <Form {...formItemLayout} form={form}>
-        <Collapse bordered={false} defaultActiveKey={['basicInfo', 'templateConfig']}>
-          <CollapseItem name="basicInfo" header={t('skill.newSkillModal.basicInfo')}>
-            <FormItem
-              label={t('skill.newSkillModal.name')}
-              required
-              field="displayName"
-              rules={[{ required: true, message: t('skill.newSkillModal.namePlaceholder') }]}
-            >
-              <Input placeholder={t('skill.newSkillModal.namePlaceholder')} maxLength={50} showWordLimit />
-            </FormItem>
-            <FormItem
-              label={t('skill.newSkillModal.description')}
-              required
-              field="description"
-              rules={[{ required: true, message: t('skill.newSkillModal.descriptionPlaceholder') }]}
-            >
-              <TextArea
-                placeholder={t('skill.newSkillModal.descriptionPlaceholder')}
-                autoSize
-                maxLength={500}
-                showWordLimit
-                style={{ minHeight: 84 }}
-              />
-            </FormItem>
-          </CollapseItem>
-
-          {configSchema?.items?.length > 0 && (
-            <CollapseItem name="templateConfig" header={t('common.templateConfig')}>
-              <TemplateConfigFormItems
-                schema={configSchema}
-                form={form}
-                fieldPrefix="tplConfig"
-                tplConfig={instance?.tplConfig}
-              />
-            </CollapseItem>
-          )}
-        </Collapse>
+        <BasicInfoFormItems />
+        <TemplateConfigFormItems
+          headerTitle={t('common.templateConfig')}
+          schema={configSchema}
+          form={form}
+          fieldPrefix="tplConfig"
+          tplConfig={instance?.tplConfig}
+        />
       </Form>
     </Modal>
   );

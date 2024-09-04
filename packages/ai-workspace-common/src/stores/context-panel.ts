@@ -2,6 +2,7 @@ import { TreeNodeProps, TreeProps } from '@arco-design/web-react';
 import { SearchDomain, SearchResult } from '@refly/openapi-schema';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { Mark, SelectedNamespace, ContextDomain, SelectedTextCardDomain } from '@refly/common-types';
 
 export interface LinkMeta {
   key: string;
@@ -13,6 +14,54 @@ export interface LinkMeta {
   isHandled?: boolean; // 已经爬取
   isError?: boolean; // 处理失败
 }
+
+export const selectedTextCardDomainWeb = [
+  {
+    key: 'resource',
+    labelDict: {
+      en: 'Resource',
+      'zh-CN': '资源',
+    },
+  },
+  {
+    key: 'note',
+    labelDict: {
+      en: 'Note',
+      'zh-CN': '笔记',
+    },
+  },
+  {
+    key: 'noteCursorSelection',
+    labelDict: {
+      en: 'Note Cursor Selection',
+      'zh-CN': '选中文本',
+    },
+  },
+  {
+    key: 'noteBeforeCursorSelection',
+    labelDict: {
+      en: 'Note Before Cursor Selection',
+      'zh-CN': '选中文本前',
+    },
+  },
+  {
+    key: 'noteAfterCursorSelection',
+    labelDict: {
+      en: 'Note After Cursor Selection',
+      'zh-CN': '选中文本后',
+    },
+  },
+];
+
+export const selectedTextCardDomainExtension = [
+  {
+    key: 'weblink',
+    labelDict: {
+      en: 'Web Link',
+      'zh-CN': '网页链接',
+    },
+  },
+];
 
 interface ContextPanelState {
   envContextInitMap: { resource: boolean; collection: boolean; note: boolean };
@@ -35,6 +84,23 @@ interface ContextPanelState {
   // context card 的处理
   nowSelectedContextDomain: SearchDomain;
 
+  // selected text card, suuport multi selected as it is all selected text
+  selectedTextCardDomain: SelectedTextCardDomain[];
+  // selection text
+  currentSelectedMark: Mark;
+  selectedNamespace: SelectedNamespace;
+  enableMultiSelect: boolean; // 支持多选
+  currentSelectedMarks: Mark[]; // 多选内容
+
+  // context card
+  showContextCard: boolean;
+  contextDomain: ContextDomain;
+
+  // note cursor selection
+  beforeSelectionNoteContent: string;
+  afterSelectionNoteContent: string;
+  currentSelectionContent: string;
+
   setEnvContextInitMap: (envContextInitMap: Partial<{ resource: boolean; collection: boolean; note: boolean }>) => void;
   setContextPanelPopoverVisible: (visible: boolean) => void;
   setImportPopoverVisible: (visible: boolean) => void;
@@ -45,9 +111,47 @@ interface ContextPanelState {
   setTreeData: (treeData: TreeProps['treeData']) => void;
   setCheckedKeys: (keys: string[]) => void;
   setExpandedKeys: (keys: string[]) => void;
+
+  // selected text context 面板相关的内容
+  updateCurrentSelectedMark: (mark: Mark) => void;
+  updateSelectedNamespace: (selectedNamespace: SelectedNamespace) => void;
+  updateEnableMultiSelect: (enableMultiSelect: boolean) => void;
+  updateCurrentSelectedMarks: (marks: Mark[]) => void;
+  resetSelectedTextCardState: () => void;
+  setSelectedTextCardDomain: (domain: SelectedTextCardDomain[]) => void;
+
+  // context card
+  setShowContextCard: (showcontextCard: boolean) => void;
+  setContextDomain: (contextDomain: ContextDomain) => void;
   setNowSelectedContextDomain: (domain: SearchDomain) => void;
+
+  // note cursor selection
+  updateBeforeSelectionNoteContent: (content: string) => void;
+  updateAfterSelectionNoteContent: (content: string) => void;
+  updateCurrentSelectionContent: (content: string) => void;
+
   resetState: () => void;
 }
+
+export const defaultSelectedTextCardState = {
+  currentSelectedMark: null as Mark,
+  selectedNamespace: 'resource' as SelectedNamespace,
+  enableMultiSelect: true, // default enable multi select, later to see if we need to enable multiSelect ability
+  currentSelectedMarks: [] as Mark[],
+  selectedTextCardDomain: ['resource'] as SelectedTextCardDomain[],
+};
+
+export const defaultCurrentContext = {
+  contextDomain: 'resource' as ContextDomain,
+  showContextCard: false, // 插件状态下自动打开
+};
+
+// not add to currentSelectedMarks as it cannot delete, only can unselect
+export const defaultNoteCursorSelection = {
+  beforeSelectionNoteContent: '',
+  afterSelectionNoteContent: '',
+  currentSelectionContent: '',
+};
 
 export const defaultState = {
   envContextInitMap: { resource: false, collection: false, note: false },
@@ -62,6 +166,11 @@ export const defaultState = {
   treeData: [],
   checkedKeys: [],
   expandedKeys: [],
+
+  // selected text card
+  ...defaultSelectedTextCardState,
+  ...defaultCurrentContext,
+  ...defaultNoteCursorSelection,
 };
 
 export const useContextPanelStore = create<ContextPanelState>()(
@@ -84,6 +193,31 @@ export const useContextPanelStore = create<ContextPanelState>()(
     setExpandedKeys: (keys: string[]) => set((state) => ({ ...state, expandedKeys: keys })),
     setNowSelectedContextDomain: (domain: SearchDomain) =>
       set((state) => ({ ...state, nowSelectedContextDomain: domain })),
+    setSelectedTextCardDomain: (domain: SelectedTextCardDomain[]) =>
+      set((state) => ({ ...state, selectedTextCardDomain: domain })),
+
+    // selected text
+    updateCurrentSelectedMark: (mark: Mark) => set((state) => ({ ...state, currentSelectedMark: mark })),
+    updateSelectedNamespace: (selectedNamespace: SelectedNamespace) =>
+      set((state) => ({ ...state, selectedNamespace })),
+    updateEnableMultiSelect: (enableMultiSelect: boolean) => set((state) => ({ ...state, enableMultiSelect })),
+    updateCurrentSelectedMarks: (marks: Mark[]) => set((state) => ({ ...state, currentSelectedMarks: marks })),
+
+    resetSelectedTextCardState: () => set((state) => ({ ...state, ...defaultSelectedTextCardState })),
+
+    // context card
+    setContextDomain: (contextDomain: ContextDomain) => set((state) => ({ ...state, contextDomain })),
+    setShowContextCard: (showContextCard: boolean) => set((state) => ({ ...state, showContextCard })),
+
+    // note cursor selection
+    updateBeforeSelectionNoteContent: (content: string) =>
+      set((state) => ({ ...state, beforeSelectionNoteContent: content })),
+    updateAfterSelectionNoteContent: (content: string) =>
+      set((state) => ({ ...state, afterSelectionNoteContent: content })),
+    updateLastCursorPosRef: (pos: number) => set((state) => ({ ...state, lastCursorPosRef: pos })),
+    updateCurrentSelectionContent: (content: string) =>
+      set((state) => ({ ...state, currentSelectionContent: content })),
+
     resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),
 );

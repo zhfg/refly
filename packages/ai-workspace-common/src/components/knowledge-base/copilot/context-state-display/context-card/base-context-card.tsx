@@ -1,13 +1,21 @@
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { Button, Switch, Tag, Tooltip, Select } from '@arco-design/web-react';
-import { IconCloseCircle, IconFile, IconFolder, IconFontColors, IconRefresh } from '@arco-design/web-react/icon';
+import {
+  IconCloseCircle,
+  IconFile,
+  IconFilter,
+  IconFolder,
+  IconFontColors,
+  IconRefresh,
+} from '@arco-design/web-react/icon';
 import { useGetSkills } from '@refly-packages/ai-workspace-common/skills/main-logic/use-get-skills';
 import { useDispatchAction } from '@refly-packages/ai-workspace-common/skills/main-logic/use-dispatch-action';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useGetCurrentEnvContext } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-env-context';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { safeParseURL } from '@refly-packages/utils/url';
+import { useTranslation } from 'react-i18next';
 
 // hooks
 
@@ -21,8 +29,11 @@ const Option = Select.Option;
 
 export const BaseContextCard = (props: BaseContextPanelProps) => {
   const { title, skillContent, icon = <IconFontColors /> } = props;
-  const knowledgeBaseStore = useKnowledgeBaseStore();
-  const { setNowSelectedContextDomain } = useContextPanelStore();
+  const { t } = useTranslation();
+  const { setNowSelectedContextDomain, setShowContextCard } = useContextPanelStore((state) => ({
+    setNowSelectedContextDomain: state.setNowSelectedContextDomain,
+    setShowContextCard: state.setShowContextCard,
+  }));
   const searchStateStore = useSearchStateStore();
 
   const { currentEnvContextKeys, nowSelectedEnvContext, hasContent } = useGetCurrentEnvContext();
@@ -37,32 +48,16 @@ export const BaseContextCard = (props: BaseContextPanelProps) => {
       <div className="context-state-card-header">
         <div className="context-state-card-header-left">
           <IconFontColors />
-          <span className="context-state-card-header-title">{hasContent ? title : '快捷操作'}</span>
+          <span className="context-state-card-header-title">{t('copilot.baseContextCard.title')}</span>
         </div>
         <div className="context-state-card-header-right">
-          {currentEnvContextKeys?.length > 0 && !isExtension ? (
-            <Select
-              bordered={false}
-              className="context-state-card-selector"
-              value={nowSelectedEnvContext?.key}
-              onChange={(val) => {
-                setNowSelectedContextDomain(val);
-              }}
-            >
-              {currentEnvContextKeys.map((item, index) => (
-                <Option key={item?.key} value={item?.key}>
-                  <span style={{ fontSize: 12 }}>{item?.data?.title}</span>
-                </Option>
-              ))}
-            </Select>
-          ) : null}
           <Button
             type="text"
             className="assist-action-item"
             icon={
               <IconCloseCircle
                 onClick={() => {
-                  knowledgeBaseStore.setShowContextCard(false);
+                  setShowContextCard(false);
                 }}
               />
             }
@@ -84,7 +79,29 @@ export const BaseContextCard = (props: BaseContextPanelProps) => {
           </div>
         )}
       </div>
-      <div className="context-state-card-footer">{skillContent}</div>
+      <div className="context-state-card-quick-action">{skillContent}</div>
+      <div className="context-state-card-footer">
+        <IconFilter />
+        {currentEnvContextKeys?.length > 0 && !isExtension ? (
+          <Tooltip content={t('copilot.baseContextCard.title')}>
+            <Select
+              bordered={false}
+              className="context-state-card-selector"
+              value={nowSelectedEnvContext?.key}
+              onChange={(val) => {
+                setNowSelectedContextDomain(val);
+              }}
+              autoWidth={{ minWidth: 100, maxWidth: 150 }}
+            >
+              {currentEnvContextKeys.map((item, index) => (
+                <Option key={item?.key} value={item?.key}>
+                  <span style={{ fontSize: 12 }}>{item?.data?.title}</span>
+                </Option>
+              ))}
+            </Select>
+          </Tooltip>
+        ) : null}
+      </div>
     </div>
   );
 };

@@ -273,7 +273,7 @@ export const $LabelInstance = {
 export const $InputMode = {
   type: 'string',
   description: 'Data input mode',
-  enum: ['input', 'inputNumber', 'select', 'multiSelect'],
+  enum: ['input', 'inputNumber', 'inputTextArea', 'select', 'multiSelect'],
 } as const;
 
 export const $SelectOption = {
@@ -2031,6 +2031,18 @@ export const $SkillInvocationRule = {
       type: 'number',
       description: 'Maximum number of items',
       default: 10,
+    },
+    inputMode: {
+      type: 'string',
+      description: 'Input mode',
+      enum: ['input', 'inputNumber', 'inputTextArea', 'select', 'multiSelect'],
+    },
+    defaultValue: {
+      type: 'array',
+      description: 'Default value',
+      items: {
+        type: 'string',
+      },
     },
     required: {
       type: 'boolean',

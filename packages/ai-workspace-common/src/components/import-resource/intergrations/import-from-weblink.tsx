@@ -1,5 +1,6 @@
 import { Button, Divider, Empty, Input, List, Avatar, Message as message, Affix, Spin } from '@arco-design/web-react';
-import { IconLink, IconClose } from '@arco-design/web-react/icon';
+import { HiLink } from 'react-icons/hi';
+import { HiOutlineXMark } from 'react-icons/hi2';
 import { useEffect, useState } from 'react';
 
 // utils
@@ -12,10 +13,12 @@ import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { SearchSelect } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
 import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
+import { useTranslation } from 'react-i18next';
 
 const { TextArea } = Input;
 
 export const ImportFromWeblink = () => {
+  const { t } = useTranslation();
   const [linkStr, setLinkStr] = useState('');
   const importResourceStore = useImportResourceStore();
   const reloadListState = useReloadListState();
@@ -76,7 +79,7 @@ export const ImportFromWeblink = () => {
         }));
 
       if (links?.length === 0) {
-        message.warning('请输入有效的网页链接，以 http 或 https 开头');
+        message.warning(t('resource.import.linkFormatError'));
         return;
       }
 
@@ -95,7 +98,7 @@ export const ImportFromWeblink = () => {
     const { scrapeLinks, selectedCollectionId } = useImportResourceStore.getState();
 
     if (scrapeLinks?.length === 0) {
-      message.warning('你还未添加任何链接！');
+      message.warning(t('resource.import.emptyLink'));
       return;
     }
 
@@ -118,11 +121,11 @@ export const ImportFromWeblink = () => {
 
       if (!res?.data?.success) {
         setSaveLoading(false);
-        message.error('保存失败');
+        message.error(t('common.putErr'));
         return;
       }
 
-      message.success('保存成功');
+      message.success(t('common.putSuccess'));
       importResourceStore.setScrapeLinks([]);
       importResourceStore.setImportResourceModalVisible(false);
       if (!kbId || (kbId && selectedCollectionId === kbId)) {
@@ -131,7 +134,7 @@ export const ImportFromWeblink = () => {
       }
       setLinkStr('');
     } catch (err) {
-      message.error('保存失败');
+      message.error(t('common.putErr'));
     }
 
     setSaveLoading(false);
@@ -151,15 +154,15 @@ export const ImportFromWeblink = () => {
         <div className="intergation-operation-container">
           <div className="intergration-header">
             <span className="menu-item-icon">
-              <IconLink />
+              <HiLink />
             </span>
-            <span className="intergration-header-title">网页链接</span>
+            <span className="intergration-header-title">{t('resource.import.fromWeblink')}</span>
           </div>
           <Divider />
           <div className="intergation-body">
             <div className="intergation-body-action">
               <TextArea
-                placeholder="输入或粘贴有效的网页链接，每行一个...."
+                placeholder={t('resource.import.webLinkPlaceholer')}
                 rows={4}
                 autoSize={{
                   minRows: 4,
@@ -177,11 +180,11 @@ export const ImportFromWeblink = () => {
                   scrapeLink(linkStr);
                 }}
               >
-                添加
+                {t('common.add')}
               </Button>
             </div>
             <div className="intergation-body-result">
-              <h2 className="intergation-body-result-title">待处理列表</h2>
+              <h2 className="intergation-body-result-title">{t('resource.import.waitingList')}</h2>
               <div className="intergation-result-list">
                 {scrapeLinks?.length > 0 ? (
                   <List
@@ -200,12 +203,14 @@ export const ImportFromWeblink = () => {
       <Affix offsetBottom={0} target={() => document.querySelector('.import-resource-right-panel') as HTMLElement}>
         <div className="intergation-footer">
           <div className="footer-location">
-            <p className="footer-count text-item">共 {scrapeLinks?.length} 个</p>
+            <p className="footer-count text-item">
+              {t('resource.import.linkCount', { count: scrapeLinks?.length || 0 })}
+            </p>
             <p style={{ margin: '0 8px' }} className="text-item">
               {' '}
               |{' '}
             </p>
-            <p className="text-item">保存至 </p>
+            <p className="text-item">{t('resource.import.saveTo')}</p>
             <SearchSelect
               domain="collection"
               className="kg-selector"
@@ -221,7 +226,7 @@ export const ImportFromWeblink = () => {
               style={{ width: 72, marginRight: 8 }}
               onClick={() => importResourceStore.setImportResourceModalVisible(false)}
             >
-              取消
+              {t('common.cancel')}
             </Button>
             <Button
               type="primary"
@@ -230,7 +235,7 @@ export const ImportFromWeblink = () => {
               disabled={scrapeLinks.length === 0}
               loading={saveLoading}
             >
-              保存
+              {t('common.save')}
             </Button>
           </div>
         </div>
@@ -242,6 +247,7 @@ export const ImportFromWeblink = () => {
 const RenderItem = (props: { item: LinkMeta }) => {
   const importResourceStore = useImportResourceStore();
   const { item } = props;
+  const { t } = useTranslation();
 
   return (
     <Spin loading={!item.isHandled && !item.isError} style={{ width: '100%', minHeight: 80 }}>
@@ -254,7 +260,7 @@ const RenderItem = (props: { item: LinkMeta }) => {
               window.open(item?.url, '_blank');
             }}
           >
-            <IconLink />
+            <HiLink />
           </Button>,
           <Button
             type="text"
@@ -267,7 +273,7 @@ const RenderItem = (props: { item: LinkMeta }) => {
               importResourceStore.setScrapeLinks(newLinks);
             }}
           >
-            <IconClose />
+            <HiOutlineXMark strokeWidth={2} />
           </Button>,
         ]}
         className="intergation-result-list-item"
@@ -281,7 +287,9 @@ const RenderItem = (props: { item: LinkMeta }) => {
                   {item?.url}
                 </span>
               </p>
-              <p>{item?.isError ? <span className="text-red-500">抓取失败</span> : item?.title}</p>
+              <p>
+                {item?.isError ? <span className="text-red-500">{t('resource.import.scrapeError')}</span> : item?.title}
+              </p>
             </div>
           }
           description={item.description}

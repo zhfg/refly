@@ -6,12 +6,11 @@ import { Note } from '@refly/openapi-schema';
 import './index.scss';
 import { useCookie } from 'react-use';
 import { Button, Divider, Input, Spin, Switch, Tabs } from '@arco-design/web-react';
-import { IconLock, IconUnlock } from '@arco-design/web-react/icon';
+import { HiOutlineLockClosed, HiOutlineLockOpen, HiOutlineClock } from 'react-icons/hi2';
+import { HiOutlineSearch } from 'react-icons/hi';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { IconClockCircle, IconSearch } from '@arco-design/web-react/icon';
 import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
-import { useListenToSelection } from '@refly-packages/ai-workspace-common/hooks/use-listen-to-selection';
 // 编辑器组件
 import {
   CollabEditorCommand,
@@ -46,6 +45,7 @@ import { useContentSelector } from '@refly-packages/ai-workspace-common/modules/
 import '@refly-packages/ai-workspace-common/modules/content-selector/styles/content-selector.scss';
 import classNames from 'classnames';
 import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
+import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) => {
   const { readOnly } = note;
@@ -56,9 +56,12 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
     updateNoteSaveStatus: state.updateNoteSaveStatus,
     updateNoteServerStatus: state.updateNoteServerStatus,
     updateEditor: state.updateEditor,
+
+    updateLastCursorPosRef: state.updateLastCursorPosRef,
+  }));
+  const contextPanelStore = useContextPanelStore((state) => ({
     updateBeforeSelectionNoteContent: state.updateBeforeSelectionNoteContent,
     updateAfterSelectionNoteContent: state.updateAfterSelectionNoteContent,
-    updateLastCursorPosRef: state.updateLastCursorPosRef,
     updateCurrentSelectionContent: state.updateCurrentSelectionContent,
   }));
   const editorRef = useRef<EditorInstance>();
@@ -135,16 +138,22 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
         const editor = editorRef.current;
         const { state } = editor?.view || {};
         const { selection } = state || {};
+        const { doc } = editor?.state || {};
         const { from, to } = selection || {};
 
-        const prevSelectionContent = editor?.state?.doc?.textBetween(0, from);
-        const afterSelectionContent = editor?.state?.doc?.textBetween(to, editor?.state?.doc?.content?.size);
-        const selectedContent = editor?.state?.doc?.textBetween(from, to);
+        const getMarkdownSlice = (start: number, end: number) => {
+          const slice = doc.slice(start, end);
+          return editor.storage.markdown.serializer.serialize(slice.content);
+        };
+
+        const prevSelectionContent = getMarkdownSlice(0, from);
+        const afterSelectionContent = getMarkdownSlice(to, editor?.state?.doc?.content?.size);
+        const selectedContent = getMarkdownSlice(from, to);
 
         noteStore.updateLastCursorPosRef(lastCursorPosRef.current);
-        noteStore.updateCurrentSelectionContent(selectedContent);
-        noteStore.updateBeforeSelectionNoteContent(prevSelectionContent);
-        noteStore.updateAfterSelectionNoteContent(afterSelectionContent);
+        contextPanelStore.updateCurrentSelectionContent(selectedContent);
+        contextPanelStore.updateBeforeSelectionNoteContent(prevSelectionContent);
+        contextPanelStore.updateAfterSelectionNoteContent(afterSelectionContent);
 
         console.log('cursor position', lastCursorPosRef.current);
         console.log('Content before cursor:', prevSelectionContent);
@@ -271,7 +280,7 @@ export const AINoteStatusBar = (props: AINoteStatusBarProps) => {
         {noteId && noteStore.noteServerStatus === 'connected' ? (
           <div className="note-status-bar-item">
             <Divider type="vertical" />
-            <IconClockCircle />
+            <HiOutlineClock />
             <p className="conv-title">
               {noteStore.noteSaveStatus === 'Saved'
                 ? t('knowledgeBase.note.autoSaved')
@@ -283,7 +292,7 @@ export const AINoteStatusBar = (props: AINoteStatusBarProps) => {
       <div className="note-status-bar-menu">
         {noteId ? (
           <div className="note-status-bar-item">
-            {note.readOnly ? <IconLock /> : <IconUnlock />}
+            {note.readOnly ? <HiOutlineLockClosed /> : <HiOutlineLockOpen />}
             <p className="mr-2 conv-title">
               {note.readOnly ? t('knowledgeBase.note.readOnly') : t('knowledgeBase.note.edit')}
             </p>
@@ -430,7 +439,7 @@ export const AINote = () => {
               </div>
               <div className="note-detail-navigation-bar">
                 <Button
-                  icon={<IconSearch />}
+                  icon={<HiOutlineSearch />}
                   type="text"
                   style={{ marginRight: 4 }}
                   className="assist-action-item"

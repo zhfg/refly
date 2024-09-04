@@ -270,6 +270,7 @@ Please generate the summary based on these requirements and offer suggestions fo
       tools = installedSkills.map((skill) => toolMap.get(skill.tplName)!).filter((tool) => tool);
     }
 
+    tools = tools.filter((tool) => tool);
     const boundModel = this.engine
       .chatModel()
       .bindTools([...tools, new ReflyDefaultResponse()], { parallel_tool_calls: false });

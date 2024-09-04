@@ -4,7 +4,9 @@ import React, { useEffect, useState } from 'react';
 import { List, Skeleton, Message as message, Typography } from '@arco-design/web-react';
 // stores
 import { useThreadStore } from '@refly-packages/ai-workspace-common/stores/thread';
-import { IconClockCircle, IconMessage, IconRightCircle } from '@arco-design/web-react/icon';
+import { HiOutlineClock } from 'react-icons/hi2';
+import { LuChevronRightCircle } from 'react-icons/lu';
+import { BiMessageRoundedDetail } from 'react-icons/bi';
 import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 // utils
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
@@ -126,19 +128,19 @@ export const ConvList = (props: ConvListProps) => {
                 props.handleConvItemClick(item?.convId);
               }}
             >
-              <IconRightCircle style={{ fontSize: 14, color: '#64645F' }} />
+              <LuChevronRightCircle style={{ fontSize: 14, color: '#64645F' }} />
               <span className="thread-library-list-item-text">{t('threadLibrary.item.askFollow')}</span>
             </span>,
-            <span key={2}>
-              <IconClockCircle style={{ fontSize: 14, color: '#64645F' }} />
+            <span key={2} className="flex items-center">
+              <HiOutlineClock style={{ fontSize: 14, color: '#64645F' }} />
               <span className="thread-library-list-item-text">
                 {time(item.updatedAt, language as LOCALE)
                   .utc()
                   .fromNow()}
               </span>
             </span>,
-            <span key={3}>
-              <IconMessage style={{ fontSize: 14, color: '#64645F' }} />
+            <span key={3} className="flex items-center">
+              <BiMessageRoundedDetail style={{ fontSize: 14, color: '#64645F' }} />
               <span className="thread-library-list-item-text">
                 {t('threadLibrary.item.messageCount', {
                   count: item?.messageCount,

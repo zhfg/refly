@@ -49,7 +49,7 @@ export const SkillTemplateList = () => {
   }, [dataList?.length]);
 
   return (
-    <div className="skill-template-list">
+    <div className="skill-instance-list">
       <div className="skill-instance-list__top-container">
         <div className="skill-search-container">
           <Input
