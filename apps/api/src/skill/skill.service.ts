@@ -55,6 +55,7 @@ import {
   buildSuccessResponse,
   writeSSEResponse,
   pick,
+  QUEUE_REPORT_TOKEN_USAGE,
 } from '@/utils';
 import { InvokeSkillJobData } from './skill.dto';
 import { KnowledgeService } from '@/knowledge/knowledge.service';
@@ -66,6 +67,7 @@ import { ConfigService } from '@nestjs/config';
 import { SearchService } from '@/search/search.service';
 import { LabelService } from '@/label/label.service';
 import { labelClassPO2DTO, labelPO2DTO } from '@/label/label.dto';
+import { ReportTokenUsageJobData } from '@/subscription/subscription.dto';
 
 export function createLangchainMessage(message: ChatMessage): BaseMessage {
   const messageData = {
@@ -131,7 +133,8 @@ export class SkillService {
     private search: SearchService,
     private knowledge: KnowledgeService,
     private conversation: ConversationService,
-    @InjectQueue(QUEUE_SKILL) private queue: Queue<InvokeSkillJobData>,
+    @InjectQueue(QUEUE_SKILL) private skillQueue: Queue<InvokeSkillJobData>,
+    @InjectQueue(QUEUE_REPORT_TOKEN_USAGE) private usageReportQueue: Queue<ReportTokenUsageJobData>,
   ) {
     this.skillEngine = new SkillEngine(
       this.logger,
@@ -449,7 +452,7 @@ export class SkillService {
 
     const job = await this.createSkillJob(user, { ...param, skill });
 
-    await this.queue.add(CHANNEL_INVOKE_SKILL, {
+    await this.skillQueue.add(CHANNEL_INVOKE_SKILL, {
       ...param,
       uid: user.uid,
       jobId: job.jobId,
@@ -644,6 +647,11 @@ export class SkillService {
     const scheduler = new Scheduler(this.skillEngine);
 
     let runMeta: SkillRunnableMeta | null = null;
+    const basicUsageData = {
+      uid: user.uid,
+      convId: conversation?.convId,
+      jobId: job?.jobId,
+    };
 
     try {
       for await (const event of scheduler.streamEvents(
@@ -679,23 +687,21 @@ export class SkillService {
             break;
           case 'on_chat_model_end':
             if (runMeta && chunk) {
-              const usage = await this.prisma.tokenUsage.create({
-                data: {
-                  uid: user.uid,
-                  convId: conversation?.convId,
-                  jobId: job?.jobId,
-                  spanId: runMeta.spanId,
+              const tokenUsage: ReportTokenUsageJobData = {
+                ...basicUsageData,
+                spanId: runMeta.spanId,
+                usage: {
                   tier: getModelTier(String(runMeta.ls_model_name)),
                   modelProvider: String(runMeta.ls_provider),
                   modelName: String(runMeta.ls_model_name),
                   inputTokens: chunk.usage_metadata?.input_tokens ?? 0,
                   outputTokens: chunk.usage_metadata?.output_tokens ?? 0,
-                  skillId: skill?.skillId,
-                  skillTplName: skill?.tplName,
-                  skillDisplayName: skill?.displayName,
                 },
-              });
-              msgAggregator.handleStreamEndEvent(runMeta, chunk, usage);
+                skill: pick(runMeta, ['skillId', 'tplName', 'displayName']),
+                timestamp: new Date(),
+              };
+              await this.usageReportQueue.add(tokenUsage);
+              msgAggregator.handleStreamEndEvent(runMeta, chunk, tokenUsage.usage);
             }
             break;
         }
@@ -745,7 +751,7 @@ export class SkillService {
       year: 365 * 24 * 60 * 60 * 1000,
     };
 
-    const job = await this.queue.add(
+    const job = await this.skillQueue.add(
       CHANNEL_INVOKE_SKILL,
       {
         input: JSON.parse(trigger.input || '{}'),
@@ -773,7 +779,7 @@ export class SkillService {
       return;
     }
 
-    const jobToRemove = await this.queue.getJob(trigger.bullJobId);
+    const jobToRemove = await this.skillQueue.getJob(trigger.bullJobId);
     if (jobToRemove) {
       await jobToRemove.remove();
     }

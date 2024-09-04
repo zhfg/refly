@@ -16,6 +16,10 @@ export type User = {
    * Output locale
    */
   outputLocale?: string;
+  /**
+   * Subscription plan ID
+   */
+  planId?: string;
 };
 
 /**
@@ -954,6 +958,70 @@ export type ChatTaskResponse = {
  */
 export type IndexStatus = 'init' | 'processing' | 'finish' | 'failed' | 'unavailable';
 
+/**
+ * Payment recurring interval
+ */
+export type SubscriptionInterval = 'monthly' | 'yearly';
+
+/**
+ * Subscription plan type
+ */
+export type SubscriptionPlanType = 'free' | 'pro';
+
+export type SubscriptionPlan = {
+  /**
+   * Plan ID
+   */
+  planId: string;
+  /**
+   * Subscription plan type
+   */
+  planType: SubscriptionPlanType;
+  /**
+   * Payment recurring interval
+   */
+  interval?: SubscriptionInterval;
+};
+
+export type UsageMeter = {
+  /**
+   * Usage meter ID
+   */
+  meterId: string;
+  /**
+   * User ID
+   */
+  uid: string;
+  /**
+   * Subscription plan ID
+   */
+  planId: string;
+  /**
+   * Usage meter start time
+   */
+  startAt: string;
+  /**
+   * Usage meter end time
+   */
+  endAt: string;
+  /**
+   * Token quota (T1)
+   */
+  t1TokenQuota?: number;
+  /**
+   * Token used (T1)
+   */
+  t1TokenUsed?: number;
+  /**
+   * Token quota (T2)
+   */
+  t2TokenQuota?: number;
+  /**
+   * Token used (T2)
+   */
+  t2TokenUsed?: number;
+};
+
 export type UserSettings = {
   /**
    * User ID
@@ -987,6 +1055,10 @@ export type UserSettings = {
    * User output locale
    */
   outputLocale?: string;
+  /**
+   * User subscription plan
+   */
+  subscriptionPlan?: SubscriptionPlan;
 };
 
 export type GetUserSettingsResponse = BaseResponse & {
@@ -2549,6 +2621,14 @@ export type CheckSettingsFieldResponse2 = CheckSettingsFieldResponse;
 
 export type CheckSettingsFieldError = unknown;
 
+export type GetSubscriptionPlanResponse = unknown;
+
+export type GetSubscriptionPlanError = unknown;
+
+export type GetSubscriptionUsageResponse = unknown;
+
+export type GetSubscriptionUsageError = unknown;
+
 export type SearchData = {
   body: SearchRequest;
 };
@@ -3075,6 +3155,46 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': CheckSettingsFieldResponse;
+      };
+    };
+  };
+  '/subscription/plan': {
+    get: {
+      res: {
+        /**
+         * successful operation
+         */
+        '200': unknown;
+      };
+    };
+  };
+  '/subscription/usage': {
+    get: {
+      res: {
+        /**
+         * successful operation
+         */
+        '200': unknown;
+      };
+    };
+  };
+  '/subscription/createCheckoutSession': {
+    post: {
+      res: {
+        /**
+         * Redirect to Stripe checkout page
+         */
+        '303': unknown;
+      };
+    };
+  };
+  '/subscription/createPortalSession': {
+    post: {
+      res: {
+        /**
+         * Redirect to Stripe portal
+         */
+        '303': unknown;
       };
     };
   };

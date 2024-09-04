@@ -17,6 +17,10 @@ export const $User = {
       type: 'string',
       description: 'Output locale',
     },
+    planId: {
+      type: 'string',
+      description: 'Subscription plan ID',
+    },
   },
 } as const;
 
@@ -1201,6 +1205,91 @@ export const $IndexStatus = {
   enum: ['init', 'processing', 'finish', 'failed', 'unavailable'],
 } as const;
 
+export const $SubscriptionInterval = {
+  type: 'string',
+  description: 'Payment recurring interval',
+  enum: ['monthly', 'yearly'],
+} as const;
+
+export const $SubscriptionPlanType = {
+  type: 'string',
+  description: 'Subscription plan type',
+  enum: ['free', 'pro'],
+} as const;
+
+export const $SubscriptionPlan = {
+  type: 'object',
+  required: ['planId', 'planType'],
+  properties: {
+    planId: {
+      type: 'string',
+      description: 'Plan ID',
+      example: 'sp-g30e1b80b5g1itbemc0g5jj3',
+    },
+    planType: {
+      type: 'string',
+      description: 'Subscription plan type',
+      $ref: '#/components/schemas/SubscriptionPlanType',
+    },
+    interval: {
+      description: 'Payment recurring interval',
+      $ref: '#/components/schemas/SubscriptionInterval',
+    },
+  },
+} as const;
+
+export const $UsageMeter = {
+  type: 'object',
+  required: ['meterId', 'uid', 'planId', 'startAt', 'endAt'],
+  properties: {
+    meterId: {
+      type: 'string',
+      description: 'Usage meter ID',
+      example: 'um-g30e1b80b5g1itbemc0g5jj3',
+    },
+    uid: {
+      type: 'string',
+      description: 'User ID',
+      example: 'u-g30e1b80b5g1itbemc0g5jj3',
+    },
+    planId: {
+      type: 'string',
+      description: 'Subscription plan ID',
+      example: 'sp-g30e1b80b5g1itbemc0g5jj3',
+    },
+    startAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Usage meter start time',
+    },
+    endAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Usage meter end time',
+    },
+    t1TokenQuota: {
+      type: 'number',
+      description: 'Token quota (T1)',
+      example: 1000000,
+    },
+    t1TokenUsed: {
+      type: 'number',
+      description: 'Token used (T1)',
+      example: 100000,
+    },
+    t2TokenQuota: {
+      type: 'number',
+      description: 'Token quota (T2)',
+      example: 1000000,
+    },
+    t2TokenUsed: {
+      type: 'number',
+      description: 'Token used (T2)',
+      example: 100000,
+    },
+  },
+} as const;
+
 export const $UserSettings = {
   type: 'object',
   required: ['uid', 'avatar', 'name', 'email'],
@@ -1244,6 +1333,10 @@ export const $UserSettings = {
       type: 'string',
       description: 'User output locale',
       example: 'en',
+    },
+    subscriptionPlan: {
+      description: 'User subscription plan',
+      $ref: '#/components/schemas/SubscriptionPlan',
     },
   },
 } as const;

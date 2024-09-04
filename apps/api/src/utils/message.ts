@@ -1,10 +1,10 @@
 import { SkillEvent } from '@refly/common-types';
-import { Prisma, TokenUsage } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { SkillMeta, TokenUsageItem, User } from '@refly/openapi-schema';
 import { SkillRunnableMeta } from '@refly/skill-template';
 import { AIMessageChunk } from '@langchain/core/dist/messages';
 import { ToolCall } from '@langchain/core/dist/messages/tool';
-import { aggregateTokenUsage, pick } from '@refly/utils';
+import { aggregateTokenUsage } from '@refly/utils';
 
 interface MessageData {
   skillMeta: SkillMeta;
@@ -79,7 +79,7 @@ export class MessageAggregator {
     this.data[event.spanId] = msg;
   }
 
-  handleStreamEndEvent(meta: SkillRunnableMeta, chunk: AIMessageChunk, usage: TokenUsage) {
+  handleStreamEndEvent(meta: SkillRunnableMeta, chunk: AIMessageChunk, tokenUsage: TokenUsageItem) {
     if (this.aborted) {
       return;
     }
@@ -88,9 +88,7 @@ export class MessageAggregator {
 
     msg.content += chunk.content.toString();
     msg.toolCalls.push(...chunk.tool_calls);
-    msg.usageItems.push(
-      pick(usage, ['tier', 'modelName', 'modelProvider', 'inputTokens', 'outputTokens']),
-    );
+    msg.usageItems.push(tokenUsage);
 
     this.data[meta.spanId] = msg;
   }

@@ -1149,6 +1149,46 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CheckSettingsFieldResponse'
+  /subscription/plan:
+    get:
+      tags:
+        - subscription
+      summary: Get subscription plan
+      description: Get subscription plan
+      operationId: getSubscriptionPlan
+      responses:
+        '200':
+          description: successful operation
+  /subscription/usage:
+    get:
+      tags:
+        - subscription
+      summary: Get subscription usage
+      description: Get subscription usage
+      operationId: getSubscriptionUsage
+      responses:
+        '200':
+          description: successful operation
+  /subscription/createCheckoutSession:
+    post:
+      tags:
+        - subscription
+      summary: Create checkout session
+      description: Create a checkout session
+      operationId: createCheckoutSession
+      responses:
+        '303':
+          description: Redirect to Stripe checkout page
+  /subscription/createPortalSession:
+    post:
+      tags:
+        - subscription
+      summary: Create portal session
+      description: Create a portal session
+      operationId: createPortalSession
+      responses:
+        '303':
+          description: Redirect to Stripe portal
   /search:
     post:
       tags:
@@ -1236,6 +1276,9 @@ components:
         outputLocale:
           type: string
           description: Output locale
+        planId:
+          type: string
+          description: Subscription plan ID
     ResourceMeta:
       type: object
       description: Resource metadata
@@ -2199,6 +2242,80 @@ components:
         - finish
         - failed
         - unavailable
+    SubscriptionInterval:
+      type: string
+      description: Payment recurring interval
+      enum:
+        - monthly
+        - yearly
+    SubscriptionPlanType:
+      type: string
+      description: Subscription plan type
+      enum:
+        - free
+        - pro
+    SubscriptionPlan:
+      type: object
+      required:
+        - planId
+        - planType
+      properties:
+        planId:
+          type: string
+          description: Plan ID
+          example: sp-g30e1b80b5g1itbemc0g5jj3
+        planType:
+          type: string
+          description: Subscription plan type
+          $ref: '#/components/schemas/SubscriptionPlanType'
+        interval:
+          description: Payment recurring interval
+          $ref: '#/components/schemas/SubscriptionInterval'
+    UsageMeter:
+      type: object
+      required:
+        - meterId
+        - uid
+        - planId
+        - startAt
+        - endAt
+      properties:
+        meterId:
+          type: string
+          description: Usage meter ID
+          example: um-g30e1b80b5g1itbemc0g5jj3
+        uid:
+          type: string
+          description: User ID
+          example: u-g30e1b80b5g1itbemc0g5jj3
+        planId:
+          type: string
+          description: Subscription plan ID
+          example: sp-g30e1b80b5g1itbemc0g5jj3
+        startAt:
+          type: string
+          format: date-time
+          description: Usage meter start time
+        endAt:
+          type: string
+          format: date-time
+          description: Usage meter end time
+        t1TokenQuota:
+          type: number
+          description: Token quota (T1)
+          example: 1000000
+        t1TokenUsed:
+          type: number
+          description: Token used (T1)
+          example: 100000
+        t2TokenQuota:
+          type: number
+          description: Token quota (T2)
+          example: 1000000
+        t2TokenUsed:
+          type: number
+          description: Token used (T2)
+          example: 100000
     UserSettings:
       type: object
       required:
@@ -2239,6 +2356,9 @@ components:
           type: string
           description: User output locale
           example: en
+        subscriptionPlan:
+          description: User subscription plan
+          $ref: '#/components/schemas/SubscriptionPlan'
     GetUserSettingsResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

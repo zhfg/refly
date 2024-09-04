@@ -11,22 +11,26 @@ import {
 } from '@refly/openapi-schema';
 import { buildSuccessResponse, pick } from '@/utils';
 import { User as UserModel } from '@prisma/client';
+import { SubscriptionService } from '@/subscription/subscription.service';
+import { subscriptionPlanPo2DTO } from '@/subscription/subscription.dto';
 
 @Controller('user')
 export class UserController {
   private logger = new Logger(UserController.name);
 
-  constructor(private userService: UserService) {}
+  constructor(private userService: UserService, private subscriptionService: SubscriptionService) {}
 
   @UseGuards(JwtAuthGuard)
   @Get('settings')
-  getSettings(@User() user: UserModel): GetUserSettingsResponse {
-    this.logger.log(`getSettings success, req.user = ${user.email}`);
+  async getSettings(@User() user: UserModel): Promise<GetUserSettingsResponse> {
+    const subscriptionPlan = await this.subscriptionService.getOrInitSubscriptionPlan(user);
     const settings = {
       ...pick(user, ['uid', 'avatar', 'name', 'nickname', 'email', 'uiLocale', 'outputLocale']),
       emailVerified: !!user.emailVerified,
+      subscriptionPlan: subscriptionPlanPo2DTO(subscriptionPlan),
     };
-    return { success: true, data: settings, ...settings };
+
+    return buildSuccessResponse(settings);
   }
 
   @UseGuards(JwtAuthGuard)

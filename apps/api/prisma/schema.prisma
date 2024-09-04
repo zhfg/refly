@@ -57,6 +57,8 @@ model User {
   uiLocale      String?   @map("ui_locale")
   /// Output language setting
   outputLocale  String?   @map("output_locale")
+  /// Billing plan ID
+  planId        String?   @map("plan_id")
   /// Create timestamp
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
@@ -427,6 +429,80 @@ model LabelInstance {
 
   @@index([entityType, entityId])
   @@map("label_instances")
+}
+
+model SubscriptionUsageQuota {
+  /// Primary key
+  pk           BigInt   @id @default(autoincrement())
+  /// Subscription plan type
+  planType     String   @unique @map("plan_type")
+  /// Token quota (T1)
+  t1TokenQuota Int      @default(0) @map("t1_token_quota")
+  /// Token quota (T2)
+  t2TokenQuota Int      @default(0) @map("t2_token_quota")
+  /// Create timestamp
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([planType])
+  @@map("subscription_usage_quotas")
+}
+
+model SubscriptionPlan {
+  /// Primary key
+  pk              BigInt    @id @default(autoincrement())
+  /// Billing plan ID
+  planId          String    @unique @map("plan_id")
+  /// Plan type (free, pro, max, etc.)
+  planType        String    @map("plan_type")
+  /// Billing interval (monthly, yearly, etc.)
+  interval        String?   @map("interval")
+  /// UID
+  uid             String    @map("uid")
+  /// Annulment timestamp
+  anulledAt       DateTime? @map("anulled_at") @db.Timestamptz()
+  /// Annulment reason
+  annulmentReason String?   @map("annulment_reason")
+  /// Create timestamp
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([uid, anulledAt])
+  @@map("subscription_plans")
+}
+
+model UsageMeter {
+  /// Primary key
+  pk           BigInt    @id @default(autoincrement())
+  /// Meter ID
+  meterId      String    @unique @map("meter_id")
+  /// UID
+  uid          String    @map("uid")
+  /// Subscription plan
+  planId       String    @map("plan_id")
+  /// Meter start timestamp
+  startAt      DateTime  @map("start_at") @db.Timestamptz()
+  /// Meter end timestamp
+  endAt        DateTime  @map("end_at") @db.Timestamptz()
+  /// Token quota (T1)
+  t1TokenQuota Int       @default(0) @map("t1_token_quota")
+  /// Token used (T1)
+  t1TokenUsed  Int       @default(0) @map("t1_token_used")
+  /// Token quota (T2)
+  t2TokenQuota Int       @default(0) @map("t2_token_quota")
+  /// Token used (T2)
+  t2TokenUsed  Int       @default(0) @map("t2_token_used")
+  /// Create timestamp
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  /// Deletion timestamp
+  deletedAt    DateTime? @map("deleted_at") @db.Timestamptz()
+
+  @@index([uid, deletedAt])
+  @@map("usage_meters")
 }
 
 enum MessageType {

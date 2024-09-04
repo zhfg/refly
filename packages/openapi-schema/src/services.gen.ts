@@ -138,6 +138,10 @@ import type {
   CheckSettingsFieldData,
   CheckSettingsFieldError,
   CheckSettingsFieldResponse2,
+  GetSubscriptionPlanError,
+  GetSubscriptionPlanResponse,
+  GetSubscriptionUsageError,
+  GetSubscriptionUsageResponse,
   SearchData,
   SearchError,
   SearchResponse2,
@@ -654,6 +658,50 @@ export const checkSettingsField = (options: Options<CheckSettingsFieldData>) => 
   return (options?.client ?? client).get<CheckSettingsFieldResponse2, CheckSettingsFieldError>({
     ...options,
     url: '/user/checkSettingsField',
+  });
+};
+
+/**
+ * Get subscription plan
+ * Get subscription plan
+ */
+export const getSubscriptionPlan = (options?: Options) => {
+  return (options?.client ?? client).get<GetSubscriptionPlanResponse, GetSubscriptionPlanError>({
+    ...options,
+    url: '/subscription/plan',
+  });
+};
+
+/**
+ * Get subscription usage
+ * Get subscription usage
+ */
+export const getSubscriptionUsage = (options?: Options) => {
+  return (options?.client ?? client).get<GetSubscriptionUsageResponse, GetSubscriptionUsageError>({
+    ...options,
+    url: '/subscription/usage',
+  });
+};
+
+/**
+ * Create checkout session
+ * Create a checkout session
+ */
+export const createCheckoutSession = (options?: Options) => {
+  return (options?.client ?? client).post<void>({
+    ...options,
+    url: '/subscription/createCheckoutSession',
+  });
+};
+
+/**
+ * Create portal session
+ * Create a portal session
+ */
+export const createPortalSession = (options?: Options) => {
+  return (options?.client ?? client).post<void>({
+    ...options,
+    url: '/subscription/createPortalSession',
   });
 };
 

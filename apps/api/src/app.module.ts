@@ -17,6 +17,7 @@ import { SearchModule } from './search/search.module';
 import { LabelModule } from './label/label.module';
 import { EventModule } from './event/event.module';
 import { MiscModule } from './misc/misc.module';
+import { SubscriptionModule } from './subscription/subscription.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { MiscModule } from './misc/misc.module';
     LabelModule,
     EventModule,
     MiscModule,
+    SubscriptionModule,
   ],
   controllers: [AppController],
 })
