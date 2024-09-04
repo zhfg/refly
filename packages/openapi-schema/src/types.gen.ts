@@ -884,9 +884,13 @@ export type UserSettings = {
    */
   avatar: string;
   /**
-   * User name
+   * Username (can only contains letters, numbers, and underscores)
    */
   name: string;
+  /**
+   * User nickname
+   */
+  nickname?: string;
   /**
    * User email
    */
@@ -903,6 +907,10 @@ export type UserSettings = {
    * User output locale
    */
   outputLocale?: string;
+};
+
+export type GetUserSettingsResponse = BaseResponse & {
+  data?: UserSettings;
 };
 
 export type BaseResponse = {
@@ -1617,6 +1625,14 @@ export type GetConversationDetailResponse = BaseResponse & {
 
 export type UpdateUserSettingsRequest = {
   /**
+   * User name
+   */
+  name?: string;
+  /**
+   * User nickname
+   */
+  nickname?: string;
+  /**
    * UI locale
    */
   uiLocale?: string;
@@ -1624,6 +1640,28 @@ export type UpdateUserSettingsRequest = {
    * Output locale
    */
   outputLocale?: string;
+};
+
+export type CheckSettingsFieldResult = {
+  /**
+   * Settings field
+   */
+  field: string;
+  /**
+   * Settings field value
+   */
+  value: string;
+  /**
+   * Whether the field value is available
+   */
+  available: boolean;
+};
+
+export type CheckSettingsFieldResponse = BaseResponse & {
+  /**
+   * Settings field check result
+   */
+  data?: CheckSettingsFieldResult;
 };
 
 export type SearchDomain = 'resource' | 'note' | 'collection' | 'conversation' | 'skill';
@@ -2300,7 +2338,7 @@ export type GetConversationDetailResponse2 = GetConversationDetailResponse;
 
 export type GetConversationDetailError = unknown;
 
-export type GetSettingsResponse = UserSettings;
+export type GetSettingsResponse = GetUserSettingsResponse;
 
 export type GetSettingsError = unknown;
 
@@ -2311,6 +2349,23 @@ export type UpdateSettingsData = {
 export type UpdateSettingsResponse = BaseResponse;
 
 export type UpdateSettingsError = unknown;
+
+export type CheckSettingsFieldData = {
+  query: {
+    /**
+     * Settings field
+     */
+    field: 'name' | 'email';
+    /**
+     * Field value
+     */
+    value: string;
+  };
+};
+
+export type CheckSettingsFieldResponse2 = CheckSettingsFieldResponse;
+
+export type CheckSettingsFieldError = unknown;
 
 export type SearchData = {
   body: SearchRequest;
@@ -2817,7 +2872,7 @@ export type $OpenApiTs = {
         /**
          * successful operation
          */
-        '200': UserSettings;
+        '200': GetUserSettingsResponse;
       };
     };
     put: {
@@ -2827,6 +2882,17 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': BaseResponse;
+      };
+    };
+  };
+  '/user/checkSettingsField': {
+    get: {
+      req: CheckSettingsFieldData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': CheckSettingsFieldResponse;
       };
     };
   };

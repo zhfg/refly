@@ -1095,7 +1095,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserSettings'
+                $ref: '#/components/schemas/GetUserSettingsResponse'
       security:
         - api_key: []
     put:
@@ -1119,6 +1119,36 @@ paths:
                 $ref: '#/components/schemas/BaseResponse'
       security:
         - api_key: []
+  /user/checkSettingsField:
+    get:
+      tags:
+        - user
+      summary: Check settings field
+      description: Given a settings field, check if the given value is valid
+      operationId: checkSettingsField
+      parameters:
+        - name: field
+          in: query
+          description: Settings field
+          required: true
+          schema:
+            type: string
+            enum:
+              - name
+              - email
+        - name: value
+          in: query
+          description: Field value
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckSettingsFieldResponse'
   /search:
     post:
       tags:
@@ -2100,10 +2130,14 @@ components:
         avatar:
           type: string
           description: User avatar
-          example: https://www.gstatic.com/webp/gallery/1.jpg
+          example: https://static.refly.ai/avatar/1.jpg
         name:
           type: string
-          description: User name
+          description: Username (can only contains letters, numbers, and underscores)
+          example: john_doe
+        nickname:
+          type: string
+          description: User nickname
           example: John Doe
         email:
           type: string
@@ -2121,6 +2155,13 @@ components:
           type: string
           description: User output locale
           example: en
+    GetUserSettingsResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/UserSettings'
     BaseResponse:
       type: object
       required:
@@ -2951,6 +2992,14 @@ components:
     UpdateUserSettingsRequest:
       type: object
       properties:
+        name:
+          type: string
+          description: User name
+          example: john_name
+        nickname:
+          type: string
+          description: User nickname
+          example: John Doe
         uiLocale:
           type: string
           description: UI locale
@@ -2959,6 +3008,30 @@ components:
           type: string
           description: Output locale
           example: en
+    CheckSettingsFieldResult:
+      type: object
+      required:
+        - field
+        - value
+        - available
+      properties:
+        field:
+          type: string
+          description: Settings field
+        value:
+          type: string
+          description: Settings field value
+        available:
+          type: boolean
+          description: Whether the field value is available
+    CheckSettingsFieldResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              description: Settings field check result
+              $ref: '#/components/schemas/CheckSettingsFieldResult'
     SearchDomain:
       type: string
       enum:

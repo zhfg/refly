@@ -328,7 +328,7 @@ export const WelcomeMessage = () => {
               <img src={userStore?.userProfile?.avatar || ''} />
             </Avatar>
           </div>
-          <div className="user-container-title">Hello, {userStore?.userProfile?.name}</div>
+          <div className="user-container-title">Hello, {userStore?.userProfile?.nickname}</div>
         </div>
         <div className="welcome-message-text">How can I help you today?</div>
         {needInstallSkillInstance ? (

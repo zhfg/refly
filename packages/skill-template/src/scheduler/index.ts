@@ -267,7 +267,7 @@ Please generate the summary based on these requirements and offer suggestions fo
     let tools = this.skills;
     if (installedSkills) {
       const toolMap = new Map(tools.map((tool) => [tool.name, tool]));
-      tools = installedSkills.map((skill) => toolMap.get(skill.tplName)!);
+      tools = installedSkills.map((skill) => toolMap.get(skill.tplName)!).filter((tool) => tool);
     }
 
     tools = tools.filter((tool) => tool);

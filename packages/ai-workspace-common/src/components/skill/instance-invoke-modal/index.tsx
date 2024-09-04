@@ -29,7 +29,7 @@ export const InstanceInvokeModal = (props: InstanceInvokeModalProps) => {
       const res = await form.validate();
 
       const { input, context, tplConfig } = res;
-      const { contentList, urls } = context;
+      const { contentList, urls } = context || {};
 
       try {
         const { error: resultError } = await getClient().invokeSkill({

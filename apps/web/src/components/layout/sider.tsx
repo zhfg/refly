@@ -11,8 +11,8 @@ import {
   useLocation,
   useNavigate,
 } from "@refly-packages/ai-workspace-common/utils/router"
-import { HiOutlineHome, HiLanguage } from "react-icons/hi2"
-import { LuSettings, LuDownload } from "react-icons/lu"
+import { HiOutlineHome } from "react-icons/hi2"
+import { LuDownload } from "react-icons/lu"
 import { RiRobot2Line, RiHistoryLine } from "react-icons/ri"
 import {
   AiOutlineTwitter,
@@ -20,6 +20,17 @@ import {
   AiOutlineMenuFold,
   AiOutlineMenuUnfold,
 } from "react-icons/ai"
+import {
+  IconHome,
+  IconDownload,
+  IconTwitter,
+  IconLanguage,
+  IconImport,
+  IconMenuFold,
+  IconMenuUnfold,
+  IconRobot,
+  IconHistory,
+} from "@arco-design/web-react/icon"
 // 静态资源
 import Logo from "@/assets/logo.svg"
 import "./sider.scss"
@@ -32,6 +43,7 @@ import { openGetStartDocument } from "@refly-packages/ai-workspace-common/utils"
 import { UILocaleList } from "@refly-packages/ai-workspace-common/components/ui-locale-list"
 import { useImportResourceStore } from "@refly-packages/ai-workspace-common/stores/import-resource"
 import { useKnowledgeBaseStore } from "@refly-packages/ai-workspace-common/stores/knowledge-base"
+import { SiderMenuSettingList } from "@refly-packages/ai-workspace-common/components/sider-menu-setting-list"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -104,40 +116,28 @@ const MenuItemTooltipContent = (props: { title: string }) => {
   return <div>{props.title}</div>
 }
 
-const SettingItem = (props: { navigate: (path: string) => void }) => {
-  const { navigate } = props
+const SettingItem = () => {
   const userStore = useUserStore()
   return (
     <div className="flex flex-1 items-center justify-between">
-      <div
-        className="menu-settings"
-        onClick={() => {
-          navigate("/settings")
-        }}>
-        <Avatar size={32}>
-          <img src={userStore?.userProfile?.avatar || ""} alt="user-avatar" />
-        </Avatar>
-        <span className="username">{userStore?.userProfile?.name}</span>
-      </div>
+      <SiderMenuSettingList>
+        <div className="menu-settings user-profile">
+          <Avatar size={32}>
+            <img src={userStore?.userProfile?.avatar || ""} alt="user-avatar" />
+          </Avatar>
+          <span className="username">
+            <span>{userStore?.userProfile?.nickname}</span>
+          </span>
+        </div>
+      </SiderMenuSettingList>
+
       <div>
         <span
           className="setting-language-icon"
-          style={{ display: "inline-block", marginRight: "8px" }}>
+          style={{ display: "inline-block" }}>
           <UILocaleList>
-            <HiLanguage
-              className="arco-icon"
-              style={{
-                fontSize: 20,
-              }}
-            />
+            <IconLanguage style={{ fontSize: 20 }} />
           </UILocaleList>
-        </span>
-        <span
-          className="setting-icon"
-          onClick={() => {
-            navigate("/settings")
-          }}>
-          <LuSettings className="arco-icon" style={{ fontSize: 20 }} />
         </span>
       </div>
     </div>
@@ -269,21 +269,23 @@ export const SiderLayout = () => {
     key: string
     name: string
     icon: React.ReactNode
+    showDivider?: boolean
     onClick?: () => void
   }
   const siderCenter: SiderCenterProps[] = [
     {
-      key: "Workspace",
-      name: "homePage",
-      icon: <HiOutlineHome className="arco-icon" style={{ fontSize: 20 }} />,
-    },
-    {
       key: "Import",
       name: "newResource",
-      icon: <AiOutlineImport className="arco-icon" style={{ fontSize: 20 }} />,
+      icon: <IconImport style={{ fontSize: 20 }} />,
+      showDivider: true,
       onClick: () => {
         importResourceStore.setImportResourceModalVisible(true)
       },
+    },
+    {
+      key: "Workspace",
+      name: "homePage",
+      icon: <HiOutlineHome className="arco-icon" style={{ fontSize: 20 }} />,
     },
     {
       key: "Skill",
@@ -325,20 +327,28 @@ export const SiderLayout = () => {
           <div className="sider-center">
             {siderCenter.map(item => {
               return (
-                <MenuItem
-                  key={item.key}
-                  className="custom-menu-item"
-                  renderItemInTooltip={() => (
-                    <MenuItemTooltipContent
+                <div key={item.key}>
+                  <MenuItem
+                    key={item.key}
+                    className="custom-menu-item"
+                    renderItemInTooltip={() => (
+                      <MenuItemTooltipContent
+                        title={t(`loggedHomePage.siderMenu.${item.name}`)}
+                      />
+                    )}
+                    onClick={item.onClick}>
+                    <MenuItemContent
+                      icon={item.icon}
                       title={t(`loggedHomePage.siderMenu.${item.name}`)}
                     />
+                  </MenuItem>
+                  {item.showDivider && (
+                    <Divider
+                      key={item.key + "divider"}
+                      style={{ margin: "8px 0" }}
+                    />
                   )}
-                  onClick={item.onClick}>
-                  <MenuItemContent
-                    icon={item.icon}
-                    title={t(`loggedHomePage.siderMenu.${item.name}`)}
-                  />
-                </MenuItem>
+                </div>
               )
             })}
           </div>
@@ -374,7 +384,7 @@ export const SiderLayout = () => {
                     title={t("loggedHomePage.siderMenu.settings")}
                   />
                 )}>
-                <SettingItem navigate={path => navigate(path)}></SettingItem>
+                <SettingItem></SettingItem>
               </MenuItem>
             )}
             <Divider style={{ margin: "8px 0" }} />

@@ -50,7 +50,7 @@ export const ChatMessages = memo((props: ChatMessagesProps) => {
             message={item}
             disable={props?.disable}
             key={item?.msgId}
-            profile={{ avatar: userProfile?.avatar, name: userProfile?.name }}
+            profile={{ avatar: userProfile?.avatar, name: userProfile?.nickname }}
           />
         );
       } else if (item?.type === 'ai') {
