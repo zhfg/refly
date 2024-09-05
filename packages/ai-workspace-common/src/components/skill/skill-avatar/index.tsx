@@ -1,5 +1,3 @@
-import './index.scss';
-
 import { Avatar } from '@arco-design/web-react';
 import { Icon } from '@refly/openapi-schema';
 interface SkillAvatarProps {
