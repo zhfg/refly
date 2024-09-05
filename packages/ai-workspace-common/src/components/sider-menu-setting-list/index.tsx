@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useCookie } from 'react-use';
 import Cookies from 'js-cookie';
-import { getClientOrigin, getCookieOrigin, getExtensionId } from '@refly/utils/url';
+import { getWebLogin, getCookieOrigin, getExtensionId } from '@refly/utils/url';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
@@ -40,7 +40,7 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
         Cookies.remove('_refly_ai_sid', { domain: getCookieOrigin() });
 
         if (getRuntime() === 'web') {
-          window.location.href = getClientOrigin(true); // 没有登录，直接跳转到登录页
+          window.location.href = getWebLogin(); // 没有登录，直接跳转到登录页
         } else {
           navigate('/');
         }

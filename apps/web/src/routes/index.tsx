@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { Route, Routes } from "react-router-dom"
+import { Route, Routes, useMatch } from "react-router-dom"
 
 // 自定义组件
 import { ConvLibrary } from "@/pages/conv-library"
@@ -52,7 +52,9 @@ export const AppRouter = (props: { layout?: any }) => {
     }
   }, [locale])
 
-  if (!notShowLoginBtn) {
+  const routeLogin = useMatch("/login")
+
+  if (!notShowLoginBtn && !routeLogin) {
     return (
       <div
         style={{

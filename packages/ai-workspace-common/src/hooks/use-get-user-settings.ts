@@ -9,7 +9,7 @@ import { mapDefaultLocale } from '@refly-packages/ai-workspace-common/utils/loca
 import { useCookie } from 'react-use';
 import { LOCALE } from '@refly/common-types';
 import { useTranslation } from 'react-i18next';
-import { getClientOrigin } from '@refly-packages/utils/url';
+import { getClientOrigin, getWebLogin } from '@refly-packages/utils/url';
 import { getRuntime } from '../utils/env';
 
 export const useGetUserSettings = () => {
@@ -20,11 +20,14 @@ export const useGetUserSettings = () => {
   const { i18n } = useTranslation();
 
   const routeLandingPageMatch = useMatch('/');
+  const routePrivacyPageMatch = useMatch('/privacy');
+  const routeTermsPageMatch = useMatch('/terms');
   const routeLoginPageMatch = useMatch('/login');
   const routeDigestDetailPageMatch = useMatch('/digest/:digestId');
   const routeFeedDetailPageMatch = useMatch('/feed/:feedId');
   const routeAIGCContentDetailPageMatch = useMatch('/content/:digestId');
   const routeThreadDetailPageMatch = useMatch('/thread/:threadId');
+  const isWebLogin = useMatch('/login');
 
   const getLoginStatus = async () => {
     try {
@@ -40,7 +43,7 @@ export const useGetUserSettings = () => {
         localStorage.removeItem('refly-local-settings');
 
         if (getRuntime() === 'web') {
-          window.location.href = getClientOrigin(true); // 没有登录，直接跳转到登录页
+          window.location.href = getWebLogin(); // 没有登录，直接跳转到登录页
         } else {
           navigate('/'); // 插件等直接导航到首页
         }
@@ -94,14 +97,58 @@ export const useGetUserSettings = () => {
       localStorage.removeItem('refly-local-settings');
 
       if (getRuntime() === 'web') {
-        window.location.href = getClientOrigin(true); // 没有登录，直接跳转到登录页
+        window.location.href = getWebLogin(); // 没有登录，直接跳转到登录页
       } else {
         navigate('/'); // 插件等直接导航到首页
       }
     }
   };
 
+  const getLoginStatusForLogin = async () => {
+    try {
+      const res = await getClient().getSettings();
+      console.log('loginStatus', res);
+
+      if (res.error || !res.data) {
+        userStore.setUserProfile(undefined);
+        userStore.setToken('');
+        localStorage.removeItem('refly-user-profile');
+        localStorage.removeItem('refly-local-settings');
+
+        if (
+          routeLandingPageMatch ||
+          routePrivacyPageMatch ||
+          routeTermsPageMatch ||
+          routeLoginPageMatch ||
+          routeDigestDetailPageMatch ||
+          routeFeedDetailPageMatch ||
+          routeAIGCContentDetailPageMatch ||
+          routeThreadDetailPageMatch ||
+          isWebLogin
+        ) {
+          console.log('命中不需要鉴权页面，直接展示');
+        } else {
+          navigate('/');
+        }
+      } else {
+        // 鉴权成功直接重定向到 app.refly.ai
+        window.location.href = getClientOrigin(false);
+      }
+    } catch (err) {
+      console.log('getLoginStatus err', err);
+      userStore.setUserProfile(undefined);
+      userStore.setLocalSettings(defaultLocalSettings);
+      userStore.setToken('');
+      localStorage.removeItem('refly-user-profile');
+      localStorage.removeItem('refly-local-settings');
+    }
+  };
+
   useEffect(() => {
-    getLoginStatus();
+    if (isWebLogin) {
+      getLoginStatusForLogin();
+    } else {
+      getLoginStatus();
+    }
   }, [token, userStore.loginModalVisible]);
 };
