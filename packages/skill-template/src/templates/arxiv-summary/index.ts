@@ -6,7 +6,7 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 // schema
 import { z } from 'zod';
-import { SearchResponse, SkillInvocationConfig, SkillTemplateConfigSchema } from '@refly/openapi-schema';
+import { Icon, SearchResponse, SkillInvocationConfig, SkillTemplateConfigSchema } from '@refly/openapi-schema';
 import { TokenTextSplitter } from 'langchain/text_splitter';
 import { LLMChain, loadSummarizationChain } from 'langchain/chains';
 import { PromptTemplate } from '@langchain/core/prompts';
@@ -43,6 +43,8 @@ export class ArxivSummarySkill extends BaseSkill {
     en: 'Arxiv Summary',
     'zh-CN': 'Arxiv 总结',
   };
+
+  icon: Icon = { type: 'emoji', value: '📚' };
 
   configSchema: SkillTemplateConfigSchema = {
     items: [],

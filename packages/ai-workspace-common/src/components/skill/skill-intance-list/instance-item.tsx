@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Avatar, Button, Typography, Message as message, Tooltip } from '@arco-design/web-react';
+import { Button, Typography, Message as message, Tooltip } from '@arco-design/web-react';
 import { InstanceDropdownMenu } from '@refly-packages/ai-workspace-common/components/skill/instance-dropdown-menu';
 import { NewSkillInstanceModal } from '@refly-packages/ai-workspace-common/components/skill/new-instance-modal';
 
@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { InstanceInvokeModal } from '@refly-packages/ai-workspace-common/components/skill/instance-invoke-modal';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { SkillInstanceListSource } from '@refly-packages/ai-workspace-common/components/skill/skill-intance-list';
+import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
 
 interface InstanceItemProps {
   data: SkillInstance;
@@ -91,11 +92,7 @@ export const InstanceItem = (props: InstanceItemProps) => {
         onClick={goSkillDetail}
       >
         <div className="instance-item__header">
-          <div className="instance-item__profile">
-            <Avatar size={40} shape="square" style={{ backgroundColor: '#00d0b6', borderRadius: 8 }}>
-              {data?.displayName}
-            </Avatar>
-          </div>
+          <SkillAvatar icon={data?.icon} size={40} displayName={data?.displayName} />
           <div className="instance-item__title">
             <div className="instance-item__title-name">{data?.displayName}</div>
             {/* <div className="instance-item__title-info">

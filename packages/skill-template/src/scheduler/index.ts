@@ -10,7 +10,7 @@ import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { ToolMessage } from '@langchain/core/messages';
 import { pick, safeParseJSON } from '@refly/utils';
-import { SkillInvocationConfig, SkillMeta, SkillTemplateConfigSchema } from '@refly/openapi-schema';
+import { Icon, SkillInvocationConfig, SkillMeta, SkillTemplateConfigSchema } from '@refly/openapi-schema';
 import { ToolCall } from '@langchain/core/dist/messages/tool';
 import { randomUUID } from 'node:crypto';
 import { createSkillInventory } from '../inventory';
@@ -33,9 +33,11 @@ export class Scheduler extends BaseSkill {
   name = 'scheduler';
 
   displayName = {
-    en: 'Scheduler',
-    'zh-CN': 'Refly 知识管家',
+    en: 'Knowledge Curator',
+    'zh-CN': '知识管家',
   };
+
+  icon: Icon = { type: 'emoji', value: '🧙‍♂️' };
 
   configSchema: SkillTemplateConfigSchema = {
     items: [],
@@ -85,7 +87,7 @@ export class Scheduler extends BaseSkill {
   directCallSkill = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { selectedSkill, installedSkills } = config.configurable || {};
 
-    const skillInstance = installedSkills.find((skill) => skill.tplName === selectedSkill.tplName);
+    const skillInstance = installedSkills.find((skill) => skill.skillId === selectedSkill.skillId);
     if (!skillInstance) {
       throw new Error(`Skill ${selectedSkill.tplName} not installed.`);
     }
@@ -99,7 +101,7 @@ export class Scheduler extends BaseSkill {
       ...config,
       configurable: {
         ...config.configurable,
-        currentSkill: pick(skillInstance, ['skillId', 'tplName', 'displayName']),
+        currentSkill: skillInstance,
       },
     };
 
@@ -226,12 +228,11 @@ Please generate the summary based on these requirements and offer suggestions fo
     const { installedSkills = [] } = config.configurable || {};
     const skillInstance = installedSkills.find((skill) => skill.tplName === call.name);
     const skillTemplate = this.skills.find((skill) => skill.name === call.name);
-    const currentSkill: SkillMeta = skillInstance
-      ? pick(skillInstance, ['skillId', 'tplName', 'displayName'])
-      : {
-          tplName: skillTemplate.name,
-          displayName: skillTemplate.displayName[locale],
-        };
+    const currentSkill: SkillMeta = skillInstance ?? {
+      tplName: skillTemplate.name,
+      displayName: skillTemplate.displayName[locale],
+      icon: skillTemplate.icon,
+    };
     const skillConfig: SkillRunnableConfig = {
       ...config,
       configurable: {
@@ -247,7 +248,12 @@ Please generate the summary based on these requirements and offer suggestions fo
 
     const realOutput: { messages: BaseMessage[] } = typeof output === 'string' ? safeParseJSON(output) : output;
     const realToolOutputMsg = await this.getToolMsg(
-      { tplName: currentSkill.tplName, skillId: call?.id, displayName: currentSkill.displayName },
+      {
+        tplName: currentSkill.tplName,
+        skillId: call?.id,
+        displayName: currentSkill.displayName,
+        icon: currentSkill.icon,
+      },
       contextualUserQuery || query,
       realOutput,
     );

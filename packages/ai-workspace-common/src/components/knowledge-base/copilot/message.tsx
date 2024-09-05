@@ -18,6 +18,7 @@ import {
 import { IconBook, IconCaretDown, IconCheckCircle, IconCopy, IconImport, IconRight } from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
 // 自定义组件
+import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
 import { SourceList } from '@refly-packages/ai-workspace-common/components/source-list';
 import { safeParseJSON } from '../../../utils/parse';
 import { EditorOperation, editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
@@ -83,7 +84,11 @@ export const AssistantMessage = memo(
         ? safeParseJSON(message?.structuredData?.['relatedQuestions'])
         : (message?.structuredData?.['relatedQuestions'] as Array<string>);
 
-    const profile = { name: message?.skillMeta?.displayName, avatar: message?.skillMeta?.displayName };
+    const profile = {
+      name: message?.skillMeta?.displayName,
+      avatar: message?.skillMeta?.displayName,
+      icon: message.skillMeta.icon,
+    };
 
     // TODO: 移入新组件
     console.log(
@@ -146,10 +151,12 @@ export const AssistantMessage = memo(
         <div className="assistant-message">
           <>
             <div className="message-avatar">
-              <Avatar size={32} style={{ backgroundColor: '#00d0b6' }}>
-                {/* <img src={profile?.avatar} /> */}
-                {profile?.avatar || 'Refly 知识管家'}
-              </Avatar>
+              <SkillAvatar
+                icon={profile?.icon}
+                size={32}
+                shape="circle"
+                displayName={profile?.name || 'Refly 知识管家'}
+              />
             </div>
             <div className="message-name-and-content">
               <span className="message-name">{profile?.name || 'Refly 知识管家'}</span>

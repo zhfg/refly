@@ -237,6 +237,8 @@ model SkillInstance {
   displayName      String    @default("") @map("display_name")
   /// Skill description
   description      String    @default("") @map("description")
+  /// Skill icon
+  icon             String    @default("{}") @map("icon")
   /// UID of skill owner
   uid              String    @map("uid")
   /// Skill invocation config (JSON)

@@ -2,6 +2,7 @@ import { IconSettings } from '@arco-design/web-react/icon';
 import { useResizeBox } from '@refly-packages/ai-workspace-common/hooks/use-resize-box';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
+import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
 
 export const SkillDisplay = () => {
   const skillStore = useSkillStore();
@@ -35,6 +36,7 @@ export const SkillDisplay = () => {
             skillStore.setSelectedSkillInstance(item);
           }}
         >
+          <SkillAvatar noBorder size={20} icon={item?.icon} displayName={item?.displayName} background="transparent" />
           <span className="skill-item-title">{item?.displayName}</span>
         </div>
       ))}
