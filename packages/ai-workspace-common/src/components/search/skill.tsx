@@ -38,7 +38,7 @@ export function Skill({
           value={`refly-built-in-execute_${selectedSkill?.skillId}`}
           keywords={[`execute_${selectedSkill?.displayName}`]}
           onSelect={() => {
-            skillStore.setSelectedSkillInstalce(selectedSkill as SkillInstance);
+            skillStore.setSelectedSkillInstance(selectedSkill as SkillInstance);
             triggerSkillQuickAction(searchValue);
             searchStore.setIsSearchOpen(false);
           }}

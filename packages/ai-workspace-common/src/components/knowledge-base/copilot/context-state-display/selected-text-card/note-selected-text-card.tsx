@@ -16,8 +16,8 @@ const MenuItem = Menu.Item;
 
 export const NoteSelectedTextCard = () => {
   const { runSkill } = useBuildThreadAndRun();
-  const { hasContent } = useGetCurrentSelectedMark();
-  const disabled = !hasContent;
+  const { hasSelectedTextCardContent } = useGetCurrentSelectedMark();
+  const disabled = !hasSelectedTextCardContent;
 
   const { t, i18n } = useTranslation();
   const uiLocale = (i18n?.languages?.[0] as LOCALE) || LOCALE.EN;

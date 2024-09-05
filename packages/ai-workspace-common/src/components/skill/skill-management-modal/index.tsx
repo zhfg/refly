@@ -30,7 +30,7 @@ export const SkillManagementModal = (props: any) => {
       onCancel={onCancel}
       escToExit
     >
-      <div className="skill-management-modal">
+      <div className="skill-management-modal-content">
         <SkillInstanceList source="skill-management-modal" />
       </div>
     </Modal>

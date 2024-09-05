@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
 import type { ClientChatMessage, SessionItem } from '@refly/common-types';
+import { SkillContext, SkillTemplateConfig } from '@refly/openapi-schema';
 
 export interface ChatState {
   // state
@@ -10,10 +11,14 @@ export interface ChatState {
   newQAText: string;
   isGenTitle: boolean;
 
+  // context
+  invokeParams?: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig }; // for selected skill instance from copilot
+
   // method
   setMessages: (val: ClientChatMessage[]) => void;
   setIsGenTitle: (val: boolean) => void;
   setNewQAText: (val: string) => void;
+  setInvokeParams: (val: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig }) => void;
   resetState: () => void;
 }
 
@@ -23,6 +28,7 @@ export const defaultState = {
   sessions: [],
   newQAText: '',
   isGenTitle: false,
+  invokeParams: undefined,
 };
 
 export const useChatStore = create<ChatState>()(
@@ -35,6 +41,8 @@ export const useChatStore = create<ChatState>()(
     setNewQAText: (val: string) => {
       return set({ newQAText: val });
     },
+    setInvokeParams: (val: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig }) =>
+      set({ invokeParams: val }),
     resetState: () => {
       console.log('trigger resetState');
       return set((state) => ({ ...state, ...defaultState }));

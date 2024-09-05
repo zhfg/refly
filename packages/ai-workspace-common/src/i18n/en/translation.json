@@ -7,6 +7,7 @@
     "delete": "Delete",
     "edit": "Edit",
     "save": "Save",
+    "add": "Add",
     "loadMore": "Load More",
     "more": "More",
     "putErr": "Failed to perform operation. Please try again!",
@@ -16,7 +17,9 @@
     "input": "Input",
     "context": "Context",
     "templateConfig": "Template Config",
-    "required": "This item is required"
+    "required": "This item is required",
+    "empty": "No content",
+    "selectContext": "Select Context"
   },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",
@@ -176,7 +179,7 @@
     },
     "directory": {
       "resourceCount": "{{count}} contents",
-      "searchPlaceholder": "Search Knowledge Base..."
+      "searchPlaceholder": "Search resource..."
     },
     "quickSearch": {
       "suggest": "Suggestions",
@@ -190,6 +193,24 @@
       "readOnly": "Read Only",
       "edit": "Edit",
       "serviceDisconnected": "Service Disconnected"
+    }
+  },
+  "resource": {
+    "import": {
+      "title": "Resource Integration",
+      "fromWeblink": "Web Link",
+      "webLinkPlaceholer": "Enter or paste valid web links, one per line...",
+      "fromText": "Copy Text",
+      "linkFormatError": "Please enter a valid web link starting with http or https",
+      "emptyLink": "You haven't added any links yet!",
+      "waitingList": "Pending List",
+      "linkCount": "Total {{count}} links",
+      "saveTo": "Save to",
+      "scrapeError": "Scraping failed",
+      "integration": "Integration",
+      "emptyText": "Title and text content cannot be empty!",
+      "textTitlePlaceholder": "Enter title",
+      "textContentPlaceholder": "Enter or paste text"
     }
   },
   "loggedHomePage": {
@@ -278,6 +299,8 @@
       "newResource": "Import Resource",
       "settings": "Settings",
       "skill": "Skills",
+      "collapse": "Collapse",
+      "expand": "Expand",
       "logout": "Log Out"
     }
   },
@@ -445,8 +468,21 @@
         "resourceIds": "Please select resource",
         "noteIds": "Please select note",
         "collectionIds": "Please select collection",
-        "contentList": "Please enter or paste content",
+        "contentList": {
+          "select": "Please select content",
+          "textarea": "Please enter or paste content"
+        },
         "urls": "Please enter URLs, one per line"
+      },
+      "context": {
+        "contentList": {
+          "resource": "Resource",
+          "note": "Note",
+          "extension-weblink": "Web Link",
+          "noteCursorSelection": "Note Cursor Selection",
+          "noteBeforeCursorSelection": "Note Before Cursor Selection",
+          "noteAfterCursorSelection": "Note After Cursor Selection"
+        }
       },
       "invokeConfig": "Invocation Config",
       "templateConfig": "Template Config"
@@ -660,6 +696,8 @@
   "copilot": {
     "quickActions": "Quick Actions",
     "baseContextCard": {
+      "title": "Environment Context Quick Actions",
+      "filterTitle": "Filter Environment Context",
       "resourceContextCard": {
         "title": "Quick Actions for Current Resource",
         "summary": {
@@ -750,6 +788,19 @@
           "prompt": "Write a social media post",
           "title": "Write a Social Media Post"
         }
+      }
+    },
+    "selectedTextCard": {
+      "title": "Selected Text Quick Actions",
+      "filterTitle": "Filter Selected Content",
+      "placeholder": "No quick actions for selected text...",
+      "options": {
+        "resource": "Selected Resource Content",
+        "note": "Selected Note Content",
+        "noteCursorSelection": "Note Cursor Selection",
+        "noteBeforeCursorSelection": "Note Cursor Before Selection",
+        "noteAfterCursorSelection": "Note Cursor After Selection",
+        "conversation": "Selected Conversation Content"
       }
     },
     "chatInput": {

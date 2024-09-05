@@ -33,7 +33,7 @@ export const SkillDisplay = () => {
           key={index}
           className="skill-item"
           onClick={() => {
-            skillStore.setSelectedSkillInstalce(item);
+            skillStore.setSelectedSkillInstance(item);
           }}
         >
           <SkillAvatar noBorder size={20} icon={item?.icon} displayName={item?.displayName} background="transparent" />

@@ -1,4 +1,5 @@
-import { SelectedNamespace, useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { SelectedNamespace } from '@refly/common-types';
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { Mark } from '@refly/common-types';
 import { useEffect, useRef } from 'react';
@@ -6,22 +7,29 @@ import { useEffect, useRef } from 'react';
 export const useListenToSelection = (selector: string, namespace: SelectedNamespace) => {
   const mouseUpTimerRef = useRef<number>();
   const mouseDownTimerRef = useRef<number>();
-  const knowledgeBaseStore = useKnowledgeBaseStore();
+  const contextPanelStore = useContextPanelStore((state) => ({
+    currentSelectedMark: state.currentSelectedMark,
+    currentSelectedMarks: state.currentSelectedMarks,
+    enableMultiSelect: state.enableMultiSelect,
+    updateCurrentSelectedMark: state.updateCurrentSelectedMark,
+    updateCurrentSelectedMarks: state.updateCurrentSelectedMarks,
+    updateSelectedNamespace: state.updateSelectedNamespace,
+  }));
   const searchStateStore = useSearchStateStore();
 
   const timerForMouseEvent = () => {
-    const { enableMultiSelect, currentSelectedMarks } = useKnowledgeBaseStore.getState();
+    const { enableMultiSelect, currentSelectedMarks } = useContextPanelStore.getState();
     const selection = window.getSelection();
     const text = selection?.toString();
 
     if (text && text?.trim()?.length > 0) {
       const mark = { type: 'text', data: text } as Mark;
-      knowledgeBaseStore.updateCurrentSelectedMark(mark);
-      knowledgeBaseStore.updateSelectedNamespace(namespace);
+      contextPanelStore.updateCurrentSelectedMark(mark);
+      contextPanelStore.updateSelectedNamespace(namespace);
       searchStateStore.setSearchTarget(SearchTarget.CurrentPage);
 
       if (enableMultiSelect) {
-        knowledgeBaseStore.updateCurrentSelectedMarks(currentSelectedMarks.concat(mark));
+        contextPanelStore.updateCurrentSelectedMarks(currentSelectedMarks.concat(mark));
       }
     }
   };

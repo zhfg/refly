@@ -1,5 +1,5 @@
 .resource-collection-list {
-  padding-top: 24px;
+  padding: 12px 0;
   display: flex;
   flex-wrap: wrap;
   background-color: #fcfcf9;
@@ -9,6 +9,9 @@
   .resource-collection-list-item {
     background-color: transparent;
     max-width: 200px;
+    .arco-tag-icon {
+      display: flex;
+    }
 
     &:hover {
       cursor: pointer;

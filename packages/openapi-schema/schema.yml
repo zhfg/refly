@@ -1456,6 +1456,7 @@ components:
       enum:
         - input
         - inputNumber
+        - inputTextArea
         - select
         - multiSelect
     SelectOption:
@@ -2761,6 +2762,20 @@ components:
           type: number
           description: Maximum number of items
           default: 10
+        inputMode:
+          type: string
+          description: Input mode
+          enum:
+            - input
+            - inputNumber
+            - inputTextArea
+            - select
+            - multiSelect
+        defaultValue:
+          type: array
+          description: Default value
+          items:
+            type: string
         required:
           type: boolean
           description: Whether this key is required (default is false)

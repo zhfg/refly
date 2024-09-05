@@ -28,7 +28,7 @@ interface InstanceItemProps {
 
 export const InstanceItem = (props: InstanceItemProps) => {
   const navigate = useNavigate();
-  const setSelectedSkillInstalce = useSkillStore((state) => state.setSelectedSkillInstalce);
+  const setSelectedSkillInstance = useSkillStore((state) => state.setSelectedSkillInstance);
   const setSkillManagerModalVisible = useSkillStore((state) => state.setSkillManagerModalVisible);
 
   const { data, itemKey, canGoDetail, source, refreshList, postDeleteList } = props;
@@ -45,7 +45,7 @@ export const InstanceItem = (props: InstanceItemProps) => {
 
     // click from skill-management-modal, set selectedSkill for copilot
     if (source === 'skill-management-modal') {
-      setSelectedSkillInstalce(data);
+      setSelectedSkillInstance(data);
       setSkillManagerModalVisible(false);
       return;
     }

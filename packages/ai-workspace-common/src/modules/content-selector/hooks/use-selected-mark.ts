@@ -6,14 +6,14 @@ import {
 } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import type { SyncMarkEvent, SyncStatusEvent } from '@refly/common-types';
-import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 // stores
 
 // 与 selectedText 一起控制最终的选中
 export const useSelectedMark = () => {
   const contentSelectorStore = useContentSelectorStore();
-  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
+  const contextPanelStore = useContextPanelStore((state) => ({
     currentSelectedMark: state.currentSelectedMark,
     currentSelectedMarks: state.currentSelectedMarks,
     updateCurrentSelectedMarks: state.updateCurrentSelectedMarks,
@@ -31,7 +31,7 @@ export const useSelectedMark = () => {
     if (name === 'syncMarkEvent') {
       // 代表从 content-selector-app 获取信息
       const { marks = [] } = useContentSelectorStore.getState();
-      const { currentSelectedMarks, enableMultiSelect, currentSelectedMark } = useKnowledgeBaseStore.getState();
+      const { currentSelectedMarks, enableMultiSelect, currentSelectedMark } = useContextPanelStore.getState();
       const { type, mark } = body || {};
 
       // enableMultiSelect 只是打开生效状态，不影响实际选中
@@ -40,22 +40,22 @@ export const useSelectedMark = () => {
         contentSelectorStore.setMarks(newMarks);
 
         const newCurrentSelectedMarks = currentSelectedMarks.filter((item) => item?.xPath !== mark?.xPath);
-        knowledgeBaseStore.updateCurrentSelectedMarks(newCurrentSelectedMarks);
+        contextPanelStore.updateCurrentSelectedMarks(newCurrentSelectedMarks);
 
-        knowledgeBaseStore.updateCurrentSelectedMark(null);
+        contextPanelStore.updateCurrentSelectedMark(null);
       } else if (type === 'add') {
         const newMarks = [...marks, mark];
         contentSelectorStore.setMarks(newMarks);
 
         const newCurrentSelectedMarks = [...currentSelectedMarks, mark];
-        knowledgeBaseStore.updateCurrentSelectedMarks(newCurrentSelectedMarks);
+        contextPanelStore.updateCurrentSelectedMarks(newCurrentSelectedMarks);
 
-        knowledgeBaseStore.updateCurrentSelectedMark(mark);
+        contextPanelStore.updateCurrentSelectedMark(mark);
       } else if (type === 'reset') {
         // 这里代表一起清空
         contentSelectorStore.setMarks([]);
-        knowledgeBaseStore.updateCurrentSelectedMarks([]);
-        knowledgeBaseStore.updateCurrentSelectedMark(null);
+        contextPanelStore.updateCurrentSelectedMarks([]);
+        contextPanelStore.updateCurrentSelectedMark(null);
       }
     }
   };

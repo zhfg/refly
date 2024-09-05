@@ -30,6 +30,7 @@ export const SkillInstanceList = (props: SkillInstanceListProps) => {
   const { source, canGoDetail } = props;
   const { t } = useTranslation();
   const setSkillManagerModalVisible = useSkillStore((state) => state.setSkillManagerModalVisible);
+  const skillStore = useSkillStore();
   const { dataList, loadMore, setDataList, hasMore, isRequesting, reload } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listSkillInstances({
@@ -64,6 +65,9 @@ export const SkillInstanceList = (props: SkillInstanceListProps) => {
 
   useEffect(() => {
     setSkillList(dataList);
+    if (source === 'skill-management-modal') {
+      skillStore.setSkillInstances(dataList);
+    }
   }, [dataList]);
 
   return (

@@ -3,13 +3,15 @@ import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hook
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { getQuickActionPrompt } from '@refly-packages/ai-workspace-common/utils/quickActionPrompt';
-import { Button, Switch, Tag, Tooltip } from '@arco-design/web-react';
+import { Button, Select, Switch, Tag, Tooltip } from '@arco-design/web-react';
 import {
   IconCloseCircle,
   IconFile,
+  IconFilter,
   IconFolder,
   IconFontColors,
   IconHighlight,
+  IconLink,
   IconRefresh,
 } from '@arco-design/web-react/icon';
 import { useGetSkills } from '@refly-packages/ai-workspace-common/skills/main-logic/use-get-skills';
@@ -17,33 +19,77 @@ import { useDispatchAction } from '@refly-packages/ai-workspace-common/skills/ma
 import { ContentSelectorBtn } from '@refly-packages/ai-workspace-common/modules/content-selector/components/content-selector-btn';
 import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
 import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
+import { useTranslation } from 'react-i18next';
+import {
+  useContextPanelStore,
+  selectedTextCardDomainWeb,
+  selectedTextCardDomainExtension,
+} from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { LOCALE, Mark, SelectedTextCardDomain } from '@refly/common-types';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { PiNotepad, PiNotebookDuotone } from 'react-icons/pi';
+import { useGetCurrentSelectedMark } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-selected-text';
 
 interface BaseSelectedTextCardProps {
   title: string;
   skillContent: React.ReactNode;
 }
 
+const { Option } = Select;
+
+const getIcon = (mark: Mark) => {
+  // include noteCursorSelection, noteBeforeCursorSelection, noteAfterCursorSelection
+  if (mark.namespace?.includes('cursor')) {
+    return <IconFontColors />;
+  }
+
+  if (mark.namespace === 'note') {
+    return <PiNotebookDuotone />;
+  }
+
+  if (mark.namespace === 'resource') {
+    return <IconFile />;
+  }
+
+  if (mark.namespace === 'extension-weblink') {
+    return <IconLink />;
+  }
+};
+
 export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
   const { title, skillContent } = props;
-  const knowledgeBaseStore = useKnowledgeBaseStore();
-  const { enableMultiSelect, currentSelectedMarks = [], currentSelectedMark } = knowledgeBaseStore;
-  const { marks = [] } = useContentSelectorStore();
-  const searchStateStore = useSearchStateStore();
+  const { t, i18n } = useTranslation();
+  const contextPanelStore = useContextPanelStore((state) => ({
+    enableMultiSelect: state.enableMultiSelect,
+    currentSelectedMarks: state.currentSelectedMarks,
+    currentSelectedMark: state.currentSelectedMark,
+    resetSelectedTextCardState: state.resetSelectedTextCardState,
+    updateCurrentSelectedMark: state.updateCurrentSelectedMark,
+    setSelectedTextCardDomain: state.setSelectedTextCardDomain,
+    selectedTextCardDomain: state.selectedTextCardDomain,
+    updateEnableMultiSelect: state.updateEnableMultiSelect,
+    updateCurrentSelectedMarks: state.updateCurrentSelectedMarks,
+    setShowContextCard: state.setShowContextCard,
+    beforeSelectionNoteContent: state.beforeSelectionNoteContent,
+    afterSelectionNoteContent: state.afterSelectionNoteContent,
+    currentSelectionContent: state.currentSelectionContent,
+  }));
+  const { enableMultiSelect, currentSelectedMark } = contextPanelStore;
   const { handleReset } = useSelectedMark();
+  const { finalUsedMarks } = useGetCurrentSelectedMark();
 
-  // skill
-  const [skills] = useGetSkills();
-  const hasContent = currentSelectedMark || (enableMultiSelect && currentSelectedMarks?.length > 0);
+  const locale = i18n?.language || LOCALE.EN;
+  const runtime = getRuntime();
+  const isWeb = runtime === 'web';
+
+  console.log('currentSelectedMarks', finalUsedMarks, contextPanelStore);
 
   return (
     <div className="context-state-card context-state-current-page">
       <div className="context-state-card-header">
         <div className="context-state-card-header-left">
           <IconFontColors />
-          <span className="context-state-card-header-title">
-            {title}{' '}
-            {enableMultiSelect ? <span style={{ color: '#00968F' }}>（共 {currentSelectedMarks.length} 个）</span> : ``}
-          </span>
+          <span className="context-state-card-header-title">{t('copilot.selectedTextCard.title')} </span>
         </div>
         <div className="context-state-card-header-right">
           <Button
@@ -53,35 +99,34 @@ export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
             icon={
               <IconRefresh
                 onClick={() => {
-                  knowledgeBaseStore.resetSelectedContextState();
+                  contextPanelStore.resetSelectedTextCardState();
                   handleReset();
                 }}
               />
             }
           ></Button>
           <ContentSelectorBtn />
-          <Tooltip content="多选">
+          {/* <Tooltip content="多选">
             <Switch
               type="round"
               size="small"
               checked={enableMultiSelect}
               style={{ marginRight: 4 }}
               onChange={(value) => {
-                knowledgeBaseStore.updateEnableMultiSelect(value);
+                contextPanelStore.updateEnableMultiSelect(value);
                 if (currentSelectedMarks?.length === 0) {
-                  knowledgeBaseStore.updateCurrentSelectedMarks(currentSelectedMark ? [currentSelectedMark] : []);
+                  contextPanelStore.updateCurrentSelectedMarks(currentSelectedMark ? [currentSelectedMark] : []);
                 }
               }}
             />
-          </Tooltip>
+          </Tooltip> */}
           <Button
             type="text"
             className="assist-action-item"
             icon={
               <IconCloseCircle
                 onClick={() => {
-                  knowledgeBaseStore.updateCurrentSelectedMark(null);
-                  knowledgeBaseStore.setShowContextCard(false);
+                  contextPanelStore.setShowContextCard(false);
                 }}
               />
             }
@@ -90,36 +135,52 @@ export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
       </div>
       <div className="context-state-card-body">
         {enableMultiSelect ? (
-          currentSelectedMarks.map((item, index) => (
+          finalUsedMarks.map((item, index) => (
             <div className="context-state-resource-item" key={index}>
-              <Tag
-                icon={item?.xPath ? <IconHighlight /> : <IconFontColors />}
-                bordered
-                className="context-state-resource-item-tag"
-              >
+              <Tag icon={getIcon(item)} bordered className="context-state-resource-item-tag">
                 {item?.data}
               </Tag>
             </div>
           ))
         ) : currentSelectedMark ? (
           <div className="context-state-resource-item">
-            <Tag
-              icon={currentSelectedMark?.xPath ? <IconHighlight /> : <IconFontColors />}
-              bordered
-              className="context-state-resource-item-tag"
-            >
+            <Tag icon={getIcon(currentSelectedMark)} bordered className="context-state-resource-item-tag">
               {currentSelectedMark?.data}
             </Tag>
           </div>
-        ) : (
+        ) : null}
+        {(enableMultiSelect && finalUsedMarks.length === 0) || (!enableMultiSelect && !currentSelectedMark) ? (
           <div className="context-state-resource-item">
             <span className="text-gray-500" style={{ fontSize: 12 }}>
-              暂无选中内容...
+              {t('copilot.selectedTextCard.placeholder')}
             </span>
           </div>
-        )}
+        ) : null}
       </div>
-      <div className="context-state-card-footer">{skillContent}</div>
+      <div className="context-state-card-quick-action">{skillContent}</div>
+      <div className="context-state-card-footer">
+        <IconFilter />
+        <Tooltip content={t('copilot.selectedTextCard.filterTitle')}>
+          <Select
+            // bordered={false}
+            mode="multiple"
+            maxTagCount={1}
+            className="context-state-card-selector"
+            value={contextPanelStore.selectedTextCardDomain}
+            onChange={(val) => {
+              contextPanelStore.setSelectedTextCardDomain(val);
+            }}
+            allowClear
+            autoWidth={{ minWidth: 266, maxWidth: 340 }}
+          >
+            {(isWeb ? selectedTextCardDomainWeb : selectedTextCardDomainExtension).map((item, index) => (
+              <Option key={item?.key} value={item?.key}>
+                <span style={{ fontSize: 12 }}>{item?.labelDict[locale]}</span>
+              </Option>
+            ))}
+          </Select>
+        </Tooltip>
+      </div>
     </div>
   );
 };

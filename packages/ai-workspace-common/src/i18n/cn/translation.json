@@ -7,6 +7,7 @@
     "delete": "删除",
     "edit": "编辑",
     "save": "保存",
+    "add": "添加",
     "loadMore": "加载更多",
     "more": "更多",
     "putErr": "操作失败，请尝试重试！",
@@ -16,7 +17,9 @@
     "input": "输入",
     "context": "上下文",
     "templateConfig": "模板配置",
-    "required": "必填项"
+    "required": "必填项",
+    "empty": "暂无内容",
+    "selectContext": "选择待使用上下文"
   },
   "systemMaintenanceShutdown": {
     "title": "尊敬的用户，您好！",
@@ -176,7 +179,7 @@
     },
     "directory": {
       "resourceCount": "{{count}} 个内容",
-      "searchPlaceholder": "搜索知识库..."
+      "searchPlaceholder": "搜索资源..."
     },
     "quickSearch": {
       "suggest": "建议",
@@ -190,6 +193,24 @@
       "readOnly": "只读",
       "edit": "编辑",
       "serviceDisconnected": "服务已断开"
+    }
+  },
+  "resource": {
+    "import": {
+      "title": "资源集成",
+      "fromWeblink": "网页链接",
+      "webLinkPlaceholer": "输入或粘贴有效的网页链接，每行一个....",
+      "fromText": "复制文本",
+      "linkFormatError": "请输入有效的网页链接，以 http 或 https 开头",
+      "emptyLink": "你还未添加任何链接！",
+      "waitingList": "待处理列表",
+      "linkCount": "共 {{count}} 个",
+      "saveTo": "保存至",
+      "scrapeError": "抓取失败",
+      "integration": "集成",
+      "emptyText": "标题和文本内容不能为空！",
+      "textTitlePlaceholder": "输入标题",
+      "textContentPlaceholder": "输入或粘贴文本"
     }
   },
   "loggedHomePage": {
@@ -288,6 +309,8 @@
       "newResource": "导入资源",
       "settings": "设置",
       "skill": "技能",
+      "collapse": "折叠",
+      "expand": "展开",
       "logout": "登出"
     }
   },
@@ -461,8 +484,21 @@
         "resourceIds": "请选择资源",
         "noteIds": "请选择笔记",
         "collectionIds": "请选择知识库",
-        "contentList": "请输入或粘贴内容",
+        "contentList": {
+          "select": "请选择内容",
+          "textarea": "请输入或粘贴内容"
+        },
         "urls": "请输入链接，每行一个..."
+      },
+      "context": {
+        "contentList": {
+          "resource": "资源",
+          "note": "笔记",
+          "extension-weblink": "网页链接",
+          "noteCursorSelection": "笔记选中内容",
+          "noteBeforeCursorSelection": "笔记光标前内容",
+          "noteAfterCursorSelection": "笔记光标后内容"
+        }
       },
       "invokeConfig": "运行配置",
       "templateConfig": "模板配置"
@@ -671,6 +707,8 @@
   "copilot": {
     "quickActions": "快捷操作",
     "baseContextCard": {
+      "title": "环境上下文快捷操作",
+      "filterTitle": "过滤环境上下文",
       "resourceContextCard": {
         "title": "当前资源快捷操作",
         "summary": {
@@ -761,6 +799,19 @@
           "prompt": "撰写社交媒体文章",
           "title": "撰写社交媒体文章"
         }
+      }
+    },
+    "selectedTextCard": {
+      "title": "选中内容快捷操作",
+      "filterTitle": "过滤选中上下文",
+      "placeholder": "暂无可快捷操作的选中内容...",
+      "options": {
+        "resource": "选中资源内容",
+        "note": "选中笔记内容",
+        "noteCursorSelection": "笔记光标选中内容",
+        "noteBeforeCursorSelection": "笔记光标前内容",
+        "noteAfterCursorSelection": "笔记光标后内容",
+        "conversation": "选中会话内容"
       }
     },
     "chatInput": {

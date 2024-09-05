@@ -72,7 +72,7 @@ export class FindRelatedContent extends BaseSkill {
       rules: [
         { key: 'resourceIds', limit: 1 },
         { key: 'noteIds', limit: 1 },
-        { key: 'contentList', limit: 1 },
+        { key: 'contentList', limit: 1, inputMode: 'select' },
       ],
       relation: 'mutuallyExclusive',
     },

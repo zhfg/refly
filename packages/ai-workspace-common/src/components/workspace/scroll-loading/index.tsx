@@ -14,7 +14,7 @@ export const ScrollLoading = (props: ScrollLoadingProps) => {
   const { t } = useTranslation();
 
   if (!hasMore) {
-    return <span style={{ marginBottom: 32 }}>{t('knowledgeLibrary.archive.item.noMoreText')}</span>;
+    return <span style={{ marginBottom: 120 }}>{t('knowledgeLibrary.archive.item.noMoreText')}</span>;
   }
 
   if (isRequesting) {
@@ -33,7 +33,7 @@ export const ScrollLoading = (props: ScrollLoadingProps) => {
   }
 
   return (
-    <Button onClick={() => loadMore()} style={{ marginBottom: 32 }}>
+    <Button onClick={() => loadMore()} style={{ marginBottom: 120 }}>
       {t('common.loadMore')}
     </Button>
   );

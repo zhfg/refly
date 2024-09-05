@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Affix, Radio, Dropdown, Menu, Divider } from '@arco-design/web-react';
-import { IconDown } from '@arco-design/web-react/icon';
+import { HiOutlineChevronDown } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
 
 import { WorkSpaceSearch } from '../work-space-search';
@@ -74,7 +74,7 @@ const NewFileButton = (props: { val: string }) => {
     <Dropdown.Button
       type="primary"
       droplist={<NewFileDropList handleCreateButtonClick={(type) => handleCreateButtonClick(type)} />}
-      icon={<IconDown />}
+      icon={<HiOutlineChevronDown />}
     >
       <div onClick={() => handleCreateButtonClick(props.val)}>{t(`workspace.contentPanel.newButton.${props.val}`)}</div>
     </Dropdown.Button>

@@ -1,6 +1,6 @@
 // styles
 import './index.scss';
-import { IconSearch, IconPlus } from '@arco-design/web-react/icon';
+import { HiOutlineSearch, HiOutlinePlus } from 'react-icons/hi';
 import { Divider, Input, Skeleton } from '@arco-design/web-react';
 import { useSearchableList } from '@refly-packages/ai-workspace-common/components/use-searchable-list';
 import { useEffect, useState } from 'react';
@@ -50,7 +50,7 @@ export const ResourceList = (props: ResourceListProps) => {
   const AddResourceBtn = () => {
     return (
       <div className="add-resource-btn" onClick={() => setVisible(true)}>
-        <IconPlus />
+        <HiOutlinePlus />
       </div>
     );
   };
@@ -73,7 +73,7 @@ export const ResourceList = (props: ResourceListProps) => {
             className="knowledge-base-directory-search"
             style={{ height: 32, borderRadius: '8px' }}
             value={searchVal}
-            prefix={<IconSearch />}
+            prefix={<HiOutlineSearch />}
             onChange={handleChange}
           />
           {showAdd && <AddResourceBtn />}

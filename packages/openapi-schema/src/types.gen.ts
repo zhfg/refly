@@ -219,7 +219,7 @@ export type LabelInstance = {
 /**
  * Data input mode
  */
-export type InputMode = 'input' | 'inputNumber' | 'select' | 'multiSelect';
+export type InputMode = 'input' | 'inputNumber' | 'inputTextArea' | 'select' | 'multiSelect';
 
 /**
  * Select option
@@ -1427,10 +1427,23 @@ export type SkillInvocationRule = {
    */
   limit?: number;
   /**
+   * Input mode
+   */
+  inputMode?: 'input' | 'inputNumber' | 'inputTextArea' | 'select' | 'multiSelect';
+  /**
+   * Default value
+   */
+  defaultValue?: Array<string>;
+  /**
    * Whether this key is required (default is false)
    */
   required?: boolean;
 };
+
+/**
+ * Input mode
+ */
+export type inputMode = 'input' | 'inputNumber' | 'inputTextArea' | 'select' | 'multiSelect';
 
 export type InvocationRuleGroupRelation = 'regular' | 'mutuallyExclusive';
 

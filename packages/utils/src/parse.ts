@@ -39,6 +39,10 @@ export function isJSON(variable: any): boolean {
 }
 
 export const markdownCitationParse = (markdown: string) => {
+  if (typeof markdown !== 'string') {
+    return markdown;
+  }
+
   return (markdown || '')
     ?.replace(/\[\[([cC])itation/g, '[citation')
     .replace(/[cC]itation:(\d+)]]/g, 'citation:$1]')

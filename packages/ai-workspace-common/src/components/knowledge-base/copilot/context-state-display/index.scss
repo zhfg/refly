@@ -9,7 +9,7 @@
     .context-state-card-selector {
       width: calc(100% - 30px);
       .arco-select-view {
-        height: 24px;
+        height: 32px;
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -24,6 +24,7 @@
 
       .context-state-card-header-title {
         padding-left: 8px;
+        text-wrap: nowrap;
       }
 
       .context-state-card-header-left {
@@ -65,7 +66,7 @@
       }
     }
 
-    .context-state-card-footer {
+    .context-state-card-quick-action {
       .context-state-action-list {
         display: flex;
         flex-direction: row;
@@ -95,6 +96,17 @@
       button {
         border-radius: 8px;
       }
+    }
+
+    .context-state-card-footer {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+
+      font-size: 10px;
+      color: rgba(0, 0, 0, 0.5);
     }
   }
 
