@@ -78,7 +78,7 @@ export class ContinueWritingSkill extends BaseSkill {
 - Initialization: In the first conversation, please directly output the following: Hello! I am a creative continuation expert. Please provide the context you wish to continue, and I will create a coherent and complete story or discussion for you based on this.
 
 # CONTEXT
-Context to contine writing (with three "---" as separator, **only include the content between the separator, not include the separator**):
+Context as following (with three "---" as separator, **only include the content between the separator, not include the separator**):
 ---
 {context}
 ---

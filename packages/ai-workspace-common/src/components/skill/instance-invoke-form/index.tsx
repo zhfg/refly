@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 // store
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
-import { SkillInstance } from '@refly/openapi-schema';
+import { ConfigScope, SkillInstance } from '@refly/openapi-schema';
 import { Collapse, Modal, Form, Message, Button, FormInstance } from '@arco-design/web-react';
 
 import { BiBookContent } from 'react-icons/bi';
@@ -16,6 +16,7 @@ import { FaWpforms } from 'react-icons/fa';
 
 // styles
 import './index.scss';
+import { LOCALE } from '@refly/common-types';
 
 const CollapseItem = Collapse.Item;
 
@@ -76,6 +77,7 @@ export const InstanceInvokeForm = (props: InstanceInvokeProps) => {
           headerIcon={<FaWpforms />}
           schema={tplConfigSchema}
           form={form}
+          configScope={'runtime'}
           tplConfig={tplConfig}
           fieldPrefix="tplConfig"
         />

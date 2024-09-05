@@ -41,7 +41,11 @@ export class FindRelatedContent extends BaseSkill {
           en: 'The domains to search related content',
           'zh-CN': '搜索相关内容的范围',
         },
-        required: true,
+        required: {
+          value: true,
+          configScope: ['runtime'],
+        },
+        defaultValue: ['resource'],
         options: [
           {
             value: 'resource',

@@ -155,6 +155,7 @@ export const NewTriggersModal = (props: NewTriggersModalProps) => {
         <TemplateConfigFormItems
           headerTitle={t('common.templateConfig')}
           headerIcon={<FaWpforms />}
+          configScope={'runtime'}
           schema={data?.tplConfigSchema}
           form={form}
           tplConfig={data?.tplConfig}

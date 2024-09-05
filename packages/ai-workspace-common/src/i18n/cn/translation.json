@@ -20,7 +20,7 @@
     "required": "必填项",
     "empty": "暂无内容",
     "selectContext": "选择待使用上下文",
-    "emptyInput": "请输入内容"
+    "emptyInput": "请填入或选择内容"
   },
   "systemMaintenanceShutdown": {
     "title": "尊敬的用户，您好！",

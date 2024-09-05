@@ -12,6 +12,7 @@ const { TextArea } = Input;
 interface ContentListFormItemProps extends Omit<SelectProps, 'onChange'> {
   rule: SkillInvocationRule;
   onChange: (value: string) => void;
+  locale: string;
 }
 
 export const CONTENT_LIST_BREAK = '\n\n--refly-break--\n\n';
@@ -22,6 +23,7 @@ export const ContentListFormItem: React.FC<ContentListFormItemProps> = ({
   className,
   style,
   placeholder,
+  locale,
   ...restProps
 }) => {
   const { t } = useTranslation();
@@ -93,7 +95,7 @@ export const ContentListFormItem: React.FC<ContentListFormItemProps> = ({
         className={`${className} content-list-textarea`}
         style={{ ...style, width: '100%' }}
         value={content}
-        placeholder={t('skill.instanceInvokeModal.placeholder.contentList.textarea')}
+        placeholder={rule?.descriptionDict?.[locale] || t('skill.instanceInvokeModal.placeholder.contentList.textarea')}
         autoSize={{ minRows: 4, maxRows: 10 }}
         onChange={handleTextAreaChange}
       />

@@ -34,7 +34,11 @@ export class ChangeToneSkill extends BaseSkill {
           en: 'The tone to change to',
           'zh-CN': '目标语气',
         },
-        required: true,
+        required: {
+          value: true,
+          configScope: ['runtime'],
+        },
+        defaultValue: 'professional',
         options: [
           {
             value: 'professional',
@@ -152,7 +156,7 @@ export class ChangeToneSkill extends BaseSkill {
 - Initialization: In the first conversation, please directly output the following: Welcome! I specialize in adjusting the tone of content to meet your specific communication needs. Please provide the content and the desired tone you wish to achieve.
 
 # CONTEXT
-Context to contine writing (with three "---" as separator, **only include the content between the separator, not include the separator**):
+Context as following (with three "---" as separator, **only include the content between the separator, not include the separator**):
 ---
 {context}
 ---

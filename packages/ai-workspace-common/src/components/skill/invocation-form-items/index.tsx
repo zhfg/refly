@@ -7,6 +7,8 @@ import { FormHeader } from '@refly-packages/ai-workspace-common/components/skill
 
 import './index.scss';
 import { ContentListFormItem } from '@refly-packages/ai-workspace-common/components/skill/content-list-form-item';
+import { useTranslation } from 'react-i18next';
+import { LOCALE } from '@refly/common-types';
 
 const FormItem = Form.Item;
 const TextArea = Input.TextArea;
@@ -27,8 +29,9 @@ const InvokeOption = (props: {
   t: TFunction;
   onChange: (val: any) => void;
   disabled?: boolean;
+  locale: string;
 }): React.ReactNode => {
-  const { rule, t, disabled, onChange } = props;
+  const { rule, t, disabled, onChange, locale } = props;
 
   const commonProps = {
     disabled,
@@ -39,7 +42,7 @@ const InvokeOption = (props: {
     return (
       <Input
         {...commonProps}
-        placeholder={t('skill.instanceInvokeModal.placeholder.query')}
+        placeholder={rule?.descriptionDict?.[locale] || t('skill.instanceInvokeModal.placeholder.query')}
         maxLength={100}
         showWordLimit
         onChange={onChange}
@@ -70,6 +73,7 @@ const InvokeOption = (props: {
       <ContentListFormItem
         {...commonProps}
         rule={rule}
+        locale={locale}
         onChange={(value) => {
           onChange(value);
         }}
@@ -82,7 +86,7 @@ const InvokeOption = (props: {
       <TextArea
         {...commonProps}
         className={`${commonProps.className} invocation-form__input--textarea`}
-        placeholder={t(`skill.instanceInvokeModal.placeholder.${rule.key}`)}
+        placeholder={rule?.descriptionDict?.[locale] || t(`skill.instanceInvokeModal.placeholder.${rule.key}`)}
         rows={4}
         autoSize={{
           minRows: 4,
@@ -109,10 +113,12 @@ interface InvokeOptionGroupProps {
 export const InvocationFormItems = (props: InvokeOptionGroupProps) => {
   const { ruleGroup, form, t, fieldPrefix, headerTitle, selectTooltipTitle, headerIcon } = props;
   const { rules, relation } = ruleGroup;
+  const { i18n } = useTranslation();
   const resourceOptions = rules.map((rule) => ({
     label: t(`skill.instanceInvokeModal.formLabel.${rule.key}`),
     value: rule.key,
   }));
+  const locale = i18n.language || LOCALE.EN;
   const [collapsed, setCollapsed] = useState(false);
   const [selectedResource, setSelectedResource] = useState<string | string[]>(resourceOptions?.[0]?.value);
 
@@ -177,6 +183,7 @@ export const InvocationFormItems = (props: InvokeOptionGroupProps) => {
                 <InvokeOption
                   rule={selectedRule}
                   t={t}
+                  locale={locale}
                   disabled={selectedKey !== selectedRule.key}
                   onChange={(val) => {
                     const field = getFormField(fieldPrefix, selectedRule.key);
@@ -227,6 +234,7 @@ export const InvocationFormItems = (props: InvokeOptionGroupProps) => {
               <InvokeOption
                 rule={rule}
                 t={t}
+                locale={locale}
                 disabled={selectedKey !== rule.key}
                 onChange={(val) => {
                   form.setFieldValue(getFormField(fieldPrefix, rule.key), val);

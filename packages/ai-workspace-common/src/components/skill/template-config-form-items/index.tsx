@@ -5,6 +5,7 @@ import {
   DynamicConfigValue,
   SkillTemplateConfig,
   SkillTemplateConfigSchema,
+  ConfigScope,
 } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 import { FormHeader } from '@refly-packages/ai-workspace-common/components/skill/form-header';
@@ -29,6 +30,16 @@ const ConfigItem = (props: {
 }): React.ReactNode => {
   const { item, form, field, locale, configValue } = props;
 
+  useEffect(() => {
+    if (typeof item.defaultValue === 'string' || item?.defaultValue) {
+      form.setFieldValue(field, {
+        value: item.defaultValue,
+        label: getDictValue(item.labelDict, locale),
+        displayValue: String(item.defaultValue),
+      });
+    }
+  }, [item?.defaultValue]);
+
   if (!item) {
     return null;
   }
@@ -40,7 +51,7 @@ const ConfigItem = (props: {
     return (
       <Input
         placeholder={placeholder}
-        defaultValue={String(configValue?.value || '') || ''}
+        defaultValue={(item?.defaultValue as string) || String(configValue?.value || '') || ''}
         onChange={(val) =>
           form.setFieldValue(field, {
             value: val,
@@ -53,10 +64,13 @@ const ConfigItem = (props: {
   }
 
   if (item.inputMode === 'inputTextArea') {
+    console.log(`item.defaultValue`, item.defaultValue, configValue?.value);
     return (
       <TextArea
         placeholder={placeholder}
-        defaultValue={String(configValue?.value)}
+        defaultValue={
+          (typeof item?.defaultValue === 'string' ? item?.defaultValue : String(configValue?.value || '')) || ''
+        }
         rows={4}
         autoSize={{
           minRows: 4,
@@ -77,7 +91,7 @@ const ConfigItem = (props: {
     return (
       <InputNumber
         mode="button"
-        defaultValue={String(configValue?.value)}
+        defaultValue={(item?.defaultValue as number) || Number(configValue?.value) || 1}
         onChange={(val) =>
           form.setFieldValue(field, {
             value: val,
@@ -101,7 +115,7 @@ const ConfigItem = (props: {
           label: getDictValue(option.labelDict, locale),
           value: option.value,
         }))}
-        defaultValue={configValue?.value}
+        defaultValue={item?.defaultValue || configValue?.value || (item.inputMode === 'multiSelect' ? [] : '')}
         placeholder={placeholder}
         onChange={(val) =>
           form.setFieldValue(field, {
@@ -126,30 +140,30 @@ export const TemplateConfigFormItems = (props: {
   fieldPrefix?: string;
   headerTitle?: string;
   headerIcon?: React.ReactNode;
+  configScope: 'runtime' | 'template';
 }) => {
   const { i18n, t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
   const locale = i18n.languages?.[0] || 'en';
 
-  const { schema, form, fieldPrefix = '', tplConfig, headerTitle, headerIcon } = props;
+  const { schema, form, fieldPrefix = '', tplConfig, headerTitle, headerIcon, configScope } = props;
   const { items } = schema;
 
   if (!items?.length) {
     return null;
   }
 
-  useEffect(() => {
-    if (tplConfig) {
-      Object.entries(tplConfig).forEach(([key, value]) => {
-        const field = getFormField(fieldPrefix, key);
-        console.log(`field`, field);
+  // useEffect(() => {
+  //   if (tplConfig) {
+  //     Object.entries(tplConfig).forEach(([key, value]) => {
+  //       const field = getFormField(fieldPrefix, key);
 
-        if (value) {
-          form.setFieldValue(field, value);
-        }
-      });
-    }
-  }, [form, tplConfig, fieldPrefix]);
+  //       if (value) {
+  //         form.setFieldValue(field, value);
+  //       }
+  //     });
+  //   }
+  // }, [form, tplConfig, fieldPrefix]);
 
   return (
     <div style={{ marginTop: 16 }}>
@@ -170,11 +184,11 @@ export const TemplateConfigFormItems = (props: {
                 label={item.labelDict[locale]}
                 key={item.key}
                 field={field}
-                required={item.required}
+                required={item.required?.value}
                 rules={[
                   {
                     validator(value, cb) {
-                      if (!value && item?.required) {
+                      if (!value && item?.required?.value && item?.required?.configScope.includes(configScope)) {
                         return cb(t('common.emptyInput'));
                       }
 
@@ -186,7 +200,6 @@ export const TemplateConfigFormItems = (props: {
                 <ConfigItem
                   key={index}
                   item={item}
-                  headerIcon={headerIcon}
                   form={form}
                   field={field}
                   locale={locale}

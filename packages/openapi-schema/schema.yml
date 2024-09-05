@@ -1460,6 +1460,12 @@ components:
         - inputTextArea
         - select
         - multiSelect
+    ConfigScope:
+      type: array
+      description: Config scope
+      items:
+        type: string
+        enum: [runtime, template]
     SelectOption:
       type: object
       description: Select option
@@ -1494,9 +1500,19 @@ components:
           description: Config input mode
           $ref: '#/components/schemas/InputMode'
         required:
-          type: boolean
-          description: Whether this config is required
-          default: false
+          type: object
+          description: Specifies whether this config is required and in which contexts
+          properties:
+            value:
+              type: boolean
+              description: Whether this config is required
+              default: false
+            configScope:
+              description: The contexts in which the requirement applies
+              $ref: '#/components/schemas/ConfigScope'
+          default:
+            value: false
+            scope: [runtime, template]
         labelDict:
           type: object
           description: Config label (key is locale, value is label)
@@ -1507,6 +1523,14 @@ components:
           description: Config description (key is locale, value is description)
           additionalProperties:
             type: string
+        defaultValue:
+          description: Default value
+          oneOf:
+            - type: number
+            - type: string
+            - type: array
+              items:
+                type: string
         options:
           type: array
           description: Config options
@@ -2743,6 +2767,16 @@ components:
             - inputTextArea
             - select
             - multiSelect
+        labelDict:
+          type: object
+          description: Config label (key is locale, value is label)
+          additionalProperties:
+            type: string
+        descriptionDict:
+          type: object
+          description: Config description (key is locale, value is description)
+          additionalProperties:
+            type: string
         defaultValue:
           type: array
           description: Default value

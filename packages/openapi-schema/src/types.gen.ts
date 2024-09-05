@@ -222,6 +222,11 @@ export type LabelInstance = {
 export type InputMode = 'input' | 'inputNumber' | 'inputTextArea' | 'select' | 'multiSelect';
 
 /**
+ * Config scope
+ */
+export type ConfigScope = Array<'runtime' | 'template'>;
+
+/**
  * Select option
  */
 export type SelectOption = {
@@ -254,9 +259,18 @@ export type DynamicConfigItem = {
    */
   inputMode: InputMode;
   /**
-   * Whether this config is required
+   * Specifies whether this config is required and in which contexts
    */
-  required?: boolean;
+  required?: {
+    /**
+     * Whether this config is required
+     */
+    value?: boolean;
+    /**
+     * The contexts in which the requirement applies
+     */
+    configScope?: ConfigScope;
+  };
   /**
    * Config label (key is locale, value is label)
    */
@@ -269,6 +283,10 @@ export type DynamicConfigItem = {
   descriptionDict: {
     [key: string]: string;
   };
+  /**
+   * Default value
+   */
+  defaultValue?: number | string | Array<string>;
   /**
    * Config options
    */
@@ -1395,6 +1413,18 @@ export type SkillInvocationRule = {
    * Input mode
    */
   inputMode?: 'input' | 'inputNumber' | 'inputTextArea' | 'select' | 'multiSelect';
+  /**
+   * Config label (key is locale, value is label)
+   */
+  labelDict?: {
+    [key: string]: string;
+  };
+  /**
+   * Config description (key is locale, value is description)
+   */
+  descriptionDict?: {
+    [key: string]: string;
+  };
   /**
    * Default value
    */

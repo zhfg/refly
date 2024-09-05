@@ -276,6 +276,15 @@ export const $InputMode = {
   enum: ['input', 'inputNumber', 'inputTextArea', 'select', 'multiSelect'],
 } as const;
 
+export const $ConfigScope = {
+  type: 'array',
+  description: 'Config scope',
+  items: {
+    type: 'string',
+    enum: ['runtime', 'template'],
+  },
+} as const;
+
 export const $SelectOption = {
   type: 'object',
   description: 'Select option',
@@ -314,9 +323,23 @@ export const $DynamicConfigItem = {
       $ref: '#/components/schemas/InputMode',
     },
     required: {
-      type: 'boolean',
-      description: 'Whether this config is required',
-      default: false,
+      type: 'object',
+      description: 'Specifies whether this config is required and in which contexts',
+      properties: {
+        value: {
+          type: 'boolean',
+          description: 'Whether this config is required',
+          default: false,
+        },
+        configScope: {
+          description: 'The contexts in which the requirement applies',
+          $ref: '#/components/schemas/ConfigScope',
+        },
+      },
+      default: {
+        value: false,
+        scope: ['runtime', 'template'],
+      },
     },
     labelDict: {
       type: 'object',
@@ -331,6 +354,23 @@ export const $DynamicConfigItem = {
       additionalProperties: {
         type: 'string',
       },
+    },
+    defaultValue: {
+      description: 'Default value',
+      oneOf: [
+        {
+          type: 'number',
+        },
+        {
+          type: 'string',
+        },
+        {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
+      ],
     },
     options: {
       type: 'array',
@@ -2036,6 +2076,20 @@ export const $SkillInvocationRule = {
       type: 'string',
       description: 'Input mode',
       enum: ['input', 'inputNumber', 'inputTextArea', 'select', 'multiSelect'],
+    },
+    labelDict: {
+      type: 'object',
+      description: 'Config label (key is locale, value is label)',
+      additionalProperties: {
+        type: 'string',
+      },
+    },
+    descriptionDict: {
+      type: 'object',
+      description: 'Config description (key is locale, value is description)',
+      additionalProperties: {
+        type: 'string',
+      },
     },
     defaultValue: {
       type: 'array',
