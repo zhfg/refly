@@ -16,21 +16,10 @@ import { LuDownload } from "react-icons/lu"
 import { RiRobot2Line, RiHistoryLine } from "react-icons/ri"
 import {
   AiOutlineTwitter,
-  AiOutlineImport,
   AiOutlineMenuFold,
   AiOutlineMenuUnfold,
 } from "react-icons/ai"
-import {
-  IconHome,
-  IconDownload,
-  IconTwitter,
-  IconLanguage,
-  IconImport,
-  IconMenuFold,
-  IconMenuUnfold,
-  IconRobot,
-  IconHistory,
-} from "@arco-design/web-react/icon"
+import { IconLanguage, IconImport } from "@arco-design/web-react/icon"
 // 静态资源
 import Logo from "@/assets/logo.svg"
 import "./sider.scss"
@@ -70,6 +59,7 @@ const SiderLogo = (props: {
   setCollapse: (collapse: boolean) => void
 }) => {
   const { navigate, collapse, setCollapse } = props
+  const { t } = useTranslation()
   return (
     <div className="logo-box">
       <div className="logo" onClick={() => navigate("/")}>
@@ -85,7 +75,9 @@ const SiderLogo = (props: {
       </div>
       {!collapse && (
         <div className="collapse-btn" onClick={() => setCollapse(true)}>
-          <Tooltip position="right" content="Collapse">
+          <Tooltip
+            position="right"
+            content={t("loggedHomePage.siderMenu.collapse")}>
             <AiOutlineMenuFold
               className="arco-icon"
               style={{ fontSize: 20, color: "#666666" }}
