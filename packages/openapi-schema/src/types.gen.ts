@@ -1408,7 +1408,7 @@ export type SkillContextContentItem = {
   /**
    * Content
    */
-  content: unknown;
+  content: string;
   /**
    * Content context metadata
    */
@@ -1465,13 +1465,7 @@ export type SkillContext = {
 
 export type SkillInputKey = 'query';
 
-export type SkillContextKey =
-  | 'resourceIds'
-  | 'externalResources'
-  | 'collectionIds'
-  | 'noteIds'
-  | 'contentList'
-  | 'urls';
+export type SkillContextKey = 'resources' | 'collections' | 'notes' | 'contentList' | 'urls';
 
 export type SkillInvocationRule = {
   /**

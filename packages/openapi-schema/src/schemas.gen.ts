@@ -2014,6 +2014,7 @@ export const $SkillContextContentItem = {
   required: ['content'],
   properties: {
     content: {
+      type: 'string',
       description: 'Content',
     },
     metadata: {
@@ -2095,7 +2096,7 @@ export const $SkillInputKey = {
 
 export const $SkillContextKey = {
   type: 'string',
-  enum: ['resourceIds', 'externalResources', 'collectionIds', 'noteIds', 'contentList', 'urls'],
+  enum: ['resources', 'collections', 'notes', 'contentList', 'urls'],
 } as const;
 
 export const $SkillInvocationRule = {

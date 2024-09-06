@@ -72,8 +72,8 @@ export class FindRelatedContent extends BaseSkill {
     },
     context: {
       rules: [
-        { key: 'resourceIds', limit: 1 },
-        { key: 'noteIds', limit: 1 },
+        { key: 'resources', limit: 1 },
+        { key: 'notes', limit: 1 },
         { key: 'contentList', limit: 1, inputMode: 'select' },
       ],
       relation: 'mutuallyExclusive',
@@ -112,9 +112,9 @@ export class FindRelatedContent extends BaseSkill {
     let content = '';
 
     if (resources?.length > 0) {
-      content = resources[0].content;
+      content = resources[0].resource?.content;
     } else if (notes?.length > 0) {
-      content = notes[0].content;
+      content = notes[0].note?.content;
     } else if (contentList?.length > 0) {
       content = contentList.join('\n\n');
     }

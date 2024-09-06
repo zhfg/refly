@@ -24,7 +24,8 @@ import {
   ListSkillTemplatesData,
   ListSkillTriggersData,
   PinSkillInstanceRequest,
-  PopulatedSkillContext,
+  Collection,
+  Resource,
   SkillContext,
   SkillMeta,
   SkillTemplate,
@@ -35,6 +36,7 @@ import {
   UpdateSkillInstanceRequest,
   UpdateSkillTriggerRequest,
   User,
+  Note,
 } from '@refly/openapi-schema';
 import {
   BaseSkill,
@@ -100,7 +102,7 @@ function validateSkillTriggerCreateParam(param: SkillTriggerCreateParam) {
 }
 
 interface CreateSkillJobData extends InvokeSkillRequest {
-  context?: PopulatedSkillContext;
+  context?: SkillContext;
   skill?: SkillInstance;
   triggerId?: string;
   convId?: string;
@@ -339,55 +341,87 @@ export class SkillService {
    * Populate skill context with actual collections, resources and notes.
    * These data can be used in skill invocation.
    */
-  async populateSkillContext(user: User, context: SkillContext): Promise<PopulatedSkillContext> {
+  async populateSkillContext(user: User, context: SkillContext): Promise<SkillContext> {
     const { uid } = user;
-    const pContext: PopulatedSkillContext = { ...context };
 
     // Populate collections
-    if (pContext.collectionIds?.length > 0) {
+    if (context.collections?.length > 0) {
+      // Query collections which are not populated
+      const collectionIds = [
+        ...new Set(
+          context.collections
+            .filter((item) => !item.collection)
+            .map((item) => item.collectionId)
+            .filter((id) => id),
+        ),
+      ];
       const collections = await this.prisma.collection.findMany({
-        where: { collectionId: { in: pContext.collectionIds }, uid, deletedAt: null },
+        where: { collectionId: { in: collectionIds }, uid, deletedAt: null },
       });
-      if (collections.length === 0) {
-        throw new BadRequestException(`collection not found: ${pContext.collectionIds}`);
-      }
-      pContext.collections = collections.map((c) => collectionPO2DTO(c));
+      const collectionMap = new Map<string, Collection>();
+      collections.forEach((c) => collectionMap.set(c.collectionId, collectionPO2DTO(c)));
+
+      context.collections.forEach((item) => {
+        if (item.collection) return;
+        item.collection = collectionMap.get(item.collectionId);
+      });
     }
 
     // Populate resources
-    if (pContext.resourceIds?.length > 0) {
+    if (context.resources?.length > 0) {
+      // Query resources which are not populated
+      const resourceIds = [
+        ...new Set(
+          context.resources
+            .filter((item) => !item.resource)
+            .map((item) => item.resourceId)
+            .filter((id) => id),
+        ),
+      ];
       const resources = await this.prisma.resource.findMany({
-        where: { resourceId: { in: pContext.resourceIds }, uid, deletedAt: null },
+        where: { resourceId: { in: resourceIds }, uid, deletedAt: null },
       });
-      if (resources.length === 0) {
-        throw new BadRequestException(`resource not found: ${pContext.resourceIds}`);
-      }
-      pContext.resources = (pContext.externalResources ?? []).concat(
-        resources.map((r) => resourcePO2DTO(r, true)),
-      );
+      const resourceMap = new Map<string, Resource>();
+      resources.forEach((r) => resourceMap.set(r.resourceId, resourcePO2DTO(r)));
+
+      context.resources.forEach((item) => {
+        if (item.resource) return;
+        item.resource = resourceMap.get(item.resourceId);
+      });
     }
 
     // Populate notes
-    if (pContext.noteIds?.length > 0) {
+    if (context.notes?.length > 0) {
+      const noteIds = [
+        ...new Set(
+          context.notes
+            .filter((item) => !item.note)
+            .map((item) => item.noteId)
+            .filter((id) => id),
+        ),
+      ];
       const notes = await this.prisma.note.findMany({
-        where: { noteId: { in: pContext.noteIds }, uid, deletedAt: null },
+        where: { noteId: { in: noteIds }, uid, deletedAt: null },
       });
-      if (notes.length === 0) {
-        throw new BadRequestException(`note not found: ${pContext.noteIds}`);
-      }
-      pContext.notes = notes.map((n) => notePO2DTO(n));
+      const noteMap = new Map<string, Note>();
+      notes.forEach((n) => noteMap.set(n.noteId, notePO2DTO(n)));
+
+      context.notes.forEach((item) => {
+        if (item.note) return;
+        item.note = noteMap.get(item.noteId);
+      });
     }
 
-    return pContext;
+    return context;
   }
 
   async createSkillJob(user: User, param: CreateSkillJobData) {
     const { input, context, skill, triggerId, convId } = param;
 
     // remove actual content from context to save storage
-    const contextCopy: PopulatedSkillContext = JSON.parse(JSON.stringify(context ?? {}));
-    contextCopy.resources?.forEach((resource) => (resource.content = ''));
-    contextCopy.notes?.forEach((note) => (note.content = ''));
+    const contextCopy: SkillContext = JSON.parse(JSON.stringify(context ?? {}));
+    contextCopy.resources?.forEach(({ resource }) => (resource.content = ''));
+    contextCopy.notes?.forEach(({ note }) => (note.content = ''));
 
     return this.prisma.skillJob.create({
       data: {

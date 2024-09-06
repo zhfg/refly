@@ -426,7 +426,12 @@ Please generate the summary based on these requirements and offer suggestions fo
         new SystemMessage(getSystemPrompt(locale)),
         ...chatHistory,
         ...messages,
-        new HumanMessage(getUserPrompt(query, contentList)),
+        new HumanMessage(
+          getUserPrompt(
+            query,
+            contentList.map((item) => item.content),
+          ),
+        ),
       ],
       {
         ...this.configSnapshot,

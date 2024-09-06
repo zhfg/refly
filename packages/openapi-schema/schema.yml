@@ -2717,6 +2717,7 @@ components:
         - content
       properties:
         content:
+          type: string
           description: Content
         metadata:
           type: object
@@ -2774,10 +2775,9 @@ components:
     SkillContextKey:
       type: string
       enum:
-        - resourceIds
-        - externalResources
-        - collectionIds
-        - noteIds
+        - resources
+        - collections
+        - notes
         - contentList
         - urls
     SkillInvocationRule:

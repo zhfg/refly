@@ -30,7 +30,7 @@ export class ResourceLabelerSkill extends BaseSkill {
       rules: [],
     },
     context: {
-      rules: [{ key: 'resourceIds', limit: 1, required: true }],
+      rules: [{ key: 'resources', limit: 1, required: true }],
     },
   };
 
@@ -58,7 +58,8 @@ export class ResourceLabelerSkill extends BaseSkill {
       return END;
     }
 
-    if (!resources[0].content) {
+    const { resource } = resources[0];
+    if (!resource.content) {
       this.emitEvent({ event: 'log', content: `Resource content is empty, skip labeling` }, config);
       return END;
     }
@@ -100,7 +101,7 @@ export class ResourceLabelerSkill extends BaseSkill {
 
   generateLabels = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { resources, locale = 'en' } = config?.configurable || {};
-    const resource = resources[0];
+    const { resource } = resources[0];
 
     const getSystemPrompt = (title: string, content: string) => `# Role
 You are a sharp expert in textual content classification, proficient in identifying textual information and categorizing it correctly. Your sole task is to interpret the text, provide the corresponding classification, and justify the categorization.

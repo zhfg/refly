@@ -7,7 +7,7 @@ import { StateGraphArgs } from '@langchain/langgraph';
 import { RunnableConfig } from '@langchain/core/runnables';
 import { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
 import {
-  PopulatedSkillContext,
+  SkillContext,
   SkillInput,
   SkillTemplateConfigSchema,
   SkillInvocationConfig,
@@ -133,7 +133,7 @@ export interface SkillRunnableMeta extends Record<string, unknown>, SkillMeta {
 }
 
 export interface SkillRunnableConfig extends RunnableConfig {
-  configurable?: PopulatedSkillContext & {
+  configurable?: SkillContext & {
     spanId?: string;
     convId?: string;
     locale?: string;
