@@ -458,17 +458,17 @@
       "title": "Run Skill",
       "formLabel": {
         "query": "Question",
-        "resourceIds": "Resource",
-        "noteIds": "Note",
-        "collectionIds": "Collection",
+        "resources": "Resource",
+        "notes": "Note",
+        "collections": "Collection",
         "contentList": "Content",
         "urls": "URLs"
       },
       "placeholder": {
         "query": "Please enter question",
-        "resourceIds": "Please select resource",
-        "noteIds": "Please select note",
-        "collectionIds": "Please select collection",
+        "resources": "Please select resource",
+        "notes": "Please select note",
+        "collections": "Please select collection",
         "contentList": {
           "select": "Please select content",
           "textarea": "Please enter or paste content"

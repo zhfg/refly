@@ -1433,6 +1433,14 @@ export type SkillContextUrlItem = {
   };
 };
 
+export type SkillContextValue =
+  | string
+  | Array<SkillContextResourceItem>
+  | Array<SkillContextCollectionItem>
+  | Array<SkillContextNoteItem>
+  | Array<SkillContextContentItem>
+  | Array<SkillContextUrlItem>;
+
 /**
  * Skill invocation context
  */

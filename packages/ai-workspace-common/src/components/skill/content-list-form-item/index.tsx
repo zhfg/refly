@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { Select, Input, SelectProps, InputProps, TextAreaProps } from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
 import { Mark, SelectedTextCardDomain } from '@refly/common-types';
-import { SkillInvocationRule } from '@refly/openapi-schema';
+import { SkillContextValue, SkillInvocationRule } from '@refly/openapi-schema';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
 import { useGetCurrentSelectedMark } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-selected-text';
@@ -11,7 +11,7 @@ const { TextArea } = Input;
 
 interface ContentListFormItemProps extends Omit<SelectProps, 'onChange'> {
   rule: SkillInvocationRule;
-  onChange: (value: string) => void;
+  onChange: (value: SkillContextValue) => void;
   locale: string;
 }
 
@@ -52,7 +52,7 @@ export const ContentListFormItem: React.FC<ContentListFormItemProps> = ({
     (value: SelectedTextCardDomain | SelectedTextCardDomain[]) => {
       const newSelectedDomains = Array.isArray(value) ? value : [value];
       setSelectedDomains(newSelectedDomains);
-      onChange(content);
+      onChange([{ content, metadata: { selectedDomains: newSelectedDomains } }]);
     },
     [content, onChange],
   );
@@ -60,7 +60,7 @@ export const ContentListFormItem: React.FC<ContentListFormItemProps> = ({
   const handleTextAreaChange = useCallback(
     (value: string) => {
       setContent(value);
-      onChange(value);
+      onChange([{ content: value, metadata: { selectedDomains } }]);
     },
     [selectedDomains, onChange],
   );
@@ -71,7 +71,7 @@ export const ContentListFormItem: React.FC<ContentListFormItemProps> = ({
       .map((mark) => mark.data)
       .join(CONTENT_LIST_BREAK);
     setContent(content);
-    onChange(content);
+    onChange([{ content, metadata: { selectedDomains } }]);
   };
 
   useEffect(() => {

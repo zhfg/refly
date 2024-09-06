@@ -2040,6 +2040,44 @@ export const $SkillContextUrlItem = {
   },
 } as const;
 
+export const $SkillContextValue = {
+  oneOf: [
+    {
+      type: 'string',
+    },
+    {
+      type: 'array',
+      items: {
+        $ref: '#/components/schemas/SkillContextResourceItem',
+      },
+    },
+    {
+      type: 'array',
+      items: {
+        $ref: '#/components/schemas/SkillContextCollectionItem',
+      },
+    },
+    {
+      type: 'array',
+      items: {
+        $ref: '#/components/schemas/SkillContextNoteItem',
+      },
+    },
+    {
+      type: 'array',
+      items: {
+        $ref: '#/components/schemas/SkillContextContentItem',
+      },
+    },
+    {
+      type: 'array',
+      items: {
+        $ref: '#/components/schemas/SkillContextUrlItem',
+      },
+    },
+  ],
+} as const;
+
 export const $SkillContext = {
   type: 'object',
   description: 'Skill invocation context',

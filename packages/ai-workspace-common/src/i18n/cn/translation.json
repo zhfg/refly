@@ -474,17 +474,17 @@
       "title": "运行技能",
       "formLabel": {
         "query": "问题",
-        "resourceIds": "资源",
-        "noteIds": "笔记",
-        "collectionIds": "知识库",
+        "resources": "资源",
+        "notes": "笔记",
+        "collections": "知识库",
         "contentList": "内容",
         "urls": "链接列表"
       },
       "placeholder": {
         "query": "请输入问题",
-        "resourceIds": "请选择资源",
-        "noteIds": "请选择笔记",
-        "collectionIds": "请选择知识库",
+        "resources": "请选择资源",
+        "notes": "请选择笔记",
+        "collections": "请选择知识库",
         "contentList": {
           "select": "请选择内容",
           "textarea": "请输入或粘贴内容"

@@ -2734,6 +2734,24 @@ components:
         metadata:
           type: object
           description: URL context metadata
+    SkillContextValue:
+      oneOf:
+        - type: string
+        - type: array
+          items:
+            $ref: '#/components/schemas/SkillContextResourceItem'
+        - type: array
+          items:
+            $ref: '#/components/schemas/SkillContextCollectionItem'
+        - type: array
+          items:
+            $ref: '#/components/schemas/SkillContextNoteItem'
+        - type: array
+          items:
+            $ref: '#/components/schemas/SkillContextContentItem'
+        - type: array
+          items:
+            $ref: '#/components/schemas/SkillContextUrlItem'
     SkillContext:
       type: object
       description: Skill invocation context
