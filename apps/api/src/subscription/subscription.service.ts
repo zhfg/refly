@@ -87,9 +87,8 @@ export class SubscriptionService {
     return plan;
   }
 
-  async checkTokenUsage(user: User, param: { modelTier: ModelTier }) {
+  async checkTokenUsage(user: User): Promise<ModelTier[]> {
     const { uid } = user;
-    const { modelTier } = param;
 
     let activeMeter = await this.prisma.usageMeter.findFirst({
       where: {
@@ -106,9 +105,15 @@ export class SubscriptionService {
       activeMeter = await this.createUsageMeter(user, null, true);
     }
 
-    return modelTier === 't1'
-      ? activeMeter.t1TokenUsed < activeMeter.t1TokenQuota
-      : activeMeter.t2TokenUsed < activeMeter.t2TokenQuota;
+    const availableTiers: ModelTier[] = [];
+    if (activeMeter.t1TokenUsed < activeMeter.t1TokenQuota) {
+      availableTiers.push('t1');
+    }
+    if (activeMeter.t2TokenUsed < activeMeter.t2TokenQuota) {
+      availableTiers.push('t2');
+    }
+
+    return availableTiers;
   }
 
   async createUsageMeter(user: User, plan?: SubscriptionPlan, resumeLastMeter?: boolean) {

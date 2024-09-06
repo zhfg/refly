@@ -2286,13 +2286,6 @@ export const $SkillContext = {
         $ref: '#/components/schemas/SkillContextUrlItem',
       },
     },
-    locale: {
-      type: 'string',
-      description: 'user selected output locale',
-      items: {
-        type: 'string',
-      },
-    },
   },
 } as const;
 
@@ -2435,11 +2428,22 @@ export const $InvokeSkillRequest = {
     convId: {
       description: 'Conversation ID (will add messages to this conversation if provided)',
       type: 'string',
-      example: 'cv-g30e1b80b5g1itbemc0g5jj3',
+    },
+    locale: {
+      type: 'string',
+      description: 'user selected output locale',
+    },
+    modelName: {
+      type: 'string',
+      description: 'user selected output model',
     },
     createConvParam: {
       description: 'Create conversation parameters',
       $ref: '#/components/schemas/CreateConversationRequest',
+    },
+    jobId: {
+      description: 'Skill job ID (if not provided, a new job will be created)',
+      type: 'string',
     },
     triggerId: {
       description: "Trigger ID (typically you don't need to provide this)",

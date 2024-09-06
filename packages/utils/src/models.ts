@@ -1,7 +1,15 @@
 import { ModelTier, TokenUsageItem } from '@refly/openapi-schema';
 
-const modelTierMap: Record<string, ModelTier> = {
-  'gpt-4o': 't1',
+export type AvailableModel =
+  | 'gpt-4o-2024-08-06'
+  | 'claude-3-5-sonnet'
+  | 'gemini-1.5-pro'
+  | 'gpt-4o-mini'
+  | 'gpt-3.5-turbo'
+  | 'gemini-1.5-flash';
+
+const modelTierMap: Record<AvailableModel, ModelTier> = {
+  'gpt-4o-2024-08-06': 't1',
   'claude-3-5-sonnet': 't1',
   'gemini-1.5-pro': 't1',
   'gpt-4o-mini': 't2',

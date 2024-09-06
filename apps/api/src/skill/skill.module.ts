@@ -10,6 +10,7 @@ import { SearchModule } from '@/search/search.module';
 import { QUEUE_REPORT_TOKEN_USAGE, QUEUE_SKILL } from '@/utils';
 import { LabelModule } from '@/label/label.module';
 import { SkillProcessor } from '@/skill/skill.processor';
+import { SubscriptionModule } from '@/subscription/subscription.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { SkillProcessor } from '@/skill/skill.processor';
     SearchModule,
     KnowledgeModule,
     ConversationModule,
+    SubscriptionModule,
     BullModule.registerQueue({ name: QUEUE_SKILL }),
     BullModule.registerQueue({ name: QUEUE_REPORT_TOKEN_USAGE }),
   ],

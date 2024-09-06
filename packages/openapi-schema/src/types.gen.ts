@@ -1607,10 +1607,6 @@ export type SkillContext = {
    * List of URLs
    */
   urls?: Array<SkillContextUrlItem>;
-  /**
-   * user selected output locale
-   */
-  locale?: string;
 };
 
 export type SkillInputKey = 'query';
@@ -1715,9 +1711,21 @@ export type InvokeSkillRequest = {
    */
   convId?: string;
   /**
+   * user selected output locale
+   */
+  locale?: string;
+  /**
+   * user selected output model
+   */
+  modelName?: string;
+  /**
    * Create conversation parameters
    */
   createConvParam?: CreateConversationRequest;
+  /**
+   * Skill job ID (if not provided, a new job will be created)
+   */
+  jobId?: string;
   /**
    * Trigger ID (typically you don't need to provide this)
    */
