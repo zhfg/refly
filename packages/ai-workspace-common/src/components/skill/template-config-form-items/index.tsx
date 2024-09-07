@@ -188,7 +188,7 @@ export const TemplateConfigFormItems = (props: {
                 rules={[
                   {
                     validator(value, cb) {
-                      if (!value && item?.required?.value && item?.required?.configScope.includes(configScope)) {
+                      if (!value?.value && item?.required?.value && item?.required?.configScope.includes(configScope)) {
                         return cb(t('common.emptyInput'));
                       }
 

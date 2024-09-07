@@ -25,7 +25,7 @@ import {
   selectedTextCardDomainWeb,
   selectedTextCardDomainExtension,
 } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { LOCALE, Mark, SelectedTextCardDomain } from '@refly/common-types';
+import { LOCALE, Mark } from '@refly/common-types';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { PiNotepad, PiNotebookDuotone } from 'react-icons/pi';
 import { useGetCurrentSelectedMark } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-selected-text';
@@ -39,19 +39,19 @@ const { Option } = Select;
 
 const getIcon = (mark: Mark) => {
   // include noteCursorSelection, noteBeforeCursorSelection, noteAfterCursorSelection
-  if (mark.namespace?.includes('cursor')) {
+  if (mark.domain?.includes('cursor')) {
     return <IconFontColors />;
   }
 
-  if (mark.namespace === 'note') {
+  if (mark.domain === 'note') {
     return <PiNotebookDuotone />;
   }
 
-  if (mark.namespace === 'resource') {
+  if (mark.domain === 'resource') {
     return <IconFile />;
   }
 
-  if (mark.namespace === 'extension-weblink') {
+  if (mark.domain === 'extensionWeblink') {
     return <IconLink />;
   }
 };

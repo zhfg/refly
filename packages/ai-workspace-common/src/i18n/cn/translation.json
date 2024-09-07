@@ -495,7 +495,7 @@
         "contentList": {
           "resource": "资源",
           "note": "笔记",
-          "extension-weblink": "网页链接",
+          "extensionWeblink": "网页链接",
           "noteCursorSelection": "笔记选中内容",
           "noteBeforeCursorSelection": "笔记光标前内容",
           "noteAfterCursorSelection": "笔记光标后内容"

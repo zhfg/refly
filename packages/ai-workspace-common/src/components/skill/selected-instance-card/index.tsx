@@ -10,10 +10,8 @@ import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useBuildSkillContext } from '@refly-packages/ai-workspace-common/hooks/use-build-skill-context';
 import { SkillContext, SkillInstance } from '@refly/openapi-schema';
 // requests
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useTranslation } from 'react-i18next';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
-import { CONTENT_LIST_BREAK } from '@refly-packages/ai-workspace-common/components/skill/content-list-form-item';
 
 export const SelectedInstanceCard = () => {
   // content for fill skill form
@@ -66,12 +64,12 @@ export const SelectedInstanceCard = () => {
       const { messages } = useChatStore.getState();
 
       const { input, context, tplConfig } = res;
-      const { contentList, urls } = context;
+      const { contentList = [], urls = [] } = context;
 
       const skillContext: SkillContext = {
         ...context,
-        contentList: contentList?.split(CONTENT_LIST_BREAK),
-        urls: urls?.split(CONTENT_LIST_BREAK),
+        contentList,
+        urls,
       };
       const newQAText = input?.query || '';
 

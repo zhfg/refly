@@ -1,6 +1,4 @@
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
-import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { NoteSelectedTextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/selected-text-card/note-selected-text-card';
 import { ResourceSelectedTextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/selected-text-card/resource-selected-text-card';
 import { ResourceContextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/context-card/resource-context-card';
 import { KnowledgeBaseContextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/context-card/knowledge-base-context-card';
@@ -11,14 +9,12 @@ import { WeblinkContextCard } from '@refly-packages/ai-workspace-common/componen
 import './index.scss';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { HybridSelectedTextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/selected-text-card/hybrid-selected-text-card';
 // context components
 
 export const ContextStateDisplay = () => {
   const { contextDomain, computedShowContextCard } = useCopilotContextState();
   const contextPanelStore = useContextPanelStore((state) => ({
     nowSelectedContextDomain: state.nowSelectedContextDomain,
-    selectedNamespace: state.selectedNamespace,
     selectedTextCardDomain: state.selectedTextCardDomain,
   }));
   const runtime = getRuntime();

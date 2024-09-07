@@ -479,7 +479,7 @@
         "contentList": {
           "resource": "Resource",
           "note": "Note",
-          "extension-weblink": "Web Link",
+          "extensionWeblink": "Web Link",
           "noteCursorSelection": "Note Cursor Selection",
           "noteBeforeCursorSelection": "Note Before Cursor Selection",
           "noteAfterCursorSelection": "Note After Cursor Selection"

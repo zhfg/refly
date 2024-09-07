@@ -5,12 +5,21 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 // schema
 import { z } from 'zod';
-import { DynamicConfigValue, SkillInvocationConfig, SkillTemplateConfigSchema } from '@refly/openapi-schema';
-import { languageNameToLocale, localeToLanguageName, zhCNLocale } from '@refly/common-types';
+import {
+  DynamicConfigValue,
+  SkillContextContentItem,
+  SkillInvocationConfig,
+  SkillTemplateConfigSchema,
+} from '@refly/openapi-schema';
+import { languageNameToLocale, localeToLanguageName, SelectedTextDomain, zhCNLocale } from '@refly/common-types';
 
 interface GraphState extends BaseSkillState {
   documents: Document[];
   messages: BaseMessage[];
+}
+
+export interface IContent extends SkillContextContentItem {
+  metadata: { domain: SelectedTextDomain };
 }
 
 // Define a new graph
@@ -158,9 +167,7 @@ export class CreateSocialMediaPostSkill extends BaseSkill {
 
   description = 'Create the social media post';
 
-  schema = z.object({
-    query: z.string().describe('The user query'),
-  });
+  schema = z.object({});
 
   graphState: StateGraphArgs<GraphState>['channels'] = {
     ...baseStateGraphArgs,
@@ -219,7 +226,48 @@ LANGUAGE: {language}
 """
 `;
 
-    const contextString = contentList.length > 0 ? contentList.join('\n') : 'No additional context provided.';
+    const getContentListString = (contentList: IContent[]) => {
+      let contentString = '';
+
+      const cursorSelectionRelatedContent = contentList.filter((item) => item?.metadata?.domain?.includes('Cursor'));
+      const otherContent = contentList.filter((item) => !item?.metadata?.domain?.includes('Cursor'));
+
+      const cursorSelectionDomains = cursorSelectionRelatedContent.map((item) => item?.metadata?.domain);
+      if (cursorSelectionDomains?.includes('noteBeforeCursorSelection')) {
+        const noteBeforeCursorSelectionContent = cursorSelectionRelatedContent.find(
+          (item) => item?.metadata?.domain === 'noteBeforeCursorSelection',
+        );
+        contentString += `---noteBeforeCursorSelection---
+${noteBeforeCursorSelectionContent?.content}
+`;
+      }
+      const cursorSelectionContent = cursorSelectionRelatedContent.find(
+        (item) => item?.metadata?.domain === 'noteCursorSelection',
+      );
+      contentString += `---noteCursorSelection---
+${cursorSelectionContent?.content}
+`;
+
+      if (cursorSelectionDomains?.includes('noteAfterCursorSelection')) {
+        const noteAfterCursorSelectionContent = cursorSelectionRelatedContent.find(
+          (item) => item?.metadata?.domain === 'noteAfterCursorSelection',
+        );
+        contentString += `---noteAfterCursorSelection---
+${noteAfterCursorSelectionContent?.content}
+`;
+      }
+
+      if (otherContent?.length > 0) {
+        const otherContentString = otherContent.map((item) => item.content).join('\n');
+        contentString += `---otherContent---
+${otherContentString}
+`;
+      }
+
+      return contentString;
+    };
+
+    const contextString = getContentListString(contentList as IContent[]);
     const { targetPlatform, topic, language } = (tplConfig || {}) as any as {
       targetPlatform: DynamicConfigValue;
       topic: DynamicConfigValue;

@@ -1,9 +1,7 @@
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
-import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { useGetSkills } from '@refly-packages/ai-workspace-common/skills/main-logic/use-get-skills';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { Mark, SelectedTextCardDomain } from '@refly/common-types';
+import { Mark } from '@refly/common-types';
 
 export const useGetCurrentSelectedMark = () => {
   const { currentSelectedMark } = useCopilotContextState();
@@ -29,15 +27,15 @@ export const useGetCurrentSelectedMark = () => {
 
     // stay order
     if (!selectedTextCardDomain.includes('resource')) {
-      finalUsedMarks = finalUsedMarks.filter((mark) => mark.namespace !== 'resource');
+      finalUsedMarks = finalUsedMarks.filter((mark) => mark.domain !== 'resource');
     }
 
     if (!selectedTextCardDomain.includes('note')) {
-      finalUsedMarks = finalUsedMarks.filter((mark) => mark.namespace !== 'note');
+      finalUsedMarks = finalUsedMarks.filter((mark) => mark.domain !== 'note');
     }
 
-    if (!selectedTextCardDomain.includes('extension-weblink')) {
-      finalUsedMarks = finalUsedMarks.filter((mark) => mark.namespace !== 'extension-weblink');
+    if (!selectedTextCardDomain.includes('extensionWeblink')) {
+      finalUsedMarks = finalUsedMarks.filter((mark) => mark.domain !== 'extensionWeblink');
     }
 
     // final handle note cursor selection
@@ -47,7 +45,7 @@ export const useGetCurrentSelectedMark = () => {
         data: currentSelectionContent,
         xPath: '',
         scope: 'block',
-        namespace: 'noteCursorSelection',
+        domain: 'noteCursorSelection',
       });
     }
     if (selectedTextCardDomain.includes('noteBeforeCursorSelection') && beforeSelectionNoteContent) {
@@ -56,7 +54,7 @@ export const useGetCurrentSelectedMark = () => {
         data: beforeSelectionNoteContent,
         xPath: '',
         scope: 'block',
-        namespace: 'noteBeforeCursorSelection',
+        domain: 'noteBeforeCursorSelection',
       });
     }
     if (selectedTextCardDomain.includes('noteAfterCursorSelection') && afterSelectionNoteContent) {
@@ -65,7 +63,7 @@ export const useGetCurrentSelectedMark = () => {
         data: afterSelectionNoteContent,
         xPath: '',
         scope: 'block',
-        namespace: 'noteAfterCursorSelection',
+        domain: 'noteAfterCursorSelection',
       });
     }
 

@@ -1,4 +1,4 @@
-import { SearchDomain, Source } from '@refly/openapi-schema';
+import { Source } from '@refly/openapi-schema';
 import { SyncMarkEventName } from './extension-messaging';
 
 export type MarkScope = 'block' | 'inline';
@@ -9,25 +9,20 @@ export type TextType = 'text' | 'table' | 'link' | 'image' | 'video' | 'audio';
  * 1. extension-weblink: represent the weblink in the extension
  * 2. noteCursor: represent the note cursor related selection
  */
-export type SelectedNamespace =
-  | 'resource'
-  | 'note'
-  | 'extension-weblink'
-  | 'noteCursorSelection'
-  | 'noteBeforeCursorSelection'
-  | 'noteAfterCursorSelection';
-export const selectedNamespace = [
+export const selectedTextDomains = [
   'resource',
   'note',
-  'extension-weblink',
+  'extensionWeblink',
   'noteCursorSelection',
   'noteBeforeCursorSelection',
   'noteAfterCursorSelection',
 ];
 export type ContextDomain = 'weblink' | 'resource' | 'note' | 'collection' | 'selected-text';
 // selected text card domain
-export type SelectedTextCardDomain =
-  | SelectedNamespace
+export type SelectedTextDomain =
+  | 'resource'
+  | 'note'
+  | 'extensionWeblink'
   | 'noteCursorSelection'
   | 'noteBeforeCursorSelection'
   | 'noteAfterCursorSelection';
@@ -38,7 +33,7 @@ export interface Mark {
   target?: HTMLElement;
   xPath: string; // 该元素对应的 xPath 路径，这个可以当做唯一 id
   scope: MarkScope; // 是块级还是内联元素
-  namespace: SelectedNamespace; // 该元素对应的 namespace, for selected text card
+  domain: SelectedTextDomain; // 该元素对应的 domain, for selected text card
   cleanup?: () => void; // 清理函数
 }
 
