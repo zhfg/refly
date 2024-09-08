@@ -8,11 +8,12 @@ import {
   CheckSettingsFieldResponse,
   GetUserSettingsResponse,
   UpdateUserSettingsRequest,
+  UserSettings,
 } from '@refly/openapi-schema';
 import { buildSuccessResponse, pick } from '@/utils';
 import { User as UserModel } from '@prisma/client';
 import { SubscriptionService } from '@/subscription/subscription.service';
-import { subscriptionPlanPo2DTO } from '@/subscription/subscription.dto';
+import { subscriptionPo2DTO } from '@/subscription/subscription.dto';
 
 @Controller('user')
 export class UserController {
@@ -23,12 +24,15 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Get('settings')
   async getSettings(@User() user: UserModel): Promise<GetUserSettingsResponse> {
-    const subscriptionPlan = await this.subscriptionService.getOrInitSubscriptionPlan(user);
-    const settings = {
+    const settings: UserSettings = {
       ...pick(user, ['uid', 'avatar', 'name', 'nickname', 'email', 'uiLocale', 'outputLocale']),
       emailVerified: !!user.emailVerified,
-      subscriptionPlan: subscriptionPlanPo2DTO(subscriptionPlan),
     };
+
+    if (user.subscriptionId) {
+      const subscription = await this.subscriptionService.getSubscription(user.subscriptionId);
+      settings.subscription = subscriptionPo2DTO(subscription);
+    }
 
     return buildSuccessResponse(settings);
   }

@@ -2254,16 +2254,37 @@ components:
       enum:
         - free
         - pro
-    SubscriptionPlan:
+    PriceLookupKey:
+      type: string
+      description: Price lookup key
+      enum:
+        - refly_pro_monthly
+        - refly_pro_yearly
+    SubscriptionStatus:
+      type: string
+      description: Subscription status
+      enum:
+        - active
+        - canceled
+        - incomplete
+        - incomplete_expired
+        - past_due
+        - paused
+        - trialing
+        - unpaid
+    Subscription:
       type: object
       required:
-        - planId
+        - subscriptionId
         - planType
+        - status
       properties:
-        planId:
+        subscriptionId:
           type: string
-          description: Plan ID
-          example: sp-g30e1b80b5g1itbemc0g5jj3
+          description: Subscription ID
+        lookupKey:
+          type: string
+          description: Lookup key
         planType:
           type: string
           description: Subscription plan type
@@ -2271,6 +2292,10 @@ components:
         interval:
           description: Payment recurring interval
           $ref: '#/components/schemas/SubscriptionInterval'
+        status:
+          type: string
+          description: Subscription status
+          $ref: '#/components/schemas/SubscriptionStatus'
     UsageMeter:
       type: object
       required:
@@ -2356,9 +2381,9 @@ components:
           type: string
           description: User output locale
           example: en
-        subscriptionPlan:
-          description: User subscription plan
-          $ref: '#/components/schemas/SubscriptionPlan'
+        subscription:
+          description: User subscription
+          $ref: '#/components/schemas/Subscription'
     GetUserSettingsResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -3315,6 +3340,14 @@ components:
             data:
               description: Settings field check result
               $ref: '#/components/schemas/CheckSettingsFieldResult'
+    CreateCheckoutSessionRequest:
+      type: object
+      required:
+        - lookupKey
+      properties:
+        lookupKey:
+          description: Price lookup key
+          $ref: '#/components/schemas/PriceLookupKey'
     SearchDomain:
       type: string
       enum:

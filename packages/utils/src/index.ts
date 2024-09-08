@@ -11,3 +11,4 @@ export * from './typesafe';
 export * from './url';
 export * from './scrape-weblink';
 export * from './models';
+export * from './subscription';

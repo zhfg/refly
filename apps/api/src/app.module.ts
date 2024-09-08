@@ -18,6 +18,7 @@ import { LabelModule } from './label/label.module';
 import { EventModule } from './event/event.module';
 import { MiscModule } from './misc/misc.module';
 import { SubscriptionModule } from './subscription/subscription.module';
+import { StripeModule } from '@golevelup/nestjs-stripe';
 
 @Module({
   imports: [
@@ -48,6 +49,20 @@ import { SubscriptionModule } from './subscription/subscription.module';
           host: configService.get('redis.host'),
           port: configService.get('redis.port'),
           password: configService.get('redis.password') || undefined,
+        },
+      }),
+      inject: [ConfigService],
+    }),
+    StripeModule.forRootAsync(StripeModule, {
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        apiKey: configService.get('stripe.apiKey'),
+        webhookConfig: {
+          stripeSecrets: {
+            account: configService.get('stripe.webhookSecret.account'),
+            accountTest: configService.get('stripe.webhookSecret.accountTest'),
+          },
+          requestBodyProperty: 'rawBody',
         },
       }),
       inject: [ConfigService],

@@ -1,13 +1,17 @@
 import {
   SkillMeta,
-  SubscriptionPlan,
+  Subscription,
   SubscriptionPlanType,
   SubscriptionInterval,
   TokenUsageItem,
+  SubscriptionStatus,
 } from '@refly/openapi-schema';
-import { SubscriptionPlan as SubscriptionPlanModel } from '@prisma/client';
+import { Subscription as SubscriptionModel } from '@prisma/client';
 
-export interface CreateSubscriptionPlanParam {
+export interface CreateSubscriptionParam {
+  subscriptionId: string;
+  lookupKey: string;
+  status: SubscriptionStatus;
   planType: SubscriptionPlanType;
   interval?: SubscriptionInterval;
 }
@@ -22,10 +26,12 @@ export interface ReportTokenUsageJobData {
   timestamp: Date;
 }
 
-export function subscriptionPlanPo2DTO(plan: SubscriptionPlanModel): SubscriptionPlan {
+export function subscriptionPo2DTO(sub: SubscriptionModel): Subscription {
   return {
-    planId: plan.planId,
-    planType: plan.planType as SubscriptionPlanType,
-    interval: plan.interval as SubscriptionInterval,
+    subscriptionId: sub.subscriptionId,
+    lookupKey: sub.lookupKey,
+    planType: sub.planType as SubscriptionPlanType,
+    interval: sub.interval as SubscriptionInterval,
+    status: sub.status as SubscriptionStatus,
   };
 }

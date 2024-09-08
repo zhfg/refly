@@ -1217,14 +1217,29 @@ export const $SubscriptionPlanType = {
   enum: ['free', 'pro'],
 } as const;
 
-export const $SubscriptionPlan = {
+export const $PriceLookupKey = {
+  type: 'string',
+  description: 'Price lookup key',
+  enum: ['refly_pro_monthly', 'refly_pro_yearly'],
+} as const;
+
+export const $SubscriptionStatus = {
+  type: 'string',
+  description: 'Subscription status',
+  enum: ['active', 'canceled', 'incomplete', 'incomplete_expired', 'past_due', 'paused', 'trialing', 'unpaid'],
+} as const;
+
+export const $Subscription = {
   type: 'object',
-  required: ['planId', 'planType'],
+  required: ['subscriptionId', 'planType', 'status'],
   properties: {
-    planId: {
+    subscriptionId: {
       type: 'string',
-      description: 'Plan ID',
-      example: 'sp-g30e1b80b5g1itbemc0g5jj3',
+      description: 'Subscription ID',
+    },
+    lookupKey: {
+      type: 'string',
+      description: 'Lookup key',
     },
     planType: {
       type: 'string',
@@ -1234,6 +1249,11 @@ export const $SubscriptionPlan = {
     interval: {
       description: 'Payment recurring interval',
       $ref: '#/components/schemas/SubscriptionInterval',
+    },
+    status: {
+      type: 'string',
+      description: 'Subscription status',
+      $ref: '#/components/schemas/SubscriptionStatus',
     },
   },
 } as const;
@@ -1334,9 +1354,9 @@ export const $UserSettings = {
       description: 'User output locale',
       example: 'en',
     },
-    subscriptionPlan: {
-      description: 'User subscription plan',
-      $ref: '#/components/schemas/SubscriptionPlan',
+    subscription: {
+      description: 'User subscription',
+      $ref: '#/components/schemas/Subscription',
     },
   },
 } as const;
@@ -2809,6 +2829,17 @@ export const $CheckSettingsFieldResponse = {
       },
     },
   ],
+} as const;
+
+export const $CreateCheckoutSessionRequest = {
+  type: 'object',
+  required: ['lookupKey'],
+  properties: {
+    lookupKey: {
+      description: 'Price lookup key',
+      $ref: '#/components/schemas/PriceLookupKey',
+    },
+  },
 } as const;
 
 export const $SearchDomain = {

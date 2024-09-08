@@ -968,11 +968,33 @@ export type SubscriptionInterval = 'monthly' | 'yearly';
  */
 export type SubscriptionPlanType = 'free' | 'pro';
 
-export type SubscriptionPlan = {
+/**
+ * Price lookup key
+ */
+export type PriceLookupKey = 'refly_pro_monthly' | 'refly_pro_yearly';
+
+/**
+ * Subscription status
+ */
+export type SubscriptionStatus =
+  | 'active'
+  | 'canceled'
+  | 'incomplete'
+  | 'incomplete_expired'
+  | 'past_due'
+  | 'paused'
+  | 'trialing'
+  | 'unpaid';
+
+export type Subscription = {
   /**
-   * Plan ID
+   * Subscription ID
    */
-  planId: string;
+  subscriptionId: string;
+  /**
+   * Lookup key
+   */
+  lookupKey?: string;
   /**
    * Subscription plan type
    */
@@ -981,6 +1003,10 @@ export type SubscriptionPlan = {
    * Payment recurring interval
    */
   interval?: SubscriptionInterval;
+  /**
+   * Subscription status
+   */
+  status: SubscriptionStatus;
 };
 
 export type UsageMeter = {
@@ -1056,9 +1082,9 @@ export type UserSettings = {
    */
   outputLocale?: string;
   /**
-   * User subscription plan
+   * User subscription
    */
-  subscriptionPlan?: SubscriptionPlan;
+  subscription?: Subscription;
 };
 
 export type GetUserSettingsResponse = BaseResponse & {
@@ -1924,6 +1950,13 @@ export type CheckSettingsFieldResponse = BaseResponse & {
    * Settings field check result
    */
   data?: CheckSettingsFieldResult;
+};
+
+export type CreateCheckoutSessionRequest = {
+  /**
+   * Price lookup key
+   */
+  lookupKey: PriceLookupKey;
 };
 
 export type SearchDomain = 'resource' | 'note' | 'collection' | 'conversation' | 'skill';

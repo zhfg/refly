@@ -1,13 +1,15 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { StripeModule } from '@golevelup/nestjs-stripe';
 import { SubscriptionService } from './subscription.service';
+import { ReportTokenUsageProcessor } from './subscription.processor';
 import { SubscriptionController } from './subscription.controller';
 import { CommonModule } from '@/common/common.module';
-import { ReportTokenUsageProcessor } from '@/subscription/subscription.processor';
 
 @Module({
-  imports: [CommonModule],
-  providers: [SubscriptionService],
-  controllers: [SubscriptionController, ReportTokenUsageProcessor],
+  imports: [CommonModule, ConfigModule, StripeModule.externallyConfigured(StripeModule, 0)],
+  providers: [SubscriptionService, ReportTokenUsageProcessor],
+  controllers: [SubscriptionController],
   exports: [SubscriptionService],
 })
 export class SubscriptionModule {}
