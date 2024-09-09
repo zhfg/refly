@@ -13,6 +13,7 @@ interface Option {
 
 interface FormHeaderProps {
   title: string;
+  icon?: React.ReactNode;
   options?: Option[];
   enableSelect?: boolean;
   enableCollapse?: boolean;
@@ -25,6 +26,7 @@ interface FormHeaderProps {
 
 export const FormHeader: React.FC<FormHeaderProps> = ({
   title,
+  icon,
   options = [],
   enableSelect = false,
   enableCollapse = false,
@@ -65,6 +67,7 @@ export const FormHeader: React.FC<FormHeaderProps> = ({
             {collapsed ? <IconDown /> : <IconUp />}
           </Typography.Text>
         )}
+        {icon && <div className="form-header-icon">{icon}</div>}
         <Typography.Title heading={6} style={{ margin: 0, marginLeft: 8 }}>
           {title}
         </Typography.Title>

@@ -440,6 +440,9 @@ importers:
       react-i18next:
         specifier: ^14.1.0
         version: 14.1.0(i18next@23.11.2)(react-dom@18.2.0)(react@18.2.0)
+      react-icons:
+        specifier: ~5.2.1
+        version: 5.2.1(react@18.2.0)
       react-infinite-scroll-component:
         specifier: ~6.1.0
         version: 6.1.0(react@18.2.0)
@@ -657,6 +660,9 @@ importers:
       react-i18next:
         specifier: ^14.1.0
         version: 14.1.0(i18next@23.11.2)(react-dom@18.2.0)(react@18.2.0)
+      react-icons:
+        specifier: ~5.2.1
+        version: 5.2.1(react@18.2.0)
       react-infinite-scroll-component:
         specifier: ~6.1.0
         version: 6.1.0(react@18.2.0)

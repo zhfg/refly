@@ -103,7 +103,7 @@ export class ArxivSummarySkill extends BaseSkill {
     const { urls = [] } = config?.configurable || {};
 
     // check if the url is valid
-    const url = query || urls[urls.length - 1];
+    const url = query || urls[urls.length - 1]?.url;
     const isDetailUrl = url.includes('abs') || url.includes('pdf');
     if (!url || !url.startsWith('https://arxiv.org') || !isDetailUrl) {
       return 'passThroughGenerate';
@@ -116,9 +116,9 @@ export class ArxivSummarySkill extends BaseSkill {
     this.engine.logger.log('---GENERATE---');
 
     const { query = '' } = state;
-    const { locale = 'en', contentList = [], resourceIds = [], noteIds = [], urls = [] } = config?.configurable || {};
+    const { locale = 'en', urls = [] } = config?.configurable || {};
 
-    const url = query || urls[urls.length - 1];
+    const url = query || urls[urls.length - 1]?.url;
 
     // check if the url is https://arxiv.org/abs/2406.18532 or pdf version: https://arxiv.org/pdf/2406.18532
     const pdfUrl = url.includes('abs') ? url.replace('abs', 'pdf') : url;

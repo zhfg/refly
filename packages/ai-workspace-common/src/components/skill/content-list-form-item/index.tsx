@@ -1,20 +1,24 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Select, Input, SelectProps, InputProps, TextAreaProps } from '@arco-design/web-react';
+import { Select, Input, SelectProps, InputProps, TextAreaProps, Collapse } from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
-import { Mark, SelectedTextCardDomain } from '@refly/common-types';
-import { SkillInvocationRule } from '@refly/openapi-schema';
+import { Mark, SelectedTextDomain } from '@refly/common-types';
+import { SkillContextContentItem, SkillContextValue, SkillInvocationRule } from '@refly/openapi-schema';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
 import { useGetCurrentSelectedMark } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-selected-text';
 
 const { TextArea } = Input;
+const CollapseItem = Collapse.Item;
 
 interface ContentListFormItemProps extends Omit<SelectProps, 'onChange'> {
   rule: SkillInvocationRule;
-  onChange: (value: string) => void;
+  onChange: (value: SkillContextValue) => void;
+  locale: string;
 }
 
-export const CONTENT_LIST_BREAK = '\n\n--refly-break--\n\n';
+export interface IContent extends SkillContextContentItem {
+  metadata: { domain: SelectedTextDomain };
+}
 
 export const ContentListFormItem: React.FC<ContentListFormItemProps> = ({
   rule,
@@ -22,14 +26,15 @@ export const ContentListFormItem: React.FC<ContentListFormItemProps> = ({
   className,
   style,
   placeholder,
+  locale,
   ...restProps
 }) => {
   const { t } = useTranslation();
   const { finalUsedMarks = [] } = useGetCurrentSelectedMark();
-  const [selectedDomains, setSelectedDomains] = useState<SelectedTextCardDomain[]>(
-    (rule.defaultValue as SelectedTextCardDomain[]) || [],
+  const [selectedDomains, setSelectedDomains] = useState<SelectedTextDomain[]>(
+    (rule.defaultValue as SelectedTextDomain[]) || [],
   );
-  const [content, setContent] = useState('');
+  const [contentList, setContentList] = useState<IContent[]>([]);
 
   const isMultiSelect = rule.inputMode === 'multiSelect';
   const selectMode = isMultiSelect ? 'multiple' : undefined;
@@ -37,7 +42,7 @@ export const ContentListFormItem: React.FC<ContentListFormItemProps> = ({
   const options = [
     'resource',
     'note',
-    'extension-weblink',
+    'extensionWeblink',
     'noteCursorSelection',
     'noteBeforeCursorSelection',
     'noteAfterCursorSelection',
@@ -47,34 +52,44 @@ export const ContentListFormItem: React.FC<ContentListFormItemProps> = ({
   }));
 
   const handleSelectChange = useCallback(
-    (value: SelectedTextCardDomain | SelectedTextCardDomain[]) => {
+    (value: SelectedTextDomain | SelectedTextDomain[], finalUsedMarks: Mark[] = []) => {
       const newSelectedDomains = Array.isArray(value) ? value : [value];
       setSelectedDomains(newSelectedDomains);
-      onChange(content);
+
+      updateCurrentContent(finalUsedMarks, newSelectedDomains);
     },
-    [content, onChange],
+    [finalUsedMarks, onChange],
   );
 
   const handleTextAreaChange = useCallback(
-    (value: string) => {
-      setContent(value);
-      onChange(value);
+    (domain: SelectedTextDomain, value: string) => {
+      const newContentList = contentList.map((item) => {
+        if (item?.metadata?.domain === domain) {
+          return { ...item, content: value };
+        }
+        return item;
+      });
+      setContentList(newContentList);
+      onChange(newContentList);
     },
-    [selectedDomains, onChange],
+    [onChange, contentList],
   );
 
-  const updateCurrentContent = (marks: Mark[], selectedDomains: SelectedTextCardDomain[]) => {
-    const content = marks
-      .filter((mark) => selectedDomains.includes(mark.namespace))
-      .map((mark) => mark.data)
-      .join(CONTENT_LIST_BREAK);
-    setContent(content);
-    onChange(content);
+  const updateCurrentContent = (marks: Mark[], selectedDomains: SelectedTextDomain[]) => {
+    const newContentList = marks
+      .filter((mark) => selectedDomains.includes(mark.domain))
+      .map((mark) => ({
+        metadata: { domain: mark.domain },
+        content: mark.data,
+      }));
+
+    setContentList(newContentList);
+    onChange(newContentList);
   };
 
   useEffect(() => {
     updateCurrentContent(finalUsedMarks, selectedDomains);
-  }, [selectedDomains]);
+  }, []);
 
   return (
     <>
@@ -86,17 +101,30 @@ export const ContentListFormItem: React.FC<ContentListFormItemProps> = ({
         options={options}
         value={isMultiSelect ? selectedDomains : selectedDomains[0]}
         placeholder={placeholder || t('skill.instanceInvokeModal.placeholder.contentList.select')}
-        onChange={handleSelectChange}
+        onChange={(val) => handleSelectChange(val, finalUsedMarks)}
       />
-      <TextArea
-        {...(restProps as any as TextAreaProps)}
-        className={`${className} content-list-textarea`}
-        style={{ ...style, width: '100%' }}
-        value={content}
-        placeholder={t('skill.instanceInvokeModal.placeholder.contentList.textarea')}
-        autoSize={{ minRows: 4, maxRows: 10 }}
-        onChange={handleTextAreaChange}
-      />
+
+      <Collapse>
+        {contentList.map((item, index) => (
+          <CollapseItem
+            name={item?.metadata?.domain}
+            key={index}
+            header={t(`skill.instanceInvokeModal.context.contentList.${item?.metadata?.domain}`)}
+          >
+            <TextArea
+              {...(restProps as any as TextAreaProps)}
+              className={`${className} content-list-textarea`}
+              style={{ ...style, width: '100%' }}
+              value={item?.content}
+              placeholder={
+                rule?.descriptionDict?.[locale] || t('skill.instanceInvokeModal.placeholder.contentList.textarea')
+              }
+              autoSize={{ minRows: 4, maxRows: 10 }}
+              onChange={(value) => handleTextAreaChange(item?.metadata?.domain, value)}
+            />
+          </CollapseItem>
+        ))}
+      </Collapse>
     </>
   );
 };

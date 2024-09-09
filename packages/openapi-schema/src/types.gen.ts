@@ -222,6 +222,11 @@ export type LabelInstance = {
 export type InputMode = 'input' | 'inputNumber' | 'inputTextArea' | 'select' | 'multiSelect';
 
 /**
+ * Config scope
+ */
+export type ConfigScope = Array<'runtime' | 'template'>;
+
+/**
  * Select option
  */
 export type SelectOption = {
@@ -254,9 +259,18 @@ export type DynamicConfigItem = {
    */
   inputMode: InputMode;
   /**
-   * Whether this config is required
+   * Specifies whether this config is required and in which contexts
    */
-  required?: boolean;
+  required?: {
+    /**
+     * Whether this config is required
+     */
+    value?: boolean;
+    /**
+     * The contexts in which the requirement applies
+     */
+    configScope?: ConfigScope;
+  };
   /**
    * Config label (key is locale, value is label)
    */
@@ -269,6 +283,10 @@ export type DynamicConfigItem = {
   descriptionDict: {
     [key: string]: string;
   };
+  /**
+   * Default value
+   */
+  defaultValue?: number | string | Array<string>;
   /**
    * Config options
    */
@@ -543,7 +561,7 @@ export type SkillJob = {
   /**
    * Skill context
    */
-  context: PopulatedSkillContext;
+  context: SkillContext;
   /**
    * Skill template config
    */
@@ -1359,63 +1377,138 @@ export type SkillInput = {
 };
 
 /**
+ * Skill context resource item
+ */
+export type SkillContextResourceItem = {
+  /**
+   * Resource ID (if empty, this will be considered as external resource)
+   */
+  resourceId?: string;
+  /**
+   * Resource
+   */
+  resource?: Resource;
+  /**
+   * Resource context metadata
+   */
+  metadata?: {
+    [key: string]: unknown;
+  };
+};
+
+/**
+ * Skill context collection item
+ */
+export type SkillContextCollectionItem = {
+  /**
+   * Collection ID
+   */
+  collectionId?: string;
+  /**
+   * Collection
+   */
+  collection?: Collection;
+  /**
+   * Collection context metadata
+   */
+  metadata?: {
+    [key: string]: unknown;
+  };
+};
+
+/**
+ * Skill context note item
+ */
+export type SkillContextNoteItem = {
+  /**
+   * Note ID
+   */
+  noteId?: string;
+  /**
+   * Note
+   */
+  note?: Note;
+  /**
+   * Note context metadata
+   */
+  metadata?: {
+    [key: string]: unknown;
+  };
+};
+
+/**
+ * Skill context content item
+ */
+export type SkillContextContentItem = {
+  /**
+   * Content
+   */
+  content: string;
+  /**
+   * Content context metadata
+   */
+  metadata?: {
+    [key: string]: unknown;
+  };
+};
+
+/**
+ * Skill context url item
+ */
+export type SkillContextUrlItem = {
+  /**
+   * URL
+   */
+  url: string;
+  /**
+   * URL context metadata
+   */
+  metadata?: {
+    [key: string]: unknown;
+  };
+};
+
+export type SkillContextValue =
+  | string
+  | Array<SkillContextResourceItem>
+  | Array<SkillContextCollectionItem>
+  | Array<SkillContextNoteItem>
+  | Array<SkillContextContentItem>
+  | Array<SkillContextUrlItem>;
+
+/**
  * Skill invocation context
  */
 export type SkillContext = {
   /**
-   * List of resource IDs
+   * Context resources
    */
-  resourceIds?: Array<string>;
+  resources?: Array<SkillContextResourceItem>;
   /**
-   * List of external resources
+   * Context collections
    */
-  externalResources?: Array<Resource>;
+  collections?: Array<SkillContextCollectionItem>;
   /**
-   * List of collection IDs
+   * Context notes
    */
-  collectionIds?: Array<string>;
+  notes?: Array<SkillContextNoteItem>;
   /**
-   * List of note IDs
+   * Context content list
    */
-  noteIds?: Array<string>;
-  /**
-   * List of content
-   */
-  contentList?: Array<string>;
+  contentList?: Array<SkillContextContentItem>;
   /**
    * List of URLs
    */
-  urls?: Array<string>;
+  urls?: Array<SkillContextUrlItem>;
   /**
    * user selected output locale
    */
   locale?: string;
 };
 
-export type PopulatedSkillContext = SkillContext & {
-  /**
-   * List of resources (both internal and external)
-   */
-  resources?: Array<Resource>;
-  /**
-   * List of collections
-   */
-  collections?: Array<Collection>;
-  /**
-   * List of notes
-   */
-  notes?: Array<Note>;
-};
-
 export type SkillInputKey = 'query';
 
-export type SkillContextKey =
-  | 'resourceIds'
-  | 'externalResources'
-  | 'collectionIds'
-  | 'noteIds'
-  | 'contentList'
-  | 'urls';
+export type SkillContextKey = 'resources' | 'collections' | 'notes' | 'contentList' | 'urls';
 
 export type SkillInvocationRule = {
   /**
@@ -1431,9 +1524,28 @@ export type SkillInvocationRule = {
    */
   inputMode?: 'input' | 'inputNumber' | 'inputTextArea' | 'select' | 'multiSelect';
   /**
+   * Config label (key is locale, value is label)
+   */
+  labelDict?: {
+    [key: string]: string;
+  };
+  /**
+   * Config description (key is locale, value is description)
+   */
+  descriptionDict?: {
+    [key: string]: string;
+  };
+  /**
    * Default value
    */
-  defaultValue?: Array<string>;
+  defaultValue?: Array<
+    | 'resource'
+    | 'note'
+    | 'extension-weblink'
+    | 'noteCursorSelection'
+    | 'noteBeforeCursorSelection'
+    | 'noteAfterCursorSelection'
+  >;
   /**
    * Whether this key is required (default is false)
    */

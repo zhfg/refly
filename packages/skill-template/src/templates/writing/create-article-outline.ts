@@ -31,7 +31,14 @@ export class CreateArticleOutlineSkill extends BaseSkill {
       rules: [{ key: 'query' }],
     },
     context: {
-      rules: [{ key: 'contentList' }],
+      rules: [
+        {
+          key: 'contentList',
+          limit: 1,
+          inputMode: 'multiSelect',
+          defaultValue: ['noteCursorSelection', 'noteBeforeCursorSelection', 'noteAfterCursorSelection'],
+        },
+      ],
     },
   };
 
@@ -109,20 +116,23 @@ export class CreateArticleOutlineSkill extends BaseSkill {
       - Future outlook
 - Initialization: In the first conversation, please directly output the following: Hello! I am an expert in creating article outlines. If you have not provided specific context, please tell me the topic or keywords you wish to explore, and I will construct a clear and logical article outline based on that.
 
-INPUT:
-"""
-{content}
-"""
+# CONTEXT
+Context as following (with three "---" as separator, **only include the content between the separator, not include the separator**):
+---
+{context}
+---
+
+## IMPORTANT
+Please analyze the language of the provided context and ensure that your response is in the same language. If the context is in Chinese, respond in Chinese. If it's in English, respond in English. For any other language, respond in that language.
 `;
 
     const contextString = contentList.length > 0 ? contentList.join('\n') : 'No additional context provided.';
 
-    const prompt = systemPrompt.replace('{content}', contextString);
+    const prompt = systemPrompt.replace('{context}', contextString);
 
     const responseMessage = await llm.invoke([
       new SystemMessage(prompt),
-      ...chatHistory,
-      new HumanMessage(`Please provide the article outline you wish to create`),
+      new HumanMessage(`The context is provided above, please create the article outline`),
     ]);
 
     return { messages: [responseMessage] };

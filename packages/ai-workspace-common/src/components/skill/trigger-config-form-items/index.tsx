@@ -27,6 +27,7 @@ export const TriggerConfigFormItems = (props: {
       {!collapsed && (
         <>
           <FormItem
+            layout="vertical"
             label={t('skill.newTriggerModal.name')}
             required
             field="displayName"
@@ -36,6 +37,7 @@ export const TriggerConfigFormItems = (props: {
           </FormItem>
 
           <FormItem
+            layout="vertical"
             label={t('skill.newTriggerModal.triggerType')}
             required
             field="triggerType"
@@ -61,6 +63,7 @@ export const TriggerConfigFormItems = (props: {
           {_triggerType === 'timer' && (
             <>
               <FormItem
+                layout="vertical"
                 label={t('skill.newTriggerModal.timerConfig')}
                 required
                 field="timerConfig.datetime"
@@ -75,7 +78,11 @@ export const TriggerConfigFormItems = (props: {
                 />
               </FormItem>
 
-              <FormItem label={t('skill.newTriggerModal.repeatInterval')} field="timerConfig.repeatInterval">
+              <FormItem
+                layout="vertical"
+                label={t('skill.newTriggerModal.repeatInterval')}
+                field="timerConfig.repeatInterval"
+              >
                 <Select allowClear size="large" placeholder={t('skill.newTriggerModal.repeatIntervalPlaceholder')}>
                   {repeatInterval.map((item) => {
                     return (
@@ -91,6 +98,7 @@ export const TriggerConfigFormItems = (props: {
 
           {_triggerType === 'simpleEvent' && (
             <FormItem
+              layout="vertical"
               label={t('skill.newTriggerModal.event')}
               required
               field="simpleEventName"

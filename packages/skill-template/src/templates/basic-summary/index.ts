@@ -14,11 +14,11 @@ interface GraphState extends BaseSkillState {
 
 // Define a new graph
 
-export class BasicSummaryWithContentSkill extends BaseSkill {
-  name = 'basic_summary_with_content';
+export class BasicSummarySkill extends BaseSkill {
+  name = 'basic_summary';
   displayName = {
-    en: 'Basic Summary with Content',
-    'zh-CN': '基于选中内容的总结',
+    en: 'Basic Summary',
+    'zh-CN': '基础总结',
   };
 
   configSchema: SkillTemplateConfigSchema = {
@@ -30,11 +30,16 @@ export class BasicSummaryWithContentSkill extends BaseSkill {
       rules: [{ key: 'query' }],
     },
     context: {
-      rules: [{ key: 'contentList' }],
+      relation: 'mutuallyExclusive',
+      rules: [
+        { key: 'resources', limit: 1 },
+        { key: 'notes', limit: 1 },
+        { key: 'contentList', limit: 1 },
+      ],
     },
   };
 
-  description = 'Give a summary of the selected content';
+  description = 'Give a summary of the given context';
 
   schema = z.object({
     query: z.string().describe('The user query'),
@@ -56,7 +61,7 @@ export class BasicSummaryWithContentSkill extends BaseSkill {
     this.engine.logger.log('---GENERATE---');
 
     const { documents } = state;
-    const { locale = 'en', contentList = [], resourceIds = [], noteIds = [] } = config?.configurable || {};
+    const { locale = 'en', notes = [], resources = [], contentList = [] } = config?.configurable || {};
 
     // 1. build context text
     const contextToCitationText = documents.reduce((total, cur) => {
@@ -66,11 +71,14 @@ export class BasicSummaryWithContentSkill extends BaseSkill {
       return total;
     }, '');
 
-    // 1.1 contentList
-    const contentListText = contentList.map((item, index) => `${index + 1}. ${item}`).join('\n');
-    // 1.2 handle resourceIds one by one
-
-    // 1.3 handle noteIds one by one
+    let contentListText = '';
+    if (resources?.length > 0) {
+      contentListText = resources[0].resource?.content;
+    } else if (notes?.length > 0) {
+      contentListText = notes[0].note?.content;
+    } else if (contentList?.length > 0) {
+      contentListText = contentList.map((item, index) => `${index + 1}. ${item.content}`).join('\n\n');
+    }
 
     const llm = this.engine.chatModel({
       temperature: 0.9,

@@ -101,6 +101,7 @@ export const NewSkillInstanceModal = (props: NewSkillInstanceModalProps) => {
           headerTitle={t('common.templateConfig')}
           schema={configSchema}
           form={form}
+          configScope={'template'}
           fieldPrefix="tplConfig"
           tplConfig={instance?.tplConfig}
         />

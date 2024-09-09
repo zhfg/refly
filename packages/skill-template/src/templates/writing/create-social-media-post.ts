@@ -5,12 +5,33 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 // schema
 import { z } from 'zod';
-import { Icon, SkillInvocationConfig, SkillTemplateConfigSchema } from '@refly/openapi-schema';
+import {
+  DynamicConfigValue,
+  SkillContextContentItem,
+  SkillInvocationConfig,
+  SkillTemplateConfigSchema,
+  Icon,
+} from '@refly/openapi-schema';
+import { languageNameToLocale, localeToLanguageName, SelectedTextDomain, zhCNLocale } from '@refly/common-types';
 
 interface GraphState extends BaseSkillState {
   documents: Document[];
   messages: BaseMessage[];
 }
+
+export interface IContent extends SkillContextContentItem {
+  metadata: { domain: SelectedTextDomain };
+}
+
+// Define a new graph
+const zhLocaleDict = languageNameToLocale?.['zh-CN'] || {};
+const localeOptionList = Object.values(zhLocaleDict).map((val: keyof typeof zhCNLocale) => ({
+  labelDict: {
+    en: localeToLanguageName?.['en']?.[val],
+    'zh-CN': localeToLanguageName?.['zh-CN']?.[val],
+  },
+  value: val as string,
+}));
 
 // Define a new graph
 export class CreateSocialMediaPostSkill extends BaseSkill {
@@ -23,23 +44,133 @@ export class CreateSocialMediaPostSkill extends BaseSkill {
   icon: Icon = { type: 'emoji', value: '📰' };
 
   configSchema: SkillTemplateConfigSchema = {
-    items: [],
+    items: [
+      {
+        key: 'targetPlatform',
+        inputMode: 'select',
+        labelDict: {
+          en: 'Target Platform',
+          'zh-CN': '目标平台',
+        },
+        descriptionDict: {
+          en: 'The platform to create the social media post for',
+          'zh-CN': '目标平台',
+        },
+        required: {
+          value: true,
+          configScope: ['runtime'],
+        },
+        defaultValue: 'twitter',
+        options: [
+          {
+            value: 'twitter',
+            labelDict: {
+              en: 'Twitter',
+              'zh-CN': 'Twitter',
+            },
+          },
+          {
+            value: 'facebook',
+            labelDict: {
+              en: 'Facebook',
+              'zh-CN': 'Facebook',
+            },
+          },
+          {
+            value: 'reddit',
+            labelDict: {
+              en: 'Reddit',
+              'zh-CN': 'Reddit',
+            },
+          },
+          {
+            value: 'linkedin',
+            labelDict: {
+              en: 'LinkedIn',
+              'zh-CN': 'LinkedIn',
+            },
+          },
+          {
+            value: 'xiaohongshu',
+            labelDict: {
+              en: 'Xiaohongshu',
+              'zh-CN': '小红书',
+            },
+          },
+          {
+            value: 'weibo',
+            labelDict: {
+              en: 'Weibo',
+              'zh-CN': '微博',
+            },
+          },
+          {
+            value: 'wechat-moment',
+            labelDict: {
+              en: 'WeChat Moment',
+              'zh-CN': '微信朋友圈',
+            },
+          },
+        ],
+      },
+      {
+        key: 'topic',
+        inputMode: 'inputTextArea',
+        defaultValue: '',
+        labelDict: {
+          en: 'Topic',
+          'zh-CN': '主题',
+        },
+        descriptionDict: {
+          en: 'The topic of the social media post',
+          'zh-CN': '输入你要撰写的社交媒体文章主题',
+        },
+        required: {
+          value: true,
+          configScope: ['runtime'],
+        },
+      },
+      {
+        key: 'language',
+        inputMode: 'select',
+        labelDict: {
+          en: 'Language',
+          'zh-CN': '语言',
+        },
+        defaultValue: 'en',
+        descriptionDict: {
+          en: 'The language of the article',
+          'zh-CN': '文章语言',
+        },
+        required: {
+          value: true,
+          configScope: ['runtime'],
+        },
+        options: localeOptionList,
+      },
+    ],
   };
 
   invocationConfig: SkillInvocationConfig = {
-    input: {
-      rules: [{ key: 'query' }],
-    },
     context: {
-      rules: [{ key: 'contentList' }],
+      rules: [
+        {
+          key: 'contentList',
+          limit: 1,
+          inputMode: 'multiSelect',
+          defaultValue: ['noteBeforeCursorSelection', 'noteCursorSelection', 'noteAfterCursorSelection'],
+          descriptionDict: {
+            en: 'The context of the social media post',
+            'zh-CN': '参考资料',
+          },
+        },
+      ],
     },
   };
 
   description = 'Create the social media post';
 
-  schema = z.object({
-    query: z.string().describe('The user query'),
-  });
+  schema = z.object({});
 
   graphState: StateGraphArgs<GraphState>['channels'] = {
     ...baseStateGraphArgs,
@@ -57,49 +188,106 @@ export class CreateSocialMediaPostSkill extends BaseSkill {
     this.engine.logger.log('---GENERATE---');
 
     const { query } = state;
-    const { locale = 'en', contentList = [], chatHistory = [] } = config?.configurable || {};
+    const { locale = 'en', contentList = [], chatHistory = [], tplConfig } = config?.configurable || {};
 
     const llm = this.engine.chatModel({
       temperature: 0.2,
     });
 
-    const systemPrompt = `- Role: Social Media Content Creator and Optimization Expert
-- Background: Users require the creation of a blog post based on a specific social media platform and context {context}, and they expect the content to be optimized and published in the original language.
-- Profile: You are a professional social media content creator with an in-depth understanding of the content style and user preferences across different platforms. You are capable of creating and optimizing content tailored to the characteristics of each platform.
-- Skills: You possess excellent writing skills, content strategy planning, language editing skills, SEO optimization knowledge, and a deep understanding of various social media platforms.
-- Goals: To create and optimize a blog post based on the user-specified social media platform and context, ensuring the content is engaging and effective for dissemination.
-- Constrains: The content must adhere to the specific social media platform's guidelines, avoid sensitive topics, and maintain a positive and proactive image.
-- OutputFormat: The optimized article will be presented in the original language, and the format may include plain text, a combination of images and text, or video subtitles, etc.
+    const systemPrompt = `- Role: Social Media Copywriting Expert
+- Background: Users need to generate attractive copy for different social media platforms to enhance the influence and engagement of their brand or personal presence.
+- Profile: You are a copywriting expert proficient in social media marketing, with a deep understanding of the user demographics and content preferences of each platform.
+- Skills: You possess creative thinking, market insight, language mastery, and a keen sense of social media trends.
+- Goals: To create compelling, platform-appropriate copy that resonates with the target audience on various social media platforms for the user.
+- Constrains: The copy must adhere to the content guidelines of each platform, avoid sensitive words, and consider cultural differences and language habits.
+- OutputFormat: For each platform, provide one or more pieces of copy, including headlines, body text, and possible hashtags or topics.
 - Workflow:
-  1. Identify the user-specified social media platform and context.
-  2. Analyze the platform's characteristics and context to determine the article's theme and key information points.
-  3. Create a draft that is closely related to the context, ensuring the language is smooth and natural.
-  4. Conduct language optimization, including grammar correction, word choice, and sentence adjustment to improve the article's readability and appeal.
-  5. Apply SEO techniques to ensure the reasonable distribution of keywords and enhance search engine ranking.
-  6. Add appropriate visual elements, such as images, videos, or charts, to enhance the article's expressiveness based on the platform's characteristics.
-  7. Iterate and optimize the content based on feedback.
+  1. Understand the context, topic, language, and target platform provided by the user.
+  2. Analyze the characteristics of the target platform's users and their content preferences to determine the style and tone of the copy.
+  3. Create copy that fits the platform's characteristics, combined with the background and topic.
+  4. Review the copy to ensure it is free of sensitive content, in line with language habits, and culturally appropriate.
 - Examples:
-  - Example 1: For a "technology blog" on a platform like Medium, create an article about the latest advancements in AI, highlighting its impact on society.
-  - Example 2: For a "lifestyle blog" on Instagram, craft a post about sustainable living, incorporating personal anecdotes and practical tips.
-  - Example 3: For a "health and fitness blog" on a platform like Healthline, write an in-depth guide on the benefits of a plant-based diet.
-- Initialization: In our first interaction, please provide the specific social media platform and the context for your blog post. We will then create and optimize a detailed and engaging article tailored to your needs.
+  - Example 1: Context - New product launch, Topic - Innovative technology, Language - English, Target Platform - Twitter
+    Copy: "Discover the future with our groundbreaking tech! 🚀 #Innovation #TechRelease"
+  - Example 2: Context - Advocating a healthy lifestyle, Topic - Healthy eating, Language - Chinese, Target Platform - Xiaohongshu
+    Copy: "Healthy living starts with every bite. Are you eating healthily today? #HealthyEating #NutritionalBalance"
+  - Example 3: Context - Corporate social responsibility, Topic - Environmental action, Language - Chinese, Target Platform - Weibo
+    Copy: "A green Earth is our shared responsibility. Join our environmental action to make the world a better place! #EnvironmentalAction #GreenLiving"
+- Initialization: In the first conversation, please directly output the following: Hello! I am your social media copywriting expert. Please tell me your context, topic, language, and target platform, and I will tailor-made attractive copy for you.
 
-INPUT:
-"""
-{content}
+## CONTEXT
+Context as following (with three "---" as separator, **only include the content between the separator, not include the separator**):
+---
+{context}
+---
 
-TARGET PLATFORM: {query}
+## REQUIREMENTS
+
+TARGET PLATFORM: {targetPlatform}
+TOPIC: {topic}
+LANGUAGE: {language}
 """
 `;
 
-    const contextString = contentList.length > 0 ? contentList.join('\n') : 'No additional context provided.';
+    const getContentListString = (contentList: IContent[]) => {
+      let contentString = '';
 
-    const prompt = systemPrompt.replace('{content}', contextString).replace('{query}', query);
+      const cursorSelectionRelatedContent = contentList.filter((item) => item?.metadata?.domain?.includes('Cursor'));
+      const otherContent = contentList.filter((item) => !item?.metadata?.domain?.includes('Cursor'));
+
+      const cursorSelectionDomains = cursorSelectionRelatedContent.map((item) => item?.metadata?.domain);
+      if (cursorSelectionDomains?.includes('noteBeforeCursorSelection')) {
+        const noteBeforeCursorSelectionContent = cursorSelectionRelatedContent.find(
+          (item) => item?.metadata?.domain === 'noteBeforeCursorSelection',
+        );
+        contentString += `---noteBeforeCursorSelection---
+${noteBeforeCursorSelectionContent?.content}
+`;
+      }
+      const cursorSelectionContent = cursorSelectionRelatedContent.find(
+        (item) => item?.metadata?.domain === 'noteCursorSelection',
+      );
+      contentString += `---noteCursorSelection---
+${cursorSelectionContent?.content}
+`;
+
+      if (cursorSelectionDomains?.includes('noteAfterCursorSelection')) {
+        const noteAfterCursorSelectionContent = cursorSelectionRelatedContent.find(
+          (item) => item?.metadata?.domain === 'noteAfterCursorSelection',
+        );
+        contentString += `---noteAfterCursorSelection---
+${noteAfterCursorSelectionContent?.content}
+`;
+      }
+
+      if (otherContent?.length > 0) {
+        const otherContentString = otherContent.map((item) => item.content).join('\n');
+        contentString += `---otherContent---
+${otherContentString}
+`;
+      }
+
+      return contentString;
+    };
+
+    const contextString = getContentListString(contentList as IContent[]);
+    const { targetPlatform, topic, language } = (tplConfig || {}) as any as {
+      targetPlatform: DynamicConfigValue;
+      topic: DynamicConfigValue;
+      language: DynamicConfigValue;
+    };
+    const prompt = systemPrompt
+      .replace('{context}', contextString)
+      .replace('{targetPlatform}', targetPlatform?.value as string)
+      .replace('{topic}', topic?.value as string)
+      .replace('{language}', language?.value as string);
 
     const responseMessage = await llm.invoke([
       new SystemMessage(prompt),
       ...chatHistory,
-      new HumanMessage(`Please provide the social media post you wish to create`),
+      new HumanMessage(
+        `The context and requirements are provided above, please write a social media post for the target platform`,
+      ),
     ]);
 
     return { messages: [responseMessage] };

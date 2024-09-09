@@ -275,6 +275,15 @@ export const $InputMode = {
   enum: ['input', 'inputNumber', 'inputTextArea', 'select', 'multiSelect'],
 } as const;
 
+export const $ConfigScope = {
+  type: 'array',
+  description: 'Config scope',
+  items: {
+    type: 'string',
+    enum: ['runtime', 'template'],
+  },
+} as const;
+
 export const $SelectOption = {
   type: 'object',
   description: 'Select option',
@@ -313,9 +322,23 @@ export const $DynamicConfigItem = {
       $ref: '#/components/schemas/InputMode',
     },
     required: {
-      type: 'boolean',
-      description: 'Whether this config is required',
-      default: false,
+      type: 'object',
+      description: 'Specifies whether this config is required and in which contexts',
+      properties: {
+        value: {
+          type: 'boolean',
+          description: 'Whether this config is required',
+          default: false,
+        },
+        configScope: {
+          description: 'The contexts in which the requirement applies',
+          $ref: '#/components/schemas/ConfigScope',
+        },
+      },
+      default: {
+        value: false,
+        scope: ['runtime', 'template'],
+      },
     },
     labelDict: {
       type: 'object',
@@ -330,6 +353,23 @@ export const $DynamicConfigItem = {
       additionalProperties: {
         type: 'string',
       },
+    },
+    defaultValue: {
+      description: 'Default value',
+      oneOf: [
+        {
+          type: 'number',
+        },
+        {
+          type: 'string',
+        },
+        {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
+      ],
     },
     options: {
       type: 'array',
@@ -674,7 +714,7 @@ export const $SkillJob = {
     },
     context: {
       description: 'Skill context',
-      $ref: '#/components/schemas/PopulatedSkillContext',
+      $ref: '#/components/schemas/SkillContext',
     },
     tplConfig: {
       description: 'Skill template config',
@@ -1946,50 +1986,170 @@ export const $SkillInput = {
   },
 } as const;
 
+export const $SkillContextResourceItem = {
+  type: 'object',
+  description: 'Skill context resource item',
+  properties: {
+    resourceId: {
+      type: 'string',
+      description: 'Resource ID (if empty, this will be considered as external resource)',
+    },
+    resource: {
+      description: 'Resource',
+      $ref: '#/components/schemas/Resource',
+    },
+    metadata: {
+      type: 'object',
+      description: 'Resource context metadata',
+    },
+  },
+} as const;
+
+export const $SkillContextCollectionItem = {
+  type: 'object',
+  description: 'Skill context collection item',
+  properties: {
+    collectionId: {
+      type: 'string',
+      description: 'Collection ID',
+    },
+    collection: {
+      description: 'Collection',
+      $ref: '#/components/schemas/Collection',
+    },
+    metadata: {
+      type: 'object',
+      description: 'Collection context metadata',
+    },
+  },
+} as const;
+
+export const $SkillContextNoteItem = {
+  type: 'object',
+  description: 'Skill context note item',
+  properties: {
+    noteId: {
+      type: 'string',
+      description: 'Note ID',
+    },
+    note: {
+      description: 'Note',
+      $ref: '#/components/schemas/Note',
+    },
+    metadata: {
+      type: 'object',
+      description: 'Note context metadata',
+    },
+  },
+} as const;
+
+export const $SkillContextContentItem = {
+  type: 'object',
+  description: 'Skill context content item',
+  required: ['content'],
+  properties: {
+    content: {
+      type: 'string',
+      description: 'Content',
+    },
+    metadata: {
+      type: 'object',
+      description: 'Content context metadata',
+    },
+  },
+} as const;
+
+export const $SkillContextUrlItem = {
+  type: 'object',
+  description: 'Skill context url item',
+  required: ['url'],
+  properties: {
+    url: {
+      type: 'string',
+      description: 'URL',
+    },
+    metadata: {
+      type: 'object',
+      description: 'URL context metadata',
+    },
+  },
+} as const;
+
+export const $SkillContextValue = {
+  oneOf: [
+    {
+      type: 'string',
+    },
+    {
+      type: 'array',
+      items: {
+        $ref: '#/components/schemas/SkillContextResourceItem',
+      },
+    },
+    {
+      type: 'array',
+      items: {
+        $ref: '#/components/schemas/SkillContextCollectionItem',
+      },
+    },
+    {
+      type: 'array',
+      items: {
+        $ref: '#/components/schemas/SkillContextNoteItem',
+      },
+    },
+    {
+      type: 'array',
+      items: {
+        $ref: '#/components/schemas/SkillContextContentItem',
+      },
+    },
+    {
+      type: 'array',
+      items: {
+        $ref: '#/components/schemas/SkillContextUrlItem',
+      },
+    },
+  ],
+} as const;
+
 export const $SkillContext = {
   type: 'object',
   description: 'Skill invocation context',
   properties: {
-    resourceIds: {
+    resources: {
       type: 'array',
-      description: 'List of resource IDs',
+      description: 'Context resources',
       items: {
-        type: 'string',
+        $ref: '#/components/schemas/SkillContextResourceItem',
       },
     },
-    externalResources: {
+    collections: {
       type: 'array',
-      description: 'List of external resources',
+      description: 'Context collections',
       items: {
-        $ref: '#/components/schemas/Resource',
+        $ref: '#/components/schemas/SkillContextCollectionItem',
       },
     },
-    collectionIds: {
+    notes: {
       type: 'array',
-      description: 'List of collection IDs',
+      description: 'Context notes',
       items: {
-        type: 'string',
-      },
-    },
-    noteIds: {
-      type: 'array',
-      description: 'List of note IDs',
-      items: {
-        type: 'string',
+        $ref: '#/components/schemas/SkillContextNoteItem',
       },
     },
     contentList: {
       type: 'array',
-      description: 'List of content',
+      description: 'Context content list',
       items: {
-        type: 'string',
+        $ref: '#/components/schemas/SkillContextContentItem',
       },
     },
     urls: {
       type: 'array',
       description: 'List of URLs',
       items: {
-        type: 'string',
+        $ref: '#/components/schemas/SkillContextUrlItem',
       },
     },
     locale: {
@@ -2002,40 +2162,6 @@ export const $SkillContext = {
   },
 } as const;
 
-export const $PopulatedSkillContext = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/SkillContext',
-    },
-    {
-      type: 'object',
-      properties: {
-        resources: {
-          type: 'array',
-          description: 'List of resources (both internal and external)',
-          items: {
-            $ref: '#/components/schemas/Resource',
-          },
-        },
-        collections: {
-          type: 'array',
-          description: 'List of collections',
-          items: {
-            $ref: '#/components/schemas/Collection',
-          },
-        },
-        notes: {
-          type: 'array',
-          description: 'List of notes',
-          items: {
-            $ref: '#/components/schemas/Note',
-          },
-        },
-      },
-    },
-  ],
-} as const;
-
 export const $SkillInputKey = {
   type: 'string',
   enum: ['query'],
@@ -2043,7 +2169,7 @@ export const $SkillInputKey = {
 
 export const $SkillContextKey = {
   type: 'string',
-  enum: ['resourceIds', 'externalResources', 'collectionIds', 'noteIds', 'contentList', 'urls'],
+  enum: ['resources', 'collections', 'notes', 'contentList', 'urls'],
 } as const;
 
 export const $SkillInvocationRule = {
@@ -2072,11 +2198,33 @@ export const $SkillInvocationRule = {
       description: 'Input mode',
       enum: ['input', 'inputNumber', 'inputTextArea', 'select', 'multiSelect'],
     },
+    labelDict: {
+      type: 'object',
+      description: 'Config label (key is locale, value is label)',
+      additionalProperties: {
+        type: 'string',
+      },
+    },
+    descriptionDict: {
+      type: 'object',
+      description: 'Config description (key is locale, value is description)',
+      additionalProperties: {
+        type: 'string',
+      },
+    },
     defaultValue: {
       type: 'array',
       description: 'Default value',
       items: {
         type: 'string',
+        enum: [
+          'resource',
+          'note',
+          'extension-weblink',
+          'noteCursorSelection',
+          'noteBeforeCursorSelection',
+          'noteAfterCursorSelection',
+        ],
       },
     },
     required: {

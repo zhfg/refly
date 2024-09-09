@@ -24,15 +24,89 @@ export class ChangeToneSkill extends BaseSkill {
   icon: Icon = { type: 'emoji', value: '🔈' };
 
   configSchema: SkillTemplateConfigSchema = {
-    items: [],
+    items: [
+      {
+        key: 'targetTone',
+        inputMode: 'select',
+        labelDict: {
+          en: 'Target Tone',
+          'zh-CN': '目标语气',
+        },
+        descriptionDict: {
+          en: 'The tone to change to',
+          'zh-CN': '目标语气',
+        },
+        required: {
+          value: true,
+          configScope: ['runtime'],
+        },
+        defaultValue: 'professional',
+        options: [
+          {
+            value: 'professional',
+            labelDict: {
+              en: 'Professional',
+              'zh-CN': '专业的',
+            },
+          },
+          {
+            value: 'casual',
+            labelDict: {
+              en: 'Casual',
+              'zh-CN': '随意的',
+            },
+          },
+          {
+            value: 'critical',
+            labelDict: {
+              en: 'Critical',
+              'zh-CN': '批判的',
+            },
+          },
+          {
+            value: 'humorous',
+            labelDict: {
+              en: 'Humorous',
+              'zh-CN': '幽默的',
+            },
+          },
+          {
+            value: 'direct',
+            labelDict: {
+              en: 'Direct',
+              'zh-CN': '直接的',
+            },
+          },
+          {
+            value: 'confident',
+            labelDict: {
+              en: 'Confident',
+              'zh-CN': '自信的',
+            },
+          },
+          {
+            value: 'friendly',
+            labelDict: {
+              en: 'Friendly',
+              'zh-CN': '友好的',
+            },
+          },
+        ],
+      },
+    ],
   };
 
   invocationConfig: SkillInvocationConfig = {
-    input: {
-      rules: [{ key: 'query' }],
-    },
     context: {
-      rules: [{ key: 'contentList' }],
+      rules: [
+        {
+          key: 'contentList',
+          limit: 1,
+          inputMode: 'select',
+          required: true,
+          defaultValue: ['noteCursorSelection'],
+        },
+      ],
     },
   };
 
@@ -58,7 +132,7 @@ export class ChangeToneSkill extends BaseSkill {
     this.engine.logger.log('---GENERATE---');
 
     const { query } = state;
-    const { locale = 'en', contentList = [], chatHistory = [] } = config?.configurable || {};
+    const { locale = 'en', contentList = [], chatHistory = [], tplConfig = {} } = config?.configurable || {};
 
     const llm = this.engine.chatModel({
       temperature: 0.2,
@@ -83,22 +157,23 @@ export class ChangeToneSkill extends BaseSkill {
   - Example 3: A technical report is modified to have an enthusiastic tone for a motivational speech.
 - Initialization: In the first conversation, please directly output the following: Welcome! I specialize in adjusting the tone of content to meet your specific communication needs. Please provide the content and the desired tone you wish to achieve.
 
-INPUT:
-"""
-{content}
-"""
+# CONTEXT
+Context as following (with three "---" as separator, **only include the content between the separator, not include the separator**):
+---
+{context}
+---
 
 TARGET TONE: {targetTone}
 `;
 
     const contextString = contentList.length > 0 ? contentList.join('\n') : 'No additional context provided.';
 
-    const prompt = systemPrompt.replace('{content}', contextString).replace('{targetTone}', query);
+    const targetTone = tplConfig?.targetTone?.value as string;
+    const prompt = systemPrompt.replace('{context}', contextString).replace('{targetTone}', targetTone);
 
     const responseMessage = await llm.invoke([
       new SystemMessage(prompt),
-      ...chatHistory,
-      new HumanMessage(`Please provide the content you wish to have adjusted to the specified tone`),
+      new HumanMessage(`The context is provided above, please adjust the tone to the specified tone`),
     ]);
 
     return { messages: [responseMessage] };

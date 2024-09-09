@@ -7,11 +7,16 @@ import { useTranslation } from 'react-i18next';
 // store
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
-import { SkillInstance } from '@refly/openapi-schema';
+import { ConfigScope, SkillInstance } from '@refly/openapi-schema';
 import { Collapse, Modal, Form, Message, Button, FormInstance } from '@arco-design/web-react';
+
+import { BiBookContent } from 'react-icons/bi';
+import { LuFormInput } from 'react-icons/lu';
+import { FaWpforms } from 'react-icons/fa';
 
 // styles
 import './index.scss';
+import { LOCALE } from '@refly/common-types';
 
 const CollapseItem = Collapse.Item;
 
@@ -44,6 +49,7 @@ export const InstanceInvokeForm = (props: InstanceInvokeProps) => {
       {input?.rules?.length > 0 && (
         <InvocationFormItems
           headerTitle={t('common.input')}
+          headerIcon={<LuFormInput />}
           ruleGroup={data?.invocationConfig.input}
           form={form}
           t={t}
@@ -52,9 +58,10 @@ export const InstanceInvokeForm = (props: InstanceInvokeProps) => {
       )}
 
       {context?.rules?.length > 0 && (
-        <div style={{ marginTop: 16 }}>
+        <div>
           <InvocationFormItems
             headerTitle={t('common.context')}
+            headerIcon={<BiBookContent />}
             selectTooltipTitle={t('common.selectContext')}
             ruleGroup={data?.invocationConfig.context}
             form={form}
@@ -67,8 +74,10 @@ export const InstanceInvokeForm = (props: InstanceInvokeProps) => {
       {tplConfigSchema?.items?.length > 0 && (
         <TemplateConfigFormItems
           headerTitle={t('common.templateConfig')}
+          headerIcon={<FaWpforms />}
           schema={tplConfigSchema}
           form={form}
+          configScope={'runtime'}
           tplConfig={tplConfig}
           fieldPrefix="tplConfig"
         />

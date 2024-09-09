@@ -12,6 +12,10 @@ import { Collapse, Modal, Form, Input, Message, Select, DatePicker } from '@arco
 import { TemplateConfigFormItems } from '@refly-packages/ai-workspace-common/components/skill/template-config-form-items';
 import { TriggerConfigFormItems } from '@refly-packages/ai-workspace-common/components/skill/trigger-config-form-items';
 
+import { BiBookContent } from 'react-icons/bi';
+import { LuFormInput } from 'react-icons/lu';
+import { FaWpforms } from 'react-icons/fa';
+
 const CollapseItem = Collapse.Item;
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -131,6 +135,7 @@ export const NewTriggersModal = (props: NewTriggersModalProps) => {
 
         <InvocationFormItems
           headerTitle={t('common.input')}
+          headerIcon={<LuFormInput />}
           ruleGroup={data?.invocationConfig.input}
           form={form}
           t={t}
@@ -139,6 +144,7 @@ export const NewTriggersModal = (props: NewTriggersModalProps) => {
 
         <InvocationFormItems
           headerTitle={t('common.context')}
+          headerIcon={<BiBookContent />}
           selectTooltipTitle={t('common.selectContext')}
           ruleGroup={data?.invocationConfig.context}
           form={form}
@@ -148,6 +154,8 @@ export const NewTriggersModal = (props: NewTriggersModalProps) => {
 
         <TemplateConfigFormItems
           headerTitle={t('common.templateConfig')}
+          headerIcon={<FaWpforms />}
+          configScope={'runtime'}
           schema={data?.tplConfigSchema}
           form={form}
           tplConfig={data?.tplConfig}

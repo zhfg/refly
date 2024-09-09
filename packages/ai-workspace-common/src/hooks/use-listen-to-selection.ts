@@ -1,10 +1,10 @@
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { SelectedNamespace } from '@refly/common-types';
+import { SelectedTextDomain } from '@refly/common-types';
 import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { Mark } from '@refly/common-types';
 import { useEffect, useRef } from 'react';
 
-export const useListenToSelection = (selector: string, namespace: SelectedNamespace) => {
+export const useListenToSelection = (selector: string, domain: SelectedTextDomain) => {
   const mouseUpTimerRef = useRef<number>();
   const mouseDownTimerRef = useRef<number>();
   const contextPanelStore = useContextPanelStore((state) => ({
@@ -13,7 +13,7 @@ export const useListenToSelection = (selector: string, namespace: SelectedNamesp
     enableMultiSelect: state.enableMultiSelect,
     updateCurrentSelectedMark: state.updateCurrentSelectedMark,
     updateCurrentSelectedMarks: state.updateCurrentSelectedMarks,
-    updateSelectedNamespace: state.updateSelectedNamespace,
+    updateSelectedDomain: state.updateSelectedDomain,
   }));
   const searchStateStore = useSearchStateStore();
 
@@ -25,7 +25,7 @@ export const useListenToSelection = (selector: string, namespace: SelectedNamesp
     if (text && text?.trim()?.length > 0) {
       const mark = { type: 'text', data: text } as Mark;
       contextPanelStore.updateCurrentSelectedMark(mark);
-      contextPanelStore.updateSelectedNamespace(namespace);
+      contextPanelStore.updateSelectedDomain(domain);
       searchStateStore.setSearchTarget(SearchTarget.CurrentPage);
 
       if (enableMultiSelect) {

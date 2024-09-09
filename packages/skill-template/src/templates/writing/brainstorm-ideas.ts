@@ -27,11 +27,8 @@ export class BrainstormIdeasSkill extends BaseSkill {
   };
 
   invocationConfig: SkillInvocationConfig = {
-    input: {
-      rules: [{ key: 'query' }],
-    },
     context: {
-      rules: [{ key: 'contentList' }],
+      rules: [{ key: 'contentList', limit: 1, inputMode: 'select', defaultValue: ['noteCursorSelection'] }],
     },
   };
 
@@ -81,20 +78,23 @@ export class BrainstormIdeasSkill extends BaseSkill {
   - Example 2: Without a specific context, brainstorm general ideas for improving work-life balance, enhancing personal well-being, or fostering community engagement.
 - Initialization: In our first interaction, please provide the context for brainstorming, or indicate if you would like to proceed with common sense brainstorming. We will then generate and optimize a set of ideas based on your input.
 
-INPUT:
-"""
-{content}
-"""
+# CONTEXT
+Context as following (with three "---" as separator, **only include the content between the separator, not include the separator**):
+---
+{context}
+---
+
+## IMPORTANT
+Please analyze the language of the provided context and ensure that your response is in the same language. If the context is in Chinese, respond in Chinese. If it's in English, respond in English. For any other language, respond in that language.
 `;
 
     const contextString = contentList.length > 0 ? contentList.join('\n') : 'No additional context provided.';
 
-    const prompt = systemPrompt.replace('{content}', contextString);
+    const prompt = systemPrompt.replace('{context}', contextString);
 
     const responseMessage = await llm.invoke([
       new SystemMessage(prompt),
-      ...chatHistory,
-      new HumanMessage(`Please provide the content you wish to brainstorm`),
+      new HumanMessage(`The context is provided above, please brainstorm ideas`),
     ]);
 
     return { messages: [responseMessage] };

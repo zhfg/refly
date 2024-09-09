@@ -6,7 +6,7 @@ import { safeStringifyJSON } from '@refly-packages/utils/parse';
 import { sendMessage, onMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { BackgroundMessage } from '@refly/common-types';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { SelectedNamespace } from '@refly/common-types';
+import { SelectedTextDomain } from '@refly/common-types';
 import { getElementType } from '../utils';
 import { genContentSelectorID } from '@refly-packages/utils/id';
 import { getMarkdown } from '@refly/utils/html2md';
@@ -23,7 +23,7 @@ export const getContainerElem = (selector: string | null) => {
   return selector ? container.querySelector(`.${selector}`) : container;
 };
 
-export const useContentSelector = (selector: string | null, namespace: SelectedNamespace) => {
+export const useContentSelector = (selector: string | null, domain: SelectedTextDomain) => {
   const statusRef = useRef(true);
   const markRef = useRef<HTMLDivElement>(undefined);
   const targetList = useRef<Element[]>([]);
@@ -38,7 +38,7 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
       data: content,
       xPath,
       scope: selectorScopeRef.current,
-      namespace,
+      domain,
     };
 
     return mark;
@@ -283,7 +283,7 @@ export const useContentSelector = (selector: string | null, namespace: SelectedN
           data: mark?.data,
           xPath: mark?.xPath,
           scope: selectorScopeRef.current,
-          namespace: mark?.namespace,
+          domain: mark?.domain,
         },
       },
     };

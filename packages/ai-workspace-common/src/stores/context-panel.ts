@@ -2,7 +2,7 @@ import { TreeNodeProps, TreeProps } from '@arco-design/web-react';
 import { SearchDomain, SearchResult } from '@refly/openapi-schema';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { Mark, SelectedNamespace, ContextDomain, SelectedTextCardDomain } from '@refly/common-types';
+import { Mark, ContextDomain, SelectedTextDomain } from '@refly/common-types';
 
 export interface LinkMeta {
   key: string;
@@ -85,10 +85,10 @@ interface ContextPanelState {
   nowSelectedContextDomain: SearchDomain;
 
   // selected text card, suuport multi selected as it is all selected text
-  selectedTextCardDomain: SelectedTextCardDomain[];
+  selectedTextCardDomain: SelectedTextDomain[];
   // selection text
   currentSelectedMark: Mark;
-  selectedNamespace: SelectedNamespace;
+  selectedDomain: SelectedTextDomain;
   enableMultiSelect: boolean; // 支持多选
   currentSelectedMarks: Mark[]; // 多选内容
 
@@ -114,11 +114,11 @@ interface ContextPanelState {
 
   // selected text context 面板相关的内容
   updateCurrentSelectedMark: (mark: Mark) => void;
-  updateSelectedNamespace: (selectedNamespace: SelectedNamespace) => void;
+  updateSelectedDomain: (domain: SelectedTextDomain) => void;
   updateEnableMultiSelect: (enableMultiSelect: boolean) => void;
   updateCurrentSelectedMarks: (marks: Mark[]) => void;
   resetSelectedTextCardState: () => void;
-  setSelectedTextCardDomain: (domain: SelectedTextCardDomain[]) => void;
+  setSelectedTextCardDomain: (domain: SelectedTextDomain[]) => void;
 
   // context card
   setShowContextCard: (showcontextCard: boolean) => void;
@@ -135,10 +135,10 @@ interface ContextPanelState {
 
 export const defaultSelectedTextCardState = {
   currentSelectedMark: null as Mark,
-  selectedNamespace: 'resource' as SelectedNamespace,
+  selectedDomain: 'resource' as SelectedTextDomain,
   enableMultiSelect: true, // default enable multi select, later to see if we need to enable multiSelect ability
   currentSelectedMarks: [] as Mark[],
-  selectedTextCardDomain: ['resource'] as SelectedTextCardDomain[],
+  selectedTextCardDomain: ['resource'] as SelectedTextDomain[],
 };
 
 export const defaultCurrentContext = {
@@ -193,13 +193,12 @@ export const useContextPanelStore = create<ContextPanelState>()(
     setExpandedKeys: (keys: string[]) => set((state) => ({ ...state, expandedKeys: keys })),
     setNowSelectedContextDomain: (domain: SearchDomain) =>
       set((state) => ({ ...state, nowSelectedContextDomain: domain })),
-    setSelectedTextCardDomain: (domain: SelectedTextCardDomain[]) =>
+    setSelectedTextCardDomain: (domain: SelectedTextDomain[]) =>
       set((state) => ({ ...state, selectedTextCardDomain: domain })),
 
     // selected text
     updateCurrentSelectedMark: (mark: Mark) => set((state) => ({ ...state, currentSelectedMark: mark })),
-    updateSelectedNamespace: (selectedNamespace: SelectedNamespace) =>
-      set((state) => ({ ...state, selectedNamespace })),
+    updateSelectedDomain: (selectedDomain: SelectedTextDomain) => set((state) => ({ ...state, selectedDomain })),
     updateEnableMultiSelect: (enableMultiSelect: boolean) => set((state) => ({ ...state, enableMultiSelect })),
     updateCurrentSelectedMarks: (marks: Mark[]) => set((state) => ({ ...state, currentSelectedMarks: marks })),
 

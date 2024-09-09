@@ -5,12 +5,24 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 // schema
 import { z } from 'zod';
-import { Icon, SkillInvocationConfig, SkillTemplateConfigSchema } from '@refly/openapi-schema';
+import { SkillInvocationConfig, SkillTemplateConfigSchema, DynamicConfigValue, Icon } from '@refly/openapi-schema';
+// utils
+import { languageNameToLocale, localeToLanguageName, zhCNLocale } from '@refly/common-types';
 
 interface GraphState extends BaseSkillState {
   documents: Document[];
   messages: BaseMessage[];
 }
+
+// Define a new graph
+const zhLocaleDict = languageNameToLocale?.['zh-CN'] || {};
+const localeOptionList = Object.values(zhLocaleDict).map((val: keyof typeof zhCNLocale) => ({
+  labelDict: {
+    en: localeToLanguageName?.['en']?.[val],
+    'zh-CN': localeToLanguageName?.['zh-CN']?.[val],
+  },
+  value: val as string,
+}));
 
 // Define a new graph
 export class CreateBlogPostSkill extends BaseSkill {
@@ -23,15 +35,228 @@ export class CreateBlogPostSkill extends BaseSkill {
   icon: Icon = { type: 'emoji', value: '📰' };
 
   configSchema: SkillTemplateConfigSchema = {
-    items: [],
+    items: [
+      {
+        key: 'targetPlatform',
+        inputMode: 'select',
+        labelDict: {
+          en: 'Target Platform',
+          'zh-CN': '目标平台',
+        },
+        descriptionDict: {
+          en: 'The platform to create the blog post for',
+          'zh-CN': '目标平台',
+        },
+        required: {
+          value: true,
+          configScope: ['runtime'],
+        },
+        defaultValue: 'medium',
+        options: [
+          {
+            value: 'medium',
+            labelDict: {
+              en: 'Medium',
+              'zh-CN': 'Medium',
+            },
+          },
+          {
+            value: 'wordpress',
+            labelDict: {
+              en: 'WordPress',
+              'zh-CN': 'WordPress',
+            },
+          },
+          {
+            value: 'substack',
+            labelDict: {
+              en: 'Substack',
+              'zh-CN': 'Substack',
+            },
+          },
+          {
+            value: 'wechat',
+            labelDict: {
+              en: 'WeChat',
+              'zh-CN': '微信公众号',
+            },
+          },
+          {
+            value: 'zhihu',
+            labelDict: {
+              en: 'Zhihu',
+              'zh-CN': '知乎',
+            },
+          },
+          {
+            value: 'toutiao',
+            labelDict: {
+              en: 'Toutiao',
+              'zh-CN': '今日头条',
+            },
+          },
+        ],
+      },
+      {
+        key: 'topic',
+        inputMode: 'inputTextArea',
+        defaultValue: '',
+        labelDict: {
+          en: 'Topic',
+          'zh-CN': '主题',
+        },
+        descriptionDict: {
+          en: 'The topic of the blog post',
+          'zh-CN': '输入你要撰写的博客主题',
+        },
+        required: {
+          value: true,
+          configScope: ['runtime'],
+        },
+      },
+      {
+        key: 'tone',
+        inputMode: 'select',
+        labelDict: {
+          en: 'Blog Tone',
+          'zh-CN': '博客语气',
+        },
+        descriptionDict: {
+          en: 'The tone of the blog post',
+          'zh-CN': '博客语气',
+        },
+        defaultValue: 'professional',
+        required: {
+          value: true,
+          configScope: ['runtime'],
+        },
+        options: [
+          {
+            value: 'professional',
+            labelDict: {
+              en: 'Professional',
+              'zh-CN': '专业的',
+            },
+          },
+          {
+            value: 'casual',
+            labelDict: {
+              en: 'Casual',
+              'zh-CN': '随意的',
+            },
+          },
+          {
+            value: 'critical',
+            labelDict: {
+              en: 'Critical',
+              'zh-CN': '批判的',
+            },
+          },
+          {
+            value: 'humorous',
+            labelDict: {
+              en: 'Humorous',
+              'zh-CN': '幽默的',
+            },
+          },
+          {
+            value: 'direct',
+            labelDict: {
+              en: 'Direct',
+              'zh-CN': '直接的',
+            },
+          },
+          {
+            value: 'confident',
+            labelDict: {
+              en: 'Confident',
+              'zh-CN': '自信的',
+            },
+          },
+          {
+            value: 'friendly',
+            labelDict: {
+              en: 'Friendly',
+              'zh-CN': '友好的',
+            },
+          },
+        ],
+      },
+      {
+        key: 'length',
+        inputMode: 'select',
+        labelDict: {
+          en: 'Article Length',
+          'zh-CN': '文章长度',
+        },
+        defaultValue: 'medium',
+        descriptionDict: {
+          en: 'The length of the article',
+          'zh-CN': '文章长度',
+        },
+        required: {
+          value: true,
+          configScope: ['runtime'],
+        },
+        options: [
+          {
+            value: 'short',
+            labelDict: {
+              en: 'Short',
+              'zh-CN': '短',
+            },
+          },
+          {
+            value: 'medium',
+            labelDict: {
+              en: 'Medium',
+              'zh-CN': '中',
+            },
+          },
+          {
+            value: 'long',
+            labelDict: {
+              en: 'Long',
+              'zh-CN': '长',
+            },
+          },
+        ],
+      },
+      {
+        key: 'language',
+        inputMode: 'select',
+        labelDict: {
+          en: 'Language',
+          'zh-CN': '语言',
+        },
+        defaultValue: 'en',
+        descriptionDict: {
+          en: 'The language of the article',
+          'zh-CN': '文章语言',
+        },
+        required: {
+          value: true,
+          configScope: ['runtime'],
+        },
+        options: localeOptionList,
+      },
+    ],
   };
 
   invocationConfig: SkillInvocationConfig = {
-    input: {
-      rules: [{ key: 'query' }],
-    },
     context: {
-      rules: [{ key: 'contentList' }],
+      rules: [
+        {
+          key: 'contentList',
+          limit: 1,
+          inputMode: 'multiSelect',
+          defaultValue: ['noteBeforeCursorSelection', 'noteCursorSelection', 'noteAfterCursorSelection'],
+          descriptionDict: {
+            en: 'The context of the article',
+            'zh-CN': '参考资料',
+          },
+        },
+      ],
     },
   };
 
@@ -56,66 +281,76 @@ export class CreateBlogPostSkill extends BaseSkill {
   async generate(state: GraphState, config?: SkillRunnableConfig) {
     this.engine.logger.log('---GENERATE---');
 
-    const { query } = state;
-    const { locale = 'en', contentList = [], chatHistory = [] } = config?.configurable || {};
+    const { locale = 'en', contentList = [], chatHistory = [], tplConfig } = config?.configurable || {};
 
     const llm = this.engine.chatModel({
       temperature: 0.2,
     });
 
     const systemPrompt = `- Role: Blog Article Writing Expert
-- Background: The user wishes to craft a blog post tailored to the characteristics of a specific platform, which may involve an in-depth discussion of a particular topic or sharing insights, ensuring the content is lengthy and substantial enough for a blog format.
-- Profile: You are an experienced blog post writer capable of creating in-depth and engaging long-form blog content that aligns with the preferences of different platforms.
-- Skills: You possess the ability to conduct thorough research, expand on writing, and polish content to produce rich, well-structured, and fluent long-form blog posts.
-- Goals: To write a lengthy blog post based on the given platform and context, ensuring the depth and length meet the standards for blog publication.
-- Constrains: The blog post should adhere to platform guidelines, maintain professionalism and appeal, and ensure originality and accuracy of information.
-- OutputFormat: The blog post should be presented in a format suitable for long-form reading, including clear paragraph breaks, appropriate headings and subheadings, and relevant multimedia elements.
+- Background: The user wishes to craft a blog post tailored to the characteristics of a specific platform, discussing a particular topic or sharing insights, with customizable tone, length, and language.
+- Profile: You are an experienced blog post writer capable of creating engaging blog content that aligns with various platforms, tones, and languages.
+- Skills: You can conduct thorough research, adapt writing style, and produce well-structured content in multiple languages.
+- Goals: To write a blog post based on the given parameters, ensuring it meets the specified requirements.
+- Constraints: The blog post should adhere to platform guidelines, maintain the desired tone, and ensure accuracy of information.
+- OutputFormat: The blog post should be presented in a format suitable for the specified platform, including appropriate structure and multimedia elements if applicable.
 - Workflow:
-  1. Understand the characteristics of the user-specified blog platform and its audience.
-  2. In-depth reading and analysis of the given context.
-  3. Determine the article's theme and arguments in conjunction with platform characteristics and context.
-  4. Conduct thorough research to gather materials and data supporting the arguments.
-  5. Draft a detailed outline, including introduction, multiple body paragraphs, and conclusion.
-  6. Write extensive sections of the blog post, ensuring each part is fully developed.
-  7. Review and edit the post for clarity and engagement.
-  8. Add appropriate visual and multimedia content based on platform characteristics.
+  1. Understand the user-specified parameters (platform, topic, tone, length, language).
+  2. Analyze the given context and topic.
+  3. Determine the article's structure and arguments based on the parameters.
+  4. Conduct research to gather supporting materials and data.
+  5. Draft an outline appropriate for the specified length.
+  6. Write the blog post, ensuring it matches the desired tone and language.
+  7. Review and edit the post for clarity, engagement, and adherence to parameters.
+  8. Add appropriate visual or multimedia content if relevant to the platform.
 - Examples:
-  - Example 1: The user specifies the platform Medium with the theme "The Evolution of Digital Marketing."
-    Article Structure:
-    - Title: The Evolution of Digital Marketing
-    - Introduction: Brief history and current state of digital marketing.
-    - Body: 
-      - The rise of social media marketing.
-      - Influencer marketing and its impact.
-      - Personalization in digital marketing strategies.
-    - Conclusion: Future trends and the importance of adaptability.
-  - Example 2: The user specifies the platform Instagram with the theme "Healthy Lifestyle."
-    Article Structure:
-    - Title: Living a Healthy Lifestyle in the Modern World
-    - Introduction: The importance of health and well-being.
-    - Body: 
-      - Nutrition and a balanced diet.
-      - Regular exercise and its benefits.
-      - Mental health and stress management.
-    - Conclusion: Encouraging a holistic approach to health.
-- Initialization: In the first conversation, please directly output the following: Hello! As a blog article writing expert, I am ready to create a long-form blog post for you. Please provide the platform you wish to publish on and the relevant context or theme, and I will ensure the length and depth of the article meet the requirements for blog publication.
+  - Example 1: Platform: Medium, Topic: "The Future of AI", Tone: Professional, Length: 1500 words, Language: English
+  - Example 2: Platform: Instagram, Topic: "Quick Healthy Recipes", Tone: Casual, Length: 500 words, Language: Spanish
+- Initialization: Hello! I'm ready to create a blog post tailored to your needs. Please provide the following information:
+  1. Target Platform (e.g., Medium, WordPress, LinkedIn)
+  2. Theme or Topic
+  3. Desired Tone (e.g., Professional, Casual, Humorous)
+  4. Approximate Length (in words or paragraphs)
+  5. Language
+  6. Any additional context or requirements
 
-INPUT:
-"""
-{content}
-"""
+## CONTEXT
+Context as following (with three "---" as separator, **only include the content between the separator, not include the separator**):
+---
+{context}
+---
 
-TARGET PLATFORM: {query}
+## REQUIREMENTS
+
+TARGET PLATFORM: {targetPlatform}
+TOPIC: {topic}
+TONE: {tone}
+LENGTH: {length}
+LANGUAGE: {language}
 `;
 
     const contextString = contentList.length > 0 ? contentList.join('\n') : 'No additional context provided.';
 
-    const prompt = systemPrompt.replace('{content}', contextString).replace('{query}', query);
+    const { targetPlatform, topic, tone, length, language } = (tplConfig || {}) as any as {
+      targetPlatform: DynamicConfigValue;
+      topic: DynamicConfigValue;
+      tone: DynamicConfigValue;
+      length: DynamicConfigValue;
+      language: DynamicConfigValue;
+    };
+    const prompt = systemPrompt
+      .replace('{context}', contextString)
+      .replace('{targetPlatform}', targetPlatform?.value as string)
+      .replace('{topic}', topic?.value as string)
+      .replace('{tone}', tone?.value as string)
+      .replace('{length}', length?.value as string)
+      .replace('{language}', language?.value as string);
 
     const responseMessage = await llm.invoke([
       new SystemMessage(prompt),
-      ...chatHistory,
-      new HumanMessage(`Please provide the blog post you wish to create`),
+      new HumanMessage(
+        `The context and requirements are provided above, please write a blog post for the target platform`,
+      ),
     ]);
 
     return { messages: [responseMessage] };

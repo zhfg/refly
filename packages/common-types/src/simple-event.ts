@@ -7,6 +7,6 @@ export const SimpleEvents: SimpleEvent[] = [
       'zh-CN': '资源准备就绪',
       en: 'Resource Ready',
     },
-    provideContextKeys: ['resourceIds'],
+    provideContextKeys: ['resources'],
   },
 ];

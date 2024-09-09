@@ -19,7 +19,8 @@
     "templateConfig": "Template Config",
     "required": "This item is required",
     "empty": "No content",
-    "selectContext": "Select Context"
+    "selectContext": "Select Context",
+    "emptyInput": "Please fill in or select content"
   },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",
@@ -457,17 +458,17 @@
       "title": "Run Skill",
       "formLabel": {
         "query": "Question",
-        "resourceIds": "Resource",
-        "noteIds": "Note",
-        "collectionIds": "Collection",
+        "resources": "Resource",
+        "notes": "Note",
+        "collections": "Collection",
         "contentList": "Content",
         "urls": "URLs"
       },
       "placeholder": {
         "query": "Please enter question",
-        "resourceIds": "Please select resource",
-        "noteIds": "Please select note",
-        "collectionIds": "Please select collection",
+        "resources": "Please select resource",
+        "notes": "Please select note",
+        "collections": "Please select collection",
         "contentList": {
           "select": "Please select content",
           "textarea": "Please enter or paste content"
@@ -478,7 +479,7 @@
         "contentList": {
           "resource": "Resource",
           "note": "Note",
-          "extension-weblink": "Web Link",
+          "extensionWeblink": "Web Link",
           "noteCursorSelection": "Note Cursor Selection",
           "noteBeforeCursorSelection": "Note Before Cursor Selection",
           "noteAfterCursorSelection": "Note After Cursor Selection"

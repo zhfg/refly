@@ -1,34 +1,75 @@
 import React, { useState } from 'react';
-import { Input, Form, FormInstance, Radio } from '@arco-design/web-react';
+import { Input, Form, FormInstance } from '@arco-design/web-react';
 import { TFunction } from 'i18next';
 import { SearchSelect } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
-import { SkillInvocationRule, SkillInvocationRuleGroup } from '@refly/openapi-schema';
+import {
+  SkillContextCollectionItem,
+  SkillContextContentItem,
+  SkillContextKey,
+  SkillContextValue,
+  SkillContextNoteItem,
+  SkillContextResourceItem,
+  SkillContextUrlItem,
+  SkillInputKey,
+  SkillInvocationRule,
+  SkillInvocationRuleGroup,
+} from '@refly/openapi-schema';
 import { FormHeader } from '@refly-packages/ai-workspace-common/components/skill/form-header';
 
 import './index.scss';
 import { ContentListFormItem } from '@refly-packages/ai-workspace-common/components/skill/content-list-form-item';
+import { useTranslation } from 'react-i18next';
+import { LOCALE } from '@refly/common-types';
 
 const FormItem = Form.Item;
 const TextArea = Input.TextArea;
-const RadioGroup = Radio.Group;
 
 const ruleKeyToSearchDomain = {
-  resourceIds: 'resource',
-  noteIds: 'note',
-  collectionIds: 'collection',
+  resources: 'resource',
+  notes: 'note',
+  collections: 'collection',
 } as const;
 
 const getFormField = (fieldPrefix: string, key: string) => {
   return `${fieldPrefix ? fieldPrefix + '.' : ''}${key}`;
 };
 
+const getRuleValue = (key: SkillInputKey | SkillContextKey, val: string | string[]): SkillContextValue => {
+  if (key === 'query') {
+    return String(val);
+  }
+
+  if (!Array.isArray(val)) {
+    val = [val];
+  }
+
+  if (key === 'resources') {
+    return val.map((id) => ({ resourceId: id }));
+  }
+  if (key === 'notes') {
+    return val.map((id) => ({ noteId: id }));
+  }
+  if (key === 'collections') {
+    return val.map((id) => ({ collectionId: id }));
+  }
+  if (key === 'contentList') {
+    return val.map((content) => ({ content }));
+  }
+  if (key === 'urls') {
+    return val.map((url) => ({ url }));
+  }
+
+  return [];
+};
+
 const InvokeOption = (props: {
   rule: SkillInvocationRule;
   t: TFunction;
-  onChange: (val: any) => void;
+  onChange: (val: SkillContextValue) => void;
   disabled?: boolean;
+  locale: string;
 }): React.ReactNode => {
-  const { rule, t, disabled, onChange } = props;
+  const { rule, t, disabled, onChange, locale } = props;
 
   const commonProps = {
     disabled,
@@ -39,15 +80,17 @@ const InvokeOption = (props: {
     return (
       <Input
         {...commonProps}
-        placeholder={t('skill.instanceInvokeModal.placeholder.query')}
+        placeholder={rule?.descriptionDict?.[locale] || t('skill.instanceInvokeModal.placeholder.query')}
         maxLength={100}
         showWordLimit
-        onChange={onChange}
+        onChange={(val) => {
+          onChange(val);
+        }}
       />
     );
   }
 
-  if (rule.key === 'resourceIds' || rule.key === 'noteIds' || rule.key === 'collectionIds') {
+  if (rule.key === 'resources' || rule.key === 'notes' || rule.key === 'collections') {
     return (
       <SearchSelect
         {...commonProps}
@@ -55,11 +98,7 @@ const InvokeOption = (props: {
         domain={ruleKeyToSearchDomain[rule.key]}
         placeholder={t(`skill.instanceInvokeModal.placeholder.${rule.key}`)}
         onChange={(val) => {
-          if (!Array.isArray(val)) {
-            onChange([val]);
-          } else {
-            onChange(val);
-          }
+          onChange(getRuleValue(rule.key, val));
         }}
       />
     );
@@ -70,6 +109,7 @@ const InvokeOption = (props: {
       <ContentListFormItem
         {...commonProps}
         rule={rule}
+        locale={locale}
         onChange={(value) => {
           onChange(value);
         }}
@@ -82,13 +122,15 @@ const InvokeOption = (props: {
       <TextArea
         {...commonProps}
         className={`${commonProps.className} invocation-form__input--textarea`}
-        placeholder={t(`skill.instanceInvokeModal.placeholder.${rule.key}`)}
+        placeholder={rule?.descriptionDict?.[locale] || t(`skill.instanceInvokeModal.placeholder.${rule.key}`)}
         rows={4}
         autoSize={{
           minRows: 4,
           maxRows: 10,
         }}
-        onChange={onChange}
+        onChange={(val) => {
+          onChange(getRuleValue('urls', val));
+        }}
       />
     );
   }
@@ -102,16 +144,19 @@ interface InvokeOptionGroupProps {
   t: TFunction;
   fieldPrefix?: string;
   headerTitle?: string;
+  headerIcon?: React.ReactNode;
   selectTooltipTitle?: string;
 }
 
 export const InvocationFormItems = (props: InvokeOptionGroupProps) => {
-  const { ruleGroup, form, t, fieldPrefix, headerTitle, selectTooltipTitle } = props;
+  const { ruleGroup, form, t, fieldPrefix, headerTitle, selectTooltipTitle, headerIcon } = props;
   const { rules, relation } = ruleGroup;
+  const { i18n } = useTranslation();
   const resourceOptions = rules.map((rule) => ({
     label: t(`skill.instanceInvokeModal.formLabel.${rule.key}`),
     value: rule.key,
   }));
+  const locale = i18n.language || LOCALE.EN;
   const [collapsed, setCollapsed] = useState(false);
   const [selectedResource, setSelectedResource] = useState<string | string[]>(resourceOptions?.[0]?.value);
 
@@ -119,16 +164,17 @@ export const InvocationFormItems = (props: InvokeOptionGroupProps) => {
   if (rules.length === 0) return null;
 
   const [selectedKey, setSelectedKey] = useState<string | null>(rules[0].key);
-  const [ruleValues, setRuleValues] = useState<Record<string, string>>({});
+  const [ruleValues, setRuleValues] = useState<Record<string, SkillContextValue>>({});
 
   const selectedRule = rules.find((rule) => rule.key === selectedResource);
-  console.log('rules', rules, selectedRule, relation, collapsed);
+  // console.log('rules', rules, selectedRule, relation, collapsed);
 
   if (relation === 'mutuallyExclusive') {
     return (
       <>
         <FormHeader
           title={headerTitle}
+          icon={headerIcon}
           options={resourceOptions}
           enableSelect
           enableCollapse
@@ -156,13 +202,26 @@ export const InvocationFormItems = (props: InvokeOptionGroupProps) => {
             <FormItem
               label={t(`skill.instanceInvokeModal.formLabel.${selectedRule.key}`)}
               key={selectedRule.key}
+              layout="vertical"
               required={selectedRule.required}
+              rules={[
+                {
+                  validator(value, cb) {
+                    if (!value && selectedRule?.required) {
+                      return cb(t('common.emptyInput'));
+                    }
+
+                    return cb();
+                  },
+                },
+              ]}
               field={getFormField(fieldPrefix, selectedRule.key)}
             >
               <div style={{ opacity: selectedKey === selectedRule.key ? 1 : 0.5 }}>
                 <InvokeOption
                   rule={selectedRule}
                   t={t}
+                  locale={locale}
                   disabled={selectedKey !== selectedRule.key}
                   onChange={(val) => {
                     const field = getFormField(fieldPrefix, selectedRule.key);
@@ -182,6 +241,7 @@ export const InvocationFormItems = (props: InvokeOptionGroupProps) => {
     <div>
       <FormHeader
         title={headerTitle}
+        icon={headerIcon}
         options={resourceOptions}
         enableCollapse
         collapsed={collapsed}
@@ -196,11 +256,23 @@ export const InvocationFormItems = (props: InvokeOptionGroupProps) => {
               label={t(`skill.instanceInvokeModal.formLabel.${rule.key}`)}
               key={rule.key}
               required={rule.required}
+              rules={[
+                {
+                  validator(value, cb) {
+                    if (!value && rule?.required) {
+                      return cb(t('common.emptyInput'));
+                    }
+
+                    return cb();
+                  },
+                },
+              ]}
               field={getFormField(fieldPrefix, rule.key)}
             >
               <InvokeOption
                 rule={rule}
                 t={t}
+                locale={locale}
                 disabled={selectedKey !== rule.key}
                 onChange={(val) => {
                   form.setFieldValue(getFormField(fieldPrefix, rule.key), val);
