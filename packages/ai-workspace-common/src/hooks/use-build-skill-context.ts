@@ -1,6 +1,6 @@
 // 类型
 import { ContextPanelDomain, LOCALE } from '@refly/common-types';
-import { Resource, SkillContext } from '@refly/openapi-schema';
+import { Resource, SkillContext, SkillContextContentItem } from '@refly/openapi-schema';
 // request
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
@@ -74,50 +74,47 @@ export const useBuildSkillContext = () => {
         urls.push(currentResource?.data?.url);
       }
 
-      return Array.from(new Set(urls));
+      return Array.from(new Set(urls)).map((item) => ({ url: item }));
     };
 
     const getContentList = () => {
-      let contentList = [];
+      let contentList: SkillContextContentItem[] = [];
       const finalUsedMarks = getFinalUsedMarks(contextPanelStore);
 
       if (enableMultiSelect) {
-        contentList = (finalUsedMarks || []).map((item) => item?.data);
+        contentList = (finalUsedMarks || []).map((item) => ({
+          content: item?.data,
+          metadata: {
+            domain: item?.domain,
+          },
+        }));
       } else {
-        contentList.push(currentSelectedMark?.data);
+        contentList.push({
+          content: currentSelectedMark?.data,
+        });
+      }
+
+      if (checkedKeys?.includes(`currentPage-resource`) && getRuntime() !== 'web') {
+        contentList.push({
+          content: currentResource?.content || '',
+          metadata: {
+            domain: 'extensionWeblink',
+            url: currentResource?.data?.url || '',
+            title: currentResource?.title || '',
+          },
+        });
       }
 
       return contentList;
     };
 
-    const getExternalResources = () => {
-      const externalResources: Resource[] = [];
-      if (checkedKeys?.includes(`currentPage-resource`) && getRuntime() !== 'web') {
-        externalResources.push({
-          resourceType: 'text',
-          title: currentResource?.title || '',
-          resourceId: '',
-          data: {
-            url: currentResource?.data?.url || '',
-          },
-          content: currentResource?.content || '',
-          contentPreview: currentResource?.contentPreview || '',
-          createdAt: currentResource?.createdAt || '',
-          updatedAt: currentResource?.updatedAt || '',
-        });
-      }
-
-      return externalResources;
-    };
-
     let context: SkillContext = {
       locale: localSettings?.outputLocale || LOCALE.EN,
       contentList: getContentList(),
-      collectionIds: getIds('collection', checkedKeys),
-      resourceIds: getIds('resource', checkedKeys),
-      noteIds: getIds('note', checkedKeys),
+      collections: getIds('collection', checkedKeys)?.map((item) => ({ collectionId: item })),
+      resources: getIds('resource', checkedKeys)?.map((item) => ({ resourceId: item })),
+      notes: getIds('note', checkedKeys)?.map((item) => ({ noteId: item })),
       urls: getUrls('weblink', checkedKeys),
-      externalResources: getExternalResources(),
     };
 
     return context;
