@@ -163,7 +163,7 @@ model TokenUsage {
   /// Output tokens
   outputTokens     Int      @default(0) @map("output_tokens")
   /// Skill id
-  skillId          String   @map("skill_id")
+  skillId          String?  @map("skill_id")
   /// Skill template name
   skillTplName     String   @map("skill_tpl_name")
   /// Skill display name
@@ -483,7 +483,7 @@ model UsageMeter {
   /// UID
   uid            String    @map("uid")
   /// Subscription ID
-  subscriptionId String    @map("subscription_id")
+  subscriptionId String?   @map("subscription_id")
   /// Meter start timestamp
   startAt        DateTime  @map("start_at") @db.Timestamptz()
   /// Meter end timestamp

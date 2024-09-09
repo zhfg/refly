@@ -87,7 +87,7 @@ export const AssistantMessage = memo(
     const profile = {
       name: message?.skillMeta?.displayName,
       avatar: message?.skillMeta?.displayName,
-      icon: message.skillMeta.icon,
+      icon: message?.skillMeta?.icon,
     };
 
     // TODO: 移入新组件

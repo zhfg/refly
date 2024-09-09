@@ -290,7 +290,7 @@ export class SubscriptionService {
       data: {
         meterId: genUsageMeterID(),
         uid,
-        subscriptionId: sub.subscriptionId,
+        subscriptionId: sub?.subscriptionId,
         startAt,
         endAt: new Date(startAt.getFullYear(), startAt.getMonth() + 1, startAt.getDate()),
         t1TokenQuota: tokenQuota?.t1TokenQuota || 0,
