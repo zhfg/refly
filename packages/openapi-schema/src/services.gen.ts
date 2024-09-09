@@ -141,7 +141,8 @@ import type {
   GetSubscriptionPlanError,
   GetSubscriptionPlanResponse,
   GetSubscriptionUsageError,
-  GetSubscriptionUsageResponse,
+  GetSubscriptionUsageResponse2,
+  CreateCheckoutSessionData,
   SearchData,
   SearchError,
   SearchResponse2,
@@ -677,7 +678,7 @@ export const getSubscriptionPlan = (options?: Options) => {
  * Get subscription usage
  */
 export const getSubscriptionUsage = (options?: Options) => {
-  return (options?.client ?? client).get<GetSubscriptionUsageResponse, GetSubscriptionUsageError>({
+  return (options?.client ?? client).get<GetSubscriptionUsageResponse2, GetSubscriptionUsageError>({
     ...options,
     url: '/subscription/usage',
   });
@@ -687,7 +688,7 @@ export const getSubscriptionUsage = (options?: Options) => {
  * Create checkout session
  * Create a checkout session
  */
-export const createCheckoutSession = (options?: Options) => {
+export const createCheckoutSession = (options: Options<CreateCheckoutSessionData>) => {
   return (options?.client ?? client).post<void>({
     ...options,
     url: '/subscription/createCheckoutSession',

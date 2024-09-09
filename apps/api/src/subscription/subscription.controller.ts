@@ -1,10 +1,11 @@
-import { Controller, UseGuards, Post, Res, Body } from '@nestjs/common';
+import { Controller, UseGuards, Post, Res, Body, Get } from '@nestjs/common';
 import { Response } from 'express';
 import { SubscriptionService } from '@/subscription/subscription.service';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { User } from '@/utils/decorators/user.decorator';
 import { User as UserModel } from '@prisma/client';
 import { CreateCheckoutSessionRequest } from '@refly/openapi-schema';
+import { buildSuccessResponse } from '@/utils';
 
 @Controller('subscription')
 export class SubscriptionController {
@@ -26,5 +27,12 @@ export class SubscriptionController {
   async createPortalSession(@User() user: UserModel, @Res() res: Response) {
     const session = await this.subscriptionService.createPortalSession(user);
     res.redirect(303, session.url);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/usage')
+  async getUsage(@User() user: UserModel) {
+    const usage = await this.subscriptionService.getOrCreateUsageMeter(user);
+    return buildSuccessResponse(usage);
   }
 }

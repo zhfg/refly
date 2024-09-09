@@ -95,7 +95,7 @@ export class SubscriptionService {
     });
 
     // Create a new usage meter for this plan
-    await this.createUsageMeter(user, sub, false);
+    await this.getOrCreateUsageMeter(user, sub);
 
     return sub;
   }
@@ -118,7 +118,7 @@ export class SubscriptionService {
     }
 
     // Create a free usage meter for user
-    await this.createUsageMeter(user, null, false);
+    await this.getOrCreateUsageMeter(user);
   }
 
   @StripeWebhookHandler('checkout.session.completed')
@@ -223,22 +223,13 @@ export class SubscriptionService {
   }
 
   async checkTokenUsage(user: User): Promise<ModelTier[]> {
-    const { uid } = user;
-
-    let activeMeter = await this.prisma.usageMeter.findFirst({
-      where: {
-        uid,
-        startAt: { lte: new Date() },
-        endAt: { gte: new Date() },
-        deletedAt: null,
-      },
-    });
-
-    // Compensate for the case where the usage meter is not found.
-    // Typically, the usage meter is automatically resumed with cronjobs, so this should be rare.
-    if (!activeMeter) {
-      activeMeter = await this.createUsageMeter(user, null, true);
+    const userModel = await this.prisma.user.findUnique({ where: { uid: user.uid } });
+    if (!userModel) {
+      this.logger.error(`No user found for uid ${user.uid}`);
+      return [];
     }
+
+    const activeMeter = await this.getOrCreateUsageMeter(userModel);
 
     const availableTiers: ModelTier[] = [];
     if (activeMeter.t1TokenUsed < activeMeter.t1TokenQuota) {
@@ -251,32 +242,49 @@ export class SubscriptionService {
     return availableTiers;
   }
 
-  async createUsageMeter(user: User, sub?: SubscriptionModel, resumeLastMeter?: boolean) {
+  async getOrCreateUsageMeter(user: UserModel, sub?: SubscriptionModel) {
     const { uid } = user;
     const planType = sub?.planType || 'free';
+
+    if (user.subscriptionId && !sub) {
+      sub = await this.prisma.subscription.findUnique({
+        where: { subscriptionId: user.subscriptionId },
+      });
+    }
+
+    const activeMeter = await this.prisma.usageMeter.findFirst({
+      where: {
+        uid,
+        subscriptionId: sub?.subscriptionId,
+        startAt: { lte: new Date() },
+        endAt: { gte: new Date() },
+        deletedAt: null,
+      },
+    });
+
+    // If the active meter is found, return it
+    if (activeMeter) {
+      return activeMeter;
+    }
+
+    // Try to find the last usage meter. If we find it, resume from there.
+    const lastMeter = await this.prisma.usageMeter.findFirst({
+      where: {
+        uid,
+        subscriptionId: sub?.subscriptionId,
+        endAt: { lt: new Date() },
+        deletedAt: null,
+      },
+      orderBy: {
+        startAt: 'desc',
+      },
+    });
+    const startAt = lastMeter?.endAt ?? startOfDay(new Date());
 
     // Find the token quota for the plan
     const tokenQuota = await this.prisma.subscriptionUsageQuota.findUnique({
       where: { planType },
     });
-
-    // Try to find the last usage meter. If we find it, resume from there.
-    let startAt: Date;
-
-    if (resumeLastMeter) {
-      const lastMeter = await this.prisma.usageMeter.findFirst({
-        where: {
-          uid,
-          deletedAt: null,
-        },
-        orderBy: {
-          startAt: 'desc',
-        },
-      });
-      startAt = lastMeter?.endAt ?? startOfDay(new Date());
-    } else {
-      startAt = startOfDay(new Date());
-    }
 
     return this.prisma.usageMeter.create({
       data: {

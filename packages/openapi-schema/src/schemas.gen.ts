@@ -1265,17 +1265,14 @@ export const $UsageMeter = {
     meterId: {
       type: 'string',
       description: 'Usage meter ID',
-      example: 'um-g30e1b80b5g1itbemc0g5jj3',
     },
     uid: {
       type: 'string',
       description: 'User ID',
-      example: 'u-g30e1b80b5g1itbemc0g5jj3',
     },
-    planId: {
+    subscriptionId: {
       type: 'string',
-      description: 'Subscription plan ID',
-      example: 'sp-g30e1b80b5g1itbemc0g5jj3',
+      description: 'Subscription ID',
     },
     startAt: {
       type: 'string',
@@ -2840,6 +2837,24 @@ export const $CreateCheckoutSessionRequest = {
       $ref: '#/components/schemas/PriceLookupKey',
     },
   },
+} as const;
+
+export const $GetSubscriptionUsageResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Subscription usage',
+          $ref: '#/components/schemas/UsageMeter',
+        },
+      },
+    },
+  ],
 } as const;
 
 export const $SearchDomain = {

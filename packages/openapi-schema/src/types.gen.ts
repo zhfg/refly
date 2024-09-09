@@ -1019,9 +1019,9 @@ export type UsageMeter = {
    */
   uid: string;
   /**
-   * Subscription plan ID
+   * Subscription ID
    */
-  planId: string;
+  subscriptionId?: string;
   /**
    * Usage meter start time
    */
@@ -1959,6 +1959,13 @@ export type CreateCheckoutSessionRequest = {
   lookupKey: PriceLookupKey;
 };
 
+export type GetSubscriptionUsageResponse = BaseResponse & {
+  /**
+   * Subscription usage
+   */
+  data?: UsageMeter;
+};
+
 export type SearchDomain = 'resource' | 'note' | 'collection' | 'conversation' | 'skill';
 
 export type SearchMode = 'keyword' | 'vector' | 'hybrid';
@@ -2666,9 +2673,13 @@ export type GetSubscriptionPlanResponse = unknown;
 
 export type GetSubscriptionPlanError = unknown;
 
-export type GetSubscriptionUsageResponse = unknown;
+export type GetSubscriptionUsageResponse2 = GetSubscriptionUsageResponse;
 
 export type GetSubscriptionUsageError = unknown;
+
+export type CreateCheckoutSessionData = {
+  body: CreateCheckoutSessionRequest;
+};
 
 export type SearchData = {
   body: SearchRequest;
@@ -3215,12 +3226,13 @@ export type $OpenApiTs = {
         /**
          * successful operation
          */
-        '200': unknown;
+        '200': GetSubscriptionUsageResponse;
       };
     };
   };
   '/subscription/createCheckoutSession': {
     post: {
+      req: CreateCheckoutSessionData;
       res: {
         /**
          * Redirect to Stripe checkout page

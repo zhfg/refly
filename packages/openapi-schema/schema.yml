@@ -1169,6 +1169,10 @@ paths:
       responses:
         '200':
           description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetSubscriptionUsageResponse'
   /subscription/createCheckoutSession:
     post:
       tags:
@@ -1176,6 +1180,12 @@ paths:
       summary: Create checkout session
       description: Create a checkout session
       operationId: createCheckoutSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCheckoutSessionRequest'
       responses:
         '303':
           description: Redirect to Stripe checkout page
@@ -2308,15 +2318,12 @@ components:
         meterId:
           type: string
           description: Usage meter ID
-          example: um-g30e1b80b5g1itbemc0g5jj3
         uid:
           type: string
           description: User ID
-          example: u-g30e1b80b5g1itbemc0g5jj3
-        planId:
+        subscriptionId:
           type: string
-          description: Subscription plan ID
-          example: sp-g30e1b80b5g1itbemc0g5jj3
+          description: Subscription ID
         startAt:
           type: string
           format: date-time
@@ -3348,6 +3355,15 @@ components:
         lookupKey:
           description: Price lookup key
           $ref: '#/components/schemas/PriceLookupKey'
+    GetSubscriptionUsageResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              description: Subscription usage
+              $ref: '#/components/schemas/UsageMeter'
     SearchDomain:
       type: string
       enum:
