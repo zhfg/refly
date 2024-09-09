@@ -63,6 +63,7 @@ export class CreateArticleOutlineSkill extends BaseSkill {
   async generate(state: GraphState, config?: SkillRunnableConfig) {
     this.engine.logger.log('---GENERATE---');
 
+    const { query } = state;
     const { locale = 'en', contentList = [], chatHistory = [] } = config?.configurable || {};
 
     const llm = this.engine.chatModel({
@@ -122,13 +123,16 @@ Context as following (with three "---" as separator, **only include the content 
 {context}
 ---
 
+# USER QUERY
+{query}
+
 ## IMPORTANT
 Please analyze the language of the provided context and ensure that your response is in the same language. If the context is in Chinese, respond in Chinese. If it's in English, respond in English. For any other language, respond in that language.
 `;
 
     const contextString = contentList.length > 0 ? contentList.join('\n') : 'No additional context provided.';
 
-    const prompt = systemPrompt.replace('{context}', contextString);
+    const prompt = systemPrompt.replace('{context}', contextString).replace('{query}', query);
 
     const responseMessage = await llm.invoke([
       new SystemMessage(prompt),

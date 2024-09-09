@@ -108,6 +108,27 @@ Take a deep breath and think step by step about how to best accomplish this goal
 - Do not output warnings or notes—just the requested sections.
 - Do not repeat items in the output sections.
 - Do not start items with the same opening words.
+- The title of each section should be in ${locale} language, includes "ONE SENTENCE SUMMARY"、"MAIN POINTS" and "TAKEAWAYS". 
+> Example for "MAIN POINTS": when locale = "en", the title should be "MAIN POINTS:", when locale = "zh-CN", the title should be "主要观点:"
+> Please apply example to all three sections.
+
+## EXAMPLE
+
+when locale = "en"
+
+### ONE SENTENCE SUMMARY:
+
+### MAIN POINTS:
+
+### TAKEAWAYS:
+
+when locale = "zh-CN"
+
+### 一句话总结:
+
+### 主要观点:
+
+### 要点总结:
 
 # INPUT:
 """

@@ -112,7 +112,7 @@ Content:
 
     const contextString =
       contentList.length > 0
-        ? contentList.map((item, index) => `${index + 1}. ${item}`).join('\n')
+        ? contentList.map((item, index) => `${index + 1}. ${item?.content}`).join('\n')
         : 'No additional context provided.';
 
     const prompt = systemPrompt.replace('{context}', contextString);
