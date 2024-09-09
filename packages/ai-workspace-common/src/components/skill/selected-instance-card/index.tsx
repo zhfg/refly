@@ -64,7 +64,7 @@ export const SelectedInstanceCard = () => {
       const { messages } = useChatStore.getState();
 
       const { input, context, tplConfig } = res;
-      const { contentList = [], urls = [] } = context;
+      const { contentList = [], urls = [] } = context || {};
 
       const skillContext: SkillContext = {
         ...context,
