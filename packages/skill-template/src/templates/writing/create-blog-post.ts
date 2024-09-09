@@ -5,7 +5,7 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 // schema
 import { z } from 'zod';
-import { SkillInvocationConfig, SkillTemplateConfigSchema, DynamicConfigValue } from '@refly/openapi-schema';
+import { SkillInvocationConfig, SkillTemplateConfigSchema, DynamicConfigValue, Icon } from '@refly/openapi-schema';
 // utils
 import { languageNameToLocale, localeToLanguageName, zhCNLocale } from '@refly/common-types';
 
@@ -31,6 +31,8 @@ export class CreateBlogPostSkill extends BaseSkill {
     en: 'Create Blog Post',
     'zh-CN': '创建博客文章',
   };
+
+  icon: Icon = { type: 'emoji', value: '📰' };
 
   configSchema: SkillTemplateConfigSchema = {
     items: [

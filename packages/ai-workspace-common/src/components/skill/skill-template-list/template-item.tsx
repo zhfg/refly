@@ -9,6 +9,7 @@ import './index.scss';
 import { SkillTemplate } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 import { SkillInstanceListSource } from '@refly-packages/ai-workspace-common/components/skill/skill-intance-list';
+import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
 
 interface TemplateItemProps {
   data: SkillTemplate;
@@ -26,11 +27,8 @@ export const TemplateItem = (props: TemplateItemProps) => {
     <div>
       <div className="template-item">
         <div className="template-item__header">
-          <div className="template-item__profile">
-            <Avatar size={40} shape="square" style={{ backgroundColor: '#00d0b6', borderRadius: 8 }}>
-              {data?.displayName}
-            </Avatar>
-          </div>
+          <SkillAvatar icon={data?.icon} size={40} displayName={data?.displayName} />
+
           <div className="template-item__title">
             <div className="template-item__title-name">{data?.displayName}</div>
           </div>

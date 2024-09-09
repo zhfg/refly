@@ -1413,9 +1413,8 @@ components:
           description: Label class display name
           example: Label display name
         icon:
-          type: string
           description: Label icon
-          example: IconBulb
+          $ref: '#/components/schemas/Icon'
         prompt:
           type: string
           description: Label creation instruction prompt
@@ -1569,6 +1568,25 @@ components:
           description: Config items
           items:
             $ref: '#/components/schemas/DynamicConfigItem'
+    IconType:
+      type: string
+      description: Icon type
+      enum:
+        - emoji
+        - image
+    Icon:
+      type: object
+      description: Icon
+      required:
+        - type
+        - value
+      properties:
+        type:
+          description: Icon type
+          $ref: '#/components/schemas/IconType'
+        value:
+          type: string
+          description: Icon value
     SkillTemplate:
       type: object
       description: Skill template
@@ -1585,6 +1603,9 @@ components:
         description:
           type: string
           description: Skill template description
+        icon:
+          description: Skill template icon
+          $ref: '#/components/schemas/Icon'
         configSchema:
           description: Skill template config schema
           $ref: '#/components/schemas/SkillTemplateConfigSchema'
@@ -1708,6 +1729,9 @@ components:
           type: string
           description: Skill ID
           example: sk-g30e1b80b5g1itbemc0g5jj3
+        icon:
+          description: Skill icon
+          $ref: '#/components/schemas/Icon'
     SkillTemplateConfig:
       type: object
       description: Skill template config (key is config item key, value is config value)
@@ -2444,9 +2468,8 @@ components:
           description: Label display name
           example: My Class
         icon:
-          type: string
           description: Label icon
-          example: IconBulb
+          $ref: '#/components/schemas/Icon'
         prompt:
           type: string
           description: Label creation instruction prompt
@@ -2468,9 +2491,8 @@ components:
           description: Label display name
           example: My Class
         icon:
-          type: string
           description: Label icon
-          example: IconBulb
+          $ref: '#/components/schemas/Icon'
         prompt:
           type: string
           description: Label creation instruction prompt
@@ -2590,6 +2612,9 @@ components:
         description:
           type: string
           description: Skill description
+        icon:
+          description: Skill instance icon
+          $ref: '#/components/schemas/Icon'
         tplConfig:
           description: Skill template config
           $ref: '#/components/schemas/SkillTemplateConfig'
@@ -2629,6 +2654,9 @@ components:
         description:
           type: string
           description: Skill description
+        icon:
+          description: Skill instance icon
+          $ref: '#/components/schemas/Icon'
         tplConfig:
           description: Skill template config
           $ref: '#/components/schemas/SkillTemplateConfig'

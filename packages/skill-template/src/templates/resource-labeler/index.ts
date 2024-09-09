@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { SystemMessage } from '@langchain/core/messages';
 import { HumanMessage } from '@langchain/core/messages';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
-import { LabelClass, SkillInvocationConfig, SkillTemplateConfigSchema } from '@refly/openapi-schema';
+import { Icon, LabelClass, SkillInvocationConfig, SkillTemplateConfigSchema } from '@refly/openapi-schema';
 
 interface GraphState extends BaseSkillState {
   labelClass: LabelClass;
@@ -20,6 +20,8 @@ export class ResourceLabelerSkill extends BaseSkill {
     en: 'Resource Labeler',
     'zh-CN': '资源标签归类',
   };
+
+  icon: Icon = { type: 'emoji', value: '🏷️' };
 
   configSchema: SkillTemplateConfigSchema = {
     items: [],
@@ -74,7 +76,7 @@ export class ResourceLabelerSkill extends BaseSkill {
     const { data: labelClass, success } = await this.engine.service.createLabelClass(user, {
       name: `resource_category_labeler`,
       displayName: `内容分类标签`,
-      icon: 'IconBulb',
+      icon: { type: 'emoji', value: '🏷️' },
       prompt: '',
     });
     if (!success || !labelClass) {

@@ -10,6 +10,7 @@ import {
   SkillInvocationConfig,
   SkillTemplateConfigSchema,
   SearchDomain,
+  Icon,
 } from '@refly/openapi-schema';
 
 interface GraphState extends BaseSkillState {
@@ -27,6 +28,8 @@ export class FindRelatedContent extends BaseSkill {
     en: 'Find Related Content',
     'zh-CN': '查找相关内容',
   };
+
+  icon: Icon = { type: 'emoji', value: '🔍' };
 
   configSchema: SkillTemplateConfigSchema = {
     items: [

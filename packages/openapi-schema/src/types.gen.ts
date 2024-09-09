@@ -179,7 +179,7 @@ export type LabelClass = {
   /**
    * Label icon
    */
-  icon?: string;
+  icon?: Icon;
   /**
    * Label creation instruction prompt
    */
@@ -322,6 +322,25 @@ export type SkillTemplateConfigSchema = {
 };
 
 /**
+ * Icon type
+ */
+export type IconType = 'emoji' | 'image';
+
+/**
+ * Icon
+ */
+export type Icon = {
+  /**
+   * Icon type
+   */
+  type: IconType;
+  /**
+   * Icon value
+   */
+  value: string;
+};
+
+/**
  * Skill template
  */
 export type SkillTemplate = {
@@ -337,6 +356,10 @@ export type SkillTemplate = {
    * Skill template description
    */
   description?: string;
+  /**
+   * Skill template icon
+   */
+  icon?: Icon;
   /**
    * Skill template config schema
    */
@@ -456,6 +479,10 @@ export type SkillMeta = {
    * Skill ID
    */
   skillId?: string;
+  /**
+   * Skill icon
+   */
+  icon?: Icon;
 };
 
 /**
@@ -1142,7 +1169,7 @@ export type CreateLabelClassRequest = {
   /**
    * Label icon
    */
-  icon?: string;
+  icon?: Icon;
   /**
    * Label creation instruction prompt
    */
@@ -1165,7 +1192,7 @@ export type UpdateLabelClassRequest = {
   /**
    * Label icon
    */
-  icon?: string;
+  icon?: Icon;
   /**
    * Label creation instruction prompt
    */
@@ -1265,6 +1292,10 @@ export type SkillInstanceCreateParam = {
    */
   description?: string;
   /**
+   * Skill instance icon
+   */
+  icon?: Icon;
+  /**
    * Skill template config
    */
   tplConfig?: SkillTemplateConfig;
@@ -1297,6 +1328,10 @@ export type UpdateSkillInstanceRequest = {
    * Skill description
    */
   description?: string;
+  /**
+   * Skill instance icon
+   */
+  icon?: Icon;
   /**
    * Skill template config
    */

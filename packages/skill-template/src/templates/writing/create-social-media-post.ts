@@ -10,6 +10,7 @@ import {
   SkillContextContentItem,
   SkillInvocationConfig,
   SkillTemplateConfigSchema,
+  Icon,
 } from '@refly/openapi-schema';
 import { languageNameToLocale, localeToLanguageName, SelectedTextDomain, zhCNLocale } from '@refly/common-types';
 
@@ -39,6 +40,8 @@ export class CreateSocialMediaPostSkill extends BaseSkill {
     en: 'Create Social Media Post',
     'zh-CN': '创建社交媒体文章',
   };
+
+  icon: Icon = { type: 'emoji', value: '📰' };
 
   configSchema: SkillTemplateConfigSchema = {
     items: [

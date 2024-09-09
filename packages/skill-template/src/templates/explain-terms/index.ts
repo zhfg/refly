@@ -5,7 +5,7 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 // schema
 import { z } from 'zod';
-import { SkillInvocationConfig, SkillTemplateConfigSchema } from '@refly/openapi-schema';
+import { Icon, SkillInvocationConfig, SkillTemplateConfigSchema } from '@refly/openapi-schema';
 
 interface GraphState extends BaseSkillState {
   documents: Document[];
@@ -20,6 +20,8 @@ export class ExplainTermsSkill extends BaseSkill {
     en: 'Explain Terms',
     'zh-CN': '解释术语',
   };
+
+  icon: Icon = { type: 'emoji', value: '🧑‍🏫' };
 
   configSchema: SkillTemplateConfigSchema = {
     items: [],
