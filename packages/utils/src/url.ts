@@ -64,6 +64,13 @@ export const getClientOrigin = (isLandingPage = false) => {
   }
 };
 
+export const getWebLogin = () => {
+  if (overrideLocalDev) {
+    return CLIENT_DEV_APP_DOMAIN;
+  }
+  return `${getEnv() === IENV.DEVELOPMENT ? CLIENT_DEV_APP_DOMAIN : CLIENT_PROD_APP_DOMAIN}/login`;
+};
+
 export function safeParseURL(url: string) {
   try {
     const urlObj = new URL(url);

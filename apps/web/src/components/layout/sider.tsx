@@ -59,6 +59,7 @@ const SiderLogo = (props: {
   setCollapse: (collapse: boolean) => void
 }) => {
   const { navigate, collapse, setCollapse } = props
+  const { t } = useTranslation()
   return (
     <div className="logo-box">
       <div className="logo" onClick={() => navigate("/")}>
@@ -74,7 +75,9 @@ const SiderLogo = (props: {
       </div>
       {!collapse && (
         <div className="collapse-btn" onClick={() => setCollapse(true)}>
-          <Tooltip position="right" content="Collapse">
+          <Tooltip
+            position="right"
+            content={t("loggedHomePage.siderMenu.collapse")}>
             <AiOutlineMenuFold
               className="arco-icon"
               style={{ fontSize: 20, color: "#666666" }}

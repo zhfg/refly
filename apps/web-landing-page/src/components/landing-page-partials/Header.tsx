@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react"
 import { Link } from "react-router-dom"
 import Logo from "@/assets/logo.svg"
 import { useUserStore } from "@refly-packages/ai-workspace-common/stores/user"
-import { getClientOrigin } from "@refly/utils/url"
+import { getWebLogin } from "@refly/utils/url"
 import { IENV, getEnv } from "@refly/utils/env"
 
 function Header() {
@@ -38,6 +38,10 @@ function Header() {
     document.addEventListener("keydown", keyHandler)
     return () => document.removeEventListener("keydown", keyHandler)
   })
+
+  const handleLogin = () => {
+    window.location.href = getWebLogin()
+  }
 
   return (
     <header className="fixed top-0 z-20 flex w-full justify-center px-6 backdrop-blur-lg sm:px-2 md:px-2 lg:px-0">
@@ -80,9 +84,7 @@ function Header() {
             {isDev ? (
               <li>
                 <button
-                  onClick={() => {
-                    userStore.setLoginModalVisible(true)
-                  }}
+                  onClick={handleLogin}
                   className="undefined undefined flex h-[1.9rem] items-center gap-1.5 whitespace-nowrap rounded-md bg-black px-2.5 text-sm font-semibold text-white ease-in">
                   本地登录
                 </button>
