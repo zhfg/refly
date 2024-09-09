@@ -498,6 +498,7 @@ export class SkillService {
     const config: SkillRunnableConfig = {
       configurable: {
         ...param.context,
+        locale: param.context?.locale ?? user.uiLocale ?? 'en',
         installedSkills,
         convId: param.convId,
         tplConfig: param.tplConfig,
