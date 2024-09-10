@@ -78,11 +78,14 @@ const InvokeOption = (props: {
 
   if (rule.key === 'query') {
     return (
-      <Input
+      <TextArea
         {...commonProps}
         placeholder={rule?.descriptionDict?.[locale] || t('skill.instanceInvokeModal.placeholder.query')}
-        maxLength={100}
         showWordLimit
+        autoSize={{
+          minRows: 4,
+          maxRows: 10,
+        }}
         onChange={(val) => {
           onChange(val);
         }}
@@ -94,7 +97,7 @@ const InvokeOption = (props: {
     return (
       <SearchSelect
         {...commonProps}
-        {...(rule.limit > 1 ? { mode: 'multiple' } : {})}
+        {...(rule.inputMode === 'multiSelect' ? { mode: 'multiple' } : {})}
         domain={ruleKeyToSearchDomain[rule.key]}
         placeholder={t(`skill.instanceInvokeModal.placeholder.${rule.key}`)}
         onChange={(val) => {
@@ -273,7 +276,7 @@ export const InvocationFormItems = (props: InvokeOptionGroupProps) => {
                 rule={rule}
                 t={t}
                 locale={locale}
-                disabled={selectedKey !== rule.key}
+                // disabled={selectedKey !== rule.key}
                 onChange={(val) => {
                   form.setFieldValue(getFormField(fieldPrefix, rule.key), val);
                 }}

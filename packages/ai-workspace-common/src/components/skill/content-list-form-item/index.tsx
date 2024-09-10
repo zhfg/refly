@@ -104,27 +104,29 @@ export const ContentListFormItem: React.FC<ContentListFormItemProps> = ({
         onChange={(val) => handleSelectChange(val, finalUsedMarks)}
       />
 
-      <Collapse>
-        {contentList.map((item, index) => (
-          <CollapseItem
-            name={item?.metadata?.domain}
-            key={index}
-            header={t(`skill.instanceInvokeModal.context.contentList.${item?.metadata?.domain}`)}
-          >
-            <TextArea
-              {...(restProps as any as TextAreaProps)}
-              className={`${className} content-list-textarea`}
-              style={{ ...style, width: '100%' }}
-              value={item?.content}
-              placeholder={
-                rule?.descriptionDict?.[locale] || t('skill.instanceInvokeModal.placeholder.contentList.textarea')
-              }
-              autoSize={{ minRows: 4, maxRows: 10 }}
-              onChange={(value) => handleTextAreaChange(item?.metadata?.domain, value)}
-            />
-          </CollapseItem>
-        ))}
-      </Collapse>
+      {contentList?.length > 0 && (
+        <Collapse>
+          {contentList.map((item, index) => (
+            <CollapseItem
+              name={item?.metadata?.domain}
+              key={index}
+              header={t(`skill.instanceInvokeModal.context.contentList.${item?.metadata?.domain}`)}
+            >
+              <TextArea
+                {...(restProps as any as TextAreaProps)}
+                className={`${className} content-list-textarea`}
+                style={{ ...style, width: '100%' }}
+                value={item?.content}
+                placeholder={
+                  rule?.descriptionDict?.[locale] || t('skill.instanceInvokeModal.placeholder.contentList.textarea')
+                }
+                autoSize={{ minRows: 4, maxRows: 10 }}
+                onChange={(value) => handleTextAreaChange(item?.metadata?.domain, value)}
+              />
+            </CollapseItem>
+          ))}
+        </Collapse>
+      )}
     </>
   );
 };
