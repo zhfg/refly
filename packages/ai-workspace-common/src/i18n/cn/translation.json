@@ -306,13 +306,19 @@
       "explore": "探索",
       "threadLibrary": "会话",
       "getHelp": "获得帮助",
-      "download": "下载插件",
+      "download": "下载",
+      "downloadExtension": "下载插件",
       "newResource": "导入资源",
       "settings": "设置",
       "skill": "技能",
       "collapse": "折叠",
       "expand": "展开",
-      "logout": "登出"
+      "logout": "登出",
+      "subscriptionStatus": {
+        "free": "标准版",
+        "pro": "高级版",
+        "enterprise": "企业版"
+      }
     }
   },
   "knowledgeLibrary": {

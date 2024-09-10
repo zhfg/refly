@@ -46,6 +46,12 @@
 
   .arco-menu-selected {
     background-color: #e8e8e2 !important;
+    &.setting-menu-item {
+      .subscription-status {
+        background-color: #faf9f9;
+        color: rgba(0, 0, 0, 0.7);
+      }
+    }
   }
 
   .sider-menu-nav {
@@ -124,23 +130,24 @@
   }
 
   .setting-menu-item {
-    .menu-settings {
-      padding: 0;
-
-      &:hover {
-        background-color: rgba(232, 232, 227) !important;
-        border-radius: 4px;
+    &:hover {
+      background-color: rgba(232, 232, 227) !important;
+      border-radius: 4px;
+      .subscription-status {
+        background-color: #faf9f9;
+        color: rgba(0, 0, 0, 0.7);
       }
     }
-
-    .setting-language-icon {
-      padding: 0px 8px;
-      display: inline-block;
-
-      &:hover {
-        background-color: rgba(232, 232, 227) !important;
-        border-radius: 4px;
-      }
+    .subscription-status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 24px;
+      background-color: #e9e5e5;
+      padding: 0 12px;
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: 16px;
     }
 
     .setting-icon {
@@ -165,18 +172,17 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    height: 40px;
 
     svg {
       margin-right: 0px !important;
     }
 
     .menu-settings {
+      height: 40px;
       display: flex;
       flex-direction: row;
       align-items: center;
-      &.user-profile {
-        padding: 2px 8px 2px 2px;
-      }
 
       .username {
         display: inline-block;
@@ -186,12 +192,34 @@
         font-weight: 600;
         line-height: 17px;
         letter-spacing: 0px;
-        max-width: 100px;
+        max-width: 80px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
 
         color: rgba(0, 0, 0, 0.6);
+      }
+    }
+  }
+  .more-info-menu-item-collapse {
+    &:hover {
+      background-color: rgba(232, 232, 227) !important;
+    }
+  }
+
+  .more-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 40px;
+    .more-info-btn {
+      height: 40px;
+      min-width: 40px;
+      background-color: transparent;
+      padding: 0 4px;
+      font-weight: 500;
+      &:hover {
+        background-color: rgba(232, 232, 227) !important;
       }
     }
   }

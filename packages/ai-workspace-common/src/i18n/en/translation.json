@@ -296,13 +296,19 @@
       "threadLibrary": "Threads",
       "explore": "Explore",
       "getHelp": "Get Help",
-      "download": "Download Extension",
+      "download": "Download",
+      "downloadExtension": "Download Extension",
       "newResource": "Import Resource",
       "settings": "Settings",
       "skill": "Skills",
       "collapse": "Collapse",
       "expand": "Expand",
-      "logout": "Log Out"
+      "logout": "Log Out",
+      "subscriptionStatus": {
+        "free": "Free",
+        "pro": "Pro",
+        "enterprise": "Enterprise"
+      }
     }
   },
   "knowledgeLibrary": {
