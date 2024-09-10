@@ -313,12 +313,7 @@
       "skill": "技能",
       "collapse": "折叠",
       "expand": "展开",
-      "logout": "登出",
-      "subscriptionStatus": {
-        "free": "标准版",
-        "pro": "高级版",
-        "enterprise": "企业版"
-      }
+      "logout": "登出"
     }
   },
   "knowledgeLibrary": {
@@ -532,7 +527,8 @@
     "title": "设置",
     "tabs": {
       "account": "账号",
-      "language": "语言"
+      "language": "语言",
+      "subscription": "订阅"
     },
 
     "account": {
@@ -564,6 +560,50 @@
       "outputLocale": {
         "title": "对话语言",
         "description": "AI 将按照此语言设置回答您的问题。您可以在对话中单独设置语言以覆盖此选项。"
+      }
+    },
+    "subscription": {
+      "subscribeNow": "立即订阅",
+      "currentPlan": "当前套餐",
+      "t1TokenUsed": "高阶模型 Token 使用量",
+      "t1TokenUsedDescription": "高阶模型包括 OpenAI GPT-4o、Anthropic Claude 3.5 Sonnet、Google Gemini 1.5 Pro；使用量包括模型输入和输出 Token 消耗",
+      "t2TokenUsed": "基础模型 Token 使用量",
+      "t2TokenUsedDescription": "基础模型包括 OpenAI GPT-4o-mini、OpenAI GPT-3.5-turbo、Google Gemini 1.5 Flash；使用量包括模型输入和输出 Token 消耗",
+      "subscriptionManagement": "管理账单及订阅",
+      "subscriptionStatus": {
+        "free": "标准版",
+        "pro": "高级版",
+        "enterprise": "企业版"
+      },
+      "subscribe": {
+        "title": "选择适合您的套餐",
+        "monthly": "按月",
+        "yearly": "按年",
+        "pro": {
+          "description": "享受最先进的高阶模型，并拥有更充裕的基础模型使用额度",
+          "buttonText": "立即升级",
+          "features": {
+            "t1Token": "高阶模型额度（1,000,000 Token/月）",
+            "t2Token": "基础模型额度（10,000,000 Token/月）"
+          }
+        },
+        "free": {
+          "description": "免费使用，拥有较多的基础模型使用额度",
+          "buttonText": "继续免费",
+          "features": {
+            "t1Token": "高阶模型额度（100,000 Token/月）",
+            "t2Token": "基础模型额度（5,000,000 Token/月）"
+          }
+        },
+        "description": "可随时取消订阅。订阅即表示您同意Refly的",
+        "and": "和",
+        "privacy": "隐私",
+        "terms": "条款",
+        "planFeatures": "套餐包含",
+        "period": "永久",
+        "month": "月",
+        "year": "年",
+        "forFree": "免费"
       }
     },
     "action": {

@@ -13,9 +13,14 @@ import {
   useNavigate,
 } from "@refly-packages/ai-workspace-common/utils/router"
 import { HiOutlineHome } from "react-icons/hi2"
-import { LuDownload, LuMoreHorizontal } from "react-icons/lu"
+import { LuMoreHorizontal } from "react-icons/lu"
 import { RiRobot2Line, RiHistoryLine } from "react-icons/ri"
-import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai"
+import {
+  AiOutlineMenuFold,
+  AiOutlineMenuUnfold,
+  AiFillChrome,
+} from "react-icons/ai"
+
 import { IconLanguage, IconImport } from "@arco-design/web-react/icon"
 // 静态资源
 import Logo from "@/assets/logo.svg"
@@ -126,7 +131,7 @@ const SettingItem = () => {
           </div>
           <div className="subscription-status">
             {t(
-              `loggedHomePage.siderMenu.subscriptionStatus.${userStore?.userProfile?.subscription?.planType || "free"}`,
+              `settings.subscription.subscriptionStatus.${userStore?.userProfile?.subscription?.planType || "free"}`,
             )}
           </div>
         </div>
@@ -144,7 +149,7 @@ const MoreInfo = (props: { collapse: boolean }) => {
         <Tooltip content={t("loggedHomePage.siderMenu.downloadExtension")}>
           <Button
             className="more-info-btn"
-            icon={<LuDownload style={{ fontSize: 14 }} />}
+            icon={<AiFillChrome style={{ fontSize: 16 }} />}
             onClick={() => {
               window.open(
                 `https://chromewebstore.google.com/detail/lecbjbapfkinmikhadakbclblnemmjpd`,
@@ -157,11 +162,11 @@ const MoreInfo = (props: { collapse: boolean }) => {
       )}
       <div className="flex items-center">
         {!collapse && (
-          <Button className="more-info-btn" iconOnly>
-            <UILocaleList>
+          <UILocaleList>
+            <Button className="more-info-btn" iconOnly>
               <IconLanguage style={{ fontSize: 18, marginRight: 0 }} />
-            </UILocaleList>
-          </Button>
+            </Button>
+          </UILocaleList>
         )}
         <SiderMenuMoreList>
           <Button

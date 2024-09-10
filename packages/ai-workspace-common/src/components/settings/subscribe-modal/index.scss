@@ -1,0 +1,127 @@
+.subscribe-content {
+  &-title {
+    font-size: 30px;
+    line-height: 38px;
+    color: #000;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  &-type {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+
+    &-inner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 40px;
+      padding: 4px;
+      box-sizing: border-box;
+      border-radius: 8px;
+      background: #f5f5f5;
+
+      &-item {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100px;
+        height: 100%;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        line-height: 24px;
+        color: #000;
+        &.active {
+          color: #fff;
+          background: #00968f;
+        }
+      }
+    }
+  }
+
+  &-plans {
+    margin-top: 20px;
+    padding: 12px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    background: rgb(240 249 255);
+    border-radius: 12px;
+
+    &-item {
+      flex: 1;
+      background: #fff;
+      border-radius: 12px;
+      padding: 28px;
+      box-sizing: border-box;
+      border: 1px solid transparent;
+
+      &-title {
+        font-size: 18px;
+        line-height: 32px;
+        color: #000;
+        font-weight: 600;
+      }
+
+      &.active {
+        border-color: #00968f;
+        .subscribe-content-plans-item-title {
+          color: #00968f;
+        }
+      }
+
+      &-price {
+        font-size: 28px;
+        line-height: 46px;
+        color: #000;
+        font-weight: 600;
+        .period {
+          color: #2c2929;
+          font-size: 14px;
+          line-height: 24px;
+        }
+      }
+
+      .description {
+        font-size: 14px;
+        line-height: 24px;
+        color: rgb(107 114 128);
+      }
+
+      .subscribe-btn {
+        margin: 20px 0;
+        height: 40px;
+        width: 100%;
+        font-size: 16px;
+        line-height: 24px;
+        font-weight: 600;
+        &.arco-btn-primary {
+          background: linear-gradient(to right, #00c4b8, #00968f);
+          &:hover {
+            background: linear-gradient(to right, #00c4b8, #00c4b8);
+          }
+        }
+      }
+
+      .plane-features {
+        &-item {
+          font-size: 14px;
+          line-height: 24px;
+          color: #000;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+
+  &-description {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    line-height: 24px;
+    color: rgb(107 114 128);
+  }
+}

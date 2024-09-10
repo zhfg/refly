@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-import { Dropdown, Menu, Modal, Avatar } from '@arco-design/web-react';
+import { Dropdown, Menu } from '@arco-design/web-react';
 import { AiOutlineTwitter } from 'react-icons/ai';
 import { HiOutlineExternalLink } from 'react-icons/hi';
 import { useState } from 'react';

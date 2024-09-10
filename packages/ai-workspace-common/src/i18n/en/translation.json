@@ -303,12 +303,7 @@
       "skill": "Skills",
       "collapse": "Collapse",
       "expand": "Expand",
-      "logout": "Log Out",
-      "subscriptionStatus": {
-        "free": "Free",
-        "pro": "Pro",
-        "enterprise": "Enterprise"
-      }
+      "logout": "Log Out"
     }
   },
   "knowledgeLibrary": {
@@ -533,7 +528,8 @@
     "title": "Settings",
     "tabs": {
       "account": "Account",
-      "language": "Language"
+      "language": "Language",
+      "subscription": "Subscription"
     },
 
     "account": {
@@ -568,6 +564,51 @@
         "description": "AI will respond to your questions in the language set here. You can override this option by setting the language individually within the conversation."
       }
     },
+    "subscription": {
+      "subscribeNow": "Subscribe Now",
+      "currentPlan": "Current Plan",
+      "t1TokenUsed": "High-level Model Token Usage",
+      "t1TokenUsedDescription": "High-level models include OpenAI GPT-4o, Anthropic Claude 3.5 Sonnet, and Google Gemini 1.5 Pro; usage includes both model input and output tokens.",
+      "t2TokenUsed": "Basic Model Token Usage",
+      "t2TokenUsedDescription": "Basic models include OpenAI GPT-4o-mini, OpenAI GPT-3.5-turbo, and Google Gemini 1.5 Flash; usage includes both model input and output tokens.",
+      "subscriptionManagement": "Manage Billing and Subscriptions",
+      "subscriptionStatus": {
+        "free": "Standard",
+        "pro": "Pro",
+        "enterprise": "Enterprise"
+      },
+      "subscribe": {
+        "title": "Choose the plan that suits you best",
+        "monthly": "Monthly",
+        "yearly": "Yearly",
+        "pro": {
+          "description": "Enjoy the latest high-level models and have more basic model usage",
+          "buttonText": "Upgrade Now",
+          "features": {
+            "t1Token": "High-level model quota (1,000,000 Token/month)",
+            "t2Token": "Basic model quota (10,000,000 Token/month)"
+          }
+        },
+        "free": {
+          "description": "Free usage with more basic model usage",
+          "buttonText": "Continue Free",
+          "features": {
+            "t1Token": "High-level model quota (100,000 Token/month)",
+            "t2Token": "Basic model quota (5,000,000 Token/month)"
+          }
+        },
+        "description": "Cancel anytime. Subscribing means you agree to Refly's",
+        "and": "and",
+        "privacy": "privacy",
+        "terms": "terms",
+        "planFeatures": "Plan Features",
+        "period": "Permanent",
+        "month": "Month",
+        "year": "Year",
+        "forFree": "Free"
+      }
+    },
+
     "action": {
       "putErrorNotify": "Failed to update user configuration. Please try again!"
     }

@@ -1,0 +1,102 @@
+.subscription {
+  padding: 8px 24px;
+
+  &-plan {
+    padding: 20px 24px 40px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid #fff;
+    background: linear-gradient(113deg, rgba(255, 255, 255, 0.51) 3.51%, rgba(255, 255, 255, 0) 111.71%),
+      rgb(234, 236, 240);
+    border-radius: 12px;
+    box-shadow: rgba(0, 0, 0, 0.06) 5px 7px 12px 0px;
+
+    &-info {
+      &-title {
+        font-size: 12px;
+        line-height: 16px;
+        color: #666;
+      }
+
+      &-status {
+        font-size: 20px;
+        line-height: 40px;
+        font-weight: 600;
+        color: #333;
+      }
+    }
+
+    .subscribe-btn {
+      position: relative;
+    }
+  }
+
+  &-usage {
+    margin-top: -20px;
+    padding: 20px 24px;
+    border: 1px solid transparent;
+    border-color: #fff;
+    border-top-color: transparent;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: rgba(0, 0, 0, 0.06) 5px 7px 12px 0px;
+    &-item {
+      margin-bottom: 28px;
+      &-title {
+        .title {
+          display: flex;
+          align-items: center;
+          font-size: 14px;
+          line-height: 20px;
+          color: rgb(71, 84, 103);
+          font-weight: 700;
+          .info-icon {
+            margin-left: 4px;
+            cursor: pointer;
+          }
+        }
+        .value {
+          font-size: 13px;
+          line-height: 16px;
+          color: #666;
+          .value-used {
+            color: #f00;
+          }
+        }
+      }
+      &-progress {
+        margin-top: 8px;
+      }
+    }
+  }
+
+  &-management {
+    height: 48px;
+    padding: 0 24px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 20px;
+    color: #666;
+    font-weight: 500;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    cursor: pointer;
+
+    &-left {
+      font-size: 14px;
+    }
+    &-right {
+      font-size: 16px;
+      color: #666;
+    }
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+      .subscription-management-right {
+        color: #00968f;
+      }
+    }
+  }
+}
