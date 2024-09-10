@@ -57,8 +57,15 @@ export class KnowledgeService {
     const { collectionId } = param;
 
     const coll = await this.prisma.collection.findFirst({
-      where: { collectionId, uid: user.uid, deletedAt: null },
-      include: { resources: { where: { deletedAt: null } } },
+      where: { collectionId, deletedAt: null },
+      include: {
+        resources: {
+          where: {
+            deletedAt: null,
+            OR: [{ isPublic: true }, { uid: user.uid }],
+          },
+        },
+      },
     });
     if (!coll) {
       throw new NotFoundException('Collection not found');
