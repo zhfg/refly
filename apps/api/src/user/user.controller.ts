@@ -13,7 +13,7 @@ import {
 import { buildSuccessResponse, pick } from '@/utils';
 import { User as UserModel } from '@prisma/client';
 import { SubscriptionService } from '@/subscription/subscription.service';
-import { subscriptionPo2DTO } from '@/subscription/subscription.dto';
+import { subscriptionPO2DTO } from '@/subscription/subscription.dto';
 
 @Controller('user')
 export class UserController {
@@ -31,7 +31,7 @@ export class UserController {
 
     if (user.subscriptionId) {
       const subscription = await this.subscriptionService.getSubscription(user.subscriptionId);
-      settings.subscription = subscriptionPo2DTO(subscription);
+      settings.subscription = subscriptionPO2DTO(subscription);
     }
 
     return buildSuccessResponse(settings);

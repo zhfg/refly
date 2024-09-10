@@ -5,8 +5,10 @@ import {
   SubscriptionInterval,
   TokenUsageItem,
   SubscriptionStatus,
+  UsageMeter,
 } from '@refly/openapi-schema';
-import { Subscription as SubscriptionModel } from '@prisma/client';
+import { Subscription as SubscriptionModel, UsageMeter as UsageMeterModel } from '@prisma/client';
+import { pick } from '@/utils';
 
 export interface CreateSubscriptionParam {
   subscriptionId: string;
@@ -26,12 +28,27 @@ export interface ReportTokenUsageJobData {
   timestamp: Date;
 }
 
-export function subscriptionPo2DTO(sub: SubscriptionModel): Subscription {
+export function subscriptionPO2DTO(sub: SubscriptionModel): Subscription {
   return {
-    subscriptionId: sub.subscriptionId,
-    lookupKey: sub.lookupKey,
+    ...pick(sub, ['subscriptionId', 'lookupKey']),
     planType: sub.planType as SubscriptionPlanType,
     interval: sub.interval as SubscriptionInterval,
     status: sub.status as SubscriptionStatus,
+  };
+}
+
+export function usageMeterPO2DTO(usage: UsageMeterModel): UsageMeter {
+  return {
+    ...pick(usage, [
+      'meterId',
+      'uid',
+      'subscriptionId',
+      't1TokenQuota',
+      't1TokenUsed',
+      't2TokenQuota',
+      't2TokenUsed',
+    ]),
+    startAt: usage.startAt.toJSON(),
+    endAt: usage.endAt.toJSON(),
   };
 }

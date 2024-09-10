@@ -4,8 +4,9 @@ import { SubscriptionService } from '@/subscription/subscription.service';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { User } from '@/utils/decorators/user.decorator';
 import { User as UserModel } from '@prisma/client';
-import { CreateCheckoutSessionRequest } from '@refly/openapi-schema';
+import { CreateCheckoutSessionRequest, GetSubscriptionUsageResponse } from '@refly/openapi-schema';
 import { buildSuccessResponse } from '@/utils';
+import { usageMeterPO2DTO } from '@/subscription/subscription.dto';
 
 @Controller('subscription')
 export class SubscriptionController {
@@ -31,8 +32,8 @@ export class SubscriptionController {
 
   @UseGuards(JwtAuthGuard)
   @Get('/usage')
-  async getUsage(@User() user: UserModel) {
+  async getUsage(@User() user: UserModel): Promise<GetSubscriptionUsageResponse> {
     const usage = await this.subscriptionService.getOrCreateUsageMeter(user);
-    return buildSuccessResponse(usage);
+    return buildSuccessResponse(usageMeterPO2DTO(usage));
   }
 }
