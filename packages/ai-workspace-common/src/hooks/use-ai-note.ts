@@ -22,6 +22,7 @@ export const useAINote = (shouldInitListener = false) => {
 
     if (!res?.data?.success) {
       Message.error(`创建笔记失败，请重试！`);
+      return;
     }
     const noteId = res?.data?.data?.noteId;
     jumpToNote({
