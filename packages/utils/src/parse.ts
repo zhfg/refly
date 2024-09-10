@@ -1,3 +1,5 @@
+import { Source } from '@refly/openapi-schema';
+
 export const safeParseJSON = (value: any, errorCallback?: (e: unknown) => any): any => {
   try {
     return JSON.parse(value);
@@ -50,3 +52,42 @@ export const markdownCitationParse = (markdown: string) => {
     .replace(/\[[cC]itation:(\d+)]/g, '[citation]($1)')
     .replace(/【[cC]itation:(\d+)】/g, '[citation]($1)');
 };
+
+export function parseMarkdownWithCitations(content: string, sources: Source[]): string {
+  // 统一引用格式
+  let parsedContent = content
+    .replace(/\[\[([cC])itation/g, '[citation')
+    .replace(/[cC]itation:(\d+)]]/g, 'citation:$1]')
+    .replace(/\[\[([cC]itation:\d+)]](?!])/g, `[$1]`)
+    .replace(/\[[cC]itation:(\d+)]/g, '[citation]($1)')
+    .replace(/【[cC]itation:(\d+)】/g, '[citation]($1)');
+
+  // 处理统一后的引用格式并收集使用的源
+  const citationRegex = /\[citation\]\((\d+)\)/g;
+  const usedSources = new Set<number>();
+
+  parsedContent = parsedContent.replace(citationRegex, (_, num) => {
+    const index = parseInt(num, 10) - 1;
+    const source = sources[index];
+    if (source) {
+      usedSources.add(index + 1);
+      return `[${num}](${source.url})`;
+    }
+    return `[${num}]`;
+  });
+
+  // 添加引用来源
+  if (usedSources.size > 0) {
+    parsedContent += '\n\n引用来源：\n';
+    Array.from(usedSources)
+      .sort((a, b) => a - b)
+      .forEach((num) => {
+        const source = sources[num - 1];
+        if (source) {
+          parsedContent += `-  ${num}\: [${source.title}](${source.url})\n\n`;
+        }
+      });
+  }
+
+  return parsedContent;
+}

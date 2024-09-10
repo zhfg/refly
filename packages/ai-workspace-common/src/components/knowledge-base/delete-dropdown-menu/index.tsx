@@ -9,6 +9,9 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 
 import { useTranslation } from 'react-i18next';
 import { useImportKnowledgeModal } from '@refly-packages/ai-workspace-common/stores/import-knowledge-modal';
+import { IconCopy } from '@arco-design/web-react/icon';
+import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
+import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 
 const iconStyle = {
   marginRight: 8,
@@ -29,6 +32,9 @@ interface DropListProps {
 
 const DropList = (props: DropListProps) => {
   const { handleCancel, handleDeleteClick, handlEditKnowledgeBase, type, getPopupContainer, position } = props;
+  const noteStore = useNoteStore((state) => ({
+    editor: state.editor,
+  }));
   const { t } = useTranslation();
 
   return (
@@ -61,6 +67,22 @@ const DropList = (props: DropListProps) => {
             {t('workspace.deleteDropdownMenu.delete')}
           </div>
         </Popconfirm>
+      </Menu.Item>
+      <Menu.Item key="copy">
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            const editor = noteStore.editor;
+            if (editor) {
+              const markdown = editor.storage.markdown.getMarkdown();
+              copyToClipboard(markdown);
+              Message.success({ content: t('contentDetail.item.copySuccess') });
+            }
+          }}
+        >
+          <IconCopy style={iconStyle} />
+          {t('contentDetail.item.copyContent')}
+        </div>
       </Menu.Item>
     </Menu>
   );
