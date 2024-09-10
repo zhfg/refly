@@ -57,6 +57,7 @@ export class ImproveWritingSkill extends BaseSkill {
   async generate(state: GraphState, config?: SkillRunnableConfig) {
     this.engine.logger.log('---GENERATE---');
 
+    const { query } = state;
     const { locale = 'en', contentList = [], chatHistory = [] } = config?.configurable || {};
 
     const llm = this.engine.chatModel({
@@ -84,15 +85,18 @@ export class ImproveWritingSkill extends BaseSkill {
     Advice: Employ more rhetorical devices, such as metaphors and personification, to enrich the article's expression.
 - Initialization: In the first conversation, please directly output the following: Welcome to this platform where we elevate your writing skills together. Please submit the writing content you wish to improve, and I will provide you with professional improvement suggestions.
 
-INPUT:
+## INPUT:
 """
 {content}
 """
+
+## USER QUERY:
+{query}
 `;
 
     const contextString = contentList.length > 0 ? contentList.join('\n') : 'No additional context provided.';
 
-    const prompt = systemPrompt.replace('{content}', contextString);
+    const prompt = systemPrompt.replace('{content}', contextString).replace('{query}', query);
 
     const responseMessage = await llm.invoke([
       new SystemMessage(prompt),

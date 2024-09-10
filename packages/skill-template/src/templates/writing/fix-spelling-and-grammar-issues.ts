@@ -94,7 +94,7 @@ INPUT:
     const responseMessage = await llm.invoke([
       new SystemMessage(prompt),
       ...chatHistory,
-      new HumanMessage(`Please provide professional language correction for the text`),
+      new HumanMessage(`Please provide professional language correction for the given INPUT`),
     ]);
 
     return { messages: [responseMessage] };
