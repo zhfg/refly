@@ -20,6 +20,14 @@ export interface NoteTab {
 export type NoteServerStatus = 'disconnected' | 'connected';
 export type NoteSaveStatus = 'Saved' | 'Unsaved';
 
+export interface TableOfContentsItem {
+  isActive: boolean;
+  isScrolledOver: boolean;
+  id: string;
+  itemIndex: number;
+  textContent: string;
+}
+
 interface NoteBaseState {
   currentNote: Note | null;
   isRequesting: boolean;
@@ -37,6 +45,9 @@ interface NoteBaseState {
 
   lastCursorPosRef: number | null;
 
+  // tocItems
+  tocItems: TableOfContentsItem[];
+
   updateCurrentNote: (note: Note) => void;
   updateIsRequesting: (isRequesting: boolean) => void;
   updateTabs: (tabs: NoteTab[]) => void;
@@ -48,6 +59,7 @@ interface NoteBaseState {
   updateEditor: (editor: EditorInstance) => void;
 
   updateLastCursorPosRef: (pos: number) => void;
+  updateTocItems: (items: TableOfContentsItem[]) => void;
 }
 
 export const defaultState = {
@@ -56,6 +68,7 @@ export const defaultState = {
   activeTab: 'key1',
   notePanelVisible: false,
   isRequesting: false,
+  tocItems: [],
 
   // notes
   editor: null,
@@ -85,5 +98,6 @@ export const useNoteStore = create<NoteBaseState>()(
     updateNoteSaveStatus: (status: NoteSaveStatus) => set((state) => ({ ...state, noteSaveStatus: status })),
     updateNoteCharsCount: (count: number) => set((state) => ({ ...state, noteCharsCount: count })),
     updateLastCursorPosRef: (pos: number) => set((state) => ({ ...state, lastCursorPosRef: pos })),
+    updateTocItems: (items: TableOfContentsItem[]) => set((state) => ({ ...state, tocItems: items })),
   })),
 );

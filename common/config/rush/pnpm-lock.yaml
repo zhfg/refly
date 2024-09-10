@@ -585,6 +585,12 @@ importers:
       '@tailwindcss/typography':
         specifier: ^0.5.10
         version: 0.5.10(tailwindcss@3.3.0)
+      '@tiptap-pro/extension-table-of-contents':
+        specifier: ~2.11.2
+        version: 2.11.2(@tiptap/pm@2.4.0)
+      '@tiptap-pro/extension-unique-id':
+        specifier: ~2.11.2
+        version: 2.11.2
       '@types/is-hotkey':
         specifier: ~0.1.7
         version: 0.1.7
@@ -1158,6 +1164,9 @@ importers:
       '@tailwindcss/forms':
         specifier: ^0.5.3
         version: 0.5.3(tailwindcss@3.3.0)
+      '@tiptap-pro/extension-table-of-contents':
+        specifier: ~2.11.2
+        version: 2.11.2(@tiptap/pm@2.4.0)
       '@tiptap/extension-character-count':
         specifier: ^2.4.0
         version: 2.4.0(@tiptap/core@2.4.0)(@tiptap/pm@2.4.0)
@@ -8837,6 +8846,25 @@ packages:
     resolution: {integrity: sha512-uNtAwenT276M9QYCjTBoHZ8X3MUeCRoGK59zPi92hMIxdfS9AyHjkDWJ94WroDxnv48UE+hIeo21BU84jKc8aQ==}
     dev: false
 
+  /@tiptap-pro/extension-table-of-contents@2.11.2(@tiptap/pm@2.4.0):
+    resolution: {integrity: sha512-vDB7j/hqN7du1xoyxgatCk3VwViXFTW0HYRWHB6phyQL3gU+oXEL/z3uF37KEUzMp5/8wNb+KNpxoXcAjNRAZw==}
+    peerDependencies:
+      '@tiptap/core': ^2.0.0
+      '@tiptap/pm': ^2.0.0
+    dependencies:
+      '@tiptap/pm': 2.4.0
+      uuid: 10.0.0
+    dev: false
+
+  /@tiptap-pro/extension-unique-id@2.11.2:
+    resolution: {integrity: sha512-7pJ88o/DKJj+/jG35KDeisnTjK1FU1yooi+IMin/nmu4pHaJ3uxYygi8iT4XWQUWdScK/ySUoRHWbfIOCSFytg==}
+    peerDependencies:
+      '@tiptap/core': ^2.0.0
+      '@tiptap/pm': ^2.0.0
+    dependencies:
+      uuid: 10.0.0
+    dev: false
+
   /@tiptap/core@2.4.0(@tiptap/pm@2.4.0):
     resolution: {integrity: sha512-YJSahk8pkxpCs8SflCZfTnJpE7IPyUWIylfgXM2DefjRQa5DZ+c6sNY0s/zbxKYFQ6AuHVX40r9pCfcqHChGxQ==}
     peerDependencies:
@@ -16192,7 +16220,7 @@ packages:
       '@langchain/core': 0.2.27(langchain@0.2.16)
       '@types/uuid': 9.0.8
       commander: 10.0.1
-      langchain: 0.2.16(@langchain/community@0.2.27)(cheerio@1.0.0)(ioredis@5.4.1)(pdf-parse@1.1.1)(redis@4.6.13)(ws@8.17.0)
+      langchain: 0.2.16(@langchain/community@0.2.27)
       p-queue: 6.6.2
       p-retry: 4.6.2
       uuid: 9.0.1
@@ -16215,7 +16243,7 @@ packages:
       '@langchain/core': 0.2.27(langchain@0.2.16)
       '@types/uuid': 9.0.8
       commander: 10.0.1
-      langchain: 0.2.16(@langchain/community@0.2.27)(cheerio@1.0.0)(ioredis@5.4.1)(pdf-parse@1.1.1)(redis@4.6.13)(ws@8.17.0)
+      langchain: 0.2.16(@langchain/community@0.2.27)
       p-queue: 6.6.2
       p-retry: 4.6.2
       semver: 7.6.3
@@ -22973,6 +23001,8 @@ time:
   /@swc/core@1.5.24: '2024-05-30T12:38:06.190Z'
   /@tailwindcss/forms@0.5.3: '2022-09-02T11:45:39.924Z'
   /@tailwindcss/typography@0.5.10: '2023-09-05T18:05:21.984Z'
+  /@tiptap-pro/extension-table-of-contents@2.11.2: '2024-08-30T15:28:30.214Z'
+  /@tiptap-pro/extension-unique-id@2.11.2: '2024-08-30T15:28:31.630Z'
   /@tiptap/core@2.4.0: '2024-05-14T12:55:23.460Z'
   /@tiptap/extension-character-count@2.4.0: '2024-05-14T12:55:27.713Z'
   /@tiptap/extension-code-block-lowlight@2.2.6: '2024-04-06T15:51:59.198Z'
