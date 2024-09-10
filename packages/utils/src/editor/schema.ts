@@ -32,7 +32,7 @@ export const schema = new Schema({
       },
     },
 
-    horizontal_rule: {
+    horizontalRule: {
       group: 'block',
       parseDOM: [{ tag: 'hr' }],
       toDOM() {
@@ -132,7 +132,6 @@ export const schema = new Schema({
       },
     },
 
-    // TODO: 先保障不出错，后续修复
     taskList: {
       content: 'taskItem+',
       group: 'block list',
@@ -150,7 +149,6 @@ export const schema = new Schema({
       },
     },
 
-    // TODO: 先保障不出错，后续修复
     taskItem: {
       content: 'block+',
       defining: true,
@@ -202,7 +200,7 @@ export const schema = new Schema({
   },
 
   marks: {
-    em: {
+    italic: {
       parseDOM: [
         { tag: 'i' },
         { tag: 'em' },
@@ -214,7 +212,7 @@ export const schema = new Schema({
       },
     },
 
-    strong: {
+    bold: {
       parseDOM: [
         { tag: 'strong' },
         {

@@ -26,7 +26,13 @@ import {
   QUEUE_RESOURCE,
   streamToString,
 } from '../utils';
-import { genCollectionID, genResourceID, cleanMarkdownForIngest, genNoteID } from '@refly/utils';
+import {
+  genCollectionID,
+  genResourceID,
+  cleanMarkdownForIngest,
+  genNoteID,
+  markdown2StateUpdate,
+} from '@refly/utils';
 import { FinalizeResourceParam } from './knowledge.dto';
 import { pick, omit } from '../utils';
 import { SimpleEventData } from '@/event/event.dto';
@@ -382,7 +388,16 @@ export class KnowledgeService {
   }
 
   async upsertNote(user: User, param: UpsertNoteRequest) {
+    const isNewNote = !param.noteId;
+
     param.noteId ||= genNoteID();
+
+    let stateStorageKey: string | undefined;
+    if (isNewNote && param.initialContent) {
+      stateStorageKey = `state/${param.noteId}`;
+      const ydoc = markdown2StateUpdate(param.initialContent);
+      await this.minio.client.putObject(stateStorageKey, Buffer.from(ydoc));
+    }
 
     return this.prisma.note.upsert({
       where: { noteId: param.noteId },
@@ -392,8 +407,12 @@ export class KnowledgeService {
         uid: user.uid,
         readOnly: param.readOnly ?? false,
         isPublic: param.isPublic ?? false,
+        content: param.initialContent,
+        stateStorageKey,
       },
-      update: param,
+      update: {
+        ...pick(param, ['title', 'readOnly', 'isPublic']),
+      },
     });
   }
 

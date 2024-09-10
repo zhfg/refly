@@ -2344,6 +2344,9 @@ components:
           type: boolean
           description: Whether this note is public
           default: false
+        initialContent:
+          type: string
+          description: Note initial content
     UpsertNoteResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

@@ -16,6 +16,7 @@ export const useAINote = (shouldInitListener = false) => {
     const res = await getClient().createNote({
       body: {
         title: 'New Article',
+        initialContent: content,
       },
     });
 
