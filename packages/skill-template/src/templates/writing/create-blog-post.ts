@@ -329,7 +329,8 @@ LENGTH: {length}
 LANGUAGE: {language}
 `;
 
-    const contextString = contentList.length > 0 ? contentList.join('\n') : 'No additional context provided.';
+    const contextString =
+      contentList.length > 0 ? contentList.map((item) => item?.content).join('\n') : 'No additional context provided.';
 
     const { targetPlatform, topic, tone, length, language } = (tplConfig || {}) as any as {
       targetPlatform: DynamicConfigValue;

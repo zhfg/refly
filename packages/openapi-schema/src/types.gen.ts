@@ -1072,9 +1072,9 @@ export type UpsertNoteRequest = {
    */
   isPublic?: boolean;
   /**
-   * Note initial content
+   * Note content
    */
-  initialContent?: string;
+  content?: string;
 };
 
 export type UpsertNoteResponse = BaseResponse & {

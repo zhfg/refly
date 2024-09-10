@@ -69,6 +69,6 @@ export default () => ({
     jinaToken: process.env.JINA_TOKEN,
   },
   skill: {
-    defaultModel: process.env.REFLY_DEFAULT_MODEL || 'gpt-4o-mini',
+    defaultModel: process.env.REFLY_DEFAULT_MODEL || 'anthropic/claude-3.5-sonnet',
   },
 });

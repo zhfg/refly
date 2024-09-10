@@ -145,7 +145,7 @@ Please analyze the language of the provided context and ensure that your respons
         )
         .join('\n\n');
     } else if (contentList.length > 0) {
-      contextString = contentList.join('\n\n');
+      contextString = contentList.map((item) => item?.content).join('\n\n');
     } else {
       contextString = 'No additional context provided.';
     }

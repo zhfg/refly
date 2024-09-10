@@ -3,9 +3,15 @@ import { useResizeBox } from '@refly-packages/ai-workspace-common/hooks/use-resi
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
+import { memo, useEffect } from 'react';
+import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
 
-export const SkillDisplay = () => {
-  const skillStore = useSkillStore();
+export const SkillDisplay = memo(({ source }: { source: string }) => {
+  const skillStore = useSkillStore((state) => ({
+    skillInstances: state.skillInstances,
+    setSelectedSkillInstance: state.setSelectedSkillInstance,
+    setSkillManagerModalVisible: state.setSkillManagerModalVisible,
+  }));
 
   const [containCnt] = useResizeBox({
     getGroupSelector: () => {
@@ -25,6 +31,17 @@ export const SkillDisplay = () => {
     placeholderWidth: 100,
     itemSize: 80,
   });
+
+  const { handleGetSkillInstances, handleGetSkillTemplates } = useSkillManagement();
+  const isFromSkillJob = () => {
+    return source === 'skillJob';
+  };
+
+  useEffect(() => {
+    if (isFromSkillJob()) return;
+    if (skillStore?.skillInstances?.length) return;
+    handleGetSkillInstances();
+  }, [skillStore?.skillInstances?.length]);
 
   return (
     <div className="skill-container">
@@ -51,4 +68,4 @@ export const SkillDisplay = () => {
       </div>
     </div>
   );
-};
+});

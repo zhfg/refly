@@ -55,7 +55,7 @@ export const selectedTextCardDomainWeb = [
 
 export const selectedTextCardDomainExtension = [
   {
-    key: 'weblink',
+    key: 'extensionWeblink',
     labelDict: {
       en: 'Web Link',
       'zh-CN': '网页链接',
@@ -138,7 +138,7 @@ export const defaultSelectedTextCardState = {
   selectedDomain: 'resource' as SelectedTextDomain,
   enableMultiSelect: true, // default enable multi select, later to see if we need to enable multiSelect ability
   currentSelectedMarks: [] as Mark[],
-  selectedTextCardDomain: ['resource'] as SelectedTextDomain[],
+  selectedTextCardDomain: [] as SelectedTextDomain[],
 };
 
 export const defaultCurrentContext = {

@@ -66,7 +66,7 @@ export interface Logger {
 export class SkillEngine {
   constructor(public logger: Logger, public service: ReflyService, private options?: SkillEngineOptions) {
     this.options = {
-      defaultModel: 'gpt-4o-mini',
+      defaultModel: 'anthropic/claude-3.5-sonnet',
       ...options,
     };
   }

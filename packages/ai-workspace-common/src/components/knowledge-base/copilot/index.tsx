@@ -165,7 +165,6 @@ export const AICopilot = memo((props: AICopilotProps) => {
 
   // ai-note handler
   useAINote(true);
-  const { handleGetSkillInstances, handleGetSkillTemplates } = useSkillManagement();
 
   const handleNewTempConv = () => {
     conversationStore.resetState();
@@ -265,11 +264,6 @@ export const AICopilot = memo((props: AICopilotProps) => {
   useResizeCopilot({ containerSelector: 'ai-copilot-container' });
   useDynamicInitContextPanelState(); // 动态根据页面状态更新上下文面板状态
 
-  useEffect(() => {
-    if (isFromSkillJob()) return;
-    handleGetSkillInstances();
-    handleGetSkillTemplates();
-  }, []);
   useEffect(() => {
     const runtime = getRuntime();
 
@@ -379,7 +373,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
                     <ContextStateDisplay />
                   </div>
                 ) : null}
-                <SkillDisplay />
+                <SkillDisplay source={source} />
                 <div className="ai-copilot-chat-container">
                   <div className="chat-input-container" style={{ height: actualChatContainerHeight }}>
                     <div className="chat-input-body">
