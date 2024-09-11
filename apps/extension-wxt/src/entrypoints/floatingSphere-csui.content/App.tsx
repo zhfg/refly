@@ -141,7 +141,7 @@ export const App = () => {
         {/* Dropdown menu content */}
         <div className="refly-floating-sphere-dropdown-connector" />
         <div className="refly-floating-sphere-dropdown-menu" ref={dropdownRef}>
-          <Tooltip content="总结此页面" position="left" getPopupContainer={getPopupContainer}>
+          {/* <Tooltip content="总结此页面" position="left" getPopupContainer={getPopupContainer}>
             <Button
               type="text"
               shape="circle"
@@ -149,7 +149,7 @@ export const App = () => {
               size="small"
               className="refly-floating-sphere-dropdown-item assist-action-item"
             ></Button>
-          </Tooltip>
+          </Tooltip> */}
           <Tooltip content="选择内容提问" position="left" getPopupContainer={getPopupContainer}>
             <Button
               type="text"
