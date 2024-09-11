@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { cut, extract } from '@node-rs/jieba';
 import { PrismaService } from '@/common/prisma.service';
 import {
@@ -10,6 +9,7 @@ import {
   User,
 } from '@refly/openapi-schema';
 import { RAGService } from '@/rag/rag.service';
+import { ElasticsearchService } from '@/common/elasticsearch.service';
 
 interface ProcessedSearchRequest extends SearchRequest {
   tokens: string[];
@@ -17,7 +17,11 @@ interface ProcessedSearchRequest extends SearchRequest {
 
 @Injectable()
 export class SearchService {
-  constructor(private prisma: PrismaService, private rag: RAGService) {}
+  constructor(
+    private prisma: PrismaService,
+    private elasticsearch: ElasticsearchService,
+    private rag: RAGService,
+  ) {}
 
   preprocessSearchRequest(req: SearchRequest): ProcessedSearchRequest {
     if (!req.limit || req.limit <= 0) {
@@ -73,52 +77,18 @@ export class SearchService {
     user: User,
     req: ProcessedSearchRequest,
   ): Promise<SearchResult[]> {
-    const tokens = req.tokens;
+    const hits = await this.elasticsearch.searchResources(user, req.query, req.limit || 5);
 
-    interface ResourceResult {
-      resource_id: string;
-      resource_type: ResourceType;
-      meta: string;
-      created_at: string;
-      updated_at: string;
-      title: string;
-      content: string;
-    }
-    const tokenList = tokens.join(' ');
-    const tokenOrList = tokens.join(' OR ');
-    const resources = await this.prisma.$queryRaw<ResourceResult[]>`
-      SELECT   resource_id,
-               resource_type,
-               meta,
-               created_at,
-               updated_at,
-               pgroonga_highlight_html(
-                 title, pgroonga_query_extract_keywords(${tokenList}::TEXT)
-               ) AS title,
-               pgroonga_highlight_html(
-                 content, pgroonga_query_extract_keywords(${tokenList}::TEXT)
-               ) AS content
-      FROM     resources
-      WHERE    uid = ${user.uid}
-      AND      (title &@~ ${tokenList}::TEXT OR content &@~ ${tokenOrList}::TEXT)
-      ORDER BY pgroonga_score(tableoid, ctid) DESC,
-               updated_at DESC
-      LIMIT    ${req.limit || 5}
-    `;
-
-    return resources.map((resource) => ({
-      id: resource.resource_id,
+    return hits.map((hit) => ({
+      id: hit._id,
       domain: 'resource',
-      title: resource.title,
-      content: resource.content
-        .split(/\r?\n+/)
-        .filter((line) => /<span\b[^>]*>(.*?)<\/span>/gi.test(line)),
+      title: hit.highlight?.title?.[0] || hit._source.title,
+      content: hit.highlight?.content || [hit._source.content],
       metadata: {
-        resourceMeta: JSON.parse(resource.meta || '{}'),
-        resourceType: resource.resource_type,
+        // TODO: confirm if metadata is used
       },
-      createdAt: resource.created_at,
-      updatedAt: resource.updated_at,
+      createdAt: hit._source.createdAt.toJSON(),
+      updatedAt: hit._source.updatedAt.toJSON(),
     }));
   }
 
@@ -198,44 +168,15 @@ export class SearchService {
   }
 
   async searchNotesByKeywords(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    const tokens = req.tokens;
+    const hits = await this.elasticsearch.searchNotes(user, req.query, req.limit || 5);
 
-    interface NoteResult {
-      note_id: string;
-      created_at: string;
-      updated_at: string;
-      title: string;
-      content: string;
-    }
-    const tokenList = tokens.join(' ');
-    const tokenOrList = tokens.join(' OR ');
-    const notes = await this.prisma.$queryRaw<NoteResult[]>`
-      SELECT   note_id,
-               created_at,
-               updated_at,
-               pgroonga_highlight_html(
-                 title, pgroonga_query_extract_keywords(${tokenList}::TEXT)
-               ) AS title,
-               pgroonga_highlight_html(
-                 content, pgroonga_query_extract_keywords(${tokenList}::TEXT)
-               ) AS content
-      FROM     notes
-      WHERE    uid = ${user.uid}
-      AND      (title &@~ ${tokenList}::TEXT OR content &@~ ${tokenOrList}::TEXT)
-      ORDER BY pgroonga_score(tableoid, ctid) DESC,
-               updated_at DESC
-      LIMIT    ${req.limit || 5}
-    `;
-
-    return notes.map((note) => ({
-      id: note.note_id,
+    return hits.map((hit) => ({
+      id: hit._id,
       domain: 'note',
-      title: note.title,
-      content: note.content
-        .split(/\r?\n+/)
-        .filter((line) => /<span\b[^>]*>(.*?)<\/span>/gi.test(line)),
-      createdAt: note.created_at,
-      updatedAt: note.updated_at,
+      title: hit.highlight?.title?.[0] || hit._source.title,
+      content: hit.highlight?.content || [hit._source.content],
+      createdAt: hit._source.createdAt.toJSON(),
+      updatedAt: hit._source.updatedAt.toJSON(),
     }));
   }
 
@@ -305,40 +246,15 @@ export class SearchService {
       return this.emptySearchCollections(user, req);
     }
 
-    interface CollectionResult {
-      collection_id: string;
-      created_at: string;
-      updated_at: string;
-      title: string;
-      description: string;
-    }
-    const tokenList = tokens.join(' ');
-    const tokenOrList = tokens.join(' OR ');
-    const colls = await this.prisma.$queryRaw<CollectionResult[]>`
-      SELECT   collection_id,
-               created_at,
-               updated_at,
-               pgroonga_highlight_html(
-                 title, pgroonga_query_extract_keywords(${tokenList}::TEXT)
-               ) AS title,
-               pgroonga_highlight_html(
-                 description, pgroonga_query_extract_keywords(${tokenList}::TEXT)
-               ) AS description
-      FROM     collections
-      WHERE    uid = ${user.uid}
-      AND      (title &@~ ${tokenOrList}::TEXT OR description &@~ ${tokenOrList}::TEXT)
-      ORDER BY pgroonga_score(tableoid, ctid) DESC,
-               updated_at DESC
-      LIMIT    ${req.limit || 5}
-    `;
+    const hits = await this.elasticsearch.searchCollections(user, req.query, req.limit || 5);
 
-    return colls.map((coll) => ({
-      id: coll.collection_id,
+    return hits.map((hit) => ({
+      id: hit._id,
       domain: 'collection',
-      title: coll.title,
-      content: [coll.description],
-      createdAt: coll.created_at,
-      updatedAt: coll.updated_at,
+      title: hit.highlight?.title?.[0] || hit._source.title,
+      content: hit.highlight?.description || [hit._source.description],
+      createdAt: hit._source.createdAt.toJSON(),
+      updatedAt: hit._source.updatedAt.toJSON(),
     }));
   }
 
@@ -366,65 +282,19 @@ export class SearchService {
   }
 
   async searchConversations(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    const tokens = req.tokens;
+    const hits = await this.elasticsearch.searchConversationMessages(
+      user,
+      req.query,
+      req.limit || 5,
+    );
 
-    if (tokens.length === 0) {
-      return this.emptySearchConversations(user, req);
-    }
-
-    interface MessageResult {
-      conv_id: string;
-      content: string;
-    }
-    const tokenList = tokens.join(' ');
-    const tokenOrList = tokens.join(' OR ');
-    const messages = await this.prisma.$queryRaw<MessageResult[]>`
-      SELECT   conv_id,
-               pgroonga_highlight_html(
-                 content, pgroonga_query_extract_keywords(${tokenList}::TEXT)
-               ) AS content
-      FROM     chat_messages
-      WHERE    uid = ${user.uid}
-      AND      content &@~ ${tokenOrList}::TEXT
-      ORDER BY pgroonga_score(tableoid, ctid) DESC
-    `;
-
-    if (messages.length === 0) {
-      return [];
-    }
-
-    interface ConversationResult {
-      id: number;
-      conv_id: string;
-      title: string;
-      created_at: string;
-      updated_at: string;
-    }
-    const convIds = [...new Set(messages.map((message) => message.conv_id))];
-    const conversations = await this.prisma.$queryRaw<ConversationResult[]>`
-      SELECT   id,
-               conv_id,
-               created_at,
-               updated_at,
-               pgroonga_highlight_html(
-                 title, pgroonga_query_extract_keywords(${tokenList}::TEXT)
-               ) AS title
-      FROM     conversations
-      WHERE    uid = ${user.uid}
-      AND      conv_id IN (${Prisma.join(convIds)})
-      ORDER BY updated_at DESC
-      LIMIT    ${req.limit || 5}
-    `;
-
-    return conversations.map((conversation) => ({
-      id: conversation.conv_id,
+    return hits.map((hit) => ({
+      id: hit._source.convId,
       domain: 'conversation',
-      title: conversation.title,
-      content: messages
-        .filter((message) => message.conv_id === conversation.conv_id)
-        .map((message) => message.content),
-      createdAt: conversation.created_at,
-      updatedAt: conversation.updated_at,
+      title: hit.highlight?.convTitle?.[0] || hit._source.convTitle,
+      content: hit.highlight?.content || [hit._source.content],
+      createdAt: hit._source.createdAt.toJSON(),
+      updatedAt: hit._source.updatedAt.toJSON(),
     }));
   }
 
@@ -444,42 +314,15 @@ export class SearchService {
   }
 
   async searchSkills(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    const tokens = req.tokens;
+    const hits = await this.elasticsearch.searchSkills(user, req.query, req.limit || 5);
 
-    if (tokens.length === 0) {
-      return this.emptySearchSkills(user, req);
-    }
-
-    interface SkillResult {
-      skill_id: string;
-      created_at: string;
-      updated_at: string;
-      content: string;
-    }
-    const tokenList = tokens.join(' ');
-    const tokenOrList = tokens.join(' OR ');
-    const skills = await this.prisma.$queryRaw<SkillResult[]>`
-      SELECT   skill_id,
-               created_at,
-               updated_at,
-               pgroonga_highlight_html(
-                 display_name, pgroonga_query_extract_keywords(${tokenList}::TEXT)
-               ) AS content
-      FROM     skill_instances
-      WHERE    uid = ${user.uid}
-      AND      deleted_at IS NULL
-      AND      display_name &@~ ${tokenOrList}::TEXT
-      ORDER BY pgroonga_score(tableoid, ctid) DESC,
-               updated_at DESC
-      LIMIT    ${req.limit || 5}
-    `;
-
-    return skills.map((skill) => ({
-      id: skill.skill_id,
+    return hits.map((hit) => ({
+      id: hit._id,
       domain: 'skill',
-      title: skill.content,
-      createdAt: skill.created_at,
-      updatedAt: skill.updated_at,
+      title: hit.highlight?.displayName?.[0] || hit._source.displayName,
+      content: hit.highlight?.description || [hit._source.description],
+      createdAt: hit._source.createdAt.toJSON(),
+      updatedAt: hit._source.updatedAt.toJSON(),
     }));
   }
 

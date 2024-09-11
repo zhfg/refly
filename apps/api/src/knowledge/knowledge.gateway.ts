@@ -13,6 +13,7 @@ import { Note, User } from '@prisma/client';
 import { state2Markdown } from '@refly/utils';
 import { RAGService } from '@/rag/rag.service';
 import { streamToBuffer } from '@/utils';
+import { ElasticsearchService } from '@/common/elasticsearch.service';
 
 interface NoteContext {
   note: Note;
@@ -27,6 +28,7 @@ export class NoteWsGateway implements OnGatewayConnection {
   constructor(
     private rag: RAGService,
     private prisma: PrismaService,
+    private elasticsearch: ElasticsearchService,
     private config: ConfigService,
     @Inject(MINIO_INTERNAL) private minio: MinioService,
   ) {
@@ -50,17 +52,17 @@ export class NoteWsGateway implements OnGatewayConnection {
           },
           store: async ({ state, context }: { state: Buffer; context: NoteContext }) => {
             const { note } = context;
-            note.stateStorageKey ||= `state/${note.noteId}`;
 
-            const { noteId, stateStorageKey } = note;
+            const { noteId, storageKey, stateStorageKey } = note;
             const content = state2Markdown(state);
 
             await Promise.all([
-              this.prisma.note.update({
-                where: { noteId },
-                data: { content, stateStorageKey },
-              }),
+              this.minio.client.putObject(storageKey, content),
               this.minio.client.putObject(stateStorageKey, state),
+              this.elasticsearch.upsertNote({
+                id: noteId,
+                content,
+              }),
 
               // TODO: put this in delayed queue
               // this.rag.saveDataForUser(user, {

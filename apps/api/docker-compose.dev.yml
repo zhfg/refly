@@ -39,9 +39,19 @@ services:
     volumes:
       - qdrant_data:/qdrant/storage:z
     restart: always
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
+    ports:
+      - 9200:9200
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
 
 volumes:
   db_data:
   minio_data:
   redis_data:
   qdrant_data:
+  elasticsearch_data:

@@ -40,6 +40,11 @@ export default () => ({
     apiKey: process.env.QDRANT_API_KEY,
     vectorDim: parseInt(process.env.REFLY_VEC_DIM) || 768,
   },
+  elasticsearch: {
+    url: process.env.ELASTICSEARCH_URL || 'http://localhost:9200',
+    username: process.env.ELASTICSEARCH_USERNAME,
+    password: process.env.ELASTICSEARCH_PASSWORD,
+  },
   serper: {
     apiKey: process.env.SERPER_API_KEY,
   },

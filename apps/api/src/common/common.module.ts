@@ -4,6 +4,7 @@ import { PrismaService } from './prisma.service';
 import { MINIO_EXTERNAL, MINIO_INTERNAL, MinioService } from './minio.service';
 import { RedisService } from './redis.service';
 import { QdrantService } from './qdrant.service';
+import { ElasticsearchService } from './elasticsearch.service';
 
 @Module({
   imports: [ConfigModule],
@@ -11,6 +12,7 @@ import { QdrantService } from './qdrant.service';
     PrismaService,
     RedisService,
     QdrantService,
+    ElasticsearchService,
     {
       provide: MINIO_INTERNAL,
       useFactory: (configService: ConfigService) =>
@@ -24,6 +26,13 @@ import { QdrantService } from './qdrant.service';
       inject: [ConfigService],
     },
   ],
-  exports: [PrismaService, RedisService, QdrantService, MINIO_INTERNAL, MINIO_EXTERNAL],
+  exports: [
+    PrismaService,
+    RedisService,
+    QdrantService,
+    ElasticsearchService,
+    MINIO_INTERNAL,
+    MINIO_EXTERNAL,
+  ],
 })
 export class CommonModule {}
