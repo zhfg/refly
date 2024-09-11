@@ -1959,6 +1959,30 @@ export type CreateCheckoutSessionRequest = {
   lookupKey: PriceLookupKey;
 };
 
+export type CreateCheckoutSessionResponse = BaseResponse & {
+  /**
+   * Checkout session
+   */
+  data?: {
+    /**
+     * Checkout session URL
+     */
+    url?: string;
+  };
+};
+
+export type CreatePortalSessionResponse = BaseResponse & {
+  /**
+   * Portal session
+   */
+  data?: {
+    /**
+     * Portal session URL
+     */
+    url?: string;
+  };
+};
+
 export type GetSubscriptionUsageResponse = BaseResponse & {
   /**
    * Subscription usage
@@ -2681,6 +2705,14 @@ export type CreateCheckoutSessionData = {
   body: CreateCheckoutSessionRequest;
 };
 
+export type CreateCheckoutSessionResponse2 = CreateCheckoutSessionResponse;
+
+export type CreateCheckoutSessionError = unknown;
+
+export type CreatePortalSessionResponse2 = CreatePortalSessionResponse;
+
+export type CreatePortalSessionError = unknown;
+
 export type SearchData = {
   body: SearchRequest;
 };
@@ -3235,9 +3267,9 @@ export type $OpenApiTs = {
       req: CreateCheckoutSessionData;
       res: {
         /**
-         * Redirect to Stripe checkout page
+         * successful operation
          */
-        '303': unknown;
+        '200': CreateCheckoutSessionResponse;
       };
     };
   };
@@ -3245,9 +3277,9 @@ export type $OpenApiTs = {
     post: {
       res: {
         /**
-         * Redirect to Stripe portal
+         * successful operation
          */
-        '303': unknown;
+        '200': CreatePortalSessionResponse;
       };
     };
   };

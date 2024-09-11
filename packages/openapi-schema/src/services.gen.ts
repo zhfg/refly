@@ -143,6 +143,10 @@ import type {
   GetSubscriptionUsageError,
   GetSubscriptionUsageResponse2,
   CreateCheckoutSessionData,
+  CreateCheckoutSessionError,
+  CreateCheckoutSessionResponse2,
+  CreatePortalSessionError,
+  CreatePortalSessionResponse2,
   SearchData,
   SearchError,
   SearchResponse2,
@@ -689,7 +693,7 @@ export const getSubscriptionUsage = (options?: Options) => {
  * Create a checkout session
  */
 export const createCheckoutSession = (options: Options<CreateCheckoutSessionData>) => {
-  return (options?.client ?? client).post<void>({
+  return (options?.client ?? client).post<CreateCheckoutSessionResponse2, CreateCheckoutSessionError>({
     ...options,
     url: '/subscription/createCheckoutSession',
   });
@@ -700,7 +704,7 @@ export const createCheckoutSession = (options: Options<CreateCheckoutSessionData
  * Create a portal session
  */
 export const createPortalSession = (options?: Options) => {
-  return (options?.client ?? client).post<void>({
+  return (options?.client ?? client).post<CreatePortalSessionResponse2, CreatePortalSessionError>({
     ...options,
     url: '/subscription/createPortalSession',
   });

@@ -1187,8 +1187,12 @@ paths:
             schema:
               $ref: '#/components/schemas/CreateCheckoutSessionRequest'
       responses:
-        '303':
-          description: Redirect to Stripe checkout page
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateCheckoutSessionResponse'
   /subscription/createPortalSession:
     post:
       tags:
@@ -1197,8 +1201,12 @@ paths:
       description: Create a portal session
       operationId: createPortalSession
       responses:
-        '303':
-          description: Redirect to Stripe portal
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatePortalSessionResponse'
   /search:
     post:
       tags:
@@ -3355,6 +3363,30 @@ components:
         lookupKey:
           description: Price lookup key
           $ref: '#/components/schemas/PriceLookupKey'
+    CreateCheckoutSessionResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              description: Checkout session
+              properties:
+                url:
+                  type: string
+                  description: Checkout session URL
+    CreatePortalSessionResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              description: Portal session
+              properties:
+                url:
+                  type: string
+                  description: Portal session URL
     GetSubscriptionUsageResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

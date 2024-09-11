@@ -2839,6 +2839,52 @@ export const $CreateCheckoutSessionRequest = {
   },
 } as const;
 
+export const $CreateCheckoutSessionResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Checkout session',
+          properties: {
+            url: {
+              type: 'string',
+              description: 'Checkout session URL',
+            },
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $CreatePortalSessionResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Portal session',
+          properties: {
+            url: {
+              type: 'string',
+              description: 'Portal session URL',
+            },
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
 export const $GetSubscriptionUsageResponse = {
   allOf: [
     {

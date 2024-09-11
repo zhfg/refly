@@ -1,10 +1,14 @@
-import { Controller, UseGuards, Post, Res, Body, Get } from '@nestjs/common';
-import { Response } from 'express';
+import { Controller, UseGuards, Post, Body, Get } from '@nestjs/common';
 import { SubscriptionService } from '@/subscription/subscription.service';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { User } from '@/utils/decorators/user.decorator';
 import { User as UserModel } from '@prisma/client';
-import { CreateCheckoutSessionRequest, GetSubscriptionUsageResponse } from '@refly/openapi-schema';
+import {
+  CreateCheckoutSessionRequest,
+  CreateCheckoutSessionResponse,
+  CreatePortalSessionResponse,
+  GetSubscriptionUsageResponse,
+} from '@refly/openapi-schema';
 import { buildSuccessResponse } from '@/utils';
 import { usageMeterPO2DTO } from '@/subscription/subscription.dto';
 
@@ -17,17 +21,16 @@ export class SubscriptionController {
   async createCheckoutSession(
     @User() user: UserModel,
     @Body() param: CreateCheckoutSessionRequest,
-    @Res() res: Response,
-  ) {
+  ): Promise<CreateCheckoutSessionResponse> {
     const session = await this.subscriptionService.createCheckoutSession(user, param);
-    res.redirect(303, session.url);
+    return buildSuccessResponse({ url: session.url });
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('/createPortalSession')
-  async createPortalSession(@User() user: UserModel, @Res() res: Response) {
+  async createPortalSession(@User() user: UserModel): Promise<CreatePortalSessionResponse> {
     const session = await this.subscriptionService.createPortalSession(user);
-    res.redirect(303, session.url);
+    return buildSuccessResponse({ url: session.url });
   }
 
   @UseGuards(JwtAuthGuard)
