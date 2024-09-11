@@ -2314,7 +2314,7 @@ components:
           type: string
           description: Subscription status
           $ref: '#/components/schemas/SubscriptionStatus'
-    UsageMeter:
+    TokenUsageMeter:
       type: object
       required:
         - meterId
@@ -2325,7 +2325,7 @@ components:
       properties:
         meterId:
           type: string
-          description: Usage meter ID
+          description: Token usage meter ID
         uid:
           type: string
           description: User ID
@@ -2335,11 +2335,11 @@ components:
         startAt:
           type: string
           format: date-time
-          description: Usage meter start time
+          description: Token usage meter start time
         endAt:
           type: string
           format: date-time
-          description: Usage meter end time
+          description: Token usage meter end time
         t1TokenQuota:
           type: number
           description: Token quota (T1)
@@ -3387,6 +3387,12 @@ components:
                 url:
                   type: string
                   description: Portal session URL
+    SubscriptionUsageData:
+      type: object
+      properties:
+        token:
+          description: Token usage meter
+          $ref: '#/components/schemas/TokenUsageMeter'
     GetSubscriptionUsageResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -3395,7 +3401,7 @@ components:
             data:
               type: object
               description: Subscription usage
-              $ref: '#/components/schemas/UsageMeter'
+              $ref: '#/components/schemas/SubscriptionUsageData'
     SearchDomain:
       type: string
       enum:

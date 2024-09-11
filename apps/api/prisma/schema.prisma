@@ -475,7 +475,7 @@ model Subscription {
   @@map("subscriptions")
 }
 
-model UsageMeter {
+model TokenUsageMeter {
   /// Primary key
   pk             BigInt    @id @default(autoincrement())
   /// Meter ID
@@ -504,7 +504,7 @@ model UsageMeter {
   deletedAt      DateTime? @map("deleted_at") @db.Timestamptz()
 
   @@index([uid, deletedAt])
-  @@map("usage_meters")
+  @@map("token_usage_meters")
 }
 
 model CheckoutSession {

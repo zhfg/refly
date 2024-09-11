@@ -1009,9 +1009,9 @@ export type Subscription = {
   status: SubscriptionStatus;
 };
 
-export type UsageMeter = {
+export type TokenUsageMeter = {
   /**
-   * Usage meter ID
+   * Token usage meter ID
    */
   meterId: string;
   /**
@@ -1023,11 +1023,11 @@ export type UsageMeter = {
    */
   subscriptionId?: string;
   /**
-   * Usage meter start time
+   * Token usage meter start time
    */
   startAt: string;
   /**
-   * Usage meter end time
+   * Token usage meter end time
    */
   endAt: string;
   /**
@@ -1983,11 +1983,18 @@ export type CreatePortalSessionResponse = BaseResponse & {
   };
 };
 
+export type SubscriptionUsageData = {
+  /**
+   * Token usage meter
+   */
+  token?: TokenUsageMeter;
+};
+
 export type GetSubscriptionUsageResponse = BaseResponse & {
   /**
    * Subscription usage
    */
-  data?: UsageMeter;
+  data?: SubscriptionUsageData;
 };
 
 export type SearchDomain = 'resource' | 'note' | 'collection' | 'conversation' | 'skill';

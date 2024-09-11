@@ -9,7 +9,11 @@ import {
   User,
 } from '@refly/openapi-schema';
 import { genUsageMeterID, getSubscriptionInfoFromLookupKey } from '@refly/utils';
-import { CreateSubscriptionParam, ReportTokenUsageJobData } from '@/subscription/subscription.dto';
+import {
+  CreateSubscriptionParam,
+  ReportTokenUsageJobData,
+  tokenUsageMeterPO2DTO,
+} from '@/subscription/subscription.dto';
 import { pick } from '@/utils';
 import { Subscription as SubscriptionModel, User as UserModel } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
@@ -106,7 +110,7 @@ export class SubscriptionService {
         where: { uid: sub.uid },
         data: { subscriptionId: null },
       }),
-      this.prisma.usageMeter.updateMany({
+      this.prisma.tokenUsageMeter.updateMany({
         where: { subscriptionId: sub.subscriptionId },
         data: { deletedAt: new Date() },
       }),
@@ -229,7 +233,7 @@ export class SubscriptionService {
       return [];
     }
 
-    const activeMeter = await this.getOrCreateUsageMeter(userModel);
+    const activeMeter = await this.getOrCreateTokenUsageMeter(userModel);
 
     const availableTiers: ModelTier[] = [];
     if (activeMeter.t1TokenUsed < activeMeter.t1TokenQuota) {
@@ -242,7 +246,7 @@ export class SubscriptionService {
     return availableTiers;
   }
 
-  async getOrCreateUsageMeter(user: UserModel, sub?: SubscriptionModel) {
+  async getOrCreateTokenUsageMeter(user: UserModel, sub?: SubscriptionModel) {
     const { uid } = user;
 
     if (user.subscriptionId && !sub) {
@@ -253,7 +257,7 @@ export class SubscriptionService {
 
     const now = new Date();
 
-    const activeMeter = await this.prisma.usageMeter.findFirst({
+    const activeMeter = await this.prisma.tokenUsageMeter.findFirst({
       where: {
         uid,
         subscriptionId: sub?.subscriptionId,
@@ -272,7 +276,7 @@ export class SubscriptionService {
     }
 
     // Try to find the last usage meter. If we find it, resume from there.
-    const lastMeter = await this.prisma.usageMeter.findFirst({
+    const lastMeter = await this.prisma.tokenUsageMeter.findFirst({
       where: {
         uid,
         subscriptionId: sub?.subscriptionId,
@@ -291,7 +295,7 @@ export class SubscriptionService {
       where: { planType },
     });
 
-    return this.prisma.usageMeter.create({
+    return this.prisma.tokenUsageMeter.create({
       data: {
         meterId: genUsageMeterID(),
         uid,
@@ -304,6 +308,18 @@ export class SubscriptionService {
         t2TokenUsed: 0,
       },
     });
+  }
+
+  async getOrCreateUsageMeter(user: UserModel, sub?: SubscriptionModel) {
+    if (user.subscriptionId && !sub) {
+      sub = await this.prisma.subscription.findUnique({
+        where: { subscriptionId: user.subscriptionId },
+      });
+    }
+
+    const tokenMeter = await this.getOrCreateTokenUsageMeter(user, sub);
+
+    return { token: tokenUsageMeterPO2DTO(tokenMeter) };
   }
 
   async updateTokenUsage(data: ReportTokenUsageJobData) {
@@ -319,7 +335,7 @@ export class SubscriptionService {
           skillDisplayName: skill.displayName,
         },
       }),
-      this.prisma.usageMeter.updateMany({
+      this.prisma.tokenUsageMeter.updateMany({
         where: {
           uid,
           startAt: { lte: timestamp },

@@ -1258,13 +1258,13 @@ export const $Subscription = {
   },
 } as const;
 
-export const $UsageMeter = {
+export const $TokenUsageMeter = {
   type: 'object',
   required: ['meterId', 'uid', 'planId', 'startAt', 'endAt'],
   properties: {
     meterId: {
       type: 'string',
-      description: 'Usage meter ID',
+      description: 'Token usage meter ID',
     },
     uid: {
       type: 'string',
@@ -1277,12 +1277,12 @@ export const $UsageMeter = {
     startAt: {
       type: 'string',
       format: 'date-time',
-      description: 'Usage meter start time',
+      description: 'Token usage meter start time',
     },
     endAt: {
       type: 'string',
       format: 'date-time',
-      description: 'Usage meter end time',
+      description: 'Token usage meter end time',
     },
     t1TokenQuota: {
       type: 'number',
@@ -2885,6 +2885,16 @@ export const $CreatePortalSessionResponse = {
   ],
 } as const;
 
+export const $SubscriptionUsageData = {
+  type: 'object',
+  properties: {
+    token: {
+      description: 'Token usage meter',
+      $ref: '#/components/schemas/TokenUsageMeter',
+    },
+  },
+} as const;
+
 export const $GetSubscriptionUsageResponse = {
   allOf: [
     {
@@ -2896,7 +2906,7 @@ export const $GetSubscriptionUsageResponse = {
         data: {
           type: 'object',
           description: 'Subscription usage',
-          $ref: '#/components/schemas/UsageMeter',
+          $ref: '#/components/schemas/SubscriptionUsageData',
         },
       },
     },

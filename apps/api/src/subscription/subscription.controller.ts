@@ -10,7 +10,6 @@ import {
   GetSubscriptionUsageResponse,
 } from '@refly/openapi-schema';
 import { buildSuccessResponse } from '@/utils';
-import { usageMeterPO2DTO } from '@/subscription/subscription.dto';
 
 @Controller('subscription')
 export class SubscriptionController {
@@ -37,6 +36,6 @@ export class SubscriptionController {
   @Get('/usage')
   async getUsage(@User() user: UserModel): Promise<GetSubscriptionUsageResponse> {
     const usage = await this.subscriptionService.getOrCreateUsageMeter(user);
-    return buildSuccessResponse(usageMeterPO2DTO(usage));
+    return buildSuccessResponse(usage);
   }
 }

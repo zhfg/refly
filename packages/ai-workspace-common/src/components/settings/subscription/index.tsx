@@ -12,7 +12,7 @@ import './index.scss';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { UsageMeter } from '@refly/openapi-schema';
+import { TokenUsageMeter } from '@refly/openapi-schema';
 import dayjs from 'dayjs';
 
 export const Subscription = () => {
@@ -22,12 +22,12 @@ export const Subscription = () => {
   const [subscriptionStatus, setSubscriptionStatus] = useState(
     userStore?.userProfile?.subscription?.planType || 'free',
   );
-  const [subscriptionUsage, setSubscriptionUsage] = useState<UsageMeter>(null);
+  const [subscriptionUsage, setSubscriptionUsage] = useState<TokenUsageMeter>(null);
 
   const getubscriptionStatus = async () => {
     const { data } = await getClient().getSubscriptionUsage();
     if (data?.data) {
-      setSubscriptionUsage(data.data);
+      setSubscriptionUsage(data.data.token);
     }
   };
 
