@@ -17,6 +17,7 @@ import { FaWpforms } from 'react-icons/fa';
 // styles
 import './index.scss';
 import { LOCALE } from '@refly/common-types';
+import { ChatInputAssistAction } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/chat-input-assist-action';
 
 const CollapseItem = Collapse.Item;
 
@@ -84,12 +85,30 @@ export const InstanceInvokeForm = (props: InstanceInvokeProps) => {
       )}
 
       <div className="instance-invoke-modal-footer">
-        <Button type="secondary" onClick={() => setVisible(false)}>
-          {t('common.cancel')}
-        </Button>
-        <Button type="primary" onClick={onOk} style={{ marginLeft: 12 }} loading={confirmLoading}>
-          {t('common.confirm')}
-        </Button>
+        <ChatInputAssistAction
+          rightContent={
+            <div className="instance-invoke-modal-footer-action-wrapper">
+              <Button
+                type="secondary"
+                size="mini"
+                onClick={() => setVisible(false)}
+                className="instance-invoke-modal-footer-action-btn"
+              >
+                {t('common.cancel')}
+              </Button>
+              <Button
+                type="primary"
+                onClick={onOk}
+                size="mini"
+                style={{ marginLeft: 12 }}
+                loading={confirmLoading}
+                className="instance-invoke-modal-footer-action-btn"
+              >
+                {t('common.confirm')}
+              </Button>
+            </div>
+          }
+        />
       </div>
     </Form>
   );

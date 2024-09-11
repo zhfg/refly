@@ -12,6 +12,8 @@ import { SkillContext, SkillInstance } from '@refly/openapi-schema';
 // requests
 import { useTranslation } from 'react-i18next';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
+import { ContextStateDisplay } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display';
+import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
 
 export const SelectedInstanceCard = () => {
   // content for fill skill form
@@ -20,6 +22,7 @@ export const SelectedInstanceCard = () => {
   })); // fill query in the basic config
   const { buildSkillContext } = useBuildSkillContext();
   const { runSkill, emptyConvRunSkill } = useBuildThreadAndRun();
+  const { computedShowContextCard } = useCopilotContextState();
 
   const [form] = Form.useForm();
   const { t } = useTranslation();
@@ -44,9 +47,9 @@ export const SelectedInstanceCard = () => {
     return {
       ...skill,
       invocationConfig: {
-        ...skill.invocationConfig,
+        ...(skill?.invocationConfig || {}),
         input: {
-          ...skill.invocationConfig.input,
+          ...(skill?.invocationConfig?.input || {}),
           query,
         },
       },
@@ -88,6 +91,11 @@ export const SelectedInstanceCard = () => {
 
   return (
     <div className="selected-instance-card-container">
+      {computedShowContextCard ? (
+        <div className="ai-copilot-context-display">
+          <ContextStateDisplay />
+        </div>
+      ) : null}
       <div className="selected-instance-card">
         <div className="selected-skill">
           <div className="selected-skill-profile">

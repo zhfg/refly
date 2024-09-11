@@ -42,6 +42,7 @@ export const SelectedTextContextActionBtn = () => {
               <Button
                 icon={<IconFontColors />}
                 type="text"
+                style={{ fontSize: 12 }}
                 onClick={() => {
                   setShowContextCard(!showSelectedTextCard);
 

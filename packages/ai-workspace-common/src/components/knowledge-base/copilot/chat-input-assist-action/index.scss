@@ -1,0 +1,19 @@
+.chat-input-assist-action {
+  width: 100%;
+  height: 35px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+
+  .chat-input-assist-action-left {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+  }
+}

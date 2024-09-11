@@ -16,7 +16,7 @@ import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores
 const SubMenu = Menu.SubMenu;
 const MenuItem = Menu.Item;
 
-export const ResourceSelectedTextCard = () => {
+export const SelectedTextCard = () => {
   const { runSkill } = useBuildThreadAndRun();
   const { hasSelectedTextCardContent } = useGetCurrentSelectedMark();
   const disabled = !hasSelectedTextCardContent;

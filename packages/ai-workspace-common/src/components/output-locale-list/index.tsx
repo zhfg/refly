@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Dropdown, Menu, Message as message } from '@arco-design/web-react';
+import { Button, Dropdown, Menu, Message as message } from '@arco-design/web-react';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 import { LOCALE } from '@refly/common-types';
@@ -9,8 +9,9 @@ import { OutputLocale, enLocale, localeToLanguageName } from '@refly-packages/ai
 // styles
 import './index.scss';
 import { getDefaultPopupContainer, getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
+import { IconCaretDown, IconTranslate } from '@arco-design/web-react/icon';
 
-export const OutputLocaleList = (props: { children: any; showTitle?: boolean }) => {
+export const OutputLocaleList = (props: { showTitle?: boolean }) => {
   // i18n
   const { t, i18n } = useTranslation();
   const uiLocale = i18n?.languages?.[0] as LOCALE;
@@ -62,7 +63,10 @@ export const OutputLocaleList = (props: { children: any; showTitle?: boolean }) 
         return getPopupContainer();
       }}
     >
-      {props.children}
+      <Button icon={<IconTranslate />} type="text" className="assist-action-item" style={{ fontSize: 12 }}>
+        {/* <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span> */}
+        <IconCaretDown />
+      </Button>
     </Dropdown>
   );
 };

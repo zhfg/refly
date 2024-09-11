@@ -42,6 +42,7 @@ export const CurrentContextActionBtn = () => {
             <Button
               icon={<IconTags />}
               type="text"
+              style={{ fontSize: 12 }}
               onClick={() => {
                 setShowContextCard(!isContextActionActive);
                 setContextDomain('resource');

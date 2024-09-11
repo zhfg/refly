@@ -1,15 +1,7 @@
 import { Button, Checkbox } from '@arco-design/web-react';
 
 // 自定义组件
-import {
-  IconCaretDown,
-  IconEdit,
-  IconFile,
-  IconHistory,
-  IconPlusCircle,
-  IconSearch,
-  IconTranslate,
-} from '@arco-design/web-react/icon';
+import { IconEdit, IconFile, IconHistory, IconPlusCircle, IconSearch } from '@arco-design/web-react/icon';
 // 自定义样式
 import './index.scss';
 // 自定义组件
@@ -24,6 +16,7 @@ import { ConvListModal } from './conv-list-modal';
 import { KnowledgeBaseListModal } from './knowledge-base-list-modal';
 import { SkillManagementModal } from '@refly-packages/ai-workspace-common/components/skill/skill-management-modal';
 import { SkillDisplay } from './skill-display';
+import { ChatInputAssistAction } from './chat-input-assist-action';
 
 // state
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
@@ -35,26 +28,19 @@ import { useKnowledgeBaseStore } from '../../../stores/knowledge-base';
 // utils
 import { LOCALE } from '@refly/common-types';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { OutputLocaleList } from '@refly-packages/ai-workspace-common/components/output-locale-list';
 import { useTranslation } from 'react-i18next';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
 import { useResizeCopilot } from '@refly-packages/ai-workspace-common/hooks/use-resize-copilot';
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { RegisterSkillComponent } from '@refly-packages/ai-workspace-common/skills/main-logic/register-skill-component';
-import { KnowledgeBaseNavHeader } from '@refly-packages/ai-workspace-common/components/knowledge-base/nav-header';
 import classNames from 'classnames';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
-import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
-import { ContextContentWithBadge } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 import { useDynamicInitContextPanelState } from '@refly-packages/ai-workspace-common/hooks/use-init-context-panel-state';
-import { SelectedTextContextActionBtn } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display//action-btn/selected-text-context-action-btn';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { CurrentContextActionBtn } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/action-btn/current-context-action-btn';
-import { InstanceInvokeForm } from '@refly-packages/ai-workspace-common/components/skill/instance-invoke-form';
 import { SelectedInstanceCard } from '@refly-packages/ai-workspace-common/components/skill/selected-instance-card';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
@@ -144,12 +130,11 @@ export const AICopilot = memo((props: AICopilotProps) => {
 
   const actualChatContainerHeight = inputContainerHeight;
 
-  const actualOperationContainerHeight = skillStore.selectedSkill
-    ? selectedSkillContainerHeight
-    : actualChatContainerHeight +
-      (computedShowContextCard ? contextCardHeight : 0) +
-      skillContainerHeight +
-      2 * chatContainerPadding;
+  const actualOperationContainerHeight =
+    (skillStore.selectedSkill
+      ? selectedSkillContainerHeight
+      : actualChatContainerHeight + skillContainerHeight + 2 * chatContainerPadding) +
+    (computedShowContextCard ? contextCardHeight : 0);
   console.log('actualCopilotBodyHeight', actualChatContainerHeight, actualOperationContainerHeight);
 
   const { t, i18n } = useTranslation();
@@ -362,39 +347,32 @@ export const AICopilot = memo((props: AICopilotProps) => {
         >
           <ChatMessages disable={disable} loading={isFetching} />
         </div>
-        {!disable &&
-          (skillStore.selectedSkill ? (
-            <SelectedInstanceCard />
-          ) : (
-            <div className="ai-copilot-operation-container" style={{ height: actualOperationContainerHeight }}>
-              <div className="ai-copilot-operation-body">
-                {computedShowContextCard ? (
-                  <div className="ai-copilot-context-display">
-                    <ContextStateDisplay />
-                  </div>
-                ) : null}
-                <SkillDisplay source={source} />
-                <div className="ai-copilot-chat-container">
-                  <div className="chat-input-container" style={{ height: actualChatContainerHeight }}>
-                    <div className="chat-input-body">
-                      <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
+        {!disable && (
+          <>
+            {skillStore.selectedSkill ? (
+              <SelectedInstanceCard />
+            ) : (
+              <div className="ai-copilot-operation-container" style={{ height: actualOperationContainerHeight }}>
+                <div className="ai-copilot-operation-body">
+                  {computedShowContextCard ? (
+                    <div className="ai-copilot-context-display">
+                      <ContextStateDisplay />
                     </div>
-                    <div className="chat-input-assist-action">
-                      <SelectedTextContextActionBtn />
-                      <CurrentContextActionBtn />
-                      <ContextContentWithBadge />
-                      <OutputLocaleList>
-                        <Button icon={<IconTranslate />} type="text" className="assist-action-item">
-                          {/* <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span> */}
-                          <IconCaretDown />
-                        </Button>
-                      </OutputLocaleList>
+                  ) : null}
+                  <SkillDisplay source={source} />
+                  <div className="ai-copilot-chat-container">
+                    <div className="chat-input-container" style={{ height: actualChatContainerHeight }}>
+                      <div className="chat-input-body">
+                        <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
+                      </div>
+                      <ChatInputAssistAction />
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            )}
+          </>
+        )}
       </div>
 
       {knowledgeBaseStore?.convModalVisible ? <ConvListModal title="会话库" classNames="conv-list-modal" /> : null}

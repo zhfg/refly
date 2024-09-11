@@ -63,6 +63,13 @@ export const selectedTextCardDomainExtension = [
   },
 ];
 
+export const defaultSelectedTextCardDomainKeysWeb: SelectedTextDomain[] = selectedTextCardDomainWeb.map(
+  (item) => item.key as SelectedTextDomain,
+);
+export const defaultSelectedTextCardDomainKeysExtension: SelectedTextDomain[] = selectedTextCardDomainExtension.map(
+  (item) => item.key as SelectedTextDomain,
+);
+
 interface ContextPanelState {
   envContextInitMap: { resource: boolean; collection: boolean; note: boolean };
 
@@ -138,7 +145,6 @@ export const defaultSelectedTextCardState = {
   selectedDomain: 'resource' as SelectedTextDomain,
   enableMultiSelect: true, // default enable multi select, later to see if we need to enable multiSelect ability
   currentSelectedMarks: [] as Mark[],
-  selectedTextCardDomain: [] as SelectedTextDomain[],
 };
 
 export const defaultCurrentContext = {
@@ -168,6 +174,7 @@ export const defaultState = {
   expandedKeys: [],
 
   // selected text card
+  selectedTextCardDomain: [] as SelectedTextDomain[],
   ...defaultSelectedTextCardState,
   ...defaultCurrentContext,
   ...defaultNoteCursorSelection,

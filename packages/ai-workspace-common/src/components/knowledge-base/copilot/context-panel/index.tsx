@@ -66,6 +66,7 @@ export const ContextPanel = memo(() => {
       <Button
         icon={<IconStorage />}
         type="text"
+        style={{ fontSize: 12 }}
         className="assist-action-item"
         // onClick={() => {
         //   setContextPanelPopoverVisible(true);
