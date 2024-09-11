@@ -13,6 +13,7 @@ import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { UsageMeter } from '@refly/openapi-schema';
+import dayjs from 'dayjs';
 
 export const Subscription = () => {
   const { t } = useTranslation();
@@ -38,19 +39,30 @@ export const Subscription = () => {
     }
   };
 
-  const UsageItem = ({ title, used, quota, description }) => {
+  const UsageItem = ({ title, used, quota, description, endAt }) => {
     const formatNumber = (num) => {
       return num?.toLocaleString() || '0';
+    };
+
+    const formatDate = (date) => {
+      return dayjs(date).format('YYYY-MM-DD');
     };
 
     return (
       <div className="subscription-usage-item">
         <div className="subscription-usage-item-title">
           <div className="title">
-            <span>{title}</span>
-            <Tooltip content={description}>
-              <HiOutlineQuestionMarkCircle className="info-icon" />
-            </Tooltip>
+            <div className="title-left">
+              {title}
+              <Tooltip content={description}>
+                <HiOutlineQuestionMarkCircle className="info-icon" />
+              </Tooltip>
+            </div>
+            {quota > 0 && (
+              <div className="title-right">
+                {t('settings.subscription.subscribe.resetAt', { date: formatDate(endAt) })}
+              </div>
+            )}
           </div>
         </div>
         <div className="subscription-usage-item-progress">
@@ -94,12 +106,14 @@ export const Subscription = () => {
           description={t('settings.subscription.t1TokenUsedDescription')}
           used={subscriptionUsage?.t1TokenUsed}
           quota={subscriptionUsage?.t1TokenQuota}
+          endAt={subscriptionUsage?.endAt}
         />
         <UsageItem
           title={t('settings.subscription.t2TokenUsed')}
           description={t('settings.subscription.t2TokenUsedDescription')}
           used={subscriptionUsage?.t2TokenUsed}
           quota={subscriptionUsage?.t2TokenQuota}
+          endAt={subscriptionUsage?.endAt}
         />
       </div>
 

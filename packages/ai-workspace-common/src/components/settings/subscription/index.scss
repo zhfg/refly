@@ -48,10 +48,23 @@
         .title {
           display: flex;
           align-items: center;
-          font-size: 14px;
-          line-height: 20px;
+          justify-content: space-between;
           color: rgb(71, 84, 103);
-          font-weight: 700;
+
+          .title-left {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            line-height: 20px;
+            font-weight: 700;
+          }
+
+          .title-right {
+            font-size: 13px;
+            line-height: 16px;
+            color: #666;
+          }
+
           .info-icon {
             margin-left: 4px;
             cursor: pointer;

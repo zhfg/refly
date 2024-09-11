@@ -605,7 +605,8 @@
         "period": "Permanent",
         "month": "Month",
         "year": "Year",
-        "forFree": "Free"
+        "forFree": "Free",
+        "resetAt": "（Will reset at {{date}}）"
       }
     },
 
