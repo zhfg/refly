@@ -144,7 +144,7 @@ The content to be summarized is as follows:(with three "---" as separator, **onl
 ---
 `;
 
-    const contextString = contentList.length > 0 ? contentListText : '';
+    const contextString = contentListText || '';
 
     const prompt = systemPrompt.replace(`{context}`, contextString);
     const responseMessage = await llm.invoke([
