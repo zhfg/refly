@@ -244,7 +244,6 @@ export class SubscriptionService {
 
   async getOrCreateUsageMeter(user: UserModel, sub?: SubscriptionModel) {
     const { uid } = user;
-    const planType = sub?.planType || 'free';
 
     if (user.subscriptionId && !sub) {
       sub = await this.prisma.subscription.findUnique({
@@ -252,13 +251,18 @@ export class SubscriptionService {
       });
     }
 
+    const now = new Date();
+
     const activeMeter = await this.prisma.usageMeter.findFirst({
       where: {
         uid,
         subscriptionId: sub?.subscriptionId,
-        startAt: { lte: new Date() },
-        endAt: { gte: new Date() },
+        startAt: { lte: now },
+        endAt: { gte: now },
         deletedAt: null,
+      },
+      orderBy: {
+        startAt: 'desc',
       },
     });
 
@@ -272,16 +276,17 @@ export class SubscriptionService {
       where: {
         uid,
         subscriptionId: sub?.subscriptionId,
-        endAt: { lt: new Date() },
+        endAt: { lt: now },
         deletedAt: null,
       },
       orderBy: {
         startAt: 'desc',
       },
     });
-    const startAt = lastMeter?.endAt ?? startOfDay(new Date());
+    const startAt = lastMeter?.endAt ?? startOfDay(now);
 
     // Find the token quota for the plan
+    const planType = sub?.planType || 'free';
     const tokenQuota = await this.prisma.subscriptionUsageQuota.findUnique({
       where: { planType },
     });
