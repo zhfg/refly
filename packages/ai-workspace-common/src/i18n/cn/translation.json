@@ -577,8 +577,11 @@
       },
       "subscribe": {
         "title": "选择适合您的套餐",
+        "subtitle": "订阅年度计划可免费获得 2个月！",
         "monthly": "按月",
         "yearly": "按年",
+        "monthlyPlan": "每月自动续费",
+        "yearlyPlan": "每年自动续费",
         "pro": {
           "description": "享受最先进的高阶模型，并拥有更充裕的基础模型使用额度",
           "buttonText": "立即升级",
@@ -604,7 +607,7 @@
         "month": "月",
         "year": "年",
         "forFree": "免费",
-        "resetAt": "（将于{{date}}重置）"
+        "resetAt": "将于{{date}}重置"
       }
     },
     "action": {
@@ -865,7 +868,8 @@
     "chatInput": {
       "skillManager": "管理",
       "placeholder": "提出问题，发现新知"
-    }
+    },
+    "tokenUsage": "输入 {{count}}，输出 {{count}}"
   },
   "title": "欢迎 {{name}}，使用 react-i18next 完全类型安全的 React",
   "description": {

@@ -39,7 +39,7 @@ export const SubscribeModal = (props: SubscribeModalProps) => {
     });
     console.log('data', data);
     if (data?.data?.url) {
-      window.open(data.data.url, '_blank');
+      window.location.href = data.data.url;
     } else {
       message.error(t('common.putErr'));
     }

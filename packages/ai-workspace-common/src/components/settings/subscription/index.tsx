@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { Button, Progress, Tooltip } from '@arco-design/web-react';
+import { Button, Progress, Tooltip, Tag } from '@arco-design/web-react';
 import { HiOutlineQuestionMarkCircle } from 'react-icons/hi2';
 import { HiOutlineExternalLink } from 'react-icons/hi';
 import { RiBillLine } from 'react-icons/ri';
@@ -91,6 +91,11 @@ export const Subscription = () => {
           <div className="subscription-plan-info-title">{t('settings.subscription.currentPlan')}</div>
           <div className="subscription-plan-info-status">
             {t(`settings.subscription.subscriptionStatus.${subscriptionStatus}`)}
+            {userStore.userProfile?.subscription?.interval && (
+              <Tag className="interval" color="blue">
+                {t(`settings.subscription.subscribe.${userStore.userProfile?.subscription?.interval}Plan`)}
+              </Tag>
+            )}
           </div>
         </div>
         {subscriptionStatus === 'free' && (

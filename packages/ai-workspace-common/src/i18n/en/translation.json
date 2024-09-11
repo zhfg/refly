@@ -579,8 +579,11 @@
       },
       "subscribe": {
         "title": "Choose the plan that suits you best",
+        "subtitle": "Subscribe to an annual plan to get 2 months free!",
         "monthly": "Monthly",
         "yearly": "Yearly",
+        "monthlyPlan": "Monthly Auto-Renewal",
+        "yearlyPlan": "Yearly Auto-Renewal",
         "pro": {
           "description": "Enjoy the latest high-level models and have more basic model usage",
           "buttonText": "Upgrade Now",
@@ -606,7 +609,7 @@
         "month": "Month",
         "year": "Year",
         "forFree": "Free",
-        "resetAt": "（Will reset at {{date}}）"
+        "resetAt": "Will reset at {{date}}"
       }
     },
 
@@ -855,7 +858,8 @@
     "chatInput": {
       "skillManager": "Skill Manage",
       "placeholder": "Ask a question, discover new knowledge"
-    }
+    },
+    "tokenUsage": "Input {{count}}, Output {{count}}"
   },
   "hooks": {
     "useBuildThreadAndRun": {
