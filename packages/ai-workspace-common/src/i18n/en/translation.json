@@ -614,7 +614,11 @@
     },
 
     "action": {
-      "putErrorNotify": "Failed to update user configuration. Please try again!"
+      "putErrorNotify": "Failed to update user configuration. Please try again!",
+      "paySuccessNotify": "Payment successful!",
+      "paySuccessDescription": "Thank you for your support of Refly! We will continue to iterate and make the product better! If you have any questions, please contact support@refly.ai",
+      "payCancelNotify": "Payment canceled!",
+      "payCancelDescription": "We were unable to successfully receive your payment. If you have any questions, please contact support@refly.ai"
     }
   },
   "contentDetail": {

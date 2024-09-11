@@ -611,7 +611,11 @@
       }
     },
     "action": {
-      "putErrorNotify": "修改用户配置失败，请尝试重试！"
+      "putErrorNotify": "修改用户配置失败，请尝试重试！",
+      "paySuccessNotify": "支付成功！",
+      "paySuccessDescription": "感谢您对 Refly 的大力支持，我们会持续迭代，让产品变得更好！如有任何问题，请联系 support@refly.ai",
+      "payCancelNotify": "支付取消！",
+      "payCancelDescription": "我们未能成功收到您的付款，如有任何问题，请联系 support@refly.ai"
     }
   },
   "contentDetail": {
