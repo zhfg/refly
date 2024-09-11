@@ -18,6 +18,7 @@ export const SubscribeModal = (props: SubscribeModalProps) => {
   const { t } = useTranslation();
   const { visible, setVisible } = props;
   const [lookupKey, setLookupKey] = useState<'monthly' | 'yearly'>('monthly');
+  const [loading, setLoading] = useState(false);
 
   const proFeatures = [
     t('settings.subscription.subscribe.pro.features.t1Token'),
@@ -29,14 +30,20 @@ export const SubscribeModal = (props: SubscribeModalProps) => {
   ];
 
   const createCheckoutSession = async () => {
-    const { error } = await getClient().createCheckoutSession({
+    if (loading) return;
+    setLoading(true);
+    const { data } = await getClient().createCheckoutSession({
       body: {
         lookupKey: `refly_pro_${lookupKey}`,
       },
     });
-    if (error) {
+    console.log('data', data);
+    if (data?.data?.url) {
+      window.open(data.data.url, '_blank');
+    } else {
       message.error(t('common.putErr'));
     }
+    setLoading(false);
   };
 
   const PlanItem = (props: {
@@ -70,7 +77,12 @@ export const SubscribeModal = (props: SubscribeModalProps) => {
 
         <div className="description">{description}</div>
 
-        <Button className="subscribe-btn" type={isActive ? 'primary' : 'default'} onClick={handleClick}>
+        <Button
+          className="subscribe-btn"
+          type={isActive ? 'primary' : 'default'}
+          onClick={handleClick}
+          loading={title === 'pro' && loading}
+        >
           {buttonText}
         </Button>
 
@@ -85,6 +97,12 @@ export const SubscribeModal = (props: SubscribeModalProps) => {
       </div>
     );
   };
+
+  useEffect(() => {
+    if (visible) {
+      setLookupKey('monthly');
+    }
+  }, [visible]);
 
   return (
     <Modal

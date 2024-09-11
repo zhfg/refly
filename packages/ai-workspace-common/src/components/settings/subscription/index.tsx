@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Button, Progress, Tooltip } from '@arco-design/web-react';
 import { HiOutlineQuestionMarkCircle } from 'react-icons/hi2';
 import { HiOutlineExternalLink } from 'react-icons/hi';
+import { RiBillLine } from 'react-icons/ri';
 
 import { SubscribeModal } from '@refly-packages/ai-workspace-common/components/settings/subscribe-modal';
 
@@ -38,6 +39,10 @@ export const Subscription = () => {
   };
 
   const UsageItem = ({ title, used, quota, description }) => {
+    const formatNumber = (num) => {
+      return num?.toLocaleString() || '0';
+    };
+
     return (
       <div className="subscription-usage-item">
         <div className="subscription-usage-item-title">
@@ -52,7 +57,7 @@ export const Subscription = () => {
           <Progress
             color={!quota ? '#C9CDD4' : '#00968F'}
             percent={(used / quota) * 100}
-            formatText={() => `${used} / ${quota}`}
+            formatText={() => `${formatNumber(used)} / ${formatNumber(quota)}`}
           />
         </div>
       </div>
@@ -100,7 +105,10 @@ export const Subscription = () => {
 
       {subscriptionStatus !== 'free' && (
         <div className="subscription-management" onClick={createPortalSession}>
-          <div className="subscription-management-left">{t('settings.subscription.subscriptionManagement')}</div>
+          <div className="subscription-management-left">
+            <RiBillLine style={{ marginRight: 8 }} />
+            {t('settings.subscription.subscriptionManagement')}
+          </div>
           <HiOutlineExternalLink className="subscription-management-right" />
         </div>
       )}

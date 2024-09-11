@@ -1,5 +1,6 @@
 .subscription {
   padding: 8px 24px;
+  width: 700px;
 
   &-plan {
     padding: 20px 24px 40px 24px;
@@ -86,6 +87,8 @@
     cursor: pointer;
 
     &-left {
+      display: flex;
+      align-items: center;
       font-size: 14px;
     }
     &-right {
