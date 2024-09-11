@@ -14,7 +14,7 @@ export const ChatInputAssistAction = (props: { rightContent?: React.ReactNode })
     <div className="chat-input-assist-action">
       <div className="chat-input-assist-action-left">
         <SelectedTextContextActionBtn />
-        <CurrentContextActionBtn />
+        {/* <CurrentContextActionBtn /> */}
         <ContextContentWithBadge />
         <OutputLocaleList />
       </div>

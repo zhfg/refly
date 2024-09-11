@@ -20,7 +20,7 @@
     "required": "This item is required",
     "empty": "No content",
     "selectContext": "Select Context",
-    "emptyInput": "Please fill in or select content"
+    "emptyInput": "Content is empty, please fill in or select content"
   },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",

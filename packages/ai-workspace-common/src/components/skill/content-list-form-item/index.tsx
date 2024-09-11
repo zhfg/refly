@@ -1,5 +1,14 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Select, Input, SelectProps, InputProps, TextAreaProps, Collapse } from '@arco-design/web-react';
+import {
+  Select,
+  Input,
+  SelectProps,
+  InputProps,
+  TextAreaProps,
+  Collapse,
+  Typography,
+  Empty,
+} from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
 import { Mark, SelectedTextDomain } from '@refly/common-types';
 import { SkillContextContentItem, SkillContextValue, SkillInvocationRule } from '@refly/openapi-schema';
@@ -62,9 +71,9 @@ export const ContentListFormItem: React.FC<ContentListFormItemProps> = ({
   );
 
   const handleTextAreaChange = useCallback(
-    (domain: SelectedTextDomain, value: string) => {
-      const newContentList = contentList.map((item) => {
-        if (item?.metadata?.domain === domain) {
+    (index: number, value: string) => {
+      const newContentList = contentList.map((item, idx) => {
+        if (idx === index) {
           return { ...item, content: value };
         }
         return item;
@@ -89,7 +98,7 @@ export const ContentListFormItem: React.FC<ContentListFormItemProps> = ({
 
   useEffect(() => {
     updateCurrentContent(finalUsedMarks, selectedDomains);
-  }, []);
+  }, [finalUsedMarks?.length, selectedDomains?.length]);
 
   return (
     <>
@@ -104,13 +113,13 @@ export const ContentListFormItem: React.FC<ContentListFormItemProps> = ({
         onChange={(val) => handleSelectChange(val, finalUsedMarks)}
       />
 
-      {contentList?.length > 0 && (
+      {contentList?.length > 0 ? (
         <Collapse>
           {contentList.map((item, index) => (
             <CollapseItem
-              name={item?.metadata?.domain}
+              name={`${item?.metadata?.domain}-${index}`}
               key={index}
-              header={t(`skill.instanceInvokeModal.context.contentList.${item?.metadata?.domain}`)}
+              header={`${t(`skill.instanceInvokeModal.context.contentList.${item?.metadata?.domain}`)}-${index}`}
             >
               <TextArea
                 {...(restProps as any as TextAreaProps)}
@@ -121,11 +130,13 @@ export const ContentListFormItem: React.FC<ContentListFormItemProps> = ({
                   rule?.descriptionDict?.[locale] || t('skill.instanceInvokeModal.placeholder.contentList.textarea')
                 }
                 autoSize={{ minRows: 4, maxRows: 10 }}
-                onChange={(value) => handleTextAreaChange(item?.metadata?.domain, value)}
+                onChange={(value) => handleTextAreaChange(index, value)}
               />
             </CollapseItem>
           ))}
         </Collapse>
+      ) : (
+        <Empty description={t('common.emptyInput')} />
       )}
     </>
   );
