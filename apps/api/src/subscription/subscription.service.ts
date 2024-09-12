@@ -104,11 +104,15 @@ export class SubscriptionService {
     return sub;
   }
 
-  async postSubscriptionCanceled(sub: SubscriptionModel) {
+  async cancelSubscription(sub: SubscriptionModel) {
     const [user] = await this.prisma.$transaction([
       this.prisma.user.update({
         where: { uid: sub.uid },
         data: { subscriptionId: null },
+      }),
+      this.prisma.subscription.update({
+        where: { subscriptionId: sub.subscriptionId },
+        data: { status: 'canceled' },
       }),
       this.prisma.tokenUsageMeter.updateMany({
         where: { subscriptionId: sub.subscriptionId },
@@ -199,7 +203,7 @@ export class SubscriptionService {
       return;
     }
 
-    const plan = await this.createSubscription(user, {
+    const sub = await this.createSubscription(user, {
       planType,
       interval,
       lookupKey: checkoutSession.lookupKey,
@@ -207,7 +211,7 @@ export class SubscriptionService {
       subscriptionId: subscription.id,
     });
 
-    this.logger.log(`Subscription ${plan.subscriptionId} created for user ${uid}`);
+    this.logger.log(`Subscription ${sub.subscriptionId} created for user ${uid}`);
   }
 
   @StripeWebhookHandler('customer.subscription.updated')
@@ -215,15 +219,45 @@ export class SubscriptionService {
     const subscription = event.data.object as Stripe.Subscription;
     this.logger.log(`Subscription updated: ${subscription.id}`);
 
-    // Update user's subscription status if needed
-    const sub = await this.prisma.subscription.update({
+    const sub = await this.prisma.subscription.findUnique({
       where: { subscriptionId: subscription.id },
-      data: { status: subscription.status },
     });
-
-    if (sub && sub.status !== 'active') {
-      await this.postSubscriptionCanceled(sub);
+    if (!sub) {
+      this.logger.error(`No subscription found for subscription ${subscription.id}`);
+      return;
     }
+
+    if (subscription.status !== sub.status) {
+      this.logger.log(
+        `Subscription ${sub.subscriptionId} status updated from ${sub.status} to ` +
+          `${subscription.status}`,
+      );
+      await this.prisma.subscription.update({
+        where: { subscriptionId: subscription.id },
+        data: { status: subscription.status },
+      });
+    }
+  }
+
+  @StripeWebhookHandler('customer.subscription.deleted')
+  async handleSubscriptionDeleted(event: Stripe.Event) {
+    const subscription = event.data.object as Stripe.Subscription;
+    this.logger.log(`Subscription deleted: ${subscription.id}`);
+
+    const sub = await this.prisma.subscription.findUnique({
+      where: { subscriptionId: subscription.id },
+    });
+    if (!sub) {
+      this.logger.error(`No subscription found for subscription ${subscription.id}`);
+      return;
+    }
+
+    if (sub.status === 'canceled') {
+      this.logger.log(`Subscription ${sub.subscriptionId} already canceled`);
+      return;
+    }
+
+    await this.cancelSubscription(sub);
   }
 
   async checkTokenUsage(user: User): Promise<ModelTier[]> {
