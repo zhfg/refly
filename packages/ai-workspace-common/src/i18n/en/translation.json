@@ -194,6 +194,10 @@
       "readOnly": "Read Only",
       "edit": "Edit",
       "serviceDisconnected": "Service Disconnected"
+    },
+    "context": {
+      "contentSelector": "Content Selector",
+      "clearSelector": "Clear Selection"
     }
   },
   "resource": {

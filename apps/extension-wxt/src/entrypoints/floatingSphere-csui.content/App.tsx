@@ -156,6 +156,7 @@ export const App = () => {
               shape="circle"
               icon={<IconHighlight />}
               size="small"
+              onClick={() => handleToggleCopilot({ action: { name: 'openContentSelector', value: true } })}
               className="refly-floating-sphere-dropdown-item assist-action-item"
             ></Button>
           </Tooltip>

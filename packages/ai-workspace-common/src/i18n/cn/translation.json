@@ -194,6 +194,10 @@
       "readOnly": "只读",
       "edit": "编辑",
       "serviceDisconnected": "服务已断开"
+    },
+    "context": {
+      "contentSelector": "内容划线选择器",
+      "clearSelector": "清空选择内容及划线"
     }
   },
   "resource": {

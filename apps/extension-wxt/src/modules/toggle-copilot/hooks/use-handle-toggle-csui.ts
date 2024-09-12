@@ -1,5 +1,6 @@
 import { useExtensionMessage } from '@/hooks/use-extension-message';
 import { useCopilotStore } from '@/modules/toggle-copilot/stores/copilot';
+import { useHandleContextWorkflow } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-handle-context-workflow';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { onMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { BackgroundMessage, CopilotMsgName } from '@refly/common-types';
@@ -12,6 +13,7 @@ interface CopilotStatus {
 
 export const useToggleCSUI = () => {
   const messageListenerEventRef = useRef<any>();
+  const { handlePassthroughOpenContentSelector } = useHandleContextWorkflow();
 
   // for listen to Popup event to toggle copilot
   const copilotStore = useCopilotStore();
@@ -30,12 +32,19 @@ export const useToggleCSUI = () => {
 
   const onMessageHandler = (event: MessageEvent<any>) => {
     const data = event as any as BackgroundMessage;
-    const { name } = data || {};
+    const { name, body } = data || {};
 
     // sidepanel directly open or close, csui need hide or show
     if ((name as CopilotMsgName) === 'toggleCopilotCSUI') {
       const { isCopilotOpen } = useCopilotStore.getState();
       copilotStore.setIsCopilotOpen(!isCopilotOpen);
+    }
+
+    // 1. when sidePanel already open, handle toggleSidePanel action with message
+    if ((name as CopilotMsgName) === 'toggleCopilotCSUI' && body?.action) {
+      if (body?.action?.name === 'openContentSelector' && body?.action?.value) {
+        handlePassthroughOpenContentSelector();
+      }
     }
   };
 
