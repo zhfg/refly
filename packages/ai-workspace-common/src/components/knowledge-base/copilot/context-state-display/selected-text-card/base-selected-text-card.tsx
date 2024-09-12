@@ -102,19 +102,18 @@ export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
           <span className="context-state-card-header-title">{t('copilot.selectedTextCard.title')} </span>
         </div>
         <div className="context-state-card-header-right">
-          <Button
-            type="text"
-            className="assist-action-item"
-            style={{ marginRight: 4 }}
-            icon={
-              <IconRefresh
-                onClick={() => {
-                  contextPanelStore.resetSelectedTextCardState();
-                  handleReset();
-                }}
-              />
-            }
-          ></Button>
+          <Tooltip content={t('knowledgeBase.context.clearSelector')}>
+            <Button
+              type="text"
+              className="assist-action-item"
+              style={{ marginRight: 4 }}
+              icon={<IconRefresh />}
+              onClick={() => {
+                contextPanelStore.resetSelectedTextCardState();
+                handleReset();
+              }}
+            ></Button>
+          </Tooltip>
           <ContentSelectorBtn />
           {/* <Tooltip content="多选">
             <Switch
@@ -133,13 +132,10 @@ export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
           <Button
             type="text"
             className="assist-action-item"
-            icon={
-              <IconCloseCircle
-                onClick={() => {
-                  contextPanelStore.setShowContextCard(false);
-                }}
-              />
-            }
+            onClick={() => {
+              contextPanelStore.setShowContextCard(false);
+            }}
+            icon={<IconCloseCircle />}
           ></Button>
         </div>
       </div>
