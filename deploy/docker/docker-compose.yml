@@ -2,8 +2,9 @@ version: '3.4'
 include:
   - path: docker-compose.dev.yml
 services:
-  reflyd:
-    build: .
+  api:
+    build: ../../apps/api
+    container_name: refly_api
     depends_on:
       - db
       - minio
