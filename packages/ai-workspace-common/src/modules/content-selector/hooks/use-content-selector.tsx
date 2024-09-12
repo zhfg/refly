@@ -183,12 +183,12 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
     const confirmAddMark = () => {
       const xPath = genContentSelectorID();
       const content = getSelectionNodesMarkdown();
-      // const selectionNodes = highlightSelection(xPath);
+      const selectionNodes = highlightSelection(xPath);
 
       const type = 'text' as ElementType;
       const mark = buildMark(type, content, xPath);
-      // addMark({ ...mark, cleanup }, selectionNodes);
-      addMark({ ...mark, cleanup }, []);
+      addMark({ ...mark, cleanup }, selectionNodes);
+      // addMark({ ...mark, cleanup }, []);
 
       const markEvent = { type: 'add' as SyncMarkEventType, mark };
       const msg: Partial<SyncMarkEvent> = {
@@ -197,11 +197,11 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
       syncMarkEvent(msg);
 
       // Temp remove selected marks
-      // selectionNodes.forEach((node) => {
-      //   addHoverMenuToNode(node, xPath);
-      // });
+      selectionNodes.forEach((node) => {
+        addHoverMenuToNode(node, xPath);
+      });
 
-      // cleanup();
+      cleanup();
     };
 
     const cleanup = addHoverMenu(
