@@ -1,6 +1,10 @@
-import { ReactNode } from 'react';
-import { Typography } from '@arco-design/web-react';
+import { ReactNode, useEffect, useState } from 'react';
+import { Typography, Spin } from '@arco-design/web-react';
+import { FaRegCircleXmark } from 'react-icons/fa6';
+import { IconCloseCircle } from '@arco-design/web-react/icon';
+
 import { Resource, Note, Collection } from '@refly/openapi-schema';
+import { useTranslation } from 'react-i18next';
 import './index.scss';
 
 interface CardBoxBaseProps {
@@ -14,6 +18,7 @@ interface CardBoxBaseProps {
 interface ResourceCardProps extends CardBoxBaseProps {
   type: 'resource';
   cardData: Resource;
+  reLoadResource?: () => void;
 }
 
 interface NoteCardProps extends CardBoxBaseProps {
@@ -33,53 +38,97 @@ const contentKey = {
 };
 
 export const CardBox = (props: ResourceCardProps | NoteCardProps | CollectionCardProps) => {
+  const { t } = useTranslation();
+  const { children, onClick, type, cardData, reLoadResource } = props;
+  const [loading, setLoading] = useState(false);
+
   const handleClickLink = (url: string) => {
     if (url) {
       window.open(url, '_blank');
     }
   };
 
-  const { children, onClick } = props;
+  useEffect(() => {
+    if (type === 'resource' && ['wait_parse', 'parse_failed'].includes(cardData?.indexStatus)) {
+      setLoading(true);
+    } else {
+      setLoading(false);
+    }
+  }, [cardData?.indexStatus, type, reLoadResource]);
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    if (type === 'resource' && ['wait_parse', 'wait_index'].includes(cardData?.indexStatus)) {
+      intervalId = setInterval(() => {
+        reLoadResource();
+      }, 2000); // 每2秒刷新一次
+    }
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [cardData?.indexStatus, reLoadResource, type]);
 
   return (
-    <div
-      className="p-4 m-3 border rounded-lg card-box border-black/8"
-      id={`${props.type}-${props.index}`}
-      onClick={() => onClick()}
-    >
-      <div className="h-40 overflow-hidden">
-        <div className="flex items-center mb-1 resource-url">
-          <div className="flex items-center justify-center border rounded-lg card-icon-box shrink-0 border-black/8">
-            {props.cardIcon}
+    <div id={`${props.type}-${props.index}`}>
+      <Spin
+        loading={loading}
+        className={loading ? 'loading-box' : ''}
+        tip={
+          <div
+            className="parse-failed-tip"
+            onClick={(e) => {
+              e.stopPropagation();
+              reLoadResource(cardData.resourceId);
+            }}
+          >
+            {t(`resource.${cardData?.indexStatus}`)}
           </div>
-          {props.type === 'resource' && props?.cardData?.data?.url ? (
-            <a
-              className="ml-2 text-xs"
-              href="#"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleClickLink(props.cardData.data?.url);
-              }}
-            >
-              {props?.cardData?.data?.url}
-            </a>
-          ) : (
-            <Typography.Text ellipsis={{ rows: 2 }} style={{ marginBottom: 0, marginLeft: 8, fontWeight: 500 }}>
-              {props.cardData?.title}
+        }
+        style={{ width: '100%', height: '100%' }}
+        element={
+          type === 'resource' && cardData?.indexStatus === 'parse_failed' ? (
+            <IconCloseCircle style={{ color: 'rgb(220 38 38)', fontSize: 30, strokeWidth: 2 }} />
+          ) : null
+        }
+      >
+        <div className="p-4 m-3 border rounded-lg card-box border-black/8" onClick={() => onClick()}>
+          <div className="h-40 overflow-hidden">
+            <div className="flex items-center mb-1 resource-url">
+              <div className="flex items-center justify-center border rounded-lg card-icon-box shrink-0 border-black/8">
+                {props.cardIcon}
+              </div>
+              {props.type === 'resource' && props?.cardData?.data?.url ? (
+                <a
+                  className="ml-2 text-xs"
+                  href="#"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleClickLink(props.cardData.data?.url);
+                  }}
+                >
+                  {props?.cardData?.data?.url}
+                </a>
+              ) : (
+                <Typography.Text ellipsis={{ rows: 2 }} style={{ marginBottom: 0, marginLeft: 8, fontWeight: 600 }}>
+                  {props.cardData?.title}
+                </Typography.Text>
+              )}
+            </div>
+            {props.type === 'resource' && props?.cardData?.data?.url && (
+              <Typography.Text ellipsis={{ rows: 1 }} style={{ marginBottom: 2, fontWeight: 600 }}>
+                {props.cardData?.title}
+              </Typography.Text>
+            )}
+            <Typography.Text ellipsis={{ rows: 4 }} style={{ marginBottom: 0, lineHeight: '20px', height: 80 }}>
+              {props.cardData?.[contentKey[props.type]]}
             </Typography.Text>
-          )}
-        </div>
-        {props.type === 'resource' && props?.cardData?.data?.url && (
-          <Typography.Text ellipsis={{ rows: 2 }} style={{ marginBottom: 0, fontWeight: 500 }}>
-            {props.cardData?.title}
-          </Typography.Text>
-        )}
-        <Typography.Text ellipsis={{ rows: 4 }} style={{ marginBottom: 0 }}>
-          {props.cardData?.[contentKey[props.type]]}
-        </Typography.Text>
-      </div>
+          </div>
 
-      {children}
+          {children}
+        </div>
+      </Spin>
     </div>
   );
 };

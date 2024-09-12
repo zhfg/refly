@@ -1,10 +1,6 @@
 .card-box {
   border: 1px solid rgba(0, 0, 0, 0.1);
 
-  .card-img {
-    width: 100%;
-    height: 200px;
-  }
   .card-icon-box {
     margin-right: 8px;
     width: 47px;
@@ -26,6 +22,29 @@
   .arco-list-item-action {
     li {
       width: 100%;
+    }
+  }
+}
+
+.loading-box {
+  .arco-spin-loading-layer-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 12px;
+  }
+  .parse-failed-tip {
+    margin-top: -4px;
+    font-size: 13px;
+    font-weight: 400;
+    color: rgb(220 38 38);
+    padding: 2px 12px;
+    border-radius: 8px;
+    &:hover {
+      background: rgba(255, 0, 0, 0.1);
     }
   }
 }

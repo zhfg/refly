@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
-import { List, Empty } from '@arco-design/web-react';
+import { List, Empty, Divider, Tooltip } from '@arco-design/web-react';
+import { IconLoading } from '@arco-design/web-react/icon';
 
 import { Resource } from '@refly/openapi-schema';
 
@@ -21,7 +22,7 @@ import { LOCALE } from '@refly/common-types';
 import './index.scss';
 
 export const ResourceList = () => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
 
   const reloadListState = useReloadListState();
@@ -35,6 +36,20 @@ export const ResourceList = () => {
     },
     pageSize: 12,
   });
+
+  const reLoadResource = async (resourceId: string) => {
+    const { data } = await getClient().listResources({
+      query: {
+        resourceId: resourceId,
+        pageSize: 1,
+        pageNumber: 1,
+      },
+    });
+    if (data.data?.length) {
+      const resource = data.data[0];
+      setDataList(dataList.map((n) => (n.resourceId === resource.resourceId ? resource : n)));
+    }
+  };
 
   useEffect(() => {
     loadMore();
@@ -56,6 +71,29 @@ export const ResourceList = () => {
   const cardIcon = (item: Resource) => {
     return (
       <img src={`https://www.google.com/s2/favicons?domain=${item?.data?.url}&sz=${32}`} alt={item?.data?.title} />
+    );
+  };
+
+  const IndexStatus = (props: { status: string; resourceId: string; icon?: React.ReactNode }) => {
+    const { status, resourceId, icon } = props;
+    return (
+      <>
+        <Divider style={{ margin: '0 4px' }} type="vertical" />
+        <Tooltip mini content={t(`resource.${status}_tip`)} style={status === 'index_failed' ? {} : { width: 200 }}>
+          <div
+            className={status}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (status === 'index_failed') {
+                reLoadResource(resourceId);
+              }
+            }}
+          >
+            {icon}
+            {t(`resource.${status}`)}
+          </div>
+        </Tooltip>
+      </>
     );
   };
 
@@ -95,12 +133,26 @@ export const ResourceList = () => {
               onClick={() => {
                 jumpToReadResource({ resId: item?.resourceId });
               }}
+              reLoadResource={() => reLoadResource(item.resourceId)}
             >
               <div className="flex items-center justify-between mt-6">
-                <div className="text-xs text-black/40">
-                  {time(item.updatedAt, language as LOCALE)
-                    .utc()
-                    .fromNow()}
+                <div className="flex items-center text-xs text-black/40">
+                  <div className="text-xs text-black/40">
+                    {time(item.updatedAt, language as LOCALE)
+                      .utc()
+                      .fromNow()}
+                  </div>
+                  {item.indexStatus === 'wait_index' && (
+                    <IndexStatus
+                      resourceId={item.resourceId}
+                      status="wait_index"
+                      icon={<IconLoading style={{ marginRight: 4 }} />}
+                    />
+                  )}
+
+                  {item.indexStatus === 'index_failed' && (
+                    <IndexStatus resourceId={item.resourceId} status="index_failed" />
+                  )}
                 </div>
                 <div>
                   <DeleteDropdownMenu

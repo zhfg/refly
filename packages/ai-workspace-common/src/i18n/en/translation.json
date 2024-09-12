@@ -20,7 +20,8 @@
     "required": "This item is required",
     "empty": "No content",
     "selectContext": "Select Context",
-    "emptyInput": "Please fill in or select content"
+    "emptyInput": "Please fill in or select content",
+    "retry": "Retry"
   },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",
@@ -212,7 +213,13 @@
       "emptyText": "Title and text content cannot be empty!",
       "textTitlePlaceholder": "Enter title",
       "textContentPlaceholder": "Enter or paste text"
-    }
+    },
+    "wait_parse": "Parsing",
+    "parse_failed": "Parse Failed, click to retry",
+    "wait_index": "Indexing",
+    "wait_index_tip": "The resource is temporarily not supported for AI search and needs to wait for memory addition to complete",
+    "index_failed": "Index Failed",
+    "index_failed_tip": "Click to retry"
   },
   "loggedHomePage": {
     "newThreadText": "New Thread",
