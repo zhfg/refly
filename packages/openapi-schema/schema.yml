@@ -2256,9 +2256,11 @@ components:
       description: Resource index status
       enum:
         - init
-        - processing
+        - wait_parse
+        - wait_index
         - finish
-        - failed
+        - parse_failed
+        - index_failed
         - unavailable
     SubscriptionInterval:
       type: string
