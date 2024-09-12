@@ -8,16 +8,26 @@
     align-items: center;
     justify-content: space-between;
     border: 1px solid #fff;
-    background: linear-gradient(113deg, rgba(255, 255, 255, 0.51) 3.51%, rgba(255, 255, 255, 0) 111.71%),
-      rgb(234, 236, 240);
+    background: linear-gradient(to right, #00c4b8, #00968f);
     border-radius: 12px;
     box-shadow: rgba(0, 0, 0, 0.06) 5px 7px 12px 0px;
+    color: #fff;
+    &.free {
+      background: linear-gradient(113deg, rgba(255, 255, 255, 0.51) 3.51%, rgba(255, 255, 255, 0) 111.71%),
+        rgb(234, 236, 240);
+      .subscription-plan-info-title {
+        color: #666;
+      }
+      .subscription-plan-info-status {
+        color: #333;
+      }
+    }
 
     &-info {
       &-title {
         font-size: 12px;
         line-height: 16px;
-        color: #666;
+        color: #fff;
       }
 
       &-status {
@@ -26,10 +36,13 @@
         font-size: 20px;
         line-height: 40px;
         font-weight: 600;
-        color: #333;
+        color: #fff;
         .interval {
           margin-left: 10px;
-          font-size: 12px;
+          font-size: 10px;
+          height: 18px;
+          line-height: 18px;
+          border-radius: 4px;
         }
       }
     }

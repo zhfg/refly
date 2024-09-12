@@ -91,7 +91,7 @@ export const Subscription = () => {
 
   return (
     <div className="subscription">
-      <div className="subscription-plan">
+      <div className={`subscription-plan ${subscriptionStatus === 'free' ? 'free' : ''}`}>
         <div className="subscription-plan-info">
           <div className="subscription-plan-info-title">{t('settings.subscription.currentPlan')}</div>
           <div className="subscription-plan-info-status">

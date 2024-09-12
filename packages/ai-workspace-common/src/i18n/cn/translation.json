@@ -571,9 +571,8 @@
       "t2TokenUsedDescription": "基础模型包括 OpenAI GPT-4o-mini、OpenAI GPT-3.5-turbo、Google Gemini 1.5 Flash；使用量包括模型输入和输出 Token 消耗",
       "subscriptionManagement": "管理账单及订阅",
       "subscriptionStatus": {
-        "free": "标准版",
-        "pro": "高级版",
-        "enterprise": "企业版"
+        "free": "Free",
+        "pro": "Pro"
       },
       "subscribe": {
         "title": "选择适合您的套餐",
