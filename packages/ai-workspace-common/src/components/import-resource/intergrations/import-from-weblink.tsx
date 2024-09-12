@@ -206,35 +206,24 @@ export const ImportFromWeblink = () => {
             <p className="footer-count text-item">
               {t('resource.import.linkCount', { count: scrapeLinks?.length || 0 })}
             </p>
-            <p style={{ margin: '0 8px' }} className="text-item">
-              {' '}
-              |{' '}
-            </p>
-            <p className="text-item">{t('resource.import.saveTo')}</p>
-            <SearchSelect
-              domain="collection"
-              className="kg-selector"
-              allowCreateNewEntity
-              onChange={(value) => {
-                if (!value) return;
-                importResourceStore.setSelectedCollectionId(value);
-              }}
-            />
+            <div className="save-container">
+              <p className="text-item save-text-item">{t('resource.import.saveTo')}</p>
+              <SearchSelect
+                domain="collection"
+                className="kg-selector"
+                allowCreateNewEntity
+                onChange={(value) => {
+                  if (!value) return;
+                  importResourceStore.setSelectedCollectionId(value);
+                }}
+              />
+            </div>
           </div>
           <div className="footer-action">
-            <Button
-              style={{ width: 72, marginRight: 8 }}
-              onClick={() => importResourceStore.setImportResourceModalVisible(false)}
-            >
+            <Button style={{ marginRight: 8 }} onClick={() => importResourceStore.setImportResourceModalVisible(false)}>
               {t('common.cancel')}
             </Button>
-            <Button
-              type="primary"
-              style={{ width: 100 }}
-              onClick={handleSave}
-              disabled={scrapeLinks.length === 0}
-              loading={saveLoading}
-            >
+            <Button type="primary" onClick={handleSave} disabled={scrapeLinks.length === 0} loading={saveLoading}>
               {t('common.save')}
             </Button>
           </div>

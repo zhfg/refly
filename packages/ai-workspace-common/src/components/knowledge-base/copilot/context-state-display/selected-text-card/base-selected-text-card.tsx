@@ -13,6 +13,7 @@ import {
   IconHighlight,
   IconLink,
   IconRefresh,
+  IconSave,
 } from '@arco-design/web-react/icon';
 import { useGetSkills } from '@refly-packages/ai-workspace-common/skills/main-logic/use-get-skills';
 import { useDispatchAction } from '@refly-packages/ai-workspace-common/skills/main-logic/use-dispatch-action';
@@ -33,6 +34,7 @@ import { PiNotepad, PiNotebookDuotone } from 'react-icons/pi';
 import { useGetCurrentSelectedMark } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-selected-text';
 import { useEffect } from 'react';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
+import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
 
 interface BaseSelectedTextCardProps {
   title: string;
@@ -63,6 +65,11 @@ const getIcon = (mark: Mark) => {
 export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
   const { title, skillContent } = props;
   const { t, i18n } = useTranslation();
+  const importResourceStore = useImportResourceStore((state) => ({
+    setImportResourceModalVisible: state.setImportResourceModalVisible,
+    setSelectedMenuItem: state.setSelectedMenuItem,
+    setCopiedTextPayload: state.setCopiedTextPayload,
+  }));
   const contextPanelStore = useContextPanelStore((state) => ({
     enableMultiSelect: state.enableMultiSelect,
     currentSelectedMarks: state.currentSelectedMarks,
@@ -77,6 +84,9 @@ export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
     beforeSelectionNoteContent: state.beforeSelectionNoteContent,
     afterSelectionNoteContent: state.afterSelectionNoteContent,
     currentSelectionContent: state.currentSelectionContent,
+  }));
+  const { currentResource } = useKnowledgeBaseStore((state) => ({
+    currentResource: state.currentResource,
   }));
   const { enableMultiSelect, currentSelectedMark } = contextPanelStore;
   const { handleReset } = useSelectedMark();
@@ -166,9 +176,10 @@ export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
       </div>
       <div className="context-state-card-quick-action">{skillContent}</div>
       <div className="context-state-card-footer">
-        <IconFilter />
+        {/* <IconFilter /> */}
         <Tooltip content={t('copilot.selectedTextCard.filterTitle')}>
           <Select
+            size="mini"
             // bordered={false}
             mode="multiple"
             maxTagCount={1}
@@ -178,7 +189,7 @@ export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
               contextPanelStore.setSelectedTextCardDomain(val);
             }}
             allowClear
-            autoWidth={{ minWidth: 266, maxWidth: 340 }}
+            autoWidth={{ minWidth: 150, maxWidth: 200 }}
           >
             {(isWeb ? selectedTextCardDomainWeb : selectedTextCardDomainExtension).map((item, index) => (
               <Option key={item?.key} value={item?.key}>
@@ -186,6 +197,33 @@ export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
               </Option>
             ))}
           </Select>
+        </Tooltip>
+        <Tooltip content={t('copilot.selectedTextCard.save.tooltip')} getPopupContainer={getPopupContainer}>
+          <Button
+            icon={<IconSave />}
+            type="outline"
+            style={{ fontSize: 12 }}
+            size="mini"
+            onClick={() => {
+              importResourceStore.setImportResourceModalVisible(true);
+              importResourceStore.setSelectedMenuItem('import-from-paste-text');
+
+              const content = finalUsedMarks.map((mark) => mark.data).join('\n\n');
+
+              let title = '',
+                url = '';
+
+              if (!isWeb) {
+                title = currentResource?.title;
+                url = currentResource?.data?.url;
+              }
+              // 设置 copiedTextPayload
+              importResourceStore.setCopiedTextPayload({ content, title, url });
+            }}
+            disabled={finalUsedMarks.length === 0}
+          >
+            {t('copilot.selectedTextCard.save.title')}
+          </Button>
         </Tooltip>
       </div>
     </div>

@@ -93,7 +93,7 @@ const MenuItemContent = (props: {
 }) => {
   return (
     <div className="flex">
-      <div className="flex flex-1 flex-nowrap items-center">
+      <div className="flex flex-nowrap flex-1 items-center">
         {props.icon}
         <span className="sider-menu-title">{props.title}</span>
       </div>
@@ -108,7 +108,7 @@ const MenuItemTooltipContent = (props: { title: string }) => {
 const SettingItem = () => {
   const userStore = useUserStore()
   return (
-    <div className="flex flex-1 items-center justify-between">
+    <div className="flex flex-1 justify-between items-center">
       <SiderMenuSettingList>
         <div className="menu-settings user-profile">
           <Avatar size={32}>
@@ -138,7 +138,9 @@ export const SiderLayout = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const userStore = useUserStore()
-  const importResourceStore = useImportResourceStore()
+  const importResourceStore = useImportResourceStore(state => ({
+    setImportResourceModalVisible: state.setImportResourceModalVisible,
+  }))
   const isGuideDetail = location.pathname.includes("guide/")
   const { resourcePanelVisible } = useKnowledgeBaseStore()
 

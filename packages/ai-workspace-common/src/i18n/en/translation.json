@@ -215,6 +215,7 @@
       "integration": "Integration",
       "emptyText": "Title and text content cannot be empty!",
       "textTitlePlaceholder": "Enter title",
+      "textUrlPlaceholder": "Enter or paste web link",
       "textContentPlaceholder": "Enter or paste text"
     }
   },
@@ -798,7 +799,7 @@
     "selectedTextCard": {
       "title": "Selected Text Quick Actions",
       "filterTitle": "Filter Selected Content",
-      "placeholder": "No quick actions for selected text...",
+      "placeholder": "No selected content...",
       "options": {
         "resource": "Selected Resource Content",
         "note": "Selected Note Content",
@@ -806,6 +807,12 @@
         "noteBeforeCursorSelection": "Note Cursor Before Selection",
         "noteAfterCursorSelection": "Note Cursor After Selection",
         "conversation": "Selected Conversation Content"
+      },
+      "save": {
+        "title": "Save",
+        "tooltip": "Save selected content",
+        "successNotify": "Save successfully!",
+        "errorNotify": "Save failed!"
       }
     },
     "chatInput": {

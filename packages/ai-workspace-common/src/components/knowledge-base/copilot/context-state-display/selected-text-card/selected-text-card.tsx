@@ -54,129 +54,127 @@ export const SelectedTextCard = () => {
     placeholderWidth: 120,
   });
 
-  console.log('containCnt', containCnt);
-
   // resource skill list
-  const resourceSkillList = [
-    {
-      title: '解释说明',
-      onClick: () => {
-        runSkill(getQuickActionPrompt('explain')?.prompt);
-      },
-    },
-    {
-      title: '翻译',
-      onClick: () => {
-        runSkill(getQuickActionPrompt('explain')?.prompt);
-      },
-    },
-  ];
+  // const resourceSkillList = [
+  //   {
+  //     title: '解释说明',
+  //     onClick: () => {
+  //       runSkill(getQuickActionPrompt('explain')?.prompt);
+  //     },
+  //   },
+  //   {
+  //     title: '翻译',
+  //     onClick: () => {
+  //       runSkill(getQuickActionPrompt('explain')?.prompt);
+  //     },
+  //   },
+  // ];
 
-  const resourceSkillContent = (
-    <div className="context-state-action-list">
-      {resourceSkillList.map((item, index) => (
-        <Button
-          type="outline"
-          size="mini"
-          key={index}
-          className="context-state-action-item"
-          style={{ borderRadius: 8 }}
-          disabled={disabled}
-          onClick={() => {
-            item?.onClick();
-          }}
-        >
-          {item?.title}
-        </Button>
-      ))}
-    </div>
-  );
+  // const resourceSkillContent = (
+  //   <div className="context-state-action-list">
+  //     {resourceSkillList.map((item, index) => (
+  //       <Button
+  //         type="outline"
+  //         size="mini"
+  //         key={index}
+  //         className="context-state-action-item"
+  //         style={{ borderRadius: 8 }}
+  //         disabled={disabled}
+  //         onClick={() => {
+  //           item?.onClick();
+  //         }}
+  //       >
+  //         {item?.title}
+  //       </Button>
+  //     ))}
+  //   </div>
+  // );
 
-  const isNoteRelated = !selectedTextCardDomain.includes('resource') && selectedTextCardDomain?.length > 0;
-  const isHybrid = selectedTextCardDomain?.length > 1 && selectedTextCardDomain.includes('resource');
+  // const isNoteRelated = !selectedTextCardDomain.includes('resource') && selectedTextCardDomain?.length > 0;
+  // const isHybrid = selectedTextCardDomain?.length > 1 && selectedTextCardDomain.includes('resource');
 
-  if (selectedTextCardDomain?.length === 1 && selectedTextCardDomain.includes('resource')) {
-    finalSkillContent = resourceSkillContent;
-  } else if (isNoteRelated) {
-    const dropList = (
-      <Menu>
-        {writingSkills.slice(containCnt).map((skill, index) => {
-          if (skill?.itemList && skill?.itemList?.length > 0) {
-            return (
-              <SubMenu key={`${skill.key}`} title={skill?.title}>
-                {skill?.itemList?.map((subSkill, subIndex) => (
-                  <MenuItem
-                    key={`${skill.key}_${subIndex}`}
-                    onClick={() => {
-                      if (skill?.key === 'translate') {
-                        runSkill(skill?.prompt?.replace(`{${skill?.variable || ''}}`, localeList?.[subSkill]));
-                      } else {
-                        runSkill(skill?.prompt?.replace(`{${skill?.variable || ''}}`, subSkill));
-                      }
-                    }}
-                  >
-                    {subSkill}
-                  </MenuItem>
-                ))}
-              </SubMenu>
-            );
-          } else {
-            return (
-              <MenuItem
-                key={`${skill.key}`}
-                onClick={() => {
-                  runSkill(skill?.prompt);
-                }}
-              >
-                {skill.title}
-              </MenuItem>
-            );
-          }
-        })}
-      </Menu>
-    );
+  // if (selectedTextCardDomain?.length === 1 && selectedTextCardDomain.includes('resource')) {
+  //   finalSkillContent = resourceSkillContent;
+  // } else if (isNoteRelated) {
+  //   const dropList = (
+  //     <Menu>
+  //       {writingSkills.slice(containCnt).map((skill, index) => {
+  //         if (skill?.itemList && skill?.itemList?.length > 0) {
+  //           return (
+  //             <SubMenu key={`${skill.key}`} title={skill?.title}>
+  //               {skill?.itemList?.map((subSkill, subIndex) => (
+  //                 <MenuItem
+  //                   key={`${skill.key}_${subIndex}`}
+  //                   onClick={() => {
+  //                     if (skill?.key === 'translate') {
+  //                       runSkill(skill?.prompt?.replace(`{${skill?.variable || ''}}`, localeList?.[subSkill]));
+  //                     } else {
+  //                       runSkill(skill?.prompt?.replace(`{${skill?.variable || ''}}`, subSkill));
+  //                     }
+  //                   }}
+  //                 >
+  //                   {subSkill}
+  //                 </MenuItem>
+  //               ))}
+  //             </SubMenu>
+  //           );
+  //         } else {
+  //           return (
+  //             <MenuItem
+  //               key={`${skill.key}`}
+  //               onClick={() => {
+  //                 runSkill(skill?.prompt);
+  //               }}
+  //             >
+  //               {skill.title}
+  //             </MenuItem>
+  //           );
+  //         }
+  //       })}
+  //     </Menu>
+  //   );
 
-    const skillLen = writingSkills.length;
-    const skillContent = (
-      <div className="context-state-action-list">
-        {writingSkills.slice(0, containCnt).map((skill, index) => (
-          <Button
-            type="outline"
-            size="mini"
-            className="context-state-action-item"
-            key={index}
-            disabled={disabled}
-            style={{ borderRadius: 8 }}
-            onClick={() => {
-              runSkill(skill?.prompt);
-            }}
-          >
-            {skill.title}
-          </Button>
-        ))}
-        {containCnt >= writingSkills.length || skillLen === 0 ? null : (
-          <Dropdown droplist={dropList}>
-            <Button
-              type="outline"
-              size="mini"
-              className="context-state-action-item"
-              icon={<IconMore />}
-              style={{ borderRadius: 8, paddingLeft: 8 }}
-            >
-              更多
-            </Button>
-          </Dropdown>
-        )}
-      </div>
-    );
+  //   const skillLen = writingSkills.length;
+  //   const skillContent = (
+  //     <div className="context-state-action-list">
+  //       {writingSkills.slice(0, containCnt).map((skill, index) => (
+  //         <Button
+  //           type="outline"
+  //           size="mini"
+  //           className="context-state-action-item"
+  //           key={index}
+  //           disabled={disabled}
+  //           style={{ borderRadius: 8 }}
+  //           onClick={() => {
+  //             runSkill(skill?.prompt);
+  //           }}
+  //         >
+  //           {skill.title}
+  //         </Button>
+  //       ))}
+  //       {containCnt >= writingSkills.length || skillLen === 0 ? null : (
+  //         <Dropdown droplist={dropList}>
+  //           <Button
+  //             type="outline"
+  //             size="mini"
+  //             className="context-state-action-item"
+  //             icon={<IconMore />}
+  //             style={{ borderRadius: 8, paddingLeft: 8 }}
+  //           >
+  //             更多
+  //           </Button>
+  //         </Dropdown>
+  //       )}
+  //     </div>
+  //   );
 
-    finalSkillContent = skillContent;
-  } else if (isHybrid) {
-    finalSkillContent = resourceSkillContent;
-  } else {
-    // for empty or weblink
-    finalSkillContent = resourceSkillContent;
-  }
+  //   finalSkillContent = skillContent;
+  // } else if (isHybrid) {
+  //   finalSkillContent = resourceSkillContent;
+  // } else {
+  //   // for empty or weblink
+  //   finalSkillContent = resourceSkillContent;
+  // }
 
   return <BaseSelectedTextCard title="选中资源内容问答" skillContent={finalSkillContent} />;
 };
