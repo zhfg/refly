@@ -114,6 +114,7 @@ export const SubscribeModal = (props: SubscribeModalProps) => {
     >
       <div className="subscribe-content">
         <div className="subscribe-content-title">{t('settings.subscription.subscribe.title')}</div>
+        <div className="subscribe-content-subtitle">{t('settings.subscription.subscribe.subtitle')}</div>
 
         <div className="subscribe-content-type">
           <div className="subscribe-content-type-inner">

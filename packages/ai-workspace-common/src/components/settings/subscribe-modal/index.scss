@@ -7,8 +7,17 @@
     text-align: center;
   }
 
+  &-subtitle {
+    margin-top: 8px;
+    font-size: 14px;
+    line-height: 24px;
+    color: rgb(242 103 37);
+    font-weight: 600;
+    text-align: center;
+  }
+
   &-type {
-    margin-top: 20px;
+    margin-top: 8px;
     display: flex;
     justify-content: center;
 

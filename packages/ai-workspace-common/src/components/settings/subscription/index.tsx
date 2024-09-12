@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { Button, Progress, Tooltip, Tag } from '@arco-design/web-react';
+import { Button, Progress, Tooltip, Tag, Spin, Message as message } from '@arco-design/web-react';
 import { HiOutlineQuestionMarkCircle } from 'react-icons/hi2';
 import { HiOutlineExternalLink } from 'react-icons/hi';
 import { RiBillLine } from 'react-icons/ri';
@@ -23,6 +23,7 @@ export const Subscription = () => {
     userStore?.userProfile?.subscription?.planType || 'free',
   );
   const [subscriptionUsage, setSubscriptionUsage] = useState<TokenUsageMeter>(null);
+  const [loading, setLoading] = useState(false);
 
   const getubscriptionStatus = async () => {
     const { data } = await getClient().getSubscriptionUsage();
@@ -32,11 +33,15 @@ export const Subscription = () => {
   };
 
   const createPortalSession = async () => {
-    const { error } = await getClient().createPortalSession();
-    if (error) {
-      console.error(error);
-      return;
+    if (loading) return;
+    setLoading(true);
+    const { data } = await getClient().createPortalSession();
+    if (data?.data?.url) {
+      window.location.href = data.data.url;
+    } else {
+      message.error(t('common.putErr'));
     }
+    setLoading(false);
   };
 
   const UsageItem = ({ title, used, quota, description, endAt }) => {
@@ -123,12 +128,16 @@ export const Subscription = () => {
       </div>
 
       {subscriptionStatus !== 'free' && (
-        <div className="subscription-management" onClick={createPortalSession}>
-          <div className="subscription-management-left">
-            <RiBillLine style={{ marginRight: 8 }} />
-            {t('settings.subscription.subscriptionManagement')}
-          </div>
-          <HiOutlineExternalLink className="subscription-management-right" />
+        <div className="subscription-management-wrapper">
+          <Spin loading={loading} style={{ width: '100%' }}>
+            <div className="subscription-management" onClick={createPortalSession}>
+              <div className="subscription-management-left">
+                <RiBillLine style={{ marginRight: 8 }} />
+                {t('settings.subscription.subscriptionManagement')}
+              </div>
+              <HiOutlineExternalLink className="subscription-management-right" />
+            </div>
+          </Spin>
         </div>
       )}
       <SubscribeModal visible={subscribeModalVisible} setVisible={setSubscribeModalVisible} />
