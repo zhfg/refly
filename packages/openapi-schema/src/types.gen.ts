@@ -16,6 +16,10 @@ export type User = {
    * Output locale
    */
   outputLocale?: string;
+  /**
+   * Subscription plan ID
+   */
+  planId?: string;
 };
 
 /**
@@ -676,6 +680,37 @@ export type Source = {
 export type MessageType = 'ai' | 'human' | 'system';
 
 /**
+ * Model tier
+ */
+export type ModelTier = 't1' | 't2';
+
+/**
+ * Token usage item
+ */
+export type TokenUsageItem = {
+  /**
+   * Model tier
+   */
+  tier: string;
+  /**
+   * Model name
+   */
+  modelName: string;
+  /**
+   * Model provider
+   */
+  modelProvider: string;
+  /**
+   * Input tokens
+   */
+  inputTokens: number;
+  /**
+   * Output tokens
+   */
+  outputTokens: number;
+};
+
+/**
  * Chat message
  */
 export type ChatMessage = {
@@ -723,6 +758,10 @@ export type ChatMessage = {
    * @deprecated
    */
   sources?: Array<Source>;
+  /**
+   * Token usage
+   */
+  tokenUsage?: Array<TokenUsageItem>;
   /**
    * Selected weblink config (JSON)
    */
@@ -919,6 +958,96 @@ export type ChatTaskResponse = {
  */
 export type IndexStatus = 'init' | 'processing' | 'finish' | 'failed' | 'unavailable';
 
+/**
+ * Payment recurring interval
+ */
+export type SubscriptionInterval = 'monthly' | 'yearly';
+
+/**
+ * Subscription plan type
+ */
+export type SubscriptionPlanType = 'free' | 'pro';
+
+/**
+ * Price lookup key
+ */
+export type PriceLookupKey = 'refly_pro_monthly' | 'refly_pro_yearly';
+
+/**
+ * Subscription status
+ */
+export type SubscriptionStatus =
+  | 'active'
+  | 'canceled'
+  | 'incomplete'
+  | 'incomplete_expired'
+  | 'past_due'
+  | 'paused'
+  | 'trialing'
+  | 'unpaid';
+
+export type Subscription = {
+  /**
+   * Subscription ID
+   */
+  subscriptionId: string;
+  /**
+   * Lookup key
+   */
+  lookupKey?: string;
+  /**
+   * Subscription plan type
+   */
+  planType: SubscriptionPlanType;
+  /**
+   * Payment recurring interval
+   */
+  interval?: SubscriptionInterval;
+  /**
+   * Subscription status
+   */
+  status: SubscriptionStatus;
+};
+
+export type TokenUsageMeter = {
+  /**
+   * Token usage meter ID
+   */
+  meterId: string;
+  /**
+   * User ID
+   */
+  uid: string;
+  /**
+   * Subscription ID
+   */
+  subscriptionId?: string;
+  /**
+   * Token usage meter start time
+   */
+  startAt: string;
+  /**
+   * Token usage meter end time
+   */
+  endAt: string;
+  /**
+   * Token quota (T1)
+   */
+  t1TokenQuota?: number;
+  /**
+   * Token used (T1)
+   */
+  t1TokenUsed?: number;
+  /**
+   * Token quota (T2)
+   */
+  t2TokenQuota?: number;
+  /**
+   * Token used (T2)
+   */
+  t2TokenUsed?: number;
+};
+
 export type UserSettings = {
   /**
    * User ID
@@ -952,6 +1081,10 @@ export type UserSettings = {
    * User output locale
    */
   outputLocale?: string;
+  /**
+   * User subscription
+   */
+  subscription?: Subscription;
 };
 
 export type GetUserSettingsResponse = BaseResponse & {
@@ -1500,10 +1633,6 @@ export type SkillContext = {
    * List of URLs
    */
   urls?: Array<SkillContextUrlItem>;
-  /**
-   * user selected output locale
-   */
-  locale?: string;
 };
 
 export type SkillInputKey = 'query';
@@ -1608,9 +1737,21 @@ export type InvokeSkillRequest = {
    */
   convId?: string;
   /**
+   * user selected output locale
+   */
+  locale?: string;
+  /**
+   * user selected output model
+   */
+  modelName?: string;
+  /**
    * Create conversation parameters
    */
   createConvParam?: CreateConversationRequest;
+  /**
+   * Skill job ID (if not provided, a new job will be created)
+   */
+  jobId?: string;
   /**
    * Trigger ID (typically you don't need to provide this)
    */
@@ -1809,6 +1950,51 @@ export type CheckSettingsFieldResponse = BaseResponse & {
    * Settings field check result
    */
   data?: CheckSettingsFieldResult;
+};
+
+export type CreateCheckoutSessionRequest = {
+  /**
+   * Price lookup key
+   */
+  lookupKey: PriceLookupKey;
+};
+
+export type CreateCheckoutSessionResponse = BaseResponse & {
+  /**
+   * Checkout session
+   */
+  data?: {
+    /**
+     * Checkout session URL
+     */
+    url?: string;
+  };
+};
+
+export type CreatePortalSessionResponse = BaseResponse & {
+  /**
+   * Portal session
+   */
+  data?: {
+    /**
+     * Portal session URL
+     */
+    url?: string;
+  };
+};
+
+export type SubscriptionUsageData = {
+  /**
+   * Token usage meter
+   */
+  token?: TokenUsageMeter;
+};
+
+export type GetSubscriptionUsageResponse = BaseResponse & {
+  /**
+   * Subscription usage
+   */
+  data?: SubscriptionUsageData;
 };
 
 export type SearchDomain = 'resource' | 'note' | 'collection' | 'conversation' | 'skill';
@@ -2514,6 +2700,26 @@ export type CheckSettingsFieldResponse2 = CheckSettingsFieldResponse;
 
 export type CheckSettingsFieldError = unknown;
 
+export type GetSubscriptionPlanResponse = unknown;
+
+export type GetSubscriptionPlanError = unknown;
+
+export type GetSubscriptionUsageResponse2 = GetSubscriptionUsageResponse;
+
+export type GetSubscriptionUsageError = unknown;
+
+export type CreateCheckoutSessionData = {
+  body: CreateCheckoutSessionRequest;
+};
+
+export type CreateCheckoutSessionResponse2 = CreateCheckoutSessionResponse;
+
+export type CreateCheckoutSessionError = unknown;
+
+export type CreatePortalSessionResponse2 = CreatePortalSessionResponse;
+
+export type CreatePortalSessionError = unknown;
+
 export type SearchData = {
   body: SearchRequest;
 };
@@ -3040,6 +3246,47 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': CheckSettingsFieldResponse;
+      };
+    };
+  };
+  '/subscription/plan': {
+    get: {
+      res: {
+        /**
+         * successful operation
+         */
+        '200': unknown;
+      };
+    };
+  };
+  '/subscription/usage': {
+    get: {
+      res: {
+        /**
+         * successful operation
+         */
+        '200': GetSubscriptionUsageResponse;
+      };
+    };
+  };
+  '/subscription/createCheckoutSession': {
+    post: {
+      req: CreateCheckoutSessionData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': CreateCheckoutSessionResponse;
+      };
+    };
+  };
+  '/subscription/createPortalSession': {
+    post: {
+      res: {
+        /**
+         * successful operation
+         */
+        '200': CreatePortalSessionResponse;
       };
     };
   };

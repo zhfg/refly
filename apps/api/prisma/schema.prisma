@@ -38,29 +38,33 @@ model Account {
 
 model User {
   /// Primary key
-  pk            BigInt    @id @default(autoincrement())
+  pk             BigInt    @id @default(autoincrement())
   /// UID
-  uid           String    @unique @map("uid")
+  uid            String    @unique @map("uid")
   /// Username
-  name          String    @unique @map("name")
+  name           String    @unique @map("name")
   /// Nickname
-  nickname      String?   @map("nickname")
+  nickname       String?   @map("nickname")
   /// Email
-  email         String?   @unique @map("email")
+  email          String?   @unique @map("email")
   /// Avatar url
-  avatar        String?   @map("avatar")
+  avatar         String?   @map("avatar")
   /// Email verified timestamp
-  emailVerified DateTime? @map("email_verified") @db.Timestamptz()
+  emailVerified  DateTime? @map("email_verified") @db.Timestamptz()
   /// Password
-  password      String?   @map("password")
+  password       String?   @map("password")
   /// UI language setting
-  uiLocale      String?   @map("ui_locale")
+  uiLocale       String?   @map("ui_locale")
   /// Output language setting
-  outputLocale  String?   @map("output_locale")
+  outputLocale   String?   @map("output_locale")
+  /// Stripe customer ID
+  customerId     String?   @map("customer_id")
+  /// Stripe subscription ID
+  subscriptionId String?   @map("subscription_id")
   /// Create timestamp
-  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
-  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
 
   @@map("users")
 }
@@ -104,6 +108,8 @@ model ChatMessage {
   convId                String      @default("") @map("conv_id")
   /// Skill job ID
   jobId                 String      @default("") @map("job_id")
+  /// Span id
+  spanId                String?     @map("span_id")
   /// Message type
   type                  MessageType @map("type")
   /// UID
@@ -118,6 +124,10 @@ model ChatMessage {
   structuredData        String      @default("{}") @map("structured_data")
   /// Errors
   errors                String?     @map("errors")
+  /// Tool calls (JSON array)
+  toolCalls             String?     @map("tool_calls")
+  /// Token usage summary
+  tokenUsage            String?     @map("token_usage")
   /// Locale setting
   locale                String?     @default("") @map("locale")
   /// Create timestamp
@@ -129,6 +139,42 @@ model ChatMessage {
 
   @@index([convId, updatedAt])
   @@map("chat_messages")
+}
+
+model TokenUsage {
+  /// Primary key
+  pk               BigInt   @id @default(autoincrement())
+  /// UID
+  uid              String   @map("uid")
+  /// Conversation ID
+  convId           String   @map("conv_id")
+  /// Skill job ID
+  jobId            String   @map("job_id")
+  /// Span id
+  spanId           String   @map("span_id")
+  /// Model tier
+  tier             String   @map("tier")
+  /// Model provider
+  modelProvider    String   @map("model_provider")
+  /// Model name
+  modelName        String   @map("model_name")
+  /// Input tokens
+  inputTokens      Int      @default(0) @map("input_tokens")
+  /// Output tokens
+  outputTokens     Int      @default(0) @map("output_tokens")
+  /// Skill id
+  skillId          String?  @map("skill_id")
+  /// Skill template name
+  skillTplName     String   @map("skill_tpl_name")
+  /// Skill display name
+  skillDisplayName String   @map("skill_display_name")
+  /// Create timestamp
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([uid, createdAt])
+  @@map("token_usages")
 }
 
 model Resource {
@@ -385,6 +431,106 @@ model LabelInstance {
 
   @@index([entityType, entityId])
   @@map("label_instances")
+}
+
+model SubscriptionUsageQuota {
+  /// Primary key
+  pk           BigInt   @id @default(autoincrement())
+  /// Subscription plan type
+  planType     String   @unique @map("plan_type")
+  /// Token quota (T1)
+  t1TokenQuota Int      @default(0) @map("t1_token_quota")
+  /// Token quota (T2)
+  t2TokenQuota Int      @default(0) @map("t2_token_quota")
+  /// Create timestamp
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([planType])
+  @@map("subscription_usage_quotas")
+}
+
+model Subscription {
+  /// Primary key
+  pk             BigInt   @id @default(autoincrement())
+  /// Stripe subscription ID
+  subscriptionId String   @unique @map("subscription_id")
+  /// Stripe price lookup key
+  lookupKey      String   @map("lookup_key")
+  /// Plan type (free, pro, max, etc.)
+  planType       String   @map("plan_type")
+  /// Billing interval (monthly, yearly, etc.)
+  interval       String?  @map("interval")
+  /// UID
+  uid            String   @map("uid")
+  /// Stripe subscription status
+  status         String   @map("status")
+  /// Create timestamp
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([uid])
+  @@map("subscriptions")
+}
+
+model TokenUsageMeter {
+  /// Primary key
+  pk             BigInt    @id @default(autoincrement())
+  /// Meter ID
+  meterId        String    @unique @map("meter_id")
+  /// UID
+  uid            String    @map("uid")
+  /// Subscription ID
+  subscriptionId String?   @map("subscription_id")
+  /// Meter start timestamp
+  startAt        DateTime  @map("start_at") @db.Timestamptz()
+  /// Meter end timestamp
+  endAt          DateTime  @map("end_at") @db.Timestamptz()
+  /// Token quota (T1)
+  t1TokenQuota   Int       @default(0) @map("t1_token_quota")
+  /// Token used (T1)
+  t1TokenUsed    Int       @default(0) @map("t1_token_used")
+  /// Token quota (T2)
+  t2TokenQuota   Int       @default(0) @map("t2_token_quota")
+  /// Token used (T2)
+  t2TokenUsed    Int       @default(0) @map("t2_token_used")
+  /// Create timestamp
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  /// Deletion timestamp
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz()
+
+  @@index([uid, deletedAt])
+  @@map("token_usage_meters")
+}
+
+model CheckoutSession {
+  /// Primary key
+  pk             BigInt   @id @default(autoincrement())
+  /// Stripe checkout session ID
+  sessionId      String   @map("session_id")
+  /// UID
+  uid            String   @map("uid")
+  /// Price lookup key
+  lookupKey      String   @map("lookup_key")
+  /// Payment status
+  paymentStatus  String?  @map("payment_status")
+  /// Stripe subscription ID
+  subscriptionId String?  @map("subscription_id")
+  /// Stripe invoice ID
+  invoiceId      String?  @map("invoice_id")
+  /// Stripe customer ID
+  customerId     String?  @map("customer_id")
+  /// Create timestamp
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([sessionId])
+  @@map("checkout_sessions")
 }
 
 enum MessageType {

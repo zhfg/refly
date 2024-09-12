@@ -16,6 +16,7 @@ import {
   Typography,
 } from '@arco-design/web-react';
 import { IconBook, IconCaretDown, IconCheckCircle, IconCopy, IconImport, IconRight } from '@arco-design/web-react/icon';
+import { MdOutlineToken } from 'react-icons/md';
 import { useTranslation } from 'react-i18next';
 // 自定义组件
 import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
@@ -28,6 +29,7 @@ import { ClientChatMessage } from '@refly/common-types';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 import { memo } from 'react';
 import classNames from 'classnames';
+import { useState, useEffect } from 'react';
 
 const citationRegex = /\([|【)citation()|】)]\(\d+\)/g;
 
@@ -87,7 +89,7 @@ export const AssistantMessage = memo(
     const profile = {
       name: message?.skillMeta?.displayName,
       avatar: message?.skillMeta?.displayName,
-      icon: message.skillMeta.icon,
+      icon: message?.skillMeta?.icon,
     };
 
     // TODO: 移入新组件
@@ -145,6 +147,32 @@ export const AssistantMessage = memo(
         </Menu.Item>
       </Menu>
     );
+
+    const tokenUsageDropdownList = (
+      <Menu>
+        {message?.tokenUsage?.map((item, index) => (
+          <Menu.Item key={'token-usage-' + index}>
+            <div className="flex items-center">
+              <span>
+                {item?.modelName}:{' '}
+                {t('copilot.tokenUsage', {
+                  count: item?.inputTokens + item?.outputTokens,
+                })}
+              </span>
+            </div>
+          </Menu.Item>
+        ))}
+      </Menu>
+    );
+    const [tokenUsage, setTokenUsage] = useState(0);
+
+    useEffect(() => {
+      let total = 0;
+      (message?.tokenUsage || []).forEach((item) => {
+        total += (item?.inputTokens || 0) + (item?.outputTokens || 0);
+      });
+      setTokenUsage(total);
+    }, [message.tokenUsage]);
 
     return (
       <div className="ai-copilot-message assistant-message-container">
@@ -256,8 +284,23 @@ export const AssistantMessage = memo(
                   </div>
                 ) : null}
               </div>
-              {!disable && (!isPending || !isLastSession) && (
-                <div className="ai-copilot-answer-action-container">
+
+              <div className="ai-copilot-answer-action-container">
+                {tokenUsage > 0 ? (
+                  <div className="ai-copilot-answer-token-usage">
+                    <Dropdown droplist={tokenUsageDropdownList}>
+                      <Button
+                        type="text"
+                        icon={<MdOutlineToken style={{ fontSize: 14, marginRight: 4 }} />}
+                        className={'assist-action-item'}
+                      >
+                        {tokenUsage} Tokens
+                      </Button>
+                    </Dropdown>
+                  </div>
+                ) : null}
+
+                {!disable && (!isPending || !isLastSession) && (
                   <div className="session-answer-actionbar">
                     <div className="session-answer-actionbar-left">
                       <Button
@@ -293,8 +336,8 @@ export const AssistantMessage = memo(
                     </div>
                     <div className="session-answer-actionbar-right"></div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </>
         </div>

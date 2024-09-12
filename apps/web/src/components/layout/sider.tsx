@@ -6,19 +6,21 @@ import {
   Menu,
   Tag,
   Tooltip,
+  Button,
 } from "@arco-design/web-react"
 import {
   useLocation,
   useNavigate,
 } from "@refly-packages/ai-workspace-common/utils/router"
 import { HiOutlineHome } from "react-icons/hi2"
-import { LuDownload } from "react-icons/lu"
+import { LuMoreHorizontal } from "react-icons/lu"
 import { RiRobot2Line, RiHistoryLine } from "react-icons/ri"
 import {
-  AiOutlineTwitter,
   AiOutlineMenuFold,
   AiOutlineMenuUnfold,
+  AiFillChrome,
 } from "react-icons/ai"
+
 import { IconLanguage, IconImport } from "@arco-design/web-react/icon"
 // 静态资源
 import Logo from "@/assets/logo.svg"
@@ -33,6 +35,7 @@ import { UILocaleList } from "@refly-packages/ai-workspace-common/components/ui-
 import { useImportResourceStore } from "@refly-packages/ai-workspace-common/stores/import-resource"
 import { useKnowledgeBaseStore } from "@refly-packages/ai-workspace-common/stores/knowledge-base"
 import { SiderMenuSettingList } from "@refly-packages/ai-workspace-common/components/sider-menu-setting-list"
+import { SiderMenuMoreList } from "@refly-packages/ai-workspace-common/components/sider-menu-more-list"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -110,27 +113,71 @@ const MenuItemTooltipContent = (props: { title: string }) => {
 
 const SettingItem = () => {
   const userStore = useUserStore()
+  const { t } = useTranslation()
   return (
-    <div className="flex flex-1 items-center justify-between">
+    <div className="w-full">
       <SiderMenuSettingList>
-        <div className="menu-settings user-profile">
-          <Avatar size={32}>
-            <img src={userStore?.userProfile?.avatar || ""} alt="user-avatar" />
-          </Avatar>
-          <span className="username">
-            <span>{userStore?.userProfile?.nickname}</span>
-          </span>
+        <div className="flex flex-1 items-center justify-between">
+          <div className="menu-settings user-profile">
+            <Avatar size={32}>
+              <img
+                src={userStore?.userProfile?.avatar || ""}
+                alt="user-avatar"
+              />
+            </Avatar>
+            <span className="username">
+              <span>{userStore?.userProfile?.nickname}</span>
+            </span>
+          </div>
+          <div className="subscription-status">
+            {t(
+              `settings.subscription.subscriptionStatus.${userStore?.userProfile?.subscription?.planType || "free"}`,
+            )}
+          </div>
         </div>
       </SiderMenuSettingList>
+    </div>
+  )
+}
 
-      <div>
-        <span
-          className="setting-language-icon"
-          style={{ display: "inline-block" }}>
+const MoreInfo = (props: { collapse: boolean }) => {
+  const { t } = useTranslation()
+  const { collapse } = props
+  return (
+    <div className="more-info">
+      {!collapse && (
+        <Tooltip content={t("loggedHomePage.siderMenu.downloadExtension")}>
+          <Button
+            className="more-info-btn"
+            icon={<AiFillChrome style={{ fontSize: 16 }} />}
+            onClick={() => {
+              window.open(
+                `https://chromewebstore.google.com/detail/lecbjbapfkinmikhadakbclblnemmjpd`,
+                "_blank",
+              )
+            }}>
+            {t("loggedHomePage.siderMenu.download")}
+          </Button>
+        </Tooltip>
+      )}
+      <div className="flex items-center">
+        {!collapse && (
           <UILocaleList>
-            <IconLanguage style={{ fontSize: 20 }} />
+            <Button className="more-info-btn" iconOnly>
+              <IconLanguage style={{ fontSize: 18, marginRight: 0 }} />
+            </Button>
           </UILocaleList>
-        </span>
+        )}
+        <SiderMenuMoreList>
+          <Button
+            className="more-info-btn"
+            iconOnly
+            icon={
+              <LuMoreHorizontal
+                style={{ fontSize: 18, marginLeft: collapse ? "-24px" : 0 }}
+              />
+            }></Button>
+        </SiderMenuMoreList>
       </div>
     </div>
   )
@@ -199,11 +246,6 @@ export const SiderLayout = () => {
         } else {
           navigate(`/digest`)
         }
-        break
-      }
-
-      case "GetHelp": {
-        window.open(`https://twitter.com/tuturetom`, "_blank")
         break
       }
 
@@ -334,6 +376,7 @@ export const SiderLayout = () => {
                       title={t(`loggedHomePage.siderMenu.${item.name}`)}
                     />
                   </MenuItem>
+
                   {item.showDivider && (
                     <Divider
                       key={item.key + "divider"}
@@ -379,39 +422,14 @@ export const SiderLayout = () => {
                 <SettingItem></SettingItem>
               </MenuItem>
             )}
+
             <Divider style={{ margin: "8px 0" }} />
+
             <MenuItem
-              key="GetHelp"
-              className="custom-menu-item"
-              renderItemInTooltip={() => (
-                <MenuItemTooltipContent
-                  title={t("loggedHomePage.siderMenu.getHelp")}
-                />
-              )}>
-              <MenuItemContent
-                icon={
-                  <AiOutlineTwitter
-                    className="arco-icon"
-                    style={{ fontSize: 20 }}
-                  />
-                }
-                title={t("loggedHomePage.siderMenu.getHelp")}
-              />
-            </MenuItem>
-            <MenuItem
-              key="DownloadExtension"
-              className="custom-menu-item"
-              renderItemInTooltip={() => (
-                <MenuItemTooltipContent
-                  title={t("loggedHomePage.siderMenu.download")}
-                />
-              )}>
-              <MenuItemContent
-                icon={
-                  <LuDownload className="arco-icon" style={{ fontSize: 20 }} />
-                }
-                title={t("loggedHomePage.siderMenu.download")}
-              />
+              key="MoreInfo"
+              className={`${collapse ? "more-info-menu-item-collapse" : ""}`}
+              renderItemInTooltip={() => null}>
+              <MoreInfo collapse={collapse} />
             </MenuItem>
           </div>
         </Menu>

@@ -17,6 +17,8 @@ import { SearchModule } from './search/search.module';
 import { LabelModule } from './label/label.module';
 import { EventModule } from './event/event.module';
 import { MiscModule } from './misc/misc.module';
+import { SubscriptionModule } from './subscription/subscription.module';
+import { StripeModule } from '@golevelup/nestjs-stripe';
 
 @Module({
   imports: [
@@ -51,6 +53,20 @@ import { MiscModule } from './misc/misc.module';
       }),
       inject: [ConfigService],
     }),
+    StripeModule.forRootAsync(StripeModule, {
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        apiKey: configService.get('stripe.apiKey'),
+        webhookConfig: {
+          stripeSecrets: {
+            account: configService.get('stripe.webhookSecret.account'),
+            accountTest: configService.get('stripe.webhookSecret.accountTest'),
+          },
+          requestBodyProperty: 'rawBody',
+        },
+      }),
+      inject: [ConfigService],
+    }),
     AuthModule,
     ConversationModule,
     UserModule,
@@ -61,6 +77,7 @@ import { MiscModule } from './misc/misc.module';
     LabelModule,
     EventModule,
     MiscModule,
+    SubscriptionModule,
   ],
   controllers: [AppController],
 })

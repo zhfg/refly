@@ -71,4 +71,14 @@ export default () => ({
   skill: {
     defaultModel: process.env.REFLY_DEFAULT_MODEL || 'gpt-4o-mini',
   },
+  stripe: {
+    apiKey: process.env.STRIPE_API_KEY,
+    webhookSecret: {
+      account: process.env.STRIPE_ACCOUNT_WEBHOOK_SECRET,
+      accountTest: process.env.STRIPE_ACCOUNT_TEST_WEBHOOK_SECRET,
+    },
+    sessionSuccessUrl: process.env.STRIPE_SESSION_SUCCESS_URL,
+    sessionCancelUrl: process.env.STRIPE_SESSION_CANCEL_URL,
+    portalReturnUrl: process.env.STRIPE_PORTAL_RETURN_URL,
+  },
 });

@@ -10,6 +10,9 @@ importers:
 
   ../../apps/api:
     dependencies:
+      '@golevelup/nestjs-stripe':
+        specifier: ~0.8.2
+        version: 0.8.2(@nestjs/common@10.3.9)(@nestjs/core@10.3.9)(rxjs@7.2.0)(stripe@16.10.0)
       '@hocuspocus/extension-database':
         specifier: ~2.13.0
         version: 2.13.0(y-protocols@1.0.6)(yjs@13.6.16)
@@ -190,6 +193,9 @@ importers:
       rxjs:
         specifier: ^7.2.0
         version: 7.2.0
+      stripe:
+        specifier: ~16.10.0
+        version: 16.10.0
       uuid:
         specifier: ^9.0.1
         version: 9.0.1
@@ -3933,6 +3939,53 @@ packages:
 
   /@floating-ui/utils@0.2.4:
     resolution: {integrity: sha512-dWO2pw8hhi+WrXq1YJy2yCuWoL20PddgGaqTgVe4cOS9Q6qklXCiA1tJEqX6BEwRNSCP84/afac9hd4MS+zEUA==}
+    dev: false
+
+  /@golevelup/nestjs-common@2.0.0(@nestjs/common@10.3.9):
+    resolution: {integrity: sha512-D9RLXgkqn9SDLnZ2VoMER9l/+g5CM9Z7sZXa+10+0rZs6yevMepoiWmMVsFoUXLzYG2GwfixHLExwUr3XBCHFw==}
+    peerDependencies:
+      '@nestjs/common': ^10.x
+    dependencies:
+      '@nestjs/common': 10.3.9(reflect-metadata@0.1.13)(rxjs@7.2.0)
+      lodash: 4.17.21
+      nanoid: 3.3.7
+    dev: false
+
+  /@golevelup/nestjs-discovery@4.0.1(@nestjs/common@10.3.9)(@nestjs/core@10.3.9):
+    resolution: {integrity: sha512-HFXBJayEkYcU/bbxOztozONdWaZR34ZeJ2zRbZIWY8d5K26oPZQTvJ4L0STW3XVRGWtoE0WBpmx2YPNgYvcmJQ==}
+    peerDependencies:
+      '@nestjs/common': ^10.x
+      '@nestjs/core': ^10.x
+    dependencies:
+      '@nestjs/common': 10.3.9(reflect-metadata@0.1.13)(rxjs@7.2.0)
+      '@nestjs/core': 10.3.9(@nestjs/common@10.3.9)(@nestjs/platform-express@10.3.9)(@nestjs/websockets@10.3.9)(reflect-metadata@0.1.13)(rxjs@7.2.0)
+      lodash: 4.17.21
+    dev: false
+
+  /@golevelup/nestjs-modules@0.7.1(@nestjs/common@10.3.9)(rxjs@7.2.0):
+    resolution: {integrity: sha512-L5hBuU57ujl73IAyyZYkT+41tbo+9BggLzze7AMSWJhNUJBhvifFvtfSNRy2aTTPsLYuHLH2tmerjjOQkEdgDg==}
+    peerDependencies:
+      '@nestjs/common': ^10.x
+      rxjs: ^7.x
+    dependencies:
+      '@nestjs/common': 10.3.9(reflect-metadata@0.1.13)(rxjs@7.2.0)
+      lodash: 4.17.21
+      rxjs: 7.2.0
+    dev: false
+
+  /@golevelup/nestjs-stripe@0.8.2(@nestjs/common@10.3.9)(@nestjs/core@10.3.9)(rxjs@7.2.0)(stripe@16.10.0):
+    resolution: {integrity: sha512-ar9Pmh27oXYcaxt3tYewHbVQpEd19iOpkkcanxrrCNoVOjpzwi1ikJJzaz4RT9KD7Bu2gMO8Q/vWbagbMOdkUA==}
+    peerDependencies:
+      stripe: ^14.19.0
+    dependencies:
+      '@golevelup/nestjs-common': 2.0.0(@nestjs/common@10.3.9)
+      '@golevelup/nestjs-discovery': 4.0.1(@nestjs/common@10.3.9)(@nestjs/core@10.3.9)
+      '@golevelup/nestjs-modules': 0.7.1(@nestjs/common@10.3.9)(rxjs@7.2.0)
+      stripe: 16.10.0
+    transitivePeerDependencies:
+      - '@nestjs/common'
+      - '@nestjs/core'
+      - rxjs
     dev: false
 
   /@grpc/grpc-js@1.10.9:
@@ -20854,6 +20907,14 @@ packages:
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     dev: true
 
+  /stripe@16.10.0:
+    resolution: {integrity: sha512-H0qeSCkZVvk4fVchUbg0rNNviwOyw3Rsr9X6MKe84ajBeMz4ogEOZykaUcb/n0GSdvWlXAtbnB1gxl3xOlH+ZA==}
+    engines: {node: '>=12.*'}
+    dependencies:
+      '@types/node': 20.14.8
+      qs: 6.12.3
+    dev: false
+
   /strnum@1.0.5:
     resolution: {integrity: sha512-J8bbNyKKXl5qYcR36TIO8W3mVGVHrmmxsd5PAItGkmyzwJvybiw2IVq5nqd0i4LSNSkB/sx9VHllbfFdr9k1JA==}
     dev: false
@@ -22918,6 +22979,7 @@ time:
   /@babel/traverse@7.12.12: '2020-12-23T14:05:28.061Z'
   /@babel/types@7.12.12: '2020-12-23T14:05:24.894Z'
   /@faker-js/faker@8.3.1: '2023-11-14T21:13:18.242Z'
+  /@golevelup/nestjs-stripe@0.8.2: '2024-09-03T15:13:00.429Z'
   /@headlessui/react@2.1.2: '2024-07-05T16:20:00.526Z'
   /@heroicons/react@2.1.4: '2024-06-17T22:01:24.378Z'
   /@hey-api/client-fetch@0.1.3: '2024-05-29T10:54:08.549Z'
@@ -23190,6 +23252,7 @@ time:
   /simple-git-hooks@2.9.0: '2023-07-23T17:58:10.784Z'
   /sonner@0.7.0: '2023-08-25T18:16:40.869Z'
   /source-map-support@0.5.20: '2021-09-09T09:25:18.790Z'
+  /stripe@16.10.0: '2024-09-05T20:58:20.487Z'
   /supertest@6.1.3: '2021-01-25T20:58:58.276Z'
   /tailwind-merge@1.14.0: '2023-07-16T15:22:42.447Z'
   /tailwind-merge@2.2.2: '2024-03-16T21:20:36.377Z'
