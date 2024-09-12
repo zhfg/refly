@@ -241,14 +241,9 @@ export class SkillService {
       instances.map((instance) => {
         this.elasticsearch.upsertSkill({
           id: instance.skillId,
-          ...pick(instance, [
-            'uid',
-            'tplName',
-            'displayName',
-            'description',
-            'createdAt',
-            'updatedAt',
-          ]),
+          createdAt: instance.createdAt.toJSON(),
+          updatedAt: instance.updatedAt.toJSON(),
+          ...pick(instance, ['uid', 'tplName', 'displayName', 'description']),
         });
       }),
     );

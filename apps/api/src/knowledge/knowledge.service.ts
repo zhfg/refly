@@ -101,7 +101,9 @@ export class KnowledgeService {
 
     await this.elasticsearch.upsertCollection({
       id: collection.collectionId,
-      ...pick(collection, ['title', 'description', 'uid', 'createdAt', 'updatedAt']),
+      createdAt: collection.createdAt.toJSON(),
+      updatedAt: collection.updatedAt.toJSON(),
+      ...pick(collection, ['title', 'description', 'uid']),
     });
 
     return collection;
@@ -274,7 +276,7 @@ export class KnowledgeService {
     // Remove invalid UTF-8 byte sequences
     param.content = param.content?.replace(/x00/g, '') ?? '';
 
-    const storageKey = `${user.uid}/${resourceId}.txt`;
+    const storageKey = `resources/${resourceId}.txt`;
     await this.minio.client.putObject(storageKey, param.content);
 
     const resource = await this.prisma.resource.update({
@@ -284,6 +286,7 @@ export class KnowledgeService {
         wordCount: readingTime(param.content).words,
         title: param.title,
         indexStatus: 'wait_index',
+        contentPreview: param.content?.slice(0, 500),
         meta: JSON.stringify({
           url,
           title: param.title,
@@ -295,7 +298,9 @@ export class KnowledgeService {
       id: resource.resourceId,
       content: param.content,
       url,
-      ...pick(resource, ['title', 'uid', 'createdAt', 'updatedAt']),
+      createdAt: resource.createdAt.toJSON(),
+      updatedAt: resource.updatedAt.toJSON(),
+      ...pick(resource, ['title', 'uid']),
     });
 
     // ensure the document is for ingestion use
@@ -371,7 +376,9 @@ export class KnowledgeService {
     await this.elasticsearch.upsertResource({
       id: updatedResource.resourceId,
       content: param.content || undefined,
-      ...pick(updatedResource, ['title', 'uid', 'createdAt', 'updatedAt']),
+      createdAt: updatedResource.createdAt.toJSON(),
+      updatedAt: updatedResource.updatedAt.toJSON(),
+      ...pick(updatedResource, ['title', 'uid']),
     });
 
     return updatedResource;
@@ -450,7 +457,9 @@ export class KnowledgeService {
 
     await this.elasticsearch.upsertNote({
       id: param.noteId,
-      ...pick(note, ['title', 'uid', 'createdAt', 'updatedAt']),
+      ...pick(note, ['title', 'uid']),
+      createdAt: note.createdAt.toJSON(),
+      updatedAt: note.updatedAt.toJSON(),
     });
 
     return note;

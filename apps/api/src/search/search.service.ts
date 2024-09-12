@@ -49,12 +49,13 @@ export class SearchService {
         resourceId: true,
         resourceType: true,
         title: true,
-        content: true,
+        contentPreview: true,
         createdAt: true,
         updatedAt: true,
       },
       where: {
         uid: user.uid,
+        deletedAt: null,
       },
       orderBy: { updatedAt: 'desc' },
       take: req.limit || 5,
@@ -64,7 +65,7 @@ export class SearchService {
       id: result.resourceId,
       domain: 'resource',
       title: result.title,
-      content: [result.content.slice(0, 250) + '...'], // TODO: truncate in sql to reduce traffic
+      content: [result.contentPreview],
       metadata: {
         resourceType: result.resourceType as ResourceType,
       },
@@ -87,8 +88,8 @@ export class SearchService {
       metadata: {
         // TODO: confirm if metadata is used
       },
-      createdAt: hit._source.createdAt.toJSON(),
-      updatedAt: hit._source.updatedAt.toJSON(),
+      createdAt: hit._source.createdAt,
+      updatedAt: hit._source.updatedAt,
     }));
   }
 
@@ -175,8 +176,8 @@ export class SearchService {
       domain: 'note',
       title: hit.highlight?.title?.[0] || hit._source.title,
       content: hit.highlight?.content || [hit._source.content],
-      createdAt: hit._source.createdAt.toJSON(),
-      updatedAt: hit._source.updatedAt.toJSON(),
+      createdAt: hit._source.createdAt,
+      updatedAt: hit._source.updatedAt,
     }));
   }
 
@@ -253,8 +254,8 @@ export class SearchService {
       domain: 'collection',
       title: hit.highlight?.title?.[0] || hit._source.title,
       content: hit.highlight?.description || [hit._source.description],
-      createdAt: hit._source.createdAt.toJSON(),
-      updatedAt: hit._source.updatedAt.toJSON(),
+      createdAt: hit._source.createdAt,
+      updatedAt: hit._source.updatedAt,
     }));
   }
 
@@ -282,6 +283,12 @@ export class SearchService {
   }
 
   async searchConversations(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+    const tokens = req.tokens;
+
+    if (tokens.length === 0) {
+      return this.emptySearchConversations(user, req);
+    }
+
     const hits = await this.elasticsearch.searchConversationMessages(
       user,
       req.query,
@@ -293,8 +300,8 @@ export class SearchService {
       domain: 'conversation',
       title: hit.highlight?.convTitle?.[0] || hit._source.convTitle,
       content: hit.highlight?.content || [hit._source.content],
-      createdAt: hit._source.createdAt.toJSON(),
-      updatedAt: hit._source.updatedAt.toJSON(),
+      createdAt: hit._source.createdAt,
+      updatedAt: hit._source.updatedAt,
     }));
   }
 
@@ -314,6 +321,12 @@ export class SearchService {
   }
 
   async searchSkills(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+    const tokens = req.tokens;
+
+    if (tokens.length === 0) {
+      return this.emptySearchSkills(user, req);
+    }
+
     const hits = await this.elasticsearch.searchSkills(user, req.query, req.limit || 5);
 
     return hits.map((hit) => ({
@@ -321,8 +334,8 @@ export class SearchService {
       domain: 'skill',
       title: hit.highlight?.displayName?.[0] || hit._source.displayName,
       content: hit.highlight?.description || [hit._source.description],
-      createdAt: hit._source.createdAt.toJSON(),
-      updatedAt: hit._source.updatedAt.toJSON(),
+      createdAt: hit._source.createdAt,
+      updatedAt: hit._source.updatedAt,
     }));
   }
 

@@ -9,8 +9,8 @@ interface ResourceDocument {
   title?: string;
   content?: string;
   url?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt?: string;
+  updatedAt?: string;
   uid?: string;
 }
 
@@ -18,8 +18,8 @@ interface NoteDocument {
   id: string;
   title?: string;
   content?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt?: string;
+  updatedAt?: string;
   uid?: string;
 }
 
@@ -27,8 +27,8 @@ interface CollectionDocument {
   id: string;
   title?: string;
   description?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt?: string;
+  updatedAt?: string;
   uid?: string;
 }
 
@@ -38,8 +38,8 @@ interface ConversationMessageDocument {
   convTitle?: string;
   content?: string;
   type?: MessageType;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt?: string;
+  updatedAt?: string;
   uid?: string;
 }
 
@@ -48,14 +48,25 @@ interface SkillDocument {
   displayName?: string;
   description?: string;
   tplName?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt?: string;
+  updatedAt?: string;
   uid?: string;
 }
 
-const indexConfig = {
+const commonSettings = {
+  analysis: {
+    analyzer: {
+      default: {
+        type: 'icu_analyzer',
+      },
+    },
+  },
+};
+
+export const indexConfig = {
   resource: {
     index: 'refly_resources',
+    settings: commonSettings,
     properties: {
       title: { type: 'text' },
       content: { type: 'text' },
@@ -67,6 +78,7 @@ const indexConfig = {
   },
   note: {
     index: 'refly_notes',
+    settings: commonSettings,
     properties: {
       title: { type: 'text' },
       content: { type: 'text' },
@@ -77,6 +89,7 @@ const indexConfig = {
   },
   collection: {
     index: 'refly_collections',
+    settings: commonSettings,
     properties: {
       title: { type: 'text' },
       description: { type: 'text' },
@@ -87,6 +100,7 @@ const indexConfig = {
   },
   conversationMessage: {
     index: 'refly_conversation_messages',
+    settings: commonSettings,
     properties: {
       convId: { type: 'keyword' },
       convTitle: { type: 'text' },
@@ -99,6 +113,7 @@ const indexConfig = {
   },
   skill: {
     index: 'refly_skills',
+    settings: commonSettings,
     properties: {
       displayName: { type: 'text' },
       description: { type: 'text' },
@@ -154,18 +169,19 @@ export class ElasticsearchService implements OnModuleInit {
   }
 
   private async ensureIndexExists(indexConfig: IndexConfigValue) {
-    const indexExists = await this.client.indices.exists({ index: indexConfig.index });
+    const { body: indexExists } = await this.client.indices.exists({ index: indexConfig.index });
 
     if (!indexExists) {
-      const res = await this.client.indices.create({
+      const { body } = await this.client.indices.create({
         index: indexConfig.index,
         body: {
+          settings: indexConfig.settings,
           mappings: {
             properties: indexConfig.properties,
           },
         },
       });
-      this.logger.log(`Index created successfully: ${JSON.stringify(res)}`);
+      this.logger.log(`Index created successfully: ${JSON.stringify(body)}`);
     } else {
       this.logger.log(`Index already exists: ${indexConfig.index}`);
     }
@@ -255,7 +271,8 @@ export class ElasticsearchService implements OnModuleInit {
               {
                 multi_match: {
                   query,
-                  fields: ['title', 'content'],
+                  fields: ['title^2', 'content'],
+                  type: 'most_fields',
                 },
               },
             ],
@@ -285,7 +302,8 @@ export class ElasticsearchService implements OnModuleInit {
               {
                 multi_match: {
                   query,
-                  fields: ['title', 'content'],
+                  fields: ['title^2', 'content'],
+                  type: 'most_fields',
                 },
               },
             ],
@@ -312,7 +330,13 @@ export class ElasticsearchService implements OnModuleInit {
           bool: {
             must: [
               { match: { uid: user.uid } },
-              { multi_match: { query, fields: ['title', 'description'] } },
+              {
+                multi_match: {
+                  query,
+                  fields: ['title^2', 'description'],
+                  type: 'most_fields',
+                },
+              },
             ],
           },
         },
@@ -340,7 +364,8 @@ export class ElasticsearchService implements OnModuleInit {
               {
                 multi_match: {
                   query,
-                  fields: ['convTitle', 'content'],
+                  fields: ['convTitle^2', 'content'],
+                  type: 'most_fields',
                 },
               },
             ],
@@ -370,7 +395,8 @@ export class ElasticsearchService implements OnModuleInit {
               {
                 multi_match: {
                   query,
-                  fields: ['displayName', 'description', 'tplName'],
+                  fields: ['displayName^2', 'description', 'tplName'],
+                  type: 'most_fields',
                 },
               },
             ],

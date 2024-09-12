@@ -93,8 +93,8 @@ export class ConversationService {
           convId: msg.convId,
           convTitle: conversation.title,
           uid: msg.uid,
-          createdAt: msg.createdAt,
-          updatedAt: msg.updatedAt,
+          createdAt: msg.createdAt.toJSON(),
+          updatedAt: msg.updatedAt.toJSON(),
         }),
       ),
     );
