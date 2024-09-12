@@ -1,8 +1,6 @@
 import { Runtime, browser } from 'wxt/browser';
 import { TASK_STATUS, SkillEvent } from '@refly/common-types';
 import { getCookie } from '@/utils/cookie';
-import { getServerOrigin } from '@refly/utils/url';
-import { getExtensionVersion } from '@/utils/version';
 import { ssePost } from '@refly-packages/ai-workspace-common/utils/sse-post';
 import { getAbortController, getLastUniqueId, setAbortController, setLastUniqueId } from '../index';
 

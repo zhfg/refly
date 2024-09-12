@@ -32,6 +32,7 @@ import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { PiNotepad, PiNotebookDuotone } from 'react-icons/pi';
 import { useGetCurrentSelectedMark } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-selected-text';
 import { useEffect } from 'react';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 interface BaseSelectedTextCardProps {
   title: string;
@@ -102,7 +103,7 @@ export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
           <span className="context-state-card-header-title">{t('copilot.selectedTextCard.title')} </span>
         </div>
         <div className="context-state-card-header-right">
-          <Tooltip content={t('knowledgeBase.context.clearSelector')}>
+          <Tooltip content={t('knowledgeBase.context.clearSelector')} getPopupContainer={getPopupContainer}>
             <Button
               type="text"
               className="assist-action-item"

@@ -57,7 +57,7 @@ export const OutputLocaleList = (props: { showTitle?: boolean }) => {
   return (
     <Dropdown
       droplist={dropList}
-      position="bl"
+      position="tl"
       trigger="click"
       getPopupContainer={() => {
         return getPopupContainer();
