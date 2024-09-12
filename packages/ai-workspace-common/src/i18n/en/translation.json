@@ -573,8 +573,8 @@
       "t2TokenUsedDescription": "Basic models include OpenAI GPT-4o-mini, OpenAI GPT-3.5-turbo, and Google Gemini 1.5 Flash; usage includes both model input and output tokens.",
       "subscriptionManagement": "Manage Billing and Subscriptions",
       "subscriptionStatus": {
-        "free": "Free",
-        "pro": "Pro"
+        "free": "FREE",
+        "pro": "PRO"
       },
       "subscribe": {
         "title": "Choose the plan that suits you best",
