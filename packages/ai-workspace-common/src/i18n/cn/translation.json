@@ -514,8 +514,8 @@
       "back": "返回技能管理",
       "emptyJobs": "暂无运行记录",
       "emptyTriggers": "请先配置触发器",
-      "emptyInstances": "暂无技能实例",
-      "emptyTemplates": "暂无技能模板",
+      "emptyInstances": "您未安装任何技能",
+      "emptyTemplates": "技能市场空空如也",
       "enable": "启用",
       "disable": "禁用"
     },

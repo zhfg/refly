@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Typography } from '@arco-design/web-react';
 import { Resource, Note, Collection } from '@refly/openapi-schema';
 import './index.scss';
+import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 
 interface CardBoxBaseProps {
   index: number;
@@ -28,7 +29,7 @@ interface CollectionCardProps extends CardBoxBaseProps {
 
 const contentKey = {
   resource: 'contentPreview',
-  note: 'content',
+  note: 'contentPreview',
   collection: 'description',
 };
 
@@ -64,19 +65,22 @@ export const CardBox = (props: ResourceCardProps | NoteCardProps | CollectionCar
               {props?.cardData?.data?.url}
             </a>
           ) : (
-            <Typography.Text ellipsis={{ rows: 2 }} style={{ marginBottom: 0, marginLeft: 8, fontWeight: 500 }}>
+            <Typography.Text
+              ellipsis={{ rows: 2 }}
+              style={{ marginBottom: 0, marginLeft: 8, fontWeight: 500, fontSize: '16px' }}
+            >
               {props.cardData?.title}
             </Typography.Text>
           )}
         </div>
         {props.type === 'resource' && props?.cardData?.data?.url && (
-          <Typography.Text ellipsis={{ rows: 2 }} style={{ marginBottom: 0, fontWeight: 500 }}>
+          <Typography.Text ellipsis={{ rows: 2 }} style={{ marginBottom: 0, fontWeight: 500, fontSize: '16px' }}>
             {props.cardData?.title}
           </Typography.Text>
         )}
-        <Typography.Text ellipsis={{ rows: 4 }} style={{ marginBottom: 0 }}>
-          {props.cardData?.[contentKey[props.type]]}
-        </Typography.Text>
+        <div style={{ marginBottom: 0, marginTop: 16, position: 'relative' }}>
+          <Markdown content={props.cardData?.[contentKey[props.type]]} fontSize={12} />
+        </div>
       </div>
 
       {children}
