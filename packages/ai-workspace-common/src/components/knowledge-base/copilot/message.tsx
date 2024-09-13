@@ -29,6 +29,7 @@ import { ClientChatMessage } from '@refly/common-types';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 import { memo } from 'react';
 import classNames from 'classnames';
+import { parseMarkdownWithCitations } from '@refly/utils/parse';
 import { useState, useEffect } from 'react';
 
 const citationRegex = /\([|【)citation()|】)]\(\d+\)/g;
@@ -103,7 +104,7 @@ export const AssistantMessage = memo(
     // );
 
     const handleEditorOperation = (type: EditorOperation, content: string) => {
-      // editorEmitter.emit('insertBlow', message?.content);
+      const parsedContent = parseMarkdownWithCitations(content, sources);
 
       if (type === 'insertBlow' || type === 'replaceSelection') {
         const editor = noteStoreEditor;
@@ -112,18 +113,18 @@ export const AssistantMessage = memo(
         if (!editor) return;
 
         editor
-          ?.chain()
+          .chain()
           .focus()
           .insertContentAt(
             {
               from: selection.from,
               to: selection.to,
             },
-            content,
+            parsedContent,
           )
           .run();
       } else if (type === 'createNewNote') {
-        editorEmitter.emit('createNewNote', content);
+        editorEmitter.emit('createNewNote', parsedContent);
       }
     };
 
@@ -131,7 +132,7 @@ export const AssistantMessage = memo(
       <Menu
         className={'output-locale-list-menu'}
         onClickMenuItem={(key) => {
-          const parsedText = message?.content?.replace(citationRegex, '');
+          const parsedText = parseMarkdownWithCitations(message?.content, sources);
           handleEditorOperation(key as EditorOperation, parsedText || '');
         }}
         style={{ width: 240 }}
@@ -309,8 +310,7 @@ export const AssistantMessage = memo(
                         style={{ color: '#64645F' }}
                         className={'assist-action-item'}
                         onClick={() => {
-                          const parsedText = message?.content?.replace(citationRegex, '');
-
+                          const parsedText = parseMarkdownWithCitations(message?.content, sources);
                           copyToClipboard(parsedText || '');
                           Message.success('复制成功');
                         }}
@@ -324,8 +324,7 @@ export const AssistantMessage = memo(
                           icon={<IconImport style={{ fontSize: 14 }} />}
                           style={{ color: '#64645F' }}
                           onClick={() => {
-                            const parsedText = message?.content?.replace(citationRegex, '');
-                            // editorEmitter.emit('insertBlow', message?.content || '');
+                            const parsedText = parseMarkdownWithCitations(message?.content, sources);
                             handleEditorOperation('insertBlow', parsedText || '');
                           }}
                         >

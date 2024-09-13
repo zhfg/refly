@@ -21,7 +21,7 @@ export const defaultState = {
   showContentSelector: false,
   isInjectStyles: false,
   marks: [],
-  scope: 'block' as MarkScope, // 代表此时激活的状态
+  scope: 'inline' as MarkScope, // 代表此时激活的状态
 };
 
 export const useContentSelectorStore = create<ContentSelectorState>()((set) => ({

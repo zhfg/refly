@@ -65,3 +65,7 @@ export const getCurrentDateInfo = () => {
 
   return { year, month, day };
 };
+
+export const delay = (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};

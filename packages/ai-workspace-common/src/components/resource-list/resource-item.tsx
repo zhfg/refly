@@ -111,7 +111,7 @@ export const ResourceItem = memo(
         </div>
         <div className="knowledge-base-directory-title">{item.data?.title}</div>
         <div className="knowledge-base-directory-action">
-          {showBtn?.summary ? (
+          {/* {showBtn?.summary ? (
             <div
               className={classNames('action-summary', {
                 active: btnProps?.defaultActiveKeys?.includes('summary'),
@@ -120,8 +120,8 @@ export const ResourceItem = memo(
               <IconBulb />
               <span>AI Summary</span>
             </div>
-          ) : null}
-          {showBtn?.markdown && item?.resourceId ? (
+          ) : null} */}
+          {/* {showBtn?.markdown && item?.resourceId ? (
             <div
               className={classNames('action-markdown-content', {
                 active: btnProps?.defaultActiveKeys?.includes('markdown'),
@@ -135,7 +135,7 @@ export const ResourceItem = memo(
                 }}
               />
             </div>
-          ) : null}
+          ) : null} */}
           {showBtn?.externalOrigin ? (
             <div
               className={classNames('action-external-origin-website', {

@@ -3,28 +3,35 @@ import { useResizeBox } from '@refly-packages/ai-workspace-common/hooks/use-resi
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
+import { memo, useEffect, useMemo, useCallback } from 'react';
+import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
 
-export const SkillDisplay = () => {
-  const skillStore = useSkillStore();
+export const SkillDisplay = memo(({ source }: { source: string }) => {
+  const skillStore = useSkillStore((state) => ({
+    skillInstances: state.skillInstances,
+    setSelectedSkillInstance: state.setSelectedSkillInstance,
+    setSkillManagerModalVisible: state.setSkillManagerModalVisible,
+  }));
 
   const [containCnt] = useResizeBox({
-    getGroupSelector: () => {
-      const container = getPopupContainer();
-      const elem = container.querySelector('.skill-container');
-
-      return elem as HTMLElement;
-    },
-    getResizeSelector: () => {
-      const container = getPopupContainer();
-      const elems = container.querySelectorAll('.skill-item') as NodeListOf<HTMLElement>;
-
-      return elems;
-    },
+    getGroupSelector: () => getPopupContainer().querySelector('.skill-container') as HTMLElement,
+    getResizeSelector: () => getPopupContainer().querySelectorAll('.skill-item') as NodeListOf<HTMLElement>,
     initialContainCnt: 3,
     paddingSize: 0,
     placeholderWidth: 100,
     itemSize: 80,
   });
+
+  const { handleGetSkillInstances, handleGetSkillTemplates } = useSkillManagement();
+  const isFromSkillJob = () => {
+    return source === 'skillJob';
+  };
+
+  useEffect(() => {
+    if (isFromSkillJob()) return;
+    // if (skillStore?.skillInstances?.length) return;
+    handleGetSkillInstances();
+  }, []);
 
   return (
     <div className="skill-container">
@@ -51,4 +58,4 @@ export const SkillDisplay = () => {
       </div>
     </div>
   );
-};
+});

@@ -14,22 +14,20 @@ function listIsTight(tokens: readonly Token[], i: number) {
 export const defaultMarkdownParser = new MarkdownParser(schema, MarkdownIt('commonmark', { html: false }), {
   blockquote: { block: 'blockquote' },
   paragraph: { block: 'paragraph' },
-  listItem: { block: 'listItem' },
-  bulletList: {
+  list_item: { block: 'listItem' },
+  bullet_list: {
     block: 'bulletList',
     getAttrs: (_, tokens, i) => ({ tight: listIsTight(tokens, i) }),
   },
-  orderedList: {
+  ordered_list: {
     block: 'orderedList',
     getAttrs: (tok, tokens, i) => ({
       order: +tok.attrGet('start')! || 1,
       tight: listIsTight(tokens, i),
     }),
   },
-  // TODO: 先保障不出错，后续修复
-  taskItem: { block: 'taskItem' },
-  // TODO: 先保障不出错，后续修复
-  taskList: {
+  task_item: { block: 'taskItem' },
+  task_list: {
     block: 'taskList',
     getAttrs: (_, tokens, i) => ({ tight: listIsTight(tokens, i) }),
   },
@@ -37,13 +35,13 @@ export const defaultMarkdownParser = new MarkdownParser(schema, MarkdownIt('comm
     block: 'heading',
     getAttrs: (tok) => ({ level: +tok.tag.slice(1) }),
   },
-  codeBlock: { block: 'codeBlock', noCloseToken: true },
+  code_block: { block: 'codeBlock', noCloseToken: true },
   fence: {
     block: 'codeBlock',
     getAttrs: (tok) => ({ params: tok.info || '' }),
     noCloseToken: true,
   },
-  hr: { node: 'horizontal_rule' },
+  hr: { node: 'horizontalRule' },
   image: {
     node: 'image',
     getAttrs: (tok) => ({
@@ -54,16 +52,50 @@ export const defaultMarkdownParser = new MarkdownParser(schema, MarkdownIt('comm
   },
   hardbreak: { node: 'hard_break' },
 
-  em: { mark: 'em' },
-  strong: { mark: 'strong' },
+  em: {
+    mark: 'italic',
+    getAttrs: (tok) => {
+      if (!schema.marks.italic) {
+        console.error('Italic mark not found in schema');
+        return null;
+      }
+      return {};
+    },
+  },
+  strong: {
+    mark: 'bold',
+    getAttrs: (tok) => {
+      if (!schema.marks.bold) {
+        console.error('Bold mark not found in schema');
+        return null;
+      }
+      return {};
+    },
+  },
   link: {
     mark: 'link',
-    getAttrs: (tok) => ({
-      href: tok.attrGet('href'),
-      title: tok.attrGet('title') || null,
-    }),
+    getAttrs: (tok) => {
+      if (!schema.marks.link) {
+        console.error('Link mark not found in schema');
+        return null;
+      }
+      return {
+        href: tok.attrGet('href'),
+        title: tok.attrGet('title') || null,
+      };
+    },
   },
-  code_inline: { mark: 'code', noCloseToken: true },
+  code_inline: {
+    mark: 'code',
+    getAttrs: (tok) => {
+      if (!schema.marks.code) {
+        console.error('Code mark not found in schema');
+        return null;
+      }
+      return {};
+    },
+    noCloseToken: true,
+  },
 });
 
 export { MarkdownParser };

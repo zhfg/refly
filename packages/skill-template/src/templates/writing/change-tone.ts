@@ -166,7 +166,8 @@ Context as following (with three "---" as separator, **only include the content 
 TARGET TONE: {targetTone}
 `;
 
-    const contextString = contentList.length > 0 ? contentList.join('\n') : 'No additional context provided.';
+    const contextString =
+      contentList.length > 0 ? contentList.map((item) => item?.content).join('\n') : 'No additional context provided.';
 
     const targetTone = tplConfig?.targetTone?.value as string;
     const prompt = systemPrompt.replace('{context}', contextString).replace('{targetTone}', targetTone);

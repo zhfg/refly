@@ -11,7 +11,7 @@ import { checkPageUnsupported } from '@refly-packages/ai-workspace-common/utils/
 
 const App = () => {
   // 在挂载时记录当前资源,Only for Content Script
-  useSyncWeblinkResourceMeta();
+  const { initMessageListener } = useSyncWeblinkResourceMeta();
 
   useEffect(() => {
     if (!checkPageUnsupported(location.href)) {
@@ -20,6 +20,7 @@ const App = () => {
   }, []);
   useEffect(() => {
     setRuntime('extension-csui');
+    initMessageListener();
   }, []);
 
   return <></>;

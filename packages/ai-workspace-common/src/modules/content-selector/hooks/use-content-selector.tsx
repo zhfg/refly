@@ -134,22 +134,26 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
     return cleanup;
   };
 
+  const removeAllInlineHightlightNodes = (xPath: string) => {
+    const allNodes = document.querySelectorAll(`[${INLINE_SELECTED_MARK_ID}="${xPath}"]`);
+    allNodes.forEach((node) => {
+      const nodeCleanup = (node as any).__hoverMenuCleanup;
+      if (typeof nodeCleanup === 'function') {
+        nodeCleanup();
+      }
+
+      const parent = node.parentNode;
+      const textNode = document.createTextNode(node.textContent);
+      parent.replaceChild(textNode, node);
+      parent.normalize();
+    });
+  };
+
   const addHoverMenuToNode = (node: HTMLElement, xPath: string) => {
     let cleanup: () => void;
 
-    const removeHighlight = () => {
-      const allNodes = document.querySelectorAll(`[${INLINE_SELECTED_MARK_ID}="${xPath}"]`);
-      allNodes.forEach((node) => {
-        const nodeCleanup = (node as any).__hoverMenuCleanup;
-        if (typeof nodeCleanup === 'function') {
-          nodeCleanup();
-        }
-
-        const parent = node.parentNode;
-        const textNode = document.createTextNode(node.textContent);
-        parent.replaceChild(textNode, node);
-        parent.normalize();
-      });
+    const removeHighlight = (xPath?: string) => {
+      removeAllInlineHightlightNodes(xPath);
 
       const mark = removeInlineMark(node, xPath);
       syncRemoveMarkEvent(mark);
@@ -158,7 +162,7 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
     cleanup = addHoverMenu(
       { target: node },
       {
-        onClick: removeHighlight,
+        onClick: () => removeHighlight(xPath),
         selected: true,
       },
     );
@@ -184,6 +188,7 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
       const type = 'text' as ElementType;
       const mark = buildMark(type, content, xPath);
       addMark({ ...mark, cleanup }, selectionNodes);
+      // addMark({ ...mark, cleanup }, []);
 
       const markEvent = { type: 'add' as SyncMarkEventType, mark };
       const msg: Partial<SyncMarkEvent> = {
@@ -191,6 +196,7 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
       };
       syncMarkEvent(msg);
 
+      // Temp remove selected marks
       selectionNodes.forEach((node) => {
         addHoverMenuToNode(node, xPath);
       });
@@ -201,7 +207,9 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
     const cleanup = addHoverMenu(
       { rect },
       {
-        onClick: confirmAddMark,
+        onClick: () => {
+          confirmAddMark();
+        },
         selected: false,
       },
     );
@@ -235,6 +243,8 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
 
     // 执行清理函数
     mark?.cleanup?.();
+
+    removeAllInlineHightlightNodes(xPath);
 
     return mark;
   };

@@ -16,11 +16,13 @@ export const useAINote = (shouldInitListener = false) => {
     const res = await getClient().createNote({
       body: {
         title: 'New Article',
+        initialContent: content,
       },
     });
 
     if (!res?.data?.success) {
       Message.error(`创建笔记失败，请重试！`);
+      return;
     }
     const noteId = res?.data?.data?.noteId;
     jumpToNote({

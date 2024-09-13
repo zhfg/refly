@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import wordsCount from 'words-count';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { Note } from '@refly/openapi-schema';
 
 import './index.scss';
 import { useCookie } from 'react-use';
-import { Button, Divider, Input, Spin, Switch, Tabs } from '@arco-design/web-react';
+import { Button, Divider, Input, Popconfirm, Popover, Spin, Switch, Tabs } from '@arco-design/web-react';
 import { HiOutlineLockClosed, HiOutlineLockOpen, HiOutlineClock } from 'react-icons/hi2';
 import { HiOutlineSearch } from 'react-icons/hi';
 import { useSearchParams } from 'react-router-dom';
@@ -29,6 +29,7 @@ import Collaboration from '@tiptap/extension-collaboration';
 import { useDebouncedCallback } from 'use-debounce';
 import { handleImageDrop, handleImagePaste } from '@refly-packages/editor-core/plugins';
 import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
+import { getHierarchicalIndexes, TableOfContents } from '@tiptap-pro/extension-table-of-contents';
 // 编辑器样式
 // 图标
 import { AiOutlineWarning, AiOutlineFileWord } from 'react-icons/ai';
@@ -46,7 +47,11 @@ import '@refly-packages/ai-workspace-common/modules/content-selector/styles/cont
 import classNames from 'classnames';
 import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+// componets
+import { ToC } from './ToC';
+import { IconBook } from '@arco-design/web-react/icon';
 
+const MemorizedToC = memo(ToC);
 const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) => {
   const { readOnly } = note;
   const lastCursorPosRef = useRef<number>();
@@ -56,6 +61,7 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
     updateNoteSaveStatus: state.updateNoteSaveStatus,
     updateNoteServerStatus: state.updateNoteServerStatus,
     updateEditor: state.updateEditor,
+    updateTocItems: state.updateTocItems,
 
     updateLastCursorPosRef: state.updateLastCursorPosRef,
   }));
@@ -93,6 +99,12 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
     }),
     CollaborationCursor.configure({
       provider: websocketProvider,
+    }),
+    TableOfContents.configure({
+      getIndex: getHierarchicalIndexes,
+      onUpdate(content) {
+        noteStore.updateTocItems(content);
+      },
     }),
   ];
 
@@ -290,6 +302,22 @@ export const AINoteStatusBar = (props: AINoteStatusBarProps) => {
         ) : null}
       </div>
       <div className="note-status-bar-menu">
+        <div className="note-status-bar-item" style={{ display: 'flex', alignItems: 'center', marginRight: 10 }}>
+          <Popover
+            content={
+              <div className="sidebar">
+                <div className="sidebar-options">
+                  <div className="label-large">Table of contents</div>
+                  <div className="table-of-contents">
+                    <MemorizedToC editor={noteStore.editor} items={noteStore.tocItems} />
+                  </div>
+                </div>
+              </div>
+            }
+          >
+            <IconBook style={{ fontSize: 16 }} />
+          </Popover>
+        </div>
         {noteId ? (
           <div className="note-status-bar-item">
             {note.readOnly ? <HiOutlineLockClosed /> : <HiOutlineLockOpen />}

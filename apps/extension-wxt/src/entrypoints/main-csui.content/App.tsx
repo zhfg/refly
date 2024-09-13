@@ -44,7 +44,9 @@ if (process.env.NODE_ENV !== 'development') {
 
 const App = () => {
   // 打开聊天窗口的方式
-  const copilotStore = useCopilotStore();
+  const copilotStore = useCopilotStore((state) => ({
+    isCopilotOpen: state.isCopilotOpen,
+  }));
   const { initMessageListener } = useToggleCSUI();
 
   const userStore = useUserStore();

@@ -27,11 +27,19 @@ export class MakeLongerSkill extends BaseSkill {
   };
 
   invocationConfig: SkillInvocationConfig = {
-    input: {
-      rules: [{ key: 'query' }],
-    },
     context: {
-      rules: [{ key: 'contentList' }],
+      rules: [
+        {
+          key: 'contentList',
+          limit: 1,
+          inputMode: 'multiSelect',
+          defaultValue: ['noteBeforeCursorSelection', 'noteCursorSelection', 'noteAfterCursorSelection'],
+          descriptionDict: {
+            en: 'The context of the article',
+            'zh-CN': '参考资料',
+          },
+        },
+      ],
     },
   };
 
