@@ -1466,6 +1466,40 @@ export const $BatchCreateResourceResponse = {
   ],
 } as const;
 
+export const $ReindexResourceRequest = {
+  type: 'object',
+  required: ['resourceIds'],
+  properties: {
+    resourceIds: {
+      type: 'array',
+      description: 'Resource ID list',
+      items: {
+        type: 'string',
+      },
+    },
+  },
+} as const;
+
+export const $ReindexResourceResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Resource list',
+          items: {
+            $ref: '#/components/schemas/Resource',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
 export const $DeleteResourceRequest = {
   type: 'object',
   required: ['resourceId'],

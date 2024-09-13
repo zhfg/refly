@@ -17,6 +17,9 @@ import type {
   BatchCreateResourceData,
   BatchCreateResourceError,
   BatchCreateResourceResponse2,
+  ReindexResourceData,
+  ReindexResourceError,
+  ReindexResourceResponse2,
   DeleteResourceData,
   DeleteResourceError,
   DeleteResourceResponse,
@@ -212,6 +215,17 @@ export const batchCreateResource = (options: Options<BatchCreateResourceData>) =
   return (options?.client ?? client).post<BatchCreateResourceResponse2, BatchCreateResourceError>({
     ...options,
     url: '/knowledge/resource/batch',
+  });
+};
+
+/**
+ * Reindex resource
+ * Reindex an existing resource
+ */
+export const reindexResource = (options: Options<ReindexResourceData>) => {
+  return (options?.client ?? client).post<ReindexResourceResponse2, ReindexResourceError>({
+    ...options,
+    url: '/knowledge/resource/reindex',
   });
 };
 

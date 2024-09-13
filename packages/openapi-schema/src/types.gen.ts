@@ -1150,6 +1150,20 @@ export type BatchCreateResourceResponse = BaseResponse & {
   data?: Array<Resource>;
 };
 
+export type ReindexResourceRequest = {
+  /**
+   * Resource ID list
+   */
+  resourceIds: Array<string>;
+};
+
+export type ReindexResourceResponse = BaseResponse & {
+  /**
+   * Resource list
+   */
+  data?: Array<Resource>;
+};
+
 export type DeleteResourceRequest = {
   /**
    * Resource ID to delete
@@ -2199,6 +2213,14 @@ export type BatchCreateResourceResponse2 = UpsertResourceResponse;
 
 export type BatchCreateResourceError = unknown;
 
+export type ReindexResourceData = {
+  body: ReindexResourceRequest;
+};
+
+export type ReindexResourceResponse2 = ReindexResourceResponse;
+
+export type ReindexResourceError = unknown;
+
 export type DeleteResourceData = {
   body: DeleteResourceRequest;
 };
@@ -2797,6 +2819,17 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': UpsertResourceResponse;
+      };
+    };
+  };
+  '/knowledge/resource/reindex': {
+    post: {
+      req: ReindexResourceData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': ReindexResourceResponse;
       };
     };
   };

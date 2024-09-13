@@ -40,8 +40,9 @@ const contentKey = {
 
 export const CardBox = (props: ResourceCardProps | NoteCardProps | CollectionCardProps) => {
   const { t } = useTranslation();
-  const { children, onClick, type, cardData, reLoadResource } = props;
+  const { children, onClick, type, cardData } = props;
   const [loading, setLoading] = useState(false);
+  const reLoadResource = type === 'resource' ? props.reLoadResource : undefined;
 
   const handleClickLink = (url: string) => {
     if (url) {

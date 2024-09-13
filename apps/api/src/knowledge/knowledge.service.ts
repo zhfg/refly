@@ -3,7 +3,7 @@ import { Queue } from 'bull';
 import pLimit from 'p-limit';
 import { InjectQueue } from '@nestjs/bull';
 import { readingTime } from 'reading-time-estimator';
-import { Prisma } from '@prisma/client';
+import { Prisma, Resource as ResourceModel } from '@prisma/client';
 import { RAGService } from '@/rag/rag.service';
 import { PrismaService } from '@/common/prisma.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
@@ -21,6 +21,8 @@ import {
   AddResourceToCollectionRequest,
   RemoveResourceFromCollectionRequest,
   IndexStatus,
+  ReindexResourceRequest,
+  ResourceType,
 } from '@refly/openapi-schema';
 import {
   CHANNEL_FINALIZE_RESOURCE,
@@ -205,6 +207,8 @@ export class KnowledgeService {
       param.readOnly = param.resourceType === 'weblink';
     }
 
+    let storageKey: string;
+
     if (param.resourceType === 'weblink') {
       if (!param.data) {
         throw new BadRequestException('data is required');
@@ -218,9 +222,10 @@ export class KnowledgeService {
       if (!param.content) {
         throw new BadRequestException('content is required for text resource');
       }
-      // if (param.content.length > 10000) {
-      //   throw new BadRequestException('content is too long');
-      // }
+
+      // save text content to object storage
+      storageKey = `resources/${param.resourceId}.txt`;
+      await this.minio.client.putObject(storageKey, param.content);
     } else {
       throw new BadRequestException('Invalid resource type');
     }
@@ -234,6 +239,7 @@ export class KnowledgeService {
         resourceType: param.resourceType,
         meta: JSON.stringify(param.data || {}),
         contentPreview: cleanedContent?.slice(0, 500),
+        storageKey,
         uid: user.uid,
         isPublic: param.isPublic,
         readOnly: param.readOnly,
@@ -249,8 +255,11 @@ export class KnowledgeService {
       },
     });
 
-    await this.queue.add(CHANNEL_FINALIZE_RESOURCE, { ...param, uid: user.uid });
-    // await this.finalizeResource(param);
+    // Add to queue to be processed by worker
+    await this.queue.add(CHANNEL_FINALIZE_RESOURCE, {
+      resourceId: resource.resourceId,
+      uid: user.uid,
+    });
 
     return resource;
   }
@@ -261,62 +270,93 @@ export class KnowledgeService {
     return Promise.all(tasks);
   }
 
-  async indexResource(user: User, param: UpsertResourceRequest) {
-    const { resourceType, resourceId, data = {} } = param;
-    const { url, title } = data;
-
-    param.content ||= '';
-
-    if (!param.content && url) {
-      const { data } = await this.ragService.crawlFromRemoteReader(url);
-      param.content = data.content;
-      param.title ||= data.title;
+  /**
+   * Parse resource content from remote URL into markdown.
+   * Currently only weblinks are supported.
+   */
+  async parseResource(user: User, resource: ResourceModel): Promise<ResourceModel> {
+    if (resource.indexStatus !== 'wait_parse' && resource.indexStatus !== 'parse_failed') {
+      this.logger.warn(
+        `Resource ${resource.resourceId} is not in wait_parse or parse_failed status, skip parse`,
+      );
+      return resource;
     }
 
-    // Remove invalid UTF-8 byte sequences
-    param.content = param.content?.replace(/x00/g, '') ?? '';
+    const { resourceId, meta } = resource;
+    const { url } = JSON.parse(meta) as ResourceMeta;
+
+    let content: string = '';
+    let title: string = '';
+
+    if (url) {
+      const { data } = await this.ragService.crawlFromRemoteReader(url);
+      content = data.content?.replace(/x00/g, '') ?? '';
+      title ||= data.title;
+    }
 
     const storageKey = `resources/${resourceId}.txt`;
-    await this.minio.client.putObject(storageKey, param.content);
+    await this.minio.client.putObject(storageKey, content);
 
-    const resource = await this.prisma.resource.update({
+    const updatedResource = await this.prisma.resource.update({
       where: { resourceId, uid: user.uid },
       data: {
         storageKey,
-        wordCount: readingTime(param.content).words,
-        title: param.title,
+        wordCount: readingTime(content).words,
+        title: resource.title,
         indexStatus: 'wait_index',
-        contentPreview: param.content?.slice(0, 500),
+        contentPreview: content?.slice(0, 500),
         meta: JSON.stringify({
           url,
-          title: param.title,
+          title: resource.title,
         } as ResourceMeta),
       },
     });
 
     await this.elasticsearch.upsertResource({
-      id: resource.resourceId,
-      content: param.content,
+      id: resourceId,
+      content,
       url,
       createdAt: resource.createdAt.toJSON(),
       updatedAt: resource.updatedAt.toJSON(),
-      ...pick(resource, ['title', 'uid']),
+      ...pick(updatedResource, ['title', 'uid']),
     });
 
-    // ensure the document is for ingestion use
-    if (param.content) {
-      const chunks = await this.ragService.indexContent({
-        pageContent: cleanMarkdownForIngest(param.content),
-        metadata: { nodeType: 'resource', url, title, resourceType, resourceId },
-      });
-      await this.ragService.saveDataForUser(user, { chunks });
+    return updatedResource;
+  }
+
+  /**
+   * Index resource content into vector store.
+   */
+  async indexResource(user: User, resource: ResourceModel): Promise<ResourceModel> {
+    if (resource.indexStatus !== 'wait_index' && resource.indexStatus !== 'index_failed') {
+      this.logger.warn(`Resource ${resource.resourceId} is not in wait_index status, skip index`);
+      return resource;
     }
 
-    this.logger.log(
-      `save resource segments for user ${user.uid} success, resourceId: ${resourceId}`,
-    );
+    const { resourceType, resourceId, meta, storageKey } = resource;
+    const { url, title } = JSON.parse(meta) as ResourceMeta;
 
-    await this.prisma.resource.update({
+    if (storageKey) {
+      const contentStream = await this.minio.client.getObject(storageKey);
+      const content = await streamToString(contentStream);
+      const chunks = await this.ragService.indexContent({
+        pageContent: cleanMarkdownForIngest(content),
+        metadata: {
+          nodeType: 'resource',
+          url,
+          title,
+          resourceType: resourceType as ResourceType,
+          resourceId,
+        },
+      });
+      await this.ragService.saveDataForUser(user, { chunks });
+
+      this.logger.log(
+        `save resource segments for user ${user.uid} success, resourceId: ${resourceId}`,
+      );
+    }
+
+    return this.prisma.resource.update({
       where: { resourceId, uid: user.uid },
       data: { indexStatus: 'finish' },
     });
@@ -326,30 +366,52 @@ export class KnowledgeService {
    * Process resource after being inserted, including scraping actual content, chunking and
    * save embeddings to vector store.
    */
-  async finalizeResource(param: FinalizeResourceParam) {
-    const user = await this.prisma.user.findFirst({ where: { uid: param.uid } });
+  async finalizeResource(param: FinalizeResourceParam): Promise<ResourceModel | null> {
+    const { resourceId, uid } = param;
+
+    const user = await this.prisma.user.findFirst({ where: { uid } });
     if (!user) {
-      this.logger.warn(`User not found, userId: ${param.uid}`);
-      return;
+      this.logger.warn(`User not found, userId: ${uid}`);
+      return null;
+    }
+
+    let resource = await this.prisma.resource.findFirst({
+      where: { resourceId, uid: user.uid },
+    });
+    if (!resource) {
+      this.logger.warn(`Resource not found, resourceId: ${resourceId}`);
+      return null;
     }
 
     try {
-      await this.indexResource(user, param);
-      await this.simpleEventQueue.add({
-        entityType: 'resource',
-        entityId: param.resourceId,
-        name: 'onResourceReady',
-        uid: user.uid,
-      });
+      resource = await this.parseResource(user, resource);
     } catch (err) {
-      console.error(err);
-      this.logger.error(`finalize resource error: ${err}`);
-      await this.prisma.resource.update({
-        where: { resourceId: param.resourceId, uid: user.uid },
-        data: { indexStatus: 'failed' },
+      this.logger.error(`parse resource error: ${err?.stack}`);
+      return this.prisma.resource.update({
+        where: { resourceId, uid: user.uid },
+        data: { indexStatus: 'parse_failed' },
       });
-      throw err;
     }
+
+    try {
+      resource = await this.indexResource(user, resource);
+    } catch (err) {
+      this.logger.error(`index resource error: ${err?.stack}`);
+      return this.prisma.resource.update({
+        where: { resourceId, uid: user.uid },
+        data: { indexStatus: 'index_failed' },
+      });
+    }
+
+    // Send simple event
+    await this.simpleEventQueue.add({
+      entityType: 'resource',
+      entityId: resourceId,
+      name: 'onResourceReady',
+      uid: user.uid,
+    });
+
+    return resource;
   }
 
   async updateResource(user: User, param: UpsertResourceRequest) {
@@ -382,6 +444,13 @@ export class KnowledgeService {
     });
 
     return updatedResource;
+  }
+
+  async reindexResource(user: User, param: ReindexResourceRequest) {
+    const { resourceIds = [] } = param;
+    return Promise.all(
+      resourceIds.map((resourceId) => this.finalizeResource({ resourceId, uid: user.uid })),
+    );
   }
 
   async deleteResource(user: User, resourceId: string) {

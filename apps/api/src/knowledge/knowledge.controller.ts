@@ -30,6 +30,8 @@ import {
   BatchCreateResourceResponse,
   AddResourceToCollectionRequest,
   RemoveResourceFromCollectionRequest,
+  ReindexResourceRequest,
+  ReindexResourceResponse,
 } from '@refly/openapi-schema';
 import { User as UserModel } from '@prisma/client';
 import { KnowledgeService } from './knowledge.service';
@@ -50,7 +52,7 @@ export class KnowledgeController {
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListCollectionResponse> {
     const colls = await this.knowledgeService.listCollections(user, { page, pageSize });
-    return buildSuccessResponse(colls.map((coll) => collectionPO2DTO(coll)));
+    return buildSuccessResponse(colls.map(collectionPO2DTO));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -138,7 +140,7 @@ export class KnowledgeController {
       page,
       pageSize,
     });
-    return buildSuccessResponse(resources.map((r) => resourcePO2DTO(r)));
+    return buildSuccessResponse(resources.map(resourcePO2DTO));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -148,7 +150,7 @@ export class KnowledgeController {
     @Query('resourceId') resourceId: string,
   ): Promise<GetResourceDetailResponse> {
     const resource = await this.knowledgeService.getResourceDetail(user, { resourceId });
-    return buildSuccessResponse(resourcePO2DTO(resource, true));
+    return buildSuccessResponse(resourcePO2DTO(resource));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -168,7 +170,7 @@ export class KnowledgeController {
     @Body() body: UpsertResourceRequest[],
   ): Promise<BatchCreateResourceResponse> {
     const resources = await this.knowledgeService.batchCreateResource(user, body);
-    return buildSuccessResponse(resources.map((r) => resourcePO2DTO(r)));
+    return buildSuccessResponse(resources.map(resourcePO2DTO));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -192,6 +194,16 @@ export class KnowledgeController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Post('resource/reindex')
+  async reindexResource(
+    @User() user: UserModel,
+    @Body() body: ReindexResourceRequest,
+  ): Promise<ReindexResourceResponse> {
+    const resources = await this.knowledgeService.reindexResource(user, body);
+    return buildSuccessResponse(resources.map(resourcePO2DTO));
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('resource/delete')
   async deleteResource(
     @User() user: UserModel,
@@ -212,7 +224,7 @@ export class KnowledgeController {
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListNoteResponse> {
     const notes = await this.knowledgeService.listNotes(user, { page, pageSize });
-    return buildSuccessResponse(notes.map((note) => notePO2DTO(note)));
+    return buildSuccessResponse(notes.map(notePO2DTO));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -222,7 +234,7 @@ export class KnowledgeController {
     @Query('noteId') noteId: string,
   ): Promise<GetNoteDetailResponse> {
     const note = await this.knowledgeService.getNoteDetail(user, noteId);
-    return buildSuccessResponse(notePO2DTO(note, true));
+    return buildSuccessResponse(notePO2DTO(note));
   }
 
   @UseGuards(JwtAuthGuard)
