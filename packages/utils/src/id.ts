@@ -42,6 +42,14 @@ export function genCollectionID(): string {
   return 'cl-' + createId();
 }
 
+export function genSubscriptionPlanID(): string {
+  return 'sp-' + createId();
+}
+
+export function genUsageMeterID(): string {
+  return 'um-' + createId();
+}
+
 export function genSkillID(): string {
   return 'sk-' + createId();
 }

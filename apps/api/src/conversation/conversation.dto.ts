@@ -20,6 +20,7 @@ export function toChatMessageDTO(message: ChatMessageModel): ChatMessage {
     dto.logs = JSON.parse(message.logs || '[]');
     dto.structuredData = JSON.parse(message.structuredData || '{}');
     dto.errors = JSON.parse(message.errors || '[]');
+    dto.tokenUsage = JSON.parse(message.tokenUsage || '[]');
   }
   return dto;
 }

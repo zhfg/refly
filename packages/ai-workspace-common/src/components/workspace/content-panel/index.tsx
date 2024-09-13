@@ -1,7 +1,8 @@
-import { useRef, useState } from 'react';
-import { Affix, Radio, Dropdown, Menu, Divider } from '@arco-design/web-react';
+import { useRef, useState, useEffect } from 'react';
+import { Affix, Radio, Dropdown, Menu, Modal } from '@arco-design/web-react';
 import { HiOutlineChevronDown } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { WorkSpaceSearch } from '../work-space-search';
 import { ResourceList } from '@refly-packages/ai-workspace-common/components/workspace/resource-list';
@@ -123,6 +124,34 @@ export const ContentPanel = () => {
   const ref = useRef();
   const [val, setVal] = useState('resource');
   const [hitTop, setHitTop] = useState(false);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    const paySuccess = searchParams.get('paySuccess');
+    const payCancel = searchParams.get('payCancel');
+    navigate('/', { replace: true });
+    if (paySuccess || payCancel) {
+      setTimeout(() => {
+        const title = paySuccess ? t('settings.action.paySuccessNotify') : t('settings.action.payCancelNotify');
+        const description = paySuccess
+          ? t('settings.action.paySuccessDescription')
+          : t('settings.action.payCancelDescription');
+        if (paySuccess) {
+          Modal.success({
+            title,
+            content: description,
+          });
+        } else {
+          Modal.error({
+            title,
+            content: description,
+          });
+        }
+      }, 1);
+    }
+  }, []);
 
   return (
     <div className="content-panel-container" ref={ref}>

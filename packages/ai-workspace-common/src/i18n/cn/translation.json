@@ -311,7 +311,8 @@
       "explore": "探索",
       "threadLibrary": "会话",
       "getHelp": "获得帮助",
-      "download": "下载插件",
+      "download": "下载",
+      "downloadExtension": "下载插件",
       "newResource": "导入资源",
       "settings": "设置",
       "skill": "技能",
@@ -518,8 +519,8 @@
       "back": "返回技能管理",
       "emptyJobs": "暂无运行记录",
       "emptyTriggers": "请先配置触发器",
-      "emptyInstances": "暂无技能实例",
-      "emptyTemplates": "暂无技能模板",
+      "emptyInstances": "您未安装任何技能",
+      "emptyTemplates": "技能市场空空如也",
       "enable": "启用",
       "disable": "禁用"
     },
@@ -531,7 +532,8 @@
     "title": "设置",
     "tabs": {
       "account": "账号",
-      "language": "语言"
+      "language": "语言",
+      "subscription": "订阅"
     },
 
     "account": {
@@ -565,8 +567,59 @@
         "description": "AI 将按照此语言设置回答您的问题。您可以在对话中单独设置语言以覆盖此选项。"
       }
     },
+    "subscription": {
+      "subscribeNow": "立即订阅",
+      "currentPlan": "当前套餐",
+      "t1TokenUsed": "高阶模型 Token 使用量",
+      "t1TokenUsedDescription": "高阶模型包括 OpenAI GPT-4o、Anthropic Claude 3.5 Sonnet、Google Gemini 1.5 Pro；使用量包括模型输入和输出 Token 消耗",
+      "t2TokenUsed": "基础模型 Token 使用量",
+      "t2TokenUsedDescription": "基础模型包括 OpenAI GPT-4o-mini、OpenAI GPT-3.5-turbo、Google Gemini 1.5 Flash；使用量包括模型输入和输出 Token 消耗",
+      "subscriptionManagement": "管理账单及订阅",
+      "subscriptionStatus": {
+        "free": "FREE",
+        "pro": "PRO"
+      },
+      "subscribe": {
+        "title": "选择适合您的套餐",
+        "subtitle": "订阅年度计划可免费获得 2个月！",
+        "monthly": "按月",
+        "yearly": "按年",
+        "monthlyPlan": "每月自动续费",
+        "yearlyPlan": "每年自动续费",
+        "pro": {
+          "description": "享受最先进的高阶模型，并拥有更充裕的基础模型使用额度",
+          "buttonText": "立即升级",
+          "features": {
+            "t1Token": "高阶模型额度（1,000,000 Token/月）",
+            "t2Token": "基础模型额度（10,000,000 Token/月）"
+          }
+        },
+        "free": {
+          "description": "免费使用，拥有较多的基础模型使用额度",
+          "buttonText": "继续免费",
+          "features": {
+            "t1Token": "高阶模型额度（100,000 Token/月）",
+            "t2Token": "基础模型额度（5,000,000 Token/月）"
+          }
+        },
+        "description": "可随时取消订阅。订阅即表示您同意Refly的",
+        "and": "和",
+        "privacy": "隐私",
+        "terms": "条款",
+        "planFeatures": "套餐包含",
+        "period": "永久",
+        "month": "月",
+        "year": "年",
+        "forFree": "免费",
+        "resetAt": "将于{{date}}重置"
+      }
+    },
     "action": {
-      "putErrorNotify": "修改用户配置失败，请尝试重试！"
+      "putErrorNotify": "修改用户配置失败，请尝试重试！",
+      "paySuccessNotify": "支付成功！",
+      "paySuccessDescription": "感谢您对 Refly 的大力支持，我们会持续迭代，让产品变得更好！如有任何问题，请联系 support@refly.ai",
+      "payCancelNotify": "支付取消！",
+      "payCancelDescription": "我们未能成功收到您的付款，如有任何问题，请联系 support@refly.ai"
     }
   },
   "contentDetail": {
@@ -829,7 +882,8 @@
     "chatInput": {
       "skillManager": "管理",
       "placeholder": "提出问题，发现新知"
-    }
+    },
+    "tokenUsage": "输入 {{count}}，输出 {{count}}"
   },
   "title": "欢迎 {{name}}，使用 react-i18next 完全类型安全的 React",
   "description": {

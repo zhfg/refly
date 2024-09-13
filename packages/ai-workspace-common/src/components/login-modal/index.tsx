@@ -1,8 +1,9 @@
 /**
  * 此为登录弹框，for web 使用
  */
-import { Button, Message as message, Modal, Divider, Typography } from '@arco-design/web-react';
-import React, { useEffect, useRef, useState } from 'react';
+import { Button, Modal, Divider, Typography } from '@arco-design/web-react';
+import { useEffect, useRef } from 'react';
+import { HiLanguage } from 'react-icons/hi2';
 
 // stores
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
@@ -10,14 +11,15 @@ import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 
 // 静态资源
 import Logo from '@/assets/logo.svg';
+import Google from '@/assets/google.svg';
 import { Link, useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
-import { safeParseJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 
 // styles
 import './index.scss';
 import { useCookie } from 'react-use';
-import { getServerOrigin } from '@refly/utils/url';
+import { getServerOrigin, getClientOrigin } from '@refly/utils/url';
 import { useTranslation } from 'react-i18next';
+import { UILocaleList } from '@refly-packages/ai-workspace-common/components/ui-locale-list';
 
 export const LoginModal = (props: { visible?: boolean; from?: string }) => {
   const userStore = useUserStore();
@@ -36,45 +38,8 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
   const handleLogin = () => {
     userStore.setIsCheckingLoginStatus(true);
     location.href = `${getServerOrigin()}/v1/auth/google`;
-
-    // userStore.setLoginModalVisible(false)
   };
 
-  // const handleLoginStatus = ({ body: data }: ExternalLoginPayload) => {
-  //   if (data?.status === "success") {
-  //     // 临时设置状态
-  //     userStore.setUserProfile(data?.user)
-  //     userStore.setToken(data?.token)
-
-  //     loginWindowRef.current?.close()
-
-  //     navigate("/")
-  //   } else {
-  //     message.error("登录失败!")
-
-  //     loginWindowRef.current?.close()
-  //   }
-
-  //   userStore.setIsCheckingLoginStatus(false)
-  // }
-
-  // const handleListenChildPage = (event: any) => {
-  //   const data = event?.data || {}
-  //   console.log("handleListenChildPage", event)
-
-  //   if (data?.type === "refly-login-status") {
-  //     if (data?.status === "success") {
-  //       updateCookie(data?.payload || "")
-  //       userStore.setLoginModalVisible(false)
-  //       userStore.setIsCheckingLoginStatus(false)
-  //     }
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   console.log("refly-login-status")
-  //   window.addEventListener("message", handleListenChildPage, false)
-  // }, [])
   useEffect(() => {
     // 不是插件打开的页面，就直接清除状态，区分插件和普通页面打开
     if (props?.from !== 'extension-login') {
@@ -113,6 +78,11 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
       onCancel={() => userStore.setLoginModalVisible(false)}
     >
       <div className="login-container">
+        <div className="language-btn">
+          <UILocaleList>
+            <Button type="text" icon={<HiLanguage style={{ fontSize: 20 }} />}></Button>
+          </UILocaleList>
+        </div>
         <div className="login-brand">
           <img src={Logo} alt="Refly" style={{ width: 38, height: 38 }} />
           <span
@@ -128,11 +98,13 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
         </div>
         <div className="login-hint-text">{t('landingPage.loginModal.title')}</div>
         <Button
-          type="primary"
+          className="login-btn"
+          type="outline"
           onClick={() => handleLogin()}
-          style={{ width: 260, height: 44, marginTop: 32, borderRadius: 4 }}
+          style={{ width: 260, height: 32, marginTop: 32, borderRadius: 4 }}
           loading={userStore.isCheckingLoginStatus}
         >
+          <img src={Google} alt="google" style={{ width: 15, height: 15, margin: '0 8px' }} />
           {userStore.isCheckingLoginStatus
             ? t('landingPage.loginModal.loggingStatus')
             : t('landingPage.loginModal.loginBtn')}
@@ -141,7 +113,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
         <Typography.Paragraph className="term-text">
           {t('landingPage.loginModal.utilText')}
           <Link
-            to="/terms"
+            to={`${getClientOrigin(true)}/terms`}
             style={{ margin: '0 4px' }}
             onClick={() => {
               userStore.setLoginModalVisible(false);
@@ -151,7 +123,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
           </Link>
           {t('landingPage.loginModal.and')}
           <Link
-            to="/privacy"
+            to={`${getClientOrigin(true)}/privacy`}
             style={{ margin: '0 4px' }}
             onClick={() => {
               userStore.setLoginModalVisible(false);

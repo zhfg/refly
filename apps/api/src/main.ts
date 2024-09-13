@@ -26,7 +26,9 @@ Sentry.init({
 });
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    rawBody: true,
+  });
   const logger = app.get(Logger);
   const configService = app.get(ConfigService);
 

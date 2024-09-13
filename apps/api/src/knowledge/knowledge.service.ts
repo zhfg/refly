@@ -4,9 +4,10 @@ import pLimit from 'p-limit';
 import { InjectQueue } from '@nestjs/bull';
 import { readingTime } from 'reading-time-estimator';
 import { Prisma } from '@prisma/client';
-import { RAGService } from '../rag/rag.service';
-import { PrismaService } from '../common/prisma.service';
-import { MINIO_INTERNAL, MinioService } from '../common/minio.service';
+import { RAGService } from '@/rag/rag.service';
+import { PrismaService } from '@/common/prisma.service';
+import { ElasticsearchService } from '@/common/elasticsearch.service';
+import { MINIO_INTERNAL, MinioService } from '@/common/minio.service';
 import {
   UpsertCollectionRequest,
   UpsertResourceRequest,
@@ -19,13 +20,14 @@ import {
   GetResourceDetailData,
   AddResourceToCollectionRequest,
   RemoveResourceFromCollectionRequest,
+  IndexStatus,
 } from '@refly/openapi-schema';
 import {
   CHANNEL_FINALIZE_RESOURCE,
   QUEUE_SIMPLE_EVENT,
   QUEUE_RESOURCE,
   streamToString,
-} from '../utils';
+} from '@/utils';
 import {
   genCollectionID,
   genResourceID,
@@ -43,6 +45,7 @@ export class KnowledgeService {
 
   constructor(
     private prisma: PrismaService,
+    private elasticsearch: ElasticsearchService,
     private ragService: RAGService,
     @Inject(MINIO_INTERNAL) private minio: MinioService,
     @InjectQueue(QUEUE_RESOURCE) private queue: Queue<FinalizeResourceParam>,
@@ -63,8 +66,15 @@ export class KnowledgeService {
     const { collectionId } = param;
 
     const coll = await this.prisma.collection.findFirst({
-      where: { collectionId, uid: user.uid, deletedAt: null },
-      include: { resources: { where: { deletedAt: null } } },
+      where: { collectionId, deletedAt: null },
+      include: {
+        resources: {
+          where: {
+            deletedAt: null,
+            OR: [{ isPublic: true }, { uid: user.uid }],
+          },
+        },
+      },
     });
     if (!coll) {
       throw new NotFoundException('Collection not found');
@@ -83,7 +93,7 @@ export class KnowledgeService {
       param.collectionId = genCollectionID();
     }
 
-    return this.prisma.collection.upsert({
+    const collection = await this.prisma.collection.upsert({
       where: { collectionId: param.collectionId },
       create: {
         collectionId: param.collectionId,
@@ -94,6 +104,15 @@ export class KnowledgeService {
       },
       update: { ...omit(param, ['collectionId']) },
     });
+
+    await this.elasticsearch.upsertCollection({
+      id: collection.collectionId,
+      createdAt: collection.createdAt.toJSON(),
+      updatedAt: collection.updatedAt.toJSON(),
+      ...pick(collection, ['title', 'description', 'uid']),
+    });
+
+    return collection;
   }
 
   async addResourceToCollection(user: User, param: AddResourceToCollectionRequest) {
@@ -179,7 +198,10 @@ export class KnowledgeService {
       return null;
     }
 
-    return resource;
+    const contentStream = await this.minio.client.getObject(resource.storageKey);
+    const content = await streamToString(contentStream);
+
+    return { ...resource, content };
   }
 
   async createResource(user: User, param: UpsertResourceRequest) {
@@ -209,17 +231,20 @@ export class KnowledgeService {
       throw new BadRequestException('Invalid resource type');
     }
 
+    const cleanedContent = param.content?.replace(/x00/g, '') ?? '';
+    const indexStatus: IndexStatus = param.content ? 'wait_index' : 'wait_parse';
+
     const resource = await this.prisma.resource.create({
       data: {
         resourceId: param.resourceId,
         resourceType: param.resourceType,
         meta: JSON.stringify(param.data || {}),
-        content: param.content?.replace(/x00/g, '') ?? '',
+        contentPreview: cleanedContent?.slice(0, 500),
         uid: user.uid,
         isPublic: param.isPublic,
         readOnly: param.readOnly,
         title: param.title || 'Untitled',
-        indexStatus: 'processing',
+        indexStatus,
         ...(param.collectionId
           ? {
               collections: {
@@ -244,39 +269,45 @@ export class KnowledgeService {
 
   async indexResource(user: User, param: UpsertResourceRequest) {
     const { resourceType, resourceId, data = {} } = param;
-    const { url, storageKey, title } = data;
-    param.storageKey ||= storageKey;
+    const { url, title } = data;
+
     param.content ||= '';
 
-    if (param.storageKey) {
-      const readable = await this.minio.client.getObject(param.storageKey);
-      param.content = await streamToString(readable);
-    } else {
-      if (!param.content && url) {
-        const { data } = await this.ragService.crawlFromRemoteReader(url);
-        param.content = data.content;
-        param.title ||= data.title;
-      }
+    if (!param.content && url) {
+      const { data } = await this.ragService.crawlFromRemoteReader(url);
+      param.content = data.content;
+      param.title ||= data.title;
     }
 
     // Remove invalid UTF-8 byte sequences
     param.content = param.content?.replace(/x00/g, '') ?? '';
 
-    await this.prisma.resource.update({
+    const storageKey = `resources/${resourceId}.txt`;
+    await this.minio.client.putObject(storageKey, param.content);
+
+    const resource = await this.prisma.resource.update({
       where: { resourceId, uid: user.uid },
       data: {
-        content: param.content,
+        storageKey,
         wordCount: readingTime(param.content).words,
         title: param.title,
+        indexStatus: 'wait_index',
+        contentPreview: param.content?.slice(0, 500),
         meta: JSON.stringify({
           url,
           title: param.title,
-          storageKey: param.storageKey,
         } as ResourceMeta),
       },
     });
 
-    // TODO: remove unnecessary duplicate insertions
+    await this.elasticsearch.upsertResource({
+      id: resource.resourceId,
+      content: param.content,
+      url,
+      createdAt: resource.createdAt.toJSON(),
+      updatedAt: resource.updatedAt.toJSON(),
+      ...pick(resource, ['title', 'uid']),
+    });
 
     // ensure the document is for ingestion use
     if (param.content) {
@@ -328,17 +359,35 @@ export class KnowledgeService {
   }
 
   async updateResource(user: User, param: UpsertResourceRequest) {
+    const resource = await this.prisma.resource.findFirst({
+      where: { resourceId: param.resourceId, uid: user.uid },
+    });
+    if (!resource) {
+      throw new BadRequestException('Resource not found');
+    }
+
     const updates: Prisma.ResourceUpdateInput = pick(param, ['title', 'isPublic', 'readOnly']);
     if (param.data) {
       updates.meta = JSON.stringify(param.data);
     }
     if (param.content) {
-      await this.minio.client.putObject(param.storageKey, param.content);
+      await this.minio.client.putObject(resource.storageKey, param.content);
     }
-    return this.prisma.resource.update({
+
+    const updatedResource = await this.prisma.resource.update({
       where: { resourceId: param.resourceId, uid: user.uid },
       data: updates,
     });
+
+    await this.elasticsearch.upsertResource({
+      id: updatedResource.resourceId,
+      content: param.content || undefined,
+      createdAt: updatedResource.createdAt.toJSON(),
+      updatedAt: updatedResource.updatedAt.toJSON(),
+      ...pick(updatedResource, ['title', 'uid']),
+    });
+
+    return updatedResource;
   }
 
   async deleteResource(user: User, resourceId: string) {
@@ -350,8 +399,7 @@ export class KnowledgeService {
       throw new BadRequestException('Resource not found');
     }
 
-    return Promise.all([
-      this.ragService.deleteResourceNodes(user, resourceId),
+    await this.prisma.$transaction([
       this.prisma.resource.update({
         where: { resourceId, uid, deletedAt: null },
         data: { deletedAt: new Date() },
@@ -360,6 +408,12 @@ export class KnowledgeService {
         where: { entityType: 'resource', entityId: resourceId, uid, deletedAt: null },
         data: { deletedAt: new Date() },
       }),
+    ]);
+
+    await Promise.all([
+      this.minio.client.removeObject(resource.storageKey),
+      this.ragService.deleteResourceNodes(user, resourceId),
+      this.elasticsearch.deleteResource(resourceId),
     ]);
   }
 
@@ -384,7 +438,14 @@ export class KnowledgeService {
       throw new BadRequestException('Note not found');
     }
 
-    return note;
+    if (!note.storageKey) {
+      return note;
+    }
+
+    const contentStream = await this.minio.client.getObject(note.storageKey);
+    const content = await streamToString(contentStream);
+
+    return { ...note, content };
   }
 
   async upsertNote(user: User, param: UpsertNoteRequest) {
@@ -399,7 +460,7 @@ export class KnowledgeService {
       await this.minio.client.putObject(stateStorageKey, Buffer.from(ydoc));
     }
 
-    return this.prisma.note.upsert({
+    const note = await this.prisma.note.upsert({
       where: { noteId: param.noteId },
       create: {
         noteId: param.noteId,
@@ -414,6 +475,15 @@ export class KnowledgeService {
         ...pick(param, ['title', 'readOnly', 'isPublic']),
       },
     });
+
+    await this.elasticsearch.upsertNote({
+      id: param.noteId,
+      ...pick(note, ['title', 'uid']),
+      createdAt: note.createdAt.toJSON(),
+      updatedAt: note.updatedAt.toJSON(),
+    });
+
+    return note;
   }
 
   async deleteNote(user: User, noteId: string) {
@@ -425,8 +495,7 @@ export class KnowledgeService {
       throw new BadRequestException('Note not found');
     }
 
-    const cleanups: Promise<any>[] = [
-      this.ragService.deleteNoteNodes(user, noteId),
+    await this.prisma.$transaction([
       this.prisma.note.update({
         where: { noteId },
         data: { deletedAt: new Date() },
@@ -435,6 +504,12 @@ export class KnowledgeService {
         where: { entityType: 'note', entityId: noteId, uid, deletedAt: null },
         data: { deletedAt: new Date() },
       }),
+    ]);
+
+    const cleanups: Promise<any>[] = [
+      this.minio.client.removeObject(note.storageKey),
+      this.ragService.deleteNoteNodes(user, noteId),
+      this.elasticsearch.deleteNote(noteId),
     ];
 
     if (note.stateStorageKey) {

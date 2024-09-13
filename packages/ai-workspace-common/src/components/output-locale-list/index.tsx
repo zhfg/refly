@@ -11,7 +11,7 @@ import './index.scss';
 import { getDefaultPopupContainer, getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { IconCaretDown, IconTranslate } from '@arco-design/web-react/icon';
 
-export const OutputLocaleList = (props: { showTitle?: boolean }) => {
+export const OutputLocaleList = (props: { children: any; showTitle?: boolean; width?: number }) => {
   // i18n
   const { t, i18n } = useTranslation();
   const uiLocale = i18n?.languages?.[0] as LOCALE;
@@ -41,7 +41,7 @@ export const OutputLocaleList = (props: { showTitle?: boolean }) => {
     <Menu
       className={'output-locale-list-menu'}
       onClickMenuItem={(key) => changeLang(key as OutputLocale)}
-      style={{ width: 240 }}
+      style={{ width: props.width || 240 }}
     >
       {props.showTitle && (
         <div className="output-locale-list-menu-title">{t('settings.language.outputLocale.title')}</div>

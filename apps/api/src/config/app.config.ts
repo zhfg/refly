@@ -40,6 +40,11 @@ export default () => ({
     apiKey: process.env.QDRANT_API_KEY,
     vectorDim: parseInt(process.env.REFLY_VEC_DIM) || 768,
   },
+  elasticsearch: {
+    url: process.env.ELASTICSEARCH_URL || 'http://localhost:9200',
+    username: process.env.ELASTICSEARCH_USERNAME,
+    password: process.env.ELASTICSEARCH_PASSWORD,
+  },
   serper: {
     apiKey: process.env.SERPER_API_KEY,
   },
@@ -70,5 +75,15 @@ export default () => ({
   },
   skill: {
     defaultModel: process.env.REFLY_DEFAULT_MODEL || 'anthropic/claude-3.5-sonnet',
+  },
+  stripe: {
+    apiKey: process.env.STRIPE_API_KEY,
+    webhookSecret: {
+      account: process.env.STRIPE_ACCOUNT_WEBHOOK_SECRET,
+      accountTest: process.env.STRIPE_ACCOUNT_TEST_WEBHOOK_SECRET,
+    },
+    sessionSuccessUrl: process.env.STRIPE_SESSION_SUCCESS_URL,
+    sessionCancelUrl: process.env.STRIPE_SESSION_CANCEL_URL,
+    portalReturnUrl: process.env.STRIPE_PORTAL_RETURN_URL,
   },
 });

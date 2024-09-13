@@ -473,6 +473,12 @@
     color: rgba(0, 0, 0, 0.8);
     font-weight: 500;
     font-size: 14px;
+
+    em {
+      font-style: normal;
+      color: #00968f !important;
+      font-weight: bolder !important;
+    }
   }
 
   .search-res-desc {
@@ -480,11 +486,12 @@
     margin-top: 4px;
     color: rgba(0, 0, 0, 0.5);
     font-size: 12px;
-  }
 
-  .keyword {
-    color: #00968f !important;
-    font-weight: bolder !important;
+    em {
+      font-style: normal;
+      color: #00968f !important;
+      font-weight: bolder !important;
+    }
   }
 }
 

@@ -23,6 +23,10 @@
     &::-webkit-scrollbar {
       display: none; // Webkit 浏览器(Chrome, Safari)
     }
+    &-title {
+      display: flex;
+      align-items: center;
+    }
   }
   .arco-tabs-header-size-large.arco-tabs-header-nav-line .arco-tabs-header-title {
     font-size: 16px;

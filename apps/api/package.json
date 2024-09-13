@@ -86,7 +86,10 @@
     "y-protocols": "^1.0.6",
     "yjs": "^13.6.8",
     "cheerio": "~1.0.0",
-    "pdf-parse": "~1.1.1"
+    "pdf-parse": "~1.1.1",
+    "@golevelup/nestjs-stripe": "~0.8.2",
+    "stripe": "~16.10.0",
+    "@elastic/elasticsearch": "7.17.14"
   },
   "devDependencies": {
     "@nestjs/cli": "~10.3.2",

@@ -66,14 +66,14 @@ export interface Logger {
 export class SkillEngine {
   constructor(public logger: Logger, public service: ReflyService, private options?: SkillEngineOptions) {
     this.options = {
-      defaultModel: 'anthropic/claude-3.5-sonnet',
+      defaultModel: 'openai/gpt-4o-mini',
       ...options,
     };
   }
 
   chatModel(params?: Partial<OpenAIChatInput>): ChatOpenAI {
     return new ChatOpenAI({
-      model: this.options.defaultModel,
+      model: 'gpt-4o-mini',
       apiKey: process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY,
       configuration: { baseURL: process.env.OPENROUTER_API_KEY && 'https://openrouter.ai/api/v1' },
       ...params,

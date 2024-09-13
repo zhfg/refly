@@ -17,6 +17,10 @@ export const $User = {
       type: 'string',
       description: 'Output locale',
     },
+    planId: {
+      type: 'string',
+      description: 'Subscription plan ID',
+    },
   },
 } as const;
 
@@ -33,11 +37,6 @@ export const $ResourceMeta = {
       type: 'string',
       description: 'Weblink title',
       example: 'Google',
-    },
-    storageKey: {
-      type: 'string',
-      description: 'Storage key for the weblink',
-      deprecated: true,
     },
   },
 } as const;
@@ -842,6 +841,40 @@ export const $MessageType = {
   enum: ['ai', 'human', 'system'],
 } as const;
 
+export const $ModelTier = {
+  type: 'string',
+  description: 'Model tier',
+  enum: ['t1', 't2'],
+} as const;
+
+export const $TokenUsageItem = {
+  type: 'object',
+  description: 'Token usage item',
+  required: ['tier', 'modelName', 'modelProvider', 'inputTokens', 'outputTokens'],
+  properties: {
+    tier: {
+      type: 'string',
+      description: 'Model tier',
+    },
+    modelName: {
+      type: 'string',
+      description: 'Model name',
+    },
+    modelProvider: {
+      type: 'string',
+      description: 'Model provider',
+    },
+    inputTokens: {
+      type: 'number',
+      description: 'Input tokens',
+    },
+    outputTokens: {
+      type: 'number',
+      description: 'Output tokens',
+    },
+  },
+} as const;
+
 export const $ChatMessage = {
   type: 'object',
   description: 'Chat message',
@@ -909,6 +942,13 @@ export const $ChatMessage = {
         $ref: '#/components/schemas/Source',
       },
       deprecated: true,
+    },
+    tokenUsage: {
+      type: 'array',
+      description: 'Token usage',
+      items: {
+        $ref: '#/components/schemas/TokenUsageItem',
+      },
     },
     selectedWeblinkConfig: {
       type: 'string',
@@ -1157,7 +1197,109 @@ export const $ChatTaskResponse = {
 export const $IndexStatus = {
   type: 'string',
   description: 'Resource index status',
-  enum: ['init', 'processing', 'finish', 'failed', 'unavailable'],
+  enum: ['init', 'wait_parse', 'wait_index', 'finish', 'failed', 'unavailable'],
+} as const;
+
+export const $SubscriptionInterval = {
+  type: 'string',
+  description: 'Payment recurring interval',
+  enum: ['monthly', 'yearly'],
+} as const;
+
+export const $SubscriptionPlanType = {
+  type: 'string',
+  description: 'Subscription plan type',
+  enum: ['free', 'pro'],
+} as const;
+
+export const $PriceLookupKey = {
+  type: 'string',
+  description: 'Price lookup key',
+  enum: ['refly_pro_monthly', 'refly_pro_yearly'],
+} as const;
+
+export const $SubscriptionStatus = {
+  type: 'string',
+  description: 'Subscription status',
+  enum: ['active', 'canceled', 'incomplete', 'incomplete_expired', 'past_due', 'paused', 'trialing', 'unpaid'],
+} as const;
+
+export const $Subscription = {
+  type: 'object',
+  required: ['subscriptionId', 'planType', 'status'],
+  properties: {
+    subscriptionId: {
+      type: 'string',
+      description: 'Subscription ID',
+    },
+    lookupKey: {
+      type: 'string',
+      description: 'Lookup key',
+    },
+    planType: {
+      type: 'string',
+      description: 'Subscription plan type',
+      $ref: '#/components/schemas/SubscriptionPlanType',
+    },
+    interval: {
+      description: 'Payment recurring interval',
+      $ref: '#/components/schemas/SubscriptionInterval',
+    },
+    status: {
+      type: 'string',
+      description: 'Subscription status',
+      $ref: '#/components/schemas/SubscriptionStatus',
+    },
+  },
+} as const;
+
+export const $TokenUsageMeter = {
+  type: 'object',
+  required: ['meterId', 'uid', 'planId', 'startAt', 'endAt'],
+  properties: {
+    meterId: {
+      type: 'string',
+      description: 'Token usage meter ID',
+    },
+    uid: {
+      type: 'string',
+      description: 'User ID',
+    },
+    subscriptionId: {
+      type: 'string',
+      description: 'Subscription ID',
+    },
+    startAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Token usage meter start time',
+    },
+    endAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Token usage meter end time',
+    },
+    t1TokenQuota: {
+      type: 'number',
+      description: 'Token quota (T1)',
+      example: 1000000,
+    },
+    t1TokenUsed: {
+      type: 'number',
+      description: 'Token used (T1)',
+      example: 100000,
+    },
+    t2TokenQuota: {
+      type: 'number',
+      description: 'Token quota (T2)',
+      example: 1000000,
+    },
+    t2TokenUsed: {
+      type: 'number',
+      description: 'Token used (T2)',
+      example: 100000,
+    },
+  },
 } as const;
 
 export const $UserSettings = {
@@ -1203,6 +1345,10 @@ export const $UserSettings = {
       type: 'string',
       description: 'User output locale',
       example: 'en',
+    },
+    subscription: {
+      description: 'User subscription',
+      $ref: '#/components/schemas/Subscription',
     },
   },
 } as const;
@@ -1266,10 +1412,6 @@ export const $UpsertResourceRequest = {
     data: {
       description: 'Resource metadata',
       $ref: '#/components/schemas/ResourceMeta',
-    },
-    storageKey: {
-      type: 'string',
-      description: 'Storage key for the resource',
     },
     content: {
       type: 'string',
@@ -2156,13 +2298,6 @@ export const $SkillContext = {
         $ref: '#/components/schemas/SkillContextUrlItem',
       },
     },
-    locale: {
-      type: 'string',
-      description: 'user selected output locale',
-      items: {
-        type: 'string',
-      },
-    },
   },
 } as const;
 
@@ -2305,11 +2440,22 @@ export const $InvokeSkillRequest = {
     convId: {
       description: 'Conversation ID (will add messages to this conversation if provided)',
       type: 'string',
-      example: 'cv-g30e1b80b5g1itbemc0g5jj3',
+    },
+    locale: {
+      type: 'string',
+      description: 'user selected output locale',
+    },
+    modelName: {
+      type: 'string',
+      description: 'user selected output model',
     },
     createConvParam: {
       description: 'Create conversation parameters',
       $ref: '#/components/schemas/CreateConversationRequest',
+    },
+    jobId: {
+      description: 'Skill job ID (if not provided, a new job will be created)',
+      type: 'string',
     },
     triggerId: {
       description: "Trigger ID (typically you don't need to provide this)",
@@ -2671,6 +2817,91 @@ export const $CheckSettingsFieldResponse = {
         data: {
           description: 'Settings field check result',
           $ref: '#/components/schemas/CheckSettingsFieldResult',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $CreateCheckoutSessionRequest = {
+  type: 'object',
+  required: ['lookupKey'],
+  properties: {
+    lookupKey: {
+      description: 'Price lookup key',
+      $ref: '#/components/schemas/PriceLookupKey',
+    },
+  },
+} as const;
+
+export const $CreateCheckoutSessionResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Checkout session',
+          properties: {
+            url: {
+              type: 'string',
+              description: 'Checkout session URL',
+            },
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $CreatePortalSessionResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Portal session',
+          properties: {
+            url: {
+              type: 'string',
+              description: 'Portal session URL',
+            },
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $SubscriptionUsageData = {
+  type: 'object',
+  properties: {
+    token: {
+      description: 'Token usage meter',
+      $ref: '#/components/schemas/TokenUsageMeter',
+    },
+  },
+} as const;
+
+export const $GetSubscriptionUsageResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Subscription usage',
+          $ref: '#/components/schemas/SubscriptionUsageData',
         },
       },
     },

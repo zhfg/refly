@@ -143,6 +143,7 @@ export interface SkillRunnableConfig extends RunnableConfig {
     spanId?: string;
     convId?: string;
     locale?: string;
+    modelName?: string;
     selectedSkill?: SkillMeta;
     currentSkill?: SkillMeta;
     chatHistory?: BaseMessage[];

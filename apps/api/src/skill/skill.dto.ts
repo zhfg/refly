@@ -19,7 +19,9 @@ import { toChatMessageDTO, toConversationDTO } from '@/conversation/conversation
 
 export interface InvokeSkillJobData extends InvokeSkillRequest {
   uid: string;
-  jobId?: string;
+  job?: SkillJobModel;
+  skill?: SkillInstance;
+  conversation?: ConversationModel;
 }
 
 export function skillInstancePO2DTO(skill: SkillInstanceModel): SkillInstance {
