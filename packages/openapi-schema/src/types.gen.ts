@@ -34,11 +34,6 @@ export type ResourceMeta = {
    * Weblink title
    */
   title?: string;
-  /**
-   * Storage key for the weblink
-   * @deprecated
-   */
-  storageKey?: string;
 };
 
 /**
@@ -956,7 +951,7 @@ export type ChatTaskResponse = {
 /**
  * Resource index status
  */
-export type IndexStatus = 'init' | 'processing' | 'finish' | 'failed' | 'unavailable';
+export type IndexStatus = 'init' | 'wait_parse' | 'wait_index' | 'finish' | 'failed' | 'unavailable';
 
 /**
  * Payment recurring interval
@@ -1123,10 +1118,6 @@ export type UpsertResourceRequest = {
    * Resource metadata
    */
   data?: ResourceMeta;
-  /**
-   * Storage key for the resource
-   */
-  storageKey?: string;
   /**
    * Resource content (this will be ignored if storageKey was set)
    */

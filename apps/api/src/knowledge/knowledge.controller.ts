@@ -148,7 +148,7 @@ export class KnowledgeController {
     @Query('resourceId') resourceId: string,
   ): Promise<GetResourceDetailResponse> {
     const resource = await this.knowledgeService.getResourceDetail(user, { resourceId });
-    return buildSuccessResponse(resourcePO2DTO(resource, true));
+    return buildSuccessResponse(resourcePO2DTO(resource));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -222,7 +222,7 @@ export class KnowledgeController {
     @Query('noteId') noteId: string,
   ): Promise<GetNoteDetailResponse> {
     const note = await this.knowledgeService.getNoteDetail(user, noteId);
-    return buildSuccessResponse(notePO2DTO(note, true));
+    return buildSuccessResponse(notePO2DTO(note));
   }
 
   @UseGuards(JwtAuthGuard)

@@ -179,37 +179,41 @@ model TokenUsage {
 
 model Resource {
   /// Primary key
-  pk           BigInt       @id @default(autoincrement())
+  pk             BigInt       @id @default(autoincrement())
   /// Resource id
-  resourceId   String       @unique @map("resource_id")
+  resourceId     String       @unique @map("resource_id")
   /// Resource type
-  resourceType String       @default("") @map("resource_type")
+  resourceType   String       @default("") @map("resource_type")
   /// UID
-  uid          String       @map("uid")
-  /// Collection ID
-  collectionId String       @default("") @map("collection_id")
+  uid            String       @map("uid")
   /// Word count
-  wordCount    Int          @default(0) @map("word_count")
-  /// Content of resource
-  content      String       @default("") @map("content")
+  wordCount      Int          @default(0) @map("word_count")
+  /// Content of resource (deprecated)
+  content        String?      @map("content")
+  /// Content preview
+  contentPreview String?      @map("content_preview")
+  /// Content storage key
+  storageKey     String?      @map("storage_key")
+  /// Content storage size (in bytes)
+  storageSize    Int          @default(0) @map("storage_size")
   /// Whether this resource is publicly accessible
-  isPublic     Boolean      @default(false) @map("is_public")
+  isPublic       Boolean      @default(false) @map("is_public")
   /// Whether this resource is readonly
-  readOnly     Boolean      @default(false) @map("read_only")
+  readOnly       Boolean      @default(false) @map("read_only")
   /// Index status
-  indexStatus  String       @default("init") @map("index_status")
+  indexStatus    String       @default("init") @map("index_status")
   /// Title
-  title        String       @map("title")
+  title          String       @map("title")
   /// Resource metadata
-  meta         String       @map("meta")
+  meta           String       @map("meta")
   /// Create timestamp
-  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
-  updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
   /// Soft delete timestamp
-  deletedAt    DateTime?    @map("deleted_at") @db.Timestamptz()
+  deletedAt      DateTime?    @map("deleted_at") @db.Timestamptz()
   /// Related collections
-  collections  Collection[]
+  collections    Collection[]
 
   @@index([uid, deletedAt, updatedAt])
   @@map("resources")
@@ -226,8 +230,14 @@ model Note {
   title           String    @default("Untitled") @map("title")
   /// Word count
   wordCount       Int       @default(0) @map("word_count")
-  /// Content of resource
-  content         String    @default("") @map("content")
+  /// Content of resource (deprecated)
+  content         String?   @map("content")
+  /// Content preview
+  contentPreview  String?   @map("content_preview")
+  /// Content storage key
+  storageKey      String?   @map("storage_key")
+  /// Content storage size (in bytes)
+  storageSize     Int       @default(0) @map("storage_size")
   /// Yjs state storage key
   stateStorageKey String    @default("") @map("state_storage_key")
   /// Whether this note is publicly accessible

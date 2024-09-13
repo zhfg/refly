@@ -5,12 +5,13 @@ import { CreateConversationRequest, User } from '@refly/openapi-schema';
 
 import { PrismaService } from '@/common/prisma.service';
 import { genChatMessageID, genConvID } from '@refly/utils';
+import { ElasticsearchService } from '@/common/elasticsearch.service';
 
 @Injectable()
 export class ConversationService {
   private logger = new Logger(ConversationService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private elasticsearch: ElasticsearchService) {}
 
   async upsertConversation(
     user: User,
@@ -76,12 +77,27 @@ export class ConversationService {
       };
     }
 
-    return this.prisma.$transaction([
+    const [messages, conversation] = await this.prisma.$transaction([
       this.prisma.chatMessage.createManyAndReturn({
         data: msgList.map((msg) => ({ ...msg, msgId: msg.msgId || genChatMessageID() })),
       }),
       ...(convUpserts ? [this.prisma.conversation.upsert(convUpserts)] : []),
     ]);
+
+    await Promise.all(
+      messages.map((msg) =>
+        this.elasticsearch.upsertConversationMessage({
+          id: msg.msgId,
+          content: msg.content,
+          type: msg.type,
+          convId: msg.convId,
+          convTitle: conversation.title,
+          uid: msg.uid,
+          createdAt: msg.createdAt.toJSON(),
+          updatedAt: msg.updatedAt.toJSON(),
+        }),
+      ),
+    );
   }
 
   async getConversationDetail(user: User, convId: string) {
