@@ -1,15 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { useTranslation } from 'react-i18next';
 
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
-import { List, Empty, Divider, Tooltip } from '@arco-design/web-react';
+import { List, Empty, Divider, Tooltip, Message as message } from '@arco-design/web-react';
 import { IconLoading } from '@arco-design/web-react/icon';
 
 import { Resource } from '@refly/openapi-schema';
 
-import { CardBox } from '../card-box';
+import { ResourceCard } from '@refly-packages/ai-workspace-common/components/workspace/resource-list/resource-card';
 import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
 
 import { ScrollLoading } from '../scroll-loading';
@@ -51,6 +51,26 @@ export const ResourceList = () => {
     }
   };
 
+  const [isReindexing, setIsReindexing] = useState(false);
+  const handleReindexResource = async (resourceId: string) => {
+    if (isReindexing) return;
+    setIsReindexing(true);
+    const { data, error } = await getClient().reindexResource({
+      body: {
+        resourceIds: [resourceId],
+      },
+    });
+    if (error) {
+      message.error(t('common.putErr'));
+    } else {
+      if (data.data?.length) {
+        const resource = data.data[0];
+        setDataList(dataList.map((n) => (n.resourceId === resource.resourceId ? resource : n)));
+      }
+    }
+    setIsReindexing(false);
+  };
+
   useEffect(() => {
     loadMore();
   }, []);
@@ -85,7 +105,7 @@ export const ResourceList = () => {
             onClick={(e) => {
               e.stopPropagation();
               if (status === 'index_failed') {
-                reLoadResource(resourceId);
+                handleReindexResource(resourceId);
               }
             }}
           >
@@ -120,24 +140,26 @@ export const ResourceList = () => {
             width: '100%',
           }}
           actionLayout="vertical"
-          onClick={() => {
-            jumpToReadResource({ resId: item?.resourceId });
-          }}
           actions={[
-            <CardBox
+            <ResourceCard
               index={key}
               key={item.resourceId}
               cardData={item}
               cardIcon={cardIcon(item)}
-              type="resource"
+              isReindexing={isReindexing}
               onClick={() => {
-                jumpToReadResource({ resId: item?.resourceId });
+                if (['wait_parse', 'parse_failed'].includes(item.indexStatus)) {
+                  return;
+                } else {
+                  jumpToReadResource({ resId: item?.resourceId });
+                }
               }}
               reLoadResource={() => reLoadResource(item.resourceId)}
+              handleReindexResource={() => handleReindexResource(item.resourceId)}
             >
-              <div className="flex items-center justify-between mt-6">
+              <div className="flex items-center justify-between pt-6 relative">
                 <div className="flex items-center text-xs text-black/40">
-                  <div className="text-xs text-black/40">
+                  <div className="text-xs text-black/40 mr-[4px]">
                     {time(item.updatedAt, language as LOCALE)
                       .utc()
                       .fromNow()}
@@ -151,7 +173,11 @@ export const ResourceList = () => {
                   )}
 
                   {item.indexStatus === 'index_failed' && (
-                    <IndexStatus resourceId={item.resourceId} status="index_failed" />
+                    <IndexStatus
+                      resourceId={item.resourceId}
+                      status="index_failed"
+                      icon={isReindexing ? <IconLoading style={{ marginRight: 4 }} /> : null}
+                    />
                   )}
                 </div>
                 <div>
@@ -165,7 +191,7 @@ export const ResourceList = () => {
                   />
                 </div>
               </div>
-            </CardBox>,
+            </ResourceCard>,
           ]}
         ></List.Item>
       )}
