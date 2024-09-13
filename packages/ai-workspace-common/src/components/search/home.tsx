@@ -9,7 +9,6 @@ import { useDebouncedCallback } from 'use-debounce';
 import { defaultFilter } from './cmdk/filter';
 
 import './index.scss';
-import { Modal } from '@arco-design/web-react';
 import { Item } from './item';
 
 // request
@@ -87,9 +86,10 @@ export function Home({
                 {renderItem?.icon}
                 <div className="search-res-container">
                   <p className="search-res-title" dangerouslySetInnerHTML={{ __html: item?.title }}></p>
-                  {item?.content?.length > 0 && (
-                    <p className="search-res-desc" dangerouslySetInnerHTML={{ __html: item?.content?.[0] || '' }}></p>
-                  )}
+                  {item?.content?.length > 0 &&
+                    item.content.map((content) => (
+                      <p className="search-res-desc" dangerouslySetInnerHTML={{ __html: content }}></p>
+                    ))}
                 </div>
               </Item>
             ))}

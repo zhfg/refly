@@ -6,6 +6,7 @@ import { IconCloseCircle } from '@arco-design/web-react/icon';
 import { Resource, Note, Collection } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 import './index.scss';
+import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 
 interface CardBoxBaseProps {
   index: number;
@@ -33,7 +34,7 @@ interface CollectionCardProps extends CardBoxBaseProps {
 
 const contentKey = {
   resource: 'contentPreview',
-  note: 'content',
+  note: 'contentPreview',
   collection: 'description',
 };
 
@@ -121,9 +122,9 @@ export const CardBox = (props: ResourceCardProps | NoteCardProps | CollectionCar
                 {props.cardData?.title}
               </Typography.Text>
             )}
-            <Typography.Text ellipsis={{ rows: 4 }} style={{ marginBottom: 0, lineHeight: '20px', height: 80 }}>
-              {props.cardData?.[contentKey[props.type]]}
-            </Typography.Text>
+            <div style={{ marginBottom: 0, marginTop: 16 }}>
+              <Markdown content={props.cardData?.[contentKey[props.type]]} fontSize={12} />
+            </div>
           </div>
 
           {children}

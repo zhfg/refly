@@ -1309,10 +1309,6 @@ components:
           type: string
           description: Weblink title
           example: Google
-        storageKey:
-          type: string
-          description: Storage key for the weblink
-          deprecated: true
     ResourceType:
       type: string
       description: Resource type
@@ -2445,9 +2441,6 @@ components:
         data:
           description: Resource metadata
           $ref: '#/components/schemas/ResourceMeta'
-        storageKey:
-          type: string
-          description: Storage key for the resource
         content:
           type: string
           description: Resource content (this will be ignored if storageKey was set)

@@ -411,8 +411,8 @@
   },
   "skill": {
     "tab": {
-      "skillInstances": "Skill Instances",
-      "skillTemplate": "Skill templates"
+      "skillInstances": "Installed Skills",
+      "skillTemplate": "Marketplace"
     },
     "createFromTemplate": "Create from template",
     "skillManagement": {
@@ -505,7 +505,7 @@
       "back": "Back",
       "emptyJobs": "No Jobs",
       "emptyTriggers": "Please configure triggers first",
-      "emptyInstances": "No Skill Instances",
+      "emptyInstances": "You haven't installed any skills",
       "enable": "Enable",
       "disable": "Disable"
     },

@@ -33,42 +33,34 @@ export const collectionPO2DTO = (
 };
 
 export const resourcePO2DTO = (
-  resource: ResourceModel & { collections?: CollectionModel[]; labels?: LabelInstance[] },
-  showFullContent?: boolean,
+  resource: ResourceModel & {
+    content?: string;
+    collections?: CollectionModel[];
+  },
 ): Resource => {
   if (!resource) {
     return null;
   }
   const res: Resource = {
-    ...pick(resource, ['resourceId', 'title', 'isPublic', 'readOnly']),
+    ...pick(resource, ['resourceId', 'title', 'isPublic', 'readOnly', 'content', 'contentPreview']),
     resourceType: resource.resourceType as ResourceType,
     indexStatus: resource.indexStatus as IndexStatus,
     collections: resource.collections?.map((coll) => collectionPO2DTO(coll)),
-    contentPreview: resource.content ? resource.content.slice(0, 250) + '...' : '',
     data: JSON.parse(resource.meta),
     createdAt: resource.createdAt.toJSON(),
     updatedAt: resource.updatedAt.toJSON(),
   };
-  if (showFullContent) {
-    res.content = resource.content;
-  }
   return res;
 };
 
-export const notePO2DTO = (
-  note: NoteModel & { labels?: LabelInstance[] },
-  showFullContent?: boolean,
-): Note => {
+export const notePO2DTO = (note: NoteModel & { content?: string }): Note => {
   if (!note) {
     return null;
   }
   const res: Note = {
-    ...pick(note, ['noteId', 'title', 'content', 'isPublic', 'readOnly']),
+    ...pick(note, ['noteId', 'title', 'content', 'contentPreview', 'isPublic', 'readOnly']),
     createdAt: note.createdAt.toJSON(),
     updatedAt: note.updatedAt.toJSON(),
   };
-  if (showFullContent) {
-    res.content = note.content;
-  }
   return res;
 };

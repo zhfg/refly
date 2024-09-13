@@ -38,11 +38,6 @@ export const $ResourceMeta = {
       description: 'Weblink title',
       example: 'Google',
     },
-    storageKey: {
-      type: 'string',
-      description: 'Storage key for the weblink',
-      deprecated: true,
-    },
   },
 } as const;
 
@@ -1417,10 +1412,6 @@ export const $UpsertResourceRequest = {
     data: {
       description: 'Resource metadata',
       $ref: '#/components/schemas/ResourceMeta',
-    },
-    storageKey: {
-      type: 'string',
-      description: 'Storage key for the resource',
     },
     content: {
       type: 'string',

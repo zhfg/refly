@@ -34,11 +34,6 @@ export type ResourceMeta = {
    * Weblink title
    */
   title?: string;
-  /**
-   * Storage key for the weblink
-   * @deprecated
-   */
-  storageKey?: string;
 };
 
 /**
@@ -1130,10 +1125,6 @@ export type UpsertResourceRequest = {
    * Resource metadata
    */
   data?: ResourceMeta;
-  /**
-   * Storage key for the resource
-   */
-  storageKey?: string;
   /**
    * Resource content (this will be ignored if storageKey was set)
    */

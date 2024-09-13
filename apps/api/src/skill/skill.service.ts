@@ -66,6 +66,7 @@ import { LabelService } from '@/label/label.service';
 import { labelClassPO2DTO, labelPO2DTO } from '@/label/label.dto';
 import { ReportTokenUsageJobData } from '@/subscription/subscription.dto';
 import { SubscriptionService } from '@/subscription/subscription.service';
+import { ElasticsearchService } from '@/common/elasticsearch.service';
 
 export function createLangchainMessage(message: ChatMessageModel): BaseMessage {
   const messageData = {
@@ -110,6 +111,7 @@ export class SkillService {
   constructor(
     private config: ConfigService,
     private prisma: PrismaService,
+    private elasticsearch: ElasticsearchService,
     private label: LabelService,
     private search: SearchService,
     private knowledge: KnowledgeService,
@@ -135,7 +137,7 @@ export class SkillService {
         },
         getResourceDetail: async (user, req) => {
           const resource = await this.knowledge.getResourceDetail(user, req);
-          return buildSuccessResponse(resourcePO2DTO(resource, true));
+          return buildSuccessResponse(resourcePO2DTO(resource));
         },
         createResource: async (user, req) => {
           const resource = await this.knowledge.createResource(user, req);
@@ -217,7 +219,7 @@ export class SkillService {
       tplConfigMap.set(instance.tplName, tpl);
     });
 
-    return this.prisma.skillInstance.createManyAndReturn({
+    const instances = await this.prisma.skillInstance.createManyAndReturn({
       data: instanceList.map((instance) => ({
         skillId: genSkillID(),
         uid,
@@ -234,6 +236,19 @@ export class SkillService {
         },
       })),
     });
+
+    await Promise.all(
+      instances.map((instance) => {
+        this.elasticsearch.upsertSkill({
+          id: instance.skillId,
+          createdAt: instance.createdAt.toJSON(),
+          updatedAt: instance.updatedAt.toJSON(),
+          ...pick(instance, ['uid', 'tplName', 'displayName', 'description']),
+        });
+      }),
+    );
+
+    return instances;
   }
 
   async updateSkillInstance(user: User, param: UpdateSkillInstanceRequest) {
@@ -305,6 +320,8 @@ export class SkillService {
         data: { deletedAt },
       }),
     ]);
+
+    await this.elasticsearch.deleteSkill(skillId);
   }
 
   async skillInvokePreCheck(user: User, param: InvokeSkillRequest): Promise<InvokeSkillJobData> {
