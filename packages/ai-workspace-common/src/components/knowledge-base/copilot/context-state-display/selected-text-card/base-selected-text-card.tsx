@@ -177,7 +177,7 @@ export const BaseSelectedTextCard = (props: BaseSelectedTextCardProps) => {
       <div className="context-state-card-quick-action">{skillContent}</div>
       <div className="context-state-card-footer">
         {/* <IconFilter /> */}
-        <Tooltip content={t('copilot.selectedTextCard.filterTitle')}>
+        <Tooltip content={t('copilot.selectedTextCard.filterTitle')} getPopupContainer={getPopupContainer}>
           <Select
             size="mini"
             // bordered={false}

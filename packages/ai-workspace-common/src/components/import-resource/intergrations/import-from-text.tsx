@@ -11,6 +11,8 @@ import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/r
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { SearchSelect } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
 import { useTranslation } from 'react-i18next';
+import { useSaveResourceNotify } from '@refly-packages/ai-workspace-common/hooks/use-save-resouce-notify';
+import { getClientOrigin } from '@refly/utils/url';
 
 const { TextArea } = Input;
 const FormItem = Form.Item;
@@ -18,6 +20,7 @@ const FormItem = Form.Item;
 export const ImportFromText = () => {
   const { t } = useTranslation();
   const importResourceStore = useImportResourceStore();
+  const { handleSaveResourceAndNotify } = useSaveResourceNotify();
 
   const reloadListState = useReloadListState();
   const [queryParams] = useSearchParams();
@@ -52,22 +55,24 @@ export const ImportFromText = () => {
 
       if (!res?.data?.success) {
         setSaveLoading(false);
-        message.error(t('common.putErr'));
-        return;
+        return { success: false };
       }
 
-      message.success(t('common.putSuccess'));
       importResourceStore.setCopiedTextPayload({ title: '', content: '' });
       importResourceStore.setImportResourceModalVisible(false);
       if (!kbId || (kbId && selectedCollectionId === kbId)) {
         reloadListState.setReloadKnowledgeBaseList(true);
         reloadListState.setReloadResourceList(true);
       }
-    } catch (err) {
-      message.error(t('common.putErr'));
-    }
 
-    setSaveLoading(false);
+      setSaveLoading(false);
+      const resourceId = res?.data?.data?.resourceId;
+      const url = `${getClientOrigin(false)}/knowledge-base?resId=${resourceId}`;
+      return { success: true, url };
+    } catch (err) {
+      setSaveLoading(false);
+      return { success: false };
+    }
   };
 
   useEffect(() => {
@@ -154,7 +159,7 @@ export const ImportFromText = () => {
             <Button style={{ marginRight: 8 }} onClick={() => importResourceStore.setImportResourceModalVisible(false)}>
               {t('common.cancel')}
             </Button>
-            <Button type="primary" onClick={handleSave}>
+            <Button type="primary" onClick={() => handleSaveResourceAndNotify(handleSave)}>
               {t('common.save')}
             </Button>
           </div>
