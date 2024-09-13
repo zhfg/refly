@@ -432,6 +432,10 @@ export class KnowledgeService {
       throw new BadRequestException('Note not found');
     }
 
+    if (!note.storageKey) {
+      return note;
+    }
+
     const contentStream = await this.minio.client.getObject(note.storageKey);
     const content = await streamToString(contentStream);
 
@@ -447,8 +451,6 @@ export class KnowledgeService {
         noteId: param.noteId,
         title: param.title,
         uid: user.uid,
-        storageKey: `note/${param.noteId}`,
-        stateStorageKey: `state/${param.noteId}`,
         readOnly: param.readOnly ?? false,
         isPublic: param.isPublic ?? false,
       },

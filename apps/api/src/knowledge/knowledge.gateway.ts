@@ -9,7 +9,7 @@ import { MINIO_INTERNAL, MinioService } from '@/common/minio.service';
 import { PrismaService } from '@/common/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { JwtPayload } from '@/auth/dto';
-import { Note, User } from '@prisma/client';
+import { Note, Prisma, User } from '@prisma/client';
 import { state2Markdown } from '@refly/utils';
 import { RAGService } from '@/rag/rag.service';
 import { streamToBuffer } from '@/utils';
@@ -53,14 +53,32 @@ export class NoteWsGateway implements OnGatewayConnection {
           store: async ({ state, context }: { state: Buffer; context: NoteContext }) => {
             const { note } = context;
 
-            const { noteId, storageKey, stateStorageKey } = note;
             const content = state2Markdown(state);
 
+            const notesUpdates: Prisma.NoteUpdateInput = {};
+            if (!note.stateStorageKey) {
+              notesUpdates.stateStorageKey = `state/${note.noteId}`;
+            }
+            if (!note.storageKey) {
+              notesUpdates.storageKey = `note/${note.noteId}`;
+            }
+            if (note.contentPreview !== content.slice(0, 500)) {
+              notesUpdates.contentPreview = content.slice(0, 500);
+            }
+
+            if (Object.keys(notesUpdates).length > 0) {
+              const updatedNote = await this.prisma.note.update({
+                where: { noteId: note.noteId },
+                data: notesUpdates,
+              });
+              context.note = updatedNote;
+            }
+
             await Promise.all([
-              this.minio.client.putObject(storageKey, content),
-              this.minio.client.putObject(stateStorageKey, state),
+              this.minio.client.putObject(context.note.storageKey, content),
+              this.minio.client.putObject(context.note.stateStorageKey, state),
               this.elasticsearch.upsertNote({
-                id: noteId,
+                id: context.note.noteId,
                 content,
               }),
 
