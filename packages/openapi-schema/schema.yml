@@ -162,6 +162,28 @@ paths:
                 $ref: '#/components/schemas/UpsertResourceResponse'
       security:
         - api_key: []
+  /knowledge/resource/reindex:
+    post:
+      tags:
+        - knowledge
+      summary: Reindex resource
+      description: Reindex an existing resource
+      operationId: reindexResource
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReindexResourceRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReindexResourceResponse'
+      security:
+        - api_key: []
   /knowledge/resource/delete:
     post:
       tags:
@@ -2255,8 +2277,8 @@ components:
         - wait_parse
         - wait_index
         - finish
-        - failed
-        - unavailable
+        - parse_failed
+        - index_failed
     SubscriptionInterval:
       type: string
       description: Payment recurring interval
@@ -2459,6 +2481,26 @@ components:
             data:
               $ref: '#/components/schemas/Resource'
     BatchCreateResourceResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Resource list
+              items:
+                $ref: '#/components/schemas/Resource'
+    ReindexResourceRequest:
+      type: object
+      required:
+        - resourceIds
+      properties:
+        resourceIds:
+          type: array
+          description: Resource ID list
+          items:
+            type: string
+    ReindexResourceResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object

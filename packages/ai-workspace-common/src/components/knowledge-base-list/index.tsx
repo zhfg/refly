@@ -8,7 +8,7 @@ import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { getClientOrigin } from '@refly/utils/url';
 // components
 import { useEffect } from 'react';
-import { CardBox } from '@refly-packages/ai-workspace-common/components/workspace/card-box';
+import { KnowledgeBaseCard } from '@refly-packages/ai-workspace-common/components/knowledge-base-list/knowledge-base-card';
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
 import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
 // utils
@@ -94,14 +94,10 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
           }}
           className="knowledge-base-list-item-container"
           actionLayout="vertical"
-          onClick={() => {
-            jumpToKnowledgeBase({ kbId: item?.collectionId });
-          }}
           actions={[
-            <CardBox
+            <KnowledgeBaseCard
               index={key}
               cardData={item}
-              type="collection"
               cardIcon={<HiOutlineBookOpen style={{ fontSize: '32px' }} />}
               onClick={() => {
                 jumpToKnowledgeBase({ kbId: item?.collectionId });
@@ -136,7 +132,7 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
                   />
                 </div>
               </div>
-            </CardBox>,
+            </KnowledgeBaseCard>,
           ]}
         ></List.Item>
       )}

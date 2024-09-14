@@ -188,8 +188,6 @@ model Resource {
   uid            String       @map("uid")
   /// Word count
   wordCount      Int          @default(0) @map("word_count")
-  /// Content of resource (deprecated)
-  content        String?      @map("content")
   /// Content preview
   contentPreview String?      @map("content_preview")
   /// Content storage key

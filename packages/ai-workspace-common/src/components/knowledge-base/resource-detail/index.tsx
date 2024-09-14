@@ -1,11 +1,12 @@
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { HiOutlineLightBulb } from 'react-icons/hi2';
 import { AiOutlineCodepen } from 'react-icons/ai';
+import { IconCloseCircle, IconLoading, IconRefresh } from '@arco-design/web-react/icon';
 
 // 自定义样式
 import './index.scss';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
-import { Skeleton, Message as message, Empty, Affix } from '@arco-design/web-react';
+import { Skeleton, Message as message, Empty, Affix, Alert, Spin, Button } from '@arco-design/web-react';
 import {
   type KnowledgeBaseTab,
   useKnowledgeBaseStore,
@@ -51,11 +52,10 @@ export const KnowledgeBaseResourceDetail = memo(() => {
   const resId = queryParams.get('resId');
   const kbId = queryParams.get('kbId');
   const reloadKnowledgeBaseState = useReloadListState();
+  const [resourceDetail, setResourceDetail] = useState<Resource>(knowledgeBaseStore?.currentResource as Resource);
 
-  const resourceDetail = knowledgeBaseStore?.currentResource as Resource;
-
-  const handleGetDetail = async (resourceId: string) => {
-    setIsFetching(true);
+  const handleGetDetail = async (resourceId: string, setFetch: boolean = true) => {
+    setFetch && setIsFetching(true);
     try {
       const { data: newRes, error } = await getClient().getResourceDetail({
         query: {
@@ -88,7 +88,37 @@ export const KnowledgeBaseResourceDetail = memo(() => {
       message.error('获取内容详情失败，请重新刷新试试');
     }
 
-    setIsFetching(false);
+    setFetch && setIsFetching(false);
+  };
+
+  const [isReindexing, setIsReindexing] = useState(false);
+  const handleReindexResource = async (resourceId: string) => {
+    if (!resourceId || isReindexing) return;
+
+    try {
+      setIsReindexing(true);
+      setResourceDetail({ ...resourceDetail, indexStatus: 'wait_index' });
+      const { data, error } = await getClient().reindexResource({
+        body: {
+          resourceIds: [resourceId],
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+      if (!data?.success) {
+        throw new Error(data?.errMsg);
+      }
+
+      if (data.data?.length) {
+        const resource = data.data[0];
+        knowledgeBaseStore.updateResource({ ...resourceDetail, indexStatus: resource.indexStatus });
+      }
+    } catch (error) {
+      message.error(t('common.putErr'));
+    }
+    setIsReindexing(false);
   };
 
   const handleUpdateCollections = (collectionId: string) => {
@@ -129,6 +159,26 @@ export const KnowledgeBaseResourceDetail = memo(() => {
     };
   }, [resId]);
 
+  useEffect(() => {
+    setResourceDetail(knowledgeBaseStore?.currentResource as Resource);
+  }, [knowledgeBaseStore?.currentResource]);
+
+  // refresh every 2 seconds if resource is waiting to be parsed or indexed
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    if (['wait_parse', 'wait_index'].includes(knowledgeBaseStore?.currentResource?.indexStatus)) {
+      intervalId = setInterval(() => {
+        const setFetch = false;
+        handleGetDetail(resId as string, setFetch);
+      }, 2000);
+    }
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [knowledgeBaseStore?.currentResource?.indexStatus]);
+
   return (
     <div className="knowledge-base-resource-detail-container">
       {resId ? (
@@ -145,6 +195,41 @@ export const KnowledgeBaseResourceDetail = memo(() => {
                   updateCallback={(collectionId) => handleUpdateCollections(collectionId)}
                 />
               </Affix>
+
+              {['wait_index', 'index_failed'].includes(resourceDetail?.indexStatus) && (
+                <Alert
+                  className={`${resourceDetail?.indexStatus}-alert`}
+                  style={{ marginBottom: 16 }}
+                  type={resourceDetail?.indexStatus === 'wait_index' ? 'warning' : 'error'}
+                  icon={
+                    resourceDetail?.indexStatus === 'wait_index' ? (
+                      <IconLoading style={{ color: 'rgb(202 138 4)' }} />
+                    ) : (
+                      <IconCloseCircle style={{ color: 'rgb(220 38 38)' }} />
+                    )
+                  }
+                  content={
+                    t(`resource.${resourceDetail?.indexStatus}`) +
+                    ': ' +
+                    t(`resource.${resourceDetail?.indexStatus}_tip`)
+                  }
+                  action={
+                    resourceDetail?.indexStatus === 'index_failed' ? (
+                      <Button
+                        size="mini"
+                        type="outline"
+                        loading={isReindexing}
+                        icon={<IconRefresh />}
+                        className="retry-btn"
+                        onClick={() => handleReindexResource(resId)}
+                      >
+                        {t('common.retry')}
+                      </Button>
+                    ) : null
+                  }
+                />
+              )}
+
               <div className="knowledge-base-directory-site-intro">
                 <div className="site-intro-icon">
                   <img

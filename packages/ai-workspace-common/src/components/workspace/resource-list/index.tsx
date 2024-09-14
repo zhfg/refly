@@ -1,15 +1,13 @@
 import { useEffect } from 'react';
-import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { useTranslation } from 'react-i18next';
 
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
-import { List, Empty } from '@arco-design/web-react';
+import { List, Empty, Message as message } from '@arco-design/web-react';
 
 import { Resource } from '@refly/openapi-schema';
 
-import { CardBox } from '../card-box';
-import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
+import { ResourceCard } from '@refly-packages/ai-workspace-common/components/workspace/resource-list/resource-card';
 
 import { ScrollLoading } from '../scroll-loading';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
@@ -17,12 +15,10 @@ import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common
 
 import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 
-import { LOCALE } from '@refly/common-types';
 import './index.scss';
 
 export const ResourceList = () => {
-  const { i18n } = useTranslation();
-  const language = i18n.languages?.[0];
+  const { t } = useTranslation();
 
   const reloadListState = useReloadListState();
 
@@ -35,6 +31,36 @@ export const ResourceList = () => {
     },
     pageSize: 12,
   });
+
+  const reLoadResource = async (resourceId: string) => {
+    const { data } = await getClient().listResources({
+      query: {
+        resourceId: resourceId,
+        pageSize: 1,
+        pageNumber: 1,
+      },
+    });
+    if (data.data?.length) {
+      const resource = data.data[0];
+      setDataList(dataList.map((n) => (n.resourceId === resource.resourceId ? resource : n)));
+    }
+  };
+
+  const handleReindexResource = async (resourceId: string) => {
+    const { data, error } = await getClient().reindexResource({
+      body: {
+        resourceIds: [resourceId],
+      },
+    });
+    if (error) {
+      message.error(t('common.putErr'));
+    } else {
+      if (data.data?.length) {
+        const resource = data.data[0];
+        setDataList(dataList.map((n) => (n.resourceId === resource.resourceId ? resource : n)));
+      }
+    }
+  };
 
   useEffect(() => {
     loadMore();
@@ -82,38 +108,27 @@ export const ResourceList = () => {
             width: '100%',
           }}
           actionLayout="vertical"
-          onClick={() => {
-            jumpToReadResource({ resId: item?.resourceId });
-          }}
           actions={[
-            <CardBox
+            <ResourceCard
               index={key}
               key={item.resourceId}
               cardData={item}
               cardIcon={cardIcon(item)}
-              type="resource"
               onClick={() => {
-                jumpToReadResource({ resId: item?.resourceId });
+                if (['wait_parse', 'parse_failed'].includes(item.indexStatus)) {
+                  return;
+                } else {
+                  jumpToReadResource({ resId: item?.resourceId });
+                }
               }}
-            >
-              <div className="flex items-center justify-between mt-6">
-                <div className="text-xs text-black/40">
-                  {time(item.updatedAt, language as LOCALE)
-                    .utc()
-                    .fromNow()}
-                </div>
-                <div>
-                  <DeleteDropdownMenu
-                    data={item}
-                    type="resource"
-                    postDeleteList={(resource: Resource) =>
-                      setDataList(dataList.filter((n) => n.resourceId !== resource.resourceId))
-                    }
-                    getPopupContainer={() => document.getElementById(`resource-${key}`) as HTMLElement}
-                  />
-                </div>
-              </div>
-            </CardBox>,
+              deleteData={(resource: Resource) =>
+                setDataList(dataList.filter((n) => n.resourceId !== resource.resourceId))
+              }
+              reLoadResource={() => reLoadResource(item.resourceId)}
+              handleReindexResource={() => {
+                return handleReindexResource(item.resourceId);
+              }}
+            />,
           ]}
         ></List.Item>
       )}

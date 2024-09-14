@@ -4,17 +4,11 @@ import {
   Note as NoteModel,
   LabelInstance,
 } from '@prisma/client';
-import {
-  UpsertResourceRequest,
-  Collection,
-  Resource,
-  Note,
-  ResourceType,
-  IndexStatus,
-} from '@refly/openapi-schema';
+import { Collection, Resource, Note, ResourceType, IndexStatus } from '@refly/openapi-schema';
 import { pick } from '@/utils';
 
-export type FinalizeResourceParam = UpsertResourceRequest & {
+export type FinalizeResourceParam = {
+  resourceId: string;
   uid: string;
 };
 
