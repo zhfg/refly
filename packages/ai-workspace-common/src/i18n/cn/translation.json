@@ -217,8 +217,8 @@
     "wait_parse": "内容解析中",
     "parse_failed": "解析失败，点击重试",
     "wait_index": "模型记忆中",
-    "wait_index_tip": "该资源暂时不支持 AI 搜索，需等待记忆添加完成",
-    "index_failed": "记忆失败",
+    "wait_index_tip": "该资源暂时不支持 AI 搜索，需等待模型记忆完成",
+    "index_failed": "模型记忆失败",
     "index_failed_tip": "点击重试"
   },
   "loggedHomePage": {

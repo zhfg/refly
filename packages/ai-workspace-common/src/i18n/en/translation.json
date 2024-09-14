@@ -216,9 +216,9 @@
     },
     "wait_parse": "Parsing",
     "parse_failed": "Parse Failed, click to retry",
-    "wait_index": "Indexing",
-    "wait_index_tip": "The resource is temporarily not supported for AI search and needs to wait for memory addition to complete",
-    "index_failed": "Index Failed",
+    "wait_index": "Memorizing",
+    "wait_index_tip": "The resource is temporarily not ready for AI search and needs to wait for memorization to complete",
+    "index_failed": "Memorization Failed",
     "index_failed_tip": "Click to retry"
   },
   "loggedHomePage": {
