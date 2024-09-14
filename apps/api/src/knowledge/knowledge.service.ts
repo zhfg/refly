@@ -69,6 +69,7 @@ export class KnowledgeService {
             deletedAt: null,
             OR: [{ isPublic: true }, { uid: user.uid }],
           },
+          orderBy: { updatedAt: 'desc' },
         },
       },
     });
@@ -203,10 +204,6 @@ export class KnowledgeService {
   async createResource(user: User, param: UpsertResourceRequest) {
     param.resourceId = genResourceID();
 
-    if (param.readOnly === undefined) {
-      param.readOnly = param.resourceType === 'weblink';
-    }
-
     let storageKey: string;
 
     if (param.resourceType === 'weblink') {
@@ -242,7 +239,7 @@ export class KnowledgeService {
         storageKey,
         uid: user.uid,
         isPublic: param.isPublic,
-        readOnly: param.readOnly,
+        readOnly: !!param.readOnly,
         title: param.title || 'Untitled',
         indexStatus,
         ...(param.collectionId
@@ -448,9 +445,11 @@ export class KnowledgeService {
 
   async reindexResource(user: User, param: ReindexResourceRequest) {
     const { resourceIds = [] } = param;
-    return Promise.all(
-      resourceIds.map((resourceId) => this.finalizeResource({ resourceId, uid: user.uid })),
+    const limit = pLimit(5);
+    const tasks = resourceIds.map((resourceId) =>
+      limit(() => this.finalizeResource({ resourceId, uid: user.uid })),
     );
+    return Promise.all(tasks);
   }
 
   async deleteResource(user: User, resourceId: string) {

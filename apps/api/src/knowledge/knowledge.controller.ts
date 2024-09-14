@@ -131,11 +131,13 @@ export class KnowledgeController {
   @Get('resource/list')
   async listResources(
     @User() user: UserModel,
+    @Query('resourceId') resourceId: string,
     @Query('resourceType') resourceType: ResourceType,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListResourceResponse> {
     const resources = await this.knowledgeService.listResources(user, {
+      resourceId,
       resourceType,
       page,
       pageSize,
