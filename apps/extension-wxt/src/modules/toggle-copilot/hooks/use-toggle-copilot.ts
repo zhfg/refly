@@ -4,16 +4,35 @@ import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import pTimeout from 'p-timeout';
 import { checkPageUnsupported } from '@refly-packages/ai-workspace-common/utils/extension/check';
 import { checkBrowserArc } from '@/utils/browser';
+import { SidePanelAction, ToggleCopilotStatus } from '@/types/sidePanel';
+import { storage } from '@refly-packages/ai-workspace-common/utils/storage';
+
+let toggleCopilotStatus = {} as ToggleCopilotStatus;
 
 export const useToggleCopilot = () => {
   const isCopilotOpenRef = useRef<boolean>();
   const isArcBrowserRef = useRef<boolean>();
 
-  const handleToggleCopilot = async () => {
+  const handleToggleCopilot = async (params?: { action?: SidePanelAction }) => {
+    // with action, always open, toggle selector, and notify toggle status
     const isCopilotOpen = isCopilotOpenRef.current;
     isCopilotOpenRef.current = !isCopilotOpen;
+    const { action } = params || {};
 
     await handleCheckArcBrowser();
+
+    // for sync status to content script ui or sidePanel
+    if (action) {
+      if (action?.name === 'openContentSelector') {
+        toggleCopilotStatus.openContentSelector = true;
+        await storage.setItem('local:toggleCopilotStatus', JSON.stringify({ openContentSelector: action?.value }));
+      }
+    } else {
+      // if (Object.keys(toggleCopilotStatus).length !== 0) {
+      //   await storage.removeItem('local:toggleCopilotStatus');
+      //   toggleCopilotStatus = {} as ToggleCopilotStatus;
+      // }
+    }
 
     if (isArcBrowserRef.current) {
       sendMessage({
@@ -21,7 +40,8 @@ export const useToggleCopilot = () => {
         name: 'toggleCopilotCSUI',
         body: {
           isArcBrowser: isArcBrowserRef.current,
-          isCopilotOpen: !isCopilotOpen,
+          isCopilotOpen: action && action?.value ? true : !isCopilotOpen,
+          action,
         },
         source: getRuntime(),
       });
@@ -31,7 +51,8 @@ export const useToggleCopilot = () => {
         name: 'toggleCopilotSidePanel',
         body: {
           isArcBrowser: isArcBrowserRef.current,
-          isCopilotOpen: !isCopilotOpen,
+          isCopilotOpen: action && action?.value ? true : !isCopilotOpen,
+          action,
         },
         source: getRuntime(),
       });

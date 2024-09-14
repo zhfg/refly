@@ -57,6 +57,7 @@ export class ImproveWritingSkill extends BaseSkill {
   async generate(state: GraphState, config?: SkillRunnableConfig) {
     this.engine.logger.log('---GENERATE---');
 
+    const { query } = state;
     const { locale = 'en', contentList = [], chatHistory = [] } = config?.configurable || {};
 
     const llm = this.engine.chatModel({
@@ -84,20 +85,25 @@ export class ImproveWritingSkill extends BaseSkill {
     Advice: Employ more rhetorical devices, such as metaphors and personification, to enrich the article's expression.
 - Initialization: In the first conversation, please directly output the following: Welcome to this platform where we elevate your writing skills together. Please submit the writing content you wish to improve, and I will provide you with professional improvement suggestions.
 
-INPUT:
-"""
+## The Content to be Improved:(with three "---" as separator, **only include the content between the separator, not include the separator**):
+---
 {content}
-"""
+---
+
+## USER Extra Instructions(may be empty):
+{query}
 `;
 
-    const contextString = contentList.length > 0 ? contentList.join('\n') : 'No additional context provided.';
+    const contextString =
+      contentList.length > 0 ? contentList.map((item) => item.content).join('\n') : 'No additional context provided.';
 
-    const prompt = systemPrompt.replace('{content}', contextString);
+    const prompt = systemPrompt.replace('{content}', contextString).replace('{query}', query);
 
     const responseMessage = await llm.invoke([
       new SystemMessage(prompt),
-      ...chatHistory,
-      new HumanMessage(`Please provide professional improvement suggestions for the writing content`),
+      new HumanMessage(
+        `The content to be improved is given upon, please provide professional improvement suggestions for the writing content, output with ${locale} language`,
+      ),
     ]);
 
     return { messages: [responseMessage] };

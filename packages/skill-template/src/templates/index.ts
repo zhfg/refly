@@ -11,3 +11,4 @@ export * from './find-related-content';
 export * from './writing';
 export * from './arxiv-summary';
 export * from './website-summary';
+export * from './ai-apply';

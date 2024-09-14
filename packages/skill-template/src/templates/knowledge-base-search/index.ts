@@ -3,7 +3,7 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { createStuffDocumentsChain } from 'langchain/chains/combine_documents';
 import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
-import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
+import { BasePromptTemplate, ChatPromptTemplate, MessagesPlaceholder, PromptTemplate } from '@langchain/core/prompts';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 import { ReflySearch } from '../../tools/refly-search';
 import { SearchResponse, Source, SkillInvocationConfig, SkillTemplateConfigSchema, Icon } from '@refly/openapi-schema';
@@ -40,7 +40,16 @@ export class KnowledgeBaseSearch extends BaseSkill {
       rules: [{ key: 'query', required: true }],
     },
     context: {
-      rules: [],
+      rules: [
+        {
+          key: 'resources',
+          inputMode: 'multiSelect',
+          descriptionDict: {
+            en: 'Select the resources to search',
+            'zh-CN': '选择要搜索的资源',
+          },
+        },
+      ],
     },
   };
 
@@ -179,7 +188,11 @@ export class KnowledgeBaseSearch extends BaseSkill {
     const { sources, betterQuestion } = state;
     const { locale = 'en', chatHistory = [] } = config?.configurable || {};
 
-    const systemPromt = `# Character
+    const contextToCitationText = sources
+      .map((item, index) => `[[citation:${index + 1}]] ${item?.pageContent}`)
+      .join('\n\n');
+
+    const systemPrompt = `# Character
 You are a skilled assistant proficient in answering diverse questions. Your core competence lies in using a variety of retrieved context to deliver the most accurate answers.
 
 ## Skills
@@ -193,36 +206,56 @@ You are a skilled assistant proficient in answering diverse questions. Your core
 - Aim to deliver thorough answers rooted in relevant context
 - Should only use the language used in the user's question
 - Use honesty and transparency in admitting lack of knowledge, if necessary
-- Do not offer guesses or assumptions as answers`;
+- Do not offer guesses or assumptions as answers
+- Cite the contexts with the reference numbers, in the format [[citation:x]]. If a sentence comes from multiple contexts, please list all applicable citations, like [[citation:3]][[citation:5]]
+- Other than code and specific names and citations, your answer must be written in the same language as the question
+
+Here are the set of contexts:
+
+===
+{context}
+===
+
+Remember, don't blindly repeat the contexts verbatim.`;
 
     const prompt = ChatPromptTemplate.fromMessages([
-      ['system', systemPromt],
+      ['system', systemPrompt],
       new MessagesPlaceholder('chatHistory'),
-      ['human', `The context as follow:\n === \n {context} \n === \n`],
-      ['human', `The user's question is {question}, please output answer in ${locale} language:`],
+      [
+        'human',
+        `The user's question is: {question}
+Please output answer in ${locale} language:`,
+      ],
     ]);
 
     const llm = this.engine.chatModel({ temperature: 0 });
+
+    const customDocumentPrompt = new PromptTemplate({
+      template: '[[citation:{index}]] {page_content}',
+      inputVariables: ['index', 'page_content'],
+    });
     const ragChain = await createStuffDocumentsChain({
       llm,
       prompt,
+      documentPrompt: customDocumentPrompt,
       outputParser: new StringOutputParser(),
     });
 
-    const retrievedDocs = sources.map((res) => ({
+    const retrievedDocs = sources.map((res, index) => ({
       metadata: {
         source: res.url,
         title: res.title,
         collectionId: res.metadata.collectionId,
         resourceId: res.metadata.resourceId,
+        index: index + 1, // Add index for citation
       },
       pageContent: res.pageContent,
     }));
 
     const message = await ragChain.invoke({
-      context: retrievedDocs,
       question: betterQuestion,
       chatHistory,
+      context: retrievedDocs,
     });
 
     return { messages: [new AIMessage(message)] };

@@ -1,5 +1,5 @@
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
-import { ResourceSelectedTextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/selected-text-card/resource-selected-text-card';
+import { SelectedTextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/selected-text-card/selected-text-card';
 import { ResourceContextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/context-card/resource-context-card';
 import { KnowledgeBaseContextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/context-card/knowledge-base-context-card';
 import { NoteContextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/context-card/note-context-card';
@@ -32,7 +32,7 @@ export const ContextStateDisplay = () => {
   } else {
     if (isSelectedTextCard) {
       // use one component to render all selected text card
-      renderCompList.push(<ResourceSelectedTextCard key="resource-selected-text-card" />);
+      renderCompList.push(<SelectedTextCard key="selected-text-card" />);
     } else {
       if (nowSelectedContextDomain === 'resource') {
         renderCompList.push(<ResourceContextCard key="resource-context-card" />);

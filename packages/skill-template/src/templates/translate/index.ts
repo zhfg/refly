@@ -111,7 +111,7 @@ User query (may be empty): {query}
 # OUTPUT
 Provide only the translated content without any additional comments or explanations.`;
 
-    const contextString = contentList.join('\n\n');
+    const contextString = contentList?.map((item) => item?.content).join('\n\n');
     const prompt = systemPrompt
       .replace('{context}', contextString)
       .replace('{targetLanguage}', targetLanguage)

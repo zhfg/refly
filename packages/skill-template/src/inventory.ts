@@ -25,6 +25,7 @@ import {
   MakeLongerSkill,
   ArxivSummarySkill,
   WebsiteSummarySkill,
+  AIApplySkill,
 } from './templates';
 
 export const createSkillInventory = (engine: SkillEngine): BaseSkill[] => {
@@ -53,5 +54,6 @@ export const createSkillInventory = (engine: SkillEngine): BaseSkill[] => {
     new MakeLongerSkill(engine),
     new ArxivSummarySkill(engine),
     new WebsiteSummarySkill(engine),
+    new AIApplySkill(engine),
   ];
 };

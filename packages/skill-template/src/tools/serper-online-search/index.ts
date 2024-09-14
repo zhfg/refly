@@ -25,7 +25,8 @@ export interface SearchResultContext {
 }
 
 export const serperOnlineSearch = async (props: Props, engine: SkillEngine): Promise<SearchResultContext[]> => {
-  const { query, locale, maxResults = DEFAULT_MAX_RESULTS } = props;
+  const { query, maxResults = DEFAULT_MAX_RESULTS } = props;
+  const locale = LOCALE.EN;
 
   engine.logger.log('SerperOnlineSearch', query, locale);
 

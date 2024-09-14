@@ -88,7 +88,8 @@ Context as following (with three "---" as separator, **only include the content 
 Please analyze the language of the provided context and ensure that your response is in the same language. If the context is in Chinese, respond in Chinese. If it's in English, respond in English. For any other language, respond in that language.
 `;
 
-    const contextString = contentList.length > 0 ? contentList.join('\n') : 'No additional context provided.';
+    const contextString =
+      contentList.length > 0 ? contentList.map((item) => item?.content).join('\n') : 'No additional context provided.';
 
     const prompt = systemPrompt.replace('{context}', contextString);
 

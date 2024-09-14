@@ -5,9 +5,13 @@ import { onMessage, sendMessage } from '@refly-packages/ai-workspace-common/util
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { BackgroundMessage, CopilotMsgName } from '@refly/common-types';
+import { useCopilotStore } from '@/modules/toggle-copilot/stores/copilot';
 
 export const useMockInAppResource = () => {
   const messageListenerEventRef = useRef<any>();
+  const copilotStore = useCopilotStore((state) => ({
+    isCopilotOpen: state.isCopilotOpen,
+  }));
   const knowledgeBaseStore = useKnowledgeBaseStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
@@ -54,7 +58,17 @@ export const useMockInAppResource = () => {
     };
   };
 
-  // initial check refly status
+  // after every copilot status change, send reflyStatusCheck message
+  useEffect(() => {
+    if (copilotStore.isCopilotOpen) {
+      sendMessage({
+        name: 'reflyStatusCheck',
+        type: 'others',
+        source: getRuntime(),
+      });
+    }
+  }, [copilotStore.isCopilotOpen]);
+  // when init, send reflyStatusCheck message
   useEffect(() => {
     sendMessage({
       name: 'reflyStatusCheck',

@@ -17,7 +17,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { useExtensionMessage } from './use-extension-message';
 // import { checkBrowserArc } from '@/utils/browser';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { UserSettings } from '@refly/openapi-schema';
+import { GetUserSettingsResponse, UserSettings } from '@refly/openapi-schema';
 import { browser } from 'wxt/browser';
 
 interface ExternalLoginPayload {
@@ -60,11 +60,12 @@ export const useGetUserSettings = () => {
         // await storage.removeItem('local:refly-local-settings');
         navigate('/login');
       } else {
-        userStore.setUserProfile(res?.data!);
+        const data = res?.data?.data! as UserSettings;
+        userStore.setUserProfile(data);
 
         // 增加 localSettings
-        let uiLocale = mapDefaultLocale(res?.data?.uiLocale!) as LOCALE;
-        let outputLocale = res?.data?.outputLocale as LOCALE;
+        let uiLocale = mapDefaultLocale(data?.uiLocale!) as LOCALE;
+        let outputLocale = data?.outputLocale as LOCALE;
 
         // 先写回
         localSettings = {
@@ -123,6 +124,7 @@ export const useGetUserSettings = () => {
 
         console.log('loginStatus', res);
 
+        const userData = res?.data?.data! as UserSettings;
         if (res?.error) {
           userStore.setUserProfile(undefined);
           userStore.setToken('');
@@ -133,14 +135,14 @@ export const useGetUserSettings = () => {
           navigate('/login');
           message.error(t('extension.loginPage.status.failed'));
         } else {
-          userStore.setUserProfile(res?.data!);
+          userStore.setUserProfile(userData);
           userStore.setToken(data?.token);
           setToken(data?.token as string);
           await storage.setItem('sync:refly-user-profile', safeStringifyJSON(res?.data));
 
           // 增加 localSettings
-          let uiLocale = res?.data?.uiLocale as LOCALE;
-          let outputLocale = res?.data?.outputLocale as LOCALE;
+          let uiLocale = userData?.uiLocale as LOCALE;
+          let outputLocale = userData?.outputLocale as LOCALE;
 
           // 先写回
           localSettings = {
@@ -222,7 +224,7 @@ export const useGetUserSettings = () => {
   // 收到消息之后，关闭窗口，保活检查
   const handleExtensionMessage = (request: any) => {
     if (request?.name === 'reflyStatusCheck' && getRuntime() === 'extension-csui') {
-      getLoginStatus();
+      // getLoginStatus();
       // checkBrowserArc();
     }
   };

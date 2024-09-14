@@ -1216,6 +1216,10 @@ export type UpsertNoteRequest = {
    * Whether this note is public
    */
   isPublic?: boolean;
+  /**
+   * Note initial content
+   */
+  initialContent?: string;
 };
 
 export type UpsertNoteResponse = BaseResponse & {

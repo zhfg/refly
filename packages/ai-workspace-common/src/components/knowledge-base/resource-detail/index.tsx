@@ -244,7 +244,7 @@ export const KnowledgeBaseResourceDetail = memo(() => {
                   </a>
                 </div>
               </div>
-              <div className="knowledge-base-directory-action">
+              {/* <div className="knowledge-base-directory-action">
                 <div className="action-summary">
                   <HiOutlineLightBulb />
                   <span className="action-summary-text">AI Summary</span>
@@ -254,7 +254,7 @@ export const KnowledgeBaseResourceDetail = memo(() => {
                   <AiOutlineCodepen />
                   <span className="action-summary-text">知识图谱</span>
                 </div>
-              </div>
+              </div> */}
               {resourceDetail && <LabelGroup entityId={resourceDetail.resourceId} entityType={'resource'} />}
             </div>
           )}

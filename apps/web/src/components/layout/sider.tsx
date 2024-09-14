@@ -188,7 +188,10 @@ export const SiderLayout = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const userStore = useUserStore()
-  const importResourceStore = useImportResourceStore()
+  const importResourceStore = useImportResourceStore(state => ({
+    setImportResourceModalVisible: state.setImportResourceModalVisible,
+    setSelectedMenuItem: state.setSelectedMenuItem,
+  }))
   const isGuideDetail = location.pathname.includes("guide/")
   const { resourcePanelVisible } = useKnowledgeBaseStore()
 
@@ -314,6 +317,7 @@ export const SiderLayout = () => {
       showDivider: true,
       onClick: () => {
         importResourceStore.setImportResourceModalVisible(true)
+        importResourceStore.setSelectedMenuItem("import-from-weblink")
       },
     },
     {

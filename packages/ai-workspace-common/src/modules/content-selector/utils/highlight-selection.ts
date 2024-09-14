@@ -85,8 +85,10 @@ export function removeHighlight(xPath: string) {
 export function getSelectionNodesMarkdown() {
   const selection = window.getSelection();
   const range = selection.getRangeAt(0);
+  const text = selection?.toString();
+
   const fragment = range.cloneRange().cloneContents();
   const mdText = getMarkdown(fragment);
 
-  return mdText;
+  return mdText || text; // compatible with empty markdown text
 }

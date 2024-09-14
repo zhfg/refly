@@ -1611,6 +1611,10 @@ export const $UpsertNoteRequest = {
       description: 'Whether this note is public',
       default: false,
     },
+    initialContent: {
+      type: 'string',
+      description: 'Note initial content',
+    },
   },
 } as const;
 

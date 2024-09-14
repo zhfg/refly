@@ -23,6 +23,7 @@ export const useSaveCurrentWeblinkAsResource = () => {
 
       const createResourceData: CreateResourceData = {
         body: {
+          title: resource?.title,
           resourceType: 'weblink',
           data: resource?.data,
           content: resource?.content,

@@ -20,7 +20,7 @@
     "required": "必填项",
     "empty": "暂无内容",
     "selectContext": "选择待使用上下文",
-    "emptyInput": "请填入或选择内容",
+    "emptyInput": "内容为空，请填入或选择内容",
     "retry": "重试"
   },
   "systemMaintenanceShutdown": {
@@ -195,6 +195,10 @@
       "readOnly": "只读",
       "edit": "编辑",
       "serviceDisconnected": "服务已断开"
+    },
+    "context": {
+      "contentSelector": "内容划线选择器",
+      "clearSelector": "清空选择内容及划线"
     }
   },
   "resource": {
@@ -212,6 +216,7 @@
       "integration": "集成",
       "emptyText": "标题和文本内容不能为空！",
       "textTitlePlaceholder": "输入标题",
+      "textUrlPlaceholder": "输入或粘贴网页链接",
       "textContentPlaceholder": "输入或粘贴文本"
     },
     "wait_parse": "内容解析中",
@@ -865,7 +870,7 @@
     "selectedTextCard": {
       "title": "选中内容快捷操作",
       "filterTitle": "过滤选中上下文",
-      "placeholder": "暂无可快捷操作的选中内容...",
+      "placeholder": "暂无选中内容...",
       "options": {
         "resource": "选中资源内容",
         "note": "选中笔记内容",
@@ -873,6 +878,12 @@
         "noteBeforeCursorSelection": "笔记光标前内容",
         "noteAfterCursorSelection": "笔记光标后内容",
         "conversation": "选中会话内容"
+      },
+      "save": {
+        "title": "保存",
+        "tooltip": "保存选中内容",
+        "successNotify": "保存成功！",
+        "errorNotify": "保存失败！"
       }
     },
     "chatInput": {

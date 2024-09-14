@@ -20,7 +20,7 @@
     "required": "This item is required",
     "empty": "No content",
     "selectContext": "Select Context",
-    "emptyInput": "Please fill in or select content",
+    "emptyInput": "Content is empty, please fill in or select content",
     "retry": "Retry"
   },
   "systemMaintenanceShutdown": {
@@ -195,6 +195,10 @@
       "readOnly": "Read Only",
       "edit": "Edit",
       "serviceDisconnected": "Service Disconnected"
+    },
+    "context": {
+      "contentSelector": "Content Selector",
+      "clearSelector": "Clear Selection"
     }
   },
   "resource": {
@@ -212,6 +216,7 @@
       "integration": "Integration",
       "emptyText": "Title and text content cannot be empty!",
       "textTitlePlaceholder": "Enter title",
+      "textUrlPlaceholder": "Enter or paste web link",
       "textContentPlaceholder": "Enter or paste text"
     },
     "wait_parse": "Parsing",
@@ -855,7 +860,7 @@
     "selectedTextCard": {
       "title": "Selected Text Quick Actions",
       "filterTitle": "Filter Selected Content",
-      "placeholder": "No quick actions for selected text...",
+      "placeholder": "No selected content...",
       "options": {
         "resource": "Selected Resource Content",
         "note": "Selected Note Content",
@@ -863,6 +868,12 @@
         "noteBeforeCursorSelection": "Note Cursor Before Selection",
         "noteAfterCursorSelection": "Note Cursor After Selection",
         "conversation": "Selected Conversation Content"
+      },
+      "save": {
+        "title": "Save",
+        "tooltip": "Save selected content",
+        "successNotify": "Save successfully!",
+        "errorNotify": "Save failed!"
       }
     },
     "chatInput": {

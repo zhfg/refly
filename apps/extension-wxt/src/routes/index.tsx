@@ -2,6 +2,8 @@ import { Route, Routes, useMatch } from '@refly-packages/ai-workspace-common/uti
 
 // 页面
 import KnowledgeBase from '@/pages/knowledge-base';
+import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
+import { ImportResourceModal } from '@refly-packages/ai-workspace-common/components/import-resource';
 
 // 自定义组件
 import { Login } from '@/pages/login';
@@ -14,6 +16,9 @@ import { useGetUserSettings } from '@/hooks/use-get-user-settings';
 
 export const AppRouter = () => {
   const userStore = useUserStore();
+  const importResourceStore = useImportResourceStore((state) => ({
+    importResourceModalVisible: state.importResourceModalVisible,
+  }));
 
   const locale = userStore?.localSettings?.uiLocale || LOCALE.EN;
 
@@ -42,10 +47,13 @@ export const AppRouter = () => {
   }
 
   return (
-    <Routes>
-      <Route path="/" element={<KnowledgeBase />} />
-      <Route path="/knowledge-base" element={<KnowledgeBase />} />
-      <Route path="/login" element={<Login />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<KnowledgeBase />} />
+        <Route path="/knowledge-base" element={<KnowledgeBase />} />
+        <Route path="/login" element={<Login />} />
+      </Routes>
+      {importResourceStore.importResourceModalVisible ? <ImportResourceModal /> : null}
+    </>
   );
 };
