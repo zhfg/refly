@@ -1,0 +1,47 @@
+version: '3.4'
+services:
+  db:
+    image: groonga/pgroonga:3.2.1-alpine-15
+    ports:
+      - 5432:5432
+    restart: always
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=refly
+      - POSTGRES_USER=refly
+      - POSTGRES_PASSWORD=test
+  minio:
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    restart: always
+    ports:
+      - 9000:9000
+      - 9001:9001
+    volumes:
+      - minio_data:/data
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+  redis:
+    image: redis/redis-stack
+    restart: always
+    ports:
+      - 6379:6379
+      - 8001:8001
+    volumes:
+      - redis_data:/data
+  qdrant:
+    image: qdrant/qdrant
+    ports:
+      - 6333:6333
+      - 6334:6334
+    volumes:
+      - qdrant_data:/qdrant/storage:z
+    restart: always
+
+volumes:
+  db_data:
+  minio_data:
+  redis_data:
+  qdrant_data:

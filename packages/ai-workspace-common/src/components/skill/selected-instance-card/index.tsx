@@ -12,7 +12,7 @@ import { SkillContext, SkillInstance } from '@refly/openapi-schema';
 // requests
 import { useTranslation } from 'react-i18next';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
-import { ContextStateDisplay } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display';
+import { ContextStateDisplay } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module/context-state-display';
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
 
 export const SelectedInstanceCard = () => {

@@ -6,7 +6,7 @@ import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui'
 import { useTranslation } from 'react-i18next';
 import { LOCALE } from '@refly/common-types';
 import { languageNameToLocale } from '@refly/common-types';
-import { BaseContextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/context-card/base-context-card';
+import { BaseContextCard } from './base-context-card';
 import { useGetCurrentEnvContext } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-env-context';
 
 // resize hook
@@ -14,20 +14,16 @@ const SubMenu = Menu.SubMenu;
 const MenuItem = Menu.Item;
 
 // TODO: 目前先写死，后续支持动态添加
-const resourceSkills = [
+const collectionSkills = [
   {
-    prompt: '总结',
-    key: 'summary',
-    title: '总结',
-  },
-  {
-    prompt: '相似资源',
-    key: 'relatedResource',
-    title: '相似资源',
+    prompt: '相似知识库',
+    key: 'relatedCollection',
+    title: '相似知识库',
+    group: 'editOrReviewSelection',
   },
 ];
 
-export const ResourceContextCard = () => {
+export const KnowledgeBaseContextCard = () => {
   const { runSkill } = useBuildThreadAndRun();
   const { hasContent } = useGetCurrentEnvContext();
   const disabled = !hasContent;
@@ -51,7 +47,7 @@ export const ResourceContextCard = () => {
 
       return elems;
     },
-    initialContainCnt: resourceSkills.length,
+    initialContainCnt: collectionSkills.length,
     paddingSize: 0,
     itemSize: 60,
     placeholderWidth: 120,
@@ -61,7 +57,7 @@ export const ResourceContextCard = () => {
 
   const dropList = (
     <Menu>
-      {resourceSkills.slice(containCnt).map((skill, index) => {
+      {collectionSkills.slice(containCnt).map((skill, index) => {
         return (
           <MenuItem
             key={`${skill.key}`}
@@ -76,10 +72,10 @@ export const ResourceContextCard = () => {
     </Menu>
   );
 
-  const skillLen = resourceSkills.length;
+  const skillLen = collectionSkills.length;
   const skillContent = (
     <div className="context-state-action-list">
-      {resourceSkills.slice(0, containCnt).map((skill, index) => (
+      {collectionSkills.slice(0, containCnt).map((skill, index) => (
         <Button
           type="outline"
           size="mini"
@@ -109,10 +105,9 @@ export const ResourceContextCard = () => {
       )}
     </div>
   );
-
   return (
     <div className="note-selected-context-panel">
-      <BaseContextCard title="当前资源快捷操作" skillContent={skillContent} />
+      <BaseContextCard title="当前知识库快捷操作" skillContent={skillContent} />
     </div>
   );
 };

@@ -4,6 +4,14 @@ import { SyncMarkEventName } from './extension-messaging';
 export type MarkScope = 'block' | 'inline';
 
 export type TextType = 'text' | 'table' | 'link' | 'image' | 'video' | 'audio';
+export type MarkType =
+  | 'resource'
+  | 'note'
+  | 'collection'
+  | 'extensionWeblink'
+  | 'noteSelection'
+  | 'resourceSelection'
+  | 'extensionWeblinkSelection';
 
 /**
  * 1. extension-weblink: represent the weblink in the extension
@@ -27,14 +35,23 @@ export type SelectedTextDomain =
   | 'noteBeforeCursorSelection'
   | 'noteAfterCursorSelection';
 
+// extend mark to unify selected text and database entity
 export interface Mark {
-  type: TextType; // 内容类型
+  id?: string; // unique id
+  entityId?: string; // if has entity id, it means it is a database entity
+  title?: string; // entity name, include extensionWeblink
+  url?: string | (() => string) | (() => void); // entity url, include extensionWeblink
+  type: MarkType; // 类型
+  name?: string; // mark name
+  active?: boolean; // mark active
+  textType?: TextType; // 内容类型
   data: string;
   target?: HTMLElement;
   xPath: string; // 该元素对应的 xPath 路径，这个可以当做唯一 id
   scope: MarkScope; // 是块级还是内联元素
   domain: SelectedTextDomain; // 该元素对应的 domain, for selected text card
   cleanup?: () => void; // 清理函数
+  icon?: React.ReactNode; // 图标
 }
 
 export interface Selection {

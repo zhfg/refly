@@ -97,7 +97,7 @@ interface ContextPanelState {
   currentSelectedMark: Mark;
   selectedDomain: SelectedTextDomain;
   enableMultiSelect: boolean; // 支持多选
-  currentSelectedMarks: Mark[]; // 多选内容
+  currentSelectedMarks: Mark[]; // 作为唯一的 context items 来源
 
   // context card
   showContextCard: boolean;
@@ -138,6 +138,12 @@ interface ContextPanelState {
   updateCurrentSelectionContent: (content: string) => void;
 
   resetState: () => void;
+
+  // 新增的操作方法
+  addMark: (mark: Mark) => void;
+  removeMark: (id: string) => void;
+  toggleMarkActive: (id: string) => void;
+  clearMarks: () => void;
 }
 
 export const defaultSelectedTextCardState = {
@@ -208,6 +214,20 @@ export const useContextPanelStore = create<ContextPanelState>()(
     updateSelectedDomain: (selectedDomain: SelectedTextDomain) => set((state) => ({ ...state, selectedDomain })),
     updateEnableMultiSelect: (enableMultiSelect: boolean) => set((state) => ({ ...state, enableMultiSelect })),
     updateCurrentSelectedMarks: (marks: Mark[]) => set((state) => ({ ...state, currentSelectedMarks: marks })),
+
+    addMark: (mark: Mark) =>
+      set((state) => ({ ...state, currentSelectedMarks: [...state.currentSelectedMarks, mark] })),
+    removeMark: (id: string) =>
+      set((state) => ({ ...state, currentSelectedMarks: state.currentSelectedMarks.filter((mark) => mark.id !== id) })),
+    toggleMarkActive: (id: string) =>
+      set((state) => ({
+        ...state,
+        currentSelectedMarks: state.currentSelectedMarks.map((mark) => ({
+          ...mark,
+          active: mark.id === id ? !mark.active : false,
+        })),
+      })),
+    clearMarks: () => set((state) => ({ ...state, currentSelectedMarks: [] })),
 
     resetSelectedTextCardState: () => set((state) => ({ ...state, ...defaultSelectedTextCardState })),
 

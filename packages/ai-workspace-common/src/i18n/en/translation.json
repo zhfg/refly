@@ -197,7 +197,14 @@
     },
     "context": {
       "contentSelector": "Content Selector",
-      "clearSelector": "Clear Selection"
+      "clearSelector": "Clear Selection",
+      "resource": "Resource",
+      "note": "Note",
+      "collection": "Knowledge Base",
+      "extensionWeblink": "Web Link",
+      "extensionWeblinkSelection": "Web Link Selection",
+      "noteSelection": "Note Selection",
+      "resourceSelection": "Resource Selection"
     }
   },
   "resource": {

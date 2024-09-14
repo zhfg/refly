@@ -7,16 +7,13 @@ import './index.scss';
 // 自定义组件
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
-import { ContextStateDisplay } from './context-state-display/index';
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
 import { memo, useEffect, useState } from 'react';
-import { ChatInput } from './chat-input';
 import { ChatMessages } from './chat-messages';
 import { ConvListModal } from './conv-list-modal';
 import { KnowledgeBaseListModal } from './knowledge-base-list-modal';
 import { SkillManagementModal } from '@refly-packages/ai-workspace-common/components/skill/skill-management-modal';
-import { SkillDisplay } from './skill-display';
-import { ChatInputAssistAction } from './chat-input-assist-action';
+import { CopilotOperationModule } from './copilot-operation-module';
 
 // state
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
@@ -41,7 +38,6 @@ import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/searc
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 import { useDynamicInitContextPanelState } from '@refly-packages/ai-workspace-common/hooks/use-init-context-panel-state';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { SelectedInstanceCard } from '@refly-packages/ai-workspace-common/components/skill/selected-instance-card';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 interface AICopilotProps {
@@ -135,7 +131,6 @@ export const AICopilot = memo((props: AICopilotProps) => {
       ? selectedSkillContainerHeight
       : actualChatContainerHeight + skillContainerHeight + 2 * chatContainerPadding) +
     (computedShowContextCard ? contextCardHeight : 0);
-  console.log('actualCopilotBodyHeight', actualChatContainerHeight, actualOperationContainerHeight);
 
   const { t, i18n } = useTranslation();
   const uiLocale = i18n?.languages?.[0] as LOCALE;
@@ -348,30 +343,11 @@ export const AICopilot = memo((props: AICopilotProps) => {
           <ChatMessages disable={disable} loading={isFetching} />
         </div>
         {!disable && (
-          <>
-            {skillStore.selectedSkill ? (
-              <SelectedInstanceCard />
-            ) : (
-              <div className="ai-copilot-operation-container" style={{ height: actualOperationContainerHeight }}>
-                <div className="ai-copilot-operation-body">
-                  {computedShowContextCard ? (
-                    <div className="ai-copilot-context-display">
-                      <ContextStateDisplay />
-                    </div>
-                  ) : null}
-                  <SkillDisplay source={source} />
-                  <div className="ai-copilot-chat-container">
-                    <div className="chat-input-container" style={{ height: actualChatContainerHeight }}>
-                      <div className="chat-input-body">
-                        <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 3, maxRows: 3 }} />
-                      </div>
-                      <ChatInputAssistAction />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </>
+          <CopilotOperationModule
+            source={source}
+            chatContainerHeight={actualChatContainerHeight}
+            operationContainerHeight={actualOperationContainerHeight}
+          />
         )}
       </div>
 

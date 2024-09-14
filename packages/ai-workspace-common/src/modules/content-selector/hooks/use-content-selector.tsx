@@ -1,7 +1,15 @@
 import classNames from 'classnames';
 import { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import type { Mark, MarkScope, SyncMarkEvent, SyncMarkEventType, SyncStatusEvent } from '@refly/common-types';
+import type {
+  Mark,
+  TextType,
+  MarkScope,
+  SyncMarkEvent,
+  SyncMarkEventType,
+  SyncStatusEvent,
+  MarkType,
+} from '@refly/common-types';
 import { safeStringifyJSON } from '@refly-packages/utils/parse';
 import { sendMessage, onMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { BackgroundMessage } from '@refly/common-types';
@@ -32,9 +40,10 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
   const messageListenerEventRef = useRef<any>();
   const selectorScopeRef = useRef<MarkScope>('block');
 
-  const buildMark = (type: ElementType, content: string, xPath: string) => {
+  const buildMark = (textType: TextType, content: string, xPath: string) => {
     const mark: Mark = {
-      type,
+      type: domain as MarkType,
+      textType,
       data: content,
       xPath,
       scope: selectorScopeRef.current,
@@ -185,8 +194,8 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
       const content = getSelectionNodesMarkdown();
       const selectionNodes = highlightSelection(xPath);
 
-      const type = 'text' as ElementType;
-      const mark = buildMark(type, content, xPath);
+      const textType = 'text' as ElementType;
+      const mark = buildMark(textType, content, xPath);
       addMark({ ...mark, cleanup }, selectionNodes);
       // addMark({ ...mark, cleanup }, []);
 

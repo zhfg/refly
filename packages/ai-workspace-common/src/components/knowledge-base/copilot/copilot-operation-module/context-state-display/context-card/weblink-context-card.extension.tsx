@@ -1,22 +1,42 @@
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
-import { Button, Tag, Dropdown, Menu, Tooltip, Switch } from '@arco-design/web-react';
+import { Button, Tag, Dropdown, Menu, Tooltip, Switch, Divider } from '@arco-design/web-react';
 import { IconCloseCircle, IconFontColors, IconList, IconMore } from '@arco-design/web-react/icon';
 import { useResizeBox } from '@refly-packages/ai-workspace-common/hooks/use-resize-box';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { useTranslation } from 'react-i18next';
 import { LOCALE } from '@refly/common-types';
 import { languageNameToLocale } from '@refly/common-types';
-import { writingSkills } from '@refly/utils/ai-writing';
-import { BaseContextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/context-card/base-context-card';
+import { BaseContextCard } from './base-context-card';
 import { useGetCurrentEnvContext } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-env-context';
+import { useDispatchAction } from '@refly-packages/ai-workspace-common/skills/main-logic/use-dispatch-action';
+import { safeParseURL } from '@refly-packages/utils/url';
+import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useMemo } from 'react';
+import { MemorizedImgIcon } from '@refly-packages/ai-workspace-common/components/memorizedImgIcon';
 
 // resize hook
 const SubMenu = Menu.SubMenu;
 const MenuItem = Menu.Item;
 
-export const NoteContextCard = () => {
+// TODO: 目前先写死，后续支持动态添加
+const resourceSkills = [
+  {
+    prompt: '总结',
+    key: 'summary',
+    title: '总结',
+  },
+  {
+    prompt: '相关内容',
+    key: 'relatedResource',
+    title: '相关内容',
+  },
+];
+
+export const WeblinkContextCard = () => {
   const { runSkill } = useBuildThreadAndRun();
+  const { dispatch } = useDispatchAction();
   const { hasContent } = useGetCurrentEnvContext();
+  const currentResource = useKnowledgeBaseStore((state) => state.currentResource);
   const disabled = !hasContent;
 
   const { t, i18n } = useTranslation();
@@ -38,7 +58,7 @@ export const NoteContextCard = () => {
 
       return elems;
     },
-    initialContainCnt: writingSkills.length,
+    initialContainCnt: resourceSkills.length,
     paddingSize: 0,
     itemSize: 60,
     placeholderWidth: 120,
@@ -48,46 +68,45 @@ export const NoteContextCard = () => {
 
   const dropList = (
     <Menu>
-      {writingSkills.slice(containCnt).map((skill, index) => {
-        if (skill?.itemList && skill?.itemList?.length > 0) {
-          return (
-            <SubMenu key={`${skill.key}`} title={skill?.title}>
-              {skill?.itemList?.map((subSkill, subIndex) => (
-                <MenuItem
-                  key={`${skill.key}_${subIndex}`}
-                  onClick={() => {
-                    if (skill?.key === 'translate') {
-                      runSkill(skill?.prompt?.replace(`{${skill?.variable || ''}}`, localeList?.[subSkill]));
-                    } else {
-                      runSkill(skill?.prompt?.replace(`{${skill?.variable || ''}}`, subSkill));
-                    }
-                  }}
-                >
-                  {subSkill}
-                </MenuItem>
-              ))}
-            </SubMenu>
-          );
-        } else {
-          return (
-            <MenuItem
-              key={`${skill.key}`}
-              onClick={() => {
-                runSkill(skill?.prompt);
-              }}
-            >
-              {skill.title}
-            </MenuItem>
-          );
-        }
+      {resourceSkills.slice(containCnt).map((skill, index) => {
+        return (
+          <MenuItem
+            key={`${skill.key}`}
+            onClick={() => {
+              runSkill(skill?.prompt);
+            }}
+          >
+            {skill.title}
+          </MenuItem>
+        );
       })}
     </Menu>
   );
 
-  const skillLen = writingSkills.length;
+  const skillLen = resourceSkills.length;
   const skillContent = (
     <div className="context-state-action-list">
-      {writingSkills.slice(0, containCnt).map((skill, index) => (
+      <Button
+        type="primary"
+        size="mini"
+        className="context-state-action-item"
+        disabled={disabled}
+        style={{ borderRadius: 8 }}
+        onClick={() => {
+          // 保存相关逻辑
+          dispatch({
+            name: 'saveToKnowledgeBase',
+            type: 'state',
+            body: {
+              modalVisible: true,
+            },
+          });
+        }}
+      >
+        保存
+      </Button>
+      <Divider type="vertical" style={{ margin: '0 4px' }} />
+      {resourceSkills.slice(0, containCnt).map((skill, index) => (
         <Button
           type="outline"
           size="mini"
@@ -105,7 +124,7 @@ export const NoteContextCard = () => {
       {containCnt >= skillLen || skillLen === 0 ? null : (
         <Dropdown droplist={dropList}>
           <Button
-            type="outline"
+            type="primary"
             size="mini"
             className="context-state-action-item"
             icon={<IconMore />}
@@ -117,9 +136,12 @@ export const NoteContextCard = () => {
       )}
     </div>
   );
+
+  const icon = <MemorizedImgIcon url={currentResource?.data?.url} />;
+
   return (
     <div className="note-selected-context-panel">
-      <BaseContextCard title="当前笔记快捷操作" skillContent={skillContent} />
+      <BaseContextCard title="当前网页快捷操作" skillContent={skillContent} icon={icon} />
     </div>
   );
 };

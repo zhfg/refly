@@ -70,7 +70,7 @@ export const ContentSelectorBtn = (props: ContentSelectorBtnProps) => {
       <Checkbox
         key={'knowledge-base-note-panel'}
         checked={contentSelectorStore?.showContentSelector}
-        style={{ padding: 0 }}
+        style={{ padding: 0, display: 'flex', marginRight: 0 }}
       >
         {({ checked }) => {
           return (
@@ -78,10 +78,11 @@ export const ContentSelectorBtn = (props: ContentSelectorBtnProps) => {
               onClick={() => {
                 handleToggleContentSelector(!contentSelectorStore.showContentSelector);
               }}
-              icon={contentSelectorStore.scope === 'block' ? <IconHighlight /> : <IconFontColors />}
-              type="text"
-              style={{ marginRight: 4 }}
-              className={classNames('assist-action-item', { active: checked })}
+              icon={contentSelectorStore.scope === 'block' ? <IconHighlight /> : <IconHighlight />}
+              size="mini"
+              type="outline"
+              style={{ fontSize: 10, height: 18, borderRadius: 4, borderColor: '#e5e5e5', color: 'rgba(0,0,0,0.6)' }}
+              className={classNames('context-selector-btn', { active: checked })}
             >
               {/* <Divider type="vertical" style={{ margin: '0 4px' }} /> */}
               {/* <Dropdown droplist={dropdownMenu}>

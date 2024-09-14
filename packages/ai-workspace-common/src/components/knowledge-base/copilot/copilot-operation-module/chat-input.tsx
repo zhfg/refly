@@ -1,19 +1,11 @@
-import { Avatar, Button, Divider, Input, Tooltip } from '@arco-design/web-react';
+import { Input } from '@arco-design/web-react';
 import { useRef, useState } from 'react';
 import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 // styles
 import './index.scss';
-import { useQuickSearchStateStore } from '@refly-packages/ai-workspace-common/stores/quick-search-state';
-import { IconClose, IconFontColors, IconPause, IconSend, IconStop } from '@arco-design/web-react/icon';
-import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
-import { buildConversation } from '@refly-packages/ai-workspace-common/utils/conversation';
-import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
-import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
-import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
-import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
 
 const TextArea = Input.TextArea;
 
@@ -27,9 +19,6 @@ export const ChatInput = (props: ChatInputProps) => {
   // stores
   const chatStore = useChatStore();
   const searchStore = useSearchStore();
-  const conversationStore = useConversationStore();
-  const messageStateStore = useMessageStateStore();
-  const skillStore = useSkillStore();
   const { runSkill, emptyConvRunSkill, buildShutdownTaskAndGenResponse } = useBuildThreadAndRun();
   // hooks
   const [isFocused, setIsFocused] = useState(false);
@@ -81,29 +70,6 @@ export const ChatInput = (props: ChatInputProps) => {
 
   return (
     <div className="ai-copilot-chat-input-container">
-      {skillStore?.selectedSkill ? (
-        <div className="selected-skill">
-          <div className="selected-skill-profile">
-            <SkillAvatar
-              size={20}
-              shape="circle"
-              icon={skillStore?.selectedSkill?.icon}
-              displayName={skillStore?.selectedSkill?.displayName}
-            />
-            <p>
-              和 <span className="selected-skill-name">{skillStore?.selectedSkill?.displayName}</span> 聊聊
-            </p>
-          </div>
-          <div className="selected-skill-manage">
-            <Button
-              icon={<IconClose />}
-              onClick={() => {
-                skillStore.setSelectedSkillInstance(null);
-              }}
-            ></Button>
-          </div>
-        </div>
-      ) : null}
       <div className="ai-copilot-chat-input-body">
         <TextArea
           ref={inputRef}
@@ -120,33 +86,8 @@ export const ChatInput = (props: ChatInputProps) => {
             resize: 'none',
           }}
           placeholder={props.placeholder}
-          autoSize={props.autoSize}
+          autoSize={{ maxRows: 6 }}
         ></TextArea>
-        <div className="ai-copilot-chat-input-action">
-          {messageStateStore?.pending ? (
-            <Button
-              shape="circle"
-              icon={<IconPause />}
-              className="search-btn"
-              style={{ color: '#FFF', background: '#000' }}
-              onClick={() => {
-                handleAbort();
-              }}
-            ></Button>
-          ) : (
-            <Button
-              shape="circle"
-              loading={messageStateStore?.pending}
-              icon={<IconSend />}
-              disabled={messageStateStore?.pending}
-              className="search-btn"
-              style={{ color: '#FFF', background: '#00968F' }}
-              onClick={() => {
-                handleSendMessage();
-              }}
-            ></Button>
-          )}
-        </div>
       </div>
     </div>
   );

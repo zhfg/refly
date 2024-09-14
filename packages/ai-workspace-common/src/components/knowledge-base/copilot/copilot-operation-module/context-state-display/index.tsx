@@ -1,9 +1,9 @@
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
-import { SelectedTextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/selected-text-card/selected-text-card';
-import { ResourceContextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/context-card/resource-context-card';
-import { KnowledgeBaseContextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/context-card/knowledge-base-context-card';
-import { NoteContextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/context-card/note-context-card';
-import { WeblinkContextCard } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display/context-card/weblink-context-card.extension';
+import { SelectedTextCard } from './selected-text-card/selected-text-card';
+import { ResourceContextCard } from './context-card/resource-context-card';
+import { KnowledgeBaseContextCard } from './context-card/knowledge-base-context-card';
+import { NoteContextCard } from './context-card/note-context-card';
+import { WeblinkContextCard } from './context-card/weblink-context-card.extension';
 
 // styles
 import './index.scss';

@@ -197,7 +197,14 @@
     },
     "context": {
       "contentSelector": "内容划线选择器",
-      "clearSelector": "清空选择内容及划线"
+      "clearSelector": "清空选择内容及划线",
+      "resource": "资源",
+      "note": "笔记",
+      "collection": "知识库",
+      "extensionWeblink": "网页",
+      "extensionWeblinkSelection": "网页选中",
+      "noteSelection": "笔记选中",
+      "resourceSelection": "资源选中"
     }
   },
   "resource": {
