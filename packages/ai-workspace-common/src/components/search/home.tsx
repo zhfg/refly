@@ -87,8 +87,8 @@ export function Home({
                 <div className="search-res-container">
                   <p className="search-res-title" dangerouslySetInnerHTML={{ __html: item?.title }}></p>
                   {item?.content?.length > 0 &&
-                    item.content.map((content) => (
-                      <p className="search-res-desc" dangerouslySetInnerHTML={{ __html: content }}></p>
+                    item.content.map((content, index) => (
+                      <p className="search-res-desc" key={index} dangerouslySetInnerHTML={{ __html: content }}></p>
                     ))}
                 </div>
               </Item>
