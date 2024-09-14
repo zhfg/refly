@@ -97,6 +97,7 @@ export const KnowledgeBaseResourceDetail = memo(() => {
 
     try {
       setIsReindexing(true);
+      setResourceDetail({ ...resourceDetail, indexStatus: 'wait_index' });
       const { data, error } = await getClient().reindexResource({
         body: {
           resourceIds: [resourceId],
@@ -112,7 +113,7 @@ export const KnowledgeBaseResourceDetail = memo(() => {
 
       if (data.data?.length) {
         const resource = data.data[0];
-        knowledgeBaseStore.updateResource(resource);
+        knowledgeBaseStore.updateResource({ ...resourceDetail, indexStatus: resource.indexStatus });
       }
     } catch (error) {
       message.error(t('common.putErr'));
@@ -158,14 +159,8 @@ export const KnowledgeBaseResourceDetail = memo(() => {
     };
   }, [resId]);
 
-  const [loading, setLoading] = useState(false);
   useEffect(() => {
     setResourceDetail(knowledgeBaseStore?.currentResource as Resource);
-    if (['wait_parse', 'parse_failed'].includes(knowledgeBaseStore?.currentResource?.indexStatus)) {
-      setLoading(true);
-    } else {
-      setLoading(false);
-    }
   }, [knowledgeBaseStore?.currentResource]);
 
   // refresh every 2 seconds if resource is waiting to be parsed or indexed
@@ -187,121 +182,102 @@ export const KnowledgeBaseResourceDetail = memo(() => {
   return (
     <div className="knowledge-base-resource-detail-container">
       {resId ? (
-        <Spin
-          loading={loading}
-          tip={
-            <div className={`${resourceDetail?.indexStatus}-tip`} onClick={() => handleReindexResource(resId)}>
-              {t(`resource.${resourceDetail?.indexStatus}`)}
+        <div className="knowledge-base-resource-detail-body">
+          {isFetching ? (
+            <div style={{ margin: '20px auto' }}>
+              <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
             </div>
-          }
-          style={{ width: '100%', height: '100%' }}
-          element={
-            resourceDetail?.indexStatus === 'parse_failed' ? (
-              isReindexing ? (
-                <IconLoading style={{ color: 'rgb(220 38 38)', fontSize: 38, strokeWidth: 2 }} />
-              ) : (
-                <IconCloseCircle style={{ color: 'rgb(220 38 38)', fontSize: 38, strokeWidth: 2 }} />
-              )
-            ) : null
-          }
-        >
-          <div className="knowledge-base-resource-detail-body">
-            {isFetching ? (
-              <div style={{ margin: '20px auto' }}>
-                <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
-              </div>
-            ) : (
-              <div className="knowledge-base-resource-meta">
-                <Affix offsetTop={48.1}>
-                  <ResourceCollectionList
-                    collections={resourceDetail?.collections}
-                    updateCallback={(collectionId) => handleUpdateCollections(collectionId)}
+          ) : (
+            <div className="knowledge-base-resource-meta">
+              <Affix offsetTop={48.1}>
+                <ResourceCollectionList
+                  collections={resourceDetail?.collections}
+                  updateCallback={(collectionId) => handleUpdateCollections(collectionId)}
+                />
+              </Affix>
+
+              {['wait_index', 'index_failed'].includes(resourceDetail?.indexStatus) && (
+                <Alert
+                  className={`${resourceDetail?.indexStatus}-alert`}
+                  style={{ marginBottom: 16 }}
+                  type={resourceDetail?.indexStatus === 'wait_index' ? 'warning' : 'error'}
+                  icon={
+                    resourceDetail?.indexStatus === 'wait_index' ? (
+                      <IconLoading style={{ color: 'rgb(202 138 4)' }} />
+                    ) : (
+                      <IconCloseCircle style={{ color: 'rgb(220 38 38)' }} />
+                    )
+                  }
+                  content={
+                    t(`resource.${resourceDetail?.indexStatus}`) +
+                    ': ' +
+                    t(`resource.${resourceDetail?.indexStatus}_tip`)
+                  }
+                  action={
+                    resourceDetail?.indexStatus === 'index_failed' ? (
+                      <Button
+                        size="mini"
+                        type="outline"
+                        loading={isReindexing}
+                        icon={<IconRefresh />}
+                        className="retry-btn"
+                        onClick={() => handleReindexResource(resId)}
+                      >
+                        {t('common.retry')}
+                      </Button>
+                    ) : null
+                  }
+                />
+              )}
+
+              <div className="knowledge-base-directory-site-intro">
+                <div className="site-intro-icon">
+                  <img
+                    src={`https://www.google.com/s2/favicons?domain=${safeParseURL(resourceDetail?.data?.url as string)}&sz=${32}`}
+                    alt={resourceDetail?.data?.url}
                   />
-                </Affix>
-
-                {['wait_index', 'index_failed'].includes(resourceDetail?.indexStatus) && (
-                  <Alert
-                    className={`${resourceDetail?.indexStatus}-alert`}
-                    style={{ marginBottom: 16 }}
-                    type={resourceDetail?.indexStatus === 'wait_index' ? 'warning' : 'error'}
-                    icon={
-                      resourceDetail?.indexStatus === 'wait_index' ? (
-                        <IconLoading style={{ color: 'rgb(202 138 4)' }} />
-                      ) : (
-                        <IconCloseCircle style={{ color: 'rgb(220 38 38)' }} />
-                      )
-                    }
-                    content={
-                      t(`resource.${resourceDetail?.indexStatus}`) +
-                      ': ' +
-                      t(`resource.${resourceDetail?.indexStatus}_tip`)
-                    }
-                    action={
-                      resourceDetail?.indexStatus === 'index_failed' ? (
-                        <Button
-                          size="mini"
-                          type="outline"
-                          loading={isReindexing}
-                          icon={<IconRefresh />}
-                          className="retry-btn"
-                          onClick={() => handleReindexResource(resId)}
-                        >
-                          {t('common.retry')}
-                        </Button>
-                      ) : null
-                    }
-                  />
-                )}
-
-                <div className="knowledge-base-directory-site-intro">
-                  <div className="site-intro-icon">
-                    <img
-                      src={`https://www.google.com/s2/favicons?domain=${safeParseURL(resourceDetail?.data?.url as string)}&sz=${32}`}
-                      alt={resourceDetail?.data?.url}
-                    />
-                  </div>
-                  <div className="site-intro-content">
-                    <p className="site-intro-site-name">{resourceDetail?.data?.title}</p>
-                    <a className="site-intro-site-url" href={resourceDetail?.data?.url} target="_blank">
-                      {resourceDetail?.data?.url}
-                    </a>
-                  </div>
                 </div>
-                <div className="knowledge-base-directory-action">
-                  <div className="action-summary">
-                    <HiOutlineLightBulb />
-                    <span className="action-summary-text">AI Summary</span>
-                  </div>
-
-                  <div className="action-summary">
-                    <AiOutlineCodepen />
-                    <span className="action-summary-text">知识图谱</span>
-                  </div>
+                <div className="site-intro-content">
+                  <p className="site-intro-site-name">{resourceDetail?.data?.title}</p>
+                  <a className="site-intro-site-url" href={resourceDetail?.data?.url} target="_blank">
+                    {resourceDetail?.data?.url}
+                  </a>
                 </div>
-                {resourceDetail && <LabelGroup entityId={resourceDetail.resourceId} entityType={'resource'} />}
               </div>
-            )}
-            {isFetching ? (
-              <div style={{ margin: '20px auto' }}>
-                <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
-                <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
-                <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
+              <div className="knowledge-base-directory-action">
+                <div className="action-summary">
+                  <HiOutlineLightBulb />
+                  <span className="action-summary-text">AI Summary</span>
+                </div>
+
+                <div className="action-summary">
+                  <AiOutlineCodepen />
+                  <span className="action-summary-text">知识图谱</span>
+                </div>
               </div>
-            ) : (
-              <div
-                className={classNames('knowledge-base-resource-content', {
-                  'refly-selector-mode-active': showContentSelector,
-                  'refly-block-selector-mode': scope === 'block',
-                  'refly-inline-selector-mode': scope === 'inline',
-                })}
-              >
-                {initContentSelectorElem()}
-                <div className="knowledge-base-resource-content-title">{resourceDetail?.title}</div>
-                <Markdown content={resourceDetail?.content || ''}></Markdown>
-              </div>
-            )}
-          </div>
-        </Spin>
+              {resourceDetail && <LabelGroup entityId={resourceDetail.resourceId} entityType={'resource'} />}
+            </div>
+          )}
+          {isFetching ? (
+            <div style={{ margin: '20px auto' }}>
+              <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
+              <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
+              <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
+            </div>
+          ) : (
+            <div
+              className={classNames('knowledge-base-resource-content', {
+                'refly-selector-mode-active': showContentSelector,
+                'refly-block-selector-mode': scope === 'block',
+                'refly-inline-selector-mode': scope === 'inline',
+              })}
+            >
+              {initContentSelectorElem()}
+              <div className="knowledge-base-resource-content-title">{resourceDetail?.title}</div>
+              <Markdown content={resourceDetail?.content || ''}></Markdown>
+            </div>
+          )}
+        </div>
       ) : (
         <div className="knowledge-base-resource-detail-empty">
           <Empty description={t('common.empty')} />

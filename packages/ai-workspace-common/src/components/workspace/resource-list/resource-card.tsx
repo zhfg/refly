@@ -1,31 +1,44 @@
 import { ReactNode, useEffect, useState } from 'react';
-import { Typography, Spin } from '@arco-design/web-react';
+import { Typography, Spin, Divider, Tooltip } from '@arco-design/web-react';
 import { IconCloseCircle, IconLoading } from '@arco-design/web-react/icon';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
+import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
+import { time } from '@refly-packages/ai-workspace-common/utils/time';
 
 import { Resource } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
+import { LOCALE } from '@refly/common-types';
 import './index.scss';
 
 interface ResourceCard {
   index: number;
   cardIcon?: ReactNode;
-  children?: ReactNode;
   onClick: () => void;
   cardData: Resource;
-  isReindexing: boolean;
   reLoadResource?: () => void;
-  handleReindexResource?: () => void;
+  handleReindexResource?: () => Promise<void>;
+  deleteData?: (resource: Resource) => void;
 }
 
 export const ResourceCard = (props: ResourceCard) => {
-  const { t } = useTranslation();
-  const { children, cardData, isReindexing, onClick, reLoadResource, handleReindexResource } = props;
+  const { t, i18n } = useTranslation();
+  const language = i18n.languages?.[0];
+  const { cardData, index, onClick, reLoadResource, handleReindexResource, deleteData } = props;
   const [loading, setLoading] = useState(false);
+  const [isReindexing, setIsReindexing] = useState(false);
 
   const handleClickLink = (url: string) => {
     if (url) {
       window.open(url, '_blank');
+    }
+  };
+
+  const handleReindex = async () => {
+    if (isReindexing) return;
+    if (handleReindexResource) {
+      setIsReindexing(true);
+      await handleReindexResource();
+      setIsReindexing(false);
     }
   };
 
@@ -51,6 +64,29 @@ export const ResourceCard = (props: ResourceCard) => {
     };
   }, [cardData?.indexStatus, reLoadResource]);
 
+  const IndexStatus = (props: { status: string; icon?: React.ReactNode }) => {
+    const { status, icon } = props;
+    return (
+      <>
+        <Divider style={{ margin: '0 4px' }} type="vertical" />
+        <Tooltip mini content={t(`resource.${status}_tip`)} style={status === 'index_failed' ? {} : { width: 200 }}>
+          <div
+            className={status}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (status === 'index_failed') {
+                handleReindex();
+              }
+            }}
+          >
+            {icon}
+            {t(`resource.${status}`)}
+          </div>
+        </Tooltip>
+      </>
+    );
+  };
+
   return (
     <div id={`resource-${props.index}`}>
       <Spin
@@ -58,20 +94,20 @@ export const ResourceCard = (props: ResourceCard) => {
         className={loading ? 'loading-box' : ''}
         tip={
           <div
-            className={`${cardData?.indexStatus}-tip`}
+            className={`${isReindexing ? 'wait_parse-tip' : cardData?.indexStatus}-tip`}
             onClick={(e) => {
               e.stopPropagation();
-              handleReindexResource && handleReindexResource();
+              handleReindex();
             }}
           >
-            {t(`resource.${cardData?.indexStatus}`)}
+            {t(`resource.${isReindexing ? 'wait_parse' : cardData?.indexStatus}`)}
           </div>
         }
         style={{ width: '100%', height: '100%' }}
         element={
           cardData?.indexStatus === 'parse_failed' ? (
             isReindexing ? (
-              <IconLoading style={{ color: 'rgb(220 38 38)', fontSize: 30, strokeWidth: 2 }} />
+              <IconLoading />
             ) : (
               <IconCloseCircle style={{ color: 'rgb(220 38 38)', fontSize: 30, strokeWidth: 2 }} />
             )
@@ -113,7 +149,33 @@ export const ResourceCard = (props: ResourceCard) => {
             </div>
           </div>
 
-          {children}
+          <div className="flex items-center justify-between pt-6 relative">
+            <div className="flex items-center text-xs text-black/40">
+              <div className="text-xs text-black/40 mr-[4px]">
+                {time(cardData.updatedAt, language as LOCALE)
+                  .utc()
+                  .fromNow()}
+              </div>
+              {cardData.indexStatus === 'wait_index' && (
+                <IndexStatus status="wait_index" icon={<IconLoading style={{ marginRight: 4 }} />} />
+              )}
+
+              {cardData.indexStatus === 'index_failed' && (
+                <IndexStatus
+                  status="index_failed"
+                  icon={isReindexing ? <IconLoading style={{ marginRight: 4 }} /> : null}
+                />
+              )}
+            </div>
+            <div>
+              <DeleteDropdownMenu
+                data={cardData}
+                type="resource"
+                postDeleteList={(resource: Resource) => deleteData(resource)}
+                getPopupContainer={() => document.getElementById(`resource-${index}`) as HTMLElement}
+              />
+            </div>
+          </div>
         </div>
       </Spin>
     </div>
