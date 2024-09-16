@@ -204,7 +204,12 @@
       "extensionWeblink": "Web Link",
       "extensionWeblinkSelection": "Web Link Selection",
       "noteSelection": "Note Selection",
-      "resourceSelection": "Resource Selection"
+      "resourceSelection": "Resource Selection",
+      "footer": {
+        "navigate": "Navigate",
+        "toggle": "Toggle",
+        "done": "Done"
+      }
     }
   },
   "resource": {
@@ -490,9 +495,9 @@
       },
       "context": {
         "contentList": {
-          "resource": "Resource",
-          "note": "Note",
-          "extensionWeblink": "Web Link",
+          "resourceSelection": "Resource",
+          "noteSelection": "Note",
+          "extensionWeblinkSelection": "Web Link",
           "noteCursorSelection": "Note Cursor Selection",
           "noteBeforeCursorSelection": "Note Before Cursor Selection",
           "noteAfterCursorSelection": "Note After Cursor Selection"

@@ -17,48 +17,48 @@ export interface LinkMeta {
 
 export const selectedTextCardDomainWeb = [
   {
-    key: 'resource',
+    key: 'resourceSelection',
     labelDict: {
       en: 'Resource',
-      'zh-CN': '资源',
+      'zh-CN': '资源选中',
     },
   },
   {
-    key: 'note',
+    key: 'noteSelection',
     labelDict: {
       en: 'Note',
-      'zh-CN': '笔记',
+      'zh-CN': '笔记选中',
     },
   },
   {
     key: 'noteCursorSelection',
     labelDict: {
       en: 'Note Cursor Selection',
-      'zh-CN': '选中文本',
+      'zh-CN': '笔记光标选中文本',
     },
   },
   {
     key: 'noteBeforeCursorSelection',
     labelDict: {
       en: 'Note Before Cursor Selection',
-      'zh-CN': '选中文本前',
+      'zh-CN': '笔记光标选中前文本',
     },
   },
   {
     key: 'noteAfterCursorSelection',
     labelDict: {
       en: 'Note After Cursor Selection',
-      'zh-CN': '选中文本后',
+      'zh-CN': '笔记光标选中后文本',
     },
   },
 ];
 
 export const selectedTextCardDomainExtension = [
   {
-    key: 'extensionWeblink',
+    key: 'extensionWeblinkSelection',
     labelDict: {
       en: 'Web Link',
-      'zh-CN': '网页链接',
+      'zh-CN': '网页链选中',
     },
   },
 ];

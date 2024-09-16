@@ -54,9 +54,9 @@ export const useSelectedMark = () => {
         const { currentResource } = useKnowledgeBaseStore.getState();
         const { currentNote } = useNoteStore.getState();
         let title = '';
-        if (mark.domain === 'note') {
+        if (mark.domain === 'noteSelection') {
           title = currentNote?.title;
-        } else if (mark.domain === 'resource' || mark.domain === 'extensionWeblink') {
+        } else if (mark.domain === 'resourceSelection' || mark.domain === 'extensionWeblinkSelection') {
           title = currentResource?.title;
         }
 

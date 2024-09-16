@@ -79,6 +79,7 @@ export const useBuildSkillContext = () => {
 
     const getContentList = () => {
       let contentList: SkillContextContentItem[] = [];
+      // TODO: 这里需要处理技能执行时的 context filter
       const finalUsedMarks = getFinalUsedMarks(contextPanelStore);
 
       if (enableMultiSelect) {

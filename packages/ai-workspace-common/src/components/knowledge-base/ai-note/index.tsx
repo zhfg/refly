@@ -80,7 +80,7 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
   // initial block selection
   const { initMessageListener, initContentSelectorElem } = useContentSelector(
     'ai-note-editor-content-container',
-    'note',
+    'noteSelection',
   );
 
   const websocketProvider = useMemo(() => {

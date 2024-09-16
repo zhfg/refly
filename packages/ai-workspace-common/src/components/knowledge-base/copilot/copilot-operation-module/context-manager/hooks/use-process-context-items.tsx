@@ -1,12 +1,10 @@
-import { useGetCurrentSelectedMark } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-selected-text';
 import { Mark, MarkType } from '@refly/common-types';
-import { IconFile, IconBook, IconFolder, IconLink } from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
-import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { getClientOrigin } from '@refly-packages/utils/url';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { getTypeIcon } from '../utils/icon';
 
 export const useProcessContextItems = () => {
   const { t } = useTranslation();
@@ -62,25 +60,6 @@ export const useProcessContextItems = () => {
       } else {
         return `${baseUrl}/knowledge-base?kbId=${mark.id}`;
       }
-    }
-  };
-
-  const getTypeIcon = (mark: Mark) => {
-    switch (mark.type) {
-      case 'resource':
-        return <IconFile />;
-      case 'resourceSelection':
-        return <IconFile />;
-      case 'note':
-        return <IconBook />;
-      case 'noteSelection':
-        return <IconBook />;
-      case 'collection':
-        return <IconFolder />;
-      case 'extensionWeblink':
-        return <IconLink />;
-      case 'extensionWeblinkSelection':
-        return <IconLink />;
     }
   };
 

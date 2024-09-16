@@ -1,18 +1,34 @@
 import { useState } from 'react';
 import { ContextItem } from './context-item';
 import { ContextPreview } from './context-preview';
-import { Button, Message } from '@arco-design/web-react';
-import { IconPlus, IconFile, IconBook, IconFolder, IconRefresh } from '@arco-design/web-react/icon';
 
 // hooks
 import { useProcessContextItems } from './hooks/use-process-context-items';
-
+// components
+import { AddBaseMarkContext } from './components/add-base-mark-context';
 import './index.scss';
 
 // components
 import { ContentSelectorBtn } from '@refly-packages/ai-workspace-common/modules/content-selector/components/content-selector-btn';
 import { ResetContentSelectorBtn } from './reset-content-selector-btn';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { SearchDomain, SearchResult } from '@refly/openapi-schema';
+import { backendBaseMarkTypes, BaseMarkType, Mark, SelectedTextDomain } from '@refly/common-types';
+
+const mapMarkToSearchResult = (marks: Mark[]): SearchResult[] => {
+  let searchResults: SearchResult[] = [];
+
+  searchResults = marks
+    .filter((item) => backendBaseMarkTypes.includes(item?.type as BaseMarkType))
+    .map((mark) => ({
+      id: mark.id,
+      domain: mark.type as SearchDomain,
+      title: mark.title,
+      url: mark.url,
+    }));
+
+  return searchResults;
+};
 
 export const ContextManager = () => {
   const [activeItemId, setActiveItemId] = useState(null);
@@ -25,10 +41,6 @@ export const ContextManager = () => {
   }));
 
   console.log('processedContextItems', processedContextItems);
-
-  const handleAddItem = (type) => {
-    // setContextItems((prevItems) => [...prevItems, newItem]);
-  };
 
   const handleToggleItem = (id) => {
     toggleMarkActive(id);
@@ -51,17 +63,32 @@ export const ContextManager = () => {
     // setExpandedItems(prev => [...prev, id]);
   };
 
+  const handleAddItem = (newMark: Mark) => {
+    // 检查项目是否已经存在于 store 中
+    const existingMark = useContextPanelStore
+      .getState()
+      .currentSelectedMarks.find((mark) => mark.id === newMark.id && mark.type === newMark.type);
+
+    if (!existingMark) {
+      // 如果项目不存在，添加到 store
+      addMark(newMark);
+    } else {
+      removeMark(existingMark.id);
+      // 如果项目已存在，可以选择更新它或者不做任何操作
+      // 这里我们选择不做任何操作，但您可以根据需求进行调整
+      console.log('Item already exists in the store');
+    }
+  };
+
+  const selectedItems = processedContextItems?.filter((item) =>
+    backendBaseMarkTypes.includes(item?.type as BaseMarkType),
+  );
+
   return (
     <div className="context-manager">
       <div className="context-content">
         <div className="context-items-container">
-          <Button
-            icon={<IconPlus style={{ fontSize: 10 }} />}
-            size="mini"
-            type="outline"
-            style={{ fontSize: 10, height: 18, borderRadius: 4, borderColor: '#e5e5e5', color: 'rgba(0,0,0,0.6)' }}
-            onClick={() => handleAddItem('resource')}
-          ></Button>
+          <AddBaseMarkContext handleAddItem={handleAddItem} selectedItems={selectedItems} />
 
           <ContentSelectorBtn />
 

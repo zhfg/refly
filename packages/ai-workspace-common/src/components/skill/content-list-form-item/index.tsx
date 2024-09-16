@@ -10,7 +10,7 @@ import {
   Empty,
 } from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
-import { Mark, SelectedTextDomain } from '@refly/common-types';
+import { Mark, SelectedTextDomain, selectedTextDomains } from '@refly/common-types';
 import { SkillContextContentItem, SkillContextValue, SkillInvocationRule } from '@refly/openapi-schema';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
@@ -48,14 +48,7 @@ export const ContentListFormItem: React.FC<ContentListFormItemProps> = ({
   const isMultiSelect = rule.inputMode === 'multiSelect';
   const selectMode = isMultiSelect ? 'multiple' : undefined;
 
-  const options = [
-    'resource',
-    'note',
-    'extensionWeblink',
-    'noteCursorSelection',
-    'noteBeforeCursorSelection',
-    'noteAfterCursorSelection',
-  ].map((domain) => ({
+  const options: { label: string; value: SelectedTextDomain }[] = selectedTextDomains.map((domain) => ({
     label: t(`skill.instanceInvokeModal.context.contentList.${domain}`),
     value: domain,
   }));

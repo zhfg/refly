@@ -1,39 +1,42 @@
-import { Source } from '@refly/openapi-schema';
+import { SearchDomain, Source } from '@refly/openapi-schema';
 import { SyncMarkEventName } from './extension-messaging';
 
 export type MarkScope = 'block' | 'inline';
 
 export type TextType = 'text' | 'table' | 'link' | 'image' | 'video' | 'audio';
-export type MarkType =
-  | 'resource'
-  | 'note'
-  | 'collection'
-  | 'extensionWeblink'
-  | 'noteSelection'
-  | 'resourceSelection'
-  | 'extensionWeblinkSelection';
+export type FrontendBaseMarkType = 'extensionWeblink' | 'all';
+export type BaseMarkType = FrontendBaseMarkType | SearchDomain;
+
+export const frontendBaseMarkTypes: BaseMarkType[] = ['extensionWeblink', 'all'];
+export const backendBaseMarkTypes: BaseMarkType[] = ['note', 'resource', 'collection']; // conversation and skill not supported yet
+
+export type SelectedTextMarkType = 'resourceSelection' | 'noteSelection' | 'extensionWeblinkSelection';
+// for notion cursor selection, mainly for note-related skills
+export type SelectedCursorTextMarkType =
+  | 'noteCursorSelection'
+  | 'noteBeforeCursorSelection'
+  | 'noteAfterCursorSelection';
 
 /**
  * 1. extension-weblink: represent the weblink in the extension
  * 2. noteCursor: represent the note cursor related selection
  */
-export const selectedTextDomains = [
-  'resource',
-  'note',
-  'extensionWeblink',
+export const selectedTextDomains: SelectedTextDomain[] = [
+  'resourceSelection',
+  'noteSelection',
+  'extensionWeblinkSelection',
   'noteCursorSelection',
   'noteBeforeCursorSelection',
   'noteAfterCursorSelection',
 ];
+
+// mainly for display context card, now deprecated
 export type ContextDomain = 'weblink' | 'resource' | 'note' | 'collection' | 'selected-text';
 // selected text card domain
-export type SelectedTextDomain =
-  | 'resource'
-  | 'note'
-  | 'extensionWeblink'
-  | 'noteCursorSelection'
-  | 'noteBeforeCursorSelection'
-  | 'noteAfterCursorSelection';
+export type SelectedTextDomain = SelectedTextMarkType | SelectedCursorTextMarkType;
+
+// 最后，将 MarkType 定义为 BaseMarkType 和 SelectedTextDomain 的联合
+export type MarkType = BaseMarkType | SelectedTextDomain;
 
 // extend mark to unify selected text and database entity
 export interface Mark {
@@ -47,11 +50,11 @@ export interface Mark {
   textType?: TextType; // 内容类型
   data: string;
   target?: HTMLElement;
-  xPath: string; // 该元素对应的 xPath 路径，这个可以当做唯一 id
-  scope: MarkScope; // 是块级还是内联元素
+  xPath?: string; // 该元素对应的 xPath 路径，这个可以当做唯一 id
+  scope?: MarkScope; // 是块级还是内联元素
   domain: SelectedTextDomain; // 该元素对应的 domain, for selected text card
   cleanup?: () => void; // 清理函数
-  icon?: React.ReactNode; // 图标
+  icon?: any; // React.ReactNode; // 图标, 理论上应该逻辑和 UI 分离，但是目前为了方便，还是放在一起
 }
 
 export interface Selection {
