@@ -205,10 +205,14 @@
       "extensionWeblinkSelection": "Web Link Selection",
       "noteSelection": "Note Selection",
       "resourceSelection": "Resource Selection",
-      "footer": {
-        "navigate": "Navigate",
-        "toggle": "Toggle",
-        "done": "Done"
+      "popoverSelector": {
+        "webPlaceholder": "Search notes, resources, or knowledge bases...",
+        "extensionPlaceholder": "Search web pages, notes, resources, or knowledge bases...",
+        "footer": {
+          "navigate": "Navigate",
+          "toggle": "Toggle",
+          "done": "Done"
+        }
       }
     }
   },

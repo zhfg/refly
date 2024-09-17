@@ -205,10 +205,14 @@
       "extensionWeblinkSelection": "网页选中",
       "noteSelection": "笔记选中",
       "resourceSelection": "资源选中",
-      "footer": {
-        "navigate": "导航",
-        "toggle": "切换",
-        "done": "完成"
+      "popoverSelector": {
+        "webPlaceholder": "搜索笔记、资源或知识库...",
+        "extensionPlaceholder": "搜索网页、笔记、资源或知识库...",
+        "footer": {
+          "navigate": "导航",
+          "toggle": "切换",
+          "done": "完成"
+        }
       }
     }
   },

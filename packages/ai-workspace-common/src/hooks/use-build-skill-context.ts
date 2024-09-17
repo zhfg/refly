@@ -1,5 +1,5 @@
 // 类型
-import { ContextPanelDomain, LOCALE } from '@refly/common-types';
+import { ContextPanelDomain, LOCALE, SelectedTextDomain } from '@refly/common-types';
 import { Resource, SkillContext, SkillContextContentItem } from '@refly/openapi-schema';
 // request
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
@@ -8,16 +8,16 @@ import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useGetCurrentSelectedMark } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-selected-text';
+// types
+import { MarkType, selectedTextDomains } from '@refly/common-types';
 
 export const useBuildSkillContext = () => {
-  const { getFinalUsedMarks } = useGetCurrentSelectedMark();
   const buildSkillContext = (): SkillContext => {
     const { localSettings } = useUserStore.getState();
     const { currentKnowledgeBase, currentResource } = useKnowledgeBaseStore.getState();
     const contextPanelStore = useContextPanelStore.getState();
     const { currentNote } = useNoteStore.getState();
-    const { checkedKeys, selectedWeblinks, currentSelectedMark, enableMultiSelect, currentSelectedMarks } =
-      contextPanelStore;
+    const { checkedKeys, selectedWeblinks, currentSelectedMarks } = contextPanelStore;
     const mapDomainEnvIds = {
       collection: currentKnowledgeBase?.collectionId || '',
       resource: currentResource?.resourceId || '',
@@ -25,27 +25,33 @@ export const useBuildSkillContext = () => {
     };
 
     // collections
-    const getIds = (domain: ContextPanelDomain, checkedKeys: string[]) => {
-      // for select collection context `collection-collection_1_${item?.id}`, get last item.id
-      let ids: string[] = checkedKeys
-        ?.filter((key: string = '') => {
-          if (key?.startsWith(`${domain}-`)) {
-            return true;
+    const getDatabaseEntities = (type: MarkType) => {
+      const set = new Set();
+      const databaseEntities = currentSelectedMarks
+        ?.filter((item) => item?.type === type)
+        .map((item) => ({
+          [`${type}Id`]: item?.entityId || item?.id,
+          metadata: {
+            domain: item?.domain,
+            url: item?.url || '',
+            title: item?.title || '',
+          },
+        }))
+        .filter((item) => {
+          if (set.has(item?.[`${type}Id`])) {
+            return false;
           }
 
-          return false;
-        })
-        .map((key) => {
-          const id = key?.split('_')?.slice(-1)?.[0];
-          return id;
+          set.add(item?.[`${type}Id`]);
+          return true;
         });
 
       // for env context, just check `currentPage-currentKnowledgeBase` checked
-      if (checkedKeys?.includes(`currentPage-${domain}`) && getRuntime() === 'web') {
-        ids.push(mapDomainEnvIds?.[domain] || '');
-      }
+      // if (checkedKeys?.includes(`currentPage-${domain}`) && getRuntime() === 'web') {
+      //   ids.push(mapDomainEnvIds?.[domain] || '');
+      // }
 
-      return Array.from(new Set(ids?.filter((id) => !!id)));
+      return databaseEntities;
     };
 
     const getUrls = (domain: ContextPanelDomain, checkedKeys: string[]) => {
@@ -80,41 +86,39 @@ export const useBuildSkillContext = () => {
     const getContentList = () => {
       let contentList: SkillContextContentItem[] = [];
       // TODO: 这里需要处理技能执行时的 context filter
-      const finalUsedMarks = getFinalUsedMarks(contextPanelStore);
+      console.log('currentSelectedMarks', currentSelectedMarks);
 
-      if (enableMultiSelect) {
-        contentList = (finalUsedMarks || []).map((item) => ({
-          content: item?.data,
+      contentList = currentSelectedMarks
+        ?.filter((item) => selectedTextDomains.includes(item?.type as SelectedTextDomain))
+        .map((item) => ({
+          content: item?.data || '',
           metadata: {
-            domain: item?.domain,
+            domain: item?.type,
+            url: item?.url || '',
+            title: item?.title || '',
+            entityId: item?.entityId || item?.id || '',
           },
         }));
-      } else {
-        contentList.push({
-          content: currentSelectedMark?.data,
-        });
-      }
 
-      if (checkedKeys?.includes(`currentPage-resource`) && getRuntime() !== 'web') {
-        contentList.push({
-          content: currentResource?.content || '',
-          metadata: {
-            domain: 'extensionWeblink',
-            url: currentResource?.data?.url || '',
-            title: currentResource?.title || '',
-          },
-        });
-      }
+      // if (checkedKeys?.includes(`currentPage-resource`) && getRuntime() !== 'web') {
+      //   contentList.push({
+      //     content: currentResource?.content || '',
+      //     metadata: {
+      //       domain: 'extensionWeblink',
+      //       url: currentResource?.data?.url || '',
+      //       title: currentResource?.title || '',
+      //     },
+      //   });
+      // }
 
       return contentList;
     };
 
     let context: SkillContext = {
-      locale: localSettings?.outputLocale || LOCALE.EN,
       contentList: getContentList(),
-      collections: getIds('collection', checkedKeys)?.map((item) => ({ collectionId: item })),
-      resources: getIds('resource', checkedKeys)?.map((item) => ({ resourceId: item })),
-      notes: getIds('note', checkedKeys)?.map((item) => ({ noteId: item })),
+      collections: getDatabaseEntities('collection'),
+      resources: getDatabaseEntities('resource'),
+      notes: getDatabaseEntities('note'),
       urls: getUrls('weblink', checkedKeys),
     };
 

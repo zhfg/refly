@@ -216,15 +216,11 @@ export const BaseSearchAndSelector = ({
 
   const getInputPlaceholder = (domain: BaseMarkType | 'all') => {
     if (domain === 'all') {
-      return t('loggedHomePage.quickSearch.placeholderForHome');
-    } else if (domain === 'note') {
-      return t('loggedHomePage.quickSearch.placeholderForNote');
-    } else if (domain === 'resource') {
-      return t('loggedHomePage.quickSearch.placeholderForReadResource');
-    } else if (domain === 'collection') {
-      return t('loggedHomePage.quickSearch.placeholderForCollection');
-    } else if (domain === 'extensionWeblink') {
-      return t('loggedHomePage.quickSearch.placeholderForWeblink');
+      if (getRuntime() === 'web') {
+        return t('knowledgeBase.context.popoverSelector.webPlaceholder');
+      } else {
+        return t('knowledgeBase.context.popoverSelector.extensionPlaceholder');
+      }
     }
   };
 
@@ -294,16 +290,16 @@ export const BaseSearchAndSelector = ({
             <div cmdk-vercel-shortcuts="">
               <span>
                 <kbd>↑</kbd>
-                <kbd>↓</kbd> {t('knowledgeBase.context.footer.navigate')}
+                <kbd>↓</kbd> {t('knowledgeBase.context.popoverSelector.footer.navigate')}
               </span>
               <span>
-                <kbd>↵</kbd> {t('knowledgeBase.context.footer.toggle')}
+                <kbd>↵</kbd> {t('knowledgeBase.context.popoverSelector.footer.toggle')}
               </span>
             </div>
           </div>
           <div className="cmdk-footer-action">
             <Button type="primary" size="mini" onClick={() => onClose?.()}>
-              {t('knowledgeBase.context.footer.done')}
+              {t('knowledgeBase.context.popoverSelector.footer.done')}
             </Button>
           </div>
         </div>
