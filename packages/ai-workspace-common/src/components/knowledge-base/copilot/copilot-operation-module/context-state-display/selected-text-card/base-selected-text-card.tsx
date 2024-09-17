@@ -1,3 +1,7 @@
+/**
+ * deprecated: 无需
+ */
+
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';

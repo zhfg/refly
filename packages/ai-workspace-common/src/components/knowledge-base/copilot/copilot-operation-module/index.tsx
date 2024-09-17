@@ -2,7 +2,6 @@ import { Button, Checkbox } from '@arco-design/web-react';
 // 自定义样式
 import './index.scss';
 // 自定义组件
-import { ContextStateDisplay } from './context-state-display/index';
 import { memo, useEffect, useState } from 'react';
 import { ChatInput } from './chat-input';
 import { SkillDisplay } from './skill-display';

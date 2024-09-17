@@ -11,7 +11,7 @@ import './index.scss';
 import { getDefaultPopupContainer, getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { IconCaretDown, IconTranslate } from '@arco-design/web-react/icon';
 
-export const OutputLocaleList = (props: { children: any; showTitle?: boolean; width?: number }) => {
+export const OutputLocaleList = (props: { showTitle?: boolean; width?: number }) => {
   // i18n
   const { t, i18n } = useTranslation();
   const uiLocale = i18n?.languages?.[0] as LOCALE;

@@ -91,11 +91,11 @@ export const SelectedInstanceCard = () => {
 
   return (
     <div className="selected-instance-card-container">
-      {computedShowContextCard ? (
+      {/* {computedShowContextCard ? (
         <div className="ai-copilot-context-display">
           <ContextStateDisplay />
         </div>
-      ) : null}
+      ) : null} */}
       <div className="selected-instance-card">
         <div className="selected-skill">
           <div className="selected-skill-profile">
