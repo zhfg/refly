@@ -6,6 +6,7 @@ import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels"
 import { KnowledgeBaseDetail } from "@refly-packages/ai-workspace-common/components/knowledge-base/knowledge-base-detail"
 import { AICopilot } from "@refly-packages/ai-workspace-common/components/knowledge-base/copilot"
 import { AINote } from "@refly-packages/ai-workspace-common/components/knowledge-base/ai-note"
+// import { QuickAction } from "@refly-packages/ai-workspace-common/modules/quick-action/components/quick-action"
 // utils
 // 自定义方法
 // stores

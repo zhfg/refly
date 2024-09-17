@@ -19,9 +19,9 @@ import { SelectedInstanceCard } from '@refly-packages/ai-workspace-common/compon
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
 
 interface CopilotInputModuleProps {
-  source: string;
-  chatContainerHeight: number;
-  operationContainerHeight: number;
+  source?: string;
+  chatContainerHeight?: number;
+  operationContainerHeight?: number;
 }
 
 export const CopilotOperationModule = memo((props: CopilotInputModuleProps) => {
