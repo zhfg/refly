@@ -433,7 +433,7 @@ export class SkillService {
         where: { resourceId: { in: resourceIds }, uid, deletedAt: null },
       });
       const resourceMap = new Map<string, Resource>();
-      resources.forEach((r) => resourceMap.set(r.resourceId, resourcePO2DTO(r, true)));
+      resources.forEach((r) => resourceMap.set(r.resourceId, resourcePO2DTO(r)));
 
       context.resources.forEach((item) => {
         if (item.resource) return;
@@ -455,7 +455,7 @@ export class SkillService {
         where: { noteId: { in: noteIds }, uid, deletedAt: null },
       });
       const noteMap = new Map<string, Note>();
-      notes.forEach((n) => noteMap.set(n.noteId, notePO2DTO(n, true)));
+      notes.forEach((n) => noteMap.set(n.noteId, notePO2DTO(n)));
 
       context.notes.forEach((item) => {
         if (item.note) return;
