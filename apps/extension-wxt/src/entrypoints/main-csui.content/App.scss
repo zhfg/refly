@@ -17,8 +17,8 @@
     Helvetica,
     Arial,
     sans-serif,
-    "Apple Color Emoji",
-    "Segoe UI Emoji";
+    'Apple Color Emoji',
+    'Segoe UI Emoji';
 }
 
 * + * {
@@ -181,136 +181,6 @@ img {
 .selector > div:hover {
   background-color: var(--gray-color);
   cursor: pointer;
-}
-
-.popup-content {
-  background: #ffffff;
-  border: 1px solid #e5e8eb;
-  z-index: 5;
-  box-shadow: 0 8px 16px #919eab29;
-  border-radius: 12px;
-  overflow: hidden;
-  font-size: 14px;
-  line-height: normal;
-  display: flex;
-  flex-direction: column;
-  overflow-y: overlay !important;
-  width: 500px;
-  padding: 12px 16px;
-  height: auto;
-}
-
-.popup-content header {
-  margin-bottom: 0.75em;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  .header-left {
-    flex-grow: 1;
-    display: flex;
-    align-items: center;
-
-    &:hover {
-      cursor: pointer;
-    }
-  }
-}
-
-.popup-content header span {
-  margin: 0 0.5em;
-  height: 24px;
-  line-height: 24px;
-  font-weight: bold;
-}
-
-.popup-content header div {
-  text-align: right;
-}
-
-.popup-content header img {
-  transition: transform 200ms linear;
-}
-
-.popup-content header img:hover {
-  cursor: pointer;
-  transform: rotate(90deg);
-}
-
-.popup-content .funcs {
-  margin-bottom: 0.75em;
-  display: flex;
-  flex-wrap: wrap;
-  row-gap: 10px;
-}
-
-.popup-content .funcs .menu-tag-item {
-  display: inline-block;
-  margin-right: 0.5em;
-  padding: 0.1em 0.8em;
-  border: 1px solid var(--brand-color);
-  border-radius: 5px;
-
-  min-width: 0;
-  height: 24px;
-  flex-flow: wrap;
-  place-content: flex-start right;
-  gap: 10px;
-  display: inline-flex;
-}
-
-.popup-content .funcs .menu-tag-item.active {
-  font-weight: bold;
-  background-color: rgba(0, 150, 143, 0.2);
-}
-
-.popup-content .funcs .menu-tag-item:hover {
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.popup-content .funcs .menu-tag-item span {
-  color: var(--brand-color);
-}
-
-.popup-content .input,
-.popup-content .output {
-  margin-bottom: 0.75em;
-}
-
-.popup-content .input textarea:focus,
-.popup-content .output textarea:focus {
-  border-color: var(--brand-color);
-}
-
-.popup-content .output .output-bar {
-  margin-bottom: 0.75em;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.popup-content .output .output-bar span {
-  flex: 1;
-  font-weight: bold;
-}
-
-.popup-content .output .output-bar img {
-  transition: transform 200ms linear;
-  margin-left: 0.75em;
-}
-
-.popup-content .output .output-bar img:hover {
-  cursor: pointer;
-  transform: translateY(-2px);
-}
-
-.popup-content .footer {
-  .contine-chat-btn {
-    color: var(--brand-color);
-  }
 }
 
 /* 
