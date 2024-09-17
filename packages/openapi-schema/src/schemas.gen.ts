@@ -1197,7 +1197,7 @@ export const $ChatTaskResponse = {
 export const $IndexStatus = {
   type: 'string',
   description: 'Resource index status',
-  enum: ['init', 'wait_parse', 'wait_index', 'finish', 'parse_failed', 'index_failed', 'unavailable'],
+  enum: ['init', 'wait_parse', 'wait_index', 'finish', 'parse_failed', 'index_failed'],
 } as const;
 
 export const $SubscriptionInterval = {
