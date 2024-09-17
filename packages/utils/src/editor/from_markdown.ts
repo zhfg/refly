@@ -50,7 +50,7 @@ export const defaultMarkdownParser = new MarkdownParser(schema, MarkdownIt('comm
       alt: (tok.children![0] && tok.children![0].content) || null,
     }),
   },
-  hardbreak: { node: 'hard_break' },
+  hardbreak: { node: 'hardBreak' },
 
   em: {
     mark: 'italic',
