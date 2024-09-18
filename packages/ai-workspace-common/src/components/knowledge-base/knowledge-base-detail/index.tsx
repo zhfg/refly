@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
+import throttle from 'lodash.throttle';
 import { Button, Tabs } from '@arco-design/web-react';
 import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 
@@ -18,6 +19,7 @@ import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/searc
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 const TabPane = Tabs.TabPane;
+const MIN_LEFT_PANEL_SIZE = 72;
 
 export const KnowledgeBaseDetail = () => {
   const searchStore = useSearchStore();
@@ -26,8 +28,12 @@ export const KnowledgeBaseDetail = () => {
   const resId = queryParams.get('resId');
   const kbId = queryParams.get('kbId');
   const [leftPanelSize, setLeftPanelSize] = useState(30);
-
+  const [isSmall, setIsSmall] = useState(false);
+  const [hideBtn, setHideBtn] = useState(false);
+  const leftPanelRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const { tabs, activeTab, setActiveTab, handleDeleteTab } = useKnowledgeBaseTabs();
+
   const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
     kbModalVisible: state.kbModalVisible,
     actionSource: state.actionSource,
@@ -42,12 +48,60 @@ export const KnowledgeBaseDetail = () => {
     };
   }, [resId]);
 
+  const handleResize = useCallback(
+    throttle((entries: ResizeObserverEntry[]) => {
+      for (let entry of entries) {
+        if (entry.contentRect.width < 180) {
+          setIsSmall(true);
+          setLeftPanelSize(0);
+        } else {
+          setIsSmall(false);
+        }
+      }
+    }, 200),
+    [],
+  );
+
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver(handleResize);
+
+    if (leftPanelRef.current && kbId) {
+      resizeObserver.observe(leftPanelRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+      handleResize.cancel();
+    };
+  }, [kbId, handleResize]);
+
+  const handleContainerResize = useCallback(
+    throttle((entries: ResizeObserverEntry[]) => {
+      for (let entry of entries) {
+        setHideBtn(entry.contentRect.width <= 620);
+      }
+    }, 200),
+    [],
+  );
+
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver(handleContainerResize);
+    if (containerRef.current && kbId) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+      handleResize.cancel();
+    };
+  }, [kbId, handleContainerResize]);
+
   if ((!resId || resId === 'undefined' || resId === 'null') && (!kbId || kbId === 'undefined' || kbId === 'null')) {
     return <KnowledgeBaseDetailEmpty />;
   }
 
   return (
-    <div className="knowledge-base-detail-container">
+    <div className="knowledge-base-detail-container" ref={containerRef}>
       <Tabs
         editable
         className="knowledge-base-detail-tab-container"
@@ -89,25 +143,26 @@ export const KnowledgeBaseDetail = () => {
           <>
             <Panel
               maxSize={30}
-              collapsible={true}
+              collapsible={false}
               className="knowledge-base-detail-directory-panel"
-              style={{ flex: `${leftPanelSize} 1 0px` }}
+              style={{ flexGrow: leftPanelSize, minWidth: `${MIN_LEFT_PANEL_SIZE}px` }}
               onResize={(size) => setLeftPanelSize(size)}
             >
-              <KnowledgeBaseDirectory />
-            </Panel>
-            <PanelResizeHandle
-              className={`knowledge-base-detail-panel-resize ${leftPanelSize === 0 ? 'left-panel-hidden' : ''}`}
-            >
-              <div
-                onClick={(e) => {
-                  // e.stopPropagation();
-                  setLeftPanelSize(leftPanelSize === 0 ? 30 : 0);
-                }}
-                className="toggle-left-panel-btn"
-              >
-                {leftPanelSize === 0 ? <HiChevronRight /> : <HiChevronLeft />}
+              <div ref={leftPanelRef}>
+                <KnowledgeBaseDirectory small={isSmall} />
               </div>
+            </Panel>
+            <PanelResizeHandle className="knowledge-base-detail-panel-resize">
+              {!hideBtn && (
+                <div
+                  onClick={() => {
+                    setLeftPanelSize(isSmall ? 30 : 0);
+                  }}
+                  className="toggle-left-panel-btn"
+                >
+                  {isSmall ? <HiChevronRight /> : <HiChevronLeft />}
+                </div>
+              )}
             </PanelResizeHandle>
           </>
         ) : null}

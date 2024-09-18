@@ -12,25 +12,6 @@
       text-align: center;
     }
   }
-
-  .card-box {
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    &:hover {
-      background: #eeeeee;
-    }
-
-    .card-icon-box {
-      margin-right: 8px;
-      width: 47px;
-      height: 39px;
-      box-sizing: border-box;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      img {
-        width: 25px;
-        height: 25px;
-      }
-    }
-  }
 }
 
 .content-panel-header {

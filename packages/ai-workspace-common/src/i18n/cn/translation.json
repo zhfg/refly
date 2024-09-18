@@ -41,6 +41,9 @@
     },
     "settings": {
       "title": "设置"
+    },
+    "skill": {
+      "title": "技能"
     }
   },
   "landingPage": {

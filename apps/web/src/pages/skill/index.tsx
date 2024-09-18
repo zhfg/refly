@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { Helmet } from "react-helmet"
 
 // components
 import { useTranslation } from "react-i18next"
@@ -42,6 +43,7 @@ const ContentHeader = (props: {
 }
 
 const Skill = () => {
+  const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const tab = searchParams.get("tab") as string
@@ -57,6 +59,11 @@ const Skill = () => {
 
   return (
     <div className="skill-list">
+      <Helmet>
+        <title>
+          {t("productName")} | {t("tabMeta.skill.title")}
+        </title>
+      </Helmet>
       <ContentHeader
         setVal={val => {
           searchParams.set("tab", val)
