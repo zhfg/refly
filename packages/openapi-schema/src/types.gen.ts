@@ -951,14 +951,7 @@ export type ChatTaskResponse = {
 /**
  * Resource index status
  */
-export type IndexStatus =
-  | 'init'
-  | 'wait_parse'
-  | 'wait_index'
-  | 'finish'
-  | 'parse_failed'
-  | 'index_failed'
-  | 'unavailable';
+export type IndexStatus = 'init' | 'wait_parse' | 'wait_index' | 'finish' | 'parse_failed' | 'index_failed';
 
 /**
  * Payment recurring interval

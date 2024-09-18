@@ -188,7 +188,7 @@ export const schema = new Schema({
       },
     },
 
-    hard_break: {
+    hardBreak: {
       inline: true,
       group: 'inline',
       selectable: false,

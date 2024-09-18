@@ -521,11 +521,17 @@ export class KnowledgeService {
 
     param.noteId ||= genNoteID();
 
+    let storageKey: string | undefined;
     let stateStorageKey: string | undefined;
+
     if (isNewNote && param.initialContent) {
+      storageKey = `notes/${param.noteId}.txt`;
       stateStorageKey = `state/${param.noteId}`;
       const ydoc = markdown2StateUpdate(param.initialContent);
-      await this.minio.client.putObject(stateStorageKey, Buffer.from(ydoc));
+      await Promise.all([
+        this.minio.client.putObject(storageKey, param.initialContent),
+        this.minio.client.putObject(stateStorageKey, Buffer.from(ydoc)),
+      ]);
     }
 
     const note = await this.prisma.note.upsert({
@@ -537,6 +543,8 @@ export class KnowledgeService {
         readOnly: param.readOnly ?? false,
         isPublic: param.isPublic ?? false,
         content: param.initialContent,
+        contentPreview: param.initialContent?.slice(0, 500),
+        storageKey,
         stateStorageKey,
       },
       update: {
@@ -547,6 +555,7 @@ export class KnowledgeService {
     await this.elasticsearch.upsertNote({
       id: param.noteId,
       ...pick(note, ['title', 'uid']),
+      content: param.initialContent,
       createdAt: note.createdAt.toJSON(),
       updatedAt: note.updatedAt.toJSON(),
     });
