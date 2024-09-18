@@ -17,7 +17,7 @@ export const useBuildSkillContext = () => {
     const { currentKnowledgeBase, currentResource } = useKnowledgeBaseStore.getState();
     const contextPanelStore = useContextPanelStore.getState();
     const { currentNote } = useNoteStore.getState();
-    const { checkedKeys, selectedWeblinks, currentSelectedMarks } = contextPanelStore;
+    const { currentSelectedMarks } = contextPanelStore;
     const mapDomainEnvIds = {
       collection: currentKnowledgeBase?.collectionId || '',
       resource: currentResource?.resourceId || '',
@@ -32,7 +32,7 @@ export const useBuildSkillContext = () => {
         .map((item) => ({
           [`${type}Id`]: item?.entityId || item?.id,
           metadata: {
-            domain: item?.domain,
+            domain: item?.type,
             url: item?.url || '',
             title: item?.title || '',
           },
@@ -54,33 +54,29 @@ export const useBuildSkillContext = () => {
       return databaseEntities;
     };
 
-    const getUrls = (domain: ContextPanelDomain, checkedKeys: string[]) => {
-      let ids: string[] = checkedKeys
-        ?.filter((key: string = '') => {
-          if (key?.startsWith(`${domain}-`)) {
-            return true;
+    const getUrls = () => {
+      const set = new Set();
+      const urls = currentSelectedMarks
+        ?.filter((item) => item?.type === 'extensionWeblink')
+        .map((item) => ({
+          url: (item?.url as string) || '',
+          metadata: {
+            id: item?.id,
+            domain: item?.type,
+            url: item?.url || '',
+            title: item?.title || '',
+          },
+        }))
+        .filter((item) => {
+          if (set.has(item?.url)) {
+            return false;
           }
 
-          return false;
-        })
-        .map((key) => {
-          const id = key?.split('_')?.slice(-1)?.[0];
-          return id;
+          set.add(item?.url);
+          return true;
         });
 
-      ids = Array.from(new Set(ids?.filter((id) => !!id)));
-      const urls = selectedWeblinks
-        ?.filter((item) => {
-          const id = item?.key?.split('_')?.slice(-1)?.[0];
-          return ids?.includes(id);
-        })
-        .map((item) => item?.metadata?.resourceMeta?.url);
-
-      if (checkedKeys?.includes(`currentPage-resource`) && getRuntime() !== 'web') {
-        urls.push(currentResource?.data?.url);
-      }
-
-      return Array.from(new Set(urls)).map((item) => ({ url: item }));
+      return urls;
     };
 
     const getContentList = () => {
@@ -119,7 +115,7 @@ export const useBuildSkillContext = () => {
       collections: getDatabaseEntities('collection'),
       resources: getDatabaseEntities('resource'),
       notes: getDatabaseEntities('note'),
-      urls: getUrls('weblink', checkedKeys),
+      urls: getUrls(),
     };
 
     return context;

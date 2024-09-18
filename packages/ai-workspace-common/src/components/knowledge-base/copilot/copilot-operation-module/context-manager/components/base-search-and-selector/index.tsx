@@ -22,6 +22,9 @@ import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note
 import { RenderItem } from '../../types/item';
 import classNames from 'classnames';
 
+// hooks
+import { useLoadExtensionWeblinkData } from '../../hooks/use-load-weblink-data.extension';
+
 import { useTranslation } from 'react-i18next';
 import {
   BaseMarkType,
@@ -57,7 +60,6 @@ const mapSearchResultToMark = (searchResult: SearchResult): Mark => {
     entityId: searchResult.id,
     type: searchResult.domain,
     data: (searchResult?.content || []).join('\n'),
-    domain: searchResult.domain as SelectedTextDomain,
     title: searchResult.title,
     // 根据需要添加其他必要的 Mark 属性
   };
@@ -81,6 +83,9 @@ export const BaseSearchAndSelector = ({
   const [displayMode, setDisplayMode] = useState<'search' | 'list'>('list');
   const [isComposing, setIsComposing] = useState(false);
   const { t } = useTranslation();
+
+  // handle extension weblink
+  const { loadExtensionWeblinkData } = useLoadExtensionWeblinkData();
 
   console.log('activeValue', activeValue);
 
@@ -158,7 +163,17 @@ export const BaseSearchAndSelector = ({
         });
 
         const resData = res?.data?.data || [];
-        const marks = resData.map(mapSearchResultToMark);
+        let marks = resData.map(mapSearchResultToMark);
+
+        if (!isWeb) {
+          const { success, data: extensionWeblinkData } = await loadExtensionWeblinkData();
+          if (success) {
+            const filteredExtensionWeblinks = extensionWeblinkData.filter((item) =>
+              defaultFilter(item.title, searchVal, searchVal.toLowerCase().split(/\s+/)),
+            );
+            marks = [...marks, ...filteredExtensionWeblinks];
+          }
+        }
 
         // notes
         // 将 SearchResult 转换为 Mark
@@ -197,7 +212,7 @@ export const BaseSearchAndSelector = ({
     };
   }, []);
 
-  const sortedMarks = [
+  const sortedMarks: Mark[] = [
     ...((selectedItems || []).map((item) => ({ ...item, isSelected: true })) || []),
     ...(searchStore.noCategoryBigSearchRes?.filter(
       (item) => !selectedItems.some((selected) => selected.id === item.id),
@@ -230,10 +245,6 @@ export const BaseSearchAndSelector = ({
       onValueChange={setActiveValue}
       ref={ref}
       filter={(value, search, keywords) => {
-        if (value?.startsWith('refly-built-in')) {
-          return 1;
-        }
-
         return defaultFilter(value, search, keywords);
       }}
       className={classNames(showList ? 'search-active' : '')}

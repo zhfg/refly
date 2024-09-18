@@ -13,7 +13,7 @@ import { ContentSelectorBtn } from '@refly-packages/ai-workspace-common/modules/
 import { ResetContentSelectorBtn } from './reset-content-selector-btn';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { SearchDomain, SearchResult } from '@refly/openapi-schema';
-import { backendBaseMarkTypes, BaseMarkType, Mark, SelectedTextDomain } from '@refly/common-types';
+import { backendBaseMarkTypes, BaseMarkType, frontendBaseMarkTypes, Mark } from '@refly/common-types';
 
 const mapMarkToSearchResult = (marks: Mark[]): SearchResult[] => {
   let searchResults: SearchResult[] = [];
@@ -81,7 +81,7 @@ export const ContextManager = () => {
   };
 
   const selectedItems = processedContextItems?.filter((item) =>
-    backendBaseMarkTypes.includes(item?.type as BaseMarkType),
+    [...backendBaseMarkTypes, ...frontendBaseMarkTypes].includes(item?.type as BaseMarkType),
   );
 
   return (

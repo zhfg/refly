@@ -52,7 +52,7 @@ export interface Mark {
   target?: HTMLElement;
   xPath?: string; // 该元素对应的 xPath 路径，这个可以当做唯一 id
   scope?: MarkScope; // 是块级还是内联元素
-  domain: SelectedTextDomain; // 该元素对应的 domain, for selected text card
+  domain?: SelectedTextDomain; // 该元素对应的 domain, for selected text card
   cleanup?: () => void; // 清理函数
   icon?: any; // React.ReactNode; // 图标, 理论上应该逻辑和 UI 分离，但是目前为了方便，还是放在一起
 }

@@ -48,6 +48,7 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
       xPath,
       scope: selectorScopeRef.current,
       domain,
+      url: document?.location?.href || (document as any as Location)?.href || '',
     };
 
     return mark;
@@ -303,6 +304,7 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
           xPath: mark?.xPath,
           scope: selectorScopeRef.current,
           domain: mark?.domain,
+          url: mark?.url,
         },
       },
     };
