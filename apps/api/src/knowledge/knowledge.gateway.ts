@@ -35,7 +35,7 @@ export class NoteWsGateway implements OnGatewayConnection {
     this.server = Server.configure({
       port: config.get<number>('wsPort'),
       extensions: [
-        new HocuspocusLogger(),
+        new HocuspocusLogger({ log: this.logger.log }),
         new Database({
           fetch: async ({ context }: { context: NoteContext }) => {
             const { note } = context;
@@ -51,45 +51,56 @@ export class NoteWsGateway implements OnGatewayConnection {
             }
           },
           store: async ({ state, context }: { state: Buffer; context: NoteContext }) => {
-            const { note } = context;
+            const { user, note } = context;
 
             const content = state2Markdown(state);
+            const storageKey = note.storageKey || `note/${note.noteId}.txt`;
+            const stateStorageKey = note.stateStorageKey || `state/${note.noteId}`;
 
+            // Save content and ydoc state to object storage
+            await Promise.all([
+              this.minio.client.putObject(context.note.storageKey, content),
+              this.minio.client.putObject(context.note.stateStorageKey, state),
+            ]);
+
+            // Prepare note updates
             const notesUpdates: Prisma.NoteUpdateInput = {};
-            if (!note.stateStorageKey) {
-              notesUpdates.stateStorageKey = `state/${note.noteId}`;
-            }
             if (!note.storageKey) {
-              notesUpdates.storageKey = `note/${note.noteId}`;
+              notesUpdates.storageKey = storageKey;
+            }
+            if (!note.stateStorageKey) {
+              notesUpdates.stateStorageKey = stateStorageKey;
             }
             if (note.contentPreview !== content.slice(0, 500)) {
               notesUpdates.contentPreview = content.slice(0, 500);
             }
 
-            if (Object.keys(notesUpdates).length > 0) {
-              const updatedNote = await this.prisma.note.update({
-                where: { noteId: note.noteId },
-                data: notesUpdates,
-              });
-              context.note = updatedNote;
-            }
-
-            await Promise.all([
-              this.minio.client.putObject(context.note.storageKey, content),
-              this.minio.client.putObject(context.note.stateStorageKey, state),
-              this.elasticsearch.upsertNote({
-                id: context.note.noteId,
-                content,
-              }),
-
-              // TODO: put this in delayed queue
-              // this.rag.saveDataForUser(user, {
-              //   chunks: await this.rag.indexContent({
-              //     pageContent: content,
-              //     metadata: { nodeType: 'note', title: note.title, noteId: note.noteId },
-              //   }),
-              // }),
+            // Re-calculate storage size
+            const [storageStat, stateStorageStat] = await Promise.all([
+              this.minio.client.statObject(context.note.storageKey),
+              this.minio.client.statObject(context.note.stateStorageKey),
             ]);
+            notesUpdates.storageSize = storageStat.size + stateStorageStat.size;
+
+            // Re-index content to elasticsearch and vector store
+            const [, { size }] = await Promise.all([
+              this.elasticsearch.upsertNote({
+                id: note.noteId,
+                content,
+                uid: note.uid,
+              }),
+              this.rag.indexContent(user, {
+                pageContent: content,
+                metadata: { nodeType: 'note', title: note.title, noteId: note.noteId },
+              }),
+            ]);
+            notesUpdates.vectorSize = size;
+
+            const updatedNote = await this.prisma.note.update({
+              where: { noteId: note.noteId },
+              data: notesUpdates,
+            });
+            context.note = updatedNote;
           },
         }),
       ],

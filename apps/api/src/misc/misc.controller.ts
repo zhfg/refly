@@ -14,8 +14,15 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { MiscService } from '@/misc/misc.service';
-import { ScrapeWeblinkRequest, ScrapeWeblinkResponse, UploadResponse } from '@refly/openapi-schema';
+import {
+  ScrapeWeblinkRequest,
+  ScrapeWeblinkResponse,
+  UploadRequest,
+  UploadResponse,
+} from '@refly/openapi-schema';
 import { buildSuccessResponse } from '@/utils';
+import { User as UserModel } from '@prisma/client';
+import { User } from '@/utils/decorators/user.decorator';
 import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -33,11 +40,23 @@ export class MiscController {
   @UseGuards(JwtAuthGuard)
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadStaticFile(@UploadedFile() file: Express.Multer.File): Promise<UploadResponse> {
+  async uploadStaticFile(
+    @User() user: UserModel,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: UploadRequest,
+  ): Promise<UploadResponse> {
     if (!file) {
       throw new BadRequestException('No file uploaded.');
     }
-    const result = await this.miscService.uploadFile(file);
+    const result = await this.miscService.uploadFile(
+      user,
+      {
+        file,
+        entityId: body.entityId,
+        entityType: body.entityType,
+      },
+      true,
+    );
     return buildSuccessResponse(result);
   }
 

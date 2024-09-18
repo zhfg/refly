@@ -35,9 +35,9 @@ import {
 } from '@refly/openapi-schema';
 import { User as UserModel } from '@prisma/client';
 import { KnowledgeService } from './knowledge.service';
-import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
-import { buildSuccessResponse } from '../utils';
-import { User } from 'src/utils/decorators/user.decorator';
+import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
+import { buildSuccessResponse } from '@/utils';
+import { User } from '@/utils/decorators/user.decorator';
 import { collectionPO2DTO, notePO2DTO, resourcePO2DTO } from './knowledge.dto';
 
 @Controller('knowledge')

@@ -2,7 +2,8 @@ export const QUEUE_WEBLINK = 'weblink';
 export const QUEUE_RESOURCE = 'resource';
 export const QUEUE_SKILL = 'skill';
 export const QUEUE_SIMPLE_EVENT = 'simpleEvent';
-export const QUEUE_REPORT_TOKEN_USAGE = 'reportTokenUsage';
+export const QUEUE_SYNC_TOKEN_USAGE = 'syncTokenUsage';
+export const QUEUE_SYNC_STORAGE_USAGE = 'syncStorageUsage';
 
 export const CHANNEL_PROCESS_LINK = 'processLink';
 export const CHANNEL_PROCESS_LINK_BY_USER = 'processLinkByUser';

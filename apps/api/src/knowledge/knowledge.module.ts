@@ -8,7 +8,7 @@ import { CommonModule } from '../common/common.module';
 import { RAGModule } from '../rag/rag.module';
 import { ResourceProcessor } from './knowledge.processor';
 import { NoteWsGateway } from './knowledge.gateway';
-import { QUEUE_RESOURCE, QUEUE_SIMPLE_EVENT } from '../utils';
+import { QUEUE_RESOURCE, QUEUE_SIMPLE_EVENT, QUEUE_SYNC_STORAGE_USAGE } from '../utils';
 
 @Module({
   imports: [
@@ -17,6 +17,7 @@ import { QUEUE_RESOURCE, QUEUE_SIMPLE_EVENT } from '../utils';
     RAGModule,
     BullModule.registerQueue({ name: QUEUE_RESOURCE }),
     BullModule.registerQueue({ name: QUEUE_SIMPLE_EVENT }),
+    BullModule.registerQueue({ name: QUEUE_SYNC_STORAGE_USAGE }),
   ],
   controllers: [KnowledgeController],
   providers: [KnowledgeService, ResourceProcessor, NoteWsGateway],

@@ -101,11 +101,13 @@ export class AuthService {
       userExists = await this.prisma.user.findUnique({ where: { name } });
     }
 
+    const uid = genUID();
+
     // download avatar if profile photo exists
     let avatar: string;
     try {
       if (photos?.length > 0) {
-        avatar = (await this.miscService.dumpFileFromURL(photos[0].value)).url;
+        avatar = (await this.miscService.dumpFileFromURL({ uid }, photos[0].value)).url;
       }
     } catch (e) {
       this.logger.warn(`failed to download avatar: ${e}`);
@@ -115,7 +117,7 @@ export class AuthService {
       data: {
         name,
         nickname: displayName,
-        uid: genUID(),
+        uid,
         email,
         avatar,
       },

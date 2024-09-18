@@ -8,11 +8,17 @@ import {
   PriceLookupKey,
   User,
 } from '@refly/openapi-schema';
-import { genUsageMeterID, getSubscriptionInfoFromLookupKey } from '@refly/utils';
+import {
+  genTokenUsageMeterID,
+  genStorageUsageMeterID,
+  getSubscriptionInfoFromLookupKey,
+} from '@refly/utils';
 import {
   CreateSubscriptionParam,
-  ReportTokenUsageJobData,
+  SyncTokenUsageJobData,
+  SyncStorageUsageJobData,
   tokenUsageMeterPO2DTO,
+  storageUsageMeterPO2DTO,
 } from '@/subscription/subscription.dto';
 import { pick } from '@/utils';
 import { Subscription as SubscriptionModel, User as UserModel } from '@prisma/client';
@@ -325,22 +331,61 @@ export class SubscriptionService {
 
     // Find the token quota for the plan
     const planType = sub?.planType || 'free';
-    const tokenQuota = await this.prisma.subscriptionUsageQuota.findUnique({
+    const usageQuota = await this.prisma.subscriptionUsageQuota.findUnique({
       where: { planType },
     });
 
     return this.prisma.tokenUsageMeter.create({
       data: {
-        meterId: genUsageMeterID(),
+        meterId: genTokenUsageMeterID(),
         uid,
         subscriptionId: sub?.subscriptionId,
         startAt,
         endAt: new Date(startAt.getFullYear(), startAt.getMonth() + 1, startAt.getDate()),
-        t1TokenQuota: tokenQuota?.t1TokenQuota || 0,
+        t1TokenQuota: usageQuota?.t1TokenQuota || 0,
         t1TokenUsed: 0,
-        t2TokenQuota: tokenQuota?.t2TokenQuota || 0,
+        t2TokenQuota: usageQuota?.t2TokenQuota || 0,
         t2TokenUsed: 0,
       },
+    });
+  }
+
+  async getOrCreateStorageUsageMeter(user: UserModel, sub?: SubscriptionModel) {
+    const { uid } = user;
+
+    if (user.subscriptionId && !sub) {
+      sub = await this.prisma.subscription.findUnique({
+        where: { subscriptionId: user.subscriptionId },
+      });
+    }
+
+    return this.prisma.$transaction(async (prisma) => {
+      const activeMeter = await prisma.storageUsageMeter.findFirst({
+        where: {
+          uid,
+          deletedAt: null,
+        },
+      });
+
+      if (activeMeter) {
+        return activeMeter;
+      }
+
+      // Find the storage quota for the plan
+      const planType = sub?.planType || 'free';
+      const usageQuota = await prisma.subscriptionUsageQuota.findUnique({
+        where: { planType },
+      });
+
+      return prisma.storageUsageMeter.create({
+        data: {
+          meterId: genStorageUsageMeterID(),
+          uid,
+          subscriptionId: sub?.subscriptionId,
+          objectStorageQuota: usageQuota?.objectStorageQuota,
+          vectorStorageQuota: usageQuota?.vectorStorageQuota,
+        },
+      });
     });
   }
 
@@ -351,12 +396,18 @@ export class SubscriptionService {
       });
     }
 
-    const tokenMeter = await this.getOrCreateTokenUsageMeter(user, sub);
+    const [tokenMeter, storageMeter] = await Promise.all([
+      this.getOrCreateTokenUsageMeter(user, sub),
+      this.getOrCreateStorageUsageMeter(user, sub),
+    ]);
 
-    return { token: tokenUsageMeterPO2DTO(tokenMeter) };
+    return {
+      token: tokenUsageMeterPO2DTO(tokenMeter),
+      storage: storageUsageMeterPO2DTO(storageMeter),
+    };
   }
 
-  async updateTokenUsage(data: ReportTokenUsageJobData) {
+  async syncTokenUsage(data: SyncTokenUsageJobData) {
     const { uid, usage, skill, timestamp } = data;
 
     await this.prisma.$transaction([
@@ -383,6 +434,64 @@ export class SubscriptionService {
         },
       }),
     ]);
+  }
+
+  async syncStorageUsage(data: SyncStorageUsageJobData) {
+    const { uid, timestamp } = data;
+
+    const user = await this.prisma.user.findUnique({ where: { uid } });
+    if (!user) {
+      this.logger.error(`No user found for uid ${uid}`);
+      return;
+    }
+
+    this.logger.log(`Syncing storage usage for user ${uid}`);
+
+    const activeMeter = await this.getOrCreateStorageUsageMeter(user);
+
+    // If the meter has been synced at a time after the timestamp, skip it
+    if (activeMeter.syncedAt && activeMeter.syncedAt > timestamp) {
+      this.logger.log(`Storage usage for user ${uid} already synced at ${activeMeter.syncedAt}`);
+      return;
+    }
+
+    await this.prisma.$transaction(async (prisma) => {
+      const [resourceSizeSum, noteSizeSum, fileSizeSum] = await Promise.all([
+        prisma.resource.aggregate({
+          _sum: {
+            storageSize: true,
+            vectorSize: true,
+          },
+          where: { uid, deletedAt: null },
+        }),
+        prisma.note.aggregate({
+          _sum: {
+            storageSize: true,
+            vectorSize: true,
+          },
+          where: { uid, deletedAt: null },
+        }),
+        prisma.staticFile.aggregate({
+          _sum: {
+            storageSize: true,
+          },
+          where: { uid, deletedAt: null },
+        }),
+      ]);
+
+      await prisma.storageUsageMeter.update({
+        where: { meterId: activeMeter.meterId },
+        data: {
+          resourceSize: resourceSizeSum._sum.storageSize,
+          noteSize: noteSizeSum._sum.storageSize,
+          fileSize: fileSizeSum._sum.storageSize,
+          vectorStorageUsed: resourceSizeSum._sum.vectorSize + noteSizeSum._sum.vectorSize,
+          syncedAt: timestamp,
+        },
+      });
+    });
+
+    this.logger.log(`Storage usage for user ${uid} synced at ${timestamp}`);
   }
 }
 

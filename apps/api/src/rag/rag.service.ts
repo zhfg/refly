@@ -11,14 +11,7 @@ import { cleanMarkdownForIngest } from '@refly/utils';
 
 import { User } from '@refly/openapi-schema';
 import { MINIO_INTERNAL, MinioService } from '@/common/minio.service';
-import {
-  HybridSearchParam,
-  ContentNode,
-  ContentData,
-  ContentPayload,
-  ReaderResult,
-  NodeMeta,
-} from './rag.dto';
+import { HybridSearchParam, ContentData, ContentPayload, ReaderResult, NodeMeta } from './rag.dto';
 import { QdrantService } from '@/common/qdrant.service';
 import { Condition, PointStruct } from '@/common/qdrant.dto';
 import { genResourceUuid, streamToBuffer } from '@/utils';
@@ -135,7 +128,8 @@ export class RAGService {
     return await this.splitter.splitText(cleanMarkdownForIngest(text));
   }
 
-  async indexContent(doc: Document<NodeMeta>): Promise<ContentNode[]> {
+  async indexContent(user: User, doc: Document<NodeMeta>): Promise<{ size: number }> {
+    const { uid } = user;
     const { pageContent, metadata } = doc;
     const { nodeType, noteId, resourceId } = metadata;
     const docId = nodeType === 'note' ? noteId : resourceId;
@@ -143,20 +137,23 @@ export class RAGService {
     const chunks = await this.chunkText(pageContent);
     const chunkEmbeds = await this.embeddings.embedDocuments(chunks);
 
-    const nodes: ContentNode[] = [];
+    const points: PointStruct[] = [];
     for (let i = 0; i < chunks.length; i++) {
-      nodes.push({
+      points.push({
         id: genResourceUuid(`${docId}-${i}`),
         vector: chunkEmbeds[i],
         payload: {
           ...metadata,
           seq: i,
           content: chunks[i],
+          tenantId: uid,
         },
       });
     }
 
-    return nodes;
+    await this.qdrant.batchSaveData(points);
+
+    return { size: QdrantService.estimatePointsSize(points) };
   }
 
   /**
@@ -174,19 +171,6 @@ export class RAGService {
     const readable = await this.minio.client.getObject(storageKey);
     const buffer = await streamToBuffer(readable);
     return ContentAvroType.fromBuffer(buffer) as ContentData;
-  }
-
-  async saveDataForUser(user: User, data: ContentData) {
-    const points: PointStruct[] = data.chunks.map((chunk) => ({
-      id: chunk.id,
-      vector: chunk.vector,
-      payload: {
-        ...chunk.payload,
-        tenantId: user.uid,
-      },
-    }));
-
-    return this.qdrant.batchSaveData(points);
   }
 
   async deleteResourceNodes(user: User, resourceId: string) {
