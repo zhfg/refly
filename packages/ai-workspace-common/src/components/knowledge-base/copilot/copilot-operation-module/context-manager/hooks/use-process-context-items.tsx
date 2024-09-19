@@ -77,5 +77,31 @@ export const useProcessContextItems = () => {
 
   const processedContextItems = currentSelectedMarks.map(mapMarkToItem);
 
-  return { processedContextItems };
+  const getcontextItemTypes = () => {
+    const types: Record<string, number> = {
+      resource: 0,
+      note: 0,
+      collection: 0,
+    };
+
+    processedContextItems.forEach((item) => {
+      if (!types[item.type]) {
+        types[item.type] = 1;
+      } else {
+        types[item.type] += 1;
+      }
+    });
+
+    for (const type in types) {
+      if (!types[type]) {
+        delete types[type];
+      }
+    }
+
+    return types;
+  };
+
+  const contextItemTypes = getcontextItemTypes();
+
+  return { processedContextItems, contextItemTypes };
 };

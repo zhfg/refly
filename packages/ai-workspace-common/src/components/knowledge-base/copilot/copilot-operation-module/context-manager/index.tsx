@@ -104,12 +104,14 @@ export const ContextManager = () => {
 
           <ResetContentSelectorBtn />
 
-          <ContextFilter
-            initialConfig={skillStore?.selectedSkill?.invocationConfig?.context}
-            onFilterChange={(newConfig) => {
-              console.log('newConfig', newConfig);
-            }}
-          />
+          {skillStore?.selectedSkill && (
+            <ContextFilter
+              initialConfig={skillStore?.selectedSkill?.invocationConfig?.context}
+              onFilterChange={(newConfig) => {
+                console.log('newConfig', newConfig);
+              }}
+            />
+          )}
 
           {processedContextItems.map((item) => (
             <ContextItem
