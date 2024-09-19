@@ -34,28 +34,6 @@ type ContextFilterProps = {
 const defaultLimit = 16;
 const defaultMaxLimit = 16;
 
-const defaultConfig: SkillInvocationRuleGroup = {
-  rules: [
-    { key: 'resources', limit: 10 },
-    { key: 'notes', limit: 10 },
-    { key: 'collections', limit: 10 },
-    {
-      key: 'contentList',
-      limit: 1,
-      rules: [
-        { key: 'resourceSelection' as SelectedTextDomain, limit: 1 },
-        { key: 'noteSelection' as SelectedTextDomain, limit: 1 },
-        { key: 'extensionWeblinkSelection' as SelectedTextDomain, limit: 1 },
-        { key: 'noteCursorSelection' as SelectedTextDomain, limit: 1 },
-        { key: 'noteBeforeCursorSelection' as SelectedTextDomain, limit: 1 },
-        { key: 'noteAfterCursorSelection' as SelectedTextDomain, limit: 1 },
-      ],
-      relation: 'mutuallyExclusive',
-    },
-  ],
-  relation: 'mutuallyExclusive',
-};
-
 const NumberInputWithSlider = ({ min, max, value, onChange }) => {
   return (
     <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -146,6 +124,28 @@ type FilterCondition = {
   key: string;
   limit: number;
   initialLimit: number;
+};
+
+const defaultConfig: SkillInvocationRuleGroup = {
+  rules: [
+    { key: 'resources', limit: 10 },
+    { key: 'notes', limit: 10 },
+    { key: 'collections', limit: 10 },
+    {
+      key: 'contentList',
+      limit: 1,
+      rules: [
+        { key: 'resourceSelection' as SelectedTextDomain, limit: 1 },
+        { key: 'noteSelection' as SelectedTextDomain, limit: 1 },
+        { key: 'extensionWeblinkSelection' as SelectedTextDomain, limit: 1 },
+        { key: 'noteCursorSelection' as SelectedTextDomain, limit: 1 },
+        { key: 'noteBeforeCursorSelection' as SelectedTextDomain, limit: 1 },
+        { key: 'noteAfterCursorSelection' as SelectedTextDomain, limit: 1 },
+      ],
+      relation: 'mutuallyExclusive',
+    },
+  ],
+  relation: 'mutuallyExclusive',
 };
 
 export const ContextFilter: React.FC<ContextFilterProps> = ({ initialConfig = defaultConfig, onFilterChange }) => {
