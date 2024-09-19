@@ -16,6 +16,11 @@ export class EventProcessor {
   async processSimpleEvent(job: Job<SimpleEventData>) {
     this.logger.log(`[processSimpleEvent] job: ${JSON.stringify(job)}`);
 
-    await this.eventService.handleSimpleEvent(job.data);
+    try {
+      await this.eventService.handleSimpleEvent(job.data);
+    } catch (error) {
+      this.logger.error(`[processSimpleEvent] error: ${error?.stack}`);
+      throw error;
+    }
   }
 }

@@ -579,10 +579,12 @@ export class SubscriptionService {
       await prisma.storageUsageMeter.update({
         where: { meterId: activeMeter.meterId },
         data: {
-          resourceSize: resourceSizeSum._sum.storageSize,
-          noteSize: noteSizeSum._sum.storageSize,
-          fileSize: fileSizeSum._sum.storageSize,
-          vectorStorageUsed: resourceSizeSum._sum.vectorSize + noteSizeSum._sum.vectorSize,
+          resourceSize: resourceSizeSum._sum.storageSize || 0,
+          noteSize: noteSizeSum._sum.storageSize || 0,
+          fileSize: fileSizeSum._sum.storageSize || 0,
+          vectorStorageUsed:
+            (resourceSizeSum._sum.vectorSize || BigInt(0)) +
+            (noteSizeSum._sum.vectorSize || BigInt(0)),
           syncedAt: timestamp,
         },
       });

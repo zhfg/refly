@@ -16,6 +16,11 @@ export class ResourceProcessor {
   async handleFinalizeResource(job: Job<FinalizeResourceParam>) {
     this.logger.log(`[handleFinalizeResource] job: ${JSON.stringify(job)}`);
 
-    await this.knowledgeService.finalizeResource(job.data);
+    try {
+      await this.knowledgeService.finalizeResource(job.data);
+    } catch (error) {
+      this.logger.error(`[handleFinalizeResource] error: ${error?.stack}`);
+      throw error;
+    }
   }
 }

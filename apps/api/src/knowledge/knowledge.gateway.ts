@@ -14,6 +14,7 @@ import { state2Markdown } from '@refly/utils';
 import { RAGService } from '@/rag/rag.service';
 import { streamToBuffer } from '@/utils';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
+import { SubscriptionService } from '@/subscription/subscription.service';
 
 interface NoteContext {
   note: Note;
@@ -30,6 +31,7 @@ export class NoteWsGateway implements OnGatewayConnection {
     private prisma: PrismaService,
     private elasticsearch: ElasticsearchService,
     private config: ConfigService,
+    private subscriptionService: SubscriptionService,
     @Inject(MINIO_INTERNAL) private minio: MinioService,
   ) {
     this.server = Server.configure({
@@ -54,13 +56,13 @@ export class NoteWsGateway implements OnGatewayConnection {
             const { user, note } = context;
 
             const content = state2Markdown(state);
-            const storageKey = note.storageKey || `note/${note.noteId}.txt`;
+            const storageKey = note.storageKey || `notes/${note.noteId}.txt`;
             const stateStorageKey = note.stateStorageKey || `state/${note.noteId}`;
 
             // Save content and ydoc state to object storage
             await Promise.all([
-              this.minio.client.putObject(context.note.storageKey, content),
-              this.minio.client.putObject(context.note.stateStorageKey, state),
+              this.minio.client.putObject(storageKey, content),
+              this.minio.client.putObject(stateStorageKey, state),
             ]);
 
             // Prepare note updates
@@ -77,8 +79,8 @@ export class NoteWsGateway implements OnGatewayConnection {
 
             // Re-calculate storage size
             const [storageStat, stateStorageStat] = await Promise.all([
-              this.minio.client.statObject(context.note.storageKey),
-              this.minio.client.statObject(context.note.stateStorageKey),
+              this.minio.client.statObject(storageKey),
+              this.minio.client.statObject(stateStorageKey),
             ]);
             notesUpdates.storageSize = storageStat.size + stateStorageStat.size;
 
@@ -101,6 +103,11 @@ export class NoteWsGateway implements OnGatewayConnection {
               data: notesUpdates,
             });
             context.note = updatedNote;
+
+            await this.subscriptionService.syncStorageUsage({
+              uid: user.uid,
+              timestamp: new Date(),
+            });
           },
         }),
       ],

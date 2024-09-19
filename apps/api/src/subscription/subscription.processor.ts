@@ -15,7 +15,12 @@ export class SyncTokenUsageProcessor {
   @Process()
   async handleSyncTokenUsage(job: Job<SyncTokenUsageJobData>) {
     this.logger.log(`[handleSyncTokenUsage] job: ${JSON.stringify(job)}`);
-    await this.subscriptionService.syncTokenUsage(job.data);
+    try {
+      await this.subscriptionService.syncTokenUsage(job.data);
+    } catch (error) {
+      this.logger.error(`[handleSyncTokenUsage] error: ${error?.stack}`);
+      throw error;
+    }
   }
 }
 
@@ -28,6 +33,11 @@ export class SyncStorageUsageProcessor {
   @Process()
   async handleSyncStorageUsage(job: Job<SyncStorageUsageJobData>) {
     this.logger.log(`[handleSyncStorageUsage] job: ${JSON.stringify(job)}`);
-    await this.subscriptionService.syncStorageUsage(job.data);
+    try {
+      await this.subscriptionService.syncStorageUsage(job.data);
+    } catch (error) {
+      this.logger.error(`[handleSyncStorageUsage] error: ${error?.stack}`);
+      throw error;
+    }
   }
 }
