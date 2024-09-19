@@ -13,6 +13,15 @@
     align-items: center;
     justify-content: space-between;
     padding: 16px 12px 0;
+    .knowledge-base-directory-intro-small {
+      padding-bottom: 16px;
+      height: 48px;
+      width: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .delete-button {
       margin-left: 12px;
     }

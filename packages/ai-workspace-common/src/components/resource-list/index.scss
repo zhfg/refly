@@ -1,31 +1,47 @@
 .knowledge-base-resource-list-container {
   height: 100%;
+
+  .add-resource-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    border: solid 1px rgba(0, 0, 0, 0.11);
+    cursor: pointer;
+  }
+  .add-resource-btn:hover {
+    background: #eeeeee;
+  }
+
+  .knowledge-base-resource-list-container-small {
+    padding: 0 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
   .knowledge-base-directory-search-container {
     padding: 12px 12px 0 12px;
     height: 84px;
     box-sizing: border-box;
+
     .knowledge-base-directory-search-container-inner {
       display: flex;
       align-items: center;
+
       .add-resource-btn {
-        margin-left: 12px;
         flex-shrink: 0;
-        width: 32px;
-        height: 32px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border-radius: 8px;
-        border: solid 1px rgba(0, 0, 0, 0.11);
-        cursor: pointer;
+        margin-left: 12px;
       }
-      .add-resource-btn:hover {
-        background: #eeeeee;
-      }
+
       .knowledge-base-directory-search {
         .arco-input-inner-wrapper {
           border-radius: 8px;
         }
+
         .arco-input {
           font-size: 12px;
         }

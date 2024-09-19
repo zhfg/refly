@@ -59,7 +59,7 @@ export const Subscription = () => {
           <div className="title">
             <div className="title-left">
               {title}
-              <Tooltip content={description}>
+              <Tooltip mini color="white" content={<div style={{ color: '#000' }}>{description}</div>}>
                 <HiOutlineQuestionMarkCircle className="info-icon" />
               </Tooltip>
             </div>

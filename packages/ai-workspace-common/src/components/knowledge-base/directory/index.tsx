@@ -19,7 +19,7 @@ import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common
 import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
 import { useTranslation } from 'react-i18next';
 
-export const KnowledgeBaseDirectory = () => {
+export const KnowledgeBaseDirectory = (props: { small?: boolean }) => {
   const { t } = useTranslation();
   const [isFetching, setIsFetching] = useState(false);
   const reloadKnowledgeBaseState = useReloadListState();
@@ -32,6 +32,7 @@ export const KnowledgeBaseDirectory = () => {
   const navigate = useNavigate();
   const introRef = useRef<HTMLDivElement>(null);
   const [introHeight, setIntroHeight] = useState(0);
+  const { small } = props;
 
   const handleGetDetail = async (collectionId: string, resourceId: string) => {
     setIsFetching(true);
@@ -125,38 +126,50 @@ export const KnowledgeBaseDirectory = () => {
   };
 
   return (
-    <div className="knowledge-base-directory-container">
+    <div className="knowledge-base-directory-container" style={small ? { width: 72, minWidth: 72 } : {}}>
       <div className="knowledge-base-directory-intro" ref={introRef}>
-        <div className="intro-body">
-          <div className="intro-icon">
+        {small ? (
+          <div className="knowledge-base-directory-intro-small">
             <HiOutlineBookOpen style={{ fontSize: 28, color: 'rgba(0, 0, 0, .5)' }} />
           </div>
-          <div className="intro-content">
-            <div className="intro-title">{knowledgeBaseStore?.currentKnowledgeBase?.title}</div>
-            <div className="intro-meta">
-              <span>
-                {time(knowledgeBaseStore?.currentKnowledgeBase?.updatedAt as string, LOCALE.EN)
-                  .utc()
-                  .fromNow()}
-              </span>
-              {' · '}
-              <span>
-                {t('knowledgeBase.directory.resourceCount', {
-                  count: knowledgeBaseStore?.currentKnowledgeBase?.resources?.length || 0,
-                })}
-              </span>
+        ) : (
+          <>
+            <div className="intro-body">
+              <div className="intro-icon">
+                <HiOutlineBookOpen style={{ fontSize: 28, color: 'rgba(0, 0, 0, .5)' }} />
+              </div>
+              <div className="intro-content">
+                <div className="intro-title">{knowledgeBaseStore?.currentKnowledgeBase?.title}</div>
+                <div className="intro-meta">
+                  <span>
+                    {time(knowledgeBaseStore?.currentKnowledgeBase?.updatedAt as string, LOCALE.EN)
+                      .utc()
+                      .fromNow()}
+                  </span>
+                  {' · '}
+                  <span>
+                    {t('knowledgeBase.directory.resourceCount', {
+                      count: knowledgeBaseStore?.currentKnowledgeBase?.resources?.length || 0,
+                    })}
+                  </span>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        {knowledgeBaseStore?.currentKnowledgeBase && (
-          <DeleteDropdownMenu
-            type="knowledgeBase"
-            data={knowledgeBaseStore?.currentKnowledgeBase}
-            postDeleteList={handleDeleteKnowledgeBase}
-          />
+            {knowledgeBaseStore?.currentKnowledgeBase && (
+              <DeleteDropdownMenu
+                type="knowledgeBase"
+                data={knowledgeBaseStore?.currentKnowledgeBase}
+                postDeleteList={handleDeleteKnowledgeBase}
+              />
+            )}
+          </>
         )}
       </div>
-      <div className="knowledge-base-directory-list-container" style={{ height: `calc(100% - ${introHeight}px)` }}>
+
+      <div
+        className="knowledge-base-directory-list-container"
+        style={{ height: `calc(100% - ${introHeight}px)`, minWidth: small ? 72 : 200 }}
+      >
         <ResourceList
           placeholder={t('knowledgeBase.directory.searchPlaceholder')}
           isFetching={isFetching}
@@ -164,6 +177,7 @@ export const KnowledgeBaseDirectory = () => {
           collectionId={kbId}
           canDelete={true}
           showAdd={true}
+          small={small}
           handleItemDelete={(item: RemoveResourceFromCollectionRequest) => handleDeleteResource(item)}
           handleItemClick={(item) => {
             jumpToReadResource({

@@ -1,4 +1,6 @@
 import { useEffect } from "react"
+import { Helmet } from "react-helmet"
+import { useTranslation } from "react-i18next"
 import { ErrorBoundary } from "@sentry/react"
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels"
 import { useSearchParams } from "@refly-packages/ai-workspace-common/utils/router"
@@ -12,6 +14,7 @@ import { useSkillJobForCopilot } from "@refly-packages/ai-workspace-common/store
 import "./index.scss"
 
 const SkillDetailPage = () => {
+  const { t } = useTranslation()
   const skillJobForCopilot = useSkillJobForCopilot()
   const [searchParams] = useSearchParams()
   const jobId = searchParams.get("jobId") as string
@@ -22,6 +25,11 @@ const SkillDetailPage = () => {
 
   return (
     <ErrorBoundary>
+      <Helmet>
+        <title>
+          {t("productName")} | {t("tabMeta.skill.title")}
+        </title>
+      </Helmet>
       <div className="skill-detail-page">
         <PanelGroup direction="horizontal">
           <Panel

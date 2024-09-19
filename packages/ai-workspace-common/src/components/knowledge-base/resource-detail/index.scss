@@ -10,6 +10,47 @@
     align-items: center;
   }
 
+  .parse_failed-tip {
+    font-size: 18px;
+    font-weight: 400;
+    color: rgb(220 38 38);
+    padding: 2px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    &:hover {
+      background: rgba(255, 0, 0, 0.1);
+    }
+  }
+
+  .wait_index-alert {
+    padding: 6px 15px;
+    .arco-alert-content {
+      font-size: 13px;
+      color: rgb(202 138 4);
+    }
+  }
+
+  .index_failed-alert {
+    padding: 6px 15px;
+    .arco-alert-content {
+      font-size: 13px;
+      color: rgb(220 38 38);
+    }
+  }
+
+  .retry-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgb(220 38 38);
+    border-color: rgb(220 38 38);
+    &:hover {
+      color: rgba(220, 38, 38, 0.8) !important;
+      background-color: rgba(220, 38, 38, 0.1) !important;
+      border-color: rgba(220, 38, 38, 0.8) !important;
+    }
+  }
+
   .knowledge-base-resource-meta {
     width: 95%;
     max-width: 1024px;

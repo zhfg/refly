@@ -20,7 +20,8 @@
     "required": "必填项",
     "empty": "暂无内容",
     "selectContext": "选择待使用上下文",
-    "emptyInput": "内容为空，请填入或选择内容"
+    "emptyInput": "内容为空，请填入或选择内容",
+    "retry": "重试"
   },
   "systemMaintenanceShutdown": {
     "title": "尊敬的用户，您好！",
@@ -40,6 +41,9 @@
     },
     "settings": {
       "title": "设置"
+    },
+    "skill": {
+      "title": "技能"
     }
   },
   "landingPage": {
@@ -244,7 +248,13 @@
       "textTitlePlaceholder": "输入标题",
       "textUrlPlaceholder": "输入或粘贴网页链接",
       "textContentPlaceholder": "输入或粘贴文本"
-    }
+    },
+    "wait_parse": "内容解析中",
+    "parse_failed": "解析失败，点击重试",
+    "wait_index": "模型记忆中",
+    "wait_index_tip": "该资源暂时不支持 AI 搜索，需等待模型记忆完成",
+    "index_failed": "模型记忆失败",
+    "index_failed_tip": "点击重试"
   },
   "loggedHomePage": {
     "newThreadText": "新会话",

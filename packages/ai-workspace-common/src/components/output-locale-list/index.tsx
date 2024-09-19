@@ -11,7 +11,12 @@ import './index.scss';
 import { getDefaultPopupContainer, getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { IconCaretDown, IconTranslate } from '@arco-design/web-react/icon';
 
-export const OutputLocaleList = (props: { showTitle?: boolean; width?: number }) => {
+export const OutputLocaleList = (props: {
+  children: any;
+  showTitle?: boolean;
+  width?: number;
+  position?: 'tl' | 'tr' | 'bl' | 'br';
+}) => {
   // i18n
   const { t, i18n } = useTranslation();
   const uiLocale = i18n?.languages?.[0] as LOCALE;
@@ -57,16 +62,18 @@ export const OutputLocaleList = (props: { showTitle?: boolean; width?: number })
   return (
     <Dropdown
       droplist={dropList}
-      position="tl"
+      position={props.position || 'tl'}
       trigger="click"
       getPopupContainer={() => {
         return getPopupContainer();
       }}
     >
-      <Button icon={<IconTranslate />} type="text" className="assist-action-item" style={{ fontSize: 12 }}>
-        {/* <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span> */}
-        <IconCaretDown />
-      </Button>
+      {props.children || (
+        <Button icon={<IconTranslate />} type="text" className="assist-action-item" style={{ fontSize: 12 }}>
+          {/* <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span> */}
+          <IconCaretDown />
+        </Button>
+      )}
     </Dropdown>
   );
 };

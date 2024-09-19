@@ -20,7 +20,8 @@
     "required": "This item is required",
     "empty": "No content",
     "selectContext": "Select Context",
-    "emptyInput": "Content is empty, please fill in or select content"
+    "emptyInput": "Content is empty, please fill in or select content",
+    "retry": "Retry"
   },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",
@@ -40,6 +41,9 @@
     },
     "settings": {
       "title": "Settings"
+    },
+    "skill": {
+      "title": "Skills"
     }
   },
   "landingPage": {
@@ -244,7 +248,13 @@
       "textTitlePlaceholder": "Enter title",
       "textUrlPlaceholder": "Enter or paste web link",
       "textContentPlaceholder": "Enter or paste text"
-    }
+    },
+    "wait_parse": "Parsing",
+    "parse_failed": "Parse Failed, click to retry",
+    "wait_index": "Memorizing",
+    "wait_index_tip": "The resource is temporarily not ready for AI search and needs to wait for memorization to complete",
+    "index_failed": "Memorization Failed",
+    "index_failed_tip": "Click to retry"
   },
   "loggedHomePage": {
     "newThreadText": "New Thread",

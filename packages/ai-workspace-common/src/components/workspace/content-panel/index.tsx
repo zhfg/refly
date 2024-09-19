@@ -83,8 +83,14 @@ const NewFileButton = (props: { val: string }) => {
 };
 
 const ContentHeader = (props: { setVal: (val: string) => void; hitTop: boolean; val: string }) => {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { setVal, hitTop } = props;
+
+  const handleTabChange = (key: string) => {
+    setVal(key);
+    navigate(`?tab=${key}`);
+  };
 
   return (
     <div
@@ -100,7 +106,8 @@ const ContentHeader = (props: { setVal: (val: string) => void; hitTop: boolean; 
           size="large"
           className="content-panel-radio-group"
           defaultValue="resource"
-          onChange={(val) => setVal(val)}
+          value={props.val}
+          onChange={(val) => handleTabChange(val)}
           style={{ borderRadius: 8 }}
         >
           <Radio value="resource">{t('workspace.contentPanel.tabPanel.resource')}</Radio>
@@ -129,9 +136,13 @@ export const ContentPanel = () => {
   const { t } = useTranslation();
 
   useEffect(() => {
+    const tab = searchParams.get('tab') as string;
+    setVal(tab || 'resource');
+  }, [searchParams]);
+
+  useEffect(() => {
     const paySuccess = searchParams.get('paySuccess');
     const payCancel = searchParams.get('payCancel');
-    navigate('/', { replace: true });
     if (paySuccess || payCancel) {
       setTimeout(() => {
         const title = paySuccess ? t('settings.action.paySuccessNotify') : t('settings.action.payCancelNotify');
@@ -149,6 +160,7 @@ export const ContentPanel = () => {
             content: description,
           });
         }
+        navigate('/', { replace: true });
       }, 1);
     }
   }, []);

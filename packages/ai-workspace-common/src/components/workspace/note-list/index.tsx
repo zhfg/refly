@@ -7,7 +7,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { Note } from '@refly/openapi-schema';
 import { List, Empty } from '@arco-design/web-react';
 import { PiNotepad } from 'react-icons/pi';
-import { CardBox } from '../card-box';
+import { NoteCard } from '@refly-packages/ai-workspace-common/components/workspace/note-list/note-card';
 import { ScrollLoading } from '../scroll-loading';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
@@ -75,12 +75,10 @@ export const NoteList = (props: NoteListProps) => {
           }}
           className="knowledge-base-list-item-container"
           actionLayout="vertical"
-          onClick={() => jumpToNote({ noteId: item.noteId })}
           actions={[
-            <CardBox
+            <NoteCard
               cardData={item}
               index={key}
-              type="note"
               cardIcon={<PiNotepad style={{ fontSize: '32px' }} />}
               onClick={() => jumpToNote({ noteId: item.noteId })}
             >
@@ -99,7 +97,7 @@ export const NoteList = (props: NoteListProps) => {
                   />
                 </div>
               </div>
-            </CardBox>,
+            </NoteCard>,
           ]}
         ></List.Item>
       )}

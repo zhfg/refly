@@ -1197,7 +1197,7 @@ export const $ChatTaskResponse = {
 export const $IndexStatus = {
   type: 'string',
   description: 'Resource index status',
-  enum: ['init', 'wait_parse', 'wait_index', 'finish', 'failed', 'unavailable'],
+  enum: ['init', 'wait_parse', 'wait_index', 'finish', 'parse_failed', 'index_failed'],
 } as const;
 
 export const $SubscriptionInterval = {
@@ -1447,6 +1447,40 @@ export const $UpsertResourceResponse = {
 } as const;
 
 export const $BatchCreateResourceResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Resource list',
+          items: {
+            $ref: '#/components/schemas/Resource',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $ReindexResourceRequest = {
+  type: 'object',
+  required: ['resourceIds'],
+  properties: {
+    resourceIds: {
+      type: 'array',
+      description: 'Resource ID list',
+      items: {
+        type: 'string',
+      },
+    },
+  },
+} as const;
+
+export const $ReindexResourceResponse = {
   allOf: [
     {
       $ref: '#/components/schemas/BaseResponse',

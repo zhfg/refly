@@ -97,7 +97,7 @@ export const defaultMarkdownSerializer = new MarkdownSerializer(
       state.renderInline(node, false);
       state.closeBlock(node);
     },
-    horizontal_rule(state, node) {
+    horizontalRule(state, node) {
       state.write(node.attrs.markup || '---');
       state.closeBlock(node);
     },
@@ -116,7 +116,6 @@ export const defaultMarkdownSerializer = new MarkdownSerializer(
     listItem(state, node) {
       state.renderContent(node);
     },
-    // TODO: 先保障不出错，后续修复
     taskList(state, node) {
       state.renderList(node, '  ', () => (node.attrs.bullet || '*') + ' ');
     },
@@ -140,7 +139,7 @@ export const defaultMarkdownSerializer = new MarkdownSerializer(
           ')',
       );
     },
-    hard_break(state, node, parent, index) {
+    hardBreak(state, node, parent, index) {
       for (let i = index + 1; i < parent.childCount; i++)
         if (parent.child(i).type != node.type) {
           state.write('\\\n');
