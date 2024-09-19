@@ -13,12 +13,14 @@ import { Separator } from './ui/separator';
 import GenerativeMenuSwitch from './generative/generative-menu-switch';
 import GenerativeBlockMenu from './generative/generative-block-menu';
 import { TextButtons } from './selectors/text-buttons';
-import { suggestionItems } from './slash-command';
+import { configureSuggestionItems } from './slash-command';
 
 import './styles/globals.css';
 import './styles/prosemirror.css';
 
-export const CollabEditorCommand = () => {
+export const CollabEditorCommand = (props: { entityId: string; entityType: string }) => {
+  const suggestionItems = configureSuggestionItems(props);
+
   return (
     <EditorCommand className="z-50 h-auto max-h-[330px] overflow-y-auto rounded-md border border-muted bg-background px-1 py-2 shadow-md transition-all">
       <EditorCommandEmpty className="px-2 text-muted-foreground">No results</EditorCommandEmpty>
