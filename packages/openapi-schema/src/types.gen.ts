@@ -1634,11 +1634,27 @@ export type SkillInputKey = 'query';
 
 export type SkillContextKey = 'resources' | 'collections' | 'notes' | 'contentList' | 'urls';
 
+export type SkillSelectedTextKey =
+  | 'noteSelection'
+  | 'resourceSelection'
+  | 'extensionWeblinkSelection'
+  | 'noteCursorSelection'
+  | 'noteBeforeCursorSelection'
+  | 'noteAfterCursorSelection';
+
 export type SkillInvocationRule = {
   /**
    * Field key
    */
-  key: SkillInputKey | SkillContextKey;
+  key: SkillInputKey | SkillContextKey | SkillSelectedTextKey;
+  /**
+   * Skill invocation rules
+   */
+  rules?: Array<SkillInvocationRule>;
+  /**
+   * Group relation
+   */
+  relation?: InvocationRuleGroupRelation;
   /**
    * Maximum number of items
    */

@@ -213,6 +213,17 @@
           "toggle": "Toggle",
           "done": "Done"
         }
+      },
+      "contextFilter": {
+        "acitveBtnTitle": "Context Filter",
+        "selectType": "Select Type",
+        "limitCount": "Limit Count",
+        "apply": "Apply",
+        "contentListSelectedType": "Selected Content Type",
+        "contentListLimit": "Selected Content Count",
+        "filterConditions": "Filter Conditions",
+        "reset": "Reset",
+        "collapse": "Collapse"
       }
     }
   },
@@ -499,9 +510,9 @@
       },
       "context": {
         "contentList": {
-          "resourceSelection": "Resource",
-          "noteSelection": "Note",
-          "extensionWeblinkSelection": "Web Link",
+          "resourceSelection": "Resource Selection",
+          "noteSelection": "Note Selection",
+          "extensionWeblinkSelection": "Web Link Selection",
           "noteCursorSelection": "Note Cursor Selection",
           "noteBeforeCursorSelection": "Note Before Cursor Selection",
           "noteAfterCursorSelection": "Note After Cursor Selection"

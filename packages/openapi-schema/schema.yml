@@ -3014,6 +3014,15 @@ components:
         - notes
         - contentList
         - urls
+    SkillSelectedTextKey:
+      type: string
+      enum:
+        - noteSelection
+        - resourceSelection
+        - extensionWeblinkSelection
+        - noteCursorSelection
+        - noteBeforeCursorSelection
+        - noteAfterCursorSelection
     SkillInvocationRule:
       type: object
       required:
@@ -3025,6 +3034,17 @@ components:
           oneOf:
             - $ref: '#/components/schemas/SkillInputKey'
             - $ref: '#/components/schemas/SkillContextKey'
+            - $ref: '#/components/schemas/SkillSelectedTextKey'
+        rules:
+          type: array
+          description: Skill invocation rules
+          items:
+            $ref: '#/components/schemas/SkillInvocationRule'
+        relation:
+          type: string
+          description: Group relation
+          default: regular
+          $ref: '#/components/schemas/InvocationRuleGroupRelation'
         limit:
           type: number
           description: Maximum number of items

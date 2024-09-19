@@ -11,9 +11,15 @@ import './index.scss';
 // components
 import { ContentSelectorBtn } from '@refly-packages/ai-workspace-common/modules/content-selector/components/content-selector-btn';
 import { ResetContentSelectorBtn } from './reset-content-selector-btn';
+import { ContextFilter } from './components/context-filter/index';
+
+// stores
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+
+// types
 import { SearchDomain, SearchResult } from '@refly/openapi-schema';
 import { backendBaseMarkTypes, BaseMarkType, frontendBaseMarkTypes, Mark } from '@refly/common-types';
+import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 
 const mapMarkToSearchResult = (marks: Mark[]): SearchResult[] => {
   let searchResults: SearchResult[] = [];
@@ -38,6 +44,10 @@ export const ContextManager = () => {
     removeMark: state.removeMark,
     toggleMarkActive: state.toggleMarkActive,
     clearMarks: state.clearMarks,
+  }));
+
+  const skillStore = useSkillStore((state) => ({
+    selectedSkill: state.selectedSkill,
   }));
 
   console.log('processedContextItems', processedContextItems);
@@ -93,6 +103,13 @@ export const ContextManager = () => {
           <ContentSelectorBtn />
 
           <ResetContentSelectorBtn />
+
+          <ContextFilter
+            initialConfig={skillStore?.selectedSkill?.invocationConfig?.context}
+            onFilterChange={(newConfig) => {
+              console.log('newConfig', newConfig);
+            }}
+          />
 
           {processedContextItems.map((item) => (
             <ContextItem

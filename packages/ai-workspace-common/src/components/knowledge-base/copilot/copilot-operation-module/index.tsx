@@ -40,25 +40,21 @@ export const CopilotOperationModule = memo((props: CopilotInputModuleProps) => {
 
   return (
     <>
-      {skillStore.selectedSkill ? (
-        <SelectedInstanceCard />
-      ) : (
-        <div className="ai-copilot-operation-container">
-          <div className="ai-copilot-operation-body">
-            <SkillDisplay source={source} />
-            <div className="ai-copilot-chat-container">
+      <div className="ai-copilot-operation-container">
+        <div className="ai-copilot-operation-body">
+          <SkillDisplay source={source} />
+          <div className="ai-copilot-chat-container">
+            <div className="chat-input-container">
               <SelectedSkillHeader />
-              <div className="chat-input-container">
-                <ContextManager />
-                <div className="chat-input-body">
-                  <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 1, maxRows: 3 }} />
-                </div>
-                <ChatActions />
+              <ContextManager />
+              <div className="chat-input-body">
+                <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 1, maxRows: 3 }} />
               </div>
+              <ChatActions />
             </div>
           </div>
         </div>
-      )}
+      </div>
     </>
   );
 });

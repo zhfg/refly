@@ -213,6 +213,17 @@
           "toggle": "切换",
           "done": "完成"
         }
+      },
+      "contextFilter": {
+        "acitveBtnTitle": "上下文过滤",
+        "selectType": "选择类型",
+        "limitCount": "限制数量",
+        "apply": "应用",
+        "contentListSelectedType": "选中内容类型",
+        "contentListLimit": "选中内容数量",
+        "filterConditions": "过滤条件",
+        "reset": "重置",
+        "collapse": "折叠"
       }
     }
   },
@@ -515,10 +526,10 @@
       },
       "context": {
         "contentList": {
-          "resourceSelection": "资源",
-          "noteSelection": "笔记",
-          "extensionWeblinkSelection": "网页链接",
-          "noteCursorSelection": "笔记选中内容",
+          "resourceSelection": "资源选中",
+          "noteSelection": "笔记选中",
+          "extensionWeblinkSelection": "网页选中",
+          "noteCursorSelection": "笔记光标选中内容",
           "noteBeforeCursorSelection": "笔记光标前内容",
           "noteAfterCursorSelection": "笔记光标后内容"
         }

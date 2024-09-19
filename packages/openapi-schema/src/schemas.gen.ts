@@ -2311,6 +2311,18 @@ export const $SkillContextKey = {
   enum: ['resources', 'collections', 'notes', 'contentList', 'urls'],
 } as const;
 
+export const $SkillSelectedTextKey = {
+  type: 'string',
+  enum: [
+    'noteSelection',
+    'resourceSelection',
+    'extensionWeblinkSelection',
+    'noteCursorSelection',
+    'noteBeforeCursorSelection',
+    'noteAfterCursorSelection',
+  ],
+} as const;
+
 export const $SkillInvocationRule = {
   type: 'object',
   required: ['key'],
@@ -2325,7 +2337,23 @@ export const $SkillInvocationRule = {
         {
           $ref: '#/components/schemas/SkillContextKey',
         },
+        {
+          $ref: '#/components/schemas/SkillSelectedTextKey',
+        },
       ],
+    },
+    rules: {
+      type: 'array',
+      description: 'Skill invocation rules',
+      items: {
+        $ref: '#/components/schemas/SkillInvocationRule',
+      },
+    },
+    relation: {
+      type: 'string',
+      description: 'Group relation',
+      default: 'regular',
+      $ref: '#/components/schemas/InvocationRuleGroupRelation',
     },
     limit: {
       type: 'number',
