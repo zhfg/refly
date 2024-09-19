@@ -55,7 +55,7 @@ export class MiscController {
         entityId: body.entityId,
         entityType: body.entityType,
       },
-      true,
+      { checkEntity: true, checkStorageQuota: true },
     );
     return buildSuccessResponse(result);
   }

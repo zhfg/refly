@@ -161,7 +161,9 @@ export class KnowledgeController {
     @User() user: UserModel,
     @Body() body: UpsertResourceRequest,
   ): Promise<UpsertResourceResponse> {
-    const resource = await this.knowledgeService.createResource(user, body);
+    const resource = await this.knowledgeService.createResource(user, body, {
+      checkStorageQuota: true,
+    });
     return buildSuccessResponse(resourcePO2DTO(resource));
   }
 

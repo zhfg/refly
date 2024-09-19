@@ -9,6 +9,7 @@ import {
   User,
 } from '@refly/openapi-schema';
 import { PrismaService } from '@/common/prisma.service';
+import { SubscriptionService } from '@/subscription/subscription.service';
 import { MINIO_EXTERNAL, MinioService } from '@/common/minio.service';
 import { randomUUID } from 'crypto';
 import { ConfigService } from '@nestjs/config';
@@ -21,6 +22,7 @@ export class MiscService {
   constructor(
     private config: ConfigService,
     private prisma: PrismaService,
+    private subscription: SubscriptionService,
     @Inject(MINIO_EXTERNAL) private minio: MinioService,
     @InjectQueue(QUEUE_SYNC_STORAGE_USAGE) private ssuQueue: Queue<SyncStorageUsageJobData>,
   ) {}
@@ -98,12 +100,19 @@ export class MiscService {
       entityId?: string;
       entityType?: EntityType;
     },
-    enforceEntityCheck?: boolean,
+    options?: { checkEntity?: boolean; checkStorageQuota?: boolean },
   ): Promise<UploadResponse['data']> {
     const { file, entityId, entityType } = param;
 
-    if (enforceEntityCheck) {
+    if (options?.checkEntity) {
       await this.checkEntity(user, entityId, entityType);
+    }
+
+    if (options?.checkStorageQuota) {
+      const usageResult = await this.subscription.checkStorageUsage(user);
+      if (!usageResult.objectStorageAvailable) {
+        throw new BadRequestException('Storage quota exceeded');
+      }
     }
 
     const objectKey = randomUUID();

@@ -42,6 +42,7 @@ import { FinalizeResourceParam } from './knowledge.dto';
 import { pick, omit } from '../utils';
 import { SimpleEventData } from '@/event/event.dto';
 import { SyncStorageUsageJobData } from '@/subscription/subscription.dto';
+import { SubscriptionService } from '@/subscription/subscription.service';
 
 @Injectable()
 export class KnowledgeService {
@@ -51,6 +52,7 @@ export class KnowledgeService {
     private prisma: PrismaService,
     private elasticsearch: ElasticsearchService,
     private ragService: RAGService,
+    private subscription: SubscriptionService,
     @Inject(MINIO_INTERNAL) private minio: MinioService,
     @InjectQueue(QUEUE_RESOURCE) private queue: Queue<FinalizeResourceParam>,
     @InjectQueue(QUEUE_SIMPLE_EVENT) private simpleEventQueue: Queue<SimpleEventData>,
@@ -210,7 +212,18 @@ export class KnowledgeService {
     return { ...resource, content };
   }
 
-  async createResource(user: User, param: UpsertResourceRequest) {
+  async createResource(
+    user: User,
+    param: UpsertResourceRequest,
+    options?: { checkStorageQuota?: boolean },
+  ) {
+    if (options?.checkStorageQuota) {
+      const usageResult = await this.subscription.checkStorageUsage(user);
+      if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
+        throw new BadRequestException('Storage quota exceeded');
+      }
+    }
+
     param.resourceId = genResourceID();
 
     let storageKey: string;
@@ -274,6 +287,11 @@ export class KnowledgeService {
   }
 
   async batchCreateResource(user: User, params: UpsertResourceRequest[]) {
+    const usageResult = await this.subscription.checkStorageUsage(user);
+    if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
+      throw new BadRequestException('Storage quota exceeded');
+    }
+
     const limit = pLimit(5);
     const tasks = params.map((param) => limit(async () => await this.createResource(user, param)));
     return Promise.all(tasks);
@@ -540,6 +558,11 @@ export class KnowledgeService {
   }
 
   async upsertNote(user: User, param: UpsertNoteRequest) {
+    const usageResult = await this.subscription.checkStorageUsage(user);
+    if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
+      throw new BadRequestException('Storage quota exceeded');
+    }
+
     const isNewNote = !param.noteId;
 
     param.noteId ||= genNoteID();

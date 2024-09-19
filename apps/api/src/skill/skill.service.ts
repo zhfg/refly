@@ -329,15 +329,12 @@ export class SkillService {
     const data: InvokeSkillJobData = { ...param, uid };
 
     // Check for token quota
-    const availableTiers = await this.subscription.checkTokenUsage(user);
-    if (availableTiers.length === 0) {
-      throw new BadRequestException('no available token quota');
-    }
+    const usageResult = await this.subscription.checkTokenUsage(user);
 
     data.modelName ||= this.config.get('skill.defaultModel');
     const modelTier = getModelTier(data.modelName);
 
-    if (!availableTiers.includes(modelTier)) {
+    if (!usageResult[modelTier]) {
       throw new BadRequestException(`model ${data.modelName} not available for current plan`);
     }
 

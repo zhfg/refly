@@ -7,6 +7,7 @@ import {
   SubscriptionStatus,
   TokenUsageMeter,
   StorageUsageMeter,
+  ModelTier,
 } from '@refly/openapi-schema';
 import {
   Subscription as SubscriptionModel,
@@ -37,6 +38,13 @@ export interface SyncStorageUsageJobData {
   uid: string;
   timestamp: Date;
 }
+
+export type CheckTokenUsageResult = Record<ModelTier, boolean>;
+
+export type CheckStorageUsageResult = {
+  objectStorageAvailable: boolean;
+  vectorStorageAvailable: boolean;
+};
 
 export function subscriptionPO2DTO(sub: SubscriptionModel): Subscription {
   return {
