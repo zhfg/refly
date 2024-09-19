@@ -34,7 +34,15 @@ export class BasicSummarySkill extends BaseSkill {
       rules: [
         { key: 'resources', limit: 1 },
         { key: 'notes', limit: 1 },
-        { key: 'contentList', limit: 1 },
+        {
+          key: 'contentList',
+          limit: 1,
+          rules: [
+            { key: 'resourceSelection', limit: 1 },
+            { key: 'noteSelection', limit: 1 },
+            { key: 'extensionWeblinkSelection', limit: 1 },
+          ],
+        },
       ],
     },
   };
