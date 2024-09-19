@@ -86,4 +86,14 @@ export default () => ({
     sessionCancelUrl: process.env.STRIPE_SESSION_CANCEL_URL,
     portalReturnUrl: process.env.STRIPE_PORTAL_RETURN_URL,
   },
+  quota: {
+    token: {
+      t1: parseInt(process.env.QUOTA_T1_TOKEN) || 0,
+      t2: parseInt(process.env.QUOTA_T2_TOKEN) || 1000000,
+    },
+    storage: {
+      object: parseInt(process.env.QUOTA_STORAGE_OBJECT) || 10 * 1024 * 1024 * 1024, // 10 GB
+      vector: parseInt(process.env.QUOTA_STORAGE_VECTOR) || 1024 * 1024 * 1024, // 1 GB
+    },
+  },
 });

@@ -134,9 +134,9 @@ export class SubscriptionService {
           subscriptionId: sub.subscriptionId,
           startAt: startOfDay(now),
           endAt: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate()),
-          t1TokenQuota: usageQuota?.t1TokenQuota || 0,
+          t1TokenQuota: usageQuota?.t1TokenQuota || this.config.get('quota.token.t1'),
           t1TokenUsed: 0,
-          t2TokenQuota: usageQuota?.t2TokenQuota || 0,
+          t2TokenQuota: usageQuota?.t2TokenQuota || this.config.get('quota.token.t2'),
           t2TokenUsed: 0,
         },
       });
@@ -150,8 +150,10 @@ export class SubscriptionService {
         },
         data: {
           subscriptionId: sub.subscriptionId,
-          objectStorageQuota: usageQuota?.objectStorageQuota || 0,
-          vectorStorageQuota: usageQuota?.vectorStorageQuota || 0,
+          objectStorageQuota:
+            usageQuota?.objectStorageQuota || this.config.get('quota.storage.object'),
+          vectorStorageQuota:
+            usageQuota?.vectorStorageQuota || this.config.get('quota.storage.vector'),
         },
       });
 
@@ -211,9 +213,9 @@ export class SubscriptionService {
           subscriptionId: null,
           startAt: startOfDay(now),
           endAt: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate()),
-          t1TokenQuota: freeQuota?.t1TokenQuota || 0,
+          t1TokenQuota: freeQuota?.t1TokenQuota || this.config.get('quota.token.t1'),
           t1TokenUsed: 0,
-          t2TokenQuota: freeQuota?.t2TokenQuota || 0,
+          t2TokenQuota: freeQuota?.t2TokenQuota || this.config.get('quota.token.t2'),
           t2TokenUsed: 0,
         },
       });
@@ -223,8 +225,10 @@ export class SubscriptionService {
         where: { subscriptionId: sub.subscriptionId },
         data: {
           subscriptionId: null,
-          objectStorageQuota: freeQuota?.objectStorageQuota,
-          vectorStorageQuota: freeQuota?.vectorStorageQuota,
+          objectStorageQuota:
+            freeQuota?.objectStorageQuota || this.config.get('quota.storage.object'),
+          vectorStorageQuota:
+            freeQuota?.vectorStorageQuota || this.config.get('quota.storage.vector'),
         },
       });
     });
@@ -432,9 +436,9 @@ export class SubscriptionService {
           subscriptionId: sub?.subscriptionId,
           startAt,
           endAt,
-          t1TokenQuota: usageQuota?.t1TokenQuota || 0,
+          t1TokenQuota: usageQuota?.t1TokenQuota || this.config.get('quota.token.t1'),
           t1TokenUsed: 0,
-          t2TokenQuota: usageQuota?.t2TokenQuota || 0,
+          t2TokenQuota: usageQuota?.t2TokenQuota || this.config.get('quota.token.t2'),
           t2TokenUsed: 0,
         },
       });
@@ -473,8 +477,10 @@ export class SubscriptionService {
           meterId: genStorageUsageMeterID(),
           uid,
           subscriptionId: sub?.subscriptionId,
-          objectStorageQuota: usageQuota?.objectStorageQuota,
-          vectorStorageQuota: usageQuota?.vectorStorageQuota,
+          objectStorageQuota:
+            usageQuota?.objectStorageQuota || this.config.get('quota.storage.object'),
+          vectorStorageQuota:
+            usageQuota?.vectorStorageQuota || this.config.get('quota.storage.vector'),
         },
       });
     });
