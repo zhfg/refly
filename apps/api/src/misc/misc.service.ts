@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, StreamableFile } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, StreamableFile, Logger } from '@nestjs/common';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import {
@@ -19,6 +19,8 @@ import { SyncStorageUsageJobData } from '@/subscription/subscription.dto';
 
 @Injectable()
 export class MiscService {
+  private logger = new Logger(MiscService.name);
+
   constructor(
     private config: ConfigService,
     private prisma: PrismaService,
@@ -140,6 +142,82 @@ export class MiscService {
     return {
       url: `${this.config.get('staticEndpoint')}${objectKey}`,
     };
+  }
+
+  /**
+   * Remove all files associated with an entity.
+   */
+  async removeFilesByEntity(
+    user: User,
+    param: { entityId: string; entityType: EntityType },
+  ): Promise<void> {
+    const { entityId, entityType } = param;
+    this.logger.log(`Start to remove files for entity ${entityId} of type ${entityType}`);
+
+    const files = await this.prisma.staticFile.findMany({
+      select: {
+        storageKey: true,
+      },
+      where: {
+        uid: user.uid,
+        entityId,
+        entityType,
+        deletedAt: null,
+      },
+    });
+    await this.minio.client.removeObjects(files.map((file) => file.storageKey));
+    this.logger.log(`Removed files: ${files.map((file) => file.storageKey).join(',')}`);
+
+    await this.prisma.staticFile.updateMany({
+      where: {
+        uid: user.uid,
+        entityId,
+        entityType,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+  }
+
+  async compareAndRemoveFiles(
+    user: User,
+    param: { entityId: string; entityType: EntityType; objectKeys: string[] },
+  ): Promise<void> {
+    const { entityId, entityType, objectKeys } = param;
+    const storageKeys = objectKeys.map((key) => `static/${key}`);
+    const files = await this.prisma.staticFile.findMany({
+      select: {
+        storageKey: true,
+      },
+      where: {
+        uid: user.uid,
+        entityId,
+        entityType,
+        deletedAt: null,
+      },
+    });
+    const currentStorageKeys = files.map((file) => file.storageKey);
+    const storageKeysToRemove = currentStorageKeys.filter((key) => !storageKeys.includes(key));
+
+    await this.minio.client.removeObjects(storageKeysToRemove);
+    this.logger.log(`Compare and remove files: ${storageKeysToRemove.join(',')}`);
+
+    if (storageKeysToRemove.length > 0) {
+      await this.prisma.staticFile.updateMany({
+        where: {
+          uid: user.uid,
+          entityId,
+          entityType,
+          storageKey: {
+            in: storageKeysToRemove,
+          },
+        },
+        data: {
+          deletedAt: new Date(),
+        },
+      });
+    }
   }
 
   async getFileStream(objectKey: string): Promise<StreamableFile> {

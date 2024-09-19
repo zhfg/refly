@@ -43,6 +43,7 @@ import { pick, omit } from '../utils';
 import { SimpleEventData } from '@/event/event.dto';
 import { SyncStorageUsageJobData } from '@/subscription/subscription.dto';
 import { SubscriptionService } from '@/subscription/subscription.service';
+import { MiscService } from '@/misc/misc.service';
 
 @Injectable()
 export class KnowledgeService {
@@ -52,7 +53,8 @@ export class KnowledgeService {
     private prisma: PrismaService,
     private elasticsearch: ElasticsearchService,
     private ragService: RAGService,
-    private subscription: SubscriptionService,
+    private miscService: MiscService,
+    private subscriptionService: SubscriptionService,
     @Inject(MINIO_INTERNAL) private minio: MinioService,
     @InjectQueue(QUEUE_RESOURCE) private queue: Queue<FinalizeResourceParam>,
     @InjectQueue(QUEUE_SIMPLE_EVENT) private simpleEventQueue: Queue<SimpleEventData>,
@@ -218,7 +220,7 @@ export class KnowledgeService {
     options?: { checkStorageQuota?: boolean },
   ) {
     if (options?.checkStorageQuota) {
-      const usageResult = await this.subscription.checkStorageUsage(user);
+      const usageResult = await this.subscriptionService.checkStorageUsage(user);
       if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
         throw new BadRequestException('Storage quota exceeded');
       }
@@ -287,7 +289,7 @@ export class KnowledgeService {
   }
 
   async batchCreateResource(user: User, params: UpsertResourceRequest[]) {
-    const usageResult = await this.subscription.checkStorageUsage(user);
+    const usageResult = await this.subscriptionService.checkStorageUsage(user);
     if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
       throw new BadRequestException('Storage quota exceeded');
     }
@@ -558,7 +560,7 @@ export class KnowledgeService {
   }
 
   async upsertNote(user: User, param: UpsertNoteRequest) {
-    const usageResult = await this.subscription.checkStorageUsage(user);
+    const usageResult = await this.subscriptionService.checkStorageUsage(user);
     if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
       throw new BadRequestException('Storage quota exceeded');
     }
@@ -656,9 +658,9 @@ export class KnowledgeService {
       this.minio.client.removeObject(note.storageKey),
       this.ragService.deleteNoteNodes(user, noteId),
       this.elasticsearch.deleteNote(noteId),
-      this.ssuQueue.add({
-        uid: user.uid,
-        timestamp: new Date(),
+      this.miscService.removeFilesByEntity(user, {
+        entityId: noteId,
+        entityType: 'note',
       }),
     ];
 
@@ -667,5 +669,11 @@ export class KnowledgeService {
     }
 
     await Promise.all(cleanups);
+
+    // Sync storage usage after all the cleanups
+    await this.ssuQueue.add({
+      uid: user.uid,
+      timestamp: new Date(),
+    });
   }
 }

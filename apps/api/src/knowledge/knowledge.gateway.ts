@@ -15,6 +15,7 @@ import { RAGService } from '@/rag/rag.service';
 import { streamToBuffer } from '@/utils';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
 import { SubscriptionService } from '@/subscription/subscription.service';
+import { MiscService } from '@/misc/misc.service';
 
 interface NoteContext {
   note: Note;
@@ -31,6 +32,7 @@ export class NoteWsGateway implements OnGatewayConnection {
     private prisma: PrismaService,
     private elasticsearch: ElasticsearchService,
     private config: ConfigService,
+    private miscService: MiscService,
     private subscriptionService: SubscriptionService,
     @Inject(MINIO_INTERNAL) private minio: MinioService,
   ) {
@@ -108,6 +110,17 @@ export class NoteWsGateway implements OnGatewayConnection {
               uid: user.uid,
               timestamp: new Date(),
             });
+
+            // Vacuum unused files
+            // const staticPrefix = this.config.get('staticEndpoint');
+            // const fileKeys = content
+            //   .match(new RegExp(`${staticPrefix}([^)]+)`, 'g'))
+            //   ?.map((match) => match.slice(staticPrefix.length));
+            // await this.miscService.compareAndRemoveFiles(user, {
+            //   entityId: note.noteId,
+            //   entityType: 'note',
+            //   objectKeys: fileKeys,
+            // });
           },
         }),
       ],
