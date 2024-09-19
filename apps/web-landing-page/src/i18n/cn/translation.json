@@ -9,9 +9,9 @@
     "loginBtn": "立即登录",
     "loggingStatus": "登录中...",
     "and": "及",
-    "utilText": "注册同意即表明您同意 ",
+    "utilText": "注册即表明您同意 ",
     "privacyPolicy": "隐私政策",
-    "terms": "条款和条件",
+    "terms": "服务条款",
     "status": {
       "failed": "登录失败",
       "success": "登录成功"
@@ -106,7 +106,7 @@
         "contentHandleSuccessNotify": "处理成功，正在跳转到会话页面...",
         "contentHandleFailedNotify": "处理失败！"
       }
-    },  
+    },
     "siderMenu": {
       "homePage": "主页",
       "threadLibrary": "会话库",
@@ -148,9 +148,7 @@
       "seeOther": "查看其他日期内容"
     }
   },
-  "unloginHomePage": {
-
-  },
+  "unloginHomePage": {},
   "topics": {
     "breadcrumb": {
       "homePage": "主页",
@@ -253,7 +251,7 @@
       "noMoreText": "已经到底啦~",
       "askFollow": {
         "emptyNotify": "追问内容不能为空！",
-        "successNotify":  "创建会话成功！页面跳转中...",
+        "successNotify": "创建会话成功！页面跳转中...",
         "errorNotify": "创建会话失败！请重试",
         "modal": {
           "title": "确认创建会话",
@@ -301,7 +299,7 @@
       "askFollow": {
         "btnText": "点击进行追问",
         "emptyNotify": "追问内容不能为空！",
-        "successNotify":  "创建会话成功！页面跳转中...",
+        "successNotify": "创建会话成功！页面跳转中...",
         "errorNotify": "创建会话失败！请重试",
         "modal": {
           "title": "确认创建会话",
