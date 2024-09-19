@@ -26,12 +26,13 @@ interface ResourceListProps {
   showBtn?: { summary: boolean; markdown: boolean; externalOrigin: boolean };
   canDelete?: boolean;
   showAdd?: boolean;
+  small?: boolean;
   handleItemClick: (payload: { collectionId: string; resourceId: string }) => void;
   handleItemDelete?: (resource: RemoveResourceFromCollectionRequest) => void;
 }
 
 export const ResourceList = (props: ResourceListProps) => {
-  const { searchKey = 'title', showAdd } = props;
+  const { searchKey = 'title', showAdd, small } = props;
   const [searchVal, setSearchVal] = useState('');
   const [visible, setVisible] = useState(false);
   const reloadKnowledgeBaseState = useReloadListState();
@@ -47,9 +48,9 @@ export const ResourceList = (props: ResourceListProps) => {
     setSearchVal(val);
   };
 
-  const AddResourceBtn = () => {
+  const AddResourceBtn = (props: { style?: React.CSSProperties }) => {
     return (
-      <div className="add-resource-btn" onClick={() => setVisible(true)}>
+      <div className="add-resource-btn" style={props.style} onClick={() => setVisible(true)}>
         <HiOutlinePlus />
       </div>
     );
@@ -64,24 +65,32 @@ export const ResourceList = (props: ResourceListProps) => {
   }, [props?.resources?.length]);
 
   return (
-    <div className={classNames('knowledge-base-resource-list-container', props.classNames)}>
-      <div className="knowledge-base-directory-search-container">
-        <div className="knowledge-base-directory-search-container-inner">
-          <Input
-            placeholder={props?.placeholder || ''}
-            allowClear
-            className="knowledge-base-directory-search"
-            style={{ height: 32, borderRadius: '8px' }}
-            value={searchVal}
-            prefix={<HiOutlineSearch />}
-            onChange={handleChange}
-          />
+    <div
+      className={classNames('knowledge-base-resource-list-container', props.classNames)}
+      style={small ? { minWidth: 72, width: 72 } : {}}
+    >
+      {small ? (
+        <div className="knowledge-base-resource-list-container-small">
           {showAdd && <AddResourceBtn />}
+          <Divider />
         </div>
-
-        <Divider />
-      </div>
-      <div className="knowledge-base-directory-list">
+      ) : (
+        <div className="knowledge-base-directory-search-container">
+          <div className="knowledge-base-directory-search-container-inner">
+            <Input
+              placeholder={props?.placeholder || ''}
+              allowClear
+              className="knowledge-base-directory-search"
+              style={{ height: 32, borderRadius: '8px' }}
+              value={searchVal}
+              prefix={<HiOutlineSearch />}
+              onChange={handleChange}
+            />
+            {showAdd && <AddResourceBtn />}
+          </div>
+        </div>
+      )}
+      <div className="knowledge-base-directory-list" style={small ? { minWidth: 72, width: 72 } : {}}>
         {props?.isFetching ? (
           <div style={{ margin: '8px auto' }}>
             <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
@@ -100,6 +109,7 @@ export const ResourceList = (props: ResourceListProps) => {
               showDesc={props.showDesc}
               showBtn={props.showBtn}
               canDelete={props.canDelete}
+              small={small}
               handleItemClick={props.handleItemClick}
               handleItemDelete={(item) => props.handleItemDelete(item)}
             />

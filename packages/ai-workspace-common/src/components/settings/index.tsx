@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Tabs } from '@arco-design/web-react';
 import { Helmet } from 'react-helmet';
 
@@ -5,6 +6,8 @@ import { Helmet } from 'react-helmet';
 import './index.scss';
 // components
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 
 import { AccountSetting } from '@refly-packages/ai-workspace-common/components/settings/account-setting';
 import { LanguageSetting } from '@refly-packages/ai-workspace-common/components/settings/language-setting';
@@ -18,7 +21,20 @@ const TabPane = Tabs.TabPane;
 const iconStyle = { fontSize: 16, marginRight: 8 };
 
 export const Settings = () => {
-  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { t } = useTranslation();
+  const [tab, setTab] = useState<string>('account');
+
+  const handleTabChange = (key: string) => {
+    setTab(key);
+    navigate(`?tab=${key}`);
+  };
+
+  useEffect(() => {
+    const tab = searchParams.get('tab') as string;
+    setTab(tab || 'account');
+  }, [searchParams]);
 
   return (
     <div className="settings-container">
@@ -29,7 +45,7 @@ export const Settings = () => {
       </Helmet>
       <div className="settings-inner-container">
         <div className="settings-title">{t('settings.title')}</div>
-        <Tabs key="account" tabPosition="left" size="large">
+        <Tabs activeTab={tab} tabPosition="left" size="large" onChange={handleTabChange}>
           <TabPane
             key="account"
             className="settings-tab"
