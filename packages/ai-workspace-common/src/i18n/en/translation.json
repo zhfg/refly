@@ -21,7 +21,9 @@
     "empty": "No content",
     "selectContext": "Select Context",
     "emptyInput": "Content is empty, please fill in or select content",
-    "retry": "Retry"
+    "retry": "Retry",
+    "reset": "Reset",
+    "apply": "Apply"
   },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",
@@ -203,12 +205,19 @@
       "contentSelector": "Content Selector",
       "clearSelector": "Clear Selection",
       "resource": "Resource",
+      "resources": "Resource",
       "note": "Note",
+      "notes": "Note",
       "collection": "Knowledge Base",
+      "collections": "Knowledge Base",
+      "contentList": "Content List",
       "extensionWeblink": "Web Link",
       "extensionWeblinkSelection": "Web Link Selection",
       "noteSelection": "Note Selection",
       "resourceSelection": "Resource Selection",
+      "noteCursorSelection": "Note Cursor Selection",
+      "noteBeforeCursorSelection": "Note Before Cursor Selection",
+      "noteAfterCursorSelection": "Note After Cursor Selection",
       "popoverSelector": {
         "webPlaceholder": "Search notes, resources, or knowledge bases...",
         "extensionPlaceholder": "Search web pages, notes, resources, or knowledge bases...",
@@ -227,7 +236,8 @@
         "contentListLimit": "Selected Content Count",
         "filterConditions": "Filter Conditions",
         "reset": "Reset",
-        "collapse": "Collapse"
+        "collapse": "Collapse",
+        "result": "Result"
       }
     }
   },

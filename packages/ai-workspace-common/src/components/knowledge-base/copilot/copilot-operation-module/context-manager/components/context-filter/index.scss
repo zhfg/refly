@@ -13,13 +13,11 @@
   }
 
   &__content {
-    max-height: 450px;
     width: 240px;
-    overflow-y: auto;
     background: #fcfcf9;
     border-radius: 6px;
     border: 1px solid var(--gray6);
-    padding: 8px;
+    padding: 8px 0;
   }
 
   .arco-divider-horizontal.arco-divider-with-text {
@@ -38,9 +36,16 @@
   .context-filter-popover__content {
     color: rgb(0, 0, 0, 0.6);
 
+    .config-center {
+      padding: 0 8px 8px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
     .config-title {
+      padding: 0 8px;
       font-size: 12px;
-      margin-bottom: 11px;
+      margin-bottom: 8px;
     }
 
     .config-module {
@@ -206,12 +211,13 @@
     }
 
     .config-footer {
-      padding-top: 8px;
+      padding: 8px 8px 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 16px;
+      margin-top: 8px;
       border-top: 1px solid rgba(0, 0, 0, 0.1);
+      background: #fcfcf9;
       .arco-btn {
         display: flex;
         align-items: center;

@@ -21,7 +21,9 @@
     "empty": "暂无内容",
     "selectContext": "选择待使用上下文",
     "emptyInput": "内容为空，请填入或选择内容",
-    "retry": "重试"
+    "retry": "重试",
+    "reset": "重置",
+    "apply": "应用"
   },
   "systemMaintenanceShutdown": {
     "title": "尊敬的用户，您好！",
@@ -203,12 +205,19 @@
       "contentSelector": "内容划线选择器",
       "clearSelector": "清空选择内容及划线",
       "resource": "资源",
+      "resources": "资源",
       "note": "笔记",
+      "notes": "笔记",
+      "collections": "知识库",
       "collection": "知识库",
+      "contentList": "内容列表",
       "extensionWeblink": "网页",
       "extensionWeblinkSelection": "网页选中",
       "noteSelection": "笔记选中",
       "resourceSelection": "资源选中",
+      "noteCursorSelection": "笔记光标选中内容",
+      "noteBeforeCursorSelection": "笔记光标前内容",
+      "noteAfterCursorSelection": "笔记光标后内容",
       "popoverSelector": {
         "webPlaceholder": "搜索笔记、资源或知识库...",
         "extensionPlaceholder": "搜索网页、笔记、资源或知识库...",
@@ -223,11 +232,12 @@
         "selectType": "选择类型",
         "limitCount": "限制数量",
         "apply": "应用",
-        "contentListSelectedType": "选中内容类型",
+        "contentListSelectedType": "配置选中内容类型",
         "contentListLimit": "选中内容数量",
         "filterConditions": "过滤条件",
         "reset": "重置",
-        "collapse": "折叠"
+        "collapse": "折叠",
+        "result": "结果"
       }
     }
   },

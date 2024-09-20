@@ -107,8 +107,10 @@ export const ContextManager = () => {
           {skillStore?.selectedSkill && (
             <ContextFilter
               initialConfig={skillStore?.selectedSkill?.invocationConfig?.context}
-              onFilterChange={(newConfig) => {
-                console.log('newConfig', newConfig);
+              onFilterChange={(removedContextItemIds) => {
+                removedContextItemIds.forEach((id) => {
+                  handleRemoveItem(id);
+                });
               }}
             />
           )}

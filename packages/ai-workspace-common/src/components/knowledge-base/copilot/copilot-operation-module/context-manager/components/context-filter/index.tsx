@@ -38,13 +38,13 @@ interface FilterConfig {
 
 type ContextFilterProps = {
   initialConfig?: SkillInvocationRuleGroup;
-  onFilterChange: (newConfig: SkillInvocationRuleGroup) => void;
+  onFilterChange: (removedContextItemIds: string[]) => void;
 };
 
 type ContextFilterPopoverContentProps = {
   initialConfig?: SkillInvocationRuleGroup;
   handleVisibleChange?: (visible: boolean) => void;
-  onFilterChange: (newConfig: SkillInvocationRuleGroup) => void;
+  onFilterChange: (removedContextItemIds: string[]) => void;
 };
 
 const defaultLimit = 16;
@@ -101,6 +101,9 @@ const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = 
     }
     config.type = config.type.filter(Boolean);
     config.contentListTypes = config.contentListTypes.filter(Boolean);
+    if (config.contentListTypes.length) {
+      config.type.push('contentList');
+    }
     return config;
   };
 
@@ -115,19 +118,22 @@ const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = 
   const isMutiContentListType = !!(
     contentListRule?.relation === 'mutuallyExclusive' || !contentListRule?.rules?.length
   );
-  const { contextItemTypes } = useProcessContextItems();
-
-  const isTypeDisabled = (type: string) => {
-    return initialConfig.rules?.length && !initialConfig.rules.some((rule) => rule.key === type);
-  };
+  const { contextItemIdsByType, contextItemTypes } = useProcessContextItems();
 
   const isContentList = (type: string) => {
     return !['resource', 'note', 'collection', 'resources', 'notes', 'collections'].includes(type);
   };
 
+  const isTypeDisabled = (type: string) => {
+    if (isContentList(type)) {
+      return !contentListRule?.rules?.length;
+    }
+    return initialConfig.rules?.length && !initialConfig.rules.some((rule) => rule.key === type);
+  };
+
   const getConfigLimit = (type: string) => {
     if (isContentList(type)) {
-      const contentListRule = initialConfig.rules?.find((rule) => rule.key === 'contentList') || {};
+      const contentListRule = initialConfig.rules?.find((rule) => rule.key === 'contentList');
       return contentListRule?.rules?.find((rule) => rule.key === type)?.limit || 10;
     }
     return initialConfig.rules?.find((rule) => rule.key.startsWith(type))?.limit || 10;
@@ -150,22 +156,23 @@ const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = 
   };
 
   const handleApply = () => {
+    const filteredIds = [];
+    Object.keys(contextItemIdsByType).forEach((type) => {
+      if (config.type.includes(type)) {
+        const limit = getConfigLimit(type);
+        if (limit && contextItemIdsByType[type].length > limit) {
+          filteredIds.push(...contextItemIdsByType[type].slice(limit));
+        }
+      }
+      if (config.contentListTypes.includes(type)) {
+        const limit = getConfigLimit(type);
+        if (limit && contextItemIdsByType[type].length > limit) {
+          filteredIds.push(...contextItemIdsByType[type].slice(limit));
+        }
+      }
+    });
+    onFilterChange(filteredIds);
     handleVisibleChange(false);
-    const newConfig = {
-      relation: initialConfig.relation,
-      rules: [
-        ...config.type.map((type) => ({
-          key: type,
-          limit: getConfigLimit(type),
-        })),
-        ...config.contentListTypes.map((type) => ({
-          key: type,
-          limit: getConfigLimit(type),
-        })),
-      ],
-    };
-    console.log('newConfig', newConfig);
-    onFilterChange(newConfig as SkillInvocationRuleGroup);
   };
 
   // 生成过滤条件
@@ -175,15 +182,14 @@ const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = 
       ...(config.type.includes('contentList') ? config.contentListTypes : []),
     ];
 
-    console.log('config', config, newFilters.filter(Boolean));
     setFilters(newFilters.filter(Boolean));
   }, [config]);
 
-  // useEffect(() => {
-  //   setContentListConfig(
-  //     (initialConfig.rules.find((rule) => rule.key === 'contentList')?.rules || []).map((rule) => rule.key) || [],
-  //   );
-  // }, [initialConfig]);
+  useEffect(() => {
+    setContentListConfig(
+      (initialConfig.rules.find((rule) => rule.key === 'contentList')?.rules || []).map((rule) => rule.key) || [],
+    );
+  }, [initialConfig]);
 
   const filteredContextItemTypes = useMemo(() => {
     return Object.keys(contextItemTypes).reduce((acc, type) => {
@@ -200,49 +206,22 @@ const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = 
 
   return (
     <div className="context-filter-popover__content">
-      <div className="config-title">上下文过滤器</div>
-      <div className="config-module">
-        <div className="config-type">
-          <div className="config-type__title">配置类型</div>
+      <div className="config-title">{t('knowledgeBase.context.contextFilter.acitveBtnTitle')}</div>
 
-          <div className="config-type__content">
-            {defaultTypeList.map((type) => (
-              <Checkbox
-                key={type}
-                className={`config-type__item ${!isMutiType ? 'config-type__item-radio' : ''} `}
-                checked={config.type.includes(type)}
-                disabled={isTypeDisabled(type)}
-                value={type}
-                onChange={() => updateConfig('type', type, isMutiType)}
-              >
-                {({ checked }) => {
-                  return (
-                    <div className={`custom-checkbox-card ${checked ? 'custom-checkbox-card-checked' : ''}`}>
-                      <div className="custom-checkbox-card-mask">
-                        <IconCheck className="custom-checkbox-card-mask-check" />
-                      </div>
-                      <div className="custom-checkbox-card-title">
-                        <Typography.Text ellipsis={{ showTooltip: true, rows: 1 }}>{type}</Typography.Text>
-                      </div>
-                    </div>
-                  );
-                }}
-              </Checkbox>
-            ))}
-          </div>
-        </div>
-
-        {config.type.includes('contentList') && contentListConfig.length > 0 && (
+      <div className="config-center">
+        <div className="config-module">
           <div className="config-type">
-            <div className="config-type__title">配置选中内容类型</div>
+            <div className="config-type__title">{t('knowledgeBase.context.contextFilter.selectType')}</div>
+
             <div className="config-type__content">
-              {contentListConfig.map((type) => (
+              {defaultTypeList.map((type) => (
                 <Checkbox
                   key={type}
-                  className={`config-type__item ${!isMutiContentListType ? 'config-type__item-radio' : ''} `}
-                  checked={config.contentListTypes.includes(type)}
+                  className={`config-type__item ${!isMutiType ? 'config-type__item-radio' : ''} `}
+                  checked={config.type.includes(type)}
+                  disabled={isTypeDisabled(type)}
                   value={type}
-                  onChange={() => updateConfig('contentListTypes', type, isMutiContentListType)}
+                  onChange={() => updateConfig('type', type, isMutiType)}
                 >
                   {({ checked }) => {
                     return (
@@ -250,7 +229,11 @@ const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = 
                         <div className="custom-checkbox-card-mask">
                           <IconCheck className="custom-checkbox-card-mask-check" />
                         </div>
-                        <Typography.Text ellipsis={{ showTooltip: true, rows: 1 }}>{type}</Typography.Text>
+                        <div className="custom-checkbox-card-title">
+                          <Typography.Text ellipsis={{ showTooltip: true, rows: 1 }}>
+                            {t(`knowledgeBase.context.${type}`)}
+                          </Typography.Text>
+                        </div>
                       </div>
                     );
                   }}
@@ -258,50 +241,84 @@ const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = 
               ))}
             </div>
           </div>
+
+          {config.type.includes('contentList') && contentListConfig.length > 0 && (
+            <div className="config-type">
+              <div className="config-type__title">
+                {t('knowledgeBase.context.contextFilter.contentListSelectedType')}
+              </div>
+              <div className="config-type__content">
+                {contentListConfig.map((type) => (
+                  <Checkbox
+                    key={type}
+                    className={`config-type__item ${!isMutiContentListType ? 'config-type__item-radio' : ''} `}
+                    checked={config.contentListTypes.includes(type)}
+                    value={type}
+                    onChange={() => updateConfig('contentListTypes', type, isMutiContentListType)}
+                  >
+                    {({ checked }) => {
+                      return (
+                        <div className={`custom-checkbox-card ${checked ? 'custom-checkbox-card-checked' : ''}`}>
+                          <div className="custom-checkbox-card-mask">
+                            <IconCheck className="custom-checkbox-card-mask-check" />
+                          </div>
+                          <Typography.Text ellipsis={{ showTooltip: true, rows: 1 }}>
+                            {t(`knowledgeBase.context.${type}`)}
+                          </Typography.Text>
+                        </div>
+                      );
+                    }}
+                  </Checkbox>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {filters.length > 0 && (
+          <div>
+            <Divider>
+              {t('knowledgeBase.context.contextFilter.result')}
+              <IconArrowDown />
+            </Divider>
+
+            <div className="filter-preview-title">{t('knowledgeBase.context.contextFilter.filterConditions')}</div>
+            <div className="filter-preview">
+              {Object.keys(filteredContextItemTypes).length ? (
+                Object.keys(filteredContextItemTypes).map((type) => (
+                  <div key={type} className="filter-item">
+                    {type === 'note' && <PiNotepad style={iconStyle} />}
+                    {type === 'collection' && <HiOutlineBookOpen style={iconStyle} />}
+                    {type === 'resource' && <LuFileText style={iconStyle} />}
+                    {isContentList(type) && <PiTextAlignRightBold style={iconStyle} />}
+
+                    <Typography.Text ellipsis={{ showTooltip: true, rows: 1 }}>
+                      {t(`knowledgeBase.context.${type}`)}
+                    </Typography.Text>
+                    <div className="filter-item-limit">
+                      <span style={{ color: getConfigLimit(type) >= contextItemTypes[type] ? 'green' : 'red' }}>
+                        {contextItemTypes[type]}{' '}
+                      </span>
+                      / {getConfigLimit(type)}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <Empty description="未命中过滤条件" className="filter-empty" />
+              )}
+            </div>
+          </div>
         )}
       </div>
-      {filters.length > 0 && (
-        <div>
-          <Divider>
-            结果
-            <IconArrowDown />
-          </Divider>
-          <div className="filter-preview-title">过滤条件</div>
-          <div className="filter-preview">
-            {Object.keys(filteredContextItemTypes).length ? (
-              Object.keys(filteredContextItemTypes).map((type) => (
-                <div key={type} className="filter-item">
-                  {type === 'note' && <PiNotepad style={iconStyle} />}
-                  {type === 'collection' && <HiOutlineBookOpen style={iconStyle} />}
-                  {type === 'resource' && <LuFileText style={iconStyle} />}
-                  {isContentList(type) && <PiTextAlignRightBold style={iconStyle} />}
 
-                  <Typography.Text ellipsis={{ showTooltip: true, rows: 1 }}>
-                    {isContentList(type) ? 'contentList.' : ''}
-                    {type}
-                  </Typography.Text>
-                  <div className="filter-item-limit">
-                    <span style={{ color: getConfigLimit(type) >= contextItemTypes[type] ? 'green' : 'red' }}>
-                      {contextItemTypes[type]}{' '}
-                    </span>
-                    / {getConfigLimit(type)}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <Empty description="未命中过滤条件" className="filter-empty" />
-            )}
-          </div>
-        </div>
-      )}
       <div className="config-footer">
         <Button type="dashed" icon={<IconRefresh />} onClick={() => setConfig(getInitialConfig())}>
-          重置
+          {t('common.reset')}
         </Button>
         <div className="config-footer-right">
-          <Button onClick={() => handleVisibleChange(false)}>取消</Button>
+          <Button onClick={() => handleVisibleChange(false)}>{t('common.cancel')}</Button>
           <Button type="primary" onClick={handleApply}>
-            应用
+            {t('common.apply')}
           </Button>
         </div>
       </div>

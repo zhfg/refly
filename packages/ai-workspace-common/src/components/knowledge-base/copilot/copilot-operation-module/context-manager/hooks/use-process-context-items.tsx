@@ -103,5 +103,22 @@ export const useProcessContextItems = () => {
 
   const contextItemTypes = getcontextItemTypes();
 
-  return { processedContextItems, contextItemTypes };
+  const getContextItemIdsByType = () => {
+    const result: Record<string, string[]> = {};
+    processedContextItems.forEach((item) => {
+      let type = item.type;
+      if (['resource', 'note', 'collection'].includes(item.type)) {
+        type = type + 's';
+      }
+      if (!result[type]) {
+        result[type] = [];
+      }
+      result[type].push(item.id);
+    });
+    return result;
+  };
+
+  const contextItemIdsByType = getContextItemIdsByType();
+
+  return { processedContextItems, contextItemTypes, contextItemIdsByType };
 };
