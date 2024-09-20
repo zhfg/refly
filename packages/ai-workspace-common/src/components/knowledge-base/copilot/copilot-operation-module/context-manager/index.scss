@@ -51,6 +51,16 @@
       background-color: #f1f1f0;
       border-color: #00968f;
     }
+    &.disabled {
+      background-color: #f1f1f0;
+      border-color: #e5e5e5;
+      .item-title,
+      .item-type,
+      .item-close,
+      .item-icon {
+        color: rgba(0, 0, 0, 0.3);
+      }
+    }
 
     .item-content {
       height: 18px;

@@ -237,7 +237,8 @@
         "filterConditions": "Filter Conditions",
         "reset": "Reset",
         "collapse": "Collapse",
-        "result": "Result"
+        "result": "Result",
+        "empty": "No hit filter conditions"
       }
     }
   },

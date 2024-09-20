@@ -4,7 +4,6 @@ import {
   Tooltip,
   Popover,
   InputNumber,
-  Form,
   Switch,
   Checkbox,
   Radio,
@@ -18,46 +17,30 @@ import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui'
 import { useTranslation } from 'react-i18next';
 import { SkillInvocationRule, SkillInvocationRuleGroup } from '@refly/openapi-schema';
 import { selectedTextDomains, SelectedTextDomain } from '@refly/common-types';
-import { useProcessContextItems } from '../../hooks/use-process-context-items';
+import { useProcessContextItems } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module/context-manager/hooks/use-process-context-items';
+import { useProcessContextFilter } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module/context-manager/hooks/use-process-context-filter';
 import { PiNotepad, PiTextAlignRightBold } from 'react-icons/pi';
 import { HiOutlineBookOpen } from 'react-icons/hi2';
 import { LuFileText } from 'react-icons/lu';
 import { IconRefresh } from '@arco-design/web-react/icon';
 
 import './index.scss';
-import { use } from 'node_modules/i18next';
 
 const iconStyle = { fontSize: 10, transform: 'translateY(1px)', marginRight: 6, color: 'rgb(0, 0, 0, 0.6)' };
 
-const FormItem = Form.Item;
+type ContextFilterPopoverContentProps = {
+  initialConfig?: SkillInvocationRuleGroup;
+  handleVisibleChange?: (visible: boolean) => void;
+};
 
 interface FilterConfig {
   type: string[];
   contentListTypes: string[];
 }
 
-type ContextFilterProps = {
-  initialConfig?: SkillInvocationRuleGroup;
-  onFilterChange: (removedContextItemIds: string[]) => void;
-};
-
-type ContextFilterPopoverContentProps = {
-  initialConfig?: SkillInvocationRuleGroup;
-  handleVisibleChange?: (visible: boolean) => void;
-  onFilterChange: (removedContextItemIds: string[]) => void;
-};
-
 const defaultLimit = 16;
 const defaultMaxLimit = 16;
 const defaultTypeList = ['resources', 'notes', 'collections', 'contentList'];
-const contentListTypeList = [
-  'resourceSelection',
-  'noteSelection',
-  'extensionWeblinkSelection',
-  'noteCursorSelection',
-  'noteBeforeCursorSelection',
-  'noteAfterCursorSelection',
-];
 
 const NumberInputWithSlider = ({ min, max, value, onChange }) => {
   return (
@@ -74,122 +57,39 @@ const NumberInputWithSlider = ({ min, max, value, onChange }) => {
   );
 };
 
-const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = ({
-  initialConfig,
-  handleVisibleChange,
-  onFilterChange,
-}) => {
+const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = ({ handleVisibleChange }) => {
   const { t } = useTranslation();
 
-  // initail config
-  const getInitialConfig = () => {
-    const config = {
-      type: [],
-      contentListTypes: [],
-    };
-    if (initialConfig?.relation === 'mutuallyExclusive') {
-      (initialConfig.rules || []).forEach((rule) => {
-        if (rule.key === 'contentList') {
-          config.contentListTypes =
-            rule.relation === 'mutuallyExclusive' ? (rule?.rules || []).map((r) => r.key) : [rule?.rules?.[0]?.key];
-        } else {
-          config.type.push(rule.key);
-        }
-      });
-    } else {
-      config.type = [initialConfig?.rules?.[0]?.key];
-    }
-    config.type = config.type.filter(Boolean);
-    config.contentListTypes = config.contentListTypes.filter(Boolean);
-    if (config.contentListTypes.length) {
-      config.type.push('contentList');
-    }
-    return config;
-  };
-
-  // state
-  const [config, setConfig] = useState<FilterConfig>(getInitialConfig());
-
+  const {
+    initialConfig,
+    config,
+    contentListConfig,
+    isMutiType,
+    isMutiContentListType,
+    isContentList,
+    isTypeDisabled,
+    getConfigLimit,
+    updateConfig,
+    filterApply,
+    resetConfig,
+  } = useProcessContextFilter();
   const [filters, setFilters] = useState<string[]>([]);
-  const [contentListConfig, setContentListConfig] = useState<string[]>(contentListTypeList);
-
-  const isMutiType = !!(initialConfig.relation === 'mutuallyExclusive' || !initialConfig.rules?.length);
-  const contentListRule = initialConfig.rules?.find((rule) => rule.key === 'contentList');
-  const isMutiContentListType = !!(
-    contentListRule?.relation === 'mutuallyExclusive' || !contentListRule?.rules?.length
-  );
-  const { contextItemIdsByType, contextItemTypes } = useProcessContextItems();
-
-  const isContentList = (type: string) => {
-    return !['resource', 'note', 'collection', 'resources', 'notes', 'collections'].includes(type);
-  };
-
-  const isTypeDisabled = (type: string) => {
-    if (isContentList(type)) {
-      return !contentListRule?.rules?.length;
-    }
-    return initialConfig.rules?.length && !initialConfig.rules.some((rule) => rule.key === type);
-  };
-
-  const getConfigLimit = (type: string) => {
-    if (isContentList(type)) {
-      const contentListRule = initialConfig.rules?.find((rule) => rule.key === 'contentList');
-      return contentListRule?.rules?.find((rule) => rule.key === type)?.limit || 10;
-    }
-    return initialConfig.rules?.find((rule) => rule.key.startsWith(type))?.limit || 10;
-  };
-
-  // 更新配置
-  const updateConfig = (field: keyof FilterConfig, value: string, muti?: boolean) => {
-    if (muti) {
-      setConfig((prev) => {
-        const updatedField = prev[field].includes(value)
-          ? prev[field].filter((item) => item !== value)
-          : [...prev[field], value];
-        return { ...prev, [field]: updatedField };
-      });
-    } else {
-      setConfig((prev) => {
-        return { ...prev, [field]: [value] };
-      });
-    }
-  };
+  const { contextItemTypes } = useProcessContextItems();
 
   const handleApply = () => {
-    const filteredIds = [];
-    Object.keys(contextItemIdsByType).forEach((type) => {
-      if (config.type.includes(type)) {
-        const limit = getConfigLimit(type);
-        if (limit && contextItemIdsByType[type].length > limit) {
-          filteredIds.push(...contextItemIdsByType[type].slice(limit));
-        }
-      }
-      if (config.contentListTypes.includes(type)) {
-        const limit = getConfigLimit(type);
-        if (limit && contextItemIdsByType[type].length > limit) {
-          filteredIds.push(...contextItemIdsByType[type].slice(limit));
-        }
-      }
-    });
-    onFilterChange(filteredIds);
+    filterApply(config, initialConfig);
     handleVisibleChange(false);
   };
 
-  // 生成过滤条件
+  // get filter list
   useEffect(() => {
     const newFilters = [
-      ...config.type.filter((t) => t !== 'contentList'),
-      ...(config.type.includes('contentList') ? config.contentListTypes : []),
+      ...config?.type.filter((t) => t !== 'contentList'),
+      ...(config?.type.includes('contentList') ? config?.contentListTypes : []),
     ];
 
     setFilters(newFilters.filter(Boolean));
   }, [config]);
-
-  useEffect(() => {
-    setContentListConfig(
-      (initialConfig.rules.find((rule) => rule.key === 'contentList')?.rules || []).map((rule) => rule.key) || [],
-    );
-  }, [initialConfig]);
 
   const filteredContextItemTypes = useMemo(() => {
     return Object.keys(contextItemTypes).reduce((acc, type) => {
@@ -218,7 +118,7 @@ const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = 
                 <Checkbox
                   key={type}
                   className={`config-type__item ${!isMutiType ? 'config-type__item-radio' : ''} `}
-                  checked={config.type.includes(type)}
+                  checked={config?.type.includes(type)}
                   disabled={isTypeDisabled(type)}
                   value={type}
                   onChange={() => updateConfig('type', type, isMutiType)}
@@ -242,7 +142,7 @@ const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = 
             </div>
           </div>
 
-          {config.type.includes('contentList') && contentListConfig.length > 0 && (
+          {config?.type.includes('contentList') && contentListConfig.length > 0 && (
             <div className="config-type">
               <div className="config-type__title">
                 {t('knowledgeBase.context.contextFilter.contentListSelectedType')}
@@ -252,7 +152,7 @@ const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = 
                   <Checkbox
                     key={type}
                     className={`config-type__item ${!isMutiContentListType ? 'config-type__item-radio' : ''} `}
-                    checked={config.contentListTypes.includes(type)}
+                    checked={config?.contentListTypes.includes(type)}
                     value={type}
                     onChange={() => updateConfig('contentListTypes', type, isMutiContentListType)}
                   >
@@ -296,15 +196,19 @@ const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = 
                       {t(`knowledgeBase.context.${type}`)}
                     </Typography.Text>
                     <div className="filter-item-limit">
-                      <span style={{ color: getConfigLimit(type) >= contextItemTypes[type] ? 'green' : 'red' }}>
+                      <span
+                        style={{
+                          color: getConfigLimit(type, initialConfig) >= contextItemTypes[type] ? 'green' : 'red',
+                        }}
+                      >
                         {contextItemTypes[type]}{' '}
                       </span>
-                      / {getConfigLimit(type)}
+                      / {getConfigLimit(type, initialConfig)}
                     </div>
                   </div>
                 ))
               ) : (
-                <Empty description="未命中过滤条件" className="filter-empty" />
+                <Empty description={t('knowledgeBase.context.contextFilter.empty')} className="filter-empty" />
               )}
             </div>
           </div>
@@ -312,7 +216,7 @@ const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = 
       </div>
 
       <div className="config-footer">
-        <Button type="dashed" icon={<IconRefresh />} onClick={() => setConfig(getInitialConfig())}>
+        <Button type="dashed" icon={<IconRefresh />} onClick={() => resetConfig()}>
           {t('common.reset')}
         </Button>
         <div className="config-footer-right">
@@ -332,58 +236,20 @@ type FilterCondition = {
   initialLimit: number;
 };
 
-const defaultConfig: SkillInvocationRuleGroup = {
-  rules: [
-    { key: 'resources', limit: 10 },
-    { key: 'notes', limit: 10 },
-    { key: 'collections', limit: 10 },
-    {
-      key: 'contentList',
-      limit: 1,
-      rules: [
-        { key: 'resourceSelection' as SelectedTextDomain, limit: 1 },
-        { key: 'noteSelection' as SelectedTextDomain, limit: 1 },
-        { key: 'extensionWeblinkSelection' as SelectedTextDomain, limit: 1 },
-        { key: 'noteCursorSelection' as SelectedTextDomain, limit: 1 },
-        { key: 'noteBeforeCursorSelection' as SelectedTextDomain, limit: 1 },
-        { key: 'noteAfterCursorSelection' as SelectedTextDomain, limit: 1 },
-      ],
-      relation: 'mutuallyExclusive',
-    },
-  ],
-  relation: 'mutuallyExclusive',
-};
-
-export const ContextFilter: React.FC<ContextFilterProps> = ({ initialConfig = defaultConfig, onFilterChange }) => {
+export const ContextFilter: React.FC = () => {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
-  const [form] = Form.useForm();
-  const [config, setConfig] = useState<SkillInvocationRuleGroup>(initialConfig);
-  const [filterConditions, setFilterConditions] = useState<FilterCondition[]>([]);
-  const [activePreview, setActivePreview] = useState<string | null>(null);
 
   const handleVisibleChange = (visible: boolean) => {
     setVisible(visible);
   };
-
-  useEffect(() => {
-    setConfig(initialConfig);
-    form.resetFields();
-    console.log('initialConfig', initialConfig);
-  }, [initialConfig, form]);
 
   return (
     <Popover
       position="bottom"
       trigger="click"
       className="context-filter-popover"
-      content={
-        <ContextFilterPopoverContent
-          initialConfig={initialConfig}
-          handleVisibleChange={handleVisibleChange}
-          onFilterChange={onFilterChange}
-        />
-      }
+      content={<ContextFilterPopoverContent handleVisibleChange={handleVisibleChange} />}
       popupVisible={visible}
       onVisibleChange={handleVisibleChange}
     >
@@ -393,9 +259,6 @@ export const ContextFilter: React.FC<ContextFilterProps> = ({ initialConfig = de
           type="outline"
           style={{ fontSize: 10, height: 18, borderRadius: 4, borderColor: '#e5e5e5', color: 'rgba(0,0,0,0.6)' }}
           icon={<IconFilter />}
-          // onClick={() => {
-          //   form.submit();
-          // }}
         />
       </Tooltip>
     </Popover>

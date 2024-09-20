@@ -17,7 +17,7 @@ export const useBuildSkillContext = () => {
     const { currentKnowledgeBase, currentResource } = useKnowledgeBaseStore.getState();
     const contextPanelStore = useContextPanelStore.getState();
     const { currentNote } = useNoteStore.getState();
-    const { currentSelectedMarks } = contextPanelStore;
+    const { currentSelectedMarks, filterIdsOfCurrentSelectedMarks } = contextPanelStore;
     const mapDomainEnvIds = {
       collection: currentKnowledgeBase?.collectionId || '',
       resource: currentResource?.resourceId || '',
@@ -28,7 +28,7 @@ export const useBuildSkillContext = () => {
     const getDatabaseEntities = (type: MarkType) => {
       const set = new Set();
       const databaseEntities = currentSelectedMarks
-        ?.filter((item) => item?.type === type)
+        ?.filter((item) => !filterIdsOfCurrentSelectedMarks.includes(item?.id) && item?.type === type)
         .map((item) => ({
           [`${type}Id`]: item?.entityId || item?.id,
           metadata: {
@@ -57,7 +57,7 @@ export const useBuildSkillContext = () => {
     const getUrls = () => {
       const set = new Set();
       const urls = currentSelectedMarks
-        ?.filter((item) => item?.type === 'extensionWeblink')
+        ?.filter((item) => !filterIdsOfCurrentSelectedMarks.includes(item?.id) && item?.type === 'extensionWeblink')
         .map((item) => ({
           url: (item?.url as string) || '',
           metadata: {
@@ -85,7 +85,11 @@ export const useBuildSkillContext = () => {
       console.log('currentSelectedMarks', currentSelectedMarks);
 
       contentList = currentSelectedMarks
-        ?.filter((item) => selectedTextDomains.includes(item?.type as SelectedTextDomain))
+        ?.filter(
+          (item) =>
+            !filterIdsOfCurrentSelectedMarks.includes(item?.id) &&
+            selectedTextDomains.includes(item?.type as SelectedTextDomain),
+        )
         .map((item) => ({
           content: item?.data || '',
           metadata: {

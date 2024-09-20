@@ -237,7 +237,8 @@
         "filterConditions": "过滤条件",
         "reset": "重置",
         "collapse": "折叠",
-        "result": "结果"
+        "result": "结果",
+        "empty": "未命中过滤条件"
       }
     }
   },
