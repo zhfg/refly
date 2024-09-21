@@ -12,7 +12,7 @@ import { getDefaultPopupContainer, getPopupContainer } from '@refly-packages/ai-
 import { IconCaretDown, IconTranslate } from '@arco-design/web-react/icon';
 
 export const OutputLocaleList = (props: {
-  children: any;
+  children?: any;
   showTitle?: boolean;
   width?: number;
   position?: 'tl' | 'tr' | 'bl' | 'br';

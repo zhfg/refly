@@ -14,10 +14,13 @@ import { buildConversation } from '@refly-packages/ai-workspace-common/utils/con
 import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
+import { useContextFilterErrorTip } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module/context-manager/hooks/use-context-filter-errror-tip';
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
 import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
+import { useTranslation } from 'react-i18next';
 
 export const ChatActions = () => {
+  const { t } = useTranslation();
   const [model, setModel] = useState('gpt-3.5-turbo');
   const [image, setImage] = useState(null);
   const [language, setLanguage] = useState('en');
@@ -34,7 +37,14 @@ export const ChatActions = () => {
   // hooks
   const [isFocused, setIsFocused] = useState(false);
 
+  const { handleFilterErrorTip } = useContextFilterErrorTip();
+
   const handleSendMessage = (type) => {
+    const error = handleFilterErrorTip();
+    if (error) {
+      return;
+    }
+
     setSendType(type);
 
     const { messages, newQAText } = useChatStore.getState();

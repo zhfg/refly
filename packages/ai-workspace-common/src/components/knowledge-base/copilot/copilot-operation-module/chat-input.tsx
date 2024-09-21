@@ -2,10 +2,13 @@ import { Input } from '@arco-design/web-react';
 import { useRef, useState } from 'react';
 import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useContextFilterErrorTip } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module/context-manager/hooks/use-context-filter-errror-tip';
+
 // styles
 import './index.scss';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
+import { useTranslation } from 'react-i18next';
 
 const TextArea = Input.TextArea;
 
@@ -15,6 +18,7 @@ interface ChatInputProps {
 }
 
 export const ChatInput = (props: ChatInputProps) => {
+  const { t } = useTranslation();
   const inputRef = useRef<RefTextAreaType>(null);
   // stores
   const chatStore = useChatStore();
@@ -23,7 +27,14 @@ export const ChatInput = (props: ChatInputProps) => {
   // hooks
   const [isFocused, setIsFocused] = useState(false);
 
+  const { handleFilterErrorTip } = useContextFilterErrorTip();
+
   const handleSendMessage = () => {
+    const error = handleFilterErrorTip();
+    if (error) {
+      return;
+    }
+
     const { messages, newQAText } = useChatStore.getState();
     searchStore.setIsSearchOpen(false);
 
