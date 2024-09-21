@@ -5,6 +5,7 @@ import { Mark } from '@refly/common-types';
 
 export const ContextItem = ({
   item,
+  isLimit,
   isActive,
   disabled,
   onToggle,
@@ -12,13 +13,14 @@ export const ContextItem = ({
 }: {
   item: Mark;
   isActive: boolean;
+  isLimit?: boolean;
   disabled?: boolean;
   onToggle: any;
   onRemove: any;
 }) => {
   return (
     <div
-      className={`context-item ${isActive ? 'active' : disabled ? 'disabled' : ''}`}
+      className={`context-item ${isActive ? 'active' : isLimit ? 'limit' : disabled ? 'disabled' : ''}`}
       onClick={() => onToggle(item.id)}
     >
       <div className="item-content">

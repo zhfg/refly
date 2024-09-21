@@ -2,16 +2,24 @@ import { useEffect, useState } from 'react';
 
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useContextFilterConfigStore } from '@refly-packages/ai-workspace-common/stores/use-context-filter-config';
+
 import { useProcessContextItems } from './use-process-context-items';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { SkillInvocationRuleGroup } from '@refly/openapi-schema';
 import { SelectedTextDomain } from '@refly/common-types';
 
-interface FilterConfig {
+export interface FilterConfig {
   type: string[];
   contentListTypes: string[];
 }
+
+const typeMap = {
+  resources: 'resource',
+  notes: 'note',
+  collections: 'collection',
+};
 
 const defaultConfig: SkillInvocationRuleGroup = {
   rules: [
@@ -45,28 +53,47 @@ const contentListTypeList = [
 ];
 
 export const useProcessContextFilter = (filterNow = false) => {
-  const { contextItemIdsByType, contextItemTypes } = useProcessContextItems();
+  const { contextItemIdsByType } = useProcessContextItems();
 
-  const { currentSelectedMarks, updateFilterIdsOfCurrentSelectedMarks } = useContextPanelStore((state) => ({
-    updateFilterIdsOfCurrentSelectedMarks: state.updateFilterIdsOfCurrentSelectedMarks,
-    currentSelectedMarks: state.currentSelectedMarks,
-  }));
+  const { currentSelectedMarks, updateFilterIdsOfCurrentSelectedMarks, updateFilterErrorInfo } = useContextPanelStore(
+    (state) => ({
+      updateFilterIdsOfCurrentSelectedMarks: state.updateFilterIdsOfCurrentSelectedMarks,
+      updateFilterErrorInfo: state.updateFilterErrorInfo,
+      currentSelectedMarks: state.currentSelectedMarks,
+    }),
+  );
 
   const skillStore = useSkillStore((state) => ({
     selectedSkill: state.selectedSkill,
   }));
 
-  const [initialConfig, setInitialConfig] = useState<SkillInvocationRuleGroup>(defaultConfig);
+  const useContextFilterConfig = useContextFilterConfigStore((state) => ({
+    config: state.config,
+    useConfigOfStore: state.useConfigOfStore,
+    setConfig: state.setConfig,
+    setUseConfigOfStore: state.setUseConfigOfStore,
+  }));
+
+  const [initialConfigRule, setInitialConfigRule] = useState<SkillInvocationRuleGroup>(defaultConfig);
 
   // initail config
-  const getInitialConfig = (initialConfig: SkillInvocationRuleGroup) => {
-    console.log('initialConfiggggg', initialConfig);
+  const getInitialConfig = (initialConfigRule: SkillInvocationRuleGroup) => {
     const config = {
       type: [],
       contentListTypes: [],
     };
-    if (initialConfig?.relation !== 'mutuallyExclusive') {
-      (initialConfig.rules || []).forEach((rule) => {
+
+    if (useContextFilterConfig.useConfigOfStore) {
+      const config = {
+        type: [...useContextFilterConfig.config.type],
+        contentListTypes: [...useContextFilterConfig.config.contentListTypes],
+      };
+      useContextFilterConfig.setUseConfigOfStore(false);
+      return config;
+    }
+
+    if (initialConfigRule?.relation !== 'mutuallyExclusive') {
+      (initialConfigRule.rules || []).forEach((rule) => {
         if (rule.key === 'contentList') {
           config.contentListTypes =
             rule.relation !== 'mutuallyExclusive' ? (rule?.rules || []).map((r) => r.key) : [rule?.rules?.[0]?.key];
@@ -75,10 +102,12 @@ export const useProcessContextFilter = (filterNow = false) => {
         }
       });
     } else {
-      config.type = [initialConfig?.rules?.[0]?.key];
+      config.type = [initialConfigRule?.rules?.[0]?.key];
     }
+
     config.type = config.type.filter(Boolean);
     config.contentListTypes = config.contentListTypes.filter(Boolean);
+
     if (config.contentListTypes.length) {
       config.type.push('contentList');
     }
@@ -89,10 +118,11 @@ export const useProcessContextFilter = (filterNow = false) => {
     type: [],
     contentListTypes: [],
   });
+
   const [contentListConfig, setContentListConfig] = useState<string[]>(contentListTypeList);
 
-  const isMutiType = initialConfig?.relation !== 'mutuallyExclusive';
-  const contentListRule = initialConfig.rules?.find((rule) => rule.key === 'contentList');
+  const isMutiType = initialConfigRule?.relation !== 'mutuallyExclusive';
+  const contentListRule = initialConfigRule.rules?.find((rule) => rule.key === 'contentList');
   const isMutiContentListType = contentListRule?.relation !== 'mutuallyExclusive';
 
   const isContentList = (type: string) => {
@@ -103,15 +133,15 @@ export const useProcessContextFilter = (filterNow = false) => {
     if (isContentList(type)) {
       return !contentListRule?.rules?.length;
     }
-    return initialConfig.rules?.length && !initialConfig.rules.some((rule) => rule.key === type);
+    return initialConfigRule.rules?.length && !initialConfigRule.rules.some((rule) => rule.key === type);
   };
 
-  const getConfigLimit = (type: string, initialConfig: SkillInvocationRuleGroup) => {
+  const getConfigLimit = (type: string, initialConfigRule: SkillInvocationRuleGroup) => {
     if (isContentList(type)) {
-      const contentListRule = initialConfig.rules?.find((rule) => rule.key === 'contentList');
+      const contentListRule = initialConfigRule.rules?.find((rule) => rule.key === 'contentList');
       return contentListRule?.rules?.find((rule) => rule.key === type)?.limit || 10;
     }
-    return initialConfig.rules?.find((rule) => rule.key.startsWith(type))?.limit || 10;
+    return initialConfigRule.rules?.find((rule) => rule.key.startsWith(type))?.limit || 10;
   };
 
   // update config
@@ -130,34 +160,53 @@ export const useProcessContextFilter = (filterNow = false) => {
     }
   };
 
-  const filterApply = (config: FilterConfig, initialConfig: SkillInvocationRuleGroup) => {
-    console.log('filterApplyfilterApplyfilterApplyfilterApply', config, contextItemIdsByType);
+  const filterApply = (config: FilterConfig, initialConfigRule: SkillInvocationRuleGroup) => {
     const filteredIds = [];
+    const filterErrorInfo = {};
+
     Object.keys(contextItemIdsByType).forEach((type) => {
+      if (!config.type.includes(type) && !config.contentListTypes.includes(type)) {
+        filteredIds.push(...contextItemIdsByType[type]);
+        return;
+      }
+
+      const limit = isContentList(type)
+        ? getConfigLimit(type, initialConfigRule)
+        : getConfigLimit(type, initialConfigRule);
+
+      const typeKey = typeMap[type] || type;
+
       if (config.type.includes(type)) {
-        const limit = getConfigLimit(type, initialConfig);
-        if (limit && contextItemIdsByType[type].length > limit) {
-          filteredIds.push(...contextItemIdsByType[type].slice(limit));
+        if (contextItemIdsByType[type].length > limit) {
+          filterErrorInfo[typeKey] = {
+            limit: limit,
+            currentCount: contextItemIdsByType[type].length,
+          };
         }
       }
+
       if (config.contentListTypes.includes(type)) {
-        const limit = getConfigLimit(type, initialConfig);
-        if (limit && contextItemIdsByType[type].length > limit) {
-          filteredIds.push(...contextItemIdsByType[type].slice(limit));
+        if (contextItemIdsByType[type].length > limit) {
+          filterErrorInfo[typeKey] = {
+            limit: limit,
+            currentCount: contextItemIdsByType[type].length,
+          };
         }
       }
     });
     console.log('filteredIds', filteredIds);
     updateFilterIdsOfCurrentSelectedMarks(filteredIds);
+    console.log('filterErrorInfo', filterErrorInfo);
+    updateFilterErrorInfo(filterErrorInfo);
   };
 
-  // 使用防抖或节流来限制 filterApply 的调用频率
+  // use debounce to limit the frequency of filterApply
   const debounceFilterApply = useDebouncedCallback(() => {
-    filterApply(config, initialConfig);
-  }, 300); // 300ms 延迟
+    filterApply(config, initialConfigRule);
+  }, 300); // 300ms debounce
 
   const resetConfig = () => {
-    setConfig(getInitialConfig(initialConfig));
+    setConfig(getInitialConfig(initialConfigRule));
   };
 
   useEffect(() => {
@@ -165,7 +214,7 @@ export const useProcessContextFilter = (filterNow = false) => {
       ? skillStore.selectedSkill.invocationConfig.context
       : defaultConfig;
 
-    setInitialConfig(config);
+    setInitialConfigRule(config);
     const configType = getInitialConfig(config);
     setConfig(configType);
 
@@ -187,8 +236,12 @@ export const useProcessContextFilter = (filterNow = false) => {
     };
   }, [currentSelectedMarks.length, skillStore.selectedSkill?.skillId]);
 
+  useEffect(() => {
+    useContextFilterConfig.setConfig(config);
+  }, [config]);
+
   return {
-    initialConfig,
+    initialConfigRule,
     config,
     contentListConfig,
     isMutiType,

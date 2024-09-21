@@ -39,15 +39,15 @@ const mapMarkToSearchResult = (marks: Mark[]): SearchResult[] => {
 export const ContextManager = () => {
   const [activeItemId, setActiveItemId] = useState(null);
   const { processedContextItems } = useProcessContextItems();
-  const { addMark, removeMark, toggleMarkActive, clearMarks, filterIdsOfCurrentSelectedMarks } = useContextPanelStore(
-    (state) => ({
+  const { addMark, removeMark, toggleMarkActive, clearMarks, filterIdsOfCurrentSelectedMarks, filterErrorInfo } =
+    useContextPanelStore((state) => ({
       addMark: state.addMark,
       removeMark: state.removeMark,
       toggleMarkActive: state.toggleMarkActive,
       clearMarks: state.clearMarks,
       filterIdsOfCurrentSelectedMarks: state.filterIdsOfCurrentSelectedMarks,
-    }),
-  );
+      filterErrorInfo: state.filterErrorInfo,
+    }));
 
   const skillStore = useSkillStore((state) => ({
     selectedSkill: state.selectedSkill,
@@ -114,6 +114,7 @@ export const ContextManager = () => {
               key={item.id}
               item={item}
               disabled={(filterIdsOfCurrentSelectedMarks || []).includes(item.id)}
+              isLimit={!!filterErrorInfo[item.type]}
               isActive={item.id === activeItemId}
               onToggle={handleToggleItem}
               onRemove={handleRemoveItem}

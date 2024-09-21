@@ -47,6 +47,18 @@
     align-items: center;
     transition: all 0.3s;
 
+    &.limit {
+      border-color: rgba(245, 63, 63, 0.3);
+      background-color: rgb(255, 236, 232);
+      color: rgb(245, 63, 63);
+      .item-title,
+      .item-type,
+      .item-close,
+      .item-icon {
+        color: rgb(245, 63, 63);
+      }
+    }
+
     &.active {
       background-color: #f1f1f0;
       border-color: #00968f;

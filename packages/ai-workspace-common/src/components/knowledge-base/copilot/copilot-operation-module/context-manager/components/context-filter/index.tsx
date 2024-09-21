@@ -4,19 +4,16 @@ import {
   Tooltip,
   Popover,
   InputNumber,
-  Switch,
   Checkbox,
-  Radio,
   Slider,
   Divider,
   Typography,
   Empty,
 } from '@arco-design/web-react';
-import { IconFilter, IconSync, IconClose, IconCheck, IconArrowDown } from '@arco-design/web-react/icon';
+import { IconFilter, IconCheck, IconArrowDown } from '@arco-design/web-react/icon';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { useTranslation } from 'react-i18next';
-import { SkillInvocationRule, SkillInvocationRuleGroup } from '@refly/openapi-schema';
-import { selectedTextDomains, SelectedTextDomain } from '@refly/common-types';
+import { useContextFilterConfigStore } from '@refly-packages/ai-workspace-common/stores/use-context-filter-config';
 import { useProcessContextItems } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module/context-manager/hooks/use-process-context-items';
 import { useProcessContextFilter } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module/context-manager/hooks/use-process-context-filter';
 import { PiNotepad, PiTextAlignRightBold } from 'react-icons/pi';
@@ -29,7 +26,6 @@ import './index.scss';
 const iconStyle = { fontSize: 10, transform: 'translateY(1px)', marginRight: 6, color: 'rgb(0, 0, 0, 0.6)' };
 
 type ContextFilterPopoverContentProps = {
-  initialConfig?: SkillInvocationRuleGroup;
   handleVisibleChange?: (visible: boolean) => void;
 };
 
@@ -61,7 +57,7 @@ const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = 
   const { t } = useTranslation();
 
   const {
-    initialConfig,
+    initialConfigRule,
     config,
     contentListConfig,
     isMutiType,
@@ -77,7 +73,7 @@ const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = 
   const { contextItemTypes } = useProcessContextItems();
 
   const handleApply = () => {
-    filterApply(config, initialConfig);
+    filterApply(config, initialConfigRule);
     handleVisibleChange(false);
   };
 
@@ -198,12 +194,12 @@ const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = 
                     <div className="filter-item-limit">
                       <span
                         style={{
-                          color: getConfigLimit(type, initialConfig) >= contextItemTypes[type] ? 'green' : 'red',
+                          color: getConfigLimit(type, initialConfigRule) >= contextItemTypes[type] ? 'green' : 'red',
                         }}
                       >
                         {contextItemTypes[type]}{' '}
                       </span>
-                      / {getConfigLimit(type, initialConfig)}
+                      / {getConfigLimit(type, initialConfigRule)}
                     </div>
                   </div>
                 ))
@@ -240,6 +236,10 @@ export const ContextFilter: React.FC = () => {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
 
+  const useContextFilterConfig = useContextFilterConfigStore((state) => ({
+    setUseConfigOfStore: state.setUseConfigOfStore,
+  }));
+
   const handleVisibleChange = (visible: boolean) => {
     setVisible(visible);
   };
@@ -259,6 +259,9 @@ export const ContextFilter: React.FC = () => {
           type="outline"
           style={{ fontSize: 10, height: 18, borderRadius: 4, borderColor: '#e5e5e5', color: 'rgba(0,0,0,0.6)' }}
           icon={<IconFilter />}
+          onClick={() => {
+            useContextFilterConfig.setUseConfigOfStore(true);
+          }}
         />
       </Tooltip>
     </Popover>
