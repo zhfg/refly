@@ -87,8 +87,10 @@
       }
     },
     "loginModal": {
-      "title": "Sign In or Register to start using Refly",
-      "loginBtn": "Sign In",
+      "title": "Welcome to Refly, sign in to continue",
+      "loginBtn": {
+        "google": "Sign in with Google"
+      },
       "loggingStatus": "Signing in...",
       "and": "and",
       "utilText": "By registering, you agree to our",

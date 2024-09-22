@@ -11,7 +11,7 @@ interface ResourceDocument {
   url?: string;
   createdAt?: string;
   updatedAt?: string;
-  uid?: string;
+  uid: string;
 }
 
 interface NoteDocument {
@@ -20,7 +20,7 @@ interface NoteDocument {
   content?: string;
   createdAt?: string;
   updatedAt?: string;
-  uid?: string;
+  uid: string;
 }
 
 interface CollectionDocument {
@@ -29,7 +29,7 @@ interface CollectionDocument {
   description?: string;
   createdAt?: string;
   updatedAt?: string;
-  uid?: string;
+  uid: string;
 }
 
 interface ConversationMessageDocument {
@@ -40,7 +40,7 @@ interface ConversationMessageDocument {
   type?: MessageType;
   createdAt?: string;
   updatedAt?: string;
-  uid?: string;
+  uid: string;
 }
 
 interface SkillDocument {
@@ -50,7 +50,7 @@ interface SkillDocument {
   tplName?: string;
   createdAt?: string;
   updatedAt?: string;
-  uid?: string;
+  uid: string;
 }
 
 const commonSettings = {

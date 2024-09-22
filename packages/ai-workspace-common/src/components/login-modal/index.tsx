@@ -72,6 +72,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
       {...modalProps}
       footer={null}
       className="login-modal"
+      autoFocus={false}
       wrapStyle={{
         borderRadius: 8,
       }}
@@ -107,7 +108,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
           <img src={Google} alt="google" style={{ width: 15, height: 15, margin: '0 8px' }} />
           {userStore.isCheckingLoginStatus
             ? t('landingPage.loginModal.loggingStatus')
-            : t('landingPage.loginModal.loginBtn')}
+            : t('landingPage.loginModal.loginBtn.google')}
         </Button>
         <Divider></Divider>
         <Typography.Paragraph className="term-text">

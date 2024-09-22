@@ -16,6 +16,11 @@ export class SkillProcessor {
   async handleInvokeSkill(job: Job<InvokeSkillJobData>) {
     this.logger.log(`[handleInvokeSkill] job: ${JSON.stringify(job)}`);
 
-    await this.skillService.invokeSkillFromQueue(job.data);
+    try {
+      await this.skillService.invokeSkillFromQueue(job.data);
+    } catch (error) {
+      this.logger.error(`[handleInvokeSkill] error: ${error?.stack}`);
+      throw error;
+    }
   }
 }

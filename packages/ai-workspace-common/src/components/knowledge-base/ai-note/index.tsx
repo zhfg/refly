@@ -22,8 +22,8 @@ import { EditorContent, type JSONContent, EditorInstance } from '@refly-packages
 import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
 import { ImageResizer, handleCommandNavigation } from '@refly-packages/editor-core/extensions';
 import { defaultExtensions } from '@refly-packages/editor-component/extensions';
-import { uploadFn } from '@refly-packages/editor-component/image-upload';
-import { slashCommand } from '@refly-packages/editor-component/slash-command';
+import { createUploadFn } from '@refly-packages/editor-component/image-upload';
+import { configureSlashCommand } from '@refly-packages/editor-component/slash-command';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import Collaboration from '@tiptap/extension-collaboration';
 import { useDebouncedCallback } from 'use-debounce';
@@ -90,6 +90,16 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
       token,
     });
   }, [noteId]);
+
+  const uploadFn = useMemo(() => createUploadFn({ entityId: noteId, entityType: 'note' }), [noteId]);
+  const slashCommand = useMemo(
+    () =>
+      configureSlashCommand({
+        entityId: noteId,
+        entityType: 'note',
+      }),
+    [noteId],
+  );
 
   const extensions = [
     ...defaultExtensions,
@@ -166,11 +176,6 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
         contextPanelStore.updateCurrentSelectionContent(selectedContent);
         contextPanelStore.updateBeforeSelectionNoteContent(prevSelectionContent);
         contextPanelStore.updateAfterSelectionNoteContent(afterSelectionContent);
-
-        console.log('cursor position', lastCursorPosRef.current);
-        console.log('Content before cursor:', prevSelectionContent);
-        console.log('Content after cursor:', afterSelectionContent);
-        console.log('Selected content:', selectedContent);
       });
     }
   }, [editorRef.current, readOnly]);
@@ -252,7 +257,7 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
             }}
             slotAfter={<ImageResizer />}
           >
-            <CollabEditorCommand />
+            <CollabEditorCommand entityId={noteId} entityType="note" />
             <CollabGenAIMenuSwitch />
             <CollabGenAIBlockMenu />
           </EditorContent>

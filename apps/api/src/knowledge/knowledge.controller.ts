@@ -35,9 +35,9 @@ import {
 } from '@refly/openapi-schema';
 import { User as UserModel } from '@prisma/client';
 import { KnowledgeService } from './knowledge.service';
-import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
-import { buildSuccessResponse } from '../utils';
-import { User } from 'src/utils/decorators/user.decorator';
+import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
+import { buildSuccessResponse } from '@/utils';
+import { User } from '@/utils/decorators/user.decorator';
 import { collectionPO2DTO, notePO2DTO, resourcePO2DTO } from './knowledge.dto';
 
 @Controller('knowledge')
@@ -161,7 +161,9 @@ export class KnowledgeController {
     @User() user: UserModel,
     @Body() body: UpsertResourceRequest,
   ): Promise<UpsertResourceResponse> {
-    const resource = await this.knowledgeService.createResource(user, body);
+    const resource = await this.knowledgeService.createResource(user, body, {
+      checkStorageQuota: true,
+    });
     return buildSuccessResponse(resourcePO2DTO(resource));
   }
 

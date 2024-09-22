@@ -8,9 +8,9 @@ export const translation = {
       loginBtn: '立即登录',
       loggingStatus: '登录中...',
       and: '及',
-      utilText: '注册同意即表明您同意 ',
+      utilText: '注册即表明您同意 ',
       privacyPolicy: '隐私政策',
-      terms: '条款和条件',
+      terms: '服务条款',
       status: {
         failed: '登录失败',
         success: '登录成功',

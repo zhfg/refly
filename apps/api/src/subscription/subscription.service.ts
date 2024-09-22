@@ -2,17 +2,20 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import Stripe from 'stripe';
 import { InjectStripeClient, StripeWebhookHandler } from '@golevelup/nestjs-stripe';
 import { PrismaService } from '@/common/prisma.service';
+import { CreateCheckoutSessionRequest, PriceLookupKey, User } from '@refly/openapi-schema';
 import {
-  CreateCheckoutSessionRequest,
-  ModelTier,
-  PriceLookupKey,
-  User,
-} from '@refly/openapi-schema';
-import { genUsageMeterID, getSubscriptionInfoFromLookupKey } from '@refly/utils';
+  genTokenUsageMeterID,
+  genStorageUsageMeterID,
+  getSubscriptionInfoFromLookupKey,
+} from '@refly/utils';
 import {
   CreateSubscriptionParam,
-  ReportTokenUsageJobData,
+  SyncTokenUsageJobData,
+  SyncStorageUsageJobData,
   tokenUsageMeterPO2DTO,
+  storageUsageMeterPO2DTO,
+  CheckTokenUsageResult,
+  CheckStorageUsageResult,
 } from '@/subscription/subscription.dto';
 import { pick } from '@/utils';
 import { Subscription as SubscriptionModel, User as UserModel } from '@prisma/client';
@@ -75,58 +78,160 @@ export class SubscriptionService {
     });
   }
 
-  async createSubscription(user: UserModel, param: CreateSubscriptionParam) {
-    // Check for existing subscription
-    if (user.subscriptionId) {
-      const subscription = await this.getSubscription(user.subscriptionId);
-      if (subscription.status === 'active') {
-        return subscription;
+  async createSubscription(uid: string, param: CreateSubscriptionParam) {
+    return this.prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.findUnique({ where: { uid } });
+
+      // Check for existing subscription
+      if (user.subscriptionId) {
+        const subscription = await prisma.subscription.findUnique({
+          where: { subscriptionId: user.subscriptionId },
+        });
+        if (subscription.status === 'active') {
+          return subscription;
+        }
       }
-    }
 
-    // Create a new subscription if needed
-    const sub = await this.prisma.subscription.create({
-      data: {
-        ...param,
-        uid: user.uid,
-      },
+      // Create a new subscription if needed
+      const sub = await prisma.subscription.create({
+        data: {
+          ...param,
+          uid,
+        },
+      });
+
+      // Update user's subscriptionId
+      await prisma.user.update({
+        where: { uid },
+        data: { subscriptionId: sub.subscriptionId },
+      });
+
+      const now = new Date();
+
+      // Delete existing free token meter
+      await prisma.tokenUsageMeter.updateMany({
+        where: {
+          uid,
+          subscriptionId: null,
+          startAt: { lte: now },
+          endAt: { gte: now },
+          deletedAt: null,
+        },
+        data: {
+          deletedAt: now,
+        },
+      });
+
+      const usageQuota = await prisma.subscriptionUsageQuota.findUnique({
+        where: { planType: sub.planType },
+      });
+
+      // Create a new token usage meter for this plan
+      await prisma.tokenUsageMeter.create({
+        data: {
+          meterId: genTokenUsageMeterID(),
+          uid,
+          subscriptionId: sub.subscriptionId,
+          startAt: startOfDay(now),
+          endAt: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate()),
+          t1TokenQuota: usageQuota?.t1TokenQuota || this.config.get('quota.token.t1'),
+          t1TokenUsed: 0,
+          t2TokenQuota: usageQuota?.t2TokenQuota || this.config.get('quota.token.t2'),
+          t2TokenUsed: 0,
+        },
+      });
+
+      // Update storage usage meter
+      await prisma.storageUsageMeter.updateMany({
+        where: {
+          uid,
+          subscriptionId: null,
+          deletedAt: null,
+        },
+        data: {
+          subscriptionId: sub.subscriptionId,
+          objectStorageQuota:
+            usageQuota?.objectStorageQuota || this.config.get('quota.storage.object'),
+          vectorStorageQuota:
+            usageQuota?.vectorStorageQuota || this.config.get('quota.storage.vector'),
+        },
+      });
+
+      return sub;
     });
-
-    // Update user's subscriptionId
-    await this.prisma.user.update({
-      where: { uid: user.uid },
-      data: { subscriptionId: sub.subscriptionId },
-    });
-
-    // Create a new usage meter for this plan
-    await this.getOrCreateUsageMeter(user, sub);
-
-    return sub;
   }
 
   async cancelSubscription(sub: SubscriptionModel) {
-    const [user] = await this.prisma.$transaction([
-      this.prisma.user.update({
+    await this.prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.findUnique({ where: { uid: sub.uid } });
+      if (!user) {
+        this.logger.error(`No user found for uid ${sub.uid}`);
+        return;
+      }
+
+      // Idempotency check
+      if (!user.subscriptionId) {
+        this.logger.error(`No subscription found for user ${sub.uid}`);
+        return;
+      }
+
+      // Remove user's subscriptionId
+      await prisma.user.update({
         where: { uid: sub.uid },
         data: { subscriptionId: null },
-      }),
-      this.prisma.subscription.update({
+      });
+
+      // Mark the subscription as canceled
+      await prisma.subscription.update({
         where: { subscriptionId: sub.subscriptionId },
         data: { status: 'canceled' },
-      }),
-      this.prisma.tokenUsageMeter.updateMany({
+      });
+
+      const now = new Date();
+
+      const freeQuota = await prisma.subscriptionUsageQuota.findUnique({
+        where: { planType: 'free' },
+      });
+
+      // Mark the token usage meter as deleted
+      await prisma.tokenUsageMeter.updateMany({
+        where: {
+          uid: sub.uid,
+          subscriptionId: sub.subscriptionId,
+          startAt: { lte: now },
+          endAt: { gte: now },
+          deletedAt: null,
+        },
+        data: { deletedAt: now },
+      });
+
+      // Create a new token usage meter for the free plan
+      await prisma.tokenUsageMeter.create({
+        data: {
+          meterId: genTokenUsageMeterID(),
+          uid: sub.uid,
+          subscriptionId: null,
+          startAt: startOfDay(now),
+          endAt: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate()),
+          t1TokenQuota: freeQuota?.t1TokenQuota || this.config.get('quota.token.t1'),
+          t1TokenUsed: 0,
+          t2TokenQuota: freeQuota?.t2TokenQuota || this.config.get('quota.token.t2'),
+          t2TokenUsed: 0,
+        },
+      });
+
+      // Update storage usage meter
+      await prisma.storageUsageMeter.updateMany({
         where: { subscriptionId: sub.subscriptionId },
-        data: { deletedAt: new Date() },
-      }),
-    ]);
-
-    if (!user) {
-      this.logger.error(`User ${sub.uid} not found for subscription ${sub.subscriptionId}`);
-      return;
-    }
-
-    // Create a free usage meter for user
-    await this.getOrCreateUsageMeter(user);
+        data: {
+          subscriptionId: null,
+          objectStorageQuota:
+            freeQuota?.objectStorageQuota || this.config.get('quota.storage.object'),
+          vectorStorageQuota:
+            freeQuota?.vectorStorageQuota || this.config.get('quota.storage.vector'),
+        },
+      });
+    });
   }
 
   @StripeWebhookHandler('checkout.session.completed')
@@ -197,13 +302,7 @@ export class SubscriptionService {
       checkoutSession.lookupKey as PriceLookupKey,
     );
 
-    const user = await this.prisma.user.findUnique({ where: { uid } });
-    if (!user) {
-      this.logger.error(`No user found for uid ${uid}`);
-      return;
-    }
-
-    const sub = await this.createSubscription(user, {
+    const sub = await this.createSubscription(uid, {
       planType,
       interval,
       lookupKey: checkoutSession.lookupKey,
@@ -260,24 +359,38 @@ export class SubscriptionService {
     await this.cancelSubscription(sub);
   }
 
-  async checkTokenUsage(user: User): Promise<ModelTier[]> {
+  async checkTokenUsage(user: User): Promise<CheckTokenUsageResult> {
+    const result: CheckTokenUsageResult = { t1: false, t2: false };
     const userModel = await this.prisma.user.findUnique({ where: { uid: user.uid } });
     if (!userModel) {
       this.logger.error(`No user found for uid ${user.uid}`);
-      return [];
+      return result;
     }
 
-    const activeMeter = await this.getOrCreateTokenUsageMeter(userModel);
+    const meter = await this.getOrCreateTokenUsageMeter(userModel);
 
-    const availableTiers: ModelTier[] = [];
-    if (activeMeter.t1TokenUsed < activeMeter.t1TokenQuota) {
-      availableTiers.push('t1');
-    }
-    if (activeMeter.t2TokenUsed < activeMeter.t2TokenQuota) {
-      availableTiers.push('t2');
+    result.t1 = meter.t1TokenUsed < meter.t1TokenQuota;
+    result.t2 = meter.t2TokenUsed < meter.t2TokenQuota;
+
+    return result;
+  }
+
+  async checkStorageUsage(user: User): Promise<CheckStorageUsageResult> {
+    const result = { objectStorageAvailable: false, vectorStorageAvailable: false };
+
+    const userModel = await this.prisma.user.findUnique({ where: { uid: user.uid } });
+    if (!userModel) {
+      this.logger.error(`No user found for uid ${user.uid}`);
+      return result;
     }
 
-    return availableTiers;
+    const meter = await this.getOrCreateStorageUsageMeter(userModel);
+
+    result.objectStorageAvailable =
+      meter.resourceSize + meter.noteSize + meter.fileSize < meter.objectStorageQuota;
+    result.vectorStorageAvailable = meter.vectorStorageUsed < meter.vectorStorageQuota;
+
+    return result;
   }
 
   async getOrCreateTokenUsageMeter(user: UserModel, sub?: SubscriptionModel) {
@@ -289,58 +402,87 @@ export class SubscriptionService {
       });
     }
 
-    const now = new Date();
+    return this.prisma.$transaction(async (prisma) => {
+      const now = new Date();
 
-    const activeMeter = await this.prisma.tokenUsageMeter.findFirst({
-      where: {
-        uid,
-        subscriptionId: sub?.subscriptionId,
-        startAt: { lte: now },
-        endAt: { gte: now },
-        deletedAt: null,
-      },
-      orderBy: {
-        startAt: 'desc',
-      },
+      const lastMeter = await prisma.tokenUsageMeter.findFirst({
+        where: {
+          uid,
+          subscriptionId: sub?.subscriptionId,
+          deletedAt: null,
+        },
+        orderBy: {
+          startAt: 'desc',
+        },
+      });
+
+      // If the last meter is still active, return it
+      if (lastMeter?.startAt < now && lastMeter?.endAt > now) {
+        return lastMeter;
+      }
+
+      // Otherwise, create a new meter
+      const startAt = lastMeter?.endAt ?? startOfDay(now);
+      const endAt = new Date(startAt.getFullYear(), startAt.getMonth() + 1, startAt.getDate());
+      const planType = sub?.planType || 'free';
+      const usageQuota = await prisma.subscriptionUsageQuota.findUnique({
+        where: { planType },
+      });
+
+      return prisma.tokenUsageMeter.create({
+        data: {
+          meterId: genTokenUsageMeterID(),
+          uid,
+          subscriptionId: sub?.subscriptionId,
+          startAt,
+          endAt,
+          t1TokenQuota: usageQuota?.t1TokenQuota || this.config.get('quota.token.t1'),
+          t1TokenUsed: 0,
+          t2TokenQuota: usageQuota?.t2TokenQuota || this.config.get('quota.token.t2'),
+          t2TokenUsed: 0,
+        },
+      });
     });
+  }
 
-    // If the active meter is found, return it
-    if (activeMeter) {
-      return activeMeter;
+  async getOrCreateStorageUsageMeter(user: UserModel, sub?: SubscriptionModel) {
+    const { uid } = user;
+
+    if (user.subscriptionId && !sub) {
+      sub = await this.prisma.subscription.findUnique({
+        where: { subscriptionId: user.subscriptionId },
+      });
     }
 
-    // Try to find the last usage meter. If we find it, resume from there.
-    const lastMeter = await this.prisma.tokenUsageMeter.findFirst({
-      where: {
-        uid,
-        subscriptionId: sub?.subscriptionId,
-        endAt: { lt: now },
-        deletedAt: null,
-      },
-      orderBy: {
-        startAt: 'desc',
-      },
-    });
-    const startAt = lastMeter?.endAt ?? startOfDay(now);
+    return this.prisma.$transaction(async (prisma) => {
+      const activeMeter = await prisma.storageUsageMeter.findFirst({
+        where: {
+          uid,
+          deletedAt: null,
+        },
+      });
 
-    // Find the token quota for the plan
-    const planType = sub?.planType || 'free';
-    const tokenQuota = await this.prisma.subscriptionUsageQuota.findUnique({
-      where: { planType },
-    });
+      if (activeMeter) {
+        return activeMeter;
+      }
 
-    return this.prisma.tokenUsageMeter.create({
-      data: {
-        meterId: genUsageMeterID(),
-        uid,
-        subscriptionId: sub?.subscriptionId,
-        startAt,
-        endAt: new Date(startAt.getFullYear(), startAt.getMonth() + 1, startAt.getDate()),
-        t1TokenQuota: tokenQuota?.t1TokenQuota || 0,
-        t1TokenUsed: 0,
-        t2TokenQuota: tokenQuota?.t2TokenQuota || 0,
-        t2TokenUsed: 0,
-      },
+      // Find the storage quota for the plan
+      const planType = sub?.planType || 'free';
+      const usageQuota = await prisma.subscriptionUsageQuota.findUnique({
+        where: { planType },
+      });
+
+      return prisma.storageUsageMeter.create({
+        data: {
+          meterId: genStorageUsageMeterID(),
+          uid,
+          subscriptionId: sub?.subscriptionId,
+          objectStorageQuota:
+            usageQuota?.objectStorageQuota || this.config.get('quota.storage.object'),
+          vectorStorageQuota:
+            usageQuota?.vectorStorageQuota || this.config.get('quota.storage.vector'),
+        },
+      });
     });
   }
 
@@ -351,12 +493,18 @@ export class SubscriptionService {
       });
     }
 
-    const tokenMeter = await this.getOrCreateTokenUsageMeter(user, sub);
+    const [tokenMeter, storageMeter] = await Promise.all([
+      this.getOrCreateTokenUsageMeter(user, sub),
+      this.getOrCreateStorageUsageMeter(user, sub),
+    ]);
 
-    return { token: tokenUsageMeterPO2DTO(tokenMeter) };
+    return {
+      token: tokenUsageMeterPO2DTO(tokenMeter),
+      storage: storageUsageMeterPO2DTO(storageMeter),
+    };
   }
 
-  async updateTokenUsage(data: ReportTokenUsageJobData) {
+  async syncTokenUsage(data: SyncTokenUsageJobData) {
     const { uid, usage, skill, timestamp } = data;
 
     await this.prisma.$transaction([
@@ -383,6 +531,66 @@ export class SubscriptionService {
         },
       }),
     ]);
+  }
+
+  async syncStorageUsage(data: SyncStorageUsageJobData) {
+    const { uid, timestamp } = data;
+
+    const user = await this.prisma.user.findUnique({ where: { uid } });
+    if (!user) {
+      this.logger.error(`No user found for uid ${uid}`);
+      return;
+    }
+
+    this.logger.log(`Syncing storage usage for user ${uid}`);
+
+    const activeMeter = await this.getOrCreateStorageUsageMeter(user);
+
+    // If the meter has been synced at a time after the timestamp, skip it
+    if (activeMeter.syncedAt && activeMeter.syncedAt > timestamp) {
+      this.logger.log(`Storage usage for user ${uid} already synced at ${activeMeter.syncedAt}`);
+      return;
+    }
+
+    await this.prisma.$transaction(async (prisma) => {
+      const [resourceSizeSum, noteSizeSum, fileSizeSum] = await Promise.all([
+        prisma.resource.aggregate({
+          _sum: {
+            storageSize: true,
+            vectorSize: true,
+          },
+          where: { uid, deletedAt: null },
+        }),
+        prisma.note.aggregate({
+          _sum: {
+            storageSize: true,
+            vectorSize: true,
+          },
+          where: { uid, deletedAt: null },
+        }),
+        prisma.staticFile.aggregate({
+          _sum: {
+            storageSize: true,
+          },
+          where: { uid, deletedAt: null },
+        }),
+      ]);
+
+      await prisma.storageUsageMeter.update({
+        where: { meterId: activeMeter.meterId },
+        data: {
+          resourceSize: resourceSizeSum._sum.storageSize || 0,
+          noteSize: noteSizeSum._sum.storageSize || 0,
+          fileSize: fileSizeSum._sum.storageSize || 0,
+          vectorStorageUsed:
+            (resourceSizeSum._sum.vectorSize || BigInt(0)) +
+            (noteSizeSum._sum.vectorSize || BigInt(0)),
+          syncedAt: timestamp,
+        },
+      });
+    });
+
+    this.logger.log(`Storage usage for user ${uid} synced at ${timestamp}`);
   }
 }
 
