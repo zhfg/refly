@@ -47,8 +47,10 @@ export class QdrantService implements OnModuleInit {
         vectors: {
           size: this.configService.getOrThrow<number>('vectorStore.vectorDim'),
           distance: 'Cosine',
+          on_disk: true,
         },
-        hnsw_config: { payload_m: 16, m: 0 },
+        hnsw_config: { payload_m: 16, m: 0, on_disk: true },
+        on_disk_payload: true,
       });
       this.logger.log(`collection create success: ${res}`);
     } else {
