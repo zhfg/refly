@@ -140,7 +140,7 @@ export class MiscService {
     });
 
     return {
-      url: `${this.config.get('staticEndpoint')}${objectKey}`,
+      url: `${this.config.get('staticEndpoint')}${storageKey}`,
     };
   }
 
