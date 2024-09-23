@@ -9,12 +9,13 @@ import './index.scss';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 import { useTranslation } from 'react-i18next';
-
+import { SkillTemplateConfig } from '@refly/openapi-schema';
 const TextArea = Input.TextArea;
 
 interface ChatInputProps {
   placeholder: string;
   autoSize: { minRows: number; maxRows: number };
+  tplConfig: SkillTemplateConfig;
 }
 
 export const ChatInput = (props: ChatInputProps) => {
@@ -37,13 +38,14 @@ export const ChatInput = (props: ChatInputProps) => {
 
     const { messages, newQAText } = useChatStore.getState();
     searchStore.setIsSearchOpen(false);
+    const invokeParams = { tplConfig: props.tplConfig };
 
     if (messages?.length > 0) {
       // 追问阅读
-      runSkill(newQAText);
+      runSkill(newQAText, invokeParams);
     } else {
       // 新会话阅读，先创建会话，然后进行跳转之后发起聊天
-      emptyConvRunSkill(newQAText, true);
+      emptyConvRunSkill(newQAText, true, invokeParams);
     }
   };
 
