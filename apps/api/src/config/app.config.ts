@@ -15,7 +15,7 @@ export default () => ({
     port: parseInt(process.env.REDIS_PORT) || 6379,
     password: process.env.REDIS_PASSWORD || '',
   },
-  staticEndpoint: process.env.STATIC_ENDPOINT || 'http://localhost:3000/v1/misc/static/',
+  staticEndpoint: process.env.STATIC_ENDPOINT || 'http://localhost:3000/v1/misc/',
   minio: {
     internal: {
       endPoint: process.env.MINIO_INTERNAL_ENDPOINT || 'localhost',
@@ -57,7 +57,7 @@ export default () => ({
     redirectUrl: process.env.LOGIN_REDIRECT_URL,
     jwt: {
       secret: process.env.JWT_SECRET || 'test',
-      expiresIn: parseInt(process.env.JWT_EXPIRATION_TIME) || '14d',
+      expiresIn: process.env.JWT_EXPIRATION_TIME || '14d',
     },
     github: {
       clientId: process.env.GITHUB_CLIENT_ID || 'test',
