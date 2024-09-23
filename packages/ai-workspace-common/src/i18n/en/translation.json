@@ -235,6 +235,7 @@
         "limitCount": "Limit Count",
         "apply": "Apply",
         "contentListSelectedType": "Selected Content Type",
+        "contentListSelectedTypeRequired": "Please configure the selected content type",
         "contentListLimit": "Selected Content Count",
         "filterConditions": "Filter Conditions",
         "reset": "Reset",

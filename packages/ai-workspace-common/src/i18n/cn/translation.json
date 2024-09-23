@@ -235,6 +235,7 @@
         "limitCount": "限制数量",
         "apply": "应用",
         "contentListSelectedType": "配置选中内容类型",
+        "contentListSelectedTypeRequired": "请配置选中内容类型",
         "contentListLimit": "选中内容数量",
         "filterConditions": "过滤条件",
         "reset": "重置",

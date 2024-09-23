@@ -73,7 +73,11 @@ const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = 
   const { contextItemTypes } = useProcessContextItems();
 
   const handleApply = () => {
-    filterApply(config, initialConfigRule);
+    const applyCallback = filterApply(config, initialConfigRule);
+    if (applyCallback) {
+      applyCallback();
+      return;
+    }
     handleVisibleChange(false);
   };
 

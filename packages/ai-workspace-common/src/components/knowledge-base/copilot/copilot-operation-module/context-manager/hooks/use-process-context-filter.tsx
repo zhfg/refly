@@ -7,8 +7,11 @@ import { useContextFilterConfigStore } from '@refly-packages/ai-workspace-common
 import { useProcessContextItems } from './use-process-context-items';
 import { useDebouncedCallback } from 'use-debounce';
 
-import { SkillInvocationRuleGroup } from '@refly/openapi-schema';
+import { SkillInvocationRuleGroup, SkillInvocationRule } from '@refly/openapi-schema';
 import { SelectedTextDomain } from '@refly/common-types';
+
+import { useTranslation } from 'react-i18next';
+import { Notification } from '@arco-design/web-react';
 
 export interface FilterConfig {
   type: string[];
@@ -54,6 +57,7 @@ const contentListTypeList = [
 
 export const useProcessContextFilter = (filterNow = false) => {
   const { contextItemIdsByType } = useProcessContextItems();
+  const { t } = useTranslation();
 
   const { currentSelectedMarks, updateFilterIdsOfCurrentSelectedMarks, updateFilterErrorInfo } = useContextPanelStore(
     (state) => ({
@@ -96,23 +100,30 @@ export const useProcessContextFilter = (filterNow = false) => {
       return config;
     }
 
+    const getContentListTypes = (rule: SkillInvocationRule) => {
+      return rule.relation !== 'mutuallyExclusive' ? (rule?.rules || []).map((r) => r.key) : [rule?.rules?.[0]?.key];
+    };
+
     if (initialConfigRule?.relation !== 'mutuallyExclusive') {
       (initialConfigRule.rules || []).forEach((rule) => {
         if (rule.key === 'contentList') {
-          config.contentListTypes =
-            rule.relation !== 'mutuallyExclusive' ? (rule?.rules || []).map((r) => r.key) : [rule?.rules?.[0]?.key];
+          config.contentListTypes = getContentListTypes(rule);
         } else {
           config.type.push(rule.key);
         }
       });
     } else {
-      config.type = [initialConfigRule?.rules?.[0]?.key];
+      const ruleFirst = initialConfigRule?.rules?.[0];
+      config.type = [ruleFirst?.key];
+      if (ruleFirst?.key === 'contentList') {
+        config.contentListTypes = getContentListTypes(ruleFirst);
+      }
     }
 
     config.type = config.type.filter(Boolean);
     config.contentListTypes = config.contentListTypes.filter(Boolean);
 
-    if (config.contentListTypes.length) {
+    if (config.contentListTypes.length && !config.type.includes('contentList')) {
       config.type.push('contentList');
     }
     return config;
@@ -165,6 +176,15 @@ export const useProcessContextFilter = (filterNow = false) => {
   };
 
   const filterApply = (config: FilterConfig, initialConfigRule: SkillInvocationRuleGroup) => {
+    if (config.type.includes('contentList') && !config.contentListTypes.length) {
+      return () => {
+        Notification.error({
+          style: { width: 400 },
+          content: t('knowledgeBase.context.contextFilter.contentListSelectedTypeRequired'),
+        });
+      };
+    }
+
     const filteredIds = [];
     const filterErrorInfo = {};
 
