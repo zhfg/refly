@@ -78,17 +78,21 @@ export const useProcessContextFilter = (filterNow = false) => {
 
   // initail config
   const getInitialConfig = (initialConfigRule: SkillInvocationRuleGroup) => {
-    const config = {
+    const config: FilterConfig = {
       type: [],
       contentListTypes: [],
     };
 
     if (useContextFilterConfig.useConfigOfStore) {
-      const config = {
+      const config: FilterConfig = {
         type: [...useContextFilterConfig.config.type],
         contentListTypes: [...useContextFilterConfig.config.contentListTypes],
       };
       useContextFilterConfig.setUseConfigOfStore(false);
+      return config;
+    }
+
+    if (!initialConfigRule?.rules?.length) {
       return config;
     }
 
@@ -122,7 +126,7 @@ export const useProcessContextFilter = (filterNow = false) => {
   const [contentListConfig, setContentListConfig] = useState<string[]>(contentListTypeList);
 
   const isMutiType = initialConfigRule?.relation !== 'mutuallyExclusive';
-  const contentListRule = initialConfigRule.rules?.find((rule) => rule.key === 'contentList');
+  const contentListRule = (initialConfigRule?.rules || []).find((rule) => rule.key === 'contentList');
   const isMutiContentListType = contentListRule?.relation !== 'mutuallyExclusive';
 
   const isContentList = (type: string) => {
@@ -133,15 +137,15 @@ export const useProcessContextFilter = (filterNow = false) => {
     if (isContentList(type)) {
       return !contentListRule?.rules?.length;
     }
-    return initialConfigRule.rules?.length && !initialConfigRule.rules.some((rule) => rule.key === type);
+    return initialConfigRule?.rules?.length && !initialConfigRule.rules.some((rule) => rule.key === type);
   };
 
   const getConfigLimit = (type: string, initialConfigRule: SkillInvocationRuleGroup) => {
     if (isContentList(type)) {
-      const contentListRule = initialConfigRule.rules?.find((rule) => rule.key === 'contentList');
+      const contentListRule = initialConfigRule?.rules?.find((rule) => rule.key === 'contentList');
       return contentListRule?.rules?.find((rule) => rule.key === type)?.limit || 10;
     }
-    return initialConfigRule.rules?.find((rule) => rule.key.startsWith(type))?.limit || 10;
+    return initialConfigRule?.rules?.find((rule) => rule.key.startsWith(type))?.limit || 10;
   };
 
   // update config
@@ -228,7 +232,7 @@ export const useProcessContextFilter = (filterNow = false) => {
   }, [skillStore.selectedSkill?.skillId]);
 
   useEffect(() => {
-    if (!skillStore.selectedSkill?.skillId) return;
+    // if (!skillStore.selectedSkill?.skillId) return;
     debounceFilterApply();
 
     return () => {
