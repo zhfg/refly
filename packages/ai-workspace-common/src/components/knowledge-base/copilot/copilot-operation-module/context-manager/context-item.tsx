@@ -5,17 +5,24 @@ import { Mark } from '@refly/common-types';
 
 export const ContextItem = ({
   item,
+  isLimit,
   isActive,
+  disabled,
   onToggle,
   onRemove,
 }: {
   item: Mark;
   isActive: boolean;
+  isLimit?: boolean;
+  disabled?: boolean;
   onToggle: any;
   onRemove: any;
 }) => {
   return (
-    <div className={`context-item ${isActive ? 'active' : ''}`} onClick={() => onToggle(item.id)}>
+    <div
+      className={`context-item ${isActive ? 'active' : isLimit ? 'limit' : disabled ? 'disabled' : ''}`}
+      onClick={() => onToggle(item.id)}
+    >
       <div className="item-content">
         <span className="item-icon">{item.icon}</span>
         <span className="item-title" title={item.title}>

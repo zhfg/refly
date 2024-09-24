@@ -1,4 +1,4 @@
-import { Button, Checkbox } from '@arco-design/web-react';
+import { Button, Checkbox, Form } from '@arco-design/web-react';
 // 自定义样式
 import './index.scss';
 // 自定义组件
@@ -9,6 +9,7 @@ import { ChatInputAssistAction } from './chat-input-assist-action';
 import { ContextManager } from './context-manager';
 import { ChatActions } from './chat-actions';
 import { SelectedSkillHeader } from './selected-skill-header';
+import { ConfigManager } from './config-manager';
 //stores
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 
@@ -38,6 +39,15 @@ export const CopilotOperationModule = memo((props: CopilotInputModuleProps) => {
 
   const { contextCardHeight, computedShowContextCard, showContextState } = useCopilotContextState();
 
+  const [form] = Form.useForm();
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (!skillStore.selectedSkill?.tplConfigSchema?.items?.length) {
+      form.setFieldValue('tplConfig', undefined);
+    }
+  }, [skillStore.selectedSkill?.skillId, skillStore.selectedSkill?.tplConfigSchema?.items]);
+
   return (
     <>
       <div className="ai-copilot-operation-container">
@@ -48,9 +58,30 @@ export const CopilotOperationModule = memo((props: CopilotInputModuleProps) => {
               <SelectedSkillHeader />
               <ContextManager />
               <div className="chat-input-body">
-                <ChatInput placeholder="提出问题，发现新知" autoSize={{ minRows: 1, maxRows: 3 }} />
+                <ChatInput
+                  tplConfig={form.getFieldValue('tplConfig')}
+                  formErrors={formErrors}
+                  placeholder="提出问题，发现新知"
+                  autoSize={{ minRows: 1, maxRows: 3 }}
+                />
               </div>
-              <ChatActions />
+
+              {skillStore.selectedSkill?.tplConfigSchema?.items?.length > 0 && (
+                <ConfigManager
+                  form={form}
+                  formErrors={formErrors}
+                  setFormErrors={setFormErrors}
+                  schema={skillStore.selectedSkill?.tplConfigSchema}
+                  tplConfig={skillStore.selectedSkill?.tplConfig}
+                  fieldPrefix="tplConfig"
+                  configScope="runtime"
+                  resetConfig={() => {
+                    form.setFieldValue('tplConfig', skillStore.selectedSkill?.tplConfig || {});
+                  }}
+                />
+              )}
+
+              <ChatActions tplConfig={form.getFieldValue('tplConfig')} formErrors={formErrors} />
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import { IconFile, IconBook, IconFolder, IconLink } from '@arco-design/web-react/icon';
 import { Mark } from '@refly/common-types';
 
-export const getTypeIcon = (mark: Mark, style: any) => {
+export const getTypeIcon = (mark: Mark, style?: any) => {
   switch (mark.type) {
     case 'resource':
       return <IconFile style={style} />;

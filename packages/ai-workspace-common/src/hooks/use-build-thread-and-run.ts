@@ -113,7 +113,7 @@ export const useBuildThreadAndRun = () => {
     // 开始提问
     buildTaskAndGenReponse(task as InvokeSkillRequest);
     chatStore.setNewQAText('');
-    skillStore.setSelectedSkillInstance(null);
+    // skillStore.setSelectedSkillInstance(null);
     // knowledgeBaseStore.updateCurrentSelectedMark(null);
   };
 

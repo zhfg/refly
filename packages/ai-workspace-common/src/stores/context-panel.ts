@@ -98,6 +98,8 @@ interface ContextPanelState {
   selectedDomain: SelectedTextDomain;
   enableMultiSelect: boolean; // 支持多选
   currentSelectedMarks: Mark[]; // 作为唯一的 context items 来源
+  filterIdsOfCurrentSelectedMarks: string[]; // 作为 context items 的过滤
+  filterErrorInfo: { [key: string]: { limit: number; currentCount: number } }; // 作为 context items 的过滤错误信息
 
   // context card
   showContextCard: boolean;
@@ -124,8 +126,10 @@ interface ContextPanelState {
   updateSelectedDomain: (domain: SelectedTextDomain) => void;
   updateEnableMultiSelect: (enableMultiSelect: boolean) => void;
   updateCurrentSelectedMarks: (marks: Mark[]) => void;
+  updateFilterIdsOfCurrentSelectedMarks: (ids: string[]) => void;
   resetSelectedTextCardState: () => void;
   setSelectedTextCardDomain: (domain: SelectedTextDomain[]) => void;
+  updateFilterErrorInfo: (errorInfo: { [key: string]: { limit: number; currentCount: number } }) => void;
 
   // context card
   setShowContextCard: (showcontextCard: boolean) => void;
@@ -151,6 +155,8 @@ export const defaultSelectedTextCardState = {
   selectedDomain: 'resource' as SelectedTextDomain,
   enableMultiSelect: true, // default enable multi select, later to see if we need to enable multiSelect ability
   currentSelectedMarks: [] as Mark[],
+  filterIdsOfCurrentSelectedMarks: [] as string[],
+  filterErrorInfo: {} as { [key: string]: { limit: number; currentCount: number } },
 };
 
 export const defaultCurrentContext = {
@@ -214,6 +220,10 @@ export const useContextPanelStore = create<ContextPanelState>()(
     updateSelectedDomain: (selectedDomain: SelectedTextDomain) => set((state) => ({ ...state, selectedDomain })),
     updateEnableMultiSelect: (enableMultiSelect: boolean) => set((state) => ({ ...state, enableMultiSelect })),
     updateCurrentSelectedMarks: (marks: Mark[]) => set((state) => ({ ...state, currentSelectedMarks: marks })),
+    updateFilterIdsOfCurrentSelectedMarks: (ids: string[]) =>
+      set((state) => ({ ...state, filterIdsOfCurrentSelectedMarks: ids })),
+    updateFilterErrorInfo: (errorInfo: { [key: string]: { limit: number; currentCount: number } }) =>
+      set((state) => ({ ...state, filterErrorInfo: errorInfo })),
 
     addMark: (mark: Mark) =>
       set((state) => ({ ...state, currentSelectedMarks: [...state.currentSelectedMarks, mark] })),

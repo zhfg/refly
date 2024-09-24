@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Button, Input, Dropdown, Menu } from '@arco-design/web-react';
+import { Button, Input, Dropdown, Menu, Notification } from '@arco-design/web-react';
 import './index.scss';
 
 import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
@@ -14,10 +14,20 @@ import { buildConversation } from '@refly-packages/ai-workspace-common/utils/con
 import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
+import { useContextFilterErrorTip } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module/context-manager/hooks/use-context-filter-errror-tip';
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
 import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
+import { useTranslation } from 'react-i18next';
+import { SkillTemplateConfig } from '@refly/openapi-schema';
 
-export const ChatActions = () => {
+interface ChatActionsProps {
+  tplConfig?: SkillTemplateConfig;
+  formErrors?: Record<string, string>;
+}
+
+export const ChatActions = (props: ChatActionsProps) => {
+  const { tplConfig, formErrors } = props;
+  const { t } = useTranslation();
   const [model, setModel] = useState('gpt-3.5-turbo');
   const [image, setImage] = useState(null);
   const [language, setLanguage] = useState('en');
@@ -34,18 +44,35 @@ export const ChatActions = () => {
   // hooks
   const [isFocused, setIsFocused] = useState(false);
 
+  const { handleFilterErrorTip } = useContextFilterErrorTip();
+
   const handleSendMessage = (type) => {
+    const error = handleFilterErrorTip();
+    if (error) {
+      return;
+    }
+
+    if (formErrors && Object.keys(formErrors).length > 0) {
+      Notification.error({
+        style: { width: 400 },
+        title: t('copilot.configManager.errorTipTitle'),
+        content: t('copilot.configManager.errorTip'),
+      });
+      return;
+    }
+
     setSendType(type);
 
     const { messages, newQAText } = useChatStore.getState();
     searchStore.setIsSearchOpen(false);
+    const invokeParams = { tplConfig: tplConfig };
 
     if (messages?.length > 0) {
       // 追问阅读
-      runSkill(newQAText);
+      runSkill(newQAText, invokeParams);
     } else {
       // 新会话阅读，先创建会话，然后进行跳转之后发起聊天
-      emptyConvRunSkill(newQAText, true);
+      emptyConvRunSkill(newQAText, true, invokeParams);
     }
   };
 

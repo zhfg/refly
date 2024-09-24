@@ -23,7 +23,8 @@
     "emptyInput": "Content is empty, please fill in or select content",
     "retry": "Retry",
     "reset": "Reset",
-    "apply": "Apply"
+    "apply": "Apply",
+    "collapse": "Collapse"
   },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",
@@ -218,6 +219,8 @@
       "noteCursorSelection": "Note Cursor Selection",
       "noteBeforeCursorSelection": "Note Before Cursor Selection",
       "noteAfterCursorSelection": "Note After Cursor Selection",
+      "contextLimitTipTitle": "Please adjust the context and try again",
+      "contextLimitTip": "{{type}} is limit to {{limit}} , and you have selected {{currentCount}}.",
       "popoverSelector": {
         "webPlaceholder": "Search notes, resources, or knowledge bases...",
         "extensionPlaceholder": "Search web pages, notes, resources, or knowledge bases...",
@@ -233,11 +236,13 @@
         "limitCount": "Limit Count",
         "apply": "Apply",
         "contentListSelectedType": "Selected Content Type",
+        "contentListSelectedTypeRequired": "Please configure the selected content type",
         "contentListLimit": "Selected Content Count",
         "filterConditions": "Filter Conditions",
         "reset": "Reset",
         "collapse": "Collapse",
-        "result": "Result"
+        "result": "Result",
+        "empty": "No hit filter conditions"
       }
     }
   },
@@ -919,6 +924,11 @@
     "chatInput": {
       "skillManager": "Skill Manage",
       "placeholder": "Ask a question, discover new knowledge"
+    },
+    "configManager": {
+      "title": "Skill Configuration",
+      "errorTipTitle": "Send Failed",
+      "errorTip": "Please adjust the skill configuration and try again"
     },
     "tokenUsage": "Input {{count}}, Output {{count}}"
   },
