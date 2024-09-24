@@ -1,4 +1,4 @@
-import { Input } from '@arco-design/web-react';
+import { Input, Notification } from '@arco-design/web-react';
 import { useRef, useState } from 'react';
 import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
@@ -15,10 +15,12 @@ const TextArea = Input.TextArea;
 interface ChatInputProps {
   placeholder: string;
   autoSize: { minRows: number; maxRows: number };
-  tplConfig: SkillTemplateConfig;
+  tplConfig?: SkillTemplateConfig;
+  formErrors?: Record<string, string>;
 }
 
 export const ChatInput = (props: ChatInputProps) => {
+  const { formErrors, tplConfig } = props;
   const { t } = useTranslation();
   const inputRef = useRef<RefTextAreaType>(null);
   // stores
@@ -36,9 +38,18 @@ export const ChatInput = (props: ChatInputProps) => {
       return;
     }
 
+    if (formErrors && Object.keys(formErrors).length > 0) {
+      Notification.error({
+        style: { width: 400 },
+        title: t('copilot.configManager.errorTipTitle'),
+        content: t('copilot.configManager.errorTip'),
+      });
+      return;
+    }
+
     const { messages, newQAText } = useChatStore.getState();
     searchStore.setIsSearchOpen(false);
-    const invokeParams = { tplConfig: props.tplConfig };
+    const invokeParams = { tplConfig: tplConfig };
 
     if (messages?.length > 0) {
       // 追问阅读

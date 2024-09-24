@@ -6,7 +6,7 @@ import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill'
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { SelectedInstanceCard } from '@refly-packages/ai-workspace-common/components/skill/selected-instance-card';
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
-import { Button, Checkbox, Radio, InputNumber, Input, Form, FormInstance, Select } from '@arco-design/web-react';
+import { Button, Checkbox, Radio, InputNumber, Input, Form, FormInstance } from '@arco-design/web-react';
 import { IconFile, IconRefresh } from '@arco-design/web-react/icon';
 import { GrDocumentConfig } from 'react-icons/gr';
 import { PiEyeSlash } from 'react-icons/pi';
@@ -42,7 +42,8 @@ const ConfigItem = (props: {
   const { item, form, field, locale, configValue } = props;
 
   useEffect(() => {
-    if (typeof item.defaultValue === 'string' || item?.defaultValue) {
+    const formValue = form.getFieldValue(field);
+    if (item?.defaultValue && !formValue) {
       form.setFieldValue(field, {
         value: item.defaultValue,
         label: getDictValue(item.labelDict, locale),
@@ -59,6 +60,7 @@ const ConfigItem = (props: {
   const placeholder = getDictValue(item.descriptionDict, locale);
 
   const onValueChange = (val: any, displayValue: string) => {
+    console.log('onValueChange', val, displayValue);
     form.setFieldValue(field, {
       value: val,
       label,
@@ -70,7 +72,7 @@ const ConfigItem = (props: {
     return (
       <Input
         placeholder={placeholder}
-        defaultValue={(item?.defaultValue as string) || String(configValue?.value || '') || ''}
+        defaultValue={String(configValue?.value || '')}
         onChange={(val) => {
           onValueChange(val, String(val));
         }}
@@ -83,9 +85,7 @@ const ConfigItem = (props: {
     return (
       <TextArea
         placeholder={placeholder}
-        defaultValue={
-          (typeof item?.defaultValue === 'string' ? item?.defaultValue : String(configValue?.value || '')) || ''
-        }
+        defaultValue={String(configValue?.value || '')}
         rows={4}
         autoSize={{
           minRows: 4,
@@ -100,8 +100,8 @@ const ConfigItem = (props: {
     return (
       <InputNumber
         mode="button"
-        defaultValue={(item?.defaultValue as number) || Number(configValue?.value) || 1}
-        onChange={(val) => onValueChange(val, String(val))}
+        defaultValue={Number(configValue?.value)}
+        onChange={(val) => onValueChange(val, val || val === 0 ? String(val) : '')}
       />
     );
   }
@@ -111,19 +111,40 @@ const ConfigItem = (props: {
       item.options.map((option) => [option.value, getDictValue(option.labelDict, locale)]),
     );
 
+    if (item.inputMode === 'multiSelect') {
+      return (
+        <Checkbox.Group
+          options={item.options.map((option) => ({
+            label: getDictValue(option.labelDict, locale),
+            value: option.value,
+          }))}
+          style={{ fontSize: '10px' }}
+          defaultValue={configValue?.value as string[]}
+          onChange={(val) => {
+            console.log('val', val);
+            onValueChange(
+              val,
+              Array.isArray(val) ? val.map((v) => optionValToDisplay.get(v)).join(',') : optionValToDisplay.get(val),
+            );
+          }}
+        />
+      );
+    }
+
     return (
-      <Select
-        {...(item.inputMode === 'multiSelect' ? { mode: 'multiple' } : {})}
-        options={item.options.map((option) => ({
-          label: getDictValue(option.labelDict, locale),
-          value: option.value,
-        }))}
-        defaultValue={configValue?.value || item?.defaultValue || (item.inputMode === 'multiSelect' ? [] : '')}
-        placeholder={placeholder}
-        onChange={(val) => {
-          onValueChange(val, Array.isArray(val) ? val.join(',') : optionValToDisplay.get(val));
+      <Radio.Group
+        defaultValue={configValue?.value?.[0]}
+        onChange={(checkedValue) => {
+          console.log('checkedValue', checkedValue, optionValToDisplay.get(checkedValue));
+          onValueChange([checkedValue], optionValToDisplay.get(checkedValue));
         }}
-      />
+      >
+        {item.options.map((option) => (
+          <Radio key={option.value} value={option.value}>
+            {getDictValue(option.labelDict, locale)}
+          </Radio>
+        ))}
+      </Radio.Group>
     );
   }
 
@@ -138,16 +159,40 @@ interface ConfigManagerProps {
   headerTitle?: string;
   headerIcon?: React.ReactNode;
   configScope?: 'runtime' | 'template';
+  formErrors: Record<string, string>;
   resetConfig?: () => void;
+  setFormErrors: (errors: any) => void;
 }
 
 export const ConfigManager = (props: ConfigManagerProps) => {
   const { i18n, t } = useTranslation();
   const locale = i18n.languages?.[0] || 'en';
 
-  const { schema, fieldPrefix, form, tplConfig, resetConfig } = props;
+  const { schema, fieldPrefix, form, tplConfig, configScope, resetConfig, formErrors, setFormErrors } = props;
   const [activeConfig, setActiveConfig] = useState<DynamicConfigItem>();
   const [showConfig, setShowConfig] = useState<boolean>(false);
+  const [resetCounter, setResetCounter] = useState<number>(0);
+
+  const validateField = (field: string, value: any) => {
+    const schemaItem = schema.items.find((item) => getFormField(fieldPrefix, item.key) === field);
+    if (schemaItem?.required?.value && schemaItem?.required?.configScope.includes(configScope)) {
+      const value_ = value?.value;
+      if ((!value_ && value_ !== 0) || (Array.isArray(value_) && !value_.length)) {
+        setFormErrors((prev) => ({ ...prev, [field]: t('common.emptyInput') }));
+      } else {
+        setFormErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[field];
+          return newErrors;
+        });
+      }
+    }
+  };
+
+  const getItemError = (key: string) => {
+    const field = getFormField(fieldPrefix, key);
+    return formErrors[field];
+  };
 
   useEffect(() => {
     if (tplConfig) {
@@ -167,40 +212,56 @@ export const ConfigManager = (props: ConfigManagerProps) => {
     }
   };
 
+  const handleReset = (key: string) => {
+    const resetValue = tplConfig?.[key];
+    console.log('reset', resetValue);
+    form.setFieldValue(getFormField(fieldPrefix, key), resetValue);
+    setResetCounter((prev) => prev + 1);
+  };
+
   return (
     <div className="config-manager">
       <div className="config-manager__items">
         <div className="config-manager__item">
           <GrDocumentConfig className="config-manager__item-icon" />
-          技能配置
+          {t('copilot.configManager.title')}
         </div>
         {(schema.items || []).map((item, index) => (
           <div
             key={item.key + index}
-            className={`config-manager__item config-item ${activeConfig?.key === item.key ? 'active' : ''}`}
+            className={`config-manager__item config-item ${activeConfig?.key === item.key ? 'active' : ''} ${getItemError(item.key) ? 'error' : ''}`}
             onClick={() => {
               handleConfigItemClick(item);
             }}
           >
             <IconFile className="config-manager__item-icon" />
-            <span style={{ color: '#000' }}>{getDictValue(item.labelDict, locale)}</span>
+
+            {form.getFieldValue(getFormField(fieldPrefix, item.key))?.displayValue && (
+              <div className="content">{form.getFieldValue(getFormField(fieldPrefix, item.key))?.displayValue}</div>
+            )}
+
+            <div
+              className="item-key"
+              style={{ color: getItemError(item.key) && !(activeConfig?.key === item.key) ? '#f00' : '#000' }}
+            >
+              {getDictValue(item.labelDict, locale)}
+            </div>
           </div>
         ))}
       </div>
 
       {showConfig && activeConfig && (
-        <div className="config-manager__input">
+        <div className={`config-manager__input ${getItemError(activeConfig.key) ? 'error' : ''}`}>
           <div className="config-manager__input-top">
-            <div>{getDictValue(activeConfig.labelDict, locale)}</div>
             <div>
-              <Button
-                icon={<IconRefresh />}
-                onClick={() => {
-                  console.log('reset', tplConfig);
-                  resetConfig?.();
-                }}
-              >
-                重置
+              {activeConfig.required?.value && activeConfig?.required?.configScope.includes(configScope) && (
+                <span style={{ color: 'red' }}>* </span>
+              )}
+              {getDictValue(activeConfig.labelDict, locale)}
+            </div>
+            <div>
+              <Button icon={<IconRefresh />} onClick={() => handleReset(activeConfig.key)}>
+                {t('common.reset')}
               </Button>
               <Button
                 icon={<PiEyeSlash />}
@@ -209,20 +270,47 @@ export const ConfigManager = (props: ConfigManagerProps) => {
                   setActiveConfig(undefined);
                 }}
               >
-                折叠
+                {t('common.collapse')}
               </Button>
             </div>
           </div>
-
-          <div className="config-manager__input-content">
-            <ConfigItem
-              item={activeConfig}
-              form={form}
-              field={getFormField(fieldPrefix, activeConfig.key)}
-              locale={locale}
-              configValue={tplConfig?.[activeConfig.key]}
-            />
-          </div>
+          <Form
+            form={form}
+            onValuesChange={(changedValues, allValues) => {
+              console.log('表单值变化:', changedValues, allValues);
+              Object.keys(changedValues).forEach((field) => {
+                validateField(field, changedValues[field]);
+              });
+            }}
+          >
+            {(() => {
+              const field = getFormField(fieldPrefix, activeConfig.key);
+              return (
+                <div key={activeConfig.key}>
+                  <div className="config-manager__input-content">
+                    <Form.Item
+                      layout="vertical"
+                      field={field}
+                      required={
+                        activeConfig.required?.value && activeConfig?.required?.configScope.includes(configScope)
+                      }
+                      validateStatus={formErrors[field] ? 'error' : undefined}
+                      help={formErrors[field]}
+                    >
+                      <ConfigItem
+                        key={resetCounter}
+                        item={activeConfig}
+                        form={form}
+                        field={field}
+                        locale={locale}
+                        configValue={form.getFieldValue(field)}
+                      />
+                    </Form.Item>
+                  </div>
+                </div>
+              );
+            })()}
+          </Form>
         </div>
       )}
     </div>

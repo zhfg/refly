@@ -40,6 +40,7 @@ export const CopilotOperationModule = memo((props: CopilotInputModuleProps) => {
   const { contextCardHeight, computedShowContextCard, showContextState } = useCopilotContextState();
 
   const [form] = Form.useForm();
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!skillStore.selectedSkill?.tplConfigSchema?.items?.length) {
@@ -59,6 +60,7 @@ export const CopilotOperationModule = memo((props: CopilotInputModuleProps) => {
               <div className="chat-input-body">
                 <ChatInput
                   tplConfig={form.getFieldValue('tplConfig')}
+                  formErrors={formErrors}
                   placeholder="提出问题，发现新知"
                   autoSize={{ minRows: 1, maxRows: 3 }}
                 />
@@ -67,6 +69,8 @@ export const CopilotOperationModule = memo((props: CopilotInputModuleProps) => {
               {skillStore.selectedSkill?.tplConfigSchema?.items?.length > 0 && (
                 <ConfigManager
                   form={form}
+                  formErrors={formErrors}
+                  setFormErrors={setFormErrors}
                   schema={skillStore.selectedSkill?.tplConfigSchema}
                   tplConfig={skillStore.selectedSkill?.tplConfig}
                   fieldPrefix="tplConfig"
@@ -77,7 +81,7 @@ export const CopilotOperationModule = memo((props: CopilotInputModuleProps) => {
                 />
               )}
 
-              <ChatActions />
+              <ChatActions tplConfig={form.getFieldValue('tplConfig')} formErrors={formErrors} />
             </div>
           </div>
         </div>

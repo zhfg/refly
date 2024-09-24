@@ -23,7 +23,8 @@
     "emptyInput": "Content is empty, please fill in or select content",
     "retry": "Retry",
     "reset": "Reset",
-    "apply": "Apply"
+    "apply": "Apply",
+    "collapse": "Collapse"
   },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",
@@ -923,6 +924,11 @@
     "chatInput": {
       "skillManager": "Skill Manage",
       "placeholder": "Ask a question, discover new knowledge"
+    },
+    "configManager": {
+      "title": "Skill Configuration",
+      "errorTipTitle": "Send Failed",
+      "errorTip": "Please adjust the skill configuration and try again"
     },
     "tokenUsage": "Input {{count}}, Output {{count}}"
   },
