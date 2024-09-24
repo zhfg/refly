@@ -1,4 +1,4 @@
-export const enum ConversationOperation {
+export enum ConversationOperation {
   CREATE = 'create',
   UPDATE = 'update',
   DELETE = 'delete',

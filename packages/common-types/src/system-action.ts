@@ -1,7 +1,7 @@
-export const enum SystemAction {
-  SupportUs = "supportUs",
-  InviteBoost = "inviteBoost",
-  RecommendQuestion = "recommendQuestion",
+export enum SystemAction {
+  SupportUs = 'supportUs',
+  InviteBoost = 'inviteBoost',
+  RecommendQuestion = 'recommendQuestion',
 }
 
 export type RecommendQuestionItem = {
