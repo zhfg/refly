@@ -40,14 +40,6 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
     location.href = `${getServerOrigin()}/v1/auth/google`;
   };
 
-  useEffect(() => {
-    // 不是插件打开的页面，就直接清除状态，区分插件和普通页面打开
-    if (props?.from !== 'extension-login') {
-      localStorage.removeItem('refly-login-status');
-    }
-    console.log('props', props);
-  }, []);
-
   // props
   let modalProps: any = {};
 

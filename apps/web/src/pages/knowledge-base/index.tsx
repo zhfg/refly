@@ -55,43 +55,8 @@ const KnowledgeLibraryLayout = memo(() => {
     initialMinPixelSize: 310,
   })
 
-  const handleSendMsgToExtension = async (
-    status: "success" | "failed",
-    token?: string,
-  ) => {
-    const { browser } = await import("wxt/browser")
-    try {
-      await browser.runtime.sendMessage(getExtensionId(), {
-        name: "refly-login-notify",
-        body: {
-          status,
-          token,
-        },
-      })
-    } catch (err) {
-      console.log("handleSendMsgToExtension err", err)
-    }
-
-    console.log("dashboard close")
-  }
-
   useEffect(() => {
     if (!(token || userStore?.userProfile?.uid)) return
-
-    const reflyLoginStatus = localStorage.getItem("refly-login-status")
-    console.log("reflyLoginStatus", reflyLoginStatus, token)
-    if ((token || userStore?.userProfile?.uid) && reflyLoginStatus) {
-      // 从插件打开弹窗，给插件发消息
-      handleSendMsgToExtension("success", token as string)
-      localStorage.removeItem("refly-login-status")
-      // localStorage.setItem(
-      //   "refly-user-profile",
-      //   safeStringifyJSON(userStore?.userProfile),
-      // )
-      setTimeout(() => {
-        window.close()
-      }, 500)
-    }
 
     if (resId) {
       knowledgeBaseStore.updateResourcePanelVisible(true)
