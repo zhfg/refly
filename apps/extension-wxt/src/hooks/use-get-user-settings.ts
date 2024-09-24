@@ -19,6 +19,7 @@ import { useExtensionMessage } from './use-extension-message';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { GetUserSettingsResponse, UserSettings } from '@refly/openapi-schema';
 import { browser } from 'wxt/browser';
+import debounce from 'lodash.debounce';
 
 interface ExternalLoginPayload {
   name: string;
@@ -30,7 +31,12 @@ interface ExternalLoginPayload {
 }
 
 export const useGetUserSettings = () => {
-  const userStore = useUserStore();
+  const userStore = useUserStore((state) => ({
+    resetState: state.resetState,
+    setUserProfile: state.setUserProfile,
+    setLocalSettings: state.setLocalSettings,
+    setIsCheckingLoginStatus: state.setIsCheckingLoginStatus,
+  }));
   const navigate = useNavigate();
   const copilotStore = useCopilotStore();
 
@@ -46,6 +52,11 @@ export const useGetUserSettings = () => {
       let { localSettings, userProfile } = useUserStore.getState();
       const lastStatusIsLogin = !!userProfile?.uid;
 
+      if (lastStatusIsLogin) {
+        return;
+      }
+
+      userStore.setIsCheckingLoginStatus(true);
       const res = await getClient().getSettings();
 
       console.log('loginStatus', res);
@@ -54,6 +65,7 @@ export const useGetUserSettings = () => {
         userStore.resetState();
         // await storage.removeItem('local:refly-user-profile');
         // await storage.removeItem('local:refly-local-settings');
+        userStore.setIsCheckingLoginStatus(false);
         navigate('/login');
       } else {
         const data = res?.data?.data! as UserSettings;
@@ -92,6 +104,7 @@ export const useGetUserSettings = () => {
         // 应用 locale
         i18n.changeLanguage(uiLocale);
         userStore.setLocalSettings(localSettings);
+        userStore.setIsCheckingLoginStatus(false);
 
         // await storage.setItem('sync:refly-user-profile', safeStringifyJSON(res?.data));
         // await storage.setItem('sync:refly-local-settings', safeStringifyJSON(localSettings));
@@ -102,12 +115,15 @@ export const useGetUserSettings = () => {
       }
     } catch (err) {
       console.log('getLoginStatus err', err);
+      userStore.setIsCheckingLoginStatus(false);
       userStore.resetState();
       // await storage.removeItem('sync:refly-user-profile');
       // await storage.removeItem('sync:refly-local-settings');
       navigate('/login');
     }
   };
+
+  const debounceLogin = debounce(getLoginStatus, 300);
 
   const handleLogout = async () => {
     await storage.removeItem('sync:refly-login-notify');
@@ -124,7 +140,7 @@ export const useGetUserSettings = () => {
     const loginNotify = safeParseJSON(loginNotification);
     if (loginNotify) {
       if (loginNotify?.login) {
-        getLoginStatus();
+        debounceLogin();
       } else if (loginNotify?.login === false) {
         handleLogout();
       }
@@ -134,7 +150,7 @@ export const useGetUserSettings = () => {
   // 监听打开关闭
   useEffect(() => {
     if (copilotStore?.isCopilotOpen) {
-      getLoginStatus();
+      debounceLogin();
     }
   }, [copilotStore?.isCopilotOpen]);
 

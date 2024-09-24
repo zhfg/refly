@@ -12,7 +12,10 @@ export const useMockInAppResource = () => {
   const copilotStore = useCopilotStore((state) => ({
     isCopilotOpen: state.isCopilotOpen,
   }));
-  const knowledgeBaseStore = useKnowledgeBaseStore();
+  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
+    updateResource: state.updateResource,
+    currentResource: state.currentResource,
+  }));
   const [searchParams, setSearchParams] = useSearchParams();
   const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
 

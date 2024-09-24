@@ -13,9 +13,13 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 // requests
 import { useGetUserSettings } from '@/hooks/use-get-user-settings';
+import { Spin } from '@arco-design/web-react';
 
 export const AppRouter = () => {
-  const userStore = useUserStore();
+  const userStore = useUserStore((state) => ({
+    localSettings: state.localSettings,
+    isCheckingLoginStatus: state.isCheckingLoginStatus,
+  }));
   const importResourceStore = useImportResourceStore((state) => ({
     importResourceModalVisible: state.importResourceModalVisible,
   }));
@@ -37,6 +41,15 @@ export const AppRouter = () => {
       i18n.changeLanguage(locale);
     }
   }, [locale]);
+
+  // initial display loading
+  if (userStore.isCheckingLoginStatus === undefined || userStore.isCheckingLoginStatus) {
+    return (
+      <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <Spin />
+      </div>
+    );
+  }
 
   if (routeLoginPageMatch) {
     return (

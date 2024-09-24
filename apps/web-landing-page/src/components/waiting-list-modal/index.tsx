@@ -48,43 +48,6 @@ export const WaitingListModal = (props: {
    * 2. 登录完之后，通过 chrome 的 API 给插件发消息，收到消息之后 reload 页面获取登录状态，然后持久化存储
    * 3. 之后带着 cookie or 登录状态去获取请求
    */
-  const handleLogin = () => {
-    userStore.setIsCheckingLoginStatus(true)
-    location.href = `${getServerOrigin()}/v1/auth/google`
-
-    // userStore.setWaitingListModalVisible(false)
-  }
-
-  // const handleLoginStatus = ({ body: data }: ExternalLoginPayload) => {
-  //   if (data?.status === "success") {
-  //     // 临时设置状态
-  //     userStore.setUserProfile(data?.user)
-  //     userStore.setToken(data?.token)
-
-  //     loginWindowRef.current?.close()
-
-  //     navigate("/")
-  //   } else {
-  //     message.error("登录失败!")
-
-  //     loginWindowRef.current?.close()
-  //   }
-
-  //   userStore.setIsCheckingLoginStatus(false)
-  // }
-
-  // const handleListenChildPage = (event: any) => {
-  //   const data = event?.data || {}
-  //   console.log("handleListenChildPage", event)
-
-  //   if (data?.type === "refly-login-status") {
-  //     if (data?.status === "success") {
-  //       updateCookie(data?.payload || "")
-  //       userStore.setWaitingListModalVisible(false)
-  //       userStore.setIsCheckingLoginStatus(false)
-  //     }
-  //   }
-  // }
 
   // useEffect(() => {
   //   console.log("refly-login-status")

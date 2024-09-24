@@ -22,7 +22,12 @@ import { useTranslation } from 'react-i18next';
 import { UILocaleList } from '@refly-packages/ai-workspace-common/components/ui-locale-list';
 
 export const LoginModal = (props: { visible?: boolean; from?: string }) => {
-  const userStore = useUserStore();
+  const userStore = useUserStore((state) => ({
+    setIsLogin: state.setIsLogin,
+    isLogin: state.isLogin,
+    loginModalVisible: state.loginModalVisible,
+    setLoginModalVisible: state.setLoginModalVisible,
+  }));
   const navigate = useNavigate();
   const loginWindowRef = useRef<Window | null>();
   const [token, updateCookie, deleteCookie] = useCookie('_refly_ai_sid');
@@ -36,7 +41,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
    * 3. 之后带着 cookie or 登录状态去获取请求
    */
   const handleLogin = () => {
-    userStore.setIsCheckingLoginStatus(true);
+    userStore.setIsLogin(true);
     location.href = `${getServerOrigin()}/v1/auth/google`;
   };
 
@@ -95,12 +100,10 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
           type="outline"
           onClick={() => handleLogin()}
           style={{ width: 260, height: 32, marginTop: 32, borderRadius: 4 }}
-          loading={userStore.isCheckingLoginStatus}
+          loading={userStore.isLogin}
         >
           <img src={Google} alt="google" style={{ width: 15, height: 15, margin: '0 8px' }} />
-          {userStore.isCheckingLoginStatus
-            ? t('landingPage.loginModal.loggingStatus')
-            : t('landingPage.loginModal.loginBtn.google')}
+          {userStore.isLogin ? t('landingPage.loginModal.loggingStatus') : t('landingPage.loginModal.loginBtn.google')}
         </Button>
         <Divider></Divider>
         <Typography.Paragraph className="term-text">

@@ -7,7 +7,7 @@ export const sendToBackground = async (message: BackgroundMessage, needResponse 
     const { browser } = await import('wxt/browser');
     const waitForResponse = new Promise((resolve) => {
       const listener = (response: any) => {
-        // console.log('sendToBackground response', response);
+        console.log('sendToBackground response', response);
         if (response?.name === message?.name) {
           browser.runtime.onMessage.removeListener(listener);
 
