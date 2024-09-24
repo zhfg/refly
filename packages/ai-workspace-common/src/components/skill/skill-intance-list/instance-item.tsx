@@ -16,6 +16,7 @@ import { InstanceInvokeModal } from '@refly-packages/ai-workspace-common/compone
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { SkillInstanceListSource } from '@refly-packages/ai-workspace-common/components/skill/skill-intance-list';
 import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 interface InstanceItemProps {
   data: SkillInstance;
@@ -125,6 +126,7 @@ export const InstanceItem = (props: InstanceItemProps) => {
 
           {source === 'skill-management-modal' && (
             <Tooltip
+              getPopupContainer={getPopupContainer}
               content={data.pinnedAt ? t('skill.skillManagement.removeFromTop') : t('skill.skillManagement.addToTop')}
             >
               <Button
@@ -140,7 +142,7 @@ export const InstanceItem = (props: InstanceItemProps) => {
             data={data}
             setUpdateModal={(val) => setVisible(val)}
             postDeleteList={postDeleteList}
-            getPopupContainer={getInstanceItemPopupContainer}
+            getPopupContainer={getPopupContainer}
           />
         </div>
       </div>

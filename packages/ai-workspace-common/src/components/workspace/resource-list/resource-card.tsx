@@ -9,6 +9,7 @@ import { Resource } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 import { LOCALE } from '@refly/common-types';
 import './index.scss';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 interface ResourceCard {
   index: number;
@@ -69,7 +70,12 @@ export const ResourceCard = (props: ResourceCard) => {
     return (
       <>
         <Divider style={{ margin: '0 4px' }} type="vertical" />
-        <Tooltip mini content={t(`resource.${status}_tip`)} style={status === 'index_failed' ? {} : { width: 200 }}>
+        <Tooltip
+          getPopupContainer={getPopupContainer}
+          mini
+          content={t(`resource.${status}_tip`)}
+          style={status === 'index_failed' ? {} : { width: 200 }}
+        >
           <div
             className={status}
             onClick={(e) => {
@@ -114,10 +120,10 @@ export const ResourceCard = (props: ResourceCard) => {
           ) : null
         }
       >
-        <div className="p-4 m-3 border rounded-lg card-box border-black/8" onClick={() => onClick()}>
-          <div className="content h-60 overflow-hidden relative">
+        <div className="p-4 m-3 rounded-lg border card-box border-black/8" onClick={() => onClick()}>
+          <div className="overflow-hidden relative h-60 content">
             <div className="flex items-center mb-1 resource-url">
-              <div className="flex items-center justify-center border rounded-lg card-icon-box shrink-0 border-black/8">
+              <div className="flex justify-center items-center rounded-lg border card-icon-box shrink-0 border-black/8">
                 {props.cardIcon}
               </div>
               {cardData?.data?.url ? (
@@ -149,7 +155,7 @@ export const ResourceCard = (props: ResourceCard) => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-6 relative">
+          <div className="flex relative justify-between items-center pt-6">
             <div className="flex items-center text-xs text-black/40">
               <div className="text-xs text-black/40 mr-[4px]">
                 {time(cardData.updatedAt, language as LOCALE)

@@ -2,6 +2,7 @@ import { Badge, Button, Checkbox, Tooltip } from '@arco-design/web-react';
 import { IconTags } from '@arco-design/web-react/icon';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 
@@ -31,7 +32,7 @@ export const CurrentContextActionBtn = () => {
     showContextCard && ['collection', 'resource', 'note', 'weblink'].includes(contextDomain);
 
   return (
-    <Tooltip content={t('copilot.baseContextCard.title')}>
+    <Tooltip content={t('copilot.baseContextCard.title')} getPopupContainer={getPopupContainer}>
       <Checkbox
         style={{ paddingLeft: 0 }}
         key={'knowledge-base-resource-panel'}

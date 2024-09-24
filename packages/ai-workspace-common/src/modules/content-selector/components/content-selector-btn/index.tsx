@@ -66,7 +66,7 @@ export const ContentSelectorBtn = (props: ContentSelectorBtnProps) => {
   }, []);
 
   return (
-    <Tooltip content={t('knowledgeBase.context.contentSelector')} getPopupContainer={getPopupContainer}>
+    <Tooltip getPopupContainer={getPopupContainer} content={t('knowledgeBase.context.contentSelector')}>
       <Checkbox
         key={'knowledge-base-note-panel'}
         checked={contentSelectorStore?.showContentSelector}

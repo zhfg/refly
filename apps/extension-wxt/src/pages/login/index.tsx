@@ -16,7 +16,10 @@ import { safeParseJSON } from '@refly/utils/parse';
 import { useStorage } from '@/hooks/use-storage';
 
 export const Login = () => {
-  const userStore = useUserStore();
+  const userStore = useUserStore((state) => ({
+    setIsLogin: state.setIsLogin,
+    isLogin: state.isLogin,
+  }));
   const loginWindowRef = useRef<Window | null>();
   const { t } = useTranslation();
 
@@ -31,7 +34,7 @@ export const Login = () => {
    */
   const handleLogin = () => {
     // 提示正在登录
-    userStore.setIsCheckingLoginStatus(true);
+    userStore.setIsLogin(true);
 
     const left = (screen.width - 1200) / 2;
     const top = (screen.height - 730) / 2;
@@ -41,14 +44,14 @@ export const Login = () => {
       `location=no,toolbar=no,menubar=no,width=800,height=730,left=${left} / 2,top=${top} / 2`,
     );
 
-    userStore.setIsCheckingLoginStatus(true);
+    userStore.setIsLogin(true);
   };
 
   useEffect(() => {
     console.log('loginNotification', loginNotification);
     const loginNotify = safeParseJSON(loginNotification);
     if (loginNotify) {
-      userStore.setIsCheckingLoginStatus(false);
+      userStore.setIsLogin(false);
     }
   }, [loginNotification]);
 
@@ -73,9 +76,9 @@ export const Login = () => {
           type="primary"
           onClick={() => handleLogin()}
           style={{ width: 260, height: 44, marginTop: 32 }}
-          loading={userStore.isCheckingLoginStatus}
+          loading={userStore.isLogin}
         >
-          {userStore.isCheckingLoginStatus ? t('extension.loginPage.loggingStatus') : t('extension.loginPage.loginBtn')}
+          {userStore.isLogin ? t('extension.loginPage.loggingStatus') : t('extension.loginPage.loginBtn')}
         </Button>
       </div>
     </div>

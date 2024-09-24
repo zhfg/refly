@@ -210,7 +210,7 @@ export const SaveKnowledgeBaseModal = () => {
         }}
       >
         <FormItem label="保存位置" required field="knowledge-base-location" rules={[{ required: true }]}>
-          <Select>
+          <Select getPopupContainer={getPopupContainer}>
             {selectOptions.map((item, index) => {
               return (
                 <Option key={item?.label} value={item?.label}>
@@ -228,7 +228,7 @@ export const SaveKnowledgeBaseModal = () => {
               field="select-knowledge-base"
               rules={[{ required: true, message: '知识库是必填项' }]}
             >
-              <Select allowClear showSearch>
+              <Select allowClear showSearch getPopupContainer={getPopupContainer}>
                 {knowledgeBaseStore?.knowledgeBaseList.map((option) => (
                   <Option key={option?.collectionId} value={option?.collectionId}>
                     {option?.title}
@@ -250,7 +250,7 @@ export const SaveKnowledgeBaseModal = () => {
             defaultValue={lastSavedKnowledgeBase?.title}
             rules={[{ required: true }]}
           >
-            <Select defaultValue={lastSavedKnowledgeBase?.title}>
+            <Select defaultValue={lastSavedKnowledgeBase?.title} getPopupContainer={getPopupContainer}>
               {[lastSavedKnowledgeBase].map((option) => (
                 <Option key={option?.collectionId} value={option?.title}>
                   {option?.title}

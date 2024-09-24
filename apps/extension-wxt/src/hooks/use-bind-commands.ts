@@ -7,7 +7,7 @@ import { Source } from '@refly/openapi-schema';
 import { useWeblinkStore } from '@/stores/weblink';
 import { useUserStore } from '@/stores/user';
 import { apiRequest } from '@/requests/apiRequest';
-import { useCopilotStore } from '@/modules/toggle-copilot/stores/copilot';
+import { useCopilotStore } from '@refly-packages/ai-workspace-common/stores/copilot';
 
 export const useBindCommands = () => {
   // 快捷键相关

@@ -1,7 +1,7 @@
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { sendToBackground } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 
-let isArc: boolean | undefined;
+let isArc: boolean | undefined = undefined;
 export const checkBrowserArc = async () => {
   try {
     console.log('parent', window.parent);
