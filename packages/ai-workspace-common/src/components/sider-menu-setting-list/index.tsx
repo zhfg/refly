@@ -33,7 +33,7 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
 
         // 给插件发消息
         chrome.runtime?.sendMessage(getExtensionId(), {
-          name: 'logout-notify',
+          name: 'external-refly-logout-notify',
         });
 
         deleteCookie();

@@ -1,5 +1,6 @@
 import { Button } from '@arco-design/web-react';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { storage } from '@refly-packages/ai-workspace-common/utils/storage';
 
 // stores
 import { useUserStore } from '@/stores/user';
@@ -11,11 +12,16 @@ import { ChatHeader } from '@/components/chat-header';
 import { useTranslation } from 'react-i18next';
 // styles
 import './index.scss';
+import { safeParseJSON } from '@refly/utils/parse';
+import { useStorage } from '@/hooks/use-storage';
 
 export const Login = () => {
   const userStore = useUserStore();
   const loginWindowRef = useRef<Window | null>();
   const { t } = useTranslation();
+
+  const [loginNotification, setLoginNotification] = useStorage('refly-login-notify', '', 'sync');
+  console.log('loginNotification', loginNotification);
 
   /**
    * 0. 获取主站的登录态，如果没有登录就访问 Login 页面，已登录之后再展示可操作页面
@@ -37,6 +43,14 @@ export const Login = () => {
 
     userStore.setIsCheckingLoginStatus(true);
   };
+
+  useEffect(() => {
+    console.log('loginNotification', loginNotification);
+    const loginNotify = safeParseJSON(loginNotification);
+    if (loginNotify) {
+      userStore.setIsCheckingLoginStatus(false);
+    }
+  }, [loginNotification]);
 
   return (
     <div className="login-container">
