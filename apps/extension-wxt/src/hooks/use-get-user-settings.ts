@@ -8,7 +8,7 @@ import { safeParseJSON, safeStringifyJSON } from '@refly-packages/ai-workspace-c
 import { LOCALE } from '@refly/common-types';
 import { useTranslation } from 'react-i18next';
 import { Message as message } from '@arco-design/web-react';
-import { useCopilotStore } from '@/modules/toggle-copilot/stores/copilot';
+import { useCopilotStore } from '@refly-packages/ai-workspace-common/stores/copilot';
 import { mapDefaultLocale } from '@/utils/locale';
 import { storage } from '@refly-packages/ai-workspace-common/utils/storage';
 import { useStorage } from './use-storage';

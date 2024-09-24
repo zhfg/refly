@@ -5,7 +5,7 @@ import { onMessage, sendMessage } from '@refly-packages/ai-workspace-common/util
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { BackgroundMessage, CopilotMsgName } from '@refly/common-types';
-import { useCopilotStore } from '@/modules/toggle-copilot/stores/copilot';
+import { useCopilotStore } from '@refly-packages/ai-workspace-common/stores/copilot';
 
 export const useMockInAppResource = () => {
   const messageListenerEventRef = useRef<any>();
