@@ -16,6 +16,7 @@ import { useGetCurrentEnvContext } from '@refly-packages/ai-workspace-common/com
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { safeParseURL } from '@refly-packages/utils/url';
 import { useTranslation } from 'react-i18next';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 // hooks
 
@@ -83,8 +84,9 @@ export const BaseContextCard = (props: BaseContextPanelProps) => {
       <div className="context-state-card-footer">
         <IconFilter />
         {currentEnvContextKeys?.length > 0 && !isExtension ? (
-          <Tooltip content={t('copilot.baseContextCard.title')}>
+          <Tooltip content={t('copilot.baseContextCard.title')} getPopupContainer={getPopupContainer}>
             <Select
+              getPopupContainer={getPopupContainer}
               bordered={false}
               className="context-state-card-selector"
               value={nowSelectedEnvContext?.key}

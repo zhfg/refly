@@ -115,6 +115,7 @@ const ConfigItem = (props: {
           label: getDictValue(option.labelDict, locale),
           value: option.value,
         }))}
+        getPopupContainer={getPopupContainer}
         defaultValue={item?.defaultValue || configValue?.value || (item.inputMode === 'multiSelect' ? [] : '')}
         placeholder={placeholder}
         onChange={(val) =>
