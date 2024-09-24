@@ -27,8 +27,9 @@ const Workspace = () => {
     token?: string,
   ) => {
     try {
-      await chrome.runtime.sendMessage(getExtensionId(), {
-        name: "refly-login-notify",
+      // @ts-ignore
+      await chrome?.runtime.sendMessage(getExtensionId(), {
+        name: "external-refly-login-notify",
         body: {
           status,
           token,
@@ -50,10 +51,6 @@ const Workspace = () => {
       // 从插件打开弹窗，给插件发消息
       handleSendMsgToExtension("success", token as string)
       localStorage.removeItem("refly-login-status")
-      // localStorage.setItem(
-      //   "refly-user-profile",
-      //   safeStringifyJSON(userStore?.userProfile),
-      // )
       setTimeout(() => {
         window.close()
       }, 500)
