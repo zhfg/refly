@@ -48,7 +48,7 @@ const KnowledgeLibraryLayout = () => {
         maxSize: 100,
       };
 
-  console.log('current resource', knowledgeBaseStore.currentResource);
+  // console.log('current resource', knowledgeBaseStore.currentResource);
 
   return (
     <ErrorBoundary>

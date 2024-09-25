@@ -33,14 +33,14 @@ export const useResizeBox = (props: ResizePanelProps) => {
 
     const observer = new ResizeObserver(() => {
       let width = panelGroup.offsetWidth;
-      console.log('resizeBox width', width);
+      // console.log('resizeBox width', width);
 
       let canContainIndex = 0;
       width -= placeholderWidth;
       width -= 2 * paddingSize;
       canContainIndex = Math.floor(width / itemSize);
 
-      console.log('canContainIndex', canContainIndex);
+      // console.log('canContainIndex', canContainIndex);
       setContainCnt(canContainIndex);
     });
     observer.observe(panelGroup);

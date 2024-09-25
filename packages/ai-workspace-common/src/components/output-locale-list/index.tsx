@@ -41,8 +41,6 @@ export const OutputLocaleList = (props: {
     }
   };
 
-  console.log('用户当前的模型输出语言', outputLocale);
-
   const dropList = (
     <Menu
       className={'output-locale-list-menu'}

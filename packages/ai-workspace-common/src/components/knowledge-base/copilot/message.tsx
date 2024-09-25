@@ -372,6 +372,13 @@ export const WelcomeMessage = () => {
     <div className="ai-copilot-message welcome-message-container">
       <div className="welcome-message">
         <div className="welcome-message-user-container">
+          {userStore?.userProfile?.avatar ? (
+            <div className="user-container-avatar" style={{ marginRight: 12 }}>
+              <Avatar>
+                <img src={userStore?.userProfile?.avatar || ''} />
+              </Avatar>
+            </div>
+          ) : null}
           {userStore?.userProfile?.nickname ? (
             <div className="user-container-title">
               Hello{userStore?.userProfile?.nickname ? `, ${userStore?.userProfile?.nickname}` : ''}

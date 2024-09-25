@@ -45,14 +45,14 @@ export const ContextContentWithBadge = memo(() => {
 });
 
 const WrappedContextPanel = memo(() => {
-  console.log('rerender context panel wrapper');
+  // console.log('rerender context panel wrapper');
   return <ContextPanel />;
 });
 
 export const ContextPanel = memo(() => {
   const setContextPanelPopoverVisible = useContextPanelStore((state) => state.setContextPanelPopoverVisible);
   const contextPanelPopoverVisible = useContextPanelStore((state) => state.contextPanelPopoverVisible);
-  console.log('rerender context panel');
+  // console.log('rerender context panel');
 
   return (
     <Popover
@@ -106,7 +106,7 @@ const ContextContent = memo(() => {
   const currentKnowledgeBase = useKnowledgeBaseStore((state) => state.currentKnowledgeBase);
   const currentResource = useKnowledgeBaseStore((state) => state.currentResource);
   const currentNote = useNoteStore((state) => state.currentNote);
-  console.log('rerender context content');
+  // console.log('rerender context content');
 
   let TreeData: TreeProps['treeData'] = [
     {

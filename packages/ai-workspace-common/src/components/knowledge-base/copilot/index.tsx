@@ -118,8 +118,6 @@ export const AICopilot = memo((props: AICopilotProps) => {
     setSelectedSkillInstance: state.setSelectedSkillInstance,
   }));
 
-  console.log('useKnowledgeBaseStore state update from packages', knowledgeBaseStore.resourcePanelVisible);
-
   const convId = searchParams.get('convId');
   const noteId = searchParams.get('noteId');
   const resId = searchParams.get('resId');
@@ -136,7 +134,6 @@ export const AICopilot = memo((props: AICopilotProps) => {
   const { t, i18n } = useTranslation();
   const uiLocale = i18n?.languages?.[0] as LOCALE;
   const outputLocale = userStore?.localSettings?.outputLocale || 'en';
-  console.log('uiLocale', uiLocale);
 
   const { disable, jobId, source } = props;
 
@@ -264,8 +261,6 @@ export const AICopilot = memo((props: AICopilotProps) => {
       contextPanelStore.setShowContextCard(false);
     }
   }, []);
-
-  console.log('computedShowContextCard', computedShowContextCard);
 
   return (
     <div className="ai-copilot-container">

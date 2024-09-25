@@ -45,7 +45,6 @@ export const useGetUserSettings = () => {
   const { t } = useTranslation();
 
   const [loginNotification, setLoginNotification] = useStorage('refly-login-notify', '', 'sync');
-  console.log('loginNotification', loginNotification);
 
   const getLoginStatus = async () => {
     try {
@@ -136,7 +135,6 @@ export const useGetUserSettings = () => {
 
   // sync storage
   useEffect(() => {
-    console.log('loginNotification', loginNotification);
     const loginNotify = safeParseJSON(loginNotification);
     if (loginNotify) {
       if (loginNotify?.login) {
