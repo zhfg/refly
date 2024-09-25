@@ -31,6 +31,7 @@ interface UseProcessContextFilterProps {
   contentListConfig: string[];
   isMutiType: boolean;
   isMutiContentListType: boolean;
+  getConfigOfStore: () => void;
   isContentList: (type: string) => boolean;
   isTypeDisabled: (type: string) => boolean;
   getConfigLimit: (type: string, initialConfigRule: SkillInvocationRuleGroup) => number;
@@ -264,6 +265,9 @@ export const ContextFilter: React.FC<ContextFilterProps> = ({ processContextFilt
 
   const handleVisibleChange = (visible: boolean) => {
     setVisible(visible);
+    if (visible) {
+      processContextFilterProps.getConfigOfStore();
+    }
   };
 
   return (

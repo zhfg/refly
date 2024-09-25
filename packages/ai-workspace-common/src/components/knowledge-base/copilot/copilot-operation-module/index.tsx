@@ -2,7 +2,7 @@ import { Button, Checkbox, Form } from '@arco-design/web-react';
 // 自定义样式
 import './index.scss';
 // 自定义组件
-import { memo, useEffect, useState } from 'react';
+import { forwardRef, ForwardRefRenderFunction, memo, useEffect, useState } from 'react';
 import { ChatInput } from './chat-input';
 import { SkillDisplay } from './skill-display';
 import { ChatInputAssistAction } from './chat-input-assist-action';
@@ -21,12 +21,10 @@ import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hook
 
 interface CopilotInputModuleProps {
   source?: string;
-  chatContainerHeight?: number;
-  operationContainerHeight?: number;
 }
 
-export const CopilotOperationModule = memo((props: CopilotInputModuleProps) => {
-  const { source, chatContainerHeight, operationContainerHeight } = props;
+const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, CopilotInputModuleProps> = (props, ref) => {
+  const { source } = props;
   const messageStateStore = useMessageStateStore((state) => ({
     pending: state.pending,
     pendingFirstToken: state.pendingFirstToken,
@@ -50,7 +48,7 @@ export const CopilotOperationModule = memo((props: CopilotInputModuleProps) => {
 
   return (
     <>
-      <div className="ai-copilot-operation-container">
+      <div ref={ref} className="ai-copilot-operation-container">
         <div className="ai-copilot-operation-body">
           <SkillDisplay source={source} />
           <div className="ai-copilot-chat-container">
@@ -88,4 +86,6 @@ export const CopilotOperationModule = memo((props: CopilotInputModuleProps) => {
       </div>
     </>
   );
-});
+};
+
+export const CopilotOperationModule = memo(forwardRef(CopilotOperationModuleInner));

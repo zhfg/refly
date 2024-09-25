@@ -103,11 +103,15 @@ export const useProcessContextFilter = (filterNow = false) => {
   const [initialConfigRule, setInitialConfigRule] = useState<SkillInvocationRuleGroup>(defaultConfig);
 
   // initail config
-  const getInitialConfig = (initialConfigRule: SkillInvocationRuleGroup) => {
+  const getInitialConfig = (initialConfigRule: SkillInvocationRuleGroup, useConfigOfStore?: boolean) => {
     const config: FilterConfig = {
       type: [],
       contentListTypes: [],
     };
+
+    if (useConfigOfStore) {
+      return useContextFilterConfig.config;
+    }
 
     if (!initialConfigRule?.rules?.length) {
       return config;
@@ -239,13 +243,16 @@ export const useProcessContextFilter = (filterNow = false) => {
     });
     console.log('filteredIds', filteredIds);
     updateFilterIdsOfCurrentSelectedMarks(filteredIds);
-    console.log('filterErrorInfo', filterErrorInfo);
     updateFilterErrorInfo(filterErrorInfo);
+    useContextFilterConfig.setConfig(config);
+  };
+
+  const getConfigOfStore = () => {
+    setConfig(useContextFilterConfig?.config || { type: [], contentListTypes: [] });
   };
 
   // use debounce to limit the frequency of filterApply
   const debounceFilterApply = useDebouncedCallback(() => {
-    console.log('debounceFilterApply', config, initialConfigRule);
     filterApply(config, initialConfigRule);
   }, 300); // 300ms debounce
 
@@ -264,7 +271,6 @@ export const useProcessContextFilter = (filterNow = false) => {
         : defaultConfig;
     }
 
-    console.log('useEffect config', config);
     setInitialConfigRule(config);
     const configType = getInitialConfig(config);
     setConfig(configType);
@@ -287,16 +293,13 @@ export const useProcessContextFilter = (filterNow = false) => {
     };
   }, [currentSelectedMarks.length, skillStore.selectedSkill?.skillId]);
 
-  useEffect(() => {
-    useContextFilterConfig.setConfig(config);
-  }, [config]);
-
   return {
     initialConfigRule,
     config,
     contentListConfig,
     isMutiType,
     isMutiContentListType,
+    getConfigOfStore,
     isContentList,
     isTypeDisabled,
     getConfigLimit,

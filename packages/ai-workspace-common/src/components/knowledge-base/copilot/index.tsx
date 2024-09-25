@@ -8,7 +8,7 @@ import './index.scss';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useState, useRef, useCallback } from 'react';
 import { ChatMessages } from './chat-messages';
 import { ConvListModal } from './conv-list-modal';
 import { KnowledgeBaseListModal } from './knowledge-base-list-modal';
@@ -125,13 +125,13 @@ export const AICopilot = memo((props: AICopilotProps) => {
   const resId = searchParams.get('resId');
   const { resetState } = useResetState();
 
-  const actualChatContainerHeight = inputContainerHeight;
+  // const actualChatContainerHeight = inputContainerHeight;
 
-  const actualOperationContainerHeight =
-    (skillStore.selectedSkill
-      ? selectedSkillContainerHeight
-      : actualChatContainerHeight + skillContainerHeight + 2 * chatContainerPadding) +
-    (computedShowContextCard ? contextCardHeight : 0);
+  // const actualOperationContainerHeight =
+  //   (skillStore.selectedSkill
+  //     ? selectedSkillContainerHeight
+  //     : actualChatContainerHeight + skillContainerHeight + 2 * chatContainerPadding) +
+  //   (computedShowContextCard ? contextCardHeight : 0);
 
   const { t, i18n } = useTranslation();
   const uiLocale = i18n?.languages?.[0] as LOCALE;
@@ -139,6 +139,28 @@ export const AICopilot = memo((props: AICopilotProps) => {
   console.log('uiLocale', uiLocale);
 
   const { disable, jobId, source } = props;
+
+  const copilotOperationModuleRef = useRef<HTMLDivElement>(null);
+  const [operationModuleHeight, setOperationModuleHeight] = useState(0);
+
+  const updateOperationModuleHeight = useCallback(() => {
+    if (copilotOperationModuleRef.current) {
+      setOperationModuleHeight(copilotOperationModuleRef.current.offsetHeight);
+    }
+  }, []);
+
+  useEffect(() => {
+    updateOperationModuleHeight();
+
+    const resizeObserver = new ResizeObserver(updateOperationModuleHeight);
+    if (copilotOperationModuleRef.current) {
+      resizeObserver.observe(copilotOperationModuleRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [updateOperationModuleHeight]);
 
   const isFromSkillJob = () => {
     return source === 'skillJob';
@@ -251,17 +273,11 @@ export const AICopilot = memo((props: AICopilotProps) => {
       <div className="ai-copilot-body-container">
         <div
           className="ai-copilot-message-container"
-          style={{ height: `calc(100% - ${disable ? 0 : actualOperationContainerHeight}px)` }}
+          style={{ height: `calc(100% - ${disable ? 0 : operationModuleHeight}px)` }}
         >
           <ChatMessages disable={disable} loading={isFetching} />
         </div>
-        {!disable && (
-          <CopilotOperationModule
-            source={source}
-            chatContainerHeight={actualChatContainerHeight}
-            operationContainerHeight={actualOperationContainerHeight}
-          />
-        )}
+        {!disable && <CopilotOperationModule ref={copilotOperationModuleRef} source={source} />}
       </div>
 
       {knowledgeBaseStore?.convModalVisible ? <ConvListModal title="会话库" classNames="conv-list-modal" /> : null}
