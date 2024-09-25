@@ -1,7 +1,7 @@
 import { Button, Checkbox } from '@arco-design/web-react';
 
 // 自定义组件
-import { IconEdit, IconFile, IconHistory, IconPlusCircle, IconSearch } from '@arco-design/web-react/icon';
+import { IconClose, IconEdit, IconFile, IconHistory, IconPlusCircle, IconSearch } from '@arco-design/web-react/icon';
 // 自定义样式
 import './index.scss';
 // 自定义组件
@@ -14,6 +14,7 @@ import { ConvListModal } from './conv-list-modal';
 import { KnowledgeBaseListModal } from './knowledge-base-list-modal';
 import { SkillManagementModal } from '@refly-packages/ai-workspace-common/components/skill/skill-management-modal';
 import { CopilotOperationModule } from './copilot-operation-module';
+import { CopilotChatHeader } from './chat-header';
 
 // state
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
@@ -146,16 +147,6 @@ export const AICopilot = memo((props: AICopilotProps) => {
   // ai-note handler
   useAINote(true);
 
-  const handleNewTempConv = () => {
-    conversationStore.resetState();
-    chatStore.resetState();
-    messageStateStore.resetState();
-  };
-
-  const handleNewOpenConvList = () => {
-    knowledgeBaseStore.updateConvModalVisible(true);
-  };
-
   const handleGetThreadMessages = async (convId: string) => {
     // 异步操作
     const { data: res, error } = await getClient().getConversationDetail({
@@ -256,85 +247,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
 
   return (
     <div className="ai-copilot-container">
-      <div className="knowledge-base-detail-header">
-        {!disable && (
-          <>
-            <div className="knowledge-base-detail-navigation-bar">
-              {isWeb
-                ? [
-                    <Checkbox
-                      key={'knowledge-base-resource-panel'}
-                      checked={knowledgeBaseStore.resourcePanelVisible && resId ? true : false}
-                    >
-                      {({ checked }) => {
-                        return (
-                          <Button
-                            icon={<IconFile />}
-                            type="text"
-                            onClick={() => {
-                              if (!resId) {
-                                searchStore.setPages(searchStore.pages.concat('knowledgeBases'));
-                                searchStore.setIsSearchOpen(true);
-                              } else {
-                                knowledgeBaseStore.updateResourcePanelVisible(!knowledgeBaseStore.resourcePanelVisible);
-                              }
-                            }}
-                            className={classNames('assist-action-item', { active: checked })}
-                          ></Button>
-                        );
-                      }}
-                    </Checkbox>,
-                    <Checkbox key={'knowledge-base-note-panel'} checked={noteStore.notePanelVisible}>
-                      {({ checked }) => {
-                        return (
-                          <Button
-                            icon={<IconEdit />}
-                            type="text"
-                            onClick={() => {
-                              noteStore.updateNotePanelVisible(!noteStore.notePanelVisible);
-                            }}
-                            className={classNames('assist-action-item', { active: checked })}
-                          ></Button>
-                        );
-                      }}
-                    </Checkbox>,
-                    <Button
-                      icon={<IconSearch />}
-                      type="text"
-                      onClick={() => {
-                        searchStore.setPages(searchStore.pages.concat('convs'));
-                        searchStore.setIsSearchOpen(true);
-                      }}
-                      className={classNames('assist-action-item')}
-                    ></Button>,
-                  ]
-                : null}
-            </div>
-            <div className="knowledge-base-detail-navigation-bar">
-              <Button
-                icon={<IconHistory />}
-                type="text"
-                onClick={() => {
-                  handleNewOpenConvList();
-                }}
-                className={classNames('assist-action-item')}
-              >
-                {/* 会话历史 */}
-              </Button>
-              <Button
-                icon={<IconPlusCircle />}
-                type="text"
-                onClick={() => {
-                  handleNewTempConv();
-                }}
-                className={classNames('assist-action-item', 'mr-1')}
-              >
-                {/* 新会话 */}
-              </Button>
-            </div>
-          </>
-        )}
-      </div>
+      <CopilotChatHeader />
       <div className="ai-copilot-body-container">
         <div
           className="ai-copilot-message-container"

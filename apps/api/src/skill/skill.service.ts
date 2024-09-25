@@ -52,7 +52,7 @@ import {
   buildSuccessResponse,
   writeSSEResponse,
   pick,
-  QUEUE_REPORT_TOKEN_USAGE,
+  QUEUE_SYNC_TOKEN_USAGE,
 } from '@/utils';
 import { InvokeSkillJobData, skillInstancePO2DTO } from './skill.dto';
 import { KnowledgeService } from '@/knowledge/knowledge.service';
@@ -64,7 +64,7 @@ import { ConfigService } from '@nestjs/config';
 import { SearchService } from '@/search/search.service';
 import { LabelService } from '@/label/label.service';
 import { labelClassPO2DTO, labelPO2DTO } from '@/label/label.dto';
-import { ReportTokenUsageJobData } from '@/subscription/subscription.dto';
+import { SyncTokenUsageJobData } from '@/subscription/subscription.dto';
 import { SubscriptionService } from '@/subscription/subscription.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
 
@@ -118,7 +118,7 @@ export class SkillService {
     private conversation: ConversationService,
     private subscription: SubscriptionService,
     @InjectQueue(QUEUE_SKILL) private skillQueue: Queue<InvokeSkillJobData>,
-    @InjectQueue(QUEUE_REPORT_TOKEN_USAGE) private usageReportQueue: Queue<ReportTokenUsageJobData>,
+    @InjectQueue(QUEUE_SYNC_TOKEN_USAGE) private usageReportQueue: Queue<SyncTokenUsageJobData>,
   ) {
     this.skillEngine = new SkillEngine(
       this.logger,
@@ -329,15 +329,12 @@ export class SkillService {
     const data: InvokeSkillJobData = { ...param, uid };
 
     // Check for token quota
-    const availableTiers = await this.subscription.checkTokenUsage(user);
-    if (availableTiers.length === 0) {
-      throw new BadRequestException('no available token quota');
-    }
+    const usageResult = await this.subscription.checkTokenUsage(user);
 
     data.modelName ||= this.config.get('skill.defaultModel');
     const modelTier = getModelTier(data.modelName);
 
-    if (!availableTiers.includes(modelTier)) {
+    if (!usageResult[modelTier]) {
       throw new BadRequestException(`model ${data.modelName} not available for current plan`);
     }
 
@@ -681,7 +678,7 @@ export class SkillService {
             break;
           case 'on_chat_model_end':
             if (runMeta && chunk) {
-              const tokenUsage: ReportTokenUsageJobData = {
+              const tokenUsage: SyncTokenUsageJobData = {
                 ...basicUsageData,
                 spanId: runMeta.spanId,
                 usage: {

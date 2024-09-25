@@ -15,7 +15,7 @@ export default () => ({
     port: parseInt(process.env.REDIS_PORT) || 6379,
     password: process.env.REDIS_PASSWORD || '',
   },
-  staticEndpoint: process.env.STATIC_ENDPOINT || 'http://localhost:3000/v1/misc/static/',
+  staticEndpoint: process.env.STATIC_ENDPOINT || 'http://localhost:3000/v1/misc/',
   minio: {
     internal: {
       endPoint: process.env.MINIO_INTERNAL_ENDPOINT || 'localhost',
@@ -57,7 +57,7 @@ export default () => ({
     redirectUrl: process.env.LOGIN_REDIRECT_URL,
     jwt: {
       secret: process.env.JWT_SECRET || 'test',
-      expiresIn: parseInt(process.env.JWT_EXPIRATION_TIME) || '14d',
+      expiresIn: process.env.JWT_EXPIRATION_TIME || '14d',
     },
     github: {
       clientId: process.env.GITHUB_CLIENT_ID || 'test',
@@ -85,5 +85,15 @@ export default () => ({
     sessionSuccessUrl: process.env.STRIPE_SESSION_SUCCESS_URL,
     sessionCancelUrl: process.env.STRIPE_SESSION_CANCEL_URL,
     portalReturnUrl: process.env.STRIPE_PORTAL_RETURN_URL,
+  },
+  quota: {
+    token: {
+      t1: parseInt(process.env.QUOTA_T1_TOKEN) || 0,
+      t2: parseInt(process.env.QUOTA_T2_TOKEN) || 1000000,
+    },
+    storage: {
+      object: parseInt(process.env.QUOTA_STORAGE_OBJECT) || 10 * 1024 * 1024 * 1024, // 10 GB
+      vector: parseInt(process.env.QUOTA_STORAGE_VECTOR) || 1024 * 1024 * 1024, // 1 GB
+    },
   },
 });

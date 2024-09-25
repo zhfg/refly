@@ -38,7 +38,7 @@ export const ImportResourceModal = () => {
       }}
       getPopupContainer={getPopupContainer}
       className="import-resource-modal"
-      style={{ height: '70%', minHeight: 500, maxHeight: 700, minWidth: '300px', width: '60%' }}
+      style={{ height: '70%', minHeight: 500, maxHeight: 700, width: '60%', minWidth: '300px', maxWidth: '950px' }}
     >
       <div className="import-resource-container">
         {isWeb ? (

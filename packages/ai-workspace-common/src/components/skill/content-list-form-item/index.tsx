@@ -15,6 +15,7 @@ import { SkillContextContentItem, SkillContextValue, SkillInvocationRule } from 
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
 import { useGetCurrentSelectedMark } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-selected-text';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 const { TextArea } = Input;
 const CollapseItem = Collapse.Item;
@@ -97,6 +98,7 @@ export const ContentListFormItem: React.FC<ContentListFormItemProps> = ({
     <>
       <Select
         {...restProps}
+        getPopupContainer={getPopupContainer}
         className={`${className} content-list-select`}
         style={{ ...style, marginBottom: '8px' }}
         mode={selectMode}

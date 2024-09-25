@@ -19,6 +19,22 @@ export class QdrantService implements OnModuleInit {
     this.collectionName = 'refly_resource';
   }
 
+  static estimatePointsSize(points: PointStruct[]): number {
+    return points.reduce((acc, point) => {
+      // Estimate vector size (4 bytes per float)
+      const vectorSize = (point.vector as number[]).length * 4;
+
+      // Estimate payload size
+      const payloadSize = new TextEncoder().encode(JSON.stringify(point.payload)).length;
+
+      // Estimate ID size (UTF-8 encoding)
+      const idSize = new TextEncoder().encode(String(point.id)).length;
+
+      // Add 8 bytes for the point ID (assuming it's a 64-bit integer)
+      return acc + vectorSize + payloadSize + idSize;
+    }, 0);
+  }
+
   async onModuleInit() {
     await this.ensureCollectionExists();
   }
@@ -31,8 +47,10 @@ export class QdrantService implements OnModuleInit {
         vectors: {
           size: this.configService.getOrThrow<number>('vectorStore.vectorDim'),
           distance: 'Cosine',
+          on_disk: true,
         },
-        hnsw_config: { payload_m: 16, m: 0 },
+        hnsw_config: { payload_m: 16, m: 0, on_disk: true },
+        on_disk_payload: true,
       });
       this.logger.log(`collection create success: ${res}`);
     } else {

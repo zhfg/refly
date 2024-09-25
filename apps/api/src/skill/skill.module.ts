@@ -7,7 +7,7 @@ import { SkillController } from './skill.controller';
 import { CommonModule } from '@/common/common.module';
 import { ConversationModule } from '@/conversation/conversation.module';
 import { SearchModule } from '@/search/search.module';
-import { QUEUE_REPORT_TOKEN_USAGE, QUEUE_SKILL } from '@/utils';
+import { QUEUE_SYNC_TOKEN_USAGE, QUEUE_SKILL } from '@/utils';
 import { LabelModule } from '@/label/label.module';
 import { SkillProcessor } from '@/skill/skill.processor';
 import { SubscriptionModule } from '@/subscription/subscription.module';
@@ -22,7 +22,7 @@ import { SubscriptionModule } from '@/subscription/subscription.module';
     ConversationModule,
     SubscriptionModule,
     BullModule.registerQueue({ name: QUEUE_SKILL }),
-    BullModule.registerQueue({ name: QUEUE_REPORT_TOKEN_USAGE }),
+    BullModule.registerQueue({ name: QUEUE_SYNC_TOKEN_USAGE }),
   ],
   providers: [SkillService, SkillProcessor],
   controllers: [SkillController],

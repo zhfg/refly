@@ -9,13 +9,14 @@ import FullScreenSVG from '@/assets/side/full-screen.svg';
 import { IconTip } from '@/components/icon-tip';
 import { Avatar } from '@arco-design/web-react';
 // stores
-import { useCopilotStore } from '@/modules/toggle-copilot/stores/copilot';
+import { useCopilotStore } from '@refly-packages/ai-workspace-common/stores/copilot';
 import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import { getClientOrigin } from '@refly/utils/url';
 import { useUserStore } from '@/stores/user';
 import { useHomeStateStore } from '@/stores/home-state';
 import { useTranslation } from 'react-i18next';
 import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
   const { onlyShowClose = false } = props;
@@ -24,6 +25,7 @@ export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
   const { userProfile } = useUserStore();
   const homeStateStore = useHomeStateStore();
   const { handleReset } = useSelectedMark();
+  const runtime = getRuntime();
 
   const { t } = useTranslation();
 
@@ -81,8 +83,12 @@ export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
             src={CloseGraySVG}
             alt={t('extension.loggedHomePage.homePage.header.close')}
             onClick={(_) => {
-              copilotStore.setIsCopilotOpen(false);
-              handleReset();
+              if (runtime === 'extension-sidepanel') {
+                handleReset();
+                window.close();
+              } else if (runtime === 'extension-csui') {
+                copilotStore.setIsCopilotOpen(false);
+              }
             }}
           />
         </IconTip>

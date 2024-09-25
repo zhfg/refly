@@ -1,6 +1,6 @@
 import React, { type Dispatch, useEffect, useRef, useState } from 'react';
 // stores
-import { useCopilotStore } from '@/modules/toggle-copilot/stores/copilot';
+import { useCopilotStore } from '@refly-packages/ai-workspace-common/stores/copilot';
 
 export const useSetContainerDimension = () => {
   const copilotStore = useCopilotStore();

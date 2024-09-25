@@ -368,8 +368,7 @@ export const useBuildTask = () => {
       payload?: InvokeSkillRequest;
     };
   }) => {
-    const { runtime } = useUserStore.getState();
-    console.log('handleSendMessage runtime', runtime);
+    const runtime = getRuntime();
     if (runtime?.includes('extension')) {
       return handleSendMessageFromExtension(payload);
     } else {

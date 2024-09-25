@@ -9,6 +9,7 @@ import { HiOutlinePlus } from 'react-icons/hi2';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { useDebouncedCallback } from 'use-debounce';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 interface SearchSelectProps extends SelectProps {
   domain: SearchDomain;
@@ -93,6 +94,7 @@ export const SearchSelect = (props: SearchSelectProps) => {
   return (
     <Select
       size="large"
+      getPopupContainer={getPopupContainer}
       allowClear
       showSearch
       placeholder={t(`entitySelector.placeholder.${domain}`)}

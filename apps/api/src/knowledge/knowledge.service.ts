@@ -29,6 +29,7 @@ import {
   QUEUE_SIMPLE_EVENT,
   QUEUE_RESOURCE,
   streamToString,
+  QUEUE_SYNC_STORAGE_USAGE,
 } from '@/utils';
 import {
   genCollectionID,
@@ -40,6 +41,9 @@ import {
 import { FinalizeResourceParam } from './knowledge.dto';
 import { pick, omit } from '../utils';
 import { SimpleEventData } from '@/event/event.dto';
+import { SyncStorageUsageJobData } from '@/subscription/subscription.dto';
+import { SubscriptionService } from '@/subscription/subscription.service';
+import { MiscService } from '@/misc/misc.service';
 
 @Injectable()
 export class KnowledgeService {
@@ -49,9 +53,12 @@ export class KnowledgeService {
     private prisma: PrismaService,
     private elasticsearch: ElasticsearchService,
     private ragService: RAGService,
+    private miscService: MiscService,
+    private subscriptionService: SubscriptionService,
     @Inject(MINIO_INTERNAL) private minio: MinioService,
     @InjectQueue(QUEUE_RESOURCE) private queue: Queue<FinalizeResourceParam>,
     @InjectQueue(QUEUE_SIMPLE_EVENT) private simpleEventQueue: Queue<SimpleEventData>,
+    @InjectQueue(QUEUE_SYNC_STORAGE_USAGE) private ssuQueue: Queue<SyncStorageUsageJobData>,
   ) {}
 
   async listCollections(user: User, params: ListCollectionsData['query']) {
@@ -207,10 +214,22 @@ export class KnowledgeService {
     return { ...resource, content };
   }
 
-  async createResource(user: User, param: UpsertResourceRequest) {
+  async createResource(
+    user: User,
+    param: UpsertResourceRequest,
+    options?: { checkStorageQuota?: boolean },
+  ) {
+    if (options?.checkStorageQuota) {
+      const usageResult = await this.subscriptionService.checkStorageUsage(user);
+      if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
+        throw new BadRequestException('Storage quota exceeded');
+      }
+    }
+
     param.resourceId = genResourceID();
 
     let storageKey: string;
+    let storageSize: number = 0;
 
     if (param.resourceType === 'weblink') {
       if (!param.data) {
@@ -229,6 +248,7 @@ export class KnowledgeService {
       // save text content to object storage
       storageKey = `resources/${param.resourceId}.txt`;
       await this.minio.client.putObject(storageKey, param.content);
+      storageSize = (await this.minio.client.statObject(storageKey)).size;
     } else {
       throw new BadRequestException('Invalid resource type');
     }
@@ -243,6 +263,7 @@ export class KnowledgeService {
         meta: JSON.stringify(param.data || {}),
         contentPreview: cleanedContent?.slice(0, 500),
         storageKey,
+        storageSize,
         uid: user.uid,
         isPublic: param.isPublic,
         readOnly: !!param.readOnly,
@@ -268,6 +289,11 @@ export class KnowledgeService {
   }
 
   async batchCreateResource(user: User, params: UpsertResourceRequest[]) {
+    const usageResult = await this.subscriptionService.checkStorageUsage(user);
+    if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
+      throw new BadRequestException('Storage quota exceeded');
+    }
+
     const limit = pLimit(5);
     const tasks = params.map((param) => limit(async () => await this.createResource(user, param)));
     return Promise.all(tasks);
@@ -304,6 +330,7 @@ export class KnowledgeService {
       where: { resourceId, uid: user.uid },
       data: {
         storageKey,
+        storageSize: (await this.minio.client.statObject(storageKey)).size,
         wordCount: readingTime(content).words,
         title: resource.title,
         indexStatus: 'wait_index',
@@ -338,11 +365,15 @@ export class KnowledgeService {
 
     const { resourceType, resourceId, meta, storageKey } = resource;
     const { url, title } = JSON.parse(meta) as ResourceMeta;
+    const updates: Prisma.ResourceUpdateInput = {
+      indexStatus: 'finish',
+    };
 
     if (storageKey) {
       const contentStream = await this.minio.client.getObject(storageKey);
       const content = await streamToString(contentStream);
-      const chunks = await this.ragService.indexContent({
+
+      const { size } = await this.ragService.indexContent(user, {
         pageContent: cleanMarkdownForIngest(content),
         metadata: {
           nodeType: 'resource',
@@ -352,7 +383,7 @@ export class KnowledgeService {
           resourceId,
         },
       });
-      await this.ragService.saveDataForUser(user, { chunks });
+      updates.vectorSize = size;
 
       this.logger.log(
         `save resource segments for user ${user.uid} success, resourceId: ${resourceId}`,
@@ -361,7 +392,7 @@ export class KnowledgeService {
 
     return this.prisma.resource.update({
       where: { resourceId, uid: user.uid },
-      data: { indexStatus: 'finish' },
+      data: updates,
     });
   }
 
@@ -414,6 +445,12 @@ export class KnowledgeService {
       uid: user.uid,
     });
 
+    // Sync storage usage
+    await this.ssuQueue.add({
+      uid: user.uid,
+      timestamp: new Date(),
+    });
+
     return resource;
   }
 
@@ -429,8 +466,10 @@ export class KnowledgeService {
     if (param.data) {
       updates.meta = JSON.stringify(param.data);
     }
+
     if (param.content) {
       await this.minio.client.putObject(resource.storageKey, param.content);
+      updates.storageSize = (await this.minio.client.statObject(resource.storageKey)).size;
     }
 
     const updatedResource = await this.prisma.resource.update({
@@ -482,6 +521,10 @@ export class KnowledgeService {
       this.minio.client.removeObject(resource.storageKey),
       this.ragService.deleteResourceNodes(user, resourceId),
       this.elasticsearch.deleteResource(resourceId),
+      this.ssuQueue.add({
+        uid: user.uid,
+        timestamp: new Date(),
+      }),
     ]);
   }
 
@@ -517,36 +560,59 @@ export class KnowledgeService {
   }
 
   async upsertNote(user: User, param: UpsertNoteRequest) {
+    const usageResult = await this.subscriptionService.checkStorageUsage(user);
+    if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
+      throw new BadRequestException('Storage quota exceeded');
+    }
+
     const isNewNote = !param.noteId;
 
     param.noteId ||= genNoteID();
+    param.title ||= 'Untitled';
 
-    let storageKey: string | undefined;
-    let stateStorageKey: string | undefined;
+    const createInput: Prisma.NoteCreateInput = {
+      noteId: param.noteId,
+      title: param.title,
+      uid: user.uid,
+      readOnly: param.readOnly ?? false,
+      isPublic: param.isPublic ?? false,
+      content: param.initialContent,
+      contentPreview: param.initialContent?.slice(0, 500),
+    };
 
     if (isNewNote && param.initialContent) {
-      storageKey = `notes/${param.noteId}.txt`;
-      stateStorageKey = `state/${param.noteId}`;
+      createInput.storageKey = `notes/${param.noteId}.txt`;
+      createInput.stateStorageKey = `state/${param.noteId}`;
+
+      // Save initial content and ydoc state to object storage
       const ydoc = markdown2StateUpdate(param.initialContent);
       await Promise.all([
-        this.minio.client.putObject(storageKey, param.initialContent),
-        this.minio.client.putObject(stateStorageKey, Buffer.from(ydoc)),
+        this.minio.client.putObject(createInput.storageKey, param.initialContent),
+        this.minio.client.putObject(createInput.stateStorageKey, Buffer.from(ydoc)),
       ]);
+
+      // Calculate storage size
+      const [storageStat, stateStorageStat] = await Promise.all([
+        this.minio.client.statObject(createInput.storageKey),
+        this.minio.client.statObject(createInput.stateStorageKey),
+      ]);
+      createInput.storageSize = storageStat.size + stateStorageStat.size;
+
+      // Add to vector store
+      const { size } = await this.ragService.indexContent(user, {
+        pageContent: param.initialContent,
+        metadata: {
+          nodeType: 'note',
+          noteId: param.noteId,
+          title: param.title,
+        },
+      });
+      createInput.vectorSize = size;
     }
 
     const note = await this.prisma.note.upsert({
       where: { noteId: param.noteId },
-      create: {
-        noteId: param.noteId,
-        title: param.title,
-        uid: user.uid,
-        readOnly: param.readOnly ?? false,
-        isPublic: param.isPublic ?? false,
-        content: param.initialContent,
-        contentPreview: param.initialContent?.slice(0, 500),
-        storageKey,
-        stateStorageKey,
-      },
+      create: createInput,
       update: {
         ...pick(param, ['title', 'readOnly', 'isPublic']),
       },
@@ -558,6 +624,11 @@ export class KnowledgeService {
       content: param.initialContent,
       createdAt: note.createdAt.toJSON(),
       updatedAt: note.updatedAt.toJSON(),
+    });
+
+    await this.ssuQueue.add({
+      uid: user.uid,
+      timestamp: new Date(),
     });
 
     return note;
@@ -587,6 +658,10 @@ export class KnowledgeService {
       this.minio.client.removeObject(note.storageKey),
       this.ragService.deleteNoteNodes(user, noteId),
       this.elasticsearch.deleteNote(noteId),
+      this.miscService.removeFilesByEntity(user, {
+        entityId: noteId,
+        entityType: 'note',
+      }),
     ];
 
     if (note.stateStorageKey) {
@@ -594,5 +669,11 @@ export class KnowledgeService {
     }
 
     await Promise.all(cleanups);
+
+    // Sync storage usage after all the cleanups
+    await this.ssuQueue.add({
+      uid: user.uid,
+      timestamp: new Date(),
+    });
   }
 }

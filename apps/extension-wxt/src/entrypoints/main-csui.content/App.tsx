@@ -10,7 +10,7 @@ import { useToggleCSUI } from '@/modules/toggle-copilot/hooks/use-handle-toggle-
 import { useBindCommands } from '@/hooks/use-bind-commands';
 import { useSetContainerDimension } from '@/hooks/use-set-container-dimension';
 // stores
-import { useCopilotStore } from '@/modules/toggle-copilot/stores/copilot';
+import { useCopilotStore } from '@refly-packages/ai-workspace-common/stores/copilot';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 
 // 组件
@@ -60,7 +60,9 @@ const App = () => {
   // 在激活侧边栏时，设置可操作的空间 Dimension，可以使得组件库效果展示好
   useSetContainerDimension();
   // 处理登录状态
-  useProcessLoginNotify();
+  useProcessLoginNotify(() => {
+    window?.close();
+  });
 
   // 设置 Message 通知的 container
   useEffect(() => {

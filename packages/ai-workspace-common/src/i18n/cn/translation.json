@@ -90,13 +90,15 @@
       }
     },
     "loginModal": {
-      "title": "登录或注册以继续使用 Refly",
-      "loginBtn": "立即登录",
+      "title": "欢迎来到 Refly, 登录以继续使用",
+      "loginBtn": {
+        "google": "使用 Google 登录"
+      },
       "loggingStatus": "登录中...",
       "and": "及",
-      "utilText": "注册同意即表明您同意 ",
+      "utilText": "注册即表明您同意 ",
       "privacyPolicy": "隐私政策",
-      "terms": "条款和条件"
+      "terms": "服务条款"
     }
   },
   "workspace": {

@@ -100,6 +100,7 @@ export const ResourceItem = memo(
       >
         <div className="knowledge-base-directory-site-intro">
           <Tooltip
+            getPopupContainer={getPopupContainer}
             position="right"
             color="white"
             content={small ? <div style={{ color: '#000' }}>{item?.data?.title}</div> : null}

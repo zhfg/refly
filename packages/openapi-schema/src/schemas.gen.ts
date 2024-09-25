@@ -1255,7 +1255,7 @@ export const $Subscription = {
 
 export const $TokenUsageMeter = {
   type: 'object',
-  required: ['meterId', 'uid', 'planId', 'startAt', 'endAt'],
+  required: ['meterId', 'uid', 'startAt', 'endAt', 't1TokenQuota', 't1TokenUsed', 't2TokenQuota', 't2TokenUsed'],
   properties: {
     meterId: {
       type: 'string',
@@ -1298,6 +1298,64 @@ export const $TokenUsageMeter = {
       type: 'number',
       description: 'Token used (T2)',
       example: 100000,
+    },
+  },
+} as const;
+
+export const $StorageUsageMeter = {
+  type: 'object',
+  required: [
+    'meterId',
+    'uid',
+    'objectStorageQuota',
+    'resourceSize',
+    'noteSize',
+    'fileSize',
+    'vectorStorageQuota',
+    'vectorStorageUsed',
+  ],
+  properties: {
+    meterId: {
+      type: 'string',
+      description: 'Storage usage meter ID',
+    },
+    uid: {
+      type: 'string',
+      description: 'User ID',
+    },
+    subscriptionId: {
+      type: 'string',
+      description: 'Subscription ID',
+    },
+    objectStorageQuota: {
+      type: 'string',
+      description: 'Object storage quota (in bytes), including resource, note and static files',
+      example: '104857600',
+    },
+    resourceSize: {
+      type: 'string',
+      description: 'Resource storage size in use (in bytes)',
+      example: '1048576',
+    },
+    noteSize: {
+      type: 'string',
+      description: 'Note storage size in use (in bytes)',
+      example: '1048576',
+    },
+    fileSize: {
+      type: 'string',
+      description: 'Static file storage size in use (in bytes)',
+      example: '1048576',
+    },
+    vectorStorageQuota: {
+      type: 'string',
+      description: 'Vector storage quota (in bytes)',
+      example: '1048576',
+    },
+    vectorStorageUsed: {
+      type: 'string',
+      description: 'Vector storage size used (in bytes)',
+      example: '1048576',
     },
   },
 } as const;
@@ -2949,6 +3007,10 @@ export const $SubscriptionUsageData = {
       description: 'Token usage meter',
       $ref: '#/components/schemas/TokenUsageMeter',
     },
+    storage: {
+      description: 'Storage usage meter',
+      $ref: '#/components/schemas/StorageUsageMeter',
+    },
   },
 } as const;
 
@@ -3143,12 +3205,20 @@ export const $ScrapeWeblinkResponse = {
 
 export const $UploadRequest = {
   type: 'object',
-  required: ['file'],
+  required: ['file', 'entityId', 'entityType'],
   properties: {
     file: {
       type: 'string',
       format: 'binary',
       description: 'File to upload',
+    },
+    entityId: {
+      type: 'string',
+      description: 'Entity ID',
+    },
+    entityType: {
+      description: 'Entity type',
+      $ref: '#/components/schemas/EntityType',
     },
   },
 } as const;

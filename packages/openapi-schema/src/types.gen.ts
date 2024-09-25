@@ -1028,19 +1028,58 @@ export type TokenUsageMeter = {
   /**
    * Token quota (T1)
    */
-  t1TokenQuota?: number;
+  t1TokenQuota: number;
   /**
    * Token used (T1)
    */
-  t1TokenUsed?: number;
+  t1TokenUsed: number;
   /**
    * Token quota (T2)
    */
-  t2TokenQuota?: number;
+  t2TokenQuota: number;
   /**
    * Token used (T2)
    */
-  t2TokenUsed?: number;
+  t2TokenUsed: number;
+};
+
+export type StorageUsageMeter = {
+  /**
+   * Storage usage meter ID
+   */
+  meterId: string;
+  /**
+   * User ID
+   */
+  uid: string;
+  /**
+   * Subscription ID
+   */
+  subscriptionId?: string;
+  /**
+   * Object storage quota (in bytes), including resource, note and static files
+   */
+  objectStorageQuota: string;
+  /**
+   * Resource storage size in use (in bytes)
+   */
+  resourceSize: string;
+  /**
+   * Note storage size in use (in bytes)
+   */
+  noteSize: string;
+  /**
+   * Static file storage size in use (in bytes)
+   */
+  fileSize: string;
+  /**
+   * Vector storage quota (in bytes)
+   */
+  vectorStorageQuota: string;
+  /**
+   * Vector storage size used (in bytes)
+   */
+  vectorStorageUsed: string;
 };
 
 export type UserSettings = {
@@ -2013,6 +2052,10 @@ export type SubscriptionUsageData = {
    * Token usage meter
    */
   token?: TokenUsageMeter;
+  /**
+   * Storage usage meter
+   */
+  storage?: StorageUsageMeter;
 };
 
 export type GetSubscriptionUsageResponse = BaseResponse & {
@@ -2141,6 +2184,14 @@ export type UploadRequest = {
    * File to upload
    */
   file: Blob | File;
+  /**
+   * Entity ID
+   */
+  entityId: string;
+  /**
+   * Entity type
+   */
+  entityType: EntityType;
 };
 
 export type UploadResponse = BaseResponse & {

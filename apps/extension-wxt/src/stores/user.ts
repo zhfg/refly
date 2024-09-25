@@ -12,7 +12,8 @@ export interface LocalSettings {
 
 export interface UserState {
   // state
-  isCheckingLoginStatus: boolean;
+  isCheckingLoginStatus: boolean | undefined;
+  isLogin: boolean;
   userProfile?: User;
   token?: string;
   localSettings: LocalSettings; // 在获取 user 信息的时候记录这个 settings，并 host 到 localStorage/bgStorage，每次保存更新，类似 userProfile
@@ -22,6 +23,7 @@ export interface UserState {
 
   // method
   setIsCheckingLoginStatus: (val: boolean) => void;
+  setIsLogin: (val: boolean) => void;
   setUserProfile: (val?: User) => void;
   setToken: (val?: string) => void;
   setLoginModalVisible: (val: boolean) => void;
@@ -52,6 +54,7 @@ export const defaultLocalSettings = {
 export const defaultState = {
   // messages: fakeMessages as any,
   isCheckingLoginStatus: false,
+  isLogin: false,
   userProfile: undefined,
   token: '',
   loginModalVisible: false,
@@ -63,6 +66,7 @@ export const useUserStore = create<UserState>()(
     ...defaultState,
 
     setIsCheckingLoginStatus: (val: boolean) => set((state) => ({ ...state, isCheckingLoginStatus: val })),
+    setIsLogin: (val: boolean) => set((state) => ({ ...state, isLogin: val })),
     setUserProfile: (val?: User) => set((state) => ({ ...state, userProfile: val })),
     setToken: (val?: string) => set((state) => ({ ...state, token: val })),
     setLoginModalVisible: (val: boolean) => set((state) => ({ ...state, loginModalVisible: val })),

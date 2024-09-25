@@ -380,6 +380,9 @@ importers:
       '@types/is-hotkey':
         specifier: ~0.1.7
         version: 0.1.7
+      '@types/lodash.debounce':
+        specifier: ~4.0.9
+        version: 4.0.9
       '@types/lodash.throttle':
         specifier: ^4.1.9
         version: 4.1.9
@@ -796,6 +799,9 @@ importers:
       prettier-plugin-tailwindcss:
         specifier: ~0.6.5
         version: 0.6.5(prettier@3.3.2)
+      rimraf:
+        specifier: ~6.0.1
+        version: 6.0.1
       sass:
         specifier: ^1.71.1
         version: 1.71.1
@@ -9943,6 +9949,12 @@ packages:
     resolution: {integrity: sha512-sVDA58zAw4eWAffKOaQH5/5j3XeayukzDk+ewSsnv3p4yJEZHCCzMDiZM8e0OUrRvmpGZ85jf4yDHkHsgBNr9Q==}
     dev: true
 
+  /@types/lodash.debounce@4.0.9:
+    resolution: {integrity: sha512-Ma5JcgTREwpLRwMM+XwBR7DaWe96nC38uCBDFKZWbNKD+osjVzdpnUSwBcqCptrp16sSOLBAUb50Car5I0TCsQ==}
+    dependencies:
+      '@types/lodash': 4.17.5
+    dev: false
+
   /@types/lodash.merge@4.6.9:
     resolution: {integrity: sha512-23sHDPmzd59kUgWyKGiOMO2Qb9YtqRO/x4IhkgNUiPQ1+5MUVqi6bCZeq9nBJ17msjIMbEIO5u+XW4Kz6aGUhQ==}
     dependencies:
@@ -14260,6 +14272,19 @@ packages:
       package-json-from-dist: 1.0.0
       path-scurry: 1.11.1
 
+  /glob@11.0.0:
+    resolution: {integrity: sha512-9UiX/Bl6J2yaBbxKoEBRm4Cipxgok8kQYcOPEhScPwebu2I0HoQOuYdIO6S3hLuWoZgpDpwQZMzTFxgpkyT76g==}
+    engines: {node: 20 || >=22}
+    hasBin: true
+    dependencies:
+      foreground-child: 3.2.1
+      jackspeak: 4.0.1
+      minimatch: 10.0.1
+      minipass: 7.1.2
+      package-json-from-dist: 1.0.0
+      path-scurry: 2.0.0
+    dev: true
+
   /glob@6.0.4:
     resolution: {integrity: sha512-MKZeRNyYZAVVVG1oZeLaWie1uweH40m9AZwIwxyPbTSX4hHrVYSzLg0Ro5Z5R7XKkIX+Cc6oD1rqeDJnwsB8/A==}
     requiresBuild: true
@@ -15466,6 +15491,15 @@ packages:
       '@isaacs/cliui': 8.0.2
     optionalDependencies:
       '@pkgjs/parseargs': 0.11.0
+
+  /jackspeak@4.0.1:
+    resolution: {integrity: sha512-cub8rahkh0Q/bw1+GxP7aeSe29hHHn2V4m29nnDlvCdlgU+3UGxkZp7Z53jLUdpX3jdTO0nJZUDl3xvbWc2Xog==}
+    engines: {node: 20 || >=22}
+    dependencies:
+      '@isaacs/cliui': 8.0.2
+    optionalDependencies:
+      '@pkgjs/parseargs': 0.11.0
+    dev: true
 
   /jest-changed-files@29.7.0:
     resolution: {integrity: sha512-fEArFiwf1BpQ+4bXSprcDc3/x4HSzL4al2tozwVpDFpsxALjLYdyiIK4e5Vz66GQJIbXJ82+35PtysofptNX2w==}
@@ -16995,6 +17029,11 @@ packages:
     resolution: {integrity: sha512-2bIM8x+VAf6JT4bKAljS1qUWgMsqZRPGJS6FSahIMPVvctcNhyVp7AJu7quxOW9jwkryBReKZY5tY5JYv2n/7Q==}
     engines: {node: 14 || >=16.14}
 
+  /lru-cache@11.0.1:
+    resolution: {integrity: sha512-CgeuL5uom6j/ZVrg7G/+1IXqRY8JXX4Hghfy5YE0EhoYQWvndP1kufu58cmZLNIDKnRhZrXfdS9urVWx98AipQ==}
+    engines: {node: 20 || >=22}
+    dev: true
+
   /lru-cache@4.1.5:
     resolution: {integrity: sha512-sWZlbEP2OsHNkXrMl5GYk/jKk70MBng6UU4YI/qGDYbgf6YbP4EvmqISbXCoJiRKs+1bSpFHVgQxvJ17F2li5g==}
     dependencies:
@@ -17662,6 +17701,13 @@ packages:
     resolution: {integrity: sha512-r9deDe9p5FJUPZAk3A59wGH7Ii9YrjjWw0jmw/liSbHl2CHiyXj6FcDXDu2K3TjVAXqiJdaw3xxwlZZr9E6nHg==}
     hasBin: true
     dev: false
+
+  /minimatch@10.0.1:
+    resolution: {integrity: sha512-ethXTt3SGGR+95gudmqJ1eNhRO7eGEGIgYA9vnPatK4/etz2MEVDno5GMCibdMTuBMyElzIlgxMna3K94XDIDQ==}
+    engines: {node: 20 || >=22}
+    dependencies:
+      brace-expansion: 2.0.1
+    dev: true
 
   /minimatch@3.1.2:
     resolution: {integrity: sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==}
@@ -18716,6 +18762,14 @@ packages:
     dependencies:
       lru-cache: 10.2.0
       minipass: 7.1.2
+
+  /path-scurry@2.0.0:
+    resolution: {integrity: sha512-ypGJsmGtdXUOeM5u93TyeIEfEhM6s+ljAhrk5vAvSx8uyY/02OvrZnA0YNGUrPXfpJMgI1ODd3nwz8Npx4O4cg==}
+    engines: {node: 20 || >=22}
+    dependencies:
+      lru-cache: 11.0.1
+      minipass: 7.1.2
+    dev: true
 
   /path-to-regexp@0.1.7:
     resolution: {integrity: sha512-5DFkuoqlv1uYQKxy8omFBeJPQcdoE07Kv2sferDCrAq1ohOU+MSDswDIbnx3YAM60qIOnYa53wBhXW0EbMonrQ==}
@@ -20349,6 +20403,7 @@ packages:
 
   /rimraf@2.4.5:
     resolution: {integrity: sha512-J5xnxTyqaiw06JjMftq7L9ouA448dw/E7dKghkP9WpKNuwmARNNg+Gk8/u5ryb9N/Yo2+z3MCwuqFK/+qPOPfQ==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
     requiresBuild: true
     dependencies:
@@ -20358,6 +20413,7 @@ packages:
 
   /rimraf@3.0.2:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
     dependencies:
       glob: 7.2.3
@@ -20376,6 +20432,15 @@ packages:
     hasBin: true
     dependencies:
       glob: 10.4.2
+    dev: true
+
+  /rimraf@6.0.1:
+    resolution: {integrity: sha512-9dkvaxAsk/xNXSJzMgFqqMCuFgt2+KsOFek3TMLfo8NCPfWpBmqwyNn5Y+NX56QUYfCtsyhF3ayiboEoUmJk/A==}
+    engines: {node: 20 || >=22}
+    hasBin: true
+    dependencies:
+      glob: 11.0.0
+      package-json-from-dist: 1.0.0
     dev: true
 
   /rollup@2.79.1:
@@ -23380,6 +23445,7 @@ time:
   /@types/is-hotkey@0.1.7: '2021-12-24T00:00:20.379Z'
   /@types/jest@29.5.1: '2023-04-19T10:02:42.658Z'
   /@types/jsonwebtoken@9.0.6: '2024-02-26T18:35:30.490Z'
+  /@types/lodash.debounce@4.0.9: '2023-11-07T10:00:35.947Z'
   /@types/lodash.merge@4.6.9: '2023-11-07T10:18:21.243Z'
   /@types/lodash.throttle@4.1.9: '2023-11-07T10:31:21.728Z'
   /@types/lodash@4.17.4: '2024-05-17T02:16:50.399Z'
@@ -23559,6 +23625,7 @@ time:
   /remark-gfm@3.0.1: '2021-11-03T18:15:59.082Z'
   /remark-math@5.1.1: '2021-11-11T14:16:04.375Z'
   /rimraf@5.0.7: '2024-05-12T02:48:24.568Z'
+  /rimraf@6.0.1: '2024-07-10T17:12:54.614Z'
   /rollup@4.18.0: '2024-05-22T05:04:20.148Z'
   /rxjs@7.2.0: '2021-07-05T17:36:10.369Z'
   /sass@1.71.1: '2024-02-21T01:53:22.294Z'

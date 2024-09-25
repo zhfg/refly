@@ -10,7 +10,7 @@ import { Suspense, useEffect, useRef } from 'react';
 import '@/i18n/config';
 // 加载 runtime 设置
 import { setRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { useCopilotStore } from '@/modules/toggle-copilot/stores/copilot';
+import { useCopilotStore } from '@refly-packages/ai-workspace-common/stores/copilot';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useMockInAppResource } from '@/hooks/use-mock-in-app-resource';
 import { useToggleSidePanel } from '@/modules/toggle-copilot/hooks/use-handle-toggle-side-panel';

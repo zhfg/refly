@@ -8,10 +8,10 @@ export let SENTRY_DSN =
 export const SERVER_PROD_DOMAIN = 'https://api.refly.ai';
 export const SERVER_DEV_DOMAIN = 'http://localhost:3000';
 
-export const WS_SERVER_PROD_DOMAIN = 'wss://api.refly.ai:1234';
+export const WS_SERVER_PROD_DOMAIN = 'wss://collab.refly.ai';
 export const WS_SERVER_DEV_DOMAIN = 'ws://localhost:1234';
 
-export const CLIENT_PROD_LANDING_PAGE_DOMAIN = 'https://www.refly.ai';
+export const CLIENT_PROD_LANDING_PAGE_DOMAIN = 'https://refly.ai';
 export const CLIENT_PROD_APP_DOMAIN = 'https://app.refly.ai';
 export const CLIENT_DEV_LANDING_PAGE_DOMAIN = 'http://localhost:5174';
 export const CLIENT_DEV_APP_DOMAIN = 'http://localhost:5173'; // 保持原样，插件等读 cookie 逻辑使用这个域名，退出登录时应该将两个域名都清除掉

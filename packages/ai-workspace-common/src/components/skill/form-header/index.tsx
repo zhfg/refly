@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 // styles
 import './index.scss';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 interface Option {
   label: string;
@@ -82,9 +83,10 @@ export const FormHeader: React.FC<FormHeaderProps> = ({
         {enableSelect && (
           <>
             {!isMultiSelect && (
-              <Tooltip content={selectTooltipTitle}>
+              <Tooltip content={selectTooltipTitle} getPopupContainer={getPopupContainer}>
                 <Select
                   size="mini"
+                  getPopupContainer={getPopupContainer}
                   className="context-selector"
                   defaultValue={options?.[0]?.value}
                   options={options}
