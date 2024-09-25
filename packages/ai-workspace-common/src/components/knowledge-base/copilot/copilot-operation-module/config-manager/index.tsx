@@ -200,6 +200,10 @@ export const ConfigManager = (props: ConfigManagerProps) => {
     } else {
       form.setFieldValue(fieldPrefix, {});
     }
+    setResetCounter((prev) => prev + 1);
+    setShowConfig(false);
+    setActiveConfig(undefined);
+    setFormErrors({});
   }, [tplConfig]);
 
   const handleConfigItemClick = (item: DynamicConfigItem) => {
@@ -214,7 +218,6 @@ export const ConfigManager = (props: ConfigManagerProps) => {
 
   const handleReset = (key: string) => {
     const resetValue = tplConfig?.[key];
-    console.log('reset', resetValue);
     form.setFieldValue(getFormField(fieldPrefix, key), resetValue);
     setResetCounter((prev) => prev + 1);
   };
