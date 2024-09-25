@@ -6,7 +6,12 @@ import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill'
 import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
 
 export const SelectedSkillHeader = () => {
-  const skillStore = useSkillStore();
+  const skillStore = useSkillStore((state) => ({
+    selectedSkill: state.selectedSkill,
+    setSelectedSkillInstance: state.setSelectedSkillInstance,
+  }));
+
+  console.log('selectedSkill', skillStore?.selectedSkill);
 
   return skillStore?.selectedSkill ? (
     <div className="selected-skill">
