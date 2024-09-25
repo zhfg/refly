@@ -89,6 +89,7 @@
     "loginModal": {
       "title": "Welcome to Refly, sign in to continue",
       "loginBtn": {
+        "github": "Sign in with GitHub",
         "google": "Sign in with Google"
       },
       "loggingStatus": "Signing in...",

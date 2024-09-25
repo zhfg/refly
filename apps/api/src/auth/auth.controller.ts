@@ -34,16 +34,14 @@ export class AuthController {
   }
 
   @UseGuards(GithubOauthGuard)
-  @Get('callback')
+  @Get('callback/github')
   async githubAuthCallback(@User() user: UserModel, @Res() res: Response) {
     this.logger.log(`github oauth callback success, req.user = ${user.email}`);
 
     const { accessToken } = await this.authService.login(user);
     res
       .cookie(this.configService.get('auth.cookieTokenField'), accessToken, {
-        httpOnly: true,
-        secure: false,
-        sameSite: 'lax',
+        domain: this.configService.get('auth.cookieDomain'),
       })
       .redirect(this.configService.get('auth.redirectUrl'));
   }

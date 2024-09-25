@@ -87,6 +87,7 @@ export class AuthService {
     // Return user if this email has been registered
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (user) {
+      this.logger.log(`user ${user.uid} already registered for email ${email}`);
       return user;
     }
 
@@ -120,6 +121,7 @@ export class AuthService {
         uid,
         email,
         avatar,
+        emailVerified: new Date(),
       },
     });
     this.logger.log(`user created: ${newUser.uid}`);
