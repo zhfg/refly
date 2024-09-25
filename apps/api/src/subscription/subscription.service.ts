@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import Stripe from 'stripe';
 import { InjectStripeClient, StripeWebhookHandler } from '@golevelup/nestjs-stripe';
 import { PrismaService } from '@/common/prisma.service';
@@ -7,6 +7,7 @@ import {
   genTokenUsageMeterID,
   genStorageUsageMeterID,
   getSubscriptionInfoFromLookupKey,
+  defaultModelList,
 } from '@refly/utils';
 import {
   CreateSubscriptionParam,
@@ -18,18 +19,72 @@ import {
   CheckStorageUsageResult,
 } from '@/subscription/subscription.dto';
 import { pick } from '@/utils';
-import { Subscription as SubscriptionModel, User as UserModel } from '@prisma/client';
+import {
+  Subscription as SubscriptionModel,
+  User as UserModel,
+  ModelInfo as ModelInfoModel,
+} from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class SubscriptionService {
+export class SubscriptionService implements OnModuleInit {
   private logger = new Logger(SubscriptionService.name);
+
+  private modelList: ModelInfoModel[];
+  private modelListSyncedAt: Date | null = null;
+  private modelListPromise: Promise<ModelInfoModel[]> | null = null;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
     @InjectStripeClient() private readonly stripeClient: Stripe,
   ) {}
+
+  async onModuleInit() {
+    let modelInfos = await this.prisma.modelInfo.findMany({
+      where: { enabled: true },
+    });
+    if (modelInfos.length === 0) {
+      modelInfos = await this.prisma.modelInfo.createManyAndReturn({
+        data: defaultModelList,
+      });
+      this.logger.log(`Model info created: ${modelInfos.map((m) => m.name).join(',')}`);
+    } else {
+      this.logger.log(`Model info already configured: ${modelInfos.map((m) => m.name).join(',')}`);
+    }
+
+    this.modelList = modelInfos;
+    this.modelListSyncedAt = new Date();
+
+    const usageQuotas = await this.prisma.subscriptionUsageQuota.findMany({
+      select: { planType: true },
+    });
+    if (usageQuotas.length === 0) {
+      const created = await this.prisma.subscriptionUsageQuota.createManyAndReturn({
+        data: [
+          {
+            planType: 'free',
+            t1TokenQuota: 0,
+            t2TokenQuota: 1_000_000,
+            objectStorageQuota: 100 * 1024 * 1024, // 100 MB
+            vectorStorageQuota: 10 * 1024 * 1024, // 10 MB
+          },
+          {
+            planType: 'pro',
+            t1TokenQuota: 1_000_000,
+            t2TokenQuota: 5_000_000,
+            objectStorageQuota: 10 * 1024 * 1024 * 1024, // 1 GB
+            vectorStorageQuota: 100 * 1024 * 1024, // 100 MB
+          },
+        ],
+      });
+      this.logger.log(`Usage quota created for plans: ${created.map((q) => q.planType).join(',')}`);
+    } else {
+      this.logger.log(
+        `Usage quota already configured for plans: ${usageQuotas.map((q) => q.planType).join(',')}`,
+      );
+    }
+  }
 
   async createCheckoutSession(user: UserModel, param: CreateCheckoutSessionRequest) {
     const { uid } = user;
@@ -591,6 +646,43 @@ export class SubscriptionService {
     });
 
     this.logger.log(`Storage usage for user ${uid} synced at ${timestamp}`);
+  }
+
+  async getModelList() {
+    if (
+      this.modelListSyncedAt &&
+      this.modelList?.length > 0 &&
+      this.modelListSyncedAt > new Date(Date.now() - 1000 * 60 * 5)
+    ) {
+      return this.modelList;
+    }
+
+    if (this.modelListPromise) {
+      return this.modelListPromise;
+    }
+
+    this.modelListPromise = this.fetchModelList();
+
+    try {
+      const models = await this.modelListPromise;
+      return models;
+    } finally {
+      this.modelListPromise = null;
+    }
+  }
+
+  private async fetchModelList(): Promise<ModelInfoModel[]> {
+    const models = await this.prisma.modelInfo.findMany({
+      where: { enabled: true },
+    });
+    this.modelList = models;
+    this.modelListSyncedAt = new Date();
+    return models;
+  }
+
+  async getModelInfo(modelName: string) {
+    const modelList = await this.getModelList();
+    return modelList.find((model) => model.name === modelName);
   }
 }
 

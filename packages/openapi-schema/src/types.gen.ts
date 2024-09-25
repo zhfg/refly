@@ -1801,11 +1801,11 @@ export type InvokeSkillRequest = {
    */
   convId?: string;
   /**
-   * user selected output locale
+   * Selected output locale
    */
   locale?: string;
   /**
-   * user selected output model
+   * Selected model
    */
   modelName?: string;
   /**
@@ -2204,6 +2204,32 @@ export type UploadResponse = BaseResponse & {
      */
     url?: string;
   };
+};
+
+export type ModelInfo = {
+  /**
+   * Model name
+   */
+  name: string;
+  /**
+   * Model label
+   */
+  label: string;
+  /**
+   * Model provider
+   */
+  provider: string;
+  /**
+   * Model tier
+   */
+  tier: string;
+};
+
+export type ListModelsResponse = BaseResponse & {
+  /**
+   * Model list
+   */
+  data?: Array<ModelInfo>;
 };
 
 export type ListResourcesData = {
@@ -2792,6 +2818,10 @@ export type GetSubscriptionUsageResponse2 = GetSubscriptionUsageResponse;
 
 export type GetSubscriptionUsageError = unknown;
 
+export type ListModelsResponse2 = ListModelsResponse;
+
+export type ListModelsError = unknown;
+
 export type CreateCheckoutSessionData = {
   body: CreateCheckoutSessionRequest;
 };
@@ -3361,6 +3391,16 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': GetSubscriptionUsageResponse;
+      };
+    };
+  };
+  '/subscription/modelList': {
+    get: {
+      res: {
+        /**
+         * successful operation
+         */
+        '200': ListModelsResponse;
       };
     };
   };

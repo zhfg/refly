@@ -1195,6 +1195,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetSubscriptionUsageResponse'
+  /subscription/modelList:
+    get:
+      tags:
+        - subscription
+      summary: List models
+      description: List all available models
+      operationId: listModels
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListModelsResponse'
   /subscription/createCheckoutSession:
     post:
       tags:
@@ -3230,10 +3244,10 @@ components:
           type: string
         locale:
           type: string
-          description: user selected output locale
+          description: Selected output locale
         modelName:
           type: string
-          description: user selected output model
+          description: Selected model
         createConvParam:
           description: Create conversation parameters
           $ref: '#/components/schemas/CreateConversationRequest'
@@ -3668,6 +3682,36 @@ components:
                 url:
                   type: string
                   description: File URL
+    ModelInfo:
+      type: object
+      required:
+        - name
+        - label
+        - provider
+        - tier
+      properties:
+        name:
+          type: string
+          description: Model name
+        label:
+          type: string
+          description: Model label
+        provider:
+          type: string
+          description: Model provider
+        tier:
+          type: string
+          description: Model tier
+    ListModelsResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Model list
+              items:
+                $ref: '#/components/schemas/ModelInfo'
   securitySchemes:
     api_key:
       type: apiKey

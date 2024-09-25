@@ -8,8 +8,9 @@ import {
   CreateCheckoutSessionResponse,
   CreatePortalSessionResponse,
   GetSubscriptionUsageResponse,
+  ListModelsResponse,
 } from '@refly/openapi-schema';
-import { buildSuccessResponse } from '@/utils';
+import { buildSuccessResponse, pick } from '@/utils';
 
 @Controller('subscription')
 export class SubscriptionController {
@@ -37,5 +38,12 @@ export class SubscriptionController {
   async getUsage(@User() user: UserModel): Promise<GetSubscriptionUsageResponse> {
     const usage = await this.subscriptionService.getOrCreateUsageMeter(user);
     return buildSuccessResponse(usage);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('modelList')
+  async listModels(): Promise<ListModelsResponse> {
+    const models = await this.subscriptionService.getModelList();
+    return buildSuccessResponse(models.map((m) => pick(m, ['name', 'label', 'provider', 'tier'])));
   }
 }

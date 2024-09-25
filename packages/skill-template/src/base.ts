@@ -80,6 +80,9 @@ export abstract class BaseSkill extends StructuredTool {
       throw new Error('skill config is required');
     }
 
+    // Configure the engine with the current skill config.
+    this.engine.configure(config);
+
     // Ensure currentSkill is not empty.
     config.configurable.currentSkill ??= {
       tplName: this.name,

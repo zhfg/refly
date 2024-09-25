@@ -91,7 +91,7 @@ export class ConversationService {
           content: msg.content,
           type: msg.type,
           convId: msg.convId,
-          convTitle: conversation.title,
+          convTitle: conversation?.title,
           uid: msg.uid,
           createdAt: msg.createdAt.toJSON(),
           updatedAt: msg.updatedAt.toJSON(),

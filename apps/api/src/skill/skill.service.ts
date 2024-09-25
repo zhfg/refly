@@ -7,6 +7,8 @@ import {
   Prisma,
   SkillTrigger as SkillTriggerModel,
   ChatMessage as ChatMessageModel,
+  Conversation as ConversationModel,
+  SkillJob as SkillJobModel,
 } from '@prisma/client';
 import { Response } from 'express';
 import { AIMessageChunk, BaseMessage } from '@langchain/core/dist/messages';
@@ -37,6 +39,7 @@ import {
 } from '@refly/openapi-schema';
 import {
   BaseSkill,
+  ReflyService,
   Scheduler,
   SkillEngine,
   SkillEventMap,
@@ -44,7 +47,7 @@ import {
   SkillRunnableMeta,
   createSkillInventory,
 } from '@refly/skill-template';
-import { genSkillID, genSkillJobID, genSkillTriggerID, getModelTier } from '@refly/utils';
+import { genSkillID, genSkillJobID, genSkillTriggerID } from '@refly/utils';
 import { PrismaService } from '@/common/prisma.service';
 import {
   CHANNEL_INVOKE_SKILL,
@@ -53,6 +56,7 @@ import {
   writeSSEResponse,
   pick,
   QUEUE_SYNC_TOKEN_USAGE,
+  omit,
 } from '@/utils';
 import { InvokeSkillJobData, skillInstancePO2DTO } from './skill.dto';
 import { KnowledgeService } from '@/knowledge/knowledge.service';
@@ -120,58 +124,60 @@ export class SkillService {
     @InjectQueue(QUEUE_SKILL) private skillQueue: Queue<InvokeSkillJobData>,
     @InjectQueue(QUEUE_SYNC_TOKEN_USAGE) private usageReportQueue: Queue<SyncTokenUsageJobData>,
   ) {
-    this.skillEngine = new SkillEngine(
-      this.logger,
-      {
-        getNoteDetail: async (user, noteId) => {
-          const note = await this.knowledge.getNoteDetail(user, noteId);
-          return buildSuccessResponse(notePO2DTO(note));
-        },
-        createNote: async (user, req) => {
-          const note = await this.knowledge.upsertNote(user, req);
-          return buildSuccessResponse(notePO2DTO(note));
-        },
-        listNotes: async (user, param) => {
-          const notes = await this.knowledge.listNotes(user, param);
-          return buildSuccessResponse(notes.map((note) => notePO2DTO(note)));
-        },
-        getResourceDetail: async (user, req) => {
-          const resource = await this.knowledge.getResourceDetail(user, req);
-          return buildSuccessResponse(resourcePO2DTO(resource));
-        },
-        createResource: async (user, req) => {
-          const resource = await this.knowledge.createResource(user, req);
-          return buildSuccessResponse(resourcePO2DTO(resource));
-        },
-        updateResource: async (user, req) => {
-          const resource = await this.knowledge.updateResource(user, req);
-          return buildSuccessResponse(resourcePO2DTO(resource));
-        },
-        createCollection: async (user, req) => {
-          const coll = await this.knowledge.upsertCollection(user, req);
-          return buildSuccessResponse(collectionPO2DTO(coll));
-        },
-        updateCollection: async (user, req) => {
-          const coll = await this.knowledge.upsertCollection(user, req);
-          return buildSuccessResponse(collectionPO2DTO(coll));
-        },
-        createLabelClass: async (user, req) => {
-          const labelClass = await this.label.createLabelClass(user, req);
-          return buildSuccessResponse(labelClassPO2DTO(labelClass));
-        },
-        createLabelInstance: async (user, req) => {
-          const labels = await this.label.createLabelInstance(user, req);
-          return buildSuccessResponse(labels.map((label) => labelPO2DTO(label)));
-        },
-        search: async (user, req) => {
-          const result = await this.search.search(user, req);
-          return buildSuccessResponse(result);
-        },
-      },
-      { defaultModel: this.config.get('skill.defaultModel') },
-    );
+    this.skillEngine = new SkillEngine(this.logger, this.buildReflyService(), {
+      defaultModel: this.config.get('skill.defaultModel'),
+    });
     this.skillInventory = createSkillInventory(this.skillEngine);
   }
+
+  buildReflyService = (): ReflyService => {
+    return {
+      getNoteDetail: async (user, noteId) => {
+        const note = await this.knowledge.getNoteDetail(user, noteId);
+        return buildSuccessResponse(notePO2DTO(note));
+      },
+      createNote: async (user, req) => {
+        const note = await this.knowledge.upsertNote(user, req);
+        return buildSuccessResponse(notePO2DTO(note));
+      },
+      listNotes: async (user, param) => {
+        const notes = await this.knowledge.listNotes(user, param);
+        return buildSuccessResponse(notes.map((note) => notePO2DTO(note)));
+      },
+      getResourceDetail: async (user, req) => {
+        const resource = await this.knowledge.getResourceDetail(user, req);
+        return buildSuccessResponse(resourcePO2DTO(resource));
+      },
+      createResource: async (user, req) => {
+        const resource = await this.knowledge.createResource(user, req);
+        return buildSuccessResponse(resourcePO2DTO(resource));
+      },
+      updateResource: async (user, req) => {
+        const resource = await this.knowledge.updateResource(user, req);
+        return buildSuccessResponse(resourcePO2DTO(resource));
+      },
+      createCollection: async (user, req) => {
+        const coll = await this.knowledge.upsertCollection(user, req);
+        return buildSuccessResponse(collectionPO2DTO(coll));
+      },
+      updateCollection: async (user, req) => {
+        const coll = await this.knowledge.upsertCollection(user, req);
+        return buildSuccessResponse(collectionPO2DTO(coll));
+      },
+      createLabelClass: async (user, req) => {
+        const labelClass = await this.label.createLabelClass(user, req);
+        return buildSuccessResponse(labelClassPO2DTO(labelClass));
+      },
+      createLabelInstance: async (user, req) => {
+        const labels = await this.label.createLabelInstance(user, req);
+        return buildSuccessResponse(labels.map((label) => labelPO2DTO(label)));
+      },
+      search: async (user, req) => {
+        const result = await this.search.search(user, req);
+        return buildSuccessResponse(result);
+      },
+    };
+  };
 
   listSkillTemplates(user: User, param: ListSkillTemplatesData['query']): SkillTemplate[] {
     const { page, pageSize } = param;
@@ -332,13 +338,20 @@ export class SkillService {
     const usageResult = await this.subscription.checkTokenUsage(user);
 
     data.modelName ||= this.config.get('skill.defaultModel');
-    const modelTier = getModelTier(data.modelName);
+    const modelInfo = await this.prisma.modelInfo.findUnique({ where: { name: data.modelName } });
 
-    if (!usageResult[modelTier]) {
-      throw new BadRequestException(`model ${data.modelName} not available for current plan`);
+    if (!modelInfo) {
+      throw new BadRequestException(`model ${data.modelName} not supported`);
+    }
+
+    if (!usageResult[modelInfo.tier]) {
+      throw new BadRequestException(
+        `model ${data.modelName} (${modelInfo.tier}) not available for current plan`,
+      );
     }
 
     data.input ??= { query: '' };
+    data.context ??= {};
     data.context = await this.populateSkillContext(user, data.context);
 
     // If skill is specified, find the skill instance and add to job data
@@ -356,31 +369,37 @@ export class SkillService {
     }
 
     // Create or retrieve conversation
+    let conversation: ConversationModel | null = null;
     if (data.createConvParam) {
-      data.conversation = await this.conversation.upsertConversation(
+      conversation = await this.conversation.upsertConversation(
         user,
         data.createConvParam,
         data.convId,
       );
-      data.convId = data.conversation.convId;
+      data.convId = conversation.convId;
     } else if (data.convId) {
-      data.conversation = await this.prisma.conversation.findFirst({
+      conversation = await this.prisma.conversation.findFirst({
         where: { uid: user.uid, convId: data.convId },
       });
       if (!data.conversation) {
         throw new BadRequestException(`conversation not found: ${data.convId}`);
       }
     }
+    if (conversation) {
+      data.conversation = omit(conversation, ['pk']);
+    }
 
     // If job is specified, find the job and add to job data
+    let job: SkillJobModel | null = null;
     if (data.jobId) {
-      data.job = await this.prisma.skillJob.findFirst({ where: { jobId: data.jobId } });
+      job = await this.prisma.skillJob.findFirst({ where: { jobId: data.jobId } });
     }
-    if (!data.job) {
+    if (!job) {
       // If job is not specified or found, create a new job
-      data.job = await this.createSkillJob(user, data);
-      data.jobId = data.job.jobId;
+      job = await this.createSkillJob(user, data);
     }
+    data.job = omit(job, ['pk']);
+    data.jobId = data.job.jobId;
 
     return data;
   }
@@ -678,13 +697,17 @@ export class SkillService {
             break;
           case 'on_chat_model_end':
             if (runMeta && chunk) {
+              const modelInfo = await this.subscription.getModelInfo(String(runMeta.ls_model_name));
+              if (!modelInfo) {
+                this.logger.error(`model not found: ${String(runMeta.ls_model_name)}`);
+              }
               const tokenUsage: SyncTokenUsageJobData = {
                 ...basicUsageData,
                 spanId: runMeta.spanId,
                 usage: {
-                  tier: getModelTier(String(runMeta.ls_model_name)),
-                  modelProvider: String(runMeta.ls_provider),
-                  modelName: String(runMeta.ls_model_name),
+                  tier: modelInfo?.tier,
+                  modelProvider: modelInfo?.provider,
+                  modelName: modelInfo?.name,
                   inputTokens: chunk.usage_metadata?.input_tokens ?? 0,
                   outputTokens: chunk.usage_metadata?.output_tokens ?? 0,
                 },

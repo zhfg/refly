@@ -145,6 +145,8 @@ import type {
   GetSubscriptionPlanResponse,
   GetSubscriptionUsageError,
   GetSubscriptionUsageResponse2,
+  ListModelsError,
+  ListModelsResponse2,
   CreateCheckoutSessionData,
   CreateCheckoutSessionError,
   CreateCheckoutSessionResponse2,
@@ -699,6 +701,17 @@ export const getSubscriptionUsage = (options?: Options) => {
   return (options?.client ?? client).get<GetSubscriptionUsageResponse2, GetSubscriptionUsageError>({
     ...options,
     url: '/subscription/usage',
+  });
+};
+
+/**
+ * List models
+ * List all available models
+ */
+export const listModels = (options?: Options) => {
+  return (options?.client ?? client).get<ListModelsResponse2, ListModelsError>({
+    ...options,
+    url: '/subscription/modelList',
   });
 };
 

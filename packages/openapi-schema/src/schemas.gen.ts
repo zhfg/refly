@@ -2563,11 +2563,11 @@ export const $InvokeSkillRequest = {
     },
     locale: {
       type: 'string',
-      description: 'user selected output locale',
+      description: 'Selected output locale',
     },
     modelName: {
       type: 'string',
-      description: 'user selected output model',
+      description: 'Selected model',
     },
     createConvParam: {
       description: 'Create conversation parameters',
@@ -3239,6 +3239,49 @@ export const $UploadResponse = {
               type: 'string',
               description: 'File URL',
             },
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $ModelInfo = {
+  type: 'object',
+  required: ['name', 'label', 'provider', 'tier'],
+  properties: {
+    name: {
+      type: 'string',
+      description: 'Model name',
+    },
+    label: {
+      type: 'string',
+      description: 'Model label',
+    },
+    provider: {
+      type: 'string',
+      description: 'Model provider',
+    },
+    tier: {
+      type: 'string',
+      description: 'Model tier',
+    },
+  },
+} as const;
+
+export const $ListModelsResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Model list',
+          items: {
+            $ref: '#/components/schemas/ModelInfo',
           },
         },
       },

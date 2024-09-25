@@ -3,6 +3,7 @@ import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import {
   EntityType,
+  ModelInfo,
   ScrapeWeblinkRequest,
   ScrapeWeblinkResult,
   UploadResponse,
@@ -14,7 +15,7 @@ import { MINIO_EXTERNAL, MinioService } from '@/common/minio.service';
 import { randomUUID } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { scrapeWeblink } from '@refly/utils';
-import { QUEUE_SYNC_STORAGE_USAGE } from '@/utils';
+import { pick, QUEUE_SYNC_STORAGE_USAGE } from '@/utils';
 import { SyncStorageUsageJobData } from '@/subscription/subscription.dto';
 
 @Injectable()
@@ -223,5 +224,13 @@ export class MiscService {
   async getFileStream(objectKey: string): Promise<StreamableFile> {
     const data = await this.minio.client.getObject(`static/${objectKey}`);
     return new StreamableFile(data);
+  }
+
+  async listModels(): Promise<ModelInfo[]> {
+    const models = await this.prisma.modelInfo.findMany({
+      where: { enabled: true },
+    });
+
+    return models.map((model) => pick(model, ['name', 'label', 'provider', 'tier']));
   }
 }
