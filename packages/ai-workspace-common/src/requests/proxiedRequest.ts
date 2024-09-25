@@ -6,6 +6,7 @@ import { getAuthTokenFromCookie } from '@refly-packages/ai-workspace-common/util
 import { getServerOrigin } from '@refly/utils/url';
 import { sendToBackground } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { MessageName } from '@refly/common-types';
+import { safeStringifyJSON } from '@refly-packages/utils/parse';
 
 // 添加一个全局loading状态管理函数
 let loadingCount = 0;
@@ -46,7 +47,7 @@ const wrapFunctions = (module: any) => {
     const runtime = getRuntime() || '';
     if (runtime.includes('extension') && typeof origMethod === 'function') {
       wrappedModule[key] = async function (...args: unknown[]) {
-        console.log(`Calling function ${String(key)} with arguments: ${args}`);
+        console.log(`Calling function ${String(key)} with arguments: ${safeStringifyJSON(args)}`);
 
         try {
           const res = await sendToBackground({

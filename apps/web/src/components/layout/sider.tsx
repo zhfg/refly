@@ -193,12 +193,6 @@ export const SiderLayout = () => {
     setSelectedMenuItem: state.setSelectedMenuItem,
   }))
   const isGuideDetail = location.pathname.includes("guide/")
-  const { resourcePanelVisible } = useKnowledgeBaseStore()
-
-  console.log(
-    "useKnowledgeBaseStore state update from app web",
-    resourcePanelVisible,
-  )
 
   const { t } = useTranslation()
 
