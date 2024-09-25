@@ -5,7 +5,6 @@ import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui'
 import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
 import { memo, useEffect, useMemo, useCallback } from 'react';
 import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
-import { useProcessContextFilter } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module/context-manager/hooks/use-process-context-filter';
 
 export const SkillDisplay = memo(({ source }: { source: string }) => {
   const skillStore = useSkillStore((state) => ({
@@ -24,7 +23,6 @@ export const SkillDisplay = memo(({ source }: { source: string }) => {
   });
 
   const { handleGetSkillInstances, handleGetSkillTemplates } = useSkillManagement();
-  useProcessContextFilter(true);
 
   const isFromSkillJob = () => {
     return source === 'skillJob';

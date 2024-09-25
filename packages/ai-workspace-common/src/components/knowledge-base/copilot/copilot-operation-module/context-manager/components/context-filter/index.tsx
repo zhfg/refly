@@ -15,18 +15,33 @@ import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui'
 import { useTranslation } from 'react-i18next';
 import { useContextFilterConfigStore } from '@refly-packages/ai-workspace-common/stores/use-context-filter-config';
 import { useProcessContextItems } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module/context-manager/hooks/use-process-context-items';
-import { useProcessContextFilter } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module/context-manager/hooks/use-process-context-filter';
 import { PiNotepad, PiTextAlignRightBold } from 'react-icons/pi';
 import { HiOutlineBookOpen } from 'react-icons/hi2';
 import { LuFileText } from 'react-icons/lu';
 import { IconRefresh } from '@arco-design/web-react/icon';
+import { SkillInvocationRuleGroup } from '@refly/openapi-schema';
 
 import './index.scss';
 
 const iconStyle = { fontSize: 10, transform: 'translateY(1px)', marginRight: 6, color: 'rgb(0, 0, 0, 0.6)' };
 
+interface UseProcessContextFilterProps {
+  config: FilterConfig;
+  initialConfigRule: SkillInvocationRuleGroup;
+  contentListConfig: string[];
+  isMutiType: boolean;
+  isMutiContentListType: boolean;
+  isContentList: (type: string) => boolean;
+  isTypeDisabled: (type: string) => boolean;
+  getConfigLimit: (type: string, initialConfigRule: SkillInvocationRuleGroup) => number;
+  updateConfig: (type: string, value: string, isMutiType: boolean) => void;
+  filterApply: (config: FilterConfig, initialConfigRule: SkillInvocationRuleGroup) => Function;
+  resetConfig: () => void;
+}
+
 type ContextFilterPopoverContentProps = {
   handleVisibleChange?: (visible: boolean) => void;
+  processContextFilterProps: UseProcessContextFilterProps;
 };
 
 interface FilterConfig {
@@ -53,7 +68,10 @@ const NumberInputWithSlider = ({ min, max, value, onChange }) => {
   );
 };
 
-const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = ({ handleVisibleChange }) => {
+const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = ({
+  handleVisibleChange,
+  processContextFilterProps,
+}) => {
   const { t } = useTranslation();
 
   const {
@@ -68,7 +86,7 @@ const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = 
     updateConfig,
     filterApply,
     resetConfig,
-  } = useProcessContextFilter();
+  } = processContextFilterProps;
   const [filters, setFilters] = useState<string[]>([]);
   const { contextItemTypes } = useProcessContextItems();
 
@@ -236,13 +254,13 @@ type FilterCondition = {
   initialLimit: number;
 };
 
-export const ContextFilter: React.FC = () => {
+interface ContextFilterProps {
+  processContextFilterProps: UseProcessContextFilterProps;
+}
+
+export const ContextFilter: React.FC<ContextFilterProps> = ({ processContextFilterProps }) => {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
-
-  const useContextFilterConfig = useContextFilterConfigStore((state) => ({
-    setUseConfigOfStore: state.setUseConfigOfStore,
-  }));
 
   const handleVisibleChange = (visible: boolean) => {
     setVisible(visible);
@@ -253,7 +271,12 @@ export const ContextFilter: React.FC = () => {
       position="bottom"
       trigger="click"
       className="context-filter-popover"
-      content={<ContextFilterPopoverContent handleVisibleChange={handleVisibleChange} />}
+      content={
+        <ContextFilterPopoverContent
+          processContextFilterProps={processContextFilterProps}
+          handleVisibleChange={handleVisibleChange}
+        />
+      }
       popupVisible={visible}
       onVisibleChange={handleVisibleChange}
     >
@@ -263,9 +286,6 @@ export const ContextFilter: React.FC = () => {
           type="outline"
           style={{ fontSize: 10, height: 18, borderRadius: 4, borderColor: '#e5e5e5', color: 'rgba(0,0,0,0.6)' }}
           icon={<IconFilter />}
-          onClick={() => {
-            useContextFilterConfig.setUseConfigOfStore(true);
-          }}
         />
       </Tooltip>
     </Popover>

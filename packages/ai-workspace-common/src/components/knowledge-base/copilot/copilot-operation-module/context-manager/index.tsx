@@ -4,6 +4,8 @@ import { ContextPreview } from './context-preview';
 
 // hooks
 import { useProcessContextItems } from './hooks/use-process-context-items';
+import { useProcessContextFilter } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module/context-manager/hooks/use-process-context-filter';
+
 // components
 import { AddBaseMarkContext } from './components/add-base-mark-context';
 import './index.scss';
@@ -97,6 +99,8 @@ export const ContextManager = () => {
     [...backendBaseMarkTypes, ...frontendBaseMarkTypes].includes(item?.type as BaseMarkType),
   );
 
+  const processContextFilterProps = useProcessContextFilter(true);
+
   return (
     <div className="context-manager">
       <div className="context-content">
@@ -107,7 +111,7 @@ export const ContextManager = () => {
 
           <ResetContentSelectorBtn />
 
-          <ContextFilter />
+          <ContextFilter processContextFilterProps={processContextFilterProps} />
 
           {processedContextItems.map((item) => (
             <ContextItem

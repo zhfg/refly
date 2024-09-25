@@ -46,6 +46,28 @@ const defaultConfig: SkillInvocationRuleGroup = {
   relation: 'mutuallyExclusive',
 };
 
+const configForSchedule: SkillInvocationRuleGroup = {
+  rules: [
+    { key: 'resources', limit: 10 },
+    { key: 'notes', limit: 10 },
+    { key: 'collections', limit: 10 },
+    {
+      key: 'contentList',
+      limit: 1,
+      rules: [
+        { key: 'resourceSelection' as SelectedTextDomain, limit: 1 },
+        { key: 'noteSelection' as SelectedTextDomain, limit: 1 },
+        { key: 'extensionWeblinkSelection' as SelectedTextDomain, limit: 1 },
+        { key: 'noteCursorSelection' as SelectedTextDomain, limit: 1 },
+        { key: 'noteBeforeCursorSelection' as SelectedTextDomain, limit: 1 },
+        { key: 'noteAfterCursorSelection' as SelectedTextDomain, limit: 1 },
+      ],
+      relation: 'regular',
+    },
+  ],
+  relation: 'regular',
+};
+
 const contentListTypeList = [
   'resourceSelection',
   'noteSelection',
@@ -87,15 +109,6 @@ export const useProcessContextFilter = (filterNow = false) => {
       contentListTypes: [],
     };
 
-    if (useContextFilterConfig.useConfigOfStore) {
-      const config: FilterConfig = {
-        type: [...useContextFilterConfig.config.type],
-        contentListTypes: [...useContextFilterConfig.config.contentListTypes],
-      };
-      useContextFilterConfig.setUseConfigOfStore(false);
-      return config;
-    }
-
     if (!initialConfigRule?.rules?.length) {
       return config;
     }
@@ -107,6 +120,7 @@ export const useProcessContextFilter = (filterNow = false) => {
     if (initialConfigRule?.relation !== 'mutuallyExclusive') {
       (initialConfigRule.rules || []).forEach((rule) => {
         if (rule.key === 'contentList') {
+          config.type.push(rule.key);
           config.contentListTypes = getContentListTypes(rule);
         } else {
           config.type.push(rule.key);
@@ -123,9 +137,6 @@ export const useProcessContextFilter = (filterNow = false) => {
     config.type = config.type.filter(Boolean);
     config.contentListTypes = config.contentListTypes.filter(Boolean);
 
-    if (config.contentListTypes.length && !config.type.includes('contentList')) {
-      config.type.push('contentList');
-    }
     return config;
   };
 
@@ -166,11 +177,19 @@ export const useProcessContextFilter = (filterNow = false) => {
         const updatedField = prev[field].includes(value)
           ? prev[field].filter((item) => item !== value)
           : [...prev[field], value];
-        return { ...prev, [field]: updatedField };
+        const newConfig = { ...prev, [field]: updatedField };
+        if (!newConfig.type.includes('contentList')) {
+          newConfig.contentListTypes = [];
+        }
+        return newConfig;
       });
     } else {
       setConfig((prev) => {
-        return { ...prev, [field]: [value] };
+        const newConfig = { ...prev, [field]: [value] };
+        if (!newConfig.type.includes('contentList')) {
+          newConfig.contentListTypes = [];
+        }
+        return newConfig;
       });
     }
   };
@@ -226,6 +245,7 @@ export const useProcessContextFilter = (filterNow = false) => {
 
   // use debounce to limit the frequency of filterApply
   const debounceFilterApply = useDebouncedCallback(() => {
+    console.log('debounceFilterApply', config, initialConfigRule);
     filterApply(config, initialConfigRule);
   }, 300); // 300ms debounce
 
@@ -234,10 +254,17 @@ export const useProcessContextFilter = (filterNow = false) => {
   };
 
   useEffect(() => {
-    const config = skillStore.selectedSkill?.invocationConfig?.context?.rules?.length
-      ? skillStore.selectedSkill.invocationConfig.context
-      : defaultConfig;
+    const selectedSkill = skillStore.selectedSkill;
+    let config: SkillInvocationRuleGroup;
+    if (!selectedSkill?.skillId) {
+      config = configForSchedule;
+    } else {
+      config = selectedSkill?.invocationConfig?.context?.rules?.length
+        ? selectedSkill.invocationConfig.context
+        : defaultConfig;
+    }
 
+    console.log('useEffect config', config);
     setInitialConfigRule(config);
     const configType = getInitialConfig(config);
     setConfig(configType);
