@@ -1,28 +1,28 @@
-import { InputRule } from "@tiptap/core";
-import { Color } from "@tiptap/extension-color";
-import Highlight from "@tiptap/extension-highlight";
-import HorizontalRule from "@tiptap/extension-horizontal-rule";
-import TiptapImage from "@tiptap/extension-image";
-import TiptapLink from "@tiptap/extension-link";
-import Placeholder from "@tiptap/extension-placeholder";
-import { TaskItem } from "@tiptap/extension-task-item";
-import { TaskList } from "@tiptap/extension-task-list";
-import TextStyle from "@tiptap/extension-text-style";
-import TiptapUnderline from "@tiptap/extension-underline";
-import StarterKit from "@tiptap/starter-kit";
-import { Markdown } from "tiptap-markdown";
-import CustomKeymap from "./custom-keymap";
-import { ImageResizer } from "./image-resizer";
-import UpdatedImage from "./updated-image";
+import { InputRule } from '@tiptap/core';
+import { Color } from '@tiptap/extension-color';
+import Highlight from '@tiptap/extension-highlight';
+import HorizontalRule from '@tiptap/extension-horizontal-rule';
+import TiptapImage from '@tiptap/extension-image';
+import TiptapLink from '@tiptap/extension-link';
+import Placeholder from '@tiptap/extension-placeholder';
+import { TaskItem } from '@tiptap/extension-task-item';
+import { TaskList } from '@tiptap/extension-task-list';
+import TextStyle from '@tiptap/extension-text-style';
+import TiptapUnderline from '@tiptap/extension-underline';
+import StarterKit from '@tiptap/starter-kit';
+import { Markdown } from 'tiptap-markdown';
+import CustomKeymap from './custom-keymap';
+import { ImageResizer } from './image-resizer';
+import UpdatedImage from './updated-image';
 
-import CharacterCount from "@tiptap/extension-character-count";
-import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
-import Youtube from "@tiptap/extension-youtube";
-import GlobalDragHandle from "tiptap-extension-global-drag-handle";
+import CharacterCount from '@tiptap/extension-character-count';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import Youtube from '@tiptap/extension-youtube';
+import GlobalDragHandle from 'tiptap-extension-global-drag-handle';
 
 const PlaceholderExtension = Placeholder.configure({
   placeholder: ({ node }) => {
-    if (node.type.name === "heading") {
+    if (node.type.name === 'heading') {
       return `Heading ${node.attrs.level}`;
     }
     return "Press '/' for commands";
@@ -64,8 +64,9 @@ const Horizontal = HorizontalRule.extend({
   },
 });
 
-export * from "./ai-highlight";
-export * from "./slash-command";
+export * from './ai-highlight';
+export * from './slash-command';
+export * from './hljs';
 export {
   CodeBlockLowlight,
   Horizontal as HorizontalRule,
@@ -83,5 +84,3 @@ export {
   CharacterCount,
   GlobalDragHandle,
 };
-
-  

@@ -1,24 +1,57 @@
-import { useEffect } from "react"
+import { lazy, Suspense } from "react"
 import { Route, Routes, useMatch } from "react-router-dom"
-
-// 自定义组件
-import { ConvLibrary } from "@/pages/conv-library"
-import { Settings } from "@refly-packages/ai-workspace-common/components/settings/index"
-import { Login } from "@refly-packages/ai-workspace-common/components/login/index"
-
-// 页面
-import Workspace from "@/pages/workspace"
-import KnowledgeBase from "@/pages/knowledge-base"
-import Skill from "@/pages/skill"
-import SkillDetailPage from "@/pages/skill-detail"
-
-// 这里用于分享之后的不需要鉴权的查看
+import { Spin } from "@arco-design/web-react"
+import { useEffect } from "react"
 import { safeParseJSON } from "@refly-packages/ai-workspace-common/utils/parse"
 import { useUserStore } from "@refly-packages/ai-workspace-common/stores/user"
 import { useTranslation } from "react-i18next"
 import { useGetUserSettings } from "@refly-packages/ai-workspace-common/hooks/use-get-user-settings"
 import { LOCALE } from "@refly/common-types"
-import { Spin } from "@arco-design/web-react"
+
+// Lazy load components
+const ConvLibrary = lazy(() =>
+  import("@/pages/conv-library").then(module => ({
+    default: module.ConvLibrary,
+  })),
+)
+const Settings = lazy(() =>
+  import("@refly-packages/ai-workspace-common/components/settings/index").then(
+    module => ({ default: module.Settings }),
+  ),
+)
+const Login = lazy(() =>
+  import("@refly-packages/ai-workspace-common/components/login/index").then(
+    module => ({ default: module.Login }),
+  ),
+)
+const Workspace = lazy(() => import("@/pages/workspace"))
+const KnowledgeBase = lazy(() => import("@/pages/knowledge-base"))
+const Skill = lazy(() => import("@/pages/skill"))
+const SkillDetailPage = lazy(() => import("@/pages/skill-detail"))
+
+// Loading component
+const LoadingFallback = () => (
+  <div
+    style={{
+      height: "100vh",
+      width: "100%",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+    }}>
+    <Spin />
+  </div>
+)
+
+const prefetchRoutes = () => {
+  // Prefetch common routes
+  import("@refly-packages/ai-workspace-common/components/login/index")
+  import("@/pages/workspace")
+  import("@/pages/knowledge-base")
+  import("@/pages/conv-library")
+  import("@/pages/skill")
+  import("@/pages/skill-detail")
+}
 
 export const AppRouter = (props: { layout?: any }) => {
   const { layout: Layout } = props
@@ -42,6 +75,10 @@ export const AppRouter = (props: { layout?: any }) => {
     userStore?.localSettings?.uiLocale ||
     LOCALE.EN
 
+  useEffect(() => {
+    prefetchRoutes()
+  }, [])
+
   // 这里进行用户登录信息检查
   useGetUserSettings()
 
@@ -55,33 +92,22 @@ export const AppRouter = (props: { layout?: any }) => {
   const routeLogin = useMatch("/login")
 
   if (!notShowLoginBtn && !routeLogin) {
-    return (
-      <div
-        style={{
-          height: "100vh",
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}>
-        <Spin />
-      </div>
-    )
+    return <LoadingFallback />
   }
 
   return (
-    <Layout>
-      <Routes>
-        <Route path="/" element={<Workspace />} />
-        <Route path="/knowledge-base" element={<KnowledgeBase />} />
-        <Route path="/login" element={<Login />} />
-        {/* <Route path="/feed" element={<Feed />} /> */}
-        {/* <Route path="/feed/:feedId" element={<FeedDetailPage />} /> */}
-        <Route path="/thread" element={<ConvLibrary />} />
-        <Route path="/skill" element={<Skill />} />
-        <Route path="/skill-detail" element={<SkillDetailPage />} />
-        <Route path="/settings" element={<Settings />} />
-      </Routes>
-    </Layout>
+    <Suspense fallback={<LoadingFallback />}>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Workspace />} />
+          <Route path="/knowledge-base" element={<KnowledgeBase />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/thread" element={<ConvLibrary />} />
+          <Route path="/skill" element={<Skill />} />
+          <Route path="/skill-detail" element={<SkillDetailPage />} />
+          <Route path="/settings" element={<Settings />} />
+        </Routes>
+      </Layout>
+    </Suspense>
   )
 }
