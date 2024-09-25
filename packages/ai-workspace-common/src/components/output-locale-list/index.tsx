@@ -22,7 +22,8 @@ export const OutputLocaleList = (props: {
   const uiLocale = i18n?.languages?.[0] as LOCALE;
 
   const userStore = useUserStore();
-  const { outputLocale } = userStore?.localSettings || {};
+  let { outputLocale } = userStore?.localSettings || {};
+  outputLocale = outputLocale || LOCALE.EN;
 
   const changeLang = async (lng: OutputLocale) => {
     const { localSettings } = useUserStore.getState();
@@ -70,7 +71,7 @@ export const OutputLocaleList = (props: {
     >
       {props.children || (
         <Button icon={<IconTranslate />} type="text" className="assist-action-item" style={{ fontSize: 12 }}>
-          {/* <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span> */}
+          <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span>
           <IconCaretDown />
         </Button>
       )}

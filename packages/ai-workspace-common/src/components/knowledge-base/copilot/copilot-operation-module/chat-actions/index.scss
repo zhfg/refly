@@ -7,4 +7,27 @@
     display: flex;
     gap: 10px;
   }
+
+  .arco-dropdown-popup-visible {
+    border-radius: 8px;
+
+    .arco-icon-down {
+      transform: rotate(180deg);
+    }
+  }
+
+  .model-selector {
+    font-size: 10px;
+    color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 2px;
+    transition: all 0.3s;
+
+    &:hover {
+      color: rgba(0, 0, 0, 8);
+      cursor: pointer;
+    }
+  }
 }

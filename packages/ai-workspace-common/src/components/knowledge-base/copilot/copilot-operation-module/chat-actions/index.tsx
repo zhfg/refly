@@ -1,11 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { Button, Input, Dropdown, Menu, Notification } from '@arco-design/web-react';
-import './index.scss';
 
 import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
-// styles
-import './index.scss';
 import { useQuickSearchStateStore } from '@refly-packages/ai-workspace-common/stores/quick-search-state';
 import { IconClose, IconFile, IconFontColors, IconPause, IconSend, IconStop } from '@arco-design/web-react/icon';
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
@@ -19,6 +16,13 @@ import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hook
 import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
 import { useTranslation } from 'react-i18next';
 import { SkillTemplateConfig } from '@refly/openapi-schema';
+
+// components
+import { ModelSelector } from './model-selector';
+
+// styles
+import './index.scss';
+import { OutputLocaleList } from '@refly-packages/ai-workspace-common/components/output-locale-list';
 
 interface ChatActionsProps {
   tplConfig?: SkillTemplateConfig;
@@ -83,63 +87,55 @@ export const ChatActions = (props: ChatActionsProps) => {
   return (
     <div className="chat-actions">
       <div className="left-actions">
-        <Dropdown droplist={<Menu>{/* 添加模型选择选项 */}</Menu>}>
-          <Button className={'action-btn'} size="mini" type="text">
-            选择模型
-          </Button>
-        </Dropdown>
-        <Button className={'action-btn'} icon={<IconFile />} size="mini" type="text">
+        {/* <Button className={'action-btn'} icon={<IconFile />} size="mini" type="text">
           上传图片
-        </Button>
-        <Dropdown droplist={<Menu>{/* 添加语言选择选项 */}</Menu>}>
-          <Button className={'action-btn'} size="mini" type="text">
-            选择语言
+        </Button> */}
+        <ModelSelector />
+        <OutputLocaleList />
+      </div>
+      <div className="ai-copilot-chat-input-action">
+        {messageStateStore?.pending ? (
+          <Button
+            size="mini"
+            icon={<IconPause />}
+            className="search-btn"
+            style={{ color: '#FFF', background: '#000', height: '24px', marginRight: '8px' }}
+            onClick={() => {
+              handleAbort();
+            }}
+          ></Button>
+        ) : null}
+        <Dropdown
+          position="tr"
+          droplist={
+            <Menu>
+              <Menu.Item key="direct" onClick={() => handleSendMessage('direct')}>
+                直接聊天
+              </Menu.Item>
+              <Menu.Item key="noContext" onClick={() => handleSendMessage('noContext')}>
+                不带上下文聊天
+              </Menu.Item>
+              <Menu.Item key="wholeSpace" onClick={() => handleSendMessage('wholeSpace')}>
+                在整个空间聊天
+              </Menu.Item>
+            </Menu>
+          }
+        >
+          <Button
+            size="mini"
+            icon={<IconSend />}
+            loading={messageStateStore?.pending}
+            disabled={messageStateStore?.pending}
+            className="search-btn"
+            style={{ color: '#FFF', background: '#00968F' }}
+            onClick={() => {
+              handleSendMessage('direct');
+            }}
+          >
+            发送
           </Button>
         </Dropdown>
       </div>
-      <Dropdown
-        droplist={
-          <Menu>
-            <Menu.Item key="direct" onClick={() => handleSendMessage('direct')}>
-              直接聊天
-            </Menu.Item>
-            <Menu.Item key="noContext" onClick={() => handleSendMessage('noContext')}>
-              不带上下文聊天
-            </Menu.Item>
-            <Menu.Item key="wholeSpace" onClick={() => handleSendMessage('wholeSpace')}>
-              在整个空间聊天
-            </Menu.Item>
-          </Menu>
-        }
-      >
-        <div className="ai-copilot-chat-input-action">
-          {messageStateStore?.pending ? (
-            <Button
-              shape="circle"
-              icon={<IconPause />}
-              className="search-btn"
-              style={{ color: '#FFF', background: '#000' }}
-              onClick={() => {
-                handleAbort();
-              }}
-            ></Button>
-          ) : (
-            <Button
-              size="mini"
-              icon={<IconSend />}
-              loading={messageStateStore?.pending}
-              disabled={messageStateStore?.pending}
-              className="search-btn"
-              style={{ color: '#FFF', background: '#00968F' }}
-              onClick={() => {
-                handleSendMessage('direct');
-              }}
-            >
-              发送
-            </Button>
-          )}
-        </div>
-      </Dropdown>
     </div>
   );
 };
