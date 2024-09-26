@@ -1,7 +1,15 @@
 import classNames from 'classnames';
 import { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import type { Mark, MarkScope, SyncMarkEvent, SyncMarkEventType, SyncStatusEvent } from '@refly/common-types';
+import type {
+  Mark,
+  TextType,
+  MarkScope,
+  SyncMarkEvent,
+  SyncMarkEventType,
+  SyncStatusEvent,
+  MarkType,
+} from '@refly/common-types';
 import { safeStringifyJSON } from '@refly-packages/utils/parse';
 import { sendMessage, onMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { BackgroundMessage } from '@refly/common-types';
@@ -32,13 +40,15 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
   const messageListenerEventRef = useRef<any>();
   const selectorScopeRef = useRef<MarkScope>('block');
 
-  const buildMark = (type: ElementType, content: string, xPath: string) => {
+  const buildMark = (textType: TextType, content: string, xPath: string) => {
     const mark: Mark = {
-      type,
+      type: domain as MarkType,
+      textType,
       data: content,
       xPath,
       scope: selectorScopeRef.current,
       domain,
+      url: document?.location?.href || (document as any as Location)?.href || '',
     };
 
     return mark;
@@ -183,12 +193,12 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
     const confirmAddMark = () => {
       const xPath = genContentSelectorID();
       const content = getSelectionNodesMarkdown();
-      const selectionNodes = highlightSelection(xPath);
+      // const selectionNodes = highlightSelection(xPath);
 
-      const type = 'text' as ElementType;
-      const mark = buildMark(type, content, xPath);
-      addMark({ ...mark, cleanup }, selectionNodes);
-      // addMark({ ...mark, cleanup }, []);
+      const textType = 'text' as ElementType;
+      const mark = buildMark(textType, content, xPath);
+      // addMark({ ...mark, cleanup }, selectionNodes);
+      addMark({ ...mark, cleanup }, []);
 
       const markEvent = { type: 'add' as SyncMarkEventType, mark };
       const msg: Partial<SyncMarkEvent> = {
@@ -197,9 +207,9 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
       syncMarkEvent(msg);
 
       // Temp remove selected marks
-      selectionNodes.forEach((node) => {
-        addHoverMenuToNode(node, xPath);
-      });
+      // selectionNodes.forEach((node) => {
+      //   addHoverMenuToNode(node, xPath);
+      // });
 
       cleanup();
     };
@@ -294,6 +304,7 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
           xPath: mark?.xPath,
           scope: selectorScopeRef.current,
           domain: mark?.domain,
+          url: mark?.url,
         },
       },
     };

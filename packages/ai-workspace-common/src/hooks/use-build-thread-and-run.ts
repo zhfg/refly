@@ -88,7 +88,7 @@ export const useBuildThreadAndRun = () => {
     invokeParams?: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig },
   ) => {
     // support ask follow up question
-    const { messages = [] } = useChatStore.getState();
+    const { messages = [], selectedModel } = useChatStore.getState();
     const { selectedSkill } = useSkillStore.getState();
 
     const question = comingQuestion;
@@ -104,16 +104,17 @@ export const useBuildThreadAndRun = () => {
       input: {
         query: question,
       },
+      modelName: selectedModel?.name,
       context: skillContext,
       convId: conv?.convId || '',
       tplConfig: invokeParams?.tplConfig,
-      ...(isFollowUpAsk ? {} : { createConvParam: { ...conv, title: question } }),
+      ...{ createConvParam: { ...conv, title: question } },
     };
     taskStore.setTask(task);
     // 开始提问
     buildTaskAndGenReponse(task as InvokeSkillRequest);
     chatStore.setNewQAText('');
-    skillStore.setSelectedSkillInstance(null);
+    // skillStore.setSelectedSkillInstance(null);
     // knowledgeBaseStore.updateCurrentSelectedMark(null);
   };
 

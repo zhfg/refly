@@ -28,9 +28,6 @@ export class CreateFormalEmailSkill extends BaseSkill {
   };
 
   invocationConfig: SkillInvocationConfig = {
-    input: {
-      rules: [{ key: 'query' }],
-    },
     context: {
       rules: [{ key: 'contentList' }],
     },

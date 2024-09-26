@@ -16,7 +16,7 @@ export type MessageState = {
 /**
  * 前端系统配置，可能是获取的在线配置
  */
-export const enum SystemMessageType {
+export enum SystemMessageType {
   RECOMMEND_QUESTION = 'recommendQuestion', // 比如提示的三个问题 1. 用简单的语言解释复杂的概念、集思广益前所未有的想法、立即获得朗朗上口的标题 等
   RECOMMEND_OPERATION = 'recommendOperation', // 推荐的操作，比如推荐好友、去 Chrome 商店给五星好评、发推特
 }
@@ -25,7 +25,7 @@ export const enum SystemMessageType {
  *  聊天消息相关
  */
 
-export const enum MessageItemType {
+export enum MessageItemType {
   REPLY = 'reply',
   INTENT = 'intent',
   QUESTION = 'question',
@@ -34,18 +34,18 @@ export const enum MessageItemType {
   ERROR = 'error',
 }
 
-export const enum MessageDataType {
+export enum MessageDataType {
   SELECTION = 'selection',
   TEXT = 'text',
 }
 
-export const enum ReplyType {
+export enum ReplyType {
   WELCOME = 'welcome', // 初始新会话的欢迎回复
   QUESTION = 'question', // 对某个问题的回复
   INTENT = 'intent', // 对某段选中意图的文本进行回复
 }
 
-export const enum QuestionType {
+export enum QuestionType {
   INTENT = 'intent', // 基于某段选中意图进行提问
   NORMAL = 'normal', // 正常提问
 }

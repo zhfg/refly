@@ -1,7 +1,7 @@
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { List, Message as message, Empty } from '@arco-design/web-react';
 import { FaRegCopy } from 'react-icons/fa6';
-import { HiOutlineBookOpen } from 'react-icons/hi2';
+import { IconFolder } from '@arco-design/web-react/icon';
 // types
 import { IconTip } from '@refly-packages/ai-workspace-common/components/dashboard/icon-tip';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
@@ -98,7 +98,7 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
             <KnowledgeBaseCard
               index={key}
               cardData={item}
-              cardIcon={<HiOutlineBookOpen style={{ fontSize: '32px' }} />}
+              cardIcon={<IconFolder style={{ fontSize: '32px', strokeWidth: 3 }} />}
               onClick={() => {
                 jumpToKnowledgeBase({ kbId: item?.collectionId });
               }}

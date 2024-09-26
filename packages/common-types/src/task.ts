@@ -8,13 +8,13 @@ export interface Mode {
   prompt: string;
 }
 
-export const enum TASK_STATUS {
+export enum TASK_STATUS {
   // 前端 task
   START = 'start',
   SHUTDOWN = 'shutdown',
 }
 
-export const enum TASK_TYPE {
+export enum TASK_TYPE {
   // 和服务端调通的 task
   CHAT = 'chat',
   GEN_TITLE = 'genTitle',
@@ -24,11 +24,11 @@ export const enum TASK_TYPE {
   SEARCH_ENHANCE_ASK = 'searchEnhanceAsk',
 }
 
-export const enum LANGUAGE {
+export enum LANGUAGE {
   AUTO = 'auto',
 }
 
-export const enum QUICK_ACTION_TYPE {
+export enum QUICK_ACTION_TYPE {
   SELECTION = 'selection',
   SUMMARY = 'summary', // 用作总结内容
 }

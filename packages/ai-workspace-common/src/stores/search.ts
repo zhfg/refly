@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
 import { Collection, Conversation, Resource, SearchResult, SkillMeta } from '@refly/openapi-schema';
+import { Mark } from '@refly/common-types';
 
 type SearchPage = 'notes' | 'readResources' | 'knowledgeBases' | 'convs' | 'skills';
 
@@ -15,6 +16,9 @@ export interface SearchState {
   knowledgeBases: Collection[];
   convs: Conversation[];
   skills: SkillMeta[];
+
+  // no category  big search res
+  noCategoryBigSearchRes: Mark[];
 
   // 大搜菜单页
   pages: string[];
@@ -46,6 +50,7 @@ export interface SearchState {
     convs: SearchResult[];
     skills: SearchResult[];
   }) => void;
+  setNoCategoryBigSearchRes: (noCategoryBigSearchRes: Mark[]) => void;
   setPages: (pages: string[]) => void;
   resetState: () => void;
 }
@@ -58,6 +63,9 @@ export const defaultState = {
   knowledgeBases: [],
   convs: [],
   skills: [],
+
+  noCategoryBigSearchRes: [],
+
   searchedNotes: [],
   searchedReadResources: [],
   searchedKnowledgeBases: [],
@@ -84,6 +92,8 @@ export const useSearchStore = create<SearchState>()(
         searchedKnowledgeBases: data?.knowledgeBases,
         searchedSkills: data?.skills,
       })),
+    setNoCategoryBigSearchRes: (noCategoryBigSearchRes: Mark[]) =>
+      set((state) => ({ ...state, noCategoryBigSearchRes })),
     setPages: (pages: SearchPage[]) => set((state) => ({ ...state, pages })),
     resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),

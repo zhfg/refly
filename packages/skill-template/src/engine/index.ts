@@ -1,3 +1,4 @@
+import { SkillRunnableConfig } from '../base';
 import { ChatOpenAI, OpenAIChatInput } from '@langchain/openai';
 import {
   CreateCollectionResponse,
@@ -64,6 +65,8 @@ export interface Logger {
 }
 
 export class SkillEngine {
+  private config: SkillRunnableConfig;
+
   constructor(public logger: Logger, public service: ReflyService, private options?: SkillEngineOptions) {
     this.options = {
       defaultModel: 'openai/gpt-4o-mini',
@@ -71,9 +74,13 @@ export class SkillEngine {
     };
   }
 
+  configure(config: SkillRunnableConfig) {
+    this.config = config;
+  }
+
   chatModel(params?: Partial<OpenAIChatInput>): ChatOpenAI {
     return new ChatOpenAI({
-      model: 'gpt-4o-mini',
+      model: this.config?.configurable?.modelName || this.options.defaultModel,
       apiKey: process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY,
       configuration: { baseURL: process.env.OPENROUTER_API_KEY && 'https://openrouter.ai/api/v1' },
       ...params,

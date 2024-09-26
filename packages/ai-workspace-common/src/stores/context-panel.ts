@@ -17,48 +17,48 @@ export interface LinkMeta {
 
 export const selectedTextCardDomainWeb = [
   {
-    key: 'resource',
+    key: 'resourceSelection',
     labelDict: {
       en: 'Resource',
-      'zh-CN': '资源',
+      'zh-CN': '资源选中',
     },
   },
   {
-    key: 'note',
+    key: 'noteSelection',
     labelDict: {
       en: 'Note',
-      'zh-CN': '笔记',
+      'zh-CN': '笔记选中',
     },
   },
   {
     key: 'noteCursorSelection',
     labelDict: {
       en: 'Note Cursor Selection',
-      'zh-CN': '选中文本',
+      'zh-CN': '笔记光标选中文本',
     },
   },
   {
     key: 'noteBeforeCursorSelection',
     labelDict: {
       en: 'Note Before Cursor Selection',
-      'zh-CN': '选中文本前',
+      'zh-CN': '笔记光标选中前文本',
     },
   },
   {
     key: 'noteAfterCursorSelection',
     labelDict: {
       en: 'Note After Cursor Selection',
-      'zh-CN': '选中文本后',
+      'zh-CN': '笔记光标选中后文本',
     },
   },
 ];
 
 export const selectedTextCardDomainExtension = [
   {
-    key: 'extensionWeblink',
+    key: 'extensionWeblinkSelection',
     labelDict: {
       en: 'Web Link',
-      'zh-CN': '网页链接',
+      'zh-CN': '网页链选中',
     },
   },
 ];
@@ -97,7 +97,9 @@ interface ContextPanelState {
   currentSelectedMark: Mark;
   selectedDomain: SelectedTextDomain;
   enableMultiSelect: boolean; // 支持多选
-  currentSelectedMarks: Mark[]; // 多选内容
+  currentSelectedMarks: Mark[]; // 作为唯一的 context items 来源
+  filterIdsOfCurrentSelectedMarks: string[]; // 作为 context items 的过滤
+  filterErrorInfo: { [key: string]: { limit: number; currentCount: number } }; // 作为 context items 的过滤错误信息
 
   // context card
   showContextCard: boolean;
@@ -124,8 +126,10 @@ interface ContextPanelState {
   updateSelectedDomain: (domain: SelectedTextDomain) => void;
   updateEnableMultiSelect: (enableMultiSelect: boolean) => void;
   updateCurrentSelectedMarks: (marks: Mark[]) => void;
+  updateFilterIdsOfCurrentSelectedMarks: (ids: string[]) => void;
   resetSelectedTextCardState: () => void;
   setSelectedTextCardDomain: (domain: SelectedTextDomain[]) => void;
+  updateFilterErrorInfo: (errorInfo: { [key: string]: { limit: number; currentCount: number } }) => void;
 
   // context card
   setShowContextCard: (showcontextCard: boolean) => void;
@@ -138,6 +142,12 @@ interface ContextPanelState {
   updateCurrentSelectionContent: (content: string) => void;
 
   resetState: () => void;
+
+  // 新增的操作方法
+  addMark: (mark: Mark) => void;
+  removeMark: (id: string) => void;
+  toggleMarkActive: (id: string) => void;
+  clearMarks: () => void;
 }
 
 export const defaultSelectedTextCardState = {
@@ -145,6 +155,8 @@ export const defaultSelectedTextCardState = {
   selectedDomain: 'resource' as SelectedTextDomain,
   enableMultiSelect: true, // default enable multi select, later to see if we need to enable multiSelect ability
   currentSelectedMarks: [] as Mark[],
+  filterIdsOfCurrentSelectedMarks: [] as string[],
+  filterErrorInfo: {} as { [key: string]: { limit: number; currentCount: number } },
 };
 
 export const defaultCurrentContext = {
@@ -208,6 +220,24 @@ export const useContextPanelStore = create<ContextPanelState>()(
     updateSelectedDomain: (selectedDomain: SelectedTextDomain) => set((state) => ({ ...state, selectedDomain })),
     updateEnableMultiSelect: (enableMultiSelect: boolean) => set((state) => ({ ...state, enableMultiSelect })),
     updateCurrentSelectedMarks: (marks: Mark[]) => set((state) => ({ ...state, currentSelectedMarks: marks })),
+    updateFilterIdsOfCurrentSelectedMarks: (ids: string[]) =>
+      set((state) => ({ ...state, filterIdsOfCurrentSelectedMarks: ids })),
+    updateFilterErrorInfo: (errorInfo: { [key: string]: { limit: number; currentCount: number } }) =>
+      set((state) => ({ ...state, filterErrorInfo: errorInfo })),
+
+    addMark: (mark: Mark) =>
+      set((state) => ({ ...state, currentSelectedMarks: [...state.currentSelectedMarks, mark] })),
+    removeMark: (id: string) =>
+      set((state) => ({ ...state, currentSelectedMarks: state.currentSelectedMarks.filter((mark) => mark.id !== id) })),
+    toggleMarkActive: (id: string) =>
+      set((state) => ({
+        ...state,
+        currentSelectedMarks: state.currentSelectedMarks.map((mark) => ({
+          ...mark,
+          active: mark.id === id ? !mark.active : false,
+        })),
+      })),
+    clearMarks: () => set((state) => ({ ...state, currentSelectedMarks: [] })),
 
     resetSelectedTextCardState: () => set((state) => ({ ...state, ...defaultSelectedTextCardState })),
 

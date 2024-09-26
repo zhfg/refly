@@ -18,9 +18,9 @@ import {
   CollabGenAIBlockMenu,
 } from '@refly-packages/editor-component/advanced-editor';
 import { EditorRoot } from '@refly-packages/editor-core/components';
-import { EditorContent, type JSONContent, EditorInstance } from '@refly-packages/editor-core/components';
+import { EditorContent, EditorInstance } from '@refly-packages/editor-core/components';
 import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
-import { ImageResizer, handleCommandNavigation } from '@refly-packages/editor-core/extensions';
+import { configureHighlightJs, ImageResizer, handleCommandNavigation } from '@refly-packages/editor-core/extensions';
 import { defaultExtensions } from '@refly-packages/editor-component/extensions';
 import { createUploadFn } from '@refly-packages/editor-component/image-upload';
 import { configureSlashCommand } from '@refly-packages/editor-component/slash-command';
@@ -33,7 +33,6 @@ import { getHierarchicalIndexes, TableOfContents } from '@tiptap-pro/extension-t
 // 编辑器样式
 // 图标
 import { AiOutlineWarning, AiOutlineFileWord } from 'react-icons/ai';
-import hljs from 'highlight.js';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 import { getWsServerOrigin } from '@refly-packages/utils/url';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
@@ -52,6 +51,7 @@ import { ToC } from './ToC';
 import { IconBook } from '@arco-design/web-react/icon';
 
 const MemorizedToC = memo(ToC);
+
 const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) => {
   const { readOnly } = note;
   const lastCursorPosRef = useRef<number>();
@@ -80,7 +80,7 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
   // initial block selection
   const { initMessageListener, initContentSelectorElem } = useContentSelector(
     'ai-note-editor-content-container',
-    'note',
+    'noteSelection',
   );
 
   const websocketProvider = useMemo(() => {
@@ -119,7 +119,8 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
   ];
 
   // Apply Codeblock Highlighting on the HTML from editor.getHTML()
-  const highlightCodeblocks = (content: string) => {
+  const highlightCodeblocks = async (content: string) => {
+    const hljs = await configureHighlightJs();
     const doc = new DOMParser().parseFromString(content, 'text/html');
     doc.querySelectorAll('pre code').forEach((el) => {
       // @ts-ignore
@@ -133,7 +134,7 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
     const json = editor.getJSON();
     const markdown = editor.storage.markdown.getMarkdown();
     noteStore.updateNoteCharsCount(wordsCount(markdown));
-    window.localStorage.setItem('html-content', highlightCodeblocks(editor.getHTML()));
+    window.localStorage.setItem('html-content', await highlightCodeblocks(editor.getHTML()));
     window.localStorage.setItem('novel-content', JSON.stringify(json));
     window.localStorage.setItem('markdown', editor.storage.markdown.getMarkdown());
     noteStore.updateNoteSaveStatus('Saved');

@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import '@refly-packages/ai-workspace-common/modules/content-selector/styles/content-selector.scss';
 
 export const App = () => {
-  const { initContentSelectorElem, initMessageListener } = useContentSelector(null, 'extensionWeblink');
+  const { initContentSelectorElem, initMessageListener } = useContentSelector(null, 'extensionWeblinkSelection');
 
   useEffect(() => {
     initMessageListener();

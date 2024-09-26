@@ -43,14 +43,7 @@ export class Scheduler extends BaseSkill {
     items: [],
   };
 
-  invocationConfig: SkillInvocationConfig = {
-    input: {
-      rules: [{ key: 'query' }],
-    },
-    context: {
-      rules: [],
-    },
-  };
+  invocationConfig: SkillInvocationConfig = {};
 
   description = "Inference user's intent and run related skill";
 
@@ -243,23 +236,34 @@ Please generate the summary based on these requirements and offer suggestions fo
     };
 
     this.emitEvent({ event: 'start' }, skillConfig);
-    const output = await skillTemplate.invoke(call.args, skillConfig);
-    this.emitEvent({ event: 'end' }, skillConfig);
-
-    const realOutput: { messages: BaseMessage[] } = typeof output === 'string' ? safeParseJSON(output) : output;
-    const realToolOutputMsg = await this.getToolMsg(
-      {
-        tplName: currentSkill.tplName,
-        skillId: call?.id,
-        displayName: currentSkill.displayName,
-        icon: currentSkill.icon,
-      },
-      contextualUserQuery || query,
-      realOutput,
-    );
 
     // Dequeue the first skill call from the state
-    return { messages: [realToolOutputMsg], skillCalls: state.skillCalls.slice(1) };
+    let result: Partial<GraphState> = {
+      skillCalls: state.skillCalls.slice(1),
+    };
+
+    try {
+      const output = await skillTemplate.invoke(call.args, skillConfig);
+      const realOutput: { messages: BaseMessage[] } = typeof output === 'string' ? safeParseJSON(output) : output;
+      const realToolOutputMsg = await this.getToolMsg(
+        {
+          tplName: currentSkill.tplName,
+          skillId: call?.id,
+          displayName: currentSkill.displayName,
+          icon: currentSkill.icon,
+        },
+        contextualUserQuery || query,
+        realOutput,
+      );
+
+      result = { messages: [realToolOutputMsg] };
+    } catch (error) {
+      this.engine.logger.error(`Error calling skill ${currentSkill.tplName}: ${error.stack}`);
+    } finally {
+      this.emitEvent({ event: 'end' }, skillConfig);
+    }
+
+    return result;
   };
 
   callScheduler = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
@@ -456,6 +460,16 @@ Please generate the summary based on these requirements and offer suggestions fo
     const { messages = [] } = state;
     const { locale = 'en', selectedSkill } = config.configurable || {};
 
+    const skillConfig = selectedSkill
+      ? {
+          ...config,
+          configurable: {
+            ...config.configurable,
+            currentSkill: selectedSkill,
+          },
+        }
+      : this.configSnapshot;
+
     const getSystemPrompt = (locale: string) => `## Role
 You are an SEO (Search Engine Optimization) expert, skilled at identifying key information from the provided context and proposing three semantically relevant recommended questions based on this information to help users gain a deeper understanding of the content.
 
@@ -507,33 +521,30 @@ Generated question example:
             `to assist users in gaining a better understanding of the content.`,
         ),
     );
-    const askFollowUpQuestion = await runnable.invoke([
-      new SystemMessage(getSystemPrompt(locale)),
-      ...messages,
-      new HumanMessage(`Please output answer in ${locale} language:`),
-    ]);
 
-    const followUps = askFollowUpQuestion?.recommend_ask_followup_question || [];
+    try {
+      const askFollowUpQuestion = await runnable.invoke([
+        new SystemMessage(getSystemPrompt(locale)),
+        ...messages,
+        new HumanMessage(`Please output answer in ${locale} language:`),
+      ]);
 
-    const skillConfig = selectedSkill
-      ? {
-          ...config,
-          configurable: {
-            ...config.configurable,
-            currentSkill: selectedSkill,
-          },
-        }
-      : this.configSnapshot;
+      const followUps = askFollowUpQuestion?.recommend_ask_followup_question || [];
 
-    this.emitEvent(
-      {
-        event: 'structured_data',
-        content: JSON.stringify(followUps),
-        structuredDataKey: 'relatedQuestions',
-      },
-      skillConfig,
-    );
-    this.emitEvent({ event: 'end' }, skillConfig);
+      this.emitEvent(
+        {
+          event: 'structured_data',
+          content: JSON.stringify(followUps),
+          structuredDataKey: 'relatedQuestions',
+        },
+        skillConfig,
+      );
+    } catch (error) {
+      // Models can sometimes fail to return structured data, so we just log it and do nothing
+      this.engine.logger.error(`Error generating related questions: ${error.stack}`);
+    } finally {
+      this.emitEvent({ event: 'end' }, skillConfig);
+    }
 
     return {};
   };

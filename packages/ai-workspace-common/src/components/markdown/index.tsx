@@ -1,17 +1,12 @@
 import { IconLoading } from '@arco-design/web-react/icon';
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState, lazy, Suspense } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Message as message } from '@arco-design/web-react';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
 
-import 'katex/dist/katex.min.css';
-
 import copyToClipboard from 'copy-to-clipboard';
-import RehypeHighlight from 'rehype-highlight';
-import RehypeKatex from 'rehype-katex';
 import RemarkBreaks from 'remark-breaks';
 import RemarkGfm from 'remark-gfm';
-import RemarkMath from 'remark-math';
 
 import { markdownCitationParse } from '@refly/utils';
 
@@ -101,16 +96,33 @@ export const Markdown = memo(
     } & React.DOMAttributes<HTMLDivElement>,
   ) => {
     const mdRef = useRef<HTMLDivElement>(null);
+    const { t } = useTranslation();
+    const [isKatexLoaded, setIsKatexLoaded] = useState(false);
 
-    const md = mdRef.current;
-    const rendered = useRef(true); // disable lazy loading for bad ux
-    const [counter, setCounter] = useState(0);
+    // Add state for dynamically loaded plugins
+    const [plugins, setPlugins] = useState({
+      RemarkMath: null,
+      RehypeKatex: null,
+      RehypeHighlight: null,
+    });
 
+    // Dynamically import KaTeX CSS
     useEffect(() => {
-      // to triggr rerender
-      setCounter(counter + 1);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [props.loading]);
+      import('katex/dist/katex.min.css').then(() => setIsKatexLoaded(true));
+    }, []);
+
+    // Dynamically import heavy plugins
+    useEffect(() => {
+      Promise.all([import('remark-math'), import('rehype-katex'), import('rehype-highlight')]).then(
+        ([RemarkMath, RehypeKatex, RehypeHighlight]) => {
+          setPlugins({
+            RemarkMath: RemarkMath.default,
+            RehypeKatex: RehypeKatex.default,
+            RehypeHighlight: RehypeHighlight.default,
+          });
+        },
+      );
+    }, []);
 
     const shouldLoading = props.loading;
     const parsedContent = markdownCitationParse(props?.content || '');
@@ -120,26 +132,30 @@ export const Markdown = memo(
         {shouldLoading ? (
           <IconLoading />
         ) : (
-          <ReactMarkdown
-            remarkPlugins={[RemarkMath, RemarkGfm, RemarkBreaks]}
-            rehypePlugins={[
-              RehypeKatex,
-              [
-                RehypeHighlight,
-                {
-                  detect: false,
-                  ignoreMissing: true,
-                },
-              ],
-            ]}
-            components={{
-              pre: PreCode,
-              a: (args) => ATag(args, props?.sources || []),
-            }}
-            linkTarget={'_blank'}
-          >
-            {parsedContent}
-          </ReactMarkdown>
+          <Suspense fallback={<div>{t('components.markdown.loading')}</div>}>
+            {isKatexLoaded && plugins.RemarkMath && plugins.RehypeKatex && plugins.RehypeHighlight && (
+              <ReactMarkdown
+                remarkPlugins={[RemarkGfm, RemarkBreaks, plugins.RemarkMath]}
+                rehypePlugins={[
+                  plugins.RehypeKatex,
+                  [
+                    plugins.RehypeHighlight,
+                    {
+                      detect: false,
+                      ignoreMissing: true,
+                    },
+                  ],
+                ]}
+                components={{
+                  pre: PreCode,
+                  a: (args) => ATag(args, props?.sources || []),
+                }}
+                linkTarget={'_blank'}
+              >
+                {parsedContent}
+              </ReactMarkdown>
+            )}
+          </Suspense>
         )}
       </div>
     );
