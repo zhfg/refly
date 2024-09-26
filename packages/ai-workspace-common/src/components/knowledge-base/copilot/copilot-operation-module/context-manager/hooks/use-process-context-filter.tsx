@@ -208,7 +208,7 @@ export const useProcessContextFilter = (filterNow = false) => {
       const required = getConfigRequired(type, initialConfigRule);
       const currentCount = contextItemIdsByType[type]?.length || 0;
       if (currentCount > limit || (required && !currentCount)) {
-        filterErrorInfo[type] = {
+        filterErrorInfo[typeMap[type] || type] = {
           required: required,
           limit: limit,
           currentCount: currentCount,
