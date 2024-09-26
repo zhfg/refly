@@ -107,7 +107,7 @@ export const useProcessContextItems = () => {
     const result: Record<string, string[]> = {};
     processedContextItems.forEach((item) => {
       let type = item.type;
-      if (['resource', 'note', 'collection'].includes(item.type)) {
+      if (['resource', 'note', 'collection', 'url'].includes(item.type)) {
         type = type + 's';
       }
       if (!result[type]) {

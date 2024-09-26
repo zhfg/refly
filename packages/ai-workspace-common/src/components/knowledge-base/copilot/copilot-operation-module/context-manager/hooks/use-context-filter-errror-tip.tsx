@@ -14,11 +14,15 @@ export const useContextFilterErrorTip = () => {
         <div>
           {Object.keys(filterErrorInfo).map((key) => (
             <div key={key}>
-              {t('knowledgeBase.context.contextLimitTip', {
-                limit: filterErrorInfo[key].limit,
-                currentCount: filterErrorInfo[key].currentCount,
-                type: t(`knowledgeBase.context.${key}`),
-              })}
+              {filterErrorInfo[key].required
+                ? t('knowledgeBase.context.contextRequiredTip', {
+                    type: t(`knowledgeBase.context.${key}`),
+                  })
+                : t('knowledgeBase.context.contextLimitTip', {
+                    limit: filterErrorInfo[key].limit,
+                    currentCount: filterErrorInfo[key].currentCount,
+                    type: t(`knowledgeBase.context.${key}`),
+                  })}
             </div>
           ))}
         </div>

@@ -223,6 +223,7 @@
       "noteBeforeCursorSelection": "Note Before Cursor Selection",
       "noteAfterCursorSelection": "Note After Cursor Selection",
       "contextLimitTipTitle": "Please adjust the context and try again",
+      "contextRequiredTip": "Please select at least 1 {{type}}",
       "contextLimitTip": "{{type}} is limit to {{limit}} , and you have selected {{currentCount}}.",
       "popoverSelector": {
         "webPlaceholder": "Search notes, resources, or knowledge bases...",
