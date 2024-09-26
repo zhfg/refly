@@ -32,12 +32,7 @@ export class MakeLongerSkill extends BaseSkill {
         {
           key: 'contentList',
           limit: 1,
-          inputMode: 'multiSelect',
-          defaultValue: ['noteBeforeCursorSelection', 'noteCursorSelection', 'noteAfterCursorSelection'],
-          descriptionDict: {
-            en: 'The context of the article',
-            'zh-CN': '参考资料',
-          },
+          preferredSelectionKeys: ['noteBeforeCursorSelection', 'noteCursorSelection', 'noteAfterCursorSelection'],
         },
       ],
     },

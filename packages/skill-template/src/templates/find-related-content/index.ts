@@ -70,14 +70,11 @@ export class FindRelatedContent extends BaseSkill {
   };
 
   invocationConfig: SkillInvocationConfig = {
-    input: {
-      rules: [{ key: 'query', required: true }],
-    },
     context: {
       rules: [
         { key: 'resources', limit: 1 },
         { key: 'notes', limit: 1 },
-        { key: 'contentList', limit: 1, inputMode: 'select' },
+        { key: 'contentList', limit: 1 },
       ],
       relation: 'mutuallyExclusive',
     },

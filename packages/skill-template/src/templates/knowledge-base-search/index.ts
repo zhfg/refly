@@ -36,20 +36,8 @@ export class KnowledgeBaseSearch extends BaseSkill {
   };
 
   invocationConfig: SkillInvocationConfig = {
-    input: {
-      rules: [{ key: 'query', required: true }],
-    },
     context: {
-      rules: [
-        {
-          key: 'resources',
-          inputMode: 'multiSelect',
-          descriptionDict: {
-            en: 'Select the resources to search',
-            'zh-CN': '选择要搜索的资源',
-          },
-        },
-      ],
+      rules: [{ key: 'resources' }],
     },
   };
 

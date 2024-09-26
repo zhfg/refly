@@ -50,9 +50,6 @@ export class WebsiteSummarySkill extends BaseSkill {
     items: [],
   };
   invocationConfig: SkillInvocationConfig = {
-    input: {
-      rules: [{ key: 'query' }],
-    },
     context: {
       rules: [{ key: 'contentList' }],
     },

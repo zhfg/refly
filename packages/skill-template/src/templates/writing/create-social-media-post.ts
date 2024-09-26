@@ -157,12 +157,7 @@ export class CreateSocialMediaPostSkill extends BaseSkill {
         {
           key: 'contentList',
           limit: 1,
-          inputMode: 'multiSelect',
-          defaultValue: ['noteBeforeCursorSelection', 'noteCursorSelection', 'noteAfterCursorSelection'],
-          descriptionDict: {
-            en: 'The context of the social media post',
-            'zh-CN': '参考资料',
-          },
+          preferredSelectionKeys: ['noteBeforeCursorSelection', 'noteCursorSelection', 'noteAfterCursorSelection'],
         },
       ],
     },

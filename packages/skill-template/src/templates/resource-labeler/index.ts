@@ -28,9 +28,6 @@ export class ResourceLabelerSkill extends BaseSkill {
   };
 
   invocationConfig: SkillInvocationConfig = {
-    input: {
-      rules: [],
-    },
     context: {
       rules: [{ key: 'resources', limit: 1, required: true }],
     },

@@ -27,19 +27,14 @@ export class CreateArticleOutlineSkill extends BaseSkill {
   };
 
   invocationConfig: SkillInvocationConfig = {
-    input: {
-      rules: [{ key: 'query' }],
-    },
     context: {
       rules: [
         {
           key: 'resources',
-          inputMode: 'multiSelect',
         },
         {
           key: 'contentList',
-          inputMode: 'multiSelect',
-          defaultValue: ['noteCursorSelection', 'noteBeforeCursorSelection', 'noteAfterCursorSelection'],
+          preferredSelectionKeys: ['noteBeforeCursorSelection', 'noteCursorSelection', 'noteAfterCursorSelection'],
         },
       ],
     },
