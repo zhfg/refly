@@ -8,5 +8,5 @@ jobs:
     uses: ./.github/workflows/deploy-web-base.yml
     with:
       environment: staging
-      project-name: refly-staging
+      project-name: refly-app-staging
     secrets: inherit

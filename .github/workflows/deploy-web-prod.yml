@@ -8,5 +8,5 @@ jobs:
     uses: ./.github/workflows/deploy-web-base.yml
     with:
       environment: production
-      project-name: refly
+      project-name: refly-app
     secrets: inherit
