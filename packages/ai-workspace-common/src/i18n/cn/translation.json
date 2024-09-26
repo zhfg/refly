@@ -222,6 +222,7 @@
       "noteBeforeCursorSelection": "笔记光标前内容",
       "noteAfterCursorSelection": "笔记光标后内容",
       "contextLimitTipTitle": "请调整上下文后重试",
+      "contextRequiredTip": "至少选择 1 个{{type}}",
       "contextLimitTip": "最多可选择{{limit}}个{{type}}，当前已选择{{currentCount}}个",
       "popoverSelector": {
         "webPlaceholder": "搜索笔记、资源或知识库...",
