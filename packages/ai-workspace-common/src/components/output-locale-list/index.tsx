@@ -64,7 +64,7 @@ export const OutputLocaleList = (props: {
     >
       {props.children || (
         <span className={classNames('output-locale-list-btn', 'chat-action-item')}>
-          <IconCaretDown /> {localeToLanguageName?.[uiLocale]?.[outputLocale]}{' '}
+          <IconDown /> {localeToLanguageName?.[uiLocale]?.[outputLocale]}{' '}
         </span>
       )}
     </Dropdown>
