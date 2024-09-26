@@ -36,7 +36,7 @@ jobs:
         run: node common/scripts/install-run-rush.js install
 
       - name: Rush Build
-        run: node common/scripts/install-run-rush.js build
+        run: node common/scripts/install-run-rush.js build --to @refly/web
 
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
