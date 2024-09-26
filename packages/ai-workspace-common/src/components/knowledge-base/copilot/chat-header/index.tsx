@@ -20,6 +20,12 @@ import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 import { useCopilotStore } from '@refly-packages/ai-workspace-common/stores/copilot';
+import { getClientOrigin } from '@refly-packages/utils/url';
+
+import Logo from '@/assets/logo.svg';
+
+// styles
+import './index.scss';
 
 interface CopilotChatHeaderProps {
   disable?: boolean;
@@ -142,6 +148,19 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
                   ></Button>,
                 ]
               : null}
+            {!isWeb ? (
+              <div
+                className="chat-header__brand"
+                onClick={() => {
+                  window.open(`${getClientOrigin()}/`, '_blank');
+                }}
+              >
+                <>
+                  <img src={Logo} alt="Refly" />
+                  <span>Refly</span>
+                </>
+              </div>
+            ) : null}
           </div>
           <div className="knowledge-base-detail-navigation-bar">
             <Button

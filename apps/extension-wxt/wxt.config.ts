@@ -59,7 +59,7 @@ export default defineConfig({
       },
     }) as WxtViteConfig,
   manifest: {
-    version: '0.2.0',
+    version: '0.3.1',
     author: 'pftom',
     name: '__MSG_displayName__',
     description: '__MSG_description__',
@@ -84,17 +84,7 @@ export default defineConfig({
       ],
     },
     homepage_url: 'https://refly.ai',
-    permissions: [
-      'storage',
-      'scripting',
-      'history',
-      'activeTab',
-      'tabs',
-      'unlimitedStorage',
-      'cookies',
-      'notifications',
-      'sidePanel',
-    ],
+    permissions: ['storage', 'scripting', 'history', 'activeTab', 'tabs', 'cookies', 'sidePanel'],
   },
   runner: {
     startUrls: ['https://google.com/'],
