@@ -9,6 +9,7 @@ import { handleToggleCopilotSidePanel } from './events/messages/toggleCopilot';
 import { Runtime } from 'wxt/browser';
 
 export const tempTabState: { [key: string]: string } = {};
+export let token = '';
 
 let lastUniqueId = '';
 export const getLastUniqueId = () => {
@@ -24,6 +25,12 @@ export const setAbortController = (controller: AbortController, uniqueId: string
   return controller;
 };
 export const getAbortController = (uniqueId: string) => abortControllerMap.get(uniqueId);
+export const setToken = (token: string) => {
+  token = token;
+};
+export const getToken = () => {
+  return token;
+};
 
 export default defineBackground(() => {
   // 接收 refly 官网的消息，了解登录的状态

@@ -27,7 +27,6 @@ import './App.scss';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 // 设置 runtime 环境
 import { getEnv, setRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { useMockInAppResource } from '@/hooks/use-mock-in-app-resource';
 const Sentry = _Sentry;
 
 if (process.env.NODE_ENV !== 'development') {
@@ -50,8 +49,6 @@ const App = () => {
   const { initMessageListener } = useToggleCSUI();
 
   const userStore = useUserStore();
-  // 在网页时，模拟在知识库的资源选中状态
-  const { initMessageListener: initMockMessageListener } = useMockInAppResource();
 
   // 绑定快捷键，后续允许用户自定义快捷键
   useBindCommands();
@@ -74,14 +71,13 @@ const App = () => {
     setRuntime('extension-csui');
     userStore.setRuntime('extension-csui');
     initMessageListener();
-    initMockMessageListener();
   }, []);
 
   return (
     <Suspense fallback={<Spin style={{ marginTop: '200px auto' }} />}>
       <div className="light app-container">
         <div id="refly-app-main" className={copilotStore.isCopilotOpen ? 'main active' : 'main'}>
-          <AppRouter />
+          {copilotStore.isCopilotOpen ? <AppRouter /> : null}
         </div>
       </div>
     </Suspense>

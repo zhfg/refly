@@ -3,7 +3,7 @@ import { time } from '@refly-packages/ai-workspace-common/utils/time';
 
 // styles
 import './index.scss';
-import { HiOutlineBookOpen } from 'react-icons/hi2';
+import { IconFolder } from '@arco-design/web-react/icon';
 import { Message as message } from '@arco-design/web-react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
@@ -130,13 +130,13 @@ export const KnowledgeBaseDirectory = (props: { small?: boolean }) => {
       <div className="knowledge-base-directory-intro" ref={introRef}>
         {small ? (
           <div className="knowledge-base-directory-intro-small">
-            <HiOutlineBookOpen style={{ fontSize: 28, color: 'rgba(0, 0, 0, .5)' }} />
+            <IconFolder style={{ fontSize: 28, color: 'rgba(0, 0, 0, .5)', strokeWidth: 3 }} />
           </div>
         ) : (
           <>
             <div className="intro-body">
               <div className="intro-icon">
-                <HiOutlineBookOpen style={{ fontSize: 28, color: 'rgba(0, 0, 0, .5)' }} />
+                <IconFolder style={{ fontSize: 28, color: 'rgba(0, 0, 0, .5)', strokeWidth: 3 }} />
               </div>
               <div className="intro-content">
                 <div className="intro-title">{knowledgeBaseStore?.currentKnowledgeBase?.title}</div>

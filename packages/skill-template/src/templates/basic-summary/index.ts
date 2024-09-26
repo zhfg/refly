@@ -26,15 +26,16 @@ export class BasicSummarySkill extends BaseSkill {
   };
 
   invocationConfig: SkillInvocationConfig = {
-    input: {
-      rules: [{ key: 'query' }],
-    },
     context: {
       relation: 'mutuallyExclusive',
       rules: [
         { key: 'resources', limit: 1 },
         { key: 'notes', limit: 1 },
-        { key: 'contentList', limit: 1 },
+        {
+          key: 'contentList',
+          limit: 1,
+          preferredSelectionKeys: ['resourceSelection', 'noteSelection', 'extensionWeblinkSelection'],
+        },
       ],
     },
   };

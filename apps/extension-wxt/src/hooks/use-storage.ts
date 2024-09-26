@@ -10,20 +10,32 @@ export const useStorage = <T>(
   location: 'local' | 'sync' | 'session' | 'managed' = 'local',
 ): [T, (val: T) => void] => {
   const [storageValue, setStorageValue] = useState<T>(defaultVal);
-  const storageItem = storage.defineItem<T>(`${location}:${key}`, {
-    defaultValue: defaultVal,
-  });
+  const storageItem = storage.defineItem<T>(`${location}:${key}`);
 
   const syncStorageValue = async (newStorageValue: T) => {
     await storageItem.setValue(newStorageValue);
     setStorageValue(newStorageValue);
   };
 
+  const getInitStorageValue = async () => {
+    const val = await storage.getItem(`${location}:${key}`);
+
+    if (!val) {
+      setStorageValue(defaultVal);
+    } else {
+      setStorageValue(val as T);
+    }
+  };
+
   useEffect(() => {
     storageItem.watch((newValue) => {
       console.log('new Syn storage value', newValue);
-      setStorageValue(newValue);
+      setStorageValue(newValue as T);
     });
+  }, []);
+
+  useEffect(() => {
+    getInitStorageValue();
   }, []);
 
   return [storageValue, syncStorageValue];

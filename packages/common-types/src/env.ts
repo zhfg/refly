@@ -1,1 +1,2 @@
-export type IRuntime = 'web' | 'extension-csui' | 'extension-sidepanel' | 'extension-background';
+export type ICopilotType = 'extension-sidepanel' | 'extension-csui';
+export type IRuntime = 'web' | ICopilotType | 'extension-background';

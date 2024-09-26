@@ -1,25 +1,43 @@
-import { ModelTier, TokenUsageItem } from '@refly/openapi-schema';
+import { ModelInfo, TokenUsageItem } from '@refly/openapi-schema';
 
-export type AvailableModel =
-  | 'gpt-4o-2024-08-06'
-  | 'claude-3-5-sonnet'
-  | 'gemini-1.5-pro'
-  | 'gpt-4o-mini'
-  | 'gpt-3.5-turbo'
-  | 'gemini-1.5-flash';
-
-const modelTierMap: Record<AvailableModel, ModelTier> = {
-  'gpt-4o-2024-08-06': 't1',
-  'claude-3-5-sonnet': 't1',
-  'gemini-1.5-pro': 't1',
-  'gpt-4o-mini': 't2',
-  'gpt-3.5-turbo': 't2',
-  'gemini-1.5-flash': 't2',
-};
-
-export const getModelTier = (modelName: string) => {
-  return modelTierMap[modelName];
-};
+export const defaultModelList: ModelInfo[] = [
+  {
+    name: 'openai/gpt-4o-2024-08-06',
+    label: 'GPT-4o',
+    provider: 'openai',
+    tier: 't1',
+  },
+  {
+    name: 'anthropic/claude-3.5-sonnet',
+    label: 'Claude 3.5 Sonnet',
+    provider: 'anthropic',
+    tier: 't1',
+  },
+  {
+    name: 'google/gemini-pro-1.5',
+    label: 'Gemini Pro 1.5',
+    provider: 'google',
+    tier: 't1',
+  },
+  {
+    name: 'openai/gpt-4o-mini',
+    label: 'GPT-4o Mini',
+    provider: 'openai',
+    tier: 't2',
+  },
+  {
+    name: 'anthropic/claude-3-haiku',
+    label: 'Claude 3 Haiku',
+    provider: 'anthropic',
+    tier: 't2',
+  },
+  {
+    name: 'google/gemini-flash-1.5',
+    label: 'Gemini Flash 1.5',
+    provider: 'google',
+    tier: 't2',
+  },
+];
 
 /**
  * Aggregate token usage items by model tier and name

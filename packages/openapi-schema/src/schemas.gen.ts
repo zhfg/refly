@@ -645,6 +645,10 @@ export const $SkillInstance = {
           type: 'string',
           description: 'Skill instance description',
         },
+        promptHint: {
+          type: 'string',
+          description: 'Skill instance prompt hint',
+        },
         tplConfig: {
           description: 'Skill template config',
           $ref: '#/components/schemas/SkillTemplateConfig',
@@ -2313,44 +2317,6 @@ export const $SkillContextUrlItem = {
   },
 } as const;
 
-export const $SkillContextValue = {
-  oneOf: [
-    {
-      type: 'string',
-    },
-    {
-      type: 'array',
-      items: {
-        $ref: '#/components/schemas/SkillContextResourceItem',
-      },
-    },
-    {
-      type: 'array',
-      items: {
-        $ref: '#/components/schemas/SkillContextCollectionItem',
-      },
-    },
-    {
-      type: 'array',
-      items: {
-        $ref: '#/components/schemas/SkillContextNoteItem',
-      },
-    },
-    {
-      type: 'array',
-      items: {
-        $ref: '#/components/schemas/SkillContextContentItem',
-      },
-    },
-    {
-      type: 'array',
-      items: {
-        $ref: '#/components/schemas/SkillContextUrlItem',
-      },
-    },
-  ],
-} as const;
-
 export const $SkillContext = {
   type: 'object',
   description: 'Skill invocation context',
@@ -2393,99 +2359,80 @@ export const $SkillContext = {
   },
 } as const;
 
-export const $SkillInputKey = {
-  type: 'string',
-  enum: ['query'],
-} as const;
-
 export const $SkillContextKey = {
   type: 'string',
   enum: ['resources', 'collections', 'notes', 'contentList', 'urls'],
 } as const;
 
-export const $SkillInvocationRule = {
+export const $SelectionKey = {
+  type: 'string',
+  enum: [
+    'noteSelection',
+    'resourceSelection',
+    'extensionWeblinkSelection',
+    'noteCursorSelection',
+    'noteBeforeCursorSelection',
+    'noteAfterCursorSelection',
+  ],
+} as const;
+
+export const $SkillContextRule = {
   type: 'object',
   required: ['key'],
   properties: {
     key: {
       type: 'string',
-      description: 'Field key',
-      oneOf: [
-        {
-          $ref: '#/components/schemas/SkillInputKey',
-        },
-        {
-          $ref: '#/components/schemas/SkillContextKey',
-        },
-      ],
+      description: 'Context key',
+      $ref: '#/components/schemas/SkillContextKey',
     },
     limit: {
       type: 'number',
       description: 'Maximum number of items',
-      default: 10,
-    },
-    inputMode: {
-      type: 'string',
-      description: 'Input mode',
-      enum: ['input', 'inputNumber', 'inputTextArea', 'select', 'multiSelect'],
-    },
-    labelDict: {
-      type: 'object',
-      description: 'Config label (key is locale, value is label)',
-      additionalProperties: {
-        type: 'string',
-      },
-    },
-    descriptionDict: {
-      type: 'object',
-      description: 'Config description (key is locale, value is description)',
-      additionalProperties: {
-        type: 'string',
-      },
-    },
-    defaultValue: {
-      type: 'array',
-      description: 'Default value',
-      items: {
-        type: 'string',
-        enum: [
-          'resource',
-          'note',
-          'extension-weblink',
-          'noteCursorSelection',
-          'noteBeforeCursorSelection',
-          'noteAfterCursorSelection',
-        ],
-      },
+      default: 50,
     },
     required: {
       type: 'boolean',
-      description: 'Whether this key is required (default is false)',
+      description: 'Whether this context is required',
+      default: false,
+    },
+    preferredSelectionKeys: {
+      type: 'array',
+      description: 'Preferred selection keys (only applicable when key is `contentList`)',
+      items: {
+        $ref: '#/components/schemas/SelectionKey',
+      },
     },
   },
 } as const;
 
-export const $InvocationRuleGroupRelation = {
+export const $ContextRuleGroupRelation = {
   type: 'string',
   enum: ['regular', 'mutuallyExclusive'],
 } as const;
 
-export const $SkillInvocationRuleGroup = {
+export const $SkillContextRuleGroup = {
   type: 'object',
   required: ['rules'],
   properties: {
     rules: {
       type: 'array',
-      description: 'Skill invocation rules',
+      description: 'Skill context rules',
       items: {
-        $ref: '#/components/schemas/SkillInvocationRule',
+        $ref: '#/components/schemas/SkillContextRule',
       },
     },
     relation: {
       type: 'string',
-      description: 'Group relation',
+      description: 'Rule group relation',
       default: 'regular',
-      $ref: '#/components/schemas/InvocationRuleGroupRelation',
+      $ref: '#/components/schemas/ContextRuleGroupRelation',
+    },
+    preferredContextKeys: {
+      type: 'array',
+      description: 'Preferred context keys',
+      items: {
+        $ref: '#/components/schemas/SkillContextKey',
+      },
     },
   },
 } as const;
@@ -2493,13 +2440,9 @@ export const $SkillInvocationRuleGroup = {
 export const $SkillInvocationConfig = {
   type: 'object',
   properties: {
-    input: {
-      description: 'Skill input rule group',
-      $ref: '#/components/schemas/SkillInvocationRuleGroup',
-    },
     context: {
       description: 'Skill context rule group',
-      $ref: '#/components/schemas/SkillInvocationRuleGroup',
+      $ref: '#/components/schemas/SkillContextRuleGroup',
     },
   },
 } as const;
@@ -2535,11 +2478,11 @@ export const $InvokeSkillRequest = {
     },
     locale: {
       type: 'string',
-      description: 'user selected output locale',
+      description: 'Selected output locale',
     },
     modelName: {
       type: 'string',
-      description: 'user selected output model',
+      description: 'Selected model',
     },
     createConvParam: {
       description: 'Create conversation parameters',
@@ -3211,6 +3154,49 @@ export const $UploadResponse = {
               type: 'string',
               description: 'File URL',
             },
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $ModelInfo = {
+  type: 'object',
+  required: ['name', 'label', 'provider', 'tier'],
+  properties: {
+    name: {
+      type: 'string',
+      description: 'Model name',
+    },
+    label: {
+      type: 'string',
+      description: 'Model label',
+    },
+    provider: {
+      type: 'string',
+      description: 'Model provider',
+    },
+    tier: {
+      type: 'string',
+      description: 'Model tier',
+    },
+  },
+} as const;
+
+export const $ListModelsResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Model list',
+          items: {
+            $ref: '#/components/schemas/ModelInfo',
           },
         },
       },

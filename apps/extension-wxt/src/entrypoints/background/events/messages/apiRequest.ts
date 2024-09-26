@@ -7,12 +7,13 @@ import { BackgroundMessage } from '@refly/common-types';
 import { createClient } from '@hey-api/client-fetch';
 import { getServerOrigin } from '@refly/utils/url';
 import { getCookie } from '@/utils/cookie';
+import { getToken } from '../../index';
 
 const client = createClient({ baseUrl: getServerOrigin() + '/v1' });
 
 client.interceptors.request.use(async (request) => {
-  console.log('extension intercept request:', request);
-  const token = await getCookie();
+  const token = (await getCookie()) || getToken();
+  console.log('token', token);
   if (token) {
     request.headers.set('Authorization', `Bearer ${token}`);
   }
@@ -20,7 +21,6 @@ client.interceptors.request.use(async (request) => {
 });
 
 export const handleRequestReflect = async (msg: BackgroundMessage) => {
-  console.log('reflect msg', msg);
   // @ts-ignore
   const res = await requestModule[msg.name as keyof typeof requestModule]?.call?.(null, {
     ...msg.args?.[0],

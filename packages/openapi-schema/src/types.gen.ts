@@ -500,6 +500,10 @@ export type SkillInstance = SkillMeta & {
    */
   description?: string;
   /**
+   * Skill instance prompt hint
+   */
+  promptHint?: string;
+  /**
    * Skill template config
    */
   tplConfig?: SkillTemplateConfig;
@@ -1649,14 +1653,6 @@ export type SkillContextUrlItem = {
   };
 };
 
-export type SkillContextValue =
-  | string
-  | Array<SkillContextResourceItem>
-  | Array<SkillContextCollectionItem>
-  | Array<SkillContextNoteItem>
-  | Array<SkillContextContentItem>
-  | Array<SkillContextUrlItem>;
-
 /**
  * Skill invocation context
  */
@@ -1683,79 +1679,57 @@ export type SkillContext = {
   urls?: Array<SkillContextUrlItem>;
 };
 
-export type SkillInputKey = 'query';
-
 export type SkillContextKey = 'resources' | 'collections' | 'notes' | 'contentList' | 'urls';
 
-export type SkillInvocationRule = {
+export type SelectionKey =
+  | 'noteSelection'
+  | 'resourceSelection'
+  | 'extensionWeblinkSelection'
+  | 'noteCursorSelection'
+  | 'noteBeforeCursorSelection'
+  | 'noteAfterCursorSelection';
+
+export type SkillContextRule = {
   /**
-   * Field key
+   * Context key
    */
-  key: SkillInputKey | SkillContextKey;
+  key: SkillContextKey;
   /**
    * Maximum number of items
    */
   limit?: number;
   /**
-   * Input mode
-   */
-  inputMode?: 'input' | 'inputNumber' | 'inputTextArea' | 'select' | 'multiSelect';
-  /**
-   * Config label (key is locale, value is label)
-   */
-  labelDict?: {
-    [key: string]: string;
-  };
-  /**
-   * Config description (key is locale, value is description)
-   */
-  descriptionDict?: {
-    [key: string]: string;
-  };
-  /**
-   * Default value
-   */
-  defaultValue?: Array<
-    | 'resource'
-    | 'note'
-    | 'extension-weblink'
-    | 'noteCursorSelection'
-    | 'noteBeforeCursorSelection'
-    | 'noteAfterCursorSelection'
-  >;
-  /**
-   * Whether this key is required (default is false)
+   * Whether this context is required
    */
   required?: boolean;
+  /**
+   * Preferred selection keys (only applicable when key is `contentList`)
+   */
+  preferredSelectionKeys?: Array<SelectionKey>;
 };
 
-/**
- * Input mode
- */
-export type inputMode = 'input' | 'inputNumber' | 'inputTextArea' | 'select' | 'multiSelect';
+export type ContextRuleGroupRelation = 'regular' | 'mutuallyExclusive';
 
-export type InvocationRuleGroupRelation = 'regular' | 'mutuallyExclusive';
-
-export type SkillInvocationRuleGroup = {
+export type SkillContextRuleGroup = {
   /**
-   * Skill invocation rules
+   * Skill context rules
    */
-  rules: Array<SkillInvocationRule>;
+  rules: Array<SkillContextRule>;
   /**
-   * Group relation
+   * Rule group relation
    */
-  relation?: InvocationRuleGroupRelation;
+  relation?: ContextRuleGroupRelation;
+  /**
+   * Preferred context keys
+   */
+  preferredContextKeys?: Array<SkillContextKey>;
 };
 
 export type SkillInvocationConfig = {
   /**
-   * Skill input rule group
-   */
-  input?: SkillInvocationRuleGroup;
-  /**
    * Skill context rule group
    */
-  context?: SkillInvocationRuleGroup;
+  context?: SkillContextRuleGroup;
 };
 
 /**
@@ -1785,11 +1759,11 @@ export type InvokeSkillRequest = {
    */
   convId?: string;
   /**
-   * user selected output locale
+   * Selected output locale
    */
   locale?: string;
   /**
-   * user selected output model
+   * Selected model
    */
   modelName?: string;
   /**
@@ -2188,6 +2162,32 @@ export type UploadResponse = BaseResponse & {
      */
     url?: string;
   };
+};
+
+export type ModelInfo = {
+  /**
+   * Model name
+   */
+  name: string;
+  /**
+   * Model label
+   */
+  label: string;
+  /**
+   * Model provider
+   */
+  provider: string;
+  /**
+   * Model tier
+   */
+  tier: string;
+};
+
+export type ListModelsResponse = BaseResponse & {
+  /**
+   * Model list
+   */
+  data?: Array<ModelInfo>;
 };
 
 export type ListResourcesData = {
@@ -2776,6 +2776,10 @@ export type GetSubscriptionUsageResponse2 = GetSubscriptionUsageResponse;
 
 export type GetSubscriptionUsageError = unknown;
 
+export type ListModelsResponse2 = ListModelsResponse;
+
+export type ListModelsError = unknown;
+
 export type CreateCheckoutSessionData = {
   body: CreateCheckoutSessionRequest;
 };
@@ -3345,6 +3349,16 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': GetSubscriptionUsageResponse;
+      };
+    };
+  };
+  '/subscription/modelList': {
+    get: {
+      res: {
+        /**
+         * successful operation
+         */
+        '200': ListModelsResponse;
       };
     };
   };

@@ -41,7 +41,7 @@ export const useGetCurrentSelectedMark = () => {
     // final handle note cursor selection
     if (selectedTextCardDomain.includes('noteCursorSelection') && currentSelectionContent) {
       finalUsedMarks.push({
-        type: 'text',
+        type: 'noteSelection',
         data: currentSelectionContent,
         xPath: '',
         scope: 'block',
@@ -50,7 +50,7 @@ export const useGetCurrentSelectedMark = () => {
     }
     if (selectedTextCardDomain.includes('noteBeforeCursorSelection') && beforeSelectionNoteContent) {
       finalUsedMarks.push({
-        type: 'text',
+        type: 'noteSelection',
         data: beforeSelectionNoteContent,
         xPath: '',
         scope: 'block',
@@ -59,7 +59,7 @@ export const useGetCurrentSelectedMark = () => {
     }
     if (selectedTextCardDomain.includes('noteAfterCursorSelection') && afterSelectionNoteContent) {
       finalUsedMarks.push({
-        type: 'text',
+        type: 'noteSelection',
         data: afterSelectionNoteContent,
         xPath: '',
         scope: 'block',

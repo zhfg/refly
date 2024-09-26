@@ -101,41 +101,39 @@ model Conversation {
 /// Conversation messages
 model ChatMessage {
   /// Primary key
-  pk                    BigInt      @id @default(autoincrement())
+  pk             BigInt      @id @default(autoincrement())
   /// Message id
-  msgId                 String      @default("") @map("msg_id")
+  msgId          String      @default("") @map("msg_id")
   /// Conversation ID
-  convId                String      @default("") @map("conv_id")
+  convId         String      @default("") @map("conv_id")
   /// Skill job ID
-  jobId                 String      @default("") @map("job_id")
+  jobId          String      @default("") @map("job_id")
   /// Span id
-  spanId                String?     @map("span_id")
+  spanId         String?     @map("span_id")
   /// Message type
-  type                  MessageType @map("type")
+  type           MessageType @map("type")
   /// UID
-  uid                   String      @default("") @map("uid")
+  uid            String      @default("") @map("uid")
   /// Message content
-  content               String      @map("content")
+  content        String      @map("content")
   /// Skill metadata
-  skillMeta             String      @default("{}") @map("skill_meta")
+  skillMeta      String      @default("{}") @map("skill_meta")
   /// Logs output
-  logs                  String      @default("[]") @map("logs")
+  logs           String      @default("[]") @map("logs")
   /// Structured data output (JSON)
-  structuredData        String      @default("{}") @map("structured_data")
+  structuredData String      @default("{}") @map("structured_data")
   /// Errors
-  errors                String?     @map("errors")
+  errors         String?     @map("errors")
   /// Tool calls (JSON array)
-  toolCalls             String?     @map("tool_calls")
+  toolCalls      String?     @map("tool_calls")
   /// Token usage summary
-  tokenUsage            String?     @map("token_usage")
+  tokenUsage     String?     @map("token_usage")
   /// Locale setting
-  locale                String?     @default("") @map("locale")
+  locale         String?     @default("") @map("locale")
   /// Create timestamp
-  createdAt             DateTime    @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
-  updatedAt             DateTime    @updatedAt @map("updated_at") @db.Timestamptz()
-  /// 会话选中 Weblink 配置，未来可能会变，先使用 string 保存
-  selectedWeblinkConfig String?     @map("selected_weblink_config")
+  updatedAt      DateTime    @updatedAt @map("updated_at") @db.Timestamptz()
 
   @@index([convId, updatedAt])
   @@map("chat_messages")
@@ -147,7 +145,7 @@ model TokenUsage {
   /// UID
   uid              String   @map("uid")
   /// Conversation ID
-  convId           String   @map("conv_id")
+  convId           String?  @map("conv_id")
   /// Skill job ID
   jobId            String   @map("job_id")
   /// Span id
@@ -581,6 +579,27 @@ model StorageUsageMeter {
 
   @@index([uid, deletedAt])
   @@map("storage_usage_meters")
+}
+
+model ModelInfo {
+  /// Primary key
+  pk        BigInt   @id @default(autoincrement())
+  /// Model name
+  name      String   @unique @map("name")
+  /// Model label
+  label     String   @map("label")
+  /// Model provider
+  provider  String   @map("provider")
+  /// Model tier
+  tier      String   @map("tier")
+  /// Whether this model is enabled
+  enabled   Boolean  @default(true) @map("enabled")
+  /// Create timestamp
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@map("model_infos")
 }
 
 model CheckoutSession {

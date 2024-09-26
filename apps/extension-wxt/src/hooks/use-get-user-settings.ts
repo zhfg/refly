@@ -45,7 +45,6 @@ export const useGetUserSettings = () => {
   const { t } = useTranslation();
 
   const [loginNotification, setLoginNotification] = useStorage('refly-login-notify', '', 'sync');
-  console.log('loginNotification', loginNotification);
 
   const getLoginStatus = async () => {
     try {
@@ -61,7 +60,7 @@ export const useGetUserSettings = () => {
 
       console.log('loginStatus', res);
 
-      if (res?.error) {
+      if (res?.error || !res) {
         userStore.resetState();
         // await storage.removeItem('local:refly-user-profile');
         // await storage.removeItem('local:refly-local-settings');
@@ -136,7 +135,6 @@ export const useGetUserSettings = () => {
 
   // sync storage
   useEffect(() => {
-    console.log('loginNotification', loginNotification);
     const loginNotify = safeParseJSON(loginNotification);
     if (loginNotify) {
       if (loginNotify?.login) {

@@ -21,7 +21,10 @@
     "empty": "暂无内容",
     "selectContext": "选择待使用上下文",
     "emptyInput": "内容为空，请填入或选择内容",
-    "retry": "重试"
+    "retry": "重试",
+    "reset": "重置",
+    "apply": "应用",
+    "collapse": "折叠"
   },
   "systemMaintenanceShutdown": {
     "title": "尊敬的用户，您好！",
@@ -204,7 +207,46 @@
     },
     "context": {
       "contentSelector": "内容划线选择器",
-      "clearSelector": "清空选择内容及划线"
+      "clearSelector": "清空选择内容及划线",
+      "resource": "资源",
+      "resources": "资源",
+      "note": "笔记",
+      "notes": "笔记",
+      "collections": "知识库",
+      "collection": "知识库",
+      "contentList": "内容列表",
+      "extensionWeblink": "网页",
+      "extensionWeblinkSelection": "网页选中",
+      "noteSelection": "笔记选中",
+      "resourceSelection": "资源选中",
+      "noteCursorSelection": "笔记光标选中内容",
+      "noteBeforeCursorSelection": "笔记光标前内容",
+      "noteAfterCursorSelection": "笔记光标后内容",
+      "contextLimitTipTitle": "请调整上下文后重试",
+      "contextLimitTip": "最多可选择{{limit}}个{{type}}，当前已选择{{currentCount}}个",
+      "popoverSelector": {
+        "webPlaceholder": "搜索笔记、资源或知识库...",
+        "extensionPlaceholder": "搜索网页、笔记、资源或知识库...",
+        "footer": {
+          "navigate": "导航",
+          "toggle": "切换",
+          "done": "完成"
+        }
+      },
+      "contextFilter": {
+        "acitveBtnTitle": "上下文过滤",
+        "selectType": "选择类型",
+        "limitCount": "限制数量",
+        "apply": "应用",
+        "contentListSelectedType": "配置选中内容类型",
+        "contentListSelectedTypeRequired": "请配置选中内容类型",
+        "contentListLimit": "选中内容数量",
+        "filterConditions": "过滤条件",
+        "reset": "重置",
+        "collapse": "折叠",
+        "result": "结果",
+        "empty": "未命中过滤条件"
+      }
     }
   },
   "resource": {
@@ -512,10 +554,10 @@
       },
       "context": {
         "contentList": {
-          "resource": "资源",
-          "note": "笔记",
-          "extensionWeblink": "网页链接",
-          "noteCursorSelection": "笔记选中内容",
+          "resourceSelection": "资源选中",
+          "noteSelection": "笔记选中",
+          "extensionWeblinkSelection": "网页选中",
+          "noteCursorSelection": "笔记光标选中内容",
           "noteBeforeCursorSelection": "笔记光标前内容",
           "noteAfterCursorSelection": "笔记光标后内容"
         }
@@ -895,6 +937,11 @@
     "chatInput": {
       "skillManager": "管理",
       "placeholder": "提出问题，发现新知"
+    },
+    "configManager": {
+      "title": "技能配置",
+      "errorTipTitle": "发送失败",
+      "errorTip": "请调整技能配置后再重试"
     },
     "tokenUsage": "输入 {{count}}，输出 {{count}}"
   },

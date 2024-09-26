@@ -24,7 +24,6 @@ export const Login = () => {
   const { t } = useTranslation();
 
   const [loginNotification, setLoginNotification] = useStorage('refly-login-notify', '', 'sync');
-  console.log('loginNotification', loginNotification);
 
   /**
    * 0. 获取主站的登录态，如果没有登录就访问 Login 页面，已登录之后再展示可操作页面
@@ -48,7 +47,6 @@ export const Login = () => {
   };
 
   useEffect(() => {
-    console.log('loginNotification', loginNotification);
     const loginNotify = safeParseJSON(loginNotification);
     if (loginNotify) {
       userStore.setIsLogin(false);

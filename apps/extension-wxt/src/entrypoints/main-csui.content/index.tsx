@@ -14,7 +14,7 @@ export default defineContentScript({
   async main(ctx) {
     setRuntime('extension-csui');
 
-    console.log('ctx', ctx);
+    // console.log('ctx', ctx);
     // 3. Define your UI`
     const ui = await createShadowRootUi(ctx, {
       name: 'refly-main-app',

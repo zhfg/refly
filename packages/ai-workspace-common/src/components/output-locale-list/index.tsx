@@ -12,7 +12,7 @@ import { getDefaultPopupContainer, getPopupContainer } from '@refly-packages/ai-
 import { IconCaretDown, IconTranslate } from '@arco-design/web-react/icon';
 
 export const OutputLocaleList = (props: {
-  children: any;
+  children?: any;
   showTitle?: boolean;
   width?: number;
   position?: 'tl' | 'tr' | 'bl' | 'br';
@@ -22,7 +22,8 @@ export const OutputLocaleList = (props: {
   const uiLocale = i18n?.languages?.[0] as LOCALE;
 
   const userStore = useUserStore();
-  const { outputLocale } = userStore?.localSettings || {};
+  let { outputLocale } = userStore?.localSettings || {};
+  outputLocale = outputLocale || LOCALE.EN;
 
   const changeLang = async (lng: OutputLocale) => {
     const { localSettings } = useUserStore.getState();
@@ -39,8 +40,6 @@ export const OutputLocaleList = (props: {
       message.error(t('settings.action.putErrorNotify'));
     }
   };
-
-  console.log('用户当前的模型输出语言', outputLocale);
 
   const dropList = (
     <Menu
@@ -70,7 +69,7 @@ export const OutputLocaleList = (props: {
     >
       {props.children || (
         <Button icon={<IconTranslate />} type="text" className="assist-action-item" style={{ fontSize: 12 }}>
-          {/* <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span> */}
+          <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span>
           <IconCaretDown />
         </Button>
       )}

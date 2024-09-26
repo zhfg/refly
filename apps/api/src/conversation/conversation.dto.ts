@@ -11,7 +11,7 @@ export interface Mode {
 
 export function toChatMessageDTO(message: ChatMessageModel): ChatMessage {
   const dto: ChatMessage = {
-    ...pick(message, ['msgId', 'type', 'content', 'selectedWeblinkConfig']),
+    ...pick(message, ['msgId', 'type', 'content']),
     createdAt: message.createdAt.toJSON(),
     updatedAt: message.updatedAt.toJSON(),
   };

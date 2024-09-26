@@ -15,16 +15,17 @@ export const useToggleSidePanel = () => {
     const data = event as any as BackgroundMessage;
     const { name, body } = data || {};
 
-    console.log('onSidePanelMessage', event);
     if (
       (name as CopilotMsgName) === 'toggleCopilotSidePanel' &&
       typeof body?.isCopilotOpen === 'boolean' &&
       !body?.isCopilotOpen
     ) {
+      console.log('onSidePanelMessage', event);
       window.close();
     }
 
     if ((name as CopilotMsgName) === 'checkSidePanelOpenStatus') {
+      console.log('onSidePanelMessage', event);
       sendMessage({
         type: 'others',
         name: 'checkSidePanelOpenStatus',
@@ -37,6 +38,7 @@ export const useToggleSidePanel = () => {
 
     // 1. when sidePanel already open, handle toggleSidePanel action with message
     if ((name as CopilotMsgName) === 'toggleCopilotSidePanel' && body?.action) {
+      console.log('onSidePanelMessage', event);
       if (body?.action?.name === 'openContentSelector' && body?.action?.value) {
         handlePassthroughOpenContentSelector();
       }

@@ -9,6 +9,7 @@ import { IconHighlight, IconSave } from '@arco-design/web-react/icon';
 import { useSaveCurrentWeblinkAsResource } from '@/hooks/use-save-resource';
 import { useToggleCopilot } from '@/modules/toggle-copilot/hooks/use-toggle-copilot';
 import { useSaveResourceNotify } from '@refly-packages/ai-workspace-common/hooks/use-save-resouce-notify';
+import { useListenToCopilotType } from '@/modules/toggle-copilot/hooks/use-listen-to-copilot-type';
 
 const getPopupContainer = () => {
   const elem = document
@@ -34,6 +35,9 @@ export const App = () => {
   const [isHovered, setIsHovered] = useState(false);
   const bottomDistanceRef = useRef(0);
 
+  // listen to copilotType
+  useListenToCopilotType();
+
   const updateSpherePosition = (newY: number) => {
     if (sphereRef.current) {
       const sphereHeight = sphereRef.current.offsetHeight;
@@ -51,9 +55,9 @@ export const App = () => {
       const topSpace = sphereRect.top;
       const bottomSpace = window.innerHeight - sphereRect.bottom;
 
-      console.log('topSpace', topSpace);
-      console.log('bottomSpace', bottomSpace);
-      console.log('dropdownHeight', dropdownHeight);
+      // console.log('topSpace', topSpace);
+      // console.log('bottomSpace', bottomSpace);
+      // console.log('dropdownHeight', dropdownHeight);
 
       if (bottomSpace < dropdownHeight + 8) {
         setDropdownPosition('top');
@@ -174,6 +178,8 @@ export const App = () => {
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging]);
+
+  // listen to copilotType
 
   return (
     <div className="refly-floating-sphere-entry-container">

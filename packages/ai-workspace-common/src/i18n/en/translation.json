@@ -21,7 +21,10 @@
     "empty": "No content",
     "selectContext": "Select Context",
     "emptyInput": "Content is empty, please fill in or select content",
-    "retry": "Retry"
+    "retry": "Retry",
+    "reset": "Reset",
+    "apply": "Apply",
+    "collapse": "Collapse"
   },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",
@@ -204,7 +207,46 @@
     },
     "context": {
       "contentSelector": "Content Selector",
-      "clearSelector": "Clear Selection"
+      "clearSelector": "Clear Selection",
+      "resource": "Resource",
+      "resources": "Resource",
+      "note": "Note",
+      "notes": "Note",
+      "collection": "Knowledge Base",
+      "collections": "Knowledge Base",
+      "contentList": "Content List",
+      "extensionWeblink": "Web Link",
+      "extensionWeblinkSelection": "Web Link Selection",
+      "noteSelection": "Note Selection",
+      "resourceSelection": "Resource Selection",
+      "noteCursorSelection": "Note Cursor Selection",
+      "noteBeforeCursorSelection": "Note Before Cursor Selection",
+      "noteAfterCursorSelection": "Note After Cursor Selection",
+      "contextLimitTipTitle": "Please adjust the context and try again",
+      "contextLimitTip": "{{type}} is limit to {{limit}} , and you have selected {{currentCount}}.",
+      "popoverSelector": {
+        "webPlaceholder": "Search notes, resources, or knowledge bases...",
+        "extensionPlaceholder": "Search web pages, notes, resources, or knowledge bases...",
+        "footer": {
+          "navigate": "Navigate",
+          "toggle": "Toggle",
+          "done": "Done"
+        }
+      },
+      "contextFilter": {
+        "acitveBtnTitle": "Context Filter",
+        "selectType": "Select Type",
+        "limitCount": "Limit Count",
+        "apply": "Apply",
+        "contentListSelectedType": "Selected Content Type",
+        "contentListSelectedTypeRequired": "Please configure the selected content type",
+        "contentListLimit": "Selected Content Count",
+        "filterConditions": "Filter Conditions",
+        "reset": "Reset",
+        "collapse": "Collapse",
+        "result": "Result",
+        "empty": "No hit filter conditions"
+      }
     }
   },
   "resource": {
@@ -496,9 +538,9 @@
       },
       "context": {
         "contentList": {
-          "resource": "Resource",
-          "note": "Note",
-          "extensionWeblink": "Web Link",
+          "resourceSelection": "Resource Selection",
+          "noteSelection": "Note Selection",
+          "extensionWeblinkSelection": "Web Link Selection",
           "noteCursorSelection": "Note Cursor Selection",
           "noteBeforeCursorSelection": "Note Before Cursor Selection",
           "noteAfterCursorSelection": "Note After Cursor Selection"
@@ -885,6 +927,11 @@
     "chatInput": {
       "skillManager": "Skill Manage",
       "placeholder": "Ask a question, discover new knowledge"
+    },
+    "configManager": {
+      "title": "Skill Configuration",
+      "errorTipTitle": "Send Failed",
+      "errorTip": "Please adjust the skill configuration and try again"
     },
     "tokenUsage": "Input {{count}}, Output {{count}}"
   },

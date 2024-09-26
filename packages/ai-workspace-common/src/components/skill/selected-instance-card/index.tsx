@@ -12,7 +12,6 @@ import { SkillContext, SkillInstance } from '@refly/openapi-schema';
 // requests
 import { useTranslation } from 'react-i18next';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
-import { ContextStateDisplay } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-state-display';
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
 
 export const SelectedInstanceCard = () => {
@@ -91,11 +90,11 @@ export const SelectedInstanceCard = () => {
 
   return (
     <div className="selected-instance-card-container">
-      {computedShowContextCard ? (
+      {/* {computedShowContextCard ? (
         <div className="ai-copilot-context-display">
           <ContextStateDisplay />
         </div>
-      ) : null}
+      ) : null} */}
       <div className="selected-instance-card">
         <div className="selected-skill">
           <div className="selected-skill-profile">

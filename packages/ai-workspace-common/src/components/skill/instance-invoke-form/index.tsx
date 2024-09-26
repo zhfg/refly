@@ -17,7 +17,7 @@ import { FaWpforms } from 'react-icons/fa';
 // styles
 import './index.scss';
 import { LOCALE } from '@refly/common-types';
-import { ChatInputAssistAction } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/chat-input-assist-action';
+import { ChatInputAssistAction } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module/chat-input-assist-action';
 
 const CollapseItem = Collapse.Item;
 

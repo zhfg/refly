@@ -1,5 +1,5 @@
 /** 状态码 */
-export const enum StatusCode {
+export enum StatusCode {
   /** 成功 */
   SUCCESS = 200,
   /** 参数错误 */
