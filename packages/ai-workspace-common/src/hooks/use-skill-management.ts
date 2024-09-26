@@ -8,6 +8,11 @@ export const useSkillManagement = ({ shouldInit = false }: { shouldInit: boolean
   const skillStore = useSkillStore();
 
   const handleGetSkillInstances = async () => {
+    const { userProfile } = useUserStore.getState();
+    if (!userProfile?.uid) {
+      return;
+    }
+
     const { data, error } = (await getClient().listSkillInstances({ query: { sortByPin: true } })) || {};
 
     if (data?.data) {

@@ -6,10 +6,16 @@ import { checkPageUnsupported } from '@refly-packages/ai-workspace-common/utils/
 import { checkBrowserArc } from '@/utils/browser';
 import { SidePanelAction, ToggleCopilotStatus } from '@/types/sidePanel';
 import { storage } from '@refly-packages/ai-workspace-common/utils/storage';
+import { useCopilotTypeStore, copilotTypeEnums } from '@/modules/toggle-copilot/stores/use-copilot-type';
 
 let toggleCopilotStatus = {} as ToggleCopilotStatus;
 
 export const useToggleCopilot = () => {
+  const { copilotType } = useCopilotTypeStore((state) => ({
+    copilotType: state.copilotType,
+  }));
+  const isDomVisibilityRef = useRef<'visible' | 'hidden'>(document.visibilityState);
+
   const isCopilotOpenRef = useRef<boolean>();
   const isArcBrowserRef = useRef<boolean>();
 
@@ -34,7 +40,14 @@ export const useToggleCopilot = () => {
       // }
     }
 
+    console.log(
+      'isArcBrowserRef.current',
+      isArcBrowserRef.current,
+      action && action?.value ? true : !isCopilotOpen,
+      isCopilotOpen,
+    );
     if (isArcBrowserRef.current) {
+      console.log('sendMessage', 'toggleCopilotSidePanel');
       sendMessage({
         type: 'others',
         name: 'toggleCopilotCSUI',
@@ -46,6 +59,7 @@ export const useToggleCopilot = () => {
         source: getRuntime(),
       });
     } else {
+      console.log('sendMessage', 'toggleCopilotSidePanel');
       sendMessage({
         type: 'toggleCopilot',
         name: 'toggleCopilotSidePanel',
@@ -76,6 +90,7 @@ export const useToggleCopilot = () => {
     try {
       const promise = new Promise(async (resolve) => {
         try {
+          console.log('sendMessage', 'checkSidePanelOpenStatus');
           const res = await sendMessage({
             type: 'others',
             name: 'checkSidePanelOpenStatus',
@@ -97,10 +112,28 @@ export const useToggleCopilot = () => {
     }
   };
 
+  const handleVisibilityChange = () => {
+    isDomVisibilityRef.current = document.visibilityState;
+  };
+
   useEffect(() => {
-    handleCheckArcBrowser();
-    handleCheckSidePanelOpenStatus();
-  }, []);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  });
+
+  useEffect(() => {
+    console.log('useToggleCopilot copilotType', copilotType);
+    //
+
+    // Initial check if the page is already visible
+    if (isDomVisibilityRef.current === 'visible' && !copilotType && !checkPageUnsupported(window.location.href)) {
+      handleCheckArcBrowser();
+      handleCheckSidePanelOpenStatus();
+    }
+  }, [copilotType]);
 
   return {
     handleToggleCopilot,

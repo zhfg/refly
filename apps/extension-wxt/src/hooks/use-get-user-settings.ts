@@ -60,7 +60,7 @@ export const useGetUserSettings = () => {
 
       console.log('loginStatus', res);
 
-      if (res?.error) {
+      if (res?.error || !res) {
         userStore.resetState();
         // await storage.removeItem('local:refly-user-profile');
         // await storage.removeItem('local:refly-local-settings');

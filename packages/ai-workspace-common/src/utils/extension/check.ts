@@ -9,6 +9,8 @@ export const checkPageUnsupported = (pageUrl: string) => {
       'https://browser.google.com/webstore',
       'https://microsoftedge.microsoft.com/addons',
       'https://addons.mozilla.org/en-US/firefox',
+      'https://accounts.google.com',
+      'https://github.com/login',
     ].some((url) => pageUrl.startsWith(url));
 
     return checkBrowserSettingPage || checkBrowserExtensionStorePage;

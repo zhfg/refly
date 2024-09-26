@@ -27,8 +27,8 @@ export const useSelectedMark = () => {
     const data = event as any as SyncMarkEvent;
     const { body, name } = data || {};
 
-    console.log('contentSelectedHandler', data);
     if (name === 'syncMarkEvent') {
+      console.log('contentSelectedHandler', data);
       // 代表从 content-selector-app 获取信息
       const { marks = [] } = useContentSelectorStore.getState();
       const { currentSelectedMarks, enableMultiSelect, currentSelectedMark } = useContextPanelStore.getState();

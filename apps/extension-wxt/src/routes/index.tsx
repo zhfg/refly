@@ -14,8 +14,14 @@ import { useTranslation } from 'react-i18next';
 // requests
 import { useGetUserSettings } from '@/hooks/use-get-user-settings';
 import { Spin } from '@arco-design/web-react';
+// hooks
+import { useSetCopilotType } from '@/modules/toggle-copilot/hooks/use-set-copilot-type';
+import { useMockInAppResource } from '@/hooks/use-mock-in-app-resource';
 
 export const AppRouter = () => {
+  // 在网页时，模拟在知识库的资源选中状态
+  const { initMessageListener: initMockMessageListener } = useMockInAppResource();
+
   const userStore = useUserStore((state) => ({
     localSettings: state.localSettings,
     isCheckingLoginStatus: state.isCheckingLoginStatus,
@@ -32,6 +38,9 @@ export const AppRouter = () => {
   // 不需要鉴权即可访问的路由
   const routeLoginPageMatch = useMatch('/login');
 
+  // set copilotType
+  useSetCopilotType();
+
   // 这里进行用户登录信息检查
   useGetUserSettings();
 
@@ -41,6 +50,9 @@ export const AppRouter = () => {
       i18n.changeLanguage(locale);
     }
   }, [locale]);
+  useEffect(() => {
+    initMockMessageListener();
+  }, []);
 
   // initial display loading
   if (userStore.isCheckingLoginStatus === undefined || userStore.isCheckingLoginStatus) {
