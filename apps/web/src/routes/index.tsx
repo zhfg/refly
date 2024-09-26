@@ -9,25 +9,18 @@ import { useGetUserSettings } from "@refly-packages/ai-workspace-common/hooks/us
 import { LOCALE } from "@refly/common-types"
 
 // Lazy load components
-const ConvLibrary = lazy(() =>
-  import("@/pages/conv-library").then(module => ({
-    default: module.ConvLibrary,
-  })),
-)
+const Workspace = lazy(() => import("@/pages/workspace"))
+const ConvLibrary = lazy(() => import("@/pages/conv-library"))
+const KnowledgeBase = lazy(() => import("@/pages/knowledge-base"))
+const Skill = lazy(() => import("@/pages/skill"))
+const SkillDetailPage = lazy(() => import("@/pages/skill-detail"))
+const Login = lazy(() => import("@/pages/login"))
+
 const Settings = lazy(() =>
   import("@refly-packages/ai-workspace-common/components/settings/index").then(
     module => ({ default: module.Settings }),
   ),
 )
-const Login = lazy(() =>
-  import("@refly-packages/ai-workspace-common/components/login/index").then(
-    module => ({ default: module.Login }),
-  ),
-)
-const Workspace = lazy(() => import("@/pages/workspace"))
-const KnowledgeBase = lazy(() => import("@/pages/knowledge-base"))
-const Skill = lazy(() => import("@/pages/skill"))
-const SkillDetailPage = lazy(() => import("@/pages/skill-detail"))
 
 // Loading component
 const LoadingFallback = () => (
@@ -45,7 +38,7 @@ const LoadingFallback = () => (
 
 const prefetchRoutes = () => {
   // Prefetch common routes
-  import("@refly-packages/ai-workspace-common/components/login/index")
+  import("@/pages/login")
   import("@/pages/workspace")
   import("@/pages/knowledge-base")
   import("@/pages/conv-library")
