@@ -7,11 +7,12 @@ import { BackgroundMessage } from '@refly/common-types';
 import { createClient } from '@hey-api/client-fetch';
 import { getServerOrigin } from '@refly/utils/url';
 import { getCookie } from '@/utils/cookie';
+import { getToken } from '../../index';
 
 const client = createClient({ baseUrl: getServerOrigin() + '/v1' });
 
 client.interceptors.request.use(async (request) => {
-  const token = await getCookie();
+  const token = (await getCookie()) || getToken();
   console.log('token', token);
   if (token) {
     request.headers.set('Authorization', `Bearer ${token}`);

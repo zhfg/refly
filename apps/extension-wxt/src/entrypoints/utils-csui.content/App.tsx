@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { checkBrowserArc } from '@/utils/browser';
 
 import './App.scss';
 
@@ -6,18 +7,32 @@ import './App.scss';
 // 设置 runtime 环境
 import { getEnv, setRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useSyncWeblinkResourceMeta } from '@/hooks/content-scripts/use-get-weblink-resource-meta';
-import { checkBrowserArc } from '@/utils/browser';
 import { checkPageUnsupported } from '@refly-packages/ai-workspace-common/utils/extension/check';
 
 const App = () => {
   // 在挂载时记录当前资源,Only for Content Script
   const { initMessageListener } = useSyncWeblinkResourceMeta();
+  const isDomVisibilityRef = useRef<'visible' | 'hidden'>(document.visibilityState);
+
+  const handleVisibilityChange = () => {
+    isDomVisibilityRef.current = document.visibilityState;
+  };
 
   useEffect(() => {
-    if (!checkPageUnsupported(location.href)) {
+    // Initial check if the page is already visible
+    if (isDomVisibilityRef.current === 'visible' && !checkPageUnsupported(location.href)) {
       checkBrowserArc();
     }
   }, []);
+
+  useEffect(() => {
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  });
+
   useEffect(() => {
     setRuntime('extension-csui');
     initMessageListener();

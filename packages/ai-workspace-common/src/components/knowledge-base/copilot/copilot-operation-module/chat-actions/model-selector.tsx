@@ -6,9 +6,13 @@ import classNames from 'classnames';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
+import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 
 export const ModelSelector = () => {
   const { t } = useTranslation();
+  const { userProfile } = useUserStore((state) => ({
+    userProfile: state.userProfile,
+  }));
   const { selectedModel, setSelectedModel, modelList, setModelList } = useChatStore((state) => ({
     selectedModel: state.selectedModel,
     setSelectedModel: state.setSelectedModel,
@@ -35,6 +39,11 @@ export const ModelSelector = () => {
 
   const fetchModelList = async () => {
     try {
+      const { userProfile } = useUserStore.getState();
+      if (!userProfile?.uid) {
+        return;
+      }
+
       const res = await getClient().listModels();
 
       if (res?.error) {

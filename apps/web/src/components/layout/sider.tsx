@@ -99,7 +99,7 @@ const MenuItemContent = (props: {
 }) => {
   return (
     <div className="flex">
-      <div className="flex flex-1 flex-nowrap items-center">
+      <div className="flex flex-nowrap flex-1 items-center">
         {props.icon}
         <span className="sider-menu-title">{props.title}</span>
       </div>
@@ -117,7 +117,7 @@ const SettingItem = () => {
   return (
     <div className="w-full">
       <SiderMenuSettingList>
-        <div className="flex flex-1 items-center justify-between">
+        <div className="flex flex-1 justify-between items-center">
           <div className="menu-settings user-profile">
             <Avatar size={32}>
               <img
@@ -201,7 +201,6 @@ export const SiderLayout = () => {
     localStorage.getItem("refly-user-profile"),
   )
   const notShowLoginBtn = storageUserProfile?.uid || userStore?.userProfile?.uid
-  console.log("storageUserProfile", storageUserProfile, userStore?.userProfile)
 
   const selectedKey = getNavSelectedKeys(location.pathname)
   const handleNavClick = (itemKey: string) => {

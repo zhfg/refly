@@ -16,7 +16,6 @@ export const UILocaleList = (props: { children: React.ReactNode; width?: number 
   // 获取 storage user profile
   const storageUserProfile = safeParseJSON(localStorage.getItem('refly-user-profile'));
   const notShowLoginBtn = storageUserProfile?.uid || userStore?.userProfile?.uid;
-  console.log('storageUserProfile', storageUserProfile, userStore?.userProfile);
 
   const changeLang = async (lng: LOCALE) => {
     const { localSettings } = useUserStore.getState();
