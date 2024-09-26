@@ -8,8 +8,9 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { OutputLocale, enLocale, localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/i18n';
 // styles
 import './index.scss';
-import { getDefaultPopupContainer, getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
-import { IconCaretDown, IconTranslate } from '@arco-design/web-react/icon';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
+import { IconCaretDown, IconDown, IconTranslate } from '@arco-design/web-react/icon';
+import classNames from 'classnames';
 
 export const OutputLocaleList = (props: {
   children?: any;
@@ -42,11 +43,7 @@ export const OutputLocaleList = (props: {
   };
 
   const dropList = (
-    <Menu
-      className={'output-locale-list-menu'}
-      onClickMenuItem={(key) => changeLang(key as OutputLocale)}
-      style={{ width: props.width || 240 }}
-    >
+    <Menu className={'output-locale-list-menu'} onClickMenuItem={(key) => changeLang(key as OutputLocale)}>
       {props.showTitle && (
         <div className="output-locale-list-menu-title">{t('settings.language.outputLocale.title')}</div>
       )}
@@ -63,15 +60,12 @@ export const OutputLocaleList = (props: {
       droplist={dropList}
       position={props.position || 'tl'}
       trigger="click"
-      getPopupContainer={() => {
-        return getPopupContainer();
-      }}
+      getPopupContainer={getPopupContainer}
     >
       {props.children || (
-        <Button icon={<IconTranslate />} type="text" className="assist-action-item" style={{ fontSize: 12 }}>
-          <span>{localeToLanguageName?.[uiLocale]?.[outputLocale]} </span>
-          <IconCaretDown />
-        </Button>
+        <span className={classNames('output-locale-list-btn', 'chat-action-item')}>
+          <IconCaretDown /> {localeToLanguageName?.[uiLocale]?.[outputLocale]}{' '}
+        </span>
       )}
     </Dropdown>
   );
