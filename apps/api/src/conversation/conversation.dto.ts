@@ -1,4 +1,4 @@
-import { ChatMessage, Conversation } from '@refly/openapi-schema';
+import { ChatMessage, Conversation } from '@refly-packages/openapi-schema';
 import { ChatMessage as ChatMessageModel, Conversation as ConversationModel } from '@prisma/client';
 import { pick } from '@/utils';
 

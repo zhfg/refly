@@ -38,7 +38,7 @@ import {
   PinSkillInstanceResponse,
   UnpinSkillInstanceRequest,
   UnpinSkillInstanceResponse,
-} from '@refly/openapi-schema';
+} from '@refly-packages/openapi-schema';
 import { buildSuccessResponse } from '@/utils';
 import { Response } from 'express';
 import { skillInstancePO2DTO, skillJobPO2DTO, skillTriggerPO2DTO } from './skill.dto';

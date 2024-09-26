@@ -7,9 +7,9 @@ import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { Embeddings } from '@langchain/core/embeddings';
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { FireworksEmbeddings } from '@langchain/community/embeddings/fireworks';
-import { cleanMarkdownForIngest } from '@refly/utils';
+import { cleanMarkdownForIngest } from '@refly-packages/utils';
 
-import { User } from '@refly/openapi-schema';
+import { User } from '@refly-packages/openapi-schema';
 import { MINIO_INTERNAL, MinioService } from '@/common/minio.service';
 import { HybridSearchParam, ContentData, ContentPayload, ReaderResult, NodeMeta } from './rag.dto';
 import { QdrantService } from '@/common/qdrant.service';

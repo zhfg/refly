@@ -1,4 +1,4 @@
-import { SkillEvent } from '@refly/common-types';
+import { SkillEvent } from '@refly-packages/common-types';
 import { Response } from 'express';
 
 export const buildSuccessResponse = <T>(data?: T) => {

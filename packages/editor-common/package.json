@@ -3,11 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "main": "src/index.ts",
-  "types": "./dist/cjs/index.d.ts",
-  "exports": {
-    "import": "./src/index.ts",
-    "require": "./dist/cjs/index.js"
-  },
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "rimraf dist && tsc",

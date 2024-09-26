@@ -10,8 +10,8 @@ import {
   UpdateLabelClassRequest,
   UpdateLabelInstanceRequest,
   User,
-} from '@refly/openapi-schema';
-import { genLabelClassID, genLabelInstanceID } from '@refly/utils';
+} from '@refly-packages/openapi-schema';
+import { genLabelClassID, genLabelInstanceID } from '@refly-packages/utils';
 import { pick } from '@/utils';
 
 @Injectable()

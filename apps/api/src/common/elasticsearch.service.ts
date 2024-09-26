@@ -2,7 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Client } from '@elastic/elasticsearch';
 import { MessageType } from '@prisma/client';
-import { User } from '@refly/openapi-schema';
+import { User } from '@refly-packages/openapi-schema';
 
 interface ResourceDocument {
   id: string;

@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { Prisma, Conversation } from '@prisma/client';
-import { CreateConversationRequest, User } from '@refly/openapi-schema';
+import { CreateConversationRequest, User } from '@refly-packages/openapi-schema';
 
 import { PrismaService } from '@/common/prisma.service';
-import { genChatMessageID, genConvID } from '@refly/utils';
+import { genChatMessageID, genConvID } from '@refly-packages/utils';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
 
 @Injectable()
