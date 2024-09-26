@@ -24,6 +24,8 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
 
   const handleLogout = () => {
     modal.confirm?.({
+      okText: t('common.confirm'),
+      cancelText: t('common.cancel'),
       title: t('settings.account.logoutConfirmation.title'),
       content: t('settings.account.logoutConfirmation.message'),
       onOk() {

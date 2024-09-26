@@ -1,8 +1,4 @@
-/**
- * 此为登录弹框，for web 使用
- */
 import { Button, Modal, Divider, Typography } from '@arco-design/web-react';
-import { useEffect, useRef } from 'react';
 import { HiLanguage } from 'react-icons/hi2';
 
 // stores
@@ -12,11 +8,11 @@ import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 // 静态资源
 import Logo from '@/assets/logo.svg';
 import Google from '@/assets/google.svg';
+import GitHub from '@/assets/github-mark.svg';
 import { Link, useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 
 // styles
 import './index.scss';
-import { useCookie } from 'react-use';
 import { getServerOrigin, getClientOrigin } from '@refly/utils/url';
 import { useTranslation } from 'react-i18next';
 import { UILocaleList } from '@refly-packages/ai-workspace-common/components/ui-locale-list';
@@ -24,25 +20,25 @@ import { UILocaleList } from '@refly-packages/ai-workspace-common/components/ui-
 export const LoginModal = (props: { visible?: boolean; from?: string }) => {
   const userStore = useUserStore((state) => ({
     setIsLogin: state.setIsLogin,
+    setLoginProvider: state.setLoginProvider,
     isLogin: state.isLogin,
+    loginProvider: state.loginProvider,
     loginModalVisible: state.loginModalVisible,
     setLoginModalVisible: state.setLoginModalVisible,
   }));
-  const navigate = useNavigate();
-  const loginWindowRef = useRef<Window | null>();
-  const [token, updateCookie, deleteCookie] = useCookie('_refly_ai_sid');
 
   const { t } = useTranslation();
 
   /**
-   * 0. 获取主站的登录态，如果没有登录就访问 Login 页面，已登录之后再展示可操作页面
-   * 1. 打开一个弹窗，访问 Refly 主站进行登录
-   * 2. 登录完之后，通过 chrome 的 API 给插件发消息，收到消息之后 reload 页面获取登录状态，然后持久化存储
-   * 3. 之后带着 cookie or 登录状态去获取请求
+   * 0. Get the login status from the main site. If not logged in, visit the Login page; after logging in, display the home page
+   * 1. Open a modal to access the Refly main site for login
+   * 2. After logging in, use Chrome's API to send a message to the extension. Upon receiving the message, reload the page to get the login status, then persist it
+   * 3. Subsequently, make requests with the cookie or login status
    */
-  const handleLogin = () => {
+  const handleLogin = (provider: 'github' | 'google') => {
     userStore.setIsLogin(true);
-    location.href = `${getServerOrigin()}/v1/auth/google`;
+    userStore.setLoginProvider(provider);
+    location.href = `${getServerOrigin()}/v1/auth/${provider}`;
   };
 
   // props
@@ -95,16 +91,34 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
           </span>
         </div>
         <div className="login-hint-text">{t('landingPage.loginModal.title')}</div>
-        <Button
-          className="login-btn"
-          type="outline"
-          onClick={() => handleLogin()}
-          style={{ width: 260, height: 32, marginTop: 32, borderRadius: 4 }}
-          loading={userStore.isLogin}
-        >
-          <img src={Google} alt="google" style={{ width: 15, height: 15, margin: '0 8px' }} />
-          {userStore.isLogin ? t('landingPage.loginModal.loggingStatus') : t('landingPage.loginModal.loginBtn.google')}
-        </Button>
+        <div className="login-btn-group">
+          <Button
+            className="login-btn"
+            type="outline"
+            onClick={() => handleLogin('github')}
+            style={{ width: 260, height: 32 }}
+            loading={userStore.isLogin && userStore.loginProvider === 'github'}
+            disabled={userStore.isLogin && userStore.loginProvider !== 'github'}
+          >
+            <img src={GitHub} alt="github" />
+            {userStore.isLogin && userStore.loginProvider === 'github'
+              ? t('landingPage.loginModal.loggingStatus')
+              : t('landingPage.loginModal.loginBtn.github')}
+          </Button>
+          <Button
+            className="login-btn"
+            type="outline"
+            onClick={() => handleLogin('google')}
+            style={{ width: 260, height: 32 }}
+            loading={userStore.isLogin && userStore.loginProvider === 'google'}
+            disabled={userStore.isLogin && userStore.loginProvider !== 'google'}
+          >
+            <img src={Google} alt="google" />
+            {userStore.isLogin && userStore.loginProvider === 'google'
+              ? t('landingPage.loginModal.loggingStatus')
+              : t('landingPage.loginModal.loginBtn.google')}
+          </Button>
+        </div>
         <Divider></Divider>
         <Typography.Paragraph className="term-text">
           {t('landingPage.loginModal.utilText')}

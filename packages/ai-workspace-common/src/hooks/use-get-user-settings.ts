@@ -11,12 +11,13 @@ import { LOCALE } from '@refly/common-types';
 import { useTranslation } from 'react-i18next';
 import { getClientOrigin, getWebLogin } from '@refly-packages/utils/url';
 import { getRuntime } from '../utils/env';
+import { GetUserSettingsResponse } from '@refly/openapi-schema';
 
 export const useGetUserSettings = () => {
   const userStore = useUserStore();
   const navigate = useNavigate();
 
-  const [token, updateCookie, deleteCookie] = useCookie('_refly_ai_sid');
+  const [token] = useCookie('_refly_ai_sid');
   const { i18n } = useTranslation();
 
   const routeLandingPageMatch = useMatch('/');
@@ -30,66 +31,18 @@ export const useGetUserSettings = () => {
   const isWebLogin = useMatch('/login');
 
   const getLoginStatus = async () => {
-    try {
-      const { error, data: res } = await getClient().getSettings();
-      let { localSettings } = useUserStore.getState();
+    let error: any;
+    let res: GetUserSettingsResponse;
 
-      console.log('loginStatus', res);
+    if (token) {
+      const resp = await getClient().getSettings();
+      error = resp.error;
+      res = resp.data;
+    }
+    let { localSettings } = useUserStore.getState();
 
-      if (error || !res.data) {
-        userStore.setUserProfile(undefined);
-        userStore.setToken('');
-        localStorage.removeItem('refly-user-profile');
-        localStorage.removeItem('refly-local-settings');
-
-        if (getRuntime() === 'web') {
-          window.location.href = getWebLogin(); // 没有登录，直接跳转到登录页
-        } else {
-          navigate('/'); // 插件等直接导航到首页
-        }
-      } else {
-        userStore.setUserProfile(res.data);
-        localStorage.setItem('refly-user-profile', safeStringifyJSON(res.data));
-
-        // 增加 localSettings
-        let uiLocale = mapDefaultLocale(res?.data?.uiLocale as LOCALE) as LOCALE;
-        let outputLocale = res?.data?.outputLocale as LOCALE;
-
-        // 先写回
-        localSettings = {
-          ...localSettings,
-          uiLocale,
-          outputLocale,
-          isLocaleInitialized: true,
-        };
-
-        // 说明是第一次注册使用，此时没有 locale，需要写回
-        if (!uiLocale && !outputLocale) {
-          uiLocale = mapDefaultLocale((navigator?.language || LOCALE.EN) as LOCALE) as LOCALE;
-          outputLocale = (navigator?.language || LOCALE.EN) as LOCALE;
-          // 不阻塞写回用户配置
-          getClient().updateSettings({
-            body: { uiLocale, outputLocale },
-          });
-
-          // 如果是初始化的再替换
-          localSettings = {
-            ...localSettings,
-            uiLocale,
-            outputLocale,
-            isLocaleInitialized: false,
-          } as LocalSettings;
-        }
-
-        // 应用 locale
-        i18n.changeLanguage(uiLocale);
-
-        userStore.setLocalSettings(localSettings);
-        localStorage.setItem('refly-user-profile', safeStringifyJSON(res?.data));
-        localStorage.setItem('refly-local-settings', safeStringifyJSON(localSettings));
-      }
-    } catch (err) {
-      console.log('getLoginStatus err', err);
+    // Handle
+    if (!token || error || !res.data) {
       userStore.setUserProfile(undefined);
       userStore.setLocalSettings(defaultLocalSettings);
       userStore.setToken('');
@@ -97,50 +50,89 @@ export const useGetUserSettings = () => {
       localStorage.removeItem('refly-local-settings');
 
       if (getRuntime() === 'web') {
-        window.location.href = getWebLogin(); // 没有登录，直接跳转到登录页
+        window.location.href = getWebLogin(); // Redirect to login page for web
       } else {
-        navigate('/'); // 插件等直接导航到首页
+        navigate('/'); // Extension should navigate to home
       }
+      return;
     }
+
+    userStore.setUserProfile(res.data);
+    localStorage.setItem('refly-user-profile', safeStringifyJSON(res.data));
+
+    // Add localSettings
+    let uiLocale = mapDefaultLocale(res?.data?.uiLocale as LOCALE) as LOCALE;
+    let outputLocale = res?.data?.outputLocale as LOCALE;
+
+    // Write back first
+    localSettings = {
+      ...localSettings,
+      uiLocale,
+      outputLocale,
+      isLocaleInitialized: true,
+    };
+
+    // This indicates it's the first time registering and using, so there's no locale set. We need to write it back.
+    if (!uiLocale && !outputLocale) {
+      uiLocale = mapDefaultLocale((navigator?.language || LOCALE.EN) as LOCALE) as LOCALE;
+      outputLocale = (navigator?.language || LOCALE.EN) as LOCALE;
+      // Don't block writing back user configuration
+      getClient().updateSettings({
+        body: { uiLocale, outputLocale },
+      });
+
+      // Replace if it's initialization
+      localSettings = {
+        ...localSettings,
+        uiLocale,
+        outputLocale,
+        isLocaleInitialized: false,
+      } as LocalSettings;
+    }
+
+    // Apply locale
+    i18n.changeLanguage(uiLocale);
+
+    userStore.setLocalSettings(localSettings);
+    localStorage.setItem('refly-user-profile', safeStringifyJSON(res?.data));
+    localStorage.setItem('refly-local-settings', safeStringifyJSON(localSettings));
   };
 
   const getLoginStatusForLogin = async () => {
-    try {
-      const res = await getClient().getSettings();
-      console.log('loginStatus', res);
+    let error: any;
+    let res: GetUserSettingsResponse;
 
-      if (res.error || !res.data) {
-        userStore.setUserProfile(undefined);
-        userStore.setToken('');
-        localStorage.removeItem('refly-user-profile');
-        localStorage.removeItem('refly-local-settings');
+    if (token) {
+      const resp = await getClient().getSettings();
+      error = resp.error;
+      res = resp.data;
+    }
 
-        if (
-          routeLandingPageMatch ||
-          routePrivacyPageMatch ||
-          routeTermsPageMatch ||
-          routeLoginPageMatch ||
-          routeDigestDetailPageMatch ||
-          routeFeedDetailPageMatch ||
-          routeAIGCContentDetailPageMatch ||
-          routeThreadDetailPageMatch ||
-          isWebLogin
-        ) {
-          console.log('命中不需要鉴权页面，直接展示');
-        } else {
-          navigate('/');
-        }
-      } else {
-        // 鉴权成功直接重定向到 app.refly.ai
-        window.location.href = getClientOrigin(false);
-      }
-    } catch (err) {
-      console.log('getLoginStatus err', err);
+    if (!token || error || !res.data) {
       userStore.setUserProfile(undefined);
       userStore.setLocalSettings(defaultLocalSettings);
       userStore.setToken('');
       localStorage.removeItem('refly-user-profile');
       localStorage.removeItem('refly-local-settings');
+
+      if (
+        routeLandingPageMatch ||
+        routePrivacyPageMatch ||
+        routeTermsPageMatch ||
+        routeLoginPageMatch ||
+        routeDigestDetailPageMatch ||
+        routeFeedDetailPageMatch ||
+        routeAIGCContentDetailPageMatch ||
+        routeThreadDetailPageMatch ||
+        isWebLogin
+      ) {
+        console.log("Matched a page that doesn't require authentication, display directly");
+      } else {
+        navigate('/');
+      }
+    } else {
+      // Authentication successful, redirect to app.refly.ai
+      window.location.href = getClientOrigin(false);
     }
   };
 
