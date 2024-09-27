@@ -2320,7 +2320,11 @@ components:
       enum:
         - active
         - canceled
+        - incomplete
+        - incomplete_expired
         - past_due
+        - paused
+        - trialing
         - unpaid
     Subscription:
       type: object
