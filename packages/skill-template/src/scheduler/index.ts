@@ -10,7 +10,15 @@ import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { ToolMessage } from '@langchain/core/messages';
 import { pick, safeParseJSON } from '@refly/utils';
-import { Icon, SkillInvocationConfig, SkillMeta, SkillTemplateConfigSchema } from '@refly/openapi-schema';
+import {
+  Icon,
+  Resource,
+  Note,
+  Collection,
+  SkillInvocationConfig,
+  SkillMeta,
+  SkillTemplateConfigSchema,
+} from '@refly/openapi-schema';
 import { ToolCall } from '@langchain/core/dist/messages/tool';
 import { randomUUID } from 'node:crypto';
 import { createSkillInventory } from '../inventory';
@@ -266,6 +274,252 @@ Please generate the summary based on these requirements and offer suggestions fo
     return result;
   };
 
+  private async recognizeUserIntent(
+    query: string,
+    context: {
+      contentList: string[];
+      resources: Resource[];
+      notes: Note[];
+      collections: Collection[];
+      messages: BaseMessage[];
+    },
+  ): Promise<string> {
+    this.emitEvent({ event: 'log', content: 'Recognizing user intent...' }, this.configSnapshot);
+    /**
+     * 基于给定上下文，和聊天历史，实现最有效的判断意图的能力，撰写 Prompt，调用 LLM
+     *
+     * 1. 给定上下文和聊天历史
+     *  1. 上下文：contentList <string[]>、resources <Resource[]>、notes <Note[]>、collections <Collection[]>
+     *  2. 聊天历史：messages <BaseMessage[]>
+     * 2. 待识别用户意图：
+     *  1. 搜索问答，比如基于给定的上下文回答问题（知识库搜索，或者用户明确表明了需要进行在线搜索）
+     *  2. 基于上下文进行写作，比如写邮件、写博客、优化表达、续写、缩写等
+     *  3. 基于上下文进行阅读理解，比如总结、解释、翻译
+     * 3. 上下文可以拼接元信息，比如资源、笔记、集合的元信息，传入 Prompt 辅助意图识别
+     *
+     */
+    const { contentList, resources, notes, collections, messages } = context;
+
+    const getSystemPrompt =
+      () => `You are an advanced AI assistant specializing in recognizing user intents. Your task is to analyze the given query and context to determine the user's primary intent.
+
+Possible intents:
+1. SEARCH_QA: The user is asking a question that requires searching through given context or explicitly requests online search.
+2. WRITING: The user wants help with writing tasks such as composing emails, blog posts, optimizing expressions, continuing text, or summarizing.
+3. READING_COMPREHENSION: The user needs help understanding, summarizing, explaining, or translating given text.
+
+Context Information:
+- Content List: ${contentList.length} items
+- Resources: ${resources.length} items
+- Notes: ${notes.length} items
+- Collections: ${collections.length} items
+- Chat History: ${messages.length} messages
+
+Guidelines:
+1. Analyze the query and all provided context carefully.
+2. Consider the nature of the query and how it relates to the available context.
+3. Pay attention to specific keywords or phrases that might indicate a particular intent.
+4. Take into account the types and amount of context provided (e.g., many resources might suggest a search task).
+5. Consider the chat history for any relevant context that might influence the intent.
+
+Output your response in the following JSON format:
+{
+  "intent": "SEARCH_QA | WRITING | READING_COMPREHENSION",
+  "confidence": 0.0 to 1.0,
+  "reasoning": "A brief explanation of your reasoning"
+}`;
+
+    const getUserMessage = () => `Query: ${query}
+
+Context Summary:
+${this.summarizeContext(context)}
+
+Please analyze the query and context to determine the user's primary intent.`;
+
+    const model = this.engine.chatModel({ temperature: 0 });
+    const runnable = model.withStructuredOutput(
+      z.object({
+        intent: z.enum(['SEARCH_QA', 'WRITING', 'READING_COMPREHENSION']),
+        confidence: z.number().min(0).max(1),
+        reasoning: z.string(),
+      }),
+    );
+
+    const result = await runnable.invoke([new SystemMessage(getSystemPrompt()), new HumanMessage(getUserMessage())]);
+
+    this.engine.logger.log(`Recognized intent: ${result.intent} (confidence: ${result.confidence})`);
+    this.engine.logger.log(`Intent recognition reasoning: ${result.reasoning}`);
+
+    this.emitEvent(
+      { event: 'log', content: `Recognized intent: ${result.intent} (confidence: ${result.confidence})` },
+      this.configSnapshot,
+    );
+    this.emitEvent({ event: 'log', content: `Intent recognition reasoning: ${result.reasoning}` }, this.configSnapshot);
+    return result.intent;
+  }
+
+  private summarizeContext(context: {
+    contentList: string[];
+    resources: Resource[];
+    notes: Note[];
+    collections: Collection[];
+    messages: BaseMessage[];
+  }): string {
+    const { contentList, resources, notes, collections, messages } = context;
+
+    const summarizeResources = (resources: Resource[]) =>
+      resources.map((r) => `- ${r.resourceType}: "${r.title}" (ID: ${r.resourceId})`).join('\n');
+
+    const summarizeNotes = (notes: Note[]) => notes.map((n) => `- Note: "${n.title}" (ID: ${n.noteId})`).join('\n');
+
+    const summarizeCollections = (collections: Collection[]) =>
+      collections.map((c) => `- Collection: "${c.title}" (ID: ${c.collectionId})`).join('\n');
+
+    const summarizeMessages = (messages: BaseMessage[]) =>
+      messages.map((m) => `- ${m._getType()}: ${(m.content as string)?.substring(0, 50)}...`).join('\n');
+
+    return `Content List:
+  ${contentList.map((c, i) => `- Content ${i + 1}: ${c.substring(0, 50)}...`).join('\n')}
+  
+  Resources:
+  ${summarizeResources(resources)}
+  
+  Notes:
+  ${summarizeNotes(notes)}
+  
+  Collections:
+  ${summarizeCollections(collections)}
+  
+  Recent Messages:
+  ${summarizeMessages(messages.slice(-5))}`;
+  }
+
+  private async optimizeQuery(
+    query: string,
+    context: {
+      locale: string;
+      chatHistory: BaseMessage[];
+    },
+  ): Promise<{
+    decomposedQueries: Array<{ subquery: string; relevance: number }>;
+    optimizedQueries: Array<{ query: string; score: number; reasoning: string }>;
+    translations: Array<{ language: string; query: string }>;
+  }> {
+    /**
+     * 1. 基于给定的 query、locale 和 chatHistory，优化用户的 query 为多种变体（拆分query，改写、补充完整等）、多语种
+     * 2. 返回优化后的 query 集合和理由分数等
+     * 3. 撰写 Prompt，调用 LLM
+     *
+     */
+    const { locale, chatHistory } = context;
+
+    const getSystemPrompt =
+      () => `You are an advanced AI assistant specializing in query optimization, decomposition, and translation. Analyze the given query, considering the user's locale and chat history, to provide optimized and decomposed versions of the query along with translations.
+  
+  Guidelines:
+  1. Decompose the original query into 3-6 subqueries, each addressing a specific aspect of the main query.
+  2. Generate 3 optimized versions of the original query, each addressing a different aspect or interpretation.
+  3. For each optimized query and subquery, provide a relevance score (0.0 to 1.0) and a brief reasoning.
+  4. Translate the original query into English (if not already in English) and one other relevant language.
+  5. Consider the chat history for context that might influence query optimization and decomposition.
+  6. Ensure that optimized queries and subqueries maintain the original intent while potentially expanding or clarifying it.
+  
+  User's locale: ${locale}
+  
+  Output your response in the following JSON format:
+  {
+    "decomposedQueries": [
+      {
+        "subquery": "Decomposed subquery 1",
+        "relevance": 0.0 to 1.0
+      },
+      // ... (3-6 subqueries)
+    ],
+    "optimizedQueries": [
+      {
+        "query": "Optimized query 1",
+        "score": 0.0 to 1.0,
+        "reasoning": "Brief explanation for this optimization"
+      },
+      // ... (3 optimized queries)
+    ],
+    "translations": [
+      {
+        "language": "English",
+        "query": "Translated query in English"
+      },
+      {
+        "language": "Another relevant language",
+        "query": "Translated query in another language"
+      }
+    ]
+  }`;
+
+    const getUserMessage = () => `Original Query: ${query}
+  
+  Chat History Summary:
+  ${this.summarizeChatHistory(chatHistory)}
+  
+  Please decompose, optimize the query, and provide translations based on the given guidelines.`;
+
+    const model = this.engine.chatModel({ temperature: 0.3 });
+    const runnable = model.withStructuredOutput(
+      z.object({
+        decomposedQueries: z.array(
+          z.object({
+            subquery: z.string(),
+            relevance: z.number().min(0).max(1),
+          }),
+        ),
+        optimizedQueries: z.array(
+          z.object({
+            query: z.string(),
+            score: z.number().min(0).max(1),
+            reasoning: z.string(),
+          }),
+        ),
+        translations: z.array(
+          z.object({
+            language: z.string(),
+            query: z.string(),
+          }),
+        ),
+      }),
+    );
+
+    const result = await runnable.invoke([new SystemMessage(getSystemPrompt()), new HumanMessage(getUserMessage())]);
+
+    this.engine.logger.log(
+      `Query optimized with ${result.decomposedQueries.length} subqueries, ${result.optimizedQueries.length} variations, and ${result.translations.length} translations`,
+    );
+    this.engine.logger.log(`Query optimization result: ${JSON.stringify(result, null, 2)}`);
+
+    return {
+      decomposedQueries:
+        result.decomposedQueries?.map((q) => ({
+          subquery: q.subquery || '',
+          relevance: q.relevance || 0,
+        })) || [],
+      optimizedQueries:
+        result.optimizedQueries?.map((q) => ({
+          query: q.query || '',
+          score: q.score || 0,
+          reasoning: q.reasoning || '',
+        })) || [],
+      translations:
+        result.translations?.map((t) => ({
+          language: t.language || '',
+          query: t.query || '',
+        })) || [],
+    };
+  }
+
+  private summarizeChatHistory(chatHistory: BaseMessage[]): string {
+    // Take the last 5 messages for context
+    const recentMessages = chatHistory.slice(-5);
+    return recentMessages.map((msg) => `${msg._getType()}: ${(msg.content as string)?.substring(0, 50)}...`).join('\n');
+  }
+
   callScheduler = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { query, contextualUserQuery, messages = [] } = state;
 
@@ -274,16 +528,17 @@ Please generate the summary based on these requirements and offer suggestions fo
 
     const { locale = 'en', chatHistory = [], installedSkills, currentSkill, spanId } = this.configSnapshot.configurable;
 
-    let tools = this.skills;
-    if (installedSkills) {
-      const toolMap = new Map(tools.map((tool) => [tool.name, tool]));
-      tools = installedSkills.map((skill) => toolMap.get(skill.tplName)!).filter((tool) => tool);
-    }
+    // 目前先不支持选技能，未来支持有限制的选技能
+    // let tools = this.skills;
+    // if (installedSkills) {
+    //   const toolMap = new Map(tools.map((tool) => [tool.name, tool]));
+    //   tools = installedSkills.map((skill) => toolMap.get(skill.tplName)!).filter((tool) => tool);
+    // }
 
-    tools = tools.filter((tool) => tool);
-    const boundModel = this.engine
-      .chatModel()
-      .bindTools([...tools, new ReflyDefaultResponse()], { parallel_tool_calls: false });
+    // tools = tools.filter((tool) => tool);
+    // const boundModel = this.engine
+    //   .chatModel()
+    //   .bindTools([...tools, new ReflyDefaultResponse()], { parallel_tool_calls: false });
 
     const criticalGuidelines = `## Critical Guidelines
 
@@ -556,11 +811,7 @@ Generated question example:
     const { selectedSkill, installedSkills = [] } = config.configurable || {};
 
     if (!selectedSkill) {
-      if (installedSkills?.length > 0) {
-        return 'scheduler';
-      } else {
-        return 'commonSenseGenerate';
-      }
+      return 'scheduler';
     }
 
     if (!this.isValidSkillName(selectedSkill.tplName)) {
