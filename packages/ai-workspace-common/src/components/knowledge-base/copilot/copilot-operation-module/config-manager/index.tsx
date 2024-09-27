@@ -205,7 +205,7 @@ export const ConfigManager = (props: ConfigManagerProps) => {
 
   const getItemError = (key: string) => {
     const field = getFormField(fieldPrefix, key);
-    return formErrors[field];
+    return formErrors?.[field];
   };
 
   useEffect(() => {

@@ -15,7 +15,6 @@ export const defaultState = {
   // skills
   config: {
     type: [],
-    contentListTypes: [],
   },
   useConfigOfStore: false,
 };

@@ -23,6 +23,8 @@ import { SearchDomain, SearchResult } from '@refly/openapi-schema';
 import { backendBaseMarkTypes, BaseMarkType, frontendBaseMarkTypes, Mark } from '@refly/common-types';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 
+import { mapSelectionTypeToContentList } from './utils/contentListSelection';
+
 const mapMarkToSearchResult = (marks: Mark[]): SearchResult[] => {
   let searchResults: SearchResult[] = [];
 
@@ -118,7 +120,7 @@ export const ContextManager = () => {
               key={item.id}
               item={item}
               disabled={(filterIdsOfCurrentSelectedMarks || []).includes(item.id)}
-              isLimit={!!filterErrorInfo[item.type]}
+              isLimit={!!filterErrorInfo?.[mapSelectionTypeToContentList(item.type)]}
               isActive={item.id === activeItemId}
               onToggle={handleToggleItem}
               onRemove={handleRemoveItem}
