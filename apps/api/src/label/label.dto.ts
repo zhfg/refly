@@ -1,6 +1,6 @@
 import { pick } from '@/utils';
 import { LabelClass as LabelClassModel, LabelInstance as LabelInstanceModel } from '@prisma/client';
-import { LabelClass, LabelInstance } from '@refly/openapi-schema';
+import { LabelClass, LabelInstance } from '@refly-packages/openapi-schema';
 
 export const labelClassPO2DTO = (lc: LabelClassModel): LabelClass => {
   return {

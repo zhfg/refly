@@ -1,4 +1,4 @@
-import { ModelInfo, TokenUsageItem } from '@refly/openapi-schema';
+import { ModelInfo, TokenUsageItem } from '@refly-packages/openapi-schema';
 
 export const defaultModelList: ModelInfo[] = [
   {

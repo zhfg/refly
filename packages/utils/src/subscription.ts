@@ -1,4 +1,4 @@
-import { PriceLookupKey, SubscriptionInterval, SubscriptionPlanType } from '@refly/openapi-schema';
+import { PriceLookupKey, SubscriptionInterval, SubscriptionPlanType } from '@refly-packages/openapi-schema';
 
 export type SubscriptionInfo = {
   planType: SubscriptionPlanType;

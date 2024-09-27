@@ -1,22 +1,14 @@
 # Base image
-FROM node:20-alpine AS base
-WORKDIR /app
-RUN corepack enable
+FROM node:20-alpine
 
-# Builder image
-FROM base AS builder
+WORKDIR /app
+
+RUN corepack enable
 RUN npm install -g @microsoft/rush@5.125.0
+
 COPY . .
 RUN rush install --to @refly/api
 RUN rush build --to @refly/api
-RUN rush deploy --overwrite
-RUN node common/deploy/create-links.js create
-RUN cp -r apps/api/node_modules/.bin common/deploy/apps/api/node_modules/
-RUN cd common/deploy/apps/api && npm run build
 
-# Runner image
-FROM base AS runner
-RUN apk --no-cache add curl
-COPY --from=builder /app/common/deploy /app/common/deploy
 EXPOSE 3000
-CMD [ "node", "common/deploy/apps/api/dist/main.js" ]
+CMD [ "node", "apps/api/dist/main.js" ]

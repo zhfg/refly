@@ -2,13 +2,13 @@ import { BadRequestException, Injectable, Logger, OnModuleInit } from '@nestjs/c
 import Stripe from 'stripe';
 import { InjectStripeClient, StripeWebhookHandler } from '@golevelup/nestjs-stripe';
 import { PrismaService } from '@/common/prisma.service';
-import { CreateCheckoutSessionRequest, PriceLookupKey, User } from '@refly/openapi-schema';
+import { CreateCheckoutSessionRequest, PriceLookupKey, User } from '@refly-packages/openapi-schema';
 import {
   genTokenUsageMeterID,
   genStorageUsageMeterID,
   getSubscriptionInfoFromLookupKey,
   defaultModelList,
-} from '@refly/utils';
+} from '@refly-packages/utils';
 import {
   CreateSubscriptionParam,
   SyncTokenUsageJobData,

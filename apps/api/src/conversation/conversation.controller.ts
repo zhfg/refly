@@ -16,7 +16,7 @@ import {
   CreateConversationResponse,
   ListConversationResponse,
   GetConversationDetailResponse,
-} from '@refly/openapi-schema';
+} from '@refly-packages/openapi-schema';
 import { User as UserModel } from '@prisma/client';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { ConversationService } from './conversation.service';

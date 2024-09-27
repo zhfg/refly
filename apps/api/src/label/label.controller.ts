@@ -21,7 +21,7 @@ import {
   UpdateLabelInstanceRequest,
   UpsertLabelClassResponse,
   UpsertLabelInstanceResponse,
-} from '@refly/openapi-schema';
+} from '@refly-packages/openapi-schema';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { buildSuccessResponse } from '@/utils';
 import { LabelService } from '@/label/label.service';

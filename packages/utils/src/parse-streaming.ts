@@ -1,8 +1,8 @@
 import { fetchStream } from './fetch-stream';
-import type { RelatedQuestion } from '@refly/common-types';
+import type { RelatedQuestion } from '@refly-packages/common-types';
 import { getAuthTokenFromCookie } from './request';
 import { getServerOrigin } from './url';
-import { Source, ChatTask } from '@refly/openapi-schema';
+import { Source, ChatTask } from '@refly-packages/openapi-schema';
 import { markdownCitationParse } from './parse';
 
 const LLM_SPLIT = '__LLM_RESPONSE__';

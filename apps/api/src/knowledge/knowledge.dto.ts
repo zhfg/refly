@@ -4,7 +4,13 @@ import {
   Note as NoteModel,
   LabelInstance,
 } from '@prisma/client';
-import { Collection, Resource, Note, ResourceType, IndexStatus } from '@refly/openapi-schema';
+import {
+  Collection,
+  Resource,
+  Note,
+  ResourceType,
+  IndexStatus,
+} from '@refly-packages/openapi-schema';
 import { pick } from '@/utils';
 
 export type FinalizeResourceParam = {

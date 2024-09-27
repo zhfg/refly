@@ -6,7 +6,13 @@ import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/
 import { BasePromptTemplate, ChatPromptTemplate, MessagesPlaceholder, PromptTemplate } from '@langchain/core/prompts';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 import { ReflySearch } from '../../tools/refly-search';
-import { SearchResponse, Source, SkillInvocationConfig, SkillTemplateConfigSchema, Icon } from '@refly/openapi-schema';
+import {
+  SearchResponse,
+  Source,
+  SkillInvocationConfig,
+  SkillTemplateConfigSchema,
+  Icon,
+} from '@refly-packages/openapi-schema';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 
 interface GraphState extends BaseSkillState {

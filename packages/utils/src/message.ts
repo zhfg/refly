@@ -1,7 +1,7 @@
-import { MessageDataType, MessageItemType, QuestionType, ReplyType, SystemAction } from '@refly/common-types';
+import { MessageDataType, MessageItemType, QuestionType, ReplyType, SystemAction } from '@refly-packages/common-types';
 
 import { genUniqueId } from './id';
-import { ChatMessage } from '@refly/openapi-schema';
+import { ChatMessage } from '@refly-packages/openapi-schema';
 import { safeParseJSON } from './parse';
 
 export const unsupportedMessage = '暂不支持的消息类型，请更新版本之后重试';

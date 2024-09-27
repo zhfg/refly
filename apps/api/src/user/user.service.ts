@@ -1,7 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma.service';
-import { CheckSettingsFieldData, UpdateUserSettingsRequest, User } from '@refly/openapi-schema';
-import { pick } from '@refly/utils';
+import {
+  CheckSettingsFieldData,
+  UpdateUserSettingsRequest,
+  User,
+} from '@refly-packages/openapi-schema';
+import { pick } from '@refly-packages/utils';
 
 @Injectable()
 export class UserService {

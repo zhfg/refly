@@ -1,6 +1,6 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { User as UserModel } from '@prisma/client';
-import { SearchRequest, SearchResponse } from '@refly/openapi-schema';
+import { SearchRequest, SearchResponse } from '@refly-packages/openapi-schema';
 
 import { buildSuccessResponse } from '@/utils';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';

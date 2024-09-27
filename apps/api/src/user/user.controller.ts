@@ -9,7 +9,7 @@ import {
   GetUserSettingsResponse,
   UpdateUserSettingsRequest,
   UserSettings,
-} from '@refly/openapi-schema';
+} from '@refly-packages/openapi-schema';
 import { buildSuccessResponse, pick } from '@/utils';
 import { User as UserModel } from '@prisma/client';
 import { SubscriptionService } from '@/subscription/subscription.service';
