@@ -204,6 +204,9 @@ export const useProcessContextFilter = (filterNow = false) => {
     const filterErrorInfo = {};
 
     type.forEach((type) => {
+      if (type === 'contentList') {
+        return;
+      }
       const limit = getConfigLimit(type, initialConfigRule);
       const required = getConfigRequired(type, initialConfigRule);
       const currentCount = contextItemIdsByType[type]?.length || 0;
@@ -271,8 +274,19 @@ export const useProcessContextFilter = (filterNow = false) => {
 
   useEffect(() => {
     const selectedSkill = skillStore.selectedSkill;
-    const context = selectedSkill?.invocationConfig?.context || ({} as SkillContextRuleGroup);
+    // const context = selectedSkill?.invocationConfig?.context || ({} as SkillContextRuleGroup);
     let config: SkillContextRuleGroup;
+    const context = {
+      rules: [
+        {
+          key: 'contentList',
+          limit: 1,
+          required: true,
+          preferredSelectionKeys: ['resourceSelection', 'noteSelection'],
+        },
+      ],
+      relation: 'regular',
+    };
 
     if (!Object.keys(context).length) {
       config = JSON.parse(JSON.stringify(defaultConfig));
