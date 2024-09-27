@@ -100,6 +100,7 @@ interface ContextPanelState {
   currentSelectedMarks: Mark[]; // 作为唯一的 context items 来源
   filterIdsOfCurrentSelectedMarks: string[]; // 作为 context items 的过滤
   filterErrorInfo: { [key: string]: { limit: number; currentCount: number; required?: boolean } }; // 作为 context items 的过滤错误信息
+  formErrors: Record<string, string>;
 
   // context card
   showContextCard: boolean;
@@ -132,6 +133,7 @@ interface ContextPanelState {
   updateFilterErrorInfo: (errorInfo: {
     [key: string]: { limit: number; currentCount: number; required?: boolean };
   }) => void;
+  setFormErrors: (errors: Record<string, string>) => void;
 
   // context card
   setShowContextCard: (showcontextCard: boolean) => void;
@@ -159,6 +161,7 @@ export const defaultSelectedTextCardState = {
   currentSelectedMarks: [] as Mark[],
   filterIdsOfCurrentSelectedMarks: [] as string[],
   filterErrorInfo: {} as { [key: string]: { limit: number; currentCount: number; required?: boolean } },
+  formErrors: {} as Record<string, string>,
 };
 
 export const defaultCurrentContext = {
@@ -227,6 +230,7 @@ export const useContextPanelStore = create<ContextPanelState>()(
     updateFilterErrorInfo: (errorInfo: {
       [key: string]: { limit: number; currentCount: number; required?: boolean };
     }) => set((state) => ({ ...state, filterErrorInfo: errorInfo })),
+    setFormErrors: (errors: Record<string, string>) => set((state) => ({ ...state, formErrors: errors })),
 
     addMark: (mark: Mark) =>
       set((state) => ({ ...state, currentSelectedMarks: [...state.currentSelectedMarks, mark] })),

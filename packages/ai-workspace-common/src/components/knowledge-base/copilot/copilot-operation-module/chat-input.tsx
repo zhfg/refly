@@ -10,17 +10,17 @@ import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 import { useTranslation } from 'react-i18next';
 import { SkillTemplateConfig } from '@refly/openapi-schema';
+import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 const TextArea = Input.TextArea;
 
 interface ChatInputProps {
   placeholder: string;
   autoSize: { minRows: number; maxRows: number };
   form?: FormInstance;
-  formErrors?: Record<string, string>;
 }
 
 export const ChatInput = (props: ChatInputProps) => {
-  const { formErrors, form } = props;
+  const { form } = props;
 
   const { t } = useTranslation();
   const inputRef = useRef<RefTextAreaType>(null);
@@ -39,6 +39,7 @@ export const ChatInput = (props: ChatInputProps) => {
       return;
     }
 
+    const { formErrors } = useContextPanelStore.getState();
     if (formErrors && Object.keys(formErrors).length > 0) {
       Notification.error({
         style: { width: 400 },

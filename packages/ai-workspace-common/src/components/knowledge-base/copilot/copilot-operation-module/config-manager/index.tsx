@@ -14,6 +14,7 @@ import {
   SkillTemplateConfigSchema,
 } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
+import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 const FormItem = Form.Item;
 const TextArea = Input.TextArea;
@@ -104,6 +105,9 @@ const ConfigItem = (props: {
       item.options.map((option) => [option.value, getDictValue(option.labelDict, locale)]),
     );
 
+    const defaultValue =
+      configValue?.value || (item.inputMode === 'multiSelect' ? [item.options[0]?.value] : item.options[0]?.value);
+
     if (item.inputMode === 'multiSelect') {
       return (
         <Checkbox.Group
@@ -112,7 +116,7 @@ const ConfigItem = (props: {
             value: option.value,
           }))}
           style={{ fontSize: '10px' }}
-          defaultValue={configValue?.value as string[]}
+          defaultValue={defaultValue as string[]}
           onChange={(val) => {
             console.log('val', val);
             onValueChange(
@@ -126,7 +130,7 @@ const ConfigItem = (props: {
 
     return (
       <Radio.Group
-        defaultValue={configValue?.value}
+        defaultValue={defaultValue}
         onChange={(checkedValue) => {
           console.log('checkedValue', checkedValue, optionValToDisplay.get(checkedValue));
           onValueChange(checkedValue, optionValToDisplay.get(checkedValue));
@@ -171,17 +175,16 @@ export const ConfigManager = (props: ConfigManagerProps) => {
   };
 
   const validateField = (field: string, value: any) => {
+    const { formErrors: prevFormErrors } = useContextPanelStore.getState();
     const schemaItem = schema.items.find((item) => getFormField(fieldPrefix, item.key) === field);
     if (isConfigItemRequired(schemaItem)) {
       const value_ = value?.value;
       if ((!value_ && value_ !== 0) || (Array.isArray(value_) && !value_.length)) {
-        setFormErrors((prev) => ({ ...prev, [field]: t('common.emptyInput') }));
+        setFormErrors({ ...prevFormErrors, [field]: t('common.emptyInput') });
       } else {
-        setFormErrors((prev) => {
-          const newErrors = { ...prev };
-          delete newErrors[field];
-          return newErrors;
-        });
+        const newErrors = { ...prevFormErrors };
+        delete newErrors[field];
+        setFormErrors(newErrors);
       }
     }
   };

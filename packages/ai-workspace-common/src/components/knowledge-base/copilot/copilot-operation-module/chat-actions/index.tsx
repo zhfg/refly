@@ -23,14 +23,14 @@ import { ModelSelector } from './model-selector';
 // styles
 import './index.scss';
 import { OutputLocaleList } from '@refly-packages/ai-workspace-common/components/output-locale-list';
+import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 interface ChatActionsProps {
   form?: FormInstance;
-  formErrors?: Record<string, string>;
 }
 
 export const ChatActions = (props: ChatActionsProps) => {
-  const { form, formErrors } = props;
+  const { form } = props;
   const { t } = useTranslation();
   const [model, setModel] = useState('gpt-3.5-turbo');
   const [image, setImage] = useState(null);
@@ -56,6 +56,7 @@ export const ChatActions = (props: ChatActionsProps) => {
       return;
     }
 
+    const { formErrors } = useContextPanelStore.getState();
     if (formErrors && Object.keys(formErrors).length > 0) {
       Notification.error({
         style: { width: 400 },
