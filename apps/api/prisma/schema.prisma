@@ -493,23 +493,25 @@ model SubscriptionUsageQuota {
 
 model Subscription {
   /// Primary key
-  pk             BigInt   @id @default(autoincrement())
+  pk             BigInt    @id @default(autoincrement())
   /// Stripe subscription ID
-  subscriptionId String   @unique @map("subscription_id")
+  subscriptionId String    @unique @map("subscription_id")
   /// Stripe price lookup key
-  lookupKey      String   @map("lookup_key")
+  lookupKey      String    @map("lookup_key")
   /// Plan type (free, pro, max, etc.)
-  planType       String   @map("plan_type")
+  planType       String    @map("plan_type")
   /// Billing interval (monthly, yearly, etc.)
-  interval       String?  @map("interval")
+  interval       String?   @map("interval")
   /// UID
-  uid            String   @map("uid")
+  uid            String    @map("uid")
   /// Stripe subscription status
-  status         String   @map("status")
+  status         String    @map("status")
+  /// Cancel timestamp
+  cancelAt       DateTime? @map("cancel_at") @db.Timestamptz()
   /// Create timestamp
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
-  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
 
   @@index([uid])
   @@map("subscriptions")

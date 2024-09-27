@@ -1006,6 +1006,10 @@ export type Subscription = {
    * Subscription status
    */
   status: SubscriptionStatus;
+  /**
+   * Subscription cancel time
+   */
+  cancelAt?: string;
 };
 
 export type TokenUsageMeter = {
@@ -1119,6 +1123,10 @@ export type UserSettings = {
    * User output locale
    */
   outputLocale?: string;
+  /**
+   * Stripe customer ID
+   */
+  customerId?: string;
   /**
    * User subscription
    */
