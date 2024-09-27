@@ -65,7 +65,7 @@ export const ModelSelector = () => {
 
   return (
     <Dropdown droplist={droplist} trigger="click" getPopupContainer={getPopupContainer}>
-      <span className={classNames('model-selector')}>
+      <span className={classNames('model-selector', 'chat-action-item')}>
         <IconDown />
         {selectedModel?.label}
       </span>

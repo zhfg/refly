@@ -27,15 +27,11 @@ export class AIApplySkill extends BaseSkill {
   };
 
   invocationConfig: SkillInvocationConfig = {
-    input: {
-      rules: [{ key: 'query' }],
-    },
     context: {
       rules: [
         {
           key: 'contentList',
-          inputMode: 'multiSelect',
-          defaultValue: ['noteCursorSelection', 'noteBeforeCursorSelection', 'noteAfterCursorSelection'],
+          preferredSelectionKeys: ['noteCursorSelection', 'noteBeforeCursorSelection', 'noteAfterCursorSelection'],
         },
       ],
     },

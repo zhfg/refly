@@ -1845,6 +1845,9 @@ components:
             description:
               type: string
               description: Skill instance description
+            promptHint:
+              type: string
+              description: Skill instance prompt hint
             tplConfig:
               description: Skill template config
               $ref: '#/components/schemas/SkillTemplateConfig'
@@ -3059,24 +3062,6 @@ components:
         metadata:
           type: object
           description: URL context metadata
-    SkillContextValue:
-      oneOf:
-        - type: string
-        - type: array
-          items:
-            $ref: '#/components/schemas/SkillContextResourceItem'
-        - type: array
-          items:
-            $ref: '#/components/schemas/SkillContextCollectionItem'
-        - type: array
-          items:
-            $ref: '#/components/schemas/SkillContextNoteItem'
-        - type: array
-          items:
-            $ref: '#/components/schemas/SkillContextContentItem'
-        - type: array
-          items:
-            $ref: '#/components/schemas/SkillContextUrlItem'
     SkillContext:
       type: object
       description: Skill invocation context
@@ -3106,10 +3091,6 @@ components:
           description: List of URLs
           items:
             $ref: '#/components/schemas/SkillContextUrlItem'
-    SkillInputKey:
-      type: string
-      enum:
-        - query
     SkillContextKey:
       type: string
       enum:
@@ -3118,7 +3099,7 @@ components:
         - notes
         - contentList
         - urls
-    SkillSelectedTextKey:
+    SelectionKey:
       type: string
       enum:
         - noteSelection
@@ -3127,95 +3108,59 @@ components:
         - noteCursorSelection
         - noteBeforeCursorSelection
         - noteAfterCursorSelection
-    SkillInvocationRule:
+    SkillContextRule:
       type: object
       required:
         - key
       properties:
         key:
           type: string
-          description: Field key
-          oneOf:
-            - $ref: '#/components/schemas/SkillInputKey'
-            - $ref: '#/components/schemas/SkillContextKey'
-            - $ref: '#/components/schemas/SkillSelectedTextKey'
-        rules:
-          type: array
-          description: Skill invocation rules
-          items:
-            $ref: '#/components/schemas/SkillInvocationRule'
-        relation:
-          type: string
-          description: Group relation
-          default: regular
-          $ref: '#/components/schemas/InvocationRuleGroupRelation'
+          description: Context key
+          $ref: '#/components/schemas/SkillContextKey'
         limit:
           type: number
           description: Maximum number of items
-          default: 10
-        inputMode:
-          type: string
-          description: Input mode
-          enum:
-            - input
-            - inputNumber
-            - inputTextArea
-            - select
-            - multiSelect
-        labelDict:
-          type: object
-          description: Config label (key is locale, value is label)
-          additionalProperties:
-            type: string
-        descriptionDict:
-          type: object
-          description: Config description (key is locale, value is description)
-          additionalProperties:
-            type: string
-        defaultValue:
-          type: array
-          description: Default value
-          items:
-            type: string
-            enum:
-              - resource
-              - note
-              - extension-weblink
-              - noteCursorSelection
-              - noteBeforeCursorSelection
-              - noteAfterCursorSelection
+          default: 50
         required:
           type: boolean
-          description: Whether this key is required (default is false)
-    InvocationRuleGroupRelation:
+          description: Whether this context is required
+          default: false
+        preferredSelectionKeys:
+          type: array
+          description: Preferred selection keys (only applicable when key is `contentList`)
+          items:
+            $ref: '#/components/schemas/SelectionKey'
+    ContextRuleGroupRelation:
       type: string
       enum:
         - regular
         - mutuallyExclusive
-    SkillInvocationRuleGroup:
+    SkillContextRuleGroup:
       type: object
       required:
         - rules
       properties:
         rules:
           type: array
-          description: Skill invocation rules
+          description: Skill context rules
           items:
-            $ref: '#/components/schemas/SkillInvocationRule'
+            $ref: '#/components/schemas/SkillContextRule'
         relation:
           type: string
-          description: Group relation
+          description: Rule group relation
           default: regular
-          $ref: '#/components/schemas/InvocationRuleGroupRelation'
+          $ref: '#/components/schemas/ContextRuleGroupRelation'
+        preferredContextKeys:
+          type: array
+          description: Preferred context keys
+          items:
+            $ref: '#/components/schemas/SkillContextKey'
     SkillInvocationConfig:
       type: object
       properties:
-        input:
-          description: Skill input rule group
-          $ref: '#/components/schemas/SkillInvocationRuleGroup'
         context:
           description: Skill context rule group
-          $ref: '#/components/schemas/SkillInvocationRuleGroup'
+          $ref: '#/components/schemas/SkillContextRuleGroup'
     SkillJobStatus:
       type: string
       description: Skill job status

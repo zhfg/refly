@@ -500,6 +500,10 @@ export type SkillInstance = SkillMeta & {
    */
   description?: string;
   /**
+   * Skill instance prompt hint
+   */
+  promptHint?: string;
+  /**
    * Skill template config
    */
   tplConfig?: SkillTemplateConfig;
@@ -1649,14 +1653,6 @@ export type SkillContextUrlItem = {
   };
 };
 
-export type SkillContextValue =
-  | string
-  | Array<SkillContextResourceItem>
-  | Array<SkillContextCollectionItem>
-  | Array<SkillContextNoteItem>
-  | Array<SkillContextContentItem>
-  | Array<SkillContextUrlItem>;
-
 /**
  * Skill invocation context
  */
@@ -1683,11 +1679,9 @@ export type SkillContext = {
   urls?: Array<SkillContextUrlItem>;
 };
 
-export type SkillInputKey = 'query';
-
 export type SkillContextKey = 'resources' | 'collections' | 'notes' | 'contentList' | 'urls';
 
-export type SkillSelectedTextKey =
+export type SelectionKey =
   | 'noteSelection'
   | 'resourceSelection'
   | 'extensionWeblinkSelection'
@@ -1695,83 +1689,47 @@ export type SkillSelectedTextKey =
   | 'noteBeforeCursorSelection'
   | 'noteAfterCursorSelection';
 
-export type SkillInvocationRule = {
+export type SkillContextRule = {
   /**
-   * Field key
+   * Context key
    */
-  key: SkillInputKey | SkillContextKey | SkillSelectedTextKey;
-  /**
-   * Skill invocation rules
-   */
-  rules?: Array<SkillInvocationRule>;
-  /**
-   * Group relation
-   */
-  relation?: InvocationRuleGroupRelation;
+  key: SkillContextKey;
   /**
    * Maximum number of items
    */
   limit?: number;
   /**
-   * Input mode
-   */
-  inputMode?: 'input' | 'inputNumber' | 'inputTextArea' | 'select' | 'multiSelect';
-  /**
-   * Config label (key is locale, value is label)
-   */
-  labelDict?: {
-    [key: string]: string;
-  };
-  /**
-   * Config description (key is locale, value is description)
-   */
-  descriptionDict?: {
-    [key: string]: string;
-  };
-  /**
-   * Default value
-   */
-  defaultValue?: Array<
-    | 'resource'
-    | 'note'
-    | 'extension-weblink'
-    | 'noteCursorSelection'
-    | 'noteBeforeCursorSelection'
-    | 'noteAfterCursorSelection'
-  >;
-  /**
-   * Whether this key is required (default is false)
+   * Whether this context is required
    */
   required?: boolean;
+  /**
+   * Preferred selection keys (only applicable when key is `contentList`)
+   */
+  preferredSelectionKeys?: Array<SelectionKey>;
 };
 
-/**
- * Input mode
- */
-export type inputMode = 'input' | 'inputNumber' | 'inputTextArea' | 'select' | 'multiSelect';
+export type ContextRuleGroupRelation = 'regular' | 'mutuallyExclusive';
 
-export type InvocationRuleGroupRelation = 'regular' | 'mutuallyExclusive';
-
-export type SkillInvocationRuleGroup = {
+export type SkillContextRuleGroup = {
   /**
-   * Skill invocation rules
+   * Skill context rules
    */
-  rules: Array<SkillInvocationRule>;
+  rules: Array<SkillContextRule>;
   /**
-   * Group relation
+   * Rule group relation
    */
-  relation?: InvocationRuleGroupRelation;
+  relation?: ContextRuleGroupRelation;
+  /**
+   * Preferred context keys
+   */
+  preferredContextKeys?: Array<SkillContextKey>;
 };
 
 export type SkillInvocationConfig = {
   /**
-   * Skill input rule group
-   */
-  input?: SkillInvocationRuleGroup;
-  /**
    * Skill context rule group
    */
-  context?: SkillInvocationRuleGroup;
+  context?: SkillContextRuleGroup;
 };
 
 /**

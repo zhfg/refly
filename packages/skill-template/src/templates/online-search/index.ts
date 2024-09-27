@@ -38,14 +38,7 @@ export class OnlineSearchSkill extends BaseSkill {
     items: [],
   };
 
-  invocationConfig: SkillInvocationConfig = {
-    input: {
-      rules: [{ key: 'query', required: true }],
-    },
-    context: {
-      rules: [],
-    },
-  };
+  invocationConfig: SkillInvocationConfig = {};
 
   description =
     'A search engine. Useful for when you need to answer questions about current events. Input should be a search query.';

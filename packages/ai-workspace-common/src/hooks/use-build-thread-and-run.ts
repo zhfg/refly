@@ -90,6 +90,7 @@ export const useBuildThreadAndRun = () => {
     // support ask follow up question
     const { messages = [], selectedModel } = useChatStore.getState();
     const { selectedSkill } = useSkillStore.getState();
+    const { localSettings } = useUserStore.getState();
 
     const question = comingQuestion;
     const isFollowUpAsk = messages?.length > 0;
@@ -107,6 +108,7 @@ export const useBuildThreadAndRun = () => {
       modelName: selectedModel?.name,
       context: skillContext,
       convId: conv?.convId || '',
+      locale: localSettings?.outputLocale as OutputLocale,
       tplConfig: invokeParams?.tplConfig,
       ...{ createConvParam: { ...conv, title: question } },
     };

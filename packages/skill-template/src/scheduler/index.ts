@@ -43,14 +43,7 @@ export class Scheduler extends BaseSkill {
     items: [],
   };
 
-  invocationConfig: SkillInvocationConfig = {
-    input: {
-      rules: [{ key: 'query' }],
-    },
-    context: {
-      rules: [],
-    },
-  };
+  invocationConfig: SkillInvocationConfig = {};
 
   description = "Inference user's intent and run related skill";
 

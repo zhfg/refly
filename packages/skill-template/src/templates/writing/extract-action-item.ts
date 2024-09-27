@@ -27,9 +27,6 @@ export class ExtractActionItemSkill extends BaseSkill {
   };
 
   invocationConfig: SkillInvocationConfig = {
-    input: {
-      rules: [{ key: 'query' }],
-    },
     context: {
       rules: [{ key: 'contentList' }],
     },

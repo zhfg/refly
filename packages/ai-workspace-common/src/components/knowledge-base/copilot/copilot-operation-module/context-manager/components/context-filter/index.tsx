@@ -13,13 +13,12 @@ import {
 import { IconFilter, IconCheck, IconArrowDown } from '@arco-design/web-react/icon';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { useTranslation } from 'react-i18next';
-import { useContextFilterConfigStore } from '@refly-packages/ai-workspace-common/stores/use-context-filter-config';
 import { useProcessContextItems } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module/context-manager/hooks/use-process-context-items';
 import { PiNotepad, PiTextAlignRightBold } from 'react-icons/pi';
 import { HiOutlineBookOpen } from 'react-icons/hi2';
 import { LuFileText } from 'react-icons/lu';
 import { IconRefresh } from '@arco-design/web-react/icon';
-import { SkillInvocationRuleGroup } from '@refly/openapi-schema';
+import { SkillContextRuleGroup } from '@refly/openapi-schema';
 
 import './index.scss';
 
@@ -27,16 +26,16 @@ const iconStyle = { fontSize: 10, transform: 'translateY(1px)', marginRight: 6, 
 
 interface UseProcessContextFilterProps {
   config: FilterConfig;
-  initialConfigRule: SkillInvocationRuleGroup;
+  initialConfigRule: SkillContextRuleGroup;
   contentListConfig: string[];
   isMutiType: boolean;
   isMutiContentListType: boolean;
   getConfigOfStore: () => void;
   isContentList: (type: string) => boolean;
   isTypeDisabled: (type: string) => boolean;
-  getConfigLimit: (type: string, initialConfigRule: SkillInvocationRuleGroup) => number;
+  getConfigLimit: (type: string, initialConfigRule: SkillContextRuleGroup) => number;
   updateConfig: (type: string, value: string, isMutiType: boolean) => void;
-  filterApply: (config: FilterConfig, initialConfigRule: SkillInvocationRuleGroup) => Function;
+  filterApply: (config: FilterConfig, initialConfigRule: SkillContextRuleGroup) => Function;
   resetConfig: () => void;
 }
 
@@ -50,23 +49,11 @@ interface FilterConfig {
   contentListTypes: string[];
 }
 
-const defaultLimit = 16;
-const defaultMaxLimit = 16;
 const defaultTypeList = ['resources', 'notes', 'collections', 'contentList'];
-
-const NumberInputWithSlider = ({ min, max, value, onChange }) => {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center' }}>
-      <InputNumber
-        min={min}
-        max={max}
-        value={value}
-        onChange={onChange}
-        style={{ width: '60px', marginRight: '8px' }}
-      />
-      <Slider min={min} max={max} value={value} onChange={onChange} style={{ width: '100px' }} />
-    </div>
-  );
+const typeMap = {
+  resource: 'resources',
+  note: 'notes',
+  collection: 'collections',
 };
 
 const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = ({
@@ -217,12 +204,15 @@ const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = 
                     <div className="filter-item-limit">
                       <span
                         style={{
-                          color: getConfigLimit(type, initialConfigRule) >= contextItemTypes[type] ? 'green' : 'red',
+                          color:
+                            getConfigLimit(typeMap[type] || type, initialConfigRule) >= contextItemTypes[type]
+                              ? 'green'
+                              : 'red',
                         }}
                       >
                         {contextItemTypes[type]}{' '}
                       </span>
-                      / {getConfigLimit(type, initialConfigRule)}
+                      / {getConfigLimit(typeMap[type] || type, initialConfigRule)}
                     </div>
                   </div>
                 ))

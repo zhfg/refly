@@ -10,7 +10,7 @@
   },
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "rimraf dist && tsc",
+    "build": "echo \"No build script\"",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "vite"
   },

@@ -2,10 +2,6 @@ import { useEffect, useState } from 'react';
 // 自定义样式
 import './index.scss';
 
-import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
-import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
-import { SelectedInstanceCard } from '@refly-packages/ai-workspace-common/components/skill/selected-instance-card';
-import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
 import { Button, Checkbox, Radio, InputNumber, Input, Form, FormInstance } from '@arco-design/web-react';
 import { IconFile, IconRefresh } from '@arco-design/web-react/icon';
 import { GrDocumentConfig } from 'react-icons/gr';
@@ -16,8 +12,6 @@ import {
   DynamicConfigValue,
   SkillTemplateConfig,
   SkillTemplateConfigSchema,
-  ConfigScope,
-  SkillInstance,
 } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 
@@ -60,7 +54,6 @@ const ConfigItem = (props: {
   const placeholder = getDictValue(item.descriptionDict, locale);
 
   const onValueChange = (val: any, displayValue: string) => {
-    console.log('onValueChange', val, displayValue);
     form.setFieldValue(field, {
       value: val,
       label,
@@ -133,10 +126,10 @@ const ConfigItem = (props: {
 
     return (
       <Radio.Group
-        defaultValue={configValue?.value?.[0]}
+        defaultValue={configValue?.value}
         onChange={(checkedValue) => {
           console.log('checkedValue', checkedValue, optionValToDisplay.get(checkedValue));
-          onValueChange([checkedValue], optionValToDisplay.get(checkedValue));
+          onValueChange(checkedValue, optionValToDisplay.get(checkedValue));
         }}
       >
         {item.options.map((option) => (
@@ -168,14 +161,18 @@ export const ConfigManager = (props: ConfigManagerProps) => {
   const { i18n, t } = useTranslation();
   const locale = i18n.languages?.[0] || 'en';
 
-  const { schema, fieldPrefix, form, tplConfig, configScope, resetConfig, formErrors, setFormErrors } = props;
+  const { schema, fieldPrefix, form, tplConfig, configScope, formErrors, setFormErrors } = props;
   const [activeConfig, setActiveConfig] = useState<DynamicConfigItem>();
   const [showConfig, setShowConfig] = useState<boolean>(false);
   const [resetCounter, setResetCounter] = useState<number>(0);
 
+  const isConfigItemRequired = (schemaItem: DynamicConfigItem) => {
+    return schemaItem?.required?.value && schemaItem?.required?.configScope.includes(configScope);
+  };
+
   const validateField = (field: string, value: any) => {
     const schemaItem = schema.items.find((item) => getFormField(fieldPrefix, item.key) === field);
-    if (schemaItem?.required?.value && schemaItem?.required?.configScope.includes(configScope)) {
+    if (isConfigItemRequired(schemaItem)) {
       const value_ = value?.value;
       if ((!value_ && value_ !== 0) || (Array.isArray(value_) && !value_.length)) {
         setFormErrors((prev) => ({ ...prev, [field]: t('common.emptyInput') }));
@@ -189,6 +186,20 @@ export const ConfigManager = (props: ConfigManagerProps) => {
     }
   };
 
+  const validateTplConfig = (tplConfig: SkillTemplateConfig) => {
+    const errors = {};
+    Object.keys(tplConfig).forEach((key) => {
+      const schemaItem = (schema.items || []).find((item) => item.key === key);
+      if (isConfigItemRequired(schemaItem)) {
+        const value_ = tplConfig[key].value;
+        if ((!value_ && value_ !== 0) || (Array.isArray(value_) && !value_.length)) {
+          errors[getFormField(fieldPrefix, key)] = t('common.emptyInput');
+        }
+      }
+    });
+    return errors;
+  };
+
   const getItemError = (key: string) => {
     const field = getFormField(fieldPrefix, key);
     return formErrors[field];
@@ -200,10 +211,12 @@ export const ConfigManager = (props: ConfigManagerProps) => {
     } else {
       form.setFieldValue(fieldPrefix, {});
     }
+
     setResetCounter((prev) => prev + 1);
     setShowConfig(false);
     setActiveConfig(undefined);
-    setFormErrors({});
+    const errors = validateTplConfig(tplConfig);
+    setFormErrors(errors);
   }, [tplConfig]);
 
   const handleConfigItemClick = (item: DynamicConfigItem) => {
@@ -280,7 +293,6 @@ export const ConfigManager = (props: ConfigManagerProps) => {
           <Form
             form={form}
             onValuesChange={(changedValues, allValues) => {
-              console.log('表单值变化:', changedValues, allValues);
               Object.keys(changedValues).forEach((field) => {
                 validateField(field, changedValues[field]);
               });
