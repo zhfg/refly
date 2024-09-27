@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Button, Input, Dropdown, Menu, Notification } from '@arco-design/web-react';
+import { Button, Input, Dropdown, Menu, Notification, FormInstance } from '@arco-design/web-react';
 
 import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
@@ -25,12 +25,12 @@ import './index.scss';
 import { OutputLocaleList } from '@refly-packages/ai-workspace-common/components/output-locale-list';
 
 interface ChatActionsProps {
-  tplConfig?: SkillTemplateConfig;
+  form?: FormInstance;
   formErrors?: Record<string, string>;
 }
 
 export const ChatActions = (props: ChatActionsProps) => {
-  const { tplConfig, formErrors } = props;
+  const { form, formErrors } = props;
   const { t } = useTranslation();
   const [model, setModel] = useState('gpt-3.5-turbo');
   const [image, setImage] = useState(null);
@@ -69,6 +69,7 @@ export const ChatActions = (props: ChatActionsProps) => {
 
     const { messages, newQAText } = useChatStore.getState();
     searchStore.setIsSearchOpen(false);
+    const tplConfig = form?.getFieldValue('tplConfig');
     const invokeParams = { tplConfig: tplConfig };
 
     if (messages?.length > 0) {

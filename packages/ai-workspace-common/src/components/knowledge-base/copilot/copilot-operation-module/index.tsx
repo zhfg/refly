@@ -57,7 +57,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
               <ContextManager />
               <div className="chat-input-body">
                 <ChatInput
-                  tplConfig={form.getFieldValue('tplConfig')}
+                  form={form}
                   formErrors={formErrors}
                   placeholder="提出问题，发现新知"
                   autoSize={{ minRows: 1, maxRows: 3 }}
@@ -79,7 +79,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
                 />
               )}
 
-              <ChatActions tplConfig={form.getFieldValue('tplConfig')} formErrors={formErrors} />
+              <ChatActions form={form} formErrors={formErrors} />
             </div>
           </div>
         </div>

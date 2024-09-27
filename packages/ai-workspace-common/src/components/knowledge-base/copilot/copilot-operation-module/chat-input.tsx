@@ -1,4 +1,4 @@
-import { Input, Notification } from '@arco-design/web-react';
+import { Input, Notification, FormInstance } from '@arco-design/web-react';
 import { useRef, useState } from 'react';
 import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
@@ -15,12 +15,13 @@ const TextArea = Input.TextArea;
 interface ChatInputProps {
   placeholder: string;
   autoSize: { minRows: number; maxRows: number };
-  tplConfig?: SkillTemplateConfig;
+  form?: FormInstance;
   formErrors?: Record<string, string>;
 }
 
 export const ChatInput = (props: ChatInputProps) => {
-  const { formErrors, tplConfig } = props;
+  const { formErrors, form } = props;
+
   const { t } = useTranslation();
   const inputRef = useRef<RefTextAreaType>(null);
   // stores
@@ -49,6 +50,7 @@ export const ChatInput = (props: ChatInputProps) => {
 
     const { messages, newQAText } = useChatStore.getState();
     searchStore.setIsSearchOpen(false);
+    const tplConfig = form?.getFieldValue('tplConfig');
     const invokeParams = { tplConfig: tplConfig };
 
     if (messages?.length > 0) {
