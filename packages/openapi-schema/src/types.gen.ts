@@ -975,15 +975,7 @@ export type PriceLookupKey = 'refly_pro_monthly' | 'refly_pro_yearly';
 /**
  * Subscription status
  */
-export type SubscriptionStatus =
-  | 'active'
-  | 'canceled'
-  | 'incomplete'
-  | 'incomplete_expired'
-  | 'past_due'
-  | 'paused'
-  | 'trialing'
-  | 'unpaid';
+export type SubscriptionStatus = 'active' | 'canceled' | 'past_due' | 'unpaid';
 
 export type Subscription = {
   /**
