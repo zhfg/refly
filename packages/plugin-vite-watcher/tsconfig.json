@@ -5,6 +5,7 @@
     "declarationDir": "./types",
     "moduleResolution": "node",
     "esModuleInterop": true,
+    "skipLibCheck": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "noUnusedParameters": true,

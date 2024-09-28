@@ -9,6 +9,7 @@
     "allowSyntheticDefaultImports": true,
     "noUnusedParameters": true,
     "noUnusedLocals": true,
+    "skipLibCheck": true,
     "module": "commonjs",
     "target": "esnext",
     "declaration": true,

@@ -6,8 +6,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "echo \"No build script\"",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "vite"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "react": "^18.2.0",
