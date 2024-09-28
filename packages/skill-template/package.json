@@ -19,7 +19,7 @@
     "@langchain/core": "0.2.27",
     "@langchain/openai": "0.2.7",
     "tsx": "^4.6.2",
-    "better-sqlite3": "~11.0.0",
+    "better-sqlite3": "^9.5.0",
     "dotenv": "~16.4.5",
     "zod": "3.23.8",
     "duck-duck-scrape": "~2.2.5",
