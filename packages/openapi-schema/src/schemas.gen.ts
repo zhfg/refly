@@ -1225,7 +1225,7 @@ export const $PriceLookupKey = {
 export const $SubscriptionStatus = {
   type: 'string',
   description: 'Subscription status',
-  enum: ['active', 'canceled', 'past_due', 'unpaid'],
+  enum: ['active', 'canceled', 'incomplete', 'incomplete_expired', 'past_due', 'paused', 'trialing', 'unpaid'],
 } as const;
 
 export const $Subscription = {
