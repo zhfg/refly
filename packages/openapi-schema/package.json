@@ -5,6 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "build": "openapi-ts",
+    "clean": "rimraf dist && rimraf tsconfig.tsbuildinfo",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {

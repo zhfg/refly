@@ -34,7 +34,7 @@
     "@babel/types": "^7.12.12"
   },
   "devDependencies": {
-    "vite": "^2.6.14",
+    "vite": "2.6.14",
     "esbuild": "^0.13.2"
   }
 }
