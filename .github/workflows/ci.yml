@@ -23,6 +23,11 @@ jobs:
         with:
           fetch-depth: 2
 
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          run_install: false
+
       - name: Setup Node.js environment
         uses: actions/setup-node@v4
         with:
