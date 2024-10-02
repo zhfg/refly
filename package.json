@@ -5,6 +5,7 @@
     "pnpm": ">=8"
   },
   "scripts": {
+    "commit": "cz",
     "dev": "turbo run dev",
     "build": "turbo run build",
     "clean": "turbo run clean",
@@ -24,7 +25,13 @@
     "turbo": "^2.1.2",
     "typescript": "5.3.3",
     "vitest": "^2.1.0",
+    "commitizen": "^4.2.4",
     "cz-conventional-changelog": "^3.3.0"
   },
-  "packageManager": "pnpm@8.15.8"
+  "packageManager": "pnpm@8.15.8",
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  }
 }
