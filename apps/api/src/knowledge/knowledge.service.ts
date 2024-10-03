@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
 import { Queue } from 'bull';
 import pLimit from 'p-limit';
 import { InjectQueue } from '@nestjs/bull';
@@ -50,6 +50,12 @@ import { SimpleEventData } from '@/event/event.dto';
 import { SyncStorageUsageJobData } from '@/subscription/subscription.dto';
 import { SubscriptionService } from '@/subscription/subscription.service';
 import { MiscService } from '@/misc/misc.service';
+import {
+  CollectionNotFoundError,
+  NoteNotFoundError,
+  OutOfStorageQuotaError,
+  ResourceNotFoundError,
+} from '@refly-packages/errors';
 
 @Injectable()
 export class KnowledgeService {
@@ -113,7 +119,7 @@ export class KnowledgeService {
       where: { projectId, uid, deletedAt: null },
     });
     if (!project) {
-      throw new NotFoundException('Project not found');
+      throw new CollectionNotFoundError('Project not found');
     }
 
     return project;
@@ -288,7 +294,7 @@ export class KnowledgeService {
     });
 
     if (!resource) {
-      throw new NotFoundException('Resource not found');
+      throw new ResourceNotFoundError(`resource ${resourceId} not found`);
     }
 
     let content: string;
@@ -308,7 +314,7 @@ export class KnowledgeService {
     if (options?.checkStorageQuota) {
       const usageResult = await this.subscriptionService.checkStorageUsage(user);
       if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
-        throw new BadRequestException('Storage quota exceeded');
+        throw new OutOfStorageQuotaError();
       }
     }
 
@@ -385,7 +391,7 @@ export class KnowledgeService {
   async batchCreateResource(user: User, params: UpsertResourceRequest[]) {
     const usageResult = await this.subscriptionService.checkStorageUsage(user);
     if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
-      throw new BadRequestException('Storage quota exceeded');
+      throw new OutOfStorageQuotaError();
     }
 
     const limit = pLimit(5);
@@ -553,7 +559,7 @@ export class KnowledgeService {
       where: { resourceId: param.resourceId, uid: user.uid },
     });
     if (!resource) {
-      throw new BadRequestException('Resource not found');
+      throw new ResourceNotFoundError(`resource ${param.resourceId} not found`);
     }
 
     const updates: Prisma.ResourceUpdateInput = pick(param, ['title', 'readOnly']);
@@ -602,7 +608,7 @@ export class KnowledgeService {
       where: { resourceId, uid, deletedAt: null },
     });
     if (!resource) {
-      throw new BadRequestException('Resource not found');
+      throw new ResourceNotFoundError(`resource ${resourceId} not found`);
     }
 
     await this.prisma.$transaction([
@@ -672,7 +678,7 @@ export class KnowledgeService {
     });
 
     if (!canvas) {
-      throw new BadRequestException('Canvas not found');
+      throw new NoteNotFoundError('Canvas not found');
     }
 
     let content: string;
@@ -795,7 +801,7 @@ export class KnowledgeService {
     });
 
     if (count !== canvasIds.length) {
-      throw new BadRequestException('Some of the canvases cannot be found');
+      throw new NoteNotFoundError('Some of the canvases cannot be found');
     }
 
     return this.prisma.$transaction(
@@ -814,7 +820,7 @@ export class KnowledgeService {
       where: { canvasId, uid, deletedAt: null },
     });
     if (!canvas) {
-      throw new BadRequestException('Canvas not found');
+      throw new NoteNotFoundError('Canvas not found');
     }
 
     await this.prisma.$transaction([

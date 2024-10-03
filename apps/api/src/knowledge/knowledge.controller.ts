@@ -191,6 +191,7 @@ export class KnowledgeController {
       throw new BadRequestException('Resource ID is required');
     }
 
+    // Check if the resource exists
     await this.knowledgeService.getResourceDetail(user, { resourceId });
 
     const updated = await this.knowledgeService.updateResource(user, body);

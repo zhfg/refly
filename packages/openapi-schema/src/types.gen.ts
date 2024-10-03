@@ -1118,6 +1118,10 @@ export type BaseResponse = {
    */
   success: boolean;
   /**
+   * Error code
+   */
+  errCode?: string;
+  /**
    * Error message
    */
   errMsg?: string;
