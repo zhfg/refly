@@ -1893,6 +1893,9 @@ importers:
 
   ../../packages/skill-template:
     dependencies:
+      '@dqbd/tiktoken':
+        specifier: ~1.0.16
+        version: 1.0.16
       '@langchain/community':
         specifier: 0.2.27
         version: 0.2.27(@langchain/langgraph@0.0.34)(better-sqlite3@11.0.0)(duck-duck-scrape@2.2.5)
@@ -3089,6 +3092,10 @@ packages:
       split: 1.0.1
     transitivePeerDependencies:
       - supports-color
+    dev: false
+
+  /@dqbd/tiktoken@1.0.16:
+    resolution: {integrity: sha512-4uIrs5qxAwFVFFEP507HZIZhGOsgfaEMEWDXWalr+v+XP+wJwP60EVmkZtQyQe70IsKGVkx5umBxw4NfmU0pPg==}
     dev: false
 
   /@egjs/agent@2.4.3:
@@ -23440,6 +23447,7 @@ time:
   /@babel/parser@7.12.11: '2020-12-15T23:59:16.808Z'
   /@babel/traverse@7.12.12: '2020-12-23T14:05:28.061Z'
   /@babel/types@7.12.12: '2020-12-23T14:05:24.894Z'
+  /@dqbd/tiktoken@1.0.16: '2024-08-15T23:08:43.256Z'
   /@elastic/elasticsearch@7.17.14: '2024-07-02T16:35:48.083Z'
   /@faker-js/faker@8.3.1: '2023-11-14T21:13:18.242Z'
   /@golevelup/nestjs-stripe@0.8.2: '2024-09-03T15:13:00.429Z'
