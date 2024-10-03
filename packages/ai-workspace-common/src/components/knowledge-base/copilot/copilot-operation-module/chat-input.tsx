@@ -1,4 +1,4 @@
-import { Input, Notification } from '@arco-design/web-react';
+import { Input, Notification, FormInstance } from '@arco-design/web-react';
 import { useRef, useState } from 'react';
 import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
@@ -10,17 +10,18 @@ import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 import { useTranslation } from 'react-i18next';
 import { SkillTemplateConfig } from '@refly/openapi-schema';
+import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 const TextArea = Input.TextArea;
 
 interface ChatInputProps {
   placeholder: string;
   autoSize: { minRows: number; maxRows: number };
-  tplConfig?: SkillTemplateConfig;
-  formErrors?: Record<string, string>;
+  form?: FormInstance;
 }
 
 export const ChatInput = (props: ChatInputProps) => {
-  const { formErrors, tplConfig } = props;
+  const { form } = props;
+
   const { t } = useTranslation();
   const inputRef = useRef<RefTextAreaType>(null);
   // stores
@@ -38,6 +39,7 @@ export const ChatInput = (props: ChatInputProps) => {
       return;
     }
 
+    const { formErrors } = useContextPanelStore.getState();
     if (formErrors && Object.keys(formErrors).length > 0) {
       Notification.error({
         style: { width: 400 },
@@ -49,6 +51,7 @@ export const ChatInput = (props: ChatInputProps) => {
 
     const { messages, newQAText } = useChatStore.getState();
     searchStore.setIsSearchOpen(false);
+    const tplConfig = form?.getFieldValue('tplConfig');
     const invokeParams = { tplConfig: tplConfig };
 
     if (messages?.length > 0) {

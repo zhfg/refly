@@ -34,6 +34,7 @@ export const useGetUserSettings = () => {
     let error: any;
     let res: GetUserSettingsResponse;
 
+    userStore.setIsCheckingLoginStatus(true);
     if (token) {
       const resp = await getClient().getSettings();
       error = resp.error;
@@ -43,6 +44,7 @@ export const useGetUserSettings = () => {
 
     // Handle
     if (!token || error || !res.data) {
+      userStore.setIsCheckingLoginStatus(false);
       userStore.setUserProfile(undefined);
       userStore.setLocalSettings(defaultLocalSettings);
       userStore.setToken('');
@@ -96,12 +98,14 @@ export const useGetUserSettings = () => {
     userStore.setLocalSettings(localSettings);
     localStorage.setItem('refly-user-profile', safeStringifyJSON(res?.data));
     localStorage.setItem('refly-local-settings', safeStringifyJSON(localSettings));
+    userStore.setIsCheckingLoginStatus(false);
   };
 
   const getLoginStatusForLogin = async () => {
     let error: any;
     let res: GetUserSettingsResponse;
 
+    userStore.setIsCheckingLoginStatus(true);
     if (token) {
       const resp = await getClient().getSettings();
       error = resp.error;
@@ -109,6 +113,7 @@ export const useGetUserSettings = () => {
     }
 
     if (!token || error || !res.data) {
+      userStore.setIsCheckingLoginStatus(false);
       userStore.setUserProfile(undefined);
       userStore.setLocalSettings(defaultLocalSettings);
       userStore.setToken('');
@@ -131,6 +136,7 @@ export const useGetUserSettings = () => {
         navigate('/');
       }
     } else {
+      userStore.setIsCheckingLoginStatus(false);
       // Authentication successful, redirect to app.refly.ai
       window.location.href = getClientOrigin(false);
     }

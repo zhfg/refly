@@ -84,6 +84,13 @@ export const AppRouter = (props: { layout?: any }) => {
 
   const routeLogin = useMatch("/login")
 
+  if (
+    userStore.isCheckingLoginStatus === undefined ||
+    userStore.isCheckingLoginStatus
+  ) {
+    return <LoadingFallback />
+  }
+
   if (!notShowLoginBtn && !routeLogin) {
     return <LoadingFallback />
   }

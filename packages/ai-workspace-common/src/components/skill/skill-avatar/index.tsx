@@ -19,6 +19,7 @@ export const SkillAvatar = (props: SkillAvatarProps) => {
         background: background || '#fff',
         fontSize: (size / 3) * 2,
         border: `${noBorder ? 'none' : '1px solid rgba(0, 0, 0, 0.1)'}`,
+        flexShrink: 0,
       }}
       className="skill-avatar"
     >

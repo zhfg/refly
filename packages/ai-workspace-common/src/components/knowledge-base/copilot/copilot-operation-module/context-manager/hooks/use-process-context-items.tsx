@@ -5,6 +5,7 @@ import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { getClientOrigin } from '@refly-packages/utils/url';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getTypeIcon } from '../utils/icon';
+import { mapSelectionTypeToContentList } from '../utils/contentListSelection';
 
 export const useProcessContextItems = () => {
   const { t } = useTranslation();
@@ -82,13 +83,15 @@ export const useProcessContextItems = () => {
       resource: 0,
       note: 0,
       collection: 0,
+      contentList: 0,
     };
 
     processedContextItems.forEach((item) => {
-      if (!types[item.type]) {
-        types[item.type] = 1;
+      const contextType = mapSelectionTypeToContentList(item.type);
+      if (!types[contextType]) {
+        types[contextType] = 1;
       } else {
-        types[item.type] += 1;
+        types[contextType] += 1;
       }
     });
 
@@ -106,9 +109,11 @@ export const useProcessContextItems = () => {
   const getContextItemIdsByType = () => {
     const result: Record<string, string[]> = {};
     processedContextItems.forEach((item) => {
-      let type = item.type;
+      let type = item.type as string;
       if (['resource', 'note', 'collection', 'url'].includes(item.type)) {
         type = type + 's';
+      } else {
+        type = 'contentList';
       }
       if (!result[type]) {
         result[type] = [];
