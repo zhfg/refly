@@ -1,4 +1,4 @@
-import { SkillMeta } from '@refly/openapi-schema';
+import { SkillMeta } from '@refly-packages/openapi-schema';
 
 export interface SkillEvent {
   /**

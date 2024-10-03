@@ -1,4 +1,4 @@
-import { ResourceType } from '@refly/openapi-schema';
+import { ResourceType } from '@refly-packages/openapi-schema';
 
 type ContentNodeType = 'resource' | 'note';
 

@@ -23,7 +23,7 @@ import {
   IndexStatus,
   ReindexResourceRequest,
   ResourceType,
-} from '@refly/openapi-schema';
+} from '@refly-packages/openapi-schema';
 import {
   CHANNEL_FINALIZE_RESOURCE,
   QUEUE_SIMPLE_EVENT,
@@ -37,7 +37,7 @@ import {
   cleanMarkdownForIngest,
   genNoteID,
   markdown2StateUpdate,
-} from '@refly/utils';
+} from '@refly-packages/utils';
 import { FinalizeResourceParam } from './knowledge.dto';
 import { pick, omit } from '../utils';
 import { SimpleEventData } from '@/event/event.dto';

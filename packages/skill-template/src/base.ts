@@ -15,10 +15,10 @@ import {
   User,
   SkillTemplateConfig,
   Icon,
-} from '@refly/openapi-schema';
+} from '@refly-packages/openapi-schema';
 import { EventEmitter } from 'node:stream';
 import { randomUUID } from 'node:crypto';
-import { SkillEvent } from '@refly/common-types';
+import { SkillEvent } from '@refly-packages/common-types';
 
 export abstract class BaseSkill extends StructuredTool {
   /**

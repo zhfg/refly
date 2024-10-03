@@ -32,7 +32,7 @@ import {
   RemoveResourceFromCollectionRequest,
   ReindexResourceRequest,
   ReindexResourceResponse,
-} from '@refly/openapi-schema';
+} from '@refly-packages/openapi-schema';
 import { User as UserModel } from '@prisma/client';
 import { KnowledgeService } from './knowledge.service';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';

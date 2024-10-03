@@ -13,7 +13,7 @@ import { SystemMessage } from '@langchain/core/messages';
 import { HumanMessage } from '@langchain/core/messages';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 import { ToolMessage } from '@langchain/core/messages';
-import { Source, SkillInvocationConfig, SkillTemplateConfigSchema, Icon } from '@refly/openapi-schema';
+import { Source, SkillInvocationConfig, SkillTemplateConfigSchema, Icon } from '@refly-packages/openapi-schema';
 
 interface GraphState extends BaseSkillState {
   // 初始上下文

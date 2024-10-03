@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { SystemMessage } from '@langchain/core/messages';
 import { HumanMessage } from '@langchain/core/messages';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
-import { Icon, LabelClass, SkillInvocationConfig, SkillTemplateConfigSchema } from '@refly/openapi-schema';
+import { Icon, LabelClass, SkillInvocationConfig, SkillTemplateConfigSchema } from '@refly-packages/openapi-schema';
 
 interface GraphState extends BaseSkillState {
   labelClass: LabelClass;

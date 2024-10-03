@@ -11,7 +11,7 @@ import {
   SkillTemplateConfigSchema,
   SearchDomain,
   Icon,
-} from '@refly/openapi-schema';
+} from '@refly-packages/openapi-schema';
 
 interface GraphState extends BaseSkillState {
   messages: BaseMessage[];

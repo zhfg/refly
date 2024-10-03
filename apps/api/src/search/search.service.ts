@@ -7,7 +7,7 @@ import {
   SearchRequest,
   SearchResult,
   User,
-} from '@refly/openapi-schema';
+} from '@refly-packages/openapi-schema';
 import { RAGService } from '@/rag/rag.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
 
