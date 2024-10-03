@@ -3,12 +3,10 @@ import { Route, Routes, useLocation } from "react-router-dom"
 import AOS from "aos"
 
 // 自定义组件
-import { Login } from "@refly-packages/ai-workspace-common/components/login/index"
 import Privacy from "@/pages/pravicy"
 import Terms from "@/pages/terms"
 import Home from "@/pages/Home"
 import { Helmet } from "react-helmet"
-import { LoginModal } from "@refly-packages/ai-workspace-common/components/login-modal"
 import { WaitingListModal } from "@/components/waiting-list-modal"
 
 // utils
@@ -79,7 +77,6 @@ export const AppRouter = () => {
         <Route path="/terms" element={<Terms />} />
       </Routes>
       <WaitingListModal />
-      <LoginModal />
     </>
   )
 }

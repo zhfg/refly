@@ -33,7 +33,6 @@ import { useTranslation } from "react-i18next"
 import { openGetStartDocument } from "@refly-packages/ai-workspace-common/utils"
 import { UILocaleList } from "@refly-packages/ai-workspace-common/components/ui-locale-list"
 import { useImportResourceStore } from "@refly-packages/ai-workspace-common/stores/import-resource"
-import { useKnowledgeBaseStore } from "@refly-packages/ai-workspace-common/stores/knowledge-base"
 import { SiderMenuSettingList } from "@refly-packages/ai-workspace-common/components/sider-menu-setting-list"
 import { SiderMenuMoreList } from "@refly-packages/ai-workspace-common/components/sider-menu-more-list"
 
@@ -99,7 +98,7 @@ const MenuItemContent = (props: {
 }) => {
   return (
     <div className="flex">
-      <div className="flex flex-nowrap flex-1 items-center">
+      <div className="flex flex-1 flex-nowrap items-center">
         {props.icon}
         <span className="sider-menu-title">{props.title}</span>
       </div>
@@ -117,7 +116,7 @@ const SettingItem = () => {
   return (
     <div className="w-full">
       <SiderMenuSettingList>
-        <div className="flex flex-1 justify-between items-center">
+        <div className="flex flex-1 items-center justify-between">
           <div className="menu-settings user-profile">
             <Avatar size={32}>
               <img
