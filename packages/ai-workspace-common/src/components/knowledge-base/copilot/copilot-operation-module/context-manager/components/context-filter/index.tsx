@@ -27,15 +27,12 @@ const iconStyle = { fontSize: 10, transform: 'translateY(1px)', marginRight: 6, 
 interface UseProcessContextFilterProps {
   config: FilterConfig;
   initialConfigRule: SkillContextRuleGroup;
-  contentListConfig: string[];
   isMutiType: boolean;
-  isMutiContentListType: boolean;
   getConfigOfStore: () => void;
-  isContentList: (type: string) => boolean;
   isTypeDisabled: (type: string) => boolean;
   getConfigLimit: (type: string, initialConfigRule: SkillContextRuleGroup) => number;
   updateConfig: (type: string, value: string, isMutiType: boolean) => void;
-  filterApply: (config: FilterConfig, initialConfigRule: SkillContextRuleGroup) => Function;
+  filterApply: (config: FilterConfig, initialConfigRule: SkillContextRuleGroup) => void;
   resetConfig: () => void;
 }
 
@@ -46,12 +43,11 @@ type ContextFilterPopoverContentProps = {
 
 interface FilterConfig {
   type: string[];
-  contentListTypes: string[];
 }
 
 const defaultTypeList = ['resources', 'notes', 'collections', 'contentList'];
 const typeMap = {
-  resources: 'resources',
+  resource: 'resources',
   note: 'notes',
   collection: 'collections',
 };
@@ -65,10 +61,7 @@ const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = 
   const {
     initialConfigRule,
     config,
-    contentListConfig,
     isMutiType,
-    isMutiContentListType,
-    isContentList,
     isTypeDisabled,
     getConfigLimit,
     updateConfig,
@@ -79,21 +72,13 @@ const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = 
   const { contextItemTypes } = useProcessContextItems();
 
   const handleApply = () => {
-    const applyCallback = filterApply(config, initialConfigRule);
-    if (applyCallback) {
-      applyCallback();
-      return;
-    }
+    filterApply(config, initialConfigRule);
     handleVisibleChange(false);
   };
 
   // get filter list
   useEffect(() => {
-    const newFilters = [
-      ...config?.type.filter((t) => t !== 'contentList'),
-      ...(config?.type.includes('contentList') ? config?.contentListTypes : []),
-    ];
-
+    const newFilters = [...config?.type];
     setFilters(newFilters.filter(Boolean));
   }, [config]);
 
@@ -147,38 +132,6 @@ const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = 
               ))}
             </div>
           </div>
-
-          {config?.type.includes('contentList') && contentListConfig.length > 0 && (
-            <div className="config-type">
-              <div className="config-type__title">
-                {t('knowledgeBase.context.contextFilter.contentListSelectedType')}
-              </div>
-              <div className="config-type__content">
-                {contentListConfig.map((type) => (
-                  <Checkbox
-                    key={type}
-                    className={`config-type__item ${!isMutiContentListType ? 'config-type__item-radio' : ''} `}
-                    checked={config?.contentListTypes.includes(type)}
-                    value={type}
-                    onChange={() => updateConfig('contentListTypes', type, isMutiContentListType)}
-                  >
-                    {({ checked }) => {
-                      return (
-                        <div className={`custom-checkbox-card ${checked ? 'custom-checkbox-card-checked' : ''}`}>
-                          <div className="custom-checkbox-card-mask">
-                            <IconCheck className="custom-checkbox-card-mask-check" />
-                          </div>
-                          <Typography.Text ellipsis={{ showTooltip: true, rows: 1 }}>
-                            {t(`knowledgeBase.context.${type}`)}
-                          </Typography.Text>
-                        </div>
-                      );
-                    }}
-                  </Checkbox>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {filters.length > 0 && (
@@ -196,7 +149,7 @@ const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = 
                     {type === 'note' && <PiNotepad style={iconStyle} />}
                     {type === 'collection' && <HiOutlineBookOpen style={iconStyle} />}
                     {type === 'resource' && <LuFileText style={iconStyle} />}
-                    {isContentList(type) && <PiTextAlignRightBold style={iconStyle} />}
+                    {type === 'contentList' && <PiTextAlignRightBold style={iconStyle} />}
 
                     <Typography.Text ellipsis={{ showTooltip: true, rows: 1 }}>
                       {t(`knowledgeBase.context.${type}`)}

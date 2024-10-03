@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Button, Input, Dropdown, Menu, Notification } from '@arco-design/web-react';
+import { Button, Input, Dropdown, Menu, Notification, FormInstance } from '@arco-design/web-react';
 
 import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
@@ -23,14 +23,14 @@ import { ModelSelector } from './model-selector';
 // styles
 import './index.scss';
 import { OutputLocaleList } from '@refly-packages/ai-workspace-common/components/output-locale-list';
+import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 interface ChatActionsProps {
-  tplConfig?: SkillTemplateConfig;
-  formErrors?: Record<string, string>;
+  form?: FormInstance;
 }
 
 export const ChatActions = (props: ChatActionsProps) => {
-  const { tplConfig, formErrors } = props;
+  const { form } = props;
   const { t } = useTranslation();
   const [model, setModel] = useState('gpt-3.5-turbo');
   const [image, setImage] = useState(null);
@@ -56,6 +56,7 @@ export const ChatActions = (props: ChatActionsProps) => {
       return;
     }
 
+    const { formErrors } = useContextPanelStore.getState();
     if (formErrors && Object.keys(formErrors).length > 0) {
       Notification.error({
         style: { width: 400 },
@@ -69,6 +70,7 @@ export const ChatActions = (props: ChatActionsProps) => {
 
     const { messages, newQAText } = useChatStore.getState();
     searchStore.setIsSearchOpen(false);
+    const tplConfig = form?.getFieldValue('tplConfig');
     const invokeParams = { tplConfig: tplConfig };
 
     if (messages?.length > 0) {
