@@ -1,11 +1,11 @@
 import { prosemirrorToYXmlFragment, yXmlFragmentToProseMirrorRootNode } from 'y-prosemirror';
-import { Node, Schema } from '@tiptap/pm/model';
+import { Node } from '@tiptap/pm/model';
 import * as Y from 'yjs';
 import { tables } from 'turndown-plugin-gfm';
 import TurndownService from 'turndown';
 import { defaultSchema } from './schema';
-import { MarkdownSerializer, defaultMarkdownSerializer } from './to_markdown';
-import { defaultMarkdownParser, MarkdownParser } from './from_markdown';
+import { defaultMarkdownSerializer } from './to_markdown';
+import { defaultMarkdownParser } from './from_markdown';
 
 export const state2Markdown = (stateUpdate: Uint8Array) => {
   const ydoc = new Y.Doc();
@@ -15,7 +15,7 @@ export const state2Markdown = (stateUpdate: Uint8Array) => {
   return defaultMarkdownSerializer.serialize(node);
 };
 
-export const parseMarkdown = (markdown: string) => {
+export const parseMarkdown = (markdown: string): Node => {
   return defaultMarkdownParser.parse(markdown);
 };
 
