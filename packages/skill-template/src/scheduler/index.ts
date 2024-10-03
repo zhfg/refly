@@ -28,9 +28,12 @@ import { randomUUID } from 'node:crypto';
 import { createSkillInventory } from '../inventory';
 // tools
 import { ReflyDefaultResponse } from '../tools/default-response';
-import { LOCALE } from '@refly/common-types';
+import { LOCALE } from '@refly-packages/common-types';
 // types
 import { SkillContextContentItemMetadata, SelectedContentDomain } from './types';
+// utils
+import { countToken, ModelContextLimitMap } from './utils/token';
+
 interface QueryAnalysis {
   intent: 'WRITING' | 'READING_COMPREHENSION' | 'SEARCH_QA' | 'OTHER';
   confidence: number;
@@ -48,7 +51,7 @@ interface IContext {
   resources: SkillContextResourceItem[];
   notes: SkillContextNoteItem[];
   collections: SkillContextCollectionItem[];
-  messages: BaseMessage[];
+  messages?: BaseMessage[];
   locale?: string | LOCALE;
 }
 
@@ -607,15 +610,9 @@ Please generate the summary based on these requirements and offer suggestions fo
     return result;
   };
 
-  private concatContext = () => {
-    const {
-      locale = 'en',
-      chatHistory = [],
-      contentList,
-      resources,
-      notes,
-      collections,
-    } = this.configSnapshot.configurable;
+  private concatContext = (relevantContext: IContext) => {
+    const { locale = 'en', chatHistory = [], collections } = this.configSnapshot.configurable;
+    const { contentList, resources, notes } = relevantContext;
 
     let context = '';
 
@@ -671,6 +668,73 @@ Please generate the summary based on these requirements and offer suggestions fo
     return context;
   };
 
+  private async prepareRelevantContext(query: string): Promise<string> {
+    const {
+      locale = 'en',
+      chatHistory = [],
+      modelName,
+      contentList,
+      resources,
+      notes,
+      collections,
+    } = this.configSnapshot.configurable;
+    const modelWindowSize = ModelContextLimitMap[modelName];
+    const maxContextTokens = Math.floor(modelWindowSize * 0.7);
+    let remainingTokens = 0;
+
+    let relevantContexts: IContext = {
+      contentList: [],
+      resources: [],
+      notes: [],
+      collections: [],
+    };
+
+    // Process selected content
+    const selectedContentTokens = contentList.reduce((sum, content) => sum + countToken(content?.content || ''), 0);
+    if (selectedContentTokens > maxContextTokens) {
+      const relevantContentList = await this.embedAndRetrieve(
+        query,
+        contentList.map((c) => c.content),
+        maxContextTokens,
+      );
+      relevantContexts.contentList.concat(...relevantContentList);
+    } else {
+      relevantContexts.contentList.concat(...contentList);
+    }
+
+    // Process notes
+    remainingTokens = maxContextTokens - selectedContentTokens;
+    const notesTokens = notes.reduce((sum, note) => sum + countToken(note?.note?.content), 0);
+    if (notesTokens > remainingTokens) {
+      const relevantNotes = await this.embedAndRetrieve(
+        query,
+        notes.map((n) => n.note?.content),
+        remainingTokens,
+      );
+      relevantContexts.notes.concat(...relevantNotes);
+    } else {
+      relevantContexts.notes.concat(...notes);
+    }
+
+    // Process resources
+    remainingTokens = maxContextTokens - notesTokens;
+    const resourcesTokens = resources.reduce((sum, resource) => sum + countToken(resource.resource?.content), 0);
+    if (resourcesTokens > remainingTokens) {
+      const relevantResources = await this.embedAndRetrieve(
+        query,
+        resources.map((r) => r.resource?.content),
+        remainingTokens,
+      );
+      relevantContexts.resources.concat(...relevantResources);
+    } else {
+      relevantContexts.resources.concat(...resources);
+    }
+
+    const context = this.concatContext(relevantContexts);
+
+    return context;
+  }
+
   private buildSchedulerSystemPrompt = () => {
     const { locale = 'en' } = this.configSnapshot.configurable;
 
@@ -721,9 +785,16 @@ Please generate the summary based on these requirements and offer suggestions fo
     this.emitEvent({ event: 'start' }, this.configSnapshot);
 
     const { messages = [], query, contextualUserQuery } = state;
-    const { locale = 'en', chatHistory = [], installedSkills, currentSkill, spanId } = this.configSnapshot.configurable;
+    const {
+      locale = 'en',
+      chatHistory = [],
+      installedSkills,
+      currentSkill,
+      spanId,
+      modelName,
+    } = this.configSnapshot.configurable;
 
-    const context = this.concatContext();
+    const context = await this.prepareRelevantContext(query);
     const systemPrompt = this.buildSchedulerSystemPrompt();
 
     const model = this.engine.chatModel({ temperature: 0.1 });
