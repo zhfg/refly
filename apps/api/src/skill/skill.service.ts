@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter } from 'node:events';
+import pLimit from 'p-limit';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
@@ -445,9 +446,12 @@ export class SkillService {
             .filter((id) => id),
         ),
       ];
-      const resources = await this.prisma.resource.findMany({
-        where: { resourceId: { in: resourceIds }, uid, deletedAt: null },
-      });
+      const limit = pLimit(5);
+      const resources = await Promise.all(
+        resourceIds.map((id) =>
+          limit(() => this.knowledge.getResourceDetail(user, { resourceId: id })),
+        ),
+      );
       const resourceMap = new Map<string, Resource>();
       resources.forEach((r) => resourceMap.set(r.resourceId, resourcePO2DTO(r)));
 
@@ -467,9 +471,10 @@ export class SkillService {
             .filter((id) => id),
         ),
       ];
-      const notes = await this.prisma.note.findMany({
-        where: { noteId: { in: noteIds }, uid, deletedAt: null },
-      });
+      const limit = pLimit(5);
+      const notes = await Promise.all(
+        noteIds.map((id) => limit(() => this.knowledge.getNoteDetail(user, id))),
+      );
       const noteMap = new Map<string, Note>();
       notes.forEach((n) => noteMap.set(n.noteId, notePO2DTO(n)));
 
@@ -619,21 +624,6 @@ export class SkillService {
         }
       : null;
 
-    if (input.query) {
-      await this.conversation.addChatMessages(
-        [
-          {
-            type: 'human',
-            content: input.query,
-            uid: user.uid,
-            convId: conversation?.convId,
-            jobId: job?.jobId,
-          },
-        ],
-        convParam,
-      );
-    }
-
     let aborted = false;
 
     if (res) {
@@ -658,6 +648,23 @@ export class SkillService {
       },
     });
     const scheduler = new Scheduler(this.skillEngine);
+
+    // Save user query to conversation right before invoking skill
+    // but after the chatHistory of runnable config is built
+    if (input.query) {
+      await this.conversation.addChatMessages(
+        [
+          {
+            type: 'human',
+            content: input.query,
+            uid: user.uid,
+            convId: conversation?.convId,
+            jobId: job?.jobId,
+          },
+        ],
+        convParam,
+      );
+    }
 
     let runMeta: SkillRunnableMeta | null = null;
     const basicUsageData = {
