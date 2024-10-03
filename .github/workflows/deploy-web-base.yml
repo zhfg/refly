@@ -11,33 +11,15 @@ on:
         type: string
 
 jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+
   publish:
     name: Publish to Cloudflare Pages
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 8
-
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-
-      - name: Set cache env
-        uses: gigara/rush-cache@v2
-
-      - name: Rush Install
-        run: node common/scripts/install-run-rush.js install
-
-      - name: Rush Build
-        run: node common/scripts/install-run-rush.js build --to @refly/web
-
       - name: Create Sentry release
         uses: getsentry/action-release@v1
         env:
