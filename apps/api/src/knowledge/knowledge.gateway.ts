@@ -1,4 +1,5 @@
 import { Request } from 'express';
+import { WebSocket } from 'ws';
 import { Inject, Logger } from '@nestjs/common';
 import jwt from 'jsonwebtoken';
 import { Server, Hocuspocus } from '@hocuspocus/server';
@@ -10,7 +11,7 @@ import { PrismaService } from '@/common/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { JwtPayload } from '@/auth/dto';
 import { Note, Prisma, User } from '@prisma/client';
-import { state2Markdown } from '@refly/utils';
+import { state2Markdown } from '@refly-packages/utils';
 import { RAGService } from '@/rag/rag.service';
 import { streamToBuffer } from '@/utils';
 import { ElasticsearchService } from '@/common/elasticsearch.service';

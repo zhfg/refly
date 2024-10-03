@@ -21,7 +21,7 @@ import {
   UpdateNoteResponse,
   ListNotesData,
   ListNotesResponse,
-} from '@refly/openapi-schema';
+} from '@refly-packages/openapi-schema';
 
 export interface ReflyService {
   getNoteDetail: (user: User, noteId: string) => Promise<GetNoteDetailResponse>;

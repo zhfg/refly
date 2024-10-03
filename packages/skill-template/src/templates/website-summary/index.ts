@@ -6,7 +6,7 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 // schema
 import { z } from 'zod';
-import { Icon, SkillInvocationConfig, SkillTemplateConfigSchema } from '@refly/openapi-schema';
+import { Icon, SkillInvocationConfig, SkillTemplateConfigSchema } from '@refly-packages/openapi-schema';
 import { TokenTextSplitter } from 'langchain/text_splitter';
 import { loadSummarizationChain } from 'langchain/chains';
 import { PromptTemplate } from '@langchain/core/prompts';

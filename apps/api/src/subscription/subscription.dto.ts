@@ -8,7 +8,7 @@ import {
   TokenUsageMeter,
   StorageUsageMeter,
   ModelTier,
-} from '@refly/openapi-schema';
+} from '@refly-packages/openapi-schema';
 import {
   Subscription as SubscriptionModel,
   TokenUsageMeter as TokenUsageMeterModel,

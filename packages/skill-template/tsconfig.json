@@ -23,7 +23,8 @@
     "baseUrl": "./",
     "rootDir": "./src",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@refly-packages/*": ["../*/src"]
     },
     "composite": true,
     "noEmit": false,
@@ -31,5 +32,6 @@
     "declarationMap": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist"],
+  "references": [{ "path": "../openapi-schema" }, { "path": "../common-types" }, { "path": "../utils" }]
 }

@@ -36,7 +36,7 @@ import {
   UpdateSkillTriggerRequest,
   User,
   Note,
-} from '@refly/openapi-schema';
+} from '@refly-packages/openapi-schema';
 import {
   BaseSkill,
   ReflyService,
@@ -46,8 +46,8 @@ import {
   SkillRunnableConfig,
   SkillRunnableMeta,
   createSkillInventory,
-} from '@refly/skill-template';
-import { genSkillID, genSkillJobID, genSkillTriggerID } from '@refly/utils';
+} from '@refly-packages/skill-template';
+import { genSkillID, genSkillJobID, genSkillTriggerID } from '@refly-packages/utils';
 import { PrismaService } from '@/common/prisma.service';
 import {
   CHANNEL_INVOKE_SKILL,
@@ -63,7 +63,7 @@ import { KnowledgeService } from '@/knowledge/knowledge.service';
 import { collectionPO2DTO, notePO2DTO, resourcePO2DTO } from '@/knowledge/knowledge.dto';
 import { ConversationService } from '@/conversation/conversation.service';
 import { MessageAggregator } from '@/utils/message';
-import { SkillEvent } from '@refly/common-types';
+import { SkillEvent } from '@refly-packages/common-types';
 import { ConfigService } from '@nestjs/config';
 import { SearchService } from '@/search/search.service';
 import { LabelService } from '@/label/label.service';

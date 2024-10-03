@@ -9,6 +9,7 @@
     "allowSyntheticDefaultImports": true,
     "target": "es2017",
     "sourceMap": true,
+    "rootDir": "./src",
     "outDir": "./dist",
     "baseUrl": "./",
     "esModuleInterop": true,
@@ -19,10 +20,7 @@
     "noFallthroughCasesInSwitch": false,
     "inlineSources": true,
     "lib": ["ESNext", "DOM"],
-
-    // Set `sourceRoot` to  "/" to strip the build path prefix
-    // from generated source code references.
-    // This improves issue grouping in Sentry.
+    "composite": true,
     "sourceRoot": "/"
   },
   "include": ["src/**/*"]

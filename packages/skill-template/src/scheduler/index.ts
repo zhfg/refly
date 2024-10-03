@@ -9,20 +9,20 @@ import { HumanMessage } from '@langchain/core/messages';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { ToolMessage } from '@langchain/core/messages';
-import { pick, safeParseJSON } from '@refly/utils';
+import { pick, safeParseJSON } from '@refly-packages/utils';
 import {
   Icon,
-  Resource,
-  Note,
-  Collection,
   SkillInvocationConfig,
   SkillMeta,
   SkillTemplateConfigSchema,
+  Resource,
+  Note,
+  Collection,
   SkillContextContentItem,
   SkillContextResourceItem,
   SkillContextNoteItem,
   SkillContextCollectionItem,
-} from '@refly/openapi-schema';
+} from '@refly-packages/openapi-schema';
 import { ToolCall } from '@langchain/core/dist/messages/tool';
 import { randomUUID } from 'node:crypto';
 import { createSkillInventory } from '../inventory';

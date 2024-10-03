@@ -6,7 +6,7 @@ import {
   SkillJobStatus,
   SkillTrigger,
   SkillTriggerType,
-} from '@refly/openapi-schema';
+} from '@refly-packages/openapi-schema';
 import {
   SkillInstance as SkillInstanceModel,
   SkillTrigger as SkillTriggerModel,

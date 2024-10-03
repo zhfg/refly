@@ -19,7 +19,7 @@ import {
   ScrapeWeblinkResponse,
   UploadRequest,
   UploadResponse,
-} from '@refly/openapi-schema';
+} from '@refly-packages/openapi-schema';
 import { buildSuccessResponse } from '@/utils';
 import { User as UserModel } from '@prisma/client';
 import { User } from '@/utils/decorators/user.decorator';

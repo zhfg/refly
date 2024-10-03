@@ -4,7 +4,7 @@ import os from 'node:os';
 import { Controller, Get, Param, Render, Logger } from '@nestjs/common';
 import { RAGService } from './rag.service';
 import { sha256Hash } from '../utils';
-import { cleanMarkdownForIngest } from '@refly/utils';
+import { cleanMarkdownForIngest } from '@refly-packages/utils';
 
 @Controller('rag')
 export class RagController {

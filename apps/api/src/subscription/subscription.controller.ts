@@ -9,7 +9,7 @@ import {
   CreatePortalSessionResponse,
   GetSubscriptionUsageResponse,
   ListModelsResponse,
-} from '@refly/openapi-schema';
+} from '@refly-packages/openapi-schema';
 import { buildSuccessResponse, pick } from '@/utils';
 
 @Controller('subscription')

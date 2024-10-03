@@ -1,4 +1,4 @@
-import { ChatMessage, ChatTaskType, MessageType, SkillInstance, Source } from '@refly/openapi-schema';
+import { ChatMessage, Source } from '@refly-packages/openapi-schema';
 import type { RelatedQuestion } from './session';
 
 export type MessageState = {

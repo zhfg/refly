@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { SimpleEventData } from '@/event/event.dto';
 import { PrismaService } from '@/common/prisma.service';
-import { SkillContext } from '@refly/openapi-schema';
+import { SkillContext } from '@refly-packages/openapi-schema';
 import { SkillService } from '@/skill/skill.service';
 import { SkillTrigger } from '@prisma/client';
 

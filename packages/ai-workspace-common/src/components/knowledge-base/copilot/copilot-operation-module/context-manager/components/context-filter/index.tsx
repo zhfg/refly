@@ -51,7 +51,7 @@ interface FilterConfig {
 
 const defaultTypeList = ['resources', 'notes', 'collections', 'contentList'];
 const typeMap = {
-  resources: 'resources',
+  resource: 'resources',
   note: 'notes',
   collection: 'collections',
 };
