@@ -28,7 +28,7 @@ import { randomUUID } from 'node:crypto';
 import { createSkillInventory } from '../inventory';
 // tools
 import { ReflyDefaultResponse } from '../tools/default-response';
-import { LOCALE } from '@refly/common-types';
+import { LOCALE } from '@refly-packages/common-types';
 // types
 import { SkillContextContentItemMetadata, SelectedContentDomain } from './types';
 interface QueryAnalysis {
