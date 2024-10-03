@@ -18,12 +18,39 @@ import {
   SkillInvocationConfig,
   SkillMeta,
   SkillTemplateConfigSchema,
+  SkillContextContentItem,
+  SkillContextResourceItem,
+  SkillContextNoteItem,
+  SkillContextCollectionItem,
 } from '@refly/openapi-schema';
 import { ToolCall } from '@langchain/core/dist/messages/tool';
 import { randomUUID } from 'node:crypto';
 import { createSkillInventory } from '../inventory';
 // tools
 import { ReflyDefaultResponse } from '../tools/default-response';
+import { LOCALE } from '@refly/common-types';
+// types
+import { SkillContextContentItemMetadata, SelectedContentDomain } from './types';
+interface QueryAnalysis {
+  intent: 'WRITING' | 'READING_COMPREHENSION' | 'SEARCH_QA' | 'OTHER';
+  confidence: number;
+  reasoning: string;
+  optimizedQuery: string;
+  relevantContext: {
+    type: 'message' | 'content' | 'resource' | 'note' | 'collection';
+    id: string;
+    content: string;
+  }[];
+}
+
+interface IContext {
+  contentList: SkillContextContentItem[];
+  resources: SkillContextResourceItem[];
+  notes: SkillContextNoteItem[];
+  collections: SkillContextCollectionItem[];
+  messages: BaseMessage[];
+  locale?: string | LOCALE;
+}
 
 interface GraphState extends BaseSkillState {
   /**
@@ -210,6 +237,312 @@ Please generate the summary based on these requirements and offer suggestions fo
     return realToolOutputMsg;
   };
 
+  private summarizeContext(context: IContext): string {
+    const { contentList, resources, notes, collections, messages } = context;
+
+    const summarizeResources = (resources: SkillContextResourceItem[]) =>
+      resources
+        .map((r) => `- ${r.resource.resourceType}: "${r.resource.title}" (ID: ${r.resource.resourceId})`)
+        .join('\n');
+
+    const summarizeNotes = (notes: SkillContextNoteItem[]) =>
+      notes.map((n) => `- Note: "${n.note.title}" (ID: ${n.note.noteId})`).join('\n');
+
+    const summarizeCollections = (collections: SkillContextCollectionItem[]) =>
+      collections.map((c) => `- Collection: "${c.collection.title}" (ID: ${c.collection.collectionId})`).join('\n');
+
+    const summarizeMessages = (messages: BaseMessage[]) =>
+      messages.map((m) => `- ${m._getType()}: ${(m.content as string)?.substring(0, 50)}...`).join('\n');
+
+    return `Content List:
+  ${contentList.map((c, i) => `- Content ${i + 1}: ${c.content.substring(0, 50)}...`).join('\n')}
+  
+  Resources:
+  ${summarizeResources(resources)}
+  
+  Notes:
+  ${summarizeNotes(notes)}
+  
+  Collections:
+  ${summarizeCollections(collections)}
+  
+  Recent Messages:
+  ${summarizeMessages(messages.slice(-5))}`;
+  }
+
+  private summarizeChatHistory(chatHistory: BaseMessage[]): string {
+    // Take the last 5 messages for context
+    const recentMessages = chatHistory.slice(-5);
+    return recentMessages.map((msg) => `${msg._getType()}: ${(msg.content as string)?.substring(0, 50)}...`).join('\n');
+  }
+
+  // private countTokens(text: string): number {
+  //   return this.engine.countTokens(text);
+  // }
+
+  private async analyzeQueryAndContext(query: string, context: IContext): Promise<Array<QueryAnalysis>> {
+    const { contentList, resources, notes, collections, messages, locale } = context;
+
+    this.emitEvent({ event: 'log', content: 'Analyzing query and context...' }, this.configSnapshot);
+
+    const getSystemPrompt =
+      () => `You are an advanced AI assistant specializing in query analysis, intent recognition, and context extraction. Analyze the given query and context to determine the user's atomic intents, optimize the query into atomic queries, and extract relevant context.
+  
+  Possible intents:
+  1. SEARCH_QA: The user is asking a question that requires searching through given context or explicitly requests online search.
+  2. WRITING: The user wants help with writing tasks such as composing emails, blog posts, optimizing expressions, continuing text, or summarizing.
+  3. READING_COMPREHENSION: The user needs help understanding, summarizing, explaining, or translating given text.
+  4. OTHER: The user's intent doesn't fit into the above categories.
+  
+  Guidelines:
+  1. Analyze the query and all provided context carefully.
+  2. Break down the query into atomic intents, where each intent corresponds to a single task or question.
+  3. For each atomic intent, provide an optimized query that focuses solely on that intent.
+  4. Extract the most relevant context items for each atomic intent.
+  5. Provide a confidence score and reasoning for each identified intent.
+  6. Consider the chat history and available context when analyzing the query.
+  
+  User's locale: ${locale}
+  
+  Here are some examples to illustrate the expected output:
+  
+  Example 1:
+  Original Query: "Can you summarize the article about climate change and then help me write an email about its key points?"
+  Output:
+  {
+    "analysis": [
+      {
+        "intent": "READING_COMPREHENSION",
+        "confidence": 0.9,
+        "reasoning": "The user explicitly asks for a summary of an article.",
+        "optimizedQuery": "Summarize the article about climate change",
+        "relevantContext": [
+          {
+            "type": "resource",
+            "id": "climate_change_article_id",
+            "content": "Article about climate change impacts and mitigation strategies"
+          }
+        ]
+      },
+      {
+        "intent": "WRITING",
+        "confidence": 0.85,
+        "reasoning": "The user requests help in writing an email based on the summary.",
+        "optimizedQuery": "Write an email about the key points of the climate change article summary",
+        "relevantContext": []
+      }
+    ]
+  }
+  
+  Example 2:
+  Original Query: "What are the main characters in 'To Kill a Mockingbird' and can you help me write a short essay about the theme of racial injustice in the book?"
+  Output:
+  {
+    "analysis": [
+      {
+        "intent": "SEARCH_QA",
+        "confidence": 0.95,
+        "reasoning": "The user is asking for specific information about the book's characters.",
+        "optimizedQuery": "What are the main characters in 'To Kill a Mockingbird'?",
+        "relevantContext": [
+          {
+            "type": "resource",
+            "id": "to_kill_a_mockingbird_book_id",
+            "content": "Novel 'To Kill a Mockingbird' by Harper Lee"
+          }
+        ]
+      },
+      {
+        "intent": "WRITING",
+        "confidence": 0.9,
+        "reasoning": "The user requests assistance in writing an essay about a specific theme in the book.",
+        "optimizedQuery": "Write a short essay about the theme of racial injustice in 'To Kill a Mockingbird'",
+        "relevantContext": [
+          {
+            "type": "resource",
+            "id": "to_kill_a_mockingbird_book_id",
+            "content": "Novel 'To Kill a Mockingbird' by Harper Lee"
+          }
+        ]
+      }
+    ]
+  }
+  
+  Output your response in the following JSON format:
+  {
+    "analysis": [
+      {
+        "intent": "SEARCH_QA | WRITING | READING_COMPREHENSION | OTHER",
+        "confidence": 0.0 to 1.0,
+        "reasoning": "A brief explanation of your reasoning",
+        "optimizedQuery": "An atomic, optimized version of the original query",
+        "relevantContext": [
+          {
+            "type": "content | resource | note | collection | message",
+            "id": "ID of the relevant context item",
+            "content": "Brief summary or extract of the relevant content"
+          }
+        ]
+      }
+    ]
+  }`;
+
+    const getUserMessage = () => `Query: ${query}
+  
+  Context Summary:
+  ${this.summarizeContext({ contentList, resources, notes, collections, messages, locale })}
+  
+  Please analyze the query and context to determine the user's intent, optimize the query, and extract relevant context.`;
+
+    const model = this.engine.chatModel({ temperature: 0.1 });
+    const runnable = model.withStructuredOutput(
+      z.object({
+        analysis: z.array(
+          z.object({
+            intent: z.enum(['SEARCH_QA', 'WRITING', 'READING_COMPREHENSION', 'OTHER']),
+            confidence: z.number().min(0).max(1),
+            reasoning: z.string(),
+            optimizedQuery: z.string(),
+            relevantContext: z.array(
+              z.object({
+                type: z.enum(['content', 'resource', 'note', 'collection', 'message']),
+                id: z.string(),
+                content: z.string(),
+              }),
+            ),
+          }),
+        ),
+      }),
+    );
+
+    const result = await runnable.invoke([new SystemMessage(getSystemPrompt()), new HumanMessage(getUserMessage())]);
+
+    result.analysis.forEach((item, index) => {
+      this.engine.logger.log(`Analysis ${index + 1}:`);
+      this.engine.logger.log(`Intent: ${item.intent} (confidence: ${item.confidence})`);
+      this.engine.logger.log(`Reasoning: ${item.reasoning}`);
+      this.engine.logger.log(`Optimized Query: ${item.optimizedQuery}`);
+      this.engine.logger.log(`Relevant Context: ${JSON.stringify(item.relevantContext)}`);
+
+      this.emitEvent({ event: 'log', content: `Analysis ${index + 1}:` }, this.configSnapshot);
+      this.emitEvent(
+        { event: 'log', content: `Intent: ${item.intent} (confidence: ${item.confidence})` },
+        this.configSnapshot,
+      );
+      this.emitEvent({ event: 'log', content: `Reasoning: ${item.reasoning}` }, this.configSnapshot);
+      this.emitEvent({ event: 'log', content: `Optimized Query: ${item.optimizedQuery}` }, this.configSnapshot);
+      this.emitEvent(
+        { event: 'log', content: `Relevant Context: ${JSON.stringify(item.relevantContext)}` },
+        this.configSnapshot,
+      );
+    });
+
+    return result.analysis as QueryAnalysis[];
+  }
+
+  private async extractRelevantContext(
+    messages: BaseMessage[],
+    context: {
+      contentList: string[];
+      resources: Resource[];
+      notes: Note[];
+      collections: Collection[];
+    },
+    intents: Array<{
+      intent: string;
+      confidence: number;
+      reasoning: string;
+    }>,
+  ): Promise<string> {
+    // Implement context extraction and compression logic
+    /**
+     * 1. 基于给定的聊天历史、上下文（contentList <string[]>、resources <Resource[]>、notes <Note[]>、collections <Collection[]>），还有当前的意图识别结果，提取出最相关的上下文
+     * 2. 上下文在提取过程中可能涉及到向量相似度匹配，上下文裁剪或压缩等
+     * 3. 根据模型的 token 窗口进行上下文提取，确保不会超出模型的 token 窗口同时是最相关的上下文
+     * 3. 撰写 Prompt，调用 LLM
+     */
+    const { contentList, resources, notes, collections } = context;
+
+    this.emitEvent({ event: 'log', content: 'Extracting relevant context...' }, this.configSnapshot);
+
+    const getSystemPrompt =
+      () => `You are an advanced AI assistant specializing in extracting relevant context for user queries. Your task is to analyze the given chat history, available context, and recognized intents to determine the most relevant information for answering the user's query.
+  
+  Guidelines:
+  1. Analyze the chat history to understand the context of the conversation.
+  2. Consider the recognized intents and their confidence scores when selecting relevant context.
+  3. Prioritize recent and highly relevant information from the available context.
+  4. Select a diverse range of context types (content, resources, notes, collections) if applicable.
+  5. Limit the extracted context to the most relevant items to avoid information overload.
+  6. If the available context doesn't seem relevant to the query, indicate that no relevant context was found.
+  
+  Output your response in the following JSON format:
+  {
+    "relevantContext": [
+      {
+        "type": "content | resource | note | collection",
+        "id": "ID of the relevant item (if applicable)",
+        "content": "Extracted relevant content or summary",
+        "relevance": 0.0 to 1.0
+      }
+    ],
+    "reasoning": "A brief explanation of your context selection"
+  }`;
+
+    const getUserMessage = () => `Chat History:
+  ${this.summarizeChatHistory(messages)}
+  
+  Recognized Intents:
+  ${intents.map((intent) => `- ${intent.intent} (confidence: ${intent.confidence})`).join('\n')}
+  
+  Available Context:
+  - Content List: ${contentList.length} items
+  - Resources: ${resources.length} items
+  - Notes: ${notes.length} items
+  - Collections: ${collections.length} items
+  
+  Please extract the most relevant context for answering the user's query.`;
+
+    const model = this.engine.chatModel({ temperature: 0.3 });
+    const runnable = model.withStructuredOutput(
+      z.object({
+        relevantContext: z.array(
+          z.object({
+            type: z.enum(['content', 'resource', 'note', 'collection']),
+            id: z.string().optional(),
+            content: z.string(),
+            relevance: z.number().min(0).max(1),
+          }),
+        ),
+        reasoning: z.string(),
+      }),
+    );
+
+    const result = await runnable.invoke([new SystemMessage(getSystemPrompt()), new HumanMessage(getUserMessage())]);
+
+    this.engine.logger.log(`Extracted ${result.relevantContext.length} relevant context items`);
+    this.engine.logger.log(`Context extraction reasoning: ${result.reasoning}`);
+
+    // Format the extracted context
+    const formattedContext = result.relevantContext
+      .map((item) => `[${item.type.toUpperCase()}${item.id ? ` ${item.id}` : ''}] ${item.content}`)
+      .join('\n\n');
+
+    return formattedContext;
+  }
+
+  private async writeSkill() {
+    /**
+     * 1. 基于
+     */
+  }
+
+  private async readSkill() {}
+
+  private async qaSkill() {}
+
+  private async otherIntentSkill() {}
+
   /**
    * Call the first scheduled skill within the state.
    */
@@ -274,325 +607,129 @@ Please generate the summary based on these requirements and offer suggestions fo
     return result;
   };
 
-  private async recognizeUserIntent(
-    query: string,
-    context: {
-      contentList: string[];
-      resources: Resource[];
-      notes: Note[];
-      collections: Collection[];
-      messages: BaseMessage[];
-    },
-  ): Promise<string> {
-    this.emitEvent({ event: 'log', content: 'Recognizing user intent...' }, this.configSnapshot);
-    /**
-     * 基于给定上下文，和聊天历史，实现最有效的判断意图的能力，撰写 Prompt，调用 LLM
-     *
-     * 1. 给定上下文和聊天历史
-     *  1. 上下文：contentList <string[]>、resources <Resource[]>、notes <Note[]>、collections <Collection[]>
-     *  2. 聊天历史：messages <BaseMessage[]>
-     * 2. 待识别用户意图：
-     *  1. 搜索问答，比如基于给定的上下文回答问题（知识库搜索，或者用户明确表明了需要进行在线搜索）
-     *  2. 基于上下文进行写作，比如写邮件、写博客、优化表达、续写、缩写等
-     *  3. 基于上下文进行阅读理解，比如总结、解释、翻译
-     * 3. 上下文可以拼接元信息，比如资源、笔记、集合的元信息，传入 Prompt 辅助意图识别
-     *
-     */
-    const { contentList, resources, notes, collections, messages } = context;
+  private concatContext = () => {
+    const {
+      locale = 'en',
+      chatHistory = [],
+      contentList,
+      resources,
+      notes,
+      collections,
+    } = this.configSnapshot.configurable;
 
-    const getSystemPrompt =
-      () => `You are an advanced AI assistant specializing in recognizing user intents. Your task is to analyze the given query and context to determine the user's primary intent.
+    let context = '';
 
-Possible intents:
-1. SEARCH_QA: The user is asking a question that requires searching through given context or explicitly requests online search.
-2. WRITING: The user wants help with writing tasks such as composing emails, blog posts, optimizing expressions, continuing text, or summarizing.
-3. READING_COMPREHENSION: The user needs help understanding, summarizing, explaining, or translating given text.
+    if (contentList.length > 0) {
+      context += 'Following are the user selected content: \n';
+      const concatContent = (
+        content: string,
+        from: SelectedContentDomain,
+        title: string,
+        id?: string,
+        url?: string,
+      ) => {
+        return `<UserSelectedContent from={${from}} ${id ? `entityId={${id}}` : ''} title={${title}} ${
+          url ? `weblinkUrl={${url}}` : ''
+        }>${content}</UserSelectedContent>`;
+      };
 
-Context Information:
-- Content List: ${contentList.length} items
-- Resources: ${resources.length} items
-- Notes: ${notes.length} items
-- Collections: ${collections.length} items
-- Chat History: ${messages.length} messages
+      context += contentList.map((c) => {
+        const { metadata } = c;
+        const { domain, entityId, title, url } = metadata as any as SkillContextContentItemMetadata;
+        return concatContent(c?.content, domain as SelectedContentDomain, title, entityId, url);
+      });
+    }
+
+    if (resources.length > 0) {
+      context += 'Following are the knowledge base resources: \n';
+      const concatResource = (id: string, title: string, content: string) => {
+        return `<KnowledgeBaseResource entityId={${id}} title={${title}}>${content}</KnowledgeBaseResource>`;
+      };
+
+      context += resources
+        .map((r) => concatResource(r.resource?.resourceId, r.resource?.title, r.resource?.content))
+        .join('\n');
+    }
+
+    if (notes.length > 0) {
+      context += 'Following are the knowledge base notes: \n';
+      const concatNote = (id: string, title: string, content: string) => {
+        return `<KnowledgeBaseNote entityId={${id}} title={${title}}>${content}</KnowledgeBaseNote>`;
+      };
+
+      context += notes.map((n) => concatNote(n.note?.noteId, n.note?.title, n.note?.content)).join('\n');
+    }
+
+    if (context?.length > 0) {
+      context = `<Context>${context}</Context>`;
+    }
+
+    return context;
+  };
+
+  private buildSchedulerSystemPrompt = () => {
+    const { locale = 'en' } = this.configSnapshot.configurable;
+
+    const systemPrompt = `You are an advanced AI assistant developed by Refly, specializing in knowledge management, reading comprehension, writing assistance, and answering questions related to knowledge management. Your core mission is to help users effectively manage, understand, and utilize information.
+
+Role and Capabilities:
+1. Knowledge Management Expert: You excel at organizing, interpreting, and retrieving information from various sources.
+2. Reading Assistant: You can analyze and summarize complex texts, helping users grasp key concepts quickly.
+3. Writing Aid: You offer guidance and suggestions to improve users' writing, from structure to style.
+4. Question Answering System: You provide accurate and relevant answers to users' queries, drawing from given context and your broad knowledge base.
+
+Context Handling:
+You will be provided with context in XML format. This context may include user-selected content, knowledge base resources, and notes. Always consider this context when formulating your responses. The context will be structured as follows:
+
+<Context>
+  <UserSelectedContent from={domain} entityId={id} title={title} weblinkUrl={url}>content</UserSelectedContent>
+  <KnowledgeBaseResource entityId={id} title={title}>content</KnowledgeBaseResource>
+  <KnowledgeBaseNote entityId={id} title={title}>content</KnowledgeBaseNote>
+</Context>
+
+Task:
+1. Carefully analyze the user's query, the provided context, and the conversation history.
+2. Identify the user's intent and the most relevant information from the context.
+3. Formulate a comprehensive and coherent response that directly addresses the user's needs.
+4. If the query requires multiple steps or involves complex information, break down your response into clear, logical sections.
+5. When appropriate, suggest related topics or follow-up questions that might be of interest to the user.
 
 Guidelines:
-1. Analyze the query and all provided context carefully.
-2. Consider the nature of the query and how it relates to the available context.
-3. Pay attention to specific keywords or phrases that might indicate a particular intent.
-4. Take into account the types and amount of context provided (e.g., many resources might suggest a search task).
-5. Consider the chat history for any relevant context that might influence the intent.
+1. Always maintain a professional, helpful, and friendly tone.
+2. Provide accurate information and cite sources from the given context when applicable.
+3. If you're unsure about something or if the required information is not in the context, clearly state this and offer to find more information if needed.
+4. Respect user privacy and confidentiality. Do not ask for or disclose personal information.
+5. Adapt your language complexity to match the user's level of expertise as inferred from their query and the conversation history.
+6. Responses should be in the user's preferred language (${locale}), but
+    `;
 
-Output your response in the following JSON format:
-{
-  "intent": "SEARCH_QA | WRITING | READING_COMPREHENSION",
-  "confidence": 0.0 to 1.0,
-  "reasoning": "A brief explanation of your reasoning"
-}`;
-
-    const getUserMessage = () => `Query: ${query}
-
-Context Summary:
-${this.summarizeContext(context)}
-
-Please analyze the query and context to determine the user's primary intent.`;
-
-    const model = this.engine.chatModel({ temperature: 0 });
-    const runnable = model.withStructuredOutput(
-      z.object({
-        intent: z.enum(['SEARCH_QA', 'WRITING', 'READING_COMPREHENSION']),
-        confidence: z.number().min(0).max(1),
-        reasoning: z.string(),
-      }),
-    );
-
-    const result = await runnable.invoke([new SystemMessage(getSystemPrompt()), new HumanMessage(getUserMessage())]);
-
-    this.engine.logger.log(`Recognized intent: ${result.intent} (confidence: ${result.confidence})`);
-    this.engine.logger.log(`Intent recognition reasoning: ${result.reasoning}`);
-
-    this.emitEvent(
-      { event: 'log', content: `Recognized intent: ${result.intent} (confidence: ${result.confidence})` },
-      this.configSnapshot,
-    );
-    this.emitEvent({ event: 'log', content: `Intent recognition reasoning: ${result.reasoning}` }, this.configSnapshot);
-    return result.intent;
-  }
-
-  private summarizeContext(context: {
-    contentList: string[];
-    resources: Resource[];
-    notes: Note[];
-    collections: Collection[];
-    messages: BaseMessage[];
-  }): string {
-    const { contentList, resources, notes, collections, messages } = context;
-
-    const summarizeResources = (resources: Resource[]) =>
-      resources.map((r) => `- ${r.resourceType}: "${r.title}" (ID: ${r.resourceId})`).join('\n');
-
-    const summarizeNotes = (notes: Note[]) => notes.map((n) => `- Note: "${n.title}" (ID: ${n.noteId})`).join('\n');
-
-    const summarizeCollections = (collections: Collection[]) =>
-      collections.map((c) => `- Collection: "${c.title}" (ID: ${c.collectionId})`).join('\n');
-
-    const summarizeMessages = (messages: BaseMessage[]) =>
-      messages.map((m) => `- ${m._getType()}: ${(m.content as string)?.substring(0, 50)}...`).join('\n');
-
-    return `Content List:
-  ${contentList.map((c, i) => `- Content ${i + 1}: ${c.substring(0, 50)}...`).join('\n')}
-  
-  Resources:
-  ${summarizeResources(resources)}
-  
-  Notes:
-  ${summarizeNotes(notes)}
-  
-  Collections:
-  ${summarizeCollections(collections)}
-  
-  Recent Messages:
-  ${summarizeMessages(messages.slice(-5))}`;
-  }
-
-  private async optimizeQuery(
-    query: string,
-    context: {
-      locale: string;
-      chatHistory: BaseMessage[];
-    },
-  ): Promise<{
-    decomposedQueries: Array<{ subquery: string; relevance: number }>;
-    optimizedQueries: Array<{ query: string; score: number; reasoning: string }>;
-    translations: Array<{ language: string; query: string }>;
-  }> {
-    /**
-     * 1. 基于给定的 query、locale 和 chatHistory，优化用户的 query 为多种变体（拆分query，改写、补充完整等）、多语种
-     * 2. 返回优化后的 query 集合和理由分数等
-     * 3. 撰写 Prompt，调用 LLM
-     *
-     */
-    const { locale, chatHistory } = context;
-
-    const getSystemPrompt =
-      () => `You are an advanced AI assistant specializing in query optimization, decomposition, and translation. Analyze the given query, considering the user's locale and chat history, to provide optimized and decomposed versions of the query along with translations.
-  
-  Guidelines:
-  1. Decompose the original query into 3-6 subqueries, each addressing a specific aspect of the main query.
-  2. Generate 3 optimized versions of the original query, each addressing a different aspect or interpretation.
-  3. For each optimized query and subquery, provide a relevance score (0.0 to 1.0) and a brief reasoning.
-  4. Translate the original query into English (if not already in English) and one other relevant language.
-  5. Consider the chat history for context that might influence query optimization and decomposition.
-  6. Ensure that optimized queries and subqueries maintain the original intent while potentially expanding or clarifying it.
-  
-  User's locale: ${locale}
-  
-  Output your response in the following JSON format:
-  {
-    "decomposedQueries": [
-      {
-        "subquery": "Decomposed subquery 1",
-        "relevance": 0.0 to 1.0
-      },
-      // ... (3-6 subqueries)
-    ],
-    "optimizedQueries": [
-      {
-        "query": "Optimized query 1",
-        "score": 0.0 to 1.0,
-        "reasoning": "Brief explanation for this optimization"
-      },
-      // ... (3 optimized queries)
-    ],
-    "translations": [
-      {
-        "language": "English",
-        "query": "Translated query in English"
-      },
-      {
-        "language": "Another relevant language",
-        "query": "Translated query in another language"
-      }
-    ]
-  }`;
-
-    const getUserMessage = () => `Original Query: ${query}
-  
-  Chat History Summary:
-  ${this.summarizeChatHistory(chatHistory)}
-  
-  Please decompose, optimize the query, and provide translations based on the given guidelines.`;
-
-    const model = this.engine.chatModel({ temperature: 0.3 });
-    const runnable = model.withStructuredOutput(
-      z.object({
-        decomposedQueries: z.array(
-          z.object({
-            subquery: z.string(),
-            relevance: z.number().min(0).max(1),
-          }),
-        ),
-        optimizedQueries: z.array(
-          z.object({
-            query: z.string(),
-            score: z.number().min(0).max(1),
-            reasoning: z.string(),
-          }),
-        ),
-        translations: z.array(
-          z.object({
-            language: z.string(),
-            query: z.string(),
-          }),
-        ),
-      }),
-    );
-
-    const result = await runnable.invoke([new SystemMessage(getSystemPrompt()), new HumanMessage(getUserMessage())]);
-
-    this.engine.logger.log(
-      `Query optimized with ${result.decomposedQueries.length} subqueries, ${result.optimizedQueries.length} variations, and ${result.translations.length} translations`,
-    );
-    this.engine.logger.log(`Query optimization result: ${JSON.stringify(result, null, 2)}`);
-
-    return {
-      decomposedQueries:
-        result.decomposedQueries?.map((q) => ({
-          subquery: q.subquery || '',
-          relevance: q.relevance || 0,
-        })) || [],
-      optimizedQueries:
-        result.optimizedQueries?.map((q) => ({
-          query: q.query || '',
-          score: q.score || 0,
-          reasoning: q.reasoning || '',
-        })) || [],
-      translations:
-        result.translations?.map((t) => ({
-          language: t.language || '',
-          query: t.query || '',
-        })) || [],
-    };
-  }
-
-  private summarizeChatHistory(chatHistory: BaseMessage[]): string {
-    // Take the last 5 messages for context
-    const recentMessages = chatHistory.slice(-5);
-    return recentMessages.map((msg) => `${msg._getType()}: ${(msg.content as string)?.substring(0, 50)}...`).join('\n');
-  }
+    return systemPrompt;
+  };
 
   callScheduler = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
-    const { query, contextualUserQuery, messages = [] } = state;
+    /**
+     * 1. 基于聊天历史，当前意图识别结果，上下文，以及整体优化之后的 query，调用 scheduler 模型，得到一个最优的技能调用序列
+     * 2. 基于得到的技能调用序列，调用相应的技能
+     */
 
     this.configSnapshot ??= config;
     this.emitEvent({ event: 'start' }, this.configSnapshot);
 
+    const { messages = [], query, contextualUserQuery } = state;
     const { locale = 'en', chatHistory = [], installedSkills, currentSkill, spanId } = this.configSnapshot.configurable;
 
-    // 目前先不支持选技能，未来支持有限制的选技能
-    // let tools = this.skills;
-    // if (installedSkills) {
-    //   const toolMap = new Map(tools.map((tool) => [tool.name, tool]));
-    //   tools = installedSkills.map((skill) => toolMap.get(skill.tplName)!).filter((tool) => tool);
-    // }
+    const context = this.concatContext();
+    const systemPrompt = this.buildSchedulerSystemPrompt();
 
-    // tools = tools.filter((tool) => tool);
-    // const boundModel = this.engine
-    //   .chatModel()
-    //   .bindTools([...tools, new ReflyDefaultResponse()], { parallel_tool_calls: false });
+    const model = this.engine.chatModel({ temperature: 0.1 });
 
-    const criticalGuidelines = `## Critical Guidelines
-
-      ### 1. Minimum Tools Principle:
-          • Use as few tools as possible to solve the user's problem.
-          • Prioritize the most relevant tool when multiple options are available.
-          • If the user's needs are satisfied, conclude the task immediately.
-      
-      ### 2. Sequential Tool Invocation:
-          • Emphasize sequential invocation of tools—only call one tool at a time.
-          • Adhere to the "minimum viable principle" by using only what is necessary to achieve the desired outcome.
-          
-      ### 3. Task Completion:
-          • Use tool results solely to determine whether to continue or end the task.
-          • Do not disclose or output any tool execution details. If the task is complete, indicate completion without additional content.
-          • Assess whether the available tool can resolve the user's request. If the tool does not match the user's needs, invoke the **default_response** tool, or do not call any tool. Avoid invoking irrelevant tools. For example:
-            - If a user asks for a current event that requires browsing, but browsing is unavailable, respond using **default_response** instead of invoking unrelated tools.
-            - If a user's query involves an unfamiliar term that does not match any tool's capabilities, avoid tool invocation and provide a response based on common knowledge or the **default_response** tool.`;
-
-    const getSystemPrompt = (locale: string) => `## Role
-      You are an AI intelligent response engine built by Refly AI that specializes in selecting the most suitable tools from a variety of options based on user requirements.
-      
-      ## Skills
-      ### Skill 1: Analyzing User Intent
-      - Identify key phrases and words from the user's questions.
-      - Understand the user's requests based on these key elements.
-      
-      ### Skill 2: Optimizing Suitable Tools
-      - Select the most appropriate tool(s) from the tool library to address the user's needs.
-      - If there are multiple similar tools capable of addressing the user's issue, ask the user for additional clarification and return an optimized solution based on their response.
-      
-      ### Skill 3: Step-by-Step Problem Solving
-      - If the user's requirements need multiple tools to be processed step-by-step, optimize and construct the tools sequentially based on the intended needs.
-      - Ensure that only one tool is called at a time in the sequence, adhering to the "minimum viable principle."
-      
-      ### Skill 4: Direct Interaction
-      - If the tool library cannot address the issues, rely on your internal common knowledge to interact and communicate directly with the user.
-      
-      ## Constraints
-      - Some tools may have concise or vague descriptions; detailed reasoning and careful selection of the most suitable tool based on user needs are required.
-      - Only address and guide the creation or optimization of relevant issues; do not respond to unrelated user questions.
-      - Assess the suitability of available tools before invocation. If a tool is not suitable, invoke the **default_response** tool or no tool at all. Avoid invoking irrelevant tools.
-      - Always respond in the locale **${locale}** language.
-      - Provide the optimized guidance immediately in your response without needing to explain or report it separately.
-      
-      ${criticalGuidelines}
-      `;
-
-    const responseMessage = await boundModel.invoke(
+    const responseMessage = await model.invoke(
       [
-        new SystemMessage(getSystemPrompt(locale)),
+        new SystemMessage(systemPrompt),
         ...chatHistory,
         ...messages,
-        new HumanMessage(`The user's intent is ${contextualUserQuery || query} \n\n ${criticalGuidelines}`),
+        new HumanMessage(`The context is ${context}`),
+        new HumanMessage(`The user's query is ${query}`),
       ],
       {
         ...this.configSnapshot,
@@ -603,35 +740,10 @@ Please analyze the query and context to determine the user's primary intent.`;
         },
       },
     );
-    const { tool_calls: skillCalls } = responseMessage;
 
-    // hanlde default response
-    const hasAnyToolCall = messages.find((message) => (message as ToolMessage)?._getType() === 'tool');
+    this.emitEvent({ event: 'end' }, this.configSnapshot);
 
-    if (skillCalls.length > 0) {
-      const skillCall = skillCalls[0];
-      if (!hasAnyToolCall && skillCall.name === 'default_response') {
-        return await this.commonSenseGenerate(state, config, false);
-      }
-
-      this.emitEvent(
-        {
-          event: 'log',
-          content: `Decide to call skills: ${skillCalls.map((call) => call.name).join(', ')}`,
-        },
-        this.configSnapshot,
-      );
-      this.emitEvent({ event: 'end' }, this.configSnapshot);
-
-      // Regenerate new spanId for the next scheduler call.
-      this.configSnapshot.configurable.spanId = randomUUID();
-    } else {
-      if (messages?.length === 0 || !hasAnyToolCall) {
-        return await this.commonSenseGenerate(state, config, false);
-      }
-    }
-
-    return { messages: [responseMessage], skillCalls };
+    return { messages: [responseMessage], skillCalls: [] };
   };
 
   commonSenseGenerate = async (
@@ -829,12 +941,12 @@ Generated question example:
   };
 
   shouldCallSkill = (state: GraphState, config: SkillRunnableConfig): 'skill' | 'relatedQuestions' | typeof END => {
-    const { skillCalls = [] } = state;
+    // const { skillCalls = [] } = state;
     const { convId } = this.configSnapshot?.configurable ?? config.configurable;
 
-    if (skillCalls.length > 0) {
-      return 'skill';
-    }
+    // if (skillCalls.length > 0) {
+    //   return 'skill';
+    // }
 
     // If there is no skill call, then jump to relatedQuestions node
     return convId ? 'relatedQuestions' : END;
