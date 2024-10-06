@@ -10,11 +10,12 @@ import {
   SkillContextResourceItem,
   SkillContextNoteItem,
   SkillContextCollectionItem,
+  ChatMessage,
 } from '@refly/openapi-schema';
 import { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
 import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { LOCALE } from '@refly-packages/common-types';
-import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
+import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 import { ToolCall } from '@langchain/core/dist/messages/tool';
 
 export interface SkillContextContentItemMetadata {
@@ -34,11 +35,19 @@ export interface Chunk {
   };
 }
 
+export interface MentionedContext {
+  type?: 'note' | 'resource' | 'content';
+  entityId?: string;
+  url?: string;
+  title?: string;
+}
+
 export interface QueryAnalysis {
   intent: 'WRITING' | 'READING_COMPREHENSION' | 'SEARCH_QA' | 'OTHER';
   confidence: number;
   reasoning: string;
   optimizedQuery: string;
+  mentionedContext: MentionedContext[];
   relevantContext: {
     type: 'message' | 'content' | 'resource' | 'note' | 'collection';
     id: string;
@@ -50,8 +59,8 @@ export interface IContext {
   contentList: SkillContextContentItem[];
   resources: SkillContextResourceItem[];
   notes: SkillContextNoteItem[];
-  collections: SkillContextCollectionItem[];
-  messages?: BaseMessage[];
+  collections?: SkillContextCollectionItem[];
+  messages?: ChatMessage[];
   locale?: string | LOCALE;
 }
 

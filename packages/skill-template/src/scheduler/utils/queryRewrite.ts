@@ -1,162 +1,104 @@
-import { IContext, QueryAnalysis } from '../types';
+import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { GraphState, IContext, QueryAnalysis } from '../types';
+import { summarizeChatHistory, summarizeContext } from './context';
 import { z } from 'zod';
+import { SkillEngine } from '../../engine';
+import { BaseSkill, SkillRunnableConfig } from '@/base';
+import { ChatMessage } from '@refly-packages/openapi-schema';
 
-export async function analyzeQueryAndContext(query: string, context: IContext): Promise<Array<QueryAnalysis>> {
-  const { contentList, resources, notes, collections, messages, locale } = context;
+// TODO: collections 搜索和在整个知识库搜索一起实现
+export async function analyzeQueryAndContext(
+  query: string,
+  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+): Promise<QueryAnalysis> {
+  const { chatHistory, resources, notes, contentList, collections } = ctx.configSnapshot.configurable;
+  const context: IContext = {
+    resources,
+    notes,
+    contentList,
+    collections,
+  };
 
-  this.emitEvent({ event: 'log', content: 'Analyzing query and context...' }, this.configSnapshot);
+  ctx.ctxThis.emitEvent({ event: 'log', content: 'Analyzing query and context...' }, ctx.configSnapshot);
+  const summarizedContext = summarizeContext(context);
+  const summarizedChatHistory = summarizeChatHistory((chatHistory as any as ChatMessage[]) || []);
 
-  const getSystemPrompt =
-    () => `You are an advanced AI assistant specializing in query analysis, intent recognition, and context extraction. Analyze the given query and context to determine the user's atomic intents, optimize the query into atomic queries, and extract relevant context.
-  
-  Possible intents:
-  1. SEARCH_QA: The user is asking a question that requires searching through given context or explicitly requests online search.
-  2. WRITING: The user wants help with writing tasks such as composing emails, blog posts, optimizing expressions, continuing text, or summarizing.
-  3. READING_COMPREHENSION: The user needs help understanding, summarizing, explaining, or translating given text.
-  4. OTHER: The user's intent doesn't fit into the above categories.
-  
-  Guidelines:
-  1. Analyze the query and all provided context carefully.
-  2. Break down the query into atomic intents, where each intent corresponds to a single task or question.
-  3. For each atomic intent, provide an optimized query that focuses solely on that intent.
-  4. Extract the most relevant context items for each atomic intent.
-  5. Provide a confidence score and reasoning for each identified intent.
-  6. Consider the chat history and available context when analyzing the query.
-  
-  User's locale: ${locale}
-  
-  Here are some examples to illustrate the expected output:
-  
-  Example 1:
-  Original Query: "Can you summarize the article about climate change and then help me write an email about its key points?"
-  Output:
-  {
-    "analysis": [
-      {
-        "intent": "READING_COMPREHENSION",
-        "confidence": 0.9,
-        "reasoning": "The user explicitly asks for a summary of an article.",
-        "optimizedQuery": "Summarize the article about climate change",
-        "relevantContext": [
-          {
-            "type": "resource",
-            "id": "climate_change_article_id",
-            "content": "Article about climate change impacts and mitigation strategies"
-          }
-        ]
-      },
-      {
-        "intent": "WRITING",
-        "confidence": 0.85,
-        "reasoning": "The user requests help in writing an email based on the summary.",
-        "optimizedQuery": "Write an email about the key points of the climate change article summary",
-        "relevantContext": []
-      }
-    ]
-  }
-  
-  Example 2:
-  Original Query: "What are the main characters in 'To Kill a Mockingbird' and can you help me write a short essay about the theme of racial injustice in the book?"
-  Output:
-  {
-    "analysis": [
-      {
-        "intent": "SEARCH_QA",
-        "confidence": 0.95,
-        "reasoning": "The user is asking for specific information about the book's characters.",
-        "optimizedQuery": "What are the main characters in 'To Kill a Mockingbird'?",
-        "relevantContext": [
-          {
-            "type": "resource",
-            "id": "to_kill_a_mockingbird_book_id",
-            "content": "Novel 'To Kill a Mockingbird' by Harper Lee"
-          }
-        ]
-      },
-      {
-        "intent": "WRITING",
-        "confidence": 0.9,
-        "reasoning": "The user requests assistance in writing an essay about a specific theme in the book.",
-        "optimizedQuery": "Write a short essay about the theme of racial injustice in 'To Kill a Mockingbird'",
-        "relevantContext": [
-          {
-            "type": "resource",
-            "id": "to_kill_a_mockingbird_book_id",
-            "content": "Novel 'To Kill a Mockingbird' by Harper Lee"
-          }
-        ]
-      }
-    ]
-  }
-  
-  Output your response in the following JSON format:
-  {
-    "analysis": [
-      {
-        "intent": "SEARCH_QA | WRITING | READING_COMPREHENSION | OTHER",
-        "confidence": 0.0 to 1.0,
-        "reasoning": "A brief explanation of your reasoning",
-        "optimizedQuery": "An atomic, optimized version of the original query",
-        "relevantContext": [
-          {
-            "type": "content | resource | note | collection | message",
-            "id": "ID of the relevant context item",
-            "content": "Brief summary or extract of the relevant content"
-          }
-        ]
-      }
-    ]
-  }`;
+  const systemPrompt = `You are an advanced AI assistant specializing in query analysis and context extraction. Your task is to analyze the given query, chat history, and available context to:
+1. Rewrite the query to best represent the user's intent, considering the conversation history and available context.
+2. Identify any specific context items (notes, resources, or content) mentioned in the query.
+3. Determine the primary intent of the query.
 
-  const getUserMessage = () => `Query: ${query}
-  
-  Context Summary:
-  ${this.summarizeContext({ contentList, resources, notes, collections, messages, locale })}
-  
-  Please analyze the query and context to determine the user's intent, optimize the query, and extract relevant context.`;
+Available context types:
+- Notes: Referred to by title or @note
+- Resources: Referred to by title or @resource
+- User-selected content: Referred to by title or content
 
-  const model = this.engine.chatModel({ temperature: 0.1 });
+Output your analysis in the following format:
+{
+  "rewrittenQuery": "The rewritten query that best represents the user's intent",
+  "mentionedContext": [
+    {
+      "type": "note" | "resource" | "content",
+      "entityId": "ID of the mentioned item (if available)",
+      "title": "Title of the mentioned item"
+    }
+  ],
+  "intent": "The primary intent of the query (e.g., SEARCH_QA, WRITING, READING_COMPREHENSION, or OTHER)",
+  "confidence": 0.0 to 1.0,
+  "reasoning": "A brief explanation of your analysis and rewriting process"
+}`;
+
+  const userMessage = `Query: ${query}
+
+## Chat History:
+${summarizedChatHistory}
+
+## Available Context:
+${summarizedContext}
+
+Please analyze the query, considering the chat history and available context.`;
+
+  const model = ctx.ctxThis.engine.chatModel({ temperature: 0.3 });
   const runnable = model.withStructuredOutput(
     z.object({
-      analysis: z.array(
+      rewrittenQuery: z.string(),
+      mentionedContext: z.array(
         z.object({
-          intent: z.enum(['SEARCH_QA', 'WRITING', 'READING_COMPREHENSION', 'OTHER']),
-          confidence: z.number().min(0).max(1),
-          reasoning: z.string(),
-          optimizedQuery: z.string(),
-          relevantContext: z.array(
-            z.object({
-              type: z.enum(['content', 'resource', 'note', 'collection', 'message']),
-              id: z.string(),
-              content: z.string(),
-            }),
-          ),
+          type: z.enum(['note', 'resource', 'content']),
+          entityId: z.string().optional(),
+          title: z.string(),
         }),
       ),
+      intent: z.enum(['SEARCH_QA', 'WRITING', 'READING_COMPREHENSION', 'OTHER']),
+      confidence: z.number().min(0).max(1),
+      reasoning: z.string(),
     }),
   );
 
-  const result = await runnable.invoke([new SystemMessage(getSystemPrompt()), new HumanMessage(getUserMessage())]);
+  const result = await runnable.invoke([new SystemMessage(systemPrompt), new HumanMessage(userMessage)]);
 
-  result.analysis.forEach((item, index) => {
-    this.engine.logger.log(`Analysis ${index + 1}:`);
-    this.engine.logger.log(`Intent: ${item.intent} (confidence: ${item.confidence})`);
-    this.engine.logger.log(`Reasoning: ${item.reasoning}`);
-    this.engine.logger.log(`Optimized Query: ${item.optimizedQuery}`);
-    this.engine.logger.log(`Relevant Context: ${JSON.stringify(item.relevantContext)}`);
+  ctx.ctxThis.engine.logger.log(`Rewritten Query: ${result.rewrittenQuery}`);
+  ctx.ctxThis.engine.logger.log(`Mentioned Context: ${JSON.stringify(result.mentionedContext)}`);
+  ctx.ctxThis.engine.logger.log(`Intent: ${result.intent} (confidence: ${result.confidence})`);
+  ctx.ctxThis.engine.logger.log(`Reasoning: ${result.reasoning}`);
 
-    this.emitEvent({ event: 'log', content: `Analysis ${index + 1}:` }, this.configSnapshot);
-    this.emitEvent(
-      { event: 'log', content: `Intent: ${item.intent} (confidence: ${item.confidence})` },
-      this.configSnapshot,
-    );
-    this.emitEvent({ event: 'log', content: `Reasoning: ${item.reasoning}` }, this.configSnapshot);
-    this.emitEvent({ event: 'log', content: `Optimized Query: ${item.optimizedQuery}` }, this.configSnapshot);
-    this.emitEvent(
-      { event: 'log', content: `Relevant Context: ${JSON.stringify(item.relevantContext)}` },
-      this.configSnapshot,
-    );
-  });
+  ctx.ctxThis.emitEvent({ event: 'log', content: `Rewritten Query: ${result.rewrittenQuery}` }, ctx.configSnapshot);
+  ctx.ctxThis.emitEvent(
+    { event: 'log', content: `Mentioned Context: ${JSON.stringify(result.mentionedContext)}` },
+    ctx.configSnapshot,
+  );
+  ctx.ctxThis.emitEvent(
+    { event: 'log', content: `Intent: ${result.intent} (confidence: ${result.confidence})` },
+    ctx.configSnapshot,
+  );
+  ctx.ctxThis.emitEvent({ event: 'log', content: `Reasoning: ${result.reasoning}` }, ctx.configSnapshot);
 
-  return result.analysis as QueryAnalysis[];
+  return {
+    optimizedQuery: result.rewrittenQuery,
+    mentionedContext: result.mentionedContext,
+    intent: result.intent,
+    confidence: result.confidence,
+    reasoning: result.reasoning,
+    relevantContext: [], // This will be populated by prepareRelevantContext
+  };
 }

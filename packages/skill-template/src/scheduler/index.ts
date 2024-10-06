@@ -31,9 +31,9 @@ import { ReflyDefaultResponse } from '../tools/default-response';
 // types
 import { SkillContextContentItemMetadata, SelectedContentDomain, GraphState, QueryAnalysis, IContext } from './types';
 // utils
-import { concatContext, prepareRelevantContext } from './utils/context';
+import { concatContextToStr, prepareRelevantContext } from './utils/context';
 import { buildSchedulerSystemPrompt } from './utils/prompt';
-
+import { analyzeQueryAndContext } from './utils/queryRewrite';
 export class Scheduler extends BaseSkill {
   name = 'scheduler';
 
@@ -280,7 +280,7 @@ Please generate the summary based on these requirements and offer suggestions fo
     this.configSnapshot ??= config;
     this.emitEvent({ event: 'start' }, this.configSnapshot);
 
-    const { messages = [], query, contextualUserQuery } = state;
+    const { messages = [], query } = state;
     const {
       locale = 'en',
       chatHistory = [],
@@ -290,7 +290,22 @@ Please generate the summary based on these requirements and offer suggestions fo
       modelName,
     } = this.configSnapshot.configurable;
 
-    const context = await prepareRelevantContext(query);
+    const { optimizedQuery, mentionedContext } = await analyzeQueryAndContext(query, {
+      configSnapshot: this.configSnapshot,
+      ctxThis: this,
+      state: state,
+    });
+    const context = await prepareRelevantContext(
+      {
+        query: optimizedQuery,
+        mentionedContext,
+      },
+      {
+        configSnapshot: this.configSnapshot,
+        ctxThis: this,
+        state: state,
+      },
+    );
     const systemPrompt = buildSchedulerSystemPrompt(locale);
 
     const model = this.engine.chatModel({ temperature: 0.1 });
@@ -300,8 +315,8 @@ Please generate the summary based on these requirements and offer suggestions fo
         new SystemMessage(systemPrompt),
         ...chatHistory.slice(0, -1),
         ...messages,
-        new HumanMessage(`The context is ${context}`),
-        new HumanMessage(`The user's query is ${query}`),
+        new HumanMessage(`## Context \n ${context}`),
+        new HumanMessage(`## User Query \n ${optimizedQuery}`),
       ],
       {
         ...this.configSnapshot,
@@ -314,83 +329,6 @@ Please generate the summary based on these requirements and offer suggestions fo
     );
 
     this.emitEvent({ event: 'end' }, this.configSnapshot);
-
-    return { messages: [responseMessage], skillCalls: [] };
-  };
-
-  commonSenseGenerate = async (
-    state: GraphState,
-    config: SkillRunnableConfig,
-    callByGraph = true,
-  ): Promise<Partial<GraphState>> => {
-    const { messages = [], query, contextualUserQuery } = state;
-
-    this.configSnapshot ??= config;
-
-    // default by langgraph engine call, but can be called as function
-    if (callByGraph) {
-      this.emitEvent({ event: 'start' }, this.configSnapshot);
-    }
-
-    const {
-      contentList = [],
-      locale = 'en',
-      chatHistory = [],
-      currentSkill,
-      spanId,
-    } = this.configSnapshot.configurable; // scheduler only handle contentList when no skill could
-
-    // without any skill, scheduler can handle contentList for common knowledge q & a
-    const getSystemPrompt = (locale: string) => `- Role: Knowledge Management Assistant
-- Background: Users require an intelligent assistant capable of understanding queries and context information, even when the context is absent, to provide answers in the language of the query while maintaining the language of professional terms.
-- Profile: You are an AI developed by Refly AI, specializing in knowledge management, adept at reading, writing, and integrating knowledge, and skilled in providing responses in the language of the user's query.
-- Skills: You possess capabilities in text parsing, information extraction, knowledge association, intelligent Q&A, and the ability to generate context from a query when necessary.
-- Goals: Provide accurate, relevant, and helpful answers based on the user's query and available context information, ensuring that the language of the response matches the query and that professional terms are maintained in their original language.
-- Constrains:
-  1. Always respond in the language of the user's query, the user's locale is ${locale}.
-  2. Maintain professional terms in their original language within the response.
-  3. Ensure the response is clear and understandable, even with the inclusion of professional terms.
-- OutputFormat: Clear, accurate, and helpful text responses in the query's language, with professional terms in their original language.
-- Workflow:
-  1. Receive the user's query and any provided context information.
-  2. Analyze the query and context information, or generate context if necessary, to extract key points.
-  3. Generate accurate and relevant answers, ensuring the response language matches the query and professional terms are in their original language.
-- Examples:
-  - Example 1: Query: "What is artificial intelligence?" Context: ["Artificial intelligence is a technology that simulates human intelligence", "Artificial intelligence can perform a variety of tasks"]
-    Answer: "Artificial intelligence is a technology that simulates human intelligence and can perform a variety of tasks, such as recognizing language and solving problems."
-  - Example 2: Query: "How to improve work efficiency?" Context: ["Using tools can improve work efficiency", "Proper time planning is also important"]
-    Answer: "Improving work efficiency can be achieved by using appropriate tools and proper time planning."
-  - Example 3: Query: "Define sustainability" Context: []
-    Answer: "Sustainability refers to the ability to maintain a certain process or state without depleting resources or causing long-term harm to the environment, economy, or society."
-- Initialization: In the first conversation, please directly output the following: Hello, I am your Knowledge Management Assistant. I can help you answer queries and provide answers based on context information, even if the context is not provided. My responses will always be in the language of your query, and I will maintain the original language of professional terms. Please tell me your query and any relevant context information you have.
-  `;
-    const getUserPrompt = (query: string, contentList: string[]) => {
-      return `Query: ${contextualUserQuery || query} \n\n Context: [${contentList.filter((item) => item).join(', ')}]`;
-    };
-
-    const model = this.engine.chatModel({ temperature: 0.5 });
-
-    const responseMessage = await model.invoke(
-      [
-        new SystemMessage(getSystemPrompt(locale)),
-        ...chatHistory,
-        ...messages,
-        new HumanMessage(
-          getUserPrompt(
-            query,
-            contentList.map((item) => item.content),
-          ),
-        ),
-      ],
-      {
-        ...this.configSnapshot,
-        metadata: {
-          ...this.configSnapshot.metadata,
-          ...currentSkill,
-          spanId,
-        },
-      },
-    );
 
     return { messages: [responseMessage], skillCalls: [] };
   };
@@ -488,10 +426,7 @@ Generated question example:
     return {};
   };
 
-  shouldDirectCallSkill = (
-    state: GraphState,
-    config: SkillRunnableConfig,
-  ): 'direct' | 'scheduler' | 'commonSenseGenerate' => {
+  shouldDirectCallSkill = (state: GraphState, config: SkillRunnableConfig): 'direct' | 'scheduler' => {
     const { selectedSkill, installedSkills = [] } = config.configurable || {};
 
     if (!selectedSkill) {
@@ -549,15 +484,11 @@ Generated question example:
     })
       .addNode('direct', this.directCallSkill)
       .addNode('scheduler', this.callScheduler)
-      .addNode('commonSenseGenerate', this.commonSenseGenerate)
-      .addNode('skill', this.callSkill)
       .addNode('relatedQuestions', this.genRelatedQuestions);
 
     workflow.addConditionalEdges(START, this.shouldDirectCallSkill);
     workflow.addConditionalEdges('direct', this.onDirectSkillCallFinish);
-    workflow.addConditionalEdges('commonSenseGenerate', this.onDirectSkillCallFinish);
     workflow.addConditionalEdges('scheduler', this.shouldCallSkill);
-    workflow.addConditionalEdges('skill', this.onSkillCallFinish);
     workflow.addEdge('relatedQuestions', END);
 
     return workflow.compile();
