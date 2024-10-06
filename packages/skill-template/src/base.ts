@@ -42,7 +42,7 @@ export abstract class BaseSkill extends StructuredTool {
    */
   abstract graphState: StateGraphArgs<BaseSkillState>['channels'];
 
-  constructor(protected engine: SkillEngine, protected params?: BaseToolParams) {
+  constructor(public engine: SkillEngine, protected params?: BaseToolParams) {
     super(params);
   }
 
