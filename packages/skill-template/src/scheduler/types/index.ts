@@ -35,8 +35,8 @@ export interface Chunk {
   };
 }
 
-export interface MentionedContext {
-  type?: 'note' | 'resource' | 'content';
+export interface MentionedContextItem {
+  type?: 'note' | 'resource' | 'selectedContent';
   entityId?: string;
   url?: string;
   title?: string;
@@ -47,12 +47,7 @@ export interface QueryAnalysis {
   confidence: number;
   reasoning: string;
   optimizedQuery: string;
-  mentionedContext: MentionedContext[];
-  relevantContext: {
-    type: 'message' | 'content' | 'resource' | 'note' | 'collection';
-    id: string;
-    content: string;
-  }[];
+  mentionedContext: IContext;
 }
 
 export interface IContext {

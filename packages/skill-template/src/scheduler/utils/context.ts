@@ -1,11 +1,5 @@
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
-import {
-  GraphState,
-  IContext,
-  MentionedContext,
-  SelectedContentDomain,
-  SkillContextContentItemMetadata,
-} from '../types';
+import { GraphState, IContext, SelectedContentDomain, SkillContextContentItemMetadata } from '../types';
 import {
   ChatMessage,
   Collection,
@@ -63,9 +57,9 @@ export const concatContextToStr = (relevantContext: IContext) => {
   if (contentList.length > 0) {
     contextStr += 'Following are the user selected content: \n';
     const concatContent = (content: string, from: SelectedContentDomain, title: string, id?: string, url?: string) => {
-      return `<UserSelectedContent from='${from}' ${id ? `entityId='${id}'` : ''} title='${title}' ${
-        url ? `weblinkUrl='${url}'` : ''
-      }>${content}</UserSelectedContent>`;
+      return `<UserSelectedContent type='selectedContent' from='${from}' ${
+        id ? `entityId='${id}'` : ''
+      } title='${title}' ${url ? `weblinkUrl='${url}'` : ''}>${content}</UserSelectedContent>`;
     };
 
     contextStr += contentList.map((c) => {
@@ -176,7 +170,7 @@ export async function prepareRelevantContext(
     mentionedContext,
   }: {
     query: string;
-    mentionedContext: MentionedContext[];
+    mentionedContext: IContext;
   },
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<string> {
