@@ -103,14 +103,13 @@ export class RAGService {
       }`,
     );
 
-    // TODO: error handling
-    // TODO: Jina token needs payment method
     const response = await fetch(READER_URL + url, {
       method: 'GET',
       headers: {
-        // Authorization: this.config.get('rag.jinaToken')
-        //   ? `Bearer ${this.config.get('rag.jinaToken')}`
-        //   : undefined,
+        Authorization:
+          process.env.NODE_ENV === 'production' && this.config.get('rag.jinaToken')
+            ? `Bearer ${this.config.get('rag.jinaToken')}`
+            : undefined,
         Accept: 'application/json',
       },
     });
@@ -261,19 +260,25 @@ export class RAGService {
       top_n: this.config.get('reranker.topN'),
       documents: Array.from(contentMap.keys()),
     });
-    const res = await fetch('https://api.jina.ai/v1/rerank', {
-      method: 'post',
-      headers: {
-        Authorization: `Bearer ${this.config.getOrThrow('rag.jinaToken')}`,
-        'Content-Type': 'application/json',
-      },
-      body: payload,
-    });
-    const data: JinaRerankerResponse = await res.json();
-    this.logger.debug(`Jina reranker results: ${JSON.stringify(data)}`);
 
-    return data.results
-      .filter((r) => r.relevance_score >= this.config.get('reranker.relevanceThreshold'))
-      .map((r) => contentMap.get(r.document.text) as SearchResult);
+    try {
+      const res = await fetch('https://api.jina.ai/v1/rerank', {
+        method: 'post',
+        headers: {
+          Authorization: `Bearer ${this.config.getOrThrow('rag.jinaToken')}`,
+          'Content-Type': 'application/json',
+        },
+        body: payload,
+      });
+      const data: JinaRerankerResponse = await res.json();
+      this.logger.debug(`Jina reranker results: ${JSON.stringify(data)}`);
+
+      return data.results
+        .filter((r) => r.relevance_score >= this.config.get('reranker.relevanceThreshold'))
+        .map((r) => contentMap.get(r.document.text) as SearchResult);
+    } catch (e) {
+      this.logger.error(`Reranker failed, fallback to default: ${e.stack}`);
+      return results;
+    }
   }
 }
