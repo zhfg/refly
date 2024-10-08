@@ -154,9 +154,9 @@ export class KnowledgeBaseSearch extends BaseSkill {
       title: result.title,
       pageContent: result.content.join('\n'),
       metadata: {
-        resourceId: result.id,
-        resourceName: result.title,
-        collectionId: result.metadata?.collectionId,
+        entityId: result.id,
+        entityType: 'resource',
+        title: result.title,
       },
     }));
 
@@ -239,8 +239,8 @@ Please output answer in ${locale} language:`,
       metadata: {
         source: res.url,
         title: res.title,
-        collectionId: res.metadata.collectionId,
-        resourceId: res.metadata.resourceId,
+        entityId: res.metadata.entityId,
+        entityType: res.metadata.entityType,
         index: index + 1, // Add index for citation
       },
       pageContent: res.pageContent,
