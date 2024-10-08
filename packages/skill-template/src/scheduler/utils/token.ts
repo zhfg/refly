@@ -1,4 +1,11 @@
+import { IContext } from '@/scheduler/types';
 import { get_encoding } from '@dqbd/tiktoken';
+import {
+  SkillContextCollectionItem,
+  SkillContextContentItem,
+  SkillContextNoteItem,
+  SkillContextResourceItem,
+} from '@refly-packages/openapi-schema';
 
 export enum LLMType {
   GPT4oMini = 'gpt-4o-mini',
@@ -34,4 +41,30 @@ export const isTokenOverflow = (content: string, model: string, reservation = 10
   const limit = ModelContextLimitMap[model]; // 这里model指 LLMType
   const count = countToken(content);
   return count + reservation > limit ?? 8 * 1024;
+};
+
+export const countContentTokens = (contentList: SkillContextContentItem[]) => {
+  return contentList.reduce((sum, content) => sum + countToken(content?.content || ''), 0);
+};
+
+export const countResourceTokens = (resources: SkillContextResourceItem[]) => {
+  return resources.reduce((sum, resource) => sum + countToken(resource?.resource?.content), 0);
+};
+
+export const countNoteTokens = (notes: SkillContextNoteItem[]) => {
+  return notes.reduce((sum, note) => sum + countToken(note?.note?.content), 0);
+};
+
+// TODO: collections 搜索和在整个知识库搜索一起实现
+// export const countCollectionTokens = (collections: SkillContextCollectionItem[]) => {
+//   return collections.reduce((sum, collection) => sum + countToken(collection?.collection?.content), 0);
+// };
+
+export const countMentionedContextTokens = (mentionedContext: IContext) => {
+  return (
+    countContentTokens(mentionedContext.contentList) +
+    countResourceTokens(mentionedContext.resources) +
+    countNoteTokens(mentionedContext.notes)
+    // countCollectionTokens(mentionedContext.collections)
+  );
 };

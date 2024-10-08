@@ -16,7 +16,6 @@ import { countToken, ModelContextLimitMap } from './token';
 import { MAX_NEED_RECALL_TOKEN, SHORT_CONTENT_THRESHOLD, MIN_RELEVANCE_SCORE } from './constants';
 import { calculateEmbedding, cosineSimilarity } from './embedding';
 import { getRelevantChunks } from './chunking';
-import { concatContextToStr } from './context';
 
 // TODO:替换成实际的 Chunk 定义，然后进行拼接，拼接时包含元数据和分隔符
 export function assembleChunks(chunks: Chunk[]): string {
@@ -294,4 +293,47 @@ export async function processResourcesWithSimilarity(
   }
 
   return result;
+}
+
+export async function processMentionedContextWithSimilarity(
+  query: string,
+  mentionedContext: IContext,
+  maxTokens: number,
+): Promise<IContext> {
+  const MAX_CONTENT_RAG_RELEVANT_RATIO = 0.4;
+  const MAX_RESOURCE_RAG_RELEVANT_RATIO = 0.3;
+  const MAX_NOTE_RAG_RELEVANT_RATIO = 0.3;
+
+  const MAX_CONTENT_RAG_RELEVANT_MAX_TOKENS = Math.floor(maxTokens * MAX_CONTENT_RAG_RELEVANT_RATIO);
+  const MAX_RESOURCE_RAG_RELEVANT_MAX_TOKENS = Math.floor(maxTokens * MAX_RESOURCE_RAG_RELEVANT_RATIO);
+  const MAX_NOTE_RAG_RELEVANT_MAX_TOKENS = Math.floor(maxTokens * MAX_NOTE_RAG_RELEVANT_RATIO);
+
+  // 处理 contentList
+  const processedContentList = await processSelectedContentWithSimilarity(
+    query,
+    mentionedContext.contentList,
+    MAX_CONTENT_RAG_RELEVANT_MAX_TOKENS,
+  );
+
+  // 处理 resources
+  const processedResources = await processResourcesWithSimilarity(
+    query,
+    mentionedContext.resources,
+    MAX_RESOURCE_RAG_RELEVANT_MAX_TOKENS,
+  );
+
+  // 处理 notes
+  const processedNotes = await processNotesWithSimilarity(
+    query,
+    mentionedContext.notes,
+    MAX_NOTE_RAG_RELEVANT_MAX_TOKENS,
+  );
+
+  // 返回处理后的上下文
+  return {
+    ...mentionedContext,
+    contentList: processedContentList,
+    resources: processedResources,
+    notes: processedNotes,
+  };
 }
