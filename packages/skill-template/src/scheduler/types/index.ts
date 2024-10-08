@@ -11,6 +11,7 @@ import {
   SkillContextNoteItem,
   SkillContextCollectionItem,
   ChatMessage,
+  Source,
 } from '@refly/openapi-schema';
 import { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
 import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
@@ -56,6 +57,7 @@ export interface IContext {
   notes: SkillContextNoteItem[];
   collections?: SkillContextCollectionItem[];
   messages?: ChatMessage[];
+  webSearchSources?: Source[];
   locale?: string | LOCALE;
 }
 
