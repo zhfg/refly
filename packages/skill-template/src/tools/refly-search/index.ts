@@ -1,5 +1,5 @@
 import { Tool } from '@langchain/core/tools';
-import { SearchDomain, SearchMode, User } from '@refly-packages/openapi-schema';
+import { SearchDomain, SearchMode, User, Entity } from '@refly-packages/openapi-schema';
 import { BaseToolParams } from '../../base';
 import { SkillEngine } from '../../engine';
 
@@ -7,25 +7,24 @@ export interface ReflySearchParameters extends BaseToolParams {
   user: User;
   domains: SearchDomain[];
   mode: SearchMode;
+  entities?: Entity[];
 }
 
 export class ReflySearch extends Tool {
   private engine: SkillEngine;
   private user: User;
-  private domains: SearchDomain[];
-  private mode: SearchMode;
+  private params: ReflySearchParameters;
 
   name = 'refly_search';
 
   description = 'Refly search can be used to search everything within Refly.';
 
   constructor(params: ReflySearchParameters) {
-    super(params);
+    super(params ?? {});
 
     this.engine = params.engine;
     this.user = params.user;
-    this.domains = params.domains;
-    this.mode = params.mode;
+    this.params = params;
   }
 
   static lc_name() {
@@ -33,12 +32,16 @@ export class ReflySearch extends Tool {
   }
 
   async _call(input: string): Promise<string> {
-    // TODO: implement given resourceIds and collectionIds q&a @mrcfps
-    const res = await this.engine.service.search(this.user, {
-      query: input,
-      domains: this.domains,
-      mode: this.mode,
-    });
+    const res = await this.engine.service.search(
+      this.user,
+      {
+        query: input,
+        domains: this.params.domains,
+        mode: this.params.mode,
+        entities: this.params.entities,
+      },
+      { enableReranker: true },
+    );
     return JSON.stringify(res);
   }
 }

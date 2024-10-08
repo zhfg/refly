@@ -1248,7 +1248,7 @@ paths:
       tags:
         - search
       summary: Search
-      description: Search for everything
+      description: Search for resources, collections, notes, etc.
       operationId: search
       requestBody:
         required: true
@@ -3481,6 +3481,50 @@ components:
               type: object
               description: Subscription usage
               $ref: '#/components/schemas/SubscriptionUsageData'
+    WebSearchRequest:
+      type: object
+      properties:
+        query:
+          type: string
+          description: Web search query
+        locale:
+          type: string
+          description: Web search locale
+          default: en
+        limit:
+          type: number
+          description: Web search result limit
+          default: 8
+    WebSearchResult:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Web search result name
+        url:
+          type: string
+          description: Web search result url
+        snippet:
+          type: string
+          description: Web search result snippet
+    WebSearchResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Web search results
+              items:
+                $ref: '#/components/schemas/WebSearchResult'
+    SearchOptions:
+      type: object
+      description: Search options for internal use
+      properties:
+        enableReranker:
+          type: boolean
+          description: Whether to enable reranker
+          default: true
     SearchDomain:
       type: string
       enum:
@@ -3503,13 +3547,6 @@ components:
         query:
           type: string
           description: Search query (if empty, return last updated data)
-        scope:
-          type: string
-          description: Search scope
-          enum:
-            - user
-            - public
-          default: user
         domains:
           type: array
           description: Search domains (if not specified, return all domains)

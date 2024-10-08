@@ -18,9 +18,11 @@ import {
   GetNoteDetailResponse,
   UpsertNoteRequest,
   CreateNoteResponse,
-  UpdateNoteResponse,
   ListNotesData,
   ListNotesResponse,
+  SearchOptions,
+  WebSearchRequest,
+  WebSearchResponse,
 } from '@refly-packages/openapi-schema';
 
 export interface ReflyService {
@@ -34,7 +36,8 @@ export interface ReflyService {
   updateCollection: (user: User, req: UpsertCollectionRequest) => Promise<UpdateCollectionResponse>;
   createLabelClass: (user: User, req: CreateLabelClassRequest) => Promise<CreateLabelClassResponse>;
   createLabelInstance: (user: User, req: CreateLabelInstanceRequest) => Promise<CreateLabelInstanceResponse>;
-  search: (user: User, req: SearchRequest) => Promise<SearchResponse>;
+  webSearch: (user: User, req: WebSearchRequest) => Promise<WebSearchResponse>;
+  search: (user: User, req: SearchRequest, options?: SearchOptions) => Promise<SearchResponse>;
 }
 
 export interface SkillEngineOptions {

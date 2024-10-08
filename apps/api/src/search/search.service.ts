@@ -1,22 +1,30 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@/common/prisma.service';
 import {
   Entity,
   EntityType,
   ResourceMeta,
   ResourceType,
+  SearchOptions,
   SearchRequest,
   SearchResult,
   User,
+  WebSearchRequest,
+  WebSearchResult,
 } from '@refly-packages/openapi-schema';
 import { RAGService } from '@/rag/rag.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
+import { LOCALE } from '@refly-packages/common-types';
 
 interface ProcessedSearchRequest extends SearchRequest {}
 
 @Injectable()
 export class SearchService {
+  private logger = new Logger(SearchService.name);
+
   constructor(
+    private configService: ConfigService,
     private prisma: PrismaService,
     private elasticsearch: ElasticsearchService,
     private rag: RAGService,
@@ -32,7 +40,13 @@ export class SearchService {
       req.limit = 10;
     }
     req.mode ??= 'keyword';
-    req.domains ??= ['resource', 'note', 'collection', 'conversation', 'skill'];
+
+    if (req.mode === 'vector') {
+      // Currently only resource and note are supported for vector search
+      req.domains ??= ['resource', 'note'];
+    } else {
+      req.domains ??= ['resource', 'note', 'collection', 'conversation', 'skill'];
+    }
 
     const reqList: SearchRequest[] = [];
 
@@ -373,7 +387,71 @@ export class SearchService {
     }));
   }
 
-  async search(user: User, req: SearchRequest): Promise<SearchResult[]> {
+  async webSearch(user: User, req: WebSearchRequest): Promise<WebSearchResult[]> {
+    const { query, limit = 8 } = req;
+    const locale = user.outputLocale || LOCALE.EN;
+
+    let jsonContent: any = [];
+    try {
+      const queryPayload = JSON.stringify({
+        q: query,
+        num: limit,
+        hl: locale.toLocaleLowerCase(),
+        gl: locale.toLocaleLowerCase() === LOCALE.ZH_CN.toLocaleLowerCase() ? 'cn' : 'us',
+      });
+
+      const res = await fetch('https://google.serper.dev/search', {
+        method: 'post',
+        headers: {
+          'X-API-KEY': this.configService.get('serper.apiKey'),
+          'Content-Type': 'application/json',
+        },
+        body: queryPayload,
+      });
+      jsonContent = await res.json();
+
+      // convert to the same format as bing/google
+      const contexts: WebSearchResult[] = [];
+      if (jsonContent.hasOwnProperty('knowledgeGraph')) {
+        const url = jsonContent.knowledgeGraph.descriptionUrl || jsonContent.knowledgeGraph.website;
+        const snippet = jsonContent.knowledgeGraph.description;
+        if (url && snippet) {
+          contexts.push({
+            name: jsonContent.knowledgeGraph.title || '',
+            url: url,
+            snippet: snippet,
+          });
+        }
+      }
+
+      if (jsonContent.hasOwnProperty('answerBox')) {
+        const url = jsonContent.answerBox.url;
+        const snippet = jsonContent.answerBox.snippet || jsonContent.answerBox.answer;
+        if (url && snippet) {
+          contexts.push({
+            name: jsonContent.answerBox.title || '',
+            url: url,
+            snippet: snippet,
+          });
+        }
+      }
+      if (jsonContent.hasOwnProperty('organic')) {
+        for (const c of jsonContent.organic) {
+          contexts.push({
+            name: c.title,
+            url: c.link,
+            snippet: c.snippet || '',
+          });
+        }
+      }
+      return contexts.slice(0, limit);
+    } catch (e) {
+      this.logger.error(`onlineSearch error encountered: ${e}`);
+      return [];
+    }
+  }
+
+  async search(user: User, req: SearchRequest, options?: SearchOptions): Promise<SearchResult[]> {
     const reqList = await this.preprocessSearchRequest(user, req);
 
     const results = await Promise.all(
@@ -394,6 +472,14 @@ export class SearchService {
         }
       }),
     );
+
+    if (options?.enableReranker) {
+      this.logger.log(`Reranker enabled for query: ${req.query}`);
+      const rerankedResults = await this.rag.rerank(req.query, results.flat());
+      this.logger.log(`Reranked results: ${JSON.stringify(rerankedResults)}`);
+
+      return rerankedResults;
+    }
 
     return results.flat();
   }
