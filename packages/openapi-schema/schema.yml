@@ -1483,6 +1483,16 @@ components:
         - resource
         - collection
         - note
+    Entity:
+      type: object
+      description: Entity
+      properties:
+        entityId:
+          type: string
+          description: Entity ID
+        entityType:
+          description: Entity type
+          $ref: '#/components/schemas/EntityType'
     LabelClass:
       type: object
       description: Label class
@@ -3505,6 +3515,11 @@ components:
           description: Search domains (if not specified, return all domains)
           items:
             $ref: '#/components/schemas/SearchDomain'
+        entities:
+          type: array
+          description: Search entities
+          items:
+            $ref: '#/components/schemas/Entity'
         mode:
           type: string
           description: Search mode

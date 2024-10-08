@@ -160,6 +160,20 @@ export type Collection = {
 export type EntityType = 'resource' | 'collection' | 'note';
 
 /**
+ * Entity
+ */
+export type Entity = {
+  /**
+   * Entity ID
+   */
+  entityId?: string;
+  /**
+   * Entity type
+   */
+  entityType?: EntityType;
+};
+
+/**
  * Label class
  */
 export type LabelClass = {
@@ -2040,6 +2054,14 @@ export type SearchRequest = {
    * Search domains (if not specified, return all domains)
    */
   domains?: Array<SearchDomain>;
+  /**
+   * Search entities
+   */
+  entities?: Array<Entity>;
+  /**
+   * Search project IDs
+   */
+  projectIds?: Array<string>;
   /**
    * Search mode
    */

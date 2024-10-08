@@ -199,6 +199,21 @@ export const $EntityType = {
   enum: ['resource', 'collection', 'note'],
 } as const;
 
+export const $Entity = {
+  type: 'object',
+  description: 'Entity',
+  properties: {
+    entityId: {
+      type: 'string',
+      description: 'Entity ID',
+    },
+    entityType: {
+      description: 'Entity type',
+      $ref: '#/components/schemas/EntityType',
+    },
+  },
+} as const;
+
 export const $LabelClass = {
   type: 'object',
   description: 'Label class',
@@ -2976,6 +2991,20 @@ export const $SearchRequest = {
       description: 'Search domains (if not specified, return all domains)',
       items: {
         $ref: '#/components/schemas/SearchDomain',
+      },
+    },
+    entities: {
+      type: 'array',
+      description: 'Search entities',
+      items: {
+        $ref: '#/components/schemas/Entity',
+      },
+    },
+    projectIds: {
+      type: 'array',
+      description: 'Search project IDs',
+      items: {
+        type: 'string',
       },
     },
     mode: {

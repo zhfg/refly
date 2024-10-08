@@ -1,7 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { cut, extract } from '@node-rs/jieba';
 import { PrismaService } from '@/common/prisma.service';
 import {
+  Entity,
+  EntityType,
   ResourceMeta,
   ResourceType,
   SearchRequest,
@@ -11,9 +12,7 @@ import {
 import { RAGService } from '@/rag/rag.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
 
-interface ProcessedSearchRequest extends SearchRequest {
-  tokens: string[];
-}
+interface ProcessedSearchRequest extends SearchRequest {}
 
 @Injectable()
 export class SearchService {
@@ -23,7 +22,9 @@ export class SearchService {
     private rag: RAGService,
   ) {}
 
-  preprocessSearchRequest(req: SearchRequest): ProcessedSearchRequest {
+  async preprocessSearchRequest(user: User, req: SearchRequest): Promise<SearchRequest[]> {
+    req.query = req.query?.trim() || '';
+
     if (!req.limit || req.limit <= 0) {
       req.limit = 5;
     }
@@ -33,14 +34,55 @@ export class SearchService {
     req.mode ??= 'keyword';
     req.domains ??= ['resource', 'note', 'collection', 'conversation', 'skill'];
 
-    let tokens = cut(req.query);
-    if (tokens.length > 5) {
-      const extractedTokens = extract(req.query, 5).map((item) => item.keyword);
-      if (extractedTokens.length > 0) {
-        tokens = extractedTokens;
+    const reqList: SearchRequest[] = [];
+
+    if (req.entities?.length > 0) {
+      const entities = req.entities.filter((entity) => req.domains.includes(entity.entityType));
+      if (entities.length === 0) {
+        return [];
       }
+
+      // Add collection resources to entities
+      const collectionIds = entities
+        .filter((entity) => entity.entityType === 'collection')
+        .map((entity) => entity.entityId);
+      if (collectionIds.length > 0) {
+        const collections = await this.prisma.collection.findMany({
+          where: { collectionId: { in: collectionIds }, uid: user.uid, deletedAt: null },
+          include: { resources: true },
+        });
+        collections.forEach((collection) => {
+          collection.resources.forEach((resource) => {
+            entities.push({
+              entityType: 'resource',
+              entityId: resource.resourceId,
+            });
+          });
+        });
+      }
+
+      const entityMap = new Map<EntityType, Set<Entity>>();
+
+      entities.forEach((entity) => {
+        const entitySet = entityMap.get(entity.entityType) || new Set<Entity>();
+        entitySet.add(entity);
+        entityMap.set(entity.entityType, entitySet);
+      });
+
+      entityMap.forEach((entitySet, entityType) => {
+        reqList.push({
+          ...req,
+          domains: [entityType],
+          entities: Array.from(entitySet),
+        });
+      });
+    } else {
+      req.domains.forEach((domain) => {
+        reqList.push({ ...req, domains: [domain] });
+      });
     }
-    return { ...req, tokens };
+
+    return reqList;
   }
 
   async emptySearchResources(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
@@ -78,7 +120,7 @@ export class SearchService {
     user: User,
     req: ProcessedSearchRequest,
   ): Promise<SearchResult[]> {
-    const hits = await this.elasticsearch.searchResources(user, req.query, req.limit || 5);
+    const hits = await this.elasticsearch.searchResources(user, req);
 
     return hits.map((hit) => ({
       id: hit._id,
@@ -97,7 +139,10 @@ export class SearchService {
     const nodes = await this.rag.retrieve(user, {
       query: req.query,
       limit: req.limit,
-      filter: { nodeTypes: ['resource'] },
+      filter: {
+        nodeTypes: ['resource'],
+        resourceIds: req.entities?.map((entity) => entity.entityId),
+      },
     });
     if (nodes.length === 0) {
       return [];
@@ -127,9 +172,7 @@ export class SearchService {
   }
 
   async searchResources(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    const tokens = req.tokens;
-
-    if (tokens.length === 0) {
+    if (req.query.length === 0) {
       return this.emptySearchResources(user, req);
     }
 
@@ -169,7 +212,7 @@ export class SearchService {
   }
 
   async searchNotesByKeywords(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    const hits = await this.elasticsearch.searchNotes(user, req.query, req.limit || 5);
+    const hits = await this.elasticsearch.searchNotes(user, req);
 
     return hits.map((hit) => ({
       id: hit._id,
@@ -185,7 +228,10 @@ export class SearchService {
     const nodes = await this.rag.retrieve(user, {
       query: req.query,
       limit: req.limit,
-      filter: { nodeTypes: ['note'] },
+      filter: {
+        nodeTypes: ['note'],
+        noteIds: req.entities?.map((entity) => entity.entityId),
+      },
     });
     if (nodes.length === 0) {
       return [];
@@ -200,9 +246,7 @@ export class SearchService {
   }
 
   async searchNotes(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    const tokens = req.tokens;
-
-    if (tokens.length === 0) {
+    if (req.query.length === 0) {
       return this.emptySearchNotes(user, req);
     }
 
@@ -241,13 +285,11 @@ export class SearchService {
   }
 
   async searchCollections(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    const tokens = req.tokens;
-
-    if (tokens.length === 0) {
+    if (req.query.length === 0) {
       return this.emptySearchCollections(user, req);
     }
 
-    const hits = await this.elasticsearch.searchCollections(user, req.query, req.limit || 5);
+    const hits = await this.elasticsearch.searchCollections(user, req);
 
     return hits.map((hit) => ({
       id: hit._id,
@@ -283,17 +325,11 @@ export class SearchService {
   }
 
   async searchConversations(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    const tokens = req.tokens;
-
-    if (tokens.length === 0) {
+    if (req.query.length === 0) {
       return this.emptySearchConversations(user, req);
     }
 
-    const hits = await this.elasticsearch.searchConversationMessages(
-      user,
-      req.query,
-      req.limit || 5,
-    );
+    const hits = await this.elasticsearch.searchConversationMessages(user, req);
 
     return hits.map((hit) => ({
       id: hit._source.convId,
@@ -321,13 +357,11 @@ export class SearchService {
   }
 
   async searchSkills(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    const tokens = req.tokens;
-
-    if (tokens.length === 0) {
+    if (req.query.length === 0) {
       return this.emptySearchSkills(user, req);
     }
 
-    const hits = await this.elasticsearch.searchSkills(user, req.query, req.limit || 5);
+    const hits = await this.elasticsearch.searchSkills(user, req);
 
     return hits.map((hit) => ({
       id: hit._id,
@@ -340,21 +374,21 @@ export class SearchService {
   }
 
   async search(user: User, req: SearchRequest): Promise<SearchResult[]> {
-    const processedReq = this.preprocessSearchRequest(req);
+    const reqList = await this.preprocessSearchRequest(user, req);
 
     const results = await Promise.all(
-      processedReq.domains.map((domain) => {
-        switch (domain) {
+      reqList.map((req) => {
+        switch (req.domains[0]) {
           case 'resource':
-            return this.searchResources(user, processedReq);
+            return this.searchResources(user, req);
           case 'note':
-            return this.searchNotes(user, processedReq);
+            return this.searchNotes(user, req);
           case 'collection':
-            return this.searchCollections(user, processedReq);
+            return this.searchCollections(user, req);
           case 'conversation':
-            return this.searchConversations(user, processedReq);
+            return this.searchConversations(user, req);
           case 'skill':
-            return this.searchSkills(user, processedReq);
+            return this.searchSkills(user, req);
           default:
             return [] as SearchResult[];
         }
