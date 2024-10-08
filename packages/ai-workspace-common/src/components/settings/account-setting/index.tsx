@@ -20,6 +20,7 @@ export const AccountSetting = () => {
   const [nameMessage, setNameMessage] = useState('');
   const [emailStatus, setEmailStatus] = useState<'error' | 'success' | 'warning' | 'validating'>('success');
   const [emailMessage, setEmailMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const statusMap = {
     name: { status: nameStatus, setStatus: setNameStatus, setMessage: setNameMessage },
@@ -67,6 +68,8 @@ export const AccountSetting = () => {
     }
     form.validate().then(async (values) => {
       const { name, nickname } = values;
+      if (loading) return;
+      setLoading(true);
       const { error } = await getClient().updateSettings({
         body: {
           name,
@@ -78,6 +81,7 @@ export const AccountSetting = () => {
         message.error(t('settings.account.updateError'));
         return;
       }
+      setLoading(false);
       message.success(t('settings.account.updateSuccess'));
       userStore.setUserProfile({ ...userStore.userProfile, name, nickname });
     });
@@ -164,7 +168,7 @@ export const AccountSetting = () => {
           </FormItem>
 
           <div className="account-setting-update">
-            <Button type="primary" onClick={handleUpdate}>
+            <Button type="primary" onClick={handleUpdate} loading={loading}>
               {t('settings.account.update')}
             </Button>
           </div>
