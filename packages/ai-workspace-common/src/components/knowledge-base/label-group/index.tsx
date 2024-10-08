@@ -107,7 +107,7 @@ export const LabelGroup = (props: LabelGroupProps) => {
       ))}
       <Button
         size="mini"
-        title={labels?.length > 0 && t('workspace.labelGroup.addLabelTitle')}
+        title={labels?.length > 0 ? t('workspace.labelGroup.addLabelTitle') : undefined}
         style={{ borderRadius: '999px' }}
         icon={<HiPlus size={13} strokeWidth={1} />}
         onClick={() => setLabelModalVisible(true)}
