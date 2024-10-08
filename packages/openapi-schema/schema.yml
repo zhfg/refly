@@ -1939,18 +1939,12 @@ components:
           type: string
           format: date-time
           description: Source publish time
-        collectionId:
+        entityId:
           type: string
-          description: Related collection ID
-        collectionName:
+          description: Related entity ID
+        entityType:
           type: string
-          description: Related collection name
-        resourceId:
-          type: string
-          description: Related resource ID
-        resourceName:
-          type: string
-          description: Related resource name
+          description: Related entity type
     SourceSelection:
       type: object
       description: Source selection

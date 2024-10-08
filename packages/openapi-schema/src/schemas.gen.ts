@@ -762,21 +762,13 @@ export const $SourceMeta = {
       format: 'date-time',
       description: 'Source publish time',
     },
-    collectionId: {
+    entityId: {
       type: 'string',
-      description: 'Related collection ID',
+      description: 'Related entity ID',
     },
-    collectionName: {
+    entityType: {
       type: 'string',
-      description: 'Related collection name',
-    },
-    resourceId: {
-      type: 'string',
-      description: 'Related resource ID',
-    },
-    resourceName: {
-      type: 'string',
-      description: 'Related resource name',
+      description: 'Related entity type',
     },
   },
 } as const;

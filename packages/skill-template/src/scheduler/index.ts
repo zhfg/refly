@@ -26,12 +26,10 @@ import {
 import { ToolCall } from '@langchain/core/dist/messages/tool';
 import { randomUUID } from 'node:crypto';
 import { createSkillInventory } from '../inventory';
-// tools
-import { ReflyDefaultResponse } from '../tools/default-response';
 // types
 import { SkillContextContentItemMetadata, SelectedContentDomain, GraphState, QueryAnalysis, IContext } from './types';
 // utils
-import { concatContextToStr, prepareRelevantContext } from './utils/context';
+import { prepareContext } from './utils/context';
 import { buildSchedulerSystemPrompt } from './utils/prompt';
 import { analyzeQueryAndContext } from './utils/queryRewrite';
 export class Scheduler extends BaseSkill {
@@ -295,7 +293,7 @@ Please generate the summary based on these requirements and offer suggestions fo
       ctxThis: this,
       state: state,
     });
-    const context = await prepareRelevantContext(
+    const context = await prepareContext(
       {
         query: optimizedQuery,
         mentionedContext,

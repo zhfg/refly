@@ -25,15 +25,27 @@ export const concatChatHistoryToStr = (messages: ChatMessage[]) => {
   return chatHistoryStr;
 };
 
-export const concatContextToStr = (relevantContext: IContext) => {
-  const { contentList, resources, notes } = relevantContext;
+// citationIndex for each context item is used for LLM to cite the context item in the final answer
+export const concatContextToStr = (context: IContext) => {
+  const { contentList, resources, notes, webSearchSources } = context;
 
   let contextStr = '';
+  let index = 0;
+
+  if (webSearchSources.length > 0) {
+    // contextStr += 'Following are the web search results: \n';
+    const concatWebSearchSource = (url: string, title: string, content: string) => {
+      return `<ContextItem citationIndex='[[citation:${index++}]]' type='webSearchSource' url='${url}' title='${title}'>${content}</WebSearchSource>`;
+    };
+
+    contextStr += webSearchSources.map((s) => concatWebSearchSource(s.url, s.title, s.pageContent)).join('\n');
+    contextStr += '\n\n';
+  }
 
   if (contentList.length > 0) {
-    contextStr += 'Following are the user selected content: \n';
+    // contextStr += 'Following are the user selected content: \n';
     const concatContent = (content: string, from: SelectedContentDomain, title: string, id?: string, url?: string) => {
-      return `<UserSelectedContent type='selectedContent' from='${from}' ${
+      return `<ContextItem citationIndex='[[citation:${index++}]]' type='selectedContent' from='${from}' ${
         id ? `entityId='${id}'` : ''
       } title='${title}' ${url ? `weblinkUrl='${url}'` : ''}>${content}</UserSelectedContent>`;
     };
@@ -47,10 +59,19 @@ export const concatContextToStr = (relevantContext: IContext) => {
     contextStr += '\n\n';
   }
 
+  if (notes.length > 0) {
+    // contextStr += 'Following are the knowledge base notes: \n';
+    const concatNote = (id: string, title: string, content: string) => {
+      return `<ContextItem citationIndex='[[citation:${index++}]]' type='note' entityId='${id}' title='${title}'>${content}</KnowledgeBaseNote>`;
+    };
+
+    contextStr += notes.map((n) => concatNote(n.note?.noteId!, n.note?.title!, n.note?.content!)).join('\n');
+  }
+
   if (resources.length > 0) {
-    contextStr += 'Following are the knowledge base resources: \n';
+    // contextStr += 'Following are the knowledge base resources: \n';
     const concatResource = (id: string, type: ResourceType, title: string, content: string) => {
-      return `<KnowledgeBaseItem type='${type}' entityId='${id}' title='${title}'>${content}</KnowledgeBaseResource>`;
+      return `<ContextItem citationIndex='[[citation:${index++}]]' type='resource' entityId='${id}' title='${title}'>${content}</KnowledgeBaseResource>`;
     };
 
     contextStr += resources
@@ -60,15 +81,6 @@ export const concatContextToStr = (relevantContext: IContext) => {
       .join('\n');
 
     contextStr += '\n\n';
-  }
-
-  if (notes.length > 0) {
-    contextStr += 'Following are the knowledge base notes: \n';
-    const concatNote = (id: string, title: string, content: string) => {
-      return `<KnowledgeBaseItem type='note' entityId='${id}' title='${title}'>${content}</KnowledgeBaseNote>`;
-    };
-
-    contextStr += notes.map((n) => concatNote(n.note?.noteId!, n.note?.title!, n.note?.content!)).join('\n');
   }
 
   if (contextStr?.length > 0) {

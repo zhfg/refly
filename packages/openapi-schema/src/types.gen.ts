@@ -602,21 +602,13 @@ export type SourceMeta = {
    */
   publishedTime?: string;
   /**
-   * Related collection ID
+   * Related entity ID
    */
-  collectionId?: string;
+  entityId?: string;
   /**
-   * Related collection name
+   * Related entity type
    */
-  collectionName?: string;
-  /**
-   * Related resource ID
-   */
-  resourceId?: string;
-  /**
-   * Related resource name
-   */
-  resourceName?: string;
+  entityType?: string;
 };
 
 /**

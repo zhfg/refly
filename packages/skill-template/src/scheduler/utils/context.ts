@@ -1,4 +1,4 @@
-import { GraphState, IContext } from '../types';
+import { GraphState, IContext, SkillContextContentItemMetadata } from '../types';
 import {
   countContentTokens,
   countMentionedContextTokens,
@@ -16,6 +16,9 @@ import {
 import { BaseSkill, SkillRunnableConfig } from '@/base';
 import { truncateContext, truncateText } from './truncator';
 import { concatContextToStr } from './summarizer';
+import { webSearch } from '../skills/webSearch';
+import { SkillContextContentItem, SkillContextNoteItem, SkillContextResourceItem, Source } from '@refly/openapi-schema';
+import { uniqBy } from 'lodash';
 
 // configurable params
 const MAX_CONTEXT_RATIO = 0.7;
@@ -47,8 +50,7 @@ export async function prepareContext(
   // TODO: think remainingTokens may out of range
   let remainingTokens = maxContextTokens;
 
-  // TODO: web search context
-  const processedWebSearchContext = await prepareWebSearchContext(
+  const { processedWebSearchContext } = await prepareWebSearchContext(
     {
       query,
     },
@@ -69,7 +71,7 @@ export async function prepareContext(
   remainingTokens -= mentionedContextTokens;
 
   // 3. relevant context
-  const { relevantContextTokens, processedRelevantContext } = await prepareRelevantContext(
+  const { processedRelevantContext } = await prepareRelevantContext(
     {
       query,
       maxRelevantContextTokens: remainingTokens,
@@ -77,19 +79,22 @@ export async function prepareContext(
     ctx,
   );
 
-  let contextStr = '';
-  if (webSearchContextTokens > 0) {
-    contextStr += `### Web search context: \n`;
-    contextStr += concatContextToStr(processedWebSearchContext);
-  }
-  if (mentionedContextTokens > 0) {
-    contextStr += `### Mentioned context: \n`;
-    contextStr += concatContextToStr(processedMentionedContext);
-  }
-  if (relevantContextTokens > 0) {
-    contextStr += `### Relevant context: \n`;
-    contextStr += concatContextToStr(processedRelevantContext);
-  }
+  let mergedContext = mergeAndDeduplicateContexts(processedMentionedContext, processedRelevantContext);
+  mergedContext = {
+    ...mergedContext,
+    webSearchSources: processedWebSearchContext.webSearchSources,
+  };
+  const contextStr = concatContextToStr(mergedContext);
+  const sources = flattenContextToSources(mergedContext);
+
+  ctx.ctxThis.emitEvent(
+    {
+      event: 'structured_data',
+      content: JSON.stringify(sources),
+      structuredDataKey: 'sources',
+    },
+    ctx.configSnapshot,
+  );
 
   return contextStr;
 }
@@ -101,15 +106,21 @@ export async function prepareWebSearchContext(
     query: string;
   },
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
-): Promise<IContext> {
-  const webSearchContext = {
+): Promise<{
+  processedWebSearchContext: IContext;
+}> {
+  const processedWebSearchContext: IContext = {
     contentList: [],
     resources: [],
     notes: [],
-    collections: [],
+    webSearchSources: [],
   };
+  const webSearchSources = await webSearch(query, ctx);
+  processedWebSearchContext.webSearchSources = webSearchSources;
 
-  return webSearchContext;
+  return {
+    processedWebSearchContext,
+  };
 }
 
 export async function prepareMentionedContext(
@@ -127,8 +138,6 @@ export async function prepareMentionedContext(
   mentionedContextTokens: number;
   processedMentionedContext: IContext;
 }> {
-  const { locale = 'en', chatHistory = [], modelName } = ctx.configSnapshot.configurable;
-
   let processedMentionedContext: IContext = {
     contentList: [],
     resources: [],
@@ -262,4 +271,78 @@ export async function prepareRelevantContext(
     processedRelevantContext: relevantContexts,
     relevantContextTokens: totalTokens,
   };
+}
+
+export function mergeAndDeduplicateContexts(context1: IContext, context2: IContext): IContext {
+  return {
+    contentList: uniqBy([...context1.contentList, ...context2.contentList], 'content'),
+    resources: uniqBy([...context1.resources, ...context2.resources], (item) => item.resource?.content),
+    notes: uniqBy([...context1.notes, ...context2.notes], (item) => item.note?.content),
+    webSearchSources: uniqBy(
+      [...(context1.webSearchSources || []), ...(context2.webSearchSources || [])],
+      (item) => item?.pageContent,
+    ),
+  };
+}
+
+export function flattenContextToSources(context: IContext): Source[] {
+  const { webSearchSources = [], contentList = [], resources = [], notes = [] } = context;
+  const sources: Source[] = [];
+
+  // Web search sources
+  webSearchSources.forEach((source, index) => {
+    sources.push({
+      url: source.url,
+      title: source.title,
+      pageContent: source.pageContent,
+      metadata: {
+        source: source.url,
+        title: source.title,
+      },
+    });
+  });
+
+  // User selected content
+  contentList.forEach((content: SkillContextContentItem, index) => {
+    const metadata = content.metadata as unknown as SkillContextContentItemMetadata;
+    sources.push({
+      url: metadata?.url,
+      title: metadata?.title,
+      pageContent: content.content,
+      metadata: {
+        source: metadata?.url,
+        title: metadata?.title,
+        entityId: metadata?.entityId,
+        entityType: metadata?.domain,
+      },
+    });
+  });
+
+  // Knowledge base notes
+  notes.forEach((note: SkillContextNoteItem, index) => {
+    sources.push({
+      title: note.note?.title,
+      pageContent: note.note?.content || '',
+      metadata: {
+        title: note.note?.title,
+        entityId: note.note?.noteId,
+        entityType: 'note',
+      },
+    });
+  });
+
+  // Knowledge base resources
+  resources.forEach((resource: SkillContextResourceItem, index) => {
+    sources.push({
+      title: resource.resource?.title,
+      pageContent: resource.resource?.content || '',
+      metadata: {
+        title: resource.resource?.title,
+        entityId: resource.resource?.resourceId,
+        entityType: 'resource',
+      },
+    });
+  });
+
+  return sources;
 }
