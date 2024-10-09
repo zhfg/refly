@@ -60,6 +60,8 @@ interface NoteBaseState {
 
   updateLastCursorPosRef: (pos: number) => void;
   updateTocItems: (items: TableOfContentsItem[]) => void;
+
+  resetState: () => void;
 }
 
 export const defaultState = {
@@ -99,5 +101,7 @@ export const useNoteStore = create<NoteBaseState>()(
     updateNoteCharsCount: (count: number) => set((state) => ({ ...state, noteCharsCount: count })),
     updateLastCursorPosRef: (pos: number) => set((state) => ({ ...state, lastCursorPosRef: pos })),
     updateTocItems: (items: TableOfContentsItem[]) => set((state) => ({ ...state, tocItems: items })),
+
+    resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),
 );

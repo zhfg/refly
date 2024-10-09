@@ -2,26 +2,20 @@ import { memo, useEffect } from "react"
 import { Helmet } from "react-helmet"
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels"
 
-// 自定义组件
 import { KnowledgeBaseDetail } from "@refly-packages/ai-workspace-common/components/knowledge-base/knowledge-base-detail"
 import { AICopilot } from "@refly-packages/ai-workspace-common/components/knowledge-base/copilot"
 import { AINote } from "@refly-packages/ai-workspace-common/components/knowledge-base/ai-note"
-// import { QuickAction } from "@refly-packages/ai-workspace-common/modules/quick-action/components/quick-action"
-// utils
-// 自定义方法
-// stores
-// scss
-import "./index.scss"
+
 import { useCookie } from "react-use"
 // types
 import { useUserStore } from "@refly-packages/ai-workspace-common/stores/user"
-import { getExtensionId } from "@refly/utils/url"
 import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
-import { useResizePanel } from "@refly-packages/ai-workspace-common/hooks/use-resize-panel"
 import { ErrorBoundary } from "@sentry/react"
 import { useKnowledgeBaseStore } from "@refly-packages/ai-workspace-common/stores/knowledge-base"
 import { useNoteStore } from "@refly-packages/ai-workspace-common/stores/note"
+
+import "./index.scss"
 
 /**
  *
@@ -46,15 +40,6 @@ const KnowledgeLibraryLayout = memo(() => {
     updateNotePanelVisible: state.updateNotePanelVisible,
   }))
   const { t } = useTranslation()
-
-  const [minSize] = useResizePanel({
-    getGroupSelector: () =>
-      document.querySelector(`.workspace-panel-container`) as HTMLElement,
-    getResizeSelector: () =>
-      document.querySelectorAll(`.workspace-panel-resize`),
-    initialMinSize: 30,
-    initialMinPixelSize: 310,
-  })
 
   useEffect(() => {
     if (!(token || userStore?.userProfile?.uid)) return
