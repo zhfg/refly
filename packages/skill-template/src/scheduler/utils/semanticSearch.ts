@@ -453,18 +453,22 @@ export async function knowledgeBaseSearchGetRelevantChunks(
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<DocumentInterface[]> {
   // 1. search relevant chunks
-  const res = await ctx.ctxThis.engine.service.search(ctx.configSnapshot.user, {
-    query,
-    entities: [
-      {
-        entityId: metadata.entityId,
-        entityType: metadata.entityType,
-      },
-    ],
-    mode: 'vector',
-    limit: 10,
-    domains: [metadata.domain],
-  });
+  const res = await ctx.ctxThis.engine.service.search(
+    ctx.configSnapshot.user,
+    {
+      query,
+      entities: [
+        {
+          entityId: metadata.entityId,
+          entityType: metadata.entityType,
+        },
+      ],
+      mode: 'vector',
+      limit: 10,
+      domains: [metadata.domain],
+    },
+    { enableReranker: true },
+  );
   const relevantChunks = res?.data?.map((item) => ({
     id: item.id,
     pageContent: item?.content?.[0] || '',
