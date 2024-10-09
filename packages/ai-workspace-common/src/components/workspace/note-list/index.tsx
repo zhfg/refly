@@ -51,7 +51,6 @@ export const NoteList = (props: NoteListProps) => {
 
   return (
     <List
-      loading={isRequesting}
       grid={
         listGrid || {
           sm: 24,

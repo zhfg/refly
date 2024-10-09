@@ -105,7 +105,6 @@ export const SkillInstanceList = (props: SkillInstanceListProps) => {
           bordered={false}
           pagination={false}
           dataSource={skillList}
-          loading={isRequesting}
           scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
           render={(item: SkillInstance, key) => (
             <List.Item

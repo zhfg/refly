@@ -87,7 +87,6 @@ export const SkillTemplateList = () => {
           wrapperStyle={{ width: '100%' }}
           bordered={false}
           pagination={false}
-          loading={isRequesting}
           dataSource={skillList}
           scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
           render={(item: SkillTemplate, key) => (

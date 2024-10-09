@@ -447,7 +447,7 @@ export const AINote = () => {
   }
 
   if (!note) {
-    return <Spin dot block className="flex justify-center items-center w-full h-full" />;
+    return <Spin block className="flex justify-center items-center w-full h-full" />;
   }
 
   const onTitleChange = (newTitle: string) => {

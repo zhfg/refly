@@ -32,8 +32,6 @@ import classNames from 'classnames';
 import { parseMarkdownWithCitations } from '@refly/utils/parse';
 import { useState, useEffect } from 'react';
 
-const citationRegex = /\([|【)citation()|】)]\(\d+\)/g;
-
 export const HumanMessage = memo(
   (props: { message: Partial<ChatMessage>; profile: { avatar: string; name: string }; disable?: boolean }) => {
     const { message, profile } = props;
@@ -92,16 +90,6 @@ export const AssistantMessage = memo(
       avatar: message?.skillMeta?.displayName,
       icon: message?.skillMeta?.icon,
     };
-
-    // TODO: 移入新组件
-    // console.log(
-    //   'rerender assistant message',
-    //   message,
-    //   isPendingFirstToken,
-    //   isPending,
-    //   isLastSession,
-    //   handleAskFollowing,
-    // );
 
     const handleEditorOperation = (type: EditorOperation, content: string) => {
       const parsedContent = parseMarkdownWithCitations(content, sources);
