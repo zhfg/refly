@@ -2,12 +2,13 @@ import { Injectable, Inject, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import avro from 'avsc';
 import { LRUCache } from 'lru-cache';
-import { Document } from '@langchain/core/documents';
+import { Document, DocumentInterface } from '@langchain/core/documents';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { Embeddings } from '@langchain/core/embeddings';
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { FireworksEmbeddings } from '@langchain/community/embeddings/fireworks';
-import { cleanMarkdownForIngest } from '@refly-packages/utils';
+import { MemoryVectorStore } from 'langchain/vectorstores/memory';
+import { cleanMarkdownForIngest } from '@refly/utils';
 
 import { User } from '@refly-packages/openapi-schema';
 import { MINIO_INTERNAL, MinioService } from '@/common/minio.service';
@@ -54,6 +55,7 @@ export class RAGService {
   private embeddings: Embeddings;
   private splitter: RecursiveCharacterTextSplitter;
   private cache: LRUCache<string, ReaderResult>; // url -> reader result
+  private memoryVectorStore: MemoryVectorStore;
   private logger = new Logger(RAGService.name);
 
   constructor(
@@ -76,6 +78,8 @@ export class RAGService {
         maxRetries: 3,
       });
     }
+
+    this.memoryVectorStore = new MemoryVectorStore(this.embeddings);
 
     this.splitter = RecursiveCharacterTextSplitter.fromLanguage('markdown', {
       chunkSize: 1000,
@@ -126,6 +130,64 @@ export class RAGService {
 
   async chunkText(text: string) {
     return await this.splitter.splitText(cleanMarkdownForIngest(text));
+  }
+
+  // metadata?.uniqueId for save or retrieve
+  async inMemoryIndexContent(
+    user: User,
+    doc: Document<any>,
+    needChunk: boolean = true,
+  ): Promise<void> {
+    const { uid } = user;
+    const { pageContent, metadata } = doc;
+    const chunks = needChunk ? await this.chunkText(pageContent) : [pageContent];
+
+    let startIndex = 0;
+    const documents = chunks.map((chunk) => {
+      const document = {
+        pageContent: chunk.trim(),
+        metadata: {
+          ...metadata,
+          tenantId: uid,
+          start: startIndex,
+          end: startIndex + chunk.trim().length,
+        },
+      };
+
+      startIndex += chunk.trim().length;
+      return document;
+    });
+
+    await this.memoryVectorStore.addDocuments(documents);
+  }
+
+  async inMemoryIndexDocuments(user: User, docs: Array<Document<any>>): Promise<void> {
+    const { uid } = user;
+    const documents = docs.map((item) => {
+      const document = {
+        ...item,
+        metadata: {
+          ...item.metadata,
+          tenantId: uid,
+        },
+      };
+
+      return document;
+    });
+
+    await this.memoryVectorStore.addDocuments(documents);
+  }
+
+  async inMemorySearch(
+    user: User,
+    query: string,
+    k: number = 10,
+    filter: (doc: Document<NodeMeta>) => boolean,
+  ): Promise<DocumentInterface[]> {
+    const wrapperFilter = (doc: Document<NodeMeta>) => {
+      return filter(doc) && doc.metadata.tenantId === user.uid;
+    };
+    return this.memoryVectorStore.similaritySearch(query, k, wrapperFilter);
   }
 
   async indexContent(user: User, doc: Document<NodeMeta>): Promise<{ size: number }> {

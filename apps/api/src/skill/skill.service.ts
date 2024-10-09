@@ -67,6 +67,7 @@ import { MessageAggregator } from '@/utils/message';
 import { SkillEvent } from '@refly-packages/common-types';
 import { ConfigService } from '@nestjs/config';
 import { SearchService } from '@/search/search.service';
+import { RAGService } from '@/rag/rag.service';
 import { LabelService } from '@/label/label.service';
 import { labelClassPO2DTO, labelPO2DTO } from '@/label/label.dto';
 import { SyncTokenUsageJobData } from '@/subscription/subscription.dto';
@@ -120,6 +121,7 @@ export class SkillService {
     private label: LabelService,
     private search: SearchService,
     private knowledge: KnowledgeService,
+    private rag: RAGService,
     private conversation: ConversationService,
     private subscription: SubscriptionService,
     @InjectQueue(QUEUE_SKILL) private skillQueue: Queue<InvokeSkillJobData>,
@@ -175,6 +177,21 @@ export class SkillService {
       },
       search: async (user, req) => {
         const result = await this.search.search(user, req);
+        return buildSuccessResponse(result);
+      },
+      inMemoryIndexContent: async (user, req) => {
+        const { doc, needChunk } = req;
+        const result = await this.rag.inMemoryIndexContent(user, doc, needChunk);
+        return buildSuccessResponse({ data: result });
+      },
+      inMemoryIndexDocuments: async (user, req) => {
+        const { docs } = req;
+        const result = await this.rag.inMemoryIndexDocuments(user, docs);
+        return buildSuccessResponse({ data: result });
+      },
+      inMemorySearch: async (user, req) => {
+        const { query, filter, k } = req;
+        const result = await this.rag.inMemorySearch(user, query, k, filter);
         return buildSuccessResponse(result);
       },
     };

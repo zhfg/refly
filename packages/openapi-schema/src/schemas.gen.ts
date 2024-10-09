@@ -3195,3 +3195,59 @@ export const $ListModelsResponse = {
     },
   ],
 } as const;
+
+export const $DocumentInterface = {
+  type: 'object',
+  properties: {
+    id: {
+      type: 'string',
+      description:
+        'An optional identifier for the document. Ideally this should be unique across the document collection and formatted as a UUID.',
+    },
+    pageContent: {
+      type: 'string',
+      description: 'The main content of the document.',
+    },
+    metadata: {
+      type: 'object',
+      additionalProperties: true,
+      description: 'Metadata associated with the document.',
+    },
+  },
+} as const;
+
+export const $InMemoryIndexContentResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          nullable: true,
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $InMemorySearchResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          items: {
+            $ref: '#/components/schemas/DocumentInterface',
+          },
+        },
+      },
+    },
+  ],
+} as const;

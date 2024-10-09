@@ -2182,6 +2182,33 @@ export type ListModelsResponse = BaseResponse & {
   data?: Array<ModelInfo>;
 };
 
+export type DocumentInterface = {
+  /**
+   * An optional identifier for the document. Ideally this should be unique across the document collection and formatted as a UUID.
+   */
+  id?: string;
+  /**
+   * The main content of the document.
+   */
+  pageContent?: string;
+  /**
+   * Metadata associated with the document.
+   */
+  metadata?: {
+    [key: string]: unknown;
+  };
+};
+
+export type InMemoryIndexContentResponse = BaseResponse & {
+  data?: {
+    [key: string]: unknown;
+  } | null;
+};
+
+export type InMemorySearchResponse = BaseResponse & {
+  data?: Array<DocumentInterface>;
+};
+
 export type ListResourcesData = {
   query?: {
     /**
