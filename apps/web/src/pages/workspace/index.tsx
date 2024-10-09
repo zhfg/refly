@@ -11,14 +11,16 @@ import { ContentPanel } from "@refly-packages/ai-workspace-common/components/wor
 import "./index.scss"
 import { useCookie } from "react-use"
 // types
-import { useUserStore } from "@refly-packages/ai-workspace-common/stores/user"
+import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
 import { getExtensionId } from "@refly/utils/url"
 import { useTranslation } from "react-i18next"
 
 const Workspace = () => {
   const [token] = useCookie("_refly_ai_sid")
 
-  const userStore = useUserStore()
+  const userStore = useUserStoreShallow(state => ({
+    userProfile: state.userProfile,
+  }))
 
   const { t } = useTranslation()
 

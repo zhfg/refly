@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import type {} from '@redux-devtools/extension';
-// 类型
+import { useShallow } from 'zustand/react/shallow';
 import { Collection } from '@refly/openapi-schema';
 
 interface ImportKnowledgeModal {
@@ -23,3 +22,7 @@ export const useImportKnowledgeModal = create<ImportKnowledgeModal>()(
     setEditCollection: (state: Collection | null) => set({ editCollection: state ? { ...state } : null }),
   })),
 );
+
+export const useImportKnowledgeModalShallow = <T>(selector: (state: ImportKnowledgeModal) => T) => {
+  return useImportKnowledgeModal(useShallow(selector));
+};

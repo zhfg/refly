@@ -7,8 +7,8 @@ import { IconFolder } from '@arco-design/web-react/icon';
 import { Message as message } from '@arco-design/web-react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
-import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
+import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useReloadListStateShallow } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 // 类型
 import { Resource, RemoveResourceFromCollectionRequest } from '@refly/openapi-schema';
 // 请求
@@ -18,13 +18,25 @@ import { ResourceList } from '@refly-packages/ai-workspace-common/components/res
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
 import { useTranslation } from 'react-i18next';
+import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 
 export const KnowledgeBaseDirectory = (props: { small?: boolean }) => {
   const { t } = useTranslation();
   const [isFetching, setIsFetching] = useState(false);
-  const reloadKnowledgeBaseState = useReloadListState();
-  const knowledgeBaseStore = useKnowledgeBaseStore();
+
+  const reloadKnowledgeBaseState = useReloadListStateShallow((state) => ({
+    reloadKnowledgeBaseList: state.reloadKnowledgeBaseList,
+    reloadResourceDetail: state.reloadResourceDetail,
+    setReloadKnowledgeBaseList: state.setReloadKnowledgeBaseList,
+    setReloadResourceDetail: state.setReloadResourceDetail,
+  }));
+  const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
+    currentKnowledgeBase: state.currentKnowledgeBase,
+    updateCurrentKnowledgeBase: state.updateCurrentKnowledgeBase,
+  }));
+
   const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
+  const { handleAddTab } = useKnowledgeBaseTabs();
 
   const [queryParams] = useSearchParams();
   const kbId = queryParams.get('kbId');
@@ -34,7 +46,7 @@ export const KnowledgeBaseDirectory = (props: { small?: boolean }) => {
   const [introHeight, setIntroHeight] = useState(0);
   const { small } = props;
 
-  const handleGetDetail = async (collectionId: string, resourceId: string) => {
+  const handleGetDetail = async (collectionId: string) => {
     setIsFetching(true);
     try {
       const { data: newRes, error } = await getClient().getCollectionDetail({
@@ -53,16 +65,6 @@ export const KnowledgeBaseDirectory = (props: { small?: boolean }) => {
       console.log('newRes', newRes);
       if (newRes.data) {
         knowledgeBaseStore.updateCurrentKnowledgeBase(newRes?.data);
-      }
-
-      // 如果没有资源，则跳转到第一个资源
-      if (!resourceId) {
-        const firstResourceId = newRes?.data?.resources?.[0]?.resourceId;
-        if (firstResourceId) {
-          jumpToReadResource({
-            resId: firstResourceId,
-          });
-        }
       }
     } catch (err) {
       message.error('获取内容详情失败，请重新刷新试试');
@@ -92,14 +94,26 @@ export const KnowledgeBaseDirectory = (props: { small?: boolean }) => {
 
   useEffect(() => {
     if (kbId) {
-      handleGetDetail(kbId as string, resId as string);
+      handleGetDetail(kbId);
     }
-  }, [kbId, resId]);
+  }, [kbId]);
+
+  useEffect(() => {
+    // 如果没有资源，则跳转到第一个资源
+    if (!resId) {
+      const firstResourceId = knowledgeBaseStore.currentKnowledgeBase?.resources?.[0]?.resourceId;
+      if (firstResourceId) {
+        jumpToReadResource({
+          resId: firstResourceId,
+        });
+      }
+    }
+  }, [kbId]);
 
   useEffect(() => {
     if (reloadKnowledgeBaseState.reloadKnowledgeBaseList) {
       reloadKnowledgeBaseState.setReloadKnowledgeBaseList(false);
-      handleGetDetail(kbId as string, resId as string);
+      handleGetDetail(kbId);
     }
   }, [reloadKnowledgeBaseState.reloadKnowledgeBaseList]);
 
@@ -178,10 +192,16 @@ export const KnowledgeBaseDirectory = (props: { small?: boolean }) => {
           canDelete={true}
           showAdd={true}
           small={small}
-          handleItemDelete={(item: RemoveResourceFromCollectionRequest) => handleDeleteResource(item)}
+          handleItemDelete={(item) => handleDeleteResource(item)}
           handleItemClick={(item) => {
             jumpToReadResource({
               resId: item?.resourceId,
+            });
+            handleAddTab({
+              title: item?.title,
+              key: item?.resourceId,
+              content: '',
+              resourceId: item?.resourceId,
             });
           }}
         />

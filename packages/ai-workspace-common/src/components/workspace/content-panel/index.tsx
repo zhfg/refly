@@ -59,7 +59,9 @@ const NewFileButton = (props: { val: string }) => {
   const importResourceStore = useImportResourceStore();
   const importKnowledgeModal = useImportKnowledgeModal();
   const { handleInitEmptyNote } = useAINote();
-  const { newNoteCreating } = useNoteStore();
+  const { newNoteCreating } = useNoteStore((state) => ({
+    newNoteCreating: state.newNoteCreating,
+  }));
 
   const handleCreateButtonClick = (type: string) => {
     if (type === 'note' && !newNoteCreating) {

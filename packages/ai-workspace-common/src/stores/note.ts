@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 
 import { Note } from '@refly/openapi-schema';
 import { EditorInstance } from '@refly-packages/editor-core/components';
@@ -109,3 +110,7 @@ export const useNoteStore = create<NoteBaseState>()(
     resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),
 );
+
+export const useNoteStoreShallow = <T>(selector: (state: NoteBaseState) => T) => {
+  return useNoteStore(useShallow(selector));
+};

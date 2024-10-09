@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 
 import type { ClientChatMessage, SessionItem } from '@refly/common-types';
 import { ModelInfo, SkillContext, SkillTemplateConfig } from '@refly/openapi-schema';
@@ -78,3 +79,7 @@ export const useChatStore = create<ChatState>()(
     },
   })),
 );
+
+export const useChatStoreShallow = <T>(selector: (state: ChatState) => T) => {
+  return useChatStore(useShallow(selector));
+};

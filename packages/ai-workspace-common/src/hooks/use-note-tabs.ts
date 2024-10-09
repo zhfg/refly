@@ -3,7 +3,13 @@ import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common
 import { NoteTab, useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 
 export const useNoteTabs = () => {
-  const noteStore = useNoteStore();
+  const noteStore = useNoteStore((state) => ({
+    tabs: state.tabs,
+    activeTab: state.activeTab,
+    updateTabs: state.updateTabs,
+    updateActiveTab: state.updateActiveTab,
+    notePanelVisible: state.notePanelVisible,
+  }));
   const { jumpToNote } = useKnowledgeBaseJumpNewPath();
 
   const tabs = noteStore.tabs;
@@ -20,7 +26,7 @@ export const useNoteTabs = () => {
   };
 
   const handleAddTab = (newTab: NoteTab) => {
-    const { tabs } = useNoteStore.getState();
+    const tabs = noteStore.tabs;
     if (tabs?.length === 1 && tabs?.[0]?.key === 'key1') {
       noteStore.updateTabs([newTab]);
     } else {

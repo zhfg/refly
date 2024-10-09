@@ -1,4 +1,4 @@
-import { memo, useEffect } from "react"
+import { useEffect } from "react"
 import { Helmet } from "react-helmet"
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels"
 
@@ -7,13 +7,12 @@ import { AICopilot } from "@refly-packages/ai-workspace-common/components/knowle
 import { AINote } from "@refly-packages/ai-workspace-common/components/knowledge-base/ai-note"
 
 import { useCookie } from "react-use"
-// types
-import { useUserStore } from "@refly-packages/ai-workspace-common/stores/user"
+import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
 import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
 import { ErrorBoundary } from "@sentry/react"
-import { useKnowledgeBaseStore } from "@refly-packages/ai-workspace-common/stores/knowledge-base"
-import { useNoteStore } from "@refly-packages/ai-workspace-common/stores/note"
+import { useKnowledgeBaseStoreShallow } from "@refly-packages/ai-workspace-common/stores/knowledge-base"
+import { useNoteStoreShallow } from "@refly-packages/ai-workspace-common/stores/note"
 
 import "./index.scss"
 
@@ -22,20 +21,20 @@ import "./index.scss"
  * 分层架构设计：AI Workspace -> AI Knowledge Base (Knowledge Collecton + AI Note + AI Copilot)
  * /knowledge-base 打开的是一体的，通过 query 参数显示 collection、note 或 copilot，都属于 knowledge base 里面的资源
  */
-const KnowledgeLibraryLayout = memo(() => {
+const KnowledgeLibraryLayout = () => {
   const [token] = useCookie("_refly_ai_sid")
   const [searchParams] = useSearchParams()
   const kbId = searchParams.get("kbId")
   const resId = searchParams.get("resId")
   const noteId = searchParams.get("noteId")
-  const userStore = useUserStore(state => ({
+  const userStore = useUserStoreShallow(state => ({
     userProfile: state.userProfile,
   }))
-  const knowledgeBaseStore = useKnowledgeBaseStore(state => ({
+  const knowledgeBaseStore = useKnowledgeBaseStoreShallow(state => ({
     resourcePanelVisible: state.resourcePanelVisible,
     updateResourcePanelVisible: state.updateResourcePanelVisible,
   }))
-  const noteStore = useNoteStore(state => ({
+  const noteStore = useNoteStoreShallow(state => ({
     notePanelVisible: state.notePanelVisible,
     updateNotePanelVisible: state.updateNotePanelVisible,
   }))
@@ -132,6 +131,6 @@ const KnowledgeLibraryLayout = memo(() => {
       </div>
     </ErrorBoundary>
   )
-})
+}
 
 export default KnowledgeLibraryLayout
