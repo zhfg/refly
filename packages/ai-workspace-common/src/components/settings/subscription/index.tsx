@@ -135,7 +135,7 @@ export const Subscription = () => {
         color: '#ffbf00',
         percentage: knowledgePercentage,
       },
-    ];
+    ].sort((a, b) => b.percentage - a.percentage);
 
     return (
       <div className="file-storage-usage-bar">

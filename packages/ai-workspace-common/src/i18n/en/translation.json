@@ -652,9 +652,9 @@
         "vectorStorage": "Vector Storage",
         "fileStorage": "File Storage",
         "fileStorageType": {
-          "note": "Note",
-          "resource": "Resource",
-          "file": "Knowledge Base"
+          "note": "Notes",
+          "resource": "Resources",
+          "file": "Uploaded Files"
         },
         "pro": {
           "description": "Enjoy the latest Premium models and have more basic model usage",

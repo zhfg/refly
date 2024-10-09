@@ -652,7 +652,7 @@
         "fileStorageType": {
           "note": "笔记",
           "resource": "资源",
-          "file": "知识库"
+          "file": "上传文件"
         },
         "pro": {
           "description": "享受最先进的高阶模型，并拥有更充裕的基础模型使用额度",
