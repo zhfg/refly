@@ -11,88 +11,138 @@ import {
   SkillContextNoteItem,
   SkillContextCollectionItem,
 } from '@refly/openapi-schema';
-import { Chunk, IContext } from '../types';
+import { BaseSkill, SkillRunnableConfig } from '@/base';
+import { IContext, GraphState, SkillContextContentItemMetadata } from '../types';
 import { countToken, ModelContextLimitMap } from './token';
 import { MAX_NEED_RECALL_TOKEN, SHORT_CONTENT_THRESHOLD, MIN_RELEVANCE_SCORE } from './constants';
-import { calculateEmbedding, cosineSimilarity } from './embedding';
 import { getRelevantChunks } from './chunking';
+import { DocumentInterface, Document } from '@langchain/core/documents';
+import { ContentNodeType, NodeMeta } from '@/engine';
+import { genUniqueId } from '@refly/utils';
 
 // TODO:替换成实际的 Chunk 定义，然后进行拼接，拼接时包含元数据和分隔符
-export function assembleChunks(chunks: Chunk[]): string {
+export function assembleChunks(chunks: DocumentInterface[]): string {
   // 按照原始位置排序 chunks
   chunks.sort((a, b) => a.metadata.start - b.metadata.start);
 
   // 组装 chunks 为一个字符串，可能需要添加一些标记来指示不连续的部分
-  return chunks.map((chunk) => chunk.content).join(' [...] ');
+  return chunks.map((chunk) => chunk.pageContent).join('\n [...] \n');
 }
 
 export async function sortContentBySimilarity(
   query: string,
   contentList: SkillContextContentItem[],
+  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextContentItem[]> {
-  // 1. 计算查询的嵌入向量
-  const queryEmbedding = await calculateEmbedding(query);
+  const uniqueId = genUniqueId();
 
-  // 2. 计算每个内容项的嵌入向量和相似度
-  const contentWithSimilarity = await Promise.all(
-    contentList.map(async (content) => {
-      const contentEmbedding = await calculateEmbedding(content.content);
-      const similarity = cosineSimilarity(queryEmbedding, contentEmbedding);
-      return { content, similarity };
-    }),
-  );
+  // 1. construct documents
+  const documents: Document<NodeMeta>[] = contentList.map((item) => {
+    return {
+      pageContent: item.content,
+      metadata: {
+        ...item.metadata,
+        uniqueId,
+        title: item.metadata?.title as string,
+        nodeType: item.metadata?.entityType as ContentNodeType,
+      },
+    };
+  });
 
-  // 3. 根据相似度排序
-  contentWithSimilarity.sort((a, b) => b.similarity - a.similarity);
+  // 2. index documents
+  await ctx.ctxThis.engine.service.inMemoryIndexDocuments(ctx.configSnapshot.user, { docs: documents });
 
-  // 4. 返回排序后的内容列表
-  return contentWithSimilarity.map((item) => item.content);
+  // 3. search by similarity
+  const res = await ctx.ctxThis.engine.service.inMemorySearch(ctx.configSnapshot.user, {
+    query,
+    k: documents.length,
+    filter: (doc) => doc.metadata.uniqueId === uniqueId,
+  });
+  const sortedContent = res.data;
+
+  // 4. return sorted content
+  return sortedContent.map((item) => ({
+    content: item.pageContent,
+    metadata: {
+      ...item.metadata,
+    },
+  }));
 }
 
 export async function sortNotesBySimilarity(
   query: string,
   notes: SkillContextNoteItem[],
+  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextNoteItem[]> {
-  // 1. 计算查询的嵌入向量
-  const queryEmbedding = await calculateEmbedding(query);
+  const uniqueId = genUniqueId();
 
-  // 2. 计算每个笔记的嵌入向量和相似度
-  const notesWithSimilarity = await Promise.all(
-    notes.map(async (note) => {
-      const noteEmbedding = await calculateEmbedding(note.note?.content || '');
-      const similarity = cosineSimilarity(queryEmbedding, noteEmbedding);
-      return { note, similarity };
-    }),
-  );
+  // 1. construct documents
+  const documents: Document<NodeMeta>[] = notes.map((item) => {
+    return {
+      pageContent: item.note?.content || '',
+      metadata: {
+        ...item.metadata,
+        uniqueId,
+        title: item.note?.title as string,
+        nodeType: 'note' as ContentNodeType,
+        noteId: item.note?.noteId,
+      },
+    };
+  });
 
-  // 3. 根据相似度排序
-  notesWithSimilarity.sort((a, b) => b.similarity - a.similarity);
+  // 2. index documents
+  await ctx.ctxThis.engine.service.inMemoryIndexDocuments(ctx.configSnapshot.user, { docs: documents });
 
-  // 4. 返回排序后的笔记列表
-  return notesWithSimilarity.map((item) => item.note);
+  // 3. search by similarity
+  const res = await ctx.ctxThis.engine.service.inMemorySearch(ctx.configSnapshot.user, {
+    query,
+    k: documents.length,
+    filter: (doc) => doc.metadata.uniqueId === uniqueId,
+  });
+  const sortedNotes = res.data;
+
+  // 4. return sorted notes
+  return sortedNotes
+    .map((item) => notes.find((note) => note.note?.noteId === item.metadata.noteId))
+    .filter((note): note is SkillContextNoteItem => note !== undefined);
 }
 
 export async function sortResourcesBySimilarity(
   query: string,
   resources: SkillContextResourceItem[],
+  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextResourceItem[]> {
-  // 1. 计算查询的嵌入向量
-  const queryEmbedding = await calculateEmbedding(query);
+  const uniqueId = genUniqueId();
 
-  // 2. 计算每个资源的嵌入向量和相似度
-  const resourcesWithSimilarity = await Promise.all(
-    resources.map(async (resource) => {
-      const resourceEmbedding = await calculateEmbedding(resource.resource?.content || '');
-      const similarity = cosineSimilarity(queryEmbedding, resourceEmbedding);
-      return { resource, similarity };
-    }),
-  );
+  // 1. construct documents
+  const documents: Document<NodeMeta>[] = resources.map((item) => {
+    return {
+      pageContent: item.resource?.content || '',
+      metadata: {
+        ...item.metadata,
+        uniqueId,
+        title: item.resource?.title as string,
+        nodeType: 'resource' as ContentNodeType,
+        resourceId: item.resource?.resourceId,
+      },
+    };
+  });
 
-  // 3. 根据相似度排序
-  resourcesWithSimilarity.sort((a, b) => b.similarity - a.similarity);
+  // 2. index documents
+  await ctx.ctxThis.engine.service.inMemoryIndexDocuments(ctx.configSnapshot.user, { docs: documents });
 
-  // 4. 返回排序后的资源列表
-  return resourcesWithSimilarity.map((item) => item.resource);
+  // 3. search by similarity
+  const res = await ctx.ctxThis.engine.service.inMemorySearch(ctx.configSnapshot.user, {
+    query,
+    k: documents.length,
+    filter: (doc) => doc.metadata.uniqueId === uniqueId,
+  });
+  const sortedResources = res.data;
+
+  // 4. return sorted resources
+  return sortedResources
+    .map((item) => resources.find((resource) => resource.resource?.resourceId === item.metadata.resourceId))
+    .filter((resource): resource is SkillContextResourceItem => resource !== undefined);
 }
 
 // TODO: 处理 collections 作为上下文召回，类似 Web 处理，collections 主要用户搜索范围
@@ -109,6 +159,7 @@ export async function processSelectedContentWithSimilarity(
   query: string,
   contentList: SkillContextContentItem[],
   maxTokens: number,
+  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextContentItem[]> {
   const MAX_RAG_RELEVANT_CONTENT_RATIO = 0.7;
   const MAX_SHORT_CONTENT_RATIO = 0.3;
@@ -117,7 +168,7 @@ export async function processSelectedContentWithSimilarity(
   const MAX_SHORT_CONTENT_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_CONTENT_RATIO);
 
   // 1. 计算相似度并排序
-  const sortedContent = await sortContentBySimilarity(query, contentList);
+  const sortedContent = await sortContentBySimilarity(query, contentList, ctx);
 
   let result: SkillContextContentItem[] = [];
   let usedTokens = 0;
@@ -128,7 +179,18 @@ export async function processSelectedContentWithSimilarity(
 
     if (contentTokens > MAX_NEED_RECALL_TOKEN) {
       // 2.1 大内容，直接走召回
-      const relevantChunks = await getRelevantChunks(query, content.content, MAX_NEED_RECALL_TOKEN);
+      const contentMeta = content?.metadata as any as SkillContextContentItemMetadata;
+      const relevantChunks = await getRelevantChunks(
+        query,
+        content.content,
+        {
+          entityId: contentMeta?.entityId,
+          title: contentMeta?.title,
+          entityType: contentMeta?.domain,
+        },
+        MAX_NEED_RECALL_TOKEN,
+        ctx,
+      );
       const relevantContent = assembleChunks(relevantChunks);
       result.push({ ...content, content: relevantContent });
       usedTokens += countToken(relevantContent);
@@ -156,7 +218,18 @@ export async function processSelectedContentWithSimilarity(
     } else {
       // 剩下的长内容走召回
       const remainingTokens = maxTokens - usedTokens;
-      const relevantChunks = await getRelevantChunks(query, remainingContent.content, remainingTokens);
+      const contentMeta = remainingContent?.metadata as any as SkillContextContentItemMetadata;
+      const relevantChunks = await getRelevantChunks(
+        query,
+        remainingContent.content,
+        {
+          entityId: contentMeta?.entityId,
+          title: contentMeta?.title,
+          entityType: contentMeta?.domain,
+        },
+        remainingTokens,
+        ctx,
+      );
       const relevantContent = assembleChunks(relevantChunks);
       result.push({ ...remainingContent, content: relevantContent });
       usedTokens += countToken(relevantContent);
@@ -172,6 +245,7 @@ export async function processNotesWithSimilarity(
   query: string,
   notes: SkillContextNoteItem[],
   maxTokens: number,
+  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextNoteItem[]> {
   const MAX_RAG_RELEVANT_NOTES_RATIO = 0.7;
   const MAX_SHORT_NOTES_RATIO = 0.3;
@@ -180,7 +254,7 @@ export async function processNotesWithSimilarity(
   const MAX_SHORT_NOTES_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_NOTES_RATIO);
 
   // 1. 计算相似度并排序
-  const sortedNotes = await sortNotesBySimilarity(query, notes);
+  const sortedNotes = await sortNotesBySimilarity(query, notes, ctx);
 
   let result: SkillContextNoteItem[] = [];
   let usedTokens = 0;
@@ -191,7 +265,17 @@ export async function processNotesWithSimilarity(
 
     if (noteTokens > MAX_NEED_RECALL_TOKEN) {
       // 1.1 大内容，直接走召回
-      const relevantChunks = await getRelevantChunks(query, note?.note?.content || '', MAX_NEED_RECALL_TOKEN);
+      const relevantChunks = await getRelevantChunks(
+        query,
+        note?.note?.content || '',
+        {
+          entityId: note?.note?.noteId,
+          title: note?.note?.title,
+          entityType: 'note',
+        },
+        MAX_NEED_RECALL_TOKEN,
+        ctx,
+      );
       const relevantContent = assembleChunks(relevantChunks);
       result.push({ ...note, note: { ...note.note!, content: relevantContent } });
       usedTokens += countToken(relevantContent);
@@ -219,7 +303,17 @@ export async function processNotesWithSimilarity(
     } else {
       // 剩下的长内容走召回
       const remainingTokens = maxTokens - usedTokens;
-      const relevantChunks = await getRelevantChunks(query, remainingNote?.note?.content || '', remainingTokens);
+      const relevantChunks = await getRelevantChunks(
+        query,
+        remainingNote?.note?.content || '',
+        {
+          entityId: remainingNote?.note?.noteId,
+          title: remainingNote?.note?.title,
+          entityType: 'note',
+        },
+        remainingTokens,
+        ctx,
+      );
       const relevantContent = assembleChunks(relevantChunks);
       result.push({ ...remainingNote, note: { ...remainingNote.note!, content: relevantContent } });
       usedTokens += countToken(relevantContent);
@@ -233,6 +327,7 @@ export async function processResourcesWithSimilarity(
   query: string,
   resources: SkillContextResourceItem[],
   maxTokens: number,
+  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextResourceItem[]> {
   const MAX_RAG_RELEVANT_RESOURCES_RATIO = 0.7;
   const MAX_SHORT_RESOURCES_RATIO = 0.3;
@@ -241,7 +336,7 @@ export async function processResourcesWithSimilarity(
   const MAX_SHORT_RESOURCES_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_RESOURCES_RATIO);
 
   // 1. 计算相似度并排序
-  const sortedResources = await sortResourcesBySimilarity(query, resources);
+  const sortedResources = await sortResourcesBySimilarity(query, resources, ctx);
 
   let result: SkillContextResourceItem[] = [];
   let usedTokens = 0;
@@ -252,7 +347,17 @@ export async function processResourcesWithSimilarity(
 
     if (resourceTokens > MAX_NEED_RECALL_TOKEN) {
       // 2.1 大内容，直接走召回
-      const relevantChunks = await getRelevantChunks(query, resource?.resource?.content || '', MAX_NEED_RECALL_TOKEN);
+      const relevantChunks = await getRelevantChunks(
+        query,
+        resource?.resource?.content || '',
+        {
+          entityId: resource?.resource?.resourceId,
+          title: resource?.resource?.title,
+          entityType: resource?.resource?.resourceType as ContentNodeType,
+        },
+        MAX_NEED_RECALL_TOKEN,
+        ctx,
+      );
       const relevantContent = assembleChunks(relevantChunks);
       result.push({ ...resource, resource: { ...resource.resource!, content: relevantContent } });
       usedTokens += countToken(relevantContent);
@@ -284,7 +389,13 @@ export async function processResourcesWithSimilarity(
       const relevantChunks = await getRelevantChunks(
         query,
         remainingResource?.resource?.content || '',
+        {
+          entityId: remainingResource?.resource?.resourceId,
+          title: remainingResource?.resource?.title,
+          entityType: remainingResource?.resource?.resourceType as ContentNodeType,
+        },
         remainingTokens,
+        ctx,
       );
       const relevantContent = assembleChunks(relevantChunks);
       result.push({ ...remainingResource, resource: { ...remainingResource.resource!, content: relevantContent } });
@@ -299,6 +410,7 @@ export async function processMentionedContextWithSimilarity(
   query: string,
   mentionedContext: IContext,
   maxTokens: number,
+  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<IContext> {
   const MAX_CONTENT_RAG_RELEVANT_RATIO = 0.4;
   const MAX_RESOURCE_RAG_RELEVANT_RATIO = 0.3;
@@ -313,6 +425,7 @@ export async function processMentionedContextWithSimilarity(
     query,
     mentionedContext.contentList,
     MAX_CONTENT_RAG_RELEVANT_MAX_TOKENS,
+    ctx,
   );
 
   // 处理 resources
@@ -320,6 +433,7 @@ export async function processMentionedContextWithSimilarity(
     query,
     mentionedContext.resources,
     MAX_RESOURCE_RAG_RELEVANT_MAX_TOKENS,
+    ctx,
   );
 
   // 处理 notes
@@ -327,6 +441,7 @@ export async function processMentionedContextWithSimilarity(
     query,
     mentionedContext.notes,
     MAX_NOTE_RAG_RELEVANT_MAX_TOKENS,
+    ctx,
   );
 
   // 返回处理后的上下文

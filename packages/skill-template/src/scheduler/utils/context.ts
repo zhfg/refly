@@ -153,6 +153,7 @@ export async function prepareMentionedContext(
       query,
       mentionedContext,
       maxMentionedContextTokens,
+      ctx,
     );
     mentionedContextTokens = countMentionedContextTokens(processedMentionedContext);
 
@@ -216,6 +217,7 @@ export async function prepareRelevantContext(
       query,
       contentList,
       selectedContentMaxTokens,
+      ctx,
     );
     relevantContexts.contentList.concat(...relevantContentList);
     selectedContentTokens = relevantContentList.reduce((sum, content) => sum + countToken(content?.content || ''), 0);
@@ -231,7 +233,7 @@ export async function prepareRelevantContext(
       ? remainingTokens - selectedContentTokens - allResourcesTokens
       : MAX_NOTES_RATIO * remainingTokens;
   if (notesTokens > notesMaxTokens) {
-    const relevantNotes = await processNotesWithSimilarity(query, notes, notesMaxTokens);
+    const relevantNotes = await processNotesWithSimilarity(query, notes, notesMaxTokens, ctx);
     relevantContexts.notes.concat(...relevantNotes);
     notesTokens = relevantNotes.reduce((sum, note) => sum + countToken(note?.note?.content || ''), 0);
   } else {
@@ -246,7 +248,7 @@ export async function prepareRelevantContext(
       ? remainingTokens - selectedContentTokens - notesTokens
       : MAX_RESOURCES_RATIO * remainingTokens;
   if (resourcesTokens > resourcesMaxTokens) {
-    const relevantResources = await processResourcesWithSimilarity(query, resources, resourcesMaxTokens);
+    const relevantResources = await processResourcesWithSimilarity(query, resources, resourcesMaxTokens, ctx);
     relevantContexts.resources.concat(...relevantResources);
     resourcesTokens = relevantResources.reduce(
       (sum, resource) => sum + countToken(resource?.resource?.content || ''),

@@ -1,38 +1,51 @@
-import { Chunk } from '../types';
-import { calculateEmbedding, cosineSimilarity } from './embedding';
 import { countToken } from './token';
+import { BaseSkill, SkillRunnableConfig } from '@/base';
+import { Chunk, IContext, GraphState, SelectedContentDomain } from '../types';
+import { ContentNodeType, NodeMeta } from '../../engine';
+import { Document, DocumentInterface } from '@langchain/core/documents';
 import { MIN_RELEVANCE_SCORE } from './constants';
+import { genUniqueId } from '@refly/utils';
 
-export async function getRelevantChunks(query: string, content: string, maxTokens: number): Promise<Chunk[]> {
-  // 1. 将内容分割成多个 chunks
-  const chunks = splitContentIntoChunks(content);
+// TODO: concern start index and endIndex for concat, optimize rag service's splitText
+export async function getRelevantChunks(
+  query: string,
+  content: string,
+  metadata: { entityId: string; title: string; entityType: ContentNodeType },
+  maxTokens: number,
+  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+): Promise<DocumentInterface[]> {
+  // 1. 获取 relevantChunks
+  const uniqueId = genUniqueId();
+  const filter = (doc: Document<NodeMeta>) => {
+    return doc.metadata.uniqueId === uniqueId;
+  };
+  const doc: Document<NodeMeta> = {
+    pageContent: content,
+    metadata: {
+      nodeType: metadata.entityType,
+      entityType: metadata.entityType,
+      title: metadata.title,
+      entityId: metadata.entityId,
+      tenantId: ctx.configSnapshot.user.uid,
+      uniqueId, // uniqueId for inMemorySearch
+    },
+  };
+  await ctx.ctxThis.engine.service.inMemoryIndexContent(ctx.configSnapshot.user, { doc, needChunk: true });
+  const res = await ctx.ctxThis.engine.service.inMemorySearch(ctx.configSnapshot.user, {
+    query,
+    k: 10,
+    filter,
+  });
+  const relevantChunks = res?.data;
 
-  // 2. 计算查询的嵌入向量
-  const queryEmbedding = await calculateEmbedding(query);
-
-  // 3. 计算每个 chunk 与查询的相似度
-  const chunksWithSimilarity = await Promise.all(
-    chunks.map(async (chunk) => {
-      const chunkEmbedding = await calculateEmbedding(chunk.content);
-      const similarity = cosineSimilarity(queryEmbedding, chunkEmbedding);
-      return { ...chunk, similarity };
-    }),
-  );
-
-  // 4. 过滤掉相关性低于 MIN_RELEVANCE_SCORE 的 Chunks
-  const relevantChunks = chunksWithSimilarity.filter((chunk) => chunk.similarity >= MIN_RELEVANCE_SCORE);
-
-  // 5. 按相似度排序
-  relevantChunks.sort((a, b) => b.similarity - a.similarity);
-
-  // 6. 选择最相关的 chunks，直到达到 maxTokens 限制
-  let result: Chunk[] = [];
+  // 2. 选择最相关的 chunks，直到达到 maxTokens 限制
+  let result: DocumentInterface[] = [];
   let usedTokens = 0;
 
   for (const chunk of relevantChunks) {
-    const chunkTokens = countToken(chunk.content);
+    const chunkTokens = countToken(chunk.pageContent);
     if (usedTokens + chunkTokens <= maxTokens) {
-      result.push(chunk);
+      result.push(chunk as DocumentInterface);
       usedTokens += chunkTokens;
     } else {
       break;
@@ -40,22 +53,4 @@ export async function getRelevantChunks(query: string, content: string, maxToken
   }
 
   return result;
-}
-
-export function splitContentIntoChunks(content: string): Chunk[] {
-  // 实现内容分割逻辑
-  // 这里使用一个简单的按句子分割的方法，您可能需要根据实际需求调整
-  const sentences = content.match(/[^.!?]+[.!?]+/g) || [content];
-  let startIndex = 0;
-  return sentences.map((sentence) => {
-    const chunk: Chunk = {
-      content: sentence.trim(),
-      metadata: {
-        start: startIndex,
-        end: startIndex + sentence.length,
-      },
-    };
-    startIndex += sentence.length;
-    return chunk;
-  });
 }
