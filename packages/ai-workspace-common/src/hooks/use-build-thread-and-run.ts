@@ -88,7 +88,7 @@ export const useBuildThreadAndRun = () => {
     invokeParams?: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig },
   ) => {
     // support ask follow up question
-    const { messages = [], selectedModel } = useChatStore.getState();
+    const { messages = [], selectedModel, enableWebSearch, chatMode } = useChatStore.getState();
     const { selectedSkill } = useSkillStore.getState();
     const { localSettings } = useUserStore.getState();
 
@@ -98,6 +98,24 @@ export const useBuildThreadAndRun = () => {
     // 创建新会话并跳转
     const conv = ensureConversationExist();
     const skillContext = invokeParams?.skillContext || buildSkillContext();
+
+    // TODO: temp make scheduler support
+    const tplConfig = !!selectedSkill?.skillId
+      ? invokeParams?.tplConfig
+      : {
+          enableWebSearch: {
+            value: enableWebSearch,
+            configScope: ['runtime'],
+            displayValue: localSettings?.uiLocale === 'zh-CN' ? '联网搜索' : 'Web Search',
+            label: localSettings?.uiLocale === 'zh-CN' ? '联网搜索' : 'Web Search',
+          },
+          chatMode: {
+            value: chatMode,
+            configScope: ['runtime'],
+            displayValue: localSettings?.uiLocale === 'zh-CN' ? '提问模式' : 'Chat Mode',
+            label: localSettings?.uiLocale === 'zh-CN' ? '提问模式' : 'Chat Mode',
+          },
+        };
 
     // 设置当前的任务类型及会话 id
     const task: InvokeSkillRequest = {
@@ -109,7 +127,7 @@ export const useBuildThreadAndRun = () => {
       context: skillContext,
       convId: conv?.convId || '',
       locale: localSettings?.outputLocale as OutputLocale,
-      tplConfig: invokeParams?.tplConfig,
+      tplConfig,
       ...{ createConvParam: { ...conv, title: question } },
     };
     taskStore.setTask(task);

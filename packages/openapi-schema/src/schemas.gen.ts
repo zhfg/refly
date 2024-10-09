@@ -286,7 +286,7 @@ export const $LabelInstance = {
 export const $InputMode = {
   type: 'string',
   description: 'Data input mode',
-  enum: ['input', 'inputNumber', 'inputTextArea', 'select', 'multiSelect'],
+  enum: ['input', 'inputNumber', 'inputTextArea', 'select', 'multiSelect', 'radio'],
 } as const;
 
 export const $ConfigScope = {
@@ -378,6 +378,9 @@ export const $DynamicConfigItem = {
           type: 'string',
         },
         {
+          type: 'boolean',
+        },
+        {
           type: 'array',
           items: {
             type: 'string',
@@ -411,6 +414,9 @@ export const $DynamicConfigValue = {
         },
         {
           type: 'number',
+        },
+        {
+          type: 'boolean',
         },
         {
           type: 'array',

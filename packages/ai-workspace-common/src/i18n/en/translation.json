@@ -958,7 +958,19 @@
       "errorTipTitle": "Send Failed",
       "errorTip": "Please adjust the skill configuration and try again"
     },
-    "tokenUsage": "Input {{count}}, Output {{count}}"
+    "tokenUsage": "Input {{count}}, Output {{count}}",
+    "chatMode": {
+      "title": "Chat Mode",
+      "normal": "Normal Chat",
+      "noContext": "No Context Chat",
+      "wholeSpace": "Whole Space Chat"
+    },
+    "webSearch": {
+      "title": "Web Search",
+      "enable": "Enable",
+      "disable": "Disable"
+    },
+    "send": "Send"
   },
   "hooks": {
     "useBuildThreadAndRun": {

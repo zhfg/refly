@@ -1,8 +1,8 @@
 import React, { useRef, useState } from 'react';
-import { Button, Input, Dropdown, Menu, Notification, FormInstance } from '@arco-design/web-react';
+import { Button, Input, Dropdown, Menu, Notification, FormInstance, Switch } from '@arco-design/web-react';
 
 import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
-import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
+import { ChatMode, useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useQuickSearchStateStore } from '@refly-packages/ai-workspace-common/stores/quick-search-state';
 import { IconClose, IconFile, IconFontColors, IconPause, IconSend, IconStop } from '@arco-design/web-react/icon';
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
@@ -32,25 +32,29 @@ interface ChatActionsProps {
 export const ChatActions = (props: ChatActionsProps) => {
   const { form } = props;
   const { t } = useTranslation();
-  const [model, setModel] = useState('gpt-3.5-turbo');
   const [image, setImage] = useState(null);
-  const [language, setLanguage] = useState('en');
-  const [sendType, setSendType] = useState('direct');
 
   const inputRef = useRef<RefTextAreaType>(null);
   // stores
-  const chatStore = useChatStore();
+  const chatStore = useChatStore((state) => ({
+    chatMode: state.chatMode,
+    setChatMode: state.setChatMode,
+    enableWebSearch: state.enableWebSearch,
+    setEnableWebSearch: state.setEnableWebSearch,
+  }));
   const searchStore = useSearchStore();
   const conversationStore = useConversationStore();
   const messageStateStore = useMessageStateStore();
-  const skillStore = useSkillStore();
+  const skillStore = useSkillStore((state) => ({
+    selectedSkill: state.selectedSkill,
+  }));
   const { runSkill, emptyConvRunSkill, buildShutdownTaskAndGenResponse } = useBuildThreadAndRun();
   // hooks
   const [isFocused, setIsFocused] = useState(false);
 
   const { handleFilterErrorTip } = useContextFilterErrorTip();
 
-  const handleSendMessage = (type) => {
+  const handleSendMessage = (type: ChatMode) => {
     const error = handleFilterErrorTip();
     if (error) {
       return;
@@ -66,7 +70,7 @@ export const ChatActions = (props: ChatActionsProps) => {
       return;
     }
 
-    setSendType(type);
+    chatStore.setChatMode(type);
 
     const { messages, newQAText } = useChatStore.getState();
     searchStore.setIsSearchOpen(false);
@@ -94,8 +98,14 @@ export const ChatActions = (props: ChatActionsProps) => {
         </Button> */}
         <ModelSelector />
         <OutputLocaleList />
+        {!skillStore?.selectedSkill?.skillId ? (
+          <div className="chat-action-item" onClick={() => chatStore.setEnableWebSearch(!chatStore.enableWebSearch)}>
+            <Switch type="round" size="small" checked={chatStore.enableWebSearch} />
+            <span className="chat-action-item-text">{t('copilot.webSearch.title')}</span>
+          </div>
+        ) : null}
       </div>
-      <div className="ai-copilot-chat-input-action">
+      <div className="right-actions">
         {messageStateStore?.pending ? (
           <Button
             size="mini"
@@ -111,14 +121,14 @@ export const ChatActions = (props: ChatActionsProps) => {
           position="tr"
           droplist={
             <Menu>
-              <Menu.Item key="direct" onClick={() => handleSendMessage('direct')}>
-                直接聊天
+              <Menu.Item key="direct" onClick={() => handleSendMessage('normal')}>
+                {t('copilot.chatMode.normal')}
               </Menu.Item>
               <Menu.Item key="noContext" onClick={() => handleSendMessage('noContext')}>
-                不带上下文聊天
+                {t('copilot.chatMode.noContext')}
               </Menu.Item>
               <Menu.Item key="wholeSpace" onClick={() => handleSendMessage('wholeSpace')}>
-                在整个空间聊天
+                {t('copilot.chatMode.wholeSpace')}
               </Menu.Item>
             </Menu>
           }
@@ -131,10 +141,10 @@ export const ChatActions = (props: ChatActionsProps) => {
             className="search-btn"
             style={{ color: '#FFF', background: '#00968F' }}
             onClick={() => {
-              handleSendMessage('direct');
+              handleSendMessage('normal');
             }}
           >
-            发送
+            {t('copilot.send')}
           </Button>
         </Dropdown>
       </div>

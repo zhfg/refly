@@ -968,7 +968,19 @@
       "errorTipTitle": "发送失败",
       "errorTip": "请调整技能配置后再重试"
     },
-    "tokenUsage": "输入 {{count}}，输出 {{count}}"
+    "tokenUsage": "输入 {{count}}，输出 {{count}}",
+    "chatMode": {
+      "title": "聊天模式",
+      "normal": "直接聊天",
+      "noContext": "不带上下文聊天",
+      "wholeSpace": "在整个空间聊天"
+    },
+    "webSearch": {
+      "title": "联网搜索",
+      "enable": "启用",
+      "disable": "禁用"
+    },
+    "send": "发送"
   },
   "title": "欢迎 {{name}}，使用 react-i18next 完全类型安全的 React",
   "description": {

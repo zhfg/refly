@@ -232,7 +232,7 @@ export type LabelInstance = {
 /**
  * Data input mode
  */
-export type InputMode = 'input' | 'inputNumber' | 'inputTextArea' | 'select' | 'multiSelect';
+export type InputMode = 'input' | 'inputNumber' | 'inputTextArea' | 'select' | 'multiSelect' | 'radio';
 
 /**
  * Config scope
@@ -299,7 +299,7 @@ export type DynamicConfigItem = {
   /**
    * Default value
    */
-  defaultValue?: number | string | Array<string>;
+  defaultValue?: number | string | boolean | Array<string>;
   /**
    * Config options
    */
@@ -317,7 +317,7 @@ export type DynamicConfigValue = {
   /**
    * Config value
    */
-  value: string | number | Array<string>;
+  value: string | number | boolean | Array<string>;
   /**
    * Config display value
    */

@@ -1562,6 +1562,7 @@ components:
         - inputTextArea
         - select
         - multiSelect
+        - radio
     ConfigScope:
       type: array
       description: Config scope
@@ -1630,6 +1631,7 @@ components:
           oneOf:
             - type: number
             - type: string
+            - type: boolean
             - type: array
               items:
                 type: string
@@ -1653,6 +1655,7 @@ components:
           oneOf:
             - type: string
             - type: number
+            - type: boolean
             - type: array
               items:
                 type: string
