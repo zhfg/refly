@@ -18,7 +18,7 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { LOCALE } from '@refly-packages/common-types';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 import { ToolCall } from '@langchain/core/dist/messages/tool';
-import { ContentNodeType } from '@/engine';
+import { ContentNodeType } from '../../engine';
 
 export interface SkillContextContentItemMetadata {
   domain: ContentNodeType;

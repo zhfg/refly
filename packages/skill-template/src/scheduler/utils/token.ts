@@ -1,4 +1,4 @@
-import { IContext } from '@/scheduler/types';
+import { IContext } from '../types';
 import { get_encoding } from '@dqbd/tiktoken';
 import {
   SkillContextCollectionItem,

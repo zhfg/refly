@@ -5,12 +5,12 @@ import {
   SearchDomain,
   EntityType,
 } from '@refly/openapi-schema';
-import { BaseSkill, SkillRunnableConfig } from '@/base';
+import { BaseSkill, SkillRunnableConfig } from '../../base';
 import { IContext, GraphState, SkillContextContentItemMetadata } from '../types';
 import { countToken, ModelContextLimitMap } from './token';
 import { MAX_NEED_RECALL_TOKEN, SHORT_CONTENT_THRESHOLD, MIN_RELEVANCE_SCORE } from './constants';
 import { DocumentInterface, Document } from '@langchain/core/documents';
-import { ContentNodeType, NodeMeta } from '@/engine';
+import { ContentNodeType, NodeMeta } from '../../engine';
 import { genUniqueId } from '@refly/utils';
 
 // TODO:替换成实际的 Chunk 定义，然后进行拼接，拼接时包含元数据和分隔符

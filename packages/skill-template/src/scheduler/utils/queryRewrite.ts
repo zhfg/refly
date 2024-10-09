@@ -3,7 +3,7 @@ import { GraphState, IContext, MentionedContextItem, QueryAnalysis } from '../ty
 import { summarizeChatHistory, summarizeContext } from './summarizer';
 import { z } from 'zod';
 import { SkillEngine } from '../../engine';
-import { BaseSkill, SkillRunnableConfig } from '@/base';
+import { BaseSkill, SkillRunnableConfig } from '../../base';
 import { ChatMessage } from '@refly-packages/openapi-schema';
 
 // simplify context entityId for better extraction
