@@ -48,7 +48,7 @@ import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/mod
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 // componets
 import { ToC } from './ToC';
-import { IconBook } from '@arco-design/web-react/icon';
+import { IconBook, IconLoading, IconPlus } from '@arco-design/web-react/icon';
 
 const MemorizedToC = memo(ToC);
 
@@ -362,7 +362,9 @@ export const AINoteStatusBar = (props: AINoteStatusBarProps) => {
 interface AINoteHeaderProps {}
 
 export const AINoteHeader = (props: AINoteHeaderProps) => {
-  const { currentNote, updateCurrentNote } = useNoteStore((state) => ({
+  const { currentNote, updateCurrentNote, tabs, activeTab } = useNoteStore((state) => ({
+    tabs: state.tabs,
+    activeTab: state.activeTab,
     currentNote: state.currentNote,
     updateCurrentNote: state.updateCurrentNote,
   }));
@@ -373,13 +375,15 @@ export const AINoteHeader = (props: AINoteHeaderProps) => {
     handleUpdateTabTitle(currentNote.noteId, newTitle);
   };
 
+  const title = tabs.find((tab) => tab.key === activeTab)?.title || currentNote?.title;
+
   return (
     <div className="w-full">
       <div className="mx-2 mt-4 max-w-screen-lg">
         <Input
           className="text-3xl font-bold bg-transparent focus:border-transparent focus:bg-transparent"
           placeholder="Enter The Title"
-          value={currentNote?.title}
+          value={title}
           onChange={onTitleChange}
         />
       </div>
@@ -391,10 +395,13 @@ export const AINote = () => {
   const [searchParams] = useSearchParams();
   const noteId = searchParams.get('noteId');
 
+  const { t } = useTranslation();
+
   const { handleInitEmptyNote } = useAINote();
   const {
     currentNote: note,
     isRequesting,
+    newNoteCreating,
     noteServerStatus,
     updateCurrentNote,
     updateIsRequesting,
@@ -404,6 +411,7 @@ export const AINote = () => {
   } = useNoteStore((state) => ({
     currentNote: state.currentNote,
     isRequesting: state.isRequesting,
+    newNoteCreating: state.newNoteCreating,
     noteServerStatus: state.noteServerStatus,
     updateCurrentNote: state.updateCurrentNote,
     updateIsRequesting: state.updateIsRequesting,
@@ -415,7 +423,7 @@ export const AINote = () => {
 
   const searchStore = useSearchStore();
 
-  const { tabs, activeTab, setActiveTab, handleAddTab, handleDeleteTab } = useNoteTabs();
+  const { tabs, activeTab, setActiveTab, handleDeleteTab, handleAddTab } = useNoteTabs();
 
   useEffect(() => {
     return () => {
@@ -437,6 +445,8 @@ export const AINote = () => {
       if (note) {
         updateCurrentNote(note);
         updateIsRequesting(false);
+      }
+      if (!tabs.some((tab) => tab.key === noteId)) {
         handleAddTab({
           title: note.title,
           key: note.noteId,
@@ -485,6 +495,15 @@ export const AINote = () => {
     <div className="ai-note-container">
       <Tabs
         editable
+        addButton={
+          <Button
+            type="text"
+            size="small"
+            shape="circle"
+            disabled={newNoteCreating}
+            icon={newNoteCreating ? <IconLoading /> : <IconPlus />}
+          />
+        }
         type="card-gutter"
         className="note-detail-tab-container"
         activeTab={activeTab}
@@ -520,7 +539,7 @@ export const AINote = () => {
         ))}
       </Tabs>
       <Spin
-        tip="Loading..."
+        tip={t('knowledgeBase.note.connecting')}
         loading={!note || isRequesting || noteServerStatus !== 'connected'}
         style={{ height: '100%', width: '100%' }}
       >

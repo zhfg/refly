@@ -13,12 +13,7 @@ export const AINoteEmpty = () => {
   return (
     <div className="flex items-center justify-center w-full mt-16 overflow-auto ai-note-empty">
       <div className="w-full h-full max-w-screen-lg">
-        {/* <Title className="mb-8 ml-8 text-3xl font-bold">暂无笔记</Title> */}
-        <Button
-          className="ml-8 text-green-400"
-          icon={<HiOutlinePlus />}
-          onClick={() => handleInitEmptyNote('New note')}
-        >
+        <Button className="ml-20 text-green-400" icon={<HiOutlinePlus />} onClick={() => handleInitEmptyNote('')}>
           {t('knowledgeBase.note.newNote')}
         </Button>
         <Divider />

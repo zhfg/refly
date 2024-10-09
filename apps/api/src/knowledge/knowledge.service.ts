@@ -655,7 +655,6 @@ export class KnowledgeService {
     ]);
 
     const cleanups: Promise<any>[] = [
-      this.minio.client.removeObject(note.storageKey),
       this.ragService.deleteNoteNodes(user, noteId),
       this.elasticsearch.deleteNote(noteId),
       this.miscService.removeFilesByEntity(user, {
@@ -663,6 +662,10 @@ export class KnowledgeService {
         entityType: 'note',
       }),
     ];
+
+    if (note.storageKey) {
+      cleanups.push(this.minio.client.removeObject(note.storageKey));
+    }
 
     if (note.stateStorageKey) {
       cleanups.push(this.minio.client.removeObject(note.stateStorageKey));

@@ -41,7 +41,7 @@ export const useProcessContextItems = () => {
 
     if (mark.type === 'note' || mark.type === 'noteSelection') {
       if (isWebRuntime) {
-        return () => jumpToNote({ noteId: mark.id });
+        return () => jumpToNote({ noteId: mark.id, title: mark.title });
       } else {
         return `${baseUrl}/knowledge-base?noteId=${mark.id}`;
       }

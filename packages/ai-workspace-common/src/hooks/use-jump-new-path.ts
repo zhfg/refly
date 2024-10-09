@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-commo
 export const useKnowledgeBaseJumpNewPath = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const noteStore = useNoteStore((state) => ({
+    updateCurrentNote: state.updateCurrentNote,
     updateNotePanelVisible: state.updateNotePanelVisible,
   }));
   const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
@@ -12,7 +13,7 @@ export const useKnowledgeBaseJumpNewPath = () => {
   }));
   const navigate = useNavigate();
 
-  const jumpToNote = ({ noteId, baseUrl = '' }: { noteId; baseUrl?: string }, extraQuery?: Record<string, string>) => {
+  const jumpToNote = ({ noteId, baseUrl = '' }: { noteId: string; baseUrl?: string }) => {
     searchParams.set('noteId', noteId);
     setSearchParams(searchParams);
     navigate(`${baseUrl}/knowledge-base?${searchParams.toString()}`);
