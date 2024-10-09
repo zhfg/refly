@@ -40,7 +40,7 @@ export class NoteWsGateway implements OnGatewayConnection {
     this.server = Server.configure({
       port: config.get<number>('wsPort'),
       extensions: [
-        new HocuspocusLogger({ log: this.logger.log }),
+        new HocuspocusLogger({ log: (...args) => this.logger.log(args.join('; ')) }),
         new Database({
           fetch: async ({ context }: { context: NoteContext }) => {
             const { note } = context;
