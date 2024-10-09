@@ -24,7 +24,9 @@
     "retry": "重试",
     "reset": "重置",
     "apply": "应用",
-    "collapse": "折叠"
+    "collapse": "折叠",
+    "open": "打开",
+    "close": "关闭"
   },
   "systemMaintenanceShutdown": {
     "title": "尊敬的用户，您好！",
@@ -845,6 +847,9 @@
   },
   "copilot": {
     "quickActions": "快捷操作",
+    "selectedSkillHeader": {
+      "title": "和 {{name}} 聊聊"
+    },
     "baseContextCard": {
       "title": "环境上下文快捷操作",
       "filterTitle": "过滤环境上下文",
@@ -959,16 +964,44 @@
         "errorNotify": "保存失败！"
       }
     },
+    "skillDisplay": {
+      "skillManager": "技能管理",
+      "manager": "管理"
+    },
     "chatInput": {
-      "skillManager": "管理",
       "placeholder": "提出问题，发现新知"
+    },
+    "chatActions": {
+      "send": "发送",
+      "directChat": "直接聊天",
+      "noContextChat": "不带上下文聊天",
+      "wholeSpaceChat": "在整个空间聊天"
     },
     "configManager": {
       "title": "技能配置",
       "errorTipTitle": "发送失败",
       "errorTip": "请调整技能配置后再重试"
     },
-    "tokenUsage": "输入 {{count}}，输出 {{count}}"
+    "tokenUsage": "输入 {{count}}，输出 {{count}}",
+    "reflyAssistant": "知识管家",
+    "message": {
+      "copy": "复制",
+      "copySuccess": "复制成功",
+      "insertBlow": "插入笔记",
+      "replaceSelection": "替换选中",
+      "createNewNote": "创建新笔记",
+      "skillRunSuccess": "技能已完成，共 {{count}} 条日志",
+      "skillRunning": "技能运行中...",
+      "relatedQuestion": "你可能还想问",
+      "summarySelectedContent": "总结选中内容要点",
+      "brainstormIdeas": "脑暴写作灵感",
+      "writeTwitterArticle": "写一篇 Twitter 原创文章",
+      "installSkillHint": "你还未添加任何助手，点我添加",
+      "installSkillHintTitle": "添加助手"
+    },
+    "contextItem": {
+      "current": "当前"
+    }
   },
   "title": "欢迎 {{name}}，使用 react-i18next 完全类型安全的 React",
   "description": {

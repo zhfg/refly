@@ -19,6 +19,7 @@ import { SelectedInstanceCard } from '@refly-packages/ai-workspace-common/compon
 // hooks
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useTranslation } from 'react-i18next';
 
 interface CopilotInputModuleProps {
   source?: string;
@@ -26,6 +27,7 @@ interface CopilotInputModuleProps {
 
 const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, CopilotInputModuleProps> = (props, ref) => {
   const { source } = props;
+  const { t } = useTranslation();
   const messageStateStore = useMessageStateStore((state) => ({
     pending: state.pending,
     pendingFirstToken: state.pendingFirstToken,
@@ -60,7 +62,11 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
               <SelectedSkillHeader />
               <ContextManager />
               <div className="chat-input-body">
-                <ChatInput form={form} placeholder="提出问题，发现新知" autoSize={{ minRows: 1, maxRows: 3 }} />
+                <ChatInput
+                  form={form}
+                  placeholder={t('copilot.chatInput.placeholder')}
+                  autoSize={{ minRows: 1, maxRows: 3 }}
+                />
               </div>
 
               {skillStore.selectedSkill?.tplConfigSchema?.items?.length > 0 && (

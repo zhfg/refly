@@ -24,7 +24,9 @@
     "retry": "Retry",
     "reset": "Reset",
     "apply": "Apply",
-    "collapse": "Collapse"
+    "collapse": "Collapse",
+    "open": "Open",
+    "close": "Close"
   },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",
@@ -199,8 +201,8 @@
     "note": {
       "newNote": "Click to add new note",
       "noteCharsCount": "{{count}} characters",
-      "autoSaved": "Note has been saved",
-      "saving": "Note is being saved...",
+      "autoSaved": "Saved",
+      "saving": "Saving...",
       "readOnly": "Read Only",
       "edit": "Edit",
       "serviceDisconnected": "Service Disconnected"
@@ -835,6 +837,9 @@
   },
   "copilot": {
     "quickActions": "Quick Actions",
+    "selectedSkillHeader": {
+      "title": "Chat with {{name}}"
+    },
     "baseContextCard": {
       "title": "Environment Context Quick Actions",
       "filterTitle": "Filter Environment Context",
@@ -949,16 +954,44 @@
         "errorNotify": "Save failed!"
       }
     },
-    "chatInput": {
+    "skillDisplay": {
       "skillManager": "Skill Manage",
+      "manager": "Manage"
+    },
+    "chatInput": {
       "placeholder": "Ask a question, discover new knowledge"
+    },
+    "chatActions": {
+      "send": "Send",
+      "directChat": "Direct Chat",
+      "noContextChat": "No Context Chat",
+      "wholeSpaceChat": "Whole Space Chat"
     },
     "configManager": {
       "title": "Skill Configuration",
       "errorTipTitle": "Send Failed",
       "errorTip": "Please adjust the skill configuration and try again"
     },
-    "tokenUsage": "Input {{count}}, Output {{count}}"
+    "tokenUsage": "Input {{count}}, Output {{count}}",
+    "reflyAssistant": "Knowledge Curator",
+    "message": {
+      "copy": "Copy",
+      "copySuccess": "Copy Success",
+      "insertBlow": "Insert Note",
+      "replaceSelection": "Replace Selection",
+      "createNewNote": "Create New Note",
+      "skillRunSuccess": "Skill Completed, {{count}} Logs",
+      "skillRunning": "Skill Running...",
+      "relatedQuestion": "You may also ask",
+      "summarySelectedContent": "Summarize the Selected Content",
+      "brainstormIdeas": "Brainstorm Ideas",
+      "writeTwitterArticle": "Write a Twitter Original Article",
+      "installSkillHint": "You haven't added any assistants, click me to add",
+      "installSkillHintTitle": "Add Assistant"
+    },
+    "contextItem": {
+      "current": "Current "
+    }
   },
   "hooks": {
     "useBuildThreadAndRun": {

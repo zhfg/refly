@@ -93,16 +93,6 @@ export const AssistantMessage = memo(
       icon: message?.skillMeta?.icon,
     };
 
-    // TODO: 移入新组件
-    // console.log(
-    //   'rerender assistant message',
-    //   message,
-    //   isPendingFirstToken,
-    //   isPending,
-    //   isLastSession,
-    //   handleAskFollowing,
-    // );
-
     const handleEditorOperation = (type: EditorOperation, content: string) => {
       const parsedContent = parseMarkdownWithCitations(content, sources);
 
@@ -138,13 +128,13 @@ export const AssistantMessage = memo(
         style={{ width: 240 }}
       >
         <Menu.Item key="insertBlow">
-          <IconImport /> 插入笔记
+          <IconImport /> {t('copilot.message.insertBlow')}
         </Menu.Item>
         <Menu.Item key="replaceSelection">
-          <IconCheckCircle /> 替换选中
+          <IconCheckCircle /> {t('copilot.message.replaceSelection')}
         </Menu.Item>
         <Menu.Item key="createNewNote">
-          <IconBook /> 创建新笔记
+          <IconBook /> {t('copilot.message.createNewNote')}
         </Menu.Item>
       </Menu>
     );
@@ -184,11 +174,11 @@ export const AssistantMessage = memo(
                 icon={profile?.icon}
                 size={32}
                 shape="circle"
-                displayName={profile?.name || 'Refly 知识管家'}
+                displayName={profile?.name || t('copilot.reflyAssistant')}
               />
             </div>
             <div className="message-name-and-content">
-              <span className="message-name">{profile?.name || 'Refly 知识管家'}</span>
+              <span className="message-name">{profile?.name || t('copilot.reflyAssistant')}</span>
               <div className="assistant-message-content">
                 <Collapse bordered={false} expandIconPosition="right">
                   <CollapseItem
@@ -199,7 +189,9 @@ export const AssistantMessage = memo(
                           <Spin size={12} />
                           <p className="message-log-content">
                             <Typography.Ellipsis>
-                              {message?.logs?.length > 0 ? message?.logs?.[message?.logs?.length - 1] : '技能运行中...'}
+                              {message?.logs?.length > 0
+                                ? message?.logs?.[message?.logs?.length - 1]
+                                : t('copilot.message.skillRunning')}
                             </Typography.Ellipsis>
                           </p>
                         </div>
@@ -208,7 +200,9 @@ export const AssistantMessage = memo(
                           <IconCheckCircle style={{ fontSize: 12, color: 'green' }} />
                           <p className={classNames('message-log-content')}>
                             <Typography.Ellipsis>
-                              技能已完成，共 {message?.logs?.length || 0} 条日志
+                              {t('copilot.message.skillRunSuccess', {
+                                count: message?.logs?.length || 0,
+                              })}
                             </Typography.Ellipsis>
                           </p>
                         </div>
@@ -267,7 +261,7 @@ export const AssistantMessage = memo(
                   <div className="ai-copilot-related-question-container">
                     {(relatedQuestions || [])?.length > 0 ? (
                       <div className="session-title-icon">
-                        <p>你可能还想问</p>
+                        <p>{t('copilot.message.relatedQuestion')}</p>
                       </div>
                     ) : null}
                     <div className="ai-copilot-related-question-list">
@@ -312,10 +306,10 @@ export const AssistantMessage = memo(
                         onClick={() => {
                           const parsedText = parseMarkdownWithCitations(message?.content, sources);
                           copyToClipboard(parsedText || '');
-                          Message.success('复制成功');
+                          Message.success(t('copilot.message.copySuccess'));
                         }}
                       >
-                        复制
+                        {t('copilot.message.copy')}
                       </Button>
                       <Dropdown droplist={dropList} position="bl">
                         <Button
@@ -328,7 +322,7 @@ export const AssistantMessage = memo(
                             handleEditorOperation('insertBlow', parsedText || '');
                           }}
                         >
-                          插入笔记
+                          {t('copilot.message.insertBlow')}
                           <IconCaretDown />
                         </Button>
                       </Dropdown>
@@ -366,7 +360,12 @@ export const WelcomeMessage = () => {
   // const needInstallSkillInstance = skillInstances?.length === 0 && skillTemplates?.length > 0;
   const needInstallSkillInstance = true;
 
-  const guessQuestions = ['总结选中内容要点', '脑暴写作灵感', '写一篇 Twitter 原创文章'];
+  const { t } = useTranslation();
+  const guessQuestions = [
+    t('copilot.message.summarySelectedContent'),
+    t('copilot.message.brainstormIdeas'),
+    t('copilot.message.writeTwitterArticle'),
+  ];
 
   return (
     <div className="ai-copilot-message welcome-message-container">
@@ -391,17 +390,17 @@ export const WelcomeMessage = () => {
             {skillInstances?.length === 0 ? (
               <div className="install-skill-hint">
                 <div className="install-skill-hint-container">
-                  <p className="install-skill-hint-title">
-                    你还未添加任何助手，
+                  <div className="install-skill-hint-title">
+                    {t('copilot.message.installSkillHint')}
                     <Button
                       type="text"
                       onClick={() => {
                         skillStore.setSkillManagerModalVisible(true);
                       }}
                     >
-                      点我添加 -&gt;
+                      {t('copilot.message.installSkillHintTitle')}
                     </Button>
-                  </p>
+                  </div>
                 </div>
               </div>
             ) : null}

@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@arco-design/web-react';
 import { IconClose, IconDelete } from '@arco-design/web-react/icon';
 import { Mark } from '@refly/common-types';
+import { useTranslation } from 'react-i18next';
 
 export const ContextItem = ({
   item,
@@ -18,6 +19,7 @@ export const ContextItem = ({
   onToggle: any;
   onRemove: any;
 }) => {
+  const { t } = useTranslation();
   return (
     <div
       className={`context-item ${isActive ? 'active' : isLimit ? 'limit' : disabled ? 'disabled' : ''}`}
@@ -28,7 +30,10 @@ export const ContextItem = ({
         <span className="item-title" title={item.title}>
           {item.title}
         </span>
-        <span className="item-type">{item?.name}</span>
+        <span className="item-type">
+          {item.isCurrentContext ? t('copilot.contextItem.current') : ''}
+          {item?.name}
+        </span>
         <IconClose
           className="item-close"
           onClick={(e) => {

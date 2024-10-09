@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ContextItem } from './context-item';
 import { ContextPreview } from './context-preview';
 
@@ -17,9 +17,11 @@ import { ContextFilter } from './components/context-filter/index';
 
 // stores
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 
 // types
-import { SearchDomain, SearchResult } from '@refly/openapi-schema';
+import { Collection, Note, Resource, SearchDomain, SearchResult } from '@refly/openapi-schema';
 import { backendBaseMarkTypes, BaseMarkType, frontendBaseMarkTypes, Mark } from '@refly/common-types';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 
@@ -43,15 +45,23 @@ const mapMarkToSearchResult = (marks: Mark[]): SearchResult[] => {
 export const ContextManager = () => {
   const [activeItemId, setActiveItemId] = useState(null);
   const { processedContextItems } = useProcessContextItems();
-  const { addMark, removeMark, toggleMarkActive, clearMarks, filterIdsOfCurrentSelectedMarks, filterErrorInfo } =
-    useContextPanelStore((state) => ({
-      addMark: state.addMark,
-      removeMark: state.removeMark,
-      toggleMarkActive: state.toggleMarkActive,
-      clearMarks: state.clearMarks,
-      filterIdsOfCurrentSelectedMarks: state.filterIdsOfCurrentSelectedMarks,
-      filterErrorInfo: state.filterErrorInfo,
-    }));
+  const {
+    addMark,
+    removeMark,
+    toggleMarkActive,
+    clearMarks,
+    updateMark,
+    filterIdsOfCurrentSelectedMarks,
+    filterErrorInfo,
+  } = useContextPanelStore((state) => ({
+    addMark: state.addMark,
+    removeMark: state.removeMark,
+    toggleMarkActive: state.toggleMarkActive,
+    clearMarks: state.clearMarks,
+    updateMark: state.updateMark,
+    filterIdsOfCurrentSelectedMarks: state.filterIdsOfCurrentSelectedMarks,
+    filterErrorInfo: state.filterErrorInfo,
+  }));
 
   const skillStore = useSkillStore((state) => ({
     selectedSkill: state.selectedSkill,
@@ -81,6 +91,7 @@ export const ContextManager = () => {
   };
 
   const handleAddItem = (newMark: Mark) => {
+    console.log('newMark', newMark);
     // 检查项目是否已经存在于 store 中
     const existingMark = useContextPanelStore
       .getState()
@@ -88,6 +99,7 @@ export const ContextManager = () => {
 
     if (!existingMark) {
       // 如果项目不存在，添加到 store
+
       addMark(newMark);
     } else {
       removeMark(existingMark.id);
@@ -102,6 +114,94 @@ export const ContextManager = () => {
   );
 
   const processContextFilterProps = useProcessContextFilter(true);
+
+  const currentKnowledgeBase = useKnowledgeBaseStore((state) => state.currentKnowledgeBase);
+  const currentResource = useKnowledgeBaseStore((state) => state.currentResource);
+  const currentNote = useNoteStore((state) => state.currentNote);
+
+  const buildEnvContext = (currentKnowledgeBase: Collection, currentResource: Resource, currentNote: Note) => {
+    let envContextArr: Mark[] = [];
+
+    if (currentResource?.resourceId) {
+      envContextArr.push({
+        title: currentResource?.title,
+        type: 'resource',
+        id: currentResource?.resourceId,
+        entityId: currentResource.resourceId,
+        data: currentResource.content,
+        onlyForCurrentContext: true,
+        isCurrentContext: true,
+      });
+    }
+
+    if (currentKnowledgeBase?.collectionId) {
+      envContextArr.push({
+        title: currentKnowledgeBase?.title,
+        type: 'collection',
+        id: currentKnowledgeBase?.collectionId,
+        entityId: currentKnowledgeBase.collectionId,
+        data: currentKnowledgeBase.description,
+        onlyForCurrentContext: true,
+        isCurrentContext: true,
+      });
+    }
+
+    if (currentNote?.noteId) {
+      envContextArr.push({
+        title: currentNote?.title,
+        type: 'note',
+        id: currentNote?.noteId,
+        entityId: currentNote.noteId,
+        data: currentNote.content,
+        onlyForCurrentContext: true,
+        isCurrentContext: true,
+      });
+    }
+
+    return envContextArr;
+  };
+
+  const removeNotCurrentContext = (type: string) => {
+    useContextPanelStore
+      .getState()
+      .currentSelectedMarks.filter((mark) => mark.type === type)
+      .forEach((mark) => {
+        if (mark.onlyForCurrentContext) {
+          removeMark(mark.id);
+        } else if (mark.isCurrentContext) {
+          updateMark({ ...mark, isCurrentContext: false });
+        }
+      });
+  };
+
+  const handleAddCurrentContext = (newMark: Mark) => {
+    removeNotCurrentContext(newMark.type);
+
+    // 检查项目是否已经存在于 store 中
+    const existingMark = useContextPanelStore
+      .getState()
+      .currentSelectedMarks.find((mark) => mark.id === newMark.id && mark.type === newMark.type);
+    console.log('envContext newMark', newMark, existingMark);
+    if (!existingMark) {
+      addMark(newMark);
+    } else {
+      newMark.onlyForCurrentContext = existingMark.onlyForCurrentContext;
+      updateMark(newMark);
+    }
+  };
+
+  useEffect(() => {
+    const envContext = buildEnvContext(currentKnowledgeBase, currentResource, currentNote);
+    console.log('envContext', envContext);
+    ['collection', 'resource', 'note'].forEach((type) => {
+      const item = envContext.find((item) => item.type === type);
+      if (item) {
+        handleAddCurrentContext(item);
+      } else {
+        removeNotCurrentContext(type);
+      }
+    });
+  }, [currentKnowledgeBase, currentResource, currentNote]);
 
   return (
     <div className="context-manager">
