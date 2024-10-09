@@ -115,9 +115,9 @@ export const Subscription = () => {
     const used = noteSize + resourceSize + fileSize;
     const total = Number(storage?.objectStorageQuota || 0);
 
-    const notePercentage = (noteSize / total) * 100;
-    const resourcePercentage = (resourceSize / total) * 100;
-    const knowledgePercentage = (fileSize / total) * 100;
+    const notePercentage = total > 0 ? (noteSize / total) * 100 : 0;
+    const resourcePercentage = total > 0 ? (resourceSize / total) * 100 : 0;
+    const knowledgePercentage = total > 0 ? (fileSize / total) * 100 : 0;
 
     const categories = [
       {
