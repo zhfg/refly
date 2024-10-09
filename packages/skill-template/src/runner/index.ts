@@ -42,7 +42,8 @@ async function run() {
     updateCollection: async (user, req) => null,
     createLabelClass: async (user, req) => null,
     createLabelInstance: async (user, req) => null,
-    search: async (user, req) => null,
+    webSearch: async (user, req) => null,
+    search: async (user, req, options) => null,
   });
   // const runnable = getRunnable(engine, name);
   const skill = new Scheduler(engine);

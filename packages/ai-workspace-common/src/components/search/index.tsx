@@ -132,7 +132,6 @@ export const Search = (props: SearchProps) => {
         const res = await getClient().search({
           body: {
             query: searchVal,
-            scope: 'user',
             domains: domains,
           },
         });
@@ -228,7 +227,6 @@ export const Search = (props: SearchProps) => {
       icon: <IconBook style={{ fontSize: 12 }} />,
       onItemClick: (item: SearchResult) => {
         jumpToReadResource({
-          kbId: item?.metadata?.collectionId,
           resId: item?.id,
         });
         searchStore.setIsSearchOpen(false);

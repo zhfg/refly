@@ -2,7 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Client } from '@elastic/elasticsearch';
 import { MessageType } from '@prisma/client';
-import { User } from '@refly-packages/openapi-schema';
+import { SearchRequest, User } from '@refly-packages/openapi-schema';
 
 interface ResourceDocument {
   id: string;
@@ -125,7 +125,7 @@ export const indexConfig = {
   },
 };
 
-type IndexConfigValue = typeof indexConfig[keyof typeof indexConfig];
+type IndexConfigValue = (typeof indexConfig)[keyof typeof indexConfig];
 
 interface SearchHit<T> {
   _index: string;
@@ -260,7 +260,8 @@ export class ElasticsearchService implements OnModuleInit {
     });
   }
 
-  async searchResources(user: User, query: string, limit: number = 5) {
+  async searchResources(user: User, req: SearchRequest) {
+    const { query, limit, entities } = req;
     const { body } = await this.client.search<SearchResponse<ResourceDocument>>({
       index: indexConfig.resource.index,
       body: {
@@ -276,6 +277,9 @@ export class ElasticsearchService implements OnModuleInit {
                 },
               },
             ],
+            ...(entities?.length > 0 && {
+              filter: [{ terms: { _id: entities.map((entity) => entity.entityId) } }],
+            }),
           },
         },
         size: limit,
@@ -291,7 +295,8 @@ export class ElasticsearchService implements OnModuleInit {
     return body.hits.hits;
   }
 
-  async searchNotes(user: User, query: string, limit: number = 5) {
+  async searchNotes(user: User, req: SearchRequest) {
+    const { query, limit, entities } = req;
     const { body } = await this.client.search<SearchResponse<NoteDocument>>({
       index: indexConfig.note.index,
       body: {
@@ -307,6 +312,9 @@ export class ElasticsearchService implements OnModuleInit {
                 },
               },
             ],
+            ...(entities?.length > 0 && {
+              filter: [{ terms: { _id: entities.map((entity) => entity.entityId) } }],
+            }),
           },
         },
         size: limit,
@@ -322,7 +330,8 @@ export class ElasticsearchService implements OnModuleInit {
     return body.hits.hits;
   }
 
-  async searchCollections(user: User, query: string, limit: number = 5) {
+  async searchCollections(user: User, req: SearchRequest) {
+    const { query, limit, entities } = req;
     const { body } = await this.client.search<SearchResponse<CollectionDocument>>({
       index: indexConfig.collection.index,
       body: {
@@ -338,6 +347,9 @@ export class ElasticsearchService implements OnModuleInit {
                 },
               },
             ],
+            ...(entities?.length > 0 && {
+              filter: [{ terms: { _id: entities.map((entity) => entity.entityId) } }],
+            }),
           },
         },
         size: limit,
@@ -353,7 +365,8 @@ export class ElasticsearchService implements OnModuleInit {
     return body.hits.hits;
   }
 
-  async searchConversationMessages(user: User, query: string, limit: number = 5) {
+  async searchConversationMessages(user: User, req: SearchRequest) {
+    const { query, limit } = req;
     const { body } = await this.client.search<SearchResponse<ConversationMessageDocument>>({
       index: indexConfig.conversationMessage.index,
       body: {
@@ -384,7 +397,8 @@ export class ElasticsearchService implements OnModuleInit {
     return body.hits.hits;
   }
 
-  async searchSkills(user: User, query: string, limit: number = 5) {
+  async searchSkills(user: User, req: SearchRequest) {
+    const { query, limit } = req;
     const { body } = await this.client.search<SearchResponse<SkillDocument>>({
       index: indexConfig.skill.index,
       body: {

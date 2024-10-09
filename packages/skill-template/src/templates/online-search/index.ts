@@ -5,7 +5,7 @@ import { AIMessage, BaseMessage } from '@langchain/core/messages';
 import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 
 // tools
-import { SearchResultContext, SerperSearch } from '../../tools/serper-online-search';
+import { SerperSearch } from '../../tools/serper-online-search';
 // schema
 import { z } from 'zod';
 // types
@@ -13,7 +13,13 @@ import { SystemMessage } from '@langchain/core/messages';
 import { HumanMessage } from '@langchain/core/messages';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 import { ToolMessage } from '@langchain/core/messages';
-import { Source, SkillInvocationConfig, SkillTemplateConfigSchema, Icon } from '@refly-packages/openapi-schema';
+import {
+  Source,
+  SkillInvocationConfig,
+  SkillTemplateConfigSchema,
+  Icon,
+  WebSearchResponse,
+} from '@refly-packages/openapi-schema';
 
 interface GraphState extends BaseSkillState {
   // 初始上下文
@@ -71,15 +77,15 @@ export class OnlineSearchSkill extends BaseSkill {
     const isToolMessage = (lastMessage as ToolMessage)?._getType() === 'tool';
 
     // 这里是注册 tools 的描述，用于 Agent 调度
-    const tools = [new SerperSearch({ searchOptions: { maxResults: 8, locale }, engine: this.engine })];
+    const tools = [new SerperSearch({ maxResults: 8, locale, user: config?.user, engine: this.engine })];
 
     // For versions of @langchain/core < 0.2.3, you must call `.stream()`
     // and aggregate the message from chunks instead of calling `.invoke()`.
     const boundModel = this.engine.chatModel().bindTools(tools);
 
     if (isToolMessage) {
-      const releventDocs: SearchResultContext[] = JSON.parse((lastMessage as ToolMessage)?.content as string) || [];
-      const sources: Source[] = releventDocs.map((item) => ({
+      const res: WebSearchResponse = JSON.parse((lastMessage as ToolMessage)?.content as string) || {};
+      const sources: Source[] = res.data?.map((item) => ({
         url: item.url,
         title: item.name,
         pageContent: item.snippet,
@@ -244,7 +250,7 @@ just reformulate it if needed and otherwise return it as is.
     const { locale = 'en' } = config?.configurable || {};
 
     // 这里是直接用于执行的 tool，tool as ToolNode 执行
-    const tools = [new SerperSearch({ searchOptions: { maxResults: 8, locale }, engine: this.engine })];
+    const tools = [new SerperSearch({ maxResults: 8, locale, user: config?.user, engine: this.engine })];
 
     const message = messages[messages.length - 1];
 

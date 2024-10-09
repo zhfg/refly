@@ -172,8 +172,12 @@ export class SkillService {
         const labels = await this.label.createLabelInstance(user, req);
         return buildSuccessResponse(labels.map((label) => labelPO2DTO(label)));
       },
-      search: async (user, req) => {
-        const result = await this.search.search(user, req);
+      webSearch: async (user, req) => {
+        const result = await this.search.webSearch(user, req);
+        return buildSuccessResponse(result);
+      },
+      search: async (user, req, options) => {
+        const result = await this.search.search(user, req, options);
         return buildSuccessResponse(result);
       },
     };

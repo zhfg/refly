@@ -47,10 +47,7 @@ export const Search = () => {
   const debouncedSearch = useDebouncedCallback(async (searchVal) => {
     try {
       const res = await getClient().search({
-        body: {
-          query: searchVal,
-          scope: 'user',
-        },
+        body: { query: searchVal },
       });
 
       const resData = res?.data?.data || [];

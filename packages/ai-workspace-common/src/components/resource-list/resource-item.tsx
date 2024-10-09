@@ -18,6 +18,7 @@ import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/route
 
 import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
 import { memo, useState, useEffect } from 'react';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 export const ResourceItem = memo(
   (props: {

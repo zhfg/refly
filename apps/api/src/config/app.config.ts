@@ -73,6 +73,11 @@ export default () => ({
   rag: {
     jinaToken: process.env.JINA_TOKEN,
   },
+  reranker: {
+    topN: parseInt(process.env.RERANKER_TOP_N) || 10,
+    model: process.env.RERANKER_MODEL || 'jina-reranker-v2-base-multilingual',
+    relevanceThreshold: parseFloat(process.env.RERANKER_RELEVANCE_THRESHOLD) || 0.5,
+  },
   skill: {
     defaultModel: process.env.REFLY_DEFAULT_MODEL || 'openai/gpt-4o-mini',
   },

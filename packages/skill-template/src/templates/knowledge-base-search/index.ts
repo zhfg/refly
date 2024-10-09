@@ -12,6 +12,8 @@ import {
   SkillInvocationConfig,
   SkillTemplateConfigSchema,
   Icon,
+  Entity,
+  EntityType,
 } from '@refly-packages/openapi-schema';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 
@@ -138,10 +140,19 @@ export class KnowledgeBaseSearch extends BaseSkill {
       config,
     );
 
-    // TODO: implement given resourceIds and collectionIds q&a @mrcfps
     const { resources, collections } = config?.configurable || {};
+    const entities: Entity[] = [
+      ...(resources?.map((resource) => ({
+        entityType: 'resource' as EntityType,
+        entityId: resource.resourceId,
+      })) ?? []),
+      ...(collections?.map((collection) => ({
+        entityType: 'collection' as EntityType,
+        entityId: collection.collectionId,
+      })) ?? []),
+    ];
 
-    const tool = new ReflySearch({ engine: this.engine, user, domains: ['resource'], mode: 'vector' });
+    const tool = new ReflySearch({ engine: this.engine, user, domains: ['resource'], mode: 'vector', entities });
     const output = await tool.invoke(betterQuestion, config);
     const searchResp = JSON.parse(output) as SearchResponse;
 

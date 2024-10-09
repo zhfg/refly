@@ -160,6 +160,20 @@ export type Collection = {
 export type EntityType = 'resource' | 'collection' | 'note';
 
 /**
+ * Entity
+ */
+export type Entity = {
+  /**
+   * Entity ID
+   */
+  entityId?: string;
+  /**
+   * Entity type
+   */
+  entityType?: EntityType;
+};
+
+/**
  * Label class
  */
 export type LabelClass = {
@@ -2023,6 +2037,53 @@ export type GetSubscriptionUsageResponse = BaseResponse & {
   data?: SubscriptionUsageData;
 };
 
+export type WebSearchRequest = {
+  /**
+   * Web search query
+   */
+  query?: string;
+  /**
+   * Web search locale
+   */
+  locale?: string;
+  /**
+   * Web search result limit
+   */
+  limit?: number;
+};
+
+export type WebSearchResult = {
+  /**
+   * Web search result name
+   */
+  name?: string;
+  /**
+   * Web search result url
+   */
+  url?: string;
+  /**
+   * Web search result snippet
+   */
+  snippet?: string;
+};
+
+export type WebSearchResponse = BaseResponse & {
+  /**
+   * Web search results
+   */
+  data?: Array<WebSearchResult>;
+};
+
+/**
+ * Search options for internal use
+ */
+export type SearchOptions = {
+  /**
+   * Whether to enable reranker
+   */
+  enableReranker?: boolean;
+};
+
 export type SearchDomain = 'resource' | 'note' | 'collection' | 'conversation' | 'skill';
 
 export type SearchMode = 'keyword' | 'vector' | 'hybrid';
@@ -2033,13 +2094,13 @@ export type SearchRequest = {
    */
   query: string;
   /**
-   * Search scope
-   */
-  scope?: 'user' | 'public';
-  /**
    * Search domains (if not specified, return all domains)
    */
   domains?: Array<SearchDomain>;
+  /**
+   * Search entities
+   */
+  entities?: Array<Entity>;
   /**
    * Search mode
    */
@@ -2049,11 +2110,6 @@ export type SearchRequest = {
    */
   limit?: number;
 };
-
-/**
- * Search scope
- */
-export type scope = 'user' | 'public';
 
 export type SearchResultMeta = {
   /**
