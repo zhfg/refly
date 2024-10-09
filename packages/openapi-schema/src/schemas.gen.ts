@@ -1269,6 +1269,11 @@ export const $Subscription = {
       description: 'Subscription status',
       $ref: '#/components/schemas/SubscriptionStatus',
     },
+    cancelAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Subscription cancel time',
+    },
   },
 } as const;
 
@@ -1422,6 +1427,10 @@ export const $UserSettings = {
       type: 'string',
       description: 'User output locale',
       example: 'en',
+    },
+    customerId: {
+      type: 'string',
+      description: 'Stripe customer ID',
     },
     subscription: {
       description: 'User subscription',

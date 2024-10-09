@@ -25,7 +25,16 @@ export class UserController {
   @Get('settings')
   async getSettings(@User() user: UserModel): Promise<GetUserSettingsResponse> {
     const settings: UserSettings = {
-      ...pick(user, ['uid', 'avatar', 'name', 'nickname', 'email', 'uiLocale', 'outputLocale']),
+      ...pick(user, [
+        'uid',
+        'avatar',
+        'name',
+        'nickname',
+        'email',
+        'uiLocale',
+        'outputLocale',
+        'customerId',
+      ]),
       emailVerified: !!user.emailVerified,
     };
 

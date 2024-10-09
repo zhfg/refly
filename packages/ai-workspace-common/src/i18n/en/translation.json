@@ -628,10 +628,10 @@
     "subscription": {
       "subscribeNow": "Subscribe Now",
       "currentPlan": "Current Plan",
-      "t1TokenUsed": "High-level Model Token Usage",
-      "t1TokenUsedDescription": "High-level models include OpenAI GPT-4o, Anthropic Claude 3.5 Sonnet, and Google Gemini 1.5 Pro; usage includes both model input and output tokens.",
+      "t1TokenUsed": "Premium Model Token Usage",
+      "t1TokenUsedDescription": "Premium models include OpenAI GPT-4o, Anthropic Claude 3.5 Sonnet, and Google Gemini 1.5 Pro, usage includes both model input and output tokens.",
       "t2TokenUsed": "Basic Model Token Usage",
-      "t2TokenUsedDescription": "Basic models include OpenAI GPT-4o-mini, OpenAI GPT-3.5-turbo, and Google Gemini 1.5 Flash; usage includes both model input and output tokens.",
+      "t2TokenUsedDescription": "Basic models include OpenAI GPT-4o-mini, Claude 3 Haiku, and Google Gemini 1.5 Flash, usage includes both model input and output tokens.",
       "subscriptionManagement": "Manage Billing and Subscriptions",
       "subscriptionStatus": {
         "free": "FREE",
@@ -644,20 +644,44 @@
         "yearly": "Yearly",
         "monthlyPlan": "Monthly Auto-Renewal",
         "yearlyPlan": "Yearly Auto-Renewal",
+        "tooltip": {
+          "modelToken": "Usage includes both model input and output tokens",
+          "vectorStorage": "Used for storing semantic embeddings of resources and notes",
+          "fileStorage": "Used for storing resource texts, text and history versions of notes, and uploaded files (images)"
+        },
+        "vectorStorage": "Vector Storage",
+        "fileStorage": "File Storage",
+        "fileStorageType": {
+          "note": "Notes",
+          "resource": "Resources",
+          "file": "Uploaded Files"
+        },
         "pro": {
-          "description": "Enjoy the latest high-level models and have more basic model usage",
+          "description": "Enjoy the latest Premium models and have more basic model usage",
           "buttonText": "Upgrade Now",
-          "features": {
-            "t1Token": "High-level model quota (1,000,000 Token/month)",
-            "t2Token": "Basic model quota (10,000,000 Token/month)"
+          "t1Token": {
+            "name": "Premium Models",
+            "count": "1,000,000 tokens / Month"
+          },
+          "t2Token": {
+            "name": "Basic Models",
+            "count": "5,000,000 tokens / Month"
+          },
+          "serviceSupport": {
+            "name": "Service Support",
+            "details": "Priority Email Support"
           }
         },
         "free": {
           "description": "Free usage with more basic model usage",
           "buttonText": "Continue Free",
-          "features": {
-            "t1Token": "High-level model quota (100,000 Token/month)",
-            "t2Token": "Basic model quota (5,000,000 Token/month)"
+          "t2Token": {
+            "name": "Basic Models",
+            "count": "1,000,000 tokens / One-time"
+          },
+          "serviceSupport": {
+            "name": "Service Support",
+            "details": "Community support (Discord)"
           }
         },
         "description": "Cancel anytime. Subscribing means you agree to Refly's",
@@ -669,7 +693,7 @@
         "month": "Month",
         "year": "Year",
         "forFree": "Free",
-        "resetAt": "Will reset at {{date}}"
+        "resetAt": "reset at {{date}}"
       }
     },
 

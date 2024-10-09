@@ -118,10 +118,18 @@
 
       .plane-features {
         &-item {
+          margin-bottom: 8px;
           font-size: 14px;
-          line-height: 24px;
           color: #000;
           font-weight: 500;
+          &:last-child {
+            margin-bottom: 0;
+          }
+          .details {
+            margin-left: 18px;
+            font-size: 12px;
+            color: rgba(0, 0, 0, 0.5);
+          }
         }
       }
     }
