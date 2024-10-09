@@ -5,6 +5,7 @@ import {
   SkillContextContentItem,
   SkillContextNoteItem,
   SkillContextResourceItem,
+  Source,
 } from '@refly-packages/openapi-schema';
 
 export enum LLMType {
@@ -53,6 +54,10 @@ export const countResourceTokens = (resources: SkillContextResourceItem[]) => {
 
 export const countNoteTokens = (notes: SkillContextNoteItem[]) => {
   return notes.reduce((sum, note) => sum + countToken(note?.note?.content), 0);
+};
+
+export const countWebSearchContextTokens = (webSearchSources: Source[]) => {
+  return webSearchSources.reduce((sum, source) => sum + countToken(source?.pageContent), 0);
 };
 
 // TODO: collections 搜索和在整个知识库搜索一起实现

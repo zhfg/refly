@@ -112,8 +112,8 @@ export const useBuildThreadAndRun = () => {
           chatMode: {
             value: chatMode,
             configScope: ['runtime'],
-            displayValue: localSettings?.uiLocale === 'zh-CN' ? '提问模式' : 'Chat Mode',
-            label: localSettings?.uiLocale === 'zh-CN' ? '提问模式' : 'Chat Mode',
+            displayValue: localSettings?.uiLocale === 'zh-CN' ? '提问模式' : 'Normal Chat',
+            label: localSettings?.uiLocale === 'zh-CN' ? '直接提问' : 'Normal Chat',
           },
         };
 

@@ -22,6 +22,7 @@ import {
   SkillContextResourceItem,
   SkillContextNoteItem,
   SkillContextCollectionItem,
+  ChatMessage,
 } from '@refly-packages/openapi-schema';
 import { ToolCall } from '@langchain/core/dist/messages/tool';
 import { randomUUID } from 'node:crypto';
@@ -32,6 +33,7 @@ import { SkillContextContentItemMetadata, SelectedContentDomain, GraphState, Que
 import { prepareContext } from './utils/context';
 import { buildSchedulerSystemPrompt } from './utils/prompt';
 import { analyzeQueryAndContext } from './utils/queryRewrite';
+import { truncateMessages } from '@/scheduler/utils/truncator';
 export class Scheduler extends BaseSkill {
   name = 'scheduler';
 
@@ -43,7 +45,57 @@ export class Scheduler extends BaseSkill {
   icon: Icon = { type: 'emoji', value: '🧙‍♂️' };
 
   configSchema: SkillTemplateConfigSchema = {
-    items: [],
+    items: [
+      {
+        key: 'enableWebSearch',
+        inputMode: 'radio',
+        labelDict: {
+          en: 'Web Search',
+          'zh-CN': '联网搜索',
+        },
+        descriptionDict: {
+          en: 'Enable web search',
+          'zh-CN': '启用联网搜索',
+        },
+        defaultValue: true,
+      },
+      {
+        key: 'chatMode',
+        inputMode: 'select',
+        labelDict: {
+          en: 'Chat Mode',
+          'zh-CN': '聊天模式',
+        },
+        descriptionDict: {
+          en: 'Select chat mode',
+          'zh-CN': '选择聊天模式',
+        },
+        defaultValue: 'normal',
+        options: [
+          {
+            value: 'normal',
+            labelDict: {
+              en: 'Normal',
+              'zh-CN': '直接提问',
+            },
+          },
+          {
+            value: 'noContext',
+            labelDict: {
+              en: 'No Context',
+              'zh-CN': '不带上下文提问',
+            },
+          },
+          {
+            value: 'wholeSpace',
+            labelDict: {
+              en: 'Whole Space',
+              'zh-CN': '在整个空间提问',
+            },
+          },
+        ],
+      },
+    ],
   };
 
   invocationConfig: SkillInvocationConfig = {};
@@ -288,43 +340,57 @@ Please generate the summary based on these requirements and offer suggestions fo
       modelName,
     } = this.configSnapshot.configurable;
 
-    const { optimizedQuery, mentionedContext } = await analyzeQueryAndContext(query, {
-      configSnapshot: this.configSnapshot,
-      ctxThis: this,
-      state: state,
-    });
-    const context = await prepareContext(
-      {
-        query: optimizedQuery,
-        mentionedContext,
-      },
-      {
+    const { tplConfig } = config?.configurable || {};
+    const chatMode = tplConfig?.chatMode?.value;
+
+    let optimizedQuery = query;
+    let mentionedContext: IContext;
+    let context: string = '';
+
+    if (chatMode !== 'noContext') {
+      const analyedRes = await analyzeQueryAndContext(query, {
         configSnapshot: this.configSnapshot,
         ctxThis: this,
         state: state,
-      },
-    );
-    const systemPrompt = buildSchedulerSystemPrompt(locale);
+        tplConfig,
+      });
+      optimizedQuery = analyedRes.optimizedQuery;
+      mentionedContext = analyedRes.mentionedContext;
+    }
+
+    if (chatMode !== 'noContext') {
+      context = await prepareContext(
+        {
+          query: optimizedQuery,
+          mentionedContext,
+        },
+        {
+          configSnapshot: this.configSnapshot,
+          ctxThis: this,
+          state: state,
+          tplConfig,
+        },
+      );
+    }
+    const systemPrompt = buildSchedulerSystemPrompt(locale, chatMode as string);
 
     const model = this.engine.chatModel({ temperature: 0.1 });
+    const requestMessages = [
+      new SystemMessage(systemPrompt),
+      ...truncateMessages(chatHistory.slice(0, -1) as any as ChatMessage[]),
+      ...messages,
+      ...(chatMode !== 'noContext' ? [new HumanMessage(`## Context \n ${context}`)] : []),
+      new HumanMessage(`## User Query \n ${optimizedQuery}`),
+    ];
 
-    const responseMessage = await model.invoke(
-      [
-        new SystemMessage(systemPrompt),
-        ...chatHistory.slice(0, -1),
-        ...messages,
-        new HumanMessage(`## Context \n ${context}`),
-        new HumanMessage(`## User Query \n ${optimizedQuery}`),
-      ],
-      {
-        ...this.configSnapshot,
-        metadata: {
-          ...this.configSnapshot.metadata,
-          ...currentSkill,
-          spanId,
-        },
+    const responseMessage = await model.invoke(requestMessages, {
+      ...this.configSnapshot,
+      metadata: {
+        ...this.configSnapshot.metadata,
+        ...currentSkill,
+        spanId,
       },
-    );
+    });
 
     this.emitEvent({ event: 'end' }, this.configSnapshot);
 

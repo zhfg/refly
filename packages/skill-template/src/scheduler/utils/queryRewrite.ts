@@ -4,7 +4,7 @@ import { summarizeChatHistory, summarizeContext } from './summarizer';
 import { z } from 'zod';
 import { SkillEngine } from '../../engine';
 import { BaseSkill, SkillRunnableConfig } from '../../base';
-import { ChatMessage } from '@refly-packages/openapi-schema';
+import { ChatMessage, SkillTemplateConfig } from '@refly-packages/openapi-schema';
 
 // simplify context entityId for better extraction
 export const preprocessContext = (context: IContext): IContext => {
@@ -56,7 +56,7 @@ export const postprocessContext = (
 // TODO: collections 搜索和在整个知识库搜索一起实现
 export async function analyzeQueryAndContext(
   query: string,
-  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<QueryAnalysis> {
   const { chatHistory, resources, notes, contentList, collections } = ctx.configSnapshot.configurable;
   const context: IContext = {

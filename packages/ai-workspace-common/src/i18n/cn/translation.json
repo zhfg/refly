@@ -971,9 +971,9 @@
     "tokenUsage": "输入 {{count}}，输出 {{count}}",
     "chatMode": {
       "title": "聊天模式",
-      "normal": "直接聊天",
-      "noContext": "不带上下文聊天",
-      "wholeSpace": "在整个空间聊天"
+      "normal": "直接提问",
+      "noContext": "不带上下文提问",
+      "wholeSpace": "在整个空间提问"
     },
     "webSearch": {
       "title": "联网搜索",

@@ -5,6 +5,7 @@ import {
   countNoteTokens,
   countResourceTokens,
   countToken,
+  countWebSearchContextTokens,
 } from './token';
 import { ModelContextLimitMap } from './token';
 import {
@@ -16,7 +17,13 @@ import {
 import { BaseSkill, SkillRunnableConfig } from '../../base';
 import { truncateContext, truncateText } from './truncator';
 import { concatContextToStr } from './summarizer';
-import { SkillContextContentItem, SkillContextNoteItem, SkillContextResourceItem, Source } from '@refly/openapi-schema';
+import {
+  SkillContextContentItem,
+  SkillContextNoteItem,
+  SkillContextResourceItem,
+  SkillTemplateConfig,
+  Source,
+} from '@refly/openapi-schema';
 import { uniqBy } from 'lodash';
 
 // configurable params
@@ -33,7 +40,7 @@ export async function prepareContext(
     query: string;
     mentionedContext: IContext;
   },
-  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<string> {
   const {
     locale = 'en',
@@ -44,18 +51,30 @@ export async function prepareContext(
     notes,
     collections,
   } = ctx.configSnapshot.configurable;
+  const enableWebSearch = ctx.tplConfig?.enableWebSearch?.value;
+
   const modelWindowSize = ModelContextLimitMap[modelName];
   const maxContextTokens = Math.floor(modelWindowSize * MAX_CONTEXT_RATIO);
   // TODO: think remainingTokens may out of range
   let remainingTokens = maxContextTokens;
 
-  const { processedWebSearchContext } = await prepareWebSearchContext(
-    {
-      query,
-    },
-    ctx,
-  );
-  const webSearchContextTokens = 0;
+  // 1. web search context
+  let processedWebSearchContext: IContext = {
+    contentList: [],
+    resources: [],
+    notes: [],
+    webSearchSources: [],
+  };
+  if (enableWebSearch) {
+    const preparedRes = await prepareWebSearchContext(
+      {
+        query,
+      },
+      ctx,
+    );
+    processedWebSearchContext = preparedRes.processedWebSearchContext;
+  }
+  const webSearchContextTokens = countWebSearchContextTokens(processedWebSearchContext.webSearchSources);
   remainingTokens = maxContextTokens - webSearchContextTokens;
 
   // 2. mentioned context
@@ -213,7 +232,7 @@ export async function prepareRelevantContext(
   const allNotesTokens = countNoteTokens(notes);
   const allResourcesTokens = countResourceTokens(resources);
 
-  // 3. selected content context
+  // 1. selected content context
   let selectedContentTokens = allSelectedContentTokens;
   const selectedContentMaxTokens =
     remainingTokens - allNotesTokens - allResourcesTokens > MAX_SELECTED_CONTENT_RATIO * remainingTokens
@@ -232,7 +251,7 @@ export async function prepareRelevantContext(
     relevantContexts.contentList.concat(...contentList);
   }
 
-  // 4. notes context
+  // 2. notes context
   // remainingTokens = maxContextTokens - selectedContentTokens;
   let notesTokens = allNotesTokens;
   const notesMaxTokens =
@@ -247,7 +266,7 @@ export async function prepareRelevantContext(
     relevantContexts.notes.concat(...notes);
   }
 
-  // 5. resources context
+  // 3. resources context
   // remainingTokens = maxContextTokens - notesTokens;
   let resourcesTokens = allResourcesTokens;
   const resourcesMaxTokens =
@@ -265,7 +284,9 @@ export async function prepareRelevantContext(
     relevantContexts.resources.concat(...resources);
   }
 
-  // 6. TODO: collections context, mainly for knowledge base search meat filter
+  // 4. TODO: collections context, mainly for knowledge base search meat filter
+
+  // 5. TODO: whole space search context
 
   let totalTokens = selectedContentTokens + notesTokens + resourcesTokens;
   if (totalTokens > remainingTokens) {
