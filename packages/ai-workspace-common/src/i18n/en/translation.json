@@ -661,11 +661,11 @@
           "buttonText": "Upgrade Now",
           "t1Token": {
             "name": "Premium Models",
-            "count": "1000000 tokens / Month"
+            "count": "1,000,000 tokens / Month"
           },
           "t2Token": {
             "name": "Basic Models",
-            "count": "5000000 tokens / Month"
+            "count": "5,000,000 tokens / Month"
           },
           "serviceSupport": {
             "name": "Service Support",
@@ -677,7 +677,7 @@
           "buttonText": "Continue Free",
           "t2Token": {
             "name": "Basic Models",
-            "count": "1000000 tokens / One-time"
+            "count": "1,000,000 tokens / One-time"
           },
           "serviceSupport": {
             "name": "Service Support",

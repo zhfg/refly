@@ -37,7 +37,7 @@ export const SubscribeModal = (props: SubscribeModalProps) => {
     },
     {
       name: t('settings.subscription.subscribe.pro.t2Token.name'),
-      count: t('settings.subscription.subscribe.free.t2Token.count'),
+      count: t('settings.subscription.subscribe.pro.t2Token.count'),
       details: 'GPT-4o Mini / Claude 3 Haiku / Gemini Flash 1.5',
       tooltip: t('settings.subscription.subscribe.tooltip.modelToken'),
     },
