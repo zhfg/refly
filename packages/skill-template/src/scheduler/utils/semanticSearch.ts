@@ -1,21 +1,14 @@
 import {
-  Icon,
-  Resource,
-  Note,
-  Collection,
-  SkillInvocationConfig,
-  SkillMeta,
-  SkillTemplateConfigSchema,
   SkillContextContentItem,
   SkillContextResourceItem,
   SkillContextNoteItem,
-  SkillContextCollectionItem,
+  SearchDomain,
+  EntityType,
 } from '@refly/openapi-schema';
 import { BaseSkill, SkillRunnableConfig } from '@/base';
 import { IContext, GraphState, SkillContextContentItemMetadata } from '../types';
 import { countToken, ModelContextLimitMap } from './token';
 import { MAX_NEED_RECALL_TOKEN, SHORT_CONTENT_THRESHOLD, MIN_RELEVANCE_SCORE } from './constants';
-import { getRelevantChunks } from './chunking';
 import { DocumentInterface, Document } from '@langchain/core/documents';
 import { ContentNodeType, NodeMeta } from '@/engine';
 import { genUniqueId } from '@refly/utils';
@@ -180,7 +173,7 @@ export async function processSelectedContentWithSimilarity(
     if (contentTokens > MAX_NEED_RECALL_TOKEN) {
       // 2.1 大内容，直接走召回
       const contentMeta = content?.metadata as any as SkillContextContentItemMetadata;
-      const relevantChunks = await getRelevantChunks(
+      const relevantChunks = await inMemoryGetRelevantChunks(
         query,
         content.content,
         {
@@ -219,7 +212,7 @@ export async function processSelectedContentWithSimilarity(
       // 剩下的长内容走召回
       const remainingTokens = maxTokens - usedTokens;
       const contentMeta = remainingContent?.metadata as any as SkillContextContentItemMetadata;
-      const relevantChunks = await getRelevantChunks(
+      const relevantChunks = await inMemoryGetRelevantChunks(
         query,
         remainingContent.content,
         {
@@ -265,13 +258,13 @@ export async function processNotesWithSimilarity(
 
     if (noteTokens > MAX_NEED_RECALL_TOKEN) {
       // 1.1 大内容，直接走召回
-      const relevantChunks = await getRelevantChunks(
+      const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
         query,
-        note?.note?.content || '',
         {
           entityId: note?.note?.noteId,
           title: note?.note?.title,
           entityType: 'note',
+          domain: 'note',
         },
         MAX_NEED_RECALL_TOKEN,
         ctx,
@@ -303,13 +296,13 @@ export async function processNotesWithSimilarity(
     } else {
       // 剩下的长内容走召回
       const remainingTokens = maxTokens - usedTokens;
-      const relevantChunks = await getRelevantChunks(
+      const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
         query,
-        remainingNote?.note?.content || '',
         {
           entityId: remainingNote?.note?.noteId,
           title: remainingNote?.note?.title,
           entityType: 'note',
+          domain: 'note',
         },
         remainingTokens,
         ctx,
@@ -347,13 +340,13 @@ export async function processResourcesWithSimilarity(
 
     if (resourceTokens > MAX_NEED_RECALL_TOKEN) {
       // 2.1 大内容，直接走召回
-      const relevantChunks = await getRelevantChunks(
+      const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
         query,
-        resource?.resource?.content || '',
         {
           entityId: resource?.resource?.resourceId,
           title: resource?.resource?.title,
-          entityType: resource?.resource?.resourceType as ContentNodeType,
+          entityType: 'resource',
+          domain: 'resource',
         },
         MAX_NEED_RECALL_TOKEN,
         ctx,
@@ -386,13 +379,13 @@ export async function processResourcesWithSimilarity(
     } else {
       // 长内容走召回
       const remainingTokens = maxTokens - usedTokens;
-      const relevantChunks = await getRelevantChunks(
+      const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
         query,
-        remainingResource?.resource?.content || '',
         {
           entityId: remainingResource?.resource?.resourceId,
           title: remainingResource?.resource?.title,
-          entityType: remainingResource?.resource?.resourceType as ContentNodeType,
+          entityType: 'resource',
+          domain: 'resource',
         },
         remainingTokens,
         ctx,
@@ -451,4 +444,97 @@ export async function processMentionedContextWithSimilarity(
     resources: processedResources,
     notes: processedNotes,
   };
+}
+
+export async function knowledgeBaseSearchGetRelevantChunks(
+  query: string,
+  metadata: { entityId: string; title: string; entityType: EntityType; domain: SearchDomain },
+  maxTokens: number,
+  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+): Promise<DocumentInterface[]> {
+  // 1. search relevant chunks
+  const res = await ctx.ctxThis.engine.service.search(ctx.configSnapshot.user, {
+    query,
+    entities: [
+      {
+        entityId: metadata.entityId,
+        entityType: metadata.entityType,
+      },
+    ],
+    mode: 'vector',
+    limit: 10,
+    domains: [metadata.domain],
+  });
+  const relevantChunks = res?.data?.map((item) => ({
+    id: item.id,
+    pageContent: item?.content?.[0] || '',
+    metadata: {
+      ...item.metadata,
+      title: item.title,
+    },
+  }));
+
+  // 2. 选择最相关的 chunks，直到达到 maxTokens 限制
+  let result: DocumentInterface[] = [];
+  let usedTokens = 0;
+
+  for (const chunk of relevantChunks) {
+    const chunkTokens = countToken(chunk?.pageContent || '');
+    if (usedTokens + chunkTokens <= maxTokens) {
+      result.push(chunk as DocumentInterface);
+      usedTokens += chunkTokens;
+    } else {
+      break;
+    }
+  }
+
+  return result;
+}
+
+export async function inMemoryGetRelevantChunks(
+  query: string,
+  content: string,
+  metadata: { entityId: string; title: string; entityType: ContentNodeType },
+  maxTokens: number,
+  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+): Promise<DocumentInterface[]> {
+  // 1. 获取 relevantChunks
+  const uniqueId = genUniqueId();
+  const filter = (doc: Document<NodeMeta>) => {
+    return doc.metadata.uniqueId === uniqueId;
+  };
+  const doc: Document<NodeMeta> = {
+    pageContent: content,
+    metadata: {
+      nodeType: metadata.entityType,
+      entityType: metadata.entityType,
+      title: metadata.title,
+      entityId: metadata.entityId,
+      tenantId: ctx.configSnapshot.user.uid,
+      uniqueId, // uniqueId for inMemorySearch
+    },
+  };
+  await ctx.ctxThis.engine.service.inMemoryIndexContent(ctx.configSnapshot.user, { doc, needChunk: true });
+  const res = await ctx.ctxThis.engine.service.inMemorySearch(ctx.configSnapshot.user, {
+    query,
+    k: 10,
+    filter,
+  });
+  const relevantChunks = res?.data;
+
+  // 2. 选择最相关的 chunks，直到达到 maxTokens 限制
+  let result: DocumentInterface[] = [];
+  let usedTokens = 0;
+
+  for (const chunk of relevantChunks) {
+    const chunkTokens = countToken(chunk.pageContent);
+    if (usedTokens + chunkTokens <= maxTokens) {
+      result.push(chunk as DocumentInterface);
+      usedTokens += chunkTokens;
+    } else {
+      break;
+    }
+  }
+
+  return result;
 }
