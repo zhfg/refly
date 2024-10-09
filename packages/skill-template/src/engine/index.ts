@@ -19,12 +19,14 @@ import {
   GetNoteDetailResponse,
   UpsertNoteRequest,
   CreateNoteResponse,
-  UpdateNoteResponse,
   ListNotesData,
   ListNotesResponse,
   ResourceType,
   InMemoryIndexContentResponse,
   InMemorySearchResponse,
+  SearchOptions,
+  WebSearchRequest,
+  WebSearchResponse,
 } from '@refly/openapi-schema';
 
 // TODO: unify with frontend
@@ -57,7 +59,8 @@ export interface ReflyService {
   updateCollection: (user: User, req: UpsertCollectionRequest) => Promise<UpdateCollectionResponse>;
   createLabelClass: (user: User, req: CreateLabelClassRequest) => Promise<CreateLabelClassResponse>;
   createLabelInstance: (user: User, req: CreateLabelInstanceRequest) => Promise<CreateLabelInstanceResponse>;
-  search: (user: User, req: SearchRequest) => Promise<SearchResponse>;
+  webSearch: (user: User, req: WebSearchRequest) => Promise<WebSearchResponse>;
+  search: (user: User, req: SearchRequest, options?: SearchOptions) => Promise<SearchResponse>;
   inMemoryIndexContent: (
     user: User,
     req: { doc: Document<NodeMeta>; needChunk: boolean },

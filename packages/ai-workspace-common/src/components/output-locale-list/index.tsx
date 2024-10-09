@@ -43,7 +43,11 @@ export const OutputLocaleList = (props: {
   };
 
   const dropList = (
-    <Menu className={'output-locale-list-menu'} onClickMenuItem={(key) => changeLang(key as OutputLocale)}>
+    <Menu
+      className={'output-locale-list-menu'}
+      style={{ width: props?.width }}
+      onClickMenuItem={(key) => changeLang(key as OutputLocale)}
+    >
       {props.showTitle && (
         <div className="output-locale-list-menu-title">{t('settings.language.outputLocale.title')}</div>
       )}

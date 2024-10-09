@@ -57,7 +57,6 @@ export const useFetchOrSearchList = ({
         const res = await getClient().search({
           body: {
             query: searchVal,
-            scope: 'user',
             domains,
           },
         });

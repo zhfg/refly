@@ -127,8 +127,6 @@ export class FindRelatedContent extends BaseSkill {
       config,
     );
 
-    // TODO: implement given resourceIds and collectionIds q&a @mrcfps
-
     const tool = new ReflySearch({
       engine: this.engine,
       user,

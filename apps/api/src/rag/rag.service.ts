@@ -10,7 +10,7 @@ import { FireworksEmbeddings } from '@langchain/community/embeddings/fireworks';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { cleanMarkdownForIngest } from '@refly/utils';
 
-import { User } from '@refly-packages/openapi-schema';
+import { SearchResult, User } from '@refly-packages/openapi-schema';
 import { MINIO_INTERNAL, MinioService } from '@/common/minio.service';
 import { HybridSearchParam, ContentData, ContentPayload, ReaderResult, NodeMeta } from './rag.dto';
 import { QdrantService } from '@/common/qdrant.service';
@@ -49,6 +49,13 @@ export const ContentAvroType = avro.Type.forSchema({
 });
 
 export const PARSER_VERSION = '20240424';
+
+interface JinaRerankerResponse {
+  results: {
+    document: { text: string };
+    relevance_score: number;
+  }[];
+}
 
 @Injectable()
 export class RAGService {
@@ -100,14 +107,13 @@ export class RAGService {
       }`,
     );
 
-    // TODO: error handling
-    // TODO: Jina token needs payment method
     const response = await fetch(READER_URL + url, {
       method: 'GET',
       headers: {
-        // Authorization: this.config.get('rag.jinaToken')
-        //   ? `Bearer ${this.config.get('rag.jinaToken')}`
-        //   : undefined,
+        Authorization:
+          process.env.NODE_ENV === 'production' && this.config.get('rag.jinaToken')
+            ? `Bearer ${this.config.get('rag.jinaToken')}`
+            : undefined,
         Accept: 'application/json',
       },
     });
@@ -299,5 +305,42 @@ export class RAGService {
 
     const results = await this.qdrant.search(param, { must: conditions });
     return results.map((res) => res.payload as any);
+  }
+
+  /**
+   * Rerank search results using Jina Reranker.
+   */
+  async rerank(query: string, results: SearchResult[]): Promise<SearchResult[]> {
+    const contentMap = new Map<string, SearchResult>();
+    results.forEach((r) => {
+      contentMap.set(r.content.join('\n\n'), r);
+    });
+
+    const payload = JSON.stringify({
+      query,
+      model: this.config.get('reranker.model'),
+      top_n: this.config.get('reranker.topN'),
+      documents: Array.from(contentMap.keys()),
+    });
+
+    try {
+      const res = await fetch('https://api.jina.ai/v1/rerank', {
+        method: 'post',
+        headers: {
+          Authorization: `Bearer ${this.config.getOrThrow('rag.jinaToken')}`,
+          'Content-Type': 'application/json',
+        },
+        body: payload,
+      });
+      const data: JinaRerankerResponse = await res.json();
+      this.logger.debug(`Jina reranker results: ${JSON.stringify(data)}`);
+
+      return data.results
+        .filter((r) => r.relevance_score >= this.config.get('reranker.relevanceThreshold'))
+        .map((r) => contentMap.get(r.document.text) as SearchResult);
+    } catch (e) {
+      this.logger.error(`Reranker failed, fallback to default: ${e.stack}`);
+      return results;
+    }
   }
 }

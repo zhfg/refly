@@ -739,7 +739,7 @@ export const createPortalSession = (options?: Options) => {
 
 /**
  * Search
- * Search for everything
+ * Search for resources, collections, notes, etc.
  */
 export const search = (options: Options<SearchData>) => {
   return (options?.client ?? client).post<SearchResponse2, SearchError>({

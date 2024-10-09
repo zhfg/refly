@@ -157,7 +157,6 @@ export const BaseSearchAndSelector = ({
         const res = await getClient().search({
           body: {
             query: searchVal,
-            scope: 'user',
             domains: domains,
           },
         });

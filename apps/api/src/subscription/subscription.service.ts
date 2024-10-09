@@ -23,6 +23,7 @@ import {
   Subscription as SubscriptionModel,
   User as UserModel,
   ModelInfo as ModelInfoModel,
+  Prisma,
 } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 
@@ -135,6 +136,8 @@ export class SubscriptionService implements OnModuleInit {
 
   async createSubscription(uid: string, param: CreateSubscriptionParam) {
     return this.prisma.$transaction(async (prisma) => {
+      const now = new Date();
+
       const user = await prisma.user.findUnique({ where: { uid } });
 
       // Check for existing subscription
@@ -142,39 +145,23 @@ export class SubscriptionService implements OnModuleInit {
         const subscription = await prisma.subscription.findUnique({
           where: { subscriptionId: user.subscriptionId },
         });
-        if (subscription.status === 'active') {
+        if (
+          subscription?.status === 'active' &&
+          (!subscription.cancelAt || subscription.cancelAt > now)
+        ) {
           return subscription;
         }
       }
 
       // Create a new subscription if needed
       const sub = await prisma.subscription.create({
-        data: {
-          ...param,
-          uid,
-        },
+        data: { ...param, uid },
       });
 
       // Update user's subscriptionId
       await prisma.user.update({
         where: { uid },
         data: { subscriptionId: sub.subscriptionId },
-      });
-
-      const now = new Date();
-
-      // Delete existing free token meter
-      await prisma.tokenUsageMeter.updateMany({
-        where: {
-          uid,
-          subscriptionId: null,
-          startAt: { lte: now },
-          endAt: { gte: now },
-          deletedAt: null,
-        },
-        data: {
-          deletedAt: now,
-        },
       });
 
       const usageQuota = await prisma.subscriptionUsageQuota.findUnique({
@@ -277,7 +264,11 @@ export class SubscriptionService implements OnModuleInit {
 
       // Update storage usage meter
       await prisma.storageUsageMeter.updateMany({
-        where: { subscriptionId: sub.subscriptionId },
+        where: {
+          uid: user.uid,
+          subscriptionId: sub.subscriptionId,
+          deletedAt: null,
+        },
         data: {
           subscriptionId: null,
           objectStorageQuota:
@@ -381,14 +372,21 @@ export class SubscriptionService implements OnModuleInit {
       return;
     }
 
+    const updates: Prisma.SubscriptionUpdateInput = {};
     if (subscription.status !== sub.status) {
+      updates.status = subscription.status;
+    }
+    if (subscription.cancel_at && !sub.cancelAt) {
+      updates.cancelAt = new Date(subscription.cancel_at * 1000);
+    }
+
+    if (Object.keys(updates).length > 0) {
       this.logger.log(
-        `Subscription ${sub.subscriptionId} status updated from ${sub.status} to ` +
-          `${subscription.status}`,
+        `Subscription ${sub.subscriptionId} received updates: ${JSON.stringify(updates)}`,
       );
       await this.prisma.subscription.update({
         where: { subscriptionId: subscription.id },
-        data: { status: subscription.status },
+        data: updates,
       });
     }
   }
@@ -463,7 +461,7 @@ export class SubscriptionService implements OnModuleInit {
       const lastMeter = await prisma.tokenUsageMeter.findFirst({
         where: {
           uid,
-          subscriptionId: sub?.subscriptionId,
+          subscriptionId: sub?.subscriptionId || null,
           deletedAt: null,
         },
         orderBy: {
@@ -472,14 +470,18 @@ export class SubscriptionService implements OnModuleInit {
       });
 
       // If the last meter is still active, return it
-      if (lastMeter?.startAt < now && lastMeter?.endAt > now) {
+      if (lastMeter?.startAt < now && (!lastMeter.endAt || lastMeter.endAt > now)) {
         return lastMeter;
       }
 
       // Otherwise, create a new meter
       const startAt = lastMeter?.endAt ?? startOfDay(now);
-      const endAt = new Date(startAt.getFullYear(), startAt.getMonth() + 1, startAt.getDate());
       const planType = sub?.planType || 'free';
+      const endAt =
+        planType === 'free'
+          ? null
+          : new Date(startAt.getFullYear(), startAt.getMonth() + 1, startAt.getDate());
+
       const usageQuota = await prisma.subscriptionUsageQuota.findUnique({
         where: { planType },
       });

@@ -199,6 +199,21 @@ export const $EntityType = {
   enum: ['resource', 'collection', 'note'],
 } as const;
 
+export const $Entity = {
+  type: 'object',
+  description: 'Entity',
+  properties: {
+    entityId: {
+      type: 'string',
+      description: 'Entity ID',
+    },
+    entityType: {
+      description: 'Entity type',
+      $ref: '#/components/schemas/EntityType',
+    },
+  },
+} as const;
+
 export const $LabelClass = {
   type: 'object',
   description: 'Label class',
@@ -1246,6 +1261,11 @@ export const $Subscription = {
       description: 'Subscription status',
       $ref: '#/components/schemas/SubscriptionStatus',
     },
+    cancelAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Subscription cancel time',
+    },
   },
 } as const;
 
@@ -1399,6 +1419,10 @@ export const $UserSettings = {
       type: 'string',
       description: 'User output locale',
       example: 'en',
+    },
+    customerId: {
+      type: 'string',
+      description: 'Stripe customer ID',
     },
     subscription: {
       description: 'User subscription',
@@ -2939,6 +2963,76 @@ export const $GetSubscriptionUsageResponse = {
   ],
 } as const;
 
+export const $WebSearchRequest = {
+  type: 'object',
+  properties: {
+    query: {
+      type: 'string',
+      description: 'Web search query',
+    },
+    locale: {
+      type: 'string',
+      description: 'Web search locale',
+      default: 'en',
+    },
+    limit: {
+      type: 'number',
+      description: 'Web search result limit',
+      default: 8,
+    },
+  },
+} as const;
+
+export const $WebSearchResult = {
+  type: 'object',
+  properties: {
+    name: {
+      type: 'string',
+      description: 'Web search result name',
+    },
+    url: {
+      type: 'string',
+      description: 'Web search result url',
+    },
+    snippet: {
+      type: 'string',
+      description: 'Web search result snippet',
+    },
+  },
+} as const;
+
+export const $WebSearchResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Web search results',
+          items: {
+            $ref: '#/components/schemas/WebSearchResult',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $SearchOptions = {
+  type: 'object',
+  description: 'Search options for internal use',
+  properties: {
+    enableReranker: {
+      type: 'boolean',
+      description: 'Whether to enable reranker',
+      default: true,
+    },
+  },
+} as const;
+
 export const $SearchDomain = {
   type: 'string',
   enum: ['resource', 'note', 'collection', 'conversation', 'skill'],
@@ -2957,17 +3051,18 @@ export const $SearchRequest = {
       type: 'string',
       description: 'Search query (if empty, return last updated data)',
     },
-    scope: {
-      type: 'string',
-      description: 'Search scope',
-      enum: ['user', 'public'],
-      default: 'user',
-    },
     domains: {
       type: 'array',
       description: 'Search domains (if not specified, return all domains)',
       items: {
         $ref: '#/components/schemas/SearchDomain',
+      },
+    },
+    entities: {
+      type: 'array',
+      description: 'Search entities',
+      items: {
+        $ref: '#/components/schemas/Entity',
       },
     },
     mode: {
