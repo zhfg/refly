@@ -4,6 +4,8 @@ import {
   SkillContextNoteItem,
   SearchDomain,
   EntityType,
+  SkillContextCollectionItem,
+  Entity,
 } from '@refly/openapi-schema';
 import { BaseSkill, SkillRunnableConfig } from '../../base';
 import { IContext, GraphState, SkillContextContentItemMetadata } from '../types';
@@ -181,7 +183,6 @@ export async function processSelectedContentWithSimilarity(
           title: contentMeta?.title,
           entityType: contentMeta?.domain,
         },
-        MAX_NEED_RECALL_TOKEN,
         ctx,
       );
       const relevantContent = assembleChunks(relevantChunks);
@@ -212,7 +213,7 @@ export async function processSelectedContentWithSimilarity(
       // 剩下的长内容走召回
       const remainingTokens = maxTokens - usedTokens;
       const contentMeta = remainingContent?.metadata as any as SkillContextContentItemMetadata;
-      const relevantChunks = await inMemoryGetRelevantChunks(
+      let relevantChunks = await inMemoryGetRelevantChunks(
         query,
         remainingContent.content,
         {
@@ -220,9 +221,9 @@ export async function processSelectedContentWithSimilarity(
           title: contentMeta?.title,
           entityType: contentMeta?.domain,
         },
-        remainingTokens,
         ctx,
       );
+      relevantChunks = truncateChunks(relevantChunks, remainingTokens);
       const relevantContent = assembleChunks(relevantChunks);
       result.push({ ...remainingContent, content: relevantContent });
       usedTokens += countToken(relevantContent);
@@ -261,12 +262,15 @@ export async function processNotesWithSimilarity(
       const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
         query,
         {
-          entityId: note?.note?.noteId,
-          title: note?.note?.title,
-          entityType: 'note',
-          domain: 'note',
+          entities: [
+            {
+              entityId: note?.note?.noteId,
+              entityType: 'note',
+            },
+          ],
+          domains: ['note'],
+          limit: 10,
         },
-        MAX_NEED_RECALL_TOKEN,
         ctx,
       );
       const relevantContent = assembleChunks(relevantChunks);
@@ -296,17 +300,21 @@ export async function processNotesWithSimilarity(
     } else {
       // 剩下的长内容走召回
       const remainingTokens = maxTokens - usedTokens;
-      const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
+      let relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
         query,
         {
-          entityId: remainingNote?.note?.noteId,
-          title: remainingNote?.note?.title,
-          entityType: 'note',
-          domain: 'note',
+          entities: [
+            {
+              entityId: remainingNote?.note?.noteId,
+              entityType: 'note',
+            },
+          ],
+          domains: ['note'],
+          limit: 10,
         },
-        remainingTokens,
         ctx,
       );
+      relevantChunks = truncateChunks(relevantChunks, remainingTokens);
       const relevantContent = assembleChunks(relevantChunks);
       result.push({ ...remainingNote, note: { ...remainingNote.note!, content: relevantContent } });
       usedTokens += countToken(relevantContent);
@@ -343,12 +351,15 @@ export async function processResourcesWithSimilarity(
       const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
         query,
         {
-          entityId: resource?.resource?.resourceId,
-          title: resource?.resource?.title,
-          entityType: 'resource',
-          domain: 'resource',
+          entities: [
+            {
+              entityId: resource?.resource?.resourceId,
+              entityType: 'resource',
+            },
+          ],
+          domains: ['resource'],
+          limit: 10,
         },
-        MAX_NEED_RECALL_TOKEN,
         ctx,
       );
       const relevantContent = assembleChunks(relevantChunks);
@@ -379,17 +390,21 @@ export async function processResourcesWithSimilarity(
     } else {
       // 长内容走召回
       const remainingTokens = maxTokens - usedTokens;
-      const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
+      let relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
         query,
         {
-          entityId: remainingResource?.resource?.resourceId,
-          title: remainingResource?.resource?.title,
-          entityType: 'resource',
-          domain: 'resource',
+          entities: [
+            {
+              entityId: remainingResource?.resource?.resourceId,
+              entityType: 'resource',
+            },
+          ],
+          domains: ['resource'],
+          limit: 10,
         },
-        remainingTokens,
         ctx,
       );
+      relevantChunks = truncateChunks(relevantChunks, remainingTokens);
       const relevantContent = assembleChunks(relevantChunks);
       result.push({ ...remainingResource, resource: { ...remainingResource.resource!, content: relevantContent } });
       usedTokens += countToken(relevantContent);
@@ -446,10 +461,127 @@ export async function processMentionedContextWithSimilarity(
   };
 }
 
+// lower priority, if out of maxTokens, prior to cut off
+export async function processCollectionsWithSimilarity(
+  query: string,
+  collections: SkillContextCollectionItem[],
+  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+): Promise<(SkillContextResourceItem | SkillContextNoteItem)[]> {
+  // 1. scope collections for get relevant chunks
+  const entities: Entity[] = collections.map((collection) => ({
+    entityId: collection?.collection?.collectionId,
+    entityType: 'collection',
+  }));
+  const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
+    query,
+    {
+      entities,
+      domains: ['collection'],
+      limit: 10,
+    },
+    ctx,
+  );
+
+  // 2. 按照 domain 和 id 进行分类
+  const groupedChunks: { [key: string]: DocumentInterface[] } = {};
+  relevantChunks.forEach((chunk) => {
+    const key = `${chunk.metadata.domain}_${chunk.id}`;
+    if (!groupedChunks[key]) {
+      groupedChunks[key] = [];
+    }
+    groupedChunks[key].push(chunk);
+  });
+
+  // 3. 组装结果
+  const result: (SkillContextResourceItem | SkillContextNoteItem)[] = [];
+  for (const key in groupedChunks) {
+    const [domain, id] = key.split('_');
+    const assembledContent = assembleChunks(groupedChunks[key]);
+
+    if (domain === 'resource') {
+      result.push({
+        resource: {
+          resourceId: id,
+          content: assembledContent,
+          title: groupedChunks[key][0].metadata.title,
+          // 其他必要的字段需要根据实际情况填充
+        },
+      } as SkillContextResourceItem);
+    } else if (domain === 'note') {
+      result.push({
+        note: {
+          noteId: id,
+          content: assembledContent,
+          title: groupedChunks[key][0].metadata.title,
+          // 其他必要的字段需要根据实际情况填充
+        },
+      } as SkillContextNoteItem);
+    }
+    // 如果还有其他类型，可以在这里继续添加
+  }
+
+  return result;
+}
+
+export async function processWholeSpaceWithSimilarity(
+  query: string,
+  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+): Promise<(SkillContextResourceItem | SkillContextNoteItem)[]> {
+  // 1. scope collections for get relevant chunks
+  const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
+    query,
+    {
+      entities: [],
+      domains: ['resource', 'note'],
+      limit: 10,
+    },
+    ctx,
+  );
+
+  // 2. 按照 domain 和 id 进行分类
+  const groupedChunks: { [key: string]: DocumentInterface[] } = {};
+  relevantChunks.forEach((chunk) => {
+    const key = `${chunk.metadata.domain}_${chunk.id}`;
+    if (!groupedChunks[key]) {
+      groupedChunks[key] = [];
+    }
+    groupedChunks[key].push(chunk);
+  });
+
+  // 3. 组装结果
+  const result: (SkillContextResourceItem | SkillContextNoteItem)[] = [];
+  for (const key in groupedChunks) {
+    const [domain, id] = key.split('_');
+    const assembledContent = assembleChunks(groupedChunks[key]);
+
+    if (domain === 'resource') {
+      result.push({
+        resource: {
+          resourceId: id,
+          content: assembledContent,
+          title: groupedChunks[key][0].metadata.title,
+          // 其他必要的字段需要根据实际情况填充
+        },
+      } as SkillContextResourceItem);
+    } else if (domain === 'note') {
+      result.push({
+        note: {
+          noteId: id,
+          content: assembledContent,
+          title: groupedChunks[key][0].metadata.title,
+          // 其他必要的字段需要根据实际情况填充
+        },
+      } as SkillContextNoteItem);
+    }
+    // 如果还有其他类型，可以在这里继续添加
+  }
+
+  return result;
+}
+
 export async function knowledgeBaseSearchGetRelevantChunks(
   query: string,
-  metadata: { entityId: string; title: string; entityType: EntityType; domain: SearchDomain },
-  maxTokens: number,
+  metadata: { entities: Entity[]; domains: SearchDomain[]; limit: number },
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<DocumentInterface[]> {
   // 1. search relevant chunks
@@ -457,15 +589,10 @@ export async function knowledgeBaseSearchGetRelevantChunks(
     ctx.configSnapshot.user,
     {
       query,
-      entities: [
-        {
-          entityId: metadata.entityId,
-          entityType: metadata.entityType,
-        },
-      ],
+      entities: metadata.entities,
       mode: 'vector',
-      limit: 10,
-      domains: [metadata.domain],
+      limit: metadata.limit,
+      domains: metadata.domains,
     },
     { enableReranker: true },
   );
@@ -475,31 +602,17 @@ export async function knowledgeBaseSearchGetRelevantChunks(
     metadata: {
       ...item.metadata,
       title: item.title,
+      domain: item.domain, // collection, resource, note
     },
   }));
 
-  // 2. 选择最相关的 chunks，直到达到 maxTokens 限制
-  let result: DocumentInterface[] = [];
-  let usedTokens = 0;
-
-  for (const chunk of relevantChunks) {
-    const chunkTokens = countToken(chunk?.pageContent || '');
-    if (usedTokens + chunkTokens <= maxTokens) {
-      result.push(chunk as DocumentInterface);
-      usedTokens += chunkTokens;
-    } else {
-      break;
-    }
-  }
-
-  return result;
+  return relevantChunks;
 }
 
 export async function inMemoryGetRelevantChunks(
   query: string,
   content: string,
   metadata: { entityId: string; title: string; entityType: ContentNodeType },
-  maxTokens: number,
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<DocumentInterface[]> {
   // 1. 获取 relevantChunks
@@ -524,13 +637,16 @@ export async function inMemoryGetRelevantChunks(
     k: 10,
     filter,
   });
-  const relevantChunks = res?.data;
+  const relevantChunks = res?.data as DocumentInterface[];
 
-  // 2. 选择最相关的 chunks，直到达到 maxTokens 限制
+  return relevantChunks;
+}
+
+export function truncateChunks(chunks: DocumentInterface[], maxTokens: number): DocumentInterface[] {
   let result: DocumentInterface[] = [];
   let usedTokens = 0;
 
-  for (const chunk of relevantChunks) {
+  for (const chunk of chunks) {
     const chunkTokens = countToken(chunk.pageContent);
     if (usedTokens + chunkTokens <= maxTokens) {
       result.push(chunk as DocumentInterface);

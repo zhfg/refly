@@ -4,8 +4,10 @@ import {
   SkillContextNoteItem,
   SkillContextResourceItem,
 } from '@refly-packages/openapi-schema';
+import { BaseSkill, SkillRunnableConfig } from '../../base';
+import { sortContentBySimilarity, sortNotesBySimilarity, sortResourcesBySimilarity } from './semanticSearch';
 
-import { IContext } from '../types';
+import { IContext, GraphState } from '../types';
 import { countToken } from './token';
 
 const MAX_MESSAGES = 5;
@@ -107,3 +109,116 @@ export const truncateContext = (context: IContext, maxTokens: number): IContext 
 
   return truncatedContext;
 };
+
+export async function mergeAndTruncateContexts(
+  relevantContext: IContext,
+  containerLevelContext: IContext,
+  query: string,
+  maxTokens: number,
+  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+): Promise<IContext> {
+  // 1. 处理 contentList（优先级最高）
+  const allContentList = [...relevantContext.contentList, ...containerLevelContext.contentList];
+  const uniqueContentList = Array.from(new Set(allContentList.map((item) => JSON.stringify(item)))).map((item) =>
+    JSON.parse(item),
+  );
+  const sortedContentList = await sortContentBySimilarity(query, uniqueContentList, ctx);
+
+  // 2. 合并 resources 和 notes 到一个数组
+  const combinedItems: (SkillContextResourceItem | SkillContextNoteItem)[] = [
+    ...relevantContext.resources,
+    ...relevantContext.notes,
+    ...containerLevelContext.resources,
+    ...containerLevelContext.notes,
+  ];
+
+  // 3. 去重（按 id 和 content 组合）
+  const uniqueCombinedItems = Array.from(
+    new Set(
+      combinedItems.map((item) => {
+        const id =
+          (item as SkillContextResourceItem).resource?.resourceId || (item as SkillContextNoteItem).note?.noteId;
+        const content =
+          (item as SkillContextResourceItem).resource?.content || (item as SkillContextNoteItem).note?.content;
+        return `${id}:${content}`;
+      }),
+    ),
+  ).map(
+    (key) =>
+      combinedItems.find((item) => {
+        const id =
+          (item as SkillContextResourceItem).resource?.resourceId || (item as SkillContextNoteItem).note?.noteId;
+        const content =
+          (item as SkillContextResourceItem).resource?.content || (item as SkillContextNoteItem).note?.content;
+        return `${id}:${content}` === key;
+      })!,
+  );
+
+  // 4. 整体进行相似度排序
+  const itemsForSorting = uniqueCombinedItems.map((item) => ({
+    content: (item as SkillContextResourceItem).resource?.content || (item as SkillContextNoteItem).note?.content,
+    metadata: {
+      type: 'resource' in item ? 'resource' : 'note',
+      id: (item as SkillContextResourceItem).resource?.resourceId || (item as SkillContextNoteItem).note?.noteId,
+    },
+  }));
+  const sortedItems = await sortContentBySimilarity(query, itemsForSorting, ctx);
+
+  // 还原排序后的实际 items
+  const sortedCombinedItems = sortedItems.map(
+    (sortedItem) =>
+      uniqueCombinedItems.find(
+        (item) =>
+          ('resource' in item ? 'resource' : 'note') === sortedItem.metadata.type &&
+          ((item as SkillContextResourceItem).resource?.resourceId || (item as SkillContextNoteItem).note?.noteId) ===
+            sortedItem.metadata.id,
+      )!,
+  );
+
+  // 5. Truncate
+  const truncatedContext = truncateContextWithPriority(sortedContentList, sortedCombinedItems, maxTokens);
+
+  return truncatedContext;
+}
+
+function truncateContextWithPriority(
+  contentList: SkillContextContentItem[],
+  combinedItems: any[],
+  maxTokens: number,
+): IContext {
+  let remainingTokens = maxTokens;
+  const truncatedContext: IContext = {
+    contentList: [],
+    resources: [],
+    notes: [],
+  };
+
+  // First, add contentList items
+  for (const item of contentList) {
+    const tokens = countToken(item.content);
+    if (remainingTokens >= tokens) {
+      truncatedContext.contentList.push(item);
+      remainingTokens -= tokens;
+    } else {
+      break;
+    }
+  }
+
+  // Then, add combined items (resources and notes)
+  for (const item of combinedItems) {
+    const content = item.type === 'resource' ? item.resource?.content : item.note?.content;
+    const tokens = countToken(content);
+    if (remainingTokens >= tokens) {
+      if (item.type === 'resource') {
+        truncatedContext.resources.push(item);
+      } else {
+        truncatedContext.notes.push(item);
+      }
+      remainingTokens -= tokens;
+    } else {
+      break;
+    }
+  }
+
+  return truncatedContext;
+}

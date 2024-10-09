@@ -12,10 +12,12 @@ import {
   processSelectedContentWithSimilarity,
   processNotesWithSimilarity,
   processResourcesWithSimilarity,
+  processCollectionsWithSimilarity,
+  processWholeSpaceWithSimilarity,
   processMentionedContextWithSimilarity,
 } from './semanticSearch';
 import { BaseSkill, SkillRunnableConfig } from '../../base';
-import { truncateContext, truncateText } from './truncator';
+import { mergeAndTruncateContexts, truncateContext, truncateText } from './truncator';
 import { concatContextToStr } from './summarizer';
 import {
   SkillContextContentItem,
@@ -88,16 +90,24 @@ export async function prepareContext(
   );
   remainingTokens -= mentionedContextTokens;
 
-  // 3. relevant context
-  const { processedRelevantContext } = await prepareRelevantContext(
-    {
-      query,
-      maxRelevantContextTokens: remainingTokens,
-    },
-    ctx,
-  );
+  // 3. lower priority context
+  let lowerPriorityContext: IContext = {
+    contentList: [],
+    resources: [],
+    notes: [],
+    collections: [],
+  };
+  if (remainingTokens > 0) {
+    lowerPriorityContext = await prepareLowerPriorityContext(
+      {
+        query,
+        maxLowerPriorityContextTokens: remainingTokens,
+      },
+      ctx,
+    );
+  }
 
-  let mergedContext = mergeAndDeduplicateContexts(processedMentionedContext, processedRelevantContext);
+  let mergedContext = mergeAndDeduplicateContexts(processedMentionedContext, lowerPriorityContext);
   mergedContext = {
     ...mergedContext,
     webSearchSources: processedWebSearchContext.webSearchSources,
@@ -195,31 +205,52 @@ export async function prepareMentionedContext(
   };
 }
 
+export async function prepareLowerPriorityContext(
+  {
+    query,
+    maxLowerPriorityContextTokens,
+  }: {
+    query: string;
+    maxLowerPriorityContextTokens: number;
+  },
+  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
+): Promise<IContext> {
+  // 1. relevant context
+  const relevantContext = await prepareRelevantContext(
+    {
+      query,
+    },
+    ctx,
+  );
+
+  // 2. container level context
+  const containerLevelContext = await prepareContainerLevelContext(
+    {
+      query,
+    },
+    ctx,
+  );
+
+  const finalContext = await mergeAndTruncateContexts(
+    relevantContext,
+    containerLevelContext,
+    query,
+    maxLowerPriorityContextTokens,
+    ctx,
+  );
+
+  return finalContext;
+}
+
 export async function prepareRelevantContext(
   {
     query,
-    maxRelevantContextTokens,
   }: {
     query: string;
-    maxRelevantContextTokens: number;
   },
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
-): Promise<{
-  relevantContextTokens: number;
-  processedRelevantContext: IContext;
-}> {
-  const {
-    locale = 'en',
-    chatHistory = [],
-    modelName,
-    contentList,
-    resources,
-    notes,
-    collections,
-  } = ctx.configSnapshot.configurable;
-
-  // configurable params
-  let remainingTokens = maxRelevantContextTokens;
+): Promise<IContext> {
+  const { contentList, resources, notes } = ctx.configSnapshot.configurable;
 
   let relevantContexts: IContext = {
     contentList: [],
@@ -227,80 +258,76 @@ export async function prepareRelevantContext(
     notes: [],
   };
 
-  // all tokens
-  const allSelectedContentTokens = countContentTokens(contentList);
-  const allNotesTokens = countNoteTokens(notes);
-  const allResourcesTokens = countResourceTokens(resources);
-
   // 1. selected content context
-  let selectedContentTokens = allSelectedContentTokens;
-  const selectedContentMaxTokens =
-    remainingTokens - allNotesTokens - allResourcesTokens > MAX_SELECTED_CONTENT_RATIO * remainingTokens
-      ? remainingTokens - allNotesTokens - allResourcesTokens
-      : MAX_SELECTED_CONTENT_RATIO * remainingTokens;
-  if (selectedContentTokens > selectedContentMaxTokens) {
-    const relevantContentList = await processSelectedContentWithSimilarity(
-      query,
-      contentList,
-      selectedContentMaxTokens,
-      ctx,
-    );
-    relevantContexts.contentList.concat(...relevantContentList);
-    selectedContentTokens = relevantContentList.reduce((sum, content) => sum + countToken(content?.content || ''), 0);
-  } else {
-    relevantContexts.contentList.concat(...contentList);
-  }
+  relevantContexts.contentList = await processSelectedContentWithSimilarity(query, contentList, Infinity, ctx);
 
   // 2. notes context
-  // remainingTokens = maxContextTokens - selectedContentTokens;
-  let notesTokens = allNotesTokens;
-  const notesMaxTokens =
-    remainingTokens - selectedContentTokens - allResourcesTokens > MAX_NOTES_RATIO * remainingTokens
-      ? remainingTokens - selectedContentTokens - allResourcesTokens
-      : MAX_NOTES_RATIO * remainingTokens;
-  if (notesTokens > notesMaxTokens) {
-    const relevantNotes = await processNotesWithSimilarity(query, notes, notesMaxTokens, ctx);
-    relevantContexts.notes.concat(...relevantNotes);
-    notesTokens = relevantNotes.reduce((sum, note) => sum + countToken(note?.note?.content || ''), 0);
-  } else {
-    relevantContexts.notes.concat(...notes);
-  }
+  relevantContexts.notes = await processNotesWithSimilarity(query, notes, Infinity, ctx);
 
   // 3. resources context
   // remainingTokens = maxContextTokens - notesTokens;
-  let resourcesTokens = allResourcesTokens;
-  const resourcesMaxTokens =
-    remainingTokens - selectedContentTokens - notesTokens > MAX_RESOURCES_RATIO * remainingTokens
-      ? remainingTokens - selectedContentTokens - notesTokens
-      : MAX_RESOURCES_RATIO * remainingTokens;
-  if (resourcesTokens > resourcesMaxTokens) {
-    const relevantResources = await processResourcesWithSimilarity(query, resources, resourcesMaxTokens, ctx);
-    relevantContexts.resources.concat(...relevantResources);
-    resourcesTokens = relevantResources.reduce(
-      (sum, resource) => sum + countToken(resource?.resource?.content || ''),
-      0,
-    );
-  } else {
-    relevantContexts.resources.concat(...resources);
-  }
+  relevantContexts.resources = await processResourcesWithSimilarity(query, resources, Infinity, ctx);
 
-  // 4. TODO: collections context, mainly for knowledge base search meat filter
+  return relevantContexts;
+}
 
-  // 5. TODO: whole space search context
+export async function prepareContainerLevelContext(
+  {
+    query,
+  }: {
+    query: string;
+  },
+  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
+): Promise<IContext> {
+  const chatMode = ctx.tplConfig?.chatMode?.value;
+  const enableSearchWholeSpace = chatMode === 'wholeSpace';
 
-  let totalTokens = selectedContentTokens + notesTokens + resourcesTokens;
-  if (totalTokens > remainingTokens) {
-    relevantContexts = truncateContext(relevantContexts, remainingTokens);
-    totalTokens =
-      countContentTokens(relevantContexts.contentList) +
-      countNoteTokens(relevantContexts.notes) +
-      countResourceTokens(relevantContexts.resources);
-  }
-
-  return {
-    processedRelevantContext: relevantContexts,
-    relevantContextTokens: totalTokens,
+  const processedContext: IContext = {
+    contentList: [],
+    resources: [],
+    notes: [],
+    collections: [],
   };
+  const { collections } = ctx.configSnapshot.configurable;
+
+  // 1. collections context, mainly for knowledge base search meat filter
+  const relevantResourcesOrNotesFromCollections = await processCollectionsWithSimilarity(query, collections, ctx);
+
+  // 2. whole space search context
+  const relevantResourcesOrNotesFromWholeSpace = enableSearchWholeSpace
+    ? await processWholeSpaceWithSimilarity(query, ctx)
+    : [];
+
+  // 3. 按照 resource 和 note 进行分组，去重，并放置在 processedContext
+  const uniqueResourceIds = new Set<string>();
+  const uniqueNoteIds = new Set<string>();
+
+  const addUniqueItem = (item: SkillContextResourceItem | SkillContextNoteItem) => {
+    if ('resource' in item && item.resource) {
+      const resourceId = item.resource.resourceId;
+      if (!uniqueResourceIds.has(resourceId)) {
+        uniqueResourceIds.add(resourceId);
+        processedContext.resources.push(item);
+      }
+    } else if ('note' in item && item.note) {
+      const noteId = item.note.noteId;
+      if (!uniqueNoteIds.has(noteId)) {
+        uniqueNoteIds.add(noteId);
+        processedContext.notes.push(item);
+      }
+    }
+  };
+
+  // 优先添加来自 collections 的项目
+  relevantResourcesOrNotesFromCollections.forEach(addUniqueItem);
+
+  // 然后添加来自 whole space 的项目
+  relevantResourcesOrNotesFromWholeSpace.forEach(addUniqueItem);
+
+  // 保留原始的 collections
+  processedContext.collections = collections;
+
+  return processedContext;
 }
 
 export function mergeAndDeduplicateContexts(context1: IContext, context2: IContext): IContext {
