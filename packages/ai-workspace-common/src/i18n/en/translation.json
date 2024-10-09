@@ -693,7 +693,7 @@
         "month": "Month",
         "year": "Year",
         "forFree": "Free",
-        "resetAt": "Will reset at {{date}}"
+        "resetAt": "reset at {{date}}"
       }
     },
 

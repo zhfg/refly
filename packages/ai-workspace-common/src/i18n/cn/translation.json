@@ -691,7 +691,7 @@
         "month": "月",
         "year": "年",
         "forFree": "免费",
-        "resetAt": "将于{{date}}重置"
+        "resetAt": "将于 {{date}} 重置"
       }
     },
     "action": {

@@ -13,8 +13,7 @@
     "lint": "turbo run lint",
     "test": "pnpm -r --if-present test",
     "test:unit": "pnpm -r --if-present test:unit",
-    "test:integration": "pnpm -r --if-present test:integration",
-    "prepare": "husky"
+    "test:integration": "pnpm -r --if-present test:integration"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.0",

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { Button, Progress, Tooltip, Tag, Spin, Message as message, Skeleton, Space } from '@arco-design/web-react';
+import { Button, Progress, Tooltip, Tag, Spin, Message as message, Space } from '@arco-design/web-react';
 import { HiOutlineQuestionMarkCircle } from 'react-icons/hi2';
 import { HiOutlineExternalLink } from 'react-icons/hi';
 import { RiBillLine } from 'react-icons/ri';
@@ -162,7 +162,7 @@ export const Subscription = () => {
             />
           ))}
         </div>
-        <Space size="large" style={{ marginTop: '8px' }}>
+        <Space size="medium" style={{ marginTop: '8px' }}>
           {categories.map((category, index) => (
             <div key={index} className="file-storage-usage-bar-category">
               <div
@@ -171,7 +171,7 @@ export const Subscription = () => {
                   backgroundColor: category.color,
                 }}
               />
-              <span>{category.name}</span>
+              <span className="file-storage-usage-bar-category-name">{category.name}</span>
             </div>
           ))}
         </Space>
@@ -188,77 +188,70 @@ export const Subscription = () => {
   }, []);
 
   return (
-    <div className="subscription">
-      {isRequest ? (
-        <>
-          <Skeleton style={{ marginBottom: 12 }}></Skeleton>
-          <Skeleton></Skeleton>
-        </>
-      ) : (
-        <>
-          <div className={`subscription-plan ${subscriptionStatus === 'free' ? 'free' : ''}`}>
-            <div className="subscription-plan-info">
-              <div className="subscription-plan-info-title">{t('settings.subscription.currentPlan')}</div>
-              <div className="subscription-plan-info-status">
-                {t(`settings.subscription.subscriptionStatus.${subscriptionStatus}`)}
-                {userStore.userProfile?.subscription?.interval && (
-                  <Tag className="interval" color="blue">
-                    {t(`settings.subscription.subscribe.${userStore.userProfile?.subscription?.interval}Plan`)}
-                  </Tag>
-                )}
-              </div>
+    <Spin loading={isRequest}>
+      <div className="subscription">
+        <div className={`subscription-plan ${subscriptionStatus === 'free' ? 'free' : ''}`}>
+          <div className="subscription-plan-info">
+            <div className="subscription-plan-info-title">{t('settings.subscription.currentPlan')}</div>
+            <div className="subscription-plan-info-status">
+              {t(`settings.subscription.subscriptionStatus.${subscriptionStatus}`)}
+              {userStore.userProfile?.subscription?.interval && (
+                <Tag className="interval" color="blue">
+                  {t(`settings.subscription.subscribe.${userStore.userProfile?.subscription?.interval}Plan`)}
+                </Tag>
+              )}
             </div>
-            {subscriptionStatus === 'free' && (
-              <Button type="primary" className="subscribe-btn" onClick={() => setSubscribeModalVisible(true)}>
-                {t('settings.subscription.subscribeNow')}
-              </Button>
-            )}
           </div>
-
-          <div className="subscription-usage">
-            <UsageItem
-              title={t('settings.subscription.t1TokenUsed')}
-              description={t('settings.subscription.t1TokenUsedDescription')}
-              used={subscriptionUsage?.t1TokenUsed}
-              quota={subscriptionUsage?.t1TokenQuota}
-              endAt={subscriptionUsage?.endAt}
-              type="t1Token"
-            />
-            <UsageItem
-              title={t('settings.subscription.t2TokenUsed')}
-              description={t('settings.subscription.t2TokenUsedDescription')}
-              used={subscriptionUsage?.t2TokenUsed}
-              quota={subscriptionUsage?.t2TokenQuota}
-              endAt={subscriptionUsage?.endAt}
-              type="t2Token"
-            />
-            <UsageItem
-              title={t('settings.subscription.subscribe.vectorStorage')}
-              description={t('settings.subscription.subscribe.tooltip.vectorStorage')}
-              used={storageUsage?.vectorStorageUsed}
-              quota={storageUsage?.vectorStorageQuota}
-              type="vectorStorage"
-            />
-            <FileStorageUsageItem storage={storageUsage} />
-          </div>
-
-          {subscriptionStatus !== 'free' && (
-            <div className="subscription-management-wrapper">
-              <Spin loading={loading} style={{ width: '100%' }}>
-                <div className="subscription-management" onClick={createPortalSession}>
-                  <div className="subscription-management-left">
-                    <RiBillLine style={{ marginRight: 8 }} />
-                    {t('settings.subscription.subscriptionManagement')}
-                  </div>
-                  <HiOutlineExternalLink className="subscription-management-right" />
-                </div>
-              </Spin>
-            </div>
+          {subscriptionStatus === 'free' && (
+            <Button type="primary" className="subscribe-btn" onClick={() => setSubscribeModalVisible(true)}>
+              {t('settings.subscription.subscribeNow')}
+            </Button>
           )}
-        </>
-      )}
+        </div>
 
-      <SubscribeModal visible={subscribeModalVisible} setVisible={setSubscribeModalVisible} />
-    </div>
+        <div className="subscription-usage">
+          <UsageItem
+            title={t('settings.subscription.t1TokenUsed')}
+            description={t('settings.subscription.t1TokenUsedDescription')}
+            used={subscriptionUsage?.t1TokenUsed}
+            quota={subscriptionUsage?.t1TokenQuota}
+            endAt={subscriptionUsage?.endAt}
+            type="t1Token"
+          />
+          <UsageItem
+            title={t('settings.subscription.t2TokenUsed')}
+            description={t('settings.subscription.t2TokenUsedDescription')}
+            used={subscriptionUsage?.t2TokenUsed}
+            quota={subscriptionUsage?.t2TokenQuota}
+            endAt={subscriptionUsage?.endAt}
+            type="t2Token"
+          />
+          <UsageItem
+            title={t('settings.subscription.subscribe.vectorStorage')}
+            description={t('settings.subscription.subscribe.tooltip.vectorStorage')}
+            used={storageUsage?.vectorStorageUsed}
+            quota={storageUsage?.vectorStorageQuota}
+            type="vectorStorage"
+          />
+          <FileStorageUsageItem storage={storageUsage} />
+        </div>
+
+        {subscriptionStatus !== 'free' && (
+          <div className="subscription-management-wrapper">
+            <Spin loading={loading} style={{ width: '100%' }}>
+              <div className="subscription-management" onClick={createPortalSession}>
+                <div className="subscription-management-left">
+                  <RiBillLine style={{ marginRight: 8 }} />
+                  {t('settings.subscription.subscriptionManagement')}
+                </div>
+                <HiOutlineExternalLink className="subscription-management-right" />
+              </div>
+            </Spin>
+          </div>
+        )}
+
+        <SubscribeModal visible={subscribeModalVisible} setVisible={setSubscribeModalVisible} />
+      </div>
+    </Spin>
   );
 };
