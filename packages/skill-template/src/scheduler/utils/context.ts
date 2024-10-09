@@ -13,10 +13,9 @@ import {
   processResourcesWithSimilarity,
   processMentionedContextWithSimilarity,
 } from './semanticSearch';
-import { BaseSkill, SkillRunnableConfig } from '@/base';
+import { BaseSkill, SkillRunnableConfig } from '../../base';
 import { truncateContext, truncateText } from './truncator';
 import { concatContextToStr } from './summarizer';
-import { webSearch } from '../skills/webSearch';
 import { SkillContextContentItem, SkillContextNoteItem, SkillContextResourceItem, Source } from '@refly/openapi-schema';
 import { uniqBy } from 'lodash';
 
@@ -115,7 +114,15 @@ export async function prepareWebSearchContext(
     notes: [],
     webSearchSources: [],
   };
-  const webSearchSources = await webSearch(query, ctx);
+  const res = await ctx.ctxThis.engine.service.webSearch(ctx.configSnapshot.user, {
+    query,
+    limit: 10,
+  });
+  const webSearchSources = res.data.map((item) => ({
+    url: item.url,
+    title: item.name,
+    pageContent: item.snippet,
+  }));
   processedWebSearchContext.webSearchSources = webSearchSources;
 
   return {
