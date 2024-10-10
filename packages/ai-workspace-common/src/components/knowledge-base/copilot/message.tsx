@@ -147,7 +147,8 @@ export const AssistantMessage = memo(
               <span>
                 {item?.modelName}:{' '}
                 {t('copilot.tokenUsage', {
-                  count: item?.inputTokens + item?.outputTokens,
+                  inputCount: item?.inputTokens,
+                  outputCount: item?.outputTokens,
                 })}
               </span>
             </div>

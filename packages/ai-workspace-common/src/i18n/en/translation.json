@@ -280,7 +280,7 @@
   "loggedHomePage": {
     "newThreadText": "New Thread",
     "quickSearch": {
-      "skill": "Skills",
+      "skills": "Skills",
       "note": "Notes",
       "newNote": "Create New Note",
       "readResource": "Read Resources",
@@ -298,7 +298,10 @@
         "onlineSearch": "AI Online Search",
         "collectionSearch": "AI Knowledge Base Search",
         "showAll": "View All {{heading}}"
-      }
+      },
+      "basedOn": "Based on",
+      "execute": "content execution",
+      "skill": "skill"
     },
     "homePage": {
       "title": "Where knowledge thrives",
@@ -972,7 +975,7 @@
       "errorTipTitle": "Send Failed",
       "errorTip": "Please adjust the skill configuration and try again"
     },
-    "tokenUsage": "Input {{count}}, Output {{count}}",
+    "tokenUsage": "Input {{inputCount}}, Output {{outputCount}}",
     "reflyAssistant": "Knowledge Curator",
     "message": {
       "copy": "Copy",
@@ -991,6 +994,23 @@
     },
     "contextItem": {
       "current": "Current "
+    },
+    "contentSelector": {
+      "openForWeb": "Enable content selection for questions, and the note is now in read-only mode",
+      "closeForWeb": "Close the selector, and the note is now in edit mode",
+      "open": "Content selector is enabled",
+      "close": "Content selector is disabled"
+    },
+    "convListModal": {
+      "title": "Threads"
+    },
+    "kbListModal": {
+      "title": "Knowledge Bases"
+    },
+    "sourceListModal": {
+      "title": "Result Sources",
+      "moreSources": "View More {{count}} Sources",
+      "searchPlaceholder": "Search Sources..."
     }
   },
   "hooks": {

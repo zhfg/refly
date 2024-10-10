@@ -123,14 +123,6 @@ export const AICopilot = memo((props: AICopilotProps) => {
   const resId = searchParams.get('resId');
   const { resetState } = useResetState();
 
-  // const actualChatContainerHeight = inputContainerHeight;
-
-  // const actualOperationContainerHeight =
-  //   (skillStore.selectedSkill
-  //     ? selectedSkillContainerHeight
-  //     : actualChatContainerHeight + skillContainerHeight + 2 * chatContainerPadding) +
-  //   (computedShowContextCard ? contextCardHeight : 0);
-
   const { t, i18n } = useTranslation();
   const uiLocale = i18n?.languages?.[0] as LOCALE;
   const outputLocale = userStore?.localSettings?.outputLocale || 'en';
@@ -275,13 +267,15 @@ export const AICopilot = memo((props: AICopilotProps) => {
         {!disable && <CopilotOperationModule ref={copilotOperationModuleRef} source={source} />}
       </div>
 
-      {knowledgeBaseStore?.convModalVisible ? <ConvListModal title="会话库" classNames="conv-list-modal" /> : null}
+      {knowledgeBaseStore?.convModalVisible ? (
+        <ConvListModal title={t('copilot.convListModal.title')} classNames="conv-list-modal" />
+      ) : null}
       {knowledgeBaseStore?.kbModalVisible && knowledgeBaseStore.actionSource === ActionSource.Conv ? (
-        <KnowledgeBaseListModal title="知识库" classNames="kb-list-modal" />
+        <KnowledgeBaseListModal title={t('copilot.kbListModal.title')} classNames="kb-list-modal" />
       ) : null}
       {knowledgeBaseStore?.sourceListModalVisible ? (
         <SourceListModal
-          title={`结果来源 (${knowledgeBaseStore?.tempConvResources?.length || 0})`}
+          title={`${t('copilot.sourceListModal.title')} (${knowledgeBaseStore?.tempConvResources?.length || 0})`}
           classNames="source-list-modal"
           resources={knowledgeBaseStore?.tempConvResources || []}
         />

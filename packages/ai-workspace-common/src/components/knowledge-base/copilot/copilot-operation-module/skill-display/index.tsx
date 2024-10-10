@@ -23,7 +23,7 @@ export const SkillDisplay = memo(({ source }: { source: string }) => {
     getResizeSelector: () => getPopupContainer().querySelectorAll('.skill-item') as NodeListOf<HTMLElement>,
     initialContainCnt: 3,
     paddingSize: 0,
-    placeholderWidth: 100,
+    placeholderWidth: 95,
   });
 
   const { handleGetSkillInstances, handleGetSkillTemplates } = useSkillManagement();

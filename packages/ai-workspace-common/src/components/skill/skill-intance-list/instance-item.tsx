@@ -117,12 +117,12 @@ export const InstanceItem = (props: InstanceItemProps) => {
         )}
 
         <div className="instance-item__action">
-          <Button
+          {/* <Button
             icon={<HiOutlinePlay />}
             type="text"
             onClick={(e) => handleClickInvoke(e)}
             className="instance-item__action-icon"
-          ></Button>
+          ></Button> */}
 
           {source === 'skill-management-modal' && (
             <Tooltip

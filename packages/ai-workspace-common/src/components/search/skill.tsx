@@ -11,6 +11,7 @@ import { Item } from './item';
 import { SkillInstance, SkillMeta } from '@refly/openapi-schema';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useBigSearchQuickAction } from '@refly-packages/ai-workspace-common/hooks/use-big-search-quick-action';
+import { useTranslation } from 'react-i18next';
 
 export function Skill({
   activeValue,
@@ -26,14 +27,14 @@ export function Skill({
   const searchStore = useSearchStore();
   const skillStore = useSkillStore();
   const { triggerSkillQuickAction } = useBigSearchQuickAction();
-
+  const { t } = useTranslation();
   useEffect(() => {
     setValue(`refly-built-in-execute_${selectedSkill?.skillId}`);
   }, [selectedSkill?.skillId]);
 
   return (
     <>
-      <Command.Group heading="建议">
+      <Command.Group heading={t('loggedHomePage.quickSearch.home.heading')}>
         <Item
           value={`refly-built-in-execute_${selectedSkill?.skillId}`}
           keywords={[`execute_${selectedSkill?.displayName}`]}
@@ -45,9 +46,10 @@ export function Skill({
           activeValue={activeValue}
         >
           <IconMessage style={{ fontSize: 12 }} />
-          基于「 <span className="font-bold">{searchValue || '...'}</span> 」内容执行{' '}
+          {t('loggedHomePage.quickSearch.basedOn')}「 <span className="font-bold">{searchValue || '...'}</span> 」
+          {t('loggedHomePage.quickSearch.execute')}{' '}
           <span className="font-bold" dangerouslySetInnerHTML={{ __html: selectedSkill?.displayName || '...' }}></span>
-          技能
+          {t('loggedHomePage.quickSearch.skill')}
         </Item>
       </Command.Group>
     </>

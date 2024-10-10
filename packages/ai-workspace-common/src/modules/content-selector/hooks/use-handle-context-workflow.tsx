@@ -38,14 +38,14 @@ export const useHandleContextWorkflow = () => {
       // 将 note 切入只读模式
       const { currentNote } = useNoteStore.getState();
       noteStore.updateCurrentNote({ ...currentNote, readOnly: false });
-      message.info(runtime === 'web' ? '关闭选择器, 笔记已恢复编辑' : '已关闭内容选择器');
+      message.info(runtime === 'web' ? t('copilot.contentSelector.closeForWeb') : t('copilot.contentSelector.close'));
     } else {
       handleInitContentSelectorListener();
 
       // 将 note 切入只读模式
       const { currentNote } = useNoteStore.getState();
       noteStore.updateCurrentNote({ ...currentNote, readOnly: true });
-      message.info(runtime === 'web' ? '开启选择内容提问, 笔记已进入只读模式' : '已开启内容选择器');
+      message.info(runtime === 'web' ? t('copilot.contentSelector.openForWeb') : t('copilot.contentSelector.open'));
     }
   };
 

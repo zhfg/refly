@@ -119,46 +119,31 @@ export const ContextManager = () => {
   const currentResource = useKnowledgeBaseStore((state) => state.currentResource);
   const currentNote = useNoteStore((state) => state.currentNote);
 
-  const buildEnvContext = (currentKnowledgeBase: Collection, currentResource: Resource, currentNote: Note) => {
-    let envContextArr: Mark[] = [];
+  const buildEnvContext = (data: Collection | Resource | Note, type: 'collection' | 'resource' | 'note'): Mark[] => {
+    if (!data) return [];
 
-    if (currentResource?.resourceId) {
-      envContextArr.push({
-        title: currentResource?.title,
-        type: 'resource',
-        id: currentResource?.resourceId,
-        entityId: currentResource.resourceId,
-        data: currentResource.content,
+    const typeMap = {
+      resource: 'resourceId',
+      collection: 'collectionId',
+      note: 'noteId',
+    };
+
+    const idKey = typeMap[type];
+    const id = data[idKey];
+
+    if (!id) return [];
+
+    return [
+      {
+        title: data.title,
+        type,
+        id,
+        entityId: id,
+        data: type === 'collection' ? (data as Collection).description : (data as Resource | Note).content,
         onlyForCurrentContext: true,
         isCurrentContext: true,
-      });
-    }
-
-    if (currentKnowledgeBase?.collectionId) {
-      envContextArr.push({
-        title: currentKnowledgeBase?.title,
-        type: 'collection',
-        id: currentKnowledgeBase?.collectionId,
-        entityId: currentKnowledgeBase.collectionId,
-        data: currentKnowledgeBase.description,
-        onlyForCurrentContext: true,
-        isCurrentContext: true,
-      });
-    }
-
-    if (currentNote?.noteId) {
-      envContextArr.push({
-        title: currentNote?.title,
-        type: 'note',
-        id: currentNote?.noteId,
-        entityId: currentNote.noteId,
-        data: currentNote.content,
-        onlyForCurrentContext: true,
-        isCurrentContext: true,
-      });
-    }
-
-    return envContextArr;
+      },
+    ];
   };
 
   const removeNotCurrentContext = (type: string) => {
@@ -177,11 +162,10 @@ export const ContextManager = () => {
   const handleAddCurrentContext = (newMark: Mark) => {
     removeNotCurrentContext(newMark.type);
 
-    // 检查项目是否已经存在于 store 中
     const existingMark = useContextPanelStore
       .getState()
       .currentSelectedMarks.find((mark) => mark.id === newMark.id && mark.type === newMark.type);
-    console.log('envContext newMark', newMark, existingMark);
+
     if (!existingMark) {
       addMark(newMark);
     } else {
@@ -190,18 +174,27 @@ export const ContextManager = () => {
     }
   };
 
+  const updateContext = (item: any, type: 'collection' | 'resource' | 'note') => {
+    const envContext = buildEnvContext(item, type);
+    const contextItem = envContext?.[0];
+    if (contextItem) {
+      handleAddCurrentContext(contextItem);
+    } else {
+      removeNotCurrentContext(type);
+    }
+  };
+
   useEffect(() => {
-    const envContext = buildEnvContext(currentKnowledgeBase, currentResource, currentNote);
-    console.log('envContext', envContext);
-    ['collection', 'resource', 'note'].forEach((type) => {
-      const item = envContext.find((item) => item.type === type);
-      if (item) {
-        handleAddCurrentContext(item);
-      } else {
-        removeNotCurrentContext(type);
-      }
-    });
-  }, [currentKnowledgeBase, currentResource, currentNote]);
+    updateContext(currentKnowledgeBase, 'collection');
+  }, [currentKnowledgeBase?.collectionId]);
+
+  useEffect(() => {
+    updateContext(currentResource, 'resource');
+  }, [currentResource?.resourceId]);
+
+  useEffect(() => {
+    updateContext(currentNote, 'note');
+  }, [currentNote?.noteId]);
 
   return (
     <div className="context-manager">

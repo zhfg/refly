@@ -182,7 +182,7 @@ export const Search = (props: SearchProps) => {
   const renderData: RenderItem[] = [
     {
       domain: 'skill',
-      heading: t('loggedHomePage.quickSearch.skill'),
+      heading: t('loggedHomePage.quickSearch.skills'),
       action: false, // 是否开启 action
       data: searchStore.searchedSkills || [],
       icon: <IconRobot style={{ fontSize: 12 }} />,
