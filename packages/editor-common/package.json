@@ -4,8 +4,6 @@
   "description": "",
   "main": "src/index.ts",
   "scripts": {
-    "prebuild": "rimraf dist",
-    "build": "echo \"No build script\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

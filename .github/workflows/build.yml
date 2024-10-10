@@ -35,6 +35,9 @@ jobs:
 
       - name: Build
         run: pnpm build
+        env:
+          TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
 
       - name: Create Sentry release
         if: inputs.environment == 'production'
@@ -46,15 +49,12 @@ jobs:
         with:
           environment: ${{ inputs.environment }}
 
-  deploy-web:
-    name: Deploy Web
-    if: inputs.web_deploy_project != ''
-    runs-on: ubuntu-latest
-    steps:
-      - name: Remove source map files
+      - name: Remove web source map files
+        if: inputs.web_deploy_project != ''
         run: find apps/web/dist/assets -name "*.map" -type f -delete
 
-      - name: Deploy to Cloudflare Pages
+      - name: Deploy web to Cloudflare Pages
+        if: inputs.web_deploy_project != ''
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
