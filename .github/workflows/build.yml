@@ -2,6 +2,10 @@ name: Build
 
 on:
   workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
 
 jobs:
   build:
@@ -28,3 +32,13 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      - name: Create Sentry release
+        if: inputs.environment == 'production'
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: refly-ai
+          SENTRY_PROJECT: web
+        with:
+          environment: ${{ inputs.environment }}
