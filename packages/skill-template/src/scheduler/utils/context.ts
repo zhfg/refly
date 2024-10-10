@@ -179,6 +179,7 @@ export async function prepareMentionedContext(
     resources: [],
     notes: [],
     collections: [],
+    ...mentionedContext,
   };
 
   const allMentionedContextTokens = countContextTokens(mentionedContext);
@@ -188,6 +189,15 @@ export async function prepareMentionedContext(
       mentionedContextTokens: 0,
       processedMentionedContext: mentionedContext,
     };
+  } else {
+    // if mentioned context is not empty, we need to mutate the metadata of the mentioned context
+    const { contentList = [], resources = [], notes = [] } = ctx.configSnapshot.configurable;
+    const context: IContext = {
+      contentList,
+      resources,
+      notes,
+    };
+    mutateContextMetadata(mentionedContext, context);
   }
 
   let mentionedContextTokens = allMentionedContextTokens;
@@ -257,7 +267,7 @@ export async function prepareRelevantContext(
   },
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<IContext> {
-  const { contentList, resources, notes } = ctx.configSnapshot.configurable;
+  const { contentList = [], resources = [], notes = [] } = ctx.configSnapshot.configurable;
 
   let relevantContexts: IContext = {
     contentList: [],
@@ -410,3 +420,53 @@ export function flattenContextToSources(context: IContext): Source[] {
 
   return sources;
 }
+
+export const mutateContextMetadata = (mentionedContext: IContext, originalContext: IContext): IContext => {
+  // Process notes
+  mentionedContext.notes.forEach((mentionedNote) => {
+    const index = originalContext.notes.findIndex((n) => n.note.noteId === mentionedNote.note.noteId);
+    if (index !== -1) {
+      originalContext.notes[index] = {
+        ...originalContext.notes[index],
+        metadata: {
+          ...originalContext.notes[index].metadata,
+          useWholeContent: mentionedNote.metadata?.useWholeContent,
+        },
+      };
+    }
+  });
+
+  // Process resources
+  mentionedContext.resources.forEach((mentionedResource) => {
+    const index = originalContext.resources.findIndex(
+      (r) => r.resource.resourceId === mentionedResource.resource.resourceId,
+    );
+    if (index !== -1) {
+      originalContext.resources[index] = {
+        ...originalContext.resources[index],
+        metadata: {
+          ...originalContext.resources[index].metadata,
+          useWholeContent: mentionedResource.metadata?.useWholeContent,
+        },
+      };
+    }
+  });
+
+  // Process contentList
+  mentionedContext.contentList.forEach((mentionedContent) => {
+    const index = originalContext.contentList.findIndex(
+      (c) => c.metadata.entityId === mentionedContent.metadata.entityId,
+    );
+    if (index !== -1) {
+      originalContext.contentList[index] = {
+        ...originalContext.contentList[index],
+        metadata: {
+          ...originalContext.contentList[index].metadata,
+          useWholeContent: mentionedContent.metadata?.useWholeContent,
+        },
+      };
+    }
+  });
+
+  return originalContext;
+};

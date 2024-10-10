@@ -41,6 +41,7 @@ export interface MentionedContextItem {
   entityId?: string;
   url?: string;
   title?: string;
+  useWholeContent?: boolean;
 }
 
 export interface QueryAnalysis {

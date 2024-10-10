@@ -206,10 +206,10 @@ function truncateContextWithPriority(
 
   // Then, add combined items (resources and notes)
   for (const item of combinedItems) {
-    const content = item.type === 'resource' ? item.resource?.content : item.note?.content;
+    const content = 'resource' in item ? item.resource?.content : item.note?.content;
     const tokens = countToken(content);
     if (remainingTokens >= tokens) {
-      if (item.type === 'resource') {
+      if ('resource' in item) {
         truncatedContext.resources.push(item);
       } else {
         truncatedContext.notes.push(item);

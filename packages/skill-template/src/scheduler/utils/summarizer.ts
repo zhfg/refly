@@ -25,6 +25,7 @@ export const concatChatHistoryToStr = (messages: BaseMessage[]) => {
   return chatHistoryStr;
 };
 
+// TODO: should replace id with `type-index` for better llm extraction
 // citationIndex for each context item is used for LLM to cite the context item in the final answer
 export const concatContextToStr = (context: IContext) => {
   const { contentList = [], resources = [], notes = [], webSearchSources = [] } = context;
