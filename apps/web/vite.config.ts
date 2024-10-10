@@ -1,4 +1,3 @@
-import { sentryVitePlugin } from "@sentry/vite-plugin"
 import { defineConfig, searchForWorkspaceRoot, UserConfig } from "vite"
 import react from "@vitejs/plugin-react"
 import path from "path"
@@ -8,9 +7,7 @@ import tsconfigPaths from "vite-tsconfig-paths"
 import { codeInspectorPlugin } from "code-inspector-plugin"
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
-  const isDev = mode === "development"
-
+export default defineConfig(() => {
   return {
     plugins: [
       react(),
@@ -27,15 +24,6 @@ export default defineConfig(({ mode }) => {
         bundler: "vite",
         editor: "code",
       }),
-      ...(isDev
-        ? []
-        : [
-            sentryVitePlugin({
-              org: "refly-ai",
-              project: "web",
-              errorHandler: err => console.warn(err),
-            }),
-          ]),
     ],
     css: {
       postcss,
