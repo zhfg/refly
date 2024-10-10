@@ -84,7 +84,6 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
       pagination={false}
       dataSource={dataList}
       scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
-      loading={isRequesting}
       render={(item: Collection, key) => (
         <List.Item
           key={item?.collectionId + key}

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 import { Conversation, InvokeSkillRequest, ChatTask as Task } from '@refly/openapi-schema';
 import { ConversationOperation } from '@refly/common-types';
 
@@ -75,3 +76,7 @@ export const useTaskStore = create<TaskState>()(
     setTask: (val: InvokeSkillRequest) => set((state) => ({ ...state, task: val })),
   })),
 );
+
+export const useTaskStoreShallow = <T>(selector: (state: TaskState) => T) => {
+  return useTaskStore(useShallow(selector));
+};

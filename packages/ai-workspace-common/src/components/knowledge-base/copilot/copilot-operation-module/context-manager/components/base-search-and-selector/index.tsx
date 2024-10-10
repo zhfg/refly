@@ -92,8 +92,6 @@ export const BaseSearchAndSelector = ({
   // stores
   const searchStore = useSearchStore();
   // hooks
-  // notes
-  const { handleInitEmptyNote } = useAINote();
 
   // 整体处理
   const { jumpToKnowledgeBase, jumpToNote, jumpToReadResource, jumpToConv } = useKnowledgeBaseJumpNewPath();

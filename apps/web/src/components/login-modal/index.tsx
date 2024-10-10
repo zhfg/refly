@@ -1,23 +1,23 @@
-import { Button, Modal, Divider, Typography } from '@arco-design/web-react'
-import { HiLanguage } from 'react-icons/hi2'
-import { Link } from '@refly-packages/ai-workspace-common/utils/router'
+import { Button, Modal, Divider, Typography } from "@arco-design/web-react"
+import { HiLanguage } from "react-icons/hi2"
+import { Link } from "@refly-packages/ai-workspace-common/utils/router"
 
 // stores
-import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user'
+import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
 
 // assets
-import Logo from '@/assets/logo.svg'
-import Google from '@/assets/google.svg'
-import GitHub from '@/assets/github-mark.svg'
+import Logo from "@/assets/logo.svg"
+import Google from "@/assets/google.svg"
+import GitHub from "@/assets/github-mark.svg"
 
 // styles
-import './index.scss'
-import { getServerOrigin, getClientOrigin } from '@refly/utils/url'
-import { useTranslation } from 'react-i18next'
-import { UILocaleList } from '@refly-packages/ai-workspace-common/components/ui-locale-list'
+import "./index.scss"
+import { getServerOrigin, getClientOrigin } from "@refly/utils/url"
+import { useTranslation } from "react-i18next"
+import { UILocaleList } from "@refly-packages/ai-workspace-common/components/ui-locale-list"
 
 export const LoginModal = (props: { visible?: boolean; from?: string }) => {
-  const userStore = useUserStore(state => ({
+  const userStore = useUserStoreShallow(state => ({
     setIsLogin: state.setIsLogin,
     setLoginProvider: state.setLoginProvider,
     isLogin: state.isLogin,
@@ -34,7 +34,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
    * 2. After logging in, use Chrome's API to send a message to the extension. Upon receiving the message, reload the page to get the login status, then persist it
    * 3. Subsequently, make requests with the cookie or login status
    */
-  const handleLogin = (provider: 'github' | 'google') => {
+  const handleLogin = (provider: "github" | "google") => {
     userStore.setIsLogin(true)
     userStore.setLoginProvider(provider)
     location.href = `${getServerOrigin()}/v1/auth/${provider}`
@@ -49,7 +49,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
       closable: false,
       maskClosable: false,
       maskStyle: {
-        backgroundColor: '#F3F3EE',
+        backgroundColor: "#F3F3EE",
         opacity: 1,
       },
     }
@@ -82,68 +82,68 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
           <span
             style={{
               fontSize: 20,
-              fontWeight: 'bold',
-              display: 'inline-block',
+              fontWeight: "bold",
+              display: "inline-block",
               marginLeft: 8,
             }}>
             Refly
           </span>
         </div>
         <div className="login-hint-text">
-          {t('landingPage.loginModal.title')}
+          {t("landingPage.loginModal.title")}
         </div>
         <div className="login-btn-group">
           <Button
             className="login-btn"
             type="outline"
-            onClick={() => handleLogin('github')}
+            onClick={() => handleLogin("github")}
             style={{ width: 260, height: 32 }}
-            loading={userStore.isLogin && userStore.loginProvider === 'github'}
+            loading={userStore.isLogin && userStore.loginProvider === "github"}
             disabled={
-              userStore.isLogin && userStore.loginProvider !== 'github'
+              userStore.isLogin && userStore.loginProvider !== "github"
             }>
             <img src={GitHub} alt="github" />
-            {userStore.isLogin && userStore.loginProvider === 'github'
-              ? t('landingPage.loginModal.loggingStatus')
-              : t('landingPage.loginModal.loginBtn.github')}
+            {userStore.isLogin && userStore.loginProvider === "github"
+              ? t("landingPage.loginModal.loggingStatus")
+              : t("landingPage.loginModal.loginBtn.github")}
           </Button>
           <Button
             className="login-btn"
             type="outline"
-            onClick={() => handleLogin('google')}
+            onClick={() => handleLogin("google")}
             style={{ width: 260, height: 32 }}
-            loading={userStore.isLogin && userStore.loginProvider === 'google'}
+            loading={userStore.isLogin && userStore.loginProvider === "google"}
             disabled={
-              userStore.isLogin && userStore.loginProvider !== 'google'
+              userStore.isLogin && userStore.loginProvider !== "google"
             }>
             <img src={Google} alt="google" />
-            {userStore.isLogin && userStore.loginProvider === 'google'
-              ? t('landingPage.loginModal.loggingStatus')
-              : t('landingPage.loginModal.loginBtn.google')}
+            {userStore.isLogin && userStore.loginProvider === "google"
+              ? t("landingPage.loginModal.loggingStatus")
+              : t("landingPage.loginModal.loginBtn.google")}
           </Button>
         </div>
         <Divider></Divider>
         <Typography.Paragraph className="term-text">
-          {t('landingPage.loginModal.utilText')}
+          {t("landingPage.loginModal.utilText")}
           <Link
             to={`${getClientOrigin(true)}/terms`}
-            style={{ margin: '0 4px' }}
+            style={{ margin: "0 4px" }}
             onClick={() => {
               userStore.setLoginModalVisible(false)
             }}>
             <Typography.Text underline>
-              {t('landingPage.loginModal.terms')}
+              {t("landingPage.loginModal.terms")}
             </Typography.Text>
           </Link>
-          {t('landingPage.loginModal.and')}
+          {t("landingPage.loginModal.and")}
           <Link
             to={`${getClientOrigin(true)}/privacy`}
-            style={{ margin: '0 4px' }}
+            style={{ margin: "0 4px" }}
             onClick={() => {
               userStore.setLoginModalVisible(false)
             }}>
             <Typography.Text underline>
-              {t('landingPage.loginModal.privacyPolicy')}
+              {t("landingPage.loginModal.privacyPolicy")}
             </Typography.Text>
           </Link>
         </Typography.Paragraph>

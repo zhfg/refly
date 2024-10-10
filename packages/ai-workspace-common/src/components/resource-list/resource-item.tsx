@@ -13,12 +13,10 @@ import { IndexStatus } from '@refly/openapi-schema';
 import { safeParseURL } from '@refly/utils/url';
 import { Markdown } from '../markdown';
 import classNames from 'classnames';
-import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
 import { memo, useState, useEffect } from 'react';
-import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 export const ResourceItem = memo(
   (props: {
@@ -31,7 +29,7 @@ export const ResourceItem = memo(
     canDelete?: boolean;
     small?: boolean;
     btnProps?: { defaultActiveKeys: string[] };
-    handleItemClick: ({ resourceId, collectionId }: { resourceId: string; collectionId: string }) => void;
+    handleItemClick: (resource: Resource) => void;
     handleItemDelete?: (resource: RemoveResourceFromCollectionRequest) => void;
   }) => {
     const {
@@ -45,7 +43,6 @@ export const ResourceItem = memo(
       collectionId,
       small = false,
     } = props;
-    const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
     const [searchParams] = useSearchParams();
     const resId = searchParams.get('resId') as string;
     const [selectedResId, setSelectedResId] = useState<string | null>(resId);
@@ -93,10 +90,7 @@ export const ResourceItem = memo(
         }
         key={index}
         onClick={() => {
-          props?.handleItemClick({
-            collectionId: collectionId as string,
-            resourceId: item?.resourceId as string,
-          });
+          props?.handleItemClick(item);
         }}
       >
         <div className="knowledge-base-directory-site-intro">

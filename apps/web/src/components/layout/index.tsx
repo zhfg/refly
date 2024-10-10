@@ -3,7 +3,7 @@ import { Layout } from "@arco-design/web-react"
 import { SiderLayout } from "./sider"
 
 import { LoginModal } from "@/components/login-modal"
-import { useUserStore } from "@refly-packages/ai-workspace-common/stores/user"
+import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
 import { BigSearchModal } from "@refly-packages/ai-workspace-common/components/search/modal"
 import { ImportResourceModal } from "@refly-packages/ai-workspace-common/components/import-resource"
 import { NewKnowledgeModal } from "@refly-packages/ai-workspace-common/components/knowledge-base/new-knowledge-modal"
@@ -21,7 +21,9 @@ interface AppLayoutProps {
 
 export const AppLayout = (props: AppLayoutProps) => {
   // stores
-  const userStore = useUserStore()
+  const userStore = useUserStoreShallow(state => ({
+    loginModalVisible: state.loginModalVisible,
+  }))
   const importResourceStore = useImportResourceStore()
   const importKnowledgeModal = useImportKnowledgeModal()
 

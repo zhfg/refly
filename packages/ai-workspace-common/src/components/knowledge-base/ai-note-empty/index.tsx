@@ -5,26 +5,34 @@ import { NoteList } from '@refly-packages/ai-workspace-common/components/workspa
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useTranslation } from 'react-i18next';
 import './index.scss';
+import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 
 export const AINoteEmpty = () => {
-  const { handleInitEmptyNote } = useAINote();
-  const knowledgeBaseStore = useKnowledgeBaseStore();
   const { t } = useTranslation();
+  const { handleInitEmptyNote } = useAINote();
+
+  const { newNoteCreating } = useNoteStore((state) => ({
+    newNoteCreating: state.newNoteCreating,
+  }));
+  const { resourcePanelVisible } = useKnowledgeBaseStore((state) => ({
+    resourcePanelVisible: state.resourcePanelVisible,
+  }));
+
   return (
     <div className="flex items-center justify-center w-full mt-16 overflow-auto ai-note-empty">
       <div className="w-full h-full max-w-screen-lg">
-        {/* <Title className="mb-8 ml-8 text-3xl font-bold">暂无笔记</Title> */}
         <Button
-          className="ml-8 text-green-400"
+          className="ml-20 text-green-400"
           icon={<HiOutlinePlus />}
-          onClick={() => handleInitEmptyNote('New note')}
+          loading={newNoteCreating}
+          onClick={() => handleInitEmptyNote('')}
         >
           {t('knowledgeBase.note.newNote')}
         </Button>
         <Divider />
         <NoteList
           listGrid={
-            knowledgeBaseStore.resourcePanelVisible
+            resourcePanelVisible
               ? {
                   sm: 48,
                   md: 24,

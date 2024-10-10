@@ -29,3 +29,8 @@ export const useReloadListState = create<ReloadListState>()(
     setReloadResourceDetail: (val: boolean) => set({ reloadResourceDetail: val }),
   })),
 );
+
+export const useReloadListStateShallow = <T>(selector: (state: ReloadListState) => T): T => {
+  const state = useReloadListState();
+  return selector(state);
+};

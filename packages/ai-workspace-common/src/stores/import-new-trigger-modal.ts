@@ -1,10 +1,9 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import type {} from '@redux-devtools/extension';
-// 类型
 import { SkillTrigger } from '@refly/openapi-schema';
+import { useShallow } from 'zustand/react/shallow';
 
-interface ImportKnowledgeModal {
+interface ImportNewTriggerModal {
   // state
   showtriggerModal: boolean;
   reloadTriggerList?: boolean;
@@ -16,7 +15,7 @@ interface ImportKnowledgeModal {
   setTrigger: (val: SkillTrigger | null) => void;
 }
 
-export const useImportNewTriggerModal = create<ImportKnowledgeModal>()(
+export const useImportNewTriggerModal = create<ImportNewTriggerModal>()(
   devtools((set) => ({
     showtriggerModal: false,
     reloadTriggerList: false,
@@ -27,3 +26,7 @@ export const useImportNewTriggerModal = create<ImportKnowledgeModal>()(
     setTrigger: (state: SkillTrigger | null) => set({ trigger: state ? { ...state } : null }),
   })),
 );
+
+export const useImportNewTriggerModalShallow = <T>(selector: (state: ImportNewTriggerModal) => T) => {
+  return useImportNewTriggerModal(useShallow(selector));
+};

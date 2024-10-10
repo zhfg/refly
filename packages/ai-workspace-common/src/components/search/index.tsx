@@ -16,6 +16,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { SearchDomain, SearchResult, SkillMeta } from '@refly/openapi-schema';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
+import { useNoteTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
 import { RenderItem } from '@refly-packages/ai-workspace-common/components/search/types';
 import classNames from 'classnames';
 
@@ -43,8 +44,8 @@ export const Search = (props: SearchProps) => {
   const [selectedSkill, setSelectedSkill] = useState<SkillMeta>();
   // notes
   const { handleInitEmptyNote } = useAINote();
+  const { handleAddTab } = useNoteTabs();
 
-  // 整体处理
   const { jumpToKnowledgeBase, jumpToNote, jumpToReadResource, jumpToConv } = useKnowledgeBaseJumpNewPath();
 
   const pages = searchStore.pages;
@@ -209,10 +210,16 @@ export const Search = (props: SearchProps) => {
         jumpToNote({
           noteId: item?.id,
         });
+        handleAddTab({
+          title: item?.title,
+          key: item?.id,
+          content: '',
+          noteId: item?.id,
+        });
         searchStore.setIsSearchOpen(false);
       },
       onCreateClick: async () => {
-        await handleInitEmptyNote('New note');
+        await handleInitEmptyNote('');
         searchStore.setIsSearchOpen(false);
       },
     },

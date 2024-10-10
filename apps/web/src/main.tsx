@@ -26,7 +26,7 @@ import {
   getEnv,
   setRuntime,
 } from "@refly-packages/ai-workspace-common/utils/env"
-import { useUserStore } from "@refly-packages/ai-workspace-common/stores/user"
+import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
 
 // styles
 import "@/styles/style.css"
@@ -74,7 +74,9 @@ const prefetchComponents = () => {
 }
 
 export const App = () => {
-  const userStore = useUserStore()
+  const userStore = useUserStoreShallow(state => ({
+    setRuntime: state.setRuntime,
+  }))
 
   useEffect(() => {
     setRuntime("web")

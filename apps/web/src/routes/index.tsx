@@ -3,7 +3,7 @@ import { Route, Routes, useMatch } from "react-router-dom"
 import { Spin } from "@arco-design/web-react"
 import { useEffect } from "react"
 import { safeParseJSON } from "@refly-packages/ai-workspace-common/utils/parse"
-import { useUserStore } from "@refly-packages/ai-workspace-common/stores/user"
+import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
 import { useTranslation } from "react-i18next"
 import { useGetUserSettings } from "@refly-packages/ai-workspace-common/hooks/use-get-user-settings"
 import { LOCALE } from "@refly/common-types"
@@ -48,7 +48,11 @@ const prefetchRoutes = () => {
 
 export const AppRouter = (props: { layout?: any }) => {
   const { layout: Layout } = props
-  const userStore = useUserStore()
+  const userStore = useUserStoreShallow(state => ({
+    userProfile: state.userProfile,
+    localSettings: state.localSettings,
+    isCheckingLoginStatus: state.isCheckingLoginStatus,
+  }))
 
   const { i18n } = useTranslation()
   const language = i18n.languages?.[0]

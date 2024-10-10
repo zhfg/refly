@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-
+import { useShallow } from 'zustand/react/shallow';
 import type { Conversation as Thread } from '@refly/openapi-schema';
 
 interface ThreadState {
@@ -36,3 +36,7 @@ export const useThreadStore = create<ThreadState>()(
     resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),
 );
+
+export const useThreadStoreShallow = <T>(selector: (state: ThreadState) => T) => {
+  return useThreadStore(useShallow(selector));
+};

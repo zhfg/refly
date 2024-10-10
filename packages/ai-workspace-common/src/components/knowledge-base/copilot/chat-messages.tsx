@@ -4,7 +4,7 @@ import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { AssistantMessage, HumanMessage, PendingMessage, WelcomeMessage } from './message';
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
-import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { memo, useCallback } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { MessageState } from '@refly/common-types';
@@ -27,8 +27,8 @@ const useMessages = () => useChatStore(useShallow((state) => state.messages));
 
 export const ChatMessages = memo((props: ChatMessagesProps) => {
   const messages = useMessages();
-  const userProfile = useUserStore(useShallow((state) => state.userProfile));
-  const messageStateStore = useMessageStateStore(useShallow(messageStateSelector));
+  const userProfile = useUserStoreShallow((state) => state.userProfile);
+  const messageStateStore = useMessageStateStore(messageStateSelector);
   const { runSkill } = useBuildThreadAndRun();
   const { loading } = props;
 

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 
 import { Note } from '@refly/openapi-schema';
 import { EditorInstance } from '@refly-packages/editor-core/components';
@@ -31,6 +32,7 @@ export interface TableOfContentsItem {
 interface NoteBaseState {
   currentNote: Note | null;
   isRequesting: boolean;
+  newNoteCreating: boolean;
 
   // tabs
   tabs: NoteTab[];
@@ -50,6 +52,7 @@ interface NoteBaseState {
 
   updateCurrentNote: (note: Note) => void;
   updateIsRequesting: (isRequesting: boolean) => void;
+  updateNewNoteCreating: (creating: boolean) => void;
   updateTabs: (tabs: NoteTab[]) => void;
   updateActiveTab: (key: string) => void;
   updateNotePanelVisible: (visible: boolean) => void;
@@ -60,6 +63,8 @@ interface NoteBaseState {
 
   updateLastCursorPosRef: (pos: number) => void;
   updateTocItems: (items: TableOfContentsItem[]) => void;
+
+  resetState: () => void;
 }
 
 export const defaultState = {
@@ -68,6 +73,7 @@ export const defaultState = {
   activeTab: 'key1',
   notePanelVisible: false,
   isRequesting: false,
+  newNoteCreating: false,
   tocItems: [],
 
   // notes
@@ -88,6 +94,7 @@ export const useNoteStore = create<NoteBaseState>()(
     updateIsRequesting: (isRequesting: boolean) => set((state) => ({ ...state, isRequesting })),
     updateTabs: (tabs: NoteTab[]) => set((state) => ({ ...state, tabs })),
     updateActiveTab: (key: string) => set((state) => ({ ...state, activeTab: key })),
+    updateNewNoteCreating: (creating: boolean) => set((state) => ({ ...state, newNoteCreating: creating })),
 
     // tabs
     updateNotePanelVisible: (visible: boolean) => set((state) => ({ ...state, notePanelVisible: visible })),
@@ -99,5 +106,11 @@ export const useNoteStore = create<NoteBaseState>()(
     updateNoteCharsCount: (count: number) => set((state) => ({ ...state, noteCharsCount: count })),
     updateLastCursorPosRef: (pos: number) => set((state) => ({ ...state, lastCursorPosRef: pos })),
     updateTocItems: (items: TableOfContentsItem[]) => set((state) => ({ ...state, tocItems: items })),
+
+    resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),
 );
+
+export const useNoteStoreShallow = <T>(selector: (state: NoteBaseState) => T) => {
+  return useNoteStore(useShallow(selector));
+};

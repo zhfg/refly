@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import type {} from '@redux-devtools/extension';
+import { useShallow } from 'zustand/react/shallow';
 import { Conversation, CreateConversationRequest } from '@refly/openapi-schema';
 import { ConversationOperation } from '@refly/common-types';
 
@@ -87,3 +87,7 @@ export const useConversationStore = create<ConversationState>()(
     resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),
 );
+
+export const useConversationStoreShallow = <T>(selector: (state: ConversationState) => T) => {
+  return useConversationStore(useShallow(selector));
+};

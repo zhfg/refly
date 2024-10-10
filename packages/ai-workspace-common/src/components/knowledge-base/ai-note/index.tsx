@@ -32,7 +32,7 @@ import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import { getHierarchicalIndexes, TableOfContents } from '@tiptap-pro/extension-table-of-contents';
 // 编辑器样式
 // 图标
-import { AiOutlineWarning, AiOutlineFileWord } from 'react-icons/ai';
+import { AiOutlineWarning, AiOutlineFileWord, AiOutlineDisconnect } from 'react-icons/ai';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 import { getWsServerOrigin } from '@refly-packages/utils/url';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
@@ -48,23 +48,26 @@ import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/mod
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 // componets
 import { ToC } from './ToC';
-import { IconBook } from '@arco-design/web-react/icon';
+import { IconBook, IconLoading, IconPlus } from '@arco-design/web-react/icon';
 
 const MemorizedToC = memo(ToC);
 
-const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) => {
-  const { readOnly } = note;
+const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
   const lastCursorPosRef = useRef<number>();
   const [token] = useCookie('_refly_ai_sid');
+
   const noteStore = useNoteStore((state) => ({
+    currentNote: state.currentNote,
+    noteServerStatus: state.noteServerStatus,
+    updateCurrentNote: state.updateCurrentNote,
     updateNoteCharsCount: state.updateNoteCharsCount,
     updateNoteSaveStatus: state.updateNoteSaveStatus,
     updateNoteServerStatus: state.updateNoteServerStatus,
     updateEditor: state.updateEditor,
     updateTocItems: state.updateTocItems,
-
     updateLastCursorPosRef: state.updateLastCursorPosRef,
   }));
+
   const contextPanelStore = useContextPanelStore((state) => ({
     updateBeforeSelectionNoteContent: state.updateBeforeSelectionNoteContent,
     updateAfterSelectionNoteContent: state.updateAfterSelectionNoteContent,
@@ -152,6 +155,8 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
       editorRef.current.destroy();
     };
   }, []);
+
+  const readOnly = noteStore?.currentNote?.readOnly ?? false;
 
   useEffect(() => {
     if (editorRef.current && !readOnly) {
@@ -268,41 +273,43 @@ const CollaborativeEditor = ({ noteId, note }: { noteId: string; note: Note }) =
   );
 };
 
-interface AINoteStatusBarProps {
-  note: Note;
-}
+interface AINoteStatusBarProps {}
 
 export const AINoteStatusBar = (props: AINoteStatusBarProps) => {
-  const { note } = props;
-  const { noteId } = note;
-  const noteStore = useNoteStore();
+  const { currentNote, updateCurrentNote, noteServerStatus, noteCharsCount, noteSaveStatus, editor, tocItems } =
+    useNoteStore((state) => ({
+      currentNote: state.currentNote,
+      updateCurrentNote: state.updateCurrentNote,
+      noteServerStatus: state.noteServerStatus,
+      noteCharsCount: state.noteCharsCount,
+      noteSaveStatus: state.noteSaveStatus,
+      editor: state.editor,
+      tocItems: state.tocItems,
+    }));
   const { handleDeleteTab } = useNoteTabs();
   const { t } = useTranslation();
 
   return (
     <div className="note-status-bar">
       <div className="note-status-bar-menu">
-        {noteId && noteStore.noteServerStatus === 'connected' ? (
+        {noteServerStatus === 'connected' ? (
           <div className="note-status-bar-item">
             <AiOutlineFileWord />
-            <p className="conv-title">{t('knowledgeBase.note.noteCharsCount', { count: noteStore.noteCharsCount })}</p>
+            <p className="conv-title">{t('knowledgeBase.note.noteCharsCount', { count: noteCharsCount })}</p>
           </div>
         ) : null}
-        {noteId && noteStore.noteServerStatus === 'disconnected' ? (
+        {noteServerStatus === 'disconnected' ? (
           <div className="note-status-bar-item">
-            <Divider type="vertical" />
             <AiOutlineWarning />
             <p className="conv-title">{t('knowledgeBase.note.serviceDisconnected')}</p>
           </div>
         ) : null}
-        {noteId && noteStore.noteServerStatus === 'connected' ? (
+        {noteServerStatus === 'connected' ? (
           <div className="note-status-bar-item">
             <Divider type="vertical" />
             <HiOutlineClock />
             <p className="conv-title">
-              {noteStore.noteSaveStatus === 'Saved'
-                ? t('knowledgeBase.note.autoSaved')
-                : t('knowledgeBase.note.saving')}
+              {noteSaveStatus === 'Saved' ? t('knowledgeBase.note.autoSaved') : t('knowledgeBase.note.saving')}
             </p>
           </div>
         ) : null}
@@ -315,7 +322,7 @@ export const AINoteStatusBar = (props: AINoteStatusBarProps) => {
                 <div className="sidebar-options">
                   <div className="label-large">Table of contents</div>
                   <div className="table-of-contents">
-                    <MemorizedToC editor={noteStore.editor} items={noteStore.tocItems} />
+                    <MemorizedToC editor={editor} items={tocItems} />
                   </div>
                 </div>
               </div>
@@ -323,37 +330,52 @@ export const AINoteStatusBar = (props: AINoteStatusBarProps) => {
           >
             <IconBook style={{ fontSize: 16 }} />
           </Popover>
+          <Divider type="vertical" />
         </div>
-        {noteId ? (
+        {currentNote && noteServerStatus === 'connected' ? (
           <div className="note-status-bar-item">
-            {note.readOnly ? <HiOutlineLockClosed /> : <HiOutlineLockOpen />}
+            {currentNote?.readOnly ? <HiOutlineLockClosed /> : <HiOutlineLockOpen />}
             <p className="mr-2 conv-title">
-              {note.readOnly ? t('knowledgeBase.note.readOnly') : t('knowledgeBase.note.edit')}
+              {currentNote?.readOnly ? t('knowledgeBase.note.readOnly') : t('knowledgeBase.note.edit')}
             </p>
             <Switch
               type="round"
               size="small"
-              checked={note.readOnly}
-              onChange={(readOnly) => noteStore.updateCurrentNote({ ...note, readOnly })}
+              checked={currentNote?.readOnly}
+              onChange={(readOnly) => updateCurrentNote({ ...currentNote, readOnly })}
             />
           </div>
         ) : null}
         <div className="note-status-bar-item">
           <Divider type="vertical" />
-          <DeleteDropdownMenu type="note" data={note} postDeleteList={(note: Note) => handleDeleteTab(note.noteId)} />
+          <DeleteDropdownMenu
+            type="note"
+            data={currentNote}
+            postDeleteList={(note: Note) => handleDeleteTab(note.noteId)}
+          />
         </div>
       </div>
     </div>
   );
 };
 
-interface AINoteHeaderProps {
-  note: Note;
-  onTitleChange: (newTitle: string) => void;
-}
+interface AINoteHeaderProps {}
 
 export const AINoteHeader = (props: AINoteHeaderProps) => {
-  const { note, onTitleChange } = props;
+  const { currentNote, updateCurrentNote, tabs, activeTab } = useNoteStore((state) => ({
+    tabs: state.tabs,
+    activeTab: state.activeTab,
+    currentNote: state.currentNote,
+    updateCurrentNote: state.updateCurrentNote,
+  }));
+  const { handleUpdateTabTitle } = useNoteTabs();
+
+  const onTitleChange = (newTitle: string) => {
+    updateCurrentNote({ ...currentNote, title: newTitle });
+    handleUpdateTabTitle(currentNote.noteId, newTitle);
+  };
+
+  const title = tabs.find((tab) => tab.key === activeTab)?.title || currentNote?.title;
 
   return (
     <div className="w-full">
@@ -361,7 +383,7 @@ export const AINoteHeader = (props: AINoteHeaderProps) => {
         <Input
           className="text-3xl font-bold bg-transparent focus:border-transparent focus:bg-transparent"
           placeholder="Enter The Title"
-          value={note.title}
+          value={title}
           onChange={onTitleChange}
         />
       </div>
@@ -373,33 +395,58 @@ export const AINote = () => {
   const [searchParams] = useSearchParams();
   const noteId = searchParams.get('noteId');
 
+  const { t } = useTranslation();
+
   const { handleInitEmptyNote } = useAINote();
-  const noteStore = useNoteStore();
-  const note = noteStore.currentNote;
+  const {
+    currentNote: note,
+    isRequesting,
+    newNoteCreating,
+    noteServerStatus,
+    updateCurrentNote,
+    updateIsRequesting,
+    updateNotePanelVisible,
+    updateNoteServerStatus,
+    resetState,
+  } = useNoteStore((state) => ({
+    currentNote: state.currentNote,
+    isRequesting: state.isRequesting,
+    newNoteCreating: state.newNoteCreating,
+    noteServerStatus: state.noteServerStatus,
+    updateCurrentNote: state.updateCurrentNote,
+    updateIsRequesting: state.updateIsRequesting,
+    updateNotePanelVisible: state.updateNotePanelVisible,
+    updateNoteServerStatus: state.updateNoteServerStatus,
+    resetState: state.resetState,
+  }));
   const prevNote = useRef<Note>();
 
   const searchStore = useSearchStore();
 
-  const { tabs, activeTab, setActiveTab, handleAddTab, handleDeleteTab, handleUpdateTabTitle } = useNoteTabs();
+  const { tabs, activeTab, setActiveTab, handleDeleteTab, handleAddTab } = useNoteTabs();
 
   useEffect(() => {
     return () => {
-      noteStore.updateNotePanelVisible(false);
+      resetState();
     };
   }, []);
 
   useEffect(() => {
-    noteStore.updateNotePanelVisible(true);
+    updateCurrentNote(null);
+    updateNotePanelVisible(true);
+    updateNoteServerStatus('disconnected');
 
     const fetchData = async () => {
-      noteStore.updateIsRequesting(true);
+      updateIsRequesting(true);
       const { data } = await getClient().getNoteDetail({
         query: { noteId },
       });
       const note = data?.data;
       if (note) {
-        noteStore.updateCurrentNote(note);
-        noteStore.updateIsRequesting(false);
+        updateCurrentNote(note);
+        updateIsRequesting(false);
+      }
+      if (!tabs.some((tab) => tab.key === noteId)) {
         handleAddTab({
           title: note.title,
           key: note.noteId,
@@ -410,13 +457,11 @@ export const AINote = () => {
     };
     if (noteId) {
       fetchData();
-    } else {
-      noteStore.updateCurrentNote(null);
     }
 
     return () => {
-      noteStore.updateIsRequesting(false);
-      noteStore.updateNotePanelVisible(false);
+      updateIsRequesting(false);
+      updateNotePanelVisible(false);
     };
   }, [noteId]);
 
@@ -446,19 +491,19 @@ export const AINote = () => {
     return <AINoteEmpty />;
   }
 
-  if (!note) {
-    return <Spin dot block className="flex justify-center items-center w-full h-full" />;
-  }
-
-  const onTitleChange = (newTitle: string) => {
-    noteStore.updateCurrentNote({ ...note, title: newTitle });
-    handleUpdateTabTitle(note.noteId, newTitle);
-  };
-
   return (
     <div className="ai-note-container">
       <Tabs
         editable
+        addButton={
+          <Button
+            type="text"
+            size="small"
+            shape="circle"
+            disabled={newNoteCreating}
+            icon={newNoteCreating ? <IconLoading /> : <IconPlus />}
+          />
+        }
         type="card-gutter"
         className="note-detail-tab-container"
         activeTab={activeTab}
@@ -473,7 +518,7 @@ export const AINote = () => {
               </div>
               <div className="note-detail-navigation-bar">
                 <Button
-                  icon={<HiOutlineSearch />}
+                  icon={<HiOutlineSearch size={14} />}
                   type="text"
                   style={{ marginRight: 4 }}
                   className="assist-action-item"
@@ -493,15 +538,19 @@ export const AINote = () => {
           </Tabs.TabPane>
         ))}
       </Tabs>
-      {note ? (
+      <Spin
+        tip={t('knowledgeBase.note.connecting')}
+        loading={!note || isRequesting || noteServerStatus !== 'connected'}
+        style={{ height: '100%', width: '100%' }}
+      >
         <div className="ai-note-editor">
           <div className="ai-note-editor-container">
-            <AINoteHeader note={note} onTitleChange={onTitleChange} />
-            <CollaborativeEditor key={noteId} noteId={noteId} note={note} />
+            <AINoteHeader />
+            <CollaborativeEditor key={noteId} noteId={noteId} />
           </div>
         </div>
-      ) : null}
-      {note ? <AINoteStatusBar note={note} /> : null}
+      </Spin>
+      <AINoteStatusBar />
     </div>
   );
 };
