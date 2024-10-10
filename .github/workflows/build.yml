@@ -6,6 +6,9 @@ on:
       environment:
         required: true
         type: string
+      web_deploy_project:
+        required: false
+        type: string
 
 jobs:
   build:
@@ -42,3 +45,21 @@ jobs:
           SENTRY_PROJECT: web
         with:
           environment: ${{ inputs.environment }}
+
+  deploy-web:
+    name: Deploy Web
+    if: inputs.web_deploy_project != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remove source map files
+        run: find apps/web/dist/assets -name "*.map" -type f -delete
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: ${{ inputs.web_deploy_project }}
+          branch: main
+          workingDirectory: apps/web
+          directory: dist

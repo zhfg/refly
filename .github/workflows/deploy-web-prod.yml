@@ -5,8 +5,8 @@ on:
 
 jobs:
   deploy-prod:
-    uses: ./.github/workflows/deploy-web-base.yml
+    uses: ./.github/workflows/build.yml
     secrets: inherit
     with:
       environment: production
-      project-name: refly-app
+      web_deploy_project: refly-app
