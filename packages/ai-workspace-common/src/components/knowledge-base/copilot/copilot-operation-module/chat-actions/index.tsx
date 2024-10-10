@@ -117,22 +117,7 @@ export const ChatActions = (props: ChatActionsProps) => {
             }}
           ></Button>
         ) : null}
-        <Dropdown
-          position="tr"
-          droplist={
-            <Menu>
-              <Menu.Item key="direct" onClick={() => handleSendMessage('normal')}>
-                {t('copilot.chatMode.normal')}
-              </Menu.Item>
-              <Menu.Item key="noContext" onClick={() => handleSendMessage('noContext')}>
-                {t('copilot.chatMode.noContext')}
-              </Menu.Item>
-              <Menu.Item key="wholeSpace" onClick={() => handleSendMessage('wholeSpace')}>
-                {t('copilot.chatMode.wholeSpace')}
-              </Menu.Item>
-            </Menu>
-          }
-        >
+        {skillStore?.selectedSkill?.skillId ? (
           <Button
             size="mini"
             icon={<IconSend />}
@@ -146,7 +131,38 @@ export const ChatActions = (props: ChatActionsProps) => {
           >
             {t('copilot.send')}
           </Button>
-        </Dropdown>
+        ) : (
+          <Dropdown
+            position="tr"
+            droplist={
+              <Menu>
+                <Menu.Item key="direct" onClick={() => handleSendMessage('normal')}>
+                  {t('copilot.chatMode.normal')}
+                </Menu.Item>
+                <Menu.Item key="noContext" onClick={() => handleSendMessage('noContext')}>
+                  {t('copilot.chatMode.noContext')}
+                </Menu.Item>
+                <Menu.Item key="wholeSpace" onClick={() => handleSendMessage('wholeSpace')}>
+                  {t('copilot.chatMode.wholeSpace')}
+                </Menu.Item>
+              </Menu>
+            }
+          >
+            <Button
+              size="mini"
+              icon={<IconSend />}
+              loading={messageStateStore?.pending}
+              disabled={messageStateStore?.pending}
+              className="search-btn"
+              style={{ color: '#FFF', background: '#00968F' }}
+              onClick={() => {
+                handleSendMessage('normal');
+              }}
+            >
+              {t('copilot.send')}
+            </Button>
+          </Dropdown>
+        )}
       </div>
     </div>
   );

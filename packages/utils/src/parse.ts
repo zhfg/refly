@@ -46,24 +46,24 @@ export const markdownCitationParse = (markdown: string) => {
   }
 
   return (markdown || '')
-    ?.replace(/\[\[([cC])itation/g, '[citation')
-    .replace(/[cC]itation:(\d+)]]/g, 'citation:$1]')
-    .replace(/\[\[([cC]itation:\d+)]](?!])/g, `[$1]`)
-    .replace(/\[[cC]itation:(\d+)]/g, '[citation]($1)')
-    .replace(/【[cC]itation:(\d+)】/g, '[citation]($1)');
+    ?.replace(/\[\s*([cC])itation/g, '[citation')
+    .replace(/[cC]itation\s*:\s*(\d+)\s*]]/g, 'citation:$1]')
+    .replace(/\[\s*([cC]itation\s*:\s*\d+)\s*]](?!])/g, `[$1]`)
+    .replace(/\[\s*[cC]itation\s*:\s*(\d+)\s*]/g, '[citation]($1)')
+    .replace(/【\s*[cC]itation\s*:\s*(\d+)\s*】/g, '[citation]($1)');
 };
 
 export function parseMarkdownWithCitations(content: string, sources: Source[]): string {
   // 统一引用格式
   let parsedContent = content
-    .replace(/\[\[([cC])itation/g, '[citation')
-    .replace(/[cC]itation:(\d+)]]/g, 'citation:$1]')
-    .replace(/\[\[([cC]itation:\d+)]](?!])/g, `[$1]`)
-    .replace(/\[[cC]itation:(\d+)]/g, '[citation]($1)')
-    .replace(/【[cC]itation:(\d+)】/g, '[citation]($1)');
+    ?.replace(/\[\s*([cC])itation/g, '[citation')
+    .replace(/[cC]itation\s*:\s*(\d+)\s*]]/g, 'citation:$1]')
+    .replace(/\[\s*([cC]itation\s*:\s*\d+)\s*]](?!])/g, `[$1]`)
+    .replace(/\[\s*[cC]itation\s*:\s*(\d+)\s*]/g, '[citation]($1)')
+    .replace(/【\s*[cC]itation\s*:\s*(\d+)\s*】/g, '[citation]($1)');
 
   // 处理统一后的引用格式并收集使用的源
-  const citationRegex = /\[citation\]\((\d+)\)/g;
+  const citationRegex = /\[\s*citation\s*]\s*\(\s*(\d+)\s*\)|\[\s*citation\s*:\s*(\d+)\s*]/g;
   const usedSources = new Set<number>();
 
   parsedContent = parsedContent.replace(citationRegex, (_, num) => {

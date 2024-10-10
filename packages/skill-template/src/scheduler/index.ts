@@ -352,7 +352,7 @@ Please generate the summary based on these requirements and offer suggestions fo
     const contextTokens = countContextTokens(mentionedContext);
 
     const needRewriteQuery = chatMode !== ChatMode.NO_CONTEXT_CHAT && (messagesTokens > 0 || contextTokens > 0);
-    const needPrepareContext = chatMode !== ChatMode.NO_CONTEXT_CHAT && contextTokens > 0;
+    const needPrepareContext = chatMode !== ChatMode.NO_CONTEXT_CHAT;
 
     if (needRewriteQuery) {
       const analyedRes = await analyzeQueryAndContext(query, {
