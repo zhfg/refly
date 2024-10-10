@@ -111,7 +111,7 @@ export const ChatActions = (props: ChatActionsProps) => {
             size="mini"
             icon={<IconPause />}
             className="search-btn"
-            style={{ color: '#FFF', background: '#000', height: '24px', marginRight: '8px' }}
+            style={{ color: '#FFF', background: '#000', height: '24px' }}
             onClick={() => {
               handleAbort();
             }}

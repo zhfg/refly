@@ -81,6 +81,7 @@ export function createLangchainMessage(message: ChatMessageModel): BaseMessage {
       logs: JSON.parse(message.logs),
       skillMeta: JSON.parse(message.skillMeta),
       structuredData: JSON.parse(message.structuredData),
+      type: message.type,
     },
   };
 

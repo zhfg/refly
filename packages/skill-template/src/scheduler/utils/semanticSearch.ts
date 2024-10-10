@@ -140,16 +140,6 @@ export async function sortResourcesBySimilarity(
     .filter((resource): resource is SkillContextResourceItem => resource !== undefined);
 }
 
-// TODO: 处理 collections 作为上下文召回，类似 Web 处理，collections 主要用户搜索范围
-// export async function sortCollectionsBySimilarity(
-//   query: string,
-//   collections: SkillContextCollectionItem[],
-// ): Promise<SkillContextCollectionItem[]> {
-//   // 实现相似度计算和排序逻辑
-//   // 这里可以使用向量数据库或其他相似度计算方法
-//   // 返回按相似度排序的 collections
-// }
-
 export async function processSelectedContentWithSimilarity(
   query: string,
   contentList: SkillContextContentItem[],
@@ -161,6 +151,10 @@ export async function processSelectedContentWithSimilarity(
 
   const MAX_RAG_RELEVANT_CONTENT_MAX_TOKENS = Math.floor(maxTokens * MAX_RAG_RELEVANT_CONTENT_RATIO);
   const MAX_SHORT_CONTENT_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_CONTENT_RATIO);
+
+  if (contentList.length === 0) {
+    return [];
+  }
 
   // 1. 计算相似度并排序
   const sortedContent = await sortContentBySimilarity(query, contentList, ctx);
@@ -246,6 +240,10 @@ export async function processNotesWithSimilarity(
 
   const MAX_RAG_RELEVANT_NOTES_MAX_TOKENS = Math.floor(maxTokens * MAX_RAG_RELEVANT_NOTES_RATIO);
   const MAX_SHORT_NOTES_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_NOTES_RATIO);
+
+  if (notes.length === 0) {
+    return [];
+  }
 
   // 1. 计算相似度并排序
   const sortedNotes = await sortNotesBySimilarity(query, notes, ctx);
@@ -335,6 +333,10 @@ export async function processResourcesWithSimilarity(
 
   const MAX_RAG_RELEVANT_RESOURCES_MAX_TOKENS = Math.floor(maxTokens * MAX_RAG_RELEVANT_RESOURCES_RATIO);
   const MAX_SHORT_RESOURCES_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_RESOURCES_RATIO);
+
+  if (resources.length === 0) {
+    return [];
+  }
 
   // 1. 计算相似度并排序
   const sortedResources = await sortResourcesBySimilarity(query, resources, ctx);
@@ -467,6 +469,10 @@ export async function processCollectionsWithSimilarity(
   collections: SkillContextCollectionItem[],
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<(SkillContextResourceItem | SkillContextNoteItem)[]> {
+  if (collections.length === 0) {
+    return [];
+  }
+
   // 1. scope collections for get relevant chunks
   const entities: Entity[] = collections.map((collection) => ({
     entityId: collection?.collection?.collectionId,

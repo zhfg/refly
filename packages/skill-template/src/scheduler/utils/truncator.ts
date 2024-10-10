@@ -1,5 +1,4 @@
 import {
-  ChatMessage,
   SkillContextContentItem,
   SkillContextNoteItem,
   SkillContextResourceItem,
@@ -9,14 +8,15 @@ import { sortContentBySimilarity, sortNotesBySimilarity, sortResourcesBySimilari
 
 import { IContext, GraphState } from '../types';
 import { countToken } from './token';
+import { BaseMessage } from '@langchain/core/messages';
 
 const MAX_MESSAGES = 5;
 const MAX_MESSAGE_TOKENS = 100;
 const MAX_MESSAGES_TOTAL_TOKENS = 1000;
 
-export const truncateMessages = (messages: ChatMessage[]): ChatMessage[] => {
+export const truncateMessages = (messages: BaseMessage[]): BaseMessage[] => {
   let totalTokens = 0;
-  const truncatedMessages: ChatMessage[] = [];
+  const truncatedMessages: BaseMessage[] = [];
 
   for (let i = messages.length - 1; i >= Math.max(0, messages.length - MAX_MESSAGES); i--) {
     const message = messages[i];
@@ -32,8 +32,8 @@ export const truncateMessages = (messages: ChatMessage[]): ChatMessage[] => {
       break;
     }
 
-    const newMessage = { ...message, content };
-    truncatedMessages.unshift(newMessage);
+    message.content = content; // replace content other than new message
+    truncatedMessages.unshift(message);
     totalTokens += tokens;
   }
 

@@ -78,8 +78,8 @@ export const buildContextualSchedulerSystemPrompt = (locale: string) => {
   return systemPrompt;
 };
 
-export const buildSchedulerSystemPrompt = (locale: string, chatMode: string) => {
-  if (chatMode === 'noContext') {
+export const buildSchedulerSystemPrompt = (locale: string, needPrepareContext: boolean) => {
+  if (!needPrepareContext) {
     return buildNoContextSchedulerSystemPrompt(locale);
   }
   return buildContextualSchedulerSystemPrompt(locale);

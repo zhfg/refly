@@ -4,7 +4,7 @@ import { summarizeChatHistory, summarizeContext } from './summarizer';
 import { z } from 'zod';
 import { SkillEngine } from '../../engine';
 import { BaseSkill, SkillRunnableConfig } from '../../base';
-import { ChatMessage, SkillTemplateConfig } from '@refly-packages/openapi-schema';
+import { SkillTemplateConfig } from '@refly-packages/openapi-schema';
 
 // simplify context entityId for better extraction
 export const preprocessContext = (context: IContext): IContext => {
@@ -53,7 +53,7 @@ export const postprocessContext = (
   return context;
 };
 
-// TODO: collections 搜索和在整个知识库搜索一起实现
+// TODO: build chatHistory and context related system prompt
 export async function analyzeQueryAndContext(
   query: string,
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
@@ -71,7 +71,7 @@ export async function analyzeQueryAndContext(
   // preprocess context for better extract mentioned context
   const preprocessedContext = preprocessContext(context);
   const summarizedContext = summarizeContext(preprocessedContext);
-  const summarizedChatHistory = summarizeChatHistory((chatHistory as any as ChatMessage[]) || []);
+  const summarizedChatHistory = summarizeChatHistory(chatHistory || []);
 
   const systemPrompt = `## Role & Background \n You are an advanced AI assistant specializing in query analysis and context extraction. Your task is to analyze the given query, chat history, and available context to:
 1. Rewrite the query to best represent the user's intent, considering the conversation history and available context. If specific entities or concepts are mentioned, ensure they are fully expanded and clarified in the rewritten query. If no specific entities are mentioned, the rewritten query may remain general.

@@ -1,5 +1,6 @@
 import { IContext } from '../types';
 import { get_encoding } from '@dqbd/tiktoken';
+import { BaseMessage } from '@langchain/core/messages';
 import {
   SkillContextCollectionItem,
   SkillContextContentItem,
@@ -9,12 +10,12 @@ import {
 } from '@refly-packages/openapi-schema';
 
 export enum LLMType {
-  GPT4oMini = 'gpt-4o-mini',
-  GPT4o = 'gpt-4o-turbo',
-  Claude35Sonnet = 'claude-3-5-sonnet',
-  Claude3Haiku = 'claude-3-haiku',
-  GeminiFlash15 = 'gemini-flash-1.5',
-  GeminiPro15 = 'gemini-pro-1.5',
+  GPT4oMini = 'openai/gpt-4o-mini',
+  GPT4o = 'openai/gpt-4o-turbo',
+  Claude35Sonnet = 'anthropic/claude-3-5-sonnet',
+  Claude3Haiku = 'anthropic/claude-3-haiku',
+  GeminiFlash15 = 'google/gemini-flash-1.5',
+  GeminiPro15 = 'google/gemini-pro-1.5',
 }
 
 export const ModelContextLimitMap = {
@@ -44,19 +45,19 @@ export const isTokenOverflow = (content: string, model: string, reservation = 10
   return count + reservation > limit ?? 8 * 1024;
 };
 
-export const countContentTokens = (contentList: SkillContextContentItem[]) => {
+export const countContentTokens = (contentList: SkillContextContentItem[] = []) => {
   return contentList.reduce((sum, content) => sum + countToken(content?.content || ''), 0);
 };
 
-export const countResourceTokens = (resources: SkillContextResourceItem[]) => {
+export const countResourceTokens = (resources: SkillContextResourceItem[] = []) => {
   return resources.reduce((sum, resource) => sum + countToken(resource?.resource?.content), 0);
 };
 
-export const countNoteTokens = (notes: SkillContextNoteItem[]) => {
+export const countNoteTokens = (notes: SkillContextNoteItem[] = []) => {
   return notes.reduce((sum, note) => sum + countToken(note?.note?.content), 0);
 };
 
-export const countWebSearchContextTokens = (webSearchSources: Source[]) => {
+export const countWebSearchContextTokens = (webSearchSources: Source[] = []) => {
   return webSearchSources.reduce((sum, source) => sum + countToken(source?.pageContent), 0);
 };
 
@@ -65,11 +66,14 @@ export const countWebSearchContextTokens = (webSearchSources: Source[]) => {
 //   return collections.reduce((sum, collection) => sum + countToken(collection?.collection?.content), 0);
 // };
 
-export const countMentionedContextTokens = (mentionedContext: IContext) => {
+export const countContextTokens = (mentionedContext: IContext) => {
   return (
-    countContentTokens(mentionedContext.contentList) +
-    countResourceTokens(mentionedContext.resources) +
-    countNoteTokens(mentionedContext.notes)
-    // countCollectionTokens(mentionedContext.collections)
+    countContentTokens(mentionedContext?.contentList) +
+    countResourceTokens(mentionedContext?.resources) +
+    countNoteTokens(mentionedContext?.notes)
   );
+};
+
+export const countMessagesTokens = (messages: BaseMessage[] = []) => {
+  return messages.reduce((sum, message) => sum + countToken(message.content as string), 0);
 };

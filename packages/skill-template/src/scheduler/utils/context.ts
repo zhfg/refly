@@ -1,7 +1,7 @@
-import { GraphState, IContext, SkillContextContentItemMetadata } from '../types';
+import { ChatMode, GraphState, IContext, SkillContextContentItemMetadata } from '../types';
 import {
   countContentTokens,
-  countMentionedContextTokens,
+  countContextTokens,
   countNoteTokens,
   countResourceTokens,
   countToken,
@@ -181,7 +181,14 @@ export async function prepareMentionedContext(
     collections: [],
   };
 
-  const allMentionedContextTokens = countMentionedContextTokens(mentionedContext);
+  const allMentionedContextTokens = countContextTokens(mentionedContext);
+
+  if (allMentionedContextTokens === 0) {
+    return {
+      mentionedContextTokens: 0,
+      processedMentionedContext: mentionedContext,
+    };
+  }
 
   let mentionedContextTokens = allMentionedContextTokens;
   if (allMentionedContextTokens > maxMentionedContextTokens) {
@@ -191,11 +198,11 @@ export async function prepareMentionedContext(
       maxMentionedContextTokens,
       ctx,
     );
-    mentionedContextTokens = countMentionedContextTokens(processedMentionedContext);
+    mentionedContextTokens = countContextTokens(processedMentionedContext);
 
     if (mentionedContextTokens > maxMentionedContextTokens) {
       processedMentionedContext = truncateContext(processedMentionedContext, maxMentionedContextTokens);
-      mentionedContextTokens = countMentionedContextTokens(processedMentionedContext);
+      mentionedContextTokens = countContextTokens(processedMentionedContext);
     }
   }
 
@@ -279,8 +286,8 @@ export async function prepareContainerLevelContext(
   },
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<IContext> {
-  const chatMode = ctx.tplConfig?.chatMode?.value;
-  const enableSearchWholeSpace = chatMode === 'wholeSpace';
+  const chatMode = ctx.tplConfig?.chatMode?.value as ChatMode;
+  const enableSearchWholeSpace = chatMode === ChatMode.WHOLE_SPACE_SEARCH;
 
   const processedContext: IContext = {
     contentList: [],

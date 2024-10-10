@@ -5,7 +5,7 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { z } from 'zod';
 // types
 import { SystemMessage } from '@langchain/core/messages';
-import { HumanMessage } from '@langchain/core/messages';
+import { HumanMessage, ChatMessage } from '@langchain/core/messages';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { ToolMessage } from '@langchain/core/messages';
@@ -22,7 +22,6 @@ import {
   SkillContextResourceItem,
   SkillContextNoteItem,
   SkillContextCollectionItem,
-  ChatMessage,
 } from '@refly-packages/openapi-schema';
 import { ToolCall } from '@langchain/core/dist/messages/tool';
 import { randomUUID } from 'node:crypto';
@@ -33,7 +32,9 @@ import { SkillContextContentItemMetadata, SelectedContentDomain, GraphState, Que
 import { prepareContext } from './utils/context';
 import { buildSchedulerSystemPrompt } from './utils/prompt';
 import { analyzeQueryAndContext } from './utils/queryRewrite';
-import { truncateMessages } from '@/scheduler/utils/truncator';
+import { truncateMessages } from './utils/truncator';
+import { countContextTokens, countMessagesTokens } from './utils/token';
+import { ChatMode } from './types';
 export class Scheduler extends BaseSkill {
   name = 'scheduler';
 
@@ -341,13 +342,19 @@ Please generate the summary based on these requirements and offer suggestions fo
     } = this.configSnapshot.configurable;
 
     const { tplConfig } = config?.configurable || {};
-    const chatMode = tplConfig?.chatMode?.value;
+    const chatMode = tplConfig?.chatMode?.value as ChatMode;
 
     let optimizedQuery = query;
     let mentionedContext: IContext;
     let context: string = '';
 
-    if (chatMode !== 'noContext') {
+    const messagesTokens = countMessagesTokens(chatHistory);
+    const contextTokens = countContextTokens(mentionedContext);
+
+    const needRewriteQuery = chatMode !== ChatMode.NO_CONTEXT_CHAT && (messagesTokens > 0 || contextTokens > 0);
+    const needPrepareContext = chatMode !== ChatMode.NO_CONTEXT_CHAT && contextTokens > 0;
+
+    if (needRewriteQuery) {
       const analyedRes = await analyzeQueryAndContext(query, {
         configSnapshot: this.configSnapshot,
         ctxThis: this,
@@ -358,7 +365,7 @@ Please generate the summary based on these requirements and offer suggestions fo
       mentionedContext = analyedRes.mentionedContext;
     }
 
-    if (chatMode !== 'noContext') {
+    if (needPrepareContext) {
       context = await prepareContext(
         {
           query: optimizedQuery,
@@ -372,14 +379,14 @@ Please generate the summary based on these requirements and offer suggestions fo
         },
       );
     }
-    const systemPrompt = buildSchedulerSystemPrompt(locale, chatMode as string);
+    const systemPrompt = buildSchedulerSystemPrompt(locale, needPrepareContext);
 
     const model = this.engine.chatModel({ temperature: 0.1 });
     const requestMessages = [
       new SystemMessage(systemPrompt),
-      ...truncateMessages(chatHistory.slice(0, -1) as any as ChatMessage[]),
+      ...truncateMessages(chatHistory as any as ChatMessage[]),
       ...messages,
-      ...(chatMode !== 'noContext' ? [new HumanMessage(`## Context \n ${context}`)] : []),
+      ...(needPrepareContext ? [new HumanMessage(`## Context \n ${context}`)] : []),
       new HumanMessage(`## User Query \n ${optimizedQuery}`),
     ];
 

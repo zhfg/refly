@@ -1,19 +1,19 @@
 import { IContext, SelectedContentDomain, SkillContextContentItemMetadata } from '../types';
-import { ChatMessage, MessageType, ResourceType } from '@refly-packages/openapi-schema';
+import { ResourceType } from '@refly-packages/openapi-schema';
 import { truncateMessages } from './truncator';
+import { BaseMessage } from '@langchain/core/messages';
 
-export const concatChatHistoryToStr = (messages: ChatMessage[]) => {
+export const concatChatHistoryToStr = (messages: BaseMessage[]) => {
   let chatHistoryStr = '';
 
   if (messages.length > 0) {
-    chatHistoryStr += 'Following are the chat history: \n';
-
-    const concatMessage = (content: string, type: MessageType) => {
+    const concatMessage = (content: string, type: string) => {
       return `<ChatHistoryItem type={${type}}>${content}</ChatHistoryItem>`;
     };
 
     chatHistoryStr += messages.map((m) => {
-      const { type, content } = m;
+      const type = m?.additional_kwargs?.type as string;
+      const content = m.content as string;
       return concatMessage(content, type);
     });
   }
@@ -27,7 +27,7 @@ export const concatChatHistoryToStr = (messages: ChatMessage[]) => {
 
 // citationIndex for each context item is used for LLM to cite the context item in the final answer
 export const concatContextToStr = (context: IContext) => {
-  const { contentList, resources, notes, webSearchSources } = context;
+  const { contentList = [], resources = [], notes = [], webSearchSources = [] } = context;
 
   let contextStr = '';
   let index = 0;
@@ -100,10 +100,10 @@ export const summarizeContext = (context: IContext): string => {
     // collections: collections.map((c) => ({ ...c, content: c.collection?.content?.slice(0, 50) + '...' })),
   });
 
-  return contextStr;
+  return contextStr || 'no available context';
 };
 
-export const summarizeChatHistory = (messages: ChatMessage[]): string => {
+export const summarizeChatHistory = (messages: BaseMessage[]): string => {
   const chatHistoryStr = concatChatHistoryToStr(truncateMessages(messages));
-  return chatHistoryStr;
+  return chatHistoryStr || 'no available chat history';
 };
