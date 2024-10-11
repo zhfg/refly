@@ -1,5 +1,11 @@
 import { IContext, SelectedContentDomain, SkillContextContentItemMetadata } from '../types';
-import { ResourceType } from '@refly-packages/openapi-schema';
+import {
+  SkillContextContentItem,
+  SkillContextNoteItem,
+  SkillContextResourceItem,
+  Source,
+  ResourceType,
+} from '@refly-packages/openapi-schema';
 import { truncateMessages } from './truncator';
 import { BaseMessage } from '@langchain/core/messages';
 
@@ -25,9 +31,48 @@ export const concatChatHistoryToStr = (messages: BaseMessage[]) => {
   return chatHistoryStr;
 };
 
+export const concatMergedContextToStr = (mergedContext: {
+  mentionedContext: IContext;
+  lowerPriorityContext: IContext;
+  webSearchSources: Source[];
+}) => {
+  const { mentionedContext, lowerPriorityContext, webSearchSources } = mergedContext;
+  let contextStr = '';
+
+  const webSearchContextStr = concatContextToStr({ webSearchSources });
+  const mentionedContextStr = concatContextToStr(mentionedContext);
+  const lowerPriorityContextStr = concatContextToStr(lowerPriorityContext);
+
+  contextStr = webSearchContextStr + mentionedContextStr + lowerPriorityContextStr;
+
+  if (contextStr?.length > 0) {
+    contextStr = `<Context>${contextStr}</Context>`;
+  }
+
+  return contextStr;
+};
+
+export const flattenMergedContextToSources = (mergedContext: {
+  mentionedContext: IContext;
+  lowerPriorityContext: IContext;
+  webSearchSources: Source[];
+}) => {
+  const { mentionedContext, lowerPriorityContext, webSearchSources } = mergedContext;
+
+  const sources = [
+    ...flattenContextToSources({
+      webSearchSources,
+    }),
+    ...flattenContextToSources(mentionedContext),
+    ...flattenContextToSources(lowerPriorityContext),
+  ];
+
+  return sources;
+};
+
 // TODO: should replace id with `type-index` for better llm extraction
 // citationIndex for each context item is used for LLM to cite the context item in the final answer
-export const concatContextToStr = (context: IContext) => {
+export const concatContextToStr = (context: Partial<IContext>) => {
   const { contentList = [], resources = [], notes = [], webSearchSources = [] } = context;
 
   let contextStr = '';
@@ -42,6 +87,9 @@ export const concatContextToStr = (context: IContext) => {
     contextStr += webSearchSources.map((s) => concatWebSearchSource(s.url, s.title, s.pageContent)).join('\n');
     contextStr += '\n\n';
   }
+
+  // TODO: prior handle mentioned context, includes mentioned contentList、notes、resources
+  // TODO: otherwise, the context more front will be more priority, should be most focused in the prompt
 
   if (contentList.length > 0) {
     // contextStr += 'Following are the user selected content: \n';
@@ -67,6 +115,8 @@ export const concatContextToStr = (context: IContext) => {
     };
 
     contextStr += notes.map((n) => concatNote(n.note?.noteId!, n.note?.title!, n.note?.content!)).join('\n');
+
+    contextStr += '\n\n';
   }
 
   if (resources.length > 0) {
@@ -82,10 +132,6 @@ export const concatContextToStr = (context: IContext) => {
       .join('\n');
 
     contextStr += '\n\n';
-  }
-
-  if (contextStr?.length > 0) {
-    contextStr = `<Context>${contextStr}</Context>`;
   }
 
   return contextStr;
@@ -108,3 +154,65 @@ export const summarizeChatHistory = (messages: BaseMessage[]): string => {
   const chatHistoryStr = concatChatHistoryToStr(truncateMessages(messages));
   return chatHistoryStr || 'no available chat history';
 };
+
+export function flattenContextToSources(context: Partial<IContext>): Source[] {
+  const { webSearchSources = [], contentList = [], resources = [], notes = [] } = context;
+  const sources: Source[] = [];
+
+  // Web search sources
+  webSearchSources.forEach((source, index) => {
+    sources.push({
+      url: source.url,
+      title: source.title,
+      pageContent: source.pageContent,
+      metadata: {
+        source: source.url,
+        title: source.title,
+      },
+    });
+  });
+
+  // User selected content
+  contentList.forEach((content: SkillContextContentItem, index) => {
+    const metadata = content.metadata as unknown as SkillContextContentItemMetadata;
+    sources.push({
+      url: metadata?.url,
+      title: metadata?.title,
+      pageContent: content.content,
+      metadata: {
+        source: metadata?.url,
+        title: metadata?.title,
+        entityId: metadata?.entityId,
+        entityType: metadata?.domain,
+      },
+    });
+  });
+
+  // Knowledge base notes
+  notes.forEach((note: SkillContextNoteItem, index) => {
+    sources.push({
+      title: note.note?.title,
+      pageContent: note.note?.content || '',
+      metadata: {
+        title: note.note?.title,
+        entityId: note.note?.noteId,
+        entityType: 'note',
+      },
+    });
+  });
+
+  // Knowledge base resources
+  resources.forEach((resource: SkillContextResourceItem, index) => {
+    sources.push({
+      title: resource.resource?.title,
+      pageContent: resource.resource?.content || '',
+      metadata: {
+        title: resource.resource?.title,
+        entityId: resource.resource?.resourceId,
+        entityType: 'resource',
+      },
+    });
+  });
+
+  return sources;
+}

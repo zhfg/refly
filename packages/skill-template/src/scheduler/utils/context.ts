@@ -18,7 +18,7 @@ import {
 } from './semanticSearch';
 import { BaseSkill, SkillRunnableConfig } from '../../base';
 import { mergeAndTruncateContexts, truncateContext, truncateText } from './truncator';
-import { concatContextToStr } from './summarizer';
+import { flattenMergedContextToSources, concatMergedContextToStr } from './summarizer';
 import {
   SkillContextContentItem,
   SkillContextNoteItem,
@@ -99,22 +99,27 @@ export async function prepareContext(
     collections: [],
   };
   if (remainingTokens > 0) {
+    const { contentList = [], resources = [], notes = [] } = ctx.configSnapshot.configurable;
+
+    const context = removeOverlappingContextItems(processedMentionedContext, { contentList, resources, notes });
     lowerPriorityContext = await prepareLowerPriorityContext(
       {
         query,
         maxLowerPriorityContextTokens: remainingTokens,
+        context,
       },
       ctx,
     );
   }
 
-  let mergedContext = mergeAndDeduplicateContexts(processedMentionedContext, lowerPriorityContext);
-  mergedContext = {
-    ...mergedContext,
+  const deduplicatedLowerPriorityContext = deduplicateContexts(lowerPriorityContext);
+  const mergedContext = {
+    mentionedContext: processedMentionedContext,
+    lowerPriorityContext: deduplicatedLowerPriorityContext,
     webSearchSources: processedWebSearchContext.webSearchSources,
   };
-  const contextStr = concatContextToStr(mergedContext);
-  const sources = flattenContextToSources(mergedContext);
+  const contextStr = concatMergedContextToStr(mergedContext);
+  const sources = flattenMergedContextToSources(mergedContext);
 
   ctx.ctxThis.emitEvent(
     {
@@ -228,9 +233,11 @@ export async function prepareLowerPriorityContext(
   {
     query,
     maxLowerPriorityContextTokens,
+    context,
   }: {
     query: string;
     maxLowerPriorityContextTokens: number;
+    context: IContext;
   },
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<IContext> {
@@ -238,6 +245,7 @@ export async function prepareLowerPriorityContext(
   const relevantContext = await prepareRelevantContext(
     {
       query,
+      context,
     },
     ctx,
   );
@@ -246,6 +254,7 @@ export async function prepareLowerPriorityContext(
   const containerLevelContext = await prepareContainerLevelContext(
     {
       query,
+      context,
     },
     ctx,
   );
@@ -264,13 +273,14 @@ export async function prepareLowerPriorityContext(
 export async function prepareRelevantContext(
   {
     query,
+    context,
   }: {
     query: string;
+    context: IContext;
   },
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<IContext> {
-  const { contentList = [], resources = [], notes = [] } = ctx.configSnapshot.configurable;
-
+  const { contentList = [], resources = [], notes = [] } = context;
   let relevantContexts: IContext = {
     contentList: [],
     resources: [],
@@ -295,8 +305,10 @@ export async function prepareRelevantContext(
 export async function prepareContainerLevelContext(
   {
     query,
+    context,
   }: {
     query: string;
+    context: IContext;
   },
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<IContext> {
@@ -309,7 +321,8 @@ export async function prepareContainerLevelContext(
     notes: [],
     collections: [],
   };
-  const { collections } = ctx.configSnapshot.configurable;
+
+  const { collections } = context;
 
   // 1. collections context, mainly for knowledge base search meat filter
   const relevantResourcesOrNotesFromCollections = await processCollectionsWithSimilarity(query, collections, ctx);
@@ -351,81 +364,53 @@ export async function prepareContainerLevelContext(
   return processedContext;
 }
 
-export function mergeAndDeduplicateContexts(context1: IContext, context2: IContext): IContext {
+export function deduplicateContexts(context: IContext): IContext {
   return {
-    contentList: uniqBy([...(context1?.contentList || []), ...(context2?.contentList || [])], 'content'),
-    resources: uniqBy(
-      [...(context1?.resources || []), ...(context2?.resources || [])],
-      (item) => item.resource?.content,
-    ),
-    notes: uniqBy([...(context1?.notes || []), ...(context2?.notes || [])], (item) => item.note?.content),
-    webSearchSources: uniqBy(
-      [...(context1?.webSearchSources || []), ...(context2?.webSearchSources || [])],
-      (item) => item?.pageContent,
-    ),
+    contentList: uniqBy(context.contentList || [], 'content'),
+    resources: uniqBy(context.resources || [], (item) => item.resource?.content),
+    notes: uniqBy(context.notes || [], (item) => item.note?.content),
+    webSearchSources: uniqBy(context.webSearchSources || [], (item) => item?.pageContent),
   };
 }
 
-export function flattenContextToSources(context: IContext): Source[] {
-  const { webSearchSources = [], contentList = [], resources = [], notes = [] } = context;
-  const sources: Source[] = [];
+export function removeOverlappingContextItems(context: IContext, originalContext: IContext): IContext {
+  const deduplicatedContext: IContext = {
+    contentList: [],
+    resources: [],
+    notes: [],
+  };
 
-  // Web search sources
-  webSearchSources.forEach((source, index) => {
-    sources.push({
-      url: source.url,
-      title: source.title,
-      pageContent: source.pageContent,
-      metadata: {
-        source: source.url,
-        title: source.title,
-      },
-    });
-  });
+  // Helper function to check if an item exists in the context
+  const itemExistsInContext = (item: any, contextArray: any[], idField: string) => {
+    return contextArray.some((contextItem) => contextItem[idField] === item[idField]);
+  };
 
-  // User selected content
-  contentList.forEach((content: SkillContextContentItem, index) => {
-    const metadata = content.metadata as unknown as SkillContextContentItemMetadata;
-    sources.push({
-      url: metadata?.url,
-      title: metadata?.title,
-      pageContent: content.content,
-      metadata: {
-        source: metadata?.url,
-        title: metadata?.title,
-        entityId: metadata?.entityId,
-        entityType: metadata?.domain,
-      },
-    });
-  });
+  // Deduplicate contentList
+  deduplicatedContext.contentList = originalContext.contentList.filter(
+    (item) => !itemExistsInContext(item, context.contentList, 'metadata.entityId'),
+  );
 
-  // Knowledge base notes
-  notes.forEach((note: SkillContextNoteItem, index) => {
-    sources.push({
-      title: note.note?.title,
-      pageContent: note.note?.content || '',
-      metadata: {
-        title: note.note?.title,
-        entityId: note.note?.noteId,
-        entityType: 'note',
-      },
-    });
-  });
+  // Deduplicate resources
+  deduplicatedContext.resources = originalContext.resources.filter(
+    (item) =>
+      !itemExistsInContext(
+        item.resource,
+        context.resources.map((r) => r.resource),
+        'resourceId',
+      ),
+  );
 
-  // Knowledge base resources
-  resources.forEach((resource: SkillContextResourceItem, index) => {
-    sources.push({
-      title: resource.resource?.title,
-      pageContent: resource.resource?.content || '',
-      metadata: {
-        title: resource.resource?.title,
-        entityId: resource.resource?.resourceId,
-        entityType: 'resource',
-      },
-    });
-  });
+  // Deduplicate notes
+  deduplicatedContext.notes = originalContext.notes.filter(
+    (item) =>
+      !itemExistsInContext(
+        item.note,
+        context.notes.map((n) => n.note),
+        'noteId',
+      ),
+  );
 
-  return sources;
+  return deduplicatedContext;
 }
 
 export const mutateContextMetadata = (mentionedContext: IContext, originalContext: IContext): IContext => {
