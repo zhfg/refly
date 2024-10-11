@@ -1,10 +1,8 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 
-import type { Collection, Resource, SearchDomain } from '@refly/openapi-schema';
-import { EditorInstance } from '@refly-packages/editor-core/components';
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { Mark } from '@refly/common-types';
+import { Collection, Resource } from '@refly/openapi-schema';
 
 export enum ActionSource {
   KnowledgeBase = 'knowledge-base',
@@ -143,3 +141,7 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
     updateNotePanelVisible: (visible: boolean) => set((state) => ({ ...state, notePanelVisible: visible })),
   })),
 );
+
+export const useKnowledgeBaseStoreShallow = <T>(selector: (state: KnowledgeBaseState) => T) => {
+  return useKnowledgeBaseStore(useShallow(selector));
+};

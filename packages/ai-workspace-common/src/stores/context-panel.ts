@@ -1,7 +1,8 @@
-import { TreeNodeProps, TreeProps } from '@arco-design/web-react';
+import { TreeProps } from '@arco-design/web-react';
 import { SearchDomain, SearchResult } from '@refly/openapi-schema';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 import { Mark, ContextDomain, SelectedTextDomain } from '@refly/common-types';
 
 export interface LinkMeta {
@@ -152,6 +153,7 @@ interface ContextPanelState {
   removeMark: (id: string) => void;
   toggleMarkActive: (id: string) => void;
   clearMarks: () => void;
+  updateMark: (mark: Mark) => void;
 }
 
 export const defaultSelectedTextCardState = {
@@ -245,6 +247,13 @@ export const useContextPanelStore = create<ContextPanelState>()(
         })),
       })),
     clearMarks: () => set((state) => ({ ...state, currentSelectedMarks: [] })),
+    updateMark: (mark: Mark) =>
+      set((state) => ({
+        ...state,
+        currentSelectedMarks: state.currentSelectedMarks.map((item) =>
+          item.id === mark.id ? { ...item, ...mark } : item,
+        ),
+      })),
 
     resetSelectedTextCardState: () => set((state) => ({ ...state, ...defaultSelectedTextCardState })),
 
@@ -264,3 +273,7 @@ export const useContextPanelStore = create<ContextPanelState>()(
     resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),
 );
+
+export const useContextPanelStoreShallow = <T>(selector: (state: ContextPanelState) => T) => {
+  return useContextPanelStore(useShallow(selector));
+};

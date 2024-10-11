@@ -10,11 +10,13 @@ import { IconBook } from '@arco-design/web-react/icon';
 import { NoteCard } from '@refly-packages/ai-workspace-common/components/workspace/note-list/note-card';
 import { ScrollLoading } from '../scroll-loading';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useNoteTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
 import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 
 import { LOCALE } from '@refly/common-types';
 import './index.scss';
+
 interface NoteListProps {
   listGrid?: {
     sm: number;
@@ -44,14 +46,24 @@ export const NoteList = (props: NoteListProps) => {
   }, []);
 
   const { jumpToNote } = useKnowledgeBaseJumpNewPath();
+  const { handleAddTab } = useNoteTabs();
 
   if (dataList.length === 0 && !isRequesting) {
     return <Empty />;
   }
 
+  const handleClickNote = (note: Note) => {
+    jumpToNote({ noteId: note.noteId });
+    handleAddTab({
+      title: note.title,
+      key: note.noteId,
+      content: note.contentPreview || '',
+      noteId: note.noteId,
+    });
+  };
+
   return (
     <List
-      loading={isRequesting}
       grid={
         listGrid || {
           sm: 24,
@@ -80,7 +92,7 @@ export const NoteList = (props: NoteListProps) => {
               cardData={item}
               index={key}
               cardIcon={<IconBook style={{ fontSize: '32px', strokeWidth: 3 }} />}
-              onClick={() => jumpToNote({ noteId: item.noteId })}
+              onClick={() => handleClickNote(item)}
             >
               <div className="flex items-center justify-between mt-6">
                 <div className="text-xs text-black/40">

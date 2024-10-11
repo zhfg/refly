@@ -7,8 +7,10 @@ import { SkillInstanceList } from '@refly-packages/ai-workspace-common/component
 // 样式
 import './index.scss';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
+import { useTranslation } from 'react-i18next';
 
 export const SkillManagementModal = (props: any) => {
+  const { t } = useTranslation();
   const skillStore = useSkillStore();
 
   const onCancel = () => {
@@ -18,7 +20,7 @@ export const SkillManagementModal = (props: any) => {
   return (
     <Modal
       visible={skillStore.skillManagerModalVisible}
-      title="技能管理"
+      title={t('copilot.skillDisplay.skillManager')}
       getPopupContainer={() => {
         const elem = getPopupContainer();
 

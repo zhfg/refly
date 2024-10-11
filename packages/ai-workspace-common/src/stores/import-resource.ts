@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 
 export interface LinkMeta {
   key: string;
@@ -56,3 +57,7 @@ export const useImportResourceStore = create<ImportResourceState>()(
       set((state) => ({ ...state, selectedMenuItem: menuItem })),
   })),
 );
+
+export const useImportResourceStoreShallow = <T>(selector: (state: ImportResourceState) => T) => {
+  return useImportResourceStore(useShallow(selector));
+};

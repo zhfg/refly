@@ -14,7 +14,16 @@ import { getRuntime } from '../utils/env';
 import { GetUserSettingsResponse } from '@refly/openapi-schema';
 
 export const useGetUserSettings = () => {
-  const userStore = useUserStore();
+  const userStore = useUserStore((state) => ({
+    setUserProfile: state.setUserProfile,
+    setLocalSettings: state.setLocalSettings,
+    setToken: state.setToken,
+    setIsCheckingLoginStatus: state.setIsCheckingLoginStatus,
+    loginModalVisible: state.loginModalVisible,
+    userProfile: state.userProfile,
+    localSettings: state.localSettings,
+    isCheckingLoginStatus: state.isCheckingLoginStatus,
+  }));
   const navigate = useNavigate();
 
   const [token] = useCookie('_refly_ai_sid');
@@ -40,7 +49,7 @@ export const useGetUserSettings = () => {
       error = resp.error;
       res = resp.data;
     }
-    let { localSettings } = useUserStore.getState();
+    let { localSettings } = userStore;
 
     // Handle
     if (!token || error || !res.data) {

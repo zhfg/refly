@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 
 // 搜索的内容来源
 export enum SearchTarget {
@@ -30,3 +31,7 @@ export const useSearchStateStore = create<SearchState>()(
     setSearchTarget: (searchTarget: SearchTarget) => set((state) => ({ ...state, searchTarget })),
   })),
 );
+
+export const useSearchStateStoreShallow = <T>(selector: (state: SearchState) => T) => {
+  return useSearchStateStore(useShallow(selector));
+};

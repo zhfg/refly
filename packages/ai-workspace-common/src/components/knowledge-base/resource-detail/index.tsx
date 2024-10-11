@@ -1,45 +1,58 @@
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
-import { HiOutlineLightBulb } from 'react-icons/hi2';
-import { AiOutlineCodepen } from 'react-icons/ai';
 import { IconCloseCircle, IconLoading, IconRefresh } from '@arco-design/web-react/icon';
 
 // 自定义样式
 import './index.scss';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { Skeleton, Message as message, Empty, Affix, Alert, Spin, Button } from '@arco-design/web-react';
-import {
-  type KnowledgeBaseTab,
-  useKnowledgeBaseStore,
-} from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 // 请求
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-// 类型
+
 import { Resource } from '@refly/openapi-schema';
 import { memo, useEffect, useState } from 'react';
 import { safeParseURL } from '@refly/utils/url';
-import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 import { LabelGroup } from '@refly-packages/ai-workspace-common/components/knowledge-base/label-group';
+import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 
 // content selector
 import { useContentSelector } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-content-selector';
 import '@refly-packages/ai-workspace-common/modules/content-selector/styles/content-selector.scss';
 import classNames from 'classnames';
-import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
+import { useContentSelectorStoreShallow } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
 import ResourceCollectionList from '@refly-packages/ai-workspace-common/components/knowledge-base/resource-detail/resource-collection-list';
 import { useTranslation } from 'react-i18next';
 
 export const KnowledgeBaseResourceDetail = memo(() => {
   const { t } = useTranslation();
   const [isFetching, setIsFetching] = useState(false);
-  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
+
+  const [queryParams] = useSearchParams();
+  const resId = queryParams.get('resId');
+  const kbId = queryParams.get('kbId');
+
+  const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
     currentResource: state.currentResource,
     updateResource: state.updateResource,
     resetTabs: state.resetTabs,
   }));
-  const { handleAddTab } = useKnowledgeBaseTabs();
-  // 初始块选择
-  const { showContentSelector, scope } = useContentSelectorStore((state) => ({
+  const { activeTab, handleAddTab } = useKnowledgeBaseTabs();
+
+  const resource = knowledgeBaseStore.currentResource;
+
+  useEffect(() => {
+    if (resource && activeTab !== resId && activeTab !== resource.resourceId) {
+      handleAddTab({
+        title: resource.title,
+        key: resource.resourceId,
+        content: resource.contentPreview,
+        resourceId: resource.resourceId,
+      });
+    }
+  }, [resId, activeTab, resource]);
+
+  const { showContentSelector, scope } = useContentSelectorStoreShallow((state) => ({
     showContentSelector: state.showContentSelector,
     scope: state.scope,
   }));
@@ -48,11 +61,8 @@ export const KnowledgeBaseResourceDetail = memo(() => {
     'resourceSelection',
   );
 
-  const [queryParams] = useSearchParams();
-  const resId = queryParams.get('resId');
-  const kbId = queryParams.get('kbId');
   const reloadKnowledgeBaseState = useReloadListState();
-  const [resourceDetail, setResourceDetail] = useState<Resource>(knowledgeBaseStore?.currentResource as Resource);
+  const [resourceDetail, setResourceDetail] = useState(knowledgeBaseStore?.currentResource);
 
   const handleGetDetail = async (resourceId: string, setFetch: boolean = true) => {
     setFetch && setIsFetching(true);
@@ -70,20 +80,8 @@ export const KnowledgeBaseResourceDetail = memo(() => {
         throw new Error(newRes?.errMsg);
       }
 
-      console.log('newRes', newRes);
       const resource = newRes?.data as Resource;
       knowledgeBaseStore.updateResource(resource);
-
-      setTimeout(() => {
-        // 添加新 Tab
-        const newTab: KnowledgeBaseTab = {
-          title: resource?.title || '',
-          key: resource?.resourceId || '',
-          content: resource?.contentPreview || '',
-          resourceId: resource?.resourceId || '',
-        };
-        handleAddTab(newTab);
-      });
     } catch (err) {
       message.error('获取内容详情失败，请重新刷新试试');
     }
@@ -184,7 +182,7 @@ export const KnowledgeBaseResourceDetail = memo(() => {
       {resId ? (
         <div className="knowledge-base-resource-detail-body">
           {isFetching ? (
-            <div style={{ margin: '20px auto' }}>
+            <div className="knowledge-base-resource-skeleton">
               <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
             </div>
           ) : (
@@ -244,22 +242,11 @@ export const KnowledgeBaseResourceDetail = memo(() => {
                   </a>
                 </div>
               </div>
-              {/* <div className="knowledge-base-directory-action">
-                <div className="action-summary">
-                  <HiOutlineLightBulb />
-                  <span className="action-summary-text">AI Summary</span>
-                </div>
-
-                <div className="action-summary">
-                  <AiOutlineCodepen />
-                  <span className="action-summary-text">知识图谱</span>
-                </div>
-              </div> */}
               {resourceDetail && <LabelGroup entityId={resourceDetail.resourceId} entityType={'resource'} />}
             </div>
           )}
           {isFetching ? (
-            <div style={{ margin: '20px auto' }}>
+            <div className="knowledge-base-resource-skeleton">
               <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
               <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
               <Skeleton animation style={{ marginTop: 24 }}></Skeleton>

@@ -1,13 +1,16 @@
 import { Message as message } from '@arco-design/web-react';
 
-import { KnowledgeBaseTab, useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import {
+  KnowledgeBaseTab,
+  useKnowledgeBaseStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { Resource } from '@refly/openapi-schema';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useTranslation } from 'react-i18next';
 
 export const useKnowledgeBaseTabs = () => {
   const { t } = useTranslation();
-  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
+  const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
     tabs: state.tabs,
     activeTab: state.activeTab,
     updateTabs: state.updateTabs,
@@ -24,14 +27,13 @@ export const useKnowledgeBaseTabs = () => {
       title: resource?.title || '',
       key: resource?.resourceId || '',
       content: resource?.contentPreview || '',
-      collectionId: resource?.collectionId || '',
       resourceId: resource?.resourceId || '',
     };
     handleAddTab(newTab);
   };
 
   const handleAddTab = (newTab: KnowledgeBaseTab) => {
-    const { tabs } = useKnowledgeBaseStore.getState();
+    const { tabs } = knowledgeBaseStore;
     if (tabs?.length === 1 && tabs?.[0]?.key === 'key1') {
       knowledgeBaseStore.updateTabs([newTab]);
     } else {
@@ -68,7 +70,6 @@ export const useKnowledgeBaseTabs = () => {
     const tab = tabs?.find((tab) => tab?.key === key);
 
     jumpToReadResource({
-      kbId: tab?.collectionId || '',
       resId: tab?.resourceId || '',
     });
   };

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Button, Divider, Input, Message, Select } from '@arco-design/web-react';
+import { Button, Divider, Input, Message, Select, Tooltip } from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
 import { SearchDomain } from '@refly/openapi-schema';
 import { SelectProps } from '@arco-design/web-react/es/Select/interface';
@@ -149,8 +149,18 @@ export const SearchSelect = (props: SearchSelectProps) => {
                   size="mini"
                   onClick={handleCreateNewEntity}
                 >
-                  {createLoading ? <AiOutlineLoading3Quarters /> : <HiOutlinePlus />}
-                  {t(`entitySelector.createEntity.${domain}`)}
+                  {createLoading ? (
+                    <AiOutlineLoading3Quarters />
+                  ) : (
+                    <Tooltip
+                      getPopupContainer={getPopupContainer}
+                      position="right"
+                      mini
+                      content={t(`entitySelector.createEntity.${domain}`)}
+                    >
+                      <HiOutlinePlus />
+                    </Tooltip>
+                  )}
                 </Button>
               </div>
             </>

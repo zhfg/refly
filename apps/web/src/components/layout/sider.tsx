@@ -25,7 +25,7 @@ import { IconLanguage, IconImport } from "@arco-design/web-react/icon"
 // 静态资源
 import Logo from "@/assets/logo.svg"
 import "./sider.scss"
-import { useUserStore } from "@refly-packages/ai-workspace-common/stores/user"
+import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
 import { safeParseJSON } from "@refly-packages/ai-workspace-common/utils/parse"
 // components
 import { SearchQuickOpenBtn } from "@refly-packages/ai-workspace-common/components/search-quick-open-btn"
@@ -111,7 +111,9 @@ const MenuItemTooltipContent = (props: { title: string }) => {
 }
 
 const SettingItem = () => {
-  const userStore = useUserStore()
+  const userStore = useUserStoreShallow(state => ({
+    userProfile: state.userProfile,
+  }))
   const { t } = useTranslation()
   return (
     <div className="w-full">
@@ -186,7 +188,11 @@ export const SiderLayout = () => {
   const [collapse, setCollapse] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
-  const userStore = useUserStore()
+  const userStore = useUserStoreShallow(state => ({
+    userProfile: state.userProfile,
+    loginModalVisible: state.loginModalVisible,
+    setLoginModalVisible: state.setLoginModalVisible,
+  }))
   const importResourceStore = useImportResourceStore(state => ({
     setImportResourceModalVisible: state.setImportResourceModalVisible,
     setSelectedMenuItem: state.setSelectedMenuItem,

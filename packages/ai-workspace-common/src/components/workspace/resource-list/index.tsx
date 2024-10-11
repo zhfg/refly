@@ -99,7 +99,6 @@ export const ResourceList = () => {
       pagination={false}
       dataSource={dataList}
       scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
-      loading={isRequesting}
       render={(item: Resource, key) => (
         <List.Item
           key={item?.resourceId + key}

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import type {} from '@redux-devtools/extension';
+import { useShallow } from 'zustand/react/shallow';
 import { LOCALE } from '@refly/common-types';
 import { UserSettings } from '@refly/openapi-schema';
 import { OutputLocale } from '@refly-packages/ai-workspace-common/utils/i18n';
@@ -98,3 +98,7 @@ export const useUserStore = create<UserState>()(
     resetState: () => set((state) => ({ ...state, ...defaultExtraState })),
   })),
 );
+
+export const useUserStoreShallow = <T>(selector: (state: UserState) => T) => {
+  return useUserStore(useShallow(selector));
+};

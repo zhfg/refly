@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import type {} from '@redux-devtools/extension';
-// 类型
+import { useShallow } from 'zustand/react/shallow';
 
 interface SkillJobForCopilot {
   // state
@@ -18,3 +17,7 @@ export const useSkillJobForCopilot = create<SkillJobForCopilot>()(
     setJobId: (val: string) => set({ jobId: val }),
   })),
 );
+
+export const useSkillJobForCopilotShallow = <T>(selector: (state: SkillJobForCopilot) => T) => {
+  return useSkillJobForCopilot(useShallow(selector));
+};

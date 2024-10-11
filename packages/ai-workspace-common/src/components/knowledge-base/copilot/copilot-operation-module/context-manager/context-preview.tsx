@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@arco-design/web-react';
 import { IconClose, IconDelete, IconLink } from '@arco-design/web-react/icon';
 import { Mark } from '@refly/common-types';
+import { useTranslation } from 'react-i18next';
 
 export const ContextPreview = ({
   item,
@@ -14,6 +15,8 @@ export const ContextPreview = ({
   onRemove: (id: string) => void;
   onOpenUrl: (url: string | (() => string) | (() => void)) => void;
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="context-preview">
       <div className="preview-action-container">
@@ -25,7 +28,7 @@ export const ContextPreview = ({
             size="mini"
             onClick={() => onOpenUrl(item.url)}
           >
-            打开
+            {t('common.open')}
           </Button>
           <Button
             className="preview-action-btn"
@@ -34,10 +37,10 @@ export const ContextPreview = ({
             size="mini"
             onClick={() => onRemove(item.id)}
           >
-            删除
+            {t('common.delete')}
           </Button>
           <Button className="preview-action-btn" icon={<IconClose />} type="outline" size="mini" onClick={onClose}>
-            关闭
+            {t('common.close')}
           </Button>
         </div>
       </div>

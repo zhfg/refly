@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 
 import { Collection, Conversation, Resource, SearchResult, SkillMeta } from '@refly/openapi-schema';
 import { Mark } from '@refly/common-types';
@@ -98,3 +99,7 @@ export const useSearchStore = create<SearchState>()(
     resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),
 );
+
+export const useSearchStoreShallow = <T>(selector: (state: SearchState) => T) => {
+  return useSearchStore(useShallow(selector));
+};

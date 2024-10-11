@@ -1,23 +1,27 @@
-import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
+import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useNoteStoreShallow } from '@refly-packages/ai-workspace-common/stores/note';
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 export const useKnowledgeBaseJumpNewPath = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const noteStore = useNoteStore((state) => ({
+  const noteStore = useNoteStoreShallow((state) => ({
+    notePanelVisible: state.notePanelVisible,
+    updateCurrentNote: state.updateCurrentNote,
     updateNotePanelVisible: state.updateNotePanelVisible,
   }));
-  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
+  const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
+    resourcePanelVisible: state.resourcePanelVisible,
     updateResourcePanelVisible: state.updateResourcePanelVisible,
   }));
   const navigate = useNavigate();
 
-  const jumpToNote = ({ noteId, baseUrl = '' }: { noteId; baseUrl?: string }, extraQuery?: Record<string, string>) => {
+  const jumpToNote = ({ noteId, baseUrl = '' }: { noteId: string; baseUrl?: string }) => {
     searchParams.set('noteId', noteId);
     setSearchParams(searchParams);
     navigate(`${baseUrl}/knowledge-base?${searchParams.toString()}`);
-    noteStore.updateNotePanelVisible(true);
-    knowledgeBaseStore.updateResourcePanelVisible(false);
+    if (!noteStore.notePanelVisible) {
+      noteStore.updateNotePanelVisible(true);
+    }
   };
 
   const jumpToKnowledgeBase = (
@@ -27,14 +31,18 @@ export const useKnowledgeBaseJumpNewPath = () => {
     searchParams.set('kbId', kbId);
     setSearchParams(searchParams.toString());
     navigate(`${baseUrl}/knowledge-base?${searchParams.toString()}`);
-    knowledgeBaseStore.updateResourcePanelVisible(true);
+    if (!knowledgeBaseStore.resourcePanelVisible) {
+      knowledgeBaseStore.updateResourcePanelVisible(true);
+    }
   };
 
   const jumpToReadResource = ({ resId, baseUrl = '' }: { resId: string; baseUrl?: string }) => {
     searchParams.set('resId', resId);
     setSearchParams(searchParams);
     navigate(`${baseUrl}/knowledge-base?${searchParams.toString()}`);
-    knowledgeBaseStore.updateResourcePanelVisible(true);
+    if (!knowledgeBaseStore.resourcePanelVisible) {
+      knowledgeBaseStore.updateResourcePanelVisible(true);
+    }
   };
 
   const removeKbAndResId = ({ baseUrl = '' }: { baseUrl?: string }) => {

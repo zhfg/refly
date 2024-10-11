@@ -4,7 +4,7 @@
  * 1. 传入 container、menu 元素
  * 2. 监听 container 的 resize，决定能够容纳的元素大小，进行动态的展示 menu 元素,
  */
-import { useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useState, useCallback } from 'react';
 
 interface ResizePanelProps {
   getGroupSelector: () => HTMLElement;
@@ -12,51 +12,48 @@ interface ResizePanelProps {
   paddingSize: number;
   initialContainCnt: number;
   placeholderWidth: number;
-  itemSize: number;
 }
 
-export const useResizeBox = (props: ResizePanelProps) => {
-  const {
-    getGroupSelector,
-    getResizeSelector,
-    paddingSize = 0,
-    initialContainCnt,
-    placeholderWidth,
-    itemSize = 60,
-  } = props;
+export const useResizeBox = (props: ResizePanelProps): [number, () => void] => {
+  const { getGroupSelector, getResizeSelector, paddingSize = 0, initialContainCnt, placeholderWidth } = props;
+
   const [containCnt, setContainCnt] = useState(initialContainCnt);
+
+  const updateContainCnt = useCallback(() => {
+    const panelGroup = getGroupSelector();
+    if (!panelGroup) return;
+
+    let resizeHandles = getResizeSelector();
+    if (resizeHandles.length === 0) return;
+
+    let availableWidth = panelGroup.offsetWidth - placeholderWidth - 2 * paddingSize;
+    let totalWidth = 0;
+    let canContainIndex = 0;
+
+    for (let i = 0; i < resizeHandles.length; i++) {
+      const itemWidth = resizeHandles[i].offsetWidth;
+      if (totalWidth + itemWidth > availableWidth) break;
+      totalWidth += itemWidth;
+      canContainIndex++;
+    }
+
+    setContainCnt(canContainIndex);
+  }, [getGroupSelector, getResizeSelector, placeholderWidth, paddingSize]);
 
   useLayoutEffect(() => {
     const panelGroup = getGroupSelector();
-    const resizeHandles = getResizeSelector();
-    if (!(panelGroup instanceof Element)) return;
+    if (!panelGroup) return;
 
     const observer = new ResizeObserver(() => {
-      let width = panelGroup.offsetWidth;
-      // console.log('resizeBox width', width);
-
-      let canContainIndex = 0;
-      width -= placeholderWidth;
-      width -= 2 * paddingSize;
-      canContainIndex = Math.floor(width / itemSize);
-
-      // console.log('canContainIndex', canContainIndex);
-      setContainCnt(canContainIndex);
+      updateContainCnt();
     });
+
     observer.observe(panelGroup);
-    resizeHandles.forEach((resizeHandle) => {
-      if (!(resizeHandle instanceof Element)) return;
-      observer.observe(resizeHandle);
-    });
 
     return () => {
-      observer.unobserve(panelGroup);
-      resizeHandles.forEach((resizeHandle) => {
-        observer.unobserve(resizeHandle);
-      });
       observer.disconnect();
     };
-  }, []);
+  }, [updateContainCnt]);
 
-  return [containCnt];
+  return [containCnt, updateContainCnt];
 };

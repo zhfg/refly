@@ -25,7 +25,7 @@ interface DropListProps {
   type: string;
   position?: positionType;
   handleCancel: (e: any) => void;
-  handleDeleteClick: (e: any) => void;
+  handleDeleteClick: (e: any) => Promise<void>;
   handlEditKnowledgeBase?: (e: any) => void;
   getPopupContainer?: () => HTMLElement;
 }
@@ -47,27 +47,6 @@ const DropList = (props: DropListProps) => {
           </div>
         </Menu.Item>
       )}
-      <Menu.Item key="delete">
-        <Popconfirm
-          focusLock
-          getPopupContainer={getPopupContainer}
-          title={t(`common.deleteConfirmMessage`)}
-          okText={t('common.confirm')}
-          cancelText={t('common.cancel')}
-          position={position || 'br'}
-          onOk={(e) => {
-            handleDeleteClick(e);
-          }}
-          onCancel={(e) => {
-            handleCancel(e);
-          }}
-        >
-          <div onClick={(e) => e.stopPropagation()}>
-            <RiDeleteBinLine style={iconStyle} />
-            {t('workspace.deleteDropdownMenu.delete')}
-          </div>
-        </Popconfirm>
-      </Menu.Item>
       <Menu.Item key="copy">
         <div
           onClick={(e) => {
@@ -83,6 +62,23 @@ const DropList = (props: DropListProps) => {
           <IconCopy style={iconStyle} />
           {t('contentDetail.item.copyContent')}
         </div>
+      </Menu.Item>
+      <Menu.Item key="delete">
+        <Popconfirm
+          focusLock
+          getPopupContainer={getPopupContainer}
+          title={t(`common.deleteConfirmMessage`)}
+          okText={t('common.confirm')}
+          cancelText={t('common.cancel')}
+          position={position || 'br'}
+          onOk={handleDeleteClick}
+          onCancel={handleCancel}
+        >
+          <div onClick={(e) => e.stopPropagation()}>
+            <RiDeleteBinLine style={iconStyle} />
+            {t('workspace.deleteDropdownMenu.delete')}
+          </div>
+        </Popconfirm>
       </Menu.Item>
     </Menu>
   );

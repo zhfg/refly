@@ -129,7 +129,7 @@ export const ChatActions = (props: ChatActionsProps) => {
               handleSendMessage('normal');
             }}
           >
-            {t('copilot.send')}
+            {t('copilot.chatActions.send')}
           </Button>
         ) : (
           <Dropdown
