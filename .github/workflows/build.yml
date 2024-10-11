@@ -2,6 +2,13 @@ name: Build
 
 on:
   workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      web_deploy_project:
+        required: false
+        type: string
 
 jobs:
   build:
@@ -28,3 +35,31 @@ jobs:
 
       - name: Build
         run: pnpm build
+        env:
+          TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+
+      - name: Create Sentry release
+        if: inputs.environment == 'production'
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: refly-ai
+          SENTRY_PROJECT: web
+        with:
+          environment: ${{ inputs.environment }}
+
+      - name: Remove web source map files
+        if: inputs.web_deploy_project != ''
+        run: find apps/web/dist/assets -name "*.map" -type f -delete
+
+      - name: Deploy web to Cloudflare Pages
+        if: inputs.web_deploy_project != ''
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: ${{ inputs.web_deploy_project }}
+          branch: main
+          workingDirectory: apps/web
+          directory: dist

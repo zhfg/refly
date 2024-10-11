@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-
+import { useShallow } from 'zustand/react/shallow';
 import { SkillTemplate, SkillInstance } from '@refly/openapi-schema';
 
 export interface SkillState {
@@ -51,3 +51,7 @@ export const useSkillStore = create<SkillManageState>()(
     resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),
 );
+
+export const useSkillStoreShallow = <T>(selector: (state: SkillManageState) => T) => {
+  return useSkillStore(useShallow(selector));
+};

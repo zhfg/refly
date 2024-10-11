@@ -15,6 +15,8 @@ import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note
 
 import './index.scss';
 import classNames from 'classnames';
+import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
+import { IconLoading } from '@arco-design/web-react/icon';
 
 const RadioGroup = Radio.Group;
 
@@ -57,9 +59,12 @@ const NewFileButton = (props: { val: string }) => {
   const importResourceStore = useImportResourceStore();
   const importKnowledgeModal = useImportKnowledgeModal();
   const { handleInitEmptyNote } = useAINote();
+  const { newNoteCreating } = useNoteStore((state) => ({
+    newNoteCreating: state.newNoteCreating,
+  }));
 
   const handleCreateButtonClick = (type: string) => {
-    if (type === 'note') {
+    if (type === 'note' && !newNoteCreating) {
       handleInitEmptyNote('');
     }
     if (type === 'resource') {
@@ -75,7 +80,7 @@ const NewFileButton = (props: { val: string }) => {
     <Dropdown.Button
       type="primary"
       droplist={<NewFileDropList handleCreateButtonClick={(type) => handleCreateButtonClick(type)} />}
-      icon={<HiOutlineChevronDown />}
+      icon={newNoteCreating ? <IconLoading /> : <HiOutlineChevronDown />}
     >
       <div onClick={() => handleCreateButtonClick(props.val)}>{t(`workspace.contentPanel.newButton.${props.val}`)}</div>
     </Dropdown.Button>

@@ -199,13 +199,16 @@
       "new": "Create New {{domain}}"
     },
     "note": {
-      "newNote": "Click to add new note",
+      "connecting": "Connecting...",
+      "newNote": "Create New Note",
       "noteCharsCount": "{{count}} characters",
       "autoSaved": "Saved",
       "saving": "Saving...",
       "readOnly": "Read Only",
       "edit": "Edit",
-      "serviceDisconnected": "Service Disconnected"
+      "serviceDisconnected": "Service Disconnected",
+      "createNoteFailed": "Failed to create note, please try again!",
+      "defaultTitle": "Untitled"
     },
     "context": {
       "contentSelector": "Content Selector",

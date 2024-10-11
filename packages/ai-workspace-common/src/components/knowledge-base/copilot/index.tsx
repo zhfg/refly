@@ -1,14 +1,6 @@
-import { Button, Checkbox } from '@arco-design/web-react';
-
-// 自定义组件
-import { IconClose, IconEdit, IconFile, IconHistory, IconPlusCircle, IconSearch } from '@arco-design/web-react/icon';
-// 自定义样式
-import './index.scss';
-// 自定义组件
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
-import { useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
-import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
 import { memo, useEffect, useState, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChatMessages } from './chat-messages';
 import { ConvListModal } from './conv-list-modal';
 import { KnowledgeBaseListModal } from './knowledge-base-list-modal';
@@ -24,22 +16,16 @@ import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/
 import { ActionSource } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useKnowledgeBaseStore } from '../../../stores/knowledge-base';
 // utils
-import { LOCALE } from '@refly/common-types';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { useTranslation } from 'react-i18next';
-import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
 import { useResizeCopilot } from '@refly-packages/ai-workspace-common/hooks/use-resize-copilot';
-import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { RegisterSkillComponent } from '@refly-packages/ai-workspace-common/skills/main-logic/register-skill-component';
-import classNames from 'classnames';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
-import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
-import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
-import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 import { useDynamicInitContextPanelState } from '@refly-packages/ai-workspace-common/hooks/use-init-context-panel-state';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+
+import './index.scss';
 
 interface AICopilotProps {
   disable?: boolean;
@@ -47,24 +33,13 @@ interface AICopilotProps {
   jobId?: string;
 }
 
-const skillContainerPadding = 8;
-const skillContainerHeight = 24 + 2 * skillContainerPadding;
-// const selectedSkillContainerHeight = 32;
-const inputContainerHeight = 115;
-const chatContainerPadding = 8;
-const layoutContainerPadding = 16;
-const selectedSkillContainerHeight = 270 + 32 + 2 * chatContainerPadding;
-const knowledgeBaseDetailHeaderHeight = 40;
-
 export const AICopilot = memo((props: AICopilotProps) => {
-  // 所属的环境
-  const runtime = getRuntime();
-  const isWeb = runtime === 'web';
+  const { t } = useTranslation();
+  const { disable, jobId, source } = props;
 
   const [searchParams] = useSearchParams();
-  const userStore = useUserStore((state) => ({
-    localSettings: state.localSettings,
-  }));
+  const convId = searchParams.get('convId');
+
   const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
     resourcePanelVisible: state.resourcePanelVisible,
     kbModalVisible: state.kbModalVisible,
@@ -76,26 +51,18 @@ export const AICopilot = memo((props: AICopilotProps) => {
     convModalVisible: state.convModalVisible,
     sourceListModalVisible: state.sourceListModalVisible,
   }));
+
   const contextPanelStore = useContextPanelStore((state) => ({
     setShowContextCard: state.setShowContextCard,
   }));
-  const noteStore = useNoteStore((state) => ({
-    notePanelVisible: state.notePanelVisible,
-    updateNotePanelVisible: state.updateNotePanelVisible,
-  }));
-  const searchStore = useSearchStore((state) => ({
-    pages: state.pages,
-    isSearchOpen: state.isSearchOpen,
-    setPages: state.setPages,
-    setIsSearchOpen: state.setIsSearchOpen,
-  }));
-  const { contextCardHeight, computedShowContextCard, showContextState } = useCopilotContextState();
+
   const chatStore = useChatStore((state) => ({
     messages: state.messages,
     resetState: state.resetState,
     setMessages: state.setMessages,
     setInvokeParams: state.setInvokeParams,
   }));
+
   const conversationStore = useConversationStore((state) => ({
     isNewConversation: state.isNewConversation,
     currentConversation: state.currentConversation,
@@ -103,31 +70,12 @@ export const AICopilot = memo((props: AICopilotProps) => {
     setCurrentConversation: state.setCurrentConversation,
     setIsNewConversation: state.setIsNewConversation,
   }));
+
   const [isFetching, setIsFetching] = useState(false);
+
   const { runSkill } = useBuildThreadAndRun();
-  const searchStateStore = useSearchStateStore((state) => ({
-    searchTarget: state.searchTarget,
-  }));
-  const messageStateStore = useMessageStateStore((state) => ({
-    pending: state.pending,
-    pendingFirstToken: state.pendingFirstToken,
-    resetState: state.resetState,
-  }));
-  const skillStore = useSkillStore((state) => ({
-    selectedSkill: state.selectedSkill,
-    setSelectedSkillInstance: state.setSelectedSkillInstance,
-  }));
 
-  const convId = searchParams.get('convId');
-  const noteId = searchParams.get('noteId');
-  const resId = searchParams.get('resId');
   const { resetState } = useResetState();
-
-  const { t, i18n } = useTranslation();
-  const uiLocale = i18n?.languages?.[0] as LOCALE;
-  const outputLocale = userStore?.localSettings?.outputLocale || 'en';
-
-  const { disable, jobId, source } = props;
 
   const copilotOperationModuleRef = useRef<HTMLDivElement>(null);
   const [operationModuleHeight, setOperationModuleHeight] = useState(0);
@@ -159,23 +107,18 @@ export const AICopilot = memo((props: AICopilotProps) => {
   useAINote(true);
 
   const handleGetThreadMessages = async (convId: string) => {
-    // 异步操作
     const { data: res, error } = await getClient().getConversationDetail({
       path: {
         convId,
       },
     });
 
-    console.log('getThreadMessages', res, error);
-
     if (error) {
       throw error;
     }
 
-    // 清空之前的状态
     resetState();
 
-    // 设置会话和消息
     if (res?.data) {
       conversationStore.setCurrentConversation(res?.data);
     }
@@ -185,25 +128,21 @@ export const AICopilot = memo((props: AICopilotProps) => {
 
   const getThreadMessagesByJobId = async (jobId: string) => {
     setIsFetching(true);
-    try {
-      const { data: res, error } = await getClient().getSkillJobDetail({
-        query: {
-          jobId,
-        },
-      });
 
-      if (error) {
-        throw error;
-      }
+    const { data: res, error } = await getClient().getSkillJobDetail({
+      query: {
+        jobId,
+      },
+    });
 
-      // 清空之前的状态
-      resetState();
-
-      setIsFetching(false);
-      chatStore.setMessages(res?.data?.messages || []);
-    } catch (error) {
-      console.log('getThreadMessagesByJobId error', error);
+    if (error) {
+      throw error;
     }
+
+    resetState();
+
+    setIsFetching(false);
+    chatStore.setMessages(res?.data?.messages || []);
   };
 
   const handleConvTask = async (convId: string) => {
@@ -217,7 +156,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
         // 更换成基于 task 的消息模式，核心是基于 task 来处理
         runSkill(newQAText, invokeParams);
       } else if (convId) {
-        handleGetThreadMessages(convId);
+        await handleGetThreadMessages(convId);
       }
     } catch (err) {
       console.log('thread error');

@@ -32,8 +32,6 @@ import classNames from 'classnames';
 import { parseMarkdownWithCitations } from '@refly/utils/parse';
 import { useState, useEffect } from 'react';
 
-const citationRegex = /\([|【)citation()|】)]\(\d+\)/g;
-
 export const HumanMessage = memo(
   (props: { message: Partial<ChatMessage>; profile: { avatar: string; name: string }; disable?: boolean }) => {
     const { message, profile } = props;

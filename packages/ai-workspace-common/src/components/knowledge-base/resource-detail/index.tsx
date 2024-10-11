@@ -1,6 +1,4 @@
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
-import { HiOutlineLightBulb } from 'react-icons/hi2';
-import { AiOutlineCodepen } from 'react-icons/ai';
 import { IconCloseCircle, IconLoading, IconRefresh } from '@arco-design/web-react/icon';
 
 // 自定义样式
@@ -17,7 +15,6 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { Resource } from '@refly/openapi-schema';
 import { memo, useEffect, useState } from 'react';
 import { safeParseURL } from '@refly/utils/url';
-import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 import { LabelGroup } from '@refly-packages/ai-workspace-common/components/knowledge-base/label-group';
 import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 
@@ -37,7 +34,7 @@ export const KnowledgeBaseResourceDetail = memo(() => {
     updateResource: state.updateResource,
     resetTabs: state.resetTabs,
   }));
-  const { handleAddTab } = useKnowledgeBaseTabs();
+
   // 初始块选择
   const { showContentSelector, scope } = useContentSelectorStore((state) => ({
     showContentSelector: state.showContentSelector,
@@ -70,20 +67,8 @@ export const KnowledgeBaseResourceDetail = memo(() => {
         throw new Error(newRes?.errMsg);
       }
 
-      console.log('newRes', newRes);
       const resource = newRes?.data as Resource;
       knowledgeBaseStore.updateResource(resource);
-
-      setTimeout(() => {
-        // 添加新 Tab
-        const newTab: KnowledgeBaseTab = {
-          title: resource?.title || '',
-          key: resource?.resourceId || '',
-          content: resource?.contentPreview || '',
-          resourceId: resource?.resourceId || '',
-        };
-        handleAddTab(newTab);
-      });
     } catch (err) {
       message.error('获取内容详情失败，请重新刷新试试');
     }

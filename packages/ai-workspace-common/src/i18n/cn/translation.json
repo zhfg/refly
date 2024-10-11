@@ -199,13 +199,16 @@
       "new": "创建新 {{domain}}"
     },
     "note": {
+      "connecting": "连接中...",
       "newNote": "创建新笔记",
       "noteCharsCount": "共 {{count}} 字",
       "autoSaved": "笔记已自动保存",
       "saving": "笔记保存中...",
       "readOnly": "只读",
       "edit": "编辑",
-      "serviceDisconnected": "服务已断开"
+      "serviceDisconnected": "服务已断开",
+      "createNoteFailed": "创建笔记失败，请重试！",
+      "defaultTitle": "未命名"
     },
     "context": {
       "contentSelector": "内容划线选择器",

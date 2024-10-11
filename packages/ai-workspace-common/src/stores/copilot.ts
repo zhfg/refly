@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import type {} from '@redux-devtools/extension';
+import { useShallow } from 'zustand/react/shallow';
 
 interface CopilotState {
   // state
@@ -17,3 +17,7 @@ export const useCopilotStore = create<CopilotState>()(
     setIsCopilotOpen: (val: boolean) => set({ isCopilotOpen: val }),
   })),
 );
+
+export const useCopilotStoreShallow = <T>(selector: (state: CopilotState) => T) => {
+  return useCopilotStore(useShallow(selector));
+};

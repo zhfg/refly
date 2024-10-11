@@ -4,7 +4,6 @@
   "description": "",
   "main": "src/index.ts",
   "scripts": {
-    "build": "echo \"Skip build\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

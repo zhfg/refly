@@ -72,7 +72,7 @@ const ViewMoreItem = ({ sources = [], extraCnt = 0 }: { sources: Source[]; extra
     >
       <div className="flex gap-2 items-center">
         <div className="overflow-hidden flex-1">
-          <div className="overflow-hidden w-full font-medium whitespace-nowrap break-all text-ellipsis text-zinc-400 text-zinc-950">
+          <div className="overflow-hidden w-full font-medium whitespace-nowrap break-all text-ellipsis text-zinc-950">
             {t('copilot.sourceListModal.moreSources', { count: extraCnt })}
           </div>
         </div>
@@ -103,9 +103,7 @@ export const ResourceItem = (props: {
   showDesc?: boolean;
 }) => {
   const { item, index, showDesc = false } = props;
-  const { handleAddTabWithResource } = useKnowledgeBaseTabs();
   const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
-  const navigate = useNavigate();
 
   return (
     <div className="knowledge-base-directory-item source-list-container" key={index}>
@@ -130,7 +128,6 @@ export const ResourceItem = (props: {
             <IconBook
               onClick={() => {
                 jumpToReadResource({
-                  kbId: item?.collectionId,
                   resId: item?.resourceId,
                 });
               }}

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, memo } from 'react';
 import throttle from 'lodash.throttle';
 import { Button, Tabs } from '@arco-design/web-react';
 import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
@@ -9,24 +9,23 @@ import { KnowledgeBaseResourceDetail } from '../resource-detail';
 import { KnowledgeBaseDetailEmpty } from '../knowledge-base-detail-empty';
 // 样式
 import './index.scss';
-import { ActionSource, useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { ActionSource, useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { KnowledgeBaseListModal } from '../copilot/knowledge-base-list-modal';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 import { HiOutlineSearch } from 'react-icons/hi';
 import { HiChevronLeft, HiChevronRight } from 'react-icons/hi2';
 
-import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
+import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 const TabPane = Tabs.TabPane;
 const MIN_LEFT_PANEL_SIZE = 72;
 
 export const KnowledgeBaseDetail = () => {
-  const searchStore = useSearchStore();
-
   const [queryParams] = useSearchParams();
   const resId = queryParams.get('resId');
   const kbId = queryParams.get('kbId');
+
   const [leftPanelSize, setLeftPanelSize] = useState(30);
   const [isSmall, setIsSmall] = useState(false);
   const [hideBtn, setHideBtn] = useState(false);
@@ -34,7 +33,13 @@ export const KnowledgeBaseDetail = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { tabs, activeTab, setActiveTab, handleDeleteTab } = useKnowledgeBaseTabs();
 
-  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
+  const searchStore = useSearchStoreShallow((state) => ({
+    pages: state.pages,
+    setPages: state.setPages,
+    setIsSearchOpen: state.setIsSearchOpen,
+  }));
+
+  const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
     kbModalVisible: state.kbModalVisible,
     actionSource: state.actionSource,
     updateResourcePanelVisible: state.updateResourcePanelVisible,

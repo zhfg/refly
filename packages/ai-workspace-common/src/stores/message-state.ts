@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-
-import { ChatTaskType } from '@refly/openapi-schema';
+import { useShallow } from 'zustand/react/shallow';
 import type { MessageState } from '@refly/common-types';
 
 interface MessageStoreState extends MessageState {
@@ -32,3 +31,7 @@ export const useMessageStateStore = create<MessageStoreState>()(
     resetState: () => set((state) => ({ ...state, ...defaultMessageState })),
   })),
 );
+
+export const useMessageStateStoreShallow = <T>(selector: (state: MessageStoreState) => T) => {
+  return useMessageStateStore(useShallow(selector));
+};
