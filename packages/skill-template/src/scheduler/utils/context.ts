@@ -55,6 +55,7 @@ export async function prepareContext(
   } = ctx.configSnapshot.configurable;
   const enableWebSearch = ctx.tplConfig?.enableWebSearch?.value;
 
+  // TO TEST
   const modelWindowSize = ModelContextLimitMap[modelName];
   const maxContextTokens = Math.floor(modelWindowSize * MAX_CONTEXT_RATIO);
   // TODO: think remainingTokens may out of range
@@ -277,14 +278,16 @@ export async function prepareRelevantContext(
   };
 
   // 1. selected content context
-  relevantContexts.contentList = await processSelectedContentWithSimilarity(query, contentList, Infinity, ctx);
+  relevantContexts.contentList =
+    contentList.length > 0 ? await processSelectedContentWithSimilarity(query, contentList, Infinity, ctx) : [];
 
   // 2. notes context
-  relevantContexts.notes = await processNotesWithSimilarity(query, notes, Infinity, ctx);
+  relevantContexts.notes = notes.length > 0 ? await processNotesWithSimilarity(query, notes, Infinity, ctx) : [];
 
   // 3. resources context
   // remainingTokens = maxContextTokens - notesTokens;
-  relevantContexts.resources = await processResourcesWithSimilarity(query, resources, Infinity, ctx);
+  relevantContexts.resources =
+    resources.length > 0 ? await processResourcesWithSimilarity(query, resources, Infinity, ctx) : [];
 
   return relevantContexts;
 }

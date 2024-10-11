@@ -17,11 +17,12 @@ import { genUniqueId } from '@refly/utils';
 import { truncateText } from './truncator';
 
 // TODO:替换成实际的 Chunk 定义，然后进行拼接，拼接时包含元数据和分隔符
-export function assembleChunks(chunks: DocumentInterface[]): string {
-  // 按照原始位置排序 chunks
-  chunks.sort((a, b) => a.metadata.start - b.metadata.start);
+export function assembleChunks(chunks: DocumentInterface[] = []): string {
+  // if chunks has metadata.start, sort by start
+  if (chunks?.[0]?.metadata?.start) {
+    chunks.sort((a, b) => a.metadata.start - b.metadata.start);
+  }
 
-  // 组装 chunks 为一个字符串，可能需要添加一些标记来指示不连续的部分
   return chunks.map((chunk) => chunk.pageContent).join('\n [...] \n');
 }
 
@@ -364,7 +365,7 @@ export async function processResourcesWithSimilarity(
   for (const resource of sortedResources) {
     const resourceTokens = countToken(resource?.resource?.content || '');
 
-    if (resourceTokens > MAX_NEED_RECALL_TOKEN && !resource.metadata?.useWholeContent) {
+    if (resourceTokens > MAX_NEED_RECALL_TOKEN || !resource.metadata?.useWholeContent) {
       // 2.1 大内容，直接走召回
       const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
         query,
@@ -601,6 +602,7 @@ export async function processWholeSpaceWithSimilarity(
   return result;
 }
 
+// TODO: 召回有问题，需要优化
 export async function knowledgeBaseSearchGetRelevantChunks(
   query: string,
   metadata: { entities: Entity[]; domains: SearchDomain[]; limit: number },
@@ -616,7 +618,7 @@ export async function knowledgeBaseSearchGetRelevantChunks(
       limit: metadata.limit,
       domains: metadata.domains,
     },
-    { enableReranker: true },
+    { enableReranker: false },
   );
   const relevantChunks = res?.data?.map((item) => ({
     id: item.id,
@@ -631,6 +633,7 @@ export async function knowledgeBaseSearchGetRelevantChunks(
   return relevantChunks;
 }
 
+// TODO: 召回有问题，需要优化
 export async function inMemoryGetRelevantChunks(
   query: string,
   content: string,
