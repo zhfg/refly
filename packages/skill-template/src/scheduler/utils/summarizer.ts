@@ -31,7 +31,7 @@ export const concatContextToStr = (context: IContext) => {
   const { contentList = [], resources = [], notes = [], webSearchSources = [] } = context;
 
   let contextStr = '';
-  let index = 0;
+  let index = 1; // start from 1 to avoid 0 index issue in citation
 
   if (webSearchSources.length > 0) {
     // contextStr += 'Following are the web search results: \n';

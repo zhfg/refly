@@ -122,7 +122,13 @@ export async function mergeAndTruncateContexts(
   const uniqueContentList = Array.from(new Set(allContentList.map((item) => JSON.stringify(item)))).map((item) =>
     JSON.parse(item),
   );
-  const sortedContentList = await sortContentBySimilarity(query, uniqueContentList, ctx);
+
+  let sortedContentList: SkillContextContentItem[] = [];
+  if (uniqueContentList.length > 1) {
+    sortedContentList = await sortContentBySimilarity(query, uniqueContentList, ctx);
+  } else {
+    sortedContentList = uniqueContentList;
+  }
 
   // 2. 合并 resources 和 notes 到一个数组
   const combinedItems: (SkillContextResourceItem | SkillContextNoteItem)[] = [
@@ -162,7 +168,13 @@ export async function mergeAndTruncateContexts(
       id: (item as SkillContextResourceItem).resource?.resourceId || (item as SkillContextNoteItem).note?.noteId,
     },
   }));
-  const sortedItems = await sortContentBySimilarity(query, itemsForSorting, ctx);
+
+  let sortedItems: (SkillContextResourceItem | SkillContextNoteItem)[] = [];
+  if (itemsForSorting.length > 1) {
+    sortedItems = await sortContentBySimilarity(query, itemsForSorting, ctx);
+  } else {
+    sortedItems = itemsForSorting;
+  }
 
   // 还原排序后的实际 items
   const sortedCombinedItems = sortedItems.map(

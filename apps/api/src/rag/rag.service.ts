@@ -110,10 +110,9 @@ export class RAGService {
     const response = await fetch(READER_URL + url, {
       method: 'GET',
       headers: {
-        Authorization:
-          process.env.NODE_ENV === 'production' && this.config.get('rag.jinaToken')
-            ? `Bearer ${this.config.get('rag.jinaToken')}`
-            : undefined,
+        Authorization: this.config.get('rag.jinaToken')
+          ? `Bearer ${this.config.get('rag.jinaToken')}`
+          : undefined,
         Accept: 'application/json',
       },
     });

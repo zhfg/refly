@@ -127,6 +127,7 @@ export async function prepareContext(
   return contextStr;
 }
 
+// TODO: should be agentic search: 1. query split 2. atom query rewrite 3. multi-round search 4. reflection 5. end? -> iterative search
 export async function prepareWebSearchContext(
   {
     query,
@@ -349,11 +350,14 @@ export async function prepareContainerLevelContext(
 
 export function mergeAndDeduplicateContexts(context1: IContext, context2: IContext): IContext {
   return {
-    contentList: uniqBy([...context1.contentList, ...context2.contentList], 'content'),
-    resources: uniqBy([...context1.resources, ...context2.resources], (item) => item.resource?.content),
-    notes: uniqBy([...context1.notes, ...context2.notes], (item) => item.note?.content),
+    contentList: uniqBy([...(context1?.contentList || []), ...(context2?.contentList || [])], 'content'),
+    resources: uniqBy(
+      [...(context1?.resources || []), ...(context2?.resources || [])],
+      (item) => item.resource?.content,
+    ),
+    notes: uniqBy([...(context1?.notes || []), ...(context2?.notes || [])], (item) => item.note?.content),
     webSearchSources: uniqBy(
-      [...(context1.webSearchSources || []), ...(context2.webSearchSources || [])],
+      [...(context1?.webSearchSources || []), ...(context2?.webSearchSources || [])],
       (item) => item?.pageContent,
     ),
   };

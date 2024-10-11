@@ -14,6 +14,7 @@ import { MAX_NEED_RECALL_TOKEN, SHORT_CONTENT_THRESHOLD, MIN_RELEVANCE_SCORE } f
 import { DocumentInterface, Document } from '@langchain/core/documents';
 import { ContentNodeType, NodeMeta } from '../../engine';
 import { genUniqueId } from '@refly/utils';
+import { truncateText } from './truncator';
 
 // TODO:替换成实际的 Chunk 定义，然后进行拼接，拼接时包含元数据和分隔符
 export function assembleChunks(chunks: DocumentInterface[]): string {
@@ -34,7 +35,7 @@ export async function sortContentBySimilarity(
   // 1. construct documents
   const documents: Document<NodeMeta>[] = contentList.map((item) => {
     return {
-      pageContent: item.content,
+      pageContent: truncateText(item.content, MAX_NEED_RECALL_TOKEN),
       metadata: {
         ...item.metadata,
         uniqueId,
@@ -74,7 +75,7 @@ export async function sortNotesBySimilarity(
   // 1. construct documents
   const documents: Document<NodeMeta>[] = notes.map((item) => {
     return {
-      pageContent: item.note?.content || '',
+      pageContent: truncateText(item.note?.content || '', MAX_NEED_RECALL_TOKEN),
       metadata: {
         ...item.metadata,
         uniqueId,
@@ -112,7 +113,7 @@ export async function sortResourcesBySimilarity(
   // 1. construct documents
   const documents: Document<NodeMeta>[] = resources.map((item) => {
     return {
-      pageContent: item.resource?.content || '',
+      pageContent: truncateText(item.resource?.content || '', MAX_NEED_RECALL_TOKEN),
       metadata: {
         ...item.metadata,
         uniqueId,
@@ -156,8 +157,13 @@ export async function processSelectedContentWithSimilarity(
     return [];
   }
 
-  // 1. 计算相似度并排序
-  const sortedContent = await sortContentBySimilarity(query, contentList, ctx);
+  // 1. calculate similarity and sort
+  let sortedContent: SkillContextContentItem[] = [];
+  if (contentList.length > 1) {
+    sortedContent = await sortContentBySimilarity(query, contentList, ctx);
+  } else {
+    sortedContent = contentList;
+  }
 
   let result: SkillContextContentItem[] = [];
   let usedTokens = 0;
@@ -245,8 +251,13 @@ export async function processNotesWithSimilarity(
     return [];
   }
 
-  // 1. 计算相似度并排序
-  const sortedNotes = await sortNotesBySimilarity(query, notes, ctx);
+  // 1. calculate similarity and sort
+  let sortedNotes: SkillContextNoteItem[] = [];
+  if (notes.length > 1) {
+    sortedNotes = await sortNotesBySimilarity(query, notes, ctx);
+  } else {
+    sortedNotes = notes;
+  }
 
   let result: SkillContextNoteItem[] = [];
   let usedTokens = 0;
@@ -338,8 +349,13 @@ export async function processResourcesWithSimilarity(
     return [];
   }
 
-  // 1. 计算相似度并排序
-  const sortedResources = await sortResourcesBySimilarity(query, resources, ctx);
+  // 1. calculate similarity and sort
+  let sortedResources: SkillContextResourceItem[] = [];
+  if (resources.length > 1) {
+    sortedResources = await sortResourcesBySimilarity(query, resources, ctx);
+  } else {
+    sortedResources = resources;
+  }
 
   let result: SkillContextResourceItem[] = [];
   let usedTokens = 0;
