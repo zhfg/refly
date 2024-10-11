@@ -173,7 +173,7 @@ export async function processSelectedContentWithSimilarity(
   for (const content of sortedContent) {
     const contentTokens = countToken(content.content);
 
-    if (contentTokens > MAX_NEED_RECALL_TOKEN && !content.metadata?.useWholeContent) {
+    if (contentTokens > MAX_NEED_RECALL_TOKEN || !content.metadata?.useWholeContent) {
       // 2.1 大内容，直接走召回
       const contentMeta = content?.metadata as any as SkillContextContentItemMetadata;
       const relevantChunks = await inMemoryGetRelevantChunks(
@@ -267,7 +267,7 @@ export async function processNotesWithSimilarity(
   for (const note of sortedNotes) {
     const noteTokens = countToken(note?.note?.content || '');
 
-    if (noteTokens > MAX_NEED_RECALL_TOKEN && !note.metadata?.useWholeContent) {
+    if (noteTokens > MAX_NEED_RECALL_TOKEN || !note.metadata?.useWholeContent) {
       // 1.1 大内容，直接走召回
       const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
         query,
