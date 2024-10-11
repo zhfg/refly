@@ -212,7 +212,7 @@
     },
     "context": {
       "contentSelector": "Content Selector",
-      "clearSelector": "Clear Selection",
+      "clearContext": "Clear Context",
       "resource": "Resource",
       "resources": "Resource",
       "note": "Note",
