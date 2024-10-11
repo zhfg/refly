@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import type {} from '@redux-devtools/extension';
 import { Mark, MarkScope } from '@refly/common-types';
+import { useShallow } from 'zustand/react/shallow';
 
 interface ContentSelectorState {
   // state
@@ -33,3 +33,7 @@ export const useContentSelectorStore = create<ContentSelectorState>()((set) => (
   setScope: (scope: 'block' | 'inline') => set({ scope }),
   resetState: () => set((state) => ({ ...state, ...defaultState })),
 }));
+
+export const useContentSelectorStoreShallow = <T>(selector: (state: ContentSelectorState) => T) => {
+  return useContentSelectorStore(useShallow(selector));
+};

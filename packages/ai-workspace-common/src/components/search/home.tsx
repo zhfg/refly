@@ -1,23 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Command } from 'cmdk';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
-import * as Popover from '@radix-ui/react-popover';
-import { Logo, LinearIcon, FigmaIcon, SlackIcon, YouTubeIcon, RaycastIcon } from './icons';
-import {} from '@heroicons/react/24/outline';
 import { IconMessage, IconApps, IconFolderAdd } from '@arco-design/web-react/icon';
-import { useDebouncedCallback } from 'use-debounce';
-import { defaultFilter } from './cmdk/filter';
 
 import './index.scss';
 import { Item } from './item';
 
-// request
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { SearchDomain, SearchRequest, SearchResult } from '@refly/openapi-schema';
-import { useNavigate } from 'react-router-dom';
-import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
-import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useBigSearchQuickAction } from '@refly-packages/ai-workspace-common/hooks/use-big-search-quick-action';
 import { RenderItem } from '@refly-packages/ai-workspace-common/components/search/types';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
@@ -40,11 +28,7 @@ export function Home({
   searchValue: string;
   setValue: (val: string) => void;
 }) {
-  const navigate = useNavigate();
   const searchStore = useSearchStore();
-  const knowledgeBaseStore = useKnowledgeBaseStore();
-  const { jumpToKnowledgeBase, jumpToNote, jumpToReadResource } = useKnowledgeBaseJumpNewPath();
-  const [searchParams, setSearchParams] = useSearchParams();
   const { triggerSkillQuickAction } = useBigSearchQuickAction();
   const skillStore = useSkillStore();
   const { t } = useTranslation();

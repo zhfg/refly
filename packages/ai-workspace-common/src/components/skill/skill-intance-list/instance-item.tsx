@@ -17,6 +17,7 @@ import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill'
 import { SkillInstanceListSource } from '@refly-packages/ai-workspace-common/components/skill/skill-intance-list';
 import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
+import { IconLoading } from '@arco-design/web-react/icon';
 
 interface InstanceItemProps {
   data: SkillInstance;
@@ -57,7 +58,10 @@ export const InstanceItem = (props: InstanceItemProps) => {
     navigate(`/skill-detail?skillId=${skillId}`);
   };
 
+  const [isRequesting, setIsRequesting] = useState(false);
+
   const handlePinSkill = async () => {
+    setIsRequesting(true);
     const { error } = await getClient()[data.pinnedAt ? 'unpinSkillInstance' : 'pinSkillInstance']({
       body: { skillId: data.skillId },
     });
@@ -69,6 +73,7 @@ export const InstanceItem = (props: InstanceItemProps) => {
         refreshList();
       }
     }
+    setIsRequesting(false);
   };
 
   const handleTopSkill = (e) => {
@@ -132,7 +137,8 @@ export const InstanceItem = (props: InstanceItemProps) => {
               <Button
                 className="instance-item__action-icon"
                 type="text"
-                icon={data.pinnedAt ? <BsPinAngleFill /> : <BsPinAngle />}
+                disabled={isRequesting}
+                icon={isRequesting ? <IconLoading /> : data.pinnedAt ? <BsPinAngleFill /> : <BsPinAngle />}
                 onClick={(e) => handleTopSkill(e)}
               />
             </Tooltip>

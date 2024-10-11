@@ -21,6 +21,7 @@ import { RenderItem } from '@refly-packages/ai-workspace-common/components/searc
 import classNames from 'classnames';
 
 import { useTranslation } from 'react-i18next';
+import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 
 export interface SearchProps extends React.ComponentProps<'div'> {
   showList?: boolean;
@@ -44,7 +45,8 @@ export const Search = (props: SearchProps) => {
   const [selectedSkill, setSelectedSkill] = useState<SkillMeta>();
   // notes
   const { handleInitEmptyNote } = useAINote();
-  const { handleAddTab } = useNoteTabs();
+  const { handleAddTab: handleAddNoteTab } = useNoteTabs();
+  const { handleAddTab: handleAddResourceTab } = useKnowledgeBaseTabs();
 
   const { jumpToKnowledgeBase, jumpToNote, jumpToReadResource, jumpToConv } = useKnowledgeBaseJumpNewPath();
 
@@ -210,7 +212,7 @@ export const Search = (props: SearchProps) => {
         jumpToNote({
           noteId: item?.id,
         });
-        handleAddTab({
+        handleAddNoteTab({
           title: item?.title,
           key: item?.id,
           content: '',
@@ -235,6 +237,12 @@ export const Search = (props: SearchProps) => {
       onItemClick: (item: SearchResult) => {
         jumpToReadResource({
           resId: item?.id,
+        });
+        handleAddResourceTab({
+          title: item?.title,
+          key: item?.id,
+          content: '',
+          resourceId: item?.id,
         });
         searchStore.setIsSearchOpen(false);
       },
