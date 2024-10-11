@@ -1,24 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Tabs, Input, List, Checkbox, Button } from '@arco-design/web-react';
-import { IconClose } from '@arco-design/web-react/icon';
+import { Button, Message, Spin } from '@arco-design/web-react';
 import './index.scss';
 
 import { Command } from 'cmdk';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 import {} from '@heroicons/react/24/outline';
-import { IconMessage, IconFile, IconBook, IconEdit, IconRobot } from '@arco-design/web-react/icon';
 import { useDebouncedCallback } from 'use-debounce';
 import { defaultFilter } from '@refly-packages/ai-workspace-common/components/search/cmdk/filter';
 
 import './index.scss';
 import { Home } from './home';
-import { DataList } from './data-list';
 
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { SearchDomain, SearchResult, SkillMeta } from '@refly/openapi-schema';
-import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
-import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
 import { RenderItem } from '../../types/item';
 import classNames from 'classnames';
 
@@ -26,19 +21,11 @@ import classNames from 'classnames';
 import { useLoadExtensionWeblinkData } from '../../hooks/use-load-weblink-data.extension';
 
 import { useTranslation } from 'react-i18next';
-import {
-  BaseMarkType,
-  frontendBaseMarkTypes,
-  backendBaseMarkTypes,
-  SelectedTextDomain,
-  Mark,
-} from '@refly/common-types';
+import { BaseMarkType, frontendBaseMarkTypes, backendBaseMarkTypes, Mark } from '@refly/common-types';
 import { getTypeIcon } from '../../utils/icon';
 import { SortMark } from '../../types/mark';
 
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-
-const TabPane = Tabs.TabPane;
 
 interface CustomProps {
   showList?: boolean;
@@ -61,7 +48,6 @@ const mapSearchResultToMark = (searchResult: SearchResult): Mark => {
     type: searchResult.domain,
     data: (searchResult?.content || []).join('\n'),
     title: searchResult.title,
-    // 根据需要添加其他必要的 Mark 属性
   };
 
   return newMark;
@@ -84,6 +70,8 @@ export const BaseSearchAndSelector = ({
   const [isComposing, setIsComposing] = useState(false);
   const { t } = useTranslation();
 
+  const [loading, setLoading] = useState(false);
+
   // handle extension weblink
   const { loadExtensionWeblinkData } = useLoadExtensionWeblinkData();
 
@@ -93,14 +81,50 @@ export const BaseSearchAndSelector = ({
   const searchStore = useSearchStore();
   // hooks
 
-  // 整体处理
-  const { jumpToKnowledgeBase, jumpToNote, jumpToReadResource, jumpToConv } = useKnowledgeBaseJumpNewPath();
-
   const isHome = activeTab === 'all';
   const isWeb = getRuntime() === 'web';
   const tabs: (BaseMarkType | 'all')[] = isWeb
     ? ['all', 'note', 'resource', 'collection']
     : ['all', 'extensionWeblink', 'note', 'resource', 'collection'];
+
+  const debouncedSearch = useDebouncedCallback(
+    async ({ searchVal, domains }: { searchVal: string; domains?: Array<SearchDomain> }) => {
+      setLoading(true);
+
+      const { data, error } = await getClient().search({
+        body: {
+          query: searchVal,
+          domains: domains,
+        },
+      });
+
+      setLoading(false);
+
+      if (error) {
+        Message.error(String(error));
+        return;
+      }
+
+      const resData = data?.data || [];
+      let marks = resData.map(mapSearchResultToMark);
+
+      if (!isWeb) {
+        const { success, data: extensionWeblinkData } = await loadExtensionWeblinkData();
+        if (success) {
+          const filteredExtensionWeblinks = extensionWeblinkData.filter((item) =>
+            defaultFilter(item.title, searchVal, searchVal.toLowerCase().split(/\s+/)),
+          );
+          marks = [...marks, ...filteredExtensionWeblinks];
+        }
+      }
+
+      // notes
+      // 将 SearchResult 转换为 Mark
+
+      searchStore.setNoCategoryBigSearchRes(marks);
+    },
+    200,
+  );
 
   const handleBigSearchValueChange = (searchVal: string, domain: BaseMarkType) => {
     // searchVal 为空的时候获取正常列表的内容
@@ -120,10 +144,6 @@ export const BaseSearchAndSelector = ({
             domains: backendBaseMarkTypes as SearchDomain[],
           });
         }
-        // debouncedSearch({
-        //   searchVal: '',
-        //   domains: domain ? [domain] : undefined,
-        // });
       }
     } else {
       // searchVal 不为空的时候获取搜索的内容
@@ -142,46 +162,9 @@ export const BaseSearchAndSelector = ({
             domains: backendBaseMarkTypes as SearchDomain[],
           });
         }
-        // debouncedSearch({
-        //   searchVal: searchVal,
-        //   domains: (domain ? [domain] : undefined) as SearchDomain[],
       }
     }
   };
-
-  const debouncedSearch = useDebouncedCallback(
-    async ({ searchVal, domains }: { searchVal: string; domains?: Array<SearchDomain> }) => {
-      try {
-        const res = await getClient().search({
-          body: {
-            query: searchVal,
-            domains: domains,
-          },
-        });
-
-        const resData = res?.data?.data || [];
-        let marks = resData.map(mapSearchResultToMark);
-
-        if (!isWeb) {
-          const { success, data: extensionWeblinkData } = await loadExtensionWeblinkData();
-          if (success) {
-            const filteredExtensionWeblinks = extensionWeblinkData.filter((item) =>
-              defaultFilter(item.title, searchVal, searchVal.toLowerCase().split(/\s+/)),
-            );
-            marks = [...marks, ...filteredExtensionWeblinks];
-          }
-        }
-
-        // notes
-        // 将 SearchResult 转换为 Mark
-
-        searchStore.setNoCategoryBigSearchRes(marks);
-      } catch (err) {
-        console.log('big search err: ', err);
-      }
-    },
-    200,
-  );
 
   const handleConfirm = (activeValue: string, sortedRenderData: RenderItem[]) => {
     const [_, id] = activeValue.split('__');
@@ -280,18 +263,20 @@ export const BaseSearchAndSelector = ({
           }}
         />
       </div>
-      <Command.List>
-        <Command.Empty>No results found.</Command.Empty>
-        <Home
-          showItemDetail={false}
-          key={'search'}
-          displayMode={displayMode}
-          data={sortedRenderData}
-          activeValue={activeValue}
-          setValue={setActiveValue}
-          searchValue={searchValue}
-        />
-      </Command.List>
+      <Spin loading={loading} style={{ width: '100%', height: '100%' }}>
+        <Command.List>
+          <Command.Empty>No results found.</Command.Empty>
+          <Home
+            showItemDetail={false}
+            key={'search'}
+            displayMode={displayMode}
+            data={sortedRenderData}
+            activeValue={activeValue}
+            setValue={setActiveValue}
+            searchValue={searchValue}
+          />
+        </Command.List>
+      </Spin>
       <div cmdk-footer="">
         <div className="cmdk-footer-inner">
           <div className="cmdk-footer-hint">

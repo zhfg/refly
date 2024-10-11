@@ -22,6 +22,7 @@ import classNames from 'classnames';
 
 import { useTranslation } from 'react-i18next';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
+import { Message, Spin } from '@arco-design/web-react';
 
 export interface SearchProps extends React.ComponentProps<'div'> {
   showList?: boolean;
@@ -129,35 +130,41 @@ export const Search = (props: SearchProps) => {
     }
   };
 
+  const [loading, setLoading] = useState(false);
+
   const debouncedSearch = useDebouncedCallback(
     async ({ searchVal, domains }: { searchVal: string; domains?: Array<SearchDomain> }) => {
-      try {
-        const res = await getClient().search({
-          body: {
-            query: searchVal,
-            domains: domains,
-          },
-        });
+      setLoading(true);
 
-        const resData = res?.data?.data || [];
+      const { data, error } = await getClient().search({
+        body: {
+          query: searchVal,
+          domains: domains,
+        },
+      });
+      setLoading(false);
 
-        // notes
-        const notes = resData.filter((item) => item?.domain === 'note') || [];
-        const readResources = resData.filter((item) => item?.domain === 'resource') || [];
-        const knowledgeBases = resData.filter((item) => item?.domain === 'collection') || [];
-        const convs = resData.filter((item) => item?.domain === 'conversation') || [];
-        const skills = resData.filter((item) => item?.domain === 'skill') || [];
-
-        searchStore.setSearchedRes({
-          notes,
-          readResources,
-          knowledgeBases,
-          convs,
-          skills,
-        });
-      } catch (err) {
-        console.log('big search err: ', err);
+      if (error) {
+        Message.error(String(error));
+        return;
       }
+
+      const resData = data?.data || [];
+
+      // notes
+      const notes = resData.filter((item) => item?.domain === 'note') || [];
+      const readResources = resData.filter((item) => item?.domain === 'resource') || [];
+      const knowledgeBases = resData.filter((item) => item?.domain === 'collection') || [];
+      const convs = resData.filter((item) => item?.domain === 'conversation') || [];
+      const skills = resData.filter((item) => item?.domain === 'skill') || [];
+
+      searchStore.setSearchedRes({
+        notes,
+        readResources,
+        knowledgeBases,
+        convs,
+        skills,
+      });
     },
     200,
   );
@@ -359,40 +366,44 @@ export const Search = (props: SearchProps) => {
             handleBigSearchValueChange(val, activePage);
           }}
         />
-        <Command.List style={{ display: showList ? 'inherit' : 'none' }}>
-          <Command.Empty>No results found.</Command.Empty>
-          {activePage === 'home' && (
-            <Home
-              key={'search'}
-              displayMode={displayMode}
-              pages={pages}
-              setPages={(pages: string[]) => setPages(pages)}
-              data={renderData}
-              activeValue={value}
-              setValue={setValue}
-              searchValue={searchValue}
-            />
-          )}
-          {activePage !== 'home' && activePage !== 'skill-execute' ? (
-            <DataList
-              key="data-list"
-              displayMode={displayMode}
-              {...getRenderData(activePage)}
-              activeValue={value}
-              searchValue={searchValue}
-              setValue={setValue}
-            />
-          ) : null}
-          {activePage === 'skill-execute' ? (
-            <Skill
-              key="skill"
-              activeValue={value}
-              searchValue={searchValue}
-              setValue={setValue}
-              selectedSkill={selectedSkill}
-            />
-          ) : null}
-        </Command.List>
+        {showList && (
+          <Spin loading={loading} className="w-full h-full">
+            <Command.List>
+              <Command.Empty>No results found.</Command.Empty>
+              {activePage === 'home' && (
+                <Home
+                  key={'search'}
+                  displayMode={displayMode}
+                  pages={pages}
+                  setPages={(pages: string[]) => setPages(pages)}
+                  data={renderData}
+                  activeValue={value}
+                  setValue={setValue}
+                  searchValue={searchValue}
+                />
+              )}
+              {activePage !== 'home' && activePage !== 'skill-execute' ? (
+                <DataList
+                  key="data-list"
+                  displayMode={displayMode}
+                  {...getRenderData(activePage)}
+                  activeValue={value}
+                  searchValue={searchValue}
+                  setValue={setValue}
+                />
+              ) : null}
+              {activePage === 'skill-execute' ? (
+                <Skill
+                  key="skill"
+                  activeValue={value}
+                  searchValue={searchValue}
+                  setValue={setValue}
+                  selectedSkill={selectedSkill}
+                />
+              ) : null}
+            </Command.List>
+          </Spin>
+        )}
       </Command>
     </div>
   );

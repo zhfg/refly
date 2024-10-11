@@ -16,14 +16,13 @@ import { ResetContentSelectorBtn } from './reset-content-selector-btn';
 import { ContextFilter } from './components/context-filter/index';
 
 // stores
-import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 
 // types
 import { Collection, Note, Resource, SearchDomain, SearchResult } from '@refly/openapi-schema';
 import { backendBaseMarkTypes, BaseMarkType, frontendBaseMarkTypes, Mark } from '@refly/common-types';
-import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 
 import { mapSelectionTypeToContentList } from './utils/contentListSelection';
 
@@ -51,20 +50,18 @@ export const ContextManager = () => {
     toggleMarkActive,
     clearMarks,
     updateMark,
+    currentSelectedMarks,
     filterIdsOfCurrentSelectedMarks,
     filterErrorInfo,
-  } = useContextPanelStore((state) => ({
+  } = useContextPanelStoreShallow((state) => ({
     addMark: state.addMark,
     removeMark: state.removeMark,
     toggleMarkActive: state.toggleMarkActive,
     clearMarks: state.clearMarks,
     updateMark: state.updateMark,
+    currentSelectedMarks: state.currentSelectedMarks,
     filterIdsOfCurrentSelectedMarks: state.filterIdsOfCurrentSelectedMarks,
     filterErrorInfo: state.filterErrorInfo,
-  }));
-
-  const skillStore = useSkillStore((state) => ({
-    selectedSkill: state.selectedSkill,
   }));
 
   console.log('processedContextItems', processedContextItems);
@@ -93,9 +90,7 @@ export const ContextManager = () => {
   const handleAddItem = (newMark: Mark) => {
     console.log('newMark', newMark);
     // 检查项目是否已经存在于 store 中
-    const existingMark = useContextPanelStore
-      .getState()
-      .currentSelectedMarks.find((mark) => mark.id === newMark.id && mark.type === newMark.type);
+    const existingMark = currentSelectedMarks.find((mark) => mark.id === newMark.id && mark.type === newMark.type);
 
     if (!existingMark) {
       // 如果项目不存在，添加到 store
@@ -147,9 +142,8 @@ export const ContextManager = () => {
   };
 
   const removeNotCurrentContext = (type: string) => {
-    useContextPanelStore
-      .getState()
-      .currentSelectedMarks.filter((mark) => mark.type === type)
+    currentSelectedMarks
+      .filter((mark) => mark.type === type)
       .forEach((mark) => {
         if (mark.onlyForCurrentContext) {
           removeMark(mark.id);
@@ -162,9 +156,7 @@ export const ContextManager = () => {
   const handleAddCurrentContext = (newMark: Mark) => {
     removeNotCurrentContext(newMark.type);
 
-    const existingMark = useContextPanelStore
-      .getState()
-      .currentSelectedMarks.find((mark) => mark.id === newMark.id && mark.type === newMark.type);
+    const existingMark = currentSelectedMarks.find((mark) => mark.id === newMark.id && mark.type === newMark.type);
 
     if (!existingMark) {
       addMark(newMark);
