@@ -11,7 +11,7 @@ import {
   SkillContextNoteItem,
   SkillContextCollectionItem,
   Source,
-} from '@refly/openapi-schema';
+} from '@refly-packages/openapi-schema';
 import { BaseMessage } from '@langchain/core/messages';
 import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { LOCALE } from '@refly-packages/common-types';

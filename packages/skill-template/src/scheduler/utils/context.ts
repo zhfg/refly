@@ -25,7 +25,7 @@ import {
   SkillContextResourceItem,
   SkillTemplateConfig,
   Source,
-} from '@refly/openapi-schema';
+} from '@refly-packages/openapi-schema';
 import { uniqBy } from 'lodash';
 
 // configurable params

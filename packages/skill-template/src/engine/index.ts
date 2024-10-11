@@ -27,7 +27,7 @@ import {
   SearchOptions,
   WebSearchRequest,
   WebSearchResponse,
-} from '@refly/openapi-schema';
+} from '@refly-packages/openapi-schema';
 
 // TODO: unify with frontend
 export type ContentNodeType =
