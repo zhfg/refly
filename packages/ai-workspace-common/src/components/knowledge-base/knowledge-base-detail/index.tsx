@@ -43,6 +43,7 @@ export const KnowledgeBaseDetail = () => {
     kbModalVisible: state.kbModalVisible,
     actionSource: state.actionSource,
     updateResourcePanelVisible: state.updateResourcePanelVisible,
+    updateCurrentKnowledgeBase: state.updateCurrentKnowledgeBase,
   }));
 
   useEffect(() => {
@@ -52,6 +53,12 @@ export const KnowledgeBaseDetail = () => {
       knowledgeBaseStore.updateResourcePanelVisible(false);
     };
   }, [resId]);
+
+  useEffect(() => {
+    if (!kbId) {
+      knowledgeBaseStore.updateCurrentKnowledgeBase(null);
+    }
+  }, [kbId]);
 
   const handleResize = useCallback(
     throttle((entries: ResizeObserverEntry[]) => {

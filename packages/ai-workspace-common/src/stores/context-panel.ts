@@ -153,6 +153,7 @@ interface ContextPanelState {
   removeMark: (id: string) => void;
   toggleMarkActive: (id: string) => void;
   clearMarks: () => void;
+  updateMark: (mark: Mark) => void;
 }
 
 export const defaultSelectedTextCardState = {
@@ -246,6 +247,13 @@ export const useContextPanelStore = create<ContextPanelState>()(
         })),
       })),
     clearMarks: () => set((state) => ({ ...state, currentSelectedMarks: [] })),
+    updateMark: (mark: Mark) =>
+      set((state) => ({
+        ...state,
+        currentSelectedMarks: state.currentSelectedMarks.map((item) =>
+          item.id === mark.id ? { ...item, ...mark } : item,
+        ),
+      })),
 
     resetSelectedTextCardState: () => set((state) => ({ ...state, ...defaultSelectedTextCardState })),
 

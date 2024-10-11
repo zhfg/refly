@@ -52,7 +52,7 @@ export const SourceListModal = (props: SourceListModalProps) => {
       }}
     >
       <ResourceList
-        placeholder="搜索来源..."
+        placeholder={t('copilot.sourceListModal.searchPlaceholder')}
         resources={props.resources}
         showUtil={false}
         searchKey="description"

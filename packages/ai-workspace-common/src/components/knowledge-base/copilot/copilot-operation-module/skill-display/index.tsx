@@ -3,8 +3,9 @@ import { useResizeBox } from '@refly-packages/ai-workspace-common/hooks/use-resi
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
-import { memo, useEffect, useMemo, useCallback } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
+import { useTranslation } from 'react-i18next';
 
 export const SkillDisplay = memo(({ source }: { source: string }) => {
   const skillStore = useSkillStore((state) => ({
@@ -13,13 +14,16 @@ export const SkillDisplay = memo(({ source }: { source: string }) => {
     setSkillManagerModalVisible: state.setSkillManagerModalVisible,
   }));
 
-  const [containCnt] = useResizeBox({
-    getGroupSelector: () => getPopupContainer().querySelector('.skill-container') as HTMLElement,
+  const { t } = useTranslation();
+
+  const skillDisplayRef = useRef<HTMLDivElement>(null);
+
+  const [containCnt, updateContainCnt] = useResizeBox({
+    getGroupSelector: () => skillDisplayRef.current,
     getResizeSelector: () => getPopupContainer().querySelectorAll('.skill-item') as NodeListOf<HTMLElement>,
     initialContainCnt: 3,
     paddingSize: 0,
-    placeholderWidth: 100,
-    itemSize: 80,
+    placeholderWidth: 95,
   });
 
   const { handleGetSkillInstances, handleGetSkillTemplates } = useSkillManagement();
@@ -30,16 +34,23 @@ export const SkillDisplay = memo(({ source }: { source: string }) => {
 
   useEffect(() => {
     if (isFromSkillJob()) return;
-    // if (skillStore?.skillInstances?.length) return;
     handleGetSkillInstances();
   }, []);
 
+  useEffect(() => {
+    if (skillStore.skillInstances.length > 0) {
+      setTimeout(() => {
+        updateContainCnt();
+      }, 0);
+    }
+  }, [skillStore.skillInstances]);
+
   return (
-    <div className="skill-container">
-      {skillStore?.skillInstances?.slice(0, containCnt).map((item, index) => (
+    <div className="skill-container" ref={skillDisplayRef}>
+      {skillStore?.skillInstances?.map((item, index) => (
         <div
           key={index}
-          className="skill-item"
+          className={`skill-item ${index >= containCnt ? 'hide' : ''}`}
           onClick={() => {
             skillStore.setSelectedSkillInstance(item);
           }}
@@ -55,7 +66,7 @@ export const SkillDisplay = memo(({ source }: { source: string }) => {
           skillStore.setSkillManagerModalVisible(true);
         }}
       >
-        <IconSettings /> <p className="skill-title skill-item-title">管理</p>
+        <IconSettings /> <p className="skill-title skill-item-title">{t('copilot.skillDisplay.manager')}</p>
       </div>
     </div>
   );

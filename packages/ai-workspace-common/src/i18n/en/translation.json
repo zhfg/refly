@@ -24,7 +24,9 @@
     "retry": "Retry",
     "reset": "Reset",
     "apply": "Apply",
-    "collapse": "Collapse"
+    "collapse": "Collapse",
+    "open": "Open",
+    "close": "Close"
   },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",
@@ -200,8 +202,8 @@
       "connecting": "Connecting...",
       "newNote": "Create New Note",
       "noteCharsCount": "{{count}} characters",
-      "autoSaved": "Note has been saved",
-      "saving": "Note is being saved...",
+      "autoSaved": "Saved",
+      "saving": "Saving...",
       "readOnly": "Read Only",
       "edit": "Edit",
       "serviceDisconnected": "Service Disconnected",
@@ -281,7 +283,7 @@
   "loggedHomePage": {
     "newThreadText": "New Thread",
     "quickSearch": {
-      "skill": "Skills",
+      "skills": "Skills",
       "note": "Notes",
       "newNote": "Create New Note",
       "readResource": "Read Resources",
@@ -299,7 +301,10 @@
         "onlineSearch": "AI Online Search",
         "collectionSearch": "AI Knowledge Base Search",
         "showAll": "View All {{heading}}"
-      }
+      },
+      "basedOn": "Based on",
+      "execute": "content execution",
+      "skill": "skill"
     },
     "homePage": {
       "title": "Where knowledge thrives",
@@ -838,6 +843,9 @@
   },
   "copilot": {
     "quickActions": "Quick Actions",
+    "selectedSkillHeader": {
+      "title": "Chat with {{name}}"
+    },
     "baseContextCard": {
       "title": "Environment Context Quick Actions",
       "filterTitle": "Filter Environment Context",
@@ -952,16 +960,61 @@
         "errorNotify": "Save failed!"
       }
     },
-    "chatInput": {
+    "skillDisplay": {
       "skillManager": "Skill Manage",
+      "manager": "Manage"
+    },
+    "chatInput": {
       "placeholder": "Ask a question, discover new knowledge"
+    },
+    "chatActions": {
+      "send": "Send",
+      "directChat": "Direct Chat",
+      "noContextChat": "No Context Chat",
+      "wholeSpaceChat": "Whole Space Chat"
     },
     "configManager": {
       "title": "Skill Configuration",
       "errorTipTitle": "Send Failed",
       "errorTip": "Please adjust the skill configuration and try again"
     },
-    "tokenUsage": "Input {{count}}, Output {{count}}"
+    "tokenUsage": "Input {{inputCount}}, Output {{outputCount}}",
+    "reflyAssistant": "Knowledge Curator",
+    "message": {
+      "copy": "Copy",
+      "copySuccess": "Copy Success",
+      "insertBlow": "Insert Note",
+      "replaceSelection": "Replace Selection",
+      "createNewNote": "Create New Note",
+      "skillRunSuccess": "Skill Completed, {{count}} Logs",
+      "skillRunning": "Skill Running...",
+      "relatedQuestion": "You may also ask",
+      "summarySelectedContent": "Summarize the Selected Content",
+      "brainstormIdeas": "Brainstorm Ideas",
+      "writeTwitterArticle": "Write a Twitter Original Article",
+      "installSkillHint": "You haven't added any assistants, click me to add",
+      "installSkillHintTitle": "Add Assistant"
+    },
+    "contextItem": {
+      "current": "Current "
+    },
+    "contentSelector": {
+      "openForWeb": "Enable content selection for questions, and the note is now in read-only mode",
+      "closeForWeb": "Close the selector, and the note is now in edit mode",
+      "open": "Content selector is enabled",
+      "close": "Content selector is disabled"
+    },
+    "convListModal": {
+      "title": "Threads"
+    },
+    "kbListModal": {
+      "title": "Knowledge Bases"
+    },
+    "sourceListModal": {
+      "title": "Result Sources",
+      "moreSources": "View More {{count}} Sources",
+      "searchPlaceholder": "Search Sources..."
+    }
   },
   "hooks": {
     "useBuildThreadAndRun": {

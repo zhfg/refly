@@ -144,7 +144,7 @@
 
       .install-skill-hint-container {
         border-radius: 8px;
-        height: 46px;
+        padding: 12px;
         border: 1px solid rgba(0, 0, 0, 0.1);
         display: flex;
         flex-direction: row;
@@ -154,6 +154,9 @@
         margin-top: 16px;
 
         .install-skill-hint-title {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
           color: rgba(0, 0, 0, 0.5);
 
           button {

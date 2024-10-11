@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Command } from 'cmdk';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
-import {} from '@heroicons/react/24/outline';
 import { IconFolderAdd } from '@arco-design/web-react/icon';
 
 import './index.scss';
@@ -11,7 +10,6 @@ import { Item } from './item';
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { SearchResult } from '@refly/openapi-schema';
-import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useTranslation } from 'react-i18next';
 
 export function DataList({
@@ -41,7 +39,6 @@ export function DataList({
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isRequesting, setIsRequesting] = useState(false);
-  const { jumpToKnowledgeBase, jumpToNote, jumpToReadResource, jumpToConv } = useKnowledgeBaseJumpNewPath();
   const { t } = useTranslation();
 
   const searchStore = useSearchStore();
@@ -95,7 +92,6 @@ export function DataList({
           title: item?.title,
           content: [item?.content?.slice(0, 30) + '...'],
           metadata: {
-            collectionId: item?.collectionId,
             resourceType: 'weblink',
           },
         } as SearchResult;

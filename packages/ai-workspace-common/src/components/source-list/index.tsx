@@ -60,6 +60,7 @@ const SourceItem = ({ source, index }: { source: Source; index: number }) => {
 const ViewMoreItem = ({ sources = [], extraCnt = 0 }: { sources: Source[]; extraCnt: number }) => {
   const knowledgeBaseStore = useKnowledgeBaseStore();
   const mappedResources = mapSourceToResource(sources);
+  const { t } = useTranslation();
 
   return (
     <div
@@ -72,7 +73,7 @@ const ViewMoreItem = ({ sources = [], extraCnt = 0 }: { sources: Source[]; extra
       <div className="flex gap-2 items-center">
         <div className="overflow-hidden flex-1">
           <div className="overflow-hidden w-full font-medium whitespace-nowrap break-all text-ellipsis text-zinc-950">
-            查看更多 {extraCnt} 来源
+            {t('copilot.sourceListModal.moreSources', { count: extraCnt })}
           </div>
         </div>
       </div>
@@ -179,7 +180,6 @@ const SourceDetailContent = (props: { source: Source; index: number }) => {
 export const SourceList = (props: SourceListProps) => {
   const { isPendingFirstToken = false, isLastSession = false } = props;
   const [scrollLoading] = useState(<Skeleton animation></Skeleton>);
-  const { t } = useTranslation();
 
   return (props?.sources || []).length > 0 ? (
     <div className="session-source-content">

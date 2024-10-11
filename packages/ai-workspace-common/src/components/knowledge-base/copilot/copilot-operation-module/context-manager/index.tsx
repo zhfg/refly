@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ContextItem } from './context-item';
 import { ContextPreview } from './context-preview';
 
@@ -16,12 +16,13 @@ import { ResetContentSelectorBtn } from './reset-content-selector-btn';
 import { ContextFilter } from './components/context-filter/index';
 
 // stores
-import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 
 // types
-import { SearchDomain, SearchResult } from '@refly/openapi-schema';
+import { Collection, Note, Resource, SearchDomain, SearchResult } from '@refly/openapi-schema';
 import { backendBaseMarkTypes, BaseMarkType, frontendBaseMarkTypes, Mark } from '@refly/common-types';
-import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 
 import { mapSelectionTypeToContentList } from './utils/contentListSelection';
 
@@ -43,18 +44,24 @@ const mapMarkToSearchResult = (marks: Mark[]): SearchResult[] => {
 export const ContextManager = () => {
   const [activeItemId, setActiveItemId] = useState(null);
   const { processedContextItems } = useProcessContextItems();
-  const { addMark, removeMark, toggleMarkActive, clearMarks, filterIdsOfCurrentSelectedMarks, filterErrorInfo } =
-    useContextPanelStore((state) => ({
-      addMark: state.addMark,
-      removeMark: state.removeMark,
-      toggleMarkActive: state.toggleMarkActive,
-      clearMarks: state.clearMarks,
-      filterIdsOfCurrentSelectedMarks: state.filterIdsOfCurrentSelectedMarks,
-      filterErrorInfo: state.filterErrorInfo,
-    }));
-
-  const skillStore = useSkillStore((state) => ({
-    selectedSkill: state.selectedSkill,
+  const {
+    addMark,
+    removeMark,
+    toggleMarkActive,
+    clearMarks,
+    updateMark,
+    currentSelectedMarks,
+    filterIdsOfCurrentSelectedMarks,
+    filterErrorInfo,
+  } = useContextPanelStoreShallow((state) => ({
+    addMark: state.addMark,
+    removeMark: state.removeMark,
+    toggleMarkActive: state.toggleMarkActive,
+    clearMarks: state.clearMarks,
+    updateMark: state.updateMark,
+    currentSelectedMarks: state.currentSelectedMarks,
+    filterIdsOfCurrentSelectedMarks: state.filterIdsOfCurrentSelectedMarks,
+    filterErrorInfo: state.filterErrorInfo,
   }));
 
   console.log('processedContextItems', processedContextItems);
@@ -81,13 +88,13 @@ export const ContextManager = () => {
   };
 
   const handleAddItem = (newMark: Mark) => {
+    console.log('newMark', newMark);
     // 检查项目是否已经存在于 store 中
-    const existingMark = useContextPanelStore
-      .getState()
-      .currentSelectedMarks.find((mark) => mark.id === newMark.id && mark.type === newMark.type);
+    const existingMark = currentSelectedMarks.find((mark) => mark.id === newMark.id && mark.type === newMark.type);
 
     if (!existingMark) {
       // 如果项目不存在，添加到 store
+
       addMark(newMark);
     } else {
       removeMark(existingMark.id);
@@ -102,6 +109,84 @@ export const ContextManager = () => {
   );
 
   const processContextFilterProps = useProcessContextFilter(true);
+
+  const currentKnowledgeBase = useKnowledgeBaseStore((state) => state.currentKnowledgeBase);
+  const currentResource = useKnowledgeBaseStore((state) => state.currentResource);
+  const currentNote = useNoteStore((state) => state.currentNote);
+
+  const buildEnvContext = (data: Collection | Resource | Note, type: 'collection' | 'resource' | 'note'): Mark[] => {
+    if (!data) return [];
+
+    const typeMap = {
+      resource: 'resourceId',
+      collection: 'collectionId',
+      note: 'noteId',
+    };
+
+    const idKey = typeMap[type];
+    const id = data[idKey];
+
+    if (!id) return [];
+
+    return [
+      {
+        title: data.title,
+        type,
+        id,
+        entityId: id,
+        data: type === 'collection' ? (data as Collection).description : (data as Resource | Note).content,
+        onlyForCurrentContext: true,
+        isCurrentContext: true,
+      },
+    ];
+  };
+
+  const removeNotCurrentContext = (type: string) => {
+    currentSelectedMarks
+      .filter((mark) => mark.type === type)
+      .forEach((mark) => {
+        if (mark.onlyForCurrentContext) {
+          removeMark(mark.id);
+        } else if (mark.isCurrentContext) {
+          updateMark({ ...mark, isCurrentContext: false });
+        }
+      });
+  };
+
+  const handleAddCurrentContext = (newMark: Mark) => {
+    removeNotCurrentContext(newMark.type);
+
+    const existingMark = currentSelectedMarks.find((mark) => mark.id === newMark.id && mark.type === newMark.type);
+
+    if (!existingMark) {
+      addMark(newMark);
+    } else {
+      newMark.onlyForCurrentContext = existingMark.onlyForCurrentContext;
+      updateMark(newMark);
+    }
+  };
+
+  const updateContext = (item: any, type: 'collection' | 'resource' | 'note') => {
+    const envContext = buildEnvContext(item, type);
+    const contextItem = envContext?.[0];
+    if (contextItem) {
+      handleAddCurrentContext(contextItem);
+    } else {
+      removeNotCurrentContext(type);
+    }
+  };
+
+  useEffect(() => {
+    updateContext(currentKnowledgeBase, 'collection');
+  }, [currentKnowledgeBase?.collectionId]);
+
+  useEffect(() => {
+    updateContext(currentResource, 'resource');
+  }, [currentResource?.resourceId]);
+
+  useEffect(() => {
+    updateContext(currentNote, 'note');
+  }, [currentNote?.noteId]);
 
   return (
     <div className="context-manager">

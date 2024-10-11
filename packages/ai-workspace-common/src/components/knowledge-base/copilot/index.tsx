@@ -1,5 +1,6 @@
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { memo, useEffect, useState, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChatMessages } from './chat-messages';
 import { ConvListModal } from './conv-list-modal';
 import { KnowledgeBaseListModal } from './knowledge-base-list-modal';
@@ -33,6 +34,9 @@ interface AICopilotProps {
 }
 
 export const AICopilot = memo((props: AICopilotProps) => {
+  const { t } = useTranslation();
+  const { disable, jobId, source } = props;
+
   const [searchParams] = useSearchParams();
   const convId = searchParams.get('convId');
 
@@ -72,8 +76,6 @@ export const AICopilot = memo((props: AICopilotProps) => {
   const { runSkill } = useBuildThreadAndRun();
 
   const { resetState } = useResetState();
-
-  const { disable, jobId, source } = props;
 
   const copilotOperationModuleRef = useRef<HTMLDivElement>(null);
   const [operationModuleHeight, setOperationModuleHeight] = useState(0);
@@ -204,13 +206,15 @@ export const AICopilot = memo((props: AICopilotProps) => {
         {!disable && <CopilotOperationModule ref={copilotOperationModuleRef} source={source} />}
       </div>
 
-      {knowledgeBaseStore?.convModalVisible ? <ConvListModal title="会话库" classNames="conv-list-modal" /> : null}
+      {knowledgeBaseStore?.convModalVisible ? (
+        <ConvListModal title={t('copilot.convListModal.title')} classNames="conv-list-modal" />
+      ) : null}
       {knowledgeBaseStore?.kbModalVisible && knowledgeBaseStore.actionSource === ActionSource.Conv ? (
-        <KnowledgeBaseListModal title="知识库" classNames="kb-list-modal" />
+        <KnowledgeBaseListModal title={t('copilot.kbListModal.title')} classNames="kb-list-modal" />
       ) : null}
       {knowledgeBaseStore?.sourceListModalVisible ? (
         <SourceListModal
-          title={`结果来源 (${knowledgeBaseStore?.tempConvResources?.length || 0})`}
+          title={`${t('copilot.sourceListModal.title')} (${knowledgeBaseStore?.tempConvResources?.length || 0})`}
           classNames="source-list-modal"
           resources={knowledgeBaseStore?.tempConvResources || []}
         />

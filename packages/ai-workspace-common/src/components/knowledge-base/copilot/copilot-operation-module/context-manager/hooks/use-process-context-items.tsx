@@ -6,11 +6,16 @@ import { getClientOrigin } from '@refly-packages/utils/url';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getTypeIcon } from '../utils/icon';
 import { mapSelectionTypeToContentList } from '../utils/contentListSelection';
+import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
+import { useNoteTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
 
 export const useProcessContextItems = () => {
   const { t } = useTranslation();
   const { jumpToNote, jumpToKnowledgeBase, jumpToReadResource } = useKnowledgeBaseJumpNewPath();
   const currentSelectedMarks = useContextPanelStore((state) => state.currentSelectedMarks);
+
+  const { handleAddTab: handleAddResourceTab } = useKnowledgeBaseTabs();
+  const { handleAddTab: handleAddNoteTab } = useNoteTabs();
 
   const getTypeName = (type: MarkType) => {
     switch (type) {
@@ -41,7 +46,15 @@ export const useProcessContextItems = () => {
 
     if (mark.type === 'note' || mark.type === 'noteSelection') {
       if (isWebRuntime) {
-        return () => jumpToNote({ noteId: mark.id, title: mark.title });
+        return () => {
+          jumpToNote({ noteId: mark.id });
+          handleAddNoteTab({
+            title: mark.title,
+            key: mark.id,
+            content: '',
+            noteId: mark.id,
+          });
+        };
       } else {
         return `${baseUrl}/knowledge-base?noteId=${mark.id}`;
       }
@@ -49,7 +62,15 @@ export const useProcessContextItems = () => {
 
     if (mark.type === 'resource' || mark.type === 'resourceSelection') {
       if (isWebRuntime) {
-        return () => jumpToReadResource({ resId: mark.id });
+        return () => {
+          jumpToReadResource({ resId: mark.id });
+          handleAddResourceTab({
+            title: mark.title,
+            key: mark.id,
+            content: '',
+            resourceId: mark.id,
+          });
+        };
       } else {
         return `${baseUrl}/knowledge-base?resId=${mark.id}`;
       }

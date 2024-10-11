@@ -112,13 +112,13 @@ export const ChatActions = (props: ChatActionsProps) => {
           droplist={
             <Menu>
               <Menu.Item key="direct" onClick={() => handleSendMessage('direct')}>
-                直接聊天
+                {t('copilot.chatActions.directChat')}
               </Menu.Item>
               <Menu.Item key="noContext" onClick={() => handleSendMessage('noContext')}>
-                不带上下文聊天
+                {t('copilot.chatActions.noContextChat')}
               </Menu.Item>
               <Menu.Item key="wholeSpace" onClick={() => handleSendMessage('wholeSpace')}>
-                在整个空间聊天
+                {t('copilot.chatActions.wholeSpaceChat')}
               </Menu.Item>
             </Menu>
           }
@@ -134,7 +134,7 @@ export const ChatActions = (props: ChatActionsProps) => {
               handleSendMessage('direct');
             }}
           >
-            发送
+            {t('copilot.chatActions.send')}
           </Button>
         </Dropdown>
       </div>

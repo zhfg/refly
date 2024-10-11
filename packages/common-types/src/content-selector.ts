@@ -55,6 +55,8 @@ export interface Mark {
   domain?: SelectedTextDomain; // 该元素对应的 domain, for selected text card
   cleanup?: () => void; // 清理函数
   icon?: any; // React.ReactNode; // 图标, 理论上应该逻辑和 UI 分离，但是目前为了方便，还是放在一起
+  onlyForCurrentContext?: boolean; // 只是当前上下文使用
+  isCurrentContext?: boolean; // 是否是当前上下文
 }
 
 export interface Selection {

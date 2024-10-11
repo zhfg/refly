@@ -4,8 +4,10 @@ import './index.scss';
 import { IconClose } from '@arco-design/web-react/icon';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
+import { useTranslation } from 'react-i18next';
 
 export const SelectedSkillHeader = () => {
+  const { t } = useTranslation();
   const skillStore = useSkillStoreShallow((state) => ({
     selectedSkill: state.selectedSkill,
     setSelectedSkillInstance: state.setSelectedSkillInstance,
@@ -23,7 +25,9 @@ export const SelectedSkillHeader = () => {
           displayName={skillStore?.selectedSkill?.displayName}
         />
         <p>
-          和 <span className="selected-skill-name">{skillStore?.selectedSkill?.displayName}</span> 聊聊
+          {t('copilot.selectedSkillHeader.title', {
+            name: skillStore?.selectedSkill?.displayName,
+          })}
         </p>
       </div>
       <div className="selected-skill-manage">
