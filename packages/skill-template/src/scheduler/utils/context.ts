@@ -99,9 +99,14 @@ export async function prepareContext(
     collections: [],
   };
   if (remainingTokens > 0) {
-    const { contentList = [], resources = [], notes = [] } = ctx.configSnapshot.configurable;
+    const { contentList = [], resources = [], notes = [], collections = [] } = ctx.configSnapshot.configurable;
 
-    const context = removeOverlappingContextItems(processedMentionedContext, { contentList, resources, notes });
+    const context = removeOverlappingContextItems(processedMentionedContext, {
+      contentList,
+      resources,
+      notes,
+      collections,
+    });
     lowerPriorityContext = await prepareLowerPriorityContext(
       {
         query,
@@ -378,10 +383,11 @@ export function removeOverlappingContextItems(context: IContext, originalContext
     contentList: [],
     resources: [],
     notes: [],
+    collections: [],
   };
 
   // Helper function to check if an item exists in the context
-  const itemExistsInContext = (item: any, contextArray: any[], idField: string) => {
+  const itemExistsInContext = (item: any, contextArray: any[] = [], idField: string) => {
     return contextArray.some((contextItem) => contextItem[idField] === item[idField]);
   };
 
@@ -408,6 +414,11 @@ export function removeOverlappingContextItems(context: IContext, originalContext
         context.notes.map((n) => n.note),
         'noteId',
       ),
+  );
+
+  // Deduplicate collections
+  deduplicatedContext.collections = originalContext.collections.filter(
+    (item) => !itemExistsInContext(item, context.collections, 'collectionId'),
   );
 
   return deduplicatedContext;

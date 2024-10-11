@@ -144,7 +144,7 @@ export async function sortResourcesBySimilarity(
 
 export async function processSelectedContentWithSimilarity(
   query: string,
-  contentList: SkillContextContentItem[],
+  contentList: SkillContextContentItem[] = [],
   maxTokens: number,
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextContentItem[]> {
@@ -238,7 +238,7 @@ export async function processSelectedContentWithSimilarity(
 
 export async function processNotesWithSimilarity(
   query: string,
-  notes: SkillContextNoteItem[],
+  notes: SkillContextNoteItem[] = [],
   maxTokens: number,
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextNoteItem[]> {
@@ -336,7 +336,7 @@ export async function processNotesWithSimilarity(
 
 export async function processResourcesWithSimilarity(
   query: string,
-  resources: SkillContextResourceItem[],
+  resources: SkillContextResourceItem[] = [],
   maxTokens: number,
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextResourceItem[]> {
@@ -483,10 +483,10 @@ export async function processMentionedContextWithSimilarity(
 // lower priority, if out of maxTokens, prior to cut off
 export async function processCollectionsWithSimilarity(
   query: string,
-  collections: SkillContextCollectionItem[],
+  collections: SkillContextCollectionItem[] = [],
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<(SkillContextResourceItem | SkillContextNoteItem)[]> {
-  if (collections.length === 0) {
+  if (collections?.length === 0) {
     return [];
   }
 
