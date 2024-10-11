@@ -1,6 +1,6 @@
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
-import { buildConversation } from '@refly-packages/ai-workspace-common/utils/conversation';
+import { buildConversation, getConversation } from '@refly-packages/ai-workspace-common/utils/conversation';
 import { useResetState } from './use-reset-state';
 import { useTaskStore } from '@refly-packages/ai-workspace-common/stores/task';
 
@@ -128,7 +128,7 @@ export const useBuildThreadAndRun = () => {
       convId: conv?.convId || '',
       locale: localSettings?.outputLocale as OutputLocale,
       tplConfig,
-      ...{ createConvParam: { ...conv, title: question } },
+      ...{ createConvParam: getConversation({ ...conv, title: question }) },
     };
     taskStore.setTask(task);
     // 开始提问
