@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { SkillEngine } from '../../engine';
 import { BaseSkill, SkillRunnableConfig } from '../../base';
 import { SkillTemplateConfig } from '@refly-packages/openapi-schema';
-import { ModelContextLimitMap } from '@/scheduler/utils/token';
+import { ModelContextLimitMap } from './token';
 import { MAX_CONTEXT_RATIO } from './constants';
 
 // simplify context entityId for better extraction

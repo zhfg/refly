@@ -95,18 +95,20 @@ export async function prepareContext(
   };
   if (remainingTokens > 0) {
     const { contentList = [], resources = [], notes = [], collections = [] } = ctx.configSnapshot.configurable;
-
+    // prev remove overlapping items in mentioned context
     const context = removeOverlappingContextItems(processedMentionedContext, {
       contentList,
       resources,
       notes,
       collections,
     });
+
     lowerPriorityContext = await prepareLowerPriorityContext(
       {
         query,
         maxLowerPriorityContextTokens: remainingTokens,
         context,
+        processedMentionedContext,
       },
       ctx,
     );
@@ -234,10 +236,12 @@ export async function prepareLowerPriorityContext(
     query,
     maxLowerPriorityContextTokens,
     context,
+    processedMentionedContext,
   }: {
     query: string;
     maxLowerPriorityContextTokens: number;
     context: IContext;
+    processedMentionedContext: IContext;
   },
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<IContext> {
@@ -259,9 +263,15 @@ export async function prepareLowerPriorityContext(
     ctx,
   );
 
+  // 3. remove overlapping items in container level context
+  const removeOverlappingItemsInContainerLevelContext = removeOverlappingContextItems(
+    relevantContext,
+    removeOverlappingContextItems(processedMentionedContext, containerLevelContext),
+  );
+
   const finalContext = await mergeAndTruncateContexts(
     relevantContext,
-    containerLevelContext,
+    removeOverlappingItemsInContainerLevelContext,
     query,
     maxLowerPriorityContextTokens,
     ctx,

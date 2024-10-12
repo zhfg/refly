@@ -387,7 +387,7 @@ Please generate the summary based on these requirements and offer suggestions fo
       ...truncateMessages(chatHistory as any as ChatMessage[]),
       ...messages,
       ...(needPrepareContext ? [new HumanMessage(`## Context \n ${context}`)] : []),
-      new HumanMessage(`## User Query \n ${optimizedQuery}`),
+      new HumanMessage(`## Original User Query \n ${query}\n\n## Rewritten Query \n ${optimizedQuery}`),
     ];
 
     const responseMessage = await model.invoke(requestMessages, {
