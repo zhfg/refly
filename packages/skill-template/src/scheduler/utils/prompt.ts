@@ -1,3 +1,5 @@
+import { HumanMessage, SystemMessage, BaseMessage } from '@langchain/core/messages';
+
 export const buildNoContextSchedulerSystemPrompt = (locale: string) => {
   return `You are an advanced AI assistant developed by Refly, specializing in knowledge management, reading comprehension, writing assistance, and answering questions related to knowledge management. Your core mission is to help users effectively manage, understand, and utilize information.
 
@@ -91,4 +93,53 @@ export const buildSchedulerSystemPrompt = (locale: string, needPrepareContext: b
     return buildNoContextSchedulerSystemPrompt(locale);
   }
   return buildContextualSchedulerSystemPrompt(locale);
+};
+
+export const buildSchedulerUserPrompt = ({
+  originalQuery,
+  rewrittenQuery,
+}: {
+  originalQuery: string;
+  rewrittenQuery: string;
+}) => {
+  return `## Original User Query
+${originalQuery}
+
+## Rewritten User Query
+${rewrittenQuery}
+`;
+};
+
+export const buildFinalRequestMessages = ({
+  locale,
+  chatHistory,
+  messages,
+  needPrepareContext,
+  context,
+  originalQuery,
+  rewrittenQuery,
+}: {
+  locale: string;
+  chatHistory: BaseMessage[];
+  messages: BaseMessage[];
+  needPrepareContext: boolean;
+  context: string;
+  originalQuery: string;
+  rewrittenQuery: string;
+}) => {
+  const systemPrompt = buildSchedulerSystemPrompt(locale, needPrepareContext);
+  const contextPrompt = needPrepareContext ? `## Context \n ${context}` : '';
+  const userPrompt = buildSchedulerUserPrompt({ originalQuery, rewrittenQuery });
+
+  // TODO: last check for token limit
+
+  const requestMessages = [
+    new SystemMessage(systemPrompt),
+    ...chatHistory,
+    ...messages, // TODO: for refractor scheduler to agent use case
+    ...(needPrepareContext ? [new HumanMessage(contextPrompt)] : []),
+    new HumanMessage(userPrompt),
+  ];
+
+  return requestMessages;
 };

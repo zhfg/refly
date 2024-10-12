@@ -16,7 +16,7 @@ const MAX_MESSAGE_TOKENS = 400;
 const MAX_MESSAGES_TOTAL_TOKENS = 2000;
 
 export const truncateMessages = (
-  messages: BaseMessage[],
+  messages: BaseMessage[] = [],
   maxMessages = MAX_MESSAGES,
   maxMessageTokens = MAX_MESSAGE_TOKENS,
   maxMessagesTotalTokens = MAX_MESSAGES_TOTAL_TOKENS,

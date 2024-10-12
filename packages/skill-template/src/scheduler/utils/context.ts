@@ -33,26 +33,17 @@ export async function prepareContext(
   {
     query,
     mentionedContext,
+    maxTokens,
   }: {
     query: string;
     mentionedContext: IContext;
+    maxTokens: number;
   },
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<string> {
-  const {
-    locale = 'en',
-    chatHistory = [],
-    modelName,
-    contentList,
-    resources,
-    notes,
-    collections,
-  } = ctx.configSnapshot.configurable;
   const enableWebSearch = ctx.tplConfig?.enableWebSearch?.value;
 
-  // TO TEST
-  const modelWindowSize = ModelContextLimitMap[modelName];
-  const maxContextTokens = Math.floor(modelWindowSize * MAX_CONTEXT_RATIO);
+  const maxContextTokens = Math.floor(maxTokens * MAX_CONTEXT_RATIO);
   // TODO: think remainingTokens may out of range
   let remainingTokens = maxContextTokens;
 

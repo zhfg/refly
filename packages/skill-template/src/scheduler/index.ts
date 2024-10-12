@@ -30,10 +30,16 @@ import { createSkillInventory } from '../inventory';
 import { SkillContextContentItemMetadata, SelectedContentDomain, GraphState, QueryAnalysis, IContext } from './types';
 // utils
 import { prepareContext } from './utils/context';
-import { buildSchedulerSystemPrompt } from './utils/prompt';
-import { analyzeQueryAndContext } from './utils/queryRewrite';
+import { buildFinalRequestMessages } from './utils/prompt';
+import { analyzeQueryAndContext, preprocessQuery } from './utils/queryRewrite';
 import { truncateMessages } from './utils/truncator';
-import { countContextTokens, countMessagesTokens } from './utils/token';
+import {
+  countContextTokens,
+  countMessagesTokens,
+  countToken,
+  ModelContextLimitMap,
+  checkHasContext,
+} from './utils/token';
 import { ChatMode } from './types';
 export class Scheduler extends BaseSkill {
   name = 'scheduler';
@@ -331,7 +337,7 @@ Please generate the summary based on these requirements and offer suggestions fo
     this.configSnapshot ??= config;
     this.emitEvent({ event: 'start' }, this.configSnapshot);
 
-    const { messages = [], query } = state;
+    const { messages = [], query: originalQuery } = state;
     const {
       locale = 'en',
       chatHistory = [],
@@ -339,20 +345,45 @@ Please generate the summary based on these requirements and offer suggestions fo
       currentSkill,
       spanId,
       modelName,
+      resources,
+      notes,
+      contentList,
+      collections,
     } = this.configSnapshot.configurable;
 
     const { tplConfig } = config?.configurable || {};
     const chatMode = tplConfig?.chatMode?.value as ChatMode;
 
-    let optimizedQuery = query;
+    let optimizedQuery = '';
     let mentionedContext: IContext;
     let context: string = '';
 
-    const messagesTokens = countMessagesTokens(chatHistory);
-    const contextTokens = countContextTokens(mentionedContext);
+    // preprocess query, ensure query is not too long
+    const query = preprocessQuery(originalQuery, {
+      configSnapshot: this.configSnapshot,
+      ctxThis: this,
+      state: state,
+      tplConfig,
+    });
 
-    const needRewriteQuery = chatMode !== ChatMode.NO_CONTEXT_CHAT && (messagesTokens > 0 || contextTokens > 0);
-    const needPrepareContext = chatMode !== ChatMode.NO_CONTEXT_CHAT;
+    // preprocess chat history, ensure chat history is not too long
+    const usedChatHistory = truncateMessages(chatHistory);
+
+    // check if there is any context
+    const hasContext = checkHasContext({
+      contentList,
+      resources,
+      notes,
+      collections,
+    });
+
+    const maxTokens = ModelContextLimitMap[modelName];
+    const queryTokens = countToken(query);
+    const chatHistoryTokens = countMessagesTokens(usedChatHistory);
+    const remainingTokens = maxTokens - queryTokens - chatHistoryTokens;
+
+    const needRewriteQuery = chatMode !== ChatMode.NO_CONTEXT_CHAT && (hasContext || chatHistoryTokens > 0);
+    const needPrepareContext = chatMode !== ChatMode.NO_CONTEXT_CHAT && hasContext && remainingTokens > 0;
 
     if (needRewriteQuery) {
       const analyedRes = await analyzeQueryAndContext(query, {
@@ -370,6 +401,7 @@ Please generate the summary based on these requirements and offer suggestions fo
         {
           query: optimizedQuery,
           mentionedContext,
+          maxTokens: remainingTokens,
         },
         {
           configSnapshot: this.configSnapshot,
@@ -379,16 +411,18 @@ Please generate the summary based on these requirements and offer suggestions fo
         },
       );
     }
-    const systemPrompt = buildSchedulerSystemPrompt(locale, needPrepareContext);
 
     const model = this.engine.chatModel({ temperature: 0.1 });
-    const requestMessages = [
-      new SystemMessage(systemPrompt),
-      ...truncateMessages(chatHistory as any as ChatMessage[]),
-      ...messages,
-      ...(needPrepareContext ? [new HumanMessage(`## Context \n ${context}`)] : []),
-      new HumanMessage(`## Original User Query \n ${query}\n\n## Rewritten Query \n ${optimizedQuery}`),
-    ];
+
+    const requestMessages = buildFinalRequestMessages({
+      locale,
+      chatHistory: usedChatHistory,
+      messages,
+      needPrepareContext,
+      context,
+      originalQuery: query,
+      rewrittenQuery: optimizedQuery,
+    });
 
     const responseMessage = await model.invoke(requestMessages, {
       ...this.configSnapshot,

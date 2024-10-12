@@ -6,7 +6,8 @@ import { SkillEngine } from '../../engine';
 import { BaseSkill, SkillRunnableConfig } from '../../base';
 import { SkillTemplateConfig } from '@refly-packages/openapi-schema';
 import { ModelContextLimitMap } from './token';
-import { MAX_CONTEXT_RATIO } from './constants';
+import { MAX_CONTEXT_RATIO, MAX_QUERY_TOKENS_RATIO } from './constants';
+import { truncateText } from './truncator';
 
 // simplify context entityId for better extraction
 export const preprocessContext = (context: IContext): IContext => {
@@ -298,3 +299,13 @@ Please analyze the query, focusing primarily on the current query and available 
     reasoning: result.reasoning,
   };
 }
+
+export const preprocessQuery = (
+  query: string,
+  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
+) => {
+  const { modelName } = ctx.configSnapshot.configurable;
+  const maxQueryTokens = ModelContextLimitMap[modelName] * MAX_QUERY_TOKENS_RATIO;
+
+  return truncateText(query, maxQueryTokens);
+};

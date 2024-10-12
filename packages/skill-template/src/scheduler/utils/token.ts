@@ -74,6 +74,14 @@ export const countContextTokens = (mentionedContext: IContext) => {
   );
 };
 
+export const checkHasContext = (mentionedContext: IContext) => {
+  return (
+    mentionedContext?.contentList?.length > 0 ||
+    mentionedContext?.resources?.length > 0 ||
+    mentionedContext?.notes?.length > 0
+  );
+};
+
 export const countMessagesTokens = (messages: BaseMessage[] = []) => {
   return messages.reduce((sum, message) => sum + countToken(message.content as string), 0);
 };

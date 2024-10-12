@@ -16,3 +16,5 @@ export const MAX_SHORT_NOTES_RATIO = 0.3;
 
 export const MAX_RAG_RELEVANT_RESOURCES_RATIO = 0.7;
 export const MAX_SHORT_RESOURCES_RATIO = 0.3;
+
+export const MAX_QUERY_TOKENS_RATIO = 0.7;
