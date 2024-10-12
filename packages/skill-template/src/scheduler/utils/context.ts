@@ -27,12 +27,7 @@ import {
   Source,
 } from '@refly-packages/openapi-schema';
 import { uniqBy } from 'lodash';
-
-// configurable params
-const MAX_CONTEXT_RATIO = 0.7;
-const MAX_SELECTED_CONTENT_RATIO = 2 / 4;
-const MAX_NOTES_RATIO = 1 / 4;
-const MAX_RESOURCES_RATIO = 1 / 4;
+import { MAX_CONTEXT_RATIO } from './constants';
 
 export async function prepareContext(
   {
@@ -392,33 +387,33 @@ export function removeOverlappingContextItems(context: IContext, originalContext
   };
 
   // Deduplicate contentList
-  deduplicatedContext.contentList = originalContext.contentList.filter(
-    (item) => !itemExistsInContext(item, context.contentList, 'metadata.entityId'),
+  deduplicatedContext.contentList = (originalContext?.contentList || []).filter(
+    (item) => !itemExistsInContext(item, context?.contentList || [], 'metadata.entityId'),
   );
 
   // Deduplicate resources
-  deduplicatedContext.resources = originalContext.resources.filter(
+  deduplicatedContext.resources = (originalContext?.resources || []).filter(
     (item) =>
       !itemExistsInContext(
         item.resource,
-        context.resources.map((r) => r.resource),
+        (context?.resources || []).map((r) => r.resource),
         'resourceId',
       ),
   );
 
   // Deduplicate notes
-  deduplicatedContext.notes = originalContext.notes.filter(
+  deduplicatedContext.notes = (originalContext?.notes || []).filter(
     (item) =>
       !itemExistsInContext(
         item.note,
-        context.notes.map((n) => n.note),
+        (context?.notes || []).map((n) => n.note),
         'noteId',
       ),
   );
 
   // Deduplicate collections
-  deduplicatedContext.collections = originalContext.collections.filter(
-    (item) => !itemExistsInContext(item, context.collections, 'collectionId'),
+  deduplicatedContext.collections = (originalContext?.collections || []).filter(
+    (item) => !itemExistsInContext(item, context?.collections || [], 'collectionId'),
   );
 
   return deduplicatedContext;

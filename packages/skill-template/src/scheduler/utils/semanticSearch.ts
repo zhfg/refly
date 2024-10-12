@@ -15,6 +15,14 @@ import { DocumentInterface, Document } from '@langchain/core/documents';
 import { ContentNodeType, NodeMeta } from '../../engine';
 import { genUniqueId } from '@refly-packages/utils';
 import { truncateText } from './truncator';
+import {
+  MAX_RAG_RELEVANT_CONTENT_RATIO,
+  MAX_SHORT_CONTENT_RATIO,
+  MAX_RAG_RELEVANT_NOTES_RATIO,
+  MAX_SHORT_NOTES_RATIO,
+  MAX_RAG_RELEVANT_RESOURCES_RATIO,
+  MAX_SHORT_RESOURCES_RATIO,
+} from './constants';
 
 // TODO:替换成实际的 Chunk 定义，然后进行拼接，拼接时包含元数据和分隔符
 export function assembleChunks(chunks: DocumentInterface[] = []): string {
@@ -148,9 +156,6 @@ export async function processSelectedContentWithSimilarity(
   maxTokens: number,
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextContentItem[]> {
-  const MAX_RAG_RELEVANT_CONTENT_RATIO = 0.7;
-  const MAX_SHORT_CONTENT_RATIO = 0.3;
-
   const MAX_RAG_RELEVANT_CONTENT_MAX_TOKENS = Math.floor(maxTokens * MAX_RAG_RELEVANT_CONTENT_RATIO);
   const MAX_SHORT_CONTENT_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_CONTENT_RATIO);
 
@@ -242,9 +247,6 @@ export async function processNotesWithSimilarity(
   maxTokens: number,
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextNoteItem[]> {
-  const MAX_RAG_RELEVANT_NOTES_RATIO = 0.7;
-  const MAX_SHORT_NOTES_RATIO = 0.3;
-
   const MAX_RAG_RELEVANT_NOTES_MAX_TOKENS = Math.floor(maxTokens * MAX_RAG_RELEVANT_NOTES_RATIO);
   const MAX_SHORT_NOTES_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_NOTES_RATIO);
 
@@ -340,9 +342,6 @@ export async function processResourcesWithSimilarity(
   maxTokens: number,
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextResourceItem[]> {
-  const MAX_RAG_RELEVANT_RESOURCES_RATIO = 0.7;
-  const MAX_SHORT_RESOURCES_RATIO = 0.3;
-
   const MAX_RAG_RELEVANT_RESOURCES_MAX_TOKENS = Math.floor(maxTokens * MAX_RAG_RELEVANT_RESOURCES_RATIO);
   const MAX_SHORT_RESOURCES_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_RESOURCES_RATIO);
 

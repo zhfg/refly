@@ -6,7 +6,7 @@ import {
   Source,
   ResourceType,
 } from '@refly-packages/openapi-schema';
-import { truncateMessages } from './truncator';
+import { truncateContext, truncateMessages } from './truncator';
 import { BaseMessage } from '@langchain/core/messages';
 
 export const concatChatHistoryToStr = (messages: BaseMessage[]) => {
@@ -36,7 +36,7 @@ export const concatMergedContextToStr = (mergedContext: {
   lowerPriorityContext: IContext;
   webSearchSources: Source[];
 }) => {
-  const { mentionedContext, lowerPriorityContext, webSearchSources } = mergedContext;
+  const { mentionedContext, lowerPriorityContext, webSearchSources } = mergedContext || {};
   let contextStr = '';
 
   const webSearchContextStr = concatContextToStr({ webSearchSources });
@@ -57,7 +57,7 @@ export const flattenMergedContextToSources = (mergedContext: {
   lowerPriorityContext: IContext;
   webSearchSources: Source[];
 }) => {
-  const { mentionedContext, lowerPriorityContext, webSearchSources } = mergedContext;
+  const { mentionedContext, lowerPriorityContext, webSearchSources } = mergedContext || {};
 
   const sources = [
     ...flattenContextToSources({
@@ -73,7 +73,7 @@ export const flattenMergedContextToSources = (mergedContext: {
 // TODO: should replace id with `type-index` for better llm extraction
 // citationIndex for each context item is used for LLM to cite the context item in the final answer
 export const concatContextToStr = (context: Partial<IContext>) => {
-  const { contentList = [], resources = [], notes = [], webSearchSources = [] } = context;
+  const { contentList = [], resources = [], notes = [], webSearchSources = [] } = context || {};
 
   let contextStr = '';
   let index = 1; // start from 1 to avoid 0 index issue in citation
@@ -137,15 +137,20 @@ export const concatContextToStr = (context: Partial<IContext>) => {
   return contextStr;
 };
 
-export const summarizeContext = (context: IContext): string => {
-  const { contentList, resources, notes, collections, messages } = context;
-
-  const contextStr = concatContextToStr({
-    resources: resources.map((r) => ({ ...r, content: r.resource?.content?.slice(0, 50) + '...' })),
-    notes: notes.map((n) => ({ ...n, content: n.note?.content?.slice(0, 50) + '...' })),
+export const summarizeContext = (context: IContext, maxContextTokens: number): string => {
+  const { contentList = [], resources = [], notes = [], collections, messages } = context || {};
+  const previewedContext: IContext = {
+    resources: resources.map((r) => ({
+      ...r,
+      content: r?.resource?.contentPreview || r.resource?.content?.slice(0, 50) + '...',
+    })),
+    notes: notes.map((n) => ({ ...n, content: n?.note?.contentPreview || n.note?.content?.slice(0, 50) + '...' })),
     contentList: contentList.map((c) => ({ ...c, content: c.content?.slice(0, 50) + '...' })),
-    // collections: collections.map((c) => ({ ...c, content: c.collection?.content?.slice(0, 50) + '...' })),
-  });
+  };
+  const truncatedContext = truncateContext(previewedContext, maxContextTokens);
+
+  // contentPreview just about 100~150 tokens, cannot overflow
+  const contextStr = concatContextToStr(truncatedContext);
 
   return contextStr || 'no available context';
 };
@@ -156,7 +161,7 @@ export const summarizeChatHistory = (messages: BaseMessage[]): string => {
 };
 
 export function flattenContextToSources(context: Partial<IContext>): Source[] {
-  const { webSearchSources = [], contentList = [], resources = [], notes = [] } = context;
+  const { webSearchSources = [], contentList = [], resources = [], notes = [] } = context || {};
   const sources: Source[] = [];
 
   // Web search sources

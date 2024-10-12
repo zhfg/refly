@@ -10,25 +10,31 @@ import { IContext, GraphState } from '../types';
 import { countToken } from './token';
 import { BaseMessage } from '@langchain/core/messages';
 
+// configurable params
 const MAX_MESSAGES = 5;
-const MAX_MESSAGE_TOKENS = 100;
-const MAX_MESSAGES_TOTAL_TOKENS = 1000;
+const MAX_MESSAGE_TOKENS = 400;
+const MAX_MESSAGES_TOTAL_TOKENS = 2000;
 
-export const truncateMessages = (messages: BaseMessage[]): BaseMessage[] => {
+export const truncateMessages = (
+  messages: BaseMessage[],
+  maxMessages = MAX_MESSAGES,
+  maxMessageTokens = MAX_MESSAGE_TOKENS,
+  maxMessagesTotalTokens = MAX_MESSAGES_TOTAL_TOKENS,
+): BaseMessage[] => {
   let totalTokens = 0;
   const truncatedMessages: BaseMessage[] = [];
 
-  for (let i = messages.length - 1; i >= Math.max(0, messages.length - MAX_MESSAGES); i--) {
+  for (let i = messages.length - 1; i >= Math.max(0, messages.length - maxMessages); i--) {
     const message = messages[i];
     let content = message.content as string;
     let tokens = countToken(content);
 
-    if (tokens > MAX_MESSAGE_TOKENS) {
-      content = truncateText(content, MAX_MESSAGE_TOKENS);
-      tokens = MAX_MESSAGE_TOKENS;
+    if (tokens > maxMessageTokens) {
+      content = truncateText(content, maxMessageTokens);
+      tokens = maxMessageTokens;
     }
 
-    if (totalTokens + tokens > MAX_MESSAGES_TOTAL_TOKENS) {
+    if (totalTokens + tokens > maxMessagesTotalTokens) {
       break;
     }
 

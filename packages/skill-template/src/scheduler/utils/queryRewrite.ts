@@ -5,6 +5,8 @@ import { z } from 'zod';
 import { SkillEngine } from '../../engine';
 import { BaseSkill, SkillRunnableConfig } from '../../base';
 import { SkillTemplateConfig } from '@refly-packages/openapi-schema';
+import { ModelContextLimitMap } from '@/scheduler/utils/token';
+import { MAX_CONTEXT_RATIO } from './constants';
 
 // simplify context entityId for better extraction
 export const preprocessContext = (context: IContext): IContext => {
@@ -190,7 +192,7 @@ export async function analyzeQueryAndContext(
   query: string,
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<QueryAnalysis> {
-  const { chatHistory, resources, notes, contentList, collections } = ctx.configSnapshot.configurable;
+  const { chatHistory, resources, notes, contentList, collections, modelName } = ctx.configSnapshot.configurable;
   const context: IContext = {
     resources,
     notes,
@@ -202,7 +204,10 @@ export async function analyzeQueryAndContext(
 
   // preprocess context for better extract mentioned context
   const preprocessedContext = preprocessContext(context);
-  const summarizedContext = summarizeContext(preprocessedContext);
+  const maxContextTokens = ModelContextLimitMap[modelName] * MAX_CONTEXT_RATIO;
+  const summarizedContext = summarizeContext(preprocessedContext, maxContextTokens);
+
+  // summarize chat history
   const summarizedChatHistory = summarizeChatHistory(chatHistory || []);
 
   const systemPrompt = `## Role & Background
