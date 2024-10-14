@@ -529,7 +529,7 @@ model TokenUsageMeter {
   /// Meter start timestamp
   startAt        DateTime  @map("start_at") @db.Timestamptz()
   /// Meter end timestamp
-  endAt          DateTime  @map("end_at") @db.Timestamptz()
+  endAt          DateTime? @map("end_at") @db.Timestamptz()
   /// Token quota (T1)
   t1TokenQuota   Int       @default(0) @map("t1_token_quota")
   /// Token used (T1)

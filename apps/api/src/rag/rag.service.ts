@@ -1,6 +1,5 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import avro from 'avsc';
 import { LRUCache } from 'lru-cache';
 import { Document, DocumentInterface } from '@langchain/core/documents';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
@@ -12,43 +11,13 @@ import { cleanMarkdownForIngest } from '@refly-packages/utils';
 
 import { SearchResult, User } from '@refly-packages/openapi-schema';
 import { MINIO_INTERNAL, MinioService } from '@/common/minio.service';
-import { HybridSearchParam, ContentData, ContentPayload, ReaderResult, NodeMeta } from './rag.dto';
+import { HybridSearchParam, ContentPayload, ReaderResult, NodeMeta } from './rag.dto';
 import { QdrantService } from '@/common/qdrant.service';
 import { Condition, PointStruct } from '@/common/qdrant.dto';
-import { genResourceUuid, streamToBuffer } from '@/utils';
+import { genResourceUuid } from '@/utils';
+import { JinaEmbeddings } from '@/utils/embeddings/jina';
 
 const READER_URL = 'https://r.jina.ai/';
-
-export type FormatMode =
-  | 'render' // For markdown rendering
-  | 'ingest' // For consumption by LLMs
-  | 'vanilla'; // Without any processing;
-
-export const ChunkAvroType = avro.Type.forSchema({
-  type: 'record',
-  name: 'Chunk',
-  fields: [
-    { name: 'id', type: 'string' },
-    { name: 'url', type: 'string' },
-    { name: 'type', type: 'string' },
-    { name: 'title', type: 'string' },
-    { name: 'content', type: 'string' },
-    { name: 'vector', type: { type: 'array', items: 'float' } },
-  ],
-});
-
-export const ContentAvroType = avro.Type.forSchema({
-  type: 'record',
-  name: 'ContentChunks',
-  fields: [
-    {
-      name: 'chunks',
-      type: { type: 'array', items: ChunkAvroType },
-    },
-  ],
-});
-
-export const PARSER_VERSION = '20240424';
 
 interface JinaRerankerResponse {
   results: {
@@ -69,20 +38,31 @@ export class RAGService {
     private qdrant: QdrantService,
     @Inject(MINIO_INTERNAL) private minio: MinioService,
   ) {
-    if (process.env.NODE_ENV === 'development') {
+    const provider = this.config.get('embeddings.provider');
+    if (provider === 'fireworks') {
       this.embeddings = new FireworksEmbeddings({
-        modelName: 'nomic-ai/nomic-embed-text-v1.5',
-        batchSize: 512,
+        modelName: this.config.getOrThrow('embeddings.modelName'),
+        batchSize: this.config.getOrThrow('embeddings.batchSize'),
         maxRetries: 3,
       });
-    } else {
+    } else if (provider === 'jina') {
+      this.embeddings = new JinaEmbeddings({
+        modelName: this.config.getOrThrow('embeddings.modelName'),
+        batchSize: this.config.getOrThrow('embeddings.batchSize'),
+        dimensions: this.config.getOrThrow('embeddings.dimensions'),
+        apiKey: this.config.getOrThrow('credentials.jina'),
+        maxRetries: 3,
+      });
+    } else if (provider === 'openai') {
       this.embeddings = new OpenAIEmbeddings({
-        modelName: 'text-embedding-3-large',
-        batchSize: 512,
-        dimensions: this.config.getOrThrow('vectorStore.vectorDim'),
+        modelName: this.config.getOrThrow('embeddings.modelName'),
+        batchSize: this.config.getOrThrow('embeddings.batchSize'),
+        dimensions: this.config.getOrThrow('embeddings.dimensions'),
         timeout: 5000,
         maxRetries: 3,
       });
+    } else {
+      throw new Error(`Unsupported embeddings provider: ${provider}`);
     }
 
     this.splitter = RecursiveCharacterTextSplitter.fromLanguage('markdown', {
@@ -100,15 +80,17 @@ export class RAGService {
 
     this.logger.log(
       `Authorization: ${
-        this.config.get('rag.jinaToken') ? `Bearer ${this.config.get('rag.jinaToken')}` : undefined
+        this.config.get('credentials.jina')
+          ? `Bearer ${this.config.get('credentials.jina')}`
+          : undefined
       }`,
     );
 
     const response = await fetch(READER_URL + url, {
       method: 'GET',
       headers: {
-        Authorization: this.config.get('rag.jinaToken')
-          ? `Bearer ${this.config.get('rag.jinaToken')}`
+        Authorization: this.config.get('credentials.jina')
+          ? `Bearer ${this.config.get('credentials.jina')}`
           : undefined,
         Accept: 'application/json',
       },
@@ -256,23 +238,6 @@ export class RAGService {
     return { size: QdrantService.estimatePointsSize(points) };
   }
 
-  /**
-   * Save content chunks to object storage.
-   */
-  async saveContentChunks(storageKey: string, data: ContentData) {
-    const buf = ContentAvroType.toBuffer(data);
-    return this.minio.client.putObject(storageKey, buf);
-  }
-
-  /**
-   * Load content chunks from object storage.
-   */
-  async loadContentChunks(storageKey: string) {
-    const readable = await this.minio.client.getObject(storageKey);
-    const buffer = await streamToBuffer(readable);
-    return ContentAvroType.fromBuffer(buffer) as ContentData;
-  }
-
   async deleteResourceNodes(user: User, resourceId: string) {
     return this.qdrant.batchDelete({
       must: [
@@ -359,7 +324,7 @@ export class RAGService {
       const res = await fetch('https://api.jina.ai/v1/rerank', {
         method: 'post',
         headers: {
-          Authorization: `Bearer ${this.config.getOrThrow('rag.jinaToken')}`,
+          Authorization: `Bearer ${this.config.getOrThrow('credentials.jina')}`,
           'Content-Type': 'application/json',
         },
         body: payload,

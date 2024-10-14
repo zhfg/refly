@@ -23,10 +23,6 @@ export interface ContentNode {
   payload: ContentPayload;
 }
 
-export interface ContentData {
-  chunks: ContentNode[];
-}
-
 export interface RetrieveFilter {
   nodeTypes?: ContentNodeType[];
   urls?: string[];

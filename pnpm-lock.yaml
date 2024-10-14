@@ -131,9 +131,6 @@ importers:
       '@sentry/profiling-node':
         specifier: ^7.113.0
         version: 7.119.0
-      avsc:
-        specifier: ^5.7.7
-        version: 5.7.7
       bull:
         specifier: ^4.12.2
         version: 4.16.3
@@ -9950,11 +9947,6 @@ packages:
     engines: {node: '>= 0.4'}
     dependencies:
       possible-typed-array-names: 1.0.0
-
-  /avsc@5.7.7:
-    resolution: {integrity: sha512-9cYNccliXZDByFsFliVwk5GvTq058Fj513CiR4E60ndDwmuXzTJEp/Bp8FyuRmGyYupLjHLs+JA9/CBoVS4/NQ==}
-    engines: {node: '>=0.11'}
-    dev: false
 
   /axios@1.7.7:
     resolution: {integrity: sha512-S4kL7XrjgBmvdGut0sN3yJxqYzrDOnivkBiN0OFs6hLiUam3UPvswUo0kqGyhqUZGEOytHyumEdXsAkgCOUf3Q==}
