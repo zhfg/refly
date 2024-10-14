@@ -34,18 +34,8 @@ export const useHandleContextWorkflow = () => {
 
     if (!showContentSelector) {
       handleStopContentSelectorListener();
-
-      // 将 note 切入只读模式
-      // const { currentNote } = useNoteStore.getState();
-      // noteStore.updateCurrentNote({ ...currentNote, readOnly: false });
-      // message.info(runtime === 'web' ? t('copilot.contentSelector.closeForWeb') : t('copilot.contentSelector.close'));
     } else {
       handleInitContentSelectorListener();
-
-      // 将 note 切入只读模式
-      // const { currentNote } = useNoteStore.getState();
-      // noteStore.updateCurrentNote({ ...currentNote, readOnly: true });
-      // message.info(runtime === 'web' ? t('copilot.contentSelector.openForWeb') : t('copilot.contentSelector.open'));
     }
   };
 

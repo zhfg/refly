@@ -27,18 +27,7 @@ const HoverMenu: React.FC<HoverMenuProps> = ({ onClick, onMouseEnter, onMouseLea
         padding: '2px 4px',
       }}
     >
-      <Button
-        style={{
-          '&:hover': {
-            cursor: 'pointer',
-          },
-        }}
-        type="text"
-        onClick={onClick}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
-        size="mini"
-      >
+      <Button type="text" onClick={onClick} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} size="mini">
         {t('knowledgeBase.context.addToContext')}
       </Button>
     </div>
