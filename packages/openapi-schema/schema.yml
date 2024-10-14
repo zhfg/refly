@@ -1562,6 +1562,7 @@ components:
         - inputTextArea
         - select
         - multiSelect
+        - radio
     ConfigScope:
       type: array
       description: Config scope
@@ -1630,6 +1631,7 @@ components:
           oneOf:
             - type: number
             - type: string
+            - type: boolean
             - type: array
               items:
                 type: string
@@ -1653,6 +1655,7 @@ components:
           oneOf:
             - type: string
             - type: number
+            - type: boolean
             - type: array
               items:
                 type: string
@@ -1949,18 +1952,12 @@ components:
           type: string
           format: date-time
           description: Source publish time
-        collectionId:
+        entityId:
           type: string
-          description: Related collection ID
-        collectionName:
+          description: Related entity ID
+        entityType:
           type: string
-          description: Related collection name
-        resourceId:
-          type: string
-          description: Related resource ID
-        resourceName:
-          type: string
-          description: Related resource name
+          description: Related entity type
     SourceSelection:
       type: object
       description: Source selection
@@ -3716,6 +3713,37 @@ components:
               description: Model list
               items:
                 $ref: '#/components/schemas/ModelInfo'
+    DocumentInterface:
+      type: object
+      properties:
+        id:
+          type: string
+          description: An optional identifier for the document. Ideally this should be unique across the document collection and formatted as a UUID.
+        pageContent:
+          type: string
+          description: The main content of the document.
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Metadata associated with the document.
+    InMemoryIndexContentResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              nullable: true
+    InMemorySearchResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/DocumentInterface'
+
   securitySchemes:
     api_key:
       type: apiKey

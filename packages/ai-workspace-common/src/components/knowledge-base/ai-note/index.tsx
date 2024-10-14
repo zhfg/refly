@@ -34,7 +34,7 @@ import { getHierarchicalIndexes, TableOfContents } from '@tiptap-pro/extension-t
 // 图标
 import { AiOutlineWarning, AiOutlineFileWord, AiOutlineDisconnect } from 'react-icons/ai';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
-import { getWsServerOrigin } from '@refly-packages/utils/url';
+import { getClientOrigin, getWsServerOrigin } from '@refly-packages/utils/url';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 import { useNoteTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
@@ -81,9 +81,13 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
   }));
 
   // initial block selection
+  const baseUrl = getClientOrigin();
   const { initMessageListener, initContentSelectorElem } = useContentSelector(
     'ai-note-editor-content-container',
     'noteSelection',
+    {
+      url: `${baseUrl}/knowledge-base?noteId=${noteId}`,
+    },
   );
 
   const websocketProvider = useMemo(() => {

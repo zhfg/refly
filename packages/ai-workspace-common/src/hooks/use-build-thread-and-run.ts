@@ -1,6 +1,6 @@
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
-import { buildConversation } from '@refly-packages/ai-workspace-common/utils/conversation';
+import { buildConversation, getConversation } from '@refly-packages/ai-workspace-common/utils/conversation';
 import { useResetState } from './use-reset-state';
 import { useTaskStore } from '@refly-packages/ai-workspace-common/stores/task';
 
@@ -88,7 +88,7 @@ export const useBuildThreadAndRun = () => {
     invokeParams?: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig },
   ) => {
     // support ask follow up question
-    const { messages = [], selectedModel } = useChatStore.getState();
+    const { messages = [], selectedModel, enableWebSearch, chatMode } = useChatStore.getState();
     const { selectedSkill } = useSkillStore.getState();
     const { localSettings } = useUserStore.getState();
 
@@ -98,6 +98,24 @@ export const useBuildThreadAndRun = () => {
     // 创建新会话并跳转
     const conv = ensureConversationExist();
     const skillContext = invokeParams?.skillContext || buildSkillContext();
+
+    // TODO: temp make scheduler support
+    const tplConfig = !!selectedSkill?.skillId
+      ? invokeParams?.tplConfig
+      : {
+          enableWebSearch: {
+            value: enableWebSearch,
+            configScope: ['runtime'],
+            displayValue: localSettings?.uiLocale === 'zh-CN' ? '联网搜索' : 'Web Search',
+            label: localSettings?.uiLocale === 'zh-CN' ? '联网搜索' : 'Web Search',
+          },
+          chatMode: {
+            value: chatMode,
+            configScope: ['runtime'],
+            displayValue: localSettings?.uiLocale === 'zh-CN' ? '提问模式' : 'Normal Chat',
+            label: localSettings?.uiLocale === 'zh-CN' ? '直接提问' : 'Normal Chat',
+          },
+        };
 
     // 设置当前的任务类型及会话 id
     const task: InvokeSkillRequest = {
@@ -109,8 +127,8 @@ export const useBuildThreadAndRun = () => {
       context: skillContext,
       convId: conv?.convId || '',
       locale: localSettings?.outputLocale as OutputLocale,
-      tplConfig: invokeParams?.tplConfig,
-      ...{ createConvParam: { ...conv, title: question } },
+      tplConfig,
+      ...{ createConvParam: getConversation({ ...conv, title: question }) },
     };
     taskStore.setTask(task);
     // 开始提问

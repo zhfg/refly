@@ -31,7 +31,7 @@ export const getContainerElem = (selector: string | null) => {
   return selector ? container.querySelector(`.${selector}`) : container;
 };
 
-export const useContentSelector = (selector: string | null, domain: SelectedTextDomain) => {
+export const useContentSelector = (selector: string | null, domain: SelectedTextDomain, metadata?: { url: string }) => {
   const statusRef = useRef(true);
   const markRef = useRef<HTMLDivElement>(undefined);
   const targetList = useRef<Element[]>([]);
@@ -48,7 +48,7 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
       xPath,
       scope: selectorScopeRef.current,
       domain,
-      url: document?.location?.href || (document as any as Location)?.href || '',
+      url: metadata?.url || document?.location?.href || (document as any as Location)?.href || '',
     };
 
     return mark;
@@ -76,7 +76,7 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
     const menuContainer = document.createElement('div');
     menuContainer.setAttribute('data-id', 'refly-content-selector-hover-menu');
     menuContainer.style.position = 'fixed';
-    menuContainer.style.zIndex = '1000';
+    menuContainer.style.zIndex = '10000';
     menuContainer.style.opacity = '0';
     menuContainer.style.transition = 'opacity 0.3s ease-in-out';
     containerElem?.appendChild?.(menuContainer);

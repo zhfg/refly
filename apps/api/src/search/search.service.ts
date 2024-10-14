@@ -403,7 +403,7 @@ export class SearchService {
       const res = await fetch('https://google.serper.dev/search', {
         method: 'post',
         headers: {
-          'X-API-KEY': this.configService.get('serper.apiKey'),
+          'X-API-KEY': this.configService.get('credentials.serper'),
           'Content-Type': 'application/json',
         },
         body: queryPayload,

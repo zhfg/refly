@@ -31,7 +31,9 @@ export function PreCode(props: { children: any }) {
             message.success(t('components.markdown.copySuccess'));
           }
         }}
-      ></span>
+      >
+        {t('copilot.message.copy')}
+      </span>
       {props.children}
     </pre>
   );

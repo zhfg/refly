@@ -145,9 +145,9 @@ export class FindRelatedContent extends BaseSkill {
       title: result.title,
       pageContent: result.content?.join('\n'),
       metadata: {
-        resourceId: result.id,
-        resourceName: result.title,
-        collectionId: result.metadata?.collectionId,
+        entityId: result.id,
+        entityType: 'resource',
+        title: result.title,
       },
     }));
 

@@ -232,7 +232,7 @@ export type LabelInstance = {
 /**
  * Data input mode
  */
-export type InputMode = 'input' | 'inputNumber' | 'inputTextArea' | 'select' | 'multiSelect';
+export type InputMode = 'input' | 'inputNumber' | 'inputTextArea' | 'select' | 'multiSelect' | 'radio';
 
 /**
  * Config scope
@@ -299,7 +299,7 @@ export type DynamicConfigItem = {
   /**
    * Default value
    */
-  defaultValue?: number | string | Array<string>;
+  defaultValue?: number | string | boolean | Array<string>;
   /**
    * Config options
    */
@@ -317,7 +317,7 @@ export type DynamicConfigValue = {
   /**
    * Config value
    */
-  value: string | number | Array<string>;
+  value: string | number | boolean | Array<string>;
   /**
    * Config display value
    */
@@ -616,21 +616,13 @@ export type SourceMeta = {
    */
   publishedTime?: string;
   /**
-   * Related collection ID
+   * Related entity ID
    */
-  collectionId?: string;
+  entityId?: string;
   /**
-   * Related collection name
+   * Related entity type
    */
-  collectionName?: string;
-  /**
-   * Related resource ID
-   */
-  resourceId?: string;
-  /**
-   * Related resource name
-   */
-  resourceName?: string;
+  entityType?: string;
 };
 
 /**
@@ -2252,6 +2244,33 @@ export type ListModelsResponse = BaseResponse & {
    * Model list
    */
   data?: Array<ModelInfo>;
+};
+
+export type DocumentInterface = {
+  /**
+   * An optional identifier for the document. Ideally this should be unique across the document collection and formatted as a UUID.
+   */
+  id?: string;
+  /**
+   * The main content of the document.
+   */
+  pageContent?: string;
+  /**
+   * Metadata associated with the document.
+   */
+  metadata?: {
+    [key: string]: unknown;
+  };
+};
+
+export type InMemoryIndexContentResponse = BaseResponse & {
+  data?: {
+    [key: string]: unknown;
+  } | null;
+};
+
+export type InMemorySearchResponse = BaseResponse & {
+  data?: Array<DocumentInterface>;
 };
 
 export type ListResourcesData = {

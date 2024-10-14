@@ -212,7 +212,8 @@
     },
     "context": {
       "contentSelector": "Content Selector",
-      "clearSelector": "Clear Selection",
+      "clearContext": "Clear Context",
+      "addToContext": "Add to Chat",
       "resource": "Resource",
       "resources": "Resource",
       "note": "Note",
@@ -977,6 +978,17 @@
       "title": "Skill Configuration",
       "errorTipTitle": "Send Failed",
       "errorTip": "Please adjust the skill configuration and try again"
+    },
+    "chatMode": {
+      "title": "Chat Mode",
+      "normal": "Normal Chat",
+      "noContext": "No Context Chat",
+      "wholeSpace": "Whole Space Chat"
+    },
+    "webSearch": {
+      "title": "Web Search",
+      "enable": "Enable",
+      "disable": "Disable"
     },
     "tokenUsage": "Input {{inputCount}}, Output {{outputCount}}",
     "reflyAssistant": "Knowledge Curator",

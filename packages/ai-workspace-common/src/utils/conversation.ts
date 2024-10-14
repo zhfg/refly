@@ -11,9 +11,13 @@ export const buildConversation = (convPayload?: Partial<Conversation>): Conversa
     originPageTitle: document?.title || '',
     title: document?.title || '',
     originPageUrl: location.href,
-    convId: genConvID(),
+    convId: convPayload?.convId || genConvID(),
     locale: convPayload?.locale,
   };
 
   return conversation;
+};
+
+export const getConversation = (convPayload?: Partial<Conversation>) => {
+  return buildConversation(convPayload);
 };

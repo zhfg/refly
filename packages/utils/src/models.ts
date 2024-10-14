@@ -14,12 +14,6 @@ export const defaultModelList: ModelInfo[] = [
     tier: 't1',
   },
   {
-    name: 'google/gemini-pro-1.5',
-    label: 'Gemini Pro 1.5',
-    provider: 'google',
-    tier: 't1',
-  },
-  {
     name: 'openai/gpt-4o-mini',
     label: 'GPT-4o Mini',
     provider: 'openai',
@@ -29,12 +23,6 @@ export const defaultModelList: ModelInfo[] = [
     name: 'anthropic/claude-3-haiku',
     label: 'Claude 3 Haiku',
     provider: 'anthropic',
-    tier: 't2',
-  },
-  {
-    name: 'google/gemini-flash-1.5',
-    label: 'Gemini Flash 1.5',
-    provider: 'google',
     tier: 't2',
   },
 ];
