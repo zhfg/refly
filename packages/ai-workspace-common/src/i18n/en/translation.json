@@ -211,7 +211,10 @@
       "defaultTitle": "Untitled"
     },
     "context": {
+      "contentSelectorHoverText": "Add to Context",
       "contentSelector": "Content Selector",
+      "contentSelectorAddSuccess": "Add Success",
+      "contentSelectorIsEmpty": "Please select text",
       "clearSelector": "Clear Selection",
       "resource": "Resource",
       "resources": "Resource",

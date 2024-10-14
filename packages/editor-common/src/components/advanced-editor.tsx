@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { ColorSelector } from './selectors/color-selector';
 import { LinkSelector } from './selectors/link-selector';
 import { NodeSelector } from './selectors/node-selector';
+import { ContentSelectorButtons } from './selectors/content-selector-buttons';
 import { Separator } from './ui/separator';
 
 import GenerativeMenuSwitch from './generative/generative-menu-switch';
@@ -46,7 +47,14 @@ export const CollabEditorCommand = (props: { entityId: string; entityType: strin
   );
 };
 
-export const CollabGenAIMenuSwitch = () => {
+interface CollabGenAIMenuSwitchProps {
+  contentSelector: {
+    text: string;
+    handleClick: () => void;
+  };
+}
+export const CollabGenAIMenuSwitch: React.FC<CollabGenAIMenuSwitchProps> = (props) => {
+  const { contentSelector } = props;
   const [openNode, setOpenNode] = useState(false);
   const [openColor, setOpenColor] = useState(false);
   const [openLink, setOpenLink] = useState(false);
@@ -54,6 +62,8 @@ export const CollabGenAIMenuSwitch = () => {
 
   return (
     <GenerativeMenuSwitch open={openAI} onOpenChange={setOpenAI}>
+      <ContentSelectorButtons text={contentSelector?.text} handleClick={contentSelector?.handleClick} />
+      <Separator orientation="vertical" />
       <NodeSelector open={openNode} onOpenChange={setOpenNode} />
       <Separator orientation="vertical" />
       <LinkSelector open={openLink} onOpenChange={setOpenLink} />

@@ -211,6 +211,9 @@
       "defaultTitle": "未命名"
     },
     "context": {
+      "contentSelectorHoverText": "添加至上下文",
+      "contentSelectorAddSuccess": "添加成功",
+      "contentSelectorIsEmpty": "请选择文本",
       "contentSelector": "内容划线选择器",
       "clearSelector": "清空选择内容及划线",
       "resource": "资源",

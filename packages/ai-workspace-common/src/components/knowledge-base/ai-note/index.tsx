@@ -53,6 +53,7 @@ import { IconBook, IconLoading, IconPlus } from '@arco-design/web-react/icon';
 const MemorizedToC = memo(ToC);
 
 const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
+  const { t } = useTranslation();
   const lastCursorPosRef = useRef<number>();
   const [token] = useCookie('_refly_ai_sid');
 
@@ -81,7 +82,7 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
   }));
 
   // initial block selection
-  const { initMessageListener, initContentSelectorElem } = useContentSelector(
+  const { initMessageListener, initContentSelectorElem, addInlineMarkForNote } = useContentSelector(
     'ai-note-editor-content-container',
     'noteSelection',
   );
@@ -142,6 +143,10 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
     window.localStorage.setItem('markdown', editor.storage.markdown.getMarkdown());
     noteStore.updateNoteSaveStatus('Saved');
   }, 500);
+
+  const handleContentSelectorClick = () => {
+    addInlineMarkForNote();
+  };
 
   useEffect(() => {
     // Update status changes
@@ -209,15 +214,6 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
     });
   }, []);
 
-  // 初始化块选择
-  useEffect(() => {
-    const remove = initMessageListener();
-
-    return () => {
-      remove();
-    };
-  }, [noteId]);
-
   useEffect(() => {
     if (editorRef.current) {
       if (readOnly) {
@@ -264,7 +260,12 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
             slotAfter={<ImageResizer />}
           >
             <CollabEditorCommand entityId={noteId} entityType="note" />
-            <CollabGenAIMenuSwitch />
+            <CollabGenAIMenuSwitch
+              contentSelector={{
+                text: t('knowledgeBase.context.contentSelectorHoverText'),
+                handleClick: handleContentSelectorClick,
+              }}
+            />
             <CollabGenAIBlockMenu />
           </EditorContent>
         </EditorRoot>

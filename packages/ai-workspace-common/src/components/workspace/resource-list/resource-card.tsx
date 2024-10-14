@@ -95,33 +95,39 @@ export const ResourceCard = (props: ResourceCard) => {
 
   return (
     <div id={`resource-${props.index}`}>
-      <Spin
-        loading={loading}
-        className={loading ? 'loading-box' : ''}
-        tip={
-          <div
-            className={`${isReindexing ? 'wait_parse-tip' : cardData?.indexStatus}-tip`}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleReindex();
-            }}
-          >
-            {t(`resource.${isReindexing ? 'wait_parse' : cardData?.indexStatus}`)}
-          </div>
-        }
-        style={{ width: '100%', height: '100%' }}
-        element={
-          cardData?.indexStatus === 'parse_failed' ? (
-            isReindexing ? (
-              <IconLoading />
-            ) : (
-              <IconCloseCircle style={{ color: 'rgb(220 38 38)', fontSize: 30, strokeWidth: 2 }} />
-            )
-          ) : null
-        }
-      >
-        <div className="p-4 m-3 rounded-lg border card-box border-black/8" onClick={() => onClick()}>
-          <div className="overflow-hidden relative h-60 content">
+      <div className="m-3 rounded-lg border card-box border-black/8" onClick={() => onClick()}>
+        <Spin
+          loading={loading}
+          className={loading ? 'loading-box' : ''}
+          tip={
+            <div
+              className={`${isReindexing ? 'wait_parse-tip' : cardData?.indexStatus}-tip`}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleReindex();
+              }}
+            >
+              {t(`resource.${isReindexing ? 'wait_parse' : cardData?.indexStatus}`)}
+            </div>
+          }
+          style={{
+            width: '100%',
+            height: '100%',
+            borderTopLeftRadius: 12,
+            borderTopRightRadius: 12,
+            overflow: 'hidden',
+          }}
+          element={
+            cardData?.indexStatus === 'parse_failed' ? (
+              isReindexing ? (
+                <IconLoading />
+              ) : (
+                <IconCloseCircle style={{ color: 'rgb(220 38 38)', fontSize: 30, strokeWidth: 2 }} />
+              )
+            ) : null
+          }
+        >
+          <div className="pt-4 pl-4 pr-4 overflow-hidden relative h-60 content">
             <div className="flex items-center mb-1 resource-url">
               <div className="flex justify-center items-center rounded-lg border card-icon-box shrink-0 border-black/8">
                 {props.cardIcon}
@@ -154,36 +160,36 @@ export const ResourceCard = (props: ResourceCard) => {
               <Markdown content={props.cardData?.contentPreview} fontSize={12} />
             </div>
           </div>
+        </Spin>
 
-          <div className="flex relative justify-between items-center pt-6">
-            <div className="flex items-center text-xs text-black/40">
-              <div className="text-xs text-black/40 mr-[4px]">
-                {time(cardData.updatedAt, language as LOCALE)
-                  .utc()
-                  .fromNow()}
-              </div>
-              {cardData.indexStatus === 'wait_index' && (
-                <IndexStatus status="wait_index" icon={<IconLoading style={{ marginRight: 4 }} />} />
-              )}
-
-              {cardData.indexStatus === 'index_failed' && (
-                <IndexStatus
-                  status="index_failed"
-                  icon={isReindexing ? <IconLoading style={{ marginRight: 4 }} /> : null}
-                />
-              )}
+        <div className="flex relative justify-between items-center pl-4 pr-4 pb-4 pt-6">
+          <div className="flex items-center text-xs text-black/40">
+            <div className="text-xs text-black/40 mr-[4px]">
+              {time(cardData.updatedAt, language as LOCALE)
+                .utc()
+                .fromNow()}
             </div>
-            <div>
-              <DeleteDropdownMenu
-                data={cardData}
-                type="resource"
-                postDeleteList={(resource: Resource) => deleteData(resource)}
-                getPopupContainer={() => document.getElementById(`resource-${index}`) as HTMLElement}
+            {cardData.indexStatus === 'wait_index' && (
+              <IndexStatus status="wait_index" icon={<IconLoading style={{ marginRight: 4 }} />} />
+            )}
+
+            {cardData.indexStatus === 'index_failed' && (
+              <IndexStatus
+                status="index_failed"
+                icon={isReindexing ? <IconLoading style={{ marginRight: 4 }} /> : null}
               />
-            </div>
+            )}
+          </div>
+          <div>
+            <DeleteDropdownMenu
+              data={cardData}
+              type="resource"
+              postDeleteList={(resource: Resource) => deleteData(resource)}
+              getPopupContainer={() => document.getElementById(`resource-${index}`) as HTMLElement}
+            />
           </div>
         </div>
-      </Spin>
+      </div>
     </div>
   );
 };

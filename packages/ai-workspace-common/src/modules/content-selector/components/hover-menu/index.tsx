@@ -1,7 +1,6 @@
 import React from 'react';
 import { Button } from '@arco-design/web-react';
-import { IconDelete } from '@arco-design/web-react/icon';
-import { AiOutlineHighlight } from 'react-icons/ai';
+import { useTranslation } from 'react-i18next';
 
 interface HoverMenuProps {
   onClick: () => void;
@@ -11,6 +10,7 @@ interface HoverMenuProps {
 }
 
 const HoverMenu: React.FC<HoverMenuProps> = ({ onClick, onMouseEnter, onMouseLeave, selected }) => {
+  const { t } = useTranslation();
   return (
     <div
       className="refly-selector-hover-menu"
@@ -23,14 +23,9 @@ const HoverMenu: React.FC<HoverMenuProps> = ({ onClick, onMouseEnter, onMouseLea
         padding: '2px 4px',
       }}
     >
-      <Button
-        type="text"
-        icon={selected ? <IconDelete /> : <AiOutlineHighlight />}
-        onClick={onClick}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
-        size="mini"
-      />
+      <Button type="text" onClick={onClick} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} size="mini">
+        {t('knowledgeBase.context.contentSelectorHoverText')}
+      </Button>
     </div>
   );
 };

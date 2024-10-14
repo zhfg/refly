@@ -30,33 +30,6 @@ export const ContentSelectorBtn = (props: ContentSelectorBtnProps) => {
 
   const { handleToggleContentSelector } = useHandleContextWorkflow();
 
-  const baseStyle = {
-    marginRight: 0,
-    color: contentSelectorStore?.showContentSelector ? '#fff' : '#00000080',
-  };
-
-  // inline选择和块选择的下拉菜单
-  const dropdownMenu = (
-    <Menu
-      onClickMenuItem={(key, ev) => {
-        ev?.stopPropagation?.();
-
-        contentSelectorStore.setScope(key as MarkScope);
-        const event: SyncStatusEvent = {
-          name: 'syncMarkStatusEvent',
-          body: {
-            type: 'update',
-            scope: key as MarkScope,
-          },
-        };
-        sendMessage({ ...event, source: getRuntime() });
-      }}
-    >
-      <Item key="inline">自由选择</Item>
-      <Item key="block">块选择</Item>
-    </Menu>
-  );
-
   useEffect(() => {
     const clearEvent = initMessageListener();
 
@@ -66,32 +39,28 @@ export const ContentSelectorBtn = (props: ContentSelectorBtnProps) => {
   }, []);
 
   return (
-    <Tooltip getPopupContainer={getPopupContainer} content={t('knowledgeBase.context.contentSelector')}>
-      <Checkbox
-        key={'knowledge-base-note-panel'}
-        checked={contentSelectorStore?.showContentSelector}
-        style={{ padding: 0, display: 'flex', marginRight: 0 }}
-      >
-        {({ checked }) => {
-          return (
-            <Button
-              onClick={() => {
-                handleToggleContentSelector(!contentSelectorStore.showContentSelector);
-              }}
-              icon={contentSelectorStore.scope === 'block' ? <IconHighlight /> : <IconHighlight />}
-              size="mini"
-              type="outline"
-              style={{ fontSize: 10, height: 18, borderRadius: 4, borderColor: '#e5e5e5', color: 'rgba(0,0,0,0.6)' }}
-              className={classNames('context-selector-btn', { active: checked })}
-            >
-              {/* <Divider type="vertical" style={{ margin: '0 4px' }} /> */}
-              {/* <Dropdown droplist={dropdownMenu}>
-              <IconCaretDown />
-            </Dropdown> */}
-            </Button>
-          );
-        }}
-      </Checkbox>
-    </Tooltip>
+    <></>
+    // <Tooltip getPopupContainer={getPopupContainer} content={t('knowledgeBase.context.contentSelector')}>
+    //   <Checkbox
+    //     key={'knowledge-base-note-panel'}
+    //     checked={contentSelectorStore?.showContentSelector}
+    //     style={{ padding: 0, display: 'flex', marginRight: 0 }}
+    //   >
+    //     {({ checked }) => {
+    //       return (
+    //         <Button
+    //           onClick={() => {
+    //             handleToggleContentSelector(!contentSelectorStore.showContentSelector);
+    //           }}
+    //           icon={contentSelectorStore.scope === 'block' ? <IconHighlight /> : <IconHighlight />}
+    //           size="mini"
+    //           type="outline"
+    //           style={{ fontSize: 10, height: 18, borderRadius: 4, borderColor: '#e5e5e5', color: 'rgba(0,0,0,0.6)' }}
+    //           className={classNames('context-selector-btn', { active: checked })}
+    //         ></Button>
+    //       );
+    //     }}
+    //   </Checkbox>
+    // </Tooltip>
   );
 };
