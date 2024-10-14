@@ -67,10 +67,11 @@ interface InstanceDropdownMenuProps {
   setUpdateModal: (val: boolean) => void;
   getPopupContainer?: () => HTMLElement;
   data: SkillInstance;
+  icon?: React.ReactNode;
 }
 
 export const InstanceDropdownMenu = (props: InstanceDropdownMenuProps) => {
-  const { data, postDeleteList, setUpdateModal, getPopupContainer } = props;
+  const { data, icon, postDeleteList, setUpdateModal, getPopupContainer } = props;
   const [popupVisible, setPopupVisible] = useState(false);
   const { t } = useTranslation();
   const location = useLocation();
@@ -127,7 +128,7 @@ export const InstanceDropdownMenu = (props: InstanceDropdownMenuProps) => {
       getPopupContainer={getPopupContainer}
     >
       <Button
-        icon={<RiMoreFill style={{ fontSize: 16 }} />}
+        icon={icon || <RiMoreFill style={{ fontSize: 16 }} />}
         type="text"
         onClick={(e) => handleIconClick(e)}
         className="text-gray-500"

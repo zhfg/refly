@@ -23,6 +23,7 @@ type positionType = 'left' | 'tr' | 'br' | 'tl' | 'bl' | 'top' | 'bottom' | 'rig
 
 interface DropListProps {
   type: string;
+  canCopy?: boolean;
   position?: positionType;
   handleCancel: (e: any) => void;
   handleDeleteClick: (e: any) => Promise<void>;
@@ -31,7 +32,7 @@ interface DropListProps {
 }
 
 const DropList = (props: DropListProps) => {
-  const { handleCancel, handleDeleteClick, handlEditKnowledgeBase, type, getPopupContainer, position } = props;
+  const { handleCancel, handleDeleteClick, handlEditKnowledgeBase, type, getPopupContainer, position, canCopy } = props;
   const noteStore = useNoteStore((state) => ({
     editor: state.editor,
   }));
@@ -47,22 +48,26 @@ const DropList = (props: DropListProps) => {
           </div>
         </Menu.Item>
       )}
-      <Menu.Item key="copy">
-        <div
-          onClick={(e) => {
-            e.stopPropagation();
-            const editor = noteStore.editor;
-            if (editor) {
-              const markdown = editor.storage.markdown.getMarkdown();
-              copyToClipboard(markdown);
-              Message.success({ content: t('contentDetail.item.copySuccess') });
-            }
-          }}
-        >
-          <IconCopy style={iconStyle} />
-          {t('contentDetail.item.copyContent')}
-        </div>
-      </Menu.Item>
+
+      {canCopy && (
+        <Menu.Item key="copy">
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              const editor = noteStore.editor;
+              if (editor) {
+                const markdown = editor.storage.markdown.getMarkdown();
+                copyToClipboard(markdown);
+                Message.success({ content: t('contentDetail.item.copySuccess') });
+              }
+            }}
+          >
+            <IconCopy style={iconStyle} />
+            {t('contentDetail.item.copyContent')}
+          </div>
+        </Menu.Item>
+      )}
+
       <Menu.Item key="delete">
         <Popconfirm
           focusLock
@@ -88,6 +93,7 @@ interface DeleteDropdownMenuProps {
   postDeleteList?: (note: Note | Collection | Resource | RemoveResourceFromCollectionRequest) => void;
   getPopupContainer?: () => HTMLElement;
   deleteConfirmPosition?: positionType;
+  canCopy?: boolean;
 }
 
 interface NotePros extends DeleteDropdownMenuProps {
@@ -111,7 +117,7 @@ interface ResourceCollectionPros extends DeleteDropdownMenuProps {
 }
 
 export const DeleteDropdownMenu = (props: NotePros | KnowledgeBasePros | ResourcePros | ResourceCollectionPros) => {
-  const { type, data, postDeleteList, getPopupContainer, deleteConfirmPosition } = props;
+  const { type, data, postDeleteList, getPopupContainer, deleteConfirmPosition, canCopy } = props;
   const [popupVisible, setPopupVisible] = useState(false);
   const { t } = useTranslation();
 
@@ -159,7 +165,7 @@ export const DeleteDropdownMenu = (props: NotePros | KnowledgeBasePros | Resourc
   const handlEditKnowledgeBase = (e: MouseEvent) => {
     e.stopPropagation();
     importKnowledgeModal.setShowNewKnowledgeModal(true);
-    importKnowledgeModal.setEditCollection(data);
+    importKnowledgeModal.setEditCollection(data as Collection);
   };
 
   const handleIconClick = (e) => {
@@ -168,6 +174,7 @@ export const DeleteDropdownMenu = (props: NotePros | KnowledgeBasePros | Resourc
   };
 
   const droplist = DropList({
+    canCopy,
     type,
     position: deleteConfirmPosition,
     handleCancel,

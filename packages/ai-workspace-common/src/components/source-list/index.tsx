@@ -122,26 +122,6 @@ export const ResourceItem = (props: {
         </div>
       </div>
       <div className="knowledge-base-directory-title">{item.data?.title}</div>
-      <div className="knowledge-base-directory-action">
-        {item?.resourceId ? (
-          <div className="action-markdown-content knowledge-base-directory-action-item">
-            <IconBook
-              onClick={() => {
-                jumpToReadResource({
-                  resId: item?.resourceId,
-                });
-              }}
-            />
-          </div>
-        ) : null}
-        <div className="action-external-origin-website knowledge-base-directory-action-item">
-          <IconCompass
-            onClick={() => {
-              window.open(item?.data?.url, '_blank');
-            }}
-          />
-        </div>
-      </div>
       {showDesc ? (
         <div style={{ maxHeight: 300, overflowY: 'scroll', marginTop: 16 }}>
           <Markdown content={item?.content || ''} />
