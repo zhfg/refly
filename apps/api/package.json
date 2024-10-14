@@ -45,7 +45,6 @@
     "@sentry/cli": "^2.31.2",
     "@sentry/node": "^7.113.0",
     "@sentry/profiling-node": "^7.113.0",
-    "avsc": "^5.7.7",
     "bull": "^4.12.2",
     "cookie-parser": "~1.4.6",
     "hbs": "^4.2.0",
