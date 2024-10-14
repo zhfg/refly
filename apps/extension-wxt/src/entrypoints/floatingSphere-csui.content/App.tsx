@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Button, Tooltip, Message } from '@arco-design/web-react';
 import { reflyEnv } from '@/utils/env';
 
@@ -78,25 +78,33 @@ export const App = () => {
     e.preventDefault();
   };
 
-  const handleMouseEnter = () => {
-    setIsHovered(true);
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    setIsDropdownVisible(true);
     updateDropdownPosition();
-  };
+  }, []);
 
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-  };
+  const handleMouseLeave = useCallback(() => {
+    timeoutRef.current = setTimeout(() => {
+      setIsDropdownVisible(false);
+    }, 300);
+  }, []);
 
-  const Dropdown = () => {
+  const Dropdown = useCallback(() => {
     return (
       <div
         className={`refly-floating-sphere-dropdown ${dropdownPosition}`}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
         style={{
           position: 'absolute',
           right: 4,
         }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         {/* Dropdown menu content */}
         <div className="refly-floating-sphere-dropdown-connector" />
@@ -126,14 +134,17 @@ export const App = () => {
               shape="circle"
               icon={<IconSave />}
               size="small"
-              onClick={() => handleSaveResourceAndNotify(saveResource)}
+              onClick={() => {
+                console.log('saveResource', saveResource);
+                handleSaveResourceAndNotify(saveResource);
+              }}
               className="refly-floating-sphere-dropdown-item assist-action-item"
             ></Button>
           </Tooltip>
         </div>
       </div>
     );
-  };
+  }, [dropdownPosition, handleMouseEnter, handleMouseLeave]);
 
   useEffect(() => {
     Message.config({
@@ -180,12 +191,15 @@ export const App = () => {
   }, [isDragging]);
 
   // listen to copilotType
+  console.log('ishovered', isHovered);
 
   return (
     <div className="refly-floating-sphere-entry-container">
       <div
         ref={sphereRef}
-        className={classNames('refly-floating-sphere-entry', { active: !!selectedText || isDragging || isHovered })}
+        className={classNames('refly-floating-sphere-entry', {
+          active: !!selectedText || isDragging || isDropdownVisible,
+        })}
         style={{
           top: `${position.y}px`,
           right: '0px',
@@ -194,7 +208,7 @@ export const App = () => {
         <div className={classNames('refly-floating-sphere-entry-wrapper')}>
           <div
             className={classNames('refly-floating-sphere-entry-content', {
-              active: !!selectedText || isDragging || isHovered,
+              active: !!selectedText || isDragging || isDropdownVisible,
             })}
             onMouseDown={handleDragStart}
             onMouseEnter={handleMouseEnter}
@@ -205,8 +219,7 @@ export const App = () => {
             <span className="refly-floating-sphere-entry-shortcut">{shortcut}</span>
           </div>
 
-          {/* <Dropdown /> */}
-          {(isHovered || isDragging) && <Dropdown />}
+          {isDropdownVisible && <Dropdown />}
         </div>
       </div>
     </div>

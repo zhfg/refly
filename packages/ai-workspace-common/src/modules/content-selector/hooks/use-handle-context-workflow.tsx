@@ -7,6 +7,7 @@ import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useEffect } from 'react';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
 
 export const useHandleContextWorkflow = () => {
   const noteStore = useNoteStore((state) => ({
@@ -20,6 +21,9 @@ export const useHandleContextWorkflow = () => {
     showContextCard: state.showContextCard,
     contextDomain: state.contextDomain,
     setContextDomain: state.setContextDomain,
+  }));
+  const contentSelectorStore = useContentSelectorStore((state) => ({
+    setShowContentSelector: state.setShowContentSelector,
   }));
   const runtime = getRuntime();
 
@@ -49,6 +53,7 @@ export const useHandleContextWorkflow = () => {
 
   const handlePassthroughOpenContentSelector = (enable = true) => {
     handleToggleContentSelectorPanel(enable);
+    contentSelectorStore.setShowContentSelector(enable);
     handleToggleContentSelector(enable);
   };
 
