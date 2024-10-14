@@ -8,6 +8,7 @@ import {
 } from '@refly-packages/openapi-schema';
 import { truncateContext, truncateMessages } from './truncator';
 import { BaseMessage } from '@langchain/core/messages';
+import { getClientOrigin } from '@refly-packages/utils';
 
 export const concatChatHistoryToStr = (messages: BaseMessage[]) => {
   let chatHistoryStr = '';
@@ -43,7 +44,17 @@ export const concatMergedContextToStr = (mergedContext: {
   const mentionedContextStr = concatContextToStr(mentionedContext);
   const lowerPriorityContextStr = concatContextToStr(lowerPriorityContext);
 
-  contextStr = webSearchContextStr + mentionedContextStr + lowerPriorityContextStr;
+  if (webSearchContextStr?.length > 0) {
+    contextStr += `\n\n<WebSearchContext>${webSearchContextStr}</WebSearchContext>\n\n`;
+  }
+
+  if (mentionedContextStr?.length > 0) {
+    contextStr += `\n\n<MentionedContext>${mentionedContextStr}</MentionedContext>\n\n`;
+  }
+
+  if (lowerPriorityContextStr?.length > 0) {
+    contextStr += `\n\n<OtherContext>${lowerPriorityContextStr}</OtherContext>\n\n`;
+  }
 
   if (contextStr?.length > 0) {
     contextStr = `<Context>${contextStr}</Context>`;
@@ -96,42 +107,44 @@ export const concatContextToStr = (context: Partial<IContext>) => {
     const concatContent = (content: string, from: SelectedContentDomain, title: string, id?: string, url?: string) => {
       return `<ContextItem citationIndex='[[citation:${index++}]]' type='selectedContent' from='${from}' ${
         id ? `entityId='${id}'` : ''
-      } title='${title}' ${url ? `weblinkUrl='${url}'` : ''}>${content}</UserSelectedContent>`;
+      } title='${title}' ${url ? `weblinkUrl='${url}'` : ''}>${content}</ContextItem>`;
     };
 
-    contextStr += contentList.map((c) => {
-      const { metadata } = c;
-      const { domain, entityId, title, url } = metadata as any as SkillContextContentItemMetadata;
-      return concatContent(c?.content, domain as SelectedContentDomain, title, entityId, url);
-    });
+    const contentStr = contentList
+      .map((c) => {
+        const { metadata } = c;
+        const { domain, entityId, title, url } = metadata as any as SkillContextContentItemMetadata;
+        return concatContent(c?.content, domain as SelectedContentDomain, title, entityId, url);
+      })
+      .join('\n\n');
 
-    contextStr += '\n\n';
+    contextStr += `\n\n<UserSelectedContent>${contentStr}</UserSelectedContent>\n\n`;
   }
 
   if (notes.length > 0) {
     // contextStr += 'Following are the knowledge base notes: \n';
     const concatNote = (id: string, title: string, content: string) => {
-      return `<ContextItem citationIndex='[[citation:${index++}]]' type='note' entityId='${id}' title='${title}'>${content}</KnowledgeBaseNote>`;
+      return `<ContextItem citationIndex='[[citation:${index++}]]' type='note' entityId='${id}' title='${title}'>${content}</ContextItem>`;
     };
 
-    contextStr += notes.map((n) => concatNote(n.note?.noteId!, n.note?.title!, n.note?.content!)).join('\n');
+    const noteStr = notes.map((n) => concatNote(n.note?.noteId!, n.note?.title!, n.note?.content!)).join('\n\n');
 
-    contextStr += '\n\n';
+    contextStr += `\n\n<KnowledgeBaseNotes>${noteStr}</KnowledgeBaseNotes>\n\n`;
   }
 
   if (resources.length > 0) {
     // contextStr += 'Following are the knowledge base resources: \n';
     const concatResource = (id: string, type: ResourceType, title: string, content: string) => {
-      return `<ContextItem citationIndex='[[citation:${index++}]]' type='resource' entityId='${id}' title='${title}'>${content}</KnowledgeBaseResource>`;
+      return `<ContextItem citationIndex='[[citation:${index++}]]' type='resource' entityId='${id}' title='${title}'>${content}</ContextItem>`;
     };
 
-    contextStr += resources
+    const resourceStr = resources
       .map((r) =>
         concatResource(r.resource?.resourceId!, r.resource?.resourceType!, r.resource?.title!, r.resource?.content!),
       )
       .join('\n');
 
-    contextStr += '\n\n';
+    contextStr += `\n\n<KnowledgeBaseResources>${resourceStr}</KnowledgeBaseResources>\n\n`;
   }
 
   return contextStr;
@@ -177,6 +190,8 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
     });
   });
 
+  const baseUrl = getClientOrigin();
+
   // User selected content
   contentList.forEach((content: SkillContextContentItem, index) => {
     const metadata = content.metadata as unknown as SkillContextContentItemMetadata;
@@ -196,12 +211,14 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
   // Knowledge base notes
   notes.forEach((note: SkillContextNoteItem, index) => {
     sources.push({
+      url: `${baseUrl}/knowledge-base?noteId=${note.note?.noteId}`,
       title: note.note?.title,
       pageContent: note.note?.content || '',
       metadata: {
         title: note.note?.title,
         entityId: note.note?.noteId,
         entityType: 'note',
+        source: `${baseUrl}/knowledge-base?noteId=${note.note?.noteId}`,
       },
     });
   });
@@ -209,12 +226,14 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
   // Knowledge base resources
   resources.forEach((resource: SkillContextResourceItem, index) => {
     sources.push({
+      url: `${baseUrl}/knowledge-base?resId=${resource.resource?.resourceId}`,
       title: resource.resource?.title,
       pageContent: resource.resource?.content || '',
       metadata: {
         title: resource.resource?.title,
         entityId: resource.resource?.resourceId,
         entityType: 'resource',
+        source: `${baseUrl}/knowledge-base?resId=${resource.resource?.resourceId}`,
       },
     });
   });

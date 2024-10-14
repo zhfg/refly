@@ -117,7 +117,7 @@ export const ChatActions = (props: ChatActionsProps) => {
             }}
           ></Button>
         ) : null}
-        {skillStore?.selectedSkill?.skillId ? (
+        {skillStore?.selectedSkill?.skillId || messageStateStore?.pending ? (
           <Button
             size="mini"
             icon={<IconSend />}
@@ -136,9 +136,6 @@ export const ChatActions = (props: ChatActionsProps) => {
             position="tr"
             droplist={
               <Menu>
-                <Menu.Item key="direct" onClick={() => handleSendMessage('normal')}>
-                  {t('copilot.chatMode.normal')}
-                </Menu.Item>
                 <Menu.Item key="noContext" onClick={() => handleSendMessage('noContext')}>
                   {t('copilot.chatMode.noContext')}
                 </Menu.Item>

@@ -11,7 +11,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 
 import { Resource } from '@refly/openapi-schema';
 import { memo, useEffect, useState } from 'react';
-import { safeParseURL } from '@refly/utils/url';
+import { getClientOrigin, safeParseURL } from '@refly/utils/url';
 import { LabelGroup } from '@refly-packages/ai-workspace-common/components/knowledge-base/label-group';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
@@ -56,9 +56,14 @@ export const KnowledgeBaseResourceDetail = memo(() => {
     showContentSelector: state.showContentSelector,
     scope: state.scope,
   }));
+
+  const baseUrl = getClientOrigin();
   const { initMessageListener, initContentSelectorElem } = useContentSelector(
     'knowledge-base-resource-content',
     'resourceSelection',
+    {
+      url: `${baseUrl}/knowledge-base?resId=${resId}`,
+    },
   );
 
   const reloadKnowledgeBaseState = useReloadListState();
