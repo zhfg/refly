@@ -76,7 +76,7 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
     const menuContainer = document.createElement('div');
     menuContainer.setAttribute('data-id', 'refly-content-selector-hover-menu');
     menuContainer.style.position = 'fixed';
-    menuContainer.style.zIndex = '1000';
+    menuContainer.style.zIndex = '10000';
     menuContainer.style.opacity = '0';
     menuContainer.style.transition = 'opacity 0.3s ease-in-out';
     containerElem?.appendChild?.(menuContainer);

@@ -213,6 +213,7 @@
     "context": {
       "contentSelector": "内容划线选择器",
       "clearContext": "清空上下文",
+      "addToContext": "添加到聊天",
       "resource": "资源",
       "resources": "资源",
       "note": "笔记",

@@ -213,6 +213,7 @@
     "context": {
       "contentSelector": "Content Selector",
       "clearContext": "Clear Context",
+      "addToContext": "Add to Chat",
       "resource": "Resource",
       "resources": "Resource",
       "note": "Note",
