@@ -16,6 +16,7 @@ import { HybridSearchParam, ContentData, ContentPayload, ReaderResult, NodeMeta 
 import { QdrantService } from '@/common/qdrant.service';
 import { Condition, PointStruct } from '@/common/qdrant.dto';
 import { genResourceUuid, streamToBuffer } from '@/utils';
+import { JinaEmbeddings } from '@/utils/embeddings/jina';
 
 const READER_URL = 'https://r.jina.ai/';
 
@@ -70,20 +71,31 @@ export class RAGService {
     private qdrant: QdrantService,
     @Inject(MINIO_INTERNAL) private minio: MinioService,
   ) {
-    if (process.env.NODE_ENV === 'development') {
+    const provider = this.config.get('embeddings.provider');
+    if (provider === 'fireworks') {
       this.embeddings = new FireworksEmbeddings({
-        modelName: 'nomic-ai/nomic-embed-text-v1.5',
-        batchSize: 512,
+        modelName: this.config.getOrThrow('embeddings.modelName'),
+        batchSize: this.config.getOrThrow('embeddings.batchSize'),
         maxRetries: 3,
       });
-    } else {
+    } else if (provider === 'jina') {
+      this.embeddings = new JinaEmbeddings({
+        modelName: this.config.getOrThrow('embeddings.modelName'),
+        batchSize: this.config.getOrThrow('embeddings.batchSize'),
+        dimensions: this.config.getOrThrow('embeddings.dimensions'),
+        apiKey: this.config.getOrThrow('credentials.jina'),
+        maxRetries: 3,
+      });
+    } else if (provider === 'openai') {
       this.embeddings = new OpenAIEmbeddings({
-        modelName: 'text-embedding-3-large',
-        batchSize: 512,
-        dimensions: this.config.getOrThrow('vectorStore.vectorDim'),
+        modelName: this.config.getOrThrow('embeddings.modelName'),
+        batchSize: this.config.getOrThrow('embeddings.batchSize'),
+        dimensions: this.config.getOrThrow('embeddings.dimensions'),
         timeout: 5000,
         maxRetries: 3,
       });
+    } else {
+      throw new Error(`Unsupported embeddings provider: ${provider}`);
     }
 
     this.memoryVectorStore = new MemoryVectorStore(this.embeddings);
@@ -103,15 +115,17 @@ export class RAGService {
 
     this.logger.log(
       `Authorization: ${
-        this.config.get('rag.jinaToken') ? `Bearer ${this.config.get('rag.jinaToken')}` : undefined
+        this.config.get('credentials.jina')
+          ? `Bearer ${this.config.get('credentials.jina')}`
+          : undefined
       }`,
     );
 
     const response = await fetch(READER_URL + url, {
       method: 'GET',
       headers: {
-        Authorization: this.config.get('rag.jinaToken')
-          ? `Bearer ${this.config.get('rag.jinaToken')}`
+        Authorization: this.config.get('credentials.jina')
+          ? `Bearer ${this.config.get('credentials.jina')}`
           : undefined,
         Accept: 'application/json',
       },
@@ -326,7 +340,7 @@ export class RAGService {
       const res = await fetch('https://api.jina.ai/v1/rerank', {
         method: 'post',
         headers: {
-          Authorization: `Bearer ${this.config.getOrThrow('rag.jinaToken')}`,
+          Authorization: `Bearer ${this.config.getOrThrow('credentials.jina')}`,
           'Content-Type': 'application/json',
         },
         body: payload,

@@ -45,12 +45,6 @@ export default () => ({
     username: process.env.ELASTICSEARCH_USERNAME,
     password: process.env.ELASTICSEARCH_PASSWORD,
   },
-  serper: {
-    apiKey: process.env.SERPER_API_KEY,
-  },
-  fireworks: {
-    apiKey: process.env.FIREWORKS_API_KEY,
-  },
   auth: {
     cookieTokenField: '_refly_ai_sid',
     cookieDomain: process.env.REFLY_COOKIE_DOMAIN || '.refly.ai',
@@ -70,8 +64,11 @@ export default () => ({
       callbackUrl: process.env.GOOGLE_CALLBACK_URL || 'test',
     },
   },
-  rag: {
-    jinaToken: process.env.JINA_TOKEN,
+  embeddings: {
+    provider: process.env.EMBEDDINGS_PROVIDER || 'jina',
+    modelName: process.env.EMBEDDINGS_MODEL_NAME || 'jina-embeddings-v3',
+    dimensions: parseInt(process.env.EMBEDDINGS_DIMENSIONS) || 768,
+    batchSize: parseInt(process.env.EMBEDDINGS_BATCH_SIZE) || 512,
   },
   reranker: {
     topN: parseInt(process.env.RERANKER_TOP_N) || 10,
@@ -100,5 +97,11 @@ export default () => ({
       object: parseInt(process.env.QUOTA_STORAGE_OBJECT) || 10 * 1024 * 1024 * 1024, // 10 GB
       vector: parseInt(process.env.QUOTA_STORAGE_VECTOR) || 1024 * 1024 * 1024, // 1 GB
     },
+  },
+  credentials: {
+    openai: process.env.OPENAI_API_KEY,
+    jina: process.env.JINA_API_KEY,
+    fireworks: process.env.FIREWORKS_API_KEY,
+    serper: process.env.SERPER_API_KEY,
   },
 });
