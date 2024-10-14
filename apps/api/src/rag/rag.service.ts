@@ -1,6 +1,5 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import avro from 'avsc';
 import { LRUCache } from 'lru-cache';
 import { Document, DocumentInterface } from '@langchain/core/documents';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
@@ -12,44 +11,13 @@ import { cleanMarkdownForIngest } from '@refly-packages/utils';
 
 import { SearchResult, User } from '@refly-packages/openapi-schema';
 import { MINIO_INTERNAL, MinioService } from '@/common/minio.service';
-import { HybridSearchParam, ContentData, ContentPayload, ReaderResult, NodeMeta } from './rag.dto';
+import { HybridSearchParam, ContentPayload, ReaderResult, NodeMeta } from './rag.dto';
 import { QdrantService } from '@/common/qdrant.service';
 import { Condition, PointStruct } from '@/common/qdrant.dto';
-import { genResourceUuid, streamToBuffer } from '@/utils';
+import { genResourceUuid } from '@/utils';
 import { JinaEmbeddings } from '@/utils/embeddings/jina';
 
 const READER_URL = 'https://r.jina.ai/';
-
-export type FormatMode =
-  | 'render' // For markdown rendering
-  | 'ingest' // For consumption by LLMs
-  | 'vanilla'; // Without any processing;
-
-export const ChunkAvroType = avro.Type.forSchema({
-  type: 'record',
-  name: 'Chunk',
-  fields: [
-    { name: 'id', type: 'string' },
-    { name: 'url', type: 'string' },
-    { name: 'type', type: 'string' },
-    { name: 'title', type: 'string' },
-    { name: 'content', type: 'string' },
-    { name: 'vector', type: { type: 'array', items: 'float' } },
-  ],
-});
-
-export const ContentAvroType = avro.Type.forSchema({
-  type: 'record',
-  name: 'ContentChunks',
-  fields: [
-    {
-      name: 'chunks',
-      type: { type: 'array', items: ChunkAvroType },
-    },
-  ],
-});
-
-export const PARSER_VERSION = '20240424';
 
 interface JinaRerankerResponse {
   results: {
@@ -235,23 +203,6 @@ export class RAGService {
     await this.qdrant.batchSaveData(points);
 
     return { size: QdrantService.estimatePointsSize(points) };
-  }
-
-  /**
-   * Save content chunks to object storage.
-   */
-  async saveContentChunks(storageKey: string, data: ContentData) {
-    const buf = ContentAvroType.toBuffer(data);
-    return this.minio.client.putObject(storageKey, buf);
-  }
-
-  /**
-   * Load content chunks from object storage.
-   */
-  async loadContentChunks(storageKey: string) {
-    const readable = await this.minio.client.getObject(storageKey);
-    const buffer = await streamToBuffer(readable);
-    return ContentAvroType.fromBuffer(buffer) as ContentData;
   }
 
   async deleteResourceNodes(user: User, resourceId: string) {
