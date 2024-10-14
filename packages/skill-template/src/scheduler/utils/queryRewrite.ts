@@ -8,6 +8,7 @@ import { SkillTemplateConfig } from '@refly-packages/openapi-schema';
 import { ModelContextLimitMap } from './token';
 import { MAX_CONTEXT_RATIO, MAX_QUERY_TOKENS_RATIO } from './constants';
 import { truncateText } from './truncator';
+import { safeStringifyJSON } from '@refly-packages/utils';
 
 // simplify context entityId for better extraction
 export const preprocessContext = (context: IContext): IContext => {
@@ -275,10 +276,11 @@ Please analyze the query, focusing primarily on the current query and available 
 
   const result = await runnable.invoke([new SystemMessage(systemPrompt), new HumanMessage(userMessage)]);
 
-  ctx.ctxThis.engine.logger.log(`Rewritten Query: ${result.rewrittenQuery}`);
-  ctx.ctxThis.engine.logger.log(`Mentioned Context: ${JSON.stringify(result.mentionedContext)}`);
-  ctx.ctxThis.engine.logger.log(`Intent: ${result.intent} (confidence: ${result.confidence})`);
-  ctx.ctxThis.engine.logger.log(`Reasoning: ${result.reasoning}`);
+  ctx.ctxThis.engine.logger.log(`- Rewritten Query: ${result.rewrittenQuery}
+    - Mentioned Context: ${safeStringifyJSON(result.mentionedContext)}
+    - Intent: ${result.intent} (confidence: ${result.confidence})
+    - Reasoning: ${result.reasoning}
+    `);
 
   ctx.ctxThis.emitEvent({ event: 'log', content: `Analyzed query and context successfully!` }, ctx.configSnapshot);
 

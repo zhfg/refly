@@ -9,25 +9,13 @@ import { HumanMessage, ChatMessage } from '@langchain/core/messages';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { ToolMessage } from '@langchain/core/messages';
-import { pick, safeParseJSON } from '@refly-packages/utils';
-import {
-  Icon,
-  SkillInvocationConfig,
-  SkillMeta,
-  SkillTemplateConfigSchema,
-  Resource,
-  Note,
-  Collection,
-  SkillContextContentItem,
-  SkillContextResourceItem,
-  SkillContextNoteItem,
-  SkillContextCollectionItem,
-} from '@refly-packages/openapi-schema';
+import { pick, safeParseJSON, safeStringifyJSON } from '@refly-packages/utils';
+import { Icon, SkillInvocationConfig, SkillMeta, SkillTemplateConfigSchema } from '@refly-packages/openapi-schema';
 import { ToolCall } from '@langchain/core/dist/messages/tool';
 import { randomUUID } from 'node:crypto';
 import { createSkillInventory } from '../inventory';
 // types
-import { SkillContextContentItemMetadata, SelectedContentDomain, GraphState, QueryAnalysis, IContext } from './types';
+import { GraphState, QueryAnalysis, IContext } from './types';
 // utils
 import { prepareContext } from './utils/context';
 import { buildFinalRequestMessages } from './utils/prompt';
@@ -355,6 +343,8 @@ Please generate the summary based on these requirements and offer suggestions fo
     const { tplConfig } = config?.configurable || {};
     const chatMode = tplConfig?.chatMode?.value as ChatMode;
 
+    this.engine.logger.log(`config: ${safeStringifyJSON(this.configSnapshot.configurable)}`);
+
     let optimizedQuery = '';
     let mentionedContext: IContext;
     let context: string = '';
@@ -366,6 +356,7 @@ Please generate the summary based on these requirements and offer suggestions fo
       state: state,
       tplConfig,
     });
+    this.engine.logger.log(`preprocess query: ${query}`);
 
     // preprocess chat history, ensure chat history is not too long
     const usedChatHistory = truncateMessages(chatHistory);
@@ -377,14 +368,19 @@ Please generate the summary based on these requirements and offer suggestions fo
       notes,
       collections,
     });
+    this.engine.logger.log(`checkHasContext: ${hasContext}`);
 
     const maxTokens = ModelContextLimitMap[modelName];
     const queryTokens = countToken(query);
     const chatHistoryTokens = countMessagesTokens(usedChatHistory);
     const remainingTokens = maxTokens - queryTokens - chatHistoryTokens;
+    this.engine.logger.log(
+      `maxTokens: ${maxTokens}, queryTokens: ${queryTokens}, chatHistoryTokens: ${chatHistoryTokens}, remainingTokens: ${remainingTokens}`,
+    );
 
     const needRewriteQuery = chatMode !== ChatMode.NO_CONTEXT_CHAT && (hasContext || chatHistoryTokens > 0);
     const needPrepareContext = chatMode !== ChatMode.NO_CONTEXT_CHAT && hasContext && remainingTokens > 0;
+    this.engine.logger.log(`needRewriteQuery: ${needRewriteQuery}, needPrepareContext: ${needPrepareContext}`);
 
     if (needRewriteQuery) {
       const analyedRes = await analyzeQueryAndContext(query, {
@@ -396,6 +392,9 @@ Please generate the summary based on these requirements and offer suggestions fo
       optimizedQuery = analyedRes.optimizedQuery;
       mentionedContext = analyedRes.mentionedContext;
     }
+
+    this.engine.logger.log(`optimizedQuery: ${optimizedQuery}`);
+    this.engine.logger.log(`mentionedContext: ${safeStringifyJSON(mentionedContext)}`);
 
     if (needPrepareContext) {
       context = await prepareContext(
@@ -413,6 +412,8 @@ Please generate the summary based on these requirements and offer suggestions fo
       );
     }
 
+    this.engine.logger.log(`context: ${safeStringifyJSON(context)}`);
+
     this.emitEvent({ event: 'log', content: `Start to generate an answer...` }, this.configSnapshot);
     const model = this.engine.chatModel({ temperature: 0.1 });
 
@@ -426,6 +427,8 @@ Please generate the summary based on these requirements and offer suggestions fo
       rewrittenQuery: optimizedQuery,
     });
 
+    this.engine.logger.log(`requestMessages: ${safeStringifyJSON(requestMessages)}`);
+
     const responseMessage = await model.invoke(requestMessages, {
       ...this.configSnapshot,
       metadata: {
@@ -434,6 +437,8 @@ Please generate the summary based on these requirements and offer suggestions fo
         spanId,
       },
     });
+
+    this.engine.logger.log(`responseMessage: ${safeStringifyJSON(responseMessage)}`);
 
     this.emitEvent({ event: 'log', content: `Generated an answer successfully!` }, this.configSnapshot);
     this.emitEvent({ event: 'end' }, this.configSnapshot);

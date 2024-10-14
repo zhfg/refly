@@ -28,6 +28,7 @@ import {
 } from '@refly-packages/openapi-schema';
 import { uniqBy } from 'lodash';
 import { MAX_CONTEXT_RATIO } from './constants';
+import { safeStringifyJSON } from '@refly-packages/utils';
 
 export async function prepareContext(
   {
@@ -44,10 +45,12 @@ export async function prepareContext(
   ctx.ctxThis.emitEvent({ event: 'log', content: `Start to prepare context...` }, ctx.configSnapshot);
 
   const enableWebSearch = ctx.tplConfig?.enableWebSearch?.value;
+  ctx.ctxThis.engine.logger.log(`Enable Web Search: ${enableWebSearch}`);
 
   const maxContextTokens = Math.floor(maxTokens * MAX_CONTEXT_RATIO);
   // TODO: think remainingTokens may out of range
   let remainingTokens = maxContextTokens;
+  ctx.ctxThis.engine.logger.log(`Max Context Tokens: ${maxContextTokens}`);
 
   // 1. web search context
   let processedWebSearchContext: IContext = {
@@ -89,6 +92,18 @@ export async function prepareContext(
   if (remainingTokens > 0) {
     const { contentList = [], resources = [], notes = [], collections = [] } = ctx.configSnapshot.configurable;
     // prev remove overlapping items in mentioned context
+    ctx.ctxThis.engine.logger.log(
+      `Remove Overlapping Items In Mentioned Context...
+      - mentionedContext: ${safeStringifyJSON(processedMentionedContext)}
+      - context: ${safeStringifyJSON({
+        contentList,
+        resources,
+        notes,
+        collections,
+      })}
+      `,
+    );
+
     const context = removeOverlappingContextItems(processedMentionedContext, {
       contentList,
       resources,
@@ -107,14 +122,26 @@ export async function prepareContext(
     );
   }
 
+  ctx.ctxThis.engine.logger.log(
+    `Prepared Lower Priority before deduplication! ${safeStringifyJSON(lowerPriorityContext)}`,
+  );
+
   const deduplicatedLowerPriorityContext = deduplicateContexts(lowerPriorityContext);
   const mergedContext = {
     mentionedContext: processedMentionedContext,
     lowerPriorityContext: deduplicatedLowerPriorityContext,
     webSearchSources: processedWebSearchContext.webSearchSources,
   };
+
+  ctx.ctxThis.engine.logger.log(`Prepared Lower Priority after deduplication! ${safeStringifyJSON(mergedContext)}`);
+
   const contextStr = concatMergedContextToStr(mergedContext);
   const sources = flattenMergedContextToSources(mergedContext);
+
+  ctx.ctxThis.engine.logger.log(
+    `- contextStr: ${contextStr}
+     - sources: ${safeStringifyJSON(sources)}`,
+  );
 
   ctx.ctxThis.emitEvent(
     {
@@ -126,6 +153,7 @@ export async function prepareContext(
   );
 
   ctx.ctxThis.emitEvent({ event: 'log', content: `Prepared context successfully!` }, ctx.configSnapshot);
+  ctx.ctxThis.engine.logger.log(`Prepared context successfully! ${safeStringifyJSON(mergedContext)}`);
 
   return contextStr;
 }
@@ -141,6 +169,9 @@ export async function prepareWebSearchContext(
 ): Promise<{
   processedWebSearchContext: IContext;
 }> {
+  ctx.ctxThis.emitEvent({ event: 'log', content: `Prepare Web Search Context...` }, ctx.configSnapshot);
+  ctx.ctxThis.engine.logger.log(`Prepare Web Search Context...`);
+
   const processedWebSearchContext: IContext = {
     contentList: [],
     resources: [],
@@ -157,6 +188,11 @@ export async function prepareWebSearchContext(
     pageContent: item.snippet,
   }));
   processedWebSearchContext.webSearchSources = webSearchSources;
+
+  ctx.ctxThis.emitEvent({ event: 'log', content: `Prepared Web Search Context successfully!` }, ctx.configSnapshot);
+  ctx.ctxThis.engine.logger.log(
+    `Prepared Web Search Context successfully! ${safeStringifyJSON(processedWebSearchContext)}`,
+  );
 
   return {
     processedWebSearchContext,
@@ -178,6 +214,8 @@ export async function prepareMentionedContext(
   mentionedContextTokens: number;
   processedMentionedContext: IContext;
 }> {
+  ctx.ctxThis.engine.logger.log(`Prepare Mentioned Context...`);
+
   let processedMentionedContext: IContext = {
     contentList: [],
     resources: [],
@@ -187,6 +225,7 @@ export async function prepareMentionedContext(
   };
 
   const allMentionedContextTokens = countContextTokens(mentionedContext);
+  ctx.ctxThis.engine.logger.log(`All Mentioned Context Tokens: ${allMentionedContextTokens}`);
 
   if (allMentionedContextTokens === 0) {
     return {
@@ -201,11 +240,15 @@ export async function prepareMentionedContext(
       resources,
       notes,
     };
+
+    ctx.ctxThis.engine.logger.log(`Mutate Context Metadata...`);
     mutateContextMetadata(mentionedContext, context);
   }
 
   let mentionedContextTokens = allMentionedContextTokens;
+
   if (allMentionedContextTokens > maxMentionedContextTokens) {
+    ctx.ctxThis.engine.logger.log(`Process Mentioned Context With Similarity...`);
     processedMentionedContext = await processMentionedContextWithSimilarity(
       query,
       mentionedContext,
@@ -219,6 +262,10 @@ export async function prepareMentionedContext(
       mentionedContextTokens = countContextTokens(processedMentionedContext);
     }
   }
+
+  ctx.ctxThis.engine.logger.log(
+    `Prepared Mentioned Context successfully! ${safeStringifyJSON(processedMentionedContext)}`,
+  );
 
   return {
     mentionedContextTokens,
@@ -240,6 +287,8 @@ export async function prepareLowerPriorityContext(
   },
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<IContext> {
+  ctx.ctxThis.engine.logger.log(`Prepare Lower Priority Context..., ${safeStringifyJSON(context)}`);
+
   // 1. relevant context
   const relevantContext = await prepareRelevantContext(
     {
@@ -272,6 +321,8 @@ export async function prepareLowerPriorityContext(
     ctx,
   );
 
+  ctx.ctxThis.engine.logger.log(`Prepared Lower Priority Context successfully! ${safeStringifyJSON(finalContext)}`);
+
   return finalContext;
 }
 
@@ -292,6 +343,8 @@ export async function prepareRelevantContext(
     notes: [],
   };
 
+  ctx.ctxThis.engine.logger.log(`Prepare Relevant Context..., ${safeStringifyJSON(context)}`);
+
   // 1. selected content context
   relevantContexts.contentList =
     contentList.length > 0 ? await processSelectedContentWithSimilarity(query, contentList, Infinity, ctx) : [];
@@ -303,6 +356,8 @@ export async function prepareRelevantContext(
   // remainingTokens = maxContextTokens - notesTokens;
   relevantContexts.resources =
     resources.length > 0 ? await processResourcesWithSimilarity(query, resources, Infinity, ctx) : [];
+
+  ctx.ctxThis.engine.logger.log(`Prepared Relevant Context successfully! ${safeStringifyJSON(relevantContexts)}`);
 
   return relevantContexts;
 }
@@ -328,6 +383,14 @@ export async function prepareContainerLevelContext(
   };
 
   const { collections } = context;
+
+  ctx.ctxThis.engine.logger.log(
+    `Prepare Container Level Context..., 
+     - context: ${safeStringifyJSON(context)}
+     - chatMode: ${chatMode}
+     - enableSearchWholeSpace: ${enableSearchWholeSpace}
+     - processedContext: ${safeStringifyJSON(processedContext)}`,
+  );
 
   // 1. collections context, mainly for knowledge base search meat filter
   const relevantResourcesOrNotesFromCollections = await processCollectionsWithSimilarity(query, collections, ctx);
@@ -365,6 +428,10 @@ export async function prepareContainerLevelContext(
 
   // 保留原始的 collections
   processedContext.collections = collections;
+
+  ctx.ctxThis.engine.logger.log(
+    `Prepared Container Level Context successfully! ${safeStringifyJSON(processedContext)}`,
+  );
 
   return processedContext;
 }
