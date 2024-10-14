@@ -184,19 +184,8 @@ export class SkillService {
         const result = await this.search.search(user, req, options);
         return buildSuccessResponse(result);
       },
-      inMemoryIndexContent: async (user, req) => {
-        const { doc, needChunk } = req;
-        const result = await this.rag.inMemoryIndexContent(user, doc, needChunk);
-        return buildSuccessResponse({ data: result });
-      },
-      inMemoryIndexDocuments: async (user, req) => {
-        const { docs } = req;
-        const result = await this.rag.inMemoryIndexDocuments(user, docs);
-        return buildSuccessResponse({ data: result });
-      },
-      inMemorySearch: async (user, req) => {
-        const { query, filter, k } = req;
-        const result = await this.rag.inMemorySearch(user, query, k, filter);
+      inMemorySearchWithIndexing: async (user, options) => {
+        const result = await this.rag.inMemorySearchWithIndexing(user, options);
         return buildSuccessResponse(result);
       },
     };

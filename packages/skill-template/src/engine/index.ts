@@ -61,14 +61,16 @@ export interface ReflyService {
   createLabelInstance: (user: User, req: CreateLabelInstanceRequest) => Promise<CreateLabelInstanceResponse>;
   webSearch: (user: User, req: WebSearchRequest) => Promise<WebSearchResponse>;
   search: (user: User, req: SearchRequest, options?: SearchOptions) => Promise<SearchResponse>;
-  inMemoryIndexContent: (
+  inMemorySearchWithIndexing: (
     user: User,
-    req: { doc: Document<NodeMeta>; needChunk: boolean },
-  ) => Promise<InMemoryIndexContentResponse>;
-  inMemoryIndexDocuments: (user: User, req: { docs: Document<NodeMeta>[] }) => Promise<InMemoryIndexContentResponse>;
-  inMemorySearch: (
-    user: User,
-    req: { query: string; filter: (doc: Document<NodeMeta>) => boolean; k: number },
+    options: {
+      content: string | Document<any> | Array<Document<any>>;
+      query?: string;
+      k?: number;
+      filter?: (doc: Document<NodeMeta>) => boolean;
+      needChunk?: boolean;
+      additionalMetadata?: Record<string, any>;
+    },
   ) => Promise<InMemorySearchResponse>;
 }
 

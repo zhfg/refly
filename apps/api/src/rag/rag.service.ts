@@ -62,7 +62,6 @@ export class RAGService {
   private embeddings: Embeddings;
   private splitter: RecursiveCharacterTextSplitter;
   private cache: LRUCache<string, ReaderResult>; // url -> reader result
-  private memoryVectorStore: MemoryVectorStore;
   private logger = new Logger(RAGService.name);
 
   constructor(
@@ -85,8 +84,6 @@ export class RAGService {
         maxRetries: 3,
       });
     }
-
-    this.memoryVectorStore = new MemoryVectorStore(this.embeddings);
 
     this.splitter = RecursiveCharacterTextSplitter.fromLanguage('markdown', {
       chunkSize: 1000,
@@ -138,61 +135,97 @@ export class RAGService {
   }
 
   // metadata?.uniqueId for save or retrieve
-  async inMemoryIndexContent(
+  async inMemorySearchWithIndexing(
     user: User,
-    doc: Document<any>,
-    needChunk: boolean = true,
-  ): Promise<void> {
-    const { uid } = user;
-    const { pageContent, metadata } = doc;
-    const chunks = needChunk ? await this.chunkText(pageContent) : [pageContent];
-
-    let startIndex = 0;
-    const documents = chunks.map((chunk) => {
-      const document = {
-        pageContent: chunk.trim(),
-        metadata: {
-          ...metadata,
-          tenantId: uid,
-          start: startIndex,
-          end: startIndex + chunk.trim().length,
-        },
-      };
-
-      startIndex += chunk.trim().length;
-      return document;
-    });
-
-    await this.memoryVectorStore.addDocuments(documents);
-  }
-
-  async inMemoryIndexDocuments(user: User, docs: Array<Document<any>>): Promise<void> {
-    const { uid } = user;
-    const documents = docs.map((item) => {
-      const document = {
-        ...item,
-        metadata: {
-          ...item.metadata,
-          tenantId: uid,
-        },
-      };
-
-      return document;
-    });
-
-    await this.memoryVectorStore.addDocuments(documents);
-  }
-
-  async inMemorySearch(
-    user: User,
-    query: string,
-    k: number = 10,
-    filter: (doc: Document<NodeMeta>) => boolean,
+    options: {
+      content: string | Document<any> | Array<Document<any>>;
+      query?: string;
+      k?: number;
+      filter?: (doc: Document<NodeMeta>) => boolean;
+      needChunk?: boolean;
+      additionalMetadata?: Record<string, any>;
+    },
   ): Promise<DocumentInterface[]> {
+    const { content, query, k = 10, filter, needChunk = true, additionalMetadata = {} } = options;
+    const { uid } = user;
+
+    if (!query) {
+      return [];
+    }
+
+    // Create a temporary MemoryVectorStore for this operation
+    const tempMemoryVectorStore = new MemoryVectorStore(this.embeddings);
+
+    // Prepare the document
+    let documents: Document<any>[];
+    if (Array.isArray(content)) {
+      documents = content.map((doc) => ({
+        ...doc,
+        metadata: {
+          ...doc.metadata,
+          tenantId: uid,
+          ...additionalMetadata,
+        },
+      }));
+    } else {
+      let doc: Document<any>;
+      if (typeof content === 'string') {
+        doc = {
+          pageContent: content,
+          metadata: {
+            tenantId: uid,
+            ...additionalMetadata,
+          },
+        };
+      } else {
+        doc = {
+          ...content,
+          metadata: {
+            ...content.metadata,
+            tenantId: uid,
+            ...additionalMetadata,
+          },
+        };
+      }
+
+      // Index the content
+      const chunks = needChunk ? await this.chunkText(doc.pageContent) : [doc.pageContent];
+      let startIndex = 0;
+      documents = chunks.map((chunk) => {
+        const document = {
+          pageContent: chunk.trim(),
+          metadata: {
+            ...doc.metadata,
+            tenantId: uid,
+            ...additionalMetadata,
+            start: startIndex,
+            end: startIndex + chunk.trim().length,
+          },
+        };
+
+        startIndex += chunk.trim().length;
+
+        return document;
+      });
+    }
+
+    await tempMemoryVectorStore.addDocuments(documents);
+
+    // Perform the search
     const wrapperFilter = (doc: Document<NodeMeta>) => {
-      return filter(doc) && doc.metadata.tenantId === user.uid;
+      // Always check for tenantId
+      const tenantIdMatch = doc.metadata.tenantId === uid;
+
+      // If filter is undefined, only check tenantId
+      if (filter === undefined) {
+        return tenantIdMatch;
+      }
+
+      // If filter is defined, apply both filter and tenantId check
+      return filter(doc) && tenantIdMatch;
     };
-    return this.memoryVectorStore.similaritySearch(query, k, wrapperFilter);
+
+    return tempMemoryVectorStore.similaritySearch(query, k, wrapperFilter);
   }
 
   async indexContent(user: User, doc: Document<NodeMeta>): Promise<{ size: number }> {

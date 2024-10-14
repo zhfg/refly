@@ -39,15 +39,12 @@ export async function sortContentBySimilarity(
   contentList: SkillContextContentItem[],
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextContentItem[]> {
-  const uniqueId = genUniqueId();
-
   // 1. construct documents
   const documents: Document<NodeMeta>[] = contentList.map((item) => {
     return {
       pageContent: truncateText(item.content, MAX_NEED_RECALL_TOKEN),
       metadata: {
         ...item.metadata,
-        uniqueId,
         title: item.metadata?.title as string,
         nodeType: item.metadata?.entityType as ContentNodeType,
       },
@@ -55,13 +52,11 @@ export async function sortContentBySimilarity(
   });
 
   // 2. index documents
-  await ctx.ctxThis.engine.service.inMemoryIndexDocuments(ctx.configSnapshot.user, { docs: documents });
-
-  // 3. search by similarity
-  const res = await ctx.ctxThis.engine.service.inMemorySearch(ctx.configSnapshot.user, {
+  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.configSnapshot.user, {
+    content: documents,
     query,
     k: documents.length,
-    filter: (doc) => doc.metadata.uniqueId === uniqueId,
+    filter: undefined,
   });
   const sortedContent = res.data;
 
@@ -79,15 +74,12 @@ export async function sortNotesBySimilarity(
   notes: SkillContextNoteItem[],
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextNoteItem[]> {
-  const uniqueId = genUniqueId();
-
   // 1. construct documents
   const documents: Document<NodeMeta>[] = notes.map((item) => {
     return {
       pageContent: truncateText(item.note?.content || '', MAX_NEED_RECALL_TOKEN),
       metadata: {
         ...item.metadata,
-        uniqueId,
         title: item.note?.title as string,
         nodeType: 'note' as ContentNodeType,
         noteId: item.note?.noteId,
@@ -96,13 +88,11 @@ export async function sortNotesBySimilarity(
   });
 
   // 2. index documents
-  await ctx.ctxThis.engine.service.inMemoryIndexDocuments(ctx.configSnapshot.user, { docs: documents });
-
-  // 3. search by similarity
-  const res = await ctx.ctxThis.engine.service.inMemorySearch(ctx.configSnapshot.user, {
+  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.configSnapshot.user, {
+    content: documents,
     query,
     k: documents.length,
-    filter: (doc) => doc.metadata.uniqueId === uniqueId,
+    filter: undefined,
   });
   const sortedNotes = res.data;
 
@@ -117,15 +107,12 @@ export async function sortResourcesBySimilarity(
   resources: SkillContextResourceItem[],
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextResourceItem[]> {
-  const uniqueId = genUniqueId();
-
   // 1. construct documents
   const documents: Document<NodeMeta>[] = resources.map((item) => {
     return {
       pageContent: truncateText(item.resource?.content || '', MAX_NEED_RECALL_TOKEN),
       metadata: {
         ...item.metadata,
-        uniqueId,
         title: item.resource?.title as string,
         nodeType: 'resource' as ContentNodeType,
         resourceId: item.resource?.resourceId,
@@ -134,13 +121,11 @@ export async function sortResourcesBySimilarity(
   });
 
   // 2. index documents
-  await ctx.ctxThis.engine.service.inMemoryIndexDocuments(ctx.configSnapshot.user, { docs: documents });
-
-  // 3. search by similarity
-  const res = await ctx.ctxThis.engine.service.inMemorySearch(ctx.configSnapshot.user, {
+  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.configSnapshot.user, {
+    content: documents,
     query,
     k: documents.length,
-    filter: (doc) => doc.metadata.uniqueId === uniqueId,
+    filter: undefined,
   });
   const sortedResources = res.data;
 
@@ -640,10 +625,6 @@ export async function inMemoryGetRelevantChunks(
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<DocumentInterface[]> {
   // 1. 获取 relevantChunks
-  const uniqueId = genUniqueId();
-  const filter = (doc: Document<NodeMeta>) => {
-    return doc.metadata.uniqueId === uniqueId;
-  };
   const doc: Document<NodeMeta> = {
     pageContent: content,
     metadata: {
@@ -652,16 +633,17 @@ export async function inMemoryGetRelevantChunks(
       title: metadata.title,
       entityId: metadata.entityId,
       tenantId: ctx.configSnapshot.user.uid,
-      uniqueId, // uniqueId for inMemorySearch
     },
   };
-  await ctx.ctxThis.engine.service.inMemoryIndexContent(ctx.configSnapshot.user, { doc, needChunk: true });
-  const res = await ctx.ctxThis.engine.service.inMemorySearch(ctx.configSnapshot.user, {
+  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.configSnapshot.user, {
+    content: doc,
     query,
     k: 10,
-    filter,
+    filter: undefined,
+    needChunk: true,
+    additionalMetadata: {},
   });
-  const relevantChunks = res?.data as DocumentInterface[];
+  const relevantChunks = res.data as DocumentInterface[];
 
   return relevantChunks;
 }
