@@ -130,32 +130,7 @@ export const ResourceItem = memo(
         {!small && (
           <>
             <div className="knowledge-base-directory-title">{item.data?.title}</div>
-            <div className="knowledge-base-directory-action">
-              {/* {showBtn?.summary ? (
-            <div
-              className={classNames('action-summary', {
-                active: btnProps?.defaultActiveKeys?.includes('summary'),
-              })}
-            >
-              <IconBulb />
-              <span>AI Summary</span>
-            </div>
-          ) : null} */}
-              {/* {showBtn?.markdown && item?.resourceId ? (
-            <div
-              className={classNames('action-markdown-content', {
-                active: btnProps?.defaultActiveKeys?.includes('markdown'),
-              })}
-            >
-              <IconBook
-                onClick={() => {
-                  jumpToReadResource({
-                    resId: item?.resourceId,
-                  });
-                }}
-              />
-            </div>
-          ) : null} */}
+            {/* <div className="knowledge-base-directory-action">
               {showBtn?.externalOrigin ? (
                 <div
                   className={classNames('action-external-origin-website', {
@@ -169,7 +144,7 @@ export const ResourceItem = memo(
                   />
                 </div>
               ) : null}
-            </div>
+            </div> */}
             {showUtil ? (
               <div className="resource-utility-info">
                 <span>

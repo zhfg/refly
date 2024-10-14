@@ -20,7 +20,7 @@ import './index.scss';
 import { SkillInstance } from '@refly/openapi-schema';
 
 import { Radio, Avatar, Button, Typography, Spin } from '@arco-design/web-react';
-import { HiOutlinePlay, HiOutlinePlus, HiMiniArrowUturnLeft } from 'react-icons/hi2';
+import { HiOutlinePlus, HiMiniArrowUturnLeft } from 'react-icons/hi2';
 
 const RadioGroup = Radio.Group;
 
@@ -134,7 +134,8 @@ const SkillDetail = () => {
                   {skillDetail?.description}
                 </Typography.Paragraph>
                 <div className="skill-action" id="skill-detail-action">
-                  <Button
+                  {/* 暂时隐藏 */}
+                  {/* <Button
                     className="skill-action__invoke"
                     type="primary"
                     style={{ borderRadius: 4 }}
@@ -142,7 +143,7 @@ const SkillDetail = () => {
                   >
                     <HiOutlinePlay />
                     {t('skill.skillDetail.run')}
-                  </Button>
+                  </Button> */}
                   <InstanceDropdownMenu
                     data={skillDetail}
                     setUpdateModal={(visible) => setVisible(visible)}
@@ -153,7 +154,8 @@ const SkillDetail = () => {
             </div>
 
             <div className="skill-detail__content-bottom">
-              <ContentTab setVal={setVal} val={val} />
+              {/* 暂时隐藏 */}
+              {/* <ContentTab setVal={setVal} val={val} /> */}
               <div className="skill-detail__content-list">
                 {val === 'jobs' ? (
                   <SkillJobs reloadList={reloadJobList} setReloadList={setReloadJobList} />

@@ -350,6 +350,7 @@ export const AINoteStatusBar = (props: AINoteStatusBarProps) => {
           <Divider type="vertical" />
           <DeleteDropdownMenu
             type="note"
+            canCopy={true}
             data={currentNote}
             postDeleteList={(note: Note) => handleDeleteTab(note.noteId)}
           />
