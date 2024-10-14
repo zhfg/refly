@@ -156,7 +156,7 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
     return () => {
       websocketProvider.forceSync();
       websocketProvider.destroy();
-      editorRef.current.destroy();
+      editorRef.current?.destroy();
     };
   }, []);
 
