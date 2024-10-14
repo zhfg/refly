@@ -1038,7 +1038,7 @@ export type TokenUsageMeter = {
   /**
    * Token usage meter end time
    */
-  endAt: string;
+  endAt?: string;
   /**
    * Token quota (T1)
    */

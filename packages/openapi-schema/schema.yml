@@ -2367,7 +2367,6 @@ components:
         - meterId
         - uid
         - startAt
-        - endAt
         - t1TokenQuota
         - t1TokenUsed
         - t2TokenQuota
