@@ -247,7 +247,7 @@ export const KnowledgeBaseResourceDetail = memo(() => {
                   </a>
                 </div>
               </div>
-              {resourceDetail && <LabelGroup entityId={resourceDetail.resourceId} entityType={'resource'} />}
+              {/* {resourceDetail && <LabelGroup entityId={resourceDetail.resourceId} entityType={'resource'} />} */}
             </div>
           )}
           {isFetching ? (
