@@ -1277,7 +1277,7 @@ export const $Subscription = {
 
 export const $TokenUsageMeter = {
   type: 'object',
-  required: ['meterId', 'uid', 'startAt', 'endAt', 't1TokenQuota', 't1TokenUsed', 't2TokenQuota', 't2TokenUsed'],
+  required: ['meterId', 'uid', 'startAt', 't1TokenQuota', 't1TokenUsed', 't2TokenQuota', 't2TokenUsed'],
   properties: {
     meterId: {
       type: 'string',

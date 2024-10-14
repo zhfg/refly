@@ -67,7 +67,7 @@ export function tokenUsageMeterPO2DTO(usage: TokenUsageMeterModel): TokenUsageMe
       't2TokenUsed',
     ]),
     startAt: usage.startAt.toJSON(),
-    endAt: usage.endAt.toJSON(),
+    endAt: usage.endAt?.toJSON(),
   };
 }
 
