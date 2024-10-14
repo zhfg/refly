@@ -280,16 +280,7 @@ Please analyze the query, focusing primarily on the current query and available 
   ctx.ctxThis.engine.logger.log(`Intent: ${result.intent} (confidence: ${result.confidence})`);
   ctx.ctxThis.engine.logger.log(`Reasoning: ${result.reasoning}`);
 
-  ctx.ctxThis.emitEvent({ event: 'log', content: `Rewritten Query: ${result.rewrittenQuery}` }, ctx.configSnapshot);
-  ctx.ctxThis.emitEvent(
-    { event: 'log', content: `Mentioned Context: ${JSON.stringify(result.mentionedContext)}` },
-    ctx.configSnapshot,
-  );
-  ctx.ctxThis.emitEvent(
-    { event: 'log', content: `Intent: ${result.intent} (confidence: ${result.confidence})` },
-    ctx.configSnapshot,
-  );
-  ctx.ctxThis.emitEvent({ event: 'log', content: `Reasoning: ${result.reasoning}` }, ctx.configSnapshot);
+  ctx.ctxThis.emitEvent({ event: 'log', content: `Analyzed query and context successfully!` }, ctx.configSnapshot);
 
   return {
     optimizedQuery: result.rewrittenQuery,

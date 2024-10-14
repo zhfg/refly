@@ -336,6 +336,7 @@ Please generate the summary based on these requirements and offer suggestions fo
 
     this.configSnapshot ??= config;
     this.emitEvent({ event: 'start' }, this.configSnapshot);
+    this.emitEvent({ event: 'log', content: `Start to call scheduler...` }, this.configSnapshot);
 
     const { messages = [], query: originalQuery } = state;
     const {
@@ -412,6 +413,7 @@ Please generate the summary based on these requirements and offer suggestions fo
       );
     }
 
+    this.emitEvent({ event: 'log', content: `Start to generate an answer...` }, this.configSnapshot);
     const model = this.engine.chatModel({ temperature: 0.1 });
 
     const requestMessages = buildFinalRequestMessages({
@@ -433,6 +435,7 @@ Please generate the summary based on these requirements and offer suggestions fo
       },
     });
 
+    this.emitEvent({ event: 'log', content: `Generated an answer successfully!` }, this.configSnapshot);
     this.emitEvent({ event: 'end' }, this.configSnapshot);
 
     return { messages: [responseMessage], skillCalls: [] };

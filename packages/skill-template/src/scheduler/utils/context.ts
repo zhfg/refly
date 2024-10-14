@@ -41,6 +41,8 @@ export async function prepareContext(
   },
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<string> {
+  ctx.ctxThis.emitEvent({ event: 'log', content: `Start to prepare context...` }, ctx.configSnapshot);
+
   const enableWebSearch = ctx.tplConfig?.enableWebSearch?.value;
 
   const maxContextTokens = Math.floor(maxTokens * MAX_CONTEXT_RATIO);
@@ -122,6 +124,8 @@ export async function prepareContext(
     },
     ctx.configSnapshot,
   );
+
+  ctx.ctxThis.emitEvent({ event: 'log', content: `Prepared context successfully!` }, ctx.configSnapshot);
 
   return contextStr;
 }
