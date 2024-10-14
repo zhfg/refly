@@ -5,8 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "clean": "rimraf dist && rimraf tsconfig.tsbuildinfo",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsx ./src/runner/index.ts"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {},
   "keywords": [],
