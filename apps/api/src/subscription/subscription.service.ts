@@ -236,11 +236,7 @@ export class SubscriptionService implements OnModuleInit {
 
       const now = new Date();
 
-      const freeQuota = await prisma.subscriptionUsageQuota.findUnique({
-        where: { planType: 'free' },
-      });
-
-      // Mark the token usage meter as deleted
+      // Mark the token usage meter related to this subscription as deleted
       await prisma.tokenUsageMeter.updateMany({
         where: {
           uid: sub.uid,
@@ -252,18 +248,8 @@ export class SubscriptionService implements OnModuleInit {
         data: { deletedAt: now },
       });
 
-      // Create a new token usage meter for the free plan
-      await prisma.tokenUsageMeter.create({
-        data: {
-          meterId: genTokenUsageMeterID(),
-          uid: sub.uid,
-          subscriptionId: null,
-          startAt: startOfDay(now),
-          t1TokenQuota: freeQuota?.t1TokenQuota || this.config.get('quota.token.t1'),
-          t1TokenUsed: 0,
-          t2TokenQuota: freeQuota?.t2TokenQuota || this.config.get('quota.token.t2'),
-          t2TokenUsed: 0,
-        },
+      const freeQuota = await prisma.subscriptionUsageQuota.findUnique({
+        where: { planType: 'free' },
       });
 
       // Update storage usage meter
