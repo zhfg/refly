@@ -14,13 +14,8 @@ const ConvLibrary = lazy(() => import("@/pages/conv-library"))
 const KnowledgeBase = lazy(() => import("@/pages/knowledge-base"))
 const Skill = lazy(() => import("@/pages/skill"))
 const SkillDetailPage = lazy(() => import("@/pages/skill-detail"))
+const Settings = lazy(() => import("@/pages/settings"))
 const Login = lazy(() => import("@/pages/login"))
-
-const Settings = lazy(() =>
-  import("@refly-packages/ai-workspace-common/components/settings/index").then(
-    module => ({ default: module.Settings }),
-  ),
-)
 
 // Loading component
 const LoadingFallback = () => (
@@ -44,6 +39,7 @@ const prefetchRoutes = () => {
   import("@/pages/conv-library")
   import("@/pages/skill")
   import("@/pages/skill-detail")
+  import("@/pages/settings")
 }
 
 export const AppRouter = (props: { layout?: any }) => {
@@ -54,16 +50,13 @@ export const AppRouter = (props: { layout?: any }) => {
     isCheckingLoginStatus: state.isCheckingLoginStatus,
   }))
 
-  const { i18n } = useTranslation()
-  const language = i18n.languages?.[0]
-
-  // 获取 storage user profile
+  // Get storage user profile
   const storageUserProfile = safeParseJSON(
     localStorage.getItem("refly-user-profile"),
   )
   const notShowLoginBtn = storageUserProfile?.uid || userStore?.userProfile?.uid
 
-  // 获取 locale
+  // Get locale settings
   const storageLocalSettings = safeParseJSON(
     localStorage.getItem("refly-local-settings"),
   )
@@ -76,15 +69,16 @@ export const AppRouter = (props: { layout?: any }) => {
     prefetchRoutes()
   }, [])
 
-  // 这里进行用户登录信息检查
+  // Check user login status
   useGetUserSettings()
 
-  // TODO: 国际化相关内容
+  // Change locale if not matched
+  const { i18n } = useTranslation()
   useEffect(() => {
-    if (locale && language !== locale) {
+    if (locale && i18n.languages?.[0] !== locale) {
       i18n.changeLanguage(locale)
     }
-  }, [locale])
+  }, [i18n, locale])
 
   const routeLogin = useMatch("/login")
 
