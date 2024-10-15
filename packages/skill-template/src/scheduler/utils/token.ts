@@ -8,24 +8,7 @@ import {
   SkillContextResourceItem,
   Source,
 } from '@refly-packages/openapi-schema';
-
-export enum LLMType {
-  GPT4oMini = 'openai/gpt-4o-mini',
-  GPT4o = 'openai/gpt-4o-2024-08-06',
-  Claude35Sonnet = 'anthropic/claude-3.5-sonnet',
-  Claude3Haiku = 'anthropic/claude-3-haiku',
-  GeminiFlash15 = 'google/gemini-flash-1.5',
-  GeminiPro15 = 'google/gemini-pro-1.5',
-}
-
-export const ModelContextLimitMap = {
-  [LLMType.GPT4oMini]: 128 * 1024,
-  [LLMType.GPT4o]: 128 * 1024,
-  [LLMType.Claude35Sonnet]: 200 * 1024,
-  [LLMType.Claude3Haiku]: 200 * 1024,
-  [LLMType.GeminiFlash15]: 4 * 1024 * 1024,
-  [LLMType.GeminiPro15]: 4 * 1024 * 1024,
-};
+import { ModelContextLimitMap, LLMType } from '@refly-packages/utils';
 
 // const enc_p50k_base = get_encoding('p50k_base');
 const enc_cl100k_base = get_encoding('cl100k_base');
@@ -85,3 +68,5 @@ export const checkHasContext = (mentionedContext: IContext) => {
 export const countMessagesTokens = (messages: BaseMessage[] = []) => {
   return messages.reduce((sum, message) => sum + countToken(message.content as string), 0);
 };
+
+export { ModelContextLimitMap, LLMType };
