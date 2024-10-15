@@ -49,6 +49,9 @@ import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores
 // componets
 import { ToC } from './ToC';
 import { IconBook, IconLoading, IconPlus } from '@arco-design/web-react/icon';
+import { PiTextT, PiListBulletsLight, PiCodeLight } from 'react-icons/pi';
+import { LuHeading1, LuHeading2, LuHeading3, LuListTodo, LuTextQuote } from 'react-icons/lu';
+import { MdFormatListNumbered } from 'react-icons/md';
 
 const MemorizedToC = memo(ToC);
 
@@ -265,6 +268,9 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
           >
             <CollabEditorCommand entityId={noteId} entityType="note" />
             <CollabGenAIMenuSwitch
+              nodeSelector={{
+                items: textItems,
+              }}
               contentSelector={{
                 text: t('knowledgeBase.context.addToContext'),
                 handleClick: handleContentSelectorClick,
@@ -396,6 +402,50 @@ export const AINoteHeader = (props: AINoteHeaderProps) => {
     </div>
   );
 };
+
+const style = {
+  display: 'flex',
+  alignItems: 'center',
+  fontWeight: 'medium',
+};
+const textItems: { name: string; icon: React.ReactNode }[] = [
+  {
+    name: 'Text',
+    icon: <PiTextT style={style} />,
+  },
+  {
+    name: 'Heading 1',
+    icon: <LuHeading1 style={style} />,
+  },
+  {
+    name: 'Heading 2',
+    icon: <LuHeading2 style={style} />,
+  },
+  {
+    name: 'Heading 3',
+    icon: <LuHeading3 style={style} />,
+  },
+  {
+    name: 'To-do List',
+    icon: <LuListTodo style={style} />,
+  },
+  {
+    name: 'Bullet List',
+    icon: <PiListBulletsLight style={style} />,
+  },
+  {
+    name: 'Numbered List',
+    icon: <MdFormatListNumbered style={style} />,
+  },
+  {
+    name: 'Quote',
+    icon: <LuTextQuote style={style} />,
+  },
+  {
+    name: 'Code',
+    icon: <PiCodeLight style={style} />,
+  },
+];
 
 export const AINote = () => {
   const [searchParams] = useSearchParams();
