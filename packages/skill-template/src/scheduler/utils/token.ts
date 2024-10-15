@@ -49,20 +49,18 @@ export const countWebSearchContextTokens = (webSearchSources: Source[] = []) => 
 //   return collections.reduce((sum, collection) => sum + countToken(collection?.collection?.content), 0);
 // };
 
-export const countContextTokens = (mentionedContext: IContext) => {
+export const countContextTokens = (context: IContext) => {
   return (
-    countContentTokens(mentionedContext?.contentList) +
-    countResourceTokens(mentionedContext?.resources) +
-    countNoteTokens(mentionedContext?.notes)
+    countContentTokens(context?.contentList) + countResourceTokens(context?.resources) + countNoteTokens(context?.notes)
   );
 };
 
-export const checkHasContext = (mentionedContext: IContext) => {
+export const checkHasContext = (context: IContext) => {
   return (
-    mentionedContext?.contentList?.length > 0 ||
-    mentionedContext?.resources?.length > 0 ||
-    mentionedContext?.notes?.length > 0 ||
-    mentionedContext?.collections?.length > 0
+    context?.contentList?.length > 0 ||
+    context?.resources?.length > 0 ||
+    context?.notes?.length > 0 ||
+    context?.collections?.length > 0
   );
 };
 
