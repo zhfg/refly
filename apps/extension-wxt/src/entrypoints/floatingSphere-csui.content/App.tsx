@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { Button, Tooltip, Message } from '@arco-design/web-react';
 import { reflyEnv } from '@/utils/env';
 
+import '@/i18n/config';
 import Logo from '@/assets/logo.svg';
 import './App.scss';
 import classNames from 'classnames';
@@ -10,6 +11,7 @@ import { useSaveCurrentWeblinkAsResource } from '@/hooks/use-save-resource';
 import { useToggleCopilot } from '@/modules/toggle-copilot/hooks/use-toggle-copilot';
 import { useSaveResourceNotify } from '@refly-packages/ai-workspace-common/hooks/use-save-resouce-notify';
 import { useListenToCopilotType } from '@/modules/toggle-copilot/hooks/use-listen-to-copilot-type';
+import { useTranslation } from 'react-i18next';
 
 const getPopupContainer = () => {
   const elem = document
@@ -24,6 +26,8 @@ export const App = () => {
   const { saveResource } = useSaveCurrentWeblinkAsResource();
   const { handleSaveResourceAndNotify } = useSaveResourceNotify();
   const { handleToggleCopilot } = useToggleCopilot();
+  const { t } = useTranslation();
+
   // 加载快捷键
   const [shortcut, setShortcut] = useState<string>(reflyEnv.getOsType() === 'OSX' ? '⌘ J' : 'Ctrl J');
   const [isDragging, setIsDragging] = useState(false);
@@ -118,7 +122,11 @@ export const App = () => {
               className="refly-floating-sphere-dropdown-item assist-action-item"
             ></Button>
           </Tooltip> */}
-          <Tooltip content="选择内容提问" position="left" getPopupContainer={getPopupContainer}>
+          <Tooltip
+            content={t('extension.floatingSphere.selectContentToAsk')}
+            position="left"
+            getPopupContainer={getPopupContainer}
+          >
             <Button
               type="text"
               shape="circle"
@@ -128,7 +136,11 @@ export const App = () => {
               className="refly-floating-sphere-dropdown-item assist-action-item"
             ></Button>
           </Tooltip>
-          <Tooltip content="保存到 Refly" position="left" getPopupContainer={getPopupContainer}>
+          <Tooltip
+            content={t('extension.floatingSphere.saveResource')}
+            position="left"
+            getPopupContainer={getPopupContainer}
+          >
             <Button
               type="text"
               shape="circle"
@@ -215,7 +227,7 @@ export const App = () => {
             onMouseLeave={handleMouseLeave}
             onClick={(_) => handleToggleCopilot()}
           >
-            <img src={Logo} alt="唤起 Refly" style={{ width: 25, height: 25 }} />
+            <img src={Logo} alt={t('extension.floatingSphere.toggleCopilot')} style={{ width: 25, height: 25 }} />
             <span className="refly-floating-sphere-entry-shortcut">{shortcut}</span>
           </div>
 

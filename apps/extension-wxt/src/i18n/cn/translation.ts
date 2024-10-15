@@ -114,5 +114,10 @@ export const translation = {
         newResource: '导入资源',
       },
     },
+    floatingSphere: {
+      saveResource: '保存到 Refly',
+      selectContentToAsk: '选择内容提问',
+      toggleCopilot: '唤起 Refly',
+    },
   },
 };
