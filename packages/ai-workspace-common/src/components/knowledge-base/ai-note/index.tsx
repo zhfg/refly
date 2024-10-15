@@ -5,7 +5,7 @@ import { Note } from '@refly/openapi-schema';
 
 import './index.scss';
 import { useCookie } from 'react-use';
-import { Button, Divider, Input, Popconfirm, Popover, Spin, Switch, Tabs } from '@arco-design/web-react';
+import { Button, Divider, Input, Popconfirm, Popover, Spin, Switch, Tabs, Tooltip } from '@arco-design/web-react';
 import { HiOutlineLockClosed, HiOutlineLockOpen, HiOutlineClock } from 'react-icons/hi2';
 import { HiOutlineSearch } from 'react-icons/hi';
 import { useSearchParams } from 'react-router-dom';
@@ -48,7 +48,8 @@ import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/mod
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 // componets
 import { ToC } from './ToC';
-import { IconBook, IconLoading, IconPlus } from '@arco-design/web-react/icon';
+import { IconBook, IconLoading, IconPlus, IconSearch } from '@arco-design/web-react/icon';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 const MemorizedToC = memo(ToC);
 
@@ -522,16 +523,18 @@ export const AINote = () => {
                 <DefaultTabHeader {...props} />
               </div>
               <div className="note-detail-navigation-bar">
-                <Button
-                  icon={<HiOutlineSearch size={14} />}
-                  type="text"
-                  style={{ marginRight: 4 }}
-                  className="assist-action-item"
-                  onClick={() => {
-                    searchStore.setPages(searchStore.pages.concat('note'));
-                    searchStore.setIsSearchOpen(true);
-                  }}
-                ></Button>
+                <Tooltip content={t('knowledgeBase.header.searchOrOpenNote')} getPopupContainer={getPopupContainer}>
+                  <Button
+                    icon={<IconSearch />}
+                    type="text"
+                    style={{ marginRight: 4 }}
+                    className="assist-action-item"
+                    onClick={() => {
+                      searchStore.setPages(searchStore.pages.concat('note'));
+                      searchStore.setIsSearchOpen(true);
+                    }}
+                  ></Button>
+                </Tooltip>
               </div>
             </div>
           );

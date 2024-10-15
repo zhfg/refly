@@ -1,7 +1,15 @@
-import { Button, Checkbox } from '@arco-design/web-react';
+import { Button, Checkbox, Tooltip } from '@arco-design/web-react';
 
 // 自定义组件
-import { IconClose, IconEdit, IconFile, IconHistory, IconPlusCircle, IconSearch } from '@arco-design/web-react/icon';
+import {
+  IconClose,
+  IconEdit,
+  IconFile,
+  IconHistory,
+  IconPlus,
+  IconPlusCircle,
+  IconSearch,
+} from '@arco-design/web-react/icon';
 // 自定义样式
 // 自定义组件
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
@@ -26,6 +34,8 @@ import Logo from '@/assets/logo.svg';
 
 // styles
 import './index.scss';
+import { useTranslation } from 'react-i18next';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 interface CopilotChatHeaderProps {
   disable?: boolean;
@@ -33,6 +43,8 @@ interface CopilotChatHeaderProps {
 
 export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
   const { disable } = props;
+
+  const { t } = useTranslation();
 
   const [searchParams] = useSearchParams();
   const noteId = searchParams.get('noteId');
@@ -107,45 +119,57 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
                   >
                     {({ checked }) => {
                       return (
-                        <Button
-                          icon={<IconFile />}
-                          type="text"
-                          onClick={() => {
-                            if (!resId) {
-                              searchStore.setPages(searchStore.pages.concat('knowledgeBases'));
-                              searchStore.setIsSearchOpen(true);
-                            } else {
-                              knowledgeBaseStore.updateResourcePanelVisible(!knowledgeBaseStore.resourcePanelVisible);
-                            }
-                          }}
-                          className={classNames('assist-action-item', { active: checked })}
-                        ></Button>
+                        <Tooltip
+                          content={t('knowledgeBase.header.searchAndOpenResourceOrCollection')}
+                          getPopupContainer={getPopupContainer}
+                        >
+                          <Button
+                            icon={<IconFile />}
+                            type="text"
+                            onClick={() => {
+                              if (!resId) {
+                                searchStore.setPages(searchStore.pages.concat('knowledgeBases'));
+                                searchStore.setIsSearchOpen(true);
+                              } else {
+                                knowledgeBaseStore.updateResourcePanelVisible(!knowledgeBaseStore.resourcePanelVisible);
+                              }
+                            }}
+                            className={classNames('assist-action-item', { active: checked })}
+                          ></Button>
+                        </Tooltip>
                       );
                     }}
                   </Checkbox>,
                   <Checkbox key={'knowledge-base-note-panel'} checked={noteStore.notePanelVisible}>
                     {({ checked }) => {
                       return (
-                        <Button
-                          icon={<IconEdit />}
-                          type="text"
-                          onClick={() => {
-                            noteStore.updateNotePanelVisible(!noteStore.notePanelVisible);
-                          }}
-                          className={classNames('assist-action-item', { active: checked })}
-                        ></Button>
+                        <Tooltip
+                          content={t('knowledgeBase.header.searchOrOpenNote')}
+                          getPopupContainer={getPopupContainer}
+                        >
+                          <Button
+                            icon={<IconEdit />}
+                            type="text"
+                            onClick={() => {
+                              noteStore.updateNotePanelVisible(!noteStore.notePanelVisible);
+                            }}
+                            className={classNames('assist-action-item', { active: checked })}
+                          ></Button>
+                        </Tooltip>
                       );
                     }}
                   </Checkbox>,
-                  <Button
-                    icon={<IconSearch />}
-                    type="text"
-                    onClick={() => {
-                      searchStore.setPages(searchStore.pages.concat('convs'));
-                      searchStore.setIsSearchOpen(true);
-                    }}
-                    className={classNames('assist-action-item')}
-                  ></Button>,
+                  <Tooltip content={t('knowledgeBase.header.searchOrOpenThread')} getPopupContainer={getPopupContainer}>
+                    <Button
+                      icon={<IconSearch />}
+                      type="text"
+                      onClick={() => {
+                        searchStore.setPages(searchStore.pages.concat('convs'));
+                        searchStore.setIsSearchOpen(true);
+                      }}
+                      className={classNames('assist-action-item')}
+                    ></Button>
+                  </Tooltip>,
                 ]
               : null}
             {!isWeb ? (
@@ -163,26 +187,30 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
             ) : null}
           </div>
           <div className="knowledge-base-detail-navigation-bar">
-            <Button
-              icon={<IconHistory />}
-              type="text"
-              onClick={() => {
-                handleNewOpenConvList();
-              }}
-              className={classNames('assist-action-item')}
-            >
-              {/* 会话历史 */}
-            </Button>
-            <Button
-              icon={<IconPlusCircle />}
-              type="text"
-              onClick={() => {
-                handleNewTempConv();
-              }}
-              className={classNames('assist-action-item', 'mr-1')}
-            >
-              {/* 新会话 */}
-            </Button>
+            <Tooltip content={t('knowledgeBase.header.openThreadHistory')} getPopupContainer={getPopupContainer}>
+              <Button
+                icon={<IconHistory />}
+                type="text"
+                onClick={() => {
+                  handleNewOpenConvList();
+                }}
+                className={classNames('assist-action-item')}
+              >
+                {/* 会话历史 */}
+              </Button>
+            </Tooltip>
+            <Tooltip content={t('knowledgeBase.header.newThread')} getPopupContainer={getPopupContainer}>
+              <Button
+                icon={<IconPlus />}
+                type="text"
+                onClick={() => {
+                  handleNewTempConv();
+                }}
+                className={classNames('assist-action-item', 'mr-1')}
+              >
+                {/* 新会话 */}
+              </Button>
+            </Tooltip>
             {runtime === 'extension-csui' ? (
               <Button
                 icon={<IconClose />}
