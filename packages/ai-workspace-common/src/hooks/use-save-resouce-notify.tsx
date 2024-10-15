@@ -1,11 +1,13 @@
 import { Message, Link } from '@arco-design/web-react';
 
 import { delay } from '@refly/utils';
+import { useTranslation } from 'react-i18next';
 
 export const useSaveResourceNotify = () => {
+  const { t } = useTranslation();
   const handleSaveResourceAndNotify = async (saveResource: () => Promise<{ success: boolean; url: string }>) => {
     const close = Message.loading({
-      content: '保存中...',
+      content: t('extension.floatingSphere.isSaving'),
       duration: 0,
       style: {
         borderRadius: 8,
@@ -22,11 +24,11 @@ export const useSaveResourceNotify = () => {
       Message.success({
         content: (
           <span>
-            保存成功，点击{' '}
+            {t('extension.floatingSphere.saveResourceSuccess.prefix')}{' '}
             <Link href={url} target="_blank" style={{ borderRadius: 4 }} hoverable>
-              链接
+              {t('extension.floatingSphere.saveResourceSuccess.link')}
             </Link>{' '}
-            查看
+            {t('extension.floatingSphere.saveResourceSuccess.suffix')}
           </span>
         ),
         duration: 5000,
@@ -38,7 +40,7 @@ export const useSaveResourceNotify = () => {
       });
     } else {
       Message.error({
-        content: '保存失败，请尝试重新保存',
+        content: t('extension.floatingSphere.saveResourceFailed'),
         duration: 3000,
         style: {
           borderRadius: 8,

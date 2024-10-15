@@ -9,7 +9,6 @@ import { safeParseJSON } from '@refly/utils/parse';
 
 export const useToggleSidePanel = () => {
   const messageListenerEventRef = useRef<any>();
-  const { handlePassthroughOpenContentSelector } = useHandleContextWorkflow();
 
   const onMessageHandler = async (event: MessageEvent<any>) => {
     const data = event as any as BackgroundMessage;
@@ -35,14 +34,6 @@ export const useToggleSidePanel = () => {
         source: getRuntime(),
       });
     }
-
-    // 1. when sidePanel already open, handle toggleSidePanel action with message
-    if ((name as CopilotMsgName) === 'toggleCopilotSidePanel' && body?.action) {
-      console.log('onSidePanelMessage', event);
-      if (body?.action?.name === 'openContentSelector' && body?.action?.value) {
-        handlePassthroughOpenContentSelector();
-      }
-    }
   };
 
   const initMessageListener = () => {
@@ -54,22 +45,6 @@ export const useToggleSidePanel = () => {
       messageListenerEventRef.current?.();
     };
   };
-
-  // 2. when sidePanel not open, use floatSphere to open, init handle storage
-  const handleOpenContentSelector = async () => {
-    const toggleCopilotStatusStr = await storage.getItem('local:toggleCopilotStatus');
-    const toggleCopilotStatus = safeParseJSON(toggleCopilotStatusStr) as ToggleCopilotStatus;
-    console.log('toggleCopilotStatus', toggleCopilotStatus);
-    if (toggleCopilotStatus?.openContentSelector) {
-      handlePassthroughOpenContentSelector();
-    }
-
-    await storage.removeItem('local:toggleCopilotStatus');
-  };
-
-  useEffect(() => {
-    handleOpenContentSelector();
-  }, []);
 
   return {
     initMessageListener,

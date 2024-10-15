@@ -12,6 +12,7 @@ import { useToggleCopilot } from '@/modules/toggle-copilot/hooks/use-toggle-copi
 import { useSaveResourceNotify } from '@refly-packages/ai-workspace-common/hooks/use-save-resouce-notify';
 import { useListenToCopilotType } from '@/modules/toggle-copilot/hooks/use-listen-to-copilot-type';
 import { useTranslation } from 'react-i18next';
+import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
 
 const getPopupContainer = () => {
   const elem = document
@@ -26,7 +27,9 @@ export const App = () => {
   const { saveResource } = useSaveCurrentWeblinkAsResource();
   const { handleSaveResourceAndNotify } = useSaveResourceNotify();
   const { handleToggleCopilot } = useToggleCopilot();
+  const { handleStopContentSelectorListener, handleInitContentSelectorListener } = useSelectedMark();
   const { t } = useTranslation();
+  const [isContentSelectorOpen, setIsContentSelectorOpen] = useState(false);
 
   // 加载快捷键
   const [shortcut, setShortcut] = useState<string>(reflyEnv.getOsType() === 'OSX' ? '⌘ J' : 'Ctrl J');
@@ -99,6 +102,19 @@ export const App = () => {
     }, 300);
   }, []);
 
+  const handleToggleContentSelectorPanel = (isContentSelectorOpen: boolean) => {
+    if (!isContentSelectorOpen) {
+      setIsContentSelectorOpen(true);
+      handleInitContentSelectorListener();
+      Message.info(t('extension.floatingSphere.enableSelectContentToAskNotify'));
+      handleToggleCopilot(true);
+    } else {
+      handleStopContentSelectorListener();
+      setIsContentSelectorOpen(false);
+      Message.info(t('extension.floatingSphere.disableSelectContentToAskNotify'));
+    }
+  };
+
   const Dropdown = useCallback(() => {
     return (
       <div
@@ -123,7 +139,11 @@ export const App = () => {
             ></Button>
           </Tooltip> */}
           <Tooltip
-            content={t('extension.floatingSphere.selectContentToAsk')}
+            content={t(
+              isContentSelectorOpen
+                ? 'extension.floatingSphere.closeContentSelector'
+                : 'extension.floatingSphere.selectContentToAsk',
+            )}
             position="left"
             getPopupContainer={getPopupContainer}
           >
@@ -132,8 +152,10 @@ export const App = () => {
               shape="circle"
               icon={<IconHighlight />}
               size="small"
-              onClick={() => handleToggleCopilot({ action: { name: 'openContentSelector', value: true } })}
-              className="refly-floating-sphere-dropdown-item assist-action-item"
+              onClick={() => {
+                handleToggleContentSelectorPanel(isContentSelectorOpen);
+              }}
+              className={`refly-floating-sphere-dropdown-item assist-action-item ${isContentSelectorOpen ? 'active' : ''}`}
             ></Button>
           </Tooltip>
           <Tooltip
@@ -156,7 +178,7 @@ export const App = () => {
         </div>
       </div>
     );
-  }, [dropdownPosition, handleMouseEnter, handleMouseLeave]);
+  }, [dropdownPosition, handleMouseEnter, handleMouseLeave, isContentSelectorOpen]);
 
   useEffect(() => {
     Message.config({

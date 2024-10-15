@@ -13,7 +13,6 @@ interface CopilotStatus {
 
 export const useToggleCSUI = () => {
   const messageListenerEventRef = useRef<any>();
-  const { handlePassthroughOpenContentSelector } = useHandleContextWorkflow();
 
   // for listen to Popup event to toggle copilot
   const copilotStore = useCopilotStore();
@@ -37,14 +36,8 @@ export const useToggleCSUI = () => {
     // sidepanel directly open or close, csui need hide or show
     if ((name as CopilotMsgName) === 'toggleCopilotCSUI') {
       const { isCopilotOpen } = useCopilotStore.getState();
-      copilotStore.setIsCopilotOpen(!isCopilotOpen);
-    }
-
-    // 1. when sidePanel already open, handle toggleSidePanel action with message
-    if ((name as CopilotMsgName) === 'toggleCopilotCSUI' && body?.action) {
-      if (body?.action?.name === 'openContentSelector' && body?.action?.value) {
-        handlePassthroughOpenContentSelector();
-      }
+      const isBoolean = typeof body?.isCopilotOpen === 'boolean';
+      copilotStore.setIsCopilotOpen(isBoolean ? body?.isCopilotOpen : !isCopilotOpen);
     }
   };
 

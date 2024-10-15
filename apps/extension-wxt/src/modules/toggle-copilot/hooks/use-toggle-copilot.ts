@@ -19,33 +19,14 @@ export const useToggleCopilot = () => {
   const isCopilotOpenRef = useRef<boolean>();
   const isArcBrowserRef = useRef<boolean>();
 
-  const handleToggleCopilot = async (params?: { action?: SidePanelAction }) => {
+  const handleToggleCopilot = async (isOpen: boolean = false) => {
     // with action, always open, toggle selector, and notify toggle status
     const isCopilotOpen = isCopilotOpenRef.current;
     isCopilotOpenRef.current = !isCopilotOpen;
-    const { action } = params || {};
 
     await handleCheckArcBrowser();
 
-    // for sync status to content script ui or sidePanel
-    if (action) {
-      if (action?.name === 'openContentSelector') {
-        toggleCopilotStatus.openContentSelector = true;
-        await storage.setItem('local:toggleCopilotStatus', JSON.stringify({ openContentSelector: action?.value }));
-      }
-    } else {
-      // if (Object.keys(toggleCopilotStatus).length !== 0) {
-      //   await storage.removeItem('local:toggleCopilotStatus');
-      //   toggleCopilotStatus = {} as ToggleCopilotStatus;
-      // }
-    }
-
-    console.log(
-      'isArcBrowserRef.current',
-      isArcBrowserRef.current,
-      action && action?.value ? true : !isCopilotOpen,
-      isCopilotOpen,
-    );
+    console.log('isArcBrowserRef.current', isArcBrowserRef.current, isCopilotOpen);
     if (isArcBrowserRef.current) {
       console.log('sendMessage', 'toggleCopilotSidePanel');
       sendMessage({
@@ -53,8 +34,7 @@ export const useToggleCopilot = () => {
         name: 'toggleCopilotCSUI',
         body: {
           isArcBrowser: isArcBrowserRef.current,
-          isCopilotOpen: action && action?.value ? true : !isCopilotOpen,
-          action,
+          isCopilotOpen: isOpen ? true : !isCopilotOpen,
         },
         source: getRuntime(),
       });
@@ -65,8 +45,7 @@ export const useToggleCopilot = () => {
         name: 'toggleCopilotSidePanel',
         body: {
           isArcBrowser: isArcBrowserRef.current,
-          isCopilotOpen: action && action?.value ? true : !isCopilotOpen,
-          action,
+          isCopilotOpen: isOpen ? true : !isCopilotOpen,
         },
         source: getRuntime(),
       });

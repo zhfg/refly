@@ -117,7 +117,17 @@ export const translation = {
     floatingSphere: {
       saveResource: 'Save to Refly',
       selectContentToAsk: 'Select content to ask',
+      enableSelectContentToAskNotify: 'Enable select content to ask',
+      disableSelectContentToAskNotify: 'Disable select content to ask',
+      closeContentSelector: 'Close content selector',
       toggleCopilot: 'Toggle Copilot',
+      saveResourceSuccess: {
+        prefix: 'Save successfully, click',
+        link: 'link',
+        suffix: 'to view',
+      },
+      saveResourceFailed: 'Save failed, please try to save again',
+      isSaving: 'Saving...',
     },
   },
 };
