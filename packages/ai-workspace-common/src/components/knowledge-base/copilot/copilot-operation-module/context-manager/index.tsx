@@ -5,13 +5,13 @@ import { ContextPreview } from './context-preview';
 // hooks
 import { useProcessContextItems } from './hooks/use-process-context-items';
 import { useProcessContextFilter } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module/context-manager/hooks/use-process-context-filter';
+import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
 
 // components
 import { AddBaseMarkContext } from './components/add-base-mark-context';
 import './index.scss';
 
 // components
-import { ContentSelectorBtn } from '@refly-packages/ai-workspace-common/modules/content-selector/components/content-selector-btn';
 import { ResetContentSelectorBtn } from './reset-content-selector-btn';
 import { ContextFilter } from './components/context-filter/index';
 
@@ -113,6 +113,7 @@ export const ContextManager = () => {
   const currentKnowledgeBase = useKnowledgeBaseStore((state) => state.currentKnowledgeBase);
   const currentResource = useKnowledgeBaseStore((state) => state.currentResource);
   const currentNote = useNoteStore((state) => state.currentNote);
+  const { initMessageListener } = useSelectedMark();
 
   const buildEnvContext = (data: Collection | Resource | Note, type: 'collection' | 'resource' | 'note'): Mark[] => {
     if (!data) return [];
@@ -188,13 +189,19 @@ export const ContextManager = () => {
     updateContext(currentNote, 'note');
   }, [currentNote?.noteId]);
 
+  useEffect(() => {
+    const clearEvent = initMessageListener();
+
+    return () => {
+      clearEvent?.();
+    };
+  }, []);
+
   return (
     <div className="context-manager">
       <div className="context-content">
         <div className="context-items-container">
           <AddBaseMarkContext handleAddItem={handleAddItem} selectedItems={selectedItems} />
-
-          <ContentSelectorBtn />
 
           <ResetContentSelectorBtn />
 
