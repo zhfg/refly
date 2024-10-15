@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Button, Tooltip, Message } from '@arco-design/web-react';
 import { reflyEnv } from '@/utils/env';
 
@@ -6,7 +6,7 @@ import '@/i18n/config';
 import Logo from '@/assets/logo.svg';
 import './App.scss';
 import classNames from 'classnames';
-import { IconHighlight, IconSave } from '@arco-design/web-react/icon';
+import { IconHighlight, IconSave, IconClose } from '@arco-design/web-react/icon';
 import { useSaveCurrentWeblinkAsResource } from '@/hooks/use-save-resource';
 import { useToggleCopilot } from '@/modules/toggle-copilot/hooks/use-toggle-copilot';
 import { useSaveResourceNotify } from '@refly-packages/ai-workspace-common/hooks/use-save-resouce-notify';
@@ -227,6 +227,22 @@ export const App = () => {
   // listen to copilotType
   console.log('ishovered', isHovered);
 
+  const [isVisible, setIsVisible] = useState(true);
+
+  const handleClose = (e: React.MouseEvent) => {
+    Message.info({
+      content: t('extension.floatingSphere.toggleCopilotClose'),
+      duration: 3000,
+    });
+
+    e.stopPropagation();
+    setIsVisible(false);
+  };
+
+  if (!isVisible) {
+    return null;
+  }
+
   return (
     <div className="refly-floating-sphere-entry-container">
       <div
@@ -249,6 +265,25 @@ export const App = () => {
             onMouseLeave={handleMouseLeave}
             onClick={(_) => handleToggleCopilot()}
           >
+            <Tooltip
+              position="left"
+              content={t('extension.floatingSphere.toggleCopilotTooltip')}
+              getPopupContainer={getPopupContainer}
+            >
+              <Button
+                type="text"
+                shape="circle"
+                icon={<IconClose />}
+                style={{
+                  fontSize: 10,
+                  width: 16,
+                  height: 16,
+                }}
+                size="mini"
+                className="refly-floating-sphere-close-button"
+                onClick={(e) => handleClose(e as any as React.MouseEvent)}
+              />
+            </Tooltip>
             <img src={Logo} alt={t('extension.floatingSphere.toggleCopilot')} style={{ width: 25, height: 25 }} />
             <span className="refly-floating-sphere-entry-shortcut">{shortcut}</span>
           </div>

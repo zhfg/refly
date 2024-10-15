@@ -128,6 +128,8 @@ export const translation = {
       },
       saveResourceFailed: 'Save failed, please try to save again',
       isSaving: 'Saving...',
+      toggleCopilotClose: 'The floating sphere is closed, you can refresh the page to redisplay',
+      toggleCopilotTooltip: 'Close the floating sphere, you can refresh the page to redisplay',
     },
   },
 };

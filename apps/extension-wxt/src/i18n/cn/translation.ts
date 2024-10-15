@@ -128,6 +128,8 @@ export const translation = {
       },
       saveResourceFailed: '保存失败，请尝试重新保存',
       isSaving: '保存中...',
+      toggleCopilotClose: '悬浮球已关闭，可以刷新页面重新展示',
+      toggleCopilotTooltip: '关闭悬浮球，可以刷新页面重新展示',
     },
   },
 };
