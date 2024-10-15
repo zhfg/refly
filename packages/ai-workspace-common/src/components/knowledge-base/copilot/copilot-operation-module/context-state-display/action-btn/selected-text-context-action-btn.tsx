@@ -24,8 +24,6 @@ export const SelectedTextContextActionBtn = () => {
   const count = enableMultiSelect ? currentSelectedMarks.length : currentSelectedMark ? 1 : 0;
   const showSelectedTextCard = showContextCard && contextDomain === 'selected-text';
 
-  const { handleToggleContentSelectorPanel } = useHandleContextWorkflow();
-
   return (
     <Badge count={count} dotStyle={{ backgroundColor: '#00968F', fontSize: 8, fontWeight: 'bold' }}>
       <Tooltip content={t('copilot.selectedTextCard.title')} getPopupContainer={getPopupContainer}>
@@ -40,9 +38,7 @@ export const SelectedTextContextActionBtn = () => {
                 icon={<IconFontColors />}
                 type="text"
                 style={{ fontSize: 12 }}
-                onClick={() => {
-                  handleToggleContentSelectorPanel(!showSelectedTextCard);
-                }}
+                onClick={() => {}}
                 className={classNames('assist-action-item', { active: checked })}
               ></Button>
             );

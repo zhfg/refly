@@ -117,7 +117,12 @@ export const translation = {
     floatingSphere: {
       saveResource: '保存到 Refly',
       selectContentToAsk: '选择内容提问',
+      enableSelectContentToAskNotify: '启用选择内容提问',
+      disableSelectContentToAskNotify: '禁用选择内容提问',
+      closeContentSelector: '关闭选择内容',
       toggleCopilot: '唤起 Refly',
+      toggleCopilotClose: '悬浮球已关闭，可以刷新页面重新展示',
+      toggleCopilotTooltip: '关闭悬浮球，可以刷新页面重新展示',
     },
   },
 };

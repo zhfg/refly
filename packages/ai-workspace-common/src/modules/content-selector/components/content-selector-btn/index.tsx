@@ -28,8 +28,6 @@ export const ContentSelectorBtn = (props: ContentSelectorBtnProps) => {
   const { initMessageListener } = useSelectedMark();
   const { t } = useTranslation();
 
-  const { handleToggleContentSelector } = useHandleContextWorkflow();
-
   useEffect(() => {
     const clearEvent = initMessageListener();
 

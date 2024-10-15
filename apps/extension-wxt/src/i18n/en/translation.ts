@@ -117,7 +117,12 @@ export const translation = {
     floatingSphere: {
       saveResource: 'Save to Refly',
       selectContentToAsk: 'Select content to ask',
+      enableSelectContentToAskNotify: 'Enable select content to ask',
+      disableSelectContentToAskNotify: 'Disable select content to ask',
+      closeContentSelector: 'Close content selector',
       toggleCopilot: 'Toggle Copilot',
+      toggleCopilotClose: 'The floating sphere is closed, you can refresh the page to redisplay',
+      toggleCopilotTooltip: 'Close the floating sphere, you can refresh the page to redisplay',
     },
   },
 };

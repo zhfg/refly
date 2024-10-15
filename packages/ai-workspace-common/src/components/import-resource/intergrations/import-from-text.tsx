@@ -105,7 +105,7 @@ export const ImportFromText = () => {
           <div className="intergation-body">
             <div className="intergation-body-action">
               <Form>
-                <FormItem required layout="vertical" label={t('resource.import.textTitlePlaceholder')}>
+                <FormItem layout="vertical" label={t('resource.import.textTitlePlaceholder')}>
                   <Input
                     // placeholder={t('resource.import.textTitlePlaceholder')}
                     value={importResourceStore.copiedTextPayload?.title}

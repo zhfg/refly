@@ -43,20 +43,6 @@ export const useHandleContextWorkflow = () => {
     }
   };
 
-  // for open or close content selector
-  const handleToggleContentSelectorPanel = (showSelectedTextCard: boolean) => {
-    setShowContextCard(showSelectedTextCard);
-
-    // 如果是激活文本，
-    setContextDomain('selected-text');
-  };
-
-  const handlePassthroughOpenContentSelector = (enable = true) => {
-    handleToggleContentSelectorPanel(enable);
-    contentSelectorStore.setShowContentSelector(enable);
-    handleToggleContentSelector(enable);
-  };
-
   const handleSidePanelClose = () => {
     handleStopContentSelectorListener();
     const { currentNote } = useNoteStore.getState();
@@ -65,8 +51,6 @@ export const useHandleContextWorkflow = () => {
 
   return {
     handleToggleContentSelector,
-    handleToggleContentSelectorPanel,
-    handlePassthroughOpenContentSelector,
     handleSidePanelClose,
   };
 };
