@@ -8,24 +8,7 @@ import {
   SkillContextResourceItem,
   Source,
 } from '@refly-packages/openapi-schema';
-
-export enum LLMType {
-  GPT4oMini = 'openai/gpt-4o-mini',
-  GPT4o = 'openai/gpt-4o-turbo',
-  Claude35Sonnet = 'anthropic/claude-3-5-sonnet',
-  Claude3Haiku = 'anthropic/claude-3-haiku',
-  GeminiFlash15 = 'google/gemini-flash-1.5',
-  GeminiPro15 = 'google/gemini-pro-1.5',
-}
-
-export const ModelContextLimitMap = {
-  [LLMType.GPT4oMini]: 128 * 1024,
-  [LLMType.GPT4o]: 128 * 1024,
-  [LLMType.Claude35Sonnet]: 200 * 1024,
-  [LLMType.Claude3Haiku]: 200 * 1024,
-  [LLMType.GeminiFlash15]: 4 * 1024 * 1024,
-  [LLMType.GeminiPro15]: 4 * 1024 * 1024,
-};
+import { ModelContextLimitMap, LLMType } from '@refly-packages/utils';
 
 // const enc_p50k_base = get_encoding('p50k_base');
 const enc_cl100k_base = get_encoding('cl100k_base');
@@ -66,22 +49,23 @@ export const countWebSearchContextTokens = (webSearchSources: Source[] = []) => 
 //   return collections.reduce((sum, collection) => sum + countToken(collection?.collection?.content), 0);
 // };
 
-export const countContextTokens = (mentionedContext: IContext) => {
+export const countContextTokens = (context: IContext) => {
   return (
-    countContentTokens(mentionedContext?.contentList) +
-    countResourceTokens(mentionedContext?.resources) +
-    countNoteTokens(mentionedContext?.notes)
+    countContentTokens(context?.contentList) + countResourceTokens(context?.resources) + countNoteTokens(context?.notes)
   );
 };
 
-export const checkHasContext = (mentionedContext: IContext) => {
+export const checkHasContext = (context: IContext) => {
   return (
-    mentionedContext?.contentList?.length > 0 ||
-    mentionedContext?.resources?.length > 0 ||
-    mentionedContext?.notes?.length > 0
+    context?.contentList?.length > 0 ||
+    context?.resources?.length > 0 ||
+    context?.notes?.length > 0 ||
+    context?.collections?.length > 0
   );
 };
 
 export const countMessagesTokens = (messages: BaseMessage[] = []) => {
   return messages.reduce((sum, message) => sum + countToken(message.content as string), 0);
 };
+
+export { ModelContextLimitMap, LLMType };

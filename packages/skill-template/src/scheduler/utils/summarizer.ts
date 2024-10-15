@@ -78,7 +78,14 @@ export const flattenMergedContextToSources = (mergedContext: {
     ...flattenContextToSources(lowerPriorityContext),
   ];
 
-  return sources;
+  // Remove duplicates
+  const uniqueSources = sources.filter(
+    (source, index, self) =>
+      index ===
+      self.findIndex((s) => s.url === source.url && s.title === source.title && s.pageContent === source.pageContent),
+  );
+
+  return uniqueSources;
 };
 
 // TODO: should replace id with `type-index` for better llm extraction

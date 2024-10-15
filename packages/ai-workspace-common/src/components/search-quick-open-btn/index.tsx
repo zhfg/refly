@@ -5,7 +5,7 @@ import './index.scss';
 import { useTranslation } from 'react-i18next';
 import { bigSearchQuickOpenEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/big-search-quick-open';
 import classNames from 'classnames';
-import { IconPlus } from '@arco-design/web-react/icon';
+import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 
 interface SearchQuickOpenBtnProps extends React.ComponentProps<'div'> {
   placeholder?: string;
@@ -20,12 +20,12 @@ export const SearchQuickOpenBtn = (props: SearchQuickOpenBtnProps) => {
     <div {...divProps} className={classNames('search-quick-open-container', divProps.className)}>
       {collapse ? (
         <div
-          className="quick-search-btn-collapse flex justify-center items-center"
+          className="flex justify-center items-center quick-search-btn-collapse"
           onClick={() => {
             bigSearchQuickOpenEmitter.emit('openSearch');
           }}
         >
-          <IconPlus style={{ fontSize: 20 }} />
+          <IconSearch style={{ fontSize: 20 }} />
         </div>
       ) : (
         <div
@@ -34,7 +34,10 @@ export const SearchQuickOpenBtn = (props: SearchQuickOpenBtnProps) => {
             bigSearchQuickOpenEmitter.emit('openSearch');
           }}
         >
-          <div className="search-quick-open-text">{t(`${placeholder || 'loggedHomePage.newThreadText'}`)}</div>
+          <div className="search-quick-open-text">
+            <IconSearch />
+            <span style={{ marginLeft: 8 }}>{t(`${placeholder || 'loggedHomePage.searchEverything'}`)}</span>
+          </div>
           <div className="search-quick-open-shortcuts">
             <div className="search-quick-open-shortcut-key">{reflyEnv.getOsType() === 'OSX' ? '⌘' : 'ctrl'}</div>
             <div className="search-quick-open-shortcut-key search-quick-open-shortcut-key__right">K</div>

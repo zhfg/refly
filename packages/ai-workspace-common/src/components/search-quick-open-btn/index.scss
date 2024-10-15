@@ -30,7 +30,7 @@
 
     .search-quick-open-text {
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 400;
       color: rgb(100, 100, 95);
     }
 
@@ -41,8 +41,7 @@
 
       .search-quick-open-shortcut-key {
         border-radius: 0.25rem;
-        border-width: 1px;
-        border-color: hsla(60, 11%, 83%, 0.5);
+        border: 1px solid hsla(60, 11%, 83%, 0.5);
         background-color: transparent;
         padding-left: 4px;
         padding-right: 4px;

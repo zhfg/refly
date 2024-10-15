@@ -3702,6 +3702,9 @@ components:
         tier:
           type: string
           description: Model tier
+        contextLimit:
+          type: number
+          description: Model context limit
     ListModelsResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

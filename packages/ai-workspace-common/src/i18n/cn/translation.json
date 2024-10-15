@@ -256,6 +256,14 @@
         "result": "结果",
         "empty": "未命中过滤条件"
       }
+    },
+    "header": {
+      "searchAndOpenResourceOrCollection": "搜索并打开资源或知识库",
+      "searchOrOpenResourceOrCollection": "搜索或打开资源或知识库",
+      "searchOrOpenNote": "搜索或打开笔记",
+      "searchOrOpenThread": "搜索或打开会话",
+      "openThreadHistory": "打开会话历史",
+      "newThread": "新建会话"
     }
   },
   "resource": {
@@ -284,7 +292,7 @@
     "index_failed_tip": "点击重试"
   },
   "loggedHomePage": {
-    "newThreadText": "新会话",
+    "searchEverything": "搜索任何内容",
     "quickSearch": {
       "skills": "技能",
       "note": "笔记",

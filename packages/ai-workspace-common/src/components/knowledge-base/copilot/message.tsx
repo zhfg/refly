@@ -96,21 +96,24 @@ export const AssistantMessage = memo(
 
       if (type === 'insertBlow' || type === 'replaceSelection') {
         const editor = noteStoreEditor;
-        const selection = editor.view.state.selection;
 
         if (!editor) return;
 
-        editor
-          .chain()
-          .focus()
-          .insertContentAt(
-            {
-              from: selection.from,
-              to: selection.to,
-            },
-            parsedContent,
-          )
-          .run();
+        const selection = editor.view?.state?.selection;
+
+        if (selection) {
+          editor
+            .chain()
+            .focus()
+            .insertContentAt(
+              {
+                from: selection.from,
+                to: selection.to,
+              },
+              parsedContent,
+            )
+            .run();
+        }
       } else if (type === 'createNewNote') {
         editorEmitter.emit('createNewNote', parsedContent);
       }

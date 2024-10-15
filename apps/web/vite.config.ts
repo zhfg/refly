@@ -8,9 +8,7 @@ import tsconfigPaths from "vite-tsconfig-paths"
 import { codeInspectorPlugin } from "code-inspector-plugin"
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
-  const isDev = mode === "development"
-
+export default defineConfig(() => {
   return {
     plugins: [
       react(),
@@ -27,15 +25,16 @@ export default defineConfig(({ mode }) => {
         bundler: "vite",
         editor: "code",
       }),
-      ...(isDev
-        ? []
-        : [
+      ...(process.env.SENTRY_AUTH_TOKEN
+        ? [
             sentryVitePlugin({
               org: "refly-ai",
               project: "web",
+              authToken: process.env.SENTRY_AUTH_TOKEN,
               errorHandler: err => console.warn(err),
             }),
-          ]),
+          ]
+        : []),
     ],
     css: {
       postcss,
