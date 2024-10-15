@@ -1,12 +1,15 @@
 import { CreateResourceData } from '@refly/openapi-schema';
-import { getMarkdown } from '@refly/utils/html2md';
+import { getMarkdown, getReadabilityMarkdown } from '@refly/utils/html2md';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { getClientOrigin } from '@refly/utils/url';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 export const useSaveCurrentWeblinkAsResource = () => {
   const saveResource = async () => {
     try {
-      const pageContent = getMarkdown(document?.body);
+      const runtime = getRuntime();
+      const isWeb = runtime === 'web';
+      const pageContent = isWeb ? getMarkdown(document?.body) : getReadabilityMarkdown(document);
       const resource = {
         resourceId: 'tempResId',
         title: document?.title || '',
