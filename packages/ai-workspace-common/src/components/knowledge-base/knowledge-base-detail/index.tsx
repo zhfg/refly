@@ -137,7 +137,7 @@ export const KnowledgeBaseDetail = () => {
                     icon={<IconSearch />}
                     type="text"
                     shape="circle"
-                    className="assist-action-item"
+                    className="assist-action-item-header"
                     onClick={() => {
                       searchStore.setPages(searchStore.pages.concat('readResources'));
                       searchStore.setIsSearchOpen(true);

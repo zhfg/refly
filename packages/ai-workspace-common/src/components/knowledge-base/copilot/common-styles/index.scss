@@ -1,6 +1,6 @@
 .assist-action-item {
   color: rgba(0, 0, 0, 0.5) !important;
-  font-size: 16px !important;
+  font-size: 12px !important;
 
   &:hover,
   &.active {
@@ -11,6 +11,31 @@
 }
 
 button.assist-action-item {
+  height: 24px !important;
+  padding: 0 4px !important;
+  border-radius: 8px !important;
+
+  &:hover,
+  &.active {
+    cursor: pointer;
+    background-color: #f1f1f0 !important;
+    color: #00968f !important;
+  }
+}
+
+.assist-action-item-header {
+  color: rgba(0, 0, 0, 0.5) !important;
+  font-size: 16px !important;
+
+  &:hover,
+  &.active {
+    cursor: pointer;
+    background-color: #f1f1f0 !important;
+    color: #00968f;
+  }
+}
+
+button.assist-action-item-header {
   height: 24px !important;
   padding: 0 4px !important;
   border-radius: 8px !important;

@@ -528,7 +528,7 @@ export const AINote = () => {
                     icon={<IconSearch />}
                     type="text"
                     style={{ marginRight: 4 }}
-                    className="assist-action-item"
+                    className="assist-action-item-header"
                     onClick={() => {
                       searchStore.setPages(searchStore.pages.concat('note'));
                       searchStore.setIsSearchOpen(true);

@@ -134,7 +134,7 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
                                 knowledgeBaseStore.updateResourcePanelVisible(!knowledgeBaseStore.resourcePanelVisible);
                               }
                             }}
-                            className={classNames('assist-action-item', { active: checked })}
+                            className={classNames('assist-action-item-header', { active: checked })}
                           ></Button>
                         </Tooltip>
                       );
@@ -153,7 +153,7 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
                             onClick={() => {
                               noteStore.updateNotePanelVisible(!noteStore.notePanelVisible);
                             }}
-                            className={classNames('assist-action-item', { active: checked })}
+                            className={classNames('assist-action-item-header', { active: checked })}
                           ></Button>
                         </Tooltip>
                       );
@@ -167,7 +167,8 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
                         searchStore.setPages(searchStore.pages.concat('convs'));
                         searchStore.setIsSearchOpen(true);
                       }}
-                      className={classNames('assist-action-item')}
+                      style={{ marginLeft: '5px' }}
+                      className={classNames('assist-action-item-header')}
                     ></Button>
                   </Tooltip>,
                 ]
@@ -194,7 +195,7 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
                 onClick={() => {
                   handleNewOpenConvList();
                 }}
-                className={classNames('assist-action-item')}
+                className={classNames('assist-action-item-header')}
               >
                 {/* 会话历史 */}
               </Button>
@@ -206,7 +207,7 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
                 onClick={() => {
                   handleNewTempConv();
                 }}
-                className={classNames('assist-action-item', 'mr-1')}
+                className={classNames('assist-action-item-header', 'mr-1')}
               >
                 {/* 新会话 */}
               </Button>
@@ -220,7 +221,7 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
                     copilotStore.setIsCopilotOpen(false);
                   }
                 }}
-                className={classNames('assist-action-item', 'mr-1')}
+                className={classNames('assist-action-item-header', 'mr-1')}
               ></Button>
             ) : null}
           </div>
