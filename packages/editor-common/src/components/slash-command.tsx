@@ -100,6 +100,8 @@ export const configureSuggestionItems = (param: { entityId: string; entityType: 
       searchTerms: ['photo', 'picture', 'media'],
       icon: <ImageIcon size={18} />,
       command: ({ editor, range }) => {
+        if (!editor) return;
+
         editor.chain().focus().deleteRange(range).run();
         // upload image
         const input = document.createElement('input');
@@ -111,8 +113,10 @@ export const configureSuggestionItems = (param: { entityId: string; entityType: 
         input.onchange = async () => {
           if (input.files?.length) {
             const file = input.files[0];
-            const pos = editor.view.state.selection.from;
-            uploadFn(file, editor.view, pos);
+            const pos = editor.view?.state?.selection?.from;
+            if (pos) {
+              uploadFn(file, editor.view, pos);
+            }
           }
         };
         input.click();
