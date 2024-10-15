@@ -40,27 +40,31 @@ export function isJSON(variable: any): boolean {
   }
 }
 
+const getParsedCitation = (markdown: string = '') => {
+  return markdown
+    ?.replace(/\[\s*([cC])itation/g, '[citation')
+    .replace(/\[\[([cC])itation/g, "[citation")
+    .replace(/[cC]itation:(\d+)]]/g, "citation:$1]")
+    .replace(/\[\[([cC]itation:\d+)]](?!])/g, `[$1]`)
+    .replace(/\[[cC]itation:(\d+)]/g, "[citation]($1)")
+    .replace(/[cC]itation\s*:\s*(\d+)\s*]]/g, 'citation:$1]')
+    .replace(/\[\s*([cC]itation\s*:\s*\d+)\s*]](?!])/g, `[$1]`)
+  .replace(/\[\s*[cC]itation\s*:\s*(\d+)\s*]/g, '[citation]($1)')
+  .replace(/【\s*[cC]itation\s*:\s*(\d+)\s*】/g, '[citation]($1)')
+  .replace(/\[\[\s*[cC]itation\s*:\s*(\d+)\s*]]/g, '[citation]($1)');
+}
+
 export const markdownCitationParse = (markdown: string) => {
   if (typeof markdown !== 'string') {
     return markdown;
   }
 
-  return (markdown || '')
-    ?.replace(/\[\s*([cC])itation/g, '[citation')
-    .replace(/[cC]itation\s*:\s*(\d+)\s*]]/g, 'citation:$1]')
-    .replace(/\[\s*([cC]itation\s*:\s*\d+)\s*]](?!])/g, `[$1]`)
-    .replace(/\[\s*[cC]itation\s*:\s*(\d+)\s*]/g, '[citation]($1)')
-    .replace(/【\s*[cC]itation\s*:\s*(\d+)\s*】/g, '[citation]($1)');
+  return getParsedCitation(markdown);
 };
 
 export function parseMarkdownWithCitations(content: string, sources: Source[]): string {
   // 统一引用格式
-  let parsedContent = content
-    ?.replace(/\[\s*([cC])itation/g, '[citation')
-    .replace(/[cC]itation\s*:\s*(\d+)\s*]]/g, 'citation:$1]')
-    .replace(/\[\s*([cC]itation\s*:\s*\d+)\s*]](?!])/g, `[$1]`)
-    .replace(/\[\s*[cC]itation\s*:\s*(\d+)\s*]/g, '[citation]($1)')
-    .replace(/【\s*[cC]itation\s*:\s*(\d+)\s*】/g, '[citation]($1)');
+  let parsedContent = getParsedCitation(content);
 
   // 处理统一后的引用格式并收集使用的源
   const citationRegex = /\[\s*citation\s*]\s*\(\s*(\d+)\s*\)|\[\s*citation\s*:\s*(\d+)\s*]/g;
