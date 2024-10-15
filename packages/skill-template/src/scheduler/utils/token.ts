@@ -11,8 +11,8 @@ import {
 
 export enum LLMType {
   GPT4oMini = 'openai/gpt-4o-mini',
-  GPT4o = 'openai/gpt-4o-turbo',
-  Claude35Sonnet = 'anthropic/claude-3-5-sonnet',
+  GPT4o = 'openai/gpt-4o-2024-08-06',
+  Claude35Sonnet = 'anthropic/claude-3.5-sonnet',
   Claude3Haiku = 'anthropic/claude-3-haiku',
   GeminiFlash15 = 'google/gemini-flash-1.5',
   GeminiPro15 = 'google/gemini-pro-1.5',
