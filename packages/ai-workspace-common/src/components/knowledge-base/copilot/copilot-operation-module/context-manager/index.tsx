@@ -14,7 +14,7 @@ import './index.scss';
 import { ContentSelectorBtn } from '@refly-packages/ai-workspace-common/modules/content-selector/components/content-selector-btn';
 import { ResetContentSelectorBtn } from './reset-content-selector-btn';
 import { ContextFilter } from './components/context-filter/index';
-
+import { SaveToKnowledgeBase } from './components/save-to-knowledge-base/index';
 // stores
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
@@ -22,9 +22,17 @@ import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 
 // types
 import { Collection, Note, Resource, SearchDomain, SearchResult } from '@refly/openapi-schema';
-import { backendBaseMarkTypes, BaseMarkType, frontendBaseMarkTypes, Mark } from '@refly/common-types';
+import {
+  backendBaseMarkTypes,
+  BaseMarkType,
+  frontendBaseMarkTypes,
+  Mark,
+  SelectedTextDomain,
+  selectedTextDomains,
+} from '@refly/common-types';
 
 import { mapSelectionTypeToContentList } from './utils/contentListSelection';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 const mapMarkToSearchResult = (marks: Mark[]): SearchResult[] => {
   let searchResults: SearchResult[] = [];
@@ -63,6 +71,8 @@ export const ContextManager = () => {
     filterIdsOfCurrentSelectedMarks: state.filterIdsOfCurrentSelectedMarks,
     filterErrorInfo: state.filterErrorInfo,
   }));
+  const runtime = getRuntime();
+  const isWeb = runtime === 'web';
 
   console.log('processedContextItems', processedContextItems);
 
@@ -113,6 +123,11 @@ export const ContextManager = () => {
   const currentKnowledgeBase = useKnowledgeBaseStore((state) => state.currentKnowledgeBase);
   const currentResource = useKnowledgeBaseStore((state) => state.currentResource);
   const currentNote = useNoteStore((state) => state.currentNote);
+  const currentSelectedContentList =
+    (currentSelectedMarks || []).filter(
+      (mark) =>
+        selectedTextDomains?.includes(mark?.domain) || selectedTextDomains.includes(mark?.type as SelectedTextDomain),
+    ) || [];
 
   const buildEnvContext = (data: Collection | Resource | Note, type: 'collection' | 'resource' | 'note'): Mark[] => {
     if (!data) return [];
@@ -199,6 +214,8 @@ export const ContextManager = () => {
           <ResetContentSelectorBtn />
 
           <ContextFilter processContextFilterProps={processContextFilterProps} />
+
+          {!isWeb && currentSelectedContentList?.length > 0 && <SaveToKnowledgeBase />}
 
           {processedContextItems.map((item) => (
             <ContextItem

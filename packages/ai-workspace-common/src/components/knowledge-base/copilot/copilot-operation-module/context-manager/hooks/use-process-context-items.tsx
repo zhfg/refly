@@ -97,7 +97,18 @@ export const useProcessContextItems = () => {
     };
   };
 
-  const processedContextItems = currentSelectedMarks.map(mapMarkToItem);
+  const processedContextItems = (() => {
+    const uniqueMarks = new Map<string, Mark>();
+
+    currentSelectedMarks.forEach((mark) => {
+      const key = `${mark.type}_${mark.id}`;
+      if (!uniqueMarks.has(key)) {
+        uniqueMarks.set(key, mapMarkToItem(mark));
+      }
+    });
+
+    return Array.from(uniqueMarks.values());
+  })();
 
   const getcontextItemTypes = () => {
     const types: Record<string, number> = {
