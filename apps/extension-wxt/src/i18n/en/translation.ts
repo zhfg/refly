@@ -121,13 +121,6 @@ export const translation = {
       disableSelectContentToAskNotify: 'Disable select content to ask',
       closeContentSelector: 'Close content selector',
       toggleCopilot: 'Toggle Copilot',
-      saveResourceSuccess: {
-        prefix: 'Save successfully, click',
-        link: 'link',
-        suffix: 'to view',
-      },
-      saveResourceFailed: 'Save failed, please try to save again',
-      isSaving: 'Saving...',
       toggleCopilotClose: 'The floating sphere is closed, you can refresh the page to redisplay',
       toggleCopilotTooltip: 'Close the floating sphere, you can refresh the page to redisplay',
     },

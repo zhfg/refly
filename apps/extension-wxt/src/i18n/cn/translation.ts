@@ -121,13 +121,6 @@ export const translation = {
       disableSelectContentToAskNotify: '禁用选择内容提问',
       closeContentSelector: '关闭选择内容',
       toggleCopilot: '唤起 Refly',
-      saveResourceSuccess: {
-        prefix: '保存成功，点击',
-        link: '链接',
-        suffix: '查看',
-      },
-      saveResourceFailed: '保存失败，请尝试重新保存',
-      isSaving: '保存中...',
       toggleCopilotClose: '悬浮球已关闭，可以刷新页面重新展示',
       toggleCopilotTooltip: '关闭悬浮球，可以刷新页面重新展示',
     },

@@ -283,7 +283,14 @@
       "emptyText": "Title and text content cannot be empty!",
       "textTitlePlaceholder": "Enter title",
       "textUrlPlaceholder": "Enter or paste web link",
-      "textContentPlaceholder": "Enter or paste text"
+      "textContentPlaceholder": "Enter or paste text",
+      "saveResourceSuccess": {
+        "prefix": "Save successfully, click",
+        "link": "link",
+        "suffix": "to view"
+      },
+      "saveResourceFailed": "Save failed, please try to save again",
+      "isSaving": "Saving..."
     },
     "wait_parse": "Parsing",
     "parse_failed": "Parse Failed, click to retry",

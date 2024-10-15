@@ -7,7 +7,7 @@ export const useSaveResourceNotify = () => {
   const { t } = useTranslation();
   const handleSaveResourceAndNotify = async (saveResource: () => Promise<{ success: boolean; url: string }>) => {
     const close = Message.loading({
-      content: t('extension.floatingSphere.isSaving'),
+      content: t('resource.import.isSaving'),
       duration: 0,
       style: {
         borderRadius: 8,
@@ -24,11 +24,11 @@ export const useSaveResourceNotify = () => {
       Message.success({
         content: (
           <span>
-            {t('extension.floatingSphere.saveResourceSuccess.prefix')}{' '}
+            {t('resource.import.saveResourceSuccess.prefix')}{' '}
             <Link href={url} target="_blank" style={{ borderRadius: 4 }} hoverable>
-              {t('extension.floatingSphere.saveResourceSuccess.link')}
+              {t('resource.import.saveResourceSuccess.link')}
             </Link>{' '}
-            {t('extension.floatingSphere.saveResourceSuccess.suffix')}
+            {t('resource.import.saveResourceSuccess.suffix')}
           </span>
         ),
         duration: 5000,
@@ -40,7 +40,7 @@ export const useSaveResourceNotify = () => {
       });
     } else {
       Message.error({
-        content: t('extension.floatingSphere.saveResourceFailed'),
+        content: t('resource.import.saveResourceFailed'),
         duration: 3000,
         style: {
           borderRadius: 8,

@@ -282,7 +282,14 @@
       "emptyText": "标题和文本内容不能为空！",
       "textTitlePlaceholder": "输入标题",
       "textUrlPlaceholder": "输入或粘贴网页链接",
-      "textContentPlaceholder": "输入或粘贴文本"
+      "textContentPlaceholder": "输入或粘贴文本",
+      "saveResourceSuccess": {
+        "prefix": "保存成功，点击",
+        "link": "链接",
+        "suffix": "查看"
+      },
+      "saveResourceFailed": "保存失败，请尝试重新保存",
+      "isSaving": "保存中..."
     },
     "wait_parse": "内容解析中",
     "parse_failed": "解析失败，点击重试",
