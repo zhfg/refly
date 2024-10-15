@@ -254,6 +254,14 @@
         "result": "Result",
         "empty": "No hit filter conditions"
       }
+    },
+    "header": {
+      "searchAndOpenResourceOrCollection": "Search and open resource or collection",
+      "searchOrOpenResourceOrCollection": "Search or open resource or collection",
+      "searchOrOpenNote": "Search or open note",
+      "searchOrOpenThread": "Search or open thread",
+      "openThreadHistory": "Open Thread History",
+      "newThread": "New Thread"
     }
   },
   "resource": {
@@ -282,7 +290,7 @@
     "index_failed_tip": "Click to retry"
   },
   "loggedHomePage": {
-    "newThreadText": "New Thread",
+    "searchEverything": "Search",
     "quickSearch": {
       "skills": "Skills",
       "note": "Notes",

@@ -2237,6 +2237,10 @@ export type ModelInfo = {
    * Model tier
    */
   tier: string;
+  /**
+   * Model context limit
+   */
+  contextLimit?: number;
 };
 
 export type ListModelsResponse = BaseResponse & {

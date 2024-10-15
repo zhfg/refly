@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback, memo } from 'react';
 import throttle from 'lodash.throttle';
-import { Button, Tabs } from '@arco-design/web-react';
+import { Button, Tabs, Tooltip } from '@arco-design/web-react';
 import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 
 // 自定义组件
@@ -17,11 +17,14 @@ import { HiChevronLeft, HiChevronRight } from 'react-icons/hi2';
 
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
+import { IconSearch } from '@arco-design/web-react/icon';
+import { useTranslation } from 'react-i18next';
 
 const TabPane = Tabs.TabPane;
 const MIN_LEFT_PANEL_SIZE = 72;
 
 export const KnowledgeBaseDetail = () => {
+  const { t } = useTranslation();
   const [queryParams] = useSearchParams();
   const resId = queryParams.get('resId');
   const kbId = queryParams.get('kbId');
@@ -129,16 +132,18 @@ export const KnowledgeBaseDetail = () => {
                 <DefaultTabHeader {...props} />
               </div>
               <div className="knowledge-base-detail-navigation-bar">
-                <Button
-                  icon={<HiOutlineSearch />}
-                  type="text"
-                  shape="circle"
-                  className="assist-action-item"
-                  onClick={() => {
-                    searchStore.setPages(searchStore.pages.concat('readResources'));
-                    searchStore.setIsSearchOpen(true);
-                  }}
-                ></Button>
+                <Tooltip content={t('knowledgeBase.header.searchAndOpenResourceOrCollection')}>
+                  <Button
+                    icon={<IconSearch />}
+                    type="text"
+                    shape="circle"
+                    className="assist-action-item-header"
+                    onClick={() => {
+                      searchStore.setPages(searchStore.pages.concat('readResources'));
+                      searchStore.setIsSearchOpen(true);
+                    }}
+                  ></Button>
+                </Tooltip>
               </div>
             </div>
           );

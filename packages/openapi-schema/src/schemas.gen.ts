@@ -3274,6 +3274,10 @@ export const $ModelInfo = {
       type: 'string',
       description: 'Model tier',
     },
+    contextLimit: {
+      type: 'number',
+      description: 'Model context limit',
+    },
   },
 } as const;
 

@@ -59,7 +59,7 @@ export default defineConfig({
       },
     }) as WxtViteConfig,
   manifest: {
-    version: '0.3.1',
+    version: '0.3.3',
     author: 'pftom',
     name: '__MSG_displayName__',
     description: '__MSG_description__',

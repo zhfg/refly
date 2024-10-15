@@ -42,7 +42,17 @@ export function PreCode(props: { children: any }) {
 export function ATag({ ...props }, sources: Source[]) {
   if (!props.href) return <></>;
   const source = sources[+props.href - 1];
-  if (!source) return <a href={props.href}>{props.children}</a>;
+  if (!source) {
+    try {
+      const num = Number(props.href);
+      if (!Number.isNaN(num) && num > sources.length) {
+        console.log('source not found', props);
+        return <></>;
+      }
+    } catch (err) {}
+
+    return <a href={props.href}>{props.children}</a>;
+  }
   return (
     <span className="inline-block w-4">
       <Popover>
