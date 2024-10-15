@@ -52,12 +52,9 @@ interface CollabGenAIMenuSwitchProps {
     text: string;
     handleClick: () => void;
   };
-  nodeSelector: {
-    items: { name: string; icon: React.ReactNode }[];
-  };
 }
 export const CollabGenAIMenuSwitch: React.FC<CollabGenAIMenuSwitchProps> = (props) => {
-  const { contentSelector, nodeSelector } = props;
+  const { contentSelector } = props;
   const [openNode, setOpenNode] = useState(false);
   const [openColor, setOpenColor] = useState(false);
   const [openLink, setOpenLink] = useState(false);
@@ -67,11 +64,10 @@ export const CollabGenAIMenuSwitch: React.FC<CollabGenAIMenuSwitchProps> = (prop
     <GenerativeMenuSwitch open={openAI} onOpenChange={setOpenAI}>
       <ContentSelectorButtons text={contentSelector?.text} handleClick={contentSelector?.handleClick} />
       <Separator orientation="vertical" />
-      <NodeSelector open={openNode} onOpenChange={setOpenNode} textItems={nodeSelector.items} />
-      <Separator orientation="vertical" />
-      <LinkSelector open={openLink} onOpenChange={setOpenLink} />
+      <NodeSelector open={openNode} onOpenChange={setOpenNode} />
       <Separator orientation="vertical" />
       <TextButtons />
+      <LinkSelector open={openLink} onOpenChange={setOpenLink} />
       <Separator orientation="vertical" />
       <ColorSelector open={openColor} onOpenChange={setOpenColor} />
     </GenerativeMenuSwitch>

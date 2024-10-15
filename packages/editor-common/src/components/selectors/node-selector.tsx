@@ -20,7 +20,7 @@ import { Popover } from '@radix-ui/react-popover';
 
 export type SelectorItem = {
   name: string;
-  icon: React.ReactNode;
+  icon: LucideIcon;
   command: (editor: ReturnType<typeof useEditor>['editor']) => void;
   isActive: (editor: ReturnType<typeof useEditor>['editor']) => boolean;
 };
@@ -28,7 +28,7 @@ export type SelectorItem = {
 const items: SelectorItem[] = [
   {
     name: 'Text',
-    icon: <TextIcon />,
+    icon: TextIcon,
     command: (editor) => editor.chain().focus().clearNodes().run(),
     // I feel like there has to be a more efficient way to do this – feel free to PR if you know how!
     isActive: (editor) =>
@@ -36,78 +36,69 @@ const items: SelectorItem[] = [
   },
   {
     name: 'Heading 1',
-    icon: <Heading1 />,
+    icon: Heading1,
     command: (editor) => editor.chain().focus().clearNodes().toggleHeading({ level: 1 }).run(),
     isActive: (editor) => editor.isActive('heading', { level: 1 }),
   },
   {
     name: 'Heading 2',
-    icon: <Heading2 />,
+    icon: Heading2,
     command: (editor) => editor.chain().focus().clearNodes().toggleHeading({ level: 2 }).run(),
     isActive: (editor) => editor.isActive('heading', { level: 2 }),
   },
   {
     name: 'Heading 3',
-    icon: <Heading3 />,
+    icon: Heading3,
     command: (editor) => editor.chain().focus().clearNodes().toggleHeading({ level: 3 }).run(),
     isActive: (editor) => editor.isActive('heading', { level: 3 }),
   },
   {
     name: 'To-do List',
-    icon: <CheckSquare />,
+    icon: CheckSquare,
     command: (editor) => editor.chain().focus().clearNodes().toggleTaskList().run(),
     isActive: (editor) => editor.isActive('taskItem'),
   },
   {
     name: 'Bullet List',
-    icon: <ListOrdered />,
+    icon: ListOrdered,
     command: (editor) => editor.chain().focus().clearNodes().toggleBulletList().run(),
     isActive: (editor) => editor.isActive('bulletList'),
   },
   {
     name: 'Numbered List',
-    icon: <ListOrdered />,
+    icon: ListOrdered,
     command: (editor) => editor.chain().focus().clearNodes().toggleOrderedList().run(),
     isActive: (editor) => editor.isActive('orderedList'),
   },
   {
     name: 'Quote',
-    icon: <TextQuote />,
+    icon: TextQuote,
     command: (editor) => editor.chain().focus().clearNodes().toggleBlockquote().run(),
     isActive: (editor) => editor.isActive('blockquote'),
   },
   {
     name: 'Code',
-    icon: <Code />,
+    icon: Code,
     command: (editor) => editor.chain().focus().clearNodes().toggleCodeBlock().run(),
     isActive: (editor) => editor.isActive('codeBlock'),
   },
 ];
 
 interface NodeSelectorProps {
-  textItems: { name: string; icon: React.ReactNode }[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export const NodeSelector = ({ open, onOpenChange, textItems }: NodeSelectorProps) => {
+export const NodeSelector = ({ open, onOpenChange }: NodeSelectorProps) => {
   const { editor } = useEditor();
   if (!editor) return null;
-  const activeItem = items.filter((item) => item.isActive(editor)).pop() ?? {
-    name: 'Multiple',
-  };
-
-  useEffect(() => {
-    items.forEach((item) => {
-      item.icon = textItems.find((textItem) => textItem.name === item.name)?.icon;
-    });
-  }, []);
+  const activeItem = items.filter((item) => item.isActive(editor)).pop() ?? items[0];
 
   return (
     <Popover modal={true} open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild className="gap-2 rounded-none border-none hover:bg-accent focus:ring-0">
         <Button size="sm" variant="ghost" className="gap-2">
-          {items.find((item) => item.name === activeItem.name)?.icon}
+          <activeItem.icon className="h-4 w-4" />
           <ChevronDown className="h-3 w-3" />
         </Button>
       </PopoverTrigger>
@@ -122,7 +113,9 @@ export const NodeSelector = ({ open, onOpenChange, textItems }: NodeSelectorProp
             className="flex cursor-pointer items-center justify-between rounded-sm px-2 py-1 text-sm hover:bg-accent"
           >
             <div className="flex items-center space-x-2">
-              <div className="rounded-sm border p-1">{item.icon}</div>
+              <div className="rounded-sm border p-1 flex items-center justify-center">
+                <item.icon className="h-4 w-4" />
+              </div>
               <span className="text-xs">{item.name}</span>
             </div>
             {activeItem.name === item.name && <Check className="h-4 w-4" />}

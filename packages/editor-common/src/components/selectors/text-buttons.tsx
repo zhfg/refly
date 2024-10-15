@@ -56,7 +56,7 @@ export const TextButtons = () => {
         >
           <Button size="sm" className="rounded-none" variant="ghost">
             <item.icon
-              className={cn('h-3 w-3 font-medium', {
+              className={cn('h-3.5 w-3.5', {
                 'text-blue-500': item.isActive(editor),
               })}
             />

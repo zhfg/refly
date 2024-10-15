@@ -104,7 +104,7 @@ export const ColorSelector = ({ open, onOpenChange }: ColorSelectorProps) => {
       <PopoverTrigger asChild>
         <Button size="sm" className="gap-2 rounded-none" variant="ghost">
           <span
-            className="rounded-sm px-1 text-xs font-normal"
+            className="rounded-sm px-1 text-sm font-normal"
             style={{
               color: activeColorItem?.color,
               backgroundColor: activeHighlightItem?.color,

@@ -5,13 +5,12 @@ import { Note } from '@refly/openapi-schema';
 
 import './index.scss';
 import { useCookie } from 'react-use';
-import { Button, Divider, Input, Popconfirm, Popover, Spin, Switch, Tabs, Tooltip } from '@arco-design/web-react';
+import { Button, Divider, Input, Popover, Spin, Switch, Tabs, Tooltip } from '@arco-design/web-react';
 import { HiOutlineLockClosed, HiOutlineLockOpen, HiOutlineClock } from 'react-icons/hi2';
-import { HiOutlineSearch } from 'react-icons/hi';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
-// 编辑器组件
+
 import {
   CollabEditorCommand,
   CollabGenAIMenuSwitch,
@@ -30,8 +29,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import { handleImageDrop, handleImagePaste } from '@refly-packages/editor-core/plugins';
 import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import { getHierarchicalIndexes, TableOfContents } from '@tiptap-pro/extension-table-of-contents';
-// 编辑器样式
-// 图标
+
 import { AiOutlineWarning, AiOutlineFileWord, AiOutlineDisconnect } from 'react-icons/ai';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 import { getClientOrigin, getWsServerOrigin } from '@refly-packages/utils/url';
@@ -49,9 +47,6 @@ import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores
 // componets
 import { ToC } from './ToC';
 import { IconBook, IconLoading, IconPlus, IconSearch } from '@arco-design/web-react/icon';
-import { PiTextT, PiListBulletsLight, PiCodeLight } from 'react-icons/pi';
-import { LuHeading1, LuHeading2, LuHeading3, LuListTodo, LuTextQuote } from 'react-icons/lu';
-import { MdFormatListNumbered } from 'react-icons/md';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 const MemorizedToC = memo(ToC);
@@ -269,9 +264,6 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
           >
             <CollabEditorCommand entityId={noteId} entityType="note" />
             <CollabGenAIMenuSwitch
-              nodeSelector={{
-                items: textItems,
-              }}
               contentSelector={{
                 text: t('knowledgeBase.context.addToContext'),
                 handleClick: handleContentSelectorClick,
@@ -403,50 +395,6 @@ export const AINoteHeader = (props: AINoteHeaderProps) => {
     </div>
   );
 };
-
-const style = {
-  display: 'flex',
-  alignItems: 'center',
-  fontWeight: 'medium',
-};
-const textItems: { name: string; icon: React.ReactNode }[] = [
-  {
-    name: 'Text',
-    icon: <PiTextT style={style} />,
-  },
-  {
-    name: 'Heading 1',
-    icon: <LuHeading1 style={style} />,
-  },
-  {
-    name: 'Heading 2',
-    icon: <LuHeading2 style={style} />,
-  },
-  {
-    name: 'Heading 3',
-    icon: <LuHeading3 style={style} />,
-  },
-  {
-    name: 'To-do List',
-    icon: <LuListTodo style={style} />,
-  },
-  {
-    name: 'Bullet List',
-    icon: <PiListBulletsLight style={style} />,
-  },
-  {
-    name: 'Numbered List',
-    icon: <MdFormatListNumbered style={style} />,
-  },
-  {
-    name: 'Quote',
-    icon: <LuTextQuote style={style} />,
-  },
-  {
-    name: 'Code',
-    icon: <PiCodeLight style={style} />,
-  },
-];
 
 export const AINote = () => {
   const [searchParams] = useSearchParams();
