@@ -286,7 +286,7 @@ export const $LabelInstance = {
 export const $InputMode = {
   type: 'string',
   description: 'Data input mode',
-  enum: ['input', 'inputNumber', 'inputTextArea', 'select', 'multiSelect'],
+  enum: ['input', 'inputNumber', 'inputTextArea', 'select', 'multiSelect', 'radio'],
 } as const;
 
 export const $ConfigScope = {
@@ -378,6 +378,9 @@ export const $DynamicConfigItem = {
           type: 'string',
         },
         {
+          type: 'boolean',
+        },
+        {
           type: 'array',
           items: {
             type: 'string',
@@ -411,6 +414,9 @@ export const $DynamicConfigValue = {
         },
         {
           type: 'number',
+        },
+        {
+          type: 'boolean',
         },
         {
           type: 'array',
@@ -777,21 +783,13 @@ export const $SourceMeta = {
       format: 'date-time',
       description: 'Source publish time',
     },
-    collectionId: {
+    entityId: {
       type: 'string',
-      description: 'Related collection ID',
+      description: 'Related entity ID',
     },
-    collectionName: {
+    entityType: {
       type: 'string',
-      description: 'Related collection name',
-    },
-    resourceId: {
-      type: 'string',
-      description: 'Related resource ID',
-    },
-    resourceName: {
-      type: 'string',
-      description: 'Related resource name',
+      description: 'Related entity type',
     },
   },
 } as const;
@@ -1279,7 +1277,7 @@ export const $Subscription = {
 
 export const $TokenUsageMeter = {
   type: 'object',
-  required: ['meterId', 'uid', 'startAt', 'endAt', 't1TokenQuota', 't1TokenUsed', 't2TokenQuota', 't2TokenUsed'],
+  required: ['meterId', 'uid', 'startAt', 't1TokenQuota', 't1TokenUsed', 't2TokenQuota', 't2TokenUsed'],
   properties: {
     meterId: {
       type: 'string',
@@ -3292,6 +3290,62 @@ export const $ListModelsResponse = {
           description: 'Model list',
           items: {
             $ref: '#/components/schemas/ModelInfo',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $DocumentInterface = {
+  type: 'object',
+  properties: {
+    id: {
+      type: 'string',
+      description:
+        'An optional identifier for the document. Ideally this should be unique across the document collection and formatted as a UUID.',
+    },
+    pageContent: {
+      type: 'string',
+      description: 'The main content of the document.',
+    },
+    metadata: {
+      type: 'object',
+      additionalProperties: true,
+      description: 'Metadata associated with the document.',
+    },
+  },
+} as const;
+
+export const $InMemoryIndexContentResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          nullable: true,
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $InMemorySearchResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          items: {
+            $ref: '#/components/schemas/DocumentInterface',
           },
         },
       },

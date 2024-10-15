@@ -114,5 +114,10 @@ export const translation = {
         newResource: 'New Resource',
       },
     },
+    floatingSphere: {
+      saveResource: 'Save to Refly',
+      selectContentToAsk: 'Select content to ask',
+      toggleCopilot: 'Toggle Copilot',
+    },
   },
 };

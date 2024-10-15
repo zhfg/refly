@@ -7,6 +7,7 @@ import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useEffect } from 'react';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
 
 export const useHandleContextWorkflow = () => {
   const noteStore = useNoteStore((state) => ({
@@ -21,6 +22,9 @@ export const useHandleContextWorkflow = () => {
     contextDomain: state.contextDomain,
     setContextDomain: state.setContextDomain,
   }));
+  const contentSelectorStore = useContentSelectorStore((state) => ({
+    setShowContentSelector: state.setShowContentSelector,
+  }));
   const runtime = getRuntime();
 
   // 设置 selected-mark 的监听器
@@ -34,18 +38,8 @@ export const useHandleContextWorkflow = () => {
 
     if (!showContentSelector) {
       handleStopContentSelectorListener();
-
-      // 将 note 切入只读模式
-      const { currentNote } = useNoteStore.getState();
-      noteStore.updateCurrentNote({ ...currentNote, readOnly: false });
-      message.info(runtime === 'web' ? t('copilot.contentSelector.closeForWeb') : t('copilot.contentSelector.close'));
     } else {
       handleInitContentSelectorListener();
-
-      // 将 note 切入只读模式
-      const { currentNote } = useNoteStore.getState();
-      noteStore.updateCurrentNote({ ...currentNote, readOnly: true });
-      message.info(runtime === 'web' ? t('copilot.contentSelector.openForWeb') : t('copilot.contentSelector.open'));
     }
   };
 
@@ -59,6 +53,7 @@ export const useHandleContextWorkflow = () => {
 
   const handlePassthroughOpenContentSelector = (enable = true) => {
     handleToggleContentSelectorPanel(enable);
+    contentSelectorStore.setShowContentSelector(enable);
     handleToggleContentSelector(enable);
   };
 

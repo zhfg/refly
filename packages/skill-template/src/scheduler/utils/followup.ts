@@ -1,6 +1,8 @@
 import { HumanMessage } from '@langchain/core/messages';
 import { ChatMessage } from '@langchain/core/messages';
 
+// 目前先简单给定一定的数量 N 以及总结每一轮对话，裁剪最近的 N 条对话（< M tokens），之后可以考虑更复杂的裁剪策略
+// TODO: 后续考虑更加复杂的策略
 export function followUpQueryPrompt(previousRounds: ChatMessage[][], currentUserInput: string) {
   const history = previousRounds
     .map((round) =>

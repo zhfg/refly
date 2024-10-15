@@ -34,7 +34,7 @@ import { getHierarchicalIndexes, TableOfContents } from '@tiptap-pro/extension-t
 // 图标
 import { AiOutlineWarning, AiOutlineFileWord, AiOutlineDisconnect } from 'react-icons/ai';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
-import { getWsServerOrigin } from '@refly-packages/utils/url';
+import { getClientOrigin, getWsServerOrigin } from '@refly-packages/utils/url';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 import { useNoteTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
@@ -82,9 +82,13 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
   }));
 
   // initial block selection
-  const { initMessageListener, initContentSelectorElem, addInlineMarkForNote } = useContentSelector(
+  const baseUrl = getClientOrigin();
+  const { initContentSelectorElem, addInlineMarkForNote } = useContentSelector(
     'ai-note-editor-content-container',
     'noteSelection',
+    {
+      url: `${baseUrl}/knowledge-base?noteId=${noteId}`,
+    },
   );
 
   const websocketProvider = useMemo(() => {
@@ -157,7 +161,7 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
     return () => {
       websocketProvider.forceSync();
       websocketProvider.destroy();
-      editorRef.current.destroy();
+      editorRef.current?.destroy();
     };
   }, []);
 
@@ -262,7 +266,7 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
             <CollabEditorCommand entityId={noteId} entityType="note" />
             <CollabGenAIMenuSwitch
               contentSelector={{
-                text: t('knowledgeBase.context.contentSelectorHoverText'),
+                text: t('knowledgeBase.context.addToContext'),
                 handleClick: handleContentSelectorClick,
               }}
             />

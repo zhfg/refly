@@ -1,4 +1,4 @@
-import { Resource, Source } from '@refly/openapi-schema';
+import { Note, Resource, Source } from '@refly/openapi-schema';
 import { safeParseURL } from '@refly/utils/url';
 import { List, Popover, Skeleton, Tag, Typography } from '@arco-design/web-react';
 import { useState } from 'react';
@@ -96,35 +96,56 @@ const ViewMoreItem = ({ sources = [], extraCnt = 0 }: { sources: Source[]; extra
   );
 };
 
-export const ResourceItem = (props: {
-  item: Partial<Resource>;
-  index: number;
-  showUtil?: boolean;
-  showDesc?: boolean;
-}) => {
+export const EntityItem = (props: { item: Source; index: number; showUtil?: boolean; showDesc?: boolean }) => {
   const { item, index, showDesc = false } = props;
-  const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
+  const { jumpToReadResource, jumpToNote } = useKnowledgeBaseJumpNewPath();
 
   return (
     <div className="knowledge-base-directory-item source-list-container" key={index}>
       <div className="knowledge-base-directory-site-intro">
         <div className="site-intro-icon">
           <img
-            src={`https://www.google.com/s2/favicons?domain=${safeParseURL(item?.data?.url as string)}&sz=${32}`}
-            alt={item?.data?.url}
+            src={`https://www.google.com/s2/favicons?domain=${safeParseURL(item?.url as string)}&sz=${32}`}
+            alt={item?.url}
           />
         </div>
         <div className="site-intro-content">
-          <p className="site-intro-site-name">{item.data?.title}</p>
-          <a className="site-intro-site-url" href={item.data?.url} target="_blank">
-            {item.data?.url}
+          <p className="site-intro-site-name">{item.title}</p>
+          <a className="site-intro-site-url" href={item.url} target="_blank">
+            {item.url}
           </a>
         </div>
       </div>
-      <div className="knowledge-base-directory-title">{item.data?.title}</div>
+      <div className="knowledge-base-directory-title">{item.title}</div>
+      <div className="knowledge-base-directory-action">
+        {item?.metadata?.entityId ? (
+          <div className="action-markdown-content knowledge-base-directory-action-item">
+            <IconBook
+              onClick={() => {
+                if (item?.metadata?.entityType === 'resource') {
+                  jumpToReadResource({
+                    resId: item?.metadata?.entityId,
+                  });
+                } else if (item?.metadata?.entityType === 'note') {
+                  jumpToNote({
+                    noteId: item?.metadata?.entityId,
+                  });
+                }
+              }}
+            />
+          </div>
+        ) : null}
+        <div className="action-external-origin-website knowledge-base-directory-action-item">
+          <IconCompass
+            onClick={() => {
+              window.open(item?.url, '_blank');
+            }}
+          />
+        </div>
+      </div>
       {showDesc ? (
         <div style={{ maxHeight: 300, overflowY: 'scroll', marginTop: 16 }}>
-          <Markdown content={item?.content || ''} />
+          <Markdown content={item?.pageContent || ''} />
         </div>
       ) : null}
     </div>
@@ -133,15 +154,7 @@ export const ResourceItem = (props: {
 
 const SourceDetailContent = (props: { source: Source; index: number }) => {
   const { source, index } = props;
-  const item: Partial<Resource> = {
-    // collectionId: source?.metadata?.collectionId,
-    resourceId: source?.metadata?.resourceId,
-    data: {
-      url: source?.url || '',
-      title: source?.title,
-    },
-    content: source?.pageContent || '',
-  };
+  const item = source;
 
   return (
     <Popover
@@ -152,7 +165,7 @@ const SourceDetailContent = (props: { source: Source; index: number }) => {
       position="bottom"
       content={<SourceDetailContent source={source} index={index} />}
     >
-      <ResourceItem index={index} item={item} showDesc />
+      <EntityItem index={index} item={item} showDesc />
     </Popover>
   );
 };

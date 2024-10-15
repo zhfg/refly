@@ -5,30 +5,30 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { z } from 'zod';
 // types
 import { SystemMessage } from '@langchain/core/messages';
-import { HumanMessage } from '@langchain/core/messages';
+import { HumanMessage, ChatMessage } from '@langchain/core/messages';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { ToolMessage } from '@langchain/core/messages';
-import { pick, safeParseJSON } from '@refly-packages/utils';
+import { pick, safeParseJSON, safeStringifyJSON } from '@refly-packages/utils';
 import { Icon, SkillInvocationConfig, SkillMeta, SkillTemplateConfigSchema } from '@refly-packages/openapi-schema';
 import { ToolCall } from '@langchain/core/dist/messages/tool';
 import { randomUUID } from 'node:crypto';
 import { createSkillInventory } from '../inventory';
-// tools
-import { ReflyDefaultResponse } from '../tools/default-response';
-
-interface GraphState extends BaseSkillState {
-  /**
-   * Accumulated messages.
-   */
-  messages: BaseMessage[];
-  /**
-   * Skill calls to run.
-   */
-  skillCalls: ToolCall[];
-  contextualUserQuery: string; // 基于上下文改写 userQuery
-}
-
+// types
+import { GraphState, QueryAnalysis, IContext } from './types';
+// utils
+import { prepareContext } from './utils/context';
+import { buildFinalRequestMessages } from './utils/prompt';
+import { analyzeQueryAndContext, preprocessQuery } from './utils/queryRewrite';
+import { truncateMessages } from './utils/truncator';
+import {
+  countContextTokens,
+  countMessagesTokens,
+  countToken,
+  ModelContextLimitMap,
+  checkHasContext,
+} from './utils/token';
+import { ChatMode } from './types';
 export class Scheduler extends BaseSkill {
   name = 'scheduler';
 
@@ -40,7 +40,57 @@ export class Scheduler extends BaseSkill {
   icon: Icon = { type: 'emoji', value: '🧙‍♂️' };
 
   configSchema: SkillTemplateConfigSchema = {
-    items: [],
+    items: [
+      {
+        key: 'enableWebSearch',
+        inputMode: 'radio',
+        labelDict: {
+          en: 'Web Search',
+          'zh-CN': '联网搜索',
+        },
+        descriptionDict: {
+          en: 'Enable web search',
+          'zh-CN': '启用联网搜索',
+        },
+        defaultValue: true,
+      },
+      {
+        key: 'chatMode',
+        inputMode: 'select',
+        labelDict: {
+          en: 'Chat Mode',
+          'zh-CN': '聊天模式',
+        },
+        descriptionDict: {
+          en: 'Select chat mode',
+          'zh-CN': '选择聊天模式',
+        },
+        defaultValue: 'normal',
+        options: [
+          {
+            value: 'normal',
+            labelDict: {
+              en: 'Normal',
+              'zh-CN': '直接提问',
+            },
+          },
+          {
+            value: 'noContext',
+            labelDict: {
+              en: 'No Context',
+              'zh-CN': '不带上下文提问',
+            },
+          },
+          {
+            value: 'wholeSpace',
+            labelDict: {
+              en: 'Whole Space',
+              'zh-CN': '在整个空间提问',
+            },
+          },
+        ],
+      },
+    ],
   };
 
   invocationConfig: SkillInvocationConfig = {};
@@ -267,191 +317,131 @@ Please generate the summary based on these requirements and offer suggestions fo
   };
 
   callScheduler = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
-    const { query, contextualUserQuery, messages = [] } = state;
+    /**
+     * 1. 基于聊天历史，当前意图识别结果，上下文，以及整体优化之后的 query，调用 scheduler 模型，得到一个最优的技能调用序列
+     * 2. 基于得到的技能调用序列，调用相应的技能
+     */
 
     this.configSnapshot ??= config;
     this.emitEvent({ event: 'start' }, this.configSnapshot);
+    this.emitEvent({ event: 'log', content: `Start to call scheduler...` }, this.configSnapshot);
 
-    const { locale = 'en', chatHistory = [], installedSkills, currentSkill, spanId } = this.configSnapshot.configurable;
-
-    let tools = this.skills;
-    if (installedSkills) {
-      const toolMap = new Map(tools.map((tool) => [tool.name, tool]));
-      tools = installedSkills.map((skill) => toolMap.get(skill.tplName)!).filter((tool) => tool);
-    }
-
-    tools = tools.filter((tool) => tool);
-    const boundModel = this.engine
-      .chatModel()
-      .bindTools([...tools, new ReflyDefaultResponse()], { parallel_tool_calls: false });
-
-    const criticalGuidelines = `## Critical Guidelines
-
-      ### 1. Minimum Tools Principle:
-          • Use as few tools as possible to solve the user's problem.
-          • Prioritize the most relevant tool when multiple options are available.
-          • If the user's needs are satisfied, conclude the task immediately.
-      
-      ### 2. Sequential Tool Invocation:
-          • Emphasize sequential invocation of tools—only call one tool at a time.
-          • Adhere to the "minimum viable principle" by using only what is necessary to achieve the desired outcome.
-          
-      ### 3. Task Completion:
-          • Use tool results solely to determine whether to continue or end the task.
-          • Do not disclose or output any tool execution details. If the task is complete, indicate completion without additional content.
-          • Assess whether the available tool can resolve the user's request. If the tool does not match the user's needs, invoke the **default_response** tool, or do not call any tool. Avoid invoking irrelevant tools. For example:
-            - If a user asks for a current event that requires browsing, but browsing is unavailable, respond using **default_response** instead of invoking unrelated tools.
-            - If a user's query involves an unfamiliar term that does not match any tool's capabilities, avoid tool invocation and provide a response based on common knowledge or the **default_response** tool.`;
-
-    const getSystemPrompt = (locale: string) => `## Role
-      You are an AI intelligent response engine built by Refly AI that specializes in selecting the most suitable tools from a variety of options based on user requirements.
-      
-      ## Skills
-      ### Skill 1: Analyzing User Intent
-      - Identify key phrases and words from the user's questions.
-      - Understand the user's requests based on these key elements.
-      
-      ### Skill 2: Optimizing Suitable Tools
-      - Select the most appropriate tool(s) from the tool library to address the user's needs.
-      - If there are multiple similar tools capable of addressing the user's issue, ask the user for additional clarification and return an optimized solution based on their response.
-      
-      ### Skill 3: Step-by-Step Problem Solving
-      - If the user's requirements need multiple tools to be processed step-by-step, optimize and construct the tools sequentially based on the intended needs.
-      - Ensure that only one tool is called at a time in the sequence, adhering to the "minimum viable principle."
-      
-      ### Skill 4: Direct Interaction
-      - If the tool library cannot address the issues, rely on your internal common knowledge to interact and communicate directly with the user.
-      
-      ## Constraints
-      - Some tools may have concise or vague descriptions; detailed reasoning and careful selection of the most suitable tool based on user needs are required.
-      - Only address and guide the creation or optimization of relevant issues; do not respond to unrelated user questions.
-      - Assess the suitability of available tools before invocation. If a tool is not suitable, invoke the **default_response** tool or no tool at all. Avoid invoking irrelevant tools.
-      - Always respond in the locale **${locale}** language.
-      - Provide the optimized guidance immediately in your response without needing to explain or report it separately.
-      
-      ${criticalGuidelines}
-      `;
-
-    const responseMessage = await boundModel.invoke(
-      [
-        new SystemMessage(getSystemPrompt(locale)),
-        ...chatHistory,
-        ...messages,
-        new HumanMessage(`The user's intent is ${contextualUserQuery || query} \n\n ${criticalGuidelines}`),
-      ],
-      {
-        ...this.configSnapshot,
-        metadata: {
-          ...this.configSnapshot.metadata,
-          ...currentSkill,
-          spanId,
-        },
-      },
-    );
-    const { tool_calls: skillCalls } = responseMessage;
-
-    // hanlde default response
-    const hasAnyToolCall = messages.find((message) => (message as ToolMessage)?._getType() === 'tool');
-
-    if (skillCalls.length > 0) {
-      const skillCall = skillCalls[0];
-      if (!hasAnyToolCall && skillCall.name === 'default_response') {
-        return await this.commonSenseGenerate(state, config, false);
-      }
-
-      this.emitEvent(
-        {
-          event: 'log',
-          content: `Decide to call skills: ${skillCalls.map((call) => call.name).join(', ')}`,
-        },
-        this.configSnapshot,
-      );
-      this.emitEvent({ event: 'end' }, this.configSnapshot);
-
-      // Regenerate new spanId for the next scheduler call.
-      this.configSnapshot.configurable.spanId = randomUUID();
-    } else {
-      if (messages?.length === 0 || !hasAnyToolCall) {
-        return await this.commonSenseGenerate(state, config, false);
-      }
-    }
-
-    return { messages: [responseMessage], skillCalls };
-  };
-
-  commonSenseGenerate = async (
-    state: GraphState,
-    config: SkillRunnableConfig,
-    callByGraph = true,
-  ): Promise<Partial<GraphState>> => {
-    const { messages = [], query, contextualUserQuery } = state;
-
-    this.configSnapshot ??= config;
-
-    // default by langgraph engine call, but can be called as function
-    if (callByGraph) {
-      this.emitEvent({ event: 'start' }, this.configSnapshot);
-    }
-
+    const { messages = [], query: originalQuery } = state;
     const {
-      contentList = [],
       locale = 'en',
       chatHistory = [],
+      installedSkills,
       currentSkill,
       spanId,
-    } = this.configSnapshot.configurable; // scheduler only handle contentList when no skill could
+      modelName,
+      resources,
+      notes,
+      contentList,
+      collections,
+    } = this.configSnapshot.configurable;
 
-    // without any skill, scheduler can handle contentList for common knowledge q & a
-    const getSystemPrompt = (locale: string) => `- Role: Knowledge Management Assistant
-- Background: Users require an intelligent assistant capable of understanding queries and context information, even when the context is absent, to provide answers in the language of the query while maintaining the language of professional terms.
-- Profile: You are an AI developed by Refly AI, specializing in knowledge management, adept at reading, writing, and integrating knowledge, and skilled in providing responses in the language of the user's query.
-- Skills: You possess capabilities in text parsing, information extraction, knowledge association, intelligent Q&A, and the ability to generate context from a query when necessary.
-- Goals: Provide accurate, relevant, and helpful answers based on the user's query and available context information, ensuring that the language of the response matches the query and that professional terms are maintained in their original language.
-- Constrains:
-  1. Always respond in the language of the user's query, the user's locale is ${locale}.
-  2. Maintain professional terms in their original language within the response.
-  3. Ensure the response is clear and understandable, even with the inclusion of professional terms.
-- OutputFormat: Clear, accurate, and helpful text responses in the query's language, with professional terms in their original language.
-- Workflow:
-  1. Receive the user's query and any provided context information.
-  2. Analyze the query and context information, or generate context if necessary, to extract key points.
-  3. Generate accurate and relevant answers, ensuring the response language matches the query and professional terms are in their original language.
-- Examples:
-  - Example 1: Query: "What is artificial intelligence?" Context: ["Artificial intelligence is a technology that simulates human intelligence", "Artificial intelligence can perform a variety of tasks"]
-    Answer: "Artificial intelligence is a technology that simulates human intelligence and can perform a variety of tasks, such as recognizing language and solving problems."
-  - Example 2: Query: "How to improve work efficiency?" Context: ["Using tools can improve work efficiency", "Proper time planning is also important"]
-    Answer: "Improving work efficiency can be achieved by using appropriate tools and proper time planning."
-  - Example 3: Query: "Define sustainability" Context: []
-    Answer: "Sustainability refers to the ability to maintain a certain process or state without depleting resources or causing long-term harm to the environment, economy, or society."
-- Initialization: In the first conversation, please directly output the following: Hello, I am your Knowledge Management Assistant. I can help you answer queries and provide answers based on context information, even if the context is not provided. My responses will always be in the language of your query, and I will maintain the original language of professional terms. Please tell me your query and any relevant context information you have.
-  `;
-    const getUserPrompt = (query: string, contentList: string[]) => {
-      return `Query: ${contextualUserQuery || query} \n\n Context: [${contentList.filter((item) => item).join(', ')}]`;
-    };
+    const { tplConfig } = config?.configurable || {};
+    const chatMode = tplConfig?.chatMode?.value as ChatMode;
 
-    const model = this.engine.chatModel({ temperature: 0.5 });
+    this.engine.logger.log(`config: ${safeStringifyJSON(this.configSnapshot.configurable)}`);
 
-    const responseMessage = await model.invoke(
-      [
-        new SystemMessage(getSystemPrompt(locale)),
-        ...chatHistory,
-        ...messages,
-        new HumanMessage(
-          getUserPrompt(
-            query,
-            contentList.map((item) => item.content),
-          ),
-        ),
-      ],
-      {
-        ...this.configSnapshot,
-        metadata: {
-          ...this.configSnapshot.metadata,
-          ...currentSkill,
-          spanId,
-        },
-      },
+    let optimizedQuery = '';
+    let mentionedContext: IContext;
+    let context: string = '';
+
+    // preprocess query, ensure query is not too long
+    const query = preprocessQuery(originalQuery, {
+      configSnapshot: this.configSnapshot,
+      ctxThis: this,
+      state: state,
+      tplConfig,
+    });
+    this.engine.logger.log(`preprocess query: ${query}`);
+
+    // preprocess chat history, ensure chat history is not too long
+    const usedChatHistory = truncateMessages(chatHistory);
+
+    // check if there is any context
+    const hasContext = checkHasContext({
+      contentList,
+      resources,
+      notes,
+      collections,
+    });
+    this.engine.logger.log(`checkHasContext: ${hasContext}`);
+
+    const maxTokens = ModelContextLimitMap[modelName];
+    const queryTokens = countToken(query);
+    const chatHistoryTokens = countMessagesTokens(usedChatHistory);
+    const remainingTokens = maxTokens - queryTokens - chatHistoryTokens;
+    this.engine.logger.log(
+      `maxTokens: ${maxTokens}, queryTokens: ${queryTokens}, chatHistoryTokens: ${chatHistoryTokens}, remainingTokens: ${remainingTokens}`,
     );
+
+    const needRewriteQuery = chatMode !== ChatMode.NO_CONTEXT_CHAT && (hasContext || chatHistoryTokens > 0);
+    const needPrepareContext = chatMode !== ChatMode.NO_CONTEXT_CHAT && hasContext && remainingTokens > 0;
+    this.engine.logger.log(`needRewriteQuery: ${needRewriteQuery}, needPrepareContext: ${needPrepareContext}`);
+
+    if (needRewriteQuery) {
+      const analyedRes = await analyzeQueryAndContext(query, {
+        configSnapshot: this.configSnapshot,
+        ctxThis: this,
+        state: state,
+        tplConfig,
+      });
+      optimizedQuery = analyedRes.optimizedQuery;
+      mentionedContext = analyedRes.mentionedContext;
+    }
+
+    this.engine.logger.log(`optimizedQuery: ${optimizedQuery}`);
+    this.engine.logger.log(`mentionedContext: ${safeStringifyJSON(mentionedContext)}`);
+
+    if (needPrepareContext) {
+      context = await prepareContext(
+        {
+          query: optimizedQuery,
+          mentionedContext,
+          maxTokens: remainingTokens,
+        },
+        {
+          configSnapshot: this.configSnapshot,
+          ctxThis: this,
+          state: state,
+          tplConfig,
+        },
+      );
+    }
+
+    this.engine.logger.log(`context: ${safeStringifyJSON(context)}`);
+
+    this.emitEvent({ event: 'log', content: `Start to generate an answer...` }, this.configSnapshot);
+    const model = this.engine.chatModel({ temperature: 0.1 });
+
+    const requestMessages = buildFinalRequestMessages({
+      locale,
+      chatHistory: usedChatHistory,
+      messages,
+      needPrepareContext,
+      context,
+      originalQuery: query,
+      rewrittenQuery: optimizedQuery,
+    });
+
+    this.engine.logger.log(`requestMessages: ${safeStringifyJSON(requestMessages)}`);
+
+    const responseMessage = await model.invoke(requestMessages, {
+      ...this.configSnapshot,
+      metadata: {
+        ...this.configSnapshot.metadata,
+        ...currentSkill,
+        spanId,
+      },
+    });
+
+    this.engine.logger.log(`responseMessage: ${safeStringifyJSON(responseMessage)}`);
+
+    this.emitEvent({ event: 'log', content: `Generated an answer successfully!` }, this.configSnapshot);
+    this.emitEvent({ event: 'end' }, this.configSnapshot);
 
     return { messages: [responseMessage], skillCalls: [] };
   };
@@ -549,18 +539,11 @@ Generated question example:
     return {};
   };
 
-  shouldDirectCallSkill = (
-    state: GraphState,
-    config: SkillRunnableConfig,
-  ): 'direct' | 'scheduler' | 'commonSenseGenerate' => {
+  shouldDirectCallSkill = (state: GraphState, config: SkillRunnableConfig): 'direct' | 'scheduler' => {
     const { selectedSkill, installedSkills = [] } = config.configurable || {};
 
     if (!selectedSkill) {
-      if (installedSkills?.length > 0) {
-        return 'scheduler';
-      } else {
-        return 'commonSenseGenerate';
-      }
+      return 'scheduler';
     }
 
     if (!this.isValidSkillName(selectedSkill.tplName)) {
@@ -578,12 +561,12 @@ Generated question example:
   };
 
   shouldCallSkill = (state: GraphState, config: SkillRunnableConfig): 'skill' | 'relatedQuestions' | typeof END => {
-    const { skillCalls = [] } = state;
+    // const { skillCalls = [] } = state;
     const { convId } = this.configSnapshot?.configurable ?? config.configurable;
 
-    if (skillCalls.length > 0) {
-      return 'skill';
-    }
+    // if (skillCalls.length > 0) {
+    //   return 'skill';
+    // }
 
     // If there is no skill call, then jump to relatedQuestions node
     return convId ? 'relatedQuestions' : END;
@@ -614,15 +597,11 @@ Generated question example:
     })
       .addNode('direct', this.directCallSkill)
       .addNode('scheduler', this.callScheduler)
-      .addNode('commonSenseGenerate', this.commonSenseGenerate)
-      .addNode('skill', this.callSkill)
       .addNode('relatedQuestions', this.genRelatedQuestions);
 
     workflow.addConditionalEdges(START, this.shouldDirectCallSkill);
     workflow.addConditionalEdges('direct', this.onDirectSkillCallFinish);
-    workflow.addConditionalEdges('commonSenseGenerate', this.onDirectSkillCallFinish);
     workflow.addConditionalEdges('scheduler', this.shouldCallSkill);
-    workflow.addConditionalEdges('skill', this.onSkillCallFinish);
     workflow.addEdge('relatedQuestions', END);
 
     return workflow.compile();

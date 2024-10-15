@@ -11,7 +11,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 
 import { Resource } from '@refly/openapi-schema';
 import { memo, useEffect, useState } from 'react';
-import { safeParseURL } from '@refly/utils/url';
+import { getClientOrigin, safeParseURL } from '@refly/utils/url';
 import { LabelGroup } from '@refly-packages/ai-workspace-common/components/knowledge-base/label-group';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
@@ -59,9 +59,13 @@ export const KnowledgeBaseResourceDetail = memo(() => {
     scope: state.scope,
   }));
 
+  const baseUrl = getClientOrigin();
   const { initMessageListener, initContentSelectorElem } = useContentSelector(
     'knowledge-base-resource-content',
     'resourceSelection',
+    {
+      url: `${baseUrl}/knowledge-base?resId=${resId}`,
+    },
   );
 
   const reloadKnowledgeBaseState = useReloadListState();
@@ -155,13 +159,15 @@ export const KnowledgeBaseResourceDetail = memo(() => {
 
   // 初始化块选择
   useEffect(() => {
+    if (isFetching) {
+      return;
+    }
     const remove = initMessageListener();
     handleInitContentSelectorListener();
-
     return () => {
       remove();
     };
-  }, [resId]);
+  }, [resId, isFetching]);
 
   useEffect(() => {
     setResourceDetail(knowledgeBaseStore?.currentResource as Resource);
@@ -248,7 +254,7 @@ export const KnowledgeBaseResourceDetail = memo(() => {
                   </a>
                 </div>
               </div>
-              {resourceDetail && <LabelGroup entityId={resourceDetail.resourceId} entityType={'resource'} />}
+              {/* {resourceDetail && <LabelGroup entityId={resourceDetail.resourceId} entityType={'resource'} />} */}
             </div>
           )}
           {isFetching ? (

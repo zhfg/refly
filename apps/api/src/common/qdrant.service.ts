@@ -45,7 +45,7 @@ export class QdrantService implements OnModuleInit {
     if (!exists) {
       const res = await this.client.createCollection(this.collectionName, {
         vectors: {
-          size: this.configService.getOrThrow<number>('vectorStore.vectorDim'),
+          size: this.configService.getOrThrow<number>('embeddings.dimensions'),
           distance: 'Cosine',
           on_disk: true,
         },

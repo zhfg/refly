@@ -34,7 +34,7 @@ export const ResetContentSelectorBtn = () => {
   const { handleReset } = useSelectedMark();
 
   return (
-    <Tooltip content={t('knowledgeBase.context.clearSelector')} getPopupContainer={getPopupContainer}>
+    <Tooltip content={t('knowledgeBase.context.clearContext')} getPopupContainer={getPopupContainer}>
       <Button
         size="mini"
         type="outline"

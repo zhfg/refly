@@ -5,6 +5,8 @@ import { useShallow } from 'zustand/react/shallow';
 import type { ClientChatMessage, SessionItem } from '@refly/common-types';
 import { ModelInfo, SkillContext, SkillTemplateConfig } from '@refly/openapi-schema';
 
+export type ChatMode = 'normal' | 'noContext' | 'wholeSpace';
+
 export interface ChatState {
   // state
   messages: ClientChatMessage[];
@@ -17,7 +19,10 @@ export interface ChatState {
   // modelName?: string;
   modelList: ModelInfo[];
   selectedModel: ModelInfo;
+  enableWebSearch: boolean;
+  chatMode: ChatMode;
 
+  // method
   // method
   setMessages: (val: ClientChatMessage[]) => void;
   setIsGenTitle: (val: boolean) => void;
@@ -25,10 +30,12 @@ export interface ChatState {
   setInvokeParams: (val: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig }) => void;
   setSelectedModel: (val: ModelInfo) => void;
   setModelList: (val: ModelInfo[]) => void;
+  setEnableWebSearch: (val: boolean) => void;
+  setChatMode: (val: ChatMode) => void;
   resetState: () => void;
 }
 
-const defaultModelState = {
+const defaultConfigurableState = {
   selectedModel: {
     label: 'GPT-4o Mini',
     name: 'openai/gpt-4o-mini',
@@ -43,6 +50,8 @@ const defaultModelState = {
       tier: 't2',
     },
   ] as ModelInfo[],
+  enableWebSearch: false,
+  chatMode: 'normal' as ChatMode,
 };
 
 export const defaultExtraState = {
@@ -55,7 +64,7 @@ export const defaultExtraState = {
 };
 
 export const defaultState = {
-  ...defaultModelState,
+  ...defaultConfigurableState,
   ...defaultExtraState,
 };
 
@@ -73,6 +82,8 @@ export const useChatStore = create<ChatState>()(
       set({ invokeParams: val }),
     setSelectedModel: (val: ModelInfo) => set({ selectedModel: val }),
     setModelList: (val: ModelInfo[]) => set({ modelList: val }),
+    setEnableWebSearch: (val: boolean) => set({ enableWebSearch: val }),
+    setChatMode: (val: ChatMode) => set({ chatMode: val }),
     resetState: () => {
       console.log('trigger resetState');
       return set((state) => ({ ...state, ...defaultExtraState }));

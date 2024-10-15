@@ -1,5 +1,6 @@
 import { SkillRunnableConfig } from '../base';
 import { ChatOpenAI, OpenAIChatInput } from '@langchain/openai';
+import { Document, DocumentInterface } from '@langchain/core/documents';
 import {
   CreateCollectionResponse,
   CreateLabelClassRequest,
@@ -20,10 +21,32 @@ import {
   CreateNoteResponse,
   ListNotesData,
   ListNotesResponse,
+  ResourceType,
+  InMemoryIndexContentResponse,
+  InMemorySearchResponse,
   SearchOptions,
   WebSearchRequest,
   WebSearchResponse,
 } from '@refly-packages/openapi-schema';
+
+// TODO: unify with frontend
+export type ContentNodeType =
+  | 'resource'
+  | 'note'
+  | 'extensionWeblink'
+  | 'resourceSelection'
+  | 'collectionSelection'
+  | 'noteSelection';
+
+export interface NodeMeta {
+  title: string;
+  nodeType: ContentNodeType;
+  url?: string;
+  noteId?: string;
+  resourceId?: string;
+  resourceType?: ResourceType;
+  [key: string]: any; // any other fields
+}
 
 export interface ReflyService {
   getNoteDetail: (user: User, noteId: string) => Promise<GetNoteDetailResponse>;
@@ -38,6 +61,17 @@ export interface ReflyService {
   createLabelInstance: (user: User, req: CreateLabelInstanceRequest) => Promise<CreateLabelInstanceResponse>;
   webSearch: (user: User, req: WebSearchRequest) => Promise<WebSearchResponse>;
   search: (user: User, req: SearchRequest, options?: SearchOptions) => Promise<SearchResponse>;
+  inMemorySearchWithIndexing: (
+    user: User,
+    options: {
+      content: string | Document<any> | Array<Document<any>>;
+      query?: string;
+      k?: number;
+      filter?: (doc: Document<NodeMeta>) => boolean;
+      needChunk?: boolean;
+      additionalMetadata?: Record<string, any>;
+    },
+  ) => Promise<InMemorySearchResponse>;
 }
 
 export interface SkillEngineOptions {

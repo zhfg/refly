@@ -34,6 +34,12 @@ export const getReadabilityHtml = (node: Document | HTMLElement | DocumentFragme
   }
 };
 
+export const getReadabilityMarkdown = (element: Document | HTMLElement | DocumentFragment) => {
+  const html = getReadabilityHtml(element);
+  const md = convertHTMLToMarkdown('render', html);
+  return md;
+};
+
 export const getMarkdown = (element: Document | HTMLElement | DocumentFragment) => {
   const div = document.createElement('div');
   div.appendChild(element.cloneNode(true));

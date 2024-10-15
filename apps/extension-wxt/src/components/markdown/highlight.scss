@@ -25,10 +25,6 @@
       opacity: 0;
       transition: all ease 0.3s;
 
-      &:after {
-        content: "复制";
-      }
-
       &:hover {
         opacity: 1;
       }
@@ -37,7 +33,7 @@
 
   pre,
   code {
-    font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
   }
 
   pre code {

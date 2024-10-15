@@ -3,6 +3,7 @@ import { Button } from '@arco-design/web-react';
 import { IconClose, IconDelete, IconLink } from '@arco-design/web-react/icon';
 import { Mark } from '@refly/common-types';
 import { useTranslation } from 'react-i18next';
+import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 
 export const ContextPreview = ({
   item,
@@ -45,7 +46,7 @@ export const ContextPreview = ({
         </div>
       </div>
       <div className="preview-content">
-        <p>{item?.data || ''}</p>
+        <Markdown content={item?.data || ''} />
       </div>
     </div>
   );

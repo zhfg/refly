@@ -211,11 +211,11 @@
       "defaultTitle": "未命名"
     },
     "context": {
-      "contentSelectorHoverText": "添加至上下文",
       "contentSelectorAddSuccess": "添加成功",
       "contentSelectorIsEmpty": "请选择文本",
       "contentSelector": "内容划线选择器",
-      "clearSelector": "清空选择内容及划线",
+      "clearContext": "清空上下文",
+      "addToContext": "添加到聊天",
       "resource": "资源",
       "resources": "资源",
       "note": "笔记",
@@ -990,6 +990,17 @@
       "title": "技能配置",
       "errorTipTitle": "发送失败",
       "errorTip": "请调整技能配置后再重试"
+    },
+    "chatMode": {
+      "title": "聊天模式",
+      "normal": "直接提问",
+      "noContext": "不带上下文提问",
+      "wholeSpace": "在整个空间提问"
+    },
+    "webSearch": {
+      "title": "联网搜索",
+      "enable": "启用",
+      "disable": "禁用"
     },
     "tokenUsage": "输入 {{inputCount}}，输出 {{outputCount}}",
     "reflyAssistant": "知识管家",

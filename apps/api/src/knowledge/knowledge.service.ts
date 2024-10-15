@@ -208,8 +208,11 @@ export class KnowledgeService {
       return null;
     }
 
-    const contentStream = await this.minio.client.getObject(resource.storageKey);
-    const content = await streamToString(contentStream);
+    let content: string;
+    if (resource.storageKey) {
+      const contentStream = await this.minio.client.getObject(resource.storageKey);
+      content = await streamToString(contentStream);
+    }
 
     return { ...resource, content };
   }
@@ -230,6 +233,7 @@ export class KnowledgeService {
 
     let storageKey: string;
     let storageSize: number = 0;
+    let indexStatus: IndexStatus = 'wait_parse';
 
     if (param.resourceType === 'weblink') {
       if (!param.data) {
@@ -244,17 +248,21 @@ export class KnowledgeService {
       if (!param.content) {
         throw new BadRequestException('content is required for text resource');
       }
-
-      // save text content to object storage
-      storageKey = `resources/${param.resourceId}.txt`;
-      await this.minio.client.putObject(storageKey, param.content);
-      storageSize = (await this.minio.client.statObject(storageKey)).size;
     } else {
       throw new BadRequestException('Invalid resource type');
     }
 
     const cleanedContent = param.content?.replace(/x00/g, '') ?? '';
-    const indexStatus: IndexStatus = param.content ? 'wait_index' : 'wait_parse';
+
+    if (cleanedContent) {
+      // save text content to object storage
+      storageKey = `resources/${param.resourceId}.txt`;
+      await this.minio.client.putObject(storageKey, cleanedContent);
+      storageSize = (await this.minio.client.statObject(storageKey)).size;
+
+      // skip parse stage, since content is provided
+      indexStatus = 'wait_index';
+    }
 
     const resource = await this.prisma.resource.create({
       data: {
@@ -467,6 +475,11 @@ export class KnowledgeService {
       updates.meta = JSON.stringify(param.data);
     }
 
+    if (!resource.storageKey) {
+      resource.storageKey = `resources/${resource.resourceId}.txt`;
+      updates.storageKey = resource.storageKey;
+    }
+
     if (param.content) {
       await this.minio.client.putObject(resource.storageKey, param.content);
       updates.storageSize = (await this.minio.client.statObject(resource.storageKey)).size;
@@ -549,12 +562,11 @@ export class KnowledgeService {
       throw new BadRequestException('Note not found');
     }
 
-    if (!note.storageKey) {
-      return note;
+    let content: string;
+    if (note.storageKey) {
+      const contentStream = await this.minio.client.getObject(note.storageKey);
+      content = await streamToString(contentStream);
     }
-
-    const contentStream = await this.minio.client.getObject(note.storageKey);
-    const content = await streamToString(contentStream);
 
     return { ...note, content };
   }

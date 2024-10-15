@@ -168,6 +168,11 @@ export class SubscriptionService implements OnModuleInit {
         where: { planType: sub.planType },
       });
 
+      const endAt =
+        sub.planType === 'free'
+          ? null // one-time
+          : new Date(now.getFullYear(), now.getMonth() + 1, now.getDate());
+
       // Create a new token usage meter for this plan
       await prisma.tokenUsageMeter.create({
         data: {
@@ -175,7 +180,7 @@ export class SubscriptionService implements OnModuleInit {
           uid,
           subscriptionId: sub.subscriptionId,
           startAt: startOfDay(now),
-          endAt: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate()),
+          endAt,
           t1TokenQuota: usageQuota?.t1TokenQuota || this.config.get('quota.token.t1'),
           t1TokenUsed: 0,
           t2TokenQuota: usageQuota?.t2TokenQuota || this.config.get('quota.token.t2'),
@@ -231,11 +236,7 @@ export class SubscriptionService implements OnModuleInit {
 
       const now = new Date();
 
-      const freeQuota = await prisma.subscriptionUsageQuota.findUnique({
-        where: { planType: 'free' },
-      });
-
-      // Mark the token usage meter as deleted
+      // Mark the token usage meter related to this subscription as deleted
       await prisma.tokenUsageMeter.updateMany({
         where: {
           uid: sub.uid,
@@ -247,19 +248,8 @@ export class SubscriptionService implements OnModuleInit {
         data: { deletedAt: now },
       });
 
-      // Create a new token usage meter for the free plan
-      await prisma.tokenUsageMeter.create({
-        data: {
-          meterId: genTokenUsageMeterID(),
-          uid: sub.uid,
-          subscriptionId: null,
-          startAt: startOfDay(now),
-          endAt: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate()),
-          t1TokenQuota: freeQuota?.t1TokenQuota || this.config.get('quota.token.t1'),
-          t1TokenUsed: 0,
-          t2TokenQuota: freeQuota?.t2TokenQuota || this.config.get('quota.token.t2'),
-          t2TokenUsed: 0,
-        },
+      const freeQuota = await prisma.subscriptionUsageQuota.findUnique({
+        where: { planType: 'free' },
       });
 
       // Update storage usage meter
@@ -563,6 +553,11 @@ export class SubscriptionService implements OnModuleInit {
 
   async syncTokenUsage(data: SyncTokenUsageJobData) {
     const { uid, usage, skill, timestamp } = data;
+    const user = await this.prisma.user.findUnique({ where: { uid } });
+    if (!user) {
+      this.logger.warn(`No user found for uid ${uid}`);
+      return;
+    }
 
     await this.prisma.$transaction([
       this.prisma.tokenUsage.create({
@@ -578,7 +573,8 @@ export class SubscriptionService implements OnModuleInit {
         where: {
           uid,
           startAt: { lte: timestamp },
-          endAt: { gte: timestamp },
+          OR: [{ endAt: null }, { endAt: { gte: timestamp } }],
+          subscriptionId: user.subscriptionId,
           deletedAt: null,
         },
         data: {

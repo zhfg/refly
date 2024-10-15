@@ -1,14 +1,14 @@
 {
   "name": {
-    "message": "Refly - AI Work Assistant and Personal Knowledge Search Engine",
+    "message": "Refly: Your All-in-One AI Writing IDE",
     "description": "Name of the extension."
   },
   "description": {
-    "message": "Quick summaries, Insights, Auto tag and AI Search. Refly can build your second brain, extend knowledge and give you superpower",
+    "message": "Merge ChatGPT Canvas and Cursor in one Writing IDE. Master the entire writing process—ideation to publishing—in a unified workspace.",
     "description": "Description of the extension."
   },
   "displayName": {
-    "message": "Refly - AI Work Assistant and Personal Knowledge Search Engine",
+    "message": "Refly: Your All-in-One AI Writing IDE",
     "description": "Display name of the extension."
   }
 }

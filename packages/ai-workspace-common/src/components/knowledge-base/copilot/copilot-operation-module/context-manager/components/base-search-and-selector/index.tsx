@@ -263,7 +263,11 @@ export const BaseSearchAndSelector = ({
           }}
         />
       </div>
-      <Spin loading={loading} style={{ width: '100%', height: '100%' }}>
+      <Spin
+        loading={loading}
+        style={{ width: '100%', height: 'calc(100% - 56px)' }}
+        className="context-search-list-container"
+      >
         <Command.List>
           <Command.Empty>No results found.</Command.Empty>
           <Home
