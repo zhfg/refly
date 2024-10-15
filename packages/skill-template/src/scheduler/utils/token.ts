@@ -61,7 +61,8 @@ export const checkHasContext = (mentionedContext: IContext) => {
   return (
     mentionedContext?.contentList?.length > 0 ||
     mentionedContext?.resources?.length > 0 ||
-    mentionedContext?.notes?.length > 0
+    mentionedContext?.notes?.length > 0 ||
+    mentionedContext?.collections?.length > 0
   );
 };
 
