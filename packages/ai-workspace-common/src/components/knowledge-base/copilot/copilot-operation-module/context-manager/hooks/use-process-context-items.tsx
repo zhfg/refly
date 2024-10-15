@@ -110,6 +110,7 @@ export const useProcessContextItems = () => {
     return Array.from(uniqueMarks.values());
   })();
 
+  // TODO: use-build-skill-context need to be refactored and deduplicated
   const getcontextItemTypes = () => {
     const types: Record<string, number> = {
       resource: 0,
