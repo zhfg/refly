@@ -28,7 +28,7 @@ const HoverMenu: React.FC<HoverMenuProps> = ({ onClick, onMouseEnter, onMouseLea
       }}
     >
       <Button type="text" onClick={onClick} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} size="mini">
-        {t('knowledgeBase.context.addToContext')}
+        <span className="font-medium">{t('knowledgeBase.context.addToContext')}</span>
       </Button>
     </div>
   );

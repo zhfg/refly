@@ -24,6 +24,8 @@ import { useContentSelectorStoreShallow } from '@refly-packages/ai-workspace-com
 import ResourceCollectionList from '@refly-packages/ai-workspace-common/components/knowledge-base/resource-detail/resource-collection-list';
 import { useTranslation } from 'react-i18next';
 
+import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
+
 export const KnowledgeBaseResourceDetail = memo(() => {
   const { t } = useTranslation();
   const [isFetching, setIsFetching] = useState(false);
@@ -153,14 +155,19 @@ export const KnowledgeBaseResourceDetail = memo(() => {
     }
   }, [kbId]);
 
+  const { handleInitContentSelectorListener } = useSelectedMark();
+
   // 初始化块选择
   useEffect(() => {
+    if (isFetching) {
+      return;
+    }
     const remove = initMessageListener();
-
+    handleInitContentSelectorListener();
     return () => {
       remove();
     };
-  }, [resId]);
+  }, [resId, isFetching]);
 
   useEffect(() => {
     setResourceDetail(knowledgeBaseStore?.currentResource as Resource);

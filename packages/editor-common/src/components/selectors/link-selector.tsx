@@ -5,6 +5,7 @@ import { Popover, PopoverTrigger } from '@radix-ui/react-popover';
 import { Check, Trash } from 'lucide-react';
 import { useEditor } from '@refly-packages/editor-core/components';
 import { useEffect, useRef } from 'react';
+import { Link as LucideLink } from 'lucide-react';
 
 export function isValidUrl(url: string) {
   try {
@@ -43,14 +44,7 @@ export const LinkSelector = ({ open, onOpenChange }: LinkSelectorProps) => {
     <Popover modal={true} open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
         <Button size="sm" variant="ghost" className="gap-2 rounded-none border-none">
-          <p className="text-base">↗</p>
-          <p
-            className={cn('underline decoration-stone-400 underline-offset-4', {
-              'text-blue-500': editor.isActive('link'),
-            })}
-          >
-            Link
-          </p>
+          <LucideLink className="h-3 w-3 font-medium" />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-60 p-0" sideOffset={10}>

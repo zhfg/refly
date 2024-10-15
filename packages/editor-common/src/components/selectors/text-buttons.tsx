@@ -1,8 +1,14 @@
 import { Button } from '../ui/button';
 import { cn } from '../utils';
-import { BoldIcon, CodeIcon, ItalicIcon, StrikethroughIcon, UnderlineIcon } from 'lucide-react';
+import { BoldIcon, CodeIcon, ItalicIcon, StrikethroughIcon, UnderlineIcon, type LucideIcon } from 'lucide-react';
 import { EditorBubbleItem, useEditor } from '@refly-packages/editor-core/components';
-import type { SelectorItem } from './node-selector';
+
+type SelectorItem = {
+  name: string;
+  icon: LucideIcon;
+  command: (editor: ReturnType<typeof useEditor>['editor']) => void;
+  isActive: (editor: ReturnType<typeof useEditor>['editor']) => boolean;
+};
 
 export const TextButtons = () => {
   const { editor } = useEditor();
@@ -50,7 +56,7 @@ export const TextButtons = () => {
         >
           <Button size="sm" className="rounded-none" variant="ghost">
             <item.icon
-              className={cn('h-4 w-4', {
+              className={cn('h-3.5 w-3.5', {
                 'text-blue-500': item.isActive(editor),
               })}
             />

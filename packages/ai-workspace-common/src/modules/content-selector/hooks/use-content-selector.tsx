@@ -1,6 +1,7 @@
 import classNames from 'classnames';
 import { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
+import { Message } from '@arco-design/web-react';
 import type {
   Mark,
   TextType,
@@ -25,6 +26,7 @@ import { highlightSelection, getSelectionNodesMarkdown } from '../utils/highligh
 import { ElementType } from '../utils';
 import HoverMenu from '@refly-packages/ai-workspace-common/modules/content-selector/components/hover-menu';
 import { getPopupContainer } from '../utils/get-popup-container';
+import { t } from 'i18next';
 
 export const getContainerElem = (selector: string | null) => {
   const container = getPopupContainer();
@@ -86,6 +88,7 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
     // 使用React渲染hover菜单
     const renderMenu = () => {
       clearTimeout(hideTimeout);
+
       if (rect) {
         menuContainer.style.top = `${rect.top - 30}px`;
         menuContainer.style.left = `${rect.left + rect.width / 2}px`;
@@ -183,12 +186,48 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
     return cleanup;
   };
 
+  const addInlineMarkForNote = () => {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+
+    // check selected text
+    const selectedText = selection.toString().trim();
+    if (selectedText.length === 0) {
+      // if selected text is empty, do not show hover menu
+      Message.warning(t('knowledgeBase.context.contentSelectorIsEmpty'));
+      return;
+    }
+
+    const xPath = genContentSelectorID();
+    const content = getSelectionNodesMarkdown();
+    const textType = 'text' as ElementType;
+    const mark = buildMark(textType, content, xPath);
+    const markEvent = { type: 'add' as SyncMarkEventType, mark };
+    const msg: Partial<SyncMarkEvent> = {
+      body: markEvent,
+    };
+
+    syncMarkEvent(msg);
+    Message.success(t('knowledgeBase.context.contentSelectorAddSuccess'));
+  };
+
   const addInlineMark = () => {
     const selection = window.getSelection();
     if (!selection.rangeCount) return;
 
     const range = selection.getRangeAt(0);
     const rect = range.getBoundingClientRect();
+
+    // check selected text
+    const selectedText = selection.toString().trim();
+    if (selectedText.length === 0) {
+      // if selected text is empty, do not show hover menu
+      Message.warning(t('knowledgeBase.context.contentSelectorIsEmpty'));
+      return;
+    }
 
     const confirmAddMark = () => {
       const xPath = genContentSelectorID();
@@ -197,7 +236,6 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
 
       const textType = 'text' as ElementType;
       const mark = buildMark(textType, content, xPath);
-      // addMark({ ...mark, cleanup }, selectionNodes);
       addMark({ ...mark, cleanup }, []);
 
       const markEvent = { type: 'add' as SyncMarkEventType, mark };
@@ -205,11 +243,7 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
         body: markEvent,
       };
       syncMarkEvent(msg);
-
-      // Temp remove selected marks
-      // selectionNodes.forEach((node) => {
-      //   addHoverMenuToNode(node, xPath);
-      // });
+      Message.success(t('knowledgeBase.context.contentSelectorAddSuccess'));
 
       cleanup();
     };
@@ -223,6 +257,17 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
         selected: false,
       },
     );
+
+    // add a listener to detect selection change
+    const selectionChangeListener = () => {
+      const newSelection = window.getSelection();
+      if (newSelection.toString().trim().length === 0) {
+        cleanup();
+        document.removeEventListener('selectionchange', selectionChangeListener);
+      }
+    };
+
+    document.addEventListener('selectionchange', selectionChangeListener);
   };
 
   const addBlockMark = (target: HTMLElement) => {
@@ -462,8 +507,7 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
   const initInlineDomEventListener = () => {
     const containerElem = selector ? document.querySelector(`.${selector}`) : document.body;
 
-    // containerElem.addEventListener('mousedown', onMouseDownUpEvent);
-    containerElem.addEventListener('mouseup', onMouseDownUpEvent);
+    containerElem?.addEventListener('mouseup', onMouseDownUpEvent);
   };
 
   const initDomEventListener = () => {
@@ -580,5 +624,6 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
   return {
     initContentSelectorElem,
     initMessageListener,
+    addInlineMarkForNote,
   };
 };

@@ -212,6 +212,9 @@
     },
     "context": {
       "contentSelector": "Content Selector",
+      "contentSelectorAddSuccess": "Add Success",
+      "contentSelectorIsEmpty": "Please select text",
+      "clearSelector": "Clear Selection",
       "clearContext": "Clear Context",
       "addToContext": "Add to Chat",
       "resource": "Resource",

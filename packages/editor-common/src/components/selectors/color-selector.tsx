@@ -104,7 +104,7 @@ export const ColorSelector = ({ open, onOpenChange }: ColorSelectorProps) => {
       <PopoverTrigger asChild>
         <Button size="sm" className="gap-2 rounded-none" variant="ghost">
           <span
-            className="rounded-sm px-1"
+            className="rounded-sm px-1 text-sm font-normal"
             style={{
               color: activeColorItem?.color,
               backgroundColor: activeHighlightItem?.color,
@@ -112,7 +112,7 @@ export const ColorSelector = ({ open, onOpenChange }: ColorSelectorProps) => {
           >
             A
           </span>
-          <ChevronDown className="h-4 w-4" />
+          <ChevronDown className="h-3 w-3 font-normal" />
         </Button>
       </PopoverTrigger>
 
@@ -122,7 +122,7 @@ export const ColorSelector = ({ open, onOpenChange }: ColorSelectorProps) => {
         align="start"
       >
         <div className="flex flex-col">
-          <div className="my-1 px-2 text-sm font-semibold text-muted-foreground">Color</div>
+          <div className="my-1 px-2 text-xs font-semibold text-muted-foreground">Color</div>
           {TEXT_COLORS.map(({ name, color }) => (
             <EditorBubbleItem
               key={name}
@@ -137,7 +137,7 @@ export const ColorSelector = ({ open, onOpenChange }: ColorSelectorProps) => {
               }}
               className="flex cursor-pointer items-center justify-between px-2 py-1 text-sm hover:bg-accent"
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-xs">
                 <div className="rounded-sm border px-2 py-px font-medium" style={{ color }}>
                   A
                 </div>
@@ -147,7 +147,7 @@ export const ColorSelector = ({ open, onOpenChange }: ColorSelectorProps) => {
           ))}
         </div>
         <div>
-          <div className="my-1 px-2 text-sm font-semibold text-muted-foreground">Background</div>
+          <div className="my-1 px-2 text-xs font-semibold text-muted-foreground">Background</div>
           {HIGHLIGHT_COLORS.map(({ name, color }) => (
             <EditorBubbleItem
               key={name}
@@ -157,7 +157,7 @@ export const ColorSelector = ({ open, onOpenChange }: ColorSelectorProps) => {
               }}
               className="flex cursor-pointer items-center justify-between px-2 py-1 text-sm hover:bg-accent"
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-xs">
                 <div className="rounded-sm border px-2 py-px font-medium" style={{ backgroundColor: color }}>
                   A
                 </div>

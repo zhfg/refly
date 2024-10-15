@@ -211,6 +211,8 @@
       "defaultTitle": "未命名"
     },
     "context": {
+      "contentSelectorAddSuccess": "添加成功",
+      "contentSelectorIsEmpty": "请选择文本",
       "contentSelector": "内容划线选择器",
       "clearContext": "清空上下文",
       "addToContext": "添加到聊天",

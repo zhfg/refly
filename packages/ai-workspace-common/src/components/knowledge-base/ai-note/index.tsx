@@ -5,13 +5,12 @@ import { Note } from '@refly/openapi-schema';
 
 import './index.scss';
 import { useCookie } from 'react-use';
-import { Button, Divider, Input, Popconfirm, Popover, Spin, Switch, Tabs, Tooltip } from '@arco-design/web-react';
+import { Button, Divider, Input, Popover, Spin, Switch, Tabs, Tooltip } from '@arco-design/web-react';
 import { HiOutlineLockClosed, HiOutlineLockOpen, HiOutlineClock } from 'react-icons/hi2';
-import { HiOutlineSearch } from 'react-icons/hi';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
-// 编辑器组件
+
 import {
   CollabEditorCommand,
   CollabGenAIMenuSwitch,
@@ -30,8 +29,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import { handleImageDrop, handleImagePaste } from '@refly-packages/editor-core/plugins';
 import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import { getHierarchicalIndexes, TableOfContents } from '@tiptap-pro/extension-table-of-contents';
-// 编辑器样式
-// 图标
+
 import { AiOutlineWarning, AiOutlineFileWord, AiOutlineDisconnect } from 'react-icons/ai';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 import { getClientOrigin, getWsServerOrigin } from '@refly-packages/utils/url';
@@ -54,6 +52,7 @@ import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui'
 const MemorizedToC = memo(ToC);
 
 const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
+  const { t } = useTranslation();
   const lastCursorPosRef = useRef<number>();
   const [token] = useCookie('_refly_ai_sid');
 
@@ -83,7 +82,7 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
 
   // initial block selection
   const baseUrl = getClientOrigin();
-  const { initMessageListener, initContentSelectorElem } = useContentSelector(
+  const { initContentSelectorElem, addInlineMarkForNote } = useContentSelector(
     'ai-note-editor-content-container',
     'noteSelection',
     {
@@ -147,6 +146,10 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
     window.localStorage.setItem('markdown', editor.storage.markdown.getMarkdown());
     noteStore.updateNoteSaveStatus('Saved');
   }, 500);
+
+  const handleContentSelectorClick = () => {
+    addInlineMarkForNote();
+  };
 
   useEffect(() => {
     // Update status changes
@@ -214,15 +217,6 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
     });
   }, []);
 
-  // 初始化块选择
-  useEffect(() => {
-    const remove = initMessageListener();
-
-    return () => {
-      remove();
-    };
-  }, [noteId]);
-
   useEffect(() => {
     if (editorRef.current) {
       if (readOnly) {
@@ -269,7 +263,12 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
             slotAfter={<ImageResizer />}
           >
             <CollabEditorCommand entityId={noteId} entityType="note" />
-            <CollabGenAIMenuSwitch />
+            <CollabGenAIMenuSwitch
+              contentSelector={{
+                text: t('knowledgeBase.context.addToContext'),
+                handleClick: handleContentSelectorClick,
+              }}
+            />
             <CollabGenAIBlockMenu />
           </EditorContent>
         </EditorRoot>
