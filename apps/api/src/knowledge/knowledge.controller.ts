@@ -188,10 +188,7 @@ export class KnowledgeController {
       throw new BadRequestException('Resource ID is required');
     }
 
-    const resource = await this.knowledgeService.getResourceDetail(user, { resourceId });
-    if (!resource) {
-      throw new BadRequestException('Resource not found');
-    }
+    await this.knowledgeService.getResourceDetail(user, { resourceId });
 
     const updated = await this.knowledgeService.updateResource(user, body);
     return buildSuccessResponse(resourcePO2DTO(updated));
