@@ -5,8 +5,6 @@ export enum LLMType {
   GPT4o = 'openai/gpt-4o-2024-08-06',
   Claude35Sonnet = 'anthropic/claude-3.5-sonnet',
   Claude3Haiku = 'anthropic/claude-3-haiku',
-  GeminiFlash15 = 'google/gemini-flash-1.5',
-  GeminiPro15 = 'google/gemini-pro-1.5',
 }
 
 export const ModelContextLimitMap = {
@@ -14,8 +12,6 @@ export const ModelContextLimitMap = {
   [LLMType.GPT4o]: 128 * 1024,
   [LLMType.Claude35Sonnet]: 200 * 1024,
   [LLMType.Claude3Haiku]: 200 * 1024,
-  [LLMType.GeminiFlash15]: 4 * 1024 * 1024,
-  [LLMType.GeminiPro15]: 4 * 1024 * 1024,
 };
 
 export const defaultModelList: ModelInfo[] = [

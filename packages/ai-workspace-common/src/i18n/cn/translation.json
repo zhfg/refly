@@ -653,9 +653,9 @@
       "subscribeNow": "立即订阅",
       "currentPlan": "当前套餐",
       "t1TokenUsed": "高阶模型 Token 使用量",
-      "t1TokenUsedDescription": "高阶模型包括 OpenAI GPT-4o、Anthropic Claude 3.5 Sonnet、Google Gemini 1.5 Pro；使用量包括模型输入和输出 Token 消耗",
+      "t1TokenUsedDescription": "高阶模型包括 OpenAI GPT-4o、Anthropic Claude 3.5 Sonnet；使用量包括模型输入和输出 Token 消耗",
       "t2TokenUsed": "基础模型 Token 使用量",
-      "t2TokenUsedDescription": "基础模型包括 OpenAI GPT-4o-mini、OpenAI GPT-3.5-turbo、Google Gemini 1.5 Flash；使用量包括模型输入和输出 Token 消耗",
+      "t2TokenUsedDescription": "基础模型包括 OpenAI GPT-4o-mini、OpenAI GPT-3.5-turbo；使用量包括模型输入和输出 Token 消耗",
       "subscriptionManagement": "管理账单及订阅",
       "subscriptionStatus": {
         "free": "FREE",
@@ -663,7 +663,7 @@
       },
       "subscribe": {
         "title": "选择适合您的套餐",
-        "subtitle": "订阅年度计划可免费获得 2个月！",
+        "subtitle": "订阅年度计划可节省 20%！",
         "monthly": "按月",
         "yearly": "按年",
         "monthlyPlan": "每月自动续费",
@@ -681,7 +681,7 @@
           "file": "上传文件"
         },
         "pro": {
-          "description": "享受最先进的高阶模型，并拥有更充裕的基础模型使用额度",
+          "description": "享受先进的高阶模型，并拥有更充裕的模型使用和存储额度",
           "buttonText": "立即升级",
           "t1Token": {
             "name": "高阶模型",
@@ -697,7 +697,7 @@
           }
         },
         "free": {
-          "description": "免费使用，拥有较多的基础模型使用额度",
+          "description": "一切都准备就绪，只等您开始上手",
           "buttonText": "继续免费",
           "t2Token": {
             "name": "基础模型",
