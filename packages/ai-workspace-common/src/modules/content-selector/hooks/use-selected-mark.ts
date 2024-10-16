@@ -10,11 +10,14 @@ import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores
 import { genUniqueId } from '@refly-packages/utils/id';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
+import { Message } from '@arco-design/web-react';
+import { useTranslation } from 'react-i18next';
 
 // stores
 
 // 与 selectedText 一起控制最终的选中
 export const useSelectedMark = () => {
+  const { t } = useTranslation();
   const contentSelectorStore = useContentSelectorStore((state) => ({
     marks: state.marks,
     setMarks: state.setMarks,
@@ -44,6 +47,7 @@ export const useSelectedMark = () => {
       // enableMultiSelect 只是打开生效状态，不影响实际选中
       if (type === 'remove') {
         const newMarks = marks.filter((item) => item?.xPath !== mark?.xPath);
+
         contentSelectorStore.setMarks(newMarks);
 
         const newCurrentSelectedMarks = currentSelectedMarks.filter((item) => item?.xPath !== mark?.xPath);
@@ -64,6 +68,16 @@ export const useSelectedMark = () => {
         }
 
         const newMark = { ...mark, id: genUniqueId(), title, parentId };
+
+        // check if the content selection mark is already exists
+        const isDuplicate = marks.some(
+          (existingMark) => existingMark.type === newMark.type && existingMark.data === newMark.data,
+        );
+
+        if (isDuplicate) {
+          return;
+        }
+
         const newMarks = [...marks, newMark];
         contentSelectorStore.setMarks(newMarks);
 
@@ -71,6 +85,7 @@ export const useSelectedMark = () => {
         contextPanelStore.updateCurrentSelectedMarks(newCurrentSelectedMarks);
 
         contextPanelStore.updateCurrentSelectedMark(newMark);
+        Message.success(t('knowledgeBase.context.contentSelectorAddSuccess'));
       } else if (type === 'reset') {
         // 这里代表一起清空
         contentSelectorStore.setMarks([]);

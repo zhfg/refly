@@ -211,7 +211,6 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
     };
 
     syncMarkEvent(msg);
-    Message.success(t('knowledgeBase.context.contentSelectorAddSuccess'));
   };
 
   const addInlineMark = () => {
@@ -243,7 +242,6 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
         body: markEvent,
       };
       syncMarkEvent(msg);
-      Message.success(t('knowledgeBase.context.contentSelectorAddSuccess'));
 
       cleanup();
     };
