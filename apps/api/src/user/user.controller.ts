@@ -34,6 +34,7 @@ export class UserController {
         'uiLocale',
         'outputLocale',
         'customerId',
+        'hasBetaAccess',
       ]),
       emailVerified: !!user.emailVerified,
     };
