@@ -204,8 +204,8 @@ export class KnowledgeService {
       include: { collections: { where: { deletedAt: null } } },
     });
 
-    if (!resource.isPublic && resource.uid !== user.uid) {
-      return null;
+    if (!resource || (!resource.isPublic && resource.uid !== user.uid)) {
+      throw new NotFoundException('Resource not found');
     }
 
     let content: string;

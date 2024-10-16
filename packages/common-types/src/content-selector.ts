@@ -57,6 +57,7 @@ export interface Mark {
   icon?: any; // React.ReactNode; // 图标, 理论上应该逻辑和 UI 分离，但是目前为了方便，还是放在一起
   onlyForCurrentContext?: boolean; // 只是当前上下文使用
   isCurrentContext?: boolean; // 是否是当前上下文
+  parentId?: string; // 父级 id 比如 noteselection 的 parentId 是 noteId, resourceSelection 的 parentId 是 resourceId
 }
 
 export interface Selection {
