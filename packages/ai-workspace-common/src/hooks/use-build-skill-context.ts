@@ -28,6 +28,7 @@ export const useBuildSkillContext = () => {
     const getDatabaseEntities = (type: MarkType) => {
       const set = new Set();
       const databaseEntities = currentSelectedMarks
+        ?.filter((item) => ![item?.id, item?.entityId].includes('tempResId')) // filter extension only's mock tempResId
         ?.filter((item) => !filterIdsOfCurrentSelectedMarks.includes(item?.id) && item?.type === type)
         .map((item) => ({
           [`${type}Id`]: item?.entityId || item?.id,
@@ -80,6 +81,7 @@ export const useBuildSkillContext = () => {
     };
 
     const getContentList = () => {
+      const set = new Set();
       let contentList: SkillContextContentItem[] = [];
       // TODO: 这里需要处理技能执行时的 context filter
       console.log('currentSelectedMarks', currentSelectedMarks);
@@ -87,8 +89,9 @@ export const useBuildSkillContext = () => {
       contentList = currentSelectedMarks
         ?.filter(
           (item) =>
-            !filterIdsOfCurrentSelectedMarks.includes(item?.id) &&
-            selectedTextDomains.includes(item?.type as SelectedTextDomain),
+            (!filterIdsOfCurrentSelectedMarks.includes(item?.id) &&
+              selectedTextDomains.includes(item?.type as SelectedTextDomain)) ||
+            [item?.id, item?.entityId].includes('tempResId'), // filter extension only's mock tempResId
         )
         .map((item) => ({
           content: item?.data || '',
@@ -98,18 +101,15 @@ export const useBuildSkillContext = () => {
             title: item?.title || '',
             entityId: item?.entityId || item?.id || '',
           },
-        }));
+        }))
+        .filter((item) => {
+          if (set.has(`${item?.metadata?.entityId}-${item?.content}`)) {
+            return false;
+          }
 
-      // if (checkedKeys?.includes(`currentPage-resource`) && getRuntime() !== 'web') {
-      //   contentList.push({
-      //     content: currentResource?.content || '',
-      //     metadata: {
-      //       domain: 'extensionWeblink',
-      //       url: currentResource?.data?.url || '',
-      //       title: currentResource?.title || '',
-      //     },
-      //   });
-      // }
+          set.add(`${item?.metadata?.entityId}-${item?.content}`);
+          return true;
+        });
 
       return contentList;
     };
