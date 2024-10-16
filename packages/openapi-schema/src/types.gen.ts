@@ -1137,6 +1137,10 @@ export type UserSettings = {
    * User subscription
    */
   subscription?: Subscription;
+  /**
+   * Whether the user has beta access
+   */
+  hasBetaAccess?: boolean;
 };
 
 export type GetUserSettingsResponse = BaseResponse & {
