@@ -26,7 +26,11 @@
     "apply": "Apply",
     "collapse": "Collapse",
     "open": "Open",
-    "close": "Close"
+    "close": "Close",
+    "copy": {
+      "title": "Copy",
+      "success": "Content has been copied to the clipboard!"
+    }
   },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",

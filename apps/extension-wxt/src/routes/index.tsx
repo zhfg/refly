@@ -11,6 +11,10 @@ import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { LOCALE } from '@refly/common-types';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import {
+  BetaProtectedRoute,
+  RequestAccessRoute,
+} from '@refly-packages/ai-workspace-common/components/request-access/protected-route';
 // requests
 import { useGetUserSettings } from '@/hooks/use-get-user-settings';
 import { Spin } from '@arco-design/web-react';
@@ -24,6 +28,7 @@ export const AppRouter = () => {
 
   const userStore = useUserStore((state) => ({
     localSettings: state.localSettings,
+    userProfile: state.userProfile,
     isCheckingLoginStatus: state.isCheckingLoginStatus,
   }));
   const importResourceStore = useImportResourceStore((state) => ({
@@ -37,6 +42,8 @@ export const AppRouter = () => {
 
   // 不需要鉴权即可访问的路由
   const routeLoginPageMatch = useMatch('/login');
+
+  const hasBetaAccess = userStore?.userProfile?.hasBetaAccess || false;
 
   // set copilotType
   useSetCopilotType();
@@ -74,9 +81,13 @@ export const AppRouter = () => {
   return (
     <>
       <Routes>
-        <Route path="/" element={<KnowledgeBase />} />
-        <Route path="/knowledge-base" element={<KnowledgeBase />} />
+        <Route path="/" element={<BetaProtectedRoute component={KnowledgeBase} hasBetaAccess={hasBetaAccess} />} />
+        <Route
+          path="/knowledge-base"
+          element={<BetaProtectedRoute component={KnowledgeBase} hasBetaAccess={hasBetaAccess} />}
+        />
         <Route path="/login" element={<Login />} />
+        <Route path="/request-access" element={<RequestAccessRoute hasBetaAccess={hasBetaAccess} />} />
       </Routes>
       {importResourceStore.importResourceModalVisible ? <ImportResourceModal /> : null}
     </>

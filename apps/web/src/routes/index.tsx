@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react"
-import { Navigate, Route, Routes, useMatch } from "react-router-dom"
+import { Route, Routes, useMatch } from "react-router-dom"
 import { Spin } from "@arco-design/web-react"
 import { useEffect } from "react"
 import { safeParseJSON } from "@refly-packages/ai-workspace-common/utils/parse"
@@ -7,6 +7,10 @@ import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/
 import { useTranslation } from "react-i18next"
 import { useGetUserSettings } from "@refly-packages/ai-workspace-common/hooks/use-get-user-settings"
 import { LOCALE } from "@refly/common-types"
+import {
+  BetaProtectedRoute,
+  RequestAccessRoute,
+} from "@refly-packages/ai-workspace-common/components/request-access/protected-route"
 
 // Lazy load components
 const Workspace = lazy(() => import("@/pages/workspace"))
@@ -16,7 +20,6 @@ const Skill = lazy(() => import("@/pages/skill"))
 const SkillDetailPage = lazy(() => import("@/pages/skill-detail"))
 const Settings = lazy(() => import("@/pages/settings"))
 const Login = lazy(() => import("@/pages/login"))
-const RequestAccess = lazy(() => import("@/pages/request-access"))
 
 // Loading component
 const LoadingFallback = () => (
@@ -41,7 +44,7 @@ const prefetchRoutes = () => {
   import("@/pages/skill")
   import("@/pages/skill-detail")
   import("@/pages/settings")
-  import("@/pages/request-access")
+  import("@refly-packages/ai-workspace-common/components/request-access/index")
 }
 
 export const AppRouter = (props: { layout?: any }) => {
@@ -95,27 +98,7 @@ export const AppRouter = (props: { layout?: any }) => {
     return <LoadingFallback />
   }
 
-  // add a new high-order component for permission check
-  const BetaProtectedRoute = ({
-    component: Component,
-    ...rest
-  }: {
-    component: React.ComponentType<any>
-    [key: string]: any
-  }) => {
-    if (userStore?.userProfile?.hasBetaAccess === false) {
-      return <Navigate to="/request-access" replace />
-    }
-    return <Component {...rest} />
-  }
-
-  // add a new component for request-access route
-  const RequestAccessRoute = () => {
-    if (userStore?.userProfile?.hasBetaAccess === true) {
-      return <Navigate to="/" replace />
-    }
-    return <RequestAccess />
-  }
+  const hasBetaAccess = userStore?.userProfile?.hasBetaAccess || false
 
   return (
     <Suspense fallback={<LoadingFallback />}>
@@ -123,30 +106,63 @@ export const AppRouter = (props: { layout?: any }) => {
         <Routes>
           <Route
             path="/"
-            element={<BetaProtectedRoute component={Workspace} />}
+            element={
+              <BetaProtectedRoute
+                component={Workspace}
+                hasBetaAccess={hasBetaAccess}
+              />
+            }
           />
           <Route
             path="/knowledge-base"
-            element={<BetaProtectedRoute component={KnowledgeBase} />}
+            element={
+              <BetaProtectedRoute
+                component={KnowledgeBase}
+                hasBetaAccess={hasBetaAccess}
+              />
+            }
           />
           <Route path="/login" element={<Login />} />
           <Route
             path="/thread"
-            element={<BetaProtectedRoute component={ConvLibrary} />}
+            element={
+              <BetaProtectedRoute
+                component={ConvLibrary}
+                hasBetaAccess={hasBetaAccess}
+              />
+            }
           />
           <Route
             path="/skill"
-            element={<BetaProtectedRoute component={Skill} />}
+            element={
+              <BetaProtectedRoute
+                component={Skill}
+                hasBetaAccess={hasBetaAccess}
+              />
+            }
           />
           <Route
             path="/skill-detail"
-            element={<BetaProtectedRoute component={SkillDetailPage} />}
+            element={
+              <BetaProtectedRoute
+                component={SkillDetailPage}
+                hasBetaAccess={hasBetaAccess}
+              />
+            }
           />
           <Route
             path="/settings"
-            element={<BetaProtectedRoute component={Settings} />}
+            element={
+              <BetaProtectedRoute
+                component={Settings}
+                hasBetaAccess={hasBetaAccess}
+              />
+            }
           />
-          <Route path="/request-access" element={<RequestAccessRoute />} />
+          <Route
+            path="/request-access"
+            element={<RequestAccessRoute hasBetaAccess={hasBetaAccess} />}
+          />
         </Routes>
       </Layout>
     </Suspense>

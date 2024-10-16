@@ -26,7 +26,11 @@
     "apply": "应用",
     "collapse": "折叠",
     "open": "打开",
-    "close": "关闭"
+    "close": "关闭",
+    "copy": {
+      "title": "复制",
+      "success": "内容已复制到剪切板！"
+    }
   },
   "systemMaintenanceShutdown": {
     "title": "尊敬的用户，您好！",
