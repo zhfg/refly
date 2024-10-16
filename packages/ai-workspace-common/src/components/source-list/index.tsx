@@ -1,6 +1,6 @@
 import { Note, Resource, Source } from '@refly/openapi-schema';
-import { safeParseURL } from '@refly/utils/url';
-import { List, Popover, Skeleton, Tag, Typography } from '@arco-design/web-react';
+import { getClientOrigin, safeParseURL } from '@refly/utils/url';
+import { List, Popover, Skeleton, Tag, Tooltip, Typography } from '@arco-design/web-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -16,6 +16,7 @@ import { mapSourceToResource } from '@refly-packages/ai-workspace-common/utils/r
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 interface SourceListProps {
   sources: Source[];
@@ -98,7 +99,11 @@ const ViewMoreItem = ({ sources = [], extraCnt = 0 }: { sources: Source[]; extra
 
 export const EntityItem = (props: { item: Source; index: number; showUtil?: boolean; showDesc?: boolean }) => {
   const { item, index, showDesc = false } = props;
+  const { t } = useTranslation();
   const { jumpToReadResource, jumpToNote } = useKnowledgeBaseJumpNewPath();
+
+  const runtime = getRuntime();
+  const isWeb = runtime === 'web';
 
   return (
     <div className="knowledge-base-directory-item source-list-container" key={index}>
@@ -119,29 +124,39 @@ export const EntityItem = (props: { item: Source; index: number; showUtil?: bool
       <div className="knowledge-base-directory-title">{item.title}</div>
       <div className="knowledge-base-directory-action">
         {item?.metadata?.entityId ? (
-          <div className="action-markdown-content knowledge-base-directory-action-item">
-            <IconBook
+          <Tooltip content={t('copilot.sourceListModal.openKnowledgeBaseLink')} getPopupContainer={getPopupContainer}>
+            <div
+              className="action-markdown-content knowledge-base-directory-action-item"
               onClick={() => {
+                const extraParams = !isWeb ? { openNewTab: true, baseUrl: getClientOrigin() } : {};
+
                 if (item?.metadata?.entityType === 'resource') {
                   jumpToReadResource({
                     resId: item?.metadata?.entityId,
+                    ...extraParams,
                   });
                 } else if (item?.metadata?.entityType === 'note') {
                   jumpToNote({
                     noteId: item?.metadata?.entityId,
+                    ...extraParams,
                   });
                 }
               }}
-            />
-          </div>
+            >
+              <IconBook />
+            </div>
+          </Tooltip>
         ) : null}
-        <div className="action-external-origin-website knowledge-base-directory-action-item">
-          <IconCompass
+        <Tooltip content={t('copilot.sourceListModal.openOriginWebsite')} getPopupContainer={getPopupContainer}>
+          <div
+            className="action-external-origin-website knowledge-base-directory-action-item"
             onClick={() => {
               window.open(item?.url, '_blank');
             }}
-          />
-        </div>
+          >
+            <IconCompass />
+          </div>
+        </Tooltip>
       </div>
       {showDesc ? (
         <div style={{ maxHeight: 300, overflowY: 'scroll', marginTop: 16 }}>

@@ -1043,7 +1043,9 @@
     "sourceListModal": {
       "title": "Result Sources",
       "moreSources": "View More {{count}} Sources",
-      "searchPlaceholder": "Search Sources..."
+      "searchPlaceholder": "Search Sources...",
+      "openOriginWebsite": "Open Origin Website",
+      "openKnowledgeBaseLink": "Open Knowledge Base Link"
     }
   },
   "hooks": {

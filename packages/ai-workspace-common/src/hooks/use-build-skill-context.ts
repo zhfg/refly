@@ -99,7 +99,7 @@ export const useBuildSkillContext = () => {
             domain: item?.type,
             url: item?.url || '',
             title: item?.title || '',
-            entityId: item?.entityId || item?.id || '',
+            entityId: [item?.entityId, item?.id].includes('tempResId') ? '' : item?.entityId || item?.id || '',
           },
         }))
         .filter((item) => {
