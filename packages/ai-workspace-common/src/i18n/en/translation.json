@@ -1067,7 +1067,8 @@
   "userMessagesUnread_one": "You have {{count}} unread message.",
   "userMessagesUnread_other": "You have {{count}} unread messages.",
   "requestAccess": {
-    "description": "Oops, the email address associated with your account does not have access to the beta testing.",
-    "apply": "Apply for a trial access"
+    "description": "Oops, your account does not have access to the beta testing.",
+    "apply": "Apply for early access",
+    "copyEmail": "Copy email "
   }
 }

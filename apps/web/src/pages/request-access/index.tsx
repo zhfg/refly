@@ -21,13 +21,16 @@ const RequestAccess = () => {
         <Result
           status="403"
           title={
-            <div style={{ fontSize: "16px" }}>
-              <div className="mb-2">
+            <div>
+              <div className="mb-2" style={{ fontSize: "18px" }}>
+                {t("requestAccess.description")}
+              </div>
+              <div style={{ color: "rgba(0, 0, 0, 0.5)" }}>
+                {t("requestAccess.copyEmail")}
                 <Typography.Text copyable>
                   {userStore?.userProfile?.email}
                 </Typography.Text>
               </div>
-              {t("requestAccess.description")}
             </div>
           }
           extra={
