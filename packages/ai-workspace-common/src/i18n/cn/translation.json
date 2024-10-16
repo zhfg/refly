@@ -1061,5 +1061,9 @@
     "part2": "😉"
   },
   "userMessagesUnread_one": "您有 {{count}} 条未读消息。",
-  "userMessagesUnread_other": "您有 {{count}} 条未读消息。"
+  "userMessagesUnread_other": "您有 {{count}} 条未读消息。",
+  "requestAccess": {
+    "description": "哎呀，当前账号所使用的邮箱 {{email}} 还没有内测资格",
+    "apply": "申请试用资格"
+  }
 }
