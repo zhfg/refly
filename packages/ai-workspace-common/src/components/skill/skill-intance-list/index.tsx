@@ -18,6 +18,8 @@ import { useNavigate } from 'react-router-dom';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 // styles
 import './index.scss';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { getClientOrigin } from '@refly-packages/utils/url';
 
 export type SkillInstanceListSource = 'instance' | 'template' | 'skill-management-modal';
 
@@ -41,6 +43,9 @@ export const SkillInstanceList = (props: SkillInstanceListProps) => {
     pageSize: 12,
   });
   const navigate = useNavigate();
+  const runtime = getRuntime();
+  const isWeb = runtime === 'web';
+  const baseUrl = isWeb ? '' : getClientOrigin();
 
   // support search by displayName
   const [searchVal, setSearchVal] = useState('');
@@ -51,7 +56,12 @@ export const SkillInstanceList = (props: SkillInstanceListProps) => {
 
   const goSkillList = () => {
     setSkillManagerModalVisible(false);
-    navigate('/skill?tab=template');
+    const url = `${baseUrl}/skill?tab=template`;
+    if (isWeb) {
+      navigate(url);
+    } else {
+      window.open(url, '_blank');
+    }
   };
 
   const handleChange = (val: string) => {
@@ -84,7 +94,7 @@ export const SkillInstanceList = (props: SkillInstanceListProps) => {
             onChange={handleChange}
           />
         </div>
-        <Button type="primary" style={{ borderRadius: 8, height: 32 }} onClick={goSkillList}>
+        <Button type="primary" style={{ borderRadius: 8, height: 32, marginLeft: 8 }} onClick={goSkillList}>
           <HiMiniArrowUturnRight />
           {t('skill.tab.skillTemplate')}
         </Button>
