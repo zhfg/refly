@@ -35,7 +35,7 @@ jobs:
         run: |
           echo "${{ secrets.KUBE_CONFIG }}" > ./kubeconfig
           chmod 600 kubeconfig
-          export KUBECONFIG=./kubeconfig
+          echo "KUBECONFIG=./kubeconfig" >> $GITHUB_ENV
 
       - name: Update Kubernetes deployment
         run: |
