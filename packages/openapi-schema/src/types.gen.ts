@@ -768,6 +768,10 @@ export type ChatMessage = {
    */
   tokenUsage?: Array<TokenUsageItem>;
   /**
+   * Skill invocation parameters
+   */
+  invokeParam?: InvokeSkillRequest;
+  /**
    * Selected weblink config (JSON)
    */
   selectedWeblinkConfig?: string;

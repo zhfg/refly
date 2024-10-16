@@ -967,6 +967,10 @@ export const $ChatMessage = {
         $ref: '#/components/schemas/TokenUsageItem',
       },
     },
+    invokeParam: {
+      description: 'Skill invocation parameters',
+      $ref: '#/components/schemas/InvokeSkillRequest',
+    },
     selectedWeblinkConfig: {
       type: 'string',
       description: 'Selected weblink config (JSON)',
