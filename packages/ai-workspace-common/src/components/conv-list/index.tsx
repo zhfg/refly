@@ -121,16 +121,6 @@ export const ConvList = (props: ConvListProps) => {
             props.handleConvItemClick(item?.convId);
           }}
           actions={[
-            <span
-              key={1}
-              className="thread-library-list-item-continue-ask with-border with-hover"
-              onClick={() => {
-                props.handleConvItemClick(item?.convId);
-              }}
-            >
-              <LuChevronRightCircle style={{ fontSize: 14, color: '#64645F' }} />
-              <span className="thread-library-list-item-text">{t('threadLibrary.item.askFollow')}</span>
-            </span>,
             <span key={2} className="flex items-center conv-action-list-item">
               <HiOutlineClock style={{ fontSize: 14, color: '#64645F' }} />
               <span className="thread-library-list-item-text">
