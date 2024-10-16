@@ -54,13 +54,16 @@ export const useSelectedMark = () => {
         const { currentResource } = useKnowledgeBaseStore.getState();
         const { currentNote } = useNoteStore.getState();
         let title = '';
+        let parentId = '';
         if (mark.domain === 'noteSelection') {
           title = currentNote?.title;
+          parentId = currentNote?.noteId;
         } else if (mark.domain === 'resourceSelection' || mark.domain === 'extensionWeblinkSelection') {
           title = currentResource?.title;
+          parentId = currentResource?.resourceId;
         }
 
-        const newMark = { ...mark, id: genUniqueId(), title };
+        const newMark = { ...mark, id: genUniqueId(), title, parentId };
         const newMarks = [...marks, newMark];
         contentSelectorStore.setMarks(newMarks);
 

@@ -46,13 +46,14 @@ export const useProcessContextItems = () => {
 
     if (mark.type === 'note' || mark.type === 'noteSelection') {
       if (isWebRuntime) {
+        const currentId = mark.type === 'note' ? mark.id : mark.parentId;
         return () => {
-          jumpToNote({ noteId: mark.id });
+          jumpToNote({ noteId: currentId });
           handleAddNoteTab({
             title: mark.title,
-            key: mark.id,
+            key: currentId,
             content: '',
-            noteId: mark.id,
+            noteId: currentId,
           });
         };
       } else {
@@ -62,13 +63,14 @@ export const useProcessContextItems = () => {
 
     if (mark.type === 'resource' || mark.type === 'resourceSelection') {
       if (isWebRuntime) {
+        const currentId = mark.type === 'resource' ? mark.id : mark.parentId;
         return () => {
-          jumpToReadResource({ resId: mark.id });
+          jumpToReadResource({ resId: currentId });
           handleAddResourceTab({
             title: mark.title,
-            key: mark.id,
+            key: currentId,
             content: '',
-            resourceId: mark.id,
+            resourceId: currentId,
           });
         };
       } else {
