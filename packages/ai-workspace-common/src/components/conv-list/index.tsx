@@ -131,7 +131,7 @@ export const ConvList = (props: ConvListProps) => {
               <LuChevronRightCircle style={{ fontSize: 14, color: '#64645F' }} />
               <span className="thread-library-list-item-text">{t('threadLibrary.item.askFollow')}</span>
             </span>,
-            <span key={2} className="flex items-center">
+            <span key={2} className="flex items-center conv-action-list-item">
               <HiOutlineClock style={{ fontSize: 14, color: '#64645F' }} />
               <span className="thread-library-list-item-text">
                 {time(item.updatedAt, language as LOCALE)
@@ -139,13 +139,9 @@ export const ConvList = (props: ConvListProps) => {
                   .fromNow()}
               </span>
             </span>,
-            <span key={3} className="flex items-center">
+            <span key={3} className="flex items-center conv-action-list-item">
               <BiMessageRoundedDetail style={{ fontSize: 14, color: '#64645F' }} />
-              <span className="thread-library-list-item-text">
-                {t('threadLibrary.item.messageCount', {
-                  count: item?.messageCount,
-                })}
-              </span>
+              <span className="thread-library-list-item-text">{item?.messageCount}</span>
             </span>,
           ]}
         >
