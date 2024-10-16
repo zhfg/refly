@@ -1434,6 +1434,11 @@ export const $UserSettings = {
       description: 'User subscription',
       $ref: '#/components/schemas/Subscription',
     },
+    hasBetaAccess: {
+      type: 'boolean',
+      description: 'Whether the user has beta access',
+      default: false,
+    },
   },
 } as const;
 

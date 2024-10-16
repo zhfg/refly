@@ -26,7 +26,11 @@
     "apply": "Apply",
     "collapse": "Collapse",
     "open": "Open",
-    "close": "Close"
+    "close": "Close",
+    "copy": {
+      "title": "Copy",
+      "success": "Content has been copied to the clipboard!"
+    }
   },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",
@@ -656,9 +660,9 @@
       "subscribeNow": "Subscribe Now",
       "currentPlan": "Current Plan",
       "t1TokenUsed": "Premium Model Token Usage",
-      "t1TokenUsedDescription": "Premium models include OpenAI GPT-4o, Anthropic Claude 3.5 Sonnet, and Google Gemini 1.5 Pro, usage includes both model input and output tokens.",
+      "t1TokenUsedDescription": "Premium models include OpenAI GPT-4o and Anthropic Claude 3.5 Sonnet, usage includes both model input and output tokens.",
       "t2TokenUsed": "Basic Model Token Usage",
-      "t2TokenUsedDescription": "Basic models include OpenAI GPT-4o-mini, Claude 3 Haiku, and Google Gemini 1.5 Flash, usage includes both model input and output tokens.",
+      "t2TokenUsedDescription": "Basic models include OpenAI GPT-4o-mini and Anthropic Claude 3 Haiku, usage includes both model input and output tokens.",
       "subscriptionManagement": "Manage Billing and Subscriptions",
       "subscriptionStatus": {
         "free": "FREE",
@@ -666,7 +670,7 @@
       },
       "subscribe": {
         "title": "Choose the plan that suits you best",
-        "subtitle": "Subscribe to an annual plan to get 2 months free!",
+        "subtitle": "Subscribe to an annual plan to save 20%!",
         "monthly": "Monthly",
         "yearly": "Yearly",
         "monthlyPlan": "Monthly Auto-Renewal",
@@ -684,7 +688,7 @@
           "file": "Uploaded Files"
         },
         "pro": {
-          "description": "Enjoy the latest Premium models and have more basic model usage",
+          "description": "Premium models along with much larger token and storage quota",
           "buttonText": "Upgrade Now",
           "t1Token": {
             "name": "Premium Models",
@@ -700,7 +704,7 @@
           }
         },
         "free": {
-          "description": "Free usage with more basic model usage",
+          "description": "Everything you need to get started",
           "buttonText": "Continue Free",
           "t2Token": {
             "name": "Basic Models",
@@ -1067,5 +1071,10 @@
     "part2": "😉"
   },
   "userMessagesUnread_one": "You have {{count}} unread message.",
-  "userMessagesUnread_other": "You have {{count}} unread messages."
+  "userMessagesUnread_other": "You have {{count}} unread messages.",
+  "requestAccess": {
+    "description": "Oops, your account does not have access to the beta testing.",
+    "apply": "Apply for early access",
+    "copyEmail": "Copy email "
+  }
 }

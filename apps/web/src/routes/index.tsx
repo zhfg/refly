@@ -7,6 +7,10 @@ import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/
 import { useTranslation } from "react-i18next"
 import { useGetUserSettings } from "@refly-packages/ai-workspace-common/hooks/use-get-user-settings"
 import { LOCALE } from "@refly/common-types"
+import {
+  BetaProtectedRoute,
+  RequestAccessRoute,
+} from "@refly-packages/ai-workspace-common/components/request-access/protected-route"
 
 // Lazy load components
 const Workspace = lazy(() => import("@/pages/workspace"))
@@ -40,6 +44,7 @@ const prefetchRoutes = () => {
   import("@/pages/skill")
   import("@/pages/skill-detail")
   import("@/pages/settings")
+  import("@refly-packages/ai-workspace-common/components/request-access/index")
 }
 
 export const AppRouter = (props: { layout?: any }) => {
@@ -93,17 +98,71 @@ export const AppRouter = (props: { layout?: any }) => {
     return <LoadingFallback />
   }
 
+  const hasBetaAccess = userStore?.userProfile?.hasBetaAccess || false
+
   return (
     <Suspense fallback={<LoadingFallback />}>
       <Layout>
         <Routes>
-          <Route path="/" element={<Workspace />} />
-          <Route path="/knowledge-base" element={<KnowledgeBase />} />
+          <Route
+            path="/"
+            element={
+              <BetaProtectedRoute
+                component={Workspace}
+                hasBetaAccess={hasBetaAccess}
+              />
+            }
+          />
+          <Route
+            path="/knowledge-base"
+            element={
+              <BetaProtectedRoute
+                component={KnowledgeBase}
+                hasBetaAccess={hasBetaAccess}
+              />
+            }
+          />
           <Route path="/login" element={<Login />} />
-          <Route path="/thread" element={<ConvLibrary />} />
-          <Route path="/skill" element={<Skill />} />
-          <Route path="/skill-detail" element={<SkillDetailPage />} />
-          <Route path="/settings" element={<Settings />} />
+          <Route
+            path="/thread"
+            element={
+              <BetaProtectedRoute
+                component={ConvLibrary}
+                hasBetaAccess={hasBetaAccess}
+              />
+            }
+          />
+          <Route
+            path="/skill"
+            element={
+              <BetaProtectedRoute
+                component={Skill}
+                hasBetaAccess={hasBetaAccess}
+              />
+            }
+          />
+          <Route
+            path="/skill-detail"
+            element={
+              <BetaProtectedRoute
+                component={SkillDetailPage}
+                hasBetaAccess={hasBetaAccess}
+              />
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <BetaProtectedRoute
+                component={Settings}
+                hasBetaAccess={hasBetaAccess}
+              />
+            }
+          />
+          <Route
+            path="/request-access"
+            element={<RequestAccessRoute hasBetaAccess={hasBetaAccess} />}
+          />
         </Routes>
       </Layout>
     </Suspense>

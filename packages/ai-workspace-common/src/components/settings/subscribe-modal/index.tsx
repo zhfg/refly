@@ -32,13 +32,13 @@ export const SubscribeModal = (props: SubscribeModalProps) => {
     {
       name: t('settings.subscription.subscribe.pro.t1Token.name'),
       count: t('settings.subscription.subscribe.pro.t1Token.count'),
-      details: 'GPT-4o / Claude 3.5 Sonnet / Gemini Pro 1.5',
+      details: 'GPT-4o / Claude 3.5 Sonnet',
       tooltip: t('settings.subscription.subscribe.tooltip.modelToken'),
     },
     {
       name: t('settings.subscription.subscribe.pro.t2Token.name'),
       count: t('settings.subscription.subscribe.pro.t2Token.count'),
-      details: 'GPT-4o Mini / Claude 3 Haiku / Gemini Flash 1.5',
+      details: 'GPT-4o Mini / Claude 3 Haiku',
       tooltip: t('settings.subscription.subscribe.tooltip.modelToken'),
     },
     {
@@ -60,7 +60,7 @@ export const SubscribeModal = (props: SubscribeModalProps) => {
     {
       name: t('settings.subscription.subscribe.free.t2Token.name'),
       count: t('settings.subscription.subscribe.free.t2Token.count'),
-      details: 'GPT-4o Mini / Claude 3 Haiku / Gemini Flash 1.5',
+      details: 'GPT-4o Mini / Claude 3 Haiku',
       tooltip: t('settings.subscription.subscribe.tooltip.modelToken'),
     },
     {
@@ -119,9 +119,7 @@ export const SubscribeModal = (props: SubscribeModalProps) => {
             /{' '}
             {title === 'free'
               ? t('settings.subscription.subscribe.period')
-              : lookupKey === 'monthly'
-                ? t('settings.subscription.subscribe.month')
-                : t('settings.subscription.subscribe.year')}
+              : t('settings.subscription.subscribe.month')}
           </span>
         </div>
 
@@ -195,7 +193,7 @@ export const SubscribeModal = (props: SubscribeModalProps) => {
         <div className="subscribe-content-plans">
           <PlanItem
             title="pro"
-            price={lookupKey === 'monthly' ? 19.9 : 199}
+            price={lookupKey === 'monthly' ? 19.9 : 16.9}
             buttonText={t('settings.subscription.subscribe.pro.buttonText')}
             description={t('settings.subscription.subscribe.pro.description')}
             features={proFeatures}
