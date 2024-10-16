@@ -154,6 +154,7 @@ export const ContextManager = () => {
         data: type === 'collection' ? (data as Collection).description : (data as Resource | Note).content,
         onlyForCurrentContext: true,
         isCurrentContext: true,
+        url: (data as Resource)?.data?.url || '',
       },
     ];
   };

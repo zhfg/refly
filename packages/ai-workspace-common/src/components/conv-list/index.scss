@@ -50,15 +50,22 @@
   align-items: center;
 }
 
+.conv-action-list-item {
+  text-wrap: nowrap;
+  overflow-x: hidden;
+}
+
 .thread-library-list-item-continue-ask {
   display: inline-block;
   padding: 4px 8px;
   height: 25px;
-  border-radius: 12px;
+  border-radius: 8px;
   border: 1px solid transparent;
   display: flex;
   justify-content: center;
   align-items: center;
+  text-wrap: nowrap;
+  overflow-x: hidden;
 }
 
 .with-border {
@@ -72,6 +79,7 @@
 
     .thread-library-list-item-text {
       color: white;
+      text-wrap: nowrap;
     }
 
     svg {

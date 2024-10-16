@@ -407,7 +407,7 @@
         "fetchErr": "Failed to retrieve the archive content. Please try refreshing the page."
       },
       "item": {
-        "askFollow": "Ask Follow-Up",
+        "askFollow": "Ask",
         "share": "Share",
         "copy": "Copy Link",
         "copyNotify": "Link Copied to Clipboard",
@@ -456,7 +456,7 @@
       "noMoreText": "You've reached the end of the list!"
     },
     "item": {
-      "askFollow": "Ask Follow-Up",
+      "askFollow": "Ask",
       "share": "Share",
       "copy": "Copy Link",
       "copyNotify": "Link Copied to Clipboard",
@@ -481,7 +481,7 @@
       "fetchErr": "Failed to retrieve the conversation list. Please try refreshing the page."
     },
     "item": {
-      "askFollow": "Ask Follow-Up",
+      "askFollow": "Ask ",
       "messageCount": "{{count}} messages"
     },
     "empty": {
@@ -603,7 +603,7 @@
       "fetchErr": "Failed to retrieve the conversation list. Please try refreshing the page."
     },
     "item": {
-      "askFollow": "Ask Follow-Up",
+      "askFollow": "Ask",
       "messageCount": "{{count}} messages"
     },
     "empty": {
@@ -1043,7 +1043,9 @@
     "sourceListModal": {
       "title": "Result Sources",
       "moreSources": "View More {{count}} Sources",
-      "searchPlaceholder": "Search Sources..."
+      "searchPlaceholder": "Search Sources...",
+      "openOriginWebsite": "Open Origin Website",
+      "openKnowledgeBaseLink": "Open Knowledge Base Link"
     }
   },
   "hooks": {

@@ -1052,7 +1052,9 @@
     "sourceListModal": {
       "title": "结果来源",
       "moreSources": "查看更多 {{count}} 来源",
-      "searchPlaceholder": "搜索来源..."
+      "searchPlaceholder": "搜索来源...",
+      "openOriginWebsite": "打开来源链接",
+      "openKnowledgeBaseLink": "打开知识库链接"
     }
   },
   "title": "欢迎 {{name}}，使用 react-i18next 完全类型安全的 React",

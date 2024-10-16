@@ -31,6 +31,7 @@ import { memo } from 'react';
 import classNames from 'classnames';
 import { parseMarkdownWithCitations } from '@refly/utils/parse';
 import { useState, useEffect } from 'react';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 export const HumanMessage = memo(
   (props: { message: Partial<ChatMessage>; profile: { avatar: string; name: string }; disable?: boolean }) => {
@@ -74,6 +75,9 @@ export const AssistantMessage = memo(
       disable,
       handleAskFollowing,
     } = props;
+    const runtime = getRuntime();
+    const isWeb = runtime === 'web';
+
     const { t } = useTranslation();
     const noteStoreEditor = useNoteStore((state) => state.editor);
     let sources =
@@ -296,7 +300,6 @@ export const AssistantMessage = memo(
                     </Dropdown>
                   </div>
                 ) : null}
-
                 {!disable && (!isPending || !isLastSession) && (
                   <div className="session-answer-actionbar">
                     <div className="session-answer-actionbar-left">
@@ -313,21 +316,23 @@ export const AssistantMessage = memo(
                       >
                         {t('copilot.message.copy')}
                       </Button>
-                      <Dropdown droplist={dropList} position="bl">
-                        <Button
-                          type="text"
-                          className={'assist-action-item'}
-                          icon={<IconImport style={{ fontSize: 14 }} />}
-                          style={{ color: '#64645F' }}
-                          onClick={() => {
-                            const parsedText = parseMarkdownWithCitations(message?.content, sources);
-                            handleEditorOperation('insertBlow', parsedText || '');
-                          }}
-                        >
-                          {t('copilot.message.insertBlow')}
-                          <IconCaretDown />
-                        </Button>
-                      </Dropdown>
+                      {isWeb ? (
+                        <Dropdown droplist={dropList} position="bl">
+                          <Button
+                            type="text"
+                            className={'assist-action-item'}
+                            icon={<IconImport style={{ fontSize: 14 }} />}
+                            style={{ color: '#64645F' }}
+                            onClick={() => {
+                              const parsedText = parseMarkdownWithCitations(message?.content, sources);
+                              handleEditorOperation('insertBlow', parsedText || '');
+                            }}
+                          >
+                            {t('copilot.message.insertBlow')}
+                            <IconCaretDown />
+                          </Button>
+                        </Dropdown>
+                      ) : null}
                     </div>
                     <div className="session-answer-actionbar-right"></div>
                   </div>

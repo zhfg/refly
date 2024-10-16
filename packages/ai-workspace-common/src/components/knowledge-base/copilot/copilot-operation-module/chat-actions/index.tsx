@@ -24,6 +24,7 @@ import { ModelSelector } from './model-selector';
 import './index.scss';
 import { OutputLocaleList } from '@refly-packages/ai-workspace-common/components/output-locale-list';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 interface ChatActionsProps {
   form?: FormInstance;
@@ -51,6 +52,8 @@ export const ChatActions = (props: ChatActionsProps) => {
   const { runSkill, emptyConvRunSkill, buildShutdownTaskAndGenResponse } = useBuildThreadAndRun();
   // hooks
   const [isFocused, setIsFocused] = useState(false);
+  const runtime = getRuntime();
+  const isWeb = runtime === 'web';
 
   const { handleFilterErrorTip } = useContextFilterErrorTip();
 
@@ -118,19 +121,21 @@ export const ChatActions = (props: ChatActionsProps) => {
           ></Button>
         ) : null}
         {skillStore?.selectedSkill?.skillId || messageStateStore?.pending ? (
-          <Button
-            size="mini"
-            icon={<IconSend />}
-            loading={messageStateStore?.pending}
-            disabled={messageStateStore?.pending}
-            className="search-btn"
-            style={{ color: '#FFF', background: '#00968F' }}
-            onClick={() => {
-              handleSendMessage('normal');
-            }}
-          >
-            {t('copilot.chatActions.send')}
-          </Button>
+          isWeb ? (
+            <Button
+              size="mini"
+              icon={<IconSend />}
+              loading={messageStateStore?.pending}
+              disabled={messageStateStore?.pending}
+              className="search-btn"
+              style={{ color: '#FFF', background: '#00968F' }}
+              onClick={() => {
+                handleSendMessage('normal');
+              }}
+            >
+              {t('copilot.chatActions.send')}
+            </Button>
+          ) : null
         ) : (
           <Dropdown
             position="tr"
