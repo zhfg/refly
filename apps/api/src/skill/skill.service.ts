@@ -344,7 +344,7 @@ export class SkillService {
 
   async skillInvokePreCheck(user: User, param: InvokeSkillRequest): Promise<InvokeSkillJobData> {
     const { uid } = user;
-    const data: InvokeSkillJobData = { ...param, uid };
+    const data: InvokeSkillJobData = { ...param, uid, rawParam: JSON.stringify(param) };
 
     // Check for token quota
     const usageResult = await this.subscription.checkTokenUsage(user);
@@ -625,7 +625,7 @@ export class SkillService {
   }
 
   private async _invokeSkill(user: User, data: InvokeSkillJobData, res?: Response) {
-    const { input, conversation, job } = data;
+    const { input, conversation, job, rawParam } = data;
 
     const convParam = conversation
       ? {
@@ -671,6 +671,7 @@ export class SkillService {
             uid: user.uid,
             convId: conversation?.convId,
             jobId: job?.jobId,
+            invokeParam: rawParam,
           },
         ],
         convParam,
@@ -783,15 +784,20 @@ export class SkillService {
       year: 365 * 24 * 60 * 60 * 1000,
     };
 
+    const param: InvokeSkillRequest = {
+      input: JSON.parse(trigger.input || '{}'),
+      context: JSON.parse(trigger.context || '{}'),
+      tplConfig: JSON.parse(trigger.tplConfig || '{}'),
+      skillId: trigger.skillId,
+      triggerId: trigger.triggerId,
+    };
+
     const job = await this.skillQueue.add(
       CHANNEL_INVOKE_SKILL,
       {
-        input: JSON.parse(trigger.input || '{}'),
-        context: JSON.parse(trigger.context || '{}'),
-        tplConfig: JSON.parse(trigger.tplConfig || '{}'),
-        skillId: trigger.skillId,
-        triggerId: trigger.triggerId,
+        ...param,
         uid: user.uid,
+        rawParam: JSON.stringify(param),
       },
       {
         delay: new Date(datetime).getTime() - new Date().getTime(),

@@ -15,6 +15,9 @@ export function toChatMessageDTO(message: ChatMessageModel): ChatMessage {
     createdAt: message.createdAt.toJSON(),
     updatedAt: message.updatedAt.toJSON(),
   };
+  if (message.type === 'human') {
+    dto.invokeParam = JSON.parse(message.invokeParam || '{}');
+  }
   if (message.type === 'ai') {
     dto.skillMeta = JSON.parse(message.skillMeta || '{}');
     dto.logs = JSON.parse(message.logs || '[]');

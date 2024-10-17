@@ -19,6 +19,7 @@ import { toChatMessageDTO, toConversationDTO } from '@/conversation/conversation
 
 export interface InvokeSkillJobData extends InvokeSkillRequest {
   uid: string;
+  rawParam: string;
   skill?: SkillInstance;
   job?: Omit<SkillJobModel, 'pk'>;
   conversation?: Omit<ConversationModel, 'pk'>;
