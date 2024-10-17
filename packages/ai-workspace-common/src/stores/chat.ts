@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
+import { devtools, persist } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 
 import type { ClientChatMessage, SessionItem } from '@refly/common-types';
@@ -69,26 +69,34 @@ export const defaultState = {
 };
 
 export const useChatStore = create<ChatState>()(
-  devtools((set) => ({
-    ...defaultState,
+  devtools(
+    persist(
+      (set) => ({
+        ...defaultState,
 
-    setMessages: (val: ClientChatMessage[]) => set((state) => ({ ...state, messages: val })),
-    setSessions: (val: SessionItem[]) => set({ sessions: val }),
-    setIsGenTitle: (val: boolean) => set({ isGenTitle: val }),
-    setNewQAText: (val: string) => {
-      return set({ newQAText: val });
-    },
-    setInvokeParams: (val: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig }) =>
-      set({ invokeParams: val }),
-    setSelectedModel: (val: ModelInfo) => set({ selectedModel: val }),
-    setModelList: (val: ModelInfo[]) => set({ modelList: val }),
-    setEnableWebSearch: (val: boolean) => set({ enableWebSearch: val }),
-    setChatMode: (val: ChatMode) => set({ chatMode: val }),
-    resetState: () => {
-      console.log('trigger resetState');
-      return set((state) => ({ ...state, ...defaultExtraState }));
-    },
-  })),
+        setMessages: (val: ClientChatMessage[]) => set((state) => ({ ...state, messages: val })),
+        setSessions: (val: SessionItem[]) => set({ sessions: val }),
+        setIsGenTitle: (val: boolean) => set({ isGenTitle: val }),
+        setNewQAText: (val: string) => {
+          return set({ newQAText: val });
+        },
+        setInvokeParams: (val: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig }) =>
+          set({ invokeParams: val }),
+        setSelectedModel: (val: ModelInfo) => set({ selectedModel: val }),
+        setModelList: (val: ModelInfo[]) => set({ modelList: val }),
+        setEnableWebSearch: (val: boolean) => set({ enableWebSearch: val }),
+        setChatMode: (val: ChatMode) => set({ chatMode: val }),
+        resetState: () => {
+          console.log('trigger resetState');
+          return set((state) => ({ ...state, ...defaultExtraState }));
+        },
+      }),
+      {
+        name: 'chat-storage',
+        partialize: (state) => ({ selectedModel: state.selectedModel }),
+      },
+    ),
+  ),
 );
 
 export const useChatStoreShallow = <T>(selector: (state: ChatState) => T) => {
