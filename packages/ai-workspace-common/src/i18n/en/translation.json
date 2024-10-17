@@ -1033,6 +1033,7 @@
       "current": "Current "
     },
     "modelSelector": {
+      "noModelAvailable": "No model available",
       "quotaExceeded": {
         "t1": {
           "free": "Upgrade To Use",

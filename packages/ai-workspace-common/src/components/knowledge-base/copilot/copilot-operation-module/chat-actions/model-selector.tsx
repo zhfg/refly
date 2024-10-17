@@ -7,12 +7,12 @@ import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
-import { modelMap } from '@refly-packages/utils/models';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 
+import { PiWarningCircleBold } from 'react-icons/pi';
 import OpenAIIcon from '@refly-packages/ai-workspace-common/assets/openai.svg';
 import AnthropicIcon from '@refly-packages/ai-workspace-common/assets/anthropic.svg';
-import { TokenUsageMeter } from '@refly/openapi-schema';
+import { ModelInfo, TokenUsageMeter } from '@refly/openapi-schema';
 
 const providerIcons = {
   openai: OpenAIIcon,
@@ -31,18 +31,17 @@ export const ModelSelector = () => {
     modelList: state.modelList,
     setModelList: state.setModelList,
   }));
-  const { tokenUsageMeter, setTokenUsageMeter, setSubscribeModalVisible } = useSubscriptionStoreShallow((state) => ({
-    tokenUsageMeter: state.tokenUsage,
-    setTokenUsageMeter: state.setTokenUsage,
+  const { tokenUsage, setTokenUsage, setSubscribeModalVisible } = useSubscriptionStoreShallow((state) => ({
+    tokenUsage: state.tokenUsage,
+    setTokenUsage: state.setTokenUsage,
     setSubscribeModalVisible: state.setSubscribeModalVisible,
   }));
 
-  const isModelDisabled = (meter: TokenUsageMeter, model: string) => {
-    const tier = modelMap[model]?.tier;
-    if (meter && tier) {
-      if (tier === 't1') {
+  const isModelDisabled = (meter: TokenUsageMeter, model: ModelInfo) => {
+    if (meter && model) {
+      if (model.tier === 't1') {
         return meter.t1TokenUsed >= meter.t1TokenQuota;
-      } else if (tier === 't2') {
+      } else if (model.tier === 't2') {
         return meter.t2TokenUsed >= meter.t2TokenQuota;
       }
     }
@@ -61,7 +60,7 @@ export const ModelSelector = () => {
         }}
       >
         {modelList.map((model) => {
-          const disabled = isModelDisabled(tokenUsageMeter, model.name);
+          const disabled = isModelDisabled(tokenUsage, model);
           const hintText = disabled ? t(`copilot.modelSelector.quotaExceeded.${model.tier}.${planTier}`) : '';
           const hoverContent =
             planTier === 'free' ? (
@@ -95,7 +94,7 @@ export const ModelSelector = () => {
         })}
       </Menu>
     );
-  }, [modelList, tokenUsageMeter]);
+  }, [modelList, tokenUsage]);
 
   const fetchModelList = async () => {
     try {
@@ -127,7 +126,7 @@ export const ModelSelector = () => {
       }
 
       if (data) {
-        setTokenUsageMeter(data.data?.token);
+        setTokenUsage(data.data?.token);
       }
     } catch (error) {
       console.error(error);
@@ -140,17 +139,31 @@ export const ModelSelector = () => {
   }, []);
 
   useEffect(() => {
-    if (isModelDisabled(tokenUsageMeter, selectedModel?.name)) {
-      setSelectedModel(modelList.find((model) => !isModelDisabled(tokenUsageMeter, model.name)));
+    if (!selectedModel || isModelDisabled(tokenUsage, selectedModel)) {
+      const availableModel = modelList.find((model) => !isModelDisabled(tokenUsage, model));
+      if (availableModel) {
+        setSelectedModel(availableModel);
+      } else {
+        setSelectedModel(null);
+      }
     }
-  }, [selectedModel, tokenUsageMeter]);
+  }, [selectedModel, tokenUsage]);
 
   return (
     <Dropdown droplist={droplist} trigger="click" getPopupContainer={getPopupContainer}>
       <span className={classNames('model-selector', 'chat-action-item')}>
         <IconDown />
-        <img className="w-3 h-3 mx-1" src={providerIcons[selectedModel?.provider]} alt={selectedModel?.provider} />
-        {selectedModel?.label}
+        {selectedModel ? (
+          <>
+            <img className="w-3 h-3 mx-1" src={providerIcons[selectedModel?.provider]} alt={selectedModel?.provider} />
+            {selectedModel?.label}
+          </>
+        ) : (
+          <>
+            <PiWarningCircleBold className="text-yellow-600" />
+            <span className="text-yellow-600">{t('copilot.modelSelector.noModelAvailable')}</span>
+          </>
+        )}
       </span>
     </Dropdown>
   );

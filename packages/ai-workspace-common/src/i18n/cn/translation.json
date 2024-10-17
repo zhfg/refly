@@ -1042,6 +1042,7 @@
       "current": "当前"
     },
     "modelSelector": {
+      "noModelAvailable": "无可用模型",
       "quotaExceeded": {
         "t1": {
           "free": "升级以使用",
