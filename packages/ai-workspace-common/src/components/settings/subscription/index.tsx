@@ -5,7 +5,6 @@ import { HiOutlineQuestionMarkCircle } from 'react-icons/hi2';
 import { HiOutlineExternalLink } from 'react-icons/hi';
 import { RiBillLine } from 'react-icons/ri';
 
-import { SubscribeModal } from '@refly-packages/ai-workspace-common/components/settings/subscribe-modal';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 
 // styles
@@ -253,7 +252,7 @@ export const Subscription = () => {
           <FileStorageUsageItem storage={storageUsage} />
         </div>
 
-        {subscriptionStatus !== 'free' && (
+        {userStore.userProfile?.customerId && (
           <div className="subscription-management-wrapper">
             <Spin loading={loading} style={{ width: '100%' }}>
               <div className="subscription-management" onClick={createPortalSession}>
