@@ -8,8 +8,9 @@ import { BigSearchModal } from "@refly-packages/ai-workspace-common/components/s
 import { ImportResourceModal } from "@refly-packages/ai-workspace-common/components/import-resource"
 import { NewKnowledgeModal } from "@refly-packages/ai-workspace-common/components/knowledge-base/new-knowledge-modal"
 import { useBindCommands } from "@refly-packages/ai-workspace-common/hooks/use-bind-commands"
-import { useImportResourceStore } from "@refly-packages/ai-workspace-common/stores/import-resource"
-import { useImportKnowledgeModal } from "@refly-packages/ai-workspace-common/stores/import-knowledge-modal"
+import { useImportResourceStoreShallow } from "@refly-packages/ai-workspace-common/stores/import-resource"
+import { useImportKnowledgeModalShallow } from "@refly-packages/ai-workspace-common/stores/import-knowledge-modal"
+import { SubscribeModal } from "@refly-packages/ai-workspace-common/components/settings/subscribe-modal"
 
 import "./index.scss"
 
@@ -24,8 +25,12 @@ export const AppLayout = (props: AppLayoutProps) => {
   const userStore = useUserStoreShallow(state => ({
     loginModalVisible: state.loginModalVisible,
   }))
-  const importResourceStore = useImportResourceStore()
-  const importKnowledgeModal = useImportKnowledgeModal()
+  const importResourceStore = useImportResourceStoreShallow(state => ({
+    importResourceModalVisible: state.importResourceModalVisible,
+  }))
+  const importKnowledgeModal = useImportKnowledgeModalShallow(state => ({
+    showNewKnowledgeModal: state.showNewKnowledgeModal,
+  }))
 
   // 绑定快捷键
   useBindCommands()
@@ -49,6 +54,7 @@ export const AppLayout = (props: AppLayoutProps) => {
         <ImportResourceModal />
       ) : null}
       {importKnowledgeModal.showNewKnowledgeModal && <NewKnowledgeModal />}
+      <SubscribeModal />
     </Layout>
   )
 }

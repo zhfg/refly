@@ -1041,6 +1041,18 @@
     "contextItem": {
       "current": "当前"
     },
+    "modelSelector": {
+      "quotaExceeded": {
+        "t1": {
+          "free": "升级以使用",
+          "pro": "超出限额，请检查订阅"
+        },
+        "t2": {
+          "free": "超出限额，升级以扩充",
+          "pro": "超出限额，请检查订阅"
+        }
+      }
+    },
     "contentSelector": {
       "openForWeb": "开启选择内容提问, 笔记已进入只读模式",
       "closeForWeb": "关闭选择器, 笔记已恢复编辑",

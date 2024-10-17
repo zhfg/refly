@@ -1032,6 +1032,18 @@
     "contextItem": {
       "current": "Current "
     },
+    "modelSelector": {
+      "quotaExceeded": {
+        "t1": {
+          "free": "Upgrade To Use",
+          "pro": "Quota Exceeded, Check Your Subscription"
+        },
+        "t2": {
+          "free": "Quota Exceeded, Upgrade To Use More",
+          "pro": "Quota Exceeded, Check Your Subscription"
+        }
+      }
+    },
     "contentSelector": {
       "openForWeb": "Enable content selection for questions, and the note is now in read-only mode",
       "closeForWeb": "Close the selector, and the note is now in edit mode",

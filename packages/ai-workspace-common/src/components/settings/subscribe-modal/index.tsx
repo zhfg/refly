@@ -5,15 +5,10 @@ import { getClientOrigin } from '@refly/utils/url';
 
 // styles
 import './index.scss';
-import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { IconCheck, IconQuestionCircle } from '@arco-design/web-react/icon';
-
-interface SubscribeModalProps {
-  visible: boolean;
-  setVisible: (val: boolean) => void;
-}
+import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 
 interface ModelFeatures {
   name: string;
@@ -22,9 +17,16 @@ interface ModelFeatures {
   tooltip?: string;
 }
 
-export const SubscribeModal = (props: SubscribeModalProps) => {
+export const SubscribeModal = () => {
   const { t } = useTranslation();
-  const { visible, setVisible } = props;
+
+  const { subscribeModalVisible: visible, setSubscribeModalVisible: setVisible } = useSubscriptionStoreShallow(
+    (state) => ({
+      subscribeModalVisible: state.subscribeModalVisible,
+      setSubscribeModalVisible: state.setSubscribeModalVisible,
+    }),
+  );
+
   const [lookupKey, setLookupKey] = useState<'monthly' | 'yearly'>('monthly');
   const [loading, setLoading] = useState(false);
 

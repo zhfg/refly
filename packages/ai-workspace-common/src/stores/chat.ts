@@ -23,7 +23,6 @@ export interface ChatState {
   chatMode: ChatMode;
 
   // method
-  // method
   setMessages: (val: ClientChatMessage[]) => void;
   setIsGenTitle: (val: boolean) => void;
   setNewQAText: (val: string) => void;
@@ -61,6 +60,7 @@ export const defaultExtraState = {
   newQAText: '',
   isGenTitle: false,
   invokeParams: undefined,
+  tokenUsageMeter: null,
 };
 
 export const defaultState = {
