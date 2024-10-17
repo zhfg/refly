@@ -25,17 +25,28 @@ import { safeParseJSON } from '../../../utils/parse';
 import { EditorOperation, editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
-import { ClientChatMessage } from '@refly/common-types';
+import { ContextItem } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module/context-manager/context-item';
+import { ContextPreview } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module/context-manager/context-preview';
+
+import { ClientChatMessage, Mark } from '@refly/common-types';
 import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
 import { memo } from 'react';
 import classNames from 'classnames';
 import { parseMarkdownWithCitations } from '@refly/utils/parse';
 import { useState, useEffect } from 'react';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { useProcessContextItems } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module/context-manager/hooks/use-process-context-items';
 
 export const HumanMessage = memo(
   (props: { message: Partial<ChatMessage>; profile: { avatar: string; name: string }; disable?: boolean }) => {
     const { message, profile } = props;
+    const context = message?.invokeParam?.context || {};
+    const [activeItem, setActiveItem] = useState<Mark | null>(null);
+
+    const { processContextItemsFromMessage } = useProcessContextItems();
+    const contextItems = processContextItemsFromMessage(context);
+    console.log('===contextItems===', contextItems);
+
     return (
       <div className="ai-copilot-message human-message-container">
         <div className="human-message">
@@ -44,6 +55,38 @@ export const HumanMessage = memo(
             <div className="human-message-content">
               <Markdown content={message?.content as string} />
             </div>
+
+            {contextItems.length > 0 && (
+              <div className="context-items-container">
+                {contextItems.map((item) => (
+                  <ContextItem
+                    canNotRemove={true}
+                    key={item.id}
+                    item={item}
+                    isLimit={false}
+                    isActive={activeItem?.id === item.id}
+                    onToggle={() => {
+                      setActiveItem(activeItem?.id === item.id ? null : item);
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+
+            {activeItem && (
+              <ContextPreview
+                canNotRemove={true}
+                item={activeItem}
+                onClose={() => setActiveItem(null)}
+                onOpenUrl={(url) => {
+                  if (typeof url === 'function') {
+                    url(); // 执行跳转函数
+                  } else {
+                    window.open(url, '_blank'); // 打开外部链接
+                  }
+                }}
+              />
+            )}
           </div>
           <div className="message-avatar">
             <Avatar size={32}>

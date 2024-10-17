@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '@arco-design/web-react';
+import { Button, Empty } from '@arco-design/web-react';
 import { IconClose, IconDelete, IconLink } from '@arco-design/web-react/icon';
 import { Mark } from '@refly/common-types';
 import { useTranslation } from 'react-i18next';
@@ -7,13 +7,15 @@ import { Markdown } from '@refly-packages/ai-workspace-common/components/markdow
 
 export const ContextPreview = ({
   item,
+  canNotRemove,
   onClose,
   onRemove,
   onOpenUrl,
 }: {
   item: Mark;
+  canNotRemove?: boolean;
   onClose: () => void;
-  onRemove: (id: string) => void;
+  onRemove?: (id: string) => void;
   onOpenUrl: (url: string | (() => string) | (() => void)) => void;
 }) => {
   const { t } = useTranslation();
@@ -31,22 +33,24 @@ export const ContextPreview = ({
           >
             {t('common.open')}
           </Button>
-          <Button
-            className="preview-action-btn"
-            icon={<IconDelete />}
-            type="outline"
-            size="mini"
-            onClick={() => onRemove(item.id)}
-          >
-            {t('common.delete')}
-          </Button>
+          {!canNotRemove && (
+            <Button
+              className="preview-action-btn"
+              icon={<IconDelete />}
+              type="outline"
+              size="mini"
+              onClick={() => onRemove && onRemove(item.id)}
+            >
+              {t('common.delete')}
+            </Button>
+          )}
           <Button className="preview-action-btn" icon={<IconClose />} type="outline" size="mini" onClick={onClose}>
             {t('common.close')}
           </Button>
         </div>
       </div>
       <div className="preview-content">
-        <Markdown content={item?.data || ''} />
+        {item?.data ? <Markdown content={item?.data || ''} /> : <Empty description={t('common.empty')} />}
       </div>
     </div>
   );

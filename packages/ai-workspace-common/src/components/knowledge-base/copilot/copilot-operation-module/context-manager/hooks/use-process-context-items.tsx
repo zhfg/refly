@@ -17,6 +17,20 @@ export const useProcessContextItems = () => {
   const { handleAddTab: handleAddResourceTab } = useKnowledgeBaseTabs();
   const { handleAddTab: handleAddNoteTab } = useNoteTabs();
 
+  const getQueryParams = (url: string): Record<string, string> => {
+    const params: Record<string, string> = {};
+    const queryString = url.split('?')[1];
+    if (!queryString) return params;
+
+    const pairs = queryString.split('&');
+    pairs.forEach((pair) => {
+      const [key, value] = pair.split('=');
+      params[decodeURIComponent(key)] = decodeURIComponent(value || '');
+    });
+
+    return params;
+  };
+
   const getTypeName = (type: MarkType) => {
     switch (type) {
       case 'resource':
@@ -94,7 +108,7 @@ export const useProcessContextItems = () => {
       type: mark.type,
       active: mark?.active || false,
       url: getTypeUrl(mark),
-      icon: getTypeIcon(mark),
+      icon: getTypeIcon(mark.type),
       name: getTypeName(mark.type),
     };
   };
@@ -160,5 +174,54 @@ export const useProcessContextItems = () => {
 
   const contextItemIdsByType = getContextItemIdsByType();
 
-  return { processedContextItems, contextItemTypes, contextItemIdsByType };
+  const processContextItemsFromMessage = (context: Record<string, any>) => {
+    const contextItems = [];
+    Object.keys(context).forEach((key) => {
+      const itemList = context[key];
+      itemList.forEach((item) => {
+        const metadata = item.metadata || {};
+        let typeKey = key;
+        let id = '';
+        let parentId = '';
+        if (key === 'notes') {
+          id = item?.noteId;
+          typeKey = 'note';
+        } else if (key === 'resources') {
+          id = item?.resourceId;
+          typeKey = 'resource';
+        } else if (key === 'collections') {
+          id = item?.collectionId;
+          typeKey = 'collection';
+        } else {
+          id = metadata.entityId;
+          typeKey = metadata.domain;
+          const queryParams = getQueryParams(metadata.url || '') || {};
+          if (typeKey === 'noteSelection') {
+            parentId = queryParams.noteId;
+          } else if (typeKey === 'resourceSelection') {
+            parentId = queryParams.resId;
+          }
+        }
+
+        const mark: Mark = {
+          id,
+          entityId: id,
+          type: typeKey as MarkType,
+          title: metadata.title,
+          data: item?.content,
+          domain: metadata.domain,
+          icon: getTypeIcon(typeKey as MarkType),
+          name: getTypeName(typeKey as MarkType),
+          parentId,
+        };
+
+        mark.url = getTypeUrl(mark);
+
+        contextItems.push(mark);
+      });
+    });
+    return contextItems;
+  };
+
+  return { processedContextItems, contextItemTypes, contextItemIdsByType, processContextItemsFromMessage };
 };
