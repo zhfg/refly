@@ -163,6 +163,12 @@ export const defaultMarkdownSerializer = new MarkdownSerializer(
       mixable: true,
       expelEnclosingWhitespace: true,
     },
+    strike: {
+      open: '~~',
+      close: '~~',
+      mixable: true,
+      expelEnclosingWhitespace: true,
+    },
     link: {
       open(state, mark, parent, index) {
         state.inAutolink = isPlainURL(mark, parent, index);

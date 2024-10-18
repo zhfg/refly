@@ -72,6 +72,16 @@ export const defaultMarkdownParser = new MarkdownParser(schema, MarkdownIt('comm
       return {};
     },
   },
+  strike: {
+    mark: 'strike',
+    getAttrs: (tok) => {
+      if (!schema.marks.strike) {
+        console.error('Strike mark not found in schema');
+        return null;
+      }
+      return {};
+    },
+  },
   link: {
     mark: 'link',
     getAttrs: (tok) => {
