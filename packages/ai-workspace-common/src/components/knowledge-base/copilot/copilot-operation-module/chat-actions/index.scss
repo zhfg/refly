@@ -21,6 +21,14 @@
       color: rgba(0, 0, 0, 8);
       cursor: pointer;
     }
+
+    .chat-action-item-text {
+      margin-left: 3px;
+    }
+
+    .arco-checkbox-mask {
+      border-radius: 4px !important;
+    }
   }
 
   .right-actions {

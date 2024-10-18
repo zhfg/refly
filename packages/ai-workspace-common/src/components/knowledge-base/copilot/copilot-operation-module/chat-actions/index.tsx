@@ -1,4 +1,4 @@
-import { Button, Dropdown, Menu, Notification, FormInstance, Switch } from '@arco-design/web-react';
+import { Button, Dropdown, Menu, Notification, FormInstance, Switch, Checkbox } from '@arco-design/web-react';
 
 import { ChatMode, useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import { IconDown, IconPause, IconSend } from '@arco-design/web-react/icon';
@@ -101,7 +101,7 @@ export const ChatActions = (props: ChatActionsProps) => {
         <OutputLocaleList />
         {!skillStore?.selectedSkill?.skillId ? (
           <div className="chat-action-item" onClick={() => chatStore.setEnableWebSearch(!chatStore.enableWebSearch)}>
-            <Switch type="round" size="small" checked={chatStore.enableWebSearch} />
+            <Checkbox checked={chatStore.enableWebSearch} />
             <span className="chat-action-item-text">{t('copilot.webSearch.title')}</span>
           </div>
         ) : null}
