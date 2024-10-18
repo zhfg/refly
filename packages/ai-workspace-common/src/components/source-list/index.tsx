@@ -65,34 +65,28 @@ const ViewMoreItem = ({ sources = [], extraCnt = 0 }: { sources: Source[]; extra
 
   return (
     <div
-      className="flex relative flex-col gap-2 px-3 py-3 text-xs rounded-lg source-list-item"
+      className="flex relative flex-col flex-wrap gap-2 justify-start items-start px-3 py-3 text-xs rounded-lg source-list-item view-more-item"
       onClick={() => {
         knowledgeBaseStore.updateTempConvResources(mappedResources as Resource[]);
         knowledgeBaseStore.updateSourceListModalVisible(true);
       }}
     >
-      <div className="flex gap-2 items-center">
-        <div className="overflow-hidden flex-1">
-          <div className="overflow-hidden w-full font-medium whitespace-nowrap break-all text-ellipsis text-zinc-950">
-            {t('copilot.sourceListModal.moreSources', { count: extraCnt })}
-          </div>
-        </div>
+      <div className="overflow-hidden font-medium whitespace-nowrap break-all text-ellipsis text-zinc-950">
+        {t('copilot.sourceListModal.moreSources', { count: extraCnt })}
       </div>
-      <div className="flex flex-wrap gap-2 items-center font-medium text-zinc-950">
-        {sources?.map((item, index) => {
-          const url = item?.url;
-          const domain = safeParseURL(url || '');
+      {sources?.slice(sources.length - extraCnt)?.map((item, index) => {
+        const url = item?.url;
+        const domain = safeParseURL(url || '');
 
-          return (
-            <img
-              key={index}
-              className="w-3 h-3"
-              alt={url}
-              src={`https://www.google.com/s2/favicons?domain=${domain}&sz=${16}`}
-            />
-          );
-        })}
-      </div>
+        return (
+          <img
+            key={index}
+            className="flex-shrink-0 w-3 h-3"
+            alt={url}
+            src={`https://www.google.com/s2/favicons?domain=${domain}&sz=${16}`}
+          />
+        );
+      })}
     </div>
   );
 };
