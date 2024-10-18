@@ -1,4 +1,4 @@
-import { IContext } from '../types';
+import { ChatMode, IContext } from '../types';
 import { get_encoding } from '@dqbd/tiktoken';
 import { BaseMessage } from '@langchain/core/messages';
 import {
@@ -6,6 +6,7 @@ import {
   SkillContextContentItem,
   SkillContextNoteItem,
   SkillContextResourceItem,
+  SkillTemplateConfig,
   Source,
 } from '@refly-packages/openapi-schema';
 import { ModelContextLimitMap, LLMType } from '@refly-packages/utils';
