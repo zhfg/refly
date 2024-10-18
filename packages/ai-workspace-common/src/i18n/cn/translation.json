@@ -999,7 +999,7 @@
     },
     "chatInput": {
       "placeholder": "提出问题，发现新知",
-      "defaultQuestion": "调用「{{name}}」技能",
+      "defaultQuestion": "[调用技能: {{name}}]",
       "chatWithReflyAssistant": "和「知识管家」聊聊"
     },
     "chatActions": {

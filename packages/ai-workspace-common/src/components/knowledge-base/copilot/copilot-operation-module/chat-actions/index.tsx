@@ -29,6 +29,7 @@ export const ChatActions = (props: ChatActionsProps) => {
 
   // stores
   const chatStore = useChatStoreShallow((state) => ({
+    newQAText: state.newQAText,
     chatMode: state.chatMode,
     setChatMode: state.setChatMode,
     enableWebSearch: state.enableWebSearch,
@@ -95,6 +96,9 @@ export const ChatActions = (props: ChatActionsProps) => {
     buildShutdownTaskAndGenResponse();
   };
 
+  const canSendEmptyMessage = skillStore?.selectedSkill || (!skillStore?.selectedSkill && chatStore.newQAText?.trim());
+  const canSendMessage = !messageStateStore?.pending && tokenAvailable && canSendEmptyMessage;
+
   return (
     <div className="chat-actions">
       <div className="left-actions">
@@ -138,7 +142,7 @@ export const ChatActions = (props: ChatActionsProps) => {
         ) : (
           <Dropdown
             position="tr"
-            disabled={messageStateStore?.pending || !tokenAvailable}
+            disabled={!canSendMessage}
             droplist={
               <Menu>
                 <Menu.Item
@@ -163,7 +167,7 @@ export const ChatActions = (props: ChatActionsProps) => {
               type="primary"
               icon={<IconSend />}
               loading={messageStateStore?.pending}
-              disabled={messageStateStore?.pending || !tokenAvailable}
+              disabled={!canSendMessage}
               className="search-btn"
               onClick={() => {
                 handleSendMessage('normal');

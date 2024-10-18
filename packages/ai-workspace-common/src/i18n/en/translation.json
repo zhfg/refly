@@ -990,7 +990,7 @@
     },
     "chatInput": {
       "placeholder": "Ask a question, discover new knowledge",
-      "defaultQuestion": "Call「{{name}}」Skill",
+      "defaultQuestion": "[Call Skill: {{name}}]",
       "chatWithReflyAssistant": "Chat with Refly Assistant"
     },
     "chatActions": {
