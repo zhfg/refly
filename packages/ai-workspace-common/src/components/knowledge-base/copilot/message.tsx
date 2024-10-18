@@ -235,24 +235,20 @@ export const AssistantMessage = memo(
                       message?.pending ? (
                         <div className="message-log-collapse-header">
                           <Spin size={12} />
-                          <p className="message-log-content">
-                            <Typography.Ellipsis>
-                              {message?.logs?.length > 0
-                                ? message?.logs?.[message?.logs?.length - 1]
-                                : t('copilot.message.skillRunning')}
-                            </Typography.Ellipsis>
-                          </p>
+                          <Typography.Ellipsis className="message-log-content">
+                            {message?.logs?.length > 0
+                              ? message?.logs?.[message?.logs?.length - 1]
+                              : t('copilot.message.skillRunning')}
+                          </Typography.Ellipsis>
                         </div>
                       ) : (
                         <div className="message-log-collapse-header">
                           <IconCheckCircle style={{ fontSize: 12, color: 'green' }} />
-                          <p className={classNames('message-log-content')}>
-                            <Typography.Ellipsis>
-                              {t('copilot.message.skillRunSuccess', {
-                                count: message?.logs?.length || 0,
-                              })}
-                            </Typography.Ellipsis>
-                          </p>
+                          <Typography.Ellipsis className={classNames('message-log-content')}>
+                            {t('copilot.message.skillRunSuccess', {
+                              count: message?.logs?.length || 0,
+                            })}
+                          </Typography.Ellipsis>
                         </div>
                       )
                     }
@@ -263,9 +259,7 @@ export const AssistantMessage = memo(
                         {message?.logs?.map((log, index) => (
                           <div className="message-log-item" key={index}>
                             <IconCheckCircle style={{ fontSize: 12, color: 'green' }} />
-                            <p className="message-log-content">
-                              <Typography.Ellipsis>{log}</Typography.Ellipsis>
-                            </p>
+                            <Typography.Ellipsis className="message-log-content">{log}</Typography.Ellipsis>
                           </div>
                         ))}
                       </div>
