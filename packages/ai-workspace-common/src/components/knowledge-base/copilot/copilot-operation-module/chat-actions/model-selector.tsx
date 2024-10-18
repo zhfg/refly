@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo } from 'react';
-import { Button, Dropdown, Link, Menu, Tag, Tooltip } from '@arco-design/web-react';
+import { useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button, Dropdown, Menu, Tag, Tooltip } from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
 import { IconDown } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
@@ -21,6 +22,7 @@ const providerIcons = {
 
 export const ModelSelector = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const { userProfile } = useUserStoreShallow((state) => ({
     userProfile: state.userProfile,
@@ -64,11 +66,13 @@ export const ModelSelector = () => {
           const hintText = disabled ? t(`copilot.modelSelector.quotaExceeded.${model.tier}.${planTier}`) : '';
           const hoverContent =
             planTier === 'free' ? (
-              <Button type="primary" onClick={() => setSubscribeModalVisible(true)}>
+              <Button type="primary" size="mini" onClick={() => setSubscribeModalVisible(true)}>
                 {hintText}
               </Button>
             ) : (
-              <Link href="/settings?tab=subscription">{hintText}</Link>
+              <Button size="mini" onClick={() => navigate('/settings?tab=subscription')}>
+                {hintText}
+              </Button>
             );
 
           return (
@@ -81,7 +85,8 @@ export const ModelSelector = () => {
                     <Tag
                       color="orange"
                       size="small"
-                      className="text-xs cursor-pointer"
+                      className="ml-1 cursor-pointer"
+                      style={{ fontSize: '10px' }}
                       onClick={() => setSubscribeModalVisible(true)}
                     >
                       PRO

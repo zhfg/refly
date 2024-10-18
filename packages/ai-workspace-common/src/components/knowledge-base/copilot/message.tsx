@@ -1,6 +1,6 @@
+import { useNavigate } from 'react-router-dom';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
-import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
-import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { ChatMessage, Source } from '@refly/openapi-schema';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import {
@@ -15,7 +15,7 @@ import {
   Divider,
   Typography,
 } from '@arco-design/web-react';
-import { IconBook, IconCaretDown, IconCheckCircle, IconCopy, IconImport, IconRight } from '@arco-design/web-react/icon';
+import { IconBook, IconCaretDown, IconCheckCircle, IconCopy, IconImport } from '@arco-design/web-react/icon';
 import { MdOutlineToken } from 'react-icons/md';
 import { useTranslation } from 'react-i18next';
 // 自定义组件
@@ -23,8 +23,7 @@ import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skil
 import { SourceList } from '@refly-packages/ai-workspace-common/components/source-list';
 import { safeParseJSON } from '../../../utils/parse';
 import { EditorOperation, editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
-import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
-import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
+import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { ContextItem } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module/context-manager/context-item';
 import { ContextPreview } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module/context-manager/context-preview';
 
@@ -393,22 +392,20 @@ export const PendingMessage = () => {
 };
 
 export const WelcomeMessage = () => {
-  const userStore = useUserStore();
-  const skillStore = useSkillStore();
-  const { handleAddSkillInstance } = useSkillManagement();
-  const { runSkill } = useBuildThreadAndRun();
+  const navigate = useNavigate();
+  const userStore = useUserStoreShallow((state) => ({
+    userProfile: state.userProfile,
+  }));
+  const skillStore = useSkillStoreShallow((state) => ({
+    skillInstances: state.skillInstances,
+    isFetchingSkillInstances: state.isFetchingSkillInstances,
+    setSkillManagerModalVisible: state.setSkillManagerModalVisible,
+  }));
 
-  const { localSettings } = userStore;
-  const { skillInstances = [], skillTemplates = [] } = skillStore;
-  // const needInstallSkillInstance = skillInstances?.length === 0 && skillTemplates?.length > 0;
-  const needInstallSkillInstance = true;
+  const { skillInstances = [] } = skillStore;
+  const needInstallSkillInstance = skillInstances?.length === 0 && !skillStore?.isFetchingSkillInstances;
 
   const { t } = useTranslation();
-  const guessQuestions = [
-    t('copilot.message.summarySelectedContent'),
-    t('copilot.message.brainstormIdeas'),
-    t('copilot.message.writeTwitterArticle'),
-  ];
 
   return (
     <div className="ai-copilot-message welcome-message-container">
@@ -428,7 +425,7 @@ export const WelcomeMessage = () => {
           ) : null}
         </div>
         <div className="welcome-message-text">How can I help you today?</div>
-        {needInstallSkillInstance ? (
+        {needInstallSkillInstance && (
           <div className="skill-onboarding">
             {skillInstances?.length === 0 ? (
               <div className="install-skill-hint">
@@ -438,7 +435,7 @@ export const WelcomeMessage = () => {
                     <Button
                       type="text"
                       onClick={() => {
-                        skillStore.setSkillManagerModalVisible(true);
+                        navigate('/skill?tab=template');
                       }}
                     >
                       {t('copilot.message.installSkillHintTitle')}
@@ -447,18 +444,6 @@ export const WelcomeMessage = () => {
                 </div>
               </div>
             ) : null}
-          </div>
-        ) : (
-          <div className="welcome-message-guess-you-ask-container ai-copilot-related-question-container">
-            <div className="guess-you-ask-assist"></div>
-            <div className="guess-you-ask ai-copilot-related-question-lis">
-              {guessQuestions?.map((item, index) => (
-                <div className="ai-copilot-related-question-item" key={index} onClick={() => runSkill(item)}>
-                  <p className="ai-copilot-related-question-title">{item}</p>
-                  <IconRight style={{ color: 'rgba(0, 0, 0, 0.5)' }} />
-                </div>
-              ))}
-            </div>
           </div>
         )}
       </div>
