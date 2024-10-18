@@ -342,6 +342,7 @@ Please generate the summary based on these requirements and offer suggestions fo
 
     const { tplConfig } = config?.configurable || {};
     const chatMode = tplConfig?.chatMode?.value as ChatMode;
+    const enableWebSearch = tplConfig?.enableWebSearch?.value as boolean;
 
     this.engine.logger.log(`config: ${safeStringifyJSON(this.configSnapshot.configurable)}`);
 
@@ -356,6 +357,7 @@ Please generate the summary based on these requirements and offer suggestions fo
       state: state,
       tplConfig,
     });
+    optimizedQuery = query;
     this.engine.logger.log(`preprocess query: ${query}`);
 
     // preprocess chat history, ensure chat history is not too long
@@ -379,7 +381,10 @@ Please generate the summary based on these requirements and offer suggestions fo
     );
 
     const needRewriteQuery = chatMode !== ChatMode.NO_CONTEXT_CHAT && (hasContext || chatHistoryTokens > 0);
-    const needPrepareContext = chatMode !== ChatMode.NO_CONTEXT_CHAT && hasContext && remainingTokens > 0;
+    const needPrepareContext =
+      (chatMode !== ChatMode.NO_CONTEXT_CHAT && hasContext && remainingTokens > 0) ||
+      enableWebSearch ||
+      chatMode === ChatMode.WHOLE_SPACE_SEARCH;
     this.engine.logger.log(`needRewriteQuery: ${needRewriteQuery}, needPrepareContext: ${needPrepareContext}`);
 
     if (needRewriteQuery) {
@@ -402,6 +407,7 @@ Please generate the summary based on these requirements and offer suggestions fo
           query: optimizedQuery,
           mentionedContext,
           maxTokens: remainingTokens,
+          hasContext,
         },
         {
           configSnapshot: this.configSnapshot,
