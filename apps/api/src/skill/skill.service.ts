@@ -662,21 +662,19 @@ export class SkillService {
 
     // Save user query to conversation right before invoking skill
     // but after the chatHistory of runnable config is built
-    if (input.query) {
-      await this.conversation.addChatMessages(
-        [
-          {
-            type: 'human',
-            content: input.query,
-            uid: user.uid,
-            convId: conversation?.convId,
-            jobId: job?.jobId,
-            invokeParam: rawParam,
-          },
-        ],
-        convParam,
-      );
-    }
+    await this.conversation.addChatMessages(
+      [
+        {
+          type: 'human',
+          content: input.query,
+          uid: user.uid,
+          convId: conversation?.convId,
+          jobId: job?.jobId,
+          invokeParam: rawParam,
+        },
+      ],
+      convParam,
+    );
 
     let runMeta: SkillRunnableMeta | null = null;
     const basicUsageData = {
@@ -740,14 +738,22 @@ export class SkillService {
         }
       }
     } finally {
-      await this.conversation.addChatMessages(
-        msgAggregator.getMessages({
-          user,
-          convId: conversation?.convId,
-          jobId: job?.jobId,
-        }),
-        convParam,
-      );
+      const messages = msgAggregator.getMessages({
+        user,
+        convId: conversation?.convId,
+        jobId: job?.jobId,
+      });
+
+      messages.forEach((msg) => {
+        writeSSEResponse(res, {
+          event: 'usage',
+          skillMeta: JSON.parse(msg.skillMeta),
+          spanId: msg.spanId,
+          content: JSON.stringify({ token: msg.tokenUsage }),
+        });
+      });
+
+      await this.conversation.addChatMessages(messages, convParam);
     }
   }
 
