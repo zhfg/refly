@@ -47,6 +47,7 @@ export const useBuildTask = () => {
   const buildTaskAndGenReponse = (task: InvokeSkillRequest) => {
     console.log('buildTaskAndGenReponse', task);
     const question = task?.input?.query;
+    const context = task?.context || {};
     const { messages = [] } = useChatStore.getState();
     const { currentConversation } = useConversationStore.getState();
     const { skillInstances = [] } = useSkillStore.getState();
@@ -55,6 +56,9 @@ export const useBuildTask = () => {
     // Skill 和 Message 绑定，某条 AI Message 来自哪个 Skill
     const questionMsg = buildQuestionMessage({
       content: question,
+      invokeParam: {
+        context,
+      },
       ...(selectedSkillInstance
         ? {
             skillMeta: {
