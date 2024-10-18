@@ -3,7 +3,7 @@ import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
 import { Source } from '@refly/openapi-schema';
-import type { MessageState, OutputLocale, RelatedQuestion, SkillEvent } from '@refly/common-types';
+import type { ClientChatMessage, MessageState, OutputLocale, RelatedQuestion, SkillEvent } from '@refly/common-types';
 import { LOCALE, TASK_STATUS } from '@refly/common-types';
 import type { ChatTask, InvokeSkillRequest, ChatMessage } from '@refly/openapi-schema';
 import { buildQuestionMessage, buildReplyMessage } from '@refly-packages/ai-workspace-common/utils/message';
@@ -105,9 +105,7 @@ export const useBuildTask = () => {
     [conversationStore.currentConversation?.convId],
   );
 
-  const onSkillStart = (skillEvent: SkillEvent) => {
-    const { messages = [] } = useChatStore.getState();
-
+  const findLastRelatedMessage = (messages: ClientChatMessage[], skillEvent: SkillEvent) => {
     const lastRelatedMessage = [...messages]
       .reverse()
       .find(
@@ -116,6 +114,13 @@ export const useBuildTask = () => {
           item?.type === 'ai' &&
           item?.spanId === skillEvent?.spanId,
       );
+    return lastRelatedMessage;
+  };
+
+  const onSkillStart = (skillEvent: SkillEvent) => {
+    const { messages = [] } = useChatStore.getState();
+
+    const lastRelatedMessage = findLastRelatedMessage(messages, skillEvent);
 
     // 同一个技能对应的 spanId 只创建一条消息
     if (lastRelatedMessage) {
@@ -148,14 +153,7 @@ export const useBuildTask = () => {
 
   const onSkillThoughout = (skillEvent: SkillEvent) => {
     const { messages = [] } = useChatStore.getState();
-    const lastRelatedMessage = [...messages]
-      .reverse()
-      .find(
-        (item) =>
-          item?.skillMeta?.tplName === skillEvent?.skillMeta?.tplName &&
-          item?.type === 'ai' &&
-          item?.spanId === skillEvent?.spanId,
-      );
+    const lastRelatedMessage = findLastRelatedMessage(messages, skillEvent);
     const lastRelatedMessageIndex = messages.findIndex((item) => item.msgId === lastRelatedMessage?.msgId);
 
     if (!lastRelatedMessage) {
@@ -172,17 +170,29 @@ export const useBuildTask = () => {
     chatStore.setMessages(messages);
   };
 
+  const onSkillUsage = (skillEvent: SkillEvent) => {
+    const { messages = [] } = useChatStore.getState();
+    const lastRelatedMessage = findLastRelatedMessage(messages, skillEvent);
+    const lastRelatedMessageIndex = messages.findIndex((item) => item.msgId === lastRelatedMessage?.msgId);
+
+    if (!lastRelatedMessage) {
+      return;
+    }
+
+    const tokenUsage = safeParseJSON(skillEvent.content);
+    if (!tokenUsage?.token.length) {
+      return;
+    }
+
+    lastRelatedMessage.tokenUsage = tokenUsage.token;
+    messages[lastRelatedMessageIndex] = lastRelatedMessage;
+    chatStore.setMessages(messages);
+  };
+
   const onSkillStream = (skillEvent: SkillEvent) => {
     const { messages = [] } = useChatStore.getState();
     const { pendingFirstToken } = useMessageStateStore.getState();
-    const lastRelatedMessage = [...messages]
-      .reverse()
-      .find(
-        (item) =>
-          item?.skillMeta?.tplName === skillEvent?.skillMeta?.tplName &&
-          item?.type === 'ai' &&
-          item?.spanId === skillEvent?.spanId,
-      );
+    const lastRelatedMessage = findLastRelatedMessage(messages, skillEvent);
     const lastRelatedMessageIndex = messages.findIndex((item) => item.msgId === lastRelatedMessage?.msgId);
 
     if (!lastRelatedMessage) {
@@ -213,14 +223,7 @@ export const useBuildTask = () => {
 
   const onSkillStructedData = (skillEvent: SkillEvent) => {
     const { messages = [] } = useChatStore.getState();
-    const lastRelatedMessage = [...messages]
-      .reverse()
-      .find(
-        (item) =>
-          item?.skillMeta?.tplName === skillEvent?.skillMeta?.tplName &&
-          item?.type === 'ai' &&
-          item?.spanId === skillEvent?.spanId,
-      );
+    const lastRelatedMessage = findLastRelatedMessage(messages, skillEvent);
     const lastRelatedMessageIndex = messages.findIndex((item) => item.msgId === lastRelatedMessage?.msgId);
 
     if (!lastRelatedMessage) {
@@ -254,14 +257,7 @@ export const useBuildTask = () => {
 
   const onSkillEnd = (skillEvent: SkillEvent) => {
     const { messages = [] } = useChatStore.getState();
-    const lastRelatedMessage = [...messages]
-      .reverse()
-      .find(
-        (item) =>
-          item?.skillMeta?.tplName === skillEvent?.skillMeta?.tplName &&
-          item?.type === 'ai' &&
-          item?.spanId === skillEvent?.spanId,
-      );
+    const lastRelatedMessage = findLastRelatedMessage(messages, skillEvent);
     const lastRelatedMessageIndex = messages.findIndex((item) => item.msgId === lastRelatedMessage?.msgId);
 
     if (!lastRelatedMessage) {
@@ -400,6 +396,7 @@ export const useBuildTask = () => {
       onSkillEnd,
       onCompleted,
       onError,
+      onSkillUsage,
     });
   };
 
@@ -427,6 +424,8 @@ export const useBuildTask = () => {
         return onCompleted();
       case 'error':
         return onError(msg?.message);
+      case 'usage':
+        return onSkillUsage(msg?.message);
     }
   };
 

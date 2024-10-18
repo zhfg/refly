@@ -17,6 +17,7 @@ export const ssePost = async ({
   onSkillStructedData,
   onError,
   onCompleted,
+  onSkillUsage,
 }: {
   controller: AbortController;
   token: string;
@@ -29,6 +30,7 @@ export const ssePost = async ({
   onSkillStructedData: (event: SkillEvent) => void;
   onError?: (status: any) => void;
   onCompleted?: (val?: boolean) => void;
+  onSkillUsage?: (event: SkillEvent) => void;
 }) => {
   let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
 
@@ -94,6 +96,8 @@ export const ssePost = async ({
                 onSkillStream(skillEvent);
               } else if (skillEvent?.event === 'structured_data') {
                 onSkillStructedData(skillEvent);
+              } else if (skillEvent?.event === 'usage') {
+                onSkillUsage(skillEvent);
               }
             }
           });
