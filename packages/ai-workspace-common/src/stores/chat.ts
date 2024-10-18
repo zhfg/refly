@@ -51,7 +51,6 @@ const defaultConfigurableState = {
     },
   ] as ModelInfo[],
   enableWebSearch: false,
-  chatMode: 'normal' as ChatMode,
 };
 
 export const defaultExtraState = {
@@ -61,6 +60,8 @@ export const defaultExtraState = {
   newQAText: '',
   isGenTitle: false,
   invokeParams: undefined,
+
+  chatMode: 'normal' as ChatMode, // future support memory config
 };
 
 export const defaultState = {

@@ -35,16 +35,19 @@ export async function prepareContext(
     query,
     mentionedContext,
     maxTokens,
+    hasContext,
   }: {
     query: string;
     mentionedContext: IContext;
     maxTokens: number;
+    hasContext: boolean;
   },
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<string> {
   ctx.ctxThis.emitEvent({ event: 'log', content: `Start to prepare context...` }, ctx.configSnapshot);
 
   const enableWebSearch = ctx.tplConfig?.enableWebSearch?.value;
+  const chatMode = ctx.tplConfig?.chatMode?.value as ChatMode;
   ctx.ctxThis.engine.logger.log(`Enable Web Search: ${enableWebSearch}`);
 
   const maxContextTokens = Math.floor(maxTokens * MAX_CONTEXT_RATIO);
@@ -72,15 +75,25 @@ export async function prepareContext(
   remainingTokens = maxContextTokens - webSearchContextTokens;
 
   // 2. mentioned context
-  const { mentionedContextTokens, processedMentionedContext } = await prepareMentionedContext(
-    {
-      query,
-      mentionedContext,
-      maxMentionedContextTokens: remainingTokens,
-    },
-    ctx,
-  );
-  remainingTokens -= mentionedContextTokens;
+  let processedMentionedContext: IContext = {
+    contentList: [],
+    resources: [],
+    notes: [],
+    collections: [],
+  };
+  if (hasContext) {
+    const mentionContextRes = await prepareMentionedContext(
+      {
+        query,
+        mentionedContext,
+        maxMentionedContextTokens: remainingTokens,
+      },
+      ctx,
+    );
+
+    processedMentionedContext = mentionContextRes.processedMentionedContext;
+    remainingTokens -= mentionContextRes.mentionedContextTokens || 0;
+  }
 
   // 3. lower priority context
   let lowerPriorityContext: IContext = {
@@ -89,7 +102,7 @@ export async function prepareContext(
     notes: [],
     collections: [],
   };
-  if (remainingTokens > 0) {
+  if (remainingTokens > 0 && (hasContext || chatMode === ChatMode.WHOLE_SPACE_SEARCH)) {
     const { contentList = [], resources = [], notes = [], collections = [] } = ctx.configSnapshot.configurable;
     // prev remove overlapping items in mentioned context
     ctx.ctxThis.engine.logger.log(

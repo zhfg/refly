@@ -121,6 +121,12 @@ export const buildSchedulerUserPrompt = ({
   originalQuery: string;
   rewrittenQuery: string;
 }) => {
+  if (originalQuery === rewrittenQuery) {
+    return `## User Query
+    ${originalQuery}
+    `;
+  }
+
   return `## Original User Query
 ${originalQuery}
 
