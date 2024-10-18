@@ -8,6 +8,7 @@
     "edit": "Edit",
     "save": "Save",
     "add": "Add",
+    "loading": "Loading...",
     "loadMore": "Load More",
     "more": "More",
     "putErr": "Failed to perform operation. Please try again!",

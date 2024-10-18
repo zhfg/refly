@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { getClientOrigin } from '@refly-packages/utils/url';
-import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getTypeIcon } from '../utils/icon';
 import { mapSelectionTypeToContentList } from '../utils/contentListSelection';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
@@ -12,7 +12,7 @@ import { useNoteTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-
 export const useProcessContextItems = () => {
   const { t } = useTranslation();
   const { jumpToNote, jumpToKnowledgeBase, jumpToReadResource } = useKnowledgeBaseJumpNewPath();
-  const currentSelectedMarks = useContextPanelStore((state) => state.currentSelectedMarks);
+  const currentSelectedMarks = useContextPanelStoreShallow((state) => state.currentSelectedMarks);
 
   const { handleAddTab: handleAddResourceTab } = useKnowledgeBaseTabs();
   const { handleAddTab: handleAddNoteTab } = useNoteTabs();

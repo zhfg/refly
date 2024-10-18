@@ -1,15 +1,14 @@
 import { Input, Notification, FormInstance } from '@arco-design/web-react';
 import { useRef, useState } from 'react';
 import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
-import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useContextFilterErrorTip } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module/context-manager/hooks/use-context-filter-errror-tip';
 
 // styles
 import './index.scss';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
-import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
+import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
 import { useTranslation } from 'react-i18next';
-import { SkillTemplateConfig } from '@refly/openapi-schema';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 const TextArea = Input.TextArea;
 
@@ -25,8 +24,13 @@ export const ChatInput = (props: ChatInputProps) => {
   const { t } = useTranslation();
   const inputRef = useRef<RefTextAreaType>(null);
   // stores
-  const chatStore = useChatStore();
-  const searchStore = useSearchStore();
+  const chatStore = useChatStoreShallow((state) => ({
+    newQAText: state.newQAText,
+    setNewQAText: state.setNewQAText,
+  }));
+  const searchStore = useSearchStoreShallow((state) => ({
+    setIsSearchOpen: state.setIsSearchOpen,
+  }));
   const { runSkill, emptyConvRunSkill, buildShutdownTaskAndGenResponse } = useBuildThreadAndRun();
   // hooks
   const [isFocused, setIsFocused] = useState(false);

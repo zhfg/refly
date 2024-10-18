@@ -77,6 +77,7 @@ export const ChatActions = (props: ChatActionsProps) => {
     chatStore.setChatMode(type);
 
     const { messages, newQAText } = useChatStore.getState();
+
     searchStore.setIsSearchOpen(false);
     const tplConfig = form?.getFieldValue('tplConfig');
     const invokeParams = { tplConfig: tplConfig };

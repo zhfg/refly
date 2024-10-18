@@ -45,7 +45,6 @@ export const HumanMessage = memo(
 
     const { processContextItemsFromMessage } = useProcessContextItems();
     const contextItems = processContextItemsFromMessage(context);
-    console.log('===contextItems===', contextItems);
 
     return (
       <div className="ai-copilot-message human-message-container">

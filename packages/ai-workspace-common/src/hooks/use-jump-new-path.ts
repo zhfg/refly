@@ -1,7 +1,6 @@
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useNoteStoreShallow } from '@refly-packages/ai-workspace-common/stores/note';
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
-import { getClientOrigin } from '@refly-packages/utils/url';
 
 export const useKnowledgeBaseJumpNewPath = () => {
   const [searchParams, setSearchParams] = useSearchParams();

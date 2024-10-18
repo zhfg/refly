@@ -1,9 +1,7 @@
-import { getAuthTokenFromCookie } from './request';
 import { getServerOrigin } from '@refly/utils/url';
 import { InvokeSkillRequest } from '@refly/openapi-schema';
 import { SkillEvent } from '@refly/common-types';
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { getCookie } from '@refly-packages/ai-workspace-common/utils/cookie';
+import { scrollToBottom } from '@refly-packages/ai-workspace-common/utils/ui';
 
 export const ssePost = async ({
   controller,
@@ -99,6 +97,10 @@ export const ssePost = async ({
               } else if (skillEvent?.event === 'usage') {
                 onSkillUsage(skillEvent);
               }
+              setTimeout(() => {
+                // 滑动到底部
+                scrollToBottom();
+              });
             }
           });
 

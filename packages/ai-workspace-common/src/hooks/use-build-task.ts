@@ -1,11 +1,14 @@
-import { useCallback, useRef } from 'react';
-import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
-import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
-import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
-import { Source } from '@refly/openapi-schema';
-import type { ClientChatMessage, MessageState, OutputLocale, RelatedQuestion, SkillEvent } from '@refly/common-types';
-import { LOCALE, TASK_STATUS } from '@refly/common-types';
-import type { ChatTask, InvokeSkillRequest, ChatMessage } from '@refly/openapi-schema';
+import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
+import type { MessageState, ClientChatMessage, OutputLocale, SkillEvent } from '@refly/common-types';
+import {
+  useMessageStateStore,
+  useMessageStateStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/message-state';
+import { useConversationStoreShallow } from '@refly-packages/ai-workspace-common/stores/conversation';
+import { TASK_STATUS } from '@refly/common-types';
+import { InvokeSkillRequest, SkillMeta } from '@refly/openapi-schema';
 import { buildQuestionMessage, buildReplyMessage } from '@refly-packages/ai-workspace-common/utils/message';
 
 import { buildErrorMessage } from '@refly-packages/ai-workspace-common/utils/message';
@@ -20,10 +23,8 @@ import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { getAuthTokenFromCookie } from '@refly-packages/utils/request';
-import { useTranslation } from 'react-i18next';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { markdownCitationParse } from '@refly-packages/utils/parse';
-// stores
 
 const globalStreamingChatPortRef = { current: null as Runtime.Port | null };
 const globalAbortControllerRef = { current: null as AbortController | null };
@@ -31,29 +32,33 @@ const globalIsAbortedRef = { current: false as boolean };
 let uniqueId = genUniqueId();
 
 export const useBuildTask = () => {
-  const chatStore = useChatStore((state) => ({
+  const chatStore = useChatStoreShallow((state) => ({
     setMessages: state.setMessages,
   }));
-  const messageStateStore = useMessageStateStore((state) => ({
+  const messageStateStore = useMessageStateStoreShallow((state) => ({
     setMessageState: state.setMessageState,
     resetState: state.resetState,
   }));
-  const conversationStore = useConversationStore((state) => ({
+  const conversationStore = useConversationStoreShallow((state) => ({
     setCurrentConversation: state.setCurrentConversation,
     setIsNewConversation: state.setIsNewConversation,
     currentConversation: state.currentConversation,
   }));
 
+  const { t } = useTranslation();
+  const schedulerMeta: SkillMeta = {
+    tplName: 'scheduler',
+    displayName: t('copilot.reflyAssistant'),
+    icon: { type: 'emoji', value: '🧙‍♂️' },
+  };
+
   const buildTaskAndGenReponse = (task: InvokeSkillRequest) => {
-    console.log('buildTaskAndGenReponse', task);
     const question = task?.input?.query;
     const context = task?.context || {};
     const { messages = [] } = useChatStore.getState();
-    const { currentConversation } = useConversationStore.getState();
     const { skillInstances = [] } = useSkillStore.getState();
 
     const selectedSkillInstance = skillInstances.find((item) => item.skillId === task.skillId);
-    // Skill 和 Message 绑定，某条 AI Message 来自哪个 Skill
     const questionMsg = buildQuestionMessage({
       content: question,
       invokeParam: {
@@ -69,17 +74,30 @@ export const useBuildTask = () => {
           }
         : {}),
     });
-    // 将 reply 加到 message-state
     messageStateStore.setMessageState({
       nowInvokeSkillId: task?.skillId,
     });
 
-    chatStore.setMessages(messages.concat(questionMsg));
+    // Immediately build a reply message after the question message
+    // for better user experience
+    const replyMsg = buildReplyMessage({
+      content: '',
+      skillMeta: selectedSkillInstance ?? schedulerMeta,
+      spanId: '',
+      pending: true,
+    });
+    messageStateStore.setMessageState({
+      pendingReplyMsg: replyMsg,
+      pending: true,
+      pendingFirstToken: true,
+      nowInvokeSkillId: selectedSkillInstance?.skillId,
+    });
+
+    chatStore.setMessages(messages.concat(questionMsg, replyMsg));
 
     handleGenResponse(task);
 
     setTimeout(() => {
-      // 滑动到底部
       scrollToBottom();
     });
   };
@@ -119,36 +137,32 @@ export const useBuildTask = () => {
 
   const onSkillStart = (skillEvent: SkillEvent) => {
     const { messages = [] } = useChatStore.getState();
+    console.log('onSkillStart messages', messages);
 
-    const lastRelatedMessage = findLastRelatedMessage(messages, skillEvent);
+    const lastMessage = messages[messages.length - 1];
 
-    // 同一个技能对应的 spanId 只创建一条消息
-    if (lastRelatedMessage) {
-      return;
+    // If the last message is from the same skill, update its spanId
+    if (lastMessage?.skillMeta?.skillId === skillEvent?.skillMeta?.skillId) {
+      lastMessage.spanId = skillEvent?.spanId;
+      chatStore.setMessages(messages);
+    } else {
+      // Otherwise, create a new reply message
+      const replyMsg = buildReplyMessage({
+        content: '',
+        skillMeta: skillEvent.skillMeta,
+        spanId: skillEvent?.spanId,
+        pending: true,
+      });
+
+      messageStateStore.setMessageState({
+        pendingReplyMsg: replyMsg,
+        pending: true,
+        pendingFirstToken: true,
+        nowInvokeSkillId: skillEvent?.skillMeta?.skillId,
+      });
+
+      chatStore.setMessages(messages.concat(replyMsg));
     }
-
-    // 每次 start 开启一条新的 msg
-    const replyMsg = buildReplyMessage({
-      content: '',
-      skillMeta: skillEvent.skillMeta,
-      spanId: skillEvent?.spanId,
-      pending: true,
-    });
-
-    // 将 reply 加到 message-state
-    messageStateStore.setMessageState({
-      pendingReplyMsg: replyMsg,
-      pending: true, // 开始加载 skill 消息
-      pendingFirstToken: true, // 收到第一个字符
-      nowInvokeSkillId: skillEvent?.skillMeta?.skillId,
-    });
-
-    chatStore.setMessages(messages.concat(replyMsg));
-
-    setTimeout(() => {
-      // 滑动到底部
-      scrollToBottom();
-    });
   };
 
   const onSkillThoughout = (skillEvent: SkillEvent) => {
@@ -211,14 +225,9 @@ export const useBuildTask = () => {
     messages[lastRelatedMessageIndex] = lastRelatedMessage;
     chatStore.setMessages(messages);
 
-    if (pendingFirstToken) {
+    if (pendingFirstToken && lastRelatedMessage.content.trim()) {
       messageStateStore.setMessageState({ pendingFirstToken: false });
     }
-
-    setTimeout(() => {
-      // 滑动到底部
-      scrollToBottom();
-    });
   };
 
   const onSkillStructedData = (skillEvent: SkillEvent) => {
