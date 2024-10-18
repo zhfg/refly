@@ -27,6 +27,7 @@ export const ChatInput = (props: ChatInputProps) => {
   const chatStore = useChatStoreShallow((state) => ({
     newQAText: state.newQAText,
     setNewQAText: state.setNewQAText,
+    setChatMode: state.setChatMode,
   }));
   const searchStore = useSearchStoreShallow((state) => ({
     setIsSearchOpen: state.setIsSearchOpen,
@@ -90,6 +91,7 @@ export const ChatInput = (props: ChatInputProps) => {
 
     if (e.keyCode === 13 && !e.ctrlKey && !e.shiftKey && !e.metaKey) {
       e.preventDefault();
+      chatStore.setChatMode('normal'); // current no chat mode persist
       handleSendMessage();
     }
 

@@ -49,8 +49,8 @@ const SkillDetailPage = () => {
                 order={2}
                 className="skill-detail-page__copilot"
                 {...{
-                  defaultSize: 30,
-                  minSize: 30,
+                  defaultSize: 35,
+                  minSize: 35,
                   maxSize: 50,
                 }}
                 key="skill-detail-page__copilot"

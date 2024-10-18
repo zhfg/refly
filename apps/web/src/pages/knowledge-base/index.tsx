@@ -60,8 +60,8 @@ const KnowledgeLibraryLayout = () => {
   const copilotStyle =
     knowledgeBaseStore.resourcePanelVisible || noteStore.notePanelVisible
       ? {
-          defaultSize: 20,
-          minSize: 20,
+          defaultSize: 35,
+          minSize: 35,
           maxSize: 50,
         }
       : {
@@ -121,7 +121,6 @@ const KnowledgeLibraryLayout = () => {
               order={3}
               className="workspace-content-panel"
               {...copilotStyle}
-              minSize={30}
               key="workspace-content-panel"
               id="workspace-content-panel-copilot">
               <AICopilot />
