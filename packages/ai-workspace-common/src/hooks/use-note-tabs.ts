@@ -1,9 +1,9 @@
 import { Note } from '@refly/openapi-schema';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
-import { NoteTab, useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
+import { NoteTab, useNoteStoreShallow } from '@refly-packages/ai-workspace-common/stores/note';
 
 export const useNoteTabs = () => {
-  const noteStore = useNoteStore((state) => ({
+  const noteStore = useNoteStoreShallow((state) => ({
     tabs: state.tabs,
     activeTab: state.activeTab,
     updateTabs: state.updateTabs,

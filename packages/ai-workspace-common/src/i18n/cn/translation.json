@@ -8,6 +8,7 @@
     "edit": "编辑",
     "save": "保存",
     "add": "添加",
+    "loading": "加载中...",
     "loadMore": "加载更多",
     "more": "更多",
     "putErr": "操作失败，请尝试重试！",
@@ -997,7 +998,9 @@
       "manager": "管理"
     },
     "chatInput": {
-      "placeholder": "提出问题，发现新知"
+      "placeholder": "提出问题，发现新知",
+      "defaultQuestion": "[调用技能: {{name}}]",
+      "chatWithReflyAssistant": "和「知识管家」聊聊"
     },
     "chatActions": {
       "send": "发送",
@@ -1040,6 +1043,19 @@
     },
     "contextItem": {
       "current": "当前"
+    },
+    "modelSelector": {
+      "noModelAvailable": "无可用模型",
+      "quotaExceeded": {
+        "t1": {
+          "free": "升级以使用",
+          "pro": "超出限额，请检查订阅"
+        },
+        "t2": {
+          "free": "超出限额，升级以扩充",
+          "pro": "超出限额，请检查订阅"
+        }
+      }
     },
     "contentSelector": {
       "openForWeb": "开启选择内容提问, 笔记已进入只读模式",

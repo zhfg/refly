@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { getClientOrigin } from '@refly-packages/utils/url';
-import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getTypeIcon } from '../utils/icon';
 import { mapSelectionTypeToContentList } from '../utils/contentListSelection';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
@@ -12,10 +12,24 @@ import { useNoteTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-
 export const useProcessContextItems = () => {
   const { t } = useTranslation();
   const { jumpToNote, jumpToKnowledgeBase, jumpToReadResource } = useKnowledgeBaseJumpNewPath();
-  const currentSelectedMarks = useContextPanelStore((state) => state.currentSelectedMarks);
+  const currentSelectedMarks = useContextPanelStoreShallow((state) => state.currentSelectedMarks);
 
   const { handleAddTab: handleAddResourceTab } = useKnowledgeBaseTabs();
   const { handleAddTab: handleAddNoteTab } = useNoteTabs();
+
+  const getQueryParams = (url: string): Record<string, string> => {
+    const params: Record<string, string> = {};
+    const queryString = url.split('?')[1];
+    if (!queryString) return params;
+
+    const pairs = queryString.split('&');
+    pairs.forEach((pair) => {
+      const [key, value] = pair.split('=');
+      params[decodeURIComponent(key)] = decodeURIComponent(value || '');
+    });
+
+    return params;
+  };
 
   const getTypeName = (type: MarkType) => {
     switch (type) {
@@ -94,7 +108,7 @@ export const useProcessContextItems = () => {
       type: mark.type,
       active: mark?.active || false,
       url: getTypeUrl(mark),
-      icon: getTypeIcon(mark),
+      icon: getTypeIcon(mark.type),
       name: getTypeName(mark.type),
     };
   };
@@ -160,5 +174,54 @@ export const useProcessContextItems = () => {
 
   const contextItemIdsByType = getContextItemIdsByType();
 
-  return { processedContextItems, contextItemTypes, contextItemIdsByType };
+  const processContextItemsFromMessage = (context: Record<string, any>) => {
+    const contextItems = [];
+    Object.keys(context).forEach((key) => {
+      const itemList = context[key];
+      itemList.forEach((item) => {
+        const metadata = item.metadata || {};
+        let typeKey = key;
+        let id = '';
+        let parentId = '';
+        if (key === 'notes') {
+          id = item?.noteId;
+          typeKey = 'note';
+        } else if (key === 'resources') {
+          id = item?.resourceId;
+          typeKey = 'resource';
+        } else if (key === 'collections') {
+          id = item?.collectionId;
+          typeKey = 'collection';
+        } else {
+          id = metadata.entityId;
+          typeKey = metadata.domain;
+          const queryParams = getQueryParams(metadata.url || '') || {};
+          if (typeKey === 'noteSelection') {
+            parentId = queryParams.noteId;
+          } else if (typeKey === 'resourceSelection') {
+            parentId = queryParams.resId;
+          }
+        }
+
+        const mark: Mark = {
+          id,
+          entityId: id,
+          type: typeKey as MarkType,
+          title: metadata.title,
+          data: item?.content,
+          domain: metadata.domain,
+          icon: getTypeIcon(typeKey as MarkType),
+          name: getTypeName(typeKey as MarkType),
+          parentId,
+        };
+
+        mark.url = getTypeUrl(mark);
+
+        contextItems.push(mark);
+      });
+    });
+    return contextItems;
+  };
+
+  return { processedContextItems, contextItemTypes, contextItemIdsByType, processContextItemsFromMessage };
 };

@@ -1,25 +1,18 @@
-import { Button, Checkbox, Form } from '@arco-design/web-react';
-// 自定义样式
+import { forwardRef, ForwardRefRenderFunction, memo, useEffect } from 'react';
+import { Form } from '@arco-design/web-react';
+import { useTranslation } from 'react-i18next';
+
 import './index.scss';
-// 自定义组件
-import { forwardRef, ForwardRefRenderFunction, memo, useEffect, useState } from 'react';
+
 import { ChatInput } from './chat-input';
 import { SkillDisplay } from './skill-display';
-import { ChatInputAssistAction } from './chat-input-assist-action';
 import { ContextManager } from './context-manager';
 import { ChatActions } from './chat-actions';
 import { SelectedSkillHeader } from './selected-skill-header';
 import { ConfigManager } from './config-manager';
-//stores
-import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 
-// utils
-import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
-import { SelectedInstanceCard } from '@refly-packages/ai-workspace-common/components/skill/selected-instance-card';
-// hooks
-import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
+import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { useTranslation } from 'react-i18next';
 
 interface CopilotInputModuleProps {
   source?: string;
@@ -28,17 +21,11 @@ interface CopilotInputModuleProps {
 const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, CopilotInputModuleProps> = (props, ref) => {
   const { source } = props;
   const { t } = useTranslation();
-  const messageStateStore = useMessageStateStore((state) => ({
-    pending: state.pending,
-    pendingFirstToken: state.pendingFirstToken,
-    resetState: state.resetState,
-  }));
-  const skillStore = useSkillStore((state) => ({
+
+  const skillStore = useSkillStoreShallow((state) => ({
     selectedSkill: state.selectedSkill,
     setSelectedSkillInstance: state.setSelectedSkillInstance,
   }));
-
-  const { contextCardHeight, computedShowContextCard, showContextState } = useCopilotContextState();
 
   const [form] = Form.useForm();
   const { formErrors, setFormErrors } = useContextPanelStore((state) => ({

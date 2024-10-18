@@ -120,6 +120,7 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
                     {({ checked }) => {
                       return (
                         <Tooltip
+                          key="resourcePanel"
                           content={t('knowledgeBase.header.searchAndOpenResourceOrCollection')}
                           getPopupContainer={getPopupContainer}
                         >
@@ -144,6 +145,7 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
                     {({ checked }) => {
                       return (
                         <Tooltip
+                          key="notePanel"
                           content={t('knowledgeBase.header.searchOrOpenNote')}
                           getPopupContainer={getPopupContainer}
                         >
@@ -159,7 +161,11 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
                       );
                     }}
                   </Checkbox>,
-                  <Tooltip content={t('knowledgeBase.header.searchOrOpenThread')} getPopupContainer={getPopupContainer}>
+                  <Tooltip
+                    key="searchOrOpenThread"
+                    content={t('knowledgeBase.header.searchOrOpenThread')}
+                    getPopupContainer={getPopupContainer}
+                  >
                     <Button
                       icon={<IconSearch />}
                       type="text"
@@ -188,7 +194,11 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
             ) : null}
           </div>
           <div className="knowledge-base-detail-navigation-bar">
-            <Tooltip content={t('knowledgeBase.header.openThreadHistory')} getPopupContainer={getPopupContainer}>
+            <Tooltip
+              key="threadHistory"
+              content={t('knowledgeBase.header.openThreadHistory')}
+              getPopupContainer={getPopupContainer}
+            >
               <Button
                 icon={<IconHistory />}
                 type="text"
@@ -200,7 +210,11 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
                 {/* 会话历史 */}
               </Button>
             </Tooltip>
-            <Tooltip content={t('knowledgeBase.header.newThread')} getPopupContainer={getPopupContainer}>
+            <Tooltip
+              key="newThread"
+              content={t('knowledgeBase.header.newThread')}
+              getPopupContainer={getPopupContainer}
+            >
               <Button
                 icon={<IconPlus />}
                 type="text"

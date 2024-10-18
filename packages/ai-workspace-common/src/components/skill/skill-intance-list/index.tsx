@@ -15,7 +15,7 @@ import { HiMiniArrowUturnRight } from 'react-icons/hi2';
 import { HiSearch } from 'react-icons/hi';
 import { useSearchableList } from '@refly-packages/ai-workspace-common/components/use-searchable-list';
 import { useNavigate } from 'react-router-dom';
-import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
+import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 // styles
 import './index.scss';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
@@ -31,8 +31,12 @@ interface SkillInstanceListProps {
 export const SkillInstanceList = (props: SkillInstanceListProps) => {
   const { source, canGoDetail } = props;
   const { t } = useTranslation();
-  const setSkillManagerModalVisible = useSkillStore((state) => state.setSkillManagerModalVisible);
-  const skillStore = useSkillStore();
+
+  const { setSkillInstances, setSkillManagerModalVisible } = useSkillStoreShallow((state) => ({
+    setSkillInstances: state.setSkillInstances,
+    setSkillManagerModalVisible: state.setSkillManagerModalVisible,
+  }));
+
   const { dataList, loadMore, setDataList, hasMore, isRequesting, reload } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listSkillInstances({
@@ -42,6 +46,7 @@ export const SkillInstanceList = (props: SkillInstanceListProps) => {
     },
     pageSize: 12,
   });
+
   const navigate = useNavigate();
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
@@ -76,7 +81,7 @@ export const SkillInstanceList = (props: SkillInstanceListProps) => {
   useEffect(() => {
     setSkillList(dataList);
     if (source === 'skill-management-modal') {
-      skillStore.setSkillInstances(dataList);
+      setSkillInstances(dataList);
     }
   }, [dataList]);
 

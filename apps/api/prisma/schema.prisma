@@ -130,6 +130,8 @@ model ChatMessage {
   toolCalls      String?     @map("tool_calls")
   /// Token usage summary
   tokenUsage     String?     @map("token_usage")
+  /// Skill invocation parameters (JSON of `InvokeSkillRequest`)
+  invokeParam    String?     @map("invoke_param")
   /// Locale setting
   locale         String?     @default("") @map("locale")
   /// Create timestamp

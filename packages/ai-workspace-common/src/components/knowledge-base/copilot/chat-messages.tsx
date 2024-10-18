@@ -1,13 +1,11 @@
 // stores
-import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 // styles
-import { AssistantMessage, HumanMessage, PendingMessage, WelcomeMessage } from './message';
-import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
+import { AssistantMessage, HumanMessage, WelcomeMessage } from './message';
+import { useMessageStateStoreShallow } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { memo, useCallback } from 'react';
-import { useShallow } from 'zustand/react/shallow';
-import { MessageState } from '@refly/common-types';
 import { ChatMessage } from '@refly/openapi-schema';
 import { Skeleton } from '@arco-design/web-react';
 
@@ -16,19 +14,13 @@ interface ChatMessagesProps {
   loading?: boolean;
 }
 
-const messageStateSelector = (state: MessageState) => {
-  return {
+export const ChatMessages = memo((props: ChatMessagesProps) => {
+  const messages = useChatStoreShallow((state) => state.messages);
+  const userProfile = useUserStoreShallow((state) => state.userProfile);
+  const messageStateStore = useMessageStateStoreShallow((state) => ({
     pending: state.pending,
     pendingFirstToken: state.pendingFirstToken,
-  };
-};
-
-const useMessages = () => useChatStore(useShallow((state) => state.messages));
-
-export const ChatMessages = memo((props: ChatMessagesProps) => {
-  const messages = useMessages();
-  const userProfile = useUserStoreShallow((state) => state.userProfile);
-  const messageStateStore = useMessageStateStore(messageStateSelector);
+  }));
   const { runSkill } = useBuildThreadAndRun();
   const { loading } = props;
 
@@ -76,7 +68,6 @@ export const ChatMessages = memo((props: ChatMessagesProps) => {
     <div className="ai-copilot-message-inner-container">
       {loading ? <LoadingSkeleton /> : messages.map(renderMessage)}
       {messages?.length === 0 && !loading ? <WelcomeMessage /> : null}
-      {/* {messageStateStore?.pending && messageStateStore?.pendingFirstToken ? <PendingMessage /> : null} */}
     </div>
   );
 });

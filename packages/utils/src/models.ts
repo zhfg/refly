@@ -14,36 +14,43 @@ export const ModelContextLimitMap = {
   [LLMType.Claude3Haiku]: 200 * 1024,
 };
 
-export const defaultModelList: ModelInfo[] = [
-  {
+export const modelMap: Record<string, ModelInfo> = {
+  [LLMType.GPT4o]: {
     name: LLMType.GPT4o,
     label: 'GPT-4o',
     provider: 'openai',
     tier: 't1',
-    contextLimit: ModelContextLimitMap[LLMType.GPT4o],
+    contextLimit: 128 * 1024,
   },
-  {
-    name: LLMType.Claude35Sonnet,
-    label: 'Claude 3.5 Sonnet',
-    provider: 'anthropic',
-    tier: 't1',
-    contextLimit: ModelContextLimitMap[LLMType.Claude35Sonnet],
-  },
-  {
+  [LLMType.GPT4oMini]: {
     name: LLMType.GPT4oMini,
     label: 'GPT-4o Mini',
     provider: 'openai',
     tier: 't2',
-    contextLimit: ModelContextLimitMap[LLMType.GPT4oMini],
+    contextLimit: 128 * 1024,
   },
-  {
+  [LLMType.Claude35Sonnet]: {
+    name: LLMType.Claude35Sonnet,
+    label: 'Claude 3.5 Sonnet',
+    provider: 'anthropic',
+    tier: 't1',
+    contextLimit: 200 * 1024,
+  },
+  [LLMType.Claude3Haiku]: {
     name: LLMType.Claude3Haiku,
     label: 'Claude 3 Haiku',
     provider: 'anthropic',
     tier: 't2',
-    contextLimit: ModelContextLimitMap[LLMType.Claude3Haiku],
+    contextLimit: 200 * 1024,
   },
-];
+};
+
+export const defaultModelList: ModelInfo[] = Object.values(modelMap).sort((a, b) => {
+  if (a.tier === b.tier) {
+    return a.name.localeCompare(b.name);
+  }
+  return a.tier.localeCompare(b.tier);
+});
 
 /**
  * Aggregate token usage items by model tier and name

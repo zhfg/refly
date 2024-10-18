@@ -1,9 +1,7 @@
-import { getAuthTokenFromCookie } from './request';
 import { getServerOrigin } from '@refly/utils/url';
 import { InvokeSkillRequest } from '@refly/openapi-schema';
 import { SkillEvent } from '@refly/common-types';
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { getCookie } from '@refly-packages/ai-workspace-common/utils/cookie';
+import { scrollToBottom } from '@refly-packages/ai-workspace-common/utils/ui';
 
 export const ssePost = async ({
   controller,
@@ -17,6 +15,7 @@ export const ssePost = async ({
   onSkillStructedData,
   onError,
   onCompleted,
+  onSkillUsage,
 }: {
   controller: AbortController;
   token: string;
@@ -29,6 +28,7 @@ export const ssePost = async ({
   onSkillStructedData: (event: SkillEvent) => void;
   onError?: (status: any) => void;
   onCompleted?: (val?: boolean) => void;
+  onSkillUsage?: (event: SkillEvent) => void;
 }) => {
   let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
 
@@ -94,7 +94,13 @@ export const ssePost = async ({
                 onSkillStream(skillEvent);
               } else if (skillEvent?.event === 'structured_data') {
                 onSkillStructedData(skillEvent);
+              } else if (skillEvent?.event === 'usage') {
+                onSkillUsage(skillEvent);
               }
+              setTimeout(() => {
+                // 滑动到底部
+                scrollToBottom();
+              });
             }
           });
 

@@ -4,7 +4,7 @@ export interface SkillEvent {
   /**
    * The event type
    */
-  event: 'start' | 'end' | 'stream' | 'log' | 'structured_data' | 'error';
+  event: 'start' | 'end' | 'stream' | 'log' | 'structured_data' | 'usage' | 'error';
   /**
    * The event span, which can be used to separate events into message groups
    */

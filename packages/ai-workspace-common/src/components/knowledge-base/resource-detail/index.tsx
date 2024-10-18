@@ -90,7 +90,7 @@ export const KnowledgeBaseResourceDetail = memo(() => {
       const resource = newRes?.data as Resource;
       knowledgeBaseStore.updateResource(resource);
     } catch (err) {
-      message.error('获取内容详情失败，请重新刷新试试');
+      message.error(t('contentDetail.list.fetchErr'));
     }
 
     setFetch && setIsFetching(false);

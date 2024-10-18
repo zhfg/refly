@@ -1,11 +1,16 @@
 import { useEffect, useRef } from 'react';
 import { Message as message } from '@arco-design/web-react';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
+import { useSkillStore, useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 
 export const useSkillManagement = ({ shouldInit = false }: { shouldInit: boolean } = { shouldInit: false }) => {
-  const skillStore = useSkillStore();
+  const skillStore = useSkillStoreShallow((state) => ({
+    setSkillInstances: state.setSkillInstances,
+    setSkillTemplates: state.setSkillTemplates,
+    setIsFetchingSkillInstances: state.setIsFetchingSkillInstances,
+    setIsFetchingSkillTemplates: state.setIsFetchingSkillTemplates,
+  }));
 
   const handleGetSkillInstances = async () => {
     const { userProfile } = useUserStore.getState();
@@ -13,6 +18,7 @@ export const useSkillManagement = ({ shouldInit = false }: { shouldInit: boolean
       return;
     }
 
+    skillStore.setIsFetchingSkillInstances(true);
     const { data, error } = (await getClient().listSkillInstances({ query: { sortByPin: true } })) || {};
 
     if (data?.data) {
@@ -21,9 +27,11 @@ export const useSkillManagement = ({ shouldInit = false }: { shouldInit: boolean
     } else {
       console.log('get skill instances error', error);
     }
+    skillStore.setIsFetchingSkillInstances(false);
   };
 
   const handleGetSkillTemplates = async () => {
+    skillStore.setIsFetchingSkillTemplates(true);
     const { data, error } = (await getClient().listSkillTemplates()) || {};
 
     if (data?.data) {
@@ -32,6 +40,7 @@ export const useSkillManagement = ({ shouldInit = false }: { shouldInit: boolean
     } else {
       console.log('get skill templates error', error);
     }
+    skillStore.setIsFetchingSkillTemplates(false);
   };
 
   const handleAddSkillInstance = async (skillTemplateName: string) => {
@@ -68,39 +77,9 @@ export const useSkillManagement = ({ shouldInit = false }: { shouldInit: boolean
     }
   };
 
-  const handleRemoveSkillInstance = async (skillName: string) => {
-    const { skillInstances = [] } = useSkillStore.getState();
-    const skill = skillInstances.find((item) => item?.skillName === skillName);
-    if (!skill?.skillId) return;
-
-    message.loading({
-      content: '正在移除技能...',
-      duration: 1000,
-    });
-    try {
-      const { data } = await getClient().deleteSkillInstance({
-        body: {
-          skillId: skill?.skillId,
-        },
-      });
-
-      if (data?.success) {
-        handleGetSkillInstances(); // 重新获取技能事例
-        message.success('技能移除成功');
-      }
-    } catch (err) {
-      console.log('remove skill instance error', err);
-      message.error('技能移除失败');
-    }
-
-    const newSkillInstances = skillInstances.filter((item) => item?.skillName !== skillName);
-    skillStore.setSkillInstances(newSkillInstances);
-  };
-
   return {
     handleGetSkillInstances,
     handleGetSkillTemplates,
     handleAddSkillInstance,
-    handleRemoveSkillInstance,
   };
 };

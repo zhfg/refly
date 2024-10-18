@@ -15,7 +15,6 @@ export const useKnowledgeBaseTabs = () => {
     activeTab: state.activeTab,
     updateTabs: state.updateTabs,
     updateActiveTab: state.updateActiveTab,
-    resetTabs: state.resetTabs,
   }));
   const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
 

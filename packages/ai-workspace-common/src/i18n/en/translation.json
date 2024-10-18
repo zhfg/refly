@@ -8,6 +8,7 @@
     "edit": "Edit",
     "save": "Save",
     "add": "Add",
+    "loading": "Loading...",
     "loadMore": "Load More",
     "more": "More",
     "putErr": "Failed to perform operation. Please try again!",
@@ -988,7 +989,9 @@
       "manager": "Manage"
     },
     "chatInput": {
-      "placeholder": "Ask a question, discover new knowledge"
+      "placeholder": "Ask a question, discover new knowledge",
+      "defaultQuestion": "[Call Skill: {{name}}]",
+      "chatWithReflyAssistant": "Chat with Refly Assistant"
     },
     "chatActions": {
       "send": "Send",
@@ -1031,6 +1034,19 @@
     },
     "contextItem": {
       "current": "Current "
+    },
+    "modelSelector": {
+      "noModelAvailable": "No model available",
+      "quotaExceeded": {
+        "t1": {
+          "free": "Upgrade To Use",
+          "pro": "Quota Exceeded, Check Your Subscription"
+        },
+        "t2": {
+          "free": "Quota Exceeded, Upgrade To Use More",
+          "pro": "Quota Exceeded, Check Your Subscription"
+        }
+      }
     },
     "contentSelector": {
       "openForWeb": "Enable content selection for questions, and the note is now in read-only mode",

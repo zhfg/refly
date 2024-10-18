@@ -1,18 +1,10 @@
-import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
-import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
+import { useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useConversationStoreShallow } from '@refly-packages/ai-workspace-common/stores/conversation';
 import { buildConversation, getConversation } from '@refly-packages/ai-workspace-common/utils/conversation';
 import { useResetState } from './use-reset-state';
-import { useTaskStore } from '@refly-packages/ai-workspace-common/stores/task';
+import { useTaskStoreShallow } from '@refly-packages/ai-workspace-common/stores/task';
 
-// 类型
-import {
-  Source,
-  ChatMessage as Message,
-  InvokeSkillRequest,
-  SkillContext,
-  SearchDomain,
-  SkillTemplateConfig,
-} from '@refly/openapi-schema';
+import { InvokeSkillRequest, SkillContext, SkillTemplateConfig } from '@refly/openapi-schema';
 // request
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { OutputLocale } from '@refly-packages/ai-workspace-common/utils/i18n';
@@ -21,28 +13,25 @@ import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill'
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 // hooks
 import { useBuildSkillContext } from './use-build-skill-context';
+import { useTranslation } from 'react-i18next';
 
 export const useBuildThreadAndRun = () => {
+  const { t } = useTranslation();
   const { buildSkillContext } = useBuildSkillContext();
-  const chatStore = useChatStore((state) => ({
+  const chatStore = useChatStoreShallow((state) => ({
     setNewQAText: state.setNewQAText,
     setInvokeParams: state.setInvokeParams,
   }));
-  const skillStore = useSkillStore((state) => ({
-    setSelectedSkillInstance: state.setSelectedSkillInstance,
-  }));
-  const conversationStore = useConversationStore((state) => ({
+  const conversationStore = useConversationStoreShallow((state) => ({
+    currentConversation: state.currentConversation,
     setCurrentConversation: state.setCurrentConversation,
     setIsNewConversation: state.setIsNewConversation,
   }));
   const { resetState } = useResetState();
-  const taskStore = useTaskStore((state) => ({
+  const taskStore = useTaskStoreShallow((state) => ({
     setTask: state.setTask,
   }));
   const { buildTaskAndGenReponse, buildShutdownTaskAndGenResponse } = useBuildTask();
-  // const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
-  //   updateCurrentSelectedMark: state.updateCurrentSelectedMark,
-  // }));
   const { jumpToConv } = useKnowledgeBaseJumpNewPath();
 
   const emptyConvRunSkill = (
@@ -50,7 +39,6 @@ export const useBuildThreadAndRun = () => {
     forceNewConv?: boolean,
     invokeParams?: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig },
   ) => {
-    // 首先清空所有状态
     if (forceNewConv) {
       resetState();
     }
@@ -68,7 +56,7 @@ export const useBuildThreadAndRun = () => {
   };
 
   const ensureConversationExist = (forceNewConv = false) => {
-    const { currentConversation } = useConversationStore.getState();
+    const { currentConversation } = conversationStore;
     const { localSettings } = useUserStore.getState();
 
     if (!currentConversation?.convId || forceNewConv) {
@@ -92,7 +80,7 @@ export const useBuildThreadAndRun = () => {
     const { selectedSkill } = useSkillStore.getState();
     const { localSettings } = useUserStore.getState();
 
-    const question = comingQuestion;
+    let question = comingQuestion.trim();
     const isFollowUpAsk = messages?.length > 0;
 
     // 创建新会话并跳转
@@ -116,6 +104,12 @@ export const useBuildThreadAndRun = () => {
             label: localSettings?.uiLocale === 'zh-CN' ? '直接提问' : 'Normal Chat',
           },
         };
+
+    question =
+      question ||
+      (selectedSkill
+        ? t('copilot.chatInput.defaultQuestion', { name: selectedSkill?.displayName })
+        : t('copilot.chatInput.chatWithReflyAssistant'));
 
     // 设置当前的任务类型及会话 id
     const task: InvokeSkillRequest = {

@@ -67,7 +67,7 @@ export const KnowledgeBaseDirectory = (props: { small?: boolean }) => {
         knowledgeBaseStore.updateCurrentKnowledgeBase(newRes?.data);
       }
     } catch (err) {
-      message.error('获取内容详情失败，请重新刷新试试');
+      message.error(t('contentDetail.list.fetchErr'));
     }
     setIsFetching(false);
   };

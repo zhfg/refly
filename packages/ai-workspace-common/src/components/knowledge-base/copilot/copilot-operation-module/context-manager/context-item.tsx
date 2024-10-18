@@ -11,13 +11,15 @@ export const ContextItem = ({
   disabled,
   onToggle,
   onRemove,
+  canNotRemove,
 }: {
+  canNotRemove?: boolean;
   item: Mark;
   isActive: boolean;
   isLimit?: boolean;
   disabled?: boolean;
   onToggle: any;
-  onRemove: any;
+  onRemove?: any;
 }) => {
   const { t } = useTranslation();
   return (
@@ -34,13 +36,15 @@ export const ContextItem = ({
           {item.isCurrentContext ? t('copilot.contextItem.current') : ''}
           {item?.name}
         </span>
-        <IconClose
-          className="item-close"
-          onClick={(e) => {
-            e.stopPropagation();
-            onRemove(item.id);
-          }}
-        />
+        {!canNotRemove && (
+          <IconClose
+            className="item-close"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove && onRemove(item.id);
+            }}
+          />
+        )}
       </div>
     </div>
   );

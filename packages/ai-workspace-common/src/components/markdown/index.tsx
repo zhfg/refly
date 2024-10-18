@@ -144,7 +144,7 @@ export const Markdown = memo(
         {shouldLoading ? (
           <IconLoading />
         ) : (
-          <Suspense fallback={<div>{t('components.markdown.loading')}</div>}>
+          <Suspense fallback={<div>{t('common.loading')}</div>}>
             {isKatexLoaded && plugins.RemarkMath && plugins.RehypeKatex && plugins.RehypeHighlight && (
               <ReactMarkdown
                 remarkPlugins={[RemarkGfm, RemarkBreaks, plugins.RemarkMath]}

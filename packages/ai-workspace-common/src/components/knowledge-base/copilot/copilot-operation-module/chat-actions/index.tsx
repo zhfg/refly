@@ -1,21 +1,13 @@
-import React, { useRef, useState } from 'react';
-import { Button, Input, Dropdown, Menu, Notification, FormInstance, Switch } from '@arco-design/web-react';
+import { Button, Dropdown, Menu, Notification, FormInstance, Switch, Checkbox } from '@arco-design/web-react';
 
-import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
-import { ChatMode, useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
-import { useQuickSearchStateStore } from '@refly-packages/ai-workspace-common/stores/quick-search-state';
-import { IconClose, IconFile, IconFontColors, IconPause, IconSend, IconStop } from '@arco-design/web-react/icon';
-import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
+import { ChatMode, useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
+import { IconDown, IconPause, IconSend } from '@arco-design/web-react/icon';
+import { useMessageStateStoreShallow } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
-import { buildConversation } from '@refly-packages/ai-workspace-common/utils/conversation';
-import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
-import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
-import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
+import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
+import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
 import { useContextFilterErrorTip } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module/context-manager/hooks/use-context-filter-errror-tip';
-import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
-import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
 import { useTranslation } from 'react-i18next';
-import { SkillTemplateConfig } from '@refly/openapi-schema';
 
 // components
 import { ModelSelector } from './model-selector';
@@ -25,6 +17,7 @@ import './index.scss';
 import { OutputLocaleList } from '@refly-packages/ai-workspace-common/components/output-locale-list';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 
 interface ChatActionsProps {
   form?: FormInstance;
@@ -33,25 +26,34 @@ interface ChatActionsProps {
 export const ChatActions = (props: ChatActionsProps) => {
   const { form } = props;
   const { t } = useTranslation();
-  const [image, setImage] = useState(null);
 
-  const inputRef = useRef<RefTextAreaType>(null);
   // stores
-  const chatStore = useChatStore((state) => ({
+  const chatStore = useChatStoreShallow((state) => ({
+    newQAText: state.newQAText,
     chatMode: state.chatMode,
     setChatMode: state.setChatMode,
     enableWebSearch: state.enableWebSearch,
     setEnableWebSearch: state.setEnableWebSearch,
   }));
-  const searchStore = useSearchStore();
-  const conversationStore = useConversationStore();
-  const messageStateStore = useMessageStateStore();
-  const skillStore = useSkillStore((state) => ({
+  const searchStore = useSearchStoreShallow((state) => ({
+    setIsSearchOpen: state.setIsSearchOpen,
+  }));
+  const messageStateStore = useMessageStateStoreShallow((state) => ({
+    pending: state.pending,
+  }));
+  const skillStore = useSkillStoreShallow((state) => ({
     selectedSkill: state.selectedSkill,
   }));
+
+  const { tokenUsage } = useSubscriptionStoreShallow((state) => ({
+    tokenUsage: state.tokenUsage,
+  }));
+  const tokenAvailable =
+    tokenUsage?.t1TokenQuota > tokenUsage?.t1TokenUsed || tokenUsage?.t2TokenQuota > tokenUsage?.t2TokenUsed;
+
   const { runSkill, emptyConvRunSkill, buildShutdownTaskAndGenResponse } = useBuildThreadAndRun();
+
   // hooks
-  const [isFocused, setIsFocused] = useState(false);
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
 
@@ -76,6 +78,7 @@ export const ChatActions = (props: ChatActionsProps) => {
     chatStore.setChatMode(type);
 
     const { messages, newQAText } = useChatStore.getState();
+
     searchStore.setIsSearchOpen(false);
     const tplConfig = form?.getFieldValue('tplConfig');
     const invokeParams = { tplConfig: tplConfig };
@@ -93,17 +96,17 @@ export const ChatActions = (props: ChatActionsProps) => {
     buildShutdownTaskAndGenResponse();
   };
 
+  const canSendEmptyMessage = skillStore?.selectedSkill || (!skillStore?.selectedSkill && chatStore.newQAText?.trim());
+  const canSendMessage = !messageStateStore?.pending && tokenAvailable && canSendEmptyMessage;
+
   return (
     <div className="chat-actions">
       <div className="left-actions">
-        {/* <Button className={'action-btn'} icon={<IconFile />} size="mini" type="text">
-          上传图片
-        </Button> */}
         <ModelSelector />
         <OutputLocaleList />
         {!skillStore?.selectedSkill?.skillId ? (
           <div className="chat-action-item" onClick={() => chatStore.setEnableWebSearch(!chatStore.enableWebSearch)}>
-            <Switch type="round" size="small" checked={chatStore.enableWebSearch} />
+            <Checkbox checked={chatStore.enableWebSearch} />
             <span className="chat-action-item-text">{t('copilot.webSearch.title')}</span>
           </div>
         ) : null}
@@ -139,12 +142,21 @@ export const ChatActions = (props: ChatActionsProps) => {
         ) : (
           <Dropdown
             position="tr"
+            disabled={!canSendMessage}
             droplist={
               <Menu>
-                <Menu.Item key="noContext" onClick={() => handleSendMessage('noContext')}>
+                <Menu.Item
+                  key="noContext"
+                  className="text-xs h-8 leading-8"
+                  onClick={() => handleSendMessage('noContext')}
+                >
                   {t('copilot.chatMode.noContext')}
                 </Menu.Item>
-                <Menu.Item key="wholeSpace" onClick={() => handleSendMessage('wholeSpace')}>
+                <Menu.Item
+                  key="wholeSpace"
+                  className="text-xs h-8 leading-8"
+                  onClick={() => handleSendMessage('wholeSpace')}
+                >
                   {t('copilot.chatMode.wholeSpace')}
                 </Menu.Item>
               </Menu>
@@ -152,16 +164,17 @@ export const ChatActions = (props: ChatActionsProps) => {
           >
             <Button
               size="mini"
+              type="primary"
               icon={<IconSend />}
               loading={messageStateStore?.pending}
-              disabled={messageStateStore?.pending}
+              disabled={!canSendMessage}
               className="search-btn"
-              style={{ color: '#FFF', background: '#00968F' }}
               onClick={() => {
                 handleSendMessage('normal');
               }}
             >
               {t('copilot.chatActions.send')}
+              <IconDown />
             </Button>
           </Dropdown>
         )}

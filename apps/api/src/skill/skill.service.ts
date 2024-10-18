@@ -344,7 +344,7 @@ export class SkillService {
 
   async skillInvokePreCheck(user: User, param: InvokeSkillRequest): Promise<InvokeSkillJobData> {
     const { uid } = user;
-    const data: InvokeSkillJobData = { ...param, uid };
+    const data: InvokeSkillJobData = { ...param, uid, rawParam: JSON.stringify(param) };
 
     // Check for token quota
     const usageResult = await this.subscription.checkTokenUsage(user);
@@ -625,7 +625,7 @@ export class SkillService {
   }
 
   private async _invokeSkill(user: User, data: InvokeSkillJobData, res?: Response) {
-    const { input, conversation, job } = data;
+    const { input, conversation, job, rawParam } = data;
 
     const convParam = conversation
       ? {
@@ -662,20 +662,19 @@ export class SkillService {
 
     // Save user query to conversation right before invoking skill
     // but after the chatHistory of runnable config is built
-    if (input.query) {
-      await this.conversation.addChatMessages(
-        [
-          {
-            type: 'human',
-            content: input.query,
-            uid: user.uid,
-            convId: conversation?.convId,
-            jobId: job?.jobId,
-          },
-        ],
-        convParam,
-      );
-    }
+    await this.conversation.addChatMessages(
+      [
+        {
+          type: 'human',
+          content: input.query,
+          uid: user.uid,
+          convId: conversation?.convId,
+          jobId: job?.jobId,
+          invokeParam: rawParam,
+        },
+      ],
+      convParam,
+    );
 
     let runMeta: SkillRunnableMeta | null = null;
     const basicUsageData = {
@@ -739,14 +738,22 @@ export class SkillService {
         }
       }
     } finally {
-      await this.conversation.addChatMessages(
-        msgAggregator.getMessages({
-          user,
-          convId: conversation?.convId,
-          jobId: job?.jobId,
-        }),
-        convParam,
-      );
+      const messages = msgAggregator.getMessages({
+        user,
+        convId: conversation?.convId,
+        jobId: job?.jobId,
+      });
+
+      messages.forEach((msg) => {
+        writeSSEResponse(res, {
+          event: 'usage',
+          skillMeta: JSON.parse(msg.skillMeta || '{}'),
+          spanId: msg.spanId,
+          content: JSON.stringify({ token: JSON.parse(msg.tokenUsage || '{}') }),
+        });
+      });
+
+      await this.conversation.addChatMessages(messages, convParam);
     }
   }
 
@@ -783,15 +790,20 @@ export class SkillService {
       year: 365 * 24 * 60 * 60 * 1000,
     };
 
+    const param: InvokeSkillRequest = {
+      input: JSON.parse(trigger.input || '{}'),
+      context: JSON.parse(trigger.context || '{}'),
+      tplConfig: JSON.parse(trigger.tplConfig || '{}'),
+      skillId: trigger.skillId,
+      triggerId: trigger.triggerId,
+    };
+
     const job = await this.skillQueue.add(
       CHANNEL_INVOKE_SKILL,
       {
-        input: JSON.parse(trigger.input || '{}'),
-        context: JSON.parse(trigger.context || '{}'),
-        tplConfig: JSON.parse(trigger.tplConfig || '{}'),
-        skillId: trigger.skillId,
-        triggerId: trigger.triggerId,
+        ...param,
         uid: user.uid,
+        rawParam: JSON.stringify(param),
       },
       {
         delay: new Date(datetime).getTime() - new Date().getTime(),
