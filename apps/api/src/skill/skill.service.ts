@@ -747,9 +747,9 @@ export class SkillService {
       messages.forEach((msg) => {
         writeSSEResponse(res, {
           event: 'usage',
-          skillMeta: JSON.parse(msg.skillMeta),
+          skillMeta: JSON.parse(msg.skillMeta || '{}'),
           spanId: msg.spanId,
-          content: JSON.stringify({ token: msg.tokenUsage }),
+          content: JSON.stringify({ token: JSON.parse(msg.tokenUsage || '{}') }),
         });
       });
 
