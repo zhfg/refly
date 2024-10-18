@@ -988,7 +988,9 @@
       "manager": "Manage"
     },
     "chatInput": {
-      "placeholder": "Ask a question, discover new knowledge"
+      "placeholder": "Ask a question, discover new knowledge",
+      "defaultQuestion": "Call「{{name}}」Skill",
+      "chatWithReflyAssistant": "Chat with Refly Assistant"
     },
     "chatActions": {
       "send": "Send",
