@@ -95,7 +95,7 @@ export const Search = (props: SearchProps) => {
       case 'home':
         return '';
       case 'note':
-        return 'note';
+        return 'canvas';
       case 'readSesources':
         return 'resource';
       case 'knowledgeBases':
@@ -111,7 +111,6 @@ export const Search = (props: SearchProps) => {
 
   const handleBigSearchValueChange = (searchVal: string, activePage: string) => {
     const domain = getMappedPageToDomain(activePage);
-    console.log('activePage:', activePage, domain);
 
     // searchVal 为空的时候获取正常列表的内容
     if (!searchVal) {
@@ -152,7 +151,7 @@ export const Search = (props: SearchProps) => {
       const resData = data?.data || [];
 
       // notes
-      const notes = resData.filter((item) => item?.domain === 'note') || [];
+      const notes = resData.filter((item) => item?.domain === 'canvas') || [];
       const readResources = resData.filter((item) => item?.domain === 'resource') || [];
       const knowledgeBases = resData.filter((item) => item?.domain === 'collection') || [];
       const convs = resData.filter((item) => item?.domain === 'conversation') || [];
@@ -217,7 +216,7 @@ export const Search = (props: SearchProps) => {
       icon: <IconEdit style={{ fontSize: 12 }} />,
       onItemClick: (item: SearchResult) => {
         jumpToCanvas({
-          noteId: item?.id,
+          canvasId: item?.id,
         });
         handleAddNoteTab({
           title: item?.title,
