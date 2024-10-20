@@ -4,7 +4,7 @@ import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/searc
 import { IconFolderAdd } from '@arco-design/web-react/icon';
 
 import './index.scss';
-import { Button, Modal } from '@arco-design/web-react';
+import { Button } from '@arco-design/web-react';
 import { Item } from './item';
 
 // request
@@ -60,8 +60,8 @@ export function DataList({
       });
 
       return { success: true, data };
-    } else if (domain === 'note') {
-      const res = await getClient().listNotes({
+    } else if (domain === 'canvas') {
+      const res = await getClient().listCanvas({
         query: {
           ...queryPayload,
         },
@@ -70,7 +70,7 @@ export function DataList({
       if (!res?.data?.success) return { success: false };
       const data = res?.data?.data?.map((item) => {
         return {
-          id: item?.noteId,
+          id: item?.canvasId,
           title: item?.title,
           content: [item?.content?.slice(0, 30) + '...'],
           metadata: {},
@@ -149,7 +149,6 @@ export function DataList({
     setIsRequesting(true);
 
     const res = await fetchNewData(queryPayload);
-    console.log('res', res);
 
     if (!res?.success) {
       setIsRequesting(false);

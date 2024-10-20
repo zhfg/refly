@@ -121,15 +121,15 @@ export const SkillJobs = (props: SkillJobsProps) => {
     );
   };
 
-  type cType = 'collections' | 'notes' | 'resources' | 'urls';
+  type ContextType = 'collections' | 'canvases' | 'resources' | 'urls';
 
-  const ContextAttachment = (props: { contextType: cType; contentList: string[] }) => {
+  const ContextAttachment = (props: { contextType: ContextType; contentList: string[] }) => {
     const { contextType, contentList = [] } = props;
-    const Icon = (props: { type: cType }) => {
+    const Icon = (props: { type: ContextType }) => {
       switch (props.type) {
         case 'collections':
           return <IconFolderAdd style={{ marginRight: 8 }} />;
-        case 'notes':
+        case 'canvases':
           return <IconFile style={{ marginRight: 8 }} />;
         case 'resources':
           return <IconStorage style={{ marginRight: 8 }} />;
@@ -179,7 +179,7 @@ export const SkillJobs = (props: SkillJobsProps) => {
       navigate(`/skill-detail?skillId=${skillId}&jobId=${jobId}`, { replace: true });
     };
 
-    const { collections, notes, resources, urls } = job.context;
+    const { collections, canvases, resources, urls } = job.context;
     return (
       <div
         className={`skill-jobs__card ${selectedJobId === job.jobId ? 'skill-jobs__card--selected' : ''}`}
@@ -201,13 +201,23 @@ export const SkillJobs = (props: SkillJobsProps) => {
           <Col span={12}>
             <div className="skill-jobs__card-contexts">
               {collections?.length && (
-                <ContextAttachment contextType="collections" contentList={collections.map((item) => item.title)} />
+                <ContextAttachment
+                  contextType="collections"
+                  contentList={collections.map((item) => item.collection?.title)}
+                />
               )}
               {resources?.length && (
-                <ContextAttachment contextType="collections" contentList={resources.map((item) => item.title)} />
+                <ContextAttachment
+                  contextType="resources"
+                  contentList={resources.map((item) => item.resource?.title)}
+                />
               )}
-              {notes?.length && <ContextAttachment contextType="notes" contentList={notes.map((item) => item.title)} />}
-              {urls?.length ? <ContextAttachment contextType="urls" contentList={urls} /> : null}
+              {canvases?.length && (
+                <ContextAttachment contextType="canvases" contentList={canvases.map((item) => item.canvas?.title)} />
+              )}
+              {urls?.length ? (
+                <ContextAttachment contextType="urls" contentList={urls.map((item) => item.url)} />
+              ) : null}
             </div>
           </Col>
           <Col span={4} className="skill-jobs__card-col">

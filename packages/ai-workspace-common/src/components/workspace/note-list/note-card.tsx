@@ -1,18 +1,18 @@
 import { ReactNode } from 'react';
 import { Typography } from '@arco-design/web-react';
-import { Note } from '@refly/openapi-schema';
+import { Canvas } from '@refly/openapi-schema';
 import './index.scss';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 
-interface NoteCardProps {
-  cardData: Note;
+interface CanvasCardProps {
+  cardData: Canvas;
   index: number;
   cardIcon?: ReactNode;
   children?: ReactNode;
   onClick: () => void;
 }
 
-export const NoteCard = (props: NoteCardProps) => {
+export const NoteCard = (props: CanvasCardProps) => {
   const { children, onClick, cardData, cardIcon } = props;
 
   return (

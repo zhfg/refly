@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 export const useDynamicInitContextPanelState = () => {
-  const { currentKnowledgeBase, currentNote, currentResource } = useCopilotContextState();
+  const { currentKnowledgeBase, currentCanvas: currentNote, currentResource } = useCopilotContextState();
   const { setCheckedKeys, envContextInitMap } = useContextPanelStore();
   const [searchParams] = useSearchParams();
 

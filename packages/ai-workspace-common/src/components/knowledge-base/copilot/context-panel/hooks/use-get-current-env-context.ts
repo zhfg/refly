@@ -5,12 +5,12 @@ import { getCurrentEnvContext } from '@refly-packages/ai-workspace-common/compon
 import { useEffect } from 'react';
 
 export const useGetCurrentEnvContext = () => {
-  const { currentNote, currentResource, currentKnowledgeBase } = useCopilotContextState();
+  const { currentCanvas, currentResource, currentKnowledgeBase } = useCopilotContextState();
   const { checkedKeys, nowSelectedContextDomain, setNowSelectedContextDomain } = useContextPanelStore();
 
   const currentEnvContextKeys = getCurrentEnvContext(checkedKeys, {
     resource: currentResource,
-    note: currentNote,
+    canvas: currentCanvas,
     collection: currentKnowledgeBase,
   });
   const nowSelectedEnvContext = currentEnvContextKeys.find((item) => item?.key === nowSelectedContextDomain);

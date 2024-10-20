@@ -9,7 +9,7 @@ import type { SyncMarkEvent, SyncStatusEvent } from '@refly/common-types';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { Message } from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
 
@@ -56,12 +56,12 @@ export const useSelectedMark = () => {
         contextPanelStore.updateCurrentSelectedMark(null);
       } else if (type === 'add') {
         const { currentResource } = useKnowledgeBaseStore.getState();
-        const { currentNote } = useNoteStore.getState();
+        const { currentCanvas } = useCanvasStore.getState();
         let title = '';
         let parentId = '';
-        if (mark.domain === 'noteSelection') {
-          title = currentNote?.title;
-          parentId = currentNote?.noteId;
+        if (mark.domain === 'canvasSelection') {
+          title = currentCanvas?.title;
+          parentId = currentCanvas?.canvasId;
         } else if (mark.domain === 'resourceSelection' || mark.domain === 'extensionWeblinkSelection') {
           title = currentResource?.title;
           parentId = currentResource?.resourceId;

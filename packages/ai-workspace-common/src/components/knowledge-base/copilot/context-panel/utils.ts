@@ -1,5 +1,5 @@
 import { TreeProps } from '@arco-design/web-react';
-import { Collection, Note, Resource, SearchDomain } from '@refly/openapi-schema';
+import { Collection, Canvas, Resource, SearchDomain } from '@refly/openapi-schema';
 
 export function searchData(inputValue, TreeData) {
   const loop = (data) => {
@@ -62,8 +62,8 @@ export function getSelectedData(selectedKeys, TreeData: TreeProps['treeData']) {
   return loop(TreeData);
 }
 
-export const initialCheckedKeys = ['currentPage-resource', 'currentPage-collection', 'currentPage-note'];
-export const initalExpandedKeys = ['currentPage', 'resource', 'collection', 'note', 'weblink'];
+export const initialCheckedKeys = ['currentPage-resource', 'currentPage-collection', 'currentPage-canvas'];
+export const initalExpandedKeys = ['currentPage', 'resource', 'collection', 'canvas', 'weblink'];
 export const getTotalRealCheckedContext = (checkedKeys: string[]) => {
   const filteredKeys = checkedKeys.filter((key) => {
     if (initalExpandedKeys.includes(key)) {
@@ -76,7 +76,7 @@ export const getTotalRealCheckedContext = (checkedKeys: string[]) => {
   return filteredKeys?.length || 0;
 };
 
-export const buildEnvContext = (currentKnowledgeBase: Collection, currentResource: Resource, currentNote: Note) => {
+export const buildEnvContext = (currentKnowledgeBase: Collection, currentResource: Resource, currentCanvas: Canvas) => {
   let envContextArr = [];
 
   if (currentResource?.resourceId) {
@@ -91,9 +91,9 @@ export const buildEnvContext = (currentKnowledgeBase: Collection, currentResourc
       key: `currentPage-collection`,
     });
   }
-  if (currentNote?.noteId) {
+  if (currentCanvas?.canvasId) {
     envContextArr.push({
-      title: `当前笔记：${currentNote?.title}`,
+      title: `当前笔记：${currentCanvas?.title}`,
       key: `currentPage-note`,
     });
   }
@@ -103,8 +103,8 @@ export const buildEnvContext = (currentKnowledgeBase: Collection, currentResourc
 
 export const getCurrentEnvContext = (
   checkedKeys: string[],
-  { resource, collection, note }: { resource?: Resource; collection?: Collection; note?: Note } = {},
-): { title: string; key: SearchDomain; data?: Resource | Collection | Note }[] => {
+  { resource, collection, canvas }: { resource?: Resource; collection?: Collection; canvas?: Canvas } = {},
+): { title: string; key: SearchDomain; data?: Resource | Collection | Canvas }[] => {
   const envContextArr = [];
   if (checkedKeys.includes('currentPage-resource')) {
     envContextArr.push({
@@ -120,11 +120,11 @@ export const getCurrentEnvContext = (
       data: collection,
     });
   }
-  if (checkedKeys.includes('currentPage-note')) {
+  if (checkedKeys.includes('currentPage-canvas')) {
     envContextArr.push({
       title: `当前笔记`,
-      key: `note`,
-      data: note,
+      key: `canvas`,
+      data: canvas,
     });
   }
 

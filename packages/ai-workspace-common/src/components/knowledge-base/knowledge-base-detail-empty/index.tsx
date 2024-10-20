@@ -2,13 +2,13 @@ import { Divider, Button } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { KnowledgeBaseList } from '@refly-packages/ai-workspace-common/components/knowledge-base-list';
 import { useImportKnowledgeModal } from '@refly-packages/ai-workspace-common/stores/import-knowledge-modal';
-import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 import './index.scss';
 
 export const KnowledgeBaseDetailEmpty = () => {
   const importKnowledgeModal = useImportKnowledgeModal();
-  const noteStore = useNoteStore((state) => ({
-    notePanelVisible: state.notePanelVisible,
+  const noteStore = useCanvasStore((state) => ({
+    notePanelVisible: state.canvasPanelVisible,
   }));
 
   const handleCreateKnowledgeBase = () => {

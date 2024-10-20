@@ -1,5 +1,4 @@
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
-import { useGetSkills } from '@refly-packages/ai-workspace-common/skills/main-logic/use-get-skills';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { Mark } from '@refly/common-types';
 
@@ -30,8 +29,8 @@ export const useGetCurrentSelectedMark = () => {
       finalUsedMarks = finalUsedMarks.filter((mark) => mark.domain !== 'resource');
     }
 
-    if (!selectedTextCardDomain.includes('note')) {
-      finalUsedMarks = finalUsedMarks.filter((mark) => mark.domain !== 'note');
+    if (!selectedTextCardDomain.includes('canvas')) {
+      finalUsedMarks = finalUsedMarks.filter((mark) => mark.domain !== 'canvas');
     }
 
     if (!selectedTextCardDomain.includes('extensionWeblink')) {
@@ -39,31 +38,31 @@ export const useGetCurrentSelectedMark = () => {
     }
 
     // final handle note cursor selection
-    if (selectedTextCardDomain.includes('noteCursorSelection') && currentSelectionContent) {
+    if (selectedTextCardDomain.includes('canvasCursorSelection') && currentSelectionContent) {
       finalUsedMarks.push({
-        type: 'noteSelection',
+        type: 'canvasSelection',
         data: currentSelectionContent,
         xPath: '',
         scope: 'block',
-        domain: 'noteCursorSelection',
+        domain: 'canvasCursorSelection',
       });
     }
     if (selectedTextCardDomain.includes('noteBeforeCursorSelection') && beforeSelectionNoteContent) {
       finalUsedMarks.push({
-        type: 'noteSelection',
+        type: 'canvasSelection',
         data: beforeSelectionNoteContent,
         xPath: '',
         scope: 'block',
-        domain: 'noteBeforeCursorSelection',
+        domain: 'canvasBeforeCursorSelection',
       });
     }
     if (selectedTextCardDomain.includes('noteAfterCursorSelection') && afterSelectionNoteContent) {
       finalUsedMarks.push({
-        type: 'noteSelection',
+        type: 'canvasSelection',
         data: afterSelectionNoteContent,
         xPath: '',
         scope: 'block',
-        domain: 'noteAfterCursorSelection',
+        domain: 'canvasAfterCursorSelection',
       });
     }
 
@@ -71,8 +70,6 @@ export const useGetCurrentSelectedMark = () => {
   };
   const finalUsedMarks = getFinalUsedMarks(contextPanelStore);
 
-  // skill
-  const [skills] = useGetSkills();
   const hasSelectedTextCardContent = currentSelectedMark || (enableMultiSelect && finalUsedMarks?.length > 0);
 
   return {

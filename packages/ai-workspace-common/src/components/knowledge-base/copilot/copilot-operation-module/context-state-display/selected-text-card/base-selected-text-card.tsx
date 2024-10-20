@@ -2,27 +2,17 @@
  * deprecated: 无需
  */
 
-import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
-import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
-import { getQuickActionPrompt } from '@refly-packages/ai-workspace-common/utils/quickActionPrompt';
-import { Button, Select, Switch, Tag, Tooltip } from '@arco-design/web-react';
+import { Button, Select, Tag, Tooltip } from '@arco-design/web-react';
 import {
   IconCloseCircle,
   IconFile,
-  IconFilter,
-  IconFolder,
   IconFontColors,
-  IconHighlight,
   IconLink,
   IconRefresh,
   IconSave,
 } from '@arco-design/web-react/icon';
-import { useGetSkills } from '@refly-packages/ai-workspace-common/skills/main-logic/use-get-skills';
-import { useDispatchAction } from '@refly-packages/ai-workspace-common/skills/main-logic/use-dispatch-action';
 import { ContentSelectorBtn } from '@refly-packages/ai-workspace-common/modules/content-selector/components/content-selector-btn';
-import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
 import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
 import { useTranslation } from 'react-i18next';
 import {
@@ -34,7 +24,7 @@ import {
 } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { LOCALE, Mark } from '@refly/common-types';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { PiNotepad, PiNotebookDuotone } from 'react-icons/pi';
+import { PiNotebookDuotone } from 'react-icons/pi';
 import { useGetCurrentSelectedMark } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-selected-text';
 import { useEffect } from 'react';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';

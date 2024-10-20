@@ -29,14 +29,14 @@ export const domainToFetchData: Record<SearchDomain, DataFetcher> = {
     }));
     return { success: res?.data?.success, data };
   },
-  note: async (queryPayload) => {
-    const res = await getClient().listNotes({
+  canvas: async (queryPayload) => {
+    const res = await getClient().listCanvas({
       query: queryPayload,
     });
     const data: SearchResult[] = (res?.data?.data || []).map((item) => ({
-      id: item?.noteId,
+      id: item?.canvasId,
       title: item?.title,
-      domain: 'note',
+      domain: 'canvas',
     }));
     return { success: res?.data?.success, data };
   },

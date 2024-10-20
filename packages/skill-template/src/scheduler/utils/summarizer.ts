@@ -223,14 +223,14 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
   // Knowledge base canvases
   canvases.forEach((canvas: SkillContextCanvasItem) => {
     sources.push({
-      url: `${baseUrl}/knowledge-base?canvasId=${canvas.canvas?.canvasId}`,
+      url: `${baseUrl}/knowledge-base?noteId=${canvas.canvas?.canvasId}`,
       title: canvas.canvas?.title,
       pageContent: canvas.canvas?.content || '',
       metadata: {
         title: canvas.canvas?.title,
         entityId: canvas.canvas?.canvasId,
         entityType: 'canvas',
-        source: `${baseUrl}/knowledge-base?canvasId=${canvas.canvas?.canvasId}`,
+        source: `${baseUrl}/knowledge-base?noteId=${canvas.canvas?.canvasId}`,
       },
     });
   });

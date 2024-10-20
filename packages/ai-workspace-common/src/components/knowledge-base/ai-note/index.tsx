@@ -1,7 +1,7 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import wordsCount from 'words-count';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { Note } from '@refly/openapi-schema';
+import { Canvas } from '@refly/openapi-schema';
 
 import './index.scss';
 import { useCookie } from 'react-use';
@@ -33,8 +33,8 @@ import { getHierarchicalIndexes, TableOfContents } from '@tiptap-pro/extension-t
 import { AiOutlineWarning, AiOutlineFileWord, AiOutlineDisconnect } from 'react-icons/ai';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 import { getClientOrigin, getWsServerOrigin } from '@refly-packages/utils/url';
-import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
-import { useNoteTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
 import { AINoteEmpty } from '@refly-packages/ai-workspace-common/components/knowledge-base/ai-note-empty';
 
@@ -51,18 +51,18 @@ import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui'
 
 const MemorizedToC = memo(ToC);
 
-const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
+const CollaborativeEditor = ({ canvasId }: { canvasId: string }) => {
   const { t } = useTranslation();
   const lastCursorPosRef = useRef<number>();
   const [token] = useCookie('_refly_ai_sid');
 
-  const noteStore = useNoteStore((state) => ({
-    currentNote: state.currentNote,
-    noteServerStatus: state.noteServerStatus,
-    updateCurrentNote: state.updateCurrentNote,
-    updateNoteCharsCount: state.updateNoteCharsCount,
-    updateNoteSaveStatus: state.updateNoteSaveStatus,
-    updateNoteServerStatus: state.updateNoteServerStatus,
+  const canvasStore = useCanvasStore((state) => ({
+    currentCanvas: state.currentCanvas,
+    canvasServerStatus: state.canvasServerStatus,
+    updateCurrentCanvas: state.updateCurrentCanvas,
+    updateCanvasCharsCount: state.updateCanvasCharsCount,
+    updateCanvasSaveStatus: state.updateCanvasSaveStatus,
+    updateCanvasServerStatus: state.updateCanvasServerStatus,
     updateEditor: state.updateEditor,
     updateTocItems: state.updateTocItems,
     updateLastCursorPosRef: state.updateLastCursorPosRef,
@@ -84,28 +84,28 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
   const baseUrl = getClientOrigin();
   const { initContentSelectorElem, addInlineMarkForNote } = useContentSelector(
     'ai-note-editor-content-container',
-    'noteSelection',
+    'canvasSelection',
     {
-      url: `${baseUrl}/knowledge-base?noteId=${noteId}`,
+      url: `${baseUrl}/knowledge-base?noteId=${canvasId}`,
     },
   );
 
   const websocketProvider = useMemo(() => {
     return new HocuspocusProvider({
       url: getWsServerOrigin(),
-      name: noteId,
+      name: canvasId,
       token,
     });
-  }, [noteId]);
+  }, [canvasId]);
 
-  const uploadFn = useMemo(() => createUploadFn({ entityId: noteId, entityType: 'note' }), [noteId]);
+  const uploadFn = useMemo(() => createUploadFn({ entityId: canvasId, entityType: 'canvas' }), [canvasId]);
   const slashCommand = useMemo(
     () =>
       configureSlashCommand({
-        entityId: noteId,
-        entityType: 'note',
+        entityId: canvasId,
+        entityType: 'canvas',
       }),
-    [noteId],
+    [canvasId],
   );
 
   const extensions = [
@@ -120,7 +120,7 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
     TableOfContents.configure({
       getIndex: getHierarchicalIndexes,
       onUpdate(content) {
-        noteStore.updateTocItems(content);
+        canvasStore.updateTocItems(content);
       },
     }),
   ];
@@ -140,11 +140,11 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
   const debouncedUpdates = useDebouncedCallback(async (editor: EditorInstance) => {
     const json = editor.getJSON();
     const markdown = editor.storage.markdown.getMarkdown();
-    noteStore.updateNoteCharsCount(wordsCount(markdown));
+    canvasStore.updateCanvasCharsCount(wordsCount(markdown));
     window.localStorage.setItem('html-content', await highlightCodeblocks(editor.getHTML()));
     window.localStorage.setItem('novel-content', JSON.stringify(json));
     window.localStorage.setItem('markdown', editor.storage.markdown.getMarkdown());
-    noteStore.updateNoteSaveStatus('Saved');
+    canvasStore.updateCanvasSaveStatus('Saved');
   }, 500);
 
   const handleContentSelectorClick = () => {
@@ -154,7 +154,7 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
   useEffect(() => {
     // Update status changes
     websocketProvider.on('status', (event) => {
-      noteStore.updateNoteServerStatus(event.status);
+      canvasStore.updateCanvasServerStatus(event.status);
     });
 
     return () => {
@@ -164,7 +164,7 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
     };
   }, []);
 
-  const readOnly = noteStore?.currentNote?.readOnly ?? false;
+  const readOnly = canvasStore?.currentCanvas?.readOnly ?? false;
 
   useEffect(() => {
     if (editorRef.current && !readOnly) {
@@ -186,7 +186,7 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
         const afterSelectionContent = getMarkdownSlice(to, editor?.state?.doc?.content?.size);
         const selectedContent = getMarkdownSlice(from, to);
 
-        noteStore.updateLastCursorPosRef(lastCursorPosRef.current);
+        canvasStore.updateLastCursorPosRef(lastCursorPosRef.current);
         contextPanelStore.updateCurrentSelectionContent(selectedContent);
         contextPanelStore.updateBeforeSelectionNoteContent(prevSelectionContent);
         contextPanelStore.updateAfterSelectionNoteContent(afterSelectionContent);
@@ -242,7 +242,7 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
             extensions={extensions}
             onCreate={({ editor }) => {
               editorRef.current = editor;
-              noteStore.updateEditor(editor);
+              canvasStore.updateEditor(editor);
             }}
             editable={!readOnly}
             className="w-full h-full border-muted sm:rounded-lg"
@@ -258,11 +258,11 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
             }}
             onUpdate={({ editor }) => {
               debouncedUpdates(editor);
-              noteStore.updateNoteSaveStatus('Unsaved');
+              canvasStore.updateCanvasSaveStatus('Unsaved');
             }}
             slotAfter={<ImageResizer />}
           >
-            <CollabEditorCommand entityId={noteId} entityType="note" />
+            <CollabEditorCommand entityId={canvasId} entityType="note" />
             <CollabGenAIMenuSwitch
               contentSelector={{
                 text: t('knowledgeBase.context.addToContext'),
@@ -280,35 +280,35 @@ const CollaborativeEditor = ({ noteId }: { noteId: string }) => {
 interface AINoteStatusBarProps {}
 
 export const AINoteStatusBar = (props: AINoteStatusBarProps) => {
-  const { currentNote, updateCurrentNote, noteServerStatus, noteCharsCount, noteSaveStatus, editor, tocItems } =
-    useNoteStore((state) => ({
-      currentNote: state.currentNote,
-      updateCurrentNote: state.updateCurrentNote,
-      noteServerStatus: state.noteServerStatus,
-      noteCharsCount: state.noteCharsCount,
-      noteSaveStatus: state.noteSaveStatus,
+  const { currentCanvas, updateCurrentCanvas, canvasServerStatus, noteCharsCount, noteSaveStatus, editor, tocItems } =
+    useCanvasStore((state) => ({
+      currentCanvas: state.currentCanvas,
+      updateCurrentCanvas: state.updateCurrentCanvas,
+      canvasServerStatus: state.canvasServerStatus,
+      noteCharsCount: state.canvasCharsCount,
+      noteSaveStatus: state.canvasSaveStatus,
       editor: state.editor,
       tocItems: state.tocItems,
     }));
-  const { handleDeleteTab } = useNoteTabs();
+  const { handleDeleteTab } = useCanvasTabs();
   const { t } = useTranslation();
 
   return (
     <div className="note-status-bar">
       <div className="note-status-bar-menu">
-        {noteServerStatus === 'connected' ? (
+        {canvasServerStatus === 'connected' ? (
           <div className="note-status-bar-item">
             <AiOutlineFileWord />
             <p className="conv-title">{t('knowledgeBase.note.noteCharsCount', { count: noteCharsCount })}</p>
           </div>
         ) : null}
-        {noteServerStatus === 'disconnected' ? (
+        {canvasServerStatus === 'disconnected' ? (
           <div className="note-status-bar-item">
             <AiOutlineWarning />
             <p className="conv-title">{t('knowledgeBase.note.serviceDisconnected')}</p>
           </div>
         ) : null}
-        {noteServerStatus === 'connected' ? (
+        {canvasServerStatus === 'connected' ? (
           <div className="note-status-bar-item">
             <Divider type="vertical" />
             <HiOutlineClock />
@@ -336,17 +336,17 @@ export const AINoteStatusBar = (props: AINoteStatusBarProps) => {
           </Popover>
           <Divider type="vertical" />
         </div>
-        {currentNote && noteServerStatus === 'connected' ? (
+        {currentCanvas && canvasServerStatus === 'connected' ? (
           <div className="note-status-bar-item">
-            {currentNote?.readOnly ? <HiOutlineLockClosed /> : <HiOutlineLockOpen />}
+            {currentCanvas?.readOnly ? <HiOutlineLockClosed /> : <HiOutlineLockOpen />}
             <p className="mr-2 conv-title">
-              {currentNote?.readOnly ? t('knowledgeBase.note.readOnly') : t('knowledgeBase.note.edit')}
+              {currentCanvas?.readOnly ? t('knowledgeBase.note.readOnly') : t('knowledgeBase.note.edit')}
             </p>
             <Switch
               type="round"
               size="small"
-              checked={currentNote?.readOnly}
-              onChange={(readOnly) => updateCurrentNote({ ...currentNote, readOnly })}
+              checked={currentCanvas?.readOnly}
+              onChange={(readOnly) => updateCurrentCanvas({ ...currentCanvas, readOnly })}
             />
           </div>
         ) : null}
@@ -355,8 +355,8 @@ export const AINoteStatusBar = (props: AINoteStatusBarProps) => {
           <DeleteDropdownMenu
             type="note"
             canCopy={true}
-            data={currentNote}
-            postDeleteList={(note: Note) => handleDeleteTab(note.noteId)}
+            data={currentCanvas}
+            postDeleteList={(canvas: Canvas) => handleDeleteTab(canvas.canvasId)}
           />
         </div>
       </div>
@@ -367,20 +367,20 @@ export const AINoteStatusBar = (props: AINoteStatusBarProps) => {
 interface AINoteHeaderProps {}
 
 export const AINoteHeader = (props: AINoteHeaderProps) => {
-  const { currentNote, updateCurrentNote, tabs, activeTab } = useNoteStore((state) => ({
+  const { currentCanvas, updateCurrentCanvas, tabs, activeTab } = useCanvasStore((state) => ({
     tabs: state.tabs,
     activeTab: state.activeTab,
-    currentNote: state.currentNote,
-    updateCurrentNote: state.updateCurrentNote,
+    currentCanvas: state.currentCanvas,
+    updateCurrentCanvas: state.updateCurrentCanvas,
   }));
-  const { handleUpdateTabTitle } = useNoteTabs();
+  const { handleUpdateTabTitle } = useCanvasTabs();
 
   const onTitleChange = (newTitle: string) => {
-    updateCurrentNote({ ...currentNote, title: newTitle });
-    handleUpdateTabTitle(currentNote.noteId, newTitle);
+    updateCurrentCanvas({ ...currentCanvas, title: newTitle });
+    handleUpdateTabTitle(currentCanvas.canvasId, newTitle);
   };
 
-  const title = tabs.find((tab) => tab.key === activeTab)?.title || currentNote?.title;
+  const title = tabs.find((tab) => tab.key === activeTab)?.title || currentCanvas?.title;
 
   return (
     <div className="w-full">
@@ -398,37 +398,37 @@ export const AINoteHeader = (props: AINoteHeaderProps) => {
 
 export const AINote = () => {
   const [searchParams] = useSearchParams();
-  const noteId = searchParams.get('noteId');
+  const canvasId = searchParams.get('noteId');
 
   const { t } = useTranslation();
 
   const { handleInitEmptyNote } = useAINote();
   const {
-    currentNote: note,
+    currentCanvas: canvas,
     isRequesting,
     newNoteCreating,
-    noteServerStatus,
-    updateCurrentNote,
+    canvasServerStatus,
+    updateCurrentCanvas,
     updateIsRequesting,
     updateNotePanelVisible,
-    updateNoteServerStatus,
+    updateCanvasServerStatus,
     resetState,
-  } = useNoteStore((state) => ({
-    currentNote: state.currentNote,
+  } = useCanvasStore((state) => ({
+    currentCanvas: state.currentCanvas,
     isRequesting: state.isRequesting,
-    newNoteCreating: state.newNoteCreating,
-    noteServerStatus: state.noteServerStatus,
-    updateCurrentNote: state.updateCurrentNote,
+    newNoteCreating: state.newCanvasCreating,
+    canvasServerStatus: state.canvasServerStatus,
+    updateCurrentCanvas: state.updateCurrentCanvas,
     updateIsRequesting: state.updateIsRequesting,
-    updateNotePanelVisible: state.updateNotePanelVisible,
-    updateNoteServerStatus: state.updateNoteServerStatus,
+    updateNotePanelVisible: state.updateCanvasPanelVisible,
+    updateCanvasServerStatus: state.updateCanvasServerStatus,
     resetState: state.resetState,
   }));
-  const prevNote = useRef<Note>();
+  const prevNote = useRef<Canvas>();
 
   const searchStore = useSearchStore();
 
-  const { tabs, activeTab, setActiveTab, handleDeleteTab, handleAddTab } = useNoteTabs();
+  const { tabs, activeTab, setActiveTab, handleDeleteTab, handleAddTab } = useCanvasTabs();
 
   useEffect(() => {
     return () => {
@@ -437,30 +437,30 @@ export const AINote = () => {
   }, []);
 
   useEffect(() => {
-    updateCurrentNote(null);
+    updateCurrentCanvas(null);
     updateNotePanelVisible(true);
-    updateNoteServerStatus('disconnected');
+    updateCanvasServerStatus('disconnected');
 
     const fetchData = async () => {
       updateIsRequesting(true);
-      const { data } = await getClient().getNoteDetail({
-        query: { noteId },
+      const { data } = await getClient().getCanvasDetail({
+        query: { canvasId },
       });
-      const note = data?.data;
-      if (note) {
-        updateCurrentNote(note);
+      const canvas = data?.data;
+      if (canvas) {
+        updateCurrentCanvas(canvas);
         updateIsRequesting(false);
       }
-      if (!tabs.some((tab) => tab.key === noteId)) {
+      if (!tabs.some((tab) => tab.key === canvasId)) {
         handleAddTab({
-          title: note.title,
-          key: note.noteId,
-          content: note.contentPreview || '',
-          noteId: note.noteId,
+          title: canvas.title,
+          key: canvas.canvasId,
+          content: canvas.contentPreview || '',
+          canvasId: canvas.canvasId,
         });
       }
     };
-    if (noteId) {
+    if (canvasId) {
       fetchData();
     }
 
@@ -468,15 +468,14 @@ export const AINote = () => {
       updateIsRequesting(false);
       updateNotePanelVisible(false);
     };
-  }, [noteId]);
+  }, [canvasId]);
 
-  const debouncedUpdateNote = useDebouncedCallback(async (note: Note) => {
-    const res = await getClient().updateNote({
+  const debouncedUpdateNote = useDebouncedCallback(async (canvas: Canvas) => {
+    const res = await getClient().updateCanvas({
       body: {
-        noteId: note.noteId,
-        title: note.title,
-        readOnly: note.readOnly,
-        isPublic: note.isPublic,
+        canvasId: canvas.canvasId,
+        title: canvas.title,
+        readOnly: canvas.readOnly,
       },
     });
     if (res.error) {
@@ -486,13 +485,13 @@ export const AINote = () => {
   }, 500);
 
   useEffect(() => {
-    if (note && prevNote.current?.noteId === note.noteId) {
-      debouncedUpdateNote(note);
+    if (canvas && prevNote.current?.canvasId === canvas.canvasId) {
+      debouncedUpdateNote(canvas);
     }
-    prevNote.current = note;
-  }, [note, debouncedUpdateNote]);
+    prevNote.current = canvas;
+  }, [canvas, debouncedUpdateNote]);
 
-  if (noteId === undefined || noteId == null || noteId === '') {
+  if (canvasId === undefined || canvasId == null || canvasId === '') {
     return <AINoteEmpty />;
   }
 
@@ -547,13 +546,13 @@ export const AINote = () => {
       </Tabs>
       <Spin
         tip={t('knowledgeBase.note.connecting')}
-        loading={!note || isRequesting || noteServerStatus !== 'connected'}
+        loading={!canvas || isRequesting || canvasServerStatus !== 'connected'}
         style={{ height: '100%', width: '100%' }}
       >
         <div className="ai-note-editor">
           <div className="ai-note-editor-container">
             <AINoteHeader />
-            <CollaborativeEditor key={noteId} noteId={noteId} />
+            <CollaborativeEditor key={canvasId} canvasId={canvasId} />
           </div>
         </div>
       </Spin>

@@ -83,9 +83,6 @@ export const BaseSearchAndSelector = ({
 
   const isHome = activeTab === 'all';
   const isWeb = getRuntime() === 'web';
-  const tabs: (BaseMarkType | 'all')[] = isWeb
-    ? ['all', 'note', 'resource', 'collection']
-    : ['all', 'extensionWeblink', 'note', 'resource', 'collection'];
 
   const debouncedSearch = useDebouncedCallback(
     async ({ searchVal, domains }: { searchVal: string; domains?: Array<SearchDomain> }) => {

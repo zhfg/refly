@@ -12,7 +12,7 @@ import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
 import { ErrorBoundary } from "@sentry/react"
 import { useKnowledgeBaseStoreShallow } from "@refly-packages/ai-workspace-common/stores/knowledge-base"
-import { useNoteStoreShallow } from "@refly-packages/ai-workspace-common/stores/note"
+import { useCanvasStoreShallow } from "@refly-packages/ai-workspace-common/stores/canvas"
 
 import "./index.scss"
 
@@ -34,9 +34,9 @@ const KnowledgeLibraryLayout = () => {
     resourcePanelVisible: state.resourcePanelVisible,
     updateResourcePanelVisible: state.updateResourcePanelVisible,
   }))
-  const noteStore = useNoteStoreShallow(state => ({
-    notePanelVisible: state.notePanelVisible,
-    updateNotePanelVisible: state.updateNotePanelVisible,
+  const canvasStore = useCanvasStoreShallow(state => ({
+    canvasPanelVisible: state.canvasPanelVisible,
+    updateCanvasPanelVisible: state.updateCanvasPanelVisible,
   }))
   const { t } = useTranslation()
 
@@ -47,7 +47,7 @@ const KnowledgeLibraryLayout = () => {
       knowledgeBaseStore.updateResourcePanelVisible(true)
     }
     if (noteId) {
-      noteStore.updateNotePanelVisible(true)
+      canvasStore.updateCanvasPanelVisible(true)
     }
   }, [token, userStore?.userProfile?.uid, resId, noteId])
 
@@ -58,7 +58,7 @@ const KnowledgeLibraryLayout = () => {
   }, [])
 
   const copilotStyle =
-    knowledgeBaseStore.resourcePanelVisible || noteStore.notePanelVisible
+    knowledgeBaseStore.resourcePanelVisible || canvasStore.canvasPanelVisible
       ? {
           defaultSize: 35,
           minSize: 35,
@@ -100,7 +100,7 @@ const KnowledgeLibraryLayout = () => {
                 />
               </>
             ) : null}
-            {noteStore.notePanelVisible ? (
+            {canvasStore.canvasPanelVisible ? (
               <>
                 <Panel
                   minSize={35}

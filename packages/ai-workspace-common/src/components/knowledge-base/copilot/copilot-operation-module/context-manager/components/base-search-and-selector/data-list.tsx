@@ -41,7 +41,6 @@ export function DataList({
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isRequesting, setIsRequesting] = useState(false);
-  const { jumpToKnowledgeBase, jumpToNote, jumpToReadResource, jumpToConv } = useKnowledgeBaseJumpNewPath();
   const { t } = useTranslation();
 
   const searchStore = useSearchStore();
@@ -63,8 +62,8 @@ export function DataList({
       });
 
       return { success: true, data };
-    } else if (domain === 'note') {
-      const res = await getClient().listNotes({
+    } else if (domain === 'canvas') {
+      const res = await getClient().listCanvas({
         query: {
           ...queryPayload,
         },
@@ -73,7 +72,7 @@ export function DataList({
       if (!res?.data?.success) return { success: false };
       const data = res?.data?.data?.map((item) => {
         return {
-          id: item?.noteId,
+          id: item?.canvasId,
           title: item?.title,
           content: [item?.content?.slice(0, 30) + '...'],
           metadata: {},
@@ -95,7 +94,6 @@ export function DataList({
           title: item?.title,
           content: [item?.content?.slice(0, 30) + '...'],
           metadata: {
-            collectionId: item?.collectionId,
             resourceType: 'weblink',
           },
         } as SearchResult;

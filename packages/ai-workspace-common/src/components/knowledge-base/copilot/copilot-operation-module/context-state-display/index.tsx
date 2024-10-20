@@ -36,7 +36,7 @@ export const ContextStateDisplay = () => {
     } else {
       if (nowSelectedContextDomain === 'resource') {
         renderCompList.push(<ResourceContextCard key="resource-context-card" />);
-      } else if (nowSelectedContextDomain === 'note') {
+      } else if (nowSelectedContextDomain === 'canvas') {
         renderCompList.push(<NoteContextCard key="note-context-card" />);
       } else if (nowSelectedContextDomain === 'collection') {
         renderCompList.push(<KnowledgeBaseContextCard key="collection-context-card" />);

@@ -16,7 +16,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { SearchDomain, SearchResult, SkillMeta } from '@refly/openapi-schema';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
-import { useNoteTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
+import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
 import { RenderItem } from '@refly-packages/ai-workspace-common/components/search/types';
 import classNames from 'classnames';
 
@@ -46,10 +46,10 @@ export const Search = (props: SearchProps) => {
   const [selectedSkill, setSelectedSkill] = useState<SkillMeta>();
   // notes
   const { handleInitEmptyNote } = useAINote();
-  const { handleAddTab: handleAddNoteTab } = useNoteTabs();
+  const { handleAddTab: handleAddNoteTab } = useCanvasTabs();
   const { handleAddTab: handleAddResourceTab } = useKnowledgeBaseTabs();
 
-  const { jumpToKnowledgeBase, jumpToNote, jumpToReadResource, jumpToConv } = useKnowledgeBaseJumpNewPath();
+  const { jumpToKnowledgeBase, jumpToCanvas, jumpToReadResource, jumpToConv } = useKnowledgeBaseJumpNewPath();
 
   const pages = searchStore.pages;
   const setPages = searchStore.setPages;
@@ -216,14 +216,14 @@ export const Search = (props: SearchProps) => {
       data: searchStore.searchedNotes || [],
       icon: <IconEdit style={{ fontSize: 12 }} />,
       onItemClick: (item: SearchResult) => {
-        jumpToNote({
+        jumpToCanvas({
           noteId: item?.id,
         });
         handleAddNoteTab({
           title: item?.title,
           key: item?.id,
           content: '',
-          noteId: item?.id,
+          canvasId: item?.id,
         });
         searchStore.setIsSearchOpen(false);
       },

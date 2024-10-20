@@ -1,12 +1,11 @@
-import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
-import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { SearchTarget, useSearchStateStore } from '@refly-packages/ai-workspace-common/stores/search-state';
+import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { ChatMessage } from '@refly/openapi-schema';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
-import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
-import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 const checkShowRelatedQuestion = (messsages: ChatMessage[] = []) => {
   const message = messsages?.[messsages.length - 1];
@@ -19,36 +18,35 @@ const checkShowRelatedQuestion = (messsages: ChatMessage[] = []) => {
 
 export const useCopilotContextState = () => {
   const [contextCardHeight, setContextCardHeight] = useState(144);
-  const chatStore = useChatStore((state) => ({
+  const chatStore = useChatStoreShallow((state) => ({
     messages: state.messages,
   }));
-  const contextPanelStore = useContextPanelStore((state) => ({
+  const contextPanelStore = useContextPanelStoreShallow((state) => ({
     showContextCard: state.showContextCard,
     contextDomain: state.contextDomain,
     currentSelectedMark: state.currentSelectedMark,
   }));
-  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
+  const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
     currentKnowledgeBase: state.currentKnowledgeBase,
     currentResource: state.currentResource,
     resourcePanelVisible: state.resourcePanelVisible,
   }));
-  const noteStore = useNoteStore((state) => ({
-    currentNote: state.currentNote,
-    notePanelVisible: state.notePanelVisible,
+  const canvasStore = useCanvasStoreShallow((state) => ({
+    currentCanvas: state.currentCanvas,
   }));
 
   const [queryParams] = useSearchParams();
   const resId = queryParams.get('resId');
   const kbId = queryParams.get('kbId');
-  const noteId = queryParams.get('noteId');
+  const canvasId = queryParams.get('noteId');
   const currentSelectedMark = contextPanelStore?.currentSelectedMark;
 
   // 优先级: text > resource > knowledgeBase > all
-  const showContextState = !!resId || !!kbId || !!currentSelectedMark || !!noteId;
+  const showContextState = !!resId || !!kbId || !!currentSelectedMark || !!canvasId;
 
   const currentResource = knowledgeBaseStore.currentResource;
   const currentKnowledgeBase = knowledgeBaseStore.currentKnowledgeBase;
-  const currentNote = noteStore.currentNote;
+  const currentCanvas = canvasStore.currentCanvas;
 
   // 是否有内容正在选中
   const showSelectedMark = !!currentSelectedMark;
@@ -85,7 +83,7 @@ export const useCopilotContextState = () => {
     showRelatedQuestions,
     showSelectedMark,
     currentResource,
-    currentNote,
+    currentCanvas,
     currentKnowledgeBase,
     currentSelectedMark,
     contextCardHeight,

@@ -1,6 +1,4 @@
-import React from 'react';
-import { Button } from '@arco-design/web-react';
-import { IconClose, IconDelete } from '@arco-design/web-react/icon';
+import { IconClose } from '@arco-design/web-react/icon';
 import { Mark } from '@refly/common-types';
 import { useTranslation } from 'react-i18next';
 

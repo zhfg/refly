@@ -5,14 +5,14 @@ import { NoteList } from '@refly-packages/ai-workspace-common/components/workspa
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useTranslation } from 'react-i18next';
 import './index.scss';
-import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 export const AINoteEmpty = () => {
   const { t } = useTranslation();
   const { handleInitEmptyNote } = useAINote();
 
-  const { newNoteCreating } = useNoteStore((state) => ({
-    newNoteCreating: state.newNoteCreating,
+  const { newNoteCreating } = useCanvasStore((state) => ({
+    newNoteCreating: state.newCanvasCreating,
   }));
   const { resourcePanelVisible } = useKnowledgeBaseStore((state) => ({
     resourcePanelVisible: state.resourcePanelVisible,
