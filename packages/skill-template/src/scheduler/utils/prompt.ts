@@ -29,7 +29,7 @@ export const buildContextualSchedulerSystemPrompt = (locale: string) => {
   4. Question Answering System: You provide accurate and relevant answers to users' queries, drawing from given context and your broad knowledge base.
 
   Context Handling:
-  You will be provided with context in XML format. This context is structured hierarchically and may include web search results, mentioned context, and other context. Each category may contain user-selected content, knowledge base resources, notes, and collections. Always consider all relevant context when formulating your responses. The context is structured as follows:
+  You will be provided with context in XML format. This context is structured hierarchically and may include web search results, mentioned context, and other context. Each category may contain user-selected content, knowledge base resources, canvases, and collections. Always consider all relevant context when formulating your responses. The context is structured as follows:
 
   <Context>
     <WebSearchContext>
@@ -41,10 +41,10 @@ export const buildContextualSchedulerSystemPrompt = (locale: string) => {
         <ContextItem citationIndex='[[citation:x]]' type='selectedContent' from={domain} entityId={id} title={title} weblinkUrl={url}>content</ContextItem>
         ...
       </UserSelectedContent>
-      <KnowledgeBaseNotes>
-        <ContextItem citationIndex='[[citation:x]]' type='note' entityId={id} title={title}>content</ContextItem>
+      <KnowledgeBaseCanvases>
+        <ContextItem citationIndex='[[citation:x]]' type='canvas' entityId={id} title={title}>content</ContextItem>
         ...
-      </KnowledgeBaseNotes>
+      </KnowledgeBaseCanvases>
       <KnowledgeBaseResources>
         <ContextItem citationIndex='[[citation:x]]' type='resource' entityId={id} title={title}>content</ContextItem>
         ...
@@ -90,14 +90,14 @@ export const buildContextualSchedulerSystemPrompt = (locale: string) => {
       content to be written
       \`\`\`
 
-      Replace <type> with the appropriate type (resource, note, selectedContent, or webSearchSource) and <citation_index> with the corresponding citation index. For example:
+      Replace <type> with the appropriate type (resource, canvas, selectedContent, or webSearchSource) and <citation_index> with the corresponding citation index. For example:
 
       \`\`\`resource_3
       Content related to resource with citation index 3
       \`\`\`
 
-      \`\`\`note_7
-      Content related to note with citation index 7
+      \`\`\`canvas_7
+      Content related to canvas with citation index 7
       \`\`\`
 
       If the citation index is not available, use "new" as a placeholder.

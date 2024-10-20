@@ -206,13 +206,13 @@ paths:
                 $ref: '#/components/schemas/BaseResponse'
       security:
         - api_key: []
-  /knowledge/note/list:
+  /knowledge/canvas/list:
     get:
       tags:
         - knowledge
-      summary: List user notes
-      description: List all notes for a user
-      operationId: listNotes
+      summary: List user canvases
+      description: List all canvases for a user
+      operationId: listCanvas
       parameters:
         - name: page
           in: query
@@ -234,88 +234,88 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListNoteResponse'
-  /knowledge/note/detail:
+                $ref: '#/components/schemas/ListCanvasResponse'
+  /knowledge/canvas/detail:
     get:
       tags:
         - knowledge
-      summary: Get note detail
-      description: Return note detail
-      operationId: getNoteDetail
+      summary: Get canvas detail
+      description: Return canvas detail
+      operationId: getCanvasDetail
       parameters:
-        - name: noteId
+        - name: canvasId
           in: query
-          description: Note ID to retrieve
+          description: Canvas ID to retrieve
           required: true
           schema:
             type: string
-            example: n-g30e1b80b5g1itbemc0g5jj3
+            example: c-g30e1b80b5g1itbemc0g5jj3
       responses:
         '200':
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetNoteDetailResponse'
-  /knowledge/note/update:
+                $ref: '#/components/schemas/GetCanvasDetailResponse'
+  /knowledge/canvas/update:
     post:
       tags:
         - knowledge
-      summary: Update note
-      description: Update an existing note
-      operationId: updateNote
+      summary: Update canvas
+      description: Update an existing canvas
+      operationId: updateCanvas
       requestBody:
-        description: Note update request
+        description: Canvas update request
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpsertNoteRequest'
+              $ref: '#/components/schemas/UpsertCanvasRequest'
       responses:
         '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UpsertNoteResponse'
+                $ref: '#/components/schemas/UpsertCanvasResponse'
       security:
         - api_key: []
-  /knowledge/note/new:
+  /knowledge/canvas/new:
     post:
       tags:
         - knowledge
-      summary: Create new note
-      description: Create a new note
-      operationId: createNote
+      summary: Create new canvas
+      description: Create a new canvas
+      operationId: createCanvas
       requestBody:
-        description: Note creation request
+        description: Canvas creation request
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpsertNoteRequest'
+              $ref: '#/components/schemas/UpsertCanvasRequest'
       responses:
         '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UpsertNoteResponse'
+                $ref: '#/components/schemas/UpsertCanvasResponse'
       security:
         - api_key: []
-  /knowledge/note/delete:
+  /knowledge/canvas/delete:
     post:
       tags:
         - knowledge
-      summary: Delete note
-      description: Delete an existing note
-      operationId: deleteNote
+      summary: Delete canvas
+      description: Delete an existing canvas
+      operationId: deleteCanvas
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DeleteNoteRequest'
+              $ref: '#/components/schemas/DeleteCanvasRequest'
       responses:
         '200':
           description: Successful operation
@@ -1248,7 +1248,7 @@ paths:
       tags:
         - search
       summary: Search
-      description: Search for resources, collections, notes, etc.
+      description: Search for canvases, resources, collections, etc.
       operationId: search
       requestBody:
         required: true
@@ -1351,7 +1351,6 @@ components:
       enum:
         - weblink
         - text
-        - note
     Resource:
       type: object
       required:
@@ -1378,10 +1377,6 @@ components:
         indexStatus:
           description: Resource index status
           $ref: '#/components/schemas/IndexStatus'
-        isPublic:
-          type: boolean
-          description: Whether this resource is public
-          default: false
         createdAt:
           type: string
           format: date-time
@@ -1395,50 +1390,46 @@ components:
           description: Preview content for this resource
         content:
           type: string
-          description: Document content for this resource (only returned in getNoteDetail API)
+          description: Document content for this resource (only returned in getResourceDetail API)
         collections:
           type: array
           description: Collections this resource belongs to (only returned in getResourceDetail API)
           items:
             $ref: '#/components/schemas/Collection'
-    Note:
+    Canvas:
       type: object
       required:
-        - noteId
+        - canvasId
         - title
         - readOnly
-        - isPublic
         - createdAt
         - updatedAt
       properties:
-        noteId:
+        canvasId:
           type: string
-          description: Note ID
-          example: n-g30e1b80b5g1itbemc0g5jj3
+          description: Canvas ID
+          example: c-g30e1b80b5g1itbemc0g5jj3
         title:
           type: string
-          description: Note title
-          example: My note
+          description: Canvas title
+          example: My canvas
         contentPreview:
           type: string
-          description: Note content preview
+          description: Canvas content preview
         content:
           type: string
-          description: Full note content (only returned in detail api)
+          description: Full canvas content (only returned in detail api)
         readOnly:
           type: boolean
-          description: Whether this note is read-only
-        isPublic:
-          type: boolean
-          description: Whether this note is public
+          description: Whether this canvas is read-only
         createdAt:
           type: string
           format: date-time
-          description: Note creation time
+          description: Canvas creation time
         updatedAt:
           type: string
           format: date-time
-          description: Note update time
+          description: Canvas update time
     Collection:
       type: object
       required:
@@ -1459,10 +1450,6 @@ components:
           type: string
           description: Collection description
           example: Collection description
-        isPublic:
-          type: boolean
-          description: Whether this collection is public
-          default: false
         createdAt:
           type: string
           format: date-time
@@ -1480,9 +1467,9 @@ components:
       type: string
       description: Entity type
       enum:
+        - canvas
         - resource
         - collection
-        - note
     Entity:
       type: object
       description: Entity
@@ -2415,7 +2402,7 @@ components:
         - uid
         - objectStorageQuota
         - resourceSize
-        - noteSize
+        - canvasSize
         - fileSize
         - vectorStorageQuota
         - vectorStorageUsed
@@ -2431,15 +2418,15 @@ components:
           description: Subscription ID
         objectStorageQuota:
           type: string
-          description: Object storage quota (in bytes), including resource, note and static files
+          description: Object storage quota (in bytes), including resource, canvas and static files
           example: '104857600'
         resourceSize:
           type: string
           description: Resource storage size in use (in bytes)
           example: '1048576'
-        noteSize:
+        canvasSize:
           type: string
-          description: Note storage size in use (in bytes)
+          description: Canvas storage size in use (in bytes)
           example: '1048576'
         fileSize:
           type: string
@@ -2550,10 +2537,6 @@ components:
         content:
           type: string
           description: Resource content (this will be ignored if storageKey was set)
-        isPublic:
-          type: boolean
-          description: Whether this resource is public
-          default: false
         readOnly:
           type: boolean
           description: Whether this resource is read-only
@@ -2623,63 +2606,59 @@ components:
               type: object
               description: Resource data
               $ref: '#/components/schemas/Resource'
-    ListNoteResponse:
+    ListCanvasResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
             data:
               type: array
-              description: Note list
+              description: Canvas list
               items:
-                $ref: '#/components/schemas/Note'
-    GetNoteDetailResponse:
+                $ref: '#/components/schemas/Canvas'
+    GetCanvasDetailResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
             data:
               type: object
-              description: Note data
-              $ref: '#/components/schemas/Note'
-    UpsertNoteRequest:
+              description: Canvas data
+              $ref: '#/components/schemas/Canvas'
+    UpsertCanvasRequest:
       type: object
       properties:
         title:
           type: string
-          description: Note title
-          example: My Note
-        noteId:
+          description: Canvas title
+          example: My Canvas
+        canvasId:
           type: string
-          description: Note ID (only used for update)
-          example: n-g30e1b80b5g1itbemc0g5jj3
+          description: Canvas ID (only used for update)
+          example: c-g30e1b80b5g1itbemc0g5jj3
         readOnly:
           type: boolean
-          description: Whether this note is read-only
-          default: false
-        isPublic:
-          type: boolean
-          description: Whether this note is public
+          description: Whether this canvas is read-only
           default: false
         initialContent:
           type: string
-          description: Note initial content
-    UpsertNoteResponse:
+          description: Canvas initial content
+    UpsertCanvasResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
             data:
-              $ref: '#/components/schemas/Note'
-    DeleteNoteRequest:
+              $ref: '#/components/schemas/Canvas'
+    DeleteCanvasRequest:
       type: object
       required:
-        - noteId
+        - canvasId
       properties:
-        noteId:
+        canvasId:
           type: string
-          description: Note ID to delete
-          example: n-g30e1b80b5g1itbemc0g5jj3
+          description: Canvas ID to delete
+          example: c-g30e1b80b5g1itbemc0g5jj3
     UpsertCollectionRequest:
       type: object
       properties:
@@ -2695,10 +2674,6 @@ components:
           type: string
           description: Collection description
           example: Collection description
-        isPublic:
-          type: boolean
-          description: Whether this collection is public
-          default: false
     UpsertCollectionResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -3045,19 +3020,19 @@ components:
         metadata:
           type: object
           description: Collection context metadata
-    SkillContextNoteItem:
+    SkillContextCanvasItem:
       type: object
-      description: Skill context note item
+      description: Skill context canvas item
       properties:
-        noteId:
+        canvasId:
           type: string
-          description: Note ID
-        note:
-          description: Note
-          $ref: '#/components/schemas/Note'
+          description: Canvas ID
+        canvas:
+          description: Canvas
+          $ref: '#/components/schemas/Canvas'
         metadata:
           type: object
-          description: Note context metadata
+          description: Canvas context metadata
     SkillContextContentItem:
       type: object
       description: Skill context content item
@@ -3096,11 +3071,11 @@ components:
           description: Context collections
           items:
             $ref: '#/components/schemas/SkillContextCollectionItem'
-        notes:
+        canvases:
           type: array
-          description: Context notes
+          description: Context canvases
           items:
-            $ref: '#/components/schemas/SkillContextNoteItem'
+            $ref: '#/components/schemas/SkillContextCanvasItem'
         contentList:
           type: array
           description: Context content list
@@ -3116,18 +3091,18 @@ components:
       enum:
         - resources
         - collections
-        - notes
+        - canvases
         - contentList
         - urls
     SelectionKey:
       type: string
       enum:
-        - noteSelection
+        - canvasSelection
         - resourceSelection
         - extensionWeblinkSelection
-        - noteCursorSelection
-        - noteBeforeCursorSelection
-        - noteAfterCursorSelection
+        - canvasCursorSelection
+        - canvasBeforeCursorSelection
+        - canvasAfterCursorSelection
     SkillContextRule:
       type: object
       required:
@@ -3539,7 +3514,7 @@ components:
       type: string
       enum:
         - resource
-        - note
+        - canvas
         - collection
         - conversation
         - skill
@@ -3735,14 +3710,6 @@ components:
           type: object
           additionalProperties: true
           description: Metadata associated with the document.
-    InMemoryIndexContentResponse:
-      allOf:
-        - $ref: '#/components/schemas/BaseResponse'
-        - type: object
-          properties:
-            data:
-              type: object
-              nullable: true
     InMemorySearchResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

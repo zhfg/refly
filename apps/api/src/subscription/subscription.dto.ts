@@ -76,7 +76,7 @@ export function storageUsageMeterPO2DTO(usage: StorageUsageMeterModel): StorageU
     ...pick(usage, ['meterId', 'uid', 'subscriptionId']),
     objectStorageQuota: usage.objectStorageQuota.toString(),
     resourceSize: usage.resourceSize.toString(),
-    noteSize: usage.noteSize.toString(),
+    canvasSize: usage.canvasSize.toString(),
     fileSize: usage.fileSize.toString(),
     vectorStorageQuota: usage.vectorStorageQuota.toString(),
     vectorStorageUsed: usage.vectorStorageUsed.toString(),

@@ -1,12 +1,12 @@
 import { ResourceType } from '@refly-packages/openapi-schema';
 
-export type ContentNodeType = 'resource' | 'note';
+export type ContentNodeType = 'resource' | 'canvas';
 
 export interface NodeMeta {
   title: string;
   nodeType: ContentNodeType;
   url?: string;
-  noteId?: string;
+  canvasId?: string;
   resourceId?: string;
   resourceType?: ResourceType;
   [key: string]: any; // any other fields
@@ -26,7 +26,7 @@ export interface ContentNode {
 export interface RetrieveFilter {
   nodeTypes?: ContentNodeType[];
   urls?: string[];
-  noteIds?: string[];
+  canvasIds?: string[];
   resourceIds?: string[];
   collectionIds?: string[];
 }

@@ -253,7 +253,11 @@ export class CreateBlogPostSkill extends BaseSkill {
       rules: [
         {
           key: 'contentList',
-          preferredSelectionKeys: ['noteBeforeCursorSelection', 'noteCursorSelection', 'noteAfterCursorSelection'],
+          preferredSelectionKeys: [
+            'canvasBeforeCursorSelection',
+            'canvasCursorSelection',
+            'canvasAfterCursorSelection',
+          ],
         },
       ],
     },

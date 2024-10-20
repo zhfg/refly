@@ -12,11 +12,11 @@ import { safeStringifyJSON } from '@refly-packages/utils';
 
 // simplify context entityId for better extraction
 export const preprocessContext = (context: IContext): IContext => {
-  const { resources, notes, contentList, collections } = context;
+  const { resources, canvases, contentList, collections } = context;
 
   const preprocessedContext = {
     resources: resources.map((r, index) => ({ ...r, resource: { ...r.resource, resourceId: `resource-${index}` } })),
-    notes: notes.map((n, index) => ({ ...n, note: { ...n.note, noteId: `note-${index}` } })),
+    canvases: canvases.map((c, index) => ({ ...c, canvas: { ...c.canvas, canvasId: `canvas-${index}` } })),
     contentList: contentList.map((c, index) => ({ ...c, metadata: { ...c.metadata, entityId: `content-${index}` } })),
     collections: collections.map((c, index) => ({
       ...c,
@@ -33,19 +33,19 @@ export const postprocessContext = (
 ): IContext => {
   let context: IContext = {
     resources: [],
-    notes: [],
+    canvases: [],
     contentList: [],
     collections: [],
   };
 
   mentionedContextList.forEach((item) => {
-    if (item.type === 'note') {
-      // 这里需要根据entityId在originalContext中找到对应的note
-      const originalNote = originalContext.notes.find((n, index) => `note-${index}` === item.entityId);
-      if (originalNote) {
-        context.notes.push({
-          ...originalNote,
-          metadata: { ...originalNote.metadata, useWholeContent: item?.useWholeContent },
+    if (item.type === 'canvas') {
+      // 这里需要根据entityId在originalContext中找到对应的canvas
+      const originalCanvas = originalContext.canvases.find((c, index) => `canvas-${index}` === item.entityId);
+      if (originalCanvas) {
+        context.canvases.push({
+          ...originalCanvas,
+          metadata: { ...originalCanvas.metadata, useWholeContent: item?.useWholeContent },
         });
       }
     } else if (item.type === 'resource') {
@@ -80,7 +80,7 @@ Examples of query rewriting with context and chat history:
 
 1. Context:
    <Context>
-   <ContextItem type='selectedContent' from='note' entityId='content-1'  title='AI in Knowledge Management'>This indeed allows more people to efficiently access specialized knowledge. Combined with its paper collection and management functions, it essentially achieves a one-stop service from search acquisition, query dialogue for knowledge acquisition, to knowledge management, rather than just being a simple AI tool product.</ContextItem>
+   <ContextItem type='selectedContent' from='canvas' entityId='content-1'  title='AI in Knowledge Management'>This indeed allows more people to efficiently access specialized knowledge. Combined with its paper collection and management functions, it essentially achieves a one-stop service from search acquisition, query dialogue for knowledge acquisition, to knowledge management, rather than just being a simple AI tool product.</ContextItem>
    </Context>
 
    Chat History:
@@ -103,7 +103,7 @@ Examples of query rewriting with context and chat history:
 
 2. Context:
    <Context>
-   <ContextItem type='note' entityId='note-1' title='Meeting Minutes - Engineering Team'>Discussed the need for additional backend developers to support the new microservices architecture. The team agreed on hiring at least three senior developers with experience in distributed systems.</ContextItem>
+   <ContextItem type='canvas' entityId='canvas-1' title='Meeting Minutes - Engineering Team'>Discussed the need for additional backend developers to support the new microservices architecture. The team agreed on hiring at least three senior developers with experience in distributed systems.</ContextItem>
    </Context>
 
    Chat History:
@@ -116,8 +116,8 @@ Examples of query rewriting with context and chat history:
    Rewritten query: "Please summarize the main points from the meeting minutes about the need for additional backend developers and the hiring plans for the microservices architecture."
    mentionedContext: [
      {
-       "type": "note",
-       "entityId": "note-1",
+       "type": "canvas",
+       "entityId": "canvas-1",
        "title": "Meeting Minutes - Engineering Team",
        "useWholeContent": true
      }
@@ -194,10 +194,10 @@ export async function analyzeQueryAndContext(
   query: string,
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<QueryAnalysis> {
-  const { chatHistory, resources, notes, contentList, collections, modelName } = ctx.configSnapshot.configurable;
+  const { chatHistory, resources, canvases, contentList, collections, modelName } = ctx.configSnapshot.configurable;
   const context: IContext = {
     resources,
-    notes,
+    canvases,
     contentList,
     collections,
   };
@@ -217,7 +217,7 @@ You are an advanced AI assistant specializing in query analysis and context extr
 
 Your tasks are to:
 1. Rewrite the query to best represent the user's current intent, focusing primarily on the given context and the current query. Only consider chat history if it's directly relevant to understanding the current query.
-2. Identify any specific context items (notes, resources, or selectedContent) mentioned in the query or directly relevant to it. If none are mentioned or relevant, leave this list empty.
+2. Identify any specific context items (canvases, resources, or selectedContent) mentioned in the query or directly relevant to it. If none are mentioned or relevant, leave this list empty.
 3. For each identified context item, determine whether the entire content should be used or if partial content retrieval (e.g., through vector similarity search) is sufficient.
 4. Determine the primary intent of the query.
 
@@ -231,7 +231,7 @@ Output your analysis in the following format:
   "rewrittenQuery": "The rewritten query that best represents the user's intent",
   "mentionedContext": [
     {
-      "type": "note" | "resource" | "selectedContent",
+      "type": "canvas" | "resource" | "selectedContent",
       "entityId": "ID of the mentioned item (if available)",
       "title": "Title of the mentioned item",
       "url": "URL of the mentioned item (if available)",
@@ -261,7 +261,7 @@ Please analyze the query, focusing primarily on the current query and available 
       rewrittenQuery: z.string(),
       mentionedContext: z.array(
         z.object({
-          type: z.enum(['note', 'resource', 'selectedContent']),
+          type: z.enum(['canvas', 'resource', 'selectedContent']),
           entityId: z.string().optional(),
           title: z.string(),
           url: z.string().optional(),

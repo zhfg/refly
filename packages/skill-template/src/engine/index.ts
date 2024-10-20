@@ -1,6 +1,6 @@
 import { SkillRunnableConfig } from '../base';
 import { ChatOpenAI, OpenAIChatInput } from '@langchain/openai';
-import { Document, DocumentInterface } from '@langchain/core/documents';
+import { Document } from '@langchain/core/documents';
 import {
   CreateCollectionResponse,
   CreateLabelClassRequest,
@@ -16,42 +16,41 @@ import {
   UpsertCollectionRequest,
   UpsertResourceRequest,
   User,
-  GetNoteDetailResponse,
-  UpsertNoteRequest,
-  CreateNoteResponse,
-  ListNotesData,
-  ListNotesResponse,
+  GetCanvasDetailResponse,
+  UpsertCanvasRequest,
+  CreateCanvasResponse,
   ResourceType,
-  InMemoryIndexContentResponse,
   InMemorySearchResponse,
   SearchOptions,
   WebSearchRequest,
   WebSearchResponse,
+  ListCanvasData,
+  ListCanvasResponse,
 } from '@refly-packages/openapi-schema';
 
 // TODO: unify with frontend
 export type ContentNodeType =
   | 'resource'
-  | 'note'
+  | 'canvas'
   | 'extensionWeblink'
   | 'resourceSelection'
   | 'collectionSelection'
-  | 'noteSelection';
+  | 'canvasSelection';
 
 export interface NodeMeta {
   title: string;
   nodeType: ContentNodeType;
   url?: string;
-  noteId?: string;
+  canvasId?: string;
   resourceId?: string;
   resourceType?: ResourceType;
   [key: string]: any; // any other fields
 }
 
 export interface ReflyService {
-  getNoteDetail: (user: User, noteId: string) => Promise<GetNoteDetailResponse>;
-  createNote: (user: User, req: UpsertNoteRequest) => Promise<CreateNoteResponse>;
-  listNotes: (user: User, param: ListNotesData['query']) => Promise<ListNotesResponse>;
+  getCanvasDetail: (user: User, canvasId: string) => Promise<GetCanvasDetailResponse>;
+  createCanvas: (user: User, req: UpsertCanvasRequest) => Promise<CreateCanvasResponse>;
+  listCanvas: (user: User, param: ListCanvasData['query']) => Promise<ListCanvasResponse>;
   getResourceDetail: (user: User, req: { resourceId: string }) => Promise<GetResourceDetailResponse>;
   createResource: (user: User, req: UpsertResourceRequest) => Promise<CreateResourceResponse>;
   updateResource: (user: User, req: UpsertResourceRequest) => Promise<UpdateResourceResponse>;

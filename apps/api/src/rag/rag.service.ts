@@ -213,8 +213,8 @@ export class RAGService {
   async indexContent(user: User, doc: Document<NodeMeta>): Promise<{ size: number }> {
     const { uid } = user;
     const { pageContent, metadata } = doc;
-    const { nodeType, noteId, resourceId } = metadata;
-    const docId = nodeType === 'note' ? noteId : resourceId;
+    const { nodeType, canvasId, resourceId } = metadata;
+    const docId = nodeType === 'canvas' ? canvasId : resourceId;
 
     const chunks = await this.chunkText(pageContent);
     const chunkEmbeds = await this.embeddings.embedDocuments(chunks);
@@ -247,11 +247,11 @@ export class RAGService {
     });
   }
 
-  async deleteNoteNodes(user: User, noteId: string) {
+  async deleteCanvasNodes(user: User, canvasId: string) {
     return this.qdrant.batchDelete({
       must: [
         { key: 'tenantId', match: { value: user.uid } },
-        { key: 'noteId', match: { value: noteId } },
+        { key: 'canvasId', match: { value: canvasId } },
       ],
     });
   }
@@ -281,10 +281,10 @@ export class RAGService {
         match: { any: param.filter?.urls },
       });
     }
-    if (param.filter?.noteIds?.length > 0) {
+    if (param.filter?.canvasIds?.length > 0) {
       conditions.push({
-        key: 'noteId',
-        match: { any: param.filter?.noteIds },
+        key: 'canvasId',
+        match: { any: param.filter?.canvasIds },
       });
     }
     if (param.filter?.resourceIds?.length > 0) {

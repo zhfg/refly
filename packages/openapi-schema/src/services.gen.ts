@@ -23,21 +23,21 @@ import type {
   DeleteResourceData,
   DeleteResourceError,
   DeleteResourceResponse,
-  ListNotesData,
-  ListNotesError,
-  ListNotesResponse,
-  GetNoteDetailData,
-  GetNoteDetailError,
-  GetNoteDetailResponse2,
-  UpdateNoteData,
-  UpdateNoteError,
-  UpdateNoteResponse,
-  CreateNoteData,
-  CreateNoteError,
-  CreateNoteResponse,
-  DeleteNoteData,
-  DeleteNoteError,
-  DeleteNoteResponse,
+  ListCanvasData,
+  ListCanvasError,
+  ListCanvasResponse2,
+  GetCanvasDetailData,
+  GetCanvasDetailError,
+  GetCanvasDetailResponse2,
+  UpdateCanvasData,
+  UpdateCanvasError,
+  UpdateCanvasResponse,
+  CreateCanvasData,
+  CreateCanvasError,
+  CreateCanvasResponse,
+  DeleteCanvasData,
+  DeleteCanvasError,
+  DeleteCanvasResponse,
   ListCollectionsData,
   ListCollectionsError,
   ListCollectionsResponse,
@@ -243,57 +243,57 @@ export const deleteResource = (options: Options<DeleteResourceData>) => {
 };
 
 /**
- * List user notes
- * List all notes for a user
+ * List user canvases
+ * List all canvases for a user
  */
-export const listNotes = (options?: Options<ListNotesData>) => {
-  return (options?.client ?? client).get<ListNotesResponse, ListNotesError>({
+export const listCanvas = (options?: Options<ListCanvasData>) => {
+  return (options?.client ?? client).get<ListCanvasResponse2, ListCanvasError>({
     ...options,
-    url: '/knowledge/note/list',
+    url: '/knowledge/canvas/list',
   });
 };
 
 /**
- * Get note detail
- * Return note detail
+ * Get canvas detail
+ * Return canvas detail
  */
-export const getNoteDetail = (options: Options<GetNoteDetailData>) => {
-  return (options?.client ?? client).get<GetNoteDetailResponse2, GetNoteDetailError>({
+export const getCanvasDetail = (options: Options<GetCanvasDetailData>) => {
+  return (options?.client ?? client).get<GetCanvasDetailResponse2, GetCanvasDetailError>({
     ...options,
-    url: '/knowledge/note/detail',
+    url: '/knowledge/canvas/detail',
   });
 };
 
 /**
- * Update note
- * Update an existing note
+ * Update canvas
+ * Update an existing canvas
  */
-export const updateNote = (options: Options<UpdateNoteData>) => {
-  return (options?.client ?? client).post<UpdateNoteResponse, UpdateNoteError>({
+export const updateCanvas = (options: Options<UpdateCanvasData>) => {
+  return (options?.client ?? client).post<UpdateCanvasResponse, UpdateCanvasError>({
     ...options,
-    url: '/knowledge/note/update',
+    url: '/knowledge/canvas/update',
   });
 };
 
 /**
- * Create new note
- * Create a new note
+ * Create new canvas
+ * Create a new canvas
  */
-export const createNote = (options: Options<CreateNoteData>) => {
-  return (options?.client ?? client).post<CreateNoteResponse, CreateNoteError>({
+export const createCanvas = (options: Options<CreateCanvasData>) => {
+  return (options?.client ?? client).post<CreateCanvasResponse, CreateCanvasError>({
     ...options,
-    url: '/knowledge/note/new',
+    url: '/knowledge/canvas/new',
   });
 };
 
 /**
- * Delete note
- * Delete an existing note
+ * Delete canvas
+ * Delete an existing canvas
  */
-export const deleteNote = (options: Options<DeleteNoteData>) => {
-  return (options?.client ?? client).post<DeleteNoteResponse, DeleteNoteError>({
+export const deleteCanvas = (options: Options<DeleteCanvasData>) => {
+  return (options?.client ?? client).post<DeleteCanvasResponse, DeleteCanvasError>({
     ...options,
-    url: '/knowledge/note/delete',
+    url: '/knowledge/canvas/delete',
   });
 };
 
@@ -739,7 +739,7 @@ export const createPortalSession = (options?: Options) => {
 
 /**
  * Search
- * Search for resources, collections, notes, etc.
+ * Search for canvases, resources, collections, etc.
  */
 export const search = (options: Options<SearchData>) => {
   return (options?.client ?? client).post<SearchResponse2, SearchError>({

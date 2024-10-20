@@ -32,7 +32,11 @@ export class MakeLongerSkill extends BaseSkill {
         {
           key: 'contentList',
           limit: 1,
-          preferredSelectionKeys: ['noteBeforeCursorSelection', 'noteCursorSelection', 'noteAfterCursorSelection'],
+          preferredSelectionKeys: [
+            'canvasBeforeCursorSelection',
+            'canvasCursorSelection',
+            'canvasAfterCursorSelection',
+          ],
         },
       ],
     },

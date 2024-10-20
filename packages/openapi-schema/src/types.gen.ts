@@ -39,7 +39,7 @@ export type ResourceMeta = {
 /**
  * Resource type
  */
-export type ResourceType = 'weblink' | 'text' | 'note';
+export type ResourceType = 'weblink' | 'text';
 
 export type Resource = {
   /**
@@ -63,10 +63,6 @@ export type Resource = {
    */
   indexStatus?: IndexStatus;
   /**
-   * Whether this resource is public
-   */
-  isPublic?: boolean;
-  /**
    * Collection creation time
    */
   createdAt: string;
@@ -79,7 +75,7 @@ export type Resource = {
    */
   contentPreview?: string;
   /**
-   * Document content for this resource (only returned in getNoteDetail API)
+   * Document content for this resource (only returned in getResourceDetail API)
    */
   content?: string;
   /**
@@ -88,37 +84,33 @@ export type Resource = {
   collections?: Array<Collection>;
 };
 
-export type Note = {
+export type Canvas = {
   /**
-   * Note ID
+   * Canvas ID
    */
-  noteId: string;
+  canvasId: string;
   /**
-   * Note title
+   * Canvas title
    */
   title: string;
   /**
-   * Note content preview
+   * Canvas content preview
    */
   contentPreview?: string;
   /**
-   * Full note content (only returned in detail api)
+   * Full canvas content (only returned in detail api)
    */
   content?: string;
   /**
-   * Whether this note is read-only
+   * Whether this canvas is read-only
    */
   readOnly: boolean;
   /**
-   * Whether this note is public
-   */
-  isPublic: boolean;
-  /**
-   * Note creation time
+   * Canvas creation time
    */
   createdAt: string;
   /**
-   * Note update time
+   * Canvas update time
    */
   updatedAt: string;
 };
@@ -137,10 +129,6 @@ export type Collection = {
    */
   description?: string;
   /**
-   * Whether this collection is public
-   */
-  isPublic?: boolean;
-  /**
    * Collection creation time
    */
   createdAt: string;
@@ -157,7 +145,7 @@ export type Collection = {
 /**
  * Entity type
  */
-export type EntityType = 'resource' | 'collection' | 'note';
+export type EntityType = 'canvas' | 'resource' | 'collection';
 
 /**
  * Entity
@@ -1075,7 +1063,7 @@ export type StorageUsageMeter = {
    */
   subscriptionId?: string;
   /**
-   * Object storage quota (in bytes), including resource, note and static files
+   * Object storage quota (in bytes), including resource, canvas and static files
    */
   objectStorageQuota: string;
   /**
@@ -1083,9 +1071,9 @@ export type StorageUsageMeter = {
    */
   resourceSize: string;
   /**
-   * Note storage size in use (in bytes)
+   * Canvas storage size in use (in bytes)
    */
-  noteSize: string;
+  canvasSize: string;
   /**
    * Static file storage size in use (in bytes)
    */
@@ -1188,10 +1176,6 @@ export type UpsertResourceRequest = {
    */
   content?: string;
   /**
-   * Whether this resource is public
-   */
-  isPublic?: boolean;
-  /**
    * Whether this resource is read-only
    */
   readOnly?: boolean;
@@ -1243,52 +1227,48 @@ export type GetResourceDetailResponse = BaseResponse & {
   data?: Resource;
 };
 
-export type ListNoteResponse = BaseResponse & {
+export type ListCanvasResponse = BaseResponse & {
   /**
-   * Note list
+   * Canvas list
    */
-  data?: Array<Note>;
+  data?: Array<Canvas>;
 };
 
-export type GetNoteDetailResponse = BaseResponse & {
+export type GetCanvasDetailResponse = BaseResponse & {
   /**
-   * Note data
+   * Canvas data
    */
-  data?: Note;
+  data?: Canvas;
 };
 
-export type UpsertNoteRequest = {
+export type UpsertCanvasRequest = {
   /**
-   * Note title
+   * Canvas title
    */
   title?: string;
   /**
-   * Note ID (only used for update)
+   * Canvas ID (only used for update)
    */
-  noteId?: string;
+  canvasId?: string;
   /**
-   * Whether this note is read-only
+   * Whether this canvas is read-only
    */
   readOnly?: boolean;
   /**
-   * Whether this note is public
-   */
-  isPublic?: boolean;
-  /**
-   * Note initial content
+   * Canvas initial content
    */
   initialContent?: string;
 };
 
-export type UpsertNoteResponse = BaseResponse & {
-  data?: Note;
+export type UpsertCanvasResponse = BaseResponse & {
+  data?: Canvas;
 };
 
-export type DeleteNoteRequest = {
+export type DeleteCanvasRequest = {
   /**
-   * Note ID to delete
+   * Canvas ID to delete
    */
-  noteId: string;
+  canvasId: string;
 };
 
 export type UpsertCollectionRequest = {
@@ -1304,10 +1284,6 @@ export type UpsertCollectionRequest = {
    * Collection description
    */
   description?: string;
-  /**
-   * Whether this collection is public
-   */
-  isPublic?: boolean;
 };
 
 export type UpsertCollectionResponse = BaseResponse & {
@@ -1624,19 +1600,19 @@ export type SkillContextCollectionItem = {
 };
 
 /**
- * Skill context note item
+ * Skill context canvas item
  */
-export type SkillContextNoteItem = {
+export type SkillContextCanvasItem = {
   /**
-   * Note ID
+   * Canvas ID
    */
-  noteId?: string;
+  canvasId?: string;
   /**
-   * Note
+   * Canvas
    */
-  note?: Note;
+  canvas?: Canvas;
   /**
-   * Note context metadata
+   * Canvas context metadata
    */
   metadata?: {
     [key: string]: unknown;
@@ -1688,9 +1664,9 @@ export type SkillContext = {
    */
   collections?: Array<SkillContextCollectionItem>;
   /**
-   * Context notes
+   * Context canvases
    */
-  notes?: Array<SkillContextNoteItem>;
+  canvases?: Array<SkillContextCanvasItem>;
   /**
    * Context content list
    */
@@ -1701,15 +1677,15 @@ export type SkillContext = {
   urls?: Array<SkillContextUrlItem>;
 };
 
-export type SkillContextKey = 'resources' | 'collections' | 'notes' | 'contentList' | 'urls';
+export type SkillContextKey = 'resources' | 'collections' | 'canvases' | 'contentList' | 'urls';
 
 export type SelectionKey =
-  | 'noteSelection'
+  | 'canvasSelection'
   | 'resourceSelection'
   | 'extensionWeblinkSelection'
-  | 'noteCursorSelection'
-  | 'noteBeforeCursorSelection'
-  | 'noteAfterCursorSelection';
+  | 'canvasCursorSelection'
+  | 'canvasBeforeCursorSelection'
+  | 'canvasAfterCursorSelection';
 
 export type SkillContextRule = {
   /**
@@ -2092,7 +2068,7 @@ export type SearchOptions = {
   enableReranker?: boolean;
 };
 
-export type SearchDomain = 'resource' | 'note' | 'collection' | 'conversation' | 'skill';
+export type SearchDomain = 'resource' | 'canvas' | 'collection' | 'conversation' | 'skill';
 
 export type SearchMode = 'keyword' | 'vector' | 'hybrid';
 
@@ -2275,12 +2251,6 @@ export type DocumentInterface = {
   };
 };
 
-export type InMemoryIndexContentResponse = BaseResponse & {
-  data?: {
-    [key: string]: unknown;
-  } | null;
-};
-
 export type InMemorySearchResponse = BaseResponse & {
   data?: Array<DocumentInterface>;
 };
@@ -2372,7 +2342,7 @@ export type DeleteResourceResponse = BaseResponse;
 
 export type DeleteResourceError = unknown;
 
-export type ListNotesData = {
+export type ListCanvasData = {
   query?: {
     /**
      * Page number
@@ -2385,52 +2355,52 @@ export type ListNotesData = {
   };
 };
 
-export type ListNotesResponse = ListNoteResponse;
+export type ListCanvasResponse2 = ListCanvasResponse;
 
-export type ListNotesError = unknown;
+export type ListCanvasError = unknown;
 
-export type GetNoteDetailData = {
+export type GetCanvasDetailData = {
   query: {
     /**
-     * Note ID to retrieve
+     * Canvas ID to retrieve
      */
-    noteId: string;
+    canvasId: string;
   };
 };
 
-export type GetNoteDetailResponse2 = GetNoteDetailResponse;
+export type GetCanvasDetailResponse2 = GetCanvasDetailResponse;
 
-export type GetNoteDetailError = unknown;
+export type GetCanvasDetailError = unknown;
 
-export type UpdateNoteData = {
+export type UpdateCanvasData = {
   /**
-   * Note update request
+   * Canvas update request
    */
-  body: UpsertNoteRequest;
+  body: UpsertCanvasRequest;
 };
 
-export type UpdateNoteResponse = UpsertNoteResponse;
+export type UpdateCanvasResponse = UpsertCanvasResponse;
 
-export type UpdateNoteError = unknown;
+export type UpdateCanvasError = unknown;
 
-export type CreateNoteData = {
+export type CreateCanvasData = {
   /**
-   * Note creation request
+   * Canvas creation request
    */
-  body: UpsertNoteRequest;
+  body: UpsertCanvasRequest;
 };
 
-export type CreateNoteResponse = UpsertNoteResponse;
+export type CreateCanvasResponse = UpsertCanvasResponse;
 
-export type CreateNoteError = unknown;
+export type CreateCanvasError = unknown;
 
-export type DeleteNoteData = {
-  body: DeleteNoteRequest;
+export type DeleteCanvasData = {
+  body: DeleteCanvasRequest;
 };
 
-export type DeleteNoteResponse = BaseResponse;
+export type DeleteCanvasResponse = BaseResponse;
 
-export type DeleteNoteError = unknown;
+export type DeleteCanvasError = unknown;
 
 export type ListCollectionsData = {
   query?: {
@@ -2991,53 +2961,53 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/knowledge/note/list': {
+  '/knowledge/canvas/list': {
     get: {
-      req: ListNotesData;
+      req: ListCanvasData;
       res: {
         /**
          * Successful operation
          */
-        '200': ListNoteResponse;
+        '200': ListCanvasResponse;
       };
     };
   };
-  '/knowledge/note/detail': {
+  '/knowledge/canvas/detail': {
     get: {
-      req: GetNoteDetailData;
+      req: GetCanvasDetailData;
       res: {
         /**
          * Successful operation
          */
-        '200': GetNoteDetailResponse;
+        '200': GetCanvasDetailResponse;
       };
     };
   };
-  '/knowledge/note/update': {
+  '/knowledge/canvas/update': {
     post: {
-      req: UpdateNoteData;
+      req: UpdateCanvasData;
       res: {
         /**
          * successful operation
          */
-        '200': UpsertNoteResponse;
+        '200': UpsertCanvasResponse;
       };
     };
   };
-  '/knowledge/note/new': {
+  '/knowledge/canvas/new': {
     post: {
-      req: CreateNoteData;
+      req: CreateCanvasData;
       res: {
         /**
          * successful operation
          */
-        '200': UpsertNoteResponse;
+        '200': UpsertCanvasResponse;
       };
     };
   };
-  '/knowledge/note/delete': {
+  '/knowledge/canvas/delete': {
     post: {
-      req: DeleteNoteData;
+      req: DeleteCanvasData;
       res: {
         /**
          * Successful operation

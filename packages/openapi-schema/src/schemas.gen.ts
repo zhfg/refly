@@ -44,7 +44,7 @@ export const $ResourceMeta = {
 export const $ResourceType = {
   type: 'string',
   description: 'Resource type',
-  enum: ['weblink', 'text', 'note'],
+  enum: ['weblink', 'text'],
 } as const;
 
 export const $Resource = {
@@ -73,11 +73,6 @@ export const $Resource = {
       description: 'Resource index status',
       $ref: '#/components/schemas/IndexStatus',
     },
-    isPublic: {
-      type: 'boolean',
-      description: 'Whether this resource is public',
-      default: false,
-    },
     createdAt: {
       type: 'string',
       format: 'date-time',
@@ -94,7 +89,7 @@ export const $Resource = {
     },
     content: {
       type: 'string',
-      description: 'Document content for this resource (only returned in getNoteDetail API)',
+      description: 'Document content for this resource (only returned in getResourceDetail API)',
     },
     collections: {
       type: 'array',
@@ -106,45 +101,41 @@ export const $Resource = {
   },
 } as const;
 
-export const $Note = {
+export const $Canvas = {
   type: 'object',
-  required: ['noteId', 'title', 'readOnly', 'isPublic', 'createdAt', 'updatedAt'],
+  required: ['canvasId', 'title', 'readOnly', 'createdAt', 'updatedAt'],
   properties: {
-    noteId: {
+    canvasId: {
       type: 'string',
-      description: 'Note ID',
-      example: 'n-g30e1b80b5g1itbemc0g5jj3',
+      description: 'Canvas ID',
+      example: 'c-g30e1b80b5g1itbemc0g5jj3',
     },
     title: {
       type: 'string',
-      description: 'Note title',
-      example: 'My note',
+      description: 'Canvas title',
+      example: 'My canvas',
     },
     contentPreview: {
       type: 'string',
-      description: 'Note content preview',
+      description: 'Canvas content preview',
     },
     content: {
       type: 'string',
-      description: 'Full note content (only returned in detail api)',
+      description: 'Full canvas content (only returned in detail api)',
     },
     readOnly: {
       type: 'boolean',
-      description: 'Whether this note is read-only',
-    },
-    isPublic: {
-      type: 'boolean',
-      description: 'Whether this note is public',
+      description: 'Whether this canvas is read-only',
     },
     createdAt: {
       type: 'string',
       format: 'date-time',
-      description: 'Note creation time',
+      description: 'Canvas creation time',
     },
     updatedAt: {
       type: 'string',
       format: 'date-time',
-      description: 'Note update time',
+      description: 'Canvas update time',
     },
   },
 } as const;
@@ -167,11 +158,6 @@ export const $Collection = {
       type: 'string',
       description: 'Collection description',
       example: 'Collection description',
-    },
-    isPublic: {
-      type: 'boolean',
-      description: 'Whether this collection is public',
-      default: false,
     },
     createdAt: {
       type: 'string',
@@ -196,7 +182,7 @@ export const $Collection = {
 export const $EntityType = {
   type: 'string',
   description: 'Entity type',
-  enum: ['resource', 'collection', 'note'],
+  enum: ['canvas', 'resource', 'collection'],
 } as const;
 
 export const $Entity = {
@@ -1335,7 +1321,7 @@ export const $StorageUsageMeter = {
     'uid',
     'objectStorageQuota',
     'resourceSize',
-    'noteSize',
+    'canvasSize',
     'fileSize',
     'vectorStorageQuota',
     'vectorStorageUsed',
@@ -1355,7 +1341,7 @@ export const $StorageUsageMeter = {
     },
     objectStorageQuota: {
       type: 'string',
-      description: 'Object storage quota (in bytes), including resource, note and static files',
+      description: 'Object storage quota (in bytes), including resource, canvas and static files',
       example: '104857600',
     },
     resourceSize: {
@@ -1363,9 +1349,9 @@ export const $StorageUsageMeter = {
       description: 'Resource storage size in use (in bytes)',
       example: '1048576',
     },
-    noteSize: {
+    canvasSize: {
       type: 'string',
-      description: 'Note storage size in use (in bytes)',
+      description: 'Canvas storage size in use (in bytes)',
       example: '1048576',
     },
     fileSize: {
@@ -1510,11 +1496,6 @@ export const $UpsertResourceRequest = {
       type: 'string',
       description: 'Resource content (this will be ignored if storageKey was set)',
     },
-    isPublic: {
-      type: 'boolean',
-      description: 'Whether this resource is public',
-      default: false,
-    },
     readOnly: {
       type: 'boolean',
       description: 'Whether this resource is read-only',
@@ -1643,7 +1624,7 @@ export const $GetResourceDetailResponse = {
   ],
 } as const;
 
-export const $ListNoteResponse = {
+export const $ListCanvasResponse = {
   allOf: [
     {
       $ref: '#/components/schemas/BaseResponse',
@@ -1653,9 +1634,9 @@ export const $ListNoteResponse = {
       properties: {
         data: {
           type: 'array',
-          description: 'Note list',
+          description: 'Canvas list',
           items: {
-            $ref: '#/components/schemas/Note',
+            $ref: '#/components/schemas/Canvas',
           },
         },
       },
@@ -1663,7 +1644,7 @@ export const $ListNoteResponse = {
   ],
 } as const;
 
-export const $GetNoteDetailResponse = {
+export const $GetCanvasDetailResponse = {
   allOf: [
     {
       $ref: '#/components/schemas/BaseResponse',
@@ -1673,45 +1654,40 @@ export const $GetNoteDetailResponse = {
       properties: {
         data: {
           type: 'object',
-          description: 'Note data',
-          $ref: '#/components/schemas/Note',
+          description: 'Canvas data',
+          $ref: '#/components/schemas/Canvas',
         },
       },
     },
   ],
 } as const;
 
-export const $UpsertNoteRequest = {
+export const $UpsertCanvasRequest = {
   type: 'object',
   properties: {
     title: {
       type: 'string',
-      description: 'Note title',
-      example: 'My Note',
+      description: 'Canvas title',
+      example: 'My Canvas',
     },
-    noteId: {
+    canvasId: {
       type: 'string',
-      description: 'Note ID (only used for update)',
-      example: 'n-g30e1b80b5g1itbemc0g5jj3',
+      description: 'Canvas ID (only used for update)',
+      example: 'c-g30e1b80b5g1itbemc0g5jj3',
     },
     readOnly: {
       type: 'boolean',
-      description: 'Whether this note is read-only',
-      default: false,
-    },
-    isPublic: {
-      type: 'boolean',
-      description: 'Whether this note is public',
+      description: 'Whether this canvas is read-only',
       default: false,
     },
     initialContent: {
       type: 'string',
-      description: 'Note initial content',
+      description: 'Canvas initial content',
     },
   },
 } as const;
 
-export const $UpsertNoteResponse = {
+export const $UpsertCanvasResponse = {
   allOf: [
     {
       $ref: '#/components/schemas/BaseResponse',
@@ -1720,21 +1696,21 @@ export const $UpsertNoteResponse = {
       type: 'object',
       properties: {
         data: {
-          $ref: '#/components/schemas/Note',
+          $ref: '#/components/schemas/Canvas',
         },
       },
     },
   ],
 } as const;
 
-export const $DeleteNoteRequest = {
+export const $DeleteCanvasRequest = {
   type: 'object',
-  required: ['noteId'],
+  required: ['canvasId'],
   properties: {
-    noteId: {
+    canvasId: {
       type: 'string',
-      description: 'Note ID to delete',
-      example: 'n-g30e1b80b5g1itbemc0g5jj3',
+      description: 'Canvas ID to delete',
+      example: 'c-g30e1b80b5g1itbemc0g5jj3',
     },
   },
 } as const;
@@ -1756,11 +1732,6 @@ export const $UpsertCollectionRequest = {
       type: 'string',
       description: 'Collection description',
       example: 'Collection description',
-    },
-    isPublic: {
-      type: 'boolean',
-      description: 'Whether this collection is public',
-      default: false,
     },
   },
 } as const;
@@ -2297,21 +2268,21 @@ export const $SkillContextCollectionItem = {
   },
 } as const;
 
-export const $SkillContextNoteItem = {
+export const $SkillContextCanvasItem = {
   type: 'object',
-  description: 'Skill context note item',
+  description: 'Skill context canvas item',
   properties: {
-    noteId: {
+    canvasId: {
       type: 'string',
-      description: 'Note ID',
+      description: 'Canvas ID',
     },
-    note: {
-      description: 'Note',
-      $ref: '#/components/schemas/Note',
+    canvas: {
+      description: 'Canvas',
+      $ref: '#/components/schemas/Canvas',
     },
     metadata: {
       type: 'object',
-      description: 'Note context metadata',
+      description: 'Canvas context metadata',
     },
   },
 } as const;
@@ -2366,11 +2337,11 @@ export const $SkillContext = {
         $ref: '#/components/schemas/SkillContextCollectionItem',
       },
     },
-    notes: {
+    canvases: {
       type: 'array',
-      description: 'Context notes',
+      description: 'Context canvases',
       items: {
-        $ref: '#/components/schemas/SkillContextNoteItem',
+        $ref: '#/components/schemas/SkillContextCanvasItem',
       },
     },
     contentList: {
@@ -2392,18 +2363,18 @@ export const $SkillContext = {
 
 export const $SkillContextKey = {
   type: 'string',
-  enum: ['resources', 'collections', 'notes', 'contentList', 'urls'],
+  enum: ['resources', 'collections', 'canvases', 'contentList', 'urls'],
 } as const;
 
 export const $SelectionKey = {
   type: 'string',
   enum: [
-    'noteSelection',
+    'canvasSelection',
     'resourceSelection',
     'extensionWeblinkSelection',
-    'noteCursorSelection',
-    'noteBeforeCursorSelection',
-    'noteAfterCursorSelection',
+    'canvasCursorSelection',
+    'canvasBeforeCursorSelection',
+    'canvasAfterCursorSelection',
   ],
 } as const;
 
@@ -3050,7 +3021,7 @@ export const $SearchOptions = {
 
 export const $SearchDomain = {
   type: 'string',
-  enum: ['resource', 'note', 'collection', 'conversation', 'skill'],
+  enum: ['resource', 'canvas', 'collection', 'conversation', 'skill'],
 } as const;
 
 export const $SearchMode = {
@@ -3328,23 +3299,6 @@ export const $DocumentInterface = {
       description: 'Metadata associated with the document.',
     },
   },
-} as const;
-
-export const $InMemoryIndexContentResponse = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/BaseResponse',
-    },
-    {
-      type: 'object',
-      properties: {
-        data: {
-          type: 'object',
-          nullable: true,
-        },
-      },
-    },
-  ],
 } as const;
 
 export const $InMemorySearchResponse = {

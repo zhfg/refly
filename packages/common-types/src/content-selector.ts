@@ -8,14 +8,14 @@ export type FrontendBaseMarkType = 'extensionWeblink' | 'all';
 export type BaseMarkType = FrontendBaseMarkType | SearchDomain;
 
 export const frontendBaseMarkTypes: BaseMarkType[] = ['extensionWeblink', 'all'];
-export const backendBaseMarkTypes: BaseMarkType[] = ['note', 'resource', 'collection']; // conversation and skill not supported yet
+export const backendBaseMarkTypes: BaseMarkType[] = ['canvas', 'resource', 'collection']; // conversation and skill not supported yet
 
-export type SelectedTextMarkType = 'resourceSelection' | 'noteSelection' | 'extensionWeblinkSelection';
+export type SelectedTextMarkType = 'resourceSelection' | 'canvasSelection' | 'extensionWeblinkSelection';
 // for notion cursor selection, mainly for note-related skills
 export type SelectedCursorTextMarkType =
-  | 'noteCursorSelection'
-  | 'noteBeforeCursorSelection'
-  | 'noteAfterCursorSelection';
+  | 'canvasCursorSelection'
+  | 'canvasBeforeCursorSelection'
+  | 'canvasAfterCursorSelection';
 
 /**
  * 1. extension-weblink: represent the weblink in the extension
@@ -23,11 +23,11 @@ export type SelectedCursorTextMarkType =
  */
 export const selectedTextDomains: SelectedTextDomain[] = [
   'resourceSelection',
-  'noteSelection',
+  'canvasSelection',
   'extensionWeblinkSelection',
-  'noteCursorSelection',
-  'noteBeforeCursorSelection',
-  'noteAfterCursorSelection',
+  'canvasCursorSelection',
+  'canvasBeforeCursorSelection',
+  'canvasAfterCursorSelection',
 ];
 
 // mainly for display context card, now deprecated

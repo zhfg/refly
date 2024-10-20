@@ -1,13 +1,13 @@
 import {
   Collection as CollectionModel,
   Resource as ResourceModel,
-  Note as NoteModel,
+  Canvas as CanvasModel,
   LabelInstance,
 } from '@prisma/client';
 import {
   Collection,
   Resource,
-  Note,
+  Canvas,
   ResourceType,
   IndexStatus,
 } from '@refly-packages/openapi-schema';
@@ -53,14 +53,14 @@ export const resourcePO2DTO = (
   return res;
 };
 
-export const notePO2DTO = (note: NoteModel & { content?: string }): Note => {
-  if (!note) {
+export const canvasPO2DTO = (canvas: CanvasModel & { content?: string }): Canvas => {
+  if (!canvas) {
     return null;
   }
-  const res: Note = {
-    ...pick(note, ['noteId', 'title', 'content', 'contentPreview', 'isPublic', 'readOnly']),
-    createdAt: note.createdAt.toJSON(),
-    updatedAt: note.updatedAt.toJSON(),
+  const res: Canvas = {
+    ...pick(canvas, ['canvasId', 'title', 'content', 'contentPreview', 'isPublic', 'readOnly']),
+    createdAt: canvas.createdAt.toJSON(),
+    updatedAt: canvas.updatedAt.toJSON(),
   };
   return res;
 };

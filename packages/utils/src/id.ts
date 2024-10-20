@@ -34,8 +34,8 @@ export function genResourceID(): string {
   return 'r-' + createId();
 }
 
-export function genNoteID(): string {
-  return 'n-' + createId();
+export function genCanvasID(): string {
+  return 'c-' + createId();
 }
 
 export function genCollectionID(): string {

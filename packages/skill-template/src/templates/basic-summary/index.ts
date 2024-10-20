@@ -30,11 +30,11 @@ export class BasicSummarySkill extends BaseSkill {
       relation: 'mutuallyExclusive',
       rules: [
         { key: 'resources', limit: 1 },
-        { key: 'notes', limit: 1 },
+        { key: 'canvases', limit: 1 },
         {
           key: 'contentList',
           limit: 1,
-          preferredSelectionKeys: ['resourceSelection', 'noteSelection', 'extensionWeblinkSelection'],
+          preferredSelectionKeys: ['resourceSelection', 'canvasSelection', 'extensionWeblinkSelection'],
         },
       ],
     },
@@ -62,7 +62,7 @@ export class BasicSummarySkill extends BaseSkill {
     this.engine.logger.log('---GENERATE---');
 
     const { documents } = state;
-    const { locale = 'en', notes = [], resources = [], contentList = [] } = config?.configurable || {};
+    const { locale = 'en', canvases = [], resources = [], contentList = [] } = config?.configurable || {};
 
     // 1. build context text
     const contextToCitationText = documents.reduce((total, cur) => {
@@ -75,8 +75,8 @@ export class BasicSummarySkill extends BaseSkill {
     let contentListText = '';
     if (resources?.length > 0) {
       contentListText = resources[0].resource?.content;
-    } else if (notes?.length > 0) {
-      contentListText = notes[0].note?.content;
+    } else if (canvases?.length > 0) {
+      contentListText = canvases[0].canvas?.content;
     } else if (contentList?.length > 0) {
       contentListText = contentList.map((item, index) => `${index + 1}. ${item.content}`).join('\n\n');
     }
