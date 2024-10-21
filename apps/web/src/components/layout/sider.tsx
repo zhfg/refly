@@ -483,8 +483,6 @@ export const SiderLayout = () => {
                 </MenuItem>
               </div>
             </div>
-
-            <Divider style={{ margin: "8px 0" }} />
           </div>
 
           <div className="sider-footer">
@@ -512,6 +510,7 @@ export const SiderLayout = () => {
             {!!userStore.userProfile?.uid && (
               <MenuItem
                 key="Settings"
+                style={{ height: 40 }}
                 className={`menu-setting-container setting-menu-item ${collapse ? "setting-menu-item-collapse" : ""}`}
                 renderItemInTooltip={() => (
                   <MenuItemTooltipContent
@@ -525,6 +524,7 @@ export const SiderLayout = () => {
             <Divider style={{ margin: "8px 0" }} />
 
             <MenuItem
+              style={{ height: 40 }}
               key="MoreInfo"
               className={`${collapse ? "more-info-menu-item-collapse" : ""}`}
               renderItemInTooltip={() => null}>
