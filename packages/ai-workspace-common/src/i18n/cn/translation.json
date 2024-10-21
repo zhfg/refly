@@ -905,13 +905,6 @@
           "title": "相似资源"
         }
       },
-      "knowledgeBaseContextCard": {
-        "title": "当前知识库快捷操作",
-        "relatedCollection": {
-          "prompt": "相似知识库",
-          "title": "相似知识库"
-        }
-      },
       "noteContextCard": {
         "title": "当前笔记快捷操作",
         "noteSelectedTitle": "选中笔记内容问答",

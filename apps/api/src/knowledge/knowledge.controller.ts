@@ -10,15 +10,15 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import {
-  UpsertCollectionRequest,
-  UpsertCollectionResponse,
+  UpsertProjectRequest,
+  UpsertProjectResponse,
   UpsertResourceRequest,
   UpsertResourceResponse,
-  GetCollectionDetailResponse,
-  ListCollectionResponse,
+  GetProjectDetailResponse,
+  ListProjectResponse,
   ListResourceResponse,
   GetResourceDetailResponse,
-  DeleteCollectionRequest,
+  DeleteProjectRequest,
   DeleteResourceRequest,
   DeleteResourceResponse,
   ListCanvasResponse,
@@ -28,103 +28,89 @@ import {
   DeleteCanvasRequest,
   ResourceType,
   BatchCreateResourceResponse,
-  AddResourceToCollectionRequest,
-  RemoveResourceFromCollectionRequest,
   ReindexResourceRequest,
   ReindexResourceResponse,
+  BindProjectResourcesRequest,
 } from '@refly-packages/openapi-schema';
 import { User as UserModel } from '@prisma/client';
 import { KnowledgeService } from './knowledge.service';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { buildSuccessResponse } from '@/utils';
 import { User } from '@/utils/decorators/user.decorator';
-import { collectionPO2DTO, canvasPO2DTO, resourcePO2DTO } from './knowledge.dto';
+import { canvasPO2DTO, resourcePO2DTO, projectPO2DTO } from './knowledge.dto';
 
 @Controller('knowledge')
 export class KnowledgeController {
   constructor(private knowledgeService: KnowledgeService) {}
 
   @UseGuards(JwtAuthGuard)
-  @Get('collection/list')
-  async listCollections(
+  @Get('project/list')
+  async listProjects(
     @User() user: UserModel,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
-  ): Promise<ListCollectionResponse> {
-    const colls = await this.knowledgeService.listCollections(user, { page, pageSize });
-    return buildSuccessResponse(colls.map(collectionPO2DTO));
+  ): Promise<ListProjectResponse> {
+    const projects = await this.knowledgeService.listProjects(user, { page, pageSize });
+    return buildSuccessResponse(projects.map(projectPO2DTO));
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('collection/detail')
-  async getCollectionDetail(
+  @Get('project/detail')
+  async getProjectDetail(
     @User() user: UserModel,
-    @Query('collectionId') collectionId: string,
-  ): Promise<GetCollectionDetailResponse> {
-    const coll = await this.knowledgeService.getCollectionDetail(user, { collectionId });
-    return buildSuccessResponse(collectionPO2DTO(coll));
+    @Query('projectId') projectId: string,
+  ): Promise<GetProjectDetailResponse> {
+    const project = await this.knowledgeService.getProjectDetail(user, { projectId });
+    return buildSuccessResponse(projectPO2DTO(project));
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('collection/update')
-  async updateCollection(
+  @Post('project/update')
+  async updateProject(
     @User() user: UserModel,
-    @Body() body: UpsertCollectionRequest,
-  ): Promise<UpsertCollectionResponse> {
-    const { collectionId } = body;
-    if (!collectionId) {
-      throw new BadRequestException('collectionId is required');
+    @Body() body: UpsertProjectRequest,
+  ): Promise<UpsertProjectResponse> {
+    const { projectId } = body;
+    if (!projectId) {
+      throw new BadRequestException('projectId is required');
     }
-    const collection = await this.knowledgeService.getCollectionDetail(user, { collectionId });
-    if (!collection) {
-      throw new BadRequestException('Collection not found');
+    const project = await this.knowledgeService.getProjectDetail(user, { projectId });
+    if (!project) {
+      throw new BadRequestException('Project not found');
     }
 
-    const upserted = await this.knowledgeService.upsertCollection(user, body);
-    return buildSuccessResponse(collectionPO2DTO(upserted));
+    const upserted = await this.knowledgeService.upsertProject(user, body);
+    return buildSuccessResponse(projectPO2DTO(upserted));
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('collection/new')
-  async createCollection(
+  @Post('project/new')
+  async createProject(
     @User() user: UserModel,
-    @Body() body: UpsertCollectionRequest,
-  ): Promise<UpsertCollectionResponse> {
-    if (body.collectionId) {
-      throw new BadRequestException('collectionId is not allowed');
+    @Body() body: UpsertProjectRequest,
+  ): Promise<UpsertProjectResponse> {
+    if (body.projectId) {
+      throw new BadRequestException('projectId is not allowed');
     }
-    const coll = await this.knowledgeService.upsertCollection(user, body);
-    return buildSuccessResponse(collectionPO2DTO(coll));
+    const project = await this.knowledgeService.upsertProject(user, body);
+    return buildSuccessResponse(projectPO2DTO(project));
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('collection/addResource')
-  async addResourceToCollection(
-    @User() user: UserModel,
-    @Body() body: AddResourceToCollectionRequest,
-  ) {
-    await this.knowledgeService.addResourceToCollection(user, body);
-    return buildSuccessResponse();
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('collection/removeResource')
-  async removeResourceFromCollection(
-    @User() user: UserModel,
-    @Body() body: RemoveResourceFromCollectionRequest,
-  ) {
-    await this.knowledgeService.removeResourceFromCollection(user, body);
-    return buildSuccessResponse();
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('collection/delete')
-  async deleteCollection(@User() user: UserModel, @Body() body: DeleteCollectionRequest) {
-    if (!body.collectionId) {
-      throw new BadRequestException('collectionId is required');
+  @Post('project/delete')
+  async deleteProject(@User() user: UserModel, @Body() body: DeleteProjectRequest) {
+    if (!body.projectId) {
+      throw new BadRequestException('projectId is required');
     }
-    await this.knowledgeService.deleteCollection(user, body.collectionId);
+    await this.knowledgeService.deleteProject(user, body.projectId);
     return { data: body };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('project/bindRes')
+  async bindProjectResources(@User() user: UserModel, @Body() body: BindProjectResourcesRequest) {
+    await this.knowledgeService.bindProjectResources(user, body);
+    return buildSuccessResponse({});
   }
 
   @UseGuards(JwtAuthGuard)

@@ -11,7 +11,7 @@ export const getTypeIcon = (markType: MarkType, style?: any) => {
       return <IconBook style={style} />;
     case 'canvasSelection':
       return <IconBook style={style} />;
-    case 'collection':
+    case 'project':
       return <IconFolder style={style} />;
     case 'extensionWeblink':
       return <IconLink style={style} />;

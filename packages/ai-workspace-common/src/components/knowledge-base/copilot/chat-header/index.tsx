@@ -1,17 +1,6 @@
 import { Button, Checkbox, Tooltip } from '@arco-design/web-react';
 
-// 自定义组件
-import {
-  IconClose,
-  IconEdit,
-  IconFile,
-  IconHistory,
-  IconPlus,
-  IconPlusCircle,
-  IconSearch,
-} from '@arco-design/web-react/icon';
-// 自定义样式
-// 自定义组件
+import { IconClose, IconEdit, IconFile, IconHistory, IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 // state

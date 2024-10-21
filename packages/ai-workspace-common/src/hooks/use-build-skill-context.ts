@@ -12,7 +12,7 @@ export const useBuildSkillContext = () => {
     const contextPanelStore = useContextPanelStore.getState();
     const { currentSelectedMarks, filterIdsOfCurrentSelectedMarks } = contextPanelStore;
 
-    // collections
+    // projects
     const getDatabaseEntities = (type: MarkType) => {
       const set = new Set();
       const databaseEntities = currentSelectedMarks
@@ -104,7 +104,7 @@ export const useBuildSkillContext = () => {
 
     let context: SkillContext = {
       contentList: getContentList(),
-      collections: getDatabaseEntities('collection'),
+      projects: getDatabaseEntities('project'),
       resources: getDatabaseEntities('resource'),
       canvases: getDatabaseEntities('canvas'),
       urls: getUrls(),

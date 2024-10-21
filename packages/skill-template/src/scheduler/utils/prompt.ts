@@ -29,7 +29,7 @@ export const buildContextualSchedulerSystemPrompt = (locale: string) => {
   4. Question Answering System: You provide accurate and relevant answers to users' queries, drawing from given context and your broad knowledge base.
 
   Context Handling:
-  You will be provided with context in XML format. This context is structured hierarchically and may include web search results, mentioned context, and other context. Each category may contain user-selected content, knowledge base resources, canvases, and collections. Always consider all relevant context when formulating your responses. The context is structured as follows:
+  You will be provided with context in XML format. This context is structured hierarchically and may include web search results, mentioned context, and other context. Each category may contain user-selected content, knowledge base resources, canvases, and projects. Always consider all relevant context when formulating your responses. The context is structured as follows:
 
   <Context>
     <WebSearchContext>

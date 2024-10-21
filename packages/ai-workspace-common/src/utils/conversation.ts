@@ -1,5 +1,5 @@
 import { Conversation } from '@refly/openapi-schema';
-import { genConvID } from './id';
+import { genConvID } from '@refly/utils';
 
 export type BuildConversation = {
   selectionContent: string;

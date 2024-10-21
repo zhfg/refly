@@ -67,12 +67,12 @@ export const SearchSelect = (props: SearchSelectProps) => {
   const [createLoading, setCreateLoading] = useState(false);
 
   const handleCreateNewEntity = async () => {
-    if (domain !== 'collection') {
+    if (domain !== 'project') {
       return;
     }
 
     setCreateLoading(true);
-    const { data, error } = await getClient().createCollection({
+    const { data, error } = await getClient().createProject({
       body: {
         title: newEntityName,
       },
@@ -84,9 +84,9 @@ export const SearchSelect = (props: SearchSelectProps) => {
       return;
     }
 
-    const { collectionId, title } = data.data;
-    setDataList([{ id: collectionId, title, domain }, ...dataList]);
-    setValue(collectionId);
+    const { projectId, title } = data.data;
+    setDataList([{ id: projectId, title, domain }, ...dataList]);
+    setValue(projectId);
     setPopupVisible(false);
     setNewEntityName('');
   };

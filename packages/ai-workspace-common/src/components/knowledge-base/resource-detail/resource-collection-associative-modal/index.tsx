@@ -10,7 +10,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { Modal, Form, Message } from '@arco-design/web-react';
 const FormItem = Form.Item;
 
-type domain = 'resource' | 'collection';
+type domain = 'resource' | 'project';
 
 interface ResourceCollectionAssociativeModalProps {
   domain: domain;
@@ -19,6 +19,7 @@ interface ResourceCollectionAssociativeModalProps {
   setVisible: (val: boolean) => void;
   postConfirmCallback?: (value: string | string[] | null) => void;
 }
+
 export const ResourceCollectionAssociativeModal = (props: ResourceCollectionAssociativeModalProps) => {
   const { domain, mode, visible, setVisible, postConfirmCallback } = props;
   const { t } = useTranslation();
@@ -32,10 +33,11 @@ export const ResourceCollectionAssociativeModal = (props: ResourceCollectionAsso
       setConfirmLoading(true);
       let resultError: unknown;
       try {
-        const { error } = await getClient().addResourceToCollection({
+        const { error } = await getClient().bindProjectResources({
           body: {
-            collectionId: domain === 'collection' ? res.selectedValue : collectionId,
+            projectId: domain === 'project' ? res.selectedValue : collectionId,
             resourceIds: domain === 'resource' ? res.selectedValue : [resourceId],
+            operation: 'bind',
           },
         });
         resultError = error;

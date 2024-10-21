@@ -28,7 +28,7 @@ export function toChatMessageDTO(message: ChatMessageModel): ChatMessage {
   return dto;
 }
 
-export function toConversationDTO(
+export function conversationPO2DTO(
   conversation: ConversationModel & { messages?: ChatMessageModel[] },
 ): Conversation {
   const dto: Conversation = {

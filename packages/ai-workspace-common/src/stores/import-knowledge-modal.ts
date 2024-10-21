@@ -1,25 +1,25 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
-import { Collection } from '@refly/openapi-schema';
+import { Project } from '@refly/openapi-schema';
 
 interface ImportKnowledgeModal {
   // state
   showNewKnowledgeModal: boolean;
-  editCollection?: Collection | null;
+  editProject?: Project | null;
 
   // method
   setShowNewKnowledgeModal: (val: boolean) => void;
-  setEditCollection: (val: Collection | null) => void;
+  setEditProject: (val: Project | null) => void;
 }
 
 export const useImportKnowledgeModal = create<ImportKnowledgeModal>()(
   devtools((set) => ({
     showNewKnowledgeModal: false,
-    editCollection: null,
+    editProject: null,
 
     setShowNewKnowledgeModal: (val: boolean) => set({ showNewKnowledgeModal: val }),
-    setEditCollection: (state: Collection | null) => set({ editCollection: state ? { ...state } : null }),
+    setEditProject: (state: Project | null) => set({ editProject: state ? { ...state } : null }),
   })),
 );
 

@@ -63,11 +63,11 @@ export type Resource = {
    */
   indexStatus?: IndexStatus;
   /**
-   * Collection creation time
+   * Resource creation time
    */
   createdAt: string;
   /**
-   * Collection update time
+   * Resource update time
    */
   updatedAt: string;
   /**
@@ -78,10 +78,6 @@ export type Resource = {
    * Document content for this resource (only returned in getResourceDetail API)
    */
   content?: string;
-  /**
-   * Collections this resource belongs to (only returned in getResourceDetail API)
-   */
-  collections?: Array<Collection>;
   /**
    * Canvases this resource is referred to (only returned in getResourceDetail API)
    */
@@ -95,17 +91,25 @@ export type Resource = {
 /**
  * Reference type
  */
-export type ReferenceType = 'collection' | 'project';
+export type ReferenceType = 'canvas' | 'resource';
 
 export type Reference = {
   /**
    * Entity ID
    */
-  entityId: string;
+  referenceId: string;
   /**
    * Reference type
    */
   referenceType: ReferenceType;
+  /**
+   * Reference title
+   */
+  title: string;
+  /**
+   * Reference URL
+   */
+  url?: string;
 };
 
 export type Canvas = {
@@ -161,15 +165,15 @@ export type Project = {
    */
   description?: string;
   /**
-   * Collection creation time
+   * Project creation time
    */
   createdAt: string;
   /**
-   * Collection update time
+   * Project update time
    */
   updatedAt: string;
   /**
-   * Collection resources (only returned in detail API)
+   * Project related resources (only returned in detail API)
    */
   resources?: Array<Resource>;
   /**
@@ -182,37 +186,10 @@ export type Project = {
   conversations?: Array<Conversation>;
 };
 
-export type Collection = {
-  /**
-   * Collection ID
-   */
-  collectionId: string;
-  /**
-   * Collection title
-   */
-  title: string;
-  /**
-   * Collection description
-   */
-  description?: string;
-  /**
-   * Collection creation time
-   */
-  createdAt: string;
-  /**
-   * Collection update time
-   */
-  updatedAt: string;
-  /**
-   * Collection resources (only returned in detail API)
-   */
-  resources?: Array<Resource>;
-};
-
 /**
  * Entity type
  */
-export type EntityType = 'canvas' | 'resource' | 'collection';
+export type EntityType = 'canvas' | 'resource' | 'project';
 
 /**
  * Entity
@@ -263,7 +240,7 @@ export type LabelClass = {
 };
 
 /**
- * Label instances related to resources, collections, etc.
+ * Label instances related to resources, projects, etc.
  */
 export type LabelInstance = {
   /**
@@ -923,9 +900,9 @@ export type RetrieveFilter = {
    */
   resourceIds?: Array<string>;
   /**
-   * List of collection IDs to retrieve
+   * List of project IDs to retrieve
    */
-  collectionIds?: Array<string>;
+  projectIds?: Array<string>;
 };
 
 /**
@@ -1235,10 +1212,6 @@ export type UpsertResourceRequest = {
    */
   resourceId?: string;
   /**
-   * Collection ID (will add to the collection if given)
-   */
-  collectionId?: string;
-  /**
    * Project ID (will add to the project if given)
    */
   projectId?: string;
@@ -1350,6 +1323,26 @@ export type DeleteCanvasRequest = {
   canvasId: string;
 };
 
+export type ReferCanvasRequest = {
+  /**
+   * Canvas ID to refer
+   */
+  canvasId: string;
+  /**
+   * Operation type
+   */
+  operation: 'add' | 'remove';
+  /**
+   * Reference list
+   */
+  references?: Array<Reference>;
+};
+
+/**
+ * Operation type
+ */
+export type operation = 'add' | 'remove';
+
 export type BatchMoveCanvasRequest = {
   /**
    * Canvas ID list to move
@@ -1359,21 +1352,6 @@ export type BatchMoveCanvasRequest = {
    * Project ID to move to
    */
   projectId: string;
-};
-
-export type UpsertCollectionRequest = {
-  /**
-   * Collection ID (only used for update)
-   */
-  collectionId?: string;
-  /**
-   * Collection title
-   */
-  title?: string;
-  /**
-   * Collection description
-   */
-  description?: string;
 };
 
 export type UpsertProjectRequest = {
@@ -1391,23 +1369,8 @@ export type UpsertProjectRequest = {
   description?: string;
 };
 
-export type UpsertCollectionResponse = BaseResponse & {
-  data?: Collection;
-};
-
 export type UpsertProjectResponse = BaseResponse & {
   data?: Project;
-};
-
-export type AddResourceToCollectionRequest = {
-  /**
-   * Collection ID
-   */
-  collectionId: string;
-  /**
-   * Resource ID list
-   */
-  resourceIds: Array<string>;
 };
 
 export type BindProjectResourcesRequest = {
@@ -1428,18 +1391,7 @@ export type BindProjectResourcesRequest = {
 /**
  * Operation type
  */
-export type operation = 'bind' | 'unbind';
-
-export type RemoveResourceFromCollectionRequest = {
-  /**
-   * Collection ID
-   */
-  collectionId: string;
-  /**
-   * Resource ID list
-   */
-  resourceIds: Array<string>;
-};
+export type operation2 = 'bind' | 'unbind';
 
 export type DeleteProjectRequest = {
   /**
@@ -1448,25 +1400,11 @@ export type DeleteProjectRequest = {
   projectId: string;
 };
 
-export type DeleteCollectionRequest = {
-  /**
-   * Collection ID to delete
-   */
-  collectionId: string;
-};
-
 export type ListProjectResponse = BaseResponse & {
   /**
    * Project list
    */
-  data?: Array<Collection>;
-};
-
-export type ListCollectionResponse = BaseResponse & {
-  /**
-   * Collection list
-   */
-  data?: Array<Collection>;
+  data?: Array<Project>;
 };
 
 export type GetProjectDetailResponse = BaseResponse & {
@@ -1474,13 +1412,6 @@ export type GetProjectDetailResponse = BaseResponse & {
    * Project data
    */
   data?: Project;
-};
-
-export type GetCollectionDetailResponse = BaseResponse & {
-  /**
-   * Collection data
-   */
-  data?: Collection;
 };
 
 export type ListLabelClassesResponse = BaseResponse & {
@@ -1730,19 +1661,19 @@ export type SkillContextResourceItem = {
 };
 
 /**
- * Skill context collection item
+ * Skill context project item
  */
-export type SkillContextCollectionItem = {
+export type SkillContextProjectItem = {
   /**
-   * Collection ID
+   * Project ID
    */
-  collectionId?: string;
+  projectId?: string;
   /**
-   * Collection
+   * Project
    */
-  collection?: Collection;
+  project?: Project;
   /**
-   * Collection context metadata
+   * Project context metadata
    */
   metadata?: {
     [key: string]: unknown;
@@ -1810,9 +1741,9 @@ export type SkillContext = {
    */
   resources?: Array<SkillContextResourceItem>;
   /**
-   * Context collections
+   * Context projects
    */
-  collections?: Array<SkillContextCollectionItem>;
+  projects?: Array<SkillContextProjectItem>;
   /**
    * Context canvases
    */
@@ -1827,7 +1758,7 @@ export type SkillContext = {
   urls?: Array<SkillContextUrlItem>;
 };
 
-export type SkillContextKey = 'resources' | 'collections' | 'canvases' | 'contentList' | 'urls';
+export type SkillContextKey = 'resources' | 'projects' | 'canvases' | 'contentList' | 'urls';
 
 export type SelectionKey =
   | 'canvasSelection'
@@ -1898,6 +1829,10 @@ export type InvokeSkillRequest = {
    * Skill template config
    */
   tplConfig?: SkillTemplateConfig;
+  /**
+   * Project ID (if not provided, new project will be created)
+   */
+  projectId?: string;
   /**
    * Skill instance ID to invoke (if not provided, skill scheduler will be used)
    */
@@ -2218,7 +2153,7 @@ export type SearchOptions = {
   enableReranker?: boolean;
 };
 
-export type SearchDomain = 'resource' | 'canvas' | 'collection' | 'conversation' | 'skill';
+export type SearchDomain = 'resource' | 'canvas' | 'project' | 'conversation' | 'skill';
 
 export type SearchMode = 'keyword' | 'vector' | 'hybrid';
 
@@ -2255,9 +2190,9 @@ export type SearchResultMeta = {
    */
   resourceMeta?: ResourceMeta;
   /**
-   * Collection ID
+   * Project ID
    */
-  collectionId?: string;
+  projectId?: string;
 };
 
 export type SearchResult = {
@@ -2286,7 +2221,7 @@ export type SearchResult = {
    */
   createdAt?: string;
   /**
-   * Collection creation time
+   * Data update time
    */
   updatedAt?: string;
 };
@@ -2556,6 +2491,14 @@ export type DeleteCanvasResponse = BaseResponse;
 
 export type DeleteCanvasError = unknown;
 
+export type ManageCanvasReferenceData = {
+  body: ReferCanvasRequest;
+};
+
+export type ManageCanvasReferenceResponse = BaseResponse;
+
+export type ManageCanvasReferenceError = unknown;
+
 export type BatchMoveCanvasData = {
   body: BatchMoveCanvasRequest;
 };
@@ -2563,23 +2506,6 @@ export type BatchMoveCanvasData = {
 export type BatchMoveCanvasResponse = BaseResponse;
 
 export type BatchMoveCanvasError = unknown;
-
-export type ListCollectionsData = {
-  query?: {
-    /**
-     * Page number
-     */
-    page?: number;
-    /**
-     * Page size
-     */
-    pageSize?: number;
-  };
-};
-
-export type ListCollectionsResponse = ListCollectionResponse;
-
-export type ListCollectionsError = unknown;
 
 export type ListProjectsData = {
   query?: {
@@ -2598,19 +2524,6 @@ export type ListProjectsResponse = ListProjectResponse;
 
 export type ListProjectsError = unknown;
 
-export type GetCollectionDetailData = {
-  query: {
-    /**
-     * Collection ID to retrieve
-     */
-    collectionId: string;
-  };
-};
-
-export type GetCollectionDetailResponse2 = GetCollectionDetailResponse;
-
-export type GetCollectionDetailError = unknown;
-
 export type GetProjectDetailData = {
   query: {
     /**
@@ -2624,17 +2537,6 @@ export type GetProjectDetailResponse2 = GetProjectDetailResponse;
 
 export type GetProjectDetailError = unknown;
 
-export type UpdateCollectionData = {
-  /**
-   * Collection update request
-   */
-  body: UpsertCollectionRequest;
-};
-
-export type UpdateCollectionResponse = UpsertCollectionResponse;
-
-export type UpdateCollectionError = unknown;
-
 export type UpdateProjectData = {
   /**
    * Project update request
@@ -2645,17 +2547,6 @@ export type UpdateProjectData = {
 export type UpdateProjectResponse = UpsertProjectResponse;
 
 export type UpdateProjectError = unknown;
-
-export type CreateCollectionData = {
-  /**
-   * Collection creation request
-   */
-  body: UpsertCollectionRequest;
-};
-
-export type CreateCollectionResponse = UpsertCollectionResponse;
-
-export type CreateCollectionError = unknown;
 
 export type CreateProjectData = {
   /**
@@ -2668,22 +2559,6 @@ export type CreateProjectResponse = UpsertProjectResponse;
 
 export type CreateProjectError = unknown;
 
-export type AddResourceToCollectionData = {
-  body: AddResourceToCollectionRequest;
-};
-
-export type AddResourceToCollectionResponse = BaseResponse;
-
-export type AddResourceToCollectionError = unknown;
-
-export type RemoveResourceFromCollectionData = {
-  body: RemoveResourceFromCollectionRequest;
-};
-
-export type RemoveResourceFromCollectionResponse = BaseResponse;
-
-export type RemoveResourceFromCollectionError = unknown;
-
 export type BindProjectResourcesData = {
   body: BindProjectResourcesRequest;
 };
@@ -2691,14 +2566,6 @@ export type BindProjectResourcesData = {
 export type BindProjectResourcesResponse = BaseResponse;
 
 export type BindProjectResourcesError = unknown;
-
-export type DeleteCollectionData = {
-  body: DeleteCollectionRequest;
-};
-
-export type DeleteCollectionResponse = BaseResponse;
-
-export type DeleteCollectionError = unknown;
 
 export type DeleteProjectData = {
   body: DeleteProjectRequest;
@@ -3246,9 +3113,9 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/knowledge/canvas/batchMove': {
+  '/knowledge/canvas/manageRef': {
     post: {
-      req: BatchMoveCanvasData;
+      req: ManageCanvasReferenceData;
       res: {
         /**
          * Successful operation
@@ -3257,14 +3124,14 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/knowledge/collection/list': {
-    get: {
-      req: ListCollectionsData;
+  '/knowledge/canvas/batchMove': {
+    post: {
+      req: BatchMoveCanvasData;
       res: {
         /**
          * Successful operation
          */
-        '200': ListCollectionResponse;
+        '200': BaseResponse;
       };
     };
   };
@@ -3279,17 +3146,6 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/knowledge/collection/detail': {
-    get: {
-      req: GetCollectionDetailData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': GetCollectionDetailResponse;
-      };
-    };
-  };
   '/knowledge/project/detail': {
     get: {
       req: GetProjectDetailData;
@@ -3298,17 +3154,6 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': GetProjectDetailResponse;
-      };
-    };
-  };
-  '/knowledge/collection/update': {
-    post: {
-      req: UpdateCollectionData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertCollectionResponse;
       };
     };
   };
@@ -3323,17 +3168,6 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/knowledge/collection/new': {
-    post: {
-      req: CreateCollectionData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertCollectionResponse;
-      };
-    };
-  };
   '/knowledge/project/new': {
     post: {
       req: CreateProjectData;
@@ -3345,45 +3179,12 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/knowledge/collection/addResource': {
-    post: {
-      req: AddResourceToCollectionData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/knowledge/collection/removeResource': {
-    post: {
-      req: RemoveResourceFromCollectionData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
   '/knowledge/project/bindRes': {
     post: {
       req: BindProjectResourcesData;
       res: {
         /**
          * successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/knowledge/collection/delete': {
-    post: {
-      req: DeleteCollectionData;
-      res: {
-        /**
-         * Successful operation
          */
         '200': BaseResponse;
       };

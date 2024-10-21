@@ -24,7 +24,6 @@ import {
   ListSkillTemplatesData,
   ListSkillTriggersData,
   PinSkillInstanceRequest,
-  Collection,
   Resource,
   SkillContext,
   SkillMeta,
@@ -37,6 +36,7 @@ import {
   UpdateSkillTriggerRequest,
   User,
   Canvas,
+  Project,
 } from '@refly-packages/openapi-schema';
 import {
   BaseSkill,
@@ -61,7 +61,7 @@ import {
 } from '@/utils';
 import { InvokeSkillJobData, skillInstancePO2DTO } from './skill.dto';
 import { KnowledgeService } from '@/knowledge/knowledge.service';
-import { collectionPO2DTO, canvasPO2DTO, resourcePO2DTO } from '@/knowledge/knowledge.dto';
+import { projectPO2DTO, canvasPO2DTO, resourcePO2DTO } from '@/knowledge/knowledge.dto';
 import { ConversationService } from '@/conversation/conversation.service';
 import { MessageAggregator } from '@/utils/message';
 import { SkillEvent } from '@refly-packages/common-types';
@@ -160,13 +160,13 @@ export class SkillService {
         const resource = await this.knowledge.updateResource(user, req);
         return buildSuccessResponse(resourcePO2DTO(resource));
       },
-      createCollection: async (user, req) => {
-        const coll = await this.knowledge.upsertCollection(user, req);
-        return buildSuccessResponse(collectionPO2DTO(coll));
+      createProject: async (user, req) => {
+        const project = await this.knowledge.upsertProject(user, req);
+        return buildSuccessResponse(projectPO2DTO(project));
       },
-      updateCollection: async (user, req) => {
-        const coll = await this.knowledge.upsertCollection(user, req);
-        return buildSuccessResponse(collectionPO2DTO(coll));
+      updateProject: async (user, req) => {
+        const project = await this.knowledge.upsertProject(user, req);
+        return buildSuccessResponse(projectPO2DTO(project));
       },
       createLabelClass: async (user, req) => {
         const labelClass = await this.label.createLabelClass(user, req);
@@ -417,32 +417,32 @@ export class SkillService {
   }
 
   /**
-   * Populate skill context with actual collections, resources and canvases.
+   * Populate skill context with actual projects, resources and canvases.
    * These data can be used in skill invocation.
    */
   async populateSkillContext(user: User, context: SkillContext): Promise<SkillContext> {
     const { uid } = user;
 
-    // Populate collections
-    if (context.collections?.length > 0) {
-      // Query collections which are not populated
-      const collectionIds = [
+    // Populate projects
+    if (context.projects?.length > 0) {
+      // Query projects which are not populated
+      const projectIds = [
         ...new Set(
-          context.collections
-            .filter((item) => !item.collection)
-            .map((item) => item.collectionId)
+          context.projects
+            .filter((item) => !item.project)
+            .map((item) => item.projectId)
             .filter((id) => id),
         ),
       ];
-      const collections = await this.prisma.collection.findMany({
-        where: { collectionId: { in: collectionIds }, uid, deletedAt: null },
+      const projects = await this.prisma.project.findMany({
+        where: { projectId: { in: projectIds }, uid, deletedAt: null },
       });
-      const collectionMap = new Map<string, Collection>();
-      collections.forEach((c) => collectionMap.set(c.collectionId, collectionPO2DTO(c)));
+      const projectMap = new Map<string, Project>();
+      projects.forEach((p) => projectMap.set(p.projectId, projectPO2DTO(p)));
 
-      context.collections.forEach((item) => {
-        if (item.collection) return;
-        item.collection = collectionMap.get(item.collectionId);
+      context.projects.forEach((item) => {
+        if (item.project) return;
+        item.project = projectMap.get(item.projectId);
       });
     }
 

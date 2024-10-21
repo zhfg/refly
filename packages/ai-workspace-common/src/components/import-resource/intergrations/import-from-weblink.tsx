@@ -209,7 +209,7 @@ export const ImportFromWeblink = () => {
             <div className="save-container">
               <p className="text-item save-text-item">{t('resource.import.saveTo')}</p>
               <SearchSelect
-                domain="collection"
+                domain="project"
                 className="kg-selector"
                 allowCreateNewEntity
                 onChange={(value) => {

@@ -41,7 +41,7 @@ export const ImportFromText = () => {
       resourceType: 'text',
       title: copiedTextPayload?.title,
       content: copiedTextPayload?.content,
-      collectionId: selectedCollectionId,
+      projectId: selectedCollectionId,
       data: {
         url: copiedTextPayload?.url,
         title: copiedTextPayload?.title,
@@ -145,7 +145,7 @@ export const ImportFromText = () => {
             <div className="save-container">
               <p className="text-item">{t('resource.import.saveTo')} </p>
               <SearchSelect
-                domain="collection"
+                domain="project"
                 className="kg-selector"
                 allowCreateNewEntity
                 onChange={(value) => {

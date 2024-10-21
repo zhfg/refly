@@ -22,7 +22,7 @@ import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
 import { buildSuccessResponse } from '@/utils';
 import { User } from '@/utils/decorators/user.decorator';
-import { toConversationDTO } from '@/conversation/conversation.dto';
+import { conversationPO2DTO } from '@/conversation/conversation.dto';
 
 @Controller('conversation')
 export class ConversationController {
@@ -37,7 +37,7 @@ export class ConversationController {
     @Body() body: CreateConversationRequest,
   ): Promise<CreateConversationResponse> {
     const conversation = await this.conversationService.upsertConversation(user, body);
-    return buildSuccessResponse(toConversationDTO(conversation));
+    return buildSuccessResponse(conversationPO2DTO(conversation));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -54,7 +54,7 @@ export class ConversationController {
       orderBy: { createdAt: 'desc' },
     });
 
-    return buildSuccessResponse(conversationList.map(toConversationDTO));
+    return buildSuccessResponse(conversationList.map(conversationPO2DTO));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -67,6 +67,6 @@ export class ConversationController {
     if (!data?.convId) {
       throw new NotFoundException('conversation not found');
     }
-    return buildSuccessResponse(toConversationDTO(data));
+    return buildSuccessResponse(conversationPO2DTO(data));
   }
 }

@@ -6,8 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { LOCALE } from '@refly/common-types';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { useGetCurrentSelectedMark } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-selected-text';
-import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
+import { useGetCurrentSelectedMark } from '@refly-packages/ai-workspace-common/hooks/use-get-current-selected-text';
 import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
 
 export const SaveToKnowledgeBase = () => {

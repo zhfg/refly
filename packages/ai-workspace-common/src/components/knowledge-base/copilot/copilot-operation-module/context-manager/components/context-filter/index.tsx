@@ -45,11 +45,11 @@ interface FilterConfig {
   type: string[];
 }
 
-const defaultTypeList = ['resources', 'notes', 'collections', 'contentList'];
+const defaultTypeList = ['resources', 'notes', 'projects', 'contentList'];
 const typeMap = {
   resource: 'resources',
   note: 'notes',
-  collection: 'collections',
+  project: 'projects',
 };
 
 const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = ({
@@ -147,7 +147,7 @@ const ContextFilterPopoverContent: React.FC<ContextFilterPopoverContentProps> = 
                 Object.keys(filteredContextItemTypes).map((type) => (
                   <div key={type} className="filter-item">
                     {type === 'note' && <PiNotepad style={iconStyle} />}
-                    {type === 'collection' && <HiOutlineBookOpen style={iconStyle} />}
+                    {type === 'project' && <HiOutlineBookOpen style={iconStyle} />}
                     {type === 'resource' && <LuFileText style={iconStyle} />}
                     {type === 'contentList' && <PiTextAlignRightBold style={iconStyle} />}
 

@@ -78,7 +78,7 @@ model Conversation {
   /// Conversation ID
   convId          String   @unique @default("") @map("conv_id")
   /// Project ID
-  projectId       String?   @map("project_id")
+  projectId       String?  @map("project_id")
   /// Related project
   project         Project? @relation(fields: [projectId], references: [projectId])
   /// UID
@@ -325,25 +325,25 @@ model Collection {
 
 model Project {
   /// Primary key
-  pk          BigInt     @id @default(autoincrement())
+  pk            BigInt         @id @default(autoincrement())
   /// Project id
-  projectId   String     @unique @map("project_id")
+  projectId     String         @unique @map("project_id")
   /// Project title
-  title       String     @map("title")
+  title         String         @map("title")
   /// Project description
-  description String?    @map("description")
+  description   String?        @map("description")
   /// UID
-  uid         String     @map("uid")
+  uid           String         @map("uid")
   /// Create timestamp
-  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
-  updatedAt   DateTime   @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt     DateTime       @updatedAt @map("updated_at") @db.Timestamptz()
   /// Soft delete timestamp
-  deletedAt   DateTime?  @map("deleted_at") @db.Timestamptz()
+  deletedAt     DateTime?      @map("deleted_at") @db.Timestamptz()
   /// Related resources
-  resources   Resource[]
+  resources     Resource[]
   /// Related canvases
-  canvases    Canvas[]
+  canvases      Canvas[]
   /// Related conversations
   conversations Conversation[]
 

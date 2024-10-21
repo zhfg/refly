@@ -12,9 +12,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Mark, SelectedTextDomain, selectedTextDomains } from '@refly/common-types';
 import { SkillContextContentItem, SkillContextValue, SkillInvocationRule } from '@refly/openapi-schema';
-import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
-import { useGetCurrentSelectedMark } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-selected-text';
+import { useGetCurrentSelectedMark } from '@refly-packages/ai-workspace-common/hooks/use-get-current-selected-text';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 const { TextArea } = Input;

@@ -21,7 +21,7 @@ import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-commo
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 // types
-import { Collection, Canvas, Resource, SearchDomain, SearchResult } from '@refly/openapi-schema';
+import { Project, Canvas, Resource, SearchDomain, SearchResult } from '@refly/openapi-schema';
 import {
   backendBaseMarkTypes,
   BaseMarkType,
@@ -131,15 +131,12 @@ export const ContextManager = () => {
         selectedTextDomains?.includes(mark?.domain) || selectedTextDomains.includes(mark?.type as SelectedTextDomain),
     ) || [];
 
-  const buildEnvContext = (
-    data: Collection | Resource | Canvas,
-    type: 'collection' | 'resource' | 'canvas',
-  ): Mark[] => {
+  const buildEnvContext = (data: Project | Resource | Canvas, type: 'project' | 'resource' | 'canvas'): Mark[] => {
     if (!data) return [];
 
     const typeMap = {
       resource: 'resourceId',
-      collection: 'collectionId',
+      project: 'projectId',
       canvas: 'canvasId',
     };
 
@@ -154,7 +151,7 @@ export const ContextManager = () => {
         type,
         id,
         entityId: id,
-        data: type === 'collection' ? (data as Collection).description : (data as Resource | Canvas).content,
+        data: type === 'project' ? (data as Project).description : (data as Resource | Canvas).content,
         onlyForCurrentContext: true,
         isCurrentContext: true,
         url: (data as Resource)?.data?.url || '',
@@ -187,7 +184,7 @@ export const ContextManager = () => {
     }
   };
 
-  const updateContext = (item: any, type: 'collection' | 'resource' | 'canvas') => {
+  const updateContext = (item: any, type: 'project' | 'resource' | 'canvas') => {
     const envContext = buildEnvContext(item, type);
     const contextItem = envContext?.[0];
     if (contextItem) {
@@ -198,8 +195,8 @@ export const ContextManager = () => {
   };
 
   useEffect(() => {
-    updateContext(currentKnowledgeBase, 'collection');
-  }, [currentKnowledgeBase?.collectionId]);
+    updateContext(currentKnowledgeBase, 'project');
+  }, [currentKnowledgeBase?.projectId]);
 
   useEffect(() => {
     updateContext(currentResource, 'resource');

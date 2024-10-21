@@ -3,7 +3,7 @@ import { RiDeleteBinLine, RiMoreFill } from 'react-icons/ri';
 import { TbEdit } from 'react-icons/tb';
 import { Dropdown, Menu, Button, Popconfirm, Message } from '@arco-design/web-react';
 
-import { Canvas, Collection, Resource, RemoveResourceFromCollectionRequest } from '@refly/openapi-schema';
+import { Canvas, Project, Resource, BindProjectResourcesRequest } from '@refly/openapi-schema';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import { useTranslation } from 'react-i18next';
@@ -89,7 +89,7 @@ const DropList = (props: DropListProps) => {
 };
 
 interface DeleteDropdownMenuProps {
-  postDeleteList?: (canvas: Canvas | Collection | Resource | RemoveResourceFromCollectionRequest) => void;
+  postDeleteList?: (canvas: Canvas | Project | Resource | BindProjectResourcesRequest) => void;
   getPopupContainer?: () => HTMLElement;
   deleteConfirmPosition?: positionType;
   canCopy?: boolean;
@@ -102,7 +102,7 @@ interface CanvasPros extends DeleteDropdownMenuProps {
 
 interface KnowledgeBasePros extends DeleteDropdownMenuProps {
   type: 'knowledgeBase';
-  data: Collection;
+  data: Project;
 }
 
 interface ResourcePros extends DeleteDropdownMenuProps {
@@ -112,7 +112,7 @@ interface ResourcePros extends DeleteDropdownMenuProps {
 
 interface ResourceCollectionPros extends DeleteDropdownMenuProps {
   type: 'resourceCollection';
-  data?: RemoveResourceFromCollectionRequest;
+  data?: BindProjectResourcesRequest;
 }
 
 export const DeleteDropdownMenu = (props: CanvasPros | KnowledgeBasePros | ResourcePros | ResourceCollectionPros) => {
@@ -130,7 +130,7 @@ export const DeleteDropdownMenu = (props: CanvasPros | KnowledgeBasePros | Resou
       resultError = error;
     }
     if (type === 'knowledgeBase') {
-      const { error } = await getClient().deleteCollection({ body: { collectionId: data.collectionId } });
+      const { error } = await getClient().deleteProject({ body: { projectId: data.projectId } });
       resultError = error;
     }
     if (type === 'resource') {
@@ -138,7 +138,7 @@ export const DeleteDropdownMenu = (props: CanvasPros | KnowledgeBasePros | Resou
       resultError = error;
     }
     if (type === 'resourceCollection') {
-      const { error } = await getClient().removeResourceFromCollection({ body: { ...data } });
+      const { error } = await getClient().bindProjectResources({ body: { ...data, operation: 'unbind' } });
       resultError = error;
     }
 
@@ -164,7 +164,7 @@ export const DeleteDropdownMenu = (props: CanvasPros | KnowledgeBasePros | Resou
   const handlEditKnowledgeBase = (e: MouseEvent) => {
     e.stopPropagation();
     importKnowledgeModal.setShowNewKnowledgeModal(true);
-    importKnowledgeModal.setEditCollection(data as Collection);
+    importKnowledgeModal.setEditProject(data as Project);
   };
 
   const handleIconClick = (e) => {

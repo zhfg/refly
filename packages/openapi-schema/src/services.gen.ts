@@ -38,45 +38,27 @@ import type {
   DeleteCanvasData,
   DeleteCanvasError,
   DeleteCanvasResponse,
+  ManageCanvasReferenceData,
+  ManageCanvasReferenceError,
+  ManageCanvasReferenceResponse,
   BatchMoveCanvasData,
   BatchMoveCanvasError,
   BatchMoveCanvasResponse,
-  ListCollectionsData,
-  ListCollectionsError,
-  ListCollectionsResponse,
   ListProjectsData,
   ListProjectsError,
   ListProjectsResponse,
-  GetCollectionDetailData,
-  GetCollectionDetailError,
-  GetCollectionDetailResponse2,
   GetProjectDetailData,
   GetProjectDetailError,
   GetProjectDetailResponse2,
-  UpdateCollectionData,
-  UpdateCollectionError,
-  UpdateCollectionResponse,
   UpdateProjectData,
   UpdateProjectError,
   UpdateProjectResponse,
-  CreateCollectionData,
-  CreateCollectionError,
-  CreateCollectionResponse,
   CreateProjectData,
   CreateProjectError,
   CreateProjectResponse,
-  AddResourceToCollectionData,
-  AddResourceToCollectionError,
-  AddResourceToCollectionResponse,
-  RemoveResourceFromCollectionData,
-  RemoveResourceFromCollectionError,
-  RemoveResourceFromCollectionResponse,
   BindProjectResourcesData,
   BindProjectResourcesError,
   BindProjectResourcesResponse,
-  DeleteCollectionData,
-  DeleteCollectionError,
-  DeleteCollectionResponse,
   DeleteProjectData,
   DeleteProjectError,
   DeleteProjectResponse,
@@ -319,6 +301,17 @@ export const deleteCanvas = (options: Options<DeleteCanvasData>) => {
 };
 
 /**
+ * Manage canvas reference
+ * Manage reference between canvas and resource or another canvas
+ */
+export const manageCanvasReference = (options: Options<ManageCanvasReferenceData>) => {
+  return (options?.client ?? client).post<ManageCanvasReferenceResponse, ManageCanvasReferenceError>({
+    ...options,
+    url: '/knowledge/canvas/manageRef',
+  });
+};
+
+/**
  * Batch move canvases
  * Batch move existing canvases to another project
  */
@@ -326,17 +319,6 @@ export const batchMoveCanvas = (options: Options<BatchMoveCanvasData>) => {
   return (options?.client ?? client).post<BatchMoveCanvasResponse, BatchMoveCanvasError>({
     ...options,
     url: '/knowledge/canvas/batchMove',
-  });
-};
-
-/**
- * List user collections
- * List all collections for a user
- */
-export const listCollections = (options?: Options<ListCollectionsData>) => {
-  return (options?.client ?? client).get<ListCollectionsResponse, ListCollectionsError>({
-    ...options,
-    url: '/knowledge/collection/list',
   });
 };
 
@@ -352,17 +334,6 @@ export const listProjects = (options?: Options<ListProjectsData>) => {
 };
 
 /**
- * Get collection detail
- * Return collection details along with its resources
- */
-export const getCollectionDetail = (options: Options<GetCollectionDetailData>) => {
-  return (options?.client ?? client).get<GetCollectionDetailResponse2, GetCollectionDetailError>({
-    ...options,
-    url: '/knowledge/collection/detail',
-  });
-};
-
-/**
  * Get project detail
  * Return project details along with its canvases
  */
@@ -374,35 +345,13 @@ export const getProjectDetail = (options: Options<GetProjectDetailData>) => {
 };
 
 /**
- * Update collection
- * Update an existing collection
- */
-export const updateCollection = (options: Options<UpdateCollectionData>) => {
-  return (options?.client ?? client).post<UpdateCollectionResponse, UpdateCollectionError>({
-    ...options,
-    url: '/knowledge/collection/update',
-  });
-};
-
-/**
- * Update collection
+ * Update project
  * Update an existing project
  */
 export const updateProject = (options: Options<UpdateProjectData>) => {
   return (options?.client ?? client).post<UpdateProjectResponse, UpdateProjectError>({
     ...options,
     url: '/knowledge/project/update',
-  });
-};
-
-/**
- * Create new collection
- * Create a new collection
- */
-export const createCollection = (options: Options<CreateCollectionData>) => {
-  return (options?.client ?? client).post<CreateCollectionResponse, CreateCollectionError>({
-    ...options,
-    url: '/knowledge/collection/new',
   });
 };
 
@@ -418,28 +367,6 @@ export const createProject = (options: Options<CreateProjectData>) => {
 };
 
 /**
- * Add resource to collection
- * Add an existing resource to a collection
- */
-export const addResourceToCollection = (options: Options<AddResourceToCollectionData>) => {
-  return (options?.client ?? client).post<AddResourceToCollectionResponse, AddResourceToCollectionError>({
-    ...options,
-    url: '/knowledge/collection/addResource',
-  });
-};
-
-/**
- * Remove resource from collection
- * Remove an existing resource from a collection
- */
-export const removeResourceFromCollection = (options: Options<RemoveResourceFromCollectionData>) => {
-  return (options?.client ?? client).post<RemoveResourceFromCollectionResponse, RemoveResourceFromCollectionError>({
-    ...options,
-    url: '/knowledge/collection/removeResource',
-  });
-};
-
-/**
  * Bind resources to project
  * Bind existing resources to a project
  */
@@ -451,18 +378,7 @@ export const bindProjectResources = (options: Options<BindProjectResourcesData>)
 };
 
 /**
- * Delete collection
- * Delete an existing collection
- */
-export const deleteCollection = (options: Options<DeleteCollectionData>) => {
-  return (options?.client ?? client).post<DeleteCollectionResponse, DeleteCollectionError>({
-    ...options,
-    url: '/knowledge/collection/delete',
-  });
-};
-
-/**
- * Delete collection
+ * Delete project
  * Delete an existing project
  */
 export const deleteProject = (options: Options<DeleteProjectData>) => {
@@ -837,7 +753,7 @@ export const createPortalSession = (options?: Options) => {
 
 /**
  * Search
- * Search for canvases, resources, collections, etc.
+ * Search for canvases, resources, projects, etc.
  */
 export const search = (options: Options<SearchData>) => {
   return (options?.client ?? client).post<SearchResponse2, SearchError>({
