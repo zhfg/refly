@@ -38,27 +38,48 @@ import type {
   DeleteCanvasData,
   DeleteCanvasError,
   DeleteCanvasResponse,
+  BatchMoveCanvasData,
+  BatchMoveCanvasError,
+  BatchMoveCanvasResponse,
   ListCollectionsData,
   ListCollectionsError,
   ListCollectionsResponse,
+  ListProjectsData,
+  ListProjectsError,
+  ListProjectsResponse,
   GetCollectionDetailData,
   GetCollectionDetailError,
   GetCollectionDetailResponse2,
+  GetProjectDetailData,
+  GetProjectDetailError,
+  GetProjectDetailResponse2,
   UpdateCollectionData,
   UpdateCollectionError,
   UpdateCollectionResponse,
+  UpdateProjectData,
+  UpdateProjectError,
+  UpdateProjectResponse,
   CreateCollectionData,
   CreateCollectionError,
   CreateCollectionResponse,
+  CreateProjectData,
+  CreateProjectError,
+  CreateProjectResponse,
   AddResourceToCollectionData,
   AddResourceToCollectionError,
   AddResourceToCollectionResponse,
   RemoveResourceFromCollectionData,
   RemoveResourceFromCollectionError,
   RemoveResourceFromCollectionResponse,
+  BindProjectResourcesData,
+  BindProjectResourcesError,
+  BindProjectResourcesResponse,
   DeleteCollectionData,
   DeleteCollectionError,
   DeleteCollectionResponse,
+  DeleteProjectData,
+  DeleteProjectError,
+  DeleteProjectResponse,
   ListLabelClassesData,
   ListLabelClassesError,
   ListLabelClassesResponse2,
@@ -298,6 +319,17 @@ export const deleteCanvas = (options: Options<DeleteCanvasData>) => {
 };
 
 /**
+ * Batch move canvases
+ * Batch move existing canvases to another project
+ */
+export const batchMoveCanvas = (options: Options<BatchMoveCanvasData>) => {
+  return (options?.client ?? client).post<BatchMoveCanvasResponse, BatchMoveCanvasError>({
+    ...options,
+    url: '/knowledge/canvas/batchMove',
+  });
+};
+
+/**
  * List user collections
  * List all collections for a user
  */
@@ -305,6 +337,17 @@ export const listCollections = (options?: Options<ListCollectionsData>) => {
   return (options?.client ?? client).get<ListCollectionsResponse, ListCollectionsError>({
     ...options,
     url: '/knowledge/collection/list',
+  });
+};
+
+/**
+ * List user projects
+ * List all projects for a user
+ */
+export const listProjects = (options?: Options<ListProjectsData>) => {
+  return (options?.client ?? client).get<ListProjectsResponse, ListProjectsError>({
+    ...options,
+    url: '/knowledge/project/list',
   });
 };
 
@@ -320,6 +363,17 @@ export const getCollectionDetail = (options: Options<GetCollectionDetailData>) =
 };
 
 /**
+ * Get project detail
+ * Return project details along with its canvases
+ */
+export const getProjectDetail = (options: Options<GetProjectDetailData>) => {
+  return (options?.client ?? client).get<GetProjectDetailResponse2, GetProjectDetailError>({
+    ...options,
+    url: '/knowledge/project/detail',
+  });
+};
+
+/**
  * Update collection
  * Update an existing collection
  */
@@ -331,6 +385,17 @@ export const updateCollection = (options: Options<UpdateCollectionData>) => {
 };
 
 /**
+ * Update collection
+ * Update an existing project
+ */
+export const updateProject = (options: Options<UpdateProjectData>) => {
+  return (options?.client ?? client).post<UpdateProjectResponse, UpdateProjectError>({
+    ...options,
+    url: '/knowledge/project/update',
+  });
+};
+
+/**
  * Create new collection
  * Create a new collection
  */
@@ -338,6 +403,17 @@ export const createCollection = (options: Options<CreateCollectionData>) => {
   return (options?.client ?? client).post<CreateCollectionResponse, CreateCollectionError>({
     ...options,
     url: '/knowledge/collection/new',
+  });
+};
+
+/**
+ * Create new project
+ * Create a new project
+ */
+export const createProject = (options: Options<CreateProjectData>) => {
+  return (options?.client ?? client).post<CreateProjectResponse, CreateProjectError>({
+    ...options,
+    url: '/knowledge/project/new',
   });
 };
 
@@ -364,6 +440,17 @@ export const removeResourceFromCollection = (options: Options<RemoveResourceFrom
 };
 
 /**
+ * Bind resources to project
+ * Bind existing resources to a project
+ */
+export const bindProjectResources = (options: Options<BindProjectResourcesData>) => {
+  return (options?.client ?? client).post<BindProjectResourcesResponse, BindProjectResourcesError>({
+    ...options,
+    url: '/knowledge/project/bindRes',
+  });
+};
+
+/**
  * Delete collection
  * Delete an existing collection
  */
@@ -371,6 +458,17 @@ export const deleteCollection = (options: Options<DeleteCollectionData>) => {
   return (options?.client ?? client).post<DeleteCollectionResponse, DeleteCollectionError>({
     ...options,
     url: '/knowledge/collection/delete',
+  });
+};
+
+/**
+ * Delete collection
+ * Delete an existing project
+ */
+export const deleteProject = (options: Options<DeleteProjectData>) => {
+  return (options?.client ?? client).post<DeleteProjectResponse, DeleteProjectError>({
+    ...options,
+    url: '/knowledge/project/delete',
   });
 };
 

@@ -77,6 +77,10 @@ model Conversation {
   pk              BigInt   @id @default(autoincrement())
   /// Conversation ID
   convId          String   @unique @default("") @map("conv_id")
+  /// Project ID
+  projectId       String?   @map("project_id")
+  /// Related project
+  project         Project? @relation(fields: [projectId], references: [projectId])
   /// UID
   uid             String   @default("") @map("uid")
   /// Conversation title
@@ -224,8 +228,6 @@ model Resource {
   storageSize    BigInt       @default(0) @map("storage_size")
   /// Vector storage size (in bytes)
   vectorSize     BigInt       @default(0) @map("vector_size")
-  /// Whether this resource is publicly accessible
-  isPublic       Boolean      @default(false) @map("is_public")
   /// Whether this resource is readonly
   readOnly       Boolean      @default(false) @map("read_only")
   /// Index status
@@ -242,6 +244,10 @@ model Resource {
   deletedAt      DateTime?    @map("deleted_at") @db.Timestamptz()
   /// Related collections
   collections    Collection[]
+  /// Related projects
+  projects       Project[]
+  /// Related canvases
+  canvases       Canvas[]
 
   @@index([uid, deletedAt, updatedAt])
   @@map("resources")
@@ -249,37 +255,43 @@ model Resource {
 
 model Canvas {
   /// Primary key
-  pk              BigInt    @id @default(autoincrement())
+  pk              BigInt     @id @default(autoincrement())
   /// Canvas id
-  canvasId        String    @unique @map("note_id")
+  canvasId        String     @unique @map("note_id")
+  /// Project id
+  projectId       String?    @map("project_id")
+  /// Related project
+  project         Project?   @relation(fields: [projectId], references: [projectId])
   /// UID
-  uid             String    @map("uid")
+  uid             String     @map("uid")
   /// Canvas title
-  title           String    @default("Untitled") @map("title")
+  title           String     @default("Untitled") @map("title")
   /// Word count
-  wordCount       Int       @default(0) @map("word_count")
+  wordCount       Int        @default(0) @map("word_count")
   /// Content of resource (deprecated)
-  content         String?   @map("content")
+  content         String?    @map("content")
   /// Content preview
-  contentPreview  String?   @map("content_preview")
+  contentPreview  String?    @map("content_preview")
   /// Content storage key
-  storageKey      String?   @map("storage_key")
+  storageKey      String?    @map("storage_key")
   /// Content storage size (in bytes)
-  storageSize     BigInt    @default(0) @map("storage_size")
+  storageSize     BigInt     @default(0) @map("storage_size")
   /// Vector storage size (in bytes)
-  vectorSize      BigInt    @default(0) @map("vector_size")
+  vectorSize      BigInt     @default(0) @map("vector_size")
   /// Yjs state storage key
-  stateStorageKey String    @default("") @map("state_storage_key")
+  stateStorageKey String     @default("") @map("state_storage_key")
   /// Whether this canvas is publicly accessible
-  isPublic        Boolean   @default(false) @map("is_public")
+  isPublic        Boolean    @default(false) @map("is_public")
   /// Whether this canvas is readonly
-  readOnly        Boolean   @default(false) @map("read_only")
+  readOnly        Boolean    @default(false) @map("read_only")
   /// Create timestamp
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
-  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamptz()
   /// Soft delete timestamp
-  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt       DateTime?  @map("deleted_at") @db.Timestamptz()
+  /// Related resources
+  references      Resource[]
 
   @@index([uid, deletedAt, updatedAt])
   @@map("notes")
@@ -309,6 +321,34 @@ model Collection {
 
   @@index([uid, updatedAt])
   @@map("collections")
+}
+
+model Project {
+  /// Primary key
+  pk          BigInt     @id @default(autoincrement())
+  /// Project id
+  projectId   String     @unique @map("project_id")
+  /// Project title
+  title       String     @map("title")
+  /// Project description
+  description String?    @map("description")
+  /// UID
+  uid         String     @map("uid")
+  /// Create timestamp
+  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt   DateTime   @updatedAt @map("updated_at") @db.Timestamptz()
+  /// Soft delete timestamp
+  deletedAt   DateTime?  @map("deleted_at") @db.Timestamptz()
+  /// Related resources
+  resources   Resource[]
+  /// Related canvases
+  canvases    Canvas[]
+  /// Related conversations
+  conversations Conversation[]
+
+  @@index([uid, updatedAt])
+  @@map("projects")
 }
 
 /// User-defined skills.

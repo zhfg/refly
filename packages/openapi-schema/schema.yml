@@ -214,6 +214,12 @@ paths:
       description: List all canvases for a user
       operationId: listCanvas
       parameters:
+        - name: projectId
+          in: query
+          description: Project ID
+          required: false
+          schema:
+            type: string
         - name: page
           in: query
           description: Page number
@@ -325,6 +331,48 @@ paths:
                 $ref: '#/components/schemas/BaseResponse'
       security:
         - api_key: []
+  /knowledge/canvas/refer:
+    post:
+      tags:
+        - knowledge
+      summary: Refer canvas
+      description: Refer an existing canvas to another resource or canvas
+      operationId: referCanvas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReferCanvasRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+  /knowledge/canvas/batchMove:
+    post:
+      tags:
+        - knowledge
+      summary: Batch move canvases
+      description: Batch move existing canvases to another project
+      operationId: batchMoveCanvas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchMoveCanvasRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+      security:
+        - api_key: []
   /knowledge/collection/list:
     get:
       tags:
@@ -356,6 +404,37 @@ paths:
                 $ref: '#/components/schemas/ListCollectionResponse'
       security:
         - api_key: []
+  /knowledge/project/list:
+    get:
+      tags:
+        - knowledge
+      summary: List user projects
+      description: List all projects for a user
+      operationId: listProjects
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          required: false
+          schema:
+            type: number
+            default: 1
+        - name: pageSize
+          in: query
+          description: Page size
+          required: false
+          schema:
+            type: number
+            default: 10
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListProjectResponse'
+      security:
+        - api_key: []
   /knowledge/collection/detail:
     get:
       tags:
@@ -378,6 +457,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetCollectionDetailResponse'
+      security:
+        - api_key: []
+  /knowledge/project/detail:
+    get:
+      tags:
+        - knowledge
+      summary: Get project detail
+      description: Return project details along with its canvases
+      operationId: getProjectDetail
+      parameters:
+        - name: projectId
+          in: query
+          description: Project ID to retrieve
+          required: true
+          schema:
+            type: string
+            example: cl-g30e1b80b5g1itbemc0g5jj3
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetProjectDetailResponse'
       security:
         - api_key: []
   /knowledge/collection/update:
@@ -403,6 +506,29 @@ paths:
                 $ref: '#/components/schemas/UpsertCollectionResponse'
       security:
         - api_key: []
+  /knowledge/project/update:
+    post:
+      tags:
+        - knowledge
+      summary: Update collection
+      description: Update an existing project
+      operationId: updateProject
+      requestBody:
+        description: Project update request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertProjectRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertProjectResponse'
+      security:
+        - api_key: []
   /knowledge/collection/new:
     post:
       tags:
@@ -424,6 +550,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UpsertCollectionResponse'
+      security:
+        - api_key: []
+  /knowledge/project/new:
+    post:
+      tags:
+        - knowledge
+      summary: Create new project
+      description: Create a new project
+      operationId: createProject
+      requestBody:
+        description: Project creation request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertProjectRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertProjectResponse'
       security:
         - api_key: []
   /knowledge/collection/addResource:
@@ -470,6 +619,28 @@ paths:
                 $ref: '#/components/schemas/BaseResponse'
       security:
         - api_key: []
+  /knowledge/project/bindRes:
+    post:
+      tags:
+        - knowledge
+      summary: Bind resources to project
+      description: Bind existing resources to a project
+      operationId: bindProjectResources
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BindProjectResourcesRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+      security:
+        - api_key: []
   /knowledge/collection/delete:
     post:
       tags:
@@ -483,6 +654,28 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/DeleteCollectionRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+      security:
+        - api_key: []
+  /knowledge/project/delete:
+    post:
+      tags:
+        - knowledge
+      summary: Delete collection
+      description: Delete an existing project
+      operationId: deleteProject
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteProjectRequest'
       responses:
         '200':
           description: Successful operation
@@ -1396,6 +1589,41 @@ components:
           description: Collections this resource belongs to (only returned in getResourceDetail API)
           items:
             $ref: '#/components/schemas/Collection'
+        referredByCanvases:
+          type: array
+          description: Canvases this resource is referred to (only returned in getResourceDetail API)
+          items:
+            $ref: '#/components/schemas/Canvas'
+        projects:
+          type: array
+          description: Projects this resource belongs to (only returned in getResourceDetail API)
+          items:
+            $ref: '#/components/schemas/Project'
+    ReferenceType:
+      type: string
+      description: Reference type
+      enum:
+        - canvas
+        - resource
+    Reference:
+      type: object
+      required:
+        - referenceId
+        - referenceType
+        - title
+      properties:
+        referenceId:
+          type: string
+          description: Entity ID
+        referenceType:
+          description: Reference type
+          $ref: '#/components/schemas/ReferenceType'
+        title:
+          type: string
+          description: Reference title
+        url:
+          type: string
+          description: Reference URL
     Canvas:
       type: object
       required:
@@ -1430,6 +1658,59 @@ components:
           type: string
           format: date-time
           description: Canvas update time
+        referredByCanvases:
+          type: array
+          description: Canvases this canvas is referred to (only returned in detail API)
+          items:
+            $ref: '#/components/schemas/Canvas'
+        references:
+          type: array
+          description: References (only returned in detail API)
+          items:
+            $ref: '#/components/schemas/Reference'
+    Project:
+      type: object
+      required:
+        - projectId
+        - title
+        - createdAt
+        - updatedAt
+      properties:
+        projectId:
+          type: string
+          description: Project ID
+          example: p-g30e1b80b5g1itbemc0g5jj3
+        title:
+          type: string
+          description: Project title
+          example: Default Project
+        description:
+          type: string
+          description: Project description
+          example: Project description
+        createdAt:
+          type: string
+          format: date-time
+          description: Collection creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Collection update time
+        resources:
+          type: array
+          description: Collection resources (only returned in detail API)
+          items:
+            $ref: '#/components/schemas/Resource'
+        canvases:
+          type: array
+          description: Project canvases (only returned in detail API)
+          items:
+            $ref: '#/components/schemas/Canvas'
+        conversations:
+          type: array
+          description: Project conversations (only returned in detail API)
+          items:
+            $ref: '#/components/schemas/Conversation'
     Collection:
       type: object
       required:
@@ -2117,6 +2398,10 @@ components:
           type: string
           description: Conversation ID
           example: cv-g30e1b80b5g1itbemc0g5jj3
+        projectId:
+          type: string
+          description: Project ID
+          example: p-g30e1b80b5g1itbemc0g5jj3
         title:
           type: string
           description: Conversation title
@@ -2531,6 +2816,10 @@ components:
           type: string
           description: Collection ID (will add to the collection if given)
           example: cl-g30e1b80b5g1itbemc0g5jj3
+        projectId:
+          type: string
+          description: Project ID (will add to the project if given)
+          example: p-g30e1b80b5g1itbemc0g5jj3
         data:
           description: Resource metadata
           $ref: '#/components/schemas/ResourceMeta'
@@ -2636,6 +2925,10 @@ components:
           type: string
           description: Canvas ID (only used for update)
           example: c-g30e1b80b5g1itbemc0g5jj3
+        projectId:
+          type: string
+          description: Project ID (will add to the project if given)
+          example: p-g30e1b80b5g1itbemc0g5jj3
         readOnly:
           type: boolean
           description: Whether this canvas is read-only
@@ -2659,6 +2952,42 @@ components:
           type: string
           description: Canvas ID to delete
           example: c-g30e1b80b5g1itbemc0g5jj3
+    ReferCanvasRequest:
+      type: object
+      required:
+        - canvasId
+        - referenceId
+        - referenceType
+        - operation
+      properties:
+        canvasId:
+          type: string
+          description: Canvas ID to refer
+        operation:
+          type: string
+          description: Operation type
+          enum:
+            - add
+            - remove
+        references:
+          type: array
+          description: Reference list
+          items:
+            $ref: '#/components/schemas/Reference'
+    BatchMoveCanvasRequest:
+      type: object
+      required:
+        - canvasIds
+        - projectId
+      properties:
+        canvasIds:
+          type: array
+          description: Canvas ID list to move
+          items:
+            type: string
+        projectId:
+          type: string
+          description: Project ID to move to
     UpsertCollectionRequest:
       type: object
       properties:
@@ -2674,6 +3003,21 @@ components:
           type: string
           description: Collection description
           example: Collection description
+    UpsertProjectRequest:
+      type: object
+      properties:
+        projectId:
+          type: string
+          description: Project ID (only used for update)
+          example: p-g30e1b80b5g1itbemc0g5jj3
+        title:
+          type: string
+          description: Project title
+          example: My Project
+        description:
+          type: string
+          description: Project description
+          example: Project description
     UpsertCollectionResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -2681,6 +3025,13 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/Collection'
+    UpsertProjectResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Project'
     AddResourceToCollectionRequest:
       type: object
       required:
@@ -2695,6 +3046,27 @@ components:
           description: Resource ID list
           items:
             type: string
+    BindProjectResourcesRequest:
+      type: object
+      required:
+        - projectId
+        - resourceIds
+        - operation
+      properties:
+        projectId:
+          type: string
+          description: Project ID
+        resourceIds:
+          type: array
+          description: Resource ID list
+          items:
+            type: string
+        operation:
+          type: string
+          description: Operation type
+          enum:
+            - bind
+            - unbind
     RemoveResourceFromCollectionRequest:
       type: object
       required:
@@ -2709,6 +3081,15 @@ components:
           description: Resource ID list
           items:
             type: string
+    DeleteProjectRequest:
+      type: object
+      required:
+        - projectId
+      properties:
+        projectId:
+          type: string
+          description: Project ID to delete
+          example: p-g30e1b80b5g1itbemc0g5jj3
     DeleteCollectionRequest:
       type: object
       required:
@@ -2718,6 +3099,16 @@ components:
           type: string
           description: Collection ID to delete
           example: cl-g30e1b80b5g1itbemc0g5jj3
+    ListProjectResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Project list
+              items:
+                $ref: '#/components/schemas/Collection'
     ListCollectionResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -2728,6 +3119,15 @@ components:
               description: Collection list
               items:
                 $ref: '#/components/schemas/Collection'
+    GetProjectDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              description: Project data
+              $ref: '#/components/schemas/Project'
     GetCollectionDetailResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -3176,6 +3576,9 @@ components:
         tplConfig:
           description: Skill template config
           $ref: '#/components/schemas/SkillTemplateConfig'
+        projectId:
+          type: string
+          description: Project ID (if not provided, new project will be created)
         skillId:
           type: string
           description: Skill instance ID to invoke (if not provided, skill scheduler will be used)

@@ -98,6 +98,41 @@ export const $Resource = {
         $ref: '#/components/schemas/Collection',
       },
     },
+    referredByCanvases: {
+      type: 'array',
+      description: 'Canvases this resource is referred to (only returned in getResourceDetail API)',
+      items: {
+        $ref: '#/components/schemas/Canvas',
+      },
+    },
+    projects: {
+      type: 'array',
+      description: 'Projects this resource belongs to (only returned in getResourceDetail API)',
+      items: {
+        $ref: '#/components/schemas/Project',
+      },
+    },
+  },
+} as const;
+
+export const $ReferenceType = {
+  type: 'string',
+  description: 'Reference type',
+  enum: ['collection', 'project'],
+} as const;
+
+export const $Reference = {
+  type: 'object',
+  required: ['entityId', 'referenceType'],
+  properties: {
+    entityId: {
+      type: 'string',
+      description: 'Entity ID',
+    },
+    referenceType: {
+      description: 'Reference type',
+      $ref: '#/components/schemas/ReferenceType',
+    },
   },
 } as const;
 
@@ -136,6 +171,73 @@ export const $Canvas = {
       type: 'string',
       format: 'date-time',
       description: 'Canvas update time',
+    },
+    referredByCanvases: {
+      type: 'array',
+      description: 'Canvases this canvas is referred to (only returned in detail API)',
+      items: {
+        $ref: '#/components/schemas/Canvas',
+      },
+    },
+    references: {
+      type: 'array',
+      description: 'References (only returned in detail API)',
+      items: {
+        $ref: '#/components/schemas/Reference',
+      },
+    },
+  },
+} as const;
+
+export const $Project = {
+  type: 'object',
+  required: ['projectId', 'title', 'createdAt', 'updatedAt'],
+  properties: {
+    projectId: {
+      type: 'string',
+      description: 'Project ID',
+      example: 'p-g30e1b80b5g1itbemc0g5jj3',
+    },
+    title: {
+      type: 'string',
+      description: 'Project title',
+      example: 'Default Project',
+    },
+    description: {
+      type: 'string',
+      description: 'Project description',
+      example: 'Project description',
+    },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Collection creation time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Collection update time',
+    },
+    resources: {
+      type: 'array',
+      description: 'Collection resources (only returned in detail API)',
+      items: {
+        $ref: '#/components/schemas/Resource',
+      },
+    },
+    canvases: {
+      type: 'array',
+      description: 'Project canvases (only returned in detail API)',
+      items: {
+        $ref: '#/components/schemas/Canvas',
+      },
+    },
+    conversations: {
+      type: 'array',
+      description: 'Project conversations (only returned in detail API)',
+      items: {
+        $ref: '#/components/schemas/Conversation',
+      },
     },
   },
 } as const;
@@ -983,6 +1085,11 @@ export const $Conversation = {
       description: 'Conversation ID',
       example: 'cv-g30e1b80b5g1itbemc0g5jj3',
     },
+    projectId: {
+      type: 'string',
+      description: 'Project ID',
+      example: 'p-g30e1b80b5g1itbemc0g5jj3',
+    },
     title: {
       type: 'string',
       description: 'Conversation title',
@@ -1488,6 +1595,11 @@ export const $UpsertResourceRequest = {
       description: 'Collection ID (will add to the collection if given)',
       example: 'cl-g30e1b80b5g1itbemc0g5jj3',
     },
+    projectId: {
+      type: 'string',
+      description: 'Project ID (will add to the project if given)',
+      example: 'p-g30e1b80b5g1itbemc0g5jj3',
+    },
     data: {
       description: 'Resource metadata',
       $ref: '#/components/schemas/ResourceMeta',
@@ -1675,6 +1787,11 @@ export const $UpsertCanvasRequest = {
       description: 'Canvas ID (only used for update)',
       example: 'c-g30e1b80b5g1itbemc0g5jj3',
     },
+    projectId: {
+      type: 'string',
+      description: 'Project ID (will add to the project if given)',
+      example: 'p-g30e1b80b5g1itbemc0g5jj3',
+    },
     readOnly: {
       type: 'boolean',
       description: 'Whether this canvas is read-only',
@@ -1715,6 +1832,24 @@ export const $DeleteCanvasRequest = {
   },
 } as const;
 
+export const $BatchMoveCanvasRequest = {
+  type: 'object',
+  required: ['canvasIds', 'projectId'],
+  properties: {
+    canvasIds: {
+      type: 'array',
+      description: 'Canvas ID list to move',
+      items: {
+        type: 'string',
+      },
+    },
+    projectId: {
+      type: 'string',
+      description: 'Project ID to move to',
+    },
+  },
+} as const;
+
 export const $UpsertCollectionRequest = {
   type: 'object',
   properties: {
@@ -1736,6 +1871,27 @@ export const $UpsertCollectionRequest = {
   },
 } as const;
 
+export const $UpsertProjectRequest = {
+  type: 'object',
+  properties: {
+    projectId: {
+      type: 'string',
+      description: 'Project ID (only used for update)',
+      example: 'p-g30e1b80b5g1itbemc0g5jj3',
+    },
+    title: {
+      type: 'string',
+      description: 'Project title',
+      example: 'My Project',
+    },
+    description: {
+      type: 'string',
+      description: 'Project description',
+      example: 'Project description',
+    },
+  },
+} as const;
+
 export const $UpsertCollectionResponse = {
   allOf: [
     {
@@ -1746,6 +1902,22 @@ export const $UpsertCollectionResponse = {
       properties: {
         data: {
           $ref: '#/components/schemas/Collection',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $UpsertProjectResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          $ref: '#/components/schemas/Project',
         },
       },
     },
@@ -1770,6 +1942,29 @@ export const $AddResourceToCollectionRequest = {
   },
 } as const;
 
+export const $BindProjectResourcesRequest = {
+  type: 'object',
+  required: ['projectId', 'resourceIds', 'operation'],
+  properties: {
+    projectId: {
+      type: 'string',
+      description: 'Project ID',
+    },
+    resourceIds: {
+      type: 'array',
+      description: 'Resource ID list',
+      items: {
+        type: 'string',
+      },
+    },
+    operation: {
+      type: 'string',
+      description: 'Operation type',
+      enum: ['bind', 'unbind'],
+    },
+  },
+} as const;
+
 export const $RemoveResourceFromCollectionRequest = {
   type: 'object',
   required: ['collectionId', 'resourceIds'],
@@ -1788,6 +1983,18 @@ export const $RemoveResourceFromCollectionRequest = {
   },
 } as const;
 
+export const $DeleteProjectRequest = {
+  type: 'object',
+  required: ['projectId'],
+  properties: {
+    projectId: {
+      type: 'string',
+      description: 'Project ID to delete',
+      example: 'p-g30e1b80b5g1itbemc0g5jj3',
+    },
+  },
+} as const;
+
 export const $DeleteCollectionRequest = {
   type: 'object',
   required: ['collectionId'],
@@ -1798,6 +2005,26 @@ export const $DeleteCollectionRequest = {
       example: 'cl-g30e1b80b5g1itbemc0g5jj3',
     },
   },
+} as const;
+
+export const $ListProjectResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Project list',
+          items: {
+            $ref: '#/components/schemas/Collection',
+          },
+        },
+      },
+    },
+  ],
 } as const;
 
 export const $ListCollectionResponse = {
@@ -1814,6 +2041,24 @@ export const $ListCollectionResponse = {
           items: {
             $ref: '#/components/schemas/Collection',
           },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $GetProjectDetailResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Project data',
+          $ref: '#/components/schemas/Project',
         },
       },
     },
