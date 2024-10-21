@@ -15,7 +15,7 @@ import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note
 
 import './index.scss';
 import classNames from 'classnames';
-import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { IconLoading } from '@arco-design/web-react/icon';
 
 const RadioGroup = Radio.Group;
@@ -59,8 +59,8 @@ const NewFileButton = (props: { val: string }) => {
   const importResourceStore = useImportResourceStore();
   const importKnowledgeModal = useImportKnowledgeModal();
   const { handleInitEmptyNote } = useAINote();
-  const { newNoteCreating } = useNoteStore((state) => ({
-    newNoteCreating: state.newNoteCreating,
+  const { newNoteCreating } = useCanvasStore((state) => ({
+    newNoteCreating: state.newCanvasCreating,
   }));
 
   const handleCreateButtonClick = (type: string) => {

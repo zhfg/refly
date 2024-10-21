@@ -1,7 +1,7 @@
 import { IContext, SelectedContentDomain, SkillContextContentItemMetadata } from '../types';
 import {
   SkillContextContentItem,
-  SkillContextNoteItem,
+  SkillContextCanvasItem,
   SkillContextResourceItem,
   Source,
   ResourceType,
@@ -91,7 +91,7 @@ export const flattenMergedContextToSources = (mergedContext: {
 // TODO: should replace id with `type-index` for better llm extraction
 // citationIndex for each context item is used for LLM to cite the context item in the final answer
 export const concatContextToStr = (context: Partial<IContext>) => {
-  const { contentList = [], resources = [], notes = [], webSearchSources = [] } = context || {};
+  const { contentList = [], resources = [], canvases = [], webSearchSources = [] } = context || {};
 
   let contextStr = '';
   let index = 1; // start from 1 to avoid 0 index issue in citation
@@ -106,7 +106,7 @@ export const concatContextToStr = (context: Partial<IContext>) => {
     contextStr += '\n\n';
   }
 
-  // TODO: prior handle mentioned context, includes mentioned contentList、notes、resources
+  // TODO: prior handle mentioned context, includes mentioned contentList, canvases, and resources
   // TODO: otherwise, the context more front will be more priority, should be most focused in the prompt
 
   if (contentList.length > 0) {
@@ -128,15 +128,17 @@ export const concatContextToStr = (context: Partial<IContext>) => {
     contextStr += `\n\n<UserSelectedContent>${contentStr}</UserSelectedContent>\n\n`;
   }
 
-  if (notes.length > 0) {
-    // contextStr += 'Following are the knowledge base notes: \n';
-    const concatNote = (id: string, title: string, content: string) => {
-      return `<ContextItem citationIndex='[[citation:${index++}]]' type='note' entityId='${id}' title='${title}'>${content}</ContextItem>`;
+  if (canvases.length > 0) {
+    // contextStr += 'Following are the knowledge base canvases: \n';
+    const concatCanvas = (id: string, title: string, content: string) => {
+      return `<ContextItem citationIndex='[[citation:${index++}]]' type='canvas' entityId='${id}' title='${title}'>${content}</ContextItem>`;
     };
 
-    const noteStr = notes.map((n) => concatNote(n.note?.noteId!, n.note?.title!, n.note?.content!)).join('\n\n');
+    const canvasStr = canvases
+      .map((n) => concatCanvas(n.canvas?.canvasId!, n.canvas?.title!, n.canvas?.content!))
+      .join('\n\n');
 
-    contextStr += `\n\n<KnowledgeBaseNotes>${noteStr}</KnowledgeBaseNotes>\n\n`;
+    contextStr += `\n\n<KnowledgeBaseCanvases>${canvasStr}</KnowledgeBaseCanvases>\n\n`;
   }
 
   if (resources.length > 0) {
@@ -158,13 +160,16 @@ export const concatContextToStr = (context: Partial<IContext>) => {
 };
 
 export const summarizeContext = (context: IContext, maxContextTokens: number): string => {
-  const { contentList = [], resources = [], notes = [], collections, messages } = context || {};
+  const { contentList = [], resources = [], canvases = [] } = context || {};
   const previewedContext: IContext = {
     resources: resources.map((r) => ({
       ...r,
       content: r?.resource?.contentPreview || r.resource?.content?.slice(0, 50) + '...',
     })),
-    notes: notes.map((n) => ({ ...n, content: n?.note?.contentPreview || n.note?.content?.slice(0, 50) + '...' })),
+    canvases: canvases.map((n) => ({
+      ...n,
+      content: n?.canvas?.contentPreview || n.canvas?.content?.slice(0, 50) + '...',
+    })),
     contentList: contentList.map((c) => ({ ...c, content: c.content?.slice(0, 50) + '...' })),
   };
   const truncatedContext = truncateContext(previewedContext, maxContextTokens);
@@ -181,7 +186,7 @@ export const summarizeChatHistory = (messages: BaseMessage[]): string => {
 };
 
 export function flattenContextToSources(context: Partial<IContext>): Source[] {
-  const { webSearchSources = [], contentList = [], resources = [], notes = [] } = context || {};
+  const { webSearchSources = [], contentList = [], resources = [], canvases = [] } = context || {};
   const sources: Source[] = [];
 
   // Web search sources
@@ -215,17 +220,17 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
     });
   });
 
-  // Knowledge base notes
-  notes.forEach((note: SkillContextNoteItem, index) => {
+  // Knowledge base canvases
+  canvases.forEach((canvas: SkillContextCanvasItem) => {
     sources.push({
-      url: `${baseUrl}/knowledge-base?noteId=${note.note?.noteId}`,
-      title: note.note?.title,
-      pageContent: note.note?.content || '',
+      url: `${baseUrl}/knowledge-base?noteId=${canvas.canvas?.canvasId}`,
+      title: canvas.canvas?.title,
+      pageContent: canvas.canvas?.content || '',
       metadata: {
-        title: note.note?.title,
-        entityId: note.note?.noteId,
-        entityType: 'note',
-        source: `${baseUrl}/knowledge-base?noteId=${note.note?.noteId}`,
+        title: canvas.canvas?.title,
+        entityId: canvas.canvas?.canvasId,
+        entityType: 'canvas',
+        source: `${baseUrl}/knowledge-base?noteId=${canvas.canvas?.canvasId}`,
       },
     });
   });

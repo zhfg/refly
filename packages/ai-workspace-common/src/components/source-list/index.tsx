@@ -1,19 +1,15 @@
-import { Note, Resource, Source } from '@refly/openapi-schema';
+import { Resource, Source } from '@refly/openapi-schema';
 import { getClientOrigin, safeParseURL } from '@refly/utils/url';
-import { List, Popover, Skeleton, Tag, Tooltip, Typography } from '@arco-design/web-react';
+import { Popover, Skeleton, Tooltip } from '@arco-design/web-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // 样式
 import './index.scss';
-import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
-import { IconBook, IconBulb, IconCompass } from '@arco-design/web-react/icon';
-import { time } from '@refly-packages/ai-workspace-common/utils/time';
+import { IconBook, IconCompass } from '@arco-design/web-react/icon';
 import { Markdown } from '../markdown';
-import { KnowledgeBaseTab, useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { SourceListModal } from './source-list-modal';
+import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { mapSourceToResource } from '@refly-packages/ai-workspace-common/utils/resource';
-import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
@@ -59,7 +55,10 @@ const SourceItem = ({ source, index }: { source: Source; index: number }) => {
 };
 
 const ViewMoreItem = ({ sources = [], extraCnt = 0 }: { sources: Source[]; extraCnt: number }) => {
-  const knowledgeBaseStore = useKnowledgeBaseStore();
+  const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
+    updateTempConvResources: state.updateTempConvResources,
+    updateSourceListModalVisible: state.updateSourceListModalVisible,
+  }));
   const mappedResources = mapSourceToResource(sources);
   const { t } = useTranslation();
 
@@ -94,7 +93,7 @@ const ViewMoreItem = ({ sources = [], extraCnt = 0 }: { sources: Source[]; extra
 export const EntityItem = (props: { item: Source; index: number; showUtil?: boolean; showDesc?: boolean }) => {
   const { item, index, showDesc = false } = props;
   const { t } = useTranslation();
-  const { jumpToReadResource, jumpToNote } = useKnowledgeBaseJumpNewPath();
+  const { jumpToReadResource, jumpToCanvas } = useKnowledgeBaseJumpNewPath();
 
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
@@ -129,9 +128,9 @@ export const EntityItem = (props: { item: Source; index: number; showUtil?: bool
                     resId: item?.metadata?.entityId,
                     ...extraParams,
                   });
-                } else if (item?.metadata?.entityType === 'note') {
-                  jumpToNote({
-                    noteId: item?.metadata?.entityId,
+                } else if (item?.metadata?.entityType === 'canvas') {
+                  jumpToCanvas({
+                    canvasId: item?.metadata?.entityId,
                     ...extraParams,
                   });
                 }

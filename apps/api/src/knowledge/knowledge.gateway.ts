@@ -10,7 +10,7 @@ import { MINIO_INTERNAL, MinioService } from '@/common/minio.service';
 import { PrismaService } from '@/common/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { JwtPayload } from '@/auth/dto';
-import { Note, Prisma, User } from '@prisma/client';
+import { Canvas, Prisma, User } from '@prisma/client';
 import { state2Markdown } from '@refly-packages/utils';
 import { RAGService } from '@/rag/rag.service';
 import { streamToBuffer } from '@/utils';
@@ -18,15 +18,15 @@ import { ElasticsearchService } from '@/common/elasticsearch.service';
 import { SubscriptionService } from '@/subscription/subscription.service';
 import { MiscService } from '@/misc/misc.service';
 
-interface NoteContext {
-  note: Note;
+interface CanvasContext {
+  canvas: Canvas;
   user: User;
 }
 
 @WebSocketGateway()
-export class NoteWsGateway implements OnGatewayConnection {
+export class CanvasWsGateway implements OnGatewayConnection {
   private server: Hocuspocus;
-  private logger = new Logger(NoteWsGateway.name);
+  private logger = new Logger(CanvasWsGateway.name);
 
   constructor(
     private rag: RAGService,
@@ -42,25 +42,25 @@ export class NoteWsGateway implements OnGatewayConnection {
       extensions: [
         new HocuspocusLogger({ log: (...args) => this.logger.log(args.join('; ')) }),
         new Database({
-          fetch: async ({ context }: { context: NoteContext }) => {
-            const { note } = context;
-            if (!note.stateStorageKey) return null;
+          fetch: async ({ context }: { context: CanvasContext }) => {
+            const { canvas } = context;
+            if (!canvas.stateStorageKey) return null;
             try {
-              const readable = await this.minio.client.getObject(note.stateStorageKey);
+              const readable = await this.minio.client.getObject(canvas.stateStorageKey);
               return await streamToBuffer(readable);
             } catch (err) {
               this.logger.error(
-                `fetch state failed for ${note.stateStorageKey}, err: ${err.stack}`,
+                `fetch state failed for ${canvas.stateStorageKey}, err: ${err.stack}`,
               );
               return null;
             }
           },
-          store: async ({ state, context }: { state: Buffer; context: NoteContext }) => {
-            const { user, note } = context;
+          store: async ({ state, context }: { state: Buffer; context: CanvasContext }) => {
+            const { user, canvas } = context;
 
             const content = state2Markdown(state);
-            const storageKey = note.storageKey || `notes/${note.noteId}.txt`;
-            const stateStorageKey = note.stateStorageKey || `state/${note.noteId}`;
+            const storageKey = canvas.storageKey || `canvas/${canvas.canvasId}.txt`;
+            const stateStorageKey = canvas.stateStorageKey || `state/${canvas.canvasId}`;
 
             // Save content and ydoc state to object storage
             await Promise.all([
@@ -68,16 +68,16 @@ export class NoteWsGateway implements OnGatewayConnection {
               this.minio.client.putObject(stateStorageKey, state),
             ]);
 
-            // Prepare note updates
-            const notesUpdates: Prisma.NoteUpdateInput = {};
-            if (!note.storageKey) {
-              notesUpdates.storageKey = storageKey;
+            // Prepare canvas updates
+            const canvasUpdates: Prisma.CanvasUpdateInput = {};
+            if (!canvas.storageKey) {
+              canvasUpdates.storageKey = storageKey;
             }
-            if (!note.stateStorageKey) {
-              notesUpdates.stateStorageKey = stateStorageKey;
+            if (!canvas.stateStorageKey) {
+              canvasUpdates.stateStorageKey = stateStorageKey;
             }
-            if (note.contentPreview !== content.slice(0, 500)) {
-              notesUpdates.contentPreview = content.slice(0, 500);
+            if (canvas.contentPreview !== content.slice(0, 500)) {
+              canvasUpdates.contentPreview = content.slice(0, 500);
             }
 
             // Re-calculate storage size
@@ -85,27 +85,31 @@ export class NoteWsGateway implements OnGatewayConnection {
               this.minio.client.statObject(storageKey),
               this.minio.client.statObject(stateStorageKey),
             ]);
-            notesUpdates.storageSize = storageStat.size + stateStorageStat.size;
+            canvasUpdates.storageSize = storageStat.size + stateStorageStat.size;
 
             // Re-index content to elasticsearch and vector store
             const [, { size }] = await Promise.all([
-              this.elasticsearch.upsertNote({
-                id: note.noteId,
+              this.elasticsearch.upsertCanvas({
+                id: canvas.canvasId,
                 content,
-                uid: note.uid,
+                uid: canvas.uid,
               }),
               this.rag.indexContent(user, {
                 pageContent: content,
-                metadata: { nodeType: 'note', title: note.title, noteId: note.noteId },
+                metadata: {
+                  nodeType: 'canvas',
+                  title: canvas.title,
+                  canvasId: canvas.canvasId,
+                },
               }),
             ]);
-            notesUpdates.vectorSize = size;
+            canvasUpdates.vectorSize = size;
 
-            const updatedNote = await this.prisma.note.update({
-              where: { noteId: note.noteId },
-              data: notesUpdates,
+            const updatedCanvas = await this.prisma.canvas.update({
+              where: { canvasId: canvas.canvasId },
+              data: canvasUpdates,
             });
-            context.note = updatedNote;
+            context.canvas = updatedCanvas;
 
             await this.subscriptionService.syncStorageUsage({
               uid: user.uid,
@@ -137,10 +141,10 @@ export class NoteWsGateway implements OnGatewayConnection {
           payload = decoded as JwtPayload;
         }
 
-        const note = await this.prisma.note.findFirst({
-          where: { noteId: documentName, deletedAt: null },
+        const canvas = await this.prisma.canvas.findFirst({
+          where: { canvasId: documentName, deletedAt: null },
         });
-        if (note.uid !== payload.uid) {
+        if (canvas.uid !== payload.uid) {
           throw new Error(`user not authorized: ${documentName}`);
         }
         const user = await this.prisma.user.findFirst({
@@ -151,7 +155,7 @@ export class NoteWsGateway implements OnGatewayConnection {
         }
 
         // Set contextual data to use it in other hooks
-        return { user, note } as NoteContext;
+        return { user, canvas } as CanvasContext;
       },
     });
   }

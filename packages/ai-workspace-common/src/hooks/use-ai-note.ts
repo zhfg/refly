@@ -7,22 +7,22 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
-import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
-import { useNoteTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
 
 export const useAINote = (shouldInitListener = false) => {
   const { t } = useTranslation();
-  const noteStore = useNoteStore((state) => ({
-    updateNewNoteCreating: state.updateNewNoteCreating,
-    updateNotePanelVisible: state.updateNotePanelVisible,
+  const canvasStore = useCanvasStoreShallow((state) => ({
+    updateNewNoteCreating: state.updateNewCanvasCreating,
+    updateNotePanelVisible: state.updateCanvasPanelVisible,
   }));
-  const { jumpToNote } = useKnowledgeBaseJumpNewPath();
-  const { handleAddTab } = useNoteTabs();
+  const { jumpToCanvas } = useKnowledgeBaseJumpNewPath();
+  const { handleAddTab } = useCanvasTabs();
 
   const handleInitEmptyNote = async (content: string) => {
-    noteStore.updateNewNoteCreating(true);
+    canvasStore.updateNewNoteCreating(true);
 
-    const res = await getClient().createNote({
+    const res = await getClient().createCanvas({
       body: {
         title: t('knowledgeBase.note.defaultTitle'),
         initialContent: content,
@@ -34,17 +34,17 @@ export const useAINote = (shouldInitListener = false) => {
       return;
     }
 
-    noteStore.updateNewNoteCreating(false);
+    canvasStore.updateNewNoteCreating(false);
 
-    const { noteId, title } = res?.data?.data;
-    jumpToNote({
-      noteId,
+    const { canvasId, title } = res?.data?.data;
+    jumpToCanvas({
+      canvasId,
     });
     handleAddTab({
       title,
-      key: noteId,
+      key: canvasId,
       content: content,
-      noteId,
+      canvasId,
     });
   };
 

@@ -58,10 +58,10 @@ export class FindRelatedContent extends BaseSkill {
             },
           },
           {
-            value: 'note',
+            value: 'canvas',
             labelDict: {
-              en: 'Note',
-              'zh-CN': '笔记',
+              en: 'Canvas',
+              'zh-CN': '稿布',
             },
           },
         ],
@@ -73,7 +73,7 @@ export class FindRelatedContent extends BaseSkill {
     context: {
       rules: [
         { key: 'resources', limit: 1 },
-        { key: 'notes', limit: 1 },
+        { key: 'canvases', limit: 1 },
         { key: 'contentList', limit: 1 },
       ],
       relation: 'mutuallyExclusive',
@@ -107,14 +107,14 @@ export class FindRelatedContent extends BaseSkill {
   retrieve = async (state: GraphState, config: SkillRunnableConfig) => {
     const { user } = config;
 
-    const { resources, notes, contentList, tplConfig = {} } = config?.configurable || {};
+    const { resources, canvases, contentList, tplConfig = {} } = config?.configurable || {};
 
     let content = '';
 
     if (resources?.length > 0) {
       content = resources[0].resource?.content;
-    } else if (notes?.length > 0) {
-      content = notes[0].note?.content;
+    } else if (canvases?.length > 0) {
+      content = canvases[0].canvas?.content;
     } else if (contentList?.length > 0) {
       content = contentList.join('\n\n');
     }

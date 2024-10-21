@@ -21,11 +21,10 @@ import { KnowledgeBasePopover } from './popover/knowledge-base-and-resource';
 import { NotePopover } from './popover/note';
 import { ResourcePopover } from './popover/resource';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { WeblinkPopover } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/popover/weblink.extension';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 const TreeNode = Tree.Node;
 
@@ -105,7 +104,7 @@ const ContextContent = memo(() => {
   // 感知 route/页面状态
   const currentKnowledgeBase = useKnowledgeBaseStore((state) => state.currentKnowledgeBase);
   const currentResource = useKnowledgeBaseStore((state) => state.currentResource);
-  const currentNote = useNoteStore((state) => state.currentNote);
+  const currentNote = useCanvasStore((state) => state.currentCanvas);
   // console.log('rerender context content');
 
   let TreeData: TreeProps['treeData'] = [

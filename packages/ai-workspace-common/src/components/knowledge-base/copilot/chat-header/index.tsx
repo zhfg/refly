@@ -13,7 +13,6 @@ import {
 // 自定义样式
 // 自定义组件
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
-import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
 
 // state
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
@@ -23,8 +22,8 @@ import { useKnowledgeBaseStore } from '../../../../stores/knowledge-base';
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
 import classNames from 'classnames';
 
-import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
-import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
+import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 import { useCopilotStore } from '@refly-packages/ai-workspace-common/stores/copilot';
@@ -47,7 +46,6 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
   const { t } = useTranslation();
 
   const [searchParams] = useSearchParams();
-  const noteId = searchParams.get('noteId');
   const resId = searchParams.get('resId');
 
   // 所属的环境
@@ -79,11 +77,11 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
     pendingFirstToken: state.pendingFirstToken,
     resetState: state.resetState,
   }));
-  const noteStore = useNoteStore((state) => ({
-    notePanelVisible: state.notePanelVisible,
-    updateNotePanelVisible: state.updateNotePanelVisible,
+  const canvasStore = useCanvasStoreShallow((state) => ({
+    notePanelVisible: state.canvasPanelVisible,
+    updateNotePanelVisible: state.updateCanvasPanelVisible,
   }));
-  const searchStore = useSearchStore((state) => ({
+  const searchStore = useSearchStoreShallow((state) => ({
     pages: state.pages,
     isSearchOpen: state.isSearchOpen,
     setPages: state.setPages,
@@ -141,7 +139,7 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
                       );
                     }}
                   </Checkbox>,
-                  <Checkbox key={'knowledge-base-note-panel'} checked={noteStore.notePanelVisible}>
+                  <Checkbox key={'knowledge-base-note-panel'} checked={canvasStore.notePanelVisible}>
                     {({ checked }) => {
                       return (
                         <Tooltip
@@ -153,7 +151,7 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
                             icon={<IconEdit />}
                             type="text"
                             onClick={() => {
-                              noteStore.updateNotePanelVisible(!noteStore.notePanelVisible);
+                              canvasStore.updateNotePanelVisible(!canvasStore.notePanelVisible);
                             }}
                             className={classNames('assist-action-item-header', { active: checked })}
                           ></Button>

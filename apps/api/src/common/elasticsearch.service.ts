@@ -14,7 +14,7 @@ interface ResourceDocument {
   uid: string;
 }
 
-interface NoteDocument {
+interface CanvasDocument {
   id: string;
   title?: string;
   content?: string;
@@ -76,7 +76,7 @@ export const indexConfig = {
       uid: { type: 'keyword' },
     },
   },
-  note: {
+  canvas: {
     index: 'refly_notes',
     settings: commonSettings,
     properties: {
@@ -213,8 +213,8 @@ export class ElasticsearchService implements OnModuleInit {
     return this.upsertDocument(indexConfig.collection.index, collection);
   }
 
-  async upsertNote(note: NoteDocument) {
-    return this.upsertDocument(indexConfig.note.index, note);
+  async upsertCanvas(canvas: CanvasDocument) {
+    return this.upsertDocument(indexConfig.canvas.index, canvas);
   }
 
   async upsertConversationMessage(message: ConversationMessageDocument) {
@@ -232,10 +232,10 @@ export class ElasticsearchService implements OnModuleInit {
     });
   }
 
-  async deleteNote(noteId: string) {
+  async deleteCanvas(canvasId: string) {
     return this.client.delete({
-      index: indexConfig.note.index,
-      id: noteId,
+      index: indexConfig.canvas.index,
+      id: canvasId,
     });
   }
 
@@ -295,10 +295,10 @@ export class ElasticsearchService implements OnModuleInit {
     return body.hits.hits;
   }
 
-  async searchNotes(user: User, req: SearchRequest) {
+  async searchCanvases(user: User, req: SearchRequest) {
     const { query, limit, entities } = req;
-    const { body } = await this.client.search<SearchResponse<NoteDocument>>({
-      index: indexConfig.note.index,
+    const { body } = await this.client.search<SearchResponse<CanvasDocument>>({
+      index: indexConfig.canvas.index,
       body: {
         query: {
           bool: {

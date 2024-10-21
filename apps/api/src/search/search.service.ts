@@ -42,10 +42,10 @@ export class SearchService {
     req.mode ??= 'keyword';
 
     if (req.mode === 'vector') {
-      // Currently only resource and note are supported for vector search
-      req.domains ??= ['resource', 'note'];
+      // Currently only resource and canvas are supported for vector search
+      req.domains ??= ['resource', 'canvas'];
     } else {
-      req.domains ??= ['resource', 'note', 'collection', 'conversation', 'skill'];
+      req.domains ??= ['resource', 'canvas', 'collection', 'conversation', 'skill'];
     }
 
     const reqList: SearchRequest[] = [];
@@ -202,10 +202,10 @@ export class SearchService {
     }
   }
 
-  async emptySearchNotes(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    const notes = await this.prisma.note.findMany({
+  async emptySearchCanvases(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+    const canvases = await this.prisma.canvas.findMany({
       select: {
-        noteId: true,
+        canvasId: true,
         title: true,
         content: true,
         createdAt: true,
@@ -215,22 +215,22 @@ export class SearchService {
       orderBy: { updatedAt: 'desc' },
       take: req.limit || 5,
     });
-    return notes.map((note) => ({
-      id: note.noteId,
-      domain: 'note',
-      title: note.title,
-      content: [note.content ? note.content.slice(0, 250) + '...' : ''],
-      createdAt: note.createdAt.toJSON(),
-      updatedAt: note.updatedAt.toJSON(),
+    return canvases.map((canvas) => ({
+      id: canvas.canvasId,
+      domain: 'canvas',
+      title: canvas.title,
+      content: [canvas.content ? canvas.content.slice(0, 250) + '...' : ''],
+      createdAt: canvas.createdAt.toJSON(),
+      updatedAt: canvas.updatedAt.toJSON(),
     }));
   }
 
-  async searchNotesByKeywords(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    const hits = await this.elasticsearch.searchNotes(user, req);
+  async searchCanvasesByKeywords(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+    const hits = await this.elasticsearch.searchCanvases(user, req);
 
     return hits.map((hit) => ({
       id: hit._id,
-      domain: 'note',
+      domain: 'canvas',
       title: hit.highlight?.title?.[0] || hit._source.title,
       content: hit.highlight?.content || [hit._source.content],
       createdAt: hit._source.createdAt,
@@ -238,13 +238,13 @@ export class SearchService {
     }));
   }
 
-  async searchNotesByVector(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+  async searchCanvasesByVector(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
     const nodes = await this.rag.retrieve(user, {
       query: req.query,
       limit: req.limit,
       filter: {
-        nodeTypes: ['note'],
-        noteIds: req.entities?.map((entity) => entity.entityId),
+        nodeTypes: ['canvas'],
+        canvasIds: req.entities?.map((entity) => entity.entityId),
       },
     });
     if (nodes.length === 0) {
@@ -252,27 +252,27 @@ export class SearchService {
     }
 
     return nodes.map((node) => ({
-      id: node.noteId,
-      domain: 'note',
+      id: node.canvasId,
+      domain: 'canvas',
       title: node.title,
       content: [node.content],
     }));
   }
 
-  async searchNotes(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+  async searchCanvases(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
     if (req.query.length === 0) {
-      return this.emptySearchNotes(user, req);
+      return this.emptySearchCanvases(user, req);
     }
 
     switch (req.mode) {
       case 'keyword':
-        return this.searchNotesByKeywords(user, req);
+        return this.searchCanvasesByKeywords(user, req);
       case 'vector':
-        return this.searchNotesByVector(user, req);
+        return this.searchCanvasesByVector(user, req);
       case 'hybrid':
         throw new BadRequestException('Not implemented');
       default:
-        return this.searchNotesByKeywords(user, req);
+        return this.searchCanvasesByKeywords(user, req);
     }
   }
 
@@ -459,8 +459,8 @@ export class SearchService {
         switch (req.domains[0]) {
           case 'resource':
             return this.searchResources(user, req);
-          case 'note':
-            return this.searchNotes(user, req);
+          case 'canvas':
+            return this.searchCanvases(user, req);
           case 'collection':
             return this.searchCollections(user, req);
           case 'conversation':

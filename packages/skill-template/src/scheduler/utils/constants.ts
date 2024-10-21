@@ -8,11 +8,11 @@ export const MAX_SHORT_CONTENT_RATIO = 0.3;
 // configurable params
 export const MAX_CONTEXT_RATIO = 0.7;
 export const MAX_SELECTED_CONTENT_RATIO = 2 / 4;
-export const MAX_NOTES_RATIO = 1 / 4;
+export const MAX_CANVASES_RATIO = 1 / 4;
 export const MAX_RESOURCES_RATIO = 1 / 4;
 
-export const MAX_RAG_RELEVANT_NOTES_RATIO = 0.7;
-export const MAX_SHORT_NOTES_RATIO = 0.3;
+export const MAX_RAG_RELEVANT_CANVASES_RATIO = 0.7;
+export const MAX_SHORT_CANVASES_RATIO = 0.3;
 
 export const MAX_RAG_RELEVANT_RESOURCES_RATIO = 0.7;
 export const MAX_SHORT_RESOURCES_RATIO = 0.3;

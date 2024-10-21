@@ -1,13 +1,13 @@
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { useNoteStoreShallow } from '@refly-packages/ai-workspace-common/stores/note';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 export const useKnowledgeBaseJumpNewPath = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const noteStore = useNoteStoreShallow((state) => ({
-    notePanelVisible: state.notePanelVisible,
-    updateCurrentNote: state.updateCurrentNote,
-    updateNotePanelVisible: state.updateNotePanelVisible,
+  const canvasStore = useCanvasStoreShallow((state) => ({
+    notePanelVisible: state.canvasPanelVisible,
+    updateCurrentNote: state.updateCurrentCanvas,
+    updateNotePanelVisible: state.updateCanvasPanelVisible,
   }));
   const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
     resourcePanelVisible: state.resourcePanelVisible,
@@ -15,16 +15,16 @@ export const useKnowledgeBaseJumpNewPath = () => {
   }));
   const navigate = useNavigate();
 
-  const jumpToNote = ({
-    noteId,
+  const jumpToCanvas = ({
+    canvasId,
     baseUrl = '',
     openNewTab = false,
   }: {
-    noteId: string;
+    canvasId: string;
     baseUrl?: string;
     openNewTab?: boolean;
   }) => {
-    searchParams.set('noteId', noteId);
+    searchParams.set('noteId', canvasId);
     setSearchParams(searchParams);
     const url = `${baseUrl}/knowledge-base?${searchParams.toString()}`;
 
@@ -32,8 +32,8 @@ export const useKnowledgeBaseJumpNewPath = () => {
       window.open(url, '_blank');
     } else {
       navigate(url);
-      if (!noteStore.notePanelVisible) {
-        noteStore.updateNotePanelVisible(true);
+      if (!canvasStore.notePanelVisible) {
+        canvasStore.updateNotePanelVisible(true);
       }
     }
   };
@@ -112,7 +112,7 @@ export const useKnowledgeBaseJumpNewPath = () => {
   };
 
   return {
-    jumpToNote,
+    jumpToCanvas,
     jumpToKnowledgeBase,
     jumpToReadResource,
     jumpToConv,

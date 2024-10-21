@@ -4,6 +4,7 @@ interface ContentSelectorButtonsProps {
   text: string;
   handleClick: () => void;
 }
+
 export const ContentSelectorButtons: React.FC<ContentSelectorButtonsProps> = (props) => {
   const { text, handleClick } = props;
 

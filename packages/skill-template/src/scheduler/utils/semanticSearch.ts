@@ -1,7 +1,7 @@
 import {
   SkillContextContentItem,
   SkillContextResourceItem,
-  SkillContextNoteItem,
+  SkillContextCanvasItem,
   SearchDomain,
   EntityType,
   SkillContextCollectionItem,
@@ -13,13 +13,12 @@ import { countToken, ModelContextLimitMap } from './token';
 import { MAX_NEED_RECALL_TOKEN, SHORT_CONTENT_THRESHOLD, MIN_RELEVANCE_SCORE } from './constants';
 import { DocumentInterface, Document } from '@langchain/core/documents';
 import { ContentNodeType, NodeMeta } from '../../engine';
-import { genUniqueId } from '@refly-packages/utils';
 import { truncateText } from './truncator';
 import {
   MAX_RAG_RELEVANT_CONTENT_RATIO,
   MAX_SHORT_CONTENT_RATIO,
-  MAX_RAG_RELEVANT_NOTES_RATIO,
-  MAX_SHORT_NOTES_RATIO,
+  MAX_RAG_RELEVANT_CANVASES_RATIO,
+  MAX_SHORT_CANVASES_RATIO,
   MAX_RAG_RELEVANT_RESOURCES_RATIO,
   MAX_SHORT_RESOURCES_RATIO,
 } from './constants';
@@ -69,20 +68,20 @@ export async function sortContentBySimilarity(
   }));
 }
 
-export async function sortNotesBySimilarity(
+export async function sortCanvasesBySimilarity(
   query: string,
-  notes: SkillContextNoteItem[],
+  canvases: SkillContextCanvasItem[],
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
-): Promise<SkillContextNoteItem[]> {
+): Promise<SkillContextCanvasItem[]> {
   // 1. construct documents
-  const documents: Document<NodeMeta>[] = notes.map((item) => {
+  const documents: Document<NodeMeta>[] = canvases.map((item) => {
     return {
-      pageContent: truncateText(item.note?.content || '', MAX_NEED_RECALL_TOKEN),
+      pageContent: truncateText(item.canvas?.content || '', MAX_NEED_RECALL_TOKEN),
       metadata: {
         ...item.metadata,
-        title: item.note?.title as string,
-        nodeType: 'note' as ContentNodeType,
-        noteId: item.note?.noteId,
+        title: item.canvas?.title as string,
+        nodeType: 'canvas' as ContentNodeType,
+        canvasId: item.canvas?.canvasId,
       },
     };
   });
@@ -94,12 +93,12 @@ export async function sortNotesBySimilarity(
     k: documents.length,
     filter: undefined,
   });
-  const sortedNotes = res.data;
+  const sortedCanvases = res.data;
 
-  // 4. return sorted notes
-  return sortedNotes
-    .map((item) => notes.find((note) => note.note?.noteId === item.metadata.noteId))
-    .filter((note): note is SkillContextNoteItem => note !== undefined);
+  // 4. return sorted canvases
+  return sortedCanvases
+    .map((item) => canvases.find((canvas) => canvas.canvas?.canvasId === item.metadata.canvasId))
+    .filter((canvas): canvas is SkillContextCanvasItem => canvas !== undefined);
 }
 
 export async function sortResourcesBySimilarity(
@@ -226,74 +225,74 @@ export async function processSelectedContentWithSimilarity(
   return result;
 }
 
-export async function processNotesWithSimilarity(
+export async function processCanvasesWithSimilarity(
   query: string,
-  notes: SkillContextNoteItem[] = [],
+  canvases: SkillContextCanvasItem[] = [],
   maxTokens: number,
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
-): Promise<SkillContextNoteItem[]> {
-  const MAX_RAG_RELEVANT_NOTES_MAX_TOKENS = Math.floor(maxTokens * MAX_RAG_RELEVANT_NOTES_RATIO);
-  const MAX_SHORT_NOTES_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_NOTES_RATIO);
+): Promise<SkillContextCanvasItem[]> {
+  const MAX_RAG_RELEVANT_CANVASES_MAX_TOKENS = Math.floor(maxTokens * MAX_RAG_RELEVANT_CANVASES_RATIO);
+  const MAX_SHORT_CANVASES_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_CANVASES_RATIO);
 
-  if (notes.length === 0) {
+  if (canvases.length === 0) {
     return [];
   }
 
   // 1. calculate similarity and sort
-  let sortedNotes: SkillContextNoteItem[] = [];
-  if (notes.length > 1) {
-    sortedNotes = await sortNotesBySimilarity(query, notes, ctx);
+  let sortedCanvases: SkillContextCanvasItem[] = [];
+  if (canvases.length > 1) {
+    sortedCanvases = await sortCanvasesBySimilarity(query, canvases, ctx);
   } else {
-    sortedNotes = notes;
+    sortedCanvases = canvases;
   }
 
-  let result: SkillContextNoteItem[] = [];
+  let result: SkillContextCanvasItem[] = [];
   let usedTokens = 0;
 
-  // 2. 按相关度顺序处理 notes
-  for (const note of sortedNotes) {
-    const noteTokens = countToken(note?.note?.content || '');
+  // 2. 按相关度顺序处理 canvas
+  for (const canvas of sortedCanvases) {
+    const canvasTokens = countToken(canvas?.canvas?.content || '');
 
-    if (noteTokens > MAX_NEED_RECALL_TOKEN || !note.metadata?.useWholeContent) {
+    if (canvasTokens > MAX_NEED_RECALL_TOKEN || !canvas.metadata?.useWholeContent) {
       // 1.1 大内容，直接走召回
       const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
         query,
         {
           entities: [
             {
-              entityId: note?.note?.noteId,
-              entityType: 'note',
+              entityId: canvas?.canvas?.canvasId,
+              entityType: 'canvas',
             },
           ],
-          domains: ['note'],
+          domains: ['canvas'],
           limit: 10,
         },
         ctx,
       );
       const relevantContent = assembleChunks(relevantChunks);
-      result.push({ ...note, note: { ...note.note!, content: relevantContent } });
+      result.push({ ...canvas, canvas: { ...canvas.canvas!, content: relevantContent } });
       usedTokens += countToken(relevantContent);
-    } else if (usedTokens + noteTokens <= MAX_RAG_RELEVANT_NOTES_MAX_TOKENS) {
+    } else if (usedTokens + canvasTokens <= MAX_RAG_RELEVANT_CANVASES_MAX_TOKENS) {
       // 1.2 小内容，直接添加
-      result.push(note);
-      usedTokens += noteTokens;
+      result.push(canvas);
+      usedTokens += canvasTokens;
     } else {
-      // 1.3 达到 MAX_RAG_RELEVANT_NOTES_MAX_TOKENS，处理剩余内容
+      // 1.3 达到 MAX_RAG_RELEVANT_CANVASES_MAX_TOKENS，处理剩余内容
       break;
     }
 
-    if (usedTokens >= MAX_RAG_RELEVANT_NOTES_MAX_TOKENS) break;
+    if (usedTokens >= MAX_RAG_RELEVANT_CANVASES_MAX_TOKENS) break;
   }
 
-  // 3. 处理剩余的 notes
-  for (let i = result.length; i < sortedNotes.length; i++) {
-    const remainingNote = sortedNotes[i];
-    const noteTokens = countToken(remainingNote?.note?.content || '');
+  // 3. 处理剩余的 canvas
+  for (let i = result.length; i < sortedCanvases.length; i++) {
+    const remainingCanvas = sortedCanvases[i];
+    const canvasTokens = countToken(remainingCanvas?.canvas?.content || '');
 
     // 所有的短内容直接添加
-    if (noteTokens < SHORT_CONTENT_THRESHOLD) {
-      result.push(remainingNote);
-      usedTokens += noteTokens;
+    if (canvasTokens < SHORT_CONTENT_THRESHOLD) {
+      result.push(remainingCanvas);
+      usedTokens += canvasTokens;
     } else {
       // 剩下的长内容走召回
       const remainingTokens = maxTokens - usedTokens;
@@ -302,18 +301,18 @@ export async function processNotesWithSimilarity(
         {
           entities: [
             {
-              entityId: remainingNote?.note?.noteId,
-              entityType: 'note',
+              entityId: remainingCanvas?.canvas?.canvasId,
+              entityType: 'canvas',
             },
           ],
-          domains: ['note'],
+          domains: ['canvas'],
           limit: 10,
         },
         ctx,
       );
       relevantChunks = truncateChunks(relevantChunks, remainingTokens);
       const relevantContent = assembleChunks(relevantChunks);
-      result.push({ ...remainingNote, note: { ...remainingNote.note!, content: relevantContent } });
+      result.push({ ...remainingCanvas, canvas: { ...remainingCanvas.canvas!, content: relevantContent } });
       usedTokens += countToken(relevantContent);
     }
   }
@@ -425,11 +424,11 @@ export async function processMentionedContextWithSimilarity(
 ): Promise<IContext> {
   const MAX_CONTENT_RAG_RELEVANT_RATIO = 0.4;
   const MAX_RESOURCE_RAG_RELEVANT_RATIO = 0.3;
-  const MAX_NOTE_RAG_RELEVANT_RATIO = 0.3;
+  const MAX_CANVAS_RAG_RELEVANT_RATIO = 0.3;
 
   const MAX_CONTENT_RAG_RELEVANT_MAX_TOKENS = Math.floor(maxTokens * MAX_CONTENT_RAG_RELEVANT_RATIO);
   const MAX_RESOURCE_RAG_RELEVANT_MAX_TOKENS = Math.floor(maxTokens * MAX_RESOURCE_RAG_RELEVANT_RATIO);
-  const MAX_NOTE_RAG_RELEVANT_MAX_TOKENS = Math.floor(maxTokens * MAX_NOTE_RAG_RELEVANT_RATIO);
+  const MAX_CANVAS_RAG_RELEVANT_MAX_TOKENS = Math.floor(maxTokens * MAX_CANVAS_RAG_RELEVANT_RATIO);
 
   // 处理 contentList
   const processedContentList = await processSelectedContentWithSimilarity(
@@ -447,11 +446,11 @@ export async function processMentionedContextWithSimilarity(
     ctx,
   );
 
-  // 处理 notes
-  const processedNotes = await processNotesWithSimilarity(
+  // 处理 canvases
+  const processedCanvases = await processCanvasesWithSimilarity(
     query,
-    mentionedContext.notes,
-    MAX_NOTE_RAG_RELEVANT_MAX_TOKENS,
+    mentionedContext.canvases,
+    MAX_CANVAS_RAG_RELEVANT_MAX_TOKENS,
     ctx,
   );
 
@@ -460,7 +459,7 @@ export async function processMentionedContextWithSimilarity(
     ...mentionedContext,
     contentList: processedContentList,
     resources: processedResources,
-    notes: processedNotes,
+    canvases: processedCanvases,
   };
 }
 
@@ -469,7 +468,7 @@ export async function processCollectionsWithSimilarity(
   query: string,
   collections: SkillContextCollectionItem[] = [],
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
-): Promise<(SkillContextResourceItem | SkillContextNoteItem)[]> {
+): Promise<(SkillContextResourceItem | SkillContextCanvasItem)[]> {
   if (collections?.length === 0) {
     return [];
   }
@@ -500,7 +499,7 @@ export async function processCollectionsWithSimilarity(
   });
 
   // 3. 组装结果
-  const result: (SkillContextResourceItem | SkillContextNoteItem)[] = [];
+  const result: (SkillContextResourceItem | SkillContextCanvasItem)[] = [];
   for (const key in groupedChunks) {
     const [domain, id] = key.split('_');
     const assembledContent = assembleChunks(groupedChunks[key]);
@@ -514,15 +513,15 @@ export async function processCollectionsWithSimilarity(
           // 其他必要的字段需要根据实际情况填充
         },
       } as SkillContextResourceItem);
-    } else if (domain === 'note') {
+    } else if (domain === 'canvas') {
       result.push({
-        note: {
-          noteId: id,
+        canvas: {
+          canvasId: id,
           content: assembledContent,
           title: groupedChunks[key][0].metadata.title,
           // 其他必要的字段需要根据实际情况填充
         },
-      } as SkillContextNoteItem);
+      } as SkillContextCanvasItem);
     }
     // 如果还有其他类型，可以在这里继续添加
   }
@@ -533,13 +532,13 @@ export async function processCollectionsWithSimilarity(
 export async function processWholeSpaceWithSimilarity(
   query: string,
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
-): Promise<(SkillContextResourceItem | SkillContextNoteItem)[]> {
+): Promise<(SkillContextResourceItem | SkillContextCanvasItem)[]> {
   // 1. scope collections for get relevant chunks
   const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
     query,
     {
       entities: [],
-      domains: ['resource', 'note'],
+      domains: ['resource', 'canvas'],
       limit: 10,
     },
     ctx,
@@ -556,7 +555,7 @@ export async function processWholeSpaceWithSimilarity(
   });
 
   // 3. 组装结果
-  const result: (SkillContextResourceItem | SkillContextNoteItem)[] = [];
+  const result: (SkillContextResourceItem | SkillContextCanvasItem)[] = [];
   for (const key in groupedChunks) {
     const [domain, id] = key.split('_');
     const assembledContent = assembleChunks(groupedChunks[key]);
@@ -570,15 +569,15 @@ export async function processWholeSpaceWithSimilarity(
           // 其他必要的字段需要根据实际情况填充
         },
       } as SkillContextResourceItem);
-    } else if (domain === 'note') {
+    } else if (domain === 'canvas') {
       result.push({
-        note: {
-          noteId: id,
+        canvas: {
+          canvasId: id,
           content: assembledContent,
           title: groupedChunks[key][0].metadata.title,
           // 其他必要的字段需要根据实际情况填充
         },
-      } as SkillContextNoteItem);
+      } as SkillContextCanvasItem);
     }
     // 如果还有其他类型，可以在这里继续添加
   }
@@ -610,7 +609,7 @@ export async function knowledgeBaseSearchGetRelevantChunks(
     metadata: {
       ...item.metadata,
       title: item.title,
-      domain: item.domain, // collection, resource, note
+      domain: item.domain, // collection, resource, canvas
     },
   }));
 

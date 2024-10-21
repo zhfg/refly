@@ -1,28 +1,16 @@
 // 类型
-import { ContextPanelDomain, LOCALE, SelectedTextDomain } from '@refly/common-types';
-import { Resource, SkillContext, SkillContextContentItem } from '@refly/openapi-schema';
+import { SelectedTextDomain } from '@refly/common-types';
+import { SkillContext, SkillContextContentItem } from '@refly/openapi-schema';
 // request
-import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
-import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { useGetCurrentSelectedMark } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/hooks/use-get-current-selected-text';
+
 // types
 import { MarkType, selectedTextDomains } from '@refly/common-types';
 
 export const useBuildSkillContext = () => {
   const buildSkillContext = (): SkillContext => {
-    const { localSettings } = useUserStore.getState();
-    const { currentKnowledgeBase, currentResource } = useKnowledgeBaseStore.getState();
     const contextPanelStore = useContextPanelStore.getState();
-    const { currentNote } = useNoteStore.getState();
     const { currentSelectedMarks, filterIdsOfCurrentSelectedMarks } = contextPanelStore;
-    const mapDomainEnvIds = {
-      collection: currentKnowledgeBase?.collectionId || '',
-      resource: currentResource?.resourceId || '',
-      note: currentNote?.noteId || '',
-    };
 
     // collections
     const getDatabaseEntities = (type: MarkType) => {
@@ -118,7 +106,7 @@ export const useBuildSkillContext = () => {
       contentList: getContentList(),
       collections: getDatabaseEntities('collection'),
       resources: getDatabaseEntities('resource'),
-      notes: getDatabaseEntities('note'),
+      canvases: getDatabaseEntities('canvas'),
       urls: getUrls(),
     };
 

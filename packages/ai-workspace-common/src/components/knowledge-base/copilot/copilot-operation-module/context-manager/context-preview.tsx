@@ -24,10 +24,10 @@ export const ContextPreview = ({
   const [content, setContent] = useState(item.data);
   const [isLoading, setIsLoading] = useState(false);
 
-  const getNoteDetail = async (noteId: string) => {
+  const getCanvasDetail = async (canvasId: string) => {
     setIsLoading(true);
-    const { data, error } = await getClient().getNoteDetail({
-      query: { noteId },
+    const { data, error } = await getClient().getCanvasDetail({
+      query: { canvasId },
     });
     if (error) {
       message.error(t('contentDetail.list.fetchErr'));
@@ -54,8 +54,8 @@ export const ContextPreview = ({
   };
 
   useEffect(() => {
-    if (item.type === 'note') {
-      getNoteDetail(item.id);
+    if (item.type === 'canvas') {
+      getCanvasDetail(item.id);
     } else if (item.type === 'resource') {
       getResourceDetail(item.id);
     } else {

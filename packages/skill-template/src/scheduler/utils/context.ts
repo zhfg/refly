@@ -2,7 +2,7 @@ import { ChatMode, GraphState, IContext, SkillContextContentItemMetadata } from 
 import {
   countContentTokens,
   countContextTokens,
-  countNoteTokens,
+  countCanvasTokens,
   countResourceTokens,
   countToken,
   countWebSearchContextTokens,
@@ -10,7 +10,7 @@ import {
 import { ModelContextLimitMap } from './token';
 import {
   processSelectedContentWithSimilarity,
-  processNotesWithSimilarity,
+  processCanvasesWithSimilarity,
   processResourcesWithSimilarity,
   processCollectionsWithSimilarity,
   processWholeSpaceWithSimilarity,
@@ -21,7 +21,7 @@ import { mergeAndTruncateContexts, truncateContext, truncateText } from './trunc
 import { flattenMergedContextToSources, concatMergedContextToStr } from './summarizer';
 import {
   SkillContextContentItem,
-  SkillContextNoteItem,
+  SkillContextCanvasItem,
   SkillContextResourceItem,
   SkillTemplateConfig,
   Source,
@@ -59,7 +59,7 @@ export async function prepareContext(
   let processedWebSearchContext: IContext = {
     contentList: [],
     resources: [],
-    notes: [],
+    canvases: [],
     webSearchSources: [],
   };
   if (enableWebSearch) {
@@ -78,7 +78,7 @@ export async function prepareContext(
   let processedMentionedContext: IContext = {
     contentList: [],
     resources: [],
-    notes: [],
+    canvases: [],
     collections: [],
   };
   if (hasContext) {
@@ -99,11 +99,11 @@ export async function prepareContext(
   let lowerPriorityContext: IContext = {
     contentList: [],
     resources: [],
-    notes: [],
+    canvases: [],
     collections: [],
   };
   if (remainingTokens > 0 && (hasContext || chatMode === ChatMode.WHOLE_SPACE_SEARCH)) {
-    const { contentList = [], resources = [], notes = [], collections = [] } = ctx.configSnapshot.configurable;
+    const { contentList = [], resources = [], canvases = [], collections = [] } = ctx.configSnapshot.configurable;
     // prev remove overlapping items in mentioned context
     ctx.ctxThis.engine.logger.log(
       `Remove Overlapping Items In Mentioned Context...
@@ -111,7 +111,7 @@ export async function prepareContext(
       - context: ${safeStringifyJSON({
         contentList,
         resources,
-        notes,
+        canvases,
         collections,
       })}
       `,
@@ -120,7 +120,7 @@ export async function prepareContext(
     const context = removeOverlappingContextItems(processedMentionedContext, {
       contentList,
       resources,
-      notes,
+      canvases,
       collections,
     });
 
@@ -188,7 +188,7 @@ export async function prepareWebSearchContext(
   const processedWebSearchContext: IContext = {
     contentList: [],
     resources: [],
-    notes: [],
+    canvases: [],
     webSearchSources: [],
   };
   const res = await ctx.ctxThis.engine.service.webSearch(ctx.configSnapshot.user, {
@@ -232,7 +232,7 @@ export async function prepareMentionedContext(
   let processedMentionedContext: IContext = {
     contentList: [],
     resources: [],
-    notes: [],
+    canvases: [],
     collections: [],
     ...mentionedContext,
   };
@@ -247,11 +247,11 @@ export async function prepareMentionedContext(
     };
   } else {
     // if mentioned context is not empty, we need to mutate the metadata of the mentioned context
-    const { contentList = [], resources = [], notes = [] } = ctx.configSnapshot.configurable;
+    const { contentList = [], resources = [], canvases = [] } = ctx.configSnapshot.configurable;
     const context: IContext = {
       contentList,
       resources,
-      notes,
+      canvases,
     };
 
     ctx.ctxThis.engine.logger.log(`Mutate Context Metadata...`);
@@ -349,11 +349,11 @@ export async function prepareRelevantContext(
   },
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<IContext> {
-  const { contentList = [], resources = [], notes = [] } = context;
+  const { contentList = [], resources = [], canvases = [] } = context;
   let relevantContexts: IContext = {
     contentList: [],
     resources: [],
-    notes: [],
+    canvases: [],
   };
 
   ctx.ctxThis.engine.logger.log(`Prepare Relevant Context..., ${safeStringifyJSON(context)}`);
@@ -362,11 +362,11 @@ export async function prepareRelevantContext(
   relevantContexts.contentList =
     contentList.length > 0 ? await processSelectedContentWithSimilarity(query, contentList, Infinity, ctx) : [];
 
-  // 2. notes context
-  relevantContexts.notes = notes.length > 0 ? await processNotesWithSimilarity(query, notes, Infinity, ctx) : [];
+  // 2. canvases context
+  relevantContexts.canvases =
+    canvases.length > 0 ? await processCanvasesWithSimilarity(query, canvases, Infinity, ctx) : [];
 
   // 3. resources context
-  // remainingTokens = maxContextTokens - notesTokens;
   relevantContexts.resources =
     resources.length > 0 ? await processResourcesWithSimilarity(query, resources, Infinity, ctx) : [];
 
@@ -391,7 +391,7 @@ export async function prepareContainerLevelContext(
   const processedContext: IContext = {
     contentList: [],
     resources: [],
-    notes: [],
+    canvases: [],
     collections: [],
   };
 
@@ -406,38 +406,38 @@ export async function prepareContainerLevelContext(
   );
 
   // 1. collections context, mainly for knowledge base search meat filter
-  const relevantResourcesOrNotesFromCollections = await processCollectionsWithSimilarity(query, collections, ctx);
+  const relevantResourcesOrCanvasesFromCollections = await processCollectionsWithSimilarity(query, collections, ctx);
 
   // 2. whole space search context
-  const relevantResourcesOrNotesFromWholeSpace = enableSearchWholeSpace
+  const relevantResourcesOrCanvasesFromWholeSpace = enableSearchWholeSpace
     ? await processWholeSpaceWithSimilarity(query, ctx)
     : [];
 
-  // 3. 按照 resource 和 note 进行分组，去重，并放置在 processedContext
+  // 3. Group by resource and canvas, deduplicate, and place in processedContext
   const uniqueResourceIds = new Set<string>();
-  const uniqueNoteIds = new Set<string>();
+  const uniqueCanvasIds = new Set<string>();
 
-  const addUniqueItem = (item: SkillContextResourceItem | SkillContextNoteItem) => {
+  const addUniqueItem = (item: SkillContextResourceItem | SkillContextCanvasItem) => {
     if ('resource' in item && item.resource) {
       const resourceId = item.resource.resourceId;
       if (!uniqueResourceIds.has(resourceId)) {
         uniqueResourceIds.add(resourceId);
         processedContext.resources.push(item);
       }
-    } else if ('note' in item && item.note) {
-      const noteId = item.note.noteId;
-      if (!uniqueNoteIds.has(noteId)) {
-        uniqueNoteIds.add(noteId);
-        processedContext.notes.push(item);
+    } else if ('canvas' in item && item.canvas) {
+      const canvasId = item.canvas.canvasId;
+      if (!uniqueCanvasIds.has(canvasId)) {
+        uniqueCanvasIds.add(canvasId);
+        processedContext.canvases.push(item);
       }
     }
   };
 
   // 优先添加来自 collections 的项目
-  relevantResourcesOrNotesFromCollections.forEach(addUniqueItem);
+  relevantResourcesOrCanvasesFromCollections.forEach(addUniqueItem);
 
   // 然后添加来自 whole space 的项目
-  relevantResourcesOrNotesFromWholeSpace.forEach(addUniqueItem);
+  relevantResourcesOrCanvasesFromWholeSpace.forEach(addUniqueItem);
 
   // 保留原始的 collections
   processedContext.collections = collections;
@@ -453,7 +453,7 @@ export function deduplicateContexts(context: IContext): IContext {
   return {
     contentList: uniqBy(context.contentList || [], 'content'),
     resources: uniqBy(context.resources || [], (item) => item.resource?.content),
-    notes: uniqBy(context.notes || [], (item) => item.note?.content),
+    canvases: uniqBy(context.canvases || [], (item) => item.canvas?.content),
     webSearchSources: uniqBy(context.webSearchSources || [], (item) => item?.pageContent),
   };
 }
@@ -462,7 +462,7 @@ export function removeOverlappingContextItems(context: IContext, originalContext
   const deduplicatedContext: IContext = {
     contentList: [],
     resources: [],
-    notes: [],
+    canvases: [],
     collections: [],
   };
 
@@ -486,13 +486,13 @@ export function removeOverlappingContextItems(context: IContext, originalContext
       ),
   );
 
-  // Deduplicate notes
-  deduplicatedContext.notes = (originalContext?.notes || []).filter(
+  // Deduplicate canvases
+  deduplicatedContext.canvases = (originalContext?.canvases || []).filter(
     (item) =>
       !itemExistsInContext(
-        item.note,
-        (context?.notes || []).map((n) => n.note),
-        'noteId',
+        item.canvas,
+        (context?.canvases || []).map((n) => n.canvas),
+        'canvasId',
       ),
   );
 
@@ -505,15 +505,15 @@ export function removeOverlappingContextItems(context: IContext, originalContext
 }
 
 export const mutateContextMetadata = (mentionedContext: IContext, originalContext: IContext): IContext => {
-  // Process notes
-  mentionedContext.notes.forEach((mentionedNote) => {
-    const index = originalContext.notes.findIndex((n) => n.note.noteId === mentionedNote.note.noteId);
+  // Process canvases
+  mentionedContext.canvases.forEach((mentionedCanvas) => {
+    const index = originalContext.canvases.findIndex((n) => n.canvas.canvasId === mentionedCanvas.canvas.canvasId);
     if (index !== -1) {
-      originalContext.notes[index] = {
-        ...originalContext.notes[index],
+      originalContext.canvases[index] = {
+        ...originalContext.canvases[index],
         metadata: {
-          ...originalContext.notes[index].metadata,
-          useWholeContent: mentionedNote.metadata?.useWholeContent,
+          ...originalContext.canvases[index].metadata,
+          useWholeContent: mentionedCanvas.metadata?.useWholeContent,
         },
       };
     }

@@ -217,7 +217,7 @@ Please generate the summary based on these requirements and offer suggestions fo
       """
       {{toolResult}}
       """ 
-    ## Note
+    ## Canvas
     - The result is **already send to user**. 
     - Please evaluate whether the user's request has been fully satisfied. If further actions are needed, determine the next appropriate tool to call; otherwise, terminate the response.`;
     const toolFailedMsgTemplate = `The **${currentSkill.tplName}** tool call without any content, please check whether need call new tool or stop response`;
@@ -335,7 +335,7 @@ Please generate the summary based on these requirements and offer suggestions fo
       spanId,
       modelName,
       resources,
-      notes,
+      canvases,
       contentList,
       collections,
     } = this.configSnapshot.configurable;
@@ -367,7 +367,7 @@ Please generate the summary based on these requirements and offer suggestions fo
     const hasContext = checkHasContext({
       contentList,
       resources,
-      notes,
+      canvases,
       collections,
     });
     this.engine.logger.log(`checkHasContext: ${hasContext}`);

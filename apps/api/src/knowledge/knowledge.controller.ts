@@ -21,11 +21,11 @@ import {
   DeleteCollectionRequest,
   DeleteResourceRequest,
   DeleteResourceResponse,
-  ListNoteResponse,
-  GetNoteDetailResponse,
-  UpsertNoteResponse,
-  UpsertNoteRequest,
-  DeleteNoteRequest,
+  ListCanvasResponse,
+  GetCanvasDetailResponse,
+  UpsertCanvasResponse,
+  UpsertCanvasRequest,
+  DeleteCanvasRequest,
   ResourceType,
   BatchCreateResourceResponse,
   AddResourceToCollectionRequest,
@@ -38,7 +38,7 @@ import { KnowledgeService } from './knowledge.service';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { buildSuccessResponse } from '@/utils';
 import { User } from '@/utils/decorators/user.decorator';
-import { collectionPO2DTO, notePO2DTO, resourcePO2DTO } from './knowledge.dto';
+import { collectionPO2DTO, canvasPO2DTO, resourcePO2DTO } from './knowledge.dto';
 
 @Controller('knowledge')
 export class KnowledgeController {
@@ -218,53 +218,53 @@ export class KnowledgeController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('note/list')
-  async listNotes(
+  @Get('canvas/list')
+  async listCanvases(
     @User() user: UserModel,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
-  ): Promise<ListNoteResponse> {
-    const notes = await this.knowledgeService.listNotes(user, { page, pageSize });
-    return buildSuccessResponse(notes.map(notePO2DTO));
+  ): Promise<ListCanvasResponse> {
+    const canvases = await this.knowledgeService.listCanvas(user, { page, pageSize });
+    return buildSuccessResponse(canvases.map(canvasPO2DTO));
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('note/detail')
-  async showNoteDetail(
+  @Get('canvas/detail')
+  async getCanvasDetail(
     @User() user: UserModel,
-    @Query('noteId') noteId: string,
-  ): Promise<GetNoteDetailResponse> {
-    const note = await this.knowledgeService.getNoteDetail(user, noteId);
-    return buildSuccessResponse(notePO2DTO(note));
+    @Query('canvasId') canvasId: string,
+  ): Promise<GetCanvasDetailResponse> {
+    const canvas = await this.knowledgeService.getCanvasDetail(user, canvasId);
+    return buildSuccessResponse(canvasPO2DTO(canvas));
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('note/new')
-  async createNote(
+  @Post('canvas/new')
+  async createCanvas(
     @User() user: UserModel,
-    @Body() body: UpsertNoteRequest,
-  ): Promise<UpsertNoteResponse> {
-    const note = await this.knowledgeService.upsertNote(user, body);
-    return buildSuccessResponse(notePO2DTO(note));
+    @Body() body: UpsertCanvasRequest,
+  ): Promise<UpsertCanvasResponse> {
+    const canvas = await this.knowledgeService.upsertCanvas(user, body);
+    return buildSuccessResponse(canvasPO2DTO(canvas));
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('note/update')
-  async updateNote(@User() user: UserModel, @Body() body: UpsertNoteRequest) {
-    if (!body.noteId) {
-      throw new BadRequestException('Note ID is required');
+  @Post('canvas/update')
+  async updateCanvas(@User() user: UserModel, @Body() body: UpsertCanvasRequest) {
+    if (!body.canvasId) {
+      throw new BadRequestException('Canvas ID is required');
     }
-    const note = await this.knowledgeService.upsertNote(user, body);
-    return buildSuccessResponse(notePO2DTO(note));
+    const canvas = await this.knowledgeService.upsertCanvas(user, body);
+    return buildSuccessResponse(canvasPO2DTO(canvas));
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('note/delete')
-  async deleteNote(@User() user: UserModel, @Body() body: DeleteNoteRequest) {
-    if (!body.noteId) {
-      throw new BadRequestException('Note ID is required');
+  @Post('canvas/delete')
+  async deleteCanvas(@User() user: UserModel, @Body() body: DeleteCanvasRequest) {
+    if (!body.canvasId) {
+      throw new BadRequestException('Canvas ID is required');
     }
-    await this.knowledgeService.deleteNote(user, body.noteId);
+    await this.knowledgeService.deleteCanvas(user, body.canvasId);
     return buildSuccessResponse({});
   }
 }

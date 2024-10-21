@@ -17,11 +17,11 @@ import { ContextFilter } from './components/context-filter/index';
 import { SaveToKnowledgeBase } from './components/save-to-knowledge-base/index';
 // stores
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
+import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 // types
-import { Collection, Note, Resource, SearchDomain, SearchResult } from '@refly/openapi-schema';
+import { Collection, Canvas, Resource, SearchDomain, SearchResult } from '@refly/openapi-schema';
 import {
   backendBaseMarkTypes,
   BaseMarkType,
@@ -120,9 +120,9 @@ export const ContextManager = () => {
 
   const processContextFilterProps = useProcessContextFilter(true);
 
-  const currentKnowledgeBase = useKnowledgeBaseStore((state) => state.currentKnowledgeBase);
-  const currentResource = useKnowledgeBaseStore((state) => state.currentResource);
-  const currentNote = useNoteStore((state) => state.currentNote);
+  const currentKnowledgeBase = useKnowledgeBaseStoreShallow((state) => state.currentKnowledgeBase);
+  const currentResource = useKnowledgeBaseStoreShallow((state) => state.currentResource);
+  const currentCanvas = useCanvasStoreShallow((state) => state.currentCanvas);
   const { initMessageListener } = useSelectedMark();
 
   const currentSelectedContentList =
@@ -131,13 +131,16 @@ export const ContextManager = () => {
         selectedTextDomains?.includes(mark?.domain) || selectedTextDomains.includes(mark?.type as SelectedTextDomain),
     ) || [];
 
-  const buildEnvContext = (data: Collection | Resource | Note, type: 'collection' | 'resource' | 'note'): Mark[] => {
+  const buildEnvContext = (
+    data: Collection | Resource | Canvas,
+    type: 'collection' | 'resource' | 'canvas',
+  ): Mark[] => {
     if (!data) return [];
 
     const typeMap = {
       resource: 'resourceId',
       collection: 'collectionId',
-      note: 'noteId',
+      canvas: 'canvasId',
     };
 
     const idKey = typeMap[type];
@@ -151,7 +154,7 @@ export const ContextManager = () => {
         type,
         id,
         entityId: id,
-        data: type === 'collection' ? (data as Collection).description : (data as Resource | Note).content,
+        data: type === 'collection' ? (data as Collection).description : (data as Resource | Canvas).content,
         onlyForCurrentContext: true,
         isCurrentContext: true,
         url: (data as Resource)?.data?.url || '',
@@ -184,7 +187,7 @@ export const ContextManager = () => {
     }
   };
 
-  const updateContext = (item: any, type: 'collection' | 'resource' | 'note') => {
+  const updateContext = (item: any, type: 'collection' | 'resource' | 'canvas') => {
     const envContext = buildEnvContext(item, type);
     const contextItem = envContext?.[0];
     if (contextItem) {
@@ -203,8 +206,8 @@ export const ContextManager = () => {
   }, [currentResource?.resourceId]);
 
   useEffect(() => {
-    updateContext(currentNote, 'note');
-  }, [currentNote?.noteId]);
+    updateContext(currentCanvas, 'canvas');
+  }, [currentCanvas?.canvasId]);
 
   useEffect(() => {
     const clearEvent = initMessageListener();

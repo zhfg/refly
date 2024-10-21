@@ -10,7 +10,7 @@ import { useEffect } from 'react';
 import { MarkScope, SyncStatusEvent } from '@refly/common-types';
 import { sendMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useHandleContextWorkflow } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-handle-context-workflow';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 

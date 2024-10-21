@@ -247,14 +247,14 @@ model Resource {
   @@map("resources")
 }
 
-model Note {
+model Canvas {
   /// Primary key
   pk              BigInt    @id @default(autoincrement())
-  /// Note id
-  noteId          String    @unique @map("note_id")
+  /// Canvas id
+  canvasId        String    @unique @map("note_id")
   /// UID
   uid             String    @map("uid")
-  /// Note title
+  /// Canvas title
   title           String    @default("Untitled") @map("title")
   /// Word count
   wordCount       Int       @default(0) @map("word_count")
@@ -270,9 +270,9 @@ model Note {
   vectorSize      BigInt    @default(0) @map("vector_size")
   /// Yjs state storage key
   stateStorageKey String    @default("") @map("state_storage_key")
-  /// Whether this note is publicly accessible
+  /// Whether this canvas is publicly accessible
   isPublic        Boolean   @default(false) @map("is_public")
-  /// Whether this note is readonly
+  /// Whether this canvas is readonly
   readOnly        Boolean   @default(false) @map("read_only")
   /// Create timestamp
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
@@ -482,7 +482,7 @@ model SubscriptionUsageQuota {
   t1TokenQuota       Int      @default(0) @map("t1_token_quota")
   /// Token quota (T2)
   t2TokenQuota       Int      @default(1000000) @map("t2_token_quota")
-  /// Object storage quota (in bytes), including resource, note and static files
+  /// Object storage quota (in bytes), including resource, canvas and static files
   objectStorageQuota BigInt   @default(1000000000) @map("object_storage_quota")
   /// Vector storage quota (in bytes)
   vectorStorageQuota BigInt   @default(1000000000) @map("vector_storage_quota")
@@ -562,12 +562,12 @@ model StorageUsageMeter {
   uid                String    @map("uid")
   /// Subscription ID
   subscriptionId     String?   @map("subscription_id")
-  /// Object storage quota (in bytes), including resource, note and static files
+  /// Object storage quota (in bytes), including resource, canvas and static files
   objectStorageQuota BigInt    @default(0) @map("object_storage_quota")
   /// Resource storage size in use (in bytes)
   resourceSize       BigInt    @default(0) @map("resource_size")
-  /// Note storage size in use (in bytes)
-  noteSize           BigInt    @default(0) @map("note_size")
+  /// Canvas storage size in use (in bytes)
+  canvasSize         BigInt    @default(0) @map("note_size")
   /// Static file storage size in use (in bytes)
   fileSize           BigInt    @default(0) @map("file_size")
   /// Vector storage size quota (in bytes)

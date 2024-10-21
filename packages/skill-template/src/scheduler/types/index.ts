@@ -1,21 +1,13 @@
 import {
-  Icon,
-  Resource,
-  Note,
-  Collection,
-  SkillInvocationConfig,
-  SkillMeta,
-  SkillTemplateConfigSchema,
   SkillContextContentItem,
   SkillContextResourceItem,
-  SkillContextNoteItem,
   SkillContextCollectionItem,
   Source,
+  SkillContextCanvasItem,
 } from '@refly-packages/openapi-schema';
 import { BaseMessage } from '@langchain/core/messages';
-import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { LOCALE } from '@refly-packages/common-types';
-import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
+import { BaseSkillState } from '../../base';
 import { ToolCall } from '@langchain/core/dist/messages/tool';
 import { ContentNodeType } from '../../engine';
 
@@ -26,7 +18,7 @@ export interface SkillContextContentItemMetadata {
   entityId?: string;
 }
 
-export type SelectedContentDomain = 'resourceSelection' | 'noteSelection' | 'extensionWeblinkSelection';
+export type SelectedContentDomain = 'resourceSelection' | 'canvasSelection' | 'extensionWeblinkSelection';
 
 export interface Chunk {
   content: string;
@@ -37,7 +29,7 @@ export interface Chunk {
 }
 
 export interface MentionedContextItem {
-  type?: 'note' | 'resource' | 'selectedContent';
+  type?: 'canvas' | 'resource' | 'selectedContent';
   entityId?: string;
   url?: string;
   title?: string;
@@ -55,7 +47,7 @@ export interface QueryAnalysis {
 export interface IContext {
   contentList: SkillContextContentItem[];
   resources: SkillContextResourceItem[];
-  notes: SkillContextNoteItem[];
+  canvases: SkillContextCanvasItem[];
   collections?: SkillContextCollectionItem[];
   messages?: BaseMessage[];
   webSearchSources?: Source[];

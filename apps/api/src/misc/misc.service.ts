@@ -80,16 +80,16 @@ export class MiscService {
       if (!collection) {
         throw new BadRequestException('Collection not found');
       }
-    } else if (entityType === 'note') {
-      const note = await this.prisma.note.findUnique({
+    } else if (entityType === 'canvas') {
+      const canvas = await this.prisma.canvas.findUnique({
         where: {
-          noteId: entityId,
+          canvasId: entityId,
           uid: user.uid,
           deletedAt: null,
         },
       });
-      if (!note) {
-        throw new BadRequestException('Note not found');
+      if (!canvas) {
+        throw new BadRequestException('Canvas not found');
       }
     } else {
       throw new BadRequestException('Invalid entity type');

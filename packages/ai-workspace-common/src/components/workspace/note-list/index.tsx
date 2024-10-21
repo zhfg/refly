@@ -4,13 +4,13 @@ import { useTranslation } from 'react-i18next';
 
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
-import { Note } from '@refly/openapi-schema';
+import { Canvas } from '@refly/openapi-schema';
 import { List, Empty } from '@arco-design/web-react';
 import { IconBook } from '@arco-design/web-react/icon';
 import { NoteCard } from '@refly-packages/ai-workspace-common/components/workspace/note-list/note-card';
 import { ScrollLoading } from '../scroll-loading';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
-import { useNoteTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
+import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
 import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 
@@ -33,7 +33,7 @@ export const NoteList = (props: NoteListProps) => {
 
   const { dataList, setDataList, loadMore, hasMore, isRequesting } = useFetchDataList({
     fetchData: async (queryPayload) => {
-      const res = await getClient().listNotes({
+      const res = await getClient().listCanvas({
         query: queryPayload,
       });
       return res?.data;
@@ -45,20 +45,20 @@ export const NoteList = (props: NoteListProps) => {
     loadMore();
   }, []);
 
-  const { jumpToNote } = useKnowledgeBaseJumpNewPath();
-  const { handleAddTab } = useNoteTabs();
+  const { jumpToCanvas } = useKnowledgeBaseJumpNewPath();
+  const { handleAddTab } = useCanvasTabs();
 
   if (dataList.length === 0 && !isRequesting) {
     return <Empty />;
   }
 
-  const handleClickNote = (note: Note) => {
-    jumpToNote({ noteId: note.noteId });
+  const handleClickCanvas = (canvas: Canvas) => {
+    jumpToCanvas({ canvasId: canvas.canvasId });
     handleAddTab({
-      title: note.title,
-      key: note.noteId,
-      content: note.contentPreview || '',
-      noteId: note.noteId,
+      title: canvas.title,
+      key: canvas.canvasId,
+      content: canvas.contentPreview || '',
+      canvasId: canvas.canvasId,
     });
   };
 
@@ -78,9 +78,9 @@ export const NoteList = (props: NoteListProps) => {
       pagination={false}
       dataSource={dataList}
       scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
-      render={(item: Note, key) => (
+      render={(item: Canvas, key) => (
         <List.Item
-          key={item?.noteId + key}
+          key={item?.canvasId + key}
           style={{
             padding: '0',
             width: '100%',
@@ -92,7 +92,7 @@ export const NoteList = (props: NoteListProps) => {
               cardData={item}
               index={key}
               cardIcon={<IconBook style={{ fontSize: '32px', strokeWidth: 3 }} />}
-              onClick={() => handleClickNote(item)}
+              onClick={() => handleClickCanvas(item)}
             >
               <div className="flex items-center justify-between mt-6">
                 <div className="text-xs text-black/40">
@@ -104,7 +104,9 @@ export const NoteList = (props: NoteListProps) => {
                   <DeleteDropdownMenu
                     type="note"
                     data={item}
-                    postDeleteList={(note: Note) => setDataList(dataList.filter((n) => n.noteId !== note.noteId))}
+                    postDeleteList={(canvas: Canvas) =>
+                      setDataList(dataList.filter((n) => n.canvasId !== canvas.canvasId))
+                    }
                     getPopupContainer={() => document.getElementById(`note-${key}`) as HTMLElement}
                   />
                 </div>

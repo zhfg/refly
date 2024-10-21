@@ -1,31 +1,31 @@
-import { Note } from '@refly/openapi-schema';
+import { Canvas } from '@refly/openapi-schema';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
-import { NoteTab, useNoteStoreShallow } from '@refly-packages/ai-workspace-common/stores/note';
+import { CanvasTab, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 
-export const useNoteTabs = () => {
-  const noteStore = useNoteStoreShallow((state) => ({
+export const useCanvasTabs = () => {
+  const noteStore = useCanvasStoreShallow((state) => ({
     tabs: state.tabs,
     activeTab: state.activeTab,
     updateTabs: state.updateTabs,
     updateActiveTab: state.updateActiveTab,
-    notePanelVisible: state.notePanelVisible,
+    notePanelVisible: state.canvasPanelVisible,
   }));
-  const { jumpToNote } = useKnowledgeBaseJumpNewPath();
+  const { jumpToCanvas } = useKnowledgeBaseJumpNewPath();
 
   const tabs = noteStore.tabs;
   const activeTab = noteStore.activeTab;
 
-  const handleAddTabWithNote = (note?: Partial<Note>) => {
-    const newTab: NoteTab = {
-      title: note?.title || '',
-      key: note?.noteId || '',
-      content: note?.contentPreview || '',
-      noteId: note?.noteId || '',
+  const handleAddTabWithNote = (canvas?: Partial<Canvas>) => {
+    const newTab: CanvasTab = {
+      title: canvas?.title || '',
+      key: canvas?.canvasId || '',
+      content: canvas?.contentPreview || '',
+      canvasId: canvas?.canvasId || '',
     };
     handleAddTab(newTab);
   };
 
-  const handleAddTab = (newTab: NoteTab) => {
+  const handleAddTab = (newTab: CanvasTab) => {
     const tabs = noteStore.tabs;
     if (tabs?.length === 1 && tabs?.[0]?.key === 'key1') {
       noteStore.updateTabs([newTab]);
@@ -44,7 +44,7 @@ export const useNoteTabs = () => {
     noteStore.updateTabs(newTabs);
 
     if (newTabs.length === 0 && noteStore.notePanelVisible) {
-      jumpToNote({ noteId: '' });
+      jumpToCanvas({ canvasId: '' });
     }
 
     if (key === activeTab && index > -1 && newTabs.length) {
@@ -52,7 +52,7 @@ export const useNoteTabs = () => {
       noteStore.updateActiveTab(activeTab);
 
       if (noteStore.notePanelVisible) {
-        jumpToNote({ noteId: activeTab });
+        jumpToCanvas({ canvasId: activeTab });
       }
     }
   };
@@ -70,7 +70,7 @@ export const useNoteTabs = () => {
     noteStore.updateActiveTab(key);
     const tab = tabs?.find((tab) => tab?.key === key);
 
-    jumpToNote({ noteId: tab?.noteId || '' });
+    jumpToCanvas({ canvasId: tab?.canvasId || '' });
   };
 
   return {

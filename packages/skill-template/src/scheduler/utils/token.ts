@@ -1,12 +1,10 @@
-import { ChatMode, IContext } from '../types';
+import { IContext } from '../types';
 import { get_encoding } from '@dqbd/tiktoken';
 import { BaseMessage } from '@langchain/core/messages';
 import {
-  SkillContextCollectionItem,
+  SkillContextCanvasItem,
   SkillContextContentItem,
-  SkillContextNoteItem,
   SkillContextResourceItem,
-  SkillTemplateConfig,
   Source,
 } from '@refly-packages/openapi-schema';
 import { ModelContextLimitMap, LLMType } from '@refly-packages/utils';
@@ -37,8 +35,8 @@ export const countResourceTokens = (resources: SkillContextResourceItem[] = []) 
   return resources.reduce((sum, resource) => sum + countToken(resource?.resource?.content), 0);
 };
 
-export const countNoteTokens = (notes: SkillContextNoteItem[] = []) => {
-  return notes.reduce((sum, note) => sum + countToken(note?.note?.content), 0);
+export const countCanvasTokens = (canvases: SkillContextCanvasItem[] = []) => {
+  return canvases.reduce((sum, canvas) => sum + countToken(canvas?.canvas?.content), 0);
 };
 
 export const countWebSearchContextTokens = (webSearchSources: Source[] = []) => {
@@ -52,7 +50,9 @@ export const countWebSearchContextTokens = (webSearchSources: Source[] = []) => 
 
 export const countContextTokens = (context: IContext) => {
   return (
-    countContentTokens(context?.contentList) + countResourceTokens(context?.resources) + countNoteTokens(context?.notes)
+    countContentTokens(context?.contentList) +
+    countResourceTokens(context?.resources) +
+    countCanvasTokens(context?.canvases)
   );
 };
 
@@ -60,7 +60,7 @@ export const checkHasContext = (context: IContext) => {
   return (
     context?.contentList?.length > 0 ||
     context?.resources?.length > 0 ||
-    context?.notes?.length > 0 ||
+    context?.canvases?.length > 0 ||
     context?.collections?.length > 0
   );
 };

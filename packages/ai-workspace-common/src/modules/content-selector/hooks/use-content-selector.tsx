@@ -391,12 +391,6 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
     const y = ev.clientY;
 
     return false;
-
-    if (x < containerRect.left || x > containerRect.right || y < containerRect.top || y > containerRect.bottom) {
-      return true;
-    } else {
-      return false;
-    }
   };
 
   const onMouseMove = (ev: MouseEvent) => {

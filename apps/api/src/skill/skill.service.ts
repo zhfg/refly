@@ -36,7 +36,7 @@ import {
   UpdateSkillInstanceRequest,
   UpdateSkillTriggerRequest,
   User,
-  Note,
+  Canvas,
 } from '@refly-packages/openapi-schema';
 import {
   BaseSkill,
@@ -61,7 +61,7 @@ import {
 } from '@/utils';
 import { InvokeSkillJobData, skillInstancePO2DTO } from './skill.dto';
 import { KnowledgeService } from '@/knowledge/knowledge.service';
-import { collectionPO2DTO, notePO2DTO, resourcePO2DTO } from '@/knowledge/knowledge.dto';
+import { collectionPO2DTO, canvasPO2DTO, resourcePO2DTO } from '@/knowledge/knowledge.dto';
 import { ConversationService } from '@/conversation/conversation.service';
 import { MessageAggregator } from '@/utils/message';
 import { SkillEvent } from '@refly-packages/common-types';
@@ -136,17 +136,17 @@ export class SkillService {
 
   buildReflyService = (): ReflyService => {
     return {
-      getNoteDetail: async (user, noteId) => {
-        const note = await this.knowledge.getNoteDetail(user, noteId);
-        return buildSuccessResponse(notePO2DTO(note));
+      getCanvasDetail: async (user, canvasId) => {
+        const canvas = await this.knowledge.getCanvasDetail(user, canvasId);
+        return buildSuccessResponse(canvasPO2DTO(canvas));
       },
-      createNote: async (user, req) => {
-        const note = await this.knowledge.upsertNote(user, req);
-        return buildSuccessResponse(notePO2DTO(note));
+      createCanvas: async (user, req) => {
+        const canvas = await this.knowledge.upsertCanvas(user, req);
+        return buildSuccessResponse(canvasPO2DTO(canvas));
       },
-      listNotes: async (user, param) => {
-        const notes = await this.knowledge.listNotes(user, param);
-        return buildSuccessResponse(notes.map((note) => notePO2DTO(note)));
+      listCanvas: async (user, param) => {
+        const canvasList = await this.knowledge.listCanvas(user, param);
+        return buildSuccessResponse(canvasList.map((canvas) => canvasPO2DTO(canvas)));
       },
       getResourceDetail: async (user, req) => {
         const resource = await this.knowledge.getResourceDetail(user, req);
@@ -417,7 +417,7 @@ export class SkillService {
   }
 
   /**
-   * Populate skill context with actual collections, resources and notes.
+   * Populate skill context with actual collections, resources and canvases.
    * These data can be used in skill invocation.
    */
   async populateSkillContext(user: User, context: SkillContext): Promise<SkillContext> {
@@ -472,26 +472,26 @@ export class SkillService {
       });
     }
 
-    // Populate notes
-    if (context.notes?.length > 0) {
-      const noteIds = [
+    // Populate canvases
+    if (context.canvases?.length > 0) {
+      const canvasIds = [
         ...new Set(
-          context.notes
-            .filter((item) => !item.note)
-            .map((item) => item.noteId)
+          context.canvases
+            .filter((item) => !item.canvas)
+            .map((item) => item.canvasId)
             .filter((id) => id),
         ),
       ];
       const limit = pLimit(5);
-      const notes = await Promise.all(
-        noteIds.map((id) => limit(() => this.knowledge.getNoteDetail(user, id))),
+      const canvases = await Promise.all(
+        canvasIds.map((id) => limit(() => this.knowledge.getCanvasDetail(user, id))),
       );
-      const noteMap = new Map<string, Note>();
-      notes.forEach((n) => noteMap.set(n.noteId, notePO2DTO(n)));
+      const canvasMap = new Map<string, Canvas>();
+      canvases.forEach((c) => canvasMap.set(c.canvasId, canvasPO2DTO(c)));
 
-      context.notes.forEach((item) => {
-        if (item.note) return;
-        item.note = noteMap.get(item.noteId);
+      context.canvases.forEach((item) => {
+        if (item.canvas) return;
+        item.canvas = canvasMap.get(item.canvasId);
       });
     }
 
@@ -504,7 +504,7 @@ export class SkillService {
     // remove actual content from context to save storage
     const contextCopy: SkillContext = JSON.parse(JSON.stringify(context ?? {}));
     contextCopy.resources?.forEach(({ resource }) => (resource.content = ''));
-    contextCopy.notes?.forEach(({ note }) => (note.content = ''));
+    contextCopy.canvases?.forEach(({ canvas }) => (canvas.content = ''));
 
     return this.prisma.skillJob.create({
       data: {

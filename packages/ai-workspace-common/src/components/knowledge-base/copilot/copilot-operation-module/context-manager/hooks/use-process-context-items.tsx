@@ -7,15 +7,16 @@ import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common
 import { getTypeIcon } from '../utils/icon';
 import { mapSelectionTypeToContentList } from '../utils/contentListSelection';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
-import { useNoteTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
+import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
 
 export const useProcessContextItems = () => {
   const { t } = useTranslation();
-  const { jumpToNote, jumpToKnowledgeBase, jumpToReadResource } = useKnowledgeBaseJumpNewPath();
+  const { jumpToCanvas, jumpToKnowledgeBase, jumpToReadResource } = useKnowledgeBaseJumpNewPath();
   const currentSelectedMarks = useContextPanelStoreShallow((state) => state.currentSelectedMarks);
+  console.log('currentSelectedMarks', currentSelectedMarks);
 
   const { handleAddTab: handleAddResourceTab } = useKnowledgeBaseTabs();
-  const { handleAddTab: handleAddNoteTab } = useNoteTabs();
+  const { handleAddTab: handleAddCanvasTab } = useCanvasTabs();
 
   const getQueryParams = (url: string): Record<string, string> => {
     const params: Record<string, string> = {};
@@ -35,7 +36,7 @@ export const useProcessContextItems = () => {
     switch (type) {
       case 'resource':
         return t('knowledgeBase.context.resource');
-      case 'note':
+      case 'canvas':
         return t('knowledgeBase.context.note');
       case 'collection':
         return t('knowledgeBase.context.collection');
@@ -43,7 +44,7 @@ export const useProcessContextItems = () => {
         return t('knowledgeBase.context.extensionWeblink');
       case 'extensionWeblinkSelection':
         return t('knowledgeBase.context.extensionWeblinkSelection');
-      case 'noteSelection':
+      case 'canvasSelection':
         return t('knowledgeBase.context.noteSelection');
       case 'resourceSelection':
         return t('knowledgeBase.context.resourceSelection');
@@ -58,16 +59,16 @@ export const useProcessContextItems = () => {
       return mark.url;
     }
 
-    if (mark.type === 'note' || mark.type === 'noteSelection') {
+    if (mark.type === 'canvas' || mark.type === 'canvasSelection') {
       if (isWebRuntime) {
-        const currentId = mark.type === 'note' ? mark.id : mark.parentId;
+        const currentId = mark.type === 'canvas' ? mark.id : mark.parentId;
         return () => {
-          jumpToNote({ noteId: currentId });
-          handleAddNoteTab({
+          jumpToCanvas({ canvasId: currentId });
+          handleAddCanvasTab({
             title: mark.title,
             key: currentId,
             content: '',
-            noteId: currentId,
+            canvasId: currentId,
           });
         };
       } else {
@@ -183,9 +184,9 @@ export const useProcessContextItems = () => {
         let typeKey = key;
         let id = '';
         let parentId = '';
-        if (key === 'notes') {
-          id = item?.noteId;
-          typeKey = 'note';
+        if (key === 'canvases') {
+          id = item?.canvasId;
+          typeKey = 'canvas';
         } else if (key === 'resources') {
           id = item?.resourceId;
           typeKey = 'resource';

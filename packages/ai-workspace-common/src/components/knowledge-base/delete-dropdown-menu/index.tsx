@@ -1,16 +1,15 @@
+import { useState } from 'react';
 import { RiDeleteBinLine, RiMoreFill } from 'react-icons/ri';
 import { TbEdit } from 'react-icons/tb';
 import { Dropdown, Menu, Button, Popconfirm, Message } from '@arco-design/web-react';
-import { useEffect, useState } from 'react';
-// 类型
-import { Note, Collection, Resource, RemoveResourceFromCollectionRequest } from '@refly/openapi-schema';
-// 请求
+
+import { Canvas, Collection, Resource, RemoveResourceFromCollectionRequest } from '@refly/openapi-schema';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import { useTranslation } from 'react-i18next';
 import { useImportKnowledgeModal } from '@refly-packages/ai-workspace-common/stores/import-knowledge-modal';
 import { IconCopy } from '@arco-design/web-react/icon';
-import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 
 const iconStyle = {
@@ -33,7 +32,7 @@ interface DropListProps {
 
 const DropList = (props: DropListProps) => {
   const { handleCancel, handleDeleteClick, handlEditKnowledgeBase, type, getPopupContainer, position, canCopy } = props;
-  const noteStore = useNoteStore((state) => ({
+  const noteStore = useCanvasStore((state) => ({
     editor: state.editor,
   }));
   const { t } = useTranslation();
@@ -90,7 +89,7 @@ const DropList = (props: DropListProps) => {
 };
 
 interface DeleteDropdownMenuProps {
-  postDeleteList?: (note: Note | Collection | Resource | RemoveResourceFromCollectionRequest) => void;
+  postDeleteList?: (note: Canvas | Collection | Resource | RemoveResourceFromCollectionRequest) => void;
   getPopupContainer?: () => HTMLElement;
   deleteConfirmPosition?: positionType;
   canCopy?: boolean;
@@ -98,7 +97,7 @@ interface DeleteDropdownMenuProps {
 
 interface NotePros extends DeleteDropdownMenuProps {
   type: 'note';
-  data: Note;
+  data: Canvas;
 }
 
 interface KnowledgeBasePros extends DeleteDropdownMenuProps {
@@ -127,7 +126,7 @@ export const DeleteDropdownMenu = (props: NotePros | KnowledgeBasePros | Resourc
     e.stopPropagation();
     let resultError: unknown;
     if (type === 'note') {
-      const { error } = await getClient().deleteNote({ body: { noteId: data.noteId } });
+      const { error } = await getClient().deleteCanvas({ body: { canvasId: data.canvasId } });
       resultError = error;
     }
     if (type === 'knowledgeBase') {

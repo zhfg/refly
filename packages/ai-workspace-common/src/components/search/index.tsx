@@ -16,7 +16,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { SearchDomain, SearchResult, SkillMeta } from '@refly/openapi-schema';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
-import { useNoteTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
+import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
 import { RenderItem } from '@refly-packages/ai-workspace-common/components/search/types';
 import classNames from 'classnames';
 
@@ -46,10 +46,10 @@ export const Search = (props: SearchProps) => {
   const [selectedSkill, setSelectedSkill] = useState<SkillMeta>();
   // notes
   const { handleInitEmptyNote } = useAINote();
-  const { handleAddTab: handleAddNoteTab } = useNoteTabs();
+  const { handleAddTab: handleAddNoteTab } = useCanvasTabs();
   const { handleAddTab: handleAddResourceTab } = useKnowledgeBaseTabs();
 
-  const { jumpToKnowledgeBase, jumpToNote, jumpToReadResource, jumpToConv } = useKnowledgeBaseJumpNewPath();
+  const { jumpToKnowledgeBase, jumpToCanvas, jumpToReadResource, jumpToConv } = useKnowledgeBaseJumpNewPath();
 
   const pages = searchStore.pages;
   const setPages = searchStore.setPages;
@@ -95,7 +95,7 @@ export const Search = (props: SearchProps) => {
       case 'home':
         return '';
       case 'note':
-        return 'note';
+        return 'canvas';
       case 'readSesources':
         return 'resource';
       case 'knowledgeBases':
@@ -111,7 +111,6 @@ export const Search = (props: SearchProps) => {
 
   const handleBigSearchValueChange = (searchVal: string, activePage: string) => {
     const domain = getMappedPageToDomain(activePage);
-    console.log('activePage:', activePage, domain);
 
     // searchVal 为空的时候获取正常列表的内容
     if (!searchVal) {
@@ -152,7 +151,7 @@ export const Search = (props: SearchProps) => {
       const resData = data?.data || [];
 
       // notes
-      const notes = resData.filter((item) => item?.domain === 'note') || [];
+      const notes = resData.filter((item) => item?.domain === 'canvas') || [];
       const readResources = resData.filter((item) => item?.domain === 'resource') || [];
       const knowledgeBases = resData.filter((item) => item?.domain === 'collection') || [];
       const convs = resData.filter((item) => item?.domain === 'conversation') || [];
@@ -216,14 +215,14 @@ export const Search = (props: SearchProps) => {
       data: searchStore.searchedNotes || [],
       icon: <IconEdit style={{ fontSize: 12 }} />,
       onItemClick: (item: SearchResult) => {
-        jumpToNote({
-          noteId: item?.id,
+        jumpToCanvas({
+          canvasId: item?.id,
         });
         handleAddNoteTab({
           title: item?.title,
           key: item?.id,
           content: '',
-          noteId: item?.id,
+          canvasId: item?.id,
         });
         searchStore.setIsSearchOpen(false);
       },

@@ -1,10 +1,10 @@
 import {
   SkillContextContentItem,
-  SkillContextNoteItem,
+  SkillContextCanvasItem,
   SkillContextResourceItem,
 } from '@refly-packages/openapi-schema';
 import { BaseSkill, SkillRunnableConfig } from '../../base';
-import { sortContentBySimilarity, sortNotesBySimilarity, sortResourcesBySimilarity } from './semanticSearch';
+import { sortContentBySimilarity } from './semanticSearch';
 
 import { IContext, GraphState } from '../types';
 import { countToken } from './token';
@@ -68,8 +68,8 @@ export const truncateContext = (context: IContext, maxTokens: number): IContext 
   let remainingTokens = maxTokens;
   const truncatedContext: IContext = { ...context };
 
-  // Helper function to truncate a list of items, truncate priority is resource > note > contentList
-  const truncateItems = <T extends SkillContextContentItem | SkillContextResourceItem | SkillContextNoteItem>(
+  // Helper function to truncate a list of items, truncate priority is resource > canvas > contentList
+  const truncateItems = <T extends SkillContextContentItem | SkillContextResourceItem | SkillContextCanvasItem>(
     items: T[],
     getContent: (item: T) => string,
     setContent: (item: T, content: string) => T,
@@ -99,11 +99,11 @@ export const truncateContext = (context: IContext, maxTokens: number): IContext 
     (item, content) => ({ ...item, resource: { ...item.resource!, content } }),
   );
 
-  // Truncate notes
-  truncatedContext.notes = truncateItems<SkillContextNoteItem>(
-    context.notes,
-    (item) => item.note?.content || '',
-    (item, content) => ({ ...item, note: { ...item.note!, content } }),
+  // Truncate canvases
+  truncatedContext.canvases = truncateItems<SkillContextCanvasItem>(
+    context.canvases,
+    (item) => item.canvas?.content || '',
+    (item, content) => ({ ...item, canvas: { ...item.canvas!, content } }),
   );
 
   // Truncate contentList
@@ -123,7 +123,7 @@ export async function mergeAndTruncateContexts(
   maxTokens: number,
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<IContext> {
-  // 1. 处理 contentList（优先级最高）
+  // 1. Handle contentList (highest priority)
   const allContentList = [...relevantContext.contentList, ...containerLevelContext.contentList];
   const uniqueContentList = Array.from(new Set(allContentList.map((item) => JSON.stringify(item)))).map((item) =>
     JSON.parse(item),
@@ -136,22 +136,22 @@ export async function mergeAndTruncateContexts(
     sortedContentList = uniqueContentList;
   }
 
-  // 2. 合并 resources 和 notes 到一个数组
-  const combinedItems: (SkillContextResourceItem | SkillContextNoteItem)[] = [
+  // 2. Merge resources and canvases into one array
+  const combinedItems: (SkillContextResourceItem | SkillContextCanvasItem)[] = [
     ...relevantContext.resources,
-    ...relevantContext.notes,
+    ...relevantContext.canvases,
     ...containerLevelContext.resources,
-    ...containerLevelContext.notes,
+    ...containerLevelContext.canvases,
   ];
 
-  // 3. 去重（按 id 和 content 组合）
+  // 3. Deduplicate (by id and content combination)
   const uniqueCombinedItems = Array.from(
     new Set(
       combinedItems.map((item) => {
         const id =
-          (item as SkillContextResourceItem).resource?.resourceId || (item as SkillContextNoteItem).note?.noteId;
+          (item as SkillContextResourceItem).resource?.resourceId || (item as SkillContextCanvasItem).canvas?.canvasId;
         const content =
-          (item as SkillContextResourceItem).resource?.content || (item as SkillContextNoteItem).note?.content;
+          (item as SkillContextResourceItem).resource?.content || (item as SkillContextCanvasItem).canvas?.content;
         return `${id}:${content}`;
       }),
     ),
@@ -159,37 +159,37 @@ export async function mergeAndTruncateContexts(
     (key) =>
       combinedItems.find((item) => {
         const id =
-          (item as SkillContextResourceItem).resource?.resourceId || (item as SkillContextNoteItem).note?.noteId;
+          (item as SkillContextResourceItem).resource?.resourceId || (item as SkillContextCanvasItem).canvas?.canvasId;
         const content =
-          (item as SkillContextResourceItem).resource?.content || (item as SkillContextNoteItem).note?.content;
+          (item as SkillContextResourceItem).resource?.content || (item as SkillContextCanvasItem).canvas?.content;
         return `${id}:${content}` === key;
       })!,
   );
 
-  // 4. 整体进行相似度排序
+  // 4. Sort by similarity
   const itemsForSorting = uniqueCombinedItems.map((item) => ({
-    content: (item as SkillContextResourceItem).resource?.content || (item as SkillContextNoteItem).note?.content,
+    content: (item as SkillContextResourceItem).resource?.content || (item as SkillContextCanvasItem).canvas?.content,
     metadata: {
-      type: 'resource' in item ? 'resource' : 'note',
-      id: (item as SkillContextResourceItem).resource?.resourceId || (item as SkillContextNoteItem).note?.noteId,
+      type: 'resource' in item ? 'resource' : 'canvas',
+      id: (item as SkillContextResourceItem).resource?.resourceId || (item as SkillContextCanvasItem).canvas?.canvasId,
     },
   }));
 
-  let sortedItems: (SkillContextResourceItem | SkillContextNoteItem)[] = [];
+  let sortedItems: (SkillContextResourceItem | SkillContextCanvasItem)[] = [];
   if (itemsForSorting.length > 1) {
     sortedItems = await sortContentBySimilarity(query, itemsForSorting, ctx);
   } else {
     sortedItems = itemsForSorting;
   }
 
-  // 还原排序后的实际 items
+  // Restore the actual items after sorting
   const sortedCombinedItems = sortedItems.map(
     (sortedItem) =>
       uniqueCombinedItems.find(
         (item) =>
-          ('resource' in item ? 'resource' : 'note') === sortedItem.metadata.type &&
-          ((item as SkillContextResourceItem).resource?.resourceId || (item as SkillContextNoteItem).note?.noteId) ===
-            sortedItem.metadata.id,
+          ('resource' in item ? 'resource' : 'canvas') === sortedItem.metadata.type &&
+          ((item as SkillContextResourceItem).resource?.resourceId ||
+            (item as SkillContextCanvasItem).canvas?.canvasId) === sortedItem.metadata.id,
       )!,
   );
 
@@ -208,7 +208,7 @@ function truncateContextWithPriority(
   const truncatedContext: IContext = {
     contentList: [],
     resources: [],
-    notes: [],
+    canvases: [],
   };
 
   // First, add contentList items
@@ -222,15 +222,15 @@ function truncateContextWithPriority(
     }
   }
 
-  // Then, add combined items (resources and notes)
+  // Then, add combined items (resources and canvases)
   for (const item of combinedItems) {
-    const content = 'resource' in item ? item.resource?.content : item.note?.content;
+    const content = 'resource' in item ? item.resource?.content : item.canvas?.content;
     const tokens = countToken(content);
     if (remainingTokens >= tokens) {
       if ('resource' in item) {
         truncatedContext.resources.push(item);
       } else {
-        truncatedContext.notes.push(item);
+        truncatedContext.canvases.push(item);
       }
       remainingTokens -= tokens;
     } else {

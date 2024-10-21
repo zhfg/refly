@@ -2,7 +2,7 @@ import { Menu, Message as message } from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
 import { useSelectedMark } from '../hooks/use-selected-mark';
 // styles
-import { useNoteStore } from '@refly-packages/ai-workspace-common/stores/note';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 // stores
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useEffect } from 'react';
@@ -10,8 +10,8 @@ import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
 
 export const useHandleContextWorkflow = () => {
-  const noteStore = useNoteStore((state) => ({
-    updateCurrentNote: state.updateCurrentNote,
+  const noteStore = useCanvasStore((state) => ({
+    updateCurrentNote: state.updateCurrentCanvas,
   }));
   const { setShowContextCard, setContextDomain } = useContextPanelStore((state) => ({
     enableMultiSelect: state.enableMultiSelect,
@@ -45,7 +45,7 @@ export const useHandleContextWorkflow = () => {
 
   const handleSidePanelClose = () => {
     handleStopContentSelectorListener();
-    const { currentNote } = useNoteStore.getState();
+    const { currentCanvas: currentNote } = useCanvasStore.getState();
     noteStore.updateCurrentNote({ ...currentNote, readOnly: false });
   };
 

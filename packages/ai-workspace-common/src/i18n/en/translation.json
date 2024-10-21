@@ -233,9 +233,9 @@
       "extensionWeblinkSelection": "Web Link Selection",
       "noteSelection": "Note Selection",
       "resourceSelection": "Resource Selection",
-      "noteCursorSelection": "Note Cursor Selection",
-      "noteBeforeCursorSelection": "Note Before Cursor Selection",
-      "noteAfterCursorSelection": "Note After Cursor Selection",
+      "canvasCursorSelection": "Canvas Cursor Selection",
+      "canvasBeforeCursorSelection": "Canvas Before Cursor Selection",
+      "canvasAfterCursorSelection": "Canvas After Cursor Selection",
       "contextLimitTipTitle": "Please adjust the context and try again",
       "contextRequiredTip": "Please select at least 1 {{type}}",
       "contextLimitTip": "{{type}} is limit to {{limit}} , and you have selected {{currentCount}}.",
@@ -574,9 +574,9 @@
           "resourceSelection": "Resource Selection",
           "noteSelection": "Note Selection",
           "extensionWeblinkSelection": "Web Link Selection",
-          "noteCursorSelection": "Note Cursor Selection",
-          "noteBeforeCursorSelection": "Note Before Cursor Selection",
-          "noteAfterCursorSelection": "Note After Cursor Selection"
+          "canvasCursorSelection": "Note Cursor Selection",
+          "canvasBeforeCursorSelection": "Note Before Cursor Selection",
+          "canvasAfterCursorSelection": "Note After Cursor Selection"
         }
       },
       "invokeConfig": "Invocation Config",

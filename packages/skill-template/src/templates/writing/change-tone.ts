@@ -103,7 +103,7 @@ export class ChangeToneSkill extends BaseSkill {
           key: 'contentList',
           limit: 1,
           required: true,
-          preferredSelectionKeys: ['noteCursorSelection'],
+          preferredSelectionKeys: ['canvasCursorSelection'],
         },
       ],
     },

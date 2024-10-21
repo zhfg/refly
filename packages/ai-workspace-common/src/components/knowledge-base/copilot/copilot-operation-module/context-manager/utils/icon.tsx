@@ -7,9 +7,9 @@ export const getTypeIcon = (markType: MarkType, style?: any) => {
       return <IconFile style={style} />;
     case 'resourceSelection':
       return <IconFile style={style} />;
-    case 'note':
+    case 'canvas':
       return <IconBook style={style} />;
-    case 'noteSelection':
+    case 'canvasSelection':
       return <IconBook style={style} />;
     case 'collection':
       return <IconFolder style={style} />;

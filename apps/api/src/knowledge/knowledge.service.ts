@@ -14,8 +14,8 @@ import {
   ResourceMeta,
   ListResourcesData,
   ListCollectionsData,
-  ListNotesData,
-  UpsertNoteRequest,
+  ListCanvasData,
+  UpsertCanvasRequest,
   User,
   GetResourceDetailData,
   AddResourceToCollectionRequest,
@@ -34,8 +34,8 @@ import {
 import {
   genCollectionID,
   genResourceID,
+  genCanvasID,
   cleanMarkdownForIngest,
-  genNoteID,
   markdown2StateUpdate,
 } from '@refly-packages/utils';
 import { FinalizeResourceParam } from './knowledge.dto';
@@ -110,7 +110,6 @@ export class KnowledgeService {
         title: param.title,
         description: param.description,
         uid: user.uid,
-        isPublic: param.isPublic,
       },
       update: { ...omit(param, ['collectionId']) },
     });
@@ -273,7 +272,6 @@ export class KnowledgeService {
         storageKey,
         storageSize,
         uid: user.uid,
-        isPublic: param.isPublic,
         readOnly: !!param.readOnly,
         title: param.title || 'Untitled',
         indexStatus,
@@ -470,7 +468,7 @@ export class KnowledgeService {
       throw new BadRequestException('Resource not found');
     }
 
-    const updates: Prisma.ResourceUpdateInput = pick(param, ['title', 'isPublic', 'readOnly']);
+    const updates: Prisma.ResourceUpdateInput = pick(param, ['title', 'readOnly']);
     if (param.data) {
       updates.meta = JSON.stringify(param.data);
     }
@@ -541,9 +539,9 @@ export class KnowledgeService {
     ]);
   }
 
-  async listNotes(user: User, param: ListNotesData['query']) {
+  async listCanvas(user: User, param: ListCanvasData['query']) {
     const { page = 1, pageSize = 10 } = param;
-    return this.prisma.note.findMany({
+    return this.prisma.canvas.findMany({
       where: {
         uid: user.uid,
         deletedAt: null,
@@ -554,47 +552,46 @@ export class KnowledgeService {
     });
   }
 
-  async getNoteDetail(user: User, noteId: string) {
-    const note = await this.prisma.note.findFirst({
-      where: { noteId, uid: user.uid, deletedAt: null },
+  async getCanvasDetail(user: User, canvasId: string) {
+    const canvas = await this.prisma.canvas.findFirst({
+      where: { canvasId, uid: user.uid, deletedAt: null },
     });
-    if (!note) {
-      throw new BadRequestException('Note not found');
+    if (!canvas) {
+      throw new BadRequestException('Canvas not found');
     }
 
     let content: string;
-    if (note.storageKey) {
-      const contentStream = await this.minio.client.getObject(note.storageKey);
+    if (canvas.storageKey) {
+      const contentStream = await this.minio.client.getObject(canvas.storageKey);
       content = await streamToString(contentStream);
     }
 
-    return { ...note, content };
+    return { ...canvas, content };
   }
 
-  async upsertNote(user: User, param: UpsertNoteRequest) {
+  async upsertCanvas(user: User, param: UpsertCanvasRequest) {
     const usageResult = await this.subscriptionService.checkStorageUsage(user);
     if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
       throw new BadRequestException('Storage quota exceeded');
     }
 
-    const isNewNote = !param.noteId;
+    const isNewCanvas = !param.canvasId;
 
-    param.noteId ||= genNoteID();
+    param.canvasId ||= genCanvasID();
     param.title ||= 'Untitled';
 
-    const createInput: Prisma.NoteCreateInput = {
-      noteId: param.noteId,
+    const createInput: Prisma.CanvasCreateInput = {
+      canvasId: param.canvasId,
       title: param.title,
       uid: user.uid,
       readOnly: param.readOnly ?? false,
-      isPublic: param.isPublic ?? false,
       content: param.initialContent,
       contentPreview: param.initialContent?.slice(0, 500),
     };
 
-    if (isNewNote && param.initialContent) {
-      createInput.storageKey = `notes/${param.noteId}.txt`;
-      createInput.stateStorageKey = `state/${param.noteId}`;
+    if (isNewCanvas && param.initialContent) {
+      createInput.storageKey = `canvas/${param.canvasId}.txt`;
+      createInput.stateStorageKey = `state/${param.canvasId}`;
 
       // Save initial content and ydoc state to object storage
       const ydoc = markdown2StateUpdate(param.initialContent);
@@ -614,28 +611,28 @@ export class KnowledgeService {
       const { size } = await this.ragService.indexContent(user, {
         pageContent: param.initialContent,
         metadata: {
-          nodeType: 'note',
-          noteId: param.noteId,
+          nodeType: 'canvas',
+          canvasId: param.canvasId,
           title: param.title,
         },
       });
       createInput.vectorSize = size;
     }
 
-    const note = await this.prisma.note.upsert({
-      where: { noteId: param.noteId },
+    const canvas = await this.prisma.canvas.upsert({
+      where: { canvasId: param.canvasId },
       create: createInput,
       update: {
-        ...pick(param, ['title', 'readOnly', 'isPublic']),
+        ...pick(param, ['title', 'readOnly']),
       },
     });
 
-    await this.elasticsearch.upsertNote({
-      id: param.noteId,
-      ...pick(note, ['title', 'uid']),
+    await this.elasticsearch.upsertCanvas({
+      id: param.canvasId,
+      ...pick(canvas, ['title', 'uid']),
       content: param.initialContent,
-      createdAt: note.createdAt.toJSON(),
-      updatedAt: note.updatedAt.toJSON(),
+      createdAt: canvas.createdAt.toJSON(),
+      updatedAt: canvas.updatedAt.toJSON(),
     });
 
     await this.ssuQueue.add({
@@ -643,44 +640,44 @@ export class KnowledgeService {
       timestamp: new Date(),
     });
 
-    return note;
+    return canvas;
   }
 
-  async deleteNote(user: User, noteId: string) {
+  async deleteCanvas(user: User, canvasId: string) {
     const { uid } = user;
-    const note = await this.prisma.note.findFirst({
-      where: { noteId, uid, deletedAt: null },
+    const canvas = await this.prisma.canvas.findFirst({
+      where: { canvasId, uid, deletedAt: null },
     });
-    if (!note) {
-      throw new BadRequestException('Note not found');
+    if (!canvas) {
+      throw new BadRequestException('Canvas not found');
     }
 
     await this.prisma.$transaction([
-      this.prisma.note.update({
-        where: { noteId },
+      this.prisma.canvas.update({
+        where: { canvasId },
         data: { deletedAt: new Date() },
       }),
       this.prisma.labelInstance.updateMany({
-        where: { entityType: 'note', entityId: noteId, uid, deletedAt: null },
+        where: { entityType: 'canvas', entityId: canvasId, uid, deletedAt: null },
         data: { deletedAt: new Date() },
       }),
     ]);
 
     const cleanups: Promise<any>[] = [
-      this.ragService.deleteNoteNodes(user, noteId),
-      this.elasticsearch.deleteNote(noteId),
+      this.ragService.deleteCanvasNodes(user, canvasId),
+      this.elasticsearch.deleteCanvas(canvasId),
       this.miscService.removeFilesByEntity(user, {
-        entityId: noteId,
-        entityType: 'note',
+        entityId: canvasId,
+        entityType: 'canvas',
       }),
     ];
 
-    if (note.storageKey) {
-      cleanups.push(this.minio.client.removeObject(note.storageKey));
+    if (canvas.storageKey) {
+      cleanups.push(this.minio.client.removeObject(canvas.storageKey));
     }
 
-    if (note.stateStorageKey) {
-      cleanups.push(this.minio.client.removeObject(note.stateStorageKey));
+    if (canvas.stateStorageKey) {
+      cleanups.push(this.minio.client.removeObject(canvas.stateStorageKey));
     }
 
     await Promise.all(cleanups);

@@ -28,7 +28,7 @@ export class BrainstormIdeasSkill extends BaseSkill {
 
   invocationConfig: SkillInvocationConfig = {
     context: {
-      rules: [{ key: 'contentList', limit: 1, preferredSelectionKeys: ['noteCursorSelection'] }],
+      rules: [{ key: 'contentList', limit: 1, preferredSelectionKeys: ['canvasCursorSelection'] }],
     },
   };
 
