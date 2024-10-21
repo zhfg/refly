@@ -396,7 +396,12 @@
       "skill": "Skills",
       "collapse": "Collapse",
       "expand": "Expand",
-      "logout": "Log Out"
+      "logout": "Log Out",
+      "newDraft": "New Draft",
+      "knowledgeBase": "Knowledge Base",
+      "recentProjects": "Recent Projects",
+      "recentChats": "Recent Chats",
+      "viewMore": "View More"
     }
   },
   "knowledgeLibrary": {

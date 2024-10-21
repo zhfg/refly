@@ -12,16 +12,24 @@ import {
   useLocation,
   useNavigate,
 } from "@refly-packages/ai-workspace-common/utils/router"
-import { HiOutlineHome } from "react-icons/hi2"
+import {
+  HiOutlineHome,
+  HiOutlineDocumentAdd,
+  HiOutlineBookOpen,
+} from "react-icons/hi"
 import { LuMoreHorizontal } from "react-icons/lu"
-import { RiRobot2Line, RiHistoryLine } from "react-icons/ri"
+import { RiRobot2Line, RiHistoryLine, RiMoreLine } from "react-icons/ri"
 import {
   AiOutlineMenuFold,
   AiOutlineMenuUnfold,
   AiFillChrome,
 } from "react-icons/ai"
 
-import { IconLanguage, IconImport } from "@arco-design/web-react/icon"
+import {
+  IconLanguage,
+  IconImport,
+  IconRight,
+} from "@arco-design/web-react/icon"
 // 静态资源
 import Logo from "@/assets/logo.svg"
 import "./sider.scss"
@@ -95,12 +103,15 @@ const MenuItemContent = (props: {
   icon?: React.ReactNode
   title?: string
   collapse?: boolean
+  position?: "left" | "right"
 }) => {
+  const { position = "left" } = props
   return (
     <div className="flex">
       <div className="flex flex-1 flex-nowrap items-center">
-        {props.icon}
+        {position === "left" && props.icon}
         <span className="sider-menu-title">{props.title}</span>
+        {position === "right" && props.icon}
       </div>
     </div>
   )
@@ -307,33 +318,65 @@ export const SiderLayout = () => {
     showDivider?: boolean
     onClick?: () => void
   }
-  const siderCenter: SiderCenterProps[] = [
-    {
-      key: "Import",
-      name: "newResource",
-      icon: <IconImport style={{ fontSize: 20 }} />,
-      showDivider: true,
-      onClick: () => {
-        importResourceStore.setImportResourceModalVisible(true)
-        importResourceStore.setSelectedMenuItem("import-from-weblink")
+
+  const siderSections: SiderCenterProps[][] = [
+    [
+      {
+        key: "NewDraft",
+        name: "newDraft",
+        icon: (
+          <HiOutlineDocumentAdd
+            className="arco-icon"
+            style={{ fontSize: 20 }}
+          />
+        ),
       },
-    },
-    {
-      key: "Workspace",
-      name: "homePage",
-      icon: <HiOutlineHome className="arco-icon" style={{ fontSize: 20 }} />,
-    },
-    {
-      key: "Skill",
-      name: "skill",
-      icon: <RiRobot2Line className="arco-icon" style={{ fontSize: 20 }} />,
-    },
-    {
-      key: "ThreadLibrary",
-      name: "threadLibrary",
-      icon: <RiHistoryLine className="arco-icon" style={{ fontSize: 20 }} />,
-    },
+      {
+        key: "Import",
+        name: "newResource",
+        icon: <IconImport style={{ fontSize: 20 }} />,
+      },
+    ],
+    [
+      {
+        key: "Home",
+        name: "homePage",
+        icon: <HiOutlineHome className="arco-icon" style={{ fontSize: 20 }} />,
+      },
+      {
+        key: "Knowledge",
+        name: "knowledgeBase",
+        icon: (
+          <HiOutlineBookOpen className="arco-icon" style={{ fontSize: 20 }} />
+        ),
+      },
+      {
+        key: "Skill",
+        name: "skill",
+        icon: <RiRobot2Line className="arco-icon" style={{ fontSize: 20 }} />,
+      },
+      {
+        key: "ThreadLibrary",
+        name: "threadLibrary",
+        icon: <RiHistoryLine className="arco-icon" style={{ fontSize: 20 }} />,
+      },
+    ],
   ]
+
+  const recentProjects = [
+    // Add 7-8 recent projects here
+    { key: "project1", name: "Project 1" },
+    { key: "project2", name: "Project 2" },
+    // ... more projects
+  ]
+
+  const recentChats = [
+    // Add 7-8 recent chats here
+    { key: "chat1", name: "Chat 1" },
+    { key: "chat2", name: "Chat 2" },
+    // ... more chats
+  ]
+
   return (
     <Sider
       className={`app-sider ${isGuideDetail ? "fixed" : ""}`}
@@ -355,15 +398,15 @@ export const SiderLayout = () => {
             borderRight: "none",
           }}
           collapse={collapse}
-          defaultSelectedKeys={["Workspace"]}
+          defaultSelectedKeys={["Home"]}
           className="sider-menu-nav"
           selectedKeys={[selectedKey]}
           tooltipProps={{}}
           onClickMenuItem={handleNavClick}>
-          <div className="sider-center">
-            {siderCenter.map(item => {
-              return (
-                <div key={item.key}>
+          <div className="sider-menu-inner">
+            {siderSections.map((section, index) => (
+              <div key={`section-${index}`} className="sider-section">
+                {section.map(item => (
                   <MenuItem
                     key={item.key}
                     className="custom-menu-item"
@@ -378,16 +421,70 @@ export const SiderLayout = () => {
                       title={t(`loggedHomePage.siderMenu.${item.name}`)}
                     />
                   </MenuItem>
+                ))}
+                {index < siderSections.length - 1 && (
+                  <Divider style={{ margin: "8px 0" }} />
+                )}
+              </div>
+            ))}
 
-                  {item.showDivider && (
-                    <Divider
-                      key={item.key + "divider"}
-                      style={{ margin: "8px 0" }}
+            <Divider style={{ margin: "8px 0" }} />
+
+            <div className="recent-section">
+              <div className="recent-projects">
+                <h3>{t("loggedHomePage.siderMenu.recentProjects")}</h3>
+                {recentProjects.map(project => (
+                  <MenuItem key={project.key}>{project.name}</MenuItem>
+                ))}
+                <MenuItem
+                  key="viewMoreProjects"
+                  onClick={() => {
+                    /* Navigate to projects list */
+                  }}>
+                  <MenuItem
+                    key="viewMoreChats"
+                    onClick={() => {
+                      /* Navigate to chats list */
+                    }}>
+                    <MenuItemContent
+                      position="right"
+                      icon={
+                        <IconRight
+                          className="arco-icon"
+                          style={{ fontSize: 20 }}
+                        />
+                      }
+                      title={t("loggedHomePage.siderMenu.viewMore")}
                     />
-                  )}
-                </div>
-              )
-            })}
+                  </MenuItem>
+                </MenuItem>
+              </div>
+
+              <div className="recent-chats">
+                <h3>{t("loggedHomePage.siderMenu.recentChats")}</h3>
+                {recentChats.map(chat => (
+                  <MenuItem key={chat.key}>{chat.name}</MenuItem>
+                ))}
+                <MenuItem
+                  key="viewMoreChats"
+                  onClick={() => {
+                    /* Navigate to chats list */
+                  }}>
+                  <MenuItemContent
+                    position="right"
+                    icon={
+                      <IconRight
+                        className="arco-icon"
+                        style={{ fontSize: 20 }}
+                      />
+                    }
+                    title={t("loggedHomePage.siderMenu.viewMore")}
+                  />
+                </MenuItem>
+              </div>
+            </div>
+
+            <Divider style={{ margin: "8px 0" }} />
           </div>
 
           <div className="sider-footer">
