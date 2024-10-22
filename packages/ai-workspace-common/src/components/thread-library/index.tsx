@@ -27,9 +27,10 @@ export const ConvLibrary = () => {
       <div>{t('tabMeta.threadLibrary.title')}</div>
       <ConvList
         classNames=""
-        handleConvItemClick={(convId) => {
+        handleConvItemClick={(convId, projectId) => {
           jumpToConv({
             convId,
+            projectId,
           });
         }}
       />

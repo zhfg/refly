@@ -59,9 +59,11 @@ const getNavSelectedKeys = (pathname = "") => {
     return "ThreadLibrary"
   } else if (pathname.includes("skill")) {
     return "Skill"
+  } else if (pathname.includes("knowledge-base")) {
+    return "Knowledge"
   }
 
-  return "Workspace"
+  return "Home"
 }
 
 const SiderLogo = (props: {

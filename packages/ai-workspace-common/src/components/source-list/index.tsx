@@ -93,7 +93,7 @@ const ViewMoreItem = ({ sources = [], extraCnt = 0 }: { sources: Source[]; extra
 export const EntityItem = (props: { item: Source; index: number; showUtil?: boolean; showDesc?: boolean }) => {
   const { item, index, showDesc = false } = props;
   const { t } = useTranslation();
-  const { jumpToReadResource, jumpToCanvas } = useKnowledgeBaseJumpNewPath();
+  const { jumpToResource, jumpToCanvas } = useKnowledgeBaseJumpNewPath();
 
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
@@ -124,7 +124,7 @@ export const EntityItem = (props: { item: Source; index: number; showUtil?: bool
                 const extraParams = !isWeb ? { openNewTab: true, baseUrl: getClientOrigin() } : {};
 
                 if (item?.metadata?.entityType === 'resource') {
-                  jumpToReadResource({
+                  jumpToResource({
                     resId: item?.metadata?.entityId,
                     ...extraParams,
                   });

@@ -16,7 +16,7 @@ export const useKnowledgeBaseTabs = () => {
     updateTabs: state.updateTabs,
     updateActiveTab: state.updateActiveTab,
   }));
-  const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
+  const { jumpToResource } = useKnowledgeBaseJumpNewPath();
 
   const tabs = knowledgeBaseStore.tabs;
   const activeTab = knowledgeBaseStore.activeTab;
@@ -68,7 +68,7 @@ export const useKnowledgeBaseTabs = () => {
     knowledgeBaseStore.updateActiveTab(key);
     const tab = tabs?.find((tab) => tab?.key === key);
 
-    jumpToReadResource({
+    jumpToResource({
       resId: tab?.resourceId || '',
     });
   };

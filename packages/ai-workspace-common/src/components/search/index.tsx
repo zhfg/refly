@@ -49,7 +49,7 @@ export const Search = (props: SearchProps) => {
   const { handleAddTab: handleAddNoteTab } = useCanvasTabs();
   const { handleAddTab: handleAddResourceTab } = useKnowledgeBaseTabs();
 
-  const { jumpToKnowledgeBase, jumpToCanvas, jumpToReadResource, jumpToConv } = useKnowledgeBaseJumpNewPath();
+  const { jumpToProject, jumpToCanvas, jumpToResource, jumpToConv } = useKnowledgeBaseJumpNewPath();
 
   const pages = searchStore.pages;
   const setPages = searchStore.setPages;
@@ -241,7 +241,7 @@ export const Search = (props: SearchProps) => {
       data: searchStore.searchedReadResources || [],
       icon: <IconBook style={{ fontSize: 12 }} />,
       onItemClick: (item: SearchResult) => {
-        jumpToReadResource({
+        jumpToResource({
           resId: item?.id,
         });
         handleAddResourceTab({
@@ -264,8 +264,8 @@ export const Search = (props: SearchProps) => {
       data: searchStore.searchedKnowledgeBases || [],
       icon: <IconFile style={{ fontSize: 12 }} />,
       onItemClick: (item: SearchResult) => {
-        jumpToKnowledgeBase({
-          kbId: item?.id,
+        jumpToProject({
+          projectId: item?.id,
         });
         searchStore.setIsSearchOpen(false);
       },
@@ -283,6 +283,9 @@ export const Search = (props: SearchProps) => {
       onItemClick: (item: SearchResult) => {
         jumpToConv({
           convId: item?.id,
+          // TODO: 需要后端返回 projectId
+          // @ts-ignore
+          projectId: item?.metadata?.projectId,
         });
         searchStore.setIsSearchOpen(false);
       },

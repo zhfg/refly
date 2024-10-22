@@ -53,9 +53,10 @@ export const ConvListModal = (props: ConvListModalProps) => {
       >
         <ConvList
           classNames={props.classNames}
-          handleConvItemClick={(convId) => {
+          handleConvItemClick={(convId, projectId) => {
             jumpToConv({
               convId,
+              projectId,
             });
             knowledgeBaseStore.updateConvModalVisible(false);
           }}

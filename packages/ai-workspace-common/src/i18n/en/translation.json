@@ -122,13 +122,13 @@
     "contentPanel": {
       "tabPanel": {
         "resource": "Resources",
-        "note": "Notes",
+        "canvas": "Canvas",
         "collection": "Collections",
         "thread": "Threads"
       },
       "newButton": {
         "resource": "New Resource",
-        "note": "New Note",
+        "canvas": "New Canvas",
         "collection": "New Collection"
       }
     },

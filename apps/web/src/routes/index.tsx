@@ -15,6 +15,7 @@ import {
 // Lazy load components
 const Home = lazy(() => import("@/pages/home"))
 const KnowledgeBase = lazy(() => import("@/pages/knowledge-base"))
+const Resource = lazy(() => import("@/pages/resource"))
 const ConvLibrary = lazy(() => import("@/pages/conv-library"))
 const Project = lazy(() => import("@/pages/project"))
 const Skill = lazy(() => import("@/pages/skill"))
@@ -41,6 +42,7 @@ const prefetchRoutes = () => {
   import("@/pages/login")
   import("@/pages/home")
   import("@/pages/knowledge-base")
+  import("@/pages/resource")
   import("@/pages/project")
   import("@/pages/conv-library")
   import("@/pages/skill")
@@ -125,7 +127,16 @@ export const AppRouter = (props: { layout?: any }) => {
             }
           />
           <Route
-            path="/project"
+            path="/knowledge-base/resource/:resId"
+            element={
+              <BetaProtectedRoute
+                component={Resource}
+                hasBetaAccess={hasBetaAccess}
+              />
+            }
+          />
+          <Route
+            path="/project/:projectId"
             element={
               <BetaProtectedRoute
                 component={Project}

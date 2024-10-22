@@ -11,7 +11,7 @@ import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-not
 
 export const useProcessContextItems = () => {
   const { t } = useTranslation();
-  const { jumpToCanvas, jumpToKnowledgeBase, jumpToReadResource } = useKnowledgeBaseJumpNewPath();
+  const { jumpToCanvas, jumpToProject, jumpToResource } = useKnowledgeBaseJumpNewPath();
   const currentSelectedMarks = useContextPanelStoreShallow((state) => state.currentSelectedMarks);
   console.log('currentSelectedMarks', currentSelectedMarks);
 
@@ -80,7 +80,7 @@ export const useProcessContextItems = () => {
       if (isWebRuntime) {
         const currentId = mark.type === 'resource' ? mark.id : mark.parentId;
         return () => {
-          jumpToReadResource({ resId: currentId });
+          jumpToResource({ resId: currentId });
           handleAddResourceTab({
             title: mark.title,
             key: currentId,
@@ -95,7 +95,7 @@ export const useProcessContextItems = () => {
 
     if (mark.type === 'collection') {
       if (isWebRuntime) {
-        return () => jumpToKnowledgeBase({ kbId: mark.id });
+        return () => jumpToProject({ projectId: mark.id });
       } else {
         return `${baseUrl}/knowledge-base?kbId=${mark.id}`;
       }

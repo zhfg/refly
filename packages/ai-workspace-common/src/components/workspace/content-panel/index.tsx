@@ -24,9 +24,9 @@ const Content = (props: { val: string }) => {
   switch (props.val) {
     case 'resource':
       return <ResourceList />;
-    case 'note':
+    case 'canvas':
       return <NoteList />;
-    case 'collection':
+    case 'project':
       return <KnowledgeBaseList />;
     default:
       return <ResourceList />;
@@ -43,7 +43,7 @@ const NewFileDropList = (props: { handleCreateButtonClick: (type: string) => voi
         borderRadius: '8px',
       }}
     >
-      {['resource', 'note', 'collection'].map((item) => {
+      {['canvas', 'resource', 'project'].map((item) => {
         return (
           <Menu.Item key={item} onClick={() => props.handleCreateButtonClick(item)}>
             {t(`workspace.contentPanel.newButton.${item}`)}
@@ -64,13 +64,13 @@ const NewFileButton = (props: { val: string }) => {
   }));
 
   const handleCreateButtonClick = (type: string) => {
-    if (type === 'note' && !newNoteCreating) {
+    if (type === 'canvas' && !newNoteCreating) {
       handleInitEmptyNote('');
     }
     if (type === 'resource') {
       importResourceStore.setImportResourceModalVisible(true);
     }
-    if (type === 'collection') {
+    if (type === 'project') {
       importKnowledgeModal.setShowNewKnowledgeModal(true);
       importKnowledgeModal.setEditCollection(null);
     }
@@ -102,7 +102,7 @@ const ContentHeader = (props: { setVal: (val: string) => void; hitTop: boolean; 
       className={classNames(
         'content-panel-header',
         { 'content-panel-header-hit-top': hitTop },
-        'h-16 pt-3 pb-3 flex justify-between items-center',
+        'flex justify-between items-center pt-3 pb-3 h-16',
       )}
     >
       <div className="flex items-center">
@@ -115,9 +115,9 @@ const ContentHeader = (props: { setVal: (val: string) => void; hitTop: boolean; 
           onChange={(val) => handleTabChange(val)}
           style={{ borderRadius: 8 }}
         >
+          <Radio value="canvas">{t('workspace.contentPanel.tabPanel.canvas')}</Radio>
           <Radio value="resource">{t('workspace.contentPanel.tabPanel.resource')}</Radio>
-          <Radio value="note">{t('workspace.contentPanel.tabPanel.note')}</Radio>
-          <Radio value="collection">{t('workspace.contentPanel.tabPanel.collection')}</Radio>
+          <Radio value="project">{t('workspace.contentPanel.tabPanel.project')}</Radio>
         </RadioGroup>
         {hitTop && (
           <SearchQuickOpenBtn
@@ -134,7 +134,7 @@ const ContentHeader = (props: { setVal: (val: string) => void; hitTop: boolean; 
 
 export const ContentPanel = () => {
   const ref = useRef();
-  const [val, setVal] = useState('resource');
+  const [val, setVal] = useState('canvas');
   const [hitTop, setHitTop] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -142,7 +142,7 @@ export const ContentPanel = () => {
 
   useEffect(() => {
     const tab = searchParams.get('tab') as string;
-    setVal(tab || 'resource');
+    setVal(tab || 'canvas');
   }, [searchParams]);
 
   useEffect(() => {

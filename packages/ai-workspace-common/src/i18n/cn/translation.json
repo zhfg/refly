@@ -122,14 +122,14 @@
     "contentPanel": {
       "tabPanel": {
         "resource": "资源",
-        "note": "笔记",
-        "collection": "知识库",
+        "canvas": "稿布",
+        "project": "项目",
         "thread": "会话"
       },
       "newButton": {
         "resource": "新资源",
-        "note": "新笔记",
-        "collection": "新知识库"
+        "canvas": "新稿布",
+        "project": "新项目"
       }
     },
     "resourceCollectionList": {
