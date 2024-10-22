@@ -8,8 +8,6 @@ import { useSearchParams } from 'react-router-dom';
 
 export const useBigSearchQuickAction = () => {
   // 带着参数跳过去，然后激活会话
-  const { jumpToConv } = useKnowledgeBaseJumpNewPath();
-  const [searchParams, setSearchParams] = useSearchParams();
   const { emptyConvRunSkill } = useBuildThreadAndRun();
   const skillStore = useSkillStore();
 

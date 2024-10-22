@@ -1,16 +1,18 @@
 import { Layout } from "@arco-design/web-react"
 
 import { SiderLayout } from "./sider"
-
-import { LoginModal } from "@/components/login-modal"
-import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
-import { BigSearchModal } from "@refly-packages/ai-workspace-common/components/search/modal"
-import { ImportResourceModal } from "@refly-packages/ai-workspace-common/components/import-resource"
-import { NewKnowledgeModal } from "@refly-packages/ai-workspace-common/components/knowledge-base/new-knowledge-modal"
 import { useBindCommands } from "@refly-packages/ai-workspace-common/hooks/use-bind-commands"
 import { useImportResourceStoreShallow } from "@refly-packages/ai-workspace-common/stores/import-resource"
 import { useImportKnowledgeModalShallow } from "@refly-packages/ai-workspace-common/stores/import-knowledge-modal"
+import { useNewCanvasModalStoreShallow } from "@/store/new-canvas-modal"
+import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
+
+import { LoginModal } from "@/components/login-modal"
+import { BigSearchModal } from "@refly-packages/ai-workspace-common/components/search/modal"
+import { ImportResourceModal } from "@refly-packages/ai-workspace-common/components/import-resource"
+import { NewKnowledgeModal } from "@refly-packages/ai-workspace-common/components/knowledge-base/new-knowledge-modal"
 import { SubscribeModal } from "@refly-packages/ai-workspace-common/components/settings/subscribe-modal"
+import { NewCanvasModal } from "@/components/new-canvas-modal"
 
 import "./index.scss"
 
@@ -27,6 +29,9 @@ export const AppLayout = (props: AppLayoutProps) => {
   }))
   const importResourceStore = useImportResourceStoreShallow(state => ({
     importResourceModalVisible: state.importResourceModalVisible,
+  }))
+  const newCanvasModalStore = useNewCanvasModalStoreShallow(state => ({
+    newCanvasModalVisible: state.newCanvasModalVisible,
   }))
   const importKnowledgeModal = useImportKnowledgeModalShallow(state => ({
     showNewKnowledgeModal: state.showNewKnowledgeModal,
@@ -53,6 +58,7 @@ export const AppLayout = (props: AppLayoutProps) => {
       {importResourceStore.importResourceModalVisible ? (
         <ImportResourceModal />
       ) : null}
+      {newCanvasModalStore.newCanvasModalVisible ? <NewCanvasModal /> : null}
       {importKnowledgeModal.showNewKnowledgeModal && <NewKnowledgeModal />}
       <SubscribeModal />
     </Layout>

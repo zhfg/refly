@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
+import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-canvas-tabs';
 
 export const useAINote = (shouldInitListener = false) => {
   const { t } = useTranslation();
@@ -17,7 +17,7 @@ export const useAINote = (shouldInitListener = false) => {
     updateNotePanelVisible: state.updateCanvasPanelVisible,
   }));
   const { jumpToCanvas } = useKnowledgeBaseJumpNewPath();
-  const { handleAddTab } = useCanvasTabs();
+  const { handleAddTab: handleAddCanvasTab } = useCanvasTabs();
 
   const handleInitEmptyNote = async (content: string) => {
     canvasStore.updateNewNoteCreating(true);
@@ -39,12 +39,16 @@ export const useAINote = (shouldInitListener = false) => {
     const { canvasId, title } = res?.data?.data;
     jumpToCanvas({
       canvasId,
+      // @ts-ignore
+      projectId: res?.data?.data?.projectId, // TODO: 这里需要补充 canvas 的 projectId
     });
-    handleAddTab({
+    handleAddCanvasTab({
       title,
       key: canvasId,
       content: content,
       canvasId,
+      // @ts-ignore
+      projectId: res?.data?.data?.projectId, // TODO: 这里需要补充 canvas 的 projectId
     });
   };
 

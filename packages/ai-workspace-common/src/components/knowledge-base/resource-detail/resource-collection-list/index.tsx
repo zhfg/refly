@@ -20,7 +20,7 @@ interface ResourceCollectionListProps {
 
 const ResourceCollectionList = ({ collections = [], updateCallback }: ResourceCollectionListProps) => {
   const { t } = useTranslation();
-  const { jumpToKnowledgeBase } = useKnowledgeBaseJumpNewPath();
+  const { jumpToProject } = useKnowledgeBaseJumpNewPath();
   const [searchParams] = useSearchParams();
   const kbId = searchParams.get('kbId');
   const resId = searchParams.get('resId');
@@ -51,9 +51,9 @@ const ResourceCollectionList = ({ collections = [], updateCallback }: ResourceCo
 
     const handleTagClick = () => {
       if (coll.collectionId === kbId) {
-        jumpToKnowledgeBase({ kbId: '' });
+        jumpToProject({ projectId: '' });
       } else {
-        jumpToKnowledgeBase({ kbId: coll.collectionId });
+        jumpToProject({ projectId: coll.collectionId });
       }
     };
 

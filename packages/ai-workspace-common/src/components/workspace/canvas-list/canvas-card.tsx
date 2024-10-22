@@ -12,18 +12,18 @@ interface CanvasCardProps {
   onClick: () => void;
 }
 
-export const NoteCard = (props: CanvasCardProps) => {
+export const CanvasCard = (props: CanvasCardProps) => {
   const { children, onClick, cardData, cardIcon } = props;
 
   return (
     <div
-      className="p-4 m-3 border rounded-lg card-box border-black/8"
-      id={`note-${props.index}`}
+      className="p-4 m-3 rounded-lg border card-box border-black/8"
+      id={`canvas-${props.index}`}
       onClick={() => onClick()}
     >
-      <div className="h-40 overflow-hidden">
+      <div className="overflow-hidden h-40">
         <div className="flex items-center mb-1">
-          <div className="flex items-center justify-center border rounded-lg card-icon-box shrink-0 border-black/8">
+          <div className="flex justify-center items-center rounded-lg border card-icon-box shrink-0 border-black/8">
             {cardIcon}
           </div>
           <Typography.Text

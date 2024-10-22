@@ -122,13 +122,13 @@
     "contentPanel": {
       "tabPanel": {
         "resource": "Resources",
-        "note": "Notes",
+        "canvas": "Canvas",
         "collection": "Collections",
         "thread": "Threads"
       },
       "newButton": {
         "resource": "New Resource",
-        "note": "New Note",
+        "canvas": "New Canvas",
         "collection": "New Collection"
       }
     },
@@ -272,6 +272,13 @@
       "newThread": "New Thread"
     }
   },
+  "canvas": {
+    "newCanvas": {
+      "modalTitle": "New Canvas",
+      "titlePlaceholder": "Please enter the title of the canvas",
+      "descriptionPlaceholder": "Please enter the description of the canvas"
+    }
+  },
   "resource": {
     "import": {
       "title": "Resource Integration",
@@ -384,7 +391,7 @@
       }
     },
     "siderMenu": {
-      "homePage": "Workspace",
+      "homePage": "Home",
       "news": "What's new?",
       "threadLibrary": "Threads",
       "explore": "Explore",
@@ -396,7 +403,12 @@
       "skill": "Skills",
       "collapse": "Collapse",
       "expand": "Expand",
-      "logout": "Log Out"
+      "logout": "Log Out",
+      "newDraft": "New Draft",
+      "knowledgeBase": "Knowledge Base",
+      "recentProjects": "Recent Projects",
+      "recentChats": "Recent Chats",
+      "viewMore": "View More"
     }
   },
   "knowledgeLibrary": {

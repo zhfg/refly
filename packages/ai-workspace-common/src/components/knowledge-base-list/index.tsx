@@ -8,7 +8,7 @@ import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { getClientOrigin } from '@refly/utils/url';
 // components
 import { useEffect } from 'react';
-import { KnowledgeBaseCard } from '@refly-packages/ai-workspace-common/components/knowledge-base-list/knowledge-base-card';
+import { ProjectItemCard } from '@refly-packages/ai-workspace-common/components/knowledge-base-list/knowledge-base-card';
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
 import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
 // utils
@@ -62,7 +62,7 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
     }
   }, [reloadListState.reloadKnowledgeBaseList]);
 
-  const { jumpToKnowledgeBase } = useKnowledgeBaseJumpNewPath();
+  const { jumpToProject } = useKnowledgeBaseJumpNewPath();
 
   if (dataList.length === 0 && !isRequesting) {
     return <Empty />;
@@ -94,15 +94,15 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
           className="knowledge-base-list-item-container"
           actionLayout="vertical"
           actions={[
-            <KnowledgeBaseCard
+            <ProjectItemCard
               index={key}
               cardData={item}
               cardIcon={<IconFolder style={{ fontSize: '32px', strokeWidth: 3 }} />}
               onClick={() => {
-                jumpToKnowledgeBase({ kbId: item?.collectionId });
+                jumpToProject({ projectId: item?.collectionId });
               }}
             >
-              <div className="flex items-center justify-between mt-6">
+              <div className="flex justify-between items-center mt-6">
                 <div className="text-xs text-black/40">
                   {time(item.updatedAt, language as LOCALE)
                     .utc()
@@ -131,7 +131,7 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
                   />
                 </div>
               </div>
-            </KnowledgeBaseCard>,
+            </ProjectItemCard>,
           ]}
         ></List.Item>
       )}

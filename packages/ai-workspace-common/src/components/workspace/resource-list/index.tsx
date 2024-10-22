@@ -73,7 +73,7 @@ export const ResourceList = () => {
     }
   }, [reloadListState.reloadResourceList]);
 
-  const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
+  const { jumpToResource } = useKnowledgeBaseJumpNewPath();
 
   if (dataList.length === 0 && !isRequesting) {
     return <Empty />;
@@ -117,7 +117,7 @@ export const ResourceList = () => {
                 if (['wait_parse', 'parse_failed'].includes(item.indexStatus)) {
                   return;
                 } else {
-                  jumpToReadResource({ resId: item?.resourceId });
+                  jumpToResource({ resId: item?.resourceId });
                 }
               }}
               deleteData={(resource: Resource) =>

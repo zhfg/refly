@@ -17,7 +17,7 @@ export const useMockInAppResource = () => {
     currentResource: state.currentResource,
   }));
   const [searchParams, setSearchParams] = useSearchParams();
-  const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
+  const { jumpToResource } = useKnowledgeBaseJumpNewPath();
 
   const kbId = searchParams.get('kbId');
   const resId = searchParams.get('resId');
@@ -27,7 +27,7 @@ export const useMockInAppResource = () => {
    * 在这之前，已经在初始
    */
   const handleFakeKBRouteJump = () => {
-    jumpToReadResource({
+    jumpToResource({
       resId: 'tempResId',
     });
   };

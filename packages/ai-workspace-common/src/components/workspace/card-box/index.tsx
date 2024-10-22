@@ -3,7 +3,7 @@ import { Typography, Spin } from '@arco-design/web-react';
 import { FaRegCircleXmark } from 'react-icons/fa6';
 import { IconCloseCircle } from '@arco-design/web-react/icon';
 
-import { Resource, Note, Collection } from '@refly/openapi-schema';
+import { Resource, Canvas, Collection } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 import './index.scss';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
@@ -19,12 +19,12 @@ interface CardBoxBaseProps {
 interface ResourceCardProps extends CardBoxBaseProps {
   type: 'resource';
   cardData: Resource;
-  reLoadResource?: () => void;
+  reLoadResource?: (resourceId?: string) => void;
 }
 
-interface NoteCardProps extends CardBoxBaseProps {
-  type: 'note';
-  cardData: Note;
+interface CanvasCardProps extends CardBoxBaseProps {
+  type: 'canvas';
+  cardData: Canvas;
 }
 
 interface CollectionCardProps extends CardBoxBaseProps {
@@ -34,11 +34,11 @@ interface CollectionCardProps extends CardBoxBaseProps {
 
 const contentKey = {
   resource: 'contentPreview',
-  note: 'contentPreview',
+  canvas: 'contentPreview',
   collection: 'description',
 };
 
-export const CardBox = (props: ResourceCardProps | NoteCardProps | CollectionCardProps) => {
+export const CardBox = (props: ResourceCardProps | CanvasCardProps | CollectionCardProps) => {
   const { t } = useTranslation();
   const { children, onClick, type, cardData } = props;
   const [loading, setLoading] = useState(false);
@@ -82,7 +82,7 @@ export const CardBox = (props: ResourceCardProps | NoteCardProps | CollectionCar
             className="parse-failed-tip"
             onClick={(e) => {
               e.stopPropagation();
-              reLoadResource(cardData.resourceId);
+              reLoadResource?.(cardData.resourceId);
             }}
           >
             {t(`resource.${cardData?.indexStatus}`)}
@@ -95,10 +95,10 @@ export const CardBox = (props: ResourceCardProps | NoteCardProps | CollectionCar
           ) : null
         }
       >
-        <div className="p-4 m-3 border rounded-lg card-box border-black/8" onClick={() => onClick()}>
-          <div className="h-40 overflow-hidden">
+        <div className="p-4 m-3 rounded-lg border card-box border-black/8" onClick={() => onClick()}>
+          <div className="overflow-hidden h-40">
             <div className="flex items-center mb-1 resource-url">
-              <div className="flex items-center justify-center border rounded-lg card-icon-box shrink-0 border-black/8">
+              <div className="flex justify-center items-center rounded-lg border card-icon-box shrink-0 border-black/8">
                 {props.cardIcon}
               </div>
               {props.type === 'resource' && props?.cardData?.data?.url ? (

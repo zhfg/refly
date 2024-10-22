@@ -1,7 +1,7 @@
 import { Divider, Button } from '@arco-design/web-react';
 import { HiOutlinePlus } from 'react-icons/hi2';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
-import { NoteList } from '@refly-packages/ai-workspace-common/components/workspace/note-list';
+import { CanvasList } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useTranslation } from 'react-i18next';
 import './index.scss';
@@ -19,8 +19,8 @@ export const AINoteEmpty = () => {
   }));
 
   return (
-    <div className="flex items-center justify-center w-full mt-16 overflow-auto ai-note-empty">
-      <div className="w-full h-full max-w-screen-lg">
+    <div className="flex overflow-auto justify-center items-center mt-16 w-full ai-note-empty">
+      <div className="w-full max-w-screen-lg h-full">
         <Button
           className="ml-20 text-green-400"
           icon={<HiOutlinePlus />}
@@ -30,7 +30,7 @@ export const AINoteEmpty = () => {
           {t('knowledgeBase.note.newNote')}
         </Button>
         <Divider />
-        <NoteList
+        <CanvasList
           listGrid={
             resourcePanelVisible
               ? {

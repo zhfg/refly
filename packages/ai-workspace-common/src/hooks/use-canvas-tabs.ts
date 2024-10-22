@@ -21,6 +21,8 @@ export const useCanvasTabs = () => {
       key: canvas?.canvasId || '',
       content: canvas?.contentPreview || '',
       canvasId: canvas?.canvasId || '',
+      // @ts-ignore
+      projectId: canvas?.projectId, // TODO: 这里需要补充 canvas 的 projectId
     };
     handleAddTab(newTab);
   };
@@ -40,11 +42,12 @@ export const useCanvasTabs = () => {
 
   const handleDeleteTab = (key: string) => {
     const index = tabs.findIndex((x) => x.key === key);
+    const tab = tabs[index];
     const newTabs = tabs.slice(0, index).concat(tabs.slice(index + 1));
     noteStore.updateTabs(newTabs);
 
     if (newTabs.length === 0 && noteStore.notePanelVisible) {
-      jumpToCanvas({ canvasId: '' });
+      jumpToCanvas({ canvasId: '', projectId: tab?.projectId || '' });
     }
 
     if (key === activeTab && index > -1 && newTabs.length) {
@@ -52,7 +55,7 @@ export const useCanvasTabs = () => {
       noteStore.updateActiveTab(activeTab);
 
       if (noteStore.notePanelVisible) {
-        jumpToCanvas({ canvasId: activeTab });
+        jumpToCanvas({ canvasId: activeTab, projectId: tab?.projectId || '' });
       }
     }
   };
@@ -70,7 +73,7 @@ export const useCanvasTabs = () => {
     noteStore.updateActiveTab(key);
     const tab = tabs?.find((tab) => tab?.key === key);
 
-    jumpToCanvas({ canvasId: tab?.canvasId || '' });
+    jumpToCanvas({ canvasId: tab?.canvasId || '', projectId: tab?.projectId || '' });
   };
 
   return {

@@ -13,9 +13,12 @@ import {
 } from "@refly-packages/ai-workspace-common/components/request-access/protected-route"
 
 // Lazy load components
-const Workspace = lazy(() => import("@/pages/workspace"))
-const ConvLibrary = lazy(() => import("@/pages/conv-library"))
+const Home = lazy(() => import("@/pages/home"))
 const KnowledgeBase = lazy(() => import("@/pages/knowledge-base"))
+const Resource = lazy(() => import("@/pages/resource"))
+const ConvLibrary = lazy(() => import("@/pages/conv-library"))
+const ConvItem = lazy(() => import("@/pages/conv-item"))
+const Project = lazy(() => import("@/pages/project"))
 const Skill = lazy(() => import("@/pages/skill"))
 const SkillDetailPage = lazy(() => import("@/pages/skill-detail"))
 const Settings = lazy(() => import("@/pages/settings"))
@@ -38,9 +41,12 @@ const LoadingFallback = () => (
 const prefetchRoutes = () => {
   // Prefetch common routes
   import("@/pages/login")
-  import("@/pages/workspace")
+  import("@/pages/home")
   import("@/pages/knowledge-base")
+  import("@/pages/resource")
+  import("@/pages/project")
   import("@/pages/conv-library")
+  import("@/pages/conv-item")
   import("@/pages/skill")
   import("@/pages/skill-detail")
   import("@/pages/settings")
@@ -108,7 +114,7 @@ export const AppRouter = (props: { layout?: any }) => {
             path="/"
             element={
               <BetaProtectedRoute
-                component={Workspace}
+                component={Home}
                 hasBetaAccess={hasBetaAccess}
               />
             }
@@ -122,12 +128,39 @@ export const AppRouter = (props: { layout?: any }) => {
               />
             }
           />
+          <Route
+            path="/knowledge-base/resource/:resId"
+            element={
+              <BetaProtectedRoute
+                component={Resource}
+                hasBetaAccess={hasBetaAccess}
+              />
+            }
+          />
+          <Route
+            path="/project/:projectId"
+            element={
+              <BetaProtectedRoute
+                component={Project}
+                hasBetaAccess={hasBetaAccess}
+              />
+            }
+          />
           <Route path="/login" element={<Login />} />
           <Route
             path="/thread"
             element={
               <BetaProtectedRoute
                 component={ConvLibrary}
+                hasBetaAccess={hasBetaAccess}
+              />
+            }
+          />
+          <Route
+            path="/thread/:convId"
+            element={
+              <BetaProtectedRoute
+                component={ConvItem}
                 hasBetaAccess={hasBetaAccess}
               />
             }

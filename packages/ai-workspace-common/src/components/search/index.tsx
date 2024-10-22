@@ -16,7 +16,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { SearchDomain, SearchResult, SkillMeta } from '@refly/openapi-schema';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
-import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
+import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-canvas-tabs';
 import { RenderItem } from '@refly-packages/ai-workspace-common/components/search/types';
 import classNames from 'classnames';
 
@@ -49,7 +49,7 @@ export const Search = (props: SearchProps) => {
   const { handleAddTab: handleAddNoteTab } = useCanvasTabs();
   const { handleAddTab: handleAddResourceTab } = useKnowledgeBaseTabs();
 
-  const { jumpToKnowledgeBase, jumpToCanvas, jumpToReadResource, jumpToConv } = useKnowledgeBaseJumpNewPath();
+  const { jumpToProject, jumpToCanvas, jumpToResource, jumpToConv } = useKnowledgeBaseJumpNewPath();
 
   const pages = searchStore.pages;
   const setPages = searchStore.setPages;
@@ -217,12 +217,16 @@ export const Search = (props: SearchProps) => {
       onItemClick: (item: SearchResult) => {
         jumpToCanvas({
           canvasId: item?.id,
+          // @ts-ignore
+          projectId: item?.metadata?.projectId, // TODO: 这里需要补充 canvas 的 projectId
         });
         handleAddNoteTab({
           title: item?.title,
           key: item?.id,
           content: '',
           canvasId: item?.id,
+          // @ts-ignore
+          projectId: item?.metadata?.projectId, // TODO: 这里需要补充 canvas 的 projectId
         });
         searchStore.setIsSearchOpen(false);
       },
@@ -241,7 +245,7 @@ export const Search = (props: SearchProps) => {
       data: searchStore.searchedReadResources || [],
       icon: <IconBook style={{ fontSize: 12 }} />,
       onItemClick: (item: SearchResult) => {
-        jumpToReadResource({
+        jumpToResource({
           resId: item?.id,
         });
         handleAddResourceTab({
@@ -264,8 +268,8 @@ export const Search = (props: SearchProps) => {
       data: searchStore.searchedKnowledgeBases || [],
       icon: <IconFile style={{ fontSize: 12 }} />,
       onItemClick: (item: SearchResult) => {
-        jumpToKnowledgeBase({
-          kbId: item?.id,
+        jumpToProject({
+          projectId: item?.id,
         });
         searchStore.setIsSearchOpen(false);
       },
@@ -283,6 +287,9 @@ export const Search = (props: SearchProps) => {
       onItemClick: (item: SearchResult) => {
         jumpToConv({
           convId: item?.id,
+          // TODO: 需要后端返回 projectId
+          // @ts-ignore
+          projectId: item?.metadata?.projectId,
         });
         searchStore.setIsSearchOpen(false);
       },

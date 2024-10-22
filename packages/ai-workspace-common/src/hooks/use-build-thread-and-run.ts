@@ -52,6 +52,7 @@ export const useBuildThreadAndRun = () => {
 
     jumpToConv({
       convId: newConv?.convId,
+      projectId: newConv?.projectId, // TODO: conv 增加 projectId
     });
   };
 

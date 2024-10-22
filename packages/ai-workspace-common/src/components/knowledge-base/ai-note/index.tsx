@@ -34,7 +34,7 @@ import { AiOutlineWarning, AiOutlineFileWord, AiOutlineDisconnect } from 'react-
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 import { getClientOrigin, getWsServerOrigin } from '@refly-packages/utils/url';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
+import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-canvas-tabs';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
 import { AINoteEmpty } from '@refly-packages/ai-workspace-common/components/knowledge-base/ai-note-empty';
 
@@ -428,7 +428,7 @@ export const AINote = () => {
 
   const searchStore = useSearchStore();
 
-  const { tabs, activeTab, setActiveTab, handleDeleteTab, handleAddTab } = useCanvasTabs();
+  const { tabs, activeTab, setActiveTab, handleDeleteTab, handleAddTab: handleAddCanvasTab } = useCanvasTabs();
 
   useEffect(() => {
     return () => {
@@ -452,11 +452,13 @@ export const AINote = () => {
         updateIsRequesting(false);
       }
       if (!tabs.some((tab) => tab.key === canvasId)) {
-        handleAddTab({
+        handleAddCanvasTab({
           title: canvas.title,
           key: canvas.canvasId,
           content: canvas.contentPreview || '',
           canvasId: canvas.canvasId,
+          // @ts-ignore
+          projectId: canvas.projectId, // TODO: 这里需要补充 canvas 的 projectId
         });
       }
     };

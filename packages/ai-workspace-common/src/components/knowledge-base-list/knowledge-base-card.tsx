@@ -4,7 +4,7 @@ import { Collection } from '@refly/openapi-schema';
 import './index.scss';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 
-interface KnowledgeBaseCardProps {
+interface ProjectItemCardProps {
   cardData: Collection;
   index: number;
   cardIcon?: ReactNode;
@@ -12,18 +12,18 @@ interface KnowledgeBaseCardProps {
   onClick: () => void;
 }
 
-export const KnowledgeBaseCard = (props: KnowledgeBaseCardProps) => {
+export const ProjectItemCard = (props: ProjectItemCardProps) => {
   const { children, onClick, cardData } = props;
 
   return (
     <div
-      className="p-4 m-3 border rounded-lg card-box border-black/8"
+      className="p-4 m-3 rounded-lg border card-box border-black/8"
       id={`collection-${props.index}`}
       onClick={() => onClick()}
     >
-      <div className="h-40 overflow-hidden">
+      <div className="overflow-hidden h-40">
         <div className="flex items-center mb-1 resource-url">
-          <div className="flex items-center justify-center border rounded-lg card-icon-box shrink-0 border-black/8">
+          <div className="flex justify-center items-center rounded-lg border card-icon-box shrink-0 border-black/8">
             {props.cardIcon}
           </div>
 

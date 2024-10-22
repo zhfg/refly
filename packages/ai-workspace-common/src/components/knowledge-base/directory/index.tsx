@@ -35,7 +35,7 @@ export const KnowledgeBaseDirectory = (props: { small?: boolean }) => {
     updateCurrentKnowledgeBase: state.updateCurrentKnowledgeBase,
   }));
 
-  const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
+  const { jumpToResource } = useKnowledgeBaseJumpNewPath();
   const { handleAddTab } = useKnowledgeBaseTabs();
 
   const [queryParams] = useSearchParams();
@@ -103,7 +103,7 @@ export const KnowledgeBaseDirectory = (props: { small?: boolean }) => {
     if (!resId) {
       const firstResourceId = knowledgeBaseStore.currentKnowledgeBase?.resources?.[0]?.resourceId;
       if (firstResourceId) {
-        jumpToReadResource({
+        jumpToResource({
           resId: firstResourceId,
         });
       }
@@ -194,7 +194,7 @@ export const KnowledgeBaseDirectory = (props: { small?: boolean }) => {
           small={small}
           handleItemDelete={(item) => handleDeleteResource(item)}
           handleItemClick={(item) => {
-            jumpToReadResource({
+            jumpToResource({
               resId: item?.resourceId,
             });
             handleAddTab({
