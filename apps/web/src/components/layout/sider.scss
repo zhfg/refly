@@ -69,8 +69,33 @@
     }
 
     .recent-section {
-      h3 {
-        font-size: 14px;
+      padding-left: 12px;
+      color: rgba(0, 0, 0, 0.5);
+
+      .recent-section-title {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        height: 32px;
+        box-sizing: border-box;
+        margin-bottom: 4px;
+
+        .recent-section-title-text {
+          font-weight: 500;
+        }
+
+        .recent-section-title-more {
+          font-size: 12px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          cursor: pointer;
+          &:hover {
+            color: #00968f;
+            font-weight: 600;
+          }
+        }
       }
 
       .arco-menu-item {
@@ -139,9 +164,11 @@
     }
   }
 
-  .custom-menu-item:hover {
-    background-color: rgba(232, 232, 227) !important;
-    border-radius: 4px;
+  .custom-menu-item {
+    &:hover {
+      background-color: rgba(232, 232, 227) !important;
+      border-radius: 4px;
+    }
   }
 
   .setting-menu-item {

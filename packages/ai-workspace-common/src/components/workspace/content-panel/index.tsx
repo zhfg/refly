@@ -7,10 +7,10 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { WorkSpaceSearch } from '../work-space-search';
 import { ResourceList } from '@refly-packages/ai-workspace-common/components/workspace/resource-list';
 import { CanvasList } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list';
-import { KnowledgeBaseList } from '@refly-packages/ai-workspace-common/components/knowledge-base-list';
+import { ProjectList } from '@refly-packages/ai-workspace-common/components/project-list';
 import { SearchQuickOpenBtn } from '@refly-packages/ai-workspace-common/components/search-quick-open-btn';
 import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
-import { useImportKnowledgeModal } from '@refly-packages/ai-workspace-common/stores/import-knowledge-modal';
+import { useImportProjectModal } from '@refly-packages/ai-workspace-common/stores/import-project-modal';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
 
 import './index.scss';
@@ -27,7 +27,7 @@ const Content = (props: { val: string }) => {
     case 'canvas':
       return <CanvasList />;
     case 'project':
-      return <KnowledgeBaseList />;
+      return <ProjectList />;
     default:
       return <ResourceList />;
   }
@@ -57,7 +57,7 @@ const NewFileDropList = (props: { handleCreateButtonClick: (type: string) => voi
 const NewFileButton = (props: { val: string }) => {
   const { t } = useTranslation();
   const importResourceStore = useImportResourceStore();
-  const importKnowledgeModal = useImportKnowledgeModal();
+  const importProjectModal = useImportProjectModal();
   const { handleInitEmptyNote } = useAINote();
   const { newNoteCreating } = useCanvasStore((state) => ({
     newNoteCreating: state.newCanvasCreating,
@@ -71,8 +71,8 @@ const NewFileButton = (props: { val: string }) => {
       importResourceStore.setImportResourceModalVisible(true);
     }
     if (type === 'project') {
-      importKnowledgeModal.setShowNewKnowledgeModal(true);
-      importKnowledgeModal.setEditProject(null);
+      importProjectModal.setShowNewProjectModal(true);
+      importProjectModal.setEditProject(null);
     }
   };
 

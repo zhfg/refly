@@ -1,19 +1,19 @@
 import { Divider, Button } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
-import { KnowledgeBaseList } from '@refly-packages/ai-workspace-common/components/knowledge-base-list';
-import { useImportKnowledgeModal } from '@refly-packages/ai-workspace-common/stores/import-knowledge-modal';
+import { ProjectList } from '@refly-packages/ai-workspace-common/components/project-list';
+import { useImportProjectModal } from '@refly-packages/ai-workspace-common/stores/import-project-modal';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 import './index.scss';
 
 export const KnowledgeBaseDetailEmpty = () => {
-  const importKnowledgeModal = useImportKnowledgeModal();
+  const importProjectModal = useImportProjectModal();
   const noteStore = useCanvasStore((state) => ({
     notePanelVisible: state.canvasPanelVisible,
   }));
 
   const handleCreateKnowledgeBase = () => {
-    importKnowledgeModal.setShowNewKnowledgeModal(true);
-    importKnowledgeModal.setEditCollection(null);
+    importProjectModal.setShowNewProjectModal(true);
+    importProjectModal.setEditProject(null);
   };
 
   return (
@@ -23,7 +23,7 @@ export const KnowledgeBaseDetailEmpty = () => {
           创建知识库
         </Button>
         <Divider />
-        <KnowledgeBaseList
+        <ProjectList
           listGrid={
             noteStore.notePanelVisible
               ? {

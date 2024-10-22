@@ -4,10 +4,10 @@ import { Drawer } from '@arco-design/web-react';
 import './index.scss';
 
 // 自定义组件
-import { KnowledgeBaseList } from '@refly-packages/ai-workspace-common/components/knowledge-base-list';
+import { ProjectList } from '@refly-packages/ai-workspace-common/components/project-list';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
-interface KnowledgeBaseListModalProps {
+interface ProjectListModalProps {
   title: string;
   classNames: string;
   width?: number;
@@ -15,7 +15,7 @@ interface KnowledgeBaseListModalProps {
   placement?: 'bottom' | 'left' | 'right' | 'top';
 }
 
-export const KnowledgeBaseListModal = (props: KnowledgeBaseListModalProps) => {
+export const ProjectListModal = (props: ProjectListModalProps) => {
   const knowledgeBaseStore = useKnowledgeBaseStore();
 
   return (
@@ -46,7 +46,7 @@ export const KnowledgeBaseListModal = (props: KnowledgeBaseListModalProps) => {
         knowledgeBaseStore.updateKbModalVisible(false);
       }}
     >
-      <KnowledgeBaseList />
+      <ProjectList />
     </Drawer>
   );
 };

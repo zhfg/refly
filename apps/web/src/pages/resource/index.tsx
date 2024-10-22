@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback, memo } from "react"
+import { useEffect, useState, useRef, useCallback } from "react"
 import throttle from "lodash.throttle"
 import { Button, Tabs, Tooltip } from "@arco-design/web-react"
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels"
@@ -13,9 +13,8 @@ import {
   ActionSource,
   useKnowledgeBaseStoreShallow,
 } from "@refly-packages/ai-workspace-common/stores/knowledge-base"
-import { KnowledgeBaseListModal } from "@refly-packages/ai-workspace-common/components/knowledge-base/copilot/knowledge-base-list-modal"
+import { ProjectListModal } from "@refly-packages/ai-workspace-common/components/knowledge-base/copilot/project-list-modal"
 import { useKnowledgeBaseTabs } from "@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs"
-import { HiOutlineSearch } from "react-icons/hi"
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi2"
 
 import { useSearchStoreShallow } from "@refly-packages/ai-workspace-common/stores/search"
@@ -209,7 +208,7 @@ const Resource = () => {
       </PanelGroup>
       {knowledgeBaseStore?.kbModalVisible &&
       knowledgeBaseStore.actionSource === ActionSource.KnowledgeBase ? (
-        <KnowledgeBaseListModal
+        <ProjectListModal
           title="知识库"
           classNames="kb-list-modal"
           placement="right"

@@ -3,7 +3,7 @@ import { memo, useEffect, useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChatMessages } from './chat-messages';
 import { ConvListModal } from './conv-list-modal';
-import { KnowledgeBaseListModal } from './knowledge-base-list-modal';
+import { ProjectListModal } from './project-list-modal';
 import { SkillManagementModal } from '@refly-packages/ai-workspace-common/components/skill/skill-management-modal';
 import { CopilotOperationModule } from './copilot-operation-module';
 import { CopilotChatHeader } from './chat-header';
@@ -210,7 +210,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
         <ConvListModal title={t('copilot.convListModal.title')} classNames="conv-list-modal" />
       ) : null}
       {knowledgeBaseStore?.kbModalVisible && knowledgeBaseStore.actionSource === ActionSource.Conv ? (
-        <KnowledgeBaseListModal title={t('copilot.kbListModal.title')} classNames="kb-list-modal" />
+        <ProjectListModal title={t('copilot.kbListModal.title')} classNames="kb-list-modal" />
       ) : null}
       {knowledgeBaseStore?.sourceListModalVisible ? (
         <SourceListModal
