@@ -23,6 +23,58 @@ export type User = {
 };
 
 /**
+ * Reference metadata
+ */
+export type ReferenceMeta = {
+  /**
+   * Reference URL
+   */
+  url?: string;
+};
+
+/**
+ * Reference
+ */
+export type Reference = {
+  /**
+   * Reference ID
+   */
+  referenceId: string;
+  /**
+   * Source entity type
+   */
+  sourceType: string;
+  /**
+   * Source entity ID
+   */
+  sourceId: string;
+  /**
+   * Source entity title
+   */
+  sourceTitle: string;
+  /**
+   * Source entity metadata
+   */
+  sourceMeta?: ReferenceMeta;
+  /**
+   * Target entity type
+   */
+  targetType: string;
+  /**
+   * Target entity ID
+   */
+  targetId: string;
+  /**
+   * Target entity title
+   */
+  targetTitle: string;
+  /**
+   * Target entity metadata
+   */
+  targetMeta?: ReferenceMeta;
+};
+
+/**
  * Resource metadata
  */
 export type ResourceMeta = {
@@ -79,10 +131,6 @@ export type Resource = {
    */
   content?: string;
   /**
-   * Canvases this resource is referred to (only returned in getResourceDetail API)
-   */
-  referredByCanvases?: Array<Canvas>;
-  /**
    * Projects this resource belongs to (only returned in getResourceDetail API)
    */
   projects?: Array<Project>;
@@ -92,25 +140,6 @@ export type Resource = {
  * Reference type
  */
 export type ReferenceType = 'canvas' | 'resource';
-
-export type Reference = {
-  /**
-   * Entity ID
-   */
-  referenceId: string;
-  /**
-   * Reference type
-   */
-  referenceType: ReferenceType;
-  /**
-   * Reference title
-   */
-  title: string;
-  /**
-   * Reference URL
-   */
-  url?: string;
-};
 
 export type Canvas = {
   /**
@@ -141,14 +170,6 @@ export type Canvas = {
    * Canvas update time
    */
   updatedAt: string;
-  /**
-   * Canvases this canvas is referred to (only returned in detail API)
-   */
-  referredByCanvases?: Array<Canvas>;
-  /**
-   * References (only returned in detail API)
-   */
-  references?: Array<Reference>;
 };
 
 export type Project = {
@@ -1354,6 +1375,62 @@ export type BatchMoveCanvasRequest = {
   projectId: string;
 };
 
+export type QueryReferencesRequest = {
+  /**
+   * Source entity type
+   */
+  sourceType?: EntityType;
+  /**
+   * Source entity ID
+   */
+  sourceId?: string;
+  /**
+   * Target entity type
+   */
+  targetType?: EntityType;
+  /**
+   * Target entity ID
+   */
+  targetId?: string;
+};
+
+export type QueryReferencesResponse = BaseResponse & {
+  /**
+   * Reference list
+   */
+  data?: Array<Reference>;
+};
+
+export type ReferenceOperation = {
+  /**
+   * Source entity type
+   */
+  sourceType?: string;
+  /**
+   * Source entity ID
+   */
+  sourceId?: string;
+  /**
+   * Target entity type
+   */
+  targetType?: string;
+  /**
+   * Target entity ID
+   */
+  targetId?: string;
+  /**
+   * Operation type
+   */
+  operation: 'add' | 'remove';
+};
+
+export type OperateReferencesRequest = {
+  /**
+   * Reference operation list
+   */
+  operations?: Array<ReferenceOperation>;
+};
+
 export type UpsertProjectRequest = {
   /**
    * Project ID (only used for update)
@@ -2491,14 +2568,6 @@ export type DeleteCanvasResponse = BaseResponse;
 
 export type DeleteCanvasError = unknown;
 
-export type ManageCanvasReferenceData = {
-  body: ReferCanvasRequest;
-};
-
-export type ManageCanvasReferenceResponse = BaseResponse;
-
-export type ManageCanvasReferenceError = unknown;
-
 export type BatchMoveCanvasData = {
   body: BatchMoveCanvasRequest;
 };
@@ -2506,6 +2575,22 @@ export type BatchMoveCanvasData = {
 export type BatchMoveCanvasResponse = BaseResponse;
 
 export type BatchMoveCanvasError = unknown;
+
+export type QueryReferencesData = {
+  body: QueryReferencesRequest;
+};
+
+export type QueryReferencesResponse2 = unknown;
+
+export type QueryReferencesError = unknown;
+
+export type OperateReferencesData = {
+  body: OperateReferencesRequest;
+};
+
+export type OperateReferencesResponse = BaseResponse;
+
+export type OperateReferencesError = unknown;
 
 export type ListProjectsData = {
   query?: {
@@ -3113,9 +3198,9 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/knowledge/canvas/manageRef': {
+  '/knowledge/canvas/batchMove': {
     post: {
-      req: ManageCanvasReferenceData;
+      req: BatchMoveCanvasData;
       res: {
         /**
          * Successful operation
@@ -3124,9 +3209,20 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/knowledge/canvas/batchMove': {
+  '/knowledge/reference/query': {
     post: {
-      req: BatchMoveCanvasData;
+      req: QueryReferencesData;
+      res: {
+        /**
+         * Successful operation
+         */
+        '200': unknown;
+      };
+    };
+  };
+  '/knowledge/reference/operate': {
+    post: {
+      req: OperateReferencesData;
       res: {
         /**
          * Successful operation

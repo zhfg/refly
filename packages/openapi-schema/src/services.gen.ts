@@ -38,12 +38,15 @@ import type {
   DeleteCanvasData,
   DeleteCanvasError,
   DeleteCanvasResponse,
-  ManageCanvasReferenceData,
-  ManageCanvasReferenceError,
-  ManageCanvasReferenceResponse,
   BatchMoveCanvasData,
   BatchMoveCanvasError,
   BatchMoveCanvasResponse,
+  QueryReferencesData,
+  QueryReferencesError,
+  QueryReferencesResponse2,
+  OperateReferencesData,
+  OperateReferencesError,
+  OperateReferencesResponse,
   ListProjectsData,
   ListProjectsError,
   ListProjectsResponse,
@@ -301,17 +304,6 @@ export const deleteCanvas = (options: Options<DeleteCanvasData>) => {
 };
 
 /**
- * Manage canvas reference
- * Manage reference between canvas and resource or another canvas
- */
-export const manageCanvasReference = (options: Options<ManageCanvasReferenceData>) => {
-  return (options?.client ?? client).post<ManageCanvasReferenceResponse, ManageCanvasReferenceError>({
-    ...options,
-    url: '/knowledge/canvas/manageRef',
-  });
-};
-
-/**
  * Batch move canvases
  * Batch move existing canvases to another project
  */
@@ -319,6 +311,28 @@ export const batchMoveCanvas = (options: Options<BatchMoveCanvasData>) => {
   return (options?.client ?? client).post<BatchMoveCanvasResponse, BatchMoveCanvasError>({
     ...options,
     url: '/knowledge/canvas/batchMove',
+  });
+};
+
+/**
+ * Query references
+ * Query references by source or target entity
+ */
+export const queryReferences = (options: Options<QueryReferencesData>) => {
+  return (options?.client ?? client).post<QueryReferencesResponse2, QueryReferencesError>({
+    ...options,
+    url: '/knowledge/reference/query',
+  });
+};
+
+/**
+ * Operate references
+ * Operate references between source and target entities
+ */
+export const operateReferences = (options: Options<OperateReferencesData>) => {
+  return (options?.client ?? client).post<OperateReferencesResponse, OperateReferencesError>({
+    ...options,
+    url: '/knowledge/reference/operate',
   });
 };
 

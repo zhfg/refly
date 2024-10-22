@@ -24,6 +24,61 @@ export const $User = {
   },
 } as const;
 
+export const $ReferenceMeta = {
+  type: 'object',
+  description: 'Reference metadata',
+  properties: {
+    url: {
+      type: 'string',
+      description: 'Reference URL',
+    },
+  },
+} as const;
+
+export const $Reference = {
+  type: 'object',
+  description: 'Reference',
+  required: ['referenceId', 'sourceType', 'sourceId', 'sourceTitle', 'targetType', 'targetId', 'targetTitle'],
+  properties: {
+    referenceId: {
+      type: 'string',
+      description: 'Reference ID',
+    },
+    sourceType: {
+      type: 'string',
+      description: 'Source entity type',
+    },
+    sourceId: {
+      type: 'string',
+      description: 'Source entity ID',
+    },
+    sourceTitle: {
+      type: 'string',
+      description: 'Source entity title',
+    },
+    sourceMeta: {
+      $ref: '#/components/schemas/ReferenceMeta',
+      description: 'Source entity metadata',
+    },
+    targetType: {
+      type: 'string',
+      description: 'Target entity type',
+    },
+    targetId: {
+      type: 'string',
+      description: 'Target entity ID',
+    },
+    targetTitle: {
+      type: 'string',
+      description: 'Target entity title',
+    },
+    targetMeta: {
+      $ref: '#/components/schemas/ReferenceMeta',
+      description: 'Target entity metadata',
+    },
+  },
+} as const;
+
 export const $ResourceMeta = {
   type: 'object',
   description: 'Resource metadata',
@@ -91,13 +146,6 @@ export const $Resource = {
       type: 'string',
       description: 'Document content for this resource (only returned in getResourceDetail API)',
     },
-    referredByCanvases: {
-      type: 'array',
-      description: 'Canvases this resource is referred to (only returned in getResourceDetail API)',
-      items: {
-        $ref: '#/components/schemas/Canvas',
-      },
-    },
     projects: {
       type: 'array',
       description: 'Projects this resource belongs to (only returned in getResourceDetail API)',
@@ -112,29 +160,6 @@ export const $ReferenceType = {
   type: 'string',
   description: 'Reference type',
   enum: ['canvas', 'resource'],
-} as const;
-
-export const $Reference = {
-  type: 'object',
-  required: ['referenceId', 'referenceType', 'title'],
-  properties: {
-    referenceId: {
-      type: 'string',
-      description: 'Entity ID',
-    },
-    referenceType: {
-      description: 'Reference type',
-      $ref: '#/components/schemas/ReferenceType',
-    },
-    title: {
-      type: 'string',
-      description: 'Reference title',
-    },
-    url: {
-      type: 'string',
-      description: 'Reference URL',
-    },
-  },
 } as const;
 
 export const $Canvas = {
@@ -172,20 +197,6 @@ export const $Canvas = {
       type: 'string',
       format: 'date-time',
       description: 'Canvas update time',
-    },
-    referredByCanvases: {
-      type: 'array',
-      description: 'Canvases this canvas is referred to (only returned in detail API)',
-      items: {
-        $ref: '#/components/schemas/Canvas',
-      },
-    },
-    references: {
-      type: 'array',
-      description: 'References (only returned in detail API)',
-      items: {
-        $ref: '#/components/schemas/Reference',
-      },
     },
   },
 } as const;
@@ -1826,6 +1837,90 @@ export const $BatchMoveCanvasRequest = {
     projectId: {
       type: 'string',
       description: 'Project ID to move to',
+    },
+  },
+} as const;
+
+export const $QueryReferencesRequest = {
+  type: 'object',
+  properties: {
+    sourceType: {
+      description: 'Source entity type',
+      $ref: '#/components/schemas/EntityType',
+    },
+    sourceId: {
+      type: 'string',
+      description: 'Source entity ID',
+    },
+    targetType: {
+      description: 'Target entity type',
+      $ref: '#/components/schemas/EntityType',
+    },
+    targetId: {
+      type: 'string',
+      description: 'Target entity ID',
+    },
+  },
+} as const;
+
+export const $QueryReferencesResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Reference list',
+          items: {
+            $ref: '#/components/schemas/Reference',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $ReferenceOperation = {
+  type: 'object',
+  required: ['reference', 'operation'],
+  properties: {
+    sourceType: {
+      type: 'string',
+      description: 'Source entity type',
+    },
+    sourceId: {
+      type: 'string',
+      description: 'Source entity ID',
+    },
+    targetType: {
+      type: 'string',
+      description: 'Target entity type',
+    },
+    targetId: {
+      type: 'string',
+      description: 'Target entity ID',
+    },
+    operation: {
+      type: 'string',
+      description: 'Operation type',
+      enum: ['add', 'remove'],
+    },
+  },
+} as const;
+
+export const $OperateReferencesRequest = {
+  type: 'object',
+  required: ['operation', 'references'],
+  properties: {
+    operations: {
+      type: 'array',
+      description: 'Reference operation list',
+      items: {
+        $ref: '#/components/schemas/ReferenceOperation',
+      },
     },
   },
 } as const;

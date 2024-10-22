@@ -10,7 +10,6 @@ import {
   ResourceType,
   IndexStatus,
   Project,
-  ReferenceType,
 } from '@refly-packages/openapi-schema';
 import { pick } from '@/utils';
 import { conversationPO2DTO } from '@/conversation/conversation.dto';
@@ -41,7 +40,6 @@ export const resourcePO2DTO = (
   resource: ResourceModel & {
     content?: string;
     projects?: ProjectModel[];
-    canvases?: CanvasModel[];
   },
 ): Resource => {
   if (!resource) {
@@ -55,7 +53,6 @@ export const resourcePO2DTO = (
     createdAt: resource.createdAt.toJSON(),
     updatedAt: resource.updatedAt.toJSON(),
     projects: resource.projects?.map((project) => projectPO2DTO(project)),
-    referredByCanvases: resource.canvases?.map((canvas) => canvasPO2DTO(canvas)),
   };
   return res;
 };
@@ -63,9 +60,6 @@ export const resourcePO2DTO = (
 export const canvasPO2DTO = (
   canvas: CanvasModel & {
     content?: string;
-    referredByCanvases?: CanvasModel[];
-    referenceResources?: ResourceModel[];
-    referenceCanvases?: CanvasModel[];
   },
 ): Canvas => {
   if (!canvas) {
@@ -75,20 +69,6 @@ export const canvasPO2DTO = (
     ...pick(canvas, ['canvasId', 'title', 'content', 'contentPreview', 'isPublic', 'readOnly']),
     createdAt: canvas.createdAt.toJSON(),
     updatedAt: canvas.updatedAt.toJSON(),
-    referredByCanvases: canvas.referredByCanvases?.map((canvas) => canvasPO2DTO(canvas)),
-    references: [
-      ...(canvas.referenceResources?.map((resource) => ({
-        referenceId: resource.resourceId,
-        referenceType: 'resource' as ReferenceType,
-        title: resource.title,
-        url: JSON.parse(resource.meta || '{}').url,
-      })) || []),
-      ...(canvas.referenceCanvases?.map((canvas) => ({
-        referenceId: canvas.canvasId,
-        referenceType: 'canvas' as ReferenceType,
-        title: canvas.title,
-      })) || []),
-    ],
   };
   return res;
 };
