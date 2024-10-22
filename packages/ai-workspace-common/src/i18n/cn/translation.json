@@ -271,6 +271,13 @@
       "newThread": "新建会话"
     }
   },
+  "canvas": {
+    "newCanvas": {
+      "modalTitle": "新稿布",
+      "titlePlaceholder": "请输入稿布标题",
+      "descriptionPlaceholder": "请输入稿布描述"
+    }
+  },
   "resource": {
     "import": {
       "title": "资源集成",
@@ -393,7 +400,7 @@
       }
     },
     "siderMenu": {
-      "homePage": "工作台",
+      "homePage": "首页",
       "news": "新特性",
       "explore": "探索",
       "threadLibrary": "会话",

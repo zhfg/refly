@@ -272,6 +272,13 @@
       "newThread": "New Thread"
     }
   },
+  "canvas": {
+    "newCanvas": {
+      "modalTitle": "New Canvas",
+      "titlePlaceholder": "Please enter the title of the canvas",
+      "descriptionPlaceholder": "Please enter the description of the canvas"
+    }
+  },
   "resource": {
     "import": {
       "title": "Resource Integration",
@@ -384,7 +391,7 @@
       }
     },
     "siderMenu": {
-      "homePage": "Workspace",
+      "homePage": "Home",
       "news": "What's new?",
       "threadLibrary": "Threads",
       "explore": "Explore",

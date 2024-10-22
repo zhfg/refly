@@ -34,6 +34,7 @@ import {
 import Logo from "@/assets/logo.svg"
 import "./sider.scss"
 import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
+import { useNewCanvasModalStoreShallow } from "@/store/new-canvas-modal"
 import { safeParseJSON } from "@refly-packages/ai-workspace-common/utils/parse"
 // components
 import { SearchQuickOpenBtn } from "@refly-packages/ai-workspace-common/components/search-quick-open-btn"
@@ -208,6 +209,9 @@ export const SiderLayout = () => {
     setImportResourceModalVisible: state.setImportResourceModalVisible,
     setSelectedMenuItem: state.setSelectedMenuItem,
   }))
+  const newCanvasModalStore = useNewCanvasModalStoreShallow(state => ({
+    setNewCanvasModalVisible: state.setNewCanvasModalVisible,
+  }))
   const isGuideDetail = location.pathname.includes("guide/")
 
   const { t } = useTranslation()
@@ -221,7 +225,7 @@ export const SiderLayout = () => {
   const selectedKey = getNavSelectedKeys(location.pathname)
   const handleNavClick = (itemKey: string) => {
     switch (itemKey) {
-      case "Workspace": {
+      case "Home": {
         if (!notShowLoginBtn) {
           userStore.setLoginModalVisible(true)
         } else {
@@ -286,6 +290,11 @@ export const SiderLayout = () => {
         break
       }
 
+      case "Knowledge": {
+        navigate(`/knowledge-base`)
+        break
+      }
+
       case "ThreadLibrary": {
         navigate(`/thread`)
         break
@@ -330,11 +339,20 @@ export const SiderLayout = () => {
             style={{ fontSize: 20 }}
           />
         ),
+        showDivider: true,
+        onClick: () => {
+          newCanvasModalStore.setNewCanvasModalVisible(true)
+        },
       },
       {
         key: "Import",
         name: "newResource",
         icon: <IconImport style={{ fontSize: 20 }} />,
+        showDivider: true,
+        onClick: () => {
+          importResourceStore.setImportResourceModalVisible(true)
+          importResourceStore.setSelectedMenuItem("import-from-weblink")
+        },
       },
     ],
     [
