@@ -16,7 +16,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 // styles
 import './index.scss';
 import { LOCALE } from '@refly/common-types';
-import { Collection, Source } from '@refly/openapi-schema';
+import { Project, Source } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
@@ -43,7 +43,7 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
 
   const { dataList, setDataList, loadMore, reload, hasMore, isRequesting } = useFetchDataList({
     fetchData: async (queryPayload) => {
-      const res = await getClient().listCollections({
+      const res = await getClient().listProjects({
         query: queryPayload,
       });
       return res?.data;
@@ -84,9 +84,9 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
       pagination={false}
       dataSource={dataList}
       scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
-      render={(item: Collection, key) => (
+      render={(item: Project, key) => (
         <List.Item
-          key={item?.collectionId + key}
+          key={item?.projectId + key}
           style={{
             padding: '0',
             width: '100%',
@@ -99,7 +99,7 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
               cardData={item}
               cardIcon={<IconFolder style={{ fontSize: '32px', strokeWidth: 3 }} />}
               onClick={() => {
-                jumpToProject({ projectId: item?.collectionId });
+                jumpToProject({ projectId: item?.projectId });
               }}
             >
               <div className="flex justify-between items-center mt-6">
@@ -114,7 +114,7 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
                       key={1}
                       onClick={(e) => {
                         e.stopPropagation();
-                        copyToClipboard(`${getClientOrigin()}/knowledge-base?kbId=${item?.collectionId}`);
+                        copyToClipboard(`${getClientOrigin()}/knowledge-base?kbId=${item?.projectId}`);
                         message.success(t('knowledgeLibrary.archive.item.copyNotify'));
                       }}
                     >
@@ -124,10 +124,10 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
                   <DeleteDropdownMenu
                     type="knowledgeBase"
                     data={item}
-                    postDeleteList={(collection: Collection) =>
-                      setDataList(dataList.filter((n) => n.collectionId !== collection.collectionId))
+                    postDeleteList={(project: Project) =>
+                      setDataList(dataList.filter((n) => n.projectId !== project.projectId))
                     }
-                    getPopupContainer={() => document.getElementById(`collection-${key}`) as HTMLElement}
+                    getPopupContainer={() => document.getElementById(`project-${key}`) as HTMLElement}
                   />
                 </div>
               </div>

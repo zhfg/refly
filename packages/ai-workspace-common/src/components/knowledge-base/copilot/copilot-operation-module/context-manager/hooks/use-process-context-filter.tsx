@@ -7,12 +7,12 @@ import { useContextFilterConfigStore } from '@refly-packages/ai-workspace-common
 import { useProcessContextItems } from './use-process-context-items';
 import { useDebouncedCallback } from 'use-debounce';
 
-import { SkillContextRuleGroup } from '@refly/openapi-schema';
+import { SkillContextRuleGroup, SkillContextKey } from '@refly/openapi-schema';
 
 import { useTranslation } from 'react-i18next';
 
 export interface FilterConfig {
-  type: string[];
+  type: SkillContextKey[];
 }
 
 const MAX_LIMIT = 50;
@@ -20,22 +20,22 @@ const DISABLED_LIMIT = 0;
 
 const typeMap = {
   resources: 'resource',
-  notes: 'note',
-  collections: 'collection',
+  canvases: 'canvas',
+  projects: 'project',
 };
 
 const defaultConfig: SkillContextRuleGroup = {
   rules: [
     { key: 'resources', limit: MAX_LIMIT, required: false },
-    { key: 'notes', limit: MAX_LIMIT, required: false },
-    { key: 'collections', limit: MAX_LIMIT, required: false },
+    { key: 'canvases', limit: MAX_LIMIT, required: false },
+    { key: 'projects', limit: MAX_LIMIT, required: false },
     {
       key: 'contentList',
       limit: MAX_LIMIT,
       required: false,
     },
   ],
-  preferredContextKeys: ['resources', 'notes', 'collections', 'contentList'],
+  preferredContextKeys: ['resources', 'canvases', 'projects', 'contentList'],
   relation: 'regular',
 };
 
@@ -127,7 +127,7 @@ export const useProcessContextFilter = (filterNow = false) => {
   };
 
   // update config
-  const updateConfig = (field: keyof FilterConfig, value: string, muti?: boolean) => {
+  const updateConfig = (field: keyof FilterConfig, value: SkillContextKey, muti?: boolean) => {
     if (muti) {
       setConfig((prev) => {
         const updatedField = prev[field].includes(value)
@@ -166,7 +166,7 @@ export const useProcessContextFilter = (filterNow = false) => {
   const filterApply = (config: FilterConfig, initialConfigRule: SkillContextRuleGroup) => {
     const filteredIds = [];
     Object.keys(contextItemIdsByType).forEach((type) => {
-      if (!config.type.includes(type)) {
+      if (!config.type.includes(type as SkillContextKey)) {
         filteredIds.push(...contextItemIdsByType[type]);
         return;
       }

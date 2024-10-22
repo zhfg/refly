@@ -331,26 +331,6 @@ paths:
                 $ref: '#/components/schemas/BaseResponse'
       security:
         - api_key: []
-  /knowledge/canvas/refer:
-    post:
-      tags:
-        - knowledge
-      summary: Refer canvas
-      description: Refer an existing canvas to another resource or canvas
-      operationId: referCanvas
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReferCanvasRequest'
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BaseResponse'
   /knowledge/canvas/batchMove:
     post:
       tags:
@@ -373,37 +353,42 @@ paths:
                 $ref: '#/components/schemas/BaseResponse'
       security:
         - api_key: []
-  /knowledge/collection/list:
-    get:
+  /knowledge/reference/query:
+    post:
       tags:
         - knowledge
-      summary: List user collections
-      description: List all collections for a user
-      operationId: listCollections
-      parameters:
-        - name: page
-          in: query
-          description: Page number
-          required: false
-          schema:
-            type: number
-            default: 1
-        - name: pageSize
-          in: query
-          description: Page size
-          required: false
-          schema:
-            type: number
-            default: 10
+      summary: Query references
+      description: Query references by source or target entity
+      operationId: queryReferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryReferencesRequest'
+      responses:
+        '200':
+          description: Successful operation
+  /knowledge/reference/operate:
+    post:
+      tags:
+        - knowledge
+      summary: Operate references
+      description: Operate references between source and target entities
+      operationId: operateReferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OperateReferencesRequest'
       responses:
         '200':
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListCollectionResponse'
-      security:
-        - api_key: []
+                $ref: '#/components/schemas/BaseResponse'
   /knowledge/project/list:
     get:
       tags:
@@ -435,30 +420,6 @@ paths:
                 $ref: '#/components/schemas/ListProjectResponse'
       security:
         - api_key: []
-  /knowledge/collection/detail:
-    get:
-      tags:
-        - knowledge
-      summary: Get collection detail
-      description: Return collection details along with its resources
-      operationId: getCollectionDetail
-      parameters:
-        - name: collectionId
-          in: query
-          description: Collection ID to retrieve
-          required: true
-          schema:
-            type: string
-            example: cl-g30e1b80b5g1itbemc0g5jj3
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GetCollectionDetailResponse'
-      security:
-        - api_key: []
   /knowledge/project/detail:
     get:
       tags:
@@ -483,34 +444,11 @@ paths:
                 $ref: '#/components/schemas/GetProjectDetailResponse'
       security:
         - api_key: []
-  /knowledge/collection/update:
-    post:
-      tags:
-        - knowledge
-      summary: Update collection
-      description: Update an existing collection
-      operationId: updateCollection
-      requestBody:
-        description: Collection update request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpsertCollectionRequest'
-        required: true
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UpsertCollectionResponse'
-      security:
-        - api_key: []
   /knowledge/project/update:
     post:
       tags:
         - knowledge
-      summary: Update collection
+      summary: Update project
       description: Update an existing project
       operationId: updateProject
       requestBody:
@@ -527,29 +465,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UpsertProjectResponse'
-      security:
-        - api_key: []
-  /knowledge/collection/new:
-    post:
-      tags:
-        - knowledge
-      summary: Create new collection
-      description: Create a new collection
-      operationId: createCollection
-      requestBody:
-        description: Collection creation request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpsertCollectionRequest'
-        required: true
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UpsertCollectionResponse'
       security:
         - api_key: []
   /knowledge/project/new:
@@ -575,50 +490,6 @@ paths:
                 $ref: '#/components/schemas/UpsertProjectResponse'
       security:
         - api_key: []
-  /knowledge/collection/addResource:
-    post:
-      tags:
-        - knowledge
-      summary: Add resource to collection
-      description: Add an existing resource to a collection
-      operationId: addResourceToCollection
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AddResourceToCollectionRequest'
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BaseResponse'
-      security:
-        - api_key: []
-  /knowledge/collection/removeResource:
-    post:
-      tags:
-        - knowledge
-      summary: Remove resource from collection
-      description: Remove an existing resource from a collection
-      operationId: removeResourceFromCollection
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RemoveResourceFromCollectionRequest'
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BaseResponse'
-      security:
-        - api_key: []
   /knowledge/project/bindRes:
     post:
       tags:
@@ -641,33 +512,11 @@ paths:
                 $ref: '#/components/schemas/BaseResponse'
       security:
         - api_key: []
-  /knowledge/collection/delete:
-    post:
-      tags:
-        - knowledge
-      summary: Delete collection
-      description: Delete an existing collection
-      operationId: deleteCollection
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DeleteCollectionRequest'
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BaseResponse'
-      security:
-        - api_key: []
   /knowledge/project/delete:
     post:
       tags:
         - knowledge
-      summary: Delete collection
+      summary: Delete project
       description: Delete an existing project
       operationId: deleteProject
       requestBody:
@@ -1441,7 +1290,7 @@ paths:
       tags:
         - search
       summary: Search
-      description: Search for canvases, resources, collections, etc.
+      description: Search for canvases, resources, projects, etc.
       operationId: search
       requestBody:
         required: true
@@ -1526,6 +1375,52 @@ components:
         planId:
           type: string
           description: Subscription plan ID
+    ReferenceMeta:
+      type: object
+      description: Reference metadata
+      properties:
+        url:
+          type: string
+          description: Reference URL
+    Reference:
+      type: object
+      description: Reference
+      required:
+        - referenceId
+        - sourceType
+        - sourceId
+        - sourceTitle
+        - targetType
+        - targetId
+        - targetTitle
+      properties:
+        referenceId:
+          type: string
+          description: Reference ID
+        sourceType:
+          type: string
+          description: Source entity type
+        sourceId:
+          type: string
+          description: Source entity ID
+        sourceTitle:
+          type: string
+          description: Source entity title
+        sourceMeta:
+          $ref: '#/components/schemas/ReferenceMeta'
+          description: Source entity metadata
+        targetType:
+          type: string
+          description: Target entity type
+        targetId:
+          type: string
+          description: Target entity ID
+        targetTitle:
+          type: string
+          description: Target entity title
+        targetMeta:
+          $ref: '#/components/schemas/ReferenceMeta'
+          description: Target entity metadata
     ResourceMeta:
       type: object
       description: Resource metadata
@@ -1573,27 +1468,17 @@ components:
         createdAt:
           type: string
           format: date-time
-          description: Collection creation time
+          description: Resource creation time
         updatedAt:
           type: string
           format: date-time
-          description: Collection update time
+          description: Resource update time
         contentPreview:
           type: string
           description: Preview content for this resource
         content:
           type: string
           description: Document content for this resource (only returned in getResourceDetail API)
-        collections:
-          type: array
-          description: Collections this resource belongs to (only returned in getResourceDetail API)
-          items:
-            $ref: '#/components/schemas/Collection'
-        referredByCanvases:
-          type: array
-          description: Canvases this resource is referred to (only returned in getResourceDetail API)
-          items:
-            $ref: '#/components/schemas/Canvas'
         projects:
           type: array
           description: Projects this resource belongs to (only returned in getResourceDetail API)
@@ -1605,25 +1490,6 @@ components:
       enum:
         - canvas
         - resource
-    Reference:
-      type: object
-      required:
-        - referenceId
-        - referenceType
-        - title
-      properties:
-        referenceId:
-          type: string
-          description: Entity ID
-        referenceType:
-          description: Reference type
-          $ref: '#/components/schemas/ReferenceType'
-        title:
-          type: string
-          description: Reference title
-        url:
-          type: string
-          description: Reference URL
     Canvas:
       type: object
       required:
@@ -1658,16 +1524,6 @@ components:
           type: string
           format: date-time
           description: Canvas update time
-        referredByCanvases:
-          type: array
-          description: Canvases this canvas is referred to (only returned in detail API)
-          items:
-            $ref: '#/components/schemas/Canvas'
-        references:
-          type: array
-          description: References (only returned in detail API)
-          items:
-            $ref: '#/components/schemas/Reference'
     Project:
       type: object
       required:
@@ -1691,14 +1547,14 @@ components:
         createdAt:
           type: string
           format: date-time
-          description: Collection creation time
+          description: Project creation time
         updatedAt:
           type: string
           format: date-time
-          description: Collection update time
+          description: Project update time
         resources:
           type: array
-          description: Collection resources (only returned in detail API)
+          description: Project related resources (only returned in detail API)
           items:
             $ref: '#/components/schemas/Resource'
         canvases:
@@ -1711,46 +1567,13 @@ components:
           description: Project conversations (only returned in detail API)
           items:
             $ref: '#/components/schemas/Conversation'
-    Collection:
-      type: object
-      required:
-        - collectionId
-        - title
-        - createdAt
-        - updatedAt
-      properties:
-        collectionId:
-          type: string
-          description: Collection ID
-          example: cl-g30e1b80b5g1itbemc0g5jj3
-        title:
-          type: string
-          description: Collection title
-          example: Default Collection
-        description:
-          type: string
-          description: Collection description
-          example: Collection description
-        createdAt:
-          type: string
-          format: date-time
-          description: Collection creation time
-        updatedAt:
-          type: string
-          format: date-time
-          description: Collection update time
-        resources:
-          type: array
-          description: Collection resources (only returned in detail API)
-          items:
-            $ref: '#/components/schemas/Resource'
     EntityType:
       type: string
       description: Entity type
       enum:
         - canvas
         - resource
-        - collection
+        - project
     Entity:
       type: object
       description: Entity
@@ -1800,7 +1623,7 @@ components:
           description: Label class update time
     LabelInstance:
       type: object
-      description: Label instances related to resources, collections, etc.
+      description: Label instances related to resources, projects, etc.
       required:
         - labelId
         - labelClassId
@@ -2475,12 +2298,12 @@ components:
           items:
             type: string
             example: r-g30e1b80b5g1itbemc0g5jj3
-        collectionIds:
+        projectIds:
           type: array
-          description: List of collection IDs to retrieve
+          description: List of project IDs to retrieve
           items:
             type: string
-            example: cl-g30e1b80b5g1itbemc0g5jj3
+            example: p-g30e1b80b5g1itbemc0g5jj3
     ChatPayload:
       type: object
       description: Chat payload
@@ -2812,10 +2635,6 @@ components:
           type: string
           description: Resource ID (only used for update)
           example: r-g30e1b80b5g1itbemc0g5jj3
-        collectionId:
-          type: string
-          description: Collection ID (will add to the collection if given)
-          example: cl-g30e1b80b5g1itbemc0g5jj3
         projectId:
           type: string
           description: Project ID (will add to the project if given)
@@ -2988,21 +2807,66 @@ components:
         projectId:
           type: string
           description: Project ID to move to
-    UpsertCollectionRequest:
+    QueryReferencesRequest:
       type: object
       properties:
-        collectionId:
+        sourceType:
+          description: Source entity type
+          $ref: '#/components/schemas/EntityType'
+        sourceId:
           type: string
-          description: Collection ID (only used for update)
-          example: cl-g30e1b80b5g1itbemc0g5jj3
-        title:
+          description: Source entity ID
+        targetType:
+          description: Target entity type
+          $ref: '#/components/schemas/EntityType'
+        targetId:
           type: string
-          description: Collection title
-          example: My Collection
-        description:
+          description: Target entity ID
+    QueryReferencesResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Reference list
+              items:
+                $ref: '#/components/schemas/Reference'
+    ReferenceOperation:
+      type: object
+      required:
+        - reference
+        - operation
+      properties:
+        sourceType:
           type: string
-          description: Collection description
-          example: Collection description
+          description: Source entity type
+        sourceId:
+          type: string
+          description: Source entity ID
+        targetType:
+          type: string
+          description: Target entity type
+        targetId:
+          type: string
+          description: Target entity ID
+        operation:
+          type: string
+          description: Operation type
+          enum:
+            - add
+            - remove
+    OperateReferencesRequest:
+      type: object
+      required:
+        - operation
+        - references
+      properties:
+        operations:
+          type: array
+          description: Reference operation list
+          items:
+            $ref: '#/components/schemas/ReferenceOperation'
     UpsertProjectRequest:
       type: object
       properties:
@@ -3018,13 +2882,6 @@ components:
           type: string
           description: Project description
           example: Project description
-    UpsertCollectionResponse:
-      allOf:
-        - $ref: '#/components/schemas/BaseResponse'
-        - type: object
-          properties:
-            data:
-              $ref: '#/components/schemas/Collection'
     UpsertProjectResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -3032,20 +2889,6 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/Project'
-    AddResourceToCollectionRequest:
-      type: object
-      required:
-        - collectionId
-        - resourceIds
-      properties:
-        collectionId:
-          type: string
-          description: Collection ID
-        resourceIds:
-          type: array
-          description: Resource ID list
-          items:
-            type: string
     BindProjectResourcesRequest:
       type: object
       required:
@@ -3067,20 +2910,6 @@ components:
           enum:
             - bind
             - unbind
-    RemoveResourceFromCollectionRequest:
-      type: object
-      required:
-        - collectionId
-        - resourceIds
-      properties:
-        collectionId:
-          type: string
-          description: Collection ID
-        resourceIds:
-          type: array
-          description: Resource ID list
-          items:
-            type: string
     DeleteProjectRequest:
       type: object
       required:
@@ -3090,15 +2919,6 @@ components:
           type: string
           description: Project ID to delete
           example: p-g30e1b80b5g1itbemc0g5jj3
-    DeleteCollectionRequest:
-      type: object
-      required:
-        - collectionId
-      properties:
-        collectionId:
-          type: string
-          description: Collection ID to delete
-          example: cl-g30e1b80b5g1itbemc0g5jj3
     ListProjectResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -3108,17 +2928,7 @@ components:
               type: array
               description: Project list
               items:
-                $ref: '#/components/schemas/Collection'
-    ListCollectionResponse:
-      allOf:
-        - $ref: '#/components/schemas/BaseResponse'
-        - type: object
-          properties:
-            data:
-              type: array
-              description: Collection list
-              items:
-                $ref: '#/components/schemas/Collection'
+                $ref: '#/components/schemas/Project'
     GetProjectDetailResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -3128,15 +2938,6 @@ components:
               type: object
               description: Project data
               $ref: '#/components/schemas/Project'
-    GetCollectionDetailResponse:
-      allOf:
-        - $ref: '#/components/schemas/BaseResponse'
-        - type: object
-          properties:
-            data:
-              type: object
-              description: Collection data
-              $ref: '#/components/schemas/Collection'
     ListLabelClassesResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -3407,19 +3208,19 @@ components:
         metadata:
           type: object
           description: Resource context metadata
-    SkillContextCollectionItem:
+    SkillContextProjectItem:
       type: object
-      description: Skill context collection item
+      description: Skill context project item
       properties:
-        collectionId:
+        projectId:
           type: string
-          description: Collection ID
-        collection:
-          description: Collection
-          $ref: '#/components/schemas/Collection'
+          description: Project ID
+        project:
+          description: Project
+          $ref: '#/components/schemas/Project'
         metadata:
           type: object
-          description: Collection context metadata
+          description: Project context metadata
     SkillContextCanvasItem:
       type: object
       description: Skill context canvas item
@@ -3466,11 +3267,11 @@ components:
           description: Context resources
           items:
             $ref: '#/components/schemas/SkillContextResourceItem'
-        collections:
+        projects:
           type: array
-          description: Context collections
+          description: Context projects
           items:
-            $ref: '#/components/schemas/SkillContextCollectionItem'
+            $ref: '#/components/schemas/SkillContextProjectItem'
         canvases:
           type: array
           description: Context canvases
@@ -3490,7 +3291,7 @@ components:
       type: string
       enum:
         - resources
-        - collections
+        - projects
         - canvases
         - contentList
         - urls
@@ -3918,7 +3719,7 @@ components:
       enum:
         - resource
         - canvas
-        - collection
+        - project
         - conversation
         - skill
     SearchMode:
@@ -3965,9 +3766,9 @@ components:
           type: object
           description: Resource metadata
           $ref: '#/components/schemas/ResourceMeta'
-        collectionId:
+        projectId:
           type: string
-          description: Collection ID
+          description: Project ID
     SearchResult:
       type: object
       required:
@@ -3999,7 +3800,7 @@ components:
         updatedAt:
           type: string
           format: date-time
-          description: Collection creation time
+          description: Data update time
     SearchResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

@@ -1,8 +1,9 @@
-import { initialCheckedKeys } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/context-panel/utils';
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+
+const initialCheckedKeys = ['currentPage-resource', 'currentPage-collection', 'currentPage-canvas'];
 
 export const useDynamicInitContextPanelState = () => {
   const { currentKnowledgeBase, currentCanvas: currentNote, currentResource } = useCopilotContextState();

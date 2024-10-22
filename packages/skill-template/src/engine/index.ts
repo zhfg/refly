@@ -2,7 +2,6 @@ import { SkillRunnableConfig } from '../base';
 import { ChatOpenAI, OpenAIChatInput } from '@langchain/openai';
 import { Document } from '@langchain/core/documents';
 import {
-  CreateCollectionResponse,
   CreateLabelClassRequest,
   CreateLabelClassResponse,
   CreateLabelInstanceRequest,
@@ -11,9 +10,7 @@ import {
   GetResourceDetailResponse,
   SearchRequest,
   SearchResponse,
-  UpdateCollectionResponse,
   UpdateResourceResponse,
-  UpsertCollectionRequest,
   UpsertResourceRequest,
   User,
   GetCanvasDetailResponse,
@@ -26,16 +23,13 @@ import {
   WebSearchResponse,
   ListCanvasData,
   ListCanvasResponse,
+  UpsertProjectRequest,
+  CreateProjectResponse,
+  UpdateProjectResponse,
 } from '@refly-packages/openapi-schema';
 
 // TODO: unify with frontend
-export type ContentNodeType =
-  | 'resource'
-  | 'canvas'
-  | 'extensionWeblink'
-  | 'resourceSelection'
-  | 'collectionSelection'
-  | 'canvasSelection';
+export type ContentNodeType = 'resource' | 'canvas' | 'extensionWeblink' | 'resourceSelection' | 'canvasSelection';
 
 export interface NodeMeta {
   title: string;
@@ -54,8 +48,8 @@ export interface ReflyService {
   getResourceDetail: (user: User, req: { resourceId: string }) => Promise<GetResourceDetailResponse>;
   createResource: (user: User, req: UpsertResourceRequest) => Promise<CreateResourceResponse>;
   updateResource: (user: User, req: UpsertResourceRequest) => Promise<UpdateResourceResponse>;
-  createCollection: (user: User, req: UpsertCollectionRequest) => Promise<CreateCollectionResponse>;
-  updateCollection: (user: User, req: UpsertCollectionRequest) => Promise<UpdateCollectionResponse>;
+  createProject: (user: User, req: UpsertProjectRequest) => Promise<CreateProjectResponse>;
+  updateProject: (user: User, req: UpsertProjectRequest) => Promise<UpdateProjectResponse>;
   createLabelClass: (user: User, req: CreateLabelClassRequest) => Promise<CreateLabelClassResponse>;
   createLabelInstance: (user: User, req: CreateLabelInstanceRequest) => Promise<CreateLabelInstanceResponse>;
   webSearch: (user: User, req: WebSearchRequest) => Promise<WebSearchResponse>;

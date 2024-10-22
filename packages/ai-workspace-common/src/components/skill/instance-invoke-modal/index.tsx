@@ -1,9 +1,5 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-// components
-import { InstanceInvokeForm } from '@refly-packages/ai-workspace-common/components/skill/instance-invoke-form';
-// store
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import { SkillInstance } from '@refly/openapi-schema';
@@ -73,13 +69,13 @@ export const InstanceInvokeModal = (props: InstanceInvokeModalProps) => {
       onCancel={() => setVisible(false)}
     >
       <div className="instance-invoke-modal-content">
-        <InstanceInvokeForm
+        {/* <InstanceInvokeForm
           onOk={onOk}
           form={form}
           data={data}
           setVisible={setVisible}
           postConfirmCallback={postConfirmCallback}
-        />
+        /> */}
       </div>
     </Modal>
   );

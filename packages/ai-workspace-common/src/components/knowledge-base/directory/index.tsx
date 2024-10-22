@@ -10,7 +10,7 @@ import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-commo
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useReloadListStateShallow } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 // 类型
-import { Resource, RemoveResourceFromCollectionRequest } from '@refly/openapi-schema';
+import { Resource, BindProjectResourcesRequest } from '@refly/openapi-schema';
 // 请求
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // 组件
@@ -49,9 +49,9 @@ export const KnowledgeBaseDirectory = (props: { small?: boolean }) => {
   const handleGetDetail = async (collectionId: string) => {
     setIsFetching(true);
     try {
-      const { data: newRes, error } = await getClient().getCollectionDetail({
+      const { data: newRes, error } = await getClient().getProjectDetail({
         query: {
-          collectionId,
+          projectId: collectionId,
         },
       });
 
@@ -132,7 +132,7 @@ export const KnowledgeBaseDirectory = (props: { small?: boolean }) => {
     navigate(url, { replace: true });
   };
 
-  const handleDeleteResource = (item: RemoveResourceFromCollectionRequest) => {
+  const handleDeleteResource = (item: BindProjectResourcesRequest) => {
     reloadKnowledgeBaseState.setReloadKnowledgeBaseList(true);
     if (resId === item?.resourceIds[0]) {
       reloadKnowledgeBaseState.setReloadResourceDetail(true);

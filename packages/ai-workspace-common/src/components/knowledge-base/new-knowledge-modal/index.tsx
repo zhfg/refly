@@ -17,7 +17,7 @@ export const NewKnowledgeModal = () => {
   const importKnowledgeModal = useImportKnowledgeModal();
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [form] = Form.useForm();
-  const editCollection = importKnowledgeModal.editCollection;
+  const editProject = importKnowledgeModal.editProject;
 
   function onOk() {
     form
@@ -27,27 +27,27 @@ export const NewKnowledgeModal = () => {
         setConfirmLoading(true);
         let result = null;
         try {
-          if (editCollection) {
-            const reqBody = { ...editCollection, ...res };
+          if (editProject) {
+            const reqBody = { ...editProject, ...res };
             delete reqBody.resources;
-            result = await getClient().updateCollection({
+            result = await getClient().updateProject({
               body: reqBody,
             });
           } else {
-            result = await getClient().createCollection({
+            result = await getClient().createProject({
               body: res,
             });
           }
           setConfirmLoading(false);
           if (result?.error) {
-            Message.error(t(`workspace.newKnowledgeModal.${editCollection ? 'editFailed' : 'failed'}`));
+            Message.error(t(`workspace.newKnowledgeModal.${editProject ? 'editFailed' : 'failed'}`));
           } else {
             importKnowledgeModal.setShowNewKnowledgeModal(false);
-            Message.success(t(`workspace.newKnowledgeModal.${editCollection ? 'editSuccessful' : 'successful'}`));
+            Message.success(t(`workspace.newKnowledgeModal.${editProject ? 'editSuccessful' : 'successful'}`));
             reloadListState.setReloadKnowledgeBaseList(true);
           }
         } catch (error) {
-          Message.error(t(`workspace.newKnowledgeModal.${editCollection ? 'editFailed' : 'failed'}`));
+          Message.error(t(`workspace.newKnowledgeModal.${editProject ? 'editFailed' : 'failed'}`));
           setConfirmLoading(false);
         }
       })
@@ -66,8 +66,8 @@ export const NewKnowledgeModal = () => {
   };
 
   useEffect(() => {
-    if (importKnowledgeModal.showNewKnowledgeModal && editCollection) {
-      const { title, description } = editCollection;
+    if (importKnowledgeModal.showNewKnowledgeModal && editProject) {
+      const { title, description } = editProject;
       form.setFieldsValue({ title, description });
     }
   }, [importKnowledgeModal.showNewKnowledgeModal]);
@@ -75,7 +75,7 @@ export const NewKnowledgeModal = () => {
   return (
     <div>
       <Modal
-        title={t(`workspace.newKnowledgeModal.${editCollection ? 'editModalTitle' : 'modalTitle'}`)}
+        title={t(`workspace.newKnowledgeModal.${editProject ? 'editModalTitle' : 'modalTitle'}`)}
         visible={importKnowledgeModal.showNewKnowledgeModal}
         okText={t('common.confirm')}
         cancelText={t('common.cancel')}

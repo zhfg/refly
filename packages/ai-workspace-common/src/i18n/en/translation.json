@@ -896,13 +896,6 @@
           "title": "Similar Resources"
         }
       },
-      "knowledgeBaseContextCard": {
-        "title": "Quick Actions for Current Knowledge Base",
-        "relatedCollection": {
-          "prompt": "Similar Knowledge Base",
-          "title": "Similar Knowledge Base"
-        }
-      },
       "noteContextCard": {
         "title": "Quick Actions for Current Note",
         "noteSelectedTitle": "Question within Selected Note Content",

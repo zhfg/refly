@@ -9,20 +9,19 @@ import { PrismaService } from '@/common/prisma.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
 import { MINIO_INTERNAL, MinioService } from '@/common/minio.service';
 import {
-  UpsertCollectionRequest,
   UpsertResourceRequest,
   ResourceMeta,
   ListResourcesData,
-  ListCollectionsData,
   ListCanvasData,
   UpsertCanvasRequest,
   User,
   GetResourceDetailData,
-  AddResourceToCollectionRequest,
-  RemoveResourceFromCollectionRequest,
   IndexStatus,
   ReindexResourceRequest,
   ResourceType,
+  ListProjectsData,
+  UpsertProjectRequest,
+  BindProjectResourcesRequest,
 } from '@refly-packages/openapi-schema';
 import {
   CHANNEL_FINALIZE_RESOURCE,
@@ -32,11 +31,11 @@ import {
   QUEUE_SYNC_STORAGE_USAGE,
 } from '@/utils';
 import {
-  genCollectionID,
   genResourceID,
   genCanvasID,
   cleanMarkdownForIngest,
   markdown2StateUpdate,
+  genProjectID,
 } from '@refly-packages/utils';
 import { FinalizeResourceParam } from './knowledge.dto';
 import { pick, omit } from '../utils';
@@ -61,9 +60,9 @@ export class KnowledgeService {
     @InjectQueue(QUEUE_SYNC_STORAGE_USAGE) private ssuQueue: Queue<SyncStorageUsageJobData>,
   ) {}
 
-  async listCollections(user: User, params: ListCollectionsData['query']) {
+  async listProjects(user: User, params: ListProjectsData['query']) {
     const { page, pageSize } = params;
-    return this.prisma.collection.findMany({
+    return this.prisma.project.findMany({
       where: { uid: user.uid, deletedAt: null },
       orderBy: { updatedAt: 'desc' },
       skip: (page - 1) * pageSize,
@@ -71,112 +70,107 @@ export class KnowledgeService {
     });
   }
 
-  async getCollectionDetail(user: User, param: { collectionId: string }) {
-    const { collectionId } = param;
+  async getProjectDetail(user: User, param: { projectId: string }) {
+    const { uid } = user;
+    const { projectId } = param;
 
-    const coll = await this.prisma.collection.findFirst({
-      where: { collectionId, deletedAt: null },
+    const project = await this.prisma.project.findFirst({
+      where: { projectId, uid, deletedAt: null },
       include: {
         resources: {
-          where: {
-            deletedAt: null,
-            OR: [{ isPublic: true }, { uid: user.uid }],
-          },
+          where: { uid, deletedAt: null },
           orderBy: { updatedAt: 'desc' },
         },
       },
     });
-    if (!coll) {
-      throw new NotFoundException('Collection not found');
+    if (!project) {
+      throw new NotFoundException('Project not found');
     }
 
-    // Permission check
-    if (!coll.isPublic && coll.uid !== user.uid) {
-      return null;
-    }
-
-    return coll;
+    return project;
   }
 
-  async upsertCollection(user: User, param: UpsertCollectionRequest) {
-    if (!param.collectionId) {
-      param.collectionId = genCollectionID();
+  async upsertProject(user: User, param: UpsertProjectRequest) {
+    if (!param.projectId) {
+      param.projectId = genProjectID();
     }
 
-    const collection = await this.prisma.collection.upsert({
-      where: { collectionId: param.collectionId },
+    const project = await this.prisma.project.upsert({
+      where: { projectId: param.projectId },
       create: {
-        collectionId: param.collectionId,
+        projectId: param.projectId,
         title: param.title,
         description: param.description,
         uid: user.uid,
       },
-      update: { ...omit(param, ['collectionId']) },
+      update: { ...omit(param, ['projectId']) },
     });
 
-    await this.elasticsearch.upsertCollection({
-      id: collection.collectionId,
-      createdAt: collection.createdAt.toJSON(),
-      updatedAt: collection.updatedAt.toJSON(),
-      ...pick(collection, ['title', 'description', 'uid']),
+    await this.elasticsearch.upsertProject({
+      id: project.projectId,
+      createdAt: project.createdAt.toJSON(),
+      updatedAt: project.updatedAt.toJSON(),
+      ...pick(project, ['title', 'description', 'uid']),
     });
 
-    return collection;
+    return project;
   }
 
-  async addResourceToCollection(user: User, param: AddResourceToCollectionRequest) {
-    const { resourceIds = [], collectionId } = param;
-
-    if (resourceIds.length === 0) {
-      throw new BadRequestException('resourceIds is required');
-    }
-
-    return this.prisma.collection.update({
-      where: { collectionId, uid: user.uid, deletedAt: null },
-      data: {
-        resources: {
-          connect: resourceIds.map((resourceId) => ({ resourceId })),
-        },
-      },
-    });
-  }
-
-  async removeResourceFromCollection(user: User, param: RemoveResourceFromCollectionRequest) {
-    const { resourceIds = [], collectionId } = param;
-
-    if (resourceIds.length === 0) {
-      throw new BadRequestException('resourceIds is required');
-    }
-
-    return this.prisma.collection.update({
-      where: { collectionId, uid: user.uid, deletedAt: null },
-      data: {
-        resources: {
-          disconnect: resourceIds.map((resourceId) => ({ resourceId })),
-        },
-      },
-    });
-  }
-
-  async deleteCollection(user: User, collectionId: string) {
+  async bindProjectResources(user: User, param: BindProjectResourcesRequest) {
     const { uid } = user;
-    const coll = await this.prisma.collection.findFirst({
-      where: { collectionId, uid, deletedAt: null },
+    const { resourceIds = [], projectId, operation } = param;
+
+    if (resourceIds.length === 0) {
+      throw new BadRequestException('resourceIds is required');
+    }
+
+    if (!projectId) {
+      throw new BadRequestException('projectId is required');
+    }
+
+    const project = await this.prisma.project.findFirst({
+      where: { projectId, uid, deletedAt: null },
     });
-    if (!coll) {
-      throw new BadRequestException('Collection not found');
+    if (!project) {
+      throw new NotFoundException('Project not found');
+    }
+
+    if (operation === 'bind') {
+      return this.prisma.project.update({
+        where: { projectId },
+        data: { resources: { connect: resourceIds.map((resourceId) => ({ resourceId })) } },
+      });
+    } else if (operation === 'unbind') {
+      return this.prisma.project.update({
+        where: { projectId },
+        data: { resources: { disconnect: resourceIds.map((resourceId) => ({ resourceId })) } },
+      });
+    } else {
+      throw new BadRequestException('Invalid operation');
+    }
+  }
+
+  async deleteProject(user: User, projectId: string) {
+    const { uid } = user;
+    const project = await this.prisma.project.findFirst({
+      where: { projectId, uid, deletedAt: null },
+    });
+    if (!project) {
+      throw new BadRequestException('Project not found');
     }
 
     await this.prisma.$transaction([
-      this.prisma.collection.update({
-        where: { collectionId, uid, deletedAt: null },
+      this.prisma.project.update({
+        where: { projectId, uid, deletedAt: null },
         data: { deletedAt: new Date() },
       }),
       this.prisma.labelInstance.updateMany({
-        where: { entityType: 'collection', entityId: collectionId, uid, deletedAt: null },
+        where: { entityType: 'project', entityId: projectId, uid, deletedAt: null },
         data: { deletedAt: new Date() },
       }),
     ]);
+
+    await this.elasticsearch.deleteProject(projectId);
   }
 
   async listResources(user: User, param: ListResourcesData['query']) {
@@ -196,14 +190,18 @@ export class KnowledgeService {
   }
 
   async getResourceDetail(user: User, param: GetResourceDetailData['query']) {
+    const { uid } = user;
     const { resourceId } = param;
 
     const resource = await this.prisma.resource.findFirst({
-      where: { resourceId, deletedAt: null },
-      include: { collections: { where: { deletedAt: null } } },
+      where: { resourceId, uid, deletedAt: null },
+      include: {
+        projects: { where: { deletedAt: null } },
+        canvases: { where: { deletedAt: null } },
+      },
     });
 
-    if (!resource || (!resource.isPublic && resource.uid !== user.uid)) {
+    if (!resource) {
       throw new NotFoundException('Resource not found');
     }
 
@@ -275,10 +273,10 @@ export class KnowledgeService {
         readOnly: !!param.readOnly,
         title: param.title || 'Untitled',
         indexStatus,
-        ...(param.collectionId
+        ...(param.projectId
           ? {
-              collections: {
-                connect: { collectionId: param.collectionId },
+              projects: {
+                connect: { projectId: param.projectId },
               },
             }
           : {}),
@@ -553,9 +551,11 @@ export class KnowledgeService {
   }
 
   async getCanvasDetail(user: User, canvasId: string) {
+    const { uid } = user;
     const canvas = await this.prisma.canvas.findFirst({
-      where: { canvasId, uid: user.uid, deletedAt: null },
+      where: { canvasId, uid, deletedAt: null },
     });
+
     if (!canvas) {
       throw new BadRequestException('Canvas not found');
     }

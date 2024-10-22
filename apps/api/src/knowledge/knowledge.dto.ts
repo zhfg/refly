@@ -1,59 +1,67 @@
 import {
-  Collection as CollectionModel,
   Resource as ResourceModel,
   Canvas as CanvasModel,
-  LabelInstance,
+  Project as ProjectModel,
+  Conversation as ConversationModel,
 } from '@prisma/client';
 import {
-  Collection,
   Resource,
   Canvas,
   ResourceType,
   IndexStatus,
+  Project,
 } from '@refly-packages/openapi-schema';
 import { pick } from '@/utils';
+import { conversationPO2DTO } from '@/conversation/conversation.dto';
 
 export type FinalizeResourceParam = {
   resourceId: string;
   uid: string;
 };
 
-export const collectionPO2DTO = (
-  coll: CollectionModel & { resources?: ResourceModel[]; labels?: LabelInstance[] },
-): Collection => {
-  if (!coll) {
-    return null;
-  }
+export const projectPO2DTO = (
+  project: ProjectModel & {
+    resources?: ResourceModel[];
+    canvases?: CanvasModel[];
+    conversations?: ConversationModel[];
+  },
+): Project => {
   return {
-    ...pick(coll, ['collectionId', 'title', 'description', 'isPublic']),
-    createdAt: coll.createdAt.toJSON(),
-    updatedAt: coll.updatedAt.toJSON(),
-    resources: coll.resources?.map((resource) => resourcePO2DTO(resource)),
+    ...pick(project, ['projectId', 'title', 'description']),
+    createdAt: project.createdAt.toJSON(),
+    updatedAt: project.updatedAt.toJSON(),
+    resources: project.resources?.map((resource) => resourcePO2DTO(resource)),
+    canvases: project.canvases?.map((canvas) => canvasPO2DTO(canvas)),
+    conversations: project.conversations?.map((conversation) => conversationPO2DTO(conversation)),
   };
 };
 
 export const resourcePO2DTO = (
   resource: ResourceModel & {
     content?: string;
-    collections?: CollectionModel[];
+    projects?: ProjectModel[];
   },
 ): Resource => {
   if (!resource) {
     return null;
   }
   const res: Resource = {
-    ...pick(resource, ['resourceId', 'title', 'isPublic', 'readOnly', 'content', 'contentPreview']),
+    ...pick(resource, ['resourceId', 'title', 'readOnly', 'content', 'contentPreview']),
     resourceType: resource.resourceType as ResourceType,
     indexStatus: resource.indexStatus as IndexStatus,
-    collections: resource.collections?.map((coll) => collectionPO2DTO(coll)),
     data: JSON.parse(resource.meta),
     createdAt: resource.createdAt.toJSON(),
     updatedAt: resource.updatedAt.toJSON(),
+    projects: resource.projects?.map((project) => projectPO2DTO(project)),
   };
   return res;
 };
 
-export const canvasPO2DTO = (canvas: CanvasModel & { content?: string }): Canvas => {
+export const canvasPO2DTO = (
+  canvas: CanvasModel & {
+    content?: string;
+  },
+): Canvas => {
   if (!canvas) {
     return null;
   }

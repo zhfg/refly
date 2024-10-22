@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 
-import { Collection, Resource } from '@refly/openapi-schema';
+import { Project, Resource } from '@refly/openapi-schema';
 
 export enum ActionSource {
   KnowledgeBase = 'knowledge-base',
@@ -19,7 +19,7 @@ export interface KnowledgeBaseTab {
 
 export interface KnowledgeBaseState {
   isSaveKnowledgeBaseModalVisible: boolean;
-  knowledgeBaseList: Collection[];
+  knowledgeBaseList: Project[];
   pageSize: number;
   currentPage: number;
   hasMore: boolean;
@@ -31,7 +31,7 @@ export interface KnowledgeBaseState {
   resourcePanelVisible: boolean;
 
   // 详情
-  currentKnowledgeBase: null | Collection;
+  currentKnowledgeBase: null | Project;
   currentResource: null | Resource;
 
   // 会话 modal
@@ -45,8 +45,8 @@ export interface KnowledgeBaseState {
 
   updateIsSaveKnowledgeBaseModalVisible: (isSaveKnowledgeBaseModalVisible: boolean) => void;
   updateIsRequesting: (isRequesting: boolean) => void;
-  updateKnowledgeBaseList: (knowledgeBaseList: Collection[]) => void;
-  updateCurrentKnowledgeBase: (knowledgeBase: Collection) => void;
+  updateKnowledgeBaseList: (knowledgeBaseList: Project[]) => void;
+  updateCurrentKnowledgeBase: (knowledgeBase: Project) => void;
   updateResource: (resource: Resource) => void;
   updateCurrentPage: (currentPage: number) => void;
   updateHasMore: (hasMore: boolean) => void;
@@ -93,12 +93,12 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
 
     updateIsSaveKnowledgeBaseModalVisible: (isSaveKnowledgeBaseModalVisible: boolean) =>
       set((state) => ({ ...state, isSaveKnowledgeBaseModalVisible })),
-    updateKnowledgeBaseList: (knowledgeBaseList: Collection[]) =>
+    updateKnowledgeBaseList: (knowledgeBaseList: Project[]) =>
       set((state) => ({
         ...state,
         knowledgeBaseList,
       })),
-    updateCurrentKnowledgeBase: (knowledgeBase: Collection) =>
+    updateCurrentKnowledgeBase: (knowledgeBase: Project) =>
       set((state) => ({
         ...state,
         currentKnowledgeBase: knowledgeBase,

@@ -78,7 +78,7 @@ model Conversation {
   /// Conversation ID
   convId          String   @unique @default("") @map("conv_id")
   /// Project ID
-  projectId       String?   @map("project_id")
+  projectId       String?  @map("project_id")
   /// Related project
   project         Project? @relation(fields: [projectId], references: [projectId])
   /// UID
@@ -325,30 +325,66 @@ model Collection {
 
 model Project {
   /// Primary key
-  pk          BigInt     @id @default(autoincrement())
+  pk            BigInt         @id @default(autoincrement())
   /// Project id
-  projectId   String     @unique @map("project_id")
+  projectId     String         @unique @map("project_id")
   /// Project title
-  title       String     @map("title")
+  title         String         @map("title")
   /// Project description
-  description String?    @map("description")
+  description   String?        @map("description")
   /// UID
-  uid         String     @map("uid")
+  uid           String         @map("uid")
   /// Create timestamp
-  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
-  updatedAt   DateTime   @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt     DateTime       @updatedAt @map("updated_at") @db.Timestamptz()
   /// Soft delete timestamp
-  deletedAt   DateTime?  @map("deleted_at") @db.Timestamptz()
+  deletedAt     DateTime?      @map("deleted_at") @db.Timestamptz()
   /// Related resources
-  resources   Resource[]
+  resources     Resource[]
   /// Related canvases
-  canvases    Canvas[]
+  canvases      Canvas[]
   /// Related conversations
   conversations Conversation[]
 
   @@index([uid, updatedAt])
   @@map("projects")
+}
+
+model Reference {
+  /// Primary key
+  pk          BigInt    @id @default(autoincrement())
+  /// Reference ID
+  referenceId String    @unique @map("reference_id")
+  /// Source entity type (e.g., "canvas" or "resource")
+  sourceType  String    @map("source_type")
+  /// Source entity ID
+  sourceId    String    @map("source_id")
+  /// Source entity title
+  sourceTitle String    @map("source_title")
+  /// Source entity metadata
+  sourceMeta  String    @map("source_meta")
+  /// Target entity type (e.g., "canvas" or "resource")
+  targetType  String    @map("target_type")
+  /// Target entity ID
+  targetId    String    @map("target_id")
+  /// Target entity title
+  targetTitle String    @map("target_title")
+  /// Target entity metadata
+  targetMeta  String    @map("target_meta")
+  /// UID of the user who created the reference
+  uid         String    @map("uid")
+  /// Create timestamp
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  /// Soft delete timestamp
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz()
+
+  @@index([sourceType, sourceId])
+  @@index([targetType, targetId])
+  @@index([uid, deletedAt])
+  @@map("references")
 }
 
 /// User-defined skills.

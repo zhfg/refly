@@ -69,16 +69,16 @@ export class MiscService {
       if (!resource) {
         throw new BadRequestException('Resource not found');
       }
-    } else if (entityType === 'collection') {
-      const collection = await this.prisma.collection.findUnique({
+    } else if (entityType === 'project') {
+      const project = await this.prisma.project.findUnique({
         where: {
-          collectionId: entityId,
+          projectId: entityId,
           uid: user.uid,
           deletedAt: null,
         },
       });
-      if (!collection) {
-        throw new BadRequestException('Collection not found');
+      if (!project) {
+        throw new BadRequestException('Project not found');
       }
     } else if (entityType === 'canvas') {
       const canvas = await this.prisma.canvas.findUnique({

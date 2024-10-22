@@ -28,7 +28,7 @@ export interface RetrieveFilter {
   urls?: string[];
   canvasIds?: string[];
   resourceIds?: string[];
-  collectionIds?: string[];
+  projectIds?: string[];
 }
 
 export interface HybridSearchParam {

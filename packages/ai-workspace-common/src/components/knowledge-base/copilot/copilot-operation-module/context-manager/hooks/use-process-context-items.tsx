@@ -8,7 +8,7 @@ import { getTypeIcon } from '../utils/icon';
 import { mapSelectionTypeToContentList } from '../utils/contentListSelection';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-canvas-tabs';
-import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { SkillContextKey } from '@refly/openapi-schema';
 
 export const useProcessContextItems = () => {
   const { t } = useTranslation();
@@ -39,7 +39,7 @@ export const useProcessContextItems = () => {
         return t('knowledgeBase.context.resource');
       case 'canvas':
         return t('knowledgeBase.context.note');
-      case 'collection':
+      case 'project':
         return t('knowledgeBase.context.collection');
       case 'extensionWeblink':
         return t('knowledgeBase.context.extensionWeblink');
@@ -96,7 +96,7 @@ export const useProcessContextItems = () => {
       }
     }
 
-    if (mark.type === 'collection') {
+    if (mark.type === 'project') {
       if (isWebRuntime) {
         return () => jumpToProject({ projectId: mark.id });
       } else {
@@ -160,7 +160,13 @@ export const useProcessContextItems = () => {
   const contextItemTypes = getcontextItemTypes();
 
   const getContextItemIdsByType = () => {
-    const result: Record<string, string[]> = {};
+    const result: Record<SkillContextKey, string[]> = {
+      resources: [],
+      contentList: [],
+      projects: [],
+      canvases: [],
+      urls: [],
+    };
     processedContextItems.forEach((item) => {
       let type = item.type as string;
       if (['resource', 'note', 'collection', 'url'].includes(item.type)) {

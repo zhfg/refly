@@ -201,7 +201,7 @@ export const KnowledgeBaseResourceDetail = memo(() => {
             <div className="knowledge-base-resource-meta">
               <Affix offsetTop={48.1}>
                 <ResourceCollectionList
-                  collections={resourceDetail?.collections}
+                  collections={resourceDetail?.projects}
                   updateCallback={(collectionId) => handleUpdateCollections(collectionId)}
                 />
               </Affix>

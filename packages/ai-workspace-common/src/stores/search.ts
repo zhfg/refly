@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 
-import { Collection, Conversation, Resource, SearchResult, SkillMeta } from '@refly/openapi-schema';
+import { Project, Conversation, Resource, SearchResult, SkillMeta } from '@refly/openapi-schema';
 import { Mark } from '@refly/common-types';
 
 type SearchPage = 'notes' | 'readResources' | 'knowledgeBases' | 'convs' | 'skills';
@@ -14,7 +14,7 @@ export interface SearchState {
   // 所有列表资源
   notes: Resource[];
   readResources: Resource[];
-  knowledgeBases: Collection[];
+  knowledgeBases: Project[];
   convs: Conversation[];
   skills: SkillMeta[];
 
@@ -35,7 +35,7 @@ export interface SearchState {
   setIsSearchOpen: (isSearchOpen: boolean) => void;
   setNotes: (notes: Resource[]) => void;
   setReadResources: (readResources: Resource[]) => void;
-  setKnowledgeBases: (knowledgeBases: Collection[]) => void;
+  setKnowledgeBases: (knowledgeBases: Project[]) => void;
   setConvs: (convs: Conversation[]) => void;
   setSkills: (skills: SkillMeta[]) => void;
   setSearchedRes: ({
@@ -81,7 +81,7 @@ export const useSearchStore = create<SearchState>()(
     setIsSearchOpen: (isSearchOpen: boolean) => set((state) => ({ ...state, isSearchOpen })),
     setNotes: (notes: Resource[]) => set((state) => ({ ...state, notes })),
     setReadResources: (readResources: Resource[]) => set((state) => ({ ...state, readResources })),
-    setKnowledgeBases: (knowledgeBases: Collection[]) => set((state) => ({ ...state, knowledgeBases })),
+    setKnowledgeBases: (knowledgeBases: Project[]) => set((state) => ({ ...state, knowledgeBases })),
     setConvs: (convs: Conversation[]) => set((state) => ({ ...state, convs })),
     setSkills: (skills: SkillMeta[]) => set((state) => ({ ...state, skills })),
     setSearchedRes: (data) =>

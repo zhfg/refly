@@ -45,7 +45,7 @@ export class SearchService {
       // Currently only resource and canvas are supported for vector search
       req.domains ??= ['resource', 'canvas'];
     } else {
-      req.domains ??= ['resource', 'canvas', 'collection', 'conversation', 'skill'];
+      req.domains ??= ['resource', 'canvas', 'project', 'conversation', 'skill'];
     }
 
     const reqList: SearchRequest[] = [];
@@ -56,17 +56,17 @@ export class SearchService {
         return [];
       }
 
-      // Add collection resources to entities
-      const collectionIds = entities
-        .filter((entity) => entity.entityType === 'collection')
+      // Add project resources to entities
+      const projectIds = entities
+        .filter((entity) => entity.entityType === 'project')
         .map((entity) => entity.entityId);
-      if (collectionIds.length > 0) {
-        const collections = await this.prisma.collection.findMany({
-          where: { collectionId: { in: collectionIds }, uid: user.uid, deletedAt: null },
+      if (projectIds.length > 0) {
+        const projects = await this.prisma.project.findMany({
+          where: { projectId: { in: projectIds }, uid: user.uid, deletedAt: null },
           include: { resources: true },
         });
-        collections.forEach((collection) => {
-          collection.resources.forEach((resource) => {
+        projects.forEach((project) => {
+          project.resources.forEach((resource) => {
             entities.push({
               entityType: 'resource',
               entityId: resource.resourceId,
@@ -276,10 +276,10 @@ export class SearchService {
     }
   }
 
-  async emptySearchCollections(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    const collections = await this.prisma.collection.findMany({
+  async emptySearchProjects(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+    const projects = await this.prisma.project.findMany({
       select: {
-        collectionId: true,
+        projectId: true,
         title: true,
         description: true,
         createdAt: true,
@@ -289,25 +289,25 @@ export class SearchService {
       orderBy: { updatedAt: 'desc' },
       take: req.limit || 5,
     });
-    return collections.map((collection) => ({
-      id: collection.collectionId,
-      domain: 'collection',
-      title: collection.title,
-      createdAt: collection.createdAt.toJSON(),
-      updatedAt: collection.updatedAt.toJSON(),
+    return projects.map((project) => ({
+      id: project.projectId,
+      domain: 'project',
+      title: project.title,
+      createdAt: project.createdAt.toJSON(),
+      updatedAt: project.updatedAt.toJSON(),
     }));
   }
 
-  async searchCollections(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+  async searchProjects(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
     if (req.query.length === 0) {
-      return this.emptySearchCollections(user, req);
+      return this.emptySearchProjects(user, req);
     }
 
-    const hits = await this.elasticsearch.searchCollections(user, req);
+    const hits = await this.elasticsearch.searchProjects(user, req);
 
     return hits.map((hit) => ({
       id: hit._id,
-      domain: 'collection',
+      domain: 'project',
       title: hit.highlight?.title?.[0] || hit._source.title,
       content: hit.highlight?.description || [hit._source.description],
       createdAt: hit._source.createdAt,
@@ -461,8 +461,8 @@ export class SearchService {
             return this.searchResources(user, req);
           case 'canvas':
             return this.searchCanvases(user, req);
-          case 'collection':
-            return this.searchCollections(user, req);
+          case 'project':
+            return this.searchProjects(user, req);
           case 'conversation':
             return this.searchConversations(user, req);
           case 'skill':

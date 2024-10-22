@@ -337,7 +337,7 @@ Please generate the summary based on these requirements and offer suggestions fo
       resources,
       canvases,
       contentList,
-      collections,
+      projects,
     } = this.configSnapshot.configurable;
 
     const { tplConfig } = config?.configurable || {};
@@ -368,7 +368,7 @@ Please generate the summary based on these requirements and offer suggestions fo
       contentList,
       resources,
       canvases,
-      collections,
+      projects: projects,
     });
     this.engine.logger.log(`checkHasContext: ${hasContext}`);
 

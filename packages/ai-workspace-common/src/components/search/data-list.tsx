@@ -98,8 +98,8 @@ export function DataList({
       });
 
       return { success: true, data };
-    } else if (domain === 'knowledgeBases') {
-      const res = await getClient().listCollections({
+    } else if (domain === 'project') {
+      const res = await getClient().listProjects({
         query: {
           ...queryPayload,
         },
@@ -108,7 +108,7 @@ export function DataList({
       if (!res?.data?.success) return { success: false };
       const data = res?.data?.data?.map((item) => {
         return {
-          id: item?.collectionId,
+          id: item?.projectId,
           title: item?.title,
           content: [item?.description?.slice(0, 30) + '...'],
         } as SearchResult;

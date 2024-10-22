@@ -3,8 +3,8 @@ import './index.scss';
 import { HiOutlineSearch, HiOutlinePlus } from 'react-icons/hi';
 import { Divider, Input, Skeleton } from '@arco-design/web-react';
 import { useSearchableList } from '@refly-packages/ai-workspace-common/components/use-searchable-list';
-import { memo, useEffect, useState } from 'react';
-import { Resource, RemoveResourceFromCollectionRequest } from '@refly/openapi-schema';
+import { useEffect, useState } from 'react';
+import { Resource, BindProjectResourcesRequest } from '@refly/openapi-schema';
 import { useSearchParams } from 'react-router-dom';
 
 // 组件
@@ -28,7 +28,7 @@ interface ResourceListProps {
   showAdd?: boolean;
   small?: boolean;
   handleItemClick: (resource: Resource) => void;
-  handleItemDelete?: (resource: RemoveResourceFromCollectionRequest) => void;
+  handleItemDelete?: (resource: BindProjectResourcesRequest) => void;
 }
 
 export const ResourceList = (props: ResourceListProps) => {

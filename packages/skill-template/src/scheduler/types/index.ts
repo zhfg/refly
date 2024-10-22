@@ -1,7 +1,7 @@
 import {
   SkillContextContentItem,
   SkillContextResourceItem,
-  SkillContextCollectionItem,
+  SkillContextProjectItem,
   Source,
   SkillContextCanvasItem,
 } from '@refly-packages/openapi-schema';
@@ -48,7 +48,7 @@ export interface IContext {
   contentList: SkillContextContentItem[];
   resources: SkillContextResourceItem[];
   canvases: SkillContextCanvasItem[];
-  collections?: SkillContextCollectionItem[];
+  projects?: SkillContextProjectItem[];
   messages?: BaseMessage[];
   webSearchSources?: Source[];
   locale?: string | LOCALE;

@@ -24,6 +24,61 @@ export const $User = {
   },
 } as const;
 
+export const $ReferenceMeta = {
+  type: 'object',
+  description: 'Reference metadata',
+  properties: {
+    url: {
+      type: 'string',
+      description: 'Reference URL',
+    },
+  },
+} as const;
+
+export const $Reference = {
+  type: 'object',
+  description: 'Reference',
+  required: ['referenceId', 'sourceType', 'sourceId', 'sourceTitle', 'targetType', 'targetId', 'targetTitle'],
+  properties: {
+    referenceId: {
+      type: 'string',
+      description: 'Reference ID',
+    },
+    sourceType: {
+      type: 'string',
+      description: 'Source entity type',
+    },
+    sourceId: {
+      type: 'string',
+      description: 'Source entity ID',
+    },
+    sourceTitle: {
+      type: 'string',
+      description: 'Source entity title',
+    },
+    sourceMeta: {
+      $ref: '#/components/schemas/ReferenceMeta',
+      description: 'Source entity metadata',
+    },
+    targetType: {
+      type: 'string',
+      description: 'Target entity type',
+    },
+    targetId: {
+      type: 'string',
+      description: 'Target entity ID',
+    },
+    targetTitle: {
+      type: 'string',
+      description: 'Target entity title',
+    },
+    targetMeta: {
+      $ref: '#/components/schemas/ReferenceMeta',
+      description: 'Target entity metadata',
+    },
+  },
+} as const;
+
 export const $ResourceMeta = {
   type: 'object',
   description: 'Resource metadata',
@@ -76,12 +131,12 @@ export const $Resource = {
     createdAt: {
       type: 'string',
       format: 'date-time',
-      description: 'Collection creation time',
+      description: 'Resource creation time',
     },
     updatedAt: {
       type: 'string',
       format: 'date-time',
-      description: 'Collection update time',
+      description: 'Resource update time',
     },
     contentPreview: {
       type: 'string',
@@ -90,20 +145,6 @@ export const $Resource = {
     content: {
       type: 'string',
       description: 'Document content for this resource (only returned in getResourceDetail API)',
-    },
-    collections: {
-      type: 'array',
-      description: 'Collections this resource belongs to (only returned in getResourceDetail API)',
-      items: {
-        $ref: '#/components/schemas/Collection',
-      },
-    },
-    referredByCanvases: {
-      type: 'array',
-      description: 'Canvases this resource is referred to (only returned in getResourceDetail API)',
-      items: {
-        $ref: '#/components/schemas/Canvas',
-      },
     },
     projects: {
       type: 'array',
@@ -118,22 +159,7 @@ export const $Resource = {
 export const $ReferenceType = {
   type: 'string',
   description: 'Reference type',
-  enum: ['collection', 'project'],
-} as const;
-
-export const $Reference = {
-  type: 'object',
-  required: ['entityId', 'referenceType'],
-  properties: {
-    entityId: {
-      type: 'string',
-      description: 'Entity ID',
-    },
-    referenceType: {
-      description: 'Reference type',
-      $ref: '#/components/schemas/ReferenceType',
-    },
-  },
+  enum: ['canvas', 'resource'],
 } as const;
 
 export const $Canvas = {
@@ -172,20 +198,6 @@ export const $Canvas = {
       format: 'date-time',
       description: 'Canvas update time',
     },
-    referredByCanvases: {
-      type: 'array',
-      description: 'Canvases this canvas is referred to (only returned in detail API)',
-      items: {
-        $ref: '#/components/schemas/Canvas',
-      },
-    },
-    references: {
-      type: 'array',
-      description: 'References (only returned in detail API)',
-      items: {
-        $ref: '#/components/schemas/Reference',
-      },
-    },
   },
 } as const;
 
@@ -211,16 +223,16 @@ export const $Project = {
     createdAt: {
       type: 'string',
       format: 'date-time',
-      description: 'Collection creation time',
+      description: 'Project creation time',
     },
     updatedAt: {
       type: 'string',
       format: 'date-time',
-      description: 'Collection update time',
+      description: 'Project update time',
     },
     resources: {
       type: 'array',
-      description: 'Collection resources (only returned in detail API)',
+      description: 'Project related resources (only returned in detail API)',
       items: {
         $ref: '#/components/schemas/Resource',
       },
@@ -242,49 +254,10 @@ export const $Project = {
   },
 } as const;
 
-export const $Collection = {
-  type: 'object',
-  required: ['collectionId', 'title', 'createdAt', 'updatedAt'],
-  properties: {
-    collectionId: {
-      type: 'string',
-      description: 'Collection ID',
-      example: 'cl-g30e1b80b5g1itbemc0g5jj3',
-    },
-    title: {
-      type: 'string',
-      description: 'Collection title',
-      example: 'Default Collection',
-    },
-    description: {
-      type: 'string',
-      description: 'Collection description',
-      example: 'Collection description',
-    },
-    createdAt: {
-      type: 'string',
-      format: 'date-time',
-      description: 'Collection creation time',
-    },
-    updatedAt: {
-      type: 'string',
-      format: 'date-time',
-      description: 'Collection update time',
-    },
-    resources: {
-      type: 'array',
-      description: 'Collection resources (only returned in detail API)',
-      items: {
-        $ref: '#/components/schemas/Resource',
-      },
-    },
-  },
-} as const;
-
 export const $EntityType = {
   type: 'string',
   description: 'Entity type',
-  enum: ['canvas', 'resource', 'collection'],
+  enum: ['canvas', 'resource', 'project'],
 } as const;
 
 export const $Entity = {
@@ -346,7 +319,7 @@ export const $LabelClass = {
 
 export const $LabelInstance = {
   type: 'object',
-  description: 'Label instances related to resources, collections, etc.',
+  description: 'Label instances related to resources, projects, etc.',
   required: ['labelId', 'labelClassId', 'value'],
   properties: {
     labelId: {
@@ -1179,12 +1152,12 @@ export const $RetrieveFilter = {
         example: 'r-g30e1b80b5g1itbemc0g5jj3',
       },
     },
-    collectionIds: {
+    projectIds: {
       type: 'array',
-      description: 'List of collection IDs to retrieve',
+      description: 'List of project IDs to retrieve',
       items: {
         type: 'string',
-        example: 'cl-g30e1b80b5g1itbemc0g5jj3',
+        example: 'p-g30e1b80b5g1itbemc0g5jj3',
       },
     },
   },
@@ -1590,11 +1563,6 @@ export const $UpsertResourceRequest = {
       description: 'Resource ID (only used for update)',
       example: 'r-g30e1b80b5g1itbemc0g5jj3',
     },
-    collectionId: {
-      type: 'string',
-      description: 'Collection ID (will add to the collection if given)',
-      example: 'cl-g30e1b80b5g1itbemc0g5jj3',
-    },
     projectId: {
       type: 'string',
       description: 'Project ID (will add to the project if given)',
@@ -1832,6 +1800,29 @@ export const $DeleteCanvasRequest = {
   },
 } as const;
 
+export const $ReferCanvasRequest = {
+  type: 'object',
+  required: ['canvasId', 'referenceId', 'referenceType', 'operation'],
+  properties: {
+    canvasId: {
+      type: 'string',
+      description: 'Canvas ID to refer',
+    },
+    operation: {
+      type: 'string',
+      description: 'Operation type',
+      enum: ['add', 'remove'],
+    },
+    references: {
+      type: 'array',
+      description: 'Reference list',
+      items: {
+        $ref: '#/components/schemas/Reference',
+      },
+    },
+  },
+} as const;
+
 export const $BatchMoveCanvasRequest = {
   type: 'object',
   required: ['canvasIds', 'projectId'],
@@ -1850,23 +1841,86 @@ export const $BatchMoveCanvasRequest = {
   },
 } as const;
 
-export const $UpsertCollectionRequest = {
+export const $QueryReferencesRequest = {
   type: 'object',
   properties: {
-    collectionId: {
-      type: 'string',
-      description: 'Collection ID (only used for update)',
-      example: 'cl-g30e1b80b5g1itbemc0g5jj3',
+    sourceType: {
+      description: 'Source entity type',
+      $ref: '#/components/schemas/EntityType',
     },
-    title: {
+    sourceId: {
       type: 'string',
-      description: 'Collection title',
-      example: 'My Collection',
+      description: 'Source entity ID',
     },
-    description: {
+    targetType: {
+      description: 'Target entity type',
+      $ref: '#/components/schemas/EntityType',
+    },
+    targetId: {
       type: 'string',
-      description: 'Collection description',
-      example: 'Collection description',
+      description: 'Target entity ID',
+    },
+  },
+} as const;
+
+export const $QueryReferencesResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Reference list',
+          items: {
+            $ref: '#/components/schemas/Reference',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $ReferenceOperation = {
+  type: 'object',
+  required: ['reference', 'operation'],
+  properties: {
+    sourceType: {
+      type: 'string',
+      description: 'Source entity type',
+    },
+    sourceId: {
+      type: 'string',
+      description: 'Source entity ID',
+    },
+    targetType: {
+      type: 'string',
+      description: 'Target entity type',
+    },
+    targetId: {
+      type: 'string',
+      description: 'Target entity ID',
+    },
+    operation: {
+      type: 'string',
+      description: 'Operation type',
+      enum: ['add', 'remove'],
+    },
+  },
+} as const;
+
+export const $OperateReferencesRequest = {
+  type: 'object',
+  required: ['operation', 'references'],
+  properties: {
+    operations: {
+      type: 'array',
+      description: 'Reference operation list',
+      items: {
+        $ref: '#/components/schemas/ReferenceOperation',
+      },
     },
   },
 } as const;
@@ -1892,22 +1946,6 @@ export const $UpsertProjectRequest = {
   },
 } as const;
 
-export const $UpsertCollectionResponse = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/BaseResponse',
-    },
-    {
-      type: 'object',
-      properties: {
-        data: {
-          $ref: '#/components/schemas/Collection',
-        },
-      },
-    },
-  ],
-} as const;
-
 export const $UpsertProjectResponse = {
   allOf: [
     {
@@ -1922,24 +1960,6 @@ export const $UpsertProjectResponse = {
       },
     },
   ],
-} as const;
-
-export const $AddResourceToCollectionRequest = {
-  type: 'object',
-  required: ['collectionId', 'resourceIds'],
-  properties: {
-    collectionId: {
-      type: 'string',
-      description: 'Collection ID',
-    },
-    resourceIds: {
-      type: 'array',
-      description: 'Resource ID list',
-      items: {
-        type: 'string',
-      },
-    },
-  },
 } as const;
 
 export const $BindProjectResourcesRequest = {
@@ -1965,24 +1985,6 @@ export const $BindProjectResourcesRequest = {
   },
 } as const;
 
-export const $RemoveResourceFromCollectionRequest = {
-  type: 'object',
-  required: ['collectionId', 'resourceIds'],
-  properties: {
-    collectionId: {
-      type: 'string',
-      description: 'Collection ID',
-    },
-    resourceIds: {
-      type: 'array',
-      description: 'Resource ID list',
-      items: {
-        type: 'string',
-      },
-    },
-  },
-} as const;
-
 export const $DeleteProjectRequest = {
   type: 'object',
   required: ['projectId'],
@@ -1991,18 +1993,6 @@ export const $DeleteProjectRequest = {
       type: 'string',
       description: 'Project ID to delete',
       example: 'p-g30e1b80b5g1itbemc0g5jj3',
-    },
-  },
-} as const;
-
-export const $DeleteCollectionRequest = {
-  type: 'object',
-  required: ['collectionId'],
-  properties: {
-    collectionId: {
-      type: 'string',
-      description: 'Collection ID to delete',
-      example: 'cl-g30e1b80b5g1itbemc0g5jj3',
     },
   },
 } as const;
@@ -2019,27 +2009,7 @@ export const $ListProjectResponse = {
           type: 'array',
           description: 'Project list',
           items: {
-            $ref: '#/components/schemas/Collection',
-          },
-        },
-      },
-    },
-  ],
-} as const;
-
-export const $ListCollectionResponse = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/BaseResponse',
-    },
-    {
-      type: 'object',
-      properties: {
-        data: {
-          type: 'array',
-          description: 'Collection list',
-          items: {
-            $ref: '#/components/schemas/Collection',
+            $ref: '#/components/schemas/Project',
           },
         },
       },
@@ -2059,24 +2029,6 @@ export const $GetProjectDetailResponse = {
           type: 'object',
           description: 'Project data',
           $ref: '#/components/schemas/Project',
-        },
-      },
-    },
-  ],
-} as const;
-
-export const $GetCollectionDetailResponse = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/BaseResponse',
-    },
-    {
-      type: 'object',
-      properties: {
-        data: {
-          type: 'object',
-          description: 'Collection data',
-          $ref: '#/components/schemas/Collection',
         },
       },
     },
@@ -2494,21 +2446,21 @@ export const $SkillContextResourceItem = {
   },
 } as const;
 
-export const $SkillContextCollectionItem = {
+export const $SkillContextProjectItem = {
   type: 'object',
-  description: 'Skill context collection item',
+  description: 'Skill context project item',
   properties: {
-    collectionId: {
+    projectId: {
       type: 'string',
-      description: 'Collection ID',
+      description: 'Project ID',
     },
-    collection: {
-      description: 'Collection',
-      $ref: '#/components/schemas/Collection',
+    project: {
+      description: 'Project',
+      $ref: '#/components/schemas/Project',
     },
     metadata: {
       type: 'object',
-      description: 'Collection context metadata',
+      description: 'Project context metadata',
     },
   },
 } as const;
@@ -2575,11 +2527,11 @@ export const $SkillContext = {
         $ref: '#/components/schemas/SkillContextResourceItem',
       },
     },
-    collections: {
+    projects: {
       type: 'array',
-      description: 'Context collections',
+      description: 'Context projects',
       items: {
-        $ref: '#/components/schemas/SkillContextCollectionItem',
+        $ref: '#/components/schemas/SkillContextProjectItem',
       },
     },
     canvases: {
@@ -2608,7 +2560,7 @@ export const $SkillContext = {
 
 export const $SkillContextKey = {
   type: 'string',
-  enum: ['resources', 'collections', 'canvases', 'contentList', 'urls'],
+  enum: ['resources', 'projects', 'canvases', 'contentList', 'urls'],
 } as const;
 
 export const $SelectionKey = {
@@ -2714,6 +2666,10 @@ export const $InvokeSkillRequest = {
     tplConfig: {
       description: 'Skill template config',
       $ref: '#/components/schemas/SkillTemplateConfig',
+    },
+    projectId: {
+      type: 'string',
+      description: 'Project ID (if not provided, new project will be created)',
     },
     skillId: {
       type: 'string',
@@ -3266,7 +3222,7 @@ export const $SearchOptions = {
 
 export const $SearchDomain = {
   type: 'string',
-  enum: ['resource', 'canvas', 'collection', 'conversation', 'skill'],
+  enum: ['resource', 'canvas', 'project', 'conversation', 'skill'],
 } as const;
 
 export const $SearchMode = {
@@ -3323,9 +3279,9 @@ export const $SearchResultMeta = {
       description: 'Resource metadata',
       $ref: '#/components/schemas/ResourceMeta',
     },
-    collectionId: {
+    projectId: {
       type: 'string',
-      description: 'Collection ID',
+      description: 'Project ID',
     },
   },
 } as const;
@@ -3365,7 +3321,7 @@ export const $SearchResult = {
     updatedAt: {
       type: 'string',
       format: 'date-time',
-      description: 'Collection creation time',
+      description: 'Data update time',
     },
   },
 } as const;

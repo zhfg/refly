@@ -23,7 +23,7 @@ interface CanvasDocument {
   uid: string;
 }
 
-interface CollectionDocument {
+interface ProjectDocument {
   id: string;
   title?: string;
   description?: string;
@@ -87,7 +87,7 @@ export const indexConfig = {
       uid: { type: 'keyword' },
     },
   },
-  collection: {
+  project: {
     index: 'refly_collections',
     settings: commonSettings,
     properties: {
@@ -209,8 +209,8 @@ export class ElasticsearchService implements OnModuleInit {
     return this.upsertDocument(indexConfig.resource.index, resource);
   }
 
-  async upsertCollection(collection: CollectionDocument) {
-    return this.upsertDocument(indexConfig.collection.index, collection);
+  async upsertProject(project: ProjectDocument) {
+    return this.upsertDocument(indexConfig.project.index, project);
   }
 
   async upsertCanvas(canvas: CanvasDocument) {
@@ -239,10 +239,10 @@ export class ElasticsearchService implements OnModuleInit {
     });
   }
 
-  async deleteCollection(collectionId: string) {
+  async deleteProject(projectId: string) {
     return this.client.delete({
-      index: indexConfig.collection.index,
-      id: collectionId,
+      index: indexConfig.project.index,
+      id: projectId,
     });
   }
 
@@ -330,10 +330,10 @@ export class ElasticsearchService implements OnModuleInit {
     return body.hits.hits;
   }
 
-  async searchCollections(user: User, req: SearchRequest) {
+  async searchProjects(user: User, req: SearchRequest) {
     const { query, limit, entities } = req;
-    const { body } = await this.client.search<SearchResponse<CollectionDocument>>({
-      index: indexConfig.collection.index,
+    const { body } = await this.client.search<SearchResponse<ProjectDocument>>({
+      index: indexConfig.project.index,
       body: {
         query: {
           bool: {

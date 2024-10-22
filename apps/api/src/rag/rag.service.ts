@@ -293,10 +293,10 @@ export class RAGService {
         match: { any: param.filter?.resourceIds },
       });
     }
-    if (param.filter?.collectionIds?.length > 0) {
+    if (param.filter?.projectIds?.length > 0) {
       conditions.push({
-        key: 'collectionId',
-        match: { any: param.filter?.collectionIds },
+        key: 'projectId',
+        match: { any: param.filter?.projectIds },
       });
     }
 
