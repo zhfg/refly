@@ -18,7 +18,7 @@ import {
   HiOutlineBookOpen,
 } from "react-icons/hi"
 import { LuMoreHorizontal } from "react-icons/lu"
-import { RiRobot2Line, RiHistoryLine, RiMoreLine } from "react-icons/ri"
+import { RiRobot2Line, RiHistoryLine } from "react-icons/ri"
 import {
   AiOutlineMenuFold,
   AiOutlineMenuUnfold,
@@ -44,6 +44,8 @@ import { UILocaleList } from "@refly-packages/ai-workspace-common/components/ui-
 import { useImportResourceStore } from "@refly-packages/ai-workspace-common/stores/import-resource"
 import { SiderMenuSettingList } from "@refly-packages/ai-workspace-common/components/sider-menu-setting-list"
 import { SiderMenuMoreList } from "@refly-packages/ai-workspace-common/components/sider-menu-more-list"
+// hooks
+import { useKnowledgeBaseJumpNewPath } from "@refly-packages/ai-workspace-common/hooks/use-jump-new-path"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -216,6 +218,8 @@ export const SiderLayout = () => {
   }))
   const isGuideDetail = location.pathname.includes("guide/")
 
+  const { jumpToProject, jumpToConv } = useKnowledgeBaseJumpNewPath()
+
   const { t } = useTranslation()
 
   // 获取 storage user profile
@@ -385,15 +389,15 @@ export const SiderLayout = () => {
 
   const recentProjects = [
     // Add 7-8 recent projects here
-    { key: "project1", name: "Project 1" },
-    { key: "project2", name: "Project 2" },
+    { key: "project1", name: "Project 1", projectId: "1" },
+    { key: "project2", name: "Project 2", projectId: "2" },
     // ... more projects
   ]
 
   const recentChats = [
     // Add 7-8 recent chats here
-    { key: "chat1", name: "Chat 1" },
-    { key: "chat2", name: "Chat 2" },
+    { key: "chat1", name: "Chat 1", projectId: "1", convId: "1" },
+    { key: "chat2", name: "Chat 2", convId: "2" },
     // ... more chats
   ]
 
@@ -454,7 +458,13 @@ export const SiderLayout = () => {
               <div className="recent-projects">
                 <h3>{t("loggedHomePage.siderMenu.recentProjects")}</h3>
                 {recentProjects.map(project => (
-                  <MenuItem key={project.key}>{project.name}</MenuItem>
+                  <MenuItem
+                    key={project.key}
+                    onClick={() => {
+                      jumpToProject({ projectId: project.projectId })
+                    }}>
+                    {project.name}
+                  </MenuItem>
                 ))}
                 <MenuItem
                   key="viewMoreProjects"
@@ -465,6 +475,7 @@ export const SiderLayout = () => {
                     key="viewMoreChats"
                     onClick={() => {
                       /* Navigate to chats list */
+                      navigate(`/knowledge-base?tab=project`)
                     }}>
                     <MenuItemContent
                       position="right"
@@ -483,12 +494,26 @@ export const SiderLayout = () => {
               <div className="recent-chats">
                 <h3>{t("loggedHomePage.siderMenu.recentChats")}</h3>
                 {recentChats.map(chat => (
-                  <MenuItem key={chat.key}>{chat.name}</MenuItem>
+                  <MenuItem
+                    key={chat.key}
+                    onClick={() => {
+                      if (chat.projectId && chat.convId) {
+                        jumpToConv({
+                          projectId: chat.projectId,
+                          convId: chat.convId,
+                        })
+                      } else if (chat.convId) {
+                        jumpToConv({ convId: chat.convId })
+                      }
+                    }}>
+                    {chat.name}
+                  </MenuItem>
                 ))}
                 <MenuItem
                   key="viewMoreChats"
                   onClick={() => {
                     /* Navigate to chats list */
+                    navigate(`/thread`)
                   }}>
                   <MenuItemContent
                     position="right"
