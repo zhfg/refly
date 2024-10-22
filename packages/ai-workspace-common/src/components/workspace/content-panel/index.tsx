@@ -6,7 +6,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { WorkSpaceSearch } from '../work-space-search';
 import { ResourceList } from '@refly-packages/ai-workspace-common/components/workspace/resource-list';
-import { NoteList } from '@refly-packages/ai-workspace-common/components/workspace/note-list';
+import { CanvasList } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list';
 import { KnowledgeBaseList } from '@refly-packages/ai-workspace-common/components/knowledge-base-list';
 import { SearchQuickOpenBtn } from '@refly-packages/ai-workspace-common/components/search-quick-open-btn';
 import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
@@ -25,7 +25,7 @@ const Content = (props: { val: string }) => {
     case 'resource':
       return <ResourceList />;
     case 'canvas':
-      return <NoteList />;
+      return <CanvasList />;
     case 'project':
       return <KnowledgeBaseList />;
     default:

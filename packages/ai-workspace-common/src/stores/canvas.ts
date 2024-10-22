@@ -16,6 +16,7 @@ export interface CanvasTab {
   key: string;
   content: string;
   canvasId: string;
+  projectId: string;
 }
 
 export type CanvasServerStatus = 'disconnected' | 'connected';

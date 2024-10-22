@@ -131,6 +131,8 @@ export const EntityItem = (props: { item: Source; index: number; showUtil?: bool
                 } else if (item?.metadata?.entityType === 'canvas') {
                   jumpToCanvas({
                     canvasId: item?.metadata?.entityId,
+                    // @ts-ignore
+                    projectId: item?.metadata?.projectId, // TODO: 这里需要补充 canvas 的 projectId
                     ...extraParams,
                   });
                 }

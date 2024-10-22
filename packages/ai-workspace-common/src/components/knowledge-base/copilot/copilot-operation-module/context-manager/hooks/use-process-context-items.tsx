@@ -7,7 +7,8 @@ import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common
 import { getTypeIcon } from '../utils/icon';
 import { mapSelectionTypeToContentList } from '../utils/contentListSelection';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
-import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
+import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-canvas-tabs';
+import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 
 export const useProcessContextItems = () => {
   const { t } = useTranslation();
@@ -63,12 +64,14 @@ export const useProcessContextItems = () => {
       if (isWebRuntime) {
         const currentId = mark.type === 'canvas' ? mark.id : mark.parentId;
         return () => {
-          jumpToCanvas({ canvasId: currentId });
+          jumpToCanvas({ canvasId: currentId, projectId: mark.metadata?.projectId }); // TODO: 这里需要补充 canvas 的 projectId
           handleAddCanvasTab({
             title: mark.title,
             key: currentId,
             content: '',
             canvasId: currentId,
+            // @ts-ignore
+            projectId: mark.metadata?.projectId, // TODO: 这里需要补充 canvas 的 projectId
           });
         };
       } else {

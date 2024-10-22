@@ -17,16 +17,18 @@ export const useKnowledgeBaseJumpNewPath = () => {
 
   const jumpToCanvas = ({
     canvasId,
+    projectId,
     baseUrl = '',
     openNewTab = false,
   }: {
     canvasId: string;
+    projectId: string;
     baseUrl?: string;
     openNewTab?: boolean;
   }) => {
-    searchParams.set('noteId', canvasId);
+    searchParams.set('canvasId', canvasId);
     setSearchParams(searchParams);
-    const url = `${baseUrl}/knowledge-base?${searchParams.toString()}`;
+    const url = `${baseUrl}/project/${projectId}?${searchParams.toString()}`;
 
     if (openNewTab) {
       window.open(url, '_blank');

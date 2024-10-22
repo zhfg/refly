@@ -17,6 +17,7 @@ const Home = lazy(() => import("@/pages/home"))
 const KnowledgeBase = lazy(() => import("@/pages/knowledge-base"))
 const Resource = lazy(() => import("@/pages/resource"))
 const ConvLibrary = lazy(() => import("@/pages/conv-library"))
+const ConvItem = lazy(() => import("@/pages/conv-item"))
 const Project = lazy(() => import("@/pages/project"))
 const Skill = lazy(() => import("@/pages/skill"))
 const SkillDetailPage = lazy(() => import("@/pages/skill-detail"))
@@ -45,6 +46,7 @@ const prefetchRoutes = () => {
   import("@/pages/resource")
   import("@/pages/project")
   import("@/pages/conv-library")
+  import("@/pages/conv-item")
   import("@/pages/skill")
   import("@/pages/skill-detail")
   import("@/pages/settings")
@@ -150,6 +152,15 @@ export const AppRouter = (props: { layout?: any }) => {
             element={
               <BetaProtectedRoute
                 component={ConvLibrary}
+                hasBetaAccess={hasBetaAccess}
+              />
+            }
+          />
+          <Route
+            path="/thread/:convId"
+            element={
+              <BetaProtectedRoute
+                component={ConvItem}
                 hasBetaAccess={hasBetaAccess}
               />
             }

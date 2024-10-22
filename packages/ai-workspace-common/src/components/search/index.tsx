@@ -16,7 +16,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { SearchDomain, SearchResult, SkillMeta } from '@refly/openapi-schema';
 import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
-import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
+import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-canvas-tabs';
 import { RenderItem } from '@refly-packages/ai-workspace-common/components/search/types';
 import classNames from 'classnames';
 
@@ -217,12 +217,16 @@ export const Search = (props: SearchProps) => {
       onItemClick: (item: SearchResult) => {
         jumpToCanvas({
           canvasId: item?.id,
+          // @ts-ignore
+          projectId: item?.metadata?.projectId, // TODO: 这里需要补充 canvas 的 projectId
         });
         handleAddNoteTab({
           title: item?.title,
           key: item?.id,
           content: '',
           canvasId: item?.id,
+          // @ts-ignore
+          projectId: item?.metadata?.projectId, // TODO: 这里需要补充 canvas 的 projectId
         });
         searchStore.setIsSearchOpen(false);
       },

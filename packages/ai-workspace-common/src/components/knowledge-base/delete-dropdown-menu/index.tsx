@@ -32,7 +32,7 @@ interface DropListProps {
 
 const DropList = (props: DropListProps) => {
   const { handleCancel, handleDeleteClick, handlEditKnowledgeBase, type, getPopupContainer, position, canCopy } = props;
-  const noteStore = useCanvasStore((state) => ({
+  const canvasStore = useCanvasStore((state) => ({
     editor: state.editor,
   }));
   const { t } = useTranslation();
@@ -53,7 +53,7 @@ const DropList = (props: DropListProps) => {
           <div
             onClick={(e) => {
               e.stopPropagation();
-              const editor = noteStore.editor;
+              const editor = canvasStore.editor;
               if (editor) {
                 const markdown = editor.storage.markdown.getMarkdown();
                 copyToClipboard(markdown);
@@ -89,14 +89,14 @@ const DropList = (props: DropListProps) => {
 };
 
 interface DeleteDropdownMenuProps {
-  postDeleteList?: (note: Canvas | Collection | Resource | RemoveResourceFromCollectionRequest) => void;
+  postDeleteList?: (canvas: Canvas | Collection | Resource | RemoveResourceFromCollectionRequest) => void;
   getPopupContainer?: () => HTMLElement;
   deleteConfirmPosition?: positionType;
   canCopy?: boolean;
 }
 
-interface NotePros extends DeleteDropdownMenuProps {
-  type: 'note';
+interface CanvasPros extends DeleteDropdownMenuProps {
+  type: 'canvas';
   data: Canvas;
 }
 
@@ -115,7 +115,7 @@ interface ResourceCollectionPros extends DeleteDropdownMenuProps {
   data?: RemoveResourceFromCollectionRequest;
 }
 
-export const DeleteDropdownMenu = (props: NotePros | KnowledgeBasePros | ResourcePros | ResourceCollectionPros) => {
+export const DeleteDropdownMenu = (props: CanvasPros | KnowledgeBasePros | ResourcePros | ResourceCollectionPros) => {
   const { type, data, postDeleteList, getPopupContainer, deleteConfirmPosition, canCopy } = props;
   const [popupVisible, setPopupVisible] = useState(false);
   const { t } = useTranslation();
@@ -125,7 +125,7 @@ export const DeleteDropdownMenu = (props: NotePros | KnowledgeBasePros | Resourc
   const handleDeleteClick = async (e: MouseEvent) => {
     e.stopPropagation();
     let resultError: unknown;
-    if (type === 'note') {
+    if (type === 'canvas') {
       const { error } = await getClient().deleteCanvas({ body: { canvasId: data.canvasId } });
       resultError = error;
     }
