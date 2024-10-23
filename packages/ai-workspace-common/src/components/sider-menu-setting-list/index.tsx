@@ -41,11 +41,7 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
         deleteCookie();
         Cookies.remove('_refly_ai_sid', { domain: getCookieOrigin() });
 
-        if (getRuntime() === 'web') {
-          window.location.href = getWebLogin(); // 没有登录，直接跳转到登录页
-        } else {
-          navigate('/');
-        }
+        navigate('/');
 
         userStore.resetState();
       },

@@ -71,6 +71,7 @@ export const AppRouter = (props: { layout?: any }) => {
   const storageLocalSettings = safeParseJSON(
     localStorage.getItem("refly-local-settings"),
   )
+
   const locale =
     storageLocalSettings?.uiLocale ||
     userStore?.localSettings?.uiLocale ||
@@ -100,11 +101,13 @@ export const AppRouter = (props: { layout?: any }) => {
     return <LoadingFallback />
   }
 
-  if (!notShowLoginBtn && !routeLogin) {
-    return <LoadingFallback />
-  }
+  // if (!notShowLoginBtn && !routeLogin) {
+  //   return <LoadingFallback />
+  // }
 
-  const hasBetaAccess = userStore?.userProfile?.hasBetaAccess || false
+  // const hasBetaAccess = userStore?.userProfile?.hasBetaAccess || false
+
+  const hasBetaAccess = true // todo:调试中
 
   return (
     <Suspense fallback={<LoadingFallback />}>
@@ -119,6 +122,9 @@ export const AppRouter = (props: { layout?: any }) => {
               />
             }
           />
+
+          <Route path="/login" element={<Login />} />
+
           <Route
             path="/library"
             element={
@@ -146,7 +152,6 @@ export const AppRouter = (props: { layout?: any }) => {
               />
             }
           />
-          <Route path="/login" element={<Login />} />
           <Route
             path="/thread"
             element={

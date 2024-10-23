@@ -49,7 +49,6 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
       closable: false,
       maskClosable: false,
       maskStyle: {
-        backgroundColor: "#F3F3EE",
         opacity: 1,
       },
     }
