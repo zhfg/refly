@@ -61,7 +61,12 @@ import {
 } from '@/utils';
 import { InvokeSkillJobData, skillInstancePO2DTO } from './skill.dto';
 import { KnowledgeService } from '@/knowledge/knowledge.service';
-import { projectPO2DTO, canvasPO2DTO, resourcePO2DTO } from '@/knowledge/knowledge.dto';
+import {
+  projectPO2DTO,
+  canvasPO2DTO,
+  resourcePO2DTO,
+  referencePO2DTO,
+} from '@/knowledge/knowledge.dto';
 import { ConversationService } from '@/conversation/conversation.service';
 import { MessageAggregator } from '@/utils/message';
 import { SkillEvent } from '@refly-packages/common-types';
@@ -183,6 +188,14 @@ export class SkillService {
       search: async (user, req, options) => {
         const result = await this.search.search(user, req, options);
         return buildSuccessResponse(result);
+      },
+      addReferences: async (user, req) => {
+        const references = await this.knowledge.addReferences(user, req);
+        return buildSuccessResponse(references.map(referencePO2DTO));
+      },
+      deleteReferences: async (user, req) => {
+        await this.knowledge.deleteReferences(user, req);
+        return buildSuccessResponse({});
       },
       inMemorySearchWithIndexing: async (user, options) => {
         const result = await this.rag.inMemorySearchWithIndexing(user, options);

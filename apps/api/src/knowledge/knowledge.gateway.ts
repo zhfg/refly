@@ -91,10 +91,11 @@ export class CanvasWsGateway implements OnGatewayConnection {
             const [, { size }] = await Promise.all([
               this.elasticsearch.upsertCanvas({
                 id: canvas.canvasId,
+                projectId: canvas.projectId,
                 content,
                 uid: canvas.uid,
               }),
-              this.rag.indexContent(user, {
+              this.rag.indexDocument(user, {
                 pageContent: content,
                 metadata: {
                   nodeType: 'canvas',

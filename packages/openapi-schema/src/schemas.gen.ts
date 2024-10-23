@@ -179,12 +179,17 @@ export const $ReferenceType = {
 
 export const $Canvas = {
   type: 'object',
-  required: ['canvasId', 'title', 'readOnly', 'createdAt', 'updatedAt'],
+  required: ['canvasId', 'projectId', 'title', 'readOnly', 'createdAt', 'updatedAt'],
   properties: {
     canvasId: {
       type: 'string',
       description: 'Canvas ID',
       example: 'c-g30e1b80b5g1itbemc0g5jj3',
+    },
+    projectId: {
+      type: 'string',
+      description: 'Project ID',
+      example: 'p-g30e1b80b5g1itbemc0g5jj3',
     },
     title: {
       type: 'string',
