@@ -69,7 +69,6 @@
     }
 
     .recent-section {
-      padding-left: 12px;
       color: rgba(0, 0, 0, 0.5);
       font-size: 13px;
 
@@ -80,6 +79,7 @@
       }
 
       .recent-section-title {
+        padding-left: 12px;
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -302,6 +302,11 @@
 
   .sider-menu-inner {
     height: calc(100% - 118px);
+    overflow-y: auto;
+  }
+
+  .sider-menu-inner-collapse {
+    height: calc(100% - 118px - 36px);
     overflow-y: auto;
   }
 

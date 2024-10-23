@@ -424,7 +424,7 @@ export const SiderLayout = () => {
           selectedKeys={[selectedKey]}
           tooltipProps={{}}
           onClickMenuItem={handleNavClick}>
-          <div className="sider-menu-inner">
+          <div className={`sider-menu-inner${collapse ? "-collapse" : ""}`}>
             {siderSections.map((section, index) => (
               <div key={`section-${index}`} className="sider-section">
                 {section.map(item => (
@@ -456,22 +456,24 @@ export const SiderLayout = () => {
             <div className="recent-section">
               {recentProjects.length > 0 && (
                 <div className="recent-projects">
-                  <div className="recent-section-title">
-                    <div className="recent-section-title-text">
-                      {t("loggedHomePage.siderMenu.recentProjects")}
+                  {!collapse && (
+                    <div className="recent-section-title">
+                      <div className="recent-section-title-text">
+                        {t("loggedHomePage.siderMenu.recentProjects")}
+                      </div>
+                      <div
+                        className="recent-section-title-more"
+                        onClick={() => {
+                          navigate(`/knowledge-base?tab=project`)
+                        }}>
+                        {t("loggedHomePage.siderMenu.viewMore")}
+                        <IconRight
+                          className="arco-icon"
+                          style={{ fontSize: 12 }}
+                        />
+                      </div>
                     </div>
-                    <div
-                      className="recent-section-title-more"
-                      onClick={() => {
-                        navigate(`/knowledge-base?tab=project`)
-                      }}>
-                      {t("loggedHomePage.siderMenu.viewMore")}
-                      <IconRight
-                        className="arco-icon"
-                        style={{ fontSize: 12 }}
-                      />
-                    </div>
-                  </div>
+                  )}
 
                   {recentProjects.map(project => (
                     <MenuItem
@@ -488,20 +490,22 @@ export const SiderLayout = () => {
 
               {recentConversations.length > 0 && (
                 <div className="recent-chats">
-                  <div className="recent-section-title">
-                    <div>{t("loggedHomePage.siderMenu.recentChats")}</div>
-                    <div
-                      className="recent-section-title-more"
-                      onClick={() => {
-                        navigate(`/thread`)
-                      }}>
-                      {t("loggedHomePage.siderMenu.viewMore")}
-                      <IconRight
-                        className="arco-icon"
-                        style={{ fontSize: 12 }}
-                      />
+                  {!collapse && (
+                    <div className="recent-section-title">
+                      <div>{t("loggedHomePage.siderMenu.recentChats")}</div>
+                      <div
+                        className="recent-section-title-more"
+                        onClick={() => {
+                          navigate(`/thread`)
+                        }}>
+                        {t("loggedHomePage.siderMenu.viewMore")}
+                        <IconRight
+                          className="arco-icon"
+                          style={{ fontSize: 12 }}
+                        />
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {recentConversations.map((chat, index) => (
                     <MenuItem
