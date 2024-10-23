@@ -14,7 +14,7 @@ import {
 
 // Lazy load components
 const Home = lazy(() => import("@/pages/home"))
-const KnowledgeBase = lazy(() => import("@/pages/knowledge-base"))
+const Library = lazy(() => import("@/pages/library"))
 const Resource = lazy(() => import("@/pages/resource"))
 const ConvLibrary = lazy(() => import("@/pages/conv-library"))
 const ConvItem = lazy(() => import("@/pages/conv-item"))
@@ -42,7 +42,7 @@ const prefetchRoutes = () => {
   // Prefetch common routes
   import("@/pages/login")
   import("@/pages/home")
-  import("@/pages/knowledge-base")
+  import("@/pages/library")
   import("@/pages/resource")
   import("@/pages/project")
   import("@/pages/conv-library")
@@ -120,10 +120,10 @@ export const AppRouter = (props: { layout?: any }) => {
             }
           />
           <Route
-            path="/knowledge-base"
+            path="/library"
             element={
               <BetaProtectedRoute
-                component={KnowledgeBase}
+                component={Library}
                 hasBetaAccess={hasBetaAccess}
               />
             }

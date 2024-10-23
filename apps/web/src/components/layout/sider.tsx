@@ -63,8 +63,8 @@ const getNavSelectedKeys = (pathname = "") => {
     return "ThreadLibrary"
   } else if (pathname.includes("skill")) {
     return "Skill"
-  } else if (pathname.includes("knowledge-base")) {
-    return "Knowledge"
+  } else if (pathname.startsWith("/library")) {
+    return "Library"
   }
 
   return "Home"
@@ -298,8 +298,8 @@ export const SiderLayout = () => {
         break
       }
 
-      case "Knowledge": {
-        navigate(`/knowledge-base`)
+      case "Library": {
+        navigate(`/library`)
         break
       }
 
@@ -370,8 +370,8 @@ export const SiderLayout = () => {
         icon: <HiOutlineHome className="arco-icon" style={{ fontSize: 20 }} />,
       },
       {
-        key: "Knowledge",
-        name: "knowledgeBase",
+        key: "Library",
+        name: "library",
         icon: (
           <HiOutlineBookOpen className="arco-icon" style={{ fontSize: 20 }} />
         ),
@@ -464,7 +464,7 @@ export const SiderLayout = () => {
                       <div
                         className="recent-section-title-more"
                         onClick={() => {
-                          navigate(`/knowledge-base?tab=project`)
+                          navigate(`/library?tab=project`)
                         }}>
                         {t("loggedHomePage.siderMenu.viewMore")}
                         <IconRight
