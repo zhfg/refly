@@ -53,16 +53,13 @@ export const CanvasList = (props: CanvasListProps) => {
   }
 
   const handleClickCanvas = (canvas: Canvas) => {
-    // TODO: 这里需要补充 canvas 的 projectId
-    // @ts-ignore
     jumpToCanvas({ canvasId: canvas.canvasId, projectId: canvas.projectId });
     handleAddCanvasTab({
       title: canvas.title,
       key: canvas.canvasId,
       content: canvas.contentPreview || '',
       canvasId: canvas.canvasId,
-      // @ts-ignore
-      projectId: canvas.projectId, // TODO: 这里需要补充 canvas 的 projectId
+      projectId: canvas.projectId,
     });
   };
 

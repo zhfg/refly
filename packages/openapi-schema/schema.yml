@@ -1517,6 +1517,7 @@ components:
       type: object
       required:
         - canvasId
+        - projectId
         - title
         - readOnly
         - createdAt
@@ -1526,6 +1527,10 @@ components:
           type: string
           description: Canvas ID
           example: c-g30e1b80b5g1itbemc0g5jj3
+        projectId:
+          type: string
+          description: Project ID
+          example: p-g30e1b80b5g1itbemc0g5jj3
         title:
           type: string
           description: Canvas title

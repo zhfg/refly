@@ -210,7 +210,7 @@ export class RAGService {
     return tempMemoryVectorStore.similaritySearch(query, k, wrapperFilter);
   }
 
-  async indexContent(user: User, doc: Document<NodeMeta>): Promise<{ size: number }> {
+  async indexDocument(user: User, doc: Document<NodeMeta>): Promise<{ size: number }> {
     const { uid } = user;
     const { pageContent, metadata } = doc;
     const { nodeType, canvasId, resourceId } = metadata;

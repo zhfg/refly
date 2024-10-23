@@ -150,6 +150,10 @@ export type Canvas = {
    */
   canvasId: string;
   /**
+   * Project ID
+   */
+  projectId: string;
+  /**
    * Canvas title
    */
   title: string;

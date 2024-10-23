@@ -384,7 +384,7 @@ export class KnowledgeService {
       const contentStream = await this.minio.client.getObject(storageKey);
       const content = await streamToString(contentStream);
 
-      const { size } = await this.ragService.indexContent(user, {
+      const { size } = await this.ragService.indexDocument(user, {
         pageContent: cleanMarkdownForIngest(content),
         metadata: {
           nodeType: 'resource',
@@ -585,6 +585,7 @@ export class KnowledgeService {
     const isNewCanvas = !param.canvasId;
 
     param.canvasId ||= genCanvasID();
+    param.projectId ||= genProjectID();
     param.title ||= 'Untitled';
 
     const createInput: Prisma.CanvasCreateInput = {
@@ -594,6 +595,16 @@ export class KnowledgeService {
       readOnly: param.readOnly ?? false,
       content: param.initialContent,
       contentPreview: param.initialContent?.slice(0, 500),
+      project: {
+        connectOrCreate: {
+          where: { projectId: param.projectId },
+          create: {
+            title: param.title || 'Untitled',
+            projectId: param.projectId,
+            uid: user.uid,
+          },
+        },
+      },
     };
 
     if (isNewCanvas && param.initialContent) {
@@ -615,11 +626,12 @@ export class KnowledgeService {
       createInput.storageSize = storageStat.size + stateStorageStat.size;
 
       // Add to vector store
-      const { size } = await this.ragService.indexContent(user, {
+      const { size } = await this.ragService.indexDocument(user, {
         pageContent: param.initialContent,
         metadata: {
           nodeType: 'canvas',
           canvasId: param.canvasId,
+          projectId: param.projectId,
           title: param.title,
         },
       });
@@ -636,7 +648,7 @@ export class KnowledgeService {
 
     await this.elasticsearch.upsertCanvas({
       id: param.canvasId,
-      ...pick(canvas, ['title', 'uid']),
+      ...pick(canvas, ['projectId', 'title', 'uid']),
       content: param.initialContent,
       createdAt: canvas.createdAt.toJSON(),
       updatedAt: canvas.updatedAt.toJSON(),
@@ -841,7 +853,8 @@ export class KnowledgeService {
       throw new BadRequestException('Some of the references cannot be found');
     }
 
-    await this.prisma.reference.deleteMany({
+    await this.prisma.reference.updateMany({
+      data: { deletedAt: new Date() },
       where: {
         referenceId: { in: referenceIds },
         uid: user.uid,
