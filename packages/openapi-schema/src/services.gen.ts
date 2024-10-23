@@ -47,6 +47,9 @@ import type {
   OperateReferencesData,
   OperateReferencesError,
   OperateReferencesResponse,
+  DeleteReferencesData,
+  DeleteReferencesError,
+  DeleteReferencesResponse,
   ListProjectsData,
   ListProjectsError,
   ListProjectsResponse,
@@ -332,7 +335,18 @@ export const queryReferences = (options: Options<QueryReferencesData>) => {
 export const operateReferences = (options: Options<OperateReferencesData>) => {
   return (options?.client ?? client).post<OperateReferencesResponse, OperateReferencesError>({
     ...options,
-    url: '/knowledge/reference/operate',
+    url: '/knowledge/reference/add',
+  });
+};
+
+/**
+ * Delete references
+ * Delete references between source and target entities
+ */
+export const deleteReferences = (options: Options<DeleteReferencesData>) => {
+  return (options?.client ?? client).post<DeleteReferencesResponse, DeleteReferencesError>({
+    ...options,
+    url: '/knowledge/reference/delete',
   });
 };
 

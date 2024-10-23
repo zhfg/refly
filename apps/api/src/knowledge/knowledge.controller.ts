@@ -31,13 +31,16 @@ import {
   ReindexResourceRequest,
   ReindexResourceResponse,
   BindProjectResourcesRequest,
+  QueryReferencesRequest,
+  AddReferencesRequest,
+  DeleteReferencesRequest,
 } from '@refly-packages/openapi-schema';
 import { User as UserModel } from '@prisma/client';
 import { KnowledgeService } from './knowledge.service';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { buildSuccessResponse } from '@/utils';
 import { User } from '@/utils/decorators/user.decorator';
-import { canvasPO2DTO, resourcePO2DTO, projectPO2DTO } from './knowledge.dto';
+import { canvasPO2DTO, resourcePO2DTO, projectPO2DTO, referencePO2DTO } from './knowledge.dto';
 
 @Controller('knowledge')
 export class KnowledgeController {
@@ -251,6 +254,27 @@ export class KnowledgeController {
       throw new BadRequestException('Canvas ID is required');
     }
     await this.knowledgeService.deleteCanvas(user, body.canvasId);
+    return buildSuccessResponse({});
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('reference/query')
+  async queryReferences(@User() user: UserModel, @Body() body: QueryReferencesRequest) {
+    const references = await this.knowledgeService.queryReferences(user, body);
+    return buildSuccessResponse(references.map(referencePO2DTO));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('reference/add')
+  async addReferences(@User() user: UserModel, @Body() body: AddReferencesRequest) {
+    const references = await this.knowledgeService.addReferences(user, body);
+    return buildSuccessResponse(references.map(referencePO2DTO));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('reference/delete')
+  async deleteReferences(@User() user: UserModel, @Body() body: DeleteReferencesRequest) {
+    await this.knowledgeService.deleteReferences(user, body);
     return buildSuccessResponse({});
   }
 }

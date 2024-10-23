@@ -369,7 +369,7 @@ paths:
       responses:
         '200':
           description: Successful operation
-  /knowledge/reference/operate:
+  /knowledge/reference/add:
     post:
       tags:
         - knowledge
@@ -381,7 +381,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OperateReferencesRequest'
+              $ref: '#/components/schemas/AddReferencesRequest'
       responses:
         '200':
           description: Successful operation
@@ -389,6 +389,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BaseResponse'
+  /knowledge/reference/delete:
+    post:
+      tags:
+        - knowledge
+      summary: Delete references
+      description: Delete references between source and target entities
+      operationId: deleteReferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteReferencesRequest'
+      responses:
+        '200':
+          description: Successful operation
   /knowledge/project/list:
     get:
       tags:
@@ -1382,45 +1398,52 @@ components:
         url:
           type: string
           description: Reference URL
-    Reference:
+    BaseReference:
       type: object
-      description: Reference
+      description: Basic reference info
       required:
-        - referenceId
         - sourceType
         - sourceId
-        - sourceTitle
         - targetType
         - targetId
-        - targetTitle
       properties:
-        referenceId:
-          type: string
-          description: Reference ID
         sourceType:
-          type: string
+          $ref: '#/components/schemas/ReferenceType'
           description: Source entity type
         sourceId:
           type: string
           description: Source entity ID
-        sourceTitle:
-          type: string
-          description: Source entity title
-        sourceMeta:
-          $ref: '#/components/schemas/ReferenceMeta'
-          description: Source entity metadata
         targetType:
-          type: string
+          $ref: '#/components/schemas/ReferenceType'
           description: Target entity type
         targetId:
           type: string
           description: Target entity ID
-        targetTitle:
-          type: string
-          description: Target entity title
-        targetMeta:
-          $ref: '#/components/schemas/ReferenceMeta'
-          description: Target entity metadata
+    Reference:
+      allOf:
+        - $ref: '#/components/schemas/BaseReference'
+        - type: object
+          description: Reference extra data
+          required:
+            - referenceId
+            - sourceTitle
+            - targetTitle
+          properties:
+            referenceId:
+              type: string
+              description: Reference ID
+            sourceTitle:
+              type: string
+              description: Source entity title
+            sourceMeta:
+              $ref: '#/components/schemas/ReferenceMeta'
+              description: Source entity metadata
+            targetTitle:
+              type: string
+              description: Target entity title
+            targetMeta:
+              $ref: '#/components/schemas/ReferenceMeta'
+              description: Target entity metadata
     ResourceMeta:
       type: object
       description: Resource metadata
@@ -2832,41 +2855,36 @@ components:
               description: Reference list
               items:
                 $ref: '#/components/schemas/Reference'
-    ReferenceOperation:
+    AddReferencesRequest:
       type: object
       required:
-        - reference
-        - operation
-      properties:
-        sourceType:
-          type: string
-          description: Source entity type
-        sourceId:
-          type: string
-          description: Source entity ID
-        targetType:
-          type: string
-          description: Target entity type
-        targetId:
-          type: string
-          description: Target entity ID
-        operation:
-          type: string
-          description: Operation type
-          enum:
-            - add
-            - remove
-    OperateReferencesRequest:
-      type: object
-      required:
-        - operation
         - references
       properties:
-        operations:
+        references:
           type: array
           description: Reference operation list
           items:
-            $ref: '#/components/schemas/ReferenceOperation'
+            $ref: '#/components/schemas/BaseReference'
+    AddReferencesResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Reference list
+              items:
+                $ref: '#/components/schemas/Reference'
+    DeleteReferencesRequest:
+      type: object
+      required:
+        - referenceIds
+      properties:
+        referenceIds:
+          type: array
+          description: Reference ID list
+          items:
+            type: string
     UpsertProjectRequest:
       type: object
       properties:

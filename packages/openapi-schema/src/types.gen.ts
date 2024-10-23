@@ -33,21 +33,32 @@ export type ReferenceMeta = {
 };
 
 /**
- * Reference
+ * Basic reference info
  */
-export type Reference = {
-  /**
-   * Reference ID
-   */
-  referenceId: string;
+export type BaseReference = {
   /**
    * Source entity type
    */
-  sourceType: string;
+  sourceType: ReferenceType;
   /**
    * Source entity ID
    */
   sourceId: string;
+  /**
+   * Target entity type
+   */
+  targetType: ReferenceType;
+  /**
+   * Target entity ID
+   */
+  targetId: string;
+};
+
+export type Reference = BaseReference & {
+  /**
+   * Reference ID
+   */
+  referenceId: string;
   /**
    * Source entity title
    */
@@ -56,14 +67,6 @@ export type Reference = {
    * Source entity metadata
    */
   sourceMeta?: ReferenceMeta;
-  /**
-   * Target entity type
-   */
-  targetType: string;
-  /**
-   * Target entity ID
-   */
-  targetId: string;
   /**
    * Target entity title
    */
@@ -1401,34 +1404,25 @@ export type QueryReferencesResponse = BaseResponse & {
   data?: Array<Reference>;
 };
 
-export type ReferenceOperation = {
-  /**
-   * Source entity type
-   */
-  sourceType?: string;
-  /**
-   * Source entity ID
-   */
-  sourceId?: string;
-  /**
-   * Target entity type
-   */
-  targetType?: string;
-  /**
-   * Target entity ID
-   */
-  targetId?: string;
-  /**
-   * Operation type
-   */
-  operation: 'add' | 'remove';
-};
-
-export type OperateReferencesRequest = {
+export type AddReferencesRequest = {
   /**
    * Reference operation list
    */
-  operations?: Array<ReferenceOperation>;
+  references: Array<BaseReference>;
+};
+
+export type AddReferencesResponse = BaseResponse & {
+  /**
+   * Reference list
+   */
+  data?: Array<Reference>;
+};
+
+export type DeleteReferencesRequest = {
+  /**
+   * Reference ID list
+   */
+  referenceIds: Array<string>;
 };
 
 export type UpsertProjectRequest = {
@@ -2585,12 +2579,20 @@ export type QueryReferencesResponse2 = unknown;
 export type QueryReferencesError = unknown;
 
 export type OperateReferencesData = {
-  body: OperateReferencesRequest;
+  body: AddReferencesRequest;
 };
 
 export type OperateReferencesResponse = BaseResponse;
 
 export type OperateReferencesError = unknown;
+
+export type DeleteReferencesData = {
+  body: DeleteReferencesRequest;
+};
+
+export type DeleteReferencesResponse = unknown;
+
+export type DeleteReferencesError = unknown;
 
 export type ListProjectsData = {
   query?: {
@@ -3220,7 +3222,7 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/knowledge/reference/operate': {
+  '/knowledge/reference/add': {
     post: {
       req: OperateReferencesData;
       res: {
@@ -3228,6 +3230,17 @@ export type $OpenApiTs = {
          * Successful operation
          */
         '200': BaseResponse;
+      };
+    };
+  };
+  '/knowledge/reference/delete': {
+    post: {
+      req: DeleteReferencesData;
+      res: {
+        /**
+         * Successful operation
+         */
+        '200': unknown;
       };
     };
   };
