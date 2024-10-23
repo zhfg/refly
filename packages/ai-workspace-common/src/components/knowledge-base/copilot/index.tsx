@@ -1,5 +1,6 @@
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { memo, useEffect, useState, useRef, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChatMessages } from './chat-messages';
 import { ConvListModal } from './conv-list-modal';
@@ -38,7 +39,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
   const { disable, jobId, source } = props;
 
   const [searchParams] = useSearchParams();
-  const convId = searchParams.get('convId');
+  const { convId } = useParams();
 
   const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
     resourcePanelVisible: state.resourcePanelVisible,

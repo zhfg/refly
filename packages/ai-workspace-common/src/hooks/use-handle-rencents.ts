@@ -60,6 +60,11 @@ export const useHandleRecents = (getRecents: boolean = false) => {
     updateRecentProjects([...newRecentProjects]);
   };
 
+  const addRecentConversation = (conversation: Conversation) => {
+    const newRecentConversations = [conversation, ...recentConversations].slice(0, 5);
+    updateRecentConversations(newRecentConversations);
+  };
+
   useEffect(() => {
     if (getRecents) {
       getRecentProjects();
@@ -70,5 +75,6 @@ export const useHandleRecents = (getRecents: boolean = false) => {
   return {
     addRecentProject,
     deleteRecentProject,
+    addRecentConversation,
   };
 };

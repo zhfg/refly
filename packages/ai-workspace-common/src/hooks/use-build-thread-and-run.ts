@@ -14,6 +14,7 @@ import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common
 // hooks
 import { useBuildSkillContext } from './use-build-skill-context';
 import { useTranslation } from 'react-i18next';
+import { useHandleRecents } from '@refly-packages/ai-workspace-common/hooks/use-handle-rencents';
 
 export const useBuildThreadAndRun = () => {
   const { t } = useTranslation();
@@ -33,7 +34,7 @@ export const useBuildThreadAndRun = () => {
   }));
   const { buildTaskAndGenReponse, buildShutdownTaskAndGenResponse } = useBuildTask();
   const { jumpToConv } = useKnowledgeBaseJumpNewPath();
-
+  const { addRecentConversation } = useHandleRecents();
   const emptyConvRunSkill = (
     question: string,
     forceNewConv?: boolean,
@@ -54,6 +55,8 @@ export const useBuildThreadAndRun = () => {
       convId: newConv?.convId,
       projectId: newConv?.projectId, // TODO: conv 增加 projectId
     });
+
+    addRecentConversation(newConv);
   };
 
   const ensureConversationExist = (forceNewConv = false) => {
