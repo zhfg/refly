@@ -71,15 +71,21 @@
     .recent-section {
       padding-left: 12px;
       color: rgba(0, 0, 0, 0.5);
+      font-size: 13px;
+
+      .arco-menu-item {
+        margin-bottom: 0;
+        font-size: 13px;
+        height: 28px;
+      }
 
       .recent-section-title {
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
-        height: 32px;
+        height: 28px;
         box-sizing: border-box;
-        margin-bottom: 4px;
 
         .recent-section-title-text {
           font-weight: 500;
