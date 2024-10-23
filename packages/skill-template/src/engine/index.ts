@@ -26,6 +26,10 @@ import {
   UpsertProjectRequest,
   CreateProjectResponse,
   UpdateProjectResponse,
+  AddReferencesRequest,
+  AddReferencesResponse,
+  DeleteReferencesRequest,
+  DeleteReferencesResponse,
 } from '@refly-packages/openapi-schema';
 
 // TODO: unify with frontend
@@ -54,6 +58,8 @@ export interface ReflyService {
   createLabelInstance: (user: User, req: CreateLabelInstanceRequest) => Promise<CreateLabelInstanceResponse>;
   webSearch: (user: User, req: WebSearchRequest) => Promise<WebSearchResponse>;
   search: (user: User, req: SearchRequest, options?: SearchOptions) => Promise<SearchResponse>;
+  addReferences: (user: User, req: AddReferencesRequest) => Promise<AddReferencesResponse>;
+  deleteReferences: (user: User, req: DeleteReferencesRequest) => Promise<DeleteReferencesResponse>;
   inMemorySearchWithIndexing: (
     user: User,
     options: {
