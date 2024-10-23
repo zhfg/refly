@@ -34,6 +34,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       statusCode: httpStatus,
       timestamp: new Date().toISOString(),
       path: request.url,
+      message:
+        process.env.NODE_ENV === 'production' ? 'An unexpected error occurred' : exception.message,
+      stack: process.env.NODE_ENV === 'production' ? undefined : exception.stack,
     });
   }
 }

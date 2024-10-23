@@ -3,6 +3,7 @@ import {
   Canvas as CanvasModel,
   Project as ProjectModel,
   Conversation as ConversationModel,
+  Reference as ReferenceModel,
 } from '@prisma/client';
 import {
   Resource,
@@ -10,6 +11,8 @@ import {
   ResourceType,
   IndexStatus,
   Project,
+  Reference,
+  ReferenceType,
 } from '@refly-packages/openapi-schema';
 import { pick } from '@/utils';
 import { conversationPO2DTO } from '@/conversation/conversation.dto';
@@ -71,4 +74,14 @@ export const canvasPO2DTO = (
     updatedAt: canvas.updatedAt.toJSON(),
   };
   return res;
+};
+
+export const referencePO2DTO = (reference: ReferenceModel): Reference => {
+  return {
+    ...pick(reference, ['referenceId', 'sourceId', 'sourceTitle', 'targetId', 'targetTitle']),
+    sourceType: reference.sourceType as ReferenceType,
+    targetType: reference.targetType as ReferenceType,
+    sourceMeta: JSON.parse(reference.sourceMeta),
+    targetMeta: JSON.parse(reference.targetMeta),
+  };
 };
