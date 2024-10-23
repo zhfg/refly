@@ -9,7 +9,7 @@ import { useSearchParams } from 'react-router-dom';
 
 // 组件
 import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
-import { ResourceCollectionAssociativeModal } from '@refly-packages/ai-workspace-common/components/knowledge-base/resource-detail/resource-collection-associative-modal';
+import { BindResourceModal } from '@refly-packages/ai-workspace-common/components/project-detail/resource-detail/resource-collection-associative-modal';
 import { ResourceItem } from './resource-item';
 import classNames from 'classnames';
 
@@ -116,7 +116,7 @@ export const ResourceList = (props: ResourceListProps) => {
           ))
         )}
       </div>
-      <ResourceCollectionAssociativeModal
+      <BindResourceModal
         domain="resource"
         mode="multiple"
         visible={visible}
@@ -125,7 +125,7 @@ export const ResourceList = (props: ResourceListProps) => {
           if (value.length > 0 && value.includes(resId)) {
             reloadKnowledgeBaseState.setReloadResourceDetail(true);
           }
-          reloadKnowledgeBaseState.setReloadKnowledgeBaseList(true);
+          reloadKnowledgeBaseState.setReloadProjectList(true);
         }}
       />
     </div>

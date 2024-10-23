@@ -10,7 +10,7 @@ import { getClientOrigin } from '@refly/utils/url';
 import { useEffect } from 'react';
 import { ProjectItemCard } from '@refly-packages/ai-workspace-common/components/project-list/project-card';
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
-import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
+import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/project-detail/delete-dropdown-menu';
 // utils
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // styles
@@ -20,7 +20,7 @@ import { Project, Source } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
-import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 
 export const getFirstSourceLink = (sources: Source[]) => {
@@ -62,7 +62,7 @@ export const ProjectList = (props: ProjectListProps) => {
     }
   }, [reloadListState.reloadProjectList]);
 
-  const { jumpToProject } = useKnowledgeBaseJumpNewPath();
+  const { jumpToProject } = useJumpNewPath();
 
   if (dataList.length === 0 && !isRequesting) {
     return <Empty />;

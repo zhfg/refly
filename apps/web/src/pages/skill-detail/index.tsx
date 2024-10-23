@@ -7,7 +7,7 @@ import { useSearchParams } from "@refly-packages/ai-workspace-common/utils/route
 
 // components
 import SkillDetail from "@refly-packages/ai-workspace-common/components/skill/skill-detail"
-import { AICopilot } from "@refly-packages/ai-workspace-common/components/knowledge-base/copilot"
+import { AICopilot } from "@refly-packages/ai-workspace-common/components/copilot"
 
 import { useSkillJobForCopilot } from "@refly-packages/ai-workspace-common/stores/skill-job-for-copilot"
 

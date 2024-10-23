@@ -23,7 +23,6 @@ const setGlobalLoading = (isLoading: boolean) => {
 createClient({ baseUrl: getServerOrigin() + '/v1' });
 
 client.interceptors.request.use((request) => {
-  console.log('intercept request:', request);
   // setGlobalLoading(true);
   const token = getAuthTokenFromCookie();
   if (token) {
@@ -33,7 +32,6 @@ client.interceptors.request.use((request) => {
 });
 
 client.interceptors.response.use((response) => {
-  console.log('intercept response:', response);
   // setGlobalLoading(false);
   return response;
 });

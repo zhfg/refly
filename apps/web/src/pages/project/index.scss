@@ -1,32 +1,32 @@
-.workspace-container {
+.project-container {
   height: 100%;
   word-break: break-all;
 }
 
-.workspace-inner-container {
+.project-inner-container {
   height: 100%;
   background-color: #f3f3ee;
 }
 
-.workspace-panel-container {
+.project-panel-container {
   height: 100%;
 }
 
-.workspace-left-assist-panel {
+.project-left-assist-panel {
   border-radius: 8px;
   background-color: #fcfcf9;
   border-color: hsla(60, 11%, 83%, 0.5);
   box-shadow: 0 1px 1px 0 hsla(60, 11%, 83%, 0.3);
 }
 
-.workspace-content-panel {
+.project-content-panel {
   border-radius: 8px;
   background-color: #fcfcf9;
   border-color: hsla(60, 11%, 83%, 0.5);
   box-shadow: 0 1px 1px 0 hsla(60, 11%, 83%, 0.3);
 }
 
-.workspace-panel-resize {
+.project-panel-resize {
   background-color: #f3f3ee;
   width: 2px;
   margin: 0 3px;

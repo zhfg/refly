@@ -1,18 +1,7 @@
-import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
-export const useKnowledgeBaseJumpNewPath = () => {
+export const useJumpNewPath = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const canvasStore = useCanvasStoreShallow((state) => ({
-    notePanelVisible: state.canvasPanelVisible,
-    updateCurrentNote: state.updateCurrentCanvas,
-    updateNotePanelVisible: state.updateCanvasPanelVisible,
-  }));
-  const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
-    resourcePanelVisible: state.resourcePanelVisible,
-    updateResourcePanelVisible: state.updateResourcePanelVisible,
-  }));
   const navigate = useNavigate();
 
   const jumpToCanvas = ({
@@ -34,9 +23,6 @@ export const useKnowledgeBaseJumpNewPath = () => {
       window.open(url, '_blank');
     } else {
       navigate(url);
-      if (!canvasStore.notePanelVisible) {
-        canvasStore.updateNotePanelVisible(true);
-      }
     }
   };
 
