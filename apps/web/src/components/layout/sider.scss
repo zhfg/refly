@@ -69,8 +69,39 @@
     }
 
     .recent-section {
-      h3 {
-        font-size: 14px;
+      color: rgba(0, 0, 0, 0.5);
+      font-size: 13px;
+
+      .arco-menu-item {
+        margin-bottom: 0;
+        font-size: 13px;
+        height: 28px;
+      }
+
+      .recent-section-title {
+        padding-left: 12px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        height: 28px;
+        box-sizing: border-box;
+
+        .recent-section-title-text {
+          font-weight: 500;
+        }
+
+        .recent-section-title-more {
+          font-size: 12px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          cursor: pointer;
+          &:hover {
+            color: #00968f;
+            font-weight: 600;
+          }
+        }
       }
 
       .arco-menu-item {
@@ -139,9 +170,11 @@
     }
   }
 
-  .custom-menu-item:hover {
-    background-color: rgba(232, 232, 227) !important;
-    border-radius: 4px;
+  .custom-menu-item {
+    &:hover {
+      background-color: rgba(232, 232, 227) !important;
+      border-radius: 4px;
+    }
   }
 
   .setting-menu-item {
@@ -269,6 +302,11 @@
 
   .sider-menu-inner {
     height: calc(100% - 118px);
+    overflow-y: auto;
+  }
+
+  .sider-menu-inner-collapse {
+    height: calc(100% - 118px - 36px);
     overflow-y: auto;
   }
 

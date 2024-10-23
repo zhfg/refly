@@ -3,14 +3,14 @@ import { Layout } from "@arco-design/web-react"
 import { SiderLayout } from "./sider"
 import { useBindCommands } from "@refly-packages/ai-workspace-common/hooks/use-bind-commands"
 import { useImportResourceStoreShallow } from "@refly-packages/ai-workspace-common/stores/import-resource"
-import { useImportKnowledgeModalShallow } from "@refly-packages/ai-workspace-common/stores/import-knowledge-modal"
+import { useImportProjectModalShallow } from "@refly-packages/ai-workspace-common/stores/import-project-modal"
 import { useNewCanvasModalStoreShallow } from "@/store/new-canvas-modal"
 import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
 
 import { LoginModal } from "@/components/login-modal"
 import { BigSearchModal } from "@refly-packages/ai-workspace-common/components/search/modal"
 import { ImportResourceModal } from "@refly-packages/ai-workspace-common/components/import-resource"
-import { NewKnowledgeModal } from "@refly-packages/ai-workspace-common/components/knowledge-base/new-knowledge-modal"
+import { NewProjectModal } from "@refly-packages/ai-workspace-common/components/knowledge-base/new-project-modal"
 import { SubscribeModal } from "@refly-packages/ai-workspace-common/components/settings/subscribe-modal"
 import { NewCanvasModal } from "@/components/new-canvas-modal"
 
@@ -33,8 +33,8 @@ export const AppLayout = (props: AppLayoutProps) => {
   const newCanvasModalStore = useNewCanvasModalStoreShallow(state => ({
     newCanvasModalVisible: state.newCanvasModalVisible,
   }))
-  const importKnowledgeModal = useImportKnowledgeModalShallow(state => ({
-    showNewKnowledgeModal: state.showNewKnowledgeModal,
+  const importProjectModal = useImportProjectModalShallow(state => ({
+    showNewProjectModal: state.showNewProjectModal,
   }))
 
   // 绑定快捷键
@@ -59,7 +59,7 @@ export const AppLayout = (props: AppLayoutProps) => {
         <ImportResourceModal />
       ) : null}
       {newCanvasModalStore.newCanvasModalVisible ? <NewCanvasModal /> : null}
-      {importKnowledgeModal.showNewKnowledgeModal && <NewKnowledgeModal />}
+      {importProjectModal.showNewProjectModal && <NewProjectModal />}
       <SubscribeModal />
     </Layout>
   )

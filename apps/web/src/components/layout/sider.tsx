@@ -46,6 +46,8 @@ import { SiderMenuSettingList } from "@refly-packages/ai-workspace-common/compon
 import { SiderMenuMoreList } from "@refly-packages/ai-workspace-common/components/sider-menu-more-list"
 // hooks
 import { useKnowledgeBaseJumpNewPath } from "@refly-packages/ai-workspace-common/hooks/use-jump-new-path"
+import { useRecentsStoreShallow } from "@refly-packages/ai-workspace-common/stores/recents"
+import { useHandleRecents } from "@refly-packages/ai-workspace-common/hooks/use-handle-rencents"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -387,19 +389,14 @@ export const SiderLayout = () => {
     ],
   ]
 
-  const recentProjects = [
-    // Add 7-8 recent projects here
-    { key: "project1", name: "Project 1", projectId: "1" },
-    { key: "project2", name: "Project 2", projectId: "2" },
-    // ... more projects
-  ]
+  const { recentProjects, recentConversations } = useRecentsStoreShallow(
+    state => ({
+      recentProjects: state.recentProjects,
+      recentConversations: state.recentConversations,
+    }),
+  )
 
-  const recentChats = [
-    // Add 7-8 recent chats here
-    { key: "chat1", name: "Chat 1", projectId: "1", convId: "1" },
-    { key: "chat2", name: "Chat 2", convId: "2" },
-    // ... more chats
-  ]
+  useHandleRecents(true)
 
   return (
     <Sider
@@ -427,7 +424,7 @@ export const SiderLayout = () => {
           selectedKeys={[selectedKey]}
           tooltipProps={{}}
           onClickMenuItem={handleNavClick}>
-          <div className="sider-menu-inner">
+          <div className={`sider-menu-inner${collapse ? "-collapse" : ""}`}>
             {siderSections.map((section, index) => (
               <div key={`section-${index}`} className="sider-section">
                 {section.map(item => (
@@ -452,81 +449,83 @@ export const SiderLayout = () => {
               </div>
             ))}
 
-            <Divider style={{ margin: "8px 0" }} />
+            {(recentProjects.length > 0 || recentConversations.length > 0) && (
+              <Divider style={{ margin: "8px 0" }} />
+            )}
 
             <div className="recent-section">
-              <div className="recent-projects">
-                <h3>{t("loggedHomePage.siderMenu.recentProjects")}</h3>
-                {recentProjects.map(project => (
-                  <MenuItem
-                    key={project.key}
-                    onClick={() => {
-                      jumpToProject({ projectId: project.projectId })
-                    }}>
-                    {project.name}
-                  </MenuItem>
-                ))}
-                <MenuItem
-                  key="viewMoreProjects"
-                  onClick={() => {
-                    /* Navigate to projects list */
-                  }}>
-                  <MenuItem
-                    key="viewMoreChats"
-                    onClick={() => {
-                      /* Navigate to chats list */
-                      navigate(`/knowledge-base?tab=project`)
-                    }}>
-                    <MenuItemContent
-                      position="right"
-                      icon={
+              {recentProjects.length > 0 && (
+                <div className="recent-projects">
+                  {!collapse && (
+                    <div className="recent-section-title">
+                      <div className="recent-section-title-text">
+                        {t("loggedHomePage.siderMenu.recentProjects")}
+                      </div>
+                      <div
+                        className="recent-section-title-more"
+                        onClick={() => {
+                          navigate(`/knowledge-base?tab=project`)
+                        }}>
+                        {t("loggedHomePage.siderMenu.viewMore")}
                         <IconRight
                           className="arco-icon"
-                          style={{ fontSize: 20 }}
+                          style={{ fontSize: 12 }}
                         />
-                      }
-                      title={t("loggedHomePage.siderMenu.viewMore")}
-                    />
-                  </MenuItem>
-                </MenuItem>
-              </div>
+                      </div>
+                    </div>
+                  )}
 
-              <div className="recent-chats">
-                <h3>{t("loggedHomePage.siderMenu.recentChats")}</h3>
-                {recentChats.map(chat => (
-                  <MenuItem
-                    key={chat.key}
-                    onClick={() => {
-                      if (chat.projectId && chat.convId) {
-                        jumpToConv({
-                          projectId: chat.projectId,
-                          convId: chat.convId,
-                        })
-                      } else if (chat.convId) {
-                        jumpToConv({ convId: chat.convId })
-                      }
-                    }}>
-                    {chat.name}
-                  </MenuItem>
-                ))}
-                <MenuItem
-                  key="viewMoreChats"
-                  onClick={() => {
-                    /* Navigate to chats list */
-                    navigate(`/thread`)
-                  }}>
-                  <MenuItemContent
-                    position="right"
-                    icon={
-                      <IconRight
-                        className="arco-icon"
-                        style={{ fontSize: 20 }}
-                      />
-                    }
-                    title={t("loggedHomePage.siderMenu.viewMore")}
-                  />
-                </MenuItem>
-              </div>
+                  {recentProjects.map(project => (
+                    <MenuItem
+                      className="custom-menu-item"
+                      key={project.projectId}
+                      onClick={() => {
+                        jumpToProject({ projectId: project.projectId })
+                      }}>
+                      {project.title}
+                    </MenuItem>
+                  ))}
+                </div>
+              )}
+
+              {recentConversations.length > 0 && (
+                <div className="recent-chats">
+                  {!collapse && (
+                    <div className="recent-section-title">
+                      <div>{t("loggedHomePage.siderMenu.recentChats")}</div>
+                      <div
+                        className="recent-section-title-more"
+                        onClick={() => {
+                          navigate(`/thread`)
+                        }}>
+                        {t("loggedHomePage.siderMenu.viewMore")}
+                        <IconRight
+                          className="arco-icon"
+                          style={{ fontSize: 12 }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {recentConversations.map((chat, index) => (
+                    <MenuItem
+                      className="custom-menu-item"
+                      key={chat?.convId || `chat-${index}`}
+                      onClick={() => {
+                        if (chat.projectId && chat.convId) {
+                          jumpToConv({
+                            projectId: chat.projectId,
+                            convId: chat.convId,
+                          })
+                        } else if (chat.convId) {
+                          jumpToConv({ convId: chat.convId })
+                        }
+                      }}>
+                      {chat.title}
+                    </MenuItem>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

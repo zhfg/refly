@@ -8,7 +8,7 @@ import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { getClientOrigin } from '@refly/utils/url';
 // components
 import { useEffect } from 'react';
-import { ProjectItemCard } from '@refly-packages/ai-workspace-common/components/knowledge-base-list/knowledge-base-card';
+import { ProjectItemCard } from '@refly-packages/ai-workspace-common/components/project-list/project-card';
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
 import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
 // utils
@@ -26,7 +26,7 @@ import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/r
 export const getFirstSourceLink = (sources: Source[]) => {
   return sources?.[0]?.metadata?.source;
 };
-interface KnowledgeBaseListProps {
+interface ProjectListProps {
   listGrid?: {
     sm: number;
     md: number;
@@ -34,7 +34,7 @@ interface KnowledgeBaseListProps {
     xl: number;
   };
 }
-export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
+export const ProjectList = (props: ProjectListProps) => {
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
   const { listGrid } = props;
@@ -56,11 +56,11 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
   }, []);
 
   useEffect(() => {
-    if (reloadListState.reloadKnowledgeBaseList) {
+    if (reloadListState.reloadProjectList) {
       reload();
-      reloadListState.setReloadKnowledgeBaseList(false);
+      reloadListState.setReloadProjectList(false);
     }
-  }, [reloadListState.reloadKnowledgeBaseList]);
+  }, [reloadListState.reloadProjectList]);
 
   const { jumpToProject } = useKnowledgeBaseJumpNewPath();
 
@@ -122,7 +122,7 @@ export const KnowledgeBaseList = (props: KnowledgeBaseListProps) => {
                     </span>
                   </IconTip>
                   <DeleteDropdownMenu
-                    type="knowledgeBase"
+                    type="project"
                     data={item}
                     postDeleteList={(project: Project) =>
                       setDataList(dataList.filter((n) => n.projectId !== project.projectId))

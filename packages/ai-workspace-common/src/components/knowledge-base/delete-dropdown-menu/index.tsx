@@ -7,11 +7,11 @@ import { Canvas, Project, Resource, BindProjectResourcesRequest } from '@refly/o
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import { useTranslation } from 'react-i18next';
-import { useImportKnowledgeModal } from '@refly-packages/ai-workspace-common/stores/import-knowledge-modal';
+import { useImportProjectModal } from '@refly-packages/ai-workspace-common/stores/import-project-modal';
 import { IconCopy } from '@arco-design/web-react/icon';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
-
+import { useHandleRecents } from '@refly-packages/ai-workspace-common/hooks/use-handle-rencents';
 const iconStyle = {
   marginRight: 8,
   fontSize: 16,
@@ -26,12 +26,12 @@ interface DropListProps {
   position?: positionType;
   handleCancel: (e: any) => void;
   handleDeleteClick: (e: any) => Promise<void>;
-  handlEditKnowledgeBase?: (e: any) => void;
+  handlEditProject?: (e: any) => void;
   getPopupContainer?: () => HTMLElement;
 }
 
 const DropList = (props: DropListProps) => {
-  const { handleCancel, handleDeleteClick, handlEditKnowledgeBase, type, getPopupContainer, position, canCopy } = props;
+  const { handleCancel, handleDeleteClick, handlEditProject, type, getPopupContainer, position, canCopy } = props;
   const canvasStore = useCanvasStore((state) => ({
     editor: state.editor,
   }));
@@ -39,9 +39,9 @@ const DropList = (props: DropListProps) => {
 
   return (
     <Menu onClick={(e) => e.stopPropagation()}>
-      {type === 'knowledgeBase' && (
+      {type === 'project' && (
         <Menu.Item key="edit">
-          <div onClick={(e) => handlEditKnowledgeBase(e)}>
+          <div onClick={(e) => handlEditProject(e)}>
             <TbEdit style={iconStyle} />
             {t('workspace.deleteDropdownMenu.edit')}
           </div>
@@ -100,8 +100,8 @@ interface CanvasPros extends DeleteDropdownMenuProps {
   data: Canvas;
 }
 
-interface KnowledgeBasePros extends DeleteDropdownMenuProps {
-  type: 'knowledgeBase';
+interface ProjectProps extends DeleteDropdownMenuProps {
+  type: 'project';
   data: Project;
 }
 
@@ -115,12 +115,13 @@ interface ResourceCollectionPros extends DeleteDropdownMenuProps {
   data?: BindProjectResourcesRequest;
 }
 
-export const DeleteDropdownMenu = (props: CanvasPros | KnowledgeBasePros | ResourcePros | ResourceCollectionPros) => {
+export const DeleteDropdownMenu = (props: CanvasPros | ProjectProps | ResourcePros | ResourceCollectionPros) => {
   const { type, data, postDeleteList, getPopupContainer, deleteConfirmPosition, canCopy } = props;
   const [popupVisible, setPopupVisible] = useState(false);
   const { t } = useTranslation();
 
-  const importKnowledgeModal = useImportKnowledgeModal();
+  const importProjectModal = useImportProjectModal();
+  const { deleteRecentProject, editRecentProject } = useHandleRecents();
 
   const handleDeleteClick = async (e: MouseEvent) => {
     e.stopPropagation();
@@ -129,9 +130,12 @@ export const DeleteDropdownMenu = (props: CanvasPros | KnowledgeBasePros | Resou
       const { error } = await getClient().deleteCanvas({ body: { canvasId: data.canvasId } });
       resultError = error;
     }
-    if (type === 'knowledgeBase') {
+    if (type === 'project') {
       const { error } = await getClient().deleteProject({ body: { projectId: data.projectId } });
       resultError = error;
+      if (!resultError) {
+        deleteRecentProject(data.projectId);
+      }
     }
     if (type === 'resource') {
       const { error } = await getClient().deleteResource({ body: { resourceId: data.resourceId } });
@@ -161,10 +165,10 @@ export const DeleteDropdownMenu = (props: CanvasPros | KnowledgeBasePros | Resou
     setPopupVisible(false);
   };
 
-  const handlEditKnowledgeBase = (e: MouseEvent) => {
+  const handlEditProject = (e: MouseEvent) => {
     e.stopPropagation();
-    importKnowledgeModal.setShowNewKnowledgeModal(true);
-    importKnowledgeModal.setEditProject(data as Project);
+    importProjectModal.setShowNewProjectModal(true);
+    importProjectModal.setEditProject(data as Project);
   };
 
   const handleIconClick = (e) => {
@@ -178,7 +182,7 @@ export const DeleteDropdownMenu = (props: CanvasPros | KnowledgeBasePros | Resou
     position: deleteConfirmPosition,
     handleCancel,
     handleDeleteClick,
-    handlEditKnowledgeBase,
+    handlEditProject,
     getPopupContainer,
   });
 

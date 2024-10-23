@@ -1,11 +1,11 @@
 import { ReactNode } from 'react';
 import { Typography } from '@arco-design/web-react';
-import { Collection } from '@refly/openapi-schema';
+import { Project } from '@refly/openapi-schema';
 import './index.scss';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 
 interface ProjectItemCardProps {
-  cardData: Collection;
+  cardData: Project;
   index: number;
   cardIcon?: ReactNode;
   children?: ReactNode;
@@ -18,7 +18,7 @@ export const ProjectItemCard = (props: ProjectItemCardProps) => {
   return (
     <div
       className="p-4 m-3 rounded-lg border card-box border-black/8"
-      id={`collection-${props.index}`}
+      id={`project-${props.index}`}
       onClick={() => onClick()}
     >
       <div className="overflow-hidden h-40">

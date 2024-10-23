@@ -10,7 +10,7 @@ import { KnowledgeBaseDetailEmpty } from '../knowledge-base-detail-empty';
 // 样式
 import './index.scss';
 import { ActionSource, useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { KnowledgeBaseListModal } from '../copilot/knowledge-base-list-modal';
+import { ProjectListModal } from '../copilot/project-list-modal';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 import { HiOutlineSearch } from 'react-icons/hi';
 import { HiChevronLeft, HiChevronRight } from 'react-icons/hi2';
@@ -189,7 +189,7 @@ export const KnowledgeBaseDetail = () => {
         </Panel>
       </PanelGroup>
       {knowledgeBaseStore?.kbModalVisible && knowledgeBaseStore.actionSource === ActionSource.KnowledgeBase ? (
-        <KnowledgeBaseListModal title="知识库" classNames="kb-list-modal" placement="right" width={360} height="100%" />
+        <ProjectListModal title="知识库" classNames="kb-list-modal" placement="right" width={360} height="100%" />
       ) : null}
     </div>
   );

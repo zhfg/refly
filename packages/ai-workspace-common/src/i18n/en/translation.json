@@ -123,13 +123,13 @@
       "tabPanel": {
         "resource": "Resources",
         "canvas": "Canvas",
-        "collection": "Collections",
+        "project": "Projects",
         "thread": "Threads"
       },
       "newButton": {
         "resource": "New Resource",
         "canvas": "New Canvas",
-        "collection": "New Collection"
+        "project": "New Project"
       }
     },
     "resourceCollectionList": {
@@ -144,13 +144,13 @@
       "deleteFailed": "Failed to delete label",
       "deleteSuccessful": "Label deleted successfully"
     },
-    "newKnowledgeModal": {
-      "modalTitle": "Create New Knowledge Base",
-      "editModalTitle": "Edit the Knowledge Base",
-      "titlePlaceholder": "Enter a title for your knowledge base",
+    "newProjectModal": {
+      "modalTitle": "Create New Project",
+      "editModalTitle": "Edit the Project",
+      "titlePlaceholder": "Enter a title for your project",
       "title": "Title",
       "description": "Description",
-      "descriptionPlaceholder": "Enter a description for your knowledge base",
+      "descriptionPlaceholder": "Enter a description for your project",
       "cancel": "Cancel",
       "confirm": "Confirm",
       "successful": "Created successfully",
@@ -405,10 +405,10 @@
       "expand": "Expand",
       "logout": "Log Out",
       "newDraft": "New Draft",
-      "knowledgeBase": "Knowledge Base",
+      "knowledgeBase": "Library",
       "recentProjects": "Recent Projects",
       "recentChats": "Recent Chats",
-      "viewMore": "View More"
+      "viewMore": "More"
     }
   },
   "knowledgeLibrary": {

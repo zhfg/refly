@@ -144,13 +144,13 @@
       "deleteFailed": "标签删除失败",
       "deleteSuccessful": "标签删除成功"
     },
-    "newKnowledgeModal": {
-      "modalTitle": "新增知识库",
-      "editModalTitle": "编辑知识库",
-      "titlePlaceholder": "请输入知识库标题",
+    "newProjectModal": {
+      "modalTitle": "新增项目",
+      "editModalTitle": "编辑项目",
+      "titlePlaceholder": "请输入项目标题",
       "title": "标题",
       "description": "描述",
-      "descriptionPlaceholder": "请输入知识库描述",
+      "descriptionPlaceholder": "请输入项目描述",
       "cancel": "取消",
       "confirm": "确认",
       "successful": "创建成功",
@@ -417,7 +417,7 @@
       "knowledgeBase": "知识库",
       "recentProjects": "最近项目",
       "recentChats": "最近会话",
-      "viewMore": "查看更多"
+      "viewMore": "更多"
     }
   },
   "knowledgeLibrary": {
