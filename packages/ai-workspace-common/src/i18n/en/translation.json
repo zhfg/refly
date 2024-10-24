@@ -34,7 +34,8 @@
     "copy": {
       "title": "Copy",
       "success": "Content has been copied to the clipboard!"
-    }
+    },
+    "login": "Login"
   },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",
@@ -868,18 +869,19 @@
   },
   "entitySelector": {
     "placeholder": {
-      "collection": "Select Collection",
+      "project": "Select Project",
       "resource": "Select Resource",
       "note": "Select Note",
       "skill": "Select Skill",
       "conversation": "Select Conversation"
     },
     "createEntity": {
-      "collection": "New Collection",
+      "project": "New Project",
       "resource": "New Resource",
       "note": "New Note",
       "skill": "New Skill",
-      "conversation": "New Conversation"
+      "conversation": "New Conversation",
+      "newProjectNameIsEmpty": "Please enter the name of the project"
     }
   },
   "components": {

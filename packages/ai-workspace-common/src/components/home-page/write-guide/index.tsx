@@ -1,5 +1,6 @@
 import { List, Divider } from '@arco-design/web-react';
 import { IconDown } from '@arco-design/web-react/icon';
+import cn from 'classnames';
 
 import { useTranslation } from 'react-i18next';
 
@@ -9,6 +10,7 @@ import { CopilotOperationModule } from '@refly-packages/ai-workspace-common/comp
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 import { getClientOrigin } from '@refly/utils/url';
 import { UILocaleList } from '@refly-packages/ai-workspace-common/components/ui-locale-list';
+import { GridPattern } from './grid-pattern';
 
 const quickStartList = [
   {
@@ -122,6 +124,17 @@ export const WriteGuide = (props: WriteGuideProps) => {
           </UILocaleList>
         </div>
       </div>
+
+      <GridPattern
+        numSquares={30}
+        maxOpacity={0.1}
+        duration={3}
+        repeatDelay={1}
+        className={cn(
+          '[mask-image:radial-gradient(500px_circle_at_center,white,transparent)]',
+          'inset-x-0 inset-y-[-30%] h-[200%] skew-y-12 -z-1',
+        )}
+      />
     </div>
   );
 };

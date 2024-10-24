@@ -1,12 +1,13 @@
-import { useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
+import { ChatMode, useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useConversationStoreShallow } from '@refly-packages/ai-workspace-common/stores/conversation';
 import { buildConversation, getConversation } from '@refly-packages/ai-workspace-common/utils/conversation';
+import { Notification } from '@arco-design/web-react';
 import { useResetState } from './use-reset-state';
 import { useTaskStoreShallow } from '@refly-packages/ai-workspace-common/stores/task';
 
 import { InvokeSkillRequest, SkillContext, SkillTemplateConfig } from '@refly/openapi-schema';
 // request
-import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import { useUserStore, useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { OutputLocale } from '@refly-packages/ai-workspace-common/utils/i18n';
 import { useBuildTask } from './use-build-task';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
@@ -15,19 +16,32 @@ import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-ju
 import { useBuildSkillContext } from './use-build-skill-context';
 import { useTranslation } from 'react-i18next';
 import { useHandleRecents } from '@refly-packages/ai-workspace-common/hooks/use-handle-rencents';
+import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useContextFilterErrorTip } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/hooks/use-context-filter-errror-tip';
+import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
+
+interface InvokeParams {
+  chatMode?: ChatMode;
+  projectId?: string;
+  skillContext?: SkillContext;
+  tplConfig?: SkillTemplateConfig;
+}
 
 export const useBuildThreadAndRun = () => {
   const { t } = useTranslation();
   const { buildSkillContext } = useBuildSkillContext();
   const chatStore = useChatStoreShallow((state) => ({
+    setChatMode: state.setChatMode,
     setNewQAText: state.setNewQAText,
     setInvokeParams: state.setInvokeParams,
   }));
+  const setLoginModalVisible = useUserStoreShallow((state) => state.setLoginModalVisible);
   const conversationStore = useConversationStoreShallow((state) => ({
     currentConversation: state.currentConversation,
     setCurrentConversation: state.setCurrentConversation,
     setIsNewConversation: state.setIsNewConversation,
   }));
+  const setIsSearchOpen = useSearchStoreShallow((state) => state.setIsSearchOpen);
   const { resetState } = useResetState();
   const taskStore = useTaskStoreShallow((state) => ({
     setTask: state.setTask,
@@ -35,36 +49,40 @@ export const useBuildThreadAndRun = () => {
   const { buildTaskAndGenReponse, buildShutdownTaskAndGenResponse } = useBuildTask();
   const { jumpToConv } = useJumpNewPath();
   const { addRecentConversation } = useHandleRecents();
+  const { handleFilterErrorTip } = useContextFilterErrorTip();
+
   const emptyConvRunSkill = (
     question: string,
     forceNewConv?: boolean,
-    invokeParams?: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig },
+    invokeParams?: { projectId?: string; skillContext?: SkillContext; tplConfig?: SkillTemplateConfig },
   ) => {
     if (forceNewConv) {
       resetState();
     }
 
-    const newConv = ensureConversationExist(forceNewConv);
-    console.log('emptyConvTask', newConv);
+    const newConv = ensureConversationExist(invokeParams?.projectId, forceNewConv);
     conversationStore.setCurrentConversation(newConv);
     conversationStore.setIsNewConversation(true);
     chatStore.setNewQAText(question);
     chatStore.setInvokeParams(invokeParams);
+    console.log('emptyConvRunSkill invokeParams', invokeParams);
+    console.log('emptyConvRunSkill newConv', newConv);
 
     jumpToConv({
       convId: newConv?.convId,
-      projectId: newConv?.projectId, // TODO: conv 增加 projectId
+      projectId: newConv?.projectId,
     });
 
     addRecentConversation(newConv);
   };
 
-  const ensureConversationExist = (forceNewConv = false) => {
+  const ensureConversationExist = (projectId?: string, forceNewConv = false) => {
     const { currentConversation } = conversationStore;
     const { localSettings } = useUserStore.getState();
 
     if (!currentConversation?.convId || forceNewConv) {
       const newConv = buildConversation({
+        projectId,
         locale: localSettings?.outputLocale as OutputLocale,
       });
       conversationStore.setCurrentConversation(newConv);
@@ -75,10 +93,7 @@ export const useBuildThreadAndRun = () => {
     return currentConversation;
   };
 
-  const runSkill = (
-    comingQuestion: string,
-    invokeParams?: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig },
-  ) => {
+  const runSkill = (comingQuestion: string, invokeParams?: InvokeParams) => {
     // support ask follow up question
     const { messages = [], selectedModel, enableWebSearch, chatMode } = useChatStore.getState();
     const { selectedSkill } = useSkillStore.getState();
@@ -88,7 +103,7 @@ export const useBuildThreadAndRun = () => {
     const isFollowUpAsk = messages?.length > 0;
 
     // 创建新会话并跳转
-    const conv = ensureConversationExist();
+    const conv = ensureConversationExist(invokeParams?.projectId);
     const skillContext = invokeParams?.skillContext || buildSkillContext();
 
     // TODO: temp make scheduler support
@@ -118,6 +133,7 @@ export const useBuildThreadAndRun = () => {
     // 设置当前的任务类型及会话 id
     const task: InvokeSkillRequest = {
       skillId: selectedSkill?.skillId,
+      projectId: invokeParams?.projectId,
       input: {
         query: question,
       },
@@ -134,8 +150,49 @@ export const useBuildThreadAndRun = () => {
     chatStore.setNewQAText('');
   };
 
+  const sendChatMessage = (params: InvokeParams) => {
+    const { localSettings } = useUserStore.getState();
+
+    if (!localSettings) {
+      setLoginModalVisible(true);
+      return;
+    }
+
+    const error = handleFilterErrorTip();
+    if (error) {
+      return;
+    }
+
+    const { formErrors } = useContextPanelStore.getState();
+    if (formErrors && Object.keys(formErrors).length > 0) {
+      Notification.error({
+        style: { width: 400 },
+        title: t('copilot.configManager.errorTipTitle'),
+        content: t('copilot.configManager.errorTip'),
+      });
+      return;
+    }
+
+    if (params.chatMode) {
+      chatStore.setChatMode(params.chatMode);
+    }
+
+    const { messages, newQAText } = useChatStore.getState();
+
+    setIsSearchOpen(false);
+
+    if (messages?.length > 0) {
+      // Ask a follow-up question
+      runSkill(newQAText, params);
+    } else {
+      // Create a new conversation and run skill
+      emptyConvRunSkill(newQAText, true, params);
+    }
+  };
+
   return {
     runSkill,
+    sendChatMessage,
     emptyConvRunSkill,
     ensureConversationExist,
     buildShutdownTaskAndGenResponse,

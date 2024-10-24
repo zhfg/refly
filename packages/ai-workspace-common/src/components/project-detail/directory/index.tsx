@@ -8,6 +8,7 @@ import { Input } from '@arco-design/web-react';
 
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
+import { useNewCanvasModalStoreShallow } from '@refly-packages/ai-workspace-common/stores/new-canvas-modal';
 
 import { BindResourceModal } from '../resource-view/resource-collection-associative-modal';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
@@ -15,7 +16,7 @@ import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/componen
 import { useTranslation } from 'react-i18next';
 import { HiOutlineSearch } from 'react-icons/hi';
 import { HiOutlinePlus } from 'react-icons/hi2';
-import { IconCanvas, IconProject } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconCanvas, IconProject, IconThread } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { Favicon } from '@refly-packages/ai-workspace-common/components/common/favicon';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
 
@@ -33,16 +34,26 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
 
   const { t } = useTranslation();
 
-  const { currentProject } = useProjectStoreShallow((state) => ({
-    currentProject: state.currentProject,
+  const { project, resources, canvases, conversations, fetchProjectResources } = useProjectStoreShallow((state) => ({
+    project: state.project,
+    resources: state.resources,
+    canvases: state.canvases,
+    conversations: state.conversations,
+    fetchProjectResources: state.fetchProjectResources,
+  }));
+  const currentProject = project.data;
+
+  const newCanvasModalStore = useNewCanvasModalStoreShallow((state) => ({
+    setNewCanvasModalVisible: state.setNewCanvasModalVisible,
+    setSelectedProjectId: state.setSelectedProjectId,
   }));
 
-  const { jumpToCanvas, jumpToResource } = useJumpNewPath();
+  const { jumpToCanvas, jumpToResource, jumpToConv } = useJumpNewPath();
   const { handleAddTab } = useProjectTabs();
 
-  const [queryParams, setQueryParams] = useSearchParams();
-  const resId = queryParams.get('resId');
-  const canvasId = queryParams.get('canvasId');
+  const [searchParams, setQueryParams] = useSearchParams();
+  const resId = searchParams.get('resId');
+  const canvasId = searchParams.get('canvasId');
 
   const segmentOptions = [
     {
@@ -63,18 +74,6 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
 
   const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   // 如果没有资源，则跳转到第一个资源
-  //   if (!resId) {
-  //     const firstResourceId = currentProject?.resources?.[0]?.resourceId;
-  //     if (firstResourceId) {
-  //       jumpToResource({
-  //         resId: firstResourceId,
-  //       });
-  //     }
-  //   }
-  // }, [projectId]);
-
   const handleDeleteKnowledgeBase = () => {
     let url = '/knowledge-base';
     if (resId) {
@@ -85,20 +84,20 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
 
   let dataList: DirectoryListItem[] = [];
   if (selectedTab === 'canvas') {
-    dataList = (currentProject?.canvases || []).map((item) => ({
+    dataList = (canvases.data || []).map((item) => ({
       id: item.canvasId,
       title: item.title,
       type: 'canvas',
     }));
   } else if (selectedTab === 'resource') {
-    dataList = (currentProject?.resources || []).map((item) => ({
+    dataList = (resources.data || []).map((item) => ({
       id: item.resourceId,
       title: item.title,
       type: 'resource',
       url: item.data?.url,
     }));
   } else if (selectedTab === 'thread') {
-    dataList = (currentProject?.conversations || []).map((item) => ({
+    dataList = (conversations.data || []).map((item) => ({
       id: item.convId,
       title: item.title,
       type: 'thread',
@@ -129,7 +128,10 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
         type: 'resource',
       });
     } else if (item.type === 'thread') {
-      // TODO: jump to thread
+      jumpToConv({
+        convId: item.id,
+        projectId: projectId,
+      });
     }
   };
 
@@ -140,6 +142,15 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
   };
 
   const [bindResourceModalVisible, setBindResourceModalVisible] = useState(false);
+
+  const handleAddNewButtonClick = () => {
+    if (selectedTab === 'canvas') {
+      newCanvasModalStore.setSelectedProjectId(projectId);
+      newCanvasModalStore.setNewCanvasModalVisible(true);
+    } else if (selectedTab === 'resource') {
+      setBindResourceModalVisible(true);
+    }
+  };
 
   return (
     <div className="project-directory-container" style={small ? { width: 72, minWidth: 72 } : {}}>
@@ -155,7 +166,8 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
                 <IconProject style={{ fontSize: 28, color: 'rgba(0, 0, 0, .5)', strokeWidth: 3 }} />
               </div>
               <div className="intro-content">
-                <div className="intro-title">{currentProject?.title}</div>
+                <div className="text-sm">{currentProject?.title}</div>
+                <div className="text-xs my-1 text-gray-500 max-h-10 overflow-auto">{currentProject?.description}</div>
                 <div className="intro-meta">
                   <span>
                     {time(currentProject?.updatedAt as string, LOCALE.EN)
@@ -200,13 +212,14 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
             prefix={<HiOutlineSearch />}
             onChange={handleSearchValChange}
           />
-          <div className="add-resource-btn" onClick={() => setBindResourceModalVisible(true)}>
+
+          <div className="add-resource-btn" onClick={handleAddNewButtonClick}>
             <HiOutlinePlus />
           </div>
         </div>
       </div>
 
-      <div className="project-directory-list-container" style={{ height: `100%`, minWidth: small ? 72 : 200 }}>
+      <div className="project-directory-list-container">
         {dataList.map((item) => (
           <div
             key={item.id}
@@ -214,7 +227,13 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
             onClick={() => handleListItemClick(item)}
           >
             <div className="flex items-center align-center mx-2">
-              {item.type === 'canvas' ? <IconCanvas /> : item.type === 'resource' ? <Favicon url={item.url} /> : null}
+              {item.type === 'canvas' ? (
+                <IconCanvas />
+              ) : item.type === 'resource' ? (
+                <Favicon url={item.url} />
+              ) : item.type === 'thread' ? (
+                <IconThread />
+              ) : null}
             </div>
             <div>{item.title}</div>
           </div>
@@ -227,8 +246,8 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
         projectId={projectId}
         visible={bindResourceModalVisible}
         setVisible={setBindResourceModalVisible}
-        postConfirmCallback={(value: string[]) => {
-          // TODO: refetch current project
+        postConfirmCallback={() => {
+          fetchProjectResources(projectId);
         }}
       />
     </div>

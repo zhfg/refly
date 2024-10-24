@@ -250,27 +250,6 @@ export const $Project = {
       format: 'date-time',
       description: 'Project update time',
     },
-    resources: {
-      type: 'array',
-      description: 'Project related resources (only returned in detail API)',
-      items: {
-        $ref: '#/components/schemas/Resource',
-      },
-    },
-    canvases: {
-      type: 'array',
-      description: 'Project canvases (only returned in detail API)',
-      items: {
-        $ref: '#/components/schemas/Canvas',
-      },
-    },
-    conversations: {
-      type: 'array',
-      description: 'Project conversations (only returned in detail API)',
-      items: {
-        $ref: '#/components/schemas/Conversation',
-      },
-    },
   },
 } as const;
 
@@ -2465,6 +2444,10 @@ export const $SkillContextResourceItem = {
       description: 'Resource',
       $ref: '#/components/schemas/Resource',
     },
+    isCurrent: {
+      type: 'boolean',
+      description: 'Whether this resource is current',
+    },
     metadata: {
       type: 'object',
       description: 'Resource context metadata',
@@ -2484,6 +2467,10 @@ export const $SkillContextProjectItem = {
       description: 'Project',
       $ref: '#/components/schemas/Project',
     },
+    isCurrent: {
+      type: 'boolean',
+      description: 'Whether this project is current',
+    },
     metadata: {
       type: 'object',
       description: 'Project context metadata',
@@ -2502,6 +2489,10 @@ export const $SkillContextCanvasItem = {
     canvas: {
       description: 'Canvas',
       $ref: '#/components/schemas/Canvas',
+    },
+    isCurrent: {
+      type: 'boolean',
+      description: 'Whether this canvas is current',
     },
     metadata: {
       type: 'object',
@@ -2935,6 +2926,10 @@ export const $CreateConversationRequest = {
       type: 'string',
       description: 'Conversation title',
       example: 'My Conversation',
+    },
+    projectId: {
+      type: 'string',
+      description: 'Project ID',
     },
     locale: {
       type: 'string',

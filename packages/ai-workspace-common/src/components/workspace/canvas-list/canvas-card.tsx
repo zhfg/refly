@@ -3,17 +3,17 @@ import { Typography } from '@arco-design/web-react';
 import { Canvas } from '@refly/openapi-schema';
 import './index.scss';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
+import { IconCanvas } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 interface CanvasCardProps {
   cardData: Canvas;
   index: number;
-  cardIcon?: ReactNode;
   children?: ReactNode;
   onClick: () => void;
 }
 
 export const CanvasCard = (props: CanvasCardProps) => {
-  const { children, onClick, cardData, cardIcon } = props;
+  const { children, onClick, cardData } = props;
 
   return (
     <div
@@ -24,7 +24,7 @@ export const CanvasCard = (props: CanvasCardProps) => {
       <div className="overflow-hidden h-40">
         <div className="flex items-center mb-1">
           <div className="flex justify-center items-center rounded-lg border card-icon-box shrink-0 border-black/8">
-            {cardIcon}
+            <IconCanvas size={18} />
           </div>
           <Typography.Text
             ellipsis={{ rows: 2 }}
