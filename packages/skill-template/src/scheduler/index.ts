@@ -29,6 +29,9 @@ import {
   checkHasContext,
 } from './utils/token';
 import { ChatMode } from './types';
+
+// prompts
+import { generateCanvasPrompt } from './prompt/generateCanvas';
 export class Scheduler extends BaseSkill {
   name = 'scheduler';
 
@@ -316,6 +319,37 @@ Please generate the summary based on these requirements and offer suggestions fo
     return result;
   };
 
+  callGenerateCanvas = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
+    const { messages = [], query: originalQuery } = state;
+
+    // 确保在使用 configSnapshot 之前初始化它
+    this.configSnapshot ??= config;
+
+    const { chatHistory = [], currentSkill, spanId } = config.configurable;
+
+    this.emitEvent({ event: 'log', content: `Start to generate canvas...` }, config);
+
+    const model = this.engine.chatModel({ temperature: 0.1 });
+
+    const requestMessages = [new SystemMessage(generateCanvasPrompt), ...chatHistory, new HumanMessage(originalQuery)];
+
+    const responseMessage = await model.invoke(requestMessages, {
+      ...config,
+      metadata: {
+        ...config.metadata,
+        ...currentSkill,
+        spanId,
+      },
+    });
+
+    this.engine.logger.log(`responseMessage: ${safeStringifyJSON(responseMessage)}`);
+
+    this.emitEvent({ event: 'log', content: `Generated canvas successfully!` }, config);
+    this.emitEvent({ event: 'end' }, config);
+
+    return { messages: [responseMessage], skillCalls: [] };
+  };
+
   callScheduler = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     /**
      * 1. 基于聊天历史，当前意图识别结果，上下文，以及整体优化之后的 query，调用 scheduler 模型，得到一个最优的技能调用序列
@@ -601,13 +635,16 @@ Generated question example:
     const workflow = new StateGraph<GraphState>({
       channels: this.graphState,
     })
-      .addNode('direct', this.directCallSkill)
-      .addNode('scheduler', this.callScheduler)
+      // .addNode('direct', this.directCallSkill)
+      // .addNode('scheduler', this.callScheduler)
+      .addNode('generateCanvas', this.callGenerateCanvas)
       .addNode('relatedQuestions', this.genRelatedQuestions);
 
-    workflow.addConditionalEdges(START, this.shouldDirectCallSkill);
-    workflow.addConditionalEdges('direct', this.onDirectSkillCallFinish);
-    workflow.addConditionalEdges('scheduler', this.shouldCallSkill);
+    // workflow.addConditionalEdges(START, this.shouldDirectCallSkill);
+    // workflow.addConditionalEdges('direct', this.onDirectSkillCallFinish);
+    // workflow.addConditionalEdges('scheduler', this.shouldCallSkill);
+    workflow.addEdge(START, 'generateCanvas');
+    workflow.addEdge('generateCanvas', 'relatedQuestions');
     workflow.addEdge('relatedQuestions', END);
 
     return workflow.compile();
