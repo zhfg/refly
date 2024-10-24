@@ -114,24 +114,10 @@
     }
 
     .intergation-body {
-      max-width: 712px;
-    }
-
-    .intergation-body-result {
-      margin-top: 24px;
-    }
-
-    .intergation-body-result-title {
-      font-size: 14px;
-      color: rgba(0, 0, 0, 0.5);
-      font-weight: bold;
+      width: 100%;
     }
 
     .intergation-import-from-weblink {
-      .intergation-result-list {
-        // margin-top: 12px;
-      }
-
       .intergation-result-list-item {
         border-radius: 0;
         border-bottom: 1px solid #f1f1f0;
@@ -215,8 +201,8 @@
       }
 
       .kg-selector {
-        min-width: 200px;
-        max-width: 220px;
+        min-width: 300px;
+        max-width: 300px;
         flex: 1;
       }
 

@@ -1,7 +1,9 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Divider, Modal, Input, Button, Affix } from "@arco-design/web-react"
-import { HiLink } from "react-icons/hi"
-import { useNewCanvasModalStore } from "@/store/new-canvas-modal"
+import { CgFileDocument } from "react-icons/cg"
+
+import { useNewCanvasModalStoreShallow } from "@refly-packages/ai-workspace-common/stores/new-canvas-modal"
+import { useAINote } from "@refly-packages/ai-workspace-common/hooks/use-ai-note"
 
 // utils
 import { SearchSelect } from "@refly-packages/ai-workspace-common/modules/entity-selector/components"
@@ -16,24 +18,45 @@ const { TextArea } = Input
 export const NewCanvasModal = () => {
   const { t } = useTranslation()
   const [saveLoading, setSaveLoading] = useState(false)
-  const newCanvasModalStore = useNewCanvasModalStore(state => ({
+  const newCanvasModalStore = useNewCanvasModalStoreShallow(state => ({
     newCanvasModalVisible: state.newCanvasModalVisible,
-    setNewCanvasModalVisible: state.setNewCanvasModalVisible,
-    selectedCollectionId: state.selectedCollectionId,
-    setSelectedCollectionId: state.setSelectedCollectionId,
     title: state.title,
-    description: state.description,
+    content: state.content,
+    selectedProjectId: state.selectedProjectId,
+    setNewCanvasModalVisible: state.setNewCanvasModalVisible,
     setTitle: state.setTitle,
-    setDescription: state.setDescription,
+    setContent: state.setContent,
+    setSelectedProjectId: state.setSelectedProjectId,
   }))
+
+  const { handleInitEmptyNote } = useAINote()
 
   const handleSave = async () => {
     setSaveLoading(true)
 
-    // logic to be implemented
+    try {
+      await handleInitEmptyNote({
+        title: newCanvasModalStore.title,
+        projectId: newCanvasModalStore.selectedProjectId,
+        content: newCanvasModalStore.content,
+      })
 
-    setSaveLoading(false)
+      newCanvasModalStore.setNewCanvasModalVisible(false)
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setSaveLoading(false)
+    }
   }
+
+  useEffect(() => {
+    return () => {
+      console.log("reset")
+      newCanvasModalStore.setSelectedProjectId("")
+      newCanvasModalStore.setTitle("")
+      newCanvasModalStore.setContent("")
+    }
+  }, [newCanvasModalStore.newCanvasModalVisible])
 
   return (
     <Modal
@@ -49,53 +72,48 @@ export const NewCanvasModal = () => {
         height: "70%",
         minHeight: 500,
         maxHeight: 700,
-        width: "60%",
-        minWidth: "300px",
+        width: "55%",
+        minWidth: "400px",
         maxWidth: "950px",
       }}>
       <div className="new-canvas-container">
         <div className="new-canvas-right-panel">
           <div className="intergation-container intergation-import-from-weblink">
             <div className="intergation-content">
-              <div className="intergation-operation-container">
-                <div className="intergration-header">
-                  <span className="menu-item-icon">
-                    <HiLink />
-                  </span>
-                  <span className="intergration-header-title">
-                    {t("canvas.newCanvas.modalTitle")}
-                  </span>
-                </div>
-                <Divider />
-                <div className="intergation-body">
-                  <div className="intergation-body-action">
-                    <TextArea
-                      placeholder={t("canvas.newCanvas.titlePlaceholder")}
-                      rows={4}
-                      autoSize={{
-                        minRows: 4,
-                        maxRows: 4,
-                      }}
-                      value={newCanvasModalStore.title}
-                      onChange={value => newCanvasModalStore.setTitle(value)}
-                    />
-                    <TextArea
-                      placeholder={t("canvas.newCanvas.descriptionPlaceholder")}
-                      rows={4}
-                      autoSize={{
-                        minRows: 4,
-                        maxRows: 4,
-                      }}
-                      value={newCanvasModalStore.description}
-                      onChange={value =>
-                        newCanvasModalStore.setDescription(value)
-                      }
-                    />
-                  </div>
-                  <div className="intergation-body-result"></div>
-                </div>
+              <div className="intergration-header">
+                <span className="menu-item-icon">
+                  <CgFileDocument style={{ color: "#297AFF" }} />
+                </span>
+                <span className="intergration-header-title">
+                  {t("canvas.newCanvas.modalTitle")}
+                </span>
+              </div>
+
+              <Divider />
+
+              <div className="intergation-body">
+                <Input
+                  style={{ marginBottom: 16 }}
+                  placeholder={t("canvas.newCanvas.titlePlaceholder")}
+                  maxLength={100}
+                  showWordLimit
+                  value={newCanvasModalStore.title}
+                  onChange={value => newCanvasModalStore.setTitle(value)}
+                />
+
+                <TextArea
+                  placeholder={t("canvas.newCanvas.descriptionPlaceholder")}
+                  rows={4}
+                  autoSize={{
+                    minRows: 4,
+                    maxRows: 4,
+                  }}
+                  value={newCanvasModalStore.content}
+                  onChange={value => newCanvasModalStore.setContent(value)}
+                />
               </div>
             </div>
+
             <Affix
               offsetBottom={0}
               target={() =>
@@ -108,12 +126,13 @@ export const NewCanvasModal = () => {
                       {t("resource.import.saveTo")}
                     </p>
                     <SearchSelect
-                      domain="collection"
+                      domain="project"
                       className="kg-selector"
                       allowCreateNewEntity
+                      defaultValue={newCanvasModalStore.selectedProjectId}
                       onChange={value => {
                         if (!value) return
-                        newCanvasModalStore.setSelectedCollectionId(value)
+                        newCanvasModalStore.setSelectedProjectId(value)
                       }}
                     />
                   </div>

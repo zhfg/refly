@@ -63,7 +63,7 @@ const NewFileButton = (props: { val: string }) => {
 
   const handleCreateButtonClick = (type: string) => {
     if (type === 'canvas' && !newNoteCreating) {
-      handleInitEmptyNote('');
+      handleInitEmptyNote({ content: '' });
     }
     if (type === 'resource') {
       importResourceStore.setImportResourceModalVisible(true);

@@ -34,7 +34,7 @@ import {
 import Logo from "@/assets/logo.svg"
 import "./sider.scss"
 import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
-import { useNewCanvasModalStoreShallow } from "@/store/new-canvas-modal"
+import { useNewCanvasModalStoreShallow } from "@refly-packages/ai-workspace-common/stores/new-canvas-modal"
 import { safeParseJSON } from "@refly-packages/ai-workspace-common/utils/parse"
 // components
 import { SearchQuickOpenBtn } from "@refly-packages/ai-workspace-common/components/search-quick-open-btn"
@@ -53,12 +53,8 @@ const Sider = Layout.Sider
 const MenuItem = Menu.Item
 
 const getNavSelectedKeys = (pathname = "") => {
-  if (pathname.includes("digest")) {
-    return "Digest"
-  } else if (pathname.includes("settings")) {
+  if (pathname.includes("settings")) {
     return "Settings"
-  } else if (pathname.includes("feed")) {
-    return "Feed"
   } else if (pathname.includes("thread")) {
     return "ThreadLibrary"
   } else if (pathname.includes("skill")) {
@@ -242,49 +238,7 @@ export const SiderLayout = () => {
         break
       }
 
-      case "Explore": {
-        if (!notShowLoginBtn) {
-          userStore.setLoginModalVisible(true)
-        } else {
-          navigate(`/explore`)
-        }
-        break
-      }
-
       case "Settings": {
-        break
-      }
-
-      case "Feed": {
-        if (!notShowLoginBtn) {
-          userStore.setLoginModalVisible(true)
-        } else {
-          navigate(`/feed`)
-        }
-        break
-      }
-
-      case "Digest": {
-        if (!notShowLoginBtn) {
-          userStore.setLoginModalVisible(true)
-        } else {
-          navigate(`/digest`)
-        }
-        break
-      }
-
-      case "Collection": {
-        navigate(`/collection`)
-        break
-      }
-
-      case "Notification": {
-        navigate(`/notification`)
-        break
-      }
-
-      case "Favorites": {
-        navigate(`/favorites`)
         break
       }
 
@@ -305,15 +259,6 @@ export const SiderLayout = () => {
 
       case "ThreadLibrary": {
         navigate(`/thread`)
-        break
-      }
-
-      case "DownloadExtension": {
-        // 下载浏览器插件
-        window.open(
-          `https://chromewebstore.google.com/detail/lecbjbapfkinmikhadakbclblnemmjpd`,
-          "_blank",
-        )
         break
       }
 

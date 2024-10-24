@@ -8,7 +8,13 @@ import { useTranslation } from 'react-i18next';
 import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-canvas-tabs';
+import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
+
+interface CreateCanvasParams {
+  content?: string;
+  title?: string;
+  projectId?: string;
+}
 
 export const useAINote = (shouldInitListener = false) => {
   const { t } = useTranslation();
@@ -17,45 +23,48 @@ export const useAINote = (shouldInitListener = false) => {
     updateNotePanelVisible: state.updateCanvasPanelVisible,
   }));
   const { jumpToCanvas } = useJumpNewPath();
-  const { handleAddTab: handleAddCanvasTab } = useCanvasTabs();
+  const { handleAddTab: handleAddProjectTab } = useProjectTabs();
 
-  const handleInitEmptyNote = async (content: string) => {
+  const handleInitEmptyNote = async ({
+    content,
+    title: canvasTitle,
+    projectId: relatedProjectId,
+  }: CreateCanvasParams) => {
     canvasStore.updateNewNoteCreating(true);
 
     const res = await getClient().createCanvas({
       body: {
-        title: t('knowledgeBase.note.defaultTitle'),
-        initialContent: content,
+        title: canvasTitle || t('knowledgeBase.note.defaultTitle'),
+        initialContent: content || '',
+        projectId: relatedProjectId,
       },
     });
 
     if (!res?.data?.success) {
       Message.error(t('knowledgeBase.note.createNoteFailed'));
-      return;
+      throw new Error(t('knowledgeBase.note.createNoteFailed'));
     }
 
     canvasStore.updateNewNoteCreating(false);
 
-    const { canvasId, title } = res?.data?.data;
+    const { canvasId, title, projectId } = res?.data?.data;
     jumpToCanvas({
       canvasId,
       // @ts-ignore
       projectId: res?.data?.data?.projectId, // TODO: 这里需要补充 canvas 的 projectId
     });
-    handleAddCanvasTab({
-      title,
+    handleAddProjectTab({
+      projectId,
       key: canvasId,
-      content: content,
-      canvasId,
-      // @ts-ignore
-      projectId: res?.data?.data?.projectId, // TODO: 这里需要补充 canvas 的 projectId
+      title,
+      type: 'canvas',
     });
   };
 
   useEffect(() => {
     if (shouldInitListener) {
       editorEmitter.on('createNewNote', (content: string) => {
-        handleInitEmptyNote(content);
+        handleInitEmptyNote({ content });
       });
     }
   }, [shouldInitListener]);

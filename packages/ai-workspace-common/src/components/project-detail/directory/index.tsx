@@ -8,6 +8,7 @@ import { Input } from '@arco-design/web-react';
 
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
+import { useNewCanvasModalStoreShallow } from '@refly-packages/ai-workspace-common/stores/new-canvas-modal';
 
 import { BindResourceModal } from '../resource-view/resource-collection-associative-modal';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
@@ -35,6 +36,11 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
 
   const { currentProject } = useProjectStoreShallow((state) => ({
     currentProject: state.currentProject,
+  }));
+
+  const newCanvasModalStore = useNewCanvasModalStoreShallow((state) => ({
+    setNewCanvasModalVisible: state.setNewCanvasModalVisible,
+    setSelectedProjectId: state.setSelectedProjectId,
   }));
 
   const { jumpToCanvas, jumpToResource } = useJumpNewPath();
@@ -141,6 +147,15 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
 
   const [bindResourceModalVisible, setBindResourceModalVisible] = useState(false);
 
+  const handleAddNewButtonClick = () => {
+    if (selectedTab === 'canvas') {
+      newCanvasModalStore.setSelectedProjectId(projectId);
+      newCanvasModalStore.setNewCanvasModalVisible(true);
+    } else if (selectedTab === 'resource') {
+      setBindResourceModalVisible(true);
+    }
+  };
+
   return (
     <div className="project-directory-container" style={small ? { width: 72, minWidth: 72 } : {}}>
       <div className="project-directory-intro">
@@ -200,7 +215,8 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
             prefix={<HiOutlineSearch />}
             onChange={handleSearchValChange}
           />
-          <div className="add-resource-btn" onClick={() => setBindResourceModalVisible(true)}>
+
+          <div className="add-resource-btn" onClick={handleAddNewButtonClick}>
             <HiOutlinePlus />
           </div>
         </div>

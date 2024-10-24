@@ -217,8 +217,8 @@
       "connecting": "连接中...",
       "newNote": "创建新笔记",
       "noteCharsCount": "共 {{count}} 字",
-      "autoSaved": "笔记已自动保存",
-      "saving": "笔记保存中...",
+      "autoSaved": "已自动保存",
+      "saving": "保存中...",
       "readOnly": "只读",
       "edit": "编辑",
       "serviceDisconnected": "服务已断开",
@@ -284,7 +284,7 @@
   "canvas": {
     "newCanvas": {
       "modalTitle": "新稿布",
-      "titlePlaceholder": "请输入稿布标题",
+      "titlePlaceholder": "请输入写作标题",
       "descriptionPlaceholder": "请输入稿布描述"
     }
   },
@@ -864,14 +864,14 @@
   },
   "entitySelector": {
     "placeholder": {
-      "collection": "选择知识库",
+      "project": "选择知识库",
       "resource": "选择资源",
       "note": "选择笔记",
       "skill": "选择技能",
       "conversation": "选择会话"
     },
     "createEntity": {
-      "collection": "新建知识库",
+      "project": "新建知识库",
       "resource": "新建资源",
       "note": "新建笔记",
       "skill": "新建技能",
