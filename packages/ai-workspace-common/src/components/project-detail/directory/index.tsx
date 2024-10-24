@@ -16,7 +16,7 @@ import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/componen
 import { useTranslation } from 'react-i18next';
 import { HiOutlineSearch } from 'react-icons/hi';
 import { HiOutlinePlus } from 'react-icons/hi2';
-import { IconCanvas, IconProject } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconCanvas, IconProject, IconThread } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { Favicon } from '@refly-packages/ai-workspace-common/components/common/favicon';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
 
@@ -43,12 +43,12 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
     setSelectedProjectId: state.setSelectedProjectId,
   }));
 
-  const { jumpToCanvas, jumpToResource } = useJumpNewPath();
+  const { jumpToCanvas, jumpToResource, jumpToConv } = useJumpNewPath();
   const { handleAddTab } = useProjectTabs();
 
-  const [queryParams, setQueryParams] = useSearchParams();
-  const resId = queryParams.get('resId');
-  const canvasId = queryParams.get('canvasId');
+  const [searchParams, setQueryParams] = useSearchParams();
+  const resId = searchParams.get('resId');
+  const canvasId = searchParams.get('canvasId');
 
   const segmentOptions = [
     {
@@ -68,18 +68,6 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
   const [selectedTab, setSelectedTab] = useState<DirectoryItemType>(resId ? 'resource' : 'canvas');
 
   const navigate = useNavigate();
-
-  // useEffect(() => {
-  //   // 如果没有资源，则跳转到第一个资源
-  //   if (!resId) {
-  //     const firstResourceId = currentProject?.resources?.[0]?.resourceId;
-  //     if (firstResourceId) {
-  //       jumpToResource({
-  //         resId: firstResourceId,
-  //       });
-  //     }
-  //   }
-  // }, [projectId]);
 
   const handleDeleteKnowledgeBase = () => {
     let url = '/knowledge-base';
@@ -135,7 +123,10 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
         type: 'resource',
       });
     } else if (item.type === 'thread') {
-      // TODO: jump to thread
+      jumpToConv({
+        convId: item.id,
+        projectId: projectId,
+      });
     }
   };
 
@@ -222,7 +213,7 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
         </div>
       </div>
 
-      <div className="project-directory-list-container" style={{ height: `100%`, minWidth: small ? 72 : 200 }}>
+      <div className="project-directory-list-container">
         {dataList.map((item) => (
           <div
             key={item.id}
@@ -230,7 +221,13 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
             onClick={() => handleListItemClick(item)}
           >
             <div className="flex items-center align-center mx-2">
-              {item.type === 'canvas' ? <IconCanvas /> : item.type === 'resource' ? <Favicon url={item.url} /> : null}
+              {item.type === 'canvas' ? (
+                <IconCanvas />
+              ) : item.type === 'resource' ? (
+                <Favicon url={item.url} />
+              ) : item.type === 'thread' ? (
+                <IconThread />
+              ) : null}
             </div>
             <div>{item.title}</div>
           </div>

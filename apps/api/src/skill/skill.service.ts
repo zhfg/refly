@@ -396,6 +396,7 @@ export class SkillService {
     // Create or retrieve conversation
     let conversation: ConversationModel | null = null;
     if (data.createConvParam) {
+      data.createConvParam.projectId ||= data.projectId;
       conversation = await this.conversation.upsertConversation(
         user,
         data.createConvParam,

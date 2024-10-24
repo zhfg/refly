@@ -19,6 +19,7 @@ import { OutputLocaleList } from '@refly-packages/ai-workspace-common/components
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
+import { useProjectContext } from '@refly-packages/ai-workspace-common/components/project-detail/context-provider';
 
 interface ChatActionsProps {
   form?: FormInstance;
@@ -26,6 +27,8 @@ interface ChatActionsProps {
 
 export const ChatActions = (props: ChatActionsProps) => {
   const { form } = props;
+  const { projectId } = useProjectContext();
+
   const { t } = useTranslation();
 
   // stores
@@ -91,13 +94,13 @@ export const ChatActions = (props: ChatActionsProps) => {
 
     searchStore.setIsSearchOpen(false);
     const tplConfig = form?.getFieldValue('tplConfig');
-    const invokeParams = { tplConfig: tplConfig };
+    const invokeParams = { projectId, tplConfig: tplConfig };
 
     if (messages?.length > 0) {
-      // 追问阅读
+      // Ask a follow-up question
       runSkill(newQAText, invokeParams);
     } else {
-      // 新会话阅读，先创建会话，然后进行跳转之后发起聊天
+      // Create a new conversation and run skill
       emptyConvRunSkill(newQAText, true, invokeParams);
     }
   };

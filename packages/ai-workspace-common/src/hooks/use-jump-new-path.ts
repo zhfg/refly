@@ -16,6 +16,7 @@ export const useJumpNewPath = () => {
     openNewTab?: boolean;
   }) => {
     searchParams.set('canvasId', canvasId);
+    searchParams.delete('resId'); // either canvasId or resId can be displayed
     setSearchParams(searchParams);
     const url = `${baseUrl}/project/${projectId}?${searchParams.toString()}`;
 
@@ -71,6 +72,7 @@ export const useJumpNewPath = () => {
     openNewTab?: boolean;
   }) => {
     searchParams.set('resId', resId);
+    searchParams.delete('canvasId'); // either resId or canvasId can be displayed
     setSearchParams(searchParams);
     const url = `${baseUrl}/project/${projectId}?${searchParams.toString()}`;
 
@@ -144,6 +146,7 @@ export const useJumpNewPath = () => {
     baseUrl?: string;
     openNewTab?: boolean;
   }) => {
+    console.log('jumpToConv projectId', projectId);
     if (projectId) {
       jumpToProjectConv({ projectId, convId, baseUrl, openNewTab });
     } else {

@@ -1728,6 +1728,10 @@ export type SkillContextResourceItem = {
    */
   resource?: Resource;
   /**
+   * Whether this resource is current
+   */
+  isCurrent?: boolean;
+  /**
    * Resource context metadata
    */
   metadata?: {
@@ -1748,6 +1752,10 @@ export type SkillContextProjectItem = {
    */
   project?: Project;
   /**
+   * Whether this project is current
+   */
+  isCurrent?: boolean;
+  /**
    * Project context metadata
    */
   metadata?: {
@@ -1767,6 +1775,10 @@ export type SkillContextCanvasItem = {
    * Canvas
    */
   canvas?: Canvas;
+  /**
+   * Whether this canvas is current
+   */
+  isCurrent?: boolean;
   /**
    * Canvas context metadata
    */
@@ -2045,6 +2057,10 @@ export type CreateConversationRequest = {
    * Conversation title
    */
   title?: string;
+  /**
+   * Project ID
+   */
+  projectId?: string;
   /**
    * Conversation locale
    */

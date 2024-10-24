@@ -6,7 +6,6 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 
 import { Canvas } from '@refly/openapi-schema';
 import { List, Empty } from '@arco-design/web-react';
-import { IconBook } from '@arco-design/web-react/icon';
 import { CanvasCard } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list/canvas-card';
 import { ScrollLoading } from '../scroll-loading';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
@@ -89,12 +88,7 @@ export const CanvasList = (props: CanvasListProps) => {
           className="knowledge-base-list-item-container"
           actionLayout="vertical"
           actions={[
-            <CanvasCard
-              cardData={item}
-              index={key}
-              cardIcon={<IconBook style={{ fontSize: '32px', strokeWidth: 3 }} />}
-              onClick={() => handleClickCanvas(item)}
-            >
+            <CanvasCard cardData={item} index={key} onClick={() => handleClickCanvas(item)}>
               <div className="flex justify-between items-center mt-6">
                 <div className="text-xs text-black/40">
                   {time(item.updatedAt, language as LOCALE)

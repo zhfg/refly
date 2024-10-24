@@ -14,7 +14,6 @@ export const useProcessContextItems = () => {
   const { t } = useTranslation();
   const { jumpToCanvas, jumpToProject, jumpToResource } = useJumpNewPath();
   const currentSelectedMarks = useContextPanelStoreShallow((state) => state.currentSelectedMarks);
-  console.log('currentSelectedMarks', currentSelectedMarks);
 
   const { handleAddTab: handleAddResourceTab } = useKnowledgeBaseTabs();
   const { handleAddTab: handleAddCanvasTab } = useCanvasTabs();

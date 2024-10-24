@@ -72,7 +72,6 @@ export const useBuildSkillContext = () => {
       const set = new Set();
       let contentList: SkillContextContentItem[] = [];
       // TODO: 这里需要处理技能执行时的 context filter
-      console.log('currentSelectedMarks', currentSelectedMarks);
 
       contentList = currentSelectedMarks
         ?.filter(

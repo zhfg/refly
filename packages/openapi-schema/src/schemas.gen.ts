@@ -2465,6 +2465,10 @@ export const $SkillContextResourceItem = {
       description: 'Resource',
       $ref: '#/components/schemas/Resource',
     },
+    isCurrent: {
+      type: 'boolean',
+      description: 'Whether this resource is current',
+    },
     metadata: {
       type: 'object',
       description: 'Resource context metadata',
@@ -2484,6 +2488,10 @@ export const $SkillContextProjectItem = {
       description: 'Project',
       $ref: '#/components/schemas/Project',
     },
+    isCurrent: {
+      type: 'boolean',
+      description: 'Whether this project is current',
+    },
     metadata: {
       type: 'object',
       description: 'Project context metadata',
@@ -2502,6 +2510,10 @@ export const $SkillContextCanvasItem = {
     canvas: {
       description: 'Canvas',
       $ref: '#/components/schemas/Canvas',
+    },
+    isCurrent: {
+      type: 'boolean',
+      description: 'Whether this canvas is current',
     },
     metadata: {
       type: 'object',
@@ -2935,6 +2947,10 @@ export const $CreateConversationRequest = {
       type: 'string',
       description: 'Conversation title',
       example: 'My Conversation',
+    },
+    projectId: {
+      type: 'string',
+      description: 'Project ID',
     },
     locale: {
       type: 'string',

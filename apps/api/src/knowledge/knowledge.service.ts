@@ -45,7 +45,7 @@ import {
   genReferenceID,
 } from '@refly-packages/utils';
 import { FinalizeResourceParam } from './knowledge.dto';
-import { pick, omit } from '../utils';
+import { pick } from '../utils';
 import { SimpleEventData } from '@/event/event.dto';
 import { SyncStorageUsageJobData } from '@/subscription/subscription.dto';
 import { SubscriptionService } from '@/subscription/subscription.service';
@@ -118,7 +118,7 @@ export class KnowledgeService {
         description: param.description,
         uid: user.uid,
       },
-      update: { ...omit(param, ['projectId']) },
+      update: { ...pick(param, ['title', 'description']) },
     });
 
     await this.elasticsearch.upsertProject({

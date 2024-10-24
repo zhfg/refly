@@ -1,22 +1,19 @@
-import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { memo, useEffect, useState, useRef, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChatMessages } from './chat-messages';
 import { ConvListModal } from './conv-list-modal';
-import { ProjectListModal } from './project-list-modal';
 import { SkillManagementModal } from '@refly-packages/ai-workspace-common/components/skill/skill-management-modal';
 import { CopilotOperationModule } from './copilot-operation-module';
 import { CopilotChatHeader } from './chat-header';
+import { useParams, useSearchParams } from 'react-router-dom';
 
 // state
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
 import { useResetState } from '@refly-packages/ai-workspace-common/hooks/use-reset-state';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
-import { ActionSource } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useKnowledgeBaseStore } from '../../stores/knowledge-base';
-// utils
+
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
 import { useResizeCopilot } from '@refly-packages/ai-workspace-common/hooks/use-resize-copilot';
@@ -39,7 +36,11 @@ export const AICopilot = memo((props: AICopilotProps) => {
   const { disable, jobId, source } = props;
 
   const [searchParams] = useSearchParams();
-  const { convId } = useParams();
+  const queryConvId = searchParams.get('convId');
+
+  const { convId: pathConvId } = useParams();
+
+  const convId = queryConvId || pathConvId;
 
   const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
     resourcePanelVisible: state.resourcePanelVisible,
@@ -183,6 +184,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
       chatStore.setMessages([]);
     };
   }, [convId, jobId]);
+
   useResizeCopilot({ containerSelector: 'ai-copilot-container' });
   useDynamicInitContextPanelState(); // 动态根据页面状态更新上下文面板状态
 
@@ -209,9 +211,6 @@ export const AICopilot = memo((props: AICopilotProps) => {
 
       {knowledgeBaseStore?.convModalVisible ? (
         <ConvListModal title={t('copilot.convListModal.title')} classNames="conv-list-modal" />
-      ) : null}
-      {knowledgeBaseStore?.kbModalVisible && knowledgeBaseStore.actionSource === ActionSource.Conv ? (
-        <ProjectListModal title={t('copilot.kbListModal.title')} classNames="kb-list-modal" />
       ) : null}
       {knowledgeBaseStore?.sourceListModalVisible ? (
         <SourceListModal

@@ -9,9 +9,10 @@ export const buildConversation = (convPayload?: Partial<Conversation>): Conversa
   const conversation: Conversation = {
     origin: location?.origin || '', // 冗余存储策略，for 后续能够基于 origin 进行归类归档
     originPageTitle: document?.title || '',
-    title: document?.title || '',
+    title: convPayload?.title || '',
     originPageUrl: location.href,
     convId: convPayload?.convId || genConvID(),
+    projectId: convPayload?.projectId,
     locale: convPayload?.locale,
   };
 

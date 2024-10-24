@@ -20,6 +20,7 @@ export class ConversationService {
   ): Promise<Conversation> {
     const upsertParam = {
       convId: convId || genConvID(),
+      projectId: param.projectId,
       title: param.title,
       origin: param.origin,
       originPageUrl: param.originPageUrl,

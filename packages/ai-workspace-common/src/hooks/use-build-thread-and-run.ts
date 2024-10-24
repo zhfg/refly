@@ -35,36 +35,39 @@ export const useBuildThreadAndRun = () => {
   const { buildTaskAndGenReponse, buildShutdownTaskAndGenResponse } = useBuildTask();
   const { jumpToConv } = useJumpNewPath();
   const { addRecentConversation } = useHandleRecents();
+
   const emptyConvRunSkill = (
     question: string,
     forceNewConv?: boolean,
-    invokeParams?: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig },
+    invokeParams?: { projectId?: string; skillContext?: SkillContext; tplConfig?: SkillTemplateConfig },
   ) => {
     if (forceNewConv) {
       resetState();
     }
 
-    const newConv = ensureConversationExist(forceNewConv);
-    console.log('emptyConvTask', newConv);
+    const newConv = ensureConversationExist(invokeParams?.projectId, forceNewConv);
     conversationStore.setCurrentConversation(newConv);
     conversationStore.setIsNewConversation(true);
     chatStore.setNewQAText(question);
     chatStore.setInvokeParams(invokeParams);
+    console.log('emptyConvRunSkill invokeParams', invokeParams);
+    console.log('emptyConvRunSkill newConv', newConv);
 
     jumpToConv({
       convId: newConv?.convId,
-      projectId: newConv?.projectId, // TODO: conv 增加 projectId
+      projectId: newConv?.projectId,
     });
 
     addRecentConversation(newConv);
   };
 
-  const ensureConversationExist = (forceNewConv = false) => {
+  const ensureConversationExist = (projectId?: string, forceNewConv = false) => {
     const { currentConversation } = conversationStore;
     const { localSettings } = useUserStore.getState();
 
     if (!currentConversation?.convId || forceNewConv) {
       const newConv = buildConversation({
+        projectId,
         locale: localSettings?.outputLocale as OutputLocale,
       });
       conversationStore.setCurrentConversation(newConv);
@@ -77,7 +80,7 @@ export const useBuildThreadAndRun = () => {
 
   const runSkill = (
     comingQuestion: string,
-    invokeParams?: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig },
+    invokeParams?: { projectId?: string; skillContext?: SkillContext; tplConfig?: SkillTemplateConfig },
   ) => {
     // support ask follow up question
     const { messages = [], selectedModel, enableWebSearch, chatMode } = useChatStore.getState();
@@ -88,7 +91,7 @@ export const useBuildThreadAndRun = () => {
     const isFollowUpAsk = messages?.length > 0;
 
     // 创建新会话并跳转
-    const conv = ensureConversationExist();
+    const conv = ensureConversationExist(invokeParams?.projectId);
     const skillContext = invokeParams?.skillContext || buildSkillContext();
 
     // TODO: temp make scheduler support
@@ -118,6 +121,7 @@ export const useBuildThreadAndRun = () => {
     // 设置当前的任务类型及会话 id
     const task: InvokeSkillRequest = {
       skillId: selectedSkill?.skillId,
+      projectId: invokeParams?.projectId,
       input: {
         query: question,
       },

@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 
+import { useProjectContext } from '@refly-packages/ai-workspace-common/components/project-detail/context-provider';
 const TextArea = Input.TextArea;
 
 interface ChatInputProps {
@@ -22,6 +23,7 @@ interface ChatInputProps {
 
 export const ChatInput = (props: ChatInputProps) => {
   const { form } = props;
+  const { projectId } = useProjectContext();
 
   const { t } = useTranslation();
   const inputRef = useRef<RefTextAreaType>(null);
@@ -67,7 +69,7 @@ export const ChatInput = (props: ChatInputProps) => {
     const { messages, newQAText } = useChatStore.getState();
     searchStore.setIsSearchOpen(false);
     const tplConfig = form?.getFieldValue('tplConfig');
-    const invokeParams = { tplConfig: tplConfig };
+    const invokeParams = { projectId, tplConfig };
 
     if (messages?.length > 0) {
       // 追问阅读
