@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import { Typography, Spin, Divider, Tooltip } from '@arco-design/web-react';
 import { IconCloseCircle, IconLoading } from '@arco-design/web-react/icon';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
-import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
+import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/project-detail/delete-dropdown-menu';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 
 import { Resource } from '@refly/openapi-schema';

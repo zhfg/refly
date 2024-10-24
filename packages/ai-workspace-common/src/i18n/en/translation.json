@@ -28,6 +28,9 @@
     "collapse": "Collapse",
     "open": "Open",
     "close": "Close",
+    "canvas": "Canvas",
+    "resource": "Resource",
+    "thread": "Thread",
     "copy": {
       "title": "Copy",
       "success": "Content has been copied to the clipboard!"
@@ -107,6 +110,13 @@
       "utilText": "By registering, you agree to our",
       "privacyPolicy": "Privacy Policy",
       "terms": "Terms of Service"
+    }
+  },
+  "projectDetail": {
+    "directory": {
+      "newCanvas": "New Canvas",
+      "importResource": "Import Resource",
+      "chat": "Chat"
     }
   },
   "workspace": {
@@ -189,11 +199,11 @@
     "keepOneWindow": "Keep at least one window",
     "resourceCollectionAssociativeModal": {
       "resourceTitle": "Add Resources",
-      "collectionTitle": "Add To Collection",
+      "projectTitle": "Add To Collection",
       "resource": "Resource",
-      "collection": "Collection",
+      "project": "Project",
       "resourcePlaceholder": "Please select resources",
-      "collectionPlaceholder": "Please select Collection"
+      "projectPlaceholder": "Please select project"
     },
     "directory": {
       "resourceCount": "{{count}} contents",

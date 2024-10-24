@@ -1,4 +1,4 @@
-import { AICopilot } from "@refly-packages/ai-workspace-common/components/knowledge-base/copilot"
+import { AICopilot } from "@refly-packages/ai-workspace-common/components/copilot"
 
 const ConvItem = () => {
   return <AICopilot />

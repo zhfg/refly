@@ -5,7 +5,7 @@ import {
   useKnowledgeBaseStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { Resource } from '@refly/openapi-schema';
-import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useTranslation } from 'react-i18next';
 
 export const useKnowledgeBaseTabs = () => {
@@ -16,7 +16,7 @@ export const useKnowledgeBaseTabs = () => {
     updateTabs: state.updateTabs,
     updateActiveTab: state.updateActiveTab,
   }));
-  const { jumpToResource } = useKnowledgeBaseJumpNewPath();
+  const { jumpToResource } = useJumpNewPath();
 
   const tabs = knowledgeBaseStore.tabs;
   const activeTab = knowledgeBaseStore.activeTab;

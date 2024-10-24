@@ -14,7 +14,7 @@ import { Skill } from './skill';
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { SearchDomain, SearchResult, SkillMeta } from '@refly/openapi-schema';
-import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
 import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-canvas-tabs';
 import { RenderItem } from '@refly-packages/ai-workspace-common/components/search/types';
@@ -49,7 +49,7 @@ export const Search = (props: SearchProps) => {
   const { handleAddTab: handleAddNoteTab } = useCanvasTabs();
   const { handleAddTab: handleAddResourceTab } = useKnowledgeBaseTabs();
 
-  const { jumpToProject, jumpToCanvas, jumpToResource, jumpToConv } = useKnowledgeBaseJumpNewPath();
+  const { jumpToProject, jumpToCanvas, jumpToResource, jumpToConv } = useJumpNewPath();
 
   const pages = searchStore.pages;
   const setPages = searchStore.setPages;
