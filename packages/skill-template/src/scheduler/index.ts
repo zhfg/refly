@@ -29,6 +29,7 @@ import {
   checkHasContext,
 } from './utils/token';
 import { ChatMode } from './types';
+import { CanvasIntent } from './types/intent';
 
 // prompts
 import { generateCanvasPrompt } from './prompt/generateCanvas';
@@ -326,9 +327,32 @@ Please generate the summary based on these requirements and offer suggestions fo
     this.configSnapshot ??= config;
 
     const { chatHistory = [], currentSkill, spanId } = config.configurable;
+    const { user } = config;
 
     this.emitEvent({ event: 'start' }, this.configSnapshot);
     this.emitEvent({ event: 'log', content: `Start to generate canvas...` }, config);
+
+    const { convId, projectId = '' } = this.configSnapshot.configurable;
+    const res = await this.engine.service.createCanvas(user, {
+      title: '',
+      initialContent: '',
+      projectId,
+    });
+
+    // send intent matcher event
+    this.emitEvent(
+      {
+        event: 'structured_data',
+        structuredDataKey: 'intentMatcher',
+        content: JSON.stringify({
+          intentType: CanvasIntent.GenerateCanvas,
+          projectId: res.data?.projectId || projectId,
+          canvasId: res.data?.canvasId || '',
+          convId,
+        }),
+      },
+      config,
+    );
 
     const model = this.engine.chatModel({ temperature: 0.1 });
 

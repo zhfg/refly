@@ -582,6 +582,7 @@ export class SkillService {
         locale: data?.locale ?? user.uiLocale ?? 'en',
         installedSkills,
         convId,
+        projectId: data?.projectId ?? '',
         tplConfig,
       },
       user: pick(user, ['uid', 'uiLocale', 'outputLocale']),
