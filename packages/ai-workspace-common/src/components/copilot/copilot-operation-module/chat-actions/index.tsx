@@ -22,10 +22,12 @@ import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common
 
 interface ChatActionsProps {
   form?: FormInstance;
+  handleSendMessage: () => void;
+  handleAbort: () => void;
 }
 
 export const ChatActions = (props: ChatActionsProps) => {
-  const { form } = props;
+  const { form, handleAbort } = props;
   const { t } = useTranslation();
 
   // stores
@@ -35,9 +37,6 @@ export const ChatActions = (props: ChatActionsProps) => {
     setChatMode: state.setChatMode,
     enableWebSearch: state.enableWebSearch,
     setEnableWebSearch: state.setEnableWebSearch,
-  }));
-  const searchStore = useSearchStoreShallow((state) => ({
-    setIsSearchOpen: state.setIsSearchOpen,
   }));
   const messageStateStore = useMessageStateStoreShallow((state) => ({
     pending: state.pending,
@@ -52,8 +51,6 @@ export const ChatActions = (props: ChatActionsProps) => {
   const tokenAvailable =
     tokenUsage?.t1TokenQuota > tokenUsage?.t1TokenUsed || tokenUsage?.t2TokenQuota > tokenUsage?.t2TokenUsed;
 
-  const { runSkill, emptyConvRunSkill, buildShutdownTaskAndGenResponse } = useBuildThreadAndRun();
-
   // hooks
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
@@ -64,50 +61,13 @@ export const ChatActions = (props: ChatActionsProps) => {
     setLoginModalVisible: state.setLoginModalVisible,
   }));
 
-  const handleSendMessage = (type: ChatMode) => {
-    if (!userStore.isLogin) {
-      userStore.setLoginModalVisible(true);
-      return;
-    }
-
-    const error = handleFilterErrorTip();
-    if (error) {
-      return;
-    }
-
-    const { formErrors } = useContextPanelStore.getState();
-    if (formErrors && Object.keys(formErrors).length > 0) {
-      Notification.error({
-        style: { width: 400 },
-        title: t('copilot.configManager.errorTipTitle'),
-        content: t('copilot.configManager.errorTip'),
-      });
-      return;
-    }
-
-    chatStore.setChatMode(type);
-
-    const { messages, newQAText } = useChatStore.getState();
-
-    searchStore.setIsSearchOpen(false);
-    const tplConfig = form?.getFieldValue('tplConfig');
-    const invokeParams = { tplConfig: tplConfig };
-
-    if (messages?.length > 0) {
-      // 追问阅读
-      runSkill(newQAText, invokeParams);
-    } else {
-      // 新会话阅读，先创建会话，然后进行跳转之后发起聊天
-      emptyConvRunSkill(newQAText, true, invokeParams);
-    }
-  };
-
-  const handleAbort = () => {
-    buildShutdownTaskAndGenResponse();
-  };
-
   const canSendEmptyMessage = skillStore?.selectedSkill || (!skillStore?.selectedSkill && chatStore.newQAText?.trim());
   const canSendMessage = !userStore.isLogin || (!messageStateStore?.pending && tokenAvailable && canSendEmptyMessage);
+
+  const handleSendMessage = (chatMode: ChatMode) => {
+    chatStore.setChatMode(chatMode);
+    props.handleSendMessage();
+  };
 
   return (
     <div className="chat-actions">
@@ -157,15 +117,19 @@ export const ChatActions = (props: ChatActionsProps) => {
               <Menu>
                 <Menu.Item
                   key="noContext"
-                  className="text-xs h-8 leading-8"
-                  onClick={() => handleSendMessage('noContext')}
+                  className="h-8 text-xs leading-8"
+                  onClick={() => {
+                    handleSendMessage('noContext');
+                  }}
                 >
                   {t('copilot.chatMode.noContext')}
                 </Menu.Item>
                 <Menu.Item
                   key="wholeSpace"
-                  className="text-xs h-8 leading-8"
-                  onClick={() => handleSendMessage('wholeSpace')}
+                  className="h-8 text-xs leading-8"
+                  onClick={() => {
+                    handleSendMessage('wholeSpace');
+                  }}
                 >
                   {t('copilot.chatMode.wholeSpace')}
                 </Menu.Item>

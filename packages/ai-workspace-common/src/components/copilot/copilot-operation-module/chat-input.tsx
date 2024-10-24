@@ -2,7 +2,6 @@ import { Input, Notification, FormInstance } from '@arco-design/web-react';
 import { useRef, useState } from 'react';
 import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
 import { useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
-import { useContextFilterErrorTip } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/hooks/use-context-filter-errror-tip';
 
 // styles
 import './index.scss';
@@ -10,7 +9,6 @@ import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
 import { useTranslation } from 'react-i18next';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 
 const TextArea = Input.TextArea;
 
@@ -18,10 +16,11 @@ interface ChatInputProps {
   placeholder: string;
   autoSize: { minRows: number; maxRows: number };
   form?: FormInstance;
+  handleSendMessage: () => void;
 }
 
 export const ChatInput = (props: ChatInputProps) => {
-  const { form } = props;
+  const { form, handleSendMessage } = props;
 
   const { t } = useTranslation();
   const inputRef = useRef<RefTextAreaType>(null);
@@ -34,53 +33,8 @@ export const ChatInput = (props: ChatInputProps) => {
   const searchStore = useSearchStoreShallow((state) => ({
     setIsSearchOpen: state.setIsSearchOpen,
   }));
-  const { runSkill, emptyConvRunSkill, buildShutdownTaskAndGenResponse } = useBuildThreadAndRun();
   // hooks
   const [isFocused, setIsFocused] = useState(false);
-
-  const { handleFilterErrorTip } = useContextFilterErrorTip();
-  const userStore = useUserStoreShallow((state) => ({
-    setLoginModalVisible: state.setLoginModalVisible,
-    isLogin: state.isLogin,
-  }));
-
-  const handleSendMessage = () => {
-    if (!userStore.isLogin) {
-      userStore.setLoginModalVisible(true);
-      return;
-    }
-    const error = handleFilterErrorTip();
-    if (error) {
-      return;
-    }
-
-    const { formErrors } = useContextPanelStore.getState();
-    if (formErrors && Object.keys(formErrors).length > 0) {
-      Notification.error({
-        style: { width: 400 },
-        title: t('copilot.configManager.errorTipTitle'),
-        content: t('copilot.configManager.errorTip'),
-      });
-      return;
-    }
-
-    const { messages, newQAText } = useChatStore.getState();
-    searchStore.setIsSearchOpen(false);
-    const tplConfig = form?.getFieldValue('tplConfig');
-    const invokeParams = { tplConfig: tplConfig };
-
-    if (messages?.length > 0) {
-      // 追问阅读
-      runSkill(newQAText, invokeParams);
-    } else {
-      // 新会话阅读，先创建会话，然后进行跳转之后发起聊天
-      emptyConvRunSkill(newQAText, true, invokeParams);
-    }
-  };
-
-  const handleAbort = () => {
-    buildShutdownTaskAndGenResponse();
-  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.keyCode === 13 && (e.ctrlKey || e.shiftKey || e.metaKey)) {
