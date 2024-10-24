@@ -36,6 +36,9 @@ import { useState, useEffect } from 'react';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useProcessContextItems } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/hooks/use-process-context-items';
 
+// utils
+import { processWithCanvas } from './utils';
+
 export const HumanMessage = memo(
   (props: { message: Partial<ChatMessage>; profile: { avatar: string; name: string }; disable?: boolean }) => {
     const { message, profile } = props;
@@ -51,7 +54,7 @@ export const HumanMessage = memo(
           <div className="message-name-and-content">
             <span className="message-name">{profile?.name}</span>
             <div className="human-message-content">
-              <Markdown content={message?.content as string} />
+              <Markdown content={message?.content as string} msgId={message?.msgId} />
             </div>
 
             {contextItems.length > 0 && (
@@ -288,7 +291,11 @@ export const AssistantMessage = memo(
                 {isLastSession && isPendingFirstToken ? (
                   <Skeleton animation text={{ width: '90%' }}></Skeleton>
                 ) : (
-                  <Markdown content={message?.content as string} sources={sources} />
+                  <Markdown
+                    content={processWithCanvas(message?.content as string)}
+                    sources={sources}
+                    msgId={message?.msgId}
+                  />
                 )}
                 {(relatedQuestions || [])?.length > 0 ? (
                   <Divider
