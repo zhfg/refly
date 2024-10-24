@@ -249,12 +249,23 @@ export const useBuildTask = () => {
     }
 
     if (['sources', 'relatedQuestions', 'intentMatcher'].includes(skillEvent?.structuredDataKey)) {
-      if (!lastRelatedMessage.structuredData[skillEvent.structuredDataKey]) {
-        lastRelatedMessage.structuredData[skillEvent.structuredDataKey] = [...(structuredData || [])];
+      let existingData = lastRelatedMessage.structuredData[skillEvent.structuredDataKey];
+      const isObject = (val: unknown): val is Record<string, unknown> =>
+        typeof val === 'object' && val !== null && !Array.isArray(val);
+
+      if (!existingData) {
+        lastRelatedMessage.structuredData[skillEvent.structuredDataKey] = Array.isArray(structuredData)
+          ? [...structuredData]
+          : isObject(structuredData)
+            ? { ...structuredData }
+            : structuredData;
       } else {
-        lastRelatedMessage.structuredData[skillEvent.structuredDataKey] = (
-          lastRelatedMessage.structuredData[skillEvent.structuredDataKey] as Array<any>
-        )?.concat(...structuredData);
+        lastRelatedMessage.structuredData[skillEvent.structuredDataKey] =
+          Array.isArray(existingData) && Array.isArray(structuredData)
+            ? [...existingData, ...structuredData]
+            : isObject(existingData) && isObject(structuredData)
+              ? { ...existingData, ...structuredData }
+              : structuredData;
       }
     } else if (skillEvent?.structuredDataKey === 'AskUserForm') {
       // TODO: 未来实现

@@ -7,9 +7,8 @@ import { MarkdownElementProps } from '../../types/index';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
 
-import { CANVAS_TAG, CANVAS_TAG_CLOSED_REGEX } from '@refly-packages/ai-workspace-common/constants/canvas';
+import { CANVAS_TAG_CLOSED_REGEX } from '@refly-packages/ai-workspace-common/constants/canvas';
 
-import { Drawer } from 'antd';
 import { getCanvasContent } from '@refly-packages/ai-workspace-common/components/copilot/utils';
 import { IconCanvas } from '@refly-packages/ai-workspace-common/components/common/icon';
 
@@ -29,9 +28,9 @@ const Render = memo<CanvasProps>(({ identifier, title, type, children, id }) => 
   const hasChildren = !!children;
   const str = ((children as string) || '').toString?.();
 
-  const [open, setOpen] = useState(false);
-
   const [isGenerating] = useMessageStateStore((state) => [state.pending]);
+
+  // canvasContent for render
   const [isCanvasTagClosed, canvasContent] = useChatStore((s) => {
     const message = chatSelectors.getMessageById(id)(s);
     const canvasContent = getCanvasContent(message?.content as string);
@@ -39,10 +38,11 @@ const Render = memo<CanvasProps>(({ identifier, title, type, children, id }) => 
     return [isReflyCanvasClosed(message?.content), canvasContent];
   });
 
+  // TODO: 需要处理单独的 message id，只打开对应的 model，而且只会有一个
   const openCanvas = () => {
     // 这里直接打开 canvas
     // openArtifact({ id, identifier, title, type });
-    setOpen(true);
+    // setOpen(true);
   };
 
   useEffect(() => {
@@ -76,9 +76,6 @@ const Render = memo<CanvasProps>(({ identifier, title, type, children, id }) => 
           </div>
         </div>
       </div>
-      <Drawer title="Basic Drawer" onClose={() => setOpen(false)} open={open}>
-        <p>{canvasContent}</p>
-      </Drawer>
     </div>
   );
 });
