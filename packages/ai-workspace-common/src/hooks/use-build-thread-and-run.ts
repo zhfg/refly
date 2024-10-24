@@ -10,7 +10,7 @@ import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { OutputLocale } from '@refly-packages/ai-workspace-common/utils/i18n';
 import { useBuildTask } from './use-build-task';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
-import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 // hooks
 import { useBuildSkillContext } from './use-build-skill-context';
 import { useTranslation } from 'react-i18next';
@@ -33,7 +33,7 @@ export const useBuildThreadAndRun = () => {
     setTask: state.setTask,
   }));
   const { buildTaskAndGenReponse, buildShutdownTaskAndGenResponse } = useBuildTask();
-  const { jumpToConv } = useKnowledgeBaseJumpNewPath();
+  const { jumpToConv } = useJumpNewPath();
   const { addRecentConversation } = useHandleRecents();
   const emptyConvRunSkill = (
     question: string,

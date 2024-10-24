@@ -42,6 +42,10 @@ export function genCanvasID(): string {
   return 'c-' + createId();
 }
 
+export function genReferenceID(): string {
+  return 'rf-' + createId();
+}
+
 export function genTokenUsageMeterID(): string {
   return 'tum-' + createId();
 }

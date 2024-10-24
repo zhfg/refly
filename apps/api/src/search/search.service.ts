@@ -206,6 +206,7 @@ export class SearchService {
     const canvases = await this.prisma.canvas.findMany({
       select: {
         canvasId: true,
+        projectId: true,
         title: true,
         content: true,
         createdAt: true,
@@ -222,6 +223,9 @@ export class SearchService {
       content: [canvas.content ? canvas.content.slice(0, 250) + '...' : ''],
       createdAt: canvas.createdAt.toJSON(),
       updatedAt: canvas.updatedAt.toJSON(),
+      metadata: {
+        projectId: canvas.projectId,
+      },
     }));
   }
 
@@ -235,6 +239,9 @@ export class SearchService {
       content: hit.highlight?.content || [hit._source.content],
       createdAt: hit._source.createdAt,
       updatedAt: hit._source.updatedAt,
+      metadata: {
+        projectId: hit._source.projectId,
+      },
     }));
   }
 
@@ -256,6 +263,9 @@ export class SearchService {
       domain: 'canvas',
       title: node.title,
       content: [node.content],
+      metadata: {
+        projectId: node.projectId,
+      },
     }));
   }
 

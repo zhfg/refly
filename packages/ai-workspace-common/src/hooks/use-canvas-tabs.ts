@@ -1,5 +1,5 @@
 import { Canvas } from '@refly/openapi-schema';
-import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { CanvasTab, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 export const useCanvasTabs = () => {
@@ -10,7 +10,7 @@ export const useCanvasTabs = () => {
     updateActiveTab: state.updateActiveTab,
     notePanelVisible: state.canvasPanelVisible,
   }));
-  const { jumpToCanvas } = useKnowledgeBaseJumpNewPath();
+  const { jumpToCanvas } = useJumpNewPath();
 
   const tabs = noteStore.tabs;
   const activeTab = noteStore.activeTab;

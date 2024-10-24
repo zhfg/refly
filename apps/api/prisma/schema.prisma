@@ -257,7 +257,7 @@ model Canvas {
   /// Primary key
   pk              BigInt     @id @default(autoincrement())
   /// Canvas id
-  canvasId        String     @unique @map("note_id")
+  canvasId        String     @unique @map("canvas_id")
   /// Project id
   projectId       String?    @map("project_id")
   /// Related project
@@ -294,7 +294,7 @@ model Canvas {
   references      Resource[]
 
   @@index([uid, deletedAt, updatedAt])
-  @@map("notes")
+  @@map("canvases")
 }
 
 model Collection {
@@ -381,9 +381,9 @@ model Reference {
   /// Soft delete timestamp
   deletedAt   DateTime? @map("deleted_at") @db.Timestamptz()
 
+  @@unique([sourceType, sourceId, targetType, targetId, deletedAt])
   @@index([sourceType, sourceId])
   @@index([targetType, targetId])
-  @@index([uid, deletedAt])
   @@map("references")
 }
 

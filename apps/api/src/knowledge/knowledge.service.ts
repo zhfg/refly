@@ -22,6 +22,12 @@ import {
   ListProjectsData,
   UpsertProjectRequest,
   BindProjectResourcesRequest,
+  QueryReferencesRequest,
+  ReferenceType,
+  BaseReference,
+  AddReferencesRequest,
+  DeleteReferencesRequest,
+  ReferenceMeta,
 } from '@refly-packages/openapi-schema';
 import {
   CHANNEL_FINALIZE_RESOURCE,
@@ -36,6 +42,7 @@ import {
   cleanMarkdownForIngest,
   markdown2StateUpdate,
   genProjectID,
+  genReferenceID,
 } from '@refly-packages/utils';
 import { FinalizeResourceParam } from './knowledge.dto';
 import { pick, omit } from '../utils';
@@ -79,6 +86,14 @@ export class KnowledgeService {
       include: {
         resources: {
           where: { uid, deletedAt: null },
+          orderBy: { updatedAt: 'desc' },
+        },
+        canvases: {
+          where: { uid, deletedAt: null },
+          orderBy: { updatedAt: 'desc' },
+        },
+        conversations: {
+          where: { uid },
           orderBy: { updatedAt: 'desc' },
         },
       },
@@ -377,7 +392,7 @@ export class KnowledgeService {
       const contentStream = await this.minio.client.getObject(storageKey);
       const content = await streamToString(contentStream);
 
-      const { size } = await this.ragService.indexContent(user, {
+      const { size } = await this.ragService.indexDocument(user, {
         pageContent: cleanMarkdownForIngest(content),
         metadata: {
           nodeType: 'resource',
@@ -578,6 +593,7 @@ export class KnowledgeService {
     const isNewCanvas = !param.canvasId;
 
     param.canvasId ||= genCanvasID();
+    param.projectId ||= genProjectID();
     param.title ||= 'Untitled';
 
     const createInput: Prisma.CanvasCreateInput = {
@@ -587,6 +603,16 @@ export class KnowledgeService {
       readOnly: param.readOnly ?? false,
       content: param.initialContent,
       contentPreview: param.initialContent?.slice(0, 500),
+      project: {
+        connectOrCreate: {
+          where: { projectId: param.projectId },
+          create: {
+            title: param.title || 'Untitled',
+            projectId: param.projectId,
+            uid: user.uid,
+          },
+        },
+      },
     };
 
     if (isNewCanvas && param.initialContent) {
@@ -608,11 +634,12 @@ export class KnowledgeService {
       createInput.storageSize = storageStat.size + stateStorageStat.size;
 
       // Add to vector store
-      const { size } = await this.ragService.indexContent(user, {
+      const { size } = await this.ragService.indexDocument(user, {
         pageContent: param.initialContent,
         metadata: {
           nodeType: 'canvas',
           canvasId: param.canvasId,
+          projectId: param.projectId,
           title: param.title,
         },
       });
@@ -629,7 +656,7 @@ export class KnowledgeService {
 
     await this.elasticsearch.upsertCanvas({
       id: param.canvasId,
-      ...pick(canvas, ['title', 'uid']),
+      ...pick(canvas, ['projectId', 'title', 'uid']),
       content: param.initialContent,
       createdAt: canvas.createdAt.toJSON(),
       updatedAt: canvas.updatedAt.toJSON(),
@@ -686,6 +713,161 @@ export class KnowledgeService {
     await this.ssuQueue.add({
       uid: user.uid,
       timestamp: new Date(),
+    });
+  }
+
+  async queryReferences(user: User, param: QueryReferencesRequest) {
+    const { sourceType, sourceId, targetType, targetId } = param;
+
+    // Check if the source and target entities exist for this user
+    const entityChecks: Promise<void>[] = [];
+    if (sourceType && sourceId) {
+      entityChecks.push(this.miscService.checkEntity(user, sourceId, sourceType));
+    }
+    if (targetType && targetId) {
+      entityChecks.push(this.miscService.checkEntity(user, targetId, targetType));
+    }
+    await Promise.all(entityChecks);
+
+    const where: Prisma.ReferenceWhereInput = {};
+    if (sourceType && sourceId) {
+      where.sourceType = sourceType;
+      where.sourceId = sourceId;
+    }
+    if (targetType && targetId) {
+      where.targetType = targetType;
+      where.targetId = targetId;
+    }
+    if (Object.keys(where).length === 0) {
+      throw new BadRequestException('Either source or target condition is required');
+    }
+
+    return this.prisma.reference.findMany({ where });
+  }
+
+  private async prepareReferenceInputs(
+    user: User,
+    references: BaseReference[],
+  ): Promise<Prisma.ReferenceCreateManyInput[]> {
+    const validRefTypes: ReferenceType[] = ['resource', 'canvas'];
+
+    const resourceIds: Set<string> = new Set();
+    const canvasIds: Set<string> = new Set();
+
+    // TODO: Deduplicate references
+
+    references.forEach((ref) => {
+      if (!validRefTypes.includes(ref.sourceType)) {
+        throw new BadRequestException(`Invalid source type: ${ref.sourceType}`);
+      }
+      if (!validRefTypes.includes(ref.targetType)) {
+        throw new BadRequestException(`Invalid target type: ${ref.targetType}`);
+      }
+      if (ref.sourceType === 'resource' && ref.targetType === 'canvas') {
+        throw new BadRequestException('Resource to canvas reference is not allowed');
+      }
+      if (ref.sourceType === ref.targetType && ref.sourceId === ref.targetId) {
+        throw new BadRequestException('Source and target cannot be the same');
+      }
+
+      if (ref.sourceType === 'resource') {
+        resourceIds.add(ref.sourceId);
+      } else if (ref.sourceType === 'canvas') {
+        canvasIds.add(ref.sourceId);
+      }
+
+      if (ref.targetType === 'resource') {
+        resourceIds.add(ref.targetId);
+      } else if (ref.targetType === 'canvas') {
+        canvasIds.add(ref.targetId);
+      }
+    });
+
+    const [resources, canvases] = await Promise.all([
+      this.prisma.resource.findMany({
+        select: { title: true, resourceId: true, meta: true },
+        where: {
+          resourceId: { in: Array.from(resourceIds) },
+          uid: user.uid,
+          deletedAt: null,
+        },
+      }),
+      this.prisma.canvas.findMany({
+        select: { title: true, canvasId: true },
+        where: {
+          canvasId: { in: Array.from(canvasIds) },
+          uid: user.uid,
+          deletedAt: null,
+        },
+      }),
+    ]);
+
+    // Check if all the entities exist
+    const foundIds = new Set([
+      ...resources.map((r) => r.resourceId),
+      ...canvases.map((c) => c.canvasId),
+    ]);
+    const missingEntities = references.filter(
+      (e) => !foundIds.has(e.sourceId) || !foundIds.has(e.targetId),
+    );
+    if (missingEntities.length > 0) {
+      this.logger.warn(`Entities not found: ${JSON.stringify(missingEntities)}`);
+      throw new BadRequestException(`Some of the entities cannot be found`);
+    }
+
+    // Create a map for quick lookup
+    const entityMap: Record<string, { title: string; url?: string }> = Object.fromEntries([
+      ...resources.map((r) => [
+        r.resourceId,
+        { title: r.title, url: JSON.parse(r.meta || '{}').url },
+      ]),
+      ...canvases.map((c) => [c.canvasId, { title: c.title }]),
+    ]);
+
+    return references.map((ref) => {
+      const source = entityMap[ref.sourceId];
+      const target = entityMap[ref.targetId];
+
+      return {
+        ...ref,
+        referenceId: genReferenceID(),
+        sourceTitle: source?.title,
+        targetTitle: target?.title,
+        sourceMeta: JSON.stringify({ url: source?.url } as ReferenceMeta),
+        targetMeta: JSON.stringify({ url: target?.url } as ReferenceMeta),
+        uid: user.uid,
+      };
+    });
+  }
+
+  async addReferences(user: User, param: AddReferencesRequest) {
+    const { references } = param;
+    const referenceInputs = await this.prepareReferenceInputs(user, references);
+    return this.prisma.reference.createManyAndReturn({ data: referenceInputs });
+  }
+
+  async deleteReferences(user: User, param: DeleteReferencesRequest) {
+    const { referenceIds } = param;
+
+    const references = await this.prisma.reference.findMany({
+      where: {
+        referenceId: { in: referenceIds },
+        uid: user.uid,
+        deletedAt: null,
+      },
+    });
+
+    if (references.length !== referenceIds.length) {
+      throw new BadRequestException('Some of the references cannot be found');
+    }
+
+    await this.prisma.reference.updateMany({
+      data: { deletedAt: new Date() },
+      where: {
+        referenceId: { in: referenceIds },
+        uid: user.uid,
+        deletedAt: null,
+      },
     });
   }
 }

@@ -9,9 +9,9 @@ import { List, Empty } from '@arco-design/web-react';
 import { IconBook } from '@arco-design/web-react/icon';
 import { CanvasCard } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list/canvas-card';
 import { ScrollLoading } from '../scroll-loading';
-import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-canvas-tabs';
-import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
+import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/project-detail/delete-dropdown-menu';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 
 import { LOCALE } from '@refly/common-types';
@@ -45,7 +45,7 @@ export const CanvasList = (props: CanvasListProps) => {
     loadMore();
   }, []);
 
-  const { jumpToCanvas } = useKnowledgeBaseJumpNewPath();
+  const { jumpToCanvas } = useJumpNewPath();
   const { handleAddTab: handleAddCanvasTab } = useCanvasTabs();
 
   if (dataList.length === 0 && !isRequesting) {
@@ -53,16 +53,13 @@ export const CanvasList = (props: CanvasListProps) => {
   }
 
   const handleClickCanvas = (canvas: Canvas) => {
-    // TODO: 这里需要补充 canvas 的 projectId
-    // @ts-ignore
     jumpToCanvas({ canvasId: canvas.canvasId, projectId: canvas.projectId });
     handleAddCanvasTab({
       title: canvas.title,
       key: canvas.canvasId,
       content: canvas.contentPreview || '',
       canvasId: canvas.canvasId,
-      // @ts-ignore
-      projectId: canvas.projectId, // TODO: 这里需要补充 canvas 的 projectId
+      projectId: canvas.projectId,
     });
   };
 

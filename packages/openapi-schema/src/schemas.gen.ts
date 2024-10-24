@@ -35,48 +35,63 @@ export const $ReferenceMeta = {
   },
 } as const;
 
-export const $Reference = {
+export const $BaseReference = {
   type: 'object',
-  description: 'Reference',
-  required: ['referenceId', 'sourceType', 'sourceId', 'sourceTitle', 'targetType', 'targetId', 'targetTitle'],
+  description: 'Basic reference info',
+  required: ['sourceType', 'sourceId', 'targetType', 'targetId'],
   properties: {
-    referenceId: {
-      type: 'string',
-      description: 'Reference ID',
-    },
     sourceType: {
-      type: 'string',
+      $ref: '#/components/schemas/ReferenceType',
       description: 'Source entity type',
     },
     sourceId: {
       type: 'string',
       description: 'Source entity ID',
     },
-    sourceTitle: {
-      type: 'string',
-      description: 'Source entity title',
-    },
-    sourceMeta: {
-      $ref: '#/components/schemas/ReferenceMeta',
-      description: 'Source entity metadata',
-    },
     targetType: {
-      type: 'string',
+      $ref: '#/components/schemas/ReferenceType',
       description: 'Target entity type',
     },
     targetId: {
       type: 'string',
       description: 'Target entity ID',
     },
-    targetTitle: {
-      type: 'string',
-      description: 'Target entity title',
-    },
-    targetMeta: {
-      $ref: '#/components/schemas/ReferenceMeta',
-      description: 'Target entity metadata',
-    },
   },
+} as const;
+
+export const $Reference = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseReference',
+    },
+    {
+      type: 'object',
+      description: 'Reference extra data',
+      required: ['referenceId', 'sourceTitle', 'targetTitle'],
+      properties: {
+        referenceId: {
+          type: 'string',
+          description: 'Reference ID',
+        },
+        sourceTitle: {
+          type: 'string',
+          description: 'Source entity title',
+        },
+        sourceMeta: {
+          $ref: '#/components/schemas/ReferenceMeta',
+          description: 'Source entity metadata',
+        },
+        targetTitle: {
+          type: 'string',
+          description: 'Target entity title',
+        },
+        targetMeta: {
+          $ref: '#/components/schemas/ReferenceMeta',
+          description: 'Target entity metadata',
+        },
+      },
+    },
+  ],
 } as const;
 
 export const $ResourceMeta = {
@@ -164,12 +179,17 @@ export const $ReferenceType = {
 
 export const $Canvas = {
   type: 'object',
-  required: ['canvasId', 'title', 'readOnly', 'createdAt', 'updatedAt'],
+  required: ['canvasId', 'projectId', 'title', 'readOnly', 'createdAt', 'updatedAt'],
   properties: {
     canvasId: {
       type: 'string',
       description: 'Canvas ID',
       example: 'c-g30e1b80b5g1itbemc0g5jj3',
+    },
+    projectId: {
+      type: 'string',
+      description: 'Project ID',
+      example: 'p-g30e1b80b5g1itbemc0g5jj3',
     },
     title: {
       type: 'string',
@@ -1883,43 +1903,49 @@ export const $QueryReferencesResponse = {
   ],
 } as const;
 
-export const $ReferenceOperation = {
+export const $AddReferencesRequest = {
   type: 'object',
-  required: ['reference', 'operation'],
+  required: ['references'],
   properties: {
-    sourceType: {
-      type: 'string',
-      description: 'Source entity type',
-    },
-    sourceId: {
-      type: 'string',
-      description: 'Source entity ID',
-    },
-    targetType: {
-      type: 'string',
-      description: 'Target entity type',
-    },
-    targetId: {
-      type: 'string',
-      description: 'Target entity ID',
-    },
-    operation: {
-      type: 'string',
-      description: 'Operation type',
-      enum: ['add', 'remove'],
+    references: {
+      type: 'array',
+      description: 'Reference operation list',
+      items: {
+        $ref: '#/components/schemas/BaseReference',
+      },
     },
   },
 } as const;
 
-export const $OperateReferencesRequest = {
+export const $AddReferencesResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Reference list',
+          items: {
+            $ref: '#/components/schemas/Reference',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $DeleteReferencesRequest = {
   type: 'object',
-  required: ['operation', 'references'],
+  required: ['referenceIds'],
   properties: {
-    operations: {
+    referenceIds: {
       type: 'array',
-      description: 'Reference operation list',
+      description: 'Reference ID list',
       items: {
-        $ref: '#/components/schemas/ReferenceOperation',
+        type: 'string',
       },
     },
   },

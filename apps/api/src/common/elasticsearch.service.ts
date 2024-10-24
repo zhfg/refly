@@ -16,6 +16,7 @@ interface ResourceDocument {
 
 interface CanvasDocument {
   id: string;
+  projectId?: string;
   title?: string;
   content?: string;
   createdAt?: string;

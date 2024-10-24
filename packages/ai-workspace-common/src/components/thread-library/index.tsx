@@ -3,12 +3,12 @@ import './index.scss';
 // components
 import { ConvList } from '@refly-packages/ai-workspace-common/components/conv-list';
 import { useTranslation } from 'react-i18next';
-import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { Typography } from '@arco-design/web-react';
 
 export const ConvLibrary = () => {
   const { t } = useTranslation();
-  const { jumpToConv } = useKnowledgeBaseJumpNewPath();
+  const { jumpToConv } = useJumpNewPath();
 
   return (
     <div

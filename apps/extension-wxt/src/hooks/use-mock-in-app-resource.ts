@@ -2,7 +2,7 @@ import { useMatch, useNavigate, useSearchParams } from '@refly-packages/ai-works
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useEffect, useRef } from 'react';
 import { onMessage, sendMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
-import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { BackgroundMessage, CopilotMsgName } from '@refly/common-types';
 import { useCopilotStore } from '@refly-packages/ai-workspace-common/stores/copilot';
@@ -17,7 +17,7 @@ export const useMockInAppResource = () => {
     currentResource: state.currentResource,
   }));
   const [searchParams, setSearchParams] = useSearchParams();
-  const { jumpToResource } = useKnowledgeBaseJumpNewPath();
+  const { jumpToResource } = useJumpNewPath();
 
   const kbId = searchParams.get('kbId');
   const resId = searchParams.get('resId');

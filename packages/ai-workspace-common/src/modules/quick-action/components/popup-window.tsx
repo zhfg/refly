@@ -9,7 +9,7 @@ import Logo from '../../../assets/logo.svg';
 import { Markdown } from '../../../components/markdown';
 import { useCountDown } from '../hooks/use-countdown';
 import { useQuickActionStore } from '../stores/quick-action';
-import { CopilotOperationModule } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module';
+import { CopilotOperationModule } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module';
 
 const TextArea = Input.TextArea;
 const Option = Select.Option;

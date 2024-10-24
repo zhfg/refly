@@ -6,7 +6,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
-import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-canvas-tabs';
 
@@ -16,7 +16,7 @@ export const useAINote = (shouldInitListener = false) => {
     updateNewNoteCreating: state.updateNewCanvasCreating,
     updateNotePanelVisible: state.updateCanvasPanelVisible,
   }));
-  const { jumpToCanvas } = useKnowledgeBaseJumpNewPath();
+  const { jumpToCanvas } = useJumpNewPath();
   const { handleAddTab: handleAddCanvasTab } = useCanvasTabs();
 
   const handleInitEmptyNote = async (content: string) => {
