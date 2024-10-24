@@ -15,7 +15,7 @@ import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/
 import { getExtensionId } from "@refly/utils/url"
 import { useTranslation } from "react-i18next"
 
-const Workspace = () => {
+const Library = () => {
   const [token] = useCookie("_refly_ai_sid")
 
   const userStore = useUserStoreShallow(state => ({
@@ -80,4 +80,4 @@ const Workspace = () => {
   )
 }
 
-export default Workspace
+export default Library

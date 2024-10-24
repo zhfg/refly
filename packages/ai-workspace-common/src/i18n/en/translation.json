@@ -415,7 +415,7 @@
       "expand": "Expand",
       "logout": "Log Out",
       "newDraft": "New Draft",
-      "knowledgeBase": "Library",
+      "library": "Library",
       "recentProjects": "Recent Projects",
       "recentChats": "Recent Chats",
       "viewMore": "More"
@@ -1107,5 +1107,13 @@
     "description": "Oops, your account does not have access to the beta testing.",
     "apply": "Apply for early access",
     "copyEmail": "Copy email "
+  },
+  "homePage": {
+    "footer": {
+      "pricing": "Pricing",
+      "contact": "Contact",
+      "terms": "Terms",
+      "privacy": "Privacy"
+    }
   }
 }

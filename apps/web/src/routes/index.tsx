@@ -14,7 +14,7 @@ import {
 
 // Lazy load components
 const Home = lazy(() => import("@/pages/home"))
-const KnowledgeBase = lazy(() => import("@/pages/knowledge-base"))
+const Library = lazy(() => import("@/pages/library"))
 const Resource = lazy(() => import("@/pages/resource"))
 const ConvLibrary = lazy(() => import("@/pages/conv-library"))
 const ConvItem = lazy(() => import("@/pages/conv-item"))
@@ -42,7 +42,7 @@ const prefetchRoutes = () => {
   // Prefetch common routes
   import("@/pages/login")
   import("@/pages/home")
-  import("@/pages/knowledge-base")
+  import("@/pages/library")
   import("@/pages/resource")
   import("@/pages/project")
   import("@/pages/conv-library")
@@ -56,6 +56,7 @@ const prefetchRoutes = () => {
 export const AppRouter = (props: { layout?: any }) => {
   const { layout: Layout } = props
   const userStore = useUserStoreShallow(state => ({
+    isLogin: state.isLogin,
     userProfile: state.userProfile,
     localSettings: state.localSettings,
     isCheckingLoginStatus: state.isCheckingLoginStatus,
@@ -71,6 +72,7 @@ export const AppRouter = (props: { layout?: any }) => {
   const storageLocalSettings = safeParseJSON(
     localStorage.getItem("refly-local-settings"),
   )
+
   const locale =
     storageLocalSettings?.uiLocale ||
     userStore?.localSettings?.uiLocale ||
@@ -91,7 +93,7 @@ export const AppRouter = (props: { layout?: any }) => {
     }
   }, [i18n, locale])
 
-  const routeLogin = useMatch("/login")
+  const routeLogin = useMatch("/")
 
   if (
     userStore.isCheckingLoginStatus === undefined ||
@@ -104,7 +106,9 @@ export const AppRouter = (props: { layout?: any }) => {
     return <LoadingFallback />
   }
 
-  const hasBetaAccess = userStore?.userProfile?.hasBetaAccess || false
+  const hasBetaAccess = userStore?.isLogin
+    ? userStore?.userProfile?.hasBetaAccess || false
+    : true
 
   return (
     <Suspense fallback={<LoadingFallback />}>
@@ -119,11 +123,12 @@ export const AppRouter = (props: { layout?: any }) => {
               />
             }
           />
+
           <Route
-            path="/knowledge-base"
+            path="/library"
             element={
               <BetaProtectedRoute
-                component={KnowledgeBase}
+                component={Library}
                 hasBetaAccess={hasBetaAccess}
               />
             }
@@ -146,7 +151,6 @@ export const AppRouter = (props: { layout?: any }) => {
               />
             }
           />
-          <Route path="/login" element={<Login />} />
           <Route
             path="/thread"
             element={

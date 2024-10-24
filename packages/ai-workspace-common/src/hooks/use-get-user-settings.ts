@@ -19,6 +19,7 @@ export const useGetUserSettings = () => {
     setLocalSettings: state.setLocalSettings,
     setToken: state.setToken,
     setIsCheckingLoginStatus: state.setIsCheckingLoginStatus,
+    setIsLogin: state.setIsLogin,
     loginModalVisible: state.loginModalVisible,
     userProfile: state.userProfile,
     localSettings: state.localSettings,
@@ -59,17 +60,19 @@ export const useGetUserSettings = () => {
       userStore.setToken('');
       localStorage.removeItem('refly-user-profile');
       localStorage.removeItem('refly-local-settings');
-
-      if (getRuntime() === 'web') {
-        window.location.href = getWebLogin(); // Redirect to login page for web
-      } else {
-        navigate('/'); // Extension should navigate to home
-      }
+      userStore.setIsLogin(false);
+      // if (getRuntime() === 'web') {
+      //   window.location.href = getWebLogin(); // Redirect to login page for web
+      // } else {
+      //   navigate('/'); // Extension should navigate to home
+      // }
+      navigate('/'); // Extension should navigate to home
       return;
     }
 
     userStore.setUserProfile(res.data);
     localStorage.setItem('refly-user-profile', safeStringifyJSON(res.data));
+    userStore.setIsLogin(true);
 
     // Add localSettings
     let uiLocale = mapDefaultLocale(res?.data?.uiLocale as LOCALE) as LOCALE;
@@ -115,6 +118,7 @@ export const useGetUserSettings = () => {
     let res: GetUserSettingsResponse;
 
     userStore.setIsCheckingLoginStatus(true);
+
     if (token) {
       const resp = await getClient().getSettings();
       error = resp.error;
@@ -128,6 +132,7 @@ export const useGetUserSettings = () => {
       userStore.setToken('');
       localStorage.removeItem('refly-user-profile');
       localStorage.removeItem('refly-local-settings');
+      userStore.setIsLogin(false);
 
       if (
         routeLandingPageMatch ||
@@ -146,8 +151,9 @@ export const useGetUserSettings = () => {
       }
     } else {
       userStore.setIsCheckingLoginStatus(false);
+      userStore.setIsLogin(true);
       // Authentication successful, redirect to app.refly.ai
-      window.location.href = getClientOrigin(false);
+      navigate('/');
     }
   };
 

@@ -4,11 +4,9 @@ import { HiOutlineChevronDown } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
-import { WorkSpaceSearch } from '../work-space-search';
 import { ResourceList } from '@refly-packages/ai-workspace-common/components/workspace/resource-list';
 import { CanvasList } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list';
 import { ProjectList } from '@refly-packages/ai-workspace-common/components/project-list';
-import { SearchQuickOpenBtn } from '@refly-packages/ai-workspace-common/components/search-quick-open-btn';
 import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import { useImportProjectModal } from '@refly-packages/ai-workspace-common/stores/import-project-modal';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
@@ -119,12 +117,6 @@ const ContentHeader = (props: { setVal: (val: string) => void; hitTop: boolean; 
           <Radio value="resource">{t('workspace.contentPanel.tabPanel.resource')}</Radio>
           <Radio value="project">{t('workspace.contentPanel.tabPanel.project')}</Radio>
         </RadioGroup>
-        {hitTop && (
-          <SearchQuickOpenBtn
-            className="work-space-top-search"
-            placeholder="loggedHomePage.quickSearch.placeholderForHome"
-          />
-        )}
       </div>
 
       <NewFileButton val={props.val}></NewFileButton>
@@ -172,7 +164,6 @@ export const ContentPanel = () => {
 
   return (
     <div className="content-panel-container" ref={ref}>
-      <WorkSpaceSearch />
       <Affix offsetTop={0} target={() => ref.current} onChange={setHitTop}>
         <ContentHeader val={val} setVal={setVal} hitTop={hitTop} />
       </Affix>
