@@ -71,6 +71,11 @@ export const SearchSelect = (props: SearchSelectProps) => {
       return;
     }
 
+    if (!newEntityName) {
+      Message.warning(t('entitySelector.createEntity.newProjectNameIsEmpty'));
+      return;
+    }
+
     setCreateLoading(true);
     const { data, error } = await getClient().createProject({
       body: {
@@ -89,6 +94,7 @@ export const SearchSelect = (props: SearchSelectProps) => {
     setValue(projectId);
     setPopupVisible(false);
     setNewEntityName('');
+    onChange?.(projectId, { label: title, value: projectId });
   };
 
   return (

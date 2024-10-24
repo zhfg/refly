@@ -876,7 +876,8 @@
       "resource": "新建资源",
       "note": "新建笔记",
       "skill": "新建技能",
-      "conversation": "新建会话"
+      "conversation": "新建会话",
+      "newProjectNameIsEmpty": "请输入知识库名称"
     }
   },
   "hooks": {

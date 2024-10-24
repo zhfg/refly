@@ -880,7 +880,8 @@
       "resource": "New Resource",
       "note": "New Note",
       "skill": "New Skill",
-      "conversation": "New Conversation"
+      "conversation": "New Conversation",
+      "newProjectNameIsEmpty": "Please enter the name of the project"
     }
   },
   "components": {
