@@ -1,12 +1,10 @@
-import { Button, Dropdown, Menu, Notification, FormInstance, Switch, Checkbox } from '@arco-design/web-react';
+import { Button, Dropdown, Menu, FormInstance, Checkbox } from '@arco-design/web-react';
 
-import { ChatMode, useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
+import { ChatMode, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import { IconDown, IconPause, IconSend } from '@arco-design/web-react/icon';
 import { useMessageStateStoreShallow } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
-import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
-import { useContextFilterErrorTip } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/hooks/use-context-filter-errror-tip';
 import { useTranslation } from 'react-i18next';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 
@@ -16,7 +14,6 @@ import { ModelSelector } from './model-selector';
 // styles
 import './index.scss';
 import { OutputLocaleList } from '@refly-packages/ai-workspace-common/components/output-locale-list';
-import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 import { useProjectContext } from '@refly-packages/ai-workspace-common/components/project-detail/context-provider';
@@ -39,9 +36,6 @@ export const ChatActions = (props: ChatActionsProps) => {
     enableWebSearch: state.enableWebSearch,
     setEnableWebSearch: state.setEnableWebSearch,
   }));
-  const searchStore = useSearchStoreShallow((state) => ({
-    setIsSearchOpen: state.setIsSearchOpen,
-  }));
   const messageStateStore = useMessageStateStoreShallow((state) => ({
     pending: state.pending,
   }));
@@ -55,54 +49,20 @@ export const ChatActions = (props: ChatActionsProps) => {
   const tokenAvailable =
     tokenUsage?.t1TokenQuota > tokenUsage?.t1TokenUsed || tokenUsage?.t2TokenQuota > tokenUsage?.t2TokenUsed;
 
-  const { runSkill, emptyConvRunSkill, buildShutdownTaskAndGenResponse } = useBuildThreadAndRun();
+  const { sendChatMessage, buildShutdownTaskAndGenResponse } = useBuildThreadAndRun();
 
   // hooks
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
 
-  const { handleFilterErrorTip } = useContextFilterErrorTip();
   const userStore = useUserStoreShallow((state) => ({
     isLogin: state.isLogin,
     setLoginModalVisible: state.setLoginModalVisible,
   }));
 
-  const handleSendMessage = (type: ChatMode) => {
-    if (!userStore.isLogin) {
-      userStore.setLoginModalVisible(true);
-      return;
-    }
-
-    const error = handleFilterErrorTip();
-    if (error) {
-      return;
-    }
-
-    const { formErrors } = useContextPanelStore.getState();
-    if (formErrors && Object.keys(formErrors).length > 0) {
-      Notification.error({
-        style: { width: 400 },
-        title: t('copilot.configManager.errorTipTitle'),
-        content: t('copilot.configManager.errorTip'),
-      });
-      return;
-    }
-
-    chatStore.setChatMode(type);
-
-    const { messages, newQAText } = useChatStore.getState();
-
-    searchStore.setIsSearchOpen(false);
+  const handleSendMessage = (chatMode: ChatMode) => {
     const tplConfig = form?.getFieldValue('tplConfig');
-    const invokeParams = { projectId, tplConfig: tplConfig };
-
-    if (messages?.length > 0) {
-      // Ask a follow-up question
-      runSkill(newQAText, invokeParams);
-    } else {
-      // Create a new conversation and run skill
-      emptyConvRunSkill(newQAText, true, invokeParams);
-    }
+    sendChatMessage({ chatMode, projectId, tplConfig });
   };
 
   const handleAbort = () => {
