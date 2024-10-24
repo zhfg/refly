@@ -248,7 +248,7 @@ export const useBuildTask = () => {
       return;
     }
 
-    if (['sources', 'relatedQuestions'].includes(skillEvent?.structuredDataKey)) {
+    if (['sources', 'relatedQuestions', 'intentMatcher'].includes(skillEvent?.structuredDataKey)) {
       if (!lastRelatedMessage.structuredData[skillEvent.structuredDataKey]) {
         lastRelatedMessage.structuredData[skillEvent.structuredDataKey] = [...(structuredData || [])];
       } else {

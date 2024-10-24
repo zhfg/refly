@@ -83,7 +83,7 @@ export const WriteGuide = (props: WriteGuideProps) => {
           </div>
 
           <div className="ai-copilot">
-            <CopilotOperationModule />
+            <CopilotOperationModule source="homePage" />
             <List
               grid={{
                 sm: 48,

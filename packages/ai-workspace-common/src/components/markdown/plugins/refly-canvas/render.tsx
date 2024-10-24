@@ -4,7 +4,6 @@ import { Spin } from 'antd';
 import { chatSelectors } from '@refly-packages/ai-workspace-common/stores/chat/selectors';
 
 import { MarkdownElementProps } from '../../types/index';
-import { IconApps, IconBook, IconFile } from '@arco-design/web-react/icon';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
 
@@ -12,6 +11,7 @@ import { CANVAS_TAG, CANVAS_TAG_CLOSED_REGEX } from '@refly-packages/ai-workspac
 
 import { Drawer } from 'antd';
 import { getCanvasContent } from '@refly-packages/ai-workspace-common/components/copilot/utils';
+import { IconCanvas } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 import './render.scss';
 
@@ -60,7 +60,7 @@ const Render = memo<CanvasProps>(({ identifier, title, type, children, id }) => 
         }}
       >
         <div className="refly-canvas-render-content">
-          <IconFile style={{ fontSize: 18 }} />
+          <IconCanvas style={{ fontSize: 18 }} />
           <div className="refly-canvas-render-content-right">
             {!title && isGenerating ? (
               <span>canvas is generating...</span>
