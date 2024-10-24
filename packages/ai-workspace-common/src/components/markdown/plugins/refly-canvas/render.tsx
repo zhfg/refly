@@ -4,7 +4,7 @@ import { Spin } from 'antd';
 import { chatSelectors } from '@refly-packages/ai-workspace-common/stores/chat/selectors';
 
 import { MarkdownElementProps } from '../../types/index';
-import { IconApps } from '@arco-design/web-react/icon';
+import { IconApps, IconBook, IconFile } from '@arco-design/web-react/icon';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
 
@@ -12,6 +12,8 @@ import { CANVAS_TAG, CANVAS_TAG_CLOSED_REGEX } from '@refly-packages/ai-workspac
 
 import { Drawer } from 'antd';
 import { getCanvasContent } from '@refly-packages/ai-workspace-common/components/copilot/utils';
+
+import './render.scss';
 
 interface CanvasProps extends MarkdownElementProps {
   identifier: string;
@@ -50,30 +52,25 @@ const Render = memo<CanvasProps>(({ identifier, title, type, children, id }) => 
   }, [isGenerating, hasChildren, str, identifier, title, type, id]);
 
   return (
-    <p style={{ border: '1px solid gray', borderRadius: 4 }}>
+    <div className="refly-canvas-render-container">
       <div
         onClick={() => {
           // copilot as a assist role, so we need to open the canvas when click the canvas tag
           openCanvas();
         }}
       >
-        <div>
-          <div>
-            <IconApps />
-          </div>
-          <div>
-            {!title && isGenerating ? <span>canvas is generating...</span> : <span>{title || 'unknownTitle'}</span>}
+        <div className="refly-canvas-render-content">
+          <IconFile style={{ fontSize: 18 }} />
+          <div className="refly-canvas-render-content-right">
+            {!title && isGenerating ? (
+              <span>canvas is generating...</span>
+            ) : (
+              <span className="refly-canvas-render-title">{title || 'unknownTitle'}</span>
+            )}
             {hasChildren && (
-              <span>
-                {identifier} ·{' '}
-                <span>
-                  {!isCanvasTagClosed && (
-                    <div>
-                      <Spin />
-                    </div>
-                  )}
-                  已生成 {str?.length} 字
-                </span>
+              <span className="refly-canvas-render-content-description">
+                {!isCanvasTagClosed && <Spin size="small" />}
+                <span>共 {str?.length} 字</span>
               </span>
             )}
           </div>
@@ -82,7 +79,7 @@ const Render = memo<CanvasProps>(({ identifier, title, type, children, id }) => 
       <Drawer title="Basic Drawer" onClose={() => setOpen(false)} open={open}>
         <p>{canvasContent}</p>
       </Drawer>
-    </p>
+    </div>
   );
 });
 
