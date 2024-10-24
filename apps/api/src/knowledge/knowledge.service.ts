@@ -88,6 +88,14 @@ export class KnowledgeService {
           where: { uid, deletedAt: null },
           orderBy: { updatedAt: 'desc' },
         },
+        canvases: {
+          where: { uid, deletedAt: null },
+          orderBy: { updatedAt: 'desc' },
+        },
+        conversations: {
+          where: { uid },
+          orderBy: { updatedAt: 'desc' },
+        },
       },
     });
     if (!project) {

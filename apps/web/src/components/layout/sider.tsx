@@ -45,7 +45,7 @@ import { useImportResourceStore } from "@refly-packages/ai-workspace-common/stor
 import { SiderMenuSettingList } from "@refly-packages/ai-workspace-common/components/sider-menu-setting-list"
 import { SiderMenuMoreList } from "@refly-packages/ai-workspace-common/components/sider-menu-more-list"
 // hooks
-import { useKnowledgeBaseJumpNewPath } from "@refly-packages/ai-workspace-common/hooks/use-jump-new-path"
+import { useJumpNewPath } from "@refly-packages/ai-workspace-common/hooks/use-jump-new-path"
 import { useRecentsStoreShallow } from "@refly-packages/ai-workspace-common/stores/recents"
 import { useHandleRecents } from "@refly-packages/ai-workspace-common/hooks/use-handle-rencents"
 
@@ -220,7 +220,7 @@ export const SiderLayout = () => {
   }))
   const isGuideDetail = location.pathname.includes("guide/")
 
-  const { jumpToProject, jumpToConv } = useKnowledgeBaseJumpNewPath()
+  const { jumpToProject, jumpToConv } = useJumpNewPath()
 
   const { t } = useTranslation()
 

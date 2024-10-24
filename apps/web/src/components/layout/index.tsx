@@ -10,7 +10,7 @@ import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/
 import { LoginModal } from "@/components/login-modal"
 import { BigSearchModal } from "@refly-packages/ai-workspace-common/components/search/modal"
 import { ImportResourceModal } from "@refly-packages/ai-workspace-common/components/import-resource"
-import { NewProjectModal } from "@refly-packages/ai-workspace-common/components/knowledge-base/new-project-modal"
+import { NewProjectModal } from "@refly-packages/ai-workspace-common/components/project-detail/new-project-modal"
 import { SubscribeModal } from "@refly-packages/ai-workspace-common/components/settings/subscribe-modal"
 import { NewCanvasModal } from "@/components/new-canvas-modal"
 

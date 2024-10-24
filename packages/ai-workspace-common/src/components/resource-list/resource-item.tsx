@@ -13,7 +13,7 @@ import { safeParseURL } from '@refly/utils/url';
 import { Markdown } from '../markdown';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
-import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
+import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/project-detail/delete-dropdown-menu';
 import { memo, useState, useEffect } from 'react';
 
 export const ResourceItem = memo(
