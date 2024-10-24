@@ -129,7 +129,9 @@ export const NewCanvasModal = () => {
                       domain="project"
                       className="kg-selector"
                       allowCreateNewEntity
-                      defaultValue={newCanvasModalStore.selectedProjectId}
+                      {...(newCanvasModalStore.selectedProjectId && {
+                        defaultValue: newCanvasModalStore.selectedProjectId,
+                      })}
                       onChange={value => {
                         if (!value) return
                         newCanvasModalStore.setSelectedProjectId(value)
