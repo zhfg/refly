@@ -200,18 +200,6 @@ export type Project = {
    * Project update time
    */
   updatedAt: string;
-  /**
-   * Project related resources (only returned in detail API)
-   */
-  resources?: Array<Resource>;
-  /**
-   * Project canvases (only returned in detail API)
-   */
-  canvases?: Array<Canvas>;
-  /**
-   * Project conversations (only returned in detail API)
-   */
-  conversations?: Array<Conversation>;
 };
 
 /**
@@ -1728,6 +1716,10 @@ export type SkillContextResourceItem = {
    */
   resource?: Resource;
   /**
+   * Whether this resource is current
+   */
+  isCurrent?: boolean;
+  /**
    * Resource context metadata
    */
   metadata?: {
@@ -1748,6 +1740,10 @@ export type SkillContextProjectItem = {
    */
   project?: Project;
   /**
+   * Whether this project is current
+   */
+  isCurrent?: boolean;
+  /**
    * Project context metadata
    */
   metadata?: {
@@ -1767,6 +1763,10 @@ export type SkillContextCanvasItem = {
    * Canvas
    */
   canvas?: Canvas;
+  /**
+   * Whether this canvas is current
+   */
+  isCurrent?: boolean;
   /**
    * Canvas context metadata
    */
@@ -2045,6 +2045,10 @@ export type CreateConversationRequest = {
    * Conversation title
    */
   title?: string;
+  /**
+   * Project ID
+   */
+  projectId?: string;
   /**
    * Conversation locale
    */
@@ -2425,6 +2429,10 @@ export type ListResourcesData = {
      * Page size
      */
     pageSize?: number;
+    /**
+     * Project ID
+     */
+    projectId?: string;
     /**
      * Resource ID
      */
@@ -2974,6 +2982,23 @@ export type GetSkillJobDetailData = {
 export type GetSkillJobDetailResponse2 = GetSkillJobDetailResponse;
 
 export type GetSkillJobDetailError = unknown;
+
+export type ListConversationsData = {
+  query?: {
+    /**
+     * Page number
+     */
+    page?: number;
+    /**
+     * Page size
+     */
+    pageSize?: number;
+    /**
+     * Project ID
+     */
+    projectId?: string;
+  };
+};
 
 export type ListConversationsResponse = ListConversationResponse;
 
@@ -3569,6 +3594,7 @@ export type $OpenApiTs = {
   };
   '/conversation/list': {
     get: {
+      req: ListConversationsData;
       res: {
         /**
          * successful operation

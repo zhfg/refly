@@ -34,7 +34,7 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
 
   const { t } = useTranslation();
 
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const resId = searchParams.get('resId');
 
   // 所属的环境
@@ -84,6 +84,9 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
   }));
 
   const handleNewTempConv = () => {
+    searchParams.delete('convId');
+    setSearchParams(searchParams);
+
     conversationStore.resetState();
     chatStore.resetState();
     messageStateStore.resetState();

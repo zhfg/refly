@@ -2,7 +2,6 @@ import {
   Resource as ResourceModel,
   Canvas as CanvasModel,
   Project as ProjectModel,
-  Conversation as ConversationModel,
   Reference as ReferenceModel,
 } from '@prisma/client';
 import {
@@ -15,27 +14,17 @@ import {
   ReferenceType,
 } from '@refly-packages/openapi-schema';
 import { pick } from '@/utils';
-import { conversationPO2DTO } from '@/conversation/conversation.dto';
 
 export type FinalizeResourceParam = {
   resourceId: string;
   uid: string;
 };
 
-export const projectPO2DTO = (
-  project: ProjectModel & {
-    resources?: ResourceModel[];
-    canvases?: CanvasModel[];
-    conversations?: ConversationModel[];
-  },
-): Project => {
+export const projectPO2DTO = (project: ProjectModel): Project => {
   return {
     ...pick(project, ['projectId', 'title', 'description']),
     createdAt: project.createdAt.toJSON(),
     updatedAt: project.updatedAt.toJSON(),
-    resources: project.resources?.map((resource) => resourcePO2DTO(resource)),
-    canvases: project.canvases?.map((canvas) => canvasPO2DTO(canvas)),
-    conversations: project.conversations?.map((conversation) => conversationPO2DTO(conversation)),
   };
 };
 

@@ -150,7 +150,7 @@ export class SkillService {
         return buildSuccessResponse(canvasPO2DTO(canvas));
       },
       listCanvas: async (user, param) => {
-        const canvasList = await this.knowledge.listCanvas(user, param);
+        const canvasList = await this.knowledge.listCanvases(user, param);
         return buildSuccessResponse(canvasList.map((canvas) => canvasPO2DTO(canvas)));
       },
       getResourceDetail: async (user, req) => {
@@ -396,6 +396,7 @@ export class SkillService {
     // Create or retrieve conversation
     let conversation: ConversationModel | null = null;
     if (data.createConvParam) {
+      data.createConvParam.projectId ||= data.projectId;
       conversation = await this.conversation.upsertConversation(
         user,
         data.createConvParam,

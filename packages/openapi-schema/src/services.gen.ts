@@ -137,6 +137,7 @@ import type {
   GetSkillJobDetailData,
   GetSkillJobDetailError,
   GetSkillJobDetailResponse2,
+  ListConversationsData,
   ListConversationsError,
   ListConversationsResponse,
   GetConversationDetailData,
@@ -673,7 +674,7 @@ export const getSkillJobDetail = (options?: Options<GetSkillJobDetailData>) => {
  * List conversations
  * List all conversations
  */
-export const listConversations = (options?: Options) => {
+export const listConversations = (options?: Options<ListConversationsData>) => {
   return (options?.client ?? client).get<ListConversationsResponse, ListConversationsError>({
     ...options,
     url: '/conversation/list',

@@ -44,14 +44,14 @@ export class ConversationController {
   @Get('list')
   async listConversation(
     @User() user: UserModel,
+    @Query('projectId') projectId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListConversationResponse> {
-    const conversationList = await this.conversationService.getConversations({
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      where: { uid: user.uid },
-      orderBy: { createdAt: 'desc' },
+    const conversationList = await this.conversationService.listConversations(user, {
+      projectId,
+      page,
+      pageSize,
     });
 
     return buildSuccessResponse(conversationList.map(conversationPO2DTO));

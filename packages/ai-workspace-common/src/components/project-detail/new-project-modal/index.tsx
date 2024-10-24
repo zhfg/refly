@@ -8,6 +8,8 @@ import { useHandleRecents } from '@refly-packages/ai-workspace-common/hooks/use-
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import { useTranslation } from 'react-i18next';
+import { pick } from '@refly-packages/utils/typesafe';
+import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
 
 const FormItem = Form.Item;
 const TextArea = Input.TextArea;
@@ -20,21 +22,23 @@ export const NewProjectModal = () => {
   const [form] = Form.useForm();
   const editProject = importProjectModal.editProject;
   const { addRecentProject } = useHandleRecents();
+  const fetchProjectDetail = useProjectStoreShallow((state) => state.fetchProjectDetail);
 
   function onOk() {
     form
       .validate()
       .then(async (res) => {
-        console.log(res);
         setConfirmLoading(true);
         let result = null;
         try {
           if (editProject) {
-            const reqBody = { ...editProject, ...res };
-            delete reqBody.resources;
             result = await getClient().updateProject({
-              body: reqBody,
+              body: {
+                projectId: editProject.projectId,
+                ...pick(res, ['title', 'description']),
+              },
             });
+            fetchProjectDetail(editProject.projectId); // re-fetch project detail
           } else {
             result = await getClient().createProject({
               body: res,

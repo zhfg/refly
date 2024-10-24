@@ -1,5 +1,5 @@
 // 自定义组件
-import { AICopilot } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot';
+import { AICopilot } from '@refly-packages/ai-workspace-common/components/copilot';
 // utils
 // 自定义方法
 // stores

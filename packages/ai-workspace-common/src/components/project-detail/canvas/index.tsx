@@ -48,7 +48,6 @@ import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-pr
 const MemorizedToC = memo(ToC);
 
 const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canvasId: string }) => {
-  console.log('CollaborativeEditor rendered', canvasId);
   const { t } = useTranslation();
   const lastCursorPosRef = useRef<number>();
   const [token] = useCookie('_refly_ai_sid');

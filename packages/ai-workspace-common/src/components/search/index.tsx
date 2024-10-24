@@ -231,7 +231,7 @@ export const Search = (props: SearchProps) => {
         searchStore.setIsSearchOpen(false);
       },
       onCreateClick: async () => {
-        await handleInitEmptyNote('');
+        await handleInitEmptyNote({ content: '' });
         searchStore.setIsSearchOpen(false);
       },
     },
