@@ -34,7 +34,8 @@
     "copy": {
       "title": "Copy",
       "success": "Content has been copied to the clipboard!"
-    }
+    },
+    "login": "Login"
   },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",

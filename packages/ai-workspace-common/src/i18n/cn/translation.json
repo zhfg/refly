@@ -34,7 +34,8 @@
     "copy": {
       "title": "复制",
       "success": "内容已复制到剪切板！"
-    }
+    },
+    "login": "登录"
   },
   "systemMaintenanceShutdown": {
     "title": "尊敬的用户，您好！",

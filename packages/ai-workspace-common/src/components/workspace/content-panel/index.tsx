@@ -9,7 +9,7 @@ import { CanvasList } from '@refly-packages/ai-workspace-common/components/works
 import { ProjectList } from '@refly-packages/ai-workspace-common/components/project-list';
 import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import { useImportProjectModal } from '@refly-packages/ai-workspace-common/stores/import-project-modal';
-import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
+import { useNewCanvasModalStoreShallow } from '@refly-packages/ai-workspace-common/stores/new-canvas-modal';
 
 import './index.scss';
 import classNames from 'classnames';
@@ -56,14 +56,16 @@ const NewFileButton = (props: { val: string }) => {
   const { t } = useTranslation();
   const importResourceStore = useImportResourceStore();
   const importProjectModal = useImportProjectModal();
-  const { handleInitEmptyNote } = useAINote();
   const { newNoteCreating } = useCanvasStore((state) => ({
     newNoteCreating: state.newCanvasCreating,
+  }));
+  const newCanvasModalStore = useNewCanvasModalStoreShallow((state) => ({
+    setNewCanvasModalVisible: state.setNewCanvasModalVisible,
   }));
 
   const handleCreateButtonClick = (type: string) => {
     if (type === 'canvas' && !newNoteCreating) {
-      handleInitEmptyNote({ content: '' });
+      newCanvasModalStore.setNewCanvasModalVisible(true);
     }
     if (type === 'resource') {
       importResourceStore.setImportResourceModalVisible(true);

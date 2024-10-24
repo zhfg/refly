@@ -1,11 +1,13 @@
 import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
 import { WriteGuide } from "@refly-packages/ai-workspace-common/components/home-page/write-guide"
 import { Button, Modal } from "@arco-design/web-react"
+import { useTranslation } from "react-i18next"
 
 import "./index.scss"
 import Logo from "@/assets/logo.svg"
 
 const Home = () => {
+  const { t } = useTranslation()
   const userStore = useUserStoreShallow(state => ({
     userProfile: state.userProfile,
     setLoginModalVisible: state.setLoginModalVisible,
@@ -32,7 +34,7 @@ const Home = () => {
               className="login-btn"
               type="primary"
               onClick={() => userStore.setLoginModalVisible(true)}>
-              Login
+              {t("common.login")}
             </Button>
           </div>
 
