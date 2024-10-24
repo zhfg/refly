@@ -250,27 +250,6 @@ export const $Project = {
       format: 'date-time',
       description: 'Project update time',
     },
-    resources: {
-      type: 'array',
-      description: 'Project related resources (only returned in detail API)',
-      items: {
-        $ref: '#/components/schemas/Resource',
-      },
-    },
-    canvases: {
-      type: 'array',
-      description: 'Project canvases (only returned in detail API)',
-      items: {
-        $ref: '#/components/schemas/Canvas',
-      },
-    },
-    conversations: {
-      type: 'array',
-      description: 'Project conversations (only returned in detail API)',
-      items: {
-        $ref: '#/components/schemas/Conversation',
-      },
-    },
   },
 } as const;
 

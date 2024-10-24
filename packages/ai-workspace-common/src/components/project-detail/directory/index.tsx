@@ -34,9 +34,14 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
 
   const { t } = useTranslation();
 
-  const { currentProject } = useProjectStoreShallow((state) => ({
-    currentProject: state.currentProject,
+  const { project, resources, canvases, conversations, fetchProjectResources } = useProjectStoreShallow((state) => ({
+    project: state.project,
+    resources: state.resources,
+    canvases: state.canvases,
+    conversations: state.conversations,
+    fetchProjectResources: state.fetchProjectResources,
   }));
+  const currentProject = project.data;
 
   const newCanvasModalStore = useNewCanvasModalStoreShallow((state) => ({
     setNewCanvasModalVisible: state.setNewCanvasModalVisible,
@@ -79,20 +84,20 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
 
   let dataList: DirectoryListItem[] = [];
   if (selectedTab === 'canvas') {
-    dataList = (currentProject?.canvases || []).map((item) => ({
+    dataList = (canvases.data || []).map((item) => ({
       id: item.canvasId,
       title: item.title,
       type: 'canvas',
     }));
   } else if (selectedTab === 'resource') {
-    dataList = (currentProject?.resources || []).map((item) => ({
+    dataList = (resources.data || []).map((item) => ({
       id: item.resourceId,
       title: item.title,
       type: 'resource',
       url: item.data?.url,
     }));
   } else if (selectedTab === 'thread') {
-    dataList = (currentProject?.conversations || []).map((item) => ({
+    dataList = (conversations.data || []).map((item) => ({
       id: item.convId,
       title: item.title,
       type: 'thread',
@@ -161,7 +166,8 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
                 <IconProject style={{ fontSize: 28, color: 'rgba(0, 0, 0, .5)', strokeWidth: 3 }} />
               </div>
               <div className="intro-content">
-                <div className="intro-title">{currentProject?.title}</div>
+                <div className="text-sm">{currentProject?.title}</div>
+                <div className="text-xs my-1 text-gray-500 max-h-10 overflow-auto">{currentProject?.description}</div>
                 <div className="intro-meta">
                   <span>
                     {time(currentProject?.updatedAt as string, LOCALE.EN)
@@ -240,8 +246,8 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
         projectId={projectId}
         visible={bindResourceModalVisible}
         setVisible={setBindResourceModalVisible}
-        postConfirmCallback={(value: string[]) => {
-          // TODO: refetch current project
+        postConfirmCallback={() => {
+          fetchProjectResources(projectId);
         }}
       />
     </div>

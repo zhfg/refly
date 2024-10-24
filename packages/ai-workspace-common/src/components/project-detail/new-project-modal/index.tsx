@@ -9,6 +9,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 
 import { useTranslation } from 'react-i18next';
 import { pick } from '@refly-packages/utils/typesafe';
+import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
 
 const FormItem = Form.Item;
 const TextArea = Input.TextArea;
@@ -21,6 +22,7 @@ export const NewProjectModal = () => {
   const [form] = Form.useForm();
   const editProject = importProjectModal.editProject;
   const { addRecentProject } = useHandleRecents();
+  const fetchProjectDetail = useProjectStoreShallow((state) => state.fetchProjectDetail);
 
   function onOk() {
     form
@@ -36,6 +38,7 @@ export const NewProjectModal = () => {
                 ...pick(res, ['title', 'description']),
               },
             });
+            fetchProjectDetail(editProject.projectId); // re-fetch project detail
           } else {
             result = await getClient().createProject({
               body: res,

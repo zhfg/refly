@@ -120,12 +120,14 @@ export class KnowledgeController {
   @Get('resource/list')
   async listResources(
     @User() user: UserModel,
+    @Query('projectId') projectId: string,
     @Query('resourceId') resourceId: string,
     @Query('resourceType') resourceType: ResourceType,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListResourceResponse> {
     const resources = await this.knowledgeService.listResources(user, {
+      projectId,
       resourceId,
       resourceType,
       page,
@@ -210,10 +212,11 @@ export class KnowledgeController {
   @Get('canvas/list')
   async listCanvases(
     @User() user: UserModel,
+    @Query('projectId') projectId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListCanvasResponse> {
-    const canvases = await this.knowledgeService.listCanvas(user, { page, pageSize });
+    const canvases = await this.knowledgeService.listCanvases(user, { projectId, page, pageSize });
     return buildSuccessResponse(canvases.map(canvasPO2DTO));
   }
 

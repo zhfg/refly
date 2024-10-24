@@ -83,20 +83,6 @@ export class KnowledgeService {
 
     const project = await this.prisma.project.findFirst({
       where: { projectId, uid, deletedAt: null },
-      include: {
-        resources: {
-          where: { uid, deletedAt: null },
-          orderBy: { updatedAt: 'desc' },
-        },
-        canvases: {
-          where: { uid, deletedAt: null },
-          orderBy: { updatedAt: 'desc' },
-        },
-        conversations: {
-          where: { uid },
-          orderBy: { updatedAt: 'desc' },
-        },
-      },
     });
     if (!project) {
       throw new NotFoundException('Project not found');
@@ -189,7 +175,21 @@ export class KnowledgeService {
   }
 
   async listResources(user: User, param: ListResourcesData['query']) {
-    const { resourceId, resourceType, page = 1, pageSize = 10 } = param;
+    const { resourceId, projectId, resourceType, page = 1, pageSize = 10 } = param;
+
+    if (projectId) {
+      const project = await this.prisma.project.findFirst({
+        where: { projectId, uid: user.uid, deletedAt: null },
+        include: {
+          resources: {
+            where: { deletedAt: null },
+            take: pageSize,
+            skip: (page - 1) * pageSize,
+          },
+        },
+      });
+      return project?.resources;
+    }
 
     const resources = await this.prisma.resource.findMany({
       where: { resourceId, resourceType, uid: user.uid, deletedAt: null },
@@ -552,8 +552,24 @@ export class KnowledgeService {
     ]);
   }
 
-  async listCanvas(user: User, param: ListCanvasData['query']) {
-    const { page = 1, pageSize = 10 } = param;
+  async listCanvases(user: User, param: ListCanvasData['query']) {
+    const { projectId, page = 1, pageSize = 10 } = param;
+
+    if (projectId) {
+      const project = await this.prisma.project.findFirst({
+        where: { projectId, uid: user.uid, deletedAt: null },
+        include: {
+          canvases: {
+            where: { deletedAt: null },
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+            orderBy: { updatedAt: 'desc' },
+          },
+        },
+      });
+      return project?.canvases;
+    }
+
     return this.prisma.canvas.findMany({
       where: {
         uid: user.uid,

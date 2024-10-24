@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next"
 // 样式
 import "./index.scss"
 import { getPopupContainer } from "@refly-packages/ai-workspace-common/utils/ui"
+import { useProjectStoreShallow } from "@refly-packages/ai-workspace-common/stores/project"
 
 const { TextArea } = Input
 
@@ -28,6 +29,9 @@ export const NewCanvasModal = () => {
     setContent: state.setContent,
     setSelectedProjectId: state.setSelectedProjectId,
   }))
+  const { fetchProjectCanvases } = useProjectStoreShallow(state => ({
+    fetchProjectCanvases: state.fetchProjectCanvases,
+  }))
 
   const { handleInitEmptyNote } = useAINote()
 
@@ -40,6 +44,8 @@ export const NewCanvasModal = () => {
         projectId: newCanvasModalStore.selectedProjectId,
         content: newCanvasModalStore.content,
       })
+
+      fetchProjectCanvases(newCanvasModalStore.selectedProjectId)
 
       newCanvasModalStore.setNewCanvasModalVisible(false)
     } catch (error) {

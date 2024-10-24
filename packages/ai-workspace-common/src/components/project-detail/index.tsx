@@ -1,8 +1,5 @@
 import { Splitter, notification } from 'antd';
-import { useTranslation } from 'react-i18next';
-import { useParams, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
-
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { useParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 import { ContentArea } from './content-area';
 import { ProjectDirectory } from './directory';
@@ -14,41 +11,17 @@ import './index.scss';
 import { useEffect } from 'react';
 
 export const ProjectDetail = () => {
-  const { t } = useTranslation();
   const { projectId } = useParams();
 
-  const { setCurrentProject, setIsFetching } = useProjectStoreShallow((state) => ({
-    setCurrentProject: state.setCurrentProject,
-    setIsFetching: state.setIsFetching,
+  const projectStore = useProjectStoreShallow((state) => ({
+    setCurrentProjectId: state.setCurrentProjectId,
+    fetchProjectAll: state.fetchProjectAll,
   }));
-
-  const handleGetDetail = async (projectId: string) => {
-    setIsFetching(true);
-    const { data: newRes, error } = await getClient().getProjectDetail({
-      query: {
-        projectId,
-      },
-    });
-    setIsFetching(false);
-
-    if (error || !newRes?.success) {
-      notification.error({
-        message: t('contentDetail.list.fetchErr'),
-      });
-      return;
-    }
-    if (!newRes?.success) {
-      throw new Error(newRes?.errMsg);
-    }
-
-    if (newRes.data) {
-      setCurrentProject(newRes.data);
-    }
-  };
 
   useEffect(() => {
     if (projectId) {
-      handleGetDetail(projectId);
+      projectStore.setCurrentProjectId(projectId);
+      projectStore.fetchProjectAll(projectId);
     }
   }, [projectId]);
 

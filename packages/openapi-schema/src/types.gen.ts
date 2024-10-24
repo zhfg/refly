@@ -200,18 +200,6 @@ export type Project = {
    * Project update time
    */
   updatedAt: string;
-  /**
-   * Project related resources (only returned in detail API)
-   */
-  resources?: Array<Resource>;
-  /**
-   * Project canvases (only returned in detail API)
-   */
-  canvases?: Array<Canvas>;
-  /**
-   * Project conversations (only returned in detail API)
-   */
-  conversations?: Array<Conversation>;
 };
 
 /**
@@ -2442,6 +2430,10 @@ export type ListResourcesData = {
      */
     pageSize?: number;
     /**
+     * Project ID
+     */
+    projectId?: string;
+    /**
      * Resource ID
      */
     resourceId?: string;
@@ -2990,6 +2982,23 @@ export type GetSkillJobDetailData = {
 export type GetSkillJobDetailResponse2 = GetSkillJobDetailResponse;
 
 export type GetSkillJobDetailError = unknown;
+
+export type ListConversationsData = {
+  query?: {
+    /**
+     * Page number
+     */
+    page?: number;
+    /**
+     * Page size
+     */
+    pageSize?: number;
+    /**
+     * Project ID
+     */
+    projectId?: string;
+  };
+};
 
 export type ListConversationsResponse = ListConversationResponse;
 
@@ -3585,6 +3594,7 @@ export type $OpenApiTs = {
   };
   '/conversation/list': {
     get: {
+      req: ListConversationsData;
       res: {
         /**
          * successful operation
