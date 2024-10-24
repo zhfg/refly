@@ -3,7 +3,7 @@ import throttle from 'lodash.throttle';
 import { Button, Tabs, Tooltip } from '@arco-design/web-react';
 import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 
-import { ResourceDetail } from '@refly-packages/ai-workspace-common/components/project-detail/resource-detail';
+import { ResourceDetail } from '@refly-packages/ai-workspace-common/components/resource-detail/index';
 
 import { ActionSource, useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { ProjectListModal } from '@refly-packages/ai-workspace-common/components/copilot/project-list-modal';

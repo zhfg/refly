@@ -327,6 +327,7 @@ Please generate the summary based on these requirements and offer suggestions fo
 
     const { chatHistory = [], currentSkill, spanId } = config.configurable;
 
+    this.emitEvent({ event: 'start' }, this.configSnapshot);
     this.emitEvent({ event: 'log', content: `Start to generate canvas...` }, config);
 
     const model = this.engine.chatModel({ temperature: 0.1 });
