@@ -3,7 +3,7 @@ import throttle from 'lodash.throttle';
 import { Button, Tabs, Tooltip } from '@arco-design/web-react';
 import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 
-import { ResourceDetail } from '@refly-packages/ai-workspace-common/components/project-detail/resource-detail';
+import { ResourceView } from '@refly-packages/ai-workspace-common/components/project-detail/resource-view';
 
 import { ActionSource, useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { ProjectListModal } from '@refly-packages/ai-workspace-common/components/copilot/project-list-modal';
@@ -162,9 +162,7 @@ export const ResourceDetail2 = () => {
               }}
               onResize={(size) => setLeftPanelSize(size)}
             >
-              <div ref={leftPanelRef}>
-                <KnowledgeBaseDirectory small={isSmall} />
-              </div>
+              <div ref={leftPanelRef}></div>
             </Panel>
             <PanelResizeHandle className="knowledge-base-detail-panel-resize">
               {!hideBtn && (
@@ -182,7 +180,7 @@ export const ResourceDetail2 = () => {
         ) : null}
 
         <Panel className="knowledge-base-detail-resource-panel" minSize={50}>
-          <ResourceDetail />
+          <ResourceView resourceId={resId} />
         </Panel>
       </PanelGroup>
       {knowledgeBaseStore?.kbModalVisible && knowledgeBaseStore.actionSource === ActionSource.KnowledgeBase ? (

@@ -23,8 +23,8 @@ import { useTranslation } from 'react-i18next';
 
 import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
 
-export const ResourceView = (props: { projectId: string; resourceId: string }) => {
-  const { projectId, resourceId } = props;
+export const ResourceView = (props: { resourceId: string; projectId?: string }) => {
+  const { resourceId, projectId } = props;
 
   const { t } = useTranslation();
   const [isFetching, setIsFetching] = useState(false);
@@ -119,15 +119,6 @@ export const ResourceView = (props: { projectId: string; resourceId: string }) =
       message.error(t('common.putErr'));
     }
     setIsReindexing(false);
-  };
-
-  const handleUpdateCollections = (collectionId: string) => {
-    if (resourceId) {
-      handleGetDetail(resourceId as string);
-    }
-    if (collectionId === projectId) {
-      reloadKnowledgeBaseState.setReloadKnowledgeBaseList(true);
-    }
   };
 
   useEffect(() => {
