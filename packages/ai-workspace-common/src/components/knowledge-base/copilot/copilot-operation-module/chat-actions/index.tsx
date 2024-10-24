@@ -8,6 +8,7 @@ import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
 import { useContextFilterErrorTip } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module/context-manager/hooks/use-context-filter-errror-tip';
 import { useTranslation } from 'react-i18next';
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 
 // components
 import { ModelSelector } from './model-selector';
@@ -58,8 +59,17 @@ export const ChatActions = (props: ChatActionsProps) => {
   const isWeb = runtime === 'web';
 
   const { handleFilterErrorTip } = useContextFilterErrorTip();
+  const userStore = useUserStoreShallow((state) => ({
+    isLogin: state.isLogin,
+    setLoginModalVisible: state.setLoginModalVisible,
+  }));
 
   const handleSendMessage = (type: ChatMode) => {
+    if (!userStore.isLogin) {
+      userStore.setLoginModalVisible(true);
+      return;
+    }
+
     const error = handleFilterErrorTip();
     if (error) {
       return;
@@ -97,7 +107,7 @@ export const ChatActions = (props: ChatActionsProps) => {
   };
 
   const canSendEmptyMessage = skillStore?.selectedSkill || (!skillStore?.selectedSkill && chatStore.newQAText?.trim());
-  const canSendMessage = !messageStateStore?.pending && tokenAvailable && canSendEmptyMessage;
+  const canSendMessage = !userStore.isLogin || (!messageStateStore?.pending && tokenAvailable && canSendEmptyMessage);
 
   return (
     <div className="chat-actions">

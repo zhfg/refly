@@ -1,11 +1,9 @@
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 
 import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
 import { WriteGuide } from "@refly-packages/ai-workspace-common/components/home-page/write-guide"
 import { Button, Modal } from "@arco-design/web-react"
 import { useSearchParams } from "react-router-dom"
-
-import { LoginModal } from "@/components/login-modal"
 
 import "./index.scss"
 import Logo from "@/assets/logo.svg"
@@ -13,8 +11,8 @@ import Logo from "@/assets/logo.svg"
 const Home = () => {
   const userStore = useUserStoreShallow(state => ({
     userProfile: state.userProfile,
+    setLoginModalVisible: state.setLoginModalVisible,
   }))
-  const [loginModalVisible, setLoginModalVisible] = useState(false)
   const [searchParams] = useSearchParams()
   const isFromExtension = searchParams.get("from") === "refly-extension-login"
 
@@ -37,7 +35,8 @@ const Home = () => {
         footer={null}
         autoFocus={false}
         focusLock={true}
-        closable={false}>
+        closable={false}
+        style={{ backgroundColor: "#FFFFFF" }}>
         <div className="h-full">
           <div className="landing-modal-login">
             <div className="logo">
@@ -48,12 +47,14 @@ const Home = () => {
             <Button
               className="login-btn"
               type="primary"
-              onClick={() => setLoginModalVisible(true)}>
+              onClick={() => userStore.setLoginModalVisible(true)}>
               Login
             </Button>
           </div>
-          <WriteGuide isLogin={false} />
-          <LoginModal visible={loginModalVisible} from="extension-login" />
+
+          <div className="write-guide-container">
+            <WriteGuide isLogin={false} />
+          </div>
         </div>
       </Modal>
     )

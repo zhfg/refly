@@ -56,6 +56,7 @@ const prefetchRoutes = () => {
 export const AppRouter = (props: { layout?: any }) => {
   const { layout: Layout } = props
   const userStore = useUserStoreShallow(state => ({
+    isLogin: state.isLogin,
     userProfile: state.userProfile,
     localSettings: state.localSettings,
     isCheckingLoginStatus: state.isCheckingLoginStatus,
@@ -92,7 +93,7 @@ export const AppRouter = (props: { layout?: any }) => {
     }
   }, [i18n, locale])
 
-  const routeLogin = useMatch("/login")
+  const routeLogin = useMatch("/")
 
   if (
     userStore.isCheckingLoginStatus === undefined ||
@@ -101,13 +102,13 @@ export const AppRouter = (props: { layout?: any }) => {
     return <LoadingFallback />
   }
 
-  // if (!notShowLoginBtn && !routeLogin) {
-  //   return <LoadingFallback />
-  // }
+  if (!notShowLoginBtn && !routeLogin) {
+    return <LoadingFallback />
+  }
 
-  // const hasBetaAccess = userStore?.userProfile?.hasBetaAccess || false
-
-  const hasBetaAccess = true // todo:调试中
+  const hasBetaAccess = userStore?.isLogin
+    ? userStore?.userProfile?.hasBetaAccess || false
+    : true
 
   return (
     <Suspense fallback={<LoadingFallback />}>
@@ -122,8 +123,6 @@ export const AppRouter = (props: { layout?: any }) => {
               />
             }
           />
-
-          <Route path="/login" element={<Login />} />
 
           <Route
             path="/library"

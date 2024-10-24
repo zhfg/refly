@@ -41,20 +41,23 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
   }
 
   // props
-  let modalProps: any = {}
+  let modalProps: any = {
+    closable: false,
+    maskClosable: false,
+    maskStyle: {
+      opacity: 1,
+    },
+  }
 
   if (props.visible) {
     modalProps = {
       visible: true,
-      closable: false,
-      maskClosable: false,
-      maskStyle: {
-        opacity: 1,
-      },
+      ...modalProps,
     }
   } else {
     modalProps = {
       visible: userStore?.loginModalVisible,
+      ...modalProps,
     }
   }
 

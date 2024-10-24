@@ -10,6 +10,8 @@ import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
 import { useTranslation } from 'react-i18next';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+
 const TextArea = Input.TextArea;
 
 interface ChatInputProps {
@@ -37,8 +39,16 @@ export const ChatInput = (props: ChatInputProps) => {
   const [isFocused, setIsFocused] = useState(false);
 
   const { handleFilterErrorTip } = useContextFilterErrorTip();
+  const userStore = useUserStoreShallow((state) => ({
+    setLoginModalVisible: state.setLoginModalVisible,
+    isLogin: state.isLogin,
+  }));
 
   const handleSendMessage = () => {
+    if (!userStore.isLogin) {
+      userStore.setLoginModalVisible(true);
+      return;
+    }
     const error = handleFilterErrorTip();
     if (error) {
       return;

@@ -1093,5 +1093,13 @@
     "description": "哎呀，当前账号还没有内测资格",
     "apply": "申请试用资格",
     "copyEmail": "复制邮箱 "
+  },
+  "homePage": {
+    "footer": {
+      "pricing": "定价",
+      "contact": "联系我们",
+      "terms": "条款",
+      "privacy": "隐私"
+    }
   }
 }

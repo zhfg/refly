@@ -41,7 +41,7 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
         deleteCookie();
         Cookies.remove('_refly_ai_sid', { domain: getCookieOrigin() });
 
-        navigate('/');
+        window.location.reload();
 
         userStore.resetState();
       },

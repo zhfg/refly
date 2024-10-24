@@ -1,9 +1,7 @@
-import { useRef, useState, useEffect } from 'react';
-import { List, Divider, Button } from '@arco-design/web-react';
+import { List, Divider } from '@arco-design/web-react';
 import { IconDown } from '@arco-design/web-react/icon';
 
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import './index.scss';
 
@@ -63,7 +61,7 @@ export const WriteGuide = (props: WriteGuideProps) => {
   ];
 
   if (props.isLogin) {
-    footerList.push({
+    footerList.unshift({
       title: 'pricing',
       handleClick: () => {
         setSubscribeModalVisible(true);
@@ -72,55 +70,57 @@ export const WriteGuide = (props: WriteGuideProps) => {
   }
 
   return (
-    <div className="write-guide">
-      <div className="write-guide-inner">
-        <div className="write-guide-header">
-          {/* <div className="recent">
+    <div className="write-guide-container">
+      <div className="write-guide">
+        <div className="write-guide-inner">
+          <div className="write-guide-header">
+            {/* <div className="recent">
             <div className="recent-button">New</div>
             Introducing Refly Enterprise and Team plans
             <IconRight style={{ fontSize: '12px', marginLeft: '8px', transform: 'translateY(1px)' }} />
           </div> */}
-          <div className="guide-text">What Can I Help You Write?</div>
-        </div>
-
-        <div className="ai-copilot">
-          <CopilotOperationModule />
-          <List
-            grid={{
-              sm: 48,
-              md: 24,
-              lg: 16,
-              xl: 12,
-              gutter: 6,
-            }}
-            className="quick-start"
-            wrapperStyle={{ width: '100%' }}
-            bordered={false}
-            pagination={false}
-            dataSource={quickStartList}
-            render={(item, key) => (
-              <List.Item key={key} className="quick-start-item-container" actionLayout="vertical">
-                <div className="quick-start-item">
-                  <div className="quick-start-item-emoji">{item.emoji}</div>
-                  <div className="quick-start-item-title">{item.title}</div>
-                </div>
-              </List.Item>
-            )}
-          />
-        </div>
-
-        <div className="write-guide-footer">
-          {footerList.map((item) => (
-            <div className="write-guide-footer-item" key={item.title} onClick={item.handleClick}>
-              {item.title}
-              <Divider type="vertical" />
-            </div>
-          ))}
-          <div className="write-guide-footer-item">
-            <UILocaleList>
-              {t('language')} <IconDown className="write-guide-footer-item-icon" />
-            </UILocaleList>
+            <div className="guide-text">What Can I Help You Write?</div>
           </div>
+
+          <div className="ai-copilot">
+            <CopilotOperationModule />
+            <List
+              grid={{
+                sm: 48,
+                md: 24,
+                lg: 16,
+                xl: 12,
+                gutter: 6,
+              }}
+              className="quick-start"
+              wrapperStyle={{ width: '100%' }}
+              bordered={false}
+              pagination={false}
+              dataSource={quickStartList}
+              render={(item, key) => (
+                <List.Item key={key} className="quick-start-item-container" actionLayout="vertical">
+                  <div className="quick-start-item">
+                    <div className="quick-start-item-emoji">{item.emoji}</div>
+                    <div className="quick-start-item-title">{item.title}</div>
+                  </div>
+                </List.Item>
+              )}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="write-guide-footer">
+        {footerList.map((item) => (
+          <div className="write-guide-footer-item" key={item.title} onClick={item.handleClick}>
+            {t(`homePage.footer.${item.title}`)}
+            <Divider type="vertical" />
+          </div>
+        ))}
+        <div className="write-guide-footer-item">
+          <UILocaleList>
+            {t('language')} <IconDown className="write-guide-footer-item-icon" />
+          </UILocaleList>
         </div>
       </div>
     </div>

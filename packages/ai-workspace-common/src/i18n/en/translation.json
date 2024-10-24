@@ -1097,5 +1097,13 @@
     "description": "Oops, your account does not have access to the beta testing.",
     "apply": "Apply for early access",
     "copyEmail": "Copy email "
+  },
+  "homePage": {
+    "footer": {
+      "pricing": "Pricing",
+      "contact": "Contact",
+      "terms": "Terms",
+      "privacy": "Privacy"
+    }
   }
 }
