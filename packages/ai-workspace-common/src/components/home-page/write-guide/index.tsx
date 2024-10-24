@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import './index.scss';
 
-import { CopilotOperationModule } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot/copilot-operation-module';
+import { CopilotOperationModule } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 import { getClientOrigin } from '@refly/utils/url';
 import { UILocaleList } from '@refly-packages/ai-workspace-common/components/ui-locale-list';
@@ -90,7 +90,6 @@ export const WriteGuide = (props: WriteGuideProps) => {
                 md: 24,
                 lg: 16,
                 xl: 12,
-                gutter: 6,
               }}
               className="quick-start"
               wrapperStyle={{ width: '100%' }}
