@@ -29,7 +29,7 @@ import {
   checkHasContext,
 } from './utils/token';
 import { ChatMode } from './types';
-import { CanvasIntent } from './types/intent';
+import { CanvasIntentType } from '@refly-packages/common-types';
 
 // prompts
 import { generateCanvasPrompt } from './prompt/generateCanvas';
@@ -345,7 +345,7 @@ Please generate the summary based on these requirements and offer suggestions fo
         event: 'structured_data',
         structuredDataKey: 'intentMatcher',
         content: JSON.stringify({
-          intentType: CanvasIntent.GenerateCanvas,
+          type: CanvasIntentType.GenerateCanvas,
           projectId: res.data?.projectId || projectId,
           canvasId: res.data?.canvasId || '',
           convId,

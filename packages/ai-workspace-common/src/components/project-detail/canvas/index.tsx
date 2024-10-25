@@ -211,6 +211,25 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
       }
     });
   }, []);
+  useEffect(() => {
+    const handleStreamContent = (content: string) => {
+      if (editorRef.current) {
+        // 在当前光标位置插入内容
+        try {
+          editorRef.current.commands.insertContent(content);
+        } catch (error) {
+          console.error('streamCanvasContent error', error);
+        }
+      }
+    };
+
+    // 监听流式内容事件
+    editorEmitter.on('streamCanvasContent', handleStreamContent);
+
+    return () => {
+      editorEmitter.off('streamCanvasContent', handleStreamContent);
+    };
+  }, []);
 
   useEffect(() => {
     if (editorRef.current) {

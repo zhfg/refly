@@ -55,11 +55,9 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
     sourceListModalVisible: state.sourceListModalVisible,
   }));
   const conversationStore = useConversationStore((state) => ({
-    isNewConversation: state.isNewConversation,
     currentConversation: state.currentConversation,
     resetState: state.resetState,
     setCurrentConversation: state.setCurrentConversation,
-    setIsNewConversation: state.setIsNewConversation,
   }));
   const messageStateStore = useMessageStateStore((state) => ({
     pending: state.pending,

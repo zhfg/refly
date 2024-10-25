@@ -13,7 +13,7 @@ export const useBigSearchQuickAction = () => {
     if (skill) {
       skillStore.setSelectedSkillInstance(skill);
     }
-    emptyConvRunSkill(question, projectId, true);
+    emptyConvRunSkill(question, true, { projectId });
   };
 
   return {

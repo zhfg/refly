@@ -6,6 +6,7 @@ import type { ClientChatMessage, SessionItem } from '@refly/common-types';
 import { ModelInfo, SkillContext, SkillTemplateConfig } from '@refly/openapi-schema';
 
 export type ChatMode = 'normal' | 'noContext' | 'wholeSpace';
+export type ChatBehavior = 'askIntentMatch' | 'askFollowUp' | 'askNew';
 
 export interface ChatState {
   // state

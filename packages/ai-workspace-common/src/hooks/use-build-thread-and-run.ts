@@ -19,12 +19,16 @@ import { useHandleRecents } from '@refly-packages/ai-workspace-common/hooks/use-
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useContextFilterErrorTip } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/hooks/use-context-filter-errror-tip';
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
+import { IntentResult } from './use-handle-ai-canvas';
 
 interface InvokeParams {
   chatMode?: ChatMode;
   projectId?: string;
   skillContext?: SkillContext;
   tplConfig?: SkillTemplateConfig;
+  intentResult?: IntentResult; // 新增意图识别结果
+  skipIntentDetection?: boolean; // 是否跳过意图识别
+  forceNewConv?: boolean; // 是否是新会话
 }
 
 export const useBuildThreadAndRun = () => {
@@ -51,6 +55,7 @@ export const useBuildThreadAndRun = () => {
   const { addRecentConversation } = useHandleRecents();
   const { handleFilterErrorTip } = useContextFilterErrorTip();
 
+  // TODO: temp not need this function
   const emptyConvRunSkill = (
     question: string,
     forceNewConv?: boolean,
@@ -65,8 +70,6 @@ export const useBuildThreadAndRun = () => {
     conversationStore.setIsNewConversation(true);
     chatStore.setNewQAText(question);
     chatStore.setInvokeParams(invokeParams);
-    console.log('emptyConvRunSkill invokeParams', invokeParams);
-    console.log('emptyConvRunSkill newConv', newConv);
 
     jumpToConv({
       convId: newConv?.convId,
@@ -76,6 +79,7 @@ export const useBuildThreadAndRun = () => {
     addRecentConversation(newConv);
   };
 
+  // TODO: 这里考虑针对 homePage 来的会话请求，需要清除 conv，重新处理
   const ensureConversationExist = (projectId?: string, forceNewConv = false) => {
     const { currentConversation } = conversationStore;
     const { localSettings } = useUserStore.getState();
@@ -100,10 +104,9 @@ export const useBuildThreadAndRun = () => {
     const { localSettings } = useUserStore.getState();
 
     let question = comingQuestion.trim();
-    const isFollowUpAsk = messages?.length > 0;
 
     // 创建新会话并跳转
-    const conv = ensureConversationExist(invokeParams?.projectId);
+    const conv = ensureConversationExist(invokeParams?.projectId, invokeParams?.forceNewConv);
     const skillContext = invokeParams?.skillContext || buildSkillContext();
 
     // TODO: temp make scheduler support
@@ -177,17 +180,10 @@ export const useBuildThreadAndRun = () => {
       chatStore.setChatMode(params.chatMode);
     }
 
-    const { messages, newQAText } = useChatStore.getState();
+    const { newQAText } = useChatStore.getState();
 
     setIsSearchOpen(false);
-
-    if (messages?.length > 0) {
-      // Ask a follow-up question
-      runSkill(newQAText, params);
-    } else {
-      // Create a new conversation and run skill
-      emptyConvRunSkill(newQAText, true, params);
-    }
+    runSkill(newQAText, params); // jump extra handler in useHandleAICanvas
   };
 
   return {

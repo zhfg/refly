@@ -16,14 +16,18 @@ import { ConfigManager } from './config-manager';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
-import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
+import { ChatMode, useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
 // hooks
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { useContextFilterErrorTip } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/hooks/use-context-filter-errror-tip';
+import { useProjectContext } from '@refly-packages/ai-workspace-common/components/project-detail/context-provider';
+
+// types
+import { CopilotSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
 interface CopilotInputModuleProps {
-  source?: 'homePage' | 'skillJob' | 'isolated';
+  source?: CopilotSource;
 }
 
 const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, CopilotInputModuleProps> = (props, ref) => {
@@ -33,19 +37,11 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
   // stores
   const skillStore = useSkillStoreShallow((state) => ({
     selectedSkill: state.selectedSkill,
-    setSelectedSkillInstance: state.setSelectedSkillInstance,
-  }));
-  const userStore = useUserStoreShallow((state) => ({
-    setLoginModalVisible: state.setLoginModalVisible,
-    isLogin: state.isLogin,
-  }));
-  const searchStore = useSearchStoreShallow((state) => ({
-    setIsSearchOpen: state.setIsSearchOpen,
   }));
 
   // hooks
-  const { handleFilterErrorTip } = useContextFilterErrorTip();
-  const { runSkill, emptyConvRunSkill, buildShutdownTaskAndGenResponse } = useBuildThreadAndRun();
+  const { buildShutdownTaskAndGenResponse, sendChatMessage } = useBuildThreadAndRun();
+  const { projectId } = useProjectContext();
 
   const [form] = Form.useForm();
   const { formErrors, setFormErrors } = useContextPanelStore((state) => ({
@@ -53,38 +49,17 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
     setFormErrors: state.setFormErrors,
   }));
 
-  const handleSendMessage = () => {
-    if (!userStore.isLogin) {
-      userStore.setLoginModalVisible(true);
-      return;
-    }
-    const error = handleFilterErrorTip();
-    if (error) {
-      return;
-    }
-
-    const { formErrors } = useContextPanelStore.getState();
-    if (formErrors && Object.keys(formErrors).length > 0) {
-      Notification.error({
-        style: { width: 400 },
-        title: t('copilot.configManager.errorTipTitle'),
-        content: t('copilot.configManager.errorTip'),
-      });
-      return;
-    }
-
-    const { messages, newQAText } = useChatStore.getState();
-    searchStore.setIsSearchOpen(false);
+  const handleSendMessage = (chatMode: ChatMode) => {
     const tplConfig = form?.getFieldValue('tplConfig');
-    const invokeParams = { tplConfig: tplConfig };
+    // TODO: later may add more source
+    const forceNewConv = [CopilotSource.HomePage].includes(source);
 
-    if (messages?.length > 0) {
-      // 追问阅读
-      runSkill(newQAText, invokeParams);
-    } else {
-      // 新会话阅读，先创建会话，然后进行跳转之后发起聊天
-      emptyConvRunSkill(newQAText, true, invokeParams);
-    }
+    sendChatMessage({
+      chatMode,
+      projectId,
+      tplConfig,
+      forceNewConv,
+    });
   };
 
   const handleAbort = () => {
