@@ -13,8 +13,6 @@ export const SelectedSkillHeader = () => {
     setSelectedSkillInstance: state.setSelectedSkillInstance,
   }));
 
-  console.log('selectedSkill', skillStore?.selectedSkill);
-
   return skillStore?.selectedSkill ? (
     <div className="selected-skill">
       <div className="selected-skill-profile">

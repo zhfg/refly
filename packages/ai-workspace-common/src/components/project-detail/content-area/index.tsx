@@ -18,7 +18,9 @@ export const ContentArea = (props: { projectId: string }) => {
 
   const { tabsMap, activeTabMap, setActiveTab, handleDeleteTab } = useProjectTabs();
   const tabs = tabsMap[projectId] || [];
+  console.log('tabs', tabs);
   const activeTab = tabs.find((x) => x.key === activeTabMap[projectId]);
+  console.log('activeTab', activeTab);
 
   const searchStore = useSearchStoreShallow((state) => ({
     pages: state.pages,

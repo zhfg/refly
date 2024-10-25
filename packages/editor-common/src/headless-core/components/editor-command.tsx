@@ -61,7 +61,6 @@ export const EditorCommandOut: FC<EditorCommandOutProps> = ({ query, range }) =>
 export const EditorCommand = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<typeof Command>>(
   ({ children, className, ...rest }, ref) => {
     const [query, setQuery] = useAtom(queryAtom);
-    console.log('command query', query);
 
     return (
       <EditorCommandTunnelContext.Consumer>

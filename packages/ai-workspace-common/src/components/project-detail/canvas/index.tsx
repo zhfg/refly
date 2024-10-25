@@ -93,7 +93,6 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
       token,
     });
     provider.on('status', (event) => {
-      console.log('websocketProvider status', event);
       canvasStore.updateCanvasServerStatus(event.status);
     });
     return provider;
