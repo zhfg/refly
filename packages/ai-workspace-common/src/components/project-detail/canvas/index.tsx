@@ -396,6 +396,14 @@ export const CanvasEditorHeader = (props: { projectId: string; canvasId: string 
     }
   };
 
+  useEffect(() => {
+    editorEmitter.on('updateCanvasTitle', onTitleChange);
+
+    return () => {
+      editorEmitter.off('updateCanvasTitle', onTitleChange);
+    };
+  }, []);
+
   const title = tab?.title || currentCanvas?.title;
 
   return (

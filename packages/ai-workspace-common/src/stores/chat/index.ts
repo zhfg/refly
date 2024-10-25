@@ -4,6 +4,7 @@ import { useShallow } from 'zustand/react/shallow';
 
 import type { ClientChatMessage, SessionItem } from '@refly/common-types';
 import { ModelInfo, SkillContext, SkillTemplateConfig } from '@refly/openapi-schema';
+import { IntentResult } from '@refly-packages/ai-workspace-common/hooks/use-handle-ai-canvas';
 
 export type ChatMode = 'normal' | 'noContext' | 'wholeSpace';
 export type ChatBehavior = 'askIntentMatch' | 'askFollowUp' | 'askNew';
@@ -22,6 +23,7 @@ export interface ChatState {
   selectedModel: ModelInfo;
   enableWebSearch: boolean;
   chatMode: ChatMode;
+  intentMatcher: IntentResult | undefined;
 
   // method
   setMessages: (val: ClientChatMessage[]) => void;
@@ -32,6 +34,7 @@ export interface ChatState {
   setModelList: (val: ModelInfo[]) => void;
   setEnableWebSearch: (val: boolean) => void;
   setChatMode: (val: ChatMode) => void;
+  setIntentMatcher: (val: IntentResult | undefined) => void;
   resetState: () => void;
 }
 
@@ -61,6 +64,7 @@ export const defaultExtraState = {
   isGenTitle: false,
   invokeParams: undefined,
   chatMode: 'normal' as ChatMode, // future support memory config
+  intentMatcher: undefined,
 };
 
 export const defaultState = {
@@ -86,6 +90,7 @@ export const useChatStore = create<ChatState>()(
         setModelList: (val: ModelInfo[]) => set({ modelList: val }),
         setEnableWebSearch: (val: boolean) => set({ enableWebSearch: val }),
         setChatMode: (val: ChatMode) => set({ chatMode: val }),
+        setIntentMatcher: (val: IntentResult | undefined) => set({ intentMatcher: val }),
         resetState: () => {
           console.log('trigger resetState');
           return set((state) => ({ ...state, ...defaultExtraState }));

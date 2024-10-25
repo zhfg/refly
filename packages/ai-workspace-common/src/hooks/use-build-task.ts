@@ -40,6 +40,7 @@ let uniqueId = genUniqueId();
 export const useBuildTask = () => {
   const chatStore = useChatStoreShallow((state) => ({
     setMessages: state.setMessages,
+    setIntentMatcher: state.setIntentMatcher,
   }));
   const messageStateStore = useMessageStateStoreShallow((state) => ({
     setMessageState: state.setMessageState,
@@ -230,6 +231,7 @@ export const useBuildTask = () => {
 
     if (skillEvent?.structuredDataKey === 'intentMatcher') {
       handleStructuredDataChange(lastRelatedMessage);
+      chatStore.setIntentMatcher(structuredData);
     }
   };
 

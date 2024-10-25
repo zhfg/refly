@@ -7,7 +7,7 @@ import { Segmented, Skeleton } from 'antd';
 import { Input } from '@arco-design/web-react';
 
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
-import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
+import { useProjectStore, useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
 import { useNewCanvasModalStoreShallow } from '@refly-packages/ai-workspace-common/stores/new-canvas-modal';
 
 import { BindResourceModal } from '../resource-view/resource-collection-associative-modal';
@@ -19,6 +19,9 @@ import { HiOutlinePlus } from 'react-icons/hi2';
 import { IconCanvas, IconProject, IconThread } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { Favicon } from '@refly-packages/ai-workspace-common/components/common/favicon';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
+
+import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 type DirectoryItemType = 'canvas' | 'resource' | 'thread';
 
@@ -34,13 +37,15 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
 
   const { t } = useTranslation();
 
-  const { project, resources, canvases, conversations, fetchProjectResources } = useProjectStoreShallow((state) => ({
-    project: state.project,
-    resources: state.resources,
-    canvases: state.canvases,
-    conversations: state.conversations,
-    fetchProjectResources: state.fetchProjectResources,
-  }));
+  const { project, resources, canvases, conversations, fetchProjectResources, fetchProjectDetail } =
+    useProjectStoreShallow((state) => ({
+      project: state.project,
+      resources: state.resources,
+      canvases: state.canvases,
+      conversations: state.conversations,
+      fetchProjectResources: state.fetchProjectResources,
+      fetchProjectDetail: state.fetchProjectDetail,
+    }));
   const currentProject = project.data;
 
   const newCanvasModalStore = useNewCanvasModalStoreShallow((state) => ({
@@ -203,6 +208,30 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
     }
   };
 
+  const handleTitleUpdate = async (newTitle: string) => {
+    const { project } = useProjectStore.getState();
+    const currentProject = project.data;
+
+    // if project title is empty, update it with canvas title
+    if (!currentProject?.title || currentProject?.title === 'Untitled') {
+      await getClient().updateProject({
+        body: {
+          projectId: currentProject.projectId,
+          title: newTitle,
+        },
+      });
+      fetchProjectDetail(currentProject.projectId); // re-fetch project detail
+    }
+  };
+
+  useEffect(() => {
+    editorEmitter.on('updateCanvasTitle', handleTitleUpdate);
+
+    return () => {
+      editorEmitter.off('updateCanvasTitle', handleTitleUpdate);
+    };
+  }, [currentProject]);
+
   return (
     <div className="project-directory-container" style={small ? { width: 72, minWidth: 72 } : {}}>
       <div className="project-directory-intro">
@@ -224,10 +253,10 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
                 ) : (
                   <>
                     <div className="text-sm">{currentProject?.title}</div>
-                    <div className="text-xs my-1 text-gray-500 max-h-10 overflow-auto">
+                    <div className="overflow-auto my-1 max-h-10 text-xs text-gray-500">
                       {currentProject?.description}
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="mt-1 text-xs text-gray-500">
                       <span>
                         {time(currentProject?.updatedAt as string, LOCALE.EN)
                           .utc()
@@ -251,7 +280,7 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
         )}
       </div>
 
-      <div className="w-full p-4">
+      <div className="p-4 w-full">
         <Segmented
           block
           options={segmentOptions}
@@ -262,19 +291,19 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
         />
       </div>
 
-      <div className="px-4 pb-2 box-border">
+      <div className="box-border px-4 pb-2">
         <div className="flex items-center">
           <Input
             placeholder={t('knowledgeBase.directory.searchPlaceholder')}
             allowClear
-            className="h-8 w-full"
+            className="w-full h-8"
             value={searchVal}
             prefix={<HiOutlineSearch />}
             onChange={handleSearchValChange}
           />
 
           <div
-            className="ml-2 w-8 h-8 flex items-center justify-center border border-solid border-gray-200 rounded-md cursor-pointer hover:bg-slate-200"
+            className="flex justify-center items-center ml-2 w-8 h-8 rounded-md border border-gray-200 border-solid cursor-pointer hover:bg-slate-200"
             onClick={handleAddNewButtonClick}
           >
             <HiOutlinePlus />
@@ -284,15 +313,15 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
 
       <div className="project-directory-list-container">
         {dataListLoading ? (
-          <Skeleton active className="w-full p-6" title={false} paragraph={{ rows: 5 }} />
+          <Skeleton active className="p-6 w-full" title={false} paragraph={{ rows: 5 }} />
         ) : (
           dataList.map((item) => (
             <div
               key={item.id}
-              className="flex items-center text-sm m-2 p-1 cursor-pointer hover:bg-gray-100"
+              className="flex items-center p-1 m-2 text-sm cursor-pointer hover:bg-gray-100"
               onClick={() => handleListItemClick(item)}
             >
-              <div className="flex items-center align-center mx-2">
+              <div className="flex items-center mx-2 align-center">
                 {item.type === 'canvas' ? (
                   <IconCanvas />
                 ) : item.type === 'resource' ? (

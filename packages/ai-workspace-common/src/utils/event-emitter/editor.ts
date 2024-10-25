@@ -6,6 +6,7 @@ type Events = {
   contineInChat: string;
   createNewNote: string;
   streamCanvasContent: string;
+  updateCanvasTitle: string;
 };
 
 export type EditorOperation =
@@ -13,6 +14,7 @@ export type EditorOperation =
   | 'replaceSelection'
   | 'contineInChat'
   | 'createNewNote'
-  | 'streamCanvasContent';
+  | 'streamCanvasContent'
+  | 'updateCanvasTitle';
 
 export const editorEmitter = mitt<Events>();

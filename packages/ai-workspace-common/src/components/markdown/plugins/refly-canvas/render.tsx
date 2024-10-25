@@ -4,7 +4,7 @@ import { Spin } from 'antd';
 import { chatSelectors } from '@refly-packages/ai-workspace-common/stores/chat/selectors';
 
 import { MarkdownElementProps } from '../../types/index';
-import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
 
 import { CANVAS_TAG_CLOSED_REGEX } from '@refly-packages/ai-workspace-common/constants/canvas';
@@ -12,6 +12,8 @@ import { CANVAS_TAG_CLOSED_REGEX } from '@refly-packages/ai-workspace-common/con
 import { getCanvasContent } from '@refly-packages/ai-workspace-common/components/copilot/utils';
 import { IconCanvas } from '@refly-packages/ai-workspace-common/components/common/icon';
 
+import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
+import { CanvasIntentType } from '@refly/common-types';
 import './render.scss';
 
 interface CanvasProps extends MarkdownElementProps {
@@ -45,11 +47,26 @@ const Render = memo<CanvasProps>(({ identifier, title, type, children, id }) => 
     // setOpen(true);
   };
 
-  useEffect(() => {
-    if (!hasChildren || !isGenerating) return;
+  const saveMetadata = () => {
+    const { intentMatcher } = useChatStore.getState();
 
-    openCanvas();
-  }, [isGenerating, hasChildren, str, identifier, title, type, id]);
+    if (intentMatcher?.type === CanvasIntentType.GenerateCanvas) {
+      editorEmitter.emit('updateCanvasTitle', title);
+    }
+  };
+
+  useEffect(() => {
+    // Emit event when title is available
+    if (title) {
+      saveMetadata();
+    }
+  }, [title]);
+
+  // useEffect(() => {
+  //   if (!hasChildren || !isGenerating) return;
+
+  //   openCanvas();
+  // }, [isGenerating, hasChildren, str, identifier, title, type, id]);
 
   return (
     <div className="refly-canvas-render-container">
