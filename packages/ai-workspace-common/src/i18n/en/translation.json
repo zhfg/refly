@@ -31,6 +31,8 @@
     "canvas": "Canvas",
     "resource": "Resource",
     "thread": "Thread",
+    "meta": "Meta",
+    "project": "Project",
     "copy": {
       "title": "Copy",
       "success": "Content has been copied to the clipboard!"
@@ -143,9 +145,9 @@
         "project": "New Project"
       }
     },
-    "resourceCollectionList": {
-      "addToCollection": "Add to Collection",
-      "removeConfirmText": "Are you sure to remove this resource from the collection?"
+    "resourceProjectList": {
+      "addToCollection": "Add to Project",
+      "removeConfirmText": "Are you sure to remove this resource from the project?"
     },
     "labelGroup": {
       "addLabel": "Click to add labels",
@@ -200,7 +202,7 @@
     "keepOneWindow": "Keep at least one window",
     "resourceCollectionAssociativeModal": {
       "resourceTitle": "Add Resources",
-      "projectTitle": "Add To Collection",
+      "projectTitle": "Add To Project",
       "resource": "Resource",
       "project": "Project",
       "resourcePlaceholder": "Please select resources",
@@ -320,7 +322,8 @@
     "wait_index": "Memorizing",
     "wait_index_tip": "The resource is temporarily not ready for AI search and needs to wait for memorization to complete",
     "index_failed": "Memorization Failed",
-    "index_failed_tip": "Click to retry"
+    "index_failed_tip": "Click to retry",
+    "finish": "Finished"
   },
   "loggedHomePage": {
     "searchEverything": "Search",

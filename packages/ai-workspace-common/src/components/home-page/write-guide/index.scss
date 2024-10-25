@@ -65,6 +65,8 @@
     .ai-copilot {
       position: relative;
       width: 100%;
+      background-color: #fcfcf9;
+      z-index: 1;
 
       .ai-copilot-operation-container {
         position: relative;

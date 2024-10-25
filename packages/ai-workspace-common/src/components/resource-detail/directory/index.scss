@@ -1,0 +1,43 @@
+.resource-directory {
+  .project-directory-intro {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 12px 0;
+
+    .delete-button {
+      margin-left: 12px;
+    }
+
+    .intro-body {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
+      .intro-icon {
+        img {
+          border-radius: 8px;
+          width: 32px;
+          height: 32px;
+        }
+      }
+    }
+
+    .intro-content {
+      margin-left: 8px;
+    }
+
+    .intro-meta {
+      font-size: 10px;
+      color: rgba(0, 0, 0, 0.8);
+      margin-top: 4px;
+    }
+  }
+
+  .project-list {
+    .project-list-item {
+      padding: 0;
+    }
+  }
+}

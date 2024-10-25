@@ -72,6 +72,7 @@ export const useCanvasTabs = () => {
   const setActiveTab = (key: string) => {
     noteStore.updateActiveTab(key);
     const tab = tabs?.find((tab) => tab?.key === key);
+    console.log('tab', tab);
 
     jumpToCanvas({ canvasId: tab?.canvasId || '', projectId: tab?.projectId || '' });
   };

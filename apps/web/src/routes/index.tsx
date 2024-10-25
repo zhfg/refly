@@ -134,7 +134,7 @@ export const AppRouter = (props: { layout?: any }) => {
             }
           />
           <Route
-            path="/knowledge-base/resource/:resId"
+            path="/resource/:resId"
             element={
               <BetaProtectedRoute
                 component={Resource}

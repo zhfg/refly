@@ -92,7 +92,7 @@ export const useJumpNewPath = () => {
     baseUrl?: string;
     openNewTab?: boolean;
   }) => {
-    const url = `${baseUrl}/knowledge-base/resource/${resId}`;
+    const url = `${baseUrl}/resource/${resId}`;
 
     if (openNewTab) {
       window.open(url, '_blank');
