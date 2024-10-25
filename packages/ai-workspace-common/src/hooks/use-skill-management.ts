@@ -22,7 +22,6 @@ export const useSkillManagement = ({ shouldInit = false }: { shouldInit: boolean
     const { data, error } = (await getClient().listSkillInstances({ query: { sortByPin: true } })) || {};
 
     if (data?.data) {
-      console.log('skill instances', data?.data);
       skillStore.setSkillInstances(data?.data);
     } else {
       console.log('get skill instances error', error);
