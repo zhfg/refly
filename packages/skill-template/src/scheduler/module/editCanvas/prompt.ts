@@ -65,29 +65,44 @@ Remember:
 
 export const editCanvasUserPrompt = (
   userQuery: string,
-  selectedRange?: { startIndex: number; endIndex: number },
+  selectedContent?: {
+    beforeHighlight: string;
+    highlightedText: string;
+    afterHighlight: string;
+  },
 ) => `# User Query
 ${userQuery}
 
 # Edit Mode
-${selectedRange ? 'Selection' : 'Verbal'}
+${selectedContent ? 'Selection' : 'Verbal'}
 ${
-  selectedRange
-    ? `# Selected Range
-startIndex: ${selectedRange.startIndex}
-endIndex: ${selectedRange.endIndex}`
+  selectedContent
+    ? `# Selected Content Context
+Before selection:
+${selectedContent.beforeHighlight}
+
+Selected text:
+<highlight>${selectedContent.highlightedText}</highlight>
+
+After selection:
+${selectedContent.afterHighlight}`
     : ''
 }
 
 # Instructions
 Please edit the content based on the query while:
-- Focusing only on ${selectedRange ? 'the selected section' : 'sections mentioned in the query'}
-- Preserving surrounding content and formatting
-- Maintaining document coherence`;
+- ${selectedContent ? 'ONLY modify the text between <highlight> tags' : 'Identify and modify relevant sections'}
+- Preserve all formatting and document structure
+- Maintain document coherence
+- Return the modified content in the exact same format`;
 
 export const editCanvasContext = (
   canvas: Canvas,
-  selectedRange?: { startIndex: number; endIndex: number },
+  selectedContent?: {
+    beforeHighlight: string;
+    highlightedText: string;
+    afterHighlight: string;
+  },
 ) => `# Context
 <context>
 <reflyCanvas 
@@ -95,8 +110,11 @@ export const editCanvasContext = (
   title="${canvas.title}"
   id="${canvas.canvasId}"
   projectId="${canvas.projectId}"
-  ${selectedRange ? `selectedRange="${selectedRange.startIndex},${selectedRange.endIndex}"` : ''}
 >
-${canvas.content}
+${
+  selectedContent
+    ? `${selectedContent.beforeHighlight}<highlight>${selectedContent.highlightedText}</highlight>${selectedContent.afterHighlight}`
+    : canvas.content
+}
 </reflyCanvas>
 </context>`;

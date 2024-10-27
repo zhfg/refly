@@ -31,3 +31,15 @@ export interface SelectedRange {
   startIndex: number;
   endIndex: number;
 }
+
+export interface EditSection {
+  startIndex: number;
+  endIndex: number;
+  originalContent: string;
+  updatedContent: string;
+}
+
+export interface EditResult {
+  sections: EditSection[];
+  summary: string;
+}

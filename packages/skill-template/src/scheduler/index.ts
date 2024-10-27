@@ -451,7 +451,6 @@ Please generate the summary based on these requirements and offer suggestions fo
 
     const { chatHistory = [], currentSkill, spanId, projectId, convId, canvases } = config.configurable;
 
-    // Find current canvas
     const currentCanvas = canvases?.find((canvas) => canvas?.metadata?.isCurrentContext);
 
     if (!currentCanvas?.canvas) {
@@ -466,8 +465,15 @@ Please generate the summary based on these requirements and offer suggestions fo
       config,
     );
 
-    // Emit intent matcher event
+    // Get selected range from metadata
     const selectedRange = currentCanvas?.metadata?.selectedRange as SelectedRange;
+
+    // Extract content context if selection exists
+    const selectedContent = selectedRange
+      ? editCanvas.extractContentAroundSelection(currentCanvas.canvas.content || '', selectedRange)
+      : undefined;
+
+    // Emit intent matcher event
     this.emitEvent(
       {
         event: 'structured_data',
@@ -488,9 +494,9 @@ Please generate the summary based on these requirements and offer suggestions fo
       maxTokens: 4096,
     });
 
-    // Prepare prompts with selected range if available
-    const editCanvasUserPrompt = editCanvas.editCanvasUserPrompt(originalQuery, selectedRange);
-    const editCanvasContext = editCanvas.editCanvasContext(currentCanvas.canvas, selectedRange);
+    // Prepare prompts with selected content context
+    const editCanvasUserPrompt = editCanvas.editCanvasUserPrompt(originalQuery, selectedContent);
+    const editCanvasContext = editCanvas.editCanvasContext(currentCanvas.canvas, selectedContent);
 
     const requestMessages = [
       new SystemMessage(editCanvas.editCanvasSystemPrompt),
@@ -512,15 +518,22 @@ Please generate the summary based on these requirements and offer suggestions fo
         },
       });
 
-      // Parse the response to extract edit sections if needed
-      // This could be used by the frontend to apply updates
-      const editSections = editCanvas.extractEditSections(responseMessage.content as string);
+      // Extract edit sections from response, passing selectedContent if it exists
+      const editSections = editCanvas.extractEditSections(responseMessage.content as string, selectedContent);
 
+      // Extract thinking process for logging/debugging
+      const thinking = editCanvas.extractThinking(responseMessage.content as string);
+
+      // Emit edit sections
       this.emitEvent(
         {
           event: 'structured_data',
           structuredDataKey: 'editSections',
-          content: JSON.stringify(editSections),
+          content: JSON.stringify({
+            sections: editSections,
+            thinking,
+            mode: selectedContent ? 'selection' : 'verbal',
+          }),
         },
         config,
       );
@@ -538,7 +551,6 @@ Please generate the summary based on these requirements and offer suggestions fo
         skillCalls: [],
       };
     } catch (error) {
-      // TODO: frontend implement error handling
       this.emitEvent(
         {
           event: 'error',
