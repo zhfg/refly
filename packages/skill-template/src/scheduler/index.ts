@@ -32,15 +32,13 @@ import { ChatMode } from './types';
 import { CanvasIntentType } from '@refly-packages/common-types';
 
 // prompts
-import {
-  generateCanvasPrompt,
-  rewriteCanvasSystemPrompt,
-  rewriteCanvasUserPrompt,
-  rewriteCanvasContext,
-  editCanvasPrompt,
-  canvasIntentMatcherPrompt,
-  prepareIntentMatcherTypeDomain,
-} from './prompt';
+import * as canvasIntentMatcher from './module/canvasIntentMatcher';
+import * as generateCanvas from './module/generateCanvas';
+import * as rewriteCanvas from './module/rewriteCanvas';
+import * as editCanvas from './module/editCanvas';
+
+// types
+import { SelectedRange } from './module/editCanvas/types';
 
 export class Scheduler extends BaseSkill {
   name = 'scheduler';
@@ -364,7 +362,11 @@ Please generate the summary based on these requirements and offer suggestions fo
 
     const model = this.engine.chatModel({ temperature: 0.1 });
 
-    const requestMessages = [new SystemMessage(generateCanvasPrompt), ...chatHistory, new HumanMessage(originalQuery)];
+    const requestMessages = [
+      new SystemMessage(generateCanvas.generateCanvasPrompt),
+      ...chatHistory,
+      new HumanMessage(originalQuery),
+    ];
 
     const responseMessage = await model.invoke(requestMessages, {
       ...config,
@@ -411,10 +413,14 @@ Please generate the summary based on these requirements and offer suggestions fo
 
     const model = this.engine.chatModel({ temperature: 0.1 });
 
+    const rewriteCanvasUserPrompt = rewriteCanvas.rewriteCanvasUserPrompt(originalQuery);
+    const rewriteCanvasContext = rewriteCanvas.rewriteCanvasContext(currentCanvas?.canvas);
+
     const requestMessages = [
-      new SystemMessage(rewriteCanvasSystemPrompt),
+      new SystemMessage(rewriteCanvas.rewriteCanvasSystemPrompt),
       ...chatHistory,
-      new HumanMessage(originalQuery),
+      new HumanMessage(rewriteCanvasContext),
+      new HumanMessage(rewriteCanvasUserPrompt),
     ];
 
     const responseMessage = await model.invoke(requestMessages, {
@@ -433,57 +439,115 @@ Please generate the summary based on these requirements and offer suggestions fo
     return { messages: [responseMessage], skillCalls: [] };
   };
 
+  // TODO: 将实际的 canvas 的内容发送给模型，拼接为 prompt 处理
+  /**
+   * Update canvas：更新的形态
+   * 1. 口头模糊指明（可能涉及处理多个）：直接口头指明模糊更新的内容（需要模型扫描并给出待操作的模块和对应的 startIndex 和 endIndex），则只需要优化这些内容，其他保持原样，并且发送给前端流式写入
+   * 2. 前端明确选中（目前只支持一个）：明确具备选中的 startIndex 和 endIndex（使用的是 tiptap editor），则只需要优化这块内容，其他保持原样，并且发送给前端流式写入
+   */
   callEditCanvas = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { messages = [], query: originalQuery } = state;
-
-    // 确保在使用 configSnapshot 之前初始化它
     this.configSnapshot ??= config;
 
-    const { chatHistory = [], currentSkill, spanId } = config.configurable;
-    const { user } = config;
+    const { chatHistory = [], currentSkill, spanId, projectId, convId, canvases } = config.configurable;
 
-    this.emitEvent({ event: 'log', content: `Start to update canvas...` }, config);
+    // Find current canvas
+    const currentCanvas = canvases?.find((canvas) => canvas?.metadata?.isCurrentContext);
 
-    const { convId, projectId = '' } = this.configSnapshot.configurable;
-    const res = await this.engine.service.createCanvas(user, {
-      title: '',
-      initialContent: '',
-      projectId,
-    });
+    if (!currentCanvas?.canvas) {
+      throw new Error('No current canvas found for editing');
+    }
 
-    // send intent matcher event
+    this.emitEvent(
+      {
+        event: 'log',
+        content: `Starting canvas edit operation for canvas: ${currentCanvas.canvas.title}`,
+      },
+      config,
+    );
+
+    // Emit intent matcher event
+    const selectedRange = currentCanvas?.metadata?.selectedRange as SelectedRange;
     this.emitEvent(
       {
         event: 'structured_data',
         structuredDataKey: 'intentMatcher',
         content: JSON.stringify({
           type: CanvasIntentType.UpdateCanvas,
-          projectId: res.data?.projectId || projectId,
-          canvasId: res.data?.canvasId || '',
+          projectId,
+          canvasId: currentCanvas.canvasId,
           convId,
+          selectedRange,
         }),
       },
       config,
     );
 
-    const model = this.engine.chatModel({ temperature: 0.1 });
-
-    const requestMessages = [new SystemMessage(editCanvasPrompt), ...chatHistory, new HumanMessage(originalQuery)];
-
-    const responseMessage = await model.invoke(requestMessages, {
-      ...config,
-      metadata: {
-        ...config.metadata,
-        ...currentSkill,
-        spanId,
-      },
+    const model = this.engine.chatModel({
+      temperature: 0.1,
+      maxTokens: 4096,
     });
 
-    this.engine.logger.log(`responseMessage: ${safeStringifyJSON(responseMessage)}`);
+    // Prepare prompts with selected range if available
+    const editCanvasUserPrompt = editCanvas.editCanvasUserPrompt(originalQuery, selectedRange);
+    const editCanvasContext = editCanvas.editCanvasContext(currentCanvas.canvas, selectedRange);
 
-    this.emitEvent({ event: 'log', content: `Update canvas successfully!` }, config);
+    const requestMessages = [
+      new SystemMessage(editCanvas.editCanvasSystemPrompt),
+      ...chatHistory,
+      new HumanMessage(editCanvasContext),
+      new HumanMessage(editCanvasUserPrompt),
+    ];
 
-    return { messages: [responseMessage], skillCalls: [] };
+    try {
+      const responseMessage = await model.invoke(requestMessages, {
+        ...config,
+        metadata: {
+          ...config.metadata,
+          ...currentSkill,
+          spanId,
+          canvasId: currentCanvas.canvasId,
+          projectId,
+          selectedRange,
+        },
+      });
+
+      // Parse the response to extract edit sections if needed
+      // This could be used by the frontend to apply updates
+      const editSections = editCanvas.extractEditSections(responseMessage.content as string);
+
+      this.emitEvent(
+        {
+          event: 'structured_data',
+          structuredDataKey: 'editSections',
+          content: JSON.stringify(editSections),
+        },
+        config,
+      );
+
+      this.emitEvent(
+        {
+          event: 'log',
+          content: 'Canvas edit completed successfully',
+        },
+        config,
+      );
+
+      return {
+        messages: [responseMessage],
+        skillCalls: [],
+      };
+    } catch (error) {
+      // TODO: frontend implement error handling
+      this.emitEvent(
+        {
+          event: 'error',
+          content: `Canvas edit failed: ${error.message}`,
+        },
+        config,
+      );
+      throw error;
+    }
   };
 
   callCanvasIntentMatcher = async (state: GraphState, config: SkillRunnableConfig): Promise<CanvasIntentType> => {
@@ -496,7 +560,7 @@ Please generate the summary based on these requirements and offer suggestions fo
     this.emitEvent({ event: 'start' }, this.configSnapshot);
 
     const currentCanvas = canvases?.find((canvas) => canvas?.metadata?.isCurrentContext);
-    const intentMatcherTypeDomain = prepareIntentMatcherTypeDomain(currentCanvas, projectId);
+    const intentMatcherTypeDomain = canvasIntentMatcher.prepareIntentMatcherTypeDomain(currentCanvas, projectId);
 
     const model = this.engine.chatModel({ temperature: 0.1 });
 
@@ -514,7 +578,11 @@ Please generate the summary based on these requirements and offer suggestions fo
 
     try {
       const result = await runnable.invoke(
-        [new SystemMessage(canvasIntentMatcherPrompt), ...chatHistory, new HumanMessage(originalQuery)],
+        [
+          new SystemMessage(canvasIntentMatcher.canvasIntentMatcherPrompt),
+          ...chatHistory,
+          new HumanMessage(originalQuery),
+        ],
         config,
       );
 

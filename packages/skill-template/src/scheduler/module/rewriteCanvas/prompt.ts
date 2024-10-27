@@ -1,3 +1,5 @@
+import { Canvas } from '@refly-packages/openapi-schema';
+
 export const rewriteCanvasSystemPrompt = `# AI Content Rewriting Assistant
 
 ## Role
@@ -168,13 +170,24 @@ Remember:
 4. Provide clear indication of changes made
 5. Handle partial updates efficiently`;
 
-export const rewriteCanvasUserPrompt = `# User Query
-{user_query}`;
+export const rewriteCanvasUserPrompt = (userQuery: string) => `# User Query
+${userQuery}
 
-export const rewriteCanvasContext = `# Context
+# Instruction
+Please rewrite the content based on the query above while following these guidelines:
+- Maintain the original document structure
+- Preserve formatting and metadata
+- Focus only on requested changes
+- Ensure smooth transitions with unmodified sections`;
+
+export const rewriteCanvasContext = (canvas: Canvas) => `# Context
 <context>
-<reflyCanvas type="document" title="{original_title}">
-{original_content}
+<reflyCanvas 
+  type="document" 
+  title="${canvas.title}"
+  id="${canvas.canvasId}"
+  projectId="${canvas.projectId}"
+>
+${canvas.content}
 </reflyCanvas>
-</context>
-`;
+</context>`;
